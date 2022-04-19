@@ -235,7 +235,7 @@ class NetworkController
         // The above call won't complete immediately if the isolate is paused,
         // so give up waiting after 500ms.
         final state = await timeout(httpFuture, 500);
-        if (state.enabled != true) {
+        if (state?.enabled != true) {
           enabled = false;
         }
       },

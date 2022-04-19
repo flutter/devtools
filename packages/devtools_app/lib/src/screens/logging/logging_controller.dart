@@ -924,9 +924,9 @@ class ImageSizesForFrame {
   }
 
   final String? source;
-  final Map<String, Object>? displaySize;
-  final Map<String, Object>? imageSize;
-  final Map<String, Object>? rawJson;
+  final Map<String, Object?>? displaySize;
+  final Map<String, Object?>? imageSize;
+  final Map<String, Object?>? rawJson;
 
   String get summary {
     final file = path.basename(source!);

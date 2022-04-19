@@ -559,7 +559,7 @@ class EvalOnDartLibrary extends DisposableController
       return request();
     }
     // Future that completes when the request has finished.
-    final Completer<T> response = Completer();
+    final Completer<T?> response = Completer();
     // This is an optimization to avoid sending stale requests across the wire.
     void wrappedRequest() async {
       if (isAlive != null && isAlive.disposed || _disposed) {

@@ -845,8 +845,10 @@ FieldReference createScalar(
       final classId = originClassId;
       dataValue = data.toString();
       final dataTypeClass = controller!.heapGraph!.classes[classId];
-      final predefined = predefinedClasses[dataTypeClass.fullQualifiedName]!;
-      dataType = predefined.prettyName;
+      if (dataTypeClass != null) {
+        final predefined = predefinedClasses[dataTypeClass.fullQualifiedName]!;
+        dataType = predefined.prettyName;
+      }
   }
 
   return FieldReference.createScaler(

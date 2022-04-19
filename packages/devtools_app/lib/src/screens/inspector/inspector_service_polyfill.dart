@@ -66,7 +66,7 @@ $script''',
   final encodedResult =
       await group.inspectorLibrary.retrieveFullValueAsString(result!);
   if (encodedResult != null) {
-    final Map<String, Object> errors = json.decode(encodedResult);
+    final Map<String, Object?> errors = json.decode(encodedResult);
     for (String name in errors.keys) {
       log(
         "Unable to add service extension '$name' due to error:\n${errors[name]}",

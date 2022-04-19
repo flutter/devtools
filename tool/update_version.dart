@@ -193,6 +193,6 @@ const devToolsDependencyPrefixes = [
 
 extension JoinExtension on List<String> {
   String joinWithNewLine() {
-    return join('\n') + '\n';
+    return '${join('\n')}\n';
   }
 }
