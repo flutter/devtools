@@ -25,14 +25,13 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
     this.availableServices = const [],
     this.availableLibraries = const [],
   }) : service = service ?? createFakeService() {
-
     when(errorBadgeManager.erroredItemsForPage('inspector')).thenReturn(
       FixedValueListenable(LinkedHashMap<String, DevToolsError>()),
     );
 
     when(errorBadgeManager.errorCountNotifier('inspector'))
         .thenReturn(ValueNotifier<int>(0));
-    vmServiceOpened(service);
+    vmServiceOpened(this.service!, onClosed: Future.value());
   }
 
   Completer<void> flagsInitialized = Completer();
@@ -42,7 +41,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
     flagsInitialized.complete();
   }
 
-  static FakeVmService createFakeService({
+  static FakeVmServiceWrapper createFakeService({
     Timeline? timelineData,
     SocketProfile? socketProfile,
     HttpProfile? httpProfile,
@@ -200,7 +199,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   @override
   Future<void> vmServiceOpened(
     VmServiceWrapper service, {
-    Future<void> onClosed,
+    required Future<void> onClosed,
   }) {
     resolvedUriManager.vmServiceOpened();
     initFlagManager();

@@ -105,7 +105,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
     return Future.value(
       UriList(
         uris: _resolvedUriMap != null
-            ? (uris.map((e) => _resolvedUriMap[e]).toList())
+            ? (uris.map((e) => _resolvedUriMap![e]).toList())
             : null,
       ),
     );
