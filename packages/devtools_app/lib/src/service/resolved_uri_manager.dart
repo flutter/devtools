@@ -13,11 +13,14 @@ class ResolvedUriManager {
   Map<String, Map<String, String?>>? _isolateResolvedUrlMap;
 
   /// Initializes the [ResolvedUriManager]
-  void vmServiceOpened() =>
-      _isolateResolvedUrlMap = <String, Map<String, String?>>{};
+  void vmServiceOpened() {
+    _isolateResolvedUrlMap = <String, Map<String, String?>>{};
+  }
 
   /// Cleans up the resources of the [ResolvedUriManager]
-  void vmServiceClosed() => _isolateResolvedUrlMap = null;
+  void vmServiceClosed() {
+    _isolateResolvedUrlMap = null;
+  }
 
   /// Calls out to the [VmService] to lookup unknown uri to package uri mappings.
   ///
@@ -32,10 +35,10 @@ class ResolvedUriManager {
           (await serviceManager.service!.lookupPackageUris(isolateId, uris))
               .uris;
 
-      if (!_isolateResolvedUrlMap!.containsKey(isolateId)) {
-        _isolateResolvedUrlMap![isolateId] = <String, String?>{};
-      }
-      final resolvedUrlMap = _isolateResolvedUrlMap![isolateId]!;
+      final resolvedUrlMap = _isolateResolvedUrlMap!.putIfAbsent(
+        isolateId,
+        () => <String, String?>{},
+      );
       if (packageUris != null) {
         for (var i = 0; i < uris.length; i++) {
           final resolvedUrl = uris[i];

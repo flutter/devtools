@@ -293,7 +293,6 @@ class FakeVmService extends Fake implements VmServiceWrapper {
             });
 
   CpuSamples cpuSamples;
-  final Map<String, String> _resolvedUriMap;
 
   /// Specifies the return value of `httpEnableTimelineLogging`.
   bool httpEnableTimelineLoggingResult = true;
@@ -315,6 +314,7 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   final List<HttpProfileRequest> _startingRequests;
   final SamplesMemoryJson _memoryData;
   final AllocationMemoryJson _allocationData;
+  final Map<String, String> _resolvedUriMap;
 
   final _flags = <String, dynamic>{
     'flags': <Flag>[

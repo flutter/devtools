@@ -19,7 +19,7 @@ void main() async {
     const uri2 = 'this/is/a/uri2';
     const packageUri1 = 'uri/am/i1';
     const packageUri2 = 'uri/am/i2';
-    ResolvedUriManager? resolvedUriManager;
+    late ResolvedUriManager resolvedUriManager;
     final service = MockVmService();
 
     setUp(() {
@@ -51,30 +51,30 @@ void main() async {
       });
 
       test('does nothing before vmServiceOpened', () async {
-        await resolvedUriManager!.fetchPackageUris(isolateId, [uri1]);
+        await resolvedUriManager.fetchPackageUris(isolateId, [uri1]);
 
-        expect(resolvedUriManager!.lookupPackageUri(isolateId, uri1), isNull);
+        expect(resolvedUriManager.lookupPackageUri(isolateId, uri1), isNull);
         verifyNever(service.lookupPackageUris(any, any));
       });
 
       test('does nothing after vmServiceClosed', () async {
-        resolvedUriManager!.vmServiceOpened();
-        resolvedUriManager!.vmServiceClosed();
+        resolvedUriManager.vmServiceOpened();
+        resolvedUriManager.vmServiceClosed();
 
-        await resolvedUriManager!.fetchPackageUris(isolateId, [uri1]);
+        await resolvedUriManager.fetchPackageUris(isolateId, [uri1]);
 
-        expect(resolvedUriManager!.lookupPackageUri(isolateId, uri1), isNull);
+        expect(resolvedUriManager.lookupPackageUri(isolateId, uri1), isNull);
         verifyNever(service.lookupPackageUris(any, any));
       });
     });
 
     group('general use', () {
       setUp(() {
-        resolvedUriManager!.vmServiceOpened();
+        resolvedUriManager.vmServiceOpened();
       });
       test('lookupPackageUri when uri is unknown', () {
         final packageUriResult =
-            resolvedUriManager!.lookupPackageUri(isolateId, 'some/uri');
+            resolvedUriManager.lookupPackageUri(isolateId, 'some/uri');
         expect(packageUriResult, isNull);
       });
 
@@ -85,14 +85,14 @@ void main() async {
               Future.value(UriList(uris: [packageUri1, packageUri2])),
         );
 
-        await resolvedUriManager!.fetchPackageUris(isolateId, [uri1, uri2]);
+        await resolvedUriManager.fetchPackageUris(isolateId, [uri1, uri2]);
 
         expect(
-          resolvedUriManager!.lookupPackageUri(isolateId, uri1),
+          resolvedUriManager.lookupPackageUri(isolateId, uri1),
           equals(packageUri1),
         );
         expect(
-          resolvedUriManager!.lookupPackageUri(isolateId, uri2),
+          resolvedUriManager.lookupPackageUri(isolateId, uri2),
           equals(packageUri2),
         );
       });
@@ -107,19 +107,19 @@ void main() async {
           (realInvocation) => Future.value(UriList(uris: [packageUri2])),
         );
 
-        await resolvedUriManager!.fetchPackageUris(isolateId, [uri1]);
+        await resolvedUriManager.fetchPackageUris(isolateId, [uri1]);
         expect(
-          resolvedUriManager!.lookupPackageUri(isolateId, uri1),
+          resolvedUriManager.lookupPackageUri(isolateId, uri1),
           equals(packageUri1),
         );
 
-        await resolvedUriManager!.fetchPackageUris(isolateId, [uri2]);
+        await resolvedUriManager.fetchPackageUris(isolateId, [uri2]);
         expect(
-          resolvedUriManager!.lookupPackageUri(isolateId, uri1),
+          resolvedUriManager.lookupPackageUri(isolateId, uri1),
           equals(packageUri1),
         );
         expect(
-          resolvedUriManager!.lookupPackageUri(isolateId, uri2),
+          resolvedUriManager.lookupPackageUri(isolateId, uri2),
           equals(packageUri2),
         );
       });
@@ -138,15 +138,15 @@ void main() async {
               Future.value(UriList(uris: [packageUriFromDifferentIsolate])),
         );
 
-        await resolvedUriManager!.fetchPackageUris(isolateId, [uri1]);
-        await resolvedUriManager!.fetchPackageUris(isolateId2, [uri1]);
+        await resolvedUriManager.fetchPackageUris(isolateId, [uri1]);
+        await resolvedUriManager.fetchPackageUris(isolateId2, [uri1]);
 
         expect(
-          resolvedUriManager!.lookupPackageUri(isolateId, uri1),
+          resolvedUriManager.lookupPackageUri(isolateId, uri1),
           equals(packageUri1),
         );
         expect(
-          resolvedUriManager!.lookupPackageUri(isolateId2, uri1),
+          resolvedUriManager.lookupPackageUri(isolateId2, uri1),
           equals(packageUriFromDifferentIsolate),
         );
       });
