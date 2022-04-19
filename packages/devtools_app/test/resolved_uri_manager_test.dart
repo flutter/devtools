@@ -54,7 +54,7 @@ void main() async {
         await resolvedUriManager.fetchPackageUris(isolateId, [uri1]);
 
         expect(resolvedUriManager.lookupPackageUri(isolateId, uri1), isNull);
-        verifyNever(service.lookupPackageUris(any, any));
+        verifyNever(service.lookupPackageUris('', []));
       });
 
       test('does nothing after vmServiceClosed', () async {
@@ -64,7 +64,7 @@ void main() async {
         await resolvedUriManager.fetchPackageUris(isolateId, [uri1]);
 
         expect(resolvedUriManager.lookupPackageUri(isolateId, uri1), isNull);
-        verifyNever(service.lookupPackageUris(any, any));
+        verifyNever(service.lookupPackageUris('', []));
       });
     });
 
