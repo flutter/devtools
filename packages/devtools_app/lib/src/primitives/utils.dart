@@ -207,12 +207,12 @@ Future<void> delayForBatchProcessing({int micros = 0}) async {
 /// duration specified by `timeoutMillis` has passed.
 ///
 /// Completes with null on timeout.
-Future<T> timeout<T>(Future<T> operation, int timeoutMillis) => Future.any<T>([
+Future<T?> timeout<T>(Future<T> operation, int timeoutMillis) =>
+    Future.any<T?>([
       operation,
-      Future<T>.delayed(
+      Future<T?>.delayed(
         Duration(milliseconds: timeoutMillis),
-        // ignore: unnecessary_parenthesis
-        (() => null) as FutureOr<T> Function()?,
+        () => Future<T?>.value(),
       )
     ]);
 

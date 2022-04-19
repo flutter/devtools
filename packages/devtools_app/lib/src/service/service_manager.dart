@@ -7,6 +7,7 @@
 import 'dart:async';
 import 'dart:core';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
@@ -22,6 +23,7 @@ import '../shared/error_badge_manager.dart';
 import '../shared/globals.dart';
 import '../shared/title.dart';
 import 'isolate_manager.dart';
+import 'resolved_uri_manager.dart';
 import 'service_extension_manager.dart';
 import 'service_registrations.dart' as registrations;
 import 'vm_flags.dart';
@@ -78,6 +80,8 @@ class ServiceConnectionManager {
   final isolateManager = IsolateManager();
 
   final consoleService = ConsoleService();
+
+  final resolvedUriManager = ResolvedUriManager();
 
   InspectorServiceBase? get inspectorService => _inspectorService;
   InspectorServiceBase? _inspectorService;
@@ -180,6 +184,7 @@ class ServiceConnectionManager {
     isolateManager.vmServiceOpened(service);
     consoleService.vmServiceOpened(service);
     serviceExtensionManager.vmServiceOpened(service, connectedApp!);
+    resolvedUriManager.vmServiceOpened();
     await vmFlagManager.vmServiceOpened(service);
     await timelineStreamManager.vmServiceOpened(service, connectedApp!);
     // This needs to be called last in the above group of `vmServiceOpened`
@@ -331,6 +336,7 @@ class ServiceConnectionManager {
     vmFlagManager.vmServiceClosed();
     timelineStreamManager.vmServiceClosed();
     serviceExtensionManager.vmServiceClosed();
+    resolvedUriManager.vmServiceClosed();
 
     serviceTrafficLogger?.dispose();
 
@@ -419,9 +425,8 @@ class ServiceConnectionManager {
         flutterViewListResponse.json!['views'].cast<Map<String, dynamic>>();
 
     // Each isolate should only have one FlutterView.
-    final flutterView = views.firstWhere(
+    final flutterView = views.firstWhereOrNull(
       (view) => view['type'] == 'FlutterView',
-      orElse: () => null,
     );
 
     if (flutterView == null) {

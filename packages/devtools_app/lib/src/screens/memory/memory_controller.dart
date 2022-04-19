@@ -1097,6 +1097,8 @@ class MemoryController extends DisposableController
         ExternalReferences(this, snapshotGraph.externalSize);
     for (final liveExternal
         in heapGraph?.externals ?? <HeapGraphExternalLive>[]) {
+      if (liveExternal == null) continue;
+
       final HeapGraphClassLive? classLive =
           liveExternal.live.theClass as HeapGraphClassLive?;
 

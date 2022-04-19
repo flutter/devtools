@@ -25,11 +25,14 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
     this.availableServices = const [],
     this.availableLibraries = const [],
   }) : service = service ?? createFakeService() {
-    initFlagManager();
 
     when(errorBadgeManager.erroredItemsForPage('inspector')).thenReturn(
       FixedValueListenable(LinkedHashMap<String, DevToolsError>()),
     );
+
+    when(errorBadgeManager.errorCountNotifier('inspector'))
+        .thenReturn(ValueNotifier<int>(0));
+    vmServiceOpened(service);
   }
 
   Completer<void> flagsInitialized = Completer();
@@ -39,7 +42,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
     flagsInitialized.complete();
   }
 
-  static FakeVmServiceWrapper createFakeService({
+  static FakeVmService createFakeService({
     Timeline? timelineData,
     SocketProfile? socketProfile,
     HttpProfile? httpProfile,
@@ -47,6 +50,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
     AllocationMemoryJson? allocationData,
     CpuProfileData? cpuProfileData,
     CpuSamples? cpuSamples,
+    Map<String, String>? resolvedUriMap,
   }) =>
       FakeVmServiceWrapper(
         _flagManager,
@@ -56,6 +60,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
         memoryData,
         allocationData,
         cpuSamples,
+        resolvedUriMap,
       );
 
   final List<String> availableServices;
@@ -63,6 +68,9 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   final List<String> availableLibraries;
 
   final MockVM _mockVM = MockVM();
+
+  @override
+  final resolvedUriManager = ResolvedUriManager();
 
   @override
   VmServiceWrapper? service;
@@ -188,4 +196,14 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
 
   @override
   ValueListenable<bool> get deviceBusy => ValueNotifier(false);
+
+  @override
+  Future<void> vmServiceOpened(
+    VmServiceWrapper service, {
+    Future<void> onClosed,
+  }) {
+    resolvedUriManager.vmServiceOpened();
+    initFlagManager();
+    return Future.value();
+  }
 }

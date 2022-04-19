@@ -407,20 +407,8 @@ Future<List<ObjectField>> _parseFields(
     final owner =
         await eval.safeGetClass(fieldDeclaration.owner! as ClassRef, isAlive);
 
-    String ownerUri;
-    String ownerName;
-    final ownerMixin = owner.mixin;
-    if (ownerMixin == null) {
-      ownerUri = owner.library!.uri!;
-      ownerName = owner.name!;
-    } else {
-      final mixinClass =
-          await eval.safeGetClass(ownerMixin.typeClass!, isAlive);
-
-      ownerUri = mixinClass.library!.uri!;
-      ownerName = mixinClass.name!;
-    }
-
+    final ownerUri = fieldDeclaration.location!.script!.uri!;
+    final ownerName = owner.mixin?.name ?? owner.name!;
     final ownerPackageName = tryParsePackageName(ownerUri);
 
     return ObjectField(

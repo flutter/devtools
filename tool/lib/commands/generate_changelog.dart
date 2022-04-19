@@ -47,9 +47,9 @@ const sinceArg = 'since-tag';
 /// version number will be used for the CHANGELOG entry.
 ///
 /// If `--since-tag` is specified from the command
-/// (e.g. dart tool/bin/repo_tool.dart generate-changelog --version=2.5.2), this
-/// tag version will be used as the lower bound for commit history instead of
-/// using the most recent tagged version as the lower bound.
+/// (e.g. dart tool/bin/repo_tool.dart generate-changelog --since-tag=v2.5.2),
+/// this tag version will be used as the lower bound for commit history instead
+/// of using the most recent tagged version as the lower bound.
 class GenerateChangelogCommand extends Command {
   GenerateChangelogCommand() {
     argParser
@@ -168,7 +168,7 @@ class GenerateChangelogCommand extends Command {
           print('Skipping commit marked to be ignored: $message');
           continue;
         }
-        final entry = '* ' + _sanitize(commit[_commitKey][_messageKey]);
+        final entry = '* ${_sanitize(commit[_commitKey][_messageKey])}';
         changes.add(entry);
       }
 
@@ -195,7 +195,7 @@ class GenerateChangelogCommand extends Command {
     }
 
     final changelogFile = File('${repo.repoPath}/CHANGELOG.md');
-    final output = '## $nextVersion\n' + changes.join('\n') + '\n\n';
+    final output = '## $nextVersion\n${changes.join('\n')}\n\n';
     await changelogFile.writeAsString(
       output + changelogFile.readAsStringSync(),
     );
@@ -226,7 +226,7 @@ class GenerateChangelogCommand extends Command {
         prIndex + prPrefix.length,
         endPrIndexExclusive,
       );
-      return modifiedMessage.substring(0, prIndex).trim() +
+      return '${modifiedMessage.substring(0, prIndex).trim()}'
           ' [#$pr](https://github.com/flutter/devtools/pull/$pr)';
     } catch (_) {
       return '# Something went wrong. Please input this CHANGELOG entry '
