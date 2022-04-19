@@ -75,8 +75,6 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
     this.availableServices = const [],
     this.availableLibraries = const [],
   }) : service = service ?? createFakeService() {
-    initFlagManager();
-
     when(errorBadgeManager.erroredItemsForPage(any)).thenReturn(
       FixedValueListenable(LinkedHashMap<String, DevToolsError>()),
     );
@@ -254,6 +252,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
     Future<void> onClosed,
   }) {
     resolvedUriManager.vmServiceOpened();
+    initFlagManager();
     return Future.value();
   }
 }
