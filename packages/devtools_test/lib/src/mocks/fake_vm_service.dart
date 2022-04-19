@@ -22,6 +22,7 @@ class FakeVmService extends Fake implements VmServiceWrapper {
     this._memoryData,
     this._allocationData,
     CpuSamples cpuSamples,
+    this._resolvedUriMap,
   )   : _startingSockets = _socketProfile?.sockets ?? [],
         _startingRequests = _httpProfile?.requests ?? [],
         cpuSamples = cpuSamples ??
@@ -58,6 +59,7 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   final List<HttpProfileRequest> _startingRequests;
   final SamplesMemoryJson _memoryData;
   final AllocationMemoryJson _allocationData;
+  final Map<String, String> _resolvedUriMap;
 
   final _flags = <String, dynamic>{
     'flags': <Flag>[
@@ -96,6 +98,17 @@ class FakeVmService extends Fake implements VmServiceWrapper {
     int timeExtentMicros,
   ) {
     return Future.value(cpuSamples);
+  }
+
+  @override
+  Future<UriList> lookupPackageUris(String isolateId, List<String> uris) {
+    return Future.value(
+      UriList(
+        uris: _resolvedUriMap != null
+            ? (uris.map((e) => _resolvedUriMap[e]).toList())
+            : null,
+      ),
+    );
   }
 
   @override

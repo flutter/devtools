@@ -27,14 +27,13 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
     this.availableServices = const [],
     this.availableLibraries = const [],
   }) : service = service ?? createFakeService() {
-    initFlagManager();
-
     when(errorBadgeManager.erroredItemsForPage(any)).thenReturn(
       FixedValueListenable(LinkedHashMap<String, DevToolsError>()),
     );
 
     when(errorBadgeManager.errorCountNotifier(any))
         .thenReturn(ValueNotifier<int>(0));
+    vmServiceOpened(service);
   }
 
   Completer<void> flagsInitialized = Completer();
@@ -52,6 +51,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
     AllocationMemoryJson allocationData,
     CpuProfileData cpuProfileData,
     CpuSamples cpuSamples,
+    Map<String, String> resolvedUriMap,
   }) =>
       FakeVmService(
         _flagManager,
@@ -61,6 +61,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
         memoryData,
         allocationData,
         cpuSamples,
+        resolvedUriMap,
       );
 
   final List<String> availableServices;
@@ -68,6 +69,9 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   final List<String> availableLibraries;
 
   final MockVM _mockVM = MockVM();
+
+  @override
+  final resolvedUriManager = ResolvedUriManager();
 
   @override
   VmServiceWrapper service;
@@ -193,4 +197,14 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
 
   @override
   ValueListenable<bool> get deviceBusy => ValueNotifier(false);
+
+  @override
+  Future<void> vmServiceOpened(
+    VmServiceWrapper service, {
+    Future<void> onClosed,
+  }) {
+    resolvedUriManager.vmServiceOpened();
+    initFlagManager();
+    return Future.value();
+  }
 }
