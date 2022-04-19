@@ -463,19 +463,22 @@ class CpuProfileData {
 
   CpuStackFrame get cpuProfileRoot => _cpuProfileRoot;
 
-  Iterable<String?> get userTags {
+  Iterable<String> get userTags {
     if (_userTags != null) {
       return _userTags!;
     }
-    final tags = <String?>{};
+    final tags = <String>{};
     for (final cpuSample in cpuSamples) {
-      tags.add(cpuSample.userTag);
+      final tag = cpuSample.userTag;
+      if (tag != null) {
+        tags.add(tag);
+      }
     }
     _userTags = tags;
     return _userTags!;
   }
 
-  Iterable<String?>? _userTags;
+  Iterable<String>? _userTags;
 
   late final CpuStackFrame _cpuProfileRoot;
 

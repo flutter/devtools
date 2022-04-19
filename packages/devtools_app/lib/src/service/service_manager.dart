@@ -7,6 +7,7 @@
 import 'dart:async';
 import 'dart:core';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
@@ -424,9 +425,8 @@ class ServiceConnectionManager {
         flutterViewListResponse.json!['views'].cast<Map<String, dynamic>>();
 
     // Each isolate should only have one FlutterView.
-    final flutterView = views.firstWhere(
+    final flutterView = views.firstWhereOrNull(
       (view) => view['type'] == 'FlutterView',
-      orElse: () => null,
     );
 
     if (flutterView == null) {
