@@ -286,17 +286,4 @@ void expectScreenSize(
   final BuildContext context = tester.element(find.byType(Container));
   expect(ScreenSize(context).width, equals(width));
   expect(ScreenSize(context).height, equals(height));
-
-  // await tester.pumpWidget(
-  //   wrap(
-  //     Builder(
-  //       builder: (context) {
-  //         expectLater(ScreenSize(context).width, equals(width));
-  //         expectLater(ScreenSize(context).height, equals(height));
-  //         return Container();
-  //       },
-  //     ),
-  //   ),
-  // );
-  // await tester.pumpAndSettle();
 }

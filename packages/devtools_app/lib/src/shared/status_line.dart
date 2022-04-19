@@ -66,7 +66,7 @@ class StatusLine extends StatelessWidget {
         pageStatus,
         const BulletSpacer(),
       ],
-      buildConnectionStatus(context, isNarrow)
+      buildConnectionStatus(context, isExtraNarrow)
     ];
   }
 
@@ -94,11 +94,11 @@ class StatusLine extends StatelessWidget {
       );
     } else {
       // Use a placeholder for pages with no explicit documentation.
-      return const Text('DevTools ${devtools.version}');
+      return Text('${isNarrow ? '' : 'DevTools '}${devtools.version}');
     }
   }
 
-  Widget buildConnectionStatus(BuildContext context, bool isNarrow) {
+  Widget buildConnectionStatus(BuildContext context, bool isExtraNarrow) {
     final textTheme = Theme.of(context).textTheme;
     return ValueListenableBuilder<ConnectedState>(
       valueListenable: serviceManager.connectedState,
@@ -158,7 +158,7 @@ class StatusLine extends StatelessWidget {
                         Icons.info_outline,
                         size: actionsIconSize,
                       ),
-                      if (!isNarrow) ...[
+                      if (!isExtraNarrow) ...[
                         const SizedBox(width: denseSpacing),
                         Text(
                           description,
@@ -176,10 +176,18 @@ class StatusLine extends StatelessWidget {
           return child!;
         }
       },
-      child: Text(
-        'No client connection',
-        style: textTheme.bodyText2,
-      ),
+      child: isExtraNarrow
+          ? DevToolsTooltip(
+              message: 'No client connection',
+              child: Icon(
+                Icons.warning_amber_rounded,
+                size: actionsIconSize,
+              ),
+            )
+          : Text(
+              'No client connection',
+              style: textTheme.bodyText2,
+            ),
     );
   }
 }
