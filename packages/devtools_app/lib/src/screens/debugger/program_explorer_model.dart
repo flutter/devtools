@@ -305,7 +305,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
   }
 
   Future<void> populateLocation() async {
-    ScriptRef scriptRef = script!;
+    ScriptRef? scriptRef = script;
     int? tokenPos = 0;
     if (object != null &&
         (object is FieldRef || object is FuncRef || object is ClassRef)) {
@@ -314,15 +314,17 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
       scriptRef = location.script;
     }
 
-    final fetchedScript = await scriptManager.getScript(scriptRef);
-    final position = tokenPos == 0
-        ? null
-        : SourcePosition.calculatePosition(fetchedScript, tokenPos!);
+    if (scriptRef != null) {
+      final fetchedScript = await scriptManager.getScript(scriptRef);
+      final position = tokenPos == 0
+          ? null
+          : SourcePosition.calculatePosition(fetchedScript, tokenPos!);
 
-    location = ScriptLocation(
-      scriptRef,
-      location: position,
-    );
+      location = ScriptLocation(
+        scriptRef,
+        location: position,
+      );
+    }
   }
 
   /// Clear the _childrenAsMap map recursively to save memory.

@@ -24,6 +24,7 @@ void main() {
       fakeServiceManager = FakeServiceManager(
         service: FakeServiceManager.createFakeService(
           cpuSamples: CpuSamples.parse(goldenCpuSamplesJson),
+          resolvedUriMap: goldenResolvedUriMap,
         ),
       );
       setGlobal(ServiceConnectionManager, fakeServiceManager);
