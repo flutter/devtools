@@ -110,6 +110,7 @@ class StatusLine extends StatelessWidget {
 
   Widget buildConnectionStatus(BuildContext context, bool isExtraNarrow) {
     final textTheme = Theme.of(context).textTheme;
+    const noConnectionMsg = 'No client connection';
     return ValueListenableBuilder<ConnectedState>(
       valueListenable: serviceManager.connectedState,
       builder: (context, connectedState, child) {
@@ -188,14 +189,14 @@ class StatusLine extends StatelessWidget {
       },
       child: isExtraNarrow
           ? DevToolsTooltip(
-              message: 'No client connection',
+              message: noConnectionMsg,
               child: Icon(
                 Icons.warning_amber_rounded,
                 size: actionsIconSize,
               ),
             )
           : Text(
-              'No client connection',
+              noConnectionMsg,
               style: textTheme.bodyText2,
             ),
     );
