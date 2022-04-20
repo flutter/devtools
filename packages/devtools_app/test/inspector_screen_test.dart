@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:convert';
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
@@ -25,7 +23,7 @@ void main() {
   const screen = InspectorScreen();
 
   FakeServiceManager fakeServiceManager;
-  FakeServiceExtensionManager fakeExtensionManager;
+  FakeServiceExtensionManager? fakeExtensionManager;
   const windowSize = Size(2600.0, 1200.0);
 
   final debuggerController = MockDebuggerController.withDefaults();
@@ -41,8 +39,8 @@ void main() {
     setUp(() {
       fakeServiceManager = FakeServiceManager();
       fakeExtensionManager = fakeServiceManager.serviceExtensionManager;
-      mockIsFlutterApp(fakeServiceManager.connectedApp);
-      when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
+      mockIsFlutterApp(fakeServiceManager.connectedApp as MockConnectedApp);
+      when(fakeServiceManager.errorBadgeManager.errorCountNotifier('inspector'))
           .thenReturn(ValueNotifier<int>(0));
 
       setGlobal(ServiceConnectionManager, fakeServiceManager);
@@ -52,13 +50,13 @@ void main() {
     });
 
     void mockExtensions() {
-      fakeExtensionManager.extensionValueOnDevice = {
+      fakeExtensionManager!.extensionValueOnDevice = {
         extensions.toggleSelectWidgetMode.extension: true,
         extensions.enableOnDeviceInspector.extension: true,
         extensions.toggleOnDeviceWidgetInspector.extension: true,
         extensions.debugPaint.extension: false,
       };
-      fakeExtensionManager
+      fakeExtensionManager!
         ..fakeAddServiceExtension(
           extensions.toggleOnDeviceWidgetInspector.extension,
         )
@@ -69,14 +67,14 @@ void main() {
     }
 
     void mockNoExtensionsAvailable() {
-      fakeExtensionManager.extensionValueOnDevice = {
+      fakeExtensionManager!.extensionValueOnDevice = {
         extensions.toggleOnDeviceWidgetInspector.extension: true,
         extensions.toggleSelectWidgetMode.extension: false,
         extensions.debugPaint.extension: false,
       };
       // Don't actually send any events to the client indicating that service
       // extensions are avaiable.
-      fakeExtensionManager.fakeFrame();
+      fakeExtensionManager!.fakeFrame();
     }
 
     testWidgetsWithWindowSize('builds its tab', windowSize,
@@ -119,12 +117,12 @@ void main() {
         (WidgetTester tester) async {
       mockExtensions();
       expect(
-        fakeExtensionManager
+        fakeExtensionManager!
             .extensionValueOnDevice[extensions.debugPaint.extension],
         isFalse,
       );
       expect(
-        fakeExtensionManager.extensionValueOnDevice[
+        fakeExtensionManager!.extensionValueOnDevice[
             extensions.toggleOnDeviceWidgetInspector.extension],
         isTrue,
       );
@@ -132,7 +130,7 @@ void main() {
       await tester.pumpWidget(buildInspectorScreen());
 
       expect(
-        fakeExtensionManager.extensionValueOnDevice[
+        fakeExtensionManager!.extensionValueOnDevice[
             extensions.toggleSelectWidgetMode.extension],
         isTrue,
       );
@@ -147,27 +145,27 @@ void main() {
       await tester.pump();
       await tester.tap(find.text(extensions.toggleSelectWidgetMode.title));
       expect(
-        fakeExtensionManager.extensionValueOnDevice[
+        fakeExtensionManager!.extensionValueOnDevice[
             extensions.toggleSelectWidgetMode.extension],
         isFalse,
       );
       // Verify the the other service extension's state hasn't changed.
       expect(
-        fakeExtensionManager
+        fakeExtensionManager!
             .extensionValueOnDevice[extensions.debugPaint.extension],
         isFalse,
       );
 
       await tester.tap(find.text(extensions.toggleSelectWidgetMode.title));
       expect(
-        fakeExtensionManager.extensionValueOnDevice[
+        fakeExtensionManager!.extensionValueOnDevice[
             extensions.toggleSelectWidgetMode.extension],
         isTrue,
       );
 
       await tester.tap(find.text(extensions.debugPaint.title));
       expect(
-        fakeExtensionManager
+        fakeExtensionManager!
             .extensionValueOnDevice[extensions.debugPaint.extension],
         isTrue,
       );
@@ -178,12 +176,12 @@ void main() {
         windowSize, (WidgetTester tester) async {
       mockNoExtensionsAvailable();
       expect(
-        fakeExtensionManager
+        fakeExtensionManager!
             .extensionValueOnDevice[extensions.debugPaint.extension],
         isFalse,
       );
       expect(
-        fakeExtensionManager.extensionValueOnDevice[
+        fakeExtensionManager!.extensionValueOnDevice[
             extensions.toggleOnDeviceWidgetInspector.extension],
         isTrue,
       );
@@ -202,7 +200,7 @@ void main() {
           .tap(find.text(extensions.toggleOnDeviceWidgetInspector.title));
       // Verify the service extension state has not changed.
       expect(
-        fakeExtensionManager.extensionValueOnDevice[
+        fakeExtensionManager!.extensionValueOnDevice[
             extensions.toggleOnDeviceWidgetInspector.extension],
         isTrue,
       );
@@ -210,7 +208,7 @@ void main() {
           .tap(find.text(extensions.toggleOnDeviceWidgetInspector.title));
       // Verify the service extension state has not changed.
       expect(
-        fakeExtensionManager.extensionValueOnDevice[
+        fakeExtensionManager!.extensionValueOnDevice[
             extensions.toggleOnDeviceWidgetInspector.extension],
         isTrue,
       );
@@ -253,7 +251,7 @@ void main() {
       ''',
       );
       final diagnostic = RemoteDiagnosticsNode(
-        <String, Object>{
+        <String, Object?>{
           'widgetRuntimeType': 'Row',
           'renderObject': renderObjectJson,
           'hasChildren': false,

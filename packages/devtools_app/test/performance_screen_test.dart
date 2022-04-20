@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 @TestOn('vm')
 import 'dart:async';
 
@@ -29,9 +27,9 @@ import 'test_data/performance_test_data.dart';
 
 void main() {
   setGlobal(IdeTheme, IdeTheme());
-  PerformanceScreen screen;
-  PerformanceController controller;
-  FakeServiceManager fakeServiceManager;
+  late PerformanceScreen screen;
+  late PerformanceController controller;
+  FakeServiceManager? fakeServiceManager;
 
   Future<void> _setUpServiceManagerWithTimeline(
     Map<String, dynamic> timelineJson,
@@ -41,26 +39,27 @@ void main() {
         timelineData: vm_service.Timeline.parse(timelineJson),
       ),
     );
-    when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
-        .thenReturn(ValueNotifier<int>(0));
-    when(fakeServiceManager.connectedApp.initialized)
+    when(
+      fakeServiceManager!.errorBadgeManager.errorCountNotifier('performance'),
+    ).thenReturn(ValueNotifier<int>(0));
+    when(fakeServiceManager!.connectedApp!.initialized)
         .thenReturn(Completer()..complete(true));
-    when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
-    when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
-    when(fakeServiceManager.connectedApp.flutterVersionNow).thenReturn(
-      FlutterVersion.parse((await fakeServiceManager.flutterVersion).json),
+    when(fakeServiceManager!.connectedApp!.isDartWebAppNow).thenReturn(false);
+    when(fakeServiceManager!.connectedApp!.isFlutterAppNow).thenReturn(true);
+    when(fakeServiceManager!.connectedApp!.flutterVersionNow).thenReturn(
+      FlutterVersion.parse((await fakeServiceManager!.flutterVersion).json!),
     );
-    when(fakeServiceManager.connectedApp.isDartCliAppNow).thenReturn(false);
-    when(fakeServiceManager.connectedApp.isDebugFlutterAppNow)
+    when(fakeServiceManager!.connectedApp!.isDartCliAppNow).thenReturn(false);
+    when(fakeServiceManager!.connectedApp!.isDebugFlutterAppNow)
         .thenReturn(false);
-    when(fakeServiceManager.connectedApp.isDartWebApp)
+    when(fakeServiceManager!.connectedApp!.isDartWebApp)
         .thenAnswer((_) => Future.value(false));
     setGlobal(ServiceConnectionManager, fakeServiceManager);
   }
 
   Future<void> pumpPerformanceScreen(
     WidgetTester tester, {
-    PerformanceController performanceController,
+    PerformanceController? performanceController,
     bool runAsync = false,
   }) async {
     await tester.pumpWidget(
@@ -164,8 +163,8 @@ void main() {
     testWidgetsWithWindowSize(
         'builds initial content for non-flutter app', windowSize,
         (WidgetTester tester) async {
-      when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(false);
-      when(fakeServiceManager.connectedApp.isDartCliAppNow).thenReturn(true);
+      when(fakeServiceManager!.connectedApp!.isFlutterAppNow).thenReturn(false);
+      when(fakeServiceManager!.connectedApp!.isDartCliAppNow).thenReturn(true);
       await tester.runAsync(() async {
         await pumpPerformanceScreen(tester, runAsync: true);
         await tester.pumpAndSettle();

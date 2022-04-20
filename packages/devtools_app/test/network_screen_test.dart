@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/screens/network/network_screen.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
@@ -14,16 +12,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
 void main() {
-  NetworkScreen screen;
+  late NetworkScreen screen;
   FakeServiceManager fakeServiceManager;
 
   group('NetworkScreen', () {
     setUp(() async {
       fakeServiceManager = FakeServiceManager();
-      when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
+      when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(IdeTheme, IdeTheme());
-      when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
+      when(fakeServiceManager.errorBadgeManager.errorCountNotifier('network'))
           .thenReturn(ValueNotifier<int>(0));
       screen = const NetworkScreen();
     });

@@ -2,15 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 // ignore_for_file: avoid_redundant_argument_values
 
 import 'package:devtools_app/src/screens/debugger/debugger_model.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
@@ -22,10 +19,12 @@ final libraryRef = LibraryRef(
 );
 
 void main() {
-  ServiceConnectionManager manager;
+  ServiceConnectionManager? manager;
 
   setUp(() {
-    final service = MockVmService();
+    final service = MockVmServiceWrapper();
+    when(service.getFlagList())
+        .thenAnswer((_) => Future.value(FlagList(flags: [])));
     when(service.onDebugEvent).thenAnswer((_) {
       return const Stream.empty();
     });
@@ -88,7 +87,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any, offset: 0, count: 2))
+    when(manager!.service!.getObject('433', '123', offset: 0, count: 2))
         .thenAnswer((_) async {
       return instance;
     });
@@ -148,7 +147,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any, offset: 0, count: 2))
+    when(manager!.service!.getObject('433', '123', offset: 0, count: 2))
         .thenAnswer((_) async {
       return instance;
     });
@@ -206,7 +205,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any, offset: 0, count: 2))
+    when(manager!.service!.getObject('433', '123', offset: 0, count: 2))
         .thenAnswer((_) async {
       return instance;
     });
@@ -224,8 +223,8 @@ void main() {
 }
 
 Matcher matchesVariable({
-  @required String name,
-  @required Object value,
+  required String? name,
+  required Object value,
 }) {
   return const TypeMatcher<DartObjectNode>()
       .having(

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 // ignore_for_file: avoid_redundant_argument_values
 
 import 'dart:convert';
@@ -26,7 +24,7 @@ final isolateRef = IsolateRef(
 );
 
 void main() {
-  ServiceConnectionManager manager;
+  ServiceConnectionManager? manager;
 
   setUp(() {
     final service = MockVmService();
@@ -69,7 +67,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any, offset: 0, count: 4))
+    when(manager!.service!.getObject('!!!!!', '!!!!!', offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
@@ -104,7 +102,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any, offset: 0, count: 4))
+    when(manager!.service!.getObject('!!!!!', '!!!!!', offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
@@ -139,7 +137,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any, offset: 0, count: 4))
+    when(manager!.service!.getObject('!!!!!', '!!!!!', offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
@@ -174,7 +172,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any, offset: 0, count: 4))
+    when(manager!.service!.getObject('!!!!!', '!!!!!', offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
@@ -212,7 +210,7 @@ void main() {
         ),
         isolateRef,
       );
-      when(manager.service.getObject(any, any, offset: 0, count: 4))
+      when(manager!.service!.getObject('!!!!!', '!!!!!', offset: 0, count: 4))
           .thenAnswer((_) async {
         return instance;
       });
@@ -249,7 +247,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any, offset: 0, count: 4))
+    when(manager!.service!.getObject('!!!!!', '!!!!!', offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
@@ -284,7 +282,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any, offset: 0, count: 4))
+    when(manager!.service!.getObject('!!!!!', '!!!!!', offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
@@ -319,7 +317,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any, offset: 0, count: 4))
+    when(manager!.service!.getObject('!!!!!', '!!!!!', offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
@@ -357,7 +355,7 @@ void main() {
         ),
         isolateRef,
       );
-      when(manager.service.getObject(any, any, offset: 0, count: 4))
+      when(manager!.service!.getObject('!!!!!', '!!!!!', offset: 0, count: 4))
           .thenAnswer((_) async {
         return instance;
       });
@@ -395,7 +393,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any, offset: 0, count: 4))
+    when(manager!.service!.getObject('!!!!!', '!!!!!', offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
@@ -430,7 +428,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any, offset: 0, count: 4))
+    when(manager!.service!.getObject('!!!!!', '!!!!!', offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
@@ -466,7 +464,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any, offset: 0, count: 4))
+    when(manager!.service!.getObject('!!!!!', '!!!!!', offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
@@ -508,7 +506,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any, offset: 0, count: 4))
+    when(manager!.service!.getObject('!!!!!', '!!!!!', offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
@@ -548,7 +546,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any, offset: 0, count: 4))
+    when(manager!.service!.getObject('!!!!!', '!!!!!', offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
@@ -590,15 +588,15 @@ void main() {
     );
 
     when(
-      manager.service.getObject(
-        any,
-        any,
+      manager!.service!.getObject(
+        '!!!!!',
+        '!!!!!',
         offset: 0,
         count: 4,
       ),
     ).thenThrow('Unrecognized parameters offset / count.');
 
-    when(manager.service.getObject(any, any)).thenAnswer((_) async {
+    when(manager!.service!.getObject('!!!!!', '!!!!!')).thenAnswer((_) async {
       return instance;
     });
 
@@ -612,15 +610,15 @@ void main() {
     ]);
 
     verifyInOrder([
-      manager.service.getObject(
-        any,
-        any,
+      manager!.service!.getObject(
+        '!!!!!',
+        '!!!!!',
         offset: 0,
         count: 4,
       ),
-      manager.service.getObject(
-        any,
-        any,
+      manager!.service!.getObject(
+        '!!!!!',
+        '!!!!!',
       ),
     ]);
   });
@@ -687,21 +685,21 @@ void main() {
 }
 
 Matcher matchesVariable({
-  @required String name,
-  @required Object value,
+  required String name,
+  required Object value,
 }) {
   return const TypeMatcher<DartObjectNode>().having(
     (v) => v,
     'boundVar',
     const TypeMatcher<DartObjectNode>()
         .having((v) => v.name, 'name', equals(name))
-        .having((v) => v.ref.value, 'value', equals(value)),
+        .having((v) => v.ref!.value, 'value', equals(value)),
   );
 }
 
 Matcher matchesVariableGroup({
-  @required int start,
-  @required int end,
+  required int start,
+  required int end,
 }) {
   return const TypeMatcher<DartObjectNode>().having(
     (v) => v,

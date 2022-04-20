@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 @TestOn('vm')
 
 import 'package:ansicolor/ansicolor.dart';
@@ -25,8 +23,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
 void main() {
-  LoggingScreen screen;
-  MockLoggingController mockLoggingController;
+  late LoggingScreen screen;
+  MockLoggingController? mockLoggingController;
   const windowSize = Size(1000.0, 1000.0);
 
   group('Logging Screen', () {
@@ -44,21 +42,22 @@ void main() {
     setUp(() async {
       await ensureInspectorDependencies();
       mockLoggingController = MockLoggingController();
-      when(mockLoggingController.data).thenReturn([]);
-      when(mockLoggingController.search).thenReturn('');
-      when(mockLoggingController.searchMatches)
+      when(mockLoggingController!.data).thenReturn([]);
+      when(mockLoggingController!.search).thenReturn('');
+      when(mockLoggingController!.searchMatches)
           .thenReturn(ValueNotifier<List<LogData>>([]));
-      when(mockLoggingController.searchInProgressNotifier)
+      when(mockLoggingController!.searchInProgressNotifier)
           .thenReturn(ValueNotifier<bool>(false));
-      when(mockLoggingController.matchIndex).thenReturn(ValueNotifier<int>(0));
-      when(mockLoggingController.filteredData)
+      when(mockLoggingController!.matchIndex).thenReturn(ValueNotifier<int>(0));
+      when(mockLoggingController!.filteredData)
           .thenReturn(ListValueNotifier<LogData>([]));
 
       fakeServiceManager = FakeServiceManager();
-      when(fakeServiceManager.connectedApp.isFlutterWebAppNow)
+      when(fakeServiceManager.connectedApp!.isFlutterWebAppNow)
           .thenReturn(false);
-      when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
-      when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
+      when(fakeServiceManager.connectedApp!.isProfileBuildNow)
+          .thenReturn(false);
+      when(fakeServiceManager.errorBadgeManager.errorCountNotifier('logging'))
           .thenReturn(ValueNotifier<int>(0));
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(IdeTheme, IdeTheme());
@@ -85,16 +84,16 @@ void main() {
     testWidgetsWithWindowSize('can clear logs', windowSize,
         (WidgetTester tester) async {
       await pumpLoggingScreen(tester);
-      verifyNever(mockLoggingController.clear());
+      verifyNever(mockLoggingController!.clear());
       await tester.tap(find.text('Clear'));
-      verify(mockLoggingController.clear()).called(1);
+      verify(mockLoggingController!.clear()).called(1);
     });
 
     testWidgetsWithWindowSize(
         'search field is disabled with no data', windowSize,
         (WidgetTester tester) async {
       await pumpLoggingScreen(tester);
-      verifyNever(mockLoggingController.clear());
+      verifyNever(mockLoggingController!.clear());
 
       final textFieldFinder = find.byKey(loggingSearchFieldKey);
       expect(textFieldFinder, findsOneWidget);
@@ -105,8 +104,8 @@ void main() {
     testWidgetsWithWindowSize('can toggle structured errors', windowSize,
         (WidgetTester tester) async {
       final serviceManager = FakeServiceManager();
-      when(serviceManager.connectedApp.isFlutterWebAppNow).thenReturn(false);
-      when(serviceManager.connectedApp.isProfileBuildNow).thenReturn(false);
+      when(serviceManager.connectedApp!.isFlutterWebAppNow).thenReturn(false);
+      when(serviceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
       setGlobal(
         ServiceConnectionManager,
         serviceManager,
@@ -126,8 +125,8 @@ void main() {
 
     group('with data', () {
       setUp(() {
-        when(mockLoggingController.data).thenReturn(fakeLogData);
-        when(mockLoggingController.filteredData)
+        when(mockLoggingController!.data).thenReturn(fakeLogData);
+        when(mockLoggingController!.filteredData)
             .thenReturn(ListValueNotifier<LogData>(fakeLogData));
       });
 
@@ -176,7 +175,7 @@ void main() {
       testWidgetsWithWindowSize('search field can enter text', windowSize,
           (WidgetTester tester) async {
         await pumpLoggingScreen(tester);
-        verifyNever(mockLoggingController.clear());
+        verifyNever(mockLoggingController!.clear());
 
         final textFieldFinder = find.byKey(loggingSearchFieldKey);
         expect(textFieldFinder, findsOneWidget);
@@ -252,7 +251,7 @@ void main() {
         const index = 9;
         bool containsJson(Widget widget) {
           if (widget is! SelectableText) return false;
-          final content = (widget as SelectableText).data.trim();
+          final content = widget.data!.trim();
           return content.startsWith('{') && content.endsWith('}');
         }
 
@@ -279,7 +278,7 @@ void main() {
     });
 
     group('MessageColumn', () {
-      MessageColumn column;
+      late MessageColumn column;
 
       setUp(() {
         column = MessageColumn();
@@ -332,9 +331,9 @@ const totalLogs = 10;
 final fakeLogData = List<LogData>.generate(totalLogs, _generate);
 
 LogData _generate(int i) {
-  String details = 'log event $i';
+  String? details = 'log event $i';
   String kind = 'kind $i';
-  String computedDetails;
+  String? computedDetails;
   switch (i) {
     case 9:
       computedDetails = jsonOutput;
@@ -355,7 +354,8 @@ LogData _generate(int i) {
 
   final detailsComputer = computedDetails == null
       ? null
-      : () => Future.delayed(const Duration(seconds: 1), () => computedDetails);
+      : () =>
+          Future.delayed(const Duration(seconds: 1), () => computedDetails!);
   return LogData(kind, details, i, detailsComputer: detailsComputer);
 }
 
