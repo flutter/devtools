@@ -174,7 +174,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   int get hashCode => dartDiagnosticRef.hashCode;
 
   /// Separator text to show between property names and values.
-  String get separator => showSeparator! ? ':' : '';
+  String get separator => showSeparator ? ':' : '';
 
   /// Label describing the [RemoteDiagnosticsNode], typically shown before a separator
   /// (see [showSeparator]).
@@ -186,7 +186,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   ///
   /// If false, name and description should be shown with no separation.
   /// `:` is typically used as a separator when displaying as text.
-  bool? get showSeparator => getBooleanMember('showSeparator', true);
+  bool get showSeparator => getBooleanMember('showSeparator', true);
 
   /// Returns a description with a short summary of the node itself not
   /// including children or properties.
@@ -212,7 +212,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   ///
   /// This could be set to false (hiding the name) if the value's description
   /// will make the name self-evident.
-  bool? get showName => getBooleanMember('showName', true);
+  bool get showName => getBooleanMember('showName', true);
 
   /// Description to show if the node has no displayed properties or children.
   String? getEmptyBodyDescription() => getStringMember('emptyBodyDescription');
@@ -229,7 +229,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// Whether the description is enclosed in double quotes.
   ///
   /// Only relevant for String properties.
-  bool? get isQuoted => getBooleanMember('quoted', false);
+  bool get isQuoted => getBooleanMember('quoted', false);
 
   bool get hasIsQuoted => json.containsKey('quoted');
 
@@ -337,7 +337,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// Description if the property [value] is null.
   String? get ifNull => getStringMember('ifNull');
 
-  bool? get allowWrap => getBooleanMember('allowWrap', true);
+  bool get allowWrap => getBooleanMember('allowWrap', true);
 
   /// Optional tooltip typically describing the property.
   ///
@@ -351,7 +351,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   /// Whether a [value] of null causes the property to have [level]
   /// [DiagnosticLevel.warning] warning that the property is missing a [value].
-  bool? get missingIfNull => getBooleanMember('missingIfNull', false);
+  bool get missingIfNull => getBooleanMember('missingIfNull', false);
 
   /// String representation of exception thrown if accessing the property
   /// [value] threw an exception.
@@ -418,7 +418,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// would return null. This will allow showing nested data for properties
   /// that don't show children by default in other debugging output but
   /// could.
-  bool? get isDiagnosticableValue {
+  bool get isDiagnosticableValue {
     return getBooleanMember('isDiagnosticableValue', false);
   }
 
@@ -507,7 +507,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   Map<String, Object?>? get valuePropertiesJson =>
       json['valueProperties'] as Map<String, Object?>?;
 
-  bool? get hasChildren {
+  bool get hasChildren {
     // In the summary tree, json['hasChildren']==true when the node has details
     // tree children so we need to first check whether the list of children for
     // the node in the tree was specified. If there is an empty list of children
@@ -521,21 +521,21 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     return getBooleanMember('hasChildren', false);
   }
 
-  bool? get isCreatedByLocalProject {
+  bool get isCreatedByLocalProject {
     return getBooleanMember('createdByLocalProject', false);
   }
 
   /// Whether this node is being displayed as a full tree or a filtered tree.
-  bool? get isSummaryTree => getBooleanMember('summaryTree', false);
+  bool get isSummaryTree => getBooleanMember('summaryTree', false);
 
   /// Whether this node is being displayed as a full tree or a filtered tree.
-  bool? get isStateful => getBooleanMember('stateful', false);
+  bool get isStateful => getBooleanMember('stateful', false);
 
   String? get widgetRuntimeType => getStringMember('widgetRuntimeType');
 
   /// Check whether children are already available.
   bool get childrenReady {
-    return json.containsKey('children') || _children != null || !hasChildren!;
+    return json.containsKey('children') || _children != null || !hasChildren;
   }
 
   Future<List<RemoteDiagnosticsNode>?> get children async {
@@ -544,14 +544,14 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     return await _childrenFuture;
   }
 
-  List<RemoteDiagnosticsNode>? get childrenNow {
+  List<RemoteDiagnosticsNode> get childrenNow {
     _maybePopulateChildren();
     return _children ?? [];
   }
 
   Future<void> _computeChildren() async {
     _maybePopulateChildren();
-    if (!hasChildren! || _children != null) {
+    if (!hasChildren || _children != null) {
       return;
     }
 
@@ -571,13 +571,13 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   Future<List<RemoteDiagnosticsNode>> _getChildrenHelper() async {
     return inspectorService!.getChildren(
       dartDiagnosticRef,
-      isSummaryTree!,
+      isSummaryTree,
       this,
     );
   }
 
   void _maybePopulateChildren() {
-    if (!hasChildren! || _children != null) {
+    if (!hasChildren || _children != null) {
       return;
     }
 
@@ -603,7 +603,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   }
 
   /// Properties to show inline in the widget tree.
-  List<RemoteDiagnosticsNode>? get inlineProperties {
+  List<RemoteDiagnosticsNode> get inlineProperties {
     if (cachedProperties == null) {
       cachedProperties = [];
       if (json.containsKey('properties')) {
@@ -658,7 +658,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    for (var property in inlineProperties!) {
+    for (var property in inlineProperties) {
       properties.add(DiagnosticsProperty(property.name, property));
     }
   }
@@ -715,11 +715,11 @@ class InspectorSourceLocation {
     return fileName;
   }
 
-  int getLine() => JsonUtils.getIntMember(json!, 'line');
+  int getLine() => JsonUtils.getIntMember(json, 'line');
 
   String? getName() => JsonUtils.getStringMember(json, 'name');
 
-  int getColumn() => JsonUtils.getIntMember(json!, 'column');
+  int getColumn() => JsonUtils.getIntMember(json, 'column');
 
   SourcePosition? getXSourcePosition() {
     final file = getFile();
