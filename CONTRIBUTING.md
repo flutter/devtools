@@ -140,7 +140,7 @@ before running these tests.
 
 ```
 cd packages/devtools_app
-flutter test -j1 --no-sound-null-safety
+flutter test -j1
 ```
 
 The flag `-j1` tells Flutter to run tests with 1 concurrent test runner. If your test run does
@@ -148,7 +148,7 @@ not include the directory `devtools_app/test/integration_tests`, then you do not
 this flag.  For example, it is OK to do the following:
 
 ```
-flutter test test/ui/ --no-sound-null-safety
+flutter test test/ui/
 ```
 
 If you run the tests on other than Linux environment, first time add the flag `--update-goldens`, 
