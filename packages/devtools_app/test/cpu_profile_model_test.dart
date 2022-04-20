@@ -343,6 +343,24 @@ void main() {
         equals('[Dart] B - 0.1 ms - dart:async/zone.dart:2222'),
       );
     });
+
+    group('packageUriWithSourceLine', () {
+      test('with a sourceLine', () {
+        const sourceLine = 38239;
+        final copy = stackFrameD.shallowCopy(sourceLine: sourceLine);
+        expect(
+          copy.packageUriWithSourceLine,
+          equals('processedflutter::AnimatorBeginFrame:$sourceLine'),
+        );
+      });
+
+      test('without sourceLine', () {
+        expect(
+          stackFrameD,
+          equals('processedflutter::AnimatorBeginFrame'),
+        );
+      });
+    });
   });
 
   test('matches', () {
