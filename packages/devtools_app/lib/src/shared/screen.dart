@@ -198,7 +198,7 @@ abstract class Screen {
   /// Build a widget to display in the status line.
   ///
   /// If this method returns `null`, then no page specific status is displayed.
-  Widget? buildStatus(BuildContext context, TextTheme textTheme) {
+  Widget? buildStatus(BuildContext context) {
     return null;
   }
 }

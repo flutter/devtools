@@ -500,13 +500,15 @@ class _ServiceExtensionCheckboxState extends State<ServiceExtensionCheckbox>
                 tooltip: widget.serviceExtension.tooltip,
                 onChanged: _onChanged,
                 enabled: available,
+                gaScreenName: widget.serviceExtension.gaScreenName,
+                gaItem: widget.serviceExtension.gaItem,
               ),
             ),
             if (docsUrl != null)
               MoreInfoLink(
                 url: docsUrl,
                 gaScreenName: widget.serviceExtension.gaScreenName!,
-                gaSelectedItemDescription: widget.serviceExtension.gaItem!,
+                gaSelectedItemDescription: widget.serviceExtension.gaDocsItem!,
                 padding: const EdgeInsets.symmetric(vertical: denseSpacing),
               )
           ],
