@@ -23,8 +23,7 @@ void main() {
 
   setUp(() {
     final service = MockVmServiceWrapper();
-    when(service.getFlagList())
-        .thenAnswer((_) => Future.value(FlagList(flags: [])));
+    when(service.getFlagList()).thenAnswer((_) async => FlagList(flags: []));
     when(service.onDebugEvent).thenAnswer((_) {
       return const Stream.empty();
     });
