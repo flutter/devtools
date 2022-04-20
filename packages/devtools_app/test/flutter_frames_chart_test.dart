@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 @TestOn('vm')
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
@@ -23,12 +23,14 @@ import 'test_data/performance_test_data.dart';
 void main() {
   Future<void> pumpChart(
     WidgetTester tester, {
-    @required List<FlutterFrame> frames,
+    required List<FlutterFrame> frames,
   }) async {
-    await tester.pumpWidget(wrapWithControllers(
-      FlutterFramesChart(frames, defaultRefreshRate),
-      performance: PerformanceController(),
-    ));
+    await tester.pumpWidget(
+      wrapWithControllers(
+        FlutterFramesChart(frames, defaultRefreshRate),
+        performance: PerformanceController(),
+      ),
+    );
     await tester.pumpAndSettle();
     expect(find.byType(FlutterFramesChart), findsOneWidget);
   }
@@ -36,7 +38,7 @@ void main() {
   group('FlutterFramesChart', () {
     setUp(() async {
       final fakeServiceManager = FakeServiceManager();
-      when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
+      when(fakeServiceManager.connectedApp!.isFlutterAppNow).thenReturn(true);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(OfflineModeController, OfflineModeController());
       setGlobal(IdeTheme, IdeTheme());
@@ -157,8 +159,10 @@ void main() {
           ),
         ),
       );
-      expect(find.byKey(FlutterFramesChartItem.selectedFrameIndicatorKey),
-          findsOneWidget);
+      expect(
+        find.byKey(FlutterFramesChartItem.selectedFrameIndicatorKey),
+        findsOneWidget,
+      );
     });
   });
 }

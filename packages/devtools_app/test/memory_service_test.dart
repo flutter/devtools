@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 @TestOn('vm')
 import 'package:devtools_app/src/screens/memory/memory_controller.dart';
@@ -15,7 +15,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'test_infra/flutter_test_driver.dart' show FlutterRunConfiguration;
 import 'test_infra/flutter_test_environment.dart';
 
-MemoryController memoryController;
+late MemoryController memoryController;
 
 // Track number of onMemory events received.
 int memoryTrackersReceived = 0;
@@ -45,7 +45,7 @@ void main() async {
       test('heap info', () async {
         await env.setupEnvironment();
 
-        memoryController.onMemory.listen((MemoryTracker memoryTracker) {
+        memoryController.onMemory.listen((MemoryTracker? memoryTracker) {
           if (!serviceManager.hasConnection) {
             // VM Service connection has stopped - unexpected.
             fail('VM Service connection stoped unexpectantly.');
@@ -72,17 +72,33 @@ void main() async {
           final ClassHeapDetailStats classStat = iterator.current;
 
           if (classStat.classRef.name == 'MyApp') {
-            checkHeapStat(classStat, 'MyApp',
-                instanceCount: 1, accumulatorCount: 2);
+            checkHeapStat(
+              classStat,
+              'MyApp',
+              instanceCount: 1,
+              accumulatorCount: 2,
+            );
           } else if (classStat.classRef.name == 'ThemeData') {
-            checkHeapStat(classStat, 'ThemeData',
-                instanceCount: 2, accumulatorCount: 4);
+            checkHeapStat(
+              classStat,
+              'ThemeData',
+              instanceCount: 2,
+              accumulatorCount: 4,
+            );
           } else if (classStat.classRef.name == 'AppBar') {
-            checkHeapStat(classStat, 'AppBar',
-                instanceCount: 1, accumulatorCount: 2);
+            checkHeapStat(
+              classStat,
+              'AppBar',
+              instanceCount: 1,
+              accumulatorCount: 2,
+            );
           } else if (classStat.classRef.name == 'Center') {
-            checkHeapStat(classStat, 'Center',
-                instanceCount: 1, accumulatorCount: 2);
+            checkHeapStat(
+              classStat,
+              'Center',
+              instanceCount: 1,
+              accumulatorCount: 2,
+            );
           }
         }
 
@@ -99,17 +115,33 @@ void main() async {
           final ClassHeapDetailStats classStat = iterator.current;
 
           if (classStat.classRef.name == 'MyApp') {
-            checkHeapStat(classStat, 'MyApp',
-                instanceCount: 1, accumulatorCount: 0);
+            checkHeapStat(
+              classStat,
+              'MyApp',
+              instanceCount: 1,
+              accumulatorCount: 0,
+            );
           } else if (classStat.classRef.name == 'ThemeData') {
-            checkHeapStat(classStat, 'ThemeData',
-                instanceCount: 2, accumulatorCount: 0);
+            checkHeapStat(
+              classStat,
+              'ThemeData',
+              instanceCount: 2,
+              accumulatorCount: 0,
+            );
           } else if (classStat.classRef.name == 'AppBar') {
-            checkHeapStat(classStat, 'AppBar',
-                instanceCount: 1, accumulatorCount: 0);
+            checkHeapStat(
+              classStat,
+              'AppBar',
+              instanceCount: 1,
+              accumulatorCount: 0,
+            );
           } else if (classStat.classRef.name == 'Center') {
-            checkHeapStat(classStat, 'Center',
-                instanceCount: 1, accumulatorCount: 0);
+            checkHeapStat(
+              classStat,
+              'Center',
+              instanceCount: 1,
+              accumulatorCount: 0,
+            );
           }
         }
 
@@ -134,7 +166,7 @@ void validateHeapInfo(MemoryTimeline timeline) {
     //              Subsequent samples the rss values are valid integers.  This is
     //              a VM regression https://github.com/dart-lang/sdk/issues/40766.
     //              When fixed, remove below test rss != null and firstSample global.
-    if (sample.rss != null && firstSample) {
+    if (firstSample) {
       expect(sample.rss, greaterThan(0));
       expect(sample.rss, greaterThan(sample.capacity));
       firstSample = false;
@@ -160,8 +192,12 @@ Future<void> collectSamples([int sampleCount = defaultSampleSize]) async {
   }
 }
 
-void checkHeapStat(ClassHeapDetailStats classStat, String className,
-    {int instanceCount, int accumulatorCount}) {
+void checkHeapStat(
+  ClassHeapDetailStats classStat,
+  String className, {
+  int? instanceCount,
+  int? accumulatorCount,
+}) {
   expect(classStat.classRef.name, equals(className));
   expect(classStat.instancesCurrent, equals(instanceCount));
   // TODO(terry): investigate this failure.

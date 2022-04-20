@@ -276,11 +276,13 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
             );
 
     final tileContents = searchAutoComplete.value
-        .map((match) => _maybeHighlightMatchText(
-              match,
-              autoCompleteTextStyle,
-              autoCompleteHighlightedTextStyle,
-            ))
+        .map(
+          (match) => _maybeHighlightMatchText(
+            match,
+            autoCompleteTextStyle,
+            autoCompleteHighlightedTextStyle,
+          ),
+        )
         .toList();
 
     final tileEntryHeight = tileContents.isEmpty
@@ -512,15 +514,17 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
     bool bottom = true,
     bool maxWidth = true,
   }) {
-    return OverlayEntry(builder: (context) {
-      return AutoComplete(
-        this,
-        searchFieldKey: searchFieldKey,
-        onTap: onTap,
-        bottom: bottom,
-        maxWidth: maxWidth,
-      );
-    });
+    return OverlayEntry(
+      builder: (context) {
+        return AutoComplete(
+          this,
+          searchFieldKey: searchFieldKey,
+          onTap: onTap,
+          bottom: bottom,
+          maxWidth: maxWidth,
+        );
+      },
+    );
   }
 
   void closeAutoCompleteOverlay() {
@@ -830,7 +834,6 @@ class _SearchField extends StatelessWidget {
     required this.searchTextFieldController,
     this.label = 'Search',
     this.supportsNavigation = false,
-    this.tracking = false,
     this.decoration,
     this.onClose,
     this.overlayXPositionBuilder,
@@ -846,7 +849,6 @@ class _SearchField extends StatelessWidget {
   final TextEditingController searchTextFieldController;
   final String label;
   final bool supportsNavigation;
-  final bool tracking;
   final InputDecoration? decoration;
   final VoidCallback? onClose;
   final OverlayXPositionBuilder? overlayXPositionBuilder;
@@ -1149,49 +1151,54 @@ class SearchNavigationControls extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<List<DataSearchStateMixin>>(
-        valueListenable: controller.searchMatches,
-        builder: (context, matches, _) {
-          final numMatches = matches.length;
-          return ValueListenableBuilder<bool>(
-            valueListenable: controller.searchInProgressNotifier,
-            builder: (context, isSearchInProgress, _) {
-              return Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Opacity(
-                    opacity: isSearchInProgress ? 1 : 0,
-                    child: SizedBox(
-                      width: scaleByFontFactor(smallProgressSize),
-                      height: scaleByFontFactor(smallProgressSize),
-                      child: isSearchInProgress
-                          ? SmallCircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color?>(
-                                Theme.of(context).textTheme.bodyText2!.color,
-                              ),
-                            )
-                          : const SizedBox(),
-                    ),
+      valueListenable: controller.searchMatches,
+      builder: (context, matches, _) {
+        final numMatches = matches.length;
+        return ValueListenableBuilder<bool>(
+          valueListenable: controller.searchInProgressNotifier,
+          builder: (context, isSearchInProgress, _) {
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Opacity(
+                  opacity: isSearchInProgress ? 1 : 0,
+                  child: SizedBox(
+                    width: scaleByFontFactor(smallProgressSize),
+                    height: scaleByFontFactor(smallProgressSize),
+                    child: isSearchInProgress
+                        ? SmallCircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color?>(
+                              Theme.of(context).textTheme.bodyText2!.color,
+                            ),
+                          )
+                        : const SizedBox(),
                   ),
-                  _matchesStatus(numMatches),
-                  SizedBox(
-                    height: _searchControlDividerHeight,
-                    width: defaultIconSize,
-                    child: Transform.rotate(
-                      angle: degToRad(90),
-                      child: PaddedDivider.vertical(),
-                    ),
+                ),
+                _matchesStatus(numMatches),
+                SizedBox(
+                  height: _searchControlDividerHeight,
+                  width: defaultIconSize,
+                  child: Transform.rotate(
+                    angle: degToRad(90),
+                    child: PaddedDivider.vertical(),
                   ),
-                  inputDecorationSuffixButton(Icons.keyboard_arrow_up,
-                      numMatches > 1 ? controller.previousMatch : null),
-                  inputDecorationSuffixButton(Icons.keyboard_arrow_down,
-                      numMatches > 1 ? controller.nextMatch : null),
-                  if (onClose != null) closeSearchDropdownButton(onClose)
-                ],
-              );
-            },
-          );
-        });
+                ),
+                inputDecorationSuffixButton(
+                  Icons.keyboard_arrow_up,
+                  numMatches > 1 ? controller.previousMatch : null,
+                ),
+                inputDecorationSuffixButton(
+                  Icons.keyboard_arrow_down,
+                  numMatches > 1 ? controller.nextMatch : null,
+                ),
+                if (onClose != null) closeSearchDropdownButton(onClose)
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 
   Widget _matchesStatus(int numMatches) {

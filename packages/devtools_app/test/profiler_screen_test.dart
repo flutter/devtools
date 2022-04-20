@@ -6,7 +6,6 @@
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
-import 'package:devtools_app/src/screens/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profiler.dart';
 import 'package:devtools_app/src/screens/profiler/profiler_screen.dart';
 import 'package:devtools_app/src/screens/profiler/profiler_screen_controller.dart';
@@ -19,6 +18,7 @@ import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+import 'package:vm_service/vm_service.dart';
 
 import 'test_data/cpu_profile_test_data.dart';
 
@@ -32,7 +32,7 @@ void main() {
     setUp(() async {
       fakeServiceManager = FakeServiceManager(
         service: FakeServiceManager.createFakeService(
-          cpuProfileData: CpuProfileData.parse(goldenCpuProfileDataJson),
+          cpuSamples: CpuSamples.parse(goldenCpuSamplesJson),
         ),
       );
       when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
@@ -62,7 +62,9 @@ void main() {
       }
       expect(find.byType(ProfileGranularityDropdown), findsOneWidget);
       expect(
-          find.byKey(ProfilerScreen.recordingInstructionsKey), findsOneWidget);
+        find.byKey(ProfilerScreen.recordingInstructionsKey),
+        findsOneWidget,
+      );
       expect(find.byKey(ProfilerScreen.recordingStatusKey), findsNothing);
       expect(find.byType(CircularProgressIndicator), findsNothing);
       expect(find.byType(CpuProfiler), findsNothing);
@@ -72,17 +74,21 @@ void main() {
       WidgetTester tester,
       ProfilerScreenBody body,
     ) async {
-      await tester.pumpWidget(wrapWithControllers(
-        body,
-        profiler: ProfilerScreenController(),
-      ));
+      await tester.pumpWidget(
+        wrapWithControllers(
+          body,
+          profiler: ProfilerScreenController(),
+        ),
+      );
     }
 
     testWidgets('builds its tab', (WidgetTester tester) async {
-      await tester.pumpWidget(wrapWithControllers(
-        Builder(builder: screen.buildTab),
-        profiler: ProfilerScreenController(),
-      ));
+      await tester.pumpWidget(
+        wrapWithControllers(
+          Builder(builder: screen.buildTab),
+          profiler: ProfilerScreenController(),
+        ),
+      );
       expect(find.text('CPU Profiler'), findsOneWidget);
     });
 
@@ -118,7 +124,9 @@ void main() {
         await tester.tap(find.byType(RecordButton));
         await tester.pump();
         expect(
-            find.byKey(ProfilerScreen.recordingInstructionsKey), findsNothing);
+          find.byKey(ProfilerScreen.recordingInstructionsKey),
+          findsNothing,
+        );
         expect(find.byKey(ProfilerScreen.recordingStatusKey), findsOneWidget);
         expect(find.byType(CircularProgressIndicator), findsOneWidget);
         expect(find.byType(CpuProfiler), findsNothing);

@@ -32,10 +32,12 @@ class VmServiceTrafficLogger {
     final String? method = m['method'];
     final String? id = m['id'];
 
-    messageBus.addEvent(BusEvent(
-      eventName,
-      data: '⇨ #$id $method()\n$message',
-    ));
+    messageBus.addEvent(
+      BusEvent(
+        eventName,
+        data: '⇨ #$id $method()\n$message',
+      ),
+    );
   }
 
   void _logServiceProtocolResponses(String message) {
@@ -66,10 +68,13 @@ class VmServiceTrafficLogger {
       }
     }
 
-    messageBus.addEvent(BusEvent(
-      eventName,
-      data: '  ⇦ ${id == null ? '' : '#$id '}$details$streamId $kind\n$message',
-    ));
+    messageBus.addEvent(
+      BusEvent(
+        eventName,
+        data:
+            '  ⇦ ${id == null ? '' : '#$id '}$details$streamId $kind\n$message',
+      ),
+    );
   }
 
   void dispose() {

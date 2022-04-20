@@ -32,7 +32,7 @@ class ReleaseNotesViewer extends StatefulWidget {
 
   final ReleaseNotesController releaseNotesController;
 
-  final Widget child;
+  final Widget? child;
 
   @override
   _ReleaseNotesViewerState createState() => _ReleaseNotesViewerState();
@@ -88,10 +88,11 @@ class _ReleaseNotesViewerState extends State<ReleaseNotesViewer>
 
   @override
   Widget build(BuildContext context) {
+    final child = widget.child;
     return Material(
       child: Stack(
         children: [
-          widget.child,
+          if (child != null) child,
           ReleaseNotes(
             releaseNotesController: widget.releaseNotesController,
             visibilityAnimation: visibilityAnimation,

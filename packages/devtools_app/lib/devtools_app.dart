@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
 export 'src/analytics/analytics.dart';
 export 'src/analytics/analytics_controller.dart';
 export 'src/charts/treemap.dart';
@@ -38,8 +37,10 @@ export 'src/screens/performance/timeline_streams.dart';
 export 'src/screens/profiler/cpu_profile_model.dart';
 export 'src/screens/profiler/profile_granularity.dart';
 export 'src/screens/profiler/profiler_screen_controller.dart';
+export 'src/scripts/script_manager.dart';
 export 'src/service/isolate_manager.dart';
 export 'src/service/isolate_state.dart';
+export 'src/service/resolved_uri_manager.dart';
 export 'src/service/service_extension_manager.dart';
 export 'src/service/service_extensions.dart';
 export 'src/service/service_manager.dart';

@@ -24,7 +24,7 @@ set -x #echo on
 which flutter
 cd packages/devtools_app
 
-flutter test -j1 --update-goldens
+flutter test -j1 --update-goldens --no-sound-null-safety
 
 set +x
 echo "Done updating goldens."

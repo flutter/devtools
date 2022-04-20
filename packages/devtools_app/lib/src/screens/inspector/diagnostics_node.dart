@@ -51,8 +51,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   static final CustomIconMaker iconMaker = CustomIconMaker();
 
-  static BoxConstraints? deserializeConstraints(Map<String, Object>? json) {
-    if (json == null) return null;
+  static BoxConstraints deserializeConstraints(Map<String, Object?> json) {
     return BoxConstraints(
       minWidth: double.parse(json['minWidth'] as String? ?? '0.0'),
       maxWidth: double.parse(json['maxWidth'] as String? ?? 'Infinity'),
@@ -61,8 +60,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     );
   }
 
-  static BoxParentData? deserializeParentData(Map<String, Object>? json) {
-    if (json == null) return null;
+  static BoxParentData deserializeParentData(Map<String, Object?> json) {
     return BoxParentData()
       ..offset = Offset(
         double.parse(json['offsetX'] as String? ?? '0.0'),
@@ -70,18 +68,15 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
       );
   }
 
-  static Size? deserializeSize(Map<String, Object>? json) {
-    if (json == null) return null;
+  static Size deserializeSize(Map<String, Object> json) {
     return Size(
       double.parse(json['width'] as String),
       double.parse(json['height'] as String),
     );
   }
 
-  static FlexFit? deserializeFlexFit(String? flexFit) {
-    if (flexFit == null) {
-      return null;
-    } else if (flexFit == 'tight') return FlexFit.tight;
+  static FlexFit deserializeFlexFit(String? flexFit) {
+    if (flexFit == 'tight') return FlexFit.tight;
     return FlexFit.loose;
   }
 
@@ -110,14 +105,18 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   int? get flexFactor => json['flexFactor'] as int?;
 
-  FlexFit? get flexFit => deserializeFlexFit(json['flexFit'] as String?);
+  FlexFit get flexFit => deserializeFlexFit(json['flexFit'] as String?);
 
   RemoteDiagnosticsNode? get renderObject {
     if (_renderObject != null) return _renderObject;
     final data = json['renderObject'];
     if (data == null) return null;
     _renderObject = RemoteDiagnosticsNode(
-        data as Map<String, Object?>? ?? {}, inspectorService, false, null);
+      data as Map<String, Object?>? ?? {},
+      inspectorService,
+      false,
+      null,
+    );
     return _renderObject;
   }
 
@@ -127,19 +126,29 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     final data = json['parentRenderElement'];
     if (data == null) return null;
     _parentRenderElement = RemoteDiagnosticsNode(
-        data as Map<String, Object?>? ?? {}, inspectorService, false, null);
+      data as Map<String, Object?>? ?? {},
+      inspectorService,
+      false,
+      null,
+    );
     return _parentRenderElement;
   }
 
   RemoteDiagnosticsNode? _parentRenderElement;
 
-  BoxConstraints? get constraints =>
-      deserializeConstraints(json['constraints'] as Map<String, Object>?);
+  BoxConstraints get constraints => deserializeConstraints(
+        json['constraints'] as Map<String, Object?>? ?? {},
+      );
 
-  BoxParentData? get parentData =>
-      deserializeParentData(json['parentData'] as Map<String, Object>?);
+  BoxParentData get parentData =>
+      deserializeParentData(json['parentData'] as Map<String, Object?>? ?? {});
 
-  Size? get size => deserializeSize(json['size'] as Map<String, Object>?);
+  // [deserializeSize] expects a parameter of type Map<String, Object> (note the
+  // non-nullable Object), so we need to first type check as a Map and then we
+  // can cast to the expected type.
+  Size get size => deserializeSize(
+        (json['size'] as Map?)?.cast<String, Object>() ?? <String, Object>{},
+      );
 
   bool get isLocalClass {
     final objectGroup = inspectorService;
@@ -208,16 +217,8 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// Description to show if the node has no displayed properties or children.
   String? getEmptyBodyDescription() => getStringMember('emptyBodyDescription');
 
-  /// Hint for how the node should be displayed.
-  DiagnosticsTreeStyle get style {
-    return _style ??= getStyleMember('style', DiagnosticsTreeStyle.sparse);
-  }
-
-  DiagnosticsTreeStyle? _style;
-
-  set style(DiagnosticsTreeStyle style) {
-    _style = style;
-  }
+  late DiagnosticsTreeStyle style =
+      getStyleMember('style', DiagnosticsTreeStyle.sparse);
 
   /// Dart class defining the diagnostic node.
   /// For example, DiagnosticProperty<Color>, IntProperty, StringProperty, etc.
@@ -276,7 +277,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   ///
   /// Only applies to IterableProperty.
   List<String>? get values {
-    final List<Object>? rawValues = json['values'] as List<Object>?;
+    final rawValues = json['values'] as List<Object>?;
     if (rawValues == null) {
       return null;
     }
@@ -290,7 +291,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// interactive object debugger view to get more information on what the value
   /// is.
   List<bool>? get primitiveValues {
-    final List<Object>? rawValues = json['primitiveValues'] as List<Object>?;
+    final rawValues = json['primitiveValues'] as List<Object>?;
     if (rawValues == null) {
       return null;
     }
@@ -380,7 +381,9 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
       return null;
     }
     _creationLocation = InspectorSourceLocation(
-        json['creationLocation'] as Map<String, Object>?, null);
+      json['creationLocation'] as Map<String, Object?>? ?? {},
+      null,
+    );
     return _creationLocation;
   }
 
@@ -432,26 +435,28 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   }
 
   DiagnosticLevel getLevelMember(
-      String memberName, DiagnosticLevel defaultValue) {
-    final String? value = json[memberName] as String?;
+    String memberName,
+    DiagnosticLevel defaultValue,
+  ) {
+    final value = json[memberName] as String?;
     if (value == null) {
       return defaultValue;
     }
-    final level = diagnosticLevelUtils.enumEntry(value)!;
-    return level;
+    return diagnosticLevelUtils.enumEntry(value)!;
   }
 
   DiagnosticsTreeStyle getStyleMember(
-      String memberName, DiagnosticsTreeStyle defaultValue) {
+    String memberName,
+    DiagnosticsTreeStyle defaultValue,
+  ) {
     if (!json.containsKey(memberName)) {
       return defaultValue;
     }
-    final String? value = json[memberName] as String?;
+    final value = json[memberName] as String?;
     if (value == null) {
       return defaultValue;
     }
-    final style = treeStyleUtils.enumEntry(value)!;
-    return style;
+    return treeStyleUtils.enumEntry(value)!;
   }
 
   /// Returns a reference to the value the DiagnosticsNode object is describing.
@@ -459,7 +464,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
       InspectorInstanceRef(json['valueId'] as String?);
 
   bool isEnumProperty() {
-    return type != null && type!.startsWith('EnumProperty<');
+    return type?.startsWith('EnumProperty<') ?? false;
   }
 
   /// Returns a list of raw Dart property values of the Dart value of this
@@ -470,11 +475,10 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// Instance object for the Dart value because much of the relevant
   /// information to display good visualizations of Flutter values is stored
   /// in properties not in fields.
-  Future<Map<String, InstanceRef>?>? get valueProperties async {
+  Future<Map<String, InstanceRef>?> get valueProperties async {
     if (_valueProperties == null) {
       if (propertyType == null || valueRef.id == null) {
-        _valueProperties = Future.value();
-        return _valueProperties;
+        return _valueProperties = Future.value();
       }
       if (isEnumProperty()) {
         // Populate all the enum property values.
@@ -492,8 +496,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
           propertyNames = ['codePoint'];
           break;
         default:
-          _valueProperties = Future.value();
-          return _valueProperties;
+          return _valueProperties = Future.value();
       }
       _valueProperties =
           inspectorService?.getDartObjectProperties(valueRef, propertyNames);
@@ -501,8 +504,8 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     return _valueProperties;
   }
 
-  Map<String, Object>? get valuePropertiesJson =>
-      json['valueProperties'] as Map<String, Object>?;
+  Map<String, Object?>? get valuePropertiesJson =>
+      json['valueProperties'] as Map<String, Object?>?;
 
   bool? get hasChildren {
     // In the summary tree, json['hasChildren']==true when the node has details
@@ -511,7 +514,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     // that indicates the node should have no children in the tree while if the
     // 'children' property is not specified it means we do not know whether
     // there is a list of children and need to query the server to find out.
-    final List? children = json['children'] as List<dynamic>?;
+    final children = json['children'] as List<dynamic>?;
     if (children != null) {
       return children.isNotEmpty;
     }
@@ -535,7 +538,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     return json.containsKey('children') || _children != null || !hasChildren!;
   }
 
-  Future<List<RemoteDiagnosticsNode?>?> get children async {
+  Future<List<RemoteDiagnosticsNode>?> get children async {
     await _computeChildren();
     if (_children != null) return _children;
     return await _childrenFuture;
@@ -543,7 +546,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   List<RemoteDiagnosticsNode>? get childrenNow {
     _maybePopulateChildren();
-    return _children;
+    return _children ?? [];
   }
 
   Future<void> _computeChildren() async {
@@ -578,11 +581,10 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
       return;
     }
 
-    final List<Object>? jsonArray = json['children'] as List<Object>?;
+    final jsonArray = json['children'] as List<Object?>?;
     if (jsonArray?.isNotEmpty == true) {
-      final List<RemoteDiagnosticsNode> nodes = [];
-      for (Map<String, Object> element
-          in jsonArray as Iterable<Map<String, Object>>) {
+      final nodes = <RemoteDiagnosticsNode>[];
+      for (var element in jsonArray!.cast<Map<String, Object?>>()) {
         final child =
             RemoteDiagnosticsNode(element, inspectorService, false, parent);
         child.parent = this;
@@ -605,19 +607,20 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     if (cachedProperties == null) {
       cachedProperties = [];
       if (json.containsKey('properties')) {
-        final List<Object> jsonArray = json['properties'] as List<Object>;
-        for (Map<String, Object> element
-            in jsonArray as Iterable<Map<String, Object>>) {
+        final jsonArray = json['properties'] as List<Object?>;
+        for (var element in jsonArray.cast<Map<String, Object?>>()) {
           cachedProperties!.add(
-              RemoteDiagnosticsNode(element, inspectorService, true, parent));
+            RemoteDiagnosticsNode(element, inspectorService, true, parent),
+          );
         }
       }
     }
-    return cachedProperties;
+    return cachedProperties!;
   }
 
-  Future<List<RemoteDiagnosticsNode?>> getProperties(
-      ObjectGroupBase objectGroup) async {
+  Future<List<RemoteDiagnosticsNode>> getProperties(
+    ObjectGroupBase objectGroup,
+  ) async {
     return await objectGroup.getProperties(dartDiagnosticRef);
   }
 
@@ -663,7 +666,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
     final children = childrenNow;
-    if (children == null || children.isEmpty) return const <DiagnosticsNode>[];
+    if (children.isEmpty) return const <DiagnosticsNode>[];
     final regularChildren = <DiagnosticsNode>[];
     for (var child in children) {
       regularChildren.add(child.toDiagnosticsNode());
@@ -672,8 +675,10 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   }
 
   @override
-  DiagnosticsNode toDiagnosticsNode(
-      {String? name, DiagnosticsTreeStyle? style}) {
+  DiagnosticsNode toDiagnosticsNode({
+    String? name,
+    DiagnosticsTreeStyle? style,
+  }) {
     return super.toDiagnosticsNode(
       name: name ?? this.name,
       style: style ?? DiagnosticsTreeStyle.sparse,
@@ -682,7 +687,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   @override
   String toStringShort() {
-    return description!;
+    return description ?? '';
   }
 
   Future<void> setSelectionInspector(bool uiAlreadyUpdated) async {
@@ -696,10 +701,10 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 class InspectorSourceLocation {
   InspectorSourceLocation(this.json, this.parent);
 
-  final Map<String, Object>? json;
+  final Map<String, Object?> json;
   final InspectorSourceLocation? parent;
 
-  String? get path => JsonUtils.getStringMember(json!, 'file');
+  String? get path => JsonUtils.getStringMember(json, 'file');
 
   String? getFile() {
     final fileName = path;
@@ -712,7 +717,7 @@ class InspectorSourceLocation {
 
   int getLine() => JsonUtils.getIntMember(json!, 'line');
 
-  String? getName() => JsonUtils.getStringMember(json!, 'name');
+  String? getName() => JsonUtils.getStringMember(json, 'name');
 
   int getColumn() => JsonUtils.getIntMember(json!, 'column');
 

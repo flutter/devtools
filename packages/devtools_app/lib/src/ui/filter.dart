@@ -39,8 +39,10 @@ class FilterDialog<FilterControllerMixin, T> extends StatefulWidget {
     this.queryFilterArguments,
     this.toggleFilters,
     double? dialogWidth,
-  })  : assert(!includeQueryFilter ||
-            (queryInstructions != null && queryFilterArguments != null)),
+  })  : assert(
+          !includeQueryFilter ||
+              (queryInstructions != null && queryFilterArguments != null),
+        ),
         dialogWidth = dialogWidth ?? defaultDialogWidth;
 
   final FilterControllerMixin controller;
@@ -70,7 +72,8 @@ class _FilterDialogState<T>
   void initState() {
     super.initState();
     queryTextFieldController = TextEditingController(
-        text: widget.controller.activeFilter.value?.queryFilter?.query ?? '');
+      text: widget.controller.activeFilter.value?.queryFilter?.query ?? '',
+    );
   }
 
   @override
@@ -110,8 +113,10 @@ class _FilterDialogState<T>
           onPressed: () => widget.controller.filterData(
             Filter<T>(
               queryFilter: widget.includeQueryFilter
-                  ? QueryFilter.parse(queryTextFieldController.value.text,
-                      widget.queryFilterArguments!)
+                  ? QueryFilter.parse(
+                      queryTextFieldController.value.text,
+                      widget.queryFilterArguments!,
+                    )
                   : null,
               toggleFilters: widget.toggleFilters,
             ),
@@ -300,10 +305,14 @@ class QueryFilterArgument {
     return false;
   }
 
-  bool matchesValue(String dataValue, {bool substringMatch = false}) {
+  bool matchesValue(String? dataValue, {bool substringMatch = false}) {
     // If there are no specified filter values, consider [dataValue] to match
     // this filter.
     if (values.isEmpty) return true;
+
+    if (dataValue == null) {
+      return isNegative;
+    }
 
     var matches = false;
     for (final value in values) {

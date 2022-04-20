@@ -291,7 +291,7 @@ abstract class FlameChartState<T extends FlameChart,
         // rendered on top of the custom painters defined in [buildCustomPaints]
         child: Scrollbar(
           controller: _flameChartScrollController,
-          isAlwaysShown: true,
+          thumbVisibility: true,
           child: LayoutBuilder(
             builder: (context, constraints) {
               final chartOverlays = buildChartOverlays(constraints, context);
@@ -395,15 +395,19 @@ abstract class FlameChartState<T extends FlameChart,
       // TODO(kenz): zoom in/out faster if key is held. It actually zooms slower
       // if the key is held currently.
       if (keyLabel == 'w') {
-        zoomTo(math.min(
-          maxZoomLevel,
-          currentZoom + keyboardZoomInUnit,
-        ));
+        zoomTo(
+          math.min(
+            maxZoomLevel,
+            currentZoom + keyboardZoomInUnit,
+          ),
+        );
       } else if (keyLabel == 's') {
-        zoomTo(math.max(
-          FlameChart.minZoomLevel,
-          currentZoom - keyboardZoomOutUnit,
-        ));
+        zoomTo(
+          math.max(
+            FlameChart.minZoomLevel,
+            currentZoom - keyboardZoomOutUnit,
+          ),
+        );
       } else if (keyLabel == 'a') {
         scrollToX(horizontalControllerGroup.offset - keyboardScrollUnit);
       } else if (keyLabel == 'd') {
@@ -418,13 +422,15 @@ abstract class FlameChartState<T extends FlameChart,
       double deltaY = event.scrollDelta.dy;
       if (deltaY.abs() >= deltaX.abs()) {
         if (_altKeyPressed) {
-          verticalControllerGroup.jumpTo(math.max(
-            math.min(
-              verticalControllerGroup.offset + deltaY,
-              verticalControllerGroup.position.maxScrollExtent,
+          verticalControllerGroup.jumpTo(
+            math.max(
+              math.min(
+                verticalControllerGroup.offset + deltaY,
+                verticalControllerGroup.position.maxScrollExtent,
+              ),
+              0.0,
             ),
-            0.0,
-          ));
+          );
         } else {
           deltaY = deltaY.clamp(
             -FlameChart.maxScrollWheelDelta,
@@ -558,7 +564,7 @@ abstract class FlameChartState<T extends FlameChart,
     // had time to update their scroll extents. Otherwise, we can hit a race
     // where are trying to scroll to an offset that is beyond what the scroll
     // controller thinks its max scroll extent is.
-    WidgetsBinding.instance!.addPostFrameCallback((_) async {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       await Future.wait([
         scrollHorizontallyToData(data),
         if (scrollVertically) scrollVerticallyToData(data),
@@ -1238,7 +1244,8 @@ class _ScrollingFlameChartRowExtentDelegate extends ExtentDelegate {
       index--;
     }
     assert(
-        nodeIntervals[index].begin <= scrollOffset + precisionErrorTolerance);
+      nodeIntervals[index].begin <= scrollOffset + precisionErrorTolerance,
+    );
     return index;
   }
 

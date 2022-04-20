@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
@@ -28,15 +28,19 @@ void main() {
 
     testWidgetsWithWindowSize('recordingInfo builds info for pause', windowSize,
         (WidgetTester tester) async {
-      await tester.pumpWidget(wrap(const RecordingInfo(
-        instructionsKey: instructionsKey,
-        recordingStatusKey: recordingStatusKey,
-        processingStatusKey: processingStatusKey,
-        recording: false,
-        recordedObject: 'fake object',
-        processing: false,
-        isPause: true,
-      )));
+      await tester.pumpWidget(
+        wrap(
+          const RecordingInfo(
+            instructionsKey: instructionsKey,
+            recordingStatusKey: recordingStatusKey,
+            processingStatusKey: processingStatusKey,
+            recording: false,
+            recordedObject: 'fake object',
+            processing: false,
+            isPause: true,
+          ),
+        ),
+      );
 
       expect(find.byKey(instructionsKey), findsOneWidget);
       expect(find.byKey(recordingStatusKey), findsNothing);
@@ -47,14 +51,18 @@ void main() {
 
     testWidgetsWithWindowSize('recordingInfo builds info for stop', windowSize,
         (WidgetTester tester) async {
-      await tester.pumpWidget(wrap(const RecordingInfo(
-        instructionsKey: instructionsKey,
-        recordingStatusKey: recordingStatusKey,
-        processingStatusKey: processingStatusKey,
-        recording: false,
-        recordedObject: 'fake object',
-        processing: false,
-      )));
+      await tester.pumpWidget(
+        wrap(
+          const RecordingInfo(
+            instructionsKey: instructionsKey,
+            recordingStatusKey: recordingStatusKey,
+            processingStatusKey: processingStatusKey,
+            recording: false,
+            recordedObject: 'fake object',
+            processing: false,
+          ),
+        ),
+      );
 
       expect(find.byKey(instructionsKey), findsOneWidget);
       expect(find.byKey(recordingStatusKey), findsNothing);
@@ -66,14 +74,18 @@ void main() {
     testWidgetsWithWindowSize(
         'recordingInfo builds recording status', windowSize,
         (WidgetTester tester) async {
-      await tester.pumpWidget(wrap(const RecordingInfo(
-        instructionsKey: instructionsKey,
-        recordingStatusKey: recordingStatusKey,
-        processingStatusKey: processingStatusKey,
-        recording: true,
-        recordedObject: 'fake object',
-        processing: false,
-      )));
+      await tester.pumpWidget(
+        wrap(
+          const RecordingInfo(
+            instructionsKey: instructionsKey,
+            recordingStatusKey: recordingStatusKey,
+            processingStatusKey: processingStatusKey,
+            recording: true,
+            recordedObject: 'fake object',
+            processing: false,
+          ),
+        ),
+      );
 
       expect(find.byKey(instructionsKey), findsNothing);
       expect(find.byKey(recordingStatusKey), findsOneWidget);
@@ -83,14 +95,18 @@ void main() {
     testWidgetsWithWindowSize(
         'recordingInfo builds processing status', windowSize,
         (WidgetTester tester) async {
-      await tester.pumpWidget(wrap(const RecordingInfo(
-        instructionsKey: instructionsKey,
-        recordingStatusKey: recordingStatusKey,
-        processingStatusKey: processingStatusKey,
-        recording: false,
-        recordedObject: 'fake object',
-        processing: true,
-      )));
+      await tester.pumpWidget(
+        wrap(
+          const RecordingInfo(
+            instructionsKey: instructionsKey,
+            recordingStatusKey: recordingStatusKey,
+            processingStatusKey: processingStatusKey,
+            recording: false,
+            recordedObject: 'fake object',
+            processing: true,
+          ),
+        ),
+      );
 
       expect(find.byKey(instructionsKey), findsNothing);
       expect(find.byKey(recordingStatusKey), findsNothing);
@@ -100,10 +116,14 @@ void main() {
     testWidgetsWithWindowSize(
         'processingInfo builds for progressValue', windowSize,
         (WidgetTester tester) async {
-      await tester.pumpWidget(wrap(const ProcessingInfo(
-        progressValue: 0.0,
-        processedObject: 'fake object',
-      )));
+      await tester.pumpWidget(
+        wrap(
+          const ProcessingInfo(
+            progressValue: 0.0,
+            processedObject: 'fake object',
+          ),
+        ),
+      );
 
       final progressIndicatorFinder = find.byType(LinearProgressIndicator);
       LinearProgressIndicator progressIndicator =
@@ -111,19 +131,23 @@ void main() {
 
       expect(progressIndicator.value, equals(0.0));
 
-      await tester.pumpWidget(wrap(const ProcessingInfo(
-        progressValue: 0.5,
-        processedObject: 'fake object',
-      )));
+      await tester.pumpWidget(
+        wrap(
+          const ProcessingInfo(
+            progressValue: 0.5,
+            processedObject: 'fake object',
+          ),
+        ),
+      );
       progressIndicator = tester.widget(progressIndicatorFinder);
       expect(progressIndicator.value, equals(0.5));
     });
   });
 
   group('NotifierCheckbox', () {
-    bool findCheckboxValue() {
+    bool? findCheckboxValue() {
       final Checkbox checkboxWidget =
-          find.byType(Checkbox).evaluate().first.widget;
+          find.byType(Checkbox).evaluate().first.widget as Checkbox;
       return checkboxWidget.value;
     }
 

@@ -137,7 +137,9 @@ void debuggingTests() {
 
     // set and verify breakpoint
     await debuggingManager.addBreakpoint(
-        appFixture.appScriptPath, breakpointLine);
+      appFixture.appScriptPath,
+      breakpointLine,
+    );
 
     breakpoints = await debuggingManager.getBreakpoints();
     expect(breakpoints, hasLength(1));
@@ -192,7 +194,8 @@ void debuggingTests() {
 
   test('break on exceptions', () async {
     appFixture = await CliAppFixture.create(
-        'test/fixtures/debugging_app_exception.dart');
+      'test/fixtures/debugging_app_exception.dart',
+    );
 
     final String source = appFixture.scriptSource;
     final int exceptionLine = CliAppFixture.parseExceptionLines(source).first;
@@ -242,7 +245,8 @@ void debuggingTests() {
 
   test('console output', () async {
     appFixture = await CliAppFixture.create(
-        'test/fixtures/color_console_output_app.dart');
+      'test/fixtures/color_console_output_app.dart',
+    );
 
     final tools = DevtoolsManager(tabInstance, webBuildFixture.baseUri);
     await tools.start(appFixture);
@@ -260,9 +264,11 @@ void debuggingTests() {
     expect(await debuggingManager.getState(), 'running');
 
     // Wait until there is enough console output.
-    await waitFor(() async =>
-        (await debuggingManager.getConsoleContents())!.split('\n').length >=
-        13);
+    await waitFor(
+      () async =>
+          (await debuggingManager.getConsoleContents())!.split('\n').length >=
+          13,
+    );
     // Verify the console contents.
     expect(
       await debuggingManager.getConsoleContents(),

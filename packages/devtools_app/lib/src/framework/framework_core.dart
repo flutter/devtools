@@ -11,6 +11,7 @@ import '../config_specific/import_export/import_export.dart';
 import '../config_specific/logger/logger.dart';
 import '../primitives/message_bus.dart';
 import '../primitives/utils.dart';
+import '../scripts/script_manager.dart';
 import '../service/service.dart';
 import '../service/service_manager.dart';
 import '../service/vm_service_wrapper.dart';
@@ -28,6 +29,7 @@ class FrameworkCore {
     setGlobal(FrameworkController, FrameworkController());
     setGlobal(SurveyService, SurveyService());
     setGlobal(OfflineModeController, OfflineModeController());
+    setGlobal(ScriptManager, ScriptManager());
   }
 
   static void init() {

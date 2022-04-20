@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 @TestOn('browser')
 
@@ -86,26 +86,28 @@ void main() {
         }
       }
       expect(
-          output.toString(),
-          equals(
-              '<span style=\'background-color: rgb(0,0,0);color: rgb(255,255,255)\'>0 </span><span style=\'color: rgb(0,0,0)\'> 0 </span><span style=\'background-color: rgb(187,0,0);color: rgb(255,255,255)\'>1 </span><span style=\'color: rgb(187,0,0)\'> 1 </span><span style=\'background-color: rgb(0,187,0);color: rgb(255,255,255)\'>2 </span><span style=\'color: rgb(0,187,0)\'> 2 </span><span style=\'background-color: rgb(187,187,0);color: rgb(255,255,255)\'>3 </span><span style=\'color: rgb(187,187,0)\'> 3 </span><span style=\'background-color: rgb(0,0,187);color: rgb(255,255,255)\'>4 </span><span style=\'color: rgb(0,0,187)\'> 4 </span><span style=\'background-color: rgb(187,0,187);color: rgb(255,255,255)\'>5 </span><span style=\'color: rgb(187,0,187)\'> 5 </span><span style=\'background-color: rgb(0,187,187);color: rgb(255,255,255)\'>6 </span><span style=\'color: rgb(0,187,187)\'> 6 </span><span style=\'background-color: rgb(255,255,255);color: rgb(255,255,255)\'>7 </span><span style=\'color: rgb(255,255,255)\'> 7 </span>\n'
-              '<span style=\'background-color: rgb(85,85,85);color: rgb(255,255,255)\'>8 </span><span style=\'color: rgb(85,85,85)\'> 8 </span><span style=\'background-color: rgb(255,85,85);color: rgb(255,255,255)\'>9 </span><span style=\'color: rgb(255,85,85)\'> 9 </span><span style=\'background-color: rgb(0,255,0);color: rgb(255,255,255)\'>10 </span><span style=\'color: rgb(0,255,0)\'> 10 </span><span style=\'background-color: rgb(255,255,85);color: rgb(255,255,255)\'>11 </span><span style=\'color: rgb(255,255,85)\'> 11 </span><span style=\'background-color: rgb(85,85,255);color: rgb(255,255,255)\'>12 </span><span style=\'color: rgb(85,85,255)\'> 12 </span><span style=\'background-color: rgb(255,85,255);color: rgb(255,255,255)\'>13 </span><span style=\'color: rgb(255,85,255)\'> 13 </span><span style=\'background-color: rgb(85,255,255);color: rgb(255,255,255)\'>14 </span><span style=\'color: rgb(85,255,255)\'> 14 </span><span style=\'background-color: rgb(255,255,255);color: rgb(255,255,255)\'>15 </span><span style=\'color: rgb(255,255,255)\'> 15 </span>\n'
-              '\n'
-              '<span style=\'background-color: rgb(0,0,0);color: rgb(255,255,255)\'> 16 </span><span style=\'color: rgb(0,0,0)\'> 16 </span><span style=\'background-color: rgb(0,0,175);color: rgb(255,255,255)\'> 19 </span><span style=\'color: rgb(0,0,175)\'> 19 </span>\n'
-              '<span style=\'background-color: rgb(0,175,0);color: rgb(255,255,255)\'> 34 </span><span style=\'color: rgb(0,175,0)\'> 34 </span><span style=\'background-color: rgb(0,175,175);color: rgb(255,255,255)\'> 37 </span><span style=\'color: rgb(0,175,175)\'> 37 </span>\n'
-              '\n'
-              '<span style=\'background-color: rgb(175,0,0);color: rgb(255,255,255)\'> 124 </span><span style=\'color: rgb(175,0,0)\'> 124 </span><span style=\'background-color: rgb(175,0,175);color: rgb(255,255,255)\'> 127 </span><span style=\'color: rgb(175,0,175)\'> 127 </span>\n'
-              '<span style=\'background-color: rgb(175,175,0);color: rgb(255,255,255)\'> 142 </span><span style=\'color: rgb(175,175,0)\'> 142 </span><span style=\'background-color: rgb(175,175,175);color: rgb(255,255,255)\'> 145 </span><span style=\'color: rgb(175,175,175)\'> 145 </span>\n'
-              '\n'
-              '<span style=\'background-color: rgb(8,8,8);color: rgb(255,255,255)\'> 232 </span><span style=\'color: rgb(8,8,8)\'> 232 </span><span style=\'background-color: rgb(18,18,18);color: rgb(255,255,255)\'> 233 </span><span style=\'color: rgb(18,18,18)\'> 233 </span><span style=\'background-color: rgb(28,28,28);color: rgb(255,255,255)\'> 234 </span><span style=\'color: rgb(28,28,28)\'> 234 </span><span style=\'background-color: rgb(38,38,38);color: rgb(255,255,255)\'> 235 </span><span style=\'color: rgb(38,38,38)\'> 235 </span><span style=\'background-color: rgb(48,48,48);color: rgb(255,255,255)\'> 236 </span><span style=\'color: rgb(48,48,48)\'> 236 </span><span style=\'background-color: rgb(58,58,58);color: rgb(255,255,255)\'> 237 </span><span style=\'color: rgb(58,58,58)\'> 237 </span><span style=\'background-color: rgb(68,68,68);color: rgb(255,255,255)\'> 238 </span><span style=\'color: rgb(68,68,68)\'> 238 </span><span style=\'background-color: rgb(78,78,78);color: rgb(255,255,255)\'> 239 </span><span style=\'color: rgb(78,78,78)\'> 239 </span>\n'
-              '<span style=\'background-color: rgb(88,88,88);color: rgb(255,255,255)\'> 240 </span><span style=\'color: rgb(88,88,88)\'> 240 </span><span style=\'background-color: rgb(98,98,98);color: rgb(255,255,255)\'> 241 </span><span style=\'color: rgb(98,98,98)\'> 241 </span><span style=\'background-color: rgb(108,108,108);color: rgb(255,255,255)\'> 242 </span><span style=\'color: rgb(108,108,108)\'> 242 </span><span style=\'background-color: rgb(118,118,118);color: rgb(255,255,255)\'> 243 </span><span style=\'color: rgb(118,118,118)\'> 243 </span><span style=\'background-color: rgb(128,128,128);color: rgb(255,255,255)\'> 244 </span><span style=\'color: rgb(128,128,128)\'> 244 </span><span style=\'background-color: rgb(138,138,138);color: rgb(255,255,255)\'> 245 </span><span style=\'color: rgb(138,138,138)\'> 245 </span><span style=\'background-color: rgb(148,148,148);color: rgb(255,255,255)\'> 246 </span><span style=\'color: rgb(148,148,148)\'> 246 </span><span style=\'background-color: rgb(158,158,158);color: rgb(255,255,255)\'> 247 </span><span style=\'color: rgb(158,158,158)\'> 247 </span>\n'
-              '<span style=\'background-color: rgb(168,168,168);color: rgb(255,255,255)\'> 248 </span><span style=\'color: rgb(168,168,168)\'> 248 </span><span style=\'background-color: rgb(178,178,178);color: rgb(255,255,255)\'> 249 </span><span style=\'color: rgb(178,178,178)\'> 249 </span><span style=\'background-color: rgb(188,188,188);color: rgb(255,255,255)\'> 250 </span><span style=\'color: rgb(188,188,188)\'> 250 </span><span style=\'background-color: rgb(198,198,198);color: rgb(255,255,255)\'> 251 </span><span style=\'color: rgb(198,198,198)\'> 251 </span><span style=\'background-color: rgb(208,208,208);color: rgb(255,255,255)\'> 252 </span><span style=\'color: rgb(208,208,208)\'> 252 </span><span style=\'background-color: rgb(218,218,218);color: rgb(255,255,255)\'> 253 </span><span style=\'color: rgb(218,218,218)\'> 253 </span><span style=\'background-color: rgb(228,228,228);color: rgb(255,255,255)\'> 254 </span><span style=\'color: rgb(228,228,228)\'> 254 </span><span style=\'background-color: rgb(238,238,238);color: rgb(255,255,255)\'> 255 </span><span style=\'color: rgb(238,238,238)\'> 255 </span>'));
+        output.toString(),
+        equals(
+          '<span style=\'background-color: rgb(0,0,0);color: rgb(255,255,255)\'>0 </span><span style=\'color: rgb(0,0,0)\'> 0 </span><span style=\'background-color: rgb(187,0,0);color: rgb(255,255,255)\'>1 </span><span style=\'color: rgb(187,0,0)\'> 1 </span><span style=\'background-color: rgb(0,187,0);color: rgb(255,255,255)\'>2 </span><span style=\'color: rgb(0,187,0)\'> 2 </span><span style=\'background-color: rgb(187,187,0);color: rgb(255,255,255)\'>3 </span><span style=\'color: rgb(187,187,0)\'> 3 </span><span style=\'background-color: rgb(0,0,187);color: rgb(255,255,255)\'>4 </span><span style=\'color: rgb(0,0,187)\'> 4 </span><span style=\'background-color: rgb(187,0,187);color: rgb(255,255,255)\'>5 </span><span style=\'color: rgb(187,0,187)\'> 5 </span><span style=\'background-color: rgb(0,187,187);color: rgb(255,255,255)\'>6 </span><span style=\'color: rgb(0,187,187)\'> 6 </span><span style=\'background-color: rgb(255,255,255);color: rgb(255,255,255)\'>7 </span><span style=\'color: rgb(255,255,255)\'> 7 </span>\n'
+          '<span style=\'background-color: rgb(85,85,85);color: rgb(255,255,255)\'>8 </span><span style=\'color: rgb(85,85,85)\'> 8 </span><span style=\'background-color: rgb(255,85,85);color: rgb(255,255,255)\'>9 </span><span style=\'color: rgb(255,85,85)\'> 9 </span><span style=\'background-color: rgb(0,255,0);color: rgb(255,255,255)\'>10 </span><span style=\'color: rgb(0,255,0)\'> 10 </span><span style=\'background-color: rgb(255,255,85);color: rgb(255,255,255)\'>11 </span><span style=\'color: rgb(255,255,85)\'> 11 </span><span style=\'background-color: rgb(85,85,255);color: rgb(255,255,255)\'>12 </span><span style=\'color: rgb(85,85,255)\'> 12 </span><span style=\'background-color: rgb(255,85,255);color: rgb(255,255,255)\'>13 </span><span style=\'color: rgb(255,85,255)\'> 13 </span><span style=\'background-color: rgb(85,255,255);color: rgb(255,255,255)\'>14 </span><span style=\'color: rgb(85,255,255)\'> 14 </span><span style=\'background-color: rgb(255,255,255);color: rgb(255,255,255)\'>15 </span><span style=\'color: rgb(255,255,255)\'> 15 </span>\n'
+          '\n'
+          '<span style=\'background-color: rgb(0,0,0);color: rgb(255,255,255)\'> 16 </span><span style=\'color: rgb(0,0,0)\'> 16 </span><span style=\'background-color: rgb(0,0,175);color: rgb(255,255,255)\'> 19 </span><span style=\'color: rgb(0,0,175)\'> 19 </span>\n'
+          '<span style=\'background-color: rgb(0,175,0);color: rgb(255,255,255)\'> 34 </span><span style=\'color: rgb(0,175,0)\'> 34 </span><span style=\'background-color: rgb(0,175,175);color: rgb(255,255,255)\'> 37 </span><span style=\'color: rgb(0,175,175)\'> 37 </span>\n'
+          '\n'
+          '<span style=\'background-color: rgb(175,0,0);color: rgb(255,255,255)\'> 124 </span><span style=\'color: rgb(175,0,0)\'> 124 </span><span style=\'background-color: rgb(175,0,175);color: rgb(255,255,255)\'> 127 </span><span style=\'color: rgb(175,0,175)\'> 127 </span>\n'
+          '<span style=\'background-color: rgb(175,175,0);color: rgb(255,255,255)\'> 142 </span><span style=\'color: rgb(175,175,0)\'> 142 </span><span style=\'background-color: rgb(175,175,175);color: rgb(255,255,255)\'> 145 </span><span style=\'color: rgb(175,175,175)\'> 145 </span>\n'
+          '\n'
+          '<span style=\'background-color: rgb(8,8,8);color: rgb(255,255,255)\'> 232 </span><span style=\'color: rgb(8,8,8)\'> 232 </span><span style=\'background-color: rgb(18,18,18);color: rgb(255,255,255)\'> 233 </span><span style=\'color: rgb(18,18,18)\'> 233 </span><span style=\'background-color: rgb(28,28,28);color: rgb(255,255,255)\'> 234 </span><span style=\'color: rgb(28,28,28)\'> 234 </span><span style=\'background-color: rgb(38,38,38);color: rgb(255,255,255)\'> 235 </span><span style=\'color: rgb(38,38,38)\'> 235 </span><span style=\'background-color: rgb(48,48,48);color: rgb(255,255,255)\'> 236 </span><span style=\'color: rgb(48,48,48)\'> 236 </span><span style=\'background-color: rgb(58,58,58);color: rgb(255,255,255)\'> 237 </span><span style=\'color: rgb(58,58,58)\'> 237 </span><span style=\'background-color: rgb(68,68,68);color: rgb(255,255,255)\'> 238 </span><span style=\'color: rgb(68,68,68)\'> 238 </span><span style=\'background-color: rgb(78,78,78);color: rgb(255,255,255)\'> 239 </span><span style=\'color: rgb(78,78,78)\'> 239 </span>\n'
+          '<span style=\'background-color: rgb(88,88,88);color: rgb(255,255,255)\'> 240 </span><span style=\'color: rgb(88,88,88)\'> 240 </span><span style=\'background-color: rgb(98,98,98);color: rgb(255,255,255)\'> 241 </span><span style=\'color: rgb(98,98,98)\'> 241 </span><span style=\'background-color: rgb(108,108,108);color: rgb(255,255,255)\'> 242 </span><span style=\'color: rgb(108,108,108)\'> 242 </span><span style=\'background-color: rgb(118,118,118);color: rgb(255,255,255)\'> 243 </span><span style=\'color: rgb(118,118,118)\'> 243 </span><span style=\'background-color: rgb(128,128,128);color: rgb(255,255,255)\'> 244 </span><span style=\'color: rgb(128,128,128)\'> 244 </span><span style=\'background-color: rgb(138,138,138);color: rgb(255,255,255)\'> 245 </span><span style=\'color: rgb(138,138,138)\'> 245 </span><span style=\'background-color: rgb(148,148,148);color: rgb(255,255,255)\'> 246 </span><span style=\'color: rgb(148,148,148)\'> 246 </span><span style=\'background-color: rgb(158,158,158);color: rgb(255,255,255)\'> 247 </span><span style=\'color: rgb(158,158,158)\'> 247 </span>\n'
+          '<span style=\'background-color: rgb(168,168,168);color: rgb(255,255,255)\'> 248 </span><span style=\'color: rgb(168,168,168)\'> 248 </span><span style=\'background-color: rgb(178,178,178);color: rgb(255,255,255)\'> 249 </span><span style=\'color: rgb(178,178,178)\'> 249 </span><span style=\'background-color: rgb(188,188,188);color: rgb(255,255,255)\'> 250 </span><span style=\'color: rgb(188,188,188)\'> 250 </span><span style=\'background-color: rgb(198,198,198);color: rgb(255,255,255)\'> 251 </span><span style=\'color: rgb(198,198,198)\'> 251 </span><span style=\'background-color: rgb(208,208,208);color: rgb(255,255,255)\'> 252 </span><span style=\'color: rgb(208,208,208)\'> 252 </span><span style=\'background-color: rgb(218,218,218);color: rgb(255,255,255)\'> 253 </span><span style=\'color: rgb(218,218,218)\'> 253 </span><span style=\'background-color: rgb(228,228,228);color: rgb(255,255,255)\'> 254 </span><span style=\'color: rgb(228,228,228)\'> 254 </span><span style=\'background-color: rgb(238,238,238);color: rgb(255,255,255)\'> 255 </span><span style=\'color: rgb(238,238,238)\'> 255 </span>',
+        ),
+      );
     });
   });
 
   group('Logging Screen', () {
-    MockLoggingController mockLoggingController;
-    FakeServiceManager fakeServiceManager;
+    late MockLoggingController mockLoggingController;
+    late FakeServiceManager fakeServiceManager;
     const windowSize = Size(1000.0, 1000.0);
 
     const totalLogs = 10;
@@ -122,9 +124,9 @@ void main() {
     }
 
     LogData _generate(int i) {
-      String details = 'log event $i';
+      String? details = 'log event $i';
       String kind = 'kind $i';
-      String computedDetails;
+      String? computedDetails;
       switch (i) {
         case 9:
           computedDetails = jsonOutput;
@@ -145,18 +147,22 @@ void main() {
 
       final detailsComputer = computedDetails == null
           ? null
-          : () =>
-              Future.delayed(const Duration(seconds: 1), () => computedDetails);
+          : () => Future.delayed(
+                const Duration(seconds: 1),
+                () => computedDetails!,
+              );
       return LogData(kind, details, i, detailsComputer: detailsComputer);
     }
 
     final fakeLogData = List<LogData>.generate(totalLogs, _generate);
 
     Future<void> pumpLoggingScreen(WidgetTester tester) async {
-      await tester.pumpWidget(wrapWithControllers(
-        const LoggingScreenBody(),
-        logging: mockLoggingController,
-      ));
+      await tester.pumpWidget(
+        wrapWithControllers(
+          const LoggingScreenBody(),
+          logging: mockLoggingController,
+        ),
+      );
     }
 
     setUp(() async {
@@ -175,11 +181,14 @@ void main() {
           .thenReturn(ListValueNotifier<LogData>([]));
 
       fakeServiceManager = FakeServiceManager();
-      when(fakeServiceManager.connectedApp.isFlutterWebAppNow)
-          .thenReturn(false);
-      when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
-      when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
-          .thenReturn(ValueNotifier<int>(0));
+      final app = fakeServiceManager.connectedApp!;
+      when(app.isFlutterWebAppNow).thenReturn(false);
+      when(app.isProfileBuildNow).thenReturn(false);
+      // TODO(polinach): when we start supporting browser tests, uncomment
+      // and fix the mock configuration.
+      // See https://github.com/flutter/devtools/issues/3616.
+      // when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
+      //     .thenReturn(ValueNotifier<int>(0));
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       when(mockLoggingController.data).thenReturn(fakeLogData);
       when(mockLoggingController.filteredData)
@@ -215,14 +224,14 @@ void main() {
       finder.evaluate().forEach((element) {
         final richText = element.widget as RichText;
         final textSpan = richText.text as TextSpan;
-        final secondSpan = textSpan.children[1] as TextSpan;
+        final secondSpan = textSpan.children![1] as TextSpan;
         expect(
           secondSpan.text,
           'log 5',
           reason: 'Text with ansi code should be in separate span',
         );
         expect(
-          secondSpan.style.backgroundColor,
+          secondSpan.style!.backgroundColor,
           const Color.fromRGBO(215, 95, 135, 1),
         );
       });
@@ -230,8 +239,8 @@ void main() {
   });
 
   group('Debugger Screen', () {
-    FakeServiceManager fakeServiceManager;
-    MockDebuggerController debuggerController;
+    late FakeServiceManager fakeServiceManager;
+    late MockDebuggerController debuggerController;
 
     const windowSize = Size(4000.0, 4000.0);
 
@@ -239,15 +248,17 @@ void main() {
       WidgetTester tester,
       DebuggerController controller,
     ) async {
-      await tester.pumpWidget(wrapWithControllers(
-        Row(
-          children: [
-            Flexible(child: DebuggerConsole.buildHeader()),
-            const Expanded(child: DebuggerConsole()),
-          ],
+      await tester.pumpWidget(
+        wrapWithControllers(
+          Row(
+            children: [
+              Flexible(child: DebuggerConsole.buildHeader()),
+              const Expanded(child: DebuggerConsole()),
+            ],
+          ),
+          debugger: controller,
         ),
-        debugger: controller,
-      ));
+      );
     }
 
     String _ansiCodesOutput() {
@@ -262,13 +273,17 @@ void main() {
       // TODO(polinach): remove unnecessary setup steps after fixing
       // https://github.com/flutter/devtools/issues/3616.
       fakeServiceManager = FakeServiceManager();
-      when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
-      when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
+      final app = fakeServiceManager.connectedApp!;
+      when(app.isProfileBuildNow).thenReturn(false);
+      when(app.isDartWebAppNow).thenReturn(false);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       fakeServiceManager.consoleService.ensureServiceInitialized();
 
-      when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
-          .thenReturn(ValueNotifier<int>(0));
+      // TODO(polinach): when we start supporting browser tests, uncomment
+      // and fix the mock configuration.
+      // See https://github.com/flutter/devtools/issues/3616.
+      // when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
+      //     .thenReturn(ValueNotifier<int>(0));
 
       debuggerController = MockDebuggerController.withDefaults();
     });
@@ -285,15 +300,15 @@ void main() {
       expect(finder, findsOneWidget);
       finder.evaluate().forEach((element) {
         final selectableText = element.widget as SelectableText;
-        final textSpan = selectableText.textSpan;
-        final secondSpan = textSpan.children[1] as TextSpan;
+        final textSpan = selectableText.textSpan!;
+        final secondSpan = textSpan.children![1] as TextSpan;
         expect(
           secondSpan.text,
           'console',
           reason: 'Text with ansi code should be in separate span',
         );
         expect(
-          secondSpan.style.backgroundColor,
+          secondSpan.style!.backgroundColor,
           const Color.fromRGBO(215, 95, 135, 1),
         );
       });

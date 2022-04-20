@@ -149,8 +149,10 @@ Future<String> flutterGAClientID() async {
 /// logged.
 Future<bool> setActiveSurvey(String value) async {
   if (isDevToolsServerAvailable) {
-    final resp = await _request('$apiSetActiveSurvey'
-        '?$activeSurveyName=$value');
+    final resp = await _request(
+      '$apiSetActiveSurvey'
+      '?$activeSurveyName=$value',
+    );
     if (resp?.status == HttpStatus.ok && json.decode(resp!.responseText!)) {
       return true;
     } else {

@@ -220,10 +220,12 @@ class PerformanceController extends DisposableController
       _badgeTabForJankyFrames.value =
           await serviceManager.connectedApp!.isProfileBuild;
 
-      unawaited(allowedError(
-        serviceManager.service!.setProfilePeriod(mediumProfilePeriod),
-        logError: false,
-      ));
+      unawaited(
+        allowedError(
+          serviceManager.service!.setProfilePeriod(mediumProfilePeriod),
+          logError: false,
+        ),
+      );
       await serviceManager.timelineStreamManager.setDefaultTimelineStreams();
       await toggleHttpRequestLogging(true);
 
@@ -235,20 +237,22 @@ class PerformanceController extends DisposableController
       // Listen for Flutter.Frame events with frame timing data.
       // Listen for Flutter.RebuiltWidgets events.
       autoDisposeStreamSubscription(
-          serviceManager.service!.onExtensionEventWithHistory.listen((event) {
-        if (event.extensionKind == 'Flutter.Frame') {
-          final frame = FlutterFrame.parse(event.extensionData!.data);
-          addFrame(frame);
-        } else if (event.extensionKind == 'Flutter.RebuiltWidgets') {
-          rebuildCountModel.processRebuildEvent(event.extensionData!.data);
-        }
-      }));
+        serviceManager.service!.onExtensionEventWithHistory.listen((event) {
+          if (event.extensionKind == 'Flutter.Frame') {
+            final frame = FlutterFrame.parse(event.extensionData!.data);
+            addFrame(frame);
+          } else if (event.extensionKind == 'Flutter.RebuiltWidgets') {
+            rebuildCountModel.processRebuildEvent(event.extensionData!.data);
+          }
+        }),
+      );
 
       autoDisposeStreamSubscription(
-          serviceManager.onConnectionClosed.listen((_) {
-        _pollingTimer?.cancel();
-        _timelinePollingRateLimiter?.dispose();
-      }));
+        serviceManager.onConnectionClosed.listen((_) {
+          _pollingTimer?.cancel();
+          _timelinePollingRateLimiter?.dispose();
+        }),
+      );
 
       // Load available timeline events.
       await _pullTraceEventsFromVmTimeline(isInitialPull: true);
@@ -461,7 +465,7 @@ class PerformanceController extends DisposableController
       );
     }
 
-    if (debugTimeline) {
+    debugTraceEventCallback(() {
       final buf = StringBuffer();
       buf.writeln('UI timeline event for frame ${frame.id}:');
       frame.timelineEventData.uiEvent?.format(buf, '  ');
@@ -472,7 +476,7 @@ class PerformanceController extends DisposableController
       buf.writeln('\nRaster trace for frame ${frame.id}');
       frame.timelineEventData.rasterEvent?.writeTraceToBuffer(buf);
       log(buf.toString());
-    }
+    });
   }
 
   void addFrame(FlutterFrame frame) {
@@ -631,8 +635,10 @@ class PerformanceController extends DisposableController
 
     if (isFlutterApp && isInitialUpdate) {
       if (uiThreadId == null || rasterThreadId == null) {
-        log('Could not find UI thread and / or Raster thread from names: '
-            '${threadNamesById.values}');
+        log(
+          'Could not find UI thread and / or Raster thread from names: '
+          '${threadNamesById.values}',
+        );
       }
 
       processor.primeThreadIds(

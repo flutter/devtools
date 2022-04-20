@@ -154,71 +154,6 @@ class CpuProfileTransformer {
   }
 }
 
-// ignore: avoid_classes_with_only_static_members
-/// Process for converting a [CpuStackFrame] into a bottom-up representation of
-/// the CPU profile.
-class BottomUpProfileTransformer {
-  static List<CpuStackFrame> processData(CpuStackFrame stackFrame) {
-    final List<CpuStackFrame> bottomUpRoots = getRoots(stackFrame, null, []);
-
-    // Set the bottom up sample counts for each sample.
-    bottomUpRoots.forEach(cascadeSampleCounts);
-
-    // Merge samples when possible starting at the root (the leaf node of the
-    // original CPU sample).
-    mergeProfileRoots(bottomUpRoots);
-
-    return bottomUpRoots;
-  }
-
-  /// Returns the roots for a bottom up representation of a CpuStackFrame node.
-  ///
-  /// Each root is a leaf from the original CpuStackFrame tree, and its children
-  /// will be the reverse call stack of the original sample. The stack frames
-  /// returned will not be merged to combine common roots, and the sample counts
-  /// will not reflect the bottom up sample counts. These steps will occur later
-  /// in the bottom-up conversion process.
-  @visibleForTesting
-  static List<CpuStackFrame> getRoots(
-    CpuStackFrame node,
-    CpuStackFrame? currentBottomUpRoot,
-    List<CpuStackFrame> bottomUpRoots,
-  ) {
-    final copy = node.shallowCopy();
-
-    if (currentBottomUpRoot != null) {
-      copy.addChild(currentBottomUpRoot.deepCopy());
-    }
-
-    // [copy] is the new root of the bottom up call stack.
-    currentBottomUpRoot = copy;
-
-    if (node.exclusiveSampleCount > 0) {
-      // This node is a leaf node, meaning it is a bottom up root.
-      bottomUpRoots.add(currentBottomUpRoot);
-    }
-    for (CpuStackFrame child in node.children) {
-      getRoots(child, currentBottomUpRoot, bottomUpRoots);
-    }
-    return bottomUpRoots;
-  }
-
-  /// Sets sample counts of [stackFrame] and all children to
-  /// [exclusiveSampleCount].
-  ///
-  /// This is necessary for the transformation of a [CpuStackFrame] to its
-  /// bottom-up representation. This is an intermediate step between
-  /// [getRoots] and [mergeProfileRoots].
-  @visibleForTesting
-  static void cascadeSampleCounts(CpuStackFrame stackFrame) {
-    stackFrame.inclusiveSampleCount = stackFrame.exclusiveSampleCount;
-    for (CpuStackFrame child in stackFrame.children) {
-      child.exclusiveSampleCount = stackFrame.exclusiveSampleCount;
-      cascadeSampleCounts(child);
-    }
-  }
-}
-
 /// Merges CPU profile roots that share a common call stack (starting at the
 /// root).
 ///
@@ -229,7 +164,7 @@ class BottomUpProfileTransformer {
 ///
 /// At the time this method is called, we assume we have a list of roots with
 /// accurate inclusive/exclusive sample counts.
-void mergeProfileRoots(List<CpuStackFrame> roots) {
+void mergeCpuProfileRoots(List<CpuStackFrame> roots) {
   // Loop through a copy of [roots] so that we can remove nodes from [roots]
   // once we have merged them.
   final List<CpuStackFrame> rootsCopy = List.from(roots);
@@ -251,7 +186,7 @@ void mergeProfileRoots(List<CpuStackFrame> roots) {
       root.exclusiveSampleCount += match.exclusiveSampleCount;
       root.inclusiveSampleCount += match.inclusiveSampleCount;
       roots.remove(match);
-      mergeProfileRoots(root.children);
+      mergeCpuProfileRoots(root.children);
     }
   }
 

@@ -2,23 +2,39 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 // ignore_for_file: avoid_redundant_argument_values
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profile_model.dart';
+import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:vm_service/vm_service.dart';
 
 import 'test_data/cpu_profile_test_data.dart';
 
 void main() {
   group('CpuProfileData', () {
     final cpuProfileData = CpuProfileData.parse(cpuProfileResponseJson);
+    final cpuSamples = CpuSamples.parse(goldenCpuSamplesJson)!;
 
+    setUp(() {
+      setGlobal(
+        ServiceConnectionManager,
+        FakeServiceManager(
+          service: FakeServiceManager.createFakeService(
+            resolvedUriMap: goldenResolvedUriMap,
+          ),
+        ),
+      );
+    });
     test('init from parse', () {
       expect(
-          cpuProfileData.stackFramesJson, equals(goldenCpuProfileStackFrames));
+        cpuProfileData.stackFramesJson,
+        equals(goldenCpuProfileStackFrames),
+      );
       expect(
         cpuProfileData.cpuSamples.map((sample) => sample.json),
         equals(goldenCpuProfileTraceEvents),
@@ -26,21 +42,22 @@ void main() {
       expect(cpuProfileData.profileMetaData.sampleCount, equals(8));
       expect(cpuProfileData.profileMetaData.samplePeriod, equals(50));
       expect(
-        cpuProfileData.profileMetaData.time.start.inMicroseconds,
+        cpuProfileData.profileMetaData.time!.start!.inMicroseconds,
         equals(47377796685),
       );
       expect(
-        cpuProfileData.profileMetaData.time.end.inMicroseconds,
+        cpuProfileData.profileMetaData.time!.end!.inMicroseconds,
         equals(47377799685),
       );
     });
 
     test('subProfile', () {
       final subProfile = CpuProfileData.subProfile(
-          cpuProfileData,
-          TimeRange()
-            ..start = const Duration(microseconds: 47377796685)
-            ..end = const Duration(microseconds: 47377799063));
+        cpuProfileData,
+        TimeRange()
+          ..start = const Duration(microseconds: 47377796685)
+          ..end = const Duration(microseconds: 47377799063),
+      );
 
       expect(
         subProfile.stackFramesJson,
@@ -60,7 +77,7 @@ void main() {
     test('filterFrom', () {
       final filteredProfile = CpuProfileData.filterFrom(
         cpuProfileData,
-        (stackFrame) => !stackFrame.processedUrl.startsWith('dart:'),
+        (stackFrame) => !stackFrame.packageUri.startsWith('dart:'),
       );
       expect(
         filteredProfile.stackFramesJson,
@@ -77,8 +94,73 @@ void main() {
       );
     });
 
-    test('to json', () {
+    test('samples to json', () {
+      expect(cpuSamples.toJson(), equals(goldenCpuSamplesJson));
+    });
+
+    test('profileData to json', () {
       expect(cpuProfileData.toJson, equals(goldenCpuProfileDataJson));
+    });
+
+    test('converts golden samples to golden cpu profile data', () async {
+      final generatedCpuProfileData =
+          await CpuProfileData.generateFromCpuSamples(
+        isolateId: goldenSamplesIsolate,
+        cpuSamples: CpuSamples.parse(goldenCpuSamplesJson)!,
+      );
+
+      expect(generatedCpuProfileData.toJson, equals(goldenCpuProfileDataJson));
+    });
+
+    test('to json defaults packageUri to resolvedUrl', () {
+      const id = '140357727781376-12';
+      final profileData = Map<String, dynamic>.from(goldenCpuProfileDataJson);
+      profileData['stackFrames'] = Map<String, Map<String, String>>.from(
+        {id: goldenCpuProfileStackFrames[id]},
+      );
+      profileData['stackFrames'][id]
+          .remove(CpuProfileData.resolvedPackageUriKey);
+
+      final parsedProfileData = CpuProfileData.parse(profileData);
+
+      final jsonPackageUri = parsedProfileData.stackFrames[id]!.packageUri;
+      expect(jsonPackageUri, goldenCpuProfileStackFrames[id]!['resolvedUrl']);
+    });
+
+    test('generateFromCpuSamples handles duplicate resolvedUrls', () async {
+      const resolvedUrl = 'the/resolved/Url';
+      const packageUri = 'the/package/Uri';
+      setGlobal(
+        ServiceConnectionManager,
+        FakeServiceManager(
+          service: FakeServiceManager.createFakeService(
+            resolvedUriMap: {resolvedUrl: packageUri},
+          ),
+        ),
+      );
+      final cpuSamples = CpuSamples.parse(goldenCpuSamplesJson);
+      cpuSamples!.functions = cpuSamples.functions!.sublist(0, 3);
+      cpuSamples.samples = cpuSamples.samples!.sublist(0, 2);
+      cpuSamples.samples![0].stack = [0];
+      cpuSamples.samples![1].stack = [1];
+      cpuSamples.functions![0].resolvedUrl = resolvedUrl;
+      cpuSamples.functions![1].resolvedUrl = resolvedUrl;
+      cpuSamples.sampleCount = 2;
+
+      final cpuProfileData = await CpuProfileData.generateFromCpuSamples(
+        isolateId: goldenSamplesIsolate,
+        cpuSamples: cpuSamples,
+      );
+
+      expect(cpuProfileData.stackFrames.length, equals(2));
+      expect(
+        cpuProfileData.stackFrames.values.toList()[0].packageUri,
+        equals(packageUri),
+      );
+      expect(
+        cpuProfileData.stackFrames.values.toList()[1].packageUri,
+        equals(packageUri),
+      );
     });
 
     test('stackFrameIdCompare', () {
@@ -109,8 +191,9 @@ void main() {
           verboseName: 'all',
           category: 'Dart',
           rawUrl: '',
+          packageUri: '',
           sourceLine: null,
-          parentId: null,
+          parentId: '',
           profileMetaData: profileMetaData,
         ).isNative,
         isFalse,

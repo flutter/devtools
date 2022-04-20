@@ -60,7 +60,8 @@ void main() {
       };
       fakeExtensionManager
         ..fakeAddServiceExtension(
-            extensions.toggleOnDeviceWidgetInspector.extension)
+          extensions.toggleOnDeviceWidgetInspector.extension,
+        )
         ..fakeAddServiceExtension(extensions.toggleSelectWidgetMode.extension)
         ..fakeAddServiceExtension(extensions.enableOnDeviceInspector.extension)
         ..fakeAddServiceExtension(extensions.debugPaint.extension)
@@ -190,8 +191,10 @@ void main() {
       await tester.pumpWidget(buildInspectorScreen());
       await tester.pump();
       expect(find.byType(InspectorScreenBody), findsOneWidget);
-      expect(find.text(extensions.toggleOnDeviceWidgetInspector.title),
-          findsOneWidget);
+      expect(
+        find.text(extensions.toggleOnDeviceWidgetInspector.title),
+        findsOneWidget,
+      );
       expect(find.text(extensions.debugPaint.title), findsOneWidget);
       await tester.pump();
 
@@ -199,23 +202,26 @@ void main() {
           .tap(find.text(extensions.toggleOnDeviceWidgetInspector.title));
       // Verify the service extension state has not changed.
       expect(
-          fakeExtensionManager.extensionValueOnDevice[
-              extensions.toggleOnDeviceWidgetInspector.extension],
-          isTrue);
+        fakeExtensionManager.extensionValueOnDevice[
+            extensions.toggleOnDeviceWidgetInspector.extension],
+        isTrue,
+      );
       await tester
           .tap(find.text(extensions.toggleOnDeviceWidgetInspector.title));
       // Verify the service extension state has not changed.
       expect(
-          fakeExtensionManager.extensionValueOnDevice[
-              extensions.toggleOnDeviceWidgetInspector.extension],
-          isTrue);
+        fakeExtensionManager.extensionValueOnDevice[
+            extensions.toggleOnDeviceWidgetInspector.extension],
+        isTrue,
+      );
 
       // TODO(jacobr): also verify that the service extension buttons look
       // visually disabled.
     });
 
     group('LayoutDetailsTab', () {
-      final renderObjectJson = jsonDecode('''
+      final renderObjectJson = jsonDecode(
+        '''
         {
           "properties": [
             {
@@ -244,7 +250,8 @@ void main() {
             }
           ]
         }
-      ''');
+      ''',
+      );
       final diagnostic = RemoteDiagnosticsNode(
         <String, Object>{
           'widgetRuntimeType': 'Row',

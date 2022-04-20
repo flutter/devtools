@@ -43,13 +43,15 @@ class Notifications extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Overlay(initialEntries: [
-      OverlayEntry(
-        builder: (context) => _NotificationsProvider(child: child),
-        maintainState: true,
-        opaque: true,
-      ),
-    ]);
+    return Overlay(
+      initialEntries: [
+        OverlayEntry(
+          builder: (context) => _NotificationsProvider(child: child),
+          maintainState: true,
+          opaque: true,
+        ),
+      ],
+    );
   }
 
   static NotificationsState? of(BuildContext context) {
@@ -96,7 +98,7 @@ class NotificationsState extends State<_NotificationsProvider>
         maintainState: true,
         builder: _buildOverlay,
       );
-      SchedulerBinding.instance!.scheduleFrameCallback((_) {
+      SchedulerBinding.instance.scheduleFrameCallback((_) {
         Overlay.of(context)!.insert(_overlayEntry!);
       });
     }

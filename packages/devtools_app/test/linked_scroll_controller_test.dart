@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:async';
 
 import 'package:devtools_app/src/primitives/flutter_widgets/linked_scroll_controller.dart';
@@ -155,9 +153,12 @@ void main() {
 
       final state =
           tester.state<TestEmptyGroupState>(find.byType(TestEmptyGroup));
-      expect(() {
-        state._controllers.offset;
-      }, throwsAssertionError);
+      expect(
+        () {
+          state._controllers.offset;
+        },
+        throwsAssertionError,
+      );
     });
 
     testWidgets('offset returns current position', (tester) async {
@@ -244,11 +245,13 @@ void main() {
       // The call to `animateTo` needs to be unawaited because the animation is
       // handled by a [DrivenScrollActivity], which only completes when the
       // scroll activity is disposed.
-      unawaited(state._controllers.animateTo(
-        50.0,
-        curve: Curves.easeInOutCubic,
-        duration: const Duration(milliseconds: 200),
-      ));
+      unawaited(
+        state._controllers.animateTo(
+          50.0,
+          curve: Curves.easeInOutCubic,
+          duration: const Duration(milliseconds: 200),
+        ),
+      );
       await tester.pumpAndSettle();
 
       expect(state._controllers.offset, equals(50.0));
@@ -307,7 +310,7 @@ class TestEmptyGroup extends StatefulWidget {
 }
 
 class TestEmptyGroupState extends State<TestEmptyGroup> {
-  LinkedScrollControllerGroup _controllers;
+  late LinkedScrollControllerGroup _controllers;
 
   @override
   void initState() {
@@ -327,9 +330,9 @@ class Test extends StatefulWidget {
 }
 
 class TestState extends State<Test> {
-  LinkedScrollControllerGroup _controllers;
-  ScrollController _letters;
-  ScrollController _numbers;
+  late LinkedScrollControllerGroup _controllers;
+  late ScrollController _letters;
+  late ScrollController _numbers;
 
   @override
   void initState() {

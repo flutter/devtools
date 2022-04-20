@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:devtools_app/src/shared/survey.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -26,9 +24,13 @@ void main() {
       expect(survey.startDate, equals(DateTime.utc(2020, 10, 30, 16)));
       expect(survey.endDate, equals(DateTime.utc(2020, 11, 30, 16)));
       expect(
-          survey.title, equals('Help improve DevTools! Take our Q4 survey.'));
-      expect(survey.url,
-          'https://google.qualtrics.com/jfe/form/SV_9XDmbo8lhv0VaUl');
+        survey.title,
+        equals('Help improve DevTools! Take our Q4 survey.'),
+      );
+      expect(
+        survey.url,
+        'https://google.qualtrics.com/jfe/form/SV_9XDmbo8lhv0VaUl',
+      );
 
       final emptySurvey = DevToolsSurvey.parse({});
       expect(emptySurvey.id, isNull);

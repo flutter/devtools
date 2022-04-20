@@ -2,11 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
-import 'package:vm_service/vm_service.dart' hide SentinelException;
+import 'package:vm_service/vm_service.dart' hide SentinelException, Error;
 
 import '../../../shared/eval_on_dart_library.dart';
 
@@ -20,10 +18,10 @@ import 'fake_freezed_annotation.dart';
 part 'result.freezed.dart';
 
 @freezed
-abstract class Result<T> with _$Result<T> {
+class Result<T> with _$Result<T> {
   Result._();
-  factory Result.data(@nullable T value) = _ResultData<T>;
-  factory Result.error(Object error, [StackTrace stackTrace]) = _ResultError<T>;
+  factory Result.data(T value) = _ResultData<T>;
+  factory Result.error(Object error, StackTrace stackTrace) = _ResultError<T>;
 
   factory Result.guard(T Function() cb) {
     try {
@@ -57,18 +55,22 @@ abstract class Result<T> with _$Result<T> {
   T get dataOrThrow {
     return when(
       data: (value) => value,
-      error: (err, stack) {
-        // ignore: only_throw_errors
-        throw err;
-      },
+      error: Error.throwWithStackTrace,
     );
   }
 }
 
-Result<T> parseSentinel<T>(Object value) {
-  // TODO(rrousselGit) remove condition after migrating to NNBD
-  if (value == null) return Result.data(null);
+Result<T> parseSentinel<T>(Object? value) {
   if (value is T) return Result.data(value);
+
+  if (value == null) {
+    return Result.error(
+      ArgumentError(
+        'Expected $value to be an instance of $T but received `null`',
+      ),
+      StackTrace.current,
+    );
+  }
 
   if (value is Sentinel) {
     return Result.error(

@@ -231,7 +231,8 @@ Future<DevToolsJsonFile?> importFileFromPicker({
   // extensions than .json. We will need to return a more generic file type.
   return DevToolsJsonFile(
     data: data,
-    // This '!' is needed for google3.
+    // This '!' is needed for google3. This will throw a warning on Desktop that
+    // can be ignored.
     // ignore: unnecessary_non_null_assertion
     name: file.name!,
     lastModifiedTime: lastModifiedTime,
@@ -282,8 +283,8 @@ class DualFileImportContainer extends StatefulWidget {
   final String actionText;
 
   final Function(
-    DevToolsJsonFile? firstImportedFile,
-    DevToolsJsonFile? secondImportedFile,
+    DevToolsJsonFile firstImportedFile,
+    DevToolsJsonFile secondImportedFile,
     void Function(String error) onError,
   ) onAction;
 
@@ -370,8 +371,8 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
             ElevatedButton(
               onPressed: firstImportedFile != null && secondImportedFile != null
                   ? () => widget.onAction(
-                        firstImportedFile,
-                        secondImportedFile,
+                        firstImportedFile!,
+                        secondImportedFile!,
                         (error) => notifications.push(error),
                       )
                   : null,

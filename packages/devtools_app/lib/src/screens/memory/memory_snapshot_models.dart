@@ -280,8 +280,10 @@ class Reference extends TreeNode<Reference> {
 
   @override
   Reference shallowCopy() {
-    throw UnimplementedError('This method is not implemented. Implement if you '
-        'need to call `shallowCopy` on an instance of this class.');
+    throw UnimplementedError(
+      'This method is not implemented. Implement if you '
+      'need to call `shallowCopy` on an instance of this class.',
+    );
   }
 }
 
@@ -356,8 +358,10 @@ class AnalysisField extends TreeNode<AnalysisField> {
 
   @override
   AnalysisField shallowCopy() {
-    throw UnimplementedError('This method is not implemented. Implement if you '
-        'need to call `shallowCopy` on an instance of this class.');
+    throw UnimplementedError(
+      'This method is not implemented. Implement if you '
+      'need to call `shallowCopy` on an instance of this class.',
+    );
   }
 }
 
@@ -404,10 +408,12 @@ class LibraryReference extends Reference {
                 // Add place holders for the instances.
                 final instances =
                     actualClass.getInstances(controller.heapGraph);
-                classRef.addAllChildren(List.filled(
-                  instances.length,
-                  Reference.empty,
-                ));
+                classRef.addAllChildren(
+                  List.filled(
+                    instances.length,
+                    Reference.empty,
+                  ),
+                );
               }
             }
           },
@@ -436,11 +442,13 @@ class ExternalReference extends Reference {
 
               final externalReference = reference as ExternalReference;
               final liveElement = externalReference.liveExternal.live;
-              externalReference.addChild(ObjectReference(
-                controller,
-                0,
-                liveElement,
-              ));
+              externalReference.addChild(
+                ObjectReference(
+                  controller,
+                  0,
+                  liveElement,
+                ),
+              );
             }
           },
         );
@@ -561,8 +569,12 @@ class FieldReference extends TreeNode<FieldReference> {
         value = null;
 
   FieldReference.createScaler(
-      this.controller, this.instance, this.type, this.name, this.value)
-      : isScaler = true,
+    this.controller,
+    this.instance,
+    this.type,
+    this.name,
+    this.value,
+  )   : isScaler = true,
         isObject = false;
 
   FieldReference.createObject(
@@ -609,8 +621,10 @@ class FieldReference extends TreeNode<FieldReference> {
 
   @override
   FieldReference shallowCopy() {
-    throw UnimplementedError('This method is not implemented. Implement if you '
-        'need to call `shallowCopy` on an instance of this class.');
+    throw UnimplementedError(
+      'This method is not implemented. Implement if you '
+      'need to call `shallowCopy` on an instance of this class.',
+    );
   }
 }
 
@@ -716,11 +730,13 @@ List<FieldReference> instanceToFieldNodes(
     if (fieldElement.key != '__parts') {
       if (fieldElement.value is! HeapGraphElementSentinel &&
           instance.references![fieldIndex] is! HeapGraphElementSentinel) {
-        root.add(fieldToFieldReference(
-          controller,
-          instance,
-          fieldElement,
-        ));
+        root.add(
+          fieldToFieldReference(
+            controller,
+            instance,
+            fieldElement,
+          ),
+        );
       } else {
         sentinelCount++;
         root.add(FieldReference.sentinel);
@@ -757,8 +773,7 @@ FieldReference fieldToFieldReference(
   // Handle change in VM service to use 0 based vs/ 1 based indexing. Need to
   // support old semantics for old VMs.
   final classId = actual.origin.classId;
-  final int indexIntoClass =
-      controller.newSnapshotSemantics ? classId : classId - 1;
+  final int indexIntoClass = classId;
   if (!controller.heapGraph!.builtInClasses.containsValue(indexIntoClass)) {
     return objectToFieldReference(
       controller,
@@ -827,12 +842,13 @@ FieldReference createScalar(
       break;
     default:
       final originClassId = actual.origin.classId;
-      final classId =
-          controller!.newSnapshotSemantics ? originClassId : originClassId - 1;
+      final classId = originClassId;
       dataValue = data.toString();
-      final dataTypeClass = controller.heapGraph!.classes[classId];
-      final predefined = predefinedClasses[dataTypeClass.fullQualifiedName]!;
-      dataType = predefined.prettyName;
+      final dataTypeClass = controller!.heapGraph!.classes[classId];
+      if (dataTypeClass != null) {
+        final predefined = predefinedClasses[dataTypeClass.fullQualifiedName]!;
+        dataType = predefined.prettyName;
+      }
   }
 
   return FieldReference.createScaler(
@@ -1057,10 +1073,12 @@ FieldReference objectToFieldReference(
 
   // If the object isn't null then add one fake empty child, so node
   // can be expanded.  The object's fields are computed on expansion.
-  reference.addAllChildren(List.filled(
-    isNullValue ? 0 : 1,
-    FieldReference.empty,
-  ));
+  reference.addAllChildren(
+    List.filled(
+      isNullValue ? 0 : 1,
+      FieldReference.empty,
+    ),
+  );
 
   return reference;
 }

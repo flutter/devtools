@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 export 'package:flutter_test/flutter_test.dart';
 
 class _Tester extends WidgetController {
-  _Tester() : super(WidgetsBinding.instance!);
+  _Tester() : super(WidgetsBinding.instance);
 
   @override
   Future<List<Duration>> handlePointerEventRecord(

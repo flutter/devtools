@@ -262,6 +262,8 @@ extension DevToolsColorScheme on ColorScheme {
       ? const Color.fromARGB(255, 128, 128, 128)
       : const Color.fromARGB(255, 128, 128, 128);
 
+  Color get breakpointColor => isLight ? devtoolsBlue[600]! : Colors.white;
+
   /// Background colors for charts.
   Color get chartBackground => isLight ? Colors.white : const Color(0xFF2D2E31);
 

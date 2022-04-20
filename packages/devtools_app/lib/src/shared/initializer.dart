@@ -135,7 +135,7 @@ class _InitializerState extends State<Initializer>
 
   /// Shows a "disconnected" overlay if the [service.serviceManager] is not currently connected.
   void _handleNoConnection() {
-    WidgetsBinding.instance!.scheduleFrameCallback((_) {
+    WidgetsBinding.instance.scheduleFrameCallback((_) {
       if (!_checkLoaded() &&
           ModalRoute.of(context)!.isCurrent &&
           currentDisconnectedOverlay == null) {
@@ -174,14 +174,15 @@ class _InitializerState extends State<Initializer>
               const SizedBox(height: defaultSpacing),
               if (widget.allowConnectionScreenOnDisconnect)
                 ElevatedButton(
-                    onPressed: () {
-                      hideDisconnectedOverlay();
-                      DevToolsRouterDelegate.of(context).navigateHome(
-                        clearUriParam: true,
-                        clearScreenParam: true,
-                      );
-                    },
-                    child: const Text(connectToNewAppText))
+                  onPressed: () {
+                    hideDisconnectedOverlay();
+                    DevToolsRouterDelegate.of(context).navigateHome(
+                      clearUriParam: true,
+                      clearScreenParam: true,
+                    );
+                  },
+                  child: const Text(connectToNewAppText),
+                )
               else
                 Text(
                   'Run a new debug session to reconnect',

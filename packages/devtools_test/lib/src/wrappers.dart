@@ -5,13 +5,12 @@
 // ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:devtools_app/devtools_app.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
-import 'mocks.dart';
+import 'mocks/mocks.dart';
 
 /// The RouterDelegate must use the same NavigatorKey when building in order
 /// for widget state to be preserved.
@@ -136,17 +135,19 @@ void testWidgetsWithWindowSize(
   WidgetTesterCallback test, {
   bool skip = false,
 }) {
-  testWidgets(name, (WidgetTester tester) async {
-    await _setWindowSize(windowSize);
-    await test(tester);
-    await _resetWindowSize();
-  }, skip: skip);
+  testWidgets(
+    name,
+    (WidgetTester tester) async {
+      await _setWindowSize(windowSize);
+      await test(tester);
+      await _resetWindowSize();
+    },
+    skip: skip,
+  );
 }
 
 Future<void> _setWindowSize(Size windowSize) async {
-  final TestWidgetsFlutterBinding binding =
-      TestWidgetsFlutterBinding.ensureInitialized()
-          as TestWidgetsFlutterBinding;
+  final binding = TestWidgetsFlutterBinding.ensureInitialized();
   await binding.setSurfaceSize(windowSize);
   binding.window.physicalSizeTestValue = windowSize;
   binding.window.devicePixelRatioTestValue = 1.0;

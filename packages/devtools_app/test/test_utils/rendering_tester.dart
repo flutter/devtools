@@ -6,8 +6,6 @@
 // and is convenient for adding tests to render object behavior similar to
 // existing tests implemented in package:flutter.
 
-// @dart=2.9
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -41,14 +39,14 @@ class TestRenderingFlutterBinding extends BindingBase
   /// This function is expected to inspect these errors and decide whether they
   /// are expected or not. Use [takeFlutterErrorDetails] to take one error at a
   /// time, or [takeAllFlutterErrorDetails] to iterate over all errors.
-  VoidCallback onErrors;
+  VoidCallback? onErrors;
 
   /// Returns the error least recently caught by [FlutterError] and removes it
   /// from the list of captured errors.
   ///
   /// Returns null if no errors were captures, or if the list was exhausted by
   /// calling this method repeatedly.
-  FlutterErrorDetails takeFlutterErrorDetails() {
+  FlutterErrorDetails? takeFlutterErrorDetails() {
     if (_errors.isEmpty) {
       return null;
     }
@@ -87,9 +85,11 @@ class TestRenderingFlutterBinding extends BindingBase
 
   @override
   void drawFrame() {
-    assert(phase != EnginePhase.build,
-        'rendering_tester does not support testing the build phase; use flutter_test instead');
-    final FlutterExceptionHandler oldErrorHandler = FlutterError.onError;
+    assert(
+      phase != EnginePhase.build,
+      'rendering_tester does not support testing the build phase; use flutter_test instead',
+    );
+    final FlutterExceptionHandler? oldErrorHandler = FlutterError.onError;
     FlutterError.onError = (FlutterErrorDetails details) {
       _errors.add(details);
     };
@@ -104,34 +104,33 @@ class TestRenderingFlutterBinding extends BindingBase
       if (phase == EnginePhase.composite) return;
       pipelineOwner.flushSemantics();
       if (phase == EnginePhase.flushSemantics) return;
-      assert(phase == EnginePhase.flushSemantics ||
-          phase == EnginePhase.sendSemanticsUpdate);
+      assert(
+        phase == EnginePhase.flushSemantics ||
+            phase == EnginePhase.sendSemanticsUpdate,
+      );
     } finally {
       FlutterError.onError = oldErrorHandler;
       if (_errors.isNotEmpty) {
         if (onErrors != null) {
-          onErrors();
+          onErrors!();
           if (_errors.isNotEmpty) {
             _errors.forEach(FlutterError.dumpErrorToConsole);
             fail(
-                'There are more errors than the test inspected using TestRenderingFlutterBinding.takeFlutterErrorDetails.');
+              'There are more errors than the test inspected using TestRenderingFlutterBinding.takeFlutterErrorDetails.',
+            );
           }
         } else {
           _errors.forEach(FlutterError.dumpErrorToConsole);
           fail(
-              'Caught error while rendering frame. See preceding logs for details.');
+            'Caught error while rendering frame. See preceding logs for details.',
+          );
         }
       }
     }
   }
 }
 
-TestRenderingFlutterBinding _renderer;
-
-TestRenderingFlutterBinding get renderer {
-  _renderer ??= TestRenderingFlutterBinding();
-  return _renderer;
-}
+late TestRenderingFlutterBinding _renderer = TestRenderingFlutterBinding();
 
 /// Place the box in the render tree, at the given size and with the given
 /// alignment on the screen.
@@ -149,17 +148,17 @@ TestRenderingFlutterBinding get renderer {
 /// If `onErrors` is not null, it is set as [TestRenderingFlutterBinding.onError].
 void layout(
   RenderBox box, {
-  BoxConstraints constraints,
+  BoxConstraints? constraints,
   Alignment alignment = Alignment.center,
   EnginePhase phase = EnginePhase.layout,
-  VoidCallback onErrors,
+  VoidCallback? onErrors,
 }) {
-  assert(box !=
-      null); // If you want to just repump the last box, call pumpFrame().
-  assert(box.parent ==
-      null); // We stick the box in another, so you can't reuse it easily, sorry.
+  // If you want to just repump the last box, call pumpFrame().
+  assert(
+    box.parent == null,
+  ); // We stick the box in another, so you can't reuse it easily, sorry.
 
-  renderer.renderView.child = null;
+  _renderer.renderView.child = null;
   if (constraints != null) {
     box = RenderPositionedBox(
       alignment: alignment,
@@ -169,7 +168,7 @@ void layout(
       ),
     );
   }
-  renderer.renderView.child = box;
+  _renderer.renderView.child = box;
 
   pumpFrame(phase: phase, onErrors: onErrors);
 }
@@ -177,22 +176,22 @@ void layout(
 /// Pumps a single frame.
 ///
 /// If `onErrors` is not null, it is set as [TestRenderingFlutterBinding.onError].
-void pumpFrame(
-    {EnginePhase phase = EnginePhase.layout, VoidCallback onErrors}) {
-  assert(renderer != null);
-  assert(renderer.renderView != null);
-  assert(renderer.renderView.child != null); // call layout() first!
+void pumpFrame({
+  EnginePhase phase = EnginePhase.layout,
+  VoidCallback? onErrors,
+}) {
+  assert(_renderer.renderView.child != null); // call layout() first!
 
   if (onErrors != null) {
-    renderer.onErrors = onErrors;
+    _renderer.onErrors = onErrors;
   }
 
-  renderer.phase = phase;
-  renderer.drawFrame();
+  _renderer.phase = phase;
+  _renderer.drawFrame();
 }
 
 class TestCallbackPainter extends CustomPainter {
-  const TestCallbackPainter({this.onPaint});
+  const TestCallbackPainter({required this.onPaint});
 
   final VoidCallback onPaint;
 
@@ -254,25 +253,25 @@ class FakeTickerProvider implements TickerProvider {
 
 class FakeTicker implements Ticker {
   @override
-  bool muted;
+  late bool muted;
 
   @override
   void absorbTicker(Ticker originalTicker) {}
 
   @override
-  String get debugLabel => null;
+  String? get debugLabel => null;
 
   @override
-  bool get isActive => null;
+  bool get isActive => false;
 
   @override
-  bool get isTicking => null;
+  bool get isTicking => false;
 
   @override
-  bool get scheduled => null;
+  bool get scheduled => false;
 
   @override
-  bool get shouldScheduleTick => null;
+  bool get shouldScheduleTick => false;
 
   @override
   void dispose() {}
@@ -282,7 +281,7 @@ class FakeTicker implements Ticker {
 
   @override
   TickerFuture start() {
-    return null;
+    return TickerFuture.complete();
   }
 
   @override
@@ -296,7 +295,10 @@ class FakeTicker implements Ticker {
 
   @override
   DiagnosticsNode describeForError(String name) {
-    return DiagnosticsProperty<Ticker>(name, this,
-        style: DiagnosticsTreeStyle.errorProperty);
+    return DiagnosticsProperty<Ticker>(
+      name,
+      this,
+      style: DiagnosticsTreeStyle.errorProperty,
+    );
   }
 }

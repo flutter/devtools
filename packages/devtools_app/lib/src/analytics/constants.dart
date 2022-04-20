@@ -42,6 +42,7 @@ const String feedbackButton = 'feedbackButton';
 
 // Inspector UX actions:
 const String refresh = 'refresh';
+const String refreshEmptyTree = 'refreshEmptyTree';
 const String performanceOverlay = 'performanceOverlay';
 const String debugPaint = 'debugPaint';
 const String paintBaseline = 'paintBaseline';
@@ -52,6 +53,7 @@ const String togglePlatform = 'togglePlatform';
 const String selectWidgetMode = 'selectWidgetMode';
 const String enableOnDeviceInspector = 'enableOnDeviceInspector';
 const String showOnDeviceInspector = 'showInspector';
+const String treeNodeSelection = 'treeNodeSelection';
 
 // Performance UX actions:
 const refreshTimelineEvents = 'refreshTimelineEvents';

@@ -67,7 +67,10 @@ class _LogDetailsState extends State<LogDetails>
   }
 
   Widget _buildSimpleLog(BuildContext context, LogData? log) {
-    final disabled = log?.details == null || log!.details!.isEmpty;
+    String? Function()? _dataProvider;
+    if (log?.details != null && log!.details!.isNotEmpty) {
+      _dataProvider = log.prettyPrinted;
+    }
 
     final details = log?.details;
     if (details != _lastDetails) {
@@ -85,7 +88,7 @@ class _LogDetailsState extends State<LogDetails>
           needsTopBorder: false,
           rightActions: [
             CopyToClipboardControl(
-              dataProvider: disabled ? null : log?.prettyPrinted,
+              dataProvider: _dataProvider,
               buttonKey: LogDetails.copyToClipboardButtonKey,
             ),
           ],

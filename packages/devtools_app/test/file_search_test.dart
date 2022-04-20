@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/screens/debugger/file_search.dart';
+import 'package:devtools_app/src/scripts/script_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/ui/search.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -15,6 +16,7 @@ import 'package:mockito/mockito.dart';
 
 void main() {
   final debuggerController = MockDebuggerController.withDefaults();
+  final scriptManager = MockScriptManager();
 
   Widget buildFileSearch() {
     return MaterialApp(
@@ -30,9 +32,10 @@ void main() {
 
   group('File search', () {
     setUp(() {
-      when(debuggerController.sortedScripts)
+      when(scriptManager.sortedScripts)
           .thenReturn(ValueNotifier(mockScriptRefs));
       setGlobal(IdeTheme, IdeTheme());
+      setGlobal(ScriptManager, scriptManager);
     });
 
     testWidgetsWithWindowSize(
@@ -72,8 +75,10 @@ void main() {
 
       await tester.tap(tileFinder.at(3));
 
-      expect(autoCompleteController.search,
-          equals('kitchen:food/catering/party.dart'));
+      expect(
+        autoCompleteController.search,
+        equals('kitchen:food/catering/party.dart'),
+      );
     });
 
     testWidgetsWithWindowSize(
@@ -429,7 +434,7 @@ List<String> getAutoCompleteMatch(List<AutoCompleteMatch> matches) {
         (match) => match.transformAutoCompleteMatch<String>(
           transformMatchedSegment: (segment) => segment.toUpperCase(),
           transformUnmatchedSegment: (segment) => segment.toLowerCase(),
-          combineSegments: (segments) => segments.join(''),
+          combineSegments: (segments) => segments.join(),
         ),
       )
       .toList();

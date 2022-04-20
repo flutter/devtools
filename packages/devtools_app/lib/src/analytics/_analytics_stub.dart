@@ -32,6 +32,8 @@ void timeEnd(
   ScreenAnalyticsMetrics Function()? screenMetricsProvider,
 }) {}
 
+void cancelTimingOperation(String screenName, String timedOperation) {}
+
 void timeSync(
   String screenName,
   String timedOperation, {
@@ -78,6 +80,6 @@ void reportError(
 
 Future<void> setupDimensions() async {}
 
-Future<void> setupUserApplicationDimensions() async {}
+void setupUserApplicationDimensions() {}
 
 Map<String, dynamic> generateSurveyQueryParameters() => {};

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:devtools_app/src/primitives/math_utils.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_data_models.dart';
@@ -17,10 +17,10 @@ void main() {
   group('FlexLayoutProperties tests', () {
     Future<FlexLayoutProperties> toFlexLayoutProperties(
       Flex flex, {
-      @required WidgetTester tester,
+      required WidgetTester tester,
       int subtreeDepth = 2,
-      double width,
-      double height,
+      double? width,
+      double? height,
     }) async {
       final wrappedWidget = SizedBox(
         width: width,
@@ -75,10 +75,12 @@ void main() {
     testWidgets(
         'displayChildren is the same as children when start is top left',
         (tester) async {
-      final widget = Column(children: [
-        const SizedBox(),
-        Container(),
-      ]);
+      final widget = Column(
+        children: [
+          const SizedBox(),
+          Container(),
+        ],
+      );
       final properties = await toFlexLayoutProperties(widget, tester: tester);
       expect(properties.startIsTopLeft, true);
       expect(properties.displayChildren[0].description, 'SizedBox');
@@ -106,7 +108,8 @@ void main() {
       double maxSizeAvailable(Axis axis) => maxMainAxisDimension;
 
       List<RenderProperties> childrenRenderProperties(
-              FlexLayoutProperties properties) =>
+        FlexLayoutProperties properties,
+      ) =>
           properties.childrenRenderProperties(
             smallestRenderWidth: minRenderWidth,
             largestRenderWidth: defaultMaxRenderWidth,
@@ -215,8 +218,8 @@ void main() {
           'when the start is not top left, render properties should be equals to its mirrored version',
           (tester) async {
         Row buildWidget({
-          bool flipMainAxis,
-          MainAxisAlignment mainAxisAlignment,
+          required bool flipMainAxis,
+          required MainAxisAlignment mainAxisAlignment,
         }) =>
             Row(
               textDirection:
@@ -247,7 +250,9 @@ void main() {
             ),
           );
           expect(
-              originalWidgetRenderProperties, mirroredWidgetRenderProperties);
+            originalWidgetRenderProperties,
+            mirroredWidgetRenderProperties,
+          );
         }
       });
     });
@@ -328,16 +333,22 @@ void main() {
         final sizedBoxDiagnosticsNode =
             constrainedBoxDiagnosticsNode.childrenNow.first;
         final layoutProperties = LayoutProperties(sizedBoxDiagnosticsNode);
-        expect(layoutProperties.describeHeightConstraints(),
-            '$minHeight<=h<=$maxHeight');
-        expect(layoutProperties.describeWidthConstraints(),
-            '$minWidth<=w<=$maxWidth');
+        expect(
+          layoutProperties.describeHeightConstraints(),
+          '$minHeight<=h<=$maxHeight',
+        );
+        expect(
+          layoutProperties.describeWidthConstraints(),
+          '$minWidth<=w<=$maxWidth',
+        );
       });
 
       testWidgets('unconstrained width', (tester) async {
-        final widget = Row(children: [
-          Container(),
-        ]);
+        final widget = Row(
+          children: [
+            Container(),
+          ],
+        );
         final rowDiagnosticsNode =
             await widgetToLayoutExplorerRemoteDiagnosticsNode(
           widget: widget,
@@ -345,14 +356,18 @@ void main() {
         );
         final containerDiagnosticsNode = rowDiagnosticsNode.childrenNow.first;
         final layoutProperties = LayoutProperties(containerDiagnosticsNode);
-        expect(layoutProperties.describeWidthConstraints(),
-            'width is unconstrained');
+        expect(
+          layoutProperties.describeWidthConstraints(),
+          'width is unconstrained',
+        );
       });
 
       testWidgets('unconstrained height', (tester) async {
-        final widget = Column(children: [
-          Container(),
-        ]);
+        final widget = Column(
+          children: [
+            Container(),
+          ],
+        );
         final columnDiagnosticsNode =
             await widgetToLayoutExplorerRemoteDiagnosticsNode(
           widget: widget,
@@ -376,7 +391,9 @@ void main() {
         child: Container(),
       );
       final sizedBoxNode = await widgetToLayoutExplorerRemoteDiagnosticsNode(
-          widget: widget, tester: tester);
+        widget: widget,
+        tester: tester,
+      );
       final containerNode = sizedBoxNode.childrenNow.first;
       final layoutProperties = LayoutProperties(containerNode);
       expect(layoutProperties.describeHeight(), 'h=$height');

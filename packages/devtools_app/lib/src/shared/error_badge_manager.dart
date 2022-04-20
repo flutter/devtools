@@ -32,7 +32,8 @@ class ErrorBadgeManager extends DisposableController
   final _activeErrors =
       <String, ValueNotifier<LinkedHashMap<String, DevToolsError>>>{
     InspectorScreen.id: ValueNotifier<LinkedHashMap<String, DevToolsError>>(
-        LinkedHashMap<String, DevToolsError>()),
+      LinkedHashMap<String, DevToolsError>(),
+    ),
   };
 
   void vmServiceOpened(VmServiceWrapper service) {
@@ -45,11 +46,13 @@ class ErrorBadgeManager extends DisposableController
 
     // Log Flutter extension events.
     autoDisposeStreamSubscription(
-        service.onExtensionEventWithHistory.listen(_handleExtensionEvent));
+      service.onExtensionEventWithHistory.listen(_handleExtensionEvent),
+    );
 
     // Log stderr events.
     autoDisposeStreamSubscription(
-        service.onStderrEventWithHistory.listen(_handleStdErr));
+      service.onStderrEventWithHistory.listen(_handleStdErr),
+    );
   }
 
   void _handleExtensionEvent(Event e) async {
@@ -70,14 +73,14 @@ class ErrorBadgeManager extends DisposableController
     final node =
         RemoteDiagnosticsNode(error.extensionData!.data, null, false, null);
 
-    final errorSummaryNode = node.inlineProperties
-        ?.firstWhereOrNull((p) => p.type == 'ErrorSummary');
+    final errorSummaryNode =
+        node.inlineProperties.firstWhereOrNull((p) => p.type == 'ErrorSummary');
     final errorMessage = errorSummaryNode?.description;
     if (errorMessage == null) {
       return null;
     }
 
-    final devToolsUrlNode = node.inlineProperties?.firstWhereOrNull(
+    final devToolsUrlNode = node.inlineProperties.firstWhereOrNull(
       (p) =>
           p.type == 'DevToolsDeepLinkProperty' &&
           p.getStringMember('value') != null,
@@ -123,10 +126,12 @@ class ErrorBadgeManager extends DisposableController
   }
 
   ValueListenable<LinkedHashMap<String, DevToolsError>> erroredItemsForPage(
-      String screenId) {
+    String screenId,
+  ) {
     return _activeErrors[screenId] ??
         FixedValueListenable<LinkedHashMap<String, DevToolsError>>(
-            LinkedHashMap<String, DevToolsError>());
+          LinkedHashMap<String, DevToolsError>(),
+        );
   }
 
   ValueNotifier<int>? _errorCountNotifier(String screenId) {

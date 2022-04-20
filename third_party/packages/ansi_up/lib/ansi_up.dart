@@ -48,15 +48,23 @@ class AnsiUp {
     for (var r = 0; r < 6; ++r) {
       for (var g = 0; g < 6; ++g) {
         for (var b = 0; b < 6; ++b) {
-          palette256.add(AnsiUpColor(
-              rgb: [levels[r], levels[g], levels[b]], className: 'truecolor'));
+          palette256.add(
+            AnsiUpColor(
+              rgb: [levels[r], levels[g], levels[b]],
+              className: 'truecolor',
+            ),
+          );
         }
       }
     }
     var greyLevel = 8;
     for (var i = 0; i < 24; ++i, greyLevel += 10) {
-      palette256.add(AnsiUpColor(
-          rgb: [greyLevel, greyLevel, greyLevel], className: 'truecolor'));
+      palette256.add(
+        AnsiUpColor(
+          rgb: [greyLevel, greyLevel, greyLevel],
+          className: 'truecolor',
+        ),
+      );
     }
   }
 
@@ -92,34 +100,36 @@ class AnsiUp {
         return pkt;
       }
       if (nextChar == '[') {
-        _csiRegex ??= _cleanAndConvertToRegex('\n                        '
-            '^                           # beginning of line'
-            '\n                                                    #'
-            '\n                                                    '
-            '# First attempt'
-            '\n                        '
-            '(?:                         # legal sequence'
-            '\n                          '
-            '\\x1b\\[                      # CSI'
-            '\n                          '
-            '([\\x3c-\\x3f]?)              # private-mode char'
-            '\n                          '
-            '([\\d;]*)                    # any digits or semicolons'
-            '\n                          '
-            '([\\x20-\\x2f]?               # an intermediate modifier'
-            '\n                          '
-            '[\\x40-\\x7e])                # the command'
-            '\n                        )\n                        '
-            '|                           # alternate (second attempt)'
-            '\n                        '
-            '(?:                         # illegal sequence'
-            '\n                          '
-            '\\x1b\\[                      # CSI'
-            '\n                          '
-            '[\\x20-\\x7e]*                # anything legal'
-            '\n                          '
-            '([\\x00-\\x1f:])              # anything illegal'
-            '\n                        )\n                    ');
+        _csiRegex ??= _cleanAndConvertToRegex(
+          '\n                        '
+          '^                           # beginning of line'
+          '\n                                                    #'
+          '\n                                                    '
+          '# First attempt'
+          '\n                        '
+          '(?:                         # legal sequence'
+          '\n                          '
+          '\\x1b\\[                      # CSI'
+          '\n                          '
+          '([\\x3c-\\x3f]?)              # private-mode char'
+          '\n                          '
+          '([\\d;]*)                    # any digits or semicolons'
+          '\n                          '
+          '([\\x20-\\x2f]?               # an intermediate modifier'
+          '\n                          '
+          '[\\x40-\\x7e])                # the command'
+          '\n                        )\n                        '
+          '|                           # alternate (second attempt)'
+          '\n                        '
+          '(?:                         # illegal sequence'
+          '\n                          '
+          '\\x1b\\[                      # CSI'
+          '\n                          '
+          '[\\x20-\\x7e]*                # anything legal'
+          '\n                          '
+          '([\\x00-\\x1f:])              # anything illegal'
+          '\n                        )\n                    ',
+        );
         final match = _csiRegex!.firstMatch(_text);
         if (match == null) {
           pkt.kind = PacketKind.Incomplete;
@@ -304,11 +314,11 @@ enum PacketKind {
 }
 
 class _TextPacket {
-  _TextPacket({required this.kind, this.text = '', this.url = ''});
+  _TextPacket({required this.kind});
 
   PacketKind kind;
-  String text;
-  final String url;
+  String text = '';
+  String url = '';
 }
 
 String _colorToCss(List/*<int>*/ rgb) => 'rgb(${rgb.join(',')})';

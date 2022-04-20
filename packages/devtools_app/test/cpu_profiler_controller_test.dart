@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profile_controller.dart';
@@ -11,18 +11,20 @@ import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:vm_service/vm_service.dart';
 
 import 'test_data/cpu_profile_test_data.dart';
 
 void main() {
   group('CpuProfileController', () {
-    CpuProfilerController controller;
+    late CpuProfilerController controller;
     FakeServiceManager fakeServiceManager;
 
     setUp(() {
       fakeServiceManager = FakeServiceManager(
         service: FakeServiceManager.createFakeService(
-          cpuProfileData: CpuProfileData.parse(goldenCpuProfileDataJson),
+          cpuSamples: CpuSamples.parse(goldenCpuSamplesJson),
+          resolvedUriMap: goldenResolvedUriMap,
         ),
       );
       setGlobal(ServiceConnectionManager, fakeServiceManager);
@@ -82,8 +84,8 @@ void main() {
       );
       final originalData = controller.cpuProfileStore.lookupProfile(
         label: CpuProfilerController.userTagNone,
-      );
-      final filteredData = controller.dataNotifier.value;
+      )!;
+      final filteredData = controller.dataNotifier.value!;
       expect(originalData.stackFrames.values.length, equals(17));
       expect(filteredData.stackFrames.values.length, equals(12));
 
@@ -104,32 +106,42 @@ void main() {
 
       controller.toggleFilters[0].enabled.value = true;
       expect(
-          controller.generateToggleFilterSuffix(), equals('Hide Native code'));
+        controller.generateToggleFilterSuffix(),
+        equals('Hide Native code'),
+      );
 
       controller.toggleFilters[1].enabled.value = true;
-      expect(controller.generateToggleFilterSuffix(),
-          equals('Hide Native code,Hide core Dart libraries'));
+      expect(
+        controller.generateToggleFilterSuffix(),
+        equals('Hide Native code,Hide core Dart libraries'),
+      );
 
       controller.toggleFilters[2].enabled.value = true;
       expect(
-          controller.generateToggleFilterSuffix(),
-          equals(
-              'Hide Native code,Hide core Dart libraries,Hide core Flutter libraries'));
+        controller.generateToggleFilterSuffix(),
+        equals(
+          'Hide Native code,Hide core Dart libraries,Hide core Flutter libraries',
+        ),
+      );
 
       controller.toggleFilters[1].enabled.value = false;
-      expect(controller.generateToggleFilterSuffix(),
-          equals('Hide Native code,Hide core Flutter libraries'));
+      expect(
+        controller.generateToggleFilterSuffix(),
+        equals('Hide Native code,Hide core Flutter libraries'),
+      );
     });
 
     test('selectCpuStackFrame', () async {
+      final dataNotifierValue = controller.dataNotifier.value!;
+
       expect(
-        controller.dataNotifier.value.selectedStackFrame,
+        dataNotifierValue.selectedStackFrame,
         isNull,
       );
       expect(controller.selectedCpuStackFrameNotifier.value, isNull);
       controller.selectCpuStackFrame(testStackFrame);
       expect(
-        controller.dataNotifier.value.selectedStackFrame,
+        dataNotifierValue.selectedStackFrame,
         equals(testStackFrame),
       );
       expect(
@@ -154,7 +166,9 @@ void main() {
         processId: 'test',
       );
       expect(
-          controller.dataNotifier.value.stackFrames.values.length, equals(17));
+        controller.dataNotifier.value!.stackFrames.values.length,
+        equals(17),
+      );
 
       // Match on name.
       expect(controller.matchesForSearch('').length, equals(0));
@@ -170,7 +184,9 @@ void main() {
 
       // Match with RegExp.
       expect(
-          controller.matchesForSearch('rendering/.*\.dart').length, equals(7));
+        controller.matchesForSearch('rendering/.*\.dart').length,
+        equals(7),
+      );
       expect(controller.matchesForSearch('RENDER.*\.paint').length, equals(6));
     });
 
@@ -186,20 +202,22 @@ void main() {
         extentMicros: 100,
         processId: 'test',
       );
-      expect(
-          controller.dataNotifier.value.stackFrames.values.length, equals(17));
+
+      final dataNotifierValue = controller.dataNotifier.value!;
+
+      expect(dataNotifierValue.stackFrames.values.length, equals(17));
 
       controller.search = 'render';
       var matches = controller.searchMatches.value;
       verifyIsSearchMatchForTreeData(
-        controller.dataNotifier.value.stackFrames.values.toList(),
+        dataNotifierValue.stackFrames.values.toList(),
         matches,
       );
 
       controller.search = 'THREAD';
       matches = controller.searchMatches.value;
       verifyIsSearchMatchForTreeData(
-        controller.dataNotifier.value.stackFrames.values.toList(),
+        dataNotifierValue.stackFrames.values.toList(),
         matches,
       );
     });
@@ -221,12 +239,15 @@ void main() {
         storeAsUserTagNone: true,
       );
 
+      final dataNotifierValue = controller.dataNotifier.value!;
+
       expect(
-          controller.dataNotifier.value.cpuProfileRoot.profileMetaData.time
-              .duration.inMicroseconds,
-          equals(250));
+        dataNotifierValue
+            .cpuProfileRoot.profileMetaData.time!.duration.inMicroseconds,
+        equals(250),
+      );
       expect(
-        controller.dataNotifier.value.cpuProfileRoot.toStringDeep(),
+        dataNotifierValue.cpuProfileRoot.profileAsString(),
         equals(
           '''
   all - children: 1 - excl: 0 - incl: 5
@@ -242,7 +263,7 @@ void main() {
 
       await controller.loadDataWithTag('userTagA');
       expect(
-        controller.dataNotifier.value.cpuProfileRoot.toStringDeep(),
+        controller.dataNotifier.value!.cpuProfileRoot.profileAsString(),
         equals(
           '''
   all - children: 1 - excl: 0 - incl: 2
@@ -256,7 +277,7 @@ void main() {
 
       await controller.loadDataWithTag('userTagB');
       expect(
-        controller.dataNotifier.value.cpuProfileRoot.toStringDeep(),
+        controller.dataNotifier.value!.cpuProfileRoot.profileAsString(),
         equals(
           '''
   all - children: 1 - excl: 0 - incl: 1
@@ -269,7 +290,7 @@ void main() {
 
       await controller.loadDataWithTag('userTagC');
       expect(
-        controller.dataNotifier.value.cpuProfileRoot.toStringDeep(),
+        controller.dataNotifier.value!.cpuProfileRoot.profileAsString(),
         equals(
           '''
   all - children: 1 - excl: 0 - incl: 2
@@ -294,12 +315,13 @@ void main() {
         storeAsUserTagNone: true,
       );
 
+      final cpuProfileRoot = controller.dataNotifier.value!.cpuProfileRoot;
       expect(
-          controller.dataNotifier.value.cpuProfileRoot.profileMetaData.time
-              .duration.inMicroseconds,
-          equals(250));
+        cpuProfileRoot.profileMetaData.time!.duration.inMicroseconds,
+        equals(250),
+      );
       expect(
-        controller.dataNotifier.value.cpuProfileRoot.toStringDeep(),
+        cpuProfileRoot.profileAsString(),
         equals(
           '''
   all - children: 1 - excl: 0 - incl: 5
@@ -315,7 +337,7 @@ void main() {
 
       await controller.loadDataWithTag('userTagA');
       expect(
-        controller.dataNotifier.value.cpuProfileRoot.toStringDeep(),
+        controller.dataNotifier.value!.cpuProfileRoot.profileAsString(),
         equals(
           '''
   all - children: 2 - excl: 0 - incl: 2
@@ -327,7 +349,7 @@ void main() {
 
       await controller.loadDataWithTag('userTagB');
       expect(
-        controller.dataNotifier.value.cpuProfileRoot.toStringDeep(),
+        controller.dataNotifier.value!.cpuProfileRoot.profileAsString(),
         equals(
           '''
   all - children: 1 - excl: 0 - incl: 1
@@ -338,7 +360,7 @@ void main() {
 
       await controller.loadDataWithTag('userTagC');
       expect(
-        controller.dataNotifier.value.cpuProfileRoot.toStringDeep(),
+        controller.dataNotifier.value!.cpuProfileRoot.profileAsString(),
         equals(
           '''
   all - children: 1 - excl: 0 - incl: 2
@@ -362,15 +384,24 @@ void main() {
 
     test('disposes', () {
       controller.dispose();
-      expect(() {
-        controller.dataNotifier.addListener(() {});
-      }, throwsA(anything));
-      expect(() {
-        controller.selectedCpuStackFrameNotifier.addListener(() {});
-      }, throwsA(anything));
-      expect(() {
-        controller.processingNotifier.addListener(() {});
-      }, throwsA(anything));
+      expect(
+        () {
+          controller.dataNotifier.addListener(() {});
+        },
+        throwsA(anything),
+      );
+      expect(
+        () {
+          controller.selectedCpuStackFrameNotifier.addListener(() {});
+        },
+        throwsA(anything),
+      );
+      expect(
+        () {
+          controller.processingNotifier.addListener(() {});
+        },
+        throwsA(anything),
+      );
     });
   });
 }

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
@@ -22,12 +20,12 @@ part 'instance_details.freezed.dart';
 typedef Setter = Future<void> Function(String newValue);
 
 @freezed
-abstract class PathToProperty with _$PathToProperty {
+class PathToProperty with _$PathToProperty {
   const factory PathToProperty.listIndex(int index) = ListIndexPath;
 
   // TODO test that mutating a Map does not collapse previously expanded keys
   const factory PathToProperty.mapKey({
-    @required @nullable String ref,
+    required String? ref,
   }) = MapKeyPath;
 
   /// Must not depend on [InstanceRef] and its ID, as they may change across
@@ -39,13 +37,13 @@ abstract class PathToProperty with _$PathToProperty {
   /// an object can have multiple properties with the same name (private properties
   /// defined in different libraries)
   const factory PathToProperty.objectProperty({
-    @required String name,
+    required String name,
 
     /// Path to the class/mixin that defined this property
-    @required String ownerUri,
+    required String ownerUri,
 
     /// Name of the class/mixin that defined this property
-    @required String ownerName,
+    required String ownerName,
   }) = PropertyPath;
 
   factory PathToProperty.fromObjectField(ObjectField field) {
@@ -58,21 +56,21 @@ abstract class PathToProperty with _$PathToProperty {
 }
 
 @freezed
-abstract class ObjectField with _$ObjectField {
+class ObjectField with _$ObjectField {
   factory ObjectField({
-    @required String name,
-    @required bool isFinal,
-    @required String ownerName,
-    @required String ownerUri,
-    @required @nullable Result<InstanceRef> ref,
+    required String name,
+    required bool isFinal,
+    required String ownerName,
+    required String ownerUri,
+    required Result<InstanceRef> ref,
 
     /// An [EvalOnDartLibrary] that can access this field from the owner object
-    @required EvalOnDartLibrary eval,
+    required EvalOnDartLibrary eval,
 
     /// Whether this field was defined by the inspected app or by one of its dependencies
     ///
     /// This is used by the UI to hide variables that are not useful for the user.
-    @required bool isDefinedByDependency,
+    required bool isDefinedByDependency,
   }) = _ObjectField;
 
   ObjectField._();
@@ -81,65 +79,63 @@ abstract class ObjectField with _$ObjectField {
 }
 
 @freezed
-abstract class InstanceDetails with _$InstanceDetails {
+class InstanceDetails with _$InstanceDetails {
   InstanceDetails._();
 
-  @Assert('instanceRefId == null')
   factory InstanceDetails.nill({
-    String instanceRefId,
-    @required @nullable Setter setter,
+    required Setter? setter,
   }) = NullInstance;
 
   factory InstanceDetails.boolean(
     String displayString, {
-    @required String instanceRefId,
-    @required @nullable Setter setter,
+    required String instanceRefId,
+    required Setter? setter,
   }) = BoolInstance;
 
   factory InstanceDetails.number(
     String displayString, {
-    @required String instanceRefId,
-    @required @nullable Setter setter,
+    required String instanceRefId,
+    required Setter? setter,
   }) = NumInstance;
 
   factory InstanceDetails.string(
     String displayString, {
-    @required String instanceRefId,
-    @required @nullable Setter setter,
+    required String instanceRefId,
+    required Setter? setter,
   }) = StringInstance;
 
   factory InstanceDetails.map(
     List<InstanceDetails> keys, {
-    @required int hash,
-    @required String instanceRefId,
-    @required @nullable Setter setter,
+    required int hash,
+    required String instanceRefId,
+    required Setter? setter,
   }) = MapInstance;
 
   factory InstanceDetails.list({
-    @required @nullable int length,
-    @required int hash,
-    @required String instanceRefId,
-    @required @nullable Setter setter,
+    required int length,
+    required int hash,
+    required String instanceRefId,
+    required Setter? setter,
   }) = ListInstance;
 
   factory InstanceDetails.object(
     List<ObjectField> fields, {
-    @required String type,
-    @required int hash,
-    @required String instanceRefId,
-    @required @nullable Setter setter,
+    required String type,
+    required int hash,
+    required String instanceRefId,
+    required Setter? setter,
 
     /// An [EvalOnDartLibrary] associated with the library of this object
     ///
     /// This allows to edit private properties.
-    @required EvalOnDartLibrary evalForInstance,
+    required EvalOnDartLibrary evalForInstance,
   }) = ObjectInstance;
 
   factory InstanceDetails.enumeration({
-    @required String type,
-    @required String value,
-    @required @nullable Setter setter,
-    @required String instanceRefId,
+    required String type,
+    required String value,
+    required Setter? setter,
+    required String instanceRefId,
   }) = EnumInstance;
 
   bool get isExpandable {
@@ -156,15 +152,29 @@ abstract class InstanceDetails with _$InstanceDetails {
       object: (instance) => instance.fields.isNotEmpty,
     );
   }
+
+  // Since `nil` doesn't have those properties, we are manually exposing them
+  String? get instanceRefId {
+    return map(
+      nill: (_) => null,
+      boolean: (a) => a.instanceRefId,
+      number: (a) => a.instanceRefId,
+      string: (a) => a.instanceRefId,
+      map: (a) => a.instanceRefId,
+      list: (a) => a.instanceRefId,
+      object: (a) => a.instanceRefId,
+      enumeration: (a) => a.instanceRefId,
+    );
+  }
 }
 
 /// The path to visit child elements of an [Instance] or providers from `provider`/`riverpod`.
 @freezed
-abstract class InstancePath with _$InstancePath {
+class InstancePath with _$InstancePath {
   const InstancePath._();
 
   const factory InstancePath.fromInstanceId(
-    @nullable String instanceId, {
+    String instanceId, {
     @Default([]) List<PathToProperty> pathToProperty,
   }) = _InstancePathFromInstanceId;
 
@@ -175,7 +185,7 @@ abstract class InstancePath with _$InstancePath {
 
   InstancePath get root => copyWith(pathToProperty: []);
 
-  InstancePath get parent {
+  InstancePath? get parent {
     if (pathToProperty.isEmpty) return null;
 
     return copyWith(

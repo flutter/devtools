@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:devtools_app/src/ui/search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -15,7 +13,7 @@ void main() {
     });
 
     // [caretPosition] if null (default) TextSelection is set to EOL.
-    EditingParts testEdit(String editing, [int caretPosition]) {
+    EditingParts testEdit(String editing, [int? caretPosition]) {
       final position = caretPosition == null ? editing.length : caretPosition;
       return AutoCompleteSearchControllerMixin.activeEditingParts(
         editing,
@@ -28,9 +26,12 @@ void main() {
     const debug = false;
 
     void outputResult(int num, EditingParts editingParts) {
+      // ignore: dead_code
       if (debug) {
-        print('$num. left=${editingParts.leftSide}, '
-            'active=${editingParts.activeWord}');
+        print(
+          '$num. left=${editingParts.leftSide}, '
+          'active=${editingParts.activeWord}',
+        );
       }
     }
 
@@ -171,7 +172,8 @@ void main() {
       expect(parts.isField, isFalse);
 
       parts = testEdit(
-          'baseObject.close + 1000/2000 + chart.traces[addOne,addTwo]');
+        'baseObject.close + 1000/2000 + chart.traces[addOne,addTwo]',
+      );
       outputResult(18, parts);
       expect(parts.activeWord.isEmpty, isTrue);
       expect(
@@ -182,7 +184,8 @@ void main() {
       expect(parts.isField, isFalse);
 
       parts = testEdit(
-          'baseObject.close + 1000/2000 + chart.traces[addOne,addTwo].xNam');
+        'baseObject.close + 1000/2000 + chart.traces[addOne,addTwo].xNam',
+      );
       outputResult(19, parts);
       expect(parts.activeWord, 'xNam');
       expect(
@@ -193,7 +196,8 @@ void main() {
       expect(parts.isField, isTrue);
 
       parts = testEdit(
-          'baseObject.close + 1000/2000 + chart.traces[10].yName + compute');
+        'baseObject.close + 1000/2000 + chart.traces[10].yName + compute',
+      );
       outputResult(20, parts);
       expect(parts.activeWord, 'compute');
       expect(
@@ -204,7 +208,8 @@ void main() {
       expect(parts.isField, isFalse);
 
       parts = testEdit(
-          'baseObject.close + 1000/2000 + chart.traces[10].yName + compute()');
+        'baseObject.close + 1000/2000 + chart.traces[10].yName + compute()',
+      );
       outputResult(21, parts);
       expect(parts.activeWord.isEmpty, isTrue);
       expect(
@@ -227,7 +232,8 @@ void main() {
       expect(parts.isField, isFalse);
 
       parts = testEdit(
-          'baseObject.close + 1000/2000 + chart.traces[10].yName + compute(foo,bar');
+        'baseObject.close + 1000/2000 + chart.traces[10].yName + compute(foo,bar',
+      );
       outputResult(23, parts);
       expect(parts.activeWord, 'bar');
       expect(
@@ -238,7 +244,8 @@ void main() {
       expect(parts.isField, isFalse);
 
       parts = testEdit(
-          'baseObject.close + 1000/2000 + chart.traces[10].yName + compute(foo,bar)');
+        'baseObject.close + 1000/2000 + chart.traces[10].yName + compute(foo,bar)',
+      );
       outputResult(24, parts);
       expect(parts.activeWord.isEmpty, isTrue);
       expect(
@@ -249,7 +256,8 @@ void main() {
       expect(parts.isField, isFalse);
 
       parts = testEdit(
-          'baseObject.close + 1000/2000 + chart.traces[10].yName + compute() + foo');
+        'baseObject.close + 1000/2000 + chart.traces[10].yName + compute() + foo',
+      );
       outputResult(25, parts);
       expect(parts.activeWord, 'foo');
       expect(
@@ -260,7 +268,8 @@ void main() {
       expect(parts.isField, isFalse);
 
       parts = testEdit(
-          'baseObject.close + 1000/2000 + chart.traces[10].yName + compute() + foobar.');
+        'baseObject.close + 1000/2000 + chart.traces[10].yName + compute() + foobar.',
+      );
       outputResult(26, parts);
       expect(parts.activeWord.isEmpty, isTrue);
       expect(
@@ -271,7 +280,8 @@ void main() {
       expect(parts.isField, isTrue);
 
       parts = testEdit(
-          'baseObject.close + 1000/2000 + chart.traces[10].yName + compute() + foobar.length');
+        'baseObject.close + 1000/2000 + chart.traces[10].yName + compute() + foobar.length',
+      );
       outputResult(27, parts);
       expect(parts.activeWord, 'length');
       expect(
