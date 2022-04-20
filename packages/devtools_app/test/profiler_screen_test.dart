@@ -22,7 +22,7 @@ import 'test_data/cpu_profile_test_data.dart';
 
 void main() {
   late ProfilerScreen screen;
-  FakeServiceManager? fakeServiceManager;
+  late FakeServiceManager fakeServiceManager;
 
   const windowSize = Size(2000.0, 1000.0);
 
@@ -33,13 +33,13 @@ void main() {
           cpuSamples: CpuSamples.parse(goldenCpuSamplesJson),
         ),
       );
-      when(fakeServiceManager!.connectedApp!.isDartWebAppNow).thenReturn(false);
-      when(fakeServiceManager!.connectedApp!.isDebugFlutterAppNow)
+      when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
+      when(fakeServiceManager.connectedApp!.isDebugFlutterAppNow)
           .thenReturn(false);
-      when(fakeServiceManager!.connectedApp!.isFlutterNativeAppNow)
+      when(fakeServiceManager.connectedApp!.isFlutterNativeAppNow)
           .thenReturn(false);
-      when(fakeServiceManager!.connectedApp!.isDartCliAppNow).thenReturn(true);
-      when(fakeServiceManager!.errorBadgeManager.errorCountNotifier('profiler'))
+      when(fakeServiceManager.connectedApp!.isDartCliAppNow).thenReturn(true);
+      when(fakeServiceManager.errorBadgeManager.errorCountNotifier('profiler'))
           .thenReturn(ValueNotifier<int>(0));
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(OfflineModeController, OfflineModeController());
@@ -55,7 +55,7 @@ void main() {
       expect(find.byType(StopRecordingButton), findsOneWidget);
       expect(find.byType(ClearButton), findsOneWidget);
       expect(find.text('Load all CPU samples'), findsOneWidget);
-      if (fakeServiceManager!.connectedApp!.isFlutterNativeAppNow) {
+      if (fakeServiceManager.connectedApp!.isFlutterNativeAppNow) {
         expect(find.text('Profile app start up'), findsOneWidget);
       }
       expect(find.byType(ProfileGranularityDropdown), findsOneWidget);
@@ -101,7 +101,7 @@ void main() {
     testWidgetsWithWindowSize(
         'builds base state for Flutter native app', windowSize,
         (WidgetTester tester) async {
-      when(fakeServiceManager!.connectedApp!.isFlutterNativeAppNow)
+      when(fakeServiceManager.connectedApp!.isFlutterNativeAppNow)
           .thenReturn(true);
       const perfScreenBody = ProfilerScreenBody();
       await pumpProfilerScreenBody(tester, perfScreenBody);

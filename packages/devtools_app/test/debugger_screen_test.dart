@@ -26,9 +26,9 @@ import 'package:vm_service/vm_service.dart';
 
 void main() {
   late DebuggerScreen screen;
-  FakeServiceManager? fakeServiceManager;
-  MockDebuggerController? debuggerController;
-  MockScriptManager? scriptManager;
+  late FakeServiceManager fakeServiceManager;
+  late MockDebuggerController debuggerController;
+  late MockScriptManager scriptManager;
 
   const windowSize = Size(4000.0, 4000.0);
   const smallWindowSize = Size(1000.0, 1000.0);
@@ -36,18 +36,18 @@ void main() {
   setUp(() {
     fakeServiceManager = FakeServiceManager();
     scriptManager = MockScriptManager();
-    when(fakeServiceManager!.connectedApp!.isProfileBuildNow).thenReturn(false);
-    when(fakeServiceManager!.connectedApp!.isDartWebAppNow).thenReturn(false);
+    when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
+    when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
     setGlobal(ServiceConnectionManager, fakeServiceManager);
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(ScriptManager, scriptManager);
-    fakeServiceManager!.consoleService.ensureServiceInitialized();
+    fakeServiceManager.consoleService.ensureServiceInitialized();
   });
 
   group('DebuggerScreen', () {
     Future<void> pumpDebuggerScreen(
       WidgetTester tester,
-      DebuggerController? controller,
+      DebuggerController controller,
     ) async {
       await tester.pumpWidget(
         wrapWithControllers(
@@ -59,7 +59,7 @@ void main() {
 
     Future<void> pumpConsole(
       WidgetTester tester,
-      DebuggerController? controller,
+      DebuggerController controller,
     ) async {
       await tester.pumpWidget(
         wrapWithControllers(
@@ -75,7 +75,7 @@ void main() {
     }
 
     setUp(() {
-      when(fakeServiceManager!.errorBadgeManager.errorCountNotifier('debugger'))
+      when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
           .thenReturn(ValueNotifier<int>(0));
 
       screen = const DebuggerScreen();
@@ -126,7 +126,7 @@ void main() {
       });
 
       group('Clipboard', () {
-        String? _clipboardContents = '';
+        String _clipboardContents = '';
         final _expected = _stdio.join('\n');
 
         setUp(() {
@@ -177,17 +177,17 @@ void main() {
       setUp(() {
         final scriptsHistory = ScriptsHistory();
         scriptsHistory.pushEntry(mockScript!);
-        when(debuggerController!.currentScriptRef)
+        when(debuggerController.currentScriptRef)
             .thenReturn(ValueNotifier(mockScriptRef));
-        when(debuggerController!.currentParsedScript)
+        when(debuggerController.currentParsedScript)
             .thenReturn(ValueNotifier(mockParsedScript));
-        when(debuggerController!.showSearchInFileField)
+        when(debuggerController.showSearchInFileField)
             .thenReturn(ValueNotifier(false));
-        when(debuggerController!.showFileOpener)
+        when(debuggerController.showFileOpener)
             .thenReturn(ValueNotifier(false));
-        when(debuggerController!.scriptsHistory).thenReturn(scriptsHistory);
-        when(debuggerController!.searchMatches).thenReturn(ValueNotifier([]));
-        when(debuggerController!.activeSearchMatch)
+        when(debuggerController.scriptsHistory).thenReturn(scriptsHistory);
+        when(debuggerController.searchMatches).thenReturn(ValueNotifier([]));
+        when(debuggerController.activeSearchMatch)
             .thenReturn(ValueNotifier(null));
       });
 
@@ -200,7 +200,7 @@ void main() {
           // TODO(elliette): https://github.com/flutter/flutter/pull/88152 fixes
           // this so that forcing a scroll event is no longer necessary. Remove
           // once the change is in the stable release.
-          debuggerController!.showScriptLocation(
+          debuggerController.showScriptLocation(
             ScriptLocation(
               mockScriptRef,
               location: const SourcePosition(line: 50, column: 50),
@@ -232,13 +232,13 @@ void main() {
         ScriptRef(uri: 'package:/test/script.dart', id: 'test-script')
       ];
 
-      when(debuggerController!.programExplorerController.selectedNodeIndex)
+      when(debuggerController.programExplorerController.selectedNodeIndex)
           .thenReturn(ValueNotifier(0));
-      when(scriptManager!.sortedScripts).thenReturn(ValueNotifier(scripts));
-      when(debuggerController!.showFileOpener).thenReturn(ValueNotifier(false));
+      when(scriptManager.sortedScripts).thenReturn(ValueNotifier(scripts));
+      when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
 
       // File Explorer view is hidden
-      when(debuggerController!.fileExplorerVisible)
+      when(debuggerController.fileExplorerVisible)
           .thenReturn(ValueNotifier(false));
       await pumpDebuggerScreen(tester, debuggerController);
       expect(find.text('File Explorer'), findsOneWidget);
@@ -250,25 +250,25 @@ void main() {
         ScriptRef(uri: 'package:test/script.dart', id: 'test-script')
       ];
 
-      when(debuggerController!.programExplorerController.selectedNodeIndex)
+      when(debuggerController.programExplorerController.selectedNodeIndex)
           .thenReturn(ValueNotifier(0));
-      when(scriptManager!.sortedScripts).thenReturn(ValueNotifier(scripts));
-      when(debuggerController!.programExplorerController.rootObjectNodes)
+      when(scriptManager.sortedScripts).thenReturn(ValueNotifier(scripts));
+      when(debuggerController.programExplorerController.rootObjectNodes)
           .thenReturn(
         ValueNotifier(
           [
             VMServiceObjectNode(
-              debuggerController!.programExplorerController,
+              debuggerController.programExplorerController,
               'package:test',
               null,
             ),
           ],
         ),
       );
-      when(debuggerController!.showFileOpener).thenReturn(ValueNotifier(false));
+      when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
 
       // File Explorer view is shown
-      when(debuggerController!.fileExplorerVisible)
+      when(debuggerController.fileExplorerVisible)
           .thenReturn(ValueNotifier(true));
       await pumpDebuggerScreen(tester, debuggerController);
       // One for the button and one for the title of the File Explorer view.
@@ -300,14 +300,14 @@ void main() {
         )
       ];
 
-      when(debuggerController!.breakpoints)
+      when(debuggerController.breakpoints)
           .thenReturn(ValueNotifier(breakpoints));
-      when(debuggerController!.breakpointsWithLocation)
+      when(debuggerController.breakpointsWithLocation)
           .thenReturn(ValueNotifier(breakpointsWithLocation));
 
-      when(scriptManager!.sortedScripts).thenReturn(ValueNotifier([]));
-      when(debuggerController!.scriptLocation).thenReturn(ValueNotifier(null));
-      when(debuggerController!.showFileOpener).thenReturn(ValueNotifier(false));
+      when(scriptManager.sortedScripts).thenReturn(ValueNotifier([]));
+      when(debuggerController.scriptLocation).thenReturn(ValueNotifier(null));
+      when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
 
       await pumpDebuggerScreen(tester, debuggerController);
 
@@ -400,10 +400,10 @@ void main() {
         );
       }).toList();
 
-      when(debuggerController!.stackFramesWithLocation)
+      when(debuggerController.stackFramesWithLocation)
           .thenReturn(ValueNotifier(stackFramesWithLocation));
-      when(debuggerController!.isPaused).thenReturn(ValueNotifier(true));
-      when(debuggerController!.showFileOpener).thenReturn(ValueNotifier(false));
+      when(debuggerController.isPaused).thenReturn(ValueNotifier(true));
+      when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
       await pumpDebuggerScreen(tester, debuggerController);
 
       expect(find.text('Call Stack'), findsOneWidget);
@@ -466,7 +466,7 @@ void main() {
       testWidgetsWithWindowSize(
           'Variables shows items', const Size(1000.0, 4000.0),
           (WidgetTester tester) async {
-        when(debuggerController!.variables).thenReturn(
+        when(debuggerController.variables).thenReturn(
           ValueNotifier(
             [
               buildListVariable(),
@@ -532,7 +532,7 @@ void main() {
           const Size(1000.0, 4000.0), (WidgetTester tester) async {
         final list = buildParentListVariable(length: 380250);
         await buildVariablesTree(list);
-        when(debuggerController!.variables).thenReturn(
+        when(debuggerController.variables).thenReturn(
           ValueNotifier(
             [
               list,
@@ -590,7 +590,7 @@ void main() {
           const Size(1000.0, 4000.0), (WidgetTester tester) async {
         final map = buildParentMapVariable(length: 243621);
         await buildVariablesTree(map);
-        when(debuggerController!.variables).thenReturn(
+        when(debuggerController.variables).thenReturn(
           ValueNotifier(
             [
               map,
@@ -655,7 +655,7 @@ void main() {
 
     testWidgetsWithWindowSize('debugger controls running', windowSize,
         (WidgetTester tester) async {
-      when(debuggerController!.showFileOpener).thenReturn(ValueNotifier(false));
+      when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
       await tester.pumpWidget(
         wrapWithControllers(
           Builder(builder: screen.build),
@@ -667,7 +667,7 @@ void main() {
         find.byWidgetPredicate(createDebuggerButtonPredicate('Pause')),
         findsOneWidget,
       );
-      final DebuggerButton pause = getWidgetFromFinder(
+      final pause = getWidgetFromFinder(
         find.byWidgetPredicate(createDebuggerButtonPredicate('Pause')),
       ) as DebuggerButton;
       expect(pause.onPressed, isNotNull);
@@ -676,7 +676,7 @@ void main() {
         find.byWidgetPredicate(createDebuggerButtonPredicate('Resume')),
         findsOneWidget,
       );
-      final DebuggerButton resume = getWidgetFromFinder(
+      final resume = getWidgetFromFinder(
         find.byWidgetPredicate(createDebuggerButtonPredicate('Resume')),
       ) as DebuggerButton;
       expect(resume.onPressed, isNull);
@@ -684,9 +684,9 @@ void main() {
 
     testWidgetsWithWindowSize('debugger controls paused', windowSize,
         (WidgetTester tester) async {
-      when(debuggerController!.isPaused).thenReturn(ValueNotifier(true));
-      when(debuggerController!.showFileOpener).thenReturn(ValueNotifier(false));
-      when(debuggerController!.stackFramesWithLocation).thenReturn(
+      when(debuggerController.isPaused).thenReturn(ValueNotifier(true));
+      when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
+      when(debuggerController.stackFramesWithLocation).thenReturn(
         ValueNotifier([
           StackFrameAndSourcePosition(
             Frame(
@@ -724,7 +724,7 @@ void main() {
         find.byWidgetPredicate(createDebuggerButtonPredicate('Pause')),
         findsOneWidget,
       );
-      final DebuggerButton pause = getWidgetFromFinder(
+      final pause = getWidgetFromFinder(
         find.byWidgetPredicate(createDebuggerButtonPredicate('Pause')),
       ) as DebuggerButton;
       expect(pause.onPressed, isNull);
@@ -733,7 +733,7 @@ void main() {
         find.byWidgetPredicate(createDebuggerButtonPredicate('Resume')),
         findsOneWidget,
       );
-      final DebuggerButton resume = getWidgetFromFinder(
+      final resume = getWidgetFromFinder(
         find.byWidgetPredicate(createDebuggerButtonPredicate('Resume')),
       ) as DebuggerButton;
       expect(resume.onPressed, isNotNull);
@@ -742,7 +742,7 @@ void main() {
     testWidgetsWithWindowSize(
         'debugger controls break on exceptions', windowSize,
         (WidgetTester tester) async {
-      when(debuggerController!.showFileOpener).thenReturn(ValueNotifier(false));
+      when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
       await tester.pumpWidget(
         wrapWithControllers(
           Builder(builder: screen.build),
@@ -756,7 +756,7 @@ void main() {
   group('FloatingDebuggerControls', () {
     setUp(() {
       debuggerController = MockDebuggerController();
-      when(debuggerController!.isPaused).thenReturn(ValueNotifier<bool>(true));
+      when(debuggerController.isPaused).thenReturn(ValueNotifier<bool>(true));
     });
 
     Future<void> pumpControls(WidgetTester tester) async {
@@ -773,7 +773,7 @@ void main() {
       await pumpControls(tester);
       final animatedOpacityFinder = find.byType(AnimatedOpacity);
       expect(animatedOpacityFinder, findsOneWidget);
-      final AnimatedOpacity animatedOpacity =
+      final animatedOpacity =
           animatedOpacityFinder.evaluate().first.widget as AnimatedOpacity;
       expect(animatedOpacity.opacity, equals(1.0));
       expect(
@@ -791,7 +791,7 @@ void main() {
         return Future.value(Success());
       }
 
-      when(debuggerController!.resume()).thenAnswer((_) => resume());
+      when(debuggerController.resume()).thenAnswer((_) => resume());
       await pumpControls(tester);
       expect(didResume, isFalse);
       await tester.tap(find.byTooltip('Resume'));
@@ -806,7 +806,7 @@ void main() {
         return Future.value(Success());
       }
 
-      when(debuggerController!.stepOver()).thenAnswer((_) => stepOver());
+      when(debuggerController.stepOver()).thenAnswer((_) => stepOver());
       await pumpControls(tester);
       expect(didStep, isFalse);
       await tester.tap(find.byTooltip('Step over'));
@@ -816,11 +816,11 @@ void main() {
 
     testWidgets('are hidden when app is not paused',
         (WidgetTester tester) async {
-      when(debuggerController!.isPaused).thenReturn(ValueNotifier<bool>(false));
+      when(debuggerController.isPaused).thenReturn(ValueNotifier<bool>(false));
       await pumpControls(tester);
       final animatedOpacityFinder = find.byType(AnimatedOpacity);
       expect(animatedOpacityFinder, findsOneWidget);
-      final AnimatedOpacity animatedOpacity =
+      final animatedOpacity =
           animatedOpacityFinder.evaluate().first.widget as AnimatedOpacity;
       expect(animatedOpacity.opacity, equals(0.0));
     });

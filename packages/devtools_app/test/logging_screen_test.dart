@@ -24,7 +24,7 @@ import 'package:mockito/mockito.dart';
 
 void main() {
   late LoggingScreen screen;
-  MockLoggingController? mockLoggingController;
+  late MockLoggingController mockLoggingController;
   const windowSize = Size(1000.0, 1000.0);
 
   group('Logging Screen', () {
@@ -42,14 +42,14 @@ void main() {
     setUp(() async {
       await ensureInspectorDependencies();
       mockLoggingController = MockLoggingController();
-      when(mockLoggingController!.data).thenReturn([]);
-      when(mockLoggingController!.search).thenReturn('');
-      when(mockLoggingController!.searchMatches)
+      when(mockLoggingController.data).thenReturn([]);
+      when(mockLoggingController.search).thenReturn('');
+      when(mockLoggingController.searchMatches)
           .thenReturn(ValueNotifier<List<LogData>>([]));
-      when(mockLoggingController!.searchInProgressNotifier)
+      when(mockLoggingController.searchInProgressNotifier)
           .thenReturn(ValueNotifier<bool>(false));
-      when(mockLoggingController!.matchIndex).thenReturn(ValueNotifier<int>(0));
-      when(mockLoggingController!.filteredData)
+      when(mockLoggingController.matchIndex).thenReturn(ValueNotifier<int>(0));
+      when(mockLoggingController.filteredData)
           .thenReturn(ListValueNotifier<LogData>([]));
 
       fakeServiceManager = FakeServiceManager();
@@ -84,16 +84,16 @@ void main() {
     testWidgetsWithWindowSize('can clear logs', windowSize,
         (WidgetTester tester) async {
       await pumpLoggingScreen(tester);
-      verifyNever(mockLoggingController!.clear());
+      verifyNever(mockLoggingController.clear());
       await tester.tap(find.text('Clear'));
-      verify(mockLoggingController!.clear()).called(1);
+      verify(mockLoggingController.clear()).called(1);
     });
 
     testWidgetsWithWindowSize(
         'search field is disabled with no data', windowSize,
         (WidgetTester tester) async {
       await pumpLoggingScreen(tester);
-      verifyNever(mockLoggingController!.clear());
+      verifyNever(mockLoggingController.clear());
 
       final textFieldFinder = find.byKey(loggingSearchFieldKey);
       expect(textFieldFinder, findsOneWidget);
@@ -125,8 +125,8 @@ void main() {
 
     group('with data', () {
       setUp(() {
-        when(mockLoggingController!.data).thenReturn(fakeLogData);
-        when(mockLoggingController!.filteredData)
+        when(mockLoggingController.data).thenReturn(fakeLogData);
+        when(mockLoggingController.filteredData)
             .thenReturn(ListValueNotifier<LogData>(fakeLogData));
       });
 
@@ -175,7 +175,7 @@ void main() {
       testWidgetsWithWindowSize('search field can enter text', windowSize,
           (WidgetTester tester) async {
         await pumpLoggingScreen(tester);
-        verifyNever(mockLoggingController!.clear());
+        verifyNever(mockLoggingController.clear());
 
         final textFieldFinder = find.byKey(loggingSearchFieldKey);
         expect(textFieldFinder, findsOneWidget);

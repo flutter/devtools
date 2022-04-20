@@ -24,7 +24,7 @@ final isolateRef = IsolateRef(
 );
 
 void main() {
-  ServiceConnectionManager? manager;
+  late ServiceConnectionManager manager;
 
   setUp(() {
     final service = MockVmServiceWrapper();
@@ -71,7 +71,7 @@ void main() {
       isolateRef,
     );
 
-    when(manager!.service!.getObject('1', '123', offset: 0, count: 4))
+    when(manager.service!.getObject('1', '123', offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
@@ -106,7 +106,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager!.service!.getObject('1', '123', offset: 0, count: 4))
+    when(manager.service!.getObject('1', '123', offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
@@ -141,7 +141,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager!.service!.getObject('1', '123', offset: 0, count: 4))
+    when(manager.service!.getObject('1', '123', offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
@@ -176,7 +176,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager!.service!.getObject('1', '123', offset: 0, count: 4))
+    when(manager.service!.getObject('1', '123', offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
@@ -214,7 +214,7 @@ void main() {
         ),
         isolateRef,
       );
-      when(manager!.service!.getObject('1', '123', offset: 0, count: 4))
+      when(manager.service!.getObject('1', '123', offset: 0, count: 4))
           .thenAnswer((_) async {
         return instance;
       });
@@ -251,7 +251,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager!.service!.getObject('1', '123', offset: 0, count: 4))
+    when(manager.service!.getObject('1', '123', offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
@@ -286,7 +286,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager!.service!.getObject('1', '123', offset: 0, count: 4))
+    when(manager.service!.getObject('1', '123', offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
@@ -321,7 +321,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager!.service!.getObject('1', '123', offset: 0, count: 4))
+    when(manager.service!.getObject('1', '123', offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
@@ -359,7 +359,7 @@ void main() {
         ),
         isolateRef,
       );
-      when(manager!.service!.getObject('1', '123', offset: 0, count: 4))
+      when(manager.service!.getObject('1', '123', offset: 0, count: 4))
           .thenAnswer((_) async {
         return instance;
       });
@@ -397,7 +397,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager!.service!.getObject('1', '123', offset: 0, count: 4))
+    when(manager.service!.getObject('1', '123', offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
@@ -432,7 +432,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager!.service!.getObject('1', '123', offset: 0, count: 4))
+    when(manager.service!.getObject('1', '123', offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
@@ -468,7 +468,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager!.service!.getObject('1', '123', offset: 0, count: 4))
+    when(manager.service!.getObject('1', '123', offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
@@ -510,7 +510,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager!.service!.getObject('1', '123', offset: 0, count: 4))
+    when(manager.service!.getObject('1', '123', offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
@@ -550,7 +550,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager!.service!.getObject('1', '123', offset: 0, count: 4))
+    when(manager.service!.getObject('1', '123', offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
@@ -592,7 +592,7 @@ void main() {
     );
 
     when(
-      manager!.service!.getObject(
+      manager.service!.getObject(
         '1',
         '123',
         offset: 0,
@@ -600,7 +600,7 @@ void main() {
       ),
     ).thenThrow('Unrecognized parameters offset / count.');
 
-    when(manager!.service!.getObject('1', '123')).thenAnswer((_) async {
+    when(manager.service!.getObject('1', '123')).thenAnswer((_) async {
       return instance;
     });
 
@@ -614,13 +614,13 @@ void main() {
     ]);
 
     verifyInOrder([
-      manager!.service!.getObject(
+      manager.service!.getObject(
         '1',
         '123',
         offset: 0,
         count: 4,
       ),
-      manager!.service!.getObject(
+      manager.service!.getObject(
         '1',
         '123',
       ),
