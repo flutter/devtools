@@ -47,7 +47,7 @@ void main() {
   );
 
   late AppSizeScreen screen;
-  AppSizeTestController? appSizeController;
+  late AppSizeTestController appSizeController;
   FakeServiceManager fakeServiceManager;
 
   const windowSize = Size(2560.0, 1338.0);
@@ -71,7 +71,7 @@ void main() {
     DevToolsJsonFile? data,
   }) async {
     data ??= newV8JsonFile;
-    appSizeController!.loadTreeFromJsonFile(
+    appSizeController.loadTreeFromJsonFile(
       jsonFile: data,
       onError: (error) => {},
     );
@@ -142,7 +142,7 @@ void main() {
       expect(find.text(AnalysisView.importInstructions), findsOneWidget);
       expect(find.text('No File Selected'), findsOneWidget);
 
-      appSizeController!.loadTreeFromJsonFile(
+      appSizeController.loadTreeFromJsonFile(
         jsonFile: newV8JsonFile,
         onError: (error) => {},
         delayed: true,
@@ -215,7 +215,7 @@ void main() {
       DevToolsJsonFile oldJsonFile,
       DevToolsJsonFile newJsonFile,
     ) async {
-      appSizeController!.loadDiffTreeFromJsonFiles(
+      appSizeController.loadDiffTreeFromJsonFiles(
         oldFile: oldJsonFile,
         newFile: newJsonFile,
         onError: (error) => {},
@@ -241,7 +241,7 @@ void main() {
         (WidgetTester tester) async {
       await loadDiffTabAndSettle(tester);
 
-      appSizeController!.loadDiffTreeFromJsonFiles(
+      appSizeController.loadDiffTreeFromJsonFiles(
         oldFile: oldV8JsonFile,
         newFile: newV8JsonFile,
         onError: (error) => {},
@@ -370,7 +370,7 @@ void main() {
       String firstFile,
       String secondFile,
     ) async {
-      appSizeController!.loadDiffTreeFromJsonFiles(
+      appSizeController.loadDiffTreeFromJsonFiles(
         oldFile: DevToolsJsonFile(
           name: '',
           lastModifiedTime: lastModifiedTime,
@@ -394,7 +394,7 @@ void main() {
         controller: appSizeController,
       );
 
-      appSizeController!.loadTreeFromJsonFile(
+      appSizeController.loadTreeFromJsonFile(
         jsonFile: DevToolsJsonFile(
           name: 'unsupported_file.json',
           lastModifiedTime: lastModifiedTime,
