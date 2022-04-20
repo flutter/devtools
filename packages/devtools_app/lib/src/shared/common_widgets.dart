@@ -1678,6 +1678,8 @@ class CheckboxSetting extends StatelessWidget {
     this.tooltip,
     this.onChanged,
     this.enabled = true,
+    this.gaScreenName,
+    this.gaItem,
   }) : super(key: key);
 
   final ValueNotifier<bool?> notifier;
@@ -1692,6 +1694,10 @@ class CheckboxSetting extends StatelessWidget {
 
   /// Whether this checkbox setting should be enabled for interaction.
   final bool enabled;
+
+  final String? gaScreenName;
+
+  final String? gaItem;
 
   @override
   Widget build(BuildContext context) {
@@ -1727,7 +1733,17 @@ class CheckboxSetting extends StatelessWidget {
       children: [
         NotifierCheckbox(
           notifier: notifier,
-          onChanged: onChanged,
+          onChanged: (bool? value) {
+            final gaScreenName = this.gaScreenName;
+            final gaItem = this.gaItem;
+            if (gaScreenName != null && gaItem != null) {
+              ga.select(gaScreenName, gaItem);
+            }
+            final onChanged = this.onChanged;
+            if (onChanged != null) {
+              onChanged(value);
+            }
+          },
           enabled: enabled,
         ),
         Flexible(
