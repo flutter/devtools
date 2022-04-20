@@ -1117,7 +1117,7 @@ final CpuStackFrame stackFrameD = CpuStackFrame(
   category: 'Dart',
   rawUrl: 'flutter::AnimatorBeginFrame',
   packageUri: 'processedflutter::AnimatorBeginFrame',
-  sourceLine: 4444,
+  sourceLine: null,
   parentId: 'id_1',
   profileMetaData: profileMetaData,
 )..exclusiveSampleCount = 2;
