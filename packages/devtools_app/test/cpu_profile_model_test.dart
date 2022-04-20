@@ -356,7 +356,7 @@ void main() {
 
       test('without sourceLine', () {
         expect(
-          stackFrameD,
+          stackFrameD.packageUriWithSourceLine,
           equals('processedflutter::AnimatorBeginFrame'),
         );
       });
