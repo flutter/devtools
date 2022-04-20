@@ -11,10 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
-import 'fake_service_extension_manager.dart';
-import 'fake_vm_service_wrapper.dart';
-import 'generated.mocks.dart';
-import 'mocks.dart';
+import '../../devtools_test.dart';
 
 class FakeServiceManager extends Fake implements ServiceConnectionManager {
   FakeServiceManager({
@@ -25,12 +22,13 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
     this.availableServices = const [],
     this.availableLibraries = const [],
   }) : service = service ?? createFakeService() {
-    when(errorBadgeManager.erroredItemsForPage('inspector')).thenReturn(
-      FixedValueListenable(LinkedHashMap<String, DevToolsError>()),
-    );
-
-    when(errorBadgeManager.errorCountNotifier('inspector'))
-        .thenReturn(ValueNotifier<int>(0));
+    for (var screenId in screenIds) {
+      when(errorBadgeManager.erroredItemsForPage(screenId)).thenReturn(
+        FixedValueListenable(LinkedHashMap<String, DevToolsError>()),
+      );
+      when(errorBadgeManager.errorCountNotifier(screenId))
+          .thenReturn(ValueNotifier<int>(0));
+    }
     vmServiceOpened(this.service!, onClosed: Future.value());
   }
 
