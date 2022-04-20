@@ -1177,8 +1177,8 @@ final CpuStackFrame stackFrameC3 = CpuStackFrame(
   category: 'Dart',
   rawUrl:
       'file:///path/to/flutter/packages/flutter/lib/src/widgets/binding.dart',
-  packageUri: '',
-  sourceLine: null,
+  packageUri: 'package:flutter/widgets/binding.dart',
+  sourceLine: 3333,
   parentId: 'id_6',
   profileMetaData: profileMetaData,
 )..exclusiveSampleCount = 1;
