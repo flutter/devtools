@@ -220,7 +220,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   Future<Success> setFlag(String name, String value) {
     final List<Flag?> flags = _flags['flags'];
     final existingFlag =
-        flags.firstWhere((f) => f!.name == name, orElse: () => null);
+        flags.firstWhere((f) => f?.name == name, orElse: () => null);
     if (existingFlag != null) {
       existingFlag.valueAsString = value;
     } else {
@@ -303,7 +303,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
 
   @override
   Future<Success> clearSocketProfile(String isolateId) async {
-    _socketProfile!.sockets.clear();
+    _socketProfile?.sockets.clear();
     return Future.value(Success());
   }
 

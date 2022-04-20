@@ -145,7 +145,8 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
 
   @override
   bool libraryUriAvailableNow(String? uri) {
-    return availableLibraries.any((u) => u.startsWith(uri!));
+    if (uri == null) return false;
+    return availableLibraries.any((u) => u.startsWith(uri));
   }
 
   @override
