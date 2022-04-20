@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:async';
 
 import 'package:devtools_app/devtools_app.dart';
@@ -102,7 +100,7 @@ class FakeServiceExtensionManager extends Fake
 
   dynamic _getExtensionValueFromJson(String name, String valueFromJson) {
     final expectedValueType =
-        serviceExtensionsAllowlist[name].values.first.runtimeType;
+        serviceExtensionsAllowlist[name]!.values.first.runtimeType;
     switch (expectedValueType) {
       case bool:
         return valueFromJson == 'true' ? true : false;
@@ -137,7 +135,7 @@ class FakeServiceExtensionManager extends Fake
       // extension. This will restore extension states on the device after a hot
       // restart. [_enabledServiceExtensions] will be empty on page refresh or
       // initial start.
-      return callServiceExtension(name, _enabledServiceExtensions[name].value);
+      return callServiceExtension(name, _enabledServiceExtensions[name]!.value);
     } else {
       // Set any extensions that are already enabled on the device. This will
       // enable extension states in DevTools on page refresh or initial start.
@@ -156,7 +154,7 @@ class FakeServiceExtensionManager extends Fake
       () {
         return ValueNotifier<ServiceExtensionState>(
           _enabledServiceExtensions.containsKey(name)
-              ? _enabledServiceExtensions[name]
+              ? _enabledServiceExtensions[name]!
               : ServiceExtensionState(enabled: false, value: null),
         );
       },
@@ -206,8 +204,8 @@ class FakeServiceExtensionManager extends Fake
   @override
   Future<void> setServiceExtensionState(
     String name, {
-    @required bool enabled,
-    @required dynamic value,
+    required bool enabled,
+    required dynamic value,
     bool callExtension = true,
   }) async {
     if (callExtension && _serviceExtensions.contains(name)) {

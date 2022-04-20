@@ -12,6 +12,36 @@ import 'package:flutter/foundation.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
+class FakeIsolateManager extends Fake implements IsolateManager {
+  @override
+  ValueListenable<IsolateRef?> get selectedIsolate => _selectedIsolate;
+  final _selectedIsolate =
+      ValueNotifier(IsolateRef.parse({'id': 'fake_isolate_id'}));
+
+  @override
+  ValueListenable<IsolateRef?> get mainIsolate => _mainIsolate;
+  final _mainIsolate =
+      ValueNotifier(IsolateRef.parse({'id': 'fake_main_isolate_id'}));
+
+  @override
+  ValueNotifier<List<IsolateRef>> get isolates {
+    final value = _selectedIsolate.value;
+    _isolates ??= ValueNotifier([if (value != null) value]);
+    return _isolates!;
+  }
+
+  ValueNotifier<List<IsolateRef>>? _isolates;
+
+  @override
+  IsolateState isolateDebuggerState(IsolateRef? isolate) {
+    final state = MockIsolateState();
+    final mockIsolate = MockIsolate();
+    when(mockIsolate.libraries).thenReturn([]);
+    when(state.isolateNow).thenReturn(mockIsolate);
+    return state;
+  }
+}
+
 class FakeInspectorService extends Fake implements InspectorService {
   @override
   ObjectGroup createObjectGroup(String debugName) {
@@ -111,8 +141,6 @@ class MockLoggingController extends Mock implements LoggingController {
     _selectedLog.value = data;
   }
 }
-
-class MockErrorBadgeManager extends Mock implements ErrorBadgeManager {}
 
 class MockMemoryController extends Mock implements MemoryController {}
 
