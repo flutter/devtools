@@ -13,59 +13,73 @@ import '../screens/network/network_screen.dart';
 import '../screens/performance/performance_screen.dart';
 import '../screens/profiler/profiler_screen.dart';
 
-const String screenViewEvent = 'screen'; // Active screen (tab selected).
-const String selectEvent = 'select'; // User selected something.
-const String timingEvent = 'timing'; // Timed operation.
+const screenViewEvent = 'screen'; // Active screen (tab selected).
+const selectEvent = 'select'; // User selected something.
+const timingEvent = 'timing'; // Timed operation.
 
 // DevTools GA screenNames:
 // These screen ids must match the `screenId` for each respective subclass of
 // [Screen]. This is to ensure that the analytics for documentation links match
 // the screen id for other analytics on the same screen.
-const String inspector = InspectorScreen.id;
-const String performance = PerformanceScreen.id;
-const String cpuProfiler = ProfilerScreen.id;
-const String memory = MemoryScreen.id;
-const String network = NetworkScreen.id;
-const String logging = LoggingScreen.id;
+const inspector = InspectorScreen.id;
+const performance = PerformanceScreen.id;
+const cpuProfiler = ProfilerScreen.id;
+const memory = MemoryScreen.id;
+const network = NetworkScreen.id;
+const logging = LoggingScreen.id;
 
 // GA events not associated with a any screen e.g., hotReload, hotRestart, etc
-const String devToolsMain = 'main';
-const String hotReload = 'hotReload';
-const String hotRestart = 'hotRestart';
-const String appDisconnected = 'appDisconnected';
+const devToolsMain = 'main';
+const hotReload = 'hotReload';
+const hotRestart = 'hotRestart';
+const appDisconnected = 'appDisconnected';
 
 // DevTools UI action selected (clicked).
 
 // Main bar UX actions:
-const String feedbackLink = 'feedback';
-const String feedbackButton = 'feedbackButton';
+const feedbackLink = 'feedback';
+const feedbackButton = 'feedbackButton';
 
 // Inspector UX actions:
-const String refresh = 'refresh';
-const String refreshEmptyTree = 'refreshEmptyTree';
-const String performanceOverlay = 'performanceOverlay';
-const String debugPaint = 'debugPaint';
-const String paintBaseline = 'paintBaseline';
-const String slowAnimation = 'slowAnimation';
-const String repaintRainbow = 'repaintRainbow';
-const String debugBanner = 'debugBanner';
-const String togglePlatform = 'togglePlatform';
-const String selectWidgetMode = 'selectWidgetMode';
-const String enableOnDeviceInspector = 'enableOnDeviceInspector';
-const String showOnDeviceInspector = 'showInspector';
-const String treeNodeSelection = 'treeNodeSelection';
+const refresh = 'refresh';
+const refreshEmptyTree = 'refreshEmptyTree';
+const debugPaint = 'debugPaint';
+const debugPaintDocs = 'debugPaintDocs';
+const paintBaseline = 'paintBaseline';
+const paintBaselineDocs = 'paintBaselineDocs';
+const slowAnimation = 'slowAnimation';
+const slowAnimationDocs = 'slowAnimationDocs';
+const repaintRainbow = 'repaintRainbow';
+const repaintRainbowDocs = 'repaintRainbowDocs';
+const debugBanner = 'debugBanner';
+const togglePlatform = 'togglePlatform';
+const highlightOversizedImages = 'highlightOversizedImages';
+const highlightOversizedImagesDocs = 'highlightOversizedImagesDocs';
+const selectWidgetMode = 'selectWidgetMode';
+const enableOnDeviceInspector = 'enableOnDeviceInspector';
+const showOnDeviceInspector = 'showInspector';
+const treeNodeSelection = 'treeNodeSelection';
 
 // Performance UX actions:
 const refreshTimelineEvents = 'refreshTimelineEvents';
+const performanceOverlay = 'performanceOverlay';
+const performanceOverlayDocs = 'performanceOverlayDocs';
 const timelineFlameChartHelp = 'timelineFlameChartHelp';
 const selectFlutterFrame = 'selectFlutterFrame';
 const traceEventProcessingTime = 'traceEventProcessingTime';
-const String trackRebuilds = 'trackRebuilds';
-const String trackPaints = 'trackPaints';
-const String trackLayouts = 'trackLayouts';
+const trackRebuilds = 'trackRebuilds';
+const trackWidgetBuildsDocs = 'trackWidgetBuildsDocs';
+const trackUserCreatedWidgetBuilds = 'trackUserCreatedWidgetBuilds';
+const trackPaints = 'trackPaints';
+const trackPaintsDocs = 'trackPaintsDocs';
+const trackLayouts = 'trackLayouts';
+const trackLayoutsDocs = 'trackLayoutsDocs';
 const disableClipLayersOption = 'disableClipLayers';
+const disableClipLayersOptionDocs = 'disableClipLayersDocs';
 const disableOpacityLayersOption = 'disableOpacityLayers';
+const disableOpacityLayersOptionDocs = 'disableOpacityLayersDocs';
 const disablePhysicalShapeLayersOption = 'disablePhysicalShapeLayers';
+const disablePhysicalShapeLayersOptionDocs = 'disablePhysicalShapeLayersDocs';
 const shaderCompilationDocsTooltipLink = 'shaderCompilationDocsTooltipLink';
 const analyzeSelectedFrame = 'analyzeSelectedFrame';
 
@@ -77,49 +91,49 @@ const cpuProfileFlameChartHelp = 'cpuProfileFlameChartHelp';
 const cpuProfileProcessingTime = 'cpuProfileProcessingTime';
 
 // Memory UX actions:
-const String gc = 'gc';
-const String memoryLegend = 'memoryLegend';
-const String memorySettings = 'memorySettings';
-const String androidChart = 'androidChart';
-const String groupByPrefix = 'groupBy';
-const String trackAllocations = 'trackAllocations';
-const String resetAllocationAccumulators = 'resetAllocationAccumulators';
-const String autoCompleteSearchSelect = 'autoCompleteSearchSelect';
-const String takeSnapshot = 'takeSnapshot';
-const String snapshotFilterDialog = 'snapshotFilterDialog';
-const String sourcesDropDown = 'sourcesDropDown';
-const String memoryDisplayInterval = 'chartInterval';
-const String treemapToggle = 'treemap';
+const gc = 'gc';
+const memoryLegend = 'memoryLegend';
+const memorySettings = 'memorySettings';
+const androidChart = 'androidChart';
+const groupByPrefix = 'groupBy';
+const trackAllocations = 'trackAllocations';
+const resetAllocationAccumulators = 'resetAllocationAccumulators';
+const autoCompleteSearchSelect = 'autoCompleteSearchSelect';
+const takeSnapshot = 'takeSnapshot';
+const snapshotFilterDialog = 'snapshotFilterDialog';
+const sourcesDropDown = 'sourcesDropDown';
+const memoryDisplayInterval = 'chartInterval';
+const treemapToggle = 'treemap';
 
 // Logging UX actions:
-const String structuredErrors = 'structuredErrors';
-const String trackRebuildWidgets = 'trackRebuildWidgets';
+const structuredErrors = 'structuredErrors';
+const trackRebuildWidgets = 'trackRebuildWidgets';
 
 // Landing screen UX actions:
-const String landingScreen = 'landing';
-const String connectToApp = 'connectToApp';
-const String importFile = 'importFile';
-const String openAppSizeTool = 'openAppSizeTool';
+const landingScreen = 'landing';
+const connectToApp = 'connectToApp';
+const importFile = 'importFile';
+const openAppSizeTool = 'openAppSizeTool';
 
 // Settings actions:
-const String settingsDialog = 'settings';
-const String darkTheme = 'darkTheme';
-const String denseMode = 'denseMode';
-const String analytics = 'analytics';
-const String vmDeveloperMode = 'vmDeveloperMode';
+const settingsDialog = 'settings';
+const darkTheme = 'darkTheme';
+const denseMode = 'denseMode';
+const analytics = 'analytics';
+const vmDeveloperMode = 'vmDeveloperMode';
 
 // Common actions shared across screens.
 // These actions will be tracked per screen, so they will still be
 // distinguishable from one screen to the other.
-const String pause = 'pause';
-const String resume = 'resume';
-const String clear = 'clear';
-const String record = 'record';
-const String stop = 'stop';
-const String export = 'export';
-const String expandAll = 'expandAll';
-const String collapseAll = 'collapseAll';
-const String documentationLink = 'documentationLink';
+const pause = 'pause';
+const resume = 'resume';
+const clear = 'clear';
+const record = 'record';
+const stop = 'stop';
+const export = 'export';
+const expandAll = 'expandAll';
+const collapseAll = 'collapseAll';
+const documentationLink = 'documentationLink';
 // This should track the time from `initState` for a screen to the time when
 // the page data has loaded and is ready to interact with.
-const String pageReady = 'pageReady';
+const pageReady = 'pageReady';

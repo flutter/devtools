@@ -73,7 +73,7 @@ class DebuggerScreen extends Screen {
   Widget build(BuildContext context) => const DebuggerScreenBody();
 
   @override
-  Widget buildStatus(BuildContext context, TextTheme textTheme) {
+  Widget buildStatus(BuildContext context) {
     final controller = Provider.of<DebuggerController>(context);
     return DebuggerStatus(controller: controller);
   }

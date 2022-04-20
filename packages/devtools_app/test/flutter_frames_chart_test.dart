@@ -38,7 +38,7 @@ void main() {
   group('FlutterFramesChart', () {
     setUp(() async {
       final fakeServiceManager = FakeServiceManager();
-      when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
+      when(fakeServiceManager.connectedApp!.isFlutterAppNow).thenReturn(true);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(OfflineModeController, OfflineModeController());
       setGlobal(IdeTheme, IdeTheme());

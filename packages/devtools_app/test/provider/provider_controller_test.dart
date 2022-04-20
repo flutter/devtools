@@ -108,46 +108,41 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
   );
 
   group('Provider controllers', () {
-    test(
-      'can mutate private properties from mixins',
-      () async {
-        final container = ProviderContainer();
-        addTearDown(container.dispose);
+    test('can mutate private properties from mixins', () async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
 
-        final sub = container.listen(
-          instanceProvider(
-            const InstancePath.fromProviderId('0').pathForChild(
-              const PathToProperty.objectProperty(
-                name: '_privateMixinProperty',
-                ownerUri: 'package:provider_app/mixin.dart',
-                ownerName: 'Mixin',
-              ),
+      final sub = container.listen(
+        instanceProvider(
+          const InstancePath.fromProviderId('0').pathForChild(
+            const PathToProperty.objectProperty(
+              name: '_privateMixinProperty',
+              ownerUri: 'package:provider_app/mixin.dart',
+              ownerName: 'Mixin',
             ),
-          ).future,
-          (prev, next) {},
-        );
+          ),
+        ).future,
+        (prev, next) {},
+      );
 
-        var instance = await sub.read();
+      var instance = await sub.read();
 
-        expect(
-          instance,
-          isA<NumInstance>()
-              .having((e) => e.displayString, 'displayString', '0'),
-        );
+      expect(
+        instance,
+        isA<NumInstance>().having((e) => e.displayString, 'displayString', '0'),
+      );
 
-        await instance.setter!('42');
+      await instance.setter!('42');
 
-        // read the instance again since it should have changed
-        instance = await sub.read();
+      // read the instance again since it should have changed
+      instance = await sub.read();
 
-        expect(
-          instance,
-          isA<NumInstance>()
-              .having((e) => e.displayString, 'displayString', '42'),
-        );
-      },
-      skip: 'wait https://github.com/dart-lang/sdk/issues/45093 to be fixed',
-    );
+      expect(
+        instance,
+        isA<NumInstance>()
+            .having((e) => e.displayString, 'displayString', '42'),
+      );
+    });
 
     test(
       'sortedProviderNodesProvider',
