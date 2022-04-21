@@ -16,8 +16,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
+const isolateId = '1';
+const objectId = '123';
+
 final isolateRef = IsolateRef(
-  id: '1',
+  id: isolateId,
   number: '2',
   name: 'main',
   isSystemIsolate: false,
@@ -54,7 +57,7 @@ void main() {
     final bytes = Uint8ClampedList.fromList([0, 1, 2, 3]);
     final instance = Instance(
       kind: InstanceKind.kUint8ClampedList,
-      id: '123',
+      id: objectId,
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
       identityHashCode: null,
@@ -71,7 +74,7 @@ void main() {
       isolateRef,
     );
 
-    when(manager.service!.getObject('1', '123', offset: 0, count: 4))
+    when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
@@ -90,7 +93,7 @@ void main() {
     final bytes = Uint8List.fromList([0, 1, 2, 3]);
     final instance = Instance(
       kind: InstanceKind.kUint8List,
-      id: '123',
+      id: objectId,
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
       identityHashCode: null,
@@ -106,7 +109,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service!.getObject('1', '123', offset: 0, count: 4))
+    when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
@@ -125,7 +128,7 @@ void main() {
     final bytes = Uint16List.fromList([0, 513, 514, 515]);
     final instance = Instance(
       kind: InstanceKind.kUint16List,
-      id: '123',
+      id: objectId,
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
       identityHashCode: null,
@@ -141,7 +144,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service!.getObject('1', '123', offset: 0, count: 4))
+    when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
@@ -160,7 +163,7 @@ void main() {
     final bytes = Uint32List.fromList([0, 131072, 131073, 131074]);
     final instance = Instance(
       kind: InstanceKind.kUint32List,
-      id: '123',
+      id: objectId,
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
       identityHashCode: null,
@@ -176,7 +179,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service!.getObject('1', '123', offset: 0, count: 4))
+    when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
@@ -198,7 +201,7 @@ void main() {
           Uint64List.fromList([0, 4294967296, 4294967297, 4294967298]);
       final instance = Instance(
         kind: InstanceKind.kUint64List,
-        id: '123',
+        id: objectId,
         classRef: null,
         bytes: base64.encode(bytes.buffer.asUint8List()),
         identityHashCode: null,
@@ -214,7 +217,7 @@ void main() {
         ),
         isolateRef,
       );
-      when(manager.service!.getObject('1', '123', offset: 0, count: 4))
+      when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 4))
           .thenAnswer((_) async {
         return instance;
       });
@@ -235,7 +238,7 @@ void main() {
     final bytes = Int8List.fromList([0, 1, -2, 3]);
     final instance = Instance(
       kind: InstanceKind.kInt8List,
-      id: '123',
+      id: objectId,
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
       identityHashCode: null,
@@ -251,7 +254,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service!.getObject('1', '123', offset: 0, count: 4))
+    when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
@@ -270,7 +273,7 @@ void main() {
     final bytes = Int16List.fromList([0, 513, -514, 515]);
     final instance = Instance(
       kind: InstanceKind.kInt16List,
-      id: '123',
+      id: objectId,
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
       identityHashCode: null,
@@ -286,7 +289,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service!.getObject('1', '123', offset: 0, count: 4))
+    when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
@@ -305,7 +308,7 @@ void main() {
     final bytes = Int32List.fromList([0, 131072, -131073, 131074]);
     final instance = Instance(
       kind: InstanceKind.kInt32List,
-      id: '123',
+      id: objectId,
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
       identityHashCode: null,
@@ -321,7 +324,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service!.getObject('1', '123', offset: 0, count: 4))
+    when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
@@ -343,7 +346,7 @@ void main() {
           Int64List.fromList([0, 4294967296, -4294967297, 4294967298]);
       final instance = Instance(
         kind: InstanceKind.kInt64List,
-        id: '123',
+        id: objectId,
         classRef: null,
         bytes: base64.encode(bytes.buffer.asUint8List()),
         identityHashCode: null,
@@ -359,7 +362,7 @@ void main() {
         ),
         isolateRef,
       );
-      when(manager.service!.getObject('1', '123', offset: 0, count: 4))
+      when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 4))
           .thenAnswer((_) async {
         return instance;
       });
@@ -381,7 +384,7 @@ void main() {
         Float32List.fromList([0, 2.2300031185150146, -4.610400199890137]);
     final instance = Instance(
       kind: InstanceKind.kFloat32List,
-      id: '123',
+      id: objectId,
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
       identityHashCode: null,
@@ -397,7 +400,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service!.getObject('1', '123', offset: 0, count: 4))
+    when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
@@ -415,7 +418,7 @@ void main() {
     final bytes = Float64List.fromList([0, 5532.130793, -7532.130793]);
     final instance = Instance(
       kind: InstanceKind.kFloat64List,
-      id: '123',
+      id: objectId,
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
       identityHashCode: null,
@@ -432,7 +435,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service!.getObject('1', '123', offset: 0, count: 4))
+    when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
@@ -451,7 +454,7 @@ void main() {
         Int32x4List.fromList([Int32x4.bool(true, false, true, false)]);
     final instance = Instance(
       kind: InstanceKind.kInt32x4List,
-      id: '123',
+      id: objectId,
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
       identityHashCode: null,
@@ -468,7 +471,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service!.getObject('1', '123', offset: 0, count: 4))
+    when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
@@ -493,7 +496,7 @@ void main() {
     );
     final instance = Instance(
       kind: InstanceKind.kFloat32x4List,
-      id: '123',
+      id: objectId,
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
       identityHashCode: null,
@@ -510,7 +513,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service!.getObject('1', '123', offset: 0, count: 4))
+    when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
@@ -533,7 +536,7 @@ void main() {
     final bytes = Float64x2List.fromList([Float64x2(0, -1232.222)]);
     final instance = Instance(
       kind: InstanceKind.kFloat64x2List,
-      id: '123',
+      id: objectId,
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
       identityHashCode: null,
@@ -550,7 +553,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service!.getObject('1', '123', offset: 0, count: 4))
+    when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
@@ -574,7 +577,7 @@ void main() {
     final bytes = Uint8List.fromList([0, 1, 2, 3]);
     final instance = Instance(
       kind: InstanceKind.kUint8List,
-      id: '123',
+      id: objectId,
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
       identityHashCode: null,
@@ -593,14 +596,14 @@ void main() {
 
     when(
       manager.service!.getObject(
-        '1',
-        '123',
+        isolateId,
+        objectId,
         offset: 0,
         count: 4,
       ),
     ).thenThrow('Unrecognized parameters offset / count.');
 
-    when(manager.service!.getObject('1', '123')).thenAnswer((_) async {
+    when(manager.service!.getObject(isolateId, objectId)).thenAnswer((_) async {
       return instance;
     });
 
@@ -615,14 +618,14 @@ void main() {
 
     verifyInOrder([
       manager.service!.getObject(
-        '1',
-        '123',
+        isolateId,
+        objectId,
         offset: 0,
         count: 4,
       ),
       manager.service!.getObject(
-        '1',
-        '123',
+        isolateId,
+        objectId,
       ),
     ]);
   });
@@ -632,7 +635,7 @@ void main() {
       () async {
     final instance = Instance(
       kind: InstanceKind.kUint8ClampedList,
-      id: '123',
+      id: objectId,
       classRef: null,
       identityHashCode: null,
       length: 332,
@@ -662,7 +665,7 @@ void main() {
       () async {
     final instance = Instance(
       kind: InstanceKind.kUint8ClampedList,
-      id: '123',
+      id: objectId,
       classRef: null,
       identityHashCode: null,
       length: 300,

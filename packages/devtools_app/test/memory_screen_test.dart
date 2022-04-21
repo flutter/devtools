@@ -28,7 +28,7 @@ import 'test_data/memory_test_data.dart';
 void main() {
   late MemoryScreen screen;
   late MemoryController controller;
-  FakeServiceManager fakeServiceManager;
+  late FakeServiceManager fakeServiceManager;
 
   /// Classes to track while testing.
   final classesToTrack = <ClassRef>[];
