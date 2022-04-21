@@ -31,16 +31,17 @@ void main() {
   const windowSize = Size(4000.0, 4000.0);
   const smallWindowSize = Size(1000.0, 1000.0);
 
-  setUp(() {
-    fakeServiceManager = FakeServiceManager();
-    scriptManager = MockScriptManager();
-    when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
-    when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
-    setGlobal(IdeTheme, IdeTheme());
-    setGlobal(ScriptManager, scriptManager);
-    fakeServiceManager.consoleService.ensureServiceInitialized();
-  });
+  fakeServiceManager = FakeServiceManager();
+  scriptManager = MockScriptManager();
+  when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
+  when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
+  setGlobal(ServiceConnectionManager, fakeServiceManager);
+  setGlobal(IdeTheme, IdeTheme());
+  setGlobal(ScriptManager, scriptManager);
+  fakeServiceManager.consoleService.ensureServiceInitialized();
+
+  debuggerController = MockDebuggerController();
+  when(debuggerController.isPaused).thenReturn(ValueNotifier<bool>(true));
 
   group('DebuggerScreen', () {
     Future<void> pumpDebuggerScreen(
@@ -752,11 +753,6 @@ void main() {
   });
 
   group('FloatingDebuggerControls', () {
-    setUp(() {
-      debuggerController = MockDebuggerController();
-      when(debuggerController.isPaused).thenReturn(ValueNotifier<bool>(true));
-    });
-
     Future<void> pumpControls(WidgetTester tester) async {
       await tester.pumpWidget(
         wrapWithControllers(

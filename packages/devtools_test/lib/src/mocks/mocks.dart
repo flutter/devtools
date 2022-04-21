@@ -195,7 +195,7 @@ class MockDebuggerController extends Mock implements DebuggerController {
 
   @override
   final ProgramExplorerController programExplorerController =
-      MockProgramExplorerControllerLegacy.withDefaults();
+      createMockProgramExplorerControllerWithDefaults();
 }
 
 class MockScriptManager extends Mock implements ScriptManager {}
