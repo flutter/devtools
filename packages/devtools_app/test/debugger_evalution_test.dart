@@ -16,10 +16,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'test_infra/flutter_test_driver.dart';
 import 'test_infra/flutter_test_environment.dart';
 
-void main() {
+void main() async {
   final FlutterTestEnvironment env = FlutterTestEnvironment(
     const FlutterRunConfiguration(withDebugger: true),
   );
+  await env.setupEnvironment();
 
   final DebuggerController debuggerController = TestDebuggerController();
 
@@ -28,7 +29,6 @@ void main() {
 
   setUp(() async {
     isAlive = Disposable();
-    await env.setupEnvironment();
     eval = EvalOnDartLibrary(
       'package:flutter_app/src/autocomplete.dart',
       serviceManager.service!,
