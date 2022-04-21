@@ -120,24 +120,21 @@ class _TrackWidgetBuildsSettingState extends State<TrackWidgetBuildsSetting>
   static const _scopeSelectorPadding = 32.0;
 
   /// Service extensions for tracking widget builds.
-  ///
-  /// There is an extension for each value of [TrackWidgetBuildsScope], and the
-  /// extensions in this list are indexed according to their enum value index.
-  final _trackWidgetBuildsExtensions = [
-    extensions.profileWidgetBuilds,
-    extensions.profileUserWidgetBuilds,
-  ];
+  final _trackWidgetBuildsExtensions = {
+    TrackWidgetBuildsScope.all: extensions.profileWidgetBuilds,
+    TrackWidgetBuildsScope.userCreated: extensions.profileUserWidgetBuilds,
+  };
 
   /// The selected track widget builds scope, which may be any value in
   /// [TrackWidgetBuildsScope] or null if widget builds are not being tracked.
   final _selectedScope = ValueNotifier<TrackWidgetBuildsScope?>(null);
 
-  /// Whether either of the extensions in [_trackWidgetBuildsExtensions] are
-  /// enabled.
+  /// Whether either of the extensions in [_trackWidgetBuildsExtensions.values]
+  /// are enabled.
   final _tracked = ValueNotifier<bool>(false);
 
-  /// Whether the track widget builds service extensions
-  /// [_trackWidgetBuildsExtensions] are available.
+  /// Whether either of the extensions in [_trackWidgetBuildsExtensions.values]
+  /// are available.
   final _trackingAvailable = ValueNotifier<bool>(false);
 
   @override
@@ -147,7 +144,7 @@ class _TrackWidgetBuildsSettingState extends State<TrackWidgetBuildsSetting>
     // Listen for service extensions to become available and add a listener to
     // respond to their state changes.
     for (final type in TrackWidgetBuildsScope.values) {
-      final extension = _trackWidgetBuildsExtensions[type.index];
+      final extension = _trackWidgetBuildsExtensions[type]!;
       serviceManager.serviceExtensionManager
           .waitForServiceExtensionAvailable(extension.extension)
           .then((isServiceAvailable) {

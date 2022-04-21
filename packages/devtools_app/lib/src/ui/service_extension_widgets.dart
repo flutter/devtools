@@ -787,9 +787,7 @@ class _ServiceExtensionCheckboxGroupOverlay extends StatelessWidget {
   Widget _extensionSetting(ToggleableServiceExtensionDescription extension) {
     assert(extensions.contains(extension));
     final customUi = customExtensionUi[extension.extension];
-    return customUi != null
-        ? customUi
-        : ServiceExtensionCheckbox(serviceExtension: extension);
+    return customUi ?? ServiceExtensionCheckbox(serviceExtension: extension);
   }
 }
 
