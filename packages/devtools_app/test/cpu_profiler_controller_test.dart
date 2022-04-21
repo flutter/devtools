@@ -26,7 +26,7 @@ void main() {
           resolvedUriMap: goldenResolvedUriMap,
         ),
       );
-      when(fakeServiceManager.connectedApp!.isFlutterAppNow).thenReturn(false);
+      when(fakeServiceManager.connectedApp!.isFlutterAppNow).thenReturn(true);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(OfflineModeController, OfflineModeController());
       controller = CpuProfilerController();
