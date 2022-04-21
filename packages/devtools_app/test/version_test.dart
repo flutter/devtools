@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Ignoring redundant argument values makes the test easier to read.
 import 'package:devtools_app/src/shared/version.dart';
 import 'package:flutter_test/flutter_test.dart';
 

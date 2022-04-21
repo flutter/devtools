@@ -2,14 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: unused_import
-
 @TestOn('vm')
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:devtools_app/src/screens/debugger/span_parser.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const helloWorld = '''
