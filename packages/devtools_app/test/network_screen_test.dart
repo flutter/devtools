@@ -13,7 +13,7 @@ import 'package:mockito/mockito.dart';
 
 void main() {
   late NetworkScreen screen;
-  FakeServiceManager fakeServiceManager;
+  late FakeServiceManager fakeServiceManager;
 
   group('NetworkScreen', () {
     setUp(() async {

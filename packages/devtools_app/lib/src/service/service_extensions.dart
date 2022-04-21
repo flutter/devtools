@@ -231,6 +231,26 @@ final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
   gaDocsItem: analytics_constants.trackWidgetBuildsDocs,
 );
 
+final profileUserWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
+  extension: 'ext.flutter.profileUserWidgetBuilds',
+  title: 'Track User-Created Widget Builds',
+  enabledIcon: const ThemedImageIcon(
+    lightModeAsset: 'icons/trackwidget-white.png',
+    darkModeAsset: 'icons/trackwidget-dgrey.png',
+  ),
+  disabledIcon: const ThemedImageIcon(
+    lightModeAsset: 'icons/trackwidget-dgrey.png',
+    darkModeAsset: 'icons/trackwidget-lgrey.png',
+  ),
+  enabledValue: true,
+  disabledValue: false,
+  gaScreenName: analytics_constants.performance,
+  gaItem: analytics_constants.trackUserCreatedWidgetBuilds,
+  description:
+      'Adds an event to the timeline for every Widget created in user code.',
+  tooltip: '',
+);
+
 final profileRenderObjectPaints = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.profileRenderObjectPaints',
   title: 'Track Paints',

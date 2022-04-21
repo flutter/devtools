@@ -10,6 +10,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
+const isolateId = '433';
+const objectId = '123';
+
 final libraryRef = LibraryRef(
   name: 'some library',
   uri: 'package:foo/foo.dart',
@@ -17,7 +20,7 @@ final libraryRef = LibraryRef(
 );
 
 void main() {
-  ServiceConnectionManager? manager;
+  late ServiceConnectionManager manager;
 
   setUp(() {
     final service = MockVmServiceWrapper();
@@ -45,7 +48,7 @@ void main() {
       () async {
     final instance = Instance(
       kind: InstanceKind.kMap,
-      id: '123',
+      id: objectId,
       classRef: null,
       length: 2,
       associations: [
@@ -69,7 +72,7 @@ void main() {
       identityHashCode: null,
     );
     final isolateRef = IsolateRef(
-      id: '433',
+      id: isolateId,
       number: '1',
       name: 'my-isolate',
       isSystemIsolate: false,
@@ -84,7 +87,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager!.service!.getObject('433', '123', offset: 0, count: 2))
+    when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 2))
         .thenAnswer((_) async {
       return instance;
     });
@@ -104,14 +107,14 @@ void main() {
   test('Creates bound variables for Map with Int key and Double value',
       () async {
     final isolateRef = IsolateRef(
-      id: '433',
+      id: isolateId,
       number: '1',
       name: 'my-isolate',
       isSystemIsolate: false,
     );
     final instance = Instance(
       kind: InstanceKind.kMap,
-      id: '123',
+      id: objectId,
       classRef: null,
       length: 2,
       associations: [
@@ -144,7 +147,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager!.service!.getObject('433', '123', offset: 0, count: 2))
+    when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 2))
         .thenAnswer((_) async {
       return instance;
     });
@@ -163,14 +166,14 @@ void main() {
   test('Creates bound variables for Map with Object key and Double value',
       () async {
     final isolateRef = IsolateRef(
-      id: '433',
+      id: isolateId,
       number: '1',
       name: 'my-isolate',
       isSystemIsolate: false,
     );
     final instance = Instance(
       kind: InstanceKind.kMap,
-      id: '123',
+      id: objectId,
       classRef: null,
       length: 2,
       associations: [
@@ -202,7 +205,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager!.service!.getObject('433', '123', offset: 0, count: 2))
+    when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 2))
         .thenAnswer((_) async {
       return instance;
     });

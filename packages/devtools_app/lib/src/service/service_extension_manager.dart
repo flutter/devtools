@@ -577,4 +577,9 @@ class ServiceExtensionState {
         enabled,
         value,
       );
+
+  @override
+  String toString() {
+    return 'ServiceExtensionState(enabled: $enabled, value: $value)';
+  }
 }

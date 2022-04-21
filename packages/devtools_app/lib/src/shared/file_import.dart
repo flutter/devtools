@@ -229,10 +229,7 @@ Future<DevToolsJsonFile?> importFileFromPicker({
   // extensions than .json. We will need to return a more generic file type.
   return DevToolsJsonFile(
     data: data,
-    // This '!' is needed for google3. This will throw a warning on Desktop that
-    // can be ignored.
-    // ignore: unnecessary_non_null_assertion
-    name: file.name!,
+    name: file.name,
     lastModifiedTime: lastModifiedTime,
   );
 }
