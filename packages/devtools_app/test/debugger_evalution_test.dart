@@ -22,12 +22,12 @@ void main() async {
   );
   await env.setupEnvironment();
 
-  final DebuggerController debuggerController = TestDebuggerController();
-
+  late DebuggerController debuggerController;
   late Disposable isAlive;
   late EvalOnDartLibrary eval;
 
   setUp(() async {
+    debuggerController = TestDebuggerController();
     isAlive = Disposable();
     eval = EvalOnDartLibrary(
       'package:flutter_app/src/autocomplete.dart',
