@@ -17,6 +17,19 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as path;
 import 'package:vm_snapshot_analysis/treemap.dart';
 
+final screenIds = <String>[
+  AppSizeScreen.id,
+  DebuggerScreen.id,
+  InspectorScreen.id,
+  LoggingScreen.id,
+  MemoryScreen.id,
+  NetworkScreen.id,
+  PerformanceScreen.id,
+  ProfilerScreen.id,
+  ProviderScreen.id,
+  VMDeveloperToolsScreen.id,
+];
+
 /// Scoping method which registers `listener` as a listener for `listenable`,
 /// invokes `callback`, and then removes the `listener`.
 ///

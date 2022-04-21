@@ -165,6 +165,68 @@ void main() {
     });
   });
 
+  group('ScreenSize', () {
+    testWidgetsWithWindowSize(
+        'handles screens with xxs width and xl height', const Size(250, 1000),
+        (WidgetTester tester) async {
+      return expectScreenSize(
+        tester,
+        width: MediaSize.xxs,
+        height: MediaSize.xl,
+      );
+    });
+
+    testWidgetsWithWindowSize(
+        'handles screens with xs width and l height', const Size(500, 800),
+        (WidgetTester tester) async {
+      return expectScreenSize(
+        tester,
+        width: MediaSize.xs,
+        height: MediaSize.l,
+      );
+    });
+
+    testWidgetsWithWindowSize(
+        'handles screens with s width and m height', const Size(800, 700),
+        (WidgetTester tester) async {
+      return expectScreenSize(
+        tester,
+        width: MediaSize.s,
+        height: MediaSize.m,
+      );
+    });
+
+    testWidgetsWithWindowSize(
+        'handles screens with m width and s height', const Size(1100, 550),
+        (WidgetTester tester) async {
+      return expectScreenSize(
+        tester,
+        width: MediaSize.m,
+        height: MediaSize.s,
+      );
+    });
+
+    testWidgetsWithWindowSize(
+        'handles screens with l width and xs height', const Size(1400, 400),
+        (WidgetTester tester) async {
+      return expectScreenSize(
+        tester,
+        width: MediaSize.l,
+        height: MediaSize.xs,
+      );
+    });
+
+    testWidgetsWithWindowSize(
+        'handles screens with xl width and xxs height', const Size(1600, 250),
+        (WidgetTester tester) async {
+      return expectScreenSize(
+        tester,
+        width: MediaSize.xl,
+        height: MediaSize.xxs,
+      );
+    });
+  });
+
   testWidgetsWithWindowSize('OffsetScrollbar goldens', const Size(300, 300),
       (WidgetTester tester) async {
     const root = Key('root');
@@ -213,4 +275,15 @@ void main() {
       matchesGoldenFile('goldens/offset_scrollbar_scrolled.png'),
     );
   });
+}
+
+void expectScreenSize(
+  WidgetTester tester, {
+  required MediaSize width,
+  required MediaSize height,
+}) async {
+  await tester.pumpWidget(wrap(Container()));
+  final BuildContext context = tester.element(find.byType(Container));
+  expect(ScreenSize(context).width, equals(width));
+  expect(ScreenSize(context).height, equals(height));
 }

@@ -11,8 +11,8 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 import '../../charts/flame_chart.dart';
 import '../../primitives/trace_event.dart';
 import '../../primitives/trees.dart';
-import '../../primitives/url_utils.dart';
 import '../../primitives/utils.dart';
+import '../../shared/globals.dart';
 import '../../shared/profiler_utils.dart';
 import '../../ui/search.dart';
 import 'cpu_profile_transformer.dart';
@@ -30,7 +30,7 @@ class CpuProfileData {
       verboseName: rootName,
       category: 'Dart',
       rawUrl: '',
-      processedUrl: '',
+      packageUri: '',
       sourceLine: null,
       profileMetaData: profileMetaData,
       parentId: null,
@@ -57,6 +57,8 @@ class CpuProfileData {
         jsonDecode(jsonEncode(json[stackFramesKey] ?? <String, dynamic>{}));
     for (final MapEntry<String, dynamic> entry in stackFramesJson.entries) {
       final stackFrameJson = entry.value;
+      final resolvedUrl = stackFrameJson[resolvedUrlKey] ?? '';
+      final packageUri = stackFrameJson[resolvedPackageUriKey] ?? resolvedUrl;
       final stackFrame = CpuStackFrame(
         id: entry.key,
         name: getSimpleStackFrameName(stackFrameJson[nameKey]),
@@ -65,8 +67,9 @@ class CpuProfileData {
         // If the user is on a version of Flutter where resolvedUrl is not
         // included in the response, this will be null. If the frame is a native
         // frame, the this will be the empty string.
-        rawUrl: stackFrameJson[resolvedUrlKey] ?? '',
-        sourceLine: stackFrameJson[sourceLine],
+        rawUrl: resolvedUrl,
+        packageUri: packageUri,
+        sourceLine: stackFrameJson[sourceLineKey],
         parentId: stackFrameJson[parentIdKey] ?? rootId,
         profileMetaData: profileMetaData,
       );
@@ -283,10 +286,10 @@ class CpuProfileData {
   /// [isolateId] The isolate id which was used to get the [cpuSamples].
   /// This will be used to tag the stack frames and trace events.
   /// [cpuSamples] The CPU samples that will be used to generate the [CpuProfileData]
-  factory CpuProfileData.generateFromCpuSamples({
+  static Future<CpuProfileData> generateFromCpuSamples({
     required String isolateId,
     required vm_service.CpuSamples cpuSamples,
-  }) {
+  }) async {
     // The root ID is associated with an artificial frame / node that is the root
     // of all stacks, regardless of entrypoint. This should never be seen in the
     // final output from this method.
@@ -324,7 +327,7 @@ class CpuProfileData {
           CpuProfileData.categoryKey: 'Dart',
           CpuProfileData.nameKey: nameForStackFrame(current),
           CpuProfileData.resolvedUrlKey: current.resolvedUrl,
-          CpuProfileData.sourceLine: current.sourceLine,
+          CpuProfileData.sourceLineKey: current.sourceLine,
           if (parent != null && parent.frameId != 0)
             CpuProfileData.parentIdKey: '$isolateId-${parent.frameId}',
         };
@@ -358,7 +361,56 @@ class CpuProfileData {
         },
       });
     }
+
+    await _addPackageUrisToTraceObject(isolateId, traceObject);
+
     return CpuProfileData.parse(traceObject);
+  }
+
+  /// Helper function for determining and updating the
+  /// [CpuProfileData.resolvedPackageUriKey] entry for each stack frame in
+  /// [traceObject].
+  ///
+  /// [isolateId] The id which is passed to the getIsolate RPC to load this
+  /// isolate.
+  /// [traceObject] A map where the cpu profile data for each frame is stored.
+  static Future<void> _addPackageUrisToTraceObject(
+    String isolateId,
+    Map<String, dynamic> traceObject,
+  ) async {
+    final stackFrames = traceObject[CpuProfileData.stackFramesKey]
+        .values
+        .cast<Map<String, dynamic>>();
+    final stackFramesWaitingOnPackageUri = <Map<String, dynamic>>[];
+    final urisWithoutPackageUri = <String>{};
+    for (final stackFrameJson in stackFrames) {
+      final resolvedUrl =
+          stackFrameJson[CpuProfileData.resolvedUrlKey] as String?;
+      if (resolvedUrl != null && resolvedUrl.isNotEmpty) {
+        final packageUri = serviceManager.resolvedUriManager
+            .lookupPackageUri(isolateId, resolvedUrl);
+        if (packageUri != null) {
+          stackFrameJson[CpuProfileData.resolvedPackageUriKey] = packageUri;
+        } else {
+          stackFramesWaitingOnPackageUri.add(stackFrameJson);
+          urisWithoutPackageUri.add(resolvedUrl);
+        }
+      }
+    }
+
+    await serviceManager.resolvedUriManager.fetchPackageUris(
+      isolateId,
+      urisWithoutPackageUri.toList(),
+    );
+
+    for (var stackFrameJson in stackFramesWaitingOnPackageUri) {
+      final resolvedUri = stackFrameJson[CpuProfileData.resolvedUrlKey];
+      final packageUri = serviceManager.resolvedUriManager
+          .lookupPackageUri(isolateId, resolvedUri);
+      if (packageUri != null) {
+        stackFrameJson[CpuProfileData.resolvedPackageUriKey] = packageUri;
+      }
+    }
   }
 
   static const rootId = 'cpuProfileRoot';
@@ -371,7 +423,8 @@ class CpuProfileData {
   static const parentIdKey = 'parent';
   static const stackFrameIdKey = 'sf';
   static const resolvedUrlKey = 'resolvedUrl';
-  static const sourceLine = 'sourceLine';
+  static const resolvedPackageUriKey = 'packageUri';
+  static const sourceLineKey = 'sourceLine';
   static const stackFramesKey = 'stackFrames';
   static const traceEventsKey = 'traceEvents';
   static const sampleCountKey = 'sampleCount';
@@ -525,6 +578,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     required String? verboseName,
     required String? category,
     required String rawUrl,
+    required String packageUri,
     required int? sourceLine,
     required String parentId,
     required CpuProfileMetaData profileMetaData,
@@ -535,8 +589,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
       verboseName: verboseName,
       category: category,
       rawUrl: rawUrl,
-      processedUrl:
-          '${getSimplePackageUrl(rawUrl)}${sourceLine != null ? ':$sourceLine' : ''}',
+      packageUri: packageUri,
       sourceLine: sourceLine,
       parentId: parentId,
       profileMetaData: profileMetaData,
@@ -549,7 +602,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     required this.verboseName,
     required this.category,
     required this.rawUrl,
-    required this.processedUrl,
+    required this.packageUri,
     required this.sourceLine,
     required this.parentId,
     required CpuProfileMetaData profileMetaData,
@@ -577,7 +630,10 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
 
   final String rawUrl;
 
-  final String processedUrl;
+  final String packageUri;
+
+  String get packageUriWithSourceLine =>
+      '$packageUri${sourceLine != null ? ':$sourceLine' : ''}';
 
   final int? sourceLine;
 
@@ -592,21 +648,21 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
   String get displayName => name;
 
   bool get isNative => _isNative ??= id != CpuProfileData.rootId &&
-      processedUrl.isEmpty &&
+      packageUri.isEmpty &&
       !name.startsWith(flutterEnginePrefix);
 
   bool? _isNative;
 
   bool get isDartCore =>
-      _isDartCore ??= processedUrl.startsWith(dartPackagePrefix) &&
-          !processedUrl.startsWith(dartUiPrefix);
+      _isDartCore ??= packageUri.startsWith(dartPackagePrefix) &&
+          !packageUri.startsWith(dartUiPrefix);
 
   bool? _isDartCore;
 
   bool get isFlutterCore =>
-      _isFlutterCore ??= processedUrl.startsWith(flutterPackagePrefix) ||
+      _isFlutterCore ??= packageUri.startsWith(flutterPackagePrefix) ||
           name.startsWith(flutterEnginePrefix) ||
-          processedUrl.startsWith(dartUiPrefix);
+          packageUri.startsWith(dartUiPrefix);
 
   bool? _isFlutterCore;
 
@@ -641,7 +697,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     return [
       nameWithPrefix,
       msText(totalTime),
-      if (processedUrl.isNotEmpty) processedUrl,
+      if (packageUriWithSourceLine.isNotEmpty) packageUriWithSourceLine,
     ].join(' - ');
   }
 
@@ -652,6 +708,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     String? verboseName,
     String? category,
     String? url,
+    String? packageUri,
     String? parentId,
     CpuProfileMetaData? profileMetaData,
     bool copySampleCountsAndTags = true,
@@ -663,7 +720,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
       verboseName: verboseName ?? this.verboseName,
       category: category ?? this.category,
       rawUrl: url ?? rawUrl,
-      processedUrl: url != null ? getSimplePackageUrl(url) : processedUrl,
+      packageUri: packageUri ?? this.packageUri,
       sourceLine: sourceLine,
       parentId: parentId ?? this.parentId,
       profileMetaData: profileMetaData ?? this.profileMetaData,
@@ -707,6 +764,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
           CpuProfileData.nameKey: verboseName,
           CpuProfileData.categoryKey: category,
           CpuProfileData.resolvedUrlKey: rawUrl,
+          CpuProfileData.resolvedPackageUriKey: packageUri,
           if (parentId != null) CpuProfileData.parentIdKey: parentId,
         }
       };

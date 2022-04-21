@@ -221,3 +221,50 @@ class ThemedColor {
     return colorScheme.isLight ? light : dark;
   }
 }
+
+// TODO(elliette): Add mixin for comparing enums. Eg, size > MediaSize.s
+// Requires enhanced enums feature in Dart SDK >= 2.17.
+enum MediaSize {
+  xxs,
+  xs,
+  s,
+  m,
+  l,
+  xl,
+}
+
+class ScreenSize {
+  ScreenSize(BuildContext context) {
+    _height = _calculateHeight(context);
+    _width = _calculateWidth(context);
+  }
+
+  MediaSize get height => _height;
+  MediaSize get width => _width;
+  late MediaSize _height;
+  late MediaSize _width;
+
+  MediaSize _calculateWidth(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    if (width < 300) return MediaSize.xxs;
+    if (width < 600) return MediaSize.xs;
+    if (width < 900) return MediaSize.s;
+    if (width < 1200) return MediaSize.m;
+    if (width < 1500)
+      return MediaSize.l;
+    else
+      return MediaSize.xl;
+  }
+
+  MediaSize _calculateHeight(BuildContext context) {
+    final height = MediaQuery.of(context).size.height;
+    if (height < 300) return MediaSize.xxs;
+    if (height < 450) return MediaSize.xs;
+    if (height < 600) return MediaSize.s;
+    if (height < 750) return MediaSize.m;
+    if (height < 900)
+      return MediaSize.l;
+    else
+      return MediaSize.xl;
+  }
+}

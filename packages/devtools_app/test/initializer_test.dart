@@ -21,7 +21,7 @@ void main() {
     setUp(() async {
       await ensureInspectorDependencies();
       final serviceManager = FakeServiceManager();
-      when(serviceManager.connectedApp.isDartWebApp)
+      when(serviceManager.connectedApp!.isDartWebApp)
           .thenAnswer((_) => Future.value(false));
       setGlobal(ServiceConnectionManager, serviceManager);
       setGlobal(FrameworkController, FrameworkController());
