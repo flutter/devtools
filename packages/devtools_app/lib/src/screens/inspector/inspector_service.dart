@@ -7,8 +7,6 @@
 // If you add methods to this class you should also add them to
 // InspectorService.java.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';

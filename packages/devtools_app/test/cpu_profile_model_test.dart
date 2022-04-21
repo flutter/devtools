@@ -3,8 +3,6 @@
 // found in the LICENSE file.
 
 // ignore_for_file: avoid_redundant_argument_values
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
