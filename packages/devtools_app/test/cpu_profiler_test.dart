@@ -29,6 +29,8 @@ void main() {
   late CpuProfileData cpuProfileData;
   late CpuProfilerController controller;
   final ServiceConnectionManager fakeServiceManager = FakeServiceManager();
+  when(fakeServiceManager.connectedApp!.isFlutterNativeAppNow)
+      .thenReturn(false);
 
   setUp(() async {
     final transformer = CpuProfileTransformer();
@@ -39,8 +41,6 @@ void main() {
       processId: 'test',
     );
 
-    when(fakeServiceManager.connectedApp!.isFlutterNativeAppNow)
-        .thenReturn(false);
     setGlobal(ServiceConnectionManager, fakeServiceManager);
     setGlobal(OfflineModeController, OfflineModeController());
     setGlobal(IdeTheme, IdeTheme());
