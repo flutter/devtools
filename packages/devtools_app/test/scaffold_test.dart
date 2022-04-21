@@ -151,7 +151,7 @@ void main() {
       when(mockConnectedApp.isProfileBuildNow).thenReturn(false);
       when(mockServiceManager!.connectedAppInitialized).thenReturn(true);
       when(mockServiceManager!.connectedApp).thenReturn(mockConnectedApp);
-      final mockDebuggerController = MockDebuggerController();
+      final mockDebuggerController = MockDebuggerControllerLegacy();
       when(mockDebuggerController.isPaused)
           .thenReturn(ValueNotifier<bool>(true));
 
@@ -177,7 +177,7 @@ void main() {
       when(mockConnectedApp.isProfileBuildNow).thenReturn(true);
       when(mockServiceManager!.connectedAppInitialized).thenReturn(true);
       when(mockServiceManager!.connectedApp).thenReturn(mockConnectedApp);
-      final mockDebuggerController = MockDebuggerController();
+      final mockDebuggerController = MockDebuggerControllerLegacy();
       when(mockDebuggerController.isPaused)
           .thenReturn(ValueNotifier<bool>(true));
 
@@ -204,7 +204,7 @@ void main() {
       when(mockConnectedApp.isProfileBuildNow).thenReturn(false);
       when(mockServiceManager!.connectedAppInitialized).thenReturn(true);
       when(mockServiceManager!.connectedApp).thenReturn(mockConnectedApp);
-      final mockDebuggerController = MockDebuggerController();
+      final mockDebuggerController = MockDebuggerControllerLegacy();
       when(mockDebuggerController.isPaused)
           .thenReturn(ValueNotifier<bool>(false));
 

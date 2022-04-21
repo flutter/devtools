@@ -10,7 +10,6 @@ import 'package:flutter/foundation.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
-import 'generated.mocks.dart';
 import 'generated_mocks_factories.dart';
 
 class FakeIsolateManager extends Fake implements IsolateManager {
@@ -164,11 +163,11 @@ class TestDebuggerController extends DebuggerController {
   final _explorerController = createMockProgramExplorerControllerWithDefaults();
 }
 
-class MockDebuggerController extends Mock implements DebuggerController {
-  MockDebuggerController();
+class MockDebuggerControllerLegacy extends Mock implements DebuggerController {
+  MockDebuggerControllerLegacy();
 
-  factory MockDebuggerController.withDefaults() {
-    final debuggerController = MockDebuggerController();
+  factory MockDebuggerControllerLegacy.withDefaults() {
+    final debuggerController = MockDebuggerControllerLegacy();
     when(debuggerController.isPaused).thenReturn(ValueNotifier(false));
     when(debuggerController.resuming).thenReturn(ValueNotifier(false));
     when(debuggerController.breakpoints).thenReturn(ValueNotifier([]));

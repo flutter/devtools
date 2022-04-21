@@ -26,7 +26,7 @@ void main() {
   late FakeServiceExtensionManager fakeExtensionManager;
   const windowSize = Size(2600.0, 1200.0);
 
-  final debuggerController = MockDebuggerController.withDefaults();
+  final debuggerController = MockDebuggerControllerLegacy.withDefaults();
 
   Widget buildInspectorScreen() {
     return wrapWithControllers(

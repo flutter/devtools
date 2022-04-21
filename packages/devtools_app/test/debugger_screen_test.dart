@@ -25,7 +25,7 @@ import 'package:vm_service/vm_service.dart';
 void main() {
   late DebuggerScreen screen;
   late FakeServiceManager fakeServiceManager;
-  late MockDebuggerController debuggerController;
+  late MockDebuggerControllerLegacy debuggerController;
   late MockScriptManager scriptManager;
 
   const windowSize = Size(4000.0, 4000.0);
@@ -40,7 +40,7 @@ void main() {
   setGlobal(ScriptManager, scriptManager);
   fakeServiceManager.consoleService.ensureServiceInitialized();
 
-  debuggerController = MockDebuggerController();
+  debuggerController = MockDebuggerControllerLegacy();
   when(debuggerController.isPaused).thenReturn(ValueNotifier<bool>(true));
 
   group('DebuggerScreen', () {
@@ -79,7 +79,7 @@ void main() {
 
       screen = const DebuggerScreen();
 
-      debuggerController = MockDebuggerController.withDefaults();
+      debuggerController = MockDebuggerControllerLegacy.withDefaults();
     });
 
     testWidgets('builds its tab', (WidgetTester tester) async {

@@ -16,5 +16,6 @@ import 'package:vm_service/vm_service.dart';
   ErrorBadgeManager,
   ConnectedApp,
   ProgramExplorerController,
+  DebuggerController,
 ])
 void main() {}
