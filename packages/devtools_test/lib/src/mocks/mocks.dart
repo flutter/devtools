@@ -10,6 +10,8 @@ import 'package:flutter/foundation.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
+import 'generated.mocks.dart';
+
 class FakeIsolateManager extends Fake implements IsolateManager {
   @override
   ValueListenable<IsolateRef?> get selectedIsolate => _selectedIsolate;
@@ -158,8 +160,20 @@ class TestDebuggerController extends DebuggerController {
   @override
   ProgramExplorerController get programExplorerController =>
       _explorerController;
-  final _explorerController =
-      MockProgramExplorerControllerLegacy.withDefaults();
+  final _explorerController = createMockProgramExplorerControllerWithDefaults();
+}
+
+MockProgramExplorerController
+    createMockProgramExplorerControllerWithDefaults() {
+  final result = MockProgramExplorerController();
+
+  when(result.initialized).thenReturn(ValueNotifier(true));
+  when(result.rootObjectNodes).thenReturn(ValueNotifier([]));
+  when(result.outlineNodes).thenReturn(ValueNotifier([]));
+  when(result.outlineSelection).thenReturn(ValueNotifier(null));
+  when(result.isLoadingOutline).thenReturn(ValueNotifier(false));
+
+  return result;
 }
 
 class MockDebuggerController extends Mock implements DebuggerController {
