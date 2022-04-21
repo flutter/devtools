@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../shared/theme.dart';
-// ignore: import_of_legacy_library_into_null_safe
 import '../inspector/inspector_tree.dart';
 import 'provider_nodes.dart';
 
