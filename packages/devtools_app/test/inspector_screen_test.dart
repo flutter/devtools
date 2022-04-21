@@ -22,8 +22,8 @@ import 'package:mockito/mockito.dart';
 void main() {
   const screen = InspectorScreen();
 
-  FakeServiceManager fakeServiceManager;
-  FakeServiceExtensionManager? fakeExtensionManager;
+  late FakeServiceManager fakeServiceManager;
+  late FakeServiceExtensionManager fakeExtensionManager;
   const windowSize = Size(2600.0, 1200.0);
 
   final debuggerController = MockDebuggerController.withDefaults();
