@@ -13,6 +13,7 @@ import '../../shared/theme.dart';
 import '../../ui/colors.dart';
 import '../../ui/label.dart';
 import '../../ui/utils.dart';
+import 'enhance_tracing.dart';
 import 'performance_controller.dart';
 import 'performance_model.dart';
 import 'performance_screen.dart';
