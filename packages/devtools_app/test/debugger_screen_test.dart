@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 // ignore_for_file: avoid_redundant_argument_values
 
 import 'dart:io';
@@ -27,10 +25,10 @@ import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
 void main() {
-  DebuggerScreen screen;
-  FakeServiceManager fakeServiceManager;
-  MockDebuggerController debuggerController;
-  MockScriptManager scriptManager;
+  late DebuggerScreen screen;
+  late FakeServiceManager fakeServiceManager;
+  late MockDebuggerController debuggerController;
+  late MockScriptManager scriptManager;
 
   const windowSize = Size(4000.0, 4000.0);
   const smallWindowSize = Size(1000.0, 1000.0);
@@ -38,8 +36,8 @@ void main() {
   setUp(() {
     fakeServiceManager = FakeServiceManager();
     scriptManager = MockScriptManager();
-    when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
-    when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
+    when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
+    when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
     setGlobal(ServiceConnectionManager, fakeServiceManager);
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(ScriptManager, scriptManager);
@@ -77,7 +75,7 @@ void main() {
     }
 
     setUp(() {
-      when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
+      when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
           .thenReturn(ValueNotifier<int>(0));
 
       screen = const DebuggerScreen();
@@ -128,7 +126,7 @@ void main() {
       });
 
       group('Clipboard', () {
-        var _clipboardContents = '';
+        String _clipboardContents = '';
         final _expected = _stdio.join('\n');
 
         setUp(() {
@@ -142,10 +140,8 @@ void main() {
                 break;
               case 'Clipboard.getData':
                 return Future.value(<String, dynamic>{});
-                break;
               case 'Clipboard.hasStrings':
                 return Future.value(<String, dynamic>{'value': true});
-                break;
               default:
                 break;
             }
@@ -180,7 +176,7 @@ void main() {
     group('Codeview', () {
       setUp(() {
         final scriptsHistory = ScriptsHistory();
-        scriptsHistory.pushEntry(mockScript);
+        scriptsHistory.pushEntry(mockScript!);
         when(debuggerController.currentScriptRef)
             .thenReturn(ValueNotifier(mockScriptRef));
         when(debuggerController.currentParsedScript)
@@ -279,7 +275,7 @@ void main() {
       expect(find.text('File Explorer'), findsNWidgets(2));
 
       // test for items in the libraries tree
-      expect(find.text(scripts.first.uri.split('/').first), findsOneWidget);
+      expect(find.text(scripts.first.uri!.split('/').first), findsOneWidget);
     });
 
     testWidgetsWithWindowSize('Breakpoints show items', windowSize,
@@ -671,18 +667,18 @@ void main() {
         find.byWidgetPredicate(createDebuggerButtonPredicate('Pause')),
         findsOneWidget,
       );
-      final DebuggerButton pause = getWidgetFromFinder(
+      final pause = getWidgetFromFinder(
         find.byWidgetPredicate(createDebuggerButtonPredicate('Pause')),
-      );
+      ) as DebuggerButton;
       expect(pause.onPressed, isNotNull);
 
       expect(
         find.byWidgetPredicate(createDebuggerButtonPredicate('Resume')),
         findsOneWidget,
       );
-      final DebuggerButton resume = getWidgetFromFinder(
+      final resume = getWidgetFromFinder(
         find.byWidgetPredicate(createDebuggerButtonPredicate('Resume')),
-      );
+      ) as DebuggerButton;
       expect(resume.onPressed, isNull);
     });
 
@@ -728,18 +724,18 @@ void main() {
         find.byWidgetPredicate(createDebuggerButtonPredicate('Pause')),
         findsOneWidget,
       );
-      final DebuggerButton pause = getWidgetFromFinder(
+      final pause = getWidgetFromFinder(
         find.byWidgetPredicate(createDebuggerButtonPredicate('Pause')),
-      );
+      ) as DebuggerButton;
       expect(pause.onPressed, isNull);
 
       expect(
         find.byWidgetPredicate(createDebuggerButtonPredicate('Resume')),
         findsOneWidget,
       );
-      final DebuggerButton resume = getWidgetFromFinder(
+      final resume = getWidgetFromFinder(
         find.byWidgetPredicate(createDebuggerButtonPredicate('Resume')),
-      );
+      ) as DebuggerButton;
       expect(resume.onPressed, isNotNull);
     });
 
@@ -777,8 +773,8 @@ void main() {
       await pumpControls(tester);
       final animatedOpacityFinder = find.byType(AnimatedOpacity);
       expect(animatedOpacityFinder, findsOneWidget);
-      final AnimatedOpacity animatedOpacity =
-          animatedOpacityFinder.evaluate().first.widget;
+      final animatedOpacity =
+          animatedOpacityFinder.evaluate().first.widget as AnimatedOpacity;
       expect(animatedOpacity.opacity, equals(1.0));
       expect(
         find.text('Main isolate is paused in the debugger'),
@@ -824,8 +820,8 @@ void main() {
       await pumpControls(tester);
       final animatedOpacityFinder = find.byType(AnimatedOpacity);
       expect(animatedOpacityFinder, findsOneWidget);
-      final AnimatedOpacity animatedOpacity =
-          animatedOpacityFinder.evaluate().first.widget;
+      final animatedOpacity =
+          animatedOpacityFinder.evaluate().first.widget as AnimatedOpacity;
       expect(animatedOpacity.opacity, equals(0.0));
     });
   });

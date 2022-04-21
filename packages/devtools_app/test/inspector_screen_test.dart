@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:convert';
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
@@ -24,8 +22,8 @@ import 'package:mockito/mockito.dart';
 void main() {
   const screen = InspectorScreen();
 
-  FakeServiceManager fakeServiceManager;
-  FakeServiceExtensionManager fakeExtensionManager;
+  late FakeServiceManager fakeServiceManager;
+  late FakeServiceExtensionManager fakeExtensionManager;
   const windowSize = Size(2600.0, 1200.0);
 
   final debuggerController = MockDebuggerController.withDefaults();
@@ -41,8 +39,8 @@ void main() {
     setUp(() {
       fakeServiceManager = FakeServiceManager();
       fakeExtensionManager = fakeServiceManager.serviceExtensionManager;
-      mockIsFlutterApp(fakeServiceManager.connectedApp);
-      when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
+      mockIsFlutterApp(fakeServiceManager.connectedApp as MockConnectedApp);
+      when(fakeServiceManager.errorBadgeManager.errorCountNotifier('inspector'))
           .thenReturn(ValueNotifier<int>(0));
 
       setGlobal(ServiceConnectionManager, fakeServiceManager);
@@ -253,7 +251,7 @@ void main() {
       ''',
       );
       final diagnostic = RemoteDiagnosticsNode(
-        <String, Object>{
+        <String, Object?>{
           'widgetRuntimeType': 'Row',
           'renderObject': renderObjectJson,
           'hasChildren': false,

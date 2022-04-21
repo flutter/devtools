@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/screens/memory/memory_controller.dart';
@@ -27,18 +26,17 @@ import 'test_data//memory_test_allocation_data.dart';
 import 'test_data/memory_test_data.dart';
 
 void main() {
-  MemoryScreen screen;
-  MemoryController controller;
-  FakeServiceManager fakeServiceManager;
+  late MemoryScreen screen;
+  late MemoryController controller;
+  late FakeServiceManager fakeServiceManager;
 
   /// Classes to track while testing.
   final classesToTrack = <ClassRef>[];
 
   void setupTracking(List<ClassHeapDetailStats> classesDetail) {
     for (var classDetail in classesDetail) {
-      final tracking = classesToTrack.singleWhere(
+      final tracking = classesToTrack.singleWhereOrNull(
         (element) => element.name == classDetail.classRef.name,
-        orElse: () => null,
       );
       if (tracking != null) {
         controller.setTracking(classDetail.classRef, true);
@@ -68,12 +66,12 @@ void main() {
         allocationData: allocationJson,
       ),
     );
-    when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
-    when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
-    when(fakeServiceManager.connectedApp.isDartCliAppNow).thenReturn(false);
-    when(fakeServiceManager.connectedApp.isDebugFlutterAppNow)
+    when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
+    when(fakeServiceManager.connectedApp!.isFlutterAppNow).thenReturn(true);
+    when(fakeServiceManager.connectedApp!.isDartCliAppNow).thenReturn(false);
+    when(fakeServiceManager.connectedApp!.isDebugFlutterAppNow)
         .thenReturn(false);
-    when(fakeServiceManager.connectedApp.isDartWebApp)
+    when(fakeServiceManager.connectedApp!.isDartWebApp)
         .thenAnswer((_) => Future.value(false));
     setGlobal(ServiceConnectionManager, fakeServiceManager);
 
@@ -84,7 +82,7 @@ void main() {
 
   Future<void> pumpMemoryScreen(
     WidgetTester tester, {
-    MemoryController memoryController,
+    MemoryController? memoryController,
   }) async {
     await tester.pumpWidget(
       wrapWithControllers(
@@ -113,13 +111,13 @@ void main() {
       await ensureInspectorDependencies();
       setGlobal(OfflineModeController, OfflineModeController());
       fakeServiceManager = FakeServiceManager();
-      when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
-      when(fakeServiceManager.connectedApp.isDebugFlutterAppNow)
+      when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
+      when(fakeServiceManager.connectedApp!.isDebugFlutterAppNow)
           .thenReturn(false);
       when(fakeServiceManager.vm.operatingSystem).thenReturn('android');
-      when(fakeServiceManager.connectedApp.isDartWebApp)
+      when(fakeServiceManager.connectedApp!.isDartWebApp)
           .thenAnswer((_) => Future.value(false));
-      when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
+      when(fakeServiceManager.errorBadgeManager.errorCountNotifier('memory'))
           .thenReturn(ValueNotifier<int>(0));
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(IdeTheme, IdeTheme());
@@ -354,13 +352,13 @@ void main() {
 
       // Number of user initiated allocation monitors
       final startMonitors = totalAllocationMonitorEvents.where(
-        (element) => element.memoryEventInfo.allocationAccumulator.isStart,
+        (element) => element.memoryEventInfo.allocationAccumulator!.isStart,
       );
       expect(startMonitors.length, 2);
 
       // Number of accumulator resets
       final resetMonitors = totalAllocationMonitorEvents.where(
-        (element) => element.memoryEventInfo.allocationAccumulator.isReset,
+        (element) => element.memoryEventInfo.allocationAccumulator!.isReset,
       );
       expect(resetMonitors.length, 1);
 
@@ -384,13 +382,13 @@ void main() {
 
       final snapshotIconLabel = tester.element(heapSnapShotFinder);
       final snapshotButton =
-          snapshotIconLabel.findAncestorWidgetOfExactType<OutlinedButton>();
+          snapshotIconLabel.findAncestorWidgetOfExactType<OutlinedButton>()!;
 
       expect(snapshotButton.enabled, isFalse);
       await tester.pumpAndSettle(const Duration(seconds: 3));
 
       expect(
-        controller.selectedSnapshotTimestamp.millisecondsSinceEpoch,
+        controller.selectedSnapshotTimestamp!.millisecondsSinceEpoch,
         lessThan(DateTime.now().millisecondsSinceEpoch),
       );
 
@@ -477,7 +475,7 @@ void main() {
 
         expect(controller.offline, isTrue);
 
-        Future<void> checkGolden(String goldenFilename, {Key key}) async {
+        Future<void> checkGolden(String goldenFilename, {Key? key}) async {
           // Await delay for golden comparison.
           await pumpAndSettleTwoSeconds();
 
@@ -626,7 +624,7 @@ void main() {
         final TextField textField = tester.widget(searchField) as TextField;
         expect(textField.enabled, isTrue);
 
-        final textController = textField.controller;
+        final textController = textField.controller!;
         expect(textController.text, isEmpty);
         expect(controller.searchAutoComplete.value, isEmpty);
 
@@ -680,8 +678,8 @@ void main() {
         ); // IClass hilighted.
         await simulateKeyDownEvent(LogicalKeyboardKey.enter);
 
-        var choosenAutoComplete =
-            controller.allocationsFieldsTable.activeSearchMatchNotifier.value;
+        var choosenAutoComplete = controller
+            .allocationsFieldsTable!.activeSearchMatchNotifier!.value!;
         expect(choosenAutoComplete.classRef.name, 'IClass'); // IClass selected.
 
         // Test for 2 items found in auto-complete.
@@ -697,8 +695,8 @@ void main() {
         ); // TClass hilighted.
 
         await simulateKeyDownEvent(LogicalKeyboardKey.enter);
-        choosenAutoComplete =
-            controller.allocationsFieldsTable.activeSearchMatchNotifier.value;
+        choosenAutoComplete = controller
+            .allocationsFieldsTable!.activeSearchMatchNotifier!.value!;
         expect(choosenAutoComplete.classRef.name, autoCompletes3[1]);
 
         // Test for 1 item found in auto-complete.
@@ -709,8 +707,8 @@ void main() {
         expect(controller.currentHoveredIndex.value, 0); // ZClass hilighted.
         await simulateKeyDownEvent(LogicalKeyboardKey.enter);
 
-        choosenAutoComplete =
-            controller.allocationsFieldsTable.activeSearchMatchNotifier.value;
+        choosenAutoComplete = controller
+            .allocationsFieldsTable!.activeSearchMatchNotifier!.value!;
         expect(choosenAutoComplete.classRef.name, 'ZClass'); // ZClass selected.
 
         // Test for 4 items found in auto-complete.
@@ -786,8 +784,8 @@ void main() {
         // Select last hilighted entry.
         await simulateKeyDownEvent(LogicalKeyboardKey.enter);
 
-        choosenAutoComplete =
-            controller.allocationsFieldsTable.activeSearchMatchNotifier.value;
+        choosenAutoComplete = controller
+            .allocationsFieldsTable!.activeSearchMatchNotifier!.value!;
         // OneClass selected.
         expect(choosenAutoComplete.classRef.name, autoCompletes5[1]);
         // TODO(terry): MUST re-enable broken with latest eval auto-complete work.
