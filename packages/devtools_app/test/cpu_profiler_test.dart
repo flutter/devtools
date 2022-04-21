@@ -31,6 +31,7 @@ void main() {
   final ServiceConnectionManager fakeServiceManager = FakeServiceManager();
   when(fakeServiceManager.connectedApp!.isFlutterNativeAppNow)
       .thenReturn(false);
+  when(fakeServiceManager.connectedApp!.isFlutterAppNow).thenReturn(false);
 
   setUp(() async {
     final transformer = CpuProfileTransformer();
