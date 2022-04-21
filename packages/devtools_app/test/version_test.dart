@@ -3,8 +3,6 @@
 // found in the LICENSE file.
 
 // Ignoring redundant argument values makes the test easier to read.
-// ignore_for_file: avoid_redundant_argument_values
-
 import 'package:devtools_app/src/shared/version.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -145,7 +143,7 @@ void main() {
         equals('3.2.0'),
       );
 
-      version = SemanticVersion(major: 3, minor: 0, patch: 0);
+      version = SemanticVersion(major: 3);
       expect(
         version
             .downgrade(

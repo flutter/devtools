@@ -11,7 +11,6 @@ import 'package:vm_service/vm_service.dart' hide VmService;
 import '../../primitives/auto_dispose.dart';
 import '../../service/vm_service_wrapper.dart';
 import '../../shared/globals.dart';
-// ignore: import_of_legacy_library_into_null_safe
 import '../profiler/cpu_profile_controller.dart';
 import 'vm_service_private_extensions.dart';
 

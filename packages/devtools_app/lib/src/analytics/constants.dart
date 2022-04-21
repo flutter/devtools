@@ -4,8 +4,6 @@
 
 // Type of events (event_category):
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import '../screens/inspector/inspector_screen.dart';
 import '../screens/logging/logging_screen.dart';
 import '../screens/memory/memory_screen.dart';
