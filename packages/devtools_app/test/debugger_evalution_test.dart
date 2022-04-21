@@ -21,13 +21,14 @@ void main() {
     const FlutterRunConfiguration(withDebugger: true),
   );
 
+  final DebuggerController debuggerController = TestDebuggerController();
+
   late Disposable isAlive;
-  late DebuggerController debuggerController;
   late EvalOnDartLibrary eval;
+
   setUp(() async {
     isAlive = Disposable();
     await env.setupEnvironment();
-    debuggerController = TestDebuggerController();
     eval = EvalOnDartLibrary(
       'package:flutter_app/src/autocomplete.dart',
       serviceManager.service!,
