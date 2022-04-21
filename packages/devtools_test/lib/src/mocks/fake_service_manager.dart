@@ -83,7 +83,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   bool get isServiceAvailable => hasConnection;
 
   @override
-  ConnectedApp? connectedApp = MockConnectedApp();
+  ConnectedApp? connectedApp = MockConnectedAppLegacy();
 
   @override
   final ConsoleService consoleService = ConsoleService();
