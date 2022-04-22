@@ -73,7 +73,8 @@ void main() {
       when(app.isDartWebAppNow).thenReturn(false);
       when(app.isRunningOnDartVM).thenReturn(true);
       mockIsFlutterApp(
-          fakeServiceManager.connectedApp as MockConnectedAppLegacy);
+        fakeServiceManager.connectedApp as MockConnectedAppLegacy,
+      );
       final flutterVersion =
           FlutterVersion.parse((await fakeServiceManager.flutterVersion).json!);
 
@@ -124,7 +125,8 @@ void main() {
       when(app.isDartWebAppNow).thenReturn(false);
       when(app.isRunningOnDartVM).thenReturn(true);
       mockIsFlutterApp(
-          fakeServiceManager.connectedApp as MockConnectedAppLegacy);
+        fakeServiceManager.connectedApp as MockConnectedAppLegacy,
+      );
 
       await tester.pumpWidget(wrap(vmFlagsDialog));
       expect(find.text('VM Flags'), findsOneWidget);
