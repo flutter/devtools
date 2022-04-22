@@ -250,8 +250,10 @@ void mockFlutterVersion(
   when(connectedApp.connectedAppInitialized).thenReturn(true);
 }
 
-void mockIsDartVmApp(MockConnectedAppLegacy connectedApp,
-    [isDartVmApp = true]) {
+void mockIsDartVmApp(
+  MockConnectedAppLegacy connectedApp, [
+  isDartVmApp = true,
+]) {
   when(connectedApp.isRunningOnDartVM).thenReturn(isDartVmApp);
   when(connectedApp.connectedAppInitialized).thenReturn(true);
 }
