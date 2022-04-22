@@ -81,7 +81,7 @@ class ExtensionEvent {
         json['timestamp'] as int?,
         json['eventKind'] as String?,
         json['customEventName'] as String?,
-        json['data'] as Map<String, Object>?,
+        (json['data'] as Map?)?.cast<String, Object>(),
       );
 
   Map<String, dynamic> toJson() => <String, dynamic>{
@@ -213,18 +213,23 @@ class EventSample {
         isEventSnapshotAuto = false,
         allocationAccumulator = null;
 
-  factory EventSample.fromJson(Map<String, dynamic> json) => EventSample(
-        json['timestamp'] as int,
-        (json['gcEvent'] as bool?) ?? false,
-        (json['snapshotEvent'] as bool?) ?? false,
-        (json['snapshotAutoEvent'] as bool?) ?? false,
-        json['allocationAccumulatorEvent'] != null
-            ? AllocationAccumulator.fromJson(json['allocationAccumulatorEvent'])
-            : null,
-        json['extensionEvents'] != null
-            ? ExtensionEvents.fromJson(json['extensionEvents'])
-            : null,
-      );
+  factory EventSample.fromJson(Map<String, dynamic> json) {
+    final extensionEvents =
+        (json['extensionEvents'] as Map?)?.cast<String, Object>();
+
+    return EventSample(
+      json['timestamp'] as int,
+      (json['gcEvent'] as bool?) ?? false,
+      (json['snapshotEvent'] as bool?) ?? false,
+      (json['snapshotAutoEvent'] as bool?) ?? false,
+      json['allocationAccumulatorEvent'] != null
+          ? AllocationAccumulator.fromJson(json['allocationAccumulatorEvent'])
+          : null,
+      extensionEvents != null
+          ? ExtensionEvents.fromJson(extensionEvents)
+          : null,
+    );
+  }
 
   Map<String, dynamic> toJson() => <String, dynamic>{
         'timestamp': timestamp,
