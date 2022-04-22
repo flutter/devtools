@@ -78,7 +78,7 @@ void main() {
 
       screen = const DebuggerScreen();
 
-      debuggerController = MockDebuggerController.withDefaults();
+      debuggerController = createMockDebuggerControllerWithDefaults();
     });
 
     testWidgets('builds its tab', (WidgetTester tester) async {
