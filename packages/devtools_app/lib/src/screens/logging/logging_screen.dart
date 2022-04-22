@@ -39,7 +39,7 @@ class LoggingScreen extends Screen {
   Widget build(BuildContext context) => const LoggingScreenBody();
 
   @override
-  Widget buildStatus(BuildContext context, TextTheme textTheme) {
+  Widget buildStatus(BuildContext context) {
     final LoggingController controller =
         Provider.of<LoggingController>(context);
 

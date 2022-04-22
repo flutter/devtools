@@ -13,21 +13,22 @@ file.
 ## Workflow for making changes
 
 - Create a branch from your cloned repo: `git checkout -b myBranch`
+- Refresh local code: `sh tool/refresh.sh`
+- Implement your changes
 - Commit work to your branch: `git commit -m “description”`
 - Push to your branch: `git push origin myBranch`
 - Navigate to the Pull Requests tab in the main [DevTools repo](https://github.com/flutter/devtools). You should see a popup to create a pull request from the branch in your cloned repo to DevTools master. Create a pull request.
 
 ### Keeping your fork in-sync
 
-- Fetch branches/commits from the upstream DevTools: `git fetch upstream`
-- From your local branch, merge in the upstream master branch: `git merge upstream/master`
+- Pull the code from the upstream DevTools and refresh local code: `sh tool/pull_and_refresh.sh`
 
 ## Development prep
 
 1. If you haven't already, follow the [instructions](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh) to generate a new SSH key and connect to Github with SSH
 2. Follow the [instructions](https://docs.github.com/en/get-started/quickstart/fork-a-repo) to fork the DevTools repo to your own Github account, and clone using SSH
 3. Make sure to [configure Git to keep your fork in sync](https://docs.github.com/en/get-started/quickstart/fork-a-repo#configuring-git-to-sync-your-fork-with-the-original-repository) with the main DevTools repo
-4. Finally, update to the newest version of the package with `cd packages/devtools_app` and `flutter pub upgrade`
+4. Finally, run `sh tool/refresh.sh` to pull the latest version from repo, generate missing code and upgrade dependencies.
 
 From a separate terminal, start running a flutter app to connect to DevTools:
 - `git clone https://github.com/flutter/gallery.git` (this is an existing application with many examples of Flutter widgets)
@@ -40,6 +41,14 @@ From a separate terminal, start running a flutter app to connect to DevTools:
 ## Development
 
 *NOTE:* Though DevTools is shipped as a Flutter Web app, we recommend developing as a Flutter Desktop app where possible for a more efficient development workflow. Please see the [Desktop Embedder] section below for instructions on running DevTools as a Flutter Desktop app.
+
+To pull fresh version, regenerate code and upgrade dependencies:
+
+- `sh tool/pull_and_refresh.sh`
+
+To regenerate mocks and upgrade dependencies (after switching branches, for example):
+
+- `sh tool/refresh.sh`
 
 To run DevTools as a Flutter web app, from the packages/devtools_app directory:
 

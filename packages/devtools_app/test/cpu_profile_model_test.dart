@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: avoid_redundant_argument_values
-
 import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profile_model.dart';
+import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -16,6 +17,16 @@ void main() {
     final cpuProfileData = CpuProfileData.parse(cpuProfileResponseJson);
     final cpuSamples = CpuSamples.parse(goldenCpuSamplesJson)!;
 
+    setUp(() {
+      setGlobal(
+        ServiceConnectionManager,
+        FakeServiceManager(
+          service: FakeServiceManager.createFakeService(
+            resolvedUriMap: goldenResolvedUriMap,
+          ),
+        ),
+      );
+    });
     test('init from parse', () {
       expect(
         cpuProfileData.stackFramesJson,
@@ -63,7 +74,7 @@ void main() {
     test('filterFrom', () {
       final filteredProfile = CpuProfileData.filterFrom(
         cpuProfileData,
-        (stackFrame) => !stackFrame.processedUrl.startsWith('dart:'),
+        (stackFrame) => !stackFrame.packageUri.startsWith('dart:'),
       );
       expect(
         filteredProfile.stackFramesJson,
@@ -84,12 +95,69 @@ void main() {
       expect(cpuSamples.toJson(), equals(goldenCpuSamplesJson));
     });
 
-    test('converts golden samples to golden cpu profile data', () {
-      final generatedCpuProfileData = CpuProfileData.generateFromCpuSamples(
+    test('profileData to json', () {
+      expect(cpuProfileData.toJson, equals(goldenCpuProfileDataJson));
+    });
+
+    test('converts golden samples to golden cpu profile data', () async {
+      final generatedCpuProfileData =
+          await CpuProfileData.generateFromCpuSamples(
         isolateId: goldenSamplesIsolate,
         cpuSamples: CpuSamples.parse(goldenCpuSamplesJson)!,
       );
+
       expect(generatedCpuProfileData.toJson, equals(goldenCpuProfileDataJson));
+    });
+
+    test('to json defaults packageUri to resolvedUrl', () {
+      const id = '140357727781376-12';
+      final profileData = Map<String, dynamic>.from(goldenCpuProfileDataJson);
+      profileData['stackFrames'] = Map<String, Map<String, String>>.from(
+        {id: goldenCpuProfileStackFrames[id]},
+      );
+      profileData['stackFrames'][id]
+          .remove(CpuProfileData.resolvedPackageUriKey);
+
+      final parsedProfileData = CpuProfileData.parse(profileData);
+
+      final jsonPackageUri = parsedProfileData.stackFrames[id]!.packageUri;
+      expect(jsonPackageUri, goldenCpuProfileStackFrames[id]!['resolvedUrl']);
+    });
+
+    test('generateFromCpuSamples handles duplicate resolvedUrls', () async {
+      const resolvedUrl = 'the/resolved/Url';
+      const packageUri = 'the/package/Uri';
+      setGlobal(
+        ServiceConnectionManager,
+        FakeServiceManager(
+          service: FakeServiceManager.createFakeService(
+            resolvedUriMap: {resolvedUrl: packageUri},
+          ),
+        ),
+      );
+      final cpuSamples = CpuSamples.parse(goldenCpuSamplesJson);
+      cpuSamples!.functions = cpuSamples.functions!.sublist(0, 3);
+      cpuSamples.samples = cpuSamples.samples!.sublist(0, 2);
+      cpuSamples.samples![0].stack = [0];
+      cpuSamples.samples![1].stack = [1];
+      cpuSamples.functions![0].resolvedUrl = resolvedUrl;
+      cpuSamples.functions![1].resolvedUrl = resolvedUrl;
+      cpuSamples.sampleCount = 2;
+
+      final cpuProfileData = await CpuProfileData.generateFromCpuSamples(
+        isolateId: goldenSamplesIsolate,
+        cpuSamples: cpuSamples,
+      );
+
+      expect(cpuProfileData.stackFrames.length, equals(2));
+      expect(
+        cpuProfileData.stackFrames.values.toList()[0].packageUri,
+        equals(packageUri),
+      );
+      expect(
+        cpuProfileData.stackFrames.values.toList()[1].packageUri,
+        equals(packageUri),
+      );
     });
 
     test('stackFrameIdCompare', () {
@@ -120,6 +188,7 @@ void main() {
           verboseName: 'all',
           category: 'Dart',
           rawUrl: '',
+          packageUri: '',
           sourceLine: null,
           parentId: '',
           profileMetaData: profileMetaData,
@@ -193,6 +262,42 @@ void main() {
         equals(stackFrameD.exclusiveSampleCount),
       );
       expect(copy.inclusiveSampleCount, copy.exclusiveSampleCount);
+      expect(copy.sourceLine, equals(stackFrameD.sourceLine));
+    });
+
+    test('shallowCopy overrides', () {
+      final overrides = {
+        'id': 'overriddenId',
+        'name': 'overriddenName',
+        'verboseName': 'overriddenVerboseName',
+        'category': 'overriddenCategory',
+        'url': 'overriddenUrl',
+        'packageUri': 'overriddenPackageUri',
+        'parentId': 'overriddenParentId',
+      };
+      const overriddenSourceLine = 98329;
+
+      final copy = stackFrameC.shallowCopy(
+        id: overrides['id']!,
+        name: overrides['name']!,
+        verboseName: overrides['verboseName']!,
+        category: overrides['category']!,
+        url: overrides['url']!,
+        packageUri: overrides['packageUri']!,
+        parentId: overrides['parentId']!,
+        sourceLine: overriddenSourceLine,
+        profileMetaData: stackFrameD.profileMetaData,
+      );
+
+      expect(copy.id, equals(overrides['id']));
+      expect(copy.name, equals(overrides['name']));
+      expect(copy.verboseName, equals(overrides['verboseName']));
+      expect(copy.category, equals(overrides['category']));
+      expect(copy.rawUrl, equals(overrides['url']));
+      expect(copy.packageUri, equals(overrides['packageUri']));
+      expect(copy.parentId, equals(overrides['parentId']));
+      expect(copy.sourceLine, equals(overriddenSourceLine));
+      expect(copy.profileMetaData, stackFrameD.profileMetaData);
     });
 
     test('deepCopy', () {
@@ -223,6 +328,35 @@ void main() {
       expect(zeroStackFrame.totalTimeRatio, 0.0);
       expect(zeroStackFrame.selfTime, const Duration());
       expect(zeroStackFrame.selfTimeRatio, 0.0);
+    });
+
+    test('tooltip', () {
+      expect(
+        stackFrameA.tooltip,
+        equals('[Native] A - 0.1 ms'),
+      );
+      expect(
+        stackFrameB.tooltip,
+        equals('[Dart] B - 0.1 ms - dart:async/zone.dart:2222'),
+      );
+    });
+
+    group('packageUriWithSourceLine', () {
+      test('with a sourceLine', () {
+        const sourceLine = 38239;
+        final copy = stackFrameD.shallowCopy(sourceLine: sourceLine);
+        expect(
+          copy.packageUriWithSourceLine,
+          equals('processedflutter::AnimatorBeginFrame:$sourceLine'),
+        );
+      });
+
+      test('without sourceLine', () {
+        expect(
+          stackFrameD.packageUriWithSourceLine,
+          equals('processedflutter::AnimatorBeginFrame'),
+        );
+      });
     });
   });
 

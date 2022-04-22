@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'dart:async';
 import 'dart:core';
 
@@ -23,6 +21,7 @@ import '../shared/error_badge_manager.dart';
 import '../shared/globals.dart';
 import '../shared/title.dart';
 import 'isolate_manager.dart';
+import 'resolved_uri_manager.dart';
 import 'service_extension_manager.dart';
 import 'service_registrations.dart' as registrations;
 import 'vm_flags.dart';
@@ -79,6 +78,8 @@ class ServiceConnectionManager {
   final isolateManager = IsolateManager();
 
   final consoleService = ConsoleService();
+
+  final resolvedUriManager = ResolvedUriManager();
 
   InspectorServiceBase? get inspectorService => _inspectorService;
   InspectorServiceBase? _inspectorService;
@@ -181,6 +182,7 @@ class ServiceConnectionManager {
     isolateManager.vmServiceOpened(service);
     consoleService.vmServiceOpened(service);
     serviceExtensionManager.vmServiceOpened(service, connectedApp!);
+    resolvedUriManager.vmServiceOpened();
     await vmFlagManager.vmServiceOpened(service);
     await timelineStreamManager.vmServiceOpened(service, connectedApp!);
     // This needs to be called last in the above group of `vmServiceOpened`
@@ -332,6 +334,7 @@ class ServiceConnectionManager {
     vmFlagManager.vmServiceClosed();
     timelineStreamManager.vmServiceClosed();
     serviceExtensionManager.vmServiceClosed();
+    resolvedUriManager.vmServiceClosed();
 
     serviceTrafficLogger?.dispose();
 

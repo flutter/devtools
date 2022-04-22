@@ -11,7 +11,6 @@ import '../../shared/common_widgets.dart';
 import '../../shared/split.dart';
 import '../../shared/table.dart';
 import '../../shared/table_data.dart';
-// ignore: import_of_legacy_library_into_null_safe
 import '../profiler/cpu_profiler.dart';
 import 'isolate_statistics_view_controller.dart';
 import 'vm_developer_common_widgets.dart';

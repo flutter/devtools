@@ -253,7 +253,7 @@ class CpuProfilerController
     final currentStackFrames = _dataNotifier.value!.stackFrames.values;
     for (final frame in currentStackFrames) {
       if (frame.name.caseInsensitiveContains(regexSearch) ||
-          frame.processedUrl.caseInsensitiveContains(regexSearch)) {
+          frame.packageUri.caseInsensitiveContains(regexSearch)) {
         matches.add(frame);
       }
     }

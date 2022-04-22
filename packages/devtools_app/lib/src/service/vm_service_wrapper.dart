@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'dart:async';
 
 import 'package:dds_service_extensions/dds_service_extensions.dart';

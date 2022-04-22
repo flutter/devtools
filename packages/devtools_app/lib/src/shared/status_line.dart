@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -15,6 +13,7 @@ import '../analytics/constants.dart' as analytics_constants;
 import '../info/info_controller.dart';
 import '../service/isolate_manager.dart';
 import '../service/service_manager.dart';
+import '../ui/utils.dart';
 import 'common_widgets.dart';
 import 'device_dialog.dart';
 import 'globals.dart';
@@ -35,92 +34,61 @@ class StatusLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
+    return ValueListenableBuilder<bool>(
+      valueListenable: currentScreen.showIsolateSelector,
+      builder: (context, showIsolateSelector, _) {
+        return Container(
+          height: statusLineHeight,
+          alignment: Alignment.centerLeft,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: _getStatusItems(context, showIsolateSelector),
+          ),
+        );
+      },
+    );
+  }
 
-    final List<Widget> children = [];
-
-    // Have an area for page specific help (always docked to the left).
-    children.add(
+  List<Widget> _getStatusItems(BuildContext context, bool showIsolateSelector) {
+    final isExtraNarrow = ScreenSize(context).width == MediaSize.xxs;
+    final isNarrow = isExtraNarrow || ScreenSize(context).width == MediaSize.xs;
+    final Widget? pageStatus = currentScreen.buildStatus(context);
+    return [
       Expanded(
         child: Align(
           alignment: Alignment.centerLeft,
-          child: buildHelpUrlStatus(context, currentScreen, textTheme),
+          child: buildHelpUrlStatus(context, currentScreen, isNarrow),
         ),
       ),
-    );
-
-    children.add(const BulletSpacer());
-
-    // Display an isolate selector.
-    children.add(
-      ValueListenableBuilder<bool>(
-        valueListenable: currentScreen.showIsolateSelector,
-        builder: (context, showIsolateSelector, _) {
-          return showIsolateSelector
-              ? Flexible(
-                  child: Row(
-                    children: const [
-                      Expanded(
-                        child: Center(
-                          child: IsolateSelector(),
-                        ),
-                      ),
-                      BulletSpacer(),
-                    ],
-                  ),
-                )
-              : Container();
-        },
-      ),
-    );
-
-    // Display page specific status.
-    final Widget? pageStatus =
-        buildPageStatus(context, currentScreen, textTheme);
-
-    if (pageStatus != null) {
-      children.add(
-        Expanded(
-          child: Align(
-            child: buildPageStatus(context, currentScreen, textTheme),
-          ),
-        ),
-      );
-
-      children.add(const BulletSpacer());
-    }
-
-    // Always display connection status (docked to the right).
-    children.add(
+      const BulletSpacer(),
+      if (!isExtraNarrow && showIsolateSelector) ...[
+        const IsolateSelector(),
+        const BulletSpacer(),
+      ],
+      if (!isNarrow && pageStatus != null) ...[
+        pageStatus,
+        const BulletSpacer(),
+      ],
       Expanded(
         child: Align(
           alignment: Alignment.centerRight,
-          child: buildConnectionStatus(textTheme),
+          child: buildConnectionStatus(context, isExtraNarrow),
         ),
       ),
-    );
-
-    return Container(
-      height: statusLineHeight,
-      alignment: Alignment.centerLeft,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: children,
-      ),
-    );
+    ];
   }
 
   Widget buildHelpUrlStatus(
     BuildContext context,
     Screen currentScreen,
-    TextTheme textTheme,
+    bool isNarrow,
   ) {
     final String? docPageId = currentScreen.docPageId;
     if (docPageId != null) {
       return RichText(
         text: LinkTextSpan(
           link: Link(
-            display: 'flutter.dev/devtools/$docPageId',
+            display: isNarrow ? docPageId : 'flutter.dev/devtools/$docPageId',
             url: 'https://flutter.dev/devtools/$docPageId',
           ),
           onTap: () {
@@ -134,19 +102,13 @@ class StatusLine extends StatelessWidget {
       );
     } else {
       // Use a placeholder for pages with no explicit documentation.
-      return const Text('DevTools ${devtools.version}');
+      return Text('${isNarrow ? '' : 'DevTools '}${devtools.version}');
     }
   }
 
-  Widget? buildPageStatus(
-    BuildContext context,
-    Screen currentScreen,
-    TextTheme textTheme,
-  ) {
-    return currentScreen.buildStatus(context, textTheme);
-  }
-
-  Widget buildConnectionStatus(TextTheme textTheme) {
+  Widget buildConnectionStatus(BuildContext context, bool isExtraNarrow) {
+    final textTheme = Theme.of(context).textTheme;
+    const noConnectionMsg = 'No client connection';
     return ValueListenableBuilder<ConnectedState>(
       valueListenable: serviceManager.connectedState,
       builder: (context, connectedState, child) {
@@ -162,7 +124,7 @@ class StatusLine extends StatelessWidget {
                 '${vm.targetCPU}-${vm.architectureBits} ${vm.operatingSystem}';
           }
 
-          final color = Theme.of(context).textTheme.bodyText2!.color;
+          final color = textTheme.bodyText2!.color;
 
           return Row(
             mainAxisAlignment: MainAxisAlignment.end,
@@ -205,12 +167,14 @@ class StatusLine extends StatelessWidget {
                         Icons.info_outline,
                         size: actionsIconSize,
                       ),
-                      const SizedBox(width: denseSpacing),
-                      Text(
-                        description,
-                        style: textTheme.bodyText2,
-                        overflow: TextOverflow.clip,
-                      ),
+                      if (!isExtraNarrow) ...[
+                        const SizedBox(width: denseSpacing),
+                        Text(
+                          description,
+                          style: textTheme.bodyText2,
+                          overflow: TextOverflow.clip,
+                        ),
+                      ]
                     ],
                   ),
                 ),
@@ -221,10 +185,18 @@ class StatusLine extends StatelessWidget {
           return child!;
         }
       },
-      child: Text(
-        'No client connection',
-        style: textTheme.bodyText2,
-      ),
+      child: isExtraNarrow
+          ? DevToolsTooltip(
+              message: noConnectionMsg,
+              child: Icon(
+                Icons.warning_amber_rounded,
+                size: actionsIconSize,
+              ),
+            )
+          : Text(
+              noConnectionMsg,
+              style: textTheme.bodyText2,
+            ),
     );
   }
 }
@@ -234,42 +206,52 @@ class IsolateSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
     final IsolateManager isolateManager = serviceManager.isolateManager;
     return DualValueListenableBuilder<List<IsolateRef?>, IsolateRef?>(
       firstListenable: isolateManager.isolates,
       secondListenable: isolateManager.selectedIsolate,
       builder: (context, isolates, selectedIsolateRef, _) {
-        return DevToolsTooltip(
-          message: 'Selected Isolate',
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<IsolateRef?>(
-              value: selectedIsolateRef,
-              onChanged: isolateManager.selectIsolate,
-              isDense: true,
-              items: isolates.where((ref) => ref != null).map(
-                (ref) {
-                  return DropdownMenuItem<IsolateRef>(
-                    value: ref,
-                    child: Row(
-                      children: [
-                        ref!.isSystemIsolate ?? false
-                            ? const Icon(Icons.settings_applications)
-                            : const Icon(Icons.call_split),
-                        const SizedBox(width: denseSpacing),
-                        Text(
-                          _isolateName(ref),
-                          style: textTheme.bodyText2,
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ).toList(),
-            ),
-          ),
+        return PopupMenuButton<IsolateRef?>(
+          child: IsolateOption(isolateManager.selectedIsolate.value),
+          tooltip: 'Selected Isolate',
+          initialValue: selectedIsolateRef,
+          onSelected: isolateManager.selectIsolate,
+          itemBuilder: (BuildContext context) =>
+              isolates.where((ref) => ref != null).map(
+            (ref) {
+              return PopupMenuItem<IsolateRef>(
+                value: ref,
+                child: IsolateOption(ref!),
+              );
+            },
+          ).toList(),
         );
       },
+    );
+  }
+}
+
+class IsolateOption extends StatelessWidget {
+  const IsolateOption(
+    this.ref,
+  );
+
+  final IsolateRef? ref;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return Row(
+      children: [
+        ref?.isSystemIsolate ?? false
+            ? const Icon(Icons.settings_applications)
+            : const Icon(Icons.call_split),
+        const SizedBox(width: denseSpacing),
+        Text(
+          ref == null ? 'isolate' : _isolateName(ref!),
+          style: textTheme.bodyText2,
+        ),
+      ],
     );
   }
 

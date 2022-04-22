@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: avoid_redundant_argument_values, false positive on required nullable parameters, import_of_legacy_library_into_null_safe
-
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/provider/instance_viewer/instance_details.dart';
 import 'package:devtools_app/src/screens/provider/instance_viewer/instance_providers.dart';

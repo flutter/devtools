@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:devtools_app/src/analytics/analytics_controller.dart';
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
@@ -21,18 +19,18 @@ import 'package:mockito/mockito.dart';
 
 void main() {
   group('DevToolsScaffold widget', () {
-    MockServiceManager mockServiceManager;
+    MockServiceManager? mockServiceManager;
 
     setUp(() {
       mockServiceManager = MockServiceManager();
-      when(mockServiceManager.service).thenReturn(null);
-      when(mockServiceManager.connectedAppInitialized).thenReturn(false);
-      when(mockServiceManager.connectedState).thenReturn(
+      when(mockServiceManager!.service).thenReturn(null);
+      when(mockServiceManager!.connectedAppInitialized).thenReturn(false);
+      when(mockServiceManager!.connectedState).thenReturn(
         ValueNotifier<ConnectedState>(const ConnectedState(false)),
       );
 
       final mockErrorBadgeManager = MockErrorBadgeManager();
-      when(mockServiceManager.errorBadgeManager)
+      when(mockServiceManager!.errorBadgeManager)
           .thenReturn(mockErrorBadgeManager);
       when(mockErrorBadgeManager.errorCountNotifier(any))
           .thenReturn(ValueNotifier<int>(0));
@@ -151,8 +149,8 @@ void main() {
       final mockConnectedApp = MockConnectedApp();
       when(mockConnectedApp.isFlutterAppNow).thenReturn(true);
       when(mockConnectedApp.isProfileBuildNow).thenReturn(false);
-      when(mockServiceManager.connectedAppInitialized).thenReturn(true);
-      when(mockServiceManager.connectedApp).thenReturn(mockConnectedApp);
+      when(mockServiceManager!.connectedAppInitialized).thenReturn(true);
+      when(mockServiceManager!.connectedApp).thenReturn(mockConnectedApp);
       final mockDebuggerController = MockDebuggerController();
       when(mockDebuggerController.isPaused)
           .thenReturn(ValueNotifier<bool>(true));
@@ -177,8 +175,8 @@ void main() {
       final mockConnectedApp = MockConnectedApp();
       when(mockConnectedApp.isFlutterAppNow).thenReturn(true);
       when(mockConnectedApp.isProfileBuildNow).thenReturn(true);
-      when(mockServiceManager.connectedAppInitialized).thenReturn(true);
-      when(mockServiceManager.connectedApp).thenReturn(mockConnectedApp);
+      when(mockServiceManager!.connectedAppInitialized).thenReturn(true);
+      when(mockServiceManager!.connectedApp).thenReturn(mockConnectedApp);
       final mockDebuggerController = MockDebuggerController();
       when(mockDebuggerController.isPaused)
           .thenReturn(ValueNotifier<bool>(true));
@@ -204,8 +202,8 @@ void main() {
       final mockConnectedApp = MockConnectedApp();
       when(mockConnectedApp.isFlutterAppNow).thenReturn(true);
       when(mockConnectedApp.isProfileBuildNow).thenReturn(false);
-      when(mockServiceManager.connectedAppInitialized).thenReturn(true);
-      when(mockServiceManager.connectedApp).thenReturn(mockConnectedApp);
+      when(mockServiceManager!.connectedAppInitialized).thenReturn(true);
+      when(mockServiceManager!.connectedApp).thenReturn(mockConnectedApp);
       final mockDebuggerController = MockDebuggerController();
       when(mockDebuggerController.isPaused)
           .thenReturn(ValueNotifier<bool>(false));
@@ -254,7 +252,7 @@ void main() {
     testWidgets(
         'does not display floating debugger tab controls when no app is connected',
         (WidgetTester tester) async {
-      when(mockServiceManager.connectedAppInitialized).thenReturn(false);
+      when(mockServiceManager!.connectedAppInitialized).thenReturn(false);
       await tester.pumpWidget(
         wrapScaffold(
           wrapWithNotifications(
@@ -277,7 +275,7 @@ class _TestScreen extends Screen {
     this.name,
     this.key, {
     bool showFloatingDebuggerControls = true,
-    Key tabKey,
+    Key? tabKey,
   }) : super(
           name,
           title: name,

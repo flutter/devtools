@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profile_controller.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profile_model.dart';
@@ -24,6 +22,7 @@ void main() {
       fakeServiceManager = FakeServiceManager(
         service: FakeServiceManager.createFakeService(
           cpuSamples: CpuSamples.parse(goldenCpuSamplesJson),
+          resolvedUriMap: goldenResolvedUriMap,
         ),
       );
       setGlobal(ServiceConnectionManager, fakeServiceManager);
