@@ -14,6 +14,7 @@ import 'package:vm_service/vm_service.dart';
   ConnectedApp,
   ErrorBadgeManager,
   HeapSnapshotGraph,
+  ProgramExplorerController,
   VmServiceWrapper,
 ])
 void main() {}

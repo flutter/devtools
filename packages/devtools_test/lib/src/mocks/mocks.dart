@@ -158,7 +158,8 @@ class TestDebuggerController extends DebuggerController {
   @override
   ProgramExplorerController get programExplorerController =>
       _explorerController;
-  final _explorerController = MockProgramExplorerController.withDefaults();
+  final _explorerController =
+      MockProgramExplorerControllerLegacy.withDefaults();
 }
 
 class MockDebuggerController extends Mock implements DebuggerController {
@@ -192,17 +193,17 @@ class MockDebuggerController extends Mock implements DebuggerController {
 
   @override
   final ProgramExplorerController programExplorerController =
-      MockProgramExplorerController.withDefaults();
+      MockProgramExplorerControllerLegacy.withDefaults();
 }
 
 class MockScriptManager extends Mock implements ScriptManager {}
 
-class MockProgramExplorerController extends Mock
+class MockProgramExplorerControllerLegacy extends Mock
     implements ProgramExplorerController {
-  MockProgramExplorerController();
+  MockProgramExplorerControllerLegacy();
 
-  factory MockProgramExplorerController.withDefaults() {
-    final controller = MockProgramExplorerController();
+  factory MockProgramExplorerControllerLegacy.withDefaults() {
+    final controller = MockProgramExplorerControllerLegacy();
     when(controller.initialized).thenReturn(ValueNotifier(true));
     when(controller.rootObjectNodes).thenReturn(ValueNotifier([]));
     when(controller.outlineNodes).thenReturn(ValueNotifier([]));
