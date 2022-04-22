@@ -352,7 +352,11 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
                           initialFractions: const [0.8, 0.2],
                         )
                       : content,
-                  bottomNavigationBar: widget.embed ? null : _buildStatusLine(),
+                  bottomNavigationBar: DevToolsFooter(
+                    appPadding: widget.appPadding,
+                    currentScreen: _currentScreen,
+                    isEmbedded: widget.embed,
+                  ),
                 ),
               ),
             ),
@@ -443,30 +447,6 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     );
   }
 
-  Widget _buildStatusLine() {
-    final appPadding = widget.appPadding;
-
-    return Container(
-      height: scaleByFontFactor(24.0) +
-          widget.appPadding.top +
-          widget.appPadding.bottom,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const PaddedDivider(padding: EdgeInsets.zero),
-          Padding(
-            padding: EdgeInsets.only(
-              left: appPadding.left,
-              right: appPadding.right,
-              bottom: appPadding.bottom,
-            ),
-            child: StatusLine(_currentScreen),
-          ),
-        ],
-      ),
-    );
-  }
-
   /// Returns the width of the scaffold title, tabs and default icons.
   double _wideWidth(String title, DevToolsScaffold widget) {
     final textTheme = Theme.of(context).textTheme;
@@ -489,6 +469,43 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
           BulletSpacer.width;
     }
     return wideWidth;
+  }
+}
+
+class DevToolsFooter extends StatelessWidget {
+  const DevToolsFooter({
+    Key? key,
+    required this.appPadding,
+    required this.currentScreen,
+    required this.isEmbedded,
+  }) : super(key: key);
+
+  final EdgeInsets appPadding;
+  final Screen currentScreen;
+  final bool isEmbedded;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: scaleByFontFactor(24.0) + appPadding.top + appPadding.bottom,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const PaddedDivider(padding: EdgeInsets.zero),
+          Padding(
+            padding: EdgeInsets.only(
+              left: appPadding.left,
+              right: appPadding.right,
+              bottom: appPadding.bottom,
+            ),
+            child: StatusLine(
+              currentScreen,
+              isEmbedded,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

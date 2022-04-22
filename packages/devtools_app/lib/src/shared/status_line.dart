@@ -17,6 +17,7 @@ import '../ui/utils.dart';
 import 'common_widgets.dart';
 import 'device_dialog.dart';
 import 'globals.dart';
+import 'report_feedback_button.dart';
 import 'screen.dart';
 import 'theme.dart';
 import 'utils.dart';
@@ -28,9 +29,10 @@ double get statusLineHeight => scaleByFontFactor(24.0);
 /// This displays information global to the application, as well as gives pages
 /// a mechanism to display page-specific information.
 class StatusLine extends StatelessWidget {
-  const StatusLine(this.currentScreen);
+  const StatusLine(this.currentScreen, this.isEmbedded);
 
   final Screen currentScreen;
+  final bool isEmbedded;
 
   @override
   Widget build(BuildContext context) {
@@ -67,6 +69,10 @@ class StatusLine extends StatelessWidget {
       ],
       if (!isNarrow && pageStatus != null) ...[
         pageStatus,
+        const BulletSpacer(),
+      ],
+      if (isEmbedded && !isExtraNarrow) ...[
+        ReportFeedbackButton(),
         const BulletSpacer(),
       ],
       Expanded(
