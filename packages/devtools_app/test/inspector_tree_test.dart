@@ -32,7 +32,8 @@ void main() {
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(PreferencesController, PreferencesController());
     mockIsFlutterAppLegacy(
-        serviceManager.connectedApp as MockConnectedAppLegacy);
+      serviceManager.connectedApp as MockConnectedAppLegacy,
+    );
   });
 
   group('InspectorTreeController', () {
