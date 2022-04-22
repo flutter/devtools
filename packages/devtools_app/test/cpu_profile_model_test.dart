@@ -262,6 +262,42 @@ void main() {
         equals(stackFrameD.exclusiveSampleCount),
       );
       expect(copy.inclusiveSampleCount, copy.exclusiveSampleCount);
+      expect(copy.sourceLine, equals(stackFrameD.sourceLine));
+    });
+
+    test('shallowCopy overrides', () {
+      final overrides = {
+        'id': 'overriddenId',
+        'name': 'overriddenName',
+        'verboseName': 'overriddenVerboseName',
+        'category': 'overriddenCategory',
+        'url': 'overriddenUrl',
+        'packageUri': 'overriddenPackageUri',
+        'parentId': 'overriddenParentId',
+      };
+      const overriddenSourceLine = 98329;
+
+      final copy = stackFrameC.shallowCopy(
+        id: overrides['id']!,
+        name: overrides['name']!,
+        verboseName: overrides['verboseName']!,
+        category: overrides['category']!,
+        url: overrides['url']!,
+        packageUri: overrides['packageUri']!,
+        parentId: overrides['parentId']!,
+        sourceLine: overriddenSourceLine,
+        profileMetaData: stackFrameD.profileMetaData,
+      );
+
+      expect(copy.id, equals(overrides['id']));
+      expect(copy.name, equals(overrides['name']));
+      expect(copy.verboseName, equals(overrides['verboseName']));
+      expect(copy.category, equals(overrides['category']));
+      expect(copy.rawUrl, equals(overrides['url']));
+      expect(copy.packageUri, equals(overrides['packageUri']));
+      expect(copy.parentId, equals(overrides['parentId']));
+      expect(copy.sourceLine, equals(overriddenSourceLine));
+      expect(copy.profileMetaData, stackFrameD.profileMetaData);
     });
 
     test('deepCopy', () {
@@ -292,6 +328,35 @@ void main() {
       expect(zeroStackFrame.totalTimeRatio, 0.0);
       expect(zeroStackFrame.selfTime, const Duration());
       expect(zeroStackFrame.selfTimeRatio, 0.0);
+    });
+
+    test('tooltip', () {
+      expect(
+        stackFrameA.tooltip,
+        equals('[Native] A - 0.1 ms'),
+      );
+      expect(
+        stackFrameB.tooltip,
+        equals('[Dart] B - 0.1 ms - dart:async/zone.dart:2222'),
+      );
+    });
+
+    group('packageUriWithSourceLine', () {
+      test('with a sourceLine', () {
+        const sourceLine = 38239;
+        final copy = stackFrameD.shallowCopy(sourceLine: sourceLine);
+        expect(
+          copy.packageUriWithSourceLine,
+          equals('processedflutter::AnimatorBeginFrame:$sourceLine'),
+        );
+      });
+
+      test('without sourceLine', () {
+        expect(
+          stackFrameD.packageUriWithSourceLine,
+          equals('processedflutter::AnimatorBeginFrame'),
+        );
+      });
     });
   });
 
