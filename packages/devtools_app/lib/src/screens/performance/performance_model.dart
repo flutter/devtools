@@ -490,6 +490,16 @@ class FlutterFrame {
   /// Timeline event data for this [FlutterFrame].
   final FrameTimelineEventData timelineEventData = FrameTimelineEventData();
 
+  FrameAnalysis? get frameAnalysis {
+    if (_frameAnalysis != null) return _frameAnalysis!;
+    if (timelineEventData.isNotEmpty) {
+      return _frameAnalysis = FrameAnalysis(this);
+    }
+    return null;
+  }
+
+  FrameAnalysis? _frameAnalysis;
+
   bool get isWellFormed => timelineEventData.wellFormed;
 
   Duration get shaderDuration {

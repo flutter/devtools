@@ -108,7 +108,7 @@ void main() {
         expect(find.byType(FlutterFramesChart), findsOneWidget);
         expect(find.byType(TimelineFlameChart), findsOneWidget);
         expect(
-          find.byKey(TimelineAnalysisContainer.emptyTimelineKey),
+          find.byKey(TabbedPerformanceView.emptyTimelineKey),
           findsNothing,
         );
         expect(find.byType(EventDetails), findsOneWidget);
@@ -139,7 +139,7 @@ void main() {
         expect(find.byType(FlutterFramesChart), findsOneWidget);
         expect(find.byType(TimelineFlameChart), findsNothing);
         expect(
-          find.byKey(TimelineAnalysisContainer.emptyTimelineKey),
+          find.byKey(TabbedPerformanceView.emptyTimelineKey),
           findsOneWidget,
         );
         expect(find.byType(EventDetails), findsOneWidget);
@@ -171,7 +171,7 @@ void main() {
         expect(find.byType(FlutterFramesChart), findsNothing);
         expect(find.byType(TimelineFlameChart), findsOneWidget);
         expect(
-          find.byKey(TimelineAnalysisContainer.emptyTimelineKey),
+          find.byKey(TabbedPerformanceView.emptyTimelineKey),
           findsNothing,
         );
         expect(find.byType(EventDetails), findsOneWidget);
@@ -220,7 +220,7 @@ void main() {
         expect(find.byType(FlutterFramesChart), findsOneWidget);
         expect(find.byType(TimelineFlameChart), findsOneWidget);
         expect(
-          find.byKey(TimelineAnalysisContainer.emptyTimelineKey),
+          find.byKey(TabbedPerformanceView.emptyTimelineKey),
           findsNothing,
         );
         expect(find.byType(EventDetails), findsOneWidget);
@@ -231,7 +231,7 @@ void main() {
         expect(find.byType(FlutterFramesChart), findsOneWidget);
         expect(find.byType(TimelineFlameChart), findsNothing);
         expect(
-          find.byKey(TimelineAnalysisContainer.emptyTimelineKey),
+          find.byKey(TabbedPerformanceView.emptyTimelineKey),
           findsOneWidget,
         );
         expect(find.byType(EventDetails), findsOneWidget);

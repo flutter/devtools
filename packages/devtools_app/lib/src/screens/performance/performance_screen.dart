@@ -168,7 +168,7 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
             axis: Axis.vertical,
             initialFractions: const [0.7, 0.3],
             children: [
-              TimelineAnalysisContainer(
+              TabbedPerformanceView(
                 processing: processing,
                 processingProgress: processingProgress,
               ),
