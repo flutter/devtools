@@ -889,6 +889,9 @@ class ServiceExtensionTooltip extends StatelessWidget {
         borderRadius: BorderRadius.circular(defaultBorderRadius),
       ),
       textStyle: DefaultTextStyle.of(context).style,
+      tooltipTextColor: Theme.of(context).brightness == Brightness.dark
+          ? Colors.white
+          : Colors.black,
     );
   }
 }
