@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
@@ -1661,6 +1659,7 @@ class NotifierCheckbox extends StatelessWidget {
       valueListenable: notifier,
       builder: (context, bool? value, _) {
         return Checkbox(
+          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           value: value,
           onChanged: enabled ? _updateValue : null,
         );

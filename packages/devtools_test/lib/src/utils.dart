@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -16,6 +14,19 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as path;
 import 'package:vm_snapshot_analysis/treemap.dart';
+
+final screenIds = <String>[
+  AppSizeScreen.id,
+  DebuggerScreen.id,
+  InspectorScreen.id,
+  LoggingScreen.id,
+  MemoryScreen.id,
+  NetworkScreen.id,
+  PerformanceScreen.id,
+  ProfilerScreen.id,
+  ProviderScreen.id,
+  VMDeveloperToolsScreen.id,
+];
 
 /// Scoping method which registers `listener` as a listener for `listenable`,
 /// invokes `callback`, and then removes the `listener`.

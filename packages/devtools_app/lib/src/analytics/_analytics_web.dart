@@ -5,7 +5,7 @@
 @JS()
 library gtags;
 
-// ignore_for_file: import_of_legacy_library_into_null_safe, non_constant_identifier_names
+// ignore_for_file: non_constant_identifier_names
 
 import 'dart:async';
 import 'dart:html';

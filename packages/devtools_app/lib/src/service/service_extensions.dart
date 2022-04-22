@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 library service_extensions;
 
 import 'package:flutter/material.dart';
@@ -231,6 +229,26 @@ final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
   documentationUrl:
       'https://docs.flutter.dev/development/tools/devtools/performance#track-widget-builds',
   gaDocsItem: analytics_constants.trackWidgetBuildsDocs,
+);
+
+final profileUserWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
+  extension: 'ext.flutter.profileUserWidgetBuilds',
+  title: 'Track User-Created Widget Builds',
+  enabledIcon: const ThemedImageIcon(
+    lightModeAsset: 'icons/trackwidget-white.png',
+    darkModeAsset: 'icons/trackwidget-dgrey.png',
+  ),
+  disabledIcon: const ThemedImageIcon(
+    lightModeAsset: 'icons/trackwidget-dgrey.png',
+    darkModeAsset: 'icons/trackwidget-lgrey.png',
+  ),
+  enabledValue: true,
+  disabledValue: false,
+  gaScreenName: analytics_constants.performance,
+  gaItem: analytics_constants.trackUserCreatedWidgetBuilds,
+  description:
+      'Adds an event to the timeline for every Widget created in user code.',
+  tooltip: '',
 );
 
 final profileRenderObjectPaints = ToggleableServiceExtensionDescription<bool>._(
