@@ -33,8 +33,6 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
       when(errorBadgeManager.errorCountNotifier(screenId))
           .thenReturn(ValueNotifier<int>(0));
     }
-    when(connectedApp!.isFlutterAppNow).thenReturn(false);
-    when(connectedApp!.isDebugFlutterAppNow).thenReturn(false);
 
     vmServiceOpened(this.service!, onClosed: Future.value());
   }
