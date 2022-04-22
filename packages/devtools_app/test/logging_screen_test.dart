@@ -22,14 +22,30 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-void main() {
+void main() async {
   late LoggingScreen screen;
   late MockLoggingController mockLoggingController;
   const windowSize = Size(1000.0, 1000.0);
 
-  group('Logging Screen', () {
-    FakeServiceManager fakeServiceManager;
+  await ensureInspectorDependencies();
+  mockLoggingController = MockLoggingController();
+  when(mockLoggingController.data).thenReturn([]);
+  when(mockLoggingController.search).thenReturn('');
+  when(mockLoggingController.searchMatches)
+      .thenReturn(ValueNotifier<List<LogData>>([]));
+  when(mockLoggingController.searchInProgressNotifier)
+      .thenReturn(ValueNotifier<bool>(false));
+  when(mockLoggingController.matchIndex).thenReturn(ValueNotifier<int>(0));
+  when(mockLoggingController.filteredData)
+      .thenReturn(ListValueNotifier<LogData>([]));
 
+  final FakeServiceManager fakeServiceManager = FakeServiceManager();
+  when(fakeServiceManager.connectedApp!.isFlutterWebAppNow).thenReturn(false);
+  when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
+  when(fakeServiceManager.errorBadgeManager.errorCountNotifier('logging'))
+      .thenReturn(ValueNotifier<int>(0));
+
+  group('Logging Screen', () {
     Future<void> pumpLoggingScreen(WidgetTester tester) async {
       await tester.pumpWidget(
         wrapWithControllers(
@@ -40,25 +56,6 @@ void main() {
     }
 
     setUp(() async {
-      await ensureInspectorDependencies();
-      mockLoggingController = MockLoggingController();
-      when(mockLoggingController.data).thenReturn([]);
-      when(mockLoggingController.search).thenReturn('');
-      when(mockLoggingController.searchMatches)
-          .thenReturn(ValueNotifier<List<LogData>>([]));
-      when(mockLoggingController.searchInProgressNotifier)
-          .thenReturn(ValueNotifier<bool>(false));
-      when(mockLoggingController.matchIndex).thenReturn(ValueNotifier<int>(0));
-      when(mockLoggingController.filteredData)
-          .thenReturn(ListValueNotifier<LogData>([]));
-
-      fakeServiceManager = FakeServiceManager();
-      when(fakeServiceManager.connectedApp!.isFlutterWebAppNow)
-          .thenReturn(false);
-      when(fakeServiceManager.connectedApp!.isProfileBuildNow)
-          .thenReturn(false);
-      when(fakeServiceManager.errorBadgeManager.errorCountNotifier('logging'))
-          .thenReturn(ValueNotifier<int>(0));
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(IdeTheme, IdeTheme());
 
