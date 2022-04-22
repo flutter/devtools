@@ -132,6 +132,7 @@ elif [ "$BOT" = "test_ddc" ]; then
         # We are fixing them one by one and adding to the list below. After all
         # tests are fixed, we will delete this list and remove the flags from the commands.
         flutter test $DART_DEFINE_ARGS test/chart_test.dart
+        flutter test $DART_DEFINE_ARGS test/cpu_profiler_test
 
     elif [ "$PLATFORM" = "chrome" ]; then
         flutter test --platform chrome $DART_DEFINE_ARGS test/*.dart test/fixtures/ --no-sound-null-safety

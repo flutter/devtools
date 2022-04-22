@@ -44,14 +44,14 @@ void main() {
       SemanticVersion? flutterVersion,
     }) {
       mockIsDartVmApp(
-        fakeServiceManager.connectedApp as MockConnectedApp,
+        fakeServiceManager.connectedApp as MockConnectedAppLegacy,
         !web,
       );
       if (web) {
         fakeServiceManager.availableLibraries.add('dart:html');
       }
       mockIsFlutterApp(
-        fakeServiceManager.connectedApp as MockConnectedApp,
+        fakeServiceManager.connectedApp as MockConnectedAppLegacy,
         isFlutterApp: flutter,
         isProfileBuild: !debugMode,
       );
@@ -61,7 +61,7 @@ void main() {
       }
       flutterVersion ??= SemanticVersion(major: 2, minor: 3, patch: 1);
       mockFlutterVersion(
-        fakeServiceManager.connectedApp as MockConnectedApp,
+        fakeServiceManager.connectedApp as MockConnectedAppLegacy,
         flutterVersion,
       );
     }

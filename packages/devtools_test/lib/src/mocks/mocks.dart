@@ -121,7 +121,7 @@ class MockCpuSamples extends Mock implements CpuSamples {}
 // that will override the public getters on the class (e.g. isFlutterAppNow,
 // isProfileBuildNow, etc.). Do this after devtools_app is migrated to null
 // safety so that we can use null-safety here.
-class MockConnectedApp extends Mock implements ConnectedApp {}
+class MockConnectedAppLegacy extends Mock implements ConnectedApp {}
 
 class FakeConnectedApp extends Mock implements ConnectedApp {}
 
@@ -226,7 +226,7 @@ Future<void> ensureInspectorDependencies() async {
 }
 
 void mockIsFlutterApp(
-  MockConnectedApp connectedApp, {
+  MockConnectedAppLegacy connectedApp, {
   bool isFlutterApp = true,
   bool isProfileBuild = false,
 }) {
@@ -239,7 +239,7 @@ void mockIsFlutterApp(
 }
 
 void mockFlutterVersion(
-  MockConnectedApp connectedApp,
+  MockConnectedAppLegacy connectedApp,
   SemanticVersion version,
 ) {
   when(connectedApp.flutterVersionNow).thenReturn(
@@ -250,7 +250,8 @@ void mockFlutterVersion(
   when(connectedApp.connectedAppInitialized).thenReturn(true);
 }
 
-void mockIsDartVmApp(MockConnectedApp connectedApp, [isDartVmApp = true]) {
+void mockIsDartVmApp(MockConnectedAppLegacy connectedApp,
+    [isDartVmApp = true]) {
   when(connectedApp.isRunningOnDartVM).thenReturn(isDartVmApp);
   when(connectedApp.connectedAppInitialized).thenReturn(true);
 }
