@@ -8,6 +8,19 @@ import 'package:mockito/mockito.dart';
 
 import 'generated.mocks.dart';
 
+void mockIsFlutterApp(
+  MockConnectedApp connectedApp, {
+  bool isFlutterApp = true,
+  bool isProfileBuild = false,
+}) {
+  when(connectedApp.isFlutterAppNow).thenReturn(isFlutterApp);
+  when(connectedApp.isFlutterApp).thenAnswer((_) => Future.value(isFlutterApp));
+  when(connectedApp.connectedAppInitialized).thenReturn(true);
+  when(connectedApp.isDebugFlutterAppNow)
+      .thenReturn(!isProfileBuild && isFlutterApp);
+  when(connectedApp.isProfileBuildNow).thenReturn(isProfileBuild);
+}
+
 MockProgramExplorerController
     createMockProgramExplorerControllerWithDefaults() {
   final result = MockProgramExplorerController();

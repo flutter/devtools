@@ -50,7 +50,7 @@ void main() {
       if (web) {
         fakeServiceManager.availableLibraries.add('dart:html');
       }
-      mockIsFlutterApp(
+      mockIsFlutterAppLegacy(
         fakeServiceManager.connectedApp as MockConnectedAppLegacy,
         isFlutterApp: flutter,
         isProfileBuild: !debugMode,

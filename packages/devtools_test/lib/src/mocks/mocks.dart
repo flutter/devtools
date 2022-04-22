@@ -227,7 +227,7 @@ Future<void> ensureInspectorDependencies() async {
   );
 }
 
-void mockIsFlutterApp(
+void mockIsFlutterAppLegacy(
   MockConnectedAppLegacy connectedApp, {
   bool isFlutterApp = true,
   bool isProfileBuild = false,
