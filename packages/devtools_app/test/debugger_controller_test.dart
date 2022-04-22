@@ -11,36 +11,41 @@ import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
 void main() {
-  group('stdio', () {
-    final service = MockVmService();
-    when(service.onDebugEvent).thenAnswer((_) {
-      return const Stream.empty();
-    });
-    when(service.onVMEvent).thenAnswer((_) {
-      return const Stream.empty();
-    });
-    when(service.onIsolateEvent).thenAnswer((_) {
-      return const Stream.empty();
-    });
-    when(service.onStdoutEvent).thenAnswer((_) {
-      return const Stream.empty();
-    });
-    when(service.onStderrEvent).thenAnswer((_) {
-      return const Stream.empty();
-    });
-    when(service.onStdoutEventWithHistory).thenAnswer((_) {
-      return const Stream.empty();
-    });
-    when(service.onStderrEventWithHistory).thenAnswer((_) {
-      return const Stream.empty();
-    });
-    when(service.onExtensionEventWithHistory).thenAnswer((_) {
-      return const Stream.empty();
-    });
-    final manager = FakeServiceManager(service: service);
-    setGlobal(ServiceConnectionManager, manager);
-    manager.consoleService.ensureServiceInitialized();
+  final service = MockVmServiceWrapper();
+  when(service.getFlagList()).thenAnswer((_) async => FlagList(flags: []));
+  when(service.onDebugEvent).thenAnswer((_) {
+    return const Stream.empty();
+  });
+  when(service.onVMEvent).thenAnswer((_) {
+    return const Stream.empty();
+  });
+  when(service.onIsolateEvent).thenAnswer((_) {
+    return const Stream.empty();
+  });
+  when(service.onStdoutEvent).thenAnswer((_) {
+    return const Stream.empty();
+  });
+  when(service.onStderrEvent).thenAnswer((_) {
+    return const Stream.empty();
+  });
+  when(service.onStdoutEventWithHistory).thenAnswer((_) {
+    return const Stream.empty();
+  });
+  when(service.onStderrEventWithHistory).thenAnswer((_) {
+    return const Stream.empty();
+  });
+  when(service.onExtensionEventWithHistory).thenAnswer((_) {
+    return const Stream.empty();
+  });
+  final manager = FakeServiceManager(service: service);
+  setGlobal(ServiceConnectionManager, manager);
+  manager.consoleService.ensureServiceInitialized();
 
+  final debuggerController = TestDebuggerController(
+    initialSwitchToIsolate: false,
+  );
+
+  group('stdio', () {
     test('ignores trailing new lines', () {
       serviceManager.consoleService.appendStdio('1\n');
       expect(serviceManager.consoleService.stdio.value.length, 1);
@@ -262,12 +267,7 @@ void main() {
   });
 
   group('search', () {
-    late DebuggerController debuggerController;
-
     setUp(() {
-      debuggerController = TestDebuggerController(
-        initialSwitchToIsolate: false,
-      );
       debuggerController.parsedScript.value = ParsedScript(
         script: testScript,
         highlighter: mockSyntaxHighlighter,
