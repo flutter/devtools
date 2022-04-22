@@ -40,7 +40,7 @@ void main() {
       fakeServiceManager = FakeServiceManager();
       fakeExtensionManager = fakeServiceManager.serviceExtensionManager;
       mockIsFlutterApp(
-        fakeServiceManager.connectedApp as MockConnectedAppLegacy,
+        fakeServiceManager.connectedApp!,
       );
       when(fakeServiceManager.errorBadgeManager.errorCountNotifier('inspector'))
           .thenReturn(ValueNotifier<int>(0));
