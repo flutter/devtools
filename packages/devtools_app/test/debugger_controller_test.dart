@@ -3,11 +3,15 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
+import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
 
 void main() {
+  setGlobal(ServiceConnectionManager, FakeServiceManager());
+
   group('ScriptsHistory', () {
     late ScriptsHistory history;
 
