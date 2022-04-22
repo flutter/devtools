@@ -12,7 +12,6 @@ import '../devtools.dart' as devtools;
 import 'analytics/analytics.dart' as ga;
 import 'analytics/analytics_controller.dart';
 import 'analytics/constants.dart' as analytics_constants;
-import 'config_specific/launch_url/launch_url.dart';
 import 'config_specific/server/server.dart';
 import 'example/conditional_screen.dart';
 import 'framework/framework_core.dart';
@@ -43,6 +42,7 @@ import 'shared/initializer.dart';
 import 'shared/landing_screen.dart';
 import 'shared/notifications.dart';
 import 'shared/release_notes/release_notes.dart';
+import 'shared/report_feedback_button.dart';
 import 'shared/routing.dart';
 import 'shared/scaffold.dart';
 import 'shared/screen.dart';
@@ -468,36 +468,6 @@ class OpenSettingsAction extends StatelessWidget {
           alignment: Alignment.center,
           child: Icon(
             Icons.settings,
-            size: actionsIconSize,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class ReportFeedbackButton extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return DevToolsTooltip(
-      message: 'Report feedback',
-      child: InkWell(
-        onTap: () async {
-          ga.select(
-            analytics_constants.devToolsMain,
-            analytics_constants.feedbackButton,
-          );
-          await launchUrl(
-            devToolsExtensionPoints.issueTrackerLink().url,
-            context,
-          );
-        },
-        child: Container(
-          width: DevToolsScaffold.actionWidgetSize,
-          height: DevToolsScaffold.actionWidgetSize,
-          alignment: Alignment.center,
-          child: Icon(
-            Icons.bug_report,
             size: actionsIconSize,
           ),
         ),
