@@ -56,12 +56,10 @@ class StatusLine extends StatelessWidget {
     final isNarrow = isExtraNarrow || ScreenSize(context).width == MediaSize.xs;
     final Widget? pageStatus = currentScreen.buildStatus(context);
     return [
-      Expanded(
-        child: Align(
+      Align(
           alignment: Alignment.centerLeft,
           child: buildHelpUrlStatus(context, currentScreen, isNarrow),
         ),
-      ),
       const BulletSpacer(),
       if (!isExtraNarrow && showIsolateSelector) ...[
         const IsolateSelector(),
@@ -75,12 +73,10 @@ class StatusLine extends StatelessWidget {
         ReportFeedbackButton(),
         const BulletSpacer(),
       ],
-      Expanded(
-        child: Align(
+       Align(
           alignment: Alignment.centerRight,
           child: buildConnectionStatus(context, isExtraNarrow),
         ),
-      ),
     ];
   }
 
