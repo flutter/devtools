@@ -11,41 +11,42 @@ import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
 void main() {
-  setGlobal(ServiceConnectionManager, fakeServiceManager);
+  final service = MockVmServiceWrapper();
+  when(service.getFlagList()).thenAnswer((_) async => FlagList(flags: []));
+  when(service.onDebugEvent).thenAnswer((_) {
+    return const Stream.empty();
+  });
+  when(service.onVMEvent).thenAnswer((_) {
+    return const Stream.empty();
+  });
+  when(service.onIsolateEvent).thenAnswer((_) {
+    return const Stream.empty();
+  });
+  when(service.onStdoutEvent).thenAnswer((_) {
+    return const Stream.empty();
+  });
+  when(service.onStderrEvent).thenAnswer((_) {
+    return const Stream.empty();
+  });
+  when(service.onStdoutEventWithHistory).thenAnswer((_) {
+    return const Stream.empty();
+  });
+  when(service.onStderrEventWithHistory).thenAnswer((_) {
+    return const Stream.empty();
+  });
+  when(service.onExtensionEventWithHistory).thenAnswer((_) {
+    return const Stream.empty();
+  });
+
+  final manager = FakeServiceManager(service: service);
+
+  setGlobal(ServiceConnectionManager, manager);
   final debuggerController = TestDebuggerController(
     initialSwitchToIsolate: false,
   );
 
   group('stdio', () {
     setUp(() {
-      final service = MockVmServiceWrapper();
-      when(service.getFlagList()).thenAnswer((_) async => FlagList(flags: []));
-      when(service.onDebugEvent).thenAnswer((_) {
-        return const Stream.empty();
-      });
-      when(service.onVMEvent).thenAnswer((_) {
-        return const Stream.empty();
-      });
-      when(service.onIsolateEvent).thenAnswer((_) {
-        return const Stream.empty();
-      });
-      when(service.onStdoutEvent).thenAnswer((_) {
-        return const Stream.empty();
-      });
-      when(service.onStderrEvent).thenAnswer((_) {
-        return const Stream.empty();
-      });
-      when(service.onStdoutEventWithHistory).thenAnswer((_) {
-        return const Stream.empty();
-      });
-      when(service.onStderrEventWithHistory).thenAnswer((_) {
-        return const Stream.empty();
-      });
-      when(service.onExtensionEventWithHistory).thenAnswer((_) {
-        return const Stream.empty();
-      });
-      final manager = FakeServiceManager(service: service);
-      setGlobal(ServiceConnectionManager, manager);
       manager.consoleService.ensureServiceInitialized();
     });
 
