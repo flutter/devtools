@@ -110,7 +110,7 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
       tabs: _generateTabs(),
       tabViews: tabViews,
       gaScreen: analytics_constants.performance,
-      // TODO(kenz): enable analytics when when this view is stable.
+      // TODO(kenz): enable analytics when this view is stable.
       sendAnalytics: false,
     );
   }
@@ -151,6 +151,7 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
                   icon: Icons.camera,
                   label: 'Take Snapshot',
                   outlined: false,
+                  // TODO(kenz): hook this up to the engine service extension.
                   onPressed: () {},
                 ),
               ),
