@@ -875,6 +875,9 @@ class ServiceExtensionTooltip extends StatelessWidget {
 
     final colorScheme = Theme.of(context).colorScheme;
     final focusColor = Theme.of(context).focusColor;
+    final textStyle = DefaultTextStyle.of(context)
+        .style
+        .copyWith(color: colorScheme.toggleButtonsTitle);
 
     return DevToolsTooltip(
       message: description.tooltip,
@@ -888,10 +891,7 @@ class ServiceExtensionTooltip extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(defaultBorderRadius),
       ),
-      textStyle: DefaultTextStyle.of(context).style,
-      tooltipTextColor: Theme.of(context).brightness == Brightness.dark
-          ? Colors.white
-          : Colors.black,
+      textStyle: textStyle,
     );
   }
 }

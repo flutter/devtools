@@ -642,7 +642,6 @@ class DevToolsTooltip extends StatelessWidget {
     this.padding = const EdgeInsets.all(defaultSpacing),
     this.decoration,
     this.textStyle,
-    this.tooltipTextColor,
   })  : assert((message == null) != (richMessage == null)),
         super(key: key);
 
@@ -654,19 +653,15 @@ class DevToolsTooltip extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
   final Decoration? decoration;
   final TextStyle? textStyle;
-  final Color? tooltipTextColor;
 
   @override
   Widget build(BuildContext context) {
     TextStyle? style = textStyle;
     if (richMessage == null) {
-      style = TextStyle(
+      style ??= TextStyle(
         color: Theme.of(context).colorScheme.tooltipTextColor,
         fontSize: defaultFontSize,
       );
-    }
-    if (tooltipTextColor != null) {
-      style = style?.copyWith(color: tooltipTextColor);
     }
     return Tooltip(
       message: message,
