@@ -11,6 +11,7 @@ import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
 void main() {
+  setGlobal(ServiceConnectionManager, fakeServiceManager);
   final debuggerController = TestDebuggerController(
     initialSwitchToIsolate: false,
   );
