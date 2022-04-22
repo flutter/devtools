@@ -120,16 +120,16 @@ and rebuilding as necessary.
 
 Run and debug the local version of the server with a release build:
 - In VS Code on the Debug side bar, switch to the `Run Server with Release Build` config. Press F5.
-This will produce a release build of DevTools and then debug the server (`bin/devtools.dart`)
-to serve it.
+  This will produce a release build of DevTools and then debug the server (`bin/devtools.dart`)
+  to serve it.
 - From CLI, you can run the publish script to create a release build (`./devtools/tool/publish.sh`).
-Then `cd packages/devtools` and run `dart bin/devtools.dart`.
+  Then `cd packages/devtools` and run `dart bin/devtools.dart`.
 
 If you need to make breaking changes to DevTools that require changes to the server
 (such that DevTools cannot run against the live Pub version of devtools_server) it's
 critical that the devtools_server is released first and the version numbers in
 `packages/devtools/pubspec.yaml` and `packages/devtools_app/pubspec.yaml` are updated.
- Please make sure this is clear on any PRs you open.
+Please make sure this is clear on any PRs you open.
 
 ## Testing
 
@@ -140,7 +140,7 @@ before running these tests.
 
 ```
 cd packages/devtools_app
-flutter test -j1
+flutter test -j1 --no-sound-null-safety
 ```
 
 The flag `-j1` tells Flutter to run tests with 1 concurrent test runner. If your test run does
@@ -148,10 +148,10 @@ not include the directory `devtools_app/test/integration_tests`, then you do not
 this flag.  For example, it is OK to do the following:
 
 ```
-flutter test test/ui/
+flutter test test/ui/ --no-sound-null-safety
 ```
 
-If you run the tests on other than Linux environment, first time add the flag `--update-goldens`, 
+If you run the tests on other than Linux environment, first time add the flag `--update-goldens`,
 because goldens on your machine will be little different.
 
 ### Updating golden files

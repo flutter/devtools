@@ -105,7 +105,7 @@ if [ "$BOT" = "main" ]; then
     pushd packages/devtools_shared
     echo `pwd`
 
-    flutter test test/
+    flutter test test/ --no-sound-null-safety
     popd
 
     # Change the directory back to devtools_app.
@@ -125,9 +125,9 @@ elif [ "$BOT" = "test_ddc" ]; then
     # The flutter tool doesn't support excluding a specific set of targets,
     # so we explicitly provide them.
     if [ "$PLATFORM" = "vm" ]; then
-        flutter test $DART_DEFINE_ARGS test/*.dart test/fixtures/
+        flutter test $DART_DEFINE_ARGS test/*.dart test/fixtures/ --no-sound-null-safety
     elif [ "$PLATFORM" = "chrome" ]; then
-        flutter test --platform chrome $DART_DEFINE_ARGS test/*.dart test/fixtures/
+        flutter test --platform chrome $DART_DEFINE_ARGS test/*.dart test/fixtures/ --no-sound-null-safety
     else
         echo "unknown test platform"
         exit 1
@@ -143,9 +143,9 @@ elif [ "$BOT" = "test_dart2js" ]; then
     # The flutter tool doesn't support excluding a specific set of targets,
     # so we explicitly provide them.
     if [ "$PLATFORM" = "vm" ]; then
-        WEBDEV_RELEASE=true flutter test $DART_DEFINE_ARGS test/*.dart test/fixtures/
+        WEBDEV_RELEASE=true flutter test $DART_DEFINE_ARGS test/*.dart test/fixtures/ --no-sound-null-safety
     elif [ "$PLATFORM" = "chrome" ]; then
-        WEBDEV_RELEASE=true flutter test --platform chrome $DART_DEFINE_ARGS test/*.dart test/fixtures/
+        WEBDEV_RELEASE=true flutter test --platform chrome $DART_DEFINE_ARGS test/*.dart test/fixtures/ --no-sound-null-safety
     else
         echo "unknown test platform"
         exit 1

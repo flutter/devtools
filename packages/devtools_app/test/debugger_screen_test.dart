@@ -31,17 +31,16 @@ void main() {
   const windowSize = Size(4000.0, 4000.0);
   const smallWindowSize = Size(1000.0, 1000.0);
 
-  fakeServiceManager = FakeServiceManager();
-  scriptManager = MockScriptManager();
-  when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
-  when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
-  setGlobal(ServiceConnectionManager, fakeServiceManager);
-  setGlobal(IdeTheme, IdeTheme());
-  setGlobal(ScriptManager, scriptManager);
-  fakeServiceManager.consoleService.ensureServiceInitialized();
-
-  debuggerController = MockDebuggerController();
-  when(debuggerController.isPaused).thenReturn(ValueNotifier<bool>(true));
+  setUp(() {
+    fakeServiceManager = FakeServiceManager();
+    scriptManager = MockScriptManager();
+    when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
+    when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
+    setGlobal(ServiceConnectionManager, fakeServiceManager);
+    setGlobal(IdeTheme, IdeTheme());
+    setGlobal(ScriptManager, scriptManager);
+    fakeServiceManager.consoleService.ensureServiceInitialized();
+  });
 
   group('DebuggerScreen', () {
     Future<void> pumpDebuggerScreen(
@@ -79,7 +78,7 @@ void main() {
 
       screen = const DebuggerScreen();
 
-      debuggerController = createMockDebuggerControllerWithDefaults();
+      debuggerController = MockDebuggerController.withDefaults();
     });
 
     testWidgets('builds its tab', (WidgetTester tester) async {
@@ -753,6 +752,11 @@ void main() {
   });
 
   group('FloatingDebuggerControls', () {
+    setUp(() {
+      debuggerController = MockDebuggerController();
+      when(debuggerController.isPaused).thenReturn(ValueNotifier<bool>(true));
+    });
+
     Future<void> pumpControls(WidgetTester tester) async {
       await tester.pumpWidget(
         wrapWithControllers(
