@@ -54,6 +54,8 @@ void main() {
         .thenReturn(false);
     when(fakeServiceManager.connectedApp!.isDartWebApp)
         .thenAnswer((_) => Future.value(false));
+    when(fakeServiceManager.connectedApp!.isProfileBuild)
+        .thenAnswer((_) async => false);
     setGlobal(ServiceConnectionManager, fakeServiceManager);
   }
 
