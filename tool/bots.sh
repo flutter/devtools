@@ -133,9 +133,9 @@ elif [ "$BOT" = "test_ddc" ]; then
         # tests are fixed, we will delete this list and remove the flags from the commands.
         flutter test $DART_DEFINE_ARGS \
           test/chart_test.dart \
+          test/cpu_profiler_controller_test.dart \
           test/cpu_profiler_test.dart \
           test/debugger_controller_test.dart \
-          test/cpu_profiler_controller_test.dart \
           test/debugger_controller_stdio_test.dart \
           test/performance_screen_test.dart \
           test/performance_screen_test.dart
