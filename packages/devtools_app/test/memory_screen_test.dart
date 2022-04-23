@@ -25,7 +25,7 @@ import 'package:vm_service/vm_service.dart';
 import 'test_data//memory_test_allocation_data.dart';
 import 'test_data/memory_test_data.dart';
 
-void main() {
+void main() async {
   late MemoryScreen screen;
   late MemoryController controller;
   late FakeServiceManager fakeServiceManager;
@@ -99,6 +99,20 @@ void main() {
   // Set a wide enough screen width that we do not run into overflow.
   const windowSize = Size(2225.0, 1000.0);
 
+  await ensureInspectorDependencies();
+  setGlobal(OfflineModeController, OfflineModeController());
+  fakeServiceManager = FakeServiceManager();
+  when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
+  when(fakeServiceManager.connectedApp!.isDebugFlutterAppNow).thenReturn(false);
+  when(fakeServiceManager.vm.operatingSystem).thenReturn('android');
+  when(fakeServiceManager.connectedApp!.isDartWebApp)
+      .thenAnswer((_) => Future.value(false));
+  when(fakeServiceManager.errorBadgeManager.errorCountNotifier('memory'))
+      .thenReturn(ValueNotifier<int>(0));
+  setGlobal(ServiceConnectionManager, fakeServiceManager);
+  setGlobal(IdeTheme, IdeTheme());
+  screen = const MemoryScreen();
+
   group('MemoryScreen', () {
     void useHardCodedMonitorTimestamp() {
       // Hard-code a date/time so the golden master check is consistent.
@@ -108,21 +122,6 @@ void main() {
     }
 
     setUp(() async {
-      await ensureInspectorDependencies();
-      setGlobal(OfflineModeController, OfflineModeController());
-      fakeServiceManager = FakeServiceManager();
-      when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
-      when(fakeServiceManager.connectedApp!.isDebugFlutterAppNow)
-          .thenReturn(false);
-      when(fakeServiceManager.vm.operatingSystem).thenReturn('android');
-      when(fakeServiceManager.connectedApp!.isDartWebApp)
-          .thenAnswer((_) => Future.value(false));
-      when(fakeServiceManager.errorBadgeManager.errorCountNotifier('memory'))
-          .thenReturn(ValueNotifier<int>(0));
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
-      setGlobal(IdeTheme, IdeTheme());
-      screen = const MemoryScreen();
-
       expect(MemoryScreen.isDebugging, isFalse);
     });
 
