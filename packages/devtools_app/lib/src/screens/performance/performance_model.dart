@@ -491,7 +491,8 @@ class FlutterFrame {
   final FrameTimelineEventData timelineEventData = FrameTimelineEventData();
 
   FrameAnalysis? get frameAnalysis {
-    if (_frameAnalysis != null) return _frameAnalysis!;
+    final frameAnalysis_ = _frameAnalysis;
+    if (frameAnalysis_ != null) return frameAnalysis_;
     if (timelineEventData.isNotEmpty) {
       return _frameAnalysis = FrameAnalysis(this);
     }

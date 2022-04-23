@@ -37,12 +37,15 @@ final timelineSearchFieldKey = GlobalKey(debugLabel: 'TimelineSearchFieldKey');
 
 class TabbedPerformanceView extends StatefulWidget {
   const TabbedPerformanceView({
+    required this.controller,
     required this.processing,
     required this.processingProgress,
   });
 
   @visibleForTesting
   static const emptyTimelineKey = Key('Empty Timeline');
+
+  final PerformanceController controller;
 
   final bool processing;
 
@@ -56,19 +59,13 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
     with AutoDisposeMixin, SearchFieldMixin<TabbedPerformanceView> {
   static const _gaPrefix = 'performanceTab';
 
-  PerformanceController get controller => _controller!;
-
-  PerformanceController? _controller;
+  PerformanceController get controller => widget.controller;
 
   FlutterFrame? _selectedFlutterFrame;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-
-    final newController = Provider.of<PerformanceController>(context);
-    if (newController == _controller) return;
-    _controller = newController;
+  void initState() {
+    super.initState();
 
     _selectedFlutterFrame = controller.selectedFrame.value;
     addAutoDisposeListener(controller.selectedFrame, () {
@@ -116,8 +113,9 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
   }
 
   List<DevToolsTab> _generateTabs() {
-    final searchFieldEnabled =
-        !(controller.data?.isEmpty ?? true) && !widget.processing;
+    final data = controller.data;
+    final hasData = data != null && !data.isEmpty;
+    final searchFieldEnabled = hasData && !widget.processing;
     return [
       _buildTab(
         tabName: 'Timeline Events',
