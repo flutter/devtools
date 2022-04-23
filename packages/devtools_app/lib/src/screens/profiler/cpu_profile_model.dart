@@ -710,6 +710,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     String? url,
     String? packageUri,
     String? parentId,
+    int? sourceLine,
     CpuProfileMetaData? profileMetaData,
     bool copySampleCountsAndTags = true,
     bool resetInclusiveSampleCount = true,
@@ -721,7 +722,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
       category: category ?? this.category,
       rawUrl: url ?? rawUrl,
       packageUri: packageUri ?? this.packageUri,
-      sourceLine: sourceLine,
+      sourceLine: sourceLine ?? this.sourceLine,
       parentId: parentId ?? this.parentId,
       profileMetaData: profileMetaData ?? this.profileMetaData,
     );
@@ -765,6 +766,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
           CpuProfileData.categoryKey: category,
           CpuProfileData.resolvedUrlKey: rawUrl,
           CpuProfileData.resolvedPackageUriKey: packageUri,
+          CpuProfileData.sourceLineKey: sourceLine,
           if (parentId != null) CpuProfileData.parentIdKey: parentId,
         }
       };

@@ -33,6 +33,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
       when(errorBadgeManager.errorCountNotifier(screenId))
           .thenReturn(ValueNotifier<int>(0));
     }
+
     vmServiceOpened(this.service!, onClosed: Future.value());
   }
 
