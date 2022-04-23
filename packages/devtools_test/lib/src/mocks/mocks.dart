@@ -10,6 +10,8 @@ import 'package:flutter/foundation.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
+import 'generated_mocks_factories.dart';
+
 class FakeIsolateManager extends Fake implements IsolateManager {
   @override
   ValueListenable<IsolateRef?> get selectedIsolate => _selectedIsolate;
@@ -160,7 +162,7 @@ class TestDebuggerController extends DebuggerController {
   @override
   ProgramExplorerController get programExplorerController =>
       _explorerController;
-  final _explorerController = MockProgramExplorerController.withDefaults();
+  final _explorerController = createMockProgramExplorerControllerWithDefaults();
 }
 
 class MockDebuggerController extends Mock implements DebuggerController {
@@ -194,17 +196,19 @@ class MockDebuggerController extends Mock implements DebuggerController {
 
   @override
   final ProgramExplorerController programExplorerController =
-      MockProgramExplorerController.withDefaults();
+      MockProgramExplorerControllerLegacy.withDefaults();
 }
 
 class MockScriptManager extends Mock implements ScriptManager {}
 
-class MockProgramExplorerController extends Mock
+// TODO(polinach): delete this class.
+// See https://github.com/flutter/devtools/issues/4029.
+class MockProgramExplorerControllerLegacy extends Mock
     implements ProgramExplorerController {
-  MockProgramExplorerController();
+  MockProgramExplorerControllerLegacy();
 
-  factory MockProgramExplorerController.withDefaults() {
-    final controller = MockProgramExplorerController();
+  factory MockProgramExplorerControllerLegacy.withDefaults() {
+    final controller = MockProgramExplorerControllerLegacy();
     when(controller.initialized).thenReturn(ValueNotifier(true));
     when(controller.rootObjectNodes).thenReturn(ValueNotifier([]));
     when(controller.outlineNodes).thenReturn(ValueNotifier([]));
