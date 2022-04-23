@@ -35,6 +35,9 @@ import 'timeline_event_processor.dart';
 /// Flag to hide the frame analysis feature while it is under development.
 bool frameAnalysisSupported = false;
 
+/// Flag to hide the raster metrics feature while it is under development.
+bool rasterMetricsSupported = false;
+
 /// This class contains the business logic for [performance_screen.dart].
 ///
 /// The controller manages the timeline data model and communicates with the
