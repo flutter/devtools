@@ -228,7 +228,7 @@ Future<void> ensureInspectorDependencies() async {
 }
 
 void mockIsFlutterApp(
-  MockConnectedAppLegacy connectedApp, {
+  ConnectedApp connectedApp, {
   bool isFlutterApp = true,
   bool isProfileBuild = false,
 }) {
@@ -241,7 +241,7 @@ void mockIsFlutterApp(
 }
 
 void mockFlutterVersion(
-  MockConnectedAppLegacy connectedApp,
+  ConnectedApp connectedApp,
   SemanticVersion version,
 ) {
   when(connectedApp.flutterVersionNow).thenReturn(
@@ -253,7 +253,7 @@ void mockFlutterVersion(
 }
 
 void mockIsDartVmApp(
-  MockConnectedAppLegacy connectedApp, [
+  ConnectedApp connectedApp, [
   isDartVmApp = true,
 ]) {
   when(connectedApp.isRunningOnDartVM).thenReturn(isDartVmApp);
