@@ -209,7 +209,12 @@ void main() {
   });
 
   group('search', () {
+    late DebuggerController debuggerController;
+
     setUp(() {
+      debuggerController = TestDebuggerController(
+        initialSwitchToIsolate: false,
+      );
       debuggerController.parsedScript.value = ParsedScript(
         script: testScript,
         highlighter: mockSyntaxHighlighter,
