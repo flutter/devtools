@@ -104,7 +104,7 @@ void main() {
   });
 
   group('Logging Screen', () {
-    late MockLoggingControllerLegacy mockLoggingController;
+    late MockLoggingController mockLoggingController;
     late FakeServiceManager fakeServiceManager;
     const windowSize = Size(1000.0, 1000.0);
 
@@ -167,7 +167,7 @@ void main() {
       // TODO(polinach): remove unnecessary setup steps after fixing
       // https://github.com/flutter/devtools/issues/3616.
       await ensureInspectorDependencies();
-      mockLoggingController = MockLoggingControllerLegacy();
+      mockLoggingController = MockLoggingController();
       when(mockLoggingController.data).thenReturn([]);
       when(mockLoggingController.search).thenReturn('');
       when(mockLoggingController.searchMatches)

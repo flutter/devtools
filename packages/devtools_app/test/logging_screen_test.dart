@@ -38,6 +38,8 @@ void main() async {
   when(mockLoggingController.matchIndex).thenReturn(ValueNotifier<int>(0));
   when(mockLoggingController.filteredData)
       .thenReturn(ListValueNotifier<LogData>([]));
+  when(mockLoggingController.activeSearchMatch)
+      .thenReturn(ValueNotifier<LogData?>(null));
 
   final FakeServiceManager fakeServiceManager = FakeServiceManager();
   when(fakeServiceManager.connectedApp!.isFlutterWebAppNow).thenReturn(false);
