@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: implementation_imports
-
 import 'package:devtools_app/devtools_app.dart';
 import 'package:mockito/annotations.dart';
 import 'package:vm_service/vm_service.dart';
@@ -14,6 +12,7 @@ import 'package:vm_service/vm_service.dart';
   ConnectedApp,
   ErrorBadgeManager,
   HeapSnapshotGraph,
+  ProgramExplorerController,
   VmServiceWrapper,
 ])
 void main() {}
