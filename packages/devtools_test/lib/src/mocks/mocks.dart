@@ -165,11 +165,13 @@ class TestDebuggerController extends DebuggerController {
   final _explorerController = createMockProgramExplorerControllerWithDefaults();
 }
 
-class MockDebuggerController extends Mock implements DebuggerController {
-  MockDebuggerController();
+// TODO(polinach): delete this class.
+// See https://github.com/flutter/devtools/issues/4029.
+class MockDebuggerControllerLegacy extends Mock implements DebuggerController {
+  MockDebuggerControllerLegacy();
 
-  factory MockDebuggerController.withDefaults() {
-    final debuggerController = MockDebuggerController();
+  factory MockDebuggerControllerLegacy.withDefaults() {
+    final debuggerController = MockDebuggerControllerLegacy();
     when(debuggerController.isPaused).thenReturn(ValueNotifier(false));
     when(debuggerController.resuming).thenReturn(ValueNotifier(false));
     when(debuggerController.breakpoints).thenReturn(ValueNotifier([]));

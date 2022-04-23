@@ -14,5 +14,6 @@ import 'package:vm_service/vm_service.dart';
   HeapSnapshotGraph,
   ProgramExplorerController,
   VmServiceWrapper,
+  DebuggerController,
 ])
 void main() {}
