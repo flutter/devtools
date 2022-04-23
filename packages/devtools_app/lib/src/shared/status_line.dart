@@ -73,10 +73,11 @@ class StatusLine extends StatelessWidget {
         ReportFeedbackButton(),
         const BulletSpacer(),
       ],
-       Align(
-          alignment: Alignment.centerRight,
-          child: buildConnectionStatus(context, isExtraNarrow),
-        ),
+
+      buildConnectionStatus(context, isExtraNarrow),
+
+      if (isEmbedded) 
+        Row(children: [ReportFeedbackButton()]),
     ];
   }
 
