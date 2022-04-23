@@ -137,8 +137,11 @@ elif [ "$BOT" = "test_ddc" ]; then
           test/cpu_profiler_test.dart \
           test/debugger_controller_test.dart \
           test/debugger_controller_stdio_test.dart \
+          test/device_dialog_test.dart \
           test/performance_screen_test.dart \
-          test/performance_screen_test.dart
+          test/performance_screen_test.dart \
+          test/profiler_screen_controller_test.dart \
+          test/profiler_screen_test.dart
 
     elif [ "$PLATFORM" = "chrome" ]; then
         flutter test --platform chrome $DART_DEFINE_ARGS test/*.dart test/fixtures/ --no-sound-null-safety

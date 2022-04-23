@@ -46,6 +46,7 @@ void main() {
     when(app.initialized).thenReturn(Completer()..complete(true));
     when(app.isDartWebAppNow).thenReturn(false);
     when(app.isFlutterAppNow).thenReturn(true);
+    when(app.isProfileBuild).thenAnswer((_) => Future.value(false));
     when(app.flutterVersionNow).thenReturn(
       FlutterVersion.parse((await fakeServiceManager.flutterVersion).json!),
     );

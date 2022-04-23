@@ -30,8 +30,10 @@ void main() {
   late CpuProfilerController controller;
 
   final ServiceConnectionManager fakeServiceManager = FakeServiceManager();
-  when(fakeServiceManager.connectedApp!.isFlutterNativeAppNow)
-      .thenReturn(false);
+  final app = fakeServiceManager.connectedApp!;
+  when(app.isFlutterNativeAppNow).thenReturn(false);
+  when(app.isFlutterAppNow).thenReturn(false);
+  when(app.isDebugFlutterAppNow).thenReturn(false);
 
   setUp(() async {
     final transformer = CpuProfileTransformer();

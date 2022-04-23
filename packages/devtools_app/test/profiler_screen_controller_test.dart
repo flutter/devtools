@@ -8,14 +8,15 @@ import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 
 void main() {
   group('ProfilerScreenController', () {
     late ProfilerScreenController controller;
-    late FakeServiceManager fakeServiceManager;
+    final fakeServiceManager = FakeServiceManager();
+    when(fakeServiceManager.connectedApp!.isFlutterAppNow).thenReturn(false);
 
     setUp(() {
-      fakeServiceManager = FakeServiceManager();
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(OfflineModeController, OfflineModeController());
       controller = ProfilerScreenController();
