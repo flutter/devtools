@@ -25,7 +25,7 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'test_data/performance_test_data.dart';
 
-void main() {
+void main() async {
   setGlobal(IdeTheme, IdeTheme());
   late PerformanceScreen screen;
   late PerformanceController controller;
@@ -82,10 +82,11 @@ void main() {
 
   const windowSize = Size(3000.0, 1000.0);
 
+  await _setUpServiceManagerWithTimeline(testTimelineJson);
+
   group('PerformanceScreen', () {
     setUp(() async {
       await ensureInspectorDependencies();
-      await _setUpServiceManagerWithTimeline(testTimelineJson);
       setGlobal(OfflineModeController, OfflineModeController());
       screen = const PerformanceScreen();
     });
