@@ -123,6 +123,8 @@ class MockCpuSamples extends Mock implements CpuSamples {}
 // that will override the public getters on the class (e.g. isFlutterAppNow,
 // isProfileBuildNow, etc.). Do this after devtools_app is migrated to null
 // safety so that we can use null-safety here.
+// TODO(polinach): replace with newer.
+// See https://github.com/flutter/devtools/issues/4029.
 class MockConnectedAppLegacy extends Mock implements ConnectedApp {}
 
 class FakeConnectedApp extends Mock implements ConnectedApp {}
@@ -199,6 +201,8 @@ class MockDebuggerController extends Mock implements DebuggerController {
 
 class MockScriptManager extends Mock implements ScriptManager {}
 
+// TODO(polinach): replace with newer.
+// See https://github.com/flutter/devtools/issues/4029.
 class MockProgramExplorerControllerLegacy extends Mock
     implements ProgramExplorerController {
   MockProgramExplorerControllerLegacy();
