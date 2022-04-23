@@ -132,7 +132,7 @@ class FakeConnectedApp extends Mock implements ConnectedApp {}
 class MockBannerMessagesController extends Mock
     implements BannerMessagesController {}
 
-class MockLoggingController extends Mock implements LoggingController {
+class MockLoggingControllerLegacy extends Mock implements LoggingController {
   @override
   ValueListenable<LogData?> get selectedLog => _selectedLog;
 
