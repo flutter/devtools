@@ -42,20 +42,17 @@ void main() {
     when(
       fakeServiceManager.errorBadgeManager.errorCountNotifier('performance'),
     ).thenReturn(ValueNotifier<int>(0));
-    when(fakeServiceManager.connectedApp!.initialized)
-        .thenReturn(Completer()..complete(true));
-    when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
-    when(fakeServiceManager.connectedApp!.isFlutterAppNow).thenReturn(true);
-    when(fakeServiceManager.connectedApp!.flutterVersionNow).thenReturn(
+    final app = fakeServiceManager.connectedApp!;
+    when(app.initialized).thenReturn(Completer()..complete(true));
+    when(app.isDartWebAppNow).thenReturn(false);
+    when(app.isFlutterAppNow).thenReturn(true);
+    when(app.flutterVersionNow).thenReturn(
       FlutterVersion.parse((await fakeServiceManager.flutterVersion).json!),
     );
-    when(fakeServiceManager.connectedApp!.isDartCliAppNow).thenReturn(false);
-    when(fakeServiceManager.connectedApp!.isDebugFlutterAppNow)
-        .thenReturn(false);
-    when(fakeServiceManager.connectedApp!.isDartWebApp)
-        .thenAnswer((_) => Future.value(false));
-    when(fakeServiceManager.connectedApp!.isProfileBuild)
-        .thenAnswer((_) async => false);
+    when(app.isDartCliAppNow).thenReturn(false);
+    when(app.isDebugFlutterAppNow).thenReturn(false);
+    when(app.isDartWebApp).thenAnswer((_) async => false);
+    when(app.isProfileBuild).thenAnswer((_) async => false);
     setGlobal(ServiceConnectionManager, fakeServiceManager);
   }
 
