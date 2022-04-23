@@ -14,6 +14,7 @@ import '../info/info_controller.dart';
 import '../service/isolate_manager.dart';
 import '../service/service_manager.dart';
 import '../ui/utils.dart';
+import 'about_dialog.dart';
 import 'common_widgets.dart';
 import 'device_dialog.dart';
 import 'globals.dart';
@@ -56,10 +57,7 @@ class StatusLine extends StatelessWidget {
     final isNarrow = isExtraNarrow || ScreenSize(context).width == MediaSize.xs;
     final Widget? pageStatus = currentScreen.buildStatus(context);
     return [
-      Align(
-          alignment: Alignment.centerLeft,
-          child: buildHelpUrlStatus(context, currentScreen, isNarrow),
-        ),
+      buildHelpUrlStatus(context, currentScreen, isNarrow),
       const BulletSpacer(),
       if (!isExtraNarrow && showIsolateSelector) ...[
         const IsolateSelector(),
@@ -69,15 +67,17 @@ class StatusLine extends StatelessWidget {
         pageStatus,
         const BulletSpacer(),
       ],
-      if (isEmbedded && !isExtraNarrow) ...[
-        ReportFeedbackButton(),
-        const BulletSpacer(),
-      ],
-
       buildConnectionStatus(context, isExtraNarrow),
-
-      if (isEmbedded) 
-        Row(children: [ReportFeedbackButton()]),
+      if (isEmbedded && !isExtraNarrow) ...[
+        const BulletSpacer(),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            ReportFeedbackButton(),
+            OpenAboutAction(),
+          ],
+        ),
+      ]
     ];
   }
 
