@@ -10,6 +10,8 @@ import 'package:flutter/foundation.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
+import 'generated_mocks_factories.dart';
+
 class FakeIsolateManager extends Fake implements IsolateManager {
   @override
   ValueListenable<IsolateRef?> get selectedIsolate => _selectedIsolate;
@@ -121,7 +123,9 @@ class MockCpuSamples extends Mock implements CpuSamples {}
 // that will override the public getters on the class (e.g. isFlutterAppNow,
 // isProfileBuildNow, etc.). Do this after devtools_app is migrated to null
 // safety so that we can use null-safety here.
-class MockConnectedApp extends Mock implements ConnectedApp {}
+// TODO(polinach): delete this class.
+// See https://github.com/flutter/devtools/issues/4029.
+class MockConnectedAppLegacy extends Mock implements ConnectedApp {}
 
 class FakeConnectedApp extends Mock implements ConnectedApp {}
 
@@ -158,7 +162,7 @@ class TestDebuggerController extends DebuggerController {
   @override
   ProgramExplorerController get programExplorerController =>
       _explorerController;
-  final _explorerController = MockProgramExplorerController.withDefaults();
+  final _explorerController = createMockProgramExplorerControllerWithDefaults();
 }
 
 class MockDebuggerController extends Mock implements DebuggerController {
@@ -192,17 +196,19 @@ class MockDebuggerController extends Mock implements DebuggerController {
 
   @override
   final ProgramExplorerController programExplorerController =
-      MockProgramExplorerController.withDefaults();
+      MockProgramExplorerControllerLegacy.withDefaults();
 }
 
 class MockScriptManager extends Mock implements ScriptManager {}
 
-class MockProgramExplorerController extends Mock
+// TODO(polinach): delete this class.
+// See https://github.com/flutter/devtools/issues/4029.
+class MockProgramExplorerControllerLegacy extends Mock
     implements ProgramExplorerController {
-  MockProgramExplorerController();
+  MockProgramExplorerControllerLegacy();
 
-  factory MockProgramExplorerController.withDefaults() {
-    final controller = MockProgramExplorerController();
+  factory MockProgramExplorerControllerLegacy.withDefaults() {
+    final controller = MockProgramExplorerControllerLegacy();
     when(controller.initialized).thenReturn(ValueNotifier(true));
     when(controller.rootObjectNodes).thenReturn(ValueNotifier([]));
     when(controller.outlineNodes).thenReturn(ValueNotifier([]));
@@ -226,7 +232,7 @@ Future<void> ensureInspectorDependencies() async {
 }
 
 void mockIsFlutterApp(
-  MockConnectedApp connectedApp, {
+  ConnectedApp connectedApp, {
   bool isFlutterApp = true,
   bool isProfileBuild = false,
 }) {
@@ -239,7 +245,7 @@ void mockIsFlutterApp(
 }
 
 void mockFlutterVersion(
-  MockConnectedApp connectedApp,
+  ConnectedApp connectedApp,
   SemanticVersion version,
 ) {
   when(connectedApp.flutterVersionNow).thenReturn(
@@ -250,7 +256,10 @@ void mockFlutterVersion(
   when(connectedApp.connectedAppInitialized).thenReturn(true);
 }
 
-void mockIsDartVmApp(MockConnectedApp connectedApp, [isDartVmApp = true]) {
+void mockIsDartVmApp(
+  ConnectedApp connectedApp, [
+  isDartVmApp = true,
+]) {
   when(connectedApp.isRunningOnDartVM).thenReturn(isDartVmApp);
   when(connectedApp.connectedAppInitialized).thenReturn(true);
 }
