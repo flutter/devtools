@@ -15,6 +15,7 @@ import 'package:devtools_app/src/screens/performance/timeline_flame_chart.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/common_widgets.dart';
 import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/preferences.dart';
 import 'package:devtools_app/src/shared/split.dart';
 import 'package:devtools_app/src/shared/version.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -27,6 +28,7 @@ import 'test_data/performance_test_data.dart';
 
 void main() {
   setGlobal(IdeTheme, IdeTheme());
+  setGlobal(PreferencesController, PreferencesController());
   late PerformanceScreen screen;
   late PerformanceController controller;
   late FakeServiceManager fakeServiceManager;
@@ -108,7 +110,7 @@ void main() {
         expect(find.byType(FlutterFramesChart), findsOneWidget);
         expect(find.byType(TimelineFlameChart), findsOneWidget);
         expect(
-          find.byKey(TimelineAnalysisContainer.emptyTimelineKey),
+          find.byKey(TabbedPerformanceView.emptyTimelineKey),
           findsNothing,
         );
         expect(find.byType(EventDetails), findsOneWidget);
@@ -139,7 +141,7 @@ void main() {
         expect(find.byType(FlutterFramesChart), findsOneWidget);
         expect(find.byType(TimelineFlameChart), findsNothing);
         expect(
-          find.byKey(TimelineAnalysisContainer.emptyTimelineKey),
+          find.byKey(TabbedPerformanceView.emptyTimelineKey),
           findsOneWidget,
         );
         expect(find.byType(EventDetails), findsOneWidget);
@@ -171,7 +173,7 @@ void main() {
         expect(find.byType(FlutterFramesChart), findsNothing);
         expect(find.byType(TimelineFlameChart), findsOneWidget);
         expect(
-          find.byKey(TimelineAnalysisContainer.emptyTimelineKey),
+          find.byKey(TabbedPerformanceView.emptyTimelineKey),
           findsNothing,
         );
         expect(find.byType(EventDetails), findsOneWidget);
@@ -220,7 +222,7 @@ void main() {
         expect(find.byType(FlutterFramesChart), findsOneWidget);
         expect(find.byType(TimelineFlameChart), findsOneWidget);
         expect(
-          find.byKey(TimelineAnalysisContainer.emptyTimelineKey),
+          find.byKey(TabbedPerformanceView.emptyTimelineKey),
           findsNothing,
         );
         expect(find.byType(EventDetails), findsOneWidget);
@@ -231,7 +233,7 @@ void main() {
         expect(find.byType(FlutterFramesChart), findsOneWidget);
         expect(find.byType(TimelineFlameChart), findsNothing);
         expect(
-          find.byKey(TimelineAnalysisContainer.emptyTimelineKey),
+          find.byKey(TabbedPerformanceView.emptyTimelineKey),
           findsOneWidget,
         );
         expect(find.byType(EventDetails), findsOneWidget);
