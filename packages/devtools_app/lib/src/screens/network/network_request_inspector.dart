@@ -85,6 +85,8 @@ class NetworkRequestInspector extends StatelessWidget {
                       ],
                     ],
                     gaScreen: analytics_constants.network,
+                    // TODO(kenz): Consider using the outlined style
+                    outlined: false,
                   ),
           ),
         );

@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 
 import '../analytics/analytics.dart' as ga;
+import '../shared/common_widgets.dart';
 import '../shared/theme.dart';
 import '../shared/utils.dart';
 
@@ -78,8 +79,8 @@ class AnalyticsTabbedView<T> extends StatefulWidget {
     required this.tabs,
     required this.tabViews,
     required this.gaScreen,
-    this.tabBarContainer,
-    this.tabViewContainer,
+    this.outlined = true,
+    this.sendAnalytics = true,
   })  : trailingWidgets = List.generate(
           tabs.length,
           (index) => tabs[index].trailing ?? const SizedBox(),
@@ -94,9 +95,13 @@ class AnalyticsTabbedView<T> extends StatefulWidget {
 
   final List<Widget> trailingWidgets;
 
-  final Widget Function(Widget child)? tabBarContainer;
+  final bool outlined;
 
-  final Widget Function(Widget child)? tabViewContainer;
+  /// Whether to send analytics events to GA.
+  ///
+  /// Only set this to false if [AnalyticsTabbedView] is being used for
+  /// experimental code we do not want to send GA events for yet.
+  final bool sendAnalytics;
 
   @override
   _AnalyticsTabbedViewState createState() => _AnalyticsTabbedViewState();
@@ -124,11 +129,13 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
       ..addListener(_onTabChanged);
 
     // Record a selection for the visible tab.
-    ga.select(
-      widget.gaScreen,
-      widget.tabs[_currentTabControllerIndex].gaId,
-      nonInteraction: true,
-    );
+    if (widget.sendAnalytics) {
+      ga.select(
+        widget.gaScreen,
+        widget.tabs[_currentTabControllerIndex].gaId,
+        nonInteraction: true,
+      );
+    }
   }
 
   void _onTabChanged() {
@@ -136,10 +143,12 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
       setState(() {
         _currentTabControllerIndex = _tabController!.index;
       });
-      ga.select(
-        widget.gaScreen,
-        widget.tabs[_currentTabControllerIndex].gaId,
-      );
+      if (widget.sendAnalytics) {
+        ga.select(
+          widget.gaScreen,
+          widget.tabs[_currentTabControllerIndex].gaId,
+        );
+      }
     }
   }
 
@@ -168,8 +177,10 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final borderSide = defaultBorderSide(theme);
 
     Widget tabBar = Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         TabBar(
           labelColor: theme.textTheme.bodyText1?.color,
@@ -182,8 +193,15 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
         ),
       ],
     );
-    if (widget.tabBarContainer != null) {
-      tabBar = widget.tabBarContainer!(tabBar);
+    if (widget.outlined) {
+      tabBar = Container(
+        height: defaultButtonHeight +
+            (isDense() ? denseModeDenseSpacing : denseSpacing),
+        decoration: BoxDecoration(
+          border: Border.all(color: Theme.of(context).focusColor),
+        ),
+        child: tabBar,
+      );
     }
 
     Widget tabView = TabBarView(
@@ -191,8 +209,17 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
       controller: _tabController,
       children: widget.tabViews,
     );
-    if (widget.tabViewContainer != null) {
-      tabView = widget.tabViewContainer!(tabView);
+    if (widget.outlined) {
+      tabView = Container(
+        decoration: BoxDecoration(
+          border: Border(
+            left: borderSide,
+            bottom: borderSide,
+            right: borderSide,
+          ),
+        ),
+        child: tabView,
+      );
     }
 
     return Column(
