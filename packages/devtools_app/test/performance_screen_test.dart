@@ -42,7 +42,6 @@ void main() {
     when(
       fakeServiceManager.errorBadgeManager.errorCountNotifier('performance'),
     ).thenReturn(ValueNotifier<int>(0));
-
     final app = fakeServiceManager.connectedApp!;
     when(app.initialized).thenReturn(Completer()..complete(true));
     when(app.isDartWebAppNow).thenReturn(false);
@@ -53,7 +52,8 @@ void main() {
     );
     when(app.isDartCliAppNow).thenReturn(false);
     when(app.isDebugFlutterAppNow).thenReturn(false);
-    when(app.isDartWebApp).thenAnswer((_) => Future.value(false));
+    when(app.isDartWebApp).thenAnswer((_) async => false);
+    when(app.isProfileBuild).thenAnswer((_) async => false);
     setGlobal(ServiceConnectionManager, fakeServiceManager);
   }
 
