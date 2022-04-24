@@ -133,7 +133,7 @@ class MockBannerMessagesController extends Mock
     implements BannerMessagesController {}
 
 class MockLoggingController extends Mock
-    with SearchControllerMixin<LogData>
+    with SearchControllerMixin<LogData>, FilterControllerMixin<LogData>
     implements LoggingController {
   @override
   ValueListenable<LogData?> get selectedLog => _selectedLog;
@@ -147,18 +147,6 @@ class MockLoggingController extends Mock
 
   @override
   List<LogData> data = <LogData>[];
-
-  // when(mockLoggingController.search).thenReturn('');
-  // when(mockLoggingController.searchMatches)
-  //     .thenReturn(ValueNotifier<List<LogData>>([]));
-  // when(mockLoggingController.searchInProgressNotifier)
-  //     .thenReturn(ValueNotifier<bool>(false));
-  // when(mockLoggingController.matchIndex).thenReturn(ValueNotifier<int>(0));
-  // when(mockLoggingController.filteredData)
-  //     .thenReturn(ListValueNotifier<LogData>([]));
-  // when(mockLoggingController.activeSearchMatch)
-  //     .thenReturn(ValueNotifier<LogData?>(null));
-
 }
 
 class MockMemoryController extends Mock implements MemoryController {}
