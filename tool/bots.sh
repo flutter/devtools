@@ -136,6 +136,7 @@ elif [ "$BOT" = "test_ddc" ]; then
           test/chart_test.dart \
           test/cpu_profiler_controller_test.dart \
           test/cpu_profiler_test.dart \
+          test/debugger_console_test.dart \
           test/debugger_controller_test.dart \
           test/debugger_controller_stdio_test.dart \
           test/debugger_floating_test.dart \
