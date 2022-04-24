@@ -21,22 +21,24 @@ import 'package:vm_service/vm_service.dart';
 void main() {
   const screen = DebuggerScreen();
   late FakeServiceManager fakeServiceManager;
-  late MockDebuggerController debuggerController;
+  late MockDebuggerControllerLegacy debuggerController;
   late MockScriptManager scriptManager;
 
   const windowSize = Size(4000.0, 4000.0);
 
-  fakeServiceManager = FakeServiceManager();
-  scriptManager = MockScriptManager();
-  when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
-  when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
-  setGlobal(ServiceConnectionManager, fakeServiceManager);
-  setGlobal(IdeTheme, IdeTheme());
-  setGlobal(ScriptManager, scriptManager);
-  fakeServiceManager.consoleService.ensureServiceInitialized();
-  when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
-      .thenReturn(ValueNotifier<int>(0));
-  debuggerController = createMockDebuggerControllerWithDefaults();
+  setUp(() {
+    fakeServiceManager = FakeServiceManager();
+    scriptManager = MockScriptManager();
+    when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
+    when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
+    setGlobal(ServiceConnectionManager, fakeServiceManager);
+    setGlobal(IdeTheme, IdeTheme());
+    setGlobal(ScriptManager, scriptManager);
+    fakeServiceManager.consoleService.ensureServiceInitialized();
+    when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
+        .thenReturn(ValueNotifier<int>(0));
+    debuggerController = MockDebuggerControllerLegacy.withDefaults();
+  });
 
   Future<void> pumpDebuggerScreen(
     WidgetTester tester,
