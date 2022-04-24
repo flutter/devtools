@@ -29,17 +29,6 @@ void main() async {
 
   await ensureInspectorDependencies();
   mockLoggingController = MockLoggingController();
-  when(mockLoggingController.data).thenReturn([]);
-  when(mockLoggingController.search).thenReturn('');
-  when(mockLoggingController.searchMatches)
-      .thenReturn(ValueNotifier<List<LogData>>([]));
-  when(mockLoggingController.searchInProgressNotifier)
-      .thenReturn(ValueNotifier<bool>(false));
-  when(mockLoggingController.matchIndex).thenReturn(ValueNotifier<int>(0));
-  when(mockLoggingController.filteredData)
-      .thenReturn(ListValueNotifier<LogData>([]));
-  when(mockLoggingController.activeSearchMatch)
-      .thenReturn(ValueNotifier<LogData?>(null));
 
   final FakeServiceManager fakeServiceManager = FakeServiceManager();
   when(fakeServiceManager.connectedApp!.isFlutterWebAppNow).thenReturn(false);
