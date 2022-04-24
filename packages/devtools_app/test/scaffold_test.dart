@@ -146,7 +146,7 @@ void main() {
 
     testWidgets('displays floating debugger controls',
         (WidgetTester tester) async {
-      final mockConnectedApp = MockConnectedApp();
+      final mockConnectedApp = MockConnectedAppLegacy();
       when(mockConnectedApp.isFlutterAppNow).thenReturn(true);
       when(mockConnectedApp.isProfileBuildNow).thenReturn(false);
       when(mockServiceManager!.connectedAppInitialized).thenReturn(true);
@@ -172,7 +172,7 @@ void main() {
 
     testWidgets('does not display floating debugger controls in profile mode',
         (WidgetTester tester) async {
-      final mockConnectedApp = MockConnectedApp();
+      final mockConnectedApp = MockConnectedAppLegacy();
       when(mockConnectedApp.isFlutterAppNow).thenReturn(true);
       when(mockConnectedApp.isProfileBuildNow).thenReturn(true);
       when(mockServiceManager!.connectedAppInitialized).thenReturn(true);
@@ -199,7 +199,7 @@ void main() {
     testWidgets(
         'does not display floating debugger controls when debugger screen is showing',
         (WidgetTester tester) async {
-      final mockConnectedApp = MockConnectedApp();
+      final mockConnectedApp = MockConnectedAppLegacy();
       when(mockConnectedApp.isFlutterAppNow).thenReturn(true);
       when(mockConnectedApp.isProfileBuildNow).thenReturn(false);
       when(mockServiceManager!.connectedAppInitialized).thenReturn(true);
