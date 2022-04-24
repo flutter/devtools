@@ -135,10 +135,12 @@ elif [ "$BOT" = "test_ddc" ]; then
         flutter test $DART_DEFINE_ARGS \
           test/chart_test.dart \
           test/cpu_profiler_controller_test.dart \
+          test/cpu_profile_model_test.dart \
           test/cpu_profiler_test.dart \
           test/debugger_controller_test.dart \
           test/debugger_controller_stdio_test.dart \
           test/debugger_floating_test.dart \
+          test/debugger_screen_test.dart \
           test/device_dialog_test.dart \
           test/logging_controller_test.dart \
           test/logging_screen_data_test.dart \
