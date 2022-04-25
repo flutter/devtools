@@ -17,130 +17,126 @@ import 'package:mockito/mockito.dart';
 
 void main() {
   group('DevToolsScaffold widget', () {
-    MockServiceManager? mockServiceManager;
+    final mockServiceManager = MockServiceManager();
+    when(mockServiceManager.service).thenReturn(null);
+    when(mockServiceManager.connectedAppInitialized).thenReturn(false);
+    when(mockServiceManager.connectedState).thenReturn(
+      ValueNotifier<ConnectedState>(const ConnectedState(false)),
+    );
 
-    setUp(() {
-      mockServiceManager = MockServiceManager();
-      when(mockServiceManager!.service).thenReturn(null);
-      when(mockServiceManager!.connectedAppInitialized).thenReturn(false);
-      when(mockServiceManager!.connectedState).thenReturn(
-        ValueNotifier<ConnectedState>(const ConnectedState(false)),
-      );
+    final mockErrorBadgeManager = MockErrorBadgeManager();
+    when(mockServiceManager.errorBadgeManager)
+        .thenReturn(mockErrorBadgeManager);
+    when(mockErrorBadgeManager.errorCountNotifier(any))
+        .thenReturn(ValueNotifier<int>(0));
 
-      final mockErrorBadgeManager = MockErrorBadgeManager();
-      when(mockServiceManager!.errorBadgeManager)
-          .thenReturn(mockErrorBadgeManager);
-      when(mockErrorBadgeManager.errorCountNotifier(any))
-          .thenReturn(ValueNotifier<int>(0));
+    setGlobal(ServiceConnectionManager, mockServiceManager);
+    setGlobal(FrameworkController, FrameworkController());
+    setGlobal(SurveyService, SurveyService());
+    setGlobal(OfflineModeController, OfflineModeController());
+    setGlobal(IdeTheme, IdeTheme());
+  });
 
-      setGlobal(ServiceConnectionManager, mockServiceManager);
-      setGlobal(FrameworkController, FrameworkController());
-      setGlobal(SurveyService, SurveyService());
-      setGlobal(OfflineModeController, OfflineModeController());
-      setGlobal(IdeTheme, IdeTheme());
-    });
+  Widget wrapScaffold(Widget child) {
+    return wrap(wrapWithAnalytics(child));
+  }
 
-    Widget wrapScaffold(Widget child) {
-      return wrap(wrapWithAnalytics(child));
-    }
-
-    testWidgetsWithWindowSize(
-        'displays in narrow mode without error', const Size(200.0, 1200.0),
-        (WidgetTester tester) async {
-      await tester.pumpWidget(
-        wrapScaffold(
-          wrapWithNotifications(
-            DevToolsScaffold(
-              tabs: const [_screen1, _screen2, _screen3, _screen4, _screen5],
-              ideTheme: IdeTheme(),
-            ),
+  testWidgetsWithWindowSize(
+      'displays in narrow mode without error', const Size(200.0, 1200.0),
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrapScaffold(
+        wrapWithNotifications(
+          DevToolsScaffold(
+            tabs: const [_screen1, _screen2, _screen3, _screen4, _screen5],
+            ideTheme: IdeTheme(),
           ),
         ),
-      );
-      expect(find.byKey(_k1), findsOneWidget);
-      expect(find.byKey(DevToolsScaffold.narrowWidthKey), findsOneWidget);
-      expect(find.byKey(DevToolsScaffold.fullWidthKey), findsNothing);
-    });
+      ),
+    );
+    expect(find.byKey(_k1), findsOneWidget);
+    expect(find.byKey(DevToolsScaffold.narrowWidthKey), findsOneWidget);
+    expect(find.byKey(DevToolsScaffold.fullWidthKey), findsNothing);
+  });
 
-    testWidgetsWithWindowSize(
-        'displays in full-width mode without error', const Size(1200.0, 1200.0),
-        (WidgetTester tester) async {
-      await tester.pumpWidget(
-        wrapScaffold(
-          wrapWithNotifications(
-            DevToolsScaffold(
-              tabs: const [_screen1, _screen2, _screen3, _screen4, _screen5],
-              ideTheme: IdeTheme(),
-            ),
+  testWidgetsWithWindowSize(
+      'displays in full-width mode without error', const Size(1200.0, 1200.0),
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrapScaffold(
+        wrapWithNotifications(
+          DevToolsScaffold(
+            tabs: const [_screen1, _screen2, _screen3, _screen4, _screen5],
+            ideTheme: IdeTheme(),
           ),
         ),
-      );
-      expect(find.byKey(_k1), findsOneWidget);
-      expect(find.byKey(DevToolsScaffold.fullWidthKey), findsOneWidget);
-      expect(find.byKey(DevToolsScaffold.narrowWidthKey), findsNothing);
-    });
+      ),
+    );
+    expect(find.byKey(_k1), findsOneWidget);
+    expect(find.byKey(DevToolsScaffold.fullWidthKey), findsOneWidget);
+    expect(find.byKey(DevToolsScaffold.narrowWidthKey), findsNothing);
+  });
 
-    testWidgets('displays no tabs when only one is given',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(
-        wrapScaffold(
-          wrapWithNotifications(
-            DevToolsScaffold(
-              tabs: const [_screen1],
-              ideTheme: IdeTheme(),
-            ),
+  testWidgets('displays no tabs when only one is given',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrapScaffold(
+        wrapWithNotifications(
+          DevToolsScaffold(
+            tabs: const [_screen1],
+            ideTheme: IdeTheme(),
           ),
         ),
-      );
-      expect(find.byKey(_k1), findsOneWidget);
-      expect(find.byKey(_t1), findsNothing);
-    });
+      ),
+    );
+    expect(find.byKey(_k1), findsOneWidget);
+    expect(find.byKey(_t1), findsNothing);
+  });
 
-    testWidgets('displays only the selected tab', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        wrapScaffold(
-          wrapWithNotifications(
-            DevToolsScaffold(
-              tabs: const [_screen1, _screen2],
-              ideTheme: IdeTheme(),
-            ),
+  testWidgets('displays only the selected tab', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrapScaffold(
+        wrapWithNotifications(
+          DevToolsScaffold(
+            tabs: const [_screen1, _screen2],
+            ideTheme: IdeTheme(),
           ),
         ),
-      );
-      expect(find.byKey(_k1), findsOneWidget);
-      expect(find.byKey(_k2), findsNothing);
+      ),
+    );
+    expect(find.byKey(_k1), findsOneWidget);
+    expect(find.byKey(_k2), findsNothing);
 
-      // Tap on the tab for screen 2, then let the animation finish before
-      // checking the body is updated.
-      await tester.tap(find.byKey(_t2));
-      await tester.pumpAndSettle();
-      expect(find.byKey(_k1), findsNothing);
-      expect(find.byKey(_k2), findsOneWidget);
+    // Tap on the tab for screen 2, then let the animation finish before
+    // checking the body is updated.
+    await tester.tap(find.byKey(_t2));
+    await tester.pumpAndSettle();
+    expect(find.byKey(_k1), findsNothing);
+    expect(find.byKey(_k2), findsOneWidget);
 
-      // Return to screen 1.
-      await tester.tap(find.byKey(_t1));
-      await tester.pumpAndSettle();
-      expect(find.byKey(_k1), findsOneWidget);
-      expect(find.byKey(_k2), findsNothing);
-    });
+    // Return to screen 1.
+    await tester.tap(find.byKey(_t1));
+    await tester.pumpAndSettle();
+    expect(find.byKey(_k1), findsOneWidget);
+    expect(find.byKey(_k2), findsNothing);
+  });
 
-    testWidgets('displays the requested initial page',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(
-        wrapScaffold(
-          wrapWithNotifications(
-            DevToolsScaffold(
-              tabs: const [_screen1, _screen2],
-              page: _screen2.screenId,
-              ideTheme: IdeTheme(),
-            ),
+  testWidgets('displays the requested initial page',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrapScaffold(
+        wrapWithNotifications(
+          DevToolsScaffold(
+            tabs: const [_screen1, _screen2],
+            page: _screen2.screenId,
+            ideTheme: IdeTheme(),
           ),
         ),
-      );
+      ),
+    );
 
-      expect(find.byKey(_k1), findsNothing);
-      expect(find.byKey(_k2), findsOneWidget);
-    });
+    expect(find.byKey(_k1), findsNothing);
+    expect(find.byKey(_k2), findsOneWidget);
   });
 }
 
