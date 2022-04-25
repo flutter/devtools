@@ -190,7 +190,10 @@ class _ProgramExplorerRow extends StatelessWidget {
       }
     }
     if (kIsWeb) {
-      // TODO(https://github.com/flutter/devtools/issues/4039)
+      /*
+       TODO(https://github.com/flutter/devtools/issues/4039): Switch
+       back to unicode arrow once supported
+       */
       buffer.write(') -> ');
     } else {
       buffer.write(') → ');
