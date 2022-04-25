@@ -34,7 +34,7 @@ void main() {
     fakeServiceManager.consoleService.ensureServiceInitialized();
     when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
         .thenReturn(ValueNotifier<int>(0));
-    debuggerController = MockDebuggerController.withDefaults();
+    debuggerController = MockDebuggerControllerLegacy.withDefaults();
     when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
   });
 
