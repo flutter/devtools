@@ -658,7 +658,7 @@ class DevToolsTooltip extends StatelessWidget {
   Widget build(BuildContext context) {
     TextStyle? style = textStyle;
     if (richMessage == null) {
-      style = TextStyle(
+      style ??= TextStyle(
         color: Theme.of(context).colorScheme.tooltipTextColor,
         fontSize: defaultFontSize,
       );
