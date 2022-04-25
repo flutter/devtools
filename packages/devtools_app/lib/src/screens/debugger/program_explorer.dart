@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
@@ -188,7 +189,12 @@ class _ProgramExplorerRow extends StatelessWidget {
         buffer.write(closingTag);
       }
     }
-    buffer.write(') -> ');
+    if (kIsWeb) {
+      // TODO(https://github.com/flutter/devtools/issues/4039)
+      buffer.write(') -> ');
+    } else {
+      buffer.write(') → ');
+    }
     final returnType = signature.returnType;
     if (returnType != null) {
       final returnTypeName = signature.returnType?.name;
