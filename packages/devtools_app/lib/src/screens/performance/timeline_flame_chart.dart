@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../analytics/constants.dart' as analytics_constants;
 import '../../charts/flame_chart.dart';
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../primitives/flutter_widgets/linked_scroll_controller.dart';
@@ -20,9 +21,11 @@ import '../../shared/notifications.dart';
 import '../../shared/theme.dart';
 import '../../ui/colors.dart';
 import '../../ui/search.dart';
+import '../../ui/tab.dart';
 import '../../ui/utils.dart';
 import 'performance_controller.dart';
 import 'performance_model.dart';
+import 'performance_screen.dart';
 import 'performance_utils.dart';
 import 'timeline_analysis.dart';
 
@@ -32,8 +35,9 @@ import 'timeline_analysis.dart';
 
 final timelineSearchFieldKey = GlobalKey(debugLabel: 'TimelineSearchFieldKey');
 
-class TimelineAnalysisContainer extends StatefulWidget {
-  const TimelineAnalysisContainer({
+class TabbedPerformanceView extends StatefulWidget {
+  const TabbedPerformanceView({
+    required this.controller,
     required this.processing,
     required this.processingProgress,
   });
@@ -41,114 +45,118 @@ class TimelineAnalysisContainer extends StatefulWidget {
   @visibleForTesting
   static const emptyTimelineKey = Key('Empty Timeline');
 
+  final PerformanceController controller;
+
   final bool processing;
 
   final double processingProgress;
 
   @override
-  _TimelineAnalysisContainerState createState() =>
-      _TimelineAnalysisContainerState();
+  _TabbedPerformanceViewState createState() => _TabbedPerformanceViewState();
 }
 
-class _TimelineAnalysisContainerState extends State<TimelineAnalysisContainer>
-    with AutoDisposeMixin, SearchFieldMixin<TimelineAnalysisContainer> {
-  late PerformanceController _controller;
+class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
+    with AutoDisposeMixin, SearchFieldMixin<TabbedPerformanceView> {
+  static const _gaPrefix = 'performanceTab';
 
-  bool _controllerInitialized = false;
+  PerformanceController get controller => widget.controller;
 
-  FlutterFrameAnalysisTabData? selectedTab;
+  FlutterFrame? _selectedFlutterFrame;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  void initState() {
+    super.initState();
 
-    final newController = Provider.of<PerformanceController>(context);
-    if (_controllerInitialized && newController == _controller) return;
-    _controller = newController;
-    _controllerInitialized = true;
-
-    if (frameAnalysisSupported) {
-      selectedTab = _controller.selectedAnalysisTab.value;
-      addAutoDisposeListener(_controller.selectedAnalysisTab, () {
-        setState(() {
-          selectedTab = _controller.selectedAnalysisTab.value;
-        });
+    _selectedFlutterFrame = controller.selectedFrame.value;
+    addAutoDisposeListener(controller.selectedFrame, () {
+      setState(() {
+        _selectedFlutterFrame = controller.selectedFrame.value;
       });
-    }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    Widget content;
-    if (frameAnalysisSupported && selectedTab != null) {
-      content = FlutterFrameAnalysisView(
-        frameAnalysis: selectedTab!.frameAnalysis,
+    late Widget frameAnalysisView;
+    final selectedFrame = _selectedFlutterFrame;
+    if (selectedFrame != null) {
+      frameAnalysisView = FlutterFrameAnalysisView(
+        frameAnalysis: selectedFrame.frameAnalysis,
       );
     } else {
-      final timelineEmpty = (_controller.data?.isEmpty ?? true) ||
-          _controller.data!.eventGroups.isEmpty;
-      if (widget.processing) {
-        content = _buildProcessingInfo();
-      } else if (timelineEmpty) {
-        content = Center(
-          key: TimelineAnalysisContainer.emptyTimelineKey,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+      frameAnalysisView = const Center(
+        child: Text('Select a frame above to view analysis data.'),
+      );
+    }
+
+    const rasterMetrics = Center(
+      child: Text('Coming Soon'),
+    );
+
+    final tabViews = [
+      TimelineEventsView(
+        controller: controller,
+        processing: widget.processing,
+        processingProgress: widget.processingProgress,
+      ),
+      if (frameAnalysisSupported) frameAnalysisView,
+      if (rasterMetricsSupported) rasterMetrics,
+    ];
+
+    return AnalyticsTabbedView(
+      tabs: _generateTabs(),
+      tabViews: tabViews,
+      gaScreen: analytics_constants.performance,
+      // TODO(kenz): enable analytics when this view is stable.
+      sendAnalytics: false,
+    );
+  }
+
+  List<DevToolsTab> _generateTabs() {
+    final data = controller.data;
+    final hasData = data != null && !data.isEmpty;
+    final searchFieldEnabled = hasData && !widget.processing;
+    return [
+      _buildTab(
+        tabName: 'Timeline Events',
+        trailing: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            _buildSearchField(searchFieldEnabled),
+            const FlameChartHelpButton(
+              gaScreen: PerformanceScreen.id,
+              gaSelection: analytics_constants.timelineFlameChartHelp,
+            ),
+            RefreshTimelineEventsButton(controller: controller),
+          ],
+        ),
+      ),
+      if (frameAnalysisSupported)
+        _buildTab(
+          tabName: 'Frame Analysis',
+        ),
+      if (rasterMetricsSupported)
+        _buildTab(
+          tabName: 'Raster Metrics',
+          trailing: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Text(
-                'No timeline events. Try clicking the refresh button ',
-                style: Theme.of(context).subtleTextStyle,
-              ),
-              Icon(
-                Icons.refresh,
-                size: defaultIconSize,
-              ),
-              Text(
-                ' to load more data.',
-                style: Theme.of(context).subtleTextStyle,
+              Padding(
+                padding: const EdgeInsets.only(right: densePadding),
+                child: IconLabelButton(
+                  tooltip:
+                      'Take a snapshot of the rendering layers on the current screen',
+                  icon: Icons.camera,
+                  label: 'Take Snapshot',
+                  outlined: false,
+                  // TODO(kenz): hook this up to the engine service extension.
+                  onPressed: () {},
+                ),
               ),
             ],
           ),
-        );
-      } else {
-        content = LayoutBuilder(
-          builder: (context, constraints) {
-            return TimelineFlameChart(
-              _controller.data!,
-              width: constraints.maxWidth,
-              height: constraints.maxHeight,
-              selectionNotifier: _controller.selectedTimelineEvent,
-              searchMatchesNotifier: _controller.searchMatches,
-              activeSearchMatchNotifier: _controller.activeSearchMatch,
-              onDataSelected: _controller.selectTimelineEvent,
-            );
-          },
-        );
-      }
-    }
-
-    final searchFieldEnabled = selectedTab == null &&
-        !(_controller.data?.isEmpty ?? true) &&
-        !widget.processing;
-
-    return OutlineDecoration(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          TimelineAnalysisHeader(
-            controller: _controller,
-            selectedTab: selectedTab,
-            searchFieldBuilder: () => _buildSearchField(searchFieldEnabled),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 8.0),
-              child: content,
-            ),
-          ),
-        ],
-      ),
-    );
+        ),
+    ];
   }
 
   Widget _buildSearchField(bool searchFieldEnabled) {
@@ -156,7 +164,7 @@ class _TimelineAnalysisContainerState extends State<TimelineAnalysisContainer>
       width: defaultSearchTextWidth,
       height: defaultTextFieldHeight,
       child: buildSearchField(
-        controller: _controller,
+        controller: controller,
         searchFieldKey: timelineSearchFieldKey,
         searchFieldEnabled: searchFieldEnabled,
         shouldRequestFocus: false,
@@ -165,11 +173,77 @@ class _TimelineAnalysisContainerState extends State<TimelineAnalysisContainer>
     );
   }
 
-  Widget _buildProcessingInfo() {
-    return ProcessingInfo(
-      progressValue: widget.processingProgress,
-      processedObject: 'timeline trace',
+  DevToolsTab _buildTab({required String tabName, Widget? trailing}) {
+    return DevToolsTab.create(
+      tabName: tabName,
+      gaPrefix: _gaPrefix,
+      trailing: trailing,
     );
+  }
+}
+
+class TimelineEventsView extends StatelessWidget {
+  const TimelineEventsView({
+    Key? key,
+    required this.controller,
+    required this.processing,
+    required this.processingProgress,
+  });
+
+  @visibleForTesting
+  static const emptyTimelineKey = Key('Empty Timeline');
+
+  final PerformanceController controller;
+
+  final bool processing;
+
+  final double processingProgress;
+
+  @override
+  Widget build(BuildContext context) {
+    final timelineEmpty = (controller.data?.isEmpty ?? true) ||
+        controller.data!.eventGroups.isEmpty;
+    if (processing) {
+      return ProcessingInfo(
+        progressValue: processingProgress,
+        processedObject: 'timeline trace',
+      );
+    } else if (timelineEmpty) {
+      return Center(
+        key: TabbedPerformanceView.emptyTimelineKey,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'No timeline events. Try clicking the refresh button ',
+              style: Theme.of(context).subtleTextStyle,
+            ),
+            Icon(
+              Icons.refresh,
+              size: defaultIconSize,
+            ),
+            Text(
+              ' to load more data.',
+              style: Theme.of(context).subtleTextStyle,
+            ),
+          ],
+        ),
+      );
+    } else {
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          return TimelineFlameChart(
+            controller.data!,
+            width: constraints.maxWidth,
+            height: constraints.maxHeight,
+            selectionNotifier: controller.selectedTimelineEvent,
+            searchMatchesNotifier: controller.searchMatches,
+            activeSearchMatchNotifier: controller.activeSearchMatch,
+            onDataSelected: controller.selectTimelineEvent,
+          );
+        },
+      );
+    }
   }
 }
 
