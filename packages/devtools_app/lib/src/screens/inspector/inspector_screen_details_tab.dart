@@ -9,7 +9,6 @@ import '../../analytics/constants.dart' as analytics_constants;
 import '../../primitives/blocking_action_mixin.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/theme.dart';
-import '../../shared/utils.dart';
 import '../../ui/tab.dart';
 import 'inspector_controller.dart';
 import 'inspector_screen.dart';
@@ -38,32 +37,11 @@ class InspectorDetails extends StatelessWidget {
       LayoutExplorerTab(controller: controller),
       detailsTree,
     ];
-    final theme = Theme.of(context);
-    final focusColor = theme.focusColor;
-    final borderSide = BorderSide(color: focusColor);
 
     return AnalyticsTabbedView(
       tabs: tabs,
       tabViews: tabViews,
       gaScreen: analytics_constants.inspector,
-      tabBarContainer: (child) => Container(
-        height: defaultButtonHeight +
-            (isDense() ? denseModeDenseSpacing : denseSpacing),
-        decoration: BoxDecoration(
-          border: Border.all(color: Theme.of(context).focusColor),
-        ),
-        child: child,
-      ),
-      tabViewContainer: (child) => Container(
-        decoration: BoxDecoration(
-          border: Border(
-            left: borderSide,
-            bottom: borderSide,
-            right: borderSide,
-          ),
-        ),
-        child: child,
-      ),
     );
   }
 
