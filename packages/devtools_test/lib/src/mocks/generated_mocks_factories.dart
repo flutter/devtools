@@ -43,9 +43,10 @@ MockDebuggerController createMockDebuggerControllerWithDefaults({
   when(debuggerController.variables).thenReturn(ValueNotifier([]));
   when(debuggerController.currentParsedScript)
       .thenReturn(ValueNotifier<ParsedScript?>(null));
+  mockProgramExplorerController ??=
+      createMockProgramExplorerControllerWithDefaults();
   when(debuggerController.programExplorerController).thenReturn(
-    mockProgramExplorerController ??
-        createMockProgramExplorerControllerWithDefaults(),
+    mockProgramExplorerController,
   );
   return debuggerController;
 }
