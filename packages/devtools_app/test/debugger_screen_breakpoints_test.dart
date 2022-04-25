@@ -31,6 +31,34 @@ void main() {
   final debuggerController = createMockDebuggerControllerWithDefaults();
   when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
 
+  final breakpoints = [
+    Breakpoint(
+      breakpointNumber: 1,
+      id: 'bp1',
+      resolved: false,
+      location: UnresolvedSourceLocation(
+        scriptUri: 'package:test/script.dart',
+        line: 10,
+      ),
+      enabled: true,
+    )
+  ];
+
+  final breakpointsWithLocation = [
+    BreakpointAndSourcePosition.create(
+      breakpoints.first,
+      const SourcePosition(line: 10, column: 1),
+    )
+  ];
+
+  when(debuggerController.breakpoints).thenReturn(ValueNotifier(breakpoints));
+  when(debuggerController.breakpointsWithLocation)
+      .thenReturn(ValueNotifier(breakpointsWithLocation));
+
+  when(scriptManager.sortedScripts).thenReturn(ValueNotifier([]));
+  when(debuggerController.scriptLocation).thenReturn(ValueNotifier(null));
+  when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
+
   Future<void> pumpDebuggerScreen(
     WidgetTester tester,
     DebuggerController controller,
@@ -45,34 +73,6 @@ void main() {
 
   testWidgetsWithWindowSize('Breakpoints show items', windowSize,
       (WidgetTester tester) async {
-    final breakpoints = [
-      Breakpoint(
-        breakpointNumber: 1,
-        id: 'bp1',
-        resolved: false,
-        location: UnresolvedSourceLocation(
-          scriptUri: 'package:test/script.dart',
-          line: 10,
-        ),
-        enabled: true,
-      )
-    ];
-
-    final breakpointsWithLocation = [
-      BreakpointAndSourcePosition.create(
-        breakpoints.first,
-        const SourcePosition(line: 10, column: 1),
-      )
-    ];
-
-    when(debuggerController.breakpoints).thenReturn(ValueNotifier(breakpoints));
-    when(debuggerController.breakpointsWithLocation)
-        .thenReturn(ValueNotifier(breakpointsWithLocation));
-
-    when(scriptManager.sortedScripts).thenReturn(ValueNotifier([]));
-    when(debuggerController.scriptLocation).thenReturn(ValueNotifier(null));
-    when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
-
     await pumpDebuggerScreen(tester, debuggerController);
 
     expect(find.text('Breakpoints'), findsOneWidget);
