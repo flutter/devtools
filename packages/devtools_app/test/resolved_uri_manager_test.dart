@@ -11,143 +11,142 @@ import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
 void main() async {
-  group('ResolvedUriManager', () {
-    const String isolateId = 'anIsolateId';
-    const uri1 = 'this/is/a/uri1';
-    const uri2 = 'this/is/a/uri2';
-    const packageUri1 = 'uri/am/i1';
-    const packageUri2 = 'uri/am/i2';
-    late ResolvedUriManager resolvedUriManager;
-    final service = MockVmService();
+  late ResolvedUriManager resolvedUriManager;
+  final service = MockVmServiceWrapper();
 
+  when(service.getFlagList())
+      .thenAnswer((_) => Future.value(FlagList(flags: [])));
+  when(service.onDebugEvent).thenAnswer((_) {
+    return const Stream.empty();
+  });
+  when(service.onVMEvent).thenAnswer((_) {
+    return const Stream.empty();
+  });
+  when(service.onIsolateEvent).thenAnswer((_) {
+    return const Stream.empty();
+  });
+  when(service.onStdoutEvent).thenAnswer((_) {
+    return const Stream.empty();
+  });
+  when(service.onStderrEvent).thenAnswer((_) {
+    return const Stream.empty();
+  });
+  setGlobal(ServiceConnectionManager, FakeServiceManager(service: service));
+  resolvedUriManager = ResolvedUriManager();
+
+  const String isolateId = 'anIsolateId';
+  const uri1 = 'this/is/a/uri1';
+  const uri2 = 'this/is/a/uri2';
+  const packageUri1 = 'uri/am/i1';
+  const packageUri2 = 'uri/am/i2';
+
+  group('lifecycle', () {
     setUp(() {
-      when(service.onDebugEvent).thenAnswer((_) {
-        return const Stream.empty();
-      });
-      when(service.onVMEvent).thenAnswer((_) {
-        return const Stream.empty();
-      });
-      when(service.onIsolateEvent).thenAnswer((_) {
-        return const Stream.empty();
-      });
-      when(service.onStdoutEvent).thenAnswer((_) {
-        return const Stream.empty();
-      });
-      when(service.onStderrEvent).thenAnswer((_) {
-        return const Stream.empty();
-      });
-      setGlobal(ServiceConnectionManager, FakeServiceManager(service: service));
-      resolvedUriManager = ResolvedUriManager();
+      when(serviceManager.service!.lookupPackageUris(isolateId, [uri1]))
+          .thenAnswer(
+        (realInvocation) => Future.value(UriList(uris: [packageUri1])),
+      );
     });
 
-    group('lifecycle', () {
-      setUp(() {
-        when(serviceManager.service!.lookupPackageUris(isolateId, [uri1]))
-            .thenAnswer(
-          (realInvocation) => Future.value(UriList(uris: [packageUri1])),
-        );
-      });
+    test('does nothing before vmServiceOpened', () async {
+      await resolvedUriManager.fetchPackageUris(isolateId, [uri1]);
 
-      test('does nothing before vmServiceOpened', () async {
-        await resolvedUriManager.fetchPackageUris(isolateId, [uri1]);
-
-        expect(resolvedUriManager.lookupPackageUri(isolateId, uri1), isNull);
-        verifyNever(service.lookupPackageUris('', []));
-      });
-
-      test('does nothing after vmServiceClosed', () async {
-        resolvedUriManager.vmServiceOpened();
-        resolvedUriManager.vmServiceClosed();
-
-        await resolvedUriManager.fetchPackageUris(isolateId, [uri1]);
-
-        expect(resolvedUriManager.lookupPackageUri(isolateId, uri1), isNull);
-        verifyNever(service.lookupPackageUris('', []));
-      });
+      expect(resolvedUriManager.lookupPackageUri(isolateId, uri1), isNull);
+      verifyNever(service.lookupPackageUris('', []));
     });
 
-    group('general use', () {
-      setUp(() {
-        resolvedUriManager.vmServiceOpened();
-      });
-      test('lookupPackageUri when uri is unknown', () {
-        final packageUriResult =
-            resolvedUriManager.lookupPackageUri(isolateId, 'some/uri');
-        expect(packageUriResult, isNull);
-      });
+    test('does nothing after vmServiceClosed', () async {
+      resolvedUriManager.vmServiceOpened();
+      resolvedUriManager.vmServiceClosed();
 
-      test('lookupPackageUris', () async {
-        when(serviceManager.service!.lookupPackageUris(isolateId, [uri1, uri2]))
-            .thenAnswer(
-          (realInvocation) =>
-              Future.value(UriList(uris: [packageUri1, packageUri2])),
-        );
+      await resolvedUriManager.fetchPackageUris(isolateId, [uri1]);
 
-        await resolvedUriManager.fetchPackageUris(isolateId, [uri1, uri2]);
+      expect(resolvedUriManager.lookupPackageUri(isolateId, uri1), isNull);
+      verifyNever(service.lookupPackageUris('', []));
+    });
+  });
 
-        expect(
-          resolvedUriManager.lookupPackageUri(isolateId, uri1),
-          equals(packageUri1),
-        );
-        expect(
-          resolvedUriManager.lookupPackageUri(isolateId, uri2),
-          equals(packageUri2),
-        );
-      });
+  group('general use', () {
+    setUp(() {
+      resolvedUriManager.vmServiceOpened();
+    });
+    test('lookupPackageUri when uri is unknown', () {
+      final packageUriResult =
+          resolvedUriManager.lookupPackageUri(isolateId, 'some/uri');
+      expect(packageUriResult, isNull);
+    });
 
-      test('remembers already fetched uris', () async {
-        when(serviceManager.service!.lookupPackageUris(isolateId, [uri1]))
-            .thenAnswer(
-          (realInvocation) => Future.value(UriList(uris: [packageUri1])),
-        );
-        when(serviceManager.service!.lookupPackageUris(isolateId, [uri2]))
-            .thenAnswer(
-          (realInvocation) => Future.value(UriList(uris: [packageUri2])),
-        );
+    test('lookupPackageUris', () async {
+      when(serviceManager.service!.lookupPackageUris(isolateId, [uri1, uri2]))
+          .thenAnswer(
+        (realInvocation) =>
+            Future.value(UriList(uris: [packageUri1, packageUri2])),
+      );
 
-        await resolvedUriManager.fetchPackageUris(isolateId, [uri1]);
-        expect(
-          resolvedUriManager.lookupPackageUri(isolateId, uri1),
-          equals(packageUri1),
-        );
+      await resolvedUriManager.fetchPackageUris(isolateId, [uri1, uri2]);
 
-        await resolvedUriManager.fetchPackageUris(isolateId, [uri2]);
-        expect(
-          resolvedUriManager.lookupPackageUri(isolateId, uri1),
-          equals(packageUri1),
-        );
-        expect(
-          resolvedUriManager.lookupPackageUri(isolateId, uri2),
-          equals(packageUri2),
-        );
-      });
+      expect(
+        resolvedUriManager.lookupPackageUri(isolateId, uri1),
+        equals(packageUri1),
+      );
+      expect(
+        resolvedUriManager.lookupPackageUri(isolateId, uri2),
+        equals(packageUri2),
+      );
+    });
 
-      test('caches different mappings between different isolates', () async {
-        const String isolateId2 = 'anIsolateId2';
-        const String packageUriFromDifferentIsolate =
-            'this/is/a/third/packageUri3';
-        when(serviceManager.service!.lookupPackageUris(isolateId, [uri1]))
-            .thenAnswer(
-          (realInvocation) => Future.value(UriList(uris: [packageUri1])),
-        );
-        when(serviceManager.service!.lookupPackageUris(isolateId2, [uri1]))
-            .thenAnswer(
-          (realInvocation) =>
-              Future.value(UriList(uris: [packageUriFromDifferentIsolate])),
-        );
+    test('remembers already fetched uris', () async {
+      when(serviceManager.service!.lookupPackageUris(isolateId, [uri1]))
+          .thenAnswer(
+        (realInvocation) => Future.value(UriList(uris: [packageUri1])),
+      );
+      when(serviceManager.service!.lookupPackageUris(isolateId, [uri2]))
+          .thenAnswer(
+        (realInvocation) => Future.value(UriList(uris: [packageUri2])),
+      );
 
-        await resolvedUriManager.fetchPackageUris(isolateId, [uri1]);
-        await resolvedUriManager.fetchPackageUris(isolateId2, [uri1]);
+      await resolvedUriManager.fetchPackageUris(isolateId, [uri1]);
+      expect(
+        resolvedUriManager.lookupPackageUri(isolateId, uri1),
+        equals(packageUri1),
+      );
 
-        expect(
-          resolvedUriManager.lookupPackageUri(isolateId, uri1),
-          equals(packageUri1),
-        );
-        expect(
-          resolvedUriManager.lookupPackageUri(isolateId2, uri1),
-          equals(packageUriFromDifferentIsolate),
-        );
-      });
+      await resolvedUriManager.fetchPackageUris(isolateId, [uri2]);
+      expect(
+        resolvedUriManager.lookupPackageUri(isolateId, uri1),
+        equals(packageUri1),
+      );
+      expect(
+        resolvedUriManager.lookupPackageUri(isolateId, uri2),
+        equals(packageUri2),
+      );
+    });
+
+    test('caches different mappings between different isolates', () async {
+      const String isolateId2 = 'anIsolateId2';
+      const String packageUriFromDifferentIsolate =
+          'this/is/a/third/packageUri3';
+      when(serviceManager.service!.lookupPackageUris(isolateId, [uri1]))
+          .thenAnswer(
+        (realInvocation) => Future.value(UriList(uris: [packageUri1])),
+      );
+      when(serviceManager.service!.lookupPackageUris(isolateId2, [uri1]))
+          .thenAnswer(
+        (realInvocation) =>
+            Future.value(UriList(uris: [packageUriFromDifferentIsolate])),
+      );
+
+      await resolvedUriManager.fetchPackageUris(isolateId, [uri1]);
+      await resolvedUriManager.fetchPackageUris(isolateId2, [uri1]);
+
+      expect(
+        resolvedUriManager.lookupPackageUri(isolateId, uri1),
+        equals(packageUri1),
+      );
+      expect(
+        resolvedUriManager.lookupPackageUri(isolateId2, uri1),
+        equals(packageUriFromDifferentIsolate),
+      );
     });
   });
 }
