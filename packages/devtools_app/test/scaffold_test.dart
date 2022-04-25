@@ -16,29 +16,27 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
 void main() {
-  group('DevToolsScaffold widget', () {
-    MockServiceManager? mockServiceManager;
+  final mockServiceManager = MockServiceConnectionManager();
+  when(mockServiceManager.service).thenReturn(null);
+  when(mockServiceManager.connectedAppInitialized).thenReturn(false);
+  when(mockServiceManager.connectedState).thenReturn(
+    ValueNotifier<ConnectedState>(const ConnectedState(false)),
+  );
 
-    setUp(() {
-      mockServiceManager = MockServiceManager();
-      when(mockServiceManager!.service).thenReturn(null);
-      when(mockServiceManager!.connectedAppInitialized).thenReturn(false);
-      when(mockServiceManager!.connectedState).thenReturn(
-        ValueNotifier<ConnectedState>(const ConnectedState(false)),
-      );
+  final mockErrorBadgeManager = MockErrorBadgeManager();
+  when(mockServiceManager.errorBadgeManager).thenReturn(mockErrorBadgeManager);
+  when(mockErrorBadgeManager.errorCountNotifier(any))
+      .thenReturn(ValueNotifier<int>(0));
 
-      final mockErrorBadgeManager = MockErrorBadgeManager();
-      when(mockServiceManager!.errorBadgeManager)
-          .thenReturn(mockErrorBadgeManager);
-      when(mockErrorBadgeManager.errorCountNotifier(any))
-          .thenReturn(ValueNotifier<int>(0));
+  setGlobal(ServiceConnectionManager, mockServiceManager);
+  setGlobal(FrameworkController, FrameworkController());
+  setGlobal(SurveyService, SurveyService());
+  setGlobal(OfflineModeController, OfflineModeController());
+  setGlobal(IdeTheme, IdeTheme());
 
-      setGlobal(ServiceConnectionManager, mockServiceManager);
-      setGlobal(FrameworkController, FrameworkController());
-      setGlobal(SurveyService, SurveyService());
-      setGlobal(OfflineModeController, OfflineModeController());
-      setGlobal(IdeTheme, IdeTheme());
-    });
+  Widget wrapScaffold(Widget child) {
+    return wrap(wrapWithAnalytics(child));
+  }
 
     Widget wrapScaffold(Widget child) {
       return wrap(wrapWithAnalytics(child));
