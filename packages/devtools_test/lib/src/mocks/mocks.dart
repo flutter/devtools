@@ -132,7 +132,9 @@ class FakeConnectedApp extends Mock implements ConnectedApp {}
 class MockBannerMessagesController extends Mock
     implements BannerMessagesController {}
 
-class MockLoggingController extends Mock implements LoggingController {
+class MockLoggingController extends Mock
+    with SearchControllerMixin<LogData>, FilterControllerMixin<LogData>
+    implements LoggingController {
   @override
   ValueListenable<LogData?> get selectedLog => _selectedLog;
 
@@ -142,6 +144,9 @@ class MockLoggingController extends Mock implements LoggingController {
   void selectLog(LogData data) {
     _selectedLog.value = data;
   }
+
+  @override
+  List<LogData> data = <LogData>[];
 }
 
 class MockMemoryController extends Mock implements MemoryController {}
