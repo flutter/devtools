@@ -15,25 +15,28 @@ import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
 void main() {
-  late FakeServiceManager fakeServiceManager;
-  late MockDebuggerController debuggerController;
-  late MockScriptManager scriptManager;
-
   const windowSize = Size(4000.0, 4000.0);
+  final fakeServiceManager = FakeServiceManager();
+  final scriptManager = MockScriptManager();
+  when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
+  when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
+  setGlobal(ServiceConnectionManager, fakeServiceManager);
+  setGlobal(IdeTheme, IdeTheme());
+  setGlobal(ScriptManager, scriptManager);
+  fakeServiceManager.consoleService.ensureServiceInitialized();
+  when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
+      .thenReturn(ValueNotifier<int>(0));
+  final debuggerController = createMockDebuggerControllerWithDefaults();
 
-  setUp(() {
-    fakeServiceManager = FakeServiceManager();
-    scriptManager = MockScriptManager();
-    when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
-    when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
-    setGlobal(IdeTheme, IdeTheme());
-    setGlobal(ScriptManager, scriptManager);
-    fakeServiceManager.consoleService.ensureServiceInitialized();
-    when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
-        .thenReturn(ValueNotifier<int>(0));
-    debuggerController = createMockDebuggerControllerWithDefaults();
-  });
+  final scripts = [
+    ScriptRef(uri: 'package:/test/script.dart', id: 'test-script')
+  ];
+
+  when(scriptManager.sortedScripts).thenReturn(ValueNotifier(scripts));
+  when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
+
+  // File Explorer view is hidden
+  when(debuggerController.fileExplorerVisible).thenReturn(ValueNotifier(false));
 
   Future<void> pumpDebuggerScreen(
     WidgetTester tester,
@@ -49,18 +52,6 @@ void main() {
 
   testWidgetsWithWindowSize('File Explorer hidden', windowSize,
       (WidgetTester tester) async {
-    final scripts = [
-      ScriptRef(uri: 'package:/test/script.dart', id: 'test-script')
-    ];
-
-    when(debuggerController.programExplorerController.selectedNodeIndex)
-        .thenReturn(ValueNotifier(0));
-    when(scriptManager.sortedScripts).thenReturn(ValueNotifier(scripts));
-    when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
-
-    // File Explorer view is hidden
-    when(debuggerController.fileExplorerVisible)
-        .thenReturn(ValueNotifier(false));
     await pumpDebuggerScreen(tester, debuggerController);
     expect(find.text('File Explorer'), findsOneWidget);
   });
