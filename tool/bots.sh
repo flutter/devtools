@@ -131,6 +131,7 @@ elif [ "$BOT" = "test_ddc" ]; then
         # At the moment some tests fail without the flag --no-sound-null-safety.
         # We are fixing them one by one and adding to the list below. After all
         # tests are fixed, we will delete this list and remove the flags from the commands.
+
         flutter test $DART_DEFINE_ARGS \
           test/chart_test.dart \
           test/cpu_profiler_controller_test.dart \
@@ -138,6 +139,9 @@ elif [ "$BOT" = "test_ddc" ]; then
           test/debugger_controller_test.dart \
           test/debugger_controller_stdio_test.dart \
           test/device_dialog_test.dart \
+          test/logging_controller_test.dart \
+          test/logging_screen_data_test.dart \
+          test/logging_screen_test.dart \
           test/performance_screen_test.dart \
           test/performance_screen_test.dart \
           test/profiler_screen_controller_test.dart \

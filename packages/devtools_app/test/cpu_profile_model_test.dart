@@ -112,7 +112,7 @@ void main() {
     test('to json defaults packageUri to resolvedUrl', () {
       const id = '140357727781376-12';
       final profileData = Map<String, dynamic>.from(goldenCpuProfileDataJson);
-      profileData['stackFrames'] = Map<String, Map<String, String>>.from(
+      profileData['stackFrames'] = Map<String, Map<String, String?>>.from(
         {id: goldenCpuProfileStackFrames[id]},
       );
       profileData['stackFrames'][id]
