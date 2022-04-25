@@ -19,7 +19,7 @@ void main() {
   const windowSize = Size(4000.0, 4000.0);
 
   final fakeServiceManager = FakeServiceManager();
-  final scriptManager = MockScriptManagerLegacy();
+  final scriptManager = MockScriptManager();
   when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
   when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
   setGlobal(ServiceConnectionManager, fakeServiceManager);
@@ -30,6 +30,27 @@ void main() {
       .thenReturn(ValueNotifier<int>(0));
   final debuggerController = createMockDebuggerControllerWithDefaults();
   when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
+
+  final scripts = [
+    ScriptRef(uri: 'package:test/script.dart', id: 'test-script')
+  ];
+
+  when(scriptManager.sortedScripts).thenReturn(ValueNotifier(scripts));
+  when(debuggerController.programExplorerController.rootObjectNodes).thenReturn(
+    ValueNotifier(
+      [
+        VMServiceObjectNode(
+          debuggerController.programExplorerController,
+          'package:test',
+          null,
+        ),
+      ],
+    ),
+  );
+  when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
+
+  // File Explorer view is shown
+  when(debuggerController.fileExplorerVisible).thenReturn(ValueNotifier(true));
 
   Future<void> pumpDebuggerScreen(
     WidgetTester tester,
@@ -45,30 +66,6 @@ void main() {
 
   testWidgetsWithWindowSize('File Explorer visible', windowSize,
       (WidgetTester tester) async {
-    final scripts = [
-      ScriptRef(uri: 'package:test/script.dart', id: 'test-script')
-    ];
-
-    when(debuggerController.programExplorerController.selectedNodeIndex)
-        .thenReturn(ValueNotifier(0));
-    when(scriptManager.sortedScripts).thenReturn(ValueNotifier(scripts));
-    when(debuggerController.programExplorerController.rootObjectNodes)
-        .thenReturn(
-      ValueNotifier(
-        [
-          VMServiceObjectNode(
-            debuggerController.programExplorerController,
-            'package:test',
-            null,
-          ),
-        ],
-      ),
-    );
-    when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
-
-    // File Explorer view is shown
-    when(debuggerController.fileExplorerVisible)
-        .thenReturn(ValueNotifier(true));
     await pumpDebuggerScreen(tester, debuggerController);
     // One for the button and one for the title of the File Explorer view.
     expect(find.text('File Explorer'), findsNWidgets(2));
