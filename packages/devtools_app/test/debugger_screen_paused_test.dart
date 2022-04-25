@@ -3,9 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/screens/debugger/console.dart';
 import 'package:devtools_app/src/screens/debugger/controls.dart';
-import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
+import 'package:devtools_app/src/screens/debugger/debugger_model.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_screen.dart';
 import 'package:devtools_app/src/scripts/script_manager.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
@@ -14,11 +13,12 @@ import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+import 'package:vm_service/vm_service.dart';
 
 void main() {
   const screen = DebuggerScreen();
   late FakeServiceManager fakeServiceManager;
-  late MockDebuggerControllerLegacy debuggerController;
+  late MockDebuggerController debuggerController;
   late MockScriptManager scriptManager;
 
   const windowSize = Size(4000.0, 4000.0);
@@ -38,40 +38,6 @@ void main() {
     when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
   });
 
-  Future<void> pumpConsole(
-    WidgetTester tester,
-    DebuggerController controller,
-  ) async {
-    await tester.pumpWidget(
-      wrapWithControllers(
-        Row(
-          children: [
-            Flexible(child: DebuggerConsole.buildHeader()),
-            const Expanded(child: DebuggerConsole()),
-          ],
-        ),
-        debugger: controller,
-      ),
-    );
-  }
-
-  testWidgets('builds its tab', (WidgetTester tester) async {
-    await tester.pumpWidget(wrap(Builder(builder: screen.buildTab)));
-    expect(find.text('Debugger'), findsOneWidget);
-  });
-
-  testWidgetsWithWindowSize('has Console / stdio area', windowSize,
-      (WidgetTester tester) async {
-    serviceManager.consoleService.appendStdio('test stdio');
-
-    await pumpConsole(tester, debuggerController);
-
-    expect(find.text('Console'), findsOneWidget);
-
-    // test for stdio output.
-    expect(find.selectableText('test stdio'), findsOneWidget);
-  });
-
   WidgetPredicate createDebuggerButtonPredicate(String title) {
     return (Widget widget) {
       if (widget is DebuggerButton && widget.title == title) {
@@ -81,8 +47,36 @@ void main() {
     };
   }
 
-  testWidgetsWithWindowSize('debugger controls running', windowSize,
+  testWidgetsWithWindowSize('debugger controls paused', windowSize,
       (WidgetTester tester) async {
+    when(debuggerController.isPaused).thenReturn(ValueNotifier(true));
+    when(debuggerController.stackFramesWithLocation).thenReturn(
+      ValueNotifier([
+        StackFrameAndSourcePosition(
+          Frame(
+            index: 0,
+            code: CodeRef(
+              name: 'testCodeRef',
+              id: 'testCodeRef',
+              kind: CodeKind.kDart,
+            ),
+            location: SourceLocation(
+              script: ScriptRef(
+                uri: 'package:test/script.dart',
+                id: 'script.dart',
+              ),
+              tokenPos: 10,
+            ),
+            kind: FrameKind.kRegular,
+          ),
+          position: const SourcePosition(
+            line: 1,
+            column: 10,
+          ),
+        )
+      ]),
+    );
+
     await tester.pumpWidget(
       wrapWithControllers(
         Builder(builder: screen.build),
@@ -97,7 +91,7 @@ void main() {
     final pause = _getWidgetFromFinder(
       find.byWidgetPredicate(createDebuggerButtonPredicate('Pause')),
     ) as DebuggerButton;
-    expect(pause.onPressed, isNotNull);
+    expect(pause.onPressed, isNull);
 
     expect(
       find.byWidgetPredicate(createDebuggerButtonPredicate('Resume')),
@@ -106,18 +100,7 @@ void main() {
     final resume = _getWidgetFromFinder(
       find.byWidgetPredicate(createDebuggerButtonPredicate('Resume')),
     ) as DebuggerButton;
-    expect(resume.onPressed, isNull);
-  });
-
-  testWidgetsWithWindowSize('debugger controls break on exceptions', windowSize,
-      (WidgetTester tester) async {
-    await tester.pumpWidget(
-      wrapWithControllers(
-        Builder(builder: screen.build),
-        debugger: debuggerController,
-      ),
-    );
-    expect(find.text('Ignore'), findsOneWidget);
+    expect(resume.onPressed, isNotNull);
   });
 }
 
