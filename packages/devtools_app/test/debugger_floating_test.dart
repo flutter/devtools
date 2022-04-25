@@ -14,22 +14,17 @@ import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
 void main() {
-  late FakeServiceManager fakeServiceManager;
-  late MockDebuggerController debuggerController;
-  late MockScriptManager scriptManager;
+  final fakeServiceManager = FakeServiceManager();
+  final debuggerController = createMockDebuggerControllerWithDefaults();
+  final scriptManager = MockScriptManager();
 
-  setUp(() {
-    fakeServiceManager = FakeServiceManager();
-    scriptManager = MockScriptManager();
-    when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
-    when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
-    setGlobal(IdeTheme, IdeTheme());
-    setGlobal(ScriptManager, scriptManager);
-    fakeServiceManager.consoleService.ensureServiceInitialized();
-    debuggerController = MockDebuggerController();
-    when(debuggerController.isPaused).thenReturn(ValueNotifier<bool>(true));
-  });
+  when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
+  when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
+  setGlobal(ServiceConnectionManager, fakeServiceManager);
+  setGlobal(IdeTheme, IdeTheme());
+  setGlobal(ScriptManager, scriptManager);
+  fakeServiceManager.consoleService.ensureServiceInitialized();
+  when(debuggerController.isPaused).thenReturn(ValueNotifier<bool>(true));
 
   Future<void> pumpControls(WidgetTester tester) async {
     await tester.pumpWidget(
