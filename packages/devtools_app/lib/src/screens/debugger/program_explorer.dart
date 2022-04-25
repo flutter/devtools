@@ -188,7 +188,7 @@ class _ProgramExplorerRow extends StatelessWidget {
         buffer.write(closingTag);
       }
     }
-    buffer.write(') → ');
+    buffer.write(') -> ');
     final returnType = signature.returnType;
     if (returnType != null) {
       final returnTypeName = signature.returnType?.name;
