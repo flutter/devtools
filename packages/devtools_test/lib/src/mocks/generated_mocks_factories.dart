@@ -16,10 +16,13 @@ MockProgramExplorerController
   when(controller.outlineNodes).thenReturn(ValueNotifier([]));
   when(controller.outlineSelection).thenReturn(ValueNotifier(null));
   when(controller.isLoadingOutline).thenReturn(ValueNotifier(false));
+  when(controller.selectedNodeIndex).thenReturn(ValueNotifier(0));
   return controller;
 }
 
-MockDebuggerController createMockDebuggerControllerWithDefaults() {
+MockDebuggerController createMockDebuggerControllerWithDefaults({
+  MockProgramExplorerController? mockProgramExplorerController,
+}) {
   final debuggerController = MockDebuggerController();
   when(debuggerController.isPaused).thenReturn(ValueNotifier(false));
   when(debuggerController.resuming).thenReturn(ValueNotifier(false));
@@ -40,5 +43,9 @@ MockDebuggerController createMockDebuggerControllerWithDefaults() {
   when(debuggerController.variables).thenReturn(ValueNotifier([]));
   when(debuggerController.currentParsedScript)
       .thenReturn(ValueNotifier<ParsedScript?>(null));
+  when(debuggerController.programExplorerController).thenReturn(
+    mockProgramExplorerController ??
+        createMockProgramExplorerControllerWithDefaults(),
+  );
   return debuggerController;
 }
