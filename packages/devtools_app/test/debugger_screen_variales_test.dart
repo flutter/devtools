@@ -16,26 +16,21 @@ import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
 void main() {
-  late FakeServiceManager fakeServiceManager;
-  late MockDebuggerController debuggerController;
-  late MockScriptManager scriptManager;
+  final fakeServiceManager = FakeServiceManager();
+  final scriptManager = MockScriptManager();
+  when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
+  when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
+  setGlobal(ServiceConnectionManager, fakeServiceManager);
+  setGlobal(IdeTheme, IdeTheme());
+  setGlobal(ScriptManager, scriptManager);
+  fakeServiceManager.consoleService.ensureServiceInitialized();
+  when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
+      .thenReturn(ValueNotifier<int>(0));
+  final debuggerController = createMockDebuggerControllerWithDefaults();
+  when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
 
-  setUp(() {
-    fakeServiceManager = FakeServiceManager();
-    scriptManager = MockScriptManager();
-    when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
-    when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
-    setGlobal(IdeTheme, IdeTheme());
-    setGlobal(ScriptManager, scriptManager);
-    fakeServiceManager.consoleService.ensureServiceInitialized();
-    when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
-        .thenReturn(ValueNotifier<int>(0));
-    debuggerController = MockDebuggerController.withDefaults();
-
-    _resetRef();
-    _resetRoot();
-  });
+  _resetRef();
+  _resetRoot();
 
   Future<void> pumpDebuggerScreen(
     WidgetTester tester,
