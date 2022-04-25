@@ -33,12 +33,12 @@ void main() {
           cpuSamples: CpuSamples.parse(goldenCpuSamplesJson),
         ),
       );
-      when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
-      when(fakeServiceManager.connectedApp!.isDebugFlutterAppNow)
-          .thenReturn(false);
-      when(fakeServiceManager.connectedApp!.isFlutterNativeAppNow)
-          .thenReturn(false);
-      when(fakeServiceManager.connectedApp!.isDartCliAppNow).thenReturn(true);
+      final app = fakeServiceManager.connectedApp!;
+      when(app.isDartWebAppNow).thenReturn(false);
+      when(app.isDebugFlutterAppNow).thenReturn(false);
+      when(app.isFlutterNativeAppNow).thenReturn(false);
+      when(app.isDartCliAppNow).thenReturn(true);
+      when(app.isFlutterAppNow).thenReturn(false);
       when(fakeServiceManager.errorBadgeManager.errorCountNotifier('profiler'))
           .thenReturn(ValueNotifier<int>(0));
       setGlobal(ServiceConnectionManager, fakeServiceManager);

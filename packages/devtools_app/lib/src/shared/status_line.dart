@@ -105,7 +105,12 @@ class StatusLine extends StatelessWidget {
       );
     } else {
       // Use a placeholder for pages with no explicit documentation.
-      return Text('${isNarrow ? '' : 'DevTools '}${devtools.version}');
+      return Flexible(
+        child: Text(
+          '${isNarrow ? '' : 'DevTools '}${devtools.version}',
+          overflow: TextOverflow.ellipsis,
+        ),
+      );
     }
   }
 

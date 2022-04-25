@@ -9,22 +9,25 @@ import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
 import 'test_data/cpu_profile_test_data.dart';
 
 void main() {
+  final ServiceConnectionManager fakeServiceManager = FakeServiceManager(
+    service: FakeServiceManager.createFakeService(
+      cpuSamples: CpuSamples.parse(goldenCpuSamplesJson),
+      resolvedUriMap: goldenResolvedUriMap,
+    ),
+  );
+  final app = fakeServiceManager.connectedApp!;
+  when(app.isFlutterAppNow).thenReturn(true);
+
   group('CpuProfileController', () {
     late CpuProfilerController controller;
-    FakeServiceManager fakeServiceManager;
 
     setUp(() {
-      fakeServiceManager = FakeServiceManager(
-        service: FakeServiceManager.createFakeService(
-          cpuSamples: CpuSamples.parse(goldenCpuSamplesJson),
-          resolvedUriMap: goldenResolvedUriMap,
-        ),
-      );
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(OfflineModeController, OfflineModeController());
       controller = CpuProfilerController();
