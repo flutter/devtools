@@ -106,13 +106,6 @@ class FakeVM extends Fake implements VM {
 
 class MockIsolateState extends Mock implements IsolateState {}
 
-class MockServiceManager extends Mock implements ServiceConnectionManager {}
-
-class MockVmService extends Mock implements VmServiceWrapper {
-  @override
-  Future<FlagList> getFlagList() => Future.value(FlagList(flags: []));
-}
-
 class MockIsolate extends Mock implements Isolate {}
 
 class MockObj extends Mock implements Obj {}
