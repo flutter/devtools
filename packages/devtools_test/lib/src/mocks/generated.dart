@@ -16,6 +16,5 @@ import 'package:vm_service/vm_service.dart';
   ProgramExplorerController,
   ServiceConnectionManager,
   VmServiceWrapper,
-  DebuggerController,
 ])
 void main() {}
