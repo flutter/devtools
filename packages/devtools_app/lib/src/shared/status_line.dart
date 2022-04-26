@@ -30,18 +30,33 @@ double get statusLineHeight => scaleByFontFactor(24.0);
 /// This displays information global to the application, as well as gives pages
 /// a mechanism to display page-specific information.
 class StatusLine extends StatelessWidget {
-  const StatusLine(this.currentScreen, this.isEmbedded);
+  const StatusLine({required this.currentScreen, required this.isEmbedded});
 
   final Screen currentScreen;
   final bool isEmbedded;
 
+  /// The padding around the footer in the DevTools UI.
+  EdgeInsets get padding => const EdgeInsets.fromLTRB(
+        defaultSpacing,
+        defaultSpacing,
+        defaultSpacing,
+        denseSpacing,
+      );
+
   @override
   Widget build(BuildContext context) {
+    final height = scaleByFontFactor(24.0) + padding.top + padding.bottom;
     return ValueListenableBuilder<bool>(
       valueListenable: currentScreen.showIsolateSelector,
       builder: (context, showIsolateSelector, _) {
         return Container(
-          height: statusLineHeight,
+          decoration: BoxDecoration(
+            border: Border(
+              top: Divider.createBorderSide(context, width: 1.0),
+            ),
+          ),
+          padding: EdgeInsets.only(left: padding.left, right: padding.right),
+          height: height,
           alignment: Alignment.centerLeft,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

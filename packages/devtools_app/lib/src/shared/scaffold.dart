@@ -27,8 +27,6 @@ import 'status_line.dart';
 import 'theme.dart';
 import 'title.dart';
 import 'utils.dart';
-import 'report_feedback_button.dart';
-import 'about_dialog.dart';
 
 /// Scaffolding for a screen and navigation in the DevTools App.
 ///
@@ -42,7 +40,7 @@ class DevToolsScaffold extends StatefulWidget {
     required this.tabs,
     this.page,
     this.actions,
-    this.embed = false,
+    this.embed = true,
     required this.ideTheme,
   }) : super(key: key);
 
@@ -67,7 +65,7 @@ class DevToolsScaffold extends StatefulWidget {
   /// The size that all actions on this widget are expected to have.
   static double get actionWidgetSize => scaleByFontFactor(48.0);
 
-  /// The border around the content in the DevTools UI.
+  /// The padding around the content in the DevTools UI.
   EdgeInsets get appPadding => EdgeInsets.fromLTRB(
         horizontalPadding.left,
         isEmbedded() ? 2.0 : defaultSpacing,
@@ -354,15 +352,10 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
                           initialFractions: const [0.8, 0.2],
                         )
                       : content,
-                  bottomNavigationBar: widget.embed ? null : DevToolsFooter(
-                    appPadding: widget.appPadding,
+                  bottomNavigationBar: StatusLine(
                     currentScreen: _currentScreen,
                     isEmbedded: widget.embed,
                   ),
-                  persistentFooterButtons: widget.embed ? [
-                    ReportFeedbackButton(),
-                    OpenAboutAction(),
-                  ] : null,
                 ),
               ),
             ),
@@ -475,43 +468,6 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
           BulletSpacer.width;
     }
     return wideWidth;
-  }
-}
-
-class DevToolsFooter extends StatelessWidget {
-  const DevToolsFooter({
-    Key? key,
-    required this.appPadding,
-    required this.currentScreen,
-    required this.isEmbedded,
-  }) : super(key: key);
-
-  final EdgeInsets appPadding;
-  final Screen currentScreen;
-  final bool isEmbedded;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: scaleByFontFactor(24.0) + appPadding.top + appPadding.bottom,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const PaddedDivider(padding: EdgeInsets.zero),
-          Padding(
-            padding: EdgeInsets.only(
-              left: appPadding.left,
-              right: appPadding.right,
-              bottom: appPadding.bottom,
-            ),
-            child: StatusLine(
-              currentScreen,
-              isEmbedded,
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }
 
