@@ -27,6 +27,8 @@ import 'status_line.dart';
 import 'theme.dart';
 import 'title.dart';
 import 'utils.dart';
+import 'report_feedback_button.dart';
+import 'about_dialog.dart';
 
 /// Scaffolding for a screen and navigation in the DevTools App.
 ///
@@ -352,11 +354,15 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
                           initialFractions: const [0.8, 0.2],
                         )
                       : content,
-                  bottomNavigationBar: DevToolsFooter(
+                  bottomNavigationBar: widget.embed ? null : DevToolsFooter(
                     appPadding: widget.appPadding,
                     currentScreen: _currentScreen,
                     isEmbedded: widget.embed,
                   ),
+                  persistentFooterButtons: widget.embed ? [
+                    ReportFeedbackButton(),
+                    OpenAboutAction(),
+                  ] : null,
                 ),
               ),
             ),
