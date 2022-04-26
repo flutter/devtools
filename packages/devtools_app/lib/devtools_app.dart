@@ -70,5 +70,6 @@ export 'src/shared/split.dart';
 export 'src/shared/theme.dart';
 export 'src/shared/utils.dart';
 export 'src/shared/version.dart';
+export 'src/ui/filter.dart';
 export 'src/ui/icons.dart';
 export 'src/ui/search.dart';
