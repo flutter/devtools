@@ -299,7 +299,8 @@ class OfflinePerformanceData extends PerformanceData {
     final int? selectedFrameId = json[PerformanceData.selectedFrameIdKey];
 
     final List<Map<String, dynamic>> framesJson =
-        ((json[PerformanceData.flutterFramesKey] ?? []) as List<Object>)
+        ((json[PerformanceData.flutterFramesKey] as List?)?.cast<Object>() ??
+                [])
             .map((f) => f as Map<String, dynamic>)
             .toList();
     final frames = framesJson

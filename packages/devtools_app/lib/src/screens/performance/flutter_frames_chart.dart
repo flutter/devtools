@@ -404,17 +404,6 @@ class FlutterFramesChartItem extends StatelessWidget {
               ),
               child: ShaderJankWarningIcon(),
             ),
-          // TODO(kenz): support frame analysis for raster thread jank when the
-          // data becomes more actionable.
-          if (frameAnalysisSupported && uiJanky)
-            const Positioned(
-              left: (FlutterFramesChartItem.defaultFrameWidth +
-                      2 * densePadding -
-                      defaultActionsIconSizeBeforeScaling) /
-                  2,
-              bottom: denseSpacing,
-              child: FrameAnalysisIcon(),
-            ),
         ],
       ),
     );
@@ -581,29 +570,6 @@ class ShaderJankWarningIcon extends StatelessWidget {
           size: defaultActionsIconSizeBeforeScaling,
         ),
       ],
-    );
-  }
-}
-
-class FrameAnalysisIcon extends StatelessWidget {
-  const FrameAnalysisIcon({Key? key}) : super(key: key);
-
-  static const _backgroundColor = Color.fromRGBO(48, 48, 48, 0.8);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: defaultActionsIconSizeBeforeScaling,
-      height: defaultActionsIconSizeBeforeScaling,
-      decoration: const BoxDecoration(
-        color: _backgroundColor,
-        shape: BoxShape.circle,
-      ),
-      child: const Icon(
-        Icons.saved_search,
-        color: Colors.white,
-        size: defaultIconSizeBeforeScaling,
-      ),
     );
   }
 }

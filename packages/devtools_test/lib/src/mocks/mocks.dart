@@ -106,13 +106,6 @@ class FakeVM extends Fake implements VM {
 
 class MockIsolateState extends Mock implements IsolateState {}
 
-class MockServiceManager extends Mock implements ServiceConnectionManager {}
-
-class MockVmService extends Mock implements VmServiceWrapper {
-  @override
-  Future<FlagList> getFlagList() => Future.value(FlagList(flags: []));
-}
-
 class MockIsolate extends Mock implements Isolate {}
 
 class MockObj extends Mock implements Obj {}
@@ -132,7 +125,9 @@ class FakeConnectedApp extends Mock implements ConnectedApp {}
 class MockBannerMessagesController extends Mock
     implements BannerMessagesController {}
 
-class MockLoggingController extends Mock implements LoggingController {
+class MockLoggingController extends Mock
+    with SearchControllerMixin<LogData>, FilterControllerMixin<LogData>
+    implements LoggingController {
   @override
   ValueListenable<LogData?> get selectedLog => _selectedLog;
 
@@ -142,6 +137,9 @@ class MockLoggingController extends Mock implements LoggingController {
   void selectLog(LogData data) {
     _selectedLog.value = data;
   }
+
+  @override
+  List<LogData> data = <LogData>[];
 }
 
 class MockMemoryController extends Mock implements MemoryController {}
@@ -165,11 +163,13 @@ class TestDebuggerController extends DebuggerController {
   final _explorerController = createMockProgramExplorerControllerWithDefaults();
 }
 
-class MockDebuggerController extends Mock implements DebuggerController {
-  MockDebuggerController();
+// TODO(polinach): delete this class.
+// See https://github.com/flutter/devtools/issues/4029.
+class MockDebuggerControllerLegacy extends Mock implements DebuggerController {
+  MockDebuggerControllerLegacy();
 
-  factory MockDebuggerController.withDefaults() {
-    final debuggerController = MockDebuggerController();
+  factory MockDebuggerControllerLegacy.withDefaults() {
+    final debuggerController = MockDebuggerControllerLegacy();
     when(debuggerController.isPaused).thenReturn(ValueNotifier(false));
     when(debuggerController.resuming).thenReturn(ValueNotifier(false));
     when(debuggerController.breakpoints).thenReturn(ValueNotifier([]));
@@ -199,7 +199,7 @@ class MockDebuggerController extends Mock implements DebuggerController {
       MockProgramExplorerControllerLegacy.withDefaults();
 }
 
-class MockScriptManager extends Mock implements ScriptManager {}
+class MockScriptManagerLegacy extends Mock implements ScriptManager {}
 
 // TODO(polinach): delete this class.
 // See https://github.com/flutter/devtools/issues/4029.

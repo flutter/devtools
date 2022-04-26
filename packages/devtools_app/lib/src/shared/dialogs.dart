@@ -25,26 +25,28 @@ List<Widget> dialogSubHeader(ThemeData theme, String titleText) {
 /// It normalizes dialog layout, spacing, and look and feel.
 class DevToolsDialog extends StatelessWidget {
   const DevToolsDialog({
-    required this.title,
+    Widget? title,
     required this.content,
     this.includeDivider = true,
+    this.scrollable = true,
     this.actions,
-  });
+  }) : titleContent = title ?? const SizedBox();
 
   static const contentPadding = 24.0;
 
-  final Widget title;
+  final Widget titleContent;
   final Widget content;
   final bool includeDivider;
+  final bool scrollable;
   final List<Widget>? actions;
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      scrollable: true,
+      scrollable: scrollable,
       title: Column(
         children: [
-          title,
+          titleContent,
           includeDivider
               ? const PaddedDivider(
                   padding: EdgeInsets.only(bottom: denseRowSpacing),
