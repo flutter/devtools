@@ -149,13 +149,13 @@ elif [ "$BOT" = "test_ddc" ]; then
           test/logging_screen_test.dart \
           test/performance_controller_test.dart \
           test/performance_screen_test.dart \
-          test/performance_screen_test.dart \
           test/profiler_screen_controller_test.dart \
           test/profiler_screen_test.dart \
           test/raster_metrics_test.dart \
           test/resolved_uri_manager_test.dart \
           test/scaffold_test.dart \
-          test/timeline_analysis_test.dart
+          test/tabbed_performance_view_test.dart \
+          test/timeline_flame_chart_test.dart
 
     elif [ "$PLATFORM" = "chrome" ]; then
         flutter test --platform chrome $DART_DEFINE_ARGS test/*.dart test/fixtures/ --no-sound-null-safety
