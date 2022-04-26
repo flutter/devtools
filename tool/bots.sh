@@ -140,6 +140,7 @@ elif [ "$BOT" = "test_ddc" ]; then
           test/debugger_controller_test.dart \
           test/debugger_controller_stdio_test.dart \
           test/debugger_floating_test.dart \
+          test/debugger_screen_variables_test.dart \
           test/device_dialog_test.dart \
           test/enhance_tracing_test.dart \
           test/inspector_service_test.dart \
@@ -147,6 +148,7 @@ elif [ "$BOT" = "test_ddc" ]; then
           test/logging_screen_data_test.dart \
           test/logging_screen_test.dart \
           test/performance_controller_test.dart \
+          test/performance_screen_test.dart \
           test/performance_screen_test.dart \
           test/profiler_screen_controller_test.dart \
           test/profiler_screen_test.dart \

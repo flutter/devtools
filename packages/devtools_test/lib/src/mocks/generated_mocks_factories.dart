@@ -1,3 +1,7 @@
+// Copyright 2022 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:devtools_app/devtools_app.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mockito/mockito.dart';
@@ -12,10 +16,13 @@ MockProgramExplorerController
   when(controller.outlineNodes).thenReturn(ValueNotifier([]));
   when(controller.outlineSelection).thenReturn(ValueNotifier(null));
   when(controller.isLoadingOutline).thenReturn(ValueNotifier(false));
+  when(controller.selectedNodeIndex).thenReturn(ValueNotifier(0));
   return controller;
 }
 
-MockDebuggerController createMockDebuggerControllerWithDefaults() {
+MockDebuggerController createMockDebuggerControllerWithDefaults({
+  MockProgramExplorerController? mockProgramExplorerController,
+}) {
   final debuggerController = MockDebuggerController();
   when(debuggerController.isPaused).thenReturn(ValueNotifier(false));
   when(debuggerController.resuming).thenReturn(ValueNotifier(false));
@@ -36,5 +43,10 @@ MockDebuggerController createMockDebuggerControllerWithDefaults() {
   when(debuggerController.variables).thenReturn(ValueNotifier([]));
   when(debuggerController.currentParsedScript)
       .thenReturn(ValueNotifier<ParsedScript?>(null));
+  mockProgramExplorerController ??=
+      createMockProgramExplorerControllerWithDefaults();
+  when(debuggerController.programExplorerController).thenReturn(
+    mockProgramExplorerController,
+  );
   return debuggerController;
 }

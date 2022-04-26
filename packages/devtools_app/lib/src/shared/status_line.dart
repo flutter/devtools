@@ -54,12 +54,7 @@ class StatusLine extends StatelessWidget {
     final isNarrow = isExtraNarrow || ScreenSize(context).width == MediaSize.xs;
     final Widget? pageStatus = currentScreen.buildStatus(context);
     return [
-      Expanded(
-        child: Align(
-          alignment: Alignment.centerLeft,
-          child: buildHelpUrlStatus(context, currentScreen, isNarrow),
-        ),
-      ),
+      buildHelpUrlStatus(context, currentScreen, isNarrow),
       const BulletSpacer(),
       if (!isExtraNarrow && showIsolateSelector) ...[
         const IsolateSelector(),
@@ -69,12 +64,7 @@ class StatusLine extends StatelessWidget {
         pageStatus,
         const BulletSpacer(),
       ],
-      Expanded(
-        child: Align(
-          alignment: Alignment.centerRight,
-          child: buildConnectionStatus(context, isExtraNarrow),
-        ),
-      ),
+      buildConnectionStatus(context, isExtraNarrow),
     ];
   }
 
@@ -102,7 +92,12 @@ class StatusLine extends StatelessWidget {
       );
     } else {
       // Use a placeholder for pages with no explicit documentation.
-      return Text('${isNarrow ? '' : 'DevTools '}${devtools.version}');
+      return Flexible(
+        child: Text(
+          '${isNarrow ? '' : 'DevTools '}${devtools.version}',
+          overflow: TextOverflow.ellipsis,
+        ),
+      );
     }
   }
 
