@@ -29,6 +29,7 @@ import '../profiler/profile_granularity.dart';
 import 'performance_model.dart';
 import 'performance_screen.dart';
 import 'performance_utils.dart';
+import 'raster_metrics.dart';
 import 'rebuild_counts.dart';
 import 'timeline_event_processor.dart';
 
@@ -56,6 +57,8 @@ class PerformanceController extends DisposableController
 
   final cpuProfilerController =
       CpuProfilerController(analyticsScreenId: analytics_constants.performance);
+
+  final rasterMetricsController = RasterMetricsController();
 
   final _exportController = ExportController();
 
