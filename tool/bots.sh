@@ -162,6 +162,7 @@ elif [ "$BOT" = "test_ddc" ]; then
           test/service_extension_widgets_test.dart \
           test/sscaffold_bebugger_test.dart \
           test/scaffold_test.dart \
+          test/table_test.dart \
           test/timeline_analysis_test.dart \
           test/variables_test.dart
 
