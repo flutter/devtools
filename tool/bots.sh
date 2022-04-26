@@ -143,9 +143,11 @@ elif [ "$BOT" = "test_ddc" ]; then
           test/debugger_screen_breakpoints_test.dart \
           test/debugger_screen_explorer_hidden_test.dart \
           test/debugger_screen_explorer_visible_test.dart \
+          test/debugger_screen_test.dart \
           test/debugger_screen_variables_test.dart \
           test/device_dialog_test.dart \
           test/enhance_tracing_test.dart \
+          test/file_search_test.dart \
           test/inspector_service_test.dart \
           test/logging_controller_test.dart \
           test/logging_screen_data_test.dart \
