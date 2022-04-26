@@ -11,9 +11,11 @@ import 'package:devtools_app/src/config_specific/import_export/import_export.dar
 import 'package:devtools_app/src/screens/performance/performance_controller.dart';
 import 'package:devtools_app/src/screens/performance/performance_model.dart';
 import 'package:devtools_app/src/screens/performance/performance_screen.dart';
+import 'package:devtools_app/src/screens/performance/raster_metrics.dart';
 import 'package:devtools_app/src/screens/performance/timeline_analysis.dart';
 import 'package:devtools_app/src/screens/performance/timeline_flame_chart.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/common_widgets.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/preferences.dart';
 import 'package:devtools_app/src/shared/version.dart';
@@ -184,8 +186,9 @@ void main() {
         await tester.tap(find.text('Raster Metrics'));
         await tester.pumpAndSettle();
 
-        expect(find.text('Coming Soon'), findsOneWidget);
+        expect(find.byType(RenderingLayerVisualizer), findsOneWidget);
         expect(find.text('Take Snapshot'), findsOneWidget);
+        expect(find.byType(ClearButton), findsOneWidget);
       });
     });
   });
@@ -277,14 +280,13 @@ void main() {
       'builds flame chart with selected frame',
       windowSize,
       (WidgetTester tester) async {
-        final data = controller.data!;
-
         await tester.runAsync(() async {
           await pumpPerformanceScreenBody(tester, runAsync: true);
           controller
             ..addFrame(testFrame1.shallowCopy())
             ..addTimelineEvent(goldenUiTimelineEvent)
             ..addTimelineEvent(goldenRasterTimelineEvent);
+          final data = controller.data!;
           expect(data.frames.length, equals(1));
           await controller.toggleSelectedFrame(data.frames.first);
           await tester.pumpAndSettle();
