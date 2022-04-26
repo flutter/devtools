@@ -105,7 +105,7 @@ if [ "$BOT" = "main" ]; then
     pushd packages/devtools_shared
     echo `pwd`
 
-    flutter test test/ --no-sound-null-safety
+    flutter test test/
     popd
 
     # Change the directory back to devtools_app.
@@ -125,50 +125,9 @@ elif [ "$BOT" = "test_ddc" ]; then
     # The flutter tool doesn't support excluding a specific set of targets,
     # so we explicitly provide them.
     if [ "$PLATFORM" = "vm" ]; then
-        flutter test $DART_DEFINE_ARGS test/*.dart test/fixtures/ --no-sound-null-safety
-
-        # We are in process of transforming from unsound null safety to sound one.
-        # At the moment some tests fail without the flag --no-sound-null-safety.
-        # We are fixing them one by one and adding to the list below. After all
-        # tests are fixed, we will delete this list and remove the flags from the commands.
-
-        flutter test $DART_DEFINE_ARGS \
-          test/chart_test.dart \
-          test/cpu_profiler_controller_test.dart \
-          test/cpu_profiler_test.dart \
-          test/debugger_console_test.dart \
-          test/debugger_controller_test.dart \
-          test/debugger_controller_stdio_test.dart \
-          test/debugger_floating_test.dart \
-          test/debugger_screen_breakpoints_test.dart \
-          test/debugger_screen_explorer_hidden_test.dart \
-          test/debugger_screen_explorer_visible_test.dart \
-          test/debugger_screen_test.dart \
-          test/debugger_screen_variables_test.dart \
-          test/device_dialog_test.dart \
-          test/enhance_tracing_test.dart \
-          test/file_search_test.dart \
-          test/inspector_screen_test.dart \
-          test/inspector_service_test.dart \
-          test/logging_controller_test.dart \
-          test/logging_screen_data_test.dart \
-          test/logging_screen_test.dart \
-          test/performance_controller_test.dart \
-          test/performance_screen_test.dart \
-          test/profiler_screen_controller_test.dart \
-          test/profiler_screen_test.dart \
-          test/raster_metrics_test.dart \
-          test/resolved_uri_manager_test.dart \
-          test/service_extension_widgets_test.dart \
-          test/scaffold_bebugger_test.dart \
-          test/scaffold_test.dart \
-          test/table_test.dart \
-          test/scaffold_test.dart \
-          test/timeline_analysis_test.dart \
-          test/variables_test.dart
-
+        flutter test $DART_DEFINE_ARGS test/*.dart test/fixtures/
     elif [ "$PLATFORM" = "chrome" ]; then
-        flutter test --platform chrome $DART_DEFINE_ARGS test/*.dart test/fixtures/ --no-sound-null-safety
+        flutter test --platform chrome $DART_DEFINE_ARGS test/*.dart test/fixtures/
     else
         echo "unknown test platform"
         exit 1
@@ -184,9 +143,9 @@ elif [ "$BOT" = "test_dart2js" ]; then
     # The flutter tool doesn't support excluding a specific set of targets,
     # so we explicitly provide them.
     if [ "$PLATFORM" = "vm" ]; then
-        WEBDEV_RELEASE=true flutter test $DART_DEFINE_ARGS test/*.dart test/fixtures/ --no-sound-null-safety
+        WEBDEV_RELEASE=true flutter test $DART_DEFINE_ARGS test/*.dart test/fixtures/
     elif [ "$PLATFORM" = "chrome" ]; then
-        WEBDEV_RELEASE=true flutter test --platform chrome $DART_DEFINE_ARGS test/*.dart test/fixtures/ --no-sound-null-safety
+        WEBDEV_RELEASE=true flutter test --platform chrome $DART_DEFINE_ARGS test/*.dart test/fixtures/
     else
         echo "unknown test platform"
         exit 1
