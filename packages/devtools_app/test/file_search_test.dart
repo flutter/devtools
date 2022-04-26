@@ -13,7 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
 void main() {
-  final debuggerController = MockDebuggerController.withDefaults();
+  final debuggerController = MockDebuggerControllerLegacy.withDefaults();
   final scriptManager = MockScriptManager();
 
   Widget buildFileSearch() {

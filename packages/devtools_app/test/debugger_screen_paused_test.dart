@@ -17,26 +17,49 @@ import 'package:vm_service/vm_service.dart';
 
 void main() {
   const screen = DebuggerScreen();
-  late FakeServiceManager fakeServiceManager;
-  late MockDebuggerController debuggerController;
-  late MockScriptManager scriptManager;
 
   const windowSize = Size(4000.0, 4000.0);
 
-  setUp(() {
-    fakeServiceManager = FakeServiceManager();
-    scriptManager = MockScriptManager();
-    when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
-    when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
-    setGlobal(IdeTheme, IdeTheme());
-    setGlobal(ScriptManager, scriptManager);
-    fakeServiceManager.consoleService.ensureServiceInitialized();
-    when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
-        .thenReturn(ValueNotifier<int>(0));
-    debuggerController = MockDebuggerController.withDefaults();
-    when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
-  });
+  final fakeServiceManager = FakeServiceManager();
+  final scriptManager = MockScriptManager();
+  when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
+  when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
+  setGlobal(ServiceConnectionManager, fakeServiceManager);
+  setGlobal(IdeTheme, IdeTheme());
+  setGlobal(ScriptManager, scriptManager);
+  fakeServiceManager.consoleService.ensureServiceInitialized();
+  when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
+      .thenReturn(ValueNotifier<int>(0));
+  final debuggerController = createMockDebuggerControllerWithDefaults();
+  when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
+
+  when(debuggerController.isPaused).thenReturn(ValueNotifier(true));
+  when(debuggerController.stackFramesWithLocation).thenReturn(
+    ValueNotifier([
+      StackFrameAndSourcePosition(
+        Frame(
+          index: 0,
+          code: CodeRef(
+            name: 'testCodeRef',
+            id: 'testCodeRef',
+            kind: CodeKind.kDart,
+          ),
+          location: SourceLocation(
+            script: ScriptRef(
+              uri: 'package:test/script.dart',
+              id: 'script.dart',
+            ),
+            tokenPos: 10,
+          ),
+          kind: FrameKind.kRegular,
+        ),
+        position: const SourcePosition(
+          line: 1,
+          column: 10,
+        ),
+      )
+    ]),
+  );
 
   WidgetPredicate createDebuggerButtonPredicate(String title) {
     return (Widget widget) {
@@ -49,34 +72,6 @@ void main() {
 
   testWidgetsWithWindowSize('debugger controls paused', windowSize,
       (WidgetTester tester) async {
-    when(debuggerController.isPaused).thenReturn(ValueNotifier(true));
-    when(debuggerController.stackFramesWithLocation).thenReturn(
-      ValueNotifier([
-        StackFrameAndSourcePosition(
-          Frame(
-            index: 0,
-            code: CodeRef(
-              name: 'testCodeRef',
-              id: 'testCodeRef',
-              kind: CodeKind.kDart,
-            ),
-            location: SourceLocation(
-              script: ScriptRef(
-                uri: 'package:test/script.dart',
-                id: 'script.dart',
-              ),
-              tokenPos: 10,
-            ),
-            kind: FrameKind.kRegular,
-          ),
-          position: const SourcePosition(
-            line: 1,
-            column: 10,
-          ),
-        )
-      ]),
-    );
-
     await tester.pumpWidget(
       wrapWithControllers(
         Builder(builder: screen.build),

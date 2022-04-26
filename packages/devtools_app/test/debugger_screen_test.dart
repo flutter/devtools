@@ -18,7 +18,7 @@ import 'package:mockito/mockito.dart';
 void main() {
   const screen = DebuggerScreen();
   late FakeServiceManager fakeServiceManager;
-  late MockDebuggerController debuggerController;
+  late MockDebuggerControllerLegacy debuggerController;
   late MockScriptManager scriptManager;
 
   const windowSize = Size(4000.0, 4000.0);
@@ -34,7 +34,7 @@ void main() {
     fakeServiceManager.consoleService.ensureServiceInitialized();
     when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
         .thenReturn(ValueNotifier<int>(0));
-    debuggerController = MockDebuggerController.withDefaults();
+    debuggerController = MockDebuggerControllerLegacy.withDefaults();
     when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
   });
 
