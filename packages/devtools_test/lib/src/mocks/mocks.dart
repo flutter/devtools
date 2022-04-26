@@ -206,7 +206,7 @@ class MockDebuggerControllerLegacy extends Mock implements DebuggerController {
       MockProgramExplorerControllerLegacy.withDefaults();
 }
 
-class MockScriptManager extends Mock implements ScriptManager {}
+class MockScriptManagerLegacy extends Mock implements ScriptManager {}
 
 // TODO(polinach): delete this class.
 // See https://github.com/flutter/devtools/issues/4029.
