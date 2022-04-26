@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'dart:async';
 
 import 'package:devtools_shared/devtools_shared.dart';
@@ -174,14 +172,15 @@ class _InitializerState extends State<Initializer>
               const SizedBox(height: defaultSpacing),
               if (widget.allowConnectionScreenOnDisconnect)
                 ElevatedButton(
-                    onPressed: () {
-                      hideDisconnectedOverlay();
-                      DevToolsRouterDelegate.of(context).navigateHome(
-                        clearUriParam: true,
-                        clearScreenParam: true,
-                      );
-                    },
-                    child: const Text(connectToNewAppText))
+                  onPressed: () {
+                    hideDisconnectedOverlay();
+                    DevToolsRouterDelegate.of(context).navigateHome(
+                      clearUriParam: true,
+                      clearScreenParam: true,
+                    );
+                  },
+                  child: const Text(connectToNewAppText),
+                )
               else
                 Text(
                   'Run a new debug session to reconnect',

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/screens/app_size/code_size_attribution.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
@@ -186,14 +184,18 @@ void main() {
 
       // Only the selected node should be expanded.
       for (DominatorTreeNode child in root.children.cast<DominatorTreeNode>()) {
-        expect(child.isExpanded,
-            child.callGraphNode.display == 'package:code_size_package');
+        expect(
+          child.isExpanded,
+          child.callGraphNode.display == 'package:code_size_package',
+        );
       }
 
       // The selected node's children should not be expanded.
       final selectedNode = root.children.first as DominatorTreeNode;
-      expect(selectedNode.callGraphNode.display,
-          equals('package:code_size_package'));
+      expect(
+        selectedNode.callGraphNode.display,
+        equals('package:code_size_package'),
+      );
       expect(selectedNode.children.length, equals(3));
 
       for (DominatorTreeNode child in selectedNode.children) {

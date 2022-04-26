@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:flutter/material.dart' hide Stack;
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
@@ -14,29 +12,30 @@ import 'debugger_controller.dart';
 import 'debugger_model.dart';
 
 class CallStack extends StatefulWidget {
-  const CallStack({Key key}) : super(key: key);
+  const CallStack({Key? key}) : super(key: key);
 
   @override
   _CallStackState createState() => _CallStackState();
 }
 
 class _CallStackState extends State<CallStack> {
-  DebuggerController controller;
+  DebuggerController get controller => _controller!;
+  DebuggerController? _controller;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
     final newController = Provider.of<DebuggerController>(context);
-    if (newController == controller) return;
+    if (newController == _controller) return;
 
-    controller = newController;
+    _controller = newController;
   }
 
   @override
   Widget build(BuildContext context) {
     return DualValueListenableBuilder<List<StackFrameAndSourcePosition>,
-        StackFrameAndSourcePosition>(
+        StackFrameAndSourcePosition?>(
       firstListenable: controller.stackFramesWithLocation,
       secondListenable: controller.selectedStackFrame,
       builder: (context, stackFrames, selectedFrame, _) {

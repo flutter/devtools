@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'dart:convert';
 
 import 'package:devtools_app/src/primitives/utils.dart';
@@ -132,7 +130,9 @@ void main() {
     test('duration returns correct value', () {
       expect(httpGet.duration!.inMicroseconds, 6327091628 - 6326279935);
       expect(
-          httpGetWithError.duration!.inMicroseconds, 5387256813 - 5385227316);
+        httpGetWithError.duration!.inMicroseconds,
+        5387256813 - 5385227316,
+      );
       expect(httpPost.duration!.inMicroseconds, 2401000670 - 2399492629);
       expect(httpPut.duration!.inMicroseconds, 1206609144 - 1205283313);
       expect(httpPatch.duration!.inMicroseconds, 1911420918 - 1910177192);

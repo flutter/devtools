@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -43,13 +41,15 @@ class Notifications extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Overlay(initialEntries: [
-      OverlayEntry(
-        builder: (context) => _NotificationsProvider(child: child),
-        maintainState: true,
-        opaque: true,
-      ),
-    ]);
+    return Overlay(
+      initialEntries: [
+        OverlayEntry(
+          builder: (context) => _NotificationsProvider(child: child),
+          maintainState: true,
+          opaque: true,
+        ),
+      ],
+    );
   }
 
   static NotificationsState? of(BuildContext context) {

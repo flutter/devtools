@@ -64,8 +64,10 @@ void main() {
         minSizes,
         headers,
       );
-      expect(collectionEquals(adjustedFractions, [60.0, 10.0, 10.0, 10.0]),
-          isTrue);
+      expect(
+        collectionEquals(adjustedFractions, [60.0, 10.0, 10.0, 10.0]),
+        isTrue,
+      );
     });
 
     testWidgets('buildChildrenWithFirstHeader', (WidgetTester tester) async {

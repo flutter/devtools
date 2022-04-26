@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -135,13 +133,18 @@ class ConnectedApp {
       final flutterVersionServiceListenable = serviceManager
           .registeredServiceListenable(registrations.flutterVersion.service);
       VoidCallback listener;
-      flutterVersionServiceListenable.addListener(listener = () async {
-        final registered = flutterVersionServiceListenable.value;
-        if (registered) {
-          _flutterVersionCompleter.complete(FlutterVersion.parse(
-              (await serviceManager.flutterVersion).json!));
-        }
-      });
+      flutterVersionServiceListenable.addListener(
+        listener = () async {
+          final registered = flutterVersionServiceListenable.value;
+          if (registered) {
+            _flutterVersionCompleter.complete(
+              FlutterVersion.parse(
+                (await serviceManager.flutterVersion).json!,
+              ),
+            );
+          }
+        },
+      );
 
       _flutterVersion = await _flutterVersionCompleter.future.timeout(
         _flutterVersionTimeout,

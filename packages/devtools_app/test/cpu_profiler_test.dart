@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'package:devtools_app/src/charts/flame_chart.dart';
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
@@ -30,7 +28,12 @@ void main() {
   late CpuProfiler cpuProfiler;
   late CpuProfileData cpuProfileData;
   late CpuProfilerController controller;
-  late ServiceConnectionManager fakeServiceManager;
+
+  final ServiceConnectionManager fakeServiceManager = FakeServiceManager();
+  final app = fakeServiceManager.connectedApp!;
+  when(app.isFlutterNativeAppNow).thenReturn(false);
+  when(app.isFlutterAppNow).thenReturn(false);
+  when(app.isDebugFlutterAppNow).thenReturn(false);
 
   setUp(() async {
     final transformer = CpuProfileTransformer();
@@ -41,9 +44,6 @@ void main() {
       processId: 'test',
     );
 
-    fakeServiceManager = FakeServiceManager();
-    when(fakeServiceManager.connectedApp!.isFlutterNativeAppNow)
-        .thenReturn(false);
     setGlobal(ServiceConnectionManager, fakeServiceManager);
     setGlobal(OfflineModeController, OfflineModeController());
     setGlobal(IdeTheme, IdeTheme());
@@ -272,10 +272,12 @@ void main() {
         // We need to pump the entire `ProfilerScreenBody` widget because the
         // CpuProfiler widget has `cpuProfileData` passed in from there, and
         // CpuProfiler needs to be rebuilt on data updates.
-        await tester.pumpWidget(wrapWithControllers(
-          const ProfilerScreenBody(),
-          profiler: controller,
-        ));
+        await tester.pumpWidget(
+          wrapWithControllers(
+            const ProfilerScreenBody(),
+            profiler: controller,
+          ),
+        );
         expect(controller.cpuProfilerController.userTags.length, equals(3));
 
         expect(find.byType(UserTagDropdown), findsOneWidget);

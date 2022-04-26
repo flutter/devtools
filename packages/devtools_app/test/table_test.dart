@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: avoid_redundant_argument_values, import_of_legacy_library_into_null_safe
-
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/primitives/trees.dart';
 import 'package:devtools_app/src/primitives/utils.dart';
@@ -255,13 +253,15 @@ void main() {
         sortColumn: flatNameColumn,
         sortDirection: SortDirection.ascending,
       );
-      await tester.pumpWidget(wrap(
-        SizedBox(
-          width: 200.0,
-          height: 200.0,
-          child: table,
+      await tester.pumpWidget(
+        wrap(
+          SizedBox(
+            width: 200.0,
+            height: 200.0,
+            child: table,
+          ),
         ),
-      ));
+      );
       expect(find.byWidget(table), findsOneWidget);
       // TODO(jacobr): add a golden image test.
     });
@@ -279,13 +279,15 @@ void main() {
         sortColumn: flatNameColumn,
         sortDirection: SortDirection.ascending,
       );
-      await tester.pumpWidget(wrap(
-        SizedBox(
-          width: 800.0,
-          height: 200.0,
-          child: table,
+      await tester.pumpWidget(
+        wrap(
+          SizedBox(
+            width: 800.0,
+            height: 200.0,
+            child: table,
+          ),
         ),
-      ));
+      );
       expect(find.byWidget(table), findsOneWidget);
       {
         final FlatTableState<TestData> state =
@@ -299,13 +301,15 @@ void main() {
 
       // TODO(jacobr): add a golden image test.
 
-      await tester.pumpWidget(wrap(
-        SizedBox(
-          width: 200.0,
-          height: 200.0,
-          child: table,
+      await tester.pumpWidget(
+        wrap(
+          SizedBox(
+            width: 200.0,
+            height: 200.0,
+            child: table,
+          ),
         ),
-      ));
+      );
 
       {
         final FlatTableState<TestData> state =
@@ -335,13 +339,15 @@ void main() {
         sortColumn: flatNameColumn,
         sortDirection: SortDirection.ascending,
       );
-      await tester.pumpWidget(wrap(
-        SizedBox(
-          width: 1000.0,
-          height: 200.0,
-          child: table,
+      await tester.pumpWidget(
+        wrap(
+          SizedBox(
+            width: 1000.0,
+            height: 200.0,
+            child: table,
+          ),
         ),
-      ));
+      );
       expect(find.byWidget(table), findsOneWidget);
       {
         final FlatTableState<TestData> state =
@@ -354,13 +360,15 @@ void main() {
         expect(columnWidths[3], equals(110.0)); // Variable width wide column.
       }
 
-      await tester.pumpWidget(wrap(
-        SizedBox(
-          width: 200.0,
-          height: 200.0,
-          child: table,
+      await tester.pumpWidget(
+        wrap(
+          SizedBox(
+            width: 200.0,
+            height: 200.0,
+            child: table,
+          ),
         ),
-      ));
+      );
       {
         final FlatTableState<TestData> state =
             tester.state(find.byWidget(table));
@@ -389,13 +397,15 @@ void main() {
         sortColumn: flatNameColumn,
         sortDirection: SortDirection.ascending,
       );
-      await tester.pumpWidget(wrap(
-        SizedBox(
-          width: 1501.0,
-          height: 200.0,
-          child: table,
+      await tester.pumpWidget(
+        wrap(
+          SizedBox(
+            width: 1501.0,
+            height: 200.0,
+            child: table,
+          ),
         ),
-      ));
+      );
       expect(find.byWidget(table), findsOneWidget);
       {
         final FlatTableState<TestData> state =
@@ -405,18 +415,22 @@ void main() {
         expect(columnWidths[0], equals(300.0)); // Fixed width column.
         expect(columnWidths[1], equals(235.0)); // Min width wide column
         expect(
-            columnWidths[2], equals(235.0)); // Very wide min width wide column
+          columnWidths[2],
+          equals(235.0),
+        ); // Very wide min width wide column
         expect(columnWidths[3], equals(400.0)); // Fixed width column.
         expect(columnWidths[4], equals(235.0)); // Variable width wide column.
       }
 
-      await tester.pumpWidget(wrap(
-        SizedBox(
-          width: 1200.0,
-          height: 200.0,
-          child: table,
+      await tester.pumpWidget(
+        wrap(
+          SizedBox(
+            width: 1200.0,
+            height: 200.0,
+            child: table,
+          ),
         ),
-      ));
+      );
       expect(find.byWidget(table), findsOneWidget);
       {
         final FlatTableState<TestData> state =
@@ -426,18 +440,22 @@ void main() {
         expect(columnWidths[0], equals(300.0)); // Fixed width column.
         expect(columnWidths[1], equals(122.0)); // Min width wide column
         expect(
-            columnWidths[2], equals(160.0)); // Very wide min width wide column
+          columnWidths[2],
+          equals(160.0),
+        ); // Very wide min width wide column
         expect(columnWidths[3], equals(400.0)); // Fixed width column.
         expect(columnWidths[4], equals(122.0)); // Variable width wide column.
       }
 
-      await tester.pumpWidget(wrap(
-        SizedBox(
-          width: 1000.0,
-          height: 200.0,
-          child: table,
+      await tester.pumpWidget(
+        wrap(
+          SizedBox(
+            width: 1000.0,
+            height: 200.0,
+            child: table,
+          ),
         ),
-      ));
+      );
       expect(find.byWidget(table), findsOneWidget);
       {
         final FlatTableState<TestData> state =
@@ -447,7 +465,9 @@ void main() {
         expect(columnWidths[0], equals(300.0)); // Fixed width column.
         expect(columnWidths[1], equals(100.0)); // Min width wide column
         expect(
-            columnWidths[2], equals(160.0)); // Very wide min width wide column
+          columnWidths[2],
+          equals(160.0),
+        ); // Very wide min width wide column
         expect(columnWidths[3], equals(400.0)); // Fixed width column.
         expect(columnWidths[4], equals(0.0)); // Variable width wide column.
       }
@@ -636,13 +656,15 @@ void main() {
         sortColumn: treeColumn,
         sortDirection: SortDirection.ascending,
       );
-      await tester.pumpWidget(wrap(
-        SizedBox(
-          width: 200.0,
-          height: 200.0,
-          child: table,
+      await tester.pumpWidget(
+        wrap(
+          SizedBox(
+            width: 200.0,
+            height: 200.0,
+            child: table,
+          ),
         ),
-      ));
+      );
       expect(find.byWidget(table), findsOneWidget);
     });
 
@@ -924,16 +946,19 @@ void main() {
     });
 
     test('fails when TreeColumn is not in column list', () {
-      expect(() {
-        TreeTable<TestData>(
-          columns: const [],
-          dataRoots: [tree1],
-          treeColumn: treeColumn,
-          keyFactory: (d) => Key(d.name),
-          sortColumn: treeColumn,
-          sortDirection: SortDirection.ascending,
-        );
-      }, throwsAssertionError);
+      expect(
+        () {
+          TreeTable<TestData>(
+            columns: const [],
+            dataRoots: [tree1],
+            treeColumn: treeColumn,
+            keyFactory: (d) => Key(d.name),
+            sortColumn: treeColumn,
+            sortDirection: SortDirection.ascending,
+          );
+        },
+        throwsAssertionError,
+      );
     });
   });
 }
@@ -949,8 +974,10 @@ class TestData extends TreeNode<TestData> {
 
   @override
   TestData shallowCopy() {
-    throw UnimplementedError('This method is not implemented. Implement if you '
-        'need to call `shallowCopy` on an instance of this class.');
+    throw UnimplementedError(
+      'This method is not implemented. Implement if you '
+      'need to call `shallowCopy` on an instance of this class.',
+    );
   }
 }
 

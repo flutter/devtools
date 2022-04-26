@@ -107,6 +107,28 @@ class TraceEvent {
 
   bool get isRasterEvent => type == TimelineEventType.raster;
 
+  TraceEvent copy({
+    String? name,
+    String? category,
+    String? phase,
+    int? processId,
+    int? threadId,
+    int? duration,
+    int? timestampMicros,
+    Map<String, dynamic>? args,
+  }) {
+    return TraceEvent({
+      nameKey: name ?? this.name,
+      categoryKey: category ?? this.category,
+      phaseKey: phase ?? this.phase,
+      processIdKey: processId ?? this.processId,
+      threadIdKey: threadId ?? this.threadId,
+      durationKey: duration ?? this.duration,
+      timestampKey: timestampMicros ?? this.timestampMicros,
+      argsKey: args ?? this.args,
+    });
+  }
+
   @override
   String toString() => '$type event [$idKey: $id] [$phaseKey: $phase] '
       '$name - [$timestampKey: $timestampMicros] [$durationKey: $duration]';

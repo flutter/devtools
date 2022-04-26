@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:convert';
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
@@ -24,8 +22,8 @@ import 'package:mockito/mockito.dart';
 void main() {
   const screen = InspectorScreen();
 
-  FakeServiceManager fakeServiceManager;
-  FakeServiceExtensionManager fakeExtensionManager;
+  late FakeServiceManager fakeServiceManager;
+  late FakeServiceExtensionManager fakeExtensionManager;
   const windowSize = Size(2600.0, 1200.0);
 
   final debuggerController = MockDebuggerController.withDefaults();
@@ -41,8 +39,8 @@ void main() {
     setUp(() {
       fakeServiceManager = FakeServiceManager();
       fakeExtensionManager = fakeServiceManager.serviceExtensionManager;
-      mockIsFlutterApp(fakeServiceManager.connectedApp);
-      when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
+      mockIsFlutterApp(fakeServiceManager.connectedApp!);
+      when(fakeServiceManager.errorBadgeManager.errorCountNotifier('inspector'))
           .thenReturn(ValueNotifier<int>(0));
 
       setGlobal(ServiceConnectionManager, fakeServiceManager);
@@ -60,7 +58,8 @@ void main() {
       };
       fakeExtensionManager
         ..fakeAddServiceExtension(
-            extensions.toggleOnDeviceWidgetInspector.extension)
+          extensions.toggleOnDeviceWidgetInspector.extension,
+        )
         ..fakeAddServiceExtension(extensions.toggleSelectWidgetMode.extension)
         ..fakeAddServiceExtension(extensions.enableOnDeviceInspector.extension)
         ..fakeAddServiceExtension(extensions.debugPaint.extension)
@@ -190,8 +189,10 @@ void main() {
       await tester.pumpWidget(buildInspectorScreen());
       await tester.pump();
       expect(find.byType(InspectorScreenBody), findsOneWidget);
-      expect(find.text(extensions.toggleOnDeviceWidgetInspector.title),
-          findsOneWidget);
+      expect(
+        find.text(extensions.toggleOnDeviceWidgetInspector.title),
+        findsOneWidget,
+      );
       expect(find.text(extensions.debugPaint.title), findsOneWidget);
       await tester.pump();
 
@@ -199,23 +200,26 @@ void main() {
           .tap(find.text(extensions.toggleOnDeviceWidgetInspector.title));
       // Verify the service extension state has not changed.
       expect(
-          fakeExtensionManager.extensionValueOnDevice[
-              extensions.toggleOnDeviceWidgetInspector.extension],
-          isTrue);
+        fakeExtensionManager.extensionValueOnDevice[
+            extensions.toggleOnDeviceWidgetInspector.extension],
+        isTrue,
+      );
       await tester
           .tap(find.text(extensions.toggleOnDeviceWidgetInspector.title));
       // Verify the service extension state has not changed.
       expect(
-          fakeExtensionManager.extensionValueOnDevice[
-              extensions.toggleOnDeviceWidgetInspector.extension],
-          isTrue);
+        fakeExtensionManager.extensionValueOnDevice[
+            extensions.toggleOnDeviceWidgetInspector.extension],
+        isTrue,
+      );
 
       // TODO(jacobr): also verify that the service extension buttons look
       // visually disabled.
     });
 
     group('LayoutDetailsTab', () {
-      final renderObjectJson = jsonDecode('''
+      final renderObjectJson = jsonDecode(
+        '''
         {
           "properties": [
             {
@@ -244,9 +248,10 @@ void main() {
             }
           ]
         }
-      ''');
+      ''',
+      );
       final diagnostic = RemoteDiagnosticsNode(
-        <String, Object>{
+        <String, Object?>{
           'widgetRuntimeType': 'Row',
           'renderObject': renderObjectJson,
           'hasChildren': false,

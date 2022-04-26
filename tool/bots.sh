@@ -71,6 +71,12 @@ dart --version
 export FLUTTER_VERSION=$(flutter --version | awk -F '•' 'NR==1{print $1}' | awk '{print $2}')
 echo "Flutter version is '$FLUTTER_VERSION'"
 
+# Generate code.
+pushd packages/devtools_test
+flutter pub get
+popd
+bash tool/generate_code.sh
+
 # Change the CI to the packages/devtools_app directory.
 pushd packages/devtools_app
 echo `pwd`
@@ -108,6 +114,7 @@ if [ "$BOT" = "main" ]; then
 
 elif [ "$BOT" = "test_ddc" ]; then
 
+    # Provision our packages.
     flutter pub get
 
     # TODO(https://github.com/flutter/flutter/issues/43538): Remove workaround.
@@ -119,6 +126,28 @@ elif [ "$BOT" = "test_ddc" ]; then
     # so we explicitly provide them.
     if [ "$PLATFORM" = "vm" ]; then
         flutter test $DART_DEFINE_ARGS test/*.dart test/fixtures/ --no-sound-null-safety
+
+        # We are in process of transforming from unsound null safety to sound one.
+        # At the moment some tests fail without the flag --no-sound-null-safety.
+        # We are fixing them one by one and adding to the list below. After all
+        # tests are fixed, we will delete this list and remove the flags from the commands.
+
+        flutter test $DART_DEFINE_ARGS \
+          test/chart_test.dart \
+          test/cpu_profiler_controller_test.dart \
+          test/cpu_profiler_test.dart \
+          test/debugger_controller_test.dart \
+          test/debugger_controller_stdio_test.dart \
+          test/device_dialog_test.dart \
+          test/logging_controller_test.dart \
+          test/logging_screen_data_test.dart \
+          test/logging_screen_test.dart \
+          test/performance_screen_test.dart \
+          test/performance_screen_test.dart \
+          test/profiler_screen_controller_test.dart \
+          test/profiler_screen_test.dart \
+          test/timeline_analysis_test.dart
+
     elif [ "$PLATFORM" = "chrome" ]; then
         flutter test --platform chrome $DART_DEFINE_ARGS test/*.dart test/fixtures/ --no-sound-null-safety
     else

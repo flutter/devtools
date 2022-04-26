@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math' as math;
@@ -99,11 +97,12 @@ class LoggingDetailsController {
 
           // TODO(jacobr): node.diagnostic.isDiagnosticableValue isn't quite
           // right.
-          if (node.diagnostic.isDiagnosticableValue) {
+          final diagnosticLocal = node.diagnostic!;
+          if (diagnosticLocal.isDiagnosticableValue) {
             // TODO(jacobr): warn if the selection can't be set as the node is
             // stale which is likely if this is an old log entry.
             onShowInspector();
-            node.diagnostic.setSelectionInspector(false);
+            diagnosticLocal.setSelectionInspector(false);
           }
         },
       );
@@ -161,12 +160,14 @@ class LoggingController extends DisposableController
         AutoDisposeControllerMixin {
   LoggingController() {
     autoDisposeStreamSubscription(
-        serviceManager.onConnectionAvailable.listen(_handleConnectionStart));
+      serviceManager.onConnectionAvailable.listen(_handleConnectionStart),
+    );
     if (serviceManager.connectedAppInitialized) {
       _handleConnectionStart(serviceManager.service!);
     }
     autoDisposeStreamSubscription(
-        serviceManager.onConnectionClosed.listen(_handleConnectionStop));
+      serviceManager.onConnectionClosed.listen(_handleConnectionStop),
+    );
     _handleBusEvents();
   }
 
@@ -249,24 +250,28 @@ class LoggingController extends DisposableController
     final _StdoutEventHandler stdoutHandler =
         _StdoutEventHandler(this, 'stdout');
     autoDisposeStreamSubscription(
-        service.onStdoutEventWithHistory.listen(stdoutHandler.handle));
+      service.onStdoutEventWithHistory.listen(stdoutHandler.handle),
+    );
 
     // Log stderr events.
     final _StdoutEventHandler stderrHandler =
         _StdoutEventHandler(this, 'stderr', isError: true);
     autoDisposeStreamSubscription(
-        service.onStderrEventWithHistory.listen(stderrHandler.handle));
+      service.onStderrEventWithHistory.listen(stderrHandler.handle),
+    );
 
     // Log GC events.
     autoDisposeStreamSubscription(service.onGCEvent.listen(_handleGCEvent));
 
     // Log `dart:developer` `log` events.
     autoDisposeStreamSubscription(
-        service.onLoggingEventWithHistory.listen(_handleDeveloperLogEvent));
+      service.onLoggingEventWithHistory.listen(_handleDeveloperLogEvent),
+    );
 
     // Log Flutter extension events.
     autoDisposeStreamSubscription(
-        service.onExtensionEventWithHistory.listen(_handleExtensionEvent));
+      service.onExtensionEventWithHistory.listen(_handleExtensionEvent),
+    );
   }
 
   void _handleExtensionEvent(Event e) async {
@@ -293,49 +298,59 @@ class LoggingController extends DisposableController
       final String frameInfoText =
           '$frameId ${frame.elapsedMs!.toStringAsFixed(1).padLeft(4)}ms ';
 
-      log(LogData(
-        e.extensionKind!.toLowerCase(),
-        jsonEncode(e.extensionData!.data),
-        e.timestamp,
-        summary: frameInfoText,
-      ));
+      log(
+        LogData(
+          e.extensionKind!.toLowerCase(),
+          jsonEncode(e.extensionData!.data),
+          e.timestamp,
+          summary: frameInfoText,
+        ),
+      );
     } else if (e.extensionKind == ImageSizesForFrame.eventName) {
       final images = ImageSizesForFrame.from(e.extensionData!.data);
 
       for (final image in images) {
-        log(LogData(
-          e.extensionKind!.toLowerCase(),
-          jsonEncode(image.rawJson),
-          e.timestamp,
-          summary: image.summary,
-        ));
+        log(
+          LogData(
+            e.extensionKind!.toLowerCase(),
+            jsonEncode(image.rawJson),
+            e.timestamp,
+            summary: image.summary,
+          ),
+        );
       }
     } else if (e.extensionKind == NavigationInfo.eventName) {
       final NavigationInfo navInfo = NavigationInfo.from(e.extensionData!.data);
 
-      log(LogData(
-        e.extensionKind!.toLowerCase(),
-        jsonEncode(e.json),
-        e.timestamp,
-        summary: navInfo.routeDescription,
-      ));
+      log(
+        LogData(
+          e.extensionKind!.toLowerCase(),
+          jsonEncode(e.json),
+          e.timestamp,
+          summary: navInfo.routeDescription,
+        ),
+      );
     } else if (untitledEvents.contains(e.extensionKind)) {
-      log(LogData(
-        e.extensionKind!.toLowerCase(),
-        jsonEncode(e.json),
-        e.timestamp,
-        summary: '',
-      ));
+      log(
+        LogData(
+          e.extensionKind!.toLowerCase(),
+          jsonEncode(e.json),
+          e.timestamp,
+          summary: '',
+        ),
+      );
     } else if (e.extensionKind == ServiceExtensionStateChangedInfo.eventName) {
       final ServiceExtensionStateChangedInfo changedInfo =
           ServiceExtensionStateChangedInfo.from(e.extensionData!.data);
 
-      log(LogData(
-        e.extensionKind!.toLowerCase(),
-        jsonEncode(e.json),
-        e.timestamp,
-        summary: '${changedInfo.extension}: ${changedInfo.value}',
-      ));
+      log(
+        LogData(
+          e.extensionKind!.toLowerCase(),
+          jsonEncode(e.json),
+          e.timestamp,
+          summary: '${changedInfo.extension}: ${changedInfo.value}',
+        ),
+      );
     } else if (e.extensionKind == 'Flutter.Error') {
       // TODO(pq): add tests for error extension handling once framework changes
       // are landed.
@@ -353,19 +368,23 @@ class LoggingController extends DisposableController
       }
 
       final RemoteDiagnosticsNode summary = _findFirstSummary(node) ?? node;
-      log(LogData(
-        e.extensionKind!.toLowerCase(),
-        jsonEncode(e.extensionData!.data),
-        e.timestamp,
-        summary: summary.toDiagnosticsNode().toString(),
-      ));
+      log(
+        LogData(
+          e.extensionKind!.toLowerCase(),
+          jsonEncode(e.extensionData!.data),
+          e.timestamp,
+          summary: summary.toDiagnosticsNode().toString(),
+        ),
+      );
     } else {
-      log(LogData(
-        e.extensionKind!.toLowerCase(),
-        jsonEncode(e.json),
-        e.timestamp,
-        summary: e.json.toString(),
-      ));
+      log(
+        LogData(
+          e.extensionKind!.toLowerCase(),
+          jsonEncode(e.json),
+          e.timestamp,
+          summary: e.json.toString(),
+        ),
+      );
     }
   }
 
@@ -472,14 +491,16 @@ class LoggingController extends DisposableController
     const int severeIssue = 1000;
     final bool isError = level != null && level >= severeIssue ? true : false;
 
-    log(LogData(
-      loggerName,
-      details,
-      e.timestamp,
-      isError: isError,
-      summary: summary,
-      detailsComputer: detailsComputer,
-    ));
+    log(
+      LogData(
+        loggerName,
+        details,
+        e.timestamp,
+        isError: isError,
+        summary: summary,
+        detailsComputer: detailsComputer,
+      ),
+    );
   }
 
   void _handleConnectionStop(dynamic event) {}
@@ -527,39 +548,47 @@ class LoggingController extends DisposableController
   void _handleBusEvents() {
     // TODO(jacobr): expose the messageBus for use by vm tests.
     autoDisposeStreamSubscription(
-        messageBus.onEvent(type: 'reload.end').listen((BusEvent event) {
-      log(
-        LogData(
-          'hot.reload',
-          event.data as String?,
-          DateTime.now().millisecondsSinceEpoch,
-        ),
-      );
-    }));
+      messageBus.onEvent(type: 'reload.end').listen((BusEvent event) {
+        log(
+          LogData(
+            'hot.reload',
+            event.data as String?,
+            DateTime.now().millisecondsSinceEpoch,
+          ),
+        );
+      }),
+    );
 
     autoDisposeStreamSubscription(
-        messageBus.onEvent(type: 'restart.end').listen((BusEvent event) {
-      log(
-        LogData(
-          'hot.restart',
-          event.data as String?,
-          DateTime.now().millisecondsSinceEpoch,
-        ),
-      );
-    }));
+      messageBus.onEvent(type: 'restart.end').listen((BusEvent event) {
+        log(
+          LogData(
+            'hot.restart',
+            event.data as String?,
+            DateTime.now().millisecondsSinceEpoch,
+          ),
+        );
+      }),
+    );
 
     // Listen for debugger events.
-    autoDisposeStreamSubscription(messageBus
-        .onEvent()
-        .where((event) =>
-            event.type == 'debugger' || event.type.startsWith('debugger.'))
-        .listen(_handleDebuggerEvent));
+    autoDisposeStreamSubscription(
+      messageBus
+          .onEvent()
+          .where(
+            (event) =>
+                event.type == 'debugger' || event.type.startsWith('debugger.'),
+          )
+          .listen(_handleDebuggerEvent),
+    );
 
     // Listen for DevTools internal events.
-    autoDisposeStreamSubscription(messageBus
-        .onEvent()
-        .where((event) => event.type.startsWith('devtools.'))
-        .listen(_handleDevToolsEvent));
+    autoDisposeStreamSubscription(
+      messageBus
+          .onEvent()
+          .where((event) => event.type.startsWith('devtools.'))
+          .listen(_handleDevToolsEvent),
+    );
   }
 
   void _handleDebuggerEvent(BusEvent event) {
@@ -633,32 +662,38 @@ class LoggingController extends DisposableController
     } else {
       filteredData
         ..clear()
-        ..addAll(data.where((log) {
-          final kindArg = filter!.queryFilter!.filterArguments[kindFilterId];
-          if (kindArg != null &&
-              !kindArg.matchesValue(log.kind.toLowerCase())) {
-            return false;
-          }
-
-          if (filter.queryFilter!.substrings.isNotEmpty) {
-            for (final substring in filter.queryFilter!.substrings) {
-              final caseInsensitiveSubstring = substring.toLowerCase();
-              final matchesKind =
-                  log.kind.toLowerCase().contains(caseInsensitiveSubstring);
-              if (matchesKind) return true;
-
-              final matchesSummary = log.summary != null &&
-                  log.summary!.toLowerCase().contains(caseInsensitiveSubstring);
-              if (matchesSummary) return true;
-
-              final matchesDetails = log.details != null &&
-                  log.summary!.toLowerCase().contains(caseInsensitiveSubstring);
-              if (matchesDetails) return true;
+        ..addAll(
+          data.where((log) {
+            final kindArg = filter!.queryFilter!.filterArguments[kindFilterId];
+            if (kindArg != null &&
+                !kindArg.matchesValue(log.kind.toLowerCase())) {
+              return false;
             }
-            return false;
-          }
-          return true;
-        }).toList());
+
+            if (filter.queryFilter!.substrings.isNotEmpty) {
+              for (final substring in filter.queryFilter!.substrings) {
+                final caseInsensitiveSubstring = substring.toLowerCase();
+                final matchesKind =
+                    log.kind.toLowerCase().contains(caseInsensitiveSubstring);
+                if (matchesKind) return true;
+
+                final matchesSummary = log.summary != null &&
+                    log.summary!
+                        .toLowerCase()
+                        .contains(caseInsensitiveSubstring);
+                if (matchesSummary) return true;
+
+                final matchesDetails = log.details != null &&
+                    log.summary!
+                        .toLowerCase()
+                        .contains(caseInsensitiveSubstring);
+                if (matchesDetails) return true;
+              }
+              return false;
+            }
+            return true;
+          }).toList(),
+        );
     }
     activeFilter.value = filter;
   }
@@ -671,8 +706,11 @@ class LoggingController extends DisposableController
 /// we wait for up to 1ms when we get the `foo` event, to see if the next event
 /// is a single newline. If so, we add the newline to the previous log message.
 class _StdoutEventHandler {
-  _StdoutEventHandler(this.loggingController, this.name,
-      {this.isError = false});
+  _StdoutEventHandler(
+    this.loggingController,
+    this.name, {
+    this.isError = false,
+  });
 
   final LoggingController loggingController;
   final String name;
@@ -688,13 +726,15 @@ class _StdoutEventHandler {
       timer?.cancel();
 
       if (message == '\n') {
-        loggingController.log(LogData(
-          buffer!.kind,
-          buffer!.details! + message,
-          buffer!.timestamp,
-          summary: buffer!.summary! + message,
-          isError: buffer!.isError,
-        ));
+        loggingController.log(
+          LogData(
+            buffer!.kind,
+            buffer!.details! + message,
+            buffer!.timestamp,
+            summary: buffer!.summary! + message,
+            isError: buffer!.isError,
+          ),
+        );
         buffer = null;
         return;
       }
@@ -832,7 +872,10 @@ class FrameInfo {
 
   static FrameInfo from(Map<String, dynamic> data) {
     return FrameInfo(
-        data['number'], data['elapsed'] / 1000, data['startTime'] / 1000);
+      data['number'],
+      data['elapsed'] / 1000,
+      data['startTime'] / 1000,
+    );
   }
 
   final int? number;
@@ -879,9 +922,9 @@ class ImageSizesForFrame {
   }
 
   final String? source;
-  final Map<String, Object>? displaySize;
-  final Map<String, Object>? imageSize;
-  final Map<String, Object>? rawJson;
+  final Map<String, Object?>? displaySize;
+  final Map<String, Object?>? imageSize;
+  final Map<String, Object?>? rawJson;
 
   String get summary {
     final file = path.basename(source!);

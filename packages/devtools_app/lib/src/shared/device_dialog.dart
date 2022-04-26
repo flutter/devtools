@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -115,10 +113,12 @@ class _ViewVMFlagsButton extends StatelessWidget {
     return DialogTextButton(
       onPressed: () {
         Navigator.of(context, rootNavigator: true).pop('dialog');
-        unawaited(showDialog(
-          context: context,
-          builder: (context) => VMFlagsDialog(),
-        ));
+        unawaited(
+          showDialog(
+            context: context,
+            builder: (context) => VMFlagsDialog(),
+          ),
+        );
       },
       child: Text('View VM Flags'.toUpperCase()),
     );

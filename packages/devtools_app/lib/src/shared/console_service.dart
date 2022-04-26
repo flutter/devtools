@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -91,10 +89,12 @@ class ConsoleService extends Disposer {
     if (expandAll) {
       variable.expandCascading();
     }
-    _stdio.add(ConsoleLine.dartObjectNode(
-      variable,
-      forceScrollIntoView: forceScrollIntoView,
-    ));
+    _stdio.add(
+      ConsoleLine.dartObjectNode(
+        variable,
+        forceScrollIntoView: forceScrollIntoView,
+      ),
+    );
   }
 
   final _stdio = ListValueNotifier<ConsoleLine>([]);
@@ -192,7 +192,8 @@ class ConsoleService extends Disposer {
     // because this stream does not send event history upon the first
     // subscription like the streams in [ensureServiceInitialized].
     autoDisposeStreamSubscription(
-        service.onDebugEvent.listen(_handleDebugEvent));
+      service.onDebugEvent.listen(_handleDebugEvent),
+    );
     addAutoDisposeListener(serviceManager.isolateManager.mainIsolate, () {
       clearStdio();
     });
@@ -215,15 +216,18 @@ class ConsoleService extends Disposer {
   void ensureServiceInitialized() {
     assert(serviceManager.isServiceAvailable);
     if (!_serviceInitialized && serviceManager.isServiceAvailable) {
-      autoDisposeStreamSubscription(serviceManager
-          .service!.onStdoutEventWithHistory
-          .listen(_handleStdoutEvent));
-      autoDisposeStreamSubscription(serviceManager
-          .service!.onStderrEventWithHistory
-          .listen(_handleStderrEvent));
-      autoDisposeStreamSubscription(serviceManager
-          .service!.onExtensionEventWithHistory
-          .listen(_handleExtensionEvent));
+      autoDisposeStreamSubscription(
+        serviceManager.service!.onStdoutEventWithHistory
+            .listen(_handleStdoutEvent),
+      );
+      autoDisposeStreamSubscription(
+        serviceManager.service!.onStderrEventWithHistory
+            .listen(_handleStderrEvent),
+      );
+      autoDisposeStreamSubscription(
+        serviceManager.service!.onExtensionEventWithHistory
+            .listen(_handleExtensionEvent),
+      );
       _serviceInitialized = true;
     }
   }

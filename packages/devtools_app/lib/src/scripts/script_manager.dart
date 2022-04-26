@@ -106,9 +106,11 @@ class _ScriptCache {
         .then((obj) => obj as Script);
     _inProgress[scriptId] = scriptFuture;
 
-    unawaited(scriptFuture.then((script) {
-      scripts[scriptId] = script;
-    }));
+    unawaited(
+      scriptFuture.then((script) {
+        scripts[scriptId] = script;
+      }),
+    );
 
     return scriptFuture;
   }

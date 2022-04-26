@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Ignoring redundant argument values makes the test easier to read.
-// ignore_for_file: avoid_redundant_argument_values
-
 import 'package:devtools_app/src/shared/version.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -90,8 +87,8 @@ void main() {
     test('parse', () {
       expect(
         SemanticVersion.parse(
-                '2.15.0-233.0.dev (dev) (Mon Oct 18 14:06:26 2021 -0700) on "ios_x64"')
-            .toString(),
+          '2.15.0-233.0.dev (dev) (Mon Oct 18 14:06:26 2021 -0700) on "ios_x64"',
+        ).toString(),
         equals('2.15.0-233.0'),
       );
       expect(
@@ -145,7 +142,7 @@ void main() {
         equals('3.2.0'),
       );
 
-      version = SemanticVersion(major: 3, minor: 0, patch: 0);
+      version = SemanticVersion(major: 3);
       expect(
         version
             .downgrade(
@@ -181,7 +178,8 @@ void main() {
       );
       expect(
         SemanticVersion(major: 2, minor: 1, patch: 1).isSupported(
-            supportedVersion: SemanticVersion(major: 2, minor: 2, patch: 1)),
+          supportedVersion: SemanticVersion(major: 2, minor: 2, patch: 1),
+        ),
         isFalse,
       );
     });
@@ -209,19 +207,22 @@ void main() {
         equals(0),
       );
       expect(
-        version.compareTo(SemanticVersion(
-          major: 1,
-          minor: 1,
-          patch: 1,
-          preReleaseMajor: 0,
-          preReleaseMinor: 0,
-        )),
+        version.compareTo(
+          SemanticVersion(
+            major: 1,
+            minor: 1,
+            patch: 1,
+            preReleaseMajor: 0,
+            preReleaseMinor: 0,
+          ),
+        ),
         equals(0),
       );
 
       expect(
         version.compareTo(
-            SemanticVersion(major: 1, minor: 1, patch: 1, preReleaseMajor: 1)),
+          SemanticVersion(major: 1, minor: 1, patch: 1, preReleaseMajor: 1),
+        ),
         equals(1),
       );
 
@@ -234,17 +235,20 @@ void main() {
       );
       expect(
         version.compareTo(
-            SemanticVersion(major: 1, minor: 1, patch: 1, preReleaseMajor: 1)),
+          SemanticVersion(major: 1, minor: 1, patch: 1, preReleaseMajor: 1),
+        ),
         equals(1),
       );
       expect(
-        version.compareTo(SemanticVersion(
-          major: 1,
-          minor: 1,
-          patch: 1,
-          preReleaseMajor: 2,
-          preReleaseMinor: 1,
-        )),
+        version.compareTo(
+          SemanticVersion(
+            major: 1,
+            minor: 1,
+            patch: 1,
+            preReleaseMajor: 2,
+            preReleaseMinor: 1,
+          ),
+        ),
         equals(-1),
       );
     });

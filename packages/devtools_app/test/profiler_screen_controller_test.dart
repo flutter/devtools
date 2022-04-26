@@ -2,22 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/screens/profiler/profiler_screen_controller.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 
 void main() {
   group('ProfilerScreenController', () {
     late ProfilerScreenController controller;
-    late FakeServiceManager fakeServiceManager;
+    final fakeServiceManager = FakeServiceManager();
+    when(fakeServiceManager.connectedApp!.isFlutterAppNow).thenReturn(false);
 
     setUp(() {
-      fakeServiceManager = FakeServiceManager();
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(OfflineModeController, OfflineModeController());
       controller = ProfilerScreenController();
@@ -33,18 +32,27 @@ void main() {
 
     test('disposes', () async {
       controller.dispose();
-      expect(() {
-        controller.recordingNotifier.addListener(() {});
-      }, throwsA(anything));
+      expect(
+        () {
+          controller.recordingNotifier.addListener(() {});
+        },
+        throwsA(anything),
+      );
 
-      expect(() {
-        controller.cpuProfilerController.dataNotifier.addListener(() {});
-      }, throwsA(anything));
+      expect(
+        () {
+          controller.cpuProfilerController.dataNotifier.addListener(() {});
+        },
+        throwsA(anything),
+      );
 
-      expect(() {
-        controller.cpuProfilerController.selectedCpuStackFrameNotifier
-            .addListener(() {});
-      }, throwsA(anything));
+      expect(
+        () {
+          controller.cpuProfilerController.selectedCpuStackFrameNotifier
+              .addListener(() {});
+        },
+        throwsA(anything),
+      );
     });
   });
 }

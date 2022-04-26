@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -198,7 +196,7 @@ abstract class Screen {
   /// Build a widget to display in the status line.
   ///
   /// If this method returns `null`, then no page specific status is displayed.
-  Widget? buildStatus(BuildContext context, TextTheme textTheme) {
+  Widget? buildStatus(BuildContext context) {
     return null;
   }
 }
@@ -257,7 +255,8 @@ bool shouldShowScreen(Screen screen) {
   if (screen.shouldShowForFlutterVersion != null) {
     if (serviceManager.connectedApp!.isFlutterAppNow == true &&
         !screen.shouldShowForFlutterVersion!(
-            serviceManager.connectedApp!.flutterVersionNow)) {
+          serviceManager.connectedApp!.flutterVersionNow,
+        )) {
       return false;
     }
   }

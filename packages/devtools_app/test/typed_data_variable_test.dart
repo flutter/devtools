@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
-// ignore_for_file: avoid_redundant_argument_values
-
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -18,18 +14,24 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
+const isolateId = '1';
+const objectId = '123';
+
 final isolateRef = IsolateRef(
-  id: '1',
+  id: isolateId,
   number: '2',
   name: 'main',
   isSystemIsolate: false,
 );
 
 void main() {
-  ServiceConnectionManager manager;
+  late ServiceConnectionManager manager;
 
   setUp(() {
-    final service = MockVmService();
+    final service = MockVmServiceWrapper();
+
+    when(service.getFlagList()).thenAnswer((_) async => FlagList(flags: []));
+
     when(service.onDebugEvent).thenAnswer((_) {
       return const Stream.empty();
     });
@@ -53,7 +55,7 @@ void main() {
     final bytes = Uint8ClampedList.fromList([0, 1, 2, 3]);
     final instance = Instance(
       kind: InstanceKind.kUint8ClampedList,
-      id: '123',
+      id: objectId,
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
       identityHashCode: null,
@@ -69,7 +71,8 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any, offset: 0, count: 4))
+
+    when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
@@ -88,7 +91,7 @@ void main() {
     final bytes = Uint8List.fromList([0, 1, 2, 3]);
     final instance = Instance(
       kind: InstanceKind.kUint8List,
-      id: '123',
+      id: objectId,
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
       identityHashCode: null,
@@ -104,7 +107,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any, offset: 0, count: 4))
+    when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
@@ -123,7 +126,7 @@ void main() {
     final bytes = Uint16List.fromList([0, 513, 514, 515]);
     final instance = Instance(
       kind: InstanceKind.kUint16List,
-      id: '123',
+      id: objectId,
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
       identityHashCode: null,
@@ -139,7 +142,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any, offset: 0, count: 4))
+    when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
@@ -158,7 +161,7 @@ void main() {
     final bytes = Uint32List.fromList([0, 131072, 131073, 131074]);
     final instance = Instance(
       kind: InstanceKind.kUint32List,
-      id: '123',
+      id: objectId,
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
       identityHashCode: null,
@@ -174,7 +177,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any, offset: 0, count: 4))
+    when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
@@ -189,46 +192,51 @@ void main() {
     ]);
   });
 
-  test('Creates bound variables for Uint64List instance', () async {
-    final bytes = Uint64List.fromList([0, 4294967296, 4294967297, 4294967298]);
-    final instance = Instance(
-      kind: InstanceKind.kUint64List,
-      id: '123',
-      classRef: null,
-      bytes: base64.encode(bytes.buffer.asUint8List()),
-      identityHashCode: null,
-      length: 4,
-    );
-    final variable = DartObjectNode.create(
-      BoundVariable(
-        name: 'test',
-        value: instance,
-        declarationTokenPos: null,
-        scopeEndTokenPos: null,
-        scopeStartTokenPos: null,
-      ),
-      isolateRef,
-    );
-    when(manager.service.getObject(any, any, offset: 0, count: 4))
-        .thenAnswer((_) async {
-      return instance;
-    });
+  test(
+    'Creates bound variables for Uint64List instance',
+    () async {
+      final bytes =
+          Uint64List.fromList([0, 4294967296, 4294967297, 4294967298]);
+      final instance = Instance(
+        kind: InstanceKind.kUint64List,
+        id: objectId,
+        classRef: null,
+        bytes: base64.encode(bytes.buffer.asUint8List()),
+        identityHashCode: null,
+        length: 4,
+      );
+      final variable = DartObjectNode.create(
+        BoundVariable(
+          name: 'test',
+          value: instance,
+          declarationTokenPos: null,
+          scopeEndTokenPos: null,
+          scopeStartTokenPos: null,
+        ),
+        isolateRef,
+      );
+      when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 4))
+          .thenAnswer((_) async {
+        return instance;
+      });
 
-    await buildVariablesTree(variable);
+      await buildVariablesTree(variable);
 
-    expect(variable.children, [
-      matchesVariable(name: '[0]', value: 0),
-      matchesVariable(name: '[1]', value: 4294967296),
-      matchesVariable(name: '[2]', value: 4294967297),
-      matchesVariable(name: '[3]', value: 4294967298),
-    ]);
-  }, skip: kIsWeb);
+      expect(variable.children, [
+        matchesVariable(name: '[0]', value: 0),
+        matchesVariable(name: '[1]', value: 4294967296),
+        matchesVariable(name: '[2]', value: 4294967297),
+        matchesVariable(name: '[3]', value: 4294967298),
+      ]);
+    },
+    skip: kIsWeb,
+  );
 
   test('Creates bound variables for Int8List instance', () async {
     final bytes = Int8List.fromList([0, 1, -2, 3]);
     final instance = Instance(
       kind: InstanceKind.kInt8List,
-      id: '123',
+      id: objectId,
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
       identityHashCode: null,
@@ -244,7 +252,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any, offset: 0, count: 4))
+    when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
@@ -263,7 +271,7 @@ void main() {
     final bytes = Int16List.fromList([0, 513, -514, 515]);
     final instance = Instance(
       kind: InstanceKind.kInt16List,
-      id: '123',
+      id: objectId,
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
       identityHashCode: null,
@@ -279,7 +287,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any, offset: 0, count: 4))
+    when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
@@ -298,7 +306,7 @@ void main() {
     final bytes = Int32List.fromList([0, 131072, -131073, 131074]);
     final instance = Instance(
       kind: InstanceKind.kInt32List,
-      id: '123',
+      id: objectId,
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
       identityHashCode: null,
@@ -314,7 +322,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any, offset: 0, count: 4))
+    when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
@@ -329,47 +337,52 @@ void main() {
     ]);
   });
 
-  test('Creates bound variables for Int64List instance', () async {
-    final bytes = Int64List.fromList([0, 4294967296, -4294967297, 4294967298]);
-    final instance = Instance(
-      kind: InstanceKind.kInt64List,
-      id: '123',
-      classRef: null,
-      bytes: base64.encode(bytes.buffer.asUint8List()),
-      identityHashCode: null,
-      length: 4,
-    );
-    final variable = DartObjectNode.create(
-      BoundVariable(
-        name: 'test',
-        value: instance,
-        declarationTokenPos: null,
-        scopeEndTokenPos: null,
-        scopeStartTokenPos: null,
-      ),
-      isolateRef,
-    );
-    when(manager.service.getObject(any, any, offset: 0, count: 4))
-        .thenAnswer((_) async {
-      return instance;
-    });
+  test(
+    'Creates bound variables for Int64List instance',
+    () async {
+      final bytes =
+          Int64List.fromList([0, 4294967296, -4294967297, 4294967298]);
+      final instance = Instance(
+        kind: InstanceKind.kInt64List,
+        id: objectId,
+        classRef: null,
+        bytes: base64.encode(bytes.buffer.asUint8List()),
+        identityHashCode: null,
+        length: 4,
+      );
+      final variable = DartObjectNode.create(
+        BoundVariable(
+          name: 'test',
+          value: instance,
+          declarationTokenPos: null,
+          scopeEndTokenPos: null,
+          scopeStartTokenPos: null,
+        ),
+        isolateRef,
+      );
+      when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 4))
+          .thenAnswer((_) async {
+        return instance;
+      });
 
-    await buildVariablesTree(variable);
+      await buildVariablesTree(variable);
 
-    expect(variable.children, [
-      matchesVariable(name: '[0]', value: 0),
-      matchesVariable(name: '[1]', value: 4294967296),
-      matchesVariable(name: '[2]', value: -4294967297),
-      matchesVariable(name: '[3]', value: 4294967298),
-    ]);
-  }, skip: kIsWeb); // Int64List cannot be instantiated on the web.
+      expect(variable.children, [
+        matchesVariable(name: '[0]', value: 0),
+        matchesVariable(name: '[1]', value: 4294967296),
+        matchesVariable(name: '[2]', value: -4294967297),
+        matchesVariable(name: '[3]', value: 4294967298),
+      ]);
+    },
+    skip: kIsWeb,
+  ); // Int64List cannot be instantiated on the web.
 
   test('Creates bound variables for Float32List instance', () async {
     final bytes =
         Float32List.fromList([0, 2.2300031185150146, -4.610400199890137]);
     final instance = Instance(
       kind: InstanceKind.kFloat32List,
-      id: '123',
+      id: objectId,
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
       identityHashCode: null,
@@ -385,7 +398,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any, offset: 0, count: 4))
+    when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
@@ -403,7 +416,7 @@ void main() {
     final bytes = Float64List.fromList([0, 5532.130793, -7532.130793]);
     final instance = Instance(
       kind: InstanceKind.kFloat64List,
-      id: '123',
+      id: objectId,
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
       identityHashCode: null,
@@ -420,7 +433,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any, offset: 0, count: 4))
+    when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
@@ -439,7 +452,7 @@ void main() {
         Int32x4List.fromList([Int32x4.bool(true, false, true, false)]);
     final instance = Instance(
       kind: InstanceKind.kInt32x4List,
-      id: '123',
+      id: objectId,
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
       identityHashCode: null,
@@ -456,26 +469,32 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any, offset: 0, count: 4))
+    when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
     await buildVariablesTree(variable);
 
-    expect(variable.children.first.displayValue,
-        '[ffffffff, 00000000, ffffffff, 00000000]',
-        skip: kIsWeb);
+    expect(
+      variable.children.first.displayValue,
+      '[ffffffff, 00000000, ffffffff, 00000000]',
+      skip: kIsWeb,
+    );
     // Formatting is different on the web.
-    expect(variable.children.first.displayValue, '[-1, 0, -1, 0]',
-        skip: !kIsWeb);
+    expect(
+      variable.children.first.displayValue,
+      '[-1, 0, -1, 0]',
+      skip: !kIsWeb,
+    );
   });
 
   test('Creates bound variables for Float32x4List instance', () async {
     final bytes = Float32x4List.fromList(
-        [Float32x4(0.0, -232.1999969482422, 2.3299999237060547, 9.0)]);
+      [Float32x4(0.0, -232.1999969482422, 2.3299999237060547, 9.0)],
+    );
     final instance = Instance(
       kind: InstanceKind.kFloat32x4List,
-      id: '123',
+      id: objectId,
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
       identityHashCode: null,
@@ -492,26 +511,30 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any, offset: 0, count: 4))
+    when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
 
     await buildVariablesTree(variable);
 
-    expect(variable.children.first.displayValue,
-        '[0.000000, -232.199997, 2.330000, 9.000000]',
-        skip: kIsWeb);
-    expect(variable.children.first.displayValue,
-        '[0, -232.1999969482422, 2.3299999237060547, 9]',
-        skip: !kIsWeb);
+    expect(
+      variable.children.first.displayValue,
+      '[0.000000, -232.199997, 2.330000, 9.000000]',
+      skip: kIsWeb,
+    );
+    expect(
+      variable.children.first.displayValue,
+      '[0, -232.1999969482422, 2.3299999237060547, 9]',
+      skip: !kIsWeb,
+    );
   });
 
   test('Creates bound variables for Float64x2List instance', () async {
     final bytes = Float64x2List.fromList([Float64x2(0, -1232.222)]);
     final instance = Instance(
       kind: InstanceKind.kFloat64x2List,
-      id: '123',
+      id: objectId,
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
       identityHashCode: null,
@@ -528,17 +551,23 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any, offset: 0, count: 4))
+    when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 4))
         .thenAnswer((_) async {
       return instance;
     });
 
     await buildVariablesTree(variable);
 
-    expect(variable.children.first.displayValue, '[0.000000, -1232.222000]',
-        skip: kIsWeb);
-    expect(variable.children.first.displayValue, '[0, -1232.222]',
-        skip: !kIsWeb);
+    expect(
+      variable.children.first.displayValue,
+      '[0.000000, -1232.222000]',
+      skip: kIsWeb,
+    );
+    expect(
+      variable.children.first.displayValue,
+      '[0, -1232.222]',
+      skip: !kIsWeb,
+    );
   });
 
   test('Retries getObject calls with no offset/count if error is thrown',
@@ -546,7 +575,7 @@ void main() {
     final bytes = Uint8List.fromList([0, 1, 2, 3]);
     final instance = Instance(
       kind: InstanceKind.kUint8List,
-      id: '123',
+      id: objectId,
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
       identityHashCode: null,
@@ -563,14 +592,16 @@ void main() {
       isolateRef,
     );
 
-    when(manager.service.getObject(
-      any,
-      any,
-      offset: 0,
-      count: 4,
-    )).thenThrow('Unrecognized parameters offset / count.');
+    when(
+      manager.service!.getObject(
+        isolateId,
+        objectId,
+        offset: 0,
+        count: 4,
+      ),
+    ).thenThrow('Unrecognized parameters offset / count.');
 
-    when(manager.service.getObject(any, any)).thenAnswer((_) async {
+    when(manager.service!.getObject(isolateId, objectId)).thenAnswer((_) async {
       return instance;
     });
 
@@ -584,15 +615,15 @@ void main() {
     ]);
 
     verifyInOrder([
-      manager.service.getObject(
-        any,
-        any,
+      manager.service!.getObject(
+        isolateId,
+        objectId,
         offset: 0,
         count: 4,
       ),
-      manager.service.getObject(
-        any,
-        any,
+      manager.service!.getObject(
+        isolateId,
+        objectId,
       ),
     ]);
   });
@@ -602,7 +633,7 @@ void main() {
       () async {
     final instance = Instance(
       kind: InstanceKind.kUint8ClampedList,
-      id: '123',
+      id: objectId,
       classRef: null,
       identityHashCode: null,
       length: 332,
@@ -632,7 +663,7 @@ void main() {
       () async {
     final instance = Instance(
       kind: InstanceKind.kUint8ClampedList,
-      id: '123',
+      id: objectId,
       classRef: null,
       identityHashCode: null,
       length: 300,
@@ -659,24 +690,26 @@ void main() {
 }
 
 Matcher matchesVariable({
-  @required String name,
-  @required Object value,
+  required String name,
+  required Object value,
 }) {
   return const TypeMatcher<DartObjectNode>().having(
-      (v) => v,
-      'boundVar',
-      const TypeMatcher<DartObjectNode>()
-          .having((v) => v.name, 'name', equals(name))
-          .having((v) => v.ref.value, 'value', equals(value)));
+    (v) => v,
+    'boundVar',
+    const TypeMatcher<DartObjectNode>()
+        .having((v) => v.name, 'name', equals(name))
+        .having((v) => v.ref!.value, 'value', equals(value)),
+  );
 }
 
 Matcher matchesVariableGroup({
-  @required int start,
-  @required int end,
+  required int start,
+  required int end,
 }) {
   return const TypeMatcher<DartObjectNode>().having(
-      (v) => v,
-      'boundVar',
-      const TypeMatcher<DartObjectNode>()
-          .having((v) => v.text, 'text', equals('[$start - $end]')));
+    (v) => v,
+    'boundVar',
+    const TypeMatcher<DartObjectNode>()
+        .having((v) => v.text, 'text', equals('[$start - $end]')),
+  );
 }

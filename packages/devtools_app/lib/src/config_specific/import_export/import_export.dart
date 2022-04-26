@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -129,7 +127,8 @@ abstract class ExportController {
     // require a top level field named "traceEvents".
     if (activeScreenId == PerformanceScreen.id) {
       final traceEvents = List<Map<String, dynamic>>.from(
-          contents[PerformanceData.traceEventsKey]);
+        contents[PerformanceData.traceEventsKey],
+      );
       _contents[PerformanceData.traceEventsKey] = traceEvents;
       contents.remove(PerformanceData.traceEventsKey);
     }

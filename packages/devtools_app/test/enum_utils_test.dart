@@ -10,14 +10,15 @@ enum Color { red, green, blue }
 void main() {
   final colorUtils = EnumUtils<Color>(Color.values);
 
-  test('getEnum', () {
+  test('enumEntry', () {
     expect(colorUtils.enumEntry('red'), Color.red);
     expect(colorUtils.enumEntry('green'), Color.green);
     expect(colorUtils.enumEntry('blue'), Color.blue);
     expect(colorUtils.enumEntry('yellow'), null);
+    expect(colorUtils.enumEntry(null), null);
   });
 
-  test('getName', () {
+  test('name', () {
     expect(colorUtils.name(Color.red), 'red');
     expect(colorUtils.name(Color.green), 'green');
     expect(colorUtils.name(Color.blue), 'blue');

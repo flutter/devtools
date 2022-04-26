@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -255,8 +253,10 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
               debuggerController: _debuggerController,
             );
           } else {
-            assert(false,
-                'ConsoleLine of unsupported type ${line.runtimeType} encountered');
+            assert(
+              false,
+              'ConsoleLine of unsupported type ${line.runtimeType} encountered',
+            );
             return const SizedBox();
           }
         },

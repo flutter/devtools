@@ -39,7 +39,7 @@ class LoggingScreen extends Screen {
   Widget build(BuildContext context) => const LoggingScreenBody();
 
   @override
-  Widget buildStatus(BuildContext context, TextTheme textTheme) {
+  Widget buildStatus(BuildContext context) {
     final LoggingController controller =
         Provider.of<LoggingController>(context);
 
@@ -117,13 +117,15 @@ class _LoggingScreenState extends State<LoggingScreenBody>
 
   @override
   Widget build(BuildContext context) {
-    return Column(children: [
-      _buildLoggingControls(),
-      const SizedBox(height: denseRowSpacing),
-      Expanded(
-        child: _buildLoggingBody(),
-      ),
-    ]);
+    return Column(
+      children: [
+        _buildLoggingControls(),
+        const SizedBox(height: denseRowSpacing),
+        Expanded(
+          child: _buildLoggingBody(),
+        ),
+      ],
+    );
   }
 
   Widget _buildLoggingControls() {

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
@@ -660,7 +658,7 @@ class DevToolsTooltip extends StatelessWidget {
   Widget build(BuildContext context) {
     TextStyle? style = textStyle;
     if (richMessage == null) {
-      style = TextStyle(
+      style ??= TextStyle(
         color: Theme.of(context).colorScheme.tooltipTextColor,
         fontSize: defaultFontSize,
       );
@@ -1456,6 +1454,7 @@ class MoreInfoLink extends StatelessWidget {
     required this.url,
     required this.gaScreenName,
     required this.gaSelectedItemDescription,
+    this.padding,
   }) : super(key: key);
 
   final String url;
@@ -1464,6 +1463,8 @@ class MoreInfoLink extends StatelessWidget {
 
   final String gaSelectedItemDescription;
 
+  final EdgeInsets? padding;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -1471,7 +1472,7 @@ class MoreInfoLink extends StatelessWidget {
       onTap: () => _onLinkTap(context),
       borderRadius: BorderRadius.circular(defaultBorderRadius),
       child: Padding(
-        padding: const EdgeInsets.all(denseSpacing),
+        padding: padding ?? const EdgeInsets.all(denseSpacing),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.end,
@@ -1658,6 +1659,7 @@ class NotifierCheckbox extends StatelessWidget {
       valueListenable: notifier,
       builder: (context, bool? value, _) {
         return Checkbox(
+          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           value: value,
           onChanged: enabled ? _updateValue : null,
         );
@@ -1675,6 +1677,8 @@ class CheckboxSetting extends StatelessWidget {
     this.tooltip,
     this.onChanged,
     this.enabled = true,
+    this.gaScreenName,
+    this.gaItem,
   }) : super(key: key);
 
   final ValueNotifier<bool?> notifier;
@@ -1689,6 +1693,10 @@ class CheckboxSetting extends StatelessWidget {
 
   /// Whether this checkbox setting should be enabled for interaction.
   final bool enabled;
+
+  final String? gaScreenName;
+
+  final String? gaItem;
 
   @override
   Widget build(BuildContext context) {
@@ -1724,7 +1732,17 @@ class CheckboxSetting extends StatelessWidget {
       children: [
         NotifierCheckbox(
           notifier: notifier,
-          onChanged: onChanged,
+          onChanged: (bool? value) {
+            final gaScreenName = this.gaScreenName;
+            final gaItem = this.gaItem;
+            if (gaScreenName != null && gaItem != null) {
+              ga.select(gaScreenName, gaItem);
+            }
+            final onChanged = this.onChanged;
+            if (onChanged != null) {
+              onChanged(value);
+            }
+          },
           enabled: enabled,
         ),
         Flexible(

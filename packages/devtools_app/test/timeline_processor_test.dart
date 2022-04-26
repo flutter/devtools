@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'package:devtools_app/src/primitives/trace_event.dart';
 import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/screens/performance/performance_controller.dart';
@@ -86,8 +84,10 @@ void main() {
       //  Animator::BeginFrame
       // VSYNC
       traceEvents = List.of(goldenUiTraceEvents);
-      traceEvents.insert(goldenUiTraceEvents.length - 2,
-          goldenUiTraceEvents[goldenUiTraceEvents.length - 2]);
+      traceEvents.insert(
+        goldenUiTraceEvents.length - 2,
+        goldenUiTraceEvents[goldenUiTraceEvents.length - 2],
+      );
 
       await processor.processTraceEvents(traceEvents);
       expect(events.length, equals(1));

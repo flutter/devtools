@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'dart:async';
 
 import 'package:vm_service/utils.dart';
@@ -31,10 +29,12 @@ Future<VmServiceWrapper> _connectWithSse(
     uri,
   );
 
-  unawaited(client.sink!.done.whenComplete(() {
-    finishedCompleter.complete();
-    service.dispose();
-  }));
+  unawaited(
+    client.sink!.done.whenComplete(() {
+      finishedCompleter.complete();
+      service.dispose();
+    }),
+  );
   serviceCompleter.complete(service);
 
   unawaited(stream.drain().catchError(onError));
@@ -63,10 +63,15 @@ Future<VmServiceWrapper> _connectWithWebSocket(
     onError(null);
     return service;
   }
-  unawaited(ws.sink.done.then((_) {
-    finishedCompleter.complete();
-    service.dispose();
-  }, onError: onError));
+  unawaited(
+    ws.sink.done.then(
+      (_) {
+        finishedCompleter.complete();
+        service.dispose();
+      },
+      onError: onError,
+    ),
+  );
   return service;
 }
 

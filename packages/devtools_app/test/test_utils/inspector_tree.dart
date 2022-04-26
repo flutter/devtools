@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/foundation.dart';
@@ -13,7 +11,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 /// Create an `InspectorTreeControllerFlutter` from a single `RemoteDiagnosticsNode`
 InspectorTreeController inspectorTreeControllerFromNode(
-    RemoteDiagnosticsNode node) {
+  RemoteDiagnosticsNode node,
+) {
   final controller = InspectorTreeController()
     ..config = InspectorTreeConfig(
       summaryTree: false,

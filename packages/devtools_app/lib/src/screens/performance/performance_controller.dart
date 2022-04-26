@@ -30,11 +30,13 @@ import 'performance_model.dart';
 import 'performance_screen.dart';
 import 'performance_utils.dart';
 import 'rebuild_counts.dart';
-import 'timeline_analysis.dart';
 import 'timeline_event_processor.dart';
 
 /// Flag to hide the frame analysis feature while it is under development.
 bool frameAnalysisSupported = false;
+
+/// Flag to hide the raster metrics feature while it is under development.
+bool rasterMetricsSupported = false;
 
 /// This class contains the business logic for [performance_screen.dart].
 ///
@@ -86,51 +88,6 @@ class PerformanceController extends DisposableController
 
   ValueListenable<bool> get badgeTabForJankyFrames => _badgeTabForJankyFrames;
   final _badgeTabForJankyFrames = ValueNotifier<bool>(false);
-
-  ValueListenable<List<FlutterFrameAnalysisTabData>> get analysisTabs =>
-      _analysisTabs;
-  final _analysisTabs = ListValueNotifier<FlutterFrameAnalysisTabData>(
-    <FlutterFrameAnalysisTabData>[],
-  );
-
-  ValueListenable<FlutterFrameAnalysisTabData?> get selectedAnalysisTab =>
-      _selectedAnalysisTab;
-  final _selectedAnalysisTab =
-      ValueNotifier<FlutterFrameAnalysisTabData?>(null);
-
-  void openAnalysisTab(FlutterFrame frame) {
-    if (_selectedAnalysisTab.value?.frame.id == frame.id) return;
-    final existingTabForFrame = _analysisTabs.value.firstWhereOrNull(
-      (tab) => tab.frame.id == frame.id,
-    );
-    if (existingTabForFrame != null) {
-      _selectedAnalysisTab.value = existingTabForFrame;
-    } else {
-      final newTab = FlutterFrameAnalysisTabData('Frame ${frame.id}', frame);
-      _analysisTabs.add(newTab);
-      _selectedAnalysisTab.value = newTab;
-    }
-  }
-
-  void closeAnalysisTab(FlutterFrameAnalysisTabData tabData) {
-    if (_selectedAnalysisTab.value == tabData) {
-      // Re-adjust the selection to a different tab.
-      final indexOfTab = _analysisTabs.value.indexOf(tabData);
-      if (indexOfTab != 0) {
-        _selectedAnalysisTab.value = _analysisTabs.value[indexOfTab - 1];
-      } else if (_analysisTabs.value.length > 1) {
-        _selectedAnalysisTab.value = _analysisTabs.value[1];
-      }
-    }
-    _analysisTabs.remove(tabData);
-    if (_analysisTabs.value.isEmpty) {
-      _selectedAnalysisTab.value = null;
-    }
-  }
-
-  void showTimeline() {
-    _selectedAnalysisTab.value = null;
-  }
 
   final threadNamesById = <int, String>{};
 
@@ -220,10 +177,12 @@ class PerformanceController extends DisposableController
       _badgeTabForJankyFrames.value =
           await serviceManager.connectedApp!.isProfileBuild;
 
-      unawaited(allowedError(
-        serviceManager.service!.setProfilePeriod(mediumProfilePeriod),
-        logError: false,
-      ));
+      unawaited(
+        allowedError(
+          serviceManager.service!.setProfilePeriod(mediumProfilePeriod),
+          logError: false,
+        ),
+      );
       await serviceManager.timelineStreamManager.setDefaultTimelineStreams();
       await toggleHttpRequestLogging(true);
 
@@ -235,20 +194,22 @@ class PerformanceController extends DisposableController
       // Listen for Flutter.Frame events with frame timing data.
       // Listen for Flutter.RebuiltWidgets events.
       autoDisposeStreamSubscription(
-          serviceManager.service!.onExtensionEventWithHistory.listen((event) {
-        if (event.extensionKind == 'Flutter.Frame') {
-          final frame = FlutterFrame.parse(event.extensionData!.data);
-          addFrame(frame);
-        } else if (event.extensionKind == 'Flutter.RebuiltWidgets') {
-          rebuildCountModel.processRebuildEvent(event.extensionData!.data);
-        }
-      }));
+        serviceManager.service!.onExtensionEventWithHistory.listen((event) {
+          if (event.extensionKind == 'Flutter.Frame') {
+            final frame = FlutterFrame.parse(event.extensionData!.data);
+            addFrame(frame);
+          } else if (event.extensionKind == 'Flutter.RebuiltWidgets') {
+            rebuildCountModel.processRebuildEvent(event.extensionData!.data);
+          }
+        }),
+      );
 
       autoDisposeStreamSubscription(
-          serviceManager.onConnectionClosed.listen((_) {
-        _pollingTimer?.cancel();
-        _timelinePollingRateLimiter?.dispose();
-      }));
+        serviceManager.onConnectionClosed.listen((_) {
+          _pollingTimer?.cancel();
+          _timelinePollingRateLimiter?.dispose();
+        }),
+      );
 
       // Load available timeline events.
       await _pullTraceEventsFromVmTimeline(isInitialPull: true);
@@ -386,10 +347,6 @@ class PerformanceController extends DisposableController
     _data.selectedFrame = frame;
     _selectedFrameNotifier.value = frame;
 
-    // Default to viewing the timeline events flame chart when a new frame is
-    // selected.
-    _selectedAnalysisTab.value = null;
-
     if (!offlineController.offlineMode.value) {
       final bool frameBeforeFirstWellFormedFrame =
           firstWellFormedFrameMicros != null &&
@@ -461,7 +418,7 @@ class PerformanceController extends DisposableController
       );
     }
 
-    if (debugTimeline) {
+    debugTraceEventCallback(() {
       final buf = StringBuffer();
       buf.writeln('UI timeline event for frame ${frame.id}:');
       frame.timelineEventData.uiEvent?.format(buf, '  ');
@@ -472,7 +429,7 @@ class PerformanceController extends DisposableController
       buf.writeln('\nRaster trace for frame ${frame.id}');
       frame.timelineEventData.rasterEvent?.writeTraceToBuffer(buf);
       log(buf.toString());
-    }
+    });
   }
 
   void addFrame(FlutterFrame frame) {
@@ -631,8 +588,10 @@ class PerformanceController extends DisposableController
 
     if (isFlutterApp && isInitialUpdate) {
       if (uiThreadId == null || rasterThreadId == null) {
-        log('Could not find UI thread and / or Raster thread from names: '
-            '${threadNamesById.values}');
+        log(
+          'Could not find UI thread and / or Raster thread from names: '
+          '${threadNamesById.values}',
+        );
       }
 
       processor.primeThreadIds(
@@ -885,8 +844,6 @@ class PerformanceController extends DisposableController
     _selectedTimelineEventNotifier.value = null;
     _selectedFrameNotifier.value = null;
     _processing.value = false;
-    _analysisTabs.clear();
-    _selectedAnalysisTab.value = null;
     serviceManager.errorBadgeManager.clearErrors(PerformanceScreen.id);
   }
 

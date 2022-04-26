@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
@@ -33,8 +31,10 @@ class Tracker extends TreeNode<Tracker> {
 
   @override
   Tracker shallowCopy() {
-    throw UnimplementedError('This method is not implemented. Implement if you '
-        'need to call `shallowCopy` on an instance of this class.');
+    throw UnimplementedError(
+      'This method is not implemented. Implement if you '
+      'need to call `shallowCopy` on an instance of this class.',
+    );
   }
 }
 
@@ -178,18 +178,24 @@ class TreeTracker {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Text('To track allocations for a class, enable the '
-            'checkbox for that class in the table above.'),
+        const Text(
+          'To track allocations for a class, enable the '
+          'checkbox for that class in the table above.',
+        ),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text('After interacting with your app, come '
-                'back to this tool and click the track button '),
+            const Text(
+              'After interacting with your app, come '
+              'back to this tool and click the track button ',
+            ),
             trackImage(context),
           ],
         ),
-        const Text('to view the collected stack '
-            'traces of constructor calls.'),
+        const Text(
+          'to view the collected stack '
+          'traces of constructor calls.',
+        ),
       ],
     );
   }
@@ -226,15 +232,16 @@ class TreeTracker {
           width: double.infinity,
           height: defaultRowHeight + 4, // From table.dart
           child: Container(
-              color: titleBackground,
-              child: Align(
-                child: Text(
-                  '${tracker.parent!.name} Call Stack for Instance ${tracker.index} @ '
-                  '${prettyTimestamp(tracker.timestamp!)}',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(backgroundColor: titleBackground),
-                ),
-              )),
+            color: titleBackground,
+            child: Align(
+              child: Text(
+                '${tracker.parent!.name} Call Stack for Instance ${tracker.index} @ '
+                '${prettyTimestamp(tracker.timestamp!)}',
+                textAlign: TextAlign.center,
+                style: TextStyle(backgroundColor: titleBackground),
+              ),
+            ),
+          ),
         ),
         Expanded(
           child: Scrollbar(

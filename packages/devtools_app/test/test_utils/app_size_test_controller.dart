@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_shared/devtools_test_utils.dart';
 
@@ -31,6 +29,9 @@ class AppSizeTestController extends AppSizeController {
       await delay();
     }
     super.loadDiffTreeFromJsonFiles(
-        oldFile: oldFile, newFile: newFile, onError: onError);
+      oldFile: oldFile,
+      newFile: newFile,
+      onError: onError,
+    );
   }
 }

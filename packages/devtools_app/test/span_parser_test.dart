@@ -2,14 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe, unused_import
-
 @TestOn('vm')
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:devtools_app/src/screens/debugger/span_parser.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const helloWorld = '''
@@ -237,11 +234,12 @@ void main() {
 
       // '
       spanTester(
-          span: spans[3],
-          scopes: ['string.interpolated.single.dart'],
-          line: 2,
-          column: 9,
-          length: 13);
+        span: spans[3],
+        scopes: ['string.interpolated.single.dart'],
+        line: 2,
+        column: 9,
+        length: 13,
+      );
 
       // ;
       spanTester(

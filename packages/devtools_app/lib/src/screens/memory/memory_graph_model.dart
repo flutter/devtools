@@ -116,8 +116,10 @@ HeapGraph convertHeapGraph(
   final Map<LibraryClass, int> builtInClasses = {};
 
   if (classNamesToMonitor != null && classNamesToMonitor.isNotEmpty) {
-    print('WARNING: Remove classNamesToMonitor before PR submission. '
-        '$classNamesToMonitor');
+    print(
+      'WARNING: Remove classNamesToMonitor before PR submission. '
+      '$classNamesToMonitor',
+    );
   }
 
   // Construct all the classes in the snapshot.
@@ -204,9 +206,9 @@ HeapGraph convertHeapGraph(
   return HeapGraph(
     controller,
     builtInClasses,
-    classes as List<HeapGraphClassLive>,
-    elements as List<HeapGraphElementLive>,
-    externals as List<HeapGraphExternalLive>,
+    classes,
+    elements,
+    externals,
   );
 }
 
@@ -232,16 +234,16 @@ class HeapGraph {
   static HeapGraphClassSentinel classSentinel = HeapGraphClassSentinel();
 
   /// Indexed by classId.
-  final List<HeapGraphClassLive> classes;
+  final List<HeapGraphClassLive?> classes;
 
   /// Sentinel Object, all object sentinels point to this object.
   static HeapGraphElementSentinel elementSentinel = HeapGraphElementSentinel();
 
   /// Index by objectId.
-  final List<HeapGraphElementLive> elements;
+  final List<HeapGraphElementLive?> elements;
 
   /// Index by objectId of all external properties
-  List<HeapGraphExternalLive> externals;
+  List<HeapGraphExternalLive?> externals;
 
   /// Group all classes by libraries (key is library, value are classes).
   /// This is the entire set of objects (no filter applied).
@@ -296,6 +298,8 @@ class HeapGraph {
     if (rawGroupByLibrary.isNotEmpty || rawGroupByClass.isNotEmpty) return;
 
     for (final c in classes) {
+      if (c == null) continue;
+
       final sb = StringBuffer();
 
       final libraryKey = normalizeLibraryName(c.origin);
@@ -374,7 +378,7 @@ class HeapGraph {
   void computeInstancesForClasses() {
     if (!instancesComputed) {
       for (final instance in elements) {
-        instance.theClass!.addInstance(instance);
+        instance?.theClass!.addInstance(instance);
       }
 
       _instancesComputed = true;
@@ -502,8 +506,8 @@ abstract class HeapGraphClass {
     if (_instances == null) {
       final len = graph?.elements.length ?? 0;
       for (var i = 0; i < len; i++) {
-        final HeapGraphElementLive converted = graph!.elements[i];
-        if (converted.theClass == this) {
+        final HeapGraphElementLive? converted = graph!.elements[i];
+        if (converted != null && converted.theClass == this) {
           _instances.add(converted);
         }
       }

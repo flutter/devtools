@@ -1,8 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
-// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:devtools_app/devtools.dart' as devtools;
 import 'package:devtools_app/src/app.dart';
@@ -39,8 +37,10 @@ void main() {
     testWidgets('Feedback section', (WidgetTester tester) async {
       await tester.pumpWidget(wrap(aboutDialog));
       expect(find.text('Feedback'), findsOneWidget);
-      expect(findSubstring(aboutDialog, 'github.com/flutter/devtools'),
-          findsOneWidget);
+      expect(
+        findSubstring(aboutDialog, 'github.com/flutter/devtools'),
+        findsOneWidget,
+      );
     });
   });
 }

@@ -1,5 +1,3 @@
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 /*
  * Copyright 2017 The Chromium Authors. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be
@@ -88,7 +86,9 @@ class CircleIcon extends StatelessWidget {
         text,
         textAlign: TextAlign.center,
         style: TextStyle(
-            fontSize: scaleByFontFactor(9.0), color: const Color(0xFF231F20)),
+          fontSize: scaleByFontFactor(9.0),
+          color: const Color(0xFF231F20),
+        ),
       ),
     );
   }
@@ -141,12 +141,8 @@ class CustomIconMaker {
     });
   }
 
-  Widget? fromInfo(String name) {
-    if (name.isEmpty) {
-      return null;
-    }
-
-    return getCustomIcon(name, kind: IconKind.info);
+  CustomIcon fromInfo(String name) {
+    return getCustomIcon(name, kind: IconKind.info) as CustomIcon;
   }
 
   bool isAlphabetic(int char) {

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'package:flutter/material.dart';
 
 import 'split.dart';
@@ -98,8 +96,10 @@ class FlexSplitColumn extends StatelessWidget {
       totalHeaderHeight += header.preferredSize.height;
     }
     final intendedContentHeight = totalHeight - totalHeaderHeight;
-    final intendedChildHeights = List<double>.generate(initialFractions.length,
-        (i) => intendedContentHeight * initialFractions[i]);
+    final intendedChildHeights = List<double>.generate(
+      initialFractions.length,
+      (i) => intendedContentHeight * initialFractions[i],
+    );
     final trueContentHeight =
         intendedContentHeight + headers[0].preferredSize.height;
     return List<double>.generate(initialFractions.length, (i) {

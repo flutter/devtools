@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 
 import '../../analytics/analytics.dart' as ga;
@@ -11,7 +9,6 @@ import '../../analytics/constants.dart' as analytics_constants;
 import '../../primitives/blocking_action_mixin.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/theme.dart';
-import '../../shared/utils.dart';
 import '../../ui/tab.dart';
 import 'inspector_controller.dart';
 import 'inspector_screen.dart';
@@ -19,9 +16,9 @@ import 'layout_explorer/layout_explorer.dart';
 
 class InspectorDetails extends StatelessWidget {
   const InspectorDetails({
-    @required this.detailsTree,
-    @required this.controller,
-    Key key,
+    required this.detailsTree,
+    required this.controller,
+    Key? key,
   }) : super(key: key);
 
   final Widget detailsTree;
@@ -40,36 +37,15 @@ class InspectorDetails extends StatelessWidget {
       LayoutExplorerTab(controller: controller),
       detailsTree,
     ];
-    final theme = Theme.of(context);
-    final focusColor = theme.focusColor;
-    final borderSide = BorderSide(color: focusColor);
 
     return AnalyticsTabbedView(
       tabs: tabs,
       tabViews: tabViews,
       gaScreen: analytics_constants.inspector,
-      tabBarContainer: (child) => Container(
-        height: defaultButtonHeight +
-            (isDense() ? denseModeDenseSpacing : denseSpacing),
-        decoration: BoxDecoration(
-          border: Border.all(color: Theme.of(context).focusColor),
-        ),
-        child: child,
-      ),
-      tabViewContainer: (child) => Container(
-        decoration: BoxDecoration(
-          border: Border(
-            left: borderSide,
-            bottom: borderSide,
-            right: borderSide,
-          ),
-        ),
-        child: child,
-      ),
     );
   }
 
-  DevToolsTab _buildTab({@required String tabName, Widget trailing}) {
+  DevToolsTab _buildTab({required String tabName, Widget? trailing}) {
     return DevToolsTab.create(
       tabName: tabName,
       gaPrefix: 'inspectorDetailsTab',
@@ -80,8 +56,8 @@ class InspectorDetails extends StatelessWidget {
 
 class InspectorExpandCollapseButtons extends StatefulWidget {
   const InspectorExpandCollapseButtons({
-    Key key,
-    @required this.controller,
+    Key? key,
+    required this.controller,
   }) : super(key: key);
 
   final InspectorController controller;

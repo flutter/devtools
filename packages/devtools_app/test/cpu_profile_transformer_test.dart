@@ -4,6 +4,7 @@
 
 import 'package:devtools_app/src/screens/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profile_transformer.dart';
+import 'package:devtools_app/src/shared/profiler_utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'test_data/cpu_profile_test_data.dart';
@@ -26,7 +27,7 @@ void main() {
       );
       expect(cpuProfileData.processed, isTrue);
       expect(
-        cpuProfileData.cpuProfileRoot.toStringDeep(),
+        cpuProfileData.cpuProfileRoot.profileAsString(),
         equals(goldenCpuProfileString),
       );
     });
@@ -53,14 +54,23 @@ void main() {
 
     test('dispose', () {
       cpuProfileTransformer.dispose();
-      expect(() {
-        cpuProfileTransformer.progressNotifier.addListener(() {});
-      }, throwsA(anything));
+      expect(
+        () {
+          cpuProfileTransformer.progressNotifier.addListener(() {});
+        },
+        throwsA(anything),
+      );
     });
   });
 
-  group('BottomUpProfileTransformer', () {
-    test('setBottomUpSampleCounts', () {
+  group('BottomUpTransformer', () {
+    late BottomUpTransformer<CpuStackFrame> transformer;
+
+    setUp(() {
+      transformer = BottomUpTransformer<CpuStackFrame>();
+    });
+
+    test('cascadeSampleCounts', () {
       void verifySampleCount(CpuStackFrame stackFrame, int targetCount) {
         expect(stackFrame.exclusiveSampleCount, equals(0));
         expect(stackFrame.inclusiveSampleCount, equals(0));
@@ -70,55 +80,73 @@ void main() {
       }
 
       final stackFrame = testStackFrame.deepCopy();
-      BottomUpProfileTransformer.cascadeSampleCounts(stackFrame);
+      transformer.cascadeSampleCounts(stackFrame);
 
       verifySampleCount(stackFrame, 0);
     });
 
     test('processData step by step', () {
-      expect(testStackFrame.toStringDeep(), equals(testStackFrameStringGolden));
+      expect(
+        testStackFrame.profileAsString(),
+        equals(testStackFrameStringGolden),
+      );
       final List<CpuStackFrame> bottomUpRoots =
-          BottomUpProfileTransformer.getRoots(testStackFrame, null, []);
+          transformer.generateBottomUpRoots(
+        node: testStackFrame,
+        currentBottomUpRoot: null,
+        bottomUpRoots: [],
+      );
 
       // Verify the original stack frame was not modified.
-      expect(testStackFrame.toStringDeep(), equals(testStackFrameStringGolden));
+      expect(
+        testStackFrame.profileAsString(),
+        equals(testStackFrameStringGolden),
+      );
 
       expect(bottomUpRoots.length, equals(6));
 
       // Set the bottom up sample counts for the roots.
-      bottomUpRoots.forEach(BottomUpProfileTransformer.cascadeSampleCounts);
+      bottomUpRoots.forEach(transformer.cascadeSampleCounts);
 
       final buf = StringBuffer();
       for (CpuStackFrame stackFrame in bottomUpRoots) {
-        buf.writeln(stackFrame.toStringDeep());
+        buf.writeln(stackFrame.profileAsString());
       }
       expect(buf.toString(), equals(bottomUpPreMergeGolden));
 
       // Merge the bottom up roots.
-      mergeProfileRoots(bottomUpRoots);
+      mergeCpuProfileRoots(bottomUpRoots);
 
       expect(bottomUpRoots.length, equals(4));
 
       buf.clear();
       for (CpuStackFrame stackFrame in bottomUpRoots) {
-        buf.writeln(stackFrame.toStringDeep());
+        buf.writeln(stackFrame.profileAsString());
       }
       expect(buf.toString(), equals(bottomUpGolden));
     });
 
-    test('processData', () {
-      expect(testStackFrame.toStringDeep(), equals(testStackFrameStringGolden));
-      final List<CpuStackFrame> bottomUpRoots =
-          BottomUpProfileTransformer.processData(testStackFrame);
+    test('bottomUpRootsFor', () {
+      expect(
+        testStackFrame.profileAsString(),
+        equals(testStackFrameStringGolden),
+      );
+      final List<CpuStackFrame> bottomUpRoots = transformer.bottomUpRootsFor(
+        topDownRoot: testStackFrame,
+        mergeSamples: mergeCpuProfileRoots,
+      );
 
       // Verify the original stack frame was not modified.
-      expect(testStackFrame.toStringDeep(), equals(testStackFrameStringGolden));
+      expect(
+        testStackFrame.profileAsString(),
+        equals(testStackFrameStringGolden),
+      );
 
       expect(bottomUpRoots.length, equals(4));
 
       final buf = StringBuffer();
       for (CpuStackFrame stackFrame in bottomUpRoots) {
-        buf.writeln(stackFrame.toStringDeep());
+        buf.writeln(stackFrame.profileAsString());
       }
       expect(buf.toString(), equals(bottomUpGolden));
     });

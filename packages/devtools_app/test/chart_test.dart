@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'package:devtools_app/src/charts/chart.dart';
 import 'package:devtools_app/src/charts/chart_controller.dart';
 import 'package:devtools_app/src/charts/chart_trace.dart';
@@ -135,24 +133,33 @@ void main() {
         controller.trace(traceIndex).addDatum(data);
       }
 
-      Future<void> pumpChart(WidgetTester tester, Key theKey, Chart theChart,
-          double chartHeight) async {
-        await tester.pumpWidget(wrap(LayoutBuilder(
-            key: theKey,
-            builder: (context, constraints) {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    height: chartHeight,
-                    child: Padding(
-                      padding: const EdgeInsets.all(0.0),
-                      child: theChart,
+      Future<void> pumpChart(
+        WidgetTester tester,
+        Key theKey,
+        Chart theChart,
+        double chartHeight,
+      ) async {
+        await tester.pumpWidget(
+          wrap(
+            LayoutBuilder(
+              key: theKey,
+              builder: (context, constraints) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      height: chartHeight,
+                      child: Padding(
+                        padding: const EdgeInsets.all(0.0),
+                        child: theChart,
+                      ),
                     ),
-                  ),
-                ],
-              );
-            })));
+                  ],
+                );
+              },
+            ),
+          ),
+        );
 
         await tester.pumpAndSettle();
       }
@@ -186,7 +193,10 @@ void main() {
       }
 
       Future<void> setupScaledChart(
-          WidgetTester tester, ChartController controller, Key chartKey) async {
+        WidgetTester tester,
+        ChartController controller,
+        Key chartKey,
+      ) async {
         final theChart = Chart(controller, title: 'Scaled Chart');
 
         setupTraces(controller);
@@ -566,7 +576,10 @@ void main() {
       }
 
       Future<void> setupFixedChart(
-          WidgetTester tester, ChartController controller, Key chartKey) async {
+        WidgetTester tester,
+        ChartController controller,
+        Key chartKey,
+      ) async {
         controller.setFixedYRange(0.4, 2.4);
 
         final theChart = Chart(controller, title: 'Fixed Chart');

@@ -2,21 +2,31 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:devtools_app/devtools_app.dart';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as path;
 import 'package:vm_snapshot_analysis/treemap.dart';
+
+final screenIds = <String>[
+  AppSizeScreen.id,
+  DebuggerScreen.id,
+  InspectorScreen.id,
+  LoggingScreen.id,
+  MemoryScreen.id,
+  NetworkScreen.id,
+  PerformanceScreen.id,
+  ProfilerScreen.id,
+  ProviderScreen.id,
+  VMDeveloperToolsScreen.id,
+];
 
 /// Scoping method which registers `listener` as a listener for `listenable`,
 /// invokes `callback`, and then removes the `listener`.
@@ -113,27 +123,34 @@ Finder findSubstring(Widget widget, String text) {
 extension RichTextChecking on CommonFinders {
   Finder richText(String text) {
     return find.byWidgetPredicate(
-        (widget) => widget is RichText && widget.text.toPlainText() == text);
+      (widget) => widget is RichText && widget.text.toPlainText() == text,
+    );
   }
 
   Finder richTextContaining(String text) {
-    return find.byWidgetPredicate((widget) =>
-        widget is RichText && widget.text.toPlainText().contains(text));
+    return find.byWidgetPredicate(
+      (widget) =>
+          widget is RichText && widget.text.toPlainText().contains(text),
+    );
   }
 }
 
 extension SelectableTextChecking on CommonFinders {
   Finder selectableText(String text) {
-    return find.byWidgetPredicate((widget) =>
-        widget is SelectableText &&
-        (widget.data == text || widget.textSpan?.toPlainText() == text));
+    return find.byWidgetPredicate(
+      (widget) =>
+          widget is SelectableText &&
+          (widget.data == text || widget.textSpan?.toPlainText() == text),
+    );
   }
 
   Finder selectableTextContaining(String text) {
-    return find.byWidgetPredicate((widget) =>
-        widget is SelectableText &&
-        ((widget.data?.contains(text) ?? false) ||
-            (widget.textSpan?.toPlainText().contains(text) ?? false)));
+    return find.byWidgetPredicate(
+      (widget) =>
+          widget is SelectableText &&
+          ((widget.data?.contains(text) ?? false) ||
+              (widget.textSpan?.toPlainText().contains(text) ?? false)),
+    );
   }
 }
 

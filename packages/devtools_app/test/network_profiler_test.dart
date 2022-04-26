@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 @TestOn('vm')
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
@@ -30,10 +28,12 @@ import 'test_utils/network_test_utils.dart';
 NetworkController controller = NetworkController();
 
 Future<void> pumpNetworkScreen(WidgetTester tester) async {
-  await tester.pumpWidget(wrapWithControllers(
-    const NetworkScreenBody(),
-    network: controller,
-  ));
+  await tester.pumpWidget(
+    wrapWithControllers(
+      const NetworkScreenBody(),
+      network: controller,
+    ),
+  );
   final finder = find.byType(NetworkScreenBody);
   expect(finder, findsOneWidget);
 }
@@ -241,7 +241,9 @@ void main() {
           // The cookies tab shouldn't be displayed if there are no cookies
           // associated with the request.
           expect(
-              find.byKey(NetworkRequestInspector.cookiesTabKey), findsNothing);
+            find.byKey(NetworkRequestInspector.cookiesTabKey),
+            findsNothing,
+          );
         }
       }
 
@@ -282,7 +284,8 @@ void main() {
       expectNoSelection();
 
       final textElement = tester.element(
-          find.text('https://jsonplaceholder.typicode.com/albums/1').first);
+        find.text('https://jsonplaceholder.typicode.com/albums/1').first,
+      );
       final selectableTextWidget =
           textElement.findAncestorWidgetOfExactType<SelectableText>()!;
       await tester.tap(find.byWidget(selectableTextWidget));
@@ -329,8 +332,10 @@ void main() {
 
       // Verify general information.
       expect(find.text('Request uri: '), findsOneWidget);
-      expect(find.text('https://jsonplaceholder.typicode.com/albums/1'),
-          findsOneWidget);
+      expect(
+        find.text('https://jsonplaceholder.typicode.com/albums/1'),
+        findsOneWidget,
+      );
       expect(find.text('Method: '), findsOneWidget);
       expect(find.text('GET'), findsOneWidget);
       expect(find.text('Status: '), findsOneWidget);
@@ -346,15 +351,19 @@ void main() {
       expect(find.text(formatDateTime(data.startTimestamp)), findsOneWidget);
       expect(find.text('End time: '), findsOneWidget);
       expect(find.text(formatDateTime(data.endTimestamp!)), findsOneWidget);
-      expect(find.byKey(NetworkRequestOverviewView.httpTimingGraphKey),
-          findsOneWidget);
+      expect(
+        find.byKey(NetworkRequestOverviewView.httpTimingGraphKey),
+        findsOneWidget,
+      );
       expect(find.text('Connection established: '), findsOneWidget);
       expect(find.text('[0.0 ms - 529.0 ms] → 529.0 ms total'), findsOneWidget);
       expect(find.text('Request sent: '), findsOneWidget);
       expect(find.text('[529.0 ms - 529.0 ms] → 0.0 ms total'), findsOneWidget);
       expect(find.text('Waiting (TTFB): '), findsOneWidget);
       expect(
-          find.text('[529.0 ms - 810.7 ms] → 281.7 ms total'), findsOneWidget);
+        find.text('[529.0 ms - 810.7 ms] → 281.7 ms total'),
+        findsOneWidget,
+      );
       expect(find.text('Content Download: '), findsOneWidget);
       expect(find.text('[810.7 ms - 811.7 ms] → 1.0 ms total'), findsOneWidget);
     });
@@ -379,8 +388,10 @@ void main() {
       expect(find.text(formatDateTime(data.startTimestamp)), findsOneWidget);
       expect(find.text('End time: '), findsOneWidget);
       expect(find.text(formatDateTime(data.endTimestamp!)), findsOneWidget);
-      expect(find.byKey(NetworkRequestOverviewView.httpTimingGraphKey),
-          findsOneWidget);
+      expect(
+        find.byKey(NetworkRequestOverviewView.httpTimingGraphKey),
+        findsOneWidget,
+      );
       expect(find.text('Connection established: '), findsNothing);
       expect(find.text('Request sent: '), findsNothing);
       expect(find.text('Waiting (TTFB): '), findsNothing);
@@ -394,8 +405,10 @@ void main() {
 
       // Verify general information.
       expect(find.text('Request uri: '), findsOneWidget);
-      expect(find.text('InternetAddress(\'2606:4700:3037::ac43:bd8f\', IPv6)'),
-          findsOneWidget);
+      expect(
+        find.text('InternetAddress(\'2606:4700:3037::ac43:bd8f\', IPv6)'),
+        findsOneWidget,
+      );
       expect(find.text('Method: '), findsOneWidget);
       expect(find.text('GET'), findsOneWidget);
       expect(find.text('Status: '), findsOneWidget);
@@ -419,14 +432,20 @@ void main() {
       expect(find.text(formatDateTime(data.startTimestamp)), findsOneWidget);
       expect(find.text('End time: '), findsOneWidget);
       expect(find.text(formatDateTime(data.endTimestamp!)), findsOneWidget);
-      expect(find.byKey(NetworkRequestOverviewView.socketTimingGraphKey),
-          findsOneWidget);
+      expect(
+        find.byKey(NetworkRequestOverviewView.socketTimingGraphKey),
+        findsOneWidget,
+      );
       expect(find.text('Last read time: '), findsOneWidget);
       expect(
-          find.text(formatDateTime(data.lastReadTimestamp!)), findsOneWidget);
+        find.text(formatDateTime(data.lastReadTimestamp!)),
+        findsOneWidget,
+      );
       expect(find.text('Last write time: '), findsOneWidget);
       expect(
-          find.text(formatDateTime(data.lastWriteTimestamp!)), findsOneWidget);
+        find.text(formatDateTime(data.lastWriteTimestamp!)),
+        findsOneWidget,
+      );
     });
 
     testWidgetsWithWindowSize(
@@ -436,8 +455,10 @@ void main() {
 
       // Verify general information.
       expect(find.text('Request uri: '), findsOneWidget);
-      expect(find.text('InternetAddress(\'2606:4700:3037::ac43:0000\', IPv6)'),
-          findsOneWidget);
+      expect(
+        find.text('InternetAddress(\'2606:4700:3037::ac43:0000\', IPv6)'),
+        findsOneWidget,
+      );
       expect(find.text('Method: '), findsOneWidget);
       expect(find.text('GET'), findsOneWidget);
       expect(find.text('Status: '), findsOneWidget);
@@ -461,14 +482,20 @@ void main() {
       expect(find.text(formatDateTime(data.startTimestamp)), findsOneWidget);
       expect(find.text('End time: '), findsOneWidget);
       expect(find.text('Pending'), findsOneWidget);
-      expect(find.byKey(NetworkRequestOverviewView.socketTimingGraphKey),
-          findsOneWidget);
+      expect(
+        find.byKey(NetworkRequestOverviewView.socketTimingGraphKey),
+        findsOneWidget,
+      );
       expect(find.text('Last read time: '), findsOneWidget);
       expect(
-          find.text(formatDateTime(data.lastReadTimestamp!)), findsOneWidget);
+        find.text(formatDateTime(data.lastReadTimestamp!)),
+        findsOneWidget,
+      );
       expect(find.text('Last write time: '), findsOneWidget);
       expect(
-          find.text(formatDateTime(data.lastWriteTimestamp!)), findsOneWidget);
+        find.text(formatDateTime(data.lastWriteTimestamp!)),
+        findsOneWidget,
+      );
     });
   });
 }

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'package:flutter/material.dart';
 
 import '../config_specific/ide_theme/ide_theme.dart';
@@ -261,6 +259,8 @@ extension DevToolsColorScheme on ColorScheme {
   Color get grey => isLight
       ? const Color.fromARGB(255, 128, 128, 128)
       : const Color.fromARGB(255, 128, 128, 128);
+
+  Color get breakpointColor => isLight ? devtoolsBlue[600]! : Colors.white;
 
   /// Background colors for charts.
   Color get chartBackground => isLight ? Colors.white : const Color(0xFF2D2E31);

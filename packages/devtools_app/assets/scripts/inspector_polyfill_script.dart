@@ -116,7 +116,8 @@ String addServiceExtensions() {
   /// This is identical to Flutter's getRootWidgetSummaryTree service extension,
   /// but with the added properties.
   Future<Map<String, dynamic>> getRootWidgetSummaryTreeWithPreviews(
-      Map<String, String> parameters) {
+    Map<String, String> parameters,
+  ) {
     final instance = WidgetInspectorService.instance;
     final groupName = parameters['groupName'];
 
@@ -149,7 +150,8 @@ String addServiceExtensions() {
   }
 
   Future<Map<String, dynamic>> getLayoutExplorerNode(
-      Map<String, String> parameters) {
+    Map<String, String> parameters,
+  ) {
     final id = parameters['id'];
     final subtreeDepth = int.parse(parameters['subtreeDepth'] as String);
     final groupName = parameters['groupName'];
@@ -164,97 +166,98 @@ String addServiceExtensions() {
     result = instance._nodeToJson(
       root as DiagnosticsNode,
       InspectorSerializationDelegate(
-          groupName: groupName,
-          summaryTree: true,
-          subtreeDepth: subtreeDepth,
-          service: instance,
-          addAdditionalPropertiesCallback: (node, delegate) {
-            final Map<String, Object> additionalJson = <String, Object>{};
-            final value = node.value;
-            if (value is Element) {
-              final renderObject = value.renderObject;
-              if (renderObject != null) {
-                additionalJson['renderObject'] =
-                    renderObject.toDiagnosticsNode().toJsonMap(
-                          delegate.copyWith(
-                            subtreeDepth: 0,
-                            includeProperties: true,
-                          ),
-                        ) as Object;
+        groupName: groupName,
+        summaryTree: true,
+        subtreeDepth: subtreeDepth,
+        service: instance,
+        addAdditionalPropertiesCallback: (node, delegate) {
+          final Map<String, Object> additionalJson = <String, Object>{};
+          final value = node.value;
+          if (value is Element) {
+            final renderObject = value.renderObject;
+            if (renderObject != null) {
+              additionalJson['renderObject'] =
+                  renderObject.toDiagnosticsNode().toJsonMap(
+                        delegate.copyWith(
+                          subtreeDepth: 0,
+                          includeProperties: true,
+                        ),
+                      ) as Object;
 
-                final renderParent = renderObject.parent;
-                if (renderParent is RenderObject && subtreeDepth > 0) {
-                  final parentCreator = renderParent.debugCreator;
-                  if (parentCreator is DebugCreator) {
-                    additionalJson['parentRenderElement'] =
-                        parentCreator.element.toDiagnosticsNode().toJsonMap(
-                              delegate.copyWith(
-                                subtreeDepth: 0,
-                                includeProperties: true,
-                              ),
-                            ) as Object;
-                    // TODO(jacobr): also describe the path back up the tree to
-                    // the RenderParentElement from the current element. It
-                    // could be a surprising distance up the tree if a lot of
-                    // elements don't have their own RenderObjects.
-                  }
-                }
-
-                try {
-                  if (!renderObject.debugNeedsLayout) {
-                    final constraints = renderObject.constraints;
-                    final constraintsProperty = <String, Object>{
-                      'type': constraints.runtimeType.toString(),
-                      'description': constraints.toString(),
-                    };
-                    if (constraints is BoxConstraints) {
-                      constraintsProperty.addAll(<String, Object>{
-                        'minWidth': constraints.minWidth.toString(),
-                        'minHeight': constraints.minHeight.toString(),
-                        'maxWidth': constraints.maxWidth.toString(),
-                        'maxHeight': constraints.maxHeight.toString(),
-                      });
-                    }
-                    additionalJson['constraints'] = constraintsProperty;
-                  }
-                } catch (e) {
-                  // Constraints are sometimes unavailable even though
-                  // debugNeedsLayout is false.
-                }
-
-                try {
-                  if (renderObject is RenderBox) {
-                    additionalJson['isBox'] = true;
-                    additionalJson['size'] = <String, Object>{
-                      'width': renderObject.size.width.toString(),
-                      'height': renderObject.size.height.toString(),
-                    };
-
-                    final parentData = renderObject.parentData;
-                    if (parentData is FlexParentData) {
-                      additionalJson['flexFactor'] = parentData.flex as int;
-                      additionalJson['flexFit'] =
-                          describeEnum(parentData.fit ?? FlexFit.tight);
-                    } else if (parentData is BoxParentData) {
-                      final offset = parentData.offset;
-                      additionalJson['parentData'] = {
-                        'offsetX': offset.dx.toString(),
-                        'offsetY': offset.dy.toString(),
-                      };
-                    }
-                  } else if (renderObject is RenderView) {
-                    additionalJson['size'] = <String, Object>{
-                      'width': renderObject.size.width.toString(),
-                      'height': renderObject.size.height.toString(),
-                    };
-                  }
-                } catch (e) {
-                  // Not laid out yet.
+              final renderParent = renderObject.parent;
+              if (renderParent is RenderObject && subtreeDepth > 0) {
+                final parentCreator = renderParent.debugCreator;
+                if (parentCreator is DebugCreator) {
+                  additionalJson['parentRenderElement'] =
+                      parentCreator.element.toDiagnosticsNode().toJsonMap(
+                            delegate.copyWith(
+                              subtreeDepth: 0,
+                              includeProperties: true,
+                            ),
+                          ) as Object;
+                  // TODO(jacobr): also describe the path back up the tree to
+                  // the RenderParentElement from the current element. It
+                  // could be a surprising distance up the tree if a lot of
+                  // elements don't have their own RenderObjects.
                 }
               }
+
+              try {
+                if (!renderObject.debugNeedsLayout) {
+                  final constraints = renderObject.constraints;
+                  final constraintsProperty = <String, Object>{
+                    'type': constraints.runtimeType.toString(),
+                    'description': constraints.toString(),
+                  };
+                  if (constraints is BoxConstraints) {
+                    constraintsProperty.addAll(<String, Object>{
+                      'minWidth': constraints.minWidth.toString(),
+                      'minHeight': constraints.minHeight.toString(),
+                      'maxWidth': constraints.maxWidth.toString(),
+                      'maxHeight': constraints.maxHeight.toString(),
+                    });
+                  }
+                  additionalJson['constraints'] = constraintsProperty;
+                }
+              } catch (e) {
+                // Constraints are sometimes unavailable even though
+                // debugNeedsLayout is false.
+              }
+
+              try {
+                if (renderObject is RenderBox) {
+                  additionalJson['isBox'] = true;
+                  additionalJson['size'] = <String, Object>{
+                    'width': renderObject.size.width.toString(),
+                    'height': renderObject.size.height.toString(),
+                  };
+
+                  final parentData = renderObject.parentData;
+                  if (parentData is FlexParentData) {
+                    additionalJson['flexFactor'] = parentData.flex as int;
+                    additionalJson['flexFit'] =
+                        describeEnum(parentData.fit ?? FlexFit.tight);
+                  } else if (parentData is BoxParentData) {
+                    final offset = parentData.offset;
+                    additionalJson['parentData'] = {
+                      'offsetX': offset.dx.toString(),
+                      'offsetY': offset.dy.toString(),
+                    };
+                  }
+                } else if (renderObject is RenderView) {
+                  additionalJson['size'] = <String, Object>{
+                    'width': renderObject.size.width.toString(),
+                    'height': renderObject.size.height.toString(),
+                  };
+                }
+              } catch (e) {
+                // Not laid out yet.
+              }
             }
-            return additionalJson;
-          }),
+          }
+          return additionalJson;
+        },
+      ),
     ) as Map<String, dynamic>;
     return Future.value(<String, dynamic>{
       'result': result,
@@ -300,7 +303,8 @@ String addServiceExtensions() {
   }
 
   Future<Map<String, dynamic>> setFlexProperties(
-      Map<String, String> parameters) {
+    Map<String, String> parameters,
+  ) {
     final String id = parameters['id'] as String;
     final MainAxisAlignment mainAxisAlignment = toEnumEntry<MainAxisAlignment>(
       MainAxisAlignment.values,

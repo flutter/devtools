@@ -1,11 +1,6 @@
-// Copyright 2021 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
+// coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// ignore_for_file: deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies
-
-// @dart=2.9
+// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target
 
 part of 'instance_details.dart';
 
@@ -15,29 +10,29 @@ part of 'instance_details.dart';
 
 T _$identity<T>(T value) => value;
 
+final _privateConstructorUsedError = UnsupportedError(
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more informations: https://github.com/rrousselGit/freezed#custom-getters-and-methods');
+
 /// @nodoc
 class _$PathToPropertyTearOff {
   const _$PathToPropertyTearOff();
 
-// ignore: unused_element
   ListIndexPath listIndex(int index) {
     return ListIndexPath(
       index,
     );
   }
 
-// ignore: unused_element
-  MapKeyPath mapKey({@required @nullable String ref}) {
+  MapKeyPath mapKey({required String? ref}) {
     return MapKeyPath(
       ref: ref,
     );
   }
 
-// ignore: unused_element
   PropertyPath objectProperty(
-      {@required String name,
-      @required String ownerUri,
-      @required String ownerName}) {
+      {required String name,
+      required String ownerUri,
+      required String ownerName}) {
     return PropertyPath(
       name: name,
       ownerUri: ownerUri,
@@ -47,38 +42,57 @@ class _$PathToPropertyTearOff {
 }
 
 /// @nodoc
-// ignore: unused_element
 const $PathToProperty = _$PathToPropertyTearOff();
 
 /// @nodoc
 mixin _$PathToProperty {
   @optionalTypeArgs
-  TResult when<TResult extends Object>({
-    @required TResult listIndex(int index),
-    @required TResult mapKey(@nullable String ref),
-    @required
-        TResult objectProperty(String name, String ownerUri, String ownerName),
-  });
+  TResult when<TResult extends Object?>({
+    required TResult Function(int index) listIndex,
+    required TResult Function(String? ref) mapKey,
+    required TResult Function(String name, String ownerUri, String ownerName)
+        objectProperty,
+  }) =>
+      throw _privateConstructorUsedError;
   @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object>({
-    TResult listIndex(int index),
-    TResult mapKey(@nullable String ref),
-    TResult objectProperty(String name, String ownerUri, String ownerName),
-    @required TResult orElse(),
-  });
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult Function(int index)? listIndex,
+    TResult Function(String? ref)? mapKey,
+    TResult Function(String name, String ownerUri, String ownerName)?
+        objectProperty,
+  }) =>
+      throw _privateConstructorUsedError;
   @optionalTypeArgs
-  TResult map<TResult extends Object>({
-    @required TResult listIndex(ListIndexPath value),
-    @required TResult mapKey(MapKeyPath value),
-    @required TResult objectProperty(PropertyPath value),
-  });
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(int index)? listIndex,
+    TResult Function(String? ref)? mapKey,
+    TResult Function(String name, String ownerUri, String ownerName)?
+        objectProperty,
+    required TResult orElse(),
+  }) =>
+      throw _privateConstructorUsedError;
   @optionalTypeArgs
-  TResult maybeMap<TResult extends Object>({
-    TResult listIndex(ListIndexPath value),
-    TResult mapKey(MapKeyPath value),
-    TResult objectProperty(PropertyPath value),
-    @required TResult orElse(),
-  });
+  TResult map<TResult extends Object?>({
+    required TResult Function(ListIndexPath value) listIndex,
+    required TResult Function(MapKeyPath value) mapKey,
+    required TResult Function(PropertyPath value) objectProperty,
+  }) =>
+      throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult Function(ListIndexPath value)? listIndex,
+    TResult Function(MapKeyPath value)? mapKey,
+    TResult Function(PropertyPath value)? objectProperty,
+  }) =>
+      throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(ListIndexPath value)? listIndex,
+    TResult Function(MapKeyPath value)? mapKey,
+    TResult Function(PropertyPath value)? objectProperty,
+    required TResult orElse(),
+  }) =>
+      throw _privateConstructorUsedError;
 }
 
 /// @nodoc
@@ -119,37 +133,49 @@ class _$ListIndexPathCopyWithImpl<$Res>
 
   @override
   $Res call({
-    Object index = freezed,
+    Object? index = freezed,
   }) {
     return _then(ListIndexPath(
-      index == freezed ? _value.index : index as int,
+      index == freezed
+          ? _value.index
+          : index // ignore: cast_nullable_to_non_nullable
+              as int,
     ));
   }
 }
 
 /// @nodoc
-class _$ListIndexPath implements ListIndexPath {
-  const _$ListIndexPath(this.index) : assert(index != null);
+
+class _$ListIndexPath with DiagnosticableTreeMixin implements ListIndexPath {
+  const _$ListIndexPath(this.index);
 
   @override
   final int index;
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'PathToProperty.listIndex(index: $index)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'PathToProperty.listIndex'))
+      ..add(DiagnosticsProperty('index', index));
   }
 
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other is ListIndexPath &&
-            (identical(other.index, index) ||
-                const DeepCollectionEquality().equals(other.index, index)));
+        (other.runtimeType == runtimeType &&
+            other is ListIndexPath &&
+            const DeepCollectionEquality().equals(other.index, index));
   }
 
   @override
   int get hashCode =>
-      runtimeType.hashCode ^ const DeepCollectionEquality().hash(index);
+      Object.hash(runtimeType, const DeepCollectionEquality().hash(index));
 
   @JsonKey(ignore: true)
   @override
@@ -158,27 +184,35 @@ class _$ListIndexPath implements ListIndexPath {
 
   @override
   @optionalTypeArgs
-  TResult when<TResult extends Object>({
-    @required TResult listIndex(int index),
-    @required TResult mapKey(@nullable String ref),
-    @required
-        TResult objectProperty(String name, String ownerUri, String ownerName),
+  TResult when<TResult extends Object?>({
+    required TResult Function(int index) listIndex,
+    required TResult Function(String? ref) mapKey,
+    required TResult Function(String name, String ownerUri, String ownerName)
+        objectProperty,
   }) {
-    assert(listIndex != null);
-    assert(mapKey != null);
-    assert(objectProperty != null);
     return listIndex(index);
   }
 
   @override
   @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object>({
-    TResult listIndex(int index),
-    TResult mapKey(@nullable String ref),
-    TResult objectProperty(String name, String ownerUri, String ownerName),
-    @required TResult orElse(),
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult Function(int index)? listIndex,
+    TResult Function(String? ref)? mapKey,
+    TResult Function(String name, String ownerUri, String ownerName)?
+        objectProperty,
   }) {
-    assert(orElse != null);
+    return listIndex?.call(index);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(int index)? listIndex,
+    TResult Function(String? ref)? mapKey,
+    TResult Function(String name, String ownerUri, String ownerName)?
+        objectProperty,
+    required TResult orElse(),
+  }) {
     if (listIndex != null) {
       return listIndex(index);
     }
@@ -187,26 +221,32 @@ class _$ListIndexPath implements ListIndexPath {
 
   @override
   @optionalTypeArgs
-  TResult map<TResult extends Object>({
-    @required TResult listIndex(ListIndexPath value),
-    @required TResult mapKey(MapKeyPath value),
-    @required TResult objectProperty(PropertyPath value),
+  TResult map<TResult extends Object?>({
+    required TResult Function(ListIndexPath value) listIndex,
+    required TResult Function(MapKeyPath value) mapKey,
+    required TResult Function(PropertyPath value) objectProperty,
   }) {
-    assert(listIndex != null);
-    assert(mapKey != null);
-    assert(objectProperty != null);
     return listIndex(this);
   }
 
   @override
   @optionalTypeArgs
-  TResult maybeMap<TResult extends Object>({
-    TResult listIndex(ListIndexPath value),
-    TResult mapKey(MapKeyPath value),
-    TResult objectProperty(PropertyPath value),
-    @required TResult orElse(),
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult Function(ListIndexPath value)? listIndex,
+    TResult Function(MapKeyPath value)? mapKey,
+    TResult Function(PropertyPath value)? objectProperty,
   }) {
-    assert(orElse != null);
+    return listIndex?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(ListIndexPath value)? listIndex,
+    TResult Function(MapKeyPath value)? mapKey,
+    TResult Function(PropertyPath value)? objectProperty,
+    required TResult orElse(),
+  }) {
     if (listIndex != null) {
       return listIndex(this);
     }
@@ -219,7 +259,8 @@ abstract class ListIndexPath implements PathToProperty {
 
   int get index;
   @JsonKey(ignore: true)
-  $ListIndexPathCopyWith<ListIndexPath> get copyWith;
+  $ListIndexPathCopyWith<ListIndexPath> get copyWith =>
+      throw _privateConstructorUsedError;
 }
 
 /// @nodoc
@@ -227,7 +268,7 @@ abstract class $MapKeyPathCopyWith<$Res> {
   factory $MapKeyPathCopyWith(
           MapKeyPath value, $Res Function(MapKeyPath) then) =
       _$MapKeyPathCopyWithImpl<$Res>;
-  $Res call({@nullable String ref});
+  $Res call({String? ref});
 }
 
 /// @nodoc
@@ -241,38 +282,49 @@ class _$MapKeyPathCopyWithImpl<$Res> extends _$PathToPropertyCopyWithImpl<$Res>
 
   @override
   $Res call({
-    Object ref = freezed,
+    Object? ref = freezed,
   }) {
     return _then(MapKeyPath(
-      ref: ref == freezed ? _value.ref : ref as String,
+      ref: ref == freezed
+          ? _value.ref
+          : ref // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
 
 /// @nodoc
-class _$MapKeyPath implements MapKeyPath {
-  const _$MapKeyPath({@required @nullable this.ref});
+
+class _$MapKeyPath with DiagnosticableTreeMixin implements MapKeyPath {
+  const _$MapKeyPath({required this.ref});
 
   @override
-  @nullable
-  final String ref;
+  final String? ref;
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'PathToProperty.mapKey(ref: $ref)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'PathToProperty.mapKey'))
+      ..add(DiagnosticsProperty('ref', ref));
   }
 
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other is MapKeyPath &&
-            (identical(other.ref, ref) ||
-                const DeepCollectionEquality().equals(other.ref, ref)));
+        (other.runtimeType == runtimeType &&
+            other is MapKeyPath &&
+            const DeepCollectionEquality().equals(other.ref, ref));
   }
 
   @override
   int get hashCode =>
-      runtimeType.hashCode ^ const DeepCollectionEquality().hash(ref);
+      Object.hash(runtimeType, const DeepCollectionEquality().hash(ref));
 
   @JsonKey(ignore: true)
   @override
@@ -281,27 +333,35 @@ class _$MapKeyPath implements MapKeyPath {
 
   @override
   @optionalTypeArgs
-  TResult when<TResult extends Object>({
-    @required TResult listIndex(int index),
-    @required TResult mapKey(@nullable String ref),
-    @required
-        TResult objectProperty(String name, String ownerUri, String ownerName),
+  TResult when<TResult extends Object?>({
+    required TResult Function(int index) listIndex,
+    required TResult Function(String? ref) mapKey,
+    required TResult Function(String name, String ownerUri, String ownerName)
+        objectProperty,
   }) {
-    assert(listIndex != null);
-    assert(mapKey != null);
-    assert(objectProperty != null);
     return mapKey(ref);
   }
 
   @override
   @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object>({
-    TResult listIndex(int index),
-    TResult mapKey(@nullable String ref),
-    TResult objectProperty(String name, String ownerUri, String ownerName),
-    @required TResult orElse(),
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult Function(int index)? listIndex,
+    TResult Function(String? ref)? mapKey,
+    TResult Function(String name, String ownerUri, String ownerName)?
+        objectProperty,
   }) {
-    assert(orElse != null);
+    return mapKey?.call(ref);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(int index)? listIndex,
+    TResult Function(String? ref)? mapKey,
+    TResult Function(String name, String ownerUri, String ownerName)?
+        objectProperty,
+    required TResult orElse(),
+  }) {
     if (mapKey != null) {
       return mapKey(ref);
     }
@@ -310,26 +370,32 @@ class _$MapKeyPath implements MapKeyPath {
 
   @override
   @optionalTypeArgs
-  TResult map<TResult extends Object>({
-    @required TResult listIndex(ListIndexPath value),
-    @required TResult mapKey(MapKeyPath value),
-    @required TResult objectProperty(PropertyPath value),
+  TResult map<TResult extends Object?>({
+    required TResult Function(ListIndexPath value) listIndex,
+    required TResult Function(MapKeyPath value) mapKey,
+    required TResult Function(PropertyPath value) objectProperty,
   }) {
-    assert(listIndex != null);
-    assert(mapKey != null);
-    assert(objectProperty != null);
     return mapKey(this);
   }
 
   @override
   @optionalTypeArgs
-  TResult maybeMap<TResult extends Object>({
-    TResult listIndex(ListIndexPath value),
-    TResult mapKey(MapKeyPath value),
-    TResult objectProperty(PropertyPath value),
-    @required TResult orElse(),
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult Function(ListIndexPath value)? listIndex,
+    TResult Function(MapKeyPath value)? mapKey,
+    TResult Function(PropertyPath value)? objectProperty,
   }) {
-    assert(orElse != null);
+    return mapKey?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(ListIndexPath value)? listIndex,
+    TResult Function(MapKeyPath value)? mapKey,
+    TResult Function(PropertyPath value)? objectProperty,
+    required TResult orElse(),
+  }) {
     if (mapKey != null) {
       return mapKey(this);
     }
@@ -338,12 +404,12 @@ class _$MapKeyPath implements MapKeyPath {
 }
 
 abstract class MapKeyPath implements PathToProperty {
-  const factory MapKeyPath({@required @nullable String ref}) = _$MapKeyPath;
+  const factory MapKeyPath({required String? ref}) = _$MapKeyPath;
 
-  @nullable
-  String get ref;
+  String? get ref;
   @JsonKey(ignore: true)
-  $MapKeyPathCopyWith<MapKeyPath> get copyWith;
+  $MapKeyPathCopyWith<MapKeyPath> get copyWith =>
+      throw _privateConstructorUsedError;
 }
 
 /// @nodoc
@@ -367,25 +433,32 @@ class _$PropertyPathCopyWithImpl<$Res>
 
   @override
   $Res call({
-    Object name = freezed,
-    Object ownerUri = freezed,
-    Object ownerName = freezed,
+    Object? name = freezed,
+    Object? ownerUri = freezed,
+    Object? ownerName = freezed,
   }) {
     return _then(PropertyPath(
-      name: name == freezed ? _value.name : name as String,
-      ownerUri: ownerUri == freezed ? _value.ownerUri : ownerUri as String,
-      ownerName: ownerName == freezed ? _value.ownerName : ownerName as String,
+      name: name == freezed
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      ownerUri: ownerUri == freezed
+          ? _value.ownerUri
+          : ownerUri // ignore: cast_nullable_to_non_nullable
+              as String,
+      ownerName: ownerName == freezed
+          ? _value.ownerName
+          : ownerName // ignore: cast_nullable_to_non_nullable
+              as String,
     ));
   }
 }
 
 /// @nodoc
-class _$PropertyPath implements PropertyPath {
+
+class _$PropertyPath with DiagnosticableTreeMixin implements PropertyPath {
   const _$PropertyPath(
-      {@required this.name, @required this.ownerUri, @required this.ownerName})
-      : assert(name != null),
-        assert(ownerUri != null),
-        assert(ownerName != null);
+      {required this.name, required this.ownerUri, required this.ownerName});
 
   @override
   final String name;
@@ -399,30 +472,36 @@ class _$PropertyPath implements PropertyPath {
   final String ownerName;
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'PathToProperty.objectProperty(name: $name, ownerUri: $ownerUri, ownerName: $ownerName)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'PathToProperty.objectProperty'))
+      ..add(DiagnosticsProperty('name', name))
+      ..add(DiagnosticsProperty('ownerUri', ownerUri))
+      ..add(DiagnosticsProperty('ownerName', ownerName));
   }
 
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other is PropertyPath &&
-            (identical(other.name, name) ||
-                const DeepCollectionEquality().equals(other.name, name)) &&
-            (identical(other.ownerUri, ownerUri) ||
-                const DeepCollectionEquality()
-                    .equals(other.ownerUri, ownerUri)) &&
-            (identical(other.ownerName, ownerName) ||
-                const DeepCollectionEquality()
-                    .equals(other.ownerName, ownerName)));
+        (other.runtimeType == runtimeType &&
+            other is PropertyPath &&
+            const DeepCollectionEquality().equals(other.name, name) &&
+            const DeepCollectionEquality().equals(other.ownerUri, ownerUri) &&
+            const DeepCollectionEquality().equals(other.ownerName, ownerName));
   }
 
   @override
-  int get hashCode =>
-      runtimeType.hashCode ^
-      const DeepCollectionEquality().hash(name) ^
-      const DeepCollectionEquality().hash(ownerUri) ^
-      const DeepCollectionEquality().hash(ownerName);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(name),
+      const DeepCollectionEquality().hash(ownerUri),
+      const DeepCollectionEquality().hash(ownerName));
 
   @JsonKey(ignore: true)
   @override
@@ -431,27 +510,35 @@ class _$PropertyPath implements PropertyPath {
 
   @override
   @optionalTypeArgs
-  TResult when<TResult extends Object>({
-    @required TResult listIndex(int index),
-    @required TResult mapKey(@nullable String ref),
-    @required
-        TResult objectProperty(String name, String ownerUri, String ownerName),
+  TResult when<TResult extends Object?>({
+    required TResult Function(int index) listIndex,
+    required TResult Function(String? ref) mapKey,
+    required TResult Function(String name, String ownerUri, String ownerName)
+        objectProperty,
   }) {
-    assert(listIndex != null);
-    assert(mapKey != null);
-    assert(objectProperty != null);
     return objectProperty(name, ownerUri, ownerName);
   }
 
   @override
   @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object>({
-    TResult listIndex(int index),
-    TResult mapKey(@nullable String ref),
-    TResult objectProperty(String name, String ownerUri, String ownerName),
-    @required TResult orElse(),
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult Function(int index)? listIndex,
+    TResult Function(String? ref)? mapKey,
+    TResult Function(String name, String ownerUri, String ownerName)?
+        objectProperty,
   }) {
-    assert(orElse != null);
+    return objectProperty?.call(name, ownerUri, ownerName);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(int index)? listIndex,
+    TResult Function(String? ref)? mapKey,
+    TResult Function(String name, String ownerUri, String ownerName)?
+        objectProperty,
+    required TResult orElse(),
+  }) {
     if (objectProperty != null) {
       return objectProperty(name, ownerUri, ownerName);
     }
@@ -460,26 +547,32 @@ class _$PropertyPath implements PropertyPath {
 
   @override
   @optionalTypeArgs
-  TResult map<TResult extends Object>({
-    @required TResult listIndex(ListIndexPath value),
-    @required TResult mapKey(MapKeyPath value),
-    @required TResult objectProperty(PropertyPath value),
+  TResult map<TResult extends Object?>({
+    required TResult Function(ListIndexPath value) listIndex,
+    required TResult Function(MapKeyPath value) mapKey,
+    required TResult Function(PropertyPath value) objectProperty,
   }) {
-    assert(listIndex != null);
-    assert(mapKey != null);
-    assert(objectProperty != null);
     return objectProperty(this);
   }
 
   @override
   @optionalTypeArgs
-  TResult maybeMap<TResult extends Object>({
-    TResult listIndex(ListIndexPath value),
-    TResult mapKey(MapKeyPath value),
-    TResult objectProperty(PropertyPath value),
-    @required TResult orElse(),
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult Function(ListIndexPath value)? listIndex,
+    TResult Function(MapKeyPath value)? mapKey,
+    TResult Function(PropertyPath value)? objectProperty,
   }) {
-    assert(orElse != null);
+    return objectProperty?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(ListIndexPath value)? listIndex,
+    TResult Function(MapKeyPath value)? mapKey,
+    TResult Function(PropertyPath value)? objectProperty,
+    required TResult orElse(),
+  }) {
     if (objectProperty != null) {
       return objectProperty(this);
     }
@@ -489,9 +582,9 @@ class _$PropertyPath implements PropertyPath {
 
 abstract class PropertyPath implements PathToProperty {
   const factory PropertyPath(
-      {@required String name,
-      @required String ownerUri,
-      @required String ownerName}) = _$PropertyPath;
+      {required String name,
+      required String ownerUri,
+      required String ownerName}) = _$PropertyPath;
 
   String get name;
 
@@ -501,22 +594,22 @@ abstract class PropertyPath implements PathToProperty {
   /// Name of the class/mixin that defined this property
   String get ownerName;
   @JsonKey(ignore: true)
-  $PropertyPathCopyWith<PropertyPath> get copyWith;
+  $PropertyPathCopyWith<PropertyPath> get copyWith =>
+      throw _privateConstructorUsedError;
 }
 
 /// @nodoc
 class _$ObjectFieldTearOff {
   const _$ObjectFieldTearOff();
 
-// ignore: unused_element
   _ObjectField call(
-      {@required String name,
-      @required bool isFinal,
-      @required String ownerName,
-      @required String ownerUri,
-      @required @nullable Result<InstanceRef> ref,
-      @required EvalOnDartLibrary eval,
-      @required bool isDefinedByDependency}) {
+      {required String name,
+      required bool isFinal,
+      required String ownerName,
+      required String ownerUri,
+      required Result<InstanceRef> ref,
+      required EvalOnDartLibrary eval,
+      required bool isDefinedByDependency}) {
     return _ObjectField(
       name: name,
       isFinal: isFinal,
@@ -530,28 +623,27 @@ class _$ObjectFieldTearOff {
 }
 
 /// @nodoc
-// ignore: unused_element
 const $ObjectField = _$ObjectFieldTearOff();
 
 /// @nodoc
 mixin _$ObjectField {
-  String get name;
-  bool get isFinal;
-  String get ownerName;
-  String get ownerUri;
-  @nullable
-  Result<InstanceRef> get ref;
+  String get name => throw _privateConstructorUsedError;
+  bool get isFinal => throw _privateConstructorUsedError;
+  String get ownerName => throw _privateConstructorUsedError;
+  String get ownerUri => throw _privateConstructorUsedError;
+  Result<InstanceRef> get ref => throw _privateConstructorUsedError;
 
   /// An [EvalOnDartLibrary] that can access this field from the owner object
-  EvalOnDartLibrary get eval;
+  EvalOnDartLibrary get eval => throw _privateConstructorUsedError;
 
   /// Whether this field was defined by the inspected app or by one of its dependencies
   ///
   /// This is used by the UI to hide variables that are not useful for the user.
-  bool get isDefinedByDependency;
+  bool get isDefinedByDependency => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
-  $ObjectFieldCopyWith<ObjectField> get copyWith;
+  $ObjectFieldCopyWith<ObjectField> get copyWith =>
+      throw _privateConstructorUsedError;
 }
 
 /// @nodoc
@@ -564,7 +656,7 @@ abstract class $ObjectFieldCopyWith<$Res> {
       bool isFinal,
       String ownerName,
       String ownerUri,
-      @nullable Result<InstanceRef> ref,
+      Result<InstanceRef> ref,
       EvalOnDartLibrary eval,
       bool isDefinedByDependency});
 
@@ -581,32 +673,48 @@ class _$ObjectFieldCopyWithImpl<$Res> implements $ObjectFieldCopyWith<$Res> {
 
   @override
   $Res call({
-    Object name = freezed,
-    Object isFinal = freezed,
-    Object ownerName = freezed,
-    Object ownerUri = freezed,
-    Object ref = freezed,
-    Object eval = freezed,
-    Object isDefinedByDependency = freezed,
+    Object? name = freezed,
+    Object? isFinal = freezed,
+    Object? ownerName = freezed,
+    Object? ownerUri = freezed,
+    Object? ref = freezed,
+    Object? eval = freezed,
+    Object? isDefinedByDependency = freezed,
   }) {
     return _then(_value.copyWith(
-      name: name == freezed ? _value.name : name as String,
-      isFinal: isFinal == freezed ? _value.isFinal : isFinal as bool,
-      ownerName: ownerName == freezed ? _value.ownerName : ownerName as String,
-      ownerUri: ownerUri == freezed ? _value.ownerUri : ownerUri as String,
-      ref: ref == freezed ? _value.ref : ref as Result<InstanceRef>,
-      eval: eval == freezed ? _value.eval : eval as EvalOnDartLibrary,
+      name: name == freezed
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      isFinal: isFinal == freezed
+          ? _value.isFinal
+          : isFinal // ignore: cast_nullable_to_non_nullable
+              as bool,
+      ownerName: ownerName == freezed
+          ? _value.ownerName
+          : ownerName // ignore: cast_nullable_to_non_nullable
+              as String,
+      ownerUri: ownerUri == freezed
+          ? _value.ownerUri
+          : ownerUri // ignore: cast_nullable_to_non_nullable
+              as String,
+      ref: ref == freezed
+          ? _value.ref
+          : ref // ignore: cast_nullable_to_non_nullable
+              as Result<InstanceRef>,
+      eval: eval == freezed
+          ? _value.eval
+          : eval // ignore: cast_nullable_to_non_nullable
+              as EvalOnDartLibrary,
       isDefinedByDependency: isDefinedByDependency == freezed
           ? _value.isDefinedByDependency
-          : isDefinedByDependency as bool,
+          : isDefinedByDependency // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 
   @override
   $ResultCopyWith<InstanceRef, $Res> get ref {
-    if (_value.ref == null) {
-      return null;
-    }
     return $ResultCopyWith<InstanceRef, $Res>(_value.ref, (value) {
       return _then(_value.copyWith(ref: value));
     });
@@ -625,7 +733,7 @@ abstract class _$ObjectFieldCopyWith<$Res>
       bool isFinal,
       String ownerName,
       String ownerUri,
-      @nullable Result<InstanceRef> ref,
+      Result<InstanceRef> ref,
       EvalOnDartLibrary eval,
       bool isDefinedByDependency});
 
@@ -645,45 +753,59 @@ class __$ObjectFieldCopyWithImpl<$Res> extends _$ObjectFieldCopyWithImpl<$Res>
 
   @override
   $Res call({
-    Object name = freezed,
-    Object isFinal = freezed,
-    Object ownerName = freezed,
-    Object ownerUri = freezed,
-    Object ref = freezed,
-    Object eval = freezed,
-    Object isDefinedByDependency = freezed,
+    Object? name = freezed,
+    Object? isFinal = freezed,
+    Object? ownerName = freezed,
+    Object? ownerUri = freezed,
+    Object? ref = freezed,
+    Object? eval = freezed,
+    Object? isDefinedByDependency = freezed,
   }) {
     return _then(_ObjectField(
-      name: name == freezed ? _value.name : name as String,
-      isFinal: isFinal == freezed ? _value.isFinal : isFinal as bool,
-      ownerName: ownerName == freezed ? _value.ownerName : ownerName as String,
-      ownerUri: ownerUri == freezed ? _value.ownerUri : ownerUri as String,
-      ref: ref == freezed ? _value.ref : ref as Result<InstanceRef>,
-      eval: eval == freezed ? _value.eval : eval as EvalOnDartLibrary,
+      name: name == freezed
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      isFinal: isFinal == freezed
+          ? _value.isFinal
+          : isFinal // ignore: cast_nullable_to_non_nullable
+              as bool,
+      ownerName: ownerName == freezed
+          ? _value.ownerName
+          : ownerName // ignore: cast_nullable_to_non_nullable
+              as String,
+      ownerUri: ownerUri == freezed
+          ? _value.ownerUri
+          : ownerUri // ignore: cast_nullable_to_non_nullable
+              as String,
+      ref: ref == freezed
+          ? _value.ref
+          : ref // ignore: cast_nullable_to_non_nullable
+              as Result<InstanceRef>,
+      eval: eval == freezed
+          ? _value.eval
+          : eval // ignore: cast_nullable_to_non_nullable
+              as EvalOnDartLibrary,
       isDefinedByDependency: isDefinedByDependency == freezed
           ? _value.isDefinedByDependency
-          : isDefinedByDependency as bool,
+          : isDefinedByDependency // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
 
 /// @nodoc
-class _$_ObjectField extends _ObjectField {
+
+class _$_ObjectField extends _ObjectField with DiagnosticableTreeMixin {
   _$_ObjectField(
-      {@required this.name,
-      @required this.isFinal,
-      @required this.ownerName,
-      @required this.ownerUri,
-      @required @nullable this.ref,
-      @required this.eval,
-      @required this.isDefinedByDependency})
-      : assert(name != null),
-        assert(isFinal != null),
-        assert(ownerName != null),
-        assert(ownerUri != null),
-        assert(eval != null),
-        assert(isDefinedByDependency != null),
-        super._();
+      {required this.name,
+      required this.isFinal,
+      required this.ownerName,
+      required this.ownerUri,
+      required this.ref,
+      required this.eval,
+      required this.isDefinedByDependency})
+      : super._();
 
   @override
   final String name;
@@ -694,7 +816,6 @@ class _$_ObjectField extends _ObjectField {
   @override
   final String ownerUri;
   @override
-  @nullable
   final Result<InstanceRef> ref;
   @override
 
@@ -708,44 +829,50 @@ class _$_ObjectField extends _ObjectField {
   final bool isDefinedByDependency;
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'ObjectField(name: $name, isFinal: $isFinal, ownerName: $ownerName, ownerUri: $ownerUri, ref: $ref, eval: $eval, isDefinedByDependency: $isDefinedByDependency)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'ObjectField'))
+      ..add(DiagnosticsProperty('name', name))
+      ..add(DiagnosticsProperty('isFinal', isFinal))
+      ..add(DiagnosticsProperty('ownerName', ownerName))
+      ..add(DiagnosticsProperty('ownerUri', ownerUri))
+      ..add(DiagnosticsProperty('ref', ref))
+      ..add(DiagnosticsProperty('eval', eval))
+      ..add(
+          DiagnosticsProperty('isDefinedByDependency', isDefinedByDependency));
   }
 
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other is _ObjectField &&
-            (identical(other.name, name) ||
-                const DeepCollectionEquality().equals(other.name, name)) &&
-            (identical(other.isFinal, isFinal) ||
-                const DeepCollectionEquality()
-                    .equals(other.isFinal, isFinal)) &&
-            (identical(other.ownerName, ownerName) ||
-                const DeepCollectionEquality()
-                    .equals(other.ownerName, ownerName)) &&
-            (identical(other.ownerUri, ownerUri) ||
-                const DeepCollectionEquality()
-                    .equals(other.ownerUri, ownerUri)) &&
-            (identical(other.ref, ref) ||
-                const DeepCollectionEquality().equals(other.ref, ref)) &&
-            (identical(other.eval, eval) ||
-                const DeepCollectionEquality().equals(other.eval, eval)) &&
-            (identical(other.isDefinedByDependency, isDefinedByDependency) ||
-                const DeepCollectionEquality().equals(
-                    other.isDefinedByDependency, isDefinedByDependency)));
+        (other.runtimeType == runtimeType &&
+            other is _ObjectField &&
+            const DeepCollectionEquality().equals(other.name, name) &&
+            const DeepCollectionEquality().equals(other.isFinal, isFinal) &&
+            const DeepCollectionEquality().equals(other.ownerName, ownerName) &&
+            const DeepCollectionEquality().equals(other.ownerUri, ownerUri) &&
+            const DeepCollectionEquality().equals(other.ref, ref) &&
+            const DeepCollectionEquality().equals(other.eval, eval) &&
+            const DeepCollectionEquality()
+                .equals(other.isDefinedByDependency, isDefinedByDependency));
   }
 
   @override
-  int get hashCode =>
-      runtimeType.hashCode ^
-      const DeepCollectionEquality().hash(name) ^
-      const DeepCollectionEquality().hash(isFinal) ^
-      const DeepCollectionEquality().hash(ownerName) ^
-      const DeepCollectionEquality().hash(ownerUri) ^
-      const DeepCollectionEquality().hash(ref) ^
-      const DeepCollectionEquality().hash(eval) ^
-      const DeepCollectionEquality().hash(isDefinedByDependency);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(name),
+      const DeepCollectionEquality().hash(isFinal),
+      const DeepCollectionEquality().hash(ownerName),
+      const DeepCollectionEquality().hash(ownerUri),
+      const DeepCollectionEquality().hash(ref),
+      const DeepCollectionEquality().hash(eval),
+      const DeepCollectionEquality().hash(isDefinedByDependency));
 
   @JsonKey(ignore: true)
   @override
@@ -754,15 +881,15 @@ class _$_ObjectField extends _ObjectField {
 }
 
 abstract class _ObjectField extends ObjectField {
-  _ObjectField._() : super._();
   factory _ObjectField(
-      {@required String name,
-      @required bool isFinal,
-      @required String ownerName,
-      @required String ownerUri,
-      @required @nullable Result<InstanceRef> ref,
-      @required EvalOnDartLibrary eval,
-      @required bool isDefinedByDependency}) = _$_ObjectField;
+      {required String name,
+      required bool isFinal,
+      required String ownerName,
+      required String ownerUri,
+      required Result<InstanceRef> ref,
+      required EvalOnDartLibrary eval,
+      required bool isDefinedByDependency}) = _$_ObjectField;
+  _ObjectField._() : super._();
 
   @override
   String get name;
@@ -773,7 +900,6 @@ abstract class _ObjectField extends ObjectField {
   @override
   String get ownerUri;
   @override
-  @nullable
   Result<InstanceRef> get ref;
   @override
 
@@ -787,27 +913,22 @@ abstract class _ObjectField extends ObjectField {
   bool get isDefinedByDependency;
   @override
   @JsonKey(ignore: true)
-  _$ObjectFieldCopyWith<_ObjectField> get copyWith;
+  _$ObjectFieldCopyWith<_ObjectField> get copyWith =>
+      throw _privateConstructorUsedError;
 }
 
 /// @nodoc
 class _$InstanceDetailsTearOff {
   const _$InstanceDetailsTearOff();
 
-// ignore: unused_element
-  NullInstance nill(
-      {String instanceRefId,
-      @required @nullable Future<void> Function(String) setter}) {
+  NullInstance nill({required Setter? setter}) {
     return NullInstance(
-      instanceRefId: instanceRefId,
       setter: setter,
     );
   }
 
-// ignore: unused_element
   BoolInstance boolean(String displayString,
-      {@required String instanceRefId,
-      @required @nullable Future<void> Function(String) setter}) {
+      {required String instanceRefId, required Setter? setter}) {
     return BoolInstance(
       displayString,
       instanceRefId: instanceRefId,
@@ -815,10 +936,8 @@ class _$InstanceDetailsTearOff {
     );
   }
 
-// ignore: unused_element
   NumInstance number(String displayString,
-      {@required String instanceRefId,
-      @required @nullable Future<void> Function(String) setter}) {
+      {required String instanceRefId, required Setter? setter}) {
     return NumInstance(
       displayString,
       instanceRefId: instanceRefId,
@@ -826,10 +945,8 @@ class _$InstanceDetailsTearOff {
     );
   }
 
-// ignore: unused_element
   StringInstance string(String displayString,
-      {@required String instanceRefId,
-      @required @nullable Future<void> Function(String) setter}) {
+      {required String instanceRefId, required Setter? setter}) {
     return StringInstance(
       displayString,
       instanceRefId: instanceRefId,
@@ -837,11 +954,10 @@ class _$InstanceDetailsTearOff {
     );
   }
 
-// ignore: unused_element
   MapInstance map(List<InstanceDetails> keys,
-      {@required int hash,
-      @required String instanceRefId,
-      @required @nullable Future<void> Function(String) setter}) {
+      {required int hash,
+      required String instanceRefId,
+      required Setter? setter}) {
     return MapInstance(
       keys,
       hash: hash,
@@ -850,12 +966,11 @@ class _$InstanceDetailsTearOff {
     );
   }
 
-// ignore: unused_element
   ListInstance list(
-      {@required @nullable int length,
-      @required int hash,
-      @required String instanceRefId,
-      @required @nullable Future<void> Function(String) setter}) {
+      {required int length,
+      required int hash,
+      required String instanceRefId,
+      required Setter? setter}) {
     return ListInstance(
       length: length,
       hash: hash,
@@ -864,13 +979,12 @@ class _$InstanceDetailsTearOff {
     );
   }
 
-// ignore: unused_element
   ObjectInstance object(List<ObjectField> fields,
-      {@required String type,
-      @required int hash,
-      @required String instanceRefId,
-      @required @nullable Future<void> Function(String) setter,
-      @required EvalOnDartLibrary evalForInstance}) {
+      {required String type,
+      required int hash,
+      required String instanceRefId,
+      required Setter? setter,
+      required EvalOnDartLibrary evalForInstance}) {
     return ObjectInstance(
       fields,
       type: type,
@@ -881,12 +995,11 @@ class _$InstanceDetailsTearOff {
     );
   }
 
-// ignore: unused_element
   EnumInstance enumeration(
-      {@required String type,
-      @required String value,
-      @required @nullable Future<void> Function(String) setter,
-      @required String instanceRefId}) {
+      {required String type,
+      required String value,
+      required Setter? setter,
+      required String instanceRefId}) {
     return EnumInstance(
       type: type,
       value: value,
@@ -897,101 +1010,147 @@ class _$InstanceDetailsTearOff {
 }
 
 /// @nodoc
-// ignore: unused_element
 const $InstanceDetails = _$InstanceDetailsTearOff();
 
 /// @nodoc
 mixin _$InstanceDetails {
-  String get instanceRefId;
-  @nullable
-  Future<void> Function(String) get setter;
+  Setter? get setter => throw _privateConstructorUsedError;
 
   @optionalTypeArgs
-  TResult when<TResult extends Object>({
-    @required
-        TResult nill(String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult boolean(String displayString, String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult number(String displayString, String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult string(String displayString, String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult map(List<InstanceDetails> keys, int hash, String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult list(@nullable int length, int hash, String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult object(
+  TResult when<TResult extends Object?>({
+    required TResult Function(Setter? setter) nill,
+    required TResult Function(
+            String displayString, String instanceRefId, Setter? setter)
+        boolean,
+    required TResult Function(
+            String displayString, String instanceRefId, Setter? setter)
+        number,
+    required TResult Function(
+            String displayString, String instanceRefId, Setter? setter)
+        string,
+    required TResult Function(List<InstanceDetails> keys, int hash,
+            String instanceRefId, Setter? setter)
+        map,
+    required TResult Function(
+            int length, int hash, String instanceRefId, Setter? setter)
+        list,
+    required TResult Function(
             List<ObjectField> fields,
             String type,
             int hash,
             String instanceRefId,
-            @nullable Future<void> Function(String) setter,
-            EvalOnDartLibrary evalForInstance),
-    @required
-        TResult enumeration(
+            Setter? setter,
+            EvalOnDartLibrary evalForInstance)
+        object,
+    required TResult Function(
+            String type, String value, Setter? setter, String instanceRefId)
+        enumeration,
+  }) =>
+      throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult Function(Setter? setter)? nill,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        boolean,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        number,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        string,
+    TResult Function(List<InstanceDetails> keys, int hash, String instanceRefId,
+            Setter? setter)?
+        map,
+    TResult Function(
+            int length, int hash, String instanceRefId, Setter? setter)?
+        list,
+    TResult Function(
+            List<ObjectField> fields,
             String type,
-            String value,
-            @nullable Future<void> Function(String) setter,
-            String instanceRefId),
-  });
+            int hash,
+            String instanceRefId,
+            Setter? setter,
+            EvalOnDartLibrary evalForInstance)?
+        object,
+    TResult Function(
+            String type, String value, Setter? setter, String instanceRefId)?
+        enumeration,
+  }) =>
+      throw _privateConstructorUsedError;
   @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object>({
-    TResult nill(
-        String instanceRefId, @nullable Future<void> Function(String) setter),
-    TResult boolean(String displayString, String instanceRefId,
-        @nullable Future<void> Function(String) setter),
-    TResult number(String displayString, String instanceRefId,
-        @nullable Future<void> Function(String) setter),
-    TResult string(String displayString, String instanceRefId,
-        @nullable Future<void> Function(String) setter),
-    TResult map(List<InstanceDetails> keys, int hash, String instanceRefId,
-        @nullable Future<void> Function(String) setter),
-    TResult list(@nullable int length, int hash, String instanceRefId,
-        @nullable Future<void> Function(String) setter),
-    TResult object(
-        List<ObjectField> fields,
-        String type,
-        int hash,
-        String instanceRefId,
-        @nullable Future<void> Function(String) setter,
-        EvalOnDartLibrary evalForInstance),
-    TResult enumeration(String type, String value,
-        @nullable Future<void> Function(String) setter, String instanceRefId),
-    @required TResult orElse(),
-  });
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(Setter? setter)? nill,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        boolean,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        number,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        string,
+    TResult Function(List<InstanceDetails> keys, int hash, String instanceRefId,
+            Setter? setter)?
+        map,
+    TResult Function(
+            int length, int hash, String instanceRefId, Setter? setter)?
+        list,
+    TResult Function(
+            List<ObjectField> fields,
+            String type,
+            int hash,
+            String instanceRefId,
+            Setter? setter,
+            EvalOnDartLibrary evalForInstance)?
+        object,
+    TResult Function(
+            String type, String value, Setter? setter, String instanceRefId)?
+        enumeration,
+    required TResult orElse(),
+  }) =>
+      throw _privateConstructorUsedError;
   @optionalTypeArgs
-  TResult map<TResult extends Object>({
-    @required TResult nill(NullInstance value),
-    @required TResult boolean(BoolInstance value),
-    @required TResult number(NumInstance value),
-    @required TResult string(StringInstance value),
-    @required TResult map(MapInstance value),
-    @required TResult list(ListInstance value),
-    @required TResult object(ObjectInstance value),
-    @required TResult enumeration(EnumInstance value),
-  });
+  TResult map<TResult extends Object?>({
+    required TResult Function(NullInstance value) nill,
+    required TResult Function(BoolInstance value) boolean,
+    required TResult Function(NumInstance value) number,
+    required TResult Function(StringInstance value) string,
+    required TResult Function(MapInstance value) map,
+    required TResult Function(ListInstance value) list,
+    required TResult Function(ObjectInstance value) object,
+    required TResult Function(EnumInstance value) enumeration,
+  }) =>
+      throw _privateConstructorUsedError;
   @optionalTypeArgs
-  TResult maybeMap<TResult extends Object>({
-    TResult nill(NullInstance value),
-    TResult boolean(BoolInstance value),
-    TResult number(NumInstance value),
-    TResult string(StringInstance value),
-    TResult map(MapInstance value),
-    TResult list(ListInstance value),
-    TResult object(ObjectInstance value),
-    TResult enumeration(EnumInstance value),
-    @required TResult orElse(),
-  });
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult Function(NullInstance value)? nill,
+    TResult Function(BoolInstance value)? boolean,
+    TResult Function(NumInstance value)? number,
+    TResult Function(StringInstance value)? string,
+    TResult Function(MapInstance value)? map,
+    TResult Function(ListInstance value)? list,
+    TResult Function(ObjectInstance value)? object,
+    TResult Function(EnumInstance value)? enumeration,
+  }) =>
+      throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(NullInstance value)? nill,
+    TResult Function(BoolInstance value)? boolean,
+    TResult Function(NumInstance value)? number,
+    TResult Function(StringInstance value)? string,
+    TResult Function(MapInstance value)? map,
+    TResult Function(ListInstance value)? list,
+    TResult Function(ObjectInstance value)? object,
+    TResult Function(EnumInstance value)? enumeration,
+    required TResult orElse(),
+  }) =>
+      throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
-  $InstanceDetailsCopyWith<InstanceDetails> get copyWith;
+  $InstanceDetailsCopyWith<InstanceDetails> get copyWith =>
+      throw _privateConstructorUsedError;
 }
 
 /// @nodoc
@@ -999,8 +1158,7 @@ abstract class $InstanceDetailsCopyWith<$Res> {
   factory $InstanceDetailsCopyWith(
           InstanceDetails value, $Res Function(InstanceDetails) then) =
       _$InstanceDetailsCopyWithImpl<$Res>;
-  $Res call(
-      {String instanceRefId, @nullable Future<void> Function(String) setter});
+  $Res call({Setter? setter});
 }
 
 /// @nodoc
@@ -1014,16 +1172,13 @@ class _$InstanceDetailsCopyWithImpl<$Res>
 
   @override
   $Res call({
-    Object instanceRefId = freezed,
-    Object setter = freezed,
+    Object? setter = freezed,
   }) {
     return _then(_value.copyWith(
-      instanceRefId: instanceRefId == freezed
-          ? _value.instanceRefId
-          : instanceRefId as String,
       setter: setter == freezed
           ? _value.setter
-          : setter as Future<void> Function(String),
+          : setter // ignore: cast_nullable_to_non_nullable
+              as Setter?,
     ));
   }
 }
@@ -1035,8 +1190,7 @@ abstract class $NullInstanceCopyWith<$Res>
           NullInstance value, $Res Function(NullInstance) then) =
       _$NullInstanceCopyWithImpl<$Res>;
   @override
-  $Res call(
-      {String instanceRefId, @nullable Future<void> Function(String) setter});
+  $Res call({Setter? setter});
 }
 
 /// @nodoc
@@ -1052,53 +1206,48 @@ class _$NullInstanceCopyWithImpl<$Res>
 
   @override
   $Res call({
-    Object instanceRefId = freezed,
-    Object setter = freezed,
+    Object? setter = freezed,
   }) {
     return _then(NullInstance(
-      instanceRefId: instanceRefId == freezed
-          ? _value.instanceRefId
-          : instanceRefId as String,
       setter: setter == freezed
           ? _value.setter
-          : setter as Future<void> Function(String),
+          : setter // ignore: cast_nullable_to_non_nullable
+              as Setter?,
     ));
   }
 }
 
 /// @nodoc
-class _$NullInstance extends NullInstance {
-  _$NullInstance({this.instanceRefId, @required @nullable this.setter})
-      : assert(instanceRefId == null),
-        super._();
+
+class _$NullInstance extends NullInstance with DiagnosticableTreeMixin {
+  _$NullInstance({required this.setter}) : super._();
 
   @override
-  final String instanceRefId;
-  @override
-  @nullable
-  final Future<void> Function(String) setter;
+  final Setter? setter;
 
   @override
-  String toString() {
-    return 'InstanceDetails.nill(instanceRefId: $instanceRefId, setter: $setter)';
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'InstanceDetails.nill(setter: $setter)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'InstanceDetails.nill'))
+      ..add(DiagnosticsProperty('setter', setter));
   }
 
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other is NullInstance &&
-            (identical(other.instanceRefId, instanceRefId) ||
-                const DeepCollectionEquality()
-                    .equals(other.instanceRefId, instanceRefId)) &&
-            (identical(other.setter, setter) ||
-                const DeepCollectionEquality().equals(other.setter, setter)));
+        (other.runtimeType == runtimeType &&
+            other is NullInstance &&
+            (identical(other.setter, setter) || other.setter == setter));
   }
 
   @override
-  int get hashCode =>
-      runtimeType.hashCode ^
-      const DeepCollectionEquality().hash(instanceRefId) ^
-      const DeepCollectionEquality().hash(setter);
+  int get hashCode => Object.hash(runtimeType, setter);
 
   @JsonKey(ignore: true)
   @override
@@ -1107,121 +1256,153 @@ class _$NullInstance extends NullInstance {
 
   @override
   @optionalTypeArgs
-  TResult when<TResult extends Object>({
-    @required
-        TResult nill(String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult boolean(String displayString, String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult number(String displayString, String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult string(String displayString, String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult map(List<InstanceDetails> keys, int hash, String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult list(@nullable int length, int hash, String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult object(
+  TResult when<TResult extends Object?>({
+    required TResult Function(Setter? setter) nill,
+    required TResult Function(
+            String displayString, String instanceRefId, Setter? setter)
+        boolean,
+    required TResult Function(
+            String displayString, String instanceRefId, Setter? setter)
+        number,
+    required TResult Function(
+            String displayString, String instanceRefId, Setter? setter)
+        string,
+    required TResult Function(List<InstanceDetails> keys, int hash,
+            String instanceRefId, Setter? setter)
+        map,
+    required TResult Function(
+            int length, int hash, String instanceRefId, Setter? setter)
+        list,
+    required TResult Function(
             List<ObjectField> fields,
             String type,
             int hash,
             String instanceRefId,
-            @nullable Future<void> Function(String) setter,
-            EvalOnDartLibrary evalForInstance),
-    @required
-        TResult enumeration(
-            String type,
-            String value,
-            @nullable Future<void> Function(String) setter,
-            String instanceRefId),
+            Setter? setter,
+            EvalOnDartLibrary evalForInstance)
+        object,
+    required TResult Function(
+            String type, String value, Setter? setter, String instanceRefId)
+        enumeration,
   }) {
-    assert(nill != null);
-    assert(boolean != null);
-    assert(number != null);
-    assert(string != null);
-    assert(map != null);
-    assert(list != null);
-    assert(object != null);
-    assert(enumeration != null);
-    return nill(instanceRefId, setter);
+    return nill(setter);
   }
 
   @override
   @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object>({
-    TResult nill(
-        String instanceRefId, @nullable Future<void> Function(String) setter),
-    TResult boolean(String displayString, String instanceRefId,
-        @nullable Future<void> Function(String) setter),
-    TResult number(String displayString, String instanceRefId,
-        @nullable Future<void> Function(String) setter),
-    TResult string(String displayString, String instanceRefId,
-        @nullable Future<void> Function(String) setter),
-    TResult map(List<InstanceDetails> keys, int hash, String instanceRefId,
-        @nullable Future<void> Function(String) setter),
-    TResult list(@nullable int length, int hash, String instanceRefId,
-        @nullable Future<void> Function(String) setter),
-    TResult object(
-        List<ObjectField> fields,
-        String type,
-        int hash,
-        String instanceRefId,
-        @nullable Future<void> Function(String) setter,
-        EvalOnDartLibrary evalForInstance),
-    TResult enumeration(String type, String value,
-        @nullable Future<void> Function(String) setter, String instanceRefId),
-    @required TResult orElse(),
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult Function(Setter? setter)? nill,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        boolean,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        number,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        string,
+    TResult Function(List<InstanceDetails> keys, int hash, String instanceRefId,
+            Setter? setter)?
+        map,
+    TResult Function(
+            int length, int hash, String instanceRefId, Setter? setter)?
+        list,
+    TResult Function(
+            List<ObjectField> fields,
+            String type,
+            int hash,
+            String instanceRefId,
+            Setter? setter,
+            EvalOnDartLibrary evalForInstance)?
+        object,
+    TResult Function(
+            String type, String value, Setter? setter, String instanceRefId)?
+        enumeration,
   }) {
-    assert(orElse != null);
+    return nill?.call(setter);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(Setter? setter)? nill,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        boolean,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        number,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        string,
+    TResult Function(List<InstanceDetails> keys, int hash, String instanceRefId,
+            Setter? setter)?
+        map,
+    TResult Function(
+            int length, int hash, String instanceRefId, Setter? setter)?
+        list,
+    TResult Function(
+            List<ObjectField> fields,
+            String type,
+            int hash,
+            String instanceRefId,
+            Setter? setter,
+            EvalOnDartLibrary evalForInstance)?
+        object,
+    TResult Function(
+            String type, String value, Setter? setter, String instanceRefId)?
+        enumeration,
+    required TResult orElse(),
+  }) {
     if (nill != null) {
-      return nill(instanceRefId, setter);
+      return nill(setter);
     }
     return orElse();
   }
 
   @override
   @optionalTypeArgs
-  TResult map<TResult extends Object>({
-    @required TResult nill(NullInstance value),
-    @required TResult boolean(BoolInstance value),
-    @required TResult number(NumInstance value),
-    @required TResult string(StringInstance value),
-    @required TResult map(MapInstance value),
-    @required TResult list(ListInstance value),
-    @required TResult object(ObjectInstance value),
-    @required TResult enumeration(EnumInstance value),
+  TResult map<TResult extends Object?>({
+    required TResult Function(NullInstance value) nill,
+    required TResult Function(BoolInstance value) boolean,
+    required TResult Function(NumInstance value) number,
+    required TResult Function(StringInstance value) string,
+    required TResult Function(MapInstance value) map,
+    required TResult Function(ListInstance value) list,
+    required TResult Function(ObjectInstance value) object,
+    required TResult Function(EnumInstance value) enumeration,
   }) {
-    assert(nill != null);
-    assert(boolean != null);
-    assert(number != null);
-    assert(string != null);
-    assert(map != null);
-    assert(list != null);
-    assert(object != null);
-    assert(enumeration != null);
     return nill(this);
   }
 
   @override
   @optionalTypeArgs
-  TResult maybeMap<TResult extends Object>({
-    TResult nill(NullInstance value),
-    TResult boolean(BoolInstance value),
-    TResult number(NumInstance value),
-    TResult string(StringInstance value),
-    TResult map(MapInstance value),
-    TResult list(ListInstance value),
-    TResult object(ObjectInstance value),
-    TResult enumeration(EnumInstance value),
-    @required TResult orElse(),
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult Function(NullInstance value)? nill,
+    TResult Function(BoolInstance value)? boolean,
+    TResult Function(NumInstance value)? number,
+    TResult Function(StringInstance value)? string,
+    TResult Function(MapInstance value)? map,
+    TResult Function(ListInstance value)? list,
+    TResult Function(ObjectInstance value)? object,
+    TResult Function(EnumInstance value)? enumeration,
   }) {
-    assert(orElse != null);
+    return nill?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(NullInstance value)? nill,
+    TResult Function(BoolInstance value)? boolean,
+    TResult Function(NumInstance value)? number,
+    TResult Function(StringInstance value)? string,
+    TResult Function(MapInstance value)? map,
+    TResult Function(ListInstance value)? list,
+    TResult Function(ObjectInstance value)? object,
+    TResult Function(EnumInstance value)? enumeration,
+    required TResult orElse(),
+  }) {
     if (nill != null) {
       return nill(this);
     }
@@ -1230,20 +1411,15 @@ class _$NullInstance extends NullInstance {
 }
 
 abstract class NullInstance extends InstanceDetails {
+  factory NullInstance({required Setter? setter}) = _$NullInstance;
   NullInstance._() : super._();
-  factory NullInstance(
-          {String instanceRefId,
-          @required @nullable Future<void> Function(String) setter}) =
-      _$NullInstance;
 
   @override
-  String get instanceRefId;
-  @override
-  @nullable
-  Future<void> Function(String) get setter;
+  Setter? get setter;
   @override
   @JsonKey(ignore: true)
-  $NullInstanceCopyWith<NullInstance> get copyWith;
+  $NullInstanceCopyWith<NullInstance> get copyWith =>
+      throw _privateConstructorUsedError;
 }
 
 /// @nodoc
@@ -1253,10 +1429,7 @@ abstract class $BoolInstanceCopyWith<$Res>
           BoolInstance value, $Res Function(BoolInstance) then) =
       _$BoolInstanceCopyWithImpl<$Res>;
   @override
-  $Res call(
-      {String displayString,
-      String instanceRefId,
-      @nullable Future<void> Function(String) setter});
+  $Res call({String displayString, String instanceRefId, Setter? setter});
 }
 
 /// @nodoc
@@ -1272,63 +1445,74 @@ class _$BoolInstanceCopyWithImpl<$Res>
 
   @override
   $Res call({
-    Object displayString = freezed,
-    Object instanceRefId = freezed,
-    Object setter = freezed,
+    Object? displayString = freezed,
+    Object? instanceRefId = freezed,
+    Object? setter = freezed,
   }) {
     return _then(BoolInstance(
-      displayString == freezed ? _value.displayString : displayString as String,
+      displayString == freezed
+          ? _value.displayString
+          : displayString // ignore: cast_nullable_to_non_nullable
+              as String,
       instanceRefId: instanceRefId == freezed
           ? _value.instanceRefId
-          : instanceRefId as String,
+          : instanceRefId // ignore: cast_nullable_to_non_nullable
+              as String,
       setter: setter == freezed
           ? _value.setter
-          : setter as Future<void> Function(String),
+          : setter // ignore: cast_nullable_to_non_nullable
+              as Setter?,
     ));
   }
 }
 
 /// @nodoc
-class _$BoolInstance extends BoolInstance {
+
+class _$BoolInstance extends BoolInstance with DiagnosticableTreeMixin {
   _$BoolInstance(this.displayString,
-      {@required this.instanceRefId, @required @nullable this.setter})
-      : assert(displayString != null),
-        assert(instanceRefId != null),
-        super._();
+      {required this.instanceRefId, required this.setter})
+      : super._();
 
   @override
   final String displayString;
   @override
   final String instanceRefId;
   @override
-  @nullable
-  final Future<void> Function(String) setter;
+  final Setter? setter;
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'InstanceDetails.boolean(displayString: $displayString, instanceRefId: $instanceRefId, setter: $setter)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'InstanceDetails.boolean'))
+      ..add(DiagnosticsProperty('displayString', displayString))
+      ..add(DiagnosticsProperty('instanceRefId', instanceRefId))
+      ..add(DiagnosticsProperty('setter', setter));
   }
 
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other is BoolInstance &&
-            (identical(other.displayString, displayString) ||
-                const DeepCollectionEquality()
-                    .equals(other.displayString, displayString)) &&
-            (identical(other.instanceRefId, instanceRefId) ||
-                const DeepCollectionEquality()
-                    .equals(other.instanceRefId, instanceRefId)) &&
-            (identical(other.setter, setter) ||
-                const DeepCollectionEquality().equals(other.setter, setter)));
+        (other.runtimeType == runtimeType &&
+            other is BoolInstance &&
+            const DeepCollectionEquality()
+                .equals(other.displayString, displayString) &&
+            const DeepCollectionEquality()
+                .equals(other.instanceRefId, instanceRefId) &&
+            (identical(other.setter, setter) || other.setter == setter));
   }
 
   @override
-  int get hashCode =>
-      runtimeType.hashCode ^
-      const DeepCollectionEquality().hash(displayString) ^
-      const DeepCollectionEquality().hash(instanceRefId) ^
-      const DeepCollectionEquality().hash(setter);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(displayString),
+      const DeepCollectionEquality().hash(instanceRefId),
+      setter);
 
   @JsonKey(ignore: true)
   @override
@@ -1337,78 +1521,104 @@ class _$BoolInstance extends BoolInstance {
 
   @override
   @optionalTypeArgs
-  TResult when<TResult extends Object>({
-    @required
-        TResult nill(String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult boolean(String displayString, String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult number(String displayString, String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult string(String displayString, String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult map(List<InstanceDetails> keys, int hash, String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult list(@nullable int length, int hash, String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult object(
+  TResult when<TResult extends Object?>({
+    required TResult Function(Setter? setter) nill,
+    required TResult Function(
+            String displayString, String instanceRefId, Setter? setter)
+        boolean,
+    required TResult Function(
+            String displayString, String instanceRefId, Setter? setter)
+        number,
+    required TResult Function(
+            String displayString, String instanceRefId, Setter? setter)
+        string,
+    required TResult Function(List<InstanceDetails> keys, int hash,
+            String instanceRefId, Setter? setter)
+        map,
+    required TResult Function(
+            int length, int hash, String instanceRefId, Setter? setter)
+        list,
+    required TResult Function(
             List<ObjectField> fields,
             String type,
             int hash,
             String instanceRefId,
-            @nullable Future<void> Function(String) setter,
-            EvalOnDartLibrary evalForInstance),
-    @required
-        TResult enumeration(
-            String type,
-            String value,
-            @nullable Future<void> Function(String) setter,
-            String instanceRefId),
+            Setter? setter,
+            EvalOnDartLibrary evalForInstance)
+        object,
+    required TResult Function(
+            String type, String value, Setter? setter, String instanceRefId)
+        enumeration,
   }) {
-    assert(nill != null);
-    assert(boolean != null);
-    assert(number != null);
-    assert(string != null);
-    assert(map != null);
-    assert(list != null);
-    assert(object != null);
-    assert(enumeration != null);
     return boolean(displayString, instanceRefId, setter);
   }
 
   @override
   @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object>({
-    TResult nill(
-        String instanceRefId, @nullable Future<void> Function(String) setter),
-    TResult boolean(String displayString, String instanceRefId,
-        @nullable Future<void> Function(String) setter),
-    TResult number(String displayString, String instanceRefId,
-        @nullable Future<void> Function(String) setter),
-    TResult string(String displayString, String instanceRefId,
-        @nullable Future<void> Function(String) setter),
-    TResult map(List<InstanceDetails> keys, int hash, String instanceRefId,
-        @nullable Future<void> Function(String) setter),
-    TResult list(@nullable int length, int hash, String instanceRefId,
-        @nullable Future<void> Function(String) setter),
-    TResult object(
-        List<ObjectField> fields,
-        String type,
-        int hash,
-        String instanceRefId,
-        @nullable Future<void> Function(String) setter,
-        EvalOnDartLibrary evalForInstance),
-    TResult enumeration(String type, String value,
-        @nullable Future<void> Function(String) setter, String instanceRefId),
-    @required TResult orElse(),
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult Function(Setter? setter)? nill,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        boolean,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        number,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        string,
+    TResult Function(List<InstanceDetails> keys, int hash, String instanceRefId,
+            Setter? setter)?
+        map,
+    TResult Function(
+            int length, int hash, String instanceRefId, Setter? setter)?
+        list,
+    TResult Function(
+            List<ObjectField> fields,
+            String type,
+            int hash,
+            String instanceRefId,
+            Setter? setter,
+            EvalOnDartLibrary evalForInstance)?
+        object,
+    TResult Function(
+            String type, String value, Setter? setter, String instanceRefId)?
+        enumeration,
   }) {
-    assert(orElse != null);
+    return boolean?.call(displayString, instanceRefId, setter);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(Setter? setter)? nill,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        boolean,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        number,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        string,
+    TResult Function(List<InstanceDetails> keys, int hash, String instanceRefId,
+            Setter? setter)?
+        map,
+    TResult Function(
+            int length, int hash, String instanceRefId, Setter? setter)?
+        list,
+    TResult Function(
+            List<ObjectField> fields,
+            String type,
+            int hash,
+            String instanceRefId,
+            Setter? setter,
+            EvalOnDartLibrary evalForInstance)?
+        object,
+    TResult Function(
+            String type, String value, Setter? setter, String instanceRefId)?
+        enumeration,
+    required TResult orElse(),
+  }) {
     if (boolean != null) {
       return boolean(displayString, instanceRefId, setter);
     }
@@ -1417,41 +1627,47 @@ class _$BoolInstance extends BoolInstance {
 
   @override
   @optionalTypeArgs
-  TResult map<TResult extends Object>({
-    @required TResult nill(NullInstance value),
-    @required TResult boolean(BoolInstance value),
-    @required TResult number(NumInstance value),
-    @required TResult string(StringInstance value),
-    @required TResult map(MapInstance value),
-    @required TResult list(ListInstance value),
-    @required TResult object(ObjectInstance value),
-    @required TResult enumeration(EnumInstance value),
+  TResult map<TResult extends Object?>({
+    required TResult Function(NullInstance value) nill,
+    required TResult Function(BoolInstance value) boolean,
+    required TResult Function(NumInstance value) number,
+    required TResult Function(StringInstance value) string,
+    required TResult Function(MapInstance value) map,
+    required TResult Function(ListInstance value) list,
+    required TResult Function(ObjectInstance value) object,
+    required TResult Function(EnumInstance value) enumeration,
   }) {
-    assert(nill != null);
-    assert(boolean != null);
-    assert(number != null);
-    assert(string != null);
-    assert(map != null);
-    assert(list != null);
-    assert(object != null);
-    assert(enumeration != null);
     return boolean(this);
   }
 
   @override
   @optionalTypeArgs
-  TResult maybeMap<TResult extends Object>({
-    TResult nill(NullInstance value),
-    TResult boolean(BoolInstance value),
-    TResult number(NumInstance value),
-    TResult string(StringInstance value),
-    TResult map(MapInstance value),
-    TResult list(ListInstance value),
-    TResult object(ObjectInstance value),
-    TResult enumeration(EnumInstance value),
-    @required TResult orElse(),
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult Function(NullInstance value)? nill,
+    TResult Function(BoolInstance value)? boolean,
+    TResult Function(NumInstance value)? number,
+    TResult Function(StringInstance value)? string,
+    TResult Function(MapInstance value)? map,
+    TResult Function(ListInstance value)? list,
+    TResult Function(ObjectInstance value)? object,
+    TResult Function(EnumInstance value)? enumeration,
   }) {
-    assert(orElse != null);
+    return boolean?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(NullInstance value)? nill,
+    TResult Function(BoolInstance value)? boolean,
+    TResult Function(NumInstance value)? number,
+    TResult Function(StringInstance value)? string,
+    TResult Function(MapInstance value)? map,
+    TResult Function(ListInstance value)? list,
+    TResult Function(ObjectInstance value)? object,
+    TResult Function(EnumInstance value)? enumeration,
+    required TResult orElse(),
+  }) {
     if (boolean != null) {
       return boolean(this);
     }
@@ -1460,21 +1676,19 @@ class _$BoolInstance extends BoolInstance {
 }
 
 abstract class BoolInstance extends InstanceDetails {
-  BoolInstance._() : super._();
   factory BoolInstance(String displayString,
-          {@required String instanceRefId,
-          @required @nullable Future<void> Function(String) setter}) =
-      _$BoolInstance;
+      {required String instanceRefId,
+      required Setter? setter}) = _$BoolInstance;
+  BoolInstance._() : super._();
 
   String get displayString;
-  @override
   String get instanceRefId;
   @override
-  @nullable
-  Future<void> Function(String) get setter;
+  Setter? get setter;
   @override
   @JsonKey(ignore: true)
-  $BoolInstanceCopyWith<BoolInstance> get copyWith;
+  $BoolInstanceCopyWith<BoolInstance> get copyWith =>
+      throw _privateConstructorUsedError;
 }
 
 /// @nodoc
@@ -1484,10 +1698,7 @@ abstract class $NumInstanceCopyWith<$Res>
           NumInstance value, $Res Function(NumInstance) then) =
       _$NumInstanceCopyWithImpl<$Res>;
   @override
-  $Res call(
-      {String displayString,
-      String instanceRefId,
-      @nullable Future<void> Function(String) setter});
+  $Res call({String displayString, String instanceRefId, Setter? setter});
 }
 
 /// @nodoc
@@ -1503,63 +1714,74 @@ class _$NumInstanceCopyWithImpl<$Res>
 
   @override
   $Res call({
-    Object displayString = freezed,
-    Object instanceRefId = freezed,
-    Object setter = freezed,
+    Object? displayString = freezed,
+    Object? instanceRefId = freezed,
+    Object? setter = freezed,
   }) {
     return _then(NumInstance(
-      displayString == freezed ? _value.displayString : displayString as String,
+      displayString == freezed
+          ? _value.displayString
+          : displayString // ignore: cast_nullable_to_non_nullable
+              as String,
       instanceRefId: instanceRefId == freezed
           ? _value.instanceRefId
-          : instanceRefId as String,
+          : instanceRefId // ignore: cast_nullable_to_non_nullable
+              as String,
       setter: setter == freezed
           ? _value.setter
-          : setter as Future<void> Function(String),
+          : setter // ignore: cast_nullable_to_non_nullable
+              as Setter?,
     ));
   }
 }
 
 /// @nodoc
-class _$NumInstance extends NumInstance {
+
+class _$NumInstance extends NumInstance with DiagnosticableTreeMixin {
   _$NumInstance(this.displayString,
-      {@required this.instanceRefId, @required @nullable this.setter})
-      : assert(displayString != null),
-        assert(instanceRefId != null),
-        super._();
+      {required this.instanceRefId, required this.setter})
+      : super._();
 
   @override
   final String displayString;
   @override
   final String instanceRefId;
   @override
-  @nullable
-  final Future<void> Function(String) setter;
+  final Setter? setter;
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'InstanceDetails.number(displayString: $displayString, instanceRefId: $instanceRefId, setter: $setter)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'InstanceDetails.number'))
+      ..add(DiagnosticsProperty('displayString', displayString))
+      ..add(DiagnosticsProperty('instanceRefId', instanceRefId))
+      ..add(DiagnosticsProperty('setter', setter));
   }
 
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other is NumInstance &&
-            (identical(other.displayString, displayString) ||
-                const DeepCollectionEquality()
-                    .equals(other.displayString, displayString)) &&
-            (identical(other.instanceRefId, instanceRefId) ||
-                const DeepCollectionEquality()
-                    .equals(other.instanceRefId, instanceRefId)) &&
-            (identical(other.setter, setter) ||
-                const DeepCollectionEquality().equals(other.setter, setter)));
+        (other.runtimeType == runtimeType &&
+            other is NumInstance &&
+            const DeepCollectionEquality()
+                .equals(other.displayString, displayString) &&
+            const DeepCollectionEquality()
+                .equals(other.instanceRefId, instanceRefId) &&
+            (identical(other.setter, setter) || other.setter == setter));
   }
 
   @override
-  int get hashCode =>
-      runtimeType.hashCode ^
-      const DeepCollectionEquality().hash(displayString) ^
-      const DeepCollectionEquality().hash(instanceRefId) ^
-      const DeepCollectionEquality().hash(setter);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(displayString),
+      const DeepCollectionEquality().hash(instanceRefId),
+      setter);
 
   @JsonKey(ignore: true)
   @override
@@ -1568,78 +1790,104 @@ class _$NumInstance extends NumInstance {
 
   @override
   @optionalTypeArgs
-  TResult when<TResult extends Object>({
-    @required
-        TResult nill(String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult boolean(String displayString, String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult number(String displayString, String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult string(String displayString, String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult map(List<InstanceDetails> keys, int hash, String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult list(@nullable int length, int hash, String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult object(
+  TResult when<TResult extends Object?>({
+    required TResult Function(Setter? setter) nill,
+    required TResult Function(
+            String displayString, String instanceRefId, Setter? setter)
+        boolean,
+    required TResult Function(
+            String displayString, String instanceRefId, Setter? setter)
+        number,
+    required TResult Function(
+            String displayString, String instanceRefId, Setter? setter)
+        string,
+    required TResult Function(List<InstanceDetails> keys, int hash,
+            String instanceRefId, Setter? setter)
+        map,
+    required TResult Function(
+            int length, int hash, String instanceRefId, Setter? setter)
+        list,
+    required TResult Function(
             List<ObjectField> fields,
             String type,
             int hash,
             String instanceRefId,
-            @nullable Future<void> Function(String) setter,
-            EvalOnDartLibrary evalForInstance),
-    @required
-        TResult enumeration(
-            String type,
-            String value,
-            @nullable Future<void> Function(String) setter,
-            String instanceRefId),
+            Setter? setter,
+            EvalOnDartLibrary evalForInstance)
+        object,
+    required TResult Function(
+            String type, String value, Setter? setter, String instanceRefId)
+        enumeration,
   }) {
-    assert(nill != null);
-    assert(boolean != null);
-    assert(number != null);
-    assert(string != null);
-    assert(map != null);
-    assert(list != null);
-    assert(object != null);
-    assert(enumeration != null);
     return number(displayString, instanceRefId, setter);
   }
 
   @override
   @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object>({
-    TResult nill(
-        String instanceRefId, @nullable Future<void> Function(String) setter),
-    TResult boolean(String displayString, String instanceRefId,
-        @nullable Future<void> Function(String) setter),
-    TResult number(String displayString, String instanceRefId,
-        @nullable Future<void> Function(String) setter),
-    TResult string(String displayString, String instanceRefId,
-        @nullable Future<void> Function(String) setter),
-    TResult map(List<InstanceDetails> keys, int hash, String instanceRefId,
-        @nullable Future<void> Function(String) setter),
-    TResult list(@nullable int length, int hash, String instanceRefId,
-        @nullable Future<void> Function(String) setter),
-    TResult object(
-        List<ObjectField> fields,
-        String type,
-        int hash,
-        String instanceRefId,
-        @nullable Future<void> Function(String) setter,
-        EvalOnDartLibrary evalForInstance),
-    TResult enumeration(String type, String value,
-        @nullable Future<void> Function(String) setter, String instanceRefId),
-    @required TResult orElse(),
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult Function(Setter? setter)? nill,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        boolean,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        number,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        string,
+    TResult Function(List<InstanceDetails> keys, int hash, String instanceRefId,
+            Setter? setter)?
+        map,
+    TResult Function(
+            int length, int hash, String instanceRefId, Setter? setter)?
+        list,
+    TResult Function(
+            List<ObjectField> fields,
+            String type,
+            int hash,
+            String instanceRefId,
+            Setter? setter,
+            EvalOnDartLibrary evalForInstance)?
+        object,
+    TResult Function(
+            String type, String value, Setter? setter, String instanceRefId)?
+        enumeration,
   }) {
-    assert(orElse != null);
+    return number?.call(displayString, instanceRefId, setter);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(Setter? setter)? nill,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        boolean,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        number,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        string,
+    TResult Function(List<InstanceDetails> keys, int hash, String instanceRefId,
+            Setter? setter)?
+        map,
+    TResult Function(
+            int length, int hash, String instanceRefId, Setter? setter)?
+        list,
+    TResult Function(
+            List<ObjectField> fields,
+            String type,
+            int hash,
+            String instanceRefId,
+            Setter? setter,
+            EvalOnDartLibrary evalForInstance)?
+        object,
+    TResult Function(
+            String type, String value, Setter? setter, String instanceRefId)?
+        enumeration,
+    required TResult orElse(),
+  }) {
     if (number != null) {
       return number(displayString, instanceRefId, setter);
     }
@@ -1648,41 +1896,47 @@ class _$NumInstance extends NumInstance {
 
   @override
   @optionalTypeArgs
-  TResult map<TResult extends Object>({
-    @required TResult nill(NullInstance value),
-    @required TResult boolean(BoolInstance value),
-    @required TResult number(NumInstance value),
-    @required TResult string(StringInstance value),
-    @required TResult map(MapInstance value),
-    @required TResult list(ListInstance value),
-    @required TResult object(ObjectInstance value),
-    @required TResult enumeration(EnumInstance value),
+  TResult map<TResult extends Object?>({
+    required TResult Function(NullInstance value) nill,
+    required TResult Function(BoolInstance value) boolean,
+    required TResult Function(NumInstance value) number,
+    required TResult Function(StringInstance value) string,
+    required TResult Function(MapInstance value) map,
+    required TResult Function(ListInstance value) list,
+    required TResult Function(ObjectInstance value) object,
+    required TResult Function(EnumInstance value) enumeration,
   }) {
-    assert(nill != null);
-    assert(boolean != null);
-    assert(number != null);
-    assert(string != null);
-    assert(map != null);
-    assert(list != null);
-    assert(object != null);
-    assert(enumeration != null);
     return number(this);
   }
 
   @override
   @optionalTypeArgs
-  TResult maybeMap<TResult extends Object>({
-    TResult nill(NullInstance value),
-    TResult boolean(BoolInstance value),
-    TResult number(NumInstance value),
-    TResult string(StringInstance value),
-    TResult map(MapInstance value),
-    TResult list(ListInstance value),
-    TResult object(ObjectInstance value),
-    TResult enumeration(EnumInstance value),
-    @required TResult orElse(),
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult Function(NullInstance value)? nill,
+    TResult Function(BoolInstance value)? boolean,
+    TResult Function(NumInstance value)? number,
+    TResult Function(StringInstance value)? string,
+    TResult Function(MapInstance value)? map,
+    TResult Function(ListInstance value)? list,
+    TResult Function(ObjectInstance value)? object,
+    TResult Function(EnumInstance value)? enumeration,
   }) {
-    assert(orElse != null);
+    return number?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(NullInstance value)? nill,
+    TResult Function(BoolInstance value)? boolean,
+    TResult Function(NumInstance value)? number,
+    TResult Function(StringInstance value)? string,
+    TResult Function(MapInstance value)? map,
+    TResult Function(ListInstance value)? list,
+    TResult Function(ObjectInstance value)? object,
+    TResult Function(EnumInstance value)? enumeration,
+    required TResult orElse(),
+  }) {
     if (number != null) {
       return number(this);
     }
@@ -1691,21 +1945,18 @@ class _$NumInstance extends NumInstance {
 }
 
 abstract class NumInstance extends InstanceDetails {
-  NumInstance._() : super._();
   factory NumInstance(String displayString,
-          {@required String instanceRefId,
-          @required @nullable Future<void> Function(String) setter}) =
-      _$NumInstance;
+      {required String instanceRefId, required Setter? setter}) = _$NumInstance;
+  NumInstance._() : super._();
 
   String get displayString;
-  @override
   String get instanceRefId;
   @override
-  @nullable
-  Future<void> Function(String) get setter;
+  Setter? get setter;
   @override
   @JsonKey(ignore: true)
-  $NumInstanceCopyWith<NumInstance> get copyWith;
+  $NumInstanceCopyWith<NumInstance> get copyWith =>
+      throw _privateConstructorUsedError;
 }
 
 /// @nodoc
@@ -1715,10 +1966,7 @@ abstract class $StringInstanceCopyWith<$Res>
           StringInstance value, $Res Function(StringInstance) then) =
       _$StringInstanceCopyWithImpl<$Res>;
   @override
-  $Res call(
-      {String displayString,
-      String instanceRefId,
-      @nullable Future<void> Function(String) setter});
+  $Res call({String displayString, String instanceRefId, Setter? setter});
 }
 
 /// @nodoc
@@ -1734,63 +1982,74 @@ class _$StringInstanceCopyWithImpl<$Res>
 
   @override
   $Res call({
-    Object displayString = freezed,
-    Object instanceRefId = freezed,
-    Object setter = freezed,
+    Object? displayString = freezed,
+    Object? instanceRefId = freezed,
+    Object? setter = freezed,
   }) {
     return _then(StringInstance(
-      displayString == freezed ? _value.displayString : displayString as String,
+      displayString == freezed
+          ? _value.displayString
+          : displayString // ignore: cast_nullable_to_non_nullable
+              as String,
       instanceRefId: instanceRefId == freezed
           ? _value.instanceRefId
-          : instanceRefId as String,
+          : instanceRefId // ignore: cast_nullable_to_non_nullable
+              as String,
       setter: setter == freezed
           ? _value.setter
-          : setter as Future<void> Function(String),
+          : setter // ignore: cast_nullable_to_non_nullable
+              as Setter?,
     ));
   }
 }
 
 /// @nodoc
-class _$StringInstance extends StringInstance {
+
+class _$StringInstance extends StringInstance with DiagnosticableTreeMixin {
   _$StringInstance(this.displayString,
-      {@required this.instanceRefId, @required @nullable this.setter})
-      : assert(displayString != null),
-        assert(instanceRefId != null),
-        super._();
+      {required this.instanceRefId, required this.setter})
+      : super._();
 
   @override
   final String displayString;
   @override
   final String instanceRefId;
   @override
-  @nullable
-  final Future<void> Function(String) setter;
+  final Setter? setter;
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'InstanceDetails.string(displayString: $displayString, instanceRefId: $instanceRefId, setter: $setter)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'InstanceDetails.string'))
+      ..add(DiagnosticsProperty('displayString', displayString))
+      ..add(DiagnosticsProperty('instanceRefId', instanceRefId))
+      ..add(DiagnosticsProperty('setter', setter));
   }
 
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other is StringInstance &&
-            (identical(other.displayString, displayString) ||
-                const DeepCollectionEquality()
-                    .equals(other.displayString, displayString)) &&
-            (identical(other.instanceRefId, instanceRefId) ||
-                const DeepCollectionEquality()
-                    .equals(other.instanceRefId, instanceRefId)) &&
-            (identical(other.setter, setter) ||
-                const DeepCollectionEquality().equals(other.setter, setter)));
+        (other.runtimeType == runtimeType &&
+            other is StringInstance &&
+            const DeepCollectionEquality()
+                .equals(other.displayString, displayString) &&
+            const DeepCollectionEquality()
+                .equals(other.instanceRefId, instanceRefId) &&
+            (identical(other.setter, setter) || other.setter == setter));
   }
 
   @override
-  int get hashCode =>
-      runtimeType.hashCode ^
-      const DeepCollectionEquality().hash(displayString) ^
-      const DeepCollectionEquality().hash(instanceRefId) ^
-      const DeepCollectionEquality().hash(setter);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(displayString),
+      const DeepCollectionEquality().hash(instanceRefId),
+      setter);
 
   @JsonKey(ignore: true)
   @override
@@ -1799,78 +2058,104 @@ class _$StringInstance extends StringInstance {
 
   @override
   @optionalTypeArgs
-  TResult when<TResult extends Object>({
-    @required
-        TResult nill(String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult boolean(String displayString, String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult number(String displayString, String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult string(String displayString, String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult map(List<InstanceDetails> keys, int hash, String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult list(@nullable int length, int hash, String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult object(
+  TResult when<TResult extends Object?>({
+    required TResult Function(Setter? setter) nill,
+    required TResult Function(
+            String displayString, String instanceRefId, Setter? setter)
+        boolean,
+    required TResult Function(
+            String displayString, String instanceRefId, Setter? setter)
+        number,
+    required TResult Function(
+            String displayString, String instanceRefId, Setter? setter)
+        string,
+    required TResult Function(List<InstanceDetails> keys, int hash,
+            String instanceRefId, Setter? setter)
+        map,
+    required TResult Function(
+            int length, int hash, String instanceRefId, Setter? setter)
+        list,
+    required TResult Function(
             List<ObjectField> fields,
             String type,
             int hash,
             String instanceRefId,
-            @nullable Future<void> Function(String) setter,
-            EvalOnDartLibrary evalForInstance),
-    @required
-        TResult enumeration(
-            String type,
-            String value,
-            @nullable Future<void> Function(String) setter,
-            String instanceRefId),
+            Setter? setter,
+            EvalOnDartLibrary evalForInstance)
+        object,
+    required TResult Function(
+            String type, String value, Setter? setter, String instanceRefId)
+        enumeration,
   }) {
-    assert(nill != null);
-    assert(boolean != null);
-    assert(number != null);
-    assert(string != null);
-    assert(map != null);
-    assert(list != null);
-    assert(object != null);
-    assert(enumeration != null);
     return string(displayString, instanceRefId, setter);
   }
 
   @override
   @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object>({
-    TResult nill(
-        String instanceRefId, @nullable Future<void> Function(String) setter),
-    TResult boolean(String displayString, String instanceRefId,
-        @nullable Future<void> Function(String) setter),
-    TResult number(String displayString, String instanceRefId,
-        @nullable Future<void> Function(String) setter),
-    TResult string(String displayString, String instanceRefId,
-        @nullable Future<void> Function(String) setter),
-    TResult map(List<InstanceDetails> keys, int hash, String instanceRefId,
-        @nullable Future<void> Function(String) setter),
-    TResult list(@nullable int length, int hash, String instanceRefId,
-        @nullable Future<void> Function(String) setter),
-    TResult object(
-        List<ObjectField> fields,
-        String type,
-        int hash,
-        String instanceRefId,
-        @nullable Future<void> Function(String) setter,
-        EvalOnDartLibrary evalForInstance),
-    TResult enumeration(String type, String value,
-        @nullable Future<void> Function(String) setter, String instanceRefId),
-    @required TResult orElse(),
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult Function(Setter? setter)? nill,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        boolean,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        number,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        string,
+    TResult Function(List<InstanceDetails> keys, int hash, String instanceRefId,
+            Setter? setter)?
+        map,
+    TResult Function(
+            int length, int hash, String instanceRefId, Setter? setter)?
+        list,
+    TResult Function(
+            List<ObjectField> fields,
+            String type,
+            int hash,
+            String instanceRefId,
+            Setter? setter,
+            EvalOnDartLibrary evalForInstance)?
+        object,
+    TResult Function(
+            String type, String value, Setter? setter, String instanceRefId)?
+        enumeration,
   }) {
-    assert(orElse != null);
+    return string?.call(displayString, instanceRefId, setter);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(Setter? setter)? nill,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        boolean,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        number,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        string,
+    TResult Function(List<InstanceDetails> keys, int hash, String instanceRefId,
+            Setter? setter)?
+        map,
+    TResult Function(
+            int length, int hash, String instanceRefId, Setter? setter)?
+        list,
+    TResult Function(
+            List<ObjectField> fields,
+            String type,
+            int hash,
+            String instanceRefId,
+            Setter? setter,
+            EvalOnDartLibrary evalForInstance)?
+        object,
+    TResult Function(
+            String type, String value, Setter? setter, String instanceRefId)?
+        enumeration,
+    required TResult orElse(),
+  }) {
     if (string != null) {
       return string(displayString, instanceRefId, setter);
     }
@@ -1879,41 +2164,47 @@ class _$StringInstance extends StringInstance {
 
   @override
   @optionalTypeArgs
-  TResult map<TResult extends Object>({
-    @required TResult nill(NullInstance value),
-    @required TResult boolean(BoolInstance value),
-    @required TResult number(NumInstance value),
-    @required TResult string(StringInstance value),
-    @required TResult map(MapInstance value),
-    @required TResult list(ListInstance value),
-    @required TResult object(ObjectInstance value),
-    @required TResult enumeration(EnumInstance value),
+  TResult map<TResult extends Object?>({
+    required TResult Function(NullInstance value) nill,
+    required TResult Function(BoolInstance value) boolean,
+    required TResult Function(NumInstance value) number,
+    required TResult Function(StringInstance value) string,
+    required TResult Function(MapInstance value) map,
+    required TResult Function(ListInstance value) list,
+    required TResult Function(ObjectInstance value) object,
+    required TResult Function(EnumInstance value) enumeration,
   }) {
-    assert(nill != null);
-    assert(boolean != null);
-    assert(number != null);
-    assert(string != null);
-    assert(map != null);
-    assert(list != null);
-    assert(object != null);
-    assert(enumeration != null);
     return string(this);
   }
 
   @override
   @optionalTypeArgs
-  TResult maybeMap<TResult extends Object>({
-    TResult nill(NullInstance value),
-    TResult boolean(BoolInstance value),
-    TResult number(NumInstance value),
-    TResult string(StringInstance value),
-    TResult map(MapInstance value),
-    TResult list(ListInstance value),
-    TResult object(ObjectInstance value),
-    TResult enumeration(EnumInstance value),
-    @required TResult orElse(),
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult Function(NullInstance value)? nill,
+    TResult Function(BoolInstance value)? boolean,
+    TResult Function(NumInstance value)? number,
+    TResult Function(StringInstance value)? string,
+    TResult Function(MapInstance value)? map,
+    TResult Function(ListInstance value)? list,
+    TResult Function(ObjectInstance value)? object,
+    TResult Function(EnumInstance value)? enumeration,
   }) {
-    assert(orElse != null);
+    return string?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(NullInstance value)? nill,
+    TResult Function(BoolInstance value)? boolean,
+    TResult Function(NumInstance value)? number,
+    TResult Function(StringInstance value)? string,
+    TResult Function(MapInstance value)? map,
+    TResult Function(ListInstance value)? list,
+    TResult Function(ObjectInstance value)? object,
+    TResult Function(EnumInstance value)? enumeration,
+    required TResult orElse(),
+  }) {
     if (string != null) {
       return string(this);
     }
@@ -1922,21 +2213,19 @@ class _$StringInstance extends StringInstance {
 }
 
 abstract class StringInstance extends InstanceDetails {
-  StringInstance._() : super._();
   factory StringInstance(String displayString,
-          {@required String instanceRefId,
-          @required @nullable Future<void> Function(String) setter}) =
-      _$StringInstance;
+      {required String instanceRefId,
+      required Setter? setter}) = _$StringInstance;
+  StringInstance._() : super._();
 
   String get displayString;
-  @override
   String get instanceRefId;
   @override
-  @nullable
-  Future<void> Function(String) get setter;
+  Setter? get setter;
   @override
   @JsonKey(ignore: true)
-  $StringInstanceCopyWith<StringInstance> get copyWith;
+  $StringInstanceCopyWith<StringInstance> get copyWith =>
+      throw _privateConstructorUsedError;
 }
 
 /// @nodoc
@@ -1950,7 +2239,7 @@ abstract class $MapInstanceCopyWith<$Res>
       {List<InstanceDetails> keys,
       int hash,
       String instanceRefId,
-      @nullable Future<void> Function(String) setter});
+      Setter? setter});
 }
 
 /// @nodoc
@@ -1966,34 +2255,38 @@ class _$MapInstanceCopyWithImpl<$Res>
 
   @override
   $Res call({
-    Object keys = freezed,
-    Object hash = freezed,
-    Object instanceRefId = freezed,
-    Object setter = freezed,
+    Object? keys = freezed,
+    Object? hash = freezed,
+    Object? instanceRefId = freezed,
+    Object? setter = freezed,
   }) {
     return _then(MapInstance(
-      keys == freezed ? _value.keys : keys as List<InstanceDetails>,
-      hash: hash == freezed ? _value.hash : hash as int,
+      keys == freezed
+          ? _value.keys
+          : keys // ignore: cast_nullable_to_non_nullable
+              as List<InstanceDetails>,
+      hash: hash == freezed
+          ? _value.hash
+          : hash // ignore: cast_nullable_to_non_nullable
+              as int,
       instanceRefId: instanceRefId == freezed
           ? _value.instanceRefId
-          : instanceRefId as String,
+          : instanceRefId // ignore: cast_nullable_to_non_nullable
+              as String,
       setter: setter == freezed
           ? _value.setter
-          : setter as Future<void> Function(String),
+          : setter // ignore: cast_nullable_to_non_nullable
+              as Setter?,
     ));
   }
 }
 
 /// @nodoc
-class _$MapInstance extends MapInstance {
+
+class _$MapInstance extends MapInstance with DiagnosticableTreeMixin {
   _$MapInstance(this.keys,
-      {@required this.hash,
-      @required this.instanceRefId,
-      @required @nullable this.setter})
-      : assert(keys != null),
-        assert(hash != null),
-        assert(instanceRefId != null),
-        super._();
+      {required this.hash, required this.instanceRefId, required this.setter})
+      : super._();
 
   @override
   final List<InstanceDetails> keys;
@@ -2002,36 +2295,43 @@ class _$MapInstance extends MapInstance {
   @override
   final String instanceRefId;
   @override
-  @nullable
-  final Future<void> Function(String) setter;
+  final Setter? setter;
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'InstanceDetails.map(keys: $keys, hash: $hash, instanceRefId: $instanceRefId, setter: $setter)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'InstanceDetails.map'))
+      ..add(DiagnosticsProperty('keys', keys))
+      ..add(DiagnosticsProperty('hash', hash))
+      ..add(DiagnosticsProperty('instanceRefId', instanceRefId))
+      ..add(DiagnosticsProperty('setter', setter));
   }
 
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other is MapInstance &&
-            (identical(other.keys, keys) ||
-                const DeepCollectionEquality().equals(other.keys, keys)) &&
-            (identical(other.hash, hash) ||
-                const DeepCollectionEquality().equals(other.hash, hash)) &&
-            (identical(other.instanceRefId, instanceRefId) ||
-                const DeepCollectionEquality()
-                    .equals(other.instanceRefId, instanceRefId)) &&
-            (identical(other.setter, setter) ||
-                const DeepCollectionEquality().equals(other.setter, setter)));
+        (other.runtimeType == runtimeType &&
+            other is MapInstance &&
+            const DeepCollectionEquality().equals(other.keys, keys) &&
+            const DeepCollectionEquality().equals(other.hash, hash) &&
+            const DeepCollectionEquality()
+                .equals(other.instanceRefId, instanceRefId) &&
+            (identical(other.setter, setter) || other.setter == setter));
   }
 
   @override
-  int get hashCode =>
-      runtimeType.hashCode ^
-      const DeepCollectionEquality().hash(keys) ^
-      const DeepCollectionEquality().hash(hash) ^
-      const DeepCollectionEquality().hash(instanceRefId) ^
-      const DeepCollectionEquality().hash(setter);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(keys),
+      const DeepCollectionEquality().hash(hash),
+      const DeepCollectionEquality().hash(instanceRefId),
+      setter);
 
   @JsonKey(ignore: true)
   @override
@@ -2040,78 +2340,104 @@ class _$MapInstance extends MapInstance {
 
   @override
   @optionalTypeArgs
-  TResult when<TResult extends Object>({
-    @required
-        TResult nill(String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult boolean(String displayString, String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult number(String displayString, String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult string(String displayString, String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult map(List<InstanceDetails> keys, int hash, String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult list(@nullable int length, int hash, String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult object(
+  TResult when<TResult extends Object?>({
+    required TResult Function(Setter? setter) nill,
+    required TResult Function(
+            String displayString, String instanceRefId, Setter? setter)
+        boolean,
+    required TResult Function(
+            String displayString, String instanceRefId, Setter? setter)
+        number,
+    required TResult Function(
+            String displayString, String instanceRefId, Setter? setter)
+        string,
+    required TResult Function(List<InstanceDetails> keys, int hash,
+            String instanceRefId, Setter? setter)
+        map,
+    required TResult Function(
+            int length, int hash, String instanceRefId, Setter? setter)
+        list,
+    required TResult Function(
             List<ObjectField> fields,
             String type,
             int hash,
             String instanceRefId,
-            @nullable Future<void> Function(String) setter,
-            EvalOnDartLibrary evalForInstance),
-    @required
-        TResult enumeration(
-            String type,
-            String value,
-            @nullable Future<void> Function(String) setter,
-            String instanceRefId),
+            Setter? setter,
+            EvalOnDartLibrary evalForInstance)
+        object,
+    required TResult Function(
+            String type, String value, Setter? setter, String instanceRefId)
+        enumeration,
   }) {
-    assert(nill != null);
-    assert(boolean != null);
-    assert(number != null);
-    assert(string != null);
-    assert(map != null);
-    assert(list != null);
-    assert(object != null);
-    assert(enumeration != null);
     return map(keys, hash, instanceRefId, setter);
   }
 
   @override
   @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object>({
-    TResult nill(
-        String instanceRefId, @nullable Future<void> Function(String) setter),
-    TResult boolean(String displayString, String instanceRefId,
-        @nullable Future<void> Function(String) setter),
-    TResult number(String displayString, String instanceRefId,
-        @nullable Future<void> Function(String) setter),
-    TResult string(String displayString, String instanceRefId,
-        @nullable Future<void> Function(String) setter),
-    TResult map(List<InstanceDetails> keys, int hash, String instanceRefId,
-        @nullable Future<void> Function(String) setter),
-    TResult list(@nullable int length, int hash, String instanceRefId,
-        @nullable Future<void> Function(String) setter),
-    TResult object(
-        List<ObjectField> fields,
-        String type,
-        int hash,
-        String instanceRefId,
-        @nullable Future<void> Function(String) setter,
-        EvalOnDartLibrary evalForInstance),
-    TResult enumeration(String type, String value,
-        @nullable Future<void> Function(String) setter, String instanceRefId),
-    @required TResult orElse(),
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult Function(Setter? setter)? nill,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        boolean,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        number,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        string,
+    TResult Function(List<InstanceDetails> keys, int hash, String instanceRefId,
+            Setter? setter)?
+        map,
+    TResult Function(
+            int length, int hash, String instanceRefId, Setter? setter)?
+        list,
+    TResult Function(
+            List<ObjectField> fields,
+            String type,
+            int hash,
+            String instanceRefId,
+            Setter? setter,
+            EvalOnDartLibrary evalForInstance)?
+        object,
+    TResult Function(
+            String type, String value, Setter? setter, String instanceRefId)?
+        enumeration,
   }) {
-    assert(orElse != null);
+    return map?.call(keys, hash, instanceRefId, setter);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(Setter? setter)? nill,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        boolean,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        number,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        string,
+    TResult Function(List<InstanceDetails> keys, int hash, String instanceRefId,
+            Setter? setter)?
+        map,
+    TResult Function(
+            int length, int hash, String instanceRefId, Setter? setter)?
+        list,
+    TResult Function(
+            List<ObjectField> fields,
+            String type,
+            int hash,
+            String instanceRefId,
+            Setter? setter,
+            EvalOnDartLibrary evalForInstance)?
+        object,
+    TResult Function(
+            String type, String value, Setter? setter, String instanceRefId)?
+        enumeration,
+    required TResult orElse(),
+  }) {
     if (map != null) {
       return map(keys, hash, instanceRefId, setter);
     }
@@ -2120,41 +2446,47 @@ class _$MapInstance extends MapInstance {
 
   @override
   @optionalTypeArgs
-  TResult map<TResult extends Object>({
-    @required TResult nill(NullInstance value),
-    @required TResult boolean(BoolInstance value),
-    @required TResult number(NumInstance value),
-    @required TResult string(StringInstance value),
-    @required TResult map(MapInstance value),
-    @required TResult list(ListInstance value),
-    @required TResult object(ObjectInstance value),
-    @required TResult enumeration(EnumInstance value),
+  TResult map<TResult extends Object?>({
+    required TResult Function(NullInstance value) nill,
+    required TResult Function(BoolInstance value) boolean,
+    required TResult Function(NumInstance value) number,
+    required TResult Function(StringInstance value) string,
+    required TResult Function(MapInstance value) map,
+    required TResult Function(ListInstance value) list,
+    required TResult Function(ObjectInstance value) object,
+    required TResult Function(EnumInstance value) enumeration,
   }) {
-    assert(nill != null);
-    assert(boolean != null);
-    assert(number != null);
-    assert(string != null);
-    assert(map != null);
-    assert(list != null);
-    assert(object != null);
-    assert(enumeration != null);
     return map(this);
   }
 
   @override
   @optionalTypeArgs
-  TResult maybeMap<TResult extends Object>({
-    TResult nill(NullInstance value),
-    TResult boolean(BoolInstance value),
-    TResult number(NumInstance value),
-    TResult string(StringInstance value),
-    TResult map(MapInstance value),
-    TResult list(ListInstance value),
-    TResult object(ObjectInstance value),
-    TResult enumeration(EnumInstance value),
-    @required TResult orElse(),
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult Function(NullInstance value)? nill,
+    TResult Function(BoolInstance value)? boolean,
+    TResult Function(NumInstance value)? number,
+    TResult Function(StringInstance value)? string,
+    TResult Function(MapInstance value)? map,
+    TResult Function(ListInstance value)? list,
+    TResult Function(ObjectInstance value)? object,
+    TResult Function(EnumInstance value)? enumeration,
   }) {
-    assert(orElse != null);
+    return map?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(NullInstance value)? nill,
+    TResult Function(BoolInstance value)? boolean,
+    TResult Function(NumInstance value)? number,
+    TResult Function(StringInstance value)? string,
+    TResult Function(MapInstance value)? map,
+    TResult Function(ListInstance value)? list,
+    TResult Function(ObjectInstance value)? object,
+    TResult Function(EnumInstance value)? enumeration,
+    required TResult orElse(),
+  }) {
     if (map != null) {
       return map(this);
     }
@@ -2163,23 +2495,21 @@ class _$MapInstance extends MapInstance {
 }
 
 abstract class MapInstance extends InstanceDetails {
-  MapInstance._() : super._();
   factory MapInstance(List<InstanceDetails> keys,
-          {@required int hash,
-          @required String instanceRefId,
-          @required @nullable Future<void> Function(String) setter}) =
-      _$MapInstance;
+      {required int hash,
+      required String instanceRefId,
+      required Setter? setter}) = _$MapInstance;
+  MapInstance._() : super._();
 
   List<InstanceDetails> get keys;
   int get hash;
-  @override
   String get instanceRefId;
   @override
-  @nullable
-  Future<void> Function(String) get setter;
+  Setter? get setter;
   @override
   @JsonKey(ignore: true)
-  $MapInstanceCopyWith<MapInstance> get copyWith;
+  $MapInstanceCopyWith<MapInstance> get copyWith =>
+      throw _privateConstructorUsedError;
 }
 
 /// @nodoc
@@ -2189,11 +2519,7 @@ abstract class $ListInstanceCopyWith<$Res>
           ListInstance value, $Res Function(ListInstance) then) =
       _$ListInstanceCopyWithImpl<$Res>;
   @override
-  $Res call(
-      {@nullable int length,
-      int hash,
-      String instanceRefId,
-      @nullable Future<void> Function(String) setter});
+  $Res call({int length, int hash, String instanceRefId, Setter? setter});
 }
 
 /// @nodoc
@@ -2209,73 +2535,86 @@ class _$ListInstanceCopyWithImpl<$Res>
 
   @override
   $Res call({
-    Object length = freezed,
-    Object hash = freezed,
-    Object instanceRefId = freezed,
-    Object setter = freezed,
+    Object? length = freezed,
+    Object? hash = freezed,
+    Object? instanceRefId = freezed,
+    Object? setter = freezed,
   }) {
     return _then(ListInstance(
-      length: length == freezed ? _value.length : length as int,
-      hash: hash == freezed ? _value.hash : hash as int,
+      length: length == freezed
+          ? _value.length
+          : length // ignore: cast_nullable_to_non_nullable
+              as int,
+      hash: hash == freezed
+          ? _value.hash
+          : hash // ignore: cast_nullable_to_non_nullable
+              as int,
       instanceRefId: instanceRefId == freezed
           ? _value.instanceRefId
-          : instanceRefId as String,
+          : instanceRefId // ignore: cast_nullable_to_non_nullable
+              as String,
       setter: setter == freezed
           ? _value.setter
-          : setter as Future<void> Function(String),
+          : setter // ignore: cast_nullable_to_non_nullable
+              as Setter?,
     ));
   }
 }
 
 /// @nodoc
-class _$ListInstance extends ListInstance {
+
+class _$ListInstance extends ListInstance with DiagnosticableTreeMixin {
   _$ListInstance(
-      {@required @nullable this.length,
-      @required this.hash,
-      @required this.instanceRefId,
-      @required @nullable this.setter})
-      : assert(hash != null),
-        assert(instanceRefId != null),
-        super._();
+      {required this.length,
+      required this.hash,
+      required this.instanceRefId,
+      required this.setter})
+      : super._();
 
   @override
-  @nullable
   final int length;
   @override
   final int hash;
   @override
   final String instanceRefId;
   @override
-  @nullable
-  final Future<void> Function(String) setter;
+  final Setter? setter;
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'InstanceDetails.list(length: $length, hash: $hash, instanceRefId: $instanceRefId, setter: $setter)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'InstanceDetails.list'))
+      ..add(DiagnosticsProperty('length', length))
+      ..add(DiagnosticsProperty('hash', hash))
+      ..add(DiagnosticsProperty('instanceRefId', instanceRefId))
+      ..add(DiagnosticsProperty('setter', setter));
   }
 
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other is ListInstance &&
-            (identical(other.length, length) ||
-                const DeepCollectionEquality().equals(other.length, length)) &&
-            (identical(other.hash, hash) ||
-                const DeepCollectionEquality().equals(other.hash, hash)) &&
-            (identical(other.instanceRefId, instanceRefId) ||
-                const DeepCollectionEquality()
-                    .equals(other.instanceRefId, instanceRefId)) &&
-            (identical(other.setter, setter) ||
-                const DeepCollectionEquality().equals(other.setter, setter)));
+        (other.runtimeType == runtimeType &&
+            other is ListInstance &&
+            const DeepCollectionEquality().equals(other.length, length) &&
+            const DeepCollectionEquality().equals(other.hash, hash) &&
+            const DeepCollectionEquality()
+                .equals(other.instanceRefId, instanceRefId) &&
+            (identical(other.setter, setter) || other.setter == setter));
   }
 
   @override
-  int get hashCode =>
-      runtimeType.hashCode ^
-      const DeepCollectionEquality().hash(length) ^
-      const DeepCollectionEquality().hash(hash) ^
-      const DeepCollectionEquality().hash(instanceRefId) ^
-      const DeepCollectionEquality().hash(setter);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(length),
+      const DeepCollectionEquality().hash(hash),
+      const DeepCollectionEquality().hash(instanceRefId),
+      setter);
 
   @JsonKey(ignore: true)
   @override
@@ -2284,78 +2623,104 @@ class _$ListInstance extends ListInstance {
 
   @override
   @optionalTypeArgs
-  TResult when<TResult extends Object>({
-    @required
-        TResult nill(String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult boolean(String displayString, String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult number(String displayString, String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult string(String displayString, String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult map(List<InstanceDetails> keys, int hash, String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult list(@nullable int length, int hash, String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult object(
+  TResult when<TResult extends Object?>({
+    required TResult Function(Setter? setter) nill,
+    required TResult Function(
+            String displayString, String instanceRefId, Setter? setter)
+        boolean,
+    required TResult Function(
+            String displayString, String instanceRefId, Setter? setter)
+        number,
+    required TResult Function(
+            String displayString, String instanceRefId, Setter? setter)
+        string,
+    required TResult Function(List<InstanceDetails> keys, int hash,
+            String instanceRefId, Setter? setter)
+        map,
+    required TResult Function(
+            int length, int hash, String instanceRefId, Setter? setter)
+        list,
+    required TResult Function(
             List<ObjectField> fields,
             String type,
             int hash,
             String instanceRefId,
-            @nullable Future<void> Function(String) setter,
-            EvalOnDartLibrary evalForInstance),
-    @required
-        TResult enumeration(
-            String type,
-            String value,
-            @nullable Future<void> Function(String) setter,
-            String instanceRefId),
+            Setter? setter,
+            EvalOnDartLibrary evalForInstance)
+        object,
+    required TResult Function(
+            String type, String value, Setter? setter, String instanceRefId)
+        enumeration,
   }) {
-    assert(nill != null);
-    assert(boolean != null);
-    assert(number != null);
-    assert(string != null);
-    assert(map != null);
-    assert(list != null);
-    assert(object != null);
-    assert(enumeration != null);
     return list(length, hash, instanceRefId, setter);
   }
 
   @override
   @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object>({
-    TResult nill(
-        String instanceRefId, @nullable Future<void> Function(String) setter),
-    TResult boolean(String displayString, String instanceRefId,
-        @nullable Future<void> Function(String) setter),
-    TResult number(String displayString, String instanceRefId,
-        @nullable Future<void> Function(String) setter),
-    TResult string(String displayString, String instanceRefId,
-        @nullable Future<void> Function(String) setter),
-    TResult map(List<InstanceDetails> keys, int hash, String instanceRefId,
-        @nullable Future<void> Function(String) setter),
-    TResult list(@nullable int length, int hash, String instanceRefId,
-        @nullable Future<void> Function(String) setter),
-    TResult object(
-        List<ObjectField> fields,
-        String type,
-        int hash,
-        String instanceRefId,
-        @nullable Future<void> Function(String) setter,
-        EvalOnDartLibrary evalForInstance),
-    TResult enumeration(String type, String value,
-        @nullable Future<void> Function(String) setter, String instanceRefId),
-    @required TResult orElse(),
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult Function(Setter? setter)? nill,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        boolean,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        number,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        string,
+    TResult Function(List<InstanceDetails> keys, int hash, String instanceRefId,
+            Setter? setter)?
+        map,
+    TResult Function(
+            int length, int hash, String instanceRefId, Setter? setter)?
+        list,
+    TResult Function(
+            List<ObjectField> fields,
+            String type,
+            int hash,
+            String instanceRefId,
+            Setter? setter,
+            EvalOnDartLibrary evalForInstance)?
+        object,
+    TResult Function(
+            String type, String value, Setter? setter, String instanceRefId)?
+        enumeration,
   }) {
-    assert(orElse != null);
+    return list?.call(length, hash, instanceRefId, setter);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(Setter? setter)? nill,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        boolean,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        number,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        string,
+    TResult Function(List<InstanceDetails> keys, int hash, String instanceRefId,
+            Setter? setter)?
+        map,
+    TResult Function(
+            int length, int hash, String instanceRefId, Setter? setter)?
+        list,
+    TResult Function(
+            List<ObjectField> fields,
+            String type,
+            int hash,
+            String instanceRefId,
+            Setter? setter,
+            EvalOnDartLibrary evalForInstance)?
+        object,
+    TResult Function(
+            String type, String value, Setter? setter, String instanceRefId)?
+        enumeration,
+    required TResult orElse(),
+  }) {
     if (list != null) {
       return list(length, hash, instanceRefId, setter);
     }
@@ -2364,41 +2729,47 @@ class _$ListInstance extends ListInstance {
 
   @override
   @optionalTypeArgs
-  TResult map<TResult extends Object>({
-    @required TResult nill(NullInstance value),
-    @required TResult boolean(BoolInstance value),
-    @required TResult number(NumInstance value),
-    @required TResult string(StringInstance value),
-    @required TResult map(MapInstance value),
-    @required TResult list(ListInstance value),
-    @required TResult object(ObjectInstance value),
-    @required TResult enumeration(EnumInstance value),
+  TResult map<TResult extends Object?>({
+    required TResult Function(NullInstance value) nill,
+    required TResult Function(BoolInstance value) boolean,
+    required TResult Function(NumInstance value) number,
+    required TResult Function(StringInstance value) string,
+    required TResult Function(MapInstance value) map,
+    required TResult Function(ListInstance value) list,
+    required TResult Function(ObjectInstance value) object,
+    required TResult Function(EnumInstance value) enumeration,
   }) {
-    assert(nill != null);
-    assert(boolean != null);
-    assert(number != null);
-    assert(string != null);
-    assert(map != null);
-    assert(list != null);
-    assert(object != null);
-    assert(enumeration != null);
     return list(this);
   }
 
   @override
   @optionalTypeArgs
-  TResult maybeMap<TResult extends Object>({
-    TResult nill(NullInstance value),
-    TResult boolean(BoolInstance value),
-    TResult number(NumInstance value),
-    TResult string(StringInstance value),
-    TResult map(MapInstance value),
-    TResult list(ListInstance value),
-    TResult object(ObjectInstance value),
-    TResult enumeration(EnumInstance value),
-    @required TResult orElse(),
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult Function(NullInstance value)? nill,
+    TResult Function(BoolInstance value)? boolean,
+    TResult Function(NumInstance value)? number,
+    TResult Function(StringInstance value)? string,
+    TResult Function(MapInstance value)? map,
+    TResult Function(ListInstance value)? list,
+    TResult Function(ObjectInstance value)? object,
+    TResult Function(EnumInstance value)? enumeration,
   }) {
-    assert(orElse != null);
+    return list?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(NullInstance value)? nill,
+    TResult Function(BoolInstance value)? boolean,
+    TResult Function(NumInstance value)? number,
+    TResult Function(StringInstance value)? string,
+    TResult Function(MapInstance value)? map,
+    TResult Function(ListInstance value)? list,
+    TResult Function(ObjectInstance value)? object,
+    TResult Function(EnumInstance value)? enumeration,
+    required TResult orElse(),
+  }) {
     if (list != null) {
       return list(this);
     }
@@ -2407,25 +2778,22 @@ class _$ListInstance extends ListInstance {
 }
 
 abstract class ListInstance extends InstanceDetails {
-  ListInstance._() : super._();
   factory ListInstance(
-          {@required @nullable int length,
-          @required int hash,
-          @required String instanceRefId,
-          @required @nullable Future<void> Function(String) setter}) =
-      _$ListInstance;
+      {required int length,
+      required int hash,
+      required String instanceRefId,
+      required Setter? setter}) = _$ListInstance;
+  ListInstance._() : super._();
 
-  @nullable
   int get length;
   int get hash;
-  @override
   String get instanceRefId;
   @override
-  @nullable
-  Future<void> Function(String) get setter;
+  Setter? get setter;
   @override
   @JsonKey(ignore: true)
-  $ListInstanceCopyWith<ListInstance> get copyWith;
+  $ListInstanceCopyWith<ListInstance> get copyWith =>
+      throw _privateConstructorUsedError;
 }
 
 /// @nodoc
@@ -2440,7 +2808,7 @@ abstract class $ObjectInstanceCopyWith<$Res>
       String type,
       int hash,
       String instanceRefId,
-      @nullable Future<void> Function(String) setter,
+      Setter? setter,
       EvalOnDartLibrary evalForInstance});
 }
 
@@ -2457,44 +2825,52 @@ class _$ObjectInstanceCopyWithImpl<$Res>
 
   @override
   $Res call({
-    Object fields = freezed,
-    Object type = freezed,
-    Object hash = freezed,
-    Object instanceRefId = freezed,
-    Object setter = freezed,
-    Object evalForInstance = freezed,
+    Object? fields = freezed,
+    Object? type = freezed,
+    Object? hash = freezed,
+    Object? instanceRefId = freezed,
+    Object? setter = freezed,
+    Object? evalForInstance = freezed,
   }) {
     return _then(ObjectInstance(
-      fields == freezed ? _value.fields : fields as List<ObjectField>,
-      type: type == freezed ? _value.type : type as String,
-      hash: hash == freezed ? _value.hash : hash as int,
+      fields == freezed
+          ? _value.fields
+          : fields // ignore: cast_nullable_to_non_nullable
+              as List<ObjectField>,
+      type: type == freezed
+          ? _value.type
+          : type // ignore: cast_nullable_to_non_nullable
+              as String,
+      hash: hash == freezed
+          ? _value.hash
+          : hash // ignore: cast_nullable_to_non_nullable
+              as int,
       instanceRefId: instanceRefId == freezed
           ? _value.instanceRefId
-          : instanceRefId as String,
+          : instanceRefId // ignore: cast_nullable_to_non_nullable
+              as String,
       setter: setter == freezed
           ? _value.setter
-          : setter as Future<void> Function(String),
+          : setter // ignore: cast_nullable_to_non_nullable
+              as Setter?,
       evalForInstance: evalForInstance == freezed
           ? _value.evalForInstance
-          : evalForInstance as EvalOnDartLibrary,
+          : evalForInstance // ignore: cast_nullable_to_non_nullable
+              as EvalOnDartLibrary,
     ));
   }
 }
 
 /// @nodoc
-class _$ObjectInstance extends ObjectInstance {
+
+class _$ObjectInstance extends ObjectInstance with DiagnosticableTreeMixin {
   _$ObjectInstance(this.fields,
-      {@required this.type,
-      @required this.hash,
-      @required this.instanceRefId,
-      @required @nullable this.setter,
-      @required this.evalForInstance})
-      : assert(fields != null),
-        assert(type != null),
-        assert(hash != null),
-        assert(instanceRefId != null),
-        assert(evalForInstance != null),
-        super._();
+      {required this.type,
+      required this.hash,
+      required this.instanceRefId,
+      required this.setter,
+      required this.evalForInstance})
+      : super._();
 
   @override
   final List<ObjectField> fields;
@@ -2505,8 +2881,7 @@ class _$ObjectInstance extends ObjectInstance {
   @override
   final String instanceRefId;
   @override
-  @nullable
-  final Future<void> Function(String) setter;
+  final Setter? setter;
   @override
 
   /// An [EvalOnDartLibrary] associated with the library of this object
@@ -2515,39 +2890,47 @@ class _$ObjectInstance extends ObjectInstance {
   final EvalOnDartLibrary evalForInstance;
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'InstanceDetails.object(fields: $fields, type: $type, hash: $hash, instanceRefId: $instanceRefId, setter: $setter, evalForInstance: $evalForInstance)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'InstanceDetails.object'))
+      ..add(DiagnosticsProperty('fields', fields))
+      ..add(DiagnosticsProperty('type', type))
+      ..add(DiagnosticsProperty('hash', hash))
+      ..add(DiagnosticsProperty('instanceRefId', instanceRefId))
+      ..add(DiagnosticsProperty('setter', setter))
+      ..add(DiagnosticsProperty('evalForInstance', evalForInstance));
   }
 
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other is ObjectInstance &&
-            (identical(other.fields, fields) ||
-                const DeepCollectionEquality().equals(other.fields, fields)) &&
-            (identical(other.type, type) ||
-                const DeepCollectionEquality().equals(other.type, type)) &&
-            (identical(other.hash, hash) ||
-                const DeepCollectionEquality().equals(other.hash, hash)) &&
-            (identical(other.instanceRefId, instanceRefId) ||
-                const DeepCollectionEquality()
-                    .equals(other.instanceRefId, instanceRefId)) &&
-            (identical(other.setter, setter) ||
-                const DeepCollectionEquality().equals(other.setter, setter)) &&
-            (identical(other.evalForInstance, evalForInstance) ||
-                const DeepCollectionEquality()
-                    .equals(other.evalForInstance, evalForInstance)));
+        (other.runtimeType == runtimeType &&
+            other is ObjectInstance &&
+            const DeepCollectionEquality().equals(other.fields, fields) &&
+            const DeepCollectionEquality().equals(other.type, type) &&
+            const DeepCollectionEquality().equals(other.hash, hash) &&
+            const DeepCollectionEquality()
+                .equals(other.instanceRefId, instanceRefId) &&
+            (identical(other.setter, setter) || other.setter == setter) &&
+            const DeepCollectionEquality()
+                .equals(other.evalForInstance, evalForInstance));
   }
 
   @override
-  int get hashCode =>
-      runtimeType.hashCode ^
-      const DeepCollectionEquality().hash(fields) ^
-      const DeepCollectionEquality().hash(type) ^
-      const DeepCollectionEquality().hash(hash) ^
-      const DeepCollectionEquality().hash(instanceRefId) ^
-      const DeepCollectionEquality().hash(setter) ^
-      const DeepCollectionEquality().hash(evalForInstance);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(fields),
+      const DeepCollectionEquality().hash(type),
+      const DeepCollectionEquality().hash(hash),
+      const DeepCollectionEquality().hash(instanceRefId),
+      setter,
+      const DeepCollectionEquality().hash(evalForInstance));
 
   @JsonKey(ignore: true)
   @override
@@ -2556,78 +2939,105 @@ class _$ObjectInstance extends ObjectInstance {
 
   @override
   @optionalTypeArgs
-  TResult when<TResult extends Object>({
-    @required
-        TResult nill(String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult boolean(String displayString, String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult number(String displayString, String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult string(String displayString, String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult map(List<InstanceDetails> keys, int hash, String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult list(@nullable int length, int hash, String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult object(
+  TResult when<TResult extends Object?>({
+    required TResult Function(Setter? setter) nill,
+    required TResult Function(
+            String displayString, String instanceRefId, Setter? setter)
+        boolean,
+    required TResult Function(
+            String displayString, String instanceRefId, Setter? setter)
+        number,
+    required TResult Function(
+            String displayString, String instanceRefId, Setter? setter)
+        string,
+    required TResult Function(List<InstanceDetails> keys, int hash,
+            String instanceRefId, Setter? setter)
+        map,
+    required TResult Function(
+            int length, int hash, String instanceRefId, Setter? setter)
+        list,
+    required TResult Function(
             List<ObjectField> fields,
             String type,
             int hash,
             String instanceRefId,
-            @nullable Future<void> Function(String) setter,
-            EvalOnDartLibrary evalForInstance),
-    @required
-        TResult enumeration(
-            String type,
-            String value,
-            @nullable Future<void> Function(String) setter,
-            String instanceRefId),
+            Setter? setter,
+            EvalOnDartLibrary evalForInstance)
+        object,
+    required TResult Function(
+            String type, String value, Setter? setter, String instanceRefId)
+        enumeration,
   }) {
-    assert(nill != null);
-    assert(boolean != null);
-    assert(number != null);
-    assert(string != null);
-    assert(map != null);
-    assert(list != null);
-    assert(object != null);
-    assert(enumeration != null);
     return object(fields, type, hash, instanceRefId, setter, evalForInstance);
   }
 
   @override
   @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object>({
-    TResult nill(
-        String instanceRefId, @nullable Future<void> Function(String) setter),
-    TResult boolean(String displayString, String instanceRefId,
-        @nullable Future<void> Function(String) setter),
-    TResult number(String displayString, String instanceRefId,
-        @nullable Future<void> Function(String) setter),
-    TResult string(String displayString, String instanceRefId,
-        @nullable Future<void> Function(String) setter),
-    TResult map(List<InstanceDetails> keys, int hash, String instanceRefId,
-        @nullable Future<void> Function(String) setter),
-    TResult list(@nullable int length, int hash, String instanceRefId,
-        @nullable Future<void> Function(String) setter),
-    TResult object(
-        List<ObjectField> fields,
-        String type,
-        int hash,
-        String instanceRefId,
-        @nullable Future<void> Function(String) setter,
-        EvalOnDartLibrary evalForInstance),
-    TResult enumeration(String type, String value,
-        @nullable Future<void> Function(String) setter, String instanceRefId),
-    @required TResult orElse(),
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult Function(Setter? setter)? nill,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        boolean,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        number,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        string,
+    TResult Function(List<InstanceDetails> keys, int hash, String instanceRefId,
+            Setter? setter)?
+        map,
+    TResult Function(
+            int length, int hash, String instanceRefId, Setter? setter)?
+        list,
+    TResult Function(
+            List<ObjectField> fields,
+            String type,
+            int hash,
+            String instanceRefId,
+            Setter? setter,
+            EvalOnDartLibrary evalForInstance)?
+        object,
+    TResult Function(
+            String type, String value, Setter? setter, String instanceRefId)?
+        enumeration,
   }) {
-    assert(orElse != null);
+    return object?.call(
+        fields, type, hash, instanceRefId, setter, evalForInstance);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(Setter? setter)? nill,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        boolean,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        number,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        string,
+    TResult Function(List<InstanceDetails> keys, int hash, String instanceRefId,
+            Setter? setter)?
+        map,
+    TResult Function(
+            int length, int hash, String instanceRefId, Setter? setter)?
+        list,
+    TResult Function(
+            List<ObjectField> fields,
+            String type,
+            int hash,
+            String instanceRefId,
+            Setter? setter,
+            EvalOnDartLibrary evalForInstance)?
+        object,
+    TResult Function(
+            String type, String value, Setter? setter, String instanceRefId)?
+        enumeration,
+    required TResult orElse(),
+  }) {
     if (object != null) {
       return object(fields, type, hash, instanceRefId, setter, evalForInstance);
     }
@@ -2636,41 +3046,47 @@ class _$ObjectInstance extends ObjectInstance {
 
   @override
   @optionalTypeArgs
-  TResult map<TResult extends Object>({
-    @required TResult nill(NullInstance value),
-    @required TResult boolean(BoolInstance value),
-    @required TResult number(NumInstance value),
-    @required TResult string(StringInstance value),
-    @required TResult map(MapInstance value),
-    @required TResult list(ListInstance value),
-    @required TResult object(ObjectInstance value),
-    @required TResult enumeration(EnumInstance value),
+  TResult map<TResult extends Object?>({
+    required TResult Function(NullInstance value) nill,
+    required TResult Function(BoolInstance value) boolean,
+    required TResult Function(NumInstance value) number,
+    required TResult Function(StringInstance value) string,
+    required TResult Function(MapInstance value) map,
+    required TResult Function(ListInstance value) list,
+    required TResult Function(ObjectInstance value) object,
+    required TResult Function(EnumInstance value) enumeration,
   }) {
-    assert(nill != null);
-    assert(boolean != null);
-    assert(number != null);
-    assert(string != null);
-    assert(map != null);
-    assert(list != null);
-    assert(object != null);
-    assert(enumeration != null);
     return object(this);
   }
 
   @override
   @optionalTypeArgs
-  TResult maybeMap<TResult extends Object>({
-    TResult nill(NullInstance value),
-    TResult boolean(BoolInstance value),
-    TResult number(NumInstance value),
-    TResult string(StringInstance value),
-    TResult map(MapInstance value),
-    TResult list(ListInstance value),
-    TResult object(ObjectInstance value),
-    TResult enumeration(EnumInstance value),
-    @required TResult orElse(),
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult Function(NullInstance value)? nill,
+    TResult Function(BoolInstance value)? boolean,
+    TResult Function(NumInstance value)? number,
+    TResult Function(StringInstance value)? string,
+    TResult Function(MapInstance value)? map,
+    TResult Function(ListInstance value)? list,
+    TResult Function(ObjectInstance value)? object,
+    TResult Function(EnumInstance value)? enumeration,
   }) {
-    assert(orElse != null);
+    return object?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(NullInstance value)? nill,
+    TResult Function(BoolInstance value)? boolean,
+    TResult Function(NumInstance value)? number,
+    TResult Function(StringInstance value)? string,
+    TResult Function(MapInstance value)? map,
+    TResult Function(ListInstance value)? list,
+    TResult Function(ObjectInstance value)? object,
+    TResult Function(EnumInstance value)? enumeration,
+    required TResult orElse(),
+  }) {
     if (object != null) {
       return object(this);
     }
@@ -2679,22 +3095,20 @@ class _$ObjectInstance extends ObjectInstance {
 }
 
 abstract class ObjectInstance extends InstanceDetails {
-  ObjectInstance._() : super._();
   factory ObjectInstance(List<ObjectField> fields,
-      {@required String type,
-      @required int hash,
-      @required String instanceRefId,
-      @required @nullable Future<void> Function(String) setter,
-      @required EvalOnDartLibrary evalForInstance}) = _$ObjectInstance;
+      {required String type,
+      required int hash,
+      required String instanceRefId,
+      required Setter? setter,
+      required EvalOnDartLibrary evalForInstance}) = _$ObjectInstance;
+  ObjectInstance._() : super._();
 
   List<ObjectField> get fields;
   String get type;
   int get hash;
-  @override
   String get instanceRefId;
   @override
-  @nullable
-  Future<void> Function(String) get setter;
+  Setter? get setter;
 
   /// An [EvalOnDartLibrary] associated with the library of this object
   ///
@@ -2702,7 +3116,8 @@ abstract class ObjectInstance extends InstanceDetails {
   EvalOnDartLibrary get evalForInstance;
   @override
   @JsonKey(ignore: true)
-  $ObjectInstanceCopyWith<ObjectInstance> get copyWith;
+  $ObjectInstanceCopyWith<ObjectInstance> get copyWith =>
+      throw _privateConstructorUsedError;
 }
 
 /// @nodoc
@@ -2712,11 +3127,7 @@ abstract class $EnumInstanceCopyWith<$Res>
           EnumInstance value, $Res Function(EnumInstance) then) =
       _$EnumInstanceCopyWithImpl<$Res>;
   @override
-  $Res call(
-      {String type,
-      String value,
-      @nullable Future<void> Function(String) setter,
-      String instanceRefId});
+  $Res call({String type, String value, Setter? setter, String instanceRefId});
 }
 
 /// @nodoc
@@ -2732,73 +3143,86 @@ class _$EnumInstanceCopyWithImpl<$Res>
 
   @override
   $Res call({
-    Object type = freezed,
-    Object value = freezed,
-    Object setter = freezed,
-    Object instanceRefId = freezed,
+    Object? type = freezed,
+    Object? value = freezed,
+    Object? setter = freezed,
+    Object? instanceRefId = freezed,
   }) {
     return _then(EnumInstance(
-      type: type == freezed ? _value.type : type as String,
-      value: value == freezed ? _value.value : value as String,
+      type: type == freezed
+          ? _value.type
+          : type // ignore: cast_nullable_to_non_nullable
+              as String,
+      value: value == freezed
+          ? _value.value
+          : value // ignore: cast_nullable_to_non_nullable
+              as String,
       setter: setter == freezed
           ? _value.setter
-          : setter as Future<void> Function(String),
+          : setter // ignore: cast_nullable_to_non_nullable
+              as Setter?,
       instanceRefId: instanceRefId == freezed
           ? _value.instanceRefId
-          : instanceRefId as String,
+          : instanceRefId // ignore: cast_nullable_to_non_nullable
+              as String,
     ));
   }
 }
 
 /// @nodoc
-class _$EnumInstance extends EnumInstance {
+
+class _$EnumInstance extends EnumInstance with DiagnosticableTreeMixin {
   _$EnumInstance(
-      {@required this.type,
-      @required this.value,
-      @required @nullable this.setter,
-      @required this.instanceRefId})
-      : assert(type != null),
-        assert(value != null),
-        assert(instanceRefId != null),
-        super._();
+      {required this.type,
+      required this.value,
+      required this.setter,
+      required this.instanceRefId})
+      : super._();
 
   @override
   final String type;
   @override
   final String value;
   @override
-  @nullable
-  final Future<void> Function(String) setter;
+  final Setter? setter;
   @override
   final String instanceRefId;
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'InstanceDetails.enumeration(type: $type, value: $value, setter: $setter, instanceRefId: $instanceRefId)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'InstanceDetails.enumeration'))
+      ..add(DiagnosticsProperty('type', type))
+      ..add(DiagnosticsProperty('value', value))
+      ..add(DiagnosticsProperty('setter', setter))
+      ..add(DiagnosticsProperty('instanceRefId', instanceRefId));
   }
 
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other is EnumInstance &&
-            (identical(other.type, type) ||
-                const DeepCollectionEquality().equals(other.type, type)) &&
-            (identical(other.value, value) ||
-                const DeepCollectionEquality().equals(other.value, value)) &&
-            (identical(other.setter, setter) ||
-                const DeepCollectionEquality().equals(other.setter, setter)) &&
-            (identical(other.instanceRefId, instanceRefId) ||
-                const DeepCollectionEquality()
-                    .equals(other.instanceRefId, instanceRefId)));
+        (other.runtimeType == runtimeType &&
+            other is EnumInstance &&
+            const DeepCollectionEquality().equals(other.type, type) &&
+            const DeepCollectionEquality().equals(other.value, value) &&
+            (identical(other.setter, setter) || other.setter == setter) &&
+            const DeepCollectionEquality()
+                .equals(other.instanceRefId, instanceRefId));
   }
 
   @override
-  int get hashCode =>
-      runtimeType.hashCode ^
-      const DeepCollectionEquality().hash(type) ^
-      const DeepCollectionEquality().hash(value) ^
-      const DeepCollectionEquality().hash(setter) ^
-      const DeepCollectionEquality().hash(instanceRefId);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(type),
+      const DeepCollectionEquality().hash(value),
+      setter,
+      const DeepCollectionEquality().hash(instanceRefId));
 
   @JsonKey(ignore: true)
   @override
@@ -2807,78 +3231,104 @@ class _$EnumInstance extends EnumInstance {
 
   @override
   @optionalTypeArgs
-  TResult when<TResult extends Object>({
-    @required
-        TResult nill(String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult boolean(String displayString, String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult number(String displayString, String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult string(String displayString, String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult map(List<InstanceDetails> keys, int hash, String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult list(@nullable int length, int hash, String instanceRefId,
-            @nullable Future<void> Function(String) setter),
-    @required
-        TResult object(
+  TResult when<TResult extends Object?>({
+    required TResult Function(Setter? setter) nill,
+    required TResult Function(
+            String displayString, String instanceRefId, Setter? setter)
+        boolean,
+    required TResult Function(
+            String displayString, String instanceRefId, Setter? setter)
+        number,
+    required TResult Function(
+            String displayString, String instanceRefId, Setter? setter)
+        string,
+    required TResult Function(List<InstanceDetails> keys, int hash,
+            String instanceRefId, Setter? setter)
+        map,
+    required TResult Function(
+            int length, int hash, String instanceRefId, Setter? setter)
+        list,
+    required TResult Function(
             List<ObjectField> fields,
             String type,
             int hash,
             String instanceRefId,
-            @nullable Future<void> Function(String) setter,
-            EvalOnDartLibrary evalForInstance),
-    @required
-        TResult enumeration(
-            String type,
-            String value,
-            @nullable Future<void> Function(String) setter,
-            String instanceRefId),
+            Setter? setter,
+            EvalOnDartLibrary evalForInstance)
+        object,
+    required TResult Function(
+            String type, String value, Setter? setter, String instanceRefId)
+        enumeration,
   }) {
-    assert(nill != null);
-    assert(boolean != null);
-    assert(number != null);
-    assert(string != null);
-    assert(map != null);
-    assert(list != null);
-    assert(object != null);
-    assert(enumeration != null);
     return enumeration(type, value, setter, instanceRefId);
   }
 
   @override
   @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object>({
-    TResult nill(
-        String instanceRefId, @nullable Future<void> Function(String) setter),
-    TResult boolean(String displayString, String instanceRefId,
-        @nullable Future<void> Function(String) setter),
-    TResult number(String displayString, String instanceRefId,
-        @nullable Future<void> Function(String) setter),
-    TResult string(String displayString, String instanceRefId,
-        @nullable Future<void> Function(String) setter),
-    TResult map(List<InstanceDetails> keys, int hash, String instanceRefId,
-        @nullable Future<void> Function(String) setter),
-    TResult list(@nullable int length, int hash, String instanceRefId,
-        @nullable Future<void> Function(String) setter),
-    TResult object(
-        List<ObjectField> fields,
-        String type,
-        int hash,
-        String instanceRefId,
-        @nullable Future<void> Function(String) setter,
-        EvalOnDartLibrary evalForInstance),
-    TResult enumeration(String type, String value,
-        @nullable Future<void> Function(String) setter, String instanceRefId),
-    @required TResult orElse(),
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult Function(Setter? setter)? nill,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        boolean,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        number,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        string,
+    TResult Function(List<InstanceDetails> keys, int hash, String instanceRefId,
+            Setter? setter)?
+        map,
+    TResult Function(
+            int length, int hash, String instanceRefId, Setter? setter)?
+        list,
+    TResult Function(
+            List<ObjectField> fields,
+            String type,
+            int hash,
+            String instanceRefId,
+            Setter? setter,
+            EvalOnDartLibrary evalForInstance)?
+        object,
+    TResult Function(
+            String type, String value, Setter? setter, String instanceRefId)?
+        enumeration,
   }) {
-    assert(orElse != null);
+    return enumeration?.call(type, value, setter, instanceRefId);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(Setter? setter)? nill,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        boolean,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        number,
+    TResult Function(
+            String displayString, String instanceRefId, Setter? setter)?
+        string,
+    TResult Function(List<InstanceDetails> keys, int hash, String instanceRefId,
+            Setter? setter)?
+        map,
+    TResult Function(
+            int length, int hash, String instanceRefId, Setter? setter)?
+        list,
+    TResult Function(
+            List<ObjectField> fields,
+            String type,
+            int hash,
+            String instanceRefId,
+            Setter? setter,
+            EvalOnDartLibrary evalForInstance)?
+        object,
+    TResult Function(
+            String type, String value, Setter? setter, String instanceRefId)?
+        enumeration,
+    required TResult orElse(),
+  }) {
     if (enumeration != null) {
       return enumeration(type, value, setter, instanceRefId);
     }
@@ -2887,41 +3337,47 @@ class _$EnumInstance extends EnumInstance {
 
   @override
   @optionalTypeArgs
-  TResult map<TResult extends Object>({
-    @required TResult nill(NullInstance value),
-    @required TResult boolean(BoolInstance value),
-    @required TResult number(NumInstance value),
-    @required TResult string(StringInstance value),
-    @required TResult map(MapInstance value),
-    @required TResult list(ListInstance value),
-    @required TResult object(ObjectInstance value),
-    @required TResult enumeration(EnumInstance value),
+  TResult map<TResult extends Object?>({
+    required TResult Function(NullInstance value) nill,
+    required TResult Function(BoolInstance value) boolean,
+    required TResult Function(NumInstance value) number,
+    required TResult Function(StringInstance value) string,
+    required TResult Function(MapInstance value) map,
+    required TResult Function(ListInstance value) list,
+    required TResult Function(ObjectInstance value) object,
+    required TResult Function(EnumInstance value) enumeration,
   }) {
-    assert(nill != null);
-    assert(boolean != null);
-    assert(number != null);
-    assert(string != null);
-    assert(map != null);
-    assert(list != null);
-    assert(object != null);
-    assert(enumeration != null);
     return enumeration(this);
   }
 
   @override
   @optionalTypeArgs
-  TResult maybeMap<TResult extends Object>({
-    TResult nill(NullInstance value),
-    TResult boolean(BoolInstance value),
-    TResult number(NumInstance value),
-    TResult string(StringInstance value),
-    TResult map(MapInstance value),
-    TResult list(ListInstance value),
-    TResult object(ObjectInstance value),
-    TResult enumeration(EnumInstance value),
-    @required TResult orElse(),
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult Function(NullInstance value)? nill,
+    TResult Function(BoolInstance value)? boolean,
+    TResult Function(NumInstance value)? number,
+    TResult Function(StringInstance value)? string,
+    TResult Function(MapInstance value)? map,
+    TResult Function(ListInstance value)? list,
+    TResult Function(ObjectInstance value)? object,
+    TResult Function(EnumInstance value)? enumeration,
   }) {
-    assert(orElse != null);
+    return enumeration?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(NullInstance value)? nill,
+    TResult Function(BoolInstance value)? boolean,
+    TResult Function(NumInstance value)? number,
+    TResult Function(StringInstance value)? string,
+    TResult Function(MapInstance value)? map,
+    TResult Function(ListInstance value)? list,
+    TResult Function(ObjectInstance value)? object,
+    TResult Function(EnumInstance value)? enumeration,
+    required TResult orElse(),
+  }) {
     if (enumeration != null) {
       return enumeration(this);
     }
@@ -2930,31 +3386,29 @@ class _$EnumInstance extends EnumInstance {
 }
 
 abstract class EnumInstance extends InstanceDetails {
-  EnumInstance._() : super._();
   factory EnumInstance(
-      {@required String type,
-      @required String value,
-      @required @nullable Future<void> Function(String) setter,
-      @required String instanceRefId}) = _$EnumInstance;
+      {required String type,
+      required String value,
+      required Setter? setter,
+      required String instanceRefId}) = _$EnumInstance;
+  EnumInstance._() : super._();
 
   String get type;
   String get value;
   @override
-  @nullable
-  Future<void> Function(String) get setter;
-  @override
+  Setter? get setter;
   String get instanceRefId;
   @override
   @JsonKey(ignore: true)
-  $EnumInstanceCopyWith<EnumInstance> get copyWith;
+  $EnumInstanceCopyWith<EnumInstance> get copyWith =>
+      throw _privateConstructorUsedError;
 }
 
 /// @nodoc
 class _$InstancePathTearOff {
   const _$InstancePathTearOff();
 
-// ignore: unused_element
-  _InstancePathFromInstanceId fromInstanceId(@nullable String instanceId,
+  _InstancePathFromInstanceId fromInstanceId(String instanceId,
       {List<PathToProperty> pathToProperty = const []}) {
     return _InstancePathFromInstanceId(
       instanceId,
@@ -2962,7 +3416,6 @@ class _$InstancePathTearOff {
     );
   }
 
-// ignore: unused_element
   _InstancePathFromProviderId fromProviderId(String providerId,
       {List<PathToProperty> pathToProperty = const []}) {
     return _InstancePathFromProviderId(
@@ -2973,44 +3426,62 @@ class _$InstancePathTearOff {
 }
 
 /// @nodoc
-// ignore: unused_element
 const $InstancePath = _$InstancePathTearOff();
 
 /// @nodoc
 mixin _$InstancePath {
-  List<PathToProperty> get pathToProperty;
+  List<PathToProperty> get pathToProperty => throw _privateConstructorUsedError;
 
   @optionalTypeArgs
-  TResult when<TResult extends Object>({
-    @required
-        TResult fromInstanceId(
-            @nullable String instanceId, List<PathToProperty> pathToProperty),
-    @required
-        TResult fromProviderId(
-            String providerId, List<PathToProperty> pathToProperty),
-  });
+  TResult when<TResult extends Object?>({
+    required TResult Function(
+            String instanceId, List<PathToProperty> pathToProperty)
+        fromInstanceId,
+    required TResult Function(
+            String providerId, List<PathToProperty> pathToProperty)
+        fromProviderId,
+  }) =>
+      throw _privateConstructorUsedError;
   @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object>({
-    TResult fromInstanceId(
-        @nullable String instanceId, List<PathToProperty> pathToProperty),
-    TResult fromProviderId(
-        String providerId, List<PathToProperty> pathToProperty),
-    @required TResult orElse(),
-  });
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult Function(String instanceId, List<PathToProperty> pathToProperty)?
+        fromInstanceId,
+    TResult Function(String providerId, List<PathToProperty> pathToProperty)?
+        fromProviderId,
+  }) =>
+      throw _privateConstructorUsedError;
   @optionalTypeArgs
-  TResult map<TResult extends Object>({
-    @required TResult fromInstanceId(_InstancePathFromInstanceId value),
-    @required TResult fromProviderId(_InstancePathFromProviderId value),
-  });
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(String instanceId, List<PathToProperty> pathToProperty)?
+        fromInstanceId,
+    TResult Function(String providerId, List<PathToProperty> pathToProperty)?
+        fromProviderId,
+    required TResult orElse(),
+  }) =>
+      throw _privateConstructorUsedError;
   @optionalTypeArgs
-  TResult maybeMap<TResult extends Object>({
-    TResult fromInstanceId(_InstancePathFromInstanceId value),
-    TResult fromProviderId(_InstancePathFromProviderId value),
-    @required TResult orElse(),
-  });
+  TResult map<TResult extends Object?>({
+    required TResult Function(_InstancePathFromInstanceId value) fromInstanceId,
+    required TResult Function(_InstancePathFromProviderId value) fromProviderId,
+  }) =>
+      throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult Function(_InstancePathFromInstanceId value)? fromInstanceId,
+    TResult Function(_InstancePathFromProviderId value)? fromProviderId,
+  }) =>
+      throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(_InstancePathFromInstanceId value)? fromInstanceId,
+    TResult Function(_InstancePathFromProviderId value)? fromProviderId,
+    required TResult orElse(),
+  }) =>
+      throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
-  $InstancePathCopyWith<InstancePath> get copyWith;
+  $InstancePathCopyWith<InstancePath> get copyWith =>
+      throw _privateConstructorUsedError;
 }
 
 /// @nodoc
@@ -3031,12 +3502,13 @@ class _$InstancePathCopyWithImpl<$Res> implements $InstancePathCopyWith<$Res> {
 
   @override
   $Res call({
-    Object pathToProperty = freezed,
+    Object? pathToProperty = freezed,
   }) {
     return _then(_value.copyWith(
       pathToProperty: pathToProperty == freezed
           ? _value.pathToProperty
-          : pathToProperty as List<PathToProperty>,
+          : pathToProperty // ignore: cast_nullable_to_non_nullable
+              as List<PathToProperty>,
     ));
   }
 }
@@ -3049,7 +3521,7 @@ abstract class _$InstancePathFromInstanceIdCopyWith<$Res>
           $Res Function(_InstancePathFromInstanceId) then) =
       __$InstancePathFromInstanceIdCopyWithImpl<$Res>;
   @override
-  $Res call({@nullable String instanceId, List<PathToProperty> pathToProperty});
+  $Res call({String instanceId, List<PathToProperty> pathToProperty});
 }
 
 /// @nodoc
@@ -3066,54 +3538,66 @@ class __$InstancePathFromInstanceIdCopyWithImpl<$Res>
 
   @override
   $Res call({
-    Object instanceId = freezed,
-    Object pathToProperty = freezed,
+    Object? instanceId = freezed,
+    Object? pathToProperty = freezed,
   }) {
     return _then(_InstancePathFromInstanceId(
-      instanceId == freezed ? _value.instanceId : instanceId as String,
+      instanceId == freezed
+          ? _value.instanceId
+          : instanceId // ignore: cast_nullable_to_non_nullable
+              as String,
       pathToProperty: pathToProperty == freezed
           ? _value.pathToProperty
-          : pathToProperty as List<PathToProperty>,
+          : pathToProperty // ignore: cast_nullable_to_non_nullable
+              as List<PathToProperty>,
     ));
   }
 }
 
 /// @nodoc
-class _$_InstancePathFromInstanceId extends _InstancePathFromInstanceId {
-  const _$_InstancePathFromInstanceId(@nullable this.instanceId,
+
+class _$_InstancePathFromInstanceId extends _InstancePathFromInstanceId
+    with DiagnosticableTreeMixin {
+  const _$_InstancePathFromInstanceId(this.instanceId,
       {this.pathToProperty = const []})
-      : assert(pathToProperty != null),
-        super._();
+      : super._();
 
   @override
-  @nullable
   final String instanceId;
-  @JsonKey(defaultValue: const [])
+  @JsonKey()
   @override
   final List<PathToProperty> pathToProperty;
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'InstancePath.fromInstanceId(instanceId: $instanceId, pathToProperty: $pathToProperty)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'InstancePath.fromInstanceId'))
+      ..add(DiagnosticsProperty('instanceId', instanceId))
+      ..add(DiagnosticsProperty('pathToProperty', pathToProperty));
   }
 
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other is _InstancePathFromInstanceId &&
-            (identical(other.instanceId, instanceId) ||
-                const DeepCollectionEquality()
-                    .equals(other.instanceId, instanceId)) &&
-            (identical(other.pathToProperty, pathToProperty) ||
-                const DeepCollectionEquality()
-                    .equals(other.pathToProperty, pathToProperty)));
+        (other.runtimeType == runtimeType &&
+            other is _InstancePathFromInstanceId &&
+            const DeepCollectionEquality()
+                .equals(other.instanceId, instanceId) &&
+            const DeepCollectionEquality()
+                .equals(other.pathToProperty, pathToProperty));
   }
 
   @override
-  int get hashCode =>
-      runtimeType.hashCode ^
-      const DeepCollectionEquality().hash(instanceId) ^
-      const DeepCollectionEquality().hash(pathToProperty);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(instanceId),
+      const DeepCollectionEquality().hash(pathToProperty));
 
   @JsonKey(ignore: true)
   @override
@@ -3123,29 +3607,37 @@ class _$_InstancePathFromInstanceId extends _InstancePathFromInstanceId {
 
   @override
   @optionalTypeArgs
-  TResult when<TResult extends Object>({
-    @required
-        TResult fromInstanceId(
-            @nullable String instanceId, List<PathToProperty> pathToProperty),
-    @required
-        TResult fromProviderId(
-            String providerId, List<PathToProperty> pathToProperty),
+  TResult when<TResult extends Object?>({
+    required TResult Function(
+            String instanceId, List<PathToProperty> pathToProperty)
+        fromInstanceId,
+    required TResult Function(
+            String providerId, List<PathToProperty> pathToProperty)
+        fromProviderId,
   }) {
-    assert(fromInstanceId != null);
-    assert(fromProviderId != null);
     return fromInstanceId(instanceId, pathToProperty);
   }
 
   @override
   @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object>({
-    TResult fromInstanceId(
-        @nullable String instanceId, List<PathToProperty> pathToProperty),
-    TResult fromProviderId(
-        String providerId, List<PathToProperty> pathToProperty),
-    @required TResult orElse(),
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult Function(String instanceId, List<PathToProperty> pathToProperty)?
+        fromInstanceId,
+    TResult Function(String providerId, List<PathToProperty> pathToProperty)?
+        fromProviderId,
   }) {
-    assert(orElse != null);
+    return fromInstanceId?.call(instanceId, pathToProperty);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(String instanceId, List<PathToProperty> pathToProperty)?
+        fromInstanceId,
+    TResult Function(String providerId, List<PathToProperty> pathToProperty)?
+        fromProviderId,
+    required TResult orElse(),
+  }) {
     if (fromInstanceId != null) {
       return fromInstanceId(instanceId, pathToProperty);
     }
@@ -3154,23 +3646,29 @@ class _$_InstancePathFromInstanceId extends _InstancePathFromInstanceId {
 
   @override
   @optionalTypeArgs
-  TResult map<TResult extends Object>({
-    @required TResult fromInstanceId(_InstancePathFromInstanceId value),
-    @required TResult fromProviderId(_InstancePathFromProviderId value),
+  TResult map<TResult extends Object?>({
+    required TResult Function(_InstancePathFromInstanceId value) fromInstanceId,
+    required TResult Function(_InstancePathFromProviderId value) fromProviderId,
   }) {
-    assert(fromInstanceId != null);
-    assert(fromProviderId != null);
     return fromInstanceId(this);
   }
 
   @override
   @optionalTypeArgs
-  TResult maybeMap<TResult extends Object>({
-    TResult fromInstanceId(_InstancePathFromInstanceId value),
-    TResult fromProviderId(_InstancePathFromProviderId value),
-    @required TResult orElse(),
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult Function(_InstancePathFromInstanceId value)? fromInstanceId,
+    TResult Function(_InstancePathFromProviderId value)? fromProviderId,
   }) {
-    assert(orElse != null);
+    return fromInstanceId?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(_InstancePathFromInstanceId value)? fromInstanceId,
+    TResult Function(_InstancePathFromProviderId value)? fromProviderId,
+    required TResult orElse(),
+  }) {
     if (fromInstanceId != null) {
       return fromInstanceId(this);
     }
@@ -3179,18 +3677,17 @@ class _$_InstancePathFromInstanceId extends _InstancePathFromInstanceId {
 }
 
 abstract class _InstancePathFromInstanceId extends InstancePath {
-  const _InstancePathFromInstanceId._() : super._();
-  const factory _InstancePathFromInstanceId(@nullable String instanceId,
+  const factory _InstancePathFromInstanceId(String instanceId,
       {List<PathToProperty> pathToProperty}) = _$_InstancePathFromInstanceId;
+  const _InstancePathFromInstanceId._() : super._();
 
-  @nullable
   String get instanceId;
   @override
   List<PathToProperty> get pathToProperty;
   @override
   @JsonKey(ignore: true)
   _$InstancePathFromInstanceIdCopyWith<_InstancePathFromInstanceId>
-      get copyWith;
+      get copyWith => throw _privateConstructorUsedError;
 }
 
 /// @nodoc
@@ -3218,54 +3715,66 @@ class __$InstancePathFromProviderIdCopyWithImpl<$Res>
 
   @override
   $Res call({
-    Object providerId = freezed,
-    Object pathToProperty = freezed,
+    Object? providerId = freezed,
+    Object? pathToProperty = freezed,
   }) {
     return _then(_InstancePathFromProviderId(
-      providerId == freezed ? _value.providerId : providerId as String,
+      providerId == freezed
+          ? _value.providerId
+          : providerId // ignore: cast_nullable_to_non_nullable
+              as String,
       pathToProperty: pathToProperty == freezed
           ? _value.pathToProperty
-          : pathToProperty as List<PathToProperty>,
+          : pathToProperty // ignore: cast_nullable_to_non_nullable
+              as List<PathToProperty>,
     ));
   }
 }
 
 /// @nodoc
-class _$_InstancePathFromProviderId extends _InstancePathFromProviderId {
+
+class _$_InstancePathFromProviderId extends _InstancePathFromProviderId
+    with DiagnosticableTreeMixin {
   const _$_InstancePathFromProviderId(this.providerId,
       {this.pathToProperty = const []})
-      : assert(providerId != null),
-        assert(pathToProperty != null),
-        super._();
+      : super._();
 
   @override
   final String providerId;
-  @JsonKey(defaultValue: const [])
+  @JsonKey()
   @override
   final List<PathToProperty> pathToProperty;
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'InstancePath.fromProviderId(providerId: $providerId, pathToProperty: $pathToProperty)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'InstancePath.fromProviderId'))
+      ..add(DiagnosticsProperty('providerId', providerId))
+      ..add(DiagnosticsProperty('pathToProperty', pathToProperty));
   }
 
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other is _InstancePathFromProviderId &&
-            (identical(other.providerId, providerId) ||
-                const DeepCollectionEquality()
-                    .equals(other.providerId, providerId)) &&
-            (identical(other.pathToProperty, pathToProperty) ||
-                const DeepCollectionEquality()
-                    .equals(other.pathToProperty, pathToProperty)));
+        (other.runtimeType == runtimeType &&
+            other is _InstancePathFromProviderId &&
+            const DeepCollectionEquality()
+                .equals(other.providerId, providerId) &&
+            const DeepCollectionEquality()
+                .equals(other.pathToProperty, pathToProperty));
   }
 
   @override
-  int get hashCode =>
-      runtimeType.hashCode ^
-      const DeepCollectionEquality().hash(providerId) ^
-      const DeepCollectionEquality().hash(pathToProperty);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(providerId),
+      const DeepCollectionEquality().hash(pathToProperty));
 
   @JsonKey(ignore: true)
   @override
@@ -3275,29 +3784,37 @@ class _$_InstancePathFromProviderId extends _InstancePathFromProviderId {
 
   @override
   @optionalTypeArgs
-  TResult when<TResult extends Object>({
-    @required
-        TResult fromInstanceId(
-            @nullable String instanceId, List<PathToProperty> pathToProperty),
-    @required
-        TResult fromProviderId(
-            String providerId, List<PathToProperty> pathToProperty),
+  TResult when<TResult extends Object?>({
+    required TResult Function(
+            String instanceId, List<PathToProperty> pathToProperty)
+        fromInstanceId,
+    required TResult Function(
+            String providerId, List<PathToProperty> pathToProperty)
+        fromProviderId,
   }) {
-    assert(fromInstanceId != null);
-    assert(fromProviderId != null);
     return fromProviderId(providerId, pathToProperty);
   }
 
   @override
   @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object>({
-    TResult fromInstanceId(
-        @nullable String instanceId, List<PathToProperty> pathToProperty),
-    TResult fromProviderId(
-        String providerId, List<PathToProperty> pathToProperty),
-    @required TResult orElse(),
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult Function(String instanceId, List<PathToProperty> pathToProperty)?
+        fromInstanceId,
+    TResult Function(String providerId, List<PathToProperty> pathToProperty)?
+        fromProviderId,
   }) {
-    assert(orElse != null);
+    return fromProviderId?.call(providerId, pathToProperty);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(String instanceId, List<PathToProperty> pathToProperty)?
+        fromInstanceId,
+    TResult Function(String providerId, List<PathToProperty> pathToProperty)?
+        fromProviderId,
+    required TResult orElse(),
+  }) {
     if (fromProviderId != null) {
       return fromProviderId(providerId, pathToProperty);
     }
@@ -3306,23 +3823,29 @@ class _$_InstancePathFromProviderId extends _InstancePathFromProviderId {
 
   @override
   @optionalTypeArgs
-  TResult map<TResult extends Object>({
-    @required TResult fromInstanceId(_InstancePathFromInstanceId value),
-    @required TResult fromProviderId(_InstancePathFromProviderId value),
+  TResult map<TResult extends Object?>({
+    required TResult Function(_InstancePathFromInstanceId value) fromInstanceId,
+    required TResult Function(_InstancePathFromProviderId value) fromProviderId,
   }) {
-    assert(fromInstanceId != null);
-    assert(fromProviderId != null);
     return fromProviderId(this);
   }
 
   @override
   @optionalTypeArgs
-  TResult maybeMap<TResult extends Object>({
-    TResult fromInstanceId(_InstancePathFromInstanceId value),
-    TResult fromProviderId(_InstancePathFromProviderId value),
-    @required TResult orElse(),
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult Function(_InstancePathFromInstanceId value)? fromInstanceId,
+    TResult Function(_InstancePathFromProviderId value)? fromProviderId,
   }) {
-    assert(orElse != null);
+    return fromProviderId?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(_InstancePathFromInstanceId value)? fromInstanceId,
+    TResult Function(_InstancePathFromProviderId value)? fromProviderId,
+    required TResult orElse(),
+  }) {
     if (fromProviderId != null) {
       return fromProviderId(this);
     }
@@ -3331,9 +3854,9 @@ class _$_InstancePathFromProviderId extends _InstancePathFromProviderId {
 }
 
 abstract class _InstancePathFromProviderId extends InstancePath {
-  const _InstancePathFromProviderId._() : super._();
   const factory _InstancePathFromProviderId(String providerId,
       {List<PathToProperty> pathToProperty}) = _$_InstancePathFromProviderId;
+  const _InstancePathFromProviderId._() : super._();
 
   String get providerId;
   @override
@@ -3341,5 +3864,5 @@ abstract class _InstancePathFromProviderId extends InstancePath {
   @override
   @JsonKey(ignore: true)
   _$InstancePathFromProviderIdCopyWith<_InstancePathFromProviderId>
-      get copyWith;
+      get copyWith => throw _privateConstructorUsedError;
 }

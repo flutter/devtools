@@ -2,15 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'dart:async';
 
 import 'package:dds_service_extensions/dds_service_extensions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
-
-import '../screens/profiler/cpu_profile_model.dart' hide CpuSample;
 
 class VmServiceWrapper implements VmService {
   VmServiceWrapper(
@@ -55,7 +51,8 @@ class VmServiceWrapper implements VmService {
   /// Executes `callback` for each isolate, and waiting for all callbacks to
   /// finish before completing.
   Future<void> forEachIsolate(
-      Future<void> Function(IsolateRef) callback) async {
+    Future<void> Function(IsolateRef) callback,
+  ) async {
     final vm = await _vmService.getVM();
     final futures = <Future>[];
     for (final isolate in vm.isolates ?? []) {
@@ -71,14 +68,18 @@ class VmServiceWrapper implements VmService {
     int line, {
     int? column,
   }) {
-    return trackFuture('addBreakpoint',
-        _vmService.addBreakpoint(isolateId, scriptId, line, column: column));
+    return trackFuture(
+      'addBreakpoint',
+      _vmService.addBreakpoint(isolateId, scriptId, line, column: column),
+    );
   }
 
   @override
   Future<Breakpoint> addBreakpointAtEntry(String isolateId, String functionId) {
-    return trackFuture('addBreakpointAtEntry',
-        _vmService.addBreakpointAtEntry(isolateId, functionId));
+    return trackFuture(
+      'addBreakpointAtEntry',
+      _vmService.addBreakpointAtEntry(isolateId, functionId),
+    );
   }
 
   @override
@@ -89,13 +90,14 @@ class VmServiceWrapper implements VmService {
     int? column,
   }) {
     return trackFuture(
-        'addBreakpointWithScriptUri',
-        _vmService.addBreakpointWithScriptUri(
-          isolateId,
-          scriptUri,
-          line,
-          column: column,
-        ));
+      'addBreakpointWithScriptUri',
+      _vmService.addBreakpointWithScriptUri(
+        isolateId,
+        scriptUri,
+        line,
+        column: column,
+      ),
+    );
   }
 
   @override
@@ -104,8 +106,10 @@ class VmServiceWrapper implements VmService {
     String? isolateId,
     Map<String, dynamic>? args,
   }) {
-    return trackFuture('callMethod $method',
-        _vmService.callMethod(method, isolateId: isolateId, args: args));
+    return trackFuture(
+      'callMethod $method',
+      _vmService.callMethod(method, isolateId: isolateId, args: args),
+    );
   }
 
   @override
@@ -115,12 +119,13 @@ class VmServiceWrapper implements VmService {
     Map<String, dynamic>? args,
   }) {
     return trackFuture(
-        'callServiceExtension $method',
-        _vmService.callServiceExtension(
-          method,
-          isolateId: isolateId,
-          args: args,
-        ));
+      'callServiceExtension $method',
+      _vmService.callServiceExtension(
+        method,
+        isolateId: isolateId,
+        args: args,
+      ),
+    );
   }
 
   @override
@@ -151,14 +156,15 @@ class VmServiceWrapper implements VmService {
     bool? disableBreakpoints,
   }) {
     return trackFuture(
-        'evaluate $expression',
-        _vmService.evaluate(
-          isolateId,
-          targetId,
-          expression,
-          scope: scope,
-          disableBreakpoints: disableBreakpoints,
-        ));
+      'evaluate $expression',
+      _vmService.evaluate(
+        isolateId,
+        targetId,
+        expression,
+        scope: scope,
+        disableBreakpoints: disableBreakpoints,
+      ),
+    );
   }
 
   @override
@@ -170,14 +176,15 @@ class VmServiceWrapper implements VmService {
     bool? disableBreakpoints,
   }) {
     return trackFuture(
-        'evaluateInFrame $expression',
-        _vmService.evaluateInFrame(
-          isolateId,
-          frameIndex,
-          expression,
-          scope: scope,
-          disableBreakpoints: disableBreakpoints,
-        ));
+      'evaluateInFrame $expression',
+      _vmService.evaluateInFrame(
+        isolateId,
+        frameIndex,
+        expression,
+        scope: scope,
+        disableBreakpoints: disableBreakpoints,
+      ),
+    );
   }
 
   @override
@@ -194,98 +201,18 @@ class VmServiceWrapper implements VmService {
 
   @override
   Future<CpuSamples> getCpuSamples(
-      String isolateId, int timeOriginMicros, int timeExtentMicros) async {
-    return trackFuture(
-        'getCpuSamples',
-        _vmService.getCpuSamples(
-          isolateId,
-          timeOriginMicros,
-          timeExtentMicros,
-        ));
-  }
-
-  Future<CpuProfileData> getCpuProfileTimeline(
     String isolateId,
-    int origin,
-    int extent,
+    int timeOriginMicros,
+    int timeExtentMicros,
   ) async {
-    // As of service protocol version 3.27 _getCpuProfileTimeline does not exist
-    // and has been replaced by getCpuSamples. We need to do some processing to
-    // get back to the format we expect.
-    final cpuSamples = await getCpuSamples(isolateId, origin, extent);
-
-    // The root ID is associated with an artificial frame / node that is the root
-    // of all stacks, regardless of entrypoint. This should never be seen in the
-    // final output from this method.
-    const int kRootId = 0;
-    int nextId = kRootId;
-    final traceObject = <String, dynamic>{
-      CpuProfileData.sampleCountKey: cpuSamples.sampleCount,
-      CpuProfileData.samplePeriodKey: cpuSamples.samplePeriod,
-      CpuProfileData.stackDepthKey: cpuSamples.maxStackDepth,
-      CpuProfileData.timeOriginKey: cpuSamples.timeOriginMicros,
-      CpuProfileData.timeExtentKey: cpuSamples.timeExtentMicros,
-      CpuProfileData.stackFramesKey: {},
-      CpuProfileData.traceEventsKey: [],
-    };
-
-    String? nameForStackFrame(_CpuProfileTimelineTree current) {
-      final className = current.className;
-      if (className != null) {
-        return '$className.${current.name}';
-      }
-      return current.name;
-    }
-
-    void processStackFrame({
-      required _CpuProfileTimelineTree current,
-      required _CpuProfileTimelineTree? parent,
-    }) {
-      final id = nextId++;
-      current.frameId = id;
-
-      // Skip the root.
-      if (id != kRootId) {
-        final key = '$isolateId-$id';
-        traceObject[CpuProfileData.stackFramesKey][key] = {
-          CpuProfileData.categoryKey: 'Dart',
-          CpuProfileData.nameKey: nameForStackFrame(current),
-          CpuProfileData.resolvedUrlKey: current.resolvedUrl,
-          CpuProfileData.sourceLine: current.sourceLine,
-          if (parent != null && parent.frameId != 0)
-            CpuProfileData.parentIdKey: '$isolateId-${parent.frameId}',
-        };
-      }
-      for (final child in current.children) {
-        processStackFrame(current: child, parent: current);
-      }
-    }
-
-    final root = _CpuProfileTimelineTree.fromCpuSamples(cpuSamples);
-    processStackFrame(current: root, parent: null);
-
-    // Build the trace events.
-    for (final sample in cpuSamples.samples ?? <CpuSample>[]) {
-      final tree = _CpuProfileTimelineTree.getTreeFromSample(sample)!;
-      // Skip the root.
-      if (tree.frameId == kRootId) {
-        continue;
-      }
-      traceObject[CpuProfileData.traceEventsKey].add({
-        'ph': 'P', // kind = sample event
-        'name': '', // Blank to keep about:tracing happy
-        'pid': cpuSamples.pid,
-        'tid': sample.tid,
-        'ts': sample.timestamp,
-        'cat': 'Dart',
-        CpuProfileData.stackFrameIdKey: '$isolateId-${tree.frameId}',
-        'args': {
-          if (sample.userTag != null) 'userTag': sample.userTag,
-          if (sample.vmTag != null) 'vmTag': sample.vmTag,
-        },
-      });
-    }
-    return CpuProfileData.parse(traceObject);
+    return trackFuture(
+      'getCpuSamples',
+      _vmService.getCpuSamples(
+        isolateId,
+        timeOriginMicros,
+        timeExtentMicros,
+      ),
+    );
   }
 
   @override
@@ -313,13 +240,17 @@ class VmServiceWrapper implements VmService {
   @override
   Future<IsolateGroup> getIsolateGroup(String isolateGroupId) {
     return trackFuture(
-        'getIsolateGroup', _vmService.getIsolateGroup(isolateGroupId));
+      'getIsolateGroup',
+      _vmService.getIsolateGroup(isolateGroupId),
+    );
   }
 
   @override
   Future<MemoryUsage> getIsolateGroupMemoryUsage(String isolateGroupId) {
-    return trackFuture('getIsolateGroupMemoryUsage',
-        _vmService.getIsolateGroupMemoryUsage(isolateGroupId));
+    return trackFuture(
+      'getIsolateGroupMemoryUsage',
+      _vmService.getIsolateGroupMemoryUsage(isolateGroupId),
+    );
   }
 
   @override
@@ -330,13 +261,14 @@ class VmServiceWrapper implements VmService {
     int? count,
   }) {
     return trackFuture(
-        'getObject',
-        _vmService.getObject(
-          isolateId,
-          objectId,
-          offset: offset,
-          count: count,
-        ));
+      'getObject',
+      _vmService.getObject(
+        isolateId,
+        objectId,
+        offset: offset,
+        count: count,
+      ),
+    );
   }
 
   @override
@@ -360,16 +292,17 @@ class VmServiceWrapper implements VmService {
     bool? reportLines,
   }) async {
     return trackFuture(
-        'getSourceReport',
-        _vmService.getSourceReport(
-          isolateId,
-          reports,
-          scriptId: scriptId,
-          tokenPos: tokenPos,
-          endTokenPos: endTokenPos,
-          forceCompile: forceCompile,
-          reportLines: reportLines,
-        ));
+      'getSourceReport',
+      _vmService.getSourceReport(
+        isolateId,
+        reports,
+        scriptId: scriptId,
+        tokenPos: tokenPos,
+        endTokenPos: endTokenPos,
+        forceCompile: forceCompile,
+        reportLines: reportLines,
+      ),
+    );
   }
 
   @override
@@ -410,8 +343,10 @@ class VmServiceWrapper implements VmService {
     bool? enabled,
   ]) async {
     assert(await isHttpTimelineLoggingAvailable(isolateId));
-    return trackFuture('httpEnableTimelineLogging',
-        _vmService.httpEnableTimelineLogging(isolateId, enabled));
+    return trackFuture(
+      'httpEnableTimelineLogging',
+      _vmService.httpEnableTimelineLogging(isolateId, enabled),
+    );
   }
 
   // TODO(bkonyi): move this method to
@@ -476,20 +411,26 @@ class VmServiceWrapper implements VmService {
     bool? enabled,
   ]) async {
     assert(await isSocketProfilingAvailable(isolateId));
-    return trackFuture('socketProfilingEnabled',
-        _vmService.socketProfilingEnabled(isolateId, enabled));
+    return trackFuture(
+      'socketProfilingEnabled',
+      _vmService.socketProfilingEnabled(isolateId, enabled),
+    );
   }
 
   Future<Success> clearSocketProfile(String isolateId) async {
     assert(await isSocketProfilingAvailable(isolateId));
     return trackFuture(
-        'clearSocketProfile', _vmService.clearSocketProfile(isolateId));
+      'clearSocketProfile',
+      _vmService.clearSocketProfile(isolateId),
+    );
   }
 
   Future<SocketProfile> getSocketProfile(String isolateId) async {
     assert(await isSocketProfilingAvailable(isolateId));
     return trackFuture(
-        'getSocketProfile', _vmService.getSocketProfile(isolateId));
+      'getSocketProfile',
+      _vmService.getSocketProfile(isolateId),
+    );
   }
 
   @override
@@ -526,14 +467,15 @@ class VmServiceWrapper implements VmService {
     bool? disableBreakpoints,
   }) {
     return trackFuture(
-        'invoke $selector',
-        _vmService.invoke(
-          isolateId,
-          targetId,
-          selector,
-          argumentIds,
-          disableBreakpoints: disableBreakpoints,
-        ));
+      'invoke $selector',
+      _vmService.invoke(
+        isolateId,
+        targetId,
+        selector,
+        argumentIds,
+        disableBreakpoints: disableBreakpoints,
+      ),
+    );
   }
 
   @override
@@ -637,26 +579,31 @@ class VmServiceWrapper implements VmService {
     String? packagesUri,
   }) {
     return trackFuture(
-        'reloadSources',
-        _vmService.reloadSources(
-          isolateId,
-          force: force,
-          pause: pause,
-          rootLibUri: rootLibUri,
-          packagesUri: packagesUri,
-        ));
+      'reloadSources',
+      _vmService.reloadSources(
+        isolateId,
+        force: force,
+        pause: pause,
+        rootLibUri: rootLibUri,
+        packagesUri: packagesUri,
+      ),
+    );
   }
 
   @override
   Future<Success> removeBreakpoint(String isolateId, String breakpointId) {
-    return trackFuture('removeBreakpoint',
-        _vmService.removeBreakpoint(isolateId, breakpointId));
+    return trackFuture(
+      'removeBreakpoint',
+      _vmService.removeBreakpoint(isolateId, breakpointId),
+    );
   }
 
   @override
   Future<Success> resume(String isolateId, {String? step, int? frameIndex}) {
-    return trackFuture('resume',
-        _vmService.resume(isolateId, step: step, frameIndex: frameIndex));
+    return trackFuture(
+      'resume',
+      _vmService.resume(isolateId, step: step, frameIndex: frameIndex),
+    );
   }
 
   @override
@@ -686,8 +633,10 @@ class VmServiceWrapper implements VmService {
     String libraryId,
     bool isDebuggable,
   ) {
-    return trackFuture('setLibraryDebuggable',
-        _vmService.setLibraryDebuggable(isolateId, libraryId, isDebuggable));
+    return trackFuture(
+      'setLibraryDebuggable',
+      _vmService.setLibraryDebuggable(isolateId, libraryId, isDebuggable),
+    );
   }
 
   @override
@@ -743,9 +692,14 @@ class VmServiceWrapper implements VmService {
 
   @override
   Future<RetainingPath> getRetainingPath(
-          String isolateId, String targetId, int limit) =>
-      trackFuture('getRetainingPath',
-          _vmService.getRetainingPath(isolateId, targetId, limit));
+    String isolateId,
+    String targetId,
+    int limit,
+  ) =>
+      trackFuture(
+        'getRetainingPath',
+        _vmService.getRetainingPath(isolateId, targetId, limit),
+      );
 
   @override
   Future<CpuSamples> getAllocationTraces(
@@ -755,11 +709,14 @@ class VmServiceWrapper implements VmService {
     String? classId,
   }) {
     return trackFuture(
-        'getAllocationTraces',
-        _vmService.getAllocationTraces(isolateId,
-            timeOriginMicros: timeOriginMicros,
-            timeExtentMicros: timeExtentMicros,
-            classId: classId));
+      'getAllocationTraces',
+      _vmService.getAllocationTraces(
+        isolateId,
+        timeOriginMicros: timeOriginMicros,
+        timeExtentMicros: timeExtentMicros,
+        classId: classId,
+      ),
+    );
   }
 
   @override
@@ -777,12 +734,17 @@ class VmServiceWrapper implements VmService {
   @override
   Future<ProcessMemoryUsage> getProcessMemoryUsage() {
     return trackFuture(
-        'getProcessMemoryUsage', _vmService.getProcessMemoryUsage());
+      'getProcessMemoryUsage',
+      _vmService.getProcessMemoryUsage(),
+    );
   }
 
   @override
   Future<Breakpoint> setBreakpointState(
-      String isolateId, String breakpointId, bool enable) {
+    String isolateId,
+    String breakpointId,
+    bool enable,
+  ) {
     return trackFuture(
       'setBreakpointState',
       _vmService.setBreakpointState(
@@ -870,7 +832,8 @@ class VmServiceWrapper implements VmService {
       return onUnavailable(stringRef.valueAsString);
     } else {
       throw Exception(
-          'The full string for "{stringRef.valueAsString}..." is unavailable');
+        'The full string for "{stringRef.valueAsString}..." is unavailable',
+      );
     }
   }
 
@@ -927,86 +890,6 @@ class TrackedFuture<T> {
 
   final String name;
   final Future<T> future;
-}
-
-class _CpuProfileTimelineTree {
-  factory _CpuProfileTimelineTree.fromCpuSamples(CpuSamples cpuSamples) {
-    final root = _CpuProfileTimelineTree._fromIndex(cpuSamples, kRootIndex);
-    _CpuProfileTimelineTree current;
-    // TODO(bkonyi): handle truncated?
-    for (final sample in cpuSamples.samples ?? []) {
-      current = root;
-      // Build an inclusive trie.
-      for (final index in sample.stack!.reversed) {
-        current = current._getChild(index);
-      }
-      _timelineTreeExpando[sample] = current;
-    }
-    return root;
-  }
-
-  _CpuProfileTimelineTree._fromIndex(this.samples, this.index);
-
-  static final _timelineTreeExpando = Expando<_CpuProfileTimelineTree>();
-  static const kRootIndex = -1;
-  static const kNoFrameId = -1;
-  final CpuSamples samples;
-  final int index;
-  int frameId = kNoFrameId;
-
-  String? get name => samples.functions![index].function.name;
-
-  String? get className {
-    final function = samples.functions![index].function;
-    if (function is FuncRef) {
-      final owner = function.owner;
-      if (owner is ClassRef) {
-        return owner.name;
-      }
-    }
-    return null;
-  }
-
-  String? get resolvedUrl => samples.functions![index].resolvedUrl;
-
-  int? get sourceLine {
-    final function = samples.functions![index].function;
-    try {
-      return function.location?.line;
-    } catch (_) {
-      // Fail gracefully if `function` has no getter `location` (for example, if
-      // the function is an instance of [NativeFunction]) or generally if
-      // `function.location.line` throws an exception.
-      return null;
-    }
-  }
-
-  final children = <_CpuProfileTimelineTree>[];
-
-  static _CpuProfileTimelineTree? getTreeFromSample(CpuSample sample) =>
-      _timelineTreeExpando[sample];
-
-  _CpuProfileTimelineTree _getChild(int index) {
-    final length = children.length;
-    int i;
-    for (i = 0; i < length; ++i) {
-      final child = children[i];
-      final childIndex = child.index;
-      if (childIndex == index) {
-        return child;
-      }
-      if (childIndex > index) {
-        break;
-      }
-    }
-    final child = _CpuProfileTimelineTree._fromIndex(samples, index);
-    if (i < length) {
-      children.insert(i, child);
-    } else {
-      children.add(child);
-    }
-    return child;
-  }
 }
 
 /// Adds support for private VM RPCs that can only be used when VM developer

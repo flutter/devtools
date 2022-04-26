@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -32,7 +30,7 @@ class ReleaseNotesViewer extends StatefulWidget {
 
   final ReleaseNotesController releaseNotesController;
 
-  final Widget child;
+  final Widget? child;
 
   @override
   _ReleaseNotesViewerState createState() => _ReleaseNotesViewerState();
@@ -88,10 +86,11 @@ class _ReleaseNotesViewerState extends State<ReleaseNotesViewer>
 
   @override
   Widget build(BuildContext context) {
+    final child = widget.child;
     return Material(
       child: Stack(
         children: [
-          widget.child,
+          if (child != null) child,
           ReleaseNotes(
             releaseNotesController: widget.releaseNotesController,
             visibilityAnimation: visibilityAnimation,

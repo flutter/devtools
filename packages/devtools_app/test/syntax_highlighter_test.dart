@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 @TestOn('vm')
 import 'dart:convert';
 import 'dart:io';
@@ -181,7 +179,8 @@ void main() {
               ideTheme: getIdeTheme(),
             ),
             routerDelegate: DevToolsRouterDelegate(
-                (a, b, c) => const CupertinoPage(child: SizedBox.shrink())),
+              (a, b, c) => const CupertinoPage(child: SizedBox.shrink()),
+            ),
             routeInformationParser: DevToolsRouteInformationParser(),
             builder: (context, _) {
               callback(context);

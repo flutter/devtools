@@ -2,13 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
-// ignore_for_file: avoid_redundant_argument_values
-
 import 'dart:async';
 
 import 'package:async/async.dart';
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -37,16 +34,17 @@ class DebuggerController extends DisposableController
   // `initialSwitchToIsolate` can be set to false for tests to skip the logic
   // in `switchToIsolate`.
   DebuggerController({this.initialSwitchToIsolate = true}) {
-    _programExplorerController = ProgramExplorerController();
+    programExplorerController = ProgramExplorerController();
     autoDisposeStreamSubscription(
       serviceManager.onConnectionAvailable.listen(_handleConnectionAvailable),
     );
-    if (_service != null) {
+    if (serviceManager.hasService) {
       initialize();
     }
     _scriptHistoryListener = () {
-      if (scriptsHistory.current.value != null)
-        _showScriptLocation(ScriptLocation(scriptsHistory.current.value));
+      final currentScriptValue = scriptsHistory.current.value;
+      if (currentScriptValue != null)
+        _showScriptLocation(ScriptLocation(currentScriptValue));
     };
     scriptsHistory.current.addListener(_scriptHistoryListener);
   }
@@ -88,6 +86,7 @@ class DebuggerController extends DisposableController
     // It would be nice to not clear the script history but it is currently
     // coupled to ScriptRef objects so that is unsafe.
     scriptsHistory.clear();
+    isolateRef = null;
     _isPaused.value = false;
     _resuming.value = false;
     _lastEvent = null;
@@ -100,19 +99,16 @@ class DebuggerController extends DisposableController
     _breakpointsWithLocation.value = [];
     _selectedBreakpoint.value = null;
     _librariesVisible.value = false;
-    isolateRef = null;
     _firstDebuggerScreenLoaded = false;
   }
 
-  VmServiceWrapper _lastService;
+  VmServiceWrapper? _lastService;
 
   void _handleConnectionAvailable(VmServiceWrapper service) {
     if (service == _lastService) return;
     _lastService = service;
     onServiceShutdown();
-    if (service != null) {
-      initialize();
-    }
+    initialize();
   }
 
   void initialize() {
@@ -125,17 +121,21 @@ class DebuggerController extends DisposableController
       switchToIsolate(serviceManager.isolateManager.selectedIsolate.value);
     });
     autoDisposeStreamSubscription(
-        _service.onDebugEvent.listen(_handleDebugEvent));
+      _service.onDebugEvent.listen(_handleDebugEvent),
+    );
     autoDisposeStreamSubscription(
-        _service.onIsolateEvent.listen(_handleIsolateEvent));
+      _service.onIsolateEvent.listen(_handleIsolateEvent),
+    );
   }
 
   final bool initialSwitchToIsolate;
 
-  IsolateState get isolateDebuggerState =>
+  IsolateState? get isolateDebuggerState =>
       serviceManager.isolateManager.isolateDebuggerState(isolateRef);
 
-  VmServiceWrapper get _service => serviceManager.service;
+  VmServiceWrapper get _service {
+    return serviceManager.service!;
+  }
 
   /// Cache of autocomplete matches to show for a library when that library is
   /// imported.
@@ -143,22 +143,20 @@ class DebuggerController extends DisposableController
   /// This cache includes autocompletes from libraries exported by the library
   /// but does not include autocompletes for libraries imported by this library.
 
-  Map<LibraryRef, Future<Set<String>>> libraryMemberAutocompleteCache = {};
+  final libraryMemberAutocompleteCache = <LibraryRef, Future<Set<String?>>>{};
 
   /// Cache of autocomplete matches for a library for code written within that
   /// library.
   ///
   /// This cache includes autocompletes from all libraries imported and exported
   /// by the library as well as all private autocompletes for the library.
-  Map<LibraryRef, Future<Set<String>>>
-      libraryMemberAndImportsAutocompleteCache = {};
+  final libraryMemberAndImportsAutocompleteCache =
+      <LibraryRef, Future<Set<String?>>>{};
 
-  ProgramExplorerController get programExplorerController =>
-      _programExplorerController;
-  ProgramExplorerController _programExplorerController;
+  late final ProgramExplorerController programExplorerController;
 
   final ScriptsHistory scriptsHistory = ScriptsHistory();
-  VoidCallback _scriptHistoryListener;
+  late VoidCallback _scriptHistoryListener;
 
   final _isPaused = ValueNotifier<bool>(false);
 
@@ -170,26 +168,26 @@ class DebuggerController extends DisposableController
   /// VM, but haven't yet received the 'resumed' isolate event.
   ValueListenable<bool> get resuming => _resuming;
 
-  Event _lastEvent;
+  Event? _lastEvent;
 
-  Event get lastEvent => _lastEvent;
+  Event? get lastEvent => _lastEvent;
 
-  final _currentScriptRef = ValueNotifier<ScriptRef>(null);
+  final _currentScriptRef = ValueNotifier<ScriptRef?>(null);
 
-  ValueListenable<ScriptRef> get currentScriptRef => _currentScriptRef;
+  ValueListenable<ScriptRef?> get currentScriptRef => _currentScriptRef;
 
   @visibleForTesting
-  final parsedScript = ValueNotifier<ParsedScript>(null);
+  final parsedScript = ValueNotifier<ParsedScript?>(null);
 
-  ValueListenable<ParsedScript> get currentParsedScript => parsedScript;
+  ValueListenable<ParsedScript?> get currentParsedScript => parsedScript;
 
   ValueListenable<bool> get showSearchInFileField => _showSearchInFileField;
 
   final _showSearchInFileField = ValueNotifier<bool>(false);
 
-  ValueListenable<ScriptLocation> get scriptLocation => _scriptLocation;
+  ValueListenable<ScriptLocation?> get scriptLocation => _scriptLocation;
 
-  final _scriptLocation = ValueNotifier<ScriptLocation>(null);
+  final _scriptLocation = ValueNotifier<ScriptLocation?>(null);
 
   ValueListenable<bool> get showFileOpener => _showFileOpener;
 
@@ -217,7 +215,7 @@ class DebuggerController extends DisposableController
   /// Show the given script location (without updating the script navigation
   /// history).
   void _showScriptLocation(ScriptLocation scriptLocation) {
-    _currentScriptRef.value = scriptLocation?.scriptRef;
+    _currentScriptRef.value = scriptLocation.scriptRef;
     if (_currentScriptRef.value == null) {
       log('Trying to show a location with a null script ref', LogLevel.error);
     }
@@ -230,9 +228,9 @@ class DebuggerController extends DisposableController
     _scriptLocation.value = scriptLocation;
   }
 
-  Future<Script> getScriptForRef(ScriptRef ref) async {
+  Future<Script?> getScriptForRef(ScriptRef ref) async {
     final cachedScript = scriptManager.getScriptCached(ref);
-    if (cachedScript == null && ref != null) {
+    if (cachedScript == null) {
       return await scriptManager.getScript(ref);
     }
     return cachedScript;
@@ -242,9 +240,10 @@ class DebuggerController extends DisposableController
   /// for syntax highlighting.
   Future<void> _parseCurrentScript() async {
     // Return early if the current script has not changed.
-    if (parsedScript.value?.script?.id == _currentScriptRef?.value?.id) return;
+    if (parsedScript.value?.script.id == _currentScriptRef.value?.id) return;
 
     final scriptRef = _currentScriptRef.value;
+    if (scriptRef == null) return;
     final script = await getScriptForRef(scriptRef);
 
     // Create a new SyntaxHighlighter with the script's source in preparation
@@ -273,7 +272,7 @@ class DebuggerController extends DisposableController
   /// Find the owner library for a ClassRef, FuncRef, or LibraryRef.
   ///
   /// If Dart had union types, ref would be type ClassRef | FuncRef | LibraryRef
-  Future<LibraryRef> findOwnerLibrary(Object ref) async {
+  Future<LibraryRef?> findOwnerLibrary(Object? ref) async {
     if (ref is LibraryRef) {
       return ref;
     }
@@ -294,9 +293,9 @@ class DebuggerController extends DisposableController
   /// Returns the class for the provided [ClassRef].
   ///
   /// May return null.
-  Future<Class> classFor(ClassRef classRef) async {
+  Future<Class?> classFor(ClassRef classRef) async {
     try {
-      return _clazzCache[classRef] ??= await getObject(classRef);
+      return _clazzCache[classRef] ??= await getObject(classRef) as Class;
     } catch (_) {}
     return null;
   }
@@ -307,14 +306,14 @@ class DebuggerController extends DisposableController
   ValueListenable<List<StackFrameAndSourcePosition>>
       get stackFramesWithLocation => _stackFramesWithLocation;
 
-  final _selectedStackFrame = ValueNotifier<StackFrameAndSourcePosition>(null);
+  final _selectedStackFrame = ValueNotifier<StackFrameAndSourcePosition?>(null);
 
-  ValueListenable<StackFrameAndSourcePosition> get selectedStackFrame =>
+  ValueListenable<StackFrameAndSourcePosition?> get selectedStackFrame =>
       _selectedStackFrame;
 
-  Frame get frameForEval =>
+  Frame? get frameForEval =>
       _selectedStackFrame.value?.frame ??
-      _stackFramesWithLocation.value?.safeFirst?.frame;
+      _stackFramesWithLocation.value.safeFirst?.frame;
 
   final _variables = ValueNotifier<List<DartObjectNode>>([]);
 
@@ -330,15 +329,15 @@ class DebuggerController extends DisposableController
   ValueListenable<List<BreakpointAndSourcePosition>>
       get breakpointsWithLocation => _breakpointsWithLocation;
 
-  final _selectedBreakpoint = ValueNotifier<BreakpointAndSourcePosition>(null);
+  final _selectedBreakpoint = ValueNotifier<BreakpointAndSourcePosition?>(null);
 
-  ValueListenable<BreakpointAndSourcePosition> get selectedBreakpoint =>
+  ValueListenable<BreakpointAndSourcePosition?> get selectedBreakpoint =>
       _selectedBreakpoint;
 
   final _exceptionPauseMode =
       ValueNotifier<String>(ExceptionPauseMode.kUnhandled);
 
-  ValueListenable<String> get exceptionPauseMode => _exceptionPauseMode;
+  ValueListenable<String?> get exceptionPauseMode => _exceptionPauseMode;
 
   final _librariesVisible = ValueNotifier(false);
 
@@ -351,12 +350,19 @@ class DebuggerController extends DisposableController
     _librariesVisible.value = !_librariesVisible.value;
   }
 
-  IsolateRef isolateRef;
+  IsolateRef? isolateRef;
+
   bool get isSystemIsolate => isolateRef?.isSystemIsolate ?? false;
+
+  String get _isolateRefId {
+    final id = isolateRef?.id;
+    if (id == null) return '';
+    return id;
+  }
 
   final EvalHistory evalHistory = EvalHistory();
 
-  void switchToIsolate(IsolateRef ref) async {
+  void switchToIsolate(IsolateRef? ref) async {
     isolateRef = ref;
     _isPaused.value = false;
     await _pause(false);
@@ -371,52 +377,51 @@ class DebuggerController extends DisposableController
       return;
     }
 
-    final isolate = await _service.getIsolate(isolateRef.id);
-    if (isolate.id != isolateRef?.id) {
+    final isolate = await _service.getIsolate(_isolateRefId);
+    if (isolate.id != _isolateRefId) {
       // Current request is obsolete.
       return;
     }
 
     if (isolate.pauseEvent != null &&
-        isolate.pauseEvent.kind != EventKind.kResume) {
+        isolate.pauseEvent!.kind != EventKind.kResume) {
       _lastEvent = isolate.pauseEvent;
       await _pause(true, pauseEvent: isolate.pauseEvent);
     }
-    if (isolate.id != isolateRef?.id) {
+    if (isolate.id != _isolateRefId) {
       // Current request is obsolete.
       return;
     }
 
-    _breakpoints.value = isolate.breakpoints;
+    _breakpoints.value = isolate.breakpoints ?? [];
 
     // Build _breakpointsWithLocation from _breakpoints.
-    if (_breakpoints.value != null) {
-      // ignore: unawaited_futures
-      Future.wait(_breakpoints.value.map(_createBreakpointWithLocation))
-          .then((list) {
-        if (isolate.id != isolateRef?.id) {
-          // Current request is obsolete.
-          return;
-        }
-        _breakpointsWithLocation.value = list.toList()..sort();
-      });
-    }
+    // ignore: unawaited_futures
+    Future.wait(_breakpoints.value.map(_createBreakpointWithLocation))
+        .then((list) {
+      if (isolate.id != _isolateRefId) {
+        // Current request is obsolete.
+        return;
+      }
+      _breakpointsWithLocation.value = list.toList()..sort();
+    });
 
-    _exceptionPauseMode.value = isolate.exceptionPauseMode;
+    _exceptionPauseMode.value =
+        isolate.exceptionPauseMode ?? ExceptionPauseMode.kUnhandled;
 
-    if (isolate.id != isolateRef?.id) {
+    if (isolate.id != _isolateRefId) {
       // Current request is obsolete.
       return;
     }
     await _populateScripts(isolate);
   }
 
-  Future<Success> pause() => _service.pause(isolateRef.id);
+  Future<Success> pause() => _service.pause(_isolateRefId);
 
   Future<Success> resume() {
     _log.log('resume()');
     _resuming.value = true;
-    return _service.resume(isolateRef.id);
+    return _service.resume(_isolateRefId);
   }
 
   Future<Success> stepOver() {
@@ -427,7 +432,7 @@ class DebuggerController extends DisposableController
     final useAsyncStepping = _lastEvent?.atAsyncSuspension ?? false;
     return _service
         .resume(
-          isolateRef.id,
+          _isolateRefId,
           step: useAsyncStepping
               ? StepOption.kOverAsyncSuspension
               : StepOption.kOver,
@@ -438,13 +443,13 @@ class DebuggerController extends DisposableController
   Future<Success> stepIn() {
     _resuming.value = true;
 
-    return _service.resume(isolateRef.id, step: StepOption.kInto);
+    return _service.resume(_isolateRefId, step: StepOption.kInto);
   }
 
   Future<Success> stepOut() {
     _resuming.value = true;
 
-    return _service.resume(isolateRef.id, step: StepOption.kOut);
+    return _service.resume(_isolateRefId, step: StepOption.kOut);
   }
 
   /// Evaluate the given expression in the context of the currently selected
@@ -455,14 +460,20 @@ class DebuggerController extends DisposableController
     if (!isPaused.value) {
       return Future.error(
         RPCError.withDetails(
-            'evaluateInFrame', RPCError.kInvalidParams, 'Isolate not paused'),
+          'evaluateInFrame',
+          RPCError.kInvalidParams,
+          'Isolate not paused',
+        ),
       );
     }
 
     if (stackFramesWithLocation.value.isEmpty) {
       return Future.error(
         RPCError.withDetails(
-            'evaluateInFrame', RPCError.kInvalidParams, 'No frames available'),
+          'evaluateInFrame',
+          RPCError.kInvalidParams,
+          'No frames available',
+        ),
       );
     }
 
@@ -470,8 +481,8 @@ class DebuggerController extends DisposableController
         stackFramesWithLocation.value.first.frame;
 
     return _service.evaluateInFrame(
-      isolateRef.id,
-      frame.index,
+      _isolateRefId,
+      frame.index!,
       expression,
       disableBreakpoints: true,
     );
@@ -480,8 +491,8 @@ class DebuggerController extends DisposableController
   /// Call `toString()` on the given instance and return the result.
   Future<Response> invokeToString(InstanceRef instance) {
     return _service.invoke(
-      isolateRef.id,
-      instance.id,
+      _isolateRefId,
+      instance.id!,
       'toString',
       <String>[],
       disableBreakpoints: true,
@@ -489,12 +500,12 @@ class DebuggerController extends DisposableController
   }
 
   /// Retrieves the full string value of a [stringRef].
-  Future<String> retrieveFullStringValue(
+  Future<String?> retrieveFullStringValue(
     InstanceRef stringRef, {
-    String onUnavailable(String truncatedValue),
+    String onUnavailable(String? truncatedValue)?,
   }) async {
-    return serviceManager.service.retrieveFullStringValue(
-      isolateRef.id,
+    return _service.retrieveFullStringValue(
+      _isolateRefId,
       stringRef,
       onUnavailable: onUnavailable,
     );
@@ -508,10 +519,10 @@ class DebuggerController extends DisposableController
   }
 
   Future<Breakpoint> addBreakpoint(String scriptId, int line) =>
-      _service.addBreakpoint(isolateRef.id, scriptId, line);
+      _service.addBreakpoint(_isolateRefId, scriptId, line);
 
   Future<void> removeBreakpoint(Breakpoint breakpoint) =>
-      _service.removeBreakpoint(isolateRef.id, breakpoint.id);
+      _service.removeBreakpoint(_isolateRefId, breakpoint.id!);
 
   Future<void> toggleBreakpoint(ScriptRef script, int line) async {
     if (serviceManager.isolateManager.selectedIsolate.value == null) {
@@ -521,19 +532,19 @@ class DebuggerController extends DisposableController
     // The VM doesn't support debugging for system isolates and will crash on
     // a failed assert in debug mode. Disable the toggle breakpoint
     // functionality for system isolates.
-    if (serviceManager.isolateManager.selectedIsolate.value.isSystemIsolate) {
+    if (serviceManager.isolateManager.selectedIsolate.value!.isSystemIsolate!) {
       return;
     }
 
-    final bp = breakpointsWithLocation.value.firstWhere((bp) {
+    final bp = breakpointsWithLocation.value.firstWhereOrNull((bp) {
       return bp.scriptRef == script && bp.line == line;
-    }, orElse: () => null);
+    });
 
     if (bp != null) {
       await removeBreakpoint(bp.breakpoint);
     } else {
       try {
-        await addBreakpoint(script.id, line);
+        await addBreakpoint(script.id!, line);
       } catch (_) {
         // ignore errors setting breakpoints
       }
@@ -541,7 +552,10 @@ class DebuggerController extends DisposableController
   }
 
   Future<void> setIsolatePauseMode(String mode) async {
-    await _service.setIsolatePauseMode(isolateRef.id, exceptionPauseMode: mode);
+    await _service.setIsolatePauseMode(
+      _isolateRefId,
+      exceptionPauseMode: mode,
+    );
     _exceptionPauseMode.value = mode;
   }
 
@@ -552,7 +566,7 @@ class DebuggerController extends DisposableController
     assert(event.kind == EventKind.kPauseStart);
     assert(_resuming.value);
 
-    final id = event.isolate.id;
+    final id = event.isolate!.id!;
     _log.log('resume() $id');
     return _service.resume(id);
   }
@@ -563,12 +577,12 @@ class DebuggerController extends DisposableController
     // We're resuming and another isolate has started in a paused state,
     // resume any pauseState isolates.
     if (_resuming.value &&
-        event.isolate.id != isolateRef?.id &&
+        event.isolate!.id != _isolateRefId &&
         event.kind == EventKind.kPauseStart) {
       _resumeIsolatePauseStart(event);
     }
 
-    if (event.isolate.id != isolateRef?.id) return;
+    if (event.isolate!.id != _isolateRefId) return;
 
     _lastEvent = event;
 
@@ -590,10 +604,11 @@ class DebuggerController extends DisposableController
       // TODO(djshuckerow): switch the _breakpoints notifier to a 'ListNotifier'
       // that knows how to notify when performing a list edit operation.
       case EventKind.kBreakpointAdded:
-        _breakpoints.value = [..._breakpoints.value, event.breakpoint];
+        final breakpoint = event.breakpoint!;
+        _breakpoints.value = [..._breakpoints.value, breakpoint];
 
         // ignore: unawaited_futures
-        _createBreakpointWithLocation(event.breakpoint).then((bp) {
+        _createBreakpointWithLocation(breakpoint).then((bp) {
           final list = [
             ..._breakpointsWithLocation.value,
             bp,
@@ -604,14 +619,15 @@ class DebuggerController extends DisposableController
 
         break;
       case EventKind.kBreakpointResolved:
+        final breakpoint = event.breakpoint!;
         _breakpoints.value = [
           for (var b in _breakpoints.value)
             if (b != event.breakpoint) b,
-          event.breakpoint
+          breakpoint
         ];
 
         // ignore: unawaited_futures
-        _createBreakpointWithLocation(event.breakpoint).then((bp) {
+        _createBreakpointWithLocation(breakpoint).then((bp) {
           final list = _breakpointsWithLocation.value.toList();
           // Remote the bp with the older, unresolved information from the list.
           list.removeWhere((breakpoint) => bp.breakpoint.id == bp.id);
@@ -646,7 +662,8 @@ class DebuggerController extends DisposableController
   }
 
   void _handleIsolateEvent(Event event) {
-    if (event.isolate.id != isolateRef?.id) return;
+    final eventId = event.isolate?.id;
+    if (eventId != _isolateRefId) return;
     switch (event.kind) {
       case EventKind.kIsolateReload:
         _updateAfterIsolateReload(event);
@@ -660,10 +677,11 @@ class DebuggerController extends DisposableController
     final status = reloadEvent.status;
 
     _clearAutocompleteCaches();
+    if (isolateRef == null) return;
     // Refresh the list of scripts.
     final previousScriptRefs = scriptManager.sortedScripts.value;
     final currentScriptRefs =
-        await scriptManager.retrieveAndSortScripts(isolateRef);
+        await scriptManager.retrieveAndSortScripts(isolateRef!);
     final removedScripts =
         Set.of(previousScriptRefs).difference(Set.of(currentScriptRefs));
     final addedScripts =
@@ -673,17 +691,21 @@ class DebuggerController extends DisposableController
 
     // Show a toast.
     final count = removedScripts.length + addedScripts.length;
-    messageBus.addEvent(BusEvent('toast',
-        data: '${nf.format(count)} ${pluralize('script', count)} updated.'));
+    messageBus.addEvent(
+      BusEvent(
+        'toast',
+        data: '${nf.format(count)} ${pluralize('script', count)} updated.',
+      ),
+    );
 
     // Update breakpoints.
     _updateBreakpointsAfterReload(removedScripts, addedScripts);
 
     // Redirect the current editor screen if necessary.
     if (removedScripts.contains(currentScriptRef.value)) {
-      final uri = currentScriptRef.value.uri;
-      final newScriptRef = addedScripts
-          .firstWhere((script) => script.uri == uri, orElse: () => null);
+      final uri = currentScriptRef.value!.uri;
+      final newScriptRef =
+          addedScripts.firstWhereOrNull((script) => script.uri == uri);
 
       if (newScriptRef != null) {
         // Display the script location.
@@ -730,7 +752,7 @@ class DebuggerController extends DisposableController
     for (final scriptRef in addedScripts) {
       for (final bp in breakpointsToRemove) {
         if (scriptRef.uri == bp.scriptUri) {
-          addBreakpoint(scriptRef.id, bp.line);
+          addBreakpoint(scriptRef.id!, bp.line!);
         }
       }
     }
@@ -740,9 +762,9 @@ class DebuggerController extends DisposableController
 
   ValueListenable<bool> get hasTruncatedFrames => _hasTruncatedFrames;
 
-  CancelableOperation<_StackInfo> _getStackOperation;
+  CancelableOperation<_StackInfo>? _getStackOperation;
 
-  Future<void> _pause(bool paused, {Event pauseEvent}) async {
+  Future<void> _pause(bool paused, {Event? pauseEvent}) async {
     // TODO(jacobr): unify pause support with
     // serviceManager.isolateManager.selectedIsolateState.isPaused.value;
     // listening for changes there instead of having separate logic.
@@ -763,10 +785,10 @@ class DebuggerController extends DisposableController
     // TODO(elliette): Find a better solution for this. Currently, this means
     // we fetch all variable objects twice (once in _getFullStack and once in
     // in_createStackFrameWithLocation).
-    if (await serviceManager.connectedApp.isDartWebApp) {
+    if (await serviceManager.connectedApp!.isDartWebApp) {
       _populateFrameInfo(
         [
-          await _createStackFrameWithLocation(pauseEvent.topFrame),
+          await _createStackFrameWithLocation(pauseEvent!.topFrame!),
         ],
         truncated: true,
       );
@@ -778,13 +800,15 @@ class DebuggerController extends DisposableController
     // of visible stack frames.
     const initialFrameRequestCount = 12;
 
-    _getStackOperation = CancelableOperation.fromFuture(_getStackInfo(
-      limit: initialFrameRequestCount,
-    ));
-    final stackInfo = await _getStackOperation.value;
+    _getStackOperation = CancelableOperation.fromFuture(
+      _getStackInfo(
+        limit: initialFrameRequestCount,
+      ),
+    );
+    final stackInfo = await _getStackOperation!.value;
     _populateFrameInfo(
       stackInfo.frames,
-      truncated: stackInfo.truncated ?? false,
+      truncated: stackInfo.truncated,
     );
 
     // In the background, populate the rest of the frames.
@@ -793,26 +817,26 @@ class DebuggerController extends DisposableController
     }
   }
 
-  Future<_StackInfo> _getStackInfo({int limit}) async {
+  Future<_StackInfo> _getStackInfo({int? limit}) async {
     _log.log('getStack() with limit: $limit');
-    final stack = await _service.getStack(isolateRef.id, limit: limit);
-    _log.log('getStack() completed (frames: ${stack.frames.length})');
+    final stack = await _service.getStack(_isolateRefId, limit: limit);
+    _log.log('getStack() completed (frames: ${stack.frames!.length})');
 
     final frames = _framesForCallStack(
-      stack.frames,
-      asyncCausalFrames: stack.asyncCausalFrames,
+      stack.frames ?? [],
+      asyncCausalFrames: stack.asyncCausalFrames ?? [],
       reportedException: _lastEvent?.exception,
     );
 
     return _StackInfo(
       await Future.wait(frames.map(_createStackFrameWithLocation)),
-      stack.truncated,
+      stack.truncated ?? false,
     );
   }
 
   void _populateFrameInfo(
     List<StackFrameAndSourcePosition> frames, {
-    @required final bool truncated,
+    required final bool truncated,
   }) {
     _log.log('populated frame info');
     _stackFramesWithLocation.value = frames;
@@ -827,7 +851,7 @@ class DebuggerController extends DisposableController
   Future<void> _getFullStack() async {
     await _getStackOperation?.cancel();
     _getStackOperation = CancelableOperation.fromFuture(_getStackInfo());
-    final stackInfo = await _getStackOperation.value;
+    final stackInfo = await _getStackOperation!.value;
     _populateFrameInfo(stackInfo.frames, truncated: stackInfo.truncated);
   }
 
@@ -847,28 +871,31 @@ class DebuggerController extends DisposableController
   ///
   /// The return value can be one of [Obj] or [Sentinel].
   Future<Obj> getObject(ObjRef objRef) {
-    return _service.getObject(isolateRef.id, objRef.id);
+    return _service.getObject(_isolateRefId, objRef.id!);
   }
 
   Future<void> _populateScripts(Isolate isolate) async {
-    assert(isolate != null);
-    final scriptRefs = await scriptManager.retrieveAndSortScripts(isolateRef);
+    if (isolateRef == null) return;
+    final scriptRefs = await scriptManager.retrieveAndSortScripts(isolateRef!);
 
     // Update the selected script.
-    final mainScriptRef = scriptRefs.firstWhere((ref) {
-      return ref.uri == isolate.rootLib.uri;
-    }, orElse: () => null);
+    final mainScriptRef = scriptRefs.firstWhereOrNull((ref) {
+      return ref.uri == isolate.rootLib?.uri;
+    });
 
     // Display the script location.
-    _populateScriptAndShowLocation(mainScriptRef);
+    if (mainScriptRef != null) {
+      _populateScriptAndShowLocation(mainScriptRef);
+    }
   }
 
   Future<BreakpointAndSourcePosition> _createBreakpointWithLocation(
-      Breakpoint breakpoint) async {
-    if (breakpoint.resolved) {
+    Breakpoint breakpoint,
+  ) async {
+    if (breakpoint.resolved!) {
       final bp = BreakpointAndSourcePosition.create(breakpoint);
-      return scriptManager.getScript(bp.scriptRef).then((Script script) {
-        final pos = SourcePosition.calculatePosition(script, bp.tokenPos);
+      return scriptManager.getScript(bp.scriptRef!).then((Script script) {
+        final pos = SourcePosition.calculatePosition(script, bp.tokenPos!);
         return BreakpointAndSourcePosition.create(breakpoint, pos);
       });
     } else {
@@ -884,24 +911,28 @@ class DebuggerController extends DisposableController
       return StackFrameAndSourcePosition(frame);
     }
 
-    final script = await scriptManager.getScript(location.script);
+    final script = await scriptManager.getScript(location.script!);
     final position =
-        SourcePosition.calculatePosition(script, location.tokenPos);
+        SourcePosition.calculatePosition(script, location.tokenPos!);
     return StackFrameAndSourcePosition(frame, position: position);
   }
 
   void selectBreakpoint(BreakpointAndSourcePosition bp) {
     _selectedBreakpoint.value = bp;
 
+    final scriptRef = bp.scriptRef;
+    if (scriptRef == null) return;
+
     if (bp.sourcePosition == null) {
-      showScriptLocation(ScriptLocation(bp.scriptRef));
+      showScriptLocation(ScriptLocation(scriptRef));
     } else {
       showScriptLocation(
-          ScriptLocation(bp.scriptRef, location: bp.sourcePosition));
+        ScriptLocation(scriptRef, location: bp.sourcePosition),
+      );
     }
   }
 
-  void selectStackFrame(StackFrameAndSourcePosition frame) {
+  void selectStackFrame(StackFrameAndSourcePosition? frame) {
     _selectedStackFrame.value = frame;
 
     if (frame != null) {
@@ -910,9 +941,10 @@ class DebuggerController extends DisposableController
       _variables.value = [];
     }
 
-    if (frame?.scriptRef != null) {
-      showScriptLocation(
-          ScriptLocation(frame.scriptRef, location: frame.position));
+    final scriptRef = frame?.scriptRef;
+    final position = frame?.position;
+    if (scriptRef != null && position != null) {
+      showScriptLocation(ScriptLocation(scriptRef, location: position));
     }
   }
 
@@ -923,20 +955,23 @@ class DebuggerController extends DisposableController
     }
 
     final variables =
-        frame.vars.map((v) => DartObjectNode.create(v, isolateRef)).toList();
+        frame.vars!.map((v) => DartObjectNode.create(v, isolateRef)).toList();
     variables
       ..forEach(buildVariablesTree)
-      ..sort((a, b) => sortFieldsByName(a.name, b.name));
+      ..sort((a, b) => sortFieldsByName(a.name!, b.name!));
     return variables;
   }
 
   List<Frame> _framesForCallStack(
     List<Frame> stackFrames, {
-    List<Frame> asyncCausalFrames,
-    InstanceRef reportedException,
+    List<Frame>? asyncCausalFrames,
+    InstanceRef? reportedException,
   }) {
     // Prefer asyncCausalFrames if they exist.
-    List<Frame> frames = asyncCausalFrames ?? stackFrames;
+    List<Frame> frames =
+        asyncCausalFrames != null && asyncCausalFrames.isNotEmpty
+            ? asyncCausalFrames
+            : stackFrames;
 
     // Include any reported exception as a variable in the first frame.
     if (reportedException != null && frames.isNotEmpty) {
@@ -971,16 +1006,18 @@ class DebuggerController extends DisposableController
 
   /// Return the list of valid positions for breakpoints for a given script.
   Future<List<SourcePosition>> getBreakablePositions(Script script) async {
-    if (!_breakPositionsMap.containsKey(script.id)) {
-      _breakPositionsMap[script.id] = await _getBreakablePositions(script);
+    final key = script.id;
+    if (key == null) return [];
+    if (!_breakPositionsMap.containsKey(key)) {
+      _breakPositionsMap[key] = await _getBreakablePositions(script);
     }
 
-    return _breakPositionsMap[script.id];
+    return _breakPositionsMap[key] ?? [];
   }
 
   Future<List<SourcePosition>> _getBreakablePositions(Script script) async {
     final report = await _service.getSourceReport(
-      isolateRef.id,
+      _isolateRefId,
       [SourceReportKind.kPossibleBreakpoints],
       scriptId: script.id,
       forceCompile: true,
@@ -988,9 +1025,10 @@ class DebuggerController extends DisposableController
 
     final positions = <SourcePosition>[];
 
-    for (SourceReportRange range in report.ranges) {
-      if (range.possibleBreakpoints != null) {
-        for (int tokenPos in range.possibleBreakpoints) {
+    for (SourceReportRange range in report.ranges!) {
+      final possibleBreakpoints = range.possibleBreakpoints;
+      if (possibleBreakpoints != null) {
+        for (int tokenPos in possibleBreakpoints) {
           positions.add(SourcePosition.calculatePosition(script, tokenPos));
         }
       }
@@ -1016,23 +1054,25 @@ class DebuggerController extends DisposableController
     String search, {
     bool searchPreviousMatches = false,
   }) {
-    if (search == null || search.isEmpty || parsedScript.value == null) {
+    if (search.isEmpty || parsedScript.value == null) {
       return [];
     }
     final matches = <SourceToken>[];
     final caseInsensitiveSearch = search.toLowerCase();
 
-    final currentScript = parsedScript.value;
+    final currentScript = parsedScript.value!;
     for (int i = 0; i < currentScript.lines.length; i++) {
       final line = currentScript.lines[i].toLowerCase();
       final matchesForLine = caseInsensitiveSearch.allMatches(line);
       if (matchesForLine.isNotEmpty) {
-        matches.addAll(matchesForLine.map(
-          (m) => SourceToken(
-            position: SourcePosition(line: i, column: m.start),
-            length: m.end - m.start,
+        matches.addAll(
+          matchesForLine.map(
+            (m) => SourceToken(
+              position: SourcePosition(line: i, column: m.start),
+              length: m.end - m.start,
+            ),
           ),
-        ));
+        );
       }
     }
     return matches;
@@ -1110,7 +1150,7 @@ class EvalHistory {
     }
   }
 
-  String get currentText {
+  String? get currentText {
     return _historyPosition == -1 ? null : _evalHistory[_historyPosition];
   }
 }
@@ -1124,11 +1164,10 @@ class _StackInfo {
 
 class ParsedScript {
   ParsedScript({
-    @required this.script,
-    @required this.highlighter,
-    @required this.executableLines,
-  })  : assert(script != null),
-        lines = (script.source?.split('\n') ?? const []).toList();
+    required this.script,
+    required this.highlighter,
+    required this.executableLines,
+  }) : lines = (script.source?.split('\n') ?? const []).toList();
 
   final Script script;
 

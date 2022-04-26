@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -29,9 +27,6 @@ abstract class LayoutExplorerWidget extends StatefulWidget {
 }
 
 /// Base class for state objects for layout widgets for all widget types.
-///
-/// This class contains common code useful for visualizing all kinds of widgets.
-/// To implement
 abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
         L extends LayoutProperties> extends State<W>
     with TickerProviderStateMixin
@@ -59,7 +54,7 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
       _previousProperties ?? _animatedProperties as L? ?? _properties;
 
   RemoteDiagnosticsNode? get selectedNode =>
-      inspectorController.selectedNode?.value?.diagnostic;
+      inspectorController.selectedNode.value?.diagnostic;
 
   InspectorController get inspectorController => widget.inspectorController;
 
@@ -72,23 +67,25 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
 
   Future<void> onSelectionChanged() async {
     if (!mounted) return;
-    if (!shouldDisplay(selectedNode)) {
-      return;
-    }
+    final selectedNodeLocal = selectedNode;
+    if (selectedNodeLocal == null) return;
+    if (!shouldDisplay(selectedNodeLocal)) return;
     final prevRootId = id(_properties?.node);
-    final newRootId = id(getRoot(selectedNode));
+    final newRootId = id(getRoot(selectedNodeLocal));
     final shouldFetch = prevRootId != newRootId;
     if (shouldFetch) {
       _dirty = false;
       final newSelection = await fetchLayoutProperties();
-      _setProperties(newSelection);
+      if (newSelection != null) {
+        _setProperties(newSelection);
+      }
     } else {
       updateHighlighted(_properties);
     }
   }
 
   /// Whether this layout explorer can work with this kind of node.
-  bool shouldDisplay(RemoteDiagnosticsNode? node);
+  bool shouldDisplay(RemoteDiagnosticsNode node);
 
   Size get size => properties!.size;
 
@@ -103,13 +100,15 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
   /// of the current widget.
   RemoteDiagnosticsNode? getRoot(RemoteDiagnosticsNode? node);
 
-  Future<L> fetchLayoutProperties() async {
+  Future<L?> fetchLayoutProperties() async {
     objectGroupManager?.cancelNext();
     final manager = objectGroupManager!;
     final nextObjectGroup = manager.next;
-    final node = (await nextObjectGroup.getLayoutExplorerNode(
+    final node = await nextObjectGroup.getLayoutExplorerNode(
       getRoot(selectedNode),
-    ))!;
+    );
+    if (node == null) return null;
+
     if (!nextObjectGroup.disposed) {
       assert(manager.next == nextObjectGroup);
       manager.promoteNext();
@@ -126,13 +125,13 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
   String? id(RemoteDiagnosticsNode? node) => node?.dartDiagnosticRef.id;
 
   void _registerInspectorControllerService() {
-    inspectorController.selectedNode?.addListener(_onSelectionChangedCallback);
+    inspectorController.selectedNode.addListener(_onSelectionChangedCallback);
     inspectorService?.addClient(this);
   }
 
   void _unregisterInspectorControllerService() {
     inspectorController.selectedNode
-        ?.removeListener(_onSelectionChangedCallback);
+        .removeListener(_onSelectionChangedCallback);
     inspectorService?.removeClient(this);
   }
 
@@ -206,7 +205,9 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
     if (!_dirty) return;
     _dirty = false;
     final updatedProperties = await fetchLayoutProperties();
-    _changeProperties(updatedProperties);
+    if (updatedProperties != null) {
+      _changeProperties(updatedProperties);
+    }
   }
 
   void _changeProperties(L nextProperties) {
@@ -280,7 +281,10 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
   // TODO(albertusangga): Investigate why onForceRefresh is not getting called.
   @override
   Future<void> onForceRefresh() async {
-    _setProperties(await fetchLayoutProperties());
+    final properties = await fetchLayoutProperties();
+    if (properties != null) {
+      _setProperties(properties);
+    }
   }
 
   /// Currently this is not working so we should listen to controller selection event instead.

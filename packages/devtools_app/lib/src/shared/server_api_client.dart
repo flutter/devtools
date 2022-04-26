@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'dart:async';
 import 'dart:convert';
 
@@ -34,14 +32,15 @@ class DevToolsServerConnection {
       (e) => e.isNotEmpty,
     );
     final uri = Uri(
-        scheme: baseUri.scheme,
-        host: baseUri.host,
-        port: baseUri.port,
-        pathSegments: [
-          ...baseUriPathSegments,
-          'api',
-          'ping',
-        ]);
+      scheme: baseUri.scheme,
+      host: baseUri.host,
+      port: baseUri.port,
+      pathSegments: [
+        ...baseUriPathSegments,
+        'api',
+        'ping',
+      ],
+    );
 
     try {
       final response = await http.get(uri).timeout(const Duration(seconds: 5));
@@ -60,12 +59,14 @@ class DevToolsServerConnection {
       return null;
     }
 
-    final sseUri = Uri(pathSegments: [
-      '', // Leading '/'
-      ...baseUriPathSegments,
-      'api',
-      'sse'
-    ]);
+    final sseUri = Uri(
+      pathSegments: [
+        '', // Leading '/'
+        ...baseUriPathSegments,
+        'api',
+        'sse'
+      ],
+    );
     final client = SseClient(sseUri.toString());
     return DevToolsServerConnection._(client);
   }

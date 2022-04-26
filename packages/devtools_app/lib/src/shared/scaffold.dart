@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -273,7 +271,9 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       // dragging a new export into the browser will not result in a new
       // history entry.
       Router.neglect(
-          context, () => routerDelegate.navigate(snapshotPageId, args));
+        context,
+        () => routerDelegate.navigate(snapshotPageId, args),
+      );
     }
   }
 
@@ -394,7 +394,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       );
       preferredSize = isNarrow
           ? Size.fromHeight(
-              defaultToolbarHeight + scaleByFontFactor(36.0) + 4.0)
+              defaultToolbarHeight + scaleByFontFactor(36.0) + 4.0,
+            )
           : Size.fromHeight(defaultToolbarHeight);
       final alignment = isNarrow ? Alignment.bottomLeft : Alignment.centerRight;
 
@@ -404,7 +405,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
           : math.max(
               0.0,
               DevToolsScaffold.actionWidgetSize * (actions.length) -
-                  rightAdjust);
+                  rightAdjust,
+            );
 
       flexibleSpace = Align(
         alignment: alignment,

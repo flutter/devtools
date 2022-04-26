@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/screens/performance/event_details.dart';
@@ -31,10 +29,12 @@ void main() {
       WidgetTester tester,
     ) async {
       eventDetails = EventDetails(selectedEvent);
-      await tester.pumpWidget(wrapWithControllers(
-        eventDetails,
-        performance: PerformanceController(),
-      ));
+      await tester.pumpWidget(
+        wrapWithControllers(
+          eventDetails,
+          performance: PerformanceController(),
+        ),
+      );
       expect(find.byType(EventDetails), findsOneWidget);
     }
 

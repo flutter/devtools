@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe, unnecessary_null_comparison
-
 import 'dart:async';
 import 'dart:core';
 import 'dart:ui';
@@ -298,7 +296,8 @@ class ServiceExtensionManager extends Disposer {
           case int:
           case double:
             final num value = num.parse(
-                response.json![name.substring(name.lastIndexOf('.') + 1)]);
+              response.json![name.substring(name.lastIndexOf('.') + 1)],
+            );
             await _maybeRestoreExtension(name, value);
             return;
           default:
@@ -519,7 +518,9 @@ class ServiceExtensionManager extends Disposer {
   }
 
   void vmServiceOpened(
-      VmServiceWrapper service, ConnectedApp connectedApp) async {
+    VmServiceWrapper service,
+    ConnectedApp connectedApp,
+  ) async {
     _checkForFirstFrameStarted = false;
     cancelStreamSubscriptions();
     cancelListeners();
@@ -527,16 +528,19 @@ class ServiceExtensionManager extends Disposer {
     _service = service;
     // TODO(kenz): do we want to listen with event history here?
     autoDisposeStreamSubscription(
-        service.onExtensionEvent.listen(_handleExtensionEvent));
+      service.onExtensionEvent.listen(_handleExtensionEvent),
+    );
     addAutoDisposeListener(
       hasServiceExtension(extensions.didSendFirstFrameEvent),
       _maybeCheckForFirstFlutterFrame,
     );
     addAutoDisposeListener(_isolateManager.mainIsolate, _onMainIsolateChanged);
     autoDisposeStreamSubscription(
-        service.onDebugEvent.listen(_handleDebugEvent));
+      service.onDebugEvent.listen(_handleDebugEvent),
+    );
     autoDisposeStreamSubscription(
-        service.onIsolateEvent.listen(_handleIsolateEvent));
+      service.onIsolateEvent.listen(_handleIsolateEvent),
+    );
     final mainIsolateRef = _isolateManager.mainIsolate.value;
     if (mainIsolateRef != null) {
       _checkForFirstFrameStarted = false;
@@ -571,4 +575,9 @@ class ServiceExtensionState {
         enabled,
         value,
       );
+
+  @override
+  String toString() {
+    return 'ServiceExtensionState(enabled: $enabled, value: $value)';
+  }
 }

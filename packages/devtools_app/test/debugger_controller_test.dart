@@ -2,72 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
 void main() {
-  group('stdio', () {
-    setUp(() {
-      final service = MockVmService();
-      when(service.onDebugEvent).thenAnswer((_) {
-        return const Stream.empty();
-      });
-      when(service.onVMEvent).thenAnswer((_) {
-        return const Stream.empty();
-      });
-      when(service.onIsolateEvent).thenAnswer((_) {
-        return const Stream.empty();
-      });
-      when(service.onStdoutEvent).thenAnswer((_) {
-        return const Stream.empty();
-      });
-      when(service.onStderrEvent).thenAnswer((_) {
-        return const Stream.empty();
-      });
-      when(service.onStdoutEventWithHistory).thenAnswer((_) {
-        return const Stream.empty();
-      });
-      when(service.onStderrEventWithHistory).thenAnswer((_) {
-        return const Stream.empty();
-      });
-      when(service.onExtensionEventWithHistory).thenAnswer((_) {
-        return const Stream.empty();
-      });
-      final manager = FakeServiceManager(service: service);
-      setGlobal(ServiceConnectionManager, manager);
-      manager.consoleService.ensureServiceInitialized();
-    });
-
-    test('ignores trailing new lines', () {
-      serviceManager.consoleService.appendStdio('1\n');
-      expect(serviceManager.consoleService.stdio.value.length, 1);
-    });
-
-    test('has an item for each line', () {
-      serviceManager.consoleService
-        ..appendStdio('1\n')
-        ..appendStdio('2\n')
-        ..appendStdio('3\n')
-        ..appendStdio('4\n');
-      expect(serviceManager.consoleService.stdio.value.length, 4);
-    });
-
-    test('preserves additional newlines', () {
-      serviceManager.consoleService
-        ..appendStdio('1\n\n')
-        ..appendStdio('2\n\n')
-        ..appendStdio('3\n\n')
-        ..appendStdio('4\n\n');
-      expect(serviceManager.consoleService.stdio.value.length, 8);
-    });
-  });
+  setGlobal(ServiceConnectionManager, FakeServiceManager());
 
   group('ScriptsHistory', () {
     late ScriptsHistory history;
@@ -274,7 +217,7 @@ void main() {
       );
       debuggerController.parsedScript.value = ParsedScript(
         script: testScript,
-        highlighter: null,
+        highlighter: mockSyntaxHighlighter,
         executableLines: {},
       );
     });
@@ -298,10 +241,6 @@ void main() {
       );
       expect(
         debuggerController.matchesForSearch('').toString(),
-        equals('[]'),
-      );
-      expect(
-        debuggerController.matchesForSearch(null).toString(),
         equals('[]'),
       );
     });

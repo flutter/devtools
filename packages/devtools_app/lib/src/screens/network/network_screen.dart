@@ -43,7 +43,7 @@ class NetworkScreen extends Screen {
   Widget build(BuildContext context) => const NetworkScreenBody();
 
   @override
-  Widget buildStatus(BuildContext context, TextTheme textTheme) {
+  Widget buildStatus(BuildContext context) {
     final networkController = Provider.of<NetworkController>(context);
     final color = Theme.of(context).textTheme.bodyText2!.color!;
 

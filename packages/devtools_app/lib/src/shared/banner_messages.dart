@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -86,7 +84,9 @@ class BannerMessagesController {
 
   ValueNotifier<List<BannerMessage>> _messagesForScreen(String screenId) {
     return _messages.putIfAbsent(
-        screenId, () => ValueNotifier<List<BannerMessage>>([]));
+      screenId,
+      () => ValueNotifier<List<BannerMessage>>([]),
+    );
   }
 
   ValueListenable<List<BannerMessage>> messagesForScreen(String screenId) {
@@ -175,9 +175,9 @@ class BannerMessage extends StatelessWidget {
                   foregroundColor: foregroundColor,
                   // TODO(kenz): animate the removal of this message.
                   onPressed: () => Provider.of<BannerMessagesController>(
-                          context,
-                          listen: false)
-                      .removeMessage(this, dismiss: true),
+                    context,
+                    listen: false,
+                  ).removeMessage(this, dismiss: true),
                 ),
               ],
             ),

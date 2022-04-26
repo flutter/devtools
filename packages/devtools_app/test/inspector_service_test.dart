@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 @TestOn('vm')
 import 'package:devtools_app/src/screens/inspector/diagnostics_node.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_service.dart';
@@ -139,14 +137,19 @@ void main() async {
             ),
           );
 
-          expect(inspectorServiceLocal.rootPackages.toList(),
-              equals(['flutter_app']));
+          expect(
+            inspectorServiceLocal.rootPackages.toList(),
+            equals(['flutter_app']),
+          );
           expect(inspectorServiceLocal.rootPackagePrefixes.toList(), isEmpty);
 
           await inspectorServiceLocal.setPubRootDirectories(
-              ['/usr/jacobr/foo/lib', '/usr/jacobr/bar/lib/bla']);
-          expect(inspectorServiceLocal.rootPackages.toList(),
-              equals(['foo', 'bar']));
+            ['/usr/jacobr/foo/lib', '/usr/jacobr/bar/lib/bla'],
+          );
+          expect(
+            inspectorServiceLocal.rootPackages.toList(),
+            equals(['foo', 'bar']),
+          );
           expect(inspectorServiceLocal.rootPackagePrefixes.toList(), isEmpty);
 
           expect(
@@ -205,11 +208,16 @@ void main() async {
                 .toList();
         try {
           await inspectorServiceLocal.setPubRootDirectories(
-              ['/usr/me/clients/google3/foo/bar/baz/lib/src/bla']);
-          expect(inspectorServiceLocal.rootPackages.toList(),
-              equals(['foo.bar.baz']));
-          expect(inspectorServiceLocal.rootPackagePrefixes.toList(),
-              equals(['foo.bar.baz.']));
+            ['/usr/me/clients/google3/foo/bar/baz/lib/src/bla'],
+          );
+          expect(
+            inspectorServiceLocal.rootPackages.toList(),
+            equals(['foo.bar.baz']),
+          );
+          expect(
+            inspectorServiceLocal.rootPackagePrefixes.toList(),
+            equals(['foo.bar.baz.']),
+          );
 
           await inspectorServiceLocal.setPubRootDirectories([
             '/usr/me/clients/google3/foo/bar/baz/lib/src/bla',
@@ -367,13 +375,17 @@ void main() async {
           treeToDebugString(nodeInDetailsTree),
           anyOf(
             equalsGoldenIgnoringHashCodes(
-                'inspector_service_text_details_tree.txt'),
+              'inspector_service_text_details_tree.txt',
+            ),
             equalsGoldenIgnoringHashCodes(
-                'inspector_service_text_details_tree_v2.txt'),
+              'inspector_service_text_details_tree_v2.txt',
+            ),
             equalsGoldenIgnoringHashCodes(
-                'inspector_service_text_details_tree_v3.txt'),
+              'inspector_service_text_details_tree_v3.txt',
+            ),
             equalsGoldenIgnoringHashCodes(
-                'inspector_service_text_details_tree_v4.txt'),
+              'inspector_service_text_details_tree_v4.txt',
+            ),
           ),
         );
         expect(nodeInDetailsTree.valueRef, equals(nodeInSummaryTree.valueRef));
@@ -472,16 +484,20 @@ void main() async {
 
       // Run this test last as it will take a long time due to setting up the test
       // environment from scratch.
-      test('track widget creation off', () async {
-        await env.setupEnvironment(
-          config: const FlutterRunConfiguration(
-            withDebugger: true,
-            trackWidgetCreation: false,
-          ),
-        );
+      test(
+        'track widget creation off',
+        () async {
+          await env.setupEnvironment(
+            config: const FlutterRunConfiguration(
+              withDebugger: true,
+              trackWidgetCreation: false,
+            ),
+          );
 
-        expect(await inspectorService!.isWidgetCreationTracked(), isFalse);
-      }, skip: true);
+          expect(await inspectorService!.isWidgetCreationTracked(), isFalse);
+        },
+        skip: true,
+      );
       // TODO(albertusangga): remove or fix this test
 
       // TODO(jacobr): add tests verifying that we can stop the running device

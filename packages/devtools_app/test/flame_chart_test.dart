@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: avoid_redundant_argument_values, import_of_legacy_library_into_null_safe
-
 import 'package:devtools_app/src/charts/flame_chart.dart';
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/primitives/flutter_widgets/linked_scroll_controller.dart';
@@ -272,18 +270,20 @@ void main() {
       WidgetTester tester,
       ScrollingFlameChartRow row,
     ) async {
-      await tester.pumpWidget(Directionality(
-        textDirection: TextDirection.ltr,
-        child: Overlay(
-          initialEntries: [
-            OverlayEntry(
-              builder: (context) {
-                return currentRow = row;
-              },
-            ),
-          ],
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Overlay(
+            initialEntries: [
+              OverlayEntry(
+                builder: (context) {
+                  return currentRow = row;
+                },
+              ),
+            ],
+          ),
         ),
-      ));
+      );
     }
 
     Future<ScrollingFlameChartRowState> pumpRowAndGetState(
@@ -400,25 +400,27 @@ void main() {
     }) async {
       final _selected = selected;
       final _hovered = hovered;
-      await tester.pumpWidget(Directionality(
-        textDirection: TextDirection.ltr,
-        child: Overlay(
-          initialEntries: [
-            OverlayEntry(
-              builder: (BuildContext context) {
-                return testNode.buildWidget(
-                  selected: _selected,
-                  searchMatch: false,
-                  activeSearchMatch: false,
-                  hovered: _hovered,
-                  zoom: defaultZoom,
-                  colorScheme: Theme.of(context).colorScheme,
-                );
-              },
-            ),
-          ],
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Overlay(
+            initialEntries: [
+              OverlayEntry(
+                builder: (BuildContext context) {
+                  return testNode.buildWidget(
+                    selected: _selected,
+                    searchMatch: false,
+                    activeSearchMatch: false,
+                    hovered: _hovered,
+                    zoom: defaultZoom,
+                    colorScheme: Theme.of(context).colorScheme,
+                  );
+                },
+              ),
+            ],
+          ),
         ),
-      ));
+      );
       await tester.pumpAndSettle();
     }
 
@@ -540,8 +542,10 @@ void main() {
       expect(paddedZoomedIntervals[0], equals(const Range(0.0, 120.0)));
       expect(paddedZoomedIntervals[1], equals(const Range(120.0, 180.0)));
       expect(paddedZoomedIntervals[2], equals(const Range(180.0, 240.0)));
-      expect(paddedZoomedIntervals[3],
-          equals(const Range(240.0, 1000000000540.0)));
+      expect(
+        paddedZoomedIntervals[3],
+        equals(const Range(240.0, 1000000000540.0)),
+      );
     });
 
     test('toPaddedZoomedIntervals calculation is accurate for zoomed row', () {
@@ -553,86 +557,176 @@ void main() {
       expect(paddedZoomedIntervals[0], equals(const Range(0.0, 170.0)));
       expect(paddedZoomedIntervals[1], equals(const Range(170.0, 290.0)));
       expect(paddedZoomedIntervals[2], equals(const Range(290.0, 410.0)));
-      expect(paddedZoomedIntervals[3],
-          equals(const Range(410.0, 1000000001010.0)));
+      expect(
+        paddedZoomedIntervals[3],
+        equals(const Range(410.0, 1000000001010.0)),
+      );
     });
   });
 
   group('FlameChartUtils', () {
     test('leftPaddingForNode returns correct value for un-zoomed row', () {
       expect(
-          FlameChartUtils.leftPaddingForNode(0, testNodes,
-              chartZoom: 1.0, chartStartInset: sideInset),
-          equals(70.0));
+        FlameChartUtils.leftPaddingForNode(
+          0,
+          testNodes,
+          chartZoom: 1.0,
+          chartStartInset: sideInset,
+        ),
+        equals(70.0),
+      );
       expect(
-          FlameChartUtils.leftPaddingForNode(1, testNodes,
-              chartZoom: 1.0, chartStartInset: sideInset),
-          equals(0.0));
+        FlameChartUtils.leftPaddingForNode(
+          1,
+          testNodes,
+          chartZoom: 1.0,
+          chartStartInset: sideInset,
+        ),
+        equals(0.0),
+      );
       expect(
-          FlameChartUtils.leftPaddingForNode(2, testNodes,
-              chartZoom: 1.0, chartStartInset: sideInset),
-          equals(0.0));
+        FlameChartUtils.leftPaddingForNode(
+          2,
+          testNodes,
+          chartZoom: 1.0,
+          chartStartInset: sideInset,
+        ),
+        equals(0.0),
+      );
       expect(
-          FlameChartUtils.leftPaddingForNode(3, testNodes,
-              chartZoom: 1.0, chartStartInset: sideInset),
-          equals(0.0));
+        FlameChartUtils.leftPaddingForNode(
+          3,
+          testNodes,
+          chartZoom: 1.0,
+          chartStartInset: sideInset,
+        ),
+        equals(0.0),
+      );
     });
 
     test('rightPaddingForNode returns correct value for un-zoomed row', () {
       expect(
-          FlameChartUtils.rightPaddingForNode(0, testNodes,
-              chartZoom: 1.0, chartStartInset: sideInset, chartWidth: 610.0),
-          equals(20.0));
+        FlameChartUtils.rightPaddingForNode(
+          0,
+          testNodes,
+          chartZoom: 1.0,
+          chartStartInset: sideInset,
+          chartWidth: 610.0,
+        ),
+        equals(20.0),
+      );
       expect(
-          FlameChartUtils.rightPaddingForNode(1, testNodes,
-              chartZoom: 1.0, chartStartInset: sideInset, chartWidth: 610.0),
-          equals(10.0));
+        FlameChartUtils.rightPaddingForNode(
+          1,
+          testNodes,
+          chartZoom: 1.0,
+          chartStartInset: sideInset,
+          chartWidth: 610.0,
+        ),
+        equals(10.0),
+      );
       expect(
-          FlameChartUtils.rightPaddingForNode(2, testNodes,
-              chartZoom: 1.0, chartStartInset: sideInset, chartWidth: 610.0),
-          equals(10.0));
+        FlameChartUtils.rightPaddingForNode(
+          2,
+          testNodes,
+          chartZoom: 1.0,
+          chartStartInset: sideInset,
+          chartWidth: 610.0,
+        ),
+        equals(10.0),
+      );
       expect(
-          FlameChartUtils.rightPaddingForNode(3, testNodes,
-              chartZoom: 1.0, chartStartInset: sideInset, chartWidth: 610.0),
-          equals(1000000000000.0));
+        FlameChartUtils.rightPaddingForNode(
+          3,
+          testNodes,
+          chartZoom: 1.0,
+          chartStartInset: sideInset,
+          chartWidth: 610.0,
+        ),
+        equals(1000000000000.0),
+      );
     });
 
     test('leftPaddingForNode returns correct value for zoomed row', () {
       expect(
-          FlameChartUtils.leftPaddingForNode(0, testNodes,
-              chartZoom: 2.0, chartStartInset: sideInset),
-          equals(70.0));
+        FlameChartUtils.leftPaddingForNode(
+          0,
+          testNodes,
+          chartZoom: 2.0,
+          chartStartInset: sideInset,
+        ),
+        equals(70.0),
+      );
       expect(
-          FlameChartUtils.leftPaddingForNode(1, testNodes,
-              chartZoom: 2.0, chartStartInset: sideInset),
-          equals(0.0));
+        FlameChartUtils.leftPaddingForNode(
+          1,
+          testNodes,
+          chartZoom: 2.0,
+          chartStartInset: sideInset,
+        ),
+        equals(0.0),
+      );
       expect(
-          FlameChartUtils.leftPaddingForNode(2, testNodes,
-              chartZoom: 2.0, chartStartInset: sideInset),
-          equals(0.0));
+        FlameChartUtils.leftPaddingForNode(
+          2,
+          testNodes,
+          chartZoom: 2.0,
+          chartStartInset: sideInset,
+        ),
+        equals(0.0),
+      );
       expect(
-          FlameChartUtils.leftPaddingForNode(3, testNodes,
-              chartZoom: 2.0, chartStartInset: sideInset),
-          equals(0.0));
+        FlameChartUtils.leftPaddingForNode(
+          3,
+          testNodes,
+          chartZoom: 2.0,
+          chartStartInset: sideInset,
+        ),
+        equals(0.0),
+      );
     });
 
     test('rightPaddingForNode returns correct value for zoomed row', () {
       expect(
-          FlameChartUtils.rightPaddingForNode(0, testNodes,
-              chartZoom: 2.0, chartStartInset: sideInset, chartWidth: 1080.0),
-          equals(40.0));
+        FlameChartUtils.rightPaddingForNode(
+          0,
+          testNodes,
+          chartZoom: 2.0,
+          chartStartInset: sideInset,
+          chartWidth: 1080.0,
+        ),
+        equals(40.0),
+      );
       expect(
-          FlameChartUtils.rightPaddingForNode(1, testNodes,
-              chartZoom: 2.0, chartStartInset: sideInset, chartWidth: 1080.0),
-          equals(20.0));
+        FlameChartUtils.rightPaddingForNode(
+          1,
+          testNodes,
+          chartZoom: 2.0,
+          chartStartInset: sideInset,
+          chartWidth: 1080.0,
+        ),
+        equals(20.0),
+      );
       expect(
-          FlameChartUtils.rightPaddingForNode(2, testNodes,
-              chartZoom: 2.0, chartStartInset: sideInset, chartWidth: 1080.0),
-          equals(20.0));
+        FlameChartUtils.rightPaddingForNode(
+          2,
+          testNodes,
+          chartZoom: 2.0,
+          chartStartInset: sideInset,
+          chartWidth: 1080.0,
+        ),
+        equals(20.0),
+      );
       expect(
-          FlameChartUtils.rightPaddingForNode(3, testNodes,
-              chartZoom: 2.0, chartStartInset: sideInset, chartWidth: 1080.0),
-          equals(1000000000000.0));
+        FlameChartUtils.rightPaddingForNode(
+          3,
+          testNodes,
+          chartZoom: 2.0,
+          chartStartInset: sideInset,
+          chartWidth: 1080.0,
+        ),
+        equals(1000000000000.0),
+      );
     });
 
     test('zoomForNode returns correct values', () {
