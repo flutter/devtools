@@ -159,7 +159,7 @@ elif [ "$BOT" = "test_ddc" ]; then
           test/profiler_screen_test.dart \
           test/resolved_uri_manager_test.dart \
           test/service_extension_widgets_test.dart \
-          test/sscaffold_bebugger_test.dart \
+          test/scaffold_bebugger_test.dart \
           test/scaffold_test.dart \
           test/table_test.dart \
           test/scaffold_test.dart \
