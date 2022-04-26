@@ -23,23 +23,8 @@ void main() {
   late ServiceConnectionManager manager;
 
   setUp(() {
-    final service = MockVmServiceWrapper();
-    when(service.getFlagList()).thenAnswer((_) async => FlagList(flags: []));
-    when(service.onDebugEvent).thenAnswer((_) {
-      return const Stream.empty();
-    });
-    when(service.onVMEvent).thenAnswer((_) {
-      return const Stream.empty();
-    });
-    when(service.onIsolateEvent).thenAnswer((_) {
-      return const Stream.empty();
-    });
-    when(service.onStdoutEvent).thenAnswer((_) {
-      return const Stream.empty();
-    });
-    when(service.onStderrEvent).thenAnswer((_) {
-      return const Stream.empty();
-    });
+    final service = createMockVmServiceWrapperWithDefaults();
+
     manager = FakeServiceManager(service: service);
     setGlobal(ServiceConnectionManager, manager);
   });
