@@ -18,7 +18,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
 void main() {
-  final mockServiceManager = MockServiceManager();
+  final mockServiceManager = MockServiceConnectionManager();
   when(mockServiceManager.service).thenReturn(null);
   when(mockServiceManager.connectedAppInitialized).thenReturn(false);
   when(mockServiceManager.connectedState).thenReturn(

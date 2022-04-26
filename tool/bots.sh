@@ -153,6 +153,7 @@ elif [ "$BOT" = "test_ddc" ]; then
           test/profiler_screen_controller_test.dart \
           test/profiler_screen_test.dart \
           test/resolved_uri_manager_test.dart \
+          test/scaffold_test.dart \
           test/timeline_analysis_test.dart
 
     elif [ "$PLATFORM" = "chrome" ]; then
