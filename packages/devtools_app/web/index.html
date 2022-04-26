@@ -10,6 +10,8 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- Note: This tag is replaced when served through DDS! -->
+    <base href="/">
 
     <title></title>
     <link href="favicon.png" rel="icon" sizes="64x64">
@@ -40,18 +42,6 @@
 
         if (!supportsES6Classes()) {
             window.location.href = '/unsupported-browser.html';
-        }
-
-        // Handle URLs that pass all variables directly on a querystring without
-        // the fragment (for ex. VS Code while it has some encoding bugs preventing
-        // building the correct URLs using fragments
-        // https://github.com/microsoft/vscode/issues/85930).
-        if (window.location.search && window.location.search.length > 1) {
-          // Ensure each component is encoded, because if the URI contains / slashes
-          // Flutter will split on them and try to push multiple routes.
-          const params = new URLSearchParams(unescape(window.location.search));
-          params.forEach(function(v, k) { params.set(k, encodeURIComponent(v)) });
-          window.location.replace(window.location.origin + '/#/?' + params.toString());
         }
     </script>
 </head>

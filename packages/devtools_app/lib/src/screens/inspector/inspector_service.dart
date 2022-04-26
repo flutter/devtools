@@ -1409,10 +1409,11 @@ class ObjectGroup extends ObjectGroupBase {
   }
 
   Future<List<String>> getPubRootDirectories() async {
-    final List<Object>? directories = await invokeServiceExtensionMethod(
+    final invocationResult = await invokeServiceExtensionMethod(
       RegistrableServiceExtension.getPubRootDirectories,
       {},
-    ) as List<Object>?;
+    );
+    final directories = (invocationResult as List?)?.cast<Object>();
     return List.from(directories ?? []);
   }
 }

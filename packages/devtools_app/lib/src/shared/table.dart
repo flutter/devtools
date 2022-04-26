@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 
 import '../primitives/auto_dispose_mixin.dart';
 import '../primitives/flutter_widgets/linked_scroll_controller.dart';
+import '../primitives/listenable.dart';
 import '../primitives/trees.dart';
 import '../primitives/utils.dart';
 import '../ui/colors.dart';
@@ -246,22 +247,28 @@ class FlatTableState<T> extends State<FlatTable<T>>
     List<double> columnWidths,
   ) {
     final node = data[index];
-    return TableRow<T>(
-      key: widget.keyFactory(node),
-      linkedScrollControllerGroup: linkedScrollControllerGroup,
-      node: node,
-      onPressed: widget.onItemSelected,
-      columns: widget.columns,
-      columnWidths: columnWidths,
-      backgroundColor: alternatingColorForIndex(
-        index,
-        Theme.of(context).colorScheme,
-      ),
-      isSelected: widget.selectionNotifier != null
-          ? node == widget.selectionNotifier!.value
-          : false,
-      searchMatchesNotifier: widget.searchMatchesNotifier,
-      activeSearchMatchNotifier: widget.activeSearchMatchNotifier,
+
+    final selectionNotifier =
+        widget.selectionNotifier ?? FixedValueListenable<T?>(null);
+    return ValueListenableBuilder<T?>(
+      valueListenable: selectionNotifier,
+      builder: (context, selected, _) {
+        return TableRow<T>(
+          key: widget.keyFactory(node),
+          linkedScrollControllerGroup: linkedScrollControllerGroup,
+          node: node,
+          onPressed: widget.onItemSelected,
+          columns: widget.columns,
+          columnWidths: columnWidths,
+          backgroundColor: alternatingColorForIndex(
+            index,
+            Theme.of(context).colorScheme,
+          ),
+          isSelected: node != null && node == selected,
+          searchMatchesNotifier: widget.searchMatchesNotifier,
+          activeSearchMatchNotifier: widget.activeSearchMatchNotifier,
+        );
+      },
     );
   }
 
@@ -1324,7 +1331,7 @@ class _TableRowState<T> extends State<TableRow<T>>
           canRequestFocus: false,
           onTap: () => _handleSortChange(
             column,
-            secondarySortColumn: widget.secondarySortColumn as ColumnData<T>,
+            secondarySortColumn: widget.secondarySortColumn,
           ),
           child: Row(
             mainAxisAlignment: _mainAxisAlignmentFor(column),

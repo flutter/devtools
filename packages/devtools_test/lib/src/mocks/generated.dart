@@ -2,17 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
+
 import 'package:devtools_app/devtools_app.dart';
 import 'package:mockito/annotations.dart';
 import 'package:vm_service/vm_service.dart';
 
 // See https://github.com/dart-lang/mockito/blob/master/NULL_SAFETY_README.md
-// Run `sh tools/generate_code.sh` to regenerate mocks.
+// Run `sh tool/generate_code.sh` to regenerate mocks.
 @GenerateMocks([
   ConnectedApp,
+  DebuggerController,
   ErrorBadgeManager,
   HeapSnapshotGraph,
   ProgramExplorerController,
+  ScriptManager,
+  ServiceConnectionManager,
   VmServiceWrapper,
+  ui.Image,
 ])
 void main() {}

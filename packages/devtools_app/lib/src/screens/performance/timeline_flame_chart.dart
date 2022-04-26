@@ -27,6 +27,7 @@ import 'performance_controller.dart';
 import 'performance_model.dart';
 import 'performance_screen.dart';
 import 'performance_utils.dart';
+import 'raster_metrics.dart';
 import 'timeline_analysis.dart';
 
 // TODO(kenz): move all classes not directly related to the timeline flame chart
@@ -89,8 +90,10 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
       );
     }
 
-    const rasterMetrics = Center(
-      child: Text('Coming Soon'),
+    final rasterMetrics = Center(
+      child: RenderingLayerVisualizer(
+        rasterMetricsController: controller.rasterMetricsController,
+      ),
     );
 
     final tabViews = [
@@ -141,18 +144,22 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
           trailing: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Padding(
-                padding: const EdgeInsets.only(right: densePadding),
-                child: IconLabelButton(
-                  tooltip:
-                      'Take a snapshot of the rendering layers on the current screen',
-                  icon: Icons.camera,
-                  label: 'Take Snapshot',
-                  outlined: false,
-                  // TODO(kenz): hook this up to the engine service extension.
-                  onPressed: () {},
-                ),
+              IconLabelButton(
+                tooltip:
+                    'Take a snapshot of the rendering layers on the current'
+                    ' screen',
+                icon: Icons.camera,
+                label: 'Take Snapshot',
+                outlined: false,
+                onPressed:
+                    controller.rasterMetricsController.collectRasterStats,
               ),
+              const SizedBox(width: denseSpacing),
+              ClearButton(
+                outlined: false,
+                onPressed: controller.rasterMetricsController.clear,
+              ),
+              const SizedBox(width: densePadding),
             ],
           ),
         ),
