@@ -69,5 +69,7 @@ const displayRefreshRate = '_flutter.getDisplayRefreshRate';
 
 String get flutterEngineEstimateRasterCache => flutterEngineRasterCache;
 
+const renderFrameWithRasterStats = '_flutter.renderFrameWithRasterStats';
+
 /// Dwds listens to events for recording end-to-end analytics.
 const dwdsSendEvent = 'ext.dwds.sendEvent';

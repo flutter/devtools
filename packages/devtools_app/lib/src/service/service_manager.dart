@@ -458,6 +458,21 @@ class ServiceConnectionManager {
     );
   }
 
+  Future<Response?> get renderFrameWithRasterStats async {
+    if (connectedApp == null || !await connectedApp!.isFlutterApp) {
+      return null;
+    }
+
+    final viewId = await flutterViewId;
+
+    return await _callServiceExtensionOnMainIsolate(
+      registrations.renderFrameWithRasterStats,
+      args: {
+        'viewId': viewId,
+      },
+    );
+  }
+
   Future<double?> get queryDisplayRefreshRate async {
     if (connectedApp == null || !await connectedApp!.isFlutterApp) {
       return null;
