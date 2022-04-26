@@ -40,7 +40,7 @@ class DevToolsScaffold extends StatefulWidget {
     required this.tabs,
     this.page,
     this.actions,
-    this.embed = true,
+    this.embed = false,
     required this.ideTheme,
   }) : super(key: key);
 
