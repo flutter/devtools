@@ -12,25 +12,8 @@ import 'package:vm_service/vm_service.dart';
 
 void main() async {
   late ResolvedUriManager resolvedUriManager;
-  final service = MockVmServiceWrapper();
+  final service = createMockVmServiceWrapperWithDefaults();
 
-  when(service.getFlagList())
-      .thenAnswer((_) => Future.value(FlagList(flags: [])));
-  when(service.onDebugEvent).thenAnswer((_) {
-    return const Stream.empty();
-  });
-  when(service.onVMEvent).thenAnswer((_) {
-    return const Stream.empty();
-  });
-  when(service.onIsolateEvent).thenAnswer((_) {
-    return const Stream.empty();
-  });
-  when(service.onStdoutEvent).thenAnswer((_) {
-    return const Stream.empty();
-  });
-  when(service.onStderrEvent).thenAnswer((_) {
-    return const Stream.empty();
-  });
   setGlobal(ServiceConnectionManager, FakeServiceManager(service: service));
   resolvedUriManager = ResolvedUriManager();
 
