@@ -19,13 +19,13 @@ import 'package:mockito/mockito.dart';
 void main() {
   late FakeServiceManager fakeServiceManager;
   late MockDebuggerControllerLegacy debuggerController;
-  late MockScriptManager scriptManager;
+  late MockScriptManagerLegacy scriptManager;
 
   const smallWindowSize = Size(1000.0, 1000.0);
 
   setUp(() {
     fakeServiceManager = FakeServiceManager();
-    scriptManager = MockScriptManager();
+    scriptManager = MockScriptManagerLegacy();
     when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
     when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
     setGlobal(ServiceConnectionManager, fakeServiceManager);

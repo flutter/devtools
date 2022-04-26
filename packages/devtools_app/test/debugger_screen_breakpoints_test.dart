@@ -16,25 +16,47 @@ import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
 void main() {
-  late FakeServiceManager fakeServiceManager;
-  late MockDebuggerController debuggerController;
-  late MockScriptManager scriptManager;
-
   const windowSize = Size(4000.0, 4000.0);
 
-  setUp(() {
-    fakeServiceManager = FakeServiceManager();
-    scriptManager = MockScriptManager();
-    when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
-    when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
-    setGlobal(IdeTheme, IdeTheme());
-    setGlobal(ScriptManager, scriptManager);
-    fakeServiceManager.consoleService.ensureServiceInitialized();
-    when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
-        .thenReturn(ValueNotifier<int>(0));
-    debuggerController = createMockDebuggerControllerWithDefaults();
-  });
+  final fakeServiceManager = FakeServiceManager();
+  final scriptManager = MockScriptManager();
+  when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
+  when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
+  setGlobal(ServiceConnectionManager, fakeServiceManager);
+  setGlobal(IdeTheme, IdeTheme());
+  setGlobal(ScriptManager, scriptManager);
+  fakeServiceManager.consoleService.ensureServiceInitialized();
+  when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
+      .thenReturn(ValueNotifier<int>(0));
+  final debuggerController = createMockDebuggerControllerWithDefaults();
+
+  final breakpoints = [
+    Breakpoint(
+      breakpointNumber: 1,
+      id: 'bp1',
+      resolved: false,
+      location: UnresolvedSourceLocation(
+        scriptUri: 'package:test/script.dart',
+        line: 10,
+      ),
+      enabled: true,
+    )
+  ];
+
+  final breakpointsWithLocation = [
+    BreakpointAndSourcePosition.create(
+      breakpoints.first,
+      const SourcePosition(line: 10, column: 1),
+    )
+  ];
+
+  when(debuggerController.breakpoints).thenReturn(ValueNotifier(breakpoints));
+  when(debuggerController.breakpointsWithLocation)
+      .thenReturn(ValueNotifier(breakpointsWithLocation));
+
+  when(scriptManager.sortedScripts).thenReturn(ValueNotifier([]));
+  when(debuggerController.scriptLocation).thenReturn(ValueNotifier(null));
+  when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
 
   Future<void> pumpDebuggerScreen(
     WidgetTester tester,
@@ -50,34 +72,6 @@ void main() {
 
   testWidgetsWithWindowSize('Breakpoints show items', windowSize,
       (WidgetTester tester) async {
-    final breakpoints = [
-      Breakpoint(
-        breakpointNumber: 1,
-        id: 'bp1',
-        resolved: false,
-        location: UnresolvedSourceLocation(
-          scriptUri: 'package:test/script.dart',
-          line: 10,
-        ),
-        enabled: true,
-      )
-    ];
-
-    final breakpointsWithLocation = [
-      BreakpointAndSourcePosition.create(
-        breakpoints.first,
-        const SourcePosition(line: 10, column: 1),
-      )
-    ];
-
-    when(debuggerController.breakpoints).thenReturn(ValueNotifier(breakpoints));
-    when(debuggerController.breakpointsWithLocation)
-        .thenReturn(ValueNotifier(breakpointsWithLocation));
-
-    when(scriptManager.sortedScripts).thenReturn(ValueNotifier([]));
-    when(debuggerController.scriptLocation).thenReturn(ValueNotifier(null));
-    when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
-
     await pumpDebuggerScreen(tester, debuggerController);
 
     expect(find.text('Breakpoints'), findsOneWidget);

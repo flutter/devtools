@@ -14,7 +14,7 @@ import 'package:mockito/mockito.dart';
 
 void main() {
   final debuggerController = MockDebuggerControllerLegacy.withDefaults();
-  final scriptManager = MockScriptManager();
+  final scriptManager = MockScriptManagerLegacy();
 
   Widget buildFileSearch() {
     return MaterialApp(

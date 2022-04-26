@@ -19,13 +19,13 @@ void main() {
   const screen = DebuggerScreen();
   late FakeServiceManager fakeServiceManager;
   late MockDebuggerControllerLegacy debuggerController;
-  late MockScriptManager scriptManager;
+  late MockScriptManagerLegacy scriptManager;
 
   const windowSize = Size(4000.0, 4000.0);
 
   setUp(() {
     fakeServiceManager = FakeServiceManager();
-    scriptManager = MockScriptManager();
+    scriptManager = MockScriptManagerLegacy();
     when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
     when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
     setGlobal(ServiceConnectionManager, fakeServiceManager);
