@@ -29,7 +29,7 @@ import '../profiler/profile_granularity.dart';
 import 'performance_model.dart';
 import 'performance_screen.dart';
 import 'performance_utils.dart';
-import 'raster_metrics.dart';
+import 'raster_metrics_controller.dart';
 import 'rebuild_counts.dart';
 import 'timeline_event_processor.dart';
 

@@ -256,7 +256,7 @@ void main() {
         await pumpPerformanceScreenBody(tester, runAsync: true);
         expect(find.byType(TimelineFlameChart), findsOneWidget);
         expect(
-          find.byKey(TabbedPerformanceView.emptyTimelineKey),
+          find.byKey(TimelineEventsView.emptyTimelineKey),
           findsNothing,
         );
       });
@@ -270,7 +270,7 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.byType(TimelineFlameChart), findsNothing);
         expect(
-          find.byKey(TabbedPerformanceView.emptyTimelineKey),
+          find.byKey(TimelineEventsView.emptyTimelineKey),
           findsOneWidget,
         );
       });
