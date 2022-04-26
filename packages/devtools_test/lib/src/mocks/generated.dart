@@ -10,10 +10,11 @@ import 'package:vm_service/vm_service.dart';
 // Run `sh tool/generate_code.sh` to regenerate mocks.
 @GenerateMocks([
   ConnectedApp,
+  DebuggerController,
   ErrorBadgeManager,
   HeapSnapshotGraph,
   ProgramExplorerController,
+  ServiceConnectionManager,
   VmServiceWrapper,
-  DebuggerController,
 ])
 void main() {}

@@ -14,26 +14,20 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
 void main() {
-  late MockServiceManager mockServiceManager;
-
-  setUp(() async {
-    mockServiceManager = MockServiceManager();
-    when(mockServiceManager.serviceExtensionManager)
-        .thenReturn(FakeServiceExtensionManager());
-    setGlobal(ServiceConnectionManager, mockServiceManager);
-    setGlobal(IdeTheme, getIdeTheme());
-  });
+  late FakeServiceExtensionManager fakeExtensionManager;
+  final mockServiceManager = MockServiceConnectionManager();
+  when(mockServiceManager.serviceExtensionManager)
+      .thenAnswer((realInvocation) => fakeExtensionManager);
+  setGlobal(ServiceConnectionManager, mockServiceManager);
+  setGlobal(IdeTheme, getIdeTheme());
 
   group('TrackWidgetBuildsSetting', () {
     setUp(() async {
-      (mockServiceManager.serviceExtensionManager
-              as FakeServiceExtensionManager)
-          .fakeFrame();
-      await (mockServiceManager.serviceExtensionManager
-              as FakeServiceExtensionManager)
+      fakeExtensionManager = FakeServiceExtensionManager();
+      fakeExtensionManager.fakeFrame();
+      await fakeExtensionManager
           .fakeAddServiceExtension(profileWidgetBuilds.extension);
-      await (mockServiceManager.serviceExtensionManager
-              as FakeServiceExtensionManager)
+      await fakeExtensionManager
           .fakeAddServiceExtension(profileUserWidgetBuilds.extension);
     });
 
@@ -403,7 +397,7 @@ void main() {
 }
 
 void verifyExtensionStates({
-  required MockServiceManager mockServiceManager,
+  required MockServiceConnectionManager mockServiceManager,
   required bool trackAllWidgets,
   required bool trackUserCreatedWidgets,
 }) {
