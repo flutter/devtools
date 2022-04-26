@@ -18,11 +18,11 @@ import 'package:vm_service/vm_service.dart';
 void main() {
   late FakeServiceManager fakeServiceManager;
   late MockDebuggerController debuggerController;
-  late MockScriptManagerLegacy scriptManager;
+  late MockScriptManager scriptManager;
 
   setUp(() {
     fakeServiceManager = FakeServiceManager();
-    scriptManager = MockScriptManagerLegacy();
+    scriptManager = MockScriptManager();
     when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
     when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
     setGlobal(ServiceConnectionManager, fakeServiceManager);
