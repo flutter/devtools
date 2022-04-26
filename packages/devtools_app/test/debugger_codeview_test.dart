@@ -19,7 +19,7 @@ import 'package:mockito/mockito.dart';
 void main() {
   late FakeServiceManager fakeServiceManager;
   late MockDebuggerControllerLegacy debuggerController;
-  late MockScriptManagerLegacy scriptManager;
+  late MockScriptManager scriptManager;
 
   const smallWindowSize = Size(1000.0, 1000.0);
 

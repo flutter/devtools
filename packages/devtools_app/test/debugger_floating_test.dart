@@ -16,7 +16,7 @@ import 'package:vm_service/vm_service.dart';
 void main() {
   final fakeServiceManager = FakeServiceManager();
   final debuggerController = createMockDebuggerControllerWithDefaults();
-  final scriptManager = MockScriptManagerLegacy();
+  final scriptManager = MockScriptManager();
 
   when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
   when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);

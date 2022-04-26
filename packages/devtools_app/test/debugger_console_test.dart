@@ -25,7 +25,7 @@ void main() {
   when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
   setGlobal(ServiceConnectionManager, fakeServiceManager);
   setGlobal(IdeTheme, IdeTheme());
-  setGlobal(ScriptManager, MockScriptManagerLegacy());
+  setGlobal(ScriptManager, MockScriptManager());
   fakeServiceManager.consoleService.ensureServiceInitialized();
   when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
       .thenReturn(ValueNotifier<int>(0));
