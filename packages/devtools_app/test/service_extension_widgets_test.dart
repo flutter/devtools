@@ -18,14 +18,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
 void main() {
-  late MockServiceManager mockServiceManager;
-
-  setUp(() {
-    mockServiceManager = MockServiceManager();
-    when(mockServiceManager.serviceExtensionManager)
-        .thenReturn(FakeServiceExtensionManager());
-    setGlobal(ServiceConnectionManager, mockServiceManager);
-  });
+  final mockServiceManager = MockServiceConnectionManager();
+  when(mockServiceManager.serviceExtensionManager)
+      .thenReturn(FakeServiceExtensionManager());
+  setGlobal(ServiceConnectionManager, mockServiceManager);
 
   group('Hot Reload Button', () {
     int reloads = 0;
@@ -196,7 +192,7 @@ void main() {
 }
 
 void registerServiceExtension(
-  MockServiceManager mockServiceManager,
+  MockServiceConnectionManager mockServiceManager,
   RegisteredServiceDescription description, {
   bool serviceAvailable = true,
 }) {
