@@ -224,15 +224,11 @@ class ReleaseNotesController {
     } else {
       previousVersion = SemanticVersion.parse(lastReleaseNotesShownVersion);
     }
-    previousVersion = SemanticVersion(major: 2, minor: 0, patch: 0);
     // Parse the current version instead of using [devtools.version] directly to
     // strip off any build metadata (any characters following a '+' character).
     // Release notes will be hosted on the Flutter website with a version number
-    // that does not contain any build metadata.`
-    final parsedCurrentVersion = SemanticVersion(
-      major: 2,
-      minor: 10,
-    );
+    // that does not contain any build metadata.
+    final parsedCurrentVersion = SemanticVersion.parse(devtools.version);
     final parsedCurrentVersionStr = parsedCurrentVersion.toString();
     if (parsedCurrentVersion > previousVersion) {
       try {
