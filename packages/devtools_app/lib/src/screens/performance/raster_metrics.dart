@@ -2,22 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
-import 'dart:ui' as ui;
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../config_specific/logger/logger.dart' as logger;
 import '../../primitives/utils.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/dialogs.dart';
-import '../../shared/globals.dart';
 import '../../shared/split.dart';
 import '../../shared/table.dart';
 import '../../shared/table_data.dart';
 import '../../shared/theme.dart';
 import '../../shared/utils.dart';
+import 'raster_metrics_controller.dart';
 
 // TODO(kenz): add analytics once [rasterMetricsSupported] is enabled by default
 
@@ -231,125 +226,4 @@ class LayerImageDialog extends StatelessWidget {
       ],
     );
   }
-}
-
-class RasterMetricsController {
-  static const _snapshotsJsonKey = 'snapshots';
-
-  static const _snapshotJsonKey = 'snapshot';
-
-  static const _layerIdKey = 'layer_unique_id';
-
-  static const _durationKey = 'duration_micros';
-
-  ValueListenable<List<LayerSnapshot>> get layerSnapshots => _layerSnapshots;
-
-  final _layerSnapshots = ValueNotifier<List<LayerSnapshot>>([]);
-
-  ValueListenable<LayerSnapshot?> get selectedSnapshot => _selectedSnapshot;
-
-  final _selectedSnapshot = ValueNotifier<LayerSnapshot?>(null);
-
-  ValueListenable<bool> get loadingSnapshot => _loadingSnapshot;
-
-  final _loadingSnapshot = ValueNotifier<bool>(false);
-
-  Duration _sumRasterTime = Duration.zero;
-
-  void selectSnapshot(LayerSnapshot? snapshot) {
-    _selectedSnapshot.value = snapshot;
-  }
-
-  Future<void> collectRasterStats() async {
-    clear();
-    _loadingSnapshot.value = true;
-    try {
-      final response = await serviceManager.renderFrameWithRasterStats;
-      final json = response?.json ?? <String, Object?>{};
-      await initDataFromJson(json);
-    } catch (e) {
-      logger.log('Error collecting raster stats: $e');
-      clear();
-    } finally {
-      _loadingSnapshot.value = false;
-    }
-  }
-
-  void clear() {
-    _layerSnapshots.value = <LayerSnapshot>[];
-    _selectedSnapshot.value = null;
-    _sumRasterTime = Duration.zero;
-  }
-
-  @visibleForTesting
-  Future<void> initDataFromJson(Map<String, Object?> json) async {
-    final snapshotsFromJson =
-        (json[_snapshotsJsonKey] as List).cast<Map<String, dynamic>>();
-    final snapshots = <LayerSnapshot>[];
-    for (final snapshot in snapshotsFromJson) {
-      final id = snapshot[_layerIdKey];
-      final dur = Duration(microseconds: snapshot[_durationKey] as int);
-      final imageBytes = Uint8List.fromList(
-        (snapshot[_snapshotJsonKey] as List<dynamic>).cast<int>(),
-      );
-      final image = await imageFromBytes(imageBytes);
-      final layerSnapshot = LayerSnapshot(
-        id: id,
-        duration: dur,
-        image: image,
-        bytes: imageBytes,
-      );
-      snapshots.add(layerSnapshot);
-      _sumRasterTime += dur;
-    }
-
-    for (final snapshot in snapshots) {
-      snapshot.totalRenderingDuration = _sumRasterTime;
-    }
-
-    // Sort by percent rendering time in descending order.
-    snapshots.sort(
-      (a, b) => b.percentRenderingTimeAsDouble
-          .compareTo(a.percentRenderingTimeAsDouble),
-    );
-
-    _layerSnapshots.value = snapshots;
-    _selectedSnapshot.value = snapshots.safeFirst;
-  }
-
-  Future<ui.Image> imageFromBytes(Uint8List bytes) async {
-    return await decodeImageFromList(bytes);
-  }
-}
-
-class LayerSnapshot {
-  LayerSnapshot({
-    required this.id,
-    required this.duration,
-    required this.image,
-    required this.bytes,
-  });
-
-  final int id;
-
-  final Duration duration;
-
-  final ui.Image image;
-
-  final Uint8List bytes;
-
-  /// The total rendering time for the set of snapshots that this
-  /// [LayerSnapshot] is a part of.
-  ///
-  /// This will be set after this [LayerSnapshot] is created, once all the
-  /// [LayerSnapshot]s in a set have been processed.
-  Duration? totalRenderingDuration;
-
-  double get percentRenderingTimeAsDouble =>
-      duration.inMicroseconds / totalRenderingDuration!.inMicroseconds;
-
-  String get percentRenderingTimeDisplay =>
-      percent2(percentRenderingTimeAsDouble);
-
-  String get displayName => 'Layer $id';
 }
