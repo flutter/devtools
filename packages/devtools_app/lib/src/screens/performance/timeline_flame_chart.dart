@@ -9,7 +9,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../analytics/constants.dart' as analytics_constants;
 import '../../charts/flame_chart.dart';
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../primitives/flutter_widgets/linked_scroll_controller.dart';
@@ -20,167 +19,10 @@ import '../../shared/common_widgets.dart';
 import '../../shared/notifications.dart';
 import '../../shared/theme.dart';
 import '../../ui/colors.dart';
-import '../../ui/search.dart';
-import '../../ui/tab.dart';
 import '../../ui/utils.dart';
 import 'performance_controller.dart';
 import 'performance_model.dart';
-import 'performance_screen.dart';
 import 'performance_utils.dart';
-import 'timeline_analysis.dart';
-
-// TODO(kenz): move all classes not directly related to the timeline flame chart
-// to timeline_analysis.dart. Do this in a follow up PR so that the git diff
-// isn't messed up.
-
-final timelineSearchFieldKey = GlobalKey(debugLabel: 'TimelineSearchFieldKey');
-
-class TabbedPerformanceView extends StatefulWidget {
-  const TabbedPerformanceView({
-    required this.controller,
-    required this.processing,
-    required this.processingProgress,
-  });
-
-  @visibleForTesting
-  static const emptyTimelineKey = Key('Empty Timeline');
-
-  final PerformanceController controller;
-
-  final bool processing;
-
-  final double processingProgress;
-
-  @override
-  _TabbedPerformanceViewState createState() => _TabbedPerformanceViewState();
-}
-
-class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
-    with AutoDisposeMixin, SearchFieldMixin<TabbedPerformanceView> {
-  static const _gaPrefix = 'performanceTab';
-
-  PerformanceController get controller => widget.controller;
-
-  FlutterFrame? _selectedFlutterFrame;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _selectedFlutterFrame = controller.selectedFrame.value;
-    addAutoDisposeListener(controller.selectedFrame, () {
-      setState(() {
-        _selectedFlutterFrame = controller.selectedFrame.value;
-      });
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    late Widget frameAnalysisView;
-    final selectedFrame = _selectedFlutterFrame;
-    if (selectedFrame != null) {
-      frameAnalysisView = FlutterFrameAnalysisView(
-        frameAnalysis: selectedFrame.frameAnalysis,
-      );
-    } else {
-      frameAnalysisView = const Center(
-        child: Text('Select a frame above to view analysis data.'),
-      );
-    }
-
-    const rasterMetrics = Center(
-      child: Text('Coming Soon'),
-    );
-
-    final tabViews = [
-      TimelineEventsView(
-        controller: controller,
-        processing: widget.processing,
-        processingProgress: widget.processingProgress,
-      ),
-      if (frameAnalysisSupported) frameAnalysisView,
-      if (rasterMetricsSupported) rasterMetrics,
-    ];
-
-    return AnalyticsTabbedView(
-      tabs: _generateTabs(),
-      tabViews: tabViews,
-      gaScreen: analytics_constants.performance,
-      // TODO(kenz): enable analytics when this view is stable.
-      sendAnalytics: false,
-    );
-  }
-
-  List<DevToolsTab> _generateTabs() {
-    final data = controller.data;
-    final hasData = data != null && !data.isEmpty;
-    final searchFieldEnabled = hasData && !widget.processing;
-    return [
-      _buildTab(
-        tabName: 'Timeline Events',
-        trailing: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            _buildSearchField(searchFieldEnabled),
-            const FlameChartHelpButton(
-              gaScreen: PerformanceScreen.id,
-              gaSelection: analytics_constants.timelineFlameChartHelp,
-            ),
-            RefreshTimelineEventsButton(controller: controller),
-          ],
-        ),
-      ),
-      if (frameAnalysisSupported)
-        _buildTab(
-          tabName: 'Frame Analysis',
-        ),
-      if (rasterMetricsSupported)
-        _buildTab(
-          tabName: 'Raster Metrics',
-          trailing: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(right: densePadding),
-                child: IconLabelButton(
-                  tooltip:
-                      'Take a snapshot of the rendering layers on the current screen',
-                  icon: Icons.camera,
-                  label: 'Take Snapshot',
-                  outlined: false,
-                  // TODO(kenz): hook this up to the engine service extension.
-                  onPressed: () {},
-                ),
-              ),
-            ],
-          ),
-        ),
-    ];
-  }
-
-  Widget _buildSearchField(bool searchFieldEnabled) {
-    return Container(
-      width: defaultSearchTextWidth,
-      height: defaultTextFieldHeight,
-      child: buildSearchField(
-        controller: controller,
-        searchFieldKey: timelineSearchFieldKey,
-        searchFieldEnabled: searchFieldEnabled,
-        shouldRequestFocus: false,
-        supportsNavigation: true,
-      ),
-    );
-  }
-
-  DevToolsTab _buildTab({required String tabName, Widget? trailing}) {
-    return DevToolsTab.create(
-      tabName: tabName,
-      gaPrefix: _gaPrefix,
-      trailing: trailing,
-    );
-  }
-}
 
 class TimelineEventsView extends StatelessWidget {
   const TimelineEventsView({
@@ -210,7 +52,7 @@ class TimelineEventsView extends StatelessWidget {
       );
     } else if (timelineEmpty) {
       return Center(
-        key: TabbedPerformanceView.emptyTimelineKey,
+        key: emptyTimelineKey,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

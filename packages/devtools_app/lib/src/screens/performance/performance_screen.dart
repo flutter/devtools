@@ -30,7 +30,7 @@ import 'event_details.dart';
 import 'flutter_frames_chart.dart';
 import 'performance_controller.dart';
 import 'performance_model.dart';
-import 'timeline_flame_chart.dart';
+import 'tabbed_performance_view.dart';
 
 // TODO(kenz): handle small screen widths better by using Wrap instead of Row
 // where applicable.

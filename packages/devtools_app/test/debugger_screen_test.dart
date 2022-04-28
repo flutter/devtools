@@ -17,26 +17,21 @@ import 'package:mockito/mockito.dart';
 
 void main() {
   const screen = DebuggerScreen();
-  late FakeServiceManager fakeServiceManager;
-  late MockDebuggerControllerLegacy debuggerController;
-  late MockScriptManager scriptManager;
 
   const windowSize = Size(4000.0, 4000.0);
 
-  setUp(() {
-    fakeServiceManager = FakeServiceManager();
-    scriptManager = MockScriptManager();
-    when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
-    when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
-    setGlobal(IdeTheme, IdeTheme());
-    setGlobal(ScriptManager, scriptManager);
-    fakeServiceManager.consoleService.ensureServiceInitialized();
-    when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
-        .thenReturn(ValueNotifier<int>(0));
-    debuggerController = MockDebuggerControllerLegacy.withDefaults();
-    when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
-  });
+  final fakeServiceManager = FakeServiceManager();
+  final scriptManager = MockScriptManager();
+  when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
+  when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
+  setGlobal(ServiceConnectionManager, fakeServiceManager);
+  setGlobal(IdeTheme, IdeTheme());
+  setGlobal(ScriptManager, scriptManager);
+  fakeServiceManager.consoleService.ensureServiceInitialized();
+  when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
+      .thenReturn(ValueNotifier<int>(0));
+  final debuggerController = createMockDebuggerControllerWithDefaults();
+  when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
 
   Future<void> pumpConsole(
     WidgetTester tester,

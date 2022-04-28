@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
+
 import 'package:devtools_app/devtools_app.dart';
 import 'package:mockito/annotations.dart';
 import 'package:vm_service/vm_service.dart';
@@ -14,7 +16,10 @@ import 'package:vm_service/vm_service.dart';
   ErrorBadgeManager,
   HeapSnapshotGraph,
   ProgramExplorerController,
+  ScriptManager,
   ServiceConnectionManager,
+  VmService,
   VmServiceWrapper,
+  ui.Image,
 ])
 void main() {}

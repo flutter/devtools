@@ -238,12 +238,14 @@ class ClearButton extends IconLabelButton {
     Key? key,
     double? minScreenWidthForTextBeforeScaling,
     String tooltip = 'Clear',
+    bool outlined = true,
     required VoidCallback? onPressed,
   }) : super(
           key: key,
           icon: Icons.block,
           label: 'Clear',
           tooltip: tooltip,
+          outlined: outlined,
           minScreenWidthForTextBeforeScaling:
               minScreenWidthForTextBeforeScaling,
           onPressed: onPressed,
