@@ -777,6 +777,7 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
     this.leftPadding = defaultSpacing,
     this.rightPadding = densePadding,
     this.tall = false,
+    this.showCenterActions = true,
   }) : super(key: key);
 
   final Widget title;
@@ -790,6 +791,7 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
   final double leftPadding;
   final double rightPadding;
   final bool tall;
+  final bool showCenterActions;
 
   @override
   Widget build(BuildContext context) {
@@ -825,13 +827,13 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
 
   List<Widget> _buildActions() {
     return [
-      if (scrollableCenterActions.isEmpty)
+      if (showCenterActions && scrollableCenterActions.isEmpty)
         Expanded(
           child: Row(
             children: leftActions,
           ),
         ),
-      if (scrollableCenterActions.isNotEmpty) ...[
+      if (showCenterActions && scrollableCenterActions.isNotEmpty) ...[
         ...leftActions,
         Expanded(
           // TODO(kenz): make this look more scrollable when there are too many

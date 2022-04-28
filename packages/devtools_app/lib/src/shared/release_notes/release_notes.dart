@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -38,7 +39,8 @@ class ReleaseNotesViewer extends StatefulWidget {
 
 class _ReleaseNotesViewerState extends State<ReleaseNotesViewer>
     with AutoDisposeMixin, SingleTickerProviderStateMixin {
-  static const viewerWidth = 600.0;
+  static const maxViewerWidth = 600.0;
+  static const animationEndValue = 1000.0;
 
   /// Animation controller for animating the opening and closing of the viewer.
   late AnimationController visibilityController;
@@ -59,9 +61,8 @@ class _ReleaseNotesViewerState extends State<ReleaseNotesViewer>
     visibilityController = longAnimationController(this);
     // Add [densePadding] to the end to account for the space between the
     // release notes viewer and the right edge of DevTools.
-    visibilityAnimation =
-        Tween<double>(begin: 0, end: viewerWidth + densePadding)
-            .animate(visibilityController);
+    visibilityAnimation = Tween<double>(begin: 0, end: animationEndValue)
+        .animate(visibilityController);
 
     addAutoDisposeListener(widget.releaseNotesController.releaseNotesVisible,
         () {
@@ -91,10 +92,24 @@ class _ReleaseNotesViewerState extends State<ReleaseNotesViewer>
       child: Stack(
         children: [
           if (child != null) child,
-          ReleaseNotes(
-            releaseNotesController: widget.releaseNotesController,
-            visibilityAnimation: visibilityAnimation,
-            markdownData: markdownData,
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final width = min(
+                _ReleaseNotesViewerState.maxViewerWidth,
+                constraints.maxWidth - 2 * densePadding,
+              );
+
+              return Stack(
+                children: [
+                  ReleaseNotes(
+                    releaseNotesController: widget.releaseNotesController,
+                    visibilityAnimation: visibilityAnimation,
+                    markdownData: markdownData,
+                    width: width,
+                  )
+                ],
+              );
+            },
           ),
         ],
       ),
@@ -108,22 +123,28 @@ class ReleaseNotes extends AnimatedWidget {
     required this.releaseNotesController,
     required Animation<double> visibilityAnimation,
     required this.markdownData,
+    required this.width,
   }) : super(key: key, listenable: visibilityAnimation);
 
   final ReleaseNotesController releaseNotesController;
 
   final String? markdownData;
+  final double width;
 
   @override
   Widget build(BuildContext context) {
     final animation = listenable as Animation<double>;
     final theme = Theme.of(context);
+    //
+    final right = densePadding -
+        (width -
+            width *
+                (animation.value / _ReleaseNotesViewerState.animationEndValue));
     return Positioned(
       top: densePadding,
       bottom: densePadding,
-      right: densePadding -
-          (_ReleaseNotesViewerState.viewerWidth - animation.value),
-      width: _ReleaseNotesViewerState.viewerWidth,
+      right: right,
+      width: width,
       child: Card(
         elevation: defaultElevation,
         color: theme.scaffoldBackgroundColor,
@@ -137,7 +158,12 @@ class ReleaseNotes extends AnimatedWidget {
         child: Column(
           children: [
             AreaPaneHeader(
-              title: const Text('What\'s new in DevTools?'),
+              title: const Expanded(
+                child: Text(
+                  'What\'s new in DevTools?',
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
               needsTopBorder: false,
               rightActions: [
                 IconButton(
@@ -145,8 +171,9 @@ class ReleaseNotes extends AnimatedWidget {
                   onPressed: () =>
                       releaseNotesController.toggleReleaseNotesVisible(false),
                   icon: const Icon(Icons.close),
-                ),
+                )
               ],
+              showCenterActions: false,
             ),
             markdownData == null
                 ? const Text('Stay tuned for updates.')
@@ -197,11 +224,15 @@ class ReleaseNotesController {
     } else {
       previousVersion = SemanticVersion.parse(lastReleaseNotesShownVersion);
     }
+    previousVersion = SemanticVersion(major: 2, minor: 0, patch: 0);
     // Parse the current version instead of using [devtools.version] directly to
     // strip off any build metadata (any characters following a '+' character).
     // Release notes will be hosted on the Flutter website with a version number
-    // that does not contain any build metadata.
-    final parsedCurrentVersion = SemanticVersion.parse(devtools.version);
+    // that does not contain any build metadata.`
+    final parsedCurrentVersion = SemanticVersion(
+      major: 2,
+      minor: 10,
+    );
     final parsedCurrentVersionStr = parsedCurrentVersion.toString();
     if (parsedCurrentVersion > previousVersion) {
       try {
