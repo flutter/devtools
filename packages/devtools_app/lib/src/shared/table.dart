@@ -1331,7 +1331,7 @@ class _TableRowState<T> extends State<TableRow<T>>
           canRequestFocus: false,
           onTap: () => _handleSortChange(
             column,
-            secondarySortColumn: widget.secondarySortColumn as ColumnData<T>,
+            secondarySortColumn: widget.secondarySortColumn,
           ),
           child: Row(
             mainAxisAlignment: _mainAxisAlignmentFor(column),
