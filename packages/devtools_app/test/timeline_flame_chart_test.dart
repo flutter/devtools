@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:devtools_app/src/charts/flame_chart.dart';
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/screens/performance/frame_analysis.dart';
 import 'package:devtools_app/src/screens/performance/performance_controller.dart';
@@ -14,6 +15,7 @@ import 'package:devtools_app/src/screens/performance/tabbed_performance_view.dar
 import 'package:devtools_app/src/screens/performance/timeline_flame_chart.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/preferences.dart';
 import 'package:devtools_app/src/shared/version.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/foundation.dart';
@@ -48,6 +50,8 @@ void main() {
     when(app.isDebugFlutterAppNow).thenReturn(false);
     setGlobal(ServiceConnectionManager, fakeServiceManager);
     setGlobal(OfflineModeController, OfflineModeController());
+    setGlobal(IdeTheme, IdeTheme());
+    setGlobal(PreferencesController, PreferencesController());
     when(serviceManager.connectedApp!.isDartWebApp)
         .thenAnswer((_) => Future.value(false));
   }
