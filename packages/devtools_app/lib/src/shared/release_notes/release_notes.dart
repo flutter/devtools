@@ -171,7 +171,7 @@ class ReleaseNotes extends AnimatedWidget {
                   onPressed: () =>
                       releaseNotesController.toggleReleaseNotesVisible(false),
                   icon: const Icon(Icons.close),
-                )
+                ),
               ],
               onlyShowRightActions: true,
             ),
