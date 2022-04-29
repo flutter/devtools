@@ -211,4 +211,87 @@ void main() {
       expect(findCheckboxValue(), isTrue);
     });
   });
+
+  group('AreaPaneHeader', () {
+    const titleText = 'The title';
+    const leftActionKey = Key('testLeftAction');
+    const centerActionContainerKey = Key('scrollableCenterActionsContainer');
+    const centerAction = Text(
+      'Center Action',
+    );
+    const leftAction = Text(
+      'Left Action',
+      key: leftActionKey,
+    );
+
+    setUp(() {
+      setGlobal(IdeTheme, IdeTheme());
+    });
+
+    group('with center actions', () {
+      testWidgets('onlyShowRightActions = true', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          wrap(
+            const AreaPaneHeader(
+              title: Text(titleText),
+              leftActions: [leftAction],
+              scrollableCenterActions: [centerAction],
+              onlyShowRightActions: true,
+            ),
+          ),
+        );
+        expect(
+          find.byKey(centerActionContainerKey),
+          findsNothing,
+        );
+        expect(find.byKey(leftActionKey), findsNothing);
+      });
+
+      testWidgets('onlyShowRightActions = false', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          wrap(
+            const AreaPaneHeader(
+              title: Text(titleText),
+              leftActions: [leftAction],
+              scrollableCenterActions: [centerAction],
+            ),
+          ),
+        );
+        expect(
+          find.byKey(centerActionContainerKey),
+          findsOneWidget,
+        );
+        expect(find.byKey(leftActionKey), findsOneWidget);
+      });
+    });
+
+    group('no center actions', () {
+      testWidgets('onlyShowRightActions = true', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          wrap(
+            const AreaPaneHeader(
+              title: Text(titleText),
+              leftActions: [leftAction],
+              onlyShowRightActions: true,
+            ),
+          ),
+        );
+        expect(find.byKey(centerActionContainerKey), findsNothing);
+        expect(find.byKey(leftActionKey), findsNothing);
+      });
+
+      testWidgets('onlyShowRightActions = false', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          wrap(
+            const AreaPaneHeader(
+              title: Text(titleText),
+              leftActions: [leftAction],
+            ),
+          ),
+        );
+        expect(find.byKey(centerActionContainerKey), findsNothing);
+        expect(find.byKey(leftActionKey), findsOneWidget);
+      });
+    });
+  });
 }

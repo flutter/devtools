@@ -173,7 +173,7 @@ class ReleaseNotes extends AnimatedWidget {
                   icon: const Icon(Icons.close),
                 )
               ],
-              showCenterActions: false,
+              onlyShowRightActions: true,
             ),
             markdownData == null
                 ? const Text('Stay tuned for updates.')
