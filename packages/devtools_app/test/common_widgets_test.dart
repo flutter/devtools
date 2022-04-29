@@ -214,84 +214,79 @@ void main() {
 
   group('AreaPaneHeader', () {
     const titleText = 'The title';
-    const leftActionKey = Key('testLeftAction');
+    const leftActionText = 'The Left Action';
+    const centerActionText = 'The Center Action';
     const centerActionContainerKey = Key('scrollableCenterActionsContainer');
-    const centerAction = Text(
-      'Center Action',
-    );
-    const leftAction = Text(
-      'Left Action',
-      key: leftActionKey,
-    );
+    const centerAction = Text(centerActionText);
+    const leftAction = Text(leftActionText);
 
     setUp(() {
       setGlobal(IdeTheme, IdeTheme());
     });
 
-    group('with center actions', () {
-      testWidgets('onlyShowRightActions = true', (WidgetTester tester) async {
-        await tester.pumpWidget(
-          wrap(
-            const AreaPaneHeader(
-              title: Text(titleText),
-              leftActions: [leftAction],
-              scrollableCenterActions: [centerAction],
-              onlyShowRightActions: true,
-            ),
+    testWidgets(
+        'does NOT show center actions if no left or center actions present',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        wrap(
+          const AreaPaneHeader(
+            title: Text(titleText),
           ),
-        );
-        expect(
-          find.byKey(centerActionContainerKey),
-          findsNothing,
-        );
-        expect(find.byKey(leftActionKey), findsNothing);
-      });
-
-      testWidgets('onlyShowRightActions = false', (WidgetTester tester) async {
-        await tester.pumpWidget(
-          wrap(
-            const AreaPaneHeader(
-              title: Text(titleText),
-              leftActions: [leftAction],
-              scrollableCenterActions: [centerAction],
-            ),
-          ),
-        );
-        expect(
-          find.byKey(centerActionContainerKey),
-          findsOneWidget,
-        );
-        expect(find.byKey(leftActionKey), findsOneWidget);
-      });
+        ),
+      );
+      expect(
+        find.byKey(centerActionContainerKey),
+        findsNothing,
+      );
     });
 
-    group('no center actions', () {
-      testWidgets('onlyShowRightActions = true', (WidgetTester tester) async {
-        await tester.pumpWidget(
-          wrap(
-            const AreaPaneHeader(
-              title: Text(titleText),
-              leftActions: [leftAction],
-              onlyShowRightActions: true,
-            ),
+    testWidgets('shows left actions', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        wrap(
+          const AreaPaneHeader(
+            title: Text(titleText),
+            leftActions: [leftAction],
           ),
-        );
-        expect(find.byKey(centerActionContainerKey), findsNothing);
-        expect(find.byKey(leftActionKey), findsNothing);
-      });
+        ),
+      );
+      expect(
+        find.byKey(centerActionContainerKey),
+        findsNothing,
+      );
+      expect(find.text(leftActionText), findsOneWidget);
+    });
 
-      testWidgets('onlyShowRightActions = false', (WidgetTester tester) async {
-        await tester.pumpWidget(
-          wrap(
-            const AreaPaneHeader(
-              title: Text(titleText),
-              leftActions: [leftAction],
-            ),
+    testWidgets('shows center actions', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        wrap(
+          const AreaPaneHeader(
+            title: Text(titleText),
+            scrollableCenterActions: [centerAction],
           ),
-        );
-        expect(find.byKey(centerActionContainerKey), findsNothing);
-        expect(find.byKey(leftActionKey), findsOneWidget);
-      });
+        ),
+      );
+      expect(
+        find.byKey(centerActionContainerKey),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('shows both left and center actions',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        wrap(
+          const AreaPaneHeader(
+            title: Text(titleText),
+            leftActions: [leftAction],
+            scrollableCenterActions: [centerAction],
+          ),
+        ),
+      );
+      expect(
+        find.byKey(centerActionContainerKey),
+        findsOneWidget,
+      );
+      expect(find.text(leftActionText), findsOneWidget);
     });
   });
 }

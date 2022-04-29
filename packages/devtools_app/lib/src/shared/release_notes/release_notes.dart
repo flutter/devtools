@@ -40,7 +40,6 @@ class ReleaseNotesViewer extends StatefulWidget {
 class _ReleaseNotesViewerState extends State<ReleaseNotesViewer>
     with AutoDisposeMixin, SingleTickerProviderStateMixin {
   static const maxViewerWidth = 600.0;
-  static const animationStartValue = 1000.0;
 
   /// Animation controller for animating the opening and closing of the viewer.
   late AnimationController visibilityController;
@@ -59,10 +58,8 @@ class _ReleaseNotesViewerState extends State<ReleaseNotesViewer>
     markdownData = widget.releaseNotesController.releaseNotesMarkdown.value;
 
     visibilityController = longAnimationController(this);
-    // Add [densePadding] to the end to account for the space between the
-    // release notes viewer and the right edge of DevTools.
-    visibilityAnimation = Tween<double>(begin: animationStartValue, end: 0)
-        .animate(visibilityController);
+    visibilityAnimation =
+        Tween<double>(begin: 1.0, end: 0).animate(visibilityController);
 
     addAutoDisposeListener(widget.releaseNotesController.releaseNotesVisible,
         () {
@@ -108,7 +105,7 @@ class _ReleaseNotesViewerState extends State<ReleaseNotesViewer>
                     visibilityAnimation: visibilityAnimation,
                     markdownData: markdownData,
                     width: width,
-                  )
+                  ),
                 ],
               );
             },
@@ -131,15 +128,14 @@ class ReleaseNotes extends AnimatedWidget {
   final ReleaseNotesController releaseNotesController;
 
   final String? markdownData;
+
   final double width;
 
   @override
   Widget build(BuildContext context) {
     final animation = listenable as Animation<double>;
     final theme = Theme.of(context);
-    final animationProgress =
-        (animation.value) / _ReleaseNotesViewerState.animationStartValue;
-    final displacement = width * animationProgress;
+    final displacement = width * animation.value;
     final right = densePadding - displacement;
     return Positioned(
       top: densePadding,
@@ -174,7 +170,6 @@ class ReleaseNotes extends AnimatedWidget {
                   icon: const Icon(Icons.close),
                 ),
               ],
-              onlyShowRightActions: true,
             ),
             markdownData == null
                 ? const Text('Stay tuned for updates.')
@@ -225,11 +220,15 @@ class ReleaseNotesController {
     } else {
       previousVersion = SemanticVersion.parse(lastReleaseNotesShownVersion);
     }
+    previousVersion = SemanticVersion(major: 2, minor: 0, patch: 0);
     // Parse the current version instead of using [devtools.version] directly to
     // strip off any build metadata (any characters following a '+' character).
     // Release notes will be hosted on the Flutter website with a version number
     // that does not contain any build metadata.
-    final parsedCurrentVersion = SemanticVersion.parse(devtools.version);
+    final parsedCurrentVersion = SemanticVersion(
+      major: 2,
+      minor: 10,
+    );
     final parsedCurrentVersionStr = parsedCurrentVersion.toString();
     if (parsedCurrentVersion > previousVersion) {
       try {
