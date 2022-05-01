@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: avoid_redundant_argument_values
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
@@ -53,18 +50,23 @@ class ExpandableVariable extends StatelessWidget {
     required this.debuggerController,
   }) : super(key: key);
 
+  @visibleForTesting
+  static const emptyExpandableVariableKey = Key('empty expandable variable');
+
   final DartObjectNode? variable;
+
   final DebuggerController debuggerController;
 
   @override
   Widget build(BuildContext context) {
-    if (variable == null) return const SizedBox();
+    final variable = this.variable;
+    if (variable == null)
+      return const SizedBox(key: emptyExpandableVariableKey);
     // TODO(kenz): preserve expanded state of tree on switching frames and
     // on stepping.
     return TreeView<DartObjectNode>(
       dataRootsListenable:
-          FixedValueListenable<List<DartObjectNode?>>([variable])
-              as ValueListenable<List<DartObjectNode>>,
+          FixedValueListenable<List<DartObjectNode>>([variable]),
       shrinkWrap: true,
       dataDisplayProvider: (variable, onPressed) =>
           displayProvider(context, variable, onPressed, debuggerController),
@@ -108,7 +110,6 @@ Widget displayProvider(
   if (diagnostic != null) {
     return DiagnosticsNodeDescription(
       diagnostic,
-      isSelected: false,
       multiline: true,
       style: theme.fixedFontStyle,
       debuggerController: controller,

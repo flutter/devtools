@@ -10,8 +10,10 @@ import '_launch_url_stub.dart'
     if (dart.library.io) '_launch_url_desktop.dart';
 
 Future<void> launchUrl(String url, BuildContext context) async {
-  if (await url_launcher.canLaunch(url)) {
-    await url_launcher.launch(url);
+  final parsedUrl = Uri.tryParse(url);
+
+  if (parsedUrl != null && await url_launcher.canLaunchUrl(parsedUrl)) {
+    await url_launcher.launchUrl(parsedUrl);
   } else {
     Notifications.of(context)!.push('Unable to open $url.');
   }

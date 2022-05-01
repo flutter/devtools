@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_breadcrumbs.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_controller.dart';
@@ -26,13 +24,14 @@ void main() {
   setUp(() {
     fakeServiceManager = FakeServiceManager();
     firstInspectorTreeLoadCompleted = true;
-    when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
-    when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
+    final app = fakeServiceManager.connectedApp!;
+    when(app.isFlutterAppNow).thenReturn(true);
+    when(app.isProfileBuildNow).thenReturn(false);
 
     setGlobal(ServiceConnectionManager, fakeServiceManager);
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(PreferencesController, PreferencesController());
-    mockIsFlutterApp(serviceManager.connectedApp as MockConnectedApp);
+    mockIsFlutterApp(serviceManager.connectedApp!);
   });
 
   group('InspectorTreeController', () {

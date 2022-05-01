@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profile_controller.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profile_model.dart';
@@ -11,20 +9,25 @@ import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
+import 'package:vm_service/vm_service.dart';
 
 import 'test_data/cpu_profile_test_data.dart';
 
 void main() {
+  final ServiceConnectionManager fakeServiceManager = FakeServiceManager(
+    service: FakeServiceManager.createFakeService(
+      cpuSamples: CpuSamples.parse(goldenCpuSamplesJson),
+      resolvedUriMap: goldenResolvedUriMap,
+    ),
+  );
+  final app = fakeServiceManager.connectedApp!;
+  when(app.isFlutterAppNow).thenReturn(true);
+
   group('CpuProfileController', () {
     late CpuProfilerController controller;
-    FakeServiceManager fakeServiceManager;
 
     setUp(() {
-      fakeServiceManager = FakeServiceManager(
-        service: FakeServiceManager.createFakeService(
-          cpuProfileData: CpuProfileData.parse(goldenCpuProfileDataJson),
-        ),
-      );
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(OfflineModeController, OfflineModeController());
       controller = CpuProfilerController();
@@ -245,7 +248,7 @@ void main() {
         equals(250),
       );
       expect(
-        dataNotifierValue.cpuProfileRoot.toStringDeep(),
+        dataNotifierValue.cpuProfileRoot.profileAsString(),
         equals(
           '''
   all - children: 1 - excl: 0 - incl: 5
@@ -261,7 +264,7 @@ void main() {
 
       await controller.loadDataWithTag('userTagA');
       expect(
-        controller.dataNotifier.value!.cpuProfileRoot.toStringDeep(),
+        controller.dataNotifier.value!.cpuProfileRoot.profileAsString(),
         equals(
           '''
   all - children: 1 - excl: 0 - incl: 2
@@ -275,7 +278,7 @@ void main() {
 
       await controller.loadDataWithTag('userTagB');
       expect(
-        controller.dataNotifier.value!.cpuProfileRoot.toStringDeep(),
+        controller.dataNotifier.value!.cpuProfileRoot.profileAsString(),
         equals(
           '''
   all - children: 1 - excl: 0 - incl: 1
@@ -288,7 +291,7 @@ void main() {
 
       await controller.loadDataWithTag('userTagC');
       expect(
-        controller.dataNotifier.value!.cpuProfileRoot.toStringDeep(),
+        controller.dataNotifier.value!.cpuProfileRoot.profileAsString(),
         equals(
           '''
   all - children: 1 - excl: 0 - incl: 2
@@ -319,7 +322,7 @@ void main() {
         equals(250),
       );
       expect(
-        cpuProfileRoot.toStringDeep(),
+        cpuProfileRoot.profileAsString(),
         equals(
           '''
   all - children: 1 - excl: 0 - incl: 5
@@ -335,7 +338,7 @@ void main() {
 
       await controller.loadDataWithTag('userTagA');
       expect(
-        controller.dataNotifier.value!.cpuProfileRoot.toStringDeep(),
+        controller.dataNotifier.value!.cpuProfileRoot.profileAsString(),
         equals(
           '''
   all - children: 2 - excl: 0 - incl: 2
@@ -347,7 +350,7 @@ void main() {
 
       await controller.loadDataWithTag('userTagB');
       expect(
-        controller.dataNotifier.value!.cpuProfileRoot.toStringDeep(),
+        controller.dataNotifier.value!.cpuProfileRoot.profileAsString(),
         equals(
           '''
   all - children: 1 - excl: 0 - incl: 1
@@ -358,7 +361,7 @@ void main() {
 
       await controller.loadDataWithTag('userTagC');
       expect(
-        controller.dataNotifier.value!.cpuProfileRoot.toStringDeep(),
+        controller.dataNotifier.value!.cpuProfileRoot.profileAsString(),
         equals(
           '''
   all - children: 1 - excl: 0 - incl: 2

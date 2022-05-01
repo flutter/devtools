@@ -12,7 +12,7 @@ import '../../analytics/analytics_common.dart';
 import '../../analytics/constants.dart' as analytics_constants;
 import '../../config_specific/import_export/import_export.dart';
 import '../../primitives/auto_dispose_mixin.dart';
-import '../../service/service_extensions.dart';
+import '../../service/service_extensions.dart' as extensions;
 import '../../shared/banner_messages.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/dialogs.dart';
@@ -25,11 +25,12 @@ import '../../shared/version.dart';
 import '../../ui/icons.dart';
 import '../../ui/service_extension_widgets.dart';
 import '../../ui/vm_flag_widgets.dart';
+import 'enhance_tracing.dart';
 import 'event_details.dart';
 import 'flutter_frames_chart.dart';
 import 'performance_controller.dart';
 import 'performance_model.dart';
-import 'timeline_flame_chart.dart';
+import 'tabbed_performance_view.dart';
 
 // TODO(kenz): handle small screen widths better by using Wrap instead of Row
 // where applicable.
@@ -64,9 +65,9 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
     with
         AutoDisposeMixin,
         OfflineScreenMixin<PerformanceScreenBody, OfflinePerformanceData> {
-  late PerformanceController _controller;
+  PerformanceController get controller => _controller!;
 
-  bool _controllerInitialized = false;
+  PerformanceController? _controller;
 
   bool processing = false;
 
@@ -98,27 +99,26 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
     maybePushDebugModePerformanceMessage(context, PerformanceScreen.id);
 
     final newController = Provider.of<PerformanceController>(context);
-    if (_controllerInitialized && newController == _controller) return;
+    if (newController == _controller) return;
     _controller = newController;
-    _controllerInitialized = true;
 
     cancelListeners();
 
-    processing = _controller.processing.value;
-    addAutoDisposeListener(_controller.processing, () {
+    processing = controller.processing.value;
+    addAutoDisposeListener(controller.processing, () {
       setState(() {
-        processing = _controller.processing.value;
+        processing = controller.processing.value;
       });
     });
 
-    processingProgress = _controller.processor.progressNotifier.value;
-    addAutoDisposeListener(_controller.processor.progressNotifier, () {
+    processingProgress = controller.processor.progressNotifier.value;
+    addAutoDisposeListener(controller.processor.progressNotifier, () {
       setState(() {
-        processingProgress = _controller.processor.progressNotifier.value;
+        processingProgress = controller.processor.progressNotifier.value;
       });
     });
 
-    addAutoDisposeListener(_controller.selectedFrame);
+    addAutoDisposeListener(controller.selectedFrame);
 
     // Load offline timeline data if available.
     if (shouldLoadOfflineData()) {
@@ -142,8 +142,8 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
   @override
   Widget build(BuildContext context) {
     final isOfflineFlutterApp = offlineController.offlineMode.value &&
-        _controller.offlinePerformanceData != null &&
-        _controller.offlinePerformanceData!.frames.isNotEmpty;
+        controller.offlinePerformanceData != null &&
+        controller.offlinePerformanceData!.frames.isNotEmpty;
 
     final performanceScreen = Column(
       children: [
@@ -153,8 +153,8 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
             (!offlineController.offlineMode.value &&
                 serviceManager.connectedApp!.isFlutterAppNow!))
           DualValueListenableBuilder<List<FlutterFrame>, double>(
-            firstListenable: _controller.flutterFrames,
-            secondListenable: _controller.displayRefreshRate,
+            firstListenable: controller.flutterFrames,
+            secondListenable: controller.displayRefreshRate,
             builder: (context, frames, displayRefreshRate, child) {
               return FlutterFramesChart(
                 frames,
@@ -167,12 +167,13 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
             axis: Axis.vertical,
             initialFractions: const [0.7, 0.3],
             children: [
-              TimelineAnalysisContainer(
+              TabbedPerformanceView(
+                controller: controller,
                 processing: processing,
                 processingProgress: processingProgress,
               ),
               ValueListenableBuilder<TimelineEvent?>(
-                valueListenable: _controller.selectedTimelineEvent,
+                valueListenable: controller.selectedTimelineEvent,
                 builder: (context, selectedEvent, _) {
                   return EventDetails(selectedEvent);
                 },
@@ -204,19 +205,19 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         _PrimaryControls(
-          controller: _controller,
+          controller: controller,
           processing: processing,
           onClear: () => setState(() {}),
         ),
         const SizedBox(width: defaultSpacing),
-        _SecondaryControls(controller: _controller),
+        SecondaryPerformanceControls(controller: controller),
       ],
     );
   }
 
   @override
   FutureOr<void> processOfflineData(OfflinePerformanceData offlineData) async {
-    await _controller.processOfflineData(offlineData);
+    await controller.processOfflineData(offlineData);
   }
 
   @override
@@ -291,8 +292,8 @@ class _PrimaryControls extends StatelessWidget {
   }
 }
 
-class _SecondaryControls extends StatelessWidget {
-  const _SecondaryControls({
+class SecondaryPerformanceControls extends StatelessWidget {
+  const SecondaryPerformanceControls({
     Key? key,
     required this.controller,
   }) : super(key: key);
@@ -311,7 +312,7 @@ class _SecondaryControls extends StatelessWidget {
             minScreenWidthForTextBeforeScaling:
                 minScreenWidthForTextBeforeScaling,
             extensions: [
-              performanceOverlay,
+              extensions.performanceOverlay,
               // TODO(devoncarew): Enable this once we have a UI displaying the
               // values.
               //trackRebuildWidgets,
@@ -361,55 +362,6 @@ class _SecondaryControls extends StatelessWidget {
   }
 }
 
-class EnhanceTracingButton extends StatelessWidget {
-  const EnhanceTracingButton({Key? key}) : super(key: key);
-
-  static const title = 'Enhance Tracing';
-  static const icon = Icons.auto_awesome;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final textStyle = theme.subtleTextStyle;
-    return ServiceExtensionCheckboxGroupButton(
-      title: title,
-      icon: icon,
-      tooltip: 'Add more detail to the Timeline trace',
-      minScreenWidthForTextBeforeScaling:
-          _SecondaryControls.minScreenWidthForTextBeforeScaling,
-      extensions: [
-        profileWidgetBuilds,
-        profileRenderObjectLayouts,
-        profileRenderObjectPaints,
-      ],
-      overlayDescription: RichText(
-        text: TextSpan(
-          text: 'These options can be used to add more detail to the '
-              'timeline, but be aware that ',
-          style: textStyle,
-          children: [
-            TextSpan(
-              text: 'frame times may be negatively affected',
-              style:
-                  textStyle.copyWith(color: theme.colorScheme.errorTextColor),
-            ),
-            TextSpan(
-              text: '.\n\n',
-              style: textStyle,
-            ),
-            TextSpan(
-              text: 'When toggling on/off a tracing option, you will need '
-                  'to reproduce activity in your app to see the enhanced '
-                  'tracing in the timeline.',
-              style: textStyle,
-            )
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class MoreDebuggingOptionsButton extends StatelessWidget {
   const MoreDebuggingOptionsButton({Key? key}) : super(key: key);
 
@@ -422,11 +374,11 @@ class MoreDebuggingOptionsButton extends StatelessWidget {
       icon: Icons.build,
       tooltip: 'Opens a list of options you can use to help debug performance',
       minScreenWidthForTextBeforeScaling:
-          _SecondaryControls.minScreenWidthForTextBeforeScaling,
+          SecondaryPerformanceControls.minScreenWidthForTextBeforeScaling,
       extensions: [
-        disableClipLayers,
-        disableOpacityLayers,
-        disablePhysicalShapeLayers,
+        extensions.disableClipLayers,
+        extensions.disableOpacityLayers,
+        extensions.disablePhysicalShapeLayers,
       ],
       overlayDescription: Text(
         'When toggling on/off a rendering layer, you will need '

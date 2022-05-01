@@ -84,8 +84,7 @@ class CpuProfilerController
   final _userTagFilter = ValueNotifier<String>(userTagNone);
 
   Iterable<String> get userTags =>
-      cpuProfileStore.lookupProfile(label: userTagNone)?.userTags
-          as Iterable<String>? ??
+      cpuProfileStore.lookupProfile(label: userTagNone)?.userTags ??
       const <String>[];
 
   bool get isToggleFilterActive =>
@@ -254,7 +253,7 @@ class CpuProfilerController
     final currentStackFrames = _dataNotifier.value!.stackFrames.values;
     for (final frame in currentStackFrames) {
       if (frame.name.caseInsensitiveContains(regexSearch) ||
-          frame.processedUrl.caseInsensitiveContains(regexSearch)) {
+          frame.packageUri.caseInsensitiveContains(regexSearch)) {
         matches.add(frame);
       }
     }

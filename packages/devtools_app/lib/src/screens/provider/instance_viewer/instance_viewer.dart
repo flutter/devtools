@@ -4,8 +4,6 @@
 
 // TODO(rrousselGit) merge this code with the debugger view
 
-// @dart=2.9
-
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -41,7 +39,7 @@ final estimatedChildCountProvider =
     int one(InstanceDetails instance) => 1;
 
     int expandableEstimatedChildCount(Iterable<PathToProperty> keys) {
-      if (!ref.watch(isExpandedProvider(path)).state) {
+      if (!ref.watch(isExpandedProvider(path))) {
         return 1;
       }
       return keys.fold(1, (acc, element) {
@@ -95,11 +93,11 @@ void showErrorSnackBar(BuildContext context, Object error) {
   );
 }
 
-class InstanceViewer extends StatefulWidget {
+class InstanceViewer extends ConsumerStatefulWidget {
   const InstanceViewer({
-    Key key,
-    this.rootPath,
-    @required this.showInternalProperties,
+    Key? key,
+    required this.rootPath,
+    required this.showInternalProperties,
   }) : super(key: key);
 
   final InstancePath rootPath;
@@ -109,7 +107,7 @@ class InstanceViewer extends StatefulWidget {
   _InstanceViewerState createState() => _InstanceViewerState();
 }
 
-class _InstanceViewerState extends State<InstanceViewer> {
+class _InstanceViewerState extends ConsumerState<InstanceViewer> {
   final scrollController = ScrollController();
 
   @override
@@ -120,11 +118,12 @@ class _InstanceViewerState extends State<InstanceViewer> {
 
   Iterable<Widget> _buildError(
     Object error,
-    StackTrace stackTrace,
+    StackTrace? stackTrace,
     InstancePath path,
   ) {
     if (error is SentinelException) {
-      return [Text(error.sentinel.valueAsString)];
+      final valueAsString = error.sentinel.valueAsString;
+      if (valueAsString != null) return [Text(valueAsString)];
     }
 
     return const [Text('<unknown error>')];
@@ -132,55 +131,54 @@ class _InstanceViewerState extends State<InstanceViewer> {
 
   Iterable<Widget> _buildListViewItems(
     BuildContext context,
-    ScopedReader watch, {
-    @required InstancePath path,
+    WidgetRef ref, {
+    required InstancePath path,
     bool disableExpand = false,
   }) {
-    return watch(instanceProvider(path)).when(
-      loading: () => const [Text('loading...')],
-      error: (err, stack) => _buildError(err, stack, path),
-      data: (instance) sync* {
-        final isExpanded = watch(isExpandedProvider(path));
-        yield _buildHeader(
-          instance,
-          path: path,
-          isExpanded: isExpanded,
-          disableExpand: disableExpand,
-        );
+    return ref.watch(instanceProvider(path)).when(
+          loading: () => const [Text('loading...')],
+          error: (err, stack) => _buildError(err, stack, path),
+          data: (instance) sync* {
+            final isExpanded = ref.watch(isExpandedProvider(path).state);
+            yield _buildHeader(
+              instance,
+              path: path,
+              isExpanded: isExpanded,
+              disableExpand: disableExpand,
+            );
 
-        if (isExpanded.state) {
-          yield* instance.maybeMap(
-            object: (instance) => _buildObjectItem(
-              context,
-              watch,
-              instance,
-              path: path,
-            ),
-            list: (list) => _buildListItem(
-              context,
-              watch,
-              instance,
-              path: path,
-            ),
-            map: (map) => _buildMapItem(
-              context,
-              watch,
-              instance,
-              path: path,
-            ),
-            // string/numbers/bools have no children, but this code can be reached
-            // when the root of the instance tree (which is always expanded) is such primitive.
-            orElse: () => const [],
-          );
-        }
-      },
-    );
+            if (isExpanded.state) {
+              yield* instance.maybeMap(
+                object: (instance) => _buildObjectItem(
+                  context,
+                  ref,
+                  instance,
+                  path: path,
+                ),
+                list: (list) => _buildListItem(
+                  context,
+                  ref,
+                  list,
+                  path: path,
+                ),
+                map: (map) => _buildMapItem(
+                  context,
+                  ref,
+                  map,
+                  path: path,
+                ),
+                // Reaches when the root of the instance tree is a string/numbers/bool/....
+                orElse: () => const [],
+              );
+            }
+          },
+        );
   }
 
   Widget _buildHeader(
     InstanceDetails instance, {
-    @required InstancePath path,
-    StateController<bool> isExpanded,
+    required InstancePath path,
+    StateController<bool>? isExpanded,
     bool disableExpand = false,
   }) {
     return _Expandable(
@@ -274,14 +272,14 @@ class _InstanceViewerState extends State<InstanceViewer> {
 
   Iterable<Widget> _buildMapItem(
     BuildContext context,
-    ScopedReader watch,
+    WidgetRef ref,
     MapInstance instance, {
-    @required InstancePath path,
+    required InstancePath path,
   }) sync* {
     for (final key in instance.keys) {
       final value = _buildListViewItems(
         context,
-        watch,
+        ref,
         path: path.pathForChild(PathToProperty.mapKey(ref: key.instanceRefId)),
       );
 
@@ -314,14 +312,14 @@ class _InstanceViewerState extends State<InstanceViewer> {
 
   Iterable<Widget> _buildListItem(
     BuildContext context,
-    ScopedReader watch,
+    WidgetRef ref,
     ListInstance instance, {
-    @required InstancePath path,
+    required InstancePath path,
   }) sync* {
     for (var index = 0; index < instance.length; index++) {
       final children = _buildListViewItems(
         context,
-        watch,
+        ref,
         path: path.pathForChild(PathToProperty.listIndex(index)),
       );
 
@@ -351,9 +349,9 @@ class _InstanceViewerState extends State<InstanceViewer> {
 
   Iterable<Widget> _buildObjectItem(
     BuildContext context,
-    ScopedReader watch,
+    WidgetRef ref,
     ObjectInstance instance, {
-    @required InstancePath path,
+    required InstancePath path,
   }) sync* {
     for (final field in instance.fields) {
       if (!widget.showInternalProperties &&
@@ -365,7 +363,7 @@ class _InstanceViewerState extends State<InstanceViewer> {
 
       final children = _buildListViewItems(
         context,
-        watch,
+        ref,
         path: path.pathForChild(PathToProperty.fromObjectField(field)),
       );
 
@@ -398,49 +396,45 @@ class _InstanceViewerState extends State<InstanceViewer> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer(
-      builder: (context, watch, _) {
-        return Scrollbar(
-          thumbVisibility: true,
-          controller: scrollController,
-          child: ListView.custom(
-            controller: scrollController,
-            // TODO: item height should be based on font size
-            itemExtent: rowHeight,
-            padding: const EdgeInsets.symmetric(
-              vertical: denseSpacing,
-              horizontal: defaultSpacing,
-            ),
-            childrenDelegate: SliverIterableChildDelegate(
-              _buildListViewItems(
-                context,
-                watch,
-                path: widget.rootPath,
-                disableExpand: true,
-              ),
-              estimatedChildCount:
-                  watch(estimatedChildCountProvider(widget.rootPath)),
-            ),
+    return Scrollbar(
+      thumbVisibility: true,
+      controller: scrollController,
+      child: ListView.custom(
+        controller: scrollController,
+        // TODO: item height should be based on font size
+        itemExtent: rowHeight,
+        padding: const EdgeInsets.symmetric(
+          vertical: denseSpacing,
+          horizontal: defaultSpacing,
+        ),
+        childrenDelegate: SliverIterableChildDelegate(
+          _buildListViewItems(
+            context,
+            ref,
+            path: widget.rootPath,
+            disableExpand: true,
           ),
-        );
-      },
+          estimatedChildCount:
+              ref.watch(estimatedChildCountProvider(widget.rootPath)),
+        ),
+      ),
     );
   }
 }
 
 class _ObjectHeader extends StatelessWidget {
   const _ObjectHeader({
-    Key key,
+    Key? key,
     this.type,
-    @required this.hash,
-    @required this.meta,
-    @required this.startToken,
-    @required this.endToken,
+    required this.hash,
+    required this.meta,
+    required this.startToken,
+    required this.endToken,
   }) : super(key: key);
 
-  final String type;
+  final String? type;
   final int hash;
-  final String meta;
+  final String? meta;
   final String startToken;
   final String endToken;
 
@@ -471,15 +465,15 @@ class _ObjectHeader extends StatelessWidget {
 
 class _EditableField extends StatefulWidget {
   const _EditableField({
-    Key key,
-    @required this.setter,
-    @required this.child,
-    @required this.initialEditString,
+    Key? key,
+    required this.setter,
+    required this.child,
+    required this.initialEditString,
   }) : super(key: key);
 
   final Widget child;
   final String initialEditString;
-  final Future<void> Function(String) setter;
+  final Future<void> Function(String)? setter;
 
   @override
   _EditableFieldState createState() => _EditableFieldState();
@@ -504,9 +498,7 @@ class _EditableFieldState extends State<_EditableField> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.setter == null) {
-      return widget.child;
-    }
+    if (widget.setter == null) return widget.child;
 
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -516,9 +508,8 @@ class _EditableFieldState extends State<_EditableField> {
       focusNode: textFieldFocusNode,
       onSubmitted: (value) async {
         try {
-          if (widget.setter != null) {
-            await widget.setter(value);
-          }
+          final setter = widget.setter;
+          if (setter != null) await setter(value);
         } catch (err) {
           showErrorSnackBar(context, err);
         }
@@ -599,13 +590,13 @@ class _EditableFieldState extends State<_EditableField> {
 
 class _Expandable extends StatelessWidget {
   const _Expandable({
-    Key key,
-    @required this.isExpanded,
-    @required this.isExpandable,
-    @required this.title,
+    Key? key,
+    required this.isExpanded,
+    required this.isExpandable,
+    required this.title,
   }) : super(key: key);
 
-  final StateController isExpanded;
+  final StateController<bool>? isExpanded;
   final bool isExpandable;
   final Widget title;
 
@@ -617,6 +608,8 @@ class _Expandable extends StatelessWidget {
         child: title,
       );
     }
+
+    final isExpanded = this.isExpanded!;
 
     return GestureDetector(
       onTap: () => isExpanded.state = !isExpanded.state,

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -217,20 +215,26 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         // Clear error count when navigating to a screen.
         serviceManager.errorBadgeManager.clearErrors(screen.screenId);
 
-        // If the tab index is 0 and the current route has no page ID (eg. we're
-        // at the URL /?uri= with no page ID), those are equivalent pages but
-        // navigateIfNotCurrent does not know that and will try to navigate, so
-        // skip that here.
-        final routerDelegate = DevToolsRouterDelegate.of(context);
-        if (_tabController!.index == 0 &&
-            (routerDelegate.currentConfiguration!.page.isEmpty)) {
-          return;
-        }
-
         // Update routing with the change.
+        final routerDelegate = DevToolsRouterDelegate.of(context);
         routerDelegate.navigateIfNotCurrent(screen.screenId);
       }
     });
+
+    // If we had no explicit page, we want to write one into the URL but
+    // without triggering a navigation. Since we can't nagivate during a build
+    // we have to wrap this in `Future.microtask`.
+    if (widget.page == null && _currentScreen is! SimpleScreen) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final routerDelegate = DevToolsRouterDelegate.of(context);
+        Router.neglect(context, () {
+          routerDelegate.navigateIfNotCurrent(
+            _currentScreen.screenId,
+            routerDelegate.currentConfiguration?.args,
+          );
+        });
+      });
+    }
 
     // Broadcast the initial page.
     frameworkController.notifyPageChange(

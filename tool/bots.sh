@@ -71,6 +71,12 @@ dart --version
 export FLUTTER_VERSION=$(flutter --version | awk -F '•' 'NR==1{print $1}' | awk '{print $2}')
 echo "Flutter version is '$FLUTTER_VERSION'"
 
+# Generate code.
+pushd packages/devtools_test
+flutter pub get
+popd
+bash tool/generate_code.sh
+
 # Change the CI to the packages/devtools_app directory.
 pushd packages/devtools_app
 echo `pwd`
@@ -99,7 +105,7 @@ if [ "$BOT" = "main" ]; then
     pushd packages/devtools_shared
     echo `pwd`
 
-    flutter test test/ --no-sound-null-safety
+    flutter test test/
     popd
 
     # Change the directory back to devtools_app.
@@ -108,6 +114,7 @@ if [ "$BOT" = "main" ]; then
 
 elif [ "$BOT" = "test_ddc" ]; then
 
+    # Provision our packages.
     flutter pub get
 
     # TODO(https://github.com/flutter/flutter/issues/43538): Remove workaround.
@@ -118,9 +125,9 @@ elif [ "$BOT" = "test_ddc" ]; then
     # The flutter tool doesn't support excluding a specific set of targets,
     # so we explicitly provide them.
     if [ "$PLATFORM" = "vm" ]; then
-        flutter test $DART_DEFINE_ARGS test/*.dart test/fixtures/ --no-sound-null-safety
+        flutter test $DART_DEFINE_ARGS test/*.dart test/fixtures/
     elif [ "$PLATFORM" = "chrome" ]; then
-        flutter test --platform chrome $DART_DEFINE_ARGS test/*.dart test/fixtures/ --no-sound-null-safety
+        flutter test --platform chrome $DART_DEFINE_ARGS test/*.dart test/fixtures/
     else
         echo "unknown test platform"
         exit 1
@@ -136,9 +143,9 @@ elif [ "$BOT" = "test_dart2js" ]; then
     # The flutter tool doesn't support excluding a specific set of targets,
     # so we explicitly provide them.
     if [ "$PLATFORM" = "vm" ]; then
-        WEBDEV_RELEASE=true flutter test $DART_DEFINE_ARGS test/*.dart test/fixtures/ --no-sound-null-safety
+        WEBDEV_RELEASE=true flutter test $DART_DEFINE_ARGS test/*.dart test/fixtures/
     elif [ "$PLATFORM" = "chrome" ]; then
-        WEBDEV_RELEASE=true flutter test --platform chrome $DART_DEFINE_ARGS test/*.dart test/fixtures/ --no-sound-null-safety
+        WEBDEV_RELEASE=true flutter test --platform chrome $DART_DEFINE_ARGS test/*.dart test/fixtures/
     else
         echo "unknown test platform"
         exit 1

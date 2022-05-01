@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math' as math;
@@ -924,9 +922,9 @@ class ImageSizesForFrame {
   }
 
   final String? source;
-  final Map<String, Object>? displaySize;
-  final Map<String, Object>? imageSize;
-  final Map<String, Object>? rawJson;
+  final Map<String, Object?>? displaySize;
+  final Map<String, Object?>? imageSize;
+  final Map<String, Object?>? rawJson;
 
   String get summary {
     final file = path.basename(source!);

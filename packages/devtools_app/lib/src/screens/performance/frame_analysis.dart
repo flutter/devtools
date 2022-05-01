@@ -5,7 +5,6 @@
 import 'package:flutter/material.dart';
 
 import '../../analytics/constants.dart' as analytics_constants;
-import '../../charts/flame_chart.dart';
 import '../../primitives/utils.dart';
 import '../../service/service_extensions.dart' as extensions;
 import '../../shared/common_widgets.dart';
@@ -13,150 +12,9 @@ import '../../shared/theme.dart';
 import '../../ui/colors.dart';
 import '../../ui/label.dart';
 import '../../ui/utils.dart';
+import 'enhance_tracing.dart';
 import 'performance_controller.dart';
 import 'performance_model.dart';
-import 'performance_screen.dart';
-
-class TimelineAnalysisHeader extends StatelessWidget {
-  const TimelineAnalysisHeader({
-    Key? key,
-    required this.controller,
-    required this.selectedTab,
-    required this.searchFieldBuilder,
-  }) : super(key: key);
-
-  final PerformanceController controller;
-
-  final FlutterFrameAnalysisTabData? selectedTab;
-
-  final Widget Function() searchFieldBuilder;
-
-  @override
-  Widget build(BuildContext context) {
-    final showFrameAnalysisButton = frameAnalysisSupported &&
-        (controller.selectedFrame.value
-                ?.isUiJanky(controller.displayRefreshRate.value) ??
-            false) &&
-        (controller.selectedFrame.value?.timelineEventData.isNotEmpty ?? false);
-    return ValueListenableBuilder<List<FlutterFrameAnalysisTabData>>(
-      valueListenable: controller.analysisTabs,
-      builder: (context, tabs, _) {
-        return AreaPaneHeader(
-          title: InkWell(
-            onTap: controller.showTimeline,
-            child: const Text('Timeline Events'),
-          ),
-          tall: true,
-          needsTopBorder: false,
-          rightPadding: 0.0,
-          leftActions: [
-            const SizedBox(width: denseSpacing),
-            RefreshTimelineEventsButton(controller: controller),
-            if (showFrameAnalysisButton) AnalyzeFrameButton(controller),
-          ],
-          scrollableCenterActions: [
-            for (final tab in tabs)
-              FlutterFrameAnalysisTab(
-                tabData: tab,
-                isSelected: tab == selectedTab,
-                onSelected: () => controller.openAnalysisTab(tab.frame),
-                onClosed: () => controller.closeAnalysisTab(tab),
-              ),
-          ],
-          rightActions: [
-            searchFieldBuilder(),
-            const FlameChartHelpButton(
-              gaScreen: PerformanceScreen.id,
-              gaSelection: analytics_constants.timelineFlameChartHelp,
-            ),
-          ],
-        );
-      },
-    );
-  }
-}
-
-class FlutterFrameAnalysisTab extends StatelessWidget {
-  const FlutterFrameAnalysisTab({
-    Key? key,
-    required this.tabData,
-    required this.isSelected,
-    required this.onSelected,
-    required this.onClosed,
-  }) : super(key: key);
-
-  static const selectionIndicatorHeight = 2.0;
-
-  final FlutterFrameAnalysisTabData tabData;
-
-  final bool isSelected;
-
-  final VoidCallback onSelected;
-
-  final VoidCallback onClosed;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final textStyle =
-        isSelected ? theme.selectedTextStyle : theme.subtleTextStyle;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            '|',
-            style: theme.textTheme.headline5!.copyWith(
-              color: theme.unselectedWidgetColor,
-            ),
-          ),
-          const SizedBox(width: defaultSpacing),
-          InkWell(
-            onTap: onSelected,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (isSelected)
-                  const SizedBox(
-                    height: selectionIndicatorHeight + denseModeDenseSpacing,
-                  ),
-                Text(
-                  tabData.title,
-                  style: textStyle,
-                ),
-                if (isSelected) ...[
-                  const SizedBox(height: denseModeDenseSpacing),
-                  Container(
-                    height: selectionIndicatorHeight,
-                    width: calculateTextSpanWidth(
-                      TextSpan(
-                        text: tabData.title,
-                        style: textStyle,
-                      ),
-                    ),
-                    color: defaultSelectionColor,
-                  ),
-                ],
-              ],
-            ),
-          ),
-          const SizedBox(width: defaultSpacing),
-          InkWell(
-            onTap: onClosed,
-            child: Icon(
-              Icons.close,
-              size: defaultIconSize,
-              color: isSelected
-                  ? theme.textSelectionTheme.selectionColor
-                  : theme.unselectedWidgetColor,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 class FlutterFrameAnalysisView extends StatelessWidget {
   const FlutterFrameAnalysisView({
@@ -164,10 +22,16 @@ class FlutterFrameAnalysisView extends StatelessWidget {
     required this.frameAnalysis,
   }) : super(key: key);
 
-  final FrameAnalysis frameAnalysis;
+  final FrameAnalysis? frameAnalysis;
 
   @override
   Widget build(BuildContext context) {
+    final frameAnalysis = this.frameAnalysis;
+    if (frameAnalysis == null) {
+      return const Center(
+        child: Text('No analysis data available for this frame.'),
+      );
+    }
     return Padding(
       padding: const EdgeInsets.all(defaultSpacing),
       child: Column(
@@ -521,35 +385,4 @@ class RefreshTimelineEventsButton extends StatelessWidget {
       gaSelection: analytics_constants.refreshTimelineEvents,
     );
   }
-}
-
-class AnalyzeFrameButton extends StatelessWidget {
-  const AnalyzeFrameButton(this.controller);
-
-  final PerformanceController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return DevToolsIconButton(
-      iconData: Icons.saved_search,
-      onPressed: () =>
-          controller.openAnalysisTab(controller.selectedFrame.value!),
-      tooltip: 'Analyze the selected frame',
-      gaScreen: analytics_constants.performance,
-      gaSelection: analytics_constants.analyzeSelectedFrame,
-    );
-  }
-}
-
-// TODO(kenz): in the future this could be expanded to show data for an
-// arbitrary range of timeline data, not just a single flutter frame.
-class FlutterFrameAnalysisTabData {
-  FlutterFrameAnalysisTabData(this.title, FlutterFrame frame)
-      : frameAnalysis = FrameAnalysis(frame);
-
-  final String title;
-
-  final FrameAnalysis frameAnalysis;
-
-  FlutterFrame get frame => frameAnalysis.frame;
 }

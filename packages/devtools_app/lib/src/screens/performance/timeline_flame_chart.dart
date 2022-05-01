@@ -19,21 +19,15 @@ import '../../shared/common_widgets.dart';
 import '../../shared/notifications.dart';
 import '../../shared/theme.dart';
 import '../../ui/colors.dart';
-import '../../ui/search.dart';
 import '../../ui/utils.dart';
 import 'performance_controller.dart';
 import 'performance_model.dart';
 import 'performance_utils.dart';
-import 'timeline_analysis.dart';
 
-// TODO(kenz): move all classes not directly related to the timeline flame chart
-// to timeline_analysis.dart. Do this in a follow up PR so that the git diff
-// isn't messed up.
-
-final timelineSearchFieldKey = GlobalKey(debugLabel: 'TimelineSearchFieldKey');
-
-class TimelineAnalysisContainer extends StatefulWidget {
-  const TimelineAnalysisContainer({
+class TimelineEventsView extends StatelessWidget {
+  const TimelineEventsView({
+    Key? key,
+    required this.controller,
     required this.processing,
     required this.processingProgress,
   });
@@ -41,135 +35,57 @@ class TimelineAnalysisContainer extends StatefulWidget {
   @visibleForTesting
   static const emptyTimelineKey = Key('Empty Timeline');
 
+  final PerformanceController controller;
+
   final bool processing;
 
   final double processingProgress;
 
   @override
-  _TimelineAnalysisContainerState createState() =>
-      _TimelineAnalysisContainerState();
-}
-
-class _TimelineAnalysisContainerState extends State<TimelineAnalysisContainer>
-    with AutoDisposeMixin, SearchFieldMixin<TimelineAnalysisContainer> {
-  late PerformanceController _controller;
-
-  bool _controllerInitialized = false;
-
-  FlutterFrameAnalysisTabData? selectedTab;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-
-    final newController = Provider.of<PerformanceController>(context);
-    if (_controllerInitialized && newController == _controller) return;
-    _controller = newController;
-    _controllerInitialized = true;
-
-    if (frameAnalysisSupported) {
-      selectedTab = _controller.selectedAnalysisTab.value;
-      addAutoDisposeListener(_controller.selectedAnalysisTab, () {
-        setState(() {
-          selectedTab = _controller.selectedAnalysisTab.value;
-        });
-      });
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    Widget content;
-    if (frameAnalysisSupported && selectedTab != null) {
-      content = FlutterFrameAnalysisView(
-        frameAnalysis: selectedTab!.frameAnalysis,
+    final timelineEmpty = (controller.data?.isEmpty ?? true) ||
+        controller.data!.eventGroups.isEmpty;
+    if (processing) {
+      return ProcessingInfo(
+        progressValue: processingProgress,
+        processedObject: 'timeline trace',
+      );
+    } else if (timelineEmpty) {
+      return Center(
+        key: emptyTimelineKey,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'No timeline events. Try clicking the refresh button ',
+              style: Theme.of(context).subtleTextStyle,
+            ),
+            Icon(
+              Icons.refresh,
+              size: defaultIconSize,
+            ),
+            Text(
+              ' to load more data.',
+              style: Theme.of(context).subtleTextStyle,
+            ),
+          ],
+        ),
       );
     } else {
-      final timelineEmpty = (_controller.data?.isEmpty ?? true) ||
-          _controller.data!.eventGroups.isEmpty;
-      if (widget.processing) {
-        content = _buildProcessingInfo();
-      } else if (timelineEmpty) {
-        content = Center(
-          key: TimelineAnalysisContainer.emptyTimelineKey,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'No timeline events. Try clicking the refresh button ',
-                style: Theme.of(context).subtleTextStyle,
-              ),
-              Icon(
-                Icons.refresh,
-                size: defaultIconSize,
-              ),
-              Text(
-                ' to load more data.',
-                style: Theme.of(context).subtleTextStyle,
-              ),
-            ],
-          ),
-        );
-      } else {
-        content = LayoutBuilder(
-          builder: (context, constraints) {
-            return TimelineFlameChart(
-              _controller.data!,
-              width: constraints.maxWidth,
-              height: constraints.maxHeight,
-              selectionNotifier: _controller.selectedTimelineEvent,
-              searchMatchesNotifier: _controller.searchMatches,
-              activeSearchMatchNotifier: _controller.activeSearchMatch,
-              onDataSelected: _controller.selectTimelineEvent,
-            );
-          },
-        );
-      }
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          return TimelineFlameChart(
+            controller.data!,
+            width: constraints.maxWidth,
+            height: constraints.maxHeight,
+            selectionNotifier: controller.selectedTimelineEvent,
+            searchMatchesNotifier: controller.searchMatches,
+            activeSearchMatchNotifier: controller.activeSearchMatch,
+            onDataSelected: controller.selectTimelineEvent,
+          );
+        },
+      );
     }
-
-    final searchFieldEnabled = selectedTab == null &&
-        !(_controller.data?.isEmpty ?? true) &&
-        !widget.processing;
-
-    return OutlineDecoration(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          TimelineAnalysisHeader(
-            controller: _controller,
-            selectedTab: selectedTab,
-            searchFieldBuilder: () => _buildSearchField(searchFieldEnabled),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 8.0),
-              child: content,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSearchField(bool searchFieldEnabled) {
-    return Container(
-      width: defaultSearchTextWidth,
-      height: defaultTextFieldHeight,
-      child: buildSearchField(
-        controller: _controller,
-        searchFieldKey: timelineSearchFieldKey,
-        searchFieldEnabled: searchFieldEnabled,
-        shouldRequestFocus: false,
-        supportsNavigation: true,
-      ),
-    );
-  }
-
-  Widget _buildProcessingInfo() {
-    return ProcessingInfo(
-      progressValue: widget.processingProgress,
-      processedObject: 'timeline trace',
-    );
   }
 }
 

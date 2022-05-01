@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 @TestOn('vm')
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
@@ -38,7 +36,7 @@ void main() {
   group('FlutterFramesChart', () {
     setUp(() async {
       final fakeServiceManager = FakeServiceManager();
-      when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
+      when(fakeServiceManager.connectedApp!.isFlutterAppNow).thenReturn(true);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(OfflineModeController, OfflineModeController());
       setGlobal(IdeTheme, IdeTheme());
@@ -67,7 +65,6 @@ void main() {
       final raster =
           tester.widget(find.byKey(const Key('frame 2 - raster'))) as Container;
       expect(raster.color, equals(rasterJankColor));
-      expect(find.byType(FrameAnalysisIcon), findsOneWidget);
     });
 
     testWidgets('builds with janky frame ui only', (WidgetTester tester) async {
@@ -80,7 +77,6 @@ void main() {
       final raster =
           tester.widget(find.byKey(const Key('frame 3 - raster'))) as Container;
       expect(raster.color, equals(mainRasterColor));
-      expect(find.byType(FrameAnalysisIcon), findsOneWidget);
     });
 
     testWidgets('builds with janky frame raster only',
@@ -94,7 +90,6 @@ void main() {
       final raster =
           tester.widget(find.byKey(const Key('frame 4 - raster'))) as Container;
       expect(raster.color, equals(rasterJankColor));
-      expect(find.byType(FrameAnalysisIcon), findsNothing);
     });
 
     testWidgets('builds with janky frame with shader jank',

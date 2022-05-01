@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'package:devtools_app/src/app.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/primitives/utils.dart';
@@ -46,14 +44,14 @@ void main() {
       SemanticVersion? flutterVersion,
     }) {
       mockIsDartVmApp(
-        fakeServiceManager.connectedApp as MockConnectedApp,
+        fakeServiceManager.connectedApp!,
         !web,
       );
       if (web) {
         fakeServiceManager.availableLibraries.add('dart:html');
       }
       mockIsFlutterApp(
-        fakeServiceManager.connectedApp as MockConnectedApp,
+        fakeServiceManager.connectedApp!,
         isFlutterApp: flutter,
         isProfileBuild: !debugMode,
       );
@@ -63,7 +61,7 @@ void main() {
       }
       flutterVersion ??= SemanticVersion(major: 2, minor: 3, patch: 1);
       mockFlutterVersion(
-        fakeServiceManager.connectedApp as MockConnectedApp,
+        fakeServiceManager.connectedApp!,
         flutterVersion,
       );
     }

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 @TestOn('vm')
 import 'dart:async';
 
@@ -17,6 +15,7 @@ import 'package:devtools_app/src/screens/performance/timeline_flame_chart.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/common_widgets.dart';
 import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/preferences.dart';
 import 'package:devtools_app/src/shared/split.dart';
 import 'package:devtools_app/src/shared/version.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -29,9 +28,10 @@ import 'test_data/performance_test_data.dart';
 
 void main() {
   setGlobal(IdeTheme, IdeTheme());
-  PerformanceScreen screen;
-  PerformanceController controller;
-  FakeServiceManager fakeServiceManager;
+  setGlobal(PreferencesController, PreferencesController());
+  late PerformanceScreen screen;
+  late PerformanceController controller;
+  late FakeServiceManager fakeServiceManager;
 
   Future<void> _setUpServiceManagerWithTimeline(
     Map<String, dynamic> timelineJson,
@@ -41,26 +41,27 @@ void main() {
         timelineData: vm_service.Timeline.parse(timelineJson),
       ),
     );
-    when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
-        .thenReturn(ValueNotifier<int>(0));
-    when(fakeServiceManager.connectedApp.initialized)
-        .thenReturn(Completer()..complete(true));
-    when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
-    when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
-    when(fakeServiceManager.connectedApp.flutterVersionNow).thenReturn(
-      FlutterVersion.parse((await fakeServiceManager.flutterVersion).json),
+    when(
+      fakeServiceManager.errorBadgeManager.errorCountNotifier('performance'),
+    ).thenReturn(ValueNotifier<int>(0));
+    final app = fakeServiceManager.connectedApp!;
+    when(app.initialized).thenReturn(Completer()..complete(true));
+    when(app.isDartWebAppNow).thenReturn(false);
+    when(app.isFlutterAppNow).thenReturn(true);
+    when(app.isProfileBuild).thenAnswer((_) => Future.value(false));
+    when(app.flutterVersionNow).thenReturn(
+      FlutterVersion.parse((await fakeServiceManager.flutterVersion).json!),
     );
-    when(fakeServiceManager.connectedApp.isDartCliAppNow).thenReturn(false);
-    when(fakeServiceManager.connectedApp.isDebugFlutterAppNow)
-        .thenReturn(false);
-    when(fakeServiceManager.connectedApp.isDartWebApp)
-        .thenAnswer((_) => Future.value(false));
+    when(app.isDartCliAppNow).thenReturn(false);
+    when(app.isDebugFlutterAppNow).thenReturn(false);
+    when(app.isDartWebApp).thenAnswer((_) async => false);
+    when(app.isProfileBuild).thenAnswer((_) async => false);
     setGlobal(ServiceConnectionManager, fakeServiceManager);
   }
 
   Future<void> pumpPerformanceScreen(
     WidgetTester tester, {
-    PerformanceController performanceController,
+    PerformanceController? performanceController,
     bool runAsync = false,
   }) async {
     await tester.pumpWidget(
@@ -109,7 +110,7 @@ void main() {
         expect(find.byType(FlutterFramesChart), findsOneWidget);
         expect(find.byType(TimelineFlameChart), findsOneWidget);
         expect(
-          find.byKey(TimelineAnalysisContainer.emptyTimelineKey),
+          find.byKey(TimelineEventsView.emptyTimelineKey),
           findsNothing,
         );
         expect(find.byType(EventDetails), findsOneWidget);
@@ -140,7 +141,7 @@ void main() {
         expect(find.byType(FlutterFramesChart), findsOneWidget);
         expect(find.byType(TimelineFlameChart), findsNothing);
         expect(
-          find.byKey(TimelineAnalysisContainer.emptyTimelineKey),
+          find.byKey(TimelineEventsView.emptyTimelineKey),
           findsOneWidget,
         );
         expect(find.byType(EventDetails), findsOneWidget);
@@ -164,15 +165,15 @@ void main() {
     testWidgetsWithWindowSize(
         'builds initial content for non-flutter app', windowSize,
         (WidgetTester tester) async {
-      when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(false);
-      when(fakeServiceManager.connectedApp.isDartCliAppNow).thenReturn(true);
+      when(fakeServiceManager.connectedApp!.isFlutterAppNow).thenReturn(false);
+      when(fakeServiceManager.connectedApp!.isDartCliAppNow).thenReturn(true);
       await tester.runAsync(() async {
         await pumpPerformanceScreen(tester, runAsync: true);
         await tester.pumpAndSettle();
         expect(find.byType(FlutterFramesChart), findsNothing);
         expect(find.byType(TimelineFlameChart), findsOneWidget);
         expect(
-          find.byKey(TimelineAnalysisContainer.emptyTimelineKey),
+          find.byKey(TimelineEventsView.emptyTimelineKey),
           findsNothing,
         );
         expect(find.byType(EventDetails), findsOneWidget);
@@ -221,7 +222,7 @@ void main() {
         expect(find.byType(FlutterFramesChart), findsOneWidget);
         expect(find.byType(TimelineFlameChart), findsOneWidget);
         expect(
-          find.byKey(TimelineAnalysisContainer.emptyTimelineKey),
+          find.byKey(TimelineEventsView.emptyTimelineKey),
           findsNothing,
         );
         expect(find.byType(EventDetails), findsOneWidget);
@@ -232,7 +233,7 @@ void main() {
         expect(find.byType(FlutterFramesChart), findsOneWidget);
         expect(find.byType(TimelineFlameChart), findsNothing);
         expect(
-          find.byKey(TimelineAnalysisContainer.emptyTimelineKey),
+          find.byKey(TimelineEventsView.emptyTimelineKey),
           findsOneWidget,
         );
         expect(find.byType(EventDetails), findsOneWidget);

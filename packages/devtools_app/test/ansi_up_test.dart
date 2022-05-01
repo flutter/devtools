@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 @TestOn('browser')
 
 import 'package:ansi_up/ansi_up.dart';
@@ -181,9 +179,9 @@ void main() {
           .thenReturn(ListValueNotifier<LogData>([]));
 
       fakeServiceManager = FakeServiceManager();
-      when(fakeServiceManager.connectedApp.isFlutterWebAppNow)
-          .thenReturn(false);
-      when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
+      final app = fakeServiceManager.connectedApp!;
+      when(app.isFlutterWebAppNow).thenReturn(false);
+      when(app.isProfileBuildNow).thenReturn(false);
       // TODO(polinach): when we start supporting browser tests, uncomment
       // and fix the mock configuration.
       // See https://github.com/flutter/devtools/issues/3616.
@@ -240,7 +238,7 @@ void main() {
 
   group('Debugger Screen', () {
     late FakeServiceManager fakeServiceManager;
-    late MockDebuggerController debuggerController;
+    late MockDebuggerControllerLegacy debuggerController;
 
     const windowSize = Size(4000.0, 4000.0);
 
@@ -273,8 +271,9 @@ void main() {
       // TODO(polinach): remove unnecessary setup steps after fixing
       // https://github.com/flutter/devtools/issues/3616.
       fakeServiceManager = FakeServiceManager();
-      when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
-      when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
+      final app = fakeServiceManager.connectedApp!;
+      when(app.isProfileBuildNow).thenReturn(false);
+      when(app.isDartWebAppNow).thenReturn(false);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       fakeServiceManager.consoleService.ensureServiceInitialized();
 
@@ -284,7 +283,7 @@ void main() {
       // when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
       //     .thenReturn(ValueNotifier<int>(0));
 
-      debuggerController = MockDebuggerController.withDefaults();
+      debuggerController = MockDebuggerControllerLegacy.withDefaults();
     });
 
     testWidgetsWithWindowSize(

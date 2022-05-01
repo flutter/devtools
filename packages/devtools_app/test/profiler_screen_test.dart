@@ -2,11 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
-import 'package:devtools_app/src/screens/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profiler.dart';
 import 'package:devtools_app/src/screens/profiler/profiler_screen.dart';
 import 'package:devtools_app/src/screens/profiler/profiler_screen_controller.dart';
@@ -19,12 +16,13 @@ import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+import 'package:vm_service/vm_service.dart';
 
 import 'test_data/cpu_profile_test_data.dart';
 
 void main() {
-  ProfilerScreen screen;
-  FakeServiceManager fakeServiceManager;
+  late ProfilerScreen screen;
+  late FakeServiceManager fakeServiceManager;
 
   const windowSize = Size(2000.0, 1000.0);
 
@@ -32,16 +30,16 @@ void main() {
     setUp(() async {
       fakeServiceManager = FakeServiceManager(
         service: FakeServiceManager.createFakeService(
-          cpuProfileData: CpuProfileData.parse(goldenCpuProfileDataJson),
+          cpuSamples: CpuSamples.parse(goldenCpuSamplesJson),
         ),
       );
-      when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
-      when(fakeServiceManager.connectedApp.isDebugFlutterAppNow)
-          .thenReturn(false);
-      when(fakeServiceManager.connectedApp.isFlutterNativeAppNow)
-          .thenReturn(false);
-      when(fakeServiceManager.connectedApp.isDartCliAppNow).thenReturn(true);
-      when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
+      final app = fakeServiceManager.connectedApp!;
+      when(app.isDartWebAppNow).thenReturn(false);
+      when(app.isDebugFlutterAppNow).thenReturn(false);
+      when(app.isFlutterNativeAppNow).thenReturn(false);
+      when(app.isDartCliAppNow).thenReturn(true);
+      when(app.isFlutterAppNow).thenReturn(false);
+      when(fakeServiceManager.errorBadgeManager.errorCountNotifier('profiler'))
           .thenReturn(ValueNotifier<int>(0));
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(OfflineModeController, OfflineModeController());
@@ -57,7 +55,7 @@ void main() {
       expect(find.byType(StopRecordingButton), findsOneWidget);
       expect(find.byType(ClearButton), findsOneWidget);
       expect(find.text('Load all CPU samples'), findsOneWidget);
-      if (fakeServiceManager.connectedApp.isFlutterNativeAppNow) {
+      if (fakeServiceManager.connectedApp!.isFlutterNativeAppNow) {
         expect(find.text('Profile app start up'), findsOneWidget);
       }
       expect(find.byType(ProfileGranularityDropdown), findsOneWidget);
@@ -103,7 +101,7 @@ void main() {
     testWidgetsWithWindowSize(
         'builds base state for Flutter native app', windowSize,
         (WidgetTester tester) async {
-      when(fakeServiceManager.connectedApp.isFlutterNativeAppNow)
+      when(fakeServiceManager.connectedApp!.isFlutterNativeAppNow)
           .thenReturn(true);
       const perfScreenBody = ProfilerScreenBody();
       await pumpProfilerScreenBody(tester, perfScreenBody);
@@ -146,7 +144,7 @@ void main() {
 
     testWidgetsWithWindowSize('builds for disabled profiler', windowSize,
         (WidgetTester tester) async {
-      await serviceManager.service.setFlag(vm_flags.profiler, 'false');
+      await serviceManager.service!.setFlag(vm_flags.profiler, 'false');
       const perfScreenBody = ProfilerScreenBody();
       await pumpProfilerScreenBody(tester, perfScreenBody);
       expect(find.byType(CpuProfilerDisabled), findsOneWidget);

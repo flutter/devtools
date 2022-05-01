@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/screens/profiler/profile_granularity.dart';
@@ -190,7 +188,7 @@ BannerMessagesController bannerMessagesController(BuildContext context) {
 Future<Flag?> getProfileGranularityFlag(
   FakeServiceManager serviceManager,
 ) async {
-  final flagList = (await serviceManager.service.getFlagList()).flags!;
+  final flagList = (await serviceManager.service!.getFlagList()).flags!;
   return flagList.firstWhereOrNull(
     (flag) => flag.name == vm_flags.profilePeriod,
   );

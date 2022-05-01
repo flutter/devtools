@@ -2,18 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
-// ignore_for_file: avoid_redundant_argument_values
-
 import 'package:devtools_app/src/screens/debugger/debugger_model.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
+
+const isolateId = '433';
+const objectId = '123';
 
 final libraryRef = LibraryRef(
   name: 'some library',
@@ -22,25 +20,11 @@ final libraryRef = LibraryRef(
 );
 
 void main() {
-  ServiceConnectionManager manager;
+  late ServiceConnectionManager manager;
 
   setUp(() {
-    final service = MockVmService();
-    when(service.onDebugEvent).thenAnswer((_) {
-      return const Stream.empty();
-    });
-    when(service.onVMEvent).thenAnswer((_) {
-      return const Stream.empty();
-    });
-    when(service.onIsolateEvent).thenAnswer((_) {
-      return const Stream.empty();
-    });
-    when(service.onStdoutEvent).thenAnswer((_) {
-      return const Stream.empty();
-    });
-    when(service.onStderrEvent).thenAnswer((_) {
-      return const Stream.empty();
-    });
+    final service = createMockVmServiceWrapperWithDefaults();
+
     manager = FakeServiceManager(service: service);
     setGlobal(ServiceConnectionManager, manager);
   });
@@ -49,7 +33,7 @@ void main() {
       () async {
     final instance = Instance(
       kind: InstanceKind.kMap,
-      id: '123',
+      id: objectId,
       classRef: null,
       length: 2,
       associations: [
@@ -73,7 +57,7 @@ void main() {
       identityHashCode: null,
     );
     final isolateRef = IsolateRef(
-      id: '433',
+      id: isolateId,
       number: '1',
       name: 'my-isolate',
       isSystemIsolate: false,
@@ -88,7 +72,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any, offset: 0, count: 2))
+    when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 2))
         .thenAnswer((_) async {
       return instance;
     });
@@ -108,14 +92,14 @@ void main() {
   test('Creates bound variables for Map with Int key and Double value',
       () async {
     final isolateRef = IsolateRef(
-      id: '433',
+      id: isolateId,
       number: '1',
       name: 'my-isolate',
       isSystemIsolate: false,
     );
     final instance = Instance(
       kind: InstanceKind.kMap,
-      id: '123',
+      id: objectId,
       classRef: null,
       length: 2,
       associations: [
@@ -148,7 +132,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any, offset: 0, count: 2))
+    when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 2))
         .thenAnswer((_) async {
       return instance;
     });
@@ -167,14 +151,14 @@ void main() {
   test('Creates bound variables for Map with Object key and Double value',
       () async {
     final isolateRef = IsolateRef(
-      id: '433',
+      id: isolateId,
       number: '1',
       name: 'my-isolate',
       isSystemIsolate: false,
     );
     final instance = Instance(
       kind: InstanceKind.kMap,
-      id: '123',
+      id: objectId,
       classRef: null,
       length: 2,
       associations: [
@@ -206,7 +190,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any, offset: 0, count: 2))
+    when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 2))
         .thenAnswer((_) async {
       return instance;
     });
@@ -224,8 +208,8 @@ void main() {
 }
 
 Matcher matchesVariable({
-  @required String name,
-  @required Object value,
+  required String? name,
+  required Object value,
 }) {
   return const TypeMatcher<DartObjectNode>()
       .having(

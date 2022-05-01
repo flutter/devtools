@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -500,13 +498,15 @@ class _ServiceExtensionCheckboxState extends State<ServiceExtensionCheckbox>
                 tooltip: widget.serviceExtension.tooltip,
                 onChanged: _onChanged,
                 enabled: available,
+                gaScreenName: widget.serviceExtension.gaScreenName,
+                gaItem: widget.serviceExtension.gaItem,
               ),
             ),
             if (docsUrl != null)
               MoreInfoLink(
                 url: docsUrl,
                 gaScreenName: widget.serviceExtension.gaScreenName!,
-                gaSelectedItemDescription: widget.serviceExtension.gaItem!,
+                gaSelectedItemDescription: widget.serviceExtension.gaDocsItem!,
                 padding: const EdgeInsets.symmetric(vertical: denseSpacing),
               )
           ],
@@ -539,6 +539,7 @@ class ServiceExtensionCheckboxGroupButton extends StatefulWidget {
     required this.icon,
     required this.extensions,
     required this.overlayDescription,
+    this.customExtensionUi = const <String, Widget>{},
     this.tooltip,
     double overlayWidthBeforeScaling = _defaultWidth,
     this.minScreenWidthForTextBeforeScaling,
@@ -556,6 +557,13 @@ class ServiceExtensionCheckboxGroupButton extends StatefulWidget {
 
   /// Extensions to be surfaced as checkbox settings in the overlay.
   final List<ToggleableServiceExtensionDescription> extensions;
+
+  /// Maps service extensions to custom visualizations.
+  ///
+  /// If this map does not contain an entry for a service extension,
+  /// [ServiceExtensionCheckbox] will be used to build the service extension
+  /// setting in [_ServiceExtensionCheckboxGroupOverlay].
+  final Map<String, Widget> customExtensionUi;
 
   /// Description for the checkbox settings overlay.
   ///
@@ -671,6 +679,7 @@ class _ServiceExtensionCheckboxGroupButtonState
                       description: widget.overlayDescription,
                       extensions: widget.extensions,
                       width: widget.overlayWidth,
+                      customExtensionUi: widget.customExtensionUi,
                     ),
                   ),
                 ),
@@ -723,6 +732,7 @@ class _ServiceExtensionCheckboxGroupOverlay extends StatelessWidget {
     required this.description,
     required this.extensions,
     required this.width,
+    this.customExtensionUi = const <String, Widget>{},
   }) : super(key: key);
 
   /// Description for this checkbox settings overlay.
@@ -735,6 +745,13 @@ class _ServiceExtensionCheckboxGroupOverlay extends StatelessWidget {
   final List<ToggleableServiceExtensionDescription> extensions;
 
   final double width;
+
+  /// Maps service extensions to custom visualizations.
+  ///
+  /// If this map does not contain an entry for a service extension,
+  /// [ServiceExtensionCheckbox] will be used to build the service extension
+  /// setting.
+  final Map<String, Widget> customExtensionUi;
 
   @override
   Widget build(BuildContext context) {
@@ -758,11 +775,17 @@ class _ServiceExtensionCheckboxGroupOverlay extends StatelessWidget {
             description,
             const SizedBox(height: denseSpacing),
             for (final serviceExtension in extensions)
-              ServiceExtensionCheckbox(serviceExtension: serviceExtension),
+              _extensionSetting(serviceExtension),
           ],
         ),
       ),
     );
+  }
+
+  Widget _extensionSetting(ToggleableServiceExtensionDescription extension) {
+    assert(extensions.contains(extension));
+    final customUi = customExtensionUi[extension.extension];
+    return customUi ?? ServiceExtensionCheckbox(serviceExtension: extension);
   }
 }
 
@@ -852,6 +875,9 @@ class ServiceExtensionTooltip extends StatelessWidget {
 
     final colorScheme = Theme.of(context).colorScheme;
     final focusColor = Theme.of(context).focusColor;
+    final textStyle = DefaultTextStyle.of(context)
+        .style
+        .copyWith(color: colorScheme.toggleButtonsTitle);
 
     return DevToolsTooltip(
       message: description.tooltip,
@@ -865,7 +891,7 @@ class ServiceExtensionTooltip extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(defaultBorderRadius),
       ),
-      textStyle: DefaultTextStyle.of(context).style,
+      textStyle: textStyle,
     );
   }
 }

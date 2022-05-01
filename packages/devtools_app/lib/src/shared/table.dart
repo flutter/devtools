@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
@@ -12,6 +10,7 @@ import 'package:flutter/services.dart';
 
 import '../primitives/auto_dispose_mixin.dart';
 import '../primitives/flutter_widgets/linked_scroll_controller.dart';
+import '../primitives/listenable.dart';
 import '../primitives/trees.dart';
 import '../primitives/utils.dart';
 import '../ui/colors.dart';
@@ -248,22 +247,28 @@ class FlatTableState<T> extends State<FlatTable<T>>
     List<double> columnWidths,
   ) {
     final node = data[index];
-    return TableRow<T>(
-      key: widget.keyFactory(node),
-      linkedScrollControllerGroup: linkedScrollControllerGroup,
-      node: node,
-      onPressed: widget.onItemSelected,
-      columns: widget.columns,
-      columnWidths: columnWidths,
-      backgroundColor: alternatingColorForIndex(
-        index,
-        Theme.of(context).colorScheme,
-      ),
-      isSelected: widget.selectionNotifier != null
-          ? node == widget.selectionNotifier!.value
-          : false,
-      searchMatchesNotifier: widget.searchMatchesNotifier,
-      activeSearchMatchNotifier: widget.activeSearchMatchNotifier,
+
+    final selectionNotifier =
+        widget.selectionNotifier ?? FixedValueListenable<T?>(null);
+    return ValueListenableBuilder<T?>(
+      valueListenable: selectionNotifier,
+      builder: (context, selected, _) {
+        return TableRow<T>(
+          key: widget.keyFactory(node),
+          linkedScrollControllerGroup: linkedScrollControllerGroup,
+          node: node,
+          onPressed: widget.onItemSelected,
+          columns: widget.columns,
+          columnWidths: columnWidths,
+          backgroundColor: alternatingColorForIndex(
+            index,
+            Theme.of(context).colorScheme,
+          ),
+          isSelected: node != null && node == selected,
+          searchMatchesNotifier: widget.searchMatchesNotifier,
+          activeSearchMatchNotifier: widget.activeSearchMatchNotifier,
+        );
+      },
     );
   }
 
@@ -1126,7 +1131,7 @@ class TableRow<T> extends StatefulWidget {
   _TableRowState<T> createState() => _TableRowState<T>();
 }
 
-class _TableRowState<T> extends State<TableRow<T?>>
+class _TableRowState<T> extends State<TableRow<T>>
     with
         TickerProviderStateMixin,
         CollapsibleAnimationMixin,
@@ -1180,22 +1185,28 @@ class _TableRowState<T> extends State<TableRow<T?>>
 
   @override
   Widget build(BuildContext context) {
+    final node = widget.node;
+    final widgetOnPressed = widget.onPressed;
+
+    Function()? onPressed;
+    if (node != null && widgetOnPressed != null) {
+      onPressed = () => widgetOnPressed(node);
+    }
+
     final row = tableRowFor(
       context,
-      onPressed: widget.onPressed != null
-          ? () => widget.onPressed!(widget.node)
-          : null,
+      onPressed: onPressed,
     );
 
     final box = SizedBox(
-      height: widget.node == null ? areaPaneHeaderHeight : defaultRowHeight,
+      height: node == null ? areaPaneHeaderHeight : defaultRowHeight,
       child: Material(
         color: _searchAwareBackgroundColor(),
-        child: widget.onPressed != null
+        child: onPressed != null
             ? InkWell(
                 canRequestFocus: false,
                 key: contentKey,
-                onTap: () => widget.onPressed!(widget.node),
+                onTap: onPressed,
                 child: row,
               )
             : row,
@@ -1320,7 +1331,7 @@ class _TableRowState<T> extends State<TableRow<T?>>
           canRequestFocus: false,
           onTap: () => _handleSortChange(
             column,
-            secondarySortColumn: widget.secondarySortColumn as ColumnData<T>,
+            secondarySortColumn: widget.secondarySortColumn,
           ),
           child: Row(
             mainAxisAlignment: _mainAxisAlignmentFor(column),
@@ -1426,7 +1437,7 @@ class _TableRowState<T> extends State<TableRow<T?>>
             return const SizedBox(width: defaultSpacing);
           }
           return columnFor(
-            widget.columns[i ~/ 2] as ColumnData<T>,
+            widget.columns[i ~/ 2],
             widget.columnWidths[i ~/ 2],
           );
         },

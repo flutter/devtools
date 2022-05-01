@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/primitives/message_bus.dart';
 import 'package:devtools_app/src/primitives/utils.dart';
@@ -20,14 +18,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
 void main() {
-  late MockServiceManager mockServiceManager;
-
-  setUp(() {
-    mockServiceManager = MockServiceManager();
-    when(mockServiceManager.serviceExtensionManager)
-        .thenReturn(FakeServiceExtensionManager());
-    setGlobal(ServiceConnectionManager, mockServiceManager);
-  });
+  final mockServiceManager = MockServiceConnectionManager();
+  when(mockServiceManager.serviceExtensionManager)
+      .thenReturn(FakeServiceExtensionManager());
+  setGlobal(ServiceConnectionManager, mockServiceManager);
 
   group('Hot Reload Button', () {
     int reloads = 0;
@@ -198,7 +192,7 @@ void main() {
 }
 
 void registerServiceExtension(
-  MockServiceManager mockServiceManager,
+  MockServiceConnectionManager mockServiceManager,
   RegisteredServiceDescription description, {
   bool serviceAvailable = true,
 }) {
