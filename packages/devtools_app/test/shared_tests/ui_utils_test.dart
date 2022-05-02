@@ -261,7 +261,7 @@ void main() {
     // Screenshot should show both vertical and horizontal scrollbars.
     await expectLater(
       find.byKey(root),
-      matchesGoldenFile('goldens/offset_scrollbar_startup.png'),
+      matchesGoldenFile('../goldens/offset_scrollbar_startup.png'),
     );
 
     _scrollControllerX.jumpTo(500);
@@ -270,7 +270,7 @@ void main() {
     // scrollbar is at its initial offset.
     await expectLater(
       find.byKey(root),
-      matchesGoldenFile('goldens/offset_scrollbar_scrolled.png'),
+      matchesGoldenFile('../goldens/offset_scrollbar_scrolled.png'),
     );
   });
 }

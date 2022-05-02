@@ -272,7 +272,7 @@ void main() {
 
           await expectLater(
             find.byKey(chartKey),
-            matchesGoldenFile('goldens/memory_chart_scaled_live.png'),
+            matchesGoldenFile('../goldens/memory_chart_scaled_live.png'),
           );
           // Await delay for golden comparison.
           await tester.pumpAndSettle(const Duration(seconds: 2));
@@ -355,7 +355,7 @@ void main() {
 
         await expectLater(
           find.byKey(chartKey),
-          matchesGoldenFile('goldens/memory_chart_scaled_all.png'),
+          matchesGoldenFile('../goldens/memory_chart_scaled_all.png'),
         );
         // Await delay for golden comparison.
         await tester.pumpAndSettle(const Duration(seconds: 2));
@@ -394,7 +394,7 @@ void main() {
 
         await expectLater(
           find.byKey(chartKey),
-          matchesGoldenFile('goldens/memory_chart_scaled_five_minute.png'),
+          matchesGoldenFile('../goldens/memory_chart_scaled_five_minute.png'),
         );
         // Await delay for golden comparison.
         await tester.pumpAndSettle(const Duration(seconds: 2));
@@ -627,7 +627,7 @@ void main() {
 
           await expectLater(
             find.byKey(chartKey),
-            matchesGoldenFile('goldens/memory_chart_fixed_live.png'),
+            matchesGoldenFile('../goldens/memory_chart_fixed_live.png'),
           );
           // Await delay for golden comparison.
           await tester.pumpAndSettle(const Duration(seconds: 2));
@@ -736,7 +736,7 @@ void main() {
 
         await expectLater(
           find.byKey(chartKey),
-          matchesGoldenFile('goldens/memory_chart_fixed_all.png'),
+          matchesGoldenFile('../goldens/memory_chart_fixed_all.png'),
         );
         // Await delay for golden comparison.
         await tester.pumpAndSettle(const Duration(seconds: 2));
@@ -788,7 +788,7 @@ void main() {
 
         await expectLater(
           find.byKey(chartKey),
-          matchesGoldenFile('goldens/memory_chart_fixed_five_minutes.png'),
+          matchesGoldenFile('../goldens/memory_chart_fixed_five_minutes.png'),
         );
         // Await delay for golden comparison.
         await tester.pumpAndSettle(const Duration(seconds: 2));

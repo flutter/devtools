@@ -158,7 +158,7 @@ void main() {
         await expectLater(
           find.byType(TimelineFlameChart),
           matchesGoldenFile(
-            'goldens/timeline_flame_chart_with_selected_frame.png',
+            '../goldens/timeline_flame_chart_with_selected_frame.png',
           ),
         );
         // Await delay for golden comparison.

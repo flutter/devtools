@@ -89,7 +89,7 @@ void main() {
       );
       await expectLater(
         find.byKey(DebuggerScreenBody.codeViewKey),
-        matchesGoldenFile('goldens/codeview_scrollbars.png'),
+        matchesGoldenFile('../goldens/codeview_scrollbars.png'),
       );
     },
     skip: !Platform.isMacOS,

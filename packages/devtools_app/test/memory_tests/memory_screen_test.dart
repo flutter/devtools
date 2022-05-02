@@ -225,7 +225,7 @@ void main() {
 
       await expectLater(
         find.byType(MemoryVMChart),
-        matchesGoldenFile('goldens/memory_hover_card.png'),
+        matchesGoldenFile('../goldens/memory_hover_card.png'),
       );
 
       // Await delay for golden comparison.
@@ -394,7 +394,7 @@ void main() {
 
       await expectLater(
         find.byType(MemoryVMChart),
-        matchesGoldenFile('goldens/memory_heap_tree.png'),
+        matchesGoldenFile('../goldens/memory_heap_tree.png'),
       );
 
       // Await delay for golden comparison.
@@ -410,7 +410,7 @@ void main() {
 
       await expectLater(
         find.byType(MemoryVMChart),
-        matchesGoldenFile('goldens/memory_heap_android.png'),
+        matchesGoldenFile('../goldens/memory_heap_android.png'),
       );
 
       // Await delay for golden comparison.
@@ -428,7 +428,7 @@ void main() {
 
       await expectLater(
         find.byKey(MemoryScreen.vmChartKey),
-        matchesGoldenFile('goldens/memory_heap_android_legend.png'),
+        matchesGoldenFile('../goldens/memory_heap_android_legend.png'),
       );
 
       // Await delay for golden comparison.
@@ -442,7 +442,7 @@ void main() {
 
       await expectLater(
         find.byKey(MemoryScreen.vmChartKey),
-        matchesGoldenFile('goldens/memory_heap_legend.png'),
+        matchesGoldenFile('../goldens/memory_heap_legend.png'),
       );
 
       // Await delay for golden comparison.
@@ -570,7 +570,7 @@ void main() {
         // allocation leaf node 'Monitor <timestamp>' selected. The right-side displaying
         // all allocations in a flat table, no items checked (tracked), search should
         // be enabled with focus. No tree table displayed on the bottom only empty message.
-        await checkGolden('goldens/allocation_golden.png');
+        await checkGolden('../goldens/allocation_golden.png');
 
         // Enable classes to track.
         setupTracking(data);
@@ -591,7 +591,7 @@ void main() {
         // all allocations in a flat table, with two items checked (tracked), search should
         // be enabled with focus. The tree table displayed on the bottom right-side below
         // the flat table should display 2 tracked classes.
-        await checkGolden('goldens/allocation_two_track_golden.png');
+        await checkGolden('../goldens/allocation_two_track_golden.png');
 
         // Turn off one class being tracked.
         expect(data[0].classRef.name, 'AClass');
@@ -614,7 +614,7 @@ void main() {
         // all allocations in a flat table, with one class checked (tracked), search should
         // be enabled with focus. The tree table displayed on the bottom right-side below
         // the flat table should display one tracked class.
-        await checkGolden('goldens/allocation_one_track_golden.png');
+        await checkGolden('../goldens/allocation_one_track_golden.png');
 
         // Exercise search and auto-complete.
         final searchField = find.byKey(memorySearchFieldKey);
@@ -738,7 +738,7 @@ void main() {
 
         // Show's auto-complete dropdown with the 2nd item highlighted.
         await checkGolden(
-          'goldens/allocation_dropdown_hilight_line_2_golden.png',
+          '../goldens/allocation_dropdown_hilight_line_2_golden.png',
           key: searchAutoCompleteKey,
         );
 
@@ -747,7 +747,7 @@ void main() {
 
         // Show's auto-complete dropdown with the 3rd item highlighted.
         await checkGolden(
-          'goldens/allocation_dropdown_hilight_line_3_golden.png',
+          '../goldens/allocation_dropdown_hilight_line_3_golden.png',
           key: searchAutoCompleteKey,
         );
 
@@ -759,7 +759,7 @@ void main() {
 
         // Show's auto-complete dropdown with the 4th item highlighted.
         await checkGolden(
-          'goldens/allocation_dropdown_hilight_line_4_golden.png',
+          '../goldens/allocation_dropdown_hilight_line_4_golden.png',
           key: searchAutoCompleteKey,
         );
 
@@ -768,7 +768,7 @@ void main() {
 
         // Show's auto-complete dropdown with the last item highlighted.
         await checkGolden(
-          'goldens/allocation_dropdown_hilight_line_1_golden.png',
+          '../goldens/allocation_dropdown_hilight_line_1_golden.png',
           key: searchAutoCompleteKey,
         );
 
@@ -777,7 +777,7 @@ void main() {
 
         // Show's auto-complete dropdown with the 2nd item highlighted.
         await checkGolden(
-          'goldens/allocation_dropdown_hilight_line_2_golden.png',
+          '../goldens/allocation_dropdown_hilight_line_2_golden.png',
           key: searchAutoCompleteKey,
         );
 

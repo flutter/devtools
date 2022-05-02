@@ -186,7 +186,7 @@ void main() {
 
         await expectLater(
           find.byKey(treemapKey),
-          matchesGoldenFile('goldens/treemap_sizes.png'),
+          matchesGoldenFile('../goldens/treemap_sizes.png'),
         );
       },
       skip: kIsWeb || !Platform.isMacOS,
@@ -209,7 +209,7 @@ void main() {
 
         await expectLater(
           find.byKey(treemapKey),
-          matchesGoldenFile('goldens/treemap_v8.png'),
+          matchesGoldenFile('../goldens/treemap_v8.png'),
         );
         // Await delay for golden comparison.
         await tester.pumpAndSettle(const Duration(seconds: 2));
@@ -234,7 +234,7 @@ void main() {
 
         await expectLater(
           find.byKey(treemapKey),
-          matchesGoldenFile('goldens/treemap_apk.png'),
+          matchesGoldenFile('../goldens/treemap_apk.png'),
         );
         // Await delay for golden comparison.
         await tester.pumpAndSettle(const Duration(seconds: 2));
