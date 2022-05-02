@@ -11,6 +11,7 @@ import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'matchers/matchers.dart';
 import 'test_infra/flutter_test_driver.dart' show FlutterRunConfiguration;
 import 'test_infra/flutter_test_environment.dart';
 
@@ -75,7 +76,9 @@ void main() async {
         await tester.pumpAndSettle(inspectorChangeSettleTime);
         await expectLater(
           find.byType(InspectorScreenBody),
-          matchesGoldenFile('goldens/integration_inspector_initial_load.png'),
+          matchesDevToolsGolden(
+            'goldens/integration_inspector_initial_load.png',
+          ),
         );
 
         // Click on the Center widget (row index #5)
@@ -83,7 +86,9 @@ void main() async {
         await tester.pumpAndSettle(inspectorChangeSettleTime);
         await expectLater(
           find.byType(InspectorScreenBody),
-          matchesGoldenFile('goldens/integration_inspector_select_center.png'),
+          matchesDevToolsGolden(
+            'goldens/integration_inspector_select_center.png',
+          ),
         );
 
         // Select the details tree.
@@ -91,7 +96,7 @@ void main() async {
         await tester.pumpAndSettle(inspectorChangeSettleTime);
         await expectLater(
           find.byType(InspectorScreenBody),
-          matchesGoldenFile(
+          matchesDevToolsGolden(
             'goldens/integration_inspector_select_center_details_tree.png',
           ),
         );
@@ -101,7 +106,7 @@ void main() async {
         await tester.pumpAndSettle(inspectorChangeSettleTime);
         await expectLater(
           find.byType(InspectorScreenBody),
-          matchesGoldenFile(
+          matchesDevToolsGolden(
             'goldens/integration_inspector_richtext_selected.png',
           ),
         );
@@ -123,7 +128,7 @@ void main() async {
         // change. If this happens don't panic and rebaseline the golden.
         await expectLater(
           find.byType(InspectorScreenBody),
-          matchesGoldenFile(
+          matchesDevToolsGolden(
             'goldens/integration_inspector_scaffold_selected.png',
           ),
         );
@@ -135,7 +140,7 @@ void main() async {
         await tester.pumpAndSettle(inspectorChangeSettleTime);
         await expectLater(
           find.byType(InspectorScreenBody),
-          matchesGoldenFile(
+          matchesDevToolsGolden(
             'goldens/integration_animated_physical_model_selected.png',
           ),
         );
@@ -432,7 +437,7 @@ void main() async {
         await tester.pumpAndSettle(inspectorChangeSettleTime);
         await expectLater(
           find.byType(InspectorScreenBody),
-          matchesGoldenFile(
+          matchesDevToolsGolden(
             'goldens/integration_inspector_errors_1_initial_load.png',
           ),
         );
@@ -444,7 +449,7 @@ void main() async {
         }
         await expectLater(
           find.byType(InspectorScreenBody),
-          matchesGoldenFile(
+          matchesDevToolsGolden(
             'goldens/integration_inspector_errors_2_error_selected.png',
           ),
         );
