@@ -297,20 +297,24 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
 
     // Compute to global coordinates.
     final offset = box.localToGlobal(Offset.zero);
-
     final areaHeight = offset.dy;
+
     final maxAreaForPopup = areaHeight - tileEntryHeight;
     // TODO(terry): Scrolling doesn't work so max popup height is also total
     //              matches to use.
-    topMatchesLimit = min(
-      defaultTopMatchesLimit,
-      (maxAreaForPopup / tileEntryHeight) - 1, // zero based.
-    ).truncate();
+    topMatchesLimit = tileEntryHeight > 0
+        ? min(
+            defaultTopMatchesLimit,
+            (maxAreaForPopup / tileEntryHeight) - 1, // zero based.
+          ).truncate()
+        : defaultTopMatchesLimit;
 
     // Total tiles visible.
-    final totalTiles = bottom
-        ? searchAutoComplete.value.length
-        : (maxAreaForPopup / tileEntryHeight).truncateToDouble();
+    final totalTiles = tileEntryHeight > 0
+        ? bottom
+            ? searchAutoComplete.value.length
+            : (maxAreaForPopup / tileEntryHeight).truncateToDouble()
+        : searchAutoComplete.value.length;
 
     final autoCompleteTiles = <AutoCompleteTile>[];
     final count = min(searchAutoComplete.value.length, totalTiles);
@@ -492,6 +496,14 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
 
   final _currentHoveredIndex = ValueNotifier<int>(0);
 
+  String? get currentHoveredText => searchAutoComplete.value.isNotEmpty
+      ? searchAutoComplete.value[currentHoveredIndex.value].text
+      : null;
+
+  ValueListenable<String?> get currentSuggestion => _currentSuggestionNotifier;
+
+  final _currentSuggestionNotifier = ValueNotifier<String?>(null);
+
   static const minPopupWidth = 300.0;
 
   void setCurrentHoveredIndexValue(int index) {
@@ -503,6 +515,23 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
 
     // Default index is 0.
     setCurrentHoveredIndexValue(0);
+  }
+
+  void updateCurrentSuggestion(String activeWord) {
+    final hoveredText = currentHoveredText;
+    final suggestion =
+        hoveredText?.substring(min(activeWord.length, hoveredText.length));
+
+    if (suggestion == null || suggestion.isEmpty) {
+      clearCurrentSuggestion();
+      return;
+    }
+
+    _currentSuggestionNotifier.value = suggestion;
+  }
+
+  void clearCurrentSuggestion() {
+    _currentSuggestionNotifier.value = null;
   }
 
   /// [bottom] if false placed above TextField (search field).
@@ -674,11 +703,54 @@ typedef OverlayXPositionBuilder = double Function(
   TextStyle? inputStyle,
 );
 
+class SearchTextEditingController extends TextEditingController {
+  String? _suggestionText;
+
+  String? get suggestionText {
+    if (_suggestionText == null) return null;
+    if (selection.end < text.length) return null;
+
+    return _suggestionText;
+  }
+
+  set suggestionText(String? suggestionText) {
+    _suggestionText = suggestionText;
+    notifyListeners();
+  }
+
+  @override
+  TextSpan buildTextSpan({
+    required BuildContext context,
+    TextStyle? style,
+    required bool withComposing,
+  }) {
+    if (suggestionText == null) {
+      // If no `suggestionText` is provided, use the default implementation of `buildTextSpan`
+      return super.buildTextSpan(
+        context: context,
+        style: style,
+        withComposing: withComposing,
+      );
+    }
+
+    return TextSpan(
+      children: [
+        TextSpan(text: text),
+        TextSpan(
+          text: suggestionText,
+          style: style?.copyWith(color: Theme.of(context).colorScheme.grey),
+        )
+      ],
+      style: style,
+    );
+  }
+}
+
 // TODO(elliette) Consider refactoring this mixin to be a widget. See discussion
 // at https://github.com/flutter/devtools/pull/3532#discussion_r767015567.
 mixin SearchFieldMixin<T extends StatefulWidget>
     on AutoDisposeMixin<T>, State<T> {
-  late final TextEditingController searchTextFieldController;
+  late final SearchTextEditingController searchTextFieldController;
   late FocusNode _searchFieldFocusNode;
   late FocusNode _rawKeyboardFocusNode;
   late SelectAutoComplete _onSelection;
@@ -693,7 +765,7 @@ mixin SearchFieldMixin<T extends StatefulWidget>
     autoDisposeFocusNode(_searchFieldFocusNode);
     autoDisposeFocusNode(_rawKeyboardFocusNode);
 
-    searchTextFieldController = TextEditingController();
+    searchTextFieldController = SearchTextEditingController();
   }
 
   void callOnSelection(String foundMatch) {
@@ -735,6 +807,7 @@ mixin SearchFieldMixin<T extends StatefulWidget>
     Set<LogicalKeyboardKey> keyEventsToPropagate = const {},
     VoidCallback? onClose,
     VoidCallback? onFocusLost,
+    TextStyle? style,
   }) {
     _onSelection = onSelection;
 
@@ -749,6 +822,7 @@ mixin SearchFieldMixin<T extends StatefulWidget>
       label: label,
       overlayXPositionBuilder: overlayXPositionBuilder,
       onClose: onClose,
+      style: style,
     );
 
     return _AutoCompleteSearchField(
@@ -839,6 +913,7 @@ class _SearchField extends StatelessWidget {
     this.overlayXPositionBuilder,
     this.prefix,
     this.suffix,
+    this.style,
   });
 
   final SearchControllerMixin controller;
@@ -854,10 +929,12 @@ class _SearchField extends StatelessWidget {
   final OverlayXPositionBuilder? overlayXPositionBuilder;
   final Widget? prefix;
   final Widget? suffix;
+  final TextStyle? style;
 
   @override
   Widget build(BuildContext context) {
-    final textStyle = Theme.of(context).textTheme.subtitle1;
+    final textStyle = style ?? Theme.of(context).textTheme.subtitle1;
+
     final searchField = TextField(
       key: searchFieldKey,
       autofocus: true,
