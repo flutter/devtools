@@ -129,7 +129,7 @@ class _InstanceViewerState extends ConsumerState<InstanceViewer> {
     return const [Text('<unknown error>')];
   }
 
-  Iterable<Widget> _buildListViewItems(
+  Iterable<Widget?> _buildListViewItems(
     BuildContext context,
     WidgetRef ref, {
     required InstancePath path,
@@ -287,18 +287,20 @@ class _InstanceViewerState extends ConsumerState<InstanceViewer> {
 
       var isFirstItem = true;
       for (final child in value) {
-        yield Padding(
-          padding: const EdgeInsets.only(left: defaultSpacing),
-          child: isFirstItem
-              ? Row(
-                  children: [
-                    keyHeader,
-                    const Text(': '),
-                    Expanded(child: child),
-                  ],
-                )
-              : child,
-        );
+        yield child != null
+            ? Padding(
+                padding: const EdgeInsets.only(left: defaultSpacing),
+                child: isFirstItem
+                    ? Row(
+                        children: [
+                          keyHeader,
+                          const Text(': '),
+                          Expanded(child: child),
+                        ],
+                      )
+                    : child,
+              )
+            : const SizedBox();
 
         isFirstItem = false;
       }
@@ -326,10 +328,10 @@ class _InstanceViewerState extends ConsumerState<InstanceViewer> {
       bool isFirst = true;
 
       for (final child in children) {
-        Widget rowItem = child;
+        Widget? rowItem = child;
 
         // Add the item index only on the first line of the element
-        if (isFirst) {
+        if (isFirst && rowItem != null) {
           isFirst = false;
           rowItem = Row(
             children: [
@@ -339,10 +341,12 @@ class _InstanceViewerState extends ConsumerState<InstanceViewer> {
           );
         }
 
-        yield Padding(
-          padding: const EdgeInsets.only(left: defaultSpacing),
-          child: rowItem,
-        );
+        yield rowItem != null
+            ? const SizedBox()
+            : Padding(
+                padding: const EdgeInsets.only(left: defaultSpacing),
+                child: rowItem,
+              );
       }
     }
   }
@@ -370,8 +374,8 @@ class _InstanceViewerState extends ConsumerState<InstanceViewer> {
       bool isFirst = true;
 
       for (final child in children) {
-        Widget rowItem = child;
-        if (isFirst) {
+        Widget? rowItem = child;
+        if (isFirst && rowItem != null) {
           isFirst = false;
           rowItem = Row(
             children: [
@@ -386,10 +390,12 @@ class _InstanceViewerState extends ConsumerState<InstanceViewer> {
           );
         }
 
-        yield Padding(
-          padding: const EdgeInsets.only(left: defaultSpacing),
-          child: rowItem,
-        );
+        yield rowItem != null
+            ? Padding(
+                padding: const EdgeInsets.only(left: defaultSpacing),
+                child: rowItem,
+              )
+            : const SizedBox();
       }
     }
   }
@@ -413,7 +419,7 @@ class _InstanceViewerState extends ConsumerState<InstanceViewer> {
             ref,
             path: widget.rootPath,
             disableExpand: true,
-          ),
+          ).cast<Widget?>(), // This cast is necessary to avoid Null type errors
           estimatedChildCount:
               ref.watch(estimatedChildCountProvider(widget.rootPath)),
         ),
