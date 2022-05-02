@@ -342,11 +342,11 @@ class _InstanceViewerState extends ConsumerState<InstanceViewer> {
         }
 
         yield rowItem != null
-            ? const SizedBox()
-            : Padding(
+            ? Padding(
                 padding: const EdgeInsets.only(left: defaultSpacing),
                 child: rowItem,
-              );
+              )
+            : const SizedBox();
       }
     }
   }
