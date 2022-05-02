@@ -216,7 +216,9 @@ void main() {
 
       await expectLater(
         find.byType(MaterialApp),
-        matchesGoldenFile('show_internal_properties.png'),
+        matchesGoldenFile(
+          '../goldens/instance_viewer/show_internal_properties.png',
+        ),
       );
     });
 

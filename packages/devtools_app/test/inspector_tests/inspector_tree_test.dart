@@ -16,7 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart' hide Fake;
 import 'package:mockito/mockito.dart';
 
-import '../test_utils/inspector_tree.dart';
+import 'utils/inspector_tree.dart';
 
 void main() {
   late FakeServiceManager fakeServiceManager;

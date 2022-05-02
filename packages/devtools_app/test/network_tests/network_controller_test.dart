@@ -14,7 +14,7 @@ import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../test_utils/network_test_utils.dart';
+import 'utils/network_test_utils.dart';
 
 void main() {
   group('NetworkController', () {

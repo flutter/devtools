@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../test_infra/flutter_test_driver.dart' show FlutterRunConfiguration;
 import '../test_infra/flutter_test_environment.dart';
-import 'provider_controller_test.dart';
+import '_provider_controller_tests.dart';
 
 void main() async {
   final FlutterTestEnvironment env = FlutterTestEnvironment(
