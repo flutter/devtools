@@ -12,6 +12,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../matchers/matchers.dart';
+
 // TODO(albertusangga): Re-enable tests in this files
 // https://github.com/flutter/devtools/issues/1403
 void main() {
@@ -263,7 +265,7 @@ void main() {
       await tester.pumpAndSettle();
       await expectLater(
         find.byWidget(widget),
-        matchesGoldenFile('goldens/story_of_row_layout.png'),
+        matchesDevToolsGolden('goldens/story_of_row_layout.png'),
       );
     },
     skip: true,
@@ -282,7 +284,7 @@ void main() {
       await pump(tester, widget);
       await expectLater(
         find.byWidget(widget),
-        matchesGoldenFile('goldens/story_of_column_layout.png'),
+        matchesDevToolsGolden('goldens/story_of_column_layout.png'),
       );
     },
     skip: true,

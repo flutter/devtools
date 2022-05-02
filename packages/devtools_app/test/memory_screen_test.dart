@@ -22,6 +22,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
+import 'matchers/matchers.dart';
 import 'test_data//memory_test_allocation_data.dart';
 import 'test_data/memory_test_data.dart';
 
@@ -225,7 +226,7 @@ void main() {
 
       await expectLater(
         find.byType(MemoryVMChart),
-        matchesGoldenFile('goldens/memory_hover_card.png'),
+        matchesDevToolsGolden('goldens/memory_hover_card.png'),
       );
 
       // Await delay for golden comparison.
@@ -394,7 +395,7 @@ void main() {
 
       await expectLater(
         find.byType(MemoryVMChart),
-        matchesGoldenFile('goldens/memory_heap_tree.png'),
+        matchesDevToolsGolden('goldens/memory_heap_tree.png'),
       );
 
       // Await delay for golden comparison.
@@ -410,7 +411,7 @@ void main() {
 
       await expectLater(
         find.byType(MemoryVMChart),
-        matchesGoldenFile('goldens/memory_heap_android.png'),
+        matchesDevToolsGolden('goldens/memory_heap_android.png'),
       );
 
       // Await delay for golden comparison.
@@ -428,7 +429,7 @@ void main() {
 
       await expectLater(
         find.byKey(MemoryScreen.vmChartKey),
-        matchesGoldenFile('goldens/memory_heap_android_legend.png'),
+        matchesDevToolsGoldenFile('goldens/memory_heap_android_legend.png'),
       );
 
       // Await delay for golden comparison.
@@ -442,7 +443,7 @@ void main() {
 
       await expectLater(
         find.byKey(MemoryScreen.vmChartKey),
-        matchesGoldenFile('goldens/memory_heap_legend.png'),
+        matchesDevToolsGoldenFile('goldens/memory_heap_legend.png'),
       );
 
       // Await delay for golden comparison.
@@ -487,7 +488,7 @@ void main() {
           // allocation leaf node 'Monitor <timestamp>' selected. The right-side displaying
           // all allocations in a flat table, no items checked (tracked), search should
           // be enabled with focus. No tree table displayed on the bottom only empty message.
-          await expectLater(finder, matchesGoldenFile(goldenFilename));
+          await expectLater(finder, matchesDevToolsGolden(goldenFilename));
         }
 
         await pumpAndSettleTwoSeconds();

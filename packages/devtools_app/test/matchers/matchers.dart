@@ -135,3 +135,41 @@ class _EqualsGoldenIgnoringHashCodes extends Matcher {
         .add('  tool/update_goldens.sh"\n');
   }
 }
+
+class _AlwaysTrueMatcher extends Matcher {
+  const _AlwaysTrueMatcher();
+
+  @override
+  bool matches(dynamic object, Map<dynamic, dynamic> matchState) {
+    return true;
+  }
+
+  @override
+  Description describe(Description description) {
+    return description;
+  }
+}
+
+// TODO(https://github.com/flutter/devtools/issues/4060): add a check to the
+// bots script that verifies we never use [matchesGoldenFile] directly.
+/// A matcher for testing DevTools goldens which will always return true when
+/// the 'SHOULD_TEST_GOLDENS' environment variable is set to false.
+///
+/// This should always be used instead of [matchesGoldenFile] for testing
+/// DevTools golden images.
+///
+/// We configure this environment variable on the bots, where we have bots that
+/// test against a pinned flutter version and bots that test against Flutter
+/// master. To avoid noise on the bots, we only want to test goldens against the
+/// pinned version of Flutter that we build DevTools from (see
+/// flutter-version.txt).
+Matcher matchesDevToolsGolden(Object key) {
+  const shouldCheckForMatchingGoldens = bool.fromEnvironment(
+    'SHOULD_TEST_GOLDENS',
+    defaultValue: true,
+  );
+  if (shouldCheckForMatchingGoldens) {
+    return matchesGoldenFile(key);
+  }
+  return const _AlwaysTrueMatcher();
+}
