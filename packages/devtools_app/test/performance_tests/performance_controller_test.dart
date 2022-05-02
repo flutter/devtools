@@ -12,7 +12,7 @@ import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../test_data/performance_test_data.dart';
+import '../test_data/performance.dart';
 import '../test_infra/flutter_test_driver.dart' show FlutterRunConfiguration;
 import '../test_infra/flutter_test_environment.dart';
 

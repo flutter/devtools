@@ -15,7 +15,7 @@ import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../test_data/memory_test_data.dart';
+import '../test_data/memory.dart';
 
 void main() {
   const windowSize = Size(2225.0, 1000.0);

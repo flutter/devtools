@@ -9,7 +9,7 @@ import 'package:devtools_app/src/screens/performance/raster_metrics_controller.d
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../test_data/raster_metrics_test_data.dart';
+import '../test_data/performance_raster_metrics.dart';
 
 void main() {
   late TestRasterMetricsController controller;

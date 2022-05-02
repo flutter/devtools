@@ -10,7 +10,7 @@ import 'package:devtools_app/src/screens/performance/timeline_event_processor.da
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-import '../test_data/performance_test_data.dart';
+import '../test_data/performance.dart';
 import '../test_utils/test_utils.dart';
 
 void main() {

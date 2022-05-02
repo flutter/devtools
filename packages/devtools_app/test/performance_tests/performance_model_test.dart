@@ -11,8 +11,8 @@ import 'package:devtools_app/src/screens/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../test_data/cpu_profile_test_data.dart';
-import '../test_data/performance_test_data.dart';
+import '../test_data/cpu_profile.dart';
+import '../test_data/performance.dart';
 import '../test_utils/test_utils.dart';
 
 void main() {

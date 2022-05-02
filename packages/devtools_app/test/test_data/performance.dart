@@ -7,7 +7,7 @@ import 'dart:convert';
 import 'package:devtools_app/devtools_app.dart';
 
 import '../test_utils/test_utils.dart';
-import 'cpu_profile_test_data.dart';
+import 'cpu_profile.dart';
 
 const testUiThreadId = 1;
 const testRasterThreadId = 2;

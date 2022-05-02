@@ -21,10 +21,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-import '../test_data/app_size_test_data/new_v8.dart';
-import '../test_data/app_size_test_data/old_v8.dart';
-import '../test_data/app_size_test_data/sizes.dart';
-import '../test_data/app_size_test_data/unsupported_file.dart';
+import '../test_data/app_size/new_v8.dart';
+import '../test_data/app_size/old_v8.dart';
+import '../test_data/app_size/sizes.dart';
+import '../test_data/app_size/unsupported_file.dart';
 
 void main() {
   setUp(() {
