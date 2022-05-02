@@ -13,6 +13,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'matchers/matchers.dart';
 import 'test_data/app_size_test_data/apk_analysis.dart';
 import 'test_data/app_size_test_data/new_v8.dart';
 import 'test_data/app_size_test_data/sizes.dart';
@@ -186,7 +187,7 @@ void main() {
 
         await expectLater(
           find.byKey(treemapKey),
-          matchesGoldenFile('goldens/treemap_sizes.png'),
+          matchesDevToolsGolden('goldens/treemap_sizes.png'),
         );
       },
       skip: kIsWeb || !Platform.isMacOS,
@@ -209,7 +210,7 @@ void main() {
 
         await expectLater(
           find.byKey(treemapKey),
-          matchesGoldenFile('goldens/treemap_v8.png'),
+          matchesDevToolsGolden('goldens/treemap_v8.png'),
         );
         // Await delay for golden comparison.
         await tester.pumpAndSettle(const Duration(seconds: 2));
@@ -234,7 +235,7 @@ void main() {
 
         await expectLater(
           find.byKey(treemapKey),
-          matchesGoldenFile('goldens/treemap_apk.png'),
+          matchesDevToolsGolden('goldens/treemap_apk.png'),
         );
         // Await delay for golden comparison.
         await tester.pumpAndSettle(const Duration(seconds: 2));
