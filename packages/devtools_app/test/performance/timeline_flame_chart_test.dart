@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:devtools_app/src/charts/flame_chart.dart';
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
@@ -165,7 +164,7 @@ void main() {
         // Await delay for golden comparison.
         await tester.pumpAndSettle(const Duration(seconds: 2));
       },
-      skip: kIsWeb || !Platform.isMacOS,
+      skip: kIsWeb,
     );
   });
 }

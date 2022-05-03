@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_model.dart';
@@ -64,36 +62,33 @@ void main() {
   }
 
   testWidgetsWithWindowSize(
-    'has a horizontal and a vertical scrollbar',
-    smallWindowSize,
-    (WidgetTester tester) async {
-      await pumpDebuggerScreen(tester, debuggerController);
+      'has a horizontal and a vertical scrollbar', smallWindowSize,
+      (WidgetTester tester) async {
+    await pumpDebuggerScreen(tester, debuggerController);
 
-      // TODO(elliette): https://github.com/flutter/flutter/pull/88152 fixes
-      // this so that forcing a scroll event is no longer necessary. Remove
-      // once the change is in the stable release.
-      debuggerController.showScriptLocation(
-        ScriptLocation(
-          mockScriptRef,
-          location: const SourcePosition(line: 50, column: 50),
-        ),
-      );
-      await tester.pumpAndSettle();
+    // TODO(elliette): https://github.com/flutter/flutter/pull/88152 fixes
+    // this so that forcing a scroll event is no longer necessary. Remove
+    // once the change is in the stable release.
+    debuggerController.showScriptLocation(
+      ScriptLocation(
+        mockScriptRef,
+        location: const SourcePosition(line: 50, column: 50),
+      ),
+    );
+    await tester.pumpAndSettle();
 
-      expect(find.byType(Scrollbar), findsNWidgets(2));
-      expect(
-        find.byKey(const Key('debuggerCodeViewVerticalScrollbarKey')),
-        findsOneWidget,
-      );
-      expect(
-        find.byKey(const Key('debuggerCodeViewHorizontalScrollbarKey')),
-        findsOneWidget,
-      );
-      await expectLater(
-        find.byKey(DebuggerScreenBody.codeViewKey),
-        matchesDevToolsGolden('../goldens/codeview_scrollbars.png'),
-      );
-    },
-    skip: !Platform.isMacOS,
-  );
+    expect(find.byType(Scrollbar), findsNWidgets(2));
+    expect(
+      find.byKey(const Key('debuggerCodeViewVerticalScrollbarKey')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('debuggerCodeViewHorizontalScrollbarKey')),
+      findsOneWidget,
+    );
+    await expectLater(
+      find.byKey(DebuggerScreenBody.codeViewKey),
+      matchesDevToolsGolden('../goldens/codeview_scrollbars.png'),
+    );
+  });
 }
