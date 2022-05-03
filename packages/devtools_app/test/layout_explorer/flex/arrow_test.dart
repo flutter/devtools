@@ -7,6 +7,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../matchers/matchers.dart';
+
 void main() {
   group('Arrow Golden Tests', () {
     group('Unidirectional', () {
@@ -34,7 +36,7 @@ void main() {
           await tester.pumpWidget(widget);
           await expectLater(
             find.byWidget(widget),
-            matchesGoldenFile('goldens/arrow_unidirectional_left.png'),
+            matchesDevToolsGolden('goldens/arrow_unidirectional_left.png'),
           );
         },
         skip: kIsWeb,
@@ -46,7 +48,7 @@ void main() {
           await tester.pumpWidget(widget);
           await expectLater(
             find.byWidget(widget),
-            matchesGoldenFile('goldens/arrow_unidirectional_up.png'),
+            matchesDevToolsGolden('goldens/arrow_unidirectional_up.png'),
           );
         },
         skip: kIsWeb,
@@ -58,7 +60,7 @@ void main() {
           await tester.pumpWidget(widget);
           await expectLater(
             find.byWidget(widget),
-            matchesGoldenFile('goldens/arrow_unidirectional_right.png'),
+            matchesDevToolsGolden('goldens/arrow_unidirectional_right.png'),
           );
         },
         skip: kIsWeb,
@@ -70,7 +72,7 @@ void main() {
           await tester.pumpWidget(widget);
           await expectLater(
             find.byWidget(widget),
-            matchesGoldenFile('goldens/arrow_unidirectional_down.png'),
+            matchesDevToolsGolden('goldens/arrow_unidirectional_down.png'),
           );
         },
         skip: kIsWeb,
@@ -102,7 +104,7 @@ void main() {
           await tester.pumpWidget(widget);
           await expectLater(
             find.byWidget(widget),
-            matchesGoldenFile('goldens/arrow_bidirectional_horizontal.png'),
+            matchesDevToolsGolden('goldens/arrow_bidirectional_horizontal.png'),
           );
         },
         skip: kIsWeb,
@@ -114,7 +116,7 @@ void main() {
           await tester.pumpWidget(widget);
           await expectLater(
             find.byWidget(widget),
-            matchesGoldenFile('goldens/arrow_bidirectional_vertical.png'),
+            matchesDevToolsGolden('goldens/arrow_bidirectional_vertical.png'),
           );
         },
         skip: kIsWeb,
