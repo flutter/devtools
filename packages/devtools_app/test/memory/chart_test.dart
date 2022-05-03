@@ -792,7 +792,8 @@ void main() {
         await expectLater(
           find.byKey(chartKey),
           matchesDevToolsGolden(
-              '../goldens/memory_chart_fixed_five_minutes.png'),
+            '../goldens/memory_chart_fixed_five_minutes.png',
+          ),
         );
         // Await delay for golden comparison.
         await tester.pumpAndSettle(const Duration(seconds: 2));
