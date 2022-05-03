@@ -80,6 +80,7 @@ const disablePhysicalShapeLayersOption = 'disablePhysicalShapeLayers';
 const disablePhysicalShapeLayersOptionDocs = 'disablePhysicalShapeLayersDocs';
 const shaderCompilationDocsTooltipLink = 'shaderCompilationDocsTooltipLink';
 const analyzeSelectedFrame = 'analyzeSelectedFrame';
+const collectRasterStats = 'collectRasterStats';
 
 // CPU profiler UX actions:
 const profileGranularityPrefix = 'profileGranularity';
