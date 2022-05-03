@@ -18,12 +18,12 @@ void main() {
   const processingStatusKey = Key('processingStatus');
   const windowSize = Size(1000.0, 1000.0);
 
-  group('Common widgets', () {
-    setUp(() {
-      setGlobal(ServiceConnectionManager, FakeServiceManager());
-      setGlobal(IdeTheme, IdeTheme());
-    });
+  setUp(() {
+    setGlobal(ServiceConnectionManager, FakeServiceManager());
+    setGlobal(IdeTheme, IdeTheme());
+  });
 
+  group('Common widgets', () {
     testWidgetsWithWindowSize('recordingInfo builds info for pause', windowSize,
         (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -209,6 +209,56 @@ void main() {
       trueNotifier.value = true;
       await tester.pump();
       expect(findCheckboxValue(), isTrue);
+    });
+  });
+
+  group('AreaPaneHeader', () {
+    const titleText = 'The title';
+
+    testWidgets('actions do not take up space when not present',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        wrap(
+          const AreaPaneHeader(
+            title: Text(titleText),
+          ),
+        ),
+      );
+
+      final Row row = tester.widget(find.byType(Row)) as Row;
+      expect(
+        row.children.length,
+        equals(1),
+      );
+      expect(
+        find.text(titleText),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('shows actions', (WidgetTester tester) async {
+      const actionText = 'The Action Text';
+      const action = Text(actionText);
+
+      await tester.pumpWidget(
+        wrap(
+          const AreaPaneHeader(
+            title: Text(titleText),
+            actions: [action],
+          ),
+        ),
+      );
+
+      final Row row = tester.widget(find.byType(Row)) as Row;
+      expect(
+        row.children.length,
+        equals(2),
+      );
+      expect(find.text(actionText), findsOneWidget);
+      expect(
+        find.text(titleText),
+        findsOneWidget,
+      );
     });
   });
 }
