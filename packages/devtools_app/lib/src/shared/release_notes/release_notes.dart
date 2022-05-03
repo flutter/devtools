@@ -151,7 +151,6 @@ class ReleaseNotes extends AnimatedWidget {
             AreaPaneHeader(
               title: const Text(
                 'What\'s new in DevTools?',
-                overflow: TextOverflow.ellipsis,
               ),
               needsTopBorder: false,
               actions: [
