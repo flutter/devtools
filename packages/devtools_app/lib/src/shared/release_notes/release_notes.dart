@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -16,7 +17,6 @@ import '../../config_specific/server/server.dart' as server;
 import '../../primitives/auto_dispose_mixin.dart';
 import '../common_widgets.dart';
 import '../theme.dart';
-import '../utils.dart';
 import '../version.dart';
 
 const debugTestReleaseNotes = false;
@@ -38,7 +38,7 @@ class ReleaseNotesViewer extends StatefulWidget {
 
 class _ReleaseNotesViewerState extends State<ReleaseNotesViewer>
     with AutoDisposeMixin, SingleTickerProviderStateMixin {
-  static const viewerWidth = 600.0;
+  static const maxViewerWidth = 600.0;
 
   /// Animation controller for animating the opening and closing of the viewer.
   late AnimationController visibilityController;
@@ -57,11 +57,8 @@ class _ReleaseNotesViewerState extends State<ReleaseNotesViewer>
     markdownData = widget.releaseNotesController.releaseNotesMarkdown.value;
 
     visibilityController = longAnimationController(this);
-    // Add [densePadding] to the end to account for the space between the
-    // release notes viewer and the right edge of DevTools.
     visibilityAnimation =
-        Tween<double>(begin: 0, end: viewerWidth + densePadding)
-            .animate(visibilityController);
+        Tween<double>(begin: 1.0, end: 0).animate(visibilityController);
 
     addAutoDisposeListener(widget.releaseNotesController.releaseNotesVisible,
         () {
@@ -88,15 +85,25 @@ class _ReleaseNotesViewerState extends State<ReleaseNotesViewer>
   Widget build(BuildContext context) {
     final child = widget.child;
     return Material(
-      child: Stack(
-        children: [
-          if (child != null) child,
-          ReleaseNotes(
-            releaseNotesController: widget.releaseNotesController,
-            visibilityAnimation: visibilityAnimation,
-            markdownData: markdownData,
-          ),
-        ],
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final widthForSmallScreen = constraints.maxWidth - 2 * densePadding;
+          final width = min(
+            _ReleaseNotesViewerState.maxViewerWidth,
+            widthForSmallScreen,
+          );
+          return Stack(
+            children: [
+              if (child != null) child,
+              ReleaseNotes(
+                releaseNotesController: widget.releaseNotesController,
+                visibilityAnimation: visibilityAnimation,
+                markdownData: markdownData,
+                width: width,
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -108,22 +115,26 @@ class ReleaseNotes extends AnimatedWidget {
     required this.releaseNotesController,
     required Animation<double> visibilityAnimation,
     required this.markdownData,
+    required this.width,
   }) : super(key: key, listenable: visibilityAnimation);
 
   final ReleaseNotesController releaseNotesController;
 
   final String? markdownData;
 
+  final double width;
+
   @override
   Widget build(BuildContext context) {
     final animation = listenable as Animation<double>;
     final theme = Theme.of(context);
+    final displacement = width * animation.value;
+    final right = densePadding - displacement;
     return Positioned(
       top: densePadding,
       bottom: densePadding,
-      right: densePadding -
-          (_ReleaseNotesViewerState.viewerWidth - animation.value),
-      width: _ReleaseNotesViewerState.viewerWidth,
+      right: right,
+      width: width,
       child: Card(
         elevation: defaultElevation,
         color: theme.scaffoldBackgroundColor,
@@ -137,9 +148,11 @@ class ReleaseNotes extends AnimatedWidget {
         child: Column(
           children: [
             AreaPaneHeader(
-              title: const Text('What\'s new in DevTools?'),
+              title: const Text(
+                'What\'s new in DevTools?',
+              ),
               needsTopBorder: false,
-              rightActions: [
+              actions: [
                 IconButton(
                   padding: const EdgeInsets.all(0.0),
                   onPressed: () =>
@@ -183,7 +196,7 @@ class ReleaseNotesController {
   final _releaseNotesVisible = ValueNotifier<bool>(false);
 
   void _init() {
-    if (server.isDevToolsServerAvailable && !isEmbedded()) {
+    if (server.isDevToolsServerAvailable) {
       _maybeFetchReleaseNotes();
     }
   }
