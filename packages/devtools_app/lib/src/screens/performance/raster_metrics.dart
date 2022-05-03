@@ -14,8 +14,6 @@ import '../../shared/theme.dart';
 import '../../shared/utils.dart';
 import 'raster_metrics_controller.dart';
 
-// TODO(kenz): add analytics once [rasterMetricsSupported] is enabled by default
-
 class RenderingLayerVisualizer extends StatelessWidget {
   const RenderingLayerVisualizer({
     Key? key,
