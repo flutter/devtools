@@ -232,11 +232,10 @@ void main() {
         ),
       );
 
-      final Size actionsSize =
-          tester.getSize(find.byType(AreaPaneHeaderActions));
+      final Row row = tester.widget(find.byType(Row)) as Row;
       expect(
-        actionsSize.width,
-        equals(0.0),
+        row.children.length,
+        equals(1),
       );
     });
 
@@ -253,11 +252,10 @@ void main() {
         ),
       );
 
-      final Size actionsSize =
-          tester.getSize(find.byType(AreaPaneHeaderActions));
+      final Row row = tester.widget(find.byType(Row)) as Row;
       expect(
-        actionsSize.width,
-        greaterThan(0.0),
+        row.children.length,
+        equals(2),
       );
       expect(find.text(actionText), findsOneWidget);
     });

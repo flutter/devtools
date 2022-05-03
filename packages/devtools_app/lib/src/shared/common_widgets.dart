@@ -761,19 +761,6 @@ class ToolbarAction extends StatelessWidget {
   }
 }
 
-class AreaPaneHeaderActions extends StatelessWidget {
-  const AreaPaneHeaderActions(this.actions);
-
-  final List<Widget> actions;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: actions,
-    );
-  }
-}
-
 /// Create a bordered, fixed-height header area with a title and optional child
 /// on the right-hand side.
 ///
@@ -829,7 +816,7 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
                 child: title,
               ),
             ),
-            AreaPaneHeaderActions(actions),
+            ...actions,
           ],
         ),
       ),
