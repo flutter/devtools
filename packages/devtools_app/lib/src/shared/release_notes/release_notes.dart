@@ -197,7 +197,7 @@ class ReleaseNotesController {
   final _releaseNotesVisible = ValueNotifier<bool>(false);
 
   void _init() {
-    if (server.isDevToolsServerAvailable && !isEmbedded()) {
+    if (server.isDevToolsServerAvailable) {
       _maybeFetchReleaseNotes();
     }
   }
