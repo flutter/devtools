@@ -21,7 +21,7 @@ class LayoutExplorerSerializationDelegate
           service: service,
           summaryTree: true,
           addAdditionalPropertiesCallback: (node, delegate) {
-            final Map<String, Object> additionalJson = <String, Object>{};
+            final additionalJson = <String, Object>{};
             final Object? value = node.value;
             if (value is Element) {
               final renderObject = value.renderObject!;
@@ -57,7 +57,7 @@ class LayoutExplorerSerializationDelegate
 
                 final ParentData? parentData = renderObject.parentData;
                 if (parentData is FlexParentData) {
-                  additionalJson['flexFactor'] = parentData.flex!;
+                  additionalJson['flexFactor'] = parentData.flex ?? 0;
                   additionalJson['flexFit'] =
                       describeEnum(parentData.fit ?? FlexFit.tight);
                 }

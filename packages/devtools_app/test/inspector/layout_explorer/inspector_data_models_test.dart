@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/primitives/math_utils.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_data_models.dart';
 import 'package:devtools_app/src/screens/inspector/layout_explorer/ui/theme.dart';
+import 'package:devtools_app/src/shared/globals.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -12,6 +14,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'layout_explorer_test_utils.dart';
 
 void main() {
+  setGlobal(IdeTheme, IdeTheme());
+
   group('FlexLayoutProperties tests', () {
     Future<FlexLayoutProperties> toFlexLayoutProperties(
       Flex flex, {
@@ -49,7 +53,7 @@ void main() {
       expect(flexProperties.crossAxisAlignment, CrossAxisAlignment.center);
       expect(flexProperties.textDirection, TextDirection.ltr);
       expect(flexProperties.verticalDirection, VerticalDirection.down);
-      expect(flexProperties.textBaseline, TextBaseline.alphabetic);
+      expect(flexProperties.textBaseline, null);
     });
 
     testWidgets('startIsTopLeft should return false', (tester) async {
