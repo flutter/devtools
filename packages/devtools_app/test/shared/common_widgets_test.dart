@@ -18,12 +18,12 @@ void main() {
   const processingStatusKey = Key('processingStatus');
   const windowSize = Size(1000.0, 1000.0);
 
-  group('Common widgets', () {
-    setUp(() {
-      setGlobal(ServiceConnectionManager, FakeServiceManager());
-      setGlobal(IdeTheme, IdeTheme());
-    });
+  setUp(() {
+    setGlobal(ServiceConnectionManager, FakeServiceManager());
+    setGlobal(IdeTheme, IdeTheme());
+  });
 
+  group('Common widgets', () {
     testWidgetsWithWindowSize('recordingInfo builds info for pause', windowSize,
         (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -214,10 +214,6 @@ void main() {
 
   group('AreaPaneHeader', () {
     const titleText = 'The title';
-
-    setUp(() {
-      setGlobal(IdeTheme, IdeTheme());
-    });
 
     testWidgets('actions do not take up space when not present',
         (WidgetTester tester) async {
