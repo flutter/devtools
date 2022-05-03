@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../../analytics/analytics.dart' as ga;
 import '../../analytics/constants.dart' as analytics_constants;
 import '../../charts/flame_chart.dart';
 import '../../primitives/auto_dispose_mixin.dart';
@@ -91,8 +92,6 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
       tabs: _generateTabs(),
       tabViews: tabViews,
       gaScreen: analytics_constants.performance,
-      // TODO(kenz): enable analytics when this view is stable.
-      sendAnalytics: false,
     );
   }
 
@@ -132,8 +131,13 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
                 icon: Icons.camera,
                 label: 'Take Snapshot',
                 outlined: false,
-                onPressed:
-                    controller.rasterMetricsController.collectRasterStats,
+                onPressed: () {
+                  ga.select(
+                    PerformanceScreen.id,
+                    analytics_constants.collectRasterStats,
+                  );
+                  controller.rasterMetricsController.collectRasterStats();
+                },
               ),
               const SizedBox(width: denseSpacing),
               ClearButton(

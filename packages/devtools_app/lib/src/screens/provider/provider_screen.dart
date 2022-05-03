@@ -142,7 +142,7 @@ class ProviderScreenBody extends ConsumerWidget {
                 )
             ],
           ),
-        )
+        ),
       ],
     );
   }
