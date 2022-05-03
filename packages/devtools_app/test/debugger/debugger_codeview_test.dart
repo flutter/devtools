@@ -17,37 +17,32 @@ import 'package:mockito/mockito.dart';
 import '../matchers/matchers.dart';
 
 void main() {
-  late FakeServiceManager fakeServiceManager;
-  late MockDebuggerControllerLegacy debuggerController;
-  late MockScriptManager scriptManager;
+  final fakeServiceManager = FakeServiceManager();
+  final debuggerController = createMockDebuggerControllerWithDefaults();
+  final scriptsHistory = ScriptsHistory();
 
   const smallWindowSize = Size(1000.0, 1000.0);
 
-  setUp(() {
-    fakeServiceManager = FakeServiceManager();
-    scriptManager = MockScriptManager();
-    when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
-    when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
-    setGlobal(IdeTheme, IdeTheme());
-    setGlobal(ScriptManager, scriptManager);
-    fakeServiceManager.consoleService.ensureServiceInitialized();
-    when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
-        .thenReturn(ValueNotifier<int>(0));
-    debuggerController = MockDebuggerControllerLegacy.withDefaults();
-    final scriptsHistory = ScriptsHistory();
-    scriptsHistory.pushEntry(mockScript!);
-    when(debuggerController.currentScriptRef)
-        .thenReturn(ValueNotifier(mockScriptRef));
-    when(debuggerController.currentParsedScript)
-        .thenReturn(ValueNotifier(mockParsedScript));
-    when(debuggerController.showSearchInFileField)
-        .thenReturn(ValueNotifier(false));
-    when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
-    when(debuggerController.scriptsHistory).thenReturn(scriptsHistory);
-    when(debuggerController.searchMatches).thenReturn(ValueNotifier([]));
-    when(debuggerController.activeSearchMatch).thenReturn(ValueNotifier(null));
-  });
+  when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
+  when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
+  setGlobal(ServiceConnectionManager, fakeServiceManager);
+  setGlobal(IdeTheme, IdeTheme());
+  setGlobal(ScriptManager, MockScriptManager());
+  fakeServiceManager.consoleService.ensureServiceInitialized();
+  when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
+      .thenReturn(ValueNotifier<int>(0));
+
+  scriptsHistory.pushEntry(mockScript!);
+  when(debuggerController.currentScriptRef)
+      .thenReturn(ValueNotifier(mockScriptRef));
+  when(debuggerController.currentParsedScript)
+      .thenReturn(ValueNotifier(mockParsedScript));
+  when(debuggerController.showSearchInFileField)
+      .thenReturn(ValueNotifier(false));
+  when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
+  when(debuggerController.scriptsHistory).thenReturn(scriptsHistory);
+  when(debuggerController.searchMatches).thenReturn(ValueNotifier([]));
+  when(debuggerController.activeSearchMatch).thenReturn(ValueNotifier(null));
 
   Future<void> pumpDebuggerScreen(
     WidgetTester tester,
