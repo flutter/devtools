@@ -765,6 +765,7 @@ class AreaPaneHeaderActions extends StatelessWidget {
   const AreaPaneHeaderActions(this.actions);
 
   final List<Widget> actions;
+
   @override
   Widget build(BuildContext context) {
     return Row(
