@@ -168,7 +168,7 @@ Matcher matchesDevToolsGolden(Object key) {
     'SHOULD_TEST_GOLDENS',
     defaultValue: true,
   );
-  if (shouldCheckForMatchingGoldens) {
+  if (shouldCheckForMatchingGoldens && io.Platform.isMacOS) {
     return matchesGoldenFile(key);
   }
   return const _AlwaysTrueMatcher();
