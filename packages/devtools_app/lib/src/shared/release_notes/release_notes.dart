@@ -86,31 +86,25 @@ class _ReleaseNotesViewerState extends State<ReleaseNotesViewer>
   Widget build(BuildContext context) {
     final child = widget.child;
     return Material(
-      child: Stack(
-        children: [
-          if (child != null) child,
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final widthForSmallScreen =
-                  constraints.maxWidth - 2 * densePadding;
-              final width = min(
-                _ReleaseNotesViewerState.maxViewerWidth,
-                widthForSmallScreen,
-              );
-
-              return Stack(
-                children: [
-                  ReleaseNotes(
-                    releaseNotesController: widget.releaseNotesController,
-                    visibilityAnimation: visibilityAnimation,
-                    markdownData: markdownData,
-                    width: width,
-                  ),
-                ],
-              );
-            },
-          ),
-        ],
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final widthForSmallScreen = constraints.maxWidth - 2 * densePadding;
+          final width = min(
+            _ReleaseNotesViewerState.maxViewerWidth,
+            widthForSmallScreen,
+          );
+          return Stack(
+            children: [
+              if (child != null) child,
+              ReleaseNotes(
+                releaseNotesController: widget.releaseNotesController,
+                visibilityAnimation: visibilityAnimation,
+                markdownData: markdownData,
+                width: width,
+              ),
+            ],
+          );
+        },
       ),
     );
   }
