@@ -214,9 +214,6 @@ void main() {
 
   group('AreaPaneHeader', () {
     const titleText = 'The title';
-    const centerActionText = 'The Center Action';
-    const centerActionContainerKey = Key('scrollableCenterActionsContainer');
-    const centerAction = Text(centerActionText);
 
     setUp(() {
       setGlobal(IdeTheme, IdeTheme());
@@ -236,6 +233,10 @@ void main() {
       expect(
         row.children.length,
         equals(1),
+      );
+      expect(
+        find.text(titleText),
+        findsOneWidget,
       );
     });
 
@@ -258,6 +259,10 @@ void main() {
         equals(2),
       );
       expect(find.text(actionText), findsOneWidget);
+      expect(
+        find.text(titleText),
+        findsOneWidget,
+      );
     });
   });
 }
