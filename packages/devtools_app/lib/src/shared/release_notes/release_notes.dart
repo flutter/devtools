@@ -17,7 +17,6 @@ import '../../config_specific/server/server.dart' as server;
 import '../../primitives/auto_dispose_mixin.dart';
 import '../common_widgets.dart';
 import '../theme.dart';
-import '../utils.dart';
 import '../version.dart';
 
 const debugTestReleaseNotes = false;
