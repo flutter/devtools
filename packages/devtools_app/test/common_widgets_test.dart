@@ -214,18 +214,15 @@ void main() {
 
   group('AreaPaneHeader', () {
     const titleText = 'The title';
-    const leftActionText = 'The Left Action';
     const centerActionText = 'The Center Action';
     const centerActionContainerKey = Key('scrollableCenterActionsContainer');
     const centerAction = Text(centerActionText);
-    const leftAction = Text(leftActionText);
 
     setUp(() {
       setGlobal(IdeTheme, IdeTheme());
     });
 
-    testWidgets(
-        'does NOT show center actions if no left or center actions present',
+    testWidgets('actions do not take up space when not present',
         (WidgetTester tester) async {
       await tester.pumpWidget(
         wrap(
@@ -234,59 +231,35 @@ void main() {
           ),
         ),
       );
+
+      final Size actionsSize =
+          tester.getSize(find.byType(AreaPaneHeaderActions));
       expect(
-        find.byKey(centerActionContainerKey),
-        findsNothing,
+        actionsSize.width,
+        equals(0.0),
       );
     });
 
-    testWidgets('shows left actions', (WidgetTester tester) async {
+    testWidgets('shows actions', (WidgetTester tester) async {
+      const actionText = 'The Action Text';
+      const action = Text(actionText);
+
       await tester.pumpWidget(
         wrap(
           const AreaPaneHeader(
             title: Text(titleText),
-            leftActions: [leftAction],
+            actions: [action],
           ),
         ),
       );
-      expect(
-        find.byKey(centerActionContainerKey),
-        findsNothing,
-      );
-      expect(find.text(leftActionText), findsOneWidget);
-    });
 
-    testWidgets('shows center actions', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        wrap(
-          const AreaPaneHeader(
-            title: Text(titleText),
-            scrollableCenterActions: [centerAction],
-          ),
-        ),
-      );
+      final Size actionsSize =
+          tester.getSize(find.byType(AreaPaneHeaderActions));
       expect(
-        find.byKey(centerActionContainerKey),
-        findsOneWidget,
+        actionsSize.width,
+        greaterThan(0.0),
       );
-    });
-
-    testWidgets('shows both left and center actions',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(
-        wrap(
-          const AreaPaneHeader(
-            title: Text(titleText),
-            leftActions: [leftAction],
-            scrollableCenterActions: [centerAction],
-          ),
-        ),
-      );
-      expect(
-        find.byKey(centerActionContainerKey),
-        findsOneWidget,
-      );
-      expect(find.text(leftActionText), findsOneWidget);
+      expect(find.text(actionText), findsOneWidget);
     });
   });
 }

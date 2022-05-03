@@ -86,7 +86,7 @@ class _LogDetailsState extends State<LogDetails>
         title: AreaPaneHeader(
           title: const Text('Details'),
           needsTopBorder: false,
-          rightActions: [
+          actions: [
             CopyToClipboardControl(
               dataProvider: _dataProvider,
               buttonKey: LogDetails.copyToClipboardButtonKey,

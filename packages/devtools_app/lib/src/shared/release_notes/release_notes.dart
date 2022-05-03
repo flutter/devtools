@@ -155,14 +155,12 @@ class ReleaseNotes extends AnimatedWidget {
         child: Column(
           children: [
             AreaPaneHeader(
-              title: const Expanded(
-                child: Text(
-                  'What\'s new in DevTools?',
-                  overflow: TextOverflow.ellipsis,
-                ),
+              title: const Text(
+                'What\'s new in DevTools?',
+                overflow: TextOverflow.ellipsis,
               ),
               needsTopBorder: false,
-              rightActions: [
+              actions: [
                 IconButton(
                   padding: const EdgeInsets.all(0.0),
                   onPressed: () =>

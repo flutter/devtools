@@ -202,7 +202,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
           headers: <PreferredSizeWidget>[
             AreaPaneHeader(
               title: const Text(callStackTitle),
-              rightActions: [
+              actions: [
                 CopyToClipboardControl(
                   dataProvider: () {
                     final List<String> callStackList = controller
@@ -222,7 +222,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
             const AreaPaneHeader(title: Text(variablesTitle)),
             AreaPaneHeader(
               title: const Text(breakpointsTitle),
-              rightActions: [
+              actions: [
                 _breakpointsRightChild(),
               ],
               rightPadding: 0.0,

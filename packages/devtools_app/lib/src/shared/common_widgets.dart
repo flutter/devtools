@@ -761,6 +761,18 @@ class ToolbarAction extends StatelessWidget {
   }
 }
 
+class AreaPaneHeaderActions extends StatelessWidget {
+  const AreaPaneHeaderActions(this.actions);
+
+  final List<Widget> actions;
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: actions,
+    );
+  }
+}
+
 /// Create a bordered, fixed-height header area with a title and optional child
 /// on the right-hand side.
 ///
@@ -773,9 +785,7 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
     this.needsTopBorder = true,
     this.needsBottomBorder = true,
     this.needsLeftBorder = false,
-    this.leftActions = const [],
-    this.scrollableCenterActions = const [],
-    this.rightActions = const [],
+    this.actions = const [],
     this.leftPadding = defaultSpacing,
     this.rightPadding = densePadding,
     this.tall = false,
@@ -786,9 +796,7 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
   final bool needsTopBorder;
   final bool needsBottomBorder;
   final bool needsLeftBorder;
-  final List<Widget> leftActions;
-  final List<Widget> rightActions;
-  final List<Widget> scrollableCenterActions;
+  final List<Widget> actions;
   final double leftPadding;
   final double rightPadding;
   final bool tall;
@@ -812,42 +820,19 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
         alignment: Alignment.centerLeft,
         child: Row(
           children: [
-            DefaultTextStyle(
-              maxLines: maxLines,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.subtitle2!,
-              child: title,
+            Expanded(
+              child: DefaultTextStyle(
+                maxLines: maxLines,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.subtitle2!,
+                child: title,
+              ),
             ),
-            ..._buildActions(),
+            AreaPaneHeaderActions(actions),
           ],
         ),
       ),
     );
-  }
-
-  List<Widget> _buildActions() {
-    return [
-      if (scrollableCenterActions.isEmpty && leftActions.isNotEmpty)
-        Expanded(
-          child: Row(
-            children: leftActions,
-          ),
-        ),
-      if (scrollableCenterActions.isNotEmpty) ...[
-        ...leftActions,
-        Expanded(
-          // TODO(kenz): make this look more scrollable when there are too many
-          // actions. Either with a faded overlay over the end of the list or
-          // with a scrollbar.
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            children: scrollableCenterActions,
-          ),
-          key: const Key('scrollableCenterActionsContainer'),
-        ),
-      ],
-      ...rightActions,
-    ];
   }
 
   @override
