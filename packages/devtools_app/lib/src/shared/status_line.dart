@@ -45,7 +45,7 @@ class StatusLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final height = scaleByFontFactor(24.0) + padding.top + padding.bottom;
+    final height = statusLineHeight + padding.top + padding.bottom;
     return ValueListenableBuilder<bool>(
       valueListenable: currentScreen.showIsolateSelector,
       builder: (context, showIsolateSelector, _) {
