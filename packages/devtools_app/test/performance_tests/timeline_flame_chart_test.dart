@@ -24,6 +24,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
+import '../matchers/matchers.dart';
 import '../test_data/performance.dart';
 
 void main() {
@@ -157,7 +158,7 @@ void main() {
         expect(find.byType(TimelineFlameChart), findsOneWidget);
         await expectLater(
           find.byType(TimelineFlameChart),
-          matchesGoldenFile(
+          matchesDevToolsGolden(
             '../goldens/timeline_flame_chart_with_selected_frame.png',
           ),
         );

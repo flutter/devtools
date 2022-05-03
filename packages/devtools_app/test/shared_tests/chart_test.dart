@@ -15,6 +15,7 @@ import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../matchers/matchers.dart';
 import '../test_data/memory.dart';
 
 void main() {
@@ -272,7 +273,7 @@ void main() {
 
           await expectLater(
             find.byKey(chartKey),
-            matchesGoldenFile('../goldens/memory_chart_scaled_live.png'),
+            matchesDevToolsGolden('../goldens/memory_chart_scaled_live.png'),
           );
           // Await delay for golden comparison.
           await tester.pumpAndSettle(const Duration(seconds: 2));
@@ -355,7 +356,7 @@ void main() {
 
         await expectLater(
           find.byKey(chartKey),
-          matchesGoldenFile('../goldens/memory_chart_scaled_all.png'),
+          matchesDevToolsGolden('../goldens/memory_chart_scaled_all.png'),
         );
         // Await delay for golden comparison.
         await tester.pumpAndSettle(const Duration(seconds: 2));
@@ -394,7 +395,9 @@ void main() {
 
         await expectLater(
           find.byKey(chartKey),
-          matchesGoldenFile('../goldens/memory_chart_scaled_five_minute.png'),
+          matchesDevToolsGolden(
+            '../goldens/memory_chart_scaled_five_minute.png',
+          ),
         );
         // Await delay for golden comparison.
         await tester.pumpAndSettle(const Duration(seconds: 2));
@@ -627,7 +630,7 @@ void main() {
 
           await expectLater(
             find.byKey(chartKey),
-            matchesGoldenFile('../goldens/memory_chart_fixed_live.png'),
+            matchesDevToolsGolden('../goldens/memory_chart_fixed_live.png'),
           );
           // Await delay for golden comparison.
           await tester.pumpAndSettle(const Duration(seconds: 2));
@@ -736,7 +739,7 @@ void main() {
 
         await expectLater(
           find.byKey(chartKey),
-          matchesGoldenFile('../goldens/memory_chart_fixed_all.png'),
+          matchesDevToolsGolden('../goldens/memory_chart_fixed_all.png'),
         );
         // Await delay for golden comparison.
         await tester.pumpAndSettle(const Duration(seconds: 2));
@@ -788,7 +791,8 @@ void main() {
 
         await expectLater(
           find.byKey(chartKey),
-          matchesGoldenFile('../goldens/memory_chart_fixed_five_minutes.png'),
+          matchesDevToolsGolden(
+              '../goldens/memory_chart_fixed_five_minutes.png'),
         );
         // Await delay for golden comparison.
         await tester.pumpAndSettle(const Duration(seconds: 2));

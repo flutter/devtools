@@ -16,6 +16,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
+import '../matchers/matchers.dart';
+
 void main() {
   late FakeServiceManager fakeServiceManager;
   late MockDebuggerControllerLegacy debuggerController;
@@ -89,7 +91,7 @@ void main() {
       );
       await expectLater(
         find.byKey(DebuggerScreenBody.codeViewKey),
-        matchesGoldenFile('../goldens/codeview_scrollbars.png'),
+        matchesDevToolsGolden('../goldens/codeview_scrollbars.png'),
       );
     },
     skip: !Platform.isMacOS,

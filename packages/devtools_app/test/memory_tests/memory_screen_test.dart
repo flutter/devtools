@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
@@ -22,6 +24,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../matchers/matchers.dart';
 import '../test_data/memory.dart';
 import '../test_data/memory_allocation.dart';
 
@@ -170,42 +173,44 @@ void main() {
       );
     });
 
-    testWidgetsWithWindowSize('Chart Select Hover Test', windowSize,
-        (WidgetTester tester) async {
-      const _twoSeconds = Duration(seconds: 2);
+    testWidgetsWithWindowSize(
+      'Chart Select Hover Test',
+      windowSize,
+      (WidgetTester tester) async {
+        const _twoSeconds = Duration(seconds: 2);
 
-      Future<void> pumpAndSettleTwoSeconds() async {
-        await tester.pumpAndSettle(_twoSeconds);
-      }
+        Future<void> pumpAndSettleTwoSeconds() async {
+          await tester.pumpAndSettle(_twoSeconds);
+        }
 
-      await pumpMemoryScreen(tester);
+        await pumpMemoryScreen(tester);
 
-      // Load canned data.
-      _setUpServiceManagerForMemory();
+        // Load canned data.
+        _setUpServiceManagerForMemory();
 
-      expect(controller.offline, isTrue);
+        expect(controller.offline, isTrue);
 
-      // Verify default event pane and vm chart exists.
-      expect(find.byType(MemoryEventsPane), findsOneWidget);
-      expect(find.byType(MemoryVMChart), findsOneWidget);
+        // Verify default event pane and vm chart exists.
+        expect(find.byType(MemoryEventsPane), findsOneWidget);
+        expect(find.byType(MemoryVMChart), findsOneWidget);
 
-      expect(controller.memoryTimeline.liveData.isEmpty, isTrue);
-      expect(controller.memoryTimeline.offlineData.isEmpty, isFalse);
+        expect(controller.memoryTimeline.liveData.isEmpty, isTrue);
+        expect(controller.memoryTimeline.offlineData.isEmpty, isFalse);
 
-      controller.refreshAllCharts();
-      await pumpAndSettleTwoSeconds();
+        controller.refreshAllCharts();
+        await pumpAndSettleTwoSeconds();
 
-      expect(controller.memoryTimeline.data.isEmpty, isFalse);
+        expect(controller.memoryTimeline.data.isEmpty, isFalse);
 
-      final data = controller.memoryTimeline.data;
+        final data = controller.memoryTimeline.data;
 
-      // Total number of collected HeapSamples.
-      expect(data.length, 104);
+        // Total number of collected HeapSamples.
+        expect(data.length, 104);
 
-      await pumpAndSettleTwoSeconds();
+        await pumpAndSettleTwoSeconds();
 
-      // TODO(terry): Need to fix hover not appearing.
-      /*
+        // TODO(terry): Need to fix hover not appearing.
+        /*
       final vmChartFinder = find.byKey(MemoryScreen.vmChartKey);
       final vmChart = tester.firstWidget(vmChartFinder) as MemoryVMChart;
       final rect = tester.getRect(vmChartFinder);
@@ -223,14 +228,16 @@ void main() {
       await pumpAndSettleTwoSeconds();
       */
 
-      await expectLater(
-        find.byType(MemoryVMChart),
-        matchesGoldenFile('../goldens/memory_hover_card.png'),
-      );
+        await expectLater(
+          find.byType(MemoryVMChart),
+          matchesDevToolsGolden('../goldens/memory_hover_card.png'),
+        );
 
-      // Await delay for golden comparison.
-      await pumpAndSettleTwoSeconds();
-    });
+        // Await delay for golden comparison.
+        await pumpAndSettleTwoSeconds();
+      },
+      skip: !Platform.isMacOS,
+    );
 
     testWidgetsWithWindowSize('export current memory profile', windowSize,
         (WidgetTester tester) async {
@@ -293,131 +300,133 @@ void main() {
       expect(controller.memoryLog.removeOfflineFile(filename), isTrue);
     });
 
-    testWidgetsWithWindowSize('heap tree view', windowSize,
-        (WidgetTester tester) async {
-      await pumpMemoryScreen(tester);
+    testWidgetsWithWindowSize(
+      'heap tree view',
+      windowSize,
+      (WidgetTester tester) async {
+        await pumpMemoryScreen(tester);
 
-      final heapSnapShotFinder = find.text('Take Heap Snapshot');
+        final heapSnapShotFinder = find.text('Take Heap Snapshot');
 
-      expect(heapSnapShotFinder, findsOneWidget);
+        expect(heapSnapShotFinder, findsOneWidget);
 
-      // Load canned data.
-      _setUpServiceManagerForMemory();
+        // Load canned data.
+        _setUpServiceManagerForMemory();
 
-      expect(controller.offline, isTrue);
+        expect(controller.offline, isTrue);
 
-      // Verify default event pane and vm chart exists.
-      expect(find.byType(MemoryEventsPane), findsOneWidget);
-      expect(find.byType(MemoryVMChart), findsOneWidget);
+        // Verify default event pane and vm chart exists.
+        expect(find.byType(MemoryEventsPane), findsOneWidget);
+        expect(find.byType(MemoryVMChart), findsOneWidget);
 
-      expect(controller.memoryTimeline.liveData.isEmpty, isTrue);
-      expect(controller.memoryTimeline.offlineData.isEmpty, isFalse);
+        expect(controller.memoryTimeline.liveData.isEmpty, isTrue);
+        expect(controller.memoryTimeline.offlineData.isEmpty, isFalse);
 
-      controller.refreshAllCharts();
+        controller.refreshAllCharts();
 
-      // Await charts to update.
-      await tester.pumpAndSettle(const Duration(seconds: 2));
+        // Await charts to update.
+        await tester.pumpAndSettle(const Duration(seconds: 2));
 
-      expect(controller.memoryTimeline.data.isEmpty, isFalse);
+        expect(controller.memoryTimeline.data.isEmpty, isFalse);
 
-      final data = controller.memoryTimeline.data;
+        final data = controller.memoryTimeline.data;
 
-      // Total number of collected HeapSamples.
-      expect(data.length, 104);
+        // Total number of collected HeapSamples.
+        expect(data.length, 104);
 
-      // Number of VM GCs
-      final totalGCEvents = data.where((element) => element.isGC);
-      expect(totalGCEvents.length, 46);
+        // Number of VM GCs
+        final totalGCEvents = data.where((element) => element.isGC);
+        expect(totalGCEvents.length, 46);
 
-      // User initiated GCs
-      final totalUserGCEvents =
-          data.where((element) => element.memoryEventInfo.isEventGC);
-      expect(totalUserGCEvents.length, 3);
+        // User initiated GCs
+        final totalUserGCEvents =
+            data.where((element) => element.memoryEventInfo.isEventGC);
+        expect(totalUserGCEvents.length, 3);
 
-      // User initiated Snapshots
-      final totalSnapshotEvents =
-          data.where((element) => element.memoryEventInfo.isEventSnapshot);
-      expect(totalSnapshotEvents.length, 1);
+        // User initiated Snapshots
+        final totalSnapshotEvents =
+            data.where((element) => element.memoryEventInfo.isEventSnapshot);
+        expect(totalSnapshotEvents.length, 1);
 
-      // Number of auto-Snapshots
-      final totalSnapshotAutoEvents =
-          data.where((element) => element.memoryEventInfo.isEventSnapshotAuto);
-      expect(totalSnapshotAutoEvents.length, 2);
+        // Number of auto-Snapshots
+        final totalSnapshotAutoEvents = data
+            .where((element) => element.memoryEventInfo.isEventSnapshotAuto);
+        expect(totalSnapshotAutoEvents.length, 2);
 
-      // Total Allocation Monitor events (many are empty).
-      final totalAllocationMonitorEvents = data.where(
-        (element) => element.memoryEventInfo.isEventAllocationAccumulator,
-      );
-      expect(totalAllocationMonitorEvents.length, 81);
+        // Total Allocation Monitor events (many are empty).
+        final totalAllocationMonitorEvents = data.where(
+          (element) => element.memoryEventInfo.isEventAllocationAccumulator,
+        );
+        expect(totalAllocationMonitorEvents.length, 81);
 
-      // Number of user initiated allocation monitors
-      final startMonitors = totalAllocationMonitorEvents.where(
-        (element) => element.memoryEventInfo.allocationAccumulator!.isStart,
-      );
-      expect(startMonitors.length, 2);
+        // Number of user initiated allocation monitors
+        final startMonitors = totalAllocationMonitorEvents.where(
+          (element) => element.memoryEventInfo.allocationAccumulator!.isStart,
+        );
+        expect(startMonitors.length, 2);
 
-      // Number of accumulator resets
-      final resetMonitors = totalAllocationMonitorEvents.where(
-        (element) => element.memoryEventInfo.allocationAccumulator!.isReset,
-      );
-      expect(resetMonitors.length, 1);
+        // Number of accumulator resets
+        final resetMonitors = totalAllocationMonitorEvents.where(
+          (element) => element.memoryEventInfo.allocationAccumulator!.isReset,
+        );
+        expect(resetMonitors.length, 1);
 
-      final interval1Min =
-          MemoryController.displayIntervalToIntervalDurationInMs(
-        ChartInterval.OneMinute,
-      );
-      expect(interval1Min, 60000);
-      final interval5Min =
-          MemoryController.displayIntervalToIntervalDurationInMs(
-        ChartInterval.FiveMinutes,
-      );
-      expect(interval5Min, 300000);
+        final interval1Min =
+            MemoryController.displayIntervalToIntervalDurationInMs(
+          ChartInterval.OneMinute,
+        );
+        expect(interval1Min, 60000);
+        final interval5Min =
+            MemoryController.displayIntervalToIntervalDurationInMs(
+          ChartInterval.FiveMinutes,
+        );
+        expect(interval5Min, 300000);
 
-      // TODO(terry): Check intervals and autosnapshot does it snapshot same points?
-      // TODO(terry): Simulate sample run of liveData filling up?
+        // TODO(terry): Check intervals and autosnapshot does it snapshot same points?
+        // TODO(terry): Simulate sample run of liveData filling up?
 
-      // Take a snapshot
-      await tester.tap(heapSnapShotFinder);
-      await tester.pump();
+        // Take a snapshot
+        await tester.tap(heapSnapShotFinder);
+        await tester.pump();
 
-      final snapshotIconLabel = tester.element(heapSnapShotFinder);
-      final snapshotButton =
-          snapshotIconLabel.findAncestorWidgetOfExactType<OutlinedButton>()!;
+        final snapshotIconLabel = tester.element(heapSnapShotFinder);
+        final snapshotButton =
+            snapshotIconLabel.findAncestorWidgetOfExactType<OutlinedButton>()!;
 
-      expect(snapshotButton.enabled, isFalse);
-      await tester.pumpAndSettle(const Duration(seconds: 3));
+        expect(snapshotButton.enabled, isFalse);
+        await tester.pumpAndSettle(const Duration(seconds: 3));
 
-      expect(
-        controller.selectedSnapshotTimestamp!.millisecondsSinceEpoch,
-        lessThan(DateTime.now().millisecondsSinceEpoch),
-      );
+        expect(
+          controller.selectedSnapshotTimestamp!.millisecondsSinceEpoch,
+          lessThan(DateTime.now().millisecondsSinceEpoch),
+        );
 
-      await expectLater(
-        find.byType(MemoryVMChart),
-        matchesGoldenFile('../goldens/memory_heap_tree.png'),
-      );
+        await expectLater(
+          find.byType(MemoryVMChart),
+          matchesDevToolsGolden('../goldens/memory_heap_tree.png'),
+        );
 
-      // Await delay for golden comparison.
-      await tester.pumpAndSettle(const Duration(seconds: 2));
+        // Await delay for golden comparison.
+        await tester.pumpAndSettle(const Duration(seconds: 2));
 
-      expect(find.text('Android Memory'), findsOneWidget);
+        expect(find.text('Android Memory'), findsOneWidget);
 
-      // Bring up the Android chart.
-      await tester.tap(find.text('Android Memory'));
-      await tester.pump();
+        // Bring up the Android chart.
+        await tester.tap(find.text('Android Memory'));
+        await tester.pump();
 
-      await tester.pumpAndSettle(const Duration(seconds: 2));
+        await tester.pumpAndSettle(const Duration(seconds: 2));
 
-      await expectLater(
-        find.byType(MemoryVMChart),
-        matchesGoldenFile('../goldens/memory_heap_android.png'),
-      );
+        await expectLater(
+          find.byType(MemoryVMChart),
+          matchesDevToolsGolden('../goldens/memory_heap_android.png'),
+        );
 
-      // Await delay for golden comparison.
-      await tester.pumpAndSettle(const Duration(seconds: 2));
+        // Await delay for golden comparison.
+        await tester.pumpAndSettle(const Duration(seconds: 2));
 
-      // TODO(terry): Need to test legend.
-      /*
+        // TODO(terry): Need to test legend.
+        /*
       // Bring up the full legend with Android chart visible.
       expect(find.byKey(legendKey), findsOneWidget);
       // Bring up the legend.
@@ -428,7 +437,7 @@ void main() {
 
       await expectLater(
         find.byKey(MemoryScreen.vmChartKey),
-        matchesGoldenFile('../goldens/memory_heap_android_legend.png'),
+        matchesDevToolsGolden('../goldens/memory_heap_android_legend.png'),
       );
 
       // Await delay for golden comparison.
@@ -442,13 +451,15 @@ void main() {
 
       await expectLater(
         find.byKey(MemoryScreen.vmChartKey),
-        matchesGoldenFile('../goldens/memory_heap_legend.png'),
+        matchesDevToolsGolden('../goldens/memory_heap_legend.png'),
       );
 
       // Await delay for golden comparison.
       await tester.pumpAndSettle(const Duration(seconds: 2));
       */
-    });
+      },
+      skip: !Platform.isMacOS,
+    );
 
     testWidgetsWithWindowSize(
       'allocation monitor, class tracking and search auto-complete',
@@ -487,7 +498,7 @@ void main() {
           // allocation leaf node 'Monitor <timestamp>' selected. The right-side displaying
           // all allocations in a flat table, no items checked (tracked), search should
           // be enabled with focus. No tree table displayed on the bottom only empty message.
-          await expectLater(finder, matchesGoldenFile(goldenFilename));
+          await expectLater(finder, matchesDevToolsGolden(goldenFilename));
         }
 
         await pumpAndSettleTwoSeconds();
@@ -791,7 +802,7 @@ void main() {
         // TODO(terry): MUST re-enable broken with latest eval auto-complete work.
         //              See https://github.com/flutter/devtools/issues/3030.
       },
-      skip: true,
+      skip: true, // skip: !Platform.isMacOS,
     );
   });
 }
