@@ -164,15 +164,6 @@ class BreakOnExceptionsControl extends StatelessWidget {
                 child: Text(mode.description),
               )
           ],
-          selectedItemBuilder: (BuildContext context) {
-            return [
-              for (var mode in ExceptionMode.modes)
-                DropdownMenuItem<ExceptionMode>(
-                  value: mode,
-                  child: Text(mode.name),
-                )
-            ];
-          },
         );
       },
     );
