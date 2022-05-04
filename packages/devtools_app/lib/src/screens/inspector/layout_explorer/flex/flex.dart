@@ -661,6 +661,8 @@ class FlexChildVisualizer extends StatelessWidget {
   }
 
   Widget _buildContent(ColorScheme colorScheme) {
+    // TODO(https://github.com/flutter/devtools/issues/4058) allow more dynamic
+    // flex factor input
     final currentFlexFactor = properties.flexFactor?.toInt() ?? 0;
     final currentMaxFlexFactor =
         math.max(currentFlexFactor, maximumFlexFactorOptions);
