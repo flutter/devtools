@@ -392,14 +392,15 @@ class MoreDebuggingOptionsButton extends StatelessWidget {
             'layer may help you identify expensive operations in your app.',
             style: Theme.of(context).subtleTextStyle,
           ),
-          RichText(
-            text: TextSpan(
-              text:
-                  'These debugging options are not available for a profile build. To use them, run your app in debug mode.',
-              style:
-                  textStyle.copyWith(color: theme.colorScheme.errorTextColor),
-            ),
-          )
+          if (!serviceManager.connectedApp!.isDebugFlutterAppNow)
+            RichText(
+              text: TextSpan(
+                text:
+                    'These debugging options are not available for a profile build. To use them, run your app in debug mode.',
+                style:
+                    textStyle.copyWith(color: theme.colorScheme.errorTextColor),
+              ),
+            )
         ],
       ),
       overlayWidthBeforeScaling: _width,
