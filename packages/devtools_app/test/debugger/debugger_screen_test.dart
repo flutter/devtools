@@ -112,7 +112,7 @@ void main() {
         debugger: debuggerController,
       ),
     );
-    expect(find.text('Ignore'), findsOneWidget);
+    expect(find.text("Don't stop on exceptions"), findsOneWidget);
   });
 }
 
