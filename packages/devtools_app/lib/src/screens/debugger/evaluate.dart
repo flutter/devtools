@@ -115,8 +115,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
   }
 
   void _handleSuggestionTextChange() {
-    if (searchTextFieldController.selection.end >=
-        searchTextFieldController.text.length) {
+    if (searchTextFieldController.isAtEnd) {
       // Only when the cursor is at the end of the text field, we update the
       // `suggestionText` displayed at the end of the text field.
 

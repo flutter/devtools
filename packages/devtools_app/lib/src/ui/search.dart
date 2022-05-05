@@ -285,6 +285,10 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
         )
         .toList();
 
+    // When there are no tiles present, we don't need to display the
+    // auto correct list.
+    if (tileContents.isEmpty) return const SizedBox.shrink();
+
     final tileEntryHeight = tileContents.isEmpty
         ? 0.0
         : calculateTextSpanHeight(tileContents.first) + denseSpacing;
@@ -297,24 +301,20 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
 
     // Compute to global coordinates.
     final offset = box.localToGlobal(Offset.zero);
-    final areaHeight = offset.dy;
 
+    final areaHeight = offset.dy;
     final maxAreaForPopup = areaHeight - tileEntryHeight;
     // TODO(terry): Scrolling doesn't work so max popup height is also total
     //              matches to use.
-    topMatchesLimit = tileEntryHeight > 0
-        ? min(
-            defaultTopMatchesLimit,
-            (maxAreaForPopup / tileEntryHeight) - 1, // zero based.
-          ).truncate()
-        : defaultTopMatchesLimit;
+    topMatchesLimit = min(
+      defaultTopMatchesLimit,
+      (maxAreaForPopup / tileEntryHeight) - 1, // zero based.
+    ).truncate();
 
     // Total tiles visible.
-    final totalTiles = tileEntryHeight > 0
-        ? bottom
-            ? searchAutoComplete.value.length
-            : (maxAreaForPopup / tileEntryHeight).truncateToDouble()
-        : searchAutoComplete.value.length;
+    final totalTiles = bottom
+        ? searchAutoComplete.value.length
+        : (maxAreaForPopup / tileEntryHeight).truncateToDouble();
 
     final autoCompleteTiles = <AutoCompleteTile>[];
     final count = min(searchAutoComplete.value.length, totalTiles);
@@ -718,6 +718,8 @@ class SearchTextEditingController extends TextEditingController {
     notifyListeners();
   }
 
+  bool get isAtEnd => text.length <= selection.end;
+
   @override
   TextSpan buildTextSpan({
     required BuildContext context,
@@ -921,7 +923,7 @@ class _SearchField extends StatelessWidget {
   final bool searchFieldEnabled;
   final bool shouldRequestFocus;
   final FocusNode searchFieldFocusNode;
-  final TextEditingController searchTextFieldController;
+  final SearchTextEditingController searchTextFieldController;
   final String label;
   final bool supportsNavigation;
   final InputDecoration? decoration;
@@ -1054,6 +1056,9 @@ class _AutoCompleteSearchFieldState extends State<_AutoCompleteSearchField>
 
   int get tab => LogicalKeyboardKey.tab.keyId & LogicalKeyboardKey.valueMask;
 
+  int get arrowRight =>
+      LogicalKeyboardKey.arrowRight.keyId & LogicalKeyboardKey.valueMask;
+
   HighlightAutoComplete get _highlightDropdown =>
       widget.onHighlightDropdown != null
           ? widget.onHighlightDropdown as HighlightAutoComplete
@@ -1111,8 +1116,11 @@ class _AutoCompleteSearchFieldState extends State<_AutoCompleteSearchField>
           widget.keyEventsToPropagate,
         );
       } else if (widget.controller.autoCompleteOverlay != null) {
-        if (key == enter || key == tab) {
-          // Enter / Tab pressed.
+        if (key == enter ||
+            key == tab ||
+            (key == arrowRight &&
+                widget.searchField.searchTextFieldController.isAtEnd)) {
+          // Enter / Tab pressed OR right arrow pressed while text field is at the end
           String? foundExact;
 
           // What the user has typed in so far.
