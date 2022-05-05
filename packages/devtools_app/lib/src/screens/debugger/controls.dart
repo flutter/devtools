@@ -164,6 +164,17 @@ class BreakOnExceptionsControl extends StatelessWidget {
                 child: Text(mode.description),
               )
           ],
+          selectedItemBuilder: (BuildContext context) {
+            return [
+              for (var mode in ExceptionMode.modes)
+                DropdownMenuItem<ExceptionMode>(
+                  value: mode,
+                  child: Text(
+                    includeText(context, 1300.0) ? mode.description : mode.name,
+                  ),
+                )
+            ];
+          },
         );
       },
     );
@@ -176,17 +187,17 @@ class ExceptionMode {
   static final modes = [
     ExceptionMode(
       ExceptionPauseMode.kNone,
-      'Ignore',
+      'Ignore exceptions',
       "Don't stop on exceptions",
     ),
     ExceptionMode(
       ExceptionPauseMode.kUnhandled,
-      'Uncaught',
+      'Uncaught exceptions',
       'Stop on uncaught exceptions',
     ),
     ExceptionMode(
       ExceptionPauseMode.kAll,
-      'All',
+      'All exceptions',
       'Stop on all exceptions',
     ),
   ];
@@ -231,7 +242,7 @@ class DebuggerButton extends StatelessWidget {
         child: MaterialIconLabel(
           label: title,
           iconData: icon,
-          minScreenWidthForTextBeforeScaling: 1350.0,
+          minScreenWidthForTextBeforeScaling: mediumDeviceWidth,
         ),
       ),
     );
