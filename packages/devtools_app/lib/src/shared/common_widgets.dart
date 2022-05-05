@@ -28,7 +28,7 @@ const tooltipWaitLong = Duration(milliseconds: 1000);
 /// The width of the package:flutter_test debugger device.
 const debuggerDeviceWidth = 800.0;
 
-const mediumDeviceWidth = 1000.0;
+const mediumDeviceWidth = 1300.0;
 
 const defaultDialogRadius = 20.0;
 double get areaPaneHeaderHeight => scaleByFontFactor(36.0);

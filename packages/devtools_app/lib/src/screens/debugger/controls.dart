@@ -145,6 +145,7 @@ class BreakOnExceptionsControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isInSmallMode = MediaQuery.of(context).size.width < mediumDeviceWidth;
     return ValueListenableBuilder<String?>(
       valueListenable: controller.exceptionPauseMode,
       builder: (BuildContext context, modeId, _) {
@@ -161,20 +162,11 @@ class BreakOnExceptionsControl extends StatelessWidget {
             for (var mode in ExceptionMode.modes)
               DropdownMenuItem<ExceptionMode>(
                 value: mode,
-                child: Text(mode.description),
+                child: Text(
+                  isInSmallMode ? mode.name : mode.description,
+                ),
               )
           ],
-          selectedItemBuilder: (BuildContext context) {
-            return [
-              for (var mode in ExceptionMode.modes)
-                DropdownMenuItem<ExceptionMode>(
-                  value: mode,
-                  child: Text(
-                    includeText(context, 1300.0) ? mode.description : mode.name,
-                  ),
-                )
-            ];
-          },
         );
       },
     );

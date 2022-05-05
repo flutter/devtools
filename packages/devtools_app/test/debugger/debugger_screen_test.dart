@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:html';
+
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/screens/debugger/console.dart';
 import 'package:devtools_app/src/screens/debugger/controls.dart';
@@ -9,6 +11,7 @@ import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_screen.dart';
 import 'package:devtools_app/src/scripts/script_manager.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/common_widgets.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
@@ -112,7 +115,11 @@ void main() {
         debugger: debuggerController,
       ),
     );
-    expect(find.text("Don't stop on exceptions"), findsOneWidget);
+    if (windowSize.width < mediumDeviceWidth) {
+      expect(find.text('Ignore exceptions'), findsOneWidget);
+    } else {
+      expect(find.text("Don't stop on exceptions"), findsOneWidget);
+    }
   });
 }
 
