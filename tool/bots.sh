@@ -121,13 +121,13 @@ elif [ "$BOT" = "test_ddc" ]; then
     flutter config --enable-web
     flutter build web --pwa-strategy=none --no-tree-shake-icons
 
-    # Run every test except for integration_tests.
-    # The flutter tool doesn't support excluding a specific set of targets,
-    # so we explicitly provide them.
+    # TODO(https://github.com/flutter/devtools/issues/1987): once this issue is fixed,
+    # we may need to explicitly exclude running integration_tests here (this is what we
+    # used to do when integration tests were enabled).
     if [ "$PLATFORM" = "vm" ]; then
-        flutter test $DART_DEFINE_ARGS test/*.dart test/fixtures/
+        flutter test $DART_DEFINE_ARGS test/
     elif [ "$PLATFORM" = "chrome" ]; then
-        flutter test --platform chrome $DART_DEFINE_ARGS test/*.dart test/fixtures/
+        flutter test --platform chrome $DART_DEFINE_ARGS test/
     else
         echo "unknown test platform"
         exit 1
@@ -139,13 +139,13 @@ elif [ "$BOT" = "test_dart2js" ]; then
     flutter config --enable-web
     flutter build web --pwa-strategy=none --no-tree-shake-icons
 
-    # Run every test except for integration_tests.
-    # The flutter tool doesn't support excluding a specific set of targets,
-    # so we explicitly provide them.
+    # TODO(https://github.com/flutter/devtools/issues/1987): once this issue is fixed,
+    # we may need to explicitly exclude running integration_tests here (this is what we
+    # used to do when integration tests were enabled).
     if [ "$PLATFORM" = "vm" ]; then
-        WEBDEV_RELEASE=true flutter test $DART_DEFINE_ARGS test/*.dart test/fixtures/
+        WEBDEV_RELEASE=true flutter test $DART_DEFINE_ARGS test/
     elif [ "$PLATFORM" = "chrome" ]; then
-        WEBDEV_RELEASE=true flutter test --platform chrome $DART_DEFINE_ARGS test/*.dart test/fixtures/
+        WEBDEV_RELEASE=true flutter test --platform chrome $DART_DEFINE_ARGS test/
     else
         echo "unknown test platform"
         exit 1
