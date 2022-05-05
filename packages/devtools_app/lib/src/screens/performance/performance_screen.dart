@@ -369,6 +369,8 @@ class MoreDebuggingOptionsButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textStyle = theme.subtleTextStyle;
     return ServiceExtensionCheckboxGroupButton(
       title: 'More debugging options',
       icon: Icons.build,
@@ -380,12 +382,25 @@ class MoreDebuggingOptionsButton extends StatelessWidget {
         extensions.disableOpacityLayers,
         extensions.disablePhysicalShapeLayers,
       ],
-      overlayDescription: Text(
-        'When toggling on/off a rendering layer, you will need '
-        'to reproduce activity in your app to see the effects of the '
-        'debugging option. All layers are rendered by default - disabling a '
-        'layer may help you identify expensive operations in your app.',
-        style: Theme.of(context).subtleTextStyle,
+      overlayDescription: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'When toggling on/off a rendering layer, you will need '
+            'to reproduce activity in your app to see the effects of the '
+            'debugging option. All layers are rendered by default - disabling a '
+            'layer may help you identify expensive operations in your app.',
+            style: Theme.of(context).subtleTextStyle,
+          ),
+          RichText(
+            text: TextSpan(
+              text:
+                  'These debugging options are not available for a profile build. To use them, run your app in debug mode.',
+              style:
+                  textStyle.copyWith(color: theme.colorScheme.errorTextColor),
+            ),
+          )
+        ],
       ),
       overlayWidthBeforeScaling: _width,
     );
