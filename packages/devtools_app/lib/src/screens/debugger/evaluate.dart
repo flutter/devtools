@@ -91,7 +91,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
   }
 
   void _handleHoverChange() {
-    final editingParts = _getCurrentEditingParts();
+    final editingParts = _currentEditingParts();
 
     if (!_isRealVariableNameOrField(editingParts)) {
       return;
@@ -100,7 +100,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
     _autoCompleteController.updateCurrentSuggestion(_activeWord);
   }
 
-  EditingParts _getCurrentEditingParts() {
+  EditingParts _currentEditingParts() {
     final searchingValue = _autoCompleteController.search;
     final isField = searchingValue.endsWith('.');
 
@@ -142,7 +142,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
       // as Flutter will render a frame before the new matches are available.
 
       // Find word in TextField to try and match (word breaks).
-      final parts = _getCurrentEditingParts();
+      final parts = _currentEditingParts();
 
       // Only show pop-up if there's a real variable name or field.
       if (!_isRealVariableNameOrField(parts)) {

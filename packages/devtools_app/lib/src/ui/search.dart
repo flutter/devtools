@@ -286,7 +286,7 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
         .toList();
 
     // When there are no tiles present, we don't need to display the
-    // auto correct list.
+    // auto complete list.
     if (tileContents.isEmpty) return const SizedBox.shrink();
 
     final tileEntryHeight = tileContents.isEmpty
