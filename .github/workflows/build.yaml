@@ -87,7 +87,7 @@ jobs:
           path: packages/devtools_app/test/failures # Path to upload
 
   macos-test:
-    name: test ${{ matrix.bot }} - (flutter ${{ matrix.flutter-test-env }})
+    name: macos ${{ matrix.bot }} - (flutter ${{ matrix.flutter-test-env }})
     runs-on: macos-latest
     strategy:
       fail-fast: false
