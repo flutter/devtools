@@ -16,7 +16,7 @@ import 'debugger_controller.dart';
 class DebuggingControls extends StatefulWidget {
   const DebuggingControls({Key? key}) : super(key: key);
 
-  static const minWidthBeforeScaline = 1300.0;
+  static const minWidthBeforeScaling = 1300.0;
 
   @override
   _DebuggingControlsState createState() => _DebuggingControlsState();
@@ -148,7 +148,7 @@ class BreakOnExceptionsControl extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isInSmallMode = MediaQuery.of(context).size.width <
-        DebuggingControls.minWidthBeforeScaline;
+        DebuggingControls.minWidthBeforeScaling;
     return ValueListenableBuilder<String?>(
       valueListenable: controller.exceptionPauseMode,
       builder: (BuildContext context, modeId, _) {
@@ -238,7 +238,7 @@ class DebuggerButton extends StatelessWidget {
           label: title,
           iconData: icon,
           minScreenWidthForTextBeforeScaling:
-              DebuggingControls.minWidthBeforeScaline,
+              DebuggingControls.minWidthBeforeScaling,
         ),
       ),
     );
