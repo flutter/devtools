@@ -231,7 +231,7 @@ void main() async {
 }
 
 bool isPerformanceDataEqual(PerformanceData a, PerformanceData b) {
-  print("DAKE ${helper(a, b)}");
+  print('DAKE ${helper(a, b)}');
   return a.traceEvents == b.traceEvents &&
       a.frames == b.frames &&
       a.selectedFrame == b.selectedFrame &&
