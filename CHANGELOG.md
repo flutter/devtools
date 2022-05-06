@@ -1,3 +1,10 @@
+## 2.13.1
+* Add "publish_to: none" to devtools_app and devtools_test pubspecs [#4077](https://github.com/flutter/devtools/pull/4077)
+* Polish connection status [#4076](https://github.com/flutter/devtools/pull/4076)
+* Fix breakpoint scrolling bug [#4074](https://github.com/flutter/devtools/pull/4074)
+* Display flex values larger than 5 [#4055](https://github.com/flutter/devtools/pull/4055)
+* Upgrade package:provider version to eliminate null safety warnings [#4065](https://github.com/flutter/devtools/pull/4065)
+
 ## 2.13.0
 * Release notes in small screens [#4053](https://github.com/flutter/devtools/pull/4053)
 * Bump pinned flutter version to latest Flutter Beta [#4063](https://github.com/flutter/devtools/pull/4063)
