@@ -19,7 +19,8 @@ import '../test_infra/flutter_test_environment.dart';
 // reduced to under 1 second without introducing flakes.
 const inspectorChangeSettleTime = Duration(seconds: 2);
 
-// TODO: investigate why inspector golden images are inconsistent.
+// TODO(https://github.com/flutter/devtools/issues/4081): investigate why
+// inspector golden images are inconsistent.
 const _temporarilySkipGoldens = true;
 
 void main() async {

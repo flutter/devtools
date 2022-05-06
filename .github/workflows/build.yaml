@@ -37,54 +37,54 @@ jobs:
           FLUTTER_TEST_ENV: ${{ matrix.flutter-test-env }}
         run: ./tool/bots.sh
 
-#  packages:
-#    name: packages
-#    runs-on: ubuntu-latest
-#    strategy:
-#      fail-fast: false
-#      matrix:
-#        flutter-test-env:
-#          - pinned
-#    steps:
-#      - name: git clone
-#        uses: actions/checkout@v2
-#      - name: tool/bots.sh
-#        env:
-#          BOT: packages
-#          FLUTTER_TEST_ENV: ${{ matrix.flutter-test-env }}
-#        run: ./tool/bots.sh
-#
-#  test:
-#    name: test ${{ matrix.bot }} - (flutter ${{ matrix.flutter-test-env }})
-#    runs-on: ubuntu-latest
-#    strategy:
-#      fail-fast: false
-#      matrix:
-#        bot:
-#          - test_ddc
-#          - test_dart2js
-#        flutter-test-env:
-#          - pinned
-#          - master
-#    steps:
-#      - name: git clone
-#        uses: actions/checkout@v2
-#
-#      - name: tool/bots.sh
-#        env:
-#          BOT: ${{ matrix.bot }}
-#          PLATFORM: vm
-#          FLUTTER_TEST_ENV: ${{ matrix.flutter-test-env }}
-#        run: ./tool/bots.sh
-#
-#      - name: image failures
-#        uses: actions/upload-artifact@v1
-#        if: failure() # Only if failure then failures directory exists.
-#        with:
-#          # TODO(terry): matrix.os currently empty. If we run tests on other
-#          #              platforms this will be used.
-#          name: test-image-failures-${{ matrix.os }} # Name for the artifact
-#          path: packages/devtools_app/test/failures # Path to upload
+  packages:
+    name: packages
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        flutter-test-env:
+          - pinned
+    steps:
+      - name: git clone
+        uses: actions/checkout@v2
+      - name: tool/bots.sh
+        env:
+          BOT: packages
+          FLUTTER_TEST_ENV: ${{ matrix.flutter-test-env }}
+        run: ./tool/bots.sh
+
+  test:
+    name: test ${{ matrix.bot }} - (flutter ${{ matrix.flutter-test-env }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        bot:
+          - test_ddc
+          - test_dart2js
+        flutter-test-env:
+          - pinned
+          - master
+    steps:
+      - name: git clone
+        uses: actions/checkout@v2
+
+      - name: tool/bots.sh
+        env:
+          BOT: ${{ matrix.bot }}
+          PLATFORM: vm
+          FLUTTER_TEST_ENV: ${{ matrix.flutter-test-env }}
+        run: ./tool/bots.sh
+
+      - name: image failures
+        uses: actions/upload-artifact@v1
+        if: failure() # Only if failure then failures directory exists.
+        with:
+          # TODO(terry): matrix.os currently empty. If we run tests on other
+          #              platforms this will be used.
+          name: test-image-failures-${{ matrix.os }} # Name for the artifact
+          path: packages/devtools_app/test/failures # Path to upload
 
   macos-test:
     name: macos ${{ matrix.bot }} - (flutter ${{ matrix.flutter-test-env }})
