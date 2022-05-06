@@ -155,8 +155,8 @@ class _CodeViewState extends State<CodeView>
       log('LinkedScrollControllerGroup has no attached controllers');
       return;
     }
-    final location = widget.controller.scriptLocation.value?.location;
-    if (location?.line == null) {
+    final line = widget.controller.scriptLocation.value?.location?.line;
+    if (line == null) {
       // Don't scroll to top if we're just rebuilding the code view for the
       // same script.
       if (_lastScriptRef?.uri != scriptRef?.uri) {
@@ -182,7 +182,7 @@ class _CodeViewState extends State<CodeView>
     // middle third of the screen.
     final lineCount = parsedScript?.lineCount;
     if (lineCount != null && lineCount * CodeView.rowHeight > extent) {
-      final lineIndex = lineCount - 1;
+      final lineIndex = line - 1;
       final scrollPosition =
           lineIndex * CodeView.rowHeight - ((extent - CodeView.rowHeight) / 2);
       if (animate) {

@@ -661,6 +661,12 @@ class FlexChildVisualizer extends StatelessWidget {
   }
 
   Widget _buildContent(ColorScheme colorScheme) {
+    // TODO(https://github.com/flutter/devtools/issues/4058) allow more dynamic
+    // flex factor input
+    final currentFlexFactor = properties.flexFactor?.toInt() ?? 0;
+    final currentMaxFlexFactor =
+        math.max(currentFlexFactor, maximumFlexFactorOptions);
+
     return Container(
       margin: const EdgeInsets.only(
         top: margin,
@@ -670,7 +676,7 @@ class FlexChildVisualizer extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Flexible(
-            child: _buildFlexFactorChangerDropdown(maximumFlexFactorOptions),
+            child: _buildFlexFactorChangerDropdown(currentMaxFlexFactor),
           ),
           if (!properties.hasFlexFactor)
             Text(
