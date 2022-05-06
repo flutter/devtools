@@ -14,6 +14,7 @@ import 'package:devtools_app/src/screens/performance/performance_screen.dart';
 import 'package:devtools_app/src/screens/performance/timeline_flame_chart.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/common_widgets.dart';
+import 'package:devtools_app/src/shared/connected_app.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/preferences.dart';
 import 'package:devtools_app/src/shared/split.dart';
@@ -289,7 +290,35 @@ void main() {
           find.richTextContaining('Render Physical Shape layers'),
           findsOneWidget,
         );
+        expect(
+          find.richTextContaining(
+            'These debugging options are not available for a profile build. To use them, run your app in debug mode.',
+          ),
+          findsOneWidget,
+        );
         expect(find.byType(MoreInfoLink), findsNWidgets(3));
+      });
+    });
+
+    testWidgetsWithWindowSize(
+        'hides warning in debugging options overlay when in debug mode',
+        windowSize, (WidgetTester tester) async {
+      when(fakeServiceManager.connectedApp!.isDebugFlutterAppNow)
+          .thenReturn(true);
+
+      await tester.runAsync(() async {
+        await pumpPerformanceScreen(tester, runAsync: true);
+        await tester.pumpAndSettle();
+        expect(find.text('More debugging options'), findsOneWidget);
+        await tester.tap(find.text('More debugging options'));
+        await tester.pumpAndSettle();
+
+        expect(
+          find.richTextContaining(
+            'These debugging options are not available for a profile build. To use them, run your app in debug mode.',
+          ),
+          findsNothing,
+        );
       });
     });
   });
