@@ -14,7 +14,6 @@ import 'package:devtools_app/src/screens/performance/performance_screen.dart';
 import 'package:devtools_app/src/screens/performance/timeline_flame_chart.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/common_widgets.dart';
-import 'package:devtools_app/src/shared/connected_app.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/preferences.dart';
 import 'package:devtools_app/src/shared/split.dart';
