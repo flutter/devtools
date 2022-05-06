@@ -291,7 +291,7 @@ void main() {
         );
         expect(
           find.richTextContaining(
-            'These debugging options are not available for a profile build. To use them, run your app in debug mode.',
+            'These debugging options are not available in profile mode. To use them, run your app in debug mode.',
           ),
           findsOneWidget,
         );
@@ -314,7 +314,7 @@ void main() {
 
         expect(
           find.richTextContaining(
-            'These debugging options are not available for a profile build. To use them, run your app in debug mode.',
+            'These debugging options are not available in profile mode. To use them, run your app in debug mode.',
           ),
           findsNothing,
         );
