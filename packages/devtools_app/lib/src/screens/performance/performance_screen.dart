@@ -387,10 +387,10 @@ class MoreDebuggingOptionsButton extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'When toggling on/off a rendering layer, you will need '
-            'to reproduce activity in your app to see the effects of the '
-            'debugging option. All layers are rendered by default - disabling a '
-            'layer may help you identify expensive operations in your app.',
+            'After toggling a rendering layer on/off, '
+            'reproduce the activity in your app to see the effects.
+            ' All layers are rendered by default - disabling a '
+            'layer might help identify expensive operations in your app.',
             style: Theme.of(context).subtleTextStyle,
           ),
           if (serviceManager.connectedApp!.isProfileBuildNow!) ...[
@@ -398,7 +398,8 @@ class MoreDebuggingOptionsButton extends StatelessWidget {
             RichText(
               text: TextSpan(
                 text:
-                    'These debugging options are not available in profile mode. To use them, run your app in debug mode.',
+                    'These debugging options aren't available in profile mode. '
+                    'To use them, run your app in debug mode.',
                 style:
                     textStyle.copyWith(color: theme.colorScheme.errorTextColor),
               ),
