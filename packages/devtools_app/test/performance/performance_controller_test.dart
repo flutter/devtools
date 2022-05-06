@@ -231,10 +231,22 @@ void main() async {
 }
 
 bool isPerformanceDataEqual(PerformanceData a, PerformanceData b) {
+  print("DAKE ${helper(a, b)}");
   return a.traceEvents == b.traceEvents &&
       a.frames == b.frames &&
       a.selectedFrame == b.selectedFrame &&
       a.selectedEvent!.name == b.selectedEvent!.name &&
       a.selectedEvent!.time == b.selectedEvent!.time &&
       a.cpuProfileData == b.cpuProfileData;
+}
+
+String helper(PerformanceData a, PerformanceData b) {
+  return '''
+${a.traceEvents} == ${b.traceEvents} &&
+      ${a.frames} == ${b.frames} &&
+      ${a.selectedFrame} == ${b.selectedFrame} &&
+      ${a.selectedEvent!.name} == ${b.selectedEvent!.name} &&
+      ${a.selectedEvent!.time} == ${b.selectedEvent!.time} &&
+      ${a.cpuProfileData} == ${b.cpuProfileData}
+''';
 }
