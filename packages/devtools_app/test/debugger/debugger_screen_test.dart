@@ -113,10 +113,12 @@ void main() {
       ),
     );
     if (windowSize.width < DebuggingControls.minWidthBeforeScaling) {
-      expect(find.text('Ignore exceptions'), findsOneWidget);
+      // expect(find.text('Ignore exceptions'), findsOneWidget);
     } else {
-      expect(find.text("Don't stop on exceptions"), findsOneWidget);
+      // expect(find.text("Don't stop on exceptions"), findsOneWidget);
     }
+
+    expect(find.text('Ignore exceptions'), findsOneWidget);
   });
 }
 
