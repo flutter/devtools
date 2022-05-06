@@ -143,8 +143,8 @@ class StatusLine extends StatelessWidget {
             description = 'web app';
           } else {
             final VM vm = serviceManager.vm!;
-            description =
-                '${vm.targetCPU}-${vm.architectureBits} ${vm.operatingSystem}';
+            description = '${vm.targetCPU} (${vm.architectureBits} bit) '
+                '${vm.operatingSystem}';
           }
 
           final color = textTheme.bodyText2!.color;
