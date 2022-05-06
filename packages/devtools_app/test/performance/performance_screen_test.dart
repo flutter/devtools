@@ -53,7 +53,7 @@ void main() {
       FlutterVersion.parse((await fakeServiceManager.flutterVersion).json!),
     );
     when(app.isDartCliAppNow).thenReturn(false);
-    when(app.isDebugFlutterAppNow).thenReturn(false);
+    when(app.isProfileBuildNow).thenReturn(true);
     when(app.isDartWebApp).thenAnswer((_) async => false);
     when(app.isProfileBuild).thenAnswer((_) async => false);
     setGlobal(ServiceConnectionManager, fakeServiceManager);
@@ -302,8 +302,8 @@ void main() {
     testWidgetsWithWindowSize(
         'hides warning in debugging options overlay when in debug mode',
         windowSize, (WidgetTester tester) async {
-      when(fakeServiceManager.connectedApp!.isDebugFlutterAppNow)
-          .thenReturn(true);
+      when(fakeServiceManager.connectedApp!.isProfileBuildNow)
+          .thenReturn(false);
 
       await tester.runAsync(() async {
         await pumpPerformanceScreen(tester, runAsync: true);

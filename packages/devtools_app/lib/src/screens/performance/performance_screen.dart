@@ -380,7 +380,7 @@ class MoreDebuggingOptionsButton extends StatelessWidget {
         style: Theme.of(context).subtleTextStyle,
       )
     ];
-    if (!serviceManager.connectedApp!.isDebugFlutterAppNow) {
+    if (serviceManager.connectedApp!.isProfileBuildNow!) {
       overlayChildren.addAll([
         const SizedBox(height: denseSpacing),
         RichText(
