@@ -118,7 +118,7 @@ void main() {
       // expect(find.text("Don't stop on exceptions"), findsOneWidget);
     }
 
-    expect(find.text('Ignore exceptions'), findsOneWidget);
+    expect(find.text("Don't stop on exceptions"), findsOneWidget);
   });
 }
 
