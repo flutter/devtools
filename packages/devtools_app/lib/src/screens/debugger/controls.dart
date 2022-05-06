@@ -13,10 +13,10 @@ import '../../shared/theme.dart';
 import '../../ui/label.dart';
 import 'debugger_controller.dart';
 
-const minWidthBeforeScaline = 1300.0;
-
 class DebuggingControls extends StatefulWidget {
   const DebuggingControls({Key? key}) : super(key: key);
+
+  static const minWidthBeforeScaline = 1300.0;
 
   @override
   _DebuggingControlsState createState() => _DebuggingControlsState();
@@ -147,8 +147,8 @@ class BreakOnExceptionsControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isInSmallMode =
-        MediaQuery.of(context).size.width < minWidthBeforeScaline;
+    final isInSmallMode = MediaQuery.of(context).size.width <
+        DebuggingControls.minWidthBeforeScaline;
     return ValueListenableBuilder<String?>(
       valueListenable: controller.exceptionPauseMode,
       builder: (BuildContext context, modeId, _) {
@@ -237,7 +237,8 @@ class DebuggerButton extends StatelessWidget {
         child: MaterialIconLabel(
           label: title,
           iconData: icon,
-          minScreenWidthForTextBeforeScaling: minWidthBeforeScaline,
+          minScreenWidthForTextBeforeScaling:
+              DebuggingControls.minWidthBeforeScaline,
         ),
       ),
     );
