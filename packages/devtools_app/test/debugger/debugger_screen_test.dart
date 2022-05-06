@@ -19,6 +19,7 @@ void main() {
   const screen = DebuggerScreen();
 
   const windowSize = Size(4000.0, 4000.0);
+  const smallWindowSize = Size(1100.0, 1100.0);
 
   final fakeServiceManager = FakeServiceManager();
   final scriptManager = MockScriptManager();
@@ -112,13 +113,19 @@ void main() {
         debugger: debuggerController,
       ),
     );
-    if (windowSize.width < DebuggingControls.minWidthBeforeScaling) {
-      // expect(find.text('Ignore exceptions'), findsOneWidget);
-    } else {
-      // expect(find.text("Don't stop on exceptions"), findsOneWidget);
-    }
-
     expect(find.text("Don't stop on exceptions"), findsOneWidget);
+  });
+
+  testWidgetsWithWindowSize(
+      'debugger controls break on exceptions abbreviated on small window',
+      smallWindowSize, (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrapWithControllers(
+        Builder(builder: screen.build),
+        debugger: debuggerController,
+      ),
+    );
+    expect(find.text('Ignore exceptions'), findsOneWidget);
   });
 }
 
