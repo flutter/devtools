@@ -107,6 +107,27 @@ jobs:
           FLUTTER_TEST_ENV: ${{ matrix.flutter-test-env }}
         run: ./tool/bots.sh
 
+  windows-test:
+    name: windows ${{ matrix.bot }} - (flutter ${{ matrix.flutter-test-env }})
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        bot:
+          - test_dart2js
+        flutter-test-env:
+          - pinned
+    steps:
+      - name: git clone
+        uses: actions/checkout@v2
+
+      - name: tool/bots.sh
+        env:
+          BOT: ${{ matrix.bot }}
+          PLATFORM: vm
+          FLUTTER_TEST_ENV: ${{ matrix.flutter-test-env }}
+        run: ./tool/bots.sh
+
 # TODO(https://github.com/flutter/devtools/issues/1987): rewrite integration tests.
 #  integration:
 #    name: integration ${{ matrix.bot }} - (flutter ${{ matrix.flutter-test-env }})
