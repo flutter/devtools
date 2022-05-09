@@ -241,33 +241,33 @@ bool isPerformanceDataEqual(PerformanceData a, PerformanceData b) {
 }
 
 void helper(PerformanceData a, PerformanceData b) {
-  if (a.traceEvents == b.traceEvents) {
+  if (a.traceEvents != b.traceEvents) {
     print("Dake trace events differ");
     print(a.traceEvents);
     print(b.traceEvents);
   }
-  if (a.frames == b.frames) {
+  if (a.frames != b.frames) {
     print("Dake frames differ");
     print(a.frames);
     print(b.frames);
   }
-  if (a.selectedFrame == b.selectedFrame) {
+  if (a.selectedFrame != b.selectedFrame) {
     print("Dake selectedFrame differ");
     print("FRAME_A ${a.selectedFrame?.json}");
     print("FRAME_B ${a.selectedFrame?.json}");
   }
 
-  if (a.selectedEvent!.name == b.selectedEvent!.name) {
+  if (a.selectedEvent!.name != b.selectedEvent!.name) {
     print("Dake selectedEvent!.name differ");
     print(a.selectedEvent!.name);
     print(b.selectedEvent!.name);
   }
-  if (a.selectedEvent!.time == b.selectedEvent!.time) {
+  if (a.selectedEvent!.time != b.selectedEvent!.time) {
     print("Dake selectedEvent!.time differ");
     print(a.selectedEvent!.time);
     print(b.selectedEvent!.time);
   }
-  if (a.cpuProfileData == b.cpuProfileData) {
+  if (a.cpuProfileData != b.cpuProfileData) {
     print("Dake cpuProfileData differ");
     print(a.cpuProfileData);
     print(b.cpuProfileData);
