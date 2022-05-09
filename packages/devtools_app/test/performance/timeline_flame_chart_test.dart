@@ -46,6 +46,7 @@ void main() {
       FlutterVersion.parse((await fakeServiceManager.flutterVersion).json!),
     );
     when(app.isProfileBuild).thenAnswer((_) => Future.value(true));
+    when(app.isProfileBuildNow).thenReturn(true);
     when(app.isDartCliAppNow).thenReturn(false);
     when(app.isDebugFlutterAppNow).thenReturn(false);
     setGlobal(ServiceConnectionManager, fakeServiceManager);
