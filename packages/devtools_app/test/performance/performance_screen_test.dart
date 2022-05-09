@@ -53,7 +53,7 @@ void main() {
       FlutterVersion.parse((await fakeServiceManager.flutterVersion).json!),
     );
     when(app.isDartCliAppNow).thenReturn(false);
-    when(app.isDebugFlutterAppNow).thenReturn(false);
+    when(app.isProfileBuildNow).thenReturn(true);
     when(app.isDartWebApp).thenAnswer((_) async => false);
     when(app.isProfileBuild).thenAnswer((_) async => false);
     setGlobal(ServiceConnectionManager, fakeServiceManager);
@@ -276,7 +276,8 @@ void main() {
         await tester.pumpAndSettle();
         expect(
           find.richTextContaining(
-            'you will need to reproduce activity in your app',
+            'After toggling a rendering layer on/off, '
+            'reproduce the activity in your app to see the effects',
           ),
           findsOneWidget,
         );
@@ -289,7 +290,37 @@ void main() {
           find.richTextContaining('Render Physical Shape layers'),
           findsOneWidget,
         );
+        expect(
+          find.richTextContaining(
+            "These debugging options aren't available in profile mode. "
+            'To use them, run your app in debug mode.',
+          ),
+          findsOneWidget,
+        );
         expect(find.byType(MoreInfoLink), findsNWidgets(3));
+      });
+    });
+
+    testWidgetsWithWindowSize(
+        'hides warning in debugging options overlay when in debug mode',
+        windowSize, (WidgetTester tester) async {
+      when(fakeServiceManager.connectedApp!.isProfileBuildNow)
+          .thenReturn(false);
+
+      await tester.runAsync(() async {
+        await pumpPerformanceScreen(tester, runAsync: true);
+        await tester.pumpAndSettle();
+        expect(find.text('More debugging options'), findsOneWidget);
+        await tester.tap(find.text('More debugging options'));
+        await tester.pumpAndSettle();
+
+        expect(
+          find.richTextContaining(
+            "These debugging options aren't available in profile mode. "
+            'To use them, run your app in debug mode.',
+          ),
+          findsNothing,
+        );
       });
     });
   });
