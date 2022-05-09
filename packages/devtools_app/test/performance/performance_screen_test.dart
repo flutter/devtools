@@ -276,7 +276,8 @@ void main() {
         await tester.pumpAndSettle();
         expect(
           find.richTextContaining(
-            'you will need to reproduce activity in your app',
+            'After toggling a rendering layer on/off, '
+            'reproduce the activity in your app to see the effects',
           ),
           findsOneWidget,
         );
@@ -291,7 +292,8 @@ void main() {
         );
         expect(
           find.richTextContaining(
-            'These debugging options are not available in profile mode. To use them, run your app in debug mode.',
+            "These debugging options aren't available in profile mode. "
+            'To use them, run your app in debug mode.',
           ),
           findsOneWidget,
         );
@@ -314,7 +316,8 @@ void main() {
 
         expect(
           find.richTextContaining(
-            'These debugging options are not available in profile mode. To use them, run your app in debug mode.',
+            "These debugging options aren't available in profile mode. "
+            'To use them, run your app in debug mode.',
           ),
           findsNothing,
         );
