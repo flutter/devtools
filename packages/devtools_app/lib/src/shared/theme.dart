@@ -427,7 +427,7 @@ extension ThemeDataExtension on ThemeData {
       );
 
   TextStyle get subtleErrorTextStyle =>
-      textTheme.bodyText2!.copyWith(color: colorScheme.errorTextColor);
+      subtleTextStyle.copyWith(color: colorScheme.errorTextColor);
 
   TextStyle get selectedTextStyle => TextStyle(
         color: textSelectionTheme.selectionColor,
