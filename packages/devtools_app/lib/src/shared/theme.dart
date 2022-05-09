@@ -426,6 +426,9 @@ extension ThemeDataExtension on ThemeData {
         fontSize: defaultFontSize,
       );
 
+  TextStyle get subtleErrorTextStyle =>
+      textTheme.bodyText2!.copyWith(color: colorScheme.errorTextColor);
+
   TextStyle get selectedTextStyle => TextStyle(
         color: textSelectionTheme.selectionColor,
         fontSize: defaultFontSize,

@@ -369,9 +369,6 @@ class MoreDebuggingOptionsButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final textStyle = theme.subtleTextStyle;
-
     return ServiceExtensionCheckboxGroupButton(
       title: 'More debugging options',
       icon: Icons.build,
@@ -400,8 +397,7 @@ class MoreDebuggingOptionsButton extends StatelessWidget {
                 text:
                     "These debugging options aren't available in profile mode. "
                     'To use them, run your app in debug mode.',
-                style:
-                    textStyle.copyWith(color: theme.colorScheme.errorTextColor),
+                style: Theme.of(context).subtleErrorTextStyle,
               ),
             )
           ]
