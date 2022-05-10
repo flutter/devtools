@@ -254,7 +254,11 @@ void helper(PerformanceData a, PerformanceData b) {
   if (a.selectedFrame != b.selectedFrame) {
     print("Dake selectedFrame differ");
     print("FRAME_A ${a.selectedFrame?.json}");
-    print("FRAME_B ${a.selectedFrame?.json}");
+    print("FRAME_B ${b.selectedFrame?.json}");
+  } else {
+    print("Dake selectedFrames are SAME");
+    print("FRAME_A ${a.selectedFrame?.json}");
+    print("FRAME_B ${b.selectedFrame?.json}");
   }
 
   if (a.selectedEvent!.name != b.selectedEvent!.name) {
