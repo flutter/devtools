@@ -101,11 +101,7 @@ abstract class FlameChart<T, V> extends StatefulWidget {
 // like implementation).
 abstract class FlameChartState<T extends FlameChart,
         V extends FlameChartDataMixin<V>> extends State<T>
-    with
-        AutoDisposeMixin,
-        AutomaticKeepAliveClientMixin,
-        FlameChartColorMixin,
-        TickerProviderStateMixin {
+    with AutoDisposeMixin, FlameChartColorMixin, TickerProviderStateMixin {
   int get rowOffsetForTopPadding => 2;
 
   // The "top" positional value for each flame chart node will be 0.0 because
@@ -280,12 +276,7 @@ abstract class FlameChartState<T extends FlameChart,
   }
 
   @override
-  bool wantKeepAlive = true;
-
-  @override
   Widget build(BuildContext context) {
-    super.build(context);
-
     // TODO(kenz): handle tooltips hover here instead of wrapping each row in a
     // MouseRegion widget.
     return MouseRegion(

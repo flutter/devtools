@@ -1931,3 +1931,24 @@ class ElevatedCard extends StatelessWidget {
     );
   }
 }
+
+class KeepAliveWrapper extends StatefulWidget {
+  const KeepAliveWrapper({Key? key, required this.child}) : super(key: key);
+
+  final Widget child;
+
+  @override
+  State<KeepAliveWrapper> createState() => _KeepAliveWrapperState();
+}
+
+class _KeepAliveWrapperState extends State<KeepAliveWrapper>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool wantKeepAlive = true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return widget.child;
+  }
+}
