@@ -484,6 +484,12 @@ class SettingsDialog extends StatelessWidget {
             toggle: preferences.toggleVmDeveloperMode,
             gaItem: analytics_constants.vmDeveloperMode,
           ),
+          CheckboxSetting(
+            label: const Text('Enable hover inspection in Flutter Inspector'),
+            listenable: preferences.hoverEvalModeEnabled,
+            toggle: preferences.toggleHoverEvalMode,
+            gaItem: analytics_constants.hoverEvalMode,
+          )
         ],
       ),
       actions: [
