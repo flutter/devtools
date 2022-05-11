@@ -6,10 +6,11 @@ import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
   // This widget is the root of your application.
 
   @override
@@ -169,12 +170,14 @@ class MyHomePageState extends State<MyHomePage>
   void _jumpNewPage() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => SecondScreen()),
+      MaterialPageRoute(builder: (context) => const SecondScreen()),
     );
   }
 }
 
-class SecondScreen extends MyHomePage {}
+class SecondScreen extends MyHomePage {
+  const SecondScreen({Key? key}) : super(key: key);
+}
 
 // Loaded images. key is ImageUrl and value is the ImageChunkEvent (total and cumulative bytes loaded).
 final loadedImages = <String, ImageChunkEvent>{};
