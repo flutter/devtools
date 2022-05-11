@@ -37,7 +37,7 @@ import 'timeline_event_processor.dart';
 bool frameAnalysisSupported = false;
 
 /// Flag to hide the raster metrics feature while it is under development.
-bool rasterMetricsSupported = false;
+bool rasterMetricsSupported = true;
 
 /// This class contains the business logic for [performance_screen.dart].
 ///

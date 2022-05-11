@@ -16,6 +16,8 @@ import 'debugger_controller.dart';
 class DebuggingControls extends StatefulWidget {
   const DebuggingControls({Key? key}) : super(key: key);
 
+  static const minWidthBeforeScaling = 1300.0;
+
   @override
   _DebuggingControlsState createState() => _DebuggingControlsState();
 }
@@ -145,6 +147,8 @@ class BreakOnExceptionsControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isInSmallMode = MediaQuery.of(context).size.width <
+        DebuggingControls.minWidthBeforeScaling;
     return ValueListenableBuilder<String?>(
       valueListenable: controller.exceptionPauseMode,
       builder: (BuildContext context, modeId, _) {
@@ -161,18 +165,11 @@ class BreakOnExceptionsControl extends StatelessWidget {
             for (var mode in ExceptionMode.modes)
               DropdownMenuItem<ExceptionMode>(
                 value: mode,
-                child: Text(mode.description),
+                child: Text(
+                  isInSmallMode ? mode.name : mode.description,
+                ),
               )
           ],
-          selectedItemBuilder: (BuildContext context) {
-            return [
-              for (var mode in ExceptionMode.modes)
-                DropdownMenuItem<ExceptionMode>(
-                  value: mode,
-                  child: Text(mode.name),
-                )
-            ];
-          },
         );
       },
     );
@@ -185,17 +182,17 @@ class ExceptionMode {
   static final modes = [
     ExceptionMode(
       ExceptionPauseMode.kNone,
-      'Ignore',
+      'Ignore exceptions',
       "Don't stop on exceptions",
     ),
     ExceptionMode(
       ExceptionPauseMode.kUnhandled,
-      'Uncaught',
+      'Uncaught exceptions',
       'Stop on uncaught exceptions',
     ),
     ExceptionMode(
       ExceptionPauseMode.kAll,
-      'All',
+      'All exceptions',
       'Stop on all exceptions',
     ),
   ];
@@ -240,7 +237,8 @@ class DebuggerButton extends StatelessWidget {
         child: MaterialIconLabel(
           label: title,
           iconData: icon,
-          minScreenWidthForTextBeforeScaling: mediumDeviceWidth,
+          minScreenWidthForTextBeforeScaling:
+              DebuggingControls.minWidthBeforeScaling,
         ),
       ),
     );
