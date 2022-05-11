@@ -173,7 +173,7 @@ double get defaultListItemHeight => scaleByFontFactor(28.0);
 // TODO(jacobr) define a more sophisticated formula for chart height.
 // The chart height does need to increase somewhat to leave room for the legend
 // and tick marks but does not need to scale linearly with the font factor.
-double get defaultChartHeight => scaleByFontFactor(150.0);
+double get defaultChartHeight => scaleByFontFactor(120.0);
 
 /// Width of all settings dialogs.
 double get dialogSettingsWidth => scaleByFontFactor(700.0);
