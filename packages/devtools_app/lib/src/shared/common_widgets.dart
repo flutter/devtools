@@ -1932,6 +1932,14 @@ class ElevatedCard extends StatelessWidget {
   }
 }
 
+/// A convenience wrapper for a [StatefulWidget] that uses the
+/// [AutomaticKeepAliveClientMixin] on its [State].
+///
+/// Wrap a widget in this class if you want [child] to stay alive, and avoid
+/// rebuilding. This is useful for children of [TabView]s. When wrapped in this
+/// wrapper, [child] will not be destroyed and rebuilt when switching tabs.
+///
+/// See [AutomaticKeepAliveClientMixin] for more information.
 class KeepAliveWrapper extends StatefulWidget {
   const KeepAliveWrapper({Key? key, required this.child}) : super(key: key);
 
