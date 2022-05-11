@@ -33,7 +33,7 @@ class DebuggerConsole extends StatefulWidget {
     return AreaPaneHeader(
       title: const Text('Console'),
       needsTopBorder: false,
-      rightActions: [
+      actions: [
         CopyToClipboardControl(
           dataProvider: () =>
               serviceManager.consoleService.stdio.value.join('\n'),

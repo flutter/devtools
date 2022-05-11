@@ -14,9 +14,11 @@ import '../info/info_controller.dart';
 import '../service/isolate_manager.dart';
 import '../service/service_manager.dart';
 import '../ui/utils.dart';
+import 'about_dialog.dart';
 import 'common_widgets.dart';
 import 'device_dialog.dart';
 import 'globals.dart';
+import 'report_feedback_button.dart';
 import 'screen.dart';
 import 'theme.dart';
 import 'utils.dart';
@@ -28,17 +30,33 @@ double get statusLineHeight => scaleByFontFactor(24.0);
 /// This displays information global to the application, as well as gives pages
 /// a mechanism to display page-specific information.
 class StatusLine extends StatelessWidget {
-  const StatusLine(this.currentScreen);
+  const StatusLine({required this.currentScreen, required this.isEmbedded});
 
   final Screen currentScreen;
+  final bool isEmbedded;
+
+  /// The padding around the footer in the DevTools UI.
+  EdgeInsets get padding => const EdgeInsets.fromLTRB(
+        defaultSpacing,
+        defaultSpacing,
+        defaultSpacing,
+        denseSpacing,
+      );
 
   @override
   Widget build(BuildContext context) {
+    final height = statusLineHeight + padding.top + padding.bottom;
     return ValueListenableBuilder<bool>(
       valueListenable: currentScreen.showIsolateSelector,
       builder: (context, showIsolateSelector, _) {
         return Container(
-          height: statusLineHeight,
+          decoration: BoxDecoration(
+            border: Border(
+              top: Divider.createBorderSide(context, width: 1.0),
+            ),
+          ),
+          padding: EdgeInsets.only(left: padding.left, right: padding.right),
+          height: height,
           alignment: Alignment.centerLeft,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -65,6 +83,16 @@ class StatusLine extends StatelessWidget {
         const BulletSpacer(),
       ],
       buildConnectionStatus(context, isExtraNarrow),
+      if (isEmbedded && !isExtraNarrow) ...[
+        const BulletSpacer(),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            ReportFeedbackButton(),
+            OpenAboutAction(),
+          ],
+        ),
+      ]
     ];
   }
 
@@ -115,8 +143,8 @@ class StatusLine extends StatelessWidget {
             description = 'web app';
           } else {
             final VM vm = serviceManager.vm!;
-            description =
-                '${vm.targetCPU}-${vm.architectureBits} ${vm.operatingSystem}';
+            description = '${vm.targetCPU} (${vm.architectureBits} bit) '
+                '${vm.operatingSystem}';
           }
 
           final color = textTheme.bodyText2!.color;
