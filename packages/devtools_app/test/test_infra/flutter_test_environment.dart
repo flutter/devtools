@@ -10,6 +10,7 @@ import 'package:devtools_app/src/config_specific/framework_initialize/_framework
 import 'package:devtools_app/src/primitives/message_bus.dart';
 
 import 'flutter_test_driver.dart';
+import 'flutter_test_storage.dart';
 
 final flutterVersion = Platform.environment['FLUTTER_VERSION'];
 
@@ -114,7 +115,7 @@ class FlutterTestEnvironment {
 
       _service = _flutter!.vmService!;
       final preferencesController = PreferencesController();
-      setGlobal(Storage, FlutterDesktopStorage());
+      setGlobal(Storage, FlutterTestStorage());
       await preferencesController.init();
       setGlobal(ServiceConnectionManager, ServiceConnectionManager());
       setGlobal(PreferencesController, preferencesController);
