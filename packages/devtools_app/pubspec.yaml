@@ -10,10 +10,7 @@ repository: https://github.com/flutter/devtools/tree/master/packages/devtools_ap
 
 environment:
   sdk: '>=2.17.0 <3.0.0'
-  # The flutter desktop support interacts with build scripts on the Flutter
-  # side that are not yet stable, so it requires a very recent version of
-  # Flutter. This version will increase regularly as the build scripts change.
-  flutter: '>=1.10.0'
+  flutter: '>=3.0.0'
 
 dependencies:
   ansi_up: ^1.0.0
