@@ -2,20 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:collection';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../analytics/analytics.dart' as ga;
 import '../../analytics/constants.dart' as analytics_constants;
+
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../primitives/blocking_action_mixin.dart';
 import '../../service/service_extensions.dart' as extensions;
-import '../../shared/common_widgets.dart';
+import '../../shared/common_widgets.dart' hide CheckboxSetting;
 import '../../shared/connected_app.dart';
+import '../../shared/dialogs.dart';
 import '../../shared/error_badge_manager.dart';
 import '../../shared/globals.dart';
+import '../../shared/scaffold.dart';
 import '../../shared/screen.dart';
 import '../../shared/split.dart';
 import '../../shared/theme.dart';
@@ -304,6 +309,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
           extensions.invertOversizedImages,
         ],
       ),
+      const SizedBox(width: defaultSpacing),
+      OpenInspectorSettingsAction(),
       // TODO(jacobr): implement TogglePlatformSelector.
       //  TogglePlatformSelector().selector
     ];
@@ -330,6 +337,95 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       }
       await inspectorController.onForceRefresh();
     });
+  }
+}
+
+class OpenInspectorSettingsAction extends StatelessWidget {
+  //Settings icon
+  @override
+  Widget build(BuildContext context) {
+    return DevToolsTooltip(
+      message: 'Inspector Settings',
+      child: SettingsOutlinedButton(
+        onPressed: () async {
+          unawaited(
+            showDialog(
+              context: context,
+              builder: (context) => FlutterInspectorSettingsDialog(),
+            ),
+          );
+        },
+        label: 'Flutter Inspector Settings',
+      ),
+    );
+  }
+}
+
+class FlutterInspectorSettingsDialog extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return DevToolsDialog(
+      title: dialogTitleText(Theme.of(context), 'Flutter Inspector Settings'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _CheckboxSetting(
+            label: const Text('Enable hover inspection'),
+            listenable: inspectorPreferences.hoverEvalModeEnabled,
+            toggle: inspectorPreferences.toggleHoverEvalMode,
+            gaItem: analytics_constants.hoverEvalMode,
+          )
+        ],
+      ),
+      actions: [
+        DialogCloseButton(),
+      ],
+    );
+  }
+}
+
+class _CheckboxSetting extends StatelessWidget {
+  const _CheckboxSetting({
+    Key? key,
+    required this.label,
+    required this.listenable,
+    required this.toggle,
+    required this.gaItem,
+  }) : super(key: key);
+
+  final Text label;
+
+  final ValueListenable<bool> listenable;
+
+  final Function(bool) toggle;
+
+  final String gaItem;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () => toggleSetting(!listenable.value),
+      child: Row(
+        children: [
+          ValueListenableBuilder<bool>(
+            valueListenable: listenable,
+            builder: (context, value, _) {
+              return Checkbox(value: value, onChanged: toggleSetting);
+            },
+          ),
+          label,
+        ],
+      ),
+    );
+  }
+
+  void toggleSetting(bool? newValue) {
+    ga.select(
+      analytics_constants.settingsDialog,
+      '$gaItem-${newValue == true ? 'enabled' : 'disabled'}',
+    );
+    toggle(newValue == true);
   }
 }
 

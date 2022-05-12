@@ -11,12 +11,10 @@ import 'globals.dart';
 class PreferencesController {
   final ValueNotifier<bool> _darkModeTheme = ValueNotifier(true);
   final ValueNotifier<bool> _vmDeveloperMode = ValueNotifier(false);
-  final ValueNotifier<bool> _hoverEvalMode = ValueNotifier(false);
   final ValueNotifier<bool> _denseMode = ValueNotifier(false);
 
   ValueListenable<bool> get darkModeTheme => _darkModeTheme;
   ValueListenable<bool> get vmDeveloperModeEnabled => _vmDeveloperMode;
-  ValueListenable<bool> get hoverEvalModeEnabled => _hoverEvalMode;
   ValueListenable<bool> get denseModeEnabled => _denseMode;
 
   Future<void> init() async {
@@ -29,10 +27,6 @@ class PreferencesController {
 
     value = await storage.getValue('ui.vmDeveloperMode');
     toggleVmDeveloperMode(value == 'true');
-    _hoverEvalMode.addListener(() {
-      storage.setValue('ui.hoverEvalMode', '${_hoverEvalMode.value}');
-    });
-
     _vmDeveloperMode.addListener(() {
       storage.setValue('ui.vmDeveloperMode', '${_vmDeveloperMode.value}');
     });
@@ -55,12 +49,6 @@ class PreferencesController {
   void toggleVmDeveloperMode(bool enableVmDeveloperMode) {
     _vmDeveloperMode.value = enableVmDeveloperMode;
     VmServicePrivate.enablePrivateRpcs = enableVmDeveloperMode;
-  }
-
-  /// Change the value for the VM developer mode setting.
-  void toggleHoverEvalMode(bool enableHoverEvalMode) {
-    _hoverEvalMode.value = enableHoverEvalMode;
-    VmServicePrivate.enablePrivateRpcs = enableHoverEvalMode; // What do?
   }
 
   /// Change the value for the dense mode setting.
