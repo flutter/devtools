@@ -1,15 +1,17 @@
 import 'dart:convert';
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/shared/inspector_preferences_controller.dart';
 import 'package:devtools_app/src/ui/hover.dart';
 import 'package:devtools_test/devtools_test.dart';
-
-import '../fixtures/riverpod_app/lib/tester.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('DiagnosticsNodeDescription', () {
     setUp(() {
       setGlobal(PreferencesController, PreferencesController());
+      setGlobal(
+          InspectorPreferencesController, InspectorPreferencesController());
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(ServiceConnectionManager, FakeServiceManager());
     });
@@ -63,7 +65,7 @@ void main() {
       late DiagnosticsNodeDescription diagnosticsNodeDescription;
 
       setUp(() {
-        preferences.toggleHoverEvalMode(true);
+        inspectorPreferences.toggleHoverEvalMode(true);
         diagnosticsNodeDescription = DiagnosticsNodeDescription(
           diagnostic,
           debuggerController: MockDebuggerController(),
@@ -79,7 +81,7 @@ void main() {
       });
 
       testWidgets('disabled from preferences', (WidgetTester tester) async {
-        preferences.toggleHoverEvalMode(false);
+        inspectorPreferences.toggleHoverEvalMode(false);
 
         await tester.pumpWidget(wrap(diagnosticsNodeDescription));
 
