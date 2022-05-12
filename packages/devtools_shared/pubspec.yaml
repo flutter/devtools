@@ -6,7 +6,7 @@ version: 2.13.1
 repository: https://github.com/flutter/devtools/tree/master/packages/devtools_shared
 
 environment:
-  sdk: '>=2.12.0 <3.0.0'
+  sdk: '>=2.17.0 <3.0.0'
 
 dependencies:
   path: ^1.8.0
