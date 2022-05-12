@@ -345,7 +345,7 @@ class OpenInspectorSettingsAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DevToolsTooltip(
-      message: 'Inspector Settings',
+      message: 'Flutter Inspector Settings',
       child: SettingsOutlinedButton(
         onPressed: () async {
           unawaited(
