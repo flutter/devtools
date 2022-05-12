@@ -3,16 +3,24 @@ import 'package:flutter/foundation.dart';
 import '../../devtools_app.dart';
 
 class InspectorPreferencesController {
-  final ValueNotifier<bool> _hoverEvalMode = ValueNotifier(ideTheme.embed);
+  final ValueNotifier<bool> _hoverEvalMode = ValueNotifier(false);
+  final String _hoverEvalModeStorageId = 'inspector.hoverEvalMode';
 
   ValueListenable<bool> get hoverEvalModeEnabled => _hoverEvalMode;
-  Future<void> init() async {
-    String? value = await storage.getValue('ui.darkMode');
 
-    value = await storage.getValue('ui.hoverEvalMode');
+  Future<void> init() async {
+    String? value = await storage.getValue(_hoverEvalModeStorageId);
+
+    // When embedded, default hoverEvalMode to off
+    value = await storage.getValue(_hoverEvalModeStorageId);
+    value ??= (!ideTheme.embed).toString();
     toggleHoverEvalMode(value == 'true');
+
     _hoverEvalMode.addListener(() {
-      storage.setValue('ui.hoverEvalMode', '${_hoverEvalMode.value}');
+      storage.setValue(
+        _hoverEvalModeStorageId,
+        _hoverEvalMode.value.toString(),
+      );
     });
 
     setGlobal(InspectorPreferencesController, this);
@@ -21,6 +29,5 @@ class InspectorPreferencesController {
   /// Change the value for the hover eval mode setting.
   void toggleHoverEvalMode(bool enableHoverEvalMode) {
     _hoverEvalMode.value = enableHoverEvalMode;
-    VmServicePrivate.enablePrivateRpcs = enableHoverEvalMode; // What do?
   }
 }
