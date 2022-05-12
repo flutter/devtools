@@ -20,7 +20,6 @@ import '../../shared/connected_app.dart';
 import '../../shared/dialogs.dart';
 import '../../shared/error_badge_manager.dart';
 import '../../shared/globals.dart';
-import '../../shared/scaffold.dart';
 import '../../shared/screen.dart';
 import '../../shared/split.dart';
 import '../../shared/theme.dart';

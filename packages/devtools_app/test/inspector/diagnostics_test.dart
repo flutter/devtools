@@ -11,7 +11,9 @@ void main() {
     setUp(() {
       setGlobal(PreferencesController, PreferencesController());
       setGlobal(
-          InspectorPreferencesController, InspectorPreferencesController());
+        InspectorPreferencesController,
+        InspectorPreferencesController(),
+      );
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(ServiceConnectionManager, FakeServiceManager());
     });
