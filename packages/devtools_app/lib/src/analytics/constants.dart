@@ -37,6 +37,7 @@ const appDisconnected = 'appDisconnected';
 // Main bar UX actions:
 const feedbackLink = 'feedback';
 const feedbackButton = 'feedbackButton';
+const discordLink = 'discord';
 
 // Inspector UX actions:
 const refresh = 'refresh';

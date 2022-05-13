@@ -41,6 +41,10 @@ void main() {
         findSubstring(aboutDialog, 'github.com/flutter/devtools'),
         findsOneWidget,
       );
+      expect(
+        findSubstring(aboutDialog, 'Discord'),
+        findsOneWidget,
+      );
     });
   });
 }

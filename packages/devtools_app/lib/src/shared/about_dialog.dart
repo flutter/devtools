@@ -16,6 +16,9 @@ import 'scaffold.dart';
 import 'theme.dart';
 
 class DevToolsAboutDialog extends StatelessWidget {
+  static const _discordChannelLink =
+      'https://discord.com/channels/608014603317936148/958862085297672282';
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -32,9 +35,30 @@ class DevToolsAboutDialog extends StatelessWidget {
             children: [
               const Text('Encountered an issue? Let us know at '),
               _createFeedbackLink(context),
-              const Text('.')
+              const Text(','),
             ],
           ),
+          Wrap(
+            children: [
+              const Text('or connect with us on '),
+              RichText(
+                text: LinkTextSpan(
+                  link: const Link(
+                    display: 'Discord',
+                    url: _discordChannelLink,
+                  ),
+                  context: context,
+                  onTap: () {
+                    ga.select(
+                      analytics_constants.devToolsMain,
+                      analytics_constants.discordLink,
+                    );
+                  },
+                ),
+              ),
+              const Text('.'),
+            ],
+          )
         ],
       ),
       actions: [
