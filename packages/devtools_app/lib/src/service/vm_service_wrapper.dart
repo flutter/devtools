@@ -290,6 +290,7 @@ class VmServiceWrapper implements VmService {
     int? endTokenPos,
     bool? forceCompile,
     bool? reportLines,
+    List<String>? libraryFilters,
   }) async {
     return trackFuture(
       'getSourceReport',
@@ -301,6 +302,7 @@ class VmServiceWrapper implements VmService {
         endTokenPos: endTokenPos,
         forceCompile: forceCompile,
         reportLines: reportLines,
+        libraryFilters: libraryFilters,
       ),
     );
   }

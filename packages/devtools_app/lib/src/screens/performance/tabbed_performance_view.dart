@@ -79,13 +79,21 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
     );
 
     final tabViews = [
-      TimelineEventsView(
-        controller: controller,
-        processing: widget.processing,
-        processingProgress: widget.processingProgress,
+      KeepAliveWrapper(
+        child: TimelineEventsView(
+          controller: controller,
+          processing: widget.processing,
+          processingProgress: widget.processingProgress,
+        ),
       ),
-      if (frameAnalysisSupported) frameAnalysisView,
-      if (rasterMetricsSupported) rasterMetrics,
+      if (frameAnalysisSupported)
+        KeepAliveWrapper(
+          child: frameAnalysisView,
+        ),
+      if (rasterMetricsSupported)
+        KeepAliveWrapper(
+          child: rasterMetrics,
+        ),
     ];
 
     return AnalyticsTabbedView(

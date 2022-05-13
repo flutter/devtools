@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
@@ -19,18 +20,26 @@ import '../../ui/search.dart';
 import '../../ui/utils.dart';
 import 'debugger_controller.dart';
 
+typedef AutoCompleteResultsFunction = Future<List<String>> Function(
+  EditingParts parts,
+  DebuggerController controller,
+);
+
 class ExpressionEvalField extends StatefulWidget {
   const ExpressionEvalField({
     required this.controller,
-  });
+    AutoCompleteResultsFunction? getAutoCompleteResults,
+  }) : getAutoCompleteResults =
+            getAutoCompleteResults ?? autoCompleteResultsFor;
 
   final DebuggerController controller;
+  final AutoCompleteResultsFunction getAutoCompleteResults;
 
   @override
-  _ExpressionEvalFieldState createState() => _ExpressionEvalFieldState();
+  ExpressionEvalFieldState createState() => ExpressionEvalFieldState();
 }
 
-class _ExpressionEvalFieldState extends State<ExpressionEvalField>
+class ExpressionEvalFieldState extends State<ExpressionEvalField>
     with AutoDisposeMixin, SearchFieldMixin {
   late AutoCompleteController _autoCompleteController;
   int historyPosition = -1;
@@ -65,11 +74,62 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
       _autoCompleteController.searchNotifier,
       _handleSearch,
     );
+
+    addAutoDisposeListener(
+      _autoCompleteController.currentSuggestion,
+      _handleSuggestionTextChange,
+    );
+
+    addAutoDisposeListener(
+      _autoCompleteController.currentHoveredIndex,
+      _handleHoverChange,
+    );
+  }
+
+  bool _isRealVariableNameOrField(EditingParts parts) {
+    return parts.activeWord.isNotEmpty || parts.isField;
+  }
+
+  void _handleHoverChange() {
+    final editingParts = _currentEditingParts();
+
+    if (!_isRealVariableNameOrField(editingParts)) {
+      return;
+    }
+
+    _autoCompleteController.updateCurrentSuggestion(_activeWord);
+  }
+
+  EditingParts _currentEditingParts() {
+    final searchingValue = _autoCompleteController.search;
+    final isField = searchingValue.endsWith('.');
+
+    final textFieldEditingValue = searchTextFieldController.value;
+    final selection = textFieldEditingValue.selection;
+
+    return AutoCompleteSearchControllerMixin.activeEditingParts(
+      searchingValue,
+      selection,
+      handleFields: isField,
+    );
+  }
+
+  void _handleSuggestionTextChange() {
+    if (searchTextFieldController.isAtEnd) {
+      // Only when the cursor is at the end of the text field, we update the
+      // `suggestionText` displayed at the end of the text field.
+
+      searchTextFieldController.suggestionText =
+          _autoCompleteController.currentSuggestion.value;
+    } else {
+      searchTextFieldController.suggestionText = null;
+    }
   }
 
   void _handleSearch() async {
     final searchingValue = _autoCompleteController.search;
-    final isField = searchingValue.endsWith('.');
+
+    _autoCompleteController.clearCurrentSuggestion();
 
     if (searchingValue.isNotEmpty) {
       if (_autoCompleteController.selectTheSearch) {
@@ -82,24 +142,22 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
       // as Flutter will render a frame before the new matches are available.
 
       // Find word in TextField to try and match (word breaks).
-      final textFieldEditingValue = searchTextFieldController.value;
-      final selection = textFieldEditingValue.selection;
-
-      final parts = AutoCompleteSearchControllerMixin.activeEditingParts(
-        searchingValue,
-        selection,
-        handleFields: isField,
-      );
+      final parts = _currentEditingParts();
 
       // Only show pop-up if there's a real variable name or field.
-      if (parts.activeWord.isEmpty && !parts.isField) {
+      if (!_isRealVariableNameOrField(parts)) {
         _autoCompleteController.clearSearchAutoComplete();
         return;
       }
 
-      final matches = parts.activeWord.startsWith(_activeWord)
-          ? _filterMatches(_matches, parts.activeWord)
-          : await autoCompleteResultsFor(parts, widget.controller);
+      // Update the current suggestion without waiting for the results to
+      // to prevent flickering of the suggestion text.
+      _autoCompleteController.updateCurrentSuggestion(parts.activeWord);
+
+      final matches =
+          parts.activeWord.startsWith(_activeWord) && _activeWord.isNotEmpty
+              ? _filterMatches(_matches, parts.activeWord)
+              : await widget.getAutoCompleteResults(parts, widget.controller);
 
       _matches = matches;
       _activeWord = parts.activeWord;
@@ -108,6 +166,7 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
         // It is not useful to show a single autocomplete that is exactly what
         // the already typed.
         _autoCompleteController.clearSearchAutoComplete();
+        _autoCompleteController.clearCurrentSuggestion();
       } else {
         final results = matches
             .sublist(
@@ -119,6 +178,7 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
 
         _autoCompleteController.searchAutoComplete.value = results;
         _autoCompleteController.setCurrentHoveredIndexValue(0);
+        _autoCompleteController.updateCurrentSuggestion(parts.activeWord);
       }
     } else {
       _autoCompleteController.closeAutoCompleteOverlay();
@@ -176,6 +236,11 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
                   ),
                 );
               },
+              // Disable ligatures, so the suggestions of the auto complete work correcly.
+              style: Theme.of(context)
+                  .textTheme
+                  .subtitle1
+                  ?.copyWith(fontFeatures: [const FontFeature.disable('liga')]),
             ),
           ),
         ),
@@ -188,6 +253,7 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
       _replaceActiveWord(word);
       _autoCompleteController.selectTheSearch = false;
       _autoCompleteController.closeAutoCompleteOverlay();
+      _autoCompleteController.clearCurrentSuggestion();
     });
   }
 

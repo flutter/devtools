@@ -292,21 +292,27 @@ class _CpuProfilerState extends State<CpuProfiler>
   }
 
   List<Widget> _buildProfilerViews() {
-    final bottomUp = CpuBottomUpTable(widget.bottomUpRoots);
-    final callTree = CpuCallTreeTable(widget.callTreeRoots);
-    final cpuFlameChart = LayoutBuilder(
-      builder: (context, constraints) {
-        return CpuProfileFlameChart(
-          data: data,
-          controller: widget.controller,
-          width: constraints.maxWidth,
-          height: constraints.maxHeight,
-          selectionNotifier: widget.controller.selectedCpuStackFrameNotifier,
-          searchMatchesNotifier: widget.controller.searchMatches,
-          activeSearchMatchNotifier: widget.controller.activeSearchMatch,
-          onDataSelected: (sf) => widget.controller.selectCpuStackFrame(sf),
-        );
-      },
+    final bottomUp = KeepAliveWrapper(
+      child: CpuBottomUpTable(widget.bottomUpRoots),
+    );
+    final callTree = KeepAliveWrapper(
+      child: CpuCallTreeTable(widget.callTreeRoots),
+    );
+    final cpuFlameChart = KeepAliveWrapper(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return CpuProfileFlameChart(
+            data: data,
+            controller: widget.controller,
+            width: constraints.maxWidth,
+            height: constraints.maxHeight,
+            selectionNotifier: widget.controller.selectedCpuStackFrameNotifier,
+            searchMatchesNotifier: widget.controller.searchMatches,
+            activeSearchMatchNotifier: widget.controller.activeSearchMatch,
+            onDataSelected: (sf) => widget.controller.selectCpuStackFrame(sf),
+          );
+        },
+      ),
     );
     final summaryView = widget.summaryView;
     // TODO(kenz): make this order configurable.

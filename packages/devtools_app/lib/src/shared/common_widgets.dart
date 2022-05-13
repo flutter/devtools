@@ -28,8 +28,6 @@ const tooltipWaitLong = Duration(milliseconds: 1000);
 /// The width of the package:flutter_test debugger device.
 const debuggerDeviceWidth = 800.0;
 
-const mediumDeviceWidth = 1000.0;
-
 const defaultDialogRadius = 20.0;
 double get areaPaneHeaderHeight => scaleByFontFactor(36.0);
 
@@ -1931,5 +1929,34 @@ class ElevatedCard extends StatelessWidget {
         padding: padding ?? const EdgeInsets.all(denseSpacing),
       ),
     );
+  }
+}
+
+/// A convenience wrapper for a [StatefulWidget] that uses the
+/// [AutomaticKeepAliveClientMixin] on its [State].
+///
+/// Wrap a widget in this class if you want [child] to stay alive, and avoid
+/// rebuilding. This is useful for children of [TabView]s. When wrapped in this
+/// wrapper, [child] will not be destroyed and rebuilt when switching tabs.
+///
+/// See [AutomaticKeepAliveClientMixin] for more information.
+class KeepAliveWrapper extends StatefulWidget {
+  const KeepAliveWrapper({Key? key, required this.child}) : super(key: key);
+
+  final Widget child;
+
+  @override
+  State<KeepAliveWrapper> createState() => _KeepAliveWrapperState();
+}
+
+class _KeepAliveWrapperState extends State<KeepAliveWrapper>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool wantKeepAlive = true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return widget.child;
   }
 }
