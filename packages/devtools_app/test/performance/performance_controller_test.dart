@@ -27,7 +27,6 @@ void main() async {
     tearDownAll(() async {
       await env.tearDownEnvironment(force: true);
     });
-
     setUp(() {
       env = FlutterTestEnvironment(
         const FlutterRunConfiguration(withDebugger: true),
@@ -40,37 +39,41 @@ void main() async {
       };
     });
 
-    test('processOfflineData', () async {
-      await env.setupEnvironment();
-      offlineController.enterOfflineMode();
-      final offlineTimelineData =
-          OfflinePerformanceData.parse(offlinePerformanceDataJson);
-      await performanceController.processOfflineData(offlineTimelineData);
-      expect(
-        isPerformanceDataEqual(
-          performanceController.data!,
-          offlineTimelineData,
-        ),
-        isTrue,
-      );
-      expect(
-        isPerformanceDataEqual(
-          performanceController.offlinePerformanceData!,
-          offlineTimelineData,
-        ),
-        isTrue,
-      );
-      expect(
-        performanceController.processor.uiThreadId,
-        equals(testUiThreadId),
-      );
-      expect(
-        performanceController.processor.rasterThreadId,
-        equals(testRasterThreadId),
-      );
+    test(
+      'processOfflineData',
+      () async {
+        await env.setupEnvironment();
+        offlineController.enterOfflineMode();
+        final offlineTimelineData =
+            OfflinePerformanceData.parse(offlinePerformanceDataJson);
+        await performanceController.processOfflineData(offlineTimelineData);
+        expect(
+          isPerformanceDataEqual(
+            performanceController.data!,
+            offlineTimelineData,
+          ),
+          isTrue,
+        );
+        expect(
+          isPerformanceDataEqual(
+            performanceController.offlinePerformanceData!,
+            offlineTimelineData,
+          ),
+          isTrue,
+        );
+        expect(
+          performanceController.processor.uiThreadId,
+          equals(testUiThreadId),
+        );
+        expect(
+          performanceController.processor.rasterThreadId,
+          equals(testRasterThreadId),
+        );
 
-      await env.tearDownEnvironment();
-    });
+        await env.tearDownEnvironment();
+      },
+      timeout: const Timeout.factor(8),
+    );
 
     test('frame selection', () async {
       await env.setupEnvironment();
