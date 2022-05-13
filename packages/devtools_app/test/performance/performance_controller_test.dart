@@ -17,17 +17,15 @@ import '../test_infra/flutter_test_driver.dart' show FlutterRunConfiguration;
 import '../test_infra/flutter_test_environment.dart';
 
 void main() async {
-  initializeLiveTestWidgetsFlutterBindingWithAssets();
-
-  late FlutterTestEnvironment env;
-
-  late PerformanceController performanceController;
-
   group('PerformanceController', () {
+    late FlutterTestEnvironment env;
+
+    late PerformanceController performanceController;
     tearDownAll(() async {
       await env.tearDownEnvironment(force: true);
     });
     setUp(() {
+      initializeLiveTestWidgetsFlutterBindingWithAssets();
       env = FlutterTestEnvironment(
         const FlutterRunConfiguration(withDebugger: true),
       );
