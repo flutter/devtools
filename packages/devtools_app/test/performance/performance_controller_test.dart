@@ -39,6 +39,18 @@ void main() async {
       await env.tearDownEnvironment(force: true);
     });
 
+    setUp(() {
+      env = FlutterTestEnvironment(
+        const FlutterRunConfiguration(withDebugger: true),
+      );
+      env.afterNewSetup = () async {
+        setGlobal(OfflineModeController, OfflineModeController());
+        performanceController = PerformanceController()
+          ..data = PerformanceData();
+        await performanceController.initialized;
+      };
+    });
+
     test('processOfflineData', () async {
       await env.setupEnvironment();
       offlineController.enterOfflineMode();
