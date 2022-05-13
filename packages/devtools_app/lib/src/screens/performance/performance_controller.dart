@@ -709,8 +709,6 @@ class PerformanceController extends DisposableController
     final uiThreadId = _threadIdForEvents({uiEventName}, traceEvents);
     final rasterThreadId = _threadIdForEvents({rasterEventName}, traceEvents);
 
-    print('Dake: offlineData: $offlineData');
-    print('Dake: offlineData Frames: ${offlineData.frames}');
     offlinePerformanceData = offlineData.shallowClone();
     data = offlineData.shallowClone();
 
@@ -759,10 +757,6 @@ class PerformanceController extends DisposableController
     if (frameToSelect != null) {
       _data.selectedFrame = frameToSelect;
       _selectedFrameNotifier.value = frameToSelect;
-    } else {
-      print('DAKE: no frame to select');
-      print('Dake: _offlineData: ${_offlineData}');
-      print('Dake: _offlineData Frames: ${_offlineData.frames}');
     }
     if (_offlineData.selectedEvent != null) {
       for (var timelineEvent in _data.timelineEvents) {
