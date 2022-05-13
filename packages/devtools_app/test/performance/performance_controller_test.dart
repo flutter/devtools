@@ -17,29 +17,49 @@ import '../test_infra/flutter_test_driver.dart' show FlutterRunConfiguration;
 import '../test_infra/flutter_test_environment.dart';
 
 void main() async {
-  group('PerformanceController', () {
-    late FlutterTestEnvironment env;
+  initializeLiveTestWidgetsFlutterBindingWithAssets();
 
-    late PerformanceController performanceController;
+  PerformanceController performanceController;
+
+  setUp(() async {
+    FlutterTestEnvironment env = FlutterTestEnvironment(
+      const FlutterRunConfiguration(withDebugger: true),
+    );
+    // await Future.delayed(
+    //   const Duration(
+    //     seconds: 10,
+    //   ),
+    // );
+    env.afterNewSetup = () async {
+      setGlobal(OfflineModeController, OfflineModeController());
+      performanceController = PerformanceController()..data = PerformanceData();
+      await performanceController.initialized;
+    };
+    print('DAKE: SETUP  DONE RUNNING');
+  });
+  group('PerformanceController', () {
     tearDownAll(() async {
       await env.tearDownEnvironment(force: true);
-    });
-    setUp(() {
-      initializeLiveTestWidgetsFlutterBindingWithAssets();
-      env = FlutterTestEnvironment(
-        const FlutterRunConfiguration(withDebugger: true),
-      );
-      env.afterNewSetup = () async {
-        setGlobal(OfflineModeController, OfflineModeController());
-        performanceController = PerformanceController()
-          ..data = PerformanceData();
-        await performanceController.initialized;
-      };
     });
 
     test(
       'processOfflineData',
       () async {
+        late PerformanceController performanceController;
+        FlutterTestEnvironment env = FlutterTestEnvironment(
+          const FlutterRunConfiguration(withDebugger: true),
+        );
+        // await Future.delayed(
+        //   const Duration(
+        //     seconds: 10,
+        //   ),
+        // );
+        env.afterNewSetup = () async {
+          setGlobal(OfflineModeController, OfflineModeController());
+          performanceController = PerformanceController()
+            ..data = PerformanceData();
+          await performanceController.initialized;
+        };
         await env.setupEnvironment();
         offlineController.enterOfflineMode();
         final offlineTimelineData =
@@ -74,6 +94,21 @@ void main() async {
     );
 
     test('frame selection', () async {
+      late PerformanceController performanceController;
+      FlutterTestEnvironment env = FlutterTestEnvironment(
+        const FlutterRunConfiguration(withDebugger: true),
+      );
+      // await Future.delayed(
+      //   const Duration(
+      //     seconds: 10,
+      //   ),
+      // );
+      env.afterNewSetup = () async {
+        setGlobal(OfflineModeController, OfflineModeController());
+        performanceController = PerformanceController()
+          ..data = PerformanceData();
+        await performanceController.initialized;
+      };
       await env.setupEnvironment();
 
       final frame0 = testFrame0.shallowCopy()
@@ -123,6 +158,21 @@ void main() async {
     test(
         'UI event flow sets frame.timeFromEventFlows end time if it completes after raster event flow',
         () {
+      late PerformanceController performanceController;
+      FlutterTestEnvironment env = FlutterTestEnvironment(
+        const FlutterRunConfiguration(withDebugger: true),
+      );
+      // await Future.delayed(
+      //   const Duration(
+      //     seconds: 10,
+      //   ),
+      // );
+      env.afterNewSetup = () async {
+        setGlobal(OfflineModeController, OfflineModeController());
+        performanceController = PerformanceController()
+          ..data = PerformanceData();
+        await performanceController.initialized;
+      };
       final uiEvent = goldenUiTimelineEvent.deepCopy()
         ..time = (TimeRange()
           ..start = const Duration(microseconds: 5000)
@@ -156,6 +206,21 @@ void main() async {
     });
 
     test('add frame', () async {
+      late PerformanceController performanceController;
+      FlutterTestEnvironment env = FlutterTestEnvironment(
+        const FlutterRunConfiguration(withDebugger: true),
+      );
+      // await Future.delayed(
+      //   const Duration(
+      //     seconds: 10,
+      //   ),
+      // );
+      env.afterNewSetup = () async {
+        setGlobal(OfflineModeController, OfflineModeController());
+        performanceController = PerformanceController()
+          ..data = PerformanceData();
+        await performanceController.initialized;
+      };
       await env.setupEnvironment();
       await performanceController.clearData();
 
@@ -170,6 +235,21 @@ void main() async {
     });
 
     test('matchesForSearch', () async {
+      late PerformanceController performanceController;
+      FlutterTestEnvironment env = FlutterTestEnvironment(
+        const FlutterRunConfiguration(withDebugger: true),
+      );
+      // await Future.delayed(
+      //   const Duration(
+      //     seconds: 10,
+      //   ),
+      // );
+      env.afterNewSetup = () async {
+        setGlobal(OfflineModeController, OfflineModeController());
+        performanceController = PerformanceController()
+          ..data = PerformanceData();
+        await performanceController.initialized;
+      };
       await env.setupEnvironment();
 
       // Verify an empty list is returned for bad input.
@@ -193,6 +273,21 @@ void main() async {
     });
 
     test('search query searches through previous matches', () async {
+      late PerformanceController performanceController;
+      FlutterTestEnvironment env = FlutterTestEnvironment(
+        const FlutterRunConfiguration(withDebugger: true),
+      );
+      // await Future.delayed(
+      //   const Duration(
+      //     seconds: 10,
+      //   ),
+      // );
+      env.afterNewSetup = () async {
+        setGlobal(OfflineModeController, OfflineModeController());
+        performanceController = PerformanceController()
+          ..data = PerformanceData();
+        await performanceController.initialized;
+      };
       await env.setupEnvironment();
 
       await performanceController.clearData();
