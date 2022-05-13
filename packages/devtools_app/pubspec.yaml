@@ -9,11 +9,8 @@ version: 2.13.1
 repository: https://github.com/flutter/devtools/tree/master/packages/devtools_app
 
 environment:
-  sdk: '>=2.16.0 <3.0.0'
-  # The flutter desktop support interacts with build scripts on the Flutter
-  # side that are not yet stable, so it requires a very recent version of
-  # Flutter. This version will increase regularly as the build scripts change.
-  flutter: '>=1.10.0'
+  sdk: '>=2.17.0 <3.0.0'
+  flutter: '>=3.0.0'
 
 dependencies:
   ansi_up: ^1.0.0
@@ -36,7 +33,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_markdown: ^0.6.8
-  flutter_riverpod: ^2.0.0-dev.5
+  flutter_riverpod: ^2.0.0-dev.7
   flutter_web_plugins:
     sdk: flutter
   http: ^0.13.4
