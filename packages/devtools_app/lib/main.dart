@@ -43,6 +43,7 @@ void main() async {
   // Set the extension points global.
   setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
   setGlobal(IdeTheme, getIdeTheme());
+
   // inspectorPreferences depends on the IdeTheme global
   // to initialize
   final inspectorPreferences = InspectorPreferencesController();
