@@ -19,20 +19,25 @@ import '../test_infra/flutter_test_environment.dart';
 void main() async {
   initializeLiveTestWidgetsFlutterBindingWithAssets();
 
-  final FlutterTestEnvironment env = FlutterTestEnvironment(
-    const FlutterRunConfiguration(withDebugger: true),
-  );
+  late FlutterTestEnvironment env;
 
   late PerformanceController performanceController;
-  env.afterNewSetup = () async {
-    setGlobal(OfflineModeController, OfflineModeController());
-    performanceController = PerformanceController()..data = PerformanceData();
-    await performanceController.initialized;
-  };
 
   group('PerformanceController', () {
     tearDownAll(() async {
       await env.tearDownEnvironment(force: true);
+    });
+
+    setUp(() {
+      env = FlutterTestEnvironment(
+        const FlutterRunConfiguration(withDebugger: true),
+      );
+      env.afterNewSetup = () async {
+        setGlobal(OfflineModeController, OfflineModeController());
+        performanceController = PerformanceController()
+          ..data = PerformanceData();
+        await performanceController.initialized;
+      };
     });
 
     test('processOfflineData', () async {
