@@ -289,7 +289,7 @@ class FlutterFramesChartItem extends StatelessWidget {
     required this.displayRefreshRate,
   });
 
-  static const defaultFrameWidth = 32.0;
+  static const defaultFrameWidth = 24.0;
 
   static const selectedIndicatorHeight = 8.0;
 
