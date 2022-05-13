@@ -18,7 +18,7 @@ void main() {
       setGlobal(ServiceConnectionManager, FakeServiceManager());
     });
 
-    group('hover', () {
+    group('hover eval', () {
       final renderObjectJson = jsonDecode(
         '''
         {
@@ -74,7 +74,8 @@ void main() {
         );
       });
 
-      testWidgets('enabled from preferences', (WidgetTester tester) async {
+      testWidgets('can be enabled from preferences',
+          (WidgetTester tester) async {
         await tester.pumpWidget(wrap(diagnosticsNodeDescription));
 
         final hoverCardTooltip =
@@ -82,7 +83,8 @@ void main() {
         expect(hoverCardTooltip.enabled(), true);
       });
 
-      testWidgets('disabled from preferences', (WidgetTester tester) async {
+      testWidgets('can be disabled from preferences',
+          (WidgetTester tester) async {
         inspectorPreferences.toggleHoverEvalMode(false);
 
         await tester.pumpWidget(wrap(diagnosticsNodeDescription));
