@@ -21,27 +21,8 @@ void main() async {
 
   PerformanceController performanceController;
 
-  setUp(() async {
-    FlutterTestEnvironment env = FlutterTestEnvironment(
-      const FlutterRunConfiguration(withDebugger: true),
-    );
-    // await Future.delayed(
-    //   const Duration(
-    //     seconds: 10,
-    //   ),
-    // );
-    env.afterNewSetup = () async {
-      setGlobal(OfflineModeController, OfflineModeController());
-      performanceController = PerformanceController()..data = PerformanceData();
-      await performanceController.initialized;
-    };
-    print('DAKE: SETUP  DONE RUNNING');
-  });
+  setUp(() async {});
   group('PerformanceController', () {
-    tearDownAll(() async {
-      await env.tearDownEnvironment(force: true);
-    });
-
     test(
       'processOfflineData',
       () async {
