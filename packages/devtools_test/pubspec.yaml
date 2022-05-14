@@ -1,27 +1,25 @@
 name: devtools_test
 description: A package containing shared test helpers for Dart DevTools tests.
+publish_to: none
 
 # Note: this version should only be updated by running tools/update_version.dart
 # that updates all versions of packages from packages/devtools.
 # When publishing new versions of this package be sure to publish a new version
 # of package:devtools as well. package:devtools contains a compiled snapshot of
 # this package.
-version: 2.13.0-dev.1
+version: 2.13.1
 
 repository: https://github.com/flutter/devtools/tree/master/packages/devtools_test
 
 environment:
-  sdk: '>=2.12.0 <3.0.0'
-  # The flutter desktop support interacts with build scripts on the Flutter
-  # side that are not yet stable, so it requires a very recent version of
-  # Flutter. This version will increase regularly as the build scripts change.
-  flutter: '>=1.10.0'
+  sdk: '>=2.17.0 <3.0.0'
+  flutter: '>=3.0.0'
 
 dependencies:
   async: ^2.0.0
   collection: ^1.15.0
-  devtools_shared: 2.13.0-dev.1
-  devtools_app: 2.13.0-dev.1
+  devtools_shared: 2.13.1
+  devtools_app: 2.13.1
   flutter:
     sdk: flutter
   flutter_test:
@@ -29,7 +27,7 @@ dependencies:
   mockito: ^5.0.9
   path: ^1.8.0
   pedantic: ^1.11.0
-  provider: ^5.0.0
+  provider: ^6.0.2
   vm_service: ^8.1.0
   vm_snapshot_analysis: ^0.7.1
   webkit_inspection_protocol: '>=0.5.0 <2.0.0'

@@ -37,6 +37,7 @@ const appDisconnected = 'appDisconnected';
 // Main bar UX actions:
 const feedbackLink = 'feedback';
 const feedbackButton = 'feedbackButton';
+const discordLink = 'discord';
 
 // Inspector UX actions:
 const refresh = 'refresh';
@@ -80,6 +81,7 @@ const disablePhysicalShapeLayersOption = 'disablePhysicalShapeLayers';
 const disablePhysicalShapeLayersOptionDocs = 'disablePhysicalShapeLayersDocs';
 const shaderCompilationDocsTooltipLink = 'shaderCompilationDocsTooltipLink';
 const analyzeSelectedFrame = 'analyzeSelectedFrame';
+const collectRasterStats = 'collectRasterStats';
 
 // CPU profiler UX actions:
 const profileGranularityPrefix = 'profileGranularity';

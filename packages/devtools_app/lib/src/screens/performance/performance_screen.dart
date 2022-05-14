@@ -30,7 +30,7 @@ import 'event_details.dart';
 import 'flutter_frames_chart.dart';
 import 'performance_controller.dart';
 import 'performance_model.dart';
-import 'timeline_flame_chart.dart';
+import 'tabbed_performance_view.dart';
 
 // TODO(kenz): handle small screen widths better by using Wrap instead of Row
 // where applicable.
@@ -380,12 +380,28 @@ class MoreDebuggingOptionsButton extends StatelessWidget {
         extensions.disableOpacityLayers,
         extensions.disablePhysicalShapeLayers,
       ],
-      overlayDescription: Text(
-        'When toggling on/off a rendering layer, you will need '
-        'to reproduce activity in your app to see the effects of the '
-        'debugging option. All layers are rendered by default - disabling a '
-        'layer may help you identify expensive operations in your app.',
-        style: Theme.of(context).subtleTextStyle,
+      overlayDescription: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'After toggling a rendering layer on/off, '
+            'reproduce the activity in your app to see the effects. '
+            'All layers are rendered by default - disabling a '
+            'layer might help identify expensive operations in your app.',
+            style: Theme.of(context).subtleTextStyle,
+          ),
+          if (serviceManager.connectedApp!.isProfileBuildNow!) ...[
+            const SizedBox(height: denseSpacing),
+            RichText(
+              text: TextSpan(
+                text:
+                    "These debugging options aren't available in profile mode. "
+                    'To use them, run your app in debug mode.',
+                style: Theme.of(context).subtleErrorTextStyle,
+              ),
+            )
+          ]
+        ],
       ),
       overlayWidthBeforeScaling: _width,
     );

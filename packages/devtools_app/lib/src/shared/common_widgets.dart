@@ -28,8 +28,6 @@ const tooltipWaitLong = Duration(milliseconds: 1000);
 /// The width of the package:flutter_test debugger device.
 const debuggerDeviceWidth = 800.0;
 
-const mediumDeviceWidth = 1000.0;
-
 const defaultDialogRadius = 20.0;
 double get areaPaneHeaderHeight => scaleByFontFactor(36.0);
 
@@ -773,9 +771,7 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
     this.needsTopBorder = true,
     this.needsBottomBorder = true,
     this.needsLeftBorder = false,
-    this.leftActions = const [],
-    this.scrollableCenterActions = const [],
-    this.rightActions = const [],
+    this.actions = const [],
     this.leftPadding = defaultSpacing,
     this.rightPadding = densePadding,
     this.tall = false,
@@ -786,9 +782,7 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
   final bool needsTopBorder;
   final bool needsBottomBorder;
   final bool needsLeftBorder;
-  final List<Widget> leftActions;
-  final List<Widget> rightActions;
-  final List<Widget> scrollableCenterActions;
+  final List<Widget> actions;
   final double leftPadding;
   final double rightPadding;
   final bool tall;
@@ -812,41 +806,19 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
         alignment: Alignment.centerLeft,
         child: Row(
           children: [
-            DefaultTextStyle(
-              maxLines: maxLines,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.subtitle2!,
-              child: title,
+            Expanded(
+              child: DefaultTextStyle(
+                maxLines: maxLines,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.subtitle2!,
+                child: title,
+              ),
             ),
-            ..._buildActions(),
+            ...actions,
           ],
         ),
       ),
     );
-  }
-
-  List<Widget> _buildActions() {
-    return [
-      if (scrollableCenterActions.isEmpty)
-        Expanded(
-          child: Row(
-            children: leftActions,
-          ),
-        ),
-      if (scrollableCenterActions.isNotEmpty) ...[
-        ...leftActions,
-        Expanded(
-          // TODO(kenz): make this look more scrollable when there are too many
-          // actions. Either with a faded overlay over the end of the list or
-          // with a scrollbar.
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            children: scrollableCenterActions,
-          ),
-        )
-      ],
-      ...rightActions,
-    ];
   }
 
   @override
@@ -1957,5 +1929,34 @@ class ElevatedCard extends StatelessWidget {
         padding: padding ?? const EdgeInsets.all(denseSpacing),
       ),
     );
+  }
+}
+
+/// A convenience wrapper for a [StatefulWidget] that uses the
+/// [AutomaticKeepAliveClientMixin] on its [State].
+///
+/// Wrap a widget in this class if you want [child] to stay alive, and avoid
+/// rebuilding. This is useful for children of [TabView]s. When wrapped in this
+/// wrapper, [child] will not be destroyed and rebuilt when switching tabs.
+///
+/// See [AutomaticKeepAliveClientMixin] for more information.
+class KeepAliveWrapper extends StatefulWidget {
+  const KeepAliveWrapper({Key? key, required this.child}) : super(key: key);
+
+  final Widget child;
+
+  @override
+  State<KeepAliveWrapper> createState() => _KeepAliveWrapperState();
+}
+
+class _KeepAliveWrapperState extends State<KeepAliveWrapper>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool wantKeepAlive = true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return widget.child;
   }
 }

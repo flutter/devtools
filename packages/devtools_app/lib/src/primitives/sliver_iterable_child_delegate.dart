@@ -12,23 +12,23 @@ class SliverIterableChildDelegate extends SliverChildDelegate {
     this.estimatedChildCount,
   });
 
-  final Iterable<Widget> children;
+  final Iterable<Widget?> children;
   int? _lastAccessedIndex;
-  Iterator<Widget>? _lastAccessedIterator;
+  late Iterator<Widget?> _lastAccessedIterator;
 
   @override
-  Widget build(BuildContext context, int index) {
+  Widget? build(BuildContext context, int index) {
     if (_lastAccessedIndex == null || _lastAccessedIndex! > index) {
       _lastAccessedIndex = -1;
       _lastAccessedIterator = children.iterator;
     }
 
     while (_lastAccessedIndex! < index) {
-      _lastAccessedIterator!.moveNext();
+      _lastAccessedIterator.moveNext();
       _lastAccessedIndex = _lastAccessedIndex! + 1;
     }
 
-    return _lastAccessedIterator!.current;
+    return _lastAccessedIterator.current;
   }
 
   @override
