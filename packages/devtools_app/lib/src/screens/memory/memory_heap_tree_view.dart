@@ -143,10 +143,13 @@ class HeapTreeViewState extends State<HeapTree>
   static const dartHeapAnalysisTabKey = Key('Dart Heap Analysis Tab');
   @visibleForTesting
   static const dartHeapAllocationsTabKey = Key('Dart Heap Allocations Tab');
+  @visibleForTesting
+  static const dartMemoryLeaksTabKey = Key('Dart Memory Leaks Tab');
 
   /// Below constants should match index for Tab index in DartHeapTabs.
   static const int analysisTabIndex = 0;
   static const int allocationsTabIndex = 1;
+  static const int memoryLeaksTabIndex = 2;
 
   static const _gaPrefix = 'memoryTab';
 
@@ -160,6 +163,11 @@ class HeapTreeViewState extends State<HeapTree>
       key: dartHeapAllocationsTabKey,
       gaPrefix: _gaPrefix,
       tabName: 'Allocations',
+    ),
+    DevToolsTab.create(
+      key: dartMemoryLeaksTabKey,
+      gaPrefix: _gaPrefix,
+      tabName: 'Memory Leaks',
     ),
   ];
 
@@ -200,6 +208,13 @@ class HeapTreeViewState extends State<HeapTree>
     addAutoDisposeListener(_tabController);
 
     _animation = _setupBubbleAnimationController();
+
+    messageBus.onEvent().listen((event) {
+      print('1 $event');
+    });
+    serviceManager.service!.onReceive.listen((event) {
+      print('2 $event');
+    });
   }
 
   @override
@@ -458,6 +473,9 @@ class HeapTreeViewState extends State<HeapTree>
                     const Expanded(child: AllocationTableView()),
                   ],
                 ),
+
+                // Memory Leaks Tab
+                const Text('Memory leaks will be here'),
               ],
             ),
           ),
