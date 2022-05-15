@@ -209,12 +209,16 @@ class HeapTreeViewState extends State<HeapTree>
 
     _animation = _setupBubbleAnimationController();
 
-    messageBus.onEvent().listen((event) {
-      print('1 $event');
-    });
-    serviceManager.service!.onReceive.listen((event) {
-      print('2 $event');
-    });
+    _subscribeForMemoryLeaks();
+  }
+
+  void _subscribeForMemoryLeaks() {
+    autoDisposeStreamSubscription(
+        serviceManager.service!.onExtensionEventWithHistory.listen((event) {
+      if (event.extensionKind == 'MemoryLeaks') {
+        print('received MemoryLeak event ${event.type}');
+      }
+    }));
   }
 
   @override
