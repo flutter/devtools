@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' as convert;
 import 'dart:math';
 
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_json_view/flutter_json_view.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -213,12 +213,14 @@ class HeapTreeViewState extends State<HeapTree>
     _subscribeForMemoryLeaks();
   }
 
-  String _leaksJson = '"no information yet"';
+  var _leaksJson = <String, dynamic>{};
   void _subscribeForMemoryLeaks() {
     autoDisposeStreamSubscription(
       serviceManager.service!.onExtensionEventWithHistory.listen((event) {
         if (event.extensionKind == 'MemoryLeaks') {
-          setState(() => _leaksJson = convert.jsonEncode(event.json));
+          setState(
+            () => _leaksJson = event.json!['extensionData']!,
+          );
         }
       }),
     );
@@ -482,7 +484,8 @@ class HeapTreeViewState extends State<HeapTree>
                 ),
 
                 // Memory Leaks Tab
-                Text(_leaksJson),
+
+                JsonView.map(_leaksJson),
               ],
             ),
           ),

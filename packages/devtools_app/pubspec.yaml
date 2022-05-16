@@ -51,6 +51,7 @@ dependencies:
   vm_service: ^8.3.0
   vm_snapshot_analysis: ^0.7.1
   web_socket_channel: ^2.1.0
+  flutter_json_view: ^0.3.1
   # widget_icons: ^0.0.1
 
 dev_dependencies:
