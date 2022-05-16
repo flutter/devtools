@@ -17,7 +17,7 @@ on:
 # track the latest Flutter dev release. Dev releases come out ~weekly;
 # the versions can be viewed at https://github.com/flutter/flutter/tags.
 env:
-  PINNED_FLUTTER_CHANNEL: 2.13.0-0.3.pre
+  PINNED_FLUTTER_CHANNEL: 3.0.0
 
 jobs:
   main:

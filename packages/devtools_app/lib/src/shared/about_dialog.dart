@@ -25,16 +25,23 @@ class DevToolsAboutDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _aboutDevTools(context),
+          const SelectableText('DevTools version ${devtools.version}'),
           const SizedBox(height: defaultSpacing),
           ...dialogSubHeader(theme, 'Feedback'),
           Wrap(
-            children: [
-              const Text('Encountered an issue? Let us know at '),
-              _createFeedbackLink(context),
-              const Text('.')
+            children: const [
+              Text('Encountered an issue? Let us know at '),
+              _FeedbackLink(),
+              Text(','),
             ],
           ),
+          Wrap(
+            children: const [
+              Text('or connect with us on '),
+              _DiscordLink(),
+              Text('.'),
+            ],
+          )
         ],
       ),
       actions: [
@@ -42,12 +49,13 @@ class DevToolsAboutDialog extends StatelessWidget {
       ],
     );
   }
+}
 
-  Widget _aboutDevTools(BuildContext context) {
-    return const SelectableText('DevTools version ${devtools.version}');
-  }
+class _FeedbackLink extends StatelessWidget {
+  const _FeedbackLink({Key? key}) : super(key: key);
 
-  Widget _createFeedbackLink(BuildContext context) {
+  @override
+  Widget build(BuildContext context) {
     return RichText(
       text: LinkTextSpan(
         link: devToolsExtensionPoints.issueTrackerLink(),
@@ -56,6 +64,32 @@ class DevToolsAboutDialog extends StatelessWidget {
           ga.select(
             analytics_constants.devToolsMain,
             analytics_constants.feedbackLink,
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _DiscordLink extends StatelessWidget {
+  const _DiscordLink({Key? key}) : super(key: key);
+
+  static const _channelLink =
+      'https://discord.com/channels/608014603317936148/958862085297672282';
+
+  @override
+  Widget build(BuildContext context) {
+    return RichText(
+      text: LinkTextSpan(
+        link: const Link(
+          display: 'Discord',
+          url: _channelLink,
+        ),
+        context: context,
+        onTap: () {
+          ga.select(
+            analytics_constants.devToolsMain,
+            analytics_constants.discordLink,
           );
         },
       ),
