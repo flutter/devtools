@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert' as convert;
 import 'dart:math';
 
 import 'package:collection/collection.dart' show IterableExtension;
@@ -212,13 +213,15 @@ class HeapTreeViewState extends State<HeapTree>
     _subscribeForMemoryLeaks();
   }
 
+  String _leaksJson = '"no information yet"';
   void _subscribeForMemoryLeaks() {
     autoDisposeStreamSubscription(
-        serviceManager.service!.onExtensionEventWithHistory.listen((event) {
-      if (event.extensionKind == 'MemoryLeaks') {
-        print('received MemoryLeak event ${event.type}');
-      }
-    }));
+      serviceManager.service!.onExtensionEventWithHistory.listen((event) {
+        if (event.extensionKind == 'MemoryLeaks') {
+          setState(() => _leaksJson = convert.jsonEncode(event.json));
+        }
+      }),
+    );
   }
 
   @override
@@ -479,7 +482,7 @@ class HeapTreeViewState extends State<HeapTree>
                 ),
 
                 // Memory Leaks Tab
-                const Text('Memory leaks will be here'),
+                Text(_leaksJson),
               ],
             ),
           ),
