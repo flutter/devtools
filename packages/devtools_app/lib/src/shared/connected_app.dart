@@ -161,6 +161,20 @@ class ConnectedApp {
     generateDevToolsTitle();
     initialized.complete(true);
   }
+
+  String get display {
+    final identifiers = <String>[];
+    if (isFlutterAppNow!) {
+      identifiers.addAll([
+        'Flutter',
+        isFlutterWebAppNow ? 'web' : 'native',
+        isProfileBuildNow! ? '(profile build)' : '(debug build)',
+      ]);
+    } else {
+      identifiers.addAll(['Dart', isDartWebAppNow! ? 'web' : 'CLI']);
+    }
+    return identifiers.join(' ');
+  }
 }
 
 class OfflineConnectedApp extends ConnectedApp {

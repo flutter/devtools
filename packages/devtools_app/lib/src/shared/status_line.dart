@@ -10,7 +10,6 @@ import 'package:vm_service/vm_service.dart';
 import '../../devtools.dart' as devtools;
 import '../analytics/analytics.dart' as ga;
 import '../analytics/constants.dart' as analytics_constants;
-import '../info/info_controller.dart';
 import '../service/isolate_manager.dart';
 import '../service/service_manager.dart';
 import '../ui/utils.dart';
@@ -171,15 +170,11 @@ class StatusLine extends StatelessWidget {
                 message: 'Device Info',
                 child: InkWell(
                   onTap: () async {
-                    final flutterVersion =
-                        await InfoController.getFlutterVersion();
-
                     unawaited(
                       showDialog(
                         context: context,
                         builder: (context) => DeviceDialog(
                           connectedApp: app,
-                          flutterVersion: flutterVersion,
                         ),
                       ),
                     );

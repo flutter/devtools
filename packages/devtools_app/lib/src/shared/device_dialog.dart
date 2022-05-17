@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../info/info_controller.dart';
 import '../primitives/auto_dispose_mixin.dart';
 import '../primitives/utils.dart';
 import 'common_widgets.dart';
@@ -19,16 +18,11 @@ import 'table.dart';
 import 'table_data.dart';
 import 'theme.dart';
 import 'utils.dart';
-import 'version.dart';
 
 class DeviceDialog extends StatelessWidget {
-  const DeviceDialog({
-    required this.connectedApp,
-    required this.flutterVersion,
-  });
+  const DeviceDialog({required this.connectedApp});
 
   final ConnectedApp connectedApp;
-  final FlutterVersion? flutterVersion;
 
   @override
   Widget build(BuildContext context) {
@@ -39,31 +33,7 @@ class DeviceDialog extends StatelessWidget {
 
     if (vm == null) return const SizedBox();
 
-    var version = vm.version!;
-    // Convert '2.9.0-13.0.dev (dev) (Fri May ... +0200) on "macos_x64"' to
-    // '2.9.0-13.0.dev'.
-    if (version.contains(' ')) {
-      version = version.substring(0, version.indexOf(' '));
-    }
-
-    var bits = '';
-    if (vm.architectureBits != -1) {
-      bits = '-${vm.architectureBits}';
-    }
-
-    final items = {
-      'Dart Version': version,
-      'CPU / OS': '${vm.targetCPU}$bits / ${vm.operatingSystem}',
-      if (flutterVersion != null) ...{
-        'Flutter Version':
-            '${flutterVersion!.version} / ${flutterVersion!.channel}',
-        'Framework / Engine': '${flutterVersion!.frameworkRevision} / '
-            '${flutterVersion!.engineRevision}',
-      },
-      if (serviceManager.service != null)
-        'VM Service Connection':
-            serviceManager.service!.connectedUri.toString(),
-    };
+    final items = generateDeviceDescription(vm, connectedApp);
 
     // TODO(kenz): set actions alignment to `spaceBetween` if
     // https://github.com/flutter/flutter/issues/69708 is fixed.
@@ -131,17 +101,15 @@ class VMFlagsDialog extends StatefulWidget {
 }
 
 class _VMFlagsDialogState extends State<VMFlagsDialog> with AutoDisposeMixin {
-  late InfoController infoController;
   late final TextEditingController filterController;
 
-  List<_DialogFlag> flags = [];
-  List<_DialogFlag> filteredFlags = [];
+  var flags = <_DialogFlag>[];
+
+  var filteredFlags = <_DialogFlag>[];
 
   @override
   void initState() {
     super.initState();
-
-    infoController = InfoController();
 
     filterController = TextEditingController();
     filterController.addListener(() {
@@ -151,7 +119,7 @@ class _VMFlagsDialogState extends State<VMFlagsDialog> with AutoDisposeMixin {
     });
 
     _updateFromController();
-    addAutoDisposeListener(infoController.flagListNotifier, () {
+    addAutoDisposeListener(serviceManager.vmFlagManager.flags, () {
       setState(() {
         _updateFromController();
       });
@@ -159,7 +127,7 @@ class _VMFlagsDialogState extends State<VMFlagsDialog> with AutoDisposeMixin {
   }
 
   void _updateFromController() {
-    flags = (infoController.flagListNotifier.value?.flags ?? [])
+    flags = (serviceManager.vmFlagManager.flags.value?.flags ?? [])
         .map((flag) => _DialogFlag(flag))
         .toList();
     _refilter();
@@ -214,13 +182,6 @@ class _VMFlagsDialogState extends State<VMFlagsDialog> with AutoDisposeMixin {
         DialogCloseButton(),
       ],
     );
-  }
-
-  @override
-  void dispose() {
-    infoController.dispose();
-
-    super.dispose();
   }
 }
 
@@ -301,4 +262,38 @@ class _DialogFlag {
   String? get description => flag.comment;
 
   String? get value => flag.valueAsString;
+}
+
+Map<String, String> generateDeviceDescription(
+  VM vm,
+  ConnectedApp connectedApp, {
+  bool includeVmServiceConnection = true,
+}) {
+  var version = vm.version!;
+  // Convert '2.9.0-13.0.dev (dev) (Fri May ... +0200) on "macos_x64"' to
+  // '2.9.0-13.0.dev'.
+  if (version.contains(' ')) {
+    version = version.substring(0, version.indexOf(' '));
+  }
+
+  var bits = '';
+  if (vm.architectureBits != -1) {
+    bits = '-${vm.architectureBits}';
+  }
+
+  final flutterVersion = connectedApp.flutterVersionNow;
+
+  return {
+    'CPU / OS': '${vm.targetCPU}$bits / ${vm.operatingSystem}',
+    'Dart Version': version,
+    if (flutterVersion != null) ...{
+      'Flutter Version':
+          '${flutterVersion.version} / ${flutterVersion.channel}',
+      'Framework / Engine': '${flutterVersion.frameworkRevision} / '
+          '${flutterVersion.engineRevision}',
+    },
+    'Connected app type': connectedApp.display,
+    if (includeVmServiceConnection && serviceManager.service != null)
+      'VM Service Connection': serviceManager.service!.connectedUri.toString(),
+  };
 }
