@@ -118,11 +118,12 @@ class CurlCommand {
       if (lineBreakIndexes.contains(index) &&
           index != commandParts.length - 1) {
         commandString += ' \\\n';
+
+        // Since a new line was added, don't prepend a space to the next line.
         addSpace = false;
         continue;
       }
 
-      // Since a new line was added, don't prepend a space to the next line.
       addSpace = true;
     }
 
