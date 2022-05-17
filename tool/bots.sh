@@ -7,7 +7,7 @@
 # Fast fail the script on failures.
 set -ex
 
-TAG_ARG_LIST=("--tags=\"flutter-environment\" -j1" "--exclude-tags=\"flutter-environment\"")
+TAG_ARG_LIST=(--tags="flutter-environment"\ -j1 --exclude-tags="flutter-environment")
 
 # TODO: Also support windows on github actions.
 if [[ $RUNNER_OS == "Windows" ]]; then
