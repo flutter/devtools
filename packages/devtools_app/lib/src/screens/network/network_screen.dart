@@ -8,9 +8,11 @@ import 'package:provider/provider.dart';
 
 import '../../analytics/analytics.dart' as ga;
 import '../../analytics/constants.dart' as analytics_constants;
+import '../../http/http_request_data.dart';
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../primitives/utils.dart';
 import '../../shared/common_widgets.dart';
+import '../../shared/curl_command.dart';
 import '../../shared/screen.dart';
 import '../../shared/split.dart';
 import '../../shared/table.dart';
@@ -331,6 +333,7 @@ class NetworkRequestsTable extends StatelessWidget {
   static TypeColumn typeColumn = TypeColumn();
   static DurationColumn durationColumn = DurationColumn();
   static TimestampColumn timestampColumn = TimestampColumn();
+  static ActionsColumn actionsColumn = ActionsColumn();
 
   final NetworkController networkController;
   final List<NetworkRequest> requests;
@@ -348,6 +351,7 @@ class NetworkRequestsTable extends StatelessWidget {
           typeColumn,
           durationColumn,
           timestampColumn,
+          actionsColumn
         ],
         data: requests,
         keyFactory: (NetworkRequest? data) => ValueKey<NetworkRequest?>(data),
@@ -405,6 +409,78 @@ class MethodColumn extends ColumnData<NetworkRequest> {
   @override
   dynamic getValue(NetworkRequest dataObject) {
     return dataObject.method;
+  }
+}
+
+class ActionsColumn extends ColumnData<NetworkRequest>
+    implements ColumnRenderer<NetworkRequest> {
+  ActionsColumn()
+      : super(
+          '',
+          fixedWidthPx: scaleByFontFactor(32),
+          alignment: ColumnAlignment.right,
+        );
+
+  @override
+  bool get supportsSorting => false;
+
+  @override
+  bool get disableHeader => true;
+
+  @override
+  dynamic getValue(NetworkRequest dataObject) {
+    return '';
+  }
+
+  List<PopupMenuItem> _buildOptions(BuildContext context, NetworkRequest data) {
+    return [
+      if (data is DartIOHttpRequestData) ...[
+        PopupMenuItem(
+          child: const Text('Copy as URL'),
+          onTap: () {
+            copyToClipboard(
+              data.uri,
+              'Copied the URL to the clipboard',
+              context,
+            );
+          },
+        ),
+        PopupMenuItem(
+          child: const Text('Copy as cURL'),
+          onTap: () {
+            copyToClipboard(
+              CurlCommand(data).toString(),
+              'Copied the cURL command to the clipboard',
+              context,
+            );
+          },
+        )
+      ]
+    ];
+  }
+
+  @override
+  Widget build(
+    BuildContext context,
+    NetworkRequest data, {
+    bool isRowSelected = false,
+    VoidCallback? onPressed,
+  }) {
+    final options = _buildOptions(context, data);
+
+    // Only show the actions button when there are options, and the row is
+    // currently selected.
+    if (options.isEmpty || !isRowSelected) return const SizedBox.shrink();
+
+    return PopupMenuButton(
+      icon: const Icon(Icons.more_vert),
+      padding: const EdgeInsets.only(left: 4, right: 4),
+      splashRadius: 16,
+      tooltip: '',
+      itemBuilder: (context) {
+        return options;
+      },
+    );
   }
 }
 

@@ -1327,37 +1327,41 @@ class _TableRowState<T> extends State<TableRow<T>>
           overflow: TextOverflow.ellipsis,
         );
 
-        content = InkWell(
-          canRequestFocus: false,
-          onTap: () => _handleSortChange(
-            column,
-            secondarySortColumn: widget.secondarySortColumn,
-          ),
-          child: Row(
-            mainAxisAlignment: _mainAxisAlignmentFor(column),
-            children: [
-              if (isSortColumn)
-                Icon(
-                  widget.sortDirection == SortDirection.ascending
-                      ? Icons.expand_less
-                      : Icons.expand_more,
-                  size: defaultIconSize,
-                ),
-              if (isSortColumn) const SizedBox(width: densePadding),
-              // TODO: This Flexible wrapper was added to get the
-              // network_profiler_test.dart tests to pass.
-              Flexible(
-                child: column.titleTooltip != null
-                    ? DevToolsTooltip(
-                        message: column.titleTooltip,
-                        padding: const EdgeInsets.all(denseSpacing),
-                        child: title,
-                      )
-                    : title,
+        final headerContent = Row(
+          mainAxisAlignment: _mainAxisAlignmentFor(column),
+          children: [
+            if (isSortColumn)
+              Icon(
+                widget.sortDirection == SortDirection.ascending
+                    ? Icons.expand_less
+                    : Icons.expand_more,
+                size: defaultIconSize,
               ),
-            ],
-          ),
+            if (isSortColumn) const SizedBox(width: densePadding),
+            // TODO: This Flexible wrapper was added to get the
+            // network_profiler_test.dart tests to pass.
+            Flexible(
+              child: column.titleTooltip != null
+                  ? DevToolsTooltip(
+                      message: column.titleTooltip,
+                      padding: const EdgeInsets.all(denseSpacing),
+                      child: title,
+                    )
+                  : title,
+            ),
+          ],
         );
+
+        content = column.disableHeader
+            ? headerContent
+            : InkWell(
+                canRequestFocus: false,
+                onTap: () => _handleSortChange(
+                  column,
+                  secondarySortColumn: widget.secondarySortColumn,
+                ),
+                child: headerContent,
+              );
       } else {
         final padding = column.getNodeIndentPx(node);
         assert(padding >= 0);
