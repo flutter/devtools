@@ -8,11 +8,11 @@ import 'package:flutter/material.dart';
 
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../service/service_extension_manager.dart';
+import '../../service/service_extension_widgets.dart';
 import '../../service/service_extensions.dart' as extensions;
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
 import '../../shared/theme.dart';
-import '../../ui/service_extension_widgets.dart';
 import 'performance_screen.dart';
 
 class EnhanceTracingButton extends StatelessWidget {
