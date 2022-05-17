@@ -42,7 +42,7 @@ class ConnectedApp {
   bool? _isFlutterApp;
 
   FlutterVersion? get flutterVersionNow {
-    return isFlutterNativeAppNow ? _flutterVersion : null;
+    return isFlutterAppNow! ? _flutterVersion : null;
   }
 
   FlutterVersion? _flutterVersion;
@@ -126,10 +126,7 @@ class ConnectedApp {
   Future<void> initializeValues() async {
     await Future.wait([isFlutterApp, isProfileBuild, isDartWebApp]);
 
-    // No need to check the flutter version for Flutter web apps, as the
-    // performance tools that consume [flutterVersionNow] are not available for
-    // flutter web apps.
-    if (isFlutterNativeAppNow) {
+    if (isFlutterAppNow!) {
       final flutterVersionServiceListenable = serviceManager
           .registeredServiceListenable(registrations.flutterVersion.service);
       VoidCallback listener;
