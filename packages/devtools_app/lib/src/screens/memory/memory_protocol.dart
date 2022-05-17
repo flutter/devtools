@@ -25,7 +25,7 @@ class MemoryTracker {
   final isolateHeaps = <String, MemoryUsage>{};
 
   /// Polled VM current RSS.
-  late int processRss;
+  int processRss = 0;
 
   /// Polled adb dumpsys meminfo values.
   late AdbMemoryInfo adbMemoryInfo;

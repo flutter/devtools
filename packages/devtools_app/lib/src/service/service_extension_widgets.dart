@@ -11,17 +11,17 @@ import '../config_specific/logger/logger.dart';
 import '../primitives/auto_dispose_mixin.dart';
 import '../primitives/message_bus.dart';
 import '../primitives/utils.dart';
-import '../service/service_extension_manager.dart';
-import '../service/service_extensions.dart';
-import '../service/service_registrations.dart';
 import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
 import '../shared/notifications.dart';
 import '../shared/scaffold.dart';
 import '../shared/theme.dart';
 import '../shared/utils.dart';
-import 'hover.dart';
-import 'label.dart';
+import '../ui/hover.dart';
+import '../ui/label.dart';
+import 'service_extension_manager.dart';
+import 'service_extensions.dart';
+import 'service_registrations.dart';
 
 /// Group of buttons where each button toggles the state of a VMService
 /// extension.

@@ -817,7 +817,7 @@ class MemoryController extends DisposableController
           customEventKind =
               MemoryTimeline.customEventName(event.extensionKind!);
         }
-        final jsonData = event.extensionData!.data as Map<String, Object>;
+        final jsonData = event.extensionData!.data.cast<String, Object>();
         // TODO(terry): Display events enabled in a settings page for now only these events.
         switch (extensionEventKind) {
           case 'Flutter.ImageSizesForFrame':
