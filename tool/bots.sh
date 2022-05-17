@@ -7,6 +7,8 @@
 # Fast fail the script on failures.
 set -ex
 
+TAG_ARG_LIST=("--tags=\"flutter-environment\" -j1" "--exclude-tags=\"flutter-environment\"")
+
 # TODO: Also support windows on github actions.
 if [[ $RUNNER_OS == "Windows" ]]; then
     echo Installing Google Chrome Stable...
@@ -120,18 +122,20 @@ elif [ "$BOT" = "test_ddc" ]; then
     # TODO(https://github.com/flutter/flutter/issues/43538): Remove workaround.
     flutter config --enable-web
     flutter build web --pwa-strategy=none --no-tree-shake-icons
-
-    # TODO(https://github.com/flutter/devtools/issues/1987): once this issue is fixed,
-    # we may need to explicitly exclude running integration_tests here (this is what we
-    # used to do when integration tests were enabled).
-    if [ "$PLATFORM" = "vm" ]; then
-        flutter test $DART_DEFINE_ARGS test/
-    elif [ "$PLATFORM" = "chrome" ]; then
-        flutter test --platform chrome $DART_DEFINE_ARGS test/
-    else
-        echo "unknown test platform"
-        exit 1
-    fi
+    for TAG_ARGS in "${TAG_ARG_LIST[@]}"
+    do
+        # TODO(https://github.com/flutter/devtools/issues/1987): once this issue is fixed,
+        # we may need to explicitly exclude running integration_tests here (this is what we
+        # used to do when integration tests were enabled).
+        if [ "$PLATFORM" = "vm" ]; then
+            flutter test $DART_DEFINE_ARGS $TAG_ARGS test/
+        elif [ "$PLATFORM" = "chrome" ]; then
+            flutter test --platform chrome $DART_DEFINE_ARGS $TAG_ARGS test/
+        else
+            echo "unknown test platform"
+            exit 1
+        fi
+    done
 elif [ "$BOT" = "test_dart2js" ]; then
     flutter pub get
 
@@ -142,14 +146,17 @@ elif [ "$BOT" = "test_dart2js" ]; then
     # TODO(https://github.com/flutter/devtools/issues/1987): once this issue is fixed,
     # we may need to explicitly exclude running integration_tests here (this is what we
     # used to do when integration tests were enabled).
-    if [ "$PLATFORM" = "vm" ]; then
-        WEBDEV_RELEASE=true flutter test $DART_DEFINE_ARGS test/
-    elif [ "$PLATFORM" = "chrome" ]; then
-        WEBDEV_RELEASE=true flutter test --platform chrome $DART_DEFINE_ARGS test/
-    else
-        echo "unknown test platform"
-        exit 1
-    fi
+    for TAG_ARGS in "${TAG_ARG_LIST[@]}" 
+    do
+        if [ "$PLATFORM" = "vm" ]; then
+            WEBDEV_RELEASE=true flutter test $DART_DEFINE_ARGS $TAG_ARGS test/
+        elif [ "$PLATFORM" = "chrome" ]; then
+            WEBDEV_RELEASE=true flutter test --platform chrome $DART_DEFINE_ARGS $TAG_ARGS test/
+        else
+            echo "unknown test platform"
+            exit 1
+        fi
+    done
     echo $WEBDEV_RELEASE
 
 elif [ "$BOT" = "integration_ddc" ]; then

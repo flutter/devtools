@@ -31,6 +31,7 @@ void main() async {
         await env.tearDownEnvironment();
       },
       timeout: const Timeout.factor(4),
+      tags: 'flutter-environment',
     );
 
     test(
@@ -55,6 +56,7 @@ void main() async {
         await env.tearDownEnvironment();
       },
       timeout: const Timeout.factor(4),
+      tags: 'flutter-environment',
     );
   });
 }

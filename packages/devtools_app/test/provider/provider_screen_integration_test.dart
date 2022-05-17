@@ -111,543 +111,501 @@ void main() async {
     },
     timeout: const Timeout.factor(8),
     skip: true,
+    tags: 'flutter-environment',
   );
 
-  group('Provider controllers', () {
-    test('can mutate private properties from mixins', () async {
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
-
-      final sub = container.listen(
-        instanceProvider(
-          const InstancePath.fromProviderId('0').pathForChild(
-            const PathToProperty.objectProperty(
-              name: '_privateMixinProperty',
-              ownerUri: 'package:provider_app/mixin.dart',
-              ownerName: 'Mixin',
-            ),
-          ),
-        ).future,
-        (prev, next) {},
-      );
-
-      var instance = await sub.read();
-
-      expect(
-        instance,
-        isA<NumInstance>().having((e) => e.displayString, 'displayString', '0'),
-      );
-
-      await instance.setter!('42');
-
-      // read the instance again since it should have changed
-      instance = await sub.read();
-
-      expect(
-        instance,
-        isA<NumInstance>()
-            .having((e) => e.displayString, 'displayString', '42'),
-      );
-    });
-
-    test(
-      'sortedProviderNodesProvider',
-      () async {
+  group(
+    'Provider controllers',
+    () {
+      test('can mutate private properties from mixins', () async {
         final container = ProviderContainer();
         addTearDown(container.dispose);
 
         final sub = container.listen(
-          sortedProviderNodesProvider.future,
+          instanceProvider(
+            const InstancePath.fromProviderId('0').pathForChild(
+              const PathToProperty.objectProperty(
+                name: '_privateMixinProperty',
+                ownerUri: 'package:provider_app/mixin.dart',
+                ownerName: 'Mixin',
+              ),
+            ),
+          ).future,
           (prev, next) {},
         );
 
-        await evalOnDartLibrary.asyncEval(
-          'await tester.tap(find.byKey(Key("add"))).then((_) => tester.pump())',
-          isAlive: isAlive,
+        var instance = await sub.read();
+
+        expect(
+          instance,
+          isA<NumInstance>()
+              .having((e) => e.displayString, 'displayString', '0'),
         );
 
-        await expectLater(
-          sub.read(),
-          completion([
-            isA<ProviderNode>().having((e) => e.id, 'id', '0').having(
-                  (e) => e.type,
-                  'type',
-                  'ChangeNotifierProvider<Counter>',
-                ),
-            isA<ProviderNode>()
-                .having((e) => e.id, 'id', '1')
-                .having((e) => e.type, 'type', 'Provider<int>'),
-          ]),
-        );
-      },
-      timeout: const Timeout.factor(8),
-    );
+        await instance.setter!('42');
 
-    group('rawInstanceProvider', () {
+        // read the instance again since it should have changed
+        instance = await sub.read();
+
+        expect(
+          instance,
+          isA<NumInstance>()
+              .having((e) => e.displayString, 'displayString', '42'),
+        );
+      });
+
       test(
-        'deeply parse complex objects',
+        'sortedProviderNodesProvider',
         () async {
           final container = ProviderContainer();
           addTearDown(container.dispose);
 
-          final counterFuture = container
-              .listen(
-                instanceProvider(const InstancePath.fromProviderId('0')).future,
-                (prev, next) {},
-              )
-              .read();
-
-          const complexPath = InstancePath.fromProviderId(
-            '0',
-            pathToProperty: [
-              PathToProperty.objectProperty(
-                name: 'complex',
-                ownerUri: 'package:provider_app/main.dart',
-                ownerName: 'Counter',
-              ),
-            ],
+          final sub = container.listen(
+            sortedProviderNodesProvider.future,
+            (prev, next) {},
           );
 
-          final complexFuture = await container
-              .listen(
-                instanceProvider(complexPath).future,
-                (prev, next) {},
-              )
-              .read();
-
-          final complexPropertiesFuture =
-              Future.wait<MapEntry<String, Object>>([
-            for (final field in (complexFuture as ObjectInstance).fields)
-              container
-                  .listen(
-                    instanceProvider(
-                      complexPath.pathForChild(
-                        PathToProperty.objectProperty(
-                          name: field.name,
-                          ownerUri: 'package:provider_app/main.dart',
-                          ownerName: 'ComplexObject',
-                        ),
-                      ),
-                    ).future,
-                    (prev, next) {},
-                  )
-                  .read()
-                  .then(
-                    (value) => MapEntry(field.name, value),
-                    onError: (Object err) => MapEntry(field.name, err),
-                  )
-          ]);
-
-          final mapPath = complexPath.pathForChild(
-            const PathToProperty.objectProperty(
-              name: 'map',
-              ownerUri: 'package:provider_app/main.dart',
-              ownerName: 'ComplexObject',
-            ),
-          );
-
-          final mapKeys = await container
-              .listen(
-                instanceProvider(mapPath).future,
-                (prev, next) {},
-              )
-              .read()
-              .then((value) => value as MapInstance);
-
-          final mapItems = Future.wait([
-            for (final key in mapKeys.keys)
-              container
-                  .listen(
-                    instanceProvider(
-                      mapPath.pathForChild(
-                        PathToProperty.mapKey(ref: key.instanceRefId),
-                      ),
-                    ).future,
-                    (prev, next) {},
-                  )
-                  .read()
-          ]);
-
-          final listPath = complexPath.pathForChild(
-            const PathToProperty.objectProperty(
-              name: 'list',
-              ownerUri: 'package:provider_app/main.dart',
-              ownerName: 'ComplexObject',
-            ),
-          );
-
-          final listItems = Future.wait([
-            for (var i = 0; i < 6; i++)
-              container
-                  .listen(
-                    instanceProvider(
-                      listPath.pathForChild(PathToProperty.listIndex(i)),
-                    ).future,
-                    (prev, next) {},
-                  )
-                  .read()
-          ]);
-
-          // Counter.complex.list[4].value
-          final list4valueFuture = container
-              .listen(
-                instanceProvider(
-                  listPath
-                      .pathForChild(const PathToProperty.listIndex(4))
-                      .pathForChild(
-                        const PathToProperty.objectProperty(
-                          name: 'value',
-                          ownerUri: 'package:provider_app/main.dart',
-                          ownerName: '_SubObject',
-                        ),
-                      ),
-                ).future,
-                (prev, next) {},
-              )
-              .read();
-
-          // Counter.complex.plainInstance.value
-          final plainInstanceValueFuture = container
-              .listen(
-                instanceProvider(
-                  complexPath
-                      .pathForChild(
-                        const PathToProperty.objectProperty(
-                          name: 'plainInstance',
-                          ownerUri: 'package:provider_app/main.dart',
-                          ownerName: 'ComplexObject',
-                        ),
-                      )
-                      .pathForChild(
-                        const PathToProperty.objectProperty(
-                          name: 'value',
-                          ownerUri: 'package:provider_app/main.dart',
-                          ownerName: '_SubObject',
-                        ),
-                      ),
-                ).future,
-                (prev, next) {},
-              )
-              .read();
-
-          await expectLater(
-            counterFuture,
-            completion(
-              isA<ObjectInstance>()
-                  .having((e) => e.type, 'type', 'Counter')
-                  .having(
-                    (e) => e.fields,
-                    'fields',
-                    containsAllInOrder([
-                      isA<ObjectField>()
-                          .having((e) => e.name, 'name', 'complex')
-                          .having((e) => e.ownerName, 'ownerName', 'Counter')
-                          .having((e) => e.isFinal, 'isFinal', true)
-                          .having((e) => e.isPrivate, 'isPrivate', false)
-                          .having(
-                            (e) => e.isDefinedByDependency,
-                            'isDefinedByDependency',
-                            false,
-                          ),
-                      isA<ObjectField>()
-                          .having((e) => e.ownerName, 'ownerName', 'Counter')
-                          .having((e) => e.name, 'name', '_count')
-                          .having(
-                            (e) => e.ownerUri,
-                            'ownerUri',
-                            'package:provider_app/main.dart',
-                          )
-                          .having((e) => e.isFinal, 'isFinal', false)
-                          .having((e) => e.isPrivate, 'isPrivate', true)
-                          .having(
-                            (e) => e.isDefinedByDependency,
-                            'isDefinedByDependency',
-                            false,
-                          ),
-                      isA<ObjectField>()
-                          .having(
-                            (e) => e.ownerName,
-                            'ownerName',
-                            'ChangeNotifier',
-                          )
-                          .having((e) => e.name, 'name', '_listeners')
-                          .having(
-                            (e) => e.ownerUri,
-                            'ownerUri',
-                            'package:flutter/src/foundation/change_notifier.dart',
-                          )
-                          .having((e) => e.isFinal, 'isFinal', false)
-                          .having((e) => e.isPrivate, 'isPrivate', true)
-                          .having(
-                            (e) => e.isDefinedByDependency,
-                            'isDefinedByDependency',
-                            true,
-                          ),
-                      isA<ObjectField>()
-                          .having((e) => e.ownerName, 'ownerName', 'Mixin')
-                          .having(
-                            (e) => e.name,
-                            'name',
-                            '_privateMixinProperty',
-                          )
-                          .having(
-                            (e) => e.ownerUri,
-                            'ownerUri',
-                            'package:provider_app/mixin.dart',
-                          )
-                          .having((e) => e.isFinal, 'isFinal', false)
-                          .having((e) => e.isPrivate, 'isPrivate', true)
-                          .having(
-                            (e) => e.isDefinedByDependency,
-                            'isDefinedByDependency',
-                            false,
-                          ),
-                    ]),
-                  ),
-            ),
+          await evalOnDartLibrary.asyncEval(
+            'await tester.tap(find.byKey(Key("add"))).then((_) => tester.pump())',
+            isAlive: isAlive,
           );
 
           await expectLater(
-            complexFuture,
-            isA<ObjectInstance>()
-                .having((e) => e.type, 'type', 'ComplexObject')
-                .having((e) => e.fields, 'fields', [
-              isA<ObjectField>()
-                  .having((e) => e.name, 'name', 'boolean')
-                  .having((e) => e.isFinal, 'isFinal', false)
-                  .having((e) => e.isPrivate, 'isPrivate', false)
-                  .having(
-                    (e) => e.isDefinedByDependency,
-                    'isDefinedByDependency',
-                    false,
+            sub.read(),
+            completion([
+              isA<ProviderNode>().having((e) => e.id, 'id', '0').having(
+                    (e) => e.type,
+                    'type',
+                    'ChangeNotifierProvider<Counter>',
                   ),
-              isA<ObjectField>()
-                  .having((e) => e.name, 'name', 'enumeration')
-                  .having((e) => e.isFinal, 'isFinal', false)
-                  .having((e) => e.isPrivate, 'isPrivate', false)
-                  .having(
-                    (e) => e.isDefinedByDependency,
-                    'isDefinedByDependency',
-                    false,
-                  ),
-              isA<ObjectField>()
-                  .having((e) => e.name, 'name', 'finalVar')
-                  .having((e) => e.isFinal, 'isFinal', true)
-                  .having((e) => e.isPrivate, 'isPrivate', false)
-                  .having(
-                    (e) => e.isDefinedByDependency,
-                    'isDefinedByDependency',
-                    false,
-                  ),
-              isA<ObjectField>()
-                  .having((e) => e.name, 'name', 'float')
-                  .having((e) => e.isFinal, 'isFinal', false)
-                  .having((e) => e.isPrivate, 'isPrivate', false)
-                  .having(
-                    (e) => e.isDefinedByDependency,
-                    'isDefinedByDependency',
-                    false,
-                  ),
-              isA<ObjectField>()
-                  .having((e) => e.name, 'name', 'integer')
-                  .having((e) => e.isFinal, 'isFinal', false)
-                  .having((e) => e.isPrivate, 'isPrivate', false)
-                  .having(
-                    (e) => e.isDefinedByDependency,
-                    'isDefinedByDependency',
-                    false,
-                  ),
-              isA<ObjectField>()
-                  .having((e) => e.name, 'name', 'lateWithInitializer')
-                  .having((e) => e.isFinal, 'isFinal', false)
-                  .having((e) => e.isPrivate, 'isPrivate', false)
-                  .having(
-                    (e) => e.isDefinedByDependency,
-                    'isDefinedByDependency',
-                    false,
-                  ),
-              isA<ObjectField>()
-                  .having((e) => e.name, 'name', 'list')
-                  .having((e) => e.isFinal, 'isFinal', false)
-                  .having((e) => e.isPrivate, 'isPrivate', false)
-                  .having(
-                    (e) => e.isDefinedByDependency,
-                    'isDefinedByDependency',
-                    false,
-                  ),
-              isA<ObjectField>()
-                  .having((e) => e.name, 'name', 'map')
-                  .having((e) => e.isFinal, 'isFinal', false)
-                  .having((e) => e.isPrivate, 'isPrivate', false)
-                  .having(
-                    (e) => e.isDefinedByDependency,
-                    'isDefinedByDependency',
-                    false,
-                  ),
-              isA<ObjectField>()
-                  .having((e) => e.name, 'name', 'nill')
-                  .having((e) => e.isFinal, 'isFinal', false)
-                  .having((e) => e.isPrivate, 'isPrivate', false)
-                  .having(
-                    (e) => e.isDefinedByDependency,
-                    'isDefinedByDependency',
-                    false,
-                  ),
-              isA<ObjectField>()
-                  .having((e) => e.name, 'name', 'plainInstance')
-                  .having((e) => e.isFinal, 'isFinal', false)
-                  .having((e) => e.isPrivate, 'isPrivate', false)
-                  .having(
-                    (e) => e.isDefinedByDependency,
-                    'isDefinedByDependency',
-                    false,
-                  ),
-              isA<ObjectField>()
-                  .having((e) => e.name, 'name', 'string')
-                  .having((e) => e.isFinal, 'isFinal', false)
-                  .having((e) => e.isPrivate, 'isPrivate', false)
-                  .having(
-                    (e) => e.isDefinedByDependency,
-                    'isDefinedByDependency',
-                    false,
-                  ),
-              isA<ObjectField>()
-                  .having((e) => e.name, 'name', 'uninitializedLate')
-                  .having((e) => e.isFinal, 'isFinal', false)
-                  .having((e) => e.isPrivate, 'isPrivate', false)
-                  .having(
-                    (e) => e.isDefinedByDependency,
-                    'isDefinedByDependency',
-                    false,
-                  ),
-              isA<ObjectField>()
-                  .having((e) => e.name, 'name', '_getterAndSetter')
-                  .having((e) => e.isFinal, 'isFinal', false)
-                  .having((e) => e.isPrivate, 'isPrivate', true)
-                  .having(
-                    (e) => e.isDefinedByDependency,
-                    'isDefinedByDependency',
-                    false,
-                  ),
+              isA<ProviderNode>()
+                  .having((e) => e.id, 'id', '1')
+                  .having((e) => e.type, 'type', 'Provider<int>'),
             ]),
           );
+        },
+        timeout: const Timeout.factor(8),
+      );
 
-          final complexProperties =
-              Map.fromEntries(await complexPropertiesFuture);
+      group('rawInstanceProvider', () {
+        test(
+          'deeply parse complex objects',
+          () async {
+            final container = ProviderContainer();
+            addTearDown(container.dispose);
 
-          expect(
-            complexProperties['boolean'],
-            isA<BoolInstance>()
-                .having((e) => e.displayString, 'displayString', 'false')
-                .having((e) => e.setter, 'setter', isNotNull),
-          );
+            final counterFuture = container
+                .listen(
+                  instanceProvider(const InstancePath.fromProviderId('0'))
+                      .future,
+                  (prev, next) {},
+                )
+                .read();
 
-          expect(
-            complexProperties['enumeration'],
-            isA<EnumInstance>()
-                .having((e) => e.type, 'displayString', 'Enum')
-                .having((e) => e.value, 'displayString', 'a')
-                .having((e) => e.setter, 'setter', isNotNull),
-          );
+            const complexPath = InstancePath.fromProviderId(
+              '0',
+              pathToProperty: [
+                PathToProperty.objectProperty(
+                  name: 'complex',
+                  ownerUri: 'package:provider_app/main.dart',
+                  ownerName: 'Counter',
+                ),
+              ],
+            );
 
-          expect(
-            complexProperties['finalVar'],
-            isA<NumInstance>()
-                .having((e) => e.displayString, 'displayString', '42')
-                .having((e) => e.setter, 'setter', isNull),
-          );
+            final complexFuture = await container
+                .listen(
+                  instanceProvider(complexPath).future,
+                  (prev, next) {},
+                )
+                .read();
 
-          expect(
-            complexProperties['float'],
-            isA<NumInstance>()
-                .having((e) => e.displayString, 'displayString', '0.42')
-                .having((e) => e.setter, 'setter', isNotNull),
-          );
+            final complexPropertiesFuture =
+                Future.wait<MapEntry<String, Object>>([
+              for (final field in (complexFuture as ObjectInstance).fields)
+                container
+                    .listen(
+                      instanceProvider(
+                        complexPath.pathForChild(
+                          PathToProperty.objectProperty(
+                            name: field.name,
+                            ownerUri: 'package:provider_app/main.dart',
+                            ownerName: 'ComplexObject',
+                          ),
+                        ),
+                      ).future,
+                      (prev, next) {},
+                    )
+                    .read()
+                    .then(
+                      (value) => MapEntry(field.name, value),
+                      onError: (Object err) => MapEntry(field.name, err),
+                    )
+            ]);
 
-          expect(
-            complexProperties['integer'],
-            isA<NumInstance>()
-                .having((e) => e.displayString, 'displayString', '0')
-                .having((e) => e.setter, 'setter', isNotNull),
-          );
+            final mapPath = complexPath.pathForChild(
+              const PathToProperty.objectProperty(
+                name: 'map',
+                ownerUri: 'package:provider_app/main.dart',
+                ownerName: 'ComplexObject',
+              ),
+            );
 
-          expect(
-            complexProperties['lateWithInitializer'],
-            isA<NumInstance>()
-                .having((e) => e.displayString, 'displayString', '21')
-                .having((e) => e.setter, 'setter', isNotNull),
-          );
+            final mapKeys = await container
+                .listen(
+                  instanceProvider(mapPath).future,
+                  (prev, next) {},
+                )
+                .read()
+                .then((value) => value as MapInstance);
 
-          expect(
-            complexProperties['list'],
-            isA<ListInstance>()
-                .having((e) => e.hash, 'hash', isA<int>())
-                .having((e) => e.length, 'length', 6)
-                .having((e) => e.setter, 'setter', isNotNull),
-          );
+            final mapItems = Future.wait([
+              for (final key in mapKeys.keys)
+                container
+                    .listen(
+                      instanceProvider(
+                        mapPath.pathForChild(
+                          PathToProperty.mapKey(ref: key.instanceRefId),
+                        ),
+                      ).future,
+                      (prev, next) {},
+                    )
+                    .read()
+            ]);
 
-          expect(
-            complexProperties['map'],
-            isA<MapInstance>()
-                .having((e) => e.hash, 'hash', isA<int>())
-                .having((e) => e.keys.length, 'keys.length', 8)
-                .having((e) => e.setter, 'setter', isNotNull),
-          );
+            final listPath = complexPath.pathForChild(
+              const PathToProperty.objectProperty(
+                name: 'list',
+                ownerUri: 'package:provider_app/main.dart',
+                ownerName: 'ComplexObject',
+              ),
+            );
 
-          expect(
-            complexProperties['nill'],
-            isA<NullInstance>(),
-          );
+            final listItems = Future.wait([
+              for (var i = 0; i < 6; i++)
+                container
+                    .listen(
+                      instanceProvider(
+                        listPath.pathForChild(PathToProperty.listIndex(i)),
+                      ).future,
+                      (prev, next) {},
+                    )
+                    .read()
+            ]);
 
-          expect(
-            complexProperties['plainInstance'],
-            isA<ObjectInstance>()
-                .having((e) => e.type, 'type', '_SubObject')
-                .having((e) => e.fields, 'fields', [
-              isA<ObjectField>()
-                  .having((e) => e.name, 'name', 'value')
-                  .having((e) => e.isFinal, 'isFinal', true)
-                  .having((e) => e.isPrivate, 'isPrivate', false)
-                  .having(
-                    (e) => e.isDefinedByDependency,
-                    'isDefinedByDependency',
-                    false,
-                  )
-            ]).having((e) => e.setter, 'setter', isNotNull),
-          );
+            // Counter.complex.list[4].value
+            final list4valueFuture = container
+                .listen(
+                  instanceProvider(
+                    listPath
+                        .pathForChild(const PathToProperty.listIndex(4))
+                        .pathForChild(
+                          const PathToProperty.objectProperty(
+                            name: 'value',
+                            ownerUri: 'package:provider_app/main.dart',
+                            ownerName: '_SubObject',
+                          ),
+                        ),
+                  ).future,
+                  (prev, next) {},
+                )
+                .read();
 
-          expect(
-            complexProperties['string'],
-            isA<StringInstance>()
-                .having((e) => e.displayString, 'displayString', 'hello world')
-                .having((e) => e.setter, 'setter', isNotNull),
-          );
+            // Counter.complex.plainInstance.value
+            final plainInstanceValueFuture = container
+                .listen(
+                  instanceProvider(
+                    complexPath
+                        .pathForChild(
+                          const PathToProperty.objectProperty(
+                            name: 'plainInstance',
+                            ownerUri: 'package:provider_app/main.dart',
+                            ownerName: 'ComplexObject',
+                          ),
+                        )
+                        .pathForChild(
+                          const PathToProperty.objectProperty(
+                            name: 'value',
+                            ownerUri: 'package:provider_app/main.dart',
+                            ownerName: '_SubObject',
+                          ),
+                        ),
+                  ).future,
+                  (prev, next) {},
+                )
+                .read();
 
-          expect(
-            complexProperties['_getterAndSetter'],
-            isA<NumInstance>()
-                .having((e) => e.displayString, 'displayString', '0')
-                .having((e) => e.setter, 'setter', isNotNull),
-          );
+            await expectLater(
+              counterFuture,
+              completion(
+                isA<ObjectInstance>()
+                    .having((e) => e.type, 'type', 'Counter')
+                    .having(
+                      (e) => e.fields,
+                      'fields',
+                      containsAllInOrder([
+                        isA<ObjectField>()
+                            .having((e) => e.name, 'name', 'complex')
+                            .having((e) => e.ownerName, 'ownerName', 'Counter')
+                            .having((e) => e.isFinal, 'isFinal', true)
+                            .having((e) => e.isPrivate, 'isPrivate', false)
+                            .having(
+                              (e) => e.isDefinedByDependency,
+                              'isDefinedByDependency',
+                              false,
+                            ),
+                        isA<ObjectField>()
+                            .having((e) => e.ownerName, 'ownerName', 'Counter')
+                            .having((e) => e.name, 'name', '_count')
+                            .having(
+                              (e) => e.ownerUri,
+                              'ownerUri',
+                              'package:provider_app/main.dart',
+                            )
+                            .having((e) => e.isFinal, 'isFinal', false)
+                            .having((e) => e.isPrivate, 'isPrivate', true)
+                            .having(
+                              (e) => e.isDefinedByDependency,
+                              'isDefinedByDependency',
+                              false,
+                            ),
+                        isA<ObjectField>()
+                            .having(
+                              (e) => e.ownerName,
+                              'ownerName',
+                              'ChangeNotifier',
+                            )
+                            .having((e) => e.name, 'name', '_listeners')
+                            .having(
+                              (e) => e.ownerUri,
+                              'ownerUri',
+                              'package:flutter/src/foundation/change_notifier.dart',
+                            )
+                            .having((e) => e.isFinal, 'isFinal', false)
+                            .having((e) => e.isPrivate, 'isPrivate', true)
+                            .having(
+                              (e) => e.isDefinedByDependency,
+                              'isDefinedByDependency',
+                              true,
+                            ),
+                        isA<ObjectField>()
+                            .having((e) => e.ownerName, 'ownerName', 'Mixin')
+                            .having(
+                              (e) => e.name,
+                              'name',
+                              '_privateMixinProperty',
+                            )
+                            .having(
+                              (e) => e.ownerUri,
+                              'ownerUri',
+                              'package:provider_app/mixin.dart',
+                            )
+                            .having((e) => e.isFinal, 'isFinal', false)
+                            .having((e) => e.isPrivate, 'isPrivate', true)
+                            .having(
+                              (e) => e.isDefinedByDependency,
+                              'isDefinedByDependency',
+                              false,
+                            ),
+                      ]),
+                    ),
+              ),
+            );
 
-          expect(
-            complexProperties['uninitializedLate'],
-            isA<SentinelException>().having(
-              (e) => e.sentinel.kind,
-              'sentinel.kind',
-              SentinelKind.kNotInitialized,
-            ),
-          );
+            await expectLater(
+              complexFuture,
+              isA<ObjectInstance>()
+                  .having((e) => e.type, 'type', 'ComplexObject')
+                  .having((e) => e.fields, 'fields', [
+                isA<ObjectField>()
+                    .having((e) => e.name, 'name', 'boolean')
+                    .having((e) => e.isFinal, 'isFinal', false)
+                    .having((e) => e.isPrivate, 'isPrivate', false)
+                    .having(
+                      (e) => e.isDefinedByDependency,
+                      'isDefinedByDependency',
+                      false,
+                    ),
+                isA<ObjectField>()
+                    .having((e) => e.name, 'name', 'enumeration')
+                    .having((e) => e.isFinal, 'isFinal', false)
+                    .having((e) => e.isPrivate, 'isPrivate', false)
+                    .having(
+                      (e) => e.isDefinedByDependency,
+                      'isDefinedByDependency',
+                      false,
+                    ),
+                isA<ObjectField>()
+                    .having((e) => e.name, 'name', 'finalVar')
+                    .having((e) => e.isFinal, 'isFinal', true)
+                    .having((e) => e.isPrivate, 'isPrivate', false)
+                    .having(
+                      (e) => e.isDefinedByDependency,
+                      'isDefinedByDependency',
+                      false,
+                    ),
+                isA<ObjectField>()
+                    .having((e) => e.name, 'name', 'float')
+                    .having((e) => e.isFinal, 'isFinal', false)
+                    .having((e) => e.isPrivate, 'isPrivate', false)
+                    .having(
+                      (e) => e.isDefinedByDependency,
+                      'isDefinedByDependency',
+                      false,
+                    ),
+                isA<ObjectField>()
+                    .having((e) => e.name, 'name', 'integer')
+                    .having((e) => e.isFinal, 'isFinal', false)
+                    .having((e) => e.isPrivate, 'isPrivate', false)
+                    .having(
+                      (e) => e.isDefinedByDependency,
+                      'isDefinedByDependency',
+                      false,
+                    ),
+                isA<ObjectField>()
+                    .having((e) => e.name, 'name', 'lateWithInitializer')
+                    .having((e) => e.isFinal, 'isFinal', false)
+                    .having((e) => e.isPrivate, 'isPrivate', false)
+                    .having(
+                      (e) => e.isDefinedByDependency,
+                      'isDefinedByDependency',
+                      false,
+                    ),
+                isA<ObjectField>()
+                    .having((e) => e.name, 'name', 'list')
+                    .having((e) => e.isFinal, 'isFinal', false)
+                    .having((e) => e.isPrivate, 'isPrivate', false)
+                    .having(
+                      (e) => e.isDefinedByDependency,
+                      'isDefinedByDependency',
+                      false,
+                    ),
+                isA<ObjectField>()
+                    .having((e) => e.name, 'name', 'map')
+                    .having((e) => e.isFinal, 'isFinal', false)
+                    .having((e) => e.isPrivate, 'isPrivate', false)
+                    .having(
+                      (e) => e.isDefinedByDependency,
+                      'isDefinedByDependency',
+                      false,
+                    ),
+                isA<ObjectField>()
+                    .having((e) => e.name, 'name', 'nill')
+                    .having((e) => e.isFinal, 'isFinal', false)
+                    .having((e) => e.isPrivate, 'isPrivate', false)
+                    .having(
+                      (e) => e.isDefinedByDependency,
+                      'isDefinedByDependency',
+                      false,
+                    ),
+                isA<ObjectField>()
+                    .having((e) => e.name, 'name', 'plainInstance')
+                    .having((e) => e.isFinal, 'isFinal', false)
+                    .having((e) => e.isPrivate, 'isPrivate', false)
+                    .having(
+                      (e) => e.isDefinedByDependency,
+                      'isDefinedByDependency',
+                      false,
+                    ),
+                isA<ObjectField>()
+                    .having((e) => e.name, 'name', 'string')
+                    .having((e) => e.isFinal, 'isFinal', false)
+                    .having((e) => e.isPrivate, 'isPrivate', false)
+                    .having(
+                      (e) => e.isDefinedByDependency,
+                      'isDefinedByDependency',
+                      false,
+                    ),
+                isA<ObjectField>()
+                    .having((e) => e.name, 'name', 'uninitializedLate')
+                    .having((e) => e.isFinal, 'isFinal', false)
+                    .having((e) => e.isPrivate, 'isPrivate', false)
+                    .having(
+                      (e) => e.isDefinedByDependency,
+                      'isDefinedByDependency',
+                      false,
+                    ),
+                isA<ObjectField>()
+                    .having((e) => e.name, 'name', '_getterAndSetter')
+                    .having((e) => e.isFinal, 'isFinal', false)
+                    .having((e) => e.isPrivate, 'isPrivate', true)
+                    .having(
+                      (e) => e.isDefinedByDependency,
+                      'isDefinedByDependency',
+                      false,
+                    ),
+              ]),
+            );
 
-          await expectLater(
-            listItems,
-            completion([
+            final complexProperties =
+                Map.fromEntries(await complexPropertiesFuture);
+
+            expect(
+              complexProperties['boolean'],
+              isA<BoolInstance>()
+                  .having((e) => e.displayString, 'displayString', 'false')
+                  .having((e) => e.setter, 'setter', isNotNull),
+            );
+
+            expect(
+              complexProperties['enumeration'],
+              isA<EnumInstance>()
+                  .having((e) => e.type, 'displayString', 'Enum')
+                  .having((e) => e.value, 'displayString', 'a')
+                  .having((e) => e.setter, 'setter', isNotNull),
+            );
+
+            expect(
+              complexProperties['finalVar'],
               isA<NumInstance>()
-                  .having((e) => e.displayString, 'displayString', '42'),
-              isA<StringInstance>()
-                  .having((e) => e.displayString, 'displayString', 'string'),
-              isA<ListInstance>().having((e) => e.length, 'length', 0),
-              isA<MapInstance>().having((e) => e.keys, 'value', isEmpty),
+                  .having((e) => e.displayString, 'displayString', '42')
+                  .having((e) => e.setter, 'setter', isNull),
+            );
+
+            expect(
+              complexProperties['float'],
+              isA<NumInstance>()
+                  .having((e) => e.displayString, 'displayString', '0.42')
+                  .having((e) => e.setter, 'setter', isNotNull),
+            );
+
+            expect(
+              complexProperties['integer'],
+              isA<NumInstance>()
+                  .having((e) => e.displayString, 'displayString', '0')
+                  .having((e) => e.setter, 'setter', isNotNull),
+            );
+
+            expect(
+              complexProperties['lateWithInitializer'],
+              isA<NumInstance>()
+                  .having((e) => e.displayString, 'displayString', '21')
+                  .having((e) => e.setter, 'setter', isNotNull),
+            );
+
+            expect(
+              complexProperties['list'],
+              isA<ListInstance>()
+                  .having((e) => e.hash, 'hash', isA<int>())
+                  .having((e) => e.length, 'length', 6)
+                  .having((e) => e.setter, 'setter', isNotNull),
+            );
+
+            expect(
+              complexProperties['map'],
+              isA<MapInstance>()
+                  .having((e) => e.hash, 'hash', isA<int>())
+                  .having((e) => e.keys.length, 'keys.length', 8)
+                  .having((e) => e.setter, 'setter', isNotNull),
+            );
+
+            expect(
+              complexProperties['nill'],
+              isA<NullInstance>(),
+            );
+
+            expect(
+              complexProperties['plainInstance'],
               isA<ObjectInstance>()
                   .having((e) => e.type, 'type', '_SubObject')
                   .having((e) => e.fields, 'fields', [
@@ -660,154 +618,206 @@ void main() async {
                       'isDefinedByDependency',
                       false,
                     )
-              ]),
-              isA<NullInstance>()
-            ]),
-          );
+              ]).having((e) => e.setter, 'setter', isNotNull),
+            );
 
-          await expectLater(
-            list4valueFuture,
-            completion(
-              isA<StringInstance>().having(
-                (e) => e.displayString,
-                'displayString',
-                'complex-value',
-              ),
-            ),
-          );
-
-          await expectLater(
-            plainInstanceValueFuture,
-            completion(
-              isA<StringInstance>().having(
-                (e) => e.displayString,
-                'displayString',
-                'hello world',
-              ),
-            ),
-          );
-
-          await expectLater(mapKeys.keys, [
-            isA<StringInstance>()
-                .having((e) => e.displayString, 'displayString', 'list')
-                .having((e) => e.setter, 'setter', null),
-            isA<StringInstance>()
-                .having((e) => e.displayString, 'displayString', 'string')
-                .having((e) => e.setter, 'setter', null),
-            isA<NumInstance>()
-                .having((e) => e.displayString, 'displayString', '42')
-                .having((e) => e.setter, 'setter', null),
-            isA<BoolInstance>()
-                .having((e) => e.displayString, 'displayString', 'true')
-                .having((e) => e.setter, 'setter', null),
-            isA<NullInstance>().having((e) => e.setter, 'setter', null),
-            isA<ObjectInstance>()
-                .having((e) => e.type, 'type', '_SubObject')
-                .having((e) => e.setter, 'setter', null)
-                .having((e) => e.fields, 'fields', [
-              isA<ObjectField>()
-                  .having((e) => e.name, 'name', 'value')
-                  .having((e) => e.isFinal, 'isFinal', true)
-            ]),
-            isA<ObjectInstance>()
-                .having((e) => e.type, 'type', 'Object')
-                .having((e) => e.setter, 'setter', null),
-            isA<StringInstance>()
-                .having((e) => e.displayString, 'displayString', 'nested_map')
-                .having((e) => e.setter, 'setter', null),
-          ]);
-
-          await expectLater(
-            mapItems,
-            completion([
-              isA<ListInstance>()
-                  .having((e) => e.length, 'length', 1)
+            expect(
+              complexProperties['string'],
+              isA<StringInstance>()
+                  .having(
+                      (e) => e.displayString, 'displayString', 'hello world')
                   .having((e) => e.setter, 'setter', isNotNull),
+            );
+
+            expect(
+              complexProperties['_getterAndSetter'],
+              isA<NumInstance>()
+                  .having((e) => e.displayString, 'displayString', '0')
+                  .having((e) => e.setter, 'setter', isNotNull),
+            );
+
+            expect(
+              complexProperties['uninitializedLate'],
+              isA<SentinelException>().having(
+                (e) => e.sentinel.kind,
+                'sentinel.kind',
+                SentinelKind.kNotInitialized,
+              ),
+            );
+
+            await expectLater(
+              listItems,
+              completion([
+                isA<NumInstance>()
+                    .having((e) => e.displayString, 'displayString', '42'),
+                isA<StringInstance>()
+                    .having((e) => e.displayString, 'displayString', 'string'),
+                isA<ListInstance>().having((e) => e.length, 'length', 0),
+                isA<MapInstance>().having((e) => e.keys, 'value', isEmpty),
+                isA<ObjectInstance>()
+                    .having((e) => e.type, 'type', '_SubObject')
+                    .having((e) => e.fields, 'fields', [
+                  isA<ObjectField>()
+                      .having((e) => e.name, 'name', 'value')
+                      .having((e) => e.isFinal, 'isFinal', true)
+                      .having((e) => e.isPrivate, 'isPrivate', false)
+                      .having(
+                        (e) => e.isDefinedByDependency,
+                        'isDefinedByDependency',
+                        false,
+                      )
+                ]),
+                isA<NullInstance>()
+              ]),
+            );
+
+            await expectLater(
+              list4valueFuture,
+              completion(
+                isA<StringInstance>().having(
+                  (e) => e.displayString,
+                  'displayString',
+                  'complex-value',
+                ),
+              ),
+            );
+
+            await expectLater(
+              plainInstanceValueFuture,
+              completion(
+                isA<StringInstance>().having(
+                  (e) => e.displayString,
+                  'displayString',
+                  'hello world',
+                ),
+              ),
+            );
+
+            await expectLater(mapKeys.keys, [
+              isA<StringInstance>()
+                  .having((e) => e.displayString, 'displayString', 'list')
+                  .having((e) => e.setter, 'setter', null),
               isA<StringInstance>()
                   .having((e) => e.displayString, 'displayString', 'string')
-                  .having((e) => e.setter, 'setter', isNotNull),
-              isA<StringInstance>()
-                  .having((e) => e.displayString, 'displayString', 'number_key')
-                  .having((e) => e.setter, 'setter', isNotNull),
-              isA<StringInstance>()
-                  .having((e) => e.displayString, 'displayString', 'bool_key')
-                  .having((e) => e.setter, 'setter', isNotNull),
-              isA<NullInstance>().having((e) => e.setter, 'setter', isNotNull),
+                  .having((e) => e.setter, 'setter', null),
+              isA<NumInstance>()
+                  .having((e) => e.displayString, 'displayString', '42')
+                  .having((e) => e.setter, 'setter', null),
+              isA<BoolInstance>()
+                  .having((e) => e.displayString, 'displayString', 'true')
+                  .having((e) => e.setter, 'setter', null),
+              isA<NullInstance>().having((e) => e.setter, 'setter', null),
               isA<ObjectInstance>()
                   .having((e) => e.type, 'type', '_SubObject')
-                  .having((e) => e.setter, 'setter', isNotNull)
+                  .having((e) => e.setter, 'setter', null)
                   .having((e) => e.fields, 'fields', [
                 isA<ObjectField>()
                     .having((e) => e.name, 'name', 'value')
                     .having((e) => e.isFinal, 'isFinal', true)
               ]),
+              isA<ObjectInstance>()
+                  .having((e) => e.type, 'type', 'Object')
+                  .having((e) => e.setter, 'setter', null),
               isA<StringInstance>()
-                  .having(
-                    (e) => e.displayString,
-                    'displayString',
-                    'non-constant key',
-                  )
-                  .having((e) => e.setter, 'setter', isNotNull),
-              isA<MapInstance>()
-                  .having((e) => e.setter, 'setter', isNotNull)
-                  .having((e) => e.keys, 'keys', [
+                  .having((e) => e.displayString, 'displayString', 'nested_map')
+                  .having((e) => e.setter, 'setter', null),
+            ]);
+
+            await expectLater(
+              mapItems,
+              completion([
+                isA<ListInstance>()
+                    .having((e) => e.length, 'length', 1)
+                    .having((e) => e.setter, 'setter', isNotNull),
                 isA<StringInstance>()
-                    .having((e) => e.displayString, 'displayString', 'key')
-                    .having((e) => e.setter, 'setter', null),
+                    .having((e) => e.displayString, 'displayString', 'string')
+                    .having((e) => e.setter, 'setter', isNotNull),
+                isA<StringInstance>()
+                    .having(
+                        (e) => e.displayString, 'displayString', 'number_key')
+                    .having((e) => e.setter, 'setter', isNotNull),
+                isA<StringInstance>()
+                    .having((e) => e.displayString, 'displayString', 'bool_key')
+                    .having((e) => e.setter, 'setter', isNotNull),
+                isA<NullInstance>()
+                    .having((e) => e.setter, 'setter', isNotNull),
+                isA<ObjectInstance>()
+                    .having((e) => e.type, 'type', '_SubObject')
+                    .having((e) => e.setter, 'setter', isNotNull)
+                    .having((e) => e.fields, 'fields', [
+                  isA<ObjectField>()
+                      .having((e) => e.name, 'name', 'value')
+                      .having((e) => e.isFinal, 'isFinal', true)
+                ]),
+                isA<StringInstance>()
+                    .having(
+                      (e) => e.displayString,
+                      'displayString',
+                      'non-constant key',
+                    )
+                    .having((e) => e.setter, 'setter', isNotNull),
+                isA<MapInstance>()
+                    .having((e) => e.setter, 'setter', isNotNull)
+                    .having((e) => e.keys, 'keys', [
+                  isA<StringInstance>()
+                      .having((e) => e.displayString, 'displayString', 'key')
+                      .having((e) => e.setter, 'setter', null),
+                ]),
               ]),
-            ]),
-          );
-        },
-        timeout: const Timeout.factor(8),
-      );
+            );
+          },
+          timeout: const Timeout.factor(8),
+        );
 
-      test(
-        'listens to updates from the application side',
-        () async {
-          final container = ProviderContainer();
-          addTearDown(container.dispose);
+        test(
+          'listens to updates from the application side',
+          () async {
+            final container = ProviderContainer();
+            addTearDown(container.dispose);
 
-          final _countSub = container.listen(
-            instanceProvider(
-              const InstancePath.fromProviderId(
-                '0',
-                pathToProperty: [
-                  PathToProperty.objectProperty(
-                    name: '_count',
-                    ownerUri: 'package:provider_app/main.dart',
-                    ownerName: 'Counter',
-                  ),
-                ],
+            final _countSub = container.listen(
+              instanceProvider(
+                const InstancePath.fromProviderId(
+                  '0',
+                  pathToProperty: [
+                    PathToProperty.objectProperty(
+                      name: '_count',
+                      ownerUri: 'package:provider_app/main.dart',
+                      ownerName: 'Counter',
+                    ),
+                  ],
+                ),
+              ).future,
+              (prev, next) {},
+            );
+
+            await expectLater(
+              _countSub.read(),
+              completion(
+                isA<NumInstance>()
+                    .having((e) => e.displayString, 'displayString', '0'),
               ),
-            ).future,
-            (prev, next) {},
-          );
+            );
 
-          await expectLater(
-            _countSub.read(),
-            completion(
-              isA<NumInstance>()
-                  .having((e) => e.displayString, 'displayString', '0'),
-            ),
-          );
+            await evalOnDartLibrary.asyncEval(
+              'await tester.tap(find.byKey(Key("increment"))).then((_) => tester.pump())',
+              isAlive: isAlive,
+            );
 
-          await evalOnDartLibrary.asyncEval(
-            'await tester.tap(find.byKey(Key("increment"))).then((_) => tester.pump())',
-            isAlive: isAlive,
-          );
-
-          await expectLater(
-            _countSub.read(),
-            completion(
-              isA<NumInstance>()
-                  .having((e) => e.displayString, 'displayString', '1'),
-            ),
-          );
-        },
-        timeout: const Timeout.factor(8),
-      );
-    });
-  });
+            await expectLater(
+              _countSub.read(),
+              completion(
+                isA<NumInstance>()
+                    .having((e) => e.displayString, 'displayString', '1'),
+              ),
+            );
+          },
+          timeout: const Timeout.factor(8),
+        );
+      });
+    },
+    tags: 'flutter-environment',
+  );
 
   const countPath = InstancePath.fromProviderId(
     '0',
@@ -891,5 +901,6 @@ void main() async {
       });
     },
     timeout: const Timeout.factor(8),
+    tags: 'flutter-environment',
   );
 }

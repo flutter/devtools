@@ -85,6 +85,7 @@ void main() {
           );
         },
         timeout: const Timeout.factor(8),
+        tags: 'flutter-environment',
       );
 
       test(
@@ -117,6 +118,7 @@ void main() {
           );
         },
         timeout: const Timeout.factor(8),
+        tags: 'flutter-environment',
       );
 
       test(
@@ -155,6 +157,7 @@ void main() {
           );
         },
         timeout: const Timeout.factor(8),
+        tags: 'flutter-environment',
       );
       test(
         'returns privates only from library',
@@ -183,6 +186,7 @@ void main() {
           );
         },
         timeout: const Timeout.factor(8),
+        tags: 'flutter-environment',
       );
       test(
         'returns exported members from import',
@@ -244,6 +248,7 @@ void main() {
           );
         },
         timeout: const Timeout.factor(8),
+        tags: 'flutter-environment',
       );
 
       test(
@@ -281,6 +286,7 @@ void main() {
           );
         },
         timeout: const Timeout.factor(8),
+        tags: 'flutter-environment',
       );
 
       test(
@@ -340,6 +346,7 @@ void main() {
           );
         },
         timeout: const Timeout.factor(8),
+        tags: 'flutter-environment',
       );
     },
   );

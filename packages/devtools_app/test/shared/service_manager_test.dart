@@ -85,24 +85,30 @@ void main() async {
           await env.tearDownEnvironment();
         },
         timeout: const Timeout.factor(4),
+        tags: 'flutter-environment',
       );
 
-      test('vmServiceOpened', () async {
-        await env.setupEnvironment();
+      test(
+        'vmServiceOpened',
+        () async {
+          await env.setupEnvironment();
 
-        expect(serviceManager.service, equals(env.service));
-        expect(serviceManager.isolateManager, isNotNull);
-        expect(serviceManager.serviceExtensionManager, isNotNull);
-        expect(serviceManager.vmFlagManager, isNotNull);
-        expect(serviceManager.isolateManager.isolates.value, isNotEmpty);
-        expect(serviceManager.vmFlagManager.flags.value, isNotNull);
+          expect(serviceManager.service, equals(env.service));
+          expect(serviceManager.isolateManager, isNotNull);
+          expect(serviceManager.serviceExtensionManager, isNotNull);
+          expect(serviceManager.vmFlagManager, isNotNull);
+          expect(serviceManager.isolateManager.isolates.value, isNotEmpty);
+          expect(serviceManager.vmFlagManager.flags.value, isNotNull);
 
-        if (serviceManager.isolateManager.selectedIsolate.value == null) {
-          await whenValueNonNull(serviceManager.isolateManager.selectedIsolate);
-        }
+          if (serviceManager.isolateManager.selectedIsolate.value == null) {
+            await whenValueNonNull(
+                serviceManager.isolateManager.selectedIsolate);
+          }
 
-        await env.tearDownEnvironment();
-      });
+          await env.tearDownEnvironment();
+        },
+        tags: 'flutter-environment',
+      );
 
       test(
         'invalid setBreakpoint throws exception',
@@ -127,6 +133,7 @@ void main() async {
           await env.tearDownEnvironment();
         },
         timeout: const Timeout.factor(4),
+        tags: 'flutter-environment',
       );
 
       test(
@@ -172,6 +179,7 @@ void main() async {
           await env.tearDownEnvironment();
         },
         timeout: const Timeout.factor(4),
+        tags: 'flutter-environment',
       );
 
       test(
@@ -220,6 +228,7 @@ void main() async {
           await env.tearDownEnvironment();
         },
         timeout: const Timeout.factor(4),
+        tags: 'flutter-environment',
       );
 
       test(
@@ -260,6 +269,7 @@ void main() async {
           await env.tearDownEnvironment();
         },
         timeout: const Timeout.factor(4),
+        tags: 'flutter-environment',
       );
 
       test(
@@ -280,6 +290,7 @@ void main() async {
           await env.tearDownEnvironment();
         },
         timeout: const Timeout.factor(4),
+        tags: 'flutter-environment',
       );
 
       test(
@@ -296,6 +307,7 @@ void main() async {
           await env.tearDownEnvironment();
         },
         timeout: const Timeout.factor(4),
+        tags: 'flutter-environment',
       );
 
       test(
@@ -308,6 +320,7 @@ void main() async {
           await env.tearDownEnvironment();
         },
         timeout: const Timeout.factor(4),
+        tags: 'flutter-environment',
       );
 
       // TODO(kenz): once hot restart tests are fixed, add a hot restart test
@@ -363,6 +376,7 @@ void main() async {
           await env.tearDownEnvironment();
         },
         timeout: const Timeout.factor(4),
+        tags: 'flutter-environment',
       );
     },
   );
@@ -486,6 +500,7 @@ void main() async {
         await env.tearDownEnvironment();
       },
       timeout: const Timeout.factor(4),
+      tags: 'flutter-environment',
     );
   });
 }
