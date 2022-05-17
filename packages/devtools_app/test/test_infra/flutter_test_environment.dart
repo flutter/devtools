@@ -84,7 +84,7 @@ class FlutterTestEnvironment {
   bool _needsSetup = true;
 
   // Switch this flag to false to debug issues with non-atomic test behavior.
-  bool reuseTestEnvironment = true;
+  bool reuseTestEnvironment = false;
 
   Future<void> setupEnvironment({
     bool force = false,
