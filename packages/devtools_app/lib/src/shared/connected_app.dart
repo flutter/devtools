@@ -158,7 +158,13 @@ class ConnectedApp {
     generateDevToolsTitle();
     initialized.complete(true);
   }
+}
 
+/// Extension methods for the [ConnectedApp] class.
+///
+/// Using extension methods makes testing easier, as we do not have to mock
+/// these methods.
+extension ConnectedAppExtension on ConnectedApp {
   String get display {
     final identifiers = <String>[];
     if (isFlutterAppNow!) {

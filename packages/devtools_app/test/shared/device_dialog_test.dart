@@ -8,7 +8,6 @@ import 'package:devtools_app/src/service/service_registrations.dart'
     as registrations;
 import 'package:devtools_app/src/shared/device_dialog.dart';
 import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/version.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -20,9 +19,9 @@ void main() {
   const windowSize = Size(2000.0, 1000.0);
 
   group('DeviceDialog', () {
-    void initServiceManager({
+    Future<void> initServiceManager({
       bool flutterVersionServiceAvailable = true,
-    }) {
+    }) async {
       final availableServices = [
         if (flutterVersionServiceAvailable)
           registrations.flutterVersion.service,
@@ -32,29 +31,34 @@ void main() {
       );
       when(fakeServiceManager.vm.version).thenReturn('1.9.1');
       final app = fakeServiceManager.connectedApp!;
-      when(app.isDartWebAppNow).thenReturn(false);
-      when(app.isRunningOnDartVM).thenReturn(true);
+      mockConnectedApp(
+        app,
+        isFlutterApp: true,
+        isProfileBuild: false,
+        isWebApp: false,
+      );
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(IdeTheme, IdeTheme());
     }
 
     DeviceDialog deviceDialog;
 
-    setUp(() {
-      initServiceManager();
+    setUp(() async {
+      await initServiceManager();
     });
 
-    testWidgetsWithWindowSize('builds dialog dart web', windowSize,
+    testWidgetsWithWindowSize('builds dialog for dart web app', windowSize,
         (WidgetTester tester) async {
       final app = fakeServiceManager.connectedApp!;
-      when(app.isDartWebAppNow).thenReturn(true);
-      when(app.isRunningOnDartVM).thenReturn(false);
+      mockConnectedApp(
+        app,
+        isFlutterApp: false,
+        isProfileBuild: false,
+        isWebApp: true,
+      );
 
       deviceDialog = DeviceDialog(
         connectedApp: app,
-        // The parameter is required.
-        // ignore: avoid_redundant_argument_values
-        flutterVersion: null,
       );
 
       await tester.pumpWidget(wrap(deviceDialog));
@@ -64,21 +68,50 @@ void main() {
       expect(find.text('CPU / OS: '), findsOneWidget);
       expect(find.text('Flutter Version: '), findsNothing);
       expect(find.text('Framework / Engine: '), findsNothing);
+      expect(find.text('Connected app type: '), findsOneWidget);
+      expect(find.text('Dart web'), findsOneWidget);
       expect(find.text('VM Service Connection: '), findsOneWidget);
     });
 
-    testWidgetsWithWindowSize('builds dialog flutter', windowSize,
+    testWidgetsWithWindowSize('builds dialog for dart CLI app', windowSize,
         (WidgetTester tester) async {
       final app = fakeServiceManager.connectedApp!;
-      when(app.isDartWebAppNow).thenReturn(false);
-      when(app.isRunningOnDartVM).thenReturn(true);
-      mockIsFlutterApp(fakeServiceManager.connectedApp!);
-      final flutterVersion =
-          FlutterVersion.parse((await fakeServiceManager.flutterVersion).json!);
+      mockConnectedApp(
+        app,
+        isFlutterApp: false,
+        isProfileBuild: false,
+        isWebApp: false,
+      );
 
       deviceDialog = DeviceDialog(
         connectedApp: app,
-        flutterVersion: flutterVersion,
+      );
+
+      await tester.pumpWidget(wrap(deviceDialog));
+      expect(find.text('Device Info'), findsOneWidget);
+
+      expect(find.text('Dart Version: '), findsOneWidget);
+      expect(find.text('CPU / OS: '), findsOneWidget);
+      expect(find.text('Flutter Version: '), findsNothing);
+      expect(find.text('Framework / Engine: '), findsNothing);
+      expect(find.text('Connected app type: '), findsOneWidget);
+      expect(find.text('Dart CLI'), findsOneWidget);
+      expect(find.text('VM Service Connection: '), findsOneWidget);
+    });
+
+    testWidgetsWithWindowSize(
+        'builds dialog for flutter native app (debug)', windowSize,
+        (WidgetTester tester) async {
+      final app = fakeServiceManager.connectedApp!;
+      mockConnectedApp(
+        app,
+        isFlutterApp: true,
+        isProfileBuild: false,
+        isWebApp: false,
+      );
+
+      deviceDialog = DeviceDialog(
+        connectedApp: app,
       );
 
       await tester.pumpWidget(wrap(deviceDialog));
@@ -88,6 +121,89 @@ void main() {
       expect(find.text('CPU / OS: '), findsOneWidget);
       expect(find.text('Flutter Version: '), findsOneWidget);
       expect(find.text('Framework / Engine: '), findsOneWidget);
+      expect(find.text('Connected app type: '), findsOneWidget);
+      expect(find.text('Flutter native (debug build)'), findsOneWidget);
+      expect(find.text('VM Service Connection: '), findsOneWidget);
+    });
+
+    testWidgetsWithWindowSize(
+        'builds dialog for flutter native app (profile)', windowSize,
+        (WidgetTester tester) async {
+      final app = fakeServiceManager.connectedApp!;
+      mockConnectedApp(
+        app,
+        isFlutterApp: true,
+        isProfileBuild: true,
+        isWebApp: false,
+      );
+
+      deviceDialog = DeviceDialog(
+        connectedApp: app,
+      );
+
+      await tester.pumpWidget(wrap(deviceDialog));
+      expect(find.text('Device Info'), findsOneWidget);
+
+      expect(find.text('Dart Version: '), findsOneWidget);
+      expect(find.text('CPU / OS: '), findsOneWidget);
+      expect(find.text('Flutter Version: '), findsOneWidget);
+      expect(find.text('Framework / Engine: '), findsOneWidget);
+      expect(find.text('Connected app type: '), findsOneWidget);
+      expect(find.text('Flutter native (profile build)'), findsOneWidget);
+      expect(find.text('VM Service Connection: '), findsOneWidget);
+    });
+
+    testWidgetsWithWindowSize(
+        'builds dialog for flutter web app (debug)', windowSize,
+        (WidgetTester tester) async {
+      final app = fakeServiceManager.connectedApp!;
+      mockConnectedApp(
+        app,
+        isFlutterApp: true,
+        isProfileBuild: false,
+        isWebApp: true,
+      );
+
+      deviceDialog = DeviceDialog(
+        connectedApp: app,
+      );
+
+      await tester.pumpWidget(wrap(deviceDialog));
+      expect(find.text('Device Info'), findsOneWidget);
+
+      expect(find.text('Dart Version: '), findsOneWidget);
+      expect(find.text('CPU / OS: '), findsOneWidget);
+      expect(find.text('Flutter Version: '), findsOneWidget);
+      expect(find.text('Framework / Engine: '), findsOneWidget);
+      expect(find.text('Connected app type: '), findsOneWidget);
+      expect(find.text('Flutter web (debug build)'), findsOneWidget);
+      expect(find.text('VM Service Connection: '), findsOneWidget);
+    });
+
+    testWidgetsWithWindowSize(
+        'builds dialog for flutter web app (profile)', windowSize,
+        (WidgetTester tester) async {
+      final app = fakeServiceManager.connectedApp!;
+      mockConnectedApp(
+        app,
+        isFlutterApp: true,
+        isProfileBuild: true,
+        isWebApp: true,
+      );
+
+      deviceDialog = DeviceDialog(
+        connectedApp: app,
+      );
+
+      await tester.pumpWidget(wrap(deviceDialog));
+      expect(find.text('Device Info'), findsOneWidget);
+
+      expect(find.text('Dart Version: '), findsOneWidget);
+      expect(find.text('CPU / OS: '), findsOneWidget);
+      expect(find.text('Flutter Version: '), findsOneWidget);
+      expect(find.text('Framework / Engine: '), findsOneWidget);
+      expect(find.text('Connected app type: '), findsOneWidget);
+      expect(find.text('Flutter web (profile build)'), findsOneWidget);
       expect(find.text('VM Service Connection: '), findsOneWidget);
     });
   });
@@ -119,10 +235,12 @@ void main() {
     });
 
     testWidgets('builds dialog', (WidgetTester tester) async {
-      final app = fakeServiceManager.connectedApp!;
-      when(app.isDartWebAppNow).thenReturn(false);
-      when(app.isRunningOnDartVM).thenReturn(true);
-      mockIsFlutterApp(fakeServiceManager.connectedApp!);
+      mockConnectedApp(
+        fakeServiceManager.connectedApp!,
+        isFlutterApp: true,
+        isProfileBuild: false,
+        isWebApp: false,
+      );
 
       await tester.pumpWidget(wrap(vmFlagsDialog));
       expect(find.text('VM Flags'), findsOneWidget);
