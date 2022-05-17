@@ -3,12 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_json_view/flutter_json_view.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -168,7 +169,7 @@ class HeapTreeViewState extends State<HeapTree>
     DevToolsTab.create(
       key: dartMemoryLeaksTabKey,
       gaPrefix: _gaPrefix,
-      tabName: 'Memory Leaks',
+      tabName: 'Leaks',
     ),
   ];
 
@@ -209,18 +210,19 @@ class HeapTreeViewState extends State<HeapTree>
     addAutoDisposeListener(_tabController);
 
     _animation = _setupBubbleAnimationController();
-
-    _subscribeForMemoryLeaks();
   }
 
-  var _leaksJson = <String, dynamic>{};
+  var _leaksSummary = 'Not received.';
+  var _leaksDetails = 'Not received.';
   void _subscribeForMemoryLeaks() {
     autoDisposeStreamSubscription(
       serviceManager.service!.onExtensionEventWithHistory.listen((event) {
         if (event.extensionKind == 'MemoryLeaks') {
-          setState(
-            () => _leaksJson = event.json!['extensionData']!,
-          );
+          setState(() {
+            final json = event.json!['extensionData']!;
+            _leaksDetails = json['details'].toString();
+            _leaksSummary = json['summary'].toString();
+          });
         }
       }),
     );
@@ -302,6 +304,8 @@ class HeapTreeViewState extends State<HeapTree>
     });
 
     addAutoDisposeListener(_controller.lastMonitorTimestamp);
+
+    _subscribeForMemoryLeaks();
   }
 
   @override
@@ -484,8 +488,17 @@ class HeapTreeViewState extends State<HeapTree>
                 ),
 
                 // Memory Leaks Tab
-
-                JsonView.map(_leaksJson),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(_leaksSummary),
+                    MaterialButton(
+                      child: const Text('Save Details to Clipboard'),
+                      onPressed: () =>
+                          Clipboard.setData(ClipboardData(text: _leaksDetails)),
+                    )
+                  ],
+                ),
               ],
             ),
           ),
