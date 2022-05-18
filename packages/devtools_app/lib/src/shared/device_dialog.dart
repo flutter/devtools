@@ -49,7 +49,7 @@ class DeviceDialog extends StatelessWidget {
               child: Row(
                 children: [
                   Text('$name: ', style: boldText),
-                  Text(items[name]!, style: theme.subtleTextStyle),
+                  SelectableText(items[name]!, style: theme.subtleTextStyle),
                 ],
               ),
             ),
@@ -276,15 +276,10 @@ Map<String, String> generateDeviceDescription(
     version = version.substring(0, version.indexOf(' '));
   }
 
-  var bits = '';
-  if (vm.architectureBits != -1) {
-    bits = '-${vm.architectureBits}';
-  }
-
   final flutterVersion = connectedApp.flutterVersionNow;
 
   return {
-    'CPU / OS': '${vm.targetCPU}$bits / ${vm.operatingSystem}',
+    'CPU / OS': vm.deviceDisplay,
     'Dart Version': version,
     if (flutterVersion != null) ...{
       'Flutter Version':

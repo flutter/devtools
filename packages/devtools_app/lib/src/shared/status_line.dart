@@ -141,9 +141,8 @@ class StatusLine extends StatelessWidget {
           if (!app.isRunningOnDartVM!) {
             description = 'web app';
           } else {
-            final VM vm = serviceManager.vm!;
-            description = '${vm.targetCPU} (${vm.architectureBits} bit) '
-                '${vm.operatingSystem}';
+            final vm = serviceManager.vm!;
+            description = vm.deviceDisplay;
           }
 
           final color = textTheme.bodyText2!.color;

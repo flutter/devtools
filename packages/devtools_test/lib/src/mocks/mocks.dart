@@ -231,6 +231,12 @@ Future<void> ensureInspectorDependencies() async {
   );
 }
 
+void mockWebVm(VM vm) {
+  when(vm.targetCPU).thenReturn('Web');
+  when(vm.architectureBits).thenReturn(-1);
+  when(vm.operatingSystem).thenReturn('macos');
+}
+
 void mockConnectedApp(
   ConnectedApp connectedApp, {
   required bool isFlutterApp,

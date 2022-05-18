@@ -11,6 +11,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../config_specific/logger/logger.dart' as logger;
 import 'globals.dart';
@@ -68,5 +69,16 @@ mixin CompareMixin implements Comparable {
 
   bool operator >=(other) {
     return compareTo(other) >= 0;
+  }
+}
+
+extension VmExtension on VM {
+  String get deviceDisplay {
+    return [
+      '$targetCPU',
+      if (architectureBits != null && architectureBits != -1)
+        '($architectureBits bit)',
+      operatingSystem,
+    ].join(' ');
   }
 }
