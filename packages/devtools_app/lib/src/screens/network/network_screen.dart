@@ -8,11 +8,11 @@ import 'package:provider/provider.dart';
 
 import '../../analytics/analytics.dart' as ga;
 import '../../analytics/constants.dart' as analytics_constants;
+import '../../http/curl_command.dart';
 import '../../http/http_request_data.dart';
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../primitives/utils.dart';
 import '../../shared/common_widgets.dart';
-import '../../shared/curl_command.dart';
 import '../../shared/screen.dart';
 import '../../shared/split.dart';
 import '../../shared/table.dart';
@@ -421,11 +421,13 @@ class ActionsColumn extends ColumnData<NetworkRequest>
           alignment: ColumnAlignment.right,
         );
 
+  static const _actionSplashRadius = 16.0;
+
   @override
   bool get supportsSorting => false;
 
   @override
-  bool get disableHeader => true;
+  bool get includeHeader => false;
 
   @override
   dynamic getValue(NetworkRequest dataObject) {
@@ -449,7 +451,7 @@ class ActionsColumn extends ColumnData<NetworkRequest>
           child: const Text('Copy as cURL'),
           onTap: () {
             copyToClipboard(
-              CurlCommand(data).toString(),
+              CurlCommand.from(data).toString(),
               'Copied the cURL command to the clipboard',
               context,
             );
@@ -468,14 +470,14 @@ class ActionsColumn extends ColumnData<NetworkRequest>
   }) {
     final options = _buildOptions(context, data);
 
-    // Only show the actions button when there are options, and the row is
+    // Only show the actions button when there are options and the row is
     // currently selected.
     if (options.isEmpty || !isRowSelected) return const SizedBox.shrink();
 
     return PopupMenuButton(
       icon: const Icon(Icons.more_vert),
-      padding: const EdgeInsets.only(left: 4, right: 4),
-      splashRadius: 16,
+      padding: const EdgeInsets.symmetric(horizontal: densePadding),
+      splashRadius: _actionSplashRadius,
       tooltip: '',
       itemBuilder: (context) {
         return options;

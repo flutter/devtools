@@ -5,7 +5,7 @@
 import 'dart:typed_data';
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/shared/curl_command.dart';
+import 'package:devtools_app/src/http/curl_command.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -14,7 +14,7 @@ import '../test_data/network.dart';
 void main() {
   group('NetworkCurlCommand', () {
     test('parses simple GET request', () {
-      final command = CurlCommand(
+      final command = CurlCommand.from(
         _getMockedDartIOHttpRequestData(
           method: 'GET',
           uri: Uri.parse('https://www.example.com'),
@@ -28,7 +28,7 @@ void main() {
     });
 
     test('parses PUT request', () {
-      final command = CurlCommand(
+      final command = CurlCommand.from(
         _getMockedDartIOHttpRequestData(
           method: 'PUT',
           uri: Uri.parse('https://www.example.com'),
@@ -43,7 +43,7 @@ void main() {
     });
 
     test('parses simple GET request with headers', () {
-      final command = CurlCommand(
+      final command = CurlCommand.from(
         _getMockedDartIOHttpRequestData(
           method: 'GET',
           uri: Uri.parse('https://www.example.com'),
@@ -61,7 +61,7 @@ void main() {
     });
 
     test('parses POST with body', () {
-      final command = CurlCommand(
+      final command = CurlCommand.from(
         _getMockedDartIOHttpRequestData(
           method: 'POST',
           uri: Uri.parse('https://www.example.com'),
@@ -82,7 +82,7 @@ void main() {
     });
 
     test('parses null body', () {
-      final command = CurlCommand(
+      final command = CurlCommand.from(
         _getMockedDartIOHttpRequestData(
           method: 'POST',
           uri: Uri.parse('https://www.example.com'),
@@ -100,7 +100,7 @@ void main() {
     });
 
     test('parses empty body', () {
-      final command = CurlCommand(
+      final command = CurlCommand.from(
         _getMockedDartIOHttpRequestData(
           method: 'POST',
           uri: Uri.parse('https://www.example.com'),
@@ -116,7 +116,7 @@ void main() {
     });
 
     test('escapes \' character in url', () {
-      final command = CurlCommand(
+      final command = CurlCommand.from(
         _getMockedDartIOHttpRequestData(
           method: 'GET',
           uri: Uri.parse('https://www.example.com/search?q=\'test\''),
@@ -134,7 +134,7 @@ void main() {
     });
 
     test('escapes \' character in headers', () {
-      final command = CurlCommand(
+      final command = CurlCommand.from(
         _getMockedDartIOHttpRequestData(
           method: 'GET',
           uri: Uri.parse('https://www.example.com'),
@@ -152,7 +152,7 @@ void main() {
     });
 
     test('no line breaks when "multiline" is false', () {
-      final command = CurlCommand(
+      final command = CurlCommand.from(
         _getMockedDartIOHttpRequestData(
           method: 'POST',
           uri: Uri.parse('https://www.example.com'),
@@ -172,7 +172,7 @@ void main() {
     });
 
     test('no --location when followRedirects is false', () {
-      final command = CurlCommand(
+      final command = CurlCommand.from(
         _getMockedDartIOHttpRequestData(
           method: 'GET',
           uri: Uri.parse('https://www.example.com'),
@@ -189,7 +189,7 @@ void main() {
     });
 
     test('parses GET request from test_data', () {
-      final command = CurlCommand(httpGet);
+      final command = CurlCommand.from(httpGet);
 
       expect(
         command.toString(),
@@ -198,7 +198,7 @@ void main() {
     });
 
     test('parses POST request from test_data', () {
-      final command = CurlCommand(httpPost);
+      final command = CurlCommand.from(httpPost);
 
       expect(
         command.toString(),

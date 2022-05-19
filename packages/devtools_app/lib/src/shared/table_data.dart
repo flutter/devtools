@@ -43,7 +43,7 @@ abstract class ColumnData<T> {
 
   bool get numeric => false;
 
-  bool get disableHeader => false;
+  bool get includeHeader => true;
 
   bool get supportsSorting => numeric;
 

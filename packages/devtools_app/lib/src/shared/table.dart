@@ -1352,16 +1352,16 @@ class _TableRowState<T> extends State<TableRow<T>>
           ],
         );
 
-        content = column.disableHeader
-            ? headerContent
-            : InkWell(
+        content = column.includeHeader
+            ? InkWell(
                 canRequestFocus: false,
                 onTap: () => _handleSortChange(
                   column,
                   secondarySortColumn: widget.secondarySortColumn,
                 ),
                 child: headerContent,
-              );
+              )
+            : headerContent;
       } else {
         final padding = column.getNodeIndentPx(node);
         assert(padding >= 0);
