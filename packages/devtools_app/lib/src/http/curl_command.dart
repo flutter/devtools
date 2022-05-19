@@ -47,7 +47,7 @@ class CurlCommand {
     DartIOHttpRequestData data, {
     required bool multiline,
   }) {
-    final List<String> parts = [];
+    final parts = <String>[];
     final headers = data.requestHeaders;
 
     if (headers != null && headers.isNotEmpty) {

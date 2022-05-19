@@ -15,7 +15,7 @@ void main() {
   group('NetworkCurlCommand', () {
     test('parses simple GET request', () {
       final command = CurlCommand.from(
-        _getMockedDartIOHttpRequestData(
+        _testDartIOHttpRequestData(
           method: 'GET',
           uri: Uri.parse('https://www.example.com'),
         ),
@@ -29,7 +29,7 @@ void main() {
 
     test('parses PUT request', () {
       final command = CurlCommand.from(
-        _getMockedDartIOHttpRequestData(
+        _testDartIOHttpRequestData(
           method: 'PUT',
           uri: Uri.parse('https://www.example.com'),
           headers: {},
@@ -44,7 +44,7 @@ void main() {
 
     test('parses simple GET request with headers', () {
       final command = CurlCommand.from(
-        _getMockedDartIOHttpRequestData(
+        _testDartIOHttpRequestData(
           method: 'GET',
           uri: Uri.parse('https://www.example.com'),
           headers: {
@@ -62,7 +62,7 @@ void main() {
 
     test('parses POST with body', () {
       final command = CurlCommand.from(
-        _getMockedDartIOHttpRequestData(
+        _testDartIOHttpRequestData(
           method: 'POST',
           uri: Uri.parse('https://www.example.com'),
           headers: {
@@ -83,7 +83,7 @@ void main() {
 
     test('parses null body', () {
       final command = CurlCommand.from(
-        _getMockedDartIOHttpRequestData(
+        _testDartIOHttpRequestData(
           method: 'POST',
           uri: Uri.parse('https://www.example.com'),
           headers: {},
@@ -101,7 +101,7 @@ void main() {
 
     test('parses empty body', () {
       final command = CurlCommand.from(
-        _getMockedDartIOHttpRequestData(
+        _testDartIOHttpRequestData(
           method: 'POST',
           uri: Uri.parse('https://www.example.com'),
           headers: {},
@@ -117,7 +117,7 @@ void main() {
 
     test('escapes \' character in url', () {
       final command = CurlCommand.from(
-        _getMockedDartIOHttpRequestData(
+        _testDartIOHttpRequestData(
           method: 'GET',
           uri: Uri.parse('https://www.example.com/search?q=\'test\''),
           headers: {
@@ -135,7 +135,7 @@ void main() {
 
     test('escapes \' character in headers', () {
       final command = CurlCommand.from(
-        _getMockedDartIOHttpRequestData(
+        _testDartIOHttpRequestData(
           method: 'GET',
           uri: Uri.parse('https://www.example.com'),
           headers: {
@@ -153,7 +153,7 @@ void main() {
 
     test('no line breaks when "multiline" is false', () {
       final command = CurlCommand.from(
-        _getMockedDartIOHttpRequestData(
+        _testDartIOHttpRequestData(
           method: 'POST',
           uri: Uri.parse('https://www.example.com'),
           headers: {
@@ -173,7 +173,7 @@ void main() {
 
     test('no --location when followRedirects is false', () {
       final command = CurlCommand.from(
-        _getMockedDartIOHttpRequestData(
+        _testDartIOHttpRequestData(
           method: 'GET',
           uri: Uri.parse('https://www.example.com'),
           headers: {},
@@ -208,13 +208,13 @@ void main() {
   });
 }
 
-class _MockDartIOHttpRequestData extends DartIOHttpRequestData {
-  _MockDartIOHttpRequestData(
+class _TestDartIOHttpRequestData extends DartIOHttpRequestData {
+  _TestDartIOHttpRequestData(
     int timelineMicrosBase,
-    this._mockRequest,
-  ) : super(timelineMicrosBase, _mockRequest);
+    this._request,
+  ) : super(timelineMicrosBase, _request);
 
-  final HttpProfileRequest _mockRequest;
+  final HttpProfileRequest _request;
 
   @override
   String? get requestBody {
@@ -223,8 +223,8 @@ class _MockDartIOHttpRequestData extends DartIOHttpRequestData {
       return body;
     }
 
-    if (_mockRequest.requestBody != null) {
-      return String.fromCharCodes(_mockRequest.requestBody!);
+    if (_request.requestBody != null) {
+      return String.fromCharCodes(_request.requestBody!);
     }
 
     return null;
@@ -236,14 +236,14 @@ class _MockDartIOHttpRequestData extends DartIOHttpRequestData {
   }
 }
 
-DartIOHttpRequestData _getMockedDartIOHttpRequestData({
+DartIOHttpRequestData _testDartIOHttpRequestData({
   required String method,
   required Uri uri,
   Uint8List? requestBody,
   Map<String, dynamic>? headers,
   List<String>? cookies,
 }) {
-  return _MockDartIOHttpRequestData(
+  return _TestDartIOHttpRequestData(
     0,
     HttpProfileRequest(
       id: 0,

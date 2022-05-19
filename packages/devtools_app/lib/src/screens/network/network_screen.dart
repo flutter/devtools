@@ -479,9 +479,7 @@ class ActionsColumn extends ColumnData<NetworkRequest>
       padding: const EdgeInsets.symmetric(horizontal: densePadding),
       splashRadius: _actionSplashRadius,
       tooltip: '',
-      itemBuilder: (context) {
-        return options;
-      },
+      itemBuilder: (context) => options,
     );
   }
 }
