@@ -293,6 +293,7 @@ class DartIOHttpRequestData extends NetworkRequest {
       final acceptedMethods = {'POST', 'PUT', 'PATCH'};
       if (!acceptedMethods.contains(_request.method)) return null;
       if (_requestBody != null) return _requestBody;
+      if (fullRequest.requestBody == null) return null;
       _requestBody = utf8.decode(fullRequest.requestBody!);
       return _requestBody;
     } on FormatException {
