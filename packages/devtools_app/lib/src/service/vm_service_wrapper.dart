@@ -38,7 +38,7 @@ class VmServiceWrapper implements VmService {
   }
 
   Future<void> _initSupportedProtocols() async {
-    supportedProtocols = await getSupportedProtocols();
+    final supportedProtocols = await getSupportedProtocols();
     final ddsProtocol = supportedProtocols.protocols?.firstWhereOrNull(
       (Protocol p) => p.protocolName?.caseInsensitiveEquals('DDS') ?? false,
     );
@@ -46,11 +46,9 @@ class VmServiceWrapper implements VmService {
     _supportedProtocolsInitialized.complete();
   }
 
-  late final ProtocolList supportedProtocols;
+  final _supportedProtocolsInitialized = Completer<void>();
 
-  final Completer _supportedProtocolsInitialized = Completer();
-
-  late final bool _ddsSupported;
+  bool _ddsSupported = false;
 
   late final VmService _vmService;
 
