@@ -37,6 +37,11 @@ class VmServiceWrapper implements VmService {
     _initSupportedProtocols();
   }
 
+  // TODO(https://github.com/dart-lang/sdk/issues/49072): in the long term, do
+  // not support diverging DevTools functionality based on whether the DDS
+  // protocol is supported. Conditional logic around [_ddsSupported] was added
+  // in https://github.com/flutter/devtools/pull/4119 as a workaround for
+  // profiling the analysis server.
   Future<void> _initSupportedProtocols() async {
     final supportedProtocols = await getSupportedProtocols();
     final ddsProtocol = supportedProtocols.protocols?.firstWhereOrNull(
