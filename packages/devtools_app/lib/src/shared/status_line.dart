@@ -67,22 +67,21 @@ class StatusLine extends StatelessWidget {
   }
 
   List<Widget> _getStatusItems(BuildContext context, bool showIsolateSelector) {
-    final isExtraNarrow = ScreenSize(context).width == MediaSize.xxs;
-    final isNarrow = isExtraNarrow || ScreenSize(context).width == MediaSize.xs;
+    final screenWidth = ScreenSize(context).width;
     final Widget? pageStatus = currentScreen.buildStatus(context);
     return [
-      buildHelpUrlStatus(context, currentScreen, isNarrow),
+      buildHelpUrlStatus(context, currentScreen, screenWidth),
       const BulletSpacer(),
-      if (!isExtraNarrow && showIsolateSelector) ...[
+      if (screenWidth > MediaSize.xxs && showIsolateSelector) ...[
         const IsolateSelector(),
         const BulletSpacer(),
       ],
-      if (!isNarrow && pageStatus != null) ...[
+      if (screenWidth > MediaSize.xs && pageStatus != null) ...[
         pageStatus,
         const BulletSpacer(),
       ],
-      buildConnectionStatus(context, isExtraNarrow),
-      if (isEmbedded && !isExtraNarrow) ...[
+      buildConnectionStatus(context, screenWidth),
+      if (screenWidth > MediaSize.xxs && isEmbedded) ...[
         const BulletSpacer(),
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
@@ -98,14 +97,16 @@ class StatusLine extends StatelessWidget {
   Widget buildHelpUrlStatus(
     BuildContext context,
     Screen currentScreen,
-    bool isNarrow,
+    MediaSize screenWidth,
   ) {
     final String? docPageId = currentScreen.docPageId;
     if (docPageId != null) {
       return RichText(
         text: LinkTextSpan(
           link: Link(
-            display: isNarrow ? docPageId : 'flutter.dev/devtools/$docPageId',
+            display: screenWidth <= MediaSize.xs
+                ? docPageId
+                : 'flutter.dev/devtools/$docPageId',
             url: 'https://flutter.dev/devtools/$docPageId',
           ),
           onTap: () {
@@ -121,14 +122,14 @@ class StatusLine extends StatelessWidget {
       // Use a placeholder for pages with no explicit documentation.
       return Flexible(
         child: Text(
-          '${isNarrow ? '' : 'DevTools '}${devtools.version}',
+          '${screenWidth <= MediaSize.xs ? '' : 'DevTools '}${devtools.version}',
           overflow: TextOverflow.ellipsis,
         ),
       );
     }
   }
 
-  Widget buildConnectionStatus(BuildContext context, bool isExtraNarrow) {
+  Widget buildConnectionStatus(BuildContext context, MediaSize screenWidth) {
     final textTheme = Theme.of(context).textTheme;
     const noConnectionMsg = 'No client connection';
     return ValueListenableBuilder<ConnectedState>(
@@ -184,7 +185,7 @@ class StatusLine extends StatelessWidget {
                         Icons.info_outline,
                         size: actionsIconSize,
                       ),
-                      if (!isExtraNarrow) ...[
+                      if (screenWidth > MediaSize.xxs) ...[
                         const SizedBox(width: denseSpacing),
                         Text(
                           description,
@@ -202,7 +203,7 @@ class StatusLine extends StatelessWidget {
           return child!;
         }
       },
-      child: isExtraNarrow
+      child: screenWidth <= MediaSize.xxs
           ? DevToolsTooltip(
               message: noConnectionMsg,
               child: Icon(

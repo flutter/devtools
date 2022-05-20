@@ -7,6 +7,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
+import '../primitives/enum_utils.dart';
 import '../shared/theme.dart';
 
 /// Returns a [TextSpan] that only includes the first [length] characters of
@@ -224,7 +225,7 @@ class ThemedColor {
 
 // TODO(elliette): Add mixin for comparing enums. Eg, size > MediaSize.s
 // Requires enhanced enums feature in Dart SDK >= 2.17.
-enum MediaSize {
+enum MediaSize with EnumIndexOrdering {
   xxs,
   xs,
   s,
