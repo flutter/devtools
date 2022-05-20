@@ -225,6 +225,31 @@ class HeapTreeViewState extends State<HeapTree>
         }
       }),
     );
+
+    autoDisposeStreamSubscription(
+      serviceManager.service!.onExtensionEventWithHistory.listen((event) {
+        if (event.extensionKind == 'TrackedObject') {
+          final json = event.json!['extensionData']!;
+          final hash = json['hash'] as int;
+
+          final graph = _controller.heapGraph;
+          if (graph == null) {
+            print('Graph is null');
+            return;
+          }
+          for (HeapGraphElementLive? e in graph.elements) {
+            if (e!.origin.identityHashCode == hash) {
+              print('!!!!!! found ${e.origin.toString()}!!!!!');
+              return;
+            }
+          }
+          print('!!!!! did not find :(');
+        }
+      }),
+    );
+
+    var hash = 1049513629;
+    var type = List<String>;
   }
 
   @override
