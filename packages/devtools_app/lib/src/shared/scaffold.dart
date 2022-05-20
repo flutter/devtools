@@ -345,6 +345,10 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
                           _currentScreen.showConsole(widget.embed))
                       ? Split(
                           axis: Axis.vertical,
+                          splitters: [
+                            DebuggerConsole.buildHeader(),
+                          ],
+                          initialFractions: const [0.8, 0.2],
                           children: [
                             content,
                             Padding(
@@ -352,10 +356,6 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
                               child: const DebuggerConsole(),
                             ),
                           ],
-                          splitters: [
-                            DebuggerConsole.buildHeader(),
-                          ],
-                          initialFractions: const [0.8, 0.2],
                         )
                       : content,
                   bottomNavigationBar: StatusLine(
@@ -511,11 +511,11 @@ class KeyboardShortcutsState extends State<KeyboardShortcuts>
       behavior: HitTestBehavior.opaque,
       onTap: () => FocusScope.of(context).requestFocus(_focusNode),
       child: FocusableActionDetector(
-        child: widget.child,
         shortcuts: widget.keyboardShortcuts.shortcuts,
         actions: widget.keyboardShortcuts.actions,
         autofocus: true,
         focusNode: _focusNode,
+        child: widget.child,
       ),
     );
   }
