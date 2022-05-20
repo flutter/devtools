@@ -220,12 +220,8 @@ class VariableSelectionControls extends MaterialTextSelectionControls {
       endpoints: endpoints,
       delegate: delegate,
       clipboardStatus: clipboardStatus!,
-      handleCut: canCut(delegate)
-          ? () => handleCut(delegate)
-          : null,
-      handleCopy: canCopy(delegate)
-          ? () => handleCopy(delegate)
-          : null,
+      handleCut: canCut(delegate) ? () => handleCut(delegate) : null,
+      handleCopy: canCopy(delegate) ? () => handleCopy(delegate) : null,
       handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
       handleSelectAll:
           canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
