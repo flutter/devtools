@@ -390,22 +390,20 @@ class HeapTreeViewState extends State<HeapTree>
     if (_isSnapshotRunning) {
       snapshotDisplay = Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const SizedBox(height: 50.0),
-          snapshotDisplay = const CircularProgressIndicator(),
-          const SizedBox(height: denseSpacing),
-          Text(
-            _isSnapshotStreaming
-                ? 'Processing...'
-                : _isSnapshotGraphing
-                    ? 'Graphing...'
-                    : _isSnapshotGrouping
-                        ? 'Grouping...'
-                        : _isSnapshotComplete
-                            ? 'Done'
-                            : '...',
-          ),
-        ],
+        const SizedBox(height: 50.0),
+        snapshotDisplay = const CircularProgressIndicator(),
+        const SizedBox(height: denseSpacing),
+        Text(
+          _isSnapshotStreaming
+              ? 'Processing...'
+              : _isSnapshotGraphing
+                  ? 'Graphing...'
+                  : _isSnapshotGrouping
+                      ? 'Grouping...'
+                      : _isSnapshotComplete
+                          ? 'Done'
+                          : '...',
+        ),
       );
     } else if (_controller.snapshotByLibraryData != null) {
       snapshotDisplay =
@@ -416,52 +414,43 @@ class HeapTreeViewState extends State<HeapTree>
 
     return Padding(
       padding: const EdgeInsets.only(top: denseRowSpacing),
-      child: Column(
-        children: [
-          const SizedBox(height: defaultSpacing),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              TabBar(
-                labelColor: themeData.textTheme.bodyText1!.color,
-                isScrollable: true,
-                controller: _tabController,
-                tabs: HeapTreeViewState.dartHeapTabs,
-              ),
-              _buildSearchFilterControls(),
-            ],
+      Column(
+        const SizedBox(height: defaultSpacing),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          TabBar(
+            labelColor: themeData.textTheme.bodyText1!.color,
+            isScrollable: true,
+            controller: _tabController,
+            tabs: HeapTreeViewState.dartHeapTabs,
           ),
-          const SizedBox(height: densePadding),
-          Expanded(
-            child: TabBarView(
-              physics: defaultTabBarViewPhysics,
-              controller: _tabController,
-              children: [
-                // Analysis Tab
-                Column(
-                  children: [
-                    _buildSnapshotControls(themeData.textTheme),
-                    const SizedBox(height: denseRowSpacing),
-                    Expanded(
-                      child: OutlineDecoration(
-                        child: buildSnapshotTables(snapshotDisplay),
-                      ),
-                    ),
-                  ],
-                ),
+          _buildSearchFilterControls(),
+        ),
+        const SizedBox(height: densePadding),
+        Expanded(
+          TabBarView(
+            physics: defaultTabBarViewPhysics,
+            controller: _tabController,
 
-                // Allocations Tab
-                Column(
-                  children: [
-                    _buildAllocationsControls(),
-                    const SizedBox(height: denseRowSpacing),
-                    const Expanded(child: AllocationTableView()),
-                  ],
+            // Analysis Tab
+            Column(
+              _buildSnapshotControls(themeData.textTheme),
+              const SizedBox(height: denseRowSpacing),
+              Expanded(
+                OutlineDecoration(
+                  buildSnapshotTables(snapshotDisplay),
                 ),
-              ],
+              ),
+            ),
+
+            // Allocations Tab
+            Column(
+              _buildAllocationsControls(),
+              const SizedBox(height: denseRowSpacing),
+              const Expanded(AllocationTableView()),
             ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -470,13 +459,11 @@ class HeapTreeViewState extends State<HeapTree>
     if (snapshotDisplay == null) {
       // Display help text about how to collect data.
       return Center(
-        child: Row(
+        Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Text('Click the take heap snapshot button '),
-            Icon(Icons.camera),
-            Text(' to collect a graph of memory objects.'),
-          ],
+          Text('Click the take heap snapshot button '),
+          Icon(Icons.camera),
+          Text(' to collect a graph of memory objects.'),
         ),
       );
     }
@@ -484,7 +471,7 @@ class HeapTreeViewState extends State<HeapTree>
     final rightSideTable = _controller.isLeafSelected
         ? InstanceTreeView()
         : _controller.isAnalysisLeafSelected
-            ? Expanded(child: AnalysisInstanceViewTable())
+            ? Expanded(AnalysisInstanceViewTable())
             : helpScreen();
 
     return treeMapVisible
@@ -493,12 +480,11 @@ class HeapTreeViewState extends State<HeapTree>
             initialFractions: const [0.5, 0.5],
             minSizes: const [300, 300],
             axis: Axis.horizontal,
-            children: [
-              // TODO(terry): Need better focus handling between 2 tables & up/down
-              //              arrows in the right-side field instance view table.
-              snapshotDisplay,
-              rightSideTable,
-            ],
+
+            // TODO(terry): Need better focus handling between 2 tables & up/down
+            //              arrows in the right-side field instance view table.
+            snapshotDisplay,
+            rightSideTable,
           );
   }
 
@@ -506,29 +492,25 @@ class HeapTreeViewState extends State<HeapTree>
     final themeData = Theme.of(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        iconData == null
-            ? Text(' ', style: themeData.fixedFontStyle)
-            : Icon(iconData),
-        Text(entry, style: themeData.fixedFontStyle),
-      ],
+      iconData == null
+          ? Text(' ', style: themeData.fixedFontStyle)
+          : Icon(iconData),
+      Text(entry, style: themeData.fixedFontStyle),
     );
   }
 
   Widget helpScreen() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Text(
-          'Click a leaf node instance of a class to\n'
-          'inspect the fields of that instance e.g.,',
-        ),
-        const SizedBox(height: defaultSpacing),
-        tableExample(Icons.expand_more, 'dart:collection'),
-        tableExample(Icons.expand_more, 'SplayTreeMap'),
-        const SizedBox(height: denseRowSpacing),
-        tableExample(null, 'Instance 0'),
-      ],
+      const Text(
+        'Click a leaf node instance of a class to\n'
+        'inspect the fields of that instance e.g.,',
+      ),
+      const SizedBox(height: defaultSpacing),
+      tableExample(Icons.expand_more, 'dart:collection'),
+      tableExample(Icons.expand_more, 'SplayTreeMap'),
+      const SizedBox(height: denseRowSpacing),
+      tableExample(null, 'Instance 0'),
     );
   }
 
@@ -551,7 +533,7 @@ class HeapTreeViewState extends State<HeapTree>
         return DropdownMenuItem<String>(
           key: groupByMenuItem,
           value: value,
-          child: Text(
+          Text(
             'Group by $value',
             key: groupByKey,
           ),
@@ -560,7 +542,7 @@ class HeapTreeViewState extends State<HeapTree>
     ).toList();
 
     return DropdownButtonHideUnderline(
-      child: DropdownButton<String>(
+      DropdownButton<String>(
         key: groupByMenuButtonKey,
         style: textTheme.bodyText2,
         value: _controller.groupingBy.value,
@@ -587,8 +569,8 @@ class HeapTreeViewState extends State<HeapTree>
   Widget _buildSnapshotControls(TextTheme textTheme) {
     return SizedBox(
       height: defaultButtonHeight,
-      child: Row(
-        children: [
+      Row(
+        [
           IconLabelButton(
             tooltip: 'Take a memory profile snapshot',
             icon: Icons.camera,
@@ -598,22 +580,20 @@ class HeapTreeViewState extends State<HeapTree>
           const SizedBox(width: defaultSpacing),
           Row(
             mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('Treemap'),
-              Switch(
-                value: treeMapVisible,
-                onChanged: _controller.snapshotByLibraryData != null
-                    ? (value) {
-                        ga.select(
-                          analytics_constants.memory,
-                          '${analytics_constants.treemapToggle}-'
-                          '${value ? 'show' : 'hide'}',
-                        );
-                        _controller.toggleTreeMapVisible(value);
-                      }
-                    : null,
-              ),
-            ],
+            const Text('Treemap'),
+            Switch(
+              value: treeMapVisible,
+              onChanged: _controller.snapshotByLibraryData != null
+                  ? (value) {
+                      ga.select(
+                        analytics_constants.memory,
+                        '${analytics_constants.treemapToggle}-'
+                        '${value ? 'show' : 'hide'}',
+                      );
+                      _controller.toggleTreeMapVisible(value);
+                    }
+                  : null,
+            ),
           ),
           if (!treeMapVisible) ...[
             const SizedBox(width: defaultSpacing),
@@ -735,35 +715,33 @@ class HeapTreeViewState extends State<HeapTree>
     final updateCircle = displayTimestampUpdateBubble();
 
     return Row(
-      children: [
-        IconLabelButton(
-          tooltip: 'Collect Allocation Statistics',
-          imageIcon: trackImage(context),
-          label: 'Track',
-          onPressed: () async {
-            ga.select(
-              analytics_constants.memory,
-              analytics_constants.trackAllocations,
-            );
-            await _allocationStart();
-          },
-        ),
-        const SizedBox(width: denseSpacing),
-        IconLabelButton(
-          tooltip: 'Reset all accumulators',
-          imageIcon: resetImage(context),
-          label: 'Reset',
-          onPressed: () async {
-            ga.select(
-              analytics_constants.memory,
-              analytics_constants.resetAllocationAccumulators,
-            );
-            await _allocationReset();
-          },
-        ),
-        const Spacer(),
-        updateCircle,
-      ],
+      IconLabelButton(
+        tooltip: 'Collect Allocation Statistics',
+        imageIcon: trackImage(context),
+        label: 'Track',
+        onPressed: () async {
+          ga.select(
+            analytics_constants.memory,
+            analytics_constants.trackAllocations,
+          );
+          await _allocationStart();
+        },
+      ),
+      const SizedBox(width: denseSpacing),
+      IconLabelButton(
+        tooltip: 'Reset all accumulators',
+        imageIcon: resetImage(context),
+        label: 'Reset',
+        onPressed: () async {
+          ga.select(
+            analytics_constants.memory,
+            analytics_constants.resetAllocationAccumulators,
+          );
+          await _allocationReset();
+        },
+      ),
+      const Spacer(),
+      updateCircle,
     );
   }
 
@@ -775,27 +753,25 @@ class HeapTreeViewState extends State<HeapTree>
     final textWidth = textWidgetWidth(text, style: style);
 
     return Stack(
-      children: [
-        Positioned(
-          child: Container(
-            child: Text(text, style: style),
-            width: textWidth + 10,
+      Positioned(
+        Container(
+          Text(text, style: style),
+          width: textWidth + 10,
+        ),
+      ),
+      Positioned(
+        right: 0,
+        Container(
+          alignment: Alignment.topRight,
+          width: size,
+          height: size,
+          const Icon(Icons.fiber_manual_record, size: 0),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.blue[400],
           ),
         ),
-        Positioned(
-          right: 0,
-          child: Container(
-            alignment: Alignment.topRight,
-            width: size,
-            height: size,
-            child: const Icon(Icons.fiber_manual_record, size: 0),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.blue[400],
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 
@@ -957,7 +933,7 @@ class HeapTreeViewState extends State<HeapTree>
   Widget _buildSearchWidget(GlobalKey<State<StatefulWidget>> key) => Container(
         width: wideSearchTextWidth,
         height: defaultTextFieldHeight,
-        child: buildAutoCompleteSearchField(
+        buildAutoCompleteSearchField(
           controller: _controller,
           searchFieldKey: key,
           searchFieldEnabled: _isSearchable,
@@ -970,16 +946,14 @@ class HeapTreeViewState extends State<HeapTree>
   Widget _buildSearchFilterControls() => Row(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          _buildSearchWidget(memorySearchFieldKey),
-          const SizedBox(width: denseSpacing),
-          FilterButton(
-            key: filterButtonKey,
-            onPressed: _filter,
-            // TODO(kenz): implement isFilterActive
-            isFilterActive: false,
-          ),
-        ],
+        _buildSearchWidget(memorySearchFieldKey),
+        const SizedBox(width: denseSpacing),
+        FilterButton(
+          key: filterButtonKey,
+          onPressed: _filter,
+          // TODO(kenz): implement isFilterActive
+          isFilterActive: false,
+        ),
       );
 
   // TODO: Much of the logic for _takeHeapSnapshot() might want to move into the

@@ -155,37 +155,35 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
         bottom: denseSpacing,
       ),
       height: defaultChartHeight + _frameChartScrollbarOffset,
-      child: Row(
-        children: [
-          Expanded(child: _buildChart()),
-          const SizedBox(width: defaultSpacing),
-          Padding(
-            padding: EdgeInsets.only(bottom: _frameChartScrollbarOffset),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Legend(
-                  key: FlutterFramesChart.chartLegendKey,
-                  entries: [
-                    const LegendEntry('Frame Time (UI)', mainUiColor),
-                    const LegendEntry('Frame Time (Raster)', mainRasterColor),
-                    const LegendEntry('Jank (slow frame)', uiJankColor),
-                    LegendEntry(
-                      'Shader Compilation',
-                      shaderCompilationColor.background,
-                    ),
-                  ],
-                ),
-                if (widget.frames.isNotEmpty)
-                  AverageFPS(
-                    frames: widget.frames,
-                    displayRefreshRate: widget.displayRefreshRate,
+      Row(
+        Expanded(_buildChart()),
+        const SizedBox(width: defaultSpacing),
+        Padding(
+          padding: EdgeInsets.only(bottom: _frameChartScrollbarOffset),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            [
+              Legend(
+                key: FlutterFramesChart.chartLegendKey,
+                entries: [
+                  const LegendEntry('Frame Time (UI)', mainUiColor),
+                  const LegendEntry('Frame Time (Raster)', mainRasterColor),
+                  const LegendEntry('Jank (slow frame)', uiJankColor),
+                  LegendEntry(
+                    'Shader Compilation',
+                    shaderCompilationColor.background,
                   ),
-              ],
-            ),
+                ],
+              ),
+              if (widget.frames.isNotEmpty)
+                AverageFPS(
+                  frames: widget.frames,
+                  displayRefreshRate: widget.displayRefreshRate,
+                ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -197,10 +195,10 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
         final chart = Scrollbar(
           thumbVisibility: true,
           controller: _framesScrollController,
-          child: Padding(
+          Padding(
             padding: EdgeInsets.only(bottom: _frameChartScrollbarOffset),
-            child: RoundedOutlinedBorder(
-              child: ListView.builder(
+            RoundedOutlinedBorder(
+              ListView.builder(
                 controller: _framesScrollController,
                 scrollDirection: Axis.horizontal,
                 itemCount: widget.frames.length,
@@ -221,7 +219,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
         final frameNumbers = Container(
           height: _frameNumberSectionHeight,
           padding: EdgeInsets.only(left: _yAxisUnitsSpace),
-          child: ListView.builder(
+          ListView.builder(
             controller: _frameNumbersScrollController,
             scrollDirection: Axis.horizontal,
             itemCount: widget.frames.length,
@@ -232,7 +230,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
                 return const SizedBox(width: _defaultFrameWidthWithPadding);
               }
               return Center(
-                child: Text(
+                Text(
                   '${widget.frames[index].id}',
                   style: themeData.subtleChartTextStyle,
                 ),
@@ -261,18 +259,16 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
           ),
         );
         return Stack(
-          children: [
-            chartAxisPainter,
-            Positioned(
-              top: defaultChartHeight,
-              child: frameNumbers,
-            ),
-            Padding(
-              padding: EdgeInsets.only(left: _yAxisUnitsSpace),
-              child: chart,
-            ),
-            fpsLinePainter,
-          ],
+          chartAxisPainter,
+          Positioned(
+            top: defaultChartHeight,
+            frameNumbers,
+          ),
+          Padding(
+            padding: EdgeInsets.only(left: _yAxisUnitsSpace),
+            chart,
+          ),
+          fpsLinePainter,
         );
       },
     );
@@ -344,7 +340,7 @@ class FlutterFramesChartItem extends StatelessWidget {
         frame.shaderDuration.inMilliseconds / frame.rasterTime.inMilliseconds;
 
     final raster = Column(
-      children: [
+      [
         Container(
           key: Key('frame ${frame.id} - raster'),
           width: defaultFrameWidth / 2,
@@ -367,27 +363,23 @@ class FlutterFramesChartItem extends StatelessWidget {
 
     return InkWell(
       onTap: _selectFrame,
-      child: Stack(
-        children: [
+      Stack(
+        [
           // TODO(kenz): make tooltip to persist if the frame is selected.
           FlutterFrameTooltip(
             frame: frame,
             hasShaderJank: hasShaderJank,
-            child: Container(
+            Container(
               padding: const EdgeInsets.symmetric(horizontal: densePadding),
               color: selected ? colorScheme.selectedFrameBackgroundColor : null,
-              child: Column(
-                children: [
-                  // Dummy child so that the InkWell does not take up the entire column.
-                  const Expanded(child: SizedBox()),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      ui,
-                      raster,
-                    ],
-                  ),
-                ],
+              Column(
+                // Dummy child so that the InkWell does not take up the entire column.
+                const Expanded(SizedBox()),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  ui,
+                  raster,
+                ),
               ),
             ),
           ),
@@ -402,7 +394,7 @@ class FlutterFramesChartItem extends StatelessWidget {
               padding: EdgeInsets.only(
                 top: FlutterFramesChartItem.selectedIndicatorHeight,
               ),
-              child: ShaderJankWarningIcon(),
+              ShaderJankWarningIcon(),
             ),
         ],
       ),
@@ -452,7 +444,7 @@ class FlutterFrameTooltip extends StatelessWidget {
     return HoverCardTooltip(
       enabled: () => true,
       onHover: (_) => _buildCardData(context),
-      child: child,
+      child,
     );
   }
 
@@ -469,10 +461,10 @@ class FlutterFrameTooltip extends StatelessWidget {
         position: HoverCardPosition.element,
         width: _calculateTooltipWidth([uiText, rasterText, shaderText]),
         contents: Material(
-          child: Column(
+          Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+            [
               Text(
                 uiText,
                 style: textStyle,
@@ -484,23 +476,21 @@ class FlutterFrameTooltip extends StatelessWidget {
               ),
               if (hasShaderJank)
                 Row(
-                  children: [
-                    Icon(
-                      Icons.subdirectory_arrow_right,
-                      color: textColor,
-                      size: defaultIconSizeBeforeScaling,
-                    ),
-                    Text(
-                      shaderText,
-                      style: textStyle,
-                    ),
-                    const MoreInfoLink(
-                      url: preCompileShadersDocsUrl,
-                      gaScreenName: analytics_constants.performance,
-                      gaSelectedItemDescription:
-                          analytics_constants.shaderCompilationDocsTooltipLink,
-                    ),
-                  ],
+                  Icon(
+                    Icons.subdirectory_arrow_right,
+                    color: textColor,
+                    size: defaultIconSizeBeforeScaling,
+                  ),
+                  Text(
+                    shaderText,
+                    style: textStyle,
+                  ),
+                  const MoreInfoLink(
+                    url: preCompileShadersDocsUrl,
+                    gaScreenName: analytics_constants.performance,
+                    gaSelectedItemDescription:
+                        analytics_constants.shaderCompilationDocsTooltipLink,
+                  ),
                 ),
             ],
           ),
@@ -563,13 +553,11 @@ class ShaderJankWarningIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: const [
-        BlinkingIcon(
-          icon: Icons.warning_amber_rounded,
-          color: Colors.amber,
-          size: defaultActionsIconSizeBeforeScaling,
-        ),
-      ],
+      BlinkingIcon(
+        icon: Icons.warning_amber_rounded,
+        color: Colors.amber,
+        size: defaultActionsIconSizeBeforeScaling,
+      ),
     );
   }
 }

@@ -41,7 +41,7 @@ class Console extends StatelessWidget {
     return ConsoleFrame(
       controls: controls,
       title: title,
-      child: _ConsoleOutput(lines: lines, footer: footer),
+      _ConsoleOutput(lines: lines, footer: footer),
     );
   }
 }
@@ -61,12 +61,12 @@ class ConsoleFrame extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
+      [
         if (title != null) title!,
         Expanded(
-          child: Material(
-            child: Stack(
-              children: [
+          Material(
+            Stack(
+              [
                 child,
                 if (controls.isNotEmpty)
                   _ConsoleControls(
@@ -94,10 +94,10 @@ class _ConsoleControls extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       alignment: Alignment.topRight,
-      child: ButtonBar(
+      ButtonBar(
         buttonPadding: EdgeInsets.zero,
         alignment: MainAxisAlignment.end,
-        children: controls,
+        controls,
       ),
     );
   }
@@ -220,7 +220,7 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
       controller: _scroll,
       thumbVisibility: true,
       key: _scrollBarKey,
-      child: ListView.separated(
+      ListView.separated(
         padding: const EdgeInsets.all(denseSpacing),
         itemCount: _currentLines.length + (widget.footer != null ? 1 : 0),
         controller: _scroll,

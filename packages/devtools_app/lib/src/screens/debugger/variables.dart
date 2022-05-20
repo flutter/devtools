@@ -118,7 +118,7 @@ Widget displayProvider(
   return DevToolsTooltip(
     message: variable.displayValue,
     waitDuration: tooltipWaitLong,
-    child: SelectableText.rich(
+    SelectableText.rich(
       TextSpan(
         text: variable.name?.isNotEmpty ?? false ? '${variable.name}: ' : null,
         style: theme.fixedFontStyle,
@@ -357,7 +357,7 @@ class _TextSelectionControlsToolbarState
     return TextSelectionToolbar(
       anchorAbove: anchorAbove,
       anchorBelow: anchorBelow,
-      children: itemDatas
+      itemDatas
           .asMap()
           .entries
           .map((MapEntry<int, _TextSelectionToolbarItemData> entry) {
@@ -367,7 +367,7 @@ class _TextSelectionControlsToolbarState
             itemDatas.length,
           ),
           onPressed: entry.value.onPressed,
-          child: Text(entry.value.label),
+          Text(entry.value.label),
         );
       }).toList(),
     );

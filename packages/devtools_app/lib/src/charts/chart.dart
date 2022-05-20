@@ -94,7 +94,7 @@ class ChartState extends State<Chart> with AutoDisposeMixin {
     // TODO(terry): Optimize the 10,000s of data points to just the number of pixels in the
     //              chart - this will make paint very fast.
     return RepaintBoundary(
-      child: LayoutBuilder(
+      LayoutBuilder(
         // Inner container
         builder: (_, constraints) => GestureDetector(
           onTapDown: (TapDownDetails details) {
@@ -108,10 +108,10 @@ class ChartState extends State<Chart> with AutoDisposeMixin {
               timestampIndex,
             );
           },
-          child: Container(
+          Container(
             width: constraints.widthConstraints().maxWidth,
             height: constraints.widthConstraints().maxHeight,
-            child: CustomPaint(
+            CustomPaint(
               painter: ChartPainter(controller, colorScheme),
             ),
           ),

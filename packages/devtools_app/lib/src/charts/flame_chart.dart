@@ -281,22 +281,22 @@ abstract class FlameChartState<T extends FlameChart,
     // MouseRegion widget.
     return MouseRegion(
       onHover: _handleMouseHover,
-      child: RawKeyboardListener(
+      RawKeyboardListener(
         autofocus: true,
         focusNode: focusNode,
         onKey: (event) => _handleKeyEvent(event),
         // Scrollbar needs to wrap [LayoutBuilder] so that the scroll bar is
         // rendered on top of the custom painters defined in [buildCustomPaints]
-        child: Scrollbar(
+        Scrollbar(
           controller: _flameChartScrollController,
           thumbVisibility: true,
-          child: LayoutBuilder(
+          LayoutBuilder(
             builder: (context, constraints) {
               final chartOverlays = buildChartOverlays(constraints, context);
               final flameChart = _buildFlameChart(constraints);
               return chartOverlays.isNotEmpty
                   ? Stack(
-                      children: [
+                      [
                         flameChart,
                         ...chartOverlays,
                       ],
@@ -736,16 +736,16 @@ class ScrollingFlameChartRowState<V extends FlameChartDataMixin<V>>
     // handling its own improves performance.
     return MouseRegion(
       onHover: _handleMouseHover,
-      child: GestureDetector(
+      GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTapUp: _handleTapUp,
-        child: Container(
+        Container(
           height: rowHeightWithPadding,
           width: widget.width,
           color: widget.backgroundColor,
           // TODO(kenz): investigate if `addAutomaticKeepAlives: false` and
           // `addRepaintBoundaries: false` are needed here for perf improvement.
-          child: ExtentDelegateListView(
+          ExtentDelegateListView(
             controller: scrollController,
             scrollDirection: Axis.horizontal,
             extentDelegate: extentDelegate,
@@ -867,7 +867,7 @@ class FlameChartNodeWidget extends StatelessWidget {
         ),
         bottom: rowPadding,
       ),
-      child: node.buildWidget(
+      node.buildWidget(
         selected: selected,
         hovered: hovered,
         searchMatch: node.data.isSearchMatch,
@@ -1095,7 +1095,7 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
         activeSearchMatch: activeSearchMatch,
         colorScheme: colorScheme,
       ),
-      child: zoomedWidth >= _minWidthForText
+      zoomedWidth >= _minWidthForText
           ? Text(
               text,
               textAlign: TextAlign.left,
@@ -1115,7 +1115,7 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
       return DevToolsTooltip(
         key: key,
         message: data.tooltip,
-        child: node,
+        node,
       );
     } else {
       return node;
@@ -1513,7 +1513,7 @@ class _FlameChartHelpDialog extends StatelessWidget {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+        [
           ...dialogSubHeader(theme, 'Navigation'),
           _buildNavigationInstructions(theme),
           const SizedBox(height: denseSpacing),
@@ -1531,97 +1531,85 @@ class _FlameChartHelpDialog extends StatelessWidget {
 
   Widget _buildNavigationInstructions(ThemeData theme) {
     return Row(
-      children: [
-        SizedBox(
-          width: firstColumnWidth,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                'click + drag • ',
-                style: theme.fixedFontStyle,
-              ),
-              Text(
-                'click + fling • ',
-                style: theme.fixedFontStyle,
-              ),
-              Text(
-                'alt/option + scroll • ',
-                style: theme.fixedFontStyle,
-              ),
-              Text(
-                'scroll left / right • ',
-                style: theme.fixedFontStyle,
-              ),
-              Text(
-                'a / d • ',
-                style: theme.fixedFontStyle,
-              ),
-            ],
+      SizedBox(
+        width: firstColumnWidth,
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          Text(
+            'click + drag • ',
+            style: theme.fixedFontStyle,
+          ),
+          Text(
+            'click + fling • ',
+            style: theme.fixedFontStyle,
+          ),
+          Text(
+            'alt/option + scroll • ',
+            style: theme.fixedFontStyle,
+          ),
+          Text(
+            'scroll left / right • ',
+            style: theme.fixedFontStyle,
+          ),
+          Text(
+            'a / d • ',
+            style: theme.fixedFontStyle,
           ),
         ),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Pan chart up / down / left / right',
-              style: theme.subtleTextStyle,
-            ),
-            Text(
-              'Fling chart up / down / left / right',
-              style: theme.subtleTextStyle,
-            ),
-            Text(
-              'Pan chart up / down',
-              style: theme.subtleTextStyle,
-            ),
-            Text(
-              'Pan chart left / right',
-              style: theme.subtleTextStyle,
-            ),
-            Text(
-              'Pan chart left / right',
-              style: theme.subtleTextStyle,
-            ),
-          ],
+      ),
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        Text(
+          'Pan chart up / down / left / right',
+          style: theme.subtleTextStyle,
         ),
-      ],
+        Text(
+          'Fling chart up / down / left / right',
+          style: theme.subtleTextStyle,
+        ),
+        Text(
+          'Pan chart up / down',
+          style: theme.subtleTextStyle,
+        ),
+        Text(
+          'Pan chart left / right',
+          style: theme.subtleTextStyle,
+        ),
+        Text(
+          'Pan chart left / right',
+          style: theme.subtleTextStyle,
+        ),
+      ),
     );
   }
 
   Widget _buildZoomInstructions(ThemeData theme) {
     return Row(
-      children: [
-        SizedBox(
-          width: firstColumnWidth,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                'scroll up / down • ',
-                style: theme.fixedFontStyle,
-              ),
-              Text(
-                'w / s • ',
-                style: theme.fixedFontStyle,
-              ),
-            ],
+      SizedBox(
+        width: firstColumnWidth,
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          Text(
+            'scroll up / down • ',
+            style: theme.fixedFontStyle,
+          ),
+          Text(
+            'w / s • ',
+            style: theme.fixedFontStyle,
           ),
         ),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'zoom in / out',
-              style: theme.subtleTextStyle,
-            ),
-            Text(
-              'zoom in / out',
-              style: theme.subtleTextStyle,
-            ),
-          ],
+      ),
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        Text(
+          'zoom in / out',
+          style: theme.subtleTextStyle,
         ),
-      ],
+        Text(
+          'zoom in / out',
+          style: theme.subtleTextStyle,
+        ),
+      ),
     );
   }
 }

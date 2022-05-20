@@ -44,7 +44,7 @@ class Notifications extends StatelessWidget {
     return Overlay(
       initialEntries: [
         OverlayEntry(
-          builder: (context) => _NotificationsProvider(child: child),
+          builder: (context) => _NotificationsProvider(child),
           maintainState: true,
           opaque: true,
         ),
@@ -168,20 +168,20 @@ class NotificationsState extends State<_NotificationsProvider>
   Widget _buildOverlay(BuildContext context) {
     return Align(
       alignment: Alignment.bottomRight,
-      child: Padding(
+      Padding(
         // Position the notifications in the lower right of the app window, and
         // high enough up that we don't obscure the status line.
         padding: EdgeInsets.only(
           right: defaultSpacing,
           bottom: status_line.statusLineHeight + defaultSpacing,
         ),
-        child: SizedBox(
+        SizedBox(
           width: _notificationWidth,
-          child: SingleChildScrollView(
+          SingleChildScrollView(
             reverse: true,
-            child: Column(
+            Column(
               mainAxisSize: MainAxisSize.min,
-              children: _notifications,
+              _notifications,
             ),
           ),
         ),
@@ -191,7 +191,7 @@ class NotificationsState extends State<_NotificationsProvider>
 
   @override
   Widget build(BuildContext context) {
-    return _InheritedNotifications(data: this, child: widget.child);
+    return _InheritedNotifications(data: this, widget.child);
   }
 }
 
@@ -260,25 +260,23 @@ class _NotificationState extends State<_Notification>
       builder: (context, child) {
         return Opacity(
           opacity: curve.value,
-          child: child,
+          child,
         );
       },
-      child: Padding(
+      Padding(
         padding: const EdgeInsets.all(denseSpacing),
-        child: Card(
+        Card(
           color: theme.snackBarTheme.backgroundColor,
-          child: DefaultTextStyle(
+          DefaultTextStyle(
             style: theme.snackBarTheme.contentTextStyle ??
                 theme.primaryTextTheme.subtitle1!,
-            child: Padding(
+            Padding(
               padding: const EdgeInsets.all(denseSpacing),
-              child: Column(
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildMessage(),
-                  const SizedBox(height: defaultSpacing),
-                  _buildActions(),
-                ],
+                _buildMessage(),
+                const SizedBox(height: defaultSpacing),
+                _buildActions(),
               ),
             ),
           ),
@@ -300,7 +298,7 @@ class _NotificationState extends State<_Notification>
     if (widget.actions.isEmpty) return const SizedBox();
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
-      children: widget.actions.joinWith(const SizedBox(width: denseSpacing)),
+      widget.actions.joinWith(const SizedBox(width: denseSpacing)),
     );
   }
 }
@@ -320,11 +318,11 @@ class NotificationAction extends StatelessWidget {
     return isPrimary
         ? ElevatedButton(
             onPressed: onAction,
-            child: labelText,
+            labelText,
           )
         : OutlinedButton(
             onPressed: onAction,
-            child: labelText,
+            labelText,
           );
   }
 }

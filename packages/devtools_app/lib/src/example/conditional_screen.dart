@@ -67,7 +67,7 @@ class _ExampleConditionalScreenBodyState
     final exampleScreen = ValueListenableBuilder<String>(
       valueListenable: controller!.title,
       builder: (context, String value, _) {
-        return Center(child: Text(value));
+        return Center(Text(value));
       },
     );
 
@@ -76,12 +76,12 @@ class _ExampleConditionalScreenBodyState
     // that respond to data processing events. The spinner hides the screen's
     // empty UI while data is being processed.
     return Stack(
-      children: [
+      [
         exampleScreen,
         if (loadingOfflineData)
           Container(
             color: Colors.grey[50],
-            child: const CenteredCircularProgressIndicator(),
+            const CenteredCircularProgressIndicator(),
           ),
       ],
     );

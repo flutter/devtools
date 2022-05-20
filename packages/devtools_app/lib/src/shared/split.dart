@@ -247,14 +247,14 @@ class _SplitState extends State<Split> {
         SizedBox(
           width: isHorizontal ? sizes[i] : width,
           height: isHorizontal ? height : sizes[i],
-          child: widget.children[i],
+          widget.children[i],
         ),
         if (i < widget.children.length - 1)
           MouseRegion(
             cursor: isHorizontal
                 ? SystemMouseCursors.resizeColumn
                 : SystemMouseCursors.resizeRow,
-            child: GestureDetector(
+            GestureDetector(
               key: widget.dividerKey(i),
               behavior: HitTestBehavior.translucent,
               onHorizontalDragUpdate: (details) =>
@@ -265,7 +265,7 @@ class _SplitState extends State<Split> {
               // the drag bar. There still appears to be a few frame lag before the
               // drag action triggers which is't ideal but isn't a launch blocker.
               dragStartBehavior: DragStartBehavior.down,
-              child: widget.splitters != null
+              widget.splitters != null
                   ? widget.splitters![i]
                   : DefaultSplitter(isHorizontal: isHorizontal),
             ),
@@ -274,7 +274,7 @@ class _SplitState extends State<Split> {
     }
     return Flex(
       direction: widget.axis,
-      children: children,
+      children,
       crossAxisAlignment: CrossAxisAlignment.stretch,
     );
   }
@@ -307,10 +307,10 @@ class DefaultSplitter extends StatelessWidget {
   Widget build(BuildContext context) {
     return Transform.rotate(
       angle: isHorizontal ? degToRad(90.0) : degToRad(0.0),
-      child: Align(
+      Align(
         widthFactor: 0.5,
         heightFactor: 0.5,
-        child: Icon(
+        Icon(
           Icons.drag_handle,
           size: iconSize,
           color: Theme.of(context).focusColor,

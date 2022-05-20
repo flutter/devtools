@@ -64,10 +64,10 @@ class NetworkRequestInspector extends StatelessWidget {
         return Card(
           margin: EdgeInsets.zero,
           color: Theme.of(context).canvasColor,
-          child: RoundedOutlinedBorder(
-            child: (data == null)
+          RoundedOutlinedBorder(
+            (data == null)
                 ? Center(
-                    child: Text(
+                    Text(
                       'No request selected',
                       key: NetworkRequestInspector.noRequestSelectedKey,
                       style: Theme.of(context).textTheme.headline6,

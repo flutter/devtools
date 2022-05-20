@@ -55,7 +55,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
   Widget _paddedIcon(Widget icon) {
     return Padding(
       padding: const EdgeInsets.only(right: iconPadding),
-      child: icon,
+      icon,
     );
   }
 
@@ -149,14 +149,14 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         return HoverCardData(
           title: diagnosticLocal.toStringShort(),
           contents: Material(
-            child: ExpandableVariable(
+            ExpandableVariable(
               debuggerController: debuggerController,
               variable: variable,
             ),
           ),
         );
       },
-      child: multiline
+      multiline
           ? SelectableText.rich(textSpan)
           : RichText(
               overflow: TextOverflow.ellipsis,
@@ -257,7 +257,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       // TODO(jacobr): custom display for units, iterables, and padding.
       children.add(
         Flexible(
-          child: buildDescription(
+          buildDescription(
             description,
             descriptionTextStyle,
             context,
@@ -324,34 +324,30 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         //  the nested row.
         diagnosticDescription = Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            diagnosticDescription,
-            _buildErrorText(colorScheme),
-          ],
+          diagnosticDescription,
+          _buildErrorText(colorScheme),
         );
       } else if (multiline &&
           diagnosticLocal.hasCreationLocation &&
           !diagnosticLocal.isProperty) {
         diagnosticDescription = Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            diagnosticDescription,
-            _buildLocation(context),
-          ],
+          diagnosticDescription,
+          _buildLocation(context),
         );
       }
 
-      children.add(Expanded(child: diagnosticDescription));
+      children.add(Expanded(diagnosticDescription));
     }
 
-    return Row(mainAxisSize: MainAxisSize.min, children: children);
+    return Row(mainAxisSize: MainAxisSize.min, children);
   }
 
   Widget _buildLocation(BuildContext context) {
     final theme = Theme.of(context);
     final location = diagnostic!.creationLocation!;
     return Flexible(
-      child: RichText(
+      RichText(
         textAlign: TextAlign.right,
         overflow: TextOverflow.ellipsis,
         text: TextSpan(
@@ -366,7 +362,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
 
   Flexible _buildErrorText(ColorScheme colorScheme) {
     return Flexible(
-      child: RichText(
+      RichText(
         textAlign: TextAlign.right,
         overflow: TextOverflow.ellipsis,
         text: TextSpan(

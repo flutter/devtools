@@ -85,7 +85,7 @@ class _ReleaseNotesViewerState extends State<ReleaseNotesViewer>
   Widget build(BuildContext context) {
     final child = widget.child;
     return Material(
-      child: LayoutBuilder(
+      LayoutBuilder(
         builder: (context, constraints) {
           final widthForSmallScreen = constraints.maxWidth - 2 * densePadding;
           final width = min(
@@ -93,7 +93,7 @@ class _ReleaseNotesViewerState extends State<ReleaseNotesViewer>
             widthForSmallScreen,
           );
           return Stack(
-            children: [
+            [
               if (child != null) child,
               ReleaseNotes(
                 releaseNotesController: widget.releaseNotesController,
@@ -135,7 +135,7 @@ class ReleaseNotes extends AnimatedWidget {
       bottom: densePadding,
       right: right,
       width: width,
-      child: Card(
+      Card(
         elevation: defaultElevation,
         color: theme.scaffoldBackgroundColor,
         clipBehavior: Clip.hardEdge,
@@ -145,31 +145,29 @@ class ReleaseNotes extends AnimatedWidget {
             color: theme.focusColor,
           ),
         ),
-        child: Column(
-          children: [
-            AreaPaneHeader(
-              title: const Text(
-                'What\'s new in DevTools?',
-              ),
-              needsTopBorder: false,
-              actions: [
-                IconButton(
-                  padding: const EdgeInsets.all(0.0),
-                  onPressed: () =>
-                      releaseNotesController.toggleReleaseNotesVisible(false),
-                  icon: const Icon(Icons.close),
-                ),
-              ],
+        Column(
+          AreaPaneHeader(
+            title: const Text(
+              'What\'s new in DevTools?',
             ),
-            markdownData == null
-                ? const Text('Stay tuned for updates.')
-                : Expanded(
-                    child: Markdown(
-                      data: markdownData!,
-                      onTapLink: (_, href, __) => launchUrl(href!, context),
-                    ),
+            needsTopBorder: false,
+            actions: [
+              IconButton(
+                padding: const EdgeInsets.all(0.0),
+                onPressed: () =>
+                    releaseNotesController.toggleReleaseNotesVisible(false),
+                icon: const Icon(Icons.close),
+              ),
+            ],
+          ),
+          markdownData == null
+              ? const Text('Stay tuned for updates.')
+              : Expanded(
+                  Markdown(
+                    data: markdownData!,
+                    onTapLink: (_, href, __) => launchUrl(href!, context),
                   ),
-          ],
+                ),
         ),
       ),
     );

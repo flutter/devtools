@@ -44,29 +44,23 @@ class IsolateStatisticsViewBody extends StatelessWidget {
       valueListenable: controller.refreshing,
       builder: (context, refreshing, _) {
         return Column(
-          children: [
-            Row(
-              children: [
-                RefreshButton(
-                  onPressed: controller.refresh,
-                ),
-              ],
+          Row(
+            RefreshButton(
+              onPressed: controller.refresh,
             ),
-            Flexible(
-              child: Column(
-                children: [
-                  Flexible(
-                    child: _buildTopRow(),
-                  ),
-                  Flexible(
-                    child: IsolatePortsWidget(
-                      controller: controller,
-                    ),
-                  ),
-                ],
+          ),
+          Flexible(
+            Column(
+              Flexible(
+                _buildTopRow(),
+              ),
+              Flexible(
+                IsolatePortsWidget(
+                  controller: controller,
+                ),
               ),
             ),
-          ],
+          ),
         );
       },
     );
@@ -74,34 +68,30 @@ class IsolateStatisticsViewBody extends StatelessWidget {
 
   Widget _buildTopRow() {
     return Row(
-      children: [
-        Flexible(
-          child: Column(
-            children: [
-              Flexible(
-                child: GeneralIsolateStatisticsWidget(
-                  controller: controller,
-                ),
-              ),
-              Flexible(
-                child: IsolateMemoryStatisticsWidget(
-                  controller: controller,
-                ),
-              ),
-            ],
+      Flexible(
+        Column(
+          Flexible(
+            GeneralIsolateStatisticsWidget(
+              controller: controller,
+            ),
+          ),
+          Flexible(
+            IsolateMemoryStatisticsWidget(
+              controller: controller,
+            ),
           ),
         ),
-        Flexible(
-          child: TagStatisticsWidget(
-            controller: controller,
-          ),
+      ),
+      Flexible(
+        TagStatisticsWidget(
+          controller: controller,
         ),
-        Flexible(
-          child: ServiceExtensionsWidget(
-            controller: controller,
-          ),
+      ),
+      Flexible(
+        ServiceExtensionsWidget(
+          controller: controller,
         ),
-      ],
+      ),
     );
   }
 }
@@ -178,36 +168,34 @@ class IsolateMemoryStatisticsWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final isolate = controller.isolate;
     return Column(
-      children: [
-        Flexible(
-          child: VMInfoCard(
-            title: 'Memory',
-            rowKeyValues: [
-              MapEntry(
-                'Dart Heap',
-                _buildMemoryString(
-                  isolate?.dartHeapSize,
-                  isolate?.dartHeapCapacity,
-                ),
+      Flexible(
+        VMInfoCard(
+          title: 'Memory',
+          rowKeyValues: [
+            MapEntry(
+              'Dart Heap',
+              _buildMemoryString(
+                isolate?.dartHeapSize,
+                isolate?.dartHeapCapacity,
               ),
-              MapEntry(
-                'New Space',
-                _buildMemoryString(
-                  isolate?.newSpaceUsage,
-                  isolate?.newSpaceUsage,
-                ),
+            ),
+            MapEntry(
+              'New Space',
+              _buildMemoryString(
+                isolate?.newSpaceUsage,
+                isolate?.newSpaceUsage,
               ),
-              MapEntry(
-                'Old Space',
-                _buildMemoryString(
-                  isolate?.oldSpaceUsage,
-                  isolate?.oldSpaceCapacity,
-                ),
+            ),
+            MapEntry(
+              'Old Space',
+              _buildMemoryString(
+                isolate?.oldSpaceUsage,
+                isolate?.oldSpaceCapacity,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
@@ -228,7 +216,7 @@ class TagStatisticsWidget extends StatelessWidget {
     return VMInfoCard(
       title: 'Execution Time',
       table: Flexible(
-        child: controller.cpuProfilerController.profilerEnabled
+        controller.cpuProfilerController.profilerEnabled
             ? FlatTable<VMTag>(
                 columns: columns,
                 data: controller.tags,
@@ -314,12 +302,12 @@ class StackTraceViewerWidget extends StatelessWidget {
       title: 'Allocation Location',
       table: lines == null
           ? const Expanded(
-              child: Center(
-                child: Text('No port selected'),
+              Center(
+                Text('No port selected'),
               ),
             )
           : Flexible(
-              child: FlatTable<String>(
+              FlatTable<String>(
                 columns: [
                   frame,
                 ],
@@ -363,45 +351,41 @@ class _IsolatePortsWidgetState extends State<IsolatePortsWidget> {
   Widget build(BuildContext context) {
     final ports = widget.controller.ports;
     return Column(
-      children: [
-        Flexible(
-          child: VMInfoCard(
-            title: 'Open Ports (${ports.length})',
-            table: Flexible(
-              child: Split(
-                axis: Axis.horizontal,
-                children: [
-                  FlatTable<InstanceRef?>(
-                    columns: columns,
-                    data: ports,
-                    keyFactory: (InstanceRef? port) =>
-                        ValueKey<String>(port!.debugName!),
-                    sortColumn: id,
-                    sortDirection: SortDirection.ascending,
-                    selectionNotifier: selectedPort,
-                    onItemSelected: (InstanceRef? port) => setState(
-                      () {
-                        if (port == selectedPort.value) {
-                          selectedPort.value = null;
-                        } else {
-                          selectedPort.value = port;
-                        }
-                      },
-                    ),
-                  ),
-                  StackTraceViewerWidget(
-                    stackTrace: selectedPort.value,
-                  ),
-                ],
-                initialFractions: const [
-                  0.3,
-                  0.7,
-                ],
+      Flexible(
+        VMInfoCard(
+          title: 'Open Ports (${ports.length})',
+          table: Flexible(
+            Split(
+              axis: Axis.horizontal,
+              FlatTable<InstanceRef?>(
+                columns: columns,
+                data: ports,
+                keyFactory: (InstanceRef? port) =>
+                    ValueKey<String>(port!.debugName!),
+                sortColumn: id,
+                sortDirection: SortDirection.ascending,
+                selectionNotifier: selectedPort,
+                onItemSelected: (InstanceRef? port) => setState(
+                  () {
+                    if (port == selectedPort.value) {
+                      selectedPort.value = null;
+                    } else {
+                      selectedPort.value = port;
+                    }
+                  },
+                ),
               ),
+              StackTraceViewerWidget(
+                stackTrace: selectedPort.value,
+              ),
+              initialFractions: const [
+                0.3,
+                0.7,
+              ],
             ),
           ),
         ),
-      ],
+      ),
     );
   }
 }
@@ -432,7 +416,7 @@ class ServiceExtensionsWidget extends StatelessWidget {
     return VMInfoCard(
       title: 'Service Extensions (${extensions.length})',
       table: Flexible(
-        child: FlatTable<String>(
+        FlatTable<String>(
           columns: columns,
           data: extensions,
           keyFactory: (String extension) => ValueKey<String>(extension),

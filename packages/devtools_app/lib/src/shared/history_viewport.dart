@@ -59,14 +59,12 @@ class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return OutlineDecoration(
-      child: ValueListenableBuilder<T?>(
+      ValueListenableBuilder<T?>(
         valueListenable: widget.history.current,
         builder: (context, T? current, _) {
           return Column(
-            children: [
-              _buildTitle(context, theme),
-              widget.contentBuilder(context, current),
-            ],
+            _buildTitle(context, theme),
+            widget.contentBuilder(context, current),
           );
         },
       ),
@@ -81,7 +79,7 @@ class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
     return debuggerSectionTitle(
       theme,
       child: Row(
-        children: [
+        [
           if (widget.historyEnabled) ...[
             ToolbarAction(
               icon: Icons.chevron_left,
@@ -117,7 +115,7 @@ class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
             const SizedBox(width: defaultSpacing),
           ],
           Expanded(
-            child: widget.onTitleTap == null
+            widget.onTitleTap == null
                 ? Text(
                     title,
                     style: defaultTitleStyle,
@@ -132,9 +130,9 @@ class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
                         ),
                       );
                     },
-                    child: GestureDetector(
+                    GestureDetector(
                       onTap: widget.onTitleTap,
-                      child: Text(
+                      Text(
                         title,
                         style: _titleStyle ?? theme.textTheme.subtitle2,
                       ),

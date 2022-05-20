@@ -56,40 +56,38 @@ class _FileImportContainerState extends State<FileImportContainer> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: [
-        Text(
-          widget.title,
-          style: TextStyle(fontSize: scaleByFontFactor(18.0)),
-        ),
-        const SizedBox(height: defaultSpacing),
-        Expanded(
-          // TODO(kenz): improve drag over highlight.
-          child: DragAndDrop(
-            handleDrop: _handleImportedFile,
-            child: RoundedOutlinedBorder(
-              child: Container(
-                color: Theme.of(context).scaffoldBackgroundColor,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _buildImportInstructions(),
-                    _buildImportFileRow(),
-                    if (widget.actionText != null && widget.onAction != null)
-                      _buildActionButton(),
-                  ],
-                ),
+      Text(
+        widget.title,
+        style: TextStyle(fontSize: scaleByFontFactor(18.0)),
+      ),
+      const SizedBox(height: defaultSpacing),
+      Expanded(
+        // TODO(kenz): improve drag over highlight.
+        DragAndDrop(
+          handleDrop: _handleImportedFile,
+          RoundedOutlinedBorder(
+            Container(
+              color: Theme.of(context).scaffoldBackgroundColor,
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                [
+                  _buildImportInstructions(),
+                  _buildImportFileRow(),
+                  if (widget.actionText != null && widget.onAction != null)
+                    _buildActionButton(),
+                ],
               ),
             ),
           ),
         ),
-      ],
+      ),
     );
   }
 
   Widget _buildImportInstructions() {
     return Padding(
       padding: const EdgeInsets.all(defaultSpacing),
-      child: Text(
+      Text(
         widget.instructions,
         textAlign: TextAlign.center,
         style: TextStyle(
@@ -104,46 +102,45 @@ class _FileImportContainerState extends State<FileImportContainer> {
     final theme = Theme.of(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        // Horizontal spacer with flex value of 1.
-        Flexible(
-          child: SizedBox(height: rowHeight),
-        ),
-        Flexible(
-          flex: 4,
-          fit: FlexFit.tight,
-          child: Container(
-            height: rowHeight,
-            padding: const EdgeInsets.all(denseSpacing),
-            decoration: BoxDecoration(
-              borderRadius:
-                  const BorderRadius.all(Radius.circular(defaultBorderRadius)),
-              border: Border(
-                top: BorderSide(color: theme.focusColor),
-                bottom: BorderSide(color: theme.focusColor),
-                left: BorderSide(color: theme.focusColor),
-                // TODO(kenz): remove right border when we add the import button
-                right: BorderSide(color: theme.focusColor),
-              ),
+
+      // Horizontal spacer with flex value of 1.
+      Flexible(
+        SizedBox(height: rowHeight),
+      ),
+      Flexible(
+        flex: 4,
+        fit: FlexFit.tight,
+        Container(
+          height: rowHeight,
+          padding: const EdgeInsets.all(denseSpacing),
+          decoration: BoxDecoration(
+            borderRadius:
+                const BorderRadius.all(Radius.circular(defaultBorderRadius)),
+            border: Border(
+              top: BorderSide(color: theme.focusColor),
+              bottom: BorderSide(color: theme.focusColor),
+              left: BorderSide(color: theme.focusColor),
+              // TODO(kenz): remove right border when we add the import button
+              right: BorderSide(color: theme.focusColor),
             ),
-            child: _buildImportedFileDisplay(),
           ),
+          _buildImportedFileDisplay(),
         ),
-        const SizedBox(width: denseSpacing),
-        FileImportButton(onPressed: _importFile),
-        // Horizontal spacer with flex value of 1.
-        Flexible(
-          child: SizedBox(height: rowHeight),
-        ),
-      ],
+      ),
+      const SizedBox(width: denseSpacing),
+      FileImportButton(onPressed: _importFile),
+      // Horizontal spacer with flex value of 1.
+      Flexible(
+        SizedBox(height: rowHeight),
+      ),
     );
   }
 
   Widget _buildImportedFileDisplay() {
     return Row(
-      children: [
+      [
         Expanded(
-          child: Text(
+          Text(
             importedFile?.path ?? 'No File Selected',
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
@@ -162,23 +159,19 @@ class _FileImportContainerState extends State<FileImportContainer> {
     assert(widget.onAction != null);
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const SizedBox(height: defaultSpacing),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed: importedFile != null
-                  ? () => widget.onAction!(importedFile!)
-                  : null,
-              child: MaterialIconLabel(
-                label: widget.actionText!,
-                iconData: Icons.highlight,
-              ),
-            ),
-          ],
+      const SizedBox(height: defaultSpacing),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        ElevatedButton(
+          onPressed: importedFile != null
+              ? () => widget.onAction!(importedFile!)
+              : null,
+          MaterialIconLabel(
+            label: widget.actionText!,
+            iconData: Icons.highlight,
+          ),
         ),
-      ],
+      ),
     );
   }
 
@@ -295,27 +288,25 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
   @override
   Widget build(BuildContext context) {
     return Row(
-      children: [
-        Expanded(
-          child: FileImportContainer(
-            title: widget.firstFileTitle,
-            instructions: widget.firstInstructions,
-            onFileSelected: onFirstFileSelected,
-            onFileCleared: onFirstFileCleared,
-          ),
+      Expanded(
+        FileImportContainer(
+          title: widget.firstFileTitle,
+          instructions: widget.firstInstructions,
+          onFileSelected: onFirstFileSelected,
+          onFileCleared: onFirstFileCleared,
         ),
-        const SizedBox(width: defaultSpacing),
-        Center(child: _buildActionButton()),
-        const SizedBox(width: defaultSpacing),
-        Expanded(
-          child: FileImportContainer(
-            title: widget.secondFileTitle,
-            instructions: widget.secondInstructions,
-            onFileSelected: onSecondFileSelected,
-            onFileCleared: onSecondFileCleared,
-          ),
+      ),
+      const SizedBox(width: defaultSpacing),
+      Center(_buildActionButton()),
+      const SizedBox(width: defaultSpacing),
+      Expanded(
+        FileImportContainer(
+          title: widget.secondFileTitle,
+          instructions: widget.secondInstructions,
+          onFileSelected: onSecondFileSelected,
+          onFileCleared: onSecondFileCleared,
         ),
-      ],
+      ),
     );
   }
 
@@ -358,27 +349,23 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const SizedBox(height: defaultSpacing),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed: firstImportedFile != null && secondImportedFile != null
-                  ? () => widget.onAction(
-                        firstImportedFile!,
-                        secondImportedFile!,
-                        (error) => notifications.push(error),
-                      )
-                  : null,
-              child: MaterialIconLabel(
-                label: widget.actionText,
-                iconData: Icons.highlight,
-              ),
-            ),
-          ],
+      const SizedBox(height: defaultSpacing),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        ElevatedButton(
+          onPressed: firstImportedFile != null && secondImportedFile != null
+              ? () => widget.onAction(
+                    firstImportedFile!,
+                    secondImportedFile!,
+                    (error) => notifications.push(error),
+                  )
+              : null,
+          MaterialIconLabel(
+            label: widget.actionText,
+            iconData: Icons.highlight,
+          ),
         ),
-      ],
+      ),
     );
   }
 }

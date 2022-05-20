@@ -42,15 +42,13 @@ class DeviceDialog extends StatelessWidget {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+        [
           for (var name in items.keys)
             Padding(
               padding: const EdgeInsets.only(bottom: denseRowSpacing),
-              child: Row(
-                children: [
-                  Text('$name: ', style: boldText),
-                  SelectableText(items[name]!, style: theme.subtleTextStyle),
-                ],
+              Row(
+                Text('$name: ', style: boldText),
+                SelectableText(items[name]!, style: theme.subtleTextStyle),
               ),
             ),
         ],
@@ -72,7 +70,7 @@ class DeviceDialog extends StatelessWidget {
         );
         Navigator.of(context, rootNavigator: true).pop('dialog');
       },
-      child: Text(connectToNewAppText.toUpperCase()),
+      Text(connectToNewAppText.toUpperCase()),
     );
   }
 }
@@ -90,7 +88,7 @@ class _ViewVMFlagsButton extends StatelessWidget {
           ),
         );
       },
-      child: Text('View VM Flags'.toUpperCase()),
+      Text('View VM Flags'.toUpperCase()),
     );
   }
 }
@@ -150,33 +148,29 @@ class _VMFlagsDialogState extends State<VMFlagsDialog> with AutoDisposeMixin {
 
     return DevToolsDialog(
       title: Row(
-        children: [
-          dialogTitleText(theme, 'VM Flags'),
-          const Expanded(child: SizedBox(width: denseSpacing)),
-          Container(
-            width: defaultSearchTextWidth,
-            height: defaultTextFieldHeight,
-            child: TextField(
-              controller: filterController,
-              decoration: const InputDecoration(
-                isDense: true,
-                border: OutlineInputBorder(),
-                labelText: 'Filter',
-              ),
+        dialogTitleText(theme, 'VM Flags'),
+        const Expanded(SizedBox(width: denseSpacing)),
+        Container(
+          width: defaultSearchTextWidth,
+          height: defaultTextFieldHeight,
+          TextField(
+            controller: filterController,
+            decoration: const InputDecoration(
+              isDense: true,
+              border: OutlineInputBorder(),
+              labelText: 'Filter',
             ),
           ),
-        ],
+        ),
       ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 875,
-            height: 375,
-            child: _FlagTable(filteredFlags),
-          ),
-        ],
+        SizedBox(
+          width: 875,
+          height: 375,
+          _FlagTable(filteredFlags),
+        ),
       ),
       actions: [
         DialogCloseButton(),
@@ -199,7 +193,7 @@ class _FlagTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return OutlineDecoration(
-      child: FlatTable<_DialogFlag>(
+      FlatTable<_DialogFlag>(
         columns: columns,
         data: flags,
         keyFactory: (_DialogFlag flag) => ValueKey<String?>(flag.name),

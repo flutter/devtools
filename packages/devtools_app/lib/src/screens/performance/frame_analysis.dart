@@ -29,25 +29,23 @@ class FlutterFrameAnalysisView extends StatelessWidget {
     final frameAnalysis = this.frameAnalysis;
     if (frameAnalysis == null) {
       return const Center(
-        child: Text('No analysis data available for this frame.'),
+        Text('No analysis data available for this frame.'),
       );
     }
     return Padding(
       padding: const EdgeInsets.all(defaultSpacing),
-      child: Column(
-        children: [
-          IntelligentFrameFindings(frameAnalysis: frameAnalysis),
-          const PaddedDivider(
-            padding: EdgeInsets.only(
-              top: denseSpacing,
-              bottom: denseSpacing,
-            ),
+      Column(
+        IntelligentFrameFindings(frameAnalysis: frameAnalysis),
+        const PaddedDivider(
+          padding: EdgeInsets.only(
+            top: denseSpacing,
+            bottom: denseSpacing,
           ),
-          // TODO(kenz): handle missing timeline events.
-          Expanded(
-            child: FrameTimeVisualizer(frameAnalysis: frameAnalysis),
-          ),
-        ],
+        ),
+        // TODO(kenz): handle missing timeline events.
+        Expanded(
+          FrameTimeVisualizer(frameAnalysis: frameAnalysis),
+        ),
       ),
     );
   }
@@ -87,55 +85,50 @@ class _FrameTimeVisualizerState extends State<FrameTimeVisualizer> {
       builder: (context, selectedPhase, _) {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('UI phases:'),
-            const SizedBox(height: denseSpacing),
-            Row(
-              children: [
-                Flexible(
-                  child: FramePhaseBlock(
-                    framePhase: frameAnalysis.buildPhase,
-                    icon: Icons.build,
-                    isSelected: selectedPhase == frameAnalysis.buildPhase,
-                    onSelected: frameAnalysis.selectFramePhase,
-                  ),
-                ),
-                Flexible(
-                  child: FramePhaseBlock(
-                    framePhase: frameAnalysis.layoutPhase,
-                    icon: Icons.auto_awesome_mosaic,
-                    isSelected: selectedPhase == frameAnalysis.layoutPhase,
-                    onSelected: frameAnalysis.selectFramePhase,
-                  ),
-                ),
-                Flexible(
-                  fit: FlexFit.tight,
-                  child: FramePhaseBlock(
-                    framePhase: frameAnalysis.paintPhase,
-                    icon: Icons.format_paint,
-                    isSelected: selectedPhase == frameAnalysis.paintPhase,
-                    onSelected: frameAnalysis.selectFramePhase,
-                  ),
-                ),
-              ],
+          const Text('UI phases:'),
+          const SizedBox(height: denseSpacing),
+          Row(
+            Flexible(
+              FramePhaseBlock(
+                framePhase: frameAnalysis.buildPhase,
+                icon: Icons.build,
+                isSelected: selectedPhase == frameAnalysis.buildPhase,
+                onSelected: frameAnalysis.selectFramePhase,
+              ),
             ),
-            const SizedBox(height: denseSpacing),
-            const Text('Raster phase:'),
-            const SizedBox(height: denseSpacing),
-            Row(
-              children: [
-                Expanded(
-                  child: FramePhaseBlock(
-                    framePhase: frameAnalysis.rasterPhase,
-                    icon: Icons.grid_on,
-                    isSelected: selectedPhase == frameAnalysis.rasterPhase,
-                    onSelected: frameAnalysis.selectFramePhase,
-                  ),
-                )
-              ],
+            Flexible(
+              FramePhaseBlock(
+                framePhase: frameAnalysis.layoutPhase,
+                icon: Icons.auto_awesome_mosaic,
+                isSelected: selectedPhase == frameAnalysis.layoutPhase,
+                onSelected: frameAnalysis.selectFramePhase,
+              ),
             ),
-            // TODO(kenz): show flame chart of selected events here.
-          ],
+            Flexible(
+              fit: FlexFit.tight,
+              FramePhaseBlock(
+                framePhase: frameAnalysis.paintPhase,
+                icon: Icons.format_paint,
+                isSelected: selectedPhase == frameAnalysis.paintPhase,
+                onSelected: frameAnalysis.selectFramePhase,
+              ),
+            ),
+          ),
+          const SizedBox(height: denseSpacing),
+          const Text('Raster phase:'),
+          const SizedBox(height: denseSpacing),
+          Row(
+            Expanded(
+              FramePhaseBlock(
+                framePhase: frameAnalysis.rasterPhase,
+                icon: Icons.grid_on,
+                isSelected: selectedPhase == frameAnalysis.rasterPhase,
+                onSelected: frameAnalysis.selectFramePhase,
+              ),
+            ),
+          )
+          // TODO(kenz): show flame chart of selected events here.
+          ,
         );
       },
     );
@@ -181,25 +174,23 @@ class FramePhaseBlock extends StatelessWidget {
         : '--';
     return InkWell(
       onTap: () => onSelected(framePhase),
-      child: Stack(
+      Stack(
         alignment: AlignmentDirectional.bottomStart,
-        children: [
+        [
           Container(
             color: isSelected
                 ? _selectedBackgroundColor.colorFor(colorScheme)
                 : _backgroundColor.colorFor(colorScheme),
             height: _height,
             padding: const EdgeInsets.symmetric(horizontal: densePadding),
-            child: Row(
+            Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  icon,
-                  size: defaultIconSize,
-                ),
-                const SizedBox(width: denseSpacing),
-                Text('${framePhase.title} - $durationText'),
-              ],
+              Icon(
+                icon,
+                size: defaultIconSize,
+              ),
+              const SizedBox(width: denseSpacing),
+              Text('${framePhase.title} - $durationText'),
             ),
           ),
           if (isSelected)
@@ -227,15 +218,13 @@ class IntelligentFrameFindings extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('Analysis results:'),
-        const SizedBox(height: denseSpacing),
-        _Hint(
-          message: _EnhanceTracingHint(
-            longestPhase: frameAnalysis.longestFramePhase,
-          ),
+      const Text('Analysis results:'),
+      const SizedBox(height: denseSpacing),
+      _Hint(
+        message: _EnhanceTracingHint(
+          longestPhase: frameAnalysis.longestFramePhase,
         ),
-      ],
+      ),
     );
   }
 }
@@ -248,14 +237,12 @@ class _Hint extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      children: [
-        Icon(
-          Icons.lightbulb_outline,
-          size: defaultIconSize,
-        ),
-        const SizedBox(width: denseSpacing),
-        Expanded(child: message),
-      ],
+      Icon(
+        Icons.lightbulb_outline,
+        size: defaultIconSize,
+      ),
+      const SizedBox(width: denseSpacing),
+      Expanded(message),
     );
   }
 }
@@ -327,7 +314,7 @@ class _EnhanceTracingHint extends StatelessWidget {
       alignment: PlaceholderAlignment.middle,
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: denseSpacing),
-        child: _SmallEnhanceTracingButton(),
+        _SmallEnhanceTracingButton(),
       ),
     );
     return [
@@ -355,9 +342,9 @@ class _SmallEnhanceTracingButton extends StatelessWidget {
     // simulate a tap gesture on the Enhance Tracing button at the top of the
     // screen.
     return RoundedOutlinedBorder(
-      child: Padding(
+      Padding(
         padding: const EdgeInsets.all(labelPadding),
-        child: MaterialIconLabel(
+        MaterialIconLabel(
           label: EnhanceTracingButton.title,
           iconData: EnhanceTracingButton.icon,
           color: Theme.of(context).colorScheme.toggleButtonsTitle,

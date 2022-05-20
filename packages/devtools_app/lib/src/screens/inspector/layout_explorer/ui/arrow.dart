@@ -87,14 +87,14 @@ class ArrowWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     return Flex(
       direction: direction,
-      children: <Widget>[
+      <Widget>[
         Expanded(
-          child: Container(
+          Container(
             margin: EdgeInsets.only(
               bottom: verticalMarginFromArrow,
               right: horizontalMarginFromArrow,
             ),
-            child: ArrowWidget(
+            ArrowWidget(
               color: arrowColor,
               headSize: arrowHeadSize,
               strokeWidth: arrowStrokeWidth,
@@ -108,12 +108,12 @@ class ArrowWrapper extends StatelessWidget {
         ),
         if (child != null) child!,
         Expanded(
-          child: Container(
+          Container(
             margin: EdgeInsets.only(
               top: verticalMarginFromArrow,
               left: horizontalMarginFromArrow,
             ),
-            child: ArrowWidget(
+            ArrowWidget(
               color: arrowColor,
               headSize: arrowHeadSize,
               strokeWidth: arrowStrokeWidth,
@@ -169,7 +169,7 @@ class ArrowWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomPaint(
       painter: _painter,
-      child: Container(),
+      Container(),
     );
   }
 }

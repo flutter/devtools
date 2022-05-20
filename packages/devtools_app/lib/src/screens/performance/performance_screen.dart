@@ -146,7 +146,7 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
         controller.offlinePerformanceData!.frames.isNotEmpty;
 
     final performanceScreen = Column(
-      children: [
+      [
         if (!offlineController.offlineMode.value) _buildPerformanceControls(),
         const SizedBox(height: denseRowSpacing),
         if (isOfflineFlutterApp ||
@@ -163,22 +163,20 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
             },
           ),
         Expanded(
-          child: Split(
+          Split(
             axis: Axis.vertical,
             initialFractions: const [0.7, 0.3],
-            children: [
-              TabbedPerformanceView(
-                controller: controller,
-                processing: processing,
-                processingProgress: processingProgress,
-              ),
-              ValueListenableBuilder<TimelineEvent?>(
-                valueListenable: controller.selectedTimelineEvent,
-                builder: (context, selectedEvent, _) {
-                  return EventDetails(selectedEvent);
-                },
-              ),
-            ],
+            TabbedPerformanceView(
+              controller: controller,
+              processing: processing,
+              processingProgress: processingProgress,
+            ),
+            ValueListenableBuilder<TimelineEvent?>(
+              valueListenable: controller.selectedTimelineEvent,
+              builder: (context, selectedEvent, _) {
+                return EventDetails(selectedEvent);
+              },
+            ),
           ),
         ),
       ],
@@ -189,12 +187,12 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
     // that respond to data processing events. The spinner hides the screen's
     // empty UI while data is being processed.
     return Stack(
-      children: [
+      [
         performanceScreen,
         if (loadingOfflineData)
           Container(
             color: Theme.of(context).scaffoldBackgroundColor,
-            child: const CenteredCircularProgressIndicator(),
+            const CenteredCircularProgressIndicator(),
           ),
       ],
     );
@@ -203,15 +201,13 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
   Widget _buildPerformanceControls() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        _PrimaryControls(
-          controller: controller,
-          processing: processing,
-          onClear: () => setState(() {}),
-        ),
-        const SizedBox(width: defaultSpacing),
-        SecondaryPerformanceControls(controller: controller),
-      ],
+      _PrimaryControls(
+        controller: controller,
+        processing: processing,
+        onClear: () => setState(() {}),
+      ),
+      const SizedBox(width: defaultSpacing),
+      SecondaryPerformanceControls(controller: controller),
     );
   }
 
@@ -248,24 +244,22 @@ class _PrimaryControls extends StatelessWidget {
       valueListenable: controller.recordingFrames,
       builder: (context, recording, child) {
         return Row(
-          children: [
-            OutlinedIconButton(
-              icon: Icons.pause,
-              tooltip: 'Pause frame recording',
-              onPressed: recording ? _pauseFrameRecording : null,
-            ),
-            const SizedBox(width: denseSpacing),
-            OutlinedIconButton(
-              icon: Icons.play_arrow,
-              tooltip: 'Resume frame recording',
-              onPressed: recording ? null : _resumeFrameRecording,
-            ),
-            const SizedBox(width: denseSpacing),
-            child!,
-          ],
+          OutlinedIconButton(
+            icon: Icons.pause,
+            tooltip: 'Pause frame recording',
+            onPressed: recording ? _pauseFrameRecording : null,
+          ),
+          const SizedBox(width: denseSpacing),
+          OutlinedIconButton(
+            icon: Icons.play_arrow,
+            tooltip: 'Resume frame recording',
+            onPressed: recording ? null : _resumeFrameRecording,
+          ),
+          const SizedBox(width: denseSpacing),
+          child!,
         );
       },
-      child: OutlinedIconButton(
+      OutlinedIconButton(
         icon: Icons.block,
         tooltip: 'Clear',
         onPressed: processing ? null : _clearPerformanceData,
@@ -306,7 +300,7 @@ class SecondaryPerformanceControls extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
-      children: [
+      [
         if (serviceManager.connectedApp!.isFlutterAppNow!) ...[
           ServiceExtensionButtonGroup(
             minScreenWidthForTextBeforeScaling:
@@ -382,7 +376,7 @@ class MoreDebuggingOptionsButton extends StatelessWidget {
       ],
       overlayDescription: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+        [
           Text(
             'After toggling a rendering layer on/off, '
             'reproduce the activity in your app to see the effects. '
@@ -421,10 +415,10 @@ class PerformanceSettingsDialog extends StatelessWidget {
       includeDivider: false,
       content: Container(
         width: defaultDialogWidth,
-        child: Column(
+        Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+          [
             TimelineStreamSettings(controller: controller),
             if (serviceManager.connectedApp!.isFlutterAppNow!) ...[
               const SizedBox(height: denseSpacing),
@@ -453,7 +447,7 @@ class TimelineStreamSettings extends StatelessWidget {
     final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+      [
         ...dialogSubHeader(theme, 'Recorded Timeline Streams'),
         ..._defaultRecordedStreams(theme),
         ..._advancedStreams(theme),
@@ -529,7 +523,7 @@ class FlutterSettings extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+      [
         ...dialogSubHeader(Theme.of(context), 'Additional Settings'),
         CheckboxSetting(
           notifier: controller.badgeTabForJankyFrames as ValueNotifier<bool?>,

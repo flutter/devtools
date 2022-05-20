@@ -138,20 +138,18 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
           return Split(
             axis: Axis.horizontal,
             initialFractions: const [0.70, 0.30],
-            children: [
-              child!,
-              ProgramExplorer(
-                key: DebuggerScreenBody.programExplorerKey,
-                controller: controller.programExplorerController,
-                onSelected: _onLocationSelected,
-              ),
-            ],
+            child!,
+            ProgramExplorer(
+              key: DebuggerScreenBody.programExplorerKey,
+              controller: controller.programExplorerController,
+              onSelected: _onLocationSelected,
+            ),
           );
         } else {
           return child!;
         }
       },
-      child: DualValueListenableBuilder<ScriptRef?, ParsedScript?>(
+      DualValueListenableBuilder<ScriptRef?, ParsedScript?>(
         firstListenable: controller.currentScriptRef,
         secondListenable: controller.currentParsedScript,
         builder: (context, scriptRef, parsedScript, _) {
@@ -177,18 +175,14 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     return Split(
       axis: Axis.horizontal,
       initialFractions: const [0.25, 0.75],
-      children: [
-        OutlineDecoration(child: debuggerPanes()),
-        Column(
-          children: [
-            const DebuggingControls(),
-            const SizedBox(height: denseRowSpacing),
-            Expanded(
-              child: codeArea,
-            ),
-          ],
+      OutlineDecoration(debuggerPanes()),
+      Column(
+        const DebuggingControls(),
+        const SizedBox(height: denseRowSpacing),
+        Expanded(
+          codeArea,
         ),
-      ],
+      ),
     );
   }
 
@@ -228,11 +222,9 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
               rightPadding: 0.0,
             ),
           ],
-          children: const [
-            CallStack(),
-            Variables(),
-            Breakpoints(),
-          ],
+          CallStack(),
+          Variables(),
+          Breakpoints(),
         );
       },
     );
@@ -243,17 +235,15 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
       valueListenable: controller.breakpointsWithLocation,
       builder: (context, breakpoints, _) {
         return Row(
-          children: [
-            BreakpointsCountBadge(breakpoints: breakpoints),
-            DevToolsTooltip(
-              child: ToolbarAction(
-                icon: Icons.delete,
-                onPressed:
-                    breakpoints.isNotEmpty ? controller.clearBreakpoints : null,
-              ),
-              message: 'Remove all breakpoints',
+          BreakpointsCountBadge(breakpoints: breakpoints),
+          DevToolsTooltip(
+            ToolbarAction(
+              icon: Icons.delete,
+              onPressed:
+                  breakpoints.isNotEmpty ? controller.clearBreakpoints : null,
             ),
-          ],
+            message: 'Remove all breakpoints',
+          ),
         );
       },
     );
@@ -441,49 +431,48 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
           });
         }
       },
-      child: Container(
+      Container(
         color: devtoolsWarning,
         height: controlHeight,
-        child: OutlinedRowGroup(
+        OutlinedRowGroup(
           // Default focus color for the light theme - since the background
           // color of the controls [devtoolsWarning] is the same for both
           // themes, we will use the same border color.
           borderColor: Colors.black.withOpacity(0.12),
-          children: [
-            Container(
-              height: defaultButtonHeight,
-              alignment: Alignment.centerLeft,
-              padding: const EdgeInsets.symmetric(
-                horizontal: defaultSpacing,
-              ),
-              child: const Text(
-                'Main isolate is paused in the debugger',
-                style: TextStyle(color: Colors.black),
+
+          Container(
+            height: defaultButtonHeight,
+            alignment: Alignment.centerLeft,
+            padding: const EdgeInsets.symmetric(
+              horizontal: defaultSpacing,
+            ),
+            const Text(
+              'Main isolate is paused in the debugger',
+              style: TextStyle(color: Colors.black),
+            ),
+          ),
+          DevToolsTooltip(
+            message: 'Resume',
+            TextButton(
+              onPressed: controller.resume,
+              Icon(
+                Codicons.debugContinue,
+                color: Colors.green,
+                size: defaultIconSize,
               ),
             ),
-            DevToolsTooltip(
-              message: 'Resume',
-              child: TextButton(
-                onPressed: controller.resume,
-                child: Icon(
-                  Codicons.debugContinue,
-                  color: Colors.green,
-                  size: defaultIconSize,
-                ),
+          ),
+          DevToolsTooltip(
+            message: 'Step over',
+            TextButton(
+              onPressed: controller.stepOver,
+              Icon(
+                Codicons.debugStepOver,
+                color: Colors.black,
+                size: defaultIconSize,
               ),
             ),
-            DevToolsTooltip(
-              message: 'Step over',
-              child: TextButton(
-                onPressed: controller.stepOver,
-                child: Icon(
-                  Codicons.debugStepOver,
-                  color: Colors.black,
-                  size: defaultIconSize,
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

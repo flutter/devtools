@@ -150,26 +150,24 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
 
   Widget _buildProfilerScreenBody(ProfilerScreenController controller) {
     final emptyAppStartUpProfileView = Center(
-      child: Column(
+      Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: const [
-          Text(
-            'There are no app start up samples available.',
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: denseSpacing),
-          Text(
-            'To avoid this, try to open the DevTools CPU profiler '
-            'sooner after starting your app.',
-            textAlign: TextAlign.center,
-          ),
-        ],
+        Text(
+          'There are no app start up samples available.',
+          textAlign: TextAlign.center,
+        ),
+        SizedBox(height: denseSpacing),
+        Text(
+          'To avoid this, try to open the DevTools CPU profiler '
+          'sooner after starting your app.',
+          textAlign: TextAlign.center,
+        ),
       ),
     );
     // TODO(kenz): remove the note about profiling on iOS after
     // https://github.com/flutter/flutter/issues/88466 is fixed.
     final emptyProfileView = Center(
-      child: RichText(
+      RichText(
         textAlign: TextAlign.center,
         text: TextSpan(
           text: 'No CPU samples recorded.',
@@ -193,7 +191,7 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
       ),
     );
     final profilerScreen = Column(
-      children: [
+      [
         if (!offlineController.offlineMode.value)
           ProfilerScreenControls(
             controller: controller,
@@ -202,7 +200,7 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
           ),
         const SizedBox(height: denseRowSpacing),
         Expanded(
-          child: ValueListenableBuilder<CpuProfileData?>(
+          ValueListenableBuilder<CpuProfileData?>(
             valueListenable: controller.cpuProfilerController.dataNotifier,
             builder: (context, cpuProfileData, _) {
               if (cpuProfileData ==
@@ -233,12 +231,12 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
     // that respond to data processing events. The spinner hides the screen's
     // empty UI while data is being processed.
     return Stack(
-      children: [
+      [
         profilerScreen,
         if (loadingOfflineData)
           Container(
             color: Theme.of(context).scaffoldBackgroundColor,
-            child: const CenteredCircularProgressIndicator(),
+            const CenteredCircularProgressIndicator(),
           ),
       ],
     );
@@ -290,17 +288,15 @@ class ProfilerScreenControls extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        _PrimaryControls(
-          controller: controller,
-          recording: recording,
-        ),
-        const SizedBox(width: defaultSpacing),
-        _SecondaryControls(
-          controller: controller,
-          profilerBusy: recording || processing,
-        ),
-      ],
+      _PrimaryControls(
+        controller: controller,
+        recording: recording,
+      ),
+      const SizedBox(width: defaultSpacing),
+      _SecondaryControls(
+        controller: controller,
+        profilerBusy: recording || processing,
+      ),
     );
   }
 }
@@ -320,47 +316,42 @@ class _PrimaryControls extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      children: [
-        RecordButton(
-          recording: recording,
-          minScreenWidthForTextBeforeScaling:
-              _primaryControlsMinIncludeTextWidth,
-          onPressed: () {
-            ga.select(
-              analytics_constants.cpuProfiler,
-              analytics_constants.record,
-            );
-            controller.startRecording();
-          },
-        ),
-        const SizedBox(width: denseSpacing),
-        StopRecordingButton(
-          recording: recording,
-          minScreenWidthForTextBeforeScaling:
-              _primaryControlsMinIncludeTextWidth,
-          onPressed: () {
-            ga.select(
-              analytics_constants.cpuProfiler,
-              analytics_constants.stop,
-            );
-            controller.stopRecording();
-          },
-        ),
-        const SizedBox(width: denseSpacing),
-        ClearButton(
-          minScreenWidthForTextBeforeScaling:
-              _primaryControlsMinIncludeTextWidth,
-          onPressed: recording
-              ? null
-              : () {
-                  ga.select(
-                    analytics_constants.cpuProfiler,
-                    analytics_constants.clear,
-                  );
-                  controller.clear();
-                },
-        ),
-      ],
+      RecordButton(
+        recording: recording,
+        minScreenWidthForTextBeforeScaling: _primaryControlsMinIncludeTextWidth,
+        onPressed: () {
+          ga.select(
+            analytics_constants.cpuProfiler,
+            analytics_constants.record,
+          );
+          controller.startRecording();
+        },
+      ),
+      const SizedBox(width: denseSpacing),
+      StopRecordingButton(
+        recording: recording,
+        minScreenWidthForTextBeforeScaling: _primaryControlsMinIncludeTextWidth,
+        onPressed: () {
+          ga.select(
+            analytics_constants.cpuProfiler,
+            analytics_constants.stop,
+          );
+          controller.stopRecording();
+        },
+      ),
+      const SizedBox(width: denseSpacing),
+      ClearButton(
+        minScreenWidthForTextBeforeScaling: _primaryControlsMinIncludeTextWidth,
+        onPressed: recording
+            ? null
+            : () {
+                ga.select(
+                  analytics_constants.cpuProfiler,
+                  analytics_constants.clear,
+                );
+                controller.clear();
+              },
+      ),
     );
   }
 }
@@ -383,7 +374,7 @@ class _SecondaryControls extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
-      children: [
+      [
         if (serviceManager.connectedApp!.isFlutterNativeAppNow)
           IconLabelButton(
             icon: Icons.timer,

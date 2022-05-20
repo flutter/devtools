@@ -105,19 +105,17 @@ class BannerMessages extends StatelessWidget {
     final controller = Provider.of<BannerMessagesController>(context);
     final messagesForScreen = controller.messagesForScreen(screen.screenId);
     return Column(
-      children: [
-        ValueListenableBuilder<List<BannerMessage>>(
-          valueListenable: messagesForScreen,
-          builder: (context, messages, _) {
-            return Column(
-              children: messages,
-            );
-          },
-        ),
-        Expanded(
-          child: screen.build(context),
-        )
-      ],
+      ValueListenableBuilder<List<BannerMessage>>(
+        valueListenable: messagesForScreen,
+        builder: (context, messages, _) {
+          return Column(
+            messages,
+          );
+        },
+      ),
+      Expanded(
+        screen.build(context),
+      ),
     );
   }
 }
@@ -143,45 +141,41 @@ class BannerMessage extends StatelessWidget {
     return Card(
       color: backgroundColor,
       margin: const EdgeInsets.only(bottom: denseRowSpacing),
-      child: Padding(
+      Padding(
         padding: const EdgeInsets.all(defaultSpacing),
-        child: Column(
+        Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  headerText,
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodyText1!
-                      .copyWith(color: foregroundColor),
-                ),
-                const SizedBox(width: defaultSpacing),
-                Expanded(
-                  child: RichText(
-                    text: TextSpan(
-                      children: textSpans,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: defaultSpacing),
-                CircularIconButton(
-                  icon: Icons.close,
-                  backgroundColor: backgroundColor,
-                  foregroundColor: foregroundColor,
-                  // TODO(kenz): animate the removal of this message.
-                  onPressed: () => Provider.of<BannerMessagesController>(
-                    context,
-                    listen: false,
-                  ).removeMessage(this, dismiss: true),
-                ),
-              ],
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            Text(
+              headerText,
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyText1!
+                  .copyWith(color: foregroundColor),
             ),
-          ],
+            const SizedBox(width: defaultSpacing),
+            Expanded(
+              RichText(
+                text: TextSpan(
+                  children: textSpans,
+                ),
+              ),
+            ),
+            const SizedBox(width: defaultSpacing),
+            CircularIconButton(
+              icon: Icons.close,
+              backgroundColor: backgroundColor,
+              foregroundColor: foregroundColor,
+              // TODO(kenz): animate the removal of this message.
+              onPressed: () => Provider.of<BannerMessagesController>(
+                context,
+                listen: false,
+              ).removeMessage(this, dismiss: true),
+            ),
+          ),
         ),
       ),
     );

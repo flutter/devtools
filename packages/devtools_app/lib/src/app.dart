@@ -165,7 +165,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     return MaterialPage(
       child: DevToolsScaffold.withChild(
         key: const Key('not-found'),
-        child: CenteredMessage("'$page' not found."),
+        CenteredMessage("'$page' not found."),
         ideTheme: ideTheme,
       ),
     );
@@ -182,7 +182,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     if (vmServiceUri?.isEmpty ?? true) {
       return DevToolsScaffold.withChild(
         key: const Key('landing'),
-        child: LandingScreenBody(),
+        LandingScreenBody(),
         ideTheme: ideTheme,
         actions: [
           OpenSettingsAction(),
@@ -233,8 +233,8 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
               ),
             );
           },
-          child: DevToolsScaffold.withChild(
-            child: CenteredMessage(
+          DevToolsScaffold.withChild(
+            CenteredMessage(
               page != null
                   ? 'The "$page" screen is not available for this application.'
                   : 'No tabs available for this application.',
@@ -256,7 +256,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         final snapshotArgs = SnapshotArguments.fromArgs(args);
         return DevToolsScaffold.withChild(
           key: UniqueKey(),
-          child: _providedControllers(
+          _providedControllers(
             offline: true,
             child: SnapshotScreenBody(snapshotArgs, _screens),
           ),
@@ -266,7 +266,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       appSizePageId: (_, __, ___) {
         return DevToolsScaffold.withChild(
           key: const Key('appsize'),
-          child: _providedControllers(
+          _providedControllers(
             child: const AppSizeBody(),
           ),
           ideTheme: ideTheme,
@@ -298,7 +298,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
 
     return MultiProvider(
       providers: _providers,
-      child: child,
+      child,
     );
   }
 
@@ -314,10 +314,10 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       builder: (context, child) {
         return Provider<AnalyticsController>.value(
           value: widget.analyticsController,
-          child: Notifications(
-            child: ReleaseNotesViewer(
+          Notifications(
+            ReleaseNotesViewer(
               releaseNotesController: releaseNotesController,
-              child: child,
+              child,
             ),
           ),
         );
@@ -413,7 +413,7 @@ class _AlternateCheckedModeBanner extends StatelessWidget {
       message: 'DEBUG',
       textDirection: TextDirection.ltr,
       location: BannerLocation.topStart,
-      child: Builder(
+      Builder(
         builder: builder,
       ),
     );
@@ -425,7 +425,7 @@ class OpenSettingsAction extends StatelessWidget {
   Widget build(BuildContext context) {
     return DevToolsTooltip(
       message: 'Settings',
-      child: InkWell(
+      InkWell(
         onTap: () async {
           unawaited(
             showDialog(
@@ -434,11 +434,11 @@ class OpenSettingsAction extends StatelessWidget {
             ),
           );
         },
-        child: Container(
+        Container(
           width: DevToolsScaffold.actionWidgetSize,
           height: DevToolsScaffold.actionWidgetSize,
           alignment: Alignment.center,
-          child: Icon(
+          Icon(
             Icons.settings,
             size: actionsIconSize,
           ),
@@ -458,7 +458,7 @@ class SettingsDialog extends StatelessWidget {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+        [
           CheckboxSetting(
             label: const Text('Use a dark theme'),
             listenable: preferences.darkModeTheme,
@@ -514,16 +514,14 @@ class CheckboxSetting extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () => toggleSetting(!listenable.value),
-      child: Row(
-        children: [
-          ValueListenableBuilder<bool>(
-            valueListenable: listenable,
-            builder: (context, value, _) {
-              return Checkbox(value: value, onChanged: toggleSetting);
-            },
-          ),
-          label,
-        ],
+      Row(
+        ValueListenableBuilder<bool>(
+          valueListenable: listenable,
+          builder: (context, value, _) {
+            return Checkbox(value: value, onChanged: toggleSetting);
+          },
+        ),
+        label,
       ),
     );
   }

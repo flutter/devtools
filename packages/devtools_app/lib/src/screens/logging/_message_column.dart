@@ -74,16 +74,14 @@ class MessageColumn extends ColumnData<LogData>
       }
 
       return Row(
-        children: <Widget>[
-          text,
-          Flexible(
-            child: Container(
-              height: 12.0,
-              width: frameLength,
-              decoration: const BoxDecoration(color: color),
-            ),
+        text,
+        Flexible(
+          Container(
+            height: 12.0,
+            width: frameLength,
+            decoration: const BoxDecoration(color: color),
           ),
-        ],
+        ),
       );
     } else if (data.kind == 'stdout') {
       return RichText(

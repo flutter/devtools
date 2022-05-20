@@ -162,17 +162,17 @@ class _OffsetScrollbarState extends State<OffsetScrollbar> {
             : Offset(0.0, delta);
         return Transform.translate(
           offset: offset,
-          child: Scrollbar(
+          Scrollbar(
             thumbVisibility: widget.isAlwaysShown,
             controller: widget.controller,
-            child: Transform.translate(
+            Transform.translate(
               offset: -offset,
-              child: child,
+              child,
             ),
           ),
         );
       },
-      child: widget.child,
+      widget.child,
     );
   }
 }

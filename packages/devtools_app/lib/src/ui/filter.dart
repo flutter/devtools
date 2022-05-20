@@ -91,10 +91,10 @@ class _FilterDialogState<T>
           horizontal: defaultSpacing,
         ),
         width: widget.dialogWidth,
-        child: Column(
+        Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+          [
             if (widget.includeQueryFilter) ...[
               _buildQueryTextField(),
               const SizedBox(height: defaultSpacing),
@@ -130,23 +130,21 @@ class _FilterDialogState<T>
   Widget _buildDialogTitle() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        dialogTitleText(Theme.of(context), 'Filters'),
-        TextButton(
-          onPressed: _resetFilters,
-          child: const MaterialIconLabel(
-            label: 'Reset to default',
-            iconData: Icons.replay,
-          ),
+      dialogTitleText(Theme.of(context), 'Filters'),
+      TextButton(
+        onPressed: _resetFilters,
+        const MaterialIconLabel(
+          label: 'Reset to default',
+          iconData: Icons.replay,
         ),
-      ],
+      ),
     );
   }
 
   Widget _buildQueryTextField() {
     return Container(
       height: defaultTextFieldHeight,
-      child: TextField(
+      TextField(
         autofocus: true,
         controller: queryTextFieldController,
         decoration: InputDecoration(
@@ -183,17 +181,15 @@ class ToggleFilterElement extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget content = InkWell(
       onTap: () => filter.enabled.value = !filter.enabled.value,
-      child: Row(
-        children: [
-          NotifierCheckbox(notifier: filter.enabled),
-          Text(filter.name),
-        ],
+      Row(
+        NotifierCheckbox(notifier: filter.enabled),
+        Text(filter.name),
       ),
     );
     if (filter.tooltip != null) {
       content = DevToolsTooltip(
         message: filter.tooltip,
-        child: content,
+        content,
       );
     }
     return content;

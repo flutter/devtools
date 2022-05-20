@@ -164,9 +164,9 @@ class _InitializerState extends State<Initializer>
     currentDisconnectedOverlay = OverlayEntry(
       builder: (context) => Container(
         color: theme.colorScheme.overlayShadowColor,
-        child: Center(
-          child: Column(
-            children: [
+        Center(
+          Column(
+            [
               const Spacer(),
               Text('Disconnected', style: theme.textTheme.headline3),
               const SizedBox(height: defaultSpacing),
@@ -179,7 +179,7 @@ class _InitializerState extends State<Initializer>
                       clearScreenParam: true,
                     );
                   },
-                  child: const Text(connectToNewAppText),
+                  const Text(connectToNewAppText),
                 )
               else
                 Text(
@@ -189,7 +189,7 @@ class _InitializerState extends State<Initializer>
               const Spacer(),
               ElevatedButton(
                 onPressed: hideDisconnectedOverlay,
-                child: const Text('Review History'),
+                const Text('Review History'),
               ),
               const SizedBox(height: defaultSpacing),
             ],

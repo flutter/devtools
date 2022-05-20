@@ -80,7 +80,7 @@ class ProfileGranularityDropdown extends StatelessWidget {
   DropdownMenuItem<String> _buildMenuItem(ProfileGranularity granularity) {
     return DropdownMenuItem<String>(
       value: granularity.value,
-      child: Text(granularity.display),
+      Text(granularity.display),
     );
   }
 

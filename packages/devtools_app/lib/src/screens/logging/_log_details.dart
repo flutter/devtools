@@ -51,14 +51,14 @@ class _LogDetailsState extends State<LogDetails>
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: _buildContent(context, widget.log),
+      _buildContent(context, widget.log),
     );
   }
 
   Widget _buildContent(BuildContext context, LogData? log) {
     // TODO(#1370): Handle showing flutter errors in a structured manner.
     return Stack(
-      children: [
+      [
         _buildSimpleLog(context, log),
         if (log != null && log.needsComputing)
           const CenteredCircularProgressIndicator(),
@@ -82,7 +82,7 @@ class _LogDetailsState extends State<LogDetails>
     }
 
     return OutlineDecoration(
-      child: ConsoleFrame(
+      ConsoleFrame(
         title: AreaPaneHeader(
           title: const Text('Details'),
           needsTopBorder: false,
@@ -93,11 +93,11 @@ class _LogDetailsState extends State<LogDetails>
             ),
           ],
         ),
-        child: Padding(
+        Padding(
           padding: const EdgeInsets.all(denseSpacing),
-          child: SingleChildScrollView(
+          SingleChildScrollView(
             controller: scrollController,
-            child: SelectableText(
+            SelectableText(
               log?.prettyPrinted() ?? '',
               textAlign: TextAlign.left,
               style: Theme.of(context).fixedFontStyle,

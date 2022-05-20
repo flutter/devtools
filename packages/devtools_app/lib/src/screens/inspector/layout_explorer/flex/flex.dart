@@ -131,12 +131,12 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
     }
     return RotatedBox(
       quarterTurns: axis == Axis.vertical ? 3 : 0,
-      child: Container(
+      Container(
         constraints: BoxConstraints(
           maxWidth: dropdownMaxSize,
           maxHeight: dropdownMaxSize,
         ),
-        child: DropdownButton(
+        DropdownButton(
           value: selected,
           isExpanded: true,
           // Avoid showing an underline for the main axis and cross-axis drop downs.
@@ -149,10 +149,44 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
               for (var alignment in alignmentEnumEntries)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
+                  Expanded(
+                    flex: 2,
+                    Text(
+                      describeEnum(alignment),
+                      style: TextStyle(color: color),
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Flexible(
+                    Image.asset(
+                      (axis == direction)
+                          ? mainAxisAssetImageUrl(
+                              direction,
+                              alignment as MainAxisAlignment,
+                            )
+                          : crossAxisAssetImageUrl(
+                              direction,
+                              alignment as CrossAxisAlignment,
+                            ),
+                      height: axisAlignmentAssetImageHeight,
+                      fit: BoxFit.fitHeight,
+                      color: color,
+                    ),
+                  ),
+                )
+            ];
+          },
+          items: [
+            for (var alignment in alignmentEnumEntries)
+              DropdownMenuItem(
+                value: alignment,
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: margin),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
                     Expanded(
-                      flex: 2,
-                      child: Text(
+                      Text(
                         describeEnum(alignment),
                         style: TextStyle(color: color),
                         textAlign: TextAlign.center,
@@ -160,7 +194,7 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
                       ),
                     ),
                     Flexible(
-                      child: Image.asset(
+                      Image.asset(
                         (axis == direction)
                             ? mainAxisAssetImageUrl(
                                 direction,
@@ -170,48 +204,10 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
                                 direction,
                                 alignment as CrossAxisAlignment,
                               ),
-                        height: axisAlignmentAssetImageHeight,
                         fit: BoxFit.fitHeight,
                         color: color,
                       ),
                     ),
-                  ],
-                )
-            ];
-          },
-          items: [
-            for (var alignment in alignmentEnumEntries)
-              DropdownMenuItem(
-                value: alignment,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: margin),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          describeEnum(alignment),
-                          style: TextStyle(color: color),
-                          textAlign: TextAlign.center,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      Flexible(
-                        child: Image.asset(
-                          (axis == direction)
-                              ? mainAxisAssetImageUrl(
-                                  direction,
-                                  alignment as MainAxisAlignment,
-                                )
-                              : crossAxisAssetImageUrl(
-                                  direction,
-                                  alignment as CrossAxisAlignment,
-                                ),
-                          fit: BoxFit.fitHeight,
-                          color: color,
-                        ),
-                      ),
-                    ],
                   ),
                 ),
               )
@@ -250,7 +246,7 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
     return Container(
       margin: const EdgeInsets.all(margin),
       padding: const EdgeInsets.only(bottom: margin, right: margin),
-      child: AnimatedBuilder(
+      AnimatedBuilder(
         animation: changeController,
         builder: (context, _) {
           return LayoutBuilder(builder: _buildLayout);
@@ -266,21 +262,21 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
     final propertiesLocal = properties!;
     final flexDescription = Align(
       alignment: Alignment.centerLeft,
-      child: Container(
+      Container(
         margin: EdgeInsets.only(
           top: mainAxisArrowIndicatorSize,
           left: crossAxisArrowIndicatorSize + margin,
         ),
-        child: InkWell(
+        InkWell(
           onTap: () => onTap(propertiesLocal),
-          child: WidgetVisualizer(
+          WidgetVisualizer(
             title: flexType,
             layoutProperties: propertiesLocal,
             isSelected: highlighted == properties,
             overflowSide: propertiesLocal.overflowSide,
             hint: Container(
               padding: const EdgeInsets.all(4.0),
-              child: Text(
+              Text(
                 'Total Flex Factor: ${propertiesLocal.totalFlex.toInt()}',
                 textScaleFactor: largeTextScaleFactor,
                 style: const TextStyle(
@@ -290,7 +286,7 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            child: VisualizeFlexChildren(
+            VisualizeFlexChildren(
               state: this,
               properties: propertiesLocal,
               children: children,
@@ -305,81 +301,75 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
 
     final verticalAxisDescription = Align(
       alignment: Alignment.bottomLeft,
-      child: Container(
+      Container(
         margin: EdgeInsets.only(top: mainAxisArrowIndicatorSize + margin),
         width: crossAxisArrowIndicatorSize,
-        child: Column(
-          children: [
-            Expanded(
-              child: ArrowWrapper.unidirectional(
-                arrowColor: verticalColor(colorScheme),
-                child: Truncateable(
-                  truncate: maxHeight <= minHeightToAllowTruncating,
-                  child: RotatedBox(
-                    quarterTurns: 3,
-                    child: Text(
-                      propertiesLocal.verticalDirectionDescription,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.center,
-                      textScaleFactor: largeTextScaleFactor,
-                      style: TextStyle(
-                        color: verticalTextColor(colorScheme),
-                      ),
+        Column(
+          Expanded(
+            ArrowWrapper.unidirectional(
+              arrowColor: verticalColor(colorScheme),
+              Truncateable(
+                truncate: maxHeight <= minHeightToAllowTruncating,
+                RotatedBox(
+                  quarterTurns: 3,
+                  Text(
+                    propertiesLocal.verticalDirectionDescription,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    textScaleFactor: largeTextScaleFactor,
+                    style: TextStyle(
+                      color: verticalTextColor(colorScheme),
                     ),
                   ),
                 ),
-                type: ArrowType.down,
               ),
+              type: ArrowType.down,
             ),
-            Truncateable(
-              truncate: maxHeight <= minHeightToAllowTruncating,
-              child: _buildAxisAlignmentDropdown(Axis.vertical, colorScheme),
-            ),
-          ],
+          ),
+          Truncateable(
+            truncate: maxHeight <= minHeightToAllowTruncating,
+            _buildAxisAlignmentDropdown(Axis.vertical, colorScheme),
+          ),
         ),
       ),
     );
 
     final horizontalAxisDescription = Align(
       alignment: Alignment.topRight,
-      child: Container(
+      Container(
         margin: EdgeInsets.only(left: crossAxisArrowIndicatorSize + margin),
         height: mainAxisArrowIndicatorSize,
-        child: Row(
-          children: [
-            Expanded(
-              child: ArrowWrapper.unidirectional(
-                arrowColor: horizontalColor(colorScheme),
-                child: Truncateable(
-                  truncate: maxWidth <= minWidthToAllowTruncating,
-                  child: Text(
-                    propertiesLocal.horizontalDirectionDescription,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                    textScaleFactor: largeTextScaleFactor,
-                    style: TextStyle(color: horizontalTextColor(colorScheme)),
-                  ),
+        Row(
+          Expanded(
+            ArrowWrapper.unidirectional(
+              arrowColor: horizontalColor(colorScheme),
+              Truncateable(
+                truncate: maxWidth <= minWidthToAllowTruncating,
+                Text(
+                  propertiesLocal.horizontalDirectionDescription,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  textScaleFactor: largeTextScaleFactor,
+                  style: TextStyle(color: horizontalTextColor(colorScheme)),
                 ),
-                type: ArrowType.right,
               ),
+              type: ArrowType.right,
             ),
-            Truncateable(
-              truncate: maxWidth <= minWidthToAllowTruncating,
-              child: _buildAxisAlignmentDropdown(Axis.horizontal, colorScheme),
-            ),
-          ],
+          ),
+          Truncateable(
+            truncate: maxWidth <= minWidthToAllowTruncating,
+            _buildAxisAlignmentDropdown(Axis.horizontal, colorScheme),
+          ),
         ),
       ),
     );
 
     return Container(
       constraints: BoxConstraints(maxWidth: maxWidth, maxHeight: maxHeight),
-      child: Stack(
-        children: [
-          flexDescription,
-          verticalAxisDescription,
-          horizontalAxisDescription,
-        ],
+      Stack(
+        flexDescription,
+        verticalAxisDescription,
+        horizontalAxisDescription,
       ),
     );
   }
@@ -432,7 +422,7 @@ class _VisualizeFlexChildrenState extends State<VisualizeFlexChildren> {
     }
 
     if (!widget.properties.hasChildren) {
-      return const Center(child: Text('No Children'));
+      return const Center(Text('No Children'));
     }
 
     final theme = Theme.of(context);
@@ -445,7 +435,7 @@ class _VisualizeFlexChildrenState extends State<VisualizeFlexChildren> {
         ),
       ),
       margin: const EdgeInsets.only(top: margin, left: margin),
-      child: LayoutBuilder(
+      LayoutBuilder(
         builder: (context, constraints) {
           final maxWidth = constraints.maxWidth;
           final maxHeight = constraints.maxHeight;
@@ -510,10 +500,10 @@ class _VisualizeFlexChildrenState extends State<VisualizeFlexChildren> {
           return Scrollbar(
             thumbVisibility: true,
             controller: widget.scrollController,
-            child: SingleChildScrollView(
+            SingleChildScrollView(
               scrollDirection: widget.properties.direction,
               controller: widget.scrollController,
-              child: ConstrainedBox(
+              ConstrainedBox(
                 constraints: BoxConstraints(
                   minWidth: maxWidth,
                   minHeight: maxHeight,
@@ -530,8 +520,8 @@ class _VisualizeFlexChildrenState extends State<VisualizeFlexChildren> {
                         )
                       : maxHeight,
                 ).normalize(),
-                child: Stack(
-                  children: [
+                Stack(
+                  [
                     LayoutExplorerBackground(colorScheme: colorScheme),
                     ...freeSpacesWidgets,
                     ...childrenRenderWidgets,
@@ -544,7 +534,7 @@ class _VisualizeFlexChildrenState extends State<VisualizeFlexChildren> {
       ),
     );
     return VisualizeWidthAndHeightWithConstraints(
-      child: contents,
+      contents,
       properties: widget.properties,
     );
   }
@@ -611,7 +601,7 @@ class FlexChildVisualizer extends StatelessWidget {
     DropdownMenuItem<int> buildMenuItem(int? flexFactor) {
       return DropdownMenuItem(
         value: flexFactor,
-        child: buildMenuitemChild(flexFactor),
+        buildMenuitemChild(flexFactor),
       );
     }
 
@@ -643,7 +633,7 @@ class FlexChildVisualizer extends StatelessWidget {
     DropdownMenuItem<FlexFit> buildMenuItem(FlexFit flexFit) {
       return DropdownMenuItem(
         value: flexFit,
-        child: flexFitDescription(flexFit),
+        flexFitDescription(flexFit),
       );
     }
 
@@ -672,11 +662,11 @@ class FlexChildVisualizer extends StatelessWidget {
         top: margin,
         left: margin,
       ),
-      child: Column(
+      Column(
         crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
+        [
           Flexible(
-            child: _buildFlexFactorChangerDropdown(currentMaxFlexFactor),
+            _buildFlexFactorChangerDropdown(currentMaxFlexFactor),
           ),
           if (!properties.hasFlexFactor)
             Text(
@@ -723,12 +713,12 @@ class FlexChildVisualizer extends StatelessWidget {
       // Not-expanded widgets enter much faster.
       return Opacity(
         opacity: min([state.entranceCurve.value * 5, 1.0]),
-        child: Padding(
+        Padding(
           padding: EdgeInsets.symmetric(
             horizontal: math.max(0.0, (renderSize.width - size.width) / 2),
             vertical: math.max(0.0, (renderSize.height - size.height) / 2),
           ),
-          child: child,
+          child,
         ),
       );
     }
@@ -738,26 +728,26 @@ class FlexChildVisualizer extends StatelessWidget {
     return Positioned(
       top: renderOffset.dy,
       left: renderOffset.dx,
-      child: GestureDetector(
+      GestureDetector(
         onTap: () => state.onTap(propertiesLocal),
         onDoubleTap: () => state.onDoubleTap(propertiesLocal),
         onLongPress: () => state.onDoubleTap(propertiesLocal),
-        child: SizedBox(
+        SizedBox(
           width: renderSize.width,
           height: renderSize.height,
-          child: AnimatedBuilder(
+          AnimatedBuilder(
             animation: state.entranceController,
             builder: buildEntranceAnimation,
-            child: WidgetVisualizer(
+            WidgetVisualizer(
               isSelected: isSelected,
               layoutProperties: layoutProperties,
               title: propertiesLocal.description ?? '',
               overflowSide: propertiesLocal.overflowSide,
-              child: VisualizeWidthAndHeightWithConstraints(
+              VisualizeWidthAndHeightWithConstraints(
                 arrowHeadSize: arrowHeadSize,
-                child: Align(
+                Align(
                   alignment: Alignment.topRight,
-                  child: _buildContent(colorScheme),
+                  _buildContent(colorScheme),
                 ),
                 properties: propertiesLocal,
               ),

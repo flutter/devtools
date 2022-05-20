@@ -71,16 +71,16 @@ class _ProviderListState extends ConsumerState<ProviderList> {
     final nodes = ref.watch(sortedProviderNodesProvider);
 
     return nodes.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const Center(CircularProgressIndicator()),
       error: (err, stack) => const Padding(
         padding: _tilePadding,
-        child: Text('<unknown error>'),
+        Text('<unknown error>'),
       ),
       data: (nodes) {
         return Scrollbar(
           controller: scrollController,
           thumbVisibility: true,
-          child: ListView.builder(
+          ListView.builder(
             primary: false,
             controller: scrollController,
             itemCount: nodes.length,
@@ -119,10 +119,10 @@ class ProviderNodeItem extends ConsumerWidget {
       onTap: () {
         ref.read(selectedProviderIdProvider.notifier).state = node.id;
       },
-      child: Container(
+      Container(
         color: backgroundColor,
         padding: _tilePadding,
-        child: Text('${node.type}()'),
+        Text('${node.type}()'),
       ),
     );
   }

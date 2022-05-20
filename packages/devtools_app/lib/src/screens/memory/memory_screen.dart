@@ -317,36 +317,32 @@ class MemoryBodyState extends State<MemoryBody>
         }
       },
       autofocus: true,
-      child: Column(
+      Column(
         key: hoverKey,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildPrimaryStateControls(textTheme),
-              const Spacer(),
-              _buildMemoryControls(textTheme),
-            ],
-          ),
-          const SizedBox(height: denseRowSpacing),
-          SizedBox(
-            height: scaleByFontFactor(70),
-            child: events.MemoryEventsPane(_eventChartController),
-          ),
-          SizedBox(
-            child: vm.MemoryVMChart(_vmChartController),
-          ),
-          _controller.isAndroidChartVisible
-              ? SizedBox(
-                  height: defaultChartHeight,
-                  child: android.MemoryAndroidChart(_androidChartController),
-                )
-              : const SizedBox(),
-          const SizedBox(width: defaultSpacing),
-          Expanded(
-            child: HeapTree(_controller),
-          ),
-        ],
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          _buildPrimaryStateControls(textTheme),
+          const Spacer(),
+          _buildMemoryControls(textTheme),
+        ),
+        const SizedBox(height: denseRowSpacing),
+        SizedBox(
+          height: scaleByFontFactor(70),
+          events.MemoryEventsPane(_eventChartController),
+        ),
+        SizedBox(
+          vm.MemoryVMChart(_vmChartController),
+        ),
+        _controller.isAndroidChartVisible
+            ? SizedBox(
+                height: defaultChartHeight,
+                android.MemoryAndroidChart(_androidChartController),
+              )
+            : const SizedBox(),
+        const SizedBox(width: defaultSpacing),
+        Expanded(
+          HeapTree(_controller),
+        ),
       ),
     );
   }
@@ -393,7 +389,7 @@ class MemoryBodyState extends State<MemoryBody>
 
         return DropdownMenuItem<String>(
           value: value,
-          child: Text(
+          Text(
             '${isVerboseDropdown ? 'Display' : ''} $value $unit',
           ),
         );
@@ -442,7 +438,7 @@ class MemoryBodyState extends State<MemoryBody>
               : value;
       return SourceDropdownMenuItem<String>(
         value: value,
-        child: Text(
+        Text(
           '${_controller.memorySourcePrefix}$displayValue',
           key: MemoryScreen.sourcesKey,
         ),
@@ -493,30 +489,25 @@ class MemoryBodyState extends State<MemoryBody>
       builder: (context, paused, _) {
         return Row(
           mainAxisSize: MainAxisSize.min,
-          children: [
-            PauseButton(
-              minScreenWidthForTextBeforeScaling:
-                  _primaryControlsMinVerboseWidth,
-              onPressed: paused ? null : _onPause,
-            ),
-            const SizedBox(width: denseSpacing),
-            ResumeButton(
-              minScreenWidthForTextBeforeScaling:
-                  _primaryControlsMinVerboseWidth,
-              onPressed: paused ? _onResume : null,
-            ),
-            const SizedBox(width: defaultSpacing),
-            ClearButton(
-              // TODO(terry): Button needs to be Delete for offline data.
-              onPressed: _controller.memorySource == MemoryController.liveFeed
-                  ? _clearTimeline
-                  : null,
-              minScreenWidthForTextBeforeScaling:
-                  _primaryControlsMinVerboseWidth,
-            ),
-            const SizedBox(width: defaultSpacing),
-            _intervalDropdown(textTheme),
-          ],
+          PauseButton(
+            minScreenWidthForTextBeforeScaling: _primaryControlsMinVerboseWidth,
+            onPressed: paused ? null : _onPause,
+          ),
+          const SizedBox(width: denseSpacing),
+          ResumeButton(
+            minScreenWidthForTextBeforeScaling: _primaryControlsMinVerboseWidth,
+            onPressed: paused ? _onResume : null,
+          ),
+          const SizedBox(width: defaultSpacing),
+          ClearButton(
+            // TODO(terry): Button needs to be Delete for offline data.
+            onPressed: _controller.memorySource == MemoryController.liveFeed
+                ? _clearTimeline
+                : null,
+            minScreenWidthForTextBeforeScaling: _primaryControlsMinVerboseWidth,
+          ),
+          const SizedBox(width: defaultSpacing),
+          _intervalDropdown(textTheme),
         );
       },
     );
@@ -536,7 +527,7 @@ class MemoryBodyState extends State<MemoryBody>
   Widget _buildMemoryControls(TextTheme textTheme) {
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: [
+      [
         _memorySourceDropdown(textTheme),
         const SizedBox(width: defaultSpacing),
         if (_controller.isConnectedDeviceAndroid ||
@@ -545,16 +536,14 @@ class MemoryBodyState extends State<MemoryBody>
         const SizedBox(width: denseSpacing),
         _isAdvancedSettingsEnabled
             ? Row(
-                children: [
-                  IconLabelButton(
-                    onPressed: _controller.isGcing ? null : _gc,
-                    icon: Icons.delete,
-                    label: 'GC',
-                    minScreenWidthForTextBeforeScaling:
-                        _primaryControlsMinVerboseWidth,
-                  ),
-                  const SizedBox(width: denseSpacing),
-                ],
+                IconLabelButton(
+                  onPressed: _controller.isGcing ? null : _gc,
+                  icon: Icons.delete,
+                  label: 'GC',
+                  minScreenWidthForTextBeforeScaling:
+                      _primaryControlsMinVerboseWidth,
+                ),
+                const SizedBox(width: denseSpacing),
               )
             : const SizedBox(),
         ExportButton(
@@ -755,10 +744,10 @@ class MemoryBodyState extends State<MemoryBody>
       final rightSide = <Widget>[];
       rightSide.addAll([
         Expanded(
-          child: Container(
+          Container(
             padding: EdgeInsets.fromLTRB(leftEdge, 0, 0, 2),
             width: legendTextWidth + leftEdge,
-            child: Text(name, style: legendEntry),
+            Text(name, style: legendEntry),
           ),
         ),
         const PaddedDivider(
@@ -806,11 +795,11 @@ class MemoryBodyState extends State<MemoryBody>
     }
 
     return Expanded(
-      child: Container(
+      Container(
         padding: const EdgeInsets.fromLTRB(10, 0, 0, 2),
-        child: Row(
+        Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: rowChildren,
+          rowChildren,
         ),
       ),
     );
@@ -824,7 +813,7 @@ class MemoryBodyState extends State<MemoryBody>
   Widget createDashWidget(Color color) {
     return Container(
       padding: const EdgeInsets.only(right: 20),
-      child: CustomPaint(
+      CustomPaint(
         painter: DashedLine(
           totalDashWidth,
           color,
@@ -846,7 +835,7 @@ class MemoryBodyState extends State<MemoryBody>
   Widget createSolidLine(Color color) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 1.0),
-      child: Container(
+      Container(
         height: 6,
         width: 20,
         color: color,
@@ -937,8 +926,8 @@ class MemoryBodyState extends State<MemoryBody>
     );
     return Container(
       padding: const EdgeInsets.fromLTRB(5, 0, 0, 2),
-      child: Row(
-        children: rowChildren,
+      Row(
+        rowChildren,
       ),
     );
   }
@@ -953,16 +942,14 @@ class MemoryBodyState extends State<MemoryBody>
         widgets.add(
           Container(
             height: hoverEventsHeight,
-            child: ListView(
+            ListView(
               shrinkWrap: true,
               primary: false,
-              children: [
-                listItem(
-                  allEvents: chartsValues.extensionEvents,
-                  title: entry.key,
-                  icon: Icons.dashboard,
-                ),
-              ],
+              listItem(
+                allEvents: chartsValues.extensionEvents,
+                title: entry.key,
+                icon: Icons.dashboard,
+              ),
             ),
           ),
         );
@@ -1082,14 +1069,14 @@ class MemoryBodyState extends State<MemoryBody>
 
     return Material(
       color: Colors.transparent,
-      child: Theme(
+      Theme(
         data: ThemeData(unselectedWidgetColor: contrastForeground),
-        child: ExpansionTile(
+        ExpansionTile(
           tilePadding: EdgeInsets.zero,
           childrenPadding: EdgeInsets.zero,
           leading: Container(
             padding: const EdgeInsets.fromLTRB(5, 4, 0, 0),
-            child: Image(
+            Image(
               image: allEvents.length > 1
                   ? const AssetImage(events.eventsLegend)
                   : const AssetImage(events.eventLegend),
@@ -1098,7 +1085,7 @@ class MemoryBodyState extends State<MemoryBody>
           backgroundColor: collapsedColor,
           collapsedBackgroundColor: collapsedColor,
           title: Text(title, style: hoverTextStyle),
-          children: widgets,
+          widgets,
         ),
       ),
     );
@@ -1111,20 +1098,18 @@ class MemoryBodyState extends State<MemoryBody>
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
-      child: Container(
+      Container(
         width: hoverWidth,
         decoration: BoxDecoration(
           gradient: expandedGradient,
         ),
-        child: Row(
-          children: [
-            const SizedBox(width: 10),
-            Text(
-              value,
-              overflow: TextOverflow.ellipsis,
-              style: hoverValueEntry,
-            ),
-          ],
+        Row(
+          const SizedBox(width: 10),
+          Text(
+            value,
+            overflow: TextOverflow.ellipsis,
+            style: hoverValueEntry,
+          ),
         ),
       ),
     );
@@ -1192,12 +1177,12 @@ class MemoryBodyState extends State<MemoryBody>
       androidDataDisplayed,
       firstWidget: Align(
         alignment: Alignment.topLeft,
-        child: Padding(
+        Padding(
           padding: const EdgeInsets.symmetric(
             vertical: dividerLineVerticalSpace,
             horizontal: dividerLineHorizontalSpace,
           ),
-          child: CustomPaint(painter: DashedLine(width, dashedColor)),
+          CustomPaint(painter: DashedLine(width, dashedColor)),
         ),
       ),
     );
@@ -1246,7 +1231,7 @@ class MemoryBodyState extends State<MemoryBody>
         top: position.dy + hoverYOffset,
         left: xPosition,
         height: totalHoverHeight,
-        child: Container(
+        Container(
           padding: const EdgeInsets.fromLTRB(0, 5, 0, 8),
           decoration: BoxDecoration(
             color: colorScheme.defaultBackgroundColor,
@@ -1257,13 +1242,13 @@ class MemoryBodyState extends State<MemoryBody>
             borderRadius: BorderRadius.circular(10.0),
           ),
           width: hoverWidth,
-          child: Column(
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+            [
               Container(
                 width: hoverWidth,
                 padding: const EdgeInsets.only(bottom: 4),
-                child: Text(
+                Text(
                   'Time $displayTimestamp',
                   style: hoverHeading,
                   textAlign: TextAlign.center,
@@ -1311,7 +1296,7 @@ class MemoryBodyState extends State<MemoryBody>
     legendRows.add(
       Container(
         padding: _legendTitlePadding,
-        child: Text('Events Legend', style: legendHeading),
+        Text('Events Legend', style: legendHeading),
       ),
     );
 
@@ -1326,7 +1311,7 @@ class MemoryBodyState extends State<MemoryBody>
     legendRows.add(
       Container(
         padding: _legendTitlePadding,
-        child: Text('Memory Legend', style: legendHeading),
+        Text('Memory Legend', style: legendHeading),
       ),
     );
 
@@ -1341,7 +1326,7 @@ class MemoryBodyState extends State<MemoryBody>
       legendRows.add(
         Container(
           padding: _legendTitlePadding,
-          child: Text('Android Legend', style: legendHeading),
+          Text('Android Legend', style: legendHeading),
         ),
       );
 
@@ -1360,7 +1345,7 @@ class MemoryBodyState extends State<MemoryBody>
         height: _controller.isAndroidChartVisible
             ? legendHeight2Charts
             : legendHeight1Chart,
-        child: Container(
+        Container(
           padding: const EdgeInsets.fromLTRB(0, 5, 5, 8),
           decoration: BoxDecoration(
             color: colorScheme.defaultBackgroundColor,
@@ -1368,9 +1353,9 @@ class MemoryBodyState extends State<MemoryBody>
             borderRadius: BorderRadius.circular(10.0),
           ),
           width: legendWidth,
-          child: Column(
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: legendRows,
+            legendRows,
           ),
         ),
       ),
@@ -1491,67 +1476,56 @@ class MemoryConfigurationsDialog extends StatelessWidget {
       includeDivider: false,
       content: Container(
         width: defaultDialogWidth,
-        child: Column(
+        Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+          [
             ...dialogSubHeader(theme, 'Android'),
             Column(
-              children: [
-                Row(
-                  children: [
-                    NotifierCheckbox(
-                      notifier: controller.androidCollectionEnabled
-                          as ValueNotifier<bool?>,
-                    ),
-                    RichText(
-                      overflow: TextOverflow.visible,
-                      text: TextSpan(
-                        text: 'Collect Android Memory Statistics using ADB',
-                        style: theme.regularTextStyle,
-                      ),
-                    ),
-                  ],
+              Row(
+                NotifierCheckbox(
+                  notifier: controller.androidCollectionEnabled
+                      as ValueNotifier<bool?>,
                 ),
-                Row(
-                  children: [
-                    NotifierCheckbox(
-                      notifier:
-                          controller.unitDisplayed as ValueNotifier<bool?>,
-                    ),
-                    RichText(
-                      overflow: TextOverflow.visible,
-                      text: TextSpan(
-                        text: 'Display Data In Units (B, KB, MB, and GB)',
-                        style: theme.regularTextStyle,
-                      ),
-                    ),
-                  ],
+                RichText(
+                  overflow: TextOverflow.visible,
+                  text: TextSpan(
+                    text: 'Collect Android Memory Statistics using ADB',
+                    style: theme.regularTextStyle,
+                  ),
                 ),
-              ],
+              ),
+              Row(
+                NotifierCheckbox(
+                  notifier: controller.unitDisplayed as ValueNotifier<bool?>,
+                ),
+                RichText(
+                  overflow: TextOverflow.visible,
+                  text: TextSpan(
+                    text: 'Display Data In Units (B, KB, MB, and GB)',
+                    style: theme.regularTextStyle,
+                  ),
+                ),
+              ),
             ),
             const SizedBox(
               height: defaultSpacing,
             ),
             ...dialogSubHeader(theme, 'General'),
             Column(
-              children: [
-                Row(
-                  children: [
-                    NotifierCheckbox(
-                      notifier: controller.advancedSettingsEnabled
-                          as ValueNotifier<bool?>,
-                    ),
-                    RichText(
-                      overflow: TextOverflow.visible,
-                      text: TextSpan(
-                        text: 'Enable advanced memory settings',
-                        style: theme.regularTextStyle,
-                      ),
-                    ),
-                  ],
+              Row(
+                NotifierCheckbox(
+                  notifier: controller.advancedSettingsEnabled
+                      as ValueNotifier<bool?>,
                 ),
-              ],
+                RichText(
+                  overflow: TextOverflow.visible,
+                  text: TextSpan(
+                    text: 'Enable advanced memory settings',
+                    style: theme.regularTextStyle,
+                  ),
+                ),
+              ),
             ),
           ],
         ),

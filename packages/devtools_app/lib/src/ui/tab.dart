@@ -46,7 +46,7 @@ class DevToolsTab extends Tab {
       key: key ?? ValueKey<String>(tabName),
       gaId: '${gaPrefix}_$tabName',
       trailing: trailing,
-      child: Text(
+      Text(
         tabName,
         overflow: TextOverflow.ellipsis,
       ),
@@ -181,17 +181,15 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
 
     Widget tabBar = Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        TabBar(
-          labelColor: theme.textTheme.bodyText1?.color,
-          controller: _tabController,
-          tabs: widget.tabs,
-          isScrollable: true,
-        ),
-        Expanded(
-          child: widget.trailingWidgets[_currentTabControllerIndex],
-        ),
-      ],
+      TabBar(
+        labelColor: theme.textTheme.bodyText1?.color,
+        controller: _tabController,
+        tabs: widget.tabs,
+        isScrollable: true,
+      ),
+      Expanded(
+        widget.trailingWidgets[_currentTabControllerIndex],
+      ),
     );
     if (widget.outlined) {
       tabBar = Container(
@@ -200,14 +198,14 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
         decoration: BoxDecoration(
           border: Border.all(color: Theme.of(context).focusColor),
         ),
-        child: tabBar,
+        tabBar,
       );
     }
 
     Widget tabView = TabBarView(
       physics: defaultTabBarViewPhysics,
       controller: _tabController,
-      children: widget.tabViews,
+      widget.tabViews,
     );
     if (widget.outlined) {
       tabView = Container(
@@ -218,17 +216,15 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
             right: borderSide,
           ),
         ),
-        child: tabView,
+        tabView,
       );
     }
 
     return Column(
-      children: [
-        tabBar,
-        Expanded(
-          child: tabView,
-        ),
-      ],
+      tabBar,
+      Expanded(
+        tabView,
+      ),
     );
   }
 }

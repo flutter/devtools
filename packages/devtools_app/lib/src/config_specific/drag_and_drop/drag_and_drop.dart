@@ -136,14 +136,14 @@ class DragAndDropState extends State<DragAndDrop> {
   Widget build(BuildContext context) {
     return MetaData(
       metaData: DragAndDropMetaData(state: this),
-      child: widget.handleDrop != null
+      widget.handleDrop != null
           ? ValueListenableBuilder<bool>(
               valueListenable: _dragging,
               builder: (context, dragging, _) {
                 // TODO(kenz): use AnimatedOpacity instead.
                 return Opacity(
                   opacity: dragging ? 0.5 : 1.0,
-                  child: widget.child,
+                  widget.child,
                 );
               },
             )

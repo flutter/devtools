@@ -149,7 +149,7 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
     if (_chartController.timestamps.isNotEmpty) {
       return Container(
         height: defaultChartHeight,
-        child: Chart(_chartController),
+        Chart(_chartController),
       );
     }
 

@@ -217,7 +217,7 @@ class _CodeViewState extends State<CodeView>
       secondListenable: widget.controller.showSearchInFileField,
       builder: (context, showFileOpener, showSearch, _) {
         return Stack(
-          children: [
+          [
             scriptRef == null
                 ? buildEmptyState(context)
                 : buildCodeArea(context),
@@ -225,13 +225,13 @@ class _CodeViewState extends State<CodeView>
               Positioned(
                 left: noPadding,
                 right: noPadding,
-                child: buildFileSearchField(),
+                buildFileSearchField(),
               ),
             if (showSearch && scriptRef != null)
               Positioned(
                 top: denseSpacing,
                 right: searchFieldRightPadding,
-                child: buildSearchInFileField(),
+                buildSearchInFileField(),
               ),
           ],
         );
@@ -320,8 +320,8 @@ class _CodeViewState extends State<CodeView>
         if (lines.isNotEmpty) {
           return DefaultTextStyle(
             style: theme.fixedFontStyle,
-            child: Expanded(
-              child: Scrollbar(
+            Expanded(
+              Scrollbar(
                 key: CodeView.debuggerCodeViewVerticalScrollbarKey,
                 controller: textController,
                 thumbVisibility: true,
@@ -329,7 +329,7 @@ class _CodeViewState extends State<CodeView>
                 // from the nested horizontal SingleChildScrollView):
                 notificationPredicate: (ScrollNotification notification) =>
                     notification.depth == 1,
-                child: ValueListenableBuilder<StackFrameAndSourcePosition?>(
+                ValueListenableBuilder<StackFrameAndSourcePosition?>(
                   valueListenable: widget.controller.selectedStackFrame,
                   builder: (context, frame, _) {
                     final pausedFrame = frame == null
@@ -337,67 +337,64 @@ class _CodeViewState extends State<CodeView>
                         : (frame.scriptRef == scriptRef ? frame : null);
 
                     return Row(
-                      children: [
-                        ValueListenableBuilder<
-                            List<BreakpointAndSourcePosition>>(
-                          valueListenable:
-                              widget.controller.breakpointsWithLocation,
-                          builder: (context, breakpoints, _) {
-                            return Gutter(
-                              gutterWidth: gutterWidth,
-                              scrollController: gutterController,
-                              lineCount: lines.length,
-                              pausedFrame: pausedFrame,
-                              breakpoints: breakpoints
-                                  .where((bp) => bp.scriptRef == scriptRef)
-                                  .toList(),
-                              executableLines: parsedScript != null
-                                  ? parsedScript!.executableLines
-                                  : <int>{},
-                              onPressed: _onPressed,
-                              // Disable dots for possible breakpoint locations.
-                              allowInteraction:
-                                  !widget.controller.isSystemIsolate,
+                      ValueListenableBuilder<List<BreakpointAndSourcePosition>>(
+                        valueListenable:
+                            widget.controller.breakpointsWithLocation,
+                        builder: (context, breakpoints, _) {
+                          return Gutter(
+                            gutterWidth: gutterWidth,
+                            scrollController: gutterController,
+                            lineCount: lines.length,
+                            pausedFrame: pausedFrame,
+                            breakpoints: breakpoints
+                                .where((bp) => bp.scriptRef == scriptRef)
+                                .toList(),
+                            executableLines: parsedScript != null
+                                ? parsedScript!.executableLines
+                                : <int>{},
+                            onPressed: _onPressed,
+                            // Disable dots for possible breakpoint locations.
+                            allowInteraction:
+                                !widget.controller.isSystemIsolate,
+                          );
+                        },
+                      ),
+                      const SizedBox(width: denseSpacing),
+                      Expanded(
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            final double fileWidth = calculateTextSpanWidth(
+                              findLongestTextSpan(lines),
+                            );
+
+                            return Scrollbar(
+                              key: CodeView
+                                  .debuggerCodeViewHorizontalScrollbarKey,
+                              thumbVisibility: true,
+                              controller: horizontalController,
+                              SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                controller: horizontalController,
+                                SizedBox(
+                                  height: constraints.maxHeight,
+                                  width: fileWidth,
+                                  Lines(
+                                    height: constraints.maxHeight,
+                                    debugController: widget.controller,
+                                    scrollController: textController,
+                                    lines: lines,
+                                    pausedFrame: pausedFrame,
+                                    searchMatchesNotifier:
+                                        widget.controller.searchMatches,
+                                    activeSearchMatchNotifier:
+                                        widget.controller.activeSearchMatch,
+                                  ),
+                                ),
+                              ),
                             );
                           },
                         ),
-                        const SizedBox(width: denseSpacing),
-                        Expanded(
-                          child: LayoutBuilder(
-                            builder: (context, constraints) {
-                              final double fileWidth = calculateTextSpanWidth(
-                                findLongestTextSpan(lines),
-                              );
-
-                              return Scrollbar(
-                                key: CodeView
-                                    .debuggerCodeViewHorizontalScrollbarKey,
-                                thumbVisibility: true,
-                                controller: horizontalController,
-                                child: SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  controller: horizontalController,
-                                  child: SizedBox(
-                                    height: constraints.maxHeight,
-                                    width: fileWidth,
-                                    child: Lines(
-                                      height: constraints.maxHeight,
-                                      debugController: widget.controller,
-                                      scrollController: textController,
-                                      lines: lines,
-                                      pausedFrame: pausedFrame,
-                                      searchMatchesNotifier:
-                                          widget.controller.searchMatches,
-                                      activeSearchMatchNotifier:
-                                          widget.controller.activeSearchMatch,
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      ],
+                      ),
                     );
                   },
                 ),
@@ -406,8 +403,8 @@ class _CodeViewState extends State<CodeView>
           );
         } else {
           return Expanded(
-            child: Center(
-              child: Text(
+            Center(
+              Text(
                 'No source available',
                 style: theme.textTheme.subtitle1,
               ),
@@ -420,7 +417,7 @@ class _CodeViewState extends State<CodeView>
 
   Widget buildFileSearchField() {
     return ElevatedCard(
-      child: FileSearchField(
+      FileSearchField(
         debuggerController: widget.controller,
       ),
       width: extraWideSearchTextWidth,
@@ -431,7 +428,7 @@ class _CodeViewState extends State<CodeView>
 
   Widget buildSearchInFileField() {
     return ElevatedCard(
-      child: buildSearchField(
+      buildSearchField(
         controller: widget.controller,
         searchFieldKey: debuggerCodeViewSearchKey,
         searchFieldEnabled: parsedScript != null,
@@ -448,10 +445,10 @@ class _CodeViewState extends State<CodeView>
     final theme = Theme.of(context);
 
     return Center(
-      child: ElevatedButton(
+      ElevatedButton(
         autofocus: true,
         onPressed: () => widget.controller.toggleFileOpenerVisibility(true),
-        child: Text(
+        Text(
           'Open a file ($openFileKeySetDescription)',
           style: theme.textTheme.subtitle1,
         ),
@@ -469,22 +466,20 @@ class _CodeViewState extends State<CodeView>
         .map((scriptRef) {
       return PopupMenuItem(
         value: scriptRef,
-        child: Column(
+        Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              ScriptRefUtils.fileName(scriptRef),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            Text(
-              scriptRef.uri ?? '',
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
-              style: Theme.of(context).subtleTextStyle,
-            ),
-          ],
+          Text(
+            ScriptRefUtils.fileName(scriptRef),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          Text(
+            scriptRef.uri ?? '',
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+            style: Theme.of(context).subtleTextStyle,
+          ),
         ),
       );
     }).toList();
@@ -524,7 +519,7 @@ class Gutter extends StatelessWidget {
         border: Border(right: defaultBorderSide(theme)),
         color: Theme.of(context).titleSolidBackgroundColor,
       ),
-      child: ListView.builder(
+      ListView.builder(
         controller: scrollController,
         itemExtent: CodeView.rowHeight,
         itemCount: lineCount,
@@ -583,21 +578,21 @@ class GutterItem extends StatelessWidget {
       // Force usage of default mouse pointer when gutter interaction is
       // disabled.
       mouseCursor: allowInteraction ? null : SystemMouseCursors.basic,
-      child: Container(
+      Container(
         height: CodeView.rowHeight,
         padding: const EdgeInsets.only(right: 4.0),
-        child: Stack(
+        Stack(
           alignment: AlignmentDirectional.centerStart,
           fit: StackFit.expand,
-          children: [
+          [
             if (allowInteraction && (isExecutable || isBreakpoint))
               Align(
                 alignment: Alignment.centerLeft,
-                child: SizedBox(
+                SizedBox(
                   width: bpBoxSize,
                   height: bpBoxSize,
-                  child: Center(
-                    child: createAnimatedCircleWidget(
+                  Center(
+                    createAnimatedCircleWidget(
                       isBreakpoint ? breakpointRadius : executableLineRadius,
                       isBreakpoint ? breakpointColor : subtleColor,
                     ),
@@ -608,11 +603,11 @@ class GutterItem extends StatelessWidget {
             Container(
               padding: EdgeInsets.only(left: executionPointIndent),
               alignment: Alignment.centerLeft,
-              child: AnimatedOpacity(
+              AnimatedOpacity(
                 duration: defaultDuration,
                 curve: defaultCurve,
                 opacity: isPausedHere ? 1.0 : 0.0,
-                child: Icon(
+                Icon(
                   Icons.label,
                   size: defaultIconSize,
                   color: breakpointColor,
@@ -808,7 +803,7 @@ class _LineItemState extends State<LineItem> {
           _hoverCard?.remove();
           _hoverCard = HoverCard.fromHoverEvent(
             contents: Material(
-              child: ExpandableVariable(
+              ExpandableVariable(
                 debuggerController: _debuggerController,
                 variable: variable,
               ),
@@ -853,39 +848,35 @@ class _LineItemState extends State<LineItem> {
 
       // TODO: support selecting text across multiples lines.
       child = Stack(
-        children: [
-          Row(
-            children: [
-              // Create a hidden copy of the first column-1 characters of the
-              // line as a hack to correctly compute where to place
-              // the cursor. Approximating by using column-1 spaces instead
-              // of the correct characters and style s would be risky as it leads
-              // to small errors if the font is not fixed size or the font
-              // styles vary depending on the syntax highlighting.
-              // TODO(jacobr): there might be some api exposed on SelectedText
-              // to allow us to render this as a proper overlay as similar
-              // functionality exists to render the selection handles properly.
-              Opacity(
-                opacity: 0,
-                child: RichText(
-                  text: truncateTextSpan(widget.lineContents, column - 1),
-                ),
-              ),
-              Transform.translate(
-                offset: const Offset(colLeftOffset, colBottomOffset),
-                child: Transform.rotate(
-                  angle: colIconRotate,
-                  child: Icon(
-                    Icons.label_important,
-                    size: colIconSize,
-                    color: breakpointColor,
-                  ),
-                ),
-              )
-            ],
+        Row(
+          // Create a hidden copy of the first column-1 characters of the
+          // line as a hack to correctly compute where to place
+          // the cursor. Approximating by using column-1 spaces instead
+          // of the correct characters and style s would be risky as it leads
+          // to small errors if the font is not fixed size or the font
+          // styles vary depending on the syntax highlighting.
+          // TODO(jacobr): there might be some api exposed on SelectedText
+          // to allow us to render this as a proper overlay as similar
+          // functionality exists to render the selection handles properly.
+          Opacity(
+            opacity: 0,
+            RichText(
+              text: truncateTextSpan(widget.lineContents, column - 1),
+            ),
           ),
-          _hoverableLine(),
-        ],
+          Transform.translate(
+            offset: const Offset(colLeftOffset, colBottomOffset),
+            Transform.rotate(
+              angle: colIconRotate,
+              Icon(
+                Icons.label_important,
+                size: colIconSize,
+                color: breakpointColor,
+              ),
+            ),
+          ),
+        ),
+        _hoverableLine(),
       );
     } else {
       child = _hoverableLine();
@@ -901,7 +892,7 @@ class _LineItemState extends State<LineItem> {
       alignment: Alignment.centerLeft,
       height: CodeView.rowHeight,
       color: backgroundColor,
-      child: child,
+      child,
     );
   }
 
@@ -1030,7 +1021,7 @@ class _LineItemState extends State<LineItem> {
   Widget _hoverableLine() => MouseRegion(
         onExit: (_) => _onHoverExit(),
         onHover: (e) => _onHover(e, context),
-        child: SelectableText.rich(
+        SelectableText.rich(
           searchAwareLineContents(),
           scrollPhysics: const NeverScrollableScrollPhysics(),
           maxLines: 1,
@@ -1054,7 +1045,7 @@ class ScriptPopupMenu extends StatelessWidget {
             .buildExtraDebuggerScriptPopupMenuOptions())
           extensionMenuOption.build(context),
       ],
-      child: Icon(
+      Icon(
         Icons.more_vert,
         size: actionsIconSize,
       ),
@@ -1086,7 +1077,7 @@ class ScriptHistoryPopupMenu extends StatelessWidget {
         actionsIconSize + denseSpacing,
         buttonMinWidth + denseSpacing,
       ),
-      child: Icon(
+      Icon(
         Icons.history,
         size: actionsIconSize,
       ),
@@ -1110,9 +1101,9 @@ class ScriptPopupMenuOption {
   PopupMenuItem<ScriptPopupMenuOption> build(BuildContext context) {
     return PopupMenuItem<ScriptPopupMenuOption>(
       value: this,
-      child: Row(
+      Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
+        [
           Text(label, style: Theme.of(context).regularTextStyle),
           if (icon != null)
             Icon(
@@ -1174,33 +1165,31 @@ class GoToLineDialog extends StatelessWidget {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          TextField(
-            autofocus: true,
-            onSubmitted: (value) {
-              final scriptRef =
-                  _debuggerController.scriptLocation.value?.scriptRef;
-              if (value.isNotEmpty && scriptRef != null) {
-                Navigator.of(context).pop(dialogDefaultContext);
-                final line = int.parse(value);
-                _debuggerController.showScriptLocation(
-                  ScriptLocation(
-                    scriptRef,
-                    location: SourcePosition(line: line, column: 0),
-                  ),
-                );
-              }
-            },
-            decoration: InputDecoration(
-              labelText: 'Line Number',
-              contentPadding: EdgeInsets.all(scaleByFontFactor(5.0)),
-            ),
-            keyboardType: TextInputType.number,
-            inputFormatters: <TextInputFormatter>[
-              FilteringTextInputFormatter.digitsOnly
-            ],
-          )
-        ],
+        TextField(
+          autofocus: true,
+          onSubmitted: (value) {
+            final scriptRef =
+                _debuggerController.scriptLocation.value?.scriptRef;
+            if (value.isNotEmpty && scriptRef != null) {
+              Navigator.of(context).pop(dialogDefaultContext);
+              final line = int.parse(value);
+              _debuggerController.showScriptLocation(
+                ScriptLocation(
+                  scriptRef,
+                  location: SourcePosition(line: line, column: 0),
+                ),
+              );
+            }
+          },
+          decoration: InputDecoration(
+            labelText: 'Line Number',
+            contentPadding: EdgeInsets.all(scaleByFontFactor(5.0)),
+          ),
+          keyboardType: TextInputType.number,
+          inputFormatters: <TextInputFormatter>[
+            FilteringTextInputFormatter.digitsOnly
+          ],
+        ),
       ),
       actions: const [
         DialogCancelButton(),

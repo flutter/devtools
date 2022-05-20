@@ -189,7 +189,7 @@ class _InstanceViewerState extends ConsumerState<InstanceViewer> {
         enumeration: (instance) => _EditableField(
           setter: instance.setter,
           initialEditString: '${instance.type}.${instance.value}',
-          child: Text.rich(
+          Text.rich(
             TextSpan(
               children: [
                 TextSpan(
@@ -204,12 +204,12 @@ class _InstanceViewerState extends ConsumerState<InstanceViewer> {
         nill: (instance) => _EditableField(
           setter: instance.setter,
           initialEditString: 'null',
-          child: const Text('null', style: TextStyle(color: nullColor)),
+          const Text('null', style: TextStyle(color: nullColor)),
         ),
         string: (instance) => _EditableField(
           setter: instance.setter,
           initialEditString: '"${instance.displayString}"',
-          child: Text.rich(
+          Text.rich(
             TextSpan(
               children: [
                 const TextSpan(text: '"'),
@@ -225,7 +225,7 @@ class _InstanceViewerState extends ConsumerState<InstanceViewer> {
         number: (instance) => _EditableField(
           setter: instance.setter,
           initialEditString: instance.displayString,
-          child: Text(
+          Text(
             instance.displayString,
             style: const TextStyle(color: numColor),
           ),
@@ -233,7 +233,7 @@ class _InstanceViewerState extends ConsumerState<InstanceViewer> {
         boolean: (instance) => _EditableField(
           setter: instance.setter,
           initialEditString: instance.displayString,
-          child: Text(
+          Text(
             instance.displayString,
             style: const TextStyle(color: boolColor),
           ),
@@ -290,13 +290,11 @@ class _InstanceViewerState extends ConsumerState<InstanceViewer> {
         yield child != null
             ? Padding(
                 padding: const EdgeInsets.only(left: defaultSpacing),
-                child: isFirstItem
+                isFirstItem
                     ? Row(
-                        children: [
-                          keyHeader,
-                          const Text(': '),
-                          Expanded(child: child),
-                        ],
+                        keyHeader,
+                        const Text(': '),
+                        Expanded(child),
                       )
                     : child,
               )
@@ -334,17 +332,15 @@ class _InstanceViewerState extends ConsumerState<InstanceViewer> {
         if (isFirst && rowItem != null) {
           isFirst = false;
           rowItem = Row(
-            children: [
-              Text('[$index]: '),
-              Expanded(child: rowItem),
-            ],
+            Text('[$index]: '),
+            Expanded(rowItem),
           );
         }
 
         yield rowItem != null
             ? Padding(
                 padding: const EdgeInsets.only(left: defaultSpacing),
-                child: rowItem,
+                rowItem,
               )
             : const SizedBox();
       }
@@ -378,14 +374,14 @@ class _InstanceViewerState extends ConsumerState<InstanceViewer> {
         if (isFirst && rowItem != null) {
           isFirst = false;
           rowItem = Row(
-            children: [
+            [
               if (field.isFinal)
                 Text(
                   'final ',
                   style: unimportant(Theme.of(context).colorScheme),
                 ),
               Text('${field.name}: '),
-              Expanded(child: rowItem),
+              Expanded(rowItem),
             ],
           );
         }
@@ -393,7 +389,7 @@ class _InstanceViewerState extends ConsumerState<InstanceViewer> {
         yield rowItem != null
             ? Padding(
                 padding: const EdgeInsets.only(left: defaultSpacing),
-                child: rowItem,
+                rowItem,
               )
             : const SizedBox();
       }
@@ -405,7 +401,7 @@ class _InstanceViewerState extends ConsumerState<InstanceViewer> {
     return Scrollbar(
       thumbVisibility: true,
       controller: scrollController,
-      child: ListView.custom(
+      ListView.custom(
         controller: scrollController,
         // TODO: item height should be based on font size
         itemExtent: rowHeight,
@@ -532,14 +528,14 @@ class _EditableFieldState extends State<_EditableField> {
 
     final displayChild = Stack(
       clipBehavior: Clip.none,
-      children: [
+      [
         if (isHovering)
           Positioned(
             bottom: -5,
             left: -5,
             top: -5,
             right: -5,
-            child: DecoratedBox(
+            DecoratedBox(
               decoration: BoxDecoration(
                 borderRadius: const BorderRadius.all(
                   Radius.circular(defaultBorderRadius),
@@ -559,10 +555,10 @@ class _EditableFieldState extends State<_EditableField> {
               extentOffset: widget.initialEditString.length,
             );
           },
-          child: Align(
+          Align(
             alignment: Alignment.centerLeft,
             heightFactor: 1,
-            child: widget.child,
+            widget.child,
           ),
         ),
       ],
@@ -582,11 +578,11 @@ class _EditableFieldState extends State<_EditableField> {
             }
             return KeyEventResult.ignored;
           },
-          child: MouseRegion(
+          MouseRegion(
             onEnter: (_) => setState(() => isHovering = true),
             onExit: (_) => setState(() => isHovering = false),
             // use a Stack to show the borders, to avoid the UI "moving" when hovering
-            child: isEditing ? editingChild : displayChild,
+            isEditing ? editingChild : displayChild,
           ),
         );
       },
@@ -611,7 +607,7 @@ class _Expandable extends StatelessWidget {
     if (!isExpandable) {
       return Align(
         alignment: Alignment.centerLeft,
-        child: title,
+        title,
       );
     }
 
@@ -620,23 +616,21 @@ class _Expandable extends StatelessWidget {
     return GestureDetector(
       onTap: () => isExpanded.state = !isExpanded.state,
       behavior: HitTestBehavior.opaque,
-      child: Row(
-        children: [
-          TweenAnimationBuilder<double>(
-            tween: Tween(end: isExpanded.state ? 0 : -math.pi / 2),
-            duration: defaultDuration,
-            builder: (context, angle, _) {
-              return Transform.rotate(
-                angle: angle,
-                child: Icon(
-                  Icons.expand_more,
-                  size: defaultIconSize,
-                ),
-              );
-            },
-          ),
-          title,
-        ],
+      Row(
+        TweenAnimationBuilder<double>(
+          tween: Tween(end: isExpanded.state ? 0 : -math.pi / 2),
+          duration: defaultDuration,
+          builder: (context, angle, _) {
+            return Transform.rotate(
+              angle: angle,
+              Icon(
+                Icons.expand_more,
+                size: defaultIconSize,
+              ),
+            );
+          },
+        ),
+        title,
       ),
     );
   }

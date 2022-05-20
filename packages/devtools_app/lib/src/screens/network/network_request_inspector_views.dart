@@ -34,7 +34,7 @@ ExpansionTile _buildTile(
     title: Text(
       title,
     ),
-    children: children,
+    children,
     initiallyExpanded: true,
   );
 }
@@ -62,20 +62,18 @@ class HttpRequestHeadersView extends StatelessWidget {
     return Container(
       width: constraints.minWidth,
       padding: _rowPadding,
-      child: Row(
+      Row(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+        SelectableText(
+          '$key: ',
+          style: Theme.of(context).textTheme.subtitle2,
+        ),
+        Expanded(
           SelectableText(
-            '$key: ',
-            style: Theme.of(context).textTheme.subtitle2,
+            value,
+            minLines: 1,
           ),
-          Expanded(
-            child: SelectableText(
-              value,
-              minLines: 1,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -88,51 +86,49 @@ class HttpRequestHeadersView extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         return ListView(
-          children: [
-            _buildTile(
-              'General',
-              [
-                for (final entry in general.entries)
+          _buildTile(
+            'General',
+            [
+              for (final entry in general.entries)
+                _buildRow(
+                  context,
+                  // TODO(kenz): ensure the default case of `entry.key` looks
+                  // fine.
+                  entry.key,
+                  entry.value.toString(),
+                  constraints,
+                ),
+            ],
+            key: generalKey,
+          ),
+          _buildTile(
+            'Response Headers',
+            [
+              if (responseHeaders != null)
+                for (final entry in responseHeaders.entries)
                   _buildRow(
                     context,
-                    // TODO(kenz): ensure the default case of `entry.key` looks
-                    // fine.
                     entry.key,
                     entry.value.toString(),
                     constraints,
                   ),
-              ],
-              key: generalKey,
-            ),
-            _buildTile(
-              'Response Headers',
-              [
-                if (responseHeaders != null)
-                  for (final entry in responseHeaders.entries)
-                    _buildRow(
-                      context,
-                      entry.key,
-                      entry.value.toString(),
-                      constraints,
-                    ),
-              ],
-              key: responseHeadersKey,
-            ),
-            _buildTile(
-              'Request Headers',
-              [
-                if (requestHeaders != null)
-                  for (final entry in requestHeaders.entries)
-                    _buildRow(
-                      context,
-                      entry.key,
-                      entry.value.toString(),
-                      constraints,
-                    ),
-              ],
-              key: requestHeadersKey,
-            )
-          ],
+            ],
+            key: responseHeadersKey,
+          ),
+          _buildTile(
+            'Request Headers',
+            [
+              if (requestHeaders != null)
+                for (final entry in requestHeaders.entries)
+                  _buildRow(
+                    context,
+                    entry.key,
+                    entry.value.toString(),
+                    constraints,
+                  ),
+            ],
+            key: requestHeadersKey,
+          ),
         );
       },
     );
@@ -148,8 +144,8 @@ class HttpRequestView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(denseSpacing),
-      child: SingleChildScrollView(
-        child: FormattedJson(
+      SingleChildScrollView(
+        FormattedJson(
           formattedString: data.requestBody,
         ),
       ),
@@ -183,7 +179,7 @@ class HttpResponseView extends StatelessWidget {
     // the new tree widget used in the Provider page.
     return Padding(
       padding: const EdgeInsets.all(denseSpacing),
-      child: SingleChildScrollView(child: child),
+      SingleChildScrollView(child),
     );
   }
 }
@@ -199,44 +195,42 @@ class ImageResponseView extends StatelessWidget {
     final img = image.decodeImage(encodedResponse)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        _buildTile(
-          'Image Preview',
-          [
-            Padding(
-              padding: const EdgeInsets.all(
-                denseSpacing,
-              ),
-              child: Image.memory(
-                encodedResponse,
-              ),
+      _buildTile(
+        'Image Preview',
+        [
+          Padding(
+            padding: const EdgeInsets.all(
+              denseSpacing,
             ),
-          ],
-        ),
-        _buildTile(
-          'Metadata',
-          [
-            _buildRow(
-              context,
-              'Format',
-              data.type,
+            Image.memory(
+              encodedResponse,
             ),
-            _buildRow(
-              context,
-              'Size',
-              prettyPrintBytes(
-                encodedResponse.lengthInBytes,
-                includeUnit: true,
-              )!,
-            ),
-            _buildRow(
-              context,
-              'Dimensions',
-              '${img.width} x ${img.height}',
-            ),
-          ],
-        ),
-      ],
+          ),
+        ],
+      ),
+      _buildTile(
+        'Metadata',
+        [
+          _buildRow(
+            context,
+            'Format',
+            data.type,
+          ),
+          _buildRow(
+            context,
+            'Size',
+            prettyPrintBytes(
+              encodedResponse.lengthInBytes,
+              includeUnit: true,
+            )!,
+          ),
+          _buildRow(
+            context,
+            'Dimensions',
+            '${img.width} x ${img.height}',
+          ),
+        ],
+      ),
     );
   }
 
@@ -247,25 +241,23 @@ class ImageResponseView extends StatelessWidget {
   ) {
     return Padding(
       padding: _rowPadding,
-      child: Row(
+      Row(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+        SelectableText(
+          '$key: ',
+          style: Theme.of(context).textTheme.subtitle2,
+        ),
+        Expanded(
           SelectableText(
-            '$key: ',
-            style: Theme.of(context).textTheme.subtitle2,
+            value,
+            // TODO(kenz): use top level overflow parameter if
+            // https://github.com/flutter/flutter/issues/82722 is fixed.
+            // TODO(kenz): add overflow after flutter 2.3.0 is stable. It was
+            // added in commit 65388ee2eeaf0d2cf087eaa4a325e3689020c46a.
+            // style: const TextStyle(overflow: TextOverflow.ellipsis),
           ),
-          Expanded(
-            child: SelectableText(
-              value,
-              // TODO(kenz): use top level overflow parameter if
-              // https://github.com/flutter/flutter/issues/82722 is fixed.
-              // TODO(kenz): add overflow after flutter 2.3.0 is stable. It was
-              // added in commit 65388ee2eeaf0d2cf087eaa4a325e3689020c46a.
-              // style: const TextStyle(overflow: TextOverflow.ellipsis),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -322,7 +314,7 @@ class HttpRequestCookiesView extends StatelessWidget {
     }) {
       return DataColumn(
         label: Expanded(
-          child: SelectableText(
+          SelectableText(
             title,
             // TODO(kenz): use top level overflow parameter if
             // https://github.com/flutter/flutter/issues/82722 is fixed.
@@ -350,15 +342,15 @@ class HttpRequestCookiesView extends StatelessWidget {
         ),
         Align(
           alignment: Alignment.centerLeft,
-          child: SingleChildScrollView(
+          SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            child: ConstrainedBox(
+            ConstrainedBox(
               constraints: requestCookies
                   ? const BoxConstraints()
                   : BoxConstraints(
                       minWidth: constraints.minWidth,
                     ),
-              child: DataTable(
+              DataTable(
                 key: key,
                 dataRowHeight: defaultRowHeight,
                 // NOTE: if this list of columns change, _buildRow will need
@@ -398,7 +390,7 @@ class HttpRequestCookiesView extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         return ListView(
-          children: [
+          [
             if (responseCookies.isNotEmpty)
               _buildCookiesTable(
                 context,
@@ -445,7 +437,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView(
       padding: const EdgeInsets.all(defaultSpacing),
-      children: [
+      [
         ..._buildGeneralRows(context),
         if (data is WebSocket) ..._buildSocketOverviewRows(context),
         const PaddedDivider(
@@ -543,9 +535,9 @@ class NetworkRequestOverviewView extends StatelessWidget {
         (duration.inMicroseconds / data.duration!.inMicroseconds * 100).round();
     return Flexible(
       flex: flex,
-      child: DevToolsTooltip(
+      DevToolsTooltip(
         message: '$label - ${msText(duration)}',
-        child: Container(
+        Container(
           height: _timingGraphHeight,
           color: color,
         ),
@@ -595,7 +587,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
     );
     return Row(
       key: httpTimingGraphKey,
-      children: timingWidgets,
+      timingWidgets,
     );
   }
 
@@ -692,18 +684,16 @@ class NetworkRequestOverviewView extends StatelessWidget {
   }) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          width: _keyWidth,
-          child: SelectableText(
-            title.isEmpty ? '' : '$title: ',
-            style: Theme.of(context).textTheme.subtitle2,
-          ),
+      Container(
+        width: _keyWidth,
+        SelectableText(
+          title.isEmpty ? '' : '$title: ',
+          style: Theme.of(context).textTheme.subtitle2,
         ),
-        Expanded(
-          child: child,
-        ),
-      ],
+      ),
+      Expanded(
+        child,
+      ),
     );
   }
 

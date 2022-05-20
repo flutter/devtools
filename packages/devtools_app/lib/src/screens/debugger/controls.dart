@@ -45,16 +45,14 @@ class _DebuggingControlsState extends State<DebuggingControls>
     final canStep = isPaused && !resuming && hasStackFrames && !isSystemIsolate;
     return SizedBox(
       height: defaultButtonHeight,
-      child: Row(
-        children: [
-          _pauseAndResumeButtons(isPaused: isPaused, resuming: resuming),
-          const SizedBox(width: denseSpacing),
-          _stepButtons(canStep: canStep),
-          const SizedBox(width: denseSpacing),
-          BreakOnExceptionsControl(controller: controller),
-          const Expanded(child: SizedBox(width: denseSpacing)),
-          _librariesButton(),
-        ],
+      Row(
+        _pauseAndResumeButtons(isPaused: isPaused, resuming: resuming),
+        const SizedBox(width: denseSpacing),
+        _stepButtons(canStep: canStep),
+        const SizedBox(width: denseSpacing),
+        BreakOnExceptionsControl(controller: controller),
+        const Expanded(SizedBox(width: denseSpacing)),
+        _librariesButton(),
       ),
     );
   }
@@ -65,55 +63,51 @@ class _DebuggingControlsState extends State<DebuggingControls>
   }) {
     final isSystemIsolate = controller.isSystemIsolate;
     return RoundedOutlinedBorder(
-      child: Row(
-        children: [
+      Row(
+        DebuggerButton(
+          title: 'Pause',
+          icon: Codicons.debugPause,
+          autofocus: true,
+          // Disable when paused or selected isolate is a system isolate.
+          onPressed: (isPaused || isSystemIsolate) ? null : controller.pause,
+        ),
+        LeftBorder(
           DebuggerButton(
-            title: 'Pause',
-            icon: Codicons.debugPause,
-            autofocus: true,
-            // Disable when paused or selected isolate is a system isolate.
-            onPressed: (isPaused || isSystemIsolate) ? null : controller.pause,
+            title: 'Resume',
+            icon: Codicons.debugContinue,
+            // Enable while paused + not resuming and selected isolate is not
+            // a system isolate.
+            onPressed: ((isPaused && !resuming) && !isSystemIsolate)
+                ? controller.resume
+                : null,
           ),
-          LeftBorder(
-            child: DebuggerButton(
-              title: 'Resume',
-              icon: Codicons.debugContinue,
-              // Enable while paused + not resuming and selected isolate is not
-              // a system isolate.
-              onPressed: ((isPaused && !resuming) && !isSystemIsolate)
-                  ? controller.resume
-                  : null,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
 
   Widget _stepButtons({required bool canStep}) {
     return RoundedOutlinedBorder(
-      child: Row(
-        children: [
+      Row(
+        DebuggerButton(
+          title: 'Step Over',
+          icon: Codicons.debugStepOver,
+          onPressed: canStep ? controller.stepOver : null,
+        ),
+        LeftBorder(
           DebuggerButton(
-            title: 'Step Over',
-            icon: Codicons.debugStepOver,
-            onPressed: canStep ? controller.stepOver : null,
+            title: 'Step In',
+            icon: Codicons.debugStepInto,
+            onPressed: canStep ? controller.stepIn : null,
           ),
-          LeftBorder(
-            child: DebuggerButton(
-              title: 'Step In',
-              icon: Codicons.debugStepInto,
-              onPressed: canStep ? controller.stepIn : null,
-            ),
+        ),
+        LeftBorder(
+          DebuggerButton(
+            title: 'Step Out',
+            icon: Codicons.debugStepOut,
+            onPressed: canStep ? controller.stepOut : null,
           ),
-          LeftBorder(
-            child: DebuggerButton(
-              title: 'Step Out',
-              icon: Codicons.debugStepOut,
-              onPressed: canStep ? controller.stepOut : null,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -123,9 +117,9 @@ class _DebuggingControlsState extends State<DebuggingControls>
       valueListenable: controller.fileExplorerVisible,
       builder: (context, visible, _) {
         return RoundedOutlinedBorder(
-          child: Container(
+          Container(
             color: visible ? Theme.of(context).highlightColor : null,
-            child: DebuggerButton(
+            DebuggerButton(
               title: 'File Explorer',
               icon: Icons.folder,
               onPressed: controller.toggleLibrariesVisible,
@@ -165,7 +159,7 @@ class BreakOnExceptionsControl extends StatelessWidget {
             for (var mode in ExceptionMode.modes)
               DropdownMenuItem<ExceptionMode>(
                 value: mode,
-                child: Text(
+                Text(
                   isInSmallMode ? mode.name : mode.description,
                 ),
               )
@@ -227,14 +221,14 @@ class DebuggerButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return DevToolsTooltip(
       message: title,
-      child: OutlinedButton(
+      OutlinedButton(
         autofocus: autofocus,
         style: OutlinedButton.styleFrom(
           side: BorderSide.none,
           shape: const ContinuousRectangleBorder(),
         ),
         onPressed: onPressed,
-        child: MaterialIconLabel(
+        MaterialIconLabel(
           label: title,
           iconData: icon,
           minScreenWidthForTextBeforeScaling:

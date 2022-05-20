@@ -92,7 +92,7 @@ class _VMDeveloperToolsScreenState extends State<VMDeveloperToolsScreenBody>
       valueListenable: controller.selectedIndex,
       builder: (context, selectedIndex, _) {
         return Row(
-          children: [
+          [
             if (VMDeveloperToolsScreenBody.views.length > 1)
               NavigationRail(
                 selectedIndex: selectedIndex,
@@ -108,12 +108,11 @@ class _VMDeveloperToolsScreenState extends State<VMDeveloperToolsScreenBody>
                 ],
               ),
             Expanded(
-              child: Padding(
+              Padding(
                 padding: const EdgeInsets.only(
                   left: defaultSpacing,
                 ),
-                child: VMDeveloperToolsScreenBody.views[selectedIndex]
-                    .build(context),
+                VMDeveloperToolsScreenBody.views[selectedIndex].build(context),
               ),
             )
           ],

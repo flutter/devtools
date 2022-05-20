@@ -115,8 +115,8 @@ class _ServiceExtensionButtonGroupState
     final available = _extensionStates.any((e) => e.isAvailable);
     return SizedBox(
       height: defaultButtonHeight,
-      child: DevToolsToggleButtonGroup(
-        children: <Widget>[
+      DevToolsToggleButtonGroup(
+        <Widget>[
           for (var extensionState in _extensionStates)
             _buildExtension(extensionState)
         ],
@@ -131,7 +131,7 @@ class _ServiceExtensionButtonGroupState
 
     return ServiceExtensionTooltip(
       description: description,
-      child: Container(
+      Container(
         height: defaultButtonHeight,
         padding: EdgeInsets.symmetric(
           horizontal:
@@ -139,7 +139,7 @@ class _ServiceExtensionButtonGroupState
                   ? defaultSpacing
                   : 0.0,
         ),
-        child: ImageIconLabel(
+        ImageIconLabel(
           extensionState.isSelected
               ? description.enabledIcon
               : description.disabledIcon,
@@ -187,7 +187,7 @@ class HotReloadButton extends StatelessWidget {
 
     return DevToolsTooltip(
       message: 'Hot reload',
-      child: _RegisteredServiceExtensionButton._(
+      _RegisteredServiceExtensionButton._(
         serviceDescription: hotReload,
         action: () {
           return serviceManager.runDeviceBusyTask(
@@ -209,7 +209,7 @@ class HotRestartButton extends StatelessWidget {
 
     return DevToolsTooltip(
       message: 'Hot restart',
-      child: _RegisteredServiceExtensionButton._(
+      _RegisteredServiceExtensionButton._(
         serviceDescription: hotRestart,
         action: () {
           return serviceManager.runDeviceBusyTask(
@@ -300,7 +300,7 @@ class _RegisteredServiceExtensionButtonState
         }
         await widget.action();
       }),
-      child: Container(
+      Container(
         constraints: BoxConstraints.tightFor(
           width: DevToolsScaffold.actionWidgetSize,
           height: DevToolsScaffold.actionWidgetSize,
@@ -309,7 +309,7 @@ class _RegisteredServiceExtensionButtonState
         // TODO(djshuckerow): Just make these icons the right size to fit this
         // box. The current size is a little tiny by comparison to our other
         // material icons.
-        child: widget.serviceDescription.icon,
+        widget.serviceDescription.icon,
       ),
     );
   }
@@ -374,22 +374,20 @@ class _ServiceExtensionToggleState extends State<_ServiceExtensionToggle>
   Widget build(BuildContext context) {
     return ServiceExtensionTooltip(
       description: widget.service,
-      child: InkWell(
+      InkWell(
         onTap: _onClick,
-        child: Row(
-          children: <Widget>[
-            SizedBox(
-              height: defaultButtonHeight,
-              child: Switch(
-                value: value,
-                onChanged: _onClick,
-              ),
+        Row(
+          SizedBox(
+            height: defaultButtonHeight,
+            Switch(
+              value: value,
+              onChanged: _onClick,
             ),
-            Text(widget.service.title),
-            // The switch is padded on its sides by 16dp.
-            // This balances out the tappable area.
-            const Padding(padding: EdgeInsets.only(left: defaultSpacing)),
-          ],
+          ),
+          Text(widget.service.title),
+          // The switch is padded on its sides by 16dp.
+          // This balances out the tappable area.
+          const Padding(padding: EdgeInsets.only(left: defaultSpacing)),
         ),
       ),
     );
@@ -489,9 +487,9 @@ class _ServiceExtensionCheckboxState extends State<ServiceExtensionCheckbox>
       valueListenable: extensionAvailable,
       builder: (context, available, _) {
         return Row(
-          children: [
+          [
             Expanded(
-              child: CheckboxSetting(
+              CheckboxSetting(
                 notifier: value,
                 title: widget.serviceExtension.title,
                 description: widget.serviceExtension.description,
@@ -630,7 +628,7 @@ class _ServiceExtensionCheckboxGroupButtonState
   Widget build(BuildContext context) {
     Widget label = Padding(
       padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-      child: MaterialIconLabel(
+      MaterialIconLabel(
         label: widget.title,
         iconData: widget.icon,
         minScreenWidthForTextBeforeScaling:
@@ -638,13 +636,13 @@ class _ServiceExtensionCheckboxGroupButtonState
       ),
     );
     if (widget.tooltip != null && widget.tooltip!.isNotEmpty) {
-      label = DevToolsTooltip(message: widget.tooltip, child: label);
+      label = DevToolsTooltip(message: widget.tooltip, label);
     }
     return ValueListenableBuilder<bool>(
       valueListenable: _enabled,
       builder: (context, enabled, _) {
         return DevToolsToggleButtonGroup(
-          children: [label],
+          label,
           selectedStates: [enabled],
           onPressed: (_) => _insertOverlay(context),
         );
@@ -667,23 +665,21 @@ class _ServiceExtensionCheckboxGroupButtonState
           return GestureDetector(
             behavior: HitTestBehavior.translucent,
             onTap: _maybeRemoveOverlay,
-            child: Stack(
-              children: [
-                Positioned(
-                  left: offset.dx,
-                  top: offset.dy,
-                  child: MouseRegion(
-                    onEnter: _mouseEnter,
-                    onExit: _mouseExit,
-                    child: _ServiceExtensionCheckboxGroupOverlay(
-                      description: widget.overlayDescription,
-                      extensions: widget.extensions,
-                      width: widget.overlayWidth,
-                      customExtensionUi: widget.customExtensionUi,
-                    ),
+            Stack(
+              Positioned(
+                left: offset.dx,
+                top: offset.dy,
+                MouseRegion(
+                  onEnter: _mouseEnter,
+                  onExit: _mouseExit,
+                  _ServiceExtensionCheckboxGroupOverlay(
+                    description: widget.overlayDescription,
+                    extensions: widget.extensions,
+                    width: widget.overlayWidth,
+                    customExtensionUi: widget.customExtensionUi,
                   ),
                 ),
-              ],
+              ),
             ),
           );
         },
@@ -757,7 +753,7 @@ class _ServiceExtensionCheckboxGroupOverlay extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Material(
-      child: Container(
+      Container(
         width: width,
         padding: const EdgeInsets.all(defaultSpacing),
         decoration: BoxDecoration(
@@ -768,10 +764,10 @@ class _ServiceExtensionCheckboxGroupOverlay extends StatelessWidget {
           ),
           borderRadius: BorderRadius.circular(defaultBorderRadius),
         ),
-        child: Column(
+        Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+          [
             description,
             const SizedBox(height: denseSpacing),
             for (final serviceExtension in extensions)
@@ -869,7 +865,7 @@ class ServiceExtensionTooltip extends StatelessWidget {
     if (description.documentationUrl != null) {
       return ServiceExtensionRichTooltip(
         description: description,
-        child: child,
+        child,
       );
     }
 
@@ -882,7 +878,7 @@ class ServiceExtensionTooltip extends StatelessWidget {
     return DevToolsTooltip(
       message: description.tooltip,
       preferBelow: true,
-      child: child,
+      child,
       decoration: BoxDecoration(
         color: colorScheme.defaultBackgroundColor,
         border: Border.all(
@@ -914,7 +910,7 @@ class ServiceExtensionRichTooltip extends StatelessWidget {
     return HoverCardTooltip(
       enabled: () => true,
       onHover: (_) => _buildCardData(context),
-      child: child,
+      child,
     );
   }
 
@@ -926,10 +922,10 @@ class ServiceExtensionRichTooltip extends StatelessWidget {
         position: HoverCardPosition.element,
         width: _tooltipWidth,
         contents: Material(
-          child: Column(
+          Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+            [
               Text(
                 description.tooltip,
                 style: TextStyle(color: textColor),
@@ -938,7 +934,7 @@ class ServiceExtensionRichTooltip extends StatelessWidget {
                   description.gaScreenName != null)
                 Align(
                   alignment: Alignment.bottomRight,
-                  child: MoreInfoLink(
+                  MoreInfoLink(
                     url: description.documentationUrl!,
                     gaScreenName: description.gaScreenName!,
                     gaSelectedItemDescription: description.gaItemTooltipLink,

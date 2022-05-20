@@ -346,17 +346,17 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
           ? box.size.width
           : AutoCompleteSearchControllerMixin.minPopupWidth,
       height: bottom ? null : count * tileEntryHeight,
-      child: CompositedTransformFollower(
+      CompositedTransformFollower(
         link: controller.autoCompleteLayerLink,
         showWhenUnlinked: false,
         targetAnchor: Alignment.bottomLeft,
         offset: Offset(xCoord, yCoord),
-        child: Material(
+        Material(
           elevation: defaultElevation,
-          child: ListView(
+          ListView(
             padding: EdgeInsets.zero,
             shrinkWrap: true,
-            children: autoCompleteTiles,
+            autoCompleteTiles,
             itemExtent: tileEntryHeight,
           ),
         ),
@@ -411,14 +411,14 @@ class AutoCompleteTile extends StatelessWidget {
       onHover: (_) {
         controller.setCurrentHoveredIndexValue(index);
       },
-      child: GestureDetector(
+      GestureDetector(
         onTap: () {
           final selected = textSpan.toPlainText();
           controller.selectTheSearch = true;
           controller.search = selected;
           onTap(selected);
         },
-        child: ValueListenableBuilder(
+        ValueListenableBuilder(
           valueListenable: controller.currentHoveredIndex,
           builder: (context, currentHoveredIndex, _) {
             return Container(
@@ -426,7 +426,7 @@ class AutoCompleteTile extends StatelessWidget {
                   currentHoveredIndex == index ? highlightColor : defaultColor,
               padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
               alignment: Alignment.centerLeft,
-              child: Text.rich(
+              Text.rich(
                 textSpan,
                 maxLines: 1,
               ),
@@ -973,17 +973,15 @@ class _SearchField extends StatelessWidget {
                 ? Row(
                     mainAxisSize: MainAxisSize.min,
                     mainAxisAlignment: MainAxisAlignment.end,
-                    children: <Widget>[
-                      prefix!,
-                      SizedBox(
-                        height: _searchControlDividerHeight,
-                        width: defaultIconSize,
-                        child: Transform.rotate(
-                          angle: degToRad(90),
-                          child: PaddedDivider.vertical(),
-                        ),
+                    prefix!,
+                    SizedBox(
+                      height: _searchControlDividerHeight,
+                      width: defaultIconSize,
+                      Transform.rotate(
+                        angle: degToRad(90),
+                        PaddedDivider.vertical(),
                       ),
-                    ],
+                    ),
                   )
                 : null,
             suffix: suffix != null
@@ -1077,9 +1075,9 @@ class _AutoCompleteSearchFieldState extends State<_AutoCompleteSearchField>
   Widget build(BuildContext context) {
     return RawKeyboardListener(
       focusNode: widget.rawKeyboardFocusNode,
-      child: CompositedTransformTarget(
+      CompositedTransformTarget(
         link: widget.autoCompleteLayerLink,
-        child: widget.searchField,
+        widget.searchField,
       ),
     );
   }
@@ -1245,13 +1243,13 @@ class SearchNavigationControls extends StatelessWidget {
             return Row(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.end,
-              children: [
+              [
                 Opacity(
                   opacity: isSearchInProgress ? 1 : 0,
-                  child: SizedBox(
+                  SizedBox(
                     width: scaleByFontFactor(smallProgressSize),
                     height: scaleByFontFactor(smallProgressSize),
-                    child: isSearchInProgress
+                    isSearchInProgress
                         ? SmallCircularProgressIndicator(
                             valueColor: AlwaysStoppedAnimation<Color?>(
                               Theme.of(context).textTheme.bodyText2!.color,
@@ -1264,9 +1262,9 @@ class SearchNavigationControls extends StatelessWidget {
                 SizedBox(
                   height: _searchControlDividerHeight,
                   width: defaultIconSize,
-                  child: Transform.rotate(
+                  Transform.rotate(
                     angle: degToRad(90),
-                    child: PaddedDivider.vertical(),
+                    PaddedDivider.vertical(),
                   ),
                 ),
                 inputDecorationSuffixButton(
@@ -1292,7 +1290,7 @@ class SearchNavigationControls extends StatelessWidget {
       builder: (context, index, _) {
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: densePadding),
-          child: Text(
+          Text(
             '$index/$numMatches',
             style: const TextStyle(fontSize: 12.0),
           ),

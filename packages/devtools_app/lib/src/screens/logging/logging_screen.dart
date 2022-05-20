@@ -118,42 +118,38 @@ class _LoggingScreenState extends State<LoggingScreenBody>
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: [
-        _buildLoggingControls(),
-        const SizedBox(height: denseRowSpacing),
-        Expanded(
-          child: _buildLoggingBody(),
-        ),
-      ],
+      _buildLoggingControls(),
+      const SizedBox(height: denseRowSpacing),
+      Expanded(
+        _buildLoggingBody(),
+      ),
     );
   }
 
   Widget _buildLoggingControls() {
     final hasData = _controller.filteredData.value.isNotEmpty;
     return Row(
-      children: [
-        ClearButton(onPressed: _controller.clear),
-        const Spacer(),
-        StructuredErrorsToggle(),
-        const SizedBox(width: denseSpacing),
-        // TODO(kenz): fix focus issue when state is refreshed
-        Container(
-          width: wideSearchTextWidth,
-          height: defaultTextFieldHeight,
-          child: buildSearchField(
-            controller: _controller,
-            searchFieldKey: loggingSearchFieldKey,
-            searchFieldEnabled: hasData,
-            shouldRequestFocus: false,
-            supportsNavigation: true,
-          ),
+      ClearButton(onPressed: _controller.clear),
+      const Spacer(),
+      StructuredErrorsToggle(),
+      const SizedBox(width: denseSpacing),
+      // TODO(kenz): fix focus issue when state is refreshed
+      Container(
+        width: wideSearchTextWidth,
+        height: defaultTextFieldHeight,
+        buildSearchField(
+          controller: _controller,
+          searchFieldKey: loggingSearchFieldKey,
+          searchFieldEnabled: hasData,
+          shouldRequestFocus: false,
+          supportsNavigation: true,
         ),
-        const SizedBox(width: denseSpacing),
-        FilterButton(
-          onPressed: _showFilterDialog,
-          isFilterActive: filteredLogs.length != _controller.data.length,
-        ),
-      ],
+      ),
+      const SizedBox(width: denseSpacing),
+      FilterButton(
+        onPressed: _showFilterDialog,
+        isFilterActive: filteredLogs.length != _controller.data.length,
+      ),
     );
   }
 
@@ -161,18 +157,16 @@ class _LoggingScreenState extends State<LoggingScreenBody>
     return Split(
       axis: Axis.vertical,
       initialFractions: const [0.72, 0.28],
-      children: [
-        OutlineDecoration(
-          child: LogsTable(
-            data: filteredLogs,
-            onItemSelected: _controller.selectLog,
-            selectionNotifier: _controller.selectedLog,
-            searchMatchesNotifier: _controller.searchMatches,
-            activeSearchMatchNotifier: _controller.activeSearchMatch,
-          ),
+      OutlineDecoration(
+        LogsTable(
+          data: filteredLogs,
+          onItemSelected: _controller.selectLog,
+          selectionNotifier: _controller.selectedLog,
+          searchMatchesNotifier: _controller.searchMatches,
+          activeSearchMatchNotifier: _controller.activeSearchMatch,
         ),
-        LogDetails(log: selected),
-      ],
+      ),
+      LogDetails(log: selected),
     );
   }
 

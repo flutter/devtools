@@ -91,7 +91,7 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
     return Container(
       margin: const EdgeInsets.all(margin),
       padding: const EdgeInsets.only(bottom: margin, right: margin),
-      child: AnimatedBuilder(
+      AnimatedBuilder(
         animation: changeController,
         builder: (context, _) {
           return LayoutBuilder(builder: _buildLayout);
@@ -221,8 +221,8 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
                   WidgetTheme.fromName(propertiesLocal.node.description).color,
             ),
           ),
-          child: Stack(
-            children: [
+          Stack(
+            [
               LayoutExplorerBackground(colorScheme: colorScheme),
               // Left padding.
               if (width0 != null)
@@ -325,19 +325,19 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
         largeTitle: true,
         layoutProperties: parentProperties,
         isSelected: false,
-        child: VisualizeWidthAndHeightWithConstraints(
+        VisualizeWidthAndHeightWithConstraints(
           properties: parentProperties,
           warnIfUnconstrained: false,
-          child: Padding(
+          Padding(
             padding: const EdgeInsets.all(denseSpacing),
-            child: widget,
+            widget,
           ),
         ),
       );
     }
     return Container(
       constraints: BoxConstraints(maxWidth: maxWidth, maxHeight: maxHeight),
-      child: widget,
+      widget,
     );
   }
 }
@@ -392,12 +392,12 @@ class BoxChildVisualizer extends StatelessWidget {
       // TODO(jacobr): does this entrance animation really add value.
       return Opacity(
         opacity: min([state.entranceCurve.value * 5, 1.0]),
-        child: Padding(
+        Padding(
           padding: EdgeInsets.symmetric(
             horizontal: math.max(0.0, (renderSize.width - size.width) / 2),
             vertical: math.max(0.0, (renderSize.height - size.height) / 2),
           ),
-          child: child,
+          child,
         ),
       );
     }
@@ -407,17 +407,17 @@ class BoxChildVisualizer extends StatelessWidget {
     return Positioned(
       top: renderOffset.dy,
       left: renderOffset.dx,
-      child: InkWell(
+      InkWell(
         onTap: () => state.onTap(propertiesLocal),
         onDoubleTap: () => state.onDoubleTap(propertiesLocal),
         onLongPress: () => state.onDoubleTap(propertiesLocal),
-        child: SizedBox(
+        SizedBox(
           width: safePositiveDouble(renderSize.width),
           height: safePositiveDouble(renderSize.height),
-          child: AnimatedBuilder(
+          AnimatedBuilder(
             animation: state.entranceController,
             builder: buildEntranceAnimation,
-            child: WidgetVisualizer(
+            WidgetVisualizer(
               isSelected: isSelected,
               layoutProperties: layoutProperties,
               title: describeBoxName(propertiesLocal),
@@ -427,11 +427,11 @@ class BoxChildVisualizer extends StatelessWidget {
 
               // We only show one child at a time so a large title is safe.
               largeTitle: true,
-              child: VisualizeWidthAndHeightWithConstraints(
+              VisualizeWidthAndHeightWithConstraints(
                 arrowHeadSize: arrowHeadSize,
                 properties: propertiesLocal,
                 warnIfUnconstrained: false,
-                child: const SizedBox.shrink(),
+                const SizedBox.shrink(),
               ),
             ),
           ),

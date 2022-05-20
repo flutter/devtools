@@ -30,7 +30,7 @@ Widget dimensionDescription(
         color: colorScheme.overflowBackgroundColor,
         borderRadius: BorderRadius.circular(4.0),
       ),
-      child: Center(child: text),
+      Center(text),
     );
   }
   return text;

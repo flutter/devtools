@@ -188,63 +188,61 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
   @override
   Widget build(BuildContext context) {
     return Row(
-      children: [
-        const Text('>'),
-        const SizedBox(width: 8.0),
-        Expanded(
-          child: Focus(
-            onKey: (_, RawKeyEvent event) {
-              if (event.isKeyPressed(LogicalKeyboardKey.arrowUp)) {
-                _historyNavUp();
-                return KeyEventResult.handled;
-              } else if (event.isKeyPressed(LogicalKeyboardKey.arrowDown)) {
-                _historyNavDown();
-                return KeyEventResult.handled;
-              } else if (event.isKeyPressed(LogicalKeyboardKey.enter)) {
-                _handleExpressionEval();
-                return KeyEventResult.handled;
-              }
+      const Text('>'),
+      const SizedBox(width: 8.0),
+      Expanded(
+        Focus(
+          onKey: (_, RawKeyEvent event) {
+            if (event.isKeyPressed(LogicalKeyboardKey.arrowUp)) {
+              _historyNavUp();
+              return KeyEventResult.handled;
+            } else if (event.isKeyPressed(LogicalKeyboardKey.arrowDown)) {
+              _historyNavDown();
+              return KeyEventResult.handled;
+            } else if (event.isKeyPressed(LogicalKeyboardKey.enter)) {
+              _handleExpressionEval();
+              return KeyEventResult.handled;
+            }
 
-              return KeyEventResult.ignored;
-            },
-            child: buildAutoCompleteSearchField(
-              controller: _autoCompleteController,
-              searchFieldKey: evalTextFieldKey,
-              searchFieldEnabled: true,
-              shouldRequestFocus: false,
-              supportClearField: true,
-              onSelection: _onSelection,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.all(denseSpacing),
-                border: OutlineInputBorder(),
-                focusedBorder: OutlineInputBorder(borderSide: BorderSide.none),
-                enabledBorder: OutlineInputBorder(borderSide: BorderSide.none),
-                labelText: 'Eval',
-              ),
-              overlayXPositionBuilder:
-                  (String inputValue, TextStyle? inputStyle) {
-                // X-coordinate is equivalent to the width of the input text
-                // up to the last "." or the insertion point (cursor):
-                final indexOfDot = inputValue.lastIndexOf('.');
-                final textSegment = indexOfDot != -1
-                    ? inputValue.substring(0, indexOfDot + 1)
-                    : inputValue;
-                return calculateTextSpanWidth(
-                  TextSpan(
-                    text: textSegment,
-                    style: inputStyle,
-                  ),
-                );
-              },
-              // Disable ligatures, so the suggestions of the auto complete work correcly.
-              style: Theme.of(context)
-                  .textTheme
-                  .subtitle1
-                  ?.copyWith(fontFeatures: [const FontFeature.disable('liga')]),
+            return KeyEventResult.ignored;
+          },
+          buildAutoCompleteSearchField(
+            controller: _autoCompleteController,
+            searchFieldKey: evalTextFieldKey,
+            searchFieldEnabled: true,
+            shouldRequestFocus: false,
+            supportClearField: true,
+            onSelection: _onSelection,
+            decoration: const InputDecoration(
+              contentPadding: EdgeInsets.all(denseSpacing),
+              border: OutlineInputBorder(),
+              focusedBorder: OutlineInputBorder(borderSide: BorderSide.none),
+              enabledBorder: OutlineInputBorder(borderSide: BorderSide.none),
+              labelText: 'Eval',
             ),
+            overlayXPositionBuilder:
+                (String inputValue, TextStyle? inputStyle) {
+              // X-coordinate is equivalent to the width of the input text
+              // up to the last "." or the insertion point (cursor):
+              final indexOfDot = inputValue.lastIndexOf('.');
+              final textSegment = indexOfDot != -1
+                  ? inputValue.substring(0, indexOfDot + 1)
+                  : inputValue;
+              return calculateTextSpanWidth(
+                TextSpan(
+                  text: textSegment,
+                  style: inputStyle,
+                ),
+              );
+            },
+            // Disable ligatures, so the suggestions of the auto complete work correcly.
+            style: Theme.of(context)
+                .textTheme
+                .subtitle1
+                ?.copyWith(fontFeatures: [const FontFeature.disable('liga')]),
           ),
         ),
-      ],
+      ),
     );
   }
 

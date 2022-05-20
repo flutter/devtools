@@ -31,7 +31,7 @@ class VMInfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      child: VMInfoList(
+      VMInfoList(
         title: title,
         rowKeyValues: rowKeyValues,
         table: table,
@@ -58,7 +58,7 @@ class VMInfoList extends StatelessWidget {
     final rowKeyValues = this.rowKeyValues;
     final table = this.table;
     return Column(
-      children: [
+      [
         AreaPaneHeader(
           title: Text(title),
           needsTopBorder: false,
@@ -70,19 +70,17 @@ class VMInfoList extends StatelessWidget {
               for (final row in rowKeyValues)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
+                  SelectableText(
+                    '${row.key.toString()}:',
+                    style: theme.fixedFontStyle,
+                  ),
+                  const SizedBox(width: denseSpacing),
+                  Flexible(
                     SelectableText(
-                      '${row.key.toString()}:',
+                      row.value?.toString() ?? '--',
                       style: theme.fixedFontStyle,
                     ),
-                    const SizedBox(width: denseSpacing),
-                    Flexible(
-                      child: SelectableText(
-                        row.value?.toString() ?? '--',
-                        style: theme.fixedFontStyle,
-                      ),
-                    ),
-                  ],
+                  ),
                 )
             ],
           ),
@@ -105,7 +103,7 @@ class VMInfoList extends StatelessWidget {
       padding: const EdgeInsets.symmetric(
         horizontal: defaultSpacing,
       ),
-      child: row,
+      row,
     );
   }
 }

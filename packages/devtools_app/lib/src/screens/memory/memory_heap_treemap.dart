@@ -95,20 +95,18 @@ class MemoryHeapTreemapState extends State<MemoryHeapTreemap>
   Widget build(BuildContext context) {
     if (_sizes == null) {
       return Column(
-        children: [
-          const SizedBox(height: denseRowSpacing),
-          Expanded(
-            child: OutlineDecoration(
-              child: Row(children: const [SizedBox()]),
-            ),
+        const SizedBox(height: denseRowSpacing),
+        Expanded(
+          OutlineDecoration(
+            Row(SizedBox()),
           ),
-        ],
+        ),
       );
     }
 
     return Padding(
       padding: const EdgeInsets.only(top: denseRowSpacing),
-      child: LayoutBuilder(
+      LayoutBuilder(
         builder: (context, constraints) {
           return Treemap.fromRoot(
             rootNode: root,

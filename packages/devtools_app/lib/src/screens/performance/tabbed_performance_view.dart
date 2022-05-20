@@ -69,12 +69,12 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
       );
     } else {
       frameAnalysisView = const Center(
-        child: Text('Select a frame above to view analysis data.'),
+        Text('Select a frame above to view analysis data.'),
       );
     }
 
     final rasterMetrics = Center(
-      child: RenderingLayerVisualizer(
+      RenderingLayerVisualizer(
         rasterMetricsController: controller.rasterMetricsController,
       ),
     );
@@ -82,7 +82,7 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
     final isFlutterApp = serviceManager.connectedApp!.isFlutterAppNow!;
     final tabViews = [
       KeepAliveWrapper(
-        child: TimelineEventsView(
+        TimelineEventsView(
           controller: controller,
           processing: widget.processing,
           processingProgress: widget.processingProgress,
@@ -90,11 +90,11 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
       ),
       if (frameAnalysisSupported && isFlutterApp)
         KeepAliveWrapper(
-          child: frameAnalysisView,
+          frameAnalysisView,
         ),
       if (rasterMetricsSupported && isFlutterApp)
         KeepAliveWrapper(
-          child: rasterMetrics,
+          rasterMetrics,
         ),
     ];
 
@@ -114,14 +114,12 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
         tabName: 'Timeline Events',
         trailing: Row(
           mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            _buildSearchField(searchFieldEnabled),
-            const FlameChartHelpButton(
-              gaScreen: PerformanceScreen.id,
-              gaSelection: analytics_constants.timelineFlameChartHelp,
-            ),
-            RefreshTimelineEventsButton(controller: controller),
-          ],
+          _buildSearchField(searchFieldEnabled),
+          const FlameChartHelpButton(
+            gaScreen: PerformanceScreen.id,
+            gaSelection: analytics_constants.timelineFlameChartHelp,
+          ),
+          RefreshTimelineEventsButton(controller: controller),
         ),
       ),
       if (frameAnalysisSupported && isFlutterApp)
@@ -133,29 +131,26 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
           tabName: 'Raster Metrics',
           trailing: Row(
             mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              IconLabelButton(
-                tooltip:
-                    'Take a snapshot of the rendering layers on the current'
-                    ' screen',
-                icon: Icons.camera,
-                label: 'Take Snapshot',
-                outlined: false,
-                onPressed: () {
-                  ga.select(
-                    PerformanceScreen.id,
-                    analytics_constants.collectRasterStats,
-                  );
-                  controller.rasterMetricsController.collectRasterStats();
-                },
-              ),
-              const SizedBox(width: denseSpacing),
-              ClearButton(
-                outlined: false,
-                onPressed: controller.rasterMetricsController.clear,
-              ),
-              const SizedBox(width: densePadding),
-            ],
+            IconLabelButton(
+              tooltip: 'Take a snapshot of the rendering layers on the current'
+                  ' screen',
+              icon: Icons.camera,
+              label: 'Take Snapshot',
+              outlined: false,
+              onPressed: () {
+                ga.select(
+                  PerformanceScreen.id,
+                  analytics_constants.collectRasterStats,
+                );
+                controller.rasterMetricsController.collectRasterStats();
+              },
+            ),
+            const SizedBox(width: denseSpacing),
+            ClearButton(
+              outlined: false,
+              onPressed: controller.rasterMetricsController.clear,
+            ),
+            const SizedBox(width: densePadding),
           ),
         ),
     ];
@@ -165,7 +160,7 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
     return Container(
       width: defaultSearchTextWidth,
       height: defaultTextFieldHeight,
-      child: buildSearchField(
+      buildSearchField(
         controller: controller,
         searchFieldKey: timelineSearchFieldKey,
         searchFieldEnabled: searchFieldEnabled,

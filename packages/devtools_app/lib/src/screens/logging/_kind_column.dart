@@ -54,7 +54,7 @@ class KindColumn extends ColumnData<LogData>
         color: color,
         borderRadius: BorderRadius.circular(3.0),
       ),
-      child: Text(
+      Text(
         kind,
         overflow: TextOverflow.ellipsis,
         style: textStyle,

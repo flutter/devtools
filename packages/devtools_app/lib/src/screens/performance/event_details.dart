@@ -35,25 +35,23 @@ class EventDetails extends StatelessWidget {
     final controller = Provider.of<PerformanceController>(context);
     final theme = Theme.of(context);
     return OutlineDecoration(
-      child: Column(
+      Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AreaPaneHeader(
-            needsTopBorder: false,
-            title: Text(_generateHeaderText()),
-          ),
-          Expanded(
-            child: selectedEvent != null
-                ? ValueListenableBuilder<bool>(
-                    valueListenable: offlineController.offlineMode,
-                    builder: (context, offline, _) => _buildDetails(
-                      controller,
-                      offline,
-                    ),
-                  )
-                : _buildInstructions(theme),
-          ),
-        ],
+        AreaPaneHeader(
+          needsTopBorder: false,
+          title: Text(_generateHeaderText()),
+        ),
+        Expanded(
+          selectedEvent != null
+              ? ValueListenableBuilder<bool>(
+                  valueListenable: offlineController.offlineMode,
+                  builder: (context, offline, _) => _buildDetails(
+                    controller,
+                    offline,
+                  ),
+                )
+              : _buildInstructions(theme),
+        ),
       ),
     );
   }
@@ -100,7 +98,7 @@ class EventDetails extends StatelessWidget {
           summaryView: EventSummary(selectedEvent!),
         );
       },
-      child: _buildProcessingInfo(cpuProfilerController),
+      _buildProcessingInfo(cpuProfilerController),
     );
   }
 
@@ -118,7 +116,7 @@ class EventDetails extends StatelessWidget {
 
   Widget _buildInstructions(ThemeData theme) {
     return Center(
-      child: Text(
+      Text(
         instructions,
         style: theme.subtleTextStyle,
       ),
@@ -149,16 +147,16 @@ class EventSummary extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView(
       padding: const EdgeInsets.symmetric(vertical: denseSpacing),
-      children: [
+      [
         // Wrap with horizontal padding so that these items align with the
         // expanding data items. Adding horizontal padding to the entire list
         // affects the hover boundary for the clickable expanding tiles.
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-          child: EventMetaData(
+          EventMetaData(
             title: 'Time',
             inlineValue: msText(event.time.duration),
-            child: SelectableText(
+            SelectableText(
               '[${event.time.start!.inMicroseconds} μs —  '
               '${event.time.end!.inMicroseconds} μs]',
               style: Theme.of(context).subtleFixedFontStyle,
@@ -170,11 +168,11 @@ class EventSummary extends StatelessWidget {
         // affects the hover boundary for the clickable expanding tiles.
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-          child: Row(
-            children: [
+          Row(
+            [
               Flexible(
                 fit: FlexFit.tight,
-                child: EventMetaData(
+                EventMetaData(
                   title: 'Category',
                   inlineValue: '${firstTraceEvent.category}',
                 ),
@@ -182,18 +180,18 @@ class EventSummary extends StatelessWidget {
               if (event.isAsyncEvent)
                 Flexible(
                   fit: FlexFit.tight,
-                  child: _asyncIdTile(context),
+                  _asyncIdTile(context),
                 ),
               Flexible(
                 fit: FlexFit.tight,
-                child: EventMetaData(
+                EventMetaData(
                   title: 'Thread id',
                   inlineValue: '${firstTraceEvent.threadId}',
                 ),
               ),
               Flexible(
                 fit: FlexFit.tight,
-                child: EventMetaData(
+                EventMetaData(
                   title: 'Process id',
                   inlineValue: '${firstTraceEvent.processId}',
                 ),
@@ -223,7 +221,7 @@ class EventSummary extends StatelessWidget {
   Widget _buildConnectedEvents(BuildContext context) {
     return ExpandingEventMetaData(
       title: 'Connected events',
-      children: [
+      [
         for (var e in _connectedEvents) _buildConnectedEvent(context, e),
       ],
     );
@@ -236,7 +234,7 @@ class EventSummary extends StatelessWidget {
     };
     return EventMetaData(
       title: e.name ?? '',
-      child: FormattedJson(
+      FormattedJson(
         json: eventArgs,
         useSubtleStyle: true,
       ),
@@ -246,12 +244,10 @@ class EventSummary extends StatelessWidget {
   Widget _buildArguments(BuildContext context) {
     return ExpandingEventMetaData(
       title: 'Arguments',
-      children: [
-        FormattedJson(
-          json: _eventArgs,
-          useSubtleStyle: true,
-        ),
-      ],
+      FormattedJson(
+        json: _eventArgs,
+        useSubtleStyle: true,
+      ),
     );
   }
 }
@@ -276,10 +272,10 @@ class EventMetaData extends StatelessWidget {
     final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: denseSpacing),
-      child: Column(
+      Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+        [
           SelectableText.rich(
             TextSpan(
               text: '$title${inlineValue != null ? ':  ' : ''}',
@@ -323,7 +319,7 @@ class ExpandingEventMetaData extends StatelessWidget {
       ),
       childrenPadding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
       expandedAlignment: Alignment.topLeft,
-      children: children,
+      children,
     );
   }
 }

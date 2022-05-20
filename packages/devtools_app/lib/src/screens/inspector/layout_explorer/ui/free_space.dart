@@ -29,59 +29,55 @@ class FreeSpaceVisualizerWidget extends StatelessWidget {
         (renderProperties.layoutProperties?.width);
     final widthWidget = Column(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: [
+      Flexible(
+        dimensionDescription(
+          TextSpan(
+            text: widthDescription,
+          ),
+          false,
+          colorScheme,
+        ),
+      ),
+      Container(
+        margin: EdgeInsets.symmetric(vertical: arrowMargin),
+        ArrowWrapper.bidirectional(
+          arrowColor: widthIndicatorColor,
+          direction: Axis.horizontal,
+          arrowHeadSize: arrowHeadSize,
+        ),
+      ),
+    );
+    final heightWidget = Container(
+      width: heightOnlyIndicatorSize,
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         Flexible(
-          child: dimensionDescription(
-            TextSpan(
-              text: widthDescription,
-            ),
+          dimensionDescription(
+            TextSpan(text: heightDescription),
             false,
             colorScheme,
           ),
         ),
         Container(
-          margin: EdgeInsets.symmetric(vertical: arrowMargin),
-          child: ArrowWrapper.bidirectional(
-            arrowColor: widthIndicatorColor,
-            direction: Axis.horizontal,
+          margin: EdgeInsets.symmetric(horizontal: arrowMargin),
+          ArrowWrapper.bidirectional(
+            arrowColor: heightIndicatorColor,
+            direction: Axis.vertical,
             arrowHeadSize: arrowHeadSize,
+            childMarginFromArrow: 0.0,
           ),
         ),
-      ],
-    );
-    final heightWidget = Container(
-      width: heightOnlyIndicatorSize,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Flexible(
-            child: dimensionDescription(
-              TextSpan(text: heightDescription),
-              false,
-              colorScheme,
-            ),
-          ),
-          Container(
-            margin: EdgeInsets.symmetric(horizontal: arrowMargin),
-            child: ArrowWrapper.bidirectional(
-              arrowColor: heightIndicatorColor,
-              direction: Axis.vertical,
-              arrowHeadSize: arrowHeadSize,
-              childMarginFromArrow: 0.0,
-            ),
-          ),
-        ],
       ),
     );
     return Positioned(
       top: renderProperties.offset.dy,
       left: renderProperties.offset.dx,
-      child: Container(
+      Container(
         width: renderProperties.width,
         height: renderProperties.height,
-        child: DevToolsTooltip(
+        DevToolsTooltip(
           message: '$widthDescription\n$heightDescription',
-          child: showWidth ? widthWidget : heightWidget,
+          showWidth ? widthWidget : heightWidget,
         ),
       ),
     );
@@ -106,57 +102,53 @@ class PaddingVisualizerWidget extends StatelessWidget {
     final widthDescription = 'w=${toStringAsFixed(renderProperties.realWidth)}';
     final widthWidget = Column(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: [
+      Flexible(
+        dimensionDescription(
+          TextSpan(
+            text: widthDescription,
+          ),
+          false,
+          colorScheme,
+        ),
+      ),
+      Container(
+        margin: EdgeInsets.symmetric(vertical: arrowMargin),
+        ArrowWrapper.bidirectional(
+          arrowColor: widthIndicatorColor,
+          direction: Axis.horizontal,
+          arrowHeadSize: arrowHeadSize,
+        ),
+      ),
+    );
+    final heightWidget = Container(
+      width: heightOnlyIndicatorSize,
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         Flexible(
-          child: dimensionDescription(
-            TextSpan(
-              text: widthDescription,
-            ),
+          dimensionDescription(
+            TextSpan(text: heightDescription),
             false,
             colorScheme,
           ),
         ),
         Container(
-          margin: EdgeInsets.symmetric(vertical: arrowMargin),
-          child: ArrowWrapper.bidirectional(
-            arrowColor: widthIndicatorColor,
-            direction: Axis.horizontal,
+          margin: EdgeInsets.symmetric(horizontal: arrowMargin),
+          ArrowWrapper.bidirectional(
+            arrowColor: heightIndicatorColor,
+            direction: Axis.vertical,
             arrowHeadSize: arrowHeadSize,
+            childMarginFromArrow: 0.0,
           ),
         ),
-      ],
-    );
-    final heightWidget = Container(
-      width: heightOnlyIndicatorSize,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Flexible(
-            child: dimensionDescription(
-              TextSpan(text: heightDescription),
-              false,
-              colorScheme,
-            ),
-          ),
-          Container(
-            margin: EdgeInsets.symmetric(horizontal: arrowMargin),
-            child: ArrowWrapper.bidirectional(
-              arrowColor: heightIndicatorColor,
-              direction: Axis.vertical,
-              arrowHeadSize: arrowHeadSize,
-              childMarginFromArrow: 0.0,
-            ),
-          ),
-        ],
       ),
     );
     return Positioned(
       top: renderProperties.offset.dy,
       left: renderProperties.offset.dx,
-      child: Container(
+      Container(
         width: safePositiveDouble(renderProperties.width),
         height: safePositiveDouble(renderProperties.height),
-        child: horizontal ? widthWidget : heightWidget,
+        horizontal ? widthWidget : heightWidget,
       ),
     );
   }

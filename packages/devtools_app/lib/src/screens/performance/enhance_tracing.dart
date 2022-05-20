@@ -213,30 +213,28 @@ class _TrackWidgetBuildsSettingState extends State<TrackWidgetBuildsSetting>
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        ValueListenableBuilder<bool>(
-          valueListenable: _trackingAvailable,
-          builder: (context, trackingAvailable, _) {
-            return TrackWidgetBuildsCheckbox(
-              trackingNotifier: _tracked,
-              enabled: trackingAvailable,
-            );
-          },
-        ),
-        DualValueListenableBuilder<bool, TrackWidgetBuildsScope?>(
-          firstListenable: _tracked,
-          secondListenable: _selectedScope,
-          builder: (context, tracked, selectedScope, _) {
-            return Padding(
-              padding: const EdgeInsets.only(left: _scopeSelectorPadding),
-              child: TrackWidgetBuildsScopeSelector(
-                scope: selectedScope,
-                enabled: tracked,
-              ),
-            );
-          },
-        ),
-      ],
+      ValueListenableBuilder<bool>(
+        valueListenable: _trackingAvailable,
+        builder: (context, trackingAvailable, _) {
+          return TrackWidgetBuildsCheckbox(
+            trackingNotifier: _tracked,
+            enabled: trackingAvailable,
+          );
+        },
+      ),
+      DualValueListenableBuilder<bool, TrackWidgetBuildsScope?>(
+        firstListenable: _tracked,
+        secondListenable: _selectedScope,
+        builder: (context, tracked, selectedScope, _) {
+          return Padding(
+            padding: const EdgeInsets.only(left: _scopeSelectorPadding),
+            TrackWidgetBuildsScopeSelector(
+              scope: selectedScope,
+              enabled: tracked,
+            ),
+          );
+        },
+      ),
     );
   }
 }
@@ -257,9 +255,9 @@ class TrackWidgetBuildsCheckbox extends StatelessWidget {
     final extension = extensions.profileWidgetBuilds;
     final docsUrl = extension.documentationUrl;
     return Row(
-      children: [
+      [
         Expanded(
-          child: CheckboxSetting(
+          CheckboxSetting(
             notifier: trackingNotifier,
             title: extension.title,
             description: extension.description,
@@ -322,7 +320,7 @@ class TrackWidgetBuildsScopeSelector extends StatelessWidget {
     final theme = Theme.of(context);
     final textStyle = enabled ? theme.regularTextStyle : theme.subtleTextStyle;
     return Row(
-      children: [
+      [
         ..._scopeSetting(
           TrackWidgetBuildsScope.userCreated,
           textStyle: textStyle,

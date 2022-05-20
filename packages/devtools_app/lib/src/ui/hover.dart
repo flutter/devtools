@@ -127,14 +127,14 @@ class HoverCard {
         return Positioned(
           left: position.dx,
           top: position.dy,
-          child: MouseRegion(
+          MouseRegion(
             onExit: (_) {
               remove();
             },
             onEnter: (_) {
               _hasMouseEntered = true;
             },
-            child: Container(
+            Container(
               padding: const EdgeInsets.all(denseSpacing),
               decoration: BoxDecoration(
                 color: colorScheme.defaultBackgroundColor,
@@ -145,13 +145,13 @@ class HoverCard {
                 borderRadius: BorderRadius.circular(defaultBorderRadius),
               ),
               width: width,
-              child: Column(
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+                [
                   if (title != null) ...[
                     Container(
                       width: width,
-                      child: Text(
+                      Text(
                         title,
                         overflow: TextOverflow.ellipsis,
                         style: hoverHeading,
@@ -161,9 +161,9 @@ class HoverCard {
                     Divider(color: colorScheme.hoverTextStyle.color),
                   ],
                   SingleChildScrollView(
-                    child: Container(
+                    Container(
                       constraints: BoxConstraints(maxHeight: maxCardHeight!),
-                      child: contents,
+                      contents,
                     ),
                   ),
                 ],
@@ -324,7 +324,7 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
     return MouseRegion(
       onExit: (_) => _onHoverExit(),
       onHover: _onHover,
-      child: widget.child,
+      widget.child,
     );
   }
 }

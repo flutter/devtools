@@ -45,14 +45,12 @@ class DevToolsDialog extends StatelessWidget {
     return AlertDialog(
       scrollable: scrollable,
       title: Column(
-        children: [
-          titleContent,
-          includeDivider
-              ? const PaddedDivider(
-                  padding: EdgeInsets.only(bottom: denseRowSpacing),
-                )
-              : const SizedBox(height: defaultSpacing),
-        ],
+        titleContent,
+        includeDivider
+            ? const PaddedDivider(
+                padding: EdgeInsets.only(bottom: denseRowSpacing),
+              )
+            : const SizedBox(height: defaultSpacing),
       ),
       contentPadding: const EdgeInsets.fromLTRB(
         contentPadding,
@@ -75,7 +73,7 @@ class DialogCloseButton extends StatelessWidget {
       onPressed: () {
         Navigator.of(context, rootNavigator: true).pop('dialog');
       },
-      child: const Text('CLOSE'),
+      const Text('CLOSE'),
     );
   }
 }
@@ -93,7 +91,7 @@ class DialogCancelButton extends StatelessWidget {
         if (cancelAction != null) cancelAction!();
         Navigator.of(context).pop(dialogDefaultContext);
       },
-      child: const Text('CANCEL'),
+      const Text('CANCEL'),
     );
   }
 }
@@ -111,7 +109,7 @@ class DialogApplyButton extends StatelessWidget {
         onPressed();
         Navigator.of(context).pop(dialogDefaultContext);
       },
-      child: const Text('APPLY'),
+      const Text('APPLY'),
     );
   }
 }
@@ -127,9 +125,9 @@ class DialogTextButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       height: defaultButtonHeight,
-      child: TextButton(
+      TextButton(
         onPressed: onPressed,
-        child: child,
+        child,
       ),
     );
   }

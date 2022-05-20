@@ -17,7 +17,7 @@ class ReportFeedbackButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return DevToolsTooltip(
       message: 'Report feedback',
-      child: InkWell(
+      InkWell(
         onTap: () async {
           ga.select(
             analytics_constants.devToolsMain,
@@ -28,11 +28,11 @@ class ReportFeedbackButton extends StatelessWidget {
             context,
           );
         },
-        child: Container(
+        Container(
           width: DevToolsScaffold.actionWidgetSize,
           height: DevToolsScaffold.actionWidgetSize,
           alignment: Alignment.center,
-          child: Icon(
+          Icon(
             Icons.bug_report,
             size: actionsIconSize,
           ),

@@ -47,29 +47,27 @@ class _CallGraphWithDominatorsState extends State<CallGraphWithDominators> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: [
-        AreaPaneHeader(
-          title: Text(showCallGraph ? 'Call Graph' : 'Dominator Tree'),
-          needsTopBorder: false,
-          needsBottomBorder: false,
-          needsLeftBorder: true,
-          actions: [
-            const Text('Show call graph'),
-            Switch(
-              value: showCallGraph,
-              onChanged: _toggleShowCallGraph,
-            ),
-          ],
-        ),
-        Expanded(
-          child: showCallGraph
-              ? CallGraphView(node: widget.callGraphRoot)
-              : DominatorTree(
-                  dominatorTreeRoot: dominatorTreeRoot,
-                  selectedNode: widget.callGraphRoot,
-                ),
-        ),
-      ],
+      AreaPaneHeader(
+        title: Text(showCallGraph ? 'Call Graph' : 'Dominator Tree'),
+        needsTopBorder: false,
+        needsBottomBorder: false,
+        needsLeftBorder: true,
+        actions: [
+          const Text('Show call graph'),
+          Switch(
+            value: showCallGraph,
+            onChanged: _toggleShowCallGraph,
+          ),
+        ],
+      ),
+      Expanded(
+        showCallGraph
+            ? CallGraphView(node: widget.callGraphRoot)
+            : DominatorTree(
+                dominatorTreeRoot: dominatorTreeRoot,
+                selectedNode: widget.callGraphRoot,
+              ),
+      ),
     );
   }
 
@@ -118,30 +116,26 @@ class _CallGraphViewState extends State<CallGraphView> {
     return LayoutBuilder(
       builder: (context, constraints) {
         return Stack(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Flexible(
-                  child: _buildFromTable(),
-                ),
-                Container(
-                  height: constraints.maxHeight,
-                  width: densePadding,
-                  color: Theme.of(context).titleSolidBackgroundColor,
-                ),
-                Flexible(
-                  child: _buildToTable(),
-                ),
-              ],
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            Flexible(
+              _buildFromTable(),
             ),
-            Positioned(
-              top: 0,
-              width: constraints.maxWidth,
-              child: _buildMainNode(),
+            Container(
+              height: constraints.maxHeight,
+              width: densePadding,
+              color: Theme.of(context).titleSolidBackgroundColor,
             ),
-          ],
+            Flexible(
+              _buildToTable(),
+            ),
+          ),
+          Positioned(
+            top: 0,
+            width: constraints.maxWidth,
+            _buildMainNode(),
+          ),
         );
       },
     );
@@ -174,26 +168,24 @@ class _CallGraphViewState extends State<CallGraphView> {
   Widget _buildMainNode() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: densePadding),
-          child: Icon(Icons.arrow_forward),
-        ),
-        DevToolsTooltip(
-          message: selectedNode.data.toString(),
-          child: Container(
-            padding: const EdgeInsets.all(densePadding),
-            child: Text(
-              selectedNode.display,
-              overflow: TextOverflow.ellipsis,
-            ),
+      const Padding(
+        padding: EdgeInsets.symmetric(horizontal: densePadding),
+        Icon(Icons.arrow_forward),
+      ),
+      DevToolsTooltip(
+        message: selectedNode.data.toString(),
+        Container(
+          padding: const EdgeInsets.all(densePadding),
+          Text(
+            selectedNode.display,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: densePadding),
-          child: Icon(Icons.arrow_forward),
-        ),
-      ],
+      ),
+      const Padding(
+        padding: EdgeInsets.symmetric(horizontal: densePadding),
+        Icon(Icons.arrow_forward),
+      ),
     );
   }
 

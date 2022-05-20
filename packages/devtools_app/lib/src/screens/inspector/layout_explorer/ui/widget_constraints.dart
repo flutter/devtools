@@ -39,7 +39,7 @@ class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {
         properties is FlexLayoutProperties && propertiesLocal.isOverflowHeight;
     final heightDescription = RotatedBox(
       quarterTurns: 1,
-      child: dimensionDescription(
+      dimensionDescription(
         TextSpan(
           children: [
             TextSpan(
@@ -75,28 +75,28 @@ class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {
         bottom: bottomHeight,
         right: minPadding, // custom margin for not sticking to the corner
       ),
-      child: LayoutBuilder(
+      LayoutBuilder(
         builder: (context, constraints) {
           final displayHeightOutsideArrow =
               constraints.maxHeight < minHeightToDisplayHeightInsideArrow;
           return Row(
-            children: [
+            [
               Truncateable(
                 truncate: !displayHeightOutsideArrow,
-                child: Container(
+                Container(
                   margin: EdgeInsets.symmetric(horizontal: arrowMargin),
-                  child: ArrowWrapper.bidirectional(
+                  ArrowWrapper.bidirectional(
                     arrowColor: heightIndicatorColor,
                     arrowStrokeWidth: arrowStrokeWidth,
                     arrowHeadSize: arrowHeadSize,
                     direction: Axis.vertical,
-                    child: displayHeightOutsideArrow ? null : heightDescription,
+                    displayHeightOutsideArrow ? null : heightDescription,
                   ),
                 ),
               ),
               if (displayHeightOutsideArrow)
                 Flexible(
-                  child: heightDescription,
+                  heightDescription,
                 ),
             ],
           );
@@ -135,31 +135,31 @@ class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {
         right: rightWidth,
         bottom: minPadding,
       ),
-      child: LayoutBuilder(
+      LayoutBuilder(
         builder: (context, constraints) {
           final maxWidth = constraints.maxWidth;
           final displayWidthOutsideArrow =
               maxWidth < minWidthToDisplayWidthInsideArrow;
           return Column(
-            children: [
+            [
               Truncateable(
                 truncate: !displayWidthOutsideArrow,
-                child: Container(
+                Container(
                   margin: EdgeInsets.symmetric(vertical: arrowMargin),
-                  child: ArrowWrapper.bidirectional(
+                  ArrowWrapper.bidirectional(
                     arrowColor: widthIndicatorColor,
                     arrowHeadSize: arrowHeadSize,
                     arrowStrokeWidth: arrowStrokeWidth,
                     direction: Axis.horizontal,
-                    child: displayWidthOutsideArrow ? null : widthDescription,
+                    displayWidthOutsideArrow ? null : widthDescription,
                   ),
                 ),
               ),
               if (displayWidthOutsideArrow)
                 Flexible(
-                  child: Container(
+                  Container(
                     padding: const EdgeInsets.only(top: minPadding),
-                    child: widthDescription,
+                    widthDescription,
                   ),
                 ),
             ],

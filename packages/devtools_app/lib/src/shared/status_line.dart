@@ -57,9 +57,9 @@ class StatusLine extends StatelessWidget {
           padding: EdgeInsets.only(left: padding.left, right: padding.right),
           height: height,
           alignment: Alignment.centerLeft,
-          child: Row(
+          Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: _getStatusItems(context, showIsolateSelector),
+            _getStatusItems(context, showIsolateSelector),
           ),
         );
       },
@@ -86,10 +86,8 @@ class StatusLine extends StatelessWidget {
         const BulletSpacer(),
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            ReportFeedbackButton(),
-            OpenAboutAction(),
-          ],
+          ReportFeedbackButton(),
+          OpenAboutAction(),
         ),
       ]
     ];
@@ -120,7 +118,7 @@ class StatusLine extends StatelessWidget {
     } else {
       // Use a placeholder for pages with no explicit documentation.
       return Flexible(
-        child: Text(
+        Text(
           '${isNarrow ? '' : 'DevTools '}${devtools.version}',
           overflow: TextOverflow.ellipsis,
         ),
@@ -149,63 +147,61 @@ class StatusLine extends StatelessWidget {
 
           return Row(
             mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              ValueListenableBuilder(
-                valueListenable: serviceManager.deviceBusy,
-                builder: (context, bool isBusy, _) {
-                  return SizedBox(
-                    width: smallProgressSize,
-                    height: smallProgressSize,
-                    child: isBusy
-                        ? SmallCircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color?>(color),
-                          )
-                        : const SizedBox(),
+            ValueListenableBuilder(
+              valueListenable: serviceManager.deviceBusy,
+              builder: (context, bool isBusy, _) {
+                return SizedBox(
+                  width: smallProgressSize,
+                  height: smallProgressSize,
+                  isBusy
+                      ? SmallCircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color?>(color),
+                        )
+                      : const SizedBox(),
+                );
+              },
+            ),
+            const SizedBox(width: denseSpacing),
+            DevToolsTooltip(
+              message: 'Device Info',
+              InkWell(
+                onTap: () async {
+                  unawaited(
+                    showDialog(
+                      context: context,
+                      builder: (context) => DeviceDialog(
+                        connectedApp: app,
+                      ),
+                    ),
                   );
                 },
-              ),
-              const SizedBox(width: denseSpacing),
-              DevToolsTooltip(
-                message: 'Device Info',
-                child: InkWell(
-                  onTap: () async {
-                    unawaited(
-                      showDialog(
-                        context: context,
-                        builder: (context) => DeviceDialog(
-                          connectedApp: app,
-                        ),
+                Row(
+                  [
+                    Icon(
+                      Icons.info_outline,
+                      size: actionsIconSize,
+                    ),
+                    if (!isExtraNarrow) ...[
+                      const SizedBox(width: denseSpacing),
+                      Text(
+                        description,
+                        style: textTheme.bodyText2,
+                        overflow: TextOverflow.clip,
                       ),
-                    );
-                  },
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.info_outline,
-                        size: actionsIconSize,
-                      ),
-                      if (!isExtraNarrow) ...[
-                        const SizedBox(width: denseSpacing),
-                        Text(
-                          description,
-                          style: textTheme.bodyText2,
-                          overflow: TextOverflow.clip,
-                        ),
-                      ]
-                    ],
-                  ),
+                    ]
+                  ],
                 ),
               ),
-            ],
+            ),
           );
         } else {
           return child!;
         }
       },
-      child: isExtraNarrow
+      isExtraNarrow
           ? DevToolsTooltip(
               message: noConnectionMsg,
-              child: Icon(
+              Icon(
                 Icons.warning_amber_rounded,
                 size: actionsIconSize,
               ),
@@ -229,7 +225,7 @@ class IsolateSelector extends StatelessWidget {
       secondListenable: isolateManager.selectedIsolate,
       builder: (context, isolates, selectedIsolateRef, _) {
         return PopupMenuButton<IsolateRef?>(
-          child: IsolateOption(isolateManager.selectedIsolate.value),
+          IsolateOption(isolateManager.selectedIsolate.value),
           tooltip: 'Selected Isolate',
           initialValue: selectedIsolateRef,
           onSelected: isolateManager.selectIsolate,
@@ -238,7 +234,7 @@ class IsolateSelector extends StatelessWidget {
             (ref) {
               return PopupMenuItem<IsolateRef>(
                 value: ref,
-                child: IsolateOption(ref!),
+                IsolateOption(ref!),
               );
             },
           ).toList(),
@@ -259,16 +255,14 @@ class IsolateOption extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     return Row(
-      children: [
-        ref?.isSystemIsolate ?? false
-            ? const Icon(Icons.settings_applications)
-            : const Icon(Icons.call_split),
-        const SizedBox(width: denseSpacing),
-        Text(
-          ref == null ? 'isolate' : _isolateName(ref!),
-          style: textTheme.bodyText2,
-        ),
-      ],
+      ref?.isSystemIsolate ?? false
+          ? const Icon(Icons.settings_applications)
+          : const Icon(Icons.call_split),
+      const SizedBox(width: denseSpacing),
+      Text(
+        ref == null ? 'isolate' : _isolateName(ref!),
+        style: textTheme.bodyText2,
+      ),
     );
   }
 

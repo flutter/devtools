@@ -33,7 +33,7 @@ class RenderingLayerVisualizer extends StatelessWidget {
         }
         if (snapshots.isEmpty) {
           return const Center(
-            child: Text(
+            Text(
               'Take a snapshot to view raster metrics for the current screen.',
             ),
           );
@@ -41,21 +41,19 @@ class RenderingLayerVisualizer extends StatelessWidget {
         return Split(
           axis: Axis.horizontal,
           initialFractions: const [0.5, 0.5],
-          children: [
-            LayerSnapshotTable(
-              controller: rasterMetricsController,
-              snapshots: snapshots,
-            ),
-            ValueListenableBuilder<LayerSnapshot?>(
-              valueListenable: rasterMetricsController.selectedSnapshot,
-              builder: (context, snapshot, _) {
-                return LayerImage(
-                  snapshot: snapshot,
-                  includeFullscreenButton: true,
-                );
-              },
-            ),
-          ],
+          LayerSnapshotTable(
+            controller: rasterMetricsController,
+            snapshots: snapshots,
+          ),
+          ValueListenableBuilder<LayerSnapshot?>(
+            valueListenable: rasterMetricsController.selectedSnapshot,
+            builder: (context, snapshot, _) {
+              return LayerImage(
+                snapshot: snapshot,
+                includeFullscreenButton: true,
+              );
+            },
+          ),
         );
       },
     );
@@ -88,7 +86,7 @@ class LayerSnapshotTable extends StatelessWidget {
       decoration: BoxDecoration(
         border: Border(right: borderSide),
       ),
-      child: FlatTable<LayerSnapshot>(
+      FlatTable<LayerSnapshot>(
         columns: _columns,
         data: snapshots,
         keyFactory: (LayerSnapshot snapshot) =>
@@ -160,39 +158,37 @@ class LayerImage extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        SizedBox(
-          width:
-              includeFullscreenButton ? _fullscreenButtonWidth : defaultSpacing,
+      SizedBox(
+        width:
+            includeFullscreenButton ? _fullscreenButtonWidth : defaultSpacing,
+      ),
+      Flexible(
+        Container(
+          color: color,
+          margin: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+          Image.memory(snapshot.bytes),
         ),
-        Flexible(
-          child: Container(
-            color: color,
-            margin: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-            child: Image.memory(snapshot.bytes),
-          ),
-        ),
-        includeFullscreenButton
-            ? Container(
-                padding: const EdgeInsets.only(bottom: denseSpacing),
-                alignment: Alignment.bottomRight,
-                child: IconButton(
-                  icon: Icon(
-                    Icons.fullscreen,
-                    size: defaultButtonHeight,
-                  ),
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) => LayerImageDialog(
-                        snapshot: snapshot,
-                      ),
-                    );
-                  },
+      ),
+      includeFullscreenButton
+          ? Container(
+              padding: const EdgeInsets.only(bottom: denseSpacing),
+              alignment: Alignment.bottomRight,
+              IconButton(
+                icon: Icon(
+                  Icons.fullscreen,
+                  size: defaultButtonHeight,
                 ),
-              )
-            : const SizedBox(width: defaultSpacing),
-      ],
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => LayerImageDialog(
+                      snapshot: snapshot,
+                    ),
+                  );
+                },
+              ),
+            )
+          : const SizedBox(width: defaultSpacing),
     );
   }
 }
@@ -215,7 +211,7 @@ class LayerImageDialog extends StatelessWidget {
       content: Container(
         width: mediaWidth - _padding,
         height: mediaHeight - _padding,
-        child: LayerImage(
+        LayerImage(
           snapshot: snapshot,
         ),
       ),

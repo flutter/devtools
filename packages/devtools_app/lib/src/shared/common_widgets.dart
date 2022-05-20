@@ -51,7 +51,7 @@ class PaddedDivider extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: padding,
-      child: const Divider(thickness: 1.0),
+      const Divider(thickness: 1.0),
     );
   }
 }
@@ -161,7 +161,7 @@ class IconLabelButton extends StatelessWidget {
         tooltipPadding: tooltipPadding,
         child: ElevatedButton(
           onPressed: onPressed,
-          child: iconLabel,
+          iconLabel,
         ),
       );
     }
@@ -175,18 +175,18 @@ class IconLabelButton extends StatelessWidget {
         width: !includeText(context, minScreenWidthForTextBeforeScaling)
             ? buttonMinWidth
             : null,
-        child: outlined
+        outlined
             ? OutlinedButton(
                 style: denseAwareOutlinedButtonStyle(
                   context,
                   minScreenWidthForTextBeforeScaling,
                 ),
                 onPressed: onPressed,
-                child: iconLabel,
+                iconLabel,
               )
             : TextButton(
                 onPressed: onPressed,
-                child: iconLabel,
+                iconLabel,
                 style: denseAwareOutlinedButtonStyle(
                   context,
                   minScreenWidthForTextBeforeScaling,
@@ -364,7 +364,7 @@ class ExpandAllButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return OutlinedButton(
       onPressed: onPressed,
-      child: const Text('Expand All'),
+      const Text('Expand All'),
     );
   }
 }
@@ -379,7 +379,7 @@ class CollapseAllButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return OutlinedButton(
       onPressed: onPressed,
-      child: const Text('Collapse All'),
+      const Text('Collapse All'),
     );
   }
 }
@@ -434,7 +434,7 @@ class RecordingInfo extends StatelessWidget {
       );
     }
     return Center(
-      child: child,
+      child,
     );
   }
 }
@@ -451,14 +451,12 @@ class RecordingStatus extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          'Recording $recordedObject',
-          style: Theme.of(context).subtleTextStyle,
-        ),
-        const SizedBox(height: defaultSpacing),
-        const CircularProgressIndicator(),
-      ],
+      Text(
+        'Recording $recordedObject',
+        style: Theme.of(context).subtleTextStyle,
+      ),
+      const SizedBox(height: defaultSpacing),
+      const CircularProgressIndicator(),
     );
   }
 }
@@ -478,7 +476,7 @@ class RecordingInstructions extends StatelessWidget {
   Widget build(BuildContext context) {
     final stopOrPauseRow = Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: isPause
+      isPause
           ? const [
               Text('Click the pause button '),
               Icon(Icons.pause),
@@ -492,17 +490,13 @@ class RecordingInstructions extends StatelessWidget {
     );
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('Click the record button '),
-            const Icon(Icons.fiber_manual_record),
-            Text(' to start recording $recordedObject.')
-          ],
-        ),
-        stopOrPauseRow,
-      ],
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        const Text('Click the record button '),
+        const Icon(Icons.fiber_manual_record),
+        Text(' to start recording $recordedObject.'),
+      ),
+      stopOrPauseRow,
     );
   }
 }
@@ -521,22 +515,20 @@ class ProcessingInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Column(
+      Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            'Processing $processedObject',
-            style: Theme.of(context).subtleTextStyle,
+        Text(
+          'Processing $processedObject',
+          style: Theme.of(context).subtleTextStyle,
+        ),
+        const SizedBox(height: defaultSpacing),
+        SizedBox(
+          width: 200.0,
+          height: defaultSpacing,
+          LinearProgressIndicator(
+            value: progressValue,
           ),
-          const SizedBox(height: defaultSpacing),
-          SizedBox(
-            width: 200.0,
-            height: defaultSpacing,
-            child: LinearProgressIndicator(
-              value: progressValue,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -587,7 +579,7 @@ class BulletSpacer extends StatelessWidget {
       width: width,
       height: DevToolsScaffold.actionWidgetSize,
       alignment: Alignment.center,
-      child: Text(
+      Text(
         '•',
         style: textStyle?.copyWith(color: mutedColor),
       ),
@@ -619,7 +611,7 @@ class Badge extends StatelessWidget {
         vertical: borderPadding,
         horizontal: badgePadding,
       ),
-      child: Text(
+      Text(
         text,
         // Use a slightly smaller font for the badge.
         style: (theme.primaryTextTheme.bodyText2 ?? const TextStyle())
@@ -671,7 +663,7 @@ class DevToolsTooltip extends StatelessWidget {
       padding: padding,
       textStyle: style,
       decoration: decoration,
-      child: child,
+      child,
     );
   }
 }
@@ -710,15 +702,15 @@ class DevToolsIconButton extends StatelessWidget {
         : iconWidget;
     return DevToolsTooltip(
       message: tooltip,
-      child: TextButton(
+      TextButton(
         onPressed: () {
           ga.select(gaScreen, gaSelection);
           onPressed();
         },
-        child: Container(
+        Container(
           height: defaultButtonHeight,
           width: defaultButtonHeight,
-          child: icon,
+          icon,
         ),
       ),
     );
@@ -747,14 +739,14 @@ class ToolbarAction extends StatelessWidget {
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),
       onPressed: onPressed,
-      child: Icon(icon, size: actionsIconSize),
+      Icon(icon, size: actionsIconSize),
     );
 
     return tooltip == null
         ? button
         : DevToolsTooltip(
             message: tooltip,
-            child: button,
+            button,
           );
   }
 }
@@ -792,7 +784,7 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
     final theme = Theme.of(context);
     return SizedBox.fromSize(
       size: preferredSize,
-      child: Container(
+      Container(
         decoration: BoxDecoration(
           border: Border(
             top: needsTopBorder ? defaultBorderSide(theme) : BorderSide.none,
@@ -804,14 +796,14 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
         ),
         padding: EdgeInsets.only(left: leftPadding, right: rightPadding),
         alignment: Alignment.centerLeft,
-        child: Row(
-          children: [
+        Row(
+          [
             Expanded(
-              child: DefaultTextStyle(
+              DefaultTextStyle(
                 maxLines: maxLines,
                 overflow: TextOverflow.ellipsis,
                 style: theme.textTheme.subtitle2!,
-                child: title,
+                title,
               ),
             ),
             ...actions,
@@ -861,7 +853,7 @@ class DevToolsToggleButtonGroup extends StatelessWidget {
         minWidth: defaultButtonHeight,
         minHeight: defaultButtonHeight,
       ),
-      children: children,
+      children,
       isSelected: selectedStates,
       onPressed: onPressed,
     );
@@ -908,9 +900,9 @@ class FilterButton extends StatelessWidget {
       message: 'Filter',
       // TODO(kenz): this SizedBox wrapper should be unnecessary once
       // https://github.com/flutter/flutter/issues/79894 is fixed.
-      child: SizedBox(
+      SizedBox(
         height: defaultButtonHeight,
-        child: OutlinedButton(
+        OutlinedButton(
           key: key,
           onPressed: onPressed,
           style: TextButton.styleFrom(
@@ -918,7 +910,7 @@ class FilterButton extends StatelessWidget {
                 ? theme.colorScheme.toggleButtonBackgroundColor
                 : Colors.transparent,
           ),
-          child: Icon(
+          Icon(
             Icons.filter_list,
             size: defaultIconSize,
             color: isFilterActive
@@ -957,15 +949,15 @@ class RoundedDropDownButton<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RoundedOutlinedBorder(
-      child: Center(
-        child: Container(
+      Center(
+        Container(
           padding: const EdgeInsets.only(
             left: defaultSpacing,
             right: borderPadding,
           ),
           height: defaultButtonHeight - 2.0, // subtract 2.0 for width of border
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<T>(
+          DropdownButtonHideUnderline(
+            DropdownButton<T>(
               value: value,
               onChanged: onChanged,
               isDense: isDense,
@@ -992,7 +984,7 @@ Widget inputDecorationSuffixButton(IconData icon, VoidCallback? onPressed) {
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: densePadding),
     width: defaultIconSize + denseSpacing,
-    child: IconButton(
+    IconButton(
       padding: const EdgeInsets.all(0.0),
       onPressed: onPressed,
       iconSize: defaultIconSize,
@@ -1024,13 +1016,13 @@ class OutlinedRowGroup extends StatelessWidget {
               bottom: BorderSide(color: color),
             ),
           ),
-          child: children[i],
+          children[i],
         ),
       ]);
     }
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: childrenWithOutlines,
+      childrenWithOutlines,
     );
   }
 }
@@ -1046,7 +1038,7 @@ class OutlineDecoration extends StatelessWidget {
       decoration: BoxDecoration(
         border: Border.all(color: Theme.of(context).focusColor),
       ),
-      child: child,
+      child,
     );
   }
 }
@@ -1060,7 +1052,7 @@ class RoundedOutlinedBorder extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: roundedBorderDecoration(context),
-      child: child,
+      child,
     );
   }
 }
@@ -1082,7 +1074,7 @@ class LeftBorder extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(border: leftBorder),
-      child: child,
+      child,
     );
   }
 }
@@ -1100,7 +1092,7 @@ class CenteredMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Text(
+      Text(
         message,
         style: Theme.of(context).textTheme.headline6,
       ),
@@ -1114,7 +1106,7 @@ class CenteredCircularProgressIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Center(
-      child: CircularProgressIndicator(),
+      CircularProgressIndicator(),
     );
   }
 }
@@ -1151,7 +1143,7 @@ class CircularIconButton extends StatelessWidget {
         ),
       ),
       onPressed: onPressed,
-      child: Icon(
+      Icon(
         icon,
         size: defaultIconSize,
         color: foregroundColor,
@@ -1276,7 +1268,7 @@ class BreadcrumbNavigator extends StatelessWidget {
     return Container(
       height: Breadcrumb.height + 2 * borderPadding,
       alignment: Alignment.centerLeft,
-      child: ListView.builder(
+      ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: itemCount,
         itemBuilder: builder,
@@ -1327,10 +1319,10 @@ class Breadcrumb extends StatelessWidget {
 
     return InkWell(
       onTap: onPressed,
-      child: Container(
+      Container(
         width: breadcrumbWidth,
         padding: const EdgeInsets.all(borderPadding),
-        child: CustomPaint(
+        CustomPaint(
           painter: _BreadcrumbPainter(
             textPainter: textPainter,
             isRoot: isRoot,
@@ -1445,23 +1437,21 @@ class MoreInfoLink extends StatelessWidget {
     return InkWell(
       onTap: () => _onLinkTap(context),
       borderRadius: BorderRadius.circular(defaultBorderRadius),
-      child: Padding(
+      Padding(
         padding: padding ?? const EdgeInsets.all(denseSpacing),
-        child: Row(
+        Row(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Text(
-              'More info',
-              style: theme.linkTextStyle,
-            ),
-            const SizedBox(width: densePadding),
-            Icon(
-              Icons.launch,
-              size: tooltipIconSize,
-              color: theme.colorScheme.toggleButtonsTitle,
-            )
-          ],
+          Text(
+            'More info',
+            style: theme.linkTextStyle,
+          ),
+          const SizedBox(width: densePadding),
+          Icon(
+            Icons.launch,
+            size: tooltipIconSize,
+            color: theme.colorScheme.toggleButtonsTitle,
+          ),
         ),
       ),
     );
@@ -1507,7 +1497,7 @@ Widget maybeWrapWithTooltip({
     return DevToolsTooltip(
       message: tooltip,
       padding: tooltipPadding,
-      child: child,
+      child,
     );
   }
   return child;
@@ -1528,21 +1518,19 @@ class Legend extends StatelessWidget {
         .joinWith(const SizedBox(height: denseRowSpacing));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: legendItems,
+      legendItems,
     );
   }
 
   Widget _legendItem(String description, Color? color) {
     return Row(
-      children: [
-        Container(
-          height: legendSquareSize,
-          width: legendSquareSize,
-          color: color,
-        ),
-        const SizedBox(width: denseSpacing),
-        Text(description),
-      ],
+      Container(
+        height: legendSquareSize,
+        width: legendSquareSize,
+        color: color,
+      ),
+      const SizedBox(width: denseSpacing),
+      Text(description),
     );
   }
 }
@@ -1687,47 +1675,43 @@ class CheckboxSetting extends StatelessWidget {
     if (description != null) {
       textContent = Row(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          textContent,
-          Expanded(
-            child: RichText(
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              text: TextSpan(
-                text: ' • $description',
-                style: theme.subtleTextStyle,
-              ),
+        textContent,
+        Expanded(
+          RichText(
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            text: TextSpan(
+              text: ' • $description',
+              style: theme.subtleTextStyle,
             ),
           ),
-        ],
+        ),
       );
     }
     final content = Row(
-      children: [
-        NotifierCheckbox(
-          notifier: notifier,
-          onChanged: (bool? value) {
-            final gaScreenName = this.gaScreenName;
-            final gaItem = this.gaItem;
-            if (gaScreenName != null && gaItem != null) {
-              ga.select(gaScreenName, gaItem);
-            }
-            final onChanged = this.onChanged;
-            if (onChanged != null) {
-              onChanged(value);
-            }
-          },
-          enabled: enabled,
-        ),
-        Flexible(
-          child: textContent,
-        ),
-      ],
+      NotifierCheckbox(
+        notifier: notifier,
+        onChanged: (bool? value) {
+          final gaScreenName = this.gaScreenName;
+          final gaItem = this.gaItem;
+          if (gaScreenName != null && gaItem != null) {
+            ga.select(gaScreenName, gaItem);
+          }
+          final onChanged = this.onChanged;
+          if (onChanged != null) {
+            onChanged(value);
+          }
+        },
+        enabled: enabled,
+      ),
+      Flexible(
+        textContent,
+      ),
     );
     if (tooltip != null && tooltip!.isNotEmpty) {
       return DevToolsTooltip(
         message: tooltip,
-        child: content,
+        content,
       );
     }
     return content;
@@ -1922,8 +1906,8 @@ class ElevatedCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(defaultBorderRadius),
       ),
-      child: Container(
-        child: child,
+      Container(
+        child,
         width: width,
         height: height,
         padding: padding ?? const EdgeInsets.all(denseSpacing),

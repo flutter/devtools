@@ -162,26 +162,24 @@ class _TreeViewItemState<T extends TreeNode<T>> extends State<_TreeViewItem<T>>
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.only(left: nodeIndent(widget.data)),
-      child: Container(
+      Container(
         color:
             widget.data.isSelected ? Theme.of(context).selectedRowColor : null,
-        child: Row(
+        Row(
           mainAxisSize: MainAxisSize.min,
-          children: [
-            widget.data.isExpandable
-                ? InkWell(
-                    onTap: _onExpanded,
-                    child: RotationTransition(
-                      turns: expandArrowAnimation,
-                      child: Icon(
-                        Icons.keyboard_arrow_down,
-                        size: defaultIconSize,
-                      ),
+          widget.data.isExpandable
+              ? InkWell(
+                  onTap: _onExpanded,
+                  RotationTransition(
+                    turns: expandArrowAnimation,
+                    Icon(
+                      Icons.keyboard_arrow_down,
+                      size: defaultIconSize,
                     ),
-                  )
-                : SizedBox(width: defaultIconSize),
-            Expanded(child: widget.buildDisplay(_onSelected)),
-          ],
+                  ),
+                )
+              : SizedBox(width: defaultIconSize),
+          Expanded(widget.buildDisplay(_onSelected)),
         ),
       ),
     );

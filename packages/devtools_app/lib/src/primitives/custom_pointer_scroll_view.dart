@@ -69,7 +69,7 @@ abstract class CustomPointerScrollView extends BoxScrollView {
       customPointerSignalHandler: customPointerSignalHandler,
     );
     return primary && scrollController != null
-        ? PrimaryScrollController.none(child: scrollable)
+        ? PrimaryScrollController.none(scrollable)
         : scrollable;
   }
 }
@@ -626,21 +626,21 @@ class _CustomPointerScrollableState extends State<CustomPointerScrollable>
       scrollable: this,
       position: position!,
       // TODO(ianh): Having all these global keys is sad.
-      child: Listener(
+      Listener(
         onPointerSignal:
             widget.customPointerSignalHandler ?? _receivedPointerSignal,
-        child: RawGestureDetector(
+        RawGestureDetector(
           key: _gestureDetectorKey,
           gestures: _gestureRecognizers,
           behavior: HitTestBehavior.opaque,
           excludeFromSemantics: widget.excludeFromSemantics,
-          child: Semantics(
+          Semantics(
             explicitChildNodes: !widget.excludeFromSemantics,
-            child: IgnorePointer(
+            IgnorePointer(
               key: _ignorePointerKey,
               ignoring: _shouldIgnorePointer,
               ignoringSemantics: false,
-              child: widget.viewportBuilder(context, position!),
+              widget.viewportBuilder(context, position!),
             ),
           ),
         ),
@@ -650,7 +650,7 @@ class _CustomPointerScrollableState extends State<CustomPointerScrollable>
     if (!widget.excludeFromSemantics) {
       result = _ScrollSemantics(
         key: _scrollSemanticsKey,
-        child: result,
+        result,
         position: position!,
         allowImplicitScrolling: widget.physics?.allowImplicitScrolling ??
             _physics!.allowImplicitScrolling,

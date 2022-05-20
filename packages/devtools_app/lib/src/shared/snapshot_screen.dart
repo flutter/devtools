@@ -69,29 +69,24 @@ class _SnapshotScreenBodyState extends State<SnapshotScreenBody> {
   Widget build(BuildContext context) {
     final routerDelegate = DevToolsRouterDelegate.of(context);
     return Column(
-      children: [
-        Row(
-          children: [
-            ExitOfflineButton(
-              onPressed: () {
-                offlineController.exitOfflineMode();
-                reset();
-                // Use Router.neglect to replace the current history entry with
-                // the homepage so that clicking Back will not return here.
-                Router.neglect(
-                  context,
-                  () => routerDelegate.navigateHome(clearScreenParam: true),
-                );
-              },
-            ),
-          ],
+      Row(
+        ExitOfflineButton(
+          onPressed: () {
+            offlineController.exitOfflineMode();
+            reset();
+            // Use Router.neglect to replace the current history entry with
+            // the homepage so that clicking Back will not return here.
+            Router.neglect(
+              context,
+              () => routerDelegate.navigateHome(clearScreenParam: true),
+            );
+          },
         ),
-        const SizedBox(height: denseRowSpacing),
-        Expanded(
-          child:
-              _screen != null ? _screen!.build(context) : _buildSnapshotError(),
-        ),
-      ],
+      ),
+      const SizedBox(height: denseRowSpacing),
+      Expanded(
+        _screen != null ? _screen!.build(context) : _buildSnapshotError(),
+      ),
     );
   }
 

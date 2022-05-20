@@ -38,7 +38,7 @@ class _LayoutExplorerTabState extends State<LayoutExplorerTab>
       return BoxLayoutExplorerWidget(controller);
     }
     return Center(
-      child: Text(
+      Text(
         node != null
             ? 'Currently, Layout Explorer only supports Box and Flex-based widgets.'
             : 'Select a widget to view its layout.',

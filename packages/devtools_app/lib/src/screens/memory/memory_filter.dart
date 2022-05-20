@@ -193,35 +193,33 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
   Widget applyAndCancelButton() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        DialogApplyButton(
-          onPressed: () {
-            // Re-generate librariesFiltered
-            widget.controller.libraryFilters.clearFilters();
-            // Re-filter the groups.
-            widget.controller.libraryRoot = null;
-            if (widget.controller.lastSnapshot != null) {
-              widget.controller.heapGraph!.computeFilteredGroups();
-              widget.controller.computeAllLibraries(
-                graph: widget.controller.lastSnapshot!.snapshotGraph,
-              );
-            }
+      DialogApplyButton(
+        onPressed: () {
+          // Re-generate librariesFiltered
+          widget.controller.libraryFilters.clearFilters();
+          // Re-filter the groups.
+          widget.controller.libraryRoot = null;
+          if (widget.controller.lastSnapshot != null) {
+            widget.controller.heapGraph!.computeFilteredGroups();
+            widget.controller.computeAllLibraries(
+              graph: widget.controller.lastSnapshot!.snapshotGraph,
+            );
+          }
 
-            widget.controller.updateFilter();
-          },
-        ),
-        const SizedBox(width: defaultSpacing),
-        DialogCancelButton(
-          cancelAction: () {
-            widget.controller.filterPrivateClasses.value =
-                oldFilterPrivateClassesValue;
-            widget.controller.filterZeroInstances.value =
-                oldFilterZeroInstancesValue;
-            widget.controller.filterLibraryNoInstances.value =
-                oldFilterLibraryNoInstancesValue;
-          },
-        ),
-      ],
+          widget.controller.updateFilter();
+        },
+      ),
+      const SizedBox(width: defaultSpacing),
+      DialogCancelButton(
+        cancelAction: () {
+          widget.controller.filterPrivateClasses.value =
+              oldFilterPrivateClassesValue;
+          widget.controller.filterZeroInstances.value =
+              oldFilterZeroInstancesValue;
+          widget.controller.filterLibraryNoInstances.value =
+              oldFilterLibraryNoInstancesValue;
+        },
+      ),
     );
   }
 
@@ -241,47 +239,39 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
       includeDivider: false,
       content: Container(
         width: defaultDialogWidth,
-        child: Padding(
+        Padding(
           padding: const EdgeInsets.only(left: 15),
-          child: Column(
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ...dialogSubHeader(theme, 'Snapshot Filters'),
-                  Row(
-                    children: [
-                      NotifierCheckbox(
-                        notifier: widget.controller.filterPrivateClasses,
-                      ),
-                      const DevToolsTooltip(
-                        message: 'Hide class names beginning with '
-                            'an underscore e.g., _className',
-                        child: Text('Hide Private Classes'),
-                      ),
-                    ],
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              [
+                ...dialogSubHeader(theme, 'Snapshot Filters'),
+                Row(
+                  NotifierCheckbox(
+                    notifier: widget.controller.filterPrivateClasses,
                   ),
-                  Row(
-                    children: [
-                      NotifierCheckbox(
-                        notifier: widget.controller.filterZeroInstances,
-                      ),
-                      const Text('Hide Classes with No Instances'),
-                    ],
+                  const DevToolsTooltip(
+                    message: 'Hide class names beginning with '
+                        'an underscore e.g., _className',
+                    Text('Hide Private Classes'),
                   ),
-                  Row(
-                    children: [
-                      NotifierCheckbox(
-                        notifier: widget.controller.filterLibraryNoInstances,
-                      ),
-                      const Text('Hide Library with No Instances'),
-                    ],
+                ),
+                Row(
+                  NotifierCheckbox(
+                    notifier: widget.controller.filterZeroInstances,
                   ),
-                  applyAndCancelButton(),
-                ],
-              ),
-            ],
+                  const Text('Hide Classes with No Instances'),
+                ),
+                Row(
+                  NotifierCheckbox(
+                    notifier: widget.controller.filterLibraryNoInstances,
+                  ),
+                  const Text('Hide Library with No Instances'),
+                ),
+                applyAndCancelButton(),
+              ],
+            ),
           ),
         ),
       ),

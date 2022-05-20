@@ -178,7 +178,7 @@ class _TreemapState extends State<Treemap> {
               newHeight,
             ),
             node: child,
-            child: Treemap.fromRoot(
+            Treemap.fromRoot(
               rootNode: child,
               levelsVisible: widget.levelsVisible - 1,
               onRootChangedCallback: widget.onRootChangedCallback,
@@ -320,7 +320,7 @@ class _TreemapState extends State<Treemap> {
           pivotBestHeight,
         ),
         node: pivotNode,
-        child: Treemap.fromRoot(
+        Treemap.fromRoot(
           rootNode: pivotNode,
           levelsVisible: widget.levelsVisible - 1,
           onRootChangedCallback: widget.onRootChangedCallback,
@@ -392,14 +392,14 @@ class _TreemapState extends State<Treemap> {
             key: Key(tooltipMessage),
             message: tooltipMessage,
             waitDuration: tooltipWaitLong,
-            child: MouseRegion(
+            MouseRegion(
               onHover: (event) => _onHover(event, positionedChildren),
               cursor: SystemMouseCursors.click,
-              child: GestureDetector(
+              GestureDetector(
                 onTapDown: (details) {
                   widget.onRootChangedCallback(hoveredNode);
                 },
-                child: CustomPaint(
+                CustomPaint(
                   painter: MultiCellPainter(nodes: positionedChildren),
                   size: Size(constraints.maxWidth, constraints.maxHeight),
                 ),
@@ -408,7 +408,7 @@ class _TreemapState extends State<Treemap> {
           );
         } else {
           // Else all widgets should still be positioned Treemap widgets.
-          return Stack(children: positionedChildren);
+          return Stack(positionedChildren);
         }
       },
     );
@@ -430,7 +430,7 @@ class _TreemapState extends State<Treemap> {
     if (widget.rootNode!.children.isNotEmpty) {
       return Padding(
         padding: const EdgeInsets.all(1.0),
-        child: buildTreemapFromNodes(context),
+        buildTreemapFromNodes(context),
       );
     } else {
       // If given a root node but its children are empty, draw itself.
@@ -440,11 +440,11 @@ class _TreemapState extends State<Treemap> {
 
   Widget buildTreemapFromNodes(BuildContext context) {
     return Column(
-      children: [
+      [
         if (widget.height > Treemap.minHeightToDisplayTitleText)
           buildTitleText(context),
         Expanded(
-          child: Treemap.fromNodes(
+          Treemap.fromNodes(
             nodes: widget.rootNode!.children,
             levelsVisible: widget.levelsVisible,
             onRootChangedCallback: widget.onRootChangedCallback,
@@ -458,10 +458,10 @@ class _TreemapState extends State<Treemap> {
 
   Column buildTreemapFromRoot(BuildContext context) {
     return Column(
-      children: [
+      [
         if (widget.isOutermostLevel) buildTitleText(context),
         Expanded(
-          child: widget.isOutermostLevel
+          widget.isOutermostLevel
               ? buildCell()
               : buildSelectable(child: buildCell()),
         ),
@@ -475,8 +475,8 @@ class _TreemapState extends State<Treemap> {
         color: widget.rootNode!.displayColor,
         border: Border.all(color: Colors.black87),
       ),
-      child: Center(
-        child: widget.height > Treemap.minHeightToDisplayCellText
+      Center(
+        widget.height > Treemap.minHeightToDisplayCellText
             ? buildNameAndSizeText(
                 textColor:
                     widget.rootNode!.showDiff ? Colors.white : Colors.black,
@@ -498,7 +498,7 @@ class _TreemapState extends State<Treemap> {
           decoration: BoxDecoration(
             border: Border.all(color: Colors.black87),
           ),
-          child: buildNameAndSizeText(
+          buildNameAndSizeText(
             textColor:
                 (Theme.of(context).textTheme.bodyText2 ?? const TextStyle())
                     .color,
@@ -525,7 +525,7 @@ class _TreemapState extends State<Treemap> {
     final pathFromRoot = widget.rootNode!.pathFromRoot();
     return Padding(
       padding: const EdgeInsets.only(bottom: denseRowSpacing),
-      child: BreadcrumbNavigator.builder(
+      BreadcrumbNavigator.builder(
         itemCount: pathFromRoot.length,
         builder: (context, index) {
           final node = pathFromRoot[index];
@@ -552,11 +552,11 @@ class _TreemapState extends State<Treemap> {
     return DevToolsTooltip(
       message: widget.rootNode!.displayText(),
       waitDuration: tooltipWaitLong,
-      child: InkWell(
+      InkWell(
         onTap: () {
           widget.onRootChangedCallback(newRoot);
         },
-        child: child,
+        child,
       ),
     );
   }

@@ -38,19 +38,17 @@ class CustomIcon extends StatelessWidget {
     return Container(
       width: baseIcon.width,
       height: baseIcon.height,
-      child: Stack(
+      Stack(
         alignment: AlignmentDirectional.center,
-        children: <Widget>[
-          baseIcon,
-          Text(
-            text,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: scaleByFontFactor(9.0),
-              color: const Color(0xFF231F20),
-            ),
+        baseIcon,
+        Text(
+          text,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: scaleByFontFactor(9.0),
+            color: const Color(0xFF231F20),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -82,7 +80,7 @@ class CircleIcon extends StatelessWidget {
         color: color,
       ),
       alignment: Alignment.center,
-      child: Text(
+      Text(
         text,
         textAlign: TextAlign.center,
         style: TextStyle(

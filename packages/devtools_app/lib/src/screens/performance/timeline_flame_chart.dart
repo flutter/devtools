@@ -53,22 +53,20 @@ class TimelineEventsView extends StatelessWidget {
     } else if (timelineEmpty) {
       return Center(
         key: emptyTimelineKey,
-        child: Row(
+        Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'No timeline events. Try clicking the refresh button ',
-              style: Theme.of(context).subtleTextStyle,
-            ),
-            Icon(
-              Icons.refresh,
-              size: defaultIconSize,
-            ),
-            Text(
-              ' to load more data.',
-              style: Theme.of(context).subtleTextStyle,
-            ),
-          ],
+          Text(
+            'No timeline events. Try clicking the refresh button ',
+            style: Theme.of(context).subtleTextStyle,
+          ),
+          Icon(
+            Icons.refresh,
+            size: defaultIconSize,
+          ),
+          Text(
+            ' to load more data.',
+            style: Theme.of(context).subtleTextStyle,
+          ),
         ),
       );
     } else {
@@ -572,13 +570,13 @@ class TimelineFlameChartState
           padding: EdgeInsets.only(top: topSpacer, bottom: bottomSpacer),
           alignment: Alignment.topLeft,
           height: group.displaySizePx + topSpacer + bottomSpacer,
-          child: Container(
+          Container(
             padding: const EdgeInsets.symmetric(
               horizontal: densePadding,
               vertical: rowPadding,
             ),
             color: backgroundWithOpacity,
-            child: Text(
+            Text(
               groupName,
               style: TextStyle(color: colorScheme.chartTextColor),
             ),
@@ -592,11 +590,11 @@ class TimelineFlameChartState
       left: 0.0,
       height: constraints.maxHeight,
       width: widget.startInset,
-      child: IgnorePointer(
-        child: ListView(
+      IgnorePointer(
+        ListView(
           physics: const ClampingScrollPhysics(),
           controller: _groupLabelScrollController,
-          children: children,
+          children,
         ),
       ),
     );
@@ -654,7 +652,7 @@ class TimelineFlameChartState
         left: 0.0,
         height: constraints.maxHeight,
         width: threadButtonContainerWidth,
-        child: ListView.builder(
+        ListView.builder(
           physics: const ClampingScrollPhysics(),
           controller: _previousInGroupButtonsScrollController,
           itemCount: eventGroups.length,
@@ -666,7 +664,7 @@ class TimelineFlameChartState
         right: 0.0,
         height: constraints.maxHeight,
         width: threadButtonContainerWidth,
-        child: ListView.builder(
+        ListView.builder(
           physics: const ClampingScrollPhysics(),
           controller: _nextInGroupButtonsScrollController,
           itemCount: eventGroups.length,
@@ -1249,7 +1247,7 @@ class _NavigateInThreadInButtonState extends State<NavigateInThreadInButton>
       height: widget.group.displaySizePx,
       width: widget.threadButtonContainerWidth,
       alignment: useSmallButton ? Alignment.bottomCenter : Alignment.center,
-      child: ThreadNavigatorButton(
+      ThreadNavigatorButton(
         useSmallButton: useSmallButton,
         backgroundColor: widget.backgroundColor,
         tooltip:
@@ -1290,9 +1288,9 @@ class ThreadNavigatorButton extends StatelessWidget {
       // Using [buttonMinWidth] will result in a square button.
       height: useSmallButton ? smallButtonHeight : buttonMinWidth,
       width: buttonMinWidth,
-      child: DevToolsTooltip(
+      DevToolsTooltip(
         message: tooltip,
-        child: IconButton(
+        IconButton(
           padding: EdgeInsets.zero,
           icon: Icon(
             icon,

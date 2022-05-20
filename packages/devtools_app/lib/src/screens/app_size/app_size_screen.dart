@@ -68,7 +68,7 @@ class AppSizeScreen extends Screen {
     // and drop events will be absorbed by it, meaning drag and drop actions
     // will be a no-op if they occur over this area. [DragAndDrop] widgets
     // lower in the tree will have priority over this one.
-    return const DragAndDrop(child: AppSizeBody());
+    return const DragAndDrop(AppSizeBody());
   }
 }
 
@@ -176,64 +176,56 @@ class _AppSizeBodyState extends State<AppSizeBody>
   Widget build(BuildContext context) {
     if (_preLoadingData) {
       return Center(
-        child: Column(
+        Column(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              devToolsExtensionPoints.loadingAppSizeDataMessage(),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: defaultSpacing),
-            const CircularProgressIndicator(),
-          ],
+          Text(
+            devToolsExtensionPoints.loadingAppSizeDataMessage(),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: defaultSpacing),
+          const CircularProgressIndicator(),
         ),
       );
     }
     final currentTab = tabs[_tabController.index];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          height: defaultButtonHeight,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              TabBar(
-                labelColor: Theme.of(context).textTheme.bodyText1!.color,
-                isScrollable: true,
-                controller: _tabController,
-                tabs: tabs,
-              ),
-              Row(
-                children: [
-                  if (currentTab.key == AppSizeScreen.diffTabKey)
-                    _buildDiffTreeTypeDropdown(),
-                  const SizedBox(width: defaultSpacing),
-                  _buildClearButton(currentTab.key!),
-                ],
-              ),
-            ],
-          ),
-        ),
-        Expanded(
-          child: TabBarView(
-            physics: defaultTabBarViewPhysics,
-            children: const [
-              AnalysisView(),
-              DiffView(),
-            ],
+      SizedBox(
+        height: defaultButtonHeight,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          TabBar(
+            labelColor: Theme.of(context).textTheme.bodyText1!.color,
+            isScrollable: true,
             controller: _tabController,
+            tabs: tabs,
+          ),
+          Row(
+            [
+              if (currentTab.key == AppSizeScreen.diffTabKey)
+                _buildDiffTreeTypeDropdown(),
+              const SizedBox(width: defaultSpacing),
+              _buildClearButton(currentTab.key!),
+            ],
           ),
         ),
-      ],
+      ),
+      Expanded(
+        TabBarView(
+          physics: defaultTabBarViewPhysics,
+          AnalysisView(),
+          DiffView(),
+          controller: _tabController,
+        ),
+      ),
     );
   }
 
   DropdownButtonHideUnderline _buildDiffTreeTypeDropdown() {
     return DropdownButtonHideUnderline(
       key: AppSizeScreen.dropdownKey,
-      child: DropdownButton<DiffTreeType>(
+      DropdownButton<DiffTreeType>(
         value: _controller.activeDiffTreeType.value,
         items: [
           _buildMenuItem(DiffTreeType.combined),
@@ -250,7 +242,7 @@ class _AppSizeBodyState extends State<AppSizeBody>
   DropdownMenuItem<DiffTreeType> _buildMenuItem(DiffTreeType diffTreeType) {
     return DropdownMenuItem<DiffTreeType>(
       value: diffTreeType,
-      child: Text(diffTreeType.display),
+      Text(diffTreeType.display),
     );
   }
 
@@ -302,52 +294,46 @@ class _AnalysisViewState extends State<AnalysisView> with AutoDisposeMixin {
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: [
-        Expanded(
-          child: analysisRoot != null
-              ? _buildTreemapAndTableSplitView()
-              : _buildImportFileView(),
-        ),
-      ],
+      Expanded(
+        analysisRoot != null
+            ? _buildTreemapAndTableSplitView()
+            : _buildImportFileView(),
+      ),
     );
   }
 
   Widget _buildTreemapAndTableSplitView() {
     final analysisCallGraphRoot = _controller.analysisCallGraphRoot.value;
     return OutlineDecoration(
-      child: Column(
-        children: [
-          AreaPaneHeader(
-            title: Text(_generateSingleFileHeaderText()),
-            maxLines: 2,
-            needsTopBorder: false,
-          ),
-          Expanded(
-            child: Split(
-              axis: Axis.vertical,
-              children: [
-                _buildTreemap(),
-                Row(
-                  children: [
-                    Flexible(
-                      child: AppSizeAnalysisTable(rootNode: analysisRoot!),
-                    ),
-                    if (analysisCallGraphRoot != null)
-                      Flexible(
-                        child: CallGraphWithDominators(
-                          callGraphRoot: analysisCallGraphRoot,
-                        ),
-                      ),
-                  ],
+      Column(
+        AreaPaneHeader(
+          title: Text(_generateSingleFileHeaderText()),
+          maxLines: 2,
+          needsTopBorder: false,
+        ),
+        Expanded(
+          Split(
+            axis: Axis.vertical,
+            _buildTreemap(),
+            Row(
+              [
+                Flexible(
+                  AppSizeAnalysisTable(rootNode: analysisRoot!),
                 ),
-              ],
-              initialFractions: const [
-                initialFractionForTreemap,
-                initialFractionForTreeTable,
+                if (analysisCallGraphRoot != null)
+                  Flexible(
+                    CallGraphWithDominators(
+                      callGraphRoot: analysisCallGraphRoot,
+                    ),
+                  ),
               ],
             ),
+            initialFractions: const [
+              initialFractionForTreemap,
+              initialFractionForTreeTable,
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -383,7 +369,7 @@ class _AnalysisViewState extends State<AnalysisView> with AutoDisposeMixin {
       builder: (context, processing, _) {
         if (processing) {
           return Center(
-            child: Text(
+            Text(
               AppSizeScreen.loadingMessage,
               textAlign: TextAlign.center,
               style: TextStyle(
@@ -393,23 +379,21 @@ class _AnalysisViewState extends State<AnalysisView> with AutoDisposeMixin {
           );
         } else {
           return Column(
-            children: [
-              Flexible(
-                child: FileImportContainer(
-                  title: 'Size analysis',
-                  instructions: AnalysisView.importInstructions,
-                  actionText: 'Analyze Size',
-                  onAction: (jsonFile) {
-                    _controller.loadTreeFromJsonFile(
-                      jsonFile: jsonFile,
-                      onError: (error) {
-                        if (mounted) Notifications.of(context)!.push(error);
-                      },
-                    );
-                  },
-                ),
+            Flexible(
+              FileImportContainer(
+                title: 'Size analysis',
+                instructions: AnalysisView.importInstructions,
+                actionText: 'Analyze Size',
+                onAction: (jsonFile) {
+                  _controller.loadTreeFromJsonFile(
+                    jsonFile: jsonFile,
+                    onError: (error) {
+                      if (mounted) Notifications.of(context)!.push(error);
+                    },
+                  );
+                },
               ),
-            ],
+            ),
           );
         }
       },
@@ -463,52 +447,46 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: [
-        Expanded(
-          child: diffRoot != null
-              ? _buildTreemapAndTableSplitView()
-              : _buildImportDiffView(),
-        ),
-      ],
+      Expanded(
+        diffRoot != null
+            ? _buildTreemapAndTableSplitView()
+            : _buildImportDiffView(),
+      ),
     );
   }
 
   Widget _buildTreemapAndTableSplitView() {
     final diffCallGraphRoot = _controller.diffCallGraphRoot.value;
     return OutlineDecoration(
-      child: Column(
-        children: [
-          AreaPaneHeader(
-            title: Text(_generateDualFileHeaderText()),
-            maxLines: 2,
-            needsTopBorder: false,
-          ),
-          Expanded(
-            child: Split(
-              axis: Axis.vertical,
-              children: [
-                _buildTreemap(),
-                Row(
-                  children: [
-                    Flexible(
-                      child: AppSizeDiffTable(rootNode: diffRoot!),
-                    ),
-                    if (diffCallGraphRoot != null)
-                      Flexible(
-                        child: CallGraphWithDominators(
-                          callGraphRoot: diffCallGraphRoot,
-                        ),
-                      ),
-                  ],
+      Column(
+        AreaPaneHeader(
+          title: Text(_generateDualFileHeaderText()),
+          maxLines: 2,
+          needsTopBorder: false,
+        ),
+        Expanded(
+          Split(
+            axis: Axis.vertical,
+            _buildTreemap(),
+            Row(
+              [
+                Flexible(
+                  AppSizeDiffTable(rootNode: diffRoot!),
                 ),
-              ],
-              initialFractions: const [
-                initialFractionForTreemap,
-                initialFractionForTreeTable,
+                if (diffCallGraphRoot != null)
+                  Flexible(
+                    CallGraphWithDominators(
+                      callGraphRoot: diffCallGraphRoot,
+                    ),
+                  ),
               ],
             ),
+            initialFractions: const [
+              initialFractionForTreemap,
+              initialFractionForTreeTable,
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -535,24 +513,22 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
         } else {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(
-                child: DualFileImportContainer(
-                  firstFileTitle: 'Old',
-                  secondFileTitle: 'New',
-                  // TODO(kenz): perhaps bold "original" and "modified".
-                  firstInstructions: DiffView.importOldInstructions,
-                  secondInstructions: DiffView.importNewInstructions,
-                  actionText: 'Analyze Diff',
-                  onAction: (oldFile, newFile, onError) =>
-                      _controller.loadDiffTreeFromJsonFiles(
-                    oldFile: oldFile,
-                    newFile: newFile,
-                    onError: onError,
-                  ),
+            Expanded(
+              DualFileImportContainer(
+                firstFileTitle: 'Old',
+                secondFileTitle: 'New',
+                // TODO(kenz): perhaps bold "original" and "modified".
+                firstInstructions: DiffView.importOldInstructions,
+                secondInstructions: DiffView.importNewInstructions,
+                actionText: 'Analyze Diff',
+                onAction: (oldFile, newFile, onError) =>
+                    _controller.loadDiffTreeFromJsonFiles(
+                  oldFile: oldFile,
+                  newFile: newFile,
+                  onError: onError,
                 ),
               ),
-            ],
+            ),
           );
         }
       },
@@ -561,7 +537,7 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
 
   Widget _buildLoadingMessage() {
     return Center(
-      child: Text(
+      Text(
         AppSizeScreen.loadingMessage,
         textAlign: TextAlign.center,
         style: TextStyle(

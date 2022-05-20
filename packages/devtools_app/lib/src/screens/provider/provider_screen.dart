@@ -101,49 +101,45 @@ class ProviderScreenBody extends ConsumerWidget {
     return Split(
       axis: splitAxis,
       initialFractions: const [0.33, 0.67],
-      children: [
-        OutlineDecoration(
-          child: Column(
-            children: const [
-              AreaPaneHeader(
-                needsTopBorder: false,
-                title: Text('Providers'),
-              ),
+      OutlineDecoration(
+        Column(
+          AreaPaneHeader(
+            needsTopBorder: false,
+            title: Text('Providers'),
+          ),
+          Expanded(
+            ProviderList(),
+          ),
+        ),
+      ),
+      OutlineDecoration(
+        Column(
+          [
+            AreaPaneHeader(
+              needsTopBorder: false,
+              title: Text(detailsTitleText),
+              actions: [
+                SettingsOutlinedButton(
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (_) => _StateInspectorSettingsDialog(),
+                    );
+                  },
+                  label: _StateInspectorSettingsDialog.title,
+                ),
+              ],
+            ),
+            if (selectedProviderId != null)
               Expanded(
-                child: ProviderList(),
-              ),
-            ],
-          ),
+                InstanceViewer(
+                  rootPath: InstancePath.fromProviderId(selectedProviderId),
+                  showInternalProperties: ref.watch(_showInternals),
+                ),
+              )
+          ],
         ),
-        OutlineDecoration(
-          child: Column(
-            children: [
-              AreaPaneHeader(
-                needsTopBorder: false,
-                title: Text(detailsTitleText),
-                actions: [
-                  SettingsOutlinedButton(
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (_) => _StateInspectorSettingsDialog(),
-                      );
-                    },
-                    label: _StateInspectorSettingsDialog.title,
-                  ),
-                ],
-              ),
-              if (selectedProviderId != null)
-                Expanded(
-                  child: InstanceViewer(
-                    rootPath: InstancePath.fromProviderId(selectedProviderId),
-                    showInternalProperties: ref.watch(_showInternals),
-                  ),
-                )
-            ],
-          ),
-        ),
-      ],
+      ),
     );
   }
 }
@@ -170,25 +166,20 @@ class _StateInspectorSettingsDialog extends ConsumerWidget {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          InkWell(
-            onTap: () =>
-                ref.read(_showInternals.notifier).update((state) => !state),
-            child: Row(
-              children: [
-                Checkbox(
-                  value: ref.watch(_showInternals),
-                  onChanged: (_) => ref
-                      .read(_showInternals.notifier)
-                      .update((state) => !state),
-                ),
-                const Text(
-                  'Show private properties inherited from SDKs/packages',
-                ),
-              ],
+        InkWell(
+          onTap: () =>
+              ref.read(_showInternals.notifier).update((state) => !state),
+          Row(
+            Checkbox(
+              value: ref.watch(_showInternals),
+              onChanged: (_) =>
+                  ref.read(_showInternals.notifier).update((state) => !state),
             ),
-          )
-        ],
+            const Text(
+              'Show private properties inherited from SDKs/packages',
+            ),
+          ),
+        ),
       ),
       actions: [
         DialogCloseButton(),

@@ -147,14 +147,12 @@ abstract class Screen {
       builder: (context, count, _) {
         final tab = Tab(
           key: tabKey,
-          child: Row(
-            children: <Widget>[
-              Icon(icon, size: defaultIconSize),
-              Padding(
-                padding: const EdgeInsets.only(left: denseSpacing),
-                child: Text(title),
-              ),
-            ],
+          Row(
+            Icon(icon, size: defaultIconSize),
+            Padding(
+              padding: const EdgeInsets.only(left: denseSpacing),
+              Text(title),
+            ),
           ),
         );
 
@@ -173,13 +171,11 @@ abstract class Screen {
           return LayoutBuilder(
             builder: (context, constraints) {
               return Stack(
-                children: [
-                  CustomPaint(
-                    size: Size(defaultIconSize + denseSpacing + titleWidth, 0),
-                    painter: BadgePainter(number: count),
-                  ),
-                  tab,
-                ],
+                CustomPaint(
+                  size: Size(defaultIconSize + denseSpacing + titleWidth, 0),
+                  painter: BadgePainter(number: count),
+                ),
+                tab,
               );
             },
           );

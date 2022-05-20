@@ -24,23 +24,19 @@ class DevToolsAboutDialog extends StatelessWidget {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+        [
           const SelectableText('DevTools version ${devtools.version}'),
           const SizedBox(height: defaultSpacing),
           ...dialogSubHeader(theme, 'Feedback'),
           Wrap(
-            children: const [
-              Text('Encountered an issue? Let us know at '),
-              _FeedbackLink(),
-              Text(','),
-            ],
+            Text('Encountered an issue? Let us know at '),
+            _FeedbackLink(),
+            Text(','),
           ),
           Wrap(
-            children: const [
-              Text('or connect with us on '),
-              _DiscordLink(),
-              Text('.'),
-            ],
+            Text('or connect with us on '),
+            _DiscordLink(),
+            Text('.'),
           )
         ],
       ),
@@ -102,7 +98,7 @@ class OpenAboutAction extends StatelessWidget {
   Widget build(BuildContext context) {
     return DevToolsTooltip(
       message: 'About DevTools',
-      child: InkWell(
+      InkWell(
         onTap: () async {
           unawaited(
             showDialog(
@@ -111,11 +107,11 @@ class OpenAboutAction extends StatelessWidget {
             ),
           );
         },
-        child: Container(
+        Container(
           width: DevToolsScaffold.actionWidgetSize,
           height: DevToolsScaffold.actionWidgetSize,
           alignment: Alignment.center,
-          child: Icon(
+          Icon(
             Icons.help_outline,
             size: actionsIconSize,
           ),

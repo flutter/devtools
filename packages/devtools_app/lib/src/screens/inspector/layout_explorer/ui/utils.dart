@@ -67,37 +67,37 @@ class BorderLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Stack(
-      children: <Widget>[
+      <Widget>[
         Center(
-          child: Container(
+          Container(
             margin: EdgeInsets.only(
               left: leftWidth ?? 0,
               right: rightWidth ?? 0,
               top: topHeight ?? 0,
               bottom: bottomHeight ?? 0,
             ),
-            child: center,
+            center,
           ),
         ),
         if (top != null)
           Align(
             alignment: Alignment.topCenter,
-            child: Container(height: topHeight, child: top),
+            Container(height: topHeight, top),
           ),
         if (left != null)
           Align(
             alignment: Alignment.centerLeft,
-            child: Container(width: leftWidth, child: left),
+            Container(width: leftWidth, left),
           ),
         if (right != null)
           Align(
             alignment: Alignment.centerRight,
-            child: Container(width: rightWidth, child: right),
+            Container(width: rightWidth, right),
           ),
         if (bottom != null)
           Align(
             alignment: Alignment.bottomCenter,
-            child: Container(height: bottomHeight, child: bottom),
+            Container(height: bottomHeight, bottom),
           )
       ],
     );
@@ -114,7 +114,7 @@ class Truncateable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Flexible(flex: truncate ? 1 : 0, child: child);
+    return Flexible(flex: truncate ? 1 : 0, child);
   }
 }
 
@@ -168,12 +168,12 @@ class WidgetVisualizer extends StatelessWidget {
           maxWidth: constraints.maxWidth + boxAdjust,
           maxHeight: constraints.maxHeight + boxAdjust,
           minHeight: constraints.minHeight + boxAdjust,
-          child: Container(
-            child: Stack(
-              children: [
+          Container(
+            Stack(
+              [
                 if (drawOverflow)
                   Positioned.fill(
-                    child: CustomPaint(
+                    CustomPaint(
                       painter: OverflowIndicatorPainter(
                         overflowSide!,
                         _overflowIndicatorSize,
@@ -189,42 +189,40 @@ class WidgetVisualizer extends StatelessWidget {
                         ? _overflowIndicatorSize
                         : 0.0,
                   ),
-                  child: Column(
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IntrinsicHeight(
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Flexible(
-                              child: Container(
-                                constraints: BoxConstraints(
-                                  maxWidth: largeTitle
-                                      ? defaultMaxRenderWidth
-                                      : minRenderWidth *
-                                          widgetTitleMaxWidthPercentage,
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    title,
-                                    style: TextStyle(
-                                      color: colorScheme.widgetNameColor,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                decoration: BoxDecoration(color: borderColor),
-                                padding: const EdgeInsets.all(4.0),
+                    IntrinsicHeight(
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        [
+                          Flexible(
+                            Container(
+                              constraints: BoxConstraints(
+                                maxWidth: largeTitle
+                                    ? defaultMaxRenderWidth
+                                    : minRenderWidth *
+                                        widgetTitleMaxWidthPercentage,
                               ),
+                              Center(
+                                Text(
+                                  title,
+                                  style: TextStyle(
+                                    color: colorScheme.widgetNameColor,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              decoration: BoxDecoration(color: borderColor),
+                              padding: const EdgeInsets.all(4.0),
                             ),
-                            if (hintLocal != null) Flexible(child: hintLocal),
-                          ],
-                        ),
+                          ),
+                          if (hintLocal != null) Flexible(hintLocal),
+                        ],
                       ),
-                      Expanded(child: child),
-                    ],
+                    ),
+                    Expanded(child),
                   ),
                 ),
               ],
@@ -441,9 +439,9 @@ class LayoutExplorerBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Positioned.fill(
-      child: Opacity(
+      Opacity(
         opacity: colorScheme.isLight ? 0.3 : 0.2,
-        child: Image.asset(
+        Image.asset(
           colorScheme.isLight
               ? negativeSpaceLightAssetName
               : negativeSpaceDarkAssetName,

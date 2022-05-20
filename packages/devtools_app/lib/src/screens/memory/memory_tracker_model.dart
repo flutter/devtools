@@ -177,35 +177,29 @@ class TreeTracker {
   Widget allocationTrackingInstructions(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: [
+      const Text(
+        'To track allocations for a class, enable the '
+        'checkbox for that class in the table above.',
+      ),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         const Text(
-          'To track allocations for a class, enable the '
-          'checkbox for that class in the table above.',
+          'After interacting with your app, come '
+          'back to this tool and click the track button ',
         ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              'After interacting with your app, come '
-              'back to this tool and click the track button ',
-            ),
-            trackImage(context),
-          ],
-        ),
-        const Text(
-          'to view the collected stack '
-          'traces of constructor calls.',
-        ),
-      ],
+        trackImage(context),
+      ),
+      const Text(
+        'to view the collected stack '
+        'traces of constructor calls.',
+      ),
     );
   }
 
   Widget allocationCallStackInstructions(BuildContext context) => Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: const [
-          Text('Select an instance of a tracked class'),
-          Text('to view its allocation stack trace.'),
-        ],
+        Text('Select an instance of a tracked class'),
+        Text('to view its allocation stack trace.'),
       );
 
   // TODO(terry): Move to a class derived from widget.
@@ -227,49 +221,45 @@ class TreeTracker {
     final titleBackground = Theme.of(context).titleSolidBackgroundColor;
 
     return Column(
-      children: [
-        SizedBox(
-          width: double.infinity,
-          height: defaultRowHeight + 4, // From table.dart
-          child: Container(
-            color: titleBackground,
-            child: Align(
-              child: Text(
-                '${tracker.parent!.name} Call Stack for Instance ${tracker.index} @ '
-                '${prettyTimestamp(tracker.timestamp!)}',
-                textAlign: TextAlign.center,
-                style: TextStyle(backgroundColor: titleBackground),
-              ),
+      SizedBox(
+        width: double.infinity,
+        height: defaultRowHeight + 4, // From table.dart
+        Container(
+          color: titleBackground,
+          Align(
+            Text(
+              '${tracker.parent!.name} Call Stack for Instance ${tracker.index} @ '
+              '${prettyTimestamp(tracker.timestamp!)}',
+              textAlign: TextAlign.center,
+              style: TextStyle(backgroundColor: titleBackground),
             ),
           ),
         ),
-        Expanded(
-          child: Scrollbar(
-            thumbVisibility: true,
+      ),
+      Expanded(
+        Scrollbar(
+          thumbVisibility: true,
+          controller: scroller,
+          ListView.separated(
+            shrinkWrap: true,
+            padding: EdgeInsets.zero,
             controller: scroller,
-            child: ListView.separated(
-              shrinkWrap: true,
-              padding: EdgeInsets.zero,
-              controller: scroller,
-              itemCount: callstackLength,
-              itemBuilder: (context, index) => Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '#$index ${stackTrace[index]}',
-                    style: colorScheme.stackTraceCall,
-                  ),
-                  Text(sources[index]!, style: colorScheme.stackTraceSource),
-                ],
+            itemCount: callstackLength,
+            itemBuilder: (context, index) => Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              Text(
+                '#$index ${stackTrace[index]}',
+                style: colorScheme.stackTraceCall,
               ),
-              separatorBuilder: (context, index) => Divider(
-                color: devtoolsGrey[400],
-                height: defaultSpacerHeight,
-              ),
+              Text(sources[index]!, style: colorScheme.stackTraceSource),
+            ),
+            separatorBuilder: (context, index) => Divider(
+              color: devtoolsGrey[400],
+              height: defaultSpacerHeight,
             ),
           ),
         ),
-      ],
+      ),
     );
   }
 
@@ -292,30 +282,28 @@ class TreeTracker {
             initialFractions: const [0.5, 0.5],
             minSizes: const [trackInstancesViewWidth, callstackViewWidth],
             axis: Axis.horizontal,
-            children: [
-              TreeTable<Tracker>(
-                columns: [
-                  treeColumn,
-                  _TrackerCountColumn(),
-                ],
-                dataRoots: tree1.children,
-                treeColumn: treeColumn,
-                keyFactory: (d) {
-                  return Key(d.name);
-                },
-                sortColumn: treeColumn,
-                sortDirection: SortDirection.ascending,
-                selectionNotifier: selectionNotifier,
-              ),
-              trackerAllocation == null
-                  ? allocationCallStackInstructions(context)
-                  : displaySelectedStackTrace(
-                      context,
-                      controller,
-                      scroller,
-                      trackerAllocation as TrackerAllocation,
-                    ),
-            ],
+            TreeTable<Tracker>(
+              columns: [
+                treeColumn,
+                _TrackerCountColumn(),
+              ],
+              dataRoots: tree1.children,
+              treeColumn: treeColumn,
+              keyFactory: (d) {
+                return Key(d.name);
+              },
+              sortColumn: treeColumn,
+              sortDirection: SortDirection.ascending,
+              selectionNotifier: selectionNotifier,
+            ),
+            trackerAllocation == null
+                ? allocationCallStackInstructions(context)
+                : displaySelectedStackTrace(
+                    context,
+                    controller,
+                    scroller,
+                    trackerAllocation as TrackerAllocation,
+                  ),
           );
 
     return widget;

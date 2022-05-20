@@ -288,9 +288,9 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
           // of the [DragAndDropEventAbsorber] widget. Fix this.
           padding: widget.appPadding,
           alignment: Alignment.topLeft,
-          child: FocusScope(
-            child: AnalyticsPrompt(
-              child: BannerMessages(
+          FocusScope(
+            AnalyticsPrompt(
+              BannerMessages(
                 screen: screen,
               ),
             ),
@@ -299,11 +299,11 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     ];
 
     final content = Stack(
-      children: [
+      [
         TabBarView(
           physics: defaultTabBarViewPhysics,
           controller: _tabController,
-          children: tabBodies,
+          tabBodies,
         ),
         if (serviceManager.connectedAppInitialized &&
             !serviceManager.connectedApp!.isProfileBuildNow! &&
@@ -311,7 +311,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
             _currentScreen.showFloatingDebuggerControls)
           Container(
             alignment: Alignment.topCenter,
-            child: FloatingDebuggerControls(),
+            FloatingDebuggerControls(),
           ),
       ],
     );
@@ -319,23 +319,23 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
     return Provider<BannerMessagesController>(
       create: (_) => BannerMessagesController(),
-      child: Provider<ImportController>.value(
+      Provider<ImportController>.value(
         value: _importController,
         builder: (context, _) {
           return DragAndDrop(
             handleDrop: _importController.importData,
-            child: Title(
+            Title(
               title: scaffoldTitle,
               // Color is a required parameter but the color only appears to
               // matter on Android and we do not care about Android.
               // Using theme.primaryColor matches the default behavior of the
               // title used by [WidgetsApp].
               color: theme.primaryColor,
-              child: KeyboardShortcuts(
+              KeyboardShortcuts(
                 keyboardShortcuts: _currentScreen.buildKeyboardShortcuts(
                   context,
                 ),
-                child: Scaffold(
+                Scaffold(
                   appBar: widget.embed
                       ? null
                       : _buildAppBar(scaffoldTitle) as PreferredSizeWidget?,
@@ -345,13 +345,11 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
                           _currentScreen.showConsole(widget.embed))
                       ? Split(
                           axis: Axis.vertical,
-                          children: [
-                            content,
-                            Padding(
-                              padding: DevToolsScaffold.horizontalPadding,
-                              child: const DebuggerConsole(),
-                            ),
-                          ],
+                          content,
+                          Padding(
+                            padding: DevToolsScaffold.horizontalPadding,
+                            const DebuggerConsole(),
+                          ),
                           splitters: [
                             DebuggerConsole.buildHeader(),
                           ],
@@ -413,12 +411,12 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
       flexibleSpace = Align(
         alignment: alignment,
-        child: Padding(
+        Padding(
           padding: EdgeInsets.only(
             top: isNarrow ? scaleByFontFactor(36.0) + 4.0 : 4.0,
             right: rightPadding,
           ),
-          child: tabBar,
+          tabBar,
         ),
       );
     }
@@ -445,9 +443,9 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       preferredSize: preferredSize,
       // Place the AppBar inside of a Hero widget to keep it the same across
       // route transitions.
-      child: Hero(
+      Hero(
         tag: _appBarTag,
-        child: appBar,
+        appBar,
       ),
     );
   }
@@ -510,8 +508,8 @@ class KeyboardShortcutsState extends State<KeyboardShortcuts>
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () => FocusScope.of(context).requestFocus(_focusNode),
-      child: FocusableActionDetector(
-        child: widget.child,
+      FocusableActionDetector(
+        widget.child,
         shortcuts: widget.keyboardShortcuts.shortcuts,
         actions: widget.keyboardShortcuts.actions,
         autofocus: true,

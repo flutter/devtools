@@ -66,46 +66,42 @@ class _BreakpointsState extends State<Breakpoints> {
 
     return Material(
       color: isSelected ? theme.selectedRowColor : null,
-      child: InkWell(
+      InkWell(
         onTap: () => _onBreakpointSelected(bp),
-        child: Padding(
+        Padding(
           padding: const EdgeInsets.all(borderPadding),
-          child: Row(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(
-                  left: borderPadding,
-                  right: borderPadding * 2,
-                ),
-                child: createCircleWidget(
-                  breakpointRadius,
-                  (isSelected
+          Row(
+            Padding(
+              padding: const EdgeInsets.only(
+                left: borderPadding,
+                right: borderPadding * 2,
+              ),
+              createCircleWidget(
+                breakpointRadius,
+                (isSelected ? theme.selectedTextStyle : theme.regularTextStyle)
+                    .color,
+              ),
+            ),
+            Flexible(
+              RichText(
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                text: TextSpan(
+                  text: _descriptionFor(bp),
+                  style: isSelected
+                      ? theme.selectedTextStyle
+                      : theme.regularTextStyle,
+                  children: [
+                    TextSpan(
+                      text: ' (${bp.scriptUri})',
+                      style: isSelected
                           ? theme.selectedTextStyle
-                          : theme.regularTextStyle)
-                      .color,
+                          : theme.subtleTextStyle,
+                    ),
+                  ],
                 ),
               ),
-              Flexible(
-                child: RichText(
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  text: TextSpan(
-                    text: _descriptionFor(bp),
-                    style: isSelected
-                        ? theme.selectedTextStyle
-                        : theme.regularTextStyle,
-                    children: [
-                      TextSpan(
-                        text: ' (${bp.scriptUri})',
-                        style: isSelected
-                            ? theme.selectedTextStyle
-                            : theme.subtleTextStyle,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),

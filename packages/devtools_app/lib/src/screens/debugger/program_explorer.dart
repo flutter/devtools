@@ -52,27 +52,24 @@ class _ProgramExplorerRow extends StatelessWidget {
     return DevToolsTooltip(
       message: toolTip ?? node.name,
       textStyle: theme.toolTipFixedFontStyle,
-      child: InkWell(
+      InkWell(
         onTap: onTap,
-        child: Row(
-          children: [
-            ProgramStructureIcon(
-              object: node.object,
-            ),
-            const SizedBox(width: densePadding),
-            Flexible(
-              child: Text(
-                text!,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.fixedFontStyle.copyWith(
-                  color: node.isSelected
-                      ? Colors.white
-                      : theme.fixedFontStyle.color,
-                ),
+        Row(
+          ProgramStructureIcon(
+            object: node.object,
+          ),
+          const SizedBox(width: densePadding),
+          Flexible(
+            Text(
+              text!,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.fixedFontStyle.copyWith(
+                color:
+                    node.isSelected ? Colors.white : theme.fixedFontStyle.color,
               ),
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -257,16 +254,16 @@ class ProgramStructureIcon extends StatelessWidget {
     return SizedBox(
       height: defaultIconSize,
       width: defaultIconSize,
-      child: Container(
+      Container(
         decoration: icon == null
             ? BoxDecoration(
                 color: color,
                 shape: BoxShape.circle,
               )
             : null,
-        child: icon == null
+        icon == null
             ? Center(
-                child: Text(
+                Text(
                   character!,
                   style: TextStyle(
                     height: 1,
@@ -334,7 +331,7 @@ class _FileExplorerState extends State<_FileExplorer> with AutoDisposeMixin {
     return Scrollbar(
       thumbVisibility: true,
       controller: _scrollController,
-      child: TreeView<VMServiceObjectNode>(
+      TreeView<VMServiceObjectNode>(
         itemExtent: _programExplorerRowHeight,
         dataRootsListenable: widget.controller.rootObjectNodes,
         onItemSelected: widget.onItemSelected,
@@ -408,7 +405,7 @@ class _ProgramOutlineView extends StatelessWidget {
             );
           },
           emptyTreeViewBuilder: () => const Center(
-            child: Text('Nothing to inspect'),
+            Text('Nothing to inspect'),
           ),
         );
       },
@@ -461,10 +458,8 @@ class ProgramExplorer extends StatelessWidget {
               // See https://github.com/flutter/devtools/issues/3447.
               return serviceManager.connectedApp!.isDartWebAppNow!
                   ? Column(
-                      children: [
-                        fileExplorerHeader,
-                        Expanded(child: fileExplorer),
-                      ],
+                      fileExplorerHeader,
+                      Expanded(fileExplorer),
                     )
                   : FlexSplitColumn(
                       totalHeight: constraints.maxHeight,
@@ -474,20 +469,18 @@ class ProgramExplorer extends StatelessWidget {
                         fileExplorerHeader,
                         const AreaPaneHeader(title: Text('Outline')),
                       ],
-                      children: [
-                        fileExplorer,
-                        _ProgramOutlineView(
-                          controller: controller,
-                          onItemExpanded: onItemExpanded,
-                          onItemSelected: onItemSelected,
-                        ),
-                      ],
+                      fileExplorer,
+                      _ProgramOutlineView(
+                        controller: controller,
+                        onItemExpanded: onItemExpanded,
+                        onItemSelected: onItemSelected,
+                      ),
                     );
             },
           );
         }
         return OutlineDecoration(
-          child: body,
+          body,
         );
       },
     );

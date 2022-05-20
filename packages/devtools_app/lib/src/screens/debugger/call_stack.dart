@@ -69,17 +69,15 @@ class _CallStackState extends State<CallStack> {
 
     if (asyncMarker) {
       child = Row(
-        children: [
-          const SizedBox(width: defaultSpacing, child: Divider()),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: densePadding),
-            child: Text(
-              frameDescription,
-              style: selected ? theme.selectedTextStyle : theme.subtleTextStyle,
-            ),
+        const SizedBox(width: defaultSpacing, Divider()),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: densePadding),
+          Text(
+            frameDescription,
+            style: selected ? theme.selectedTextStyle : theme.subtleTextStyle,
           ),
-          const Expanded(child: Divider()),
-        ],
+        ),
+        const Expanded(Divider()),
       );
     } else {
       child = RichText(
@@ -106,12 +104,12 @@ class _CallStackState extends State<CallStack> {
 
     final result = Material(
       color: selected ? theme.selectedRowColor : null,
-      child: InkWell(
+      InkWell(
         onTap: () => _onStackFrameSelected(frame),
-        child: Container(
+        Container(
           padding: const EdgeInsets.symmetric(horizontal: densePadding),
           alignment: Alignment.centerLeft,
-          child: child,
+          child,
         ),
       ),
     );
@@ -124,7 +122,7 @@ class _CallStackState extends State<CallStack> {
             ? frameDescription
             : '$frameDescription $locationDescription',
         waitDuration: tooltipWaitLong,
-        child: result,
+        result,
       );
     }
   }

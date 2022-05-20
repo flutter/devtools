@@ -80,32 +80,30 @@ class _InspectorExpandCollapseButtonsState
           left: defaultBorderSide(Theme.of(context)),
         ),
       ),
-      child: Row(
+      Row(
         mainAxisAlignment: MainAxisAlignment.end,
         mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(
-            child: IconLabelButton(
-              icon: Icons.unfold_more,
-              onPressed: enableButtons ? _onExpandClick : null,
-              label: 'Expand all',
-              minScreenWidthForTextBeforeScaling:
-                  InspectorScreenBodyState.minScreenWidthForTextBeforeScaling,
-              outlined: false,
-            ),
+        SizedBox(
+          IconLabelButton(
+            icon: Icons.unfold_more,
+            onPressed: enableButtons ? _onExpandClick : null,
+            label: 'Expand all',
+            minScreenWidthForTextBeforeScaling:
+                InspectorScreenBodyState.minScreenWidthForTextBeforeScaling,
+            outlined: false,
           ),
-          const SizedBox(width: denseSpacing),
-          SizedBox(
-            child: IconLabelButton(
-              icon: Icons.unfold_less,
-              onPressed: enableButtons ? _onCollapseClick : null,
-              label: 'Collapse to selected',
-              minScreenWidthForTextBeforeScaling:
-                  InspectorScreenBodyState.minScreenWidthForTextBeforeScaling,
-              outlined: false,
-            ),
-          )
-        ],
+        ),
+        const SizedBox(width: denseSpacing),
+        SizedBox(
+          IconLabelButton(
+            icon: Icons.unfold_less,
+            onPressed: enableButtons ? _onCollapseClick : null,
+            label: 'Collapse to selected',
+            minScreenWidthForTextBeforeScaling:
+                InspectorScreenBodyState.minScreenWidthForTextBeforeScaling,
+            outlined: false,
+          ),
+        ),
       ),
     );
   }

@@ -933,47 +933,45 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
             constraints.widthConstraints().maxWidth,
             tableWidth,
           ),
-          child: Column(
+          Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              TableRow<T>.tableHeader(
-                key: const Key('Table header'),
-                linkedScrollControllerGroup:
-                    _linkedHorizontalScrollControllerGroup,
-                columns: widget.columns,
-                columnWidths: widget.columnWidths,
-                sortColumn: sortColumn,
-                sortDirection: sortDirection,
-                secondarySortColumn: widget.secondarySortColumn,
-                onSortChanged: _sortData,
-              ),
-              Expanded(
-                child: Scrollbar(
-                  thumbVisibility: true,
-                  controller: scrollController,
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.translucent,
-                    onTapDown: (a) => widget.focusNode?.requestFocus(),
-                    child: Focus(
-                      autofocus: true,
-                      onKey: (_, event) => widget.handleKeyEvent != null
-                          ? widget.handleKeyEvent!(
-                              event,
-                              scrollController,
-                              constraints,
-                            )
-                          : KeyEventResult.ignored,
-                      focusNode: widget.focusNode,
-                      child: ListView.builder(
-                        controller: scrollController,
-                        itemCount: widget.data.length,
-                        itemBuilder: _buildItem,
-                      ),
+            TableRow<T>.tableHeader(
+              key: const Key('Table header'),
+              linkedScrollControllerGroup:
+                  _linkedHorizontalScrollControllerGroup,
+              columns: widget.columns,
+              columnWidths: widget.columnWidths,
+              sortColumn: sortColumn,
+              sortDirection: sortDirection,
+              secondarySortColumn: widget.secondarySortColumn,
+              onSortChanged: _sortData,
+            ),
+            Expanded(
+              Scrollbar(
+                thumbVisibility: true,
+                controller: scrollController,
+                GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onTapDown: (a) => widget.focusNode?.requestFocus(),
+                  Focus(
+                    autofocus: true,
+                    onKey: (_, event) => widget.handleKeyEvent != null
+                        ? widget.handleKeyEvent!(
+                            event,
+                            scrollController,
+                            constraints,
+                          )
+                        : KeyEventResult.ignored,
+                    focusNode: widget.focusNode,
+                    ListView.builder(
+                      controller: scrollController,
+                      itemCount: widget.data.length,
+                      itemBuilder: _buildItem,
                     ),
                   ),
                 ),
               ),
-            ],
+            ),
           ),
         );
       },
@@ -1200,14 +1198,14 @@ class _TableRowState<T> extends State<TableRow<T>>
 
     final box = SizedBox(
       height: node == null ? areaPaneHeaderHeight : defaultRowHeight,
-      child: Material(
+      Material(
         color: _searchAwareBackgroundColor(),
-        child: onPressed != null
+        onPressed != null
             ? InkWell(
                 canRequestFocus: false,
                 key: contentKey,
                 onTap: onPressed,
-                child: row,
+                row,
               )
             : row,
       ),
@@ -1219,16 +1217,16 @@ class _TableRowState<T> extends State<TableRow<T>>
       builder: (context, child) {
         return Column(
           mainAxisSize: MainAxisSize.min,
-          children: [
+          [
             box,
             for (var c in widget.expansionChildren!)
               SizedBox(
                 height: defaultRowHeight * expandCurve.value,
-                child: OverflowBox(
+                OverflowBox(
                   minHeight: 0.0,
                   maxHeight: defaultRowHeight,
                   alignment: Alignment.topCenter,
-                  child: c,
+                  c,
                 ),
               ),
           ],
@@ -1329,7 +1327,7 @@ class _TableRowState<T> extends State<TableRow<T>>
 
         final headerContent = Row(
           mainAxisAlignment: _mainAxisAlignmentFor(column),
-          children: [
+          [
             if (isSortColumn)
               Icon(
                 widget.sortDirection == SortDirection.ascending
@@ -1341,11 +1339,11 @@ class _TableRowState<T> extends State<TableRow<T>>
             // TODO: This Flexible wrapper was added to get the
             // network_profiler_test.dart tests to pass.
             Flexible(
-              child: column.titleTooltip != null
+              column.titleTooltip != null
                   ? DevToolsTooltip(
                       message: column.titleTooltip,
                       padding: const EdgeInsets.all(denseSpacing),
-                      child: title,
+                      title,
                     )
                   : title,
             ),
@@ -1359,7 +1357,7 @@ class _TableRowState<T> extends State<TableRow<T>>
                   column,
                   secondarySortColumn: widget.secondarySortColumn,
                 ),
-                child: headerContent,
+                headerContent,
               )
             : headerContent;
       } else {
@@ -1387,7 +1385,7 @@ class _TableRowState<T> extends State<TableRow<T>>
           content = DevToolsTooltip(
             message: tooltip,
             waitDuration: tooltipWaitLong,
-            child: content,
+            content,
           );
         }
 
@@ -1395,7 +1393,7 @@ class _TableRowState<T> extends State<TableRow<T>>
           final expandIndicator = widget.isExpandable
               ? RotationTransition(
                   turns: expandArrowAnimation,
-                  child: Icon(
+                  Icon(
                     Icons.expand_more,
                     color: widget.isSelected
                         ? defaultSelectionForegroundColor
@@ -1406,25 +1404,23 @@ class _TableRowState<T> extends State<TableRow<T>>
               : SizedBox(width: defaultIconSize, height: defaultIconSize);
           content = Row(
             mainAxisSize: MainAxisSize.min,
-            children: [
-              expandIndicator,
-              Expanded(child: content),
-            ],
+            expandIndicator,
+            Expanded(content),
           );
         }
         content = Padding(
           padding: EdgeInsets.only(left: padding),
-          child: ClipRect(
-            child: content,
+          ClipRect(
+            content,
           ),
         );
       }
 
       content = SizedBox(
         width: columnWidth,
-        child: Align(
+        Align(
           alignment: _alignmentFor(column),
-          child: content,
+          content,
         ),
       );
       return content;
@@ -1432,7 +1428,7 @@ class _TableRowState<T> extends State<TableRow<T>>
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-      child: ListView.builder(
+      ListView.builder(
         scrollDirection: Axis.horizontal,
         controller: scrollController,
         itemCount: widget.columns.length + widget.numSpacers,

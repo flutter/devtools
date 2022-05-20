@@ -62,20 +62,18 @@ class _DebuggerConsoleState extends State<DebuggerConsole> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: [
-        Expanded(
-          child: Console(
-            lines: stdio,
-            footer: SizedBox(
-              height: consoleLineHeight,
-              child: ExpressionEvalField(
-                controller:
-                    Provider.of<DebuggerController>(context, listen: false),
-              ),
+      Expanded(
+        Console(
+          lines: stdio,
+          footer: SizedBox(
+            height: consoleLineHeight,
+            ExpressionEvalField(
+              controller:
+                  Provider.of<DebuggerController>(context, listen: false),
             ),
           ),
         ),
-      ],
+      ),
     );
   }
 }

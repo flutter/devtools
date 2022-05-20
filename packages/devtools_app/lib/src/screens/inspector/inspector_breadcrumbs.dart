@@ -34,10 +34,10 @@ class InspectorBreadcrumbNavigator extends StatelessWidget {
     final breadcrumbs = _generateBreadcrumbs(items);
     return SizedBox(
       height: isDense() ? 24 : 28,
-      child: Padding(
+      Padding(
         padding: const EdgeInsets.symmetric(horizontal: 6),
-        child: Row(
-          children: breadcrumbs.map((item) {
+        Row(
+          breadcrumbs.map((item) {
             if (item.isChevron) {
               return Icon(
                 Icons.chevron_right,
@@ -46,7 +46,7 @@ class InspectorBreadcrumbNavigator extends StatelessWidget {
             }
 
             return Flexible(
-              child: _InspectorBreadcrumb(
+              _InspectorBreadcrumb(
                 data: item,
                 onTap: () => onTap(item.node),
               ),
@@ -113,16 +113,16 @@ class _InspectorBreadcrumb extends StatelessWidget {
         ? null
         : Transform.scale(
             scale: _iconScale,
-            child: Padding(
+            Padding(
               padding: const EdgeInsets.only(right: iconPadding),
-              child: data.icon,
+              data.icon,
             ),
           );
 
     return InkWell(
       onTap: data.isClickable ? onTap : null,
       borderRadius: _borderRadius,
-      child: Container(
+      Container(
         padding: const EdgeInsets.symmetric(
           horizontal: densePadding,
           vertical: borderPadding,
@@ -133,11 +133,11 @@ class _InspectorBreadcrumb extends StatelessWidget {
               ? Theme.of(context).colorScheme.selectedRowBackgroundColor
               : Colors.transparent,
         ),
-        child: Row(
+        Row(
           mainAxisSize: MainAxisSize.min,
-          children: [
+          [
             if (icon != null) icon,
-            Flexible(child: text),
+            Flexible(text),
           ],
         ),
       ),

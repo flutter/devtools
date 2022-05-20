@@ -57,24 +57,22 @@ class NetworkScreen extends Screen {
         final totalCount = networkRequests.requests.length;
         return Row(
           mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Showing ${nf.format(filteredCount)} of '
-              '${nf.format(totalCount)} '
-              '${pluralize('request', totalCount)}',
-            ),
-            const SizedBox(width: denseSpacing),
-            child!,
-          ],
+          Text(
+            'Showing ${nf.format(filteredCount)} of '
+            '${nf.format(totalCount)} '
+            '${pluralize('request', totalCount)}',
+          ),
+          const SizedBox(width: denseSpacing),
+          child!,
         );
       },
-      child: ValueListenableBuilder<bool>(
+      ValueListenableBuilder<bool>(
         valueListenable: networkController.recordingNotifier,
         builder: (context, recording, _) {
           return SizedBox(
             width: smallProgressSize,
             height: smallProgressSize,
-            child: recording
+            recording
                 ? SmallCircularProgressIndicator(
                     valueColor: AlwaysStoppedAnimation<Color>(color),
                   )
@@ -144,13 +142,11 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: [
-        _NetworkProfilerControls(controller: _networkController),
-        const SizedBox(height: denseRowSpacing),
-        Expanded(
-          child: _NetworkProfilerBody(controller: _networkController),
-        ),
-      ],
+      _NetworkProfilerControls(controller: _networkController),
+      const SizedBox(height: denseRowSpacing),
+      Expanded(
+        _NetworkProfilerBody(controller: _networkController),
+      ),
     );
   }
 }
@@ -208,68 +204,66 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
   Widget build(BuildContext context) {
     final hasRequests = _filteredRequests.isNotEmpty;
     return Row(
-      children: [
-        PauseButton(
-          minScreenWidthForTextBeforeScaling:
-              _NetworkProfilerControls._includeTextWidth,
-          tooltip: 'Pause recording network traffic',
-          onPressed: _recording
-              ? () {
-                  ga.select(
-                    analytics_constants.network,
-                    analytics_constants.pause,
-                  );
-                  widget.controller.togglePolling(false);
-                }
-              : null,
+      PauseButton(
+        minScreenWidthForTextBeforeScaling:
+            _NetworkProfilerControls._includeTextWidth,
+        tooltip: 'Pause recording network traffic',
+        onPressed: _recording
+            ? () {
+                ga.select(
+                  analytics_constants.network,
+                  analytics_constants.pause,
+                );
+                widget.controller.togglePolling(false);
+              }
+            : null,
+      ),
+      const SizedBox(width: denseSpacing),
+      ResumeButton(
+        minScreenWidthForTextBeforeScaling:
+            _NetworkProfilerControls._includeTextWidth,
+        tooltip: 'Resume recording network traffic',
+        onPressed: _recording
+            ? null
+            : () {
+                ga.select(
+                  analytics_constants.network,
+                  analytics_constants.resume,
+                );
+                widget.controller.togglePolling(true);
+              },
+      ),
+      const SizedBox(width: denseSpacing),
+      ClearButton(
+        minScreenWidthForTextBeforeScaling:
+            _NetworkProfilerControls._includeTextWidth,
+        onPressed: () {
+          ga.select(
+            analytics_constants.network,
+            analytics_constants.clear,
+          );
+          widget.controller.clear();
+        },
+      ),
+      const SizedBox(width: defaultSpacing),
+      const Expanded(SizedBox()),
+      // TODO(kenz): fix focus issue when state is refreshed
+      Container(
+        width: wideSearchTextWidth,
+        height: defaultTextFieldHeight,
+        buildSearchField(
+          controller: widget.controller,
+          searchFieldKey: networkSearchFieldKey,
+          searchFieldEnabled: hasRequests,
+          shouldRequestFocus: false,
+          supportsNavigation: true,
         ),
-        const SizedBox(width: denseSpacing),
-        ResumeButton(
-          minScreenWidthForTextBeforeScaling:
-              _NetworkProfilerControls._includeTextWidth,
-          tooltip: 'Resume recording network traffic',
-          onPressed: _recording
-              ? null
-              : () {
-                  ga.select(
-                    analytics_constants.network,
-                    analytics_constants.resume,
-                  );
-                  widget.controller.togglePolling(true);
-                },
-        ),
-        const SizedBox(width: denseSpacing),
-        ClearButton(
-          minScreenWidthForTextBeforeScaling:
-              _NetworkProfilerControls._includeTextWidth,
-          onPressed: () {
-            ga.select(
-              analytics_constants.network,
-              analytics_constants.clear,
-            );
-            widget.controller.clear();
-          },
-        ),
-        const SizedBox(width: defaultSpacing),
-        const Expanded(child: SizedBox()),
-        // TODO(kenz): fix focus issue when state is refreshed
-        Container(
-          width: wideSearchTextWidth,
-          height: defaultTextFieldHeight,
-          child: buildSearchField(
-            controller: widget.controller,
-            searchFieldKey: networkSearchFieldKey,
-            searchFieldEnabled: hasRequests,
-            shouldRequestFocus: false,
-            supportsNavigation: true,
-          ),
-        ),
-        const SizedBox(width: denseSpacing),
-        FilterButton(
-          onPressed: _showFilterDialog,
-          isFilterActive: _filteredRequests.length != _requests.requests.length,
-        ),
-      ],
+      ),
+      const SizedBox(width: denseSpacing),
+      FilterButton(
+        onPressed: _showFilterDialog,
+        isFilterActive: _filteredRequests.length != _requests.requests.length,
+      ),
     );
   }
 
@@ -295,24 +289,22 @@ class _NetworkProfilerBody extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
-      child: Split(
+      Split(
         initialFractions: const [0.5, 0.5],
         minSizes: const [200, 200],
         axis: Axis.horizontal,
-        children: [
-          ValueListenableBuilder<List<NetworkRequest>>(
-            valueListenable: controller.filteredData,
-            builder: (context, filteredRequests, _) {
-              return NetworkRequestsTable(
-                networkController: controller,
-                requests: filteredRequests,
-                searchMatchesNotifier: controller.searchMatches,
-                activeSearchMatchNotifier: controller.activeSearchMatch,
-              );
-            },
-          ),
-          NetworkRequestInspector(controller),
-        ],
+        ValueListenableBuilder<List<NetworkRequest>>(
+          valueListenable: controller.filteredData,
+          builder: (context, filteredRequests, _) {
+            return NetworkRequestsTable(
+              networkController: controller,
+              requests: filteredRequests,
+              searchMatchesNotifier: controller.searchMatches,
+              activeSearchMatchNotifier: controller.activeSearchMatch,
+            );
+          },
+        ),
+        NetworkRequestInspector(controller),
       ),
     );
   }
@@ -343,7 +335,7 @@ class NetworkRequestsTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return OutlineDecoration(
-      child: FlatTable<NetworkRequest?>(
+      FlatTable<NetworkRequest?>(
         columns: [
           methodColumn,
           addressColumn,
@@ -438,7 +430,7 @@ class ActionsColumn extends ColumnData<NetworkRequest>
     return [
       if (data is DartIOHttpRequestData) ...[
         PopupMenuItem(
-          child: const Text('Copy as URL'),
+          const Text('Copy as URL'),
           onTap: () {
             copyToClipboard(
               data.uri,
@@ -448,7 +440,7 @@ class ActionsColumn extends ColumnData<NetworkRequest>
           },
         ),
         PopupMenuItem(
-          child: const Text('Copy as cURL'),
+          const Text('Copy as cURL'),
           onTap: () {
             copyToClipboard(
               CurlCommand.from(data).toString(),

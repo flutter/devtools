@@ -43,13 +43,13 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt> {
       builder: (context, showPrompt, child) {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+          [
             if (showPrompt) child!,
-            Expanded(child: widget.child),
+            Expanded(widget.child),
           ],
         );
       },
-      child: Card(
+      Card(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(defaultBorderRadius),
           side: BorderSide(
@@ -58,35 +58,31 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt> {
         ),
         color: theme.canvasColor,
         margin: const EdgeInsets.only(bottom: denseSpacing),
-        child: Padding(
+        Padding(
           padding: const EdgeInsets.all(defaultSpacing),
-          child: Column(
+          Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Send usage statistics for DevTools?',
-                    style: textTheme.headline5,
-                  ),
-                  CircularIconButton(
-                    icon: Icons.close,
-                    onPressed: _controller!.hidePrompt,
-                    backgroundColor: theme.canvasColor,
-                    foregroundColor: theme.colorScheme.contrastForeground,
-                  ),
-                ],
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              Text(
+                'Send usage statistics for DevTools?',
+                style: textTheme.headline5,
               ),
-              const Padding(
-                padding: EdgeInsets.only(top: defaultSpacing),
+              CircularIconButton(
+                icon: Icons.close,
+                onPressed: _controller!.hidePrompt,
+                backgroundColor: theme.canvasColor,
+                foregroundColor: theme.colorScheme.contrastForeground,
               ),
-              _analyticsDescription(textTheme),
-              const SizedBox(height: denseRowSpacing),
-              _actionButtons(),
-            ],
+            ),
+            const Padding(
+              padding: EdgeInsets.only(top: defaultSpacing),
+            ),
+            _analyticsDescription(textTheme),
+            const SizedBox(height: denseRowSpacing),
+            _actionButtons(),
           ),
         ),
       ),
@@ -127,27 +123,25 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt> {
   Widget _actionButtons() {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        ElevatedButton(
-          onPressed: () {
-            // This will also hide the prompt.
-            _controller!.toggleAnalyticsEnabled(false);
-          },
-          style: ElevatedButton.styleFrom(primary: Colors.grey),
-          child: const Text('No thanks.'),
-        ),
-        const Padding(
-          padding: EdgeInsets.only(left: defaultSpacing),
-        ),
-        ElevatedButton(
-          onPressed: () {
-            _controller!
-              ..toggleAnalyticsEnabled(true)
-              ..hidePrompt();
-          },
-          child: const Text('Sounds good!'),
-        ),
-      ],
+      ElevatedButton(
+        onPressed: () {
+          // This will also hide the prompt.
+          _controller!.toggleAnalyticsEnabled(false);
+        },
+        style: ElevatedButton.styleFrom(primary: Colors.grey),
+        const Text('No thanks.'),
+      ),
+      const Padding(
+        padding: EdgeInsets.only(left: defaultSpacing),
+      ),
+      ElevatedButton(
+        onPressed: () {
+          _controller!
+            ..toggleAnalyticsEnabled(true)
+            ..hidePrompt();
+        },
+        const Text('Sounds good!'),
+      ),
     );
   }
 }

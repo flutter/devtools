@@ -42,14 +42,12 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
   @override
   Widget build(BuildContext context) {
     return Scrollbar(
-      child: ListView(
-        children: const [
-          ConnectDialog(),
-          SizedBox(height: defaultSpacing),
-          ImportFileInstructions(),
-          SizedBox(height: defaultSpacing),
-          AppSizeToolingInstructions(),
-        ],
+      ListView(
+        ConnectDialog(),
+        SizedBox(height: defaultSpacing),
+        ImportFileInstructions(),
+        SizedBox(height: defaultSpacing),
+        AppSizeToolingInstructions(),
       ),
     );
   }
@@ -71,15 +69,13 @@ class LandingScreenSection extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: textTheme.headline5,
-        ),
-        const PaddedDivider(),
-        child,
-        PaddedDivider.vertical(padding: 10.0),
-      ],
+      Text(
+        title,
+        style: textTheme.headline5,
+      ),
+      const PaddedDivider(),
+      child,
+      PaddedDivider.vertical(padding: 10.0),
     );
   }
 }
@@ -111,21 +107,19 @@ class _ConnectDialogState extends State<ConnectDialog>
   Widget build(BuildContext context) {
     return LandingScreenSection(
       title: 'Connect',
-      child: Column(
+      Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Connect to a Running App',
-            style: Theme.of(context).textTheme.subtitle1,
-          ),
-          const SizedBox(height: denseRowSpacing),
-          Text(
-            'Enter a URL to a running Dart or Flutter application',
-            style: Theme.of(context).textTheme.caption,
-          ),
-          const Padding(padding: EdgeInsets.only(top: 20.0)),
-          _buildConnectInput(),
-        ],
+        Text(
+          'Connect to a Running App',
+          style: Theme.of(context).textTheme.subtitle1,
+        ),
+        const SizedBox(height: denseRowSpacing),
+        Text(
+          'Enter a URL to a running Dart or Flutter application',
+          style: Theme.of(context).textTheme.caption,
+        ),
+        const Padding(padding: EdgeInsets.only(top: 20.0)),
+        _buildConnectInput(),
       ),
     );
   }
@@ -133,42 +127,38 @@ class _ConnectDialogState extends State<ConnectDialog>
   Widget _buildConnectInput() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          children: [
-            SizedBox(
-              width: scaleByFontFactor(350.0),
-              child: TextField(
-                onSubmitted: actionInProgress ? null : (str) => _connect(),
-                autofocus: true,
-                decoration: const InputDecoration(
-                  isDense: true,
-                  border: OutlineInputBorder(),
-                  enabledBorder: OutlineInputBorder(
-                    // TODO(jacobr): we need to use themed colors everywhere instead
-                    // of hard coding material colors.
-                    borderSide: BorderSide(width: 0.5, color: Colors.grey),
-                  ),
-                ),
-                controller: connectDialogController,
+      Row(
+        SizedBox(
+          width: scaleByFontFactor(350.0),
+          TextField(
+            onSubmitted: actionInProgress ? null : (str) => _connect(),
+            autofocus: true,
+            decoration: const InputDecoration(
+              isDense: true,
+              border: OutlineInputBorder(),
+              enabledBorder: OutlineInputBorder(
+                // TODO(jacobr): we need to use themed colors everywhere instead
+                // of hard coding material colors.
+                borderSide: BorderSide(width: 0.5, color: Colors.grey),
               ),
             ),
-            const SizedBox(width: defaultSpacing),
-            ElevatedButton(
-              child: const Text('Connect'),
-              onPressed: actionInProgress ? null : _connect,
-            ),
-          ],
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
-          child: Text(
-            '(e.g., http://127.0.0.1:12345/auth_code=...)',
-            textAlign: TextAlign.start,
-            style: Theme.of(context).textTheme.caption,
+            controller: connectDialogController,
           ),
         ),
-      ],
+        const SizedBox(width: defaultSpacing),
+        ElevatedButton(
+          const Text('Connect'),
+          onPressed: actionInProgress ? null : _connect,
+        ),
+      ),
+      Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        Text(
+          '(e.g., http://127.0.0.1:12345/auth_code=...)',
+          textAlign: TextAlign.start,
+          style: Theme.of(context).textTheme.caption,
+        ),
+      ),
     );
   }
 
@@ -224,28 +214,26 @@ class ImportFileInstructions extends StatelessWidget {
   Widget build(BuildContext context) {
     return LandingScreenSection(
       title: 'Load DevTools Data',
-      child: Column(
+      Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Import a data file to use DevTools without an app connection.',
-            style: Theme.of(context).textTheme.subtitle1,
+        Text(
+          'Import a data file to use DevTools without an app connection.',
+          style: Theme.of(context).textTheme.subtitle1,
+        ),
+        const SizedBox(height: denseRowSpacing),
+        Text(
+          'At this time, DevTools only supports importing files that were originally'
+          ' exported from DevTools.',
+          style: Theme.of(context).textTheme.caption,
+        ),
+        const SizedBox(height: defaultSpacing),
+        ElevatedButton(
+          onPressed: () => _importFile(context),
+          const MaterialIconLabel(
+            label: 'Import File',
+            iconData: Icons.file_upload,
           ),
-          const SizedBox(height: denseRowSpacing),
-          Text(
-            'At this time, DevTools only supports importing files that were originally'
-            ' exported from DevTools.',
-            style: Theme.of(context).textTheme.caption,
-          ),
-          const SizedBox(height: defaultSpacing),
-          ElevatedButton(
-            onPressed: () => _importFile(context),
-            child: const MaterialIconLabel(
-              label: 'Import File',
-              iconData: Icons.file_upload,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -273,25 +261,23 @@ class AppSizeToolingInstructions extends StatelessWidget {
   Widget build(BuildContext context) {
     return LandingScreenSection(
       title: 'App Size Tooling',
-      child: Column(
+      Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Analyze and view diffs for your app\'s size',
-            style: Theme.of(context).textTheme.subtitle1,
-          ),
-          const SizedBox(height: denseRowSpacing),
-          Text(
-            'Load Dart AOT snapshots or app size analysis files to '
-            'track down size issues in your app.',
-            style: Theme.of(context).textTheme.caption,
-          ),
-          const SizedBox(height: defaultSpacing),
-          ElevatedButton(
-            child: const Text('Open app size tool'),
-            onPressed: () => _onOpenAppSizeToolSelected(context),
-          ),
-        ],
+        Text(
+          'Analyze and view diffs for your app\'s size',
+          style: Theme.of(context).textTheme.subtitle1,
+        ),
+        const SizedBox(height: denseRowSpacing),
+        Text(
+          'Load Dart AOT snapshots or app size analysis files to '
+          'track down size issues in your app.',
+          style: Theme.of(context).textTheme.caption,
+        ),
+        const SizedBox(height: defaultSpacing),
+        ElevatedButton(
+          const Text('Open app size tool'),
+          onPressed: () => _onOpenAppSizeToolSelected(context),
+        ),
       ),
     );
   }

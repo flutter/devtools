@@ -36,21 +36,17 @@ class VMStatisticsViewBody extends StatelessWidget {
       valueListenable: controller.refreshing,
       builder: (context, refreshing, child) {
         return Column(
-          children: [
-            Row(
-              children: [
-                child!,
-              ],
+          Row(
+            child!,
+          ),
+          Expanded(
+            VMStatisticsWidget(
+              controller: controller,
             ),
-            Expanded(
-              child: VMStatisticsWidget(
-                controller: controller,
-              ),
-            ),
-          ],
+          ),
         );
       },
-      child: RefreshButton(
+      RefreshButton(
         onPressed: controller.refresh,
       ),
     );
@@ -65,43 +61,37 @@ class VMStatisticsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      children: [
-        Flexible(
-          flex: 3,
-          child: Column(
-            children: [
-              Flexible(
-                child: GeneralVMStatisticsWidget(
-                  controller: controller,
-                ),
-              ),
-              Flexible(
-                child: ProcessStatisticsWidget(
-                  controller: controller,
-                ),
-              )
-            ],
+      Flexible(
+        flex: 3,
+        Column(
+          Flexible(
+            GeneralVMStatisticsWidget(
+              controller: controller,
+            ),
+          ),
+          Flexible(
+            ProcessStatisticsWidget(
+              controller: controller,
+            ),
           ),
         ),
-        Flexible(
-          flex: 4,
-          child: Column(
-            children: [
-              Flexible(
-                child: IsolatesPreviewWidget(
-                  controller: controller,
-                ),
-              ),
-              Flexible(
-                child: IsolatesPreviewWidget(
-                  controller: controller,
-                  systemIsolates: true,
-                ),
-              ),
-            ],
+      ),
+      Flexible(
+        flex: 4,
+        Column(
+          Flexible(
+            IsolatesPreviewWidget(
+              controller: controller,
+            ),
+          ),
+          Flexible(
+            IsolatesPreviewWidget(
+              controller: controller,
+              systemIsolates: true,
+            ),
           ),
         ),
-      ],
+      ),
     );
   }
 }
@@ -292,7 +282,7 @@ class IsolatesPreviewWidget extends StatelessWidget {
     return VMInfoCard(
       title: '$title (${isolates.length})',
       table: Flexible(
-        child: FlatTable<Isolate>(
+        FlatTable<Isolate>(
           columns: columns,
           data: isolates,
           keyFactory: (Isolate i) => ValueKey<String>(i.id!),
