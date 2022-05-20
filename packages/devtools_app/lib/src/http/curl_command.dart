@@ -86,7 +86,7 @@ class CurlCommand {
   ///
   /// Enclosing characters in single quotes preserves the literal value of each
   /// character in the string. Single quotes can't occur within, which is why it
-  /// is necessary to replace all occurences of the character ' with '\''.
+  /// is necessary to replace all occurrences of the character ' with '\''.
   ///
   /// See: https://www.gnu.org/software/bash/manual/html_node/Quoting.html
   static String _escapeString(String text) {
