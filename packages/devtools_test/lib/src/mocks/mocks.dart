@@ -146,8 +146,6 @@ class MockMemoryController extends Mock implements MemoryController {}
 
 class MockFlutterMemoryController extends Mock implements MemoryController {}
 
-class MockPerformanceController extends Mock implements PerformanceController {}
-
 class MockProfilerScreenController extends Mock
     implements ProfilerScreenController {}
 
@@ -279,6 +277,11 @@ void mockConnectedApp(
   when(connectedApp.isDartWebApp).thenAnswer((_) => Future.value(isWebApp));
   when(connectedApp.isDartWebAppNow).thenReturn(isWebApp);
 
+  // CLI app.
+  final isCliApp = !isFlutterApp && !isWebApp;
+  when(connectedApp.isDartCliApp).thenAnswer((_) => Future.value(isCliApp));
+  when(connectedApp.isDartCliAppNow).thenReturn(isCliApp);
+
   // Run mode.
   when(connectedApp.isProfileBuild)
       .thenAnswer((_) => Future.value(isProfileBuild));
@@ -288,6 +291,7 @@ void mockConnectedApp(
 
   // Initialized.
   when(connectedApp.connectedAppInitialized).thenReturn(true);
+  when(connectedApp.initialized).thenReturn(Completer()..complete(true));
 }
 
 void mockFlutterVersion(
