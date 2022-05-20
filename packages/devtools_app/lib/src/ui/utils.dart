@@ -223,8 +223,6 @@ class ThemedColor {
   }
 }
 
-// TODO(elliette): Add mixin for comparing enums. Eg, size > MediaSize.s
-// Requires enhanced enums feature in Dart SDK >= 2.17.
 enum MediaSize with EnumIndexOrdering {
   xxs,
   xs,
