@@ -10,7 +10,6 @@ import 'package:devtools_app/src/screens/performance/frame_analysis.dart';
 import 'package:devtools_app/src/screens/performance/performance_controller.dart';
 import 'package:devtools_app/src/screens/performance/performance_model.dart';
 import 'package:devtools_app/src/screens/performance/raster_metrics.dart';
-import 'package:devtools_app/src/screens/performance/raster_metrics_controller.dart';
 import 'package:devtools_app/src/screens/performance/tabbed_performance_view.dart';
 import 'package:devtools_app/src/screens/performance/timeline_flame_chart.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
