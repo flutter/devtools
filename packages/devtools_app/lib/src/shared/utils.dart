@@ -73,6 +73,16 @@ mixin CompareMixin implements Comparable {
 }
 
 extension VmExtension on VM {
+  List<IsolateRef> isolatesForDevToolsMode() {
+    final vmDeveloperModeEnabled = preferences.vmDeveloperModeEnabled.value;
+    final vmIsolates = isolates ?? <IsolateRef>[];
+    return [
+      ...vmIsolates,
+      if (vmDeveloperModeEnabled || vmIsolates.isEmpty)
+        ...systemIsolates ?? <IsolateRef>[],
+    ];
+  }
+
   String get deviceDisplay {
     return [
       '$targetCPU',
