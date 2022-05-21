@@ -53,6 +53,8 @@ class ChartController extends DisposableController
   /// Used for debugging to determine which chart.
   final String? name;
 
+  bool get isIt => name == 'Event Pane';
+
   // Total size of area to display the chart (includes title, axis, labels, etc.).
   Size? size;
 
@@ -123,17 +125,21 @@ class ChartController extends DisposableController
 
   // TODO(terry): Consider timestamps returning UnmodifiableListView
   //              if loaded from a file (not live).
-  List<int> get timestamps => _timestamps;
+  List<int> get timestamps => UnmodifiableListView(_timestamps);
 
   /// X axis ticks, each timestamp is a tick on the X axis.
   final _timestamps = <int>[];
 
+  /// ???
   void addTimestamp(int timestamp) {
+    if (isIt)
+      print('!!!! $name: added timestamp, old length is ${_timestamps.length}');
     _timestamps.add(timestamp);
     dirty = true;
   }
 
   void timestampsClear() {
+    if (isIt) print('!!!! cleared timestamp');
     _timestamps.clear();
     dirty = true;
   }

@@ -131,6 +131,7 @@ class MemoryTimeline {
   }
 
   void addGCEvent() {
+    print('!!!!! added GC event ${extensionEvents}.');
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     postEventSample(
       EventSample.gcEvent(
@@ -196,6 +197,8 @@ class MemoryTimeline {
 
   /// Grab and remove the event to be posted.
   EventSample pullEventSample() {
+    print('!!!!!! removing events ');
+    print(StackTrace.current);
     final result = _eventSamples.first;
     _eventSamples.removeAt(0);
     return result;

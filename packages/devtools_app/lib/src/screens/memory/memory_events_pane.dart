@@ -36,6 +36,7 @@ const manualGCLegendName = 'Manual';
 const eventLegendName = 'Event';
 const eventsLegendName = 'Events';
 
+// ?????
 class EventChartController extends ChartController {
   EventChartController(this._memoryController)
       : super(
@@ -232,11 +233,14 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
 
   @override
   Widget build(BuildContext context) {
-    if (_chartController.timestamps.isNotEmpty) {
-      return Chart(_chartController);
-    }
+    // ???
+    print(
+        '${_chartController.name}: timestamps is ${_chartController.timestamps.isEmpty ? 'empty' : 'full'}');
+    //if (_chartController.timestamps.isNotEmpty) {
+    return Chart(_chartController);
+    //}
 
-    return const SizedBox(width: denseSpacing);
+    //return const SizedBox(width: denseSpacing);
   }
 
   void setupTraces({bool isDarkMode = true}) {

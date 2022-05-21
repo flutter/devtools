@@ -168,7 +168,8 @@ class EventSample {
         isEventSnapshot = false,
         isEventSnapshotAuto = false,
         allocationAccumulator = null,
-        extensionEvents = events;
+        extensionEvents = events,
+        label = 'gc';
 
   EventSample.snapshotEvent(
     this.timestamp, {
@@ -280,6 +281,8 @@ class EventSample {
   final AllocationAccumulator? allocationAccumulator;
 
   final ExtensionEvents? extensionEvents;
+
+  String label = 'no-label';
 
   @override
   String toString() => '[EventSample timestamp: $timestamp = '
