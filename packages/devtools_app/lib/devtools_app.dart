@@ -40,6 +40,7 @@ export 'src/screens/network/network_screen.dart';
 export 'src/screens/performance/performance_controller.dart';
 export 'src/screens/performance/performance_model.dart';
 export 'src/screens/performance/performance_screen.dart';
+export 'src/screens/performance/raster_metrics_controller.dart';
 export 'src/screens/performance/timeline_streams.dart';
 export 'src/screens/profiler/cpu_profile_model.dart';
 export 'src/screens/profiler/profile_granularity.dart';

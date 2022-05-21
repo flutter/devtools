@@ -43,6 +43,8 @@ abstract class ColumnData<T> {
 
   bool get numeric => false;
 
+  bool get includeHeader => true;
+
   bool get supportsSorting => numeric;
 
   int compare(T a, T b) {

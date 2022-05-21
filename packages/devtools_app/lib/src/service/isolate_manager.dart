@@ -13,6 +13,7 @@ import '../primitives/auto_dispose.dart';
 import '../primitives/message_bus.dart';
 import '../primitives/utils.dart';
 import '../shared/globals.dart';
+import '../shared/utils.dart';
 import 'isolate_state.dart';
 import 'service_extensions.dart' as extensions;
 import 'vm_service_wrapper.dart';
@@ -48,12 +49,9 @@ class IsolateManager extends Disposer {
     // Re-initialize isolates when VM developer mode is enabled/disabled to
     // display/hide system isolates.
     addAutoDisposeListener(preferences.vmDeveloperModeEnabled, () async {
-      final vmDeveloperModeEnabled = preferences.vmDeveloperModeEnabled.value;
       final vm = await serviceManager.service!.getVM();
-      final isolates = [
-        ...vm.isolates ?? <IsolateRef>[],
-        if (vmDeveloperModeEnabled) ...vm.systemIsolates ?? <IsolateRef>[],
-      ];
+      final isolates = vm.isolatesForDevToolsMode();
+      final vmDeveloperModeEnabled = preferences.vmDeveloperModeEnabled.value;
       if (selectedIsolate.value!.isSystemIsolate! && !vmDeveloperModeEnabled) {
         selectIsolate(_isolates.value.first);
       }
