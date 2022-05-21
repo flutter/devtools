@@ -1423,6 +1423,7 @@ class MemoryBodyState extends State<MemoryBody>
 
   Future<void> _gc() async {
     try {
+      print('GCing');
       ga.select(analytics_constants.memory, analytics_constants.gc);
 
       _controller.memoryTimeline.addGCEvent();

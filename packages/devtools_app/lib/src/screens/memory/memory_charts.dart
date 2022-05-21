@@ -153,7 +153,12 @@ class ChartsValues {
 
   bool get hasManualGc => _event.containsKey(manualGCJsonName);
 
-  bool get hasGc => _vm[gcJsonName] as bool;
+  /// ????
+  bool get hasGc {
+    final result = _vm[gcJsonName] as bool;
+    print('hasGc = $result');
+    return result;
+  }
 
   int get extensionEventsLength =>
       hasExtensionEvents ? extensionEvents.length : 0;
