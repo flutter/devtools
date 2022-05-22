@@ -52,6 +52,7 @@ class MemoryTracker {
     }
 
     _pollingTimer ??= Timer(MemoryTimeline.updateDelay, _pollMemory);
+
     _gcStreamListener ??=
         serviceManager.service?.onGCEvent.listen(_handleGCEvent);
   }
@@ -67,6 +68,7 @@ class MemoryTracker {
   }
 
   void _handleGCEvent(Event event) {
+    /// ???
     final HeapSpace newHeap = HeapSpace.parse(event.json!['new'])!;
     final HeapSpace oldHeap = HeapSpace.parse(event.json!['old'])!;
 
