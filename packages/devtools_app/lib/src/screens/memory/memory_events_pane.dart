@@ -213,13 +213,13 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
     _chartController.setupData();
 
     // Monitor heap samples.
-    if (_memoryTimeline.sampleAddedNotifier.value != null) {
-      addAutoDisposeListener(_memoryTimeline.sampleAddedNotifier, () {
-        setState(() {
-          _processHeapSample(_memoryTimeline.sampleAddedNotifier.value!);
-        });
+    addAutoDisposeListener(_memoryTimeline.sampleAddedNotifier, () {
+      final value = _memoryTimeline.sampleAddedNotifier.value;
+      if (value == null) return;
+      setState(() {
+        _processHeapSample(value);
       });
-    }
+    });
 
     // Monitor event fired.
     addAutoDisposeListener(_memoryTimeline.eventNotifier, () {
