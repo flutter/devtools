@@ -216,9 +216,7 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
     addAutoDisposeListener(_memoryTimeline.sampleAddedNotifier, () {
       final value = _memoryTimeline.sampleAddedNotifier.value;
       if (value == null) return;
-      setState(() {
-        _processHeapSample(value);
-      });
+      setState(() => _processHeapSample(value));
     });
 
     // Monitor event fired.
