@@ -26,7 +26,6 @@ import 'memory_graph_model.dart';
 import 'memory_protocol.dart';
 import 'memory_snapshot_models.dart';
 import 'primitives/filter_config.dart';
-import 'primitives/memory_service.dart';
 import 'primitives/memory_timeline.dart';
 
 enum ChartType {
