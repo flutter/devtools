@@ -5,8 +5,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../../devtools_app.dart';
-
 const _collectionLibraryUri = 'package:collection';
 const _intlLibraryUri = 'package:intl';
 const _vectorMathLibraryUri = 'package:vector_math';
