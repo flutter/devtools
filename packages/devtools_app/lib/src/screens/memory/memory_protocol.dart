@@ -28,7 +28,7 @@ class MemoryTracker {
   int processRss = 0;
 
   /// Polled adb dumpsys meminfo values.
-  late AdbMemoryInfo adbMemoryInfo;
+  AdbMemoryInfo? adbMemoryInfo;
 
   /// Polled engine's RasterCache estimates.
   RasterCache? rasterCache;
