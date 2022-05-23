@@ -24,10 +24,10 @@ import '../../shared/utils.dart';
 import '../../ui/search.dart';
 import 'memory_graph_model.dart';
 import 'memory_protocol.dart';
-import 'memory_service.dart';
 import 'memory_snapshot_models.dart';
-import 'memory_timeline.dart';
 import 'primitives/filtered_libraries.dart';
+import 'primitives/memory_service.dart';
+import 'primitives/memory_timeline.dart';
 
 enum ChartType {
   DartHeaps,

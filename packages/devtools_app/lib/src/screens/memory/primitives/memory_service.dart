@@ -6,8 +6,8 @@ import 'package:collection/collection.dart' show IterableExtension;
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../config_specific/logger/logger.dart';
-import '../../shared/globals.dart';
+import '../../../config_specific/logger/logger.dart';
+import '../../../shared/globals.dart';
 
 // TODO(terry): This file prints out fatal errors.  Unable to use ga.error
 // TODO(terry): because of dart:js usage.  Look at abstracting errors to a log
