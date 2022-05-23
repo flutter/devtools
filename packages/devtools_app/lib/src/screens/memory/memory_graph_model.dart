@@ -132,7 +132,7 @@ class FilterConfig {
 }
 
 HeapGraph convertHeapGraph(
-  FilterConfig filterParameters,
+  FilterConfig filterConfig,
   HeapSnapshotGraph graph, [
   List<String>? classNamesToMonitor,
 ]) {
@@ -227,7 +227,7 @@ HeapGraph convertHeapGraph(
   }
 
   return HeapGraph(
-    filterParameters,
+    filterConfig,
     builtInClasses,
     classes,
     elements,
@@ -237,14 +237,14 @@ HeapGraph convertHeapGraph(
 
 class HeapGraph {
   HeapGraph(
-    this.filterParameters,
+    this.filterConfig,
     this.builtInClasses,
     this.classes,
     this.elements,
     this.externals,
   );
 
-  final FilterConfig filterParameters;
+  final FilterConfig filterConfig;
 
   bool _instancesComputed = false;
 
@@ -356,11 +356,10 @@ class HeapGraph {
     // Prune classes that are private or have zero instances.
     filteredElements.clear();
     groupByClass.removeWhere((className, instances) {
-      final remove =
-          (filterParameters.filterZeroInstances.value && instances.isEmpty) ||
-              (filterParameters.filterPrivateClasses.value &&
-                  isPrivate(className)) ||
-              className == internalClassName;
+      final remove = (filterConfig.filterZeroInstances.value &&
+              instances.isEmpty) ||
+          (filterConfig.filterPrivateClasses.value && isPrivate(className)) ||
+          className == internalClassName;
       if (remove) {
         filteredElements.putIfAbsent(className, () => instances);
       }
@@ -379,17 +378,17 @@ class HeapGraph {
 
     groupByLibrary.removeWhere((libraryName, classes) {
       classes.removeWhere((actual) {
-        final result = (filterParameters.filterZeroInstances.value &&
+        final result = (filterConfig.filterZeroInstances.value &&
                 actual.getInstances(this).isEmpty) ||
-            (filterParameters.filterPrivateClasses.value &&
+            (filterConfig.filterPrivateClasses.value &&
                 isPrivate(actual.name)) ||
             actual.name == internalClassName;
         return result;
       });
 
-      final result = (filterParameters.libraryFilters
-              .isLibraryFiltered(libraryName)) ||
-          filterParameters.filterLibraryNoInstances.value && classes.isEmpty;
+      final result =
+          (filterConfig.libraryFilters.isLibraryFiltered(libraryName)) ||
+              filterConfig.filterLibraryNoInstances.value && classes.isEmpty;
       if (result) {
         filteredLibraries.putIfAbsent(libraryName, () => classes);
       }
