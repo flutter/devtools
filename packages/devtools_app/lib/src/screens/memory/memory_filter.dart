@@ -134,15 +134,16 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
 
     buildFilters();
 
-    oldFilterPrivateClassesValue = widget.controller.filterPrivateClasses.value;
-    oldFilterZeroInstancesValue = widget.controller.filterZeroInstances.value;
+    final parameters = widget.controller.filterConfig;
+    oldFilterPrivateClassesValue = parameters.filterPrivateClasses.value;
+    oldFilterZeroInstancesValue = parameters.filterZeroInstances.value;
     oldFilterLibraryNoInstancesValue =
-        widget.controller.filterLibraryNoInstances.value;
+        parameters.filterLibraryNoInstances.value;
   }
 
   void addLibrary(String libraryName, {bool hideState = false}) {
     final filteredGroup = <String, List<LibraryFilter>>{};
-    final filters = widget.controller.libraryFilters;
+    final filters = widget.controller.filterConfig.libraryFilters;
 
     final isFiltered = filters.isLibraryFiltered(libraryName);
     var groupedName = libraryName;
@@ -165,7 +166,8 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
     // First time filters created, populate with the default list of libraries
     // to filters
 
-    for (final library in widget.controller.libraryFilters.librariesFiltered) {
+    for (final library
+        in widget.controller.filterConfig.libraryFilters.librariesFiltered) {
       addLibrary(library, hideState: true);
     }
     // If not snapshots, return no libraries to process.
@@ -197,7 +199,7 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
         DialogApplyButton(
           onPressed: () {
             // Re-generate librariesFiltered
-            widget.controller.libraryFilters.clearFilters();
+            widget.controller.filterConfig.libraryFilters.clearFilters();
             // Re-filter the groups.
             widget.controller.libraryRoot = null;
             if (widget.controller.lastSnapshot != null) {
@@ -213,11 +215,11 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
         const SizedBox(width: defaultSpacing),
         DialogCancelButton(
           cancelAction: () {
-            widget.controller.filterPrivateClasses.value =
+            widget.controller.filterConfig.filterPrivateClasses.value =
                 oldFilterPrivateClassesValue;
-            widget.controller.filterZeroInstances.value =
+            widget.controller.filterConfig.filterZeroInstances.value =
                 oldFilterZeroInstancesValue;
-            widget.controller.filterLibraryNoInstances.value =
+            widget.controller.filterConfig.filterLibraryNoInstances.value =
                 oldFilterLibraryNoInstancesValue;
           },
         ),
@@ -253,7 +255,8 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
                   Row(
                     children: [
                       NotifierCheckbox(
-                        notifier: widget.controller.filterPrivateClasses,
+                        notifier:
+                            widget.controller.filterConfig.filterPrivateClasses,
                       ),
                       const DevToolsTooltip(
                         message: 'Hide class names beginning with '
@@ -265,7 +268,8 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
                   Row(
                     children: [
                       NotifierCheckbox(
-                        notifier: widget.controller.filterZeroInstances,
+                        notifier:
+                            widget.controller.filterConfig.filterZeroInstances,
                       ),
                       const Text('Hide Classes with No Instances'),
                     ],
@@ -273,7 +277,8 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
                   Row(
                     children: [
                       NotifierCheckbox(
-                        notifier: widget.controller.filterLibraryNoInstances,
+                        notifier: widget
+                            .controller.filterConfig.filterLibraryNoInstances,
                       ),
                       const Text('Hide Library with No Instances'),
                     ],

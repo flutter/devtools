@@ -9,7 +9,6 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../config_specific/logger/logger.dart';
 import '../../primitives/utils.dart';
-import 'memory_controller.dart';
 
 enum ContinuesState {
   none,
@@ -20,7 +19,7 @@ enum ContinuesState {
 
 /// All Raw data received from the VM and offline data loaded from a memory log file.
 class MemoryTimeline {
-  MemoryTimeline(this.controller);
+  MemoryTimeline(this.offline);
 
   /// Version of timeline data (HeapSample) JSON payload.
   static const version = 1;
@@ -55,18 +54,16 @@ class MemoryTimeline {
   static const delayMs = 500;
   static const Duration updateDelay = Duration(milliseconds: delayMs);
 
-  final MemoryController controller;
+  final ValueListenable<bool> offline;
 
   /// Return the data payload that is active.
-  List<HeapSample> get data => controller.offline ? offlineData : liveData;
+  List<HeapSample> get data => offline.value ? offlineData : liveData;
 
   int get startingIndex =>
-      controller.offline ? offlineStartingIndex : liveStartingIndex;
+      offline.value ? offlineStartingIndex : liveStartingIndex;
 
   set startingIndex(int value) {
-    controller.offline
-        ? offlineStartingIndex = value
-        : liveStartingIndex = value;
+    offline.value ? offlineStartingIndex = value : liveStartingIndex = value;
   }
 
   int get endingIndex => data.isNotEmpty ? data.length - 1 : -1;
@@ -295,7 +292,7 @@ class MemoryTimeline {
 
     // Only notify that new sample has arrived if the
     // memory source is 'Live Feed'.
-    if (!controller.offline) {
+    if (!offline.value) {
       _sampleAddedNotifier.value = sample;
       sampleEventNotifier.value++;
     }

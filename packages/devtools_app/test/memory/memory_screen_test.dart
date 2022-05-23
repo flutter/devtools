@@ -76,7 +76,7 @@ void main() {
         .thenAnswer((_) => Future.value(false));
     setGlobal(ServiceConnectionManager, fakeServiceManager);
 
-    controller.offline = true;
+    controller.offline.value = true;
     controller.memoryTimeline.offlineData.clear();
     controller.memoryTimeline.offlineData.addAll(memoryJson.data);
   }

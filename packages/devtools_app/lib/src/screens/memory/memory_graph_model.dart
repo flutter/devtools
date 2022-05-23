@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 // import '../config_specific/logger/logger.dart';
 import '../../primitives/utils.dart';
-import 'memory_controller.dart';
+import 'memory_filter.dart';
 
 // TODO(terry): Ask Ben, what is a class name of ::?
 /// Internal class names :: automatically filter out.
@@ -108,8 +109,30 @@ bool monitorClass({int? classId, String? className, String message = ''}) {
   return false;
 }
 
+class FilterConfig {
+  FilterConfig({
+    required this.filterZeroInstances,
+    required this.filterLibraryNoInstances,
+    required this.filterPrivateClasses,
+    required this.libraryFilters,
+  });
+
+  /// Hide any private class, prefixed with an underscore.
+  final ValueNotifier<bool> filterPrivateClasses;
+
+  /// Hide any class that hasn't been constructed (zero instances).
+  final ValueNotifier<bool> filterZeroInstances;
+
+  /// Hide any library with no constructed class instances.
+  final ValueNotifier<bool> filterLibraryNoInstances;
+
+  /// State of filters used by filter dialog (create/modify) and used
+  /// by filtering in grouping.
+  final FilteredLibraries libraryFilters;
+}
+
 HeapGraph convertHeapGraph(
-  MemoryController controller,
+  FilterConfig filterParameters,
   HeapSnapshotGraph graph, [
   List<String>? classNamesToMonitor,
 ]) {
@@ -204,7 +227,7 @@ HeapGraph convertHeapGraph(
   }
 
   return HeapGraph(
-    controller,
+    filterParameters,
     builtInClasses,
     classes,
     elements,
@@ -214,14 +237,14 @@ HeapGraph convertHeapGraph(
 
 class HeapGraph {
   HeapGraph(
-    this.controller,
+    this.filterParameters,
     this.builtInClasses,
     this.classes,
     this.elements,
     this.externals,
   );
 
-  final MemoryController controller;
+  final FilterConfig filterParameters;
 
   bool _instancesComputed = false;
 
@@ -334,8 +357,9 @@ class HeapGraph {
     filteredElements.clear();
     groupByClass.removeWhere((className, instances) {
       final remove =
-          (controller.filterZeroInstances.value && instances.isEmpty) ||
-              (controller.filterPrivateClasses.value && isPrivate(className)) ||
+          (filterParameters.filterZeroInstances.value && instances.isEmpty) ||
+              (filterParameters.filterPrivateClasses.value &&
+                  isPrivate(className)) ||
               className == internalClassName;
       if (remove) {
         filteredElements.putIfAbsent(className, () => instances);
@@ -355,16 +379,17 @@ class HeapGraph {
 
     groupByLibrary.removeWhere((libraryName, classes) {
       classes.removeWhere((actual) {
-        final result = (controller.filterZeroInstances.value &&
+        final result = (filterParameters.filterZeroInstances.value &&
                 actual.getInstances(this).isEmpty) ||
-            (controller.filterPrivateClasses.value && isPrivate(actual.name)) ||
+            (filterParameters.filterPrivateClasses.value &&
+                isPrivate(actual.name)) ||
             actual.name == internalClassName;
         return result;
       });
 
-      final result =
-          (controller.libraryFilters.isLibraryFiltered(libraryName)) ||
-              controller.filterLibraryNoInstances.value && classes.isEmpty;
+      final result = (filterParameters.libraryFilters
+              .isLibraryFiltered(libraryName)) ||
+          filterParameters.filterLibraryNoInstances.value && classes.isEmpty;
       if (result) {
         filteredLibraries.putIfAbsent(libraryName, () => classes);
       }
