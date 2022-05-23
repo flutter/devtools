@@ -129,7 +129,7 @@ class _TrackerCountColumn extends ColumnData<Tracker> {
 }
 
 class TreeTracker {
-  late TrackerClass tree1;
+  TrackerClass? tree1;
 
   TreeColumnData<Tracker> treeColumn = _TrackerClassColumn();
 
@@ -141,14 +141,14 @@ class TreeTracker {
     Map<String, ClassRef> classesTracked,
     List<AllocationSamples> allocationSamples,
   ) {
-    tree1 = TrackerClass('_ROOT_tracking');
+    final treeLocal = tree1 = TrackerClass('_ROOT_tracking');
 
-    tree1.children.clear();
+    treeLocal.children.clear();
 
     final classesName = classesTracked.keys;
     for (var className in classesName) {
       final classEntry = TrackerClass(className);
-      tree1.addChild(classEntry);
+      treeLocal.addChild(classEntry);
 
       final trackedClassId = classesTracked[className]!.id;
 
@@ -298,7 +298,7 @@ class TreeTracker {
                   treeColumn,
                   _TrackerCountColumn(),
                 ],
-                dataRoots: tree1.children,
+                dataRoots: tree1!.children,
                 treeColumn: treeColumn,
                 keyFactory: (d) {
                   return Key(d.name);

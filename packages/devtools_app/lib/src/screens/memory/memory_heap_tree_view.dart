@@ -242,11 +242,14 @@ class HeapTreeViewState extends State<HeapTree>
               print('!!!!!! found ${e.origin.toString()}!!!!!');
               serviceManager.service!.forEachIsolate((isolate) async {
                 print('checking ${isolate.name}...');
-                var path = serviceManager.service!.getRetainingPath(
-                  isolate.id!,
-                  '-', // targetId,
-                  100,
-                );
+                print('data: ${e.origin.data}');
+
+                // final path = serviceManager.service!.getRetainingPath(
+                //   isolate.id!,
+                //
+                //   '-', // targetId,
+                //   100,
+                // );
               });
 
               return;
