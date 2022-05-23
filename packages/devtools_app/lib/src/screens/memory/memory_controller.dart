@@ -1307,44 +1307,6 @@ class MemoryController extends DisposableController
     }
   }
 
-  // // Temporary hack to allow accessing private fields(e.g., _extra) using eval
-  // // of '_extra.hashCode' to fetch the hashCode of the object of that field.
-  // // Used to find the object which allocated/references the object being viewed.
-  // Future<bool> matchObject(
-  //   String objectRef,
-  //   String fieldName,
-  //   int instanceHashCode,
-  // ) async {
-  //   final dynamic object = await getObject(objectRef);
-  //   if (object is Instance) {
-  //     final Instance instance = object;
-  //     final List<BoundField> fields = instance.fields!;
-  //     for (var field in fields) {
-  //       if (field.decl?.name == fieldName) {
-  //         final InstanceRef? ref = field.value;
-  //
-  //         if (ref == null) continue;
-  //
-  //         final evalResult = (await evaluate(ref.id!, 'hashCode'))!;
-  //         final int objHashCode = int.parse(evalResult.valueAsString!);
-  //         if (objHashCode == instanceHashCode) {
-  //           return true;
-  //         }
-  //       }
-  //     }
-  //   }
-  //
-  //   if (object is Sentinel) {
-  //     // TODO(terry): Need more graceful handling of sentinels.
-  //     log(
-  //       'Trying to matchObject with a Sentinel $objectRef',
-  //       LogLevel.error,
-  //     );
-  //   }
-  //
-  //   return false;
-  // }
-
   List<Reference>? snapshotByLibraryData;
 
   void createSnapshotByLibrary() {
