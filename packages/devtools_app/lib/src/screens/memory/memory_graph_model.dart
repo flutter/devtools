@@ -7,7 +7,7 @@ import 'package:vm_service/vm_service.dart';
 
 // import '../config_specific/logger/logger.dart';
 import '../../primitives/utils.dart';
-import 'memory_filter.dart';
+import 'primitives/filtered_libraries.dart';
 
 // TODO(terry): Ask Ben, what is a class name of ::?
 /// Internal class names :: automatically filter out.

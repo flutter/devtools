@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:vm_service/vm_service.dart';
 
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../shared/common_widgets.dart';
@@ -11,87 +10,11 @@ import '../../shared/dialogs.dart';
 import '../../shared/theme.dart';
 import 'memory_controller.dart';
 import 'memory_snapshot_models.dart';
-
-/// First two libraries are special e.g., dart:* and package:flutter*
-const _dartLibraryUriPrefix = 'dart:';
-const _flutterLibraryUriPrefix = 'package:flutter';
-const _collectionLibraryUri = 'package:collection';
-const _intlLibraryUri = 'package:intl';
-const _vectorMathLibraryUri = 'package:vector_math';
+import 'primitives/filtered_libraries.dart';
 
 /// Name displayed in filter dialog, for wildcard groups.
-const _prettyPrintDartAbbreviation = '$_dartLibraryUriPrefix*';
-const _prettyPrintFlutterAbbreviation = '$_flutterLibraryUriPrefix*';
-
-/// State of the libraries, wildcard included, filtered (shown or hidden).
-/// groupBy uses this class to determine is the library should be filtered.
-class FilteredLibraries {
-  final List<String> _filteredLibraries = [
-    _dartLibraryUriPrefix,
-    _collectionLibraryUri,
-    _flutterLibraryUriPrefix,
-    _intlLibraryUri,
-    _vectorMathLibraryUri,
-  ];
-
-  static String normalizeLibraryUri(Library library) {
-    final uriParts = library.uri!.split('/');
-    final firstPart = uriParts.first;
-    if (firstPart.startsWith(_dartLibraryUriPrefix)) {
-      return _dartLibraryUriPrefix;
-    } else if (firstPart.startsWith(_flutterLibraryUriPrefix)) {
-      return _flutterLibraryUriPrefix;
-    } else {
-      return firstPart;
-    }
-  }
-
-  List<String> get librariesFiltered =>
-      _filteredLibraries.toList(growable: false);
-
-  bool get isDartLibraryFiltered =>
-      _filteredLibraries.contains(_dartLibraryUriPrefix);
-
-  bool get isFlutterLibraryFiltered =>
-      _filteredLibraries.contains(_flutterLibraryUriPrefix);
-
-  void clearFilters() {
-    _filteredLibraries.clear();
-  }
-
-  void addFilter(String libraryUri) {
-    _filteredLibraries.add(libraryUri);
-  }
-
-  void removeFilter(String libraryUri) {
-    _filteredLibraries.remove(libraryUri);
-  }
-
-  // Keys in the libraries map is a normalized library name.
-  List<String> sort() => _filteredLibraries..sort();
-
-  bool isDartLibrary(Library library) =>
-      library.uri!.startsWith(_dartLibraryUriPrefix);
-
-  bool isFlutterLibrary(Library library) =>
-      library.uri!.startsWith(_flutterLibraryUriPrefix);
-
-  bool isDartLibraryName(String libraryName) =>
-      libraryName.startsWith(_dartLibraryUriPrefix);
-
-  bool isFlutterLibraryName(String libraryName) =>
-      libraryName.startsWith(_flutterLibraryUriPrefix);
-
-  bool isLibraryFiltered(String? libraryName) =>
-      // Are dart:* libraries filtered and its a Dart library?
-      (_filteredLibraries.contains(_dartLibraryUriPrefix) &&
-          isDartLibraryName(libraryName!)) ||
-      // Are package:flutter* filtered and its a Flutter package?
-      (_filteredLibraries.contains(_flutterLibraryUriPrefix) &&
-          isFlutterLibraryName(libraryName!)) ||
-      // Is this library filtered?
-      _filteredLibraries.contains(libraryName);
-}
+const _prettyPrintDartAbbreviation = '$dartLibraryUriPrefix*';
+const _prettyPrintFlutterAbbreviation = '$flutterLibraryUriPrefix*';
 
 /// State of the libraries and packages (hidden or not) for the filter dialog.
 class LibraryFilter {
