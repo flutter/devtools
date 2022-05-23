@@ -10,7 +10,7 @@ import '../../shared/dialogs.dart';
 import '../../shared/theme.dart';
 import 'memory_controller.dart';
 import 'memory_snapshot_models.dart';
-import 'primitives/filtered_libraries.dart';
+import 'primitives/filter_config.dart';
 
 /// Name displayed in filter dialog, for wildcard groups.
 const _prettyPrintDartAbbreviation = '$dartLibraryUriPrefix*';

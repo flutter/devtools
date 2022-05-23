@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 // import '../config_specific/logger/logger.dart';
 import '../../primitives/utils.dart';
-import 'primitives/filtered_libraries.dart';
+import 'primitives/filter_config.dart';
 
 // TODO(terry): Ask Ben, what is a class name of ::?
 /// Internal class names :: automatically filter out.
@@ -107,28 +106,6 @@ bool monitorClass({int? classId, String? className, String message = ''}) {
     print('WARNING: Missing classId or className to monitor.');
   }
   return false;
-}
-
-class FilterConfig {
-  FilterConfig({
-    required this.filterZeroInstances,
-    required this.filterLibraryNoInstances,
-    required this.filterPrivateClasses,
-    required this.libraryFilters,
-  });
-
-  /// Hide any private class, prefixed with an underscore.
-  final ValueNotifier<bool> filterPrivateClasses;
-
-  /// Hide any class that hasn't been constructed (zero instances).
-  final ValueNotifier<bool> filterZeroInstances;
-
-  /// Hide any library with no constructed class instances.
-  final ValueNotifier<bool> filterLibraryNoInstances;
-
-  /// State of filters used by filter dialog (create/modify) and used
-  /// by filtering in grouping.
-  final FilteredLibraries libraryFilters;
 }
 
 HeapGraph convertHeapGraph(

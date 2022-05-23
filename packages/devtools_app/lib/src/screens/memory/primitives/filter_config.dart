@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 const _collectionLibraryUri = 'package:collection';
@@ -11,6 +12,28 @@ const _vectorMathLibraryUri = 'package:vector_math';
 /// First two libraries are special e.g., dart:* and package:flutter*
 const dartLibraryUriPrefix = 'dart:';
 const flutterLibraryUriPrefix = 'package:flutter';
+
+class FilterConfig {
+  FilterConfig({
+    required this.filterZeroInstances,
+    required this.filterLibraryNoInstances,
+    required this.filterPrivateClasses,
+    required this.libraryFilters,
+  });
+
+  /// Hide any private class, prefixed with an underscore.
+  final ValueNotifier<bool> filterPrivateClasses;
+
+  /// Hide any class that hasn't been constructed (zero instances).
+  final ValueNotifier<bool> filterZeroInstances;
+
+  /// Hide any library with no constructed class instances.
+  final ValueNotifier<bool> filterLibraryNoInstances;
+
+  /// State of filters used by filter dialog (create/modify) and used
+  /// by filtering in grouping.
+  final FilteredLibraries libraryFilters;
+}
 
 /// State of the libraries, wildcard included, filtered (shown or hidden).
 /// groupBy uses this class to determine is the library should be filtered.
