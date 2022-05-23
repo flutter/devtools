@@ -76,7 +76,7 @@ void main() {
         .thenAnswer((_) => Future.value(false));
     setGlobal(ServiceConnectionManager, fakeServiceManager);
 
-    controller.offline = true;
+    controller.offline.value = true;
     controller.memoryTimeline.offlineData.clear();
     controller.memoryTimeline.offlineData.addAll(memoryJson.data);
   }
@@ -137,7 +137,7 @@ void main() {
       await pumpMemoryScreen(tester);
 
       // Should be collecting live feed.
-      expect(controller.offline, isFalse);
+      expect(controller.offline.value, isFalse);
 
       // Verify Memory, Memory Source, and Memory Sources content.
       expect(find.text('Pause'), findsOneWidget);
@@ -184,7 +184,7 @@ void main() {
       // Load canned data.
       _setUpServiceManagerForMemory();
 
-      expect(controller.offline, isTrue);
+      expect(controller.offline.value, isTrue);
 
       // Verify default event pane and vm chart exists.
       expect(find.byType(MemoryEventsPane), findsOneWidget);
@@ -238,7 +238,7 @@ void main() {
       await pumpMemoryScreen(tester);
 
       // Verify initial state - collecting live feed.
-      expect(controller.offline, isFalse);
+      expect(controller.offline.value, isFalse);
 
       final previousMemoryLogs = controller.memoryLog.offlineFiles();
 
@@ -246,7 +246,7 @@ void main() {
       await tester.tap(find.byType(ExportButton));
       await tester.pump();
 
-      expect(controller.offline, isFalse);
+      expect(controller.offline.value, isFalse);
 
       expect(controller.memoryTimeline.liveData, isEmpty);
       expect(controller.memoryTimeline.offlineData, isEmpty);
@@ -255,7 +255,7 @@ void main() {
       expect(currentMemoryLogs.length, previousMemoryLogs.length + 1);
 
       // Verify that memory source is still live feed.
-      expect(controller.offline, isFalse);
+      expect(controller.offline.value, isFalse);
     });
 
     testWidgetsWithWindowSize(
@@ -287,7 +287,7 @@ void main() {
 
       await controller.memoryLog.loadOffline(filename);
 
-      expect(controller.offline, isTrue);
+      expect(controller.offline.value, isTrue);
 
       // Remove the memory log, in desktop only version.  Don't want to polute
       // our temp directory when this test runs locally.
@@ -305,7 +305,7 @@ void main() {
       // Load canned data.
       _setUpServiceManagerForMemory();
 
-      expect(controller.offline, isTrue);
+      expect(controller.offline.value, isTrue);
 
       // Verify default event pane and vm chart exists.
       expect(find.byType(MemoryEventsPane), findsOneWidget);
@@ -474,7 +474,7 @@ void main() {
         controller.refreshAllCharts();
         await pumpAndSettleTwoSeconds();
 
-        expect(controller.offline, isTrue);
+        expect(controller.offline.value, isTrue);
 
         Future<void> checkGolden(String goldenFilename, {Key? key}) async {
           // Await delay for golden comparison.

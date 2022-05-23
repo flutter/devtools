@@ -146,8 +146,6 @@ class MockMemoryController extends Mock implements MemoryController {}
 
 class MockFlutterMemoryController extends Mock implements MemoryController {}
 
-class MockPerformanceController extends Mock implements PerformanceController {}
-
 class MockProfilerScreenController extends Mock
     implements ProfilerScreenController {}
 
@@ -231,17 +229,69 @@ Future<void> ensureInspectorDependencies() async {
   );
 }
 
-void mockIsFlutterApp(
+void mockWebVm(VM vm) {
+  when(vm.targetCPU).thenReturn('Web');
+  when(vm.architectureBits).thenReturn(-1);
+  when(vm.operatingSystem).thenReturn('macos');
+}
+
+void mockConnectedApp(
   ConnectedApp connectedApp, {
-  bool isFlutterApp = true,
-  bool isProfileBuild = false,
+  required bool isFlutterApp,
+  required isProfileBuild,
+  required isWebApp,
 }) {
+  assert(!(!isFlutterApp && isProfileBuild));
+
+  // Dart VM.
+  when(connectedApp.isRunningOnDartVM).thenReturn(!isWebApp);
+
+  // Flutter app.
   when(connectedApp.isFlutterAppNow).thenReturn(isFlutterApp);
   when(connectedApp.isFlutterApp).thenAnswer((_) => Future.value(isFlutterApp));
-  when(connectedApp.connectedAppInitialized).thenReturn(true);
-  when(connectedApp.isDebugFlutterAppNow)
-      .thenReturn(!isProfileBuild && isFlutterApp);
+  when(connectedApp.isFlutterNativeAppNow)
+      .thenReturn(isFlutterApp && !isWebApp);
+  if (isFlutterApp) {
+    when(connectedApp.flutterVersionNow).thenReturn(
+      FlutterVersion.parse({
+        'type': 'Success',
+        'frameworkVersion': '2.10.0',
+        'channel': 'unknown',
+        'repositoryUrl': 'unknown source',
+        'frameworkRevision': '74432fa91c8ffbc555ffc2701309e8729380a012',
+        'frameworkCommitDate': '2020-05-14 13:05:34 -0700',
+        'engineRevision': 'ae2222f47e788070c09020311b573542b9706a78',
+        'dartSdkVersion': '2.9.0 (build 2.9.0-8.0.dev d6fed1f624)',
+        'frameworkRevisionShort': '74432fa91c',
+        'engineRevisionShort': 'ae2222f47e',
+      }),
+    );
+  } else {
+    when(connectedApp.flutterVersionNow).thenReturn(null);
+  }
+
+  // Flutter web app.
+  when(connectedApp.isFlutterWebAppNow).thenReturn(isFlutterApp && isWebApp);
+
+  // Web app.
+  when(connectedApp.isDartWebApp).thenAnswer((_) => Future.value(isWebApp));
+  when(connectedApp.isDartWebAppNow).thenReturn(isWebApp);
+
+  // CLI app.
+  final isCliApp = !isFlutterApp && !isWebApp;
+  when(connectedApp.isDartCliApp).thenAnswer((_) => Future.value(isCliApp));
+  when(connectedApp.isDartCliAppNow).thenReturn(isCliApp);
+
+  // Run mode.
+  when(connectedApp.isProfileBuild)
+      .thenAnswer((_) => Future.value(isProfileBuild));
   when(connectedApp.isProfileBuildNow).thenReturn(isProfileBuild);
+  when(connectedApp.isDebugFlutterAppNow)
+      .thenReturn(isFlutterApp && !isProfileBuild);
+
+  // Initialized.
+  when(connectedApp.connectedAppInitialized).thenReturn(true);
+  when(connectedApp.initialized).thenReturn(Completer()..complete(true));
 }
 
 void mockFlutterVersion(
@@ -253,14 +303,6 @@ void mockFlutterVersion(
       'frameworkVersion': '$version',
     }),
   );
-  when(connectedApp.connectedAppInitialized).thenReturn(true);
-}
-
-void mockIsDartVmApp(
-  ConnectedApp connectedApp, [
-  isDartVmApp = true,
-]) {
-  when(connectedApp.isRunningOnDartVM).thenReturn(isDartVmApp);
   when(connectedApp.connectedAppInitialized).thenReturn(true);
 }
 

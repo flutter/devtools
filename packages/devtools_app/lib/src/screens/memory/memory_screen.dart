@@ -558,7 +558,7 @@ class MemoryBodyState extends State<MemoryBody>
               )
             : const SizedBox(),
         ExportButton(
-          onPressed: _controller.offline ? null : _exportToFile,
+          onPressed: _controller.offline.value ? null : _exportToFile,
           minScreenWidthForTextBeforeScaling: _primaryControlsMinVerboseWidth,
         ),
         const SizedBox(width: denseSpacing),

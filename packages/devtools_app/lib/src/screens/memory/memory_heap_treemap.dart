@@ -11,7 +11,7 @@ import '../../primitives/auto_dispose_mixin.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/theme.dart';
 import 'memory_controller.dart';
-import 'memory_graph_model.dart';
+import 'primitives/predefined_classes.dart';
 
 class MemoryHeapTreemap extends StatefulWidget {
   const MemoryHeapTreemap(this.controller);
