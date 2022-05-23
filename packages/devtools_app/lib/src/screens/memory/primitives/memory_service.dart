@@ -34,19 +34,6 @@ Future<InstanceRef?> evaluate(String objectRef, String expression) async {
   return null;
 }
 
-Future<InboundReferences?> getInboundReferences(
-  String objectRef,
-  int maxInstances,
-) async {
-  // TODO(terry): Expose a stream to reduce stalls querying 1000s of instances.
-  final Response response = await serviceManager.service!
-      .getInboundReferences(_isolateId!, objectRef, maxInstances);
-
-  if (response.type == 'Sentinel') return null;
-
-  return InboundReferences(response.json!);
-}
-
 class InboundReferences extends Response {
   InboundReferences(Map<String, dynamic> json) {
     elements = json['references']
