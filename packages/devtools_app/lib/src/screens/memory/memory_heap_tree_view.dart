@@ -240,16 +240,22 @@ class HeapTreeViewState extends State<HeapTree>
           for (HeapGraphElementLive? e in graph.elements) {
             if (e!.origin.identityHashCode == hash) {
               print('!!!!!! found ${e.origin.toString()}!!!!!');
+              serviceManager.service!.forEachIsolate((isolate) async {
+                print('checking ${isolate.name}...');
+                var path = serviceManager.service!.getRetainingPath(
+                  isolate.id!,
+                  '-', // targetId,
+                  100,
+                );
+              });
+
               return;
             }
           }
-          print('!!!!! did not find :(');
+          print('!!!!! did not find $hash :(');
         }
       }),
     );
-
-    var hash = 1049513629;
-    var type = List<String>;
   }
 
   @override
