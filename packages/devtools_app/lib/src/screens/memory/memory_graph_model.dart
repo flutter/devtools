@@ -44,7 +44,6 @@ bool monitorClass({int? classId, String? className, String message = ''}) {
   return false;
 }
 
-/// ???
 HeapGraph convertHeapGraph(
   FilterConfig filterConfig,
   HeapSnapshotGraph graph, [
@@ -351,6 +350,7 @@ class HeapGraphElementSentinel extends HeapGraphElement {
   String toString() => 'HeapGraphElementSentinel';
 }
 
+/// ???
 /// Live element.
 class HeapGraphElementLive extends HeapGraphElement {
   HeapGraphElementLive(this.origin);

@@ -211,6 +211,7 @@ class HeapTreeViewState extends State<HeapTree>
     _animation = _setupBubbleAnimationController();
   }
 
+  /// ???
   var _leaksSummary = 'Not received.';
   var _leaksDetails = 'Not received.';
   void _subscribeForMemoryLeaks() {
