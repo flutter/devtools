@@ -5,6 +5,7 @@
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
+import 'package:devtools_app/src/screens/memory/area_controls/controls_area.dart';
 import 'package:devtools_app/src/screens/memory/memory_controller.dart';
 import 'package:devtools_app/src/screens/memory/memory_events_pane.dart';
 import 'package:devtools_app/src/screens/memory/memory_heap_tree_view.dart';
@@ -155,13 +156,13 @@ void main() {
       expect(controller.memoryTimeline.offlineData.isEmpty, isTrue);
 
       // Check memory sources available.
-      await tester.tap(find.byKey(MemoryScreen.sourcesDropdownKey));
+      await tester.tap(find.byKey(sourcesDropdownKey));
       await tester.pump();
 
       // Should only be one source 'Live Feed' in the popup menu.
       final memorySources = tester.firstWidget(
         find.byKey(
-          MemoryScreen.sourcesKey,
+          sourcesKey,
         ),
       ) as Text;
 
@@ -267,7 +268,7 @@ void main() {
       expect(controller.memorySource, MemoryController.liveFeed);
 
       // Expand the memory sources.
-      await tester.tap(find.byKey(MemoryScreen.sourcesDropdownKey));
+      await tester.tap(find.byKey(sourcesDropdownKey));
       await tester.pumpAndSettle();
 
       // Last item in dropdown list of memory source should be memory log file.
