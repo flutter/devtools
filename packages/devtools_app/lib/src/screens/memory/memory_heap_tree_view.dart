@@ -34,6 +34,7 @@ import 'memory_graph_model.dart';
 import 'memory_heap_treemap.dart';
 import 'memory_instance_tree_view.dart';
 import 'memory_snapshot_models.dart';
+import '../../shared/eval_on_dart_library.dart';
 
 const memorySearchFieldKeyName = 'MemorySearchFieldKey';
 
@@ -524,15 +525,37 @@ class HeapTreeViewState extends State<HeapTree>
                 ),
 
                 // Memory Leaks Tab
+                /// ???
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(_leaksSummary),
                     MaterialButton(
-                      child: const Text('Save Details to Clipboard'),
+                      child: const Text('Copy Details to Clipboard'),
                       onPressed: () =>
                           Clipboard.setData(ClipboardData(text: _leaksDetails)),
-                    )
+                    ),
+                    MaterialButton(
+                      child: const Text('Evaluate'),
+                      onPressed: () async {
+                        final eval = EvalOnDartLibrary(
+                            'package:flutter_leaks/test_lib.dart',
+                            serviceManager.service!);
+                        final result = await eval.safeEval('getObject(27182)',
+                            isAlive: null);
+                        print(
+                            'evaluated: ${result.id!}, ${result.valueAsString}');
+
+                        final path =
+                            await serviceManager.service!.getRetainingPath(
+                          eval.isolate!.id!,
+                          result.id!,
+                          100,
+                        );
+
+                        print('path: ${path}');
+                      },
+                    ),
                   ],
                 ),
               ],
