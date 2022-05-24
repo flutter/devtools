@@ -8,7 +8,6 @@ import 'dart:math';
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -34,7 +33,6 @@ import 'memory_graph_model.dart';
 import 'memory_heap_treemap.dart';
 import 'memory_instance_tree_view.dart';
 import 'memory_snapshot_models.dart';
-import '../../shared/eval_on_dart_library.dart';
 
 const memorySearchFieldKeyName = 'MemorySearchFieldKey';
 
@@ -212,59 +210,6 @@ class HeapTreeViewState extends State<HeapTree>
     _animation = _setupBubbleAnimationController();
   }
 
-  /// ???
-  var _leaksSummary = 'Not received.';
-  var _leaksDetails = 'Not received.';
-  void _subscribeForMemoryLeaks() {
-    autoDisposeStreamSubscription(
-      serviceManager.service!.onExtensionEventWithHistory.listen((event) {
-        if (event.extensionKind == 'MemoryLeaks') {
-          setState(() {
-            final json = event.json!['extensionData']!;
-            _leaksDetails = json['details'].toString();
-            _leaksSummary = json['summary'].toString();
-          });
-        }
-      }),
-    );
-
-    autoDisposeStreamSubscription(
-      serviceManager.service!.onExtensionEventWithHistory.listen((event) {
-        if (event.extensionKind == 'TrackedObject') {
-          final json = event.json!['extensionData']!;
-          final hash = json['hash'] as int;
-
-          final graph = _controller.heapGraph;
-
-          if (graph == null) {
-            print('Graph is null');
-            return;
-          }
-
-          for (HeapGraphElementLive? e in graph.elements) {
-            if (e!.origin.identityHashCode == hash) {
-              print('!!!!!! found ${e.origin.toString()}!!!!!');
-              serviceManager.service!.forEachIsolate((isolate) async {
-                print('checking ${isolate.name}...');
-                print('data: ${e.origin.data}');
-
-                final path = serviceManager.service!.getRetainingPath(
-                  isolate.id!,
-
-                  '-', // targetId,
-                  100,
-                );
-              });
-
-              return;
-            }
-          }
-          print('!!!!! did not find $hash :(');
-        }
-      }),
-    );
-  }
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -341,8 +286,6 @@ class HeapTreeViewState extends State<HeapTree>
     });
 
     addAutoDisposeListener(_controller.lastMonitorTimestamp);
-
-    _subscribeForMemoryLeaks();
   }
 
   @override
@@ -521,41 +464,6 @@ class HeapTreeViewState extends State<HeapTree>
                     _buildAllocationsControls(),
                     const SizedBox(height: denseRowSpacing),
                     const Expanded(child: AllocationTableView()),
-                  ],
-                ),
-
-                // Memory Leaks Tab
-                /// ???
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(_leaksSummary),
-                    MaterialButton(
-                      child: const Text('Copy Details to Clipboard'),
-                      onPressed: () =>
-                          Clipboard.setData(ClipboardData(text: _leaksDetails)),
-                    ),
-                    MaterialButton(
-                      child: const Text('Evaluate'),
-                      onPressed: () async {
-                        final eval = EvalOnDartLibrary(
-                            'package:flutter_leaks/test_lib.dart',
-                            serviceManager.service!);
-                        final result = await eval.safeEval('getObject(27182)',
-                            isAlive: null);
-                        print(
-                            'evaluated: ${result.id!}, ${result.valueAsString}');
-
-                        final path =
-                            await serviceManager.service!.getRetainingPath(
-                          eval.isolate!.id!,
-                          result.id!,
-                          100,
-                        );
-
-                        print('path: ${path}');
-                      },
-                    ),
                   ],
                 ),
               ],
