@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 
 import '../../analytics/analytics.dart' as ga;
 import '../../primitives/auto_dispose_mixin.dart';
+import '../../service/service_extension_widgets.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/screen.dart';
 import '../../shared/split.dart';
@@ -14,7 +15,6 @@ import '../../shared/theme.dart';
 import '../../ui/filter.dart';
 import '../../ui/icons.dart';
 import '../../ui/search.dart';
-import '../../ui/service_extension_widgets.dart';
 import '_log_details.dart';
 import '_logs_table.dart';
 import 'logging_controller.dart';

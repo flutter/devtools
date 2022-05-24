@@ -558,7 +558,7 @@ class MemoryBodyState extends State<MemoryBody>
               )
             : const SizedBox(),
         ExportButton(
-          onPressed: _controller.offline ? null : _exportToFile,
+          onPressed: _controller.offline.value ? null : _exportToFile,
           minScreenWidthForTextBeforeScaling: _primaryControlsMinVerboseWidth,
         ),
         const SizedBox(width: denseSpacing),
@@ -1015,7 +1015,7 @@ class MemoryBodyState extends State<MemoryBody>
     if (event[eventName] == imageSizesForFrameEvent) {
       // TODO(terry): Need a more generic event displayer.
       // Flutter event emit the event name and value.
-      final data = event[eventData] as Map<String, Object>;
+      final data = (event[eventData] as Map).cast<String, Object>();
       final key = data.keys.first;
       output.writeln('${longValueToShort(key)}');
       final values = data[key] as Map<dynamic, dynamic>;

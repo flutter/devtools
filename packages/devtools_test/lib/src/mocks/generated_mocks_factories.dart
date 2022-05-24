@@ -5,9 +5,24 @@
 import 'package:devtools_app/devtools_app.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mockito/mockito.dart';
-import 'package:vm_service/vm_service.dart';
+import 'package:vm_service/vm_service.dart' hide TimelineEvent;
 
 import 'generated.mocks.dart';
+
+MockPerformanceController createMockPerformanceControllerWithDefaults() {
+  final controller = MockPerformanceController();
+  when(controller.data).thenReturn(PerformanceData());
+  when(controller.searchMatches)
+      .thenReturn(const FixedValueListenable<List<TimelineEvent>>([]));
+  when(controller.searchInProgressNotifier)
+      .thenReturn(const FixedValueListenable<bool>(false));
+  when(controller.matchIndex).thenReturn(ValueNotifier<int>(0));
+  when(controller.rasterMetricsController)
+      .thenReturn(RasterMetricsController());
+  when(controller.selectedFrame)
+      .thenReturn(const FixedValueListenable<FlutterFrame?>(null));
+  return controller;
+}
 
 MockProgramExplorerController
     createMockProgramExplorerControllerWithDefaults() {

@@ -13,7 +13,7 @@ import '../../shared/globals.dart';
 import '../../shared/utils.dart';
 import 'memory_controller.dart';
 import 'memory_screen.dart';
-import 'memory_timeline.dart';
+import 'primitives/memory_timeline.dart';
 
 class MemoryTracker {
   MemoryTracker(this.memoryController);
@@ -25,10 +25,10 @@ class MemoryTracker {
   final isolateHeaps = <String, MemoryUsage>{};
 
   /// Polled VM current RSS.
-  late int processRss;
+  int processRss = 0;
 
   /// Polled adb dumpsys meminfo values.
-  late AdbMemoryInfo adbMemoryInfo;
+  AdbMemoryInfo? adbMemoryInfo;
 
   /// Polled engine's RasterCache estimates.
   RasterCache? rasterCache;

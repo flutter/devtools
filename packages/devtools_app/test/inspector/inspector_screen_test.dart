@@ -33,7 +33,12 @@ void main() {
   setUp(() {
     fakeServiceManager = FakeServiceManager();
     fakeExtensionManager = fakeServiceManager.serviceExtensionManager;
-    mockIsFlutterApp(fakeServiceManager.connectedApp!);
+    mockConnectedApp(
+      fakeServiceManager.connectedApp!,
+      isFlutterApp: true,
+      isProfileBuild: false,
+      isWebApp: false,
+    );
     when(fakeServiceManager.errorBadgeManager.errorCountNotifier('inspector'))
         .thenReturn(ValueNotifier<int>(0));
 
