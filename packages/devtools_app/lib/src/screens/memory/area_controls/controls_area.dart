@@ -47,7 +47,16 @@ const sourcesDropdownKey = Key('Sources Dropdown');
 const sourcesKey = Key('Sources');
 
 class ControlsArea extends StatefulWidget {
-  const ControlsArea({Key? key}) : super(key: key);
+  const ControlsArea({
+    Key? key,
+    required this.eventChartController,
+    required this.vmChartController,
+    required this.androidChartController,
+  }) : super(key: key);
+
+  final events.EventChartController eventChartController;
+  final vm.VMChartController vmChartController;
+  final android.AndroidChartController androidChartController;
 
   @override
   State<ControlsArea> createState() => _ControlsAreaState();
@@ -56,15 +65,12 @@ class ControlsArea extends StatefulWidget {
 class _ControlsAreaState extends State<ControlsArea> with AutoDisposeMixin {
   /// Updated when the MemoryController's _androidCollectionEnabled ValueNotifier changes.
   bool _isAndroidCollection = MemoryController.androidADBDefault;
-  bool _controllersInitialized = false;
+  bool controllersInitialized = false;
   bool _isAdvancedSettingsEnabled = false;
 
   OverlayEntry? _legendOverlayEntry;
 
   late MemoryController _controller;
-  late events.EventChartController _eventChartController;
-  late vm.VMChartController _vmChartController;
-  late android.AndroidChartController _androidChartController;
 
   @override
   Widget build(BuildContext context) {
@@ -84,19 +90,10 @@ class _ControlsAreaState extends State<ControlsArea> with AutoDisposeMixin {
     super.didChangeDependencies();
 
     final newController = Provider.of<MemoryController>(context);
-    if (!_controllersInitialized || newController != _controller) {
-      _controllersInitialized = true;
+    if (!controllersInitialized || newController != _controller) {
+      controllersInitialized = true;
       _controller = newController;
-      _eventChartController = events.EventChartController(_controller);
-      _vmChartController = vm.VMChartController(_controller);
-      // Android Chart uses the VM Chart's computed labels.
-      _androidChartController = android.AndroidChartController(
-        _controller,
-        sharedLabels: _vmChartController.labelTimestamps,
-      );
     }
-
-    setupTraces(isDarkMode: themeData.isDarkTheme);
 
     addAutoDisposeListener(_controller.androidCollectionEnabled, () {
       _isAndroidCollection = _controller.androidCollectionEnabled.value;
@@ -151,41 +148,6 @@ class _ControlsAreaState extends State<ControlsArea> with AutoDisposeMixin {
     });
   }
 
-  Widget _buildPrimaryStateControls(TextTheme textTheme) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: _controller.paused,
-      builder: (context, paused, _) {
-        return Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            PauseButton(
-              minScreenWidthForTextBeforeScaling:
-                  _primaryControlsMinVerboseWidth,
-              onPressed: paused ? null : _onPause,
-            ),
-            const SizedBox(width: denseSpacing),
-            ResumeButton(
-              minScreenWidthForTextBeforeScaling:
-                  _primaryControlsMinVerboseWidth,
-              onPressed: paused ? _onResume : null,
-            ),
-            const SizedBox(width: defaultSpacing),
-            ClearButton(
-              // TODO(terry): Button needs to be Delete for offline data.
-              onPressed: _controller.memorySource == MemoryController.liveFeed
-                  ? _clearTimeline
-                  : null,
-              minScreenWidthForTextBeforeScaling:
-                  _primaryControlsMinVerboseWidth,
-            ),
-            const SizedBox(width: defaultSpacing),
-            _intervalDropdown(textTheme),
-          ],
-        );
-      },
-    );
-  }
-
   void _onPause() {
     ga.select(analytics_constants.memory, analytics_constants.pause);
     _controller.pauseLiveFeed();
@@ -216,9 +178,9 @@ class _ControlsAreaState extends State<ControlsArea> with AutoDisposeMixin {
     _controller.selectedLeaf = null;
 
     // Remove history of all plotted data in all charts.
-    _eventChartController.reset();
-    _vmChartController.reset();
-    _androidChartController.reset();
+    widget.eventChartController.reset();
+    widget.vmChartController.reset();
+    widget.androidChartController.reset();
   }
 
   void _exportToFile() {
@@ -275,9 +237,9 @@ class _ControlsAreaState extends State<ControlsArea> with AutoDisposeMixin {
           _controller.displayInterval = chartInterval(newValue!);
           final duration = chartDuration(_controller.displayInterval);
 
-          _eventChartController.zoomDuration = duration;
-          _vmChartController.zoomDuration = duration;
-          _androidChartController.zoomDuration = duration;
+          widget.eventChartController.zoomDuration = duration;
+          widget.vmChartController.zoomDuration = duration;
+          widget.androidChartController.zoomDuration = duration;
         });
       },
       items: _displayTypes,
@@ -395,7 +357,6 @@ class _ControlsAreaState extends State<ControlsArea> with AutoDisposeMixin {
   static const _legendTitlePadding = EdgeInsets.fromLTRB(5, 0, 0, 4);
 
   void _showLegend(BuildContext context) {
-    print('!!!! showing legend');
     final box = _legendKey.currentContext!.findRenderObject() as RenderBox;
 
     final colorScheme = Theme.of(context).colorScheme;
@@ -478,6 +439,41 @@ class _ControlsAreaState extends State<ControlsArea> with AutoDisposeMixin {
     overlayState.insert(_legendOverlayEntry!);
   }
 
+  Widget _buildPrimaryStateControls(TextTheme textTheme) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: _controller.paused,
+      builder: (context, paused, _) {
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            PauseButton(
+              minScreenWidthForTextBeforeScaling:
+                  _primaryControlsMinVerboseWidth,
+              onPressed: paused ? null : _onPause,
+            ),
+            const SizedBox(width: denseSpacing),
+            ResumeButton(
+              minScreenWidthForTextBeforeScaling:
+                  _primaryControlsMinVerboseWidth,
+              onPressed: paused ? _onResume : null,
+            ),
+            const SizedBox(width: defaultSpacing),
+            ClearButton(
+              // TODO(terry): Button needs to be Delete for offline data.
+              onPressed: _controller.memorySource == MemoryController.liveFeed
+                  ? _clearTimeline
+                  : null,
+              minScreenWidthForTextBeforeScaling:
+                  _primaryControlsMinVerboseWidth,
+            ),
+            const SizedBox(width: defaultSpacing),
+            _intervalDropdown(textTheme),
+          ],
+        );
+      },
+    );
+  }
+
   void _hideLegend() {
     _legendOverlayEntry?.remove();
     _legendOverlayEntry = null;
@@ -522,7 +518,7 @@ class _ControlsAreaState extends State<ControlsArea> with AutoDisposeMixin {
   Map<String, Map<String, Object?>> vmLegend() {
     final result = <String, Map<String, Object?>>{};
 
-    final traces = _vmChartController.traces;
+    final traces = widget.vmChartController.traces;
     // RSS trace
     result[rssDisplay] = traceRender(
       color: traces[vm.TraceName.rSS.index].characteristics.color,
@@ -563,7 +559,7 @@ class _ControlsAreaState extends State<ControlsArea> with AutoDisposeMixin {
   Map<String, Map<String, Object?>> androidLegend() {
     final result = <String, Map<String, Object?>>{};
 
-    final traces = _androidChartController.traces;
+    final traces = widget.androidChartController.traces;
     // Total trace
     result[androidTotalDisplay] = traceRender(
       color: traces[android.TraceName.total.index].characteristics.color,

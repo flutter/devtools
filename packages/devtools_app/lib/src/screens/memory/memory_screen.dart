@@ -235,7 +235,11 @@ class MemoryBodyState extends State<MemoryBody>
       child: Column(
         key: hoverKey,
         children: [
-          const ControlsArea(),
+          ControlsArea(
+            eventChartController: _eventChartController,
+            androidChartController: _androidChartController,
+            vmChartController: _vmChartController,
+          ),
           const SizedBox(height: denseRowSpacing),
           SizedBox(
             height: scaleByFontFactor(70),
