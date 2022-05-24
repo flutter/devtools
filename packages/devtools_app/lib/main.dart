@@ -18,7 +18,6 @@ import 'src/screens/debugger/syntax_highlighter.dart';
 import 'src/screens/provider/riverpod_error_logger_observer.dart';
 import 'src/shared/app_error_handling.dart';
 import 'src/shared/globals.dart';
-import 'src/shared/inspector_preferences_controller.dart';
 import 'src/shared/preferences.dart';
 
 void main() async {
@@ -43,11 +42,6 @@ void main() async {
   // Set the extension points global.
   setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
   setGlobal(IdeTheme, getIdeTheme());
-
-  // inspectorPreferences depends on the IdeTheme global
-  // to initialize
-  final inspectorPreferences = InspectorPreferencesController();
-  await inspectorPreferences.init();
 
   setupErrorHandling(() async {
     // Run the app.

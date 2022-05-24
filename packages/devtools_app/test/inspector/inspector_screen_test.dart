@@ -8,7 +8,6 @@ import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/inspector/layout_explorer/flex/flex.dart';
 import 'package:devtools_app/src/screens/inspector/layout_explorer/layout_explorer.dart';
 import 'package:devtools_app/src/service/service_extensions.dart' as extensions;
-import 'package:devtools_app/src/shared/inspector_preferences_controller.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart' hide Fake;
@@ -301,7 +300,8 @@ void main() {
       const startingHoverEvalModeValue = false;
 
       setUp(() {
-        inspectorPreferences.toggleHoverEvalMode(startingHoverEvalModeValue);
+        preferences.inspectorPreferences
+            .toggleHoverEvalMode(startingHoverEvalModeValue);
       });
 
       testWidgetsWithWindowSize(
@@ -327,7 +327,7 @@ void main() {
         await tester.tap(hoverModeCheckBox);
         await tester.pumpAndSettle();
         expect(
-          inspectorPreferences.hoverEvalModeEnabled.value,
+          preferences.inspectorPreferences.hoverEvalModeEnabled.value,
           !startingHoverEvalModeValue,
         );
       });
