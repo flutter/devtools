@@ -233,10 +233,12 @@ class HeapTreeViewState extends State<HeapTree>
           final hash = json['hash'] as int;
 
           final graph = _controller.heapGraph;
+
           if (graph == null) {
             print('Graph is null');
             return;
           }
+
           for (HeapGraphElementLive? e in graph.elements) {
             if (e!.origin.identityHashCode == hash) {
               print('!!!!!! found ${e.origin.toString()}!!!!!');
@@ -244,12 +246,12 @@ class HeapTreeViewState extends State<HeapTree>
                 print('checking ${isolate.name}...');
                 print('data: ${e.origin.data}');
 
-                // final path = serviceManager.service!.getRetainingPath(
-                //   isolate.id!,
-                //
-                //   '-', // targetId,
-                //   100,
-                // );
+                final path = serviceManager.service!.getRetainingPath(
+                  isolate.id!,
+
+                  '-', // targetId,
+                  100,
+                );
               });
 
               return;

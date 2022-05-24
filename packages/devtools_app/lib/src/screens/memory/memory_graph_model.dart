@@ -44,6 +44,7 @@ bool monitorClass({int? classId, String? className, String message = ''}) {
   return false;
 }
 
+/// ???
 HeapGraph convertHeapGraph(
   FilterConfig filterConfig,
   HeapSnapshotGraph graph, [
@@ -92,6 +93,7 @@ HeapGraph convertHeapGraph(
   // Construct all objects.
   for (int i = 0; i < graph.objects.length; i++) {
     final HeapSnapshotObject o = graph.objects[i];
+    // ???
     elements[i] = HeapGraphElementLive(o);
   }
 
