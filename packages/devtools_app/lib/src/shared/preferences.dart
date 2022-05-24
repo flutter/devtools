@@ -12,12 +12,13 @@ class PreferencesController {
   final ValueNotifier<bool> _darkModeTheme = ValueNotifier(true);
   final ValueNotifier<bool> _vmDeveloperMode = ValueNotifier(false);
   final ValueNotifier<bool> _denseMode = ValueNotifier(false);
+  final _inspectorPreferences = InspectorPreferencesController();
 
   ValueListenable<bool> get darkModeTheme => _darkModeTheme;
   ValueListenable<bool> get vmDeveloperModeEnabled => _vmDeveloperMode;
   ValueListenable<bool> get denseModeEnabled => _denseMode;
   InspectorPreferencesController get inspectorPreferences =>
-      InspectorPreferencesController();
+      _inspectorPreferences;
 
   Future<void> init() async {
     // Get the current values and listen for and write back changes.
@@ -40,6 +41,8 @@ class PreferencesController {
     });
 
     setGlobal(PreferencesController, this);
+
+    await _inspectorPreferences.init();
   }
 
   /// Change the value for the dark mode setting.
