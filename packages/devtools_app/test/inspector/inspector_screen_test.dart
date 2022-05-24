@@ -308,9 +308,8 @@ void main() {
           'can update hover inspection setting', windowSize,
           (WidgetTester tester) async {
         await tester.pumpWidget(buildInspectorScreen());
-        await tester.pump();
 
-        await tester.tap(find.byType(OpenInspectorSettingsAction));
+        await tester.tap(find.byType(SettingsOutlinedButton));
         await tester.pumpAndSettle();
         expect(
           find.byType(FlutterInspectorSettingsDialog),

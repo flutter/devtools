@@ -573,7 +573,6 @@ class MemoryBodyState extends State<MemoryBody>
         const SizedBox(width: denseSpacing),
         SettingsOutlinedButton(
           onPressed: _openSettingsDialog,
-          label: 'Memory Configuration',
         ),
       ],
     );
