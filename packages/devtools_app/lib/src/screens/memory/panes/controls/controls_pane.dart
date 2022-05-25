@@ -17,12 +17,12 @@ import '../../memory_controller.dart';
 import '../../memory_events_pane.dart' as events;
 import '../../memory_vm_chart.dart' as vm;
 import '../../primitives/painting.dart';
-import '../../area_controls/constants.dart';
+import 'constants.dart';
 import 'controls_widgets.dart';
 import 'memory_config.dart';
 
-class MemoryControls extends StatefulWidget {
-  const MemoryControls({
+class MemoryControlsPane extends StatefulWidget {
+  const MemoryControlsPane({
     Key? key,
     required this.chartControllers,
   }) : super(key: key);
@@ -30,10 +30,11 @@ class MemoryControls extends StatefulWidget {
   final ChartControllers chartControllers;
 
   @override
-  State<MemoryControls> createState() => _MemoryControlsState();
+  State<MemoryControlsPane> createState() => _MemoryControlsPaneState();
 }
 
-class _MemoryControlsState extends State<MemoryControls> with AutoDisposeMixin {
+class _MemoryControlsPaneState extends State<MemoryControlsPane>
+    with AutoDisposeMixin {
   /// Updated when the MemoryController's _androidCollectionEnabled ValueNotifier changes.
   bool _isAndroidCollection = MemoryController.androidADBDefault;
   bool _isAdvancedSettingsEnabled = false;

@@ -467,7 +467,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   /// Returns a list of raw Dart property values of the Dart value of this
   /// property that are useful for custom display of the property value.
-  /// For example, get the red, green, and blue components of color.
+  /// For example, get the red, green, and blue panes of color.
   ///
   /// Unfortunately we cannot just use the list of fields from the Observatory
   /// Instance object for the Dart value because much of the relevant

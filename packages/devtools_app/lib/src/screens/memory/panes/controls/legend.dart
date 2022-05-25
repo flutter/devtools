@@ -17,7 +17,7 @@ import '../../memory_controller.dart';
 import '../../memory_events_pane.dart' as events;
 import '../../memory_vm_chart.dart' as vm;
 import '../../primitives/painting.dart';
-import '../../area_controls/constants.dart';
+import 'constants.dart';
 import 'controls_widgets.dart';
 import 'memory_config.dart';
 

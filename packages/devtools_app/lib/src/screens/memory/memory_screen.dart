@@ -17,7 +17,7 @@ import '../../shared/screen.dart';
 import '../../shared/theme.dart';
 import '../../shared/utils.dart';
 import '../../ui/icons.dart';
-import 'components/control_pane/controls_area.dart';
+import 'panes/controls/controls_pane.dart';
 import 'memory_android_chart.dart' as android;
 import 'memory_charts.dart';
 import 'memory_controller.dart';
@@ -230,7 +230,7 @@ class MemoryBodyState extends State<MemoryBody>
       child: Column(
         key: hoverKey,
         children: [
-          MemoryControls(chartControllers: _chartControllers),
+          MemoryControlsPane(chartControllers: _chartControllers),
           const SizedBox(height: denseRowSpacing),
           SizedBox(
             height: scaleByFontFactor(70),

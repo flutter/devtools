@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../shared/utils.dart';
+import '../../../../shared/utils.dart';
 
 /// Width of application when memory buttons loose their text.
 const primaryControlsMinVerboseWidth = 1100.0;
