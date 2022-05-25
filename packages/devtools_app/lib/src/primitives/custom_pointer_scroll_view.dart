@@ -34,7 +34,8 @@ abstract class CustomPointerScrollView extends BoxScrollView {
     int? semanticChildCount,
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
     this.customPointerSignalHandler,
-  }) : _primary = primary ?? controller == null && identical(scrollDirection, Axis.vertical),
+  })  : _primary = primary ??
+            controller == null && identical(scrollDirection, Axis.vertical),
         super(
           key: key,
           scrollDirection: scrollDirection,
@@ -51,7 +52,8 @@ abstract class CustomPointerScrollView extends BoxScrollView {
 
   final void Function(PointerSignalEvent event)? customPointerSignalHandler;
 
-  // TODO(Piinks): Restore once PSC changes have landed.
+  // TODO(Piinks): Restore once PSC changes have landed, or keep to maintain
+  // original primary behavior.
   final bool _primary;
 
   @override
@@ -61,6 +63,11 @@ abstract class CustomPointerScrollView extends BoxScrollView {
 
     final ScrollController? scrollController =
         _primary ? PrimaryScrollController.of(context) : controller;
+
+    assert(
+      scrollController != null,
+      'No ScrollController has been provided to the CustomPointerScrollView.',
+    );
     final CustomPointerScrollable scrollable = CustomPointerScrollable(
       dragStartBehavior: dragStartBehavior,
       axisDirection: axisDirection,
@@ -72,9 +79,7 @@ abstract class CustomPointerScrollView extends BoxScrollView {
       },
       customPointerSignalHandler: customPointerSignalHandler,
     );
-    return _primary && scrollController != null
-        ? PrimaryScrollController.none(child: scrollable)
-        : scrollable;
+    return _primary ? PrimaryScrollController.none(child: scrollable) : scrollable;
   }
 }
 
