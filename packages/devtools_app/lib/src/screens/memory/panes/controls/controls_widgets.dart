@@ -313,38 +313,38 @@ class _CommonControlsState extends State<CommonControls>
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    if (initMemoryController()) {
-      addAutoDisposeListener(memoryController.legendVisibleNotifier, () {
-        setState(() {
-          if (memoryController.isLegendVisible) {
-            ga.select(
-              analytics_constants.memory,
-              analytics_constants.memoryLegend,
-            );
+    if (!initMemoryController()) return;
 
-            _showLegend(context);
-          } else {
-            _hideLegend();
-          }
-        });
-      });
+    addAutoDisposeListener(memoryController.legendVisibleNotifier, () {
+      setState(() {
+        if (memoryController.isLegendVisible) {
+          ga.select(
+            analytics_constants.memory,
+            analytics_constants.memoryLegend,
+          );
 
-      addAutoDisposeListener(memoryController.androidChartVisibleNotifier, () {
-        setState(() {
-          if (memoryController.androidChartVisibleNotifier.value) {
-            ga.select(
-              analytics_constants.memory,
-              analytics_constants.androidChart,
-            );
-          }
-          if (memoryController.isLegendVisible) {
-            // Recompute the legend with the new traces now visible.
-            _hideLegend();
-            _showLegend(context);
-          }
-        });
+          _showLegend(context);
+        } else {
+          _hideLegend();
+        }
       });
-    }
+    });
+
+    addAutoDisposeListener(memoryController.androidChartVisibleNotifier, () {
+      setState(() {
+        if (memoryController.androidChartVisibleNotifier.value) {
+          ga.select(
+            analytics_constants.memory,
+            analytics_constants.androidChart,
+          );
+        }
+        if (memoryController.isLegendVisible) {
+          // Recompute the legend with the new traces now visible.
+          _hideLegend();
+          _showLegend(context);
+        }
+      });
+    });
   }
 
   void _showLegend(BuildContext context) {

@@ -84,16 +84,17 @@ class MemoryBodyState extends State<MemoryBody>
     super.didChangeDependencies();
     maybePushDebugModeMemoryMessage(context, MemoryScreen.id);
 
-    if (initMemoryController()) {
-      final vmChartController = vm.VMChartController(memoryController);
-      _chartControllers = ChartControllers(
-          events.EventChartController(memoryController),
-          vmChartController,
-          android.AndroidChartController(
-            memoryController,
-            sharedLabels: vmChartController.labelTimestamps,
-          ));
-    }
+    if (!initMemoryController()) return;
+
+    final vmChartController = vm.VMChartController(memoryController);
+
+    _chartControllers = ChartControllers(
+        events.EventChartController(memoryController),
+        vmChartController,
+        android.AndroidChartController(
+          memoryController,
+          sharedLabels: vmChartController.labelTimestamps,
+        ));
 
     // Update the chart when the memorySource changes.
     addAutoDisposeListener(memoryController.selectedSnapshotNotifier, () {
