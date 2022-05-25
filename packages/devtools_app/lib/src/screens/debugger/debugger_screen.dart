@@ -446,7 +446,7 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
         height: controlHeight,
         child: OutlinedRowGroup(
           // Default focus color for the light theme - since the background
-          // color of the controls [devtoolsWarning] is the same for both
+          // color of the control [devtoolsWarning] is the same for both
           // themes, we will use the same border color.
           borderColor: Colors.black.withOpacity(0.12),
           children: [

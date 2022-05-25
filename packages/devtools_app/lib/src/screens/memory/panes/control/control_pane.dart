@@ -21,8 +21,8 @@ import 'constants.dart';
 import 'controls_widgets.dart';
 import 'memory_config.dart';
 
-class MemoryControlsPane extends StatefulWidget {
-  const MemoryControlsPane({
+class MemoryControlPane extends StatefulWidget {
+  const MemoryControlPane({
     Key? key,
     required this.chartControllers,
   }) : super(key: key);
@@ -30,10 +30,10 @@ class MemoryControlsPane extends StatefulWidget {
   final ChartControllers chartControllers;
 
   @override
-  State<MemoryControlsPane> createState() => _MemoryControlsPaneState();
+  State<MemoryControlPane> createState() => _MemoryControlPaneState();
 }
 
-class _MemoryControlsPaneState extends State<MemoryControlsPane>
+class _MemoryControlPaneState extends State<MemoryControlPane>
     with AutoDisposeMixin {
   /// Updated when the MemoryController's _androidCollectionEnabled ValueNotifier changes.
   bool _isAndroidCollection = MemoryController.androidADBDefault;

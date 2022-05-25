@@ -155,7 +155,7 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
   }
 }
 
-/// The row of controls that control the Network profiler (e.g., record, pause,
+/// The row of control that control the Network profiler (e.g., record, pause,
 /// clear, search, filter, etc.).
 class _NetworkProfilerControls extends StatefulWidget {
   const _NetworkProfilerControls({

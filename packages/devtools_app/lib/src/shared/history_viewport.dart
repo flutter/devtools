@@ -10,7 +10,7 @@ import 'common_widgets.dart';
 import 'theme.dart';
 
 /// A [Widget] that allows for displaying content based on the current state of a
-/// [HistoryManager]. Includes built-in controls for navigating back and forth
+/// [HistoryManager]. Includes built-in control for navigating back and forth
 /// through the content stored in the provided [HistoryManager].
 ///
 /// [history] is the [HistoryManger] that contains the data to be displayed.
@@ -18,7 +18,7 @@ import 'theme.dart';
 /// [contentBuilder] is invoked with the currently selected historical data
 /// when building the contents of the viewport.
 ///
-/// If [controls] is provided, each [Widget] will be inserted with padding
+/// If [control] is provided, each [Widget] will be inserted with padding
 /// at the end of the viewport title bar.
 ///
 /// If [generateTitle] is provided, the title string will be set to the

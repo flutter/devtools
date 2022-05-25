@@ -70,7 +70,7 @@ void main() {
     };
   }
 
-  testWidgetsWithWindowSize('debugger controls paused', windowSize,
+  testWidgetsWithWindowSize('debugger control paused', windowSize,
       (WidgetTester tester) async {
     await tester.pumpWidget(
       wrapWithControllers(

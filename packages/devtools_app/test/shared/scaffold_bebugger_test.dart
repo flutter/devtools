@@ -37,7 +37,7 @@ void main() {
   setGlobal(IdeTheme, IdeTheme());
 
   testWidgets(
-      'does not display floating debugger controls when debugger screen is showing',
+      'does not display floating debugger control when debugger screen is showing',
       (WidgetTester tester) async {
     final mockConnectedApp = MockConnectedAppLegacy();
     when(mockConnectedApp.isFlutterAppNow).thenReturn(true);
@@ -72,7 +72,7 @@ void main() {
     expect(find.byKey(_k2), findsNothing);
     expect(find.byType(FloatingDebuggerControls), findsNothing);
 
-    // Tap on the tab for screen 2 and verify the controls are present.
+    // Tap on the tab for screen 2 and verify the control are present.
     await tester.tap(find.byKey(_t2));
     await tester.pumpAndSettle();
     await tester.pumpAndSettle();
@@ -80,7 +80,7 @@ void main() {
     expect(find.byKey(_k2), findsOneWidget);
     expect(find.byType(FloatingDebuggerControls), findsOneWidget);
 
-    // Return to the debugger screen and verify the controls are gone.
+    // Return to the debugger screen and verify the control are gone.
     await tester.tap(find.byKey(debuggerTabKey));
     await tester.pumpAndSettle();
     await tester.pumpAndSettle();

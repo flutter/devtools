@@ -14,9 +14,9 @@ import '../shared/banner_messages.dart';
 import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
 
-/// DropdownButton that controls the value of the 'profile_period' vm flag.
+/// DropdownButton that control the value of the 'profile_period' vm flag.
 ///
-/// This flag controls the rate at which the vm samples the CPU call stack.
+/// This flag control the rate at which the vm samples the CPU call stack.
 class ProfileGranularityDropdown extends StatelessWidget {
   const ProfileGranularityDropdown({
     required this.screenId,

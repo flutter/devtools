@@ -57,10 +57,10 @@ abstract class Screen {
           tabKey: tabKey,
         );
 
-  /// Whether to show floating debugger controls if the app is paused.
+  /// Whether to show floating debugger control if the app is paused.
   ///
   /// If your page is negatively impacted by the app being paused you should
-  /// show debugger controls.
+  /// show debugger control.
   final bool showFloatingDebuggerControls;
 
   /// Whether to show the console for this screen.
