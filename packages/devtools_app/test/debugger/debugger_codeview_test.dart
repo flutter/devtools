@@ -97,8 +97,10 @@ void main() {
       of: find.byType(ScriptPopupMenu),
       matching: find.byType(Tooltip),
     );
+
     print('DAKE: menuButton');
     print(menuButton);
+
     expect(menuButton, findsOneWidget);
     await tester.tap(
       menuButton,
