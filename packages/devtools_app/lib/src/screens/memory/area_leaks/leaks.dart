@@ -35,7 +35,7 @@ class _LeaksAreaState extends State<LeaksArea> with AutoDisposeMixin {
               : DateTime.now();
           setState(() {
             _leaksSummary =
-                '${_timeForConsole(time)} $newSummary\n$_leaksSummary';
+                '${_timeForConsole(time)}: $newSummary\n$_leaksSummary';
           });
         }
       }),
