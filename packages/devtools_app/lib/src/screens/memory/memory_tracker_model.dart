@@ -129,7 +129,7 @@ class _TrackerCountColumn extends ColumnData<Tracker> {
 }
 
 class TreeTracker {
-  late TrackerClass tree1;
+  TrackerClass? tree1;
 
   TreeColumnData<Tracker> treeColumn = _TrackerClassColumn();
 
@@ -141,14 +141,14 @@ class TreeTracker {
     Map<String, ClassRef> classesTracked,
     List<AllocationSamples> allocationSamples,
   ) {
-    tree1 = TrackerClass('_ROOT_tracking');
+    final tree1Local = tree1 = TrackerClass('_ROOT_tracking');
 
-    tree1.children.clear();
+    tree1Local.children.clear();
 
     final classesName = classesTracked.keys;
     for (var className in classesName) {
       final classEntry = TrackerClass(className);
-      tree1.addChild(classEntry);
+      tree1Local.addChild(classEntry);
 
       final trackedClassId = classesTracked[className]!.id;
 
@@ -286,38 +286,40 @@ class TreeTracker {
     final trackerAllocation =
         selection.node is TrackerAllocation ? selection.node : null;
 
-    final widget = controller.trackAllocations.isEmpty
-        ? allocationTrackingInstructions(context)
-        : Split(
-            initialFractions: const [0.5, 0.5],
-            minSizes: const [trackInstancesViewWidth, callstackViewWidth],
-            axis: Axis.horizontal,
-            children: [
-              TreeTable<Tracker>(
-                columns: [
-                  treeColumn,
-                  _TrackerCountColumn(),
-                ],
-                dataRoots: tree1.children,
-                treeColumn: treeColumn,
-                keyFactory: (d) {
-                  return Key(d.name);
-                },
-                sortColumn: treeColumn,
-                sortDirection: SortDirection.ascending,
-                selectionNotifier: selectionNotifier,
-              ),
-              trackerAllocation == null
-                  ? allocationCallStackInstructions(context)
-                  : displaySelectedStackTrace(
-                      context,
-                      controller,
-                      scroller,
-                      trackerAllocation as TrackerAllocation,
-                    ),
-            ],
-          );
+    if (controller.trackAllocations.isEmpty) {
+      return allocationTrackingInstructions(context);
+    }
 
-    return widget;
+    final tree1Local = tree1!;
+
+    return Split(
+      initialFractions: const [0.5, 0.5],
+      minSizes: const [trackInstancesViewWidth, callstackViewWidth],
+      axis: Axis.horizontal,
+      children: [
+        TreeTable<Tracker>(
+          columns: [
+            treeColumn,
+            _TrackerCountColumn(),
+          ],
+          dataRoots: tree1Local.children,
+          treeColumn: treeColumn,
+          keyFactory: (d) {
+            return Key(d.name);
+          },
+          sortColumn: treeColumn,
+          sortDirection: SortDirection.ascending,
+          selectionNotifier: selectionNotifier,
+        ),
+        trackerAllocation == null
+            ? allocationCallStackInstructions(context)
+            : displaySelectedStackTrace(
+                context,
+                controller,
+                scroller,
+                trackerAllocation as TrackerAllocation,
+              ),
+      ],
+    );
   }
 }

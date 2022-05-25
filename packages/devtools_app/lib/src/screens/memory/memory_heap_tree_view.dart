@@ -1029,7 +1029,7 @@ class HeapTreeViewState extends State<HeapTree>
     // To debug particular classes add their names to the last
     // parameter classNamesToMonitor e.g., ['AppStateModel', 'Terry', 'TerryEntry']
     _controller.heapGraph = convertHeapGraph(
-      _controller,
+      _controller.filterConfig,
       graph,
       [],
     );
