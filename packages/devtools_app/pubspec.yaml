@@ -53,6 +53,11 @@ dependencies:
   web_socket_channel: ^2.1.0
   flutter_json_view: ^0.3.1
   # widget_icons: ^0.0.1
+  memory_tools:
+    path: ../../../spikes/memory_tools
+  #    git:
+  #      url: git://github.com/polina-c/spikes.git
+  #      path: memory_tools
 
 dev_dependencies:
   build_runner: ^2.0.4

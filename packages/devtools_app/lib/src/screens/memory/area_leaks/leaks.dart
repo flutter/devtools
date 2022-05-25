@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
+import 'package:memory_tools/primitives.dart';
 
 import '../../../primitives/auto_dispose_mixin.dart';
 import '../../../shared/eval_on_dart_library.dart';
 import '../../../shared/globals.dart';
+
+final DateFormat _formatter = DateFormat.Hms();
+String _timeForConsole(DateTime time) => _formatter.format(time);
 
 class LeaksArea extends StatefulWidget {
   const LeaksArea({Key? key}) : super(key: key);
@@ -13,8 +17,7 @@ class LeaksArea extends StatefulWidget {
 }
 
 class _LeaksAreaState extends State<LeaksArea> with AutoDisposeMixin {
-  var _leaksSummary = 'Not received.';
-  var _leaksDetails = 'Not received.';
+  var _leaksSummary = '';
 
   @override
   void didChangeDependencies() {
@@ -25,21 +28,15 @@ class _LeaksAreaState extends State<LeaksArea> with AutoDisposeMixin {
   void _subscribeForMemoryLeaks() {
     autoDisposeStreamSubscription(
       serviceManager.service!.onExtensionEventWithHistory.listen((event) {
-        if (event.extensionKind == 'MemoryLeaks') {
+        if (event.extensionKind == 'memory_leaks_summary') {
+          final newSummary = LeakSummary(event.json!['extensionData']!);
+          final time = event.timestamp != null
+              ? DateTime.fromMicrosecondsSinceEpoch(event.timestamp!)
+              : DateTime.now();
           setState(() {
-            final json = event.json!['extensionData']!;
-            _leaksDetails = json['details'].toString();
-            _leaksSummary = json['summary'].toString();
+            _leaksSummary =
+                '${_timeForConsole(time)} $newSummary\n$_leaksSummary';
           });
-        }
-      }),
-    );
-
-    autoDisposeStreamSubscription(
-      serviceManager.service!.onExtensionEventWithHistory.listen((event) {
-        if (event.extensionKind == 'TrackedObject') {
-          // final json = event.json!['extensionData']!;
-          // final hash = json['hash'] as int;
         }
       }),
     );
@@ -50,33 +47,29 @@ class _LeaksAreaState extends State<LeaksArea> with AutoDisposeMixin {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(_leaksSummary),
+        if (_leaksSummary.isEmpty) const Text('No information yet.'),
+        if (_leaksSummary.isNotEmpty) Text(_leaksSummary),
         MaterialButton(
-          child: const Text('Copy Details to Clipboard'),
-          onPressed: () =>
-              Clipboard.setData(ClipboardData(text: _leaksDetails)),
-        ),
-        MaterialButton(
-          child: const Text('Evaluate'),
-          onPressed: () async {
-            final eval = EvalOnDartLibrary(
-              'package:flutter_leaks/test_lib.dart',
-              serviceManager.service!,
-            );
-            final result =
-                await eval.safeEval('getObject(27182)', isAlive: null);
-            print('evaluated: ${result.id!}, ${result.valueAsString}');
-
-            final path = await serviceManager.service!.getRetainingPath(
-              eval.isolate!.id!,
-              result.id!,
-              100,
-            );
-
-            print('path: $path');
-          },
-        ),
+            child: const Text('Analyze and Copy to Clipboard'),
+            onPressed: _analyzeAndCopyToClipboard),
       ],
     );
+  }
+
+  Future<void> _analyzeAndCopyToClipboard() async {
+    final eval = EvalOnDartLibrary(
+      'package:flutter_leaks/test_lib.dart',
+      serviceManager.service!,
+    );
+    final result = await eval.safeEval('getObject(27182)', isAlive: null);
+    print('evaluated: ${result.id!}, ${result.valueAsString}');
+
+    final path = await serviceManager.service!.getRetainingPath(
+      eval.isolate!.id!,
+      result.id!,
+      100,
+    );
+
+    print('path: $path');
   }
 }
