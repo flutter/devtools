@@ -79,7 +79,9 @@ abstract class CustomPointerScrollView extends BoxScrollView {
       },
       customPointerSignalHandler: customPointerSignalHandler,
     );
-    return _primary ? PrimaryScrollController.none(child: scrollable) : scrollable;
+    return _primary
+        ? PrimaryScrollController.none(child: scrollable)
+        : scrollable;
   }
 }
 

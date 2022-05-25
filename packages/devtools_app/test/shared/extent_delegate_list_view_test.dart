@@ -81,7 +81,8 @@ void main() {
       expect(pointerSignalEventCount, equals(1));
     });
 
-    testWidgets('inherits PrimaryScrollController automatically', (tester) async {
+    testWidgets('inherits PrimaryScrollController automatically',
+        (tester) async {
       final ScrollController controller = ScrollController();
       await pumpList(
         tester,
@@ -93,7 +94,7 @@ void main() {
               computeExtent: (index) => children[index],
             ),
             childrenDelegate: SliverChildBuilderDelegate(
-                  (context, index) => Text('${children[index]}'),
+              (context, index) => Text('${children[index]}'),
               childCount: children.length,
             ),
           ),
@@ -116,7 +117,7 @@ void main() {
               computeExtent: (index) => children[index],
             ),
             childrenDelegate: SliverChildBuilderDelegate(
-                  (context, index) => Text('${children[index]}'),
+              (context, index) => Text('${children[index]}'),
               childCount: children.length,
             ),
           ),
@@ -126,7 +127,8 @@ void main() {
       expect(controller.hasClients, isTrue);
     });
 
-    testWidgets('does not inherit PrimaryScrollController - horizontal', (tester) async {
+    testWidgets('does not inherit PrimaryScrollController - horizontal',
+        (tester) async {
       final ScrollController controller = ScrollController();
       await pumpList(
         tester,
@@ -140,7 +142,7 @@ void main() {
               computeExtent: (index) => children[index],
             ),
             childrenDelegate: SliverChildBuilderDelegate(
-                  (context, index) => Text('${children[index]}'),
+              (context, index) => Text('${children[index]}'),
               childCount: children.length,
             ),
           ),
@@ -150,7 +152,8 @@ void main() {
       expect(controller.hasClients, isFalse);
     });
 
-    testWidgets('does not inherit PrimaryScrollController - explicitly set', (tester) async {
+    testWidgets('does not inherit PrimaryScrollController - explicitly set',
+        (tester) async {
       final ScrollController controller = ScrollController();
       await pumpList(
         tester,
@@ -165,7 +168,7 @@ void main() {
               computeExtent: (index) => children[index],
             ),
             childrenDelegate: SliverChildBuilderDelegate(
-                  (context, index) => Text('${children[index]}'),
+              (context, index) => Text('${children[index]}'),
               childCount: children.length,
             ),
           ),
@@ -175,7 +178,9 @@ void main() {
       expect(controller.hasClients, isFalse);
     });
 
-    testWidgets('does not inherit PrimaryScrollController - other controller set', (tester) async {
+    testWidgets(
+        'does not inherit PrimaryScrollController - other controller set',
+        (tester) async {
       final ScrollController primaryController = ScrollController();
       final ScrollController listController = ScrollController();
       await pumpList(
@@ -190,7 +195,7 @@ void main() {
               computeExtent: (index) => children[index],
             ),
             childrenDelegate: SliverChildBuilderDelegate(
-                  (context, index) => Text('${children[index]}'),
+              (context, index) => Text('${children[index]}'),
               childCount: children.length,
             ),
           ),
@@ -214,7 +219,7 @@ void main() {
               computeExtent: (index) => children[index],
             ),
             childrenDelegate: SliverChildBuilderDelegate(
-                  (context, index) => Text('${children[index]}'),
+              (context, index) => Text('${children[index]}'),
               childCount: children.length,
             ),
           ),
@@ -223,8 +228,8 @@ void main() {
 
       final AssertionError error = tester.takeException() as AssertionError;
       expect(
-          error.message,
-          'No ScrollController has been provided to the CustomPointerScrollView.',
+        error.message,
+        'No ScrollController has been provided to the CustomPointerScrollView.',
       );
     });
   });
