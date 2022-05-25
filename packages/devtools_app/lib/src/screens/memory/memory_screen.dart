@@ -91,12 +91,13 @@ class MemoryBodyState extends State<MemoryBody>
     final vmChartController = vm.VMChartController(memoryController);
 
     _chartControllers = ChartControllers(
-        events.EventChartController(memoryController),
-        vmChartController,
-        android.AndroidChartController(
-          memoryController,
-          sharedLabels: vmChartController.labelTimestamps,
-        ));
+      events.EventChartController(memoryController),
+      vmChartController,
+      android.AndroidChartController(
+        memoryController,
+        sharedLabels: vmChartController.labelTimestamps,
+      ),
+    );
 
     // Update the chart when the memorySource changes.
     addAutoDisposeListener(memoryController.selectedSnapshotNotifier, () {

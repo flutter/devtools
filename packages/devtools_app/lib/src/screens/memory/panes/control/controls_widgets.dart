@@ -24,8 +24,8 @@ import 'constants.dart';
 import 'legend.dart';
 import 'memory_config.dart';
 
-class ChartControls extends StatefulWidget {
-  const ChartControls({
+class LeftControls extends StatefulWidget {
+  const LeftControls({
     Key? key,
     required this.chartControllers,
   }) : super(key: key);
@@ -33,10 +33,10 @@ class ChartControls extends StatefulWidget {
   final ChartControllers chartControllers;
 
   @override
-  State<ChartControls> createState() => _ChartControlsState();
+  State<LeftControls> createState() => _LeftControlsState();
 }
 
-class _ChartControlsState extends State<ChartControls>
+class _LeftControlsState extends State<LeftControls>
     with MemoryControllerMixin {
   @override
   void didChangeDependencies() {
@@ -116,181 +116,9 @@ class _ChartControlsState extends State<ChartControls>
   }
 }
 
-class IntervalDropdown extends StatefulWidget {
-  const IntervalDropdown({Key? key, required this.chartControllers})
-      : super(key: key);
-
-  final ChartControllers chartControllers;
-
-  @override
-  State<IntervalDropdown> createState() => _IntervalDropdownState();
-}
-
-class _IntervalDropdownState extends State<IntervalDropdown>
-    with MemoryControllerMixin<IntervalDropdown> {
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-
-    initMemoryController();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final mediaWidth = MediaQuery.of(context).size.width;
-    final isVerboseDropdown = mediaWidth > verboseDropDownMinimumWidth;
-
-    final displayOneMinute =
-        chartDuration(ChartInterval.OneMinute)!.inMinutes.toString();
-
-    final _displayTypes = displayDurationsStrings.map<DropdownMenuItem<String>>(
-      (
-        String value,
-      ) {
-        final unit = value == displayDefault || value == displayAll
-            ? ''
-            : 'Minute${value == displayOneMinute ? '' : 's'}';
-
-        return DropdownMenuItem<String>(
-          value: value,
-          child: Text(
-            '${isVerboseDropdown ? 'Display' : ''} $value $unit',
-          ),
-        );
-      },
-    ).toList();
-
-    return RoundedDropDownButton<String>(
-      isDense: true,
-      style: textTheme.bodyText2,
-      value: displayDuration(memoryController.displayInterval),
-      onChanged: (String? newValue) {
-        setState(() {
-          ga.select(
-            analytics_constants.memory,
-            '${analytics_constants.memoryDisplayInterval}-$newValue',
-          );
-          memoryController.displayInterval = chartInterval(newValue!);
-          final duration = chartDuration(memoryController.displayInterval);
-
-          widget.chartControllers.event.zoomDuration = duration;
-          widget.chartControllers.vm.zoomDuration = duration;
-          widget.chartControllers.android.zoomDuration = duration;
-        });
-      },
-      items: _displayTypes,
-    );
-  }
-}
-
-class SourceDropdownMenuItem<T> extends DropdownMenuItem<T> {
-  const SourceDropdownMenuItem({T? value, required Widget child})
-      : super(value: value, child: child);
-}
-
-class MemorySourceDropdown extends StatefulWidget {
-  const MemorySourceDropdown({Key? key}) : super(key: key);
-
-  @override
-  State<MemorySourceDropdown> createState() => _MemorySourceDropdownState();
-}
-
-class _MemorySourceDropdownState extends State<MemorySourceDropdown>
-    with MemoryControllerMixin {
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-
-    initMemoryController();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final files = memoryController.memoryLog.offlineFiles();
-
-    // Can we display dropdowns in verbose mode?
-    final isVerbose =
-        memoryController.memorySourcePrefix == memorySourceMenuItemPrefix;
-
-    // First item is 'Live Feed', then followed by memory log filenames.
-    files.insert(0, MemoryController.liveFeed);
-
-    final allMemorySources = files.map<DropdownMenuItem<String>>((
-      String value,
-    ) {
-      // If narrow width compact the displayed name (remove prefix 'memory_log_').
-      final displayValue =
-          (!isVerbose && value.startsWith(MemoryController.logFilenamePrefix))
-              ? value.substring(MemoryController.logFilenamePrefix.length)
-              : value;
-      return SourceDropdownMenuItem<String>(
-        value: value,
-        child: Text(
-          '${memoryController.memorySourcePrefix}$displayValue',
-          key: sourcesKey,
-        ),
-      );
-    }).toList();
-
-    return RoundedDropDownButton<String>(
-      key: sourcesDropdownKey,
-      isDense: true,
-      style: textTheme.bodyText2,
-      value: memoryController.memorySource,
-      onChanged: (String? newValue) {
-        setState(() {
-          ga.select(
-            analytics_constants.memory,
-            analytics_constants.sourcesDropDown,
-          );
-          memoryController.memorySource = newValue!;
-        });
-      },
-      items: allMemorySources,
-    );
-  }
-}
-
-class CreateToggleAdbMemoryButton extends StatefulWidget {
-  const CreateToggleAdbMemoryButton(
-      {Key? key, required this.isAndroidCollection})
-      : super(key: key);
-  final bool isAndroidCollection;
-
-  @override
-  State<CreateToggleAdbMemoryButton> createState() =>
-      _CreateToggleAdbMemoryButtonState();
-}
-
-class _CreateToggleAdbMemoryButtonState
-    extends State<CreateToggleAdbMemoryButton> with MemoryControllerMixin {
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-
-    initMemoryController();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return IconLabelButton(
-      icon: memoryController.isAndroidChartVisible
-          ? Icons.close
-          : Icons.show_chart,
-      label: 'Android Memory',
-      onPressed: widget.isAndroidCollection
-          ? memoryController.toggleAndroidChartVisibility
-          : null,
-      minScreenWidthForTextBeforeScaling: 900,
-    );
-  }
-}
-
 /// Controls related to the entire memory screen.
-class CommonControls extends StatefulWidget {
-  const CommonControls(
+class RightControls extends StatefulWidget {
+  const RightControls(
       {Key? key,
       required this.isAndroidCollection,
       required this.isAdvancedSettingsEnabled,
@@ -302,10 +130,10 @@ class CommonControls extends StatefulWidget {
   final ChartControllers chartControllers;
 
   @override
-  State<CommonControls> createState() => _CommonControlsState();
+  State<RightControls> createState() => _RightControlsState();
 }
 
-class _CommonControlsState extends State<CommonControls>
+class _RightControlsState extends State<RightControls>
     with MemoryControllerMixin, AutoDisposeMixin {
   OverlayEntry? _legendOverlayEntry;
 
@@ -527,5 +355,177 @@ class _CommonControlsState extends State<CommonControls>
       // TODO(terry): Show toast?
       log('Unable to GC ${e.toString()}', LogLevel.error);
     }
+  }
+}
+
+class IntervalDropdown extends StatefulWidget {
+  const IntervalDropdown({Key? key, required this.chartControllers})
+      : super(key: key);
+
+  final ChartControllers chartControllers;
+
+  @override
+  State<IntervalDropdown> createState() => _IntervalDropdownState();
+}
+
+class _IntervalDropdownState extends State<IntervalDropdown>
+    with MemoryControllerMixin<IntervalDropdown> {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    initMemoryController();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final mediaWidth = MediaQuery.of(context).size.width;
+    final isVerboseDropdown = mediaWidth > verboseDropDownMinimumWidth;
+
+    final displayOneMinute =
+        chartDuration(ChartInterval.OneMinute)!.inMinutes.toString();
+
+    final _displayTypes = displayDurationsStrings.map<DropdownMenuItem<String>>(
+      (
+        String value,
+      ) {
+        final unit = value == displayDefault || value == displayAll
+            ? ''
+            : 'Minute${value == displayOneMinute ? '' : 's'}';
+
+        return DropdownMenuItem<String>(
+          value: value,
+          child: Text(
+            '${isVerboseDropdown ? 'Display' : ''} $value $unit',
+          ),
+        );
+      },
+    ).toList();
+
+    return RoundedDropDownButton<String>(
+      isDense: true,
+      style: textTheme.bodyText2,
+      value: displayDuration(memoryController.displayInterval),
+      onChanged: (String? newValue) {
+        setState(() {
+          ga.select(
+            analytics_constants.memory,
+            '${analytics_constants.memoryDisplayInterval}-$newValue',
+          );
+          memoryController.displayInterval = chartInterval(newValue!);
+          final duration = chartDuration(memoryController.displayInterval);
+
+          widget.chartControllers.event.zoomDuration = duration;
+          widget.chartControllers.vm.zoomDuration = duration;
+          widget.chartControllers.android.zoomDuration = duration;
+        });
+      },
+      items: _displayTypes,
+    );
+  }
+}
+
+class SourceDropdownMenuItem<T> extends DropdownMenuItem<T> {
+  const SourceDropdownMenuItem({T? value, required Widget child})
+      : super(value: value, child: child);
+}
+
+class MemorySourceDropdown extends StatefulWidget {
+  const MemorySourceDropdown({Key? key}) : super(key: key);
+
+  @override
+  State<MemorySourceDropdown> createState() => _MemorySourceDropdownState();
+}
+
+class _MemorySourceDropdownState extends State<MemorySourceDropdown>
+    with MemoryControllerMixin {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    initMemoryController();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final files = memoryController.memoryLog.offlineFiles();
+
+    // Can we display dropdowns in verbose mode?
+    final isVerbose =
+        memoryController.memorySourcePrefix == memorySourceMenuItemPrefix;
+
+    // First item is 'Live Feed', then followed by memory log filenames.
+    files.insert(0, MemoryController.liveFeed);
+
+    final allMemorySources = files.map<DropdownMenuItem<String>>((
+      String value,
+    ) {
+      // If narrow width compact the displayed name (remove prefix 'memory_log_').
+      final displayValue =
+          (!isVerbose && value.startsWith(MemoryController.logFilenamePrefix))
+              ? value.substring(MemoryController.logFilenamePrefix.length)
+              : value;
+      return SourceDropdownMenuItem<String>(
+        value: value,
+        child: Text(
+          '${memoryController.memorySourcePrefix}$displayValue',
+          key: sourcesKey,
+        ),
+      );
+    }).toList();
+
+    return RoundedDropDownButton<String>(
+      key: sourcesDropdownKey,
+      isDense: true,
+      style: textTheme.bodyText2,
+      value: memoryController.memorySource,
+      onChanged: (String? newValue) {
+        setState(() {
+          ga.select(
+            analytics_constants.memory,
+            analytics_constants.sourcesDropDown,
+          );
+          memoryController.memorySource = newValue!;
+        });
+      },
+      items: allMemorySources,
+    );
+  }
+}
+
+class CreateToggleAdbMemoryButton extends StatefulWidget {
+  const CreateToggleAdbMemoryButton(
+      {Key? key, required this.isAndroidCollection})
+      : super(key: key);
+  final bool isAndroidCollection;
+
+  @override
+  State<CreateToggleAdbMemoryButton> createState() =>
+      _CreateToggleAdbMemoryButtonState();
+}
+
+class _CreateToggleAdbMemoryButtonState
+    extends State<CreateToggleAdbMemoryButton> with MemoryControllerMixin {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    initMemoryController();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return IconLabelButton(
+      icon: memoryController.isAndroidChartVisible
+          ? Icons.close
+          : Icons.show_chart,
+      label: 'Android Memory',
+      onPressed: widget.isAndroidCollection
+          ? memoryController.toggleAndroidChartVisibility
+          : null,
+      minScreenWidthForTextBeforeScaling: 900,
+    );
   }
 }

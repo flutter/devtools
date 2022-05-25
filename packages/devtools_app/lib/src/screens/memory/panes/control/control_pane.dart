@@ -48,9 +48,9 @@ class _MemoryControlPaneState extends State<MemoryControlPane>
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        ChartControls(chartControllers: widget.chartControllers),
+        LeftControls(chartControllers: widget.chartControllers),
         const Spacer(),
-        CommonControls(
+        RightControls(
             chartControllers: widget.chartControllers,
             isAndroidCollection: _isAndroidCollection,
             isAdvancedSettingsEnabled: _isAdvancedSettingsEnabled)
