@@ -17,7 +17,7 @@ import '../../shared/screen.dart';
 import '../../shared/theme.dart';
 import '../../shared/utils.dart';
 import '../../ui/icons.dart';
-import 'area_controls/controls_area.dart';
+import 'components/control_pane/controls_area.dart';
 import 'memory_android_chart.dart' as android;
 import 'memory_charts.dart';
 import 'memory_controller.dart';
