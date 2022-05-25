@@ -4,7 +4,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
 
 import '../../analytics/analytics.dart' as ga;
 import '../../charts/chart_controller.dart';
@@ -61,12 +60,11 @@ class MemoryBody extends StatefulWidget {
 }
 
 class MemoryBodyState extends State<MemoryBody>
-    with AutoDisposeMixin, SingleTickerProviderStateMixin {
-  late events.EventChartController _eventChartController;
-  late vm.VMChartController _vmChartController;
-  late android.AndroidChartController _androidChartController;
-
-  late MemoryController _controller;
+    with
+        AutoDisposeMixin,
+        SingleTickerProviderStateMixin,
+        MemoryControllerMixin {
+  late ChartControllers _chartControllers;
 
   bool _controllersInitialized = false;
 
@@ -86,37 +84,34 @@ class MemoryBodyState extends State<MemoryBody>
     super.didChangeDependencies();
     maybePushDebugModeMemoryMessage(context, MemoryScreen.id);
 
-    final newController = Provider.of<MemoryController>(context);
-    if (_controllersInitialized && newController == _controller) return;
-    _controllersInitialized = true;
-
-    _controller = newController;
-
-    _eventChartController = events.EventChartController(_controller);
-    _vmChartController = vm.VMChartController(_controller);
-    // Android Chart uses the VM Chart's computed labels.
-    _androidChartController = android.AndroidChartController(
-      _controller,
-      sharedLabels: _vmChartController.labelTimestamps,
-    );
+    if (initMemoryController()) {
+      final vmChartController = vm.VMChartController(memoryController);
+      _chartControllers = ChartControllers(
+          events.EventChartController(memoryController),
+          vmChartController,
+          android.AndroidChartController(
+            memoryController,
+            sharedLabels: vmChartController.labelTimestamps,
+          ));
+    }
 
     // Update the chart when the memorySource changes.
-    addAutoDisposeListener(_controller.selectedSnapshotNotifier, () {
+    addAutoDisposeListener(memoryController.selectedSnapshotNotifier, () {
       setState(() {
         // TODO(terry): Create the snapshot data to display by Library,
         //              by Class or by Objects.
         // Create the snapshot data by Library.
-        _controller.createSnapshotByLibrary();
+        memoryController.createSnapshotByLibrary();
       });
     });
 
     // Update the chart when the memorySource changes.
-    addAutoDisposeListener(_controller.memorySourceNotifier, () async {
+    addAutoDisposeListener(memoryController.memorySourceNotifier, () async {
       try {
-        await _controller.updatedMemorySource();
+        await memoryController.updatedMemorySource();
       } catch (e) {
         final errorMessage = '$e';
-        _controller.memorySource = MemoryController.liveFeed;
+        memoryController.memorySource = MemoryController.liveFeed;
         // Display toast, unable to load the saved memory JSON payload.
         final notificationsState = Notifications.of(context);
         if (notificationsState != null) {
@@ -128,25 +123,25 @@ class MemoryBodyState extends State<MemoryBody>
         return;
       }
 
-      _controller.refreshAllCharts();
+      memoryController.refreshAllCharts();
     });
 
-    addAutoDisposeListener(_eventChartController.tapLocation, () {
-      if (_eventChartController.tapLocation.value != null) {
+    addAutoDisposeListener(_chartControllers.event.tapLocation, () {
+      if (_chartControllers.event.tapLocation.value != null) {
         if (_hoverOverlayEntry != null) {
           hideHover();
         }
-        final tapLocation = _eventChartController.tapLocation.value;
+        final tapLocation = _chartControllers.event.tapLocation.value;
         if (tapLocation?.tapDownDetails != null) {
           final tapData = tapLocation!;
           final index = tapData.index;
           final timestamp = tapData.timestamp!;
 
           final copied = TapLocation.copy(tapLocation);
-          _vmChartController.tapLocation.value = copied;
-          _androidChartController.tapLocation.value = copied;
+          _chartControllers.vm.tapLocation.value = copied;
+          _chartControllers.android.tapLocation.value = copied;
 
-          final allValues = ChartsValues(_controller, index, timestamp);
+          final allValues = ChartsValues(memoryController, index, timestamp);
           if (MemoryScreen.isDebuggingEnabled) {
             debugLogger(
               'Event Chart TapLocation '
@@ -158,22 +153,22 @@ class MemoryBodyState extends State<MemoryBody>
       }
     });
 
-    addAutoDisposeListener(_vmChartController.tapLocation, () {
-      if (_vmChartController.tapLocation.value != null) {
+    addAutoDisposeListener(_chartControllers.vm.tapLocation, () {
+      if (_chartControllers.vm.tapLocation.value != null) {
         if (_hoverOverlayEntry != null) {
           hideHover();
         }
-        final tapLocation = _vmChartController.tapLocation.value;
+        final tapLocation = _chartControllers.vm.tapLocation.value;
         if (tapLocation?.tapDownDetails != null) {
           final tapData = tapLocation!;
           final index = tapData.index;
           final timestamp = tapData.timestamp!;
 
           final copied = TapLocation.copy(tapLocation);
-          _eventChartController.tapLocation.value = copied;
-          _androidChartController.tapLocation.value = copied;
+          _chartControllers.event.tapLocation.value = copied;
+          _chartControllers.android.tapLocation.value = copied;
 
-          final allValues = ChartsValues(_controller, index, timestamp);
+          final allValues = ChartsValues(memoryController, index, timestamp);
           if (MemoryScreen.isDebuggingEnabled) {
             debugLogger(
               'VM Chart TapLocation '
@@ -185,22 +180,22 @@ class MemoryBodyState extends State<MemoryBody>
       }
     });
 
-    addAutoDisposeListener(_androidChartController.tapLocation, () {
-      if (_androidChartController.tapLocation.value != null) {
+    addAutoDisposeListener(_chartControllers.android.tapLocation, () {
+      if (_chartControllers.android.tapLocation.value != null) {
         if (_hoverOverlayEntry != null) {
           hideHover();
         }
-        final tapLocation = _androidChartController.tapLocation.value;
+        final tapLocation = _chartControllers.android.tapLocation.value;
         if (tapLocation?.tapDownDetails != null) {
           final tapData = tapLocation!;
           final index = tapData.index;
           final timestamp = tapData.timestamp!;
 
           final copied = TapLocation.copy(tapLocation);
-          _eventChartController.tapLocation.value = copied;
-          _vmChartController.tapLocation.value = copied;
+          _chartControllers.event.tapLocation.value = copied;
+          _chartControllers.vm.tapLocation.value = copied;
 
-          final allValues = ChartsValues(_controller, index, timestamp);
+          final allValues = ChartsValues(memoryController, index, timestamp);
           if (MemoryScreen.isDebuggingEnabled) {
             debugLogger(
               'Android Chart TapLocation '
@@ -212,7 +207,7 @@ class MemoryBodyState extends State<MemoryBody>
       }
     });
 
-    addAutoDisposeListener(_controller.refreshCharts, () {
+    addAutoDisposeListener(memoryController.refreshCharts, () {
       setState(() {
         _refreshCharts();
       });
@@ -235,28 +230,24 @@ class MemoryBodyState extends State<MemoryBody>
       child: Column(
         key: hoverKey,
         children: [
-          ControlsArea(
-            eventChartController: _eventChartController,
-            androidChartController: _androidChartController,
-            vmChartController: _vmChartController,
-          ),
+          MemoryControls(chartControllers: _chartControllers),
           const SizedBox(height: denseRowSpacing),
           SizedBox(
             height: scaleByFontFactor(70),
-            child: events.MemoryEventsPane(_eventChartController),
+            child: events.MemoryEventsPane(_chartControllers.event),
           ),
           SizedBox(
-            child: vm.MemoryVMChart(_vmChartController),
+            child: vm.MemoryVMChart(_chartControllers.vm),
           ),
-          _controller.isAndroidChartVisible
+          memoryController.isAndroidChartVisible
               ? SizedBox(
                   height: defaultChartHeight,
-                  child: android.MemoryAndroidChart(_androidChartController),
+                  child: android.MemoryAndroidChart(_chartControllers.android),
                 )
               : const SizedBox(),
           const SizedBox(width: defaultSpacing),
           Expanded(
-            child: HeapTree(_controller),
+            child: HeapTree(memoryController),
           ),
         ],
       ),
@@ -271,29 +262,29 @@ class MemoryBodyState extends State<MemoryBody>
 
   void _refreshCharts() {
     // Remove history of all plotted data in all charts.
-    _eventChartController.reset();
-    _vmChartController.reset();
-    _androidChartController.reset();
+    _chartControllers.event.reset();
+    _chartControllers.vm.reset();
+    _chartControllers.android.reset();
 
     _recomputeChartData();
   }
 
   /// Recompute (attach data to the chart) for either live or offline data source.
   void _recomputeChartData() {
-    _eventChartController.setupData();
-    _eventChartController.dirty = true;
-    _vmChartController.setupData();
-    _vmChartController.dirty = true;
-    _androidChartController.setupData();
-    _androidChartController.dirty = true;
+    _chartControllers.event.setupData();
+    _chartControllers.event.dirty = true;
+    _chartControllers.vm.setupData();
+    _chartControllers.vm.dirty = true;
+    _chartControllers.android.setupData();
+    _chartControllers.android.dirty = true;
   }
 
   void _updateListeningState() async {
     await serviceManager.onServiceAvailable;
 
-    if (_controller.hasStarted) return;
+    if (memoryController.hasStarted) return;
 
-    await _controller.startTimeline();
+    await memoryController.startTimeline();
 
     // TODO(terry): Need to set the initial state of buttons.
 /*
@@ -641,7 +632,7 @@ class MemoryBodyState extends State<MemoryBody>
           dashed: dashedLine == true,
           image: image,
           hasNumeric: true,
-          hasUnit: _controller.unitDisplayed.value,
+          hasUnit: memoryController.unitDisplayed.value,
           scaleImage: true,
         ),
       );
@@ -652,7 +643,7 @@ class MemoryBodyState extends State<MemoryBody>
 
   List<Widget> displayVmDataInHover(ChartsValues chartsValues) =>
       _dataToDisplay(
-        chartsValues.displayVmDataToDisplay(_vmChartController.traces),
+        chartsValues.displayVmDataToDisplay(_chartControllers.vm.traces),
       );
 
   List<Widget> displayAndroidDataInHover(ChartsValues chartsValues) {
@@ -660,10 +651,10 @@ class MemoryBodyState extends State<MemoryBody>
     const dividerLineHorizontalSpace = 20.0;
     const totalDividerLineHorizontalSpace = dividerLineHorizontalSpace * 2;
 
-    if (!_controller.isAndroidChartVisible) return [];
+    if (!memoryController.isAndroidChartVisible) return [];
 
     final androidDataDisplayed =
-        chartsValues.androidDataToDisplay(_androidChartController.traces);
+        chartsValues.androidDataToDisplay(_chartControllers.android.traces);
 
     // Separator between Android data.
     // TODO(terry): Why Center widget doesn't work (parent width is bigger/centered too far right).
@@ -707,7 +698,7 @@ class MemoryBodyState extends State<MemoryBody>
 
     double totalHoverHeight;
     int totalTraces;
-    if (_controller.isAndroidChartVisible) {
+    if (memoryController.isAndroidChartVisible) {
       totalTraces = chartsValues.vmData.entries.length -
           1 +
           chartsValues.androidData.entries.length;
@@ -769,9 +760,9 @@ class MemoryBodyState extends State<MemoryBody>
 
   void hideHover() {
     if (_hoverOverlayEntry != null) {
-      _eventChartController.tapLocation.value = null;
-      _vmChartController.tapLocation.value = null;
-      _androidChartController.tapLocation.value = null;
+      _chartControllers.event.tapLocation.value = null;
+      _chartControllers.vm.tapLocation.value = null;
+      _chartControllers.android.tapLocation.value = null;
 
       _hoverOverlayEntry?.remove();
       _hoverOverlayEntry = null;

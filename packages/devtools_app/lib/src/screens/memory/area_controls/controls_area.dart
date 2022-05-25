@@ -7,69 +7,39 @@ import 'package:provider/provider.dart';
 
 import '../../../analytics/analytics.dart' as ga;
 import '../../../analytics/constants.dart' as analytics_constants;
-import '../../../config_specific/logger/logger.dart';
 import '../../../primitives/auto_dispose_mixin.dart';
 import '../../../shared/common_widgets.dart';
 import '../../../shared/notifications.dart';
 import '../../../shared/theme.dart';
-import '../../../shared/utils.dart';
 import '../memory_android_chart.dart' as android;
 import '../memory_charts.dart';
 import '../memory_controller.dart';
 import '../memory_events_pane.dart' as events;
 import '../memory_vm_chart.dart' as vm;
 import '../primitives/painting.dart';
+import 'constants.dart';
+import 'controls_widgets.dart';
 import 'memory_config.dart';
 
-/// Width of application when memory buttons loose their text.
-const _primaryControlsMinVerboseWidth = 1100.0;
-
-/// When to have verbose Dropdown based on media width.
-const _verboseDropDownMinimumWidth = 950;
-
-const _memorySourceMenuItemPrefix = 'Source: ';
-
-final _legendKey = GlobalKey(debugLabel: 'Legend Button');
-const legendXOffset = 20;
-const legendYOffset = 7.0;
-double get legendWidth => scaleByFontFactor(200.0);
-double get legendTextWidth => scaleByFontFactor(55.0);
-double get legendHeight1Chart => scaleByFontFactor(200.0);
-double get legendHeight2Charts => scaleByFontFactor(323.0);
-
-// TODO(kenz): clean up these keys. We should remove them if we are only using
-// for testing and can avoid them.
-
-@visibleForTesting
-const sourcesDropdownKey = Key('Sources Dropdown');
-
-@visibleForTesting
-const sourcesKey = Key('Sources');
-
-class ControlsArea extends StatefulWidget {
-  const ControlsArea({
+class MemoryControls extends StatefulWidget {
+  const MemoryControls({
     Key? key,
-    required this.eventChartController,
-    required this.vmChartController,
-    required this.androidChartController,
+    required this.chartControllers,
   }) : super(key: key);
 
-  final events.EventChartController eventChartController;
-  final vm.VMChartController vmChartController;
-  final android.AndroidChartController androidChartController;
+  final ChartControllers chartControllers;
 
   @override
-  State<ControlsArea> createState() => _ControlsAreaState();
+  State<MemoryControls> createState() => _MemoryControlsState();
 }
 
-class _ControlsAreaState extends State<ControlsArea> with AutoDisposeMixin {
+class _MemoryControlsState extends State<MemoryControls> with AutoDisposeMixin {
   /// Updated when the MemoryController's _androidCollectionEnabled ValueNotifier changes.
   bool _isAndroidCollection = MemoryController.androidADBDefault;
-  bool controllersInitialized = false;
   bool _isAdvancedSettingsEnabled = false;
-
   OverlayEntry? _legendOverlayEntry;
 
+  bool controllersInitialized = false;
   late MemoryController _controller;
 
   @override
@@ -78,9 +48,11 @@ class _ControlsAreaState extends State<ControlsArea> with AutoDisposeMixin {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _buildPrimaryStateControls(textTheme),
+        ChartControls(chartControllers: widget.chartControllers),
         const Spacer(),
-        _buildMemoryControls(textTheme),
+        CommonControls(
+            isAndroidCollection: _isAndroidCollection,
+            isAdvancedSettingsEnabled: _isAdvancedSettingsEnabled)
       ],
     );
   }
@@ -148,41 +120,6 @@ class _ControlsAreaState extends State<ControlsArea> with AutoDisposeMixin {
     });
   }
 
-  void _onPause() {
-    ga.select(analytics_constants.memory, analytics_constants.pause);
-    _controller.pauseLiveFeed();
-  }
-
-  void _onResume() {
-    ga.select(analytics_constants.memory, analytics_constants.resume);
-    _controller.resumeLiveFeed();
-  }
-
-  void _clearTimeline() {
-    ga.select(analytics_constants.memory, analytics_constants.clear);
-
-    _controller.memoryTimeline.reset();
-
-    // Clear any current Allocation Profile collected.
-    _controller.monitorAllocations = [];
-    _controller.monitorTimestamp = null;
-    _controller.lastMonitorTimestamp.value = null;
-    _controller.trackAllocations.clear();
-    _controller.allocationSamples.clear();
-
-    // Clear all analysis and snapshots collected too.
-    _controller.clearAllSnapshots();
-    _controller.classRoot = null;
-    _controller.topNode = null;
-    _controller.selectedSnapshotTimestamp = null;
-    _controller.selectedLeaf = null;
-
-    // Remove history of all plotted data in all charts.
-    widget.eventChartController.reset();
-    widget.vmChartController.reset();
-    widget.androidChartController.reset();
-  }
-
   void _exportToFile() {
     final outputPath = _controller.memoryLog.exportMemory();
     final notificationsState = Notifications.of(context);
@@ -200,164 +137,11 @@ class _ControlsAreaState extends State<ControlsArea> with AutoDisposeMixin {
     );
   }
 
-  Widget _intervalDropdown(TextTheme textTheme) {
-    final mediaWidth = MediaQuery.of(context).size.width;
-    final isVerboseDropdown = mediaWidth > _verboseDropDownMinimumWidth;
-
-    final displayOneMinute =
-        chartDuration(ChartInterval.OneMinute)!.inMinutes.toString();
-
-    final _displayTypes = displayDurationsStrings.map<DropdownMenuItem<String>>(
-      (
-        String value,
-      ) {
-        final unit = value == displayDefault || value == displayAll
-            ? ''
-            : 'Minute${value == displayOneMinute ? '' : 's'}';
-
-        return DropdownMenuItem<String>(
-          value: value,
-          child: Text(
-            '${isVerboseDropdown ? 'Display' : ''} $value $unit',
-          ),
-        );
-      },
-    ).toList();
-
-    return RoundedDropDownButton<String>(
-      isDense: true,
-      style: textTheme.bodyText2,
-      value: displayDuration(_controller.displayInterval),
-      onChanged: (String? newValue) {
-        setState(() {
-          ga.select(
-            analytics_constants.memory,
-            '${analytics_constants.memoryDisplayInterval}-$newValue',
-          );
-          _controller.displayInterval = chartInterval(newValue!);
-          final duration = chartDuration(_controller.displayInterval);
-
-          widget.eventChartController.zoomDuration = duration;
-          widget.vmChartController.zoomDuration = duration;
-          widget.androidChartController.zoomDuration = duration;
-        });
-      },
-      items: _displayTypes,
-    );
-  }
-
-  Widget _memorySourceDropdown(TextTheme textTheme) {
-    final files = _controller.memoryLog.offlineFiles();
-
-    // Can we display dropdowns in verbose mode?
-    final isVerbose =
-        _controller.memorySourcePrefix == _memorySourceMenuItemPrefix;
-
-    // First item is 'Live Feed', then followed by memory log filenames.
-    files.insert(0, MemoryController.liveFeed);
-
-    final allMemorySources = files.map<DropdownMenuItem<String>>((
-      String value,
-    ) {
-      // If narrow width compact the displayed name (remove prefix 'memory_log_').
-      final displayValue =
-          (!isVerbose && value.startsWith(MemoryController.logFilenamePrefix))
-              ? value.substring(MemoryController.logFilenamePrefix.length)
-              : value;
-      return SourceDropdownMenuItem<String>(
-        value: value,
-        child: Text(
-          '${_controller.memorySourcePrefix}$displayValue',
-          key: sourcesKey,
-        ),
-      );
-    }).toList();
-
-    return RoundedDropDownButton<String>(
-      key: sourcesDropdownKey,
-      isDense: true,
-      style: textTheme.bodyText2,
-      value: _controller.memorySource,
-      onChanged: (String? newValue) {
-        setState(() {
-          ga.select(
-            analytics_constants.memory,
-            analytics_constants.sourcesDropDown,
-          );
-          _controller.memorySource = newValue!;
-        });
-      },
-      items: allMemorySources,
-    );
-  }
-
-  Widget _createToggleAdbMemoryButton() {
-    return IconLabelButton(
-      icon: _controller.isAndroidChartVisible ? Icons.close : Icons.show_chart,
-      label: 'Android Memory',
-      onPressed: _isAndroidCollection
-          ? _controller.toggleAndroidChartVisibility
-          : null,
-      minScreenWidthForTextBeforeScaling: 900,
-    );
-  }
-
-  Widget _buildMemoryControls(TextTheme textTheme) {
-    final mediaWidth = MediaQuery.of(context).size.width;
-    _controller.memorySourcePrefix = mediaWidth > _verboseDropDownMinimumWidth
-        ? _memorySourceMenuItemPrefix
-        : '';
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _memorySourceDropdown(textTheme),
-        const SizedBox(width: defaultSpacing),
-        if (_controller.isConnectedDeviceAndroid ||
-            _controller.isOfflineAndAndroidData)
-          _createToggleAdbMemoryButton(),
-        const SizedBox(width: denseSpacing),
-        _isAdvancedSettingsEnabled
-            ? Row(
-                children: [
-                  IconLabelButton(
-                    onPressed: _controller.isGcing ? null : _gc,
-                    icon: Icons.delete,
-                    label: 'GC',
-                    minScreenWidthForTextBeforeScaling:
-                        _primaryControlsMinVerboseWidth,
-                  ),
-                  const SizedBox(width: denseSpacing),
-                ],
-              )
-            : const SizedBox(),
-        ExportButton(
-          onPressed: _controller.offline.value ? null : _exportToFile,
-          minScreenWidthForTextBeforeScaling: _primaryControlsMinVerboseWidth,
-        ),
-        const SizedBox(width: denseSpacing),
-        IconLabelButton(
-          key: _legendKey,
-          onPressed: _controller.toggleLegendVisibility,
-          icon: _legendOverlayEntry == null ? Icons.storage : Icons.close,
-          label: 'Legend',
-          tooltip: 'Legend',
-          minScreenWidthForTextBeforeScaling: _primaryControlsMinVerboseWidth,
-        ),
-        const SizedBox(width: denseSpacing),
-        SettingsOutlinedButton(
-          onPressed: _openSettingsDialog,
-          label: 'Memory Configuration',
-        ),
-      ],
-    );
-  }
-
   /// Padding for each title in the legend.
   static const _legendTitlePadding = EdgeInsets.fromLTRB(5, 0, 0, 4);
 
   void _showLegend(BuildContext context) {
-    final box = _legendKey.currentContext!.findRenderObject() as RenderBox;
+    final box = legendKey.currentContext!.findRenderObject() as RenderBox;
 
     final colorScheme = Theme.of(context).colorScheme;
     final legendHeading = colorScheme.hoverTextStyle;
@@ -439,57 +223,9 @@ class _ControlsAreaState extends State<ControlsArea> with AutoDisposeMixin {
     overlayState.insert(_legendOverlayEntry!);
   }
 
-  Widget _buildPrimaryStateControls(TextTheme textTheme) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: _controller.paused,
-      builder: (context, paused, _) {
-        return Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            PauseButton(
-              minScreenWidthForTextBeforeScaling:
-                  _primaryControlsMinVerboseWidth,
-              onPressed: paused ? null : _onPause,
-            ),
-            const SizedBox(width: denseSpacing),
-            ResumeButton(
-              minScreenWidthForTextBeforeScaling:
-                  _primaryControlsMinVerboseWidth,
-              onPressed: paused ? _onResume : null,
-            ),
-            const SizedBox(width: defaultSpacing),
-            ClearButton(
-              // TODO(terry): Button needs to be Delete for offline data.
-              onPressed: _controller.memorySource == MemoryController.liveFeed
-                  ? _clearTimeline
-                  : null,
-              minScreenWidthForTextBeforeScaling:
-                  _primaryControlsMinVerboseWidth,
-            ),
-            const SizedBox(width: defaultSpacing),
-            _intervalDropdown(textTheme),
-          ],
-        );
-      },
-    );
-  }
-
   void _hideLegend() {
     _legendOverlayEntry?.remove();
     _legendOverlayEntry = null;
-  }
-
-  Future<void> _gc() async {
-    try {
-      ga.select(analytics_constants.memory, analytics_constants.gc);
-
-      _controller.memoryTimeline.addGCEvent();
-
-      await _controller.gc();
-    } catch (e) {
-      // TODO(terry): Show toast?
-      log('Unable to GC ${e.toString()}', LogLevel.error);
-    }
   }
 
   Map<String, Map<String, Object?>> eventLegend(bool isLight) {
@@ -518,7 +254,7 @@ class _ControlsAreaState extends State<ControlsArea> with AutoDisposeMixin {
   Map<String, Map<String, Object?>> vmLegend() {
     final result = <String, Map<String, Object?>>{};
 
-    final traces = widget.vmChartController.traces;
+    final traces = widget.chartControllers.vm.traces;
     // RSS trace
     result[rssDisplay] = traceRender(
       color: traces[vm.TraceName.rSS.index].characteristics.color,
@@ -559,7 +295,7 @@ class _ControlsAreaState extends State<ControlsArea> with AutoDisposeMixin {
   Map<String, Map<String, Object?>> androidLegend() {
     final result = <String, Map<String, Object?>>{};
 
-    final traces = widget.androidChartController.traces;
+    final traces = widget.chartControllers.android.traces;
     // Total trace
     result[androidTotalDisplay] = traceRender(
       color: traces[android.TraceName.total.index].characteristics.color,
@@ -673,9 +409,4 @@ class _ControlsAreaState extends State<ControlsArea> with AutoDisposeMixin {
       ),
     );
   }
-}
-
-class SourceDropdownMenuItem<T> extends DropdownMenuItem<T> {
-  const SourceDropdownMenuItem({T? value, required Widget child})
-      : super(value: value, child: child);
 }

@@ -7,7 +7,9 @@ import 'dart:async';
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../analytics/analytics.dart' as ga;
@@ -27,6 +29,9 @@ import 'memory_protocol.dart';
 import 'memory_snapshot_models.dart';
 import 'primitives/filter_config.dart';
 import 'primitives/memory_timeline.dart';
+import 'memory_android_chart.dart' as android_chart;
+import 'memory_events_pane.dart' as events_pane;
+import 'memory_vm_chart.dart' as vm_chart;
 
 enum ChartType {
   DartHeaps,
@@ -222,6 +227,35 @@ class AllocationSamples {
         );
       }
     }
+  }
+}
+
+mixin MemoryControllerMixin<T extends StatefulWidget> on State<T> {
+  bool _isInitialized = false;
+  late MemoryController memoryController;
+
+  /// Initializes the controller if needed and returns `true` if it was needed.
+  bool initMemoryController() {
+    final newController = Provider.of<MemoryController>(context);
+    if (_isInitialized && newController == memoryController) return false;
+
+    _isInitialized = true;
+    memoryController = newController;
+    return true;
+  }
+}
+
+class ChartControllers {
+  ChartControllers(this.event, this.vm, this.android);
+
+  final events_pane.EventChartController event;
+  final vm_chart.VMChartController vm;
+  final android_chart.AndroidChartController android;
+
+  void resetAll() {
+    event.reset();
+    vm.reset();
+    android.reset();
   }
 }
 
