@@ -43,17 +43,14 @@ void main() {
       bool debugMode = true,
       SemanticVersion? flutterVersion,
     }) {
-      mockIsDartVmApp(
-        fakeServiceManager.connectedApp!,
-        !web,
-      );
       if (web) {
         fakeServiceManager.availableLibraries.add('dart:html');
       }
-      mockIsFlutterApp(
+      mockConnectedApp(
         fakeServiceManager.connectedApp!,
         isFlutterApp: flutter,
         isProfileBuild: !debugMode,
+        isWebApp: web,
       );
       if (flutter) {
         fakeServiceManager.availableLibraries

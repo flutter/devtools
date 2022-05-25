@@ -6,72 +6,8 @@ import 'package:vm_service/vm_service.dart';
 
 // import '../config_specific/logger/logger.dart';
 import '../../primitives/utils.dart';
-import 'memory_controller.dart';
-
-// TODO(terry): Ask Ben, what is a class name of ::?
-/// Internal class names :: automatically filter out.
-const internalClassName = '::';
-
-/// Contains normalized library name and class name. Where
-/// normalized library is dart:xxx, package:xxxx, etc. This is
-/// how libraries and class names are displayed to the user
-/// to help to reduce the 100s of URIs that would otherwise be
-/// encountered.
-class LibraryClass {
-  LibraryClass(this.libraryName, this.className);
-
-  final String libraryName;
-  final String className;
-
-  @override
-  bool operator ==(dynamic other) {
-    if (other.runtimeType != LibraryClass) return false;
-    return libraryName == other.libraryName && className == other.className;
-  }
-
-  @override
-  int get hashCode => libraryName.hashCode ^ className.hashCode;
-}
-
-const core = 'dart:core';
-const collection = 'dart:collection';
-
-// TODO(terry): Bake in types instead of comparing qualified class name.
-LibraryClass predefinedNull = LibraryClass(core, 'Null');
-LibraryClass predefinedString = LibraryClass(core, '_OneByteString');
-LibraryClass predefinedList = LibraryClass(core, '_List');
-LibraryClass predefinedMap = LibraryClass(
-  collection,
-  '_InternalLinkedHashMap',
-);
-
-LibraryClass predefinedHashMap = LibraryClass(
-  collection,
-  '_HashMap',
-);
-
-class Predefined {
-  const Predefined(this.prettyName, this.isScalar);
-
-  final String prettyName;
-  final bool isScalar;
-}
-
-/// Structure key is fully qualified class name and the value is
-/// a List first entry is pretty name known to users second entry
-/// is if the type is a scalar.
-Map<LibraryClass, Predefined> predefinedClasses = {
-  LibraryClass(core, 'bool'): const Predefined('bool', true),
-  // TODO(terry): Handle Smi too (Integer)?
-  // Integers not Smi but fit into 64bits.
-  LibraryClass(core, '_Mint'): const Predefined('int', true),
-  LibraryClass(core, '_Double'): const Predefined('Double', true),
-  predefinedString: const Predefined('String', true),
-  predefinedList: const Predefined('List', false),
-  predefinedMap: const Predefined('Map', false),
-  predefinedHashMap: const Predefined('HashMap', false),
-  predefinedNull: const Predefined('Null', true),
-};
+import 'primitives/filter_config.dart';
+import 'primitives/predefined_classes.dart';
 
 // TODO(terry): Investigate if class implements the Map interface?
 bool isBuiltInMap(HeapGraphClassLive live) =>
@@ -109,7 +45,7 @@ bool monitorClass({int? classId, String? className, String message = ''}) {
 }
 
 HeapGraph convertHeapGraph(
-  MemoryController controller,
+  FilterConfig filterConfig,
   HeapSnapshotGraph graph, [
   List<String>? classNamesToMonitor,
 ]) {
@@ -204,7 +140,7 @@ HeapGraph convertHeapGraph(
   }
 
   return HeapGraph(
-    controller,
+    filterConfig,
     builtInClasses,
     classes,
     elements,
@@ -214,14 +150,14 @@ HeapGraph convertHeapGraph(
 
 class HeapGraph {
   HeapGraph(
-    this.controller,
+    this.filterConfig,
     this.builtInClasses,
     this.classes,
     this.elements,
     this.externals,
   );
 
-  final MemoryController controller;
+  final FilterConfig filterConfig;
 
   bool _instancesComputed = false;
 
@@ -333,10 +269,10 @@ class HeapGraph {
     // Prune classes that are private or have zero instances.
     filteredElements.clear();
     groupByClass.removeWhere((className, instances) {
-      final remove =
-          (controller.filterZeroInstances.value && instances.isEmpty) ||
-              (controller.filterPrivateClasses.value && isPrivate(className)) ||
-              className == internalClassName;
+      final remove = (filterConfig.filterZeroInstances.value &&
+              instances.isEmpty) ||
+          (filterConfig.filterPrivateClasses.value && isPrivate(className)) ||
+          className == internalClassName;
       if (remove) {
         filteredElements.putIfAbsent(className, () => instances);
       }
@@ -355,16 +291,17 @@ class HeapGraph {
 
     groupByLibrary.removeWhere((libraryName, classes) {
       classes.removeWhere((actual) {
-        final result = (controller.filterZeroInstances.value &&
+        final result = (filterConfig.filterZeroInstances.value &&
                 actual.getInstances(this).isEmpty) ||
-            (controller.filterPrivateClasses.value && isPrivate(actual.name)) ||
+            (filterConfig.filterPrivateClasses.value &&
+                isPrivate(actual.name)) ||
             actual.name == internalClassName;
         return result;
       });
 
       final result =
-          (controller.libraryFilters.isLibraryFiltered(libraryName)) ||
-              controller.filterLibraryNoInstances.value && classes.isEmpty;
+          (filterConfig.libraryFilters.isLibraryFiltered(libraryName)) ||
+              filterConfig.filterLibraryNoInstances.value && classes.isEmpty;
       if (result) {
         filteredLibraries.putIfAbsent(libraryName, () => classes);
       }

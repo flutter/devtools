@@ -12,7 +12,7 @@ import '../../charts/chart_trace.dart' as trace;
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../shared/theme.dart';
 import 'memory_controller.dart';
-import 'memory_timeline.dart';
+import 'primitives/memory_timeline.dart';
 
 class VMChartController extends ChartController {
   VMChartController(this._memoryController)

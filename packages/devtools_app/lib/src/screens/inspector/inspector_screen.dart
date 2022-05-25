@@ -13,6 +13,7 @@ import '../../analytics/constants.dart' as analytics_constants;
 
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../primitives/blocking_action_mixin.dart';
+import '../../service/service_extension_widgets.dart';
 import '../../service/service_extensions.dart' as extensions;
 import '../../shared/common_widgets.dart';
 import '../../shared/connected_app.dart';
@@ -25,7 +26,6 @@ import '../../shared/theme.dart';
 import '../../shared/utils.dart';
 import '../../ui/icons.dart';
 import '../../ui/search.dart';
-import '../../ui/service_extension_widgets.dart';
 import '../debugger/debugger_controller.dart';
 import 'inspector_controller.dart';
 import 'inspector_screen_details_tab.dart';
