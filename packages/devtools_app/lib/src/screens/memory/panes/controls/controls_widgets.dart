@@ -313,38 +313,38 @@ class _CommonControlsState extends State<CommonControls>
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    initMemoryController();
+    if (initMemoryController()) {
+      addAutoDisposeListener(memoryController.legendVisibleNotifier, () {
+        setState(() {
+          if (memoryController.isLegendVisible) {
+            ga.select(
+              analytics_constants.memory,
+              analytics_constants.memoryLegend,
+            );
 
-    addAutoDisposeListener(memoryController.legendVisibleNotifier, () {
-      setState(() {
-        if (memoryController.isLegendVisible) {
-          ga.select(
-            analytics_constants.memory,
-            analytics_constants.memoryLegend,
-          );
-
-          _showLegend(context);
-        } else {
-          _hideLegend();
-        }
+            _showLegend(context);
+          } else {
+            _hideLegend();
+          }
+        });
       });
-    });
 
-    addAutoDisposeListener(memoryController.androidChartVisibleNotifier, () {
-      setState(() {
-        if (memoryController.androidChartVisibleNotifier.value) {
-          ga.select(
-            analytics_constants.memory,
-            analytics_constants.androidChart,
-          );
-        }
-        if (memoryController.isLegendVisible) {
-          // Recompute the legend with the new traces now visible.
-          _hideLegend();
-          _showLegend(context);
-        }
+      addAutoDisposeListener(memoryController.androidChartVisibleNotifier, () {
+        setState(() {
+          if (memoryController.androidChartVisibleNotifier.value) {
+            ga.select(
+              analytics_constants.memory,
+              analytics_constants.androidChart,
+            );
+          }
+          if (memoryController.isLegendVisible) {
+            // Recompute the legend with the new traces now visible.
+            _hideLegend();
+            _showLegend(context);
+          }
+        });
       });
-    });
+    }
   }
 
   void _showLegend(BuildContext context) {
@@ -411,33 +411,33 @@ class _CommonControlsState extends State<CommonControls>
           chartControllers: widget.chartControllers,
         ));
       }
+    }
 
-      final OverlayState overlayState = Overlay.of(context)!;
-      _legendOverlayEntry ??= OverlayEntry(
-        builder: (context) => Positioned(
-          top: position.dy + box.size.height + legendYOffset,
-          left: position.dx - legendWidth + box.size.width - legendXOffset,
-          height: memoryController.isAndroidChartVisible
-              ? legendHeight2Charts
-              : legendHeight1Chart,
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(0, 5, 5, 8),
-            decoration: BoxDecoration(
-              color: colorScheme.defaultBackgroundColor,
-              border: Border.all(color: Colors.yellow),
-              borderRadius: BorderRadius.circular(10.0),
-            ),
-            width: legendWidth,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: legendRows,
-            ),
+    final OverlayState overlayState = Overlay.of(context)!;
+    _legendOverlayEntry ??= OverlayEntry(
+      builder: (context) => Positioned(
+        top: position.dy + box.size.height + legendYOffset,
+        left: position.dx - legendWidth + box.size.width - legendXOffset,
+        height: memoryController.isAndroidChartVisible
+            ? legendHeight2Charts
+            : legendHeight1Chart,
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(0, 5, 5, 8),
+          decoration: BoxDecoration(
+            color: colorScheme.defaultBackgroundColor,
+            border: Border.all(color: Colors.yellow),
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+          width: legendWidth,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: legendRows,
           ),
         ),
-      );
+      ),
+    );
 
-      overlayState.insert(_legendOverlayEntry!);
-    }
+    overlayState.insert(_legendOverlayEntry!);
   }
 
   void _hideLegend() {
