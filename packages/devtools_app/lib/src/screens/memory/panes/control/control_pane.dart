@@ -5,21 +5,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../analytics/analytics.dart' as ga;
-import '../../../../analytics/constants.dart' as analytics_constants;
 import '../../../../primitives/auto_dispose_mixin.dart';
-import '../../../../shared/common_widgets.dart';
-import '../../../../shared/notifications.dart';
-import '../../../../shared/theme.dart';
-import '../../memory_android_chart.dart' as android;
-import '../../memory_charts.dart';
 import '../../memory_controller.dart';
-import '../../memory_events_pane.dart' as events;
-import '../../memory_vm_chart.dart' as vm;
-import '../../primitives/painting.dart';
-import 'constants.dart';
-import 'controls_widgets.dart';
-import 'memory_config.dart';
+import 'left_controls.dart';
+import 'right_controls.dart';
 
 class MemoryControlPane extends StatefulWidget {
   const MemoryControlPane({
@@ -44,16 +33,16 @@ class _MemoryControlPaneState extends State<MemoryControlPane>
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         LeftControls(chartControllers: widget.chartControllers),
         const Spacer(),
         RightControls(
-            chartControllers: widget.chartControllers,
-            isAndroidCollection: _isAndroidCollection,
-            isAdvancedSettingsEnabled: _isAdvancedSettingsEnabled)
+          chartControllers: widget.chartControllers,
+          isAndroidCollection: _isAndroidCollection,
+          isAdvancedSettingsEnabled: _isAdvancedSettingsEnabled,
+        )
       ],
     );
   }

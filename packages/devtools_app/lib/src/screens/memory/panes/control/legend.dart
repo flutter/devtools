@@ -3,13 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-import '../../../../analytics/analytics.dart' as ga;
-import '../../../../analytics/constants.dart' as analytics_constants;
-import '../../../../primitives/auto_dispose_mixin.dart';
 import '../../../../shared/common_widgets.dart';
-import '../../../../shared/notifications.dart';
 import '../../../../shared/theme.dart';
 import '../../memory_android_chart.dart' as android;
 import '../../memory_charts.dart';
@@ -18,16 +13,14 @@ import '../../memory_events_pane.dart' as events;
 import '../../memory_vm_chart.dart' as vm;
 import '../../primitives/painting.dart';
 import 'constants.dart';
-import 'controls_widgets.dart';
-import 'memory_config.dart';
 
 class LegendRow extends StatelessWidget {
-  const LegendRow(
-      {Key? key,
-      required this.chartControllers,
-      required this.entry1,
-      this.entry2})
-      : super(key: key);
+  const LegendRow({
+    Key? key,
+    required this.chartControllers,
+    required this.entry1,
+    this.entry2,
+  }) : super(key: key);
 
   final ChartControllers chartControllers;
   final MapEntry<String, Map<String, Object?>> entry1;
@@ -132,7 +125,8 @@ Map<String, Map<String, Object?>> eventLegend(bool isLight) {
 }
 
 Map<String, Map<String, Object?>> vmLegend(
-    vm.VMChartController vmChartController) {
+  vm.VMChartController vmChartController,
+) {
   final result = <String, Map<String, Object?>>{};
 
   final traces = vmChartController.traces;
@@ -174,7 +168,8 @@ Map<String, Map<String, Object?>> vmLegend(
 }
 
 Map<String, Map<String, Object?>> androidLegend(
-    android.AndroidChartController androidChartController) {
+  android.AndroidChartController androidChartController,
+) {
   final result = <String, Map<String, Object?>>{};
 
   final traces = androidChartController.traces;
