@@ -1126,17 +1126,39 @@ class ScriptPopupMenuOption {
 }
 
 final defaultScriptPopupMenuOptions = [
-  copyScriptNameOption,
+  copyPackageOption,
+  copyFilePathOption,
   goToLineOption,
   openFileOption,
 ];
 
-final copyScriptNameOption = ScriptPopupMenuOption(
-  label: 'Copy filename',
+final copyPackageOption = ScriptPopupMenuOption(
+  label: 'Copy package path',
   icon: Icons.content_copy,
   onSelected: (_, controller) => Clipboard.setData(
     ClipboardData(text: controller.scriptLocation.value?.scriptRef.uri),
   ),
+);
+
+final copyFilePathOption = ScriptPopupMenuOption(
+  label: 'Copy file path',
+  icon: Icons.content_copy,
+  onSelected: (_, controller) async {
+    String? filePath;
+    final packagePath = controller.scriptLocation.value!.scriptRef.uri;
+    if (packagePath != null) {
+      final results = await serviceManager.service!.lookupResolvedPackageUris(
+        serviceManager.isolateManager.selectedIsolate.value!.id!,
+        [packagePath],
+      );
+      if (results.uris != null) {
+        filePath = results.uris![0];
+      }
+    }
+    return Clipboard.setData(
+      ClipboardData(text: filePath),
+    );
+  },
 );
 
 void showGoToLineDialog(BuildContext context, DebuggerController controller) {
