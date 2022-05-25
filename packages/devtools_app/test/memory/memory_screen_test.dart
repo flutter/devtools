@@ -5,7 +5,9 @@
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
+import 'package:devtools_app/src/screens/memory/area_controls/constants.dart';
 import 'package:devtools_app/src/screens/memory/area_controls/controls_area.dart';
+import 'package:devtools_app/src/screens/memory/area_controls/controls_widgets.dart';
 import 'package:devtools_app/src/screens/memory/memory_controller.dart';
 import 'package:devtools_app/src/screens/memory/memory_events_pane.dart';
 import 'package:devtools_app/src/screens/memory/memory_heap_tree_view.dart';

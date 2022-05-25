@@ -19,3 +19,6 @@ const memorySourceMenuItemPrefix = 'Source: ';
 final legendKey = GlobalKey(debugLabel: 'Legend Button');
 const sourcesDropdownKey = Key('Sources Dropdown');
 const sourcesKey = Key('Sources');
+
+/// Padding for each title in the legend.
+const legendTitlePadding = EdgeInsets.fromLTRB(5, 0, 0, 4);
