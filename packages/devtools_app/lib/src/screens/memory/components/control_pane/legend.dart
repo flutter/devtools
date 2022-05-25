@@ -5,21 +5,21 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../analytics/analytics.dart' as ga;
-import '../../../analytics/constants.dart' as analytics_constants;
-import '../../../primitives/auto_dispose_mixin.dart';
-import '../../../shared/common_widgets.dart';
-import '../../../shared/notifications.dart';
-import '../../../shared/theme.dart';
-import '../memory_android_chart.dart' as android;
-import '../memory_charts.dart';
-import '../memory_controller.dart';
-import '../memory_events_pane.dart' as events;
-import '../memory_vm_chart.dart' as vm;
-import '../primitives/painting.dart';
-import 'constants.dart';
-import 'controls_widgets.dart';
-import '../components/control_pane/memory_config.dart';
+import '../../../../analytics/analytics.dart' as ga;
+import '../../../../analytics/constants.dart' as analytics_constants;
+import '../../../../primitives/auto_dispose_mixin.dart';
+import '../../../../shared/common_widgets.dart';
+import '../../../../shared/notifications.dart';
+import '../../../../shared/theme.dart';
+import '../../memory_android_chart.dart' as android;
+import '../../memory_charts.dart';
+import '../../memory_controller.dart';
+import '../../memory_events_pane.dart' as events;
+import '../../memory_vm_chart.dart' as vm;
+import '../../primitives/painting.dart';
+import '../../area_controls/constants.dart';
+import '../../area_controls/controls_widgets.dart';
+import 'memory_config.dart';
 
 class LegendRow extends StatelessWidget {
   const LegendRow(

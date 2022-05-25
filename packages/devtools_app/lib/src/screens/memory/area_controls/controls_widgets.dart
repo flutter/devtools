@@ -21,7 +21,7 @@ import '../memory_events_pane.dart' as events;
 import '../memory_vm_chart.dart' as vm;
 import '../primitives/painting.dart';
 import 'constants.dart';
-import 'legend.dart';
+import '../components/control_pane/legend.dart';
 import '../components/control_pane/memory_config.dart';
 
 class ChartControls extends StatefulWidget {
