@@ -12,7 +12,7 @@ void main() {
   group('ExtentDelegateListView', () {
     final children = [1.0, 2.0, 3.0, 4.0];
 
-    Future<void> pumpList(
+    Future<void> wrapAndPump(
       WidgetTester tester,
       Widget listView,
     ) async {
@@ -25,7 +25,7 @@ void main() {
     }
 
     testWidgets('builds successfully', (tester) async {
-      await pumpList(
+      await wrapAndPump(
         tester,
         ExtentDelegateListView(
           controller: ScrollController(),
@@ -52,7 +52,7 @@ void main() {
         pointerSignalEventCount++;
       }
 
-      await pumpList(
+      await wrapAndPump(
         tester,
         ExtentDelegateListView(
           controller: ScrollController(),
@@ -84,7 +84,7 @@ void main() {
     testWidgets('inherits PrimaryScrollController automatically',
         (tester) async {
       final ScrollController controller = ScrollController();
-      await pumpList(
+      await wrapAndPump(
         tester,
         PrimaryScrollController(
           controller: controller,
@@ -106,7 +106,7 @@ void main() {
 
     testWidgets('inherits PrimaryScrollController explicitly', (tester) async {
       final ScrollController controller = ScrollController();
-      await pumpList(
+      await wrapAndPump(
         tester,
         PrimaryScrollController(
           controller: controller,
@@ -127,10 +127,35 @@ void main() {
       expect(controller.hasClients, isTrue);
     });
 
+    testWidgets('inherits PrimaryScrollController explicitly - horizontal',
+        (tester) async {
+      final ScrollController controller = ScrollController();
+      await wrapAndPump(
+        tester,
+        PrimaryScrollController(
+          controller: controller,
+          child: ExtentDelegateListView(
+            primary: true,
+            scrollDirection: Axis.horizontal,
+            extentDelegate: FixedExtentDelegate(
+              computeLength: () => children.length,
+              computeExtent: (index) => children[index],
+            ),
+            childrenDelegate: SliverChildBuilderDelegate(
+              (context, index) => Text('${children[index]}'),
+              childCount: children.length,
+            ),
+          ),
+        ),
+      );
+
+      expect(controller.hasClients, isTrue);
+    });
+
     testWidgets('does not inherit PrimaryScrollController - horizontal',
         (tester) async {
       final ScrollController controller = ScrollController();
-      await pumpList(
+      await wrapAndPump(
         tester,
         PrimaryScrollController(
           controller: controller,
@@ -155,7 +180,7 @@ void main() {
     testWidgets('does not inherit PrimaryScrollController - explicitly set',
         (tester) async {
       final ScrollController controller = ScrollController();
-      await pumpList(
+      await wrapAndPump(
         tester,
         PrimaryScrollController(
           controller: controller,
@@ -183,7 +208,7 @@ void main() {
         (tester) async {
       final ScrollController primaryController = ScrollController();
       final ScrollController listController = ScrollController();
-      await pumpList(
+      await wrapAndPump(
         tester,
         PrimaryScrollController(
           controller: primaryController,
@@ -208,7 +233,7 @@ void main() {
 
     testWidgets('asserts there is a scroll controller', (tester) async {
       final ScrollController controller = ScrollController();
-      await pumpList(
+      await wrapAndPump(
         tester,
         PrimaryScrollController(
           controller: controller,
