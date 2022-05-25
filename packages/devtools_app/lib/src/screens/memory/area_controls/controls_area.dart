@@ -18,7 +18,7 @@ import '../memory_events_pane.dart' as events;
 import '../memory_vm_chart.dart' as vm;
 import '../primitives/painting.dart';
 import 'constants.dart';
-import 'controls_widgets.dart';
+import '../components/control_pane/controls_widgets.dart';
 import '../components/control_pane/memory_config.dart';
 
 class MemoryControls extends StatefulWidget {

@@ -1,28 +1,28 @@
 import 'package:flutter/material.dart';
 
-import '../../../shared/common_widgets.dart';
-import '../memory_controller.dart';
+import '../../../../shared/common_widgets.dart';
+import '../../memory_controller.dart';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../analytics/analytics.dart' as ga;
-import '../../../analytics/constants.dart' as analytics_constants;
-import '../../../config_specific/logger/logger.dart';
-import '../../../primitives/auto_dispose_mixin.dart';
-import '../../../shared/common_widgets.dart';
-import '../../../shared/notifications.dart';
-import '../../../shared/theme.dart';
-import '../../../shared/utils.dart';
-import '../memory_android_chart.dart' as android;
-import '../memory_charts.dart';
-import '../memory_controller.dart';
-import '../memory_events_pane.dart' as events;
-import '../memory_vm_chart.dart' as vm;
-import '../primitives/painting.dart';
-import 'constants.dart';
-import '../components/control_pane/legend.dart';
-import '../components/control_pane/memory_config.dart';
+import '../../../../analytics/analytics.dart' as ga;
+import '../../../../analytics/constants.dart' as analytics_constants;
+import '../../../../config_specific/logger/logger.dart';
+import '../../../../primitives/auto_dispose_mixin.dart';
+import '../../../../shared/common_widgets.dart';
+import '../../../../shared/notifications.dart';
+import '../../../../shared/theme.dart';
+import '../../../../shared/utils.dart';
+import '../../memory_android_chart.dart' as android;
+import '../../memory_charts.dart';
+import '../../memory_controller.dart';
+import '../../memory_events_pane.dart' as events;
+import '../../memory_vm_chart.dart' as vm;
+import '../../primitives/painting.dart';
+import '../../area_controls/constants.dart';
+import 'legend.dart';
+import 'memory_config.dart';
 
 class ChartControls extends StatefulWidget {
   const ChartControls({
