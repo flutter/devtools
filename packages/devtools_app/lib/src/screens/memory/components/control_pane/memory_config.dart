@@ -4,10 +4,10 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../shared/common_widgets.dart';
-import '../../../shared/dialogs.dart';
-import '../../../shared/theme.dart';
-import '../memory_controller.dart';
+import '../../../../shared/common_widgets.dart';
+import '../../../../shared/dialogs.dart';
+import '../../../../shared/theme.dart';
+import '../../memory_controller.dart';
 
 class MemoryConfigurationsDialog extends StatelessWidget {
   const MemoryConfigurationsDialog(this.controller);
