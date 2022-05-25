@@ -66,7 +66,7 @@ class MemoryBodyState extends State<MemoryBody>
         MemoryControllerMixin {
   late ChartControllers _chartControllers;
 
-  bool _controllersInitialized = false;
+  late bool _isAndroidChartVisible;
 
   OverlayEntry? _hoverOverlayEntry;
 
@@ -85,6 +85,8 @@ class MemoryBodyState extends State<MemoryBody>
     maybePushDebugModeMemoryMessage(context, MemoryScreen.id);
 
     if (!initMemoryController()) return;
+
+    _isAndroidChartVisible = memoryController.isAndroidChartVisible;
 
     final vmChartController = vm.VMChartController(memoryController);
 
@@ -214,6 +216,12 @@ class MemoryBodyState extends State<MemoryBody>
       });
     });
 
+    addAutoDisposeListener(memoryController.androidChartVisibleNotifier, () {
+      setState(() {
+        _isAndroidChartVisible = memoryController.isAndroidChartVisible;
+      });
+    });
+
     _updateListeningState();
   }
 
@@ -240,7 +248,7 @@ class MemoryBodyState extends State<MemoryBody>
           SizedBox(
             child: vm.MemoryVMChart(_chartControllers.vm),
           ),
-          memoryController.isAndroidChartVisible
+          _isAndroidChartVisible
               ? SizedBox(
                   height: defaultChartHeight,
                   child: android.MemoryAndroidChart(_chartControllers.android),
