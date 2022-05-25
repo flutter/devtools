@@ -406,6 +406,8 @@ class ServiceConnectionManager {
 
   Future<Response> get adbMemoryInfo async {
     return await _callServiceOnMainIsolate(
+      // This service is registered on the vm service by flutter tools:
+      // https://github.com/flutter/flutter/blob/4cf60f7659cba379200b7d80ceb45d020dae560e/packages/flutter_tools/lib/src/vmservice.dart#L255
       registrations.flutterMemoryInfo.service,
     );
   }
