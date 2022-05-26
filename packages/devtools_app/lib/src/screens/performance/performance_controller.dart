@@ -642,10 +642,15 @@ class PerformanceController extends DisposableController
   }) async {
     if (debugSimpleTrace) {
       traceEvents = simpleTraceEvents['traceEvents']!
-          .where((json) =>
-              json.containsKey(TraceEvent.timestampKey)) // thread_name events
-          .map((e) => TraceEventWrapper(
-              TraceEvent(e), DateTime.now().microsecondsSinceEpoch))
+          .where(
+            (json) => json.containsKey(TraceEvent.timestampKey),
+          ) // thread_name events
+          .map(
+            (e) => TraceEventWrapper(
+              TraceEvent(e),
+              DateTime.now().microsecondsSinceEpoch,
+            ),
+          )
           .toList();
     }
 
