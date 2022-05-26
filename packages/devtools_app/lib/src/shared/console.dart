@@ -82,7 +82,7 @@ class ConsoleFrame extends StatelessWidget {
 }
 
 /// Renders a top-right aligned ButtonBar wrapping a List of IconButtons
-/// (`control`).
+/// (`controls`).
 class _ConsoleControls extends StatelessWidget {
   const _ConsoleControls({
     required this.controls,

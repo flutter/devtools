@@ -36,7 +36,7 @@ void main() {
   setGlobal(OfflineModeController, OfflineModeController());
   setGlobal(IdeTheme, IdeTheme());
 
-  testWidgets('displays floating debugger control',
+  testWidgets('displays floating debugger controls',
       (WidgetTester tester) async {
     final mockConnectedApp = MockConnectedAppLegacy();
     when(mockConnectedApp.isFlutterAppNow).thenReturn(true);

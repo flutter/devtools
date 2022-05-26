@@ -399,7 +399,7 @@ class CpuProfilerDisabled extends StatelessWidget {
   }
 }
 
-/// DropdownButton that control the value of
+/// DropdownButton that controls the value of
 /// [ProfilerScreenController.userTagFilter].
 class UserTagDropdown extends StatelessWidget {
   const UserTagDropdown(this.controller);

@@ -40,7 +40,7 @@ void main() {
   }
 
   testWidgets(
-      'does not display floating debugger tab control when no app is connected',
+      'does not display floating debugger tab controls when no app is connected',
       (WidgetTester tester) async {
     when(mockServiceManager.connectedAppInitialized).thenReturn(false);
     await tester.pumpWidget(

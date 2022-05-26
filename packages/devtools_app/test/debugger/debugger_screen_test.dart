@@ -77,7 +77,7 @@ void main() {
     };
   }
 
-  testWidgetsWithWindowSize('debugger control running', windowSize,
+  testWidgetsWithWindowSize('debugger controls running', windowSize,
       (WidgetTester tester) async {
     await tester.pumpWidget(
       wrapWithControllers(
@@ -105,7 +105,7 @@ void main() {
     expect(resume.onPressed, isNull);
   });
 
-  testWidgetsWithWindowSize('debugger control break on exceptions', windowSize,
+  testWidgetsWithWindowSize('debugger controls break on exceptions', windowSize,
       (WidgetTester tester) async {
     await tester.pumpWidget(
       wrapWithControllers(
@@ -117,7 +117,7 @@ void main() {
   });
 
   testWidgetsWithWindowSize(
-      'debugger control break on exceptions abbreviated on small window',
+      'debugger controls break on exceptions abbreviated on small window',
       smallWindowSize, (WidgetTester tester) async {
     await tester.pumpWidget(
       wrapWithControllers(

@@ -36,7 +36,7 @@ void main() {
   setGlobal(OfflineModeController, OfflineModeController());
   setGlobal(IdeTheme, IdeTheme());
 
-  testWidgets('does not display floating debugger control in profile mode',
+  testWidgets('does not display floating debugger controls in profile mode',
       (WidgetTester tester) async {
     final mockConnectedApp = MockConnectedAppLegacy();
     when(mockConnectedApp.isFlutterAppNow).thenReturn(true);
