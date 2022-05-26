@@ -4,11 +4,16 @@
 
 import 'dart:convert';
 
-import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/screens/inspector/diagnostics_node.dart';
+import 'package:devtools_app/src/screens/inspector/inspector_screen.dart';
+import 'package:devtools_app/src/screens/inspector/inspector_tree.dart';
 import 'package:devtools_app/src/screens/inspector/layout_explorer/flex/flex.dart';
 import 'package:devtools_app/src/screens/inspector/layout_explorer/layout_explorer.dart';
 import 'package:devtools_app/src/service/service_extensions.dart' as extensions;
-import 'package:devtools_app/src/shared/inspector_preferences_controller.dart';
+import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/preferences.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart' hide Fake;
@@ -45,7 +50,6 @@ void main() {
     setGlobal(ServiceConnectionManager, fakeServiceManager);
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(PreferencesController, PreferencesController());
-    setGlobal(InspectorPreferencesController, InspectorPreferencesController());
     fakeServiceManager.consoleService.ensureServiceInitialized();
   });
 
@@ -294,46 +298,6 @@ void main() {
       expect(find.byType(FlexLayoutExplorerWidget), findsOneWidget);
     });
   });
-
-  group(
-    'FlutterInspectorSettingsDialog',
-    () {
-      const startingHoverEvalModeValue = false;
-
-      setUp(() {
-        inspectorPreferences.toggleHoverEvalMode(startingHoverEvalModeValue);
-      });
-
-      testWidgetsWithWindowSize(
-          'can update hover inspection setting', windowSize,
-          (WidgetTester tester) async {
-        await tester.pumpWidget(buildInspectorScreen());
-        await tester.pump();
-
-        await tester.tap(find.byType(OpenInspectorSettingsAction));
-        await tester.pumpAndSettle();
-        expect(
-          find.byType(FlutterInspectorSettingsDialog),
-          findsOneWidget,
-        );
-
-        final hoverCheckBoxSetting = find.ancestor(
-          of: find.richTextContaining('Enable hover inspection'),
-          matching: find.byType(CheckboxSetting),
-        );
-        final hoverModeCheckBox = find.descendant(
-          of: hoverCheckBoxSetting,
-          matching: find.byType(NotifierCheckbox),
-        );
-        await tester.tap(hoverModeCheckBox);
-        await tester.pumpAndSettle();
-        expect(
-          inspectorPreferences.hoverEvalModeEnabled.value,
-          !startingHoverEvalModeValue,
-        );
-      });
-    },
-  );
 
   // TODO(jacobr): add screenshot tests that connect to a test application
   // in the same way the inspector_controller test does today and take golden

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/screens/debugger/codeview.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_model.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_screen.dart';
@@ -87,30 +86,4 @@ void main() {
       matchesDevToolsGolden('../goldens/codeview_scrollbars.png'),
     );
   });
-
-  testWidgetsWithWindowSize('can copy the filename', Size(2500.0, 2500.0),
-      (WidgetTester tester) async {
-    //ScriptPopupMenu
-    await pumpDebuggerScreen(tester, debuggerController);
-
-    final menuButton = find.descendant(
-      of: find.byType(ScriptPopupMenu),
-      matching: find.byType(Tooltip),
-    );
-
-    print('DAKE: menuButton');
-    print(menuButton);
-
-    expect(menuButton, findsOneWidget);
-    await tester.tap(
-      menuButton,
-    );
-    await tester.pumpAndSettle();
-    await tester.pump();
-    // debugDumpApp();
-    expect(find.byType(PopupMenuItem), findsWidgets);
-    // await tester.tap();
-  });
-  testWidgetsWithWindowSize(
-      'can copy the package', smallWindowSize, (WidgetTester test) async {});
 }

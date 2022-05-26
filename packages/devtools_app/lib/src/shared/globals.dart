@@ -10,7 +10,6 @@ import '../primitives/storage.dart';
 import '../scripts/script_manager.dart';
 import '../service/service_manager.dart';
 import 'framework_controller.dart';
-import 'inspector_preferences_controller.dart';
 import 'preferences.dart';
 import 'survey.dart';
 
@@ -30,9 +29,6 @@ Storage get storage => globals[Storage];
 SurveyService get surveyService => globals[SurveyService];
 
 PreferencesController get preferences => globals[PreferencesController];
-
-InspectorPreferencesController get inspectorPreferences =>
-    globals[InspectorPreferencesController];
 
 DevToolsExtensionPoints get devToolsExtensionPoints =>
     globals[DevToolsExtensionPoints];

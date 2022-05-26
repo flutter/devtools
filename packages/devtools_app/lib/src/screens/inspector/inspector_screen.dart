@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
@@ -10,14 +9,12 @@ import 'package:provider/provider.dart';
 
 import '../../analytics/analytics.dart' as ga;
 import '../../analytics/constants.dart' as analytics_constants;
-
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../primitives/blocking_action_mixin.dart';
 import '../../service/service_extension_widgets.dart';
 import '../../service/service_extensions.dart' as extensions;
 import '../../shared/common_widgets.dart';
 import '../../shared/connected_app.dart';
-import '../../shared/dialogs.dart';
 import '../../shared/error_badge_manager.dart';
 import '../../shared/globals.dart';
 import '../../shared/screen.dart';
@@ -307,8 +304,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
           extensions.invertOversizedImages,
         ],
       ),
-      const SizedBox(width: defaultSpacing),
-      OpenInspectorSettingsAction(),
       // TODO(jacobr): implement TogglePlatformSelector.
       //  TogglePlatformSelector().selector
     ];
@@ -335,51 +330,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       }
       await inspectorController.onForceRefresh();
     });
-  }
-}
-
-class OpenInspectorSettingsAction extends StatelessWidget {
-  //Settings icon
-  @override
-  Widget build(BuildContext context) {
-    return DevToolsTooltip(
-      message: 'Flutter Inspector Settings',
-      child: SettingsOutlinedButton(
-        onPressed: () async {
-          unawaited(
-            showDialog(
-              context: context,
-              builder: (context) => FlutterInspectorSettingsDialog(),
-            ),
-          );
-        },
-        label: 'Flutter Inspector Settings',
-      ),
-    );
-  }
-}
-
-class FlutterInspectorSettingsDialog extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return DevToolsDialog(
-      title: dialogTitleText(Theme.of(context), 'Flutter Inspector Settings'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CheckboxSetting(
-            notifier: inspectorPreferences.hoverEvalModeEnabled
-                as ValueNotifier<bool?>,
-            title: 'Enable hover inspection',
-            gaItem: analytics_constants.hoverEvalMode,
-          ),
-        ],
-      ),
-      actions: [
-        DialogCloseButton(),
-      ],
-    );
   }
 }
 
