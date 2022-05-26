@@ -19,8 +19,8 @@ import 'settings_dialog.dart';
 import 'source_dropdown.dart';
 
 /// Controls related to the entire memory screen.
-class RightControls extends StatefulWidget {
-  const RightControls({
+class SecondaryControls extends StatefulWidget {
+  const SecondaryControls({
     Key? key,
     required this.isAndroidCollection,
     required this.chartControllers,
@@ -30,10 +30,10 @@ class RightControls extends StatefulWidget {
   final ChartControllers chartControllers;
 
   @override
-  State<RightControls> createState() => _RightControlsState();
+  State<SecondaryControls> createState() => _SecondaryControlsState();
 }
 
-class _RightControlsState extends State<RightControls>
+class _SecondaryControlsState extends State<SecondaryControls>
     with MemoryControllerMixin, AutoDisposeMixin {
   OverlayEntry? _legendOverlayEntry;
 

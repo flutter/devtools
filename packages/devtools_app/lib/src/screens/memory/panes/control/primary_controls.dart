@@ -12,8 +12,8 @@ import '../../memory_controller.dart';
 import 'constants.dart';
 import 'interval_dropdown.dart';
 
-class LeftControls extends StatefulWidget {
-  const LeftControls({
+class PrimaryControls extends StatefulWidget {
+  const PrimaryControls({
     Key? key,
     required this.chartControllers,
   }) : super(key: key);
@@ -21,10 +21,10 @@ class LeftControls extends StatefulWidget {
   final ChartControllers chartControllers;
 
   @override
-  State<LeftControls> createState() => _LeftControlsState();
+  State<PrimaryControls> createState() => _PrimaryControlsState();
 }
 
-class _LeftControlsState extends State<LeftControls>
+class _PrimaryControlsState extends State<PrimaryControls>
     with MemoryControllerMixin {
   @override
   void didChangeDependencies() {

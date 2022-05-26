@@ -24,12 +24,12 @@ import '../../shared/table.dart';
 import '../../shared/table_data.dart';
 import '../../shared/utils.dart';
 import '../../ui/search.dart';
-import 'memory_android_chart.dart' as android_chart;
-import 'memory_events_pane.dart' as events_pane;
+import 'memory_android_chart.dart';
+import 'memory_events_pane.dart';
 import 'memory_graph_model.dart';
 import 'memory_protocol.dart';
 import 'memory_snapshot_models.dart';
-import 'memory_vm_chart.dart' as vm_chart;
+import 'memory_vm_chart.dart';
 import 'primitives/filter_config.dart';
 import 'primitives/memory_timeline.dart';
 
@@ -244,11 +244,15 @@ mixin MemoryControllerMixin<T extends StatefulWidget> on State<T> {
 }
 
 class ChartControllers {
-  ChartControllers(this.event, this.vm, this.android);
+  ChartControllers({
+    required this.event,
+    required this.vm,
+    required this.android,
+  });
 
-  final events_pane.EventChartController event;
-  final vm_chart.VMChartController vm;
-  final android_chart.AndroidChartController android;
+  final EventChartController event;
+  final VMChartController vm;
+  final AndroidChartController android;
 
   void resetAll() {
     event.reset();

@@ -7,8 +7,8 @@ import 'package:provider/provider.dart';
 
 import '../../../../primitives/auto_dispose_mixin.dart';
 import '../../memory_controller.dart';
-import 'left_controls.dart';
-import 'right_controls.dart';
+import 'primary_controls.dart';
+import 'secondary_controls.dart';
 
 class MemoryControlPane extends StatefulWidget {
   const MemoryControlPane({
@@ -35,9 +35,9 @@ class _MemoryControlPaneState extends State<MemoryControlPane>
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        LeftControls(chartControllers: widget.chartControllers),
+        PrimaryControls(chartControllers: widget.chartControllers),
         const Spacer(),
-        RightControls(
+        SecondaryControls(
           chartControllers: widget.chartControllers,
           isAndroidCollection: _isAndroidCollection,
         )

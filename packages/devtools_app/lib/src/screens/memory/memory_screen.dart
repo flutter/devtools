@@ -91,9 +91,9 @@ class MemoryBodyState extends State<MemoryBody>
     final vmChartController = vm.VMChartController(memoryController);
 
     _chartControllers = ChartControllers(
-      events.EventChartController(memoryController),
-      vmChartController,
-      android.AndroidChartController(
+      event: events.EventChartController(memoryController),
+      vm: vmChartController,
+      android: android.AndroidChartController(
         memoryController,
         sharedLabels: vmChartController.labelTimestamps,
       ),
