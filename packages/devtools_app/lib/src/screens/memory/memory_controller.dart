@@ -231,16 +231,14 @@ class AllocationSamples {
 }
 
 mixin MemoryControllerMixin<T extends StatefulWidget> on State<T> {
-  bool _isInitialized = false;
-  late MemoryController memoryController;
+  MemoryController get memoryController => _memoryController!;
+  MemoryController? _memoryController;
 
   /// Initializes the controller if needed and returns `true` if it was needed.
   bool initMemoryController() {
     final newController = Provider.of<MemoryController>(context);
-    if (_isInitialized && newController == memoryController) return false;
-
-    _isInitialized = true;
-    memoryController = newController;
+    if (newController == _memoryController) return false;
+    _memoryController = newController;
     return true;
   }
 }
