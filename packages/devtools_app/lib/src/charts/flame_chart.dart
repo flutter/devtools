@@ -136,15 +136,15 @@ abstract class FlameChartState<T extends FlameChart,
 
   double verticalScrollOffset = FlameChart.minScrollOffset;
 
-  // Scrolling via WASD control will pan the left/right 25% of the view.
+  // Scrolling via WASD controls will pan the left/right 25% of the view.
   double get keyboardScrollUnit => widget.containerWidth * 0.25;
 
-  // Zooming in via WASD control will zoom the view in by 50% on each zoom. For
+  // Zooming in via WASD controls will zoom the view in by 50% on each zoom. For
   // example, if the zoom level is 2.0, zooming by one unit would increase the
   // level to 3.0 (e.g. 2 + (2 * 0.5) = 3).
   double get keyboardZoomInUnit => currentZoom * 0.5;
 
-  // Zooming out via WASD control will zoom the view out to the previous zoom
+  // Zooming out via WASD controls will zoom the view out to the previous zoom
   // level. For example, if the zoom level is 3.0, zooming out by one unit would
   // decrease the level to 2.0 (e.g. 3 - 3 * 1/3 = 2). See [wasdZoomInUnit]
   // for an explanation of how we previously zoomed from level 2.0 to level 3.0.

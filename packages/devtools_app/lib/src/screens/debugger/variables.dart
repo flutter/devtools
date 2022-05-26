@@ -160,7 +160,7 @@ Widget displayProvider(
   );
 }
 
-/// Android Material styled text selection control.
+/// Android Material styled text selection controls.
 class VariableSelectionControls extends MaterialTextSelectionControls {
   VariableSelectionControls({
     required this.handleInspect,
