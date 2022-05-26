@@ -101,113 +101,115 @@ class LegendRow extends StatelessWidget {
   }
 }
 
-Map<String, Map<String, Object?>> eventLegend(bool isLight) {
-  final result = <String, Map<String, Object?>>{};
-
-  result[events.manualSnapshotLegendName] = traceRender(
-    image: events.snapshotManualLegend,
-  );
-  result[events.autoSnapshotLegendName] = traceRender(
-    image: events.snapshotAutoLegend,
-  );
-  result[events.monitorLegendName] = traceRender(image: events.monitorLegend);
-  result[events.resetLegendName] = traceRender(
-    image: isLight ? events.resetLightLegend : events.resetDarkLegend,
-  );
-  result[events.vmGCLegendName] = traceRender(image: events.gcVMLegend);
-  result[events.manualGCLegendName] = traceRender(
-    image: events.gcManualLegend,
-  );
-  result[events.eventLegendName] = traceRender(image: events.eventLegend);
-  result[events.eventsLegendName] = traceRender(image: events.eventsLegend);
-
-  return result;
-}
+Map<String, Map<String, Object?>> eventLegend(bool isLight) => {
+      events.manualSnapshotLegendName: traceRender(
+        image: events.snapshotManualLegend,
+      ),
+      events.autoSnapshotLegendName: traceRender(
+        image: events.snapshotAutoLegend,
+      ),
+      events.monitorLegendName: traceRender(
+        image: events.monitorLegend,
+      ),
+      events.resetLegendName: traceRender(
+        image: isLight ? events.resetLightLegend : events.resetDarkLegend,
+      ),
+      events.vmGCLegendName: traceRender(
+        image: events.gcVMLegend,
+      ),
+      events.manualGCLegendName: traceRender(
+        image: events.gcManualLegend,
+      ),
+      events.eventLegendName: traceRender(
+        image: events.eventLegend,
+      ),
+      events.eventsLegendName: traceRender(
+        image: events.eventsLegend,
+      )
+    };
 
 Map<String, Map<String, Object?>> vmLegend(
   vm.VMChartController vmChartController,
 ) {
-  final result = <String, Map<String, Object?>>{};
-
   final traces = vmChartController.traces;
-  // RSS trace
-  result[rssDisplay] = traceRender(
-    color: traces[vm.TraceName.rSS.index].characteristics.color,
-    dashed: true,
-  );
 
-  // Allocated trace
-  result[allocatedDisplay] = traceRender(
-    color: traces[vm.TraceName.capacity.index].characteristics.color,
-    dashed: true,
-  );
+  return <String, Map<String, Object?>>{
+    // RSS trace
+    rssDisplay: traceRender(
+      color: traces[vm.TraceName.rSS.index].characteristics.color,
+      dashed: true,
+    ),
 
-  // Used trace
-  result[usedDisplay] = traceRender(
-    color: traces[vm.TraceName.used.index].characteristics.color,
-  );
+    // Allocated trace
+    allocatedDisplay: traceRender(
+      color: traces[vm.TraceName.capacity.index].characteristics.color,
+      dashed: true,
+    ),
 
-  // External trace
-  result[externalDisplay] = traceRender(
-    color: traces[vm.TraceName.external.index].characteristics.color,
-  );
+    // Used trace
+    usedDisplay: traceRender(
+      color: traces[vm.TraceName.used.index].characteristics.color,
+    ),
 
-  // Raster layer trace
-  result[layerDisplay] = traceRender(
-    color: traces[vm.TraceName.rasterLayer.index].characteristics.color,
-    dashed: true,
-  );
+    // External trace
+    externalDisplay: traceRender(
+      color: traces[vm.TraceName.external.index].characteristics.color,
+    ),
 
-  // Raster picture trace
-  result[pictureDisplay] = traceRender(
-    color: traces[vm.TraceName.rasterPicture.index].characteristics.color,
-    dashed: true,
-  );
+    // Raster layer trace
+    layerDisplay: traceRender(
+      color: traces[vm.TraceName.rasterLayer.index].characteristics.color,
+      dashed: true,
+    ),
 
-  return result;
+    // Raster picture trace
+    pictureDisplay: traceRender(
+      color: traces[vm.TraceName.rasterPicture.index].characteristics.color,
+      dashed: true,
+    ),
+  };
 }
 
 Map<String, Map<String, Object?>> androidLegend(
   android.AndroidChartController androidChartController,
 ) {
-  final result = <String, Map<String, Object?>>{};
-
   final traces = androidChartController.traces;
-  // Total trace
-  result[androidTotalDisplay] = traceRender(
-    color: traces[android.TraceName.total.index].characteristics.color,
-    dashed: true,
-  );
 
-  // Other trace
-  result[androidOtherDisplay] = traceRender(
-    color: traces[android.TraceName.other.index].characteristics.color,
-  );
+  return <String, Map<String, Object?>>{
+    // Total trace
+    androidTotalDisplay: traceRender(
+      color: traces[android.TraceName.total.index].characteristics.color,
+      dashed: true,
+    ),
 
-  // Native heap trace
-  result[androidNativeDisplay] = traceRender(
-    color: traces[android.TraceName.nativeHeap.index].characteristics.color,
-  );
+    // Other trace
+    androidOtherDisplay: traceRender(
+      color: traces[android.TraceName.other.index].characteristics.color,
+    ),
 
-  // Graphics trace
-  result[androidGraphicsDisplay] = traceRender(
-    color: traces[android.TraceName.graphics.index].characteristics.color,
-  );
+    // Native heap trace
+    androidNativeDisplay: traceRender(
+      color: traces[android.TraceName.nativeHeap.index].characteristics.color,
+    ),
 
-  // Code trace
-  result[androidCodeDisplay] = traceRender(
-    color: traces[android.TraceName.code.index].characteristics.color,
-  );
+    // Graphics trace
+    androidGraphicsDisplay: traceRender(
+      color: traces[android.TraceName.graphics.index].characteristics.color,
+    ),
 
-  // Java heap trace
-  result[androidJavaDisplay] = traceRender(
-    color: traces[android.TraceName.javaHeap.index].characteristics.color,
-  );
+    // Code trace
+    androidCodeDisplay: traceRender(
+      color: traces[android.TraceName.code.index].characteristics.color,
+    ),
 
-  // Stack trace
-  result[androidStackDisplay] = traceRender(
-    color: traces[android.TraceName.stack.index].characteristics.color,
-  );
+    // Java heap trace
+    androidJavaDisplay: traceRender(
+      color: traces[android.TraceName.javaHeap.index].characteristics.color,
+    ),
 
-  return result;
+    // Stack trace
+    androidStackDisplay: traceRender(
+      color: traces[android.TraceName.stack.index].characteristics.color,
+    )
+  };
 }

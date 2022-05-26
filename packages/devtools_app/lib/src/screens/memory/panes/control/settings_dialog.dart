@@ -9,8 +9,8 @@ import '../../../../shared/dialogs.dart';
 import '../../../../shared/theme.dart';
 import '../../memory_controller.dart';
 
-class MemoryConfigurationsDialog extends StatelessWidget {
-  const MemoryConfigurationsDialog(this.controller);
+class MemorySettingsDialog extends StatelessWidget {
+  const MemorySettingsDialog(this.controller);
 
   final MemoryController controller;
 

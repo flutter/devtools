@@ -26,7 +26,6 @@ class _MemoryControlPaneState extends State<MemoryControlPane>
     with AutoDisposeMixin {
   /// Updated when the MemoryController's _androidCollectionEnabled ValueNotifier changes.
   bool _isAndroidCollection = MemoryController.androidADBDefault;
-  bool _isAdvancedSettingsEnabled = false;
 
   bool controllersInitialized = false;
   late MemoryController _controller;
@@ -41,7 +40,6 @@ class _MemoryControlPaneState extends State<MemoryControlPane>
         RightControls(
           chartControllers: widget.chartControllers,
           isAndroidCollection: _isAndroidCollection,
-          isAdvancedSettingsEnabled: _isAdvancedSettingsEnabled,
         )
       ],
     );
@@ -57,6 +55,8 @@ class _MemoryControlPaneState extends State<MemoryControlPane>
       _controller = newController;
     }
 
+    // TODO(polinach): do we need this listener?
+    // https://github.com/flutter/devtools/pull/4136#discussion_r881773861
     addAutoDisposeListener(_controller.androidCollectionEnabled, () {
       _isAndroidCollection = _controller.androidCollectionEnabled.value;
       setState(() {
@@ -64,16 +64,6 @@ class _MemoryControlPaneState extends State<MemoryControlPane>
           // If we're no longer collecting android stats then hide the
           // chart and disable the Android Memory button.
           _controller.toggleAndroidChartVisibility();
-        }
-      });
-    });
-
-    addAutoDisposeListener(_controller.advancedSettingsEnabled, () {
-      _isAdvancedSettingsEnabled = _controller.advancedSettingsEnabled.value;
-      setState(() {
-        if (!_isAdvancedSettingsEnabled &&
-            _controller.isAdvancedSettingsVisible) {
-          _controller.toggleAdvancedSettingsVisibility();
         }
       });
     });

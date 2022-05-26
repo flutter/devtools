@@ -15,7 +15,7 @@ import '../../memory_controller.dart';
 import 'adb_button.dart';
 import 'constants.dart';
 import 'legend.dart';
-import 'memory_config.dart';
+import 'settings_dialog.dart';
 import 'source_dropdown.dart';
 
 /// Controls related to the entire memory screen.
@@ -23,12 +23,10 @@ class RightControls extends StatefulWidget {
   const RightControls({
     Key? key,
     required this.isAndroidCollection,
-    required this.isAdvancedSettingsEnabled,
     required this.chartControllers,
   }) : super(key: key);
 
   final bool isAndroidCollection;
-  final bool isAdvancedSettingsEnabled;
   final ChartControllers chartControllers;
 
   @override
@@ -44,6 +42,9 @@ class _RightControlsState extends State<RightControls>
     super.didChangeDependencies();
 
     if (!initMemoryController()) return;
+
+    // TODO(polinach): do we need these listeners?
+    // https://github.com/flutter/devtools/pull/4136#discussion_r881773861
 
     addAutoDisposeListener(memoryController.legendVisibleNotifier, () {
       setState(() {
@@ -200,20 +201,25 @@ class _RightControlsState extends State<RightControls>
             isAndroidCollection: widget.isAndroidCollection,
           ),
         const SizedBox(width: denseSpacing),
-        widget.isAdvancedSettingsEnabled
-            ? Row(
-                children: [
-                  IconLabelButton(
-                    onPressed: memoryController.isGcing ? null : _gc,
-                    icon: Icons.delete,
-                    label: 'GC',
-                    minScreenWidthForTextBeforeScaling:
-                        primaryControlsMinVerboseWidth,
-                  ),
-                  const SizedBox(width: denseSpacing),
-                ],
-              )
-            : const SizedBox(),
+        ValueListenableBuilder<bool>(
+          valueListenable: memoryController.advancedSettingsEnabled,
+          builder: (context, paused, _) {
+            return memoryController.isAdvancedSettingsVisible
+                ? Row(
+                    children: [
+                      IconLabelButton(
+                        onPressed: memoryController.isGcing ? null : _gc,
+                        icon: Icons.delete,
+                        label: 'GC',
+                        minScreenWidthForTextBeforeScaling:
+                            primaryControlsMinVerboseWidth,
+                      ),
+                      const SizedBox(width: denseSpacing),
+                    ],
+                  )
+                : const SizedBox();
+          },
+        ),
         ExportButton(
           onPressed: memoryController.offline.value ? null : _exportToFile,
           minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
@@ -239,7 +245,7 @@ class _RightControlsState extends State<RightControls>
   void _openSettingsDialog() {
     showDialog(
       context: context,
-      builder: (context) => MemoryConfigurationsDialog(memoryController),
+      builder: (context) => MemorySettingsDialog(memoryController),
     );
   }
 
