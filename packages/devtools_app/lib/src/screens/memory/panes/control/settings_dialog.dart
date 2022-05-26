@@ -30,6 +30,7 @@ class MemorySettingsDialog extends StatelessWidget {
             ...dialogSubHeader(theme, 'Android'),
             Column(
               children: [
+                // TODO(polinach): use CheckboxSetting instead
                 Row(
                   children: [
                     NotifierCheckbox(
@@ -66,22 +67,18 @@ class MemorySettingsDialog extends StatelessWidget {
               height: defaultSpacing,
             ),
             ...dialogSubHeader(theme, 'General'),
-            Column(
+            Row(
               children: [
-                Row(
-                  children: [
-                    NotifierCheckbox(
-                      notifier: controller.advancedSettingsEnabled
-                          as ValueNotifier<bool?>,
-                    ),
-                    RichText(
-                      overflow: TextOverflow.visible,
-                      text: TextSpan(
-                        text: 'Enable advanced memory settings',
-                        style: theme.regularTextStyle,
-                      ),
-                    ),
-                  ],
+                NotifierCheckbox(
+                  notifier: controller.advancedSettingsEnabled
+                      as ValueNotifier<bool?>,
+                ),
+                RichText(
+                  overflow: TextOverflow.visible,
+                  text: TextSpan(
+                    text: 'Enable advanced memory settings',
+                    style: theme.regularTextStyle,
+                  ),
                 ),
               ],
             ),
