@@ -33,6 +33,7 @@ import 'memory_graph_model.dart';
 import 'memory_heap_treemap.dart';
 import 'memory_instance_tree_view.dart';
 import 'memory_snapshot_models.dart';
+import 'panes/leaks/leaks_pane.dart';
 
 const memorySearchFieldKeyName = 'MemorySearchFieldKey';
 
@@ -466,6 +467,7 @@ class HeapTreeViewState extends State<HeapTree>
                     const Expanded(child: AllocationTableView()),
                   ],
                 ),
+                const LeaksPane(),
               ],
             ),
           ),

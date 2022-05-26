@@ -2,22 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:memory_tools/primitives.dart';
 
-import '../../../primitives/auto_dispose_mixin.dart';
-import '../../../shared/eval_on_dart_library.dart';
-import '../../../shared/globals.dart';
+import '../../../../primitives/auto_dispose_mixin.dart';
+import '../../../../shared/eval_on_dart_library.dart';
+import '../../../../shared/globals.dart';
 
 final DateFormat _formatter = DateFormat.Hms();
 String _timeForConsole(DateTime time) => _formatter.format(time);
 
-class LeaksArea extends StatefulWidget {
-  const LeaksArea({Key? key}) : super(key: key);
+class LeaksPane extends StatefulWidget {
+  const LeaksPane({Key? key}) : super(key: key);
 
   @override
-  State<LeaksArea> createState() => _LeaksAreaState();
+  State<LeaksPane> createState() => _LeaksPaneState();
 }
 
-class _LeaksAreaState extends State<LeaksArea> with AutoDisposeMixin {
-  var _leaksSummary = '';
+class _LeaksPaneState extends State<LeaksPane> with AutoDisposeMixin {
+  LeakSummary? _previous;
+  String _leaksSummary = '';
 
   @override
   void didChangeDependencies() {
@@ -29,13 +30,16 @@ class _LeaksAreaState extends State<LeaksArea> with AutoDisposeMixin {
     autoDisposeStreamSubscription(
       serviceManager.service!.onExtensionEventWithHistory.listen((event) {
         if (event.extensionKind == 'memory_leaks_summary') {
-          final newSummary = LeakSummary(event.json!['extensionData']!);
+          final newSummary =
+              LeakSummary.fromJson(event.json!['extensionData']!);
+          if (newSummary.equals(_previous)) return;
+          _previous = newSummary;
           final time = event.timestamp != null
               ? DateTime.fromMicrosecondsSinceEpoch(event.timestamp!)
               : DateTime.now();
           setState(() {
             _leaksSummary =
-                '${_timeForConsole(time)}: $newSummary\n$_leaksSummary';
+                '${_timeForConsole(time)}: ${newSummary.toMessage()}\n$_leaksSummary';
           });
         }
       }),
@@ -50,8 +54,9 @@ class _LeaksAreaState extends State<LeaksArea> with AutoDisposeMixin {
         if (_leaksSummary.isEmpty) const Text('No information yet.'),
         if (_leaksSummary.isNotEmpty) Text(_leaksSummary),
         MaterialButton(
-            child: const Text('Analyze and Copy to Clipboard'),
-            onPressed: _analyzeAndCopyToClipboard),
+          child: const Text('Analyze and Copy to Clipboard'),
+          onPressed: _analyzeAndCopyToClipboard,
+        ),
       ],
     );
   }
