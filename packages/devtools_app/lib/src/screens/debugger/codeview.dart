@@ -1126,13 +1126,13 @@ class ScriptPopupMenuOption {
 }
 
 final defaultScriptPopupMenuOptions = [
-  copyPackageOption,
+  copyPackagePathOption,
   copyFilePathOption,
   goToLineOption,
   openFileOption,
 ];
 
-final copyPackageOption = ScriptPopupMenuOption(
+final copyPackagePathOption = ScriptPopupMenuOption(
   label: 'Copy package path',
   icon: Icons.content_copy,
   onSelected: (_, controller) => Clipboard.setData(
@@ -1147,12 +1147,21 @@ final copyFilePathOption = ScriptPopupMenuOption(
     String? filePath;
     final packagePath = controller.scriptLocation.value!.scriptRef.uri;
     if (packagePath != null) {
-      final results = await serviceManager.service!.lookupResolvedPackageUris(
-        serviceManager.isolateManager.selectedIsolate.value!.id!,
-        [packagePath],
+      final isolateId =
+          serviceManager.isolateManager.selectedIsolate.value!.id!;
+      filePath = serviceManager.resolvedUriManager.lookupFileUri(
+        isolateId,
+        packagePath,
       );
-      if (results.uris != null) {
-        filePath = results.uris![0];
+      if (filePath == null) {
+        await serviceManager.resolvedUriManager.fetchFileUris(
+          isolateId,
+          [packagePath],
+        );
+        filePath = serviceManager.resolvedUriManager.lookupFileUri(
+          isolateId,
+          packagePath,
+        );
       }
     }
     return Clipboard.setData(
