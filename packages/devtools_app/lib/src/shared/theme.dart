@@ -115,13 +115,15 @@ ThemeData _baseTheme({
     ),
     switchTheme: SwitchThemeData(
       thumbColor: MaterialStateProperty.resolveWith((states) {
-        if (states.contains(MaterialState.selected) && !states.contains(MaterialState.disabled)) {
+        if (states.contains(MaterialState.selected) &&
+            !states.contains(MaterialState.disabled)) {
           return devtoolsBlue[400];
         }
         return null;
       }),
       trackColor: MaterialStateProperty.resolveWith((states) {
-        if (states.contains(MaterialState.selected) && !states.contains(MaterialState.disabled)) {
+        if (states.contains(MaterialState.selected) &&
+            !states.contains(MaterialState.disabled)) {
           return devtoolsBlue[400]!.withAlpha(0x80);
         }
         return null;
@@ -129,7 +131,8 @@ ThemeData _baseTheme({
     ),
     radioTheme: RadioThemeData(
       fillColor: MaterialStateProperty.resolveWith((states) {
-        if (states.contains(MaterialState.selected) && !states.contains(MaterialState.disabled)) {
+        if (states.contains(MaterialState.selected) &&
+            !states.contains(MaterialState.disabled)) {
           return devtoolsBlue[400];
         }
         return null;
@@ -137,7 +140,8 @@ ThemeData _baseTheme({
     ),
     checkboxTheme: CheckboxThemeData(
       fillColor: MaterialStateProperty.resolveWith((states) {
-        if (states.contains(MaterialState.selected) && !states.contains(MaterialState.disabled)) {
+        if (states.contains(MaterialState.selected) &&
+            !states.contains(MaterialState.disabled)) {
           return devtoolsBlue[400];
         }
         return null;
