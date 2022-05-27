@@ -4,32 +4,27 @@
 
 import 'package:flutter/material.dart' hide TextStyle;
 import 'package:flutter/widgets.dart' hide TextStyle;
-import 'package:provider/provider.dart';
 
 import '../../charts/treemap.dart';
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/theme.dart';
+import '../../shared/utils.dart';
 import 'memory_controller.dart';
 import 'primitives/predefined_classes.dart';
 
 class MemoryHeapTreemap extends StatefulWidget {
-  const MemoryHeapTreemap(this.controller);
-
-  final MemoryController controller;
+  const MemoryHeapTreemap();
 
   @override
-  MemoryHeapTreemapState createState() => MemoryHeapTreemapState(controller);
+  MemoryHeapTreemapState createState() => MemoryHeapTreemapState();
 }
 
 class MemoryHeapTreemapState extends State<MemoryHeapTreemap>
-    with AutoDisposeMixin {
-  MemoryHeapTreemapState(this._controller);
-
+    with
+        AutoDisposeMixin,
+        ProvidedControllerMixin<MemoryController, MemoryHeapTreemap> {
   InstructionsSize? _sizes;
-
-  bool _initialized = false;
-  late MemoryController _controller;
 
   TreemapNode? root;
 
@@ -38,23 +33,20 @@ class MemoryHeapTreemapState extends State<MemoryHeapTreemap>
     super.didChangeDependencies();
 
     // TODO(terry): Unable to short-circuit need to investigate why?
-    final newController = Provider.of<MemoryController>(context);
-    if (_initialized && _controller == newController) return;
-    _controller = newController;
-    _initialized = true;
+    if (!initController()) return;
 
-    if (_controller.heapGraph != null) {
-      _sizes = InstructionsSize.fromSnapshot(_controller);
+    if (controller.heapGraph != null) {
+      _sizes = InstructionsSize.fromSnapshot(controller);
       root = _sizes!.root;
     }
 
     cancelListeners();
 
-    addAutoDisposeListener(_controller.selectedSnapshotNotifier, () {
+    addAutoDisposeListener(controller.selectedSnapshotNotifier, () {
       setState(() {
-        _controller.computeAllLibraries(rebuild: true);
+        controller.computeAllLibraries(rebuild: true);
 
-        _sizes = InstructionsSize.fromSnapshot(_controller);
+        _sizes = InstructionsSize.fromSnapshot(controller);
       });
     });
 

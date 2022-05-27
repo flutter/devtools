@@ -5,7 +5,6 @@
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../analytics/analytics.dart' as ga;
 import '../../analytics/constants.dart' as analytics_constants;
@@ -66,6 +65,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     with
         BlockingActionMixin,
         AutoDisposeMixin,
+        ProvidedControllerMixin<DebuggerController, InspectorScreenBody>,
         SearchFieldMixin<InspectorScreenBody> {
   late InspectorController inspectorController;
 
@@ -75,8 +75,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   InspectorTreeController get _detailsTreeController =>
       inspectorController.details!.inspectorTree;
 
-  late DebuggerController _debuggerController;
-  bool _isDebuggerControllerInitialized = false;
+  DebuggerController get _debuggerController => controller;
 
   bool searchVisible = false;
 
@@ -149,12 +148,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
-    final newDebuggerController = Provider.of<DebuggerController>(context);
-    if (_isDebuggerControllerInitialized &&
-        _debuggerController == newDebuggerController) return;
-    _isDebuggerControllerInitialized = true;
-    _debuggerController = newDebuggerController;
+    initController();
   }
 
   @override

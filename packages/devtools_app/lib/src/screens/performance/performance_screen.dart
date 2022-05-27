@@ -21,6 +21,7 @@ import '../../shared/notifications.dart';
 import '../../shared/screen.dart';
 import '../../shared/split.dart';
 import '../../shared/theme.dart';
+import '../../shared/utils.dart';
 import '../../shared/version.dart';
 import '../../ui/icons.dart';
 import '../../ui/vm_flag_widgets.dart';
@@ -64,7 +65,7 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
     with
         AutoDisposeMixin,
         OfflineScreenMixin<PerformanceScreenBody, OfflinePerformanceData>,
-        PerformanceControllerMixin {
+        ProvidedControllerMixin<PerformanceController, PerformanceScreenBody> {
   bool processing = false;
 
   double processingProgress = 0.0;
@@ -94,27 +95,25 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
     );
     maybePushDebugModePerformanceMessage(context, PerformanceScreen.id);
 
-    if (!initPerformanceController()) return;
+    if (!initController()) return;
 
     cancelListeners();
 
-    processing = performanceController.processing.value;
-    addAutoDisposeListener(performanceController.processing, () {
+    processing = controller.processing.value;
+    addAutoDisposeListener(controller.processing, () {
       setState(() {
-        processing = performanceController.processing.value;
+        processing = controller.processing.value;
       });
     });
 
-    processingProgress = performanceController.processor.progressNotifier.value;
-    addAutoDisposeListener(performanceController.processor.progressNotifier,
-        () {
+    processingProgress = controller.processor.progressNotifier.value;
+    addAutoDisposeListener(controller.processor.progressNotifier, () {
       setState(() {
-        processingProgress =
-            performanceController.processor.progressNotifier.value;
+        processingProgress = controller.processor.progressNotifier.value;
       });
     });
 
-    addAutoDisposeListener(performanceController.selectedFrame);
+    addAutoDisposeListener(controller.selectedFrame);
 
     // Load offline timeline data if available.
     if (shouldLoadOfflineData()) {
@@ -138,8 +137,8 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
   @override
   Widget build(BuildContext context) {
     final isOfflineFlutterApp = offlineController.offlineMode.value &&
-        performanceController.offlinePerformanceData != null &&
-        performanceController.offlinePerformanceData!.frames.isNotEmpty;
+        controller.offlinePerformanceData != null &&
+        controller.offlinePerformanceData!.frames.isNotEmpty;
 
     final performanceScreen = Column(
       children: [
@@ -149,8 +148,8 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
             (!offlineController.offlineMode.value &&
                 serviceManager.connectedApp!.isFlutterAppNow!))
           DualValueListenableBuilder<List<FlutterFrame>, double>(
-            firstListenable: performanceController.flutterFrames,
-            secondListenable: performanceController.displayRefreshRate,
+            firstListenable: controller.flutterFrames,
+            secondListenable: controller.displayRefreshRate,
             builder: (context, frames, displayRefreshRate, child) {
               return FlutterFramesChart(
                 frames,
@@ -164,12 +163,12 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
             initialFractions: const [0.7, 0.3],
             children: [
               TabbedPerformanceView(
-                controller: performanceController,
+                controller: controller,
                 processing: processing,
                 processingProgress: processingProgress,
               ),
               ValueListenableBuilder<TimelineEvent?>(
-                valueListenable: performanceController.selectedTimelineEvent,
+                valueListenable: controller.selectedTimelineEvent,
                 builder: (context, selectedEvent, _) {
                   return EventDetails(selectedEvent);
                 },
@@ -201,19 +200,19 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         _PrimaryControls(
-          controller: performanceController,
+          controller: controller,
           processing: processing,
           onClear: () => setState(() {}),
         ),
         const SizedBox(width: defaultSpacing),
-        SecondaryPerformanceControls(controller: performanceController),
+        SecondaryPerformanceControls(controller: controller),
       ],
     );
   }
 
   @override
   FutureOr<void> processOfflineData(OfflinePerformanceData offlineData) async {
-    await performanceController.processOfflineData(offlineData);
+    await controller.processOfflineData(offlineData);
   }
 
   @override

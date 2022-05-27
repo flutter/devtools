@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../shared/common_widgets.dart';
+import '../../../../shared/utils.dart';
 import '../../memory_controller.dart';
 
 class ToggleAdbMemoryButton extends StatefulWidget {
@@ -19,23 +20,20 @@ class ToggleAdbMemoryButton extends StatefulWidget {
 }
 
 class _ToggleAdbMemoryButtonState extends State<ToggleAdbMemoryButton>
-    with MemoryControllerMixin {
+    with ProvidedControllerMixin<MemoryController, ToggleAdbMemoryButton> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
-    initMemoryController();
+    initController();
   }
 
   @override
   Widget build(BuildContext context) {
     return IconLabelButton(
-      icon: memoryController.isAndroidChartVisible
-          ? Icons.close
-          : Icons.show_chart,
+      icon: controller.isAndroidChartVisible ? Icons.close : Icons.show_chart,
       label: 'Android Memory',
       onPressed: widget.isAndroidCollection
-          ? memoryController.toggleAndroidChartVisibility
+          ? controller.toggleAndroidChartVisibility
           : null,
       minScreenWidthForTextBeforeScaling: 900,
     );

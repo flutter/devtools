@@ -11,6 +11,7 @@ import '../../../../primitives/auto_dispose_mixin.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/notifications.dart';
 import '../../../../shared/theme.dart';
+import '../../../../shared/utils.dart';
 import '../../memory_controller.dart';
 import 'adb_button.dart';
 import 'constants.dart';
@@ -34,21 +35,22 @@ class SecondaryControls extends StatefulWidget {
 }
 
 class _SecondaryControlsState extends State<SecondaryControls>
-    with MemoryControllerMixin, AutoDisposeMixin {
+    with
+        ProvidedControllerMixin<MemoryController, SecondaryControls>,
+        AutoDisposeMixin {
   OverlayEntry? _legendOverlayEntry;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
-    if (!initMemoryController()) return;
+    if (!initController()) return;
 
     // TODO(polinach): do we need these listeners?
     // https://github.com/flutter/devtools/pull/4136#discussion_r881773861
 
-    addAutoDisposeListener(memoryController.legendVisibleNotifier, () {
+    addAutoDisposeListener(controller.legendVisibleNotifier, () {
       setState(() {
-        if (memoryController.isLegendVisible) {
+        if (controller.isLegendVisible) {
           ga.select(
             analytics_constants.memory,
             analytics_constants.memoryLegend,
@@ -61,15 +63,15 @@ class _SecondaryControlsState extends State<SecondaryControls>
       });
     });
 
-    addAutoDisposeListener(memoryController.androidChartVisibleNotifier, () {
+    addAutoDisposeListener(controller.androidChartVisibleNotifier, () {
       setState(() {
-        if (memoryController.androidChartVisibleNotifier.value) {
+        if (controller.androidChartVisibleNotifier.value) {
           ga.select(
             analytics_constants.memory,
             analytics_constants.androidChart,
           );
         }
-        if (memoryController.isLegendVisible) {
+        if (controller.isLegendVisible) {
           // Recompute the legend with the new traces now visible.
           _hideLegend();
           _showLegend(context);
@@ -129,7 +131,7 @@ class _SecondaryControlsState extends State<SecondaryControls>
       );
     }
 
-    if (memoryController.isAndroidChartVisible) {
+    if (controller.isAndroidChartVisible) {
       final androids = androidLegend(widget.chartControllers.android);
       legendRows.add(
         Container(
@@ -155,7 +157,7 @@ class _SecondaryControlsState extends State<SecondaryControls>
       builder: (context) => Positioned(
         top: position.dy + box.size.height + legendYOffset,
         left: position.dx - legendWidth + box.size.width - legendXOffset,
-        height: memoryController.isAndroidChartVisible
+        height: controller.isAndroidChartVisible
             ? legendHeight2Charts
             : legendHeight1Chart,
         child: Container(
@@ -185,30 +187,29 @@ class _SecondaryControlsState extends State<SecondaryControls>
   @override
   Widget build(BuildContext context) {
     final mediaWidth = MediaQuery.of(context).size.width;
-    memoryController.memorySourcePrefix =
-        mediaWidth > verboseDropDownMinimumWidth
-            ? memorySourceMenuItemPrefix
-            : '';
+    controller.memorySourcePrefix = mediaWidth > verboseDropDownMinimumWidth
+        ? memorySourceMenuItemPrefix
+        : '';
 
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         const MemorySourceDropdown(),
         const SizedBox(width: defaultSpacing),
-        if (memoryController.isConnectedDeviceAndroid ||
-            memoryController.isOfflineAndAndroidData)
+        if (controller.isConnectedDeviceAndroid ||
+            controller.isOfflineAndAndroidData)
           ToggleAdbMemoryButton(
             isAndroidCollection: widget.isAndroidCollection,
           ),
         const SizedBox(width: denseSpacing),
         ValueListenableBuilder<bool>(
-          valueListenable: memoryController.advancedSettingsEnabled,
+          valueListenable: controller.advancedSettingsEnabled,
           builder: (context, paused, _) {
-            return memoryController.isAdvancedSettingsVisible
+            return controller.isAdvancedSettingsVisible
                 ? Row(
                     children: [
                       IconLabelButton(
-                        onPressed: memoryController.isGcing ? null : _gc,
+                        onPressed: controller.isGcing ? null : _gc,
                         icon: Icons.delete,
                         label: 'GC',
                         minScreenWidthForTextBeforeScaling:
@@ -221,13 +222,13 @@ class _SecondaryControlsState extends State<SecondaryControls>
           },
         ),
         ExportButton(
-          onPressed: memoryController.offline.value ? null : _exportToFile,
+          onPressed: controller.offline.value ? null : _exportToFile,
           minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
         ),
         const SizedBox(width: denseSpacing),
         IconLabelButton(
           key: legendKey,
-          onPressed: memoryController.toggleLegendVisibility,
+          onPressed: controller.toggleLegendVisibility,
           icon: _legendOverlayEntry == null ? Icons.storage : Icons.close,
           label: 'Legend',
           tooltip: 'Legend',
@@ -244,12 +245,12 @@ class _SecondaryControlsState extends State<SecondaryControls>
   void _openSettingsDialog() {
     showDialog(
       context: context,
-      builder: (context) => MemorySettingsDialog(memoryController),
+      builder: (context) => MemorySettingsDialog(controller),
     );
   }
 
   void _exportToFile() {
-    final outputPath = memoryController.memoryLog.exportMemory();
+    final outputPath = controller.memoryLog.exportMemory();
     final notificationsState = Notifications.of(context);
     if (notificationsState != null) {
       notificationsState.push(
@@ -262,9 +263,9 @@ class _SecondaryControlsState extends State<SecondaryControls>
     try {
       ga.select(analytics_constants.memory, analytics_constants.gc);
 
-      memoryController.memoryTimeline.addGCEvent();
+      controller.memoryTimeline.addGCEvent();
 
-      await memoryController.gc();
+      await controller.gc();
     } catch (e) {
       // TODO(terry): Show toast?
       log('Unable to GC ${e.toString()}', LogLevel.error);

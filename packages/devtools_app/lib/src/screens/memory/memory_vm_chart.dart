@@ -4,13 +4,13 @@
 
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../charts/chart.dart';
 import '../../charts/chart_controller.dart';
 import '../../charts/chart_trace.dart' as trace;
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../shared/theme.dart';
+import '../../shared/utils.dart';
 import 'memory_controller.dart';
 import 'primitives/memory_timeline.dart';
 
@@ -103,16 +103,14 @@ enum TraceName {
   rasterPicture,
 }
 
-class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
-  bool _initialized = false;
-
+class MemoryVMChartState extends State<MemoryVMChart>
+    with
+        AutoDisposeMixin,
+        ProvidedControllerMixin<MemoryController, MemoryVMChart> {
   /// Controller attached to the chart.
   VMChartController get _chartController => widget.chartController;
 
-  /// Controller for managing memory collection.
-  late MemoryController _memoryController;
-
-  MemoryTimeline get _memoryTimeline => _memoryController.memoryTimeline;
+  MemoryTimeline get _memoryTimeline => controller.memoryTimeline;
 
   @override
   void initState() {
@@ -124,12 +122,7 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
-    final newController = Provider.of<MemoryController>(context);
-
-    if (_initialized && _memoryController == newController) return;
-    _memoryController = newController;
-    _initialized = true;
+    if (!initController()) return;
 
     cancelListeners();
 
@@ -309,7 +302,7 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
   /// Loads all heap samples (live data or offline).
   void _processHeapSample(HeapSample sample) {
     // If paused don't update the chart (data is still collected).
-    if (_memoryController.paused.value) return;
+    if (controller.paused.value) return;
     _chartController.addSample(sample);
   }
 }

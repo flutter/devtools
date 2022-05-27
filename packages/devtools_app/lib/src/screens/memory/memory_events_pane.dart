@@ -4,13 +4,13 @@
 
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../charts/chart.dart';
 import '../../charts/chart_controller.dart';
 import '../../charts/chart_trace.dart' as trace;
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../shared/theme.dart';
+import '../../shared/utils.dart';
 import 'memory_controller.dart';
 import 'primitives/memory_timeline.dart';
 
@@ -150,14 +150,11 @@ enum TraceName {
 }
 
 class MemoryEventsPaneState extends State<MemoryEventsPane>
-    with AutoDisposeMixin {
+    with
+        AutoDisposeMixin,
+        ProvidedControllerMixin<MemoryController, MemoryEventsPane> {
   /// Controller attached to this chart.
   EventChartController get _chartController => widget.chartController;
-
-  bool _initialized = false;
-
-  /// Controller for managing memory collection.
-  late MemoryController _memoryController;
 
   /// Note: The event pane is a fixed size chart (y-axis does not scale). The
   ///       Y-axis fixed range is (visibleVmEvent to extensionEvent) e.g.,
@@ -186,7 +183,7 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
   /// VM's GCs are displayed in a smaller glyph and closer to the heap graph.
   static const visibleVmEvent = 0.4;
 
-  MemoryTimeline get _memoryTimeline => _memoryController.memoryTimeline;
+  MemoryTimeline get _memoryTimeline => controller.memoryTimeline;
 
   @override
   void initState() {
@@ -199,11 +196,7 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
-    final newMemoryController = Provider.of<MemoryController>(context);
-    if (_initialized && newMemoryController == _memoryController) return;
-    _initialized = true;
-    _memoryController = newMemoryController;
+    if (!initController()) return;
 
     final themeData = Theme.of(context);
 
@@ -422,7 +415,7 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
   /// Loads all heap samples (live data or offline).
   void _processHeapSample(HeapSample sample) {
     // If paused don't update the chart (data is still collected).
-    if (_memoryController.isPaused) return;
+    if (controller.isPaused) return;
     _chartController.addSample(sample);
   }
 }
