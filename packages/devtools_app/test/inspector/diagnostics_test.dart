@@ -9,10 +9,6 @@ void main() {
   group('DiagnosticsNodeDescription', () {
     setUp(() {
       setGlobal(PreferencesController, PreferencesController());
-      setGlobal(
-        InspectorPreferencesController,
-        InspectorPreferencesController(),
-      );
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(ServiceConnectionManager, FakeServiceManager());
     });

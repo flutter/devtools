@@ -12,13 +12,14 @@ class PreferencesController {
   final ValueNotifier<bool> _darkModeTheme = ValueNotifier(true);
   final ValueNotifier<bool> _vmDeveloperMode = ValueNotifier(false);
   final ValueNotifier<bool> _denseMode = ValueNotifier(false);
-  final _inspectorPreferences = InspectorPreferencesController();
 
   ValueListenable<bool> get darkModeTheme => _darkModeTheme;
   ValueListenable<bool> get vmDeveloperModeEnabled => _vmDeveloperMode;
   ValueListenable<bool> get denseModeEnabled => _denseMode;
+
   InspectorPreferencesController get inspectorPreferences =>
       _inspectorPreferences;
+  final _inspectorPreferences = InspectorPreferencesController();
 
   Future<void> init() async {
     // Get the current values and listen for and write back changes.
@@ -40,9 +41,9 @@ class PreferencesController {
       storage.setValue('ui.denseMode', '${_denseMode.value}');
     });
 
-    setGlobal(PreferencesController, this);
-
     await _inspectorPreferences.init();
+
+    setGlobal(PreferencesController, this);
   }
 
   /// Change the value for the dark mode setting.
@@ -63,10 +64,10 @@ class PreferencesController {
 }
 
 class InspectorPreferencesController {
-  final ValueNotifier<bool> _hoverEvalMode = ValueNotifier(false);
-  final String _hoverEvalModeStorageId = 'inspector.hoverEvalMode';
-
   ValueListenable<bool> get hoverEvalModeEnabled => _hoverEvalMode;
+
+  final ValueNotifier<bool> _hoverEvalMode = ValueNotifier(false);
+  static const String _hoverEvalModeStorageId = 'inspector.hoverEvalMode';
 
   Future<void> init() async {
     String? value = await storage.getValue(_hoverEvalModeStorageId);
