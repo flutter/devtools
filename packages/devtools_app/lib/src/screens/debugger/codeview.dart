@@ -1144,31 +1144,37 @@ final copyFilePathOption = ScriptPopupMenuOption(
   label: 'Copy file path',
   icon: Icons.content_copy,
   onSelected: (_, controller) async {
-    String? filePath;
-    final packagePath = controller.scriptLocation.value!.scriptRef.uri;
-    if (packagePath != null) {
-      final isolateId =
-          serviceManager.isolateManager.selectedIsolate.value!.id!;
+    return Clipboard.setData(
+      ClipboardData(text: await getScriptLocationFullFilePath(controller)),
+    );
+  },
+);
+
+@visibleForTesting
+Future<String?> getScriptLocationFullFilePath(
+  DebuggerController controller,
+) async {
+  String? filePath;
+  final packagePath = controller.scriptLocation.value!.scriptRef.uri;
+  if (packagePath != null) {
+    final isolateId = serviceManager.isolateManager.selectedIsolate.value!.id!;
+    filePath = serviceManager.resolvedUriManager.lookupFileUri(
+      isolateId,
+      packagePath,
+    );
+    if (filePath == null) {
+      await serviceManager.resolvedUriManager.fetchFileUris(
+        isolateId,
+        [packagePath],
+      );
       filePath = serviceManager.resolvedUriManager.lookupFileUri(
         isolateId,
         packagePath,
       );
-      if (filePath == null) {
-        await serviceManager.resolvedUriManager.fetchFileUris(
-          isolateId,
-          [packagePath],
-        );
-        filePath = serviceManager.resolvedUriManager.lookupFileUri(
-          isolateId,
-          packagePath,
-        );
-      }
     }
-    return Clipboard.setData(
-      ClipboardData(text: filePath),
-    );
-  },
-);
+  }
+  return filePath;
+}
 
 void showGoToLineDialog(BuildContext context, DebuggerController controller) {
   showDialog(
