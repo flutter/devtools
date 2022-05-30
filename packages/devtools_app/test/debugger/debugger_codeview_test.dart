@@ -100,7 +100,7 @@ void main() {
     );
   });
 
-  group('getScriptLocationFullFilePath', () {
+  group('fetchScriptLocationFullFilePath', () {
     testWidgets('gets the full path', (WidgetTester tester) async {
       when(debuggerController.scriptLocation).thenReturn(
         ValueNotifier(
@@ -111,7 +111,8 @@ void main() {
         ),
       );
 
-      final filePath = await getScriptLocationFullFilePath(debuggerController);
+      final filePath =
+          await fetchScriptLocationFullFilePath(debuggerController);
 
       expect(filePath, equals(mockScriptRefFileUri));
     });
@@ -132,7 +133,8 @@ void main() {
         [mockScriptRef.uri!],
       );
 
-      final filePath = await getScriptLocationFullFilePath(debuggerController);
+      final filePath =
+          await fetchScriptLocationFullFilePath(debuggerController);
 
       expect(filePath, equals(mockScriptRefFileUri));
     });
@@ -151,7 +153,8 @@ void main() {
         ),
       );
 
-      final filePath = await getScriptLocationFullFilePath(debuggerController);
+      final filePath =
+          await fetchScriptLocationFullFilePath(debuggerController);
 
       expect(filePath, isNull);
     });

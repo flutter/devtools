@@ -1145,13 +1145,13 @@ final copyFilePathOption = ScriptPopupMenuOption(
   icon: Icons.content_copy,
   onSelected: (_, controller) async {
     return Clipboard.setData(
-      ClipboardData(text: await getScriptLocationFullFilePath(controller)),
+      ClipboardData(text: await fetchScriptLocationFullFilePath(controller)),
     );
   },
 );
 
 @visibleForTesting
-Future<String?> getScriptLocationFullFilePath(
+Future<String?> fetchScriptLocationFullFilePath(
   DebuggerController controller,
 ) async {
   String? filePath;
