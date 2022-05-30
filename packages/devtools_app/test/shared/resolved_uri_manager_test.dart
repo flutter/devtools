@@ -194,12 +194,16 @@ void main() async {
     });
 
     test('remembers already fetched file paths', () async {
-      when(serviceManager.service!
-          .lookupResolvedPackageUris(isolateId, [packageUri1])).thenAnswer(
+      when(
+        serviceManager.service!
+            .lookupResolvedPackageUris(isolateId, [packageUri1]),
+      ).thenAnswer(
         (realInvocation) => Future.value(UriList(uris: [uri1])),
       );
-      when(serviceManager.service!
-          .lookupResolvedPackageUris(isolateId, [packageUri2])).thenAnswer(
+      when(
+        serviceManager.service!
+            .lookupResolvedPackageUris(isolateId, [packageUri2]),
+      ).thenAnswer(
         (realInvocation) => Future.value(UriList(uris: [uri2])),
       );
 
@@ -224,12 +228,16 @@ void main() async {
       const String isolateId2 = 'anIsolateId2';
       const String fileUriFromDifferentIsolate =
           'file:///this/is/a/third/fileUri3';
-      when(serviceManager.service!
-          .lookupResolvedPackageUris(isolateId, [packageUri1])).thenAnswer(
+      when(
+        serviceManager.service!
+            .lookupResolvedPackageUris(isolateId, [packageUri1]),
+      ).thenAnswer(
         (realInvocation) => Future.value(UriList(uris: [uri1])),
       );
-      when(serviceManager.service!
-          .lookupResolvedPackageUris(isolateId2, [packageUri1])).thenAnswer(
+      when(
+        serviceManager.service!
+            .lookupResolvedPackageUris(isolateId2, [packageUri1]),
+      ).thenAnswer(
         (realInvocation) =>
             Future.value(UriList(uris: [fileUriFromDifferentIsolate])),
       );
