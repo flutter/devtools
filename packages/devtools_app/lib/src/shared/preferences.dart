@@ -66,8 +66,8 @@ class PreferencesController {
 class InspectorPreferencesController {
   ValueListenable<bool> get hoverEvalModeEnabled => _hoverEvalMode;
 
-  final ValueNotifier<bool> _hoverEvalMode = ValueNotifier(false);
-  static const String _hoverEvalModeStorageId = 'inspector.hoverEvalMode';
+  final _hoverEvalMode = ValueNotifier<bool>(false);
+  static const _hoverEvalModeStorageId = 'inspector.hoverEvalMode';
 
   Future<void> init() async {
     String? value = await storage.getValue(_hoverEvalModeStorageId);
