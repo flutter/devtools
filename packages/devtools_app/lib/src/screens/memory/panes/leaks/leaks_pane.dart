@@ -7,6 +7,8 @@ import '../../../../primitives/auto_dispose_mixin.dart';
 import '../../../../shared/eval_on_dart_library.dart';
 import '../../../../shared/globals.dart';
 import 'package:flutter/services.dart';
+import '../../../../config_specific/logger/logger.dart' as logger;
+import 'leak_analysis.dart';
 
 final _eval = EvalOnDartLibrary(
   'package:memory_tools/app_leak_detector.dart',
@@ -58,7 +60,7 @@ class _LeaksPaneState extends State<LeaksPane> with AutoDisposeMixin {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _LeakAnalysis(),
+        const _LeakAnalysis(),
         if (_leaksSummary.isEmpty) const Text('No information yet.'),
         if (_leaksSummary.isNotEmpty) Text(_leaksSummary),
       ],
@@ -66,27 +68,21 @@ class _LeaksPaneState extends State<LeaksPane> with AutoDisposeMixin {
   }
 }
 
-Future<void> _setRetainingPath(ObjectInfo info) async {
+Future<void> _setRetainingPath(ObjectReport info) async {
   final objectRef = await _eval
       .safeEval('getNotGCedObject(${info.theIdentityHashCode})', isAlive: null);
-  print('evaluated: ${objectRef.id!}, ${objectRef.valueAsString}');
 
+  const pathLimit = 1000;
   final path = await serviceManager.service!.getRetainingPath(
     _eval.isolate!.id!,
     objectRef.id!,
     1000,
   );
 
-  info.retainingPath = _pathToString(path);
-}
+  assert((path.elements?.length ?? 0) <= pathLimit - 1);
 
-String _pathToString(RetainingPath path) {
-  final result = StringBuffer();
-  for (var item in path.elements ?? <RetainingObject>[]) {
-    result.write('/');
-    result.write(item.value.hashCode);
-  }
-  return result.toString();
+  info.retainingPath = pathToString(path);
+  info.gcRootType = path.gcRootType;
 }
 
 class _LeakAnalysisController {
@@ -139,30 +135,40 @@ class _LeakAnalysisState extends State<_LeakAnalysis> with AutoDisposeMixin {
     autoDisposeStreamSubscription(
       serviceManager.service!.onExtensionEventWithHistory.listen((event) async {
         if (event.extensionKind == 'memory_leaks_details') {
-          final details = Leaks.fromJson(event.json!['extensionData']!);
-          setState(() {
-            _controller.detailsReceived = true;
-          });
-          double step = 0;
-          setState(() {
-            if (details.notGCed.isNotEmpty) {
-              _controller.targetIdsReceived = 0;
-              step = 1 / details.notGCed.length;
+          try {
+            final leakDetails = Leaks.fromJson(event.json!['extensionData']!);
+            setState(() {
+              _controller.detailsReceived = true;
+            });
+            double step = 0;
+            final notGCed = leakDetails.leaks[LeakType.notGCed];
+            setState(() {
+              if (notGCed != null && notGCed.isNotEmpty) {
+                _controller.targetIdsReceived = 0;
+                step = 1 / notGCed.length;
+              }
+            });
+            for (var info in notGCed ?? []) {
+              await _setRetainingPath(info);
+              setState(() => _controller.targetIdsReceived =
+                  _controller.targetIdsReceived + step);
             }
-          });
-          for (var info in details.notGCed) {
-            await _setRetainingPath(info);
-            setState(() => _controller.targetIdsReceived =
-                _controller.targetIdsReceived + step);
+            await Clipboard.setData(
+                ClipboardData(text: analyzeAndYaml(leakDetails)));
+            setState(() {
+              _controller.copiedToClipboard = true;
+            });
+            await Future.delayed(const Duration(seconds: 1));
+            setState(() {
+              _controller.reset();
+            });
+          } catch (e, trace) {
+            setState(() {
+              _controller.error = 'Processing error: $e';
+            });
+            logger.log(e);
+            logger.log(trace);
           }
-          await Clipboard.setData(ClipboardData(text: "your text"));
-          setState(() {
-            _controller.copiedToClipboard = true;
-          });
-          await Future.delayed(const Duration(seconds: 3));
-          setState(() {
-            _controller.reset();
-          });
         }
       }),
     );
@@ -205,7 +211,17 @@ class _LeakAnalysisState extends State<_LeakAnalysis> with AutoDisposeMixin {
   }
 
   Future<void> _analyzeAndCopyToClipboard() async {
-    await _eval.safeEval('sendLeaks()', isAlive: null);
+    await _eval.safeEval('sendLeaks()', isAlive: Stub());
     setState(() => _controller.detailsRequested = true);
+  }
+}
+
+class Stub implements Disposable {
+  @override
+  bool disposed = false;
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
   }
 }

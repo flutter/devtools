@@ -132,9 +132,6 @@ class EvalOnDartLibrary extends DisposableController
     Map<String, String>? scope,
     bool shouldLogError = true,
   }) async {
-    print(
-      '!!!! eval called on ${expression.substring(0, min(80, expression.length))}',
-    );
     if ((scope?.isNotEmpty ?? false) &&
         serviceManager.connectedApp!.isDartWebAppNow!) {
       final result = await eval(
