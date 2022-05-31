@@ -22,10 +22,9 @@ class ResolvedUriManager {
     _packagePathMappings = null;
   }
 
-  /// Calls out to the [VmService] to lookup unknown uri to package uri mappings.
+  /// Calls out to the [VmService] to lookup unknown full file path to package uri mappings.
   ///
-  /// Known uri mappings are cached to avoid asking [VmService] for the same
-  /// mapping.
+  /// Known mappings are cached to avoid asking [VmService] redundantly.
   ///
   /// [isolateId] The id of the isolate that the [uris] were generated on.
   /// [uris] List of uris to fetch package uris for.
@@ -45,6 +44,13 @@ class ResolvedUriManager {
     }
   }
 
+  /// Calls out to the [VMService] to lookup package uri to full file path
+  /// mappings
+  ///
+  /// Known mappings are cached to avoid asking [VmService] redundantly.
+  ///
+  /// [isolateId] The id of the isolate that the [packageUris] were generated on.
+  /// [packageUris] List of uris to fetch full file paths for.
   Future<void> fetchFileUris(String isolateId, List<String> packageUris) async {
     if (_packagePathMappings != null) {
       final fileUris = (await serviceManager.service!
@@ -72,28 +78,39 @@ class ResolvedUriManager {
       ?.lookupPackageToFullPathMapping(isolateId, packageUri);
 }
 
+/// Helper class for storing 1:1 mappings for full file paths to package paths.
 class _PackagePathMappings {
   final Map<String, Map<String, String?>> _isolatePackageToFullPathMappings =
       <String, Map<String, String?>>{};
   final Map<String, Map<String, String?>> _isolateFullPathToPackageMappings =
       <String, Map<String, String?>>{};
 
+  /// Returns the package path to full path mapping if it exists.
   String? lookupPackageToFullPathMapping(
     String isolateId,
     String packagePath,
   ) =>
       _isolatePackageToFullPathMappings[isolateId]?[packagePath];
+
+  /// Returns the full path to package path mapping if it exists.
   String? lookupFullPathToPackageMapping(
     String isolateId,
     String fullPath,
   ) =>
       _isolateFullPathToPackageMappings[isolateId]?[fullPath];
 
+  /// Saves the mappings of [fullPaths] to [packagePaths].
+  ///
+  /// Each index of [fullPaths] maps to the same index in [packagePaths].
+  /// The relationship is stored bidirectionally so that
+  /// both [lookupFullPathToPackageMapping] and [lookupPackageToFullPathMapping]
+  /// have access to the mapping.
   void addMappings({
     required String isolateId,
     required List<String?> fullPaths,
     required List<String?> packagePaths,
   }) {
+    assert(fullPaths.length == packagePaths.length);
     final fullPathToPackageMappings =
         _isolateFullPathToPackageMappings.putIfAbsent(
       isolateId,
