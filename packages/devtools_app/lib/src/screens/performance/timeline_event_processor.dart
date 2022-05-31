@@ -12,7 +12,6 @@ import '../../primitives/utils.dart';
 import 'performance_controller.dart';
 import 'performance_model.dart';
 import 'performance_utils.dart';
-// import 'simple_trace_example.dart';
 
 // For documentation, see the Chrome "Trace Event Format" document:
 // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU.
@@ -101,14 +100,6 @@ class TimelineEventProcessor {
     int startIndex = 0,
   }) async {
     resetProcessingData();
-
-// Uncomment this code for testing the timeline.
-//    traceEvents = simpleTraceEvents['traceEvents']!
-//        .where((json) =>
-//            json.containsKey(TraceEvent.timestampKey)) // thread_name events
-//        .map((e) => TraceEventWrapper(
-//            TraceEvent(e), DateTime.now().microsecondsSinceEpoch))
-//        .toList();
 
     final _traceEvents = (traceEvents.sublist(startIndex)
           // Events need to be in increasing timestamp order.
