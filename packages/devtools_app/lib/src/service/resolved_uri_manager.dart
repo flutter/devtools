@@ -6,10 +6,6 @@ import '../shared/globals.dart';
 
 /// Manager for handling package Uri lookup and caching.
 class ResolvedUriManager {
-  /// Maps isolate ids to the mappings of resolvedUrls to packageUris
-  ///
-  /// The map keys and values are as follows:
-  /// `_isolateResolvedUrlMap[isolateId][resolvedUrl] = packageUrl`
   _PackagePathMappings? _packagePathMappings;
 
   /// Initializes the [ResolvedUriManager]
@@ -85,14 +81,16 @@ class _PackagePathMappings {
   final Map<String, Map<String, String?>> _isolateFullPathToPackageMappings =
       <String, Map<String, String?>>{};
 
-  /// Returns the package path to full path mapping if it exists.
+  /// Returns the package path to full path mapping if it has already
+  /// been fetched.
   String? lookupPackageToFullPathMapping(
     String isolateId,
     String packagePath,
   ) =>
       _isolatePackageToFullPathMappings[isolateId]?[packagePath];
 
-  /// Returns the full path to package path mapping if it exists.
+  /// Returns the full path to package path mapping if it has already
+  /// been fetched.
   String? lookupFullPathToPackageMapping(
     String isolateId,
     String fullPath,
