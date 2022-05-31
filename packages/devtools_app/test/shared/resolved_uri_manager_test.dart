@@ -59,6 +59,7 @@ void main() async {
     setUp(() {
       resolvedUriManager.vmServiceOpened();
     });
+
     test('lookupPackageUri when uri is unknown', () {
       final packageUriResult =
           resolvedUriManager.lookupPackageUri(isolateId, 'some/uri');
@@ -137,6 +138,7 @@ void main() async {
         equals(packageUriFromDifferentIsolate),
       );
     });
+
     test('preserves the reverse package to file mapping', () async {
       when(
         serviceManager.service!.lookupPackageUris(
@@ -164,6 +166,7 @@ void main() async {
     setUp(() {
       resolvedUriManager.vmServiceOpened();
     });
+
     test('lookupFileUri when package is unknown', () {
       final fileUriResult =
           resolvedUriManager.lookupFileUri(isolateId, 'package:some/uri');
