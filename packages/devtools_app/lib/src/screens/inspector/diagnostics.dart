@@ -129,7 +129,9 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     final inspectorService = serviceManager.inspectorService!;
 
     return HoverCardTooltip(
-      enabled: () => diagnosticLocal.inspectorService != null,
+      enabled: () =>
+          preferences.inspectorPreferences.hoverEvalModeEnabled.value &&
+          diagnosticLocal.inspectorService != null,
       onHover: (event) async {
         final group = inspectorService.createObjectGroup('hover');
         final value =

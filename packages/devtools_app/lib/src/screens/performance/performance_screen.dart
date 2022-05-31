@@ -334,7 +334,6 @@ class SecondaryPerformanceControls extends StatelessWidget {
         const SizedBox(width: denseSpacing),
         SettingsOutlinedButton(
           onPressed: () => _openSettingsDialog(context),
-          label: 'Performance Settings',
         ),
       ],
     );

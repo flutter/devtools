@@ -236,7 +236,6 @@ class _SecondaryControlsState extends State<SecondaryControls>
         const SizedBox(width: denseSpacing),
         SettingsOutlinedButton(
           onPressed: _openSettingsDialog,
-          label: 'Memory Configuration',
         ),
       ],
     );

@@ -15,6 +15,7 @@ import '../../service/service_extension_widgets.dart';
 import '../../service/service_extensions.dart' as extensions;
 import '../../shared/common_widgets.dart';
 import '../../shared/connected_app.dart';
+import '../../shared/dialogs.dart';
 import '../../shared/error_badge_manager.dart';
 import '../../shared/globals.dart';
 import '../../shared/screen.dart';
@@ -304,6 +305,16 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
           extensions.invertOversizedImages,
         ],
       ),
+      const SizedBox(width: defaultSpacing),
+      SettingsOutlinedButton(
+        tooltip: 'Flutter Inspector Settings',
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (context) => FlutterInspectorSettingsDialog(),
+          );
+        },
+      ),
       // TODO(jacobr): implement TogglePlatformSelector.
       //  TogglePlatformSelector().selector
     ];
@@ -330,6 +341,32 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       }
       await inspectorController.onForceRefresh();
     });
+  }
+}
+
+class FlutterInspectorSettingsDialog extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return DevToolsDialog(
+      title: dialogTitleText(Theme.of(context), 'Flutter Inspector Settings'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CheckboxSetting(
+            notifier: preferences.inspectorPreferences.hoverEvalModeEnabled
+                as ValueNotifier<bool?>,
+            title: 'Enable hover inspection',
+            description:
+                'Hovering over any widget displays its properties and values.',
+            gaItem: analytics_constants.inspectorHoverEvalMode,
+          ),
+        ],
+      ),
+      actions: [
+        DialogCloseButton(),
+      ],
+    );
   }
 }
 
