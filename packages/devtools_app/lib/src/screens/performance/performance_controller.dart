@@ -7,7 +7,9 @@ import 'dart:math' as math;
 
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:pedantic/pedantic.dart';
+import 'package:provider/provider.dart';
 
 import '../../analytics/analytics.dart' as ga;
 import '../../analytics/constants.dart' as analytics_constants;
@@ -31,7 +33,11 @@ import 'performance_screen.dart';
 import 'performance_utils.dart';
 import 'raster_metrics_controller.dart';
 import 'rebuild_counts.dart';
+import 'simple_trace_example.dart';
 import 'timeline_event_processor.dart';
+
+/// Debugging flag to load sample trace events from [simple_trace_example.dart].
+bool debugSimpleTrace = false;
 
 /// Flag to hide the frame analysis feature while it is under development.
 bool frameAnalysisSupported = false;
@@ -634,6 +640,20 @@ class PerformanceController extends DisposableController
     List<TraceEventWrapper> traceEvents, {
     int startIndex = 0,
   }) async {
+    if (debugSimpleTrace) {
+      traceEvents = simpleTraceEvents['traceEvents']!
+          .where(
+            (json) => json.containsKey(TraceEvent.timestampKey),
+          ) // thread_name events
+          .map(
+            (e) => TraceEventWrapper(
+              TraceEvent(e),
+              DateTime.now().microsecondsSinceEpoch,
+            ),
+          )
+          .toList();
+    }
+
     if (data == null) {
       await _initData();
     }
@@ -860,5 +880,18 @@ class PerformanceController extends DisposableController
     _timelinePollingRateLimiter?.dispose();
     cpuProfilerController.dispose();
     super.dispose();
+  }
+}
+
+mixin PerformanceControllerMixin<T extends StatefulWidget> on State<T> {
+  PerformanceController get performanceController => _performanceController!;
+
+  PerformanceController? _performanceController;
+
+  bool initPerformanceController() {
+    final newController = Provider.of<PerformanceController>(context);
+    if (newController == _performanceController) return false;
+    _performanceController = newController;
+    return true;
   }
 }

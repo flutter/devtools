@@ -7,7 +7,9 @@ import 'dart:async';
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../analytics/analytics.dart' as ga;
@@ -22,9 +24,12 @@ import '../../shared/table.dart';
 import '../../shared/table_data.dart';
 import '../../shared/utils.dart';
 import '../../ui/search.dart';
+import 'memory_android_chart.dart';
+import 'memory_events_pane.dart';
 import 'memory_graph_model.dart';
 import 'memory_protocol.dart';
 import 'memory_snapshot_models.dart';
+import 'memory_vm_chart.dart';
 import 'primitives/filter_config.dart';
 import 'primitives/memory_timeline.dart';
 
@@ -222,6 +227,37 @@ class AllocationSamples {
         );
       }
     }
+  }
+}
+
+mixin MemoryControllerMixin<T extends StatefulWidget> on State<T> {
+  MemoryController get memoryController => _memoryController!;
+  MemoryController? _memoryController;
+
+  /// Initializes the controller if needed and returns `true` if it was needed.
+  bool initMemoryController() {
+    final newController = Provider.of<MemoryController>(context);
+    if (newController == _memoryController) return false;
+    _memoryController = newController;
+    return true;
+  }
+}
+
+class ChartControllers {
+  ChartControllers({
+    required this.event,
+    required this.vm,
+    required this.android,
+  });
+
+  final EventChartController event;
+  final VMChartController vm;
+  final AndroidChartController android;
+
+  void resetAll() {
+    event.reset();
+    vm.reset();
+    android.reset();
   }
 }
 

@@ -45,7 +45,7 @@ class FlutterFramesChart extends StatefulWidget {
 }
 
 class _FlutterFramesChartState extends State<FlutterFramesChart>
-    with AutoDisposeMixin {
+    with AutoDisposeMixin, PerformanceControllerMixin {
   static const _defaultFrameWidthWithPadding =
       FlutterFramesChartItem.defaultFrameWidth + densePadding * 2;
 
@@ -57,10 +57,6 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
 
   double get _frameChartScrollbarOffset =>
       defaultScrollBarOffset + _frameNumberSectionHeight;
-
-  late PerformanceController _controller;
-
-  bool _controllerInitialized = false;
 
   late final LinkedScrollControllerGroup _linkedScrollControllerGroup;
 
@@ -89,16 +85,13 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final newController = Provider.of<PerformanceController>(context);
-    if (_controllerInitialized && newController == _controller) return;
-    _controller = newController;
-    _controllerInitialized = true;
+    if (!initPerformanceController()) return;
 
     cancelListeners();
-    _selectedFrame = _controller.selectedFrame.value;
-    addAutoDisposeListener(_controller.selectedFrame, () {
+    _selectedFrame = performanceController.selectedFrame.value;
+    addAutoDisposeListener(performanceController.selectedFrame, () {
       setState(() {
-        _selectedFrame = _controller.selectedFrame.value;
+        _selectedFrame = performanceController.selectedFrame.value;
       });
     });
 
@@ -206,7 +199,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
                 itemCount: widget.frames.length,
                 itemExtent: _defaultFrameWidthWithPadding,
                 itemBuilder: (context, index) => FlutterFramesChartItem(
-                  controller: _controller,
+                  controller: performanceController,
                   frame: widget.frames[index],
                   selected: widget.frames[index] == _selectedFrame,
                   msPerPx: _msPerPx,
