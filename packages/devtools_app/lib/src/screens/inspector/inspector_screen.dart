@@ -358,7 +358,7 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
                 as ValueNotifier<bool?>,
             title: 'Enable hover inspection',
             description:
-                'Show cards with all widget properties when hovering over an item in the Inspector. This information is also available by default in the console at the bottom of the Inspector screen.',
+                'Hovering over any widget displays its properties and values.',
             gaItem: analytics_constants.inspectorHoverEvalMode,
           ),
         ],
