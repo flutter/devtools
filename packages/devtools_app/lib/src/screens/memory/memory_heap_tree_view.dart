@@ -1702,7 +1702,11 @@ class _ShallowSizeColumn extends ColumnData<Reference> {
             dataObject.isAllocation) &&
         value is! int) return '';
 
-    return NumberFormat.compact().format(value);
+    return prettyPrintBytes(
+      value as int,
+      kbFractionDigits: 1,
+      includeUnit: true,
+    )!;
   }
 
   @override
