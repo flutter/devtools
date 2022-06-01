@@ -149,9 +149,7 @@ class HttpRequestView extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(denseSpacing),
       child: SingleChildScrollView(
-        child: FormattedJson(
-          formattedString: data.requestBody,
-        ),
+        child: JsonViewer(data.requestBody!),
       ),
     );
   }
@@ -169,18 +167,17 @@ class HttpResponseView extends StatelessWidget {
     // timeline profiler since it's possible for response body data to get
     // dropped.
     final contentType = data.contentType;
+    final responseBody = data.responseBody;
     if (contentType != null && contentType.contains('image')) {
       child = ImageResponseView(data);
+    } else if (contentType != null &&
+        contentType.contains('json') &&
+        responseBody!.isNotEmpty) {
+      child = JsonViewer(responseBody);
     } else {
-      child = FormattedJson(
-        formattedString: data.responseBody,
-      );
+      // TODO(bkonyi): style
+      child = Text(responseBody!);
     }
-    // TODO(kenz): use a collapsible json tree for the response
-    // https://github.com/flutter/devtools/issues/2952.
-    // TODO(bkonyi): add syntax highlighting to these responses
-    // https://github.com/flutter/devtools/issues/2604. We may be able to use
-    // the new tree widget used in the Provider page.
     return Padding(
       padding: const EdgeInsets.all(denseSpacing),
       child: SingleChildScrollView(child: child),

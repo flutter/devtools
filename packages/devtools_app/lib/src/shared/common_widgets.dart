@@ -9,15 +9,20 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../analytics/analytics.dart' as ga;
 import '../config_specific/launch_url/launch_url.dart';
 import '../primitives/auto_dispose_mixin.dart';
 import '../primitives/flutter_widgets/linked_scroll_controller.dart';
 import '../primitives/utils.dart';
+import '../screens/debugger/debugger_controller.dart';
+import '../screens/debugger/variables.dart';
 import '../ui/icons.dart';
 import '../ui/label.dart';
 import 'globals.dart';
+import 'object_tree.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 import 'utils.dart';
@@ -1395,6 +1400,7 @@ class _BreadcrumbPainter extends CustomPainter {
   }
 }
 
+// TODO(bkonyi): replace uses of this class with `JsonViewer`.
 class FormattedJson extends StatelessWidget {
   const FormattedJson({
     this.json,
@@ -1417,6 +1423,72 @@ class FormattedJson extends StatelessWidget {
     return SelectableText(
       json != null ? encoder.convert(json) : formattedString!,
       style: useSubtleStyle ? theme.subtleFixedFontStyle : theme.fixedFontStyle,
+    );
+  }
+}
+
+class JsonViewer extends StatefulWidget {
+  const JsonViewer(this.data);
+
+  final String data;
+
+  @override
+  State<JsonViewer> createState() => _JsonViewerState();
+}
+
+class _JsonViewerState extends State<JsonViewer> {
+  late Future<void> _initializeTree;
+  late DartObjectNode variable;
+
+  @override
+  void initState() {
+    super.initState();
+    assert(widget.data.isNotEmpty);
+    final responseJson = json.decode(widget.data);
+    // Insert the JSON data into the fake service cache so we can use it with
+    // the `ExpandableVariable` widget.
+    final root =
+        serviceManager.service!.fakeServiceCache.insertJsonObject(responseJson);
+    variable = DartObjectNode.fromValue(
+      name: '[root]',
+      value: root,
+      artificialName: true,
+      isolateRef: IsolateRef(
+        id: 'fake-isolate',
+        number: 'fake-isolate',
+        name: 'local-cache',
+        isSystemIsolate: true,
+      ),
+    );
+    _initializeTree = buildVariablesTree(variable);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    // Remove the JSON object from the fake service cache to avoid holding on
+    // to large objects indefinitely.
+    serviceManager.service!.fakeServiceCache
+        .removeJsonObject(variable.value as Instance);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(denseSpacing),
+      child: SingleChildScrollView(
+        child: FutureBuilder(
+          future: _initializeTree,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState != ConnectionState.done)
+              return Container();
+            return ExpandableVariable(
+              variable: variable,
+              debuggerController: Provider.of<DebuggerController>(context),
+            );
+          },
+        ),
+      ),
     );
   }
 }

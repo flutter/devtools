@@ -264,11 +264,6 @@ class DartIOHttpRequestData extends NetworkRequest {
       if (!_request.isResponseComplete) return null;
       if (_responseBody != null) return _responseBody;
       _responseBody = utf8.decode(fullRequest.responseBody!);
-      if (contentType != null && contentType!.contains('json')) {
-        _responseBody = FormattedJson.encoder.convert(
-          json.decode(_responseBody!),
-        );
-      }
       return _responseBody;
     } on FormatException {
       return '<binary data>';
