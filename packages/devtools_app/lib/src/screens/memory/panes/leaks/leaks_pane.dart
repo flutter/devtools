@@ -1,3 +1,4 @@
+import 'package:devtools_app/src/screens/memory/panes/leaks/retaining_path.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:memory_tools/model.dart';
@@ -9,11 +10,6 @@ import '../../../../shared/globals.dart';
 import 'package:flutter/services.dart';
 import '../../../../config_specific/logger/logger.dart' as logger;
 import 'leak_analysis.dart';
-
-final _eval = EvalOnDartLibrary(
-  'package:memory_tools/app_leak_detector.dart',
-  serviceManager.service!,
-);
 
 final DateFormat _formatter = DateFormat.Hms();
 String _timeForConsole(DateTime time) => _formatter.format(time);
@@ -68,23 +64,6 @@ class _LeaksPaneState extends State<LeaksPane> with AutoDisposeMixin {
   }
 }
 
-Future<void> _setRetainingPath(ObjectReport info) async {
-  final objectRef = await _eval
-      .safeEval('getNotGCedObject(${info.theIdentityHashCode})', isAlive: null);
-
-  const pathLimit = 1000;
-  final path = await serviceManager.service!.getRetainingPath(
-    _eval.isolate!.id!,
-    objectRef.id!,
-    1000,
-  );
-
-  assert((path.elements?.length ?? 0) <= pathLimit - 1);
-
-  info.retainingPath = pathToString(path);
-  info.gcRootType = path.gcRootType;
-}
-
 class _LeakAnalysisController {
   bool detailsRequested = false;
   bool detailsReceived = false;
@@ -123,7 +102,7 @@ class _LeakAnalysis extends StatefulWidget {
 }
 
 class _LeakAnalysisState extends State<_LeakAnalysis> with AutoDisposeMixin {
-  final _controller = _LeakAnalysisController();
+  final _leakController = _LeakAnalysisController();
 
   @override
   void didChangeDependencies() {
@@ -133,38 +112,40 @@ class _LeakAnalysisState extends State<_LeakAnalysis> with AutoDisposeMixin {
 
   void _subscribeForMemoryLeaksDetails() {
     autoDisposeStreamSubscription(
-      serviceManager.service!.onExtensionEventWithHistory.listen((event) async {
+      serviceManager.service!.onExtensionEvent.listen((event) async {
         if (event.extensionKind == 'memory_leaks_details') {
           try {
             final leakDetails = Leaks.fromJson(event.json!['extensionData']!);
             setState(() {
-              _controller.detailsReceived = true;
+              _leakController.detailsReceived = true;
             });
             double step = 0;
             final notGCed = leakDetails.leaks[LeakType.notGCed];
             setState(() {
               if (notGCed != null && notGCed.isNotEmpty) {
-                _controller.targetIdsReceived = 0;
+                _leakController.targetIdsReceived = 0;
                 step = 1 / notGCed.length;
               }
             });
-            for (var info in notGCed ?? []) {
-              await _setRetainingPath(info);
-              setState(() => _controller.targetIdsReceived =
-                  _controller.targetIdsReceived + step);
-            }
+            // for (var info in notGCed ?? []) {
+            //   await setRetainingPath(info);
+            //   setState(() => _controller.targetIdsReceived =
+            //       _controller.targetIdsReceived + step);
+            // }
+            await setRetainingPaths(_leakController notGCed ?? []);
+            setState(() => _leakController.targetIdsReceived = 1);
             await Clipboard.setData(
                 ClipboardData(text: analyzeAndYaml(leakDetails)));
             setState(() {
-              _controller.copiedToClipboard = true;
+              _leakController.copiedToClipboard = true;
             });
             await Future.delayed(const Duration(seconds: 1));
             setState(() {
-              _controller.reset();
+              _leakController.reset();
             });
           } catch (e, trace) {
             setState(() {
-              _controller.error = 'Processing error: $e';
+              _leakController.error = 'Processing error: $e';
             });
             logger.log(e);
             logger.log(trace);
@@ -176,43 +157,41 @@ class _LeakAnalysisState extends State<_LeakAnalysis> with AutoDisposeMixin {
 
   @override
   Widget build(BuildContext context) {
-    if (!_controller.isStarted) {
+    if (!_leakController.isStarted) {
       return MaterialButton(
         child: const Text('Analyze and Copy to Clipboard'),
-        onPressed: _analyzeAndCopyToClipboard,
+        onPressed: () async {
+          await eval.safeEval('sendLeaks()', isAlive: Stub());
+          setState(() => _leakController.detailsRequested = true);
+        },
       );
     }
 
-    if (_controller.error != null) {
+    if (_leakController.error != null) {
       return Column(
         children: [
-          Text(_controller.error!),
+          Text(_leakController.error!),
           MaterialButton(
             child: const Text('OK'),
-            onPressed: () => setState(() => _controller.reset()),
+            onPressed: () => setState(() => _leakController.reset()),
           )
         ],
       );
     }
 
-    if (_controller.isComplete) {
-      return Text(_controller.message);
+    if (_leakController.isComplete) {
+      return Text(_leakController.message);
     }
 
     return Column(
       children: [
-        Text(_controller.message),
+        Text(_leakController.message),
         MaterialButton(
           child: const Text('Cancel'),
-          onPressed: () => setState(() => _controller.reset()),
+          onPressed: () => setState(() => _leakController.reset()),
         )
       ],
     );
-  }
-
-  Future<void> _analyzeAndCopyToClipboard() async {
-    await _eval.safeEval('sendLeaks()', isAlive: Stub());
-    setState(() => _controller.detailsRequested = true);
   }
 }
 
