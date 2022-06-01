@@ -321,7 +321,6 @@ class StopRecordingButton extends IconLabelButton {
 class SettingsOutlinedButton extends OutlinedIconButton {
   const SettingsOutlinedButton({
     required VoidCallback onPressed,
-    required String label,
     String? tooltip,
   }) : super(
           onPressed: onPressed,

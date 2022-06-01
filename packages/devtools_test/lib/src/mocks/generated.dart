@@ -21,6 +21,7 @@ import 'package:vm_service/vm_service.dart';
   ServiceConnectionManager,
   VmService,
   VmServiceWrapper,
+  ObjectGroupBase,
   ui.Image,
 ])
 void main() {}

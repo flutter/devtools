@@ -129,7 +129,6 @@ class ProviderScreenBody extends ConsumerWidget {
                         builder: (_) => _StateInspectorSettingsDialog(),
                       );
                     },
-                    label: _StateInspectorSettingsDialog.title,
                   ),
                 ],
               ),

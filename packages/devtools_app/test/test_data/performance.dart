@@ -491,6 +491,10 @@ final gpuRasterizerDrawEvent = testSyncTimelineEvent(gpuRasterizerDrawTrace)
   ..type = TimelineEventType.raster
   ..addEndEvent(endGpuRasterizerDrawTrace);
 
+final rasterizerDoDrawEvent = testSyncTimelineEvent(rasterizerDoDrawTrace)
+  ..type = TimelineEventType.raster
+  ..addEndEvent(endRasterizerDoDrawTrace);
+
 final pipelineConsumeEvent = testSyncTimelineEvent(pipelineConsumeTrace)
   ..type = TimelineEventType.raster
   ..addEndEvent(endPipelineConsumeTrace);
@@ -541,6 +545,27 @@ final endPipelineConsumeTrace = testTraceEventWrapper({
 });
 final endGpuRasterizerDrawTrace = testTraceEventWrapper({
   'name': 'GPURasterizer::Draw',
+  'cat': 'Embedder',
+  'tid': testRasterThreadId,
+  'pid': 94955,
+  'ts': 193938770147,
+  'ph': 'E',
+  'args': {}
+});
+final rasterizerDoDrawTrace = testTraceEventWrapper({
+  'name': 'Rasterizer::DoDraw',
+  'cat': 'Embedder',
+  'tid': testRasterThreadId,
+  'pid': 94955,
+  'ts': 193938741743,
+  'ph': 'B',
+  'args': {
+    'isolateId': 'id_001',
+    'frame_number': '1',
+  }
+});
+final endRasterizerDoDrawTrace = testTraceEventWrapper({
+  'name': 'Rasterizer::DoDraw',
   'cat': 'Embedder',
   'tid': testRasterThreadId,
   'pid': 94955,

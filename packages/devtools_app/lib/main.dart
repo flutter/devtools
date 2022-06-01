@@ -31,6 +31,8 @@ void main() async {
   // StorageController won't be initialized and preferences won't be loaded.
   await initializeFramework();
 
+  setGlobal(IdeTheme, getIdeTheme());
+
   final preferences = PreferencesController();
   // Wait for preferences to load before rendering the app to avoid a flash of
   // content with the incorrect theme.
@@ -41,7 +43,6 @@ void main() async {
 
   // Set the extension points global.
   setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
-  setGlobal(IdeTheme, getIdeTheme());
 
   setupErrorHandling(() async {
     // Run the app.

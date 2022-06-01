@@ -111,10 +111,9 @@ Example queries:
 }
 
 class _NetworkScreenBodyState extends State<NetworkScreenBody>
-    with AutoDisposeMixin {
-  bool _initialized = false;
-  late NetworkController _networkController;
-
+    with
+        AutoDisposeMixin,
+        ProvidedControllerMixin<NetworkController, NetworkScreenBody> {
   @override
   void initState() {
     super.initState();
@@ -124,20 +123,15 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
-    final newController = Provider.of<NetworkController>(context);
-    if (_initialized && newController == _networkController) return;
-
-    _networkController = newController;
-    _initialized = true;
-    _networkController.startRecording();
+    if (!initController()) return;
+    controller.startRecording();
   }
 
   @override
   void dispose() {
     // TODO(kenz): this won't work well if we eventually have multiple clients
     // that want to listen to network data.
-    _networkController.stopRecording();
+    controller.stopRecording();
     super.dispose();
   }
 
@@ -145,10 +139,10 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
   Widget build(BuildContext context) {
     return Column(
       children: [
-        _NetworkProfilerControls(controller: _networkController),
+        _NetworkProfilerControls(controller: controller),
         const SizedBox(height: denseRowSpacing),
         Expanded(
-          child: _NetworkProfilerBody(controller: _networkController),
+          child: _NetworkProfilerBody(controller: controller),
         ),
       ],
     );
