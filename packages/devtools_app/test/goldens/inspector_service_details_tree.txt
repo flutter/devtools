@@ -12,6 +12,7 @@ MaterialApp
          └─Semantics
            │ container: false
            │ properties: SemanticsProperties
+           │ tooltip: null
            │ renderObject: RenderSemanticsAnnotations#00000
            │
            └─WidgetsApp-[GlobalObjectKey _MaterialAppState#00000]
@@ -27,5 +28,4 @@ MaterialApp
                    │
                    └─UnmanagedRestorationScope
                      └─SharedAppData
-                       │ state: _SharedAppDataState#00000
 ...
