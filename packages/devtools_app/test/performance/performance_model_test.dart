@@ -342,6 +342,7 @@ void main() {
 
     test('isRasterFrameIdentifier', () {
       expect(gpuRasterizerDrawEvent.isRasterFrameIdentifier, isTrue);
+      expect(rasterizerDoDrawEvent.isRasterFrameIdentifier, isTrue);
       expect(pipelineConsumeEvent.isRasterFrameIdentifier, isFalse);
     });
   });

@@ -21,6 +21,8 @@ import 'performance_utils.dart';
 
 const String rasterEventName = 'GPURasterizer::Draw';
 
+const String rasterEventNameWithFrameNumber = 'Rasterizer::DoDraw';
+
 const String uiEventName = 'Animator::BeginFrame';
 
 const String messageLoopFlushTasks = 'MessageLoop::FlushTasks';
