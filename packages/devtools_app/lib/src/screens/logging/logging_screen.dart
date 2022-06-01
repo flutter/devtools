@@ -12,6 +12,7 @@ import '../../shared/common_widgets.dart';
 import '../../shared/screen.dart';
 import '../../shared/split.dart';
 import '../../shared/theme.dart';
+import '../../shared/utils.dart';
 import '../../ui/filter.dart';
 import '../../ui/icons.dart';
 import '../../ui/search.dart';
@@ -74,12 +75,11 @@ Example queries:
 }
 
 class _LoggingScreenState extends State<LoggingScreenBody>
-    with AutoDisposeMixin, SearchFieldMixin<LoggingScreenBody> {
+    with
+        AutoDisposeMixin,
+        ProvidedControllerMixin<LoggingController, LoggingScreenBody>,
+        SearchFieldMixin<LoggingScreenBody> {
   LogData? selected;
-
-  bool _controllerInitialized = false;
-
-  late LoggingController _controller;
 
   late List<LogData> filteredLogs;
 
@@ -92,25 +92,21 @@ class _LoggingScreenState extends State<LoggingScreenBody>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
-    final newController = Provider.of<LoggingController>(context);
-    if (_controllerInitialized && newController == _controller) return;
-    _controller = newController;
-    _controllerInitialized = true;
+    if (!initController()) return;
 
     cancelListeners();
 
-    filteredLogs = _controller.filteredData.value;
-    addAutoDisposeListener(_controller.filteredData, () {
+    filteredLogs = controller.filteredData.value;
+    addAutoDisposeListener(controller.filteredData, () {
       setState(() {
-        filteredLogs = _controller.filteredData.value;
+        filteredLogs = controller.filteredData.value;
       });
     });
 
-    selected = _controller.selectedLog.value;
-    addAutoDisposeListener(_controller.selectedLog, () {
+    selected = controller.selectedLog.value;
+    addAutoDisposeListener(controller.selectedLog, () {
       setState(() {
-        selected = _controller.selectedLog.value;
+        selected = controller.selectedLog.value;
       });
     });
   }
@@ -129,10 +125,10 @@ class _LoggingScreenState extends State<LoggingScreenBody>
   }
 
   Widget _buildLoggingControls() {
-    final hasData = _controller.filteredData.value.isNotEmpty;
+    final hasData = controller.filteredData.value.isNotEmpty;
     return Row(
       children: [
-        ClearButton(onPressed: _controller.clear),
+        ClearButton(onPressed: controller.clear),
         const Spacer(),
         StructuredErrorsToggle(),
         const SizedBox(width: denseSpacing),
@@ -141,7 +137,7 @@ class _LoggingScreenState extends State<LoggingScreenBody>
           width: wideSearchTextWidth,
           height: defaultTextFieldHeight,
           child: buildSearchField(
-            controller: _controller,
+            controller: controller,
             searchFieldKey: loggingSearchFieldKey,
             searchFieldEnabled: hasData,
             shouldRequestFocus: false,
@@ -151,7 +147,7 @@ class _LoggingScreenState extends State<LoggingScreenBody>
         const SizedBox(width: denseSpacing),
         FilterButton(
           onPressed: _showFilterDialog,
-          isFilterActive: filteredLogs.length != _controller.data.length,
+          isFilterActive: filteredLogs.length != controller.data.length,
         ),
       ],
     );
@@ -165,10 +161,10 @@ class _LoggingScreenState extends State<LoggingScreenBody>
         OutlineDecoration(
           child: LogsTable(
             data: filteredLogs,
-            onItemSelected: _controller.selectLog,
-            selectionNotifier: _controller.selectedLog,
-            searchMatchesNotifier: _controller.searchMatches,
-            activeSearchMatchNotifier: _controller.activeSearchMatch,
+            onItemSelected: controller.selectLog,
+            selectionNotifier: controller.selectedLog,
+            searchMatchesNotifier: controller.searchMatches,
+            activeSearchMatchNotifier: controller.activeSearchMatch,
           ),
         ),
         LogDetails(log: selected),
@@ -180,9 +176,9 @@ class _LoggingScreenState extends State<LoggingScreenBody>
     showDialog(
       context: context,
       builder: (context) => FilterDialog<LoggingController, LogData>(
-        controller: _controller,
+        controller: controller,
         queryInstructions: LoggingScreenBody.filterQueryInstructions,
-        queryFilterArguments: _controller.filterArgs,
+        queryFilterArguments: controller.filterArgs,
       ),
     );
   }

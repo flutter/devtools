@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../../../primitives/auto_dispose_mixin.dart';
+import '../../../../shared/utils.dart';
 import '../../memory_controller.dart';
 import 'primary_controls.dart';
 import 'secondary_controls.dart';
@@ -23,12 +23,11 @@ class MemoryControlPane extends StatefulWidget {
 }
 
 class _MemoryControlPaneState extends State<MemoryControlPane>
-    with AutoDisposeMixin {
+    with
+        AutoDisposeMixin,
+        ProvidedControllerMixin<MemoryController, MemoryControlPane> {
   /// Updated when the MemoryController's _androidCollectionEnabled ValueNotifier changes.
   bool _isAndroidCollection = MemoryController.androidADBDefault;
-
-  bool controllersInitialized = false;
-  late MemoryController _controller;
 
   @override
   Widget build(BuildContext context) {
@@ -48,22 +47,17 @@ class _MemoryControlPaneState extends State<MemoryControlPane>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
-    final newController = Provider.of<MemoryController>(context);
-    if (!controllersInitialized || newController != _controller) {
-      controllersInitialized = true;
-      _controller = newController;
-    }
+    if (!initController()) return;
 
     // TODO(polinach): do we need this listener?
     // https://github.com/flutter/devtools/pull/4136#discussion_r881773861
-    addAutoDisposeListener(_controller.androidCollectionEnabled, () {
-      _isAndroidCollection = _controller.androidCollectionEnabled.value;
+    addAutoDisposeListener(controller.androidCollectionEnabled, () {
+      _isAndroidCollection = controller.androidCollectionEnabled.value;
       setState(() {
-        if (!_isAndroidCollection && _controller.isAndroidChartVisible) {
+        if (!_isAndroidCollection && controller.isAndroidChartVisible) {
           // If we're no longer collecting android stats then hide the
           // chart and disable the Android Memory button.
-          _controller.toggleAndroidChartVisibility();
+          controller.toggleAndroidChartVisibility();
         }
       });
     });

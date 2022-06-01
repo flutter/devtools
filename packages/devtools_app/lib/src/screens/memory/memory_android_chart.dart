@@ -4,13 +4,13 @@
 
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../charts/chart.dart';
 import '../../charts/chart_controller.dart';
 import '../../charts/chart_trace.dart' as trace;
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../shared/theme.dart';
+import '../../shared/utils.dart';
 import 'memory_controller.dart';
 import 'primitives/memory_timeline.dart';
 
@@ -122,16 +122,13 @@ enum TraceName {
 }
 
 class MemoryAndroidChartState extends State<MemoryAndroidChart>
-    with AutoDisposeMixin {
+    with
+        AutoDisposeMixin,
+        ProvidedControllerMixin<MemoryController, MemoryAndroidChart> {
   /// Controller attached to the chart.
   AndroidChartController get _chartController => widget.chartController;
 
-  bool _initialized = false;
-
-  /// Controller for managing memory collection.
-  late MemoryController _memoryController;
-
-  MemoryTimeline get _memoryTimeline => _memoryController.memoryTimeline;
+  MemoryTimeline get _memoryTimeline => controller.memoryTimeline;
 
   @override
   void initState() {
@@ -141,11 +138,7 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
-    final newMemoryController = Provider.of<MemoryController>(context);
-    if (_initialized && _memoryController == newMemoryController) return;
-    _memoryController = newMemoryController;
-    _initialized = true;
+    if (!initController()) return;
 
     cancelListeners();
 
@@ -379,7 +372,7 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
   /// Loads all heap samples (live data or offline).
   void _processHeapSample(HeapSample sample) {
     // If paused don't update the chart (data is still collected).
-    if (_memoryController.paused.value) return;
+    if (controller.paused.value) return;
     _chartController.addSample(sample);
   }
 }

@@ -45,7 +45,9 @@ class FlutterFramesChart extends StatefulWidget {
 }
 
 class _FlutterFramesChartState extends State<FlutterFramesChart>
-    with AutoDisposeMixin, PerformanceControllerMixin {
+    with
+        AutoDisposeMixin,
+        ProvidedControllerMixin<PerformanceController, FlutterFramesChart> {
   static const _defaultFrameWidthWithPadding =
       FlutterFramesChartItem.defaultFrameWidth + densePadding * 2;
 
@@ -85,13 +87,13 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!initPerformanceController()) return;
+    if (!initController()) return;
 
     cancelListeners();
-    _selectedFrame = performanceController.selectedFrame.value;
-    addAutoDisposeListener(performanceController.selectedFrame, () {
+    _selectedFrame = controller.selectedFrame.value;
+    addAutoDisposeListener(controller.selectedFrame, () {
       setState(() {
-        _selectedFrame = performanceController.selectedFrame.value;
+        _selectedFrame = controller.selectedFrame.value;
       });
     });
 
@@ -199,7 +201,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
                 itemCount: widget.frames.length,
                 itemExtent: _defaultFrameWidthWithPadding,
                 itemBuilder: (context, index) => FlutterFramesChartItem(
-                  controller: performanceController,
+                  controller: controller,
                   frame: widget.frames[index],
                   selected: widget.frames[index] == _selectedFrame,
                   msPerPx: _msPerPx,

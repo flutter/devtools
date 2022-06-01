@@ -18,6 +18,7 @@ import '../../shared/globals.dart';
 import '../../shared/screen.dart';
 import '../../shared/split.dart';
 import '../../shared/theme.dart';
+import '../../shared/utils.dart';
 import '../../ui/icons.dart';
 import 'breakpoints.dart';
 import 'call_stack.dart';
@@ -94,13 +95,12 @@ class DebuggerScreenBody extends StatefulWidget {
 }
 
 class DebuggerScreenBodyState extends State<DebuggerScreenBody>
-    with AutoDisposeMixin {
+    with
+        AutoDisposeMixin,
+        ProvidedControllerMixin<DebuggerController, DebuggerScreenBody> {
   static const callStackTitle = 'Call Stack';
   static const variablesTitle = 'Variables';
   static const breakpointsTitle = 'Breakpoints';
-
-  DebuggerController get controller => _controller!;
-  DebuggerController? _controller;
 
   late bool _shownFirstScript;
 
@@ -115,10 +115,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
-    final newController = Provider.of<DebuggerController>(context);
-    if (newController == _controller) return;
-    _controller = newController;
+    if (!initController()) return;
     controller.onFirstDebuggerScreenLoad();
   }
 
@@ -406,9 +403,9 @@ class FloatingDebuggerControls extends StatefulWidget {
 }
 
 class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
-    with AutoDisposeMixin {
-  late DebuggerController controller;
-
+    with
+        AutoDisposeMixin,
+        ProvidedControllerMixin<DebuggerController, FloatingDebuggerControls> {
   late bool paused;
 
   late double controlHeight;
@@ -416,7 +413,7 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    controller = Provider.of<DebuggerController>(context);
+    if (!initController()) return;
     paused = controller.isPaused.value;
     controlHeight = paused ? defaultButtonHeight : 0.0;
     addAutoDisposeListener(controller.isPaused, () {

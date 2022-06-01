@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../../../../analytics/analytics.dart' as ga;
 import '../../../../analytics/constants.dart' as analytics_constants;
 import '../../../../shared/common_widgets.dart';
+import '../../../../shared/utils.dart';
 import '../../memory_controller.dart';
 import 'constants.dart';
 
@@ -23,22 +24,21 @@ class MemorySourceDropdown extends StatefulWidget {
 }
 
 class _MemorySourceDropdownState extends State<MemorySourceDropdown>
-    with MemoryControllerMixin {
+    with ProvidedControllerMixin<MemoryController, MemorySourceDropdown> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
-    initMemoryController();
+    initController();
   }
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final files = memoryController.memoryLog.offlineFiles();
+    final files = controller.memoryLog.offlineFiles();
 
     // Can we display dropdowns in verbose mode?
     final isVerbose =
-        memoryController.memorySourcePrefix == memorySourceMenuItemPrefix;
+        controller.memorySourcePrefix == memorySourceMenuItemPrefix;
 
     // First item is 'Live Feed', then followed by memory log filenames.
     files.insert(0, MemoryController.liveFeed);
@@ -54,7 +54,7 @@ class _MemorySourceDropdownState extends State<MemorySourceDropdown>
       return SourceDropdownMenuItem<String>(
         value: value,
         child: Text(
-          '${memoryController.memorySourcePrefix}$displayValue',
+          '${controller.memorySourcePrefix}$displayValue',
           key: sourcesKey,
         ),
       );
@@ -64,14 +64,14 @@ class _MemorySourceDropdownState extends State<MemorySourceDropdown>
       key: sourcesDropdownKey,
       isDense: true,
       style: textTheme.bodyText2,
-      value: memoryController.memorySource,
+      value: controller.memorySource,
       onChanged: (String? newValue) {
         setState(() {
           ga.select(
             analytics_constants.memory,
             analytics_constants.sourcesDropDown,
           );
-          memoryController.memorySource = newValue!;
+          controller.memorySource = newValue!;
         });
       },
       items: allMemorySources,
