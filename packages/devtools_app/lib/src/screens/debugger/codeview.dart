@@ -1126,18 +1126,55 @@ class ScriptPopupMenuOption {
 }
 
 final defaultScriptPopupMenuOptions = [
-  copyScriptNameOption,
+  copyPackagePathOption,
+  copyFilePathOption,
   goToLineOption,
   openFileOption,
 ];
 
-final copyScriptNameOption = ScriptPopupMenuOption(
-  label: 'Copy filename',
+final copyPackagePathOption = ScriptPopupMenuOption(
+  label: 'Copy package path',
   icon: Icons.content_copy,
   onSelected: (_, controller) => Clipboard.setData(
     ClipboardData(text: controller.scriptLocation.value?.scriptRef.uri),
   ),
 );
+
+final copyFilePathOption = ScriptPopupMenuOption(
+  label: 'Copy file path',
+  icon: Icons.content_copy,
+  onSelected: (_, controller) async {
+    return Clipboard.setData(
+      ClipboardData(text: await fetchScriptLocationFullFilePath(controller)),
+    );
+  },
+);
+
+@visibleForTesting
+Future<String?> fetchScriptLocationFullFilePath(
+  DebuggerController controller,
+) async {
+  String? filePath;
+  final packagePath = controller.scriptLocation.value!.scriptRef.uri;
+  if (packagePath != null) {
+    final isolateId = serviceManager.isolateManager.selectedIsolate.value!.id!;
+    filePath = serviceManager.resolvedUriManager.lookupFileUri(
+      isolateId,
+      packagePath,
+    );
+    if (filePath == null) {
+      await serviceManager.resolvedUriManager.fetchFileUris(
+        isolateId,
+        [packagePath],
+      );
+      filePath = serviceManager.resolvedUriManager.lookupFileUri(
+        isolateId,
+        packagePath,
+      );
+    }
+  }
+  return filePath;
+}
 
 void showGoToLineDialog(BuildContext context, DebuggerController controller) {
   showDialog(
