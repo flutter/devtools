@@ -1,5 +1,5 @@
 ## 2.14.0
-* Prepare for 2.14.0 release TODO
+* Prepare for 2.14.0 release [#4157](https://github.com/flutter/devtools/pull/4157)
 * Lookup frame id from 'Rasterizer::DoDraw' event [#4156](https://github.com/flutter/devtools/pull/4156)
 * Fix formatting for memory values in heap tree view [#4153](https://github.com/flutter/devtools/pull/4153)
 * Create `ProvidedControllerMixin` and use throughout DevTools [#4150](https://github.com/flutter/devtools/pull/4150)
