@@ -12,8 +12,41 @@ final eval = EvalOnDartLibrary(
 
 String analyzeAndYaml(Leaks leaks) {
   return '${ObjectReport.iterableToYaml('notDisposed', leaks.leaks[LeakType.notDisposed]!)}'
-      '${ObjectReport.iterableToYaml('notGCed', leaks.leaks[LeakType.notGCed]!)}'
+      '${_notGCedToYaml(leaks.leaks[LeakType.notGCed]!)}'
       '${ObjectReport.iterableToYaml('gcedLate', leaks.leaks[LeakType.gcedLate]!)}';
+}
+
+String _notGCedToYaml(List<ObjectReport> notGCed) {
+  final byCulprits = findCulprits(notGCed);
+
+  final header = '''notGCed:
+  total: ${notGCed.length}
+  objects:
+''';
+
+  return header +
+      byCulprits.keys
+          .map((culprit) => culpritToYaml(
+                culprit,
+                byCulprits[culprit]!,
+                indent: '  ',
+              ))
+          .join();
+}
+
+String culpritToYaml(
+  ObjectReport culprit,
+  List<ObjectReport> victims, {
+  String indent = '',
+}) {
+  final culpritYaml = culprit.toYaml(indent);
+  if (victims.isEmpty) return culpritYaml;
+
+  return '''$culpritYaml
+$indent  total-victims: ${victims.length}
+$indent  victims:
+${victims.map((e) => e.toYaml('$indent    ')).join()}
+''';
 }
 
 @visibleForTesting
