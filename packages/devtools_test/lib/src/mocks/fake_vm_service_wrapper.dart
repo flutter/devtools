@@ -122,8 +122,9 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   @override
   Future<UriList> lookupResolvedPackageUris(
     String isolateId,
-    List<String> uris,
-  ) {
+    List<String> uris, {
+    bool? local,
+  }) {
     return Future.value(
       UriList(
         uris: _reverseResolvedUriMap != null
