@@ -15,11 +15,13 @@ import 'package:vm_service/vm_service.dart';
   DebuggerController,
   ErrorBadgeManager,
   HeapSnapshotGraph,
+  PerformanceController,
   ProgramExplorerController,
   ScriptManager,
   ServiceConnectionManager,
   VmService,
   VmServiceWrapper,
+  ObjectGroupBase,
   ui.Image,
 ])
 void main() {}

@@ -22,12 +22,14 @@ import '../../shared/table.dart';
 import '../../shared/table_data.dart';
 import '../../shared/utils.dart';
 import '../../ui/search.dart';
-import 'memory_filter.dart';
+import 'memory_android_chart.dart';
+import 'memory_events_pane.dart';
 import 'memory_graph_model.dart';
 import 'memory_protocol.dart';
-import 'memory_service.dart';
 import 'memory_snapshot_models.dart';
-import 'memory_timeline.dart';
+import 'memory_vm_chart.dart';
+import 'primitives/filter_config.dart';
+import 'primitives/memory_timeline.dart';
 
 enum ChartType {
   DartHeaps,
@@ -226,6 +228,24 @@ class AllocationSamples {
   }
 }
 
+class ChartControllers {
+  ChartControllers({
+    required this.event,
+    required this.vm,
+    required this.android,
+  });
+
+  final EventChartController event;
+  final VMChartController vm;
+  final AndroidChartController android;
+
+  void resetAll() {
+    event.reset();
+    vm.reset();
+    android.reset();
+  }
+}
+
 /// This class contains the business logic for [memory.dart].
 ///
 /// This class must not have direct dependencies on dart:html. This allows tests
@@ -236,7 +256,7 @@ class MemoryController extends DisposableController
         SearchControllerMixin,
         AutoCompleteSearchControllerMixin {
   MemoryController() {
-    memoryTimeline = MemoryTimeline(this);
+    memoryTimeline = MemoryTimeline(offline);
     memoryLog = MemoryLog(this);
   }
 
@@ -419,7 +439,7 @@ class MemoryController extends DisposableController
 
   /// Source of memory heap samples. False live data, True loaded from a
   /// memory_log file.
-  bool offline = false;
+  final offline = ValueNotifier<bool>(false);
 
   HeapSample? _selectedDartSample;
 
@@ -514,13 +534,13 @@ class MemoryController extends DisposableController
   /// Return value of String is an error message.
   Future<void> updatedMemorySource() async {
     if (memorySource == MemoryController.liveFeed) {
-      if (offline) {
+      if (offline.value) {
         // User is switching back to 'Live Feed'.
         memoryTimeline.offlineData.clear();
-        offline = false; // We're live again...
+        offline.value = false; // We're live again...
       } else {
         // Still a live feed - keep collecting.
-        assert(!offline);
+        assert(!offline.value);
       }
     } else {
       // Switching to an offline memory log (JSON file in /tmp).
@@ -674,9 +694,12 @@ class MemoryController extends DisposableController
   /// Table to view fields of an Allocation Profile.
   FlatTable<ClassHeapDetailStats?>? allocationsFieldsTable;
 
-  /// State of filters used by filter dialog (create/modify) and used
-  /// by filtering in grouping.
-  final FilteredLibraries libraryFilters = FilteredLibraries();
+  final FilterConfig filterConfig = FilterConfig(
+    filterZeroInstances: ValueNotifier(true),
+    filterLibraryNoInstances: ValueNotifier(true),
+    filterPrivateClasses: ValueNotifier(true),
+    libraryFilters: FilteredLibraries(),
+  );
 
   /// All known libraries of the selected snapshot.
   LibraryReference? get libraryRoot {
@@ -751,23 +774,14 @@ class MemoryController extends DisposableController
     _filterNotifier.value++;
   }
 
-  /// Hide any class that hasn't been constructed (zero instances).
-  final filterZeroInstances = ValueNotifier(true);
-
   ValueListenable<bool> get filterZeroInstancesListenable =>
-      filterZeroInstances;
-
-  /// Hide any private class, prefixed with an underscore.
-  final filterPrivateClasses = ValueNotifier(true);
+      filterConfig.filterZeroInstances;
 
   ValueListenable<bool> get filterPrivateClassesListenable =>
-      filterPrivateClasses;
-
-  /// Hide any library with no constructed class instances.
-  final filterLibraryNoInstances = ValueNotifier(true);
+      filterConfig.filterPrivateClasses;
 
   ValueListenable<bool> get filterLibraryNoInstancesListenable =>
-      filterLibraryNoInstances;
+      filterConfig.filterLibraryNoInstances;
 
   /// Table ordered by library, class or instance
   static const groupByLibrary = 'Library';
@@ -1028,7 +1042,8 @@ class MemoryController extends DisposableController
   /// If offline and if any Android collected data then we can view the Android
   /// data.
   bool get isOfflineAndAndroidData {
-    return offline && memoryTimeline.data.first.adbMemoryInfo.realtime > 0;
+    return offline.value &&
+        memoryTimeline.data.first.adbMemoryInfo.realtime > 0;
   }
 
   bool get isConnectedDeviceAndroid {
@@ -1313,44 +1328,6 @@ class MemoryController extends DisposableController
     }
   }
 
-  // Temporary hack to allow accessing private fields(e.g., _extra) using eval
-  // of '_extra.hashCode' to fetch the hashCode of the object of that field.
-  // Used to find the object which allocated/references the object being viewed.
-  Future<bool> matchObject(
-    String objectRef,
-    String fieldName,
-    int instanceHashCode,
-  ) async {
-    final dynamic object = await getObject(objectRef);
-    if (object is Instance) {
-      final Instance instance = object;
-      final List<BoundField> fields = instance.fields!;
-      for (var field in fields) {
-        if (field.decl?.name == fieldName) {
-          final InstanceRef? ref = field.value;
-
-          if (ref == null) continue;
-
-          final evalResult = (await evaluate(ref.id!, 'hashCode'))!;
-          final int objHashCode = int.parse(evalResult.valueAsString!);
-          if (objHashCode == instanceHashCode) {
-            return true;
-          }
-        }
-      }
-    }
-
-    if (object is Sentinel) {
-      // TODO(terry): Need more graceful handling of sentinels.
-      log(
-        'Trying to matchObject with a Sentinel $objectRef',
-        LogLevel.error,
-      );
-    }
-
-    return false;
-  }
-
   List<Reference>? snapshotByLibraryData;
 
   void createSnapshotByLibrary() {
@@ -1540,7 +1517,7 @@ class MemoryLog {
 
     assert(memoryJson.isMemoryPayload);
 
-    controller.offline = true;
+    controller.offline.value = true;
     controller.memoryTimeline.offlineData.clear();
     controller.memoryTimeline.offlineData.addAll(memoryJson.data);
   }

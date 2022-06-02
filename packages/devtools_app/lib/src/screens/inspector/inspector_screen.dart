@@ -5,7 +5,6 @@
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../analytics/analytics.dart' as ga;
 import '../../analytics/constants.dart' as analytics_constants;
@@ -15,6 +14,7 @@ import '../../service/service_extension_widgets.dart';
 import '../../service/service_extensions.dart' as extensions;
 import '../../shared/common_widgets.dart';
 import '../../shared/connected_app.dart';
+import '../../shared/dialogs.dart';
 import '../../shared/error_badge_manager.dart';
 import '../../shared/globals.dart';
 import '../../shared/screen.dart';
@@ -65,6 +65,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     with
         BlockingActionMixin,
         AutoDisposeMixin,
+        ProvidedControllerMixin<DebuggerController, InspectorScreenBody>,
         SearchFieldMixin<InspectorScreenBody> {
   late InspectorController inspectorController;
 
@@ -74,8 +75,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   InspectorTreeController get _detailsTreeController =>
       inspectorController.details!.inspectorTree;
 
-  late DebuggerController _debuggerController;
-  bool _isDebuggerControllerInitialized = false;
+  DebuggerController get _debuggerController => controller;
 
   bool searchVisible = false;
 
@@ -148,12 +148,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
-    final newDebuggerController = Provider.of<DebuggerController>(context);
-    if (_isDebuggerControllerInitialized &&
-        _debuggerController == newDebuggerController) return;
-    _isDebuggerControllerInitialized = true;
-    _debuggerController = newDebuggerController;
+    initController();
   }
 
   @override
@@ -304,6 +299,16 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
           extensions.invertOversizedImages,
         ],
       ),
+      const SizedBox(width: defaultSpacing),
+      SettingsOutlinedButton(
+        tooltip: 'Flutter Inspector Settings',
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (context) => FlutterInspectorSettingsDialog(),
+          );
+        },
+      ),
       // TODO(jacobr): implement TogglePlatformSelector.
       //  TogglePlatformSelector().selector
     ];
@@ -330,6 +335,32 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       }
       await inspectorController.onForceRefresh();
     });
+  }
+}
+
+class FlutterInspectorSettingsDialog extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return DevToolsDialog(
+      title: dialogTitleText(Theme.of(context), 'Flutter Inspector Settings'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CheckboxSetting(
+            notifier: preferences.inspectorPreferences.hoverEvalModeEnabled
+                as ValueNotifier<bool?>,
+            title: 'Enable hover inspection',
+            description:
+                'Hovering over any widget displays its properties and values.',
+            gaItem: analytics_constants.inspectorHoverEvalMode,
+          ),
+        ],
+      ),
+      actions: [
+        DialogCloseButton(),
+      ],
+    );
   }
 }
 

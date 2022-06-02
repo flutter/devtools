@@ -7,7 +7,6 @@ import 'dart:math' as math;
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../charts/flame_chart.dart';
 import '../../primitives/auto_dispose_mixin.dart';
@@ -18,6 +17,7 @@ import '../../primitives/utils.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/notifications.dart';
 import '../../shared/theme.dart';
+import '../../shared/utils.dart';
 import '../../ui/colors.dart';
 import '../../ui/utils.dart';
 import 'performance_controller.dart';
@@ -142,7 +142,8 @@ class TimelineFlameChart extends FlameChart<PerformanceData, TimelineEvent> {
 }
 
 class TimelineFlameChartState
-    extends FlameChartState<TimelineFlameChart, TimelineEvent> {
+    extends FlameChartState<TimelineFlameChart, TimelineEvent>
+    with ProvidedControllerMixin<PerformanceController, TimelineFlameChart> {
   /// Stores the [FlameChartNode] for each [TimelineEvent] in the chart.
   ///
   /// We need to be able to look up a [FlameChartNode] based on its
@@ -158,10 +159,6 @@ class TimelineFlameChartState
   final eventGroupStartYValues = Expando<double>();
 
   int widestRow = -1;
-
-  late PerformanceController _performanceController;
-
-  bool _controllerInitialized = false;
 
   FlutterFrame? _selectedFrame;
 
@@ -187,22 +184,17 @@ class TimelineFlameChartState
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    final newController = Provider.of<PerformanceController>(context);
-    if (_controllerInitialized && newController == _performanceController) {
-      return;
-    }
-    _performanceController = newController;
-    _controllerInitialized = true;
+    if (!initController()) return;
 
     // If there is already a selected frame, handle setting that data and
     // positioning/zooming the flame chart accordingly.
-    _selectedFrame = _performanceController.selectedFrame.value;
+    _selectedFrame = controller.selectedFrame.value;
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _centerSelectedFrame();
     });
 
     addAutoDisposeListener(
-      _performanceController.selectedFrame,
+      controller.selectedFrame,
       _handleSelectedFrame,
     );
   }
@@ -228,7 +220,7 @@ class TimelineFlameChartState
   double topYForData(TimelineEvent data) {
     final eventGroupKey = PerformanceUtils.computeEventGroupKey(
       data,
-      _performanceController.threadNamesById,
+      controller.threadNamesById,
     );
     final eventGroup = widget.data.eventGroups[eventGroupKey]!;
     final rowOffsetInGroup = eventGroup.rowIndexForEvent[data]!;
@@ -342,7 +334,7 @@ class TimelineFlameChartState
   }
 
   void _handleSelectedFrame() async {
-    final selectedFrame = _performanceController.selectedFrame.value;
+    final selectedFrame = controller.selectedFrame.value;
     if (selectedFrame == _selectedFrame) return;
 
     setState(() {
@@ -360,9 +352,9 @@ class TimelineFlameChartState
       final time = _selected.timeToCenterFrame();
       final event = _selected.eventToCenterFrame();
       if (time == null || event == null) {
-        if (_performanceController.firstWellFormedFrameMicros != null &&
+        if (controller.firstWellFormedFrameMicros != null &&
             _selected.timeFromFrameTiming.start!.inMicroseconds <
-                _performanceController.firstWellFormedFrameMicros!) {
+                controller.firstWellFormedFrameMicros!) {
           Notifications.of(context)!.push(
             'No timeline events available for the selected frame. Timeline '
             'events occurred too long ago before DevTools could access them. '
@@ -541,7 +533,7 @@ class TimelineFlameChartState
 
   Widget _buildSectionLabels({required BoxConstraints constraints}) {
     final colorScheme = Theme.of(context).colorScheme;
-    final eventGroups = _performanceController.data!.eventGroups;
+    final eventGroups = controller.data!.eventGroups;
 
     final children = <Widget>[];
     for (int i = 0; i < eventGroups.length; i++) {
@@ -606,7 +598,7 @@ class TimelineFlameChartState
     required BoxConstraints constraints,
   }) {
     final threadButtonContainerWidth = buttonMinWidth + defaultSpacing;
-    final eventGroups = _performanceController.data!.eventGroups;
+    final eventGroups = controller.data!.eventGroups;
 
     Widget buildNavigatorButton(int index, {required bool isNext}) {
       // Add spacing to account for timestamps at top of chart.

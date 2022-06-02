@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../primitives/utils.dart';
 import '../../shared/common_widgets.dart';
@@ -23,17 +22,12 @@ class Breakpoints extends StatefulWidget {
   _BreakpointsState createState() => _BreakpointsState();
 }
 
-class _BreakpointsState extends State<Breakpoints> {
-  DebuggerController get controller => _controller!;
-  DebuggerController? _controller;
-
+class _BreakpointsState extends State<Breakpoints>
+    with ProvidedControllerMixin<DebuggerController, Breakpoints> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
-    final newController = Provider.of<DebuggerController>(context);
-    if (newController == _controller) return;
-    _controller = newController;
+    initController();
   }
 
   @override

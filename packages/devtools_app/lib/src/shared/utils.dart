@@ -11,6 +11,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../config_specific/logger/logger.dart' as logger;
@@ -73,6 +74,16 @@ mixin CompareMixin implements Comparable {
 }
 
 extension VmExtension on VM {
+  List<IsolateRef> isolatesForDevToolsMode() {
+    final vmDeveloperModeEnabled = preferences.vmDeveloperModeEnabled.value;
+    final vmIsolates = isolates ?? <IsolateRef>[];
+    return [
+      ...vmIsolates,
+      if (vmDeveloperModeEnabled || vmIsolates.isEmpty)
+        ...systemIsolates ?? <IsolateRef>[],
+    ];
+  }
+
   String get deviceDisplay {
     return [
       '$targetCPU',
@@ -80,5 +91,35 @@ extension VmExtension on VM {
         '($architectureBits bit)',
       operatingSystem,
     ].join(' ');
+  }
+}
+
+/// Mixin that provides a [controller] from package:provider for a State class.
+///
+/// [initController] must be called from [State.didChangeDependencies]. If
+/// [initController] returns false, return early from [didChangeDependencies] to
+/// avoid calling any initialization code that should only be called once for a
+/// controller. See [initController] documentation below for more details.
+mixin ProvidedControllerMixin<T, V extends StatefulWidget> on State<V> {
+  T get controller => _controller!;
+
+  T? _controller;
+
+  /// Initializes [_controller] from package:provider.
+  ///
+  /// This method should be called in [didChangeDependencies]. Returns whether
+  /// or not a new controller was provided upon subsequent calls to
+  /// [initController].
+  ///
+  /// This method will commonly be used to return early from
+  /// [didChangeDependencies] when initialization code should not be run again
+  /// if the provided controller has not changed.
+  ///
+  /// E.g. `if (!initController()) return;`
+  bool initController() {
+    final newController = Provider.of<T>(context);
+    if (newController == _controller) return false;
+    _controller = newController;
+    return true;
   }
 }

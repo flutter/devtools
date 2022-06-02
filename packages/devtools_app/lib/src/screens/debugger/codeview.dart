@@ -9,7 +9,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../../config_specific/logger/logger.dart';
@@ -757,7 +756,8 @@ class LineItem extends StatefulWidget {
   _LineItemState createState() => _LineItemState();
 }
 
-class _LineItemState extends State<LineItem> {
+class _LineItemState extends State<LineItem>
+    with ProvidedControllerMixin<DebuggerController, LineItem> {
   /// A timer that shows a [HoverCard] with an evaluation result when completed.
   Timer? _showTimer;
 
@@ -766,8 +766,6 @@ class _LineItemState extends State<LineItem> {
 
   /// Displays the evaluation result of a source code item.
   HoverCard? _hoverCard;
-
-  late DebuggerController _debuggerController;
 
   String _previousHoverWord = '';
   bool _hasMouseExited = false;
@@ -785,7 +783,7 @@ class _LineItemState extends State<LineItem> {
     _showTimer?.cancel();
     _removeTimer?.cancel();
     _hasMouseExited = false;
-    if (!_debuggerController.isPaused.value) return;
+    if (!controller.isPaused.value) return;
     _showTimer = Timer(LineItem._hoverDelay, () async {
       final word = wordForHover(
         event.localPosition.dx,
@@ -796,8 +794,8 @@ class _LineItemState extends State<LineItem> {
       _hoverCard?.remove();
       if (word != '') {
         try {
-          final response = await _debuggerController.evalAtCurrentFrame(word);
-          final isolateRef = _debuggerController.isolateRef;
+          final response = await controller.evalAtCurrentFrame(word);
+          final isolateRef = controller.isolateRef;
           if (response is! InstanceRef) return;
           final variable = DartObjectNode.fromValue(
             value: response,
@@ -809,7 +807,7 @@ class _LineItemState extends State<LineItem> {
           _hoverCard = HoverCard.fromHoverEvent(
             contents: Material(
               child: ExpandableVariable(
-                debuggerController: _debuggerController,
+                debuggerController: controller,
                 variable: variable,
               ),
             ),
@@ -826,6 +824,12 @@ class _LineItemState extends State<LineItem> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    initController();
+  }
+
+  @override
   void dispose() {
     _showTimer?.cancel();
     _removeTimer?.cancel();
@@ -837,7 +841,6 @@ class _LineItemState extends State<LineItem> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final darkTheme = theme.brightness == Brightness.dark;
-    _debuggerController = Provider.of<DebuggerController>(context);
 
     Widget child;
     final column = widget.pausedFrame?.column;
@@ -1126,18 +1129,55 @@ class ScriptPopupMenuOption {
 }
 
 final defaultScriptPopupMenuOptions = [
-  copyScriptNameOption,
+  copyPackagePathOption,
+  copyFilePathOption,
   goToLineOption,
   openFileOption,
 ];
 
-final copyScriptNameOption = ScriptPopupMenuOption(
-  label: 'Copy filename',
+final copyPackagePathOption = ScriptPopupMenuOption(
+  label: 'Copy package path',
   icon: Icons.content_copy,
   onSelected: (_, controller) => Clipboard.setData(
     ClipboardData(text: controller.scriptLocation.value?.scriptRef.uri),
   ),
 );
+
+final copyFilePathOption = ScriptPopupMenuOption(
+  label: 'Copy file path',
+  icon: Icons.content_copy,
+  onSelected: (_, controller) async {
+    return Clipboard.setData(
+      ClipboardData(text: await fetchScriptLocationFullFilePath(controller)),
+    );
+  },
+);
+
+@visibleForTesting
+Future<String?> fetchScriptLocationFullFilePath(
+  DebuggerController controller,
+) async {
+  String? filePath;
+  final packagePath = controller.scriptLocation.value!.scriptRef.uri;
+  if (packagePath != null) {
+    final isolateId = serviceManager.isolateManager.selectedIsolate.value!.id!;
+    filePath = serviceManager.resolvedUriManager.lookupFileUri(
+      isolateId,
+      packagePath,
+    );
+    if (filePath == null) {
+      await serviceManager.resolvedUriManager.fetchFileUris(
+        isolateId,
+        [packagePath],
+      );
+      filePath = serviceManager.resolvedUriManager.lookupFileUri(
+        isolateId,
+        packagePath,
+      );
+    }
+  }
+  return filePath;
+}
 
 void showGoToLineDialog(BuildContext context, DebuggerController controller) {
   showDialog(
