@@ -9,6 +9,8 @@ import '../../../../shared/eval_on_dart_library.dart';
 import '../../../../shared/globals.dart';
 import 'package:flutter/services.dart';
 import '../../../../config_specific/logger/logger.dart' as logger;
+import '../../../../shared/utils.dart';
+import '../../memory_controller.dart';
 import 'leak_analysis.dart';
 
 final DateFormat _formatter = DateFormat.Hms();
@@ -65,32 +67,16 @@ class _LeaksPaneState extends State<LeaksPane> with AutoDisposeMixin {
 }
 
 class _LeakAnalysisController {
-  bool detailsRequested = false;
-  bool detailsReceived = false;
-  double targetIdsReceived = 0;
-  bool copiedToClipboard = false;
+  bool isStarted = false;
+  bool isComplete = false;
+  String message = '';
   String? error;
 
   void reset() {
-    detailsRequested = false;
-    detailsReceived = false;
-    targetIdsReceived = 0;
-    copiedToClipboard = false;
+    message = '';
+    isStarted = false;
+    isComplete = false;
     error = null;
-  }
-
-  bool get isStarted => detailsRequested;
-
-  bool get isComplete => (error != null) || copiedToClipboard;
-
-  String get message {
-    if (error != null) return error!;
-    if (copiedToClipboard) return 'copied to clipboard';
-    if (targetIdsReceived > 0)
-      return 'analyzed ${(targetIdsReceived * 100).round()}';
-    if (detailsReceived) return 'analyzing...';
-    if (detailsRequested) return 'receiving details...';
-    return '-';
   }
 }
 
@@ -101,12 +87,16 @@ class _LeakAnalysis extends StatefulWidget {
   State<_LeakAnalysis> createState() => _LeakAnalysisState();
 }
 
-class _LeakAnalysisState extends State<_LeakAnalysis> with AutoDisposeMixin {
+class _LeakAnalysisState extends State<_LeakAnalysis>
+    with
+        AutoDisposeMixin,
+        ProvidedControllerMixin<MemoryController, _LeakAnalysis> {
   final _leakController = _LeakAnalysisController();
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    initController();
     _subscribeForMemoryLeaksDetails();
   }
 
@@ -116,28 +106,22 @@ class _LeakAnalysisState extends State<_LeakAnalysis> with AutoDisposeMixin {
         if (event.extensionKind == 'memory_leaks_details') {
           try {
             final leakDetails = Leaks.fromJson(event.json!['extensionData']!);
+
             setState(() {
-              _leakController.detailsReceived = true;
+              _leakController.message =
+                  'Received details. Getting retaining paths.';
             });
-            double step = 0;
             final notGCed = leakDetails.leaks[LeakType.notGCed];
-            setState(() {
-              if (notGCed != null && notGCed.isNotEmpty) {
-                _leakController.targetIdsReceived = 0;
-                step = 1 / notGCed.length;
-              }
-            });
-            // for (var info in notGCed ?? []) {
-            //   await setRetainingPath(info);
-            //   setState(() => _controller.targetIdsReceived =
-            //       _controller.targetIdsReceived + step);
-            // }
-            await setRetainingPaths(_leakController notGCed ?? []);
-            setState(() => _leakController.targetIdsReceived = 1);
+            await setRetainingPaths(controller, notGCed ?? []);
+            setState(
+              () => _leakController.message =
+                  'Obtained paths. Copying to clipboard.',
+            );
             await Clipboard.setData(
                 ClipboardData(text: analyzeAndYaml(leakDetails)));
             setState(() {
-              _leakController.copiedToClipboard = true;
+              _leakController.message = 'Copied to clipboard';
+              _leakController.isComplete = true;
             });
             await Future.delayed(const Duration(seconds: 1));
             setState(() {
@@ -162,7 +146,10 @@ class _LeakAnalysisState extends State<_LeakAnalysis> with AutoDisposeMixin {
         child: const Text('Analyze and Copy to Clipboard'),
         onPressed: () async {
           await eval.safeEval('sendLeaks()', isAlive: Stub());
-          setState(() => _leakController.detailsRequested = true);
+          setState(() {
+            _leakController.isStarted = true;
+            _leakController.message = 'Requested details.';
+          });
         },
       );
     }
@@ -170,6 +157,7 @@ class _LeakAnalysisState extends State<_LeakAnalysis> with AutoDisposeMixin {
     if (_leakController.error != null) {
       return Column(
         children: [
+          Text(_leakController.message),
           Text(_leakController.error!),
           MaterialButton(
             child: const Text('OK'),
@@ -179,17 +167,14 @@ class _LeakAnalysisState extends State<_LeakAnalysis> with AutoDisposeMixin {
       );
     }
 
-    if (_leakController.isComplete) {
-      return Text(_leakController.message);
-    }
-
     return Column(
       children: [
         Text(_leakController.message),
-        MaterialButton(
-          child: const Text('Cancel'),
-          onPressed: () => setState(() => _leakController.reset()),
-        )
+        if (!_leakController.isComplete)
+          MaterialButton(
+            child: const Text('Cancel'),
+            onPressed: () => setState(() => _leakController.reset()),
+          ),
       ],
     );
   }
