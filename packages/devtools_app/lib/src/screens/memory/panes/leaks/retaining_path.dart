@@ -6,74 +6,87 @@ import '../../memory_controller.dart';
 typedef IdentityHashCode = int;
 typedef Retainers = Map<IdentityHashCode, Set<HeapSnapshotObject>>;
 
-Retainers buildRetainers(HeapSnapshotGraph graph) {
-  final Retainers result = {};
-
-  for (var object in graph.objects) {
-    if (_shouldSkip(object)) continue;
-    for (var r in object.references) {
-      final reference = graph.objects[r];
-      if (_shouldSkip(reference)) continue;
-      if (reference.identityHashCode == object.identityHashCode) continue;
-
-      if (!result.containsKey(reference.identityHashCode))
-        result[reference.identityHashCode] = {};
-      result[reference.identityHashCode]!.add(object);
-    }
-  }
-  return result;
-}
-
 Future<void> setRetainingPaths(
   MemoryController controller,
   List<ObjectReport> reports,
 ) async {
   final graph = (await controller.snapshotMemory())!;
-  final retainers = buildRetainers(graph);
+  final pathAnalyzer = _PathAnalyzer(graph);
 
   for (var report in reports) {
-    report.retainingPath = _getPath(retainers, report.theIdentityHashCode);
+    report.retainingPath = pathAnalyzer.getPath(report.theIdentityHashCode);
   }
 }
 
-String _getPath(Retainers retainers, IdentityHashCode code) {
-  final path = <HeapSnapshotObject>[];
-  IdentityHashCode current = code;
-
-  while (retainers[current]?.isNotEmpty == true) {
-    if (path.length > 1000) throw 'Too large path.';
-
-    // var list = retainers[current]!.toList().map((e) => _name(e)).join(',');
-
-    path.insert(0, retainers[current]!.first);
-    current = path.first.identityHashCode;
-
-    assert(
-      current != code,
-      'loop found',
-    );
-    assert(!_shouldSkip(path.first));
+class _PathAnalyzer {
+  _PathAnalyzer(this.graph) {
+    _buildStrictures();
   }
 
-  final result = path.map((e) => _name(e)).join('/');
-  return '/$result/';
-}
+  final HeapSnapshotGraph graph;
+  late Retainers retainers;
+  late Map<int, HeapSnapshotObject> byCode;
 
-String _name(HeapSnapshotObject object) {
-  return '${object.identityHashCode}-${object.klass.name}';
-}
+  void _buildStrictures() {
+    retainers = {};
+    byCode = {};
 
-bool _shouldSkip(HeapSnapshotObject object) {
-  if (object.identityHashCode == 0) return true;
+    for (var object in graph.objects) {
+      if (_shouldSkip(object)) continue;
 
-  const toSkip = {
-    '_WeakReferenceImpl',
-    'FinalizerEntry',
-    'DiagnosticsProperty',
-    '_ElementDiagnosticableTreeNode',
-    '_InspectorReferenceData',
-  };
-  if (toSkip.contains(object.klass.name)) return true;
+      byCode[object.identityHashCode] = object;
 
-  return false;
+      for (var r in object.references) {
+        final reference = graph.objects[r];
+        if (_shouldSkip(reference)) continue;
+        if (reference.identityHashCode == object.identityHashCode) continue;
+
+        if (!retainers.containsKey(reference.identityHashCode))
+          retainers[reference.identityHashCode] = {};
+        retainers[reference.identityHashCode]!.add(object);
+      }
+    }
+  }
+
+  String getPath(IdentityHashCode code) {
+    final path = [byCode[code]!];
+    IdentityHashCode current = code;
+
+    while (retainers[current]?.isNotEmpty == true) {
+      if (path.length > 1000) throw 'Too large path.';
+
+      var list = retainers[current]!.toList().map((e) => _name(e)).join(',');
+
+      path.insert(0, retainers[current]!.first);
+      current = path.first.identityHashCode;
+
+      assert(
+        current != code,
+        'loop found',
+      );
+      assert(!_shouldSkip(path.first));
+    }
+
+    final result = path.map((e) => _name(e)).join('/');
+    return '/$result/';
+  }
+
+  static String _name(HeapSnapshotObject object) {
+    return '${object.identityHashCode}-${object.klass.name}';
+  }
+
+  static bool _shouldSkip(HeapSnapshotObject object) {
+    if (object.identityHashCode == 0) return true;
+
+    const toSkip = {
+      '_WeakReferenceImpl',
+      'FinalizerEntry',
+      'DiagnosticsProperty',
+      '_ElementDiagnosticableTreeNode',
+      '_InspectorReferenceData',
+    };
+    if (toSkip.contains(object.klass.name)) return true;
+
+    return false;
+  }
 }

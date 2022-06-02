@@ -18,7 +18,23 @@ String analyzeAndYaml(Leaks leaks) {
 
 @visibleForTesting
 Map<ObjectReport, List<ObjectReport>> findCulprits(List<ObjectReport> notGCed) {
-  return {};
+  final byPath = Map<String, ObjectReport>.fromIterable(
+    notGCed,
+    key: (r) => r.retainingPath,
+    value: (r) => r,
+  );
+
+  final result = <ObjectReport, List<ObjectReport>>{};
+  String previous = '--- not existing path ---';
+  for (var path in byPath.keys.toList()..sort()) {
+    bool isVictim = path.startsWith(previous) && (path != previous);
+    // if (isVictim){
+    //   result[]
+    //
+    // }
+
+  }
+  return result;
 }
 
 // String pathToString(RetainingPath path) {

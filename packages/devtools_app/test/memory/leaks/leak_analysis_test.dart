@@ -5,12 +5,12 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('Culprits are found as expected.', () {
     final notGCed = [
-      createReport('culprit1', '/1/2/'),
-      createReport('victim11', '/1/2/3/4/5/'),
-      createReport('victim12', '/1/2/3/'),
-      createReport('culprit1', '/1/7/'),
-      createReport('victim11', '/1/7/3/4/5/'),
-      createReport('victim12', '/1/7/3/'),
+      _createReport('culprit1', '/1/2/'),
+      _createReport('victim11', '/1/2/3/4/5/'),
+      _createReport('victim12', '/1/2/3/'),
+      _createReport('culprit1', '/1/7/'),
+      _createReport('victim11', '/1/7/3/4/5/'),
+      _createReport('victim12', '/1/7/3/'),
     ];
 
     final culprits = findCulprits(notGCed);
@@ -21,6 +21,6 @@ void main() {
   });
 }
 
-ObjectReport createReport(String token, String path) => ObjectReport(
+ObjectReport _createReport(String token, String path) => ObjectReport(
     token: token, type: '', creationLocation: '', theIdentityHashCode: 0)
   ..retainingPath = path;
