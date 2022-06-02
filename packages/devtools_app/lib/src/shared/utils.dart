@@ -99,7 +99,7 @@ extension VmExtension on VM {
 /// [initController] must be called from [State.didChangeDependencies]. If
 /// [initController] returns false, return early from [didChangeDependencies] to
 /// avoid calling any initialization code that should only be called once for a
-/// controller. See [initController] documenation below for more details.
+/// controller. See [initController] documentation below for more details.
 mixin ProvidedControllerMixin<T, V extends StatefulWidget> on State<V> {
   T get controller => _controller!;
 
