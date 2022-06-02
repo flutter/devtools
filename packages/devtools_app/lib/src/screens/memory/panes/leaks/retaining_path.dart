@@ -55,7 +55,11 @@ class _PathAnalyzer {
     while (retainers[current]?.isNotEmpty == true) {
       if (path.length > 1000) throw 'Too large path.';
 
-      var list = retainers[current]!.toList().map((e) => _name(e)).join(',');
+      if (retainers[current]!.length > 1) {
+        final list =
+            retainers[current]!.toList().map((e) => _name(e)).join(', ');
+        print(list);
+      }
 
       path.insert(0, retainers[current]!.first);
       current = path.first.identityHashCode;

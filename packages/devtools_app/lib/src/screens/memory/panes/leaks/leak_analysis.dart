@@ -25,14 +25,19 @@ Map<ObjectReport, List<ObjectReport>> findCulprits(List<ObjectReport> notGCed) {
   );
 
   final result = <ObjectReport, List<ObjectReport>>{};
-  String previous = '--- not existing path ---';
+  String previousPath = '--- not existing path ---';
+  late ObjectReport previousReport;
   for (var path in byPath.keys.toList()..sort()) {
-    bool isVictim = path.startsWith(previous) && (path != previous);
-    // if (isVictim){
-    //   result[]
-    //
-    // }
+    final report = byPath[path]!;
+    final isVictim = path.startsWith(previousPath);
 
+    if (isVictim) {
+      result[previousReport]!.add(report);
+    } else {
+      previousPath = path;
+      previousReport = report;
+      result[report] = [];
+    }
   }
   return result;
 }
