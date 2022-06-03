@@ -389,6 +389,9 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   }
 
   @override
+  final fakeServiceCache = JsonToServiceCache();
+
+  @override
   Future<Timestamp> getVMTimelineMicros() async => Timestamp(timestamp: 0);
 
   @override
