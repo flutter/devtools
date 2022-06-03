@@ -1428,9 +1428,11 @@ class FormattedJson extends StatelessWidget {
 }
 
 class JsonViewer extends StatefulWidget {
-  const JsonViewer(this.data);
+  const JsonViewer({
+    required this.json,
+  });
 
-  final String data;
+  final String json;
 
   @override
   State<JsonViewer> createState() => _JsonViewerState();
@@ -1443,8 +1445,8 @@ class _JsonViewerState extends State<JsonViewer> {
   @override
   void initState() {
     super.initState();
-    assert(widget.data.isNotEmpty);
-    final responseJson = json.decode(widget.data);
+    assert(widget.json.isNotEmpty);
+    final responseJson = json.decode(widget.json);
     // Insert the JSON data into the fake service cache so we can use it with
     // the `ExpandableVariable` widget.
     final root =

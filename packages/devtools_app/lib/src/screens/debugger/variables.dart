@@ -78,10 +78,7 @@ class ExpandableVariable extends StatelessWidget {
   void onItemPressed(DartObjectNode v, DebuggerController controller) {
     // On expansion, lazily build the variables tree for performance reasons.
     if (v.isExpanded) {
-      for (int i = 0; i < v.children.length; ++i) {
-        final child = v.children[i];
-        buildVariablesTree(child);
-      }
+      v.children.forEach(buildVariablesTree);
     }
   }
 }
@@ -146,7 +143,7 @@ Widget displayProvider(
     waitDuration: tooltipWaitLong,
     child: SelectableText.rich(
       TextSpan(
-        text: hasName ? '${variable.name}' : null,
+        text: hasName ? variable.name : null,
         style: variable.artificialName
             ? theme.subtleFixedFontStyle
             : theme.fixedFontStyle.apply(
