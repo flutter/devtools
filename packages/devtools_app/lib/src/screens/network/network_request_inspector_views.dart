@@ -175,7 +175,6 @@ class HttpResponseView extends StatelessWidget {
         responseBody!.isNotEmpty) {
       child = JsonViewer(json: responseBody);
     } else {
-      // TODO(bkonyi): style
       child = Text(responseBody!);
     }
     return Padding(

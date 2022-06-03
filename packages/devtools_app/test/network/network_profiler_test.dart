@@ -8,6 +8,7 @@ import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/http/http.dart';
 import 'package:devtools_app/src/http/http_request_data.dart';
 import 'package:devtools_app/src/primitives/utils.dart';
+import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/screens/network/network_controller.dart';
 import 'package:devtools_app/src/screens/network/network_model.dart';
 import 'package:devtools_app/src/screens/network/network_request_inspector.dart';
@@ -26,12 +27,14 @@ import '../test_data/network.dart';
 import 'utils/network_test_utils.dart';
 
 NetworkController controller = NetworkController();
+DebuggerController debugController = DebuggerController();
 
 Future<void> pumpNetworkScreen(WidgetTester tester) async {
   await tester.pumpWidget(
     wrapWithControllers(
       const NetworkScreenBody(),
       network: controller,
+      debugger: debugController,
     ),
   );
   final finder = find.byType(NetworkScreenBody);
