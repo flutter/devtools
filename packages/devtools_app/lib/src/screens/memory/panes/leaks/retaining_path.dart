@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:memory_tools/model.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -16,6 +17,17 @@ Future<void> setRetainingPaths(
   for (var report in reports) {
     report.retainingPath = pathAnalyzer.getPath(report.theIdentityHashCode);
   }
+}
+
+class PathItem {
+  PathItem(this.options);
+
+  final List<HeapSnapshotObject> options;
+  int _index = 0;
+
+  HeapSnapshotObject get selection => options[_index];
+  bool get canChange => _index < options.length - 1;
+  void change() => _index++;
 }
 
 class _PathAnalyzer {
@@ -49,7 +61,9 @@ class _PathAnalyzer {
   }
 
   String getPath(IdentityHashCode code) {
-    final path = [byCode[code]!];
+    final path = [
+      PathItem([byCode[code]!])
+    ];
     IdentityHashCode current = code;
 
     while (retainers[current]?.isNotEmpty == true) {
@@ -61,17 +75,34 @@ class _PathAnalyzer {
         print(list);
       }
 
-      path.insert(0, retainers[current]!.first);
-      current = path.first.identityHashCode;
+      final options = retainers[current]!.where((retainer) {
+        final loop = path.firstWhereOrNull((element) =>
+            element.selection.identityHashCode == retainer.identityHashCode);
+        return loop == null;
+      }).toList();
+
+      if (options.isNotEmpty) {
+        path.insert(0, PathItem(options));
+      } else {
+        int toChange = 0;
+        while (!path[toChange].canChange && toChange < path.length - 1) {
+          toChange++;
+        }
+        assert(path[toChange].canChange, 'All retainers looped the path.');
+        path[toChange].change();
+        path.removeRange(0, toChange);
+      }
+
+      current = path.first.selection.identityHashCode;
 
       assert(
         current != code,
         'loop found',
       );
-      assert(!_shouldSkip(path.first));
+      assert(!_shouldSkip(path.first.selection));
     }
 
-    final result = path.map((e) => _name(e)).join('/');
+    final result = path.map((e) => _name(e.selection)).join('/');
     return '/$result/';
   }
 
@@ -88,6 +119,8 @@ class _PathAnalyzer {
       'DiagnosticsProperty',
       '_ElementDiagnosticableTreeNode',
       '_InspectorReferenceData',
+      'DebugCreator',
+      '_WidgetTicker',
     };
     if (toSkip.contains(object.klass.name)) return true;
 
