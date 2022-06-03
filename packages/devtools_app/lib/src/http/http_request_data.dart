@@ -12,7 +12,6 @@ import 'package:vm_service/vm_service.dart';
 import '../config_specific/logger/logger.dart';
 import '../primitives/utils.dart';
 import '../screens/network/network_model.dart';
-import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
 import 'http.dart';
 

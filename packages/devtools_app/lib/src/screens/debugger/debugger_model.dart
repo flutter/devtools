@@ -2,19 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-import 'dart:convert';
-import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../config_specific/logger/logger.dart';
 import '../../primitives/trees.dart';
-import '../../primitives/utils.dart';
-import '../../shared/globals.dart';
 import '../../ui/search.dart';
 import '../inspector/diagnostics_node.dart';
 import '../inspector/inspector_service.dart';

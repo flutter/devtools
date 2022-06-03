@@ -149,7 +149,7 @@ class HttpRequestView extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(denseSpacing),
       child: SingleChildScrollView(
-        child: JsonViewer(data.requestBody!),
+        child: JsonViewer(json: data.requestBody!),
       ),
     );
   }
@@ -173,7 +173,7 @@ class HttpResponseView extends StatelessWidget {
     } else if (contentType != null &&
         contentType.contains('json') &&
         responseBody!.isNotEmpty) {
-      child = JsonViewer(responseBody);
+      child = JsonViewer(json: responseBody);
     } else {
       // TODO(bkonyi): style
       child = Text(responseBody!);
