@@ -1302,6 +1302,18 @@ class _TableRowState<T> extends State<TableRow<T>>
     }
   }
 
+  TextAlign _textAlignmentFor(ColumnData<T> column) {
+    switch (column.alignment) {
+      case ColumnAlignment.center:
+        return TextAlign.center;
+      case ColumnAlignment.right:
+        return TextAlign.right;
+      case ColumnAlignment.left:
+      default:
+        return TextAlign.left;
+    }
+  }
+
   MainAxisAlignment _mainAxisAlignmentFor(ColumnData<T> column) {
     switch (column.alignment) {
       case ColumnAlignment.center:
@@ -1379,6 +1391,7 @@ class _TableRowState<T> extends State<TableRow<T>>
             overflow: TextOverflow.ellipsis,
             style: contentTextStyle(column),
             maxLines: 1,
+            textAlign: _textAlignmentFor(column),
           );
         }
 
