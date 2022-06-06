@@ -17,6 +17,7 @@ String analyzeAndYaml(Leaks leaks) {
 }
 
 String _notGCedToYaml(List<ObjectReport> notGCed) {
+  if (notGCed.isEmpty) return '';
   final byCulprits = findCulprits(notGCed);
 
   final header = '''notGCed:

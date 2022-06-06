@@ -116,11 +116,11 @@ class _PathAnalyzer {
     const toSkip = {
       '_WeakReferenceImpl',
       'FinalizerEntry',
-      'DiagnosticsProperty',
-      '_ElementDiagnosticableTreeNode',
-      '_InspectorReferenceData',
-      'DebugCreator',
-      '_WidgetTicker',
+      // 'DiagnosticsProperty',
+      // '_ElementDiagnosticableTreeNode',
+      // '_InspectorReferenceData',
+      // 'DebugCreator',
+      // '_WidgetTicker',
     };
     if (toSkip.contains(object.klass.name)) return true;
 
