@@ -121,6 +121,7 @@ const darkTheme = 'darkTheme';
 const denseMode = 'denseMode';
 const analytics = 'analytics';
 const vmDeveloperMode = 'vmDeveloperMode';
+const inspectorHoverEvalMode = 'inspectorHoverEvalMode';
 
 // Common actions shared across screens.
 // These actions will be tracked per screen, so they will still be

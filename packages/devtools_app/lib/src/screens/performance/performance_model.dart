@@ -975,10 +975,14 @@ class SyncTimelineEvent extends TimelineEvent {
 
   bool? _isUiFrameIdentifier;
 
-  /// Whether this event is contains the flutter frame identifier for the Raster
+  /// Whether this event contains the flutter frame identifier for the Raster
   /// thread in its trace event args.
-  bool get isRasterFrameIdentifier =>
-      _isRasterFrameIdentifier ??= name == rasterEventName &&
+  ///
+  /// We check for `name == rasterEventName` in addition to
+  /// `name == rasterEventNameWithFrameNumber` so that we can load legacy traces
+  /// created before https://github.com/flutter/engine/pull/32283/ landed.
+  bool get isRasterFrameIdentifier => _isRasterFrameIdentifier ??=
+      (name == rasterEventName || name == rasterEventNameWithFrameNumber) &&
           traceEvents.first.event.args!.containsKey(TraceEvent.frameNumberArg);
 
   bool? _isRasterFrameIdentifier;

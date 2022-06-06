@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart' hide Stack;
-import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../shared/common_widgets.dart';
 import '../../shared/theme.dart';
+import '../../shared/utils.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
 
@@ -18,18 +18,12 @@ class CallStack extends StatefulWidget {
   _CallStackState createState() => _CallStackState();
 }
 
-class _CallStackState extends State<CallStack> {
-  DebuggerController get controller => _controller!;
-  DebuggerController? _controller;
-
+class _CallStackState extends State<CallStack>
+    with ProvidedControllerMixin<DebuggerController, CallStack> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
-    final newController = Provider.of<DebuggerController>(context);
-    if (newController == _controller) return;
-
-    _controller = newController;
+    initController();
   }
 
   @override

@@ -113,6 +113,8 @@ class FlutterTestEnvironment {
       );
 
       _service = _flutter!.vmService!;
+
+      setGlobal(IdeTheme, IdeTheme());
       final preferencesController = PreferencesController();
       setGlobal(Storage, FlutterDesktopStorage());
       await preferencesController.init();

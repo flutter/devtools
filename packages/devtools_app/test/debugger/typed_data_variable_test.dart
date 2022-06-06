@@ -5,9 +5,9 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:devtools_app/src/screens/debugger/debugger_model.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/object_tree.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';

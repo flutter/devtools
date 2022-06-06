@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../analytics/analytics.dart' as ga;
 import '../../analytics/analytics_common.dart';
@@ -22,6 +21,7 @@ import '../../shared/notifications.dart';
 import '../../shared/screen.dart';
 import '../../shared/split.dart';
 import '../../shared/theme.dart';
+import '../../shared/utils.dart';
 import '../../shared/version.dart';
 import '../../ui/icons.dart';
 import '../../ui/vm_flag_widgets.dart';
@@ -64,11 +64,8 @@ class PerformanceScreenBody extends StatefulWidget {
 class PerformanceScreenBodyState extends State<PerformanceScreenBody>
     with
         AutoDisposeMixin,
-        OfflineScreenMixin<PerformanceScreenBody, OfflinePerformanceData> {
-  PerformanceController get controller => _controller!;
-
-  PerformanceController? _controller;
-
+        OfflineScreenMixin<PerformanceScreenBody, OfflinePerformanceData>,
+        ProvidedControllerMixin<PerformanceController, PerformanceScreenBody> {
   bool processing = false;
 
   double processingProgress = 0.0;
@@ -98,9 +95,7 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
     );
     maybePushDebugModePerformanceMessage(context, PerformanceScreen.id);
 
-    final newController = Provider.of<PerformanceController>(context);
-    if (newController == _controller) return;
-    _controller = newController;
+    if (!initController()) return;
 
     cancelListeners();
 
@@ -338,7 +333,6 @@ class SecondaryPerformanceControls extends StatelessWidget {
         const SizedBox(width: denseSpacing),
         SettingsOutlinedButton(
           onPressed: () => _openSettingsDialog(context),
-          label: 'Performance Settings',
         ),
       ],
     );

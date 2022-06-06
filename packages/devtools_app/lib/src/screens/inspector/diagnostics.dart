@@ -6,11 +6,11 @@ import 'package:flutter/material.dart';
 
 import '../../primitives/utils.dart';
 import '../../shared/globals.dart';
+import '../../shared/object_tree.dart';
 import '../../shared/theme.dart';
 import '../../ui/hover.dart';
 import '../../ui/icons.dart';
 import '../debugger/debugger_controller.dart';
-import '../debugger/debugger_model.dart';
 import '../debugger/variables.dart';
 import 'diagnostics_node.dart';
 import 'inspector_controller.dart';
@@ -129,7 +129,9 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     final inspectorService = serviceManager.inspectorService!;
 
     return HoverCardTooltip(
-      enabled: () => diagnosticLocal.inspectorService != null,
+      enabled: () =>
+          preferences.inspectorPreferences.hoverEvalModeEnabled.value &&
+          diagnosticLocal.inspectorService != null,
       onHover: (event) async {
         final group = inspectorService.createObjectGroup('hover');
         final value =

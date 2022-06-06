@@ -17,6 +17,10 @@ class PreferencesController {
   ValueListenable<bool> get vmDeveloperModeEnabled => _vmDeveloperMode;
   ValueListenable<bool> get denseModeEnabled => _denseMode;
 
+  InspectorPreferencesController get inspectorPreferences =>
+      _inspectorPreferences;
+  final _inspectorPreferences = InspectorPreferencesController();
+
   Future<void> init() async {
     // Get the current values and listen for and write back changes.
     String? value = await storage.getValue('ui.darkMode');
@@ -37,6 +41,8 @@ class PreferencesController {
       storage.setValue('ui.denseMode', '${_denseMode.value}');
     });
 
+    await _inspectorPreferences.init();
+
     setGlobal(PreferencesController, this);
   }
 
@@ -54,5 +60,34 @@ class PreferencesController {
   /// Change the value for the dense mode setting.
   void toggleDenseMode(bool enableDenseMode) {
     _denseMode.value = enableDenseMode;
+  }
+}
+
+class InspectorPreferencesController {
+  ValueListenable<bool> get hoverEvalModeEnabled => _hoverEvalMode;
+
+  final _hoverEvalMode = ValueNotifier<bool>(false);
+  static const _hoverEvalModeStorageId = 'inspector.hoverEvalMode';
+
+  Future<void> init() async {
+    String? value = await storage.getValue(_hoverEvalModeStorageId);
+
+    // When embedded, default hoverEvalMode to off
+    value ??= (!ideTheme.embed).toString();
+    toggleHoverEvalMode(value == 'true');
+
+    _hoverEvalMode.addListener(() {
+      storage.setValue(
+        _hoverEvalModeStorageId,
+        _hoverEvalMode.value.toString(),
+      );
+    });
+
+    setGlobal(InspectorPreferencesController, this);
+  }
+
+  /// Change the value for the hover eval mode setting.
+  void toggleHoverEvalMode(bool enableHoverEvalMode) {
+    _hoverEvalMode.value = enableHoverEvalMode;
   }
 }
