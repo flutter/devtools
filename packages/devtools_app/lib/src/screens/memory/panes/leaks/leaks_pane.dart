@@ -60,7 +60,10 @@ class _LeaksPaneState extends State<LeaksPane> with AutoDisposeMixin {
       children: [
         const _LeakAnalysis(),
         if (_leaksSummary.isEmpty) const Text('No information yet.'),
-        if (_leaksSummary.isNotEmpty) Text(_leaksSummary),
+        if (_leaksSummary.isNotEmpty)
+          Expanded(
+            child: SingleChildScrollView(child: Text(_leaksSummary)),
+          ),
       ],
     );
   }

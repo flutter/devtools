@@ -21,7 +21,7 @@ String _notGCedToYaml(List<ObjectReport> notGCed) {
   final byCulprits = findCulprits(notGCed);
 
   final header = '''notGCed:
-  total: ${notGCed.length}
+  total: ${byCulprits.length}
   objects:
 ''';
 
