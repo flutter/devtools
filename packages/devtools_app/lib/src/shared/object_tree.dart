@@ -276,18 +276,48 @@ List<DartObjectNode> _createVariablesForAssociations(
 ) {
   final variables = <DartObjectNode>[];
   final associations = instance.associations ?? [];
+
+  // If the key type for the provided associations is not primitive, we want to
+  // allow for users to drill down into the key object's properties. If we're
+  // only dealing with primative types as keys, we can render a flatter
+  // representation.
+  final hasNonPrimitiveKey = associations.fold<bool>(
+    false,
+    (p, e) => p || isPrimativeInstanceKind(e.key.kind),
+  );
   for (var i = 0; i < associations.length; i++) {
     final association = associations[i];
     if (association.key is! InstanceRef) {
       continue;
     }
-    variables.add(
-      DartObjectNode.fromValue(
-        name: association.key.valueAsString,
+    if (hasNonPrimitiveKey) {
+      variables.add(
+        DartObjectNode.fromValue(
+          name: association.key.valueAsString,
+          value: association.value,
+          isolateRef: isolateRef,
+        ),
+      );
+    } else {
+      final key = DartObjectNode.fromValue(
+        name: '[key]',
+        value: association.key,
+        isolateRef: isolateRef,
+        artificialName: true,
+      );
+      final value = DartObjectNode.fromValue(
+        name: '[value]',
         value: association.value,
         isolateRef: isolateRef,
-      ),
-    );
+        artificialName: true,
+      );
+      final entryNum = instance.offset == null ? i : i + instance.offset!;
+      variables.add(
+        DartObjectNode.text('[Entry $entryNum]')
+          ..addChild(key)
+          ..addChild(value),
+      );
+    }
   }
   return variables;
 }
@@ -471,7 +501,10 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
   }
 
   factory DartObjectNode.text(String text) {
-    return DartObjectNode._(text: text);
+    return DartObjectNode._(
+      text: text,
+      artificialName: true,
+    );
   }
 
   factory DartObjectNode.grouping(

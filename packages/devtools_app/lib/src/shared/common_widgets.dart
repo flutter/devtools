@@ -9,7 +9,6 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../analytics/analytics.dart' as ga;
@@ -1446,7 +1445,6 @@ class _JsonViewerState extends State<JsonViewer>
   @override
   void initState() {
     super.initState();
-    initController();
     assert(widget.encodedJson.isNotEmpty);
     final responseJson = json.decode(widget.encodedJson);
     // Insert the JSON data into the fake service cache so we can use it with

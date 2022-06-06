@@ -79,13 +79,8 @@ void main() {
 
     await buildVariablesTree(variable);
 
-    expect(variable.children.first.children, [
-      matchesVariable(name: '[key]', value: '\'Hey\''),
-      matchesVariable(name: '[value]', value: '12.34'),
-    ]);
-
     expect(variable.children, [
-      matchesVariable(name: null, value: '[Entry 0]'),
+      matchesVariable(name: 'Hey', value: '12.34'),
     ]);
   });
 
@@ -140,11 +135,7 @@ void main() {
     await buildVariablesTree(variable);
 
     expect(variable.children, [
-      matchesVariable(name: null, value: '[Entry 0]'),
-    ]);
-    expect(variable.children.first.children, [
-      matchesVariable(name: '[key]', value: '1'),
-      matchesVariable(name: '[value]', value: '12.34'),
+      matchesVariable(name: '1', value: '12.34'),
     ]);
   });
 
