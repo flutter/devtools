@@ -433,6 +433,10 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
   ///
   /// [value] should typically be an [InstanceRef] but can also be a [Sentinel]
   /// [ObjRef] or primitive type such as num or String.
+  ///
+  /// [artificialName] is used by [ExpandableVariable] to determine styling of
+  /// `Text(name)`. Artificial names are rendered using `subtleFixedFontStyle`
+  /// to put less emphasis on the name (e.g., for the root node of a JSON tree).
   factory DartObjectNode.fromValue({
     String? name,
     required Object? value,
@@ -487,7 +491,12 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
 
   final String? text;
   final String? name;
+
+  /// [artificialName] is used by [ExpandableVariable] to determine styling of
+  /// `Text(name)`. Artificial names are rendered using `subtleFixedFontStyle`
+  /// to put less emphasis on the name (e.g., for the root node of a JSON tree).
   final bool artificialName;
+
   GenericInstanceRef? get ref => _ref;
   GenericInstanceRef? _ref;
 

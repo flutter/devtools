@@ -149,7 +149,7 @@ class HttpRequestView extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(denseSpacing),
       child: SingleChildScrollView(
-        child: JsonViewer(json: data.requestBody!),
+        child: JsonViewer(encodedJson: data.requestBody!),
       ),
     );
   }
@@ -163,19 +163,23 @@ class HttpResponseView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget child;
+    final theme = Theme.of(context);
     // We shouldn't try and display an image response view when using the
     // timeline profiler since it's possible for response body data to get
     // dropped.
     final contentType = data.contentType;
-    final responseBody = data.responseBody;
+    final responseBody = data.responseBody!;
     if (contentType != null && contentType.contains('image')) {
       child = ImageResponseView(data);
     } else if (contentType != null &&
         contentType.contains('json') &&
-        responseBody!.isNotEmpty) {
-      child = JsonViewer(json: responseBody);
+        responseBody.isNotEmpty) {
+      child = JsonViewer(encodedJson: responseBody);
     } else {
-      child = Text(responseBody!);
+      child = Text(
+        responseBody,
+        style: theme.fixedFontStyle,
+      );
     }
     return Padding(
       padding: const EdgeInsets.all(denseSpacing),

@@ -269,7 +269,7 @@ class PerformanceController extends DisposableController
 
     final threadNameEvents = <TraceEvent>[];
     for (final event in timeline.traceEvents ?? []) {
-      final traceEvent = TraceEvent(event.json!);
+      final traceEvent = TraceEvent(event.encodedJson!);
       final eventWrapper = TraceEventWrapper(
         traceEvent,
         DateTime.now().millisecondsSinceEpoch,

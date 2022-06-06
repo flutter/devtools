@@ -1429,24 +1429,26 @@ class FormattedJson extends StatelessWidget {
 
 class JsonViewer extends StatefulWidget {
   const JsonViewer({
-    required this.json,
+    required this.encodedJson,
   });
 
-  final String json;
+  final String encodedJson;
 
   @override
   State<JsonViewer> createState() => _JsonViewerState();
 }
 
-class _JsonViewerState extends State<JsonViewer> {
+class _JsonViewerState extends State<JsonViewer>
+    with ProvidedControllerMixin<DebuggerController, JsonViewer> {
   late Future<void> _initializeTree;
   late DartObjectNode variable;
 
   @override
   void initState() {
     super.initState();
-    assert(widget.json.isNotEmpty);
-    final responseJson = json.decode(widget.json);
+    initController();
+    assert(widget.encodedJson.isNotEmpty);
+    final responseJson = json.decode(widget.encodedJson);
     // Insert the JSON data into the fake service cache so we can use it with
     // the `ExpandableVariable` widget.
     final root =
@@ -1475,6 +1477,17 @@ class _JsonViewerState extends State<JsonViewer> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Currently a redundant check, but adding it anyway to prevent future
+    // bugs being introduced.
+    if (!initController()) {
+      return;
+    }
+    // Any additional initialization code should be added after this line.
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(denseSpacing),
@@ -1486,7 +1499,7 @@ class _JsonViewerState extends State<JsonViewer> {
               return Container();
             return ExpandableVariable(
               variable: variable,
-              debuggerController: Provider.of<DebuggerController>(context),
+              debuggerController: controller,
             );
           },
         ),

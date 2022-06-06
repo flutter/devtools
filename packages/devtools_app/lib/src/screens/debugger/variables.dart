@@ -116,7 +116,7 @@ Widget displayProvider(
       debuggerController: controller,
     );
   }
-  TextStyle getStyle() {
+  TextStyle variableDisplayStyle() {
     final style = theme.subtleFixedFontStyle;
     switch (variable.ref!.instanceRef!.kind) {
       case InstanceKind.kString:
@@ -157,7 +157,7 @@ Widget displayProvider(
             ),
           TextSpan(
             text: variable.displayValue,
-            style: getStyle(),
+            style: variableDisplayStyle(),
           ),
         ],
       ),
