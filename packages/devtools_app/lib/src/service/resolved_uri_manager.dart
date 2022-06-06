@@ -25,6 +25,7 @@ class ResolvedUriManager {
   /// [isolateId] The id of the isolate that the [uris] were generated on.
   /// [uris] List of uris to fetch package uris for.
   Future<void> fetchPackageUris(String isolateId, List<String> uris) async {
+    if (uris.isEmpty) return;
     if (_packagePathMappings != null) {
       final packageUris =
           (await serviceManager.service!.lookupPackageUris(isolateId, uris))
