@@ -32,3 +32,24 @@ class EnumUtils<T> {
 
   String? name(T enumEntry) => _reverseLookupTable[enumEntry];
 }
+
+mixin EnumIndexOrdering<T extends Enum> on Enum implements Comparable<T> {
+  @override
+  int compareTo(T other) => index.compareTo(other.index);
+
+  bool operator <(T other) {
+    return index < other.index;
+  }
+
+  bool operator >(T other) {
+    return index > other.index;
+  }
+
+  bool operator >=(T other) {
+    return index >= other.index;
+  }
+
+  bool operator <=(T other) {
+    return index <= other.index;
+  }
+}

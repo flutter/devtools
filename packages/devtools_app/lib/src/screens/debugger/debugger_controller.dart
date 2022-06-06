@@ -17,6 +17,7 @@ import '../../primitives/utils.dart';
 import '../../service/isolate_state.dart';
 import '../../service/vm_service_wrapper.dart';
 import '../../shared/globals.dart';
+import '../../shared/object_tree.dart';
 import '../../ui/search.dart';
 import 'debugger_model.dart';
 import 'program_explorer_controller.dart';
