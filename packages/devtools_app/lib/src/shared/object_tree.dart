@@ -281,7 +281,7 @@ List<DartObjectNode> _createVariablesForAssociations(
   // allow for users to drill down into the key object's properties. If we're
   // only dealing with primative types as keys, we can render a flatter
   // representation.
-  final hasNonPrimitiveKey = associations.fold<bool>(
+  final hasPrimitiveKey = associations.fold<bool>(
     false,
     (p, e) => p || isPrimativeInstanceKind(e.key.kind),
   );
@@ -290,7 +290,7 @@ List<DartObjectNode> _createVariablesForAssociations(
     if (association.key is! InstanceRef) {
       continue;
     }
-    if (hasNonPrimitiveKey) {
+    if (hasPrimitiveKey) {
       variables.add(
         DartObjectNode.fromValue(
           name: association.key.valueAsString,
