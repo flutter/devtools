@@ -54,6 +54,7 @@ ThemeData _darkTheme(IdeTheme ideTheme) {
     backgroundColor: background,
     indicatorColor: devtoolsBlue[400]!,
     selectedRowColor: devtoolsGrey[600]!,
+    textSelectionColor: Colors.black,
   );
 }
 
@@ -69,6 +70,7 @@ ThemeData _lightTheme(IdeTheme ideTheme) {
     backgroundColor: background,
     indicatorColor: Colors.yellowAccent[400]!,
     selectedRowColor: devtoolsBlue[600]!,
+    textSelectionColor: Colors.white,
   );
 }
 
@@ -79,6 +81,7 @@ ThemeData _baseTheme({
   required Color backgroundColor,
   required Color indicatorColor,
   required Color selectedRowColor,
+  required Color textSelectionColor,
 }) {
   return theme.copyWith(
     primaryColor: primaryColor,
@@ -146,6 +149,9 @@ ThemeData _baseTheme({
         }
         return null;
       }),
+    ),
+    textSelectionTheme: TextSelectionThemeData(
+      selectionColor: textSelectionColor,
     ),
   );
 }

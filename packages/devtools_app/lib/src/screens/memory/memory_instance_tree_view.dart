@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../primitives/utils.dart';
@@ -20,11 +19,11 @@ class InstanceTreeView extends StatefulWidget {
 
 /// Table of the fields of an instance (type, name and value).
 class InstanceTreeViewState extends State<InstanceTreeView>
-    with AutoDisposeMixin {
-  late MemoryController _controller;
-  bool _controllerInitialized = false;
-
+    with
+        AutoDisposeMixin,
+        ProvidedControllerMixin<MemoryController, InstanceTreeView> {
   final TreeColumnData<FieldReference> treeColumn = _FieldTypeColumn();
+
   final List<ColumnData<FieldReference>> columns = [];
 
   @override
@@ -42,11 +41,7 @@ class InstanceTreeViewState extends State<InstanceTreeView>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
-    final newController = Provider.of<MemoryController>(context);
-    if (_controllerInitialized && newController == _controller) return;
-    _controller = newController;
-    _controllerInitialized = true;
+    if (!initController()) return;
 
     cancelListeners();
 
@@ -54,17 +49,17 @@ class InstanceTreeViewState extends State<InstanceTreeView>
     //              controller. Have other ValueListenables on controller to
     //              listen to, so we don't need the setState calls.
     // Update the chart when the memorySource changes.
-    addAutoDisposeListener(_controller.selectedSnapshotNotifier, () {
+    addAutoDisposeListener(controller.selectedSnapshotNotifier, () {
       setState(() {
-        _controller.computeAllLibraries(rebuild: true);
+        controller.computeAllLibraries(rebuild: true);
       });
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    _controller.instanceFieldsTreeTable = TreeTable<FieldReference>(
-      dataRoots: _controller.instanceRoot!,
+    controller.instanceFieldsTreeTable = TreeTable<FieldReference>(
+      dataRoots: controller.instanceRoot!,
       columns: columns,
       treeColumn: treeColumn,
       keyFactory: (typeRef) => PageStorageKey<String>(typeRef.name),
@@ -72,7 +67,7 @@ class InstanceTreeViewState extends State<InstanceTreeView>
       sortDirection: SortDirection.ascending,
     );
 
-    return _controller.instanceFieldsTreeTable!;
+    return controller.instanceFieldsTreeTable!;
   }
 }
 

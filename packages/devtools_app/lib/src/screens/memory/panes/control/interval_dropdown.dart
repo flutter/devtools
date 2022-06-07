@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../../../../analytics/analytics.dart' as ga;
 import '../../../../analytics/constants.dart' as analytics_constants;
 import '../../../../shared/common_widgets.dart';
+import '../../../../shared/utils.dart';
 import '../../memory_controller.dart';
 import 'constants.dart';
 
@@ -21,12 +22,11 @@ class IntervalDropdown extends StatefulWidget {
 }
 
 class _IntervalDropdownState extends State<IntervalDropdown>
-    with MemoryControllerMixin<IntervalDropdown> {
+    with ProvidedControllerMixin<MemoryController, IntervalDropdown> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
-    initMemoryController();
+    initController();
   }
 
   @override
@@ -58,15 +58,15 @@ class _IntervalDropdownState extends State<IntervalDropdown>
     return RoundedDropDownButton<String>(
       isDense: true,
       style: textTheme.bodyText2,
-      value: displayDuration(memoryController.displayInterval),
+      value: displayDuration(controller.displayInterval),
       onChanged: (String? newValue) {
         setState(() {
           ga.select(
             analytics_constants.memory,
             '${analytics_constants.memoryDisplayInterval}-$newValue',
           );
-          memoryController.displayInterval = chartInterval(newValue!);
-          final duration = chartDuration(memoryController.displayInterval);
+          controller.displayInterval = chartInterval(newValue!);
+          final duration = chartDuration(controller.displayInterval);
 
           widget.chartControllers.event.zoomDuration = duration;
           widget.chartControllers.vm.zoomDuration = duration;

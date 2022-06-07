@@ -63,10 +63,12 @@ class MemoryBodyState extends State<MemoryBody>
     with
         AutoDisposeMixin,
         SingleTickerProviderStateMixin,
-        MemoryControllerMixin {
+        ProvidedControllerMixin<MemoryController, MemoryBody> {
   late ChartControllers _chartControllers;
 
   late bool _isAndroidChartVisible;
+
+  MemoryController get memoryController => controller;
 
   OverlayEntry? _hoverOverlayEntry;
 
@@ -83,8 +85,7 @@ class MemoryBodyState extends State<MemoryBody>
   void didChangeDependencies() {
     super.didChangeDependencies();
     maybePushDebugModeMemoryMessage(context, MemoryScreen.id);
-
-    if (!initMemoryController()) return;
+    if (!initController()) return;
 
     _isAndroidChartVisible = memoryController.isAndroidChartVisible;
 

@@ -6,7 +6,6 @@ import 'dart:math';
 
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../primitives/auto_dispose_mixin.dart';
@@ -14,6 +13,7 @@ import '../../primitives/utils.dart';
 import '../../shared/split.dart';
 import '../../shared/table.dart';
 import '../../shared/table_data.dart';
+import '../../shared/utils.dart';
 import '../../ui/icons.dart';
 import '../../ui/search.dart';
 import 'memory_allocation_table_data.dart';
@@ -49,11 +49,10 @@ class AllocationTableView extends StatefulWidget {
 
 /// Table of the fields of an instance (type, name and value).
 class AllocationTableViewState extends State<AllocationTableView>
-    with AutoDisposeMixin {
+    with
+        AutoDisposeMixin,
+        ProvidedControllerMixin<MemoryController, AllocationTableView> {
   AllocationTableViewState() : super();
-
-  late MemoryController controller;
-  bool _initialized = false;
 
   final List<ColumnData<ClassHeapDetailStats>> columns = [];
 
@@ -79,11 +78,7 @@ class AllocationTableViewState extends State<AllocationTableView>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
-    final newController = Provider.of<MemoryController>(context);
-    if (_initialized && newController == controller) return;
-    controller = newController;
-    _initialized = true;
+    if (!initController()) return;
 
     cancelListeners();
 

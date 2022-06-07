@@ -45,6 +45,9 @@ void main() {
       setGlobal(OfflineModeController, OfflineModeController());
       setGlobal(IdeTheme, IdeTheme());
       frameAnalysisSupported = true;
+
+      // This flag should never be turned on in production.
+      expect(debugFrames, isFalse);
     });
 
     testWidgets('builds with no frames', (WidgetTester tester) async {

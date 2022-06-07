@@ -51,6 +51,7 @@ export 'src/screens/vm_developer/vm_developer_tools_screen.dart';
 export 'src/scripts/script_manager.dart';
 export 'src/service/isolate_manager.dart';
 export 'src/service/isolate_state.dart';
+export 'src/service/json_to_service_cache.dart';
 export 'src/service/resolved_uri_manager.dart';
 export 'src/service/service_extension_manager.dart';
 export 'src/service/service_extensions.dart';

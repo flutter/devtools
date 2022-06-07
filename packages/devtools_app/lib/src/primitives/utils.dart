@@ -1413,3 +1413,11 @@ extension UriExtension on Uri {
 Iterable<T> removeNullValues<T>(Iterable<T?> values) {
   return values.whereType<T>();
 }
+
+bool isPrimativeInstanceKind(String? kind) {
+  return kind == InstanceKind.kBool ||
+      kind == InstanceKind.kDouble ||
+      kind == InstanceKind.kInt ||
+      kind == InstanceKind.kNull ||
+      kind == InstanceKind.kString;
+}

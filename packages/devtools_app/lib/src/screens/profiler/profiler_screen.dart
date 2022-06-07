@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../../analytics/analytics.dart' as ga;
@@ -21,6 +20,7 @@ import '../../shared/globals.dart';
 import '../../shared/notifications.dart';
 import '../../shared/screen.dart';
 import '../../shared/theme.dart';
+import '../../shared/utils.dart';
 import '../../ui/icons.dart';
 import '../../ui/vm_flag_widgets.dart';
 import 'cpu_profile_controller.dart';
@@ -72,10 +72,8 @@ class ProfilerScreenBody extends StatefulWidget {
 class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
     with
         AutoDisposeMixin,
-        OfflineScreenMixin<ProfilerScreenBody, CpuProfileData> {
-  late ProfilerScreenController controller;
-  bool _controllerInitialized = false;
-
+        OfflineScreenMixin<ProfilerScreenBody, CpuProfileData>,
+        ProvidedControllerMixin<ProfilerScreenController, ProfilerScreenBody> {
   bool recording = false;
 
   bool processing = false;
@@ -93,11 +91,7 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
   void didChangeDependencies() {
     super.didChangeDependencies();
     maybePushDebugModePerformanceMessage(context, ProfilerScreen.id);
-
-    final newController = Provider.of<ProfilerScreenController>(context);
-    if (_controllerInitialized && newController == controller) return;
-    controller = newController;
-    _controllerInitialized = true;
+    if (!initController()) return;
 
     cancelListeners();
 
