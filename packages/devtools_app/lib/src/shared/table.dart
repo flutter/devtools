@@ -967,6 +967,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
                       child: ListView.builder(
                         controller: scrollController,
                         itemCount: widget.data.length,
+                        itemExtent: defaultRowHeight,
                         itemBuilder: _buildItem,
                       ),
                     ),
