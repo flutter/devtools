@@ -160,8 +160,7 @@ class ChartsValues {
 
   List<Map<String, bool>> get extensionEvents {
     if (_extensionEvents.isEmpty) {
-      final events =
-          _event[extensionEventsJsonName] as List<Map<String, bool>>;
+      final events = _event[extensionEventsJsonName] as List<Map<String, bool>>;
       _extensionEvents.addAll(events);
     }
     return _extensionEvents;

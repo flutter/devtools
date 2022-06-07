@@ -906,8 +906,7 @@ class MemoryController extends DisposableController
 
   Future<HeapSnapshotGraph?> snapshotMemory() async {
     final isolate = serviceManager.isolateManager.selectedIsolate.value;
-    if (isolate == null)
-      return null;
+    if (isolate == null) return null;
     return await serviceManager.service?.getHeapSnapshotGraph(
       isolate,
     );
