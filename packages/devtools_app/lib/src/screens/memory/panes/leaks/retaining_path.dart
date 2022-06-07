@@ -5,7 +5,7 @@ import 'package:vm_service/vm_service.dart';
 import '../../memory_controller.dart';
 
 typedef IdentityHashCode = int;
-typedef Retainers = Map<IdentityHashCode, Set<HeapSnapshotObject>>;
+typedef Retainers = Map<IdentityHashCode, Set<IdentityHashCode>>;
 
 Future<void> setRetainingPaths(
   MemoryController controller,
@@ -19,13 +19,13 @@ Future<void> setRetainingPaths(
   }
 }
 
-class PathItem {
-  PathItem(this.options);
+class _PathItem {
+  _PathItem(this.options);
 
-  final List<HeapSnapshotObject> options;
+  final List<IdentityHashCode> options;
   int _index = 0;
 
-  HeapSnapshotObject get selection => options[_index];
+  IdentityHashCode get selection => options[_index];
   bool get canChange => _index < options.length - 1;
   void change() => _index++;
 }
@@ -36,53 +36,66 @@ class _PathAnalyzer {
   }
 
   final HeapSnapshotGraph graph;
-  late Retainers retainers;
-  late Map<int, HeapSnapshotObject> byCode;
+  late Retainers _retainers;
+  // All objects by hashcode.
+  late Map<int, HeapSnapshotObject> _byCode;
 
   void _buildStrictures() {
-    retainers = {};
-    byCode = {};
+    _retainers = {};
+    _byCode = {};
 
     for (var object in graph.objects) {
-      if (_shouldSkip(object)) continue;
+      if (_shouldSkip(object.identityHashCode)) continue;
 
-      byCode[object.identityHashCode] = object;
+      _byCode[object.identityHashCode] = object;
 
       for (var r in object.references) {
         final reference = graph.objects[r];
-        if (_shouldSkip(reference)) continue;
+        if (_shouldSkip(reference.identityHashCode)) continue;
         if (reference.identityHashCode == object.identityHashCode) continue;
 
-        if (!retainers.containsKey(reference.identityHashCode))
-          retainers[reference.identityHashCode] = {};
-        retainers[reference.identityHashCode]!.add(object);
+        if (!_retainers.containsKey(reference.identityHashCode))
+          _retainers[reference.identityHashCode] = {};
+        _retainers[reference.identityHashCode]!.add(object.identityHashCode);
       }
     }
+    _assertThereAreRoots();
+  }
+
+  void _assertThereAreRoots() {
+    var rootCount = 0;
+    for (var object in graph.objects) {
+      if (_retainers[object.identityHashCode]?.isEmpty != false) rootCount++;
+    }
+    print('!!!!!!!! $rootCount roots out of ${graph.objects.length} objects');
+    assert(rootCount > 0);
   }
 
   String getPath(IdentityHashCode code) {
     final path = [
-      PathItem([byCode[code]!])
+      _PathItem([code])
     ];
     IdentityHashCode current = code;
 
-    while (retainers[current]?.isNotEmpty == true) {
+    while (_retainers[current]?.isNotEmpty == true) {
       if (path.length > 1000) throw 'Too large path.';
 
-      if (retainers[current]!.length > 1) {
-        final list =
-            retainers[current]!.toList().map((e) => _name(e)).join(', ');
+      if (_retainers[current]!.length > 1) {
+        final list = _retainers[current]!
+            .toList()
+            .map((e) => _name(_byCode[e]!))
+            .join(', ');
         print(list);
       }
 
-      final options = retainers[current]!.where((retainer) {
-        final loop = path.firstWhereOrNull((element) =>
-            element.selection.identityHashCode == retainer.identityHashCode);
+      final options = _retainers[current]!.where((retainer) {
+        final loop =
+            path.firstWhereOrNull((element) => element.selection == retainer);
         return loop == null;
       }).toList();
 
       if (options.isNotEmpty) {
-        path.insert(0, PathItem(options));
+        path.insert(0, _PathItem(options));
       } else {
         int toChange = 0;
         while (!path[toChange].canChange && toChange < path.length - 1) {
@@ -93,7 +106,7 @@ class _PathAnalyzer {
         path.removeRange(0, toChange);
       }
 
-      current = path.first.selection.identityHashCode;
+      current = path.first.selection;
 
       assert(
         current != code,
@@ -102,7 +115,7 @@ class _PathAnalyzer {
       assert(!_shouldSkip(path.first.selection));
     }
 
-    final result = path.map((e) => _name(e.selection)).join('/');
+    final result = path.map((e) => _name(_byCode[e.selection]!)).join('/');
     return '/$result/';
   }
 
@@ -110,8 +123,9 @@ class _PathAnalyzer {
     return '${object.identityHashCode}-${object.klass.name}';
   }
 
-  static bool _shouldSkip(HeapSnapshotObject object) {
-    if (object.identityHashCode == 0) return true;
+  bool _shouldSkip(IdentityHashCode code) {
+    //if (object.identityHashCode == 0) return true;
+    final object = _byCode[code]!;
 
     const toSkip = {
       '_WeakReferenceImpl',
