@@ -435,9 +435,7 @@ class HeapTreeViewState extends State<HeapTree>
                     _buildSnapshotControls(themeData.textTheme),
                     const SizedBox(height: denseRowSpacing),
                     Expanded(
-                      child: OutlineDecoration(
-                        child: buildSnapshotTables(snapshotDisplay),
-                      ),
+                      child: buildSnapshotTables(snapshotDisplay),
                     ),
                   ],
                 ),
@@ -447,7 +445,9 @@ class HeapTreeViewState extends State<HeapTree>
                   children: [
                     _buildAllocationsControls(),
                     const SizedBox(height: denseRowSpacing),
-                    const Expanded(child: AllocationTableView()),
+                    const Expanded(
+                      child: AllocationTableView(),
+                    ),
                   ],
                 ),
               ],
@@ -461,14 +461,16 @@ class HeapTreeViewState extends State<HeapTree>
   Widget buildSnapshotTables(Widget? snapshotDisplay) {
     if (snapshotDisplay == null) {
       // Display help text about how to collect data.
-      return Center(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Text('Click the take heap snapshot button '),
-            Icon(Icons.camera),
-            Text(' to collect a graph of memory objects.'),
-          ],
+      return OutlineDecoration(
+        child: Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const [
+              Text('Click the take heap snapshot button '),
+              Icon(Icons.camera),
+              Text(' to collect a graph of memory objects.'),
+            ],
+          ),
         ),
       );
     }
@@ -489,7 +491,7 @@ class HeapTreeViewState extends State<HeapTree>
               // TODO(terry): Need better focus handling between 2 tables & up/down
               //              arrows in the right-side field instance view table.
               snapshotDisplay,
-              rightSideTable,
+              OutlineDecoration(child: rightSideTable),
             ],
           );
   }
@@ -1451,7 +1453,7 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
   @override
   Widget build(BuildContext context) {
     final root = controller.buildTreeFromAllData();
-
+    Widget result;
     if (root != null && root.children.isNotEmpty) {
       // Snapshots and analyses exists display the trees.
       controller.groupByTreeTable = TreeTable<Reference>(
@@ -1464,11 +1466,12 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
         selectionNotifier: controller.selectionSnapshotNotifier,
       );
 
-      return controller.groupByTreeTable;
+      result = controller.groupByTreeTable;
     } else {
       // Nothing collected yet (snapshots/analyses) - return an empty area.
-      return const SizedBox();
+      result = const SizedBox();
     }
+    return OutlineDecoration(child: result);
   }
 }
 
@@ -1502,9 +1505,6 @@ class _LibraryRefColumn extends TreeColumnData<Reference> {
   String getTooltip(Reference dataObject) {
     return dataObject.name ?? '';
   }
-
-  @override
-  double get fixedWidthPx => 250.0;
 }
 
 class _ClassOrInstanceCountColumn extends ColumnData<Reference> {

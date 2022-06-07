@@ -113,9 +113,9 @@ class ChartsValues {
 
   final int timestamp;
 
-  final _event = <String, Object>{};
+  final _event = <String, bool>{};
 
-  final _extensionEvents = <Map<String, Object>>[];
+  final _extensionEvents = <Map<String, bool>>[];
 
   Map<String, Object> get vmData => _vm;
 
@@ -158,10 +158,10 @@ class ChartsValues {
   int get extensionEventsLength =>
       hasExtensionEvents ? extensionEvents.length : 0;
 
-  List<Map<String, Object>> get extensionEvents {
+  List<Map<String, bool>> get extensionEvents {
     if (_extensionEvents.isEmpty) {
       final events =
-          _event[extensionEventsJsonName] as List<Map<String, Object>>;
+          _event[extensionEventsJsonName] as List<Map<String, bool>>;
       _extensionEvents.addAll(events);
     }
     return _extensionEvents;
