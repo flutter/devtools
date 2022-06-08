@@ -378,8 +378,8 @@ class SnapshotReference extends Reference {
     final timestamp = snapshot.collectedTimestamp;
     final displayTimestamp = MemoryController.formattedTimestamp(timestamp);
     return snapshot.autoSnapshot
-        ? 'Snapshot $displayTimestamp Auto'
-        : 'Snapshot $displayTimestamp';
+        ? 'Snapshot (${snapshot.snapshotGraph.name}) $displayTimestamp Auto'
+        : 'Snapshot (${snapshot.snapshotGraph.name}) $displayTimestamp';
   }
 
   final Snapshot snapshot;

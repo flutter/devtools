@@ -8,6 +8,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../primitives/trees.dart';
 import '../../primitives/utils.dart';
+import '../../shared/common_widgets.dart';
 import '../../shared/split.dart';
 import '../../shared/table.dart';
 import '../../shared/table_data.dart';
@@ -141,7 +142,8 @@ class TreeTracker {
     Map<String, ClassRef> classesTracked,
     List<AllocationSamples> allocationSamples,
   ) {
-    final tree1Local = tree1 = TrackerClass('_ROOT_tracking');
+    tree1 ??= TrackerClass('_ROOT_tracking');
+    final tree1Local = tree1!;
 
     tree1Local.children.clear();
 
@@ -297,19 +299,21 @@ class TreeTracker {
       minSizes: const [trackInstancesViewWidth, callstackViewWidth],
       axis: Axis.horizontal,
       children: [
-        TreeTable<Tracker>(
-          columns: [
-            treeColumn,
-            _TrackerCountColumn(),
-          ],
-          dataRoots: tree1Local.children,
-          treeColumn: treeColumn,
-          keyFactory: (d) {
-            return Key(d.name);
-          },
-          sortColumn: treeColumn,
-          sortDirection: SortDirection.ascending,
-          selectionNotifier: selectionNotifier,
+        OutlineDecoration(
+          child: TreeTable<Tracker>(
+            columns: [
+              treeColumn,
+              _TrackerCountColumn(),
+            ],
+            dataRoots: tree1Local.children,
+            treeColumn: treeColumn,
+            keyFactory: (d) {
+              return Key(d.name);
+            },
+            sortColumn: treeColumn,
+            sortDirection: SortDirection.ascending,
+            selectionNotifier: selectionNotifier,
+          ),
         ),
         trackerAllocation == null
             ? allocationCallStackInstructions(context)
