@@ -80,15 +80,6 @@ class AllocationTableViewState extends State<AllocationTableView>
     super.didChangeDependencies();
     if (!initController()) return;
 
-    // Make sure that we actually initialize the tracker tree rather than
-    // relying on `controller.updateClassStackTraces` to be updated.
-    // TODO: find out why AllocationTableView isn't persisting when switching
-    // between the 'Analysis' and 'Allocations' tabs.
-    trackerData.createTrackerTree(
-      controller.trackAllocations,
-      controller.allocationSamples,
-    );
-
     cancelListeners();
 
     // TODO(terry): setState should be called to set our state not change the

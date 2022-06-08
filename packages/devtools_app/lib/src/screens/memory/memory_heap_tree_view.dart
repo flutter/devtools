@@ -430,25 +430,29 @@ class HeapTreeViewState extends State<HeapTree>
               controller: _tabController,
               children: [
                 // Analysis Tab
-                Column(
-                  children: [
-                    _buildSnapshotControls(themeData.textTheme),
-                    const SizedBox(height: denseRowSpacing),
-                    Expanded(
-                      child: buildSnapshotTables(snapshotDisplay),
-                    ),
-                  ],
+                KeepAliveWrapper(
+                  child: Column(
+                    children: [
+                      _buildSnapshotControls(themeData.textTheme),
+                      const SizedBox(height: denseRowSpacing),
+                      Expanded(
+                        child: buildSnapshotTables(snapshotDisplay),
+                      ),
+                    ],
+                  ),
                 ),
 
                 // Allocations Tab
-                Column(
-                  children: [
-                    _buildAllocationsControls(),
-                    const SizedBox(height: denseRowSpacing),
-                    const Expanded(
-                      child: AllocationTableView(),
-                    ),
-                  ],
+                KeepAliveWrapper(
+                  child: Column(
+                    children: [
+                      _buildAllocationsControls(),
+                      const SizedBox(height: denseRowSpacing),
+                      const Expanded(
+                        child: AllocationTableView(),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
