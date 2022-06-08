@@ -2,12 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../analytics/analytics.dart' as ga;
 import '../../charts/chart_controller.dart';
 import '../../primitives/auto_dispose_mixin.dart';
+import '../../primitives/listenable.dart';
 import '../../primitives/utils.dart';
 import '../../shared/banner_messages.dart';
 import '../../shared/common_widgets.dart';
@@ -44,6 +46,10 @@ class MemoryScreen extends Screen {
   static const id = 'memory';
 
   static const hoverKeyName = 'Chart Hover';
+
+  @override
+  ValueListenable<bool> get showIsolateSelector =>
+      const FixedValueListenable<bool>(true);
 
   @override
   String get docPageId => id;

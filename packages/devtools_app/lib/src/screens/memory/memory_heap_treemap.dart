@@ -85,8 +85,9 @@ class MemoryHeapTreemapState extends State<MemoryHeapTreemap>
 
   @override
   Widget build(BuildContext context) {
+    Widget result;
     if (_sizes == null) {
-      return Column(
+      result = Column(
         children: [
           const SizedBox(height: denseRowSpacing),
           Expanded(
@@ -96,23 +97,24 @@ class MemoryHeapTreemapState extends State<MemoryHeapTreemap>
           ),
         ],
       );
+    } else {
+      result = Padding(
+        padding: const EdgeInsets.only(top: denseRowSpacing),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return Treemap.fromRoot(
+              rootNode: root,
+              levelsVisible: 2,
+              isOutermostLevel: true,
+              width: constraints.maxWidth,
+              height: constraints.maxHeight,
+              onRootChangedCallback: _onRootChanged,
+            );
+          },
+        ),
+      );
     }
-
-    return Padding(
-      padding: const EdgeInsets.only(top: denseRowSpacing),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          return Treemap.fromRoot(
-            rootNode: root,
-            levelsVisible: 2,
-            isOutermostLevel: true,
-            width: constraints.maxWidth,
-            height: constraints.maxHeight,
-            onRootChangedCallback: _onRootChanged,
-          );
-        },
-      ),
-    );
+    return OutlineDecoration(child: result);
   }
 }
 

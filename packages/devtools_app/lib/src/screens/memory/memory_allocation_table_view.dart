@@ -10,6 +10,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../primitives/utils.dart';
+import '../../shared/common_widgets.dart';
 import '../../shared/split.dart';
 import '../../shared/table.dart';
 import '../../shared/table_data.dart';
@@ -63,7 +64,6 @@ class AllocationTableViewState extends State<AllocationTableView>
   @override
   void initState() {
     super.initState();
-
     // Setup the columns.
     columns.addAll([
       FieldTrack(),
@@ -178,17 +178,19 @@ class AllocationTableViewState extends State<AllocationTableView>
 
     if (controller.monitorAllocations.isEmpty) {
       // Display help text on how to monitor classes constructed.
-      return Center(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('Click the track button '),
-            trackImage(context),
-            const Text(
-              ' to begin monitoring changes in '
-              'memory instances (classes constructed).',
-            ),
-          ],
+      return OutlineDecoration(
+        child: Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text('Click the track button '),
+              trackImage(context),
+              const Text(
+                ' to begin monitoring changes in '
+                'memory instances (classes constructed).',
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -218,7 +220,7 @@ class AllocationTableViewState extends State<AllocationTableView>
       minSizes: const [200, 0],
       axis: Axis.vertical,
       children: [
-        controller.allocationsFieldsTable!,
+        OutlineDecoration(child: controller.allocationsFieldsTable!),
         trackerData.createTrackingTable(
           context,
           controller,
