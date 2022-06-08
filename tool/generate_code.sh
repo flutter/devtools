@@ -3,8 +3,17 @@
 # Copyright 2022 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-TOOL_DIR=`dirname "${BASH_SOURCE[0]}"`
+
+# contains a path the this script, relative to the directory it was called from
+RELATIVE_PATH_TO_SCRIPT="${BASH_SOURCE[0]}"
+
+# the directory that this script is located in
+TOOL_DIR=`dirname "${RELATIVE_PATH_TO_SCRIPT}"`
+
+#The devtools root directory is assumed to be the parent of this directory
 DEVTOOLS_DIR="${TOOL_DIR}/.."
+
+
 # Fast fail the script on failures.
 set -ex
 
