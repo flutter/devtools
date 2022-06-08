@@ -108,11 +108,14 @@ class _LeakAnalysisState extends State<_LeakAnalysis>
       serviceManager.service!.onExtensionEvent.listen((event) async {
         if (event.extensionKind == 'memory_leaks_details') {
           try {
+            print('!!!!!!!!! Received leaks.');
+            setState(() {
+              _leakController.message = 'Received leaks. Parsing.';
+            });
             final leakDetails = Leaks.fromJson(event.json!['extensionData']!);
 
             setState(() {
-              _leakController.message =
-                  'Received details. Getting retaining paths.';
+              _leakController.message = 'Getting retaining paths.';
             });
             final notGCed = leakDetails.leaks[LeakType.notGCed];
             await setRetainingPaths(controller, notGCed ?? []);
@@ -131,15 +134,23 @@ class _LeakAnalysisState extends State<_LeakAnalysis>
               _leakController.reset();
             });
           } catch (e, trace) {
-            setState(() {
-              _leakController.error = 'Processing error: $e';
-            });
-            logger.log(e);
-            logger.log(trace);
+            handleError(e, trace);
           }
         }
       }),
     );
+  }
+
+  void handleError(Object error, StackTrace trace) {
+    setState(() {
+      _leakController.error = 'Processing error: $error';
+    });
+    logger.log(error);
+    logger.log(trace);
+  }
+
+  Future<void> _requestLeaks() async {
+    await eval.safeEval('sendLeaks()', isAlive: Stub());
   }
 
   @override
@@ -148,11 +159,15 @@ class _LeakAnalysisState extends State<_LeakAnalysis>
       return MaterialButton(
         child: const Text('Analyze and Copy to Clipboard'),
         onPressed: () async {
-          await eval.safeEval('sendLeaks()', isAlive: Stub());
-          setState(() {
-            _leakController.isStarted = true;
-            _leakController.message = 'Requested details.';
-          });
+          try {
+            await _requestLeaks();
+            setState(() {
+              _leakController.isStarted = true;
+              _leakController.message = 'Requested details.';
+            });
+          } catch (e, trace) {
+            handleError(e, trace);
+          }
         },
       );
     }

@@ -13,7 +13,8 @@ Future<void> setRetainingPaths(
   List<ObjectReport> reports,
 ) async {
   final graph = (await controller.snapshotMemory())!;
-  final pathAnalyzer = _PathAnalyzer(graph);
+
+  final pathAnalyzer = _PathAnalyzer(graph, reports);
 
   for (var report in reports) {
     report.retainingPath = pathAnalyzer.getPath(report.theIdentityHashCode);
@@ -37,6 +38,7 @@ class _PathAnalyzer {
   }
 
   final HeapSnapshotGraph graph;
+  final List<ObjectReport> reports;
   late Retainers _retainers;
   // All objects by hashcode.
   late Map<int, HeapSnapshotObject> _byCode;

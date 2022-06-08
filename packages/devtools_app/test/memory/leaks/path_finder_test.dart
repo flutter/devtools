@@ -58,4 +58,30 @@ void main() {
     );
     expect(path, equals([1, 3]));
   });
+
+  test('Full graph.', () {
+    const size = 10000;
+    final incomers = _fullGraph(size);
+
+    const root = size;
+    const retainer = 0;
+    const destination = size - 1;
+
+    // Add root.
+    incomers[retainer]!.add(root);
+    final path = findPathFromRoot(incomers, destination);
+    expect(path, equals([size, retainer, destination]));
+  });
+}
+
+Map<int, Set<int>> _fullGraph(int size) {
+  final result = <int, Set<int>>{};
+  for (var i in Iterable.generate(size)) {
+    final set = <int>{};
+    result[i] = set;
+    for (var j in Iterable.generate(size)) {
+      if (i != j) set.add(j);
+    }
+  }
+  return result;
 }

@@ -53,6 +53,7 @@ dependencies:
   web_socket_channel: ^2.1.0
   flutter_json_view: ^0.3.1
   # widget_icons: ^0.0.1
+  sorted_list: ^1.0.0
   memory_tools:
     path: ../../../spikes/memory_tools
   #    git:
