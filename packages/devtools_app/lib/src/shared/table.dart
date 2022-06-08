@@ -235,6 +235,7 @@ class FlatTableState<T> extends State<FlatTable<T>>
           secondarySortColumn: widget.secondarySortColumn,
           onSortChanged: _sortDataAndUpdate,
           activeSearchMatchNotifier: widget.activeSearchMatchNotifier,
+          itemExtent: defaultRowHeight,
         );
       },
     );
@@ -788,6 +789,7 @@ class _Table<T> extends StatefulWidget {
     this.autoScrollContent = false,
     this.selectionNotifier,
     this.activeSearchMatchNotifier,
+    this.itemExtent,
   }) : super(key: key);
 
   final List<T> data;
@@ -799,6 +801,7 @@ class _Table<T> extends StatefulWidget {
   final ColumnData<T> sortColumn;
   final SortDirection sortDirection;
   final ColumnData<T>? secondarySortColumn;
+  final double? itemExtent;
   final Function(
     ColumnData<T> column,
     SortDirection direction, {
@@ -815,14 +818,16 @@ class _Table<T> extends StatefulWidget {
   int get numSpacers => max(0, columns.length - 1);
 
   @override
-  _TableState<T> createState() => _TableState<T>();
+  _TableState<T> createState() => _TableState<T>(itemExtent: itemExtent);
 }
 
 class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
+  _TableState({this.itemExtent});
   late LinkedScrollControllerGroup _linkedHorizontalScrollControllerGroup;
   late ColumnData<T> sortColumn;
   late SortDirection sortDirection;
   late ScrollController scrollController;
+  final double? itemExtent;
 
   @override
   void initState() {
@@ -967,7 +972,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
                       child: ListView.builder(
                         controller: scrollController,
                         itemCount: widget.data.length,
-                        itemExtent: defaultRowHeight,
+                        itemExtent: itemExtent,
                         itemBuilder: _buildItem,
                       ),
                     ),
