@@ -818,16 +818,14 @@ class _Table<T> extends StatefulWidget {
   int get numSpacers => max(0, columns.length - 1);
 
   @override
-  _TableState<T> createState() => _TableState<T>(rowItemExtent: rowItemExtent);
+  _TableState<T> createState() => _TableState<T>();
 }
 
 class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
-  _TableState({this.rowItemExtent});
   late LinkedScrollControllerGroup _linkedHorizontalScrollControllerGroup;
   late ColumnData<T> sortColumn;
   late SortDirection sortDirection;
   late ScrollController scrollController;
-  final double? rowItemExtent;
 
   @override
   void initState() {
@@ -972,7 +970,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
                       child: ListView.builder(
                         controller: scrollController,
                         itemCount: widget.data.length,
-                        itemExtent: rowItemExtent,
+                        itemExtent: widget.rowItemExtent,
                         itemBuilder: _buildItem,
                       ),
                     ),
