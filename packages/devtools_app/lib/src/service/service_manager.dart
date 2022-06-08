@@ -497,8 +497,8 @@ class ServiceConnectionManager {
     if (uri == null) return false;
     assert(_serviceAvailable.isCompleted);
     assert(serviceManager.isolateManager.mainIsolate.value != null);
-    final isolate = isolateManager.mainIsolateDebuggerState!.isolateNow!;
-    return (isolate.libraries ?? [])
+    final isolate = isolateManager.mainIsolateDebuggerState!.isolateNow;
+    return (isolate?.libraries ?? [])
         .map((ref) => ref.uri)
         .toList()
         .any((u) => u?.startsWith(uri) == true);
