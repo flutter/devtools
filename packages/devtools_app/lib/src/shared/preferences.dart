@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 
+import '../screens/inspector/inspector_service.dart';
 import '../service/vm_service_wrapper.dart';
 import 'globals.dart';
 
@@ -65,11 +68,26 @@ class PreferencesController {
 
 class InspectorPreferencesController {
   ValueListenable<bool> get hoverEvalModeEnabled => _hoverEvalMode;
+  ValueListenable<List<String>> get customPubRootDirectories =>
+      _customPubRootDirectories;
+  InspectorService get inspectorService =>
+      serviceManager.inspectorService as InspectorService;
 
   final _hoverEvalMode = ValueNotifier<bool>(false);
+  final _customPubRootDirectories = ValueNotifier<List<String>>([]);
   static const _hoverEvalModeStorageId = 'inspector.hoverEvalMode';
+  static const _customPubRootDirectoriesStorageId =
+      'inspector.customPubRootDirectories';
+
+  late List<String>? defaultPubRootDirectories;
 
   Future<void> init() async {
+    await initHoverEvalMode();
+
+    setGlobal(InspectorPreferencesController, this);
+  }
+
+  Future<void> initHoverEvalMode() async {
     String? value = await storage.getValue(_hoverEvalModeStorageId);
 
     // When embedded, default hoverEvalMode to off
@@ -82,8 +100,34 @@ class InspectorPreferencesController {
         _hoverEvalMode.value.toString(),
       );
     });
+  }
 
-    setGlobal(InspectorPreferencesController, this);
+  Future<void> initCustomPubRootDirectories() async {
+    final pubRootDirectories = <String>[];
+    defaultPubRootDirectories = await inspectorService.getPubRootDirectories();
+
+    if (defaultPubRootDirectories != null) {
+      pubRootDirectories.addAll(defaultPubRootDirectories!);
+    }
+
+    final storedCustomPubRootDirectories =
+        await storage.getValue(_customPubRootDirectoriesStorageId);
+
+    if (storedCustomPubRootDirectories != null) {
+      pubRootDirectories.addAll(
+          List<String>.from(jsonDecode(storedCustomPubRootDirectories)));
+    }
+    setCustomPubRootDirectories(pubRootDirectories);
+    _customPubRootDirectories.addListener(() {
+      storage.setValue(
+        _customPubRootDirectoriesStorageId,
+        jsonEncode(_customPubRootDirectories.value),
+      );
+    });
+  }
+
+  void setCustomPubRootDirectories(List<String> pubRootDirectories) {
+    _customPubRootDirectories.value = pubRootDirectories;
   }
 
   /// Change the value for the hover eval mode setting.

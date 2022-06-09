@@ -208,6 +208,7 @@ class _ConnectDialogState extends State<ConnectDialog>
       routerDelegate.updateArgsIfNotCurrent({'uri': '$connectedUri'});
       final shortUri = connectedUri.replace(path: '');
       notifications.push('Successfully connected to $shortUri.');
+      await preferences.inspectorPreferences.initCustomPubRootDirectories();
     } else if (uri == null) {
       notifications.push(
         'Failed to connect to the VM Service at "${connectDialogController.text}".\n'

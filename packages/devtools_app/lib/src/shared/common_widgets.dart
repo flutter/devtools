@@ -18,6 +18,7 @@ import '../primitives/flutter_widgets/linked_scroll_controller.dart';
 import '../primitives/utils.dart';
 import '../screens/debugger/debugger_controller.dart';
 import '../screens/debugger/variables.dart';
+import '../screens/inspector/inspector_service.dart';
 import '../ui/icons.dart';
 import '../ui/label.dart';
 import 'globals.dart';
@@ -252,6 +253,114 @@ class ClearButton extends IconLabelButton {
               minScreenWidthForTextBeforeScaling,
           onPressed: onPressed,
         );
+}
+
+class PubRootField extends StatelessWidget {
+  InspectorService get inspectorService =>
+      serviceManager.inspectorService as InspectorService;
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: inspectorService.getPubRootDirectories(),
+      builder: (
+        context,
+        snapshot,
+      ) {
+        if (snapshot.hasData) {
+          return JSONTextField(snapshot.data as List<String>?);
+        } else if (snapshot.hasError) {
+          return Row(
+            children: [
+              const Icon(
+                Icons.error_outline,
+                color: Colors.red,
+                size: 60,
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: Text('Error: ${snapshot.error}'),
+              )
+            ],
+          );
+        } else {
+          return Row(children: [
+            SizedBox(
+              width: 60,
+              height: 60,
+              child: CircularProgressIndicator(),
+            ),
+            Padding(
+              padding: EdgeInsets.only(top: 16),
+              child: Text('Awaiting result...'),
+            )
+          ]);
+        }
+        return Text('THERE WAS AN ERROR');
+      },
+    );
+  }
+}
+
+class JSONTextField extends StatefulWidget {
+  JSONTextField(List<String>? initialPubRoots) {
+    _initialPubRoots = initialPubRoots;
+  }
+
+  late final List<String>? _initialPubRoots;
+
+  @override
+  State<StatefulWidget> createState() => _JSONTextFieldState(_initialPubRoots);
+}
+
+class _JSONTextFieldState extends State<JSONTextField> {
+  _JSONTextFieldState(List<String>? initialPubRoots) {
+    _initialPubRoots = initialPubRoots;
+  }
+
+  late final List<String>? _initialPubRoots;
+  bool _invalid = false;
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: jsonEncode(_initialPubRoots));
+  }
+
+  InspectorService get inspectorService =>
+      serviceManager.inspectorService as InspectorService;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: _controller,
+      decoration: InputDecoration(
+        labelText: 'List of Pub Roots',
+        errorText: _invalid ? 'Expected valid json for array of strings' : null,
+      ),
+      onChanged: (text) async {
+        try {
+          final newPubRoots = List<String>.from(jsonDecode(text));
+          await inspectorService.setPubRootDirectories(newPubRoots);
+          setState(() {
+            _invalid = false;
+          });
+          preferences.inspectorPreferences
+              .setCustomPubRootDirectories(newPubRoots);
+        } on FormatException catch (_) {
+          // Fail if not valid json
+          setState(() {
+            _invalid = true;
+          });
+        } on TypeError catch (_) {
+          // Fail if not an array of strings
+          setState(() {
+            _invalid = true;
+          });
+        }
+      },
+    );
+  }
 }
 
 class RefreshButton extends IconLabelButton {

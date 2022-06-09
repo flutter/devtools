@@ -355,6 +355,7 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
                 'Hovering over any widget displays its properties and values.',
             gaItem: analytics_constants.inspectorHoverEvalMode,
           ),
+          PubRootField(),
         ],
       ),
       actions: [

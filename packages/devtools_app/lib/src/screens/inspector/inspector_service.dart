@@ -442,6 +442,17 @@ class InspectorService extends InspectorServiceBase {
     );
   }
 
+  Future<List<String>?> getPubRootDirectories() async {
+    assert(useDaemonApi);
+    final response = await invokeServiceMethodDaemonNoGroupArgs(
+      'getPubRootDirectories',
+    );
+
+    return (response as List<dynamic>)
+        .map<String>((e) => e.toString())
+        .toList();
+  }
+
   /// As we aren't running from an IDE, we don't know exactly what the pub root
   /// directories are for the current project so we make a best guess if needed
   /// based on the the root directory of the first non artifical widget in the
