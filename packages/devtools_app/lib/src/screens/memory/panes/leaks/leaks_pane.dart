@@ -11,7 +11,7 @@ import 'package:flutter/services.dart';
 import '../../../../config_specific/logger/logger.dart' as logger;
 import '../../../../shared/utils.dart';
 import '../../memory_controller.dart';
-import 'leak_analysis.dart';
+import 'leak_analyser.dart';
 
 final DateFormat _formatter = DateFormat.Hms();
 String _timeForConsole(DateTime time) => _formatter.format(time);

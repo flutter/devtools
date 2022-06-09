@@ -7,7 +7,7 @@ class HeapObject {
   HeapObject({required this.references, required this.klass});
 
   factory HeapObject.fromJson(Map<String, dynamic> json) => HeapObject(
-        references: json['references'],
+        references: (json['references'] as List<dynamic>).cast<int>(),
         klass: json['klass'],
       );
 
@@ -20,18 +20,21 @@ class HeapObject {
       };
 }
 
-class LeakAnalysisTask {
-  LeakAnalysisTask({required this.objects, required this.reports});
+class RetainingPathExtractionTask {
+  RetainingPathExtractionTask({required this.objects, required this.reports});
 
-  factory LeakAnalysisTask.fromJson(Map<String, dynamic> json) =>
-      LeakAnalysisTask(
+  factory RetainingPathExtractionTask.fromJson(Map<String, dynamic> json) =>
+      RetainingPathExtractionTask(
         objects: (json['objects'] as Map<String, dynamic>).map(
           (key, value) => MapEntry(int.parse(key), HeapObject.fromJson(value)),
         ),
-        reports: json['reports'],
+        reports: (json['reports'] as List<dynamic>)
+            .cast<Map<String, dynamic>>()
+            .map((e) => ObjectReport.fromJson(e)),
       );
 
-  LeakAnalysisTask.fromSnapshot(HeapSnapshotGraph graph, this.reports) {
+  RetainingPathExtractionTask.fromSnapshot(
+      HeapSnapshotGraph graph, this.reports) {
     objects = Map.fromIterable(
       graph.objects,
       key: (o) => o.identityHashCode,

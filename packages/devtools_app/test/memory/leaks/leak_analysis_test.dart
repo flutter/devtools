@@ -1,4 +1,4 @@
-import 'package:devtools_app/src/screens/memory/panes/leaks/leak_analysis.dart';
+import 'package:devtools_app/src/screens/memory/panes/leaks/leak_analyser.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memory_tools/src/model.dart';
 

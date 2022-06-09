@@ -1,4 +1,9 @@
-import 'package:devtools_app/src/screens/memory/panes/leaks/path_finder.dart';
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:devtools_app/src/screens/memory/panes/leaks/model.dart';
+import 'package:devtools_app/src/screens/memory/panes/leaks/graph_analyzer.dart';
+import 'package:devtools_app/src/screens/memory/panes/leaks/retaining_path.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -72,6 +77,24 @@ void main() {
     final path = findPathFromRoot(incomers, destination);
     expect(path, equals([size, retainer, destination]));
   });
+
+  test('Six thousand not gc-ed.', () async {
+    final task = await _loadTaskFromFile(
+        'test/memory/leaks/data/six_thousand_not_gced.json');
+    final pathAnalyzer = RetainingPathExtractor(task.objects);
+    for (var report in task.reports) {
+      report.retainingPath = pathAnalyzer.getPath(report.theIdentityHashCode);
+    }
+  });
+}
+
+Future<RetainingPathExtractionTask> _loadTaskFromFile(
+  String fileNameFromProjectRoot,
+) async {
+  final json = jsonDecode(
+    await File(fileNameFromProjectRoot).readAsString(),
+  );
+  return RetainingPathExtractionTask.fromJson(json);
 }
 
 Map<int, Set<int>> _fullGraph(int size) {

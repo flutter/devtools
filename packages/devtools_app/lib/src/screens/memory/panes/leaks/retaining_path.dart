@@ -2,12 +2,13 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
+import 'package:flutter/material.dart';
 import 'package:memory_tools/model.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../memory_controller.dart';
 import 'model.dart';
-import 'path_finder.dart';
+import 'graph_analyzer.dart';
 
 typedef IdentityHashCode = int;
 typedef Retainers = Map<IdentityHashCode, Set<IdentityHashCode>>;
@@ -17,7 +18,7 @@ Future<String> getSerializedTask(
   List<ObjectReport> reports,
 ) async {
   final graph = (await controller.snapshotMemory())!;
-  final task = LeakAnalysisTask.fromSnapshot(graph, reports);
+  final task = RetainingPathExtractionTask.fromSnapshot(graph, reports);
   return jsonEncode(task.toJson());
 }
 
@@ -26,17 +27,17 @@ Future<void> setRetainingPaths(
   List<ObjectReport> reports,
 ) async {
   final graph = (await controller.snapshotMemory())!;
+  final task = RetainingPathExtractionTask.fromSnapshot(graph, reports);
 
-  final task = LeakAnalysisTask.fromSnapshot(graph, reports);
-
-  final pathAnalyzer = _PathAnalyzer(task.objects);
-  for (var report in reports) {
+  final pathAnalyzer = RetainingPathExtractor(task.objects);
+  for (var report in task.reports) {
     report.retainingPath = pathAnalyzer.getPath(report.theIdentityHashCode);
   }
 }
 
-class _PathAnalyzer {
-  _PathAnalyzer(this.objects) {
+@visibleForTesting
+class RetainingPathExtractor {
+  RetainingPathExtractor(this.objects) {
     _buildStrictures();
   }
 

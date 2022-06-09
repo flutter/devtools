@@ -6,7 +6,7 @@ import 'package:memory_tools/model.dart';
 
 void main() {
   test('LeakAnalysisTask serializes.', () {
-    final task = LeakAnalysisTask(
+    final task = RetainingPathExtractionTask(
       objects: {
         1: HeapObject(klass: 'class', references: [2, 3, 4])
       },
@@ -24,7 +24,7 @@ void main() {
 
     expect(
       jsonEncode(json),
-      jsonEncode(LeakAnalysisTask.fromJson(json).toJson()),
+      jsonEncode(RetainingPathExtractionTask.fromJson(json).toJson()),
     );
   });
 }
