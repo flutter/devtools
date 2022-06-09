@@ -38,6 +38,7 @@ class _NodesByDistance {
 
   void add(int node) {
     final distance = nodes[node]!.distance;
+    assert(distance < _infinite);
     _buckets[distance] ??= {};
     _buckets[distance]!.add(node);
 
@@ -50,6 +51,7 @@ class _NodesByDistance {
     final oldDistance = nodes[node]!.distance;
     // New distance should be better than old distance.
     assert(oldDistance > distance);
+    assert(distance < _infinite);
 
     _minDistance = distance;
 
@@ -82,7 +84,7 @@ class _NodesByDistance {
     return result;
   }
 
-  bool get isNotEmpty => _minDistance != null;
+  bool get isNotEmpty => _minDistance != _infinite;
 }
 
 /// Based on https://www.geeksforgeeks.org/prims-minimum-spanning-tree-mst-greedy-algo-5/

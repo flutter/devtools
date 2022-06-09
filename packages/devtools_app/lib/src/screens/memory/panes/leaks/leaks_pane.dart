@@ -117,14 +117,24 @@ class _LeakAnalysisState extends State<_LeakAnalysis>
             setState(() {
               _leakController.message = 'Getting retaining paths.';
             });
-            final notGCed = leakDetails.leaks[LeakType.notGCed];
-            await setRetainingPaths(controller, notGCed ?? []);
-            setState(
-              () => _leakController.message =
-                  'Obtained paths. Copying to clipboard.',
-            );
+            final notGCed = leakDetails.leaks[LeakType.notGCed] ?? [];
+
             await Clipboard.setData(
-                ClipboardData(text: analyzeAndYaml(leakDetails)));
+              ClipboardData(text: await getSerializedTask(controller, notGCed)),
+            );
+
+            // setState(() {
+            //   _leakController.message = 'Getting retaining paths.';
+            // });
+            // final notGCed = leakDetails.leaks[LeakType.notGCed] ?? [];
+            // await setRetainingPaths(controller, notGCed);
+            // setState(
+            //   () => _leakController.message =
+            //       'Obtained paths. Copying to clipboard.',
+            // );
+            // await Clipboard.setData(
+            //     ClipboardData(text: analyzeAndYaml(leakDetails)));
+
             setState(() {
               _leakController.message = 'Copied to clipboard';
               _leakController.isComplete = true;
