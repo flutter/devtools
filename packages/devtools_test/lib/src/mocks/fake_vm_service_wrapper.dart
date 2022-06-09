@@ -191,6 +191,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
     // Simulate a snapshot that takes .5 seconds.
     await Future.delayed(const Duration(milliseconds: 500));
     final result = MockHeapSnapshotGraph();
+    when(result.name).thenReturn('name');
     when(result.classes).thenReturn([]);
     when(result.objects).thenReturn([]);
     when(result.externalProperties).thenReturn([]);
@@ -387,6 +388,9 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
       HttpTimelineLoggingState(enabled: httpEnableTimelineLoggingResult),
     );
   }
+
+  @override
+  final fakeServiceCache = JsonToServiceCache();
 
   @override
   Future<Timestamp> getVMTimelineMicros() async => Timestamp(timestamp: 0);

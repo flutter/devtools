@@ -19,6 +19,7 @@ import '../../shared/common_widgets.dart';
 import '../../shared/dialogs.dart';
 import '../../shared/globals.dart';
 import '../../shared/history_viewport.dart';
+import '../../shared/object_tree.dart';
 import '../../shared/theme.dart';
 import '../../shared/utils.dart';
 import '../../ui/colors.dart';

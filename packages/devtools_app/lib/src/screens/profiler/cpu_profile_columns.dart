@@ -79,17 +79,11 @@ class TotalTimeColumn extends ColumnData<CpuStackFrame> {
 
 class MethodNameColumn extends TreeColumnData<CpuStackFrame> {
   MethodNameColumn() : super('Method');
-
-  static const maxMethodNameLength = 75;
-
   @override
   dynamic getValue(CpuStackFrame dataObject) => dataObject.name;
 
   @override
   String getDisplayValue(CpuStackFrame dataObject) {
-    if (dataObject.name.length > maxMethodNameLength) {
-      return dataObject.name.substring(0, maxMethodNameLength) + '...';
-    }
     return dataObject.name;
   }
 
