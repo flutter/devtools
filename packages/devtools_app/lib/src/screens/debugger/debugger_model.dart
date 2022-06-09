@@ -420,9 +420,14 @@ Future<void> buildVariablesTree(
       start += count;
     }
   } else if (instanceRef != null && serviceManager.service != null) {
+    final variableId = variable.ref!.isolateRef!.id!;
     try {
-      final dynamic result =
-          await _getObjectWithRetry(instanceRef.id!, variable);
+      final dynamic result = await serviceManager.service!.getObject(
+        variableId,
+        instanceRef.id!,
+        offset: variable.offset,
+        count: variable.childCount,
+      );
       if (result is Instance) {
         if (result.associations != null) {
           variable.addAllChildren(
@@ -522,29 +527,6 @@ Future<void> buildVariablesTree(
     }
   }
   variable.treeInitializeComplete = true;
-}
-
-// TODO(elliette): Remove once the fix for dart-lang/webdev/issues/1439
-// is landed. This works around a bug in DWDS where an error is thrown if
-// `getObject` is called with offset/count for an object that has no length.
-Future<Obj> _getObjectWithRetry(
-  String objectId,
-  DartObjectNode variable,
-) async {
-  final variableId = variable.ref!.isolateRef!.id!;
-  try {
-    final dynamic result = await serviceManager.service!.getObject(
-      variableId,
-      objectId,
-      offset: variable.offset,
-      count: variable.childCount,
-    );
-    return result;
-  } catch (e) {
-    final dynamic result =
-        await serviceManager.service!.getObject(variableId, objectId);
-    return result;
-  }
 }
 
 Future<DartObjectNode> _buildVariable(
