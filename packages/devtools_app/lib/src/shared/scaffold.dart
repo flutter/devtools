@@ -330,7 +330,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
               // matter on Android and we do not care about Android.
               // Using theme.primaryColor matches the default behavior of the
               // title used by [WidgetsApp].
-              color: theme.primaryColor,
+              color: theme.primaryColor.withAlpha(255),
               child: KeyboardShortcuts(
                 keyboardShortcuts: _currentScreen.buildKeyboardShortcuts(
                   context,
