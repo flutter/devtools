@@ -116,12 +116,12 @@ class _ServiceExtensionButtonGroupState
     return SizedBox(
       height: defaultButtonHeight,
       child: DevToolsToggleButtonGroup(
+        selectedStates: [for (var e in _extensionStates) e.isSelected],
+        onPressed: available ? _onPressed : null,
         children: <Widget>[
           for (var extensionState in _extensionStates)
             _buildExtension(extensionState)
         ],
-        selectedStates: [for (var e in _extensionStates) e.isSelected],
-        onPressed: available ? _onPressed : null,
       ),
     );
   }
@@ -644,9 +644,9 @@ class _ServiceExtensionCheckboxGroupButtonState
       valueListenable: _enabled,
       builder: (context, enabled, _) {
         return DevToolsToggleButtonGroup(
-          children: [label],
           selectedStates: [enabled],
           onPressed: (_) => _insertOverlay(context),
+          children: [label],
         );
       },
     );
@@ -882,7 +882,6 @@ class ServiceExtensionTooltip extends StatelessWidget {
     return DevToolsTooltip(
       message: description.tooltip,
       preferBelow: true,
-      child: child,
       decoration: BoxDecoration(
         color: colorScheme.defaultBackgroundColor,
         border: Border.all(
@@ -892,6 +891,7 @@ class ServiceExtensionTooltip extends StatelessWidget {
         borderRadius: BorderRadius.circular(defaultBorderRadius),
       ),
       textStyle: textStyle,
+      child: child,
     );
   }
 }

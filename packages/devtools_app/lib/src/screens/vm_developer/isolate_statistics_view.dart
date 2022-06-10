@@ -370,6 +370,10 @@ class _IsolatePortsWidgetState extends State<IsolatePortsWidget> {
             table: Flexible(
               child: Split(
                 axis: Axis.horizontal,
+                initialFractions: const [
+                  0.3,
+                  0.7,
+                ],
                 children: [
                   FlatTable<InstanceRef?>(
                     columns: columns,
@@ -392,10 +396,6 @@ class _IsolatePortsWidgetState extends State<IsolatePortsWidget> {
                   StackTraceViewerWidget(
                     stackTrace: selectedPort.value,
                   ),
-                ],
-                initialFractions: const [
-                  0.3,
-                  0.7,
                 ],
               ),
             ),

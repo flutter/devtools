@@ -169,6 +169,24 @@ class WidgetVisualizer extends StatelessWidget {
           maxHeight: constraints.maxHeight + boxAdjust,
           minHeight: constraints.minHeight + boxAdjust,
           child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: borderColor,
+                width:
+                    isSelected ? _borderSelectedWidth : _borderUnselectedWidth,
+              ),
+              color: isSelected
+                  ? theme.canvasColor.brighten()
+                  : theme.canvasColor.darken(),
+              boxShadow: isSelected
+                  ? [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(.5),
+                        blurRadius: 20,
+                      ),
+                    ]
+                  : null,
+            ),
             child: Stack(
               children: [
                 if (drawOverflow)
@@ -206,6 +224,8 @@ class WidgetVisualizer extends StatelessWidget {
                                       : minRenderWidth *
                                           widgetTitleMaxWidthPercentage,
                                 ),
+                                decoration: BoxDecoration(color: borderColor),
+                                padding: const EdgeInsets.all(4.0),
                                 child: Center(
                                   child: Text(
                                     title,
@@ -215,8 +235,6 @@ class WidgetVisualizer extends StatelessWidget {
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
-                                decoration: BoxDecoration(color: borderColor),
-                                padding: const EdgeInsets.all(4.0),
                               ),
                             ),
                             if (hintLocal != null) Flexible(child: hintLocal),
@@ -228,24 +246,6 @@ class WidgetVisualizer extends StatelessWidget {
                   ),
                 ),
               ],
-            ),
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: borderColor,
-                width:
-                    isSelected ? _borderSelectedWidth : _borderUnselectedWidth,
-              ),
-              color: isSelected
-                  ? theme.canvasColor.brighten()
-                  : theme.canvasColor.darken(),
-              boxShadow: isSelected
-                  ? [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(.5),
-                        blurRadius: 20,
-                      ),
-                    ]
-                  : null,
             ),
           ),
         );
