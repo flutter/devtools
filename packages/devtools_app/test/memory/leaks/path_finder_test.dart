@@ -80,11 +80,30 @@ void main() {
 
   test('Six thousand not gc-ed.', () async {
     final task = await _loadTaskFromFile(
-        'test/memory/leaks/data/six_thousand_not_gced.json');
-    final pathAnalyzer = RetainingPathExtractor(task.objects);
-    for (var report in task.reports) {
-      report.retainingPath = pathAnalyzer.getPath(report.theIdentityHashCode);
-    }
+      'test/memory/leaks/data/six_thousand_not_gced.json',
+    );
+    final pathExtractor = RetainingPathExtractor(task.objects);
+
+    final roots = pathExtractor.getRoots();
+    assert(roots.isNotEmpty, true);
+    final galleryAppCode = pathExtractor.objects.keys
+        .firstWhere((k) => pathExtractor.objects[k]!.klass == 'GalleryApp');
+    final path = pathExtractor.getPath(galleryAppCode);
+    assert(path.contains('GalleryApp'));
+
+    // for (var report in task.reports) {
+    //   report.retainingPath = pathExtractor.getPath(report.theIdentityHashCode);
+    // }
+  });
+
+  test('Not gc-ed.', () async {
+    final task =
+        await _loadTaskFromFile('test/memory/leaks/data/not_gced.json');
+    final pathExtractor = RetainingPathExtractor(task.objects);
+
+    // for (var report in task.reports) {
+    //   report.retainingPath = pathExtractor.getPath(report.theIdentityHashCode);
+    // }
   });
 }
 

@@ -13,25 +13,21 @@ import 'graph_analyzer.dart';
 typedef IdentityHashCode = int;
 typedef Retainers = Map<IdentityHashCode, Set<IdentityHashCode>>;
 
-Future<String> getSerializedTask(
+Future<RetainingPathExtractionTask> getTask(
   MemoryController controller,
   List<ObjectReport> reports,
 ) async {
   final graph = (await controller.snapshotMemory())!;
-  final task = RetainingPathExtractionTask.fromSnapshot(graph, reports);
-  return jsonEncode(task.toJson());
+  return RetainingPathExtractionTask.fromSnapshot(graph, reports);
 }
 
-Future<void> setRetainingPaths(
-  MemoryController controller,
-  List<ObjectReport> reports,
-) async {
-  final graph = (await controller.snapshotMemory())!;
-  final task = RetainingPathExtractionTask.fromSnapshot(graph, reports);
-
-  final pathAnalyzer = RetainingPathExtractor(task.objects);
+void setRetainingPaths(
+  RetainingPathExtractionTask task,
+) {
+  final pathExtractor = RetainingPathExtractor(task.objects);
   for (var report in task.reports) {
-    report.retainingPath = pathAnalyzer.getPath(report.theIdentityHashCode);
+    print('!!! calculating path for ${report.theIdentityHashCode}');
+    report.retainingPath = pathExtractor.getPath(report.theIdentityHashCode);
   }
 }
 
@@ -43,7 +39,7 @@ class RetainingPathExtractor {
 
   late Retainers _retainers;
   // All objects by hashcode.
-  late Map<int, HeapObject> objects;
+  late Map<IdentityHashCode, HeapObject> objects;
 
   void _buildStrictures() {
     _retainers = {};
@@ -62,9 +58,17 @@ class RetainingPathExtractor {
     }
   }
 
+  Map<IdentityHashCode, HeapObject> getRoots() {
+    return Map<IdentityHashCode, HeapObject>.fromIterable(
+      objects.keys.where((code) => _retainers[code]?.isEmpty ?? true),
+      key: (code) => code,
+      value: (code) => objects[code]!,
+    );
+  }
+
   String getPath(IdentityHashCode code) {
     final path = findPathFromRoot(_retainers, code);
-    if (path == null) throw 'All retainers looped.';
+    if (path == null) throw 'All retainers looped for $code.';
     final result = path.map((i) => _name(i, objects[i]!.klass)).join('/');
     return '/$result/';
   }
@@ -79,7 +83,7 @@ class RetainingPathExtractor {
       // '_ElementDiagnosticableTreeNode',
       // '_InspectorReferenceData',
       // 'DebugCreator',
-      // '_WidgetTicker',
+      //'_WidgetTicker',
     };
 
     return toSkip.contains(klass);

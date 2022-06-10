@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:devtools_app/src/screens/memory/panes/leaks/retaining_path.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:memory_tools/model.dart';
@@ -73,6 +76,7 @@ class _LeakAnalysisController {
   bool isStarted = false;
   bool isComplete = false;
   String message = '';
+  String? previousAnalysisTask;
   String? error;
 
   void reset() {
@@ -118,22 +122,25 @@ class _LeakAnalysisState extends State<_LeakAnalysis>
               _leakController.message = 'Getting retaining paths.';
             });
             final notGCed = leakDetails.leaks[LeakType.notGCed] ?? [];
+            final task = await getTask(controller, notGCed);
 
-            await Clipboard.setData(
-              ClipboardData(text: await getSerializedTask(controller, notGCed)),
+            setState(() {
+              _leakController.message = 'Getting retaining paths.';
+              _leakController.previousAnalysisTask = jsonEncode(task.toJson());
+            });
+
+            await compute(setRetainingPaths, task);
+            // setRetainingPaths(task);
+
+            assert(task.reports.first.retainingPath != null);
+
+            setState(
+              () => _leakController.message =
+                  'Obtained paths. Copying to clipboard',
             );
-
-            // setState(() {
-            //   _leakController.message = 'Getting retaining paths.';
-            // });
-            // final notGCed = leakDetails.leaks[LeakType.notGCed] ?? [];
-            // await setRetainingPaths(controller, notGCed);
-            // setState(
-            //   () => _leakController.message =
-            //       'Obtained paths. Copying to clipboard.',
-            // );
-            // await Clipboard.setData(
-            //     ClipboardData(text: analyzeAndYaml(leakDetails)));
+            await Clipboard.setData(
+              ClipboardData(text: analyzeAndYaml(leakDetails)),
+            );
 
             setState(() {
               _leakController.message = 'Copied to clipboard';
@@ -166,19 +173,30 @@ class _LeakAnalysisState extends State<_LeakAnalysis>
   @override
   Widget build(BuildContext context) {
     if (!_leakController.isStarted) {
-      return MaterialButton(
-        child: const Text('Analyze and Copy to Clipboard'),
-        onPressed: () async {
-          try {
-            await _requestLeaks();
-            setState(() {
-              _leakController.isStarted = true;
-              _leakController.message = 'Requested details.';
-            });
-          } catch (e, trace) {
-            handleError(e, trace);
-          }
-        },
+      return Column(
+        children: [
+          MaterialButton(
+            child: const Text('Analyze and copy to clipboard'),
+            onPressed: () async {
+              try {
+                await _requestLeaks();
+                setState(() {
+                  _leakController.isStarted = true;
+                  _leakController.message = 'Requested details.';
+                });
+              } catch (e, trace) {
+                handleError(e, trace);
+              }
+            },
+          ),
+          if (_leakController.previousAnalysisTask != null)
+            MaterialButton(
+              child: const Text('Copy last analysis task to clipboard'),
+              onPressed: () async => await Clipboard.setData(
+                ClipboardData(text: _leakController.previousAnalysisTask!),
+              ),
+            )
+        ],
       );
     }
 
