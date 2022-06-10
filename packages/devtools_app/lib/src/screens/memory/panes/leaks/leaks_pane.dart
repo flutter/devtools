@@ -113,31 +113,36 @@ class _LeakAnalysisState extends State<_LeakAnalysis>
         if (event.extensionKind == 'memory_leaks_details') {
           try {
             print('!!!!!!!!! Received leaks.');
-            setState(() {
+            await setHeavyState(() {
               _leakController.message = 'Received leaks. Parsing.';
             });
             final leakDetails = Leaks.fromJson(event.json!['extensionData']!);
 
-            setState(() {
+            await setHeavyState(() {
               _leakController.message = 'Getting retaining paths.';
             });
             final notGCed = leakDetails.leaks[LeakType.notGCed] ?? [];
-            final task = await getTask(controller, notGCed);
 
-            setState(() {
-              _leakController.message = 'Getting retaining paths.';
-              _leakController.previousAnalysisTask = jsonEncode(task.toJson());
-            });
+            if (notGCed.isNotEmpty) {
+              final task = await getTask(controller, notGCed);
+              assert(task.reports.isNotEmpty);
 
-            await compute(setRetainingPaths, task);
-            // setRetainingPaths(task);
+              await setHeavyState(() {
+                _leakController.message = 'Getting retaining paths.';
+                _leakController.previousAnalysisTask =
+                    jsonEncode(task.toJson());
+              });
 
-            assert(task.reports.first.retainingPath != null);
+              setRetainingPaths(task);
+
+              assert(task.reports.first.retainingPath != null);
+            }
 
             setState(
               () => _leakController.message =
                   'Obtained paths. Copying to clipboard',
             );
+
             await Clipboard.setData(
               ClipboardData(text: analyzeAndYaml(leakDetails)),
             );
@@ -158,6 +163,11 @@ class _LeakAnalysisState extends State<_LeakAnalysis>
     );
   }
 
+  Future<void> setHeavyState(void Function() setter) async {
+    setState(setter);
+    await Future.delayed(const Duration(milliseconds: 5));
+  }
+
   void handleError(Object error, StackTrace trace) {
     setState(() {
       _leakController.error = 'Processing error: $error';
@@ -168,6 +178,7 @@ class _LeakAnalysisState extends State<_LeakAnalysis>
 
   Future<void> _requestLeaks() async {
     await eval.safeEval('sendLeaks()', isAlive: Stub());
+    print('!!!!!!!!! Requested leaks.');
   }
 
   @override
