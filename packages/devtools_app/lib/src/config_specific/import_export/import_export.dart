@@ -79,11 +79,12 @@ class ImportController {
     final devToolsSnapshot = _json;
     // TODO(kenz): support imports for more than one screen at a time.
     final activeScreenId = devToolsSnapshot[activeScreenIdKey];
+    final connectedApp =
+        devToolsSnapshot[connectedAppKey].cast<String, Object>();
     offlineController
       ..enterOfflineMode()
       ..offlineDataJson = devToolsSnapshot;
-    serviceManager.connectedApp =
-        OfflineConnectedApp.parse(devToolsSnapshot[connectedAppKey]);
+    serviceManager.connectedApp = OfflineConnectedApp.parse(connectedApp);
     _notifications.push(attemptingToImportMessage(activeScreenId));
     _pushSnapshotScreenForImport(activeScreenId);
   }

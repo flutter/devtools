@@ -45,20 +45,20 @@ void main() async {
       () async {
         await env.setupEnvironment();
         offlineController.enterOfflineMode();
-        final offlineTimelineData =
+        final offlinePerformanceData =
             OfflinePerformanceData.parse(offlinePerformanceDataJson);
-        await performanceController.processOfflineData(offlineTimelineData);
+        await performanceController.processOfflineData(offlinePerformanceData);
         expect(
           isPerformanceDataEqual(
             performanceController.data!,
-            offlineTimelineData,
+            offlinePerformanceData,
           ),
           isTrue,
         );
         expect(
           isPerformanceDataEqual(
             performanceController.offlinePerformanceData!,
-            offlineTimelineData,
+            offlinePerformanceData,
           ),
           isTrue,
         );
@@ -69,6 +69,10 @@ void main() async {
         expect(
           performanceController.processor.rasterThreadId,
           equals(testRasterThreadId),
+        );
+        expect(
+          performanceController.displayRefreshRate.value,
+          equals(offlinePerformanceData.displayRefreshRate),
         );
 
         await env.tearDownEnvironment();
