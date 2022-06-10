@@ -235,6 +235,7 @@ class FlatTableState<T> extends State<FlatTable<T>>
           secondarySortColumn: widget.secondarySortColumn,
           onSortChanged: _sortDataAndUpdate,
           activeSearchMatchNotifier: widget.activeSearchMatchNotifier,
+          rowItemExtent: defaultRowHeight,
         );
       },
     );
@@ -788,6 +789,7 @@ class _Table<T> extends StatefulWidget {
     this.autoScrollContent = false,
     this.selectionNotifier,
     this.activeSearchMatchNotifier,
+    this.rowItemExtent,
   }) : super(key: key);
 
   final List<T> data;
@@ -799,6 +801,7 @@ class _Table<T> extends StatefulWidget {
   final ColumnData<T> sortColumn;
   final SortDirection sortDirection;
   final ColumnData<T>? secondarySortColumn;
+  final double? rowItemExtent;
   final Function(
     ColumnData<T> column,
     SortDirection direction, {
@@ -967,6 +970,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
                       child: ListView.builder(
                         controller: scrollController,
                         itemCount: widget.data.length,
+                        itemExtent: widget.rowItemExtent,
                         itemBuilder: _buildItem,
                       ),
                     ),
