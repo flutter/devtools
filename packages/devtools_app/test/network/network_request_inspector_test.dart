@@ -34,7 +34,6 @@ void main() {
       final requestsNotifier = controller.requests;
       await controller.networkService.refreshNetworkData();
       final firstRequest = requestsNotifier.value.requests.first;
-      print("FIRAST REQ ${firstRequest}");
       controller.selectRequest(firstRequest);
       final widget = NetworkRequestInspector(controller);
 
