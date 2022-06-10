@@ -111,7 +111,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       // The app must not be a Flutter app.
       return;
     }
-    print("Dake: is this hit?");
     final inspectorTreeController = InspectorTreeController();
     final detailsTree = InspectorTreeController();
     inspectorController = InspectorController(

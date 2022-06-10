@@ -181,21 +181,6 @@ class HttpResponseView extends StatelessWidget {
         style: theme.fixedFontStyle,
       );
     }
-    /**
-     * child = Column(
-        children: [
-          Row(
-            children: [
-              CopyToClipboardControl(
-                dataProvider: () => data.responseBody,
-              )
-            ],
-          ),
-          FormattedJson(
-            formattedString: data.responseBody,
-          )
-        ],
-     */
     return Padding(
       padding: const EdgeInsets.all(denseSpacing),
       child: SingleChildScrollView(child: child),
