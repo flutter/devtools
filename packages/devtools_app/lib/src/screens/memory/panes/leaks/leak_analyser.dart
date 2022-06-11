@@ -11,31 +11,42 @@ final eval = EvalOnDartLibrary(
 );
 
 String analyzeAndYaml(Leaks leaks) {
-  return '${ObjectReport.iterableToYaml('notDisposed', leaks.leaks[LeakType.notDisposed]!)}'
+  return '${ObjectReport.iterableToYaml('not-disposed', leaks.leaks[LeakType.notDisposed]!)}'
       '${_notGCedToYaml(leaks.leaks[LeakType.notGCed]!)}'
-      '${ObjectReport.iterableToYaml('gcedLate', leaks.leaks[LeakType.gcedLate]!)}';
+      '${ObjectReport.iterableToYaml('gced-late', leaks.leaks[LeakType.gcedLate]!)}';
 }
 
-String _notGCedToYaml(List<ObjectReport> notGCed) {
+String _notGCedToYaml(Iterable<ObjectReport> notGCed) {
+  final withPath = notGCed.where((r) => r.retainingPath != null);
+  final withoutPath = notGCed.where((r) => r.retainers != null);
+  assert(
+    notGCed.length == withPath.length + withoutPath.length,
+    '${notGCed.length} should be ${withPath.length} + ${withoutPath.length}',
+  );
+  return '${_notGCedWithPathToYaml(withPath)}'
+      '${ObjectReport.iterableToYaml('not-gced-without-path', withoutPath)}';
+}
+
+String _notGCedWithPathToYaml(Iterable<ObjectReport> notGCed) {
   if (notGCed.isEmpty) return '';
   final byCulprits = findCulprits(notGCed);
 
-  final header = '''notGCed:
+  final header = '''not-gced:
   total: ${byCulprits.length}
   objects:
 ''';
 
   return header +
       byCulprits.keys
-          .map((culprit) => culpritToYaml(
+          .map((culprit) => _culpritToYaml(
                 culprit,
                 byCulprits[culprit]!,
-                indent: '  ',
+                indent: '    ',
               ))
           .join();
 }
 
-String culpritToYaml(
+String _culpritToYaml(
   ObjectReport culprit,
   List<ObjectReport> victims, {
   String indent = '',
@@ -46,12 +57,12 @@ String culpritToYaml(
   return '''$culpritYaml
 $indent  total-victims: ${victims.length}
 $indent  victims:
-${victims.map((e) => e.toYaml('$indent    ')).join()}
-''';
+${victims.map((e) => e.toYaml('$indent    ')).join()}''';
 }
 
 @visibleForTesting
-Map<ObjectReport, List<ObjectReport>> findCulprits(List<ObjectReport> notGCed) {
+Map<ObjectReport, List<ObjectReport>> findCulprits(
+    Iterable<ObjectReport> notGCed) {
   final byPath = Map<String, ObjectReport>.fromIterable(
     notGCed,
     key: (r) => r.retainingPath,
@@ -75,34 +86,3 @@ Map<ObjectReport, List<ObjectReport>> findCulprits(List<ObjectReport> notGCed) {
   }
   return result;
 }
-
-// String pathToString(RetainingPath path) {
-//   final result = StringBuffer();
-//   final elements = path.elements ?? <RetainingObject>[];
-//   for (var i = elements.length - 1; i >= 0; i--) {
-//     final element = elements[i];
-//     result.write('/');
-//     result.write(identityHashCode(elements[i].value));
-//   }
-//   // We need this last slash to avoid parent-child detection for paths where
-//   // codes happened to be prefix for one another (like 'ab' and 'abc').
-//   result.write('/');
-//   return '${result.toString()}\n${path.toString()}';
-// }
-
-// Future<void> setRetainingPath(ObjectReport info) async {
-//   final objectRef = await eval
-//       .safeEval('getNotGCedObject(${info.theIdentityHashCode})', isAlive: null);
-//
-//   const pathLimit = 1000;
-//   final path = await serviceManager.service!.getRetainingPath(
-//     eval.isolate!.id!,
-//     objectRef.id!,
-//     1000,
-//   );
-//
-//   assert((path.elements?.length ?? 0) <= pathLimit - 1);
-//
-//   info.retainingPath = pathToString(path);
-//   info.gcRootType = path.gcRootType;
-// }

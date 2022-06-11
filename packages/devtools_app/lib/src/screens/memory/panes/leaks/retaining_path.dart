@@ -1,14 +1,9 @@
-import 'dart:convert';
-import 'dart:io';
-
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:memory_tools/model.dart';
-import 'package:vm_service/vm_service.dart';
 
 import '../../memory_controller.dart';
-import 'model.dart';
 import 'graph_analyzer.dart';
+import 'model.dart';
 
 typedef IdentityHashCode = int;
 typedef Retainers = Map<IdentityHashCode, Set<IdentityHashCode>>;
@@ -21,13 +16,20 @@ Future<RetainingPathExtractionTask> getTask(
   return RetainingPathExtractionTask.fromSnapshot(graph, reports);
 }
 
-void setRetainingPaths(
+void setRetainingPathsOrRetainers(
   RetainingPathExtractionTask task,
 ) {
   final pathExtractor = RetainingPathExtractor(task.objects);
   for (var report in task.reports) {
-    print('!!! calculating path for ${report.theIdentityHashCode}');
+    if (report.token == '681924862') print('!!!!! 681924862 updated');
+    report.retainingPath = null;
+    report.retainers = null;
     report.retainingPath = pathExtractor.getPath(report.theIdentityHashCode);
+    if (report.retainingPath == null) {
+      report.retainers =
+          pathExtractor.getRetainers(report.theIdentityHashCode, 5);
+      assert(report.retainers != null);
+    }
   }
 }
 
@@ -66,14 +68,15 @@ class RetainingPathExtractor {
     );
   }
 
-  String getPath(IdentityHashCode code) {
+  String? getPath(IdentityHashCode code) {
     final path = findPathFromRoot(_retainers, code);
-    if (path == null) throw 'All retainers looped for $code.';
-    final result = path.map((i) => _name(i, objects[i]!.klass)).join('/');
+    if (path == null) return null;
+    final result = path.map((i) => _name(i, objects[i]!)).join('/');
     return '/$result/';
   }
 
-  static String _name(IdentityHashCode code, String name) => '$code-$name';
+  static String _name(IdentityHashCode code, HeapObject object) =>
+      '$code-${object.klass}';
 
   bool _shouldSkip(String klass) {
     const toSkip = {
@@ -87,5 +90,16 @@ class RetainingPathExtractor {
     };
 
     return toSkip.contains(klass);
+  }
+
+  // Assuming all paths are infinite.
+  Map<String, dynamic> getRetainers(IdentityHashCode code, int levels) {
+    if (levels <= 0) return {};
+
+    final result = <String, dynamic>{};
+    for (var r in _retainers[code]!) {
+      result[_name(r, objects[r]!)] = getRetainers(r, levels - 1);
+    }
+    return result;
   }
 }

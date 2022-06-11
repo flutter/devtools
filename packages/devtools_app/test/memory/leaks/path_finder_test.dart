@@ -78,32 +78,45 @@ void main() {
     expect(path, equals([size, retainer, destination]));
   });
 
-  test('Six thousand not gc-ed.', () async {
-    final task = await _loadTaskFromFile(
-      'test/memory/leaks/data/six_thousand_not_gced.json',
-    );
-    final pathExtractor = RetainingPathExtractor(task.objects);
+  group('Thousands', () {
+    late RetainingPathExtractionTask task;
+    late RetainingPathExtractor pathExtractor;
 
-    final roots = pathExtractor.getRoots();
-    assert(roots.isNotEmpty, true);
-    final galleryAppCode = pathExtractor.objects.keys
-        .firstWhere((k) => pathExtractor.objects[k]!.klass == 'GalleryApp');
-    final path = pathExtractor.getPath(galleryAppCode);
-    assert(path.contains('GalleryApp'));
+    setUp(() async {
+      task = await _loadTaskFromFile(
+        'test/memory/leaks/data/thousands_not_gced.json',
+      );
+      pathExtractor = RetainingPathExtractor(task.objects);
+    });
 
-    // for (var report in task.reports) {
-    //   report.retainingPath = pathExtractor.getPath(report.theIdentityHashCode);
-    // }
-  });
+    test('has many roots.', () async {
+      final roots = pathExtractor.getRoots();
+      expect(roots.length, 337823);
+    });
 
-  test('Not gc-ed.', () async {
-    final task =
-        await _loadTaskFromFile('test/memory/leaks/data/not_gced.json');
-    final pathExtractor = RetainingPathExtractor(task.objects);
+    test('has path to gallery.', () async {
+      final galleryAppCode = pathExtractor.objects.keys
+          .firstWhere((k) => pathExtractor.objects[k]!.klass == 'GalleryApp');
+      final path = pathExtractor.getPath(galleryAppCode);
+      assert(path!.contains('GalleryApp'));
+    });
 
-    // for (var report in task.reports) {
-    //   report.retainingPath = pathExtractor.getPath(report.theIdentityHashCode);
-    // }
+    test('has some paths for not gced', () async {
+      setRetainingPathsOrRetainers(task);
+      var pathCount = 0;
+
+      for (var r in task.reports) {
+        if (r.retainingPath != null) pathCount++;
+        expect(
+          r.retainingPath == null,
+          equals(r.retainers != null),
+          reason: r.token,
+        );
+      }
+
+      expect(task.reports.length, 1000);
+      expect(pathCount, 90);
+    });
   });
 }
 

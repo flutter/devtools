@@ -133,9 +133,10 @@ class _LeakAnalysisState extends State<_LeakAnalysis>
                     jsonEncode(task.toJson());
               });
 
-              setRetainingPaths(task);
+              setRetainingPathsOrRetainers(task);
 
-              assert(task.reports.first.retainingPath != null);
+              assert(task.reports.first.retainingPath != null ||
+                  task.reports.first.retainers != null);
             }
 
             setState(
@@ -151,7 +152,9 @@ class _LeakAnalysisState extends State<_LeakAnalysis>
               _leakController.message = 'Copied to clipboard';
               _leakController.isComplete = true;
             });
+
             await Future.delayed(const Duration(seconds: 1));
+
             setState(() {
               _leakController.reset();
             });
