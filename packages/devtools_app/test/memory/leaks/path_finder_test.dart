@@ -1,10 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:devtools_app/src/screens/memory/panes/leaks/leak_analyser.dart';
 import 'package:devtools_app/src/screens/memory/panes/leaks/model.dart';
 import 'package:devtools_app/src/screens/memory/panes/leaks/graph_analyzer.dart';
 import 'package:devtools_app/src/screens/memory/panes/leaks/retaining_path.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memory_tools/model.dart';
 
 void main() {
   test('Trivial path.', () {
@@ -84,7 +86,7 @@ void main() {
 
     setUp(() async {
       task = await _loadTaskFromFile(
-        'test/memory/leaks/data/thousands_not_gced.json',
+        'test/memory/leaks/data/thousands_not_gced_task.json',
       );
       pathExtractor = RetainingPathExtractor(task.objects);
     });
@@ -125,6 +127,14 @@ void main() {
 
       expect(task.reports.length, 3076);
       expect(pathCount, 2249);
+    });
+
+    test('has expected result', () async {
+      calculateRetainingPathsOrRetainers(task);
+      final result = analyzeAndYaml(Leaks({LeakType.notGCed: task.reports}));
+      await File(
+        'test/memory/leaks/data/thousands_not_gced_result.yaml',
+      ).writeAsString(result);
     });
   });
 }

@@ -11,9 +11,9 @@ final eval = EvalOnDartLibrary(
 );
 
 String analyzeAndYaml(Leaks leaks) {
-  return '${ObjectReport.iterableToYaml('not-disposed', leaks.leaks[LeakType.notDisposed]!)}'
-      '${_notGCedToYaml(leaks.leaks[LeakType.notGCed]!)}'
-      '${ObjectReport.iterableToYaml('gced-late', leaks.leaks[LeakType.gcedLate]!)}';
+  return '${ObjectReport.iterableToYaml('not-disposed', leaks.leaks[LeakType.notDisposed] ?? [])}'
+      '${_notGCedToYaml(leaks.leaks[LeakType.notGCed] ?? [])}'
+      '${ObjectReport.iterableToYaml('gced-late', leaks.leaks[LeakType.gcedLate] ?? [])}';
 }
 
 String _notGCedToYaml(Iterable<ObjectReport> notGCed) {
