@@ -30,7 +30,8 @@ class RetainingPathExtractionTask {
         ),
         reports: (json['reports'] as List<dynamic>)
             .cast<Map<String, dynamic>>()
-            .map((e) => ObjectReport.fromJson(e)),
+            .map((e) => ObjectReport.fromJson(e))
+            .toList(),
       );
 
   RetainingPathExtractionTask.fromSnapshot(
@@ -50,11 +51,11 @@ class RetainingPathExtractionTask {
       object.references.map((e) => graph.objects[e].identityHashCode).toList();
 
   late Map<IdentityHashCode, HeapObject> objects;
-  final Iterable<ObjectReport> reports;
+  final List<ObjectReport> reports;
 
   Map<String, dynamic> toJson() => {
         'objects': objects.map<String, dynamic>(
             (key, value) => MapEntry(key.toString(), value.toJson())),
-        'reports': reports,
+        'reports': reports.map((e) => e.toJson()).toList(),
       };
 }

@@ -133,7 +133,7 @@ class _LeakAnalysisState extends State<_LeakAnalysis>
                     jsonEncode(task.toJson());
               });
 
-              setRetainingPathsOrRetainers(task);
+              calculateRetainingPathsOrRetainers(task);
 
               assert(task.reports.first.retainingPath != null ||
                   task.reports.first.retainers != null);

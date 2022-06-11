@@ -16,20 +16,25 @@ Future<RetainingPathExtractionTask> getTask(
   return RetainingPathExtractionTask.fromSnapshot(graph, reports);
 }
 
-void setRetainingPathsOrRetainers(
+void calculateRetainingPathsOrRetainers(
   RetainingPathExtractionTask task,
 ) {
   final pathExtractor = RetainingPathExtractor(task.objects);
   for (var report in task.reports) {
-    if (report.token == '681924862') print('!!!!! 681924862 updated');
-    report.retainingPath = null;
-    report.retainers = null;
-    report.retainingPath = pathExtractor.getPath(report.theIdentityHashCode);
-    if (report.retainingPath == null) {
-      report.retainers =
-          pathExtractor.getRetainers(report.theIdentityHashCode, 5);
-      assert(report.retainers != null);
-    }
+    setRetainingPathsOrRetainers(pathExtractor, report);
+  }
+}
+
+void setRetainingPathsOrRetainers(
+  RetainingPathExtractor extractor,
+  ObjectReport report,
+) {
+  report.retainingPath = null;
+  report.retainers = null;
+  report.retainingPath = extractor.getPath(report.theIdentityHashCode);
+  if (report.retainingPath == null) {
+    report.retainers = extractor.getRetainers(report.theIdentityHashCode, 5);
+    assert(report.retainers != null);
   }
 }
 

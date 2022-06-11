@@ -101,21 +101,26 @@ void main() {
       assert(path!.contains('GalleryApp'));
     });
 
-    test('has some paths for not gced', () async {
-      setRetainingPathsOrRetainers(task);
-      var pathCount = 0;
+    test('finds path for an object.', () async {
+      const objectWithPath = 681924862;
+      final extractor = RetainingPathExtractor(task.objects);
+      final report = task.reports
+          .firstWhere((r) => r.theIdentityHashCode == objectWithPath);
+      setRetainingPathsOrRetainers(extractor, report);
+      expect(report.retainingPath, isNotNull);
+      expect(report.retainers, isNull);
+    });
 
-      for (var r in task.reports) {
-        if (r.retainingPath != null) pathCount++;
-        expect(
-          r.retainingPath == null,
-          equals(r.retainers != null),
-          reason: r.token,
-        );
+    test('has some paths for not gced', () async {
+      calculateRetainingPathsOrRetainers(task);
+
+      var pathCount = 0;
+      for (var report in task.reports) {
+        if (report.retainingPath != null) pathCount++;
       }
 
-      expect(task.reports.length, 1000);
-      expect(pathCount, 90);
+      expect(task.reports.length, 3076);
+      expect(pathCount, 2249);
     });
   });
 }
