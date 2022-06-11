@@ -65,7 +65,7 @@ void main() {
   });
 
   test('Full graph.', () {
-    const size = 10000;
+    const size = 1000;
     final incomers = _fullGraph(size);
 
     const root = size;
@@ -75,7 +75,7 @@ void main() {
     // Add root.
     incomers[retainer]!.add(root);
     final path = findPathFromRoot(incomers, destination);
-    expect(path, equals([size, retainer, destination]));
+    expect(path, equals([root, retainer, destination]));
   });
 
   group('Thousands', () {
@@ -91,7 +91,11 @@ void main() {
 
     test('has many roots.', () async {
       final roots = pathExtractor.getRoots();
-      expect(roots.length, 337823);
+      expect(roots, hasLength(337823));
+    });
+
+    test('has many objects.', () async {
+      expect(task.objects, hasLength(530945));
     });
 
     test('has path to gallery.', () async {
