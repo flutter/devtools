@@ -5,18 +5,22 @@ Path? findPathFromRoot(Map<int, Set<int>> incomers, int destination) {
   bool isRoot(int index) => incomers[index]?.isEmpty ?? true;
   if (isRoot(destination)) return [destination];
 
-  final visited = {destination};
+  // Array of all nodes where the best distance to destination is n.
+  // n starts with 0 and increases by 1 on each step of the algorithm.
   var cut = [_Node(index: destination)];
+  // Set of node indexes, where shortest distance is already calculated and it is
+  // shorter or equal than the distance in the current [cut].
+  final calculated = {destination};
 
   while (true) {
     final nextCut = <_Node>[];
     for (var node in cut) {
       for (var i in incomers[node.index] ?? {}) {
-        if (visited.contains(i)) continue;
+        if (calculated.contains(i)) continue;
         final newNode = _Node(index: i, next: node);
         if (isRoot(i)) return _path(newNode);
-        visited.add(i);
         nextCut.add(newNode);
+        calculated.add(i);
       }
     }
     if (nextCut.isEmpty) return null;
@@ -24,7 +28,7 @@ Path? findPathFromRoot(Map<int, Set<int>> incomers, int destination) {
   }
 }
 
-Path? _path(_Node node) {
+Path _path(_Node node) {
   final result = [node.index];
 
   while (true) {
