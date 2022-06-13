@@ -4,11 +4,9 @@ import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../fixtures/riverpod_app/lib/tester.dart';
-import 'network_profiler_test.dart';
 import 'utils/network_test_utils.dart';
 
 void main() {
@@ -50,55 +48,59 @@ void main() {
         return Future.value(true);
       });
     });
-    testWidgets('response', (tester) async {
-      final requestsNotifier = controller.requests;
-      final widget = NetworkRequestInspector(controller);
 
-      final localizations = Localizations(
-        locale: const Locale('en', 'US'),
-        delegates: const <LocalizationsDelegate<dynamic>>[
-          DefaultWidgetsLocalizations.delegate,
-          DefaultMaterialLocalizations.delegate,
-          DefaultCupertinoLocalizations.delegate,
-        ],
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Overlay(
-            initialEntries: [
-              OverlayEntry(
-                builder: (context) => widget,
-              )
-            ],
-          ),
-        ),
-      );
-      final media = MediaQuery(
-        data: const MediaQueryData(platformBrightness: Brightness.dark),
-        child: localizations,
-      );
-      final debuggerController = createMockDebuggerControllerWithDefaults();
+    testWidgets('copy response body', (tester) async {
+      final requestsNotifier = controller.requests;
 
       await controller.startRecording();
-      await tester
-          .pumpWidget(wrapWithControllers(media, debugger: debuggerController));
+      await tester.pumpWidget(buildNetworkRequestInspector(controller));
       await controller.networkService.refreshNetworkData();
-      final firstRequest = requestsNotifier.value.requests[5];
-      print("THE REQS: ${requestsNotifier.value.requests}");
-      controller.selectRequest(firstRequest);
+      final networkRequest = requestsNotifier.value.requests[5];
+
+      controller.selectRequest(networkRequest);
       await tester.pumpAndSettle();
-      debugDumpApp();
+
       await tester.tap(find.text('Response'));
       await tester.pumpAndSettle();
       await tester.tap(find.byType(CopyToClipboardControl));
+
       expect(_clipboardContents, isNotEmpty);
       expect(
         _clipboardContents,
-        equals((firstRequest as DartIOHttpRequestData).responseBody),
+        equals((networkRequest as DartIOHttpRequestData).responseBody),
       );
+
       controller.stopRecording();
       await tester.pumpAndSettle(const Duration(seconds: 1));
     });
   });
 }
 
-void buildNetworkRequestInspector() {}
+Widget buildNetworkRequestInspector(NetworkController controller) {
+  final networkRequestInspector = NetworkRequestInspector(controller);
+  final debuggerController = createMockDebuggerControllerWithDefaults();
+
+  final localizations = Localizations(
+    locale: const Locale('en', 'US'),
+    delegates: const <LocalizationsDelegate<dynamic>>[
+      DefaultWidgetsLocalizations.delegate,
+      DefaultMaterialLocalizations.delegate,
+      DefaultCupertinoLocalizations.delegate,
+    ],
+    child: Directionality(
+      textDirection: TextDirection.ltr,
+      child: Overlay(
+        initialEntries: [
+          OverlayEntry(
+            builder: (context) => networkRequestInspector,
+          )
+        ],
+      ),
+    ),
+  );
+  final mediaQuery = MediaQuery(
+    data: const MediaQueryData(platformBrightness: Brightness.dark),
+    child: localizations,
+  );
+  return wrapWithControllers(mediaQuery, debugger: debuggerController);
+}
