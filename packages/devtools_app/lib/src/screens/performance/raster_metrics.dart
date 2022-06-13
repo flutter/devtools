@@ -177,16 +177,9 @@ class LayerImage extends StatelessWidget {
             margin: const EdgeInsets.symmetric(horizontal: defaultSpacing),
             child: LayoutBuilder(
               builder: (context, constraints) {
-                print('Snapshot ${snapshot.id}');
                 final scaleFactor = _calculateScaleFactor(constraints);
-                print('original frame size: $originalFrameSize');
-                print('scaleFactor: $scaleFactor');
                 final scaledSize = _scaledLayerSize(scaleFactor);
                 final scaledOffset = _scaledLayerOffset(scaleFactor);
-                print('original layer offset: ${snapshot.offset}');
-                print('scaled layer offset: $scaledOffset');
-                print('original layer size: ${snapshot.size}');
-                print('scaled layer size: $scaledSize');
                 return Stack(
                   children: [
                     Image.memory(snapshot.bytes),
