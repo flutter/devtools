@@ -243,12 +243,12 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
           children: [
             BreakpointsCountBadge(breakpoints: breakpoints),
             DevToolsTooltip(
+              message: 'Remove all breakpoints',
               child: ToolbarAction(
                 icon: Icons.delete,
                 onPressed:
                     breakpoints.isNotEmpty ? controller.clearBreakpoints : null,
               ),
-              message: 'Remove all breakpoints',
             ),
           ],
         );

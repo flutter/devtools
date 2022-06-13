@@ -389,8 +389,8 @@ class CpuProfilerDisabled extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: ElevatedButton(
-              child: const Text('Enable profiler'),
               onPressed: controller.enableCpuProfiler,
+              child: const Text('Enable profiler'),
             ),
           ),
         ],

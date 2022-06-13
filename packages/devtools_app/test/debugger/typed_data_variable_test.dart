@@ -553,64 +553,6 @@ void main() {
     );
   });
 
-  test('Retries getObject calls with no offset/count if error is thrown',
-      () async {
-    final bytes = Uint8List.fromList([0, 1, 2, 3]);
-    final instance = Instance(
-      kind: InstanceKind.kUint8List,
-      id: objectId,
-      classRef: null,
-      bytes: base64.encode(bytes.buffer.asUint8List()),
-      identityHashCode: null,
-      length: 4,
-    );
-    final variable = DartObjectNode.create(
-      BoundVariable(
-        name: 'test',
-        value: instance,
-        declarationTokenPos: null,
-        scopeEndTokenPos: null,
-        scopeStartTokenPos: null,
-      ),
-      isolateRef,
-    );
-
-    when(
-      manager.service!.getObject(
-        isolateId,
-        objectId,
-        offset: 0,
-        count: 4,
-      ),
-    ).thenThrow('Unrecognized parameters offset / count.');
-
-    when(manager.service!.getObject(isolateId, objectId)).thenAnswer((_) async {
-      return instance;
-    });
-
-    await buildVariablesTree(variable);
-
-    expect(variable.children, [
-      matchesVariable(name: '[0]', value: 0),
-      matchesVariable(name: '[1]', value: 1),
-      matchesVariable(name: '[2]', value: 2),
-      matchesVariable(name: '[3]', value: 3),
-    ]);
-
-    verifyInOrder([
-      manager.service!.getObject(
-        isolateId,
-        objectId,
-        offset: 0,
-        count: 4,
-      ),
-      manager.service!.getObject(
-        isolateId,
-        objectId,
-      ),
-    ]);
-  });
-
   test(
       'Creates bound variable with groupings for children for a large Uint8ClampedList instance',
       () async {

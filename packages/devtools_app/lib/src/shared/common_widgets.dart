@@ -191,11 +191,11 @@ class IconLabelButton extends StatelessWidget {
               )
             : TextButton(
                 onPressed: onPressed,
-                child: iconLabel,
                 style: denseAwareOutlinedButtonStyle(
                   context,
                   minScreenWidthForTextBeforeScaling,
                 ),
+                child: iconLabel,
               ),
       ),
     );
@@ -973,9 +973,9 @@ class DevToolsToggleButtonGroup extends StatelessWidget {
         minWidth: defaultButtonHeight,
         minHeight: defaultButtonHeight,
       ),
-      children: children,
       isSelected: selectedStates,
       onPressed: onPressed,
+      children: children,
     );
   }
 }
@@ -2116,10 +2116,10 @@ class ElevatedCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(defaultBorderRadius),
       ),
       child: Container(
-        child: child,
         width: width,
         height: height,
         padding: padding ?? const EdgeInsets.all(denseSpacing),
+        child: child,
       ),
     );
   }
