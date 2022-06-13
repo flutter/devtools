@@ -1,20 +1,22 @@
 typedef Path = List<int>;
 
-/// Returns null if there is no path.
+/// Returns null if there is no path to root.
 Path? findPathFromRoot(Map<int, Set<int>> incomers, int destination) {
-  if (incomers[destination]?.isEmpty ?? true) return [destination];
-  final destinationNode = _Node(index: destination);
-  final nodes = <int, _Node>{destination: destinationNode};
+  bool isRoot(int index) => incomers[index]?.isEmpty ?? true;
+  if (isRoot(destination)) return [destination];
 
-  var cut = <_Node>[destinationNode];
+  final visited = {destination};
+  var cut = [_Node(index: destination)];
+
   while (true) {
     final nextCut = <_Node>[];
     for (var node in cut) {
       for (var i in incomers[node.index] ?? {}) {
-        if (nodes.containsKey(i)) continue;
-        nodes[i] = _Node(index: i, next: node);
-        if (incomers[i]?.isEmpty ?? true) return _path(nodes[i]!, nodes);
-        nextCut.add(nodes[i]!);
+        if (visited.contains(i)) continue;
+        final newNode = _Node(index: i, next: node);
+        if (isRoot(i)) return _path(newNode);
+        visited.add(i);
+        nextCut.add(newNode);
       }
     }
     if (nextCut.isEmpty) return null;
@@ -22,7 +24,7 @@ Path? findPathFromRoot(Map<int, Set<int>> incomers, int destination) {
   }
 }
 
-Path? _path(_Node node, Map<int, _Node> nodes) {
+Path? _path(_Node node) {
   final result = [node.index];
 
   while (true) {
