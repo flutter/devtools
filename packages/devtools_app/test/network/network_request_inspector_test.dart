@@ -62,7 +62,13 @@ void main() {
       final requestsNotifier = controller.requests;
 
       await controller.startRecording();
-      await tester.pumpWidget(buildNetworkRequestInspector(controller));
+      await tester.pumpWidget(
+        wrapWithControllers(
+          NetworkRequestInspector(controller),
+          debugger: createMockDebuggerControllerWithDefaults(),
+        ),
+      );
+
       await controller.networkService.refreshNetworkData();
       final networkRequest = requestsNotifier.value.requests[5];
 
@@ -72,7 +78,7 @@ void main() {
       await tester.tap(find.text('Response'));
       await tester.pumpAndSettle();
 
-      expect(_clipboardContents, isNotEmpty);
+      expect(_clipboardContents, isEmpty);
       await tester.tap(find.byType(CopyToClipboardControl));
 
       expect(_clipboardContents, isNotEmpty);
@@ -85,33 +91,4 @@ void main() {
       await tester.pumpAndSettle(const Duration(seconds: 1));
     });
   });
-}
-
-Widget buildNetworkRequestInspector(NetworkController controller) {
-  final networkRequestInspector = NetworkRequestInspector(controller);
-  final debuggerController = createMockDebuggerControllerWithDefaults();
-
-  final localizations = Localizations(
-    locale: const Locale('en', 'US'),
-    delegates: const <LocalizationsDelegate<dynamic>>[
-      DefaultWidgetsLocalizations.delegate,
-      DefaultMaterialLocalizations.delegate,
-      DefaultCupertinoLocalizations.delegate,
-    ],
-    child: Directionality(
-      textDirection: TextDirection.ltr,
-      child: Overlay(
-        initialEntries: [
-          OverlayEntry(
-            builder: (context) => networkRequestInspector,
-          )
-        ],
-      ),
-    ),
-  );
-  final mediaQuery = MediaQuery(
-    data: const MediaQueryData(platformBrightness: Brightness.dark),
-    child: localizations,
-  );
-  return wrapWithControllers(mediaQuery, debugger: debuggerController);
 }
