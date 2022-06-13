@@ -9,9 +9,11 @@ Path? findPathFromRoot(Map<int, Set<int>> incomers, int destination) {
   // n starts with 0 and increases by 1 on each step of the algorithm.
   var cut = [_Node(index: destination)];
   // Set of node indexes, where shortest distance is already calculated and it is
-  // shorter or equal than the distance in the current [cut].
+  // not worth than the distance in the current [cut].
   final calculated = {destination};
 
+  // On each step of algorithm we know that there is no roots closer
+  // than nodes in the current cut, to the destination.
   while (true) {
     final nextCut = <_Node>[];
     for (var node in cut) {
