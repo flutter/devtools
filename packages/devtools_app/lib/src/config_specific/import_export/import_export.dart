@@ -80,7 +80,8 @@ class ImportController {
     // TODO(kenz): support imports for more than one screen at a time.
     final activeScreenId = devToolsSnapshot[activeScreenIdKey];
     final connectedApp =
-        devToolsSnapshot[connectedAppKey].cast<String, Object>();
+        (devToolsSnapshot[connectedAppKey] ?? <String, Object>{})
+            .cast<String, Object>();
     offlineController
       ..enterOfflineMode()
       ..offlineDataJson = devToolsSnapshot;
