@@ -32,6 +32,7 @@ import 'memory_graph_model.dart';
 import 'memory_heap_treemap.dart';
 import 'memory_instance_tree_view.dart';
 import 'memory_snapshot_models.dart';
+import 'panes/draft/draft_pane.dart';
 
 const memorySearchFieldKeyName = 'MemorySearchFieldKey';
 
@@ -143,6 +144,8 @@ class HeapTreeViewState extends State<HeapTree>
   static const dartHeapAnalysisTabKey = Key('Dart Heap Analysis Tab');
   @visibleForTesting
   static const dartHeapAllocationsTabKey = Key('Dart Heap Allocations Tab');
+  @visibleForTesting
+  static const dartDraftTabKey = Key('Draft Tab');
 
   /// Below constants should match index for Tab index in DartHeapTabs.
   static const int analysisTabIndex = 0;
@@ -160,6 +163,11 @@ class HeapTreeViewState extends State<HeapTree>
       key: dartHeapAllocationsTabKey,
       gaPrefix: _gaPrefix,
       tabName: 'Allocations',
+    ),
+    DevToolsTab.create(
+      key: dartDraftTabKey,
+      gaPrefix: _gaPrefix,
+      tabName: 'Darft',
     ),
   ];
 
@@ -454,6 +462,8 @@ class HeapTreeViewState extends State<HeapTree>
                     ],
                   ),
                 ),
+
+                const DraftPane(),
               ],
             ),
           ),
