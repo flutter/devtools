@@ -3,83 +3,11 @@ import 'dart:io';
 
 import 'package:devtools_app/src/screens/memory/panes/leaks/leak_analyser.dart';
 import 'package:devtools_app/src/screens/memory/panes/leaks/model.dart';
-import 'package:devtools_app/src/screens/memory/panes/leaks/graph_analyzer.dart';
 import 'package:devtools_app/src/screens/memory/panes/leaks/retaining_path.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memory_tools/model.dart';
 
 void main() {
-  test('Trivial path.', () {
-    final path = findPathFromRoot({}, 1);
-    expect(path, equals([1]));
-  });
-
-  test('Trivial path with other nodes.', () {
-    final path = findPathFromRoot(
-      {
-        2: {3}
-      },
-      1,
-    );
-    expect(path, equals([1]));
-  });
-
-  test('Trivial loop.', () {
-    final path = findPathFromRoot(
-      {
-        1: {1},
-      },
-      1,
-    );
-    expect(path, equals(null));
-  });
-
-  test('Two node loop.', () {
-    final path = findPathFromRoot(
-      {
-        2: {1},
-        1: {2},
-      },
-      1,
-    );
-    expect(path, equals(null));
-  });
-
-  test('Two node path.', () {
-    final path = findPathFromRoot(
-      {
-        2: {1},
-      },
-      2,
-    );
-    expect(path, equals([1, 2]));
-  });
-
-  test('Shortest path.', () {
-    final path = findPathFromRoot(
-      {
-        3: {2, 1},
-        2: {1},
-      },
-      3,
-    );
-    expect(path, equals([1, 3]));
-  });
-
-  test('Full graph.', () {
-    const size = 1000;
-    final incomers = _fullGraph(size);
-
-    const root = size;
-    const retainer = 0;
-    const destination = size - 1;
-
-    // Add root.
-    incomers[retainer]!.add(root);
-    final path = findPathFromRoot(incomers, destination);
-    expect(path, equals([root, retainer, destination]));
-  });
-
   group('Thousands', () {
     late RetainingPathExtractionTask task;
     late RetainingPathExtractor pathExtractor;
