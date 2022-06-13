@@ -661,11 +661,11 @@ class _CustomPointerScrollableState extends State<CustomPointerScrollable>
     if (!widget.excludeFromSemantics) {
       result = _ScrollSemantics(
         key: _scrollSemanticsKey,
-        child: result,
         position: position!,
         allowImplicitScrolling: widget.physics?.allowImplicitScrolling ??
             _physics!.allowImplicitScrolling,
         semanticChildCount: widget.semanticChildCount,
+        child: result,
       );
     }
 

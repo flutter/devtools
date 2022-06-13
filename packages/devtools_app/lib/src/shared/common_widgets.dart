@@ -9,15 +9,19 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../analytics/analytics.dart' as ga;
 import '../config_specific/launch_url/launch_url.dart';
 import '../primitives/auto_dispose_mixin.dart';
 import '../primitives/flutter_widgets/linked_scroll_controller.dart';
 import '../primitives/utils.dart';
+import '../screens/debugger/debugger_controller.dart';
+import '../screens/debugger/variables.dart';
 import '../ui/icons.dart';
 import '../ui/label.dart';
 import 'globals.dart';
+import 'object_tree.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 import 'utils.dart';
@@ -186,11 +190,11 @@ class IconLabelButton extends StatelessWidget {
               )
             : TextButton(
                 onPressed: onPressed,
-                child: iconLabel,
                 style: denseAwareOutlinedButtonStyle(
                   context,
                   minScreenWidthForTextBeforeScaling,
                 ),
+                child: iconLabel,
               ),
       ),
     );
@@ -860,9 +864,9 @@ class DevToolsToggleButtonGroup extends StatelessWidget {
         minWidth: defaultButtonHeight,
         minHeight: defaultButtonHeight,
       ),
-      children: children,
       isSelected: selectedStates,
       onPressed: onPressed,
+      children: children,
     );
   }
 }
@@ -1395,6 +1399,7 @@ class _BreadcrumbPainter extends CustomPainter {
   }
 }
 
+// TODO(bkonyi): replace uses of this class with `JsonViewer`.
 class FormattedJson extends StatelessWidget {
   const FormattedJson({
     this.json,
@@ -1417,6 +1422,86 @@ class FormattedJson extends StatelessWidget {
     return SelectableText(
       json != null ? encoder.convert(json) : formattedString!,
       style: useSubtleStyle ? theme.subtleFixedFontStyle : theme.fixedFontStyle,
+    );
+  }
+}
+
+class JsonViewer extends StatefulWidget {
+  const JsonViewer({
+    required this.encodedJson,
+  });
+
+  final String encodedJson;
+
+  @override
+  State<JsonViewer> createState() => _JsonViewerState();
+}
+
+class _JsonViewerState extends State<JsonViewer>
+    with ProvidedControllerMixin<DebuggerController, JsonViewer> {
+  late Future<void> _initializeTree;
+  late DartObjectNode variable;
+
+  @override
+  void initState() {
+    super.initState();
+    assert(widget.encodedJson.isNotEmpty);
+    final responseJson = json.decode(widget.encodedJson);
+    // Insert the JSON data into the fake service cache so we can use it with
+    // the `ExpandableVariable` widget.
+    final root =
+        serviceManager.service!.fakeServiceCache.insertJsonObject(responseJson);
+    variable = DartObjectNode.fromValue(
+      name: '[root]',
+      value: root,
+      artificialName: true,
+      isolateRef: IsolateRef(
+        id: 'fake-isolate',
+        number: 'fake-isolate',
+        name: 'local-cache',
+        isSystemIsolate: true,
+      ),
+    );
+    _initializeTree = buildVariablesTree(variable);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    // Remove the JSON object from the fake service cache to avoid holding on
+    // to large objects indefinitely.
+    serviceManager.service!.fakeServiceCache
+        .removeJsonObject(variable.value as Instance);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Currently a redundant check, but adding it anyway to prevent future
+    // bugs being introduced.
+    if (!initController()) {
+      return;
+    }
+    // Any additional initialization code should be added after this line.
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(denseSpacing),
+      child: SingleChildScrollView(
+        child: FutureBuilder(
+          future: _initializeTree,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState != ConnectionState.done)
+              return Container();
+            return ExpandableVariable(
+              variable: variable,
+              debuggerController: controller,
+            );
+          },
+        ),
+      ),
     );
   }
 }
@@ -1922,10 +2007,10 @@ class ElevatedCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(defaultBorderRadius),
       ),
       child: Container(
-        child: child,
         width: width,
         height: height,
         padding: padding ?? const EdgeInsets.all(denseSpacing),
+        child: child,
       ),
     );
   }

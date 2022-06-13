@@ -126,10 +126,10 @@ class FlexSplitColumn extends StatelessWidget {
   Widget build(BuildContext context) {
     return Split(
       axis: Axis.vertical,
-      children: _children,
       initialFractions: _initialFractions,
       minSizes: _minSizes,
       splitters: headers.sublist(1),
+      children: _children,
     );
   }
 }

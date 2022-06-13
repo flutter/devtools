@@ -1185,10 +1185,10 @@ Split buildSplit(
   children ??= const [_w1, _w2];
   return Split(
     axis: axis,
-    children: children,
     initialFractions: initialFractions,
     minSizes: minSizes,
     splitters: splitters,
+    children: children,
   );
 }
 

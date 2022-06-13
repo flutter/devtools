@@ -430,25 +430,29 @@ class HeapTreeViewState extends State<HeapTree>
               controller: _tabController,
               children: [
                 // Analysis Tab
-                Column(
-                  children: [
-                    _buildSnapshotControls(themeData.textTheme),
-                    const SizedBox(height: denseRowSpacing),
-                    Expanded(
-                      child: OutlineDecoration(
+                KeepAliveWrapper(
+                  child: Column(
+                    children: [
+                      _buildSnapshotControls(themeData.textTheme),
+                      const SizedBox(height: denseRowSpacing),
+                      Expanded(
                         child: buildSnapshotTables(snapshotDisplay),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
 
                 // Allocations Tab
-                Column(
-                  children: [
-                    _buildAllocationsControls(),
-                    const SizedBox(height: denseRowSpacing),
-                    const Expanded(child: AllocationTableView()),
-                  ],
+                KeepAliveWrapper(
+                  child: Column(
+                    children: [
+                      _buildAllocationsControls(),
+                      const SizedBox(height: denseRowSpacing),
+                      const Expanded(
+                        child: AllocationTableView(),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -461,14 +465,16 @@ class HeapTreeViewState extends State<HeapTree>
   Widget buildSnapshotTables(Widget? snapshotDisplay) {
     if (snapshotDisplay == null) {
       // Display help text about how to collect data.
-      return Center(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Text('Click the take heap snapshot button '),
-            Icon(Icons.camera),
-            Text(' to collect a graph of memory objects.'),
-          ],
+      return OutlineDecoration(
+        child: Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const [
+              Text('Click the take heap snapshot button '),
+              Icon(Icons.camera),
+              Text(' to collect a graph of memory objects.'),
+            ],
+          ),
         ),
       );
     }
@@ -489,7 +495,7 @@ class HeapTreeViewState extends State<HeapTree>
               // TODO(terry): Need better focus handling between 2 tables & up/down
               //              arrows in the right-side field instance view table.
               snapshotDisplay,
-              rightSideTable,
+              OutlineDecoration(child: rightSideTable),
             ],
           );
   }
@@ -769,8 +775,8 @@ class HeapTreeViewState extends State<HeapTree>
       children: [
         Positioned(
           child: Container(
-            child: Text(text, style: style),
             width: textWidth + 10,
+            child: Text(text, style: style),
           ),
         ),
         Positioned(
@@ -779,11 +785,11 @@ class HeapTreeViewState extends State<HeapTree>
             alignment: Alignment.topRight,
             width: size,
             height: size,
-            child: const Icon(Icons.fiber_manual_record, size: 0),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: Colors.blue[400],
             ),
+            child: const Icon(Icons.fiber_manual_record, size: 0),
           ),
         ),
       ],
@@ -1451,7 +1457,7 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
   @override
   Widget build(BuildContext context) {
     final root = controller.buildTreeFromAllData();
-
+    Widget result;
     if (root != null && root.children.isNotEmpty) {
       // Snapshots and analyses exists display the trees.
       controller.groupByTreeTable = TreeTable<Reference>(
@@ -1464,11 +1470,12 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
         selectionNotifier: controller.selectionSnapshotNotifier,
       );
 
-      return controller.groupByTreeTable;
+      result = controller.groupByTreeTable;
     } else {
       // Nothing collected yet (snapshots/analyses) - return an empty area.
-      return const SizedBox();
+      result = const SizedBox();
     }
+    return OutlineDecoration(child: result);
   }
 }
 
@@ -1502,9 +1509,6 @@ class _LibraryRefColumn extends TreeColumnData<Reference> {
   String getTooltip(Reference dataObject) {
     return dataObject.name ?? '';
   }
-
-  @override
-  double get fixedWidthPx => 250.0;
 }
 
 class _ClassOrInstanceCountColumn extends ColumnData<Reference> {
