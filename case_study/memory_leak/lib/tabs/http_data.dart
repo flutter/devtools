@@ -93,6 +93,8 @@ class MyGetHttpDataState extends State<MyGetHttpData> {
             // ignore: deprecated_member_use
             data: Theme.of(context).copyWith(accentColor: Colors.white),
             child: Container(
+              height: 48.0,
+              alignment: Alignment.center,
               child: Text(
                 currentRestfulAPI.activeFriendlyName,
                 style: const TextStyle(
@@ -100,8 +102,6 @@ class MyGetHttpDataState extends State<MyGetHttpData> {
                   color: Colors.lightBlueAccent,
                 ),
               ),
-              height: 48.0,
-              alignment: Alignment.center,
             ),
           ),
         ),
@@ -117,9 +117,10 @@ class MyGetHttpDataState extends State<MyGetHttpData> {
               children: [
                 Card(
                   child: Container(
+                    padding: const EdgeInsets.all(15.0),
                     child: Text(
                       // Read the name field value and set it in the Text widget
-                      api?.display(data, index),
+                      api.display(data, index),
 
                       // set some style to text
                       style: const TextStyle(
@@ -127,8 +128,6 @@ class MyGetHttpDataState extends State<MyGetHttpData> {
                         color: Colors.lightBlueAccent,
                       ),
                     ),
-                    // added padding
-                    padding: const EdgeInsets.all(15.0),
                   ),
                 )
               ],

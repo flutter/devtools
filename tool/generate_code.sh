@@ -4,6 +4,16 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+# Contains a path to this script, relative to the directory it was called from.
+RELATIVE_PATH_TO_SCRIPT="${BASH_SOURCE[0]}"
+
+# The directory that this script is located in.
+TOOL_DIR=`dirname "${RELATIVE_PATH_TO_SCRIPT}"`
+
+# The devtools root directory is assumed to be the parent of this directory.
+DEVTOOLS_DIR="${TOOL_DIR}/.."
+
+
 # Fast fail the script on failures.
 set -ex
 
@@ -11,7 +21,8 @@ echo "Generating code..."
 
 echo $(pwd)
 
-pushd packages/devtools_test
+
+pushd $DEVTOOLS_DIR/packages/devtools_test
 
 flutter pub run build_runner build --delete-conflicting-outputs
 

@@ -23,4 +23,24 @@ void main() {
     expect(colorUtils.name(Color.green), 'green');
     expect(colorUtils.name(Color.blue), 'blue');
   });
+
+  test('enum index ordering mixin', () {
+    expect(Size.xs < Size.s, isTrue);
+    expect(Size.xs <= Size.s, isTrue);
+    expect(Size.xs > Size.s, isFalse);
+    expect(Size.xs >= Size.s, isFalse);
+
+    expect(Size.xl < Size.m, isFalse);
+    expect(Size.xl <= Size.m, isFalse);
+    expect(Size.xl > Size.m, isTrue);
+    expect(Size.xl >= Size.m, isTrue);
+  });
+}
+
+enum Size with EnumIndexOrdering {
+  xs,
+  s,
+  m,
+  l,
+  xl,
 }

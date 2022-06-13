@@ -5,9 +5,9 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:devtools_app/src/screens/debugger/debugger_model.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/object_tree.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -551,64 +551,6 @@ void main() {
       '[0, -1232.222]',
       skip: !kIsWeb,
     );
-  });
-
-  test('Retries getObject calls with no offset/count if error is thrown',
-      () async {
-    final bytes = Uint8List.fromList([0, 1, 2, 3]);
-    final instance = Instance(
-      kind: InstanceKind.kUint8List,
-      id: objectId,
-      classRef: null,
-      bytes: base64.encode(bytes.buffer.asUint8List()),
-      identityHashCode: null,
-      length: 4,
-    );
-    final variable = DartObjectNode.create(
-      BoundVariable(
-        name: 'test',
-        value: instance,
-        declarationTokenPos: null,
-        scopeEndTokenPos: null,
-        scopeStartTokenPos: null,
-      ),
-      isolateRef,
-    );
-
-    when(
-      manager.service!.getObject(
-        isolateId,
-        objectId,
-        offset: 0,
-        count: 4,
-      ),
-    ).thenThrow('Unrecognized parameters offset / count.');
-
-    when(manager.service!.getObject(isolateId, objectId)).thenAnswer((_) async {
-      return instance;
-    });
-
-    await buildVariablesTree(variable);
-
-    expect(variable.children, [
-      matchesVariable(name: '[0]', value: 0),
-      matchesVariable(name: '[1]', value: 1),
-      matchesVariable(name: '[2]', value: 2),
-      matchesVariable(name: '[3]', value: 3),
-    ]);
-
-    verifyInOrder([
-      manager.service!.getObject(
-        isolateId,
-        objectId,
-        offset: 0,
-        count: 4,
-      ),
-      manager.service!.getObject(
-        isolateId,
-        objectId,
-      ),
-    ]);
   });
 
   test(

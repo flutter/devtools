@@ -155,8 +155,8 @@ class _ConnectDialogState extends State<ConnectDialog>
             ),
             const SizedBox(width: defaultSpacing),
             ElevatedButton(
-              child: const Text('Connect'),
               onPressed: actionInProgress ? null : _connect,
+              child: const Text('Connect'),
             ),
           ],
         ),

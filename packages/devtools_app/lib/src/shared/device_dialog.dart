@@ -263,32 +263,3 @@ class _DialogFlag {
 
   String? get value => flag.valueAsString;
 }
-
-Map<String, String> generateDeviceDescription(
-  VM vm,
-  ConnectedApp connectedApp, {
-  bool includeVmServiceConnection = true,
-}) {
-  var version = vm.version!;
-  // Convert '2.9.0-13.0.dev (dev) (Fri May ... +0200) on "macos_x64"' to
-  // '2.9.0-13.0.dev'.
-  if (version.contains(' ')) {
-    version = version.substring(0, version.indexOf(' '));
-  }
-
-  final flutterVersion = connectedApp.flutterVersionNow;
-
-  return {
-    'CPU / OS': vm.deviceDisplay,
-    'Dart Version': version,
-    if (flutterVersion != null) ...{
-      'Flutter Version':
-          '${flutterVersion.version} / ${flutterVersion.channel}',
-      'Framework / Engine': '${flutterVersion.frameworkRevision} / '
-          '${flutterVersion.engineRevision}',
-    },
-    'Connected app type': connectedApp.display,
-    if (includeVmServiceConnection && serviceManager.service != null)
-      'VM Service Connection': serviceManager.service!.connectedUri.toString(),
-  };
-}

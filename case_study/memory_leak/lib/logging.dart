@@ -76,7 +76,7 @@ class TimeModel {
 
   /// Stop updating.
   void stop() {
-    _clockUpdateTimer?.cancel();
+    _clockUpdateTimer.cancel();
     _clockUpdateTimer = null;
   }
 

@@ -214,11 +214,11 @@ class _AppSizeBodyState extends State<AppSizeBody>
         Expanded(
           child: TabBarView(
             physics: defaultTabBarViewPhysics,
+            controller: _tabController,
             children: const [
               AnalysisView(),
               DiffView(),
             ],
-            controller: _tabController,
           ),
         ),
       ],
@@ -315,6 +315,10 @@ class _AnalysisViewState extends State<AnalysisView>
           Expanded(
             child: Split(
               axis: Axis.vertical,
+              initialFractions: const [
+                initialFractionForTreemap,
+                initialFractionForTreeTable,
+              ],
               children: [
                 _buildTreemap(),
                 Row(
@@ -330,10 +334,6 @@ class _AnalysisViewState extends State<AnalysisView>
                       ),
                   ],
                 ),
-              ],
-              initialFractions: const [
-                initialFractionForTreemap,
-                initialFractionForTreeTable,
               ],
             ),
           ),
@@ -471,6 +471,10 @@ class _DiffViewState extends State<DiffView>
           Expanded(
             child: Split(
               axis: Axis.vertical,
+              initialFractions: const [
+                initialFractionForTreemap,
+                initialFractionForTreeTable,
+              ],
               children: [
                 _buildTreemap(),
                 Row(
@@ -486,10 +490,6 @@ class _DiffViewState extends State<DiffView>
                       ),
                   ],
                 ),
-              ],
-              initialFractions: const [
-                initialFractionForTreemap,
-                initialFractionForTreeTable,
               ],
             ),
           ),
