@@ -95,7 +95,6 @@ class NetworkRequestInspector extends StatelessWidget {
                         if (data.hasCookies) HttpRequestCookiesView(data),
                       ],
                     ],
-
                     gaScreen: analytics_constants.network,
                     // TODO(kenz): Consider using the outlined style
                     outlined: false,
