@@ -157,7 +157,8 @@ class LayerImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final snapshot = this.snapshot;
-    if (snapshot == null) {
+    final originalFrameSize = this.originalFrameSize;
+    if (snapshot == null || originalFrameSize == null) {
       return const Icon(
         Icons.image,
         size: _placeholderImageSize,
@@ -177,7 +178,10 @@ class LayerImage extends StatelessWidget {
             margin: const EdgeInsets.symmetric(horizontal: defaultSpacing),
             child: LayoutBuilder(
               builder: (context, constraints) {
-                final scaleFactor = _calculateScaleFactor(constraints);
+                final scaleFactor = _calculateScaleFactor(
+                  constraints,
+                  originalFrameSize,
+                );
                 final scaledSize = _scaledLayerSize(scaleFactor);
                 final scaledOffset = _scaledLayerOffset(scaleFactor);
                 return Stack(
@@ -216,7 +220,7 @@ class LayerImage extends StatelessWidget {
                       context: context,
                       builder: (context) => LayerImageDialog(
                         snapshot: snapshot,
-                        originalFrameSize: originalFrameSize!,
+                        originalFrameSize: originalFrameSize,
                       ),
                     );
                   },
@@ -227,10 +231,12 @@ class LayerImage extends StatelessWidget {
     );
   }
 
-  double _calculateScaleFactor(BoxConstraints constraints) {
-    final originalSize = originalFrameSize!;
-    final widthScaleFactor = constraints.maxWidth / originalSize.width;
-    final heightScaleFactor = constraints.maxHeight / originalSize.height;
+  double _calculateScaleFactor(
+    BoxConstraints constraints,
+    Size originalFrameSize,
+  ) {
+    final widthScaleFactor = constraints.maxWidth / originalFrameSize.width;
+    final heightScaleFactor = constraints.maxHeight / originalFrameSize.height;
     return math.min(widthScaleFactor, heightScaleFactor);
   }
 
