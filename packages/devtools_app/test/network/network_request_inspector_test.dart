@@ -10,12 +10,10 @@ import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/common_widgets.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../test_utils/test_utils.dart';
 import 'utils/network_test_utils.dart';
 
 void main() {
@@ -39,22 +37,8 @@ void main() {
       );
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       controller = NetworkController();
-      // This intercepts the Clipboard.setData SystemChannel message,
-      // and stores the contents that were (attempted) to be copied.
-      SystemChannels.platform.setMockMethodCallHandler((MethodCall call) {
-        switch (call.method) {
-          case 'Clipboard.setData':
-            _clipboardContents = call.arguments['text'];
-            break;
-          case 'Clipboard.getData':
-            return Future.value(<String, dynamic>{});
-          case 'Clipboard.hasStrings':
-            return Future.value(<String, dynamic>{'value': true});
-          default:
-            break;
-        }
-
-        return Future.value(true);
+      setupClipboardCopyListener(clipboardContentsCallback: (contents) {
+        _clipboardContents = contents ?? '';
       });
     });
 
