@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -80,12 +79,12 @@ class RasterMetricsController {
         (snapshot[_snapshotJsonKey] as List<dynamic>).cast<int>(),
       );
       final size = Size(
-        snapshot['width'] as double,
-        snapshot['height'] as double,
+        (snapshot['width'] as int).toDouble(),
+        (snapshot['height'] as int).toDouble(),
       );
       final offset = Offset(
-        snapshot['left'] as double,
-        snapshot['top'] as double,
+        (snapshot['left'] as int).toDouble(),
+        (snapshot['top'] as int).toDouble(),
       );
       final image = await imageFromBytes(imageBytes);
       final layerSnapshot = LayerSnapshot(
