@@ -37,9 +37,11 @@ void main() {
       );
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       controller = NetworkController();
-      setupClipboardCopyListener(clipboardContentsCallback: (contents) {
-        _clipboardContents = contents ?? '';
-      });
+      setupClipboardCopyListener(
+        clipboardContentsCallback: (contents) {
+          _clipboardContents = contents ?? '';
+        },
+      );
     });
 
     testWidgets('copy response body', (tester) async {
