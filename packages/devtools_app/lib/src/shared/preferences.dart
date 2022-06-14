@@ -21,6 +21,9 @@ class PreferencesController {
       _inspectorPreferences;
   final _inspectorPreferences = InspectorPreferencesController();
 
+  MemoryPreferencesController get memoryPreferences => _memoryPreferences;
+  final _memoryPreferences = MemoryPreferencesController();
+
   Future<void> init() async {
     // Get the current values and listen for and write back changes.
     String? value = await storage.getValue('ui.darkMode');
@@ -42,6 +45,7 @@ class PreferencesController {
     });
 
     await _inspectorPreferences.init();
+    await _memoryPreferences.init();
 
     setGlobal(PreferencesController, this);
   }
@@ -68,6 +72,35 @@ class InspectorPreferencesController {
 
   final _hoverEvalMode = ValueNotifier<bool>(false);
   static const _hoverEvalModeStorageId = 'inspector.hoverEvalMode';
+
+  Future<void> init() async {
+    String? value = await storage.getValue(_hoverEvalModeStorageId);
+
+    // When embedded, default hoverEvalMode to off
+    value ??= (!ideTheme.embed).toString();
+    toggleHoverEvalMode(value == 'true');
+
+    _hoverEvalMode.addListener(() {
+      storage.setValue(
+        _hoverEvalModeStorageId,
+        _hoverEvalMode.value.toString(),
+      );
+    });
+
+    setGlobal(InspectorPreferencesController, this);
+  }
+
+  /// Change the value for the hover eval mode setting.
+  void toggleHoverEvalMode(bool enableHoverEvalMode) {
+    _hoverEvalMode.value = enableHoverEvalMode;
+  }
+}
+
+class MemoryPreferencesController {
+  ValueListenable<bool> get hoverEvalModeEnabled => _hoverEvalMode;
+
+  final _hoverEvalMode = ValueNotifier<bool>(false);
+  static const _hoverEvalModeStorageId = 'memory.hoverEvalMode';
 
   Future<void> init() async {
     String? value = await storage.getValue(_hoverEvalModeStorageId);
