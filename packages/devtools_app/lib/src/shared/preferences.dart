@@ -20,6 +20,9 @@ class PreferencesController {
   InspectorPreferencesController get inspector => _inspector;
   final _inspector = InspectorPreferencesController();
 
+  MemoryPreferencesController get memory => _memory;
+  final _memory = MemoryPreferencesController();
+
   Future<void> init() async {
     // Get the current values and listen for and write back changes.
     String? value = await storage.getValue('ui.darkMode');
@@ -41,6 +44,7 @@ class PreferencesController {
     });
 
     await _inspector.init();
+    await _memory.init();
 
     setGlobal(PreferencesController, this);
   }
@@ -89,5 +93,36 @@ class InspectorPreferencesController {
   /// Change the value for the hover eval mode setting.
   void setHoverEvalMode(bool enableHoverEvalMode) {
     _hoverEvalMode.value = enableHoverEvalMode;
+  }
+}
+
+class MemoryPreferencesController {
+  ValueListenable<bool> get androidCollectionEnabled =>
+      _androidCollectionEnabled;
+
+  final _androidCollectionEnabled = ValueNotifier<bool>(false);
+  static const _androidCollectionEnabledStorageId =
+      'memory.androidCollectionEnabled';
+
+  Future<void> init() async {
+    String? value = await storage.getValue(_androidCollectionEnabledStorageId);
+
+    // When embedded, default hoverEvalMode to off
+    value ??= (!ideTheme.embed).toString();
+    setAndroidCollectionEnabled(value == 'true');
+
+    _androidCollectionEnabled.addListener(() {
+      storage.setValue(
+        _androidCollectionEnabledStorageId,
+        _androidCollectionEnabled.value.toString(),
+      );
+    });
+
+    setGlobal(InspectorPreferencesController, this);
+  }
+
+  /// Change the value for the hover eval mode setting.
+  void setAndroidCollectionEnabled(bool enable) {
+    _androidCollectionEnabled.value = enable;
   }
 }

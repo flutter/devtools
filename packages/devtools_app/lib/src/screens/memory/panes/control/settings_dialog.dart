@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/dialogs.dart';
+import '../../../../shared/globals.dart';
 import '../../../../shared/theme.dart';
 import '../../memory_controller.dart';
 
@@ -34,7 +35,7 @@ class MemorySettingsDialog extends StatelessWidget {
                 Row(
                   children: [
                     NotifierCheckbox(
-                      notifier: controller.androidCollectionEnabled
+                      notifier: preferences.memory.androidCollectionEnabled
                           as ValueNotifier<bool?>,
                     ),
                     RichText(
