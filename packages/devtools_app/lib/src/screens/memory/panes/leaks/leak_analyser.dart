@@ -32,7 +32,9 @@ String _notGCedWithPathToYaml(Iterable<ObjectReport> notGCed) {
   final byCulprits = findCulprits(notGCed);
 
   final header = '''not-gced:
-  total: ${byCulprits.length}
+  total: ${notGCed.length}
+  culprits: ${byCulprits.length}
+  victims: ${notGCed.length - byCulprits.length}
   objects:
 ''';
 
