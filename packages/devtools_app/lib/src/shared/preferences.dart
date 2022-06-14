@@ -79,11 +79,9 @@ class InspectorPreferencesController {
   static const _customPubRootDirectoriesStorageId =
       'inspector.customPubRootDirectories';
 
-  late List<String>? defaultPubRootDirectories;
-
   Future<void> init() async {
     await initHoverEvalMode();
-
+    initCustomPubRootDirectories();
     setGlobal(InspectorPreferencesController, this);
   }
 
@@ -102,22 +100,7 @@ class InspectorPreferencesController {
     });
   }
 
-  Future<void> initCustomPubRootDirectories() async {
-    final pubRootDirectories = <String>[];
-    defaultPubRootDirectories = await inspectorService.getPubRootDirectories();
-
-    if (defaultPubRootDirectories != null) {
-      pubRootDirectories.addAll(defaultPubRootDirectories!);
-    }
-
-    final storedCustomPubRootDirectories =
-        await storage.getValue(_customPubRootDirectoriesStorageId);
-
-    if (storedCustomPubRootDirectories != null) {
-      pubRootDirectories.addAll(
-          List<String>.from(jsonDecode(storedCustomPubRootDirectories)));
-    }
-    setCustomPubRootDirectories(pubRootDirectories);
+  void initCustomPubRootDirectories() {
     _customPubRootDirectories.addListener(() {
       storage.setValue(
         _customPubRootDirectoriesStorageId,
@@ -126,8 +109,47 @@ class InspectorPreferencesController {
     });
   }
 
-  void setCustomPubRootDirectories(List<String> pubRootDirectories) {
-    _customPubRootDirectories.value = pubRootDirectories;
+  Future<void> refreshCustomPubRootDirectories() async {
+    final storedCustomPubRootDirectories =
+        await storage.getValue(_customPubRootDirectoriesStorageId);
+
+    if (storedCustomPubRootDirectories != null) {
+      await addPubRootDirectories(
+        List<String>.from(
+          jsonDecode(storedCustomPubRootDirectories),
+        ),
+      );
+    }
+
+    await _persistPubRootDirectoriesInStorage();
+  }
+
+  Future<void> addPubRootDirectories(
+    List<String> pubRootDirectories,
+  ) async {
+    await inspectorService.addPubRootDirectories(pubRootDirectories);
+    await _persistPubRootDirectoriesInStorage();
+  }
+
+  Future<void> setPubRootDirectories(
+    List<String> pubRootDirectories,
+  ) async {
+    await inspectorService.setPubRootDirectories(pubRootDirectories);
+    await _persistPubRootDirectoriesInStorage();
+  }
+
+  Future<void> removePubRootDirectories(
+    List<String> pubRootDirectories,
+  ) async {
+    await inspectorService.removePubRootDirectories(pubRootDirectories);
+    await _persistPubRootDirectoriesInStorage();
+  }
+
+  Future<void> _persistPubRootDirectoriesInStorage() async {
+    final pubRootDirectories = await inspectorService.getPubRootDirectories();
+    if (pubRootDirectories != null) {
+      _customPubRootDirectories.value = pubRootDirectories;
+    }
   }
 
   /// Change the value for the hover eval mode setting.

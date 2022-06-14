@@ -256,46 +256,54 @@ class ClearButton extends IconLabelButton {
 }
 
 class PubRootField extends StatelessWidget {
-  InspectorService get inspectorService =>
-      serviceManager.inspectorService as InspectorService;
+  Future<List<String>?> _getUpToDatePubRootDirectories() async {
+    final inspectorService =
+        serviceManager.inspectorService as InspectorService;
+    await preferences.inspectorPreferences.refreshCustomPubRootDirectories();
+    return inspectorService.getPubRootDirectories();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: inspectorService.getPubRootDirectories(),
-      builder: (
-        context,
-        snapshot,
-      ) {
-        if (snapshot.hasData) {
-          return JSONTextField(snapshot.data as List<String>?);
-        } else if (snapshot.hasError) {
-          return Row(
-            children: [
-              const Icon(
-                Icons.error_outline,
-                color: Colors.red,
-                size: 60,
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 16),
-                child: Text('Error: ${snapshot.error}'),
-              )
-            ],
-          );
-        } else {
-          return Row(children: [
-            SizedBox(
-              width: 60,
-              height: 60,
-              child: CircularProgressIndicator(),
-            ),
-            Padding(
-              padding: EdgeInsets.only(top: 16),
-              child: Text('Awaiting result...'),
-            )
-          ]);
-        }
-        return Text('THERE WAS AN ERROR');
+    return ValueListenableBuilder<List<IsolateRef?>>(
+      valueListenable: serviceManager.isolateManager.isolates,
+      builder: (context, value, child) {
+        return FutureBuilder(
+          future: _getUpToDatePubRootDirectories(),
+          builder: (
+            context,
+            snapshot,
+          ) {
+            if (snapshot.hasData) {
+              return JSONTextField(snapshot.data as List<String>?);
+            } else if (snapshot.hasError) {
+              // TODO, do we log or report errors somewhere?
+              return Row(
+                children: [
+                  const Icon(
+                    Icons.error_outline,
+                    color: Colors.red,
+                    size: 60,
+                  ),
+                  Text('Error: pub roots are not available'),
+                ],
+              );
+            } else {
+              return Row(children: [
+                SizedBox(
+                  width: 60,
+                  height: 60,
+                  child: CircularProgressIndicator(),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(top: 16),
+                  child: Text('Awaiting result...'),
+                )
+              ]);
+            }
+            return Text('THERE WAS AN ERROR');
+          },
+        );
       },
     );
   }
@@ -341,12 +349,11 @@ class _JSONTextFieldState extends State<JSONTextField> {
       onChanged: (text) async {
         try {
           final newPubRoots = List<String>.from(jsonDecode(text));
-          await inspectorService.setPubRootDirectories(newPubRoots);
           setState(() {
             _invalid = false;
           });
-          preferences.inspectorPreferences
-              .setCustomPubRootDirectories(newPubRoots);
+          await preferences.inspectorPreferences
+              .setPubRootDirectories(newPubRoots);
         } on FormatException catch (_) {
           // Fail if not valid json
           setState(() {

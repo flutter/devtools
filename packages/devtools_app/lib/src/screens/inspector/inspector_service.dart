@@ -433,12 +433,40 @@ class InspectorService extends InspectorServiceBase {
     await _onRootDirectoriesChanged(rootDirectories);
   }
 
+  Future<void> addPubRootDirectories(List<String> rootDirectories) async {
+    await _addPubRootDirectories(rootDirectories);
+    await _onRootDirectoriesChanged(rootDirectories);
+  }
+
+  Future<void> removePubRootDirectories(List<String> rootDirectories) async {
+    await _removePubRootDirectories(rootDirectories);
+    await _onRootDirectoriesChanged(rootDirectories);
+  }
+
   Future<void> _setPubRootDirectories(List<String> rootDirectories) {
     // No need to call this from a breakpoint.
     assert(useDaemonApi);
     return invokeServiceMethodDaemonNoGroupArgs(
       'setPubRootDirectories',
       rootDirectories,
+    );
+  }
+
+  Future<void> _addPubRootDirectories(List<String> pubDirectories) {
+    // No need to call this from a breakpoint.
+    assert(useDaemonApi);
+    return invokeServiceMethodDaemonNoGroupArgs(
+      'addPubRootDirectories',
+      pubDirectories,
+    );
+  }
+
+  Future<void> _removePubRootDirectories(List<String> pubDirectories) {
+    // No need to call this from a breakpoint.
+    assert(useDaemonApi);
+    return invokeServiceMethodDaemonNoGroupArgs(
+      'removePubRootDirectories',
+      pubDirectories,
     );
   }
 
