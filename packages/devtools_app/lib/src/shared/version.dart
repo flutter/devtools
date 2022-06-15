@@ -4,8 +4,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
-
 import 'utils.dart';
 
 class FlutterVersion extends SemanticVersion {

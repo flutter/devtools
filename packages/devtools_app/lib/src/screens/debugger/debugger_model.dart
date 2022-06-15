@@ -4,7 +4,6 @@
 
 import 'dart:typed_data';
 
-import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../primitives/trees.dart';
