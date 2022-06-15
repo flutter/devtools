@@ -76,7 +76,7 @@ class FlutterVersion extends SemanticVersion {
   }
 
   @override
-  int get hashCode => hashValues(
+  int get hashCode => Object.hash(
         version,
         channel,
         repositoryUrl,

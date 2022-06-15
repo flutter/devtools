@@ -68,7 +68,7 @@ abstract class NetworkRequest with DataSearchStateMixin {
   }
 
   @override
-  int get hashCode => hashValues(
+  int get hashCode => Object.hash(
         method,
         uri,
         contentType,

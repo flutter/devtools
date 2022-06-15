@@ -571,7 +571,7 @@ class ServiceExtensionState {
   }
 
   @override
-  int get hashCode => hashValues(
+  int get hashCode => Object.hash(
         enabled,
         value,
       );
