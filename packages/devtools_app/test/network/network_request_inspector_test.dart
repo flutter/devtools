@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/http/http_request_data.dart';
 import 'package:devtools_app/src/screens/network/network_controller.dart';
@@ -13,26 +15,29 @@ import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../test_data/network.dart';
 import '../test_utils/test_utils.dart';
 import 'utils/network_test_utils.dart';
 
 void main() {
   group('NetworkRequestInspector', () {
     late NetworkController controller;
-    late SocketProfile socketProfile;
-    late HttpProfile httpProfile;
     late FakeServiceManager fakeServiceManager;
-    late String _clipboardContents;
+    final HttpProfileRequest? httpRequest =
+        HttpProfileRequest.parse(httpPostJson);
+    String _clipboardContents = '';
 
     setUp(() {
       setGlobal(IdeTheme, IdeTheme());
       _clipboardContents = '';
-      socketProfile = loadSocketProfile();
-      httpProfile = loadHttpProfile();
       fakeServiceManager = FakeServiceManager(
         service: FakeServiceManager.createFakeService(
-          socketProfile: socketProfile,
-          httpProfile: httpProfile,
+          httpProfile: HttpProfile(
+            requests: [
+              httpRequest!,
+            ],
+            timestamp: 0,
+          ),
         ),
       );
       setGlobal(ServiceConnectionManager, fakeServiceManager);
@@ -48,6 +53,7 @@ void main() {
       final requestsNotifier = controller.requests;
 
       await controller.startRecording();
+
       await tester.pumpWidget(
         wrapWithControllers(
           NetworkRequestInspector(controller),
@@ -55,25 +61,33 @@ void main() {
         ),
       );
 
+      // Load the network request.
       await controller.networkService.refreshNetworkData();
-      final networkRequest = requestsNotifier.value.requests[5];
+      expect(requestsNotifier.value.requests.length, equals(1));
 
+      // Select the request in the network request list.
+      final networkRequest = requestsNotifier.value.requests.first;
       controller.selectRequest(networkRequest);
       await tester.pumpAndSettle();
-
       await tester.tap(find.text('Response'));
       await tester.pumpAndSettle();
 
+      // Tap the responseBody copy button.
       expect(_clipboardContents, isEmpty);
       await tester.tap(find.byType(CopyToClipboardControl));
+      final expectedResponseBody =
+          jsonDecode(utf8.decode(httpRequest!.responseBody!.toList()));
 
+      // Check that the contents were copied to clipboard.
       expect(_clipboardContents, isNotEmpty);
       expect(
-        _clipboardContents,
-        equals((networkRequest as DartIOHttpRequestData).responseBody),
+        jsonDecode(_clipboardContents),
+        equals(expectedResponseBody),
       );
 
       controller.stopRecording();
+
+      // pumpAndSettle so residual http timers can clear.
       await tester.pumpAndSettle(const Duration(seconds: 1));
     });
   });
