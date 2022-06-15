@@ -5,7 +5,6 @@
 import 'dart:convert';
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/http/http_request_data.dart';
 import 'package:devtools_app/src/screens/network/network_controller.dart';
 import 'package:devtools_app/src/screens/network/network_request_inspector.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
@@ -17,7 +16,6 @@ import 'package:vm_service/vm_service.dart';
 
 import '../test_data/network.dart';
 import '../test_utils/test_utils.dart';
-import 'utils/network_test_utils.dart';
 
 void main() {
   group('NetworkRequestInspector', () {
