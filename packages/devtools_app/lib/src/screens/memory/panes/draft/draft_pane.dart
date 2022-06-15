@@ -14,7 +14,6 @@ class DraftPane extends StatefulWidget {
 }
 
 class _DraftPaneState extends State<DraftPane> {
-  ClassHeapStats? _classHeapStats;
   String _isolateId = '';
 
   ObjRef? _instance;
@@ -37,24 +36,27 @@ class _DraftPaneState extends State<DraftPane> {
                     serviceManager.isolateManager!.mainIsolate!.value!.id!;
               });
 
-              final profile =
-                  await serviceManager.service!.getAllocationProfile(
-                _isolateId,
-                gc: true,
-              );
+              // final profile =
+              //     await serviceManager.service!.getAllocationProfile(
+              //   _isolateId,
+              //   gc: true,
+              // );
 
-              for (var item in profile.members!) {
-                if (item.classRef!.name == 'MyClass') {
+              final classList =
+                  await serviceManager.service!.getClassList(_isolateId);
+              for (var item in classList.classes!) {
+                // for (var item in profile.members!) {
+                if (item!.name == 'MyClass') {
                   final isolateRef =
                       serviceManager.isolateManager!.mainIsolate!.value!;
+
                   final instances = await serviceManager.service!.getInstances(
                     _isolateId,
-                    item.classRef!.id!,
+                    item!.id!,
                     20,
                   );
 
                   setState(() {
-                    _classHeapStats = item;
                     _instance = instances.instances!.first!;
                     _code = _instance!.json!['identityHashCode'];
                   });
@@ -70,10 +72,11 @@ class _DraftPaneState extends State<DraftPane> {
                 }
               }
             }),
-        Text('${_classHeapStats?.type}-${_classHeapStats?.classRef?.id}'),
+        // Text('${_classHeapStats?.type}-${_classHeapStats?.classRef?.id}'),
         Text('${_instance?.id}'),
         Text('$_result'),
         Text('$_code'),
+        Text('${_instance!.json}'),
       ],
     );
   }
