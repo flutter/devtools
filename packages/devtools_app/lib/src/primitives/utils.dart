@@ -584,7 +584,7 @@ class TimeRange {
   }
 
   @override
-  int get hashCode => hashValues(start, end);
+  int get hashCode => Object.hash(start, end);
 }
 
 String formatDateTime(DateTime time) {
@@ -748,7 +748,7 @@ class Range {
   }
 
   @override
-  int get hashCode => hashValues(begin, end);
+  int get hashCode => Object.hash(begin, end);
 }
 
 enum SortDirection {
