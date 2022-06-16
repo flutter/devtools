@@ -10,6 +10,7 @@ import '../../primitives/auto_dispose_mixin.dart';
 import '../../shared/screen.dart';
 import '../../shared/theme.dart';
 import 'isolate_statistics_view.dart';
+import 'object_inspector_view.dart';
 import 'vm_developer_tools_controller.dart';
 import 'vm_statistics_view.dart';
 
@@ -56,19 +57,28 @@ class VMDeveloperToolsScreen extends Screen {
       controller.showIsolateSelector;
 
   @override
-  Widget build(BuildContext context) => const VMDeveloperToolsScreenBody();
+  Widget build(BuildContext context) => const VMDeveloperToolsScreenBody(
+        displayObjectInspector: true,
+      );
 }
 
 class VMDeveloperToolsScreenBody extends StatefulWidget {
-  const VMDeveloperToolsScreenBody();
+  const VMDeveloperToolsScreenBody({
+    this.displayObjectInspector = false,
+  });
 
-  static const List<VMDeveloperView> views = [
-    VMStatisticsView(),
-    IsolateStatisticsView(),
+  static List<VMDeveloperView> views = [
+    const VMStatisticsView(),
+    const IsolateStatisticsView(),
   ];
 
+  final bool displayObjectInspector;
+
   @override
-  _VMDeveloperToolsScreenState createState() => _VMDeveloperToolsScreenState();
+  _VMDeveloperToolsScreenState createState() {
+    if (displayObjectInspector) views.add(ObjectInspectorView());
+    return _VMDeveloperToolsScreenState();
+  }
 }
 
 class _VMDeveloperToolsScreenState extends State<VMDeveloperToolsScreenBody>
