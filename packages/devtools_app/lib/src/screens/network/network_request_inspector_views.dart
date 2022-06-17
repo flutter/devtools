@@ -34,8 +34,8 @@ ExpansionTile _buildTile(
     title: Text(
       title,
     ),
-    children: children,
     initiallyExpanded: true,
+    children: children,
   );
 }
 

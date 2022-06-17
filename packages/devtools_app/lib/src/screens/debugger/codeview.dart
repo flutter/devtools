@@ -420,17 +420,19 @@ class _CodeViewState extends State<CodeView>
 
   Widget buildFileSearchField() {
     return ElevatedCard(
-      child: FileSearchField(
-        debuggerController: widget.controller,
-      ),
       width: extraWideSearchTextWidth,
       height: defaultTextFieldHeight,
       padding: EdgeInsets.zero,
+      child: FileSearchField(
+        debuggerController: widget.controller,
+      ),
     );
   }
 
   Widget buildSearchInFileField() {
     return ElevatedCard(
+      width: wideSearchTextWidth,
+      height: defaultTextFieldHeight + 2 * denseSpacing,
       child: buildSearchField(
         controller: widget.controller,
         searchFieldKey: debuggerCodeViewSearchKey,
@@ -439,8 +441,6 @@ class _CodeViewState extends State<CodeView>
         supportsNavigation: true,
         onClose: () => widget.controller.toggleSearchInFileVisibility(false),
       ),
-      width: wideSearchTextWidth,
-      height: defaultTextFieldHeight + 2 * denseSpacing,
     );
   }
 

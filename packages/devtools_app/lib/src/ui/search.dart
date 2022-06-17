@@ -356,8 +356,8 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
           child: ListView(
             padding: EdgeInsets.zero,
             shrinkWrap: true,
-            children: autoCompleteTiles,
             itemExtent: tileEntryHeight,
+            children: autoCompleteTiles,
           ),
         ),
       ),
