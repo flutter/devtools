@@ -105,10 +105,9 @@ class MemoryPreferencesController {
       'memory.androidCollectionEnabled';
 
   Future<void> init() async {
-    String? value = await storage.getValue(_androidCollectionEnabledStorageId);
+    final androidCollectionEnabled =
+        await storage.getValue(_androidCollectionEnabledStorageId);
 
-    // When embedded, default hoverEvalMode to off
-    value ??= (!ideTheme.embed).toString();
     setAndroidCollectionEnabled(value == 'true');
 
     _androidCollectionEnabled.addListener(() {
