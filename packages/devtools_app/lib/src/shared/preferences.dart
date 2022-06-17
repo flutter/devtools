@@ -108,7 +108,7 @@ class MemoryPreferencesController {
     final androidCollectionEnabled =
         await storage.getValue(_androidCollectionEnabledStorageId);
 
-    setAndroidCollectionEnabled(value == 'true');
+    setAndroidCollectionEnabled(androidCollectionEnabled == 'true');
 
     _androidCollectionEnabled.addListener(() {
       storage.setValue(

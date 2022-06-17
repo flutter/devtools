@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../../../../../devtools_app.dart';
 import '../../../../primitives/auto_dispose_mixin.dart';
 import '../../../../shared/utils.dart';
 import '../../memory_controller.dart';
@@ -26,9 +27,6 @@ class _MemoryControlPaneState extends State<MemoryControlPane>
     with
         AutoDisposeMixin,
         ProvidedControllerMixin<MemoryController, MemoryControlPane> {
-  /// Updated when the MemoryController's _androidCollectionEnabled ValueNotifier changes.
-  bool _isAndroidCollection = MemoryController.androidADBDefault;
-
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -36,10 +34,13 @@ class _MemoryControlPaneState extends State<MemoryControlPane>
       children: [
         PrimaryControls(chartControllers: widget.chartControllers),
         const Spacer(),
-        SecondaryControls(
-          chartControllers: widget.chartControllers,
-          isAndroidCollection: _isAndroidCollection,
-        )
+        ValueListenableBuilder<bool>(
+          valueListenable: preferences.memory.androidCollectionEnabled,
+          builder: (context, enabled, _) => SecondaryControls(
+            chartControllers: widget.chartControllers,
+            isAndroidCollection: enabled,
+          ),
+        ),
       ],
     );
   }
@@ -47,19 +48,6 @@ class _MemoryControlPaneState extends State<MemoryControlPane>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!initController()) return;
-
-    // TODO(polinach): do we need this listener?
-    // https://github.com/flutter/devtools/pull/4136#discussion_r881773861
-    addAutoDisposeListener(controller.androidCollectionEnabled, () {
-      _isAndroidCollection = controller.androidCollectionEnabled.value;
-      setState(() {
-        if (!_isAndroidCollection && controller.isAndroidChartVisible) {
-          // If we're no longer collecting android stats then hide the
-          // chart and disable the Android Memory button.
-          controller.toggleAndroidChartVisibility();
-        }
-      });
-    });
+    initController();
   }
 }
