@@ -69,11 +69,12 @@ class InspectorPreferencesController {
   static const _hoverEvalModeStorageId = 'inspector.hoverEvalMode';
 
   Future<void> init() async {
-    String? hoverEvalMode = await storage.getValue(_hoverEvalModeStorageId);
+    String? hoverEvalModeEnabledValue =
+        await storage.getValue(_hoverEvalModeStorageId);
 
     // When embedded, default hoverEvalMode to off
-    hoverEvalMode ??= (!ideTheme.embed).toString();
-    setHoverEvalMode(hoverEvalMode == 'true');
+    hoverEvalModeEnabledValue ??= (!ideTheme.embed).toString();
+    setHoverEvalMode(hoverEvalModeEnabledValue == 'true');
 
     _hoverEvalMode.addListener(() {
       storage.setValue(
