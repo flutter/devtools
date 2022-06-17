@@ -34,12 +34,8 @@ class _MemoryControlPaneState extends State<MemoryControlPane>
       children: [
         PrimaryControls(chartControllers: widget.chartControllers),
         const Spacer(),
-        ValueListenableBuilder<bool>(
-          valueListenable: preferences.memory.androidCollectionEnabled,
-          builder: (context, enabled, _) => SecondaryControls(
-            chartControllers: widget.chartControllers,
-            isAndroidCollection: enabled,
-          ),
+        SecondaryControls(
+          chartControllers: widget.chartControllers,
         ),
       ],
     );

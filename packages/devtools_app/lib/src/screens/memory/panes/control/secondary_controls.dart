@@ -23,11 +23,9 @@ import 'source_dropdown.dart';
 class SecondaryControls extends StatefulWidget {
   const SecondaryControls({
     Key? key,
-    required this.isAndroidCollection,
     required this.chartControllers,
   }) : super(key: key);
 
-  final bool isAndroidCollection;
   final ChartControllers chartControllers;
 
   @override
@@ -195,12 +193,6 @@ class _SecondaryControlsState extends State<SecondaryControls>
       mainAxisSize: MainAxisSize.min,
       children: [
         const MemorySourceDropdown(),
-        const SizedBox(width: defaultSpacing),
-        if (controller.isConnectedDeviceAndroid ||
-            controller.isOfflineAndAndroidData)
-          ToggleAdbMemoryButton(
-            isAndroidCollection: widget.isAndroidCollection,
-          ),
         const SizedBox(width: denseSpacing),
         ValueListenableBuilder<bool>(
           valueListenable: controller.advancedSettingsEnabled,
