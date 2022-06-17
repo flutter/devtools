@@ -306,7 +306,7 @@ void main() {
       const startingHoverEvalModeValue = false;
 
       setUp(() {
-        preferences.inspector.toggleHoverEvalMode(startingHoverEvalModeValue);
+        preferences.inspector.setHoverEvalMode(startingHoverEvalModeValue);
       });
 
       testWidgetsWithWindowSize(
