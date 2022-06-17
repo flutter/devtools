@@ -17,9 +17,8 @@ class PreferencesController {
   ValueListenable<bool> get vmDeveloperModeEnabled => _vmDeveloperMode;
   ValueListenable<bool> get denseModeEnabled => _denseMode;
 
-  InspectorPreferencesController get inspectorPreferences =>
-      _inspectorPreferences;
-  final _inspectorPreferences = InspectorPreferencesController();
+  InspectorPreferencesController get inspector => _inspector;
+  final _inspector = InspectorPreferencesController();
 
   Future<void> init() async {
     // Get the current values and listen for and write back changes.
@@ -41,7 +40,7 @@ class PreferencesController {
       storage.setValue('ui.denseMode', '${_denseMode.value}');
     });
 
-    await _inspectorPreferences.init();
+    await _inspector.init();
 
     setGlobal(PreferencesController, this);
   }
