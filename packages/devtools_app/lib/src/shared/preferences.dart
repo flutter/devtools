@@ -23,6 +23,9 @@ class PreferencesController {
   MemoryPreferencesController get memory => _memory;
   final _memory = MemoryPreferencesController();
 
+  MemoryPreferencesController get memoryPreferences => _memoryPreferences;
+  final _memoryPreferences = MemoryPreferencesController();
+
   Future<void> init() async {
     // Get the current values and listen for and write back changes.
     String? value = await storage.getValue('ui.darkMode');
