@@ -123,7 +123,6 @@ class MemoryPreferencesController {
     setGlobal(InspectorPreferencesController, this);
   }
 
-  /// Change the value for the hover eval mode setting.
   void setAndroidCollectionEnabled(bool enable) {
     _androidCollectionEnabled.value = enable;
   }
