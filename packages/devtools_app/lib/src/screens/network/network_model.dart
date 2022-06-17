@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../http/http_request_data.dart';
@@ -68,7 +67,7 @@ abstract class NetworkRequest with DataSearchStateMixin {
   }
 
   @override
-  int get hashCode => hashValues(
+  int get hashCode => Object.hash(
         method,
         uri,
         contentType,
