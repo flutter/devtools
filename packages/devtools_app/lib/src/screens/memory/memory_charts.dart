@@ -333,7 +333,7 @@ class ChartsValues {
   Map<String, Map<String, Object?>> androidDataToDisplay(List<Trace> traces) {
     final androidDataDisplayed = <String, Map<String, Object?>>{};
 
-    if (controller.isAndroidChartVisible) {
+    if (controller.isAndroidChartVisibleNotifier.value) {
       final data = androidData;
 
       // Total trace

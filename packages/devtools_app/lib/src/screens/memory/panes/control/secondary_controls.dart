@@ -13,7 +13,6 @@ import '../../../../shared/notifications.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../memory_controller.dart';
-import 'adb_button.dart';
 import 'constants.dart';
 import 'legend.dart';
 import 'settings_dialog.dart';
@@ -61,14 +60,8 @@ class _SecondaryControlsState extends State<SecondaryControls>
       });
     });
 
-    addAutoDisposeListener(controller.androidChartVisibleNotifier, () {
+    addAutoDisposeListener(controller.isAndroidChartVisibleNotifier, () {
       setState(() {
-        if (controller.androidChartVisibleNotifier.value) {
-          ga.select(
-            analytics_constants.memory,
-            analytics_constants.androidChart,
-          );
-        }
         if (controller.isLegendVisible) {
           // Recompute the legend with the new traces now visible.
           _hideLegend();
@@ -129,7 +122,7 @@ class _SecondaryControlsState extends State<SecondaryControls>
       );
     }
 
-    if (controller.isAndroidChartVisible) {
+    if (controller.isAndroidChartVisibleNotifier.value) {
       final androids = androidLegend(widget.chartControllers.android);
       legendRows.add(
         Container(
@@ -155,7 +148,7 @@ class _SecondaryControlsState extends State<SecondaryControls>
       builder: (context) => Positioned(
         top: position.dy + box.size.height + legendYOffset,
         left: position.dx - legendWidth + box.size.width - legendXOffset,
-        height: controller.isAndroidChartVisible
+        height: controller.isAndroidChartVisibleNotifier.value
             ? legendHeight2Charts
             : legendHeight1Chart,
         child: Container(

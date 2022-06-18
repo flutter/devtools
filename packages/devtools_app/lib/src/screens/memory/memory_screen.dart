@@ -72,8 +72,6 @@ class MemoryBodyState extends State<MemoryBody>
         ProvidedControllerMixin<MemoryController, MemoryBody> {
   late ChartControllers _chartControllers;
 
-  late bool _isAndroidChartVisible;
-
   MemoryController get memoryController => controller;
 
   OverlayEntry? _hoverOverlayEntry;
@@ -92,8 +90,6 @@ class MemoryBodyState extends State<MemoryBody>
     super.didChangeDependencies();
     maybePushDebugModeMemoryMessage(context, MemoryScreen.id);
     if (!initController()) return;
-
-    _isAndroidChartVisible = memoryController.isAndroidChartVisible;
 
     final vmChartController = vm.VMChartController(memoryController);
 
@@ -224,17 +220,13 @@ class MemoryBodyState extends State<MemoryBody>
       });
     });
 
-    addAutoDisposeListener(memoryController.androidChartVisibleNotifier, () {
-      setState(() {
-        _isAndroidChartVisible = memoryController.isAndroidChartVisible;
-      });
-    });
-
     _updateListeningState();
   }
 
   @override
   Widget build(BuildContext context) {
+    print('parent building. value is ' +
+        controller.isAndroidChartVisibleNotifier.value.toString());
     // TODO(terry): Can Flutter's focus system be used instead of listening to keyboard?
     return RawKeyboardListener(
       focusNode: _focusNode,
@@ -256,12 +248,22 @@ class MemoryBodyState extends State<MemoryBody>
           SizedBox(
             child: vm.MemoryVMChart(_chartControllers.vm),
           ),
-          _isAndroidChartVisible
-              ? SizedBox(
-                  height: defaultChartHeight,
-                  child: android.MemoryAndroidChart(_chartControllers.android),
-                )
-              : const SizedBox(),
+          ValueListenableBuilder<bool>(
+            valueListenable: controller.isAndroidChartVisibleNotifier,
+            builder: (context, isAndroidChartVisible, _) {
+              print('child building. value is ' +
+                  controller.isAndroidChartVisibleNotifier.value.toString());
+
+              return isAndroidChartVisible
+                  ? SizedBox(
+                      height: defaultChartHeight,
+                      child: android.MemoryAndroidChart(
+                        _chartControllers.android,
+                      ),
+                    )
+                  : const SizedBox();
+            },
+          ),
           const SizedBox(width: defaultSpacing),
           Expanded(
             child: HeapTree(memoryController),
@@ -668,7 +670,7 @@ class MemoryBodyState extends State<MemoryBody>
     const dividerLineHorizontalSpace = 20.0;
     const totalDividerLineHorizontalSpace = dividerLineHorizontalSpace * 2;
 
-    if (!memoryController.isAndroidChartVisible) return [];
+    if (!memoryController.isAndroidChartVisibleNotifier.value) return [];
 
     final androidDataDisplayed =
         chartsValues.androidDataToDisplay(_chartControllers.android.traces);
@@ -715,7 +717,7 @@ class MemoryBodyState extends State<MemoryBody>
 
     double totalHoverHeight;
     int totalTraces;
-    if (memoryController.isAndroidChartVisible) {
+    if (memoryController.isAndroidChartVisibleNotifier.value) {
       totalTraces = chartsValues.vmData.entries.length -
           1 +
           chartsValues.androidData.entries.length;

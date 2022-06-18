@@ -41,7 +41,7 @@ class MemorySettingsDialog extends StatelessWidget {
                     RichText(
                       overflow: TextOverflow.visible,
                       text: TextSpan(
-                        text: 'Collect Android Memory Statistics using ADB',
+                        text: 'Show Android memory chart',
                         style: theme.regularTextStyle,
                       ),
                     ),

@@ -556,15 +556,8 @@ class MemoryController extends DisposableController
 
   bool get isPaused => _paused.value;
 
-  final _androidChartVisibleNotifier = ValueNotifier<bool>(false);
-
-  ValueListenable get androidChartVisibleNotifier =>
-      _androidChartVisibleNotifier;
-
-  bool get isAndroidChartVisible => _androidChartVisibleNotifier.value;
-
-  bool toggleAndroidChartVisibility() =>
-      _androidChartVisibleNotifier.value = !_androidChartVisibleNotifier.value;
+  final ValueNotifier<bool> isAndroidChartVisibleNotifier =
+      ValueNotifier<bool>(false);
 
   bool get isAdvancedSettingsVisible => _advancedSettingsEnabled.value;
 
@@ -867,6 +860,15 @@ class MemoryController extends DisposableController
         _memoryTracker!.stop();
         _memoryTracker = null;
       },
+    );
+
+    bool _isAndroidChartVisible() =>
+        preferences.memory.androidCollectionEnabled.value &&
+        isConnectedDeviceAndroid;
+
+    isAndroidChartVisibleNotifier.value = _isAndroidChartVisible();
+    preferences.memory.androidCollectionEnabled.addListener(
+      () => isAndroidChartVisibleNotifier.value = _isAndroidChartVisible(),
     );
   }
 

@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import '../analytics/analytics.dart' as ga;
 
+import '../analytics/constants.dart' as analytics_constants;
 import '../service/vm_service_wrapper.dart';
 import 'globals.dart';
 
@@ -125,5 +127,11 @@ class MemoryPreferencesController {
 
   void setAndroidCollectionEnabled(bool enable) {
     _androidCollectionEnabled.value = enable;
+    if (enable) {
+      ga.select(
+        analytics_constants.memory,
+        analytics_constants.androidChart,
+      );
+    }
   }
 }

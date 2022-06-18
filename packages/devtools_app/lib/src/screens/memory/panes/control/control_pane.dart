@@ -4,7 +4,6 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../../devtools_app.dart';
 import '../../../../primitives/auto_dispose_mixin.dart';
 import '../../../../shared/utils.dart';
 import '../../memory_controller.dart';
