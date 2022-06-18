@@ -102,7 +102,10 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
           final allValues = ChartsValues(controller, index, timestamp);
           _showHover(
-              context, allValues, tapData.tapDownDetails!.globalPosition);
+            context,
+            allValues,
+            tapData.tapDownDetails!.globalPosition,
+          );
         }
       }
     });
@@ -125,7 +128,10 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
           final allValues = ChartsValues(controller, index, timestamp);
 
           _showHover(
-              context, allValues, tapData.tapDownDetails!.globalPosition);
+            context,
+            allValues,
+            tapData.tapDownDetails!.globalPosition,
+          );
         }
       }
     });
@@ -148,7 +154,10 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
           final allValues = ChartsValues(controller, index, timestamp);
 
           _showHover(
-              context, allValues, tapData.tapDownDetails!.globalPosition);
+            context,
+            allValues,
+            tapData.tapDownDetails!.globalPosition,
+          );
         }
       }
     });
@@ -560,7 +569,6 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
   Widget _listItem({
     required List<Map<String, Object>> allEvents,
-    int? index,
     required String title,
     IconData? icon,
   }) {

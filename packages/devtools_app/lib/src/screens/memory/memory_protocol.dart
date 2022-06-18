@@ -12,7 +12,6 @@ import '../../config_specific/logger/logger.dart' as logger;
 import '../../shared/globals.dart';
 import '../../shared/utils.dart';
 import 'memory_controller.dart';
-import 'memory_screen.dart';
 import 'primitives/memory_timeline.dart';
 
 class MemoryTracker {
