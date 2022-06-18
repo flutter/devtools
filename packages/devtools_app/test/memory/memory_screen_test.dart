@@ -125,8 +125,6 @@ void main() {
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(IdeTheme, IdeTheme());
       screen = const MemoryScreen();
-
-      expect(MemoryScreen.isDebugging, isFalse);
     });
 
     testWidgets('builds its tab', (WidgetTester tester) async {

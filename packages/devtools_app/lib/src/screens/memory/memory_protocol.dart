@@ -314,21 +314,6 @@ class MemoryTracker {
 
     if (memoryTimeline.anyPendingExtensionEvents) {
       final extensionEvents = memoryTimeline.extensionEvents;
-
-      if (MemoryScreen.isDebuggingEnabled &&
-          extensionEvents?.isNotEmpty == true) {
-        debugLogger(
-          'Receieved Extension Events '
-          '${extensionEvents!.theEvents.length}',
-        );
-        for (var e in extensionEvents.theEvents) {
-          final dt = DateTime.fromMillisecondsSinceEpoch(e.timestamp!);
-          debugLogger(
-            '  ${e.eventKind} ${e.customEventName} '
-            '$dt ${e.data!['param']}',
-          );
-        }
-      }
       return EventSample.extensionEvent(time, extensionEvents);
     }
 
