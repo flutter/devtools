@@ -237,7 +237,7 @@ class ChartControllers {
 
   final EventChartController event;
   final VMChartController vm;
-  final AndroidChartController android;
+  AndroidChartController android;
 
   void resetAll() {
     event.reset();
@@ -865,7 +865,7 @@ class MemoryController extends DisposableController
     bool _isAndroidChartVisible() =>
         preferences.memory.androidCollectionEnabled.value &&
         isConnectedDeviceAndroid;
-
+    print('handling connection start: ${_isAndroidChartVisible()}');
     isAndroidChartVisibleNotifier.value = _isAndroidChartVisible();
     preferences.memory.androidCollectionEnabled.addListener(
       () => isAndroidChartVisibleNotifier.value = _isAndroidChartVisible(),

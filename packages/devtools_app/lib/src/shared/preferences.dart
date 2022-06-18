@@ -110,10 +110,10 @@ class MemoryPreferencesController {
       'memory.androidCollectionEnabled';
 
   Future<void> init() async {
-    final androidCollectionEnabled =
+    final androidCollectionEnabledValue =
         await storage.getValue(_androidCollectionEnabledStorageId);
 
-    setAndroidCollectionEnabled(androidCollectionEnabled == 'true');
+    setAndroidCollectionEnabled(androidCollectionEnabledValue == 'true');
 
     _androidCollectionEnabled.addListener(() {
       storage.setValue(
@@ -121,8 +121,7 @@ class MemoryPreferencesController {
         _androidCollectionEnabled.value.toString(),
       );
     });
-
-    setGlobal(InspectorPreferencesController, this);
+    print('loaded memory preferences: ${androidCollectionEnabled.value}');
   }
 
   void setAndroidCollectionEnabled(bool enable) {

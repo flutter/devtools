@@ -101,6 +101,17 @@ class MemoryBodyState extends State<MemoryBody>
         sharedLabels: vmChartController.labelTimestamps,
       ),
     );
+    print(
+        'created controller in didChangeDependencies: ${_chartControllers.android.traces.length}.');
+
+    addAutoDisposeListener(memoryController.isAndroidChartVisibleNotifier, () {
+      _chartControllers.android = android.AndroidChartController(
+        memoryController,
+        sharedLabels: vmChartController.labelTimestamps,
+      );
+      print(
+          'created controller in listener: ${_chartControllers.android.traces.length}.');
+    });
 
     // Update the chart when the memorySource changes.
     addAutoDisposeListener(memoryController.selectedSnapshotNotifier, () {

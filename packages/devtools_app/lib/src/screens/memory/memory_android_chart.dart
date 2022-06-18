@@ -20,7 +20,12 @@ class AndroidChartController extends ChartController {
           displayTopLine: false,
           name: 'Android',
           sharedLabelimestamps: sharedLabels,
-        );
+        ) {
+    print('AndroidChartController constructor. ${traces.length}');
+    _memoryController.isAndroidChartVisibleNotifier.addListener(() {
+      setupData();
+    });
+  }
 
   final MemoryController _memoryController;
 
@@ -145,23 +150,36 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
     setupTraces();
     _chartController.setupData();
 
-    if (_memoryTimeline.sampleAddedNotifier.value != null) {
-      addAutoDisposeListener(_memoryTimeline.sampleAddedNotifier, () {
+    addAutoDisposeListener(_memoryTimeline.sampleAddedNotifier, () {
+      if (_memoryTimeline.sampleAddedNotifier.value != null) {
         _processHeapSample(_memoryTimeline.sampleAddedNotifier.value!);
-      });
-    }
+      }
+    });
+
+    addAutoDisposeListener(controller.isAndroidChartVisibleNotifier, () {
+      print(
+          'memory_android_chart got update: ${controller.isAndroidChartVisibleNotifier.value}');
+      setupTraces();
+      _chartController.setupData();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_chartController.timestamps.isNotEmpty) {
-      return Container(
-        height: defaultChartHeight,
-        child: Chart(_chartController),
-      );
-    }
-
-    return const SizedBox(width: denseSpacing);
+    print('building...');
+    return ValueListenableBuilder<bool>(
+      valueListenable: controller.isAndroidChartVisibleNotifier,
+      builder: (context, isAndroidChartVisible, _) {
+        if (_chartController.timestamps.isNotEmpty) {
+          print('timestamps');
+          return Container(
+            height: defaultChartHeight,
+            child: Chart(_chartController),
+          );
+        }
+        return const SizedBox(width: denseSpacing);
+      },
+    );
   }
 
   /// TODO(terry): Colors used in charts (move to theme).
@@ -175,6 +193,7 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
   final totalColor = Colors.blueGrey.shade100;
 
   void setupTraces() {
+    print('setting up android traces, ${_chartController.traces.length}');
     if (_chartController.traces.isNotEmpty) {
       assert(_chartController.traces.length == TraceName.values.length);
 
