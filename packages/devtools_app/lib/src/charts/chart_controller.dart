@@ -545,8 +545,11 @@ class ChartController extends DisposableController
     return -1;
   }
 
-  int? xCoordToTimestamp(double xCoord) =>
-      timestamps[xCoordToTimestampIndex(xCoord)];
+  int? xCoordToTimestamp(double xCoord) {
+    final index = xCoordToTimestampIndex(xCoord);
+    if (index < 0 || index >= timestamps.length) return null;
+    return timestamps[index]!;
+  }
 
   int xCoordToTimestampIndex(double xCoord) {
     final firstVisibleIndex = leftVisibleIndex;
