@@ -4,34 +4,22 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
-import '../../../../shared/theme.dart';
-import '../../../../shared/utils.dart';
-
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../../analytics/analytics.dart' as ga;
 import '../../../../charts/chart_controller.dart';
 import '../../../../primitives/auto_dispose_mixin.dart';
 import '../../../../primitives/utils.dart';
-import '../../../../shared/banner_messages.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/notifications.dart';
-import '../../../../shared/screen.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
-import '../../../../ui/icons.dart';
-import '../../memory_android_chart.dart' as android;
-import '../../memory_charts.dart';
 import '../../memory_controller.dart';
-import '../../memory_events_pane.dart' as events;
-import '../../memory_heap_tree_view.dart';
-import '../../memory_vm_chart.dart' as vm;
-import '../../panes/chart/chart_pane.dart';
-import '../../panes/control/control_pane.dart';
 import '../../primitives/painting.dart';
+import 'memory_android_chart.dart' as android;
+import 'memory_charts.dart';
+import 'memory_events_pane.dart' as events;
+import 'memory_vm_chart.dart' as vm;
 
 class MemoryChartPane extends StatefulWidget {
   const MemoryChartPane({
@@ -54,34 +42,34 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
         ProvidedControllerMixin<MemoryController, MemoryChartPane> {
   OverlayEntry? _hoverOverlayEntry;
 
-  static const hoverXOffset = 10;
-  static const hoverYOffset = 0.0;
-  static double get hoverWidth => scaleByFontFactor(225.0);
-  static const hover_card_border_width = 2.0;
+  static const _hoverXOffset = 10;
+  static const _hoverYOffset = 0.0;
+  static double get _hoverWidth => scaleByFontFactor(225.0);
+  static const _hover_card_border_width = 2.0;
 
   // TODO(terry): Compute below heights dynamically.
-  static double get hoverHeightMinimum => scaleByFontFactor(42.0);
+  static double get _hoverHeightMinimum => scaleByFontFactor(42.0);
   static double get hoverItemHeight => scaleByFontFactor(18.0);
 
   // One extension event to display (4 lines).
-  static double get hoverOneEventsHeight => scaleByFontFactor(82.0);
+  static double get _hoverOneEventsHeight => scaleByFontFactor(82.0);
 
   // Many extension events to display.
-  static double get hoverEventsHeight => scaleByFontFactor(120.0);
+  static double get _hoverEventsHeight => scaleByFontFactor(120.0);
 
-  static double computeHoverHeight(
+  static double _computeHoverHeight(
     int eventsCount,
     int tracesCount,
     int extensionEventsCount,
   ) =>
-      hoverHeightMinimum +
+      _hoverHeightMinimum +
       (eventsCount * hoverItemHeight) +
-      hover_card_border_width +
+      _hover_card_border_width +
       (tracesCount * hoverItemHeight) +
       (extensionEventsCount > 0
           ? (extensionEventsCount == 1
-              ? hoverOneEventsHeight
-              : hoverEventsHeight)
+              ? _hoverOneEventsHeight
+              : _hoverEventsHeight)
           : 0);
 
   @override
@@ -93,14 +81,14 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
       final event = widget.keyPressed.value;
       if (event == null) return;
       if (event.isKeyPressed(LogicalKeyboardKey.escape)) {
-        hideHover();
+        _hideHover();
       }
     });
 
     addAutoDisposeListener(widget.chartControllers.event.tapLocation, () {
       if (widget.chartControllers.event.tapLocation.value != null) {
         if (_hoverOverlayEntry != null) {
-          hideHover();
+          _hideHover();
         }
         final tapLocation = widget.chartControllers.event.tapLocation.value;
         if (tapLocation?.tapDownDetails != null) {
@@ -113,7 +101,8 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
           widget.chartControllers.android.tapLocation.value = copied;
 
           final allValues = ChartsValues(controller, index, timestamp);
-          showHover(context, allValues, tapData.tapDownDetails!.globalPosition);
+          _showHover(
+              context, allValues, tapData.tapDownDetails!.globalPosition);
         }
       }
     });
@@ -121,7 +110,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     addAutoDisposeListener(widget.chartControllers.vm.tapLocation, () {
       if (widget.chartControllers.vm.tapLocation.value != null) {
         if (_hoverOverlayEntry != null) {
-          hideHover();
+          _hideHover();
         }
         final tapLocation = widget.chartControllers.vm.tapLocation.value;
         if (tapLocation?.tapDownDetails != null) {
@@ -135,7 +124,8 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
           final allValues = ChartsValues(controller, index, timestamp);
 
-          showHover(context, allValues, tapData.tapDownDetails!.globalPosition);
+          _showHover(
+              context, allValues, tapData.tapDownDetails!.globalPosition);
         }
       }
     });
@@ -143,7 +133,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     addAutoDisposeListener(widget.chartControllers.android.tapLocation, () {
       if (widget.chartControllers.android.tapLocation.value != null) {
         if (_hoverOverlayEntry != null) {
-          hideHover();
+          _hideHover();
         }
         final tapLocation = widget.chartControllers.android.tapLocation.value;
         if (tapLocation?.tapDownDetails != null) {
@@ -157,7 +147,8 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
           final allValues = ChartsValues(controller, index, timestamp);
 
-          showHover(context, allValues, tapData.tapDownDetails!.globalPosition);
+          _showHover(
+              context, allValues, tapData.tapDownDetails!.globalPosition);
         }
       }
     });
@@ -261,16 +252,16 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
   @override
   void dispose() {
-    hideHover(); // hover will leak if not hide
+    _hideHover(); // hover will leak if not hide
     super.dispose();
   }
 
-  List<Widget> displayVmDataInHover(ChartsValues chartsValues) =>
+  List<Widget> _displayVmDataInHover(ChartsValues chartsValues) =>
       _dataToDisplay(
         chartsValues.displayVmDataToDisplay(widget.chartControllers.vm.traces),
       );
 
-  List<Widget> displayAndroidDataInHover(ChartsValues chartsValues) {
+  List<Widget> _displayAndroidDataInHover(ChartsValues chartsValues) {
     const dividerLineVerticalSpace = 2.0;
     const dividerLineHorizontalSpace = 20.0;
     const totalDividerLineHorizontalSpace = dividerLineHorizontalSpace * 2;
@@ -283,7 +274,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     // Separator between Android data.
     // TODO(terry): Why Center widget doesn't work (parent width is bigger/centered too far right).
     //              Is it centering on a too wide Overlay?
-    final width = hoverWidth -
+    final width = _hoverWidth -
         totalDividerLineHorizontalSpace -
         DashedLine.defaultDashWidth;
     final dashedColor = Colors.grey.shade600;
@@ -303,7 +294,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     );
   }
 
-  void showHover(
+  void _showHover(
     BuildContext context,
     ChartsValues chartsValues,
     Offset position,
@@ -316,9 +307,9 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     final renderBoxWidth = box.size.width;
 
     // Display hover to left of right side of position.
-    double xPosition = position.dx + hoverXOffset;
-    if (xPosition + hoverWidth > renderBoxWidth) {
-      xPosition = position.dx - hoverWidth - hoverXOffset;
+    double xPosition = position.dx + _hoverXOffset;
+    if (xPosition + _hoverWidth > renderBoxWidth) {
+      xPosition = position.dx - _hoverWidth - _hoverXOffset;
     }
 
     double totalHoverHeight;
@@ -331,7 +322,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
       totalTraces = chartsValues.vmData.entries.length - 1;
     }
 
-    totalHoverHeight = computeHoverHeight(
+    totalHoverHeight = _computeHoverHeight(
       chartsValues.eventCount,
       totalTraces,
       chartsValues.extensionEventsLength,
@@ -344,7 +335,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     final OverlayState overlayState = Overlay.of(context)!;
     _hoverOverlayEntry ??= OverlayEntry(
       builder: (context) => Positioned(
-        top: position.dy + hoverYOffset,
+        top: position.dy + _hoverYOffset,
         left: xPosition,
         height: totalHoverHeight,
         child: Container(
@@ -353,16 +344,16 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
             color: colorScheme.defaultBackgroundColor,
             border: Border.all(
               color: focusColor,
-              width: hover_card_border_width,
+              width: _hover_card_border_width,
             ),
             borderRadius: BorderRadius.circular(10.0),
           ),
-          width: hoverWidth,
+          width: _hoverWidth,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                width: hoverWidth,
+                width: _hoverWidth,
                 padding: const EdgeInsets.only(bottom: 4),
                 child: Text(
                   'Time $displayTimestamp',
@@ -371,10 +362,10 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
                 ),
               ),
             ]
-              ..addAll(displayEventsInHover(chartsValues))
-              ..addAll(displayVmDataInHover(chartsValues))
-              ..addAll(displayAndroidDataInHover(chartsValues))
-              ..addAll(displayExtensionEventsInHover(chartsValues)),
+              ..addAll(_displayEventsInHover(chartsValues))
+              ..addAll(_displayVmDataInHover(chartsValues))
+              ..addAll(_displayAndroidDataInHover(chartsValues))
+              ..addAll(_displayExtensionEventsInHover(chartsValues)),
           ),
         ),
       ),
@@ -507,7 +498,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     );
   }
 
-  void hideHover() {
+  void _hideHover() {
     if (_hoverOverlayEntry != null) {
       widget.chartControllers.event.tapLocation.value = null;
       widget.chartControllers.vm.tapLocation.value = null;
@@ -518,7 +509,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     }
   }
 
-  List<Widget> displayExtensionEventsInHover(ChartsValues chartsValues) {
+  List<Widget> _displayExtensionEventsInHover(ChartsValues chartsValues) {
     final widgets = <Widget>[];
 
     final eventsDisplayed = chartsValues.extensionEventsToDisplay;
@@ -527,12 +518,12 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
       if (entry.key.endsWith(eventsDisplayName)) {
         widgets.add(
           Container(
-            height: hoverEventsHeight,
+            height: _hoverEventsHeight,
             child: ListView(
               shrinkWrap: true,
               primary: false,
               children: [
-                listItem(
+                _listItem(
                   allEvents: chartsValues.extensionEvents,
                   title: entry.key,
                   icon: Icons.dashboard,
@@ -546,14 +537,14 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
         /// Pull out the event name, and custom values.
         final output =
-            displayEvent(null, chartsValues.extensionEvents.first).trim();
+            _displayEvent(null, chartsValues.extensionEvents.first).trim();
         widgets.add(_hoverRow(name: output, bold: false, leftPadding: 0.0));
       }
     }
     return widgets;
   }
 
-  List<Widget> displayEventsInHover(ChartsValues chartsValues) {
+  List<Widget> _displayEventsInHover(ChartsValues chartsValues) {
     final results = <Widget>[];
 
     final colorScheme = Theme.of(context).colorScheme;
@@ -567,7 +558,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     return results;
   }
 
-  Widget listItem({
+  Widget _listItem({
     required List<Map<String, Object>> allEvents,
     int? index,
     required String title,
@@ -576,8 +567,8 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     final widgets = <Widget>[];
     var index = 1;
     for (var event in allEvents) {
-      final output = displayEvent(index, event);
-      widgets.add(cardWidget(output));
+      final output = _displayEvent(index, event);
+      widgets.add(_cardWidget(output));
       index++;
     }
 
@@ -610,7 +601,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     );
   }
 
-  Widget cardWidget(String value) {
+  Widget _cardWidget(String value) {
     final colorScheme = Theme.of(context).colorScheme;
     final hoverValueEntry = colorScheme.hoverSmallValueTextStyle;
     final expandedGradient = colorScheme.verticalGradient;
@@ -618,7 +609,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Container(
-        width: hoverWidth,
+        width: _hoverWidth,
         decoration: BoxDecoration(
           gradient: expandedGradient,
         ),
@@ -636,7 +627,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     );
   }
 
-  String displayEvent(int? index, Map<String, Object> event) {
+  String _displayEvent(int? index, Map<String, Object> event) {
     final output = StringBuffer();
 
     String? name;
@@ -649,19 +640,19 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     }
 
     output.writeln(index == null ? name : '$index. $name');
-    output.write(decodeEventValues(event));
+    output.write(_decodeEventValues(event));
 
     return output.toString();
   }
 
-  String decodeEventValues(Map<String, Object> event) {
+  String _decodeEventValues(Map<String, Object> event) {
     final output = StringBuffer();
     if (event[eventName] == imageSizesForFrameEvent) {
       // TODO(terry): Need a more generic event displayer.
       // Flutter event emit the event name and value.
       final data = (event[eventData] as Map).cast<String, Object>();
       final key = data.keys.first;
-      output.writeln('${longValueToShort(key)}');
+      output.writeln('${_longValueToShort(key)}');
       final values = data[key] as Map<dynamic, dynamic>;
       final displaySize = values[displaySizeInBytesData];
       final decodeSize = values[decodedSizeInBytesData];
@@ -678,7 +669,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
       final data = custom[customEventData];
       for (var key in data.keys) {
         output.write('$key=');
-        output.writeln('${longValueToShort(data[key])}');
+        output.writeln('${_longValueToShort(data[key])}');
       }
     } else {
       output.writeln('Unknown Event ${event[eventName]}');
@@ -688,18 +679,18 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
   }
 
   /// Long string need to show first part ... last part.
-  static const longStringLength = 34;
-  static const firstCharacters = 9;
-  static const lastCharacters = 20;
+  static const _longStringLength = 34;
+  static const _firstCharacters = 9;
+  static const _lastCharacters = 20;
 
   // TODO(terry): Data could be long need better mechanism for long data e.g.,:
   //                const encoder = JsonEncoder.withIndent('  ');
   //                final displayData = encoder.convert(data);
-  String longValueToShort(String longValue) {
+  String _longValueToShort(String longValue) {
     var value = longValue;
-    if (longValue.length > longStringLength) {
-      final firstPart = longValue.substring(0, firstCharacters);
-      final endPart = longValue.substring(longValue.length - lastCharacters);
+    if (longValue.length > _longStringLength) {
+      final firstPart = longValue.substring(0, _firstCharacters);
+      final endPart = longValue.substring(longValue.length - _lastCharacters);
       value = '$firstPart...$endPart';
     }
     return value;

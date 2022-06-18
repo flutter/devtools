@@ -4,24 +4,20 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../analytics/analytics.dart' as ga;
 import '../../primitives/auto_dispose_mixin.dart';
-
 import '../../primitives/listenable.dart';
-import '../../primitives/utils.dart';
-
 import '../../shared/banner_messages.dart';
 import '../../shared/screen.dart';
 import '../../shared/utils.dart';
 import '../../ui/icons.dart';
-import 'memory_android_chart.dart' as android;
 import 'memory_controller.dart';
-import 'memory_events_pane.dart' as events;
 import 'memory_heap_tree_view.dart';
-import 'memory_vm_chart.dart' as vm;
 import 'panes/chart/chart_pane.dart';
+import 'panes/chart/memory_android_chart.dart' as android;
+import 'panes/chart/memory_events_pane.dart' as events;
+import 'panes/chart/memory_vm_chart.dart' as vm;
 import 'panes/control/control_pane.dart';
 
 class MemoryScreen extends Screen {

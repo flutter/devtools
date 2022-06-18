@@ -5,14 +5,14 @@
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 
-import '../../charts/chart.dart';
-import '../../charts/chart_controller.dart';
-import '../../charts/chart_trace.dart' as trace;
-import '../../primitives/auto_dispose_mixin.dart';
-import '../../shared/theme.dart';
-import '../../shared/utils.dart';
-import 'memory_controller.dart';
-import 'primitives/memory_timeline.dart';
+import '../../../../charts/chart.dart';
+import '../../../../charts/chart_controller.dart';
+import '../../../../charts/chart_trace.dart' as trace;
+import '../../../../primitives/auto_dispose_mixin.dart';
+import '../../../../shared/theme.dart';
+import '../../../../shared/utils.dart';
+import '../../memory_controller.dart';
+import '../../primitives/memory_timeline.dart';
 
 class VMChartController extends ChartController {
   VMChartController(this._memoryController)

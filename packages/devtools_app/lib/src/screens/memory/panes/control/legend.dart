@@ -6,11 +6,11 @@ import 'package:flutter/material.dart';
 
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/theme.dart';
-import '../../memory_android_chart.dart' as android;
-import '../../memory_charts.dart';
+import '../chart/memory_android_chart.dart' as android;
+import '../chart/memory_charts.dart';
 import '../../memory_controller.dart';
-import '../../memory_events_pane.dart' as events;
-import '../../memory_vm_chart.dart' as vm;
+import '../chart/memory_events_pane.dart' as events;
+import '../chart/memory_vm_chart.dart' as vm;
 import '../../primitives/painting.dart';
 import 'constants.dart';
 

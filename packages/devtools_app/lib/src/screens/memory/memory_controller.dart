@@ -23,12 +23,12 @@ import '../../shared/table.dart';
 import '../../shared/table_data.dart';
 import '../../shared/utils.dart';
 import '../../ui/search.dart';
-import 'memory_android_chart.dart';
-import 'memory_events_pane.dart';
+import 'panes/chart/memory_android_chart.dart';
+import 'panes/chart/memory_events_pane.dart';
 import 'memory_graph_model.dart';
 import 'memory_protocol.dart';
 import 'memory_snapshot_models.dart';
-import 'memory_vm_chart.dart';
+import 'panes/chart/memory_vm_chart.dart';
 import 'primitives/filter_config.dart';
 import 'primitives/memory_timeline.dart';
 
