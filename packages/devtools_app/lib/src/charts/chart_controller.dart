@@ -548,7 +548,7 @@ class ChartController extends DisposableController
   int? xCoordToTimestamp(double xCoord) {
     final index = xCoordToTimestampIndex(xCoord);
     if (index < 0 || index >= timestamps.length) return null;
-    return timestamps[index]!;
+    return timestamps[index];
   }
 
   int xCoordToTimestampIndex(double xCoord) {
