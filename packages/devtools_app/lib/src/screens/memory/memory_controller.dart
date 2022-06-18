@@ -278,6 +278,9 @@ class MemoryController extends DisposableController
   final _advancedSettingsEnabled =
       ValueNotifier<bool>(advancedSettingsEnabledDefault);
 
+  ValueListenable<bool> get autoSnapshotEnabled => _autoSnapshotEnabled;
+  final _autoSnapshotEnabled = ValueNotifier<bool>(false);
+
   // Memory statistics displayed as raw numbers or units (KB, MB, GB).
   static const unitDisplayedDefault = true;
 

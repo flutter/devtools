@@ -30,36 +30,14 @@ class MemorySettingsDialog extends StatelessWidget {
             ...dialogSubHeader(theme, 'Android'),
             Column(
               children: [
-                // TODO(polinach): use CheckboxSetting instead
-                Row(
-                  children: [
-                    NotifierCheckbox(
-                      notifier: controller.androidCollectionEnabled
-                          as ValueNotifier<bool?>,
-                    ),
-                    RichText(
-                      overflow: TextOverflow.visible,
-                      text: TextSpan(
-                        text: 'Collect Android Memory Statistics using ADB',
-                        style: theme.regularTextStyle,
-                      ),
-                    ),
-                  ],
+                CheckboxSetting(
+                  notifier: controller.androidCollectionEnabled
+                      as ValueNotifier<bool?>,
+                  title: 'Collect Android Memory Statistics using ADB',
                 ),
-                Row(
-                  children: [
-                    NotifierCheckbox(
-                      notifier:
-                          controller.unitDisplayed as ValueNotifier<bool?>,
-                    ),
-                    RichText(
-                      overflow: TextOverflow.visible,
-                      text: TextSpan(
-                        text: 'Display Data In Units (B, KB, MB, and GB)',
-                        style: theme.regularTextStyle,
-                      ),
-                    ),
-                  ],
+                CheckboxSetting(
+                  notifier: controller.unitDisplayed as ValueNotifier<bool?>,
+                  title: 'Display Data In Units (B, KB, MB, and GB)',
                 ),
               ],
             ),
@@ -67,20 +45,14 @@ class MemorySettingsDialog extends StatelessWidget {
               height: defaultSpacing,
             ),
             ...dialogSubHeader(theme, 'General'),
-            Row(
-              children: [
-                NotifierCheckbox(
-                  notifier: controller.advancedSettingsEnabled
-                      as ValueNotifier<bool?>,
-                ),
-                RichText(
-                  overflow: TextOverflow.visible,
-                  text: TextSpan(
-                    text: 'Enable advanced memory settings',
-                    style: theme.regularTextStyle,
-                  ),
-                ),
-              ],
+            CheckboxSetting(
+              notifier:
+                  controller.advancedSettingsEnabled as ValueNotifier<bool?>,
+              title: 'Enable advanced memory settings',
+            ),
+            CheckboxSetting(
+              notifier: controller.autoSnapshotEnabled as ValueNotifier<bool?>,
+              title: 'Automatically take snapshot when memory usage spikes',
             ),
           ],
         ),
