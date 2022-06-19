@@ -20,3 +20,7 @@ https://github.com/flutter/devtools/issues. Thanks for trying out DevTools!
 
 By using Dart DevTools, you agree to the
 [Google Terms of Service](https://policies.google.com/terms).
+
+## Test change
+
+Test change.
