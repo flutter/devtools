@@ -156,8 +156,8 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
   Widget build(BuildContext context) {
     if (_chartController.timestamps.isNotEmpty) {
       return Container(
-        child: Chart(_chartController),
         height: defaultChartHeight,
+        child: Chart(_chartController),
       );
     }
 

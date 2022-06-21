@@ -316,7 +316,7 @@ class DartIOHttpRequestData extends NetworkRequest {
   }
 
   @override
-  int get hashCode => hashValues(
+  int get hashCode => Object.hash(
         wrapperId,
         method,
         uri,

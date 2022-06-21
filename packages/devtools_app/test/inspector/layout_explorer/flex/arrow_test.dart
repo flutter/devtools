@@ -18,14 +18,14 @@ void main() {
               width: 100,
               height: 100,
               child: ArrowWrapper.unidirectional(
+                type: type,
+                arrowColor: Colors.black,
+                arrowHeadSize: 8.0,
                 child: Container(
                   width: 10,
                   height: 10,
                   color: Colors.red,
                 ),
-                type: type,
-                arrowColor: Colors.black,
-                arrowHeadSize: 8.0,
               ),
             ),
           );
@@ -86,14 +86,14 @@ void main() {
               width: 100,
               height: 100,
               child: ArrowWrapper.bidirectional(
+                direction: direction,
+                arrowColor: Colors.black,
+                arrowHeadSize: 8.0,
                 child: Container(
                   width: 10,
                   height: 10,
                   color: Colors.red,
                 ),
-                direction: direction,
-                arrowColor: Colors.black,
-                arrowHeadSize: 8.0,
               ),
             ),
           );

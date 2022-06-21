@@ -53,13 +53,13 @@ class _ChannelDemoState extends State<ChannelDemo> {
                 children: <Widget>[
                   FloatingActionButton(
                     heroTag: 'reset',
-                    child: const Icon(Icons.refresh),
                     onPressed: _reset,
+                    child: const Icon(Icons.refresh),
                   ),
                   FloatingActionButton(
                     heroTag: 'send_message',
-                    child: const Icon(Icons.mail),
                     onPressed: _sendMessage,
+                    child: const Icon(Icons.mail),
                   ),
                 ],
               ),
