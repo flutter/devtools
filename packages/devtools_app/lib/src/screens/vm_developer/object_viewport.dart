@@ -1,4 +1,4 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -16,8 +16,9 @@ import 'vm_class_screen.dart';
 import 'vm_class_screen_controller.dart';
 import 'vm_developer_common_widgets.dart';
 
-/// Displays the VM information for the currently selected object in the program explorer.
-class ObjectViewport extends StatefulWidget {
+/// Displays the VM information for the currently selected object in the
+/// program explorer.
+class ObjectViewport extends StatelessWidget {
   ObjectViewport({
     Key? key,
     required this.controller,
@@ -35,32 +36,28 @@ class ObjectViewport extends StatefulWidget {
   final _refreshing = ValueNotifier<bool>(true);
 
   @override
-  _ObjectViewportState createState() => _ObjectViewportState();
-}
-
-class _ObjectViewportState extends State<ObjectViewport> with AutoDisposeMixin {
-  @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable: widget._refreshing,
+      valueListenable: _refreshing,
       builder: (context, refreshing, _) {
-        return HistoryViewport(
-          history: widget.objectHistory,
+        return HistoryViewport<ObjRef>(
+          history: objectHistory,
           controls: [
             ToolbarAction(
               icon: Icons.refresh,
-              onPressed: () =>
-                  {widget._refreshing.value = !widget._refreshing.value},
+              onPressed: () {
+                _refreshing.value = !_refreshing.value;
+              },
               tooltip: 'Refresh',
             )
           ],
-          generateTitle: (currentObjectRef) {
-            return currentObjectRef == null
+          generateTitle: (currentObjRef) {
+            return currentObjRef == null
                 ? 'No object selected.'
-                : _getViewportTitle(currentObjectRef as ObjRef);
+                : _getViewportTitle(currentObjRef);
           },
           contentBuilder: (context, _) {
-            final currentObjRef = widget.objectHistory.current.value;
+            final currentObjRef = objectHistory.current.value;
             return currentObjRef == null
                 ? const SizedBox.shrink()
                 : _buildObjectScreen(currentObjRef);
@@ -84,9 +81,8 @@ String _getViewportTitle(ObjRef objRef) {
 //Calls the object VM statistics card builder according to the VM Object type.
 Widget _buildObjectScreen(ObjRef objRef) {
   if (objRef is ClassRef) {
-    final classController = ClassScreenController(objRef);
     return VmClassScreen(
-      controller: classController,
+      controller: ClassScreenController(objRef),
     );
   }
   if (objRef is FuncRef)
@@ -113,7 +109,6 @@ class ObjectHistory extends HistoryManager<ObjRef> {
       pop();
     }
 
-    //_openedObjects.remove(ref);
     _openedObjects.add(ref);
 
     push(ref);

@@ -1,3 +1,7 @@
+// Copyright 2022 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -25,13 +29,13 @@ class VmClassScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     Flexible(
-                      flex: 10,
+                      flex: 5,
                       child: ClassInfoWidget(
                         controller: controller,
                       ),
                     ),
                     Flexible(
-                      flex: 8,
+                      flex: 4,
                       child: ClassInstancesWidget(
                         instances: controller.instances,
                       ),
@@ -75,7 +79,7 @@ class ClassInfoWidget extends StatelessWidget {
         const MapEntry('Inbound references', 'TO-DO'),
         MapEntry(
           'Library',
-          clazz?.library?.name == ''
+          clazz?.library?.name?.isEmpty ?? false
               ? controller.scriptUri!
               : clazz?.library?.name,
         ),

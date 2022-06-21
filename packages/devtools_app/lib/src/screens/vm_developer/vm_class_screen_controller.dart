@@ -1,3 +1,7 @@
+// Copyright 2022 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -9,8 +13,8 @@ import '../debugger/debugger_model.dart';
 /// Auto DisposableController for fetching and displaying data on the class screen.
 class ClassScreenController extends DisposableController
     with AutoDisposeControllerMixin {
-  ClassScreenController(ObjRef? objRef) {
-    _classRef = objRef as ClassRef;
+  ClassScreenController(ClassRef? classRef) {
+    _classRef = classRef;
     refresh();
   }
 

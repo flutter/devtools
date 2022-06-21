@@ -1,4 +1,4 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -11,7 +11,8 @@ import '../debugger/program_explorer_model.dart';
 import 'object_viewport.dart';
 import 'vm_developer_tools_screen.dart';
 
-/// Displays a program explorer used to select and display information about objects in the Dart VM
+/// Displays a program explorer used to select and display information about
+/// objects in the Dart VM.
 class ObjectInspectorView extends VMDeveloperView {
   ObjectInspectorView()
       : super(
@@ -23,7 +24,7 @@ class ObjectInspectorView extends VMDeveloperView {
 
   final programExplorerController = ProgramExplorerController();
 
-  ObjectHistory objectHistory = ObjectHistory();
+  final objectHistory = ObjectHistory();
 
   @override
   bool get showIsolateSelector => true;
@@ -52,7 +53,9 @@ class ObjectInspectorView extends VMDeveloperView {
 
   void _onNodeSelected(VMServiceObjectNode node) {
     final object = node.object;
-    if (object != null) objectHistory.pushEntry(object);
+    if (object != null) {
+      objectHistory.pushEntry(object);
+    }
     return;
   }
 }
