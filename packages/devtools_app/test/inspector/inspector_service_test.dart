@@ -319,61 +319,62 @@ void main() async {
         }
       });
 
-      test(
-        'widget tree',
-        () async {
-          await env.setupEnvironment();
-          final group = inspectorService!.createObjectGroup('test-group');
-          final RemoteDiagnosticsNode root =
-              (await group.getRoot(FlutterTreeType.widget))!;
-          // Tree only contains widgets from local app.
-          expect(
-            treeToDebugString(root),
-            equalsIgnoringHashCodes(
-              '[root]\n'
-              ' └─MyApp\n'
-              '   └─MaterialApp\n'
-              '     └─Scaffold\n'
-              '       ├─Center\n'
-              '       │ └─Text\n'
-              '       └─AppBar\n'
-              '         └─Text\n',
-            ),
-          );
-          RemoteDiagnosticsNode nodeInSummaryTree =
-              findNodeMatching(root, 'MaterialApp')!;
-          expect(nodeInSummaryTree, isNotNull);
-          expect(
-            treeToDebugString(nodeInSummaryTree),
-            equalsIgnoringHashCodes(
-              'MaterialApp\n'
-              ' └─Scaffold\n'
-              '   ├─Center\n'
-              '   │ └─Text\n'
-              '   └─AppBar\n'
-              '     └─Text\n',
-            ),
-          );
-          RemoteDiagnosticsNode nodeInDetailsTree =
-              (await group.getDetailsSubtree(nodeInSummaryTree))!;
-          // When flutter rolls, this string may sometimes change due to
-          // implementation details.
-          expect(
-            treeToDebugStringTruncated(nodeInDetailsTree, 30),
-            equalsGoldenIgnoringHashCodes('inspector_service_details_tree.txt'),
-          );
+      test('widget tree', () async {
+        // TODO(https://github.com/flutter/devtools/issues/4081): stop ignoring goldens when pinned to a new version with stable dependency orders
+        const ignoreGoldensForNow = true;
+        await env.setupEnvironment();
+        final group = inspectorService!.createObjectGroup('test-group');
+        final RemoteDiagnosticsNode root =
+            (await group.getRoot(FlutterTreeType.widget))!;
+        // Tree only contains widgets from local app.
+        expect(
+          treeToDebugString(root),
+          equalsIgnoringHashCodes(
+            '[root]\n'
+            ' └─MyApp\n'
+            '   └─MaterialApp\n'
+            '     └─Scaffold\n'
+            '       ├─Center\n'
+            '       │ └─Text\n'
+            '       └─AppBar\n'
+            '         └─Text\n',
+          ),
+        );
+        RemoteDiagnosticsNode nodeInSummaryTree =
+            findNodeMatching(root, 'MaterialApp')!;
+        expect(nodeInSummaryTree, isNotNull);
+        expect(
+          treeToDebugString(nodeInSummaryTree),
+          equalsIgnoringHashCodes(
+            'MaterialApp\n'
+            ' └─Scaffold\n'
+            '   ├─Center\n'
+            '   │ └─Text\n'
+            '   └─AppBar\n'
+            '     └─Text\n',
+          ),
+        );
+        RemoteDiagnosticsNode nodeInDetailsTree =
+            (await group.getDetailsSubtree(nodeInSummaryTree))!;
+        // When flutter rolls, this string may sometimes change due to
+        // implementation details.
+        expect(
+          treeToDebugStringTruncated(nodeInDetailsTree, 30),
+          equalsGoldenIgnoringHashCodes('inspector_service_details_tree.txt'),
+        );
 
-          nodeInSummaryTree = findNodeMatching(root, 'Text')!;
-          expect(nodeInSummaryTree, isNotNull);
-          expect(
-            treeToDebugString(nodeInSummaryTree),
-            equalsIgnoringHashCodes(
-              'Text\n',
-            ),
-          );
+        nodeInSummaryTree = findNodeMatching(root, 'Text')!;
+        expect(nodeInSummaryTree, isNotNull);
+        expect(
+          treeToDebugString(nodeInSummaryTree),
+          equalsIgnoringHashCodes(
+            'Text\n',
+          ),
+        );
 
-          nodeInDetailsTree =
-              (await group.getDetailsSubtree(nodeInSummaryTree))!;
+        nodeInDetailsTree = (await group.getDetailsSubtree(nodeInSummaryTree))!;
+        // ignore: dead_code
+        if (!ignoreGoldensForNow) {
           expect(
             treeToDebugString(nodeInDetailsTree),
             anyOf(
@@ -391,31 +392,33 @@ void main() async {
               ),
             ),
           );
-          expect(
-              nodeInDetailsTree.valueRef, equals(nodeInSummaryTree.valueRef));
+        }
+        expect(nodeInDetailsTree.valueRef, equals(nodeInSummaryTree.valueRef));
 
-          await group.setSelectionInspector(nodeInDetailsTree.valueRef, true);
-          var selection = (await group.getSelection(
-            null,
-            FlutterTreeType.widget,
-            isSummaryTree: false,
-          ))!;
-          expect(selection, isNotNull);
-          expect(selection.valueRef, equals(nodeInDetailsTree.valueRef));
-          expect(
-            treeToDebugString(selection),
-            equalsIgnoringHashCodes(
-              'Text\n'
-              ' └─RichText\n',
-            ),
-          );
+        await group.setSelectionInspector(nodeInDetailsTree.valueRef, true);
+        var selection = (await group.getSelection(
+          null,
+          FlutterTreeType.widget,
+          isSummaryTree: false,
+        ))!;
+        expect(selection, isNotNull);
+        expect(selection.valueRef, equals(nodeInDetailsTree.valueRef));
+        expect(
+          treeToDebugString(selection),
+          equalsIgnoringHashCodes(
+            'Text\n'
+            ' └─RichText\n',
+          ),
+        );
 
-          // Get selection in the render tree.
-          selection = (await group.getSelection(
-            null,
-            FlutterTreeType.renderObject,
-            isSummaryTree: false,
-          ))!;
+        // Get selection in the render tree.
+        selection = (await group.getSelection(
+          null,
+          FlutterTreeType.renderObject,
+          isSummaryTree: false,
+        ))!;
+        // ignore: dead_code
+        if (!ignoreGoldensForNow) {
           expect(
             treeToDebugString(selection),
             equalsIgnoringHashCodes(
@@ -423,11 +426,10 @@ void main() async {
               ' └─text: TextSpan\n',
             ),
           );
+        }
 
-          await group.dispose();
-        },
-        skip: true,
-      );
+        await group.dispose();
+      });
 
 // TODO(jacobr): uncomment this test once we have a more dependable golden
 //      test('render tree', () async {
