@@ -56,6 +56,5 @@ class ObjectInspectorView extends VMDeveloperView {
     if (object != null) {
       objectHistory.pushEntry(object);
     }
-    return;
   }
 }
