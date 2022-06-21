@@ -417,16 +417,13 @@ void main() async {
           FlutterTreeType.renderObject,
           isSummaryTree: false,
         ))!;
-        // ignore: dead_code
-        if (!ignoreGoldensForNow) {
-          expect(
-            treeToDebugString(selection),
-            equalsIgnoringHashCodes(
-              'RenderParagraph#00000 relayoutBoundary=up2\n'
-              ' └─text: TextSpan\n',
-            ),
-          );
-        }
+        expect(
+          treeToDebugString(selection),
+          equalsIgnoringHashCodes(
+            'RenderParagraph#00000 relayoutBoundary=up2\n'
+            ' └─text: TextSpan\n',
+          ),
+        );
 
         await group.dispose();
       });
