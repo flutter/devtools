@@ -23,7 +23,7 @@ class ObjectViewport extends StatelessWidget {
     Key? key,
     required this.controller,
     required this.objectHistory,
-    this.initialObject, //main library
+    this.initialObject,
   }) : super(key: key);
 
   static double get rowHeight => scaleByFontFactor(20.0);
