@@ -690,11 +690,12 @@ class VmServiceWrapper implements VmService {
   @override
   Future<UriList> lookupResolvedPackageUris(
     String isolateId,
-    List<String> uris,
-  ) async {
+    List<String> uris, {
+    bool? local,
+  }) async {
     return trackFuture(
       'lookupResolvedPackageUris',
-      _vmService.lookupResolvedPackageUris(isolateId, uris),
+      _vmService.lookupResolvedPackageUris(isolateId, uris, local: local),
     );
   }
 
