@@ -1,5 +1,5 @@
 ## 2.14.1
-* Bump version to 2.14.1 for devtools_shared release TODO
+* Bump version to 2.14.1 for devtools_shared release [#4208](https://github.com/flutter/devtools/pull/4208)
 * Bump vm_service dep to 9.0.0 [#4161](https://github.com/flutter/devtools/pull/4161)
 
 ## 2.14.0
