@@ -59,6 +59,19 @@ Matcher equalsGoldenIgnoringHashCodes(String path) {
   return _EqualsGoldenIgnoringHashCodes(path);
 }
 
+Matcher equalsGoldenValueIgnoringHashCodes(String value) {
+  const shouldCheckForMatchingGoldens = bool.fromEnvironment(
+    'SHOULD_TEST_GOLDENS',
+    defaultValue: true,
+  );
+
+  if (shouldCheckForMatchingGoldens) {
+    return equalsIgnoringHashCodes(value);
+  }
+
+  return const _AlwaysTrueMatcher();
+}
+
 class _EqualsGoldenIgnoringHashCodes extends Matcher {
   _EqualsGoldenIgnoringHashCodes(String pathWithinGoldenDirectory) {
     path = 'test/goldens$_goldensSuffix/$pathWithinGoldenDirectory';

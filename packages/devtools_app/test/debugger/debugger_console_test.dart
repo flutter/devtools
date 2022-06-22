@@ -15,6 +15,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
+import '../test_utils/test_utils.dart';
+
 void main() {
   final fakeServiceManager = FakeServiceManager();
   final debuggerController = createMockDebuggerControllerWithDefaults();
@@ -78,23 +80,11 @@ void main() {
 
       setUp(() {
         _appendStdioLines();
-        // This intercepts the Clipboard.setData SystemChannel message,
-        // and stores the contents that were (attempted) to be copied.
-        SystemChannels.platform.setMockMethodCallHandler((MethodCall call) {
-          switch (call.method) {
-            case 'Clipboard.setData':
-              _clipboardContents = call.arguments['text'];
-              break;
-            case 'Clipboard.getData':
-              return Future.value(<String, dynamic>{});
-            case 'Clipboard.hasStrings':
-              return Future.value(<String, dynamic>{'value': true});
-            default:
-              break;
-          }
-
-          return Future.value(true);
-        });
+        setupClipboardCopyListener(
+          clipboardContentsCallback: (contents) {
+            _clipboardContents = contents ?? '';
+          },
+        );
       });
 
       tearDown(() {

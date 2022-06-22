@@ -1162,7 +1162,7 @@ class SelectedFrameBracketPainter extends FlameChartPainter {
   }
 
   @override
-  int get hashCode => hashValues(
+  int get hashCode => Object.hash(
         selectedFrame,
         zoom,
         constraints,

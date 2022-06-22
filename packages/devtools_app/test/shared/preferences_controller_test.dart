@@ -76,7 +76,7 @@ void main() {
 
       group('init', () {
         setUp(() {
-          controller.toggleHoverEvalMode(false);
+          controller.setHoverEvalMode(false);
         });
 
         test('enables hover mode by default', () async {
@@ -100,7 +100,7 @@ void main() {
           valueChanged = true;
         });
 
-        controller.toggleHoverEvalMode(newHoverModeValue);
+        controller.setHoverEvalMode(newHoverModeValue);
 
         final storedHoverModeValue =
             await storage.getValue('inspector.hoverEvalMode');
