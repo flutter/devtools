@@ -37,10 +37,11 @@ class NetworkRequestInspector extends StatelessWidget {
 
   final NetworkController controller;
 
-  DevToolsTab _buildTab(String tabName) {
+  DevToolsTab _buildTab({required String tabName, Widget? trailing}) {
     return DevToolsTab.create(
       tabName: tabName,
       gaPrefix: 'requestInspectorTab',
+      trailing: trailing,
     );
   }
 
@@ -50,15 +51,25 @@ class NetworkRequestInspector extends StatelessWidget {
       valueListenable: controller.selectedRequest,
       builder: (context, data, _) {
         final tabs = <DevToolsTab>[
-          _buildTab(NetworkRequestInspector._overviewTabTitle),
+          _buildTab(tabName: NetworkRequestInspector._overviewTabTitle),
           if (data is DartIOHttpRequestData) ...[
-            _buildTab(NetworkRequestInspector._headersTabTitle),
+            _buildTab(tabName: NetworkRequestInspector._headersTabTitle),
             if (data.requestBody != null)
-              _buildTab(NetworkRequestInspector._requestTabTitle),
+              _buildTab(tabName: NetworkRequestInspector._requestTabTitle),
             if (data.responseBody != null)
-              _buildTab(NetworkRequestInspector._responseTabTitle),
+              _buildTab(
+                tabName: NetworkRequestInspector._responseTabTitle,
+                trailing: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    CopyToClipboardControl(
+                      dataProvider: () => data.responseBody,
+                    )
+                  ],
+                ),
+              ),
             if (data.hasCookies)
-              _buildTab(NetworkRequestInspector._cookiesTabTitle),
+              _buildTab(tabName: NetworkRequestInspector._cookiesTabTitle),
           ],
         ];
         return Card(
