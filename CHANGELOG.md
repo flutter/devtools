@@ -1,3 +1,7 @@
+## 2.14.1
+* Bump version to 2.14.1 for devtools_shared release TODO
+* Bump vm_service dep to 9.0.0 [#4161](https://github.com/flutter/devtools/pull/4161)
+
 ## 2.14.0
 * Prepare for 2.14.0 release [#4157](https://github.com/flutter/devtools/pull/4157)
 * Lookup frame id from 'Rasterizer::DoDraw' event [#4156](https://github.com/flutter/devtools/pull/4156)
