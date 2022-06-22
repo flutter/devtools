@@ -163,9 +163,8 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
       });
     });
 
-    addAutoDisposeListener(controller.androidChartVisibleNotifier, () {
-      setState(() {});
-    });
+    // There is no listener passed, so SetState will be invoked.
+    addAutoDisposeListener(controller.androidChartVisibleNotifier);
 
     // Update the chart when the memorySource changes.
     addAutoDisposeListener(controller.memorySourceNotifier, () async {
