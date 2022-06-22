@@ -159,7 +159,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
     addAutoDisposeListener(controller.refreshCharts, () {
       setState(() {
-        _refreshCharts();
+        widget.chartControllers.recomputeChartData();
       });
     });
 
@@ -208,25 +208,6 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
       memoryChart.disabled = false;
 */
     }
-  }
-
-  void _refreshCharts() {
-    // Remove history of all plotted data in all charts.
-    widget.chartControllers.event.reset();
-    widget.chartControllers.vm.reset();
-    widget.chartControllers.android.reset();
-
-    _recomputeChartData();
-  }
-
-  /// Recompute (attach data to the chart) for either live or offline data source.
-  void _recomputeChartData() {
-    widget.chartControllers.event.setupData();
-    widget.chartControllers.event.dirty = true;
-    widget.chartControllers.vm.setupData();
-    widget.chartControllers.vm.dirty = true;
-    widget.chartControllers.android.setupData();
-    widget.chartControllers.android.dirty = true;
   }
 
   @override

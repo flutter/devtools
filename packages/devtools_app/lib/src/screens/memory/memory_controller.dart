@@ -244,6 +244,18 @@ class ChartControllers {
     vm.reset();
     android.reset();
   }
+
+  /// Recomputes (attaches data to the chart) for either live or offline data
+  /// source.
+  void recomputeChartData() {
+    resetAll();
+    event.setupData();
+    event.dirty = true;
+    vm.setupData();
+    vm.dirty = true;
+    android.setupData();
+    android.dirty = true;
+  }
 }
 
 /// This class contains the business logic for [memory.dart].
