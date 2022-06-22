@@ -55,8 +55,11 @@ class MemoryBodyState extends State<MemoryBody>
         SingleTickerProviderStateMixin,
         ProvidedControllerMixin<MemoryController, MemoryBody> {
   MemoryController get memoryController => controller;
+
   late ChartControllers _chartControllers;
+
   final _keyPressed = ValueNotifier<RawKeyEvent?>(null);
+
   final _focusNode = FocusNode(debugLabel: 'memory');
 
   @override
