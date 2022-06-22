@@ -15,10 +15,10 @@ import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../memory_controller.dart';
 import '../../primitives/painting.dart';
-import 'memory_android_chart.dart' as android;
+import 'memory_android_chart.dart';
 import 'memory_charts.dart';
-import 'memory_events_pane.dart' as events;
-import 'memory_vm_chart.dart' as vm;
+import 'memory_events_pane.dart';
+import 'memory_vm_chart.dart';
 
 class MemoryChartPane extends StatefulWidget {
   const MemoryChartPane({
@@ -245,15 +245,15 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
           const SizedBox(height: denseRowSpacing),
           SizedBox(
             height: scaleByFontFactor(70),
-            child: events.MemoryEventsPane(widget.chartControllers.event),
+            child: MemoryEventsPane(widget.chartControllers.event),
           ),
           SizedBox(
-            child: vm.MemoryVMChart(widget.chartControllers.vm),
+            child: MemoryVMChart(widget.chartControllers.vm),
           ),
           controller.isAndroidChartVisible
               ? SizedBox(
                   height: defaultChartHeight,
-                  child: android.MemoryAndroidChart(
+                  child: MemoryAndroidChart(
                     widget.chartControllers.android,
                   ),
                 )
@@ -601,8 +601,8 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
             padding: const EdgeInsets.fromLTRB(5, 4, 0, 0),
             child: Image(
               image: allEvents.length > 1
-                  ? const AssetImage(events.eventsLegend)
-                  : const AssetImage(events.eventLegend),
+                  ? const AssetImage(eventsLegend)
+                  : const AssetImage(eventLegend),
             ),
           ),
           backgroundColor: collapsedColor,
