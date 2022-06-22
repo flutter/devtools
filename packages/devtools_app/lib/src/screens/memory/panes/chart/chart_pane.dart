@@ -53,10 +53,10 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
   static double get _hoverHeightMinimum => scaleByFontFactor(42.0);
   static double get hoverItemHeight => scaleByFontFactor(18.0);
 
-  // One extension event to display (4 lines).
+  /// One extension event to display (4 lines).
   static double get _hoverOneEventsHeight => scaleByFontFactor(82.0);
 
-  // Many extension events to display.
+  /// Many extension events to display.
   static double get _hoverEventsHeight => scaleByFontFactor(120.0);
 
   static double _computeHoverHeight(
@@ -79,6 +79,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     super.didChangeDependencies();
     if (!initController()) return;
 
+    // TODO(polinach): generalize three addAutoDisposeListener below.
     addAutoDisposeListener(widget.chartControllers.event.tapLocation, () {
       if (widget.chartControllers.event.tapLocation.value != null) {
         if (_hoverOverlayEntry != null) {
