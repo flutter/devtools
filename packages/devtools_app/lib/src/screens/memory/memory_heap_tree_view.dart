@@ -145,7 +145,7 @@ class HeapTreeViewState extends State<HeapTree>
   @visibleForTesting
   static const dartHeapAllocationsTabKey = Key('Dart Heap Allocations Tab');
   @visibleForTesting
-  static const dartDraftTabKey = Key('Draft Tab');
+  static const leaksTabKey = Key('Leaks Tab');
 
   /// Below constants should match index for Tab index in DartHeapTabs.
   static const int analysisTabIndex = 0;
@@ -165,9 +165,9 @@ class HeapTreeViewState extends State<HeapTree>
       tabName: 'Allocations',
     ),
     DevToolsTab.create(
-      key: dartDraftTabKey,
+      key: leaksTabKey,
       gaPrefix: _gaPrefix,
-      tabName: 'Darft',
+      tabName: 'Leaks',
     ),
   ];
 
@@ -463,7 +463,7 @@ class HeapTreeViewState extends State<HeapTree>
                   ),
                 ),
 
-                const DraftPane(),
+                const LeaksPane(),
               ],
             ),
           ),

@@ -6,77 +6,20 @@ import 'package:vm_service/vm_service.dart';
 import '../../../../shared/eval_on_dart_library.dart';
 import '../../../../shared/globals.dart';
 
-class DraftPane extends StatefulWidget {
-  const DraftPane({Key? key}) : super(key: key);
+class LeaksPane extends StatefulWidget {
+  const LeaksPane({Key? key}) : super(key: key);
 
   @override
-  State<DraftPane> createState() => _DraftPaneState();
+  State<LeaksPane> createState() => _LeaksPaneState();
 }
 
-class _DraftPaneState extends State<DraftPane> {
-  String _isolateId = '';
-
-  ObjRef? _instance;
-
-  String? _result;
-
-  var _code;
-
+class _LeaksPaneState extends State<LeaksPane> {
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('hello!!'),
-        MaterialButton(
-            child: const Text('Try It'),
-            onPressed: () async {
-              setState(() {
-                _isolateId =
-                    serviceManager.isolateManager!.mainIsolate!.value!.id!;
-              });
-
-              // final profile =
-              //     await serviceManager.service!.getAllocationProfile(
-              //   _isolateId,
-              //   gc: true,
-              // );
-
-              final classList =
-                  await serviceManager.service!.getClassList(_isolateId);
-              for (var item in classList.classes!) {
-                // for (var item in profile.members!) {
-                if (item!.name == 'MyClass') {
-                  final isolateRef =
-                      serviceManager.isolateManager!.mainIsolate!.value!;
-
-                  final instances = await serviceManager.service!.getInstances(
-                    _isolateId,
-                    item!.id!,
-                    20,
-                  );
-
-                  setState(() {
-                    _instance = instances.instances!.first!;
-                    _code = _instance!.json!['identityHashCode'];
-                  });
-
-                  final response = await serviceManager.service!
-                      .evaluate(_isolateId, _instance!.id!, 'hello()');
-
-                  setState(() {
-                    _result = response.json!['valueAsString'];
-                  });
-
-                  return;
-                }
-              }
-            }),
-        // Text('${_classHeapStats?.type}-${_classHeapStats?.classRef?.id}'),
-        Text('${_instance?.id}'),
-        Text('$_result'),
-        Text('$_code'),
-        Text('${_instance!.json}'),
+      children: const [
+        Text('Memory leak tracking functionality will be here.'),
       ],
     );
   }
