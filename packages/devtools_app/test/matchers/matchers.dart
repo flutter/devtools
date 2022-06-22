@@ -59,76 +59,17 @@ Matcher equalsGoldenIgnoringHashCodes(String path) {
   return _EqualsGoldenIgnoringHashCodes(path);
 }
 
-Matcher equalsGoldenValueIgnoringHashCodes(String path) {
-  return _EqualsGoldenValueIgnoringHashCodes(path);
-}
+Matcher equalsGoldenValueIgnoringHashCodes(String value) {
+  const shouldCheckForMatchingGoldens = bool.fromEnvironment(
+    'SHOULD_TEST_GOLDENS',
+    defaultValue: true,
+  );
 
-class _EqualsGoldenValueIgnoringHashCodes extends Matcher {
-  _EqualsGoldenValueIgnoringHashCodes(goldenValue) {
-    this.goldenValue = _normalize(goldenValue);
+  if (shouldCheckForMatchingGoldens) {
+    return equalsIgnoringHashCodes(value);
   }
 
-  late String goldenValue;
-
-  static final Object _mismatchedValueKey = Object();
-
-  static bool get updateGoldens => autoUpdateGoldenFiles;
-
-  static String _normalize(String s) {
-    return s.replaceAll(RegExp(r'#[0-9a-f]{5}'), '#00000');
-  }
-
-  @override
-  bool matches(dynamic object, Map<dynamic, dynamic> matchState) {
-    const shouldCheckForMatchingGoldens = bool.fromEnvironment(
-      'SHOULD_TEST_GOLDENS',
-      defaultValue: true,
-    );
-    if (shouldCheckForMatchingGoldens) {
-      final String description = _normalize(object);
-      if (goldenValue != description) {
-        if (updateGoldens) {
-          print('The matching value must be manually updated to: $description');
-          // Still fail to make sure the caller is notified about needing to
-          //manually update this value
-          return false;
-        }
-
-        matchState[_mismatchedValueKey] = description;
-        return false;
-      }
-    }
-    return true;
-  }
-
-  @override
-  Description describe(Description description) {
-    return description.add('multi line description equals $goldenValue');
-  }
-
-  @override
-  Description describeMismatch(
-    dynamic item,
-    Description mismatchDescription,
-    Map<dynamic, dynamic> matchState,
-    bool verbose,
-  ) {
-    if (!matchState.containsKey(_mismatchedValueKey)) {
-      return mismatchDescription;
-    }
-
-    final String? actualValue = matchState[_mismatchedValueKey];
-    // Leading whitespace is added so that lines in the multi-line
-    // description returned by addDescriptionOf are all indented equally
-    // which makes the output easier to read for this case.
-    return mismatchDescription
-        .add('expected golden value with normalized value\n  ')
-        .addDescriptionOf(goldenValue)
-        .add('\nbut got\n  ')
-        .addDescriptionOf(actualValue)
-        .add('\nTo update golden files run:\n')
-        .add('  tool/update_goldens.sh"\n');
-  }
+  return const _AlwaysTrueMatcher();
 }
 
 class _EqualsGoldenIgnoringHashCodes extends Matcher {
