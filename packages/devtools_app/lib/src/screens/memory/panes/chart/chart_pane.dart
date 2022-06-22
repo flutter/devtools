@@ -223,7 +223,6 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
       autofocus: true,
       child: Column(
         children: [
-          const SizedBox(height: denseRowSpacing),
           SizedBox(
             height: scaleByFontFactor(70),
             child: MemoryEventsPane(widget.chartControllers.event),
@@ -231,15 +230,13 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
           SizedBox(
             child: MemoryVMChart(widget.chartControllers.vm),
           ),
-          controller.isAndroidChartVisible
-              ? SizedBox(
-                  height: defaultChartHeight,
-                  child: MemoryAndroidChart(
-                    widget.chartControllers.android,
-                  ),
-                )
-              : const SizedBox(),
-          const SizedBox(width: defaultSpacing),
+          if (controller.isAndroidChartVisible)
+            SizedBox(
+              height: defaultChartHeight,
+              child: MemoryAndroidChart(
+                widget.chartControllers.android,
+              ),
+            ),
         ],
       ),
     );

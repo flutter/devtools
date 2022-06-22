@@ -10,6 +10,7 @@ import '../../primitives/auto_dispose_mixin.dart';
 import '../../primitives/listenable.dart';
 import '../../shared/banner_messages.dart';
 import '../../shared/screen.dart';
+import '../../shared/theme.dart';
 import '../../shared/utils.dart';
 import '../../ui/icons.dart';
 import 'memory_controller.dart';
@@ -100,10 +101,12 @@ class MemoryBodyState extends State<MemoryBody>
       key: MemoryChartPane.hoverKey,
       children: [
         MemoryControlPane(chartControllers: _chartControllers),
+        const SizedBox(height: denseRowSpacing),
         MemoryChartPane(
           chartControllers: _chartControllers,
           keyFocusNode: _focusNode,
         ),
+        const SizedBox(width: defaultSpacing),
         Expanded(
           child: HeapTree(memoryController),
         ),
