@@ -32,6 +32,7 @@ import 'screens/performance/performance_screen.dart';
 import 'screens/profiler/profiler_screen.dart';
 import 'screens/profiler/profiler_screen_controller.dart';
 import 'screens/provider/provider_screen.dart';
+import 'screens/riverpod/riverpod_screen.dart';
 import 'screens/vm_developer/vm_developer_tools_controller.dart';
 import 'screens/vm_developer/vm_developer_tools_screen.dart';
 import 'service/service_extension_widgets.dart';
@@ -578,6 +579,7 @@ List<DevToolsScreen> get defaultScreens {
       createController: () => LoggingController(),
     ),
     DevToolsScreen<void>(const ProviderScreen(), createController: () {}),
+    DevToolsScreen<void>(const RiverpodScreen(), createController: () {}),
     DevToolsScreen<AppSizeController>(
       const AppSizeScreen(),
       createController: () => AppSizeController(),
