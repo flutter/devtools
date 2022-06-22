@@ -419,7 +419,7 @@ void main() async {
         ))!;
         expect(
           treeToDebugString(selection),
-          equalsIgnoringHashCodes(
+          equalsGoldenIgnoringHashCodes(
             'RenderParagraph#00000 relayoutBoundary=up2\n'
             ' └─text: TextSpan\n',
           ),
