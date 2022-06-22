@@ -62,7 +62,7 @@ void main() {
       late DiagnosticsNodeDescription diagnosticsNodeDescription;
 
       setUp(() {
-        preferences.inspectorPreferences.toggleHoverEvalMode(true);
+        preferences.inspector.setHoverEvalMode(true);
         diagnosticsNodeDescription = DiagnosticsNodeDescription(
           diagnostic,
           debuggerController: MockDebuggerController(),
@@ -80,7 +80,7 @@ void main() {
 
       testWidgets('can be disabled from preferences',
           (WidgetTester tester) async {
-        preferences.inspectorPreferences.toggleHoverEvalMode(false);
+        preferences.inspector.setHoverEvalMode(false);
 
         await tester.pumpWidget(wrap(diagnosticsNodeDescription));
 
