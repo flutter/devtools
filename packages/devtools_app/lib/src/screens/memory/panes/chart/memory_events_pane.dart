@@ -73,7 +73,7 @@ class EventChartController extends ChartController {
     if (sample.isGC) {
       // Plot the VM GC on the VmEvent trace with a fixed Y coordinate.
       addDataToTrace(
-        TraceName.gc.index,
+        EventsTraceName.gc.index,
         trace.Data(sample.timestamp, MemoryEventsPaneState.visibleVmEvent),
       );
     }
@@ -84,7 +84,7 @@ class EventChartController extends ChartController {
         MemoryEventsPaneState.extensionEvent,
         (events.extensionEvents?.theEvents ?? []).length,
       );
-      addDataToTrace(TraceName.extensionEvents.index, data);
+      addDataToTrace(EventsTraceName.extensionEvents.index, data);
     }
 
     // User events snapshot, auto-snapshot, manual GC, are plotted on the top-line
@@ -96,17 +96,17 @@ class EventChartController extends ChartController {
 
     if (events.isEventGC) {
       // Plot manual requested GC on the visibleEvent Y coordinate.
-      addDataToTrace(TraceName.manualGC.index, data);
+      addDataToTrace(EventsTraceName.manualGC.index, data);
     }
 
     if (events.isEventSnapshot) {
       // Plot snapshot on the visibleEvent Y coordinate.
-      addDataToTrace(TraceName.snapshot.index, data);
+      addDataToTrace(EventsTraceName.snapshot.index, data);
     }
 
     if (events.isEventSnapshotAuto) {
       // Plot auto-snapshot on the visibleEvent Y coordinate.
-      addDataToTrace(TraceName.autoSnapshot.index, data);
+      addDataToTrace(EventsTraceName.autoSnapshot.index, data);
     }
 
     if (sample.memoryEventInfo.isEventAllocationAccumulator) {
@@ -116,9 +116,9 @@ class EventChartController extends ChartController {
         MemoryEventsPaneState.visibleMonitorEvent,
       );
       if (allocationEvent.isReset) {
-        addDataToTrace(TraceName.monitorReset.index, data);
+        addDataToTrace(EventsTraceName.monitorReset.index, data);
       } else if (allocationEvent.isStart) {
-        addDataToTrace(TraceName.monitor.index, data);
+        addDataToTrace(EventsTraceName.monitor.index, data);
       }
     }
   }
@@ -139,7 +139,7 @@ class MemoryEventsPane extends StatefulWidget {
 
 /// Name of each trace being charted, index order is the trace index
 /// too (order of trace creation top-down order).
-enum TraceName {
+enum EventsTraceName {
   extensionEvents,
   snapshot,
   autoSnapshot,
@@ -232,48 +232,48 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
 
   void setupTraces({bool isDarkMode = true}) {
     if (_chartController.traces.isNotEmpty) {
-      assert(_chartController.traces.length == TraceName.values.length);
+      assert(_chartController.traces.length == EventsTraceName.values.length);
 
-      final extensionEventsIndex = TraceName.extensionEvents.index;
+      final extensionEventsIndex = EventsTraceName.extensionEvents.index;
       assert(
         _chartController.trace(extensionEventsIndex).name ==
-            TraceName.values[extensionEventsIndex].toString(),
+            EventsTraceName.values[extensionEventsIndex].toString(),
       );
 
-      final snapshotIndex = TraceName.snapshot.index;
+      final snapshotIndex = EventsTraceName.snapshot.index;
       assert(
         _chartController.trace(snapshotIndex).name ==
-            TraceName.values[snapshotIndex].toString(),
+            EventsTraceName.values[snapshotIndex].toString(),
       );
 
-      final autoSnapshotIndex = TraceName.autoSnapshot.index;
+      final autoSnapshotIndex = EventsTraceName.autoSnapshot.index;
       assert(
         _chartController.trace(autoSnapshotIndex).name ==
-            TraceName.values[autoSnapshotIndex].toString(),
+            EventsTraceName.values[autoSnapshotIndex].toString(),
       );
 
-      final manualGCIndex = TraceName.manualGC.index;
+      final manualGCIndex = EventsTraceName.manualGC.index;
       assert(
         _chartController.trace(manualGCIndex).name ==
-            TraceName.values[manualGCIndex].toString(),
+            EventsTraceName.values[manualGCIndex].toString(),
       );
 
-      final monitorIndex = TraceName.monitor.index;
+      final monitorIndex = EventsTraceName.monitor.index;
       assert(
         _chartController.trace(monitorIndex).name ==
-            TraceName.values[monitorIndex].toString(),
+            EventsTraceName.values[monitorIndex].toString(),
       );
 
-      final monitorResetIndex = TraceName.monitorReset.index;
+      final monitorResetIndex = EventsTraceName.monitorReset.index;
       assert(
         _chartController.trace(monitorResetIndex).name ==
-            TraceName.values[monitorResetIndex].toString(),
+            EventsTraceName.values[monitorResetIndex].toString(),
       );
 
-      final gcIndex = TraceName.gc.index;
+      final gcIndex = EventsTraceName.gc.index;
       assert(
         _chartController.trace(gcIndex).name ==
-            TraceName.values[gcIndex].toString(),
+            EventsTraceName.values[gcIndex].toString(),
       );
 
       return;
@@ -290,12 +290,12 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
         fixedMinY: visibleVmEvent,
         fixedMaxY: extensionEvent,
       ),
-      name: TraceName.extensionEvents.toString(),
+      name: EventsTraceName.extensionEvents.toString(),
     );
-    assert(extensionEventsIndex == TraceName.extensionEvents.index);
+    assert(extensionEventsIndex == EventsTraceName.extensionEvents.index);
     assert(
       _chartController.trace(extensionEventsIndex).name ==
-          TraceName.values[extensionEventsIndex].toString(),
+          EventsTraceName.values[extensionEventsIndex].toString(),
     );
 
     final snapshotIndex = _chartController.createTrace(
@@ -307,12 +307,12 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
         fixedMinY: visibleVmEvent,
         fixedMaxY: extensionEvent,
       ),
-      name: TraceName.snapshot.toString(),
+      name: EventsTraceName.snapshot.toString(),
     );
-    assert(snapshotIndex == TraceName.snapshot.index);
+    assert(snapshotIndex == EventsTraceName.snapshot.index);
     assert(
       _chartController.trace(snapshotIndex).name ==
-          TraceName.values[snapshotIndex].toString(),
+          EventsTraceName.values[snapshotIndex].toString(),
     );
 
     // Auto-snapshot
@@ -325,12 +325,12 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
         fixedMinY: visibleVmEvent,
         fixedMaxY: extensionEvent,
       ),
-      name: TraceName.autoSnapshot.toString(),
+      name: EventsTraceName.autoSnapshot.toString(),
     );
-    assert(autoSnapshotIndex == TraceName.autoSnapshot.index);
+    assert(autoSnapshotIndex == EventsTraceName.autoSnapshot.index);
     assert(
       _chartController.trace(autoSnapshotIndex).name ==
-          TraceName.values[autoSnapshotIndex].toString(),
+          EventsTraceName.values[autoSnapshotIndex].toString(),
     );
 
     // Manual GC
@@ -343,12 +343,12 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
         fixedMinY: visibleVmEvent,
         fixedMaxY: extensionEvent,
       ),
-      name: TraceName.manualGC.toString(),
+      name: EventsTraceName.manualGC.toString(),
     );
-    assert(manualGCIndex == TraceName.manualGC.index);
+    assert(manualGCIndex == EventsTraceName.manualGC.index);
     assert(
       _chartController.trace(manualGCIndex).name ==
-          TraceName.values[manualGCIndex].toString(),
+          EventsTraceName.values[manualGCIndex].toString(),
     );
 
     final mainMonitorColor =
@@ -364,12 +364,12 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
         fixedMinY: visibleVmEvent,
         fixedMaxY: extensionEvent,
       ),
-      name: TraceName.monitor.toString(),
+      name: EventsTraceName.monitor.toString(),
     );
-    assert(monitorIndex == TraceName.monitor.index);
+    assert(monitorIndex == EventsTraceName.monitor.index);
     assert(
       _chartController.trace(monitorIndex).name ==
-          TraceName.values[monitorIndex].toString(),
+          EventsTraceName.values[monitorIndex].toString(),
     );
 
     final monitorResetIndex = _chartController.createTrace(
@@ -383,12 +383,12 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
         concentricCenterColor: mainMonitorColor,
         concentricCenterDiameter: 4,
       ),
-      name: TraceName.monitorReset.toString(),
+      name: EventsTraceName.monitorReset.toString(),
     );
-    assert(monitorResetIndex == TraceName.monitorReset.index);
+    assert(monitorResetIndex == EventsTraceName.monitorReset.index);
     assert(
       _chartController.trace(monitorResetIndex).name ==
-          TraceName.values[monitorResetIndex].toString(),
+          EventsTraceName.values[monitorResetIndex].toString(),
     );
 
     // VM GC
@@ -401,15 +401,15 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
         fixedMinY: visibleVmEvent,
         fixedMaxY: extensionEvent,
       ),
-      name: TraceName.gc.toString(),
+      name: EventsTraceName.gc.toString(),
     );
-    assert(gcIndex == TraceName.gc.index);
+    assert(gcIndex == EventsTraceName.gc.index);
     assert(
       _chartController.trace(gcIndex).name ==
-          TraceName.values[gcIndex].toString(),
+          EventsTraceName.values[gcIndex].toString(),
     );
 
-    assert(_chartController.traces.length == TraceName.values.length);
+    assert(_chartController.traces.length == EventsTraceName.values.length);
   }
 
   /// Loads all heap samples (live data or offline).

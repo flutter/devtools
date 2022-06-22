@@ -55,11 +55,14 @@ class AndroidChartController extends ChartController {
     final adb = sample.adbMemoryInfo;
 
     final stackValue = adb.stack.toDouble();
-    addDataToTrace(TraceName.stack.index, trace.Data(timestamp, stackValue));
+    addDataToTrace(
+      AndroidTraceName.stack.index,
+      trace.Data(timestamp, stackValue),
+    );
 
     final graphicValue = adb.graphics.toDouble();
     addDataToTrace(
-      TraceName.graphics.index,
+      AndroidTraceName.graphics.index,
       trace.Data(
         timestamp,
         graphicValue,
@@ -68,7 +71,7 @@ class AndroidChartController extends ChartController {
 
     final nativeHeapValue = adb.nativeHeap.toDouble();
     addDataToTrace(
-      TraceName.nativeHeap.index,
+      AndroidTraceName.nativeHeap.index,
       trace.Data(
         timestamp,
         nativeHeapValue,
@@ -77,21 +80,33 @@ class AndroidChartController extends ChartController {
 
     final javaHeapValue = adb.javaHeap.toDouble();
     addDataToTrace(
-      TraceName.javaHeap.index,
+      AndroidTraceName.javaHeap.index,
       trace.Data(timestamp, javaHeapValue),
     );
 
     final codeValue = adb.code.toDouble();
-    addDataToTrace(TraceName.code.index, trace.Data(timestamp, codeValue));
+    addDataToTrace(
+      AndroidTraceName.code.index,
+      trace.Data(timestamp, codeValue),
+    );
 
     final otherValue = adb.other.toDouble();
-    addDataToTrace(TraceName.other.index, trace.Data(timestamp, otherValue));
+    addDataToTrace(
+      AndroidTraceName.other.index,
+      trace.Data(timestamp, otherValue),
+    );
 
     final systemValue = adb.system.toDouble();
-    addDataToTrace(TraceName.system.index, trace.Data(timestamp, systemValue));
+    addDataToTrace(
+      AndroidTraceName.system.index,
+      trace.Data(timestamp, systemValue),
+    );
 
     final totalValue = adb.total.toDouble();
-    addDataToTrace(TraceName.total.index, trace.Data(timestamp, totalValue));
+    addDataToTrace(
+      AndroidTraceName.total.index,
+      trace.Data(timestamp, totalValue),
+    );
   }
 
   void addDataToTrace(int traceIndex, trace.Data data) {
@@ -110,7 +125,7 @@ class MemoryAndroidChart extends StatefulWidget {
 
 /// Name of each trace being charted, index order is the trace index
 /// too (order of trace creation top-down order).
-enum TraceName {
+enum AndroidTraceName {
   stack,
   javaHeap,
   code,
@@ -176,54 +191,54 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
 
   void setupTraces() {
     if (_chartController.traces.isNotEmpty) {
-      assert(_chartController.traces.length == TraceName.values.length);
+      assert(_chartController.traces.length == AndroidTraceName.values.length);
 
-      final stackIndex = TraceName.stack.index;
+      final stackIndex = AndroidTraceName.stack.index;
       assert(
         _chartController.trace(stackIndex).name ==
-            TraceName.values[stackIndex].toString(),
+            AndroidTraceName.values[stackIndex].toString(),
       );
 
-      final graphicsIndex = TraceName.graphics.index;
+      final graphicsIndex = AndroidTraceName.graphics.index;
       assert(
         _chartController.trace(graphicsIndex).name ==
-            TraceName.values[graphicsIndex].toString(),
+            AndroidTraceName.values[graphicsIndex].toString(),
       );
 
-      final nativeHeapIndex = TraceName.nativeHeap.index;
+      final nativeHeapIndex = AndroidTraceName.nativeHeap.index;
       assert(
         _chartController.trace(nativeHeapIndex).name ==
-            TraceName.values[nativeHeapIndex].toString(),
+            AndroidTraceName.values[nativeHeapIndex].toString(),
       );
 
-      final javaHeapIndex = TraceName.javaHeap.index;
+      final javaHeapIndex = AndroidTraceName.javaHeap.index;
       assert(
         _chartController.trace(javaHeapIndex).name ==
-            TraceName.values[javaHeapIndex].toString(),
+            AndroidTraceName.values[javaHeapIndex].toString(),
       );
 
-      final codeIndex = TraceName.code.index;
+      final codeIndex = AndroidTraceName.code.index;
       assert(
         _chartController.trace(codeIndex).name ==
-            TraceName.values[codeIndex].toString(),
+            AndroidTraceName.values[codeIndex].toString(),
       );
 
-      final otherIndex = TraceName.other.index;
+      final otherIndex = AndroidTraceName.other.index;
       assert(
         _chartController.trace(otherIndex).name ==
-            TraceName.values[otherIndex].toString(),
+            AndroidTraceName.values[otherIndex].toString(),
       );
 
-      final systemIndex = TraceName.system.index;
+      final systemIndex = AndroidTraceName.system.index;
       assert(
         _chartController.trace(systemIndex).name ==
-            TraceName.values[systemIndex].toString(),
+            AndroidTraceName.values[systemIndex].toString(),
       );
 
-      final totalIndex = TraceName.total.index;
+      final totalIndex = AndroidTraceName.total.index;
       assert(
         _chartController.trace(totalIndex).name ==
-            TraceName.values[totalIndex].toString(),
+            AndroidTraceName.values[totalIndex].toString(),
       );
 
       return;
@@ -240,12 +255,12 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
         diameter: 1.5,
       ),
       stacked: true,
-      name: TraceName.stack.toString(),
+      name: AndroidTraceName.stack.toString(),
     );
-    assert(stackIndex == TraceName.stack.index);
+    assert(stackIndex == AndroidTraceName.stack.index);
     assert(
       _chartController.trace(stackIndex).name ==
-          TraceName.values[stackIndex].toString(),
+          AndroidTraceName.values[stackIndex].toString(),
     );
 
     // Java heap trace.
@@ -257,12 +272,12 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
         diameter: 1.5,
       ),
       stacked: true,
-      name: TraceName.javaHeap.toString(),
+      name: AndroidTraceName.javaHeap.toString(),
     );
-    assert(javaHeapIndex == TraceName.javaHeap.index);
+    assert(javaHeapIndex == AndroidTraceName.javaHeap.index);
     assert(
       _chartController.trace(javaHeapIndex).name ==
-          TraceName.values[javaHeapIndex].toString(),
+          AndroidTraceName.values[javaHeapIndex].toString(),
     );
 
     // Code trace
@@ -274,12 +289,12 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
         diameter: 1.5,
       ),
       stacked: true,
-      name: TraceName.code.toString(),
+      name: AndroidTraceName.code.toString(),
     );
-    assert(codeIndex == TraceName.code.index);
+    assert(codeIndex == AndroidTraceName.code.index);
     assert(
       _chartController.trace(codeIndex).name ==
-          TraceName.values[codeIndex].toString(),
+          AndroidTraceName.values[codeIndex].toString(),
     );
 
     // Graphics Trace
@@ -291,12 +306,12 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
         diameter: 1.5,
       ),
       stacked: true,
-      name: TraceName.graphics.toString(),
+      name: AndroidTraceName.graphics.toString(),
     );
-    assert(graphicIndex == TraceName.graphics.index);
+    assert(graphicIndex == AndroidTraceName.graphics.index);
     assert(
       _chartController.trace(graphicIndex).name ==
-          TraceName.values[graphicIndex].toString(),
+          AndroidTraceName.values[graphicIndex].toString(),
     );
 
     // Native heap trace.
@@ -308,12 +323,12 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
         diameter: 1.5,
       ),
       stacked: true,
-      name: TraceName.nativeHeap.toString(),
+      name: AndroidTraceName.nativeHeap.toString(),
     );
-    assert(nativeHeapIndex == TraceName.nativeHeap.index);
+    assert(nativeHeapIndex == AndroidTraceName.nativeHeap.index);
     assert(
       _chartController.trace(nativeHeapIndex).name ==
-          TraceName.values[nativeHeapIndex].toString(),
+          AndroidTraceName.values[nativeHeapIndex].toString(),
     );
 
     // Other trace
@@ -325,12 +340,12 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
         diameter: 1.5,
       ),
       stacked: true,
-      name: TraceName.other.toString(),
+      name: AndroidTraceName.other.toString(),
     );
-    assert(otherIndex == TraceName.other.index);
+    assert(otherIndex == AndroidTraceName.other.index);
     assert(
       _chartController.trace(otherIndex).name ==
-          TraceName.values[otherIndex].toString(),
+          AndroidTraceName.values[otherIndex].toString(),
     );
 
     // System trace
@@ -342,12 +357,12 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
         diameter: 1.5,
       ),
       stacked: true,
-      name: TraceName.system.toString(),
+      name: AndroidTraceName.system.toString(),
     );
-    assert(systemIndex == TraceName.system.index);
+    assert(systemIndex == AndroidTraceName.system.index);
     assert(
       _chartController.trace(systemIndex).name ==
-          TraceName.values[systemIndex].toString(),
+          AndroidTraceName.values[systemIndex].toString(),
     );
 
     // Total trace.
@@ -358,15 +373,15 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
         symbol: trace.ChartSymbol.dashedLine,
         strokeWidth: 2,
       ),
-      name: TraceName.total.toString(),
+      name: AndroidTraceName.total.toString(),
     );
-    assert(totalIndex == TraceName.total.index);
+    assert(totalIndex == AndroidTraceName.total.index);
     assert(
       _chartController.trace(totalIndex).name ==
-          TraceName.values[totalIndex].toString(),
+          AndroidTraceName.values[totalIndex].toString(),
     );
 
-    assert(_chartController.traces.length == TraceName.values.length);
+    assert(_chartController.traces.length == AndroidTraceName.values.length);
   }
 
   /// Loads all heap samples (live data or offline).

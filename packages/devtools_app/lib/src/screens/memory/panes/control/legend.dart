@@ -8,10 +8,10 @@ import '../../../../shared/common_widgets.dart';
 import '../../../../shared/theme.dart';
 import '../../memory_controller.dart';
 import '../../primitives/painting.dart';
-import '../chart/memory_android_chart.dart' as android;
+import '../chart/memory_android_chart.dart';
 import '../chart/memory_charts.dart';
-import '../chart/memory_events_pane.dart' as events;
-import '../chart/memory_vm_chart.dart' as vm;
+import '../chart/memory_events_pane.dart';
+import '../chart/memory_vm_chart.dart';
 import 'constants.dart';
 
 class LegendRow extends StatelessWidget {
@@ -101,115 +101,115 @@ class LegendRow extends StatelessWidget {
   }
 }
 
-Map<String, Map<String, Object?>> eventLegend(bool isLight) => {
-      events.manualSnapshotLegendName: traceRender(
-        image: events.snapshotManualLegend,
+Map<String, Map<String, Object?>> eventLegendContent(bool isLight) => {
+      manualSnapshotLegendName: traceRender(
+        image: snapshotManualLegend,
       ),
-      events.autoSnapshotLegendName: traceRender(
-        image: events.snapshotAutoLegend,
+      autoSnapshotLegendName: traceRender(
+        image: snapshotAutoLegend,
       ),
-      events.monitorLegendName: traceRender(
-        image: events.monitorLegend,
+      monitorLegendName: traceRender(
+        image: monitorLegend,
       ),
-      events.resetLegendName: traceRender(
-        image: isLight ? events.resetLightLegend : events.resetDarkLegend,
+      resetLegendName: traceRender(
+        image: isLight ? resetLightLegend : resetDarkLegend,
       ),
-      events.vmGCLegendName: traceRender(
-        image: events.gcVMLegend,
+      vmGCLegendName: traceRender(
+        image: gcVMLegend,
       ),
-      events.manualGCLegendName: traceRender(
-        image: events.gcManualLegend,
+      manualGCLegendName: traceRender(
+        image: gcManualLegend,
       ),
-      events.eventLegendName: traceRender(
-        image: events.eventLegend,
+      eventLegendName: traceRender(
+        image: eventLegend,
       ),
-      events.eventsLegendName: traceRender(
-        image: events.eventsLegend,
+      eventsLegendName: traceRender(
+        image: eventsLegend,
       )
     };
 
-Map<String, Map<String, Object?>> vmLegend(
-  vm.VMChartController vmChartController,
+Map<String, Map<String, Object?>> vmLegendContent(
+  VMChartController vmChartController,
 ) {
   final traces = vmChartController.traces;
 
   return <String, Map<String, Object?>>{
     // RSS trace
     rssDisplay: traceRender(
-      color: traces[vm.TraceName.rSS.index].characteristics.color,
+      color: traces[VmTraceName.rSS.index].characteristics.color,
       dashed: true,
     ),
 
     // Allocated trace
     allocatedDisplay: traceRender(
-      color: traces[vm.TraceName.capacity.index].characteristics.color,
+      color: traces[VmTraceName.capacity.index].characteristics.color,
       dashed: true,
     ),
 
     // Used trace
     usedDisplay: traceRender(
-      color: traces[vm.TraceName.used.index].characteristics.color,
+      color: traces[VmTraceName.used.index].characteristics.color,
     ),
 
     // External trace
     externalDisplay: traceRender(
-      color: traces[vm.TraceName.external.index].characteristics.color,
+      color: traces[VmTraceName.external.index].characteristics.color,
     ),
 
     // Raster layer trace
     layerDisplay: traceRender(
-      color: traces[vm.TraceName.rasterLayer.index].characteristics.color,
+      color: traces[VmTraceName.rasterLayer.index].characteristics.color,
       dashed: true,
     ),
 
     // Raster picture trace
     pictureDisplay: traceRender(
-      color: traces[vm.TraceName.rasterPicture.index].characteristics.color,
+      color: traces[VmTraceName.rasterPicture.index].characteristics.color,
       dashed: true,
     ),
   };
 }
 
-Map<String, Map<String, Object?>> androidLegend(
-  android.AndroidChartController androidChartController,
+Map<String, Map<String, Object?>> androidLegendContent(
+  AndroidChartController androidChartController,
 ) {
   final traces = androidChartController.traces;
 
   return <String, Map<String, Object?>>{
     // Total trace
     androidTotalDisplay: traceRender(
-      color: traces[android.TraceName.total.index].characteristics.color,
+      color: traces[AndroidTraceName.total.index].characteristics.color,
       dashed: true,
     ),
 
     // Other trace
     androidOtherDisplay: traceRender(
-      color: traces[android.TraceName.other.index].characteristics.color,
+      color: traces[AndroidTraceName.other.index].characteristics.color,
     ),
 
     // Native heap trace
     androidNativeDisplay: traceRender(
-      color: traces[android.TraceName.nativeHeap.index].characteristics.color,
+      color: traces[AndroidTraceName.nativeHeap.index].characteristics.color,
     ),
 
     // Graphics trace
     androidGraphicsDisplay: traceRender(
-      color: traces[android.TraceName.graphics.index].characteristics.color,
+      color: traces[AndroidTraceName.graphics.index].characteristics.color,
     ),
 
     // Code trace
     androidCodeDisplay: traceRender(
-      color: traces[android.TraceName.code.index].characteristics.color,
+      color: traces[AndroidTraceName.code.index].characteristics.color,
     ),
 
     // Java heap trace
     androidJavaDisplay: traceRender(
-      color: traces[android.TraceName.javaHeap.index].characteristics.color,
+      color: traces[AndroidTraceName.javaHeap.index].characteristics.color,
     ),
 
     // Stack trace
     androidStackDisplay: traceRender(
-      color: traces[android.TraceName.stack.index].characteristics.color,
+      color: traces[AndroidTraceName.stack.index].characteristics.color,
     )
   };
 }
