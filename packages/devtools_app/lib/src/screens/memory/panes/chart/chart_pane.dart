@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -25,10 +24,13 @@ class MemoryChartPane extends StatefulWidget {
   const MemoryChartPane({
     Key? key,
     required this.chartControllers,
-    required this.keyPressed,
+    required this.keyFocusNode,
   }) : super(key: key);
   final ChartControllers chartControllers;
-  final ValueListenable<RawKeyEvent?> keyPressed;
+
+  // Which widget's key press will be handled by chart.
+  final FocusNode keyFocusNode;
+
   static final hoverKey = GlobalKey(debugLabel: 'Chart Hover');
 
   @override
@@ -76,14 +78,6 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!initController()) return;
-
-    addAutoDisposeListener(widget.keyPressed, () {
-      final event = widget.keyPressed.value;
-      if (event == null) return;
-      if (event.isKeyPressed(LogicalKeyboardKey.escape)) {
-        _hideHover();
-      }
-    });
 
     addAutoDisposeListener(widget.chartControllers.event.tapLocation, () {
       if (widget.chartControllers.event.tapLocation.value != null) {
@@ -237,25 +231,36 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const SizedBox(height: denseRowSpacing),
-        SizedBox(
-          height: scaleByFontFactor(70),
-          child: events.MemoryEventsPane(widget.chartControllers.event),
-        ),
-        SizedBox(
-          child: vm.MemoryVMChart(widget.chartControllers.vm),
-        ),
-        controller.isAndroidChartVisible
-            ? SizedBox(
-                height: defaultChartHeight,
-                child:
-                    android.MemoryAndroidChart(widget.chartControllers.android),
-              )
-            : const SizedBox(),
-        const SizedBox(width: defaultSpacing),
-      ],
+    // TODO(terry): Can Flutter's focus system be used instead of listening to keyboard?
+    return RawKeyboardListener(
+      focusNode: widget.keyFocusNode,
+      onKey: (RawKeyEvent event) {
+        if (event.isKeyPressed(LogicalKeyboardKey.escape)) {
+          _hideHover();
+        }
+      },
+      autofocus: true,
+      child: Column(
+        children: [
+          const SizedBox(height: denseRowSpacing),
+          SizedBox(
+            height: scaleByFontFactor(70),
+            child: events.MemoryEventsPane(widget.chartControllers.event),
+          ),
+          SizedBox(
+            child: vm.MemoryVMChart(widget.chartControllers.vm),
+          ),
+          controller.isAndroidChartVisible
+              ? SizedBox(
+                  height: defaultChartHeight,
+                  child: android.MemoryAndroidChart(
+                    widget.chartControllers.android,
+                  ),
+                )
+              : const SizedBox(),
+          const SizedBox(width: defaultSpacing),
+        ],
+      ),
     );
   }
 
