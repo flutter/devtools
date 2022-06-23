@@ -313,6 +313,9 @@ class MemoryController extends DisposableController
   ValueListenable<DateTime?> get selectedSnapshotNotifier =>
       _selectedSnapshotNotifier;
 
+  final _shouldShowLeaksTab = ValueNotifier<bool>(false);
+  ValueListenable<bool> get shouldShowLeaksTab => _shouldShowLeaksTab;
+
   static String formattedTimestamp(DateTime? timestamp) =>
       timestamp != null ? DateFormat('MMM dd HH:mm:ss').format(timestamp) : '';
 
@@ -830,7 +833,15 @@ class MemoryController extends DisposableController
     // TODO(terry): Need an event on the controller for this too?
   }
 
-  void _handleConnectionStart(ServiceConnectionManager serviceManager) {
+  void _refreshShouldShowLeaksTab() {
+    _shouldShowLeaksTab.value = serviceManager.serviceExtensionManager
+        .hasServiceExtension(memoryLeakTrackingExtensionName)
+        .value;
+  }
+
+  void _handleConnectionStart(ServiceConnectionManager serviceManager) async {
+    _refreshShouldShowLeaksTab();
+
     _memoryTracker = MemoryTracker(this);
     _memoryTracker!.start();
 
