@@ -153,24 +153,7 @@ class HeapTreeViewState extends State<HeapTree>
 
   static const _gaPrefix = 'memoryTab';
 
-  static final List<Tab> dartHeapTabs = [
-    DevToolsTab.create(
-      key: dartHeapAnalysisTabKey,
-      gaPrefix: _gaPrefix,
-      tabName: 'Analysis',
-    ),
-    DevToolsTab.create(
-      key: dartHeapAllocationsTabKey,
-      gaPrefix: _gaPrefix,
-      tabName: 'Allocations',
-    ),
-    DevToolsTab.create(
-      key: leaksTabKey,
-      gaPrefix: _gaPrefix,
-      tabName: 'Leaks',
-    ),
-  ];
-
+  late List<Tab> _tabs;
   late TabController _tabController;
 
   Widget? snapshotDisplay;
@@ -200,10 +183,30 @@ class HeapTreeViewState extends State<HeapTree>
   void initState() {
     super.initState();
 
-    _tabController = TabController(length: dartHeapTabs.length, vsync: this);
-    addAutoDisposeListener(_tabController);
-
     _animation = _setupBubbleAnimationController();
+  }
+
+  void _initTabs() {
+    _tabs = [
+      DevToolsTab.create(
+        key: dartHeapAnalysisTabKey,
+        gaPrefix: _gaPrefix,
+        tabName: 'Analysis',
+      ),
+      DevToolsTab.create(
+        key: dartHeapAllocationsTabKey,
+        gaPrefix: _gaPrefix,
+        tabName: 'Allocations',
+      ),
+      if (widget.controller.shouldShowLeaksTab.value)
+        DevToolsTab.create(
+          key: leaksTabKey,
+          gaPrefix: _gaPrefix,
+          tabName: 'Leaks',
+        ),
+    ];
+
+    _tabController = TabController(length: _tabs.length, vsync: this);
   }
 
   @override
@@ -212,6 +215,14 @@ class HeapTreeViewState extends State<HeapTree>
     if (!initController()) return;
 
     cancelListeners();
+
+    _initTabs();
+
+    addAutoDisposeListener(controller.shouldShowLeaksTab, () {
+      setState(() {
+        _initTabs();
+      });
+    });
 
     addAutoDisposeListener(controller.selectedSnapshotNotifier, () {
       setState(() {
@@ -426,7 +437,7 @@ class HeapTreeViewState extends State<HeapTree>
                 labelColor: themeData.textTheme.bodyText1!.color,
                 isScrollable: true,
                 controller: _tabController,
-                tabs: HeapTreeViewState.dartHeapTabs,
+                tabs: _tabs,
               ),
               _buildSearchFilterControls(),
             ],
@@ -463,7 +474,8 @@ class HeapTreeViewState extends State<HeapTree>
                   ),
                 ),
 
-                const LeaksPane(),
+                // Leaks tab.
+                if (controller.shouldShowLeaksTab.value) const LeaksPane(),
               ],
             ),
           ),

@@ -298,6 +298,8 @@ class MemoryController extends DisposableController
   ValueListenable<DateTime?> get selectedSnapshotNotifier =>
       _selectedSnapshotNotifier;
 
+  ValueListenable<bool> get shouldShowLeaksTab => ValueNotifier<bool>(true);
+
   static String formattedTimestamp(DateTime? timestamp) =>
       timestamp != null ? DateFormat('MMM dd HH:mm:ss').format(timestamp) : '';
 
