@@ -475,7 +475,8 @@ class HeapTreeViewState extends State<HeapTree>
                 ),
 
                 // Leaks tab.
-                if (controller.shouldShowLeaksTab.value) const LeaksPane(),
+                if (controller.shouldShowLeaksTab.value)
+                  const KeepAliveWrapper(child: LeaksPane()),
               ],
             ),
           ),

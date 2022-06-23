@@ -3,4 +3,4 @@
 // found in the LICENSE file.
 
 /// Name of extension that enables leak tracking for applications.
-const leakTrackingExtensionName = 'ext.memory-leak-tracking';
+const memoryLeakTrackingExtensionName = 'ext.flutter.memory.leak-tracking';

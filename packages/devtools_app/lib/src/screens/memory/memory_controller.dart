@@ -818,15 +818,14 @@ class MemoryController extends DisposableController
     // TODO(terry): Need an event on the controller for this too?
   }
 
-  Future<void> _refreshShouldShowLeaksTab() async {
-    final isolateId = serviceManager.isolateManager.mainIsolate.value!.id!;
-    final Isolate isolate = await serviceManager.service!.getIsolate(isolateId);
-    _shouldShowLeaksTab.value =
-        isolate.extensionRPCs!.contains(leakTrackingExtensionName);
+  void _refreshShouldShowLeaksTab() {
+    _shouldShowLeaksTab.value = serviceManager.serviceExtensionManager
+        .hasServiceExtension(memoryLeakTrackingExtensionName)
+        .value;
   }
 
   void _handleConnectionStart(ServiceConnectionManager serviceManager) async {
-    await _refreshShouldShowLeaksTab();
+    _refreshShouldShowLeaksTab();
 
     _memoryTracker = MemoryTracker(this);
     _memoryTracker!.start();
