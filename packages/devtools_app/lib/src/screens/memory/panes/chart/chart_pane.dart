@@ -28,7 +28,7 @@ class MemoryChartPane extends StatefulWidget {
   }) : super(key: key);
   final ChartControllers chartControllers;
 
-  // Which widget's key press will be handled by chart.
+  /// Which widget's key press will be handled by chart.
   final FocusNode keyFocusNode;
 
   static final hoverKey = GlobalKey(debugLabel: 'Chart Hover');
@@ -212,7 +212,8 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
   @override
   Widget build(BuildContext context) {
-    // TODO(terry): Can Flutter's focus system be used instead of listening to keyboard?
+    // TODO(polinach): Can Flutter's focus system be used instead of listening to keyboard?
+    // See debugger page on how to keys can be handled better.
     return RawKeyboardListener(
       focusNode: widget.keyFocusNode,
       onKey: (RawKeyEvent event) {
@@ -223,6 +224,8 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
       autofocus: true,
       child: Column(
         children: [
+          // TODO(polinach): explain why we need SizedBox here.
+          // And put 70 into a named const that describes what it is.
           SizedBox(
             height: scaleByFontFactor(70),
             child: MemoryEventsPane(widget.chartControllers.event),
