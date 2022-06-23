@@ -2,5 +2,5 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Name fo extension that enables leak tracking for applications.
+/// Name of extension that enables leak tracking for applications.
 const leakTrackingExtensionName = 'ext.memory-leak-tracking';
