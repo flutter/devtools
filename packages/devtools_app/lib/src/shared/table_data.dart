@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../primitives/trees.dart';
+import '../primitives/utils.dart';
 import 'utils.dart';
 
 // TODO(peterdjlee): Remove get from method names.
@@ -96,4 +97,13 @@ enum ColumnAlignment {
   left,
   right,
   center,
+}
+
+class ColumnGroup {
+  ColumnGroup({required this.name, required this.range});
+
+  final String name;
+
+  /// The range of column indices for columns that make up this group.
+  final Range range;
 }

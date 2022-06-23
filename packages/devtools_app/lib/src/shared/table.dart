@@ -31,6 +31,10 @@ import 'utils.dart';
 /// height of 0 and a height of [defaultRowHeight].
 double get defaultRowHeight => scaleByFontFactor(32.0);
 
+const _columnGroupSpacing = 4.0;
+const _columnGroupSpacingWithPadding = _columnGroupSpacing + 2 * defaultSpacing;
+const _columnSpacing = defaultSpacing;
+
 typedef IndexedScrollableWidgetBuilder = Widget Function(
   BuildContext,
   LinkedScrollControllerGroup linkedScrollControllerGroup,
@@ -55,6 +59,7 @@ class FlatTable<T> extends StatefulWidget {
   const FlatTable({
     Key? key,
     required this.columns,
+    this.columnGroups,
     required this.data,
     this.autoScrollContent = false,
     required this.keyFactory,
@@ -69,6 +74,8 @@ class FlatTable<T> extends StatefulWidget {
   }) : super(key: key);
 
   final List<ColumnData<T>> columns;
+
+  final List<ColumnGroup>? columnGroups;
 
   final List<T> data;
 
@@ -97,8 +104,6 @@ class FlatTable<T> extends StatefulWidget {
   final ValueListenable<T?>? activeSearchMatchNotifier;
 
   final ValueListenable<T?>? selectionNotifier;
-
-  int get numSpacers => max(0, columns.length - 1);
 
   @override
   FlatTableState<T> createState() => FlatTableState<T>();
@@ -138,7 +143,10 @@ class FlatTableState<T> extends State<FlatTable<T>>
   List<double> computeColumnWidths(double maxWidth) {
     // Subtract width from outer padding around table.
     maxWidth -= 2 * defaultSpacing;
-    maxWidth -= widget.numSpacers * defaultSpacing;
+    final numColumnGroupSpacers = widget.columnGroups?.numSpacers ?? 0;
+    final numColumnSpacers = widget.columns.numSpacers - numColumnGroupSpacers;
+    maxWidth -= numColumnSpacers * _columnSpacing;
+    maxWidth -= numColumnGroupSpacers * _columnGroupSpacingWithPadding;
     maxWidth = max(0, maxWidth);
 
     double available = maxWidth;
@@ -227,6 +235,7 @@ class FlatTableState<T> extends State<FlatTable<T>>
         return _Table<T>(
           data: data,
           columns: widget.columns,
+          columnGroups: widget.columnGroups,
           columnWidths: columnWidths,
           autoScrollContent: widget.autoScrollContent,
           rowBuilder: _buildRow,
@@ -260,6 +269,7 @@ class FlatTableState<T> extends State<FlatTable<T>>
           node: node,
           onPressed: widget.onItemSelected,
           columns: widget.columns,
+          columnGroups: widget.columnGroups,
           columnWidths: columnWidths,
           backgroundColor: alternatingColorForIndex(
             index,
@@ -783,6 +793,7 @@ class _Table<T> extends StatefulWidget {
     required this.sortColumn,
     required this.sortDirection,
     required this.onSortChanged,
+    this.columnGroups,
     this.secondarySortColumn,
     this.focusNode,
     this.handleKeyEvent,
@@ -796,6 +807,7 @@ class _Table<T> extends StatefulWidget {
 
   final bool autoScrollContent;
   final List<ColumnData<T>> columns;
+  final List<ColumnGroup>? columnGroups;
   final List<double> columnWidths;
   final IndexedScrollableWidgetBuilder rowBuilder;
   final ColumnData<T> sortColumn;
@@ -814,8 +826,6 @@ class _Table<T> extends StatefulWidget {
 
   /// The width to assume for columns that don't specify a width.
   static const defaultColumnWidth = 500.0;
-
-  int get numSpacers => max(0, columns.length - 1);
 
   @override
   _TableState<T> createState() => _TableState<T>();
@@ -904,7 +914,10 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
   /// The width of all columns in the table, with additional padding.
   double get tableWidth {
     var tableWidth = 2 * defaultSpacing;
-    tableWidth += widget.numSpacers * defaultSpacing;
+    final numColumnGroupSpacers = widget.columnGroups?.numSpacers ?? 0;
+    final numColumnSpacers = widget.columns.numSpacers - numColumnGroupSpacers;
+    tableWidth += numColumnSpacers * _columnSpacing;
+    tableWidth += numColumnGroupSpacers * _columnGroupSpacingWithPadding;
     for (var columnWidth in widget.columnWidths) {
       tableWidth += columnWidth;
     }
@@ -929,6 +942,8 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
       }
     }
 
+    final columnGroups = widget.columnGroups;
+
     return LayoutBuilder(
       builder: (context, constraints) {
         return SizedBox(
@@ -939,11 +954,23 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              TableRow<T>.tableHeader(
+              if (columnGroups != null && columnGroups.isNotEmpty)
+                TableRow<T>.tableColumnGroupHeader(
+                  linkedScrollControllerGroup:
+                      _linkedHorizontalScrollControllerGroup,
+                  columnGroups: columnGroups,
+                  columnWidths: widget.columnWidths,
+                  sortColumn: sortColumn,
+                  sortDirection: sortDirection,
+                  secondarySortColumn: widget.secondarySortColumn,
+                  onSortChanged: _sortData,
+                ),
+              TableRow<T>.tableColumnHeader(
                 key: const Key('Table header'),
                 linkedScrollControllerGroup:
                     _linkedHorizontalScrollControllerGroup,
                 columns: widget.columns,
+                columnGroups: columnGroups,
                 columnWidths: widget.columnWidths,
                 sortColumn: sortColumn,
                 sortDirection: sortDirection,
@@ -1032,6 +1059,7 @@ class TableRow<T> extends StatefulWidget {
     required this.columns,
     required this.columnWidths,
     required this.onPressed,
+    this.columnGroups,
     this.backgroundColor,
     this.expandableColumn,
     this.expansionChildren,
@@ -1046,15 +1074,17 @@ class TableRow<T> extends StatefulWidget {
         sortDirection = null,
         secondarySortColumn = null,
         onSortChanged = null,
+        rowType = _TableRowType.data,
         super(key: key);
 
   /// Constructs a [TableRow] that presents the column titles instead
   /// of any [node].
-  const TableRow.tableHeader({
+  const TableRow.tableColumnHeader({
     Key? key,
     required this.linkedScrollControllerGroup,
     required this.columns,
     required this.columnWidths,
+    required this.columnGroups,
     required this.sortColumn,
     required this.sortDirection,
     required this.onSortChanged,
@@ -1071,15 +1101,51 @@ class TableRow<T> extends StatefulWidget {
         onExpansionCompleted = null,
         searchMatchesNotifier = null,
         activeSearchMatchNotifier = null,
+        rowType = _TableRowType.columnHeader,
+        super(key: key);
+
+  /// Constructs a [TableRow] that presents column group titles instead of any
+  /// [node].
+  const TableRow.tableColumnGroupHeader({
+    Key? key,
+    required this.linkedScrollControllerGroup,
+    required this.columnGroups,
+    required this.columnWidths,
+    required this.sortColumn,
+    required this.sortDirection,
+    required this.onSortChanged,
+    this.secondarySortColumn,
+    this.onPressed,
+  })  : node = null,
+        isExpanded = false,
+        isExpandable = false,
+        isSelected = false,
+        expandableColumn = null,
+        columns = const [],
+        isShown = true,
+        backgroundColor = null,
+        expansionChildren = null,
+        onExpansionCompleted = null,
+        searchMatchesNotifier = null,
+        activeSearchMatchNotifier = null,
+        rowType = _TableRowType.columnGroupHeader,
         super(key: key);
 
   final LinkedScrollControllerGroup linkedScrollControllerGroup;
 
   final T? node;
+
   final List<ColumnData<T>> columns;
+
+  final List<ColumnGroup>? columnGroups;
+
   final ItemCallback<T>? onPressed;
+
   final List<double> columnWidths;
+
   final bool isSelected;
+
+  final _TableRowType rowType;
 
   /// Which column, if any, should show expansion affordances
   /// and nested rows.
@@ -1128,8 +1194,6 @@ class TableRow<T> extends StatefulWidget {
   final ValueListenable<List<T>>? searchMatchesNotifier;
 
   final ValueListenable<T?>? activeSearchMatchNotifier;
-
-  int get numSpacers => max(0, columns.length - 1);
 
   @override
   _TableRowState<T> createState() => _TableRowState<T>();
@@ -1203,7 +1267,9 @@ class _TableRowState<T> extends State<TableRow<T>>
     );
 
     final box = SizedBox(
-      height: node == null ? areaPaneHeaderHeight : defaultRowHeight,
+      height: widget.rowType == _TableRowType.data
+          ? defaultRowHeight
+          : areaPaneHeaderHeight,
       child: Material(
         color: _searchAwareBackgroundColor(),
         child: onPressed != null
@@ -1335,7 +1401,9 @@ class _TableRowState<T> extends State<TableRow<T>>
     Widget columnFor(ColumnData<T> column, double columnWidth) {
       late Widget content;
       final node = widget.node;
-      if (node == null) {
+      if (widget.rowType == _TableRowType.columnHeader) {
+        // TODO(kenz): clean up and pull all this code into _ColumnHeaderRow
+        // widget class.
         final isSortColumn = column == widget.sortColumn;
 
         final title = Text(
@@ -1378,7 +1446,9 @@ class _TableRowState<T> extends State<TableRow<T>>
                 child: headerContent,
               )
             : headerContent;
-      } else {
+      } else if (node != null) {
+        // TODO(kenz): clean up and pull all this code into _ColumnDataRow
+        // widget class.
         final padding = column.getNodeIndentPx(node);
         assert(padding >= 0);
 
@@ -1435,6 +1505,10 @@ class _TableRowState<T> extends State<TableRow<T>>
             child: content,
           ),
         );
+      } else {
+        throw Exception(
+          'Expected a non-null node for this table column, but node == null.',
+        );
       }
 
       content = SizedBox(
@@ -1447,20 +1521,61 @@ class _TableRowState<T> extends State<TableRow<T>>
       return content;
     }
 
+    if (widget.rowType == _TableRowType.columnGroupHeader) {
+      final groups = widget.columnGroups!;
+      return _ColumnGroupHeaderRow(
+        groups: groups,
+        columnWidths: widget.columnWidths,
+        scrollController: scrollController,
+      );
+    }
+
+    final rowDisplayParts = <_TableRowPartDisplayType>[];
+    final groups = widget.columnGroups;
+    if (groups != null && groups.isNotEmpty) {
+      for (int i = 0; i < groups.length; i++) {
+        final groupParts = List.generate(
+          groups[i].range.size as int,
+          (index) => _TableRowPartDisplayType.column,
+        ).joinWith(_TableRowPartDisplayType.columnSpacer);
+        rowDisplayParts.addAll(groupParts);
+        if (i < groups.length - 1) {
+          rowDisplayParts.add(_TableRowPartDisplayType.columnGroupSpacer);
+        }
+      }
+    } else {
+      final parts = List.generate(
+        widget.columns.length,
+        (index) => _TableRowPartDisplayType.column,
+      ).joinWith(_TableRowPartDisplayType.columnSpacer);
+      rowDisplayParts.addAll(parts);
+    }
+
+    var columnIndexTracker = 0;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         controller: scrollController,
-        itemCount: widget.columns.length + widget.numSpacers,
+        itemCount: widget.columns.length + widget.columns.numSpacers,
         itemBuilder: (context, int i) {
-          if (i % 2 == 1) {
-            return const SizedBox(width: defaultSpacing);
+          final displayTypeForIndex = rowDisplayParts[i];
+          switch (displayTypeForIndex) {
+            case _TableRowPartDisplayType.column:
+              final current = columnIndexTracker;
+              columnIndexTracker++;
+              return columnFor(
+                widget.columns[current],
+                widget.columnWidths[current],
+              );
+            case _TableRowPartDisplayType.columnSpacer:
+              // TODO(kenz): consider adding column divider lines like we do for
+              // column groups. We'll have to make sure that column divider
+              // lines with column group divider lines doesn't look too busy.
+              return const SizedBox(width: _columnSpacing);
+            case _TableRowPartDisplayType.columnGroupSpacer:
+              return const _ColumnGroupSpacer();
           }
-          return columnFor(
-            widget.columns[i ~/ 2],
-            widget.columnWidths[i ~/ 2],
-          );
         },
       ),
     );
@@ -1501,6 +1616,100 @@ class _TableRowState<T> extends State<TableRow<T>>
       secondarySortColumn: secondarySortColumn,
     );
   }
+}
+
+class _ColumnGroupHeaderRow extends StatelessWidget {
+  const _ColumnGroupHeaderRow({
+    required this.groups,
+    required this.columnWidths,
+    required this.scrollController,
+    Key? key,
+  }) : super(key: key);
+
+  final List<ColumnGroup> groups;
+
+  final List<double> columnWidths;
+
+  final ScrollController scrollController;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        controller: scrollController,
+        itemCount: groups.length + groups.numSpacers,
+        itemBuilder: (context, int i) {
+          if (i % 2 == 1) {
+            return const _ColumnGroupSpacer();
+          }
+
+          final group = groups[i ~/ 2];
+          final groupRange = group.range;
+          double groupWidth = 0.0;
+          for (int j = groupRange.begin as int; j < groupRange.end; j++) {
+            final columnWidth = columnWidths[j];
+            groupWidth += columnWidth;
+            if (j < groupRange.end - 1) {
+              groupWidth += _columnSpacing;
+            }
+          }
+          return Container(
+            alignment: Alignment.center,
+            width: groupWidth,
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: defaultBorderSide(Theme.of(context)),
+              ),
+            ),
+            child: Text(group.name),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _ColumnGroupSpacer extends StatelessWidget {
+  const _ColumnGroupSpacer({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: _columnGroupSpacingWithPadding - _columnGroupSpacing,
+      ),
+      child: Container(
+        width: _columnGroupSpacing,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Colors.black,
+              Theme.of(context).focusColor,
+              Colors.black,
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+enum _TableRowType {
+  data,
+  columnHeader,
+  columnGroupHeader,
+}
+
+enum _TableRowPartDisplayType {
+  column,
+  columnSpacer,
+  columnGroupSpacer,
+}
+
+extension _TableListExtension<T> on List<T> {
+  int get numSpacers => max(0, length - 1);
 }
 
 abstract class SortableTable<T> {
