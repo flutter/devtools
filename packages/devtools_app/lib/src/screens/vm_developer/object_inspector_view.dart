@@ -21,31 +21,44 @@ class ObjectInspectorView extends VMDeveloperView {
           title: 'Objects',
           icon: Icons.data_object,
         );
-  static const id = 'inspector-view';
-
-  final programExplorerController = ProgramExplorerController();
-
-  final controller = ObjectInspectorViewController();
+  static const id = 'object-inspector-view';
 
   @override
   bool get showIsolateSelector => true;
 
   @override
-  Widget build(BuildContext context) {
-    final programExplorerKey = GlobalKey(debugLabel: 'programExplorerKey');
+  Widget build(BuildContext context) => _ObjectInspectorView();
+}
+
+class _ObjectInspectorView extends StatefulWidget {
+  final controller = ObjectInspectorViewController();
+
+  final programExplorerController = ProgramExplorerController();
+
+  @override
+  State<StatefulWidget> createState() => _ObjectInspectorViewState();
+
+  State<StatefulWidget> initState() {
     programExplorerController.initialize();
+    return _ObjectInspectorViewState();
+  }
+}
+
+class _ObjectInspectorViewState extends State<_ObjectInspectorView> {
+  @override
+  Widget build(BuildContext context) {
+    widget.programExplorerController.initialize();
     return Split(
       axis: Axis.horizontal,
       initialFractions: const [0.20, 0.80],
       children: [
         ProgramExplorer(
-          key: programExplorerKey,
-          controller: programExplorerController,
+          controller: widget.programExplorerController,
           onNodeSelected: _onNodeSelected,
           title: 'Program Explorer',
         ),
         ObjectViewport(
-          controller: controller,
+          controller: widget.controller,
         )
       ],
     );
@@ -54,7 +67,7 @@ class ObjectInspectorView extends VMDeveloperView {
   void _onNodeSelected(VMServiceObjectNode node) {
     final objRef = node.object;
     if (objRef != null) {
-      controller.pushObject(objRef);
+      widget.controller.pushObject(objRef);
     }
   }
 }

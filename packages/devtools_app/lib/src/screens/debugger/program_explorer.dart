@@ -420,12 +420,12 @@ class _ProgramOutlineView extends StatelessWidget {
 /// filtering.
 class ProgramExplorer extends StatelessWidget {
   const ProgramExplorer({
-    required Key key,
+    Key? key,
     required this.controller,
     this.onSelected,
     this.title = 'File Explorer',
     this.onNodeSelected,
-  }) : super(key: key);
+  });
 
   final ProgramExplorerController controller;
   final void Function(ScriptLocation)? onSelected;

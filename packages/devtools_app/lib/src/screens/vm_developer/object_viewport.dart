@@ -39,7 +39,7 @@ class ObjectViewport extends StatelessWidget {
           tooltip: 'Refresh',
         )
       ],
-      generateTitle: getViewportTitle,
+      generateTitle: viewportTitle,
       contentBuilder: (context, _) {
         return ValueListenableBuilder<bool>(
           valueListenable: controller.refreshing,
@@ -52,7 +52,7 @@ class ObjectViewport extends StatelessWidget {
               final currentObject = controller.objectHistory.current.value;
               child = currentObject == null
                   ? const SizedBox.shrink()
-                  : buildObjectScreen(currentObject);
+                  : buildObjectDisplay(currentObject);
             }
 
             return Expanded(child: child);
@@ -64,7 +64,7 @@ class ObjectViewport extends StatelessWidget {
 }
 
 @visibleForTesting
-String getViewportTitle(VmObject? object) {
+String viewportTitle(VmObject? object) {
   if (object == null) {
     return 'No object selected.';
   }
@@ -79,7 +79,7 @@ String getViewportTitle(VmObject? object) {
 
 /// Calls the object VM statistics card builder according to the VM Object type.
 @visibleForTesting
-Widget buildObjectScreen(VmObject obj) {
+Widget buildObjectDisplay(VmObject obj) {
   if (obj is ClassObject) {
     return VmClassDisplay(
       clazz: obj,

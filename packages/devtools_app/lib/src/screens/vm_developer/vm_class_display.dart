@@ -20,7 +20,6 @@ class VmClassDisplay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      //mainAxisSize: MainAxisSize.min,
       children: [
         Flexible(
           flex: 5,
@@ -52,11 +51,11 @@ class ClassInfoWidget extends StatelessWidget {
     return VMInfoCard(
       title: 'General Information',
       rowKeyValues: [
-        MapEntry('Object Class', clazz.obj?.type),
+        MapEntry('Object Class', clazz.obj.type),
         MapEntry(
           'Shallow Size',
           prettyPrintBytes(
-            clazz.obj?.size ?? 0,
+            clazz.obj.size ?? 0,
             includeUnit: true,
             kbFractionDigits: 3,
           ),
@@ -67,18 +66,16 @@ class ClassInfoWidget extends StatelessWidget {
         const MapEntry('Inbound references', 'TO-DO'),
         MapEntry(
           'Library',
-          clazz.obj?.library?.name?.isEmpty ?? false
+          clazz.obj.library?.name?.isEmpty ?? false
               ? clazz.script?.uri
-              : clazz.obj?.library?.name,
+              : clazz.obj.library?.name,
         ),
         MapEntry(
           'Script',
-          (_fileName(clazz.script?.uri) ?? '') +
-              ':' +
-              (clazz.pos?.toString() ?? ''),
+          '${_fileName(clazz.script?.uri) ?? ''}:${clazz.pos?.toString() ?? ''}',
         ),
-        MapEntry('Superclass', clazz.obj?.superClass?.name),
-        MapEntry('SuperType', clazz.obj?.superType?.name),
+        MapEntry('Superclass', clazz.obj.superClass?.name),
+        MapEntry('SuperType', clazz.obj.superType?.name),
       ],
     );
   }

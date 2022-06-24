@@ -57,7 +57,9 @@ class ObjectInspectorViewController extends DisposableController
     } else if (objRef is InstanceRef) {
       object = InstanceObject(ref: objRef);
     }
+
     await object?.initialize();
+
     return object;
   }
 }

@@ -86,5 +86,6 @@ class HistoryManager<T> {
   /// Replaces the [current] item with a provided value.
   void replaceCurrent(T value) {
     _history[_historyIndex] = value;
+    _current.value = _history[_historyIndex];
   }
 }
