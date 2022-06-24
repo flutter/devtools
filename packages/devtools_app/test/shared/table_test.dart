@@ -51,6 +51,9 @@ void main() {
       );
       await tester.pumpWidget(wrap(table));
       expect(find.byWidget(table), findsOneWidget);
+      debugDumpApp();
+      expect(find.text('FlatName'), findsOneWidget);
+
       final FlatTableState state = tester.state(find.byWidget(table));
       final columnWidths = state.computeColumnWidths(1000);
       expect(columnWidths.length, 1);
@@ -74,6 +77,58 @@ void main() {
       );
       await tester.pumpWidget(wrap(table));
       expect(find.byWidget(table), findsOneWidget);
+
+      // Column headers.
+      expect(find.text('FlatName'), findsOneWidget);
+      expect(find.text('Number'), findsOneWidget);
+
+      // Table data.
+      expect(find.byKey(const Key('Foo')), findsOneWidget);
+      expect(find.byKey(const Key('Bar')), findsOneWidget);
+      // Note that two keys with the same name are allowed but not necessarily a
+      // good idea. We should be using unique identifiers for keys.
+      expect(find.byKey(const Key('Baz')), findsNWidgets(2));
+      expect(find.byKey(const Key('Qux')), findsNWidgets(2));
+      expect(find.byKey(const Key('Snap')), findsOneWidget);
+      expect(find.byKey(const Key('Crackle')), findsOneWidget);
+      expect(find.byKey(const Key('Pop')), findsOneWidget);
+    });
+
+    testWidgetsWithWindowSize(
+        'displays with column groups', const Size(800.0, 1200.0),
+        (WidgetTester tester) async {
+      final table = FlatTable<TestData>(
+        columns: [
+          flatNameColumn,
+          _NumberColumn(),
+        ],
+        columnGroups: [
+          ColumnGroup(
+            title: 'Group 1',
+            range: const Range(0, 1),
+          ),
+          ColumnGroup(
+            title: 'Group 2',
+            range: const Range(1, 2),
+          ),
+        ],
+        data: flatData,
+        onItemSelected: noop,
+        keyFactory: (d) => Key(d.name),
+        sortColumn: flatNameColumn,
+        sortDirection: SortDirection.ascending,
+      );
+      await tester.pumpWidget(wrap(table));
+      expect(find.byWidget(table), findsOneWidget);
+      // Column group headers.
+      expect(find.text('Group 1'), findsOneWidget);
+      expect(find.text('Group 2'), findsOneWidget);
+
+      // Column headers.
+      expect(find.text('FlatName'), findsOneWidget);
+      expect(find.text('Number'), findsOneWidget);
+
+      // Table data.
       expect(find.byKey(const Key('Foo')), findsOneWidget);
       expect(find.byKey(const Key('Bar')), findsOneWidget);
       // Note that two keys with the same name are allowed but not necessarily a

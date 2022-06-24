@@ -493,6 +493,7 @@ class SettingsDialog extends StatelessWidget {
   }
 }
 
+// TODO(polinach): consider reusing CheckboxSettings from shared/common_widgets.
 class CheckboxSetting extends StatelessWidget {
   const CheckboxSetting({
     Key? key,
