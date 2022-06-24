@@ -312,7 +312,7 @@ void main() {
         wrap(
           SizedBox(
             width: 200.0,
-            height: defaultRowHeight,
+            height: 200.0,
             child: table,
           ),
         ),
@@ -338,7 +338,7 @@ void main() {
         wrap(
           SizedBox(
             width: 800.0,
-            height: defaultRowHeight,
+            height: 200.0,
             child: table,
           ),
         ),
@@ -360,7 +360,7 @@ void main() {
         wrap(
           SizedBox(
             width: 200.0,
-            height: defaultRowHeight,
+            height: 200.0,
             child: table,
           ),
         ),
@@ -398,7 +398,7 @@ void main() {
         wrap(
           SizedBox(
             width: 1000.0,
-            height: defaultRowHeight,
+            height: 200.0,
             child: table,
           ),
         ),
@@ -419,7 +419,7 @@ void main() {
         wrap(
           SizedBox(
             width: 200.0,
-            height: defaultRowHeight,
+            height: 200.0,
             child: table,
           ),
         ),
@@ -456,7 +456,7 @@ void main() {
         wrap(
           SizedBox(
             width: 1501.0,
-            height: defaultRowHeight,
+            height: 200.0,
             child: table,
           ),
         ),
@@ -481,7 +481,7 @@ void main() {
         wrap(
           SizedBox(
             width: 1200.0,
-            height: defaultRowHeight,
+            height: 200.0,
             child: table,
           ),
         ),
@@ -506,7 +506,7 @@ void main() {
         wrap(
           SizedBox(
             width: 1000.0,
-            height: defaultRowHeight,
+            height: 200.0,
             child: table,
           ),
         ),
@@ -715,7 +715,7 @@ void main() {
         wrap(
           SizedBox(
             width: 200.0,
-            height: defaultRowHeight,
+            height: 200.0,
             child: table,
           ),
         ),
