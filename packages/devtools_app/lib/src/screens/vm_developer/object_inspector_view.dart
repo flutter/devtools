@@ -8,11 +8,12 @@ import '../../shared/split.dart';
 import '../debugger/program_explorer.dart';
 import '../debugger/program_explorer_controller.dart';
 import '../debugger/program_explorer_model.dart';
+import 'object_inspector_view_controller.dart';
 import 'object_viewport.dart';
 import 'vm_developer_tools_screen.dart';
 
-/// Displays a program explorer used to select and display information about
-/// objects in the Dart VM.
+/// Displays a program explorer and a history viewport that displays
+/// information about objects in the Dart VM.
 class ObjectInspectorView extends VMDeveloperView {
   ObjectInspectorView()
       : super(
@@ -24,7 +25,7 @@ class ObjectInspectorView extends VMDeveloperView {
 
   final programExplorerController = ProgramExplorerController();
 
-  final objectHistory = ObjectHistory();
+  final controller = ObjectInspectorViewController();
 
   @override
   bool get showIsolateSelector => true;
@@ -44,17 +45,16 @@ class ObjectInspectorView extends VMDeveloperView {
           title: 'Program Explorer',
         ),
         ObjectViewport(
-          controller: programExplorerController,
-          objectHistory: objectHistory,
+          controller: controller,
         )
       ],
     );
   }
 
   void _onNodeSelected(VMServiceObjectNode node) {
-    final object = node.object;
-    if (object != null) {
-      objectHistory.pushEntry(object);
+    final objRef = node.object;
+    if (objRef != null) {
+      controller.pushObject(objRef);
     }
   }
 }

@@ -2,65 +2,60 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
-import '../../primitives/auto_dispose_mixin.dart';
 import '../../primitives/history_manager.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/history_viewport.dart';
-import '../../shared/utils.dart';
-import '../debugger/program_explorer_controller.dart';
-import 'vm_class_screen.dart';
-import 'vm_class_screen_controller.dart';
+import 'object_inspector_view_controller.dart';
+import 'vm_class_display.dart';
 import 'vm_developer_common_widgets.dart';
+import 'vm_object_model.dart';
 
 /// Displays the VM information for the currently selected object in the
 /// program explorer.
 class ObjectViewport extends StatelessWidget {
-  ObjectViewport({
+  const ObjectViewport({
     Key? key,
     required this.controller,
-    required this.objectHistory,
     this.initialObject,
   }) : super(key: key);
 
-  static double get rowHeight => scaleByFontFactor(20.0);
-  static double get assumedCharacterWidth => scaleByFontFactor(16.0);
+  final ObjectInspectorViewController controller;
 
-  final ProgramExplorerController controller;
-  final ObjRef? initialObject;
-  final ObjectHistory objectHistory;
-  ValueListenable<bool> get refreshing => _refreshing;
-  final _refreshing = ValueNotifier<bool>(true);
+  final VmObject? initialObject;
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: _refreshing,
-      builder: (context, refreshing, _) {
-        return HistoryViewport<ObjRef>(
-          history: objectHistory,
-          controls: [
-            ToolbarAction(
-              icon: Icons.refresh,
-              onPressed: () {
-                _refreshing.value = !_refreshing.value;
-              },
-              tooltip: 'Refresh',
-            )
-          ],
-          generateTitle: (currentObjRef) {
-            return currentObjRef == null
-                ? 'No object selected.'
-                : _getViewportTitle(currentObjRef);
+    return HistoryViewport<VmObject>(
+      history: controller.objectHistory,
+      controls: [
+        ToolbarAction(
+          icon: Icons.refresh,
+          onPressed: () {
+            controller.refreshObject();
           },
-          contentBuilder: (context, _) {
-            final currentObjRef = objectHistory.current.value;
-            return currentObjRef == null
-                ? const SizedBox.shrink()
-                : _buildObjectScreen(currentObjRef);
+          tooltip: 'Refresh',
+        )
+      ],
+      generateTitle: getViewportTitle,
+      contentBuilder: (context, _) {
+        return ValueListenableBuilder<bool>(
+          valueListenable: controller.refreshing,
+          builder: (context, refreshing, _) {
+            Widget child;
+
+            if (refreshing) {
+              child = const CenteredCircularProgressIndicator();
+            } else {
+              final currentObject = controller.objectHistory.current.value;
+              child = currentObject == null
+                  ? const SizedBox.shrink()
+                  : buildObjectScreen(currentObject);
+            }
+
+            return Expanded(child: child);
           },
         );
       },
@@ -68,51 +63,56 @@ class ObjectViewport extends StatelessWidget {
   }
 }
 
-String _getViewportTitle(ObjRef objRef) {
-  if (objRef is ClassRef) return objRef.type + ' ' + (objRef.name ?? '<name>');
-  if (objRef is FuncRef) return objRef.type + ' ' + (objRef.name ?? '<name>');
-  if (objRef is FieldRef) return objRef.type + ' ' + (objRef.name ?? '<name>');
-  if (objRef is LibraryRef)
-    return objRef.type + ' ' + (objRef.name ?? '<name>');
-  if (objRef is ScriptRef) return 'Script @ ' + (objRef.uri ?? '<name>');
-  return '<unrecognized object>';
+@visibleForTesting
+String getViewportTitle(VmObject? object) {
+  if (object == null) {
+    return 'No object selected.';
+  }
+
+  if (object is ScriptObject) {
+    final ref = object.ref as ScriptRef?;
+    return 'Script @ ${ref?.uri ?? '<uri>'}';
+  }
+
+  return '${object.ref.type} ${object.name ?? '<name>'}';
 }
 
-//Calls the object VM statistics card builder according to the VM Object type.
-Widget _buildObjectScreen(ObjRef objRef) {
-  if (objRef is ClassRef) {
-    return VmClassScreen(
-      controller: ClassScreenController(objRef),
+/// Calls the object VM statistics card builder according to the VM Object type.
+@visibleForTesting
+Widget buildObjectScreen(VmObject obj) {
+  if (obj is ClassObject) {
+    return VmClassDisplay(
+      clazz: obj,
     );
   }
-  if (objRef is FuncRef)
+  if (obj is FuncObject) {
     return const VMInfoCard(title: 'TO-DO: Display Function object data');
-  if (objRef is FieldRef)
+  }
+  if (obj is FieldObject) {
     return const VMInfoCard(title: 'TO-DO: Display Field object data');
-  if (objRef is LibraryRef)
+  }
+  if (obj is LibraryObject) {
     return const VMInfoCard(title: 'TO-DO: Display Library object data');
-  if (objRef is ScriptRef)
+  }
+  if (obj is ScriptObject) {
     return const VMInfoCard(title: 'TO-DO: Display Script object data');
+  }
+  if (obj is InstanceObject) {
+    return const VMInfoCard(title: 'TO-DO: Display Instance object data');
+  }
   return const SizedBox.shrink();
 }
 
-/// Manages the history of selected ObjRefs to make them accessible on a HistoryViewport.
-class ObjectHistory extends HistoryManager<ObjRef> {
-  final _openedObjects = <ObjRef>{};
-
-  bool get hasObjects => _openedObjects.isNotEmpty;
-
-  void pushEntry(ObjRef ref) async {
-    if (ref == current.value) return;
+/// Manages the history of selected ObjRefs to make them accessible on a
+/// HistoryViewport.
+class ObjectHistory extends HistoryManager<VmObject> {
+  void pushEntry(VmObject object) {
+    if (object == current.value) return;
 
     while (hasNext) {
       pop();
     }
 
-    _openedObjects.add(ref);
-
-    push(ref);
+    push(object);
   }
-
-  Iterable<ObjRef> get openedObjects => _openedObjects.toList().reversed;
 }

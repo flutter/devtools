@@ -6,47 +6,35 @@ import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../primitives/utils.dart';
-import 'vm_class_screen_controller.dart';
 import 'vm_developer_common_widgets.dart';
+import 'vm_object_model.dart';
 
-/// A screen on the object inspector historyViewport displaying information related to class objects in the Dart VM.
-class VmClassScreen extends StatelessWidget {
-  const VmClassScreen({
-    required this.controller,
+/// A widget for the object inspector historyViewport displaying information
+/// related to class objects in the Dart VM.
+class VmClassDisplay extends StatelessWidget {
+  const VmClassDisplay({
+    required this.clazz,
   });
-
-  final ClassScreenController controller;
+  final ClassObject clazz;
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: controller.refreshing,
-      builder: (context, refreshing, _) {
-        return Flexible(
-          child: Row(
-            children: [
-              Flexible(
-                child: Column(
-                  children: [
-                    Flexible(
-                      flex: 5,
-                      child: ClassInfoWidget(
-                        controller: controller,
-                      ),
-                    ),
-                    Flexible(
-                      flex: 4,
-                      child: ClassInstancesWidget(
-                        instances: controller.instances,
-                      ),
-                    )
-                  ],
-                ),
-              ),
-            ],
+    return Column(
+      //mainAxisSize: MainAxisSize.min,
+      children: [
+        Flexible(
+          flex: 5,
+          child: ClassInfoWidget(
+            clazz: clazz,
           ),
-        );
-      },
+        ),
+        Flexible(
+          flex: 4,
+          child: ClassInstancesWidget(
+            instances: clazz.instances,
+          ),
+        )
+      ],
     );
   }
 }
@@ -54,21 +42,21 @@ class VmClassScreen extends StatelessWidget {
 /// Displays general VM information of the Class Object.
 class ClassInfoWidget extends StatelessWidget {
   const ClassInfoWidget({
-    required this.controller,
+    required this.clazz,
   });
-  final ClassScreenController controller;
+
+  final ClassObject clazz;
 
   @override
   Widget build(BuildContext context) {
-    final clazz = controller.clazz;
     return VMInfoCard(
       title: 'General Information',
       rowKeyValues: [
-        MapEntry('Object Class', clazz?.type),
+        MapEntry('Object Class', clazz.obj?.type),
         MapEntry(
           'Shallow Size',
           prettyPrintBytes(
-            clazz?.size ?? 0,
+            clazz.obj?.size ?? 0,
             includeUnit: true,
             kbFractionDigits: 3,
           ),
@@ -79,18 +67,18 @@ class ClassInfoWidget extends StatelessWidget {
         const MapEntry('Inbound references', 'TO-DO'),
         MapEntry(
           'Library',
-          clazz?.library?.name?.isEmpty ?? false
-              ? controller.scriptUri!
-              : clazz?.library?.name,
+          clazz.obj?.library?.name?.isEmpty ?? false
+              ? clazz.script?.uri
+              : clazz.obj?.library?.name,
         ),
         MapEntry(
           'Script',
-          (_fileName(controller.scriptUri) ?? '') +
+          (_fileName(clazz.script?.uri) ?? '') +
               ':' +
-              (controller.pos?.toString() ?? ''),
+              (clazz.pos?.toString() ?? ''),
         ),
-        MapEntry('Superclass', clazz?.superClass?.name),
-        MapEntry('SuperType', clazz?.superType?.name),
+        MapEntry('Superclass', clazz.obj?.superClass?.name),
+        MapEntry('SuperType', clazz.obj?.superType?.name),
       ],
     );
   }
@@ -107,7 +95,9 @@ class ClassInstancesWidget extends StatelessWidget {
   const ClassInstancesWidget({
     required this.instances,
   });
+
   final InstanceSet? instances;
+
   @override
   Widget build(BuildContext context) {
     return VMInfoCard(
