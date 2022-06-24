@@ -104,11 +104,11 @@ void main() {
         ],
         columnGroups: [
           ColumnGroup(
-            name: 'Group 1',
+            title: 'Group 1',
             range: const Range(0, 1),
           ),
           ColumnGroup(
-            name: 'Group 2',
+            title: 'Group 2',
             range: const Range(1, 2),
           ),
         ],

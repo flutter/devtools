@@ -99,10 +99,16 @@ enum ColumnAlignment {
   center,
 }
 
+/// Defines a group of columns for use in a table.
+///
+/// Use a column group when multiple columns should be grouped together in the
+/// table with a common title. In a table with column groups, visual dividers
+/// will be drawn between groups and an additional header row will be added to
+/// the table to display the column group titles.
 class ColumnGroup {
-  ColumnGroup({required this.name, required this.range});
+  ColumnGroup({required this.title, required this.range});
 
-  final String name;
+  final String title;
 
   /// The range of column indices for columns that make up this group.
   final Range range;

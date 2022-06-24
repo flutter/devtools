@@ -1663,7 +1663,7 @@ class _ColumnGroupHeaderRow extends StatelessWidget {
                 bottom: defaultBorderSide(Theme.of(context)),
               ),
             ),
-            child: Text(group.name),
+            child: Text(group.title),
           );
         },
       ),
