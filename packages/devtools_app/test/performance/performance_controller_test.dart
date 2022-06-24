@@ -8,9 +8,11 @@ import 'package:devtools_app/src/primitives/trace_event.dart';
 import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/screens/performance/performance_controller.dart';
 import 'package:devtools_app/src/screens/performance/performance_model.dart';
+import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../test_data/performance.dart';
 import '../test_infra/flutter_test_driver.dart' show FlutterRunConfiguration;
@@ -24,14 +26,23 @@ void main() async {
   );
 
   late PerformanceController performanceController;
-  env.afterNewSetup = () async {
-    setGlobal(OfflineModeController, OfflineModeController());
-    performanceController = PerformanceController()..data = PerformanceData();
-    await performanceController.initialized;
-  };
+  // env.afterNewSetup = () async {
+  //   setGlobal(OfflineModeController, OfflineModeController());
+  //   performanceController = PerformanceController()..data = PerformanceData();
+  //   await performanceController.initialized;
+  // };
+  final ServiceConnectionManager fakeServiceManager = FakeServiceManager(
+    service: FakeServiceManager.createFakeService(
+      timelineData: vm_service.Timeline.parse(testTimelineJson)!,
+    ),
+  );
 
   group('PerformanceController', () {
-    setUp(() {
+    setUp(() async {
+      setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(OfflineModeController, OfflineModeController());
+      performanceController = PerformanceController()..data = PerformanceData();
+      await performanceController.initialized;
       // This flag should never be turned on in production.
       expect(debugSimpleTrace, isFalse);
     });
@@ -43,7 +54,6 @@ void main() async {
     test(
       'processOfflineData',
       () async {
-        await env.setupEnvironment();
         offlineController.enterOfflineMode();
         final offlinePerformanceData =
             OfflinePerformanceData.parse(offlinePerformanceDataJson);
@@ -74,8 +84,6 @@ void main() async {
           performanceController.displayRefreshRate.value,
           equals(offlinePerformanceData.displayRefreshRate),
         );
-
-        await env.tearDownEnvironment();
       },
       timeout: const Timeout.factor(8),
     );
