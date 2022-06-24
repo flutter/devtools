@@ -324,7 +324,10 @@ class _AnalysisViewState extends State<AnalysisView>
                 Row(
                   children: [
                     Flexible(
-                      child: AppSizeAnalysisTable(rootNode: analysisRoot!),
+                      child: AppSizeAnalysisTable(
+                        rootNode: analysisRoot!,
+                        controller: controller,
+                      ),
                     ),
                     if (analysisCallGraphRoot != null)
                       Flexible(

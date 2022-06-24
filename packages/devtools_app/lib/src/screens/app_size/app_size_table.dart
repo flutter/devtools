@@ -29,6 +29,7 @@ class AppSizeAnalysisTable extends StatelessWidget {
       treeColumn,
       sizeColumn,
       columns,
+      controller,
     );
   }
 
@@ -37,6 +38,7 @@ class AppSizeAnalysisTable extends StatelessWidget {
     this.treeColumn,
     this.sortColumn,
     this.columns,
+    this.controller,
   );
 
   final TreemapNode rootNode;
@@ -56,7 +58,7 @@ class AppSizeAnalysisTable extends StatelessWidget {
       keyFactory: (node) => PageStorageKey<String>(node.name),
       sortColumn: sortColumn,
       sortDirection: SortDirection.descending,
-      onChange: controller.changeAnalysisRoot,
+      onAnalysisRootChange: controller.changeAnalysisRoot,
       autoExpandRoots: true,
     );
   }
