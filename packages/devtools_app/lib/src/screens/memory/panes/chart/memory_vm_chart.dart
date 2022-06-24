@@ -5,14 +5,14 @@
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 
-import '../../charts/chart.dart';
-import '../../charts/chart_controller.dart';
-import '../../charts/chart_trace.dart' as trace;
-import '../../primitives/auto_dispose_mixin.dart';
-import '../../shared/theme.dart';
-import '../../shared/utils.dart';
-import 'memory_controller.dart';
-import 'primitives/memory_timeline.dart';
+import '../../../../charts/chart.dart';
+import '../../../../charts/chart_controller.dart';
+import '../../../../charts/chart_trace.dart' as trace;
+import '../../../../primitives/auto_dispose_mixin.dart';
+import '../../../../shared/theme.dart';
+import '../../../../shared/utils.dart';
+import '../../memory_controller.dart';
+import '../../primitives/memory_timeline.dart';
 
 class VMChartController extends ChartController {
   VMChartController(this._memoryController)
@@ -49,31 +49,31 @@ class VMChartController extends ChartController {
     final timestamp = sample.timestamp;
     final externalValue = sample.external.toDouble();
     addDataToTrace(
-      TraceName.external.index,
+      VmTraceName.external.index,
       trace.Data(timestamp, externalValue),
     );
 
     final usedValue = sample.used.toDouble();
-    addDataToTrace(TraceName.used.index, trace.Data(timestamp, usedValue));
+    addDataToTrace(VmTraceName.used.index, trace.Data(timestamp, usedValue));
 
     final capacityValue = sample.capacity.toDouble();
     addDataToTrace(
-      TraceName.capacity.index,
+      VmTraceName.capacity.index,
       trace.Data(timestamp, capacityValue),
     );
 
     final rssValue = sample.rss.toDouble();
-    addDataToTrace(TraceName.rSS.index, trace.Data(timestamp, rssValue));
+    addDataToTrace(VmTraceName.rSS.index, trace.Data(timestamp, rssValue));
 
     final rasterLayerValue = sample.rasterCache.layerBytes.toDouble();
     addDataToTrace(
-      TraceName.rasterLayer.index,
+      VmTraceName.rasterLayer.index,
       trace.Data(timestamp, rasterLayerValue),
     );
 
     final rasterPictureValue = sample.rasterCache.pictureBytes.toDouble();
     addDataToTrace(
-      TraceName.rasterPicture.index,
+      VmTraceName.rasterPicture.index,
       trace.Data(timestamp, rasterPictureValue),
     );
   }
@@ -94,7 +94,7 @@ class MemoryVMChart extends StatefulWidget {
 
 /// Name of each trace being charted, index order is the trace index
 /// too (order of trace creation top-down order).
-enum TraceName {
+enum VmTraceName {
   external,
   used,
   capacity,
@@ -160,42 +160,42 @@ class MemoryVMChartState extends State<MemoryVMChart>
 
   void setupTraces() {
     if (_chartController.traces.isNotEmpty) {
-      assert(_chartController.traces.length == TraceName.values.length);
+      assert(_chartController.traces.length == VmTraceName.values.length);
 
-      final externalIndex = TraceName.external.index;
+      final externalIndex = VmTraceName.external.index;
       assert(
         _chartController.trace(externalIndex).name ==
-            TraceName.values[externalIndex].toString(),
+            VmTraceName.values[externalIndex].toString(),
       );
 
-      final usedIndex = TraceName.used.index;
+      final usedIndex = VmTraceName.used.index;
       assert(
         _chartController.trace(usedIndex).name ==
-            TraceName.values[usedIndex].toString(),
+            VmTraceName.values[usedIndex].toString(),
       );
 
-      final capacityIndex = TraceName.capacity.index;
+      final capacityIndex = VmTraceName.capacity.index;
       assert(
         _chartController.trace(capacityIndex).name ==
-            TraceName.values[capacityIndex].toString(),
+            VmTraceName.values[capacityIndex].toString(),
       );
 
-      final rSSIndex = TraceName.rSS.index;
+      final rSSIndex = VmTraceName.rSS.index;
       assert(
         _chartController.trace(rSSIndex).name ==
-            TraceName.values[rSSIndex].toString(),
+            VmTraceName.values[rSSIndex].toString(),
       );
 
-      final rasterLayerIndex = TraceName.rasterLayer.index;
+      final rasterLayerIndex = VmTraceName.rasterLayer.index;
       assert(
         _chartController.trace(rasterLayerIndex).name ==
-            TraceName.values[rasterLayerIndex].toString(),
+            VmTraceName.values[rasterLayerIndex].toString(),
       );
 
-      final rasterPictureIndex = TraceName.rasterPicture.index;
+      final rasterPictureIndex = VmTraceName.rasterPicture.index;
       assert(
         _chartController.trace(rasterPictureIndex).name ==
-            TraceName.values[rasterPictureIndex].toString(),
+            VmTraceName.values[rasterPictureIndex].toString(),
       );
 
       return;
@@ -209,12 +209,12 @@ class MemoryVMChartState extends State<MemoryVMChart>
         diameter: 1.5,
       ),
       stacked: true,
-      name: TraceName.external.toString(),
+      name: VmTraceName.external.toString(),
     );
-    assert(externalIndex == TraceName.external.index);
+    assert(externalIndex == VmTraceName.external.index);
     assert(
       _chartController.trace(externalIndex).name ==
-          TraceName.values[externalIndex].toString(),
+          VmTraceName.values[externalIndex].toString(),
     );
 
     // Used Heap
@@ -226,12 +226,12 @@ class MemoryVMChartState extends State<MemoryVMChart>
         diameter: 1.5,
       ),
       stacked: true,
-      name: TraceName.used.toString(),
+      name: VmTraceName.used.toString(),
     );
-    assert(usedIndex == TraceName.used.index);
+    assert(usedIndex == VmTraceName.used.index);
     assert(
       _chartController.trace(usedIndex).name ==
-          TraceName.values[usedIndex].toString(),
+          VmTraceName.values[usedIndex].toString(),
     );
 
     // Heap Capacity
@@ -242,12 +242,12 @@ class MemoryVMChartState extends State<MemoryVMChart>
         diameter: 0.0,
         symbol: trace.ChartSymbol.dashedLine,
       ),
-      name: TraceName.capacity.toString(),
+      name: VmTraceName.capacity.toString(),
     );
-    assert(capacityIndex == TraceName.capacity.index);
+    assert(capacityIndex == VmTraceName.capacity.index);
     assert(
       _chartController.trace(capacityIndex).name ==
-          TraceName.values[capacityIndex].toString(),
+          VmTraceName.values[capacityIndex].toString(),
     );
 
     // RSS
@@ -258,12 +258,12 @@ class MemoryVMChartState extends State<MemoryVMChart>
         symbol: trace.ChartSymbol.dashedLine,
         strokeWidth: 2,
       ),
-      name: TraceName.rSS.toString(),
+      name: VmTraceName.rSS.toString(),
     );
-    assert(rSSIndex == TraceName.rSS.index);
+    assert(rSSIndex == VmTraceName.rSS.index);
     assert(
       _chartController.trace(rSSIndex).name ==
-          TraceName.values[rSSIndex].toString(),
+          VmTraceName.values[rSSIndex].toString(),
     );
 
     final rasterLayerIndex = _chartController.createTrace(
@@ -273,12 +273,12 @@ class MemoryVMChartState extends State<MemoryVMChart>
         symbol: trace.ChartSymbol.dashedLine,
         strokeWidth: 2,
       ),
-      name: TraceName.rasterLayer.toString(),
+      name: VmTraceName.rasterLayer.toString(),
     );
-    assert(rasterLayerIndex == TraceName.rasterLayer.index);
+    assert(rasterLayerIndex == VmTraceName.rasterLayer.index);
     assert(
       _chartController.trace(rasterLayerIndex).name ==
-          TraceName.values[rasterLayerIndex].toString(),
+          VmTraceName.values[rasterLayerIndex].toString(),
     );
 
     final rasterPictureIndex = _chartController.createTrace(
@@ -288,15 +288,15 @@ class MemoryVMChartState extends State<MemoryVMChart>
         symbol: trace.ChartSymbol.dashedLine,
         strokeWidth: 2,
       ),
-      name: TraceName.rasterPicture.toString(),
+      name: VmTraceName.rasterPicture.toString(),
     );
-    assert(rasterPictureIndex == TraceName.rasterPicture.index);
+    assert(rasterPictureIndex == VmTraceName.rasterPicture.index);
     assert(
       _chartController.trace(rasterPictureIndex).name ==
-          TraceName.values[rasterPictureIndex].toString(),
+          VmTraceName.values[rasterPictureIndex].toString(),
     );
 
-    assert(_chartController.traces.length == TraceName.values.length);
+    assert(_chartController.traces.length == VmTraceName.values.length);
   }
 
   /// Loads all heap samples (live data or offline).
