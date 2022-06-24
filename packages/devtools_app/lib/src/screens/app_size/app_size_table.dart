@@ -11,8 +11,11 @@ import '../../shared/table_data.dart';
 import '../../shared/utils.dart';
 import '../../ui/colors.dart';
 
+import 'app_size_controller.dart';
+
 class AppSizeAnalysisTable extends StatelessWidget {
-  factory AppSizeAnalysisTable({required TreemapNode rootNode}) {
+  factory AppSizeAnalysisTable(
+      {required TreemapNode rootNode, required AppSizeController controller}) {
     final treeColumn = _NameColumn(currentRootLevel: rootNode.level);
     final sizeColumn = _SizeColumn();
     final columns = List<ColumnData<TreemapNode>>.unmodifiable([
@@ -42,6 +45,8 @@ class AppSizeAnalysisTable extends StatelessWidget {
   final ColumnData<TreemapNode> sortColumn;
   final List<ColumnData<TreemapNode>> columns;
 
+  final AppSizeController controller;
+
   @override
   Widget build(BuildContext context) {
     return TreeTable<TreemapNode>(
@@ -51,6 +56,7 @@ class AppSizeAnalysisTable extends StatelessWidget {
       keyFactory: (node) => PageStorageKey<String>(node.name),
       sortColumn: sortColumn,
       sortDirection: SortDirection.descending,
+      onChange: controller.changeAnalysisRoot,
       autoExpandRoots: true,
     );
   }
