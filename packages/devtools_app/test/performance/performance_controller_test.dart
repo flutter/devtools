@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
+import 'dart:async';
+
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/primitives/trace_event.dart';
 import 'package:devtools_app/src/primitives/utils.dart';
@@ -31,7 +33,10 @@ void main() async {
     setUpAll(() {
       when(fakeServiceManager.connectedApp!.isProfileBuild)
           .thenAnswer((realInvocation) => Future.value(false));
-
+      final initializedCompleter = Completer<bool>();
+      initializedCompleter.complete(true);
+      when(fakeServiceManager.connectedApp!.initialized)
+          .thenReturn(initializedCompleter);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
     });
 
