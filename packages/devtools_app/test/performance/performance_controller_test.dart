@@ -12,25 +12,15 @@ import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../test_data/performance.dart';
-import '../test_infra/flutter_test_driver.dart' show FlutterRunConfiguration;
-import '../test_infra/flutter_test_environment.dart';
 
 void main() async {
   initializeLiveTestWidgetsFlutterBindingWithAssets();
 
-  final FlutterTestEnvironment env = FlutterTestEnvironment(
-    const FlutterRunConfiguration(withDebugger: true),
-  );
-
   late PerformanceController performanceController;
-  // env.afterNewSetup = () async {
-  //   setGlobal(OfflineModeController, OfflineModeController());
-  //   performanceController = PerformanceController()..data = PerformanceData();
-  //   await performanceController.initialized;
-  // };
   final ServiceConnectionManager fakeServiceManager = FakeServiceManager(
     service: FakeServiceManager.createFakeService(
       timelineData: vm_service.Timeline.parse(testTimelineJson)!,
@@ -38,17 +28,19 @@ void main() async {
   );
 
   group('PerformanceController', () {
-    setUp(() async {
+    setUpAll(() {
+      when(fakeServiceManager.connectedApp!.isProfileBuild)
+          .thenAnswer((realInvocation) => Future.value(false));
+
       setGlobal(ServiceConnectionManager, fakeServiceManager);
+    });
+
+    setUp(() async {
       setGlobal(OfflineModeController, OfflineModeController());
       performanceController = PerformanceController()..data = PerformanceData();
       await performanceController.initialized;
       // This flag should never be turned on in production.
       expect(debugSimpleTrace, isFalse);
-    });
-
-    tearDownAll(() async {
-      await env.tearDownEnvironment(force: true);
     });
 
     test(
@@ -89,8 +81,6 @@ void main() async {
     );
 
     test('frame selection', () async {
-      await env.setupEnvironment();
-
       final frame0 = testFrame0.shallowCopy()
         ..setEventFlow(goldenUiTimelineEvent)
         ..setEventFlow(goldenRasterTimelineEvent);
@@ -131,8 +121,6 @@ void main() async {
         equals(frame1UiEvent),
       );
       expect(data.cpuProfileData, isNotNull);
-
-      await env.tearDownEnvironment();
     });
 
     test(
@@ -171,7 +159,6 @@ void main() async {
     });
 
     test('add frame', () async {
-      await env.setupEnvironment();
       await performanceController.clearData();
 
       final data = performanceController.data!;
@@ -181,12 +168,9 @@ void main() async {
         data.frames.length,
         equals(1),
       );
-      await env.tearDownEnvironment();
     });
 
     test('matchesForSearch', () async {
-      await env.setupEnvironment();
-
       // Verify an empty list is returned for bad input.
       expect(performanceController.matchesForSearch(''), isEmpty);
 
@@ -203,13 +187,9 @@ void main() async {
       expect(matches[1].name, equals('Framework Workload'));
       expect(matches[2].name, equals('Engine::BeginFrame'));
       expect(matches[3].name, equals('Frame'));
-
-      await env.tearDownEnvironment();
     });
 
     test('search query searches through previous matches', () async {
-      await env.setupEnvironment();
-
       await performanceController.clearData();
       performanceController.addTimelineEvent(goldenUiTimelineEvent..deepCopy());
 
@@ -245,8 +225,6 @@ void main() async {
         data.timelineEvents,
         matches,
       );
-
-      await env.tearDownEnvironment();
     });
   });
 }
