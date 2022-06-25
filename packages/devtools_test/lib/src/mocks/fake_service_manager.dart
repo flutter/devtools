@@ -36,8 +36,6 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
     final initializedCompleter = Completer<bool>();
     initializedCompleter.complete(true);
     when(connectedApp!.initialized).thenReturn(initializedCompleter);
-    when(connectedApp!.isProfileBuild)
-        .thenAnswer((realInvocation) => Future.value(false));
     when(connectedApp!.isFlutterAppNow).thenReturn(false);
     when(connectedApp!.isDebugFlutterAppNow).thenReturn(false);
 
