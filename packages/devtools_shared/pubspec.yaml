@@ -17,3 +17,5 @@ dependencies:
 
 dev_dependencies:
   test: ^1.21.2
+  build_runner: ^2.0.4
+  mockito: ^5.1.0
