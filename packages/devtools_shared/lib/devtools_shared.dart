@@ -10,6 +10,5 @@ export 'src/memory/heap_sample.dart';
 export 'src/memory/heap_space.dart';
 export 'src/memory/leaks/instrumentation.dart';
 export 'src/memory/leaks/model.dart';
-export 'src/memory/leaks/testing/generated.mocks.dart';
 export 'src/memory/memory_json.dart';
 export 'src/service_utils.dart';

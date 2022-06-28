@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '_constants.dart';
-
 /// Number of full GC cycles since start of tracking, where full GC cycle is
 /// a set of GC events that, with high confidence, guarantees GC of an object
 /// without retaining path.

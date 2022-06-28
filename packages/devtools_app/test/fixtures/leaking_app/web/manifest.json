@@ -1,6 +1,6 @@
 {
-    "name": "flutter_leaks",
-    "short_name": "flutter_leaks",
+    "name": "leaking_app",
+    "short_name": "leaking_app",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

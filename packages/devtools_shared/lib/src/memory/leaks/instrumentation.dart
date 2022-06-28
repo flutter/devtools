@@ -17,19 +17,18 @@ Timer? _timer;
 
 /// Starts leak tracking in the application, for instrumented objects.
 ///
-/// If [creationLocationDetector] provided, it will be used to collect location
+/// If [detailsProvider] provided, it will be used to collect location
 /// for the leaked objects.
 /// If [checkPeriod] is not null, the leaks summary will be regularly calculated
 /// and, in case of new leaks, output to the console.
 /// If [logger] is provided, it will be used for log output, otherwise new
 /// logger will be configured.
 void startLeakTracking({
-  CreationLocationDetector? creationLocationDetector,
+  ObjectDetailsProvider? detailsProvider,
   Duration? checkPeriod = const Duration(seconds: 1),
   Logger? logger,
 }) {
-  creationLocationDetector =
-      creationLocationDetector ?? (_) => '<no location detector provided>';
+  objectDetailsProvider = detailsProvider ?? (_) => null;
 
   if (checkPeriod != null) {
     _timer?.cancel();
@@ -41,7 +40,8 @@ void startLeakTracking({
     );
   }
 
-  registerExtension('ext.memory-leak-tracking', (method, parameters) async {
+  registerExtension(memoryLeakTrackingExtensionName,
+      (method, parameters) async {
     leakTracker.registerGCEvent(
       oldSpace: parameters.containsKey('old'),
       newSpace: parameters.containsKey('new'),
@@ -64,6 +64,11 @@ void startLeakTracking({
 
   leakTrackingEnabled = true;
   appLogger.info('Memory leak tracking started.');
+}
+
+void stopLeakTracking() {
+  leakTrackingEnabled = false;
+  _timer?.cancel();
 }
 
 void startTracking(Object object, {Object? token}) {

@@ -9,6 +9,6 @@ import '../../../devtools_shared.dart';
 bool leakTrackingEnabled = false;
 
 /// Detects creation location for an object.
-late CreationLocationDetector creationLocationDetector;
+late ObjectDetailsProvider objectDetailsProvider;
 
 late Logger appLogger;

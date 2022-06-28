@@ -77,7 +77,7 @@ class LeakTracker {
 
     final TrackedObjectInfo info = TrackedObjectInfo(
       token,
-      creationLocationDetector(object),
+      objectDetailsProvider(object),
       object,
     );
 

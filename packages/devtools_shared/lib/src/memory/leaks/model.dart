@@ -12,11 +12,11 @@ typedef GCTime = int;
 /// Distance between two [GCTime] values.
 typedef GCDuration = int;
 
-typedef CreationLocationDetector = String Function(Object object);
+typedef ObjectDetailsProvider = String? Function(Object object);
 
-const GCDuration cyclesToDeclareLeakIfNotGCed = 2;
+const GCDuration _cyclesToDeclareLeakIfNotGCed = 2;
 
-const Duration delayToDeclareLeakIfNotGCed = Duration(seconds: 1);
+const Duration _delayToDeclareLeakIfNotGCed = Duration(seconds: 1);
 
 /// Name of extension that enables leak tracking for applications.
 const memoryLeakTrackingExtensionName = 'ext.dart.memoryLeakTracking';
@@ -98,21 +98,21 @@ class LeakReport {
   LeakReport({
     required this.token,
     required this.type,
-    required this.creationLocation,
+    required this.details,
     required this.code,
   });
 
   factory LeakReport.fromJson(Map<String, dynamic> json) => LeakReport(
         token: json['token'],
         type: json['type'],
-        creationLocation: json['creationLocation'],
-        code: json['theIdentityHashCode'],
+        details: json['details'],
+        code: json['code'],
       );
 
   /// Token, provided by user.
   final String token;
   final String type;
-  final String creationLocation;
+  final String? details;
   final IdentityHashCode code;
 
   // The fields below do not need serialization as they are populated after.
@@ -122,8 +122,8 @@ class LeakReport {
   Map<String, dynamic> toJson() => {
         'token': token,
         'type': type,
-        'creationLocation': creationLocation,
-        'theIdentityHashCode': code,
+        'details': details,
+        'code': code,
       };
 
   static String iterableToYaml(
@@ -145,7 +145,7 @@ ${leaks.map((e) => e.toYaml('$indent    ')).join()}
     result.writeln('$indent$type:');
     result.writeln('$indent  token: $token');
     result.writeln('$indent  type: $type');
-    result.writeln('$indent  creationLocation: $creationLocation');
+    result.writeln('$indent  details: $details');
     result.writeln('$indent  identityHashCode: $code');
 
     if (detailedPath != null) {
@@ -162,13 +162,13 @@ ${leaks.map((e) => e.toYaml('$indent    ')).join()}
 class TrackedObjectInfo {
   TrackedObjectInfo(
     this.token,
-    this.creationLocation,
+    this.details,
     Object object,
   )   : type = object.runtimeType,
         code = identityHashCode(object);
   final Token token;
   final Type type;
-  final String creationLocation;
+  final String? details;
   final IdentityHashCode code;
 
   DateTime? _disposedTime;
@@ -212,8 +212,8 @@ class TrackedObjectInfo {
     assert((disposed == null) == (disposedTime == null));
     if (disposed == null || disposedTime == null) return false;
 
-    return gced - disposed >= cyclesToDeclareLeakIfNotGCed &&
-        gcedTime.difference(disposedTime) >= delayToDeclareLeakIfNotGCed;
+    return gced - disposed >= _cyclesToDeclareLeakIfNotGCed &&
+        gcedTime.difference(disposedTime) >= _delayToDeclareLeakIfNotGCed;
   }
 
   bool get isNotDisposedLeak {
@@ -223,7 +223,7 @@ class TrackedObjectInfo {
   LeakReport toLeakReport() => LeakReport(
         token: token.toString(),
         type: type.toString(),
-        creationLocation: creationLocation,
+        details: details,
         code: code,
       );
 }

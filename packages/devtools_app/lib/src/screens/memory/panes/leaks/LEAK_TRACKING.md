@@ -1,22 +1,27 @@
-# Memory Leaks Tracking with Dart DevTools
+# Memory leaks tracking with Dart DevTools
 
 This page and functionality are under construction. See https://github.com/flutter/devtools/issues/3951.
 
-## Concepts
+## Understand concepts
 
-## Detect Leaks in Demo App
+## Configure environment
+
+For Google3 applications, follow go/detect-memory-leaks-in-g3-flutter-app.
+
+Follow [standard Flutter installation process](https://docs.flutter.dev/get-started/install), but,
+instead of downloading or cloning official Flutter, clone `git@github.com:polina-c/flutter.git`,
+and then do not run `flutter upgrade` or `flutter channel`.
+
+## Detect leaks in demo app
 
 1. Run devtools/packages/devtools_app/test/fixtures/leaking_app in debug or profile mode
 2. [Connect](https://docs.flutter.dev/development/tools/devtools/cli#open-devtools-and-connect-to-the-target-app) DevTools to the app 
 3. Open Memory > Leaks
-4. Notice message that reports 1 not disposed and 2 not GCed objects.
+4. Notice message that reports not-disposed and not-GCed objects. If there is no not-GCed leaks,
+resize the app window, to trigger GC events.
 
-## Detect Leaks with Instrumented Flutter
+## Detect leaks in your app
 
-### With GitHub Flutter Branch
 
-### With G3 Flutter CL
 
-See go/detect-leaks-with-instrumented-g3-flutter.
-
-## Detect Leaks with Custom Instrumentation 
+## Add instrumentation to your classes
