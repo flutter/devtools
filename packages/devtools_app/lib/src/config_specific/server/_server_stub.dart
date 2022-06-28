@@ -11,6 +11,10 @@ const unsupportedMessage =
 
 bool get isDevToolsServerAvailable => false;
 
+Future<dynamic> request(String url) async {
+  throw Exception(unsupportedMessage);
+}
+
 Future<bool> isFirstRun() async {
   throw Exception(unsupportedMessage);
 }
