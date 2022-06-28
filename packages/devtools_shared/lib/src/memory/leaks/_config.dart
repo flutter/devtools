@@ -3,10 +3,12 @@
 // found in the LICENSE file.
 import 'package:logging/logging.dart';
 
+import '../../../devtools_shared.dart';
+
 /// If true, leak detection is enabled for the application.
 bool leakTrackingEnabled = false;
 
 /// Detects creation location for an object.
-late String Function(Object object) objectLocationGetter;
+late CreationLocationDetector creationLocationDetector;
 
-late Logger logger;
+late Logger appLogger;

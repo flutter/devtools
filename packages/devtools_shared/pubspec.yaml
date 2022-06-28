@@ -9,6 +9,7 @@ environment:
   sdk: '>=2.17.0 <3.0.0'
 
 dependencies:
+  intl: ^0.17.0
   path: ^1.8.0
   shelf: ^1.1.0
   usage: ^4.0.0

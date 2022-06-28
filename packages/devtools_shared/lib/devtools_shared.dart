@@ -8,6 +8,7 @@ export 'src/memory/class_heap_detail_stats.dart';
 export 'src/memory/event_sample.dart';
 export 'src/memory/heap_sample.dart';
 export 'src/memory/heap_space.dart';
+export 'src/memory/leaks/instrumentation.dart';
 export 'src/memory/leaks/model.dart';
 export 'src/memory/leaks/testing/generated.mocks.dart';
 export 'src/memory/memory_json.dart';

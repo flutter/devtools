@@ -11,7 +11,7 @@ void reportLeaksSummary(LeakSummary leakSummary) {
   _previous = leakSummary;
 
   // TODO(polina-c): add deep link for DevTools here.
-  logger.info(leakSummary.toMessage());
+  appLogger.info(leakSummary.toMessage());
 }
 
 void reportLeaks(Leaks leaks) {

@@ -3,8 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-
-import 'package:memory_tools/app_leak_detector.dart' as leak_detector;
+import 'package:devtools_shared/devtools_shared.dart';
 
 import 'leaking_widget.dart';
 
@@ -12,13 +11,7 @@ WeakReference? f;
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  leak_detector.init(
-    objectLocationGetter: (object) =>
-        describeCreationLocation(object) ?? 'location-not-detected',
-    configureLogging: true,
-    //logLevel: Level.FINE,
-  );
-
+  startLeakTracking();
   runApp(const MyApp());
 }
 
