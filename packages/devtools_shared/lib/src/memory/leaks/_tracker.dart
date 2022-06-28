@@ -8,7 +8,7 @@ import '_config.dart';
 import '_gc_time.dart';
 import 'model.dart';
 
-final objectRegistry = ObjectRegistry();
+final leakTracker = LeakTracker();
 
 Object _getToken(Object object, Token? token) =>
     token ?? identityHashCode(object);
@@ -19,9 +19,9 @@ typedef FinalizerBuilder = Finalizer<Object> Function(
 
 /// Tracks objects for leaking.
 @visibleForTesting
-class ObjectRegistry {
+class LeakTracker {
   /// The parameters are injected for testing purposes.
-  ObjectRegistry({
+  LeakTracker({
     FinalizerBuilder? finalizerBuilder,
     GCTimeLine? gcTimeLine,
   }) {

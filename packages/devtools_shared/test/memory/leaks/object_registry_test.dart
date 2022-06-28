@@ -2,8 +2,8 @@ import 'dart:math';
 
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_shared/src/memory/leaks/_gc_time.dart';
-import 'package:devtools_shared/src/memory/leaks/_object_registry.dart'
-    show ObjectRegistry;
+import 'package:devtools_shared/src/memory/leaks/_tracker.dart'
+    show LeakTracker;
 
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
@@ -15,13 +15,13 @@ void main() {
   // Object, that was just attached to mockFinalizer.
   var lastAttachedObject;
   late Function(Object token) registerGC;
-  late ObjectRegistry testObjectRegistry;
+  late LeakTracker testObjectRegistry;
 
   init(objectLocationGetter: (object) => 'location of $object');
   when(mockFinalizer.attach(any, any)).thenAnswer((invocation) {
     lastAttachedObject = invocation.positionalArguments[0];
   });
-  testObjectRegistry = ObjectRegistry(
+  testObjectRegistry = LeakTracker(
     finalizerBuilder: (handler) {
       registerGC = handler;
       return mockFinalizer;
