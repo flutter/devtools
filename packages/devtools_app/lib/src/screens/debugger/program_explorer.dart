@@ -331,27 +331,30 @@ class _FileExplorerState extends State<_FileExplorer> with AutoDisposeMixin {
   }
 
   @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scrollbar(
-      thumbVisibility: true,
-      controller: _scrollController,
-      child: TreeView<VMServiceObjectNode>(
-        itemExtent: _programExplorerRowHeight,
-        dataRootsListenable: widget.controller.rootObjectNodes,
-        onItemSelected: widget.onItemSelected,
-        onItemExpanded: widget.onItemExpanded,
-        scrollController: _scrollController,
-        dataDisplayProvider: (node, onTap) {
-          return _ProgramExplorerRow(
-            controller: widget.controller,
-            node: node,
-            onTap: () {
-              widget.controller.selectNode(node);
-              onTap();
-            },
-          );
-        },
-      ),
+    return TreeView<VMServiceObjectNode>(
+      itemExtent: _programExplorerRowHeight,
+      dataRootsListenable: widget.controller.rootObjectNodes,
+      onItemSelected: widget.onItemSelected,
+      onItemExpanded: widget.onItemExpanded,
+      scrollController: _scrollController,
+      includeScrollbar: true,
+      dataDisplayProvider: (node, onTap) {
+        return _ProgramExplorerRow(
+          controller: widget.controller,
+          node: node,
+          onTap: () {
+            widget.controller.selectNode(node);
+            onTap();
+          },
+        );
+      },
     );
   }
 

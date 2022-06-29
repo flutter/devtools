@@ -89,6 +89,7 @@ class GtagEventDevTools extends GtagEvent {
         flutter_client_id, // dimension8 Flutter tool client_id (~/.flutter).
     String? is_external_build, // dimension9 External build or google3
     String? is_embedded, // dimension10 Whether devtools is embedded
+    String? g3_username, // dimension11 g3 username (null for external users)
 
     // Performance screen metrics. See [PerformanceScreenMetrics].
     int? ui_duration_micros, // metric1
@@ -140,6 +141,8 @@ class GtagEventDevTools extends GtagEvent {
 
   external String? get is_embedded;
 
+  external String? get g3_username;
+
   // Custom metrics:
   external int? get ui_duration_micros;
 
@@ -180,6 +183,7 @@ GtagEventDevTools _gtagEvent({
     flutter_client_id: flutterClientId,
     is_external_build: isExternalBuild.toString(),
     is_embedded: ideTheme.embed.toString(),
+    g3_username: devToolsExtensionPoints.username(),
     ui_duration_micros: screenMetrics is PerformanceScreenMetrics
         ? screenMetrics.uiDuration?.inMicroseconds
         : null,
@@ -222,6 +226,7 @@ GtagExceptionDevTools _gtagException(
     flutter_client_id: flutterClientId,
     is_external_build: isExternalBuild.toString(),
     is_embedded: ideTheme.embed.toString(),
+    g3_username: devToolsExtensionPoints.username(),
     ui_duration_micros: screenMetrics is PerformanceScreenMetrics
         ? screenMetrics.uiDuration?.inMicroseconds
         : null,
@@ -264,6 +269,7 @@ class GtagExceptionDevTools extends GtagException {
     String? flutter_client_id, // dimension8 Flutter tool clientId
     String? is_external_build, // dimension9 External build or google3
     String? is_embedded, // dimension10 Whether devtools is embedded
+    String? g3_username, // dimension11 g3 username (null for external users)
 
     // Performance screen metrics. See [PerformanceScreenMetrics].
     int? ui_duration_micros, // metric1
@@ -301,6 +307,8 @@ class GtagExceptionDevTools extends GtagException {
   external String? get is_external_build;
 
   external String? get is_embedded;
+
+  external String? get g3_username;
 
   // Custom metrics:
   external int? get ui_duration_micros;
