@@ -31,34 +31,37 @@ class ObjectInspectorView extends VMDeveloperView {
 }
 
 class _ObjectInspectorView extends StatefulWidget {
-  final controller = ObjectInspectorViewController();
-
-  final programExplorerController = ProgramExplorerController();
-
   @override
   State<StatefulWidget> createState() => _ObjectInspectorViewState();
-
-  State<StatefulWidget> initState() {
-    programExplorerController.initialize();
-    return _ObjectInspectorViewState();
-  }
 }
 
 class _ObjectInspectorViewState extends State<_ObjectInspectorView> {
+  late final ObjectInspectorViewController controller;
+
+  late final ProgramExplorerController programExplorerController;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = ObjectInspectorViewController();
+    programExplorerController = ProgramExplorerController();
+    programExplorerController.initialize();
+    return;
+  }
+
   @override
   Widget build(BuildContext context) {
-    widget.programExplorerController.initialize();
     return Split(
       axis: Axis.horizontal,
       initialFractions: const [0.20, 0.80],
       children: [
         ProgramExplorer(
-          controller: widget.programExplorerController,
+          controller: programExplorerController,
           onNodeSelected: _onNodeSelected,
           title: 'Program Explorer',
         ),
         ObjectViewport(
-          controller: widget.controller,
+          controller: controller,
         )
       ],
     );
@@ -66,8 +69,9 @@ class _ObjectInspectorViewState extends State<_ObjectInspectorView> {
 
   void _onNodeSelected(VMServiceObjectNode node) {
     final objRef = node.object;
-    if (objRef != null) {
-      widget.controller.pushObject(objRef);
+    if (objRef != null &&
+        objRef != controller.objectHistory.current.value?.ref) {
+      controller.pushObject(objRef);
     }
   }
 }

@@ -313,7 +313,7 @@ class _FileExplorer extends StatefulWidget {
 }
 
 class _FileExplorerState extends State<_FileExplorer> with AutoDisposeMixin {
-  final ScrollController _scrollController = ScrollController();
+  late final ScrollController _scrollController;
 
   double get selectedNodeOffset => widget.controller.selectedNodeIndex.value ==
           -1
@@ -323,6 +323,7 @@ class _FileExplorerState extends State<_FileExplorer> with AutoDisposeMixin {
   @override
   void initState() {
     super.initState();
+    _scrollController = ScrollController();
     addAutoDisposeListener(
       widget.controller.selectedNodeIndex,
       _maybeScrollToSelectedNode,

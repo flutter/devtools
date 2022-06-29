@@ -19,12 +19,9 @@ class ObjectViewport extends StatelessWidget {
   const ObjectViewport({
     Key? key,
     required this.controller,
-    this.initialObject,
   }) : super(key: key);
 
   final ObjectInspectorViewController controller;
-
-  final VmObject? initialObject;
 
   @override
   Widget build(BuildContext context) {
