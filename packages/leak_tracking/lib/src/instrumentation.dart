@@ -40,14 +40,16 @@ void startLeakTracking({
     );
   }
 
-  registerExtension(memoryLeakTrackingExtensionName,
-      (method, parameters) async {
-    leakTracker.registerGCEvent(
-      oldSpace: parameters.containsKey('old'),
-      newSpace: parameters.containsKey('new'),
-    );
-    return ServiceExtensionResponse.result('ack');
-  });
+  if (!leakTrackingEnabled) {
+    registerExtension(memoryLeakTrackingExtensionName,
+        (method, parameters) async {
+      leakTracker.registerGCEvent(
+        oldSpace: parameters.containsKey('old'),
+        newSpace: parameters.containsKey('new'),
+      );
+      return ServiceExtensionResponse.result('ack');
+    });
+  }
 
   if (logger != null) {
     appLogger = logger;

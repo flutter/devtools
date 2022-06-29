@@ -1,8 +1,8 @@
+Code in this package will be moved to Dart SDK and/or Flutter framework after piloting the feature.
+See https://github.com/flutter/devtools/issues/3951.
 
-
-
-This code cannot be part of `devtools_shared`, because
-the version resolution fails for flutter:
+The code cannot be part of `devtools_shared`, because
+the version resolution fails, when the code is referenced from the Flutter framework:
 
 ```
 Because every version of flutter from sdk depends on devtools_shared from path which depends on 

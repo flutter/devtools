@@ -14,9 +14,9 @@ typedef GCDuration = int;
 
 typedef ObjectDetailsProvider = String? Function(Object object);
 
-const GCDuration _cyclesToDeclareLeakIfNotGCed = 2;
+const GCDuration cyclesToDeclareLeakIfNotGCed = 2;
 
-const Duration _delayToDeclareLeakIfNotGCed = Duration(seconds: 1);
+const Duration delayToDeclareLeakIfNotGCed = Duration(seconds: 1);
 
 /// Name of extension that enables leak tracking for applications.
 const memoryLeakTrackingExtensionName = 'ext.dart.memoryLeakTracking';
@@ -212,8 +212,8 @@ class TrackedObjectInfo {
     assert((disposed == null) == (disposedTime == null));
     if (disposed == null || disposedTime == null) return false;
 
-    return gced - disposed >= _cyclesToDeclareLeakIfNotGCed &&
-        gcedTime.difference(disposedTime) >= _delayToDeclareLeakIfNotGCed;
+    return gced - disposed >= cyclesToDeclareLeakIfNotGCed &&
+        gcedTime.difference(disposedTime) >= delayToDeclareLeakIfNotGCed;
   }
 
   bool get isNotDisposedLeak {

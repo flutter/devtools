@@ -1,13 +1,16 @@
-import 'package:devtools_shared/src/memory/leaks/model.dart';
+// Copyright 2021 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
+import 'package:leak_tracking/src/model.dart';
 import 'package:test/test.dart';
 
 void main() {
   final report = LeakReport(
     token: 'token',
     type: 'type',
-    creationLocation: 'creationLocation',
     code: 123,
+    details: 'creationLocation',
   );
 
   test('$LeakReport.fromJson does not lose information', () {
@@ -16,7 +19,7 @@ void main() {
 
     expect(copy.token, report.token);
     expect(copy.type, report.type);
-    expect(copy.creationLocation, report.creationLocation);
+    expect(copy.details, report.details);
     expect(copy.code, report.code);
   });
 
