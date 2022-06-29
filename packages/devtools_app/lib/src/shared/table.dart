@@ -13,6 +13,7 @@ import '../primitives/flutter_widgets/linked_scroll_controller.dart';
 import '../primitives/listenable.dart';
 import '../primitives/trees.dart';
 import '../primitives/utils.dart';
+import '../screens/app_size/code_size_attribution.dart';
 import '../ui/colors.dart';
 import '../ui/search.dart';
 import 'collapsible_mixin.dart';
@@ -503,8 +504,11 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   }
 
   void _toggleNode(T node) {
-    widget.onAnalysisRootChange!(node);
+    //TODO: not a great way to check for null
 
+    if (node is! DominatorTreeNode) {
+      widget.onAnalysisRootChange!(node);
+    }
     if (!node.isExpandable) {
       node.leaf();
       _updateItems();
