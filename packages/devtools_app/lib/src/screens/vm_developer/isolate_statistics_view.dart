@@ -79,13 +79,11 @@ class IsolateStatisticsViewBody extends StatelessWidget {
           child: Column(
             children: [
               Flexible(
-                flex: 3,
                 child: GeneralIsolateStatisticsWidget(
                   controller: controller,
                 ),
               ),
               Flexible(
-                flex: 2,
                 child: IsolateMemoryStatisticsWidget(
                   controller: controller,
                 ),
