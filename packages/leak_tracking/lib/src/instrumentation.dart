@@ -8,12 +8,15 @@ import 'dart:developer';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 
-import '_config.dart';
+import '_app_config.dart';
 import '_reporter.dart';
 import '_tracker.dart';
 import 'model.dart';
 
 Timer? _timer;
+
+/// Name of extension that enables leak tracking for applications.
+const memoryLeakTrackingExtensionName = 'ext.dart.memoryLeakTracking';
 
 /// Starts leak tracking in the application, for instrumented objects.
 ///
@@ -40,7 +43,7 @@ void startLeakTracking({
     );
   }
 
-  if (!leakTrackingEnabled) {
+  try {
     registerExtension(memoryLeakTrackingExtensionName,
         (method, parameters) async {
       leakTracker.registerGCEvent(
@@ -49,6 +52,11 @@ void startLeakTracking({
       );
       return ServiceExtensionResponse.result('ack');
     });
+  } on ArgumentError catch (ex) {
+    // Skipping error about already registered
+    final isAlreadyRegisteredError =
+        ex.message.toString().contains('registered');
+    if (!isAlreadyRegisteredError) rethrow;
   }
 
   if (logger != null) {
@@ -60,7 +68,8 @@ void startLeakTracking({
     Logger.root.onRecord.listen((record) {
       final DateFormat _formatter = DateFormat.Hms();
       print(
-          '${record.loggerName}: ${record.level.name}: ${_formatter.format(record.time)}: ${record.message}');
+        '${record.loggerName}: ${record.level.name}: ${_formatter.format(record.time)}: ${record.message}',
+      );
     });
   }
 

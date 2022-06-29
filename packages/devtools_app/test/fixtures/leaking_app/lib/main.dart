@@ -1,7 +1,7 @@
-import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 
 import 'leaking_widget.dart';
+import 'package:leak_tracking/leak_tracking.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();

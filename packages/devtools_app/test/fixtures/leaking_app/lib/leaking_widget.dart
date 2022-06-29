@@ -40,10 +40,6 @@ class _LeakingWidgetState extends State<LeakingWidget> {
       _disposedAndGCed = null;
 
       _isCleaned = true;
-
-      print('notGCed1: ${identityHashCode(_notGCed!.notGCed1)}');
-      print('notGCed2: ${identityHashCode(_notGCed!.notGCed1!.child)}');
-      print('parent: ${identityHashCode(_notGCed)}');
     }
 
     return Column(children: const [

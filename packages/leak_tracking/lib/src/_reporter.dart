@@ -4,7 +4,7 @@
 
 import 'dart:developer';
 
-import '_config.dart';
+import '_app_config.dart';
 import 'model.dart';
 
 LeakSummary? _previous;

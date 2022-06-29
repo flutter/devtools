@@ -71,6 +71,8 @@ void main() {
   });
 }
 
-void _registerGCEvents(int count, GCTimeLine gcTimeLine) =>
-    Iterable.generate(count).forEach(
-        (_) => gcTimeLine.registerGCEvent({GCEvent.newGC, GCEvent.oldGC}));
+void _registerGCEvents(int count, GCTimeLine gcTimeLine) {
+  for (var _ in Iterable.generate(count)) {
+    gcTimeLine.registerGCEvent({GCEvent.newGC, GCEvent.oldGC});
+  }
+}

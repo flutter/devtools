@@ -4,8 +4,8 @@
 
 library service_extensions;
 
-import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
+import 'package:leak_tracking/leak_tracking.dart';
 
 import '../analytics/constants.dart' as analytics_constants;
 import '../shared/theme.dart';

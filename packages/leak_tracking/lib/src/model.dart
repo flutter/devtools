@@ -18,9 +18,6 @@ const GCDuration cyclesToDeclareLeakIfNotGCed = 2;
 
 const Duration delayToDeclareLeakIfNotGCed = Duration(seconds: 1);
 
-/// Name of extension that enables leak tracking for applications.
-const memoryLeakTrackingExtensionName = 'ext.dart.memoryLeakTracking';
-
 /// Result of [identityHashCode].
 typedef IdentityHashCode = int;
 

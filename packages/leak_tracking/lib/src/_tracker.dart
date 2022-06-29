@@ -4,7 +4,7 @@
 
 import 'package:meta/meta.dart';
 
-import '_config.dart';
+import '_app_config.dart';
 import '_gc_time.dart';
 import 'model.dart';
 

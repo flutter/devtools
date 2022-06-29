@@ -11,8 +11,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  devtools_shared:
-    path: ../../../../devtools_shared
+  leak_tracking:
+    path: ../../../../leak_tracking
   cupertino_icons: ^1.0.2
 
 dev_dependencies:
