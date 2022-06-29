@@ -348,7 +348,7 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           CheckboxSetting(
-            notifier: preferences.inspectorPreferences.hoverEvalModeEnabled
+            notifier: preferences.inspector.hoverEvalModeEnabled
                 as ValueNotifier<bool?>,
             title: 'Enable hover inspection',
             description:

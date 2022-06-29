@@ -91,7 +91,7 @@ class _SecondaryControlsState extends State<SecondaryControls>
 
     final legendRows = <Widget>[];
 
-    final events = eventLegend(colorScheme.isLight);
+    final events = eventLegendContent(colorScheme.isLight);
     legendRows.add(
       Container(
         padding: legendTitlePadding,
@@ -112,7 +112,7 @@ class _SecondaryControlsState extends State<SecondaryControls>
       );
     }
 
-    final vms = vmLegend(widget.chartControllers.vm);
+    final vms = vmLegendContent(widget.chartControllers.vm);
     legendRows.add(
       Container(
         padding: legendTitlePadding,
@@ -132,7 +132,7 @@ class _SecondaryControlsState extends State<SecondaryControls>
     }
 
     if (controller.isAndroidChartVisible) {
-      final androids = androidLegend(widget.chartControllers.android);
+      final androids = androidLegendContent(widget.chartControllers.android);
       legendRows.add(
         Container(
           padding: legendTitlePadding,
