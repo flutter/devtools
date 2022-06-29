@@ -4,7 +4,6 @@
 
 import 'dart:developer';
 
-import '_app_config.dart';
 import 'model.dart';
 
 LeakSummary? _previous;
@@ -15,7 +14,7 @@ void reportLeaksSummary(LeakSummary leakSummary) {
   _previous = leakSummary;
 
   // TODO(polina-c): add deep link for DevTools here.
-  appLogger.info(leakSummary.toMessage());
+  print(leakSummary.toMessage);
 }
 
 void reportLeaks(Leaks leaks) {

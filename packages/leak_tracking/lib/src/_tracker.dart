@@ -163,10 +163,7 @@ class LeakTracker {
     return true;
   }
 
-  void registerGCEvent({required bool oldSpace, required bool newSpace}) {
-    _gcTime.registerGCEvent({
-      if (oldSpace) GCEvent.oldGC,
-      if (newSpace) GCEvent.newGC,
-    });
+  void registerOldGCEvent() {
+    _gcTime.registerOldGCEvent();
   }
 }

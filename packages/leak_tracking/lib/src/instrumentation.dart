@@ -5,9 +5,6 @@
 import 'dart:async';
 import 'dart:developer';
 
-import 'package:intl/intl.dart';
-import 'package:logging/logging.dart';
-
 import '_app_config.dart';
 import '_reporter.dart';
 import '_tracker.dart';
@@ -26,10 +23,9 @@ const memoryLeakTrackingExtensionName = 'ext.dart.memoryLeakTracking';
 /// and, in case of new leaks, output to the console.
 /// If [logger] is provided, it will be used for log output, otherwise new
 /// logger will be configured.
-void startLeakTracking({
+void startAppLeakTracking({
   ObjectDetailsProvider? detailsProvider,
   Duration? checkPeriod = const Duration(seconds: 1),
-  Logger? logger,
 }) {
   objectDetailsProvider = detailsProvider ?? (_) => null;
 
@@ -46,43 +42,25 @@ void startLeakTracking({
   try {
     registerExtension(memoryLeakTrackingExtensionName,
         (method, parameters) async {
-      leakTracker.registerGCEvent(
-        oldSpace: parameters.containsKey('old'),
-        newSpace: parameters.containsKey('new'),
-      );
-      return ServiceExtensionResponse.result('ack');
+      final isGC = parameters.containsKey('gc');
+      if (isGC) leakTracker.registerOldGCEvent();
+      return ServiceExtensionResponse.result('{}');
     });
   } on ArgumentError catch (ex) {
-    // Skipping error about already registered
-    final isAlreadyRegisteredError =
-        ex.message.toString().contains('registered');
+    // Skipping error about already registered extension.
+    final isAlreadyRegisteredError = ex.toString().contains('registered');
     if (!isAlreadyRegisteredError) rethrow;
   }
 
-  if (logger != null) {
-    appLogger = logger;
-  } else {
-    const loggerName = 'leak-tracking';
-    appLogger = Logger(loggerName);
-
-    Logger.root.onRecord.listen((record) {
-      final DateFormat _formatter = DateFormat.Hms();
-      print(
-        '${record.loggerName}: ${record.level.name}: ${_formatter.format(record.time)}: ${record.message}',
-      );
-    });
-  }
-
   leakTrackingEnabled = true;
-  appLogger.info('Memory leak tracking started.');
 }
 
-void stopLeakTracking() {
+void stopAppLeakTracking() {
   leakTrackingEnabled = false;
   _timer?.cancel();
 }
 
-void startTracking(Object object, {Object? token}) {
+void startObjectLeakTracking(Object object, {Object? token}) {
   if (leakTrackingEnabled) leakTracker.startTracking(object, token);
 }
 

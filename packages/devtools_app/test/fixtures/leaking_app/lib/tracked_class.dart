@@ -6,7 +6,7 @@ import 'package:leak_tracking/leak_tracking.dart';
 
 class MyTrackedClass {
   MyTrackedClass({required this.token, this.child}) {
-    startTracking(this, token: token);
+    startObjectLeakTracking(this, token: token);
   }
 
   final Object token;

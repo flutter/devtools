@@ -28,7 +28,7 @@ void main() {
   late LeakTracker testObjectRegistry;
 
   setUp(() {
-    startLeakTracking(detailsProvider: (object) => 'location of $object');
+    startAppLeakTracking(detailsProvider: (object) => 'location of $object');
     when(mockFinalizer.attach(any, any)).thenAnswer((invocation) {
       lastAttachedObject = invocation.positionalArguments[0];
     });
@@ -73,6 +73,6 @@ void main() {
 
 void _registerGCEvents(int count, GCTimeLine gcTimeLine) {
   for (var _ in Iterable.generate(count)) {
-    gcTimeLine.registerGCEvent({GCEvent.newGC, GCEvent.oldGC});
+    gcTimeLine.registerOldGCEvent();
   }
 }

@@ -23,6 +23,6 @@ void main() {
 
 void _registerGCEvents(int count, GCTimeLine gcTimeLine) {
   for (var _ in Iterable.generate(count)) {
-    gcTimeLine.registerGCEvent({GCEvent.newGC, GCEvent.oldGC});
+    gcTimeLine.registerOldGCEvent();
   }
 }

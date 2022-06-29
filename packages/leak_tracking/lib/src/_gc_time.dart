@@ -4,11 +4,6 @@
 
 import 'model.dart';
 
-enum GCEvent {
-  oldGC,
-  newGC,
-}
-
 /// Keeps timeline of GC cycles.
 ///
 /// In the current implementation, an unreachable new-space object can require
@@ -22,22 +17,12 @@ class GCTimeLine {
   // https://github.com/dart-lang/sdk/issues/49319.
 
   int _cyclesPassed = 0;
-
-  static const _cycleEvents = [
-    GCEvent.newGC,
-    GCEvent.oldGC,
-    GCEvent.newGC,
-    GCEvent.oldGC,
-    GCEvent.newGC,
-    GCEvent.oldGC,
-    GCEvent.newGC,
-    GCEvent.oldGC
-  ];
+  static const _cycleLength = 8;
   int _eventsPassed = 0;
 
-  void registerGCEvent(Set<GCEvent> event) {
-    if (event.contains(_cycleEvents[_eventsPassed])) _eventsPassed++;
-    if (_eventsPassed == _cycleEvents.length) {
+  void registerOldGCEvent() {
+    _eventsPassed++;
+    if (_eventsPassed == _cycleLength) {
       _cyclesPassed++;
       _eventsPassed = 0;
     }
