@@ -273,7 +273,6 @@ class _AnalysisViewState extends State<AnalysisView>
         AutoDisposeMixin,
         ProvidedControllerMixin<AppSizeController, AnalysisView> {
   TreemapNode? analysisRoot;
-  TreemapNode? appRoot;
 
   @override
   void didChangeDependencies() {
@@ -281,12 +280,10 @@ class _AnalysisViewState extends State<AnalysisView>
     if (!initController()) return;
 
     analysisRoot = controller.analysisRoot.value;
-    appRoot = controller.appRoot.value;
 
     addAutoDisposeListener(controller.analysisRoot, () {
       setState(() {
         analysisRoot = controller.analysisRoot.value;
-        appRoot = controller.appRoot.value;
       });
     });
 
@@ -298,7 +295,7 @@ class _AnalysisViewState extends State<AnalysisView>
     return Column(
       children: [
         Expanded(
-          child: analysisRoot != null && appRoot != null
+          child: analysisRoot != null
               ? _buildTreemapAndTableSplitView()
               : _buildImportFileView(),
         ),
@@ -329,7 +326,7 @@ class _AnalysisViewState extends State<AnalysisView>
                   children: [
                     Flexible(
                       child: AppSizeAnalysisTable(
-                        rootNode: appRoot!,
+                        rootNode: analysisRoot!.root,
                         controller: controller,
                       ),
                     ),

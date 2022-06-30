@@ -51,9 +51,6 @@ class AppSizeController {
   ValueListenable<TreemapNode?> get analysisRoot => _analysisRoot;
   final _analysisRoot = ValueNotifier<TreemapNode?>(null);
 
-  ValueListenable<TreemapNode?> get appRoot => _appRoot;
-  final _appRoot = ValueNotifier<TreemapNode?>(null);
-
   void changeAnalysisRoot(TreemapNode? newRoot) {
     _analysisRoot.value = newRoot;
     if (newRoot == null) return;
@@ -220,9 +217,9 @@ class AppSizeController {
     processedJson['n'] = 'Root';
 
     // Build a tree with [TreemapNode] from [processedJsonMap].
-    _appRoot.value = generateTree(processedJson)!;
+    final newRoot = generateTree(processedJson)!;
 
-    changeAnalysisRoot(_appRoot.value);
+    changeAnalysisRoot(newRoot);
 
     _processingNotifier.value = false;
   }
