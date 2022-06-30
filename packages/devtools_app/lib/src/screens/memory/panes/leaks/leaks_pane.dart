@@ -1,5 +1,8 @@
-import 'package:devtools_app/src/primitives/auto_dispose.dart';
 import 'package:flutter/material.dart';
+
+import '../../../../primitives/auto_dispose_mixin.dart';
+import '../../../../shared/globals.dart';
+import 'instrumentation/model.dart';
 
 class LeaksPane extends StatefulWidget {
   const LeaksPane({Key? key}) : super(key: key);
@@ -8,7 +11,10 @@ class LeaksPane extends StatefulWidget {
   State<LeaksPane> createState() => _LeaksPaneState();
 }
 
-class _LeaksPaneState extends State<LeaksPane> {
+class _LeaksPaneState extends State<LeaksPane> with AutoDisposeMixin {
+  LeakSummary? _lastLeakSummary;
+  String _leakSummaryHistory;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -21,14 +27,14 @@ class _LeaksPaneState extends State<LeaksPane> {
         if (event.extensionKind == 'memory_leaks_summary') {
           final newSummary =
               LeakSummary.fromJson(event.json!['extensionData']!);
-          if (newSummary.equals(_previous)) return;
-          _previous = newSummary;
+          if (newSummary.equals(_lastLeakSummary)) return;
+          _lastLeakSummary = newSummary;
           final time = event.timestamp != null
               ? DateTime.fromMicrosecondsSinceEpoch(event.timestamp!)
               : DateTime.now();
           setState(() {
-            _leaksSummary =
-                '${_timeForConsole(time)}: ${newSummary.toMessage()}\n$_leaksSummary';
+            _leakSummaryHistory =
+                '${_timeForConsole(time)}: ${newSummary.toMessage()}\n$_leakSummaryHistory';
           });
         }
       }),
