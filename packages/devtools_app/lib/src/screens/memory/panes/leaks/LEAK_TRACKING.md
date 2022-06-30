@@ -6,6 +6,7 @@ This page and functionality are under construction. See https://github.com/flutt
 
 ## Understand concepts
 
+
 ## Configure environment
 
 For Google3 applications, follow go/detect-memory-leaks-in-g3-flutter-app.
@@ -19,10 +20,15 @@ and then do not run `flutter upgrade` or `flutter channel`.
 1. Run devtools/packages/devtools_app/test/fixtures/leaking_app in debug or profile mode
 2. [Connect](https://docs.flutter.dev/development/tools/devtools/cli#open-devtools-and-connect-to-the-target-app) DevTools to the app 
 3. Open Memory > Leaks
-4. Notice message that reports not-disposed and not-GCed objects. If there is no not-GCed leaks,
-resize the app window, to trigger GC events.
+4. Notice message that reports not-disposed and not-GCed objects. If there are no not-GCed leaks,
+resize the app window, to trigger GC events, and the message should show up:
+   
+```
+flutter: 1 memory leaks: not disposed: 1, not GCed: 0, GCed late: 0
+flutter: 3 memory leaks: not disposed: 1, not GCed: 2, GCed late: 0
+```
 
-## Detect leaks in your app
+## Detect leaks in your Flutter app
 
 
 
