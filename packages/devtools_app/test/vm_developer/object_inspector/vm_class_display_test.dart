@@ -37,7 +37,7 @@ void main() {
     expect(find.text('General Information'), findsOneWidget);
     expect(find.text('1 KB'), findsOneWidget);
     expect(find.text('fooLib'), findsOneWidget);
-    expect(find.text('fooClass.dart:10:4'), findsOneWidget);
+    expect(find.text('fooScript.dart:10:4'), findsOneWidget);
     expect(find.text('fooSuperClass'), findsOneWidget);
     expect(find.text('fooSuperType'), findsOneWidget);
 

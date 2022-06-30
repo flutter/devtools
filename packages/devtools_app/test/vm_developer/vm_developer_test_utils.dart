@@ -38,21 +38,6 @@ final fakeClass = Class(
   id: '1234',
 );
 
-final fakeSuperClass =
-    ClassRef(name: 'fooSuperClass', library: fakeLibRef, id: '1234');
-
-final fakeSuperType = InstanceRef(
-  kind: '',
-  identityHashCode: null,
-  classRef: null,
-  id: '1234',
-  name: 'fooSuperType',
-);
-
-const fakePos = SourcePosition(line: 10, column: 4);
-
-final fakeInstances = InstanceSet(instances: null, totalCount: 3);
-
 final fakeScript =
     Script(uri: 'fooScript.dart', library: fakeLibRef, id: '1234');
 
@@ -109,6 +94,21 @@ final fakeInstance = Instance(
   id: '1234',
   name: 'fooInstance',
 );
+
+final fakeSuperClass =
+    ClassRef(name: 'fooSuperClass', library: fakeLibRef, id: '1234');
+
+final fakeSuperType = InstanceRef(
+  kind: '',
+  identityHashCode: null,
+  classRef: null,
+  id: '1234',
+  name: 'fooSuperType',
+);
+
+const fakePos = SourcePosition(line: 10, column: 4);
+
+final fakeInstances = InstanceSet(instances: null, totalCount: 3);
 
 class TestObjectInspectorViewController extends ObjectInspectorViewController {
   @override
