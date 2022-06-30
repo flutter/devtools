@@ -220,10 +220,9 @@ class AppSizeController {
     processedJson['n'] = 'Root';
 
     // Build a tree with [TreemapNode] from [processedJsonMap].
-    final newRoot = generateTree(processedJson)!;
-    _appRoot.value = newRoot;
+    _appRoot.value = generateTree(processedJson)!;
 
-    changeAnalysisRoot(newRoot);
+    changeAnalysisRoot(_appRoot.value);
 
     _processingNotifier.value = false;
   }
