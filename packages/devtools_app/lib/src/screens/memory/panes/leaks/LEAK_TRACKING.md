@@ -2,6 +2,8 @@
 
 This page and functionality are under construction. See https://github.com/flutter/devtools/issues/3951.
 
+[self-link](https://github.com/flutter/devtools/blob/master/packages/devtools_app/lib/src/screens/memory/panes/leaks/LEAK_TRACKING.md)
+
 ## Understand concepts
 
 ## Configure environment
