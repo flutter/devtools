@@ -155,6 +155,8 @@ class HeapTreeViewState extends State<HeapTree>
 
   late List<Tab> _tabs;
   late TabController _tabController;
+  late Set<int> _searchabeleTabs;
+  final ValueNotifier<int> _currentTab = ValueNotifier(0);
 
   Widget? snapshotDisplay;
 
@@ -206,7 +208,9 @@ class HeapTreeViewState extends State<HeapTree>
         ),
     ];
 
+    _searchabeleTabs = {0, 1};
     _tabController = TabController(length: _tabs.length, vsync: this);
+    _tabController.addListener(() => _currentTab.value = _tabController.index);
   }
 
   @override
@@ -431,17 +435,21 @@ class HeapTreeViewState extends State<HeapTree>
       child: Column(
         children: [
           const SizedBox(height: defaultSpacing),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              TabBar(
-                labelColor: themeData.textTheme.bodyText1!.color,
-                isScrollable: true,
-                controller: _tabController,
-                tabs: _tabs,
-              ),
-              _buildSearchFilterControls(),
-            ],
+          ValueListenableBuilder<int>(
+            valueListenable: _currentTab,
+            builder: (context, index, _) => Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TabBar(
+                  labelColor: themeData.textTheme.bodyText1!.color,
+                  isScrollable: true,
+                  controller: _tabController,
+                  tabs: _tabs,
+                ),
+                if (_searchabeleTabs.contains(index))
+                  _buildSearchFilterControls(),
+              ],
+            ),
           ),
           const SizedBox(height: densePadding),
           Expanded(
