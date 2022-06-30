@@ -57,6 +57,7 @@ class VMInfoList extends StatelessWidget {
     // Create shadow variables locally to avoid extra null checks.
     final rowKeyValues = this.rowKeyValues;
     final table = this.table;
+    final listScrollController = ScrollController();
     return Column(
       children: [
         AreaPaneHeader(
@@ -64,27 +65,36 @@ class VMInfoList extends StatelessWidget {
           needsTopBorder: false,
         ),
         if (rowKeyValues != null)
-          ..._prettyRows(
-            context,
-            [
-              for (final row in rowKeyValues)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    SelectableText(
-                      '${row.key.toString()}:',
-                      style: theme.fixedFontStyle,
-                    ),
-                    const SizedBox(width: denseSpacing),
-                    Flexible(
-                      child: SelectableText(
-                        row.value?.toString() ?? '--',
-                        style: theme.fixedFontStyle,
-                      ),
-                    ),
+          Expanded(
+            child: Scrollbar(
+              thumbVisibility: true,
+              controller: listScrollController,
+              child: ListView(
+                controller: listScrollController,
+                children: _prettyRows(
+                  context,
+                  [
+                    for (final row in rowKeyValues)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          SelectableText(
+                            '${row.key.toString()}:',
+                            style: theme.fixedFontStyle,
+                          ),
+                          const SizedBox(width: denseSpacing),
+                          Flexible(
+                            child: SelectableText(
+                              row.value?.toString() ?? '--',
+                              style: theme.fixedFontStyle,
+                            ),
+                          ),
+                        ],
+                      )
                   ],
-                )
-            ],
+                ),
+              ),
+            ),
           ),
         if (table != null) table,
       ],
