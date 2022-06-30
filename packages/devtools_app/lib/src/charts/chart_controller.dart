@@ -6,6 +6,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import '../primitives/auto_dispose.dart';
+import '../primitives/utils.dart';
 import 'chart_trace.dart';
 
 ///_____________________________________________________________________
@@ -545,8 +546,10 @@ class ChartController extends DisposableController
     return -1;
   }
 
-  int? xCoordToTimestamp(double xCoord) =>
-      timestamps[xCoordToTimestampIndex(xCoord)];
+  int? xCoordToTimestamp(double xCoord) {
+    final index = xCoordToTimestampIndex(xCoord);
+    return timestamps.safeGet(index);
+  }
 
   int xCoordToTimestampIndex(double xCoord) {
     final firstVisibleIndex = leftVisibleIndex;

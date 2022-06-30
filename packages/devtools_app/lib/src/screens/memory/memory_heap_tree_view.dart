@@ -32,6 +32,7 @@ import 'memory_graph_model.dart';
 import 'memory_heap_treemap.dart';
 import 'memory_instance_tree_view.dart';
 import 'memory_snapshot_models.dart';
+import 'panes/leaks/leaks_pane.dart';
 
 const memorySearchFieldKeyName = 'MemorySearchFieldKey';
 
@@ -143,6 +144,8 @@ class HeapTreeViewState extends State<HeapTree>
   static const dartHeapAnalysisTabKey = Key('Dart Heap Analysis Tab');
   @visibleForTesting
   static const dartHeapAllocationsTabKey = Key('Dart Heap Allocations Tab');
+  @visibleForTesting
+  static const leaksTabKey = Key('Leaks Tab');
 
   /// Below constants should match index for Tab index in DartHeapTabs.
   static const int analysisTabIndex = 0;
@@ -150,19 +153,7 @@ class HeapTreeViewState extends State<HeapTree>
 
   static const _gaPrefix = 'memoryTab';
 
-  static final List<Tab> dartHeapTabs = [
-    DevToolsTab.create(
-      key: dartHeapAnalysisTabKey,
-      gaPrefix: _gaPrefix,
-      tabName: 'Analysis',
-    ),
-    DevToolsTab.create(
-      key: dartHeapAllocationsTabKey,
-      gaPrefix: _gaPrefix,
-      tabName: 'Allocations',
-    ),
-  ];
-
+  late List<Tab> _tabs;
   late TabController _tabController;
 
   Widget? snapshotDisplay;
@@ -192,10 +183,30 @@ class HeapTreeViewState extends State<HeapTree>
   void initState() {
     super.initState();
 
-    _tabController = TabController(length: dartHeapTabs.length, vsync: this);
-    addAutoDisposeListener(_tabController);
-
     _animation = _setupBubbleAnimationController();
+  }
+
+  void _initTabs() {
+    _tabs = [
+      DevToolsTab.create(
+        key: dartHeapAnalysisTabKey,
+        gaPrefix: _gaPrefix,
+        tabName: 'Analysis',
+      ),
+      DevToolsTab.create(
+        key: dartHeapAllocationsTabKey,
+        gaPrefix: _gaPrefix,
+        tabName: 'Allocations',
+      ),
+      if (widget.controller.shouldShowLeaksTab.value)
+        DevToolsTab.create(
+          key: leaksTabKey,
+          gaPrefix: _gaPrefix,
+          tabName: 'Leaks',
+        ),
+    ];
+
+    _tabController = TabController(length: _tabs.length, vsync: this);
   }
 
   @override
@@ -204,6 +215,14 @@ class HeapTreeViewState extends State<HeapTree>
     if (!initController()) return;
 
     cancelListeners();
+
+    _initTabs();
+
+    addAutoDisposeListener(controller.shouldShowLeaksTab, () {
+      setState(() {
+        _initTabs();
+      });
+    });
 
     addAutoDisposeListener(controller.selectedSnapshotNotifier, () {
       setState(() {
@@ -285,6 +304,7 @@ class HeapTreeViewState extends State<HeapTree>
 
   /// Detect spike in memory usage if so do an automatic snapshot.
   void autoSnapshot() {
+    if (!controller.autoSnapshotEnabled.value) return;
     final heapSample = controller.memoryTimeline.sampleAddedNotifier.value!;
     final heapSum = heapSample.external + heapSample.used;
     heapMovingAverage.add(heapSum);
@@ -418,7 +438,7 @@ class HeapTreeViewState extends State<HeapTree>
                 labelColor: themeData.textTheme.bodyText1!.color,
                 isScrollable: true,
                 controller: _tabController,
-                tabs: HeapTreeViewState.dartHeapTabs,
+                tabs: _tabs,
               ),
               _buildSearchFilterControls(),
             ],
@@ -454,6 +474,10 @@ class HeapTreeViewState extends State<HeapTree>
                     ],
                   ),
                 ),
+
+                // Leaks tab.
+                if (controller.shouldShowLeaksTab.value)
+                  const KeepAliveWrapper(child: LeaksPane()),
               ],
             ),
           ),

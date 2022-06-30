@@ -1454,7 +1454,7 @@ class TimelineGridPainter extends FlameChartPainter {
   }
 
   @override
-  int get hashCode => hashValues(
+  int get hashCode => Object.hash(
         zoom,
         constraints,
         flameChartWidth,

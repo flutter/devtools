@@ -23,6 +23,7 @@ class TreeView<T extends TreeNode<T>> extends StatefulWidget {
     this.onTraverse,
     this.emptyTreeViewBuilder,
     this.scrollController,
+    this.includeScrollbar = false,
   });
 
   final ValueListenable<List<T>> dataRootsListenable;
@@ -57,6 +58,8 @@ class TreeView<T extends TreeNode<T>> extends StatefulWidget {
 
   final ScrollController? scrollController;
 
+  final bool includeScrollbar;
+
   @override
   _TreeViewState<T> createState() => _TreeViewState<T>();
 }
@@ -78,7 +81,7 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
   @override
   Widget build(BuildContext context) {
     if (items.isEmpty) return _emptyTreeViewBuilder();
-    return ListView.builder(
+    final content = ListView.builder(
       itemCount: items.length,
       itemExtent: widget.itemExtent,
       shrinkWrap: widget.shrinkWrap,
@@ -95,6 +98,14 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
         );
       },
     );
+    if (widget.includeScrollbar) {
+      return Scrollbar(
+        thumbVisibility: true,
+        controller: widget.scrollController,
+        child: content,
+      );
+    }
+    return content;
   }
 
   Widget _emptyTreeViewBuilder() {

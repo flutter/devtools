@@ -306,8 +306,7 @@ void main() {
       const startingHoverEvalModeValue = false;
 
       setUp(() {
-        preferences.inspectorPreferences
-            .toggleHoverEvalMode(startingHoverEvalModeValue);
+        preferences.inspector.setHoverEvalMode(startingHoverEvalModeValue);
       });
 
       testWidgetsWithWindowSize(
@@ -333,7 +332,7 @@ void main() {
         await tester.tap(hoverModeCheckBox);
         await tester.pumpAndSettle();
         expect(
-          preferences.inspectorPreferences.hoverEvalModeEnabled.value,
+          preferences.inspector.hoverEvalModeEnabled.value,
           !startingHoverEvalModeValue,
         );
       });

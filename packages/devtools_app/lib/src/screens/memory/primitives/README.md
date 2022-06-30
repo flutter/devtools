@@ -1,1 +1,1 @@
-This folder contains code that does not depend on other code in the folder `memory`.
+This folder contains libraries that do not depend on other libraries in the folder `memory`.

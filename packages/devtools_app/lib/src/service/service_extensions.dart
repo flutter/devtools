@@ -4,6 +4,7 @@
 
 library service_extensions;
 
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 
 import '../analytics/constants.dart' as analytics_constants;
@@ -526,9 +527,10 @@ final trackRebuildWidgets = ToggleableServiceExtensionDescription<bool>._(
   gaItem: analytics_constants.trackRebuildWidgets,
 );
 
-// This extension should never be displayed as a button so does not need a
-// ServiceExtensionDescription object.
+// This extensions below should never be displayed as a button so does not need
+// a ServiceExtensionDescription object.
 const String didSendFirstFrameEvent = 'ext.flutter.didSendFirstFrameEvent';
+const String memoryLeakTracking = memoryLeakTrackingExtensionName;
 
 final List<ServiceExtensionDescription> _extensionDescriptions = [
   debugPaint,
