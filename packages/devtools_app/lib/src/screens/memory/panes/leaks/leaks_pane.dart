@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../primitives/auto_dispose_mixin.dart';
 import '../../../../shared/globals.dart';
 import 'instrumentation/model.dart';
+import 'package:intl/intl.dart';
 
 final DateFormat _formatter = DateFormat.Hms();
 String _timeForConsole(DateTime time) => _formatter.format(time);
@@ -16,7 +17,7 @@ class LeaksPane extends StatefulWidget {
 
 class _LeaksPaneState extends State<LeaksPane> with AutoDisposeMixin {
   LeakSummary? _lastLeakSummary;
-  String _leakSummaryHistory;
+  String _leakSummaryHistory = '';
 
   @override
   void didChangeDependencies() {
