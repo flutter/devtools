@@ -17,7 +17,9 @@ and then do not run `flutter upgrade` or `flutter channel`.
 
 ## Detect leaks in demo app
 
-1. Run devtools/packages/devtools_app/test/fixtures/leaking_app in debug or profile mode
+TODO: move the example to test/fixtures when it compiles with stable flutter.
+
+1. Run https://github.com/polina-c/spikes/tree/master/leaking_app in debug or profile mode.
 2. [Connect](https://docs.flutter.dev/development/tools/devtools/cli#open-devtools-and-connect-to-the-target-app) DevTools to the app 
 3. Open Memory > Leaks
 4. Notice message that reports not-disposed and not-GCed objects. If there are no not-GCed leaks,

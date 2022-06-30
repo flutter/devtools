@@ -14,7 +14,6 @@ import 'package:vm_service/vm_service.dart';
   ConnectedApp,
   DebuggerController,
   ErrorBadgeManager,
-  Finalizer,
   HeapSnapshotGraph,
   PerformanceController,
   ProgramExplorerController,
