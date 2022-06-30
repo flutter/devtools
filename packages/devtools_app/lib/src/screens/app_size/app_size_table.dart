@@ -50,6 +50,7 @@ class AppSizeAnalysisTable extends StatelessWidget {
   final List<ColumnData<TreemapNode>> columns;
 
   final AppSizeController controller;
+
   @override
   Widget build(BuildContext context) {
     return TreeTable<TreemapNode>(
