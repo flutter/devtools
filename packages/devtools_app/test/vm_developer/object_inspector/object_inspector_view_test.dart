@@ -14,9 +14,6 @@ import 'package:mockito/mockito.dart';
 void main() {
   final objectInspector = ObjectInspectorView();
 
-  const windowSize = Size(4000.0, 4000.0);
-  const smallWindowSize = Size(1100.0, 1100.0);
-
   final fakeServiceManager = FakeServiceManager();
   when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
   when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
