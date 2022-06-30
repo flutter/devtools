@@ -11,8 +11,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  leak_tracking:
-    path: ../../../../leak_tracking
   cupertino_icons: ^1.0.2
 
 dev_dependencies:

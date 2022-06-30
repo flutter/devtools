@@ -40,8 +40,6 @@ dependencies:
   image: ^3.0.2
   intl: '>=0.16.1 <0.18.0'
   js: ^0.6.1+1
-  leak_tracking:
-    path: ../leak_tracking
   mime: ^1.0.0
   path: ^1.8.0
   provider: ^6.0.2

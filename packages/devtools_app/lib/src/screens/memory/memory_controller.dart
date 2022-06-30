@@ -8,7 +8,6 @@ import 'package:collection/collection.dart' show IterableExtension;
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
-import 'package:leak_tracking/leak_tracking.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../analytics/analytics.dart' as ga;
@@ -17,6 +16,7 @@ import '../../config_specific/file/file.dart';
 import '../../config_specific/logger/logger.dart';
 import '../../primitives/auto_dispose.dart';
 import '../../primitives/utils.dart';
+import '../../service/service_extensions.dart';
 import '../../service/service_manager.dart';
 import '../../shared/globals.dart';
 import '../../shared/table.dart';
@@ -836,7 +836,7 @@ class MemoryController extends DisposableController
 
   void _refreshShouldShowLeaksTab() {
     _shouldShowLeaksTab.value = serviceManager.serviceExtensionManager
-        .hasServiceExtension(memoryLeakTrackingExtensionName)
+        .hasServiceExtension(memoryLeakTracking)
         .value;
   }
 
