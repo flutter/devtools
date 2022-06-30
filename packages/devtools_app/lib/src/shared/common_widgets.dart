@@ -259,7 +259,7 @@ class PubRootField extends StatelessWidget {
   Future<List<String>?> _getUpToDatePubRootDirectories() async {
     final inspectorService =
         serviceManager.inspectorService as InspectorService;
-    await preferences.inspectorPreferences.refreshCustomPubRootDirectories();
+    await preferences.inspector.refreshCustomPubRootDirectories();
     return inspectorService.getPubRootDirectories();
   }
 
@@ -352,8 +352,7 @@ class _JSONTextFieldState extends State<JSONTextField> {
           setState(() {
             _invalid = false;
           });
-          await preferences.inspectorPreferences
-              .setPubRootDirectories(newPubRoots);
+          await preferences.inspector.setPubRootDirectories(newPubRoots);
         } on FormatException catch (_) {
           // Fail if not valid json
           setState(() {

@@ -341,7 +341,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
 class FlutterInspectorSettingsDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    preferences.inspectorPreferences.refreshCustomPubRootDirectories();
+    preferences.inspector.refreshCustomPubRootDirectories();
     return DevToolsDialog(
       title: dialogTitleText(Theme.of(context), 'Flutter Inspector Settings'),
       content: Column(
