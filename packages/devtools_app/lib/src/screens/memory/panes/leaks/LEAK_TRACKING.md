@@ -9,7 +9,7 @@ This page and functionality are under construction. See https://github.com/flutt
 
 ## Configure environment
 
-For Google3 applications, follow go/detect-memory-leaks-in-g3-flutter-app.
+For Google3 applications, follow http://go/detect-memory-leaks-in-g3-flutter-app.
 
 Follow [standard Flutter installation process](https://docs.flutter.dev/get-started/install), but,
 instead of downloading or cloning official Flutter, clone `git@github.com:polina-c/flutter.git`,
