@@ -48,7 +48,6 @@ class AppSizeAnalysisTable extends StatelessWidget {
   final List<ColumnData<TreemapNode>> columns;
 
   final AppSizeController controller;
-
   @override
   Widget build(BuildContext context) {
     return TreeTable<TreemapNode>(
@@ -58,7 +57,7 @@ class AppSizeAnalysisTable extends StatelessWidget {
       keyFactory: (node) => PageStorageKey<String>(node.name),
       sortColumn: sortColumn,
       sortDirection: SortDirection.descending,
-      onAnalysisRootChange: controller.changeAnalysisRoot,
+      onToggleNode: (TreemapNode n) => controller.changeAnalysisRoot(n),
       autoExpandRoots: true,
     );
   }

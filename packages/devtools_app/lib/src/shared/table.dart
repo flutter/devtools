@@ -359,7 +359,7 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
     required this.sortDirection,
     this.secondarySortColumn,
     this.selectionNotifier,
-    this.onAnalysisRootChange,
+    this.onToggleNode,
     this.autoExpandRoots = false,
   })  : assert(columns.contains(treeColumn)),
         assert(columns.contains(sortColumn)),
@@ -385,7 +385,7 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
 
   final ValueNotifier<Selection<T>>? selectionNotifier;
 
-  final void Function(T? node)? onAnalysisRootChange;
+  final void Function(T node)? onToggleNode;
 
   final bool autoExpandRoots;
 
@@ -504,10 +504,8 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   }
 
   void _toggleNode(T node) {
-    //TODO: not a great way to check for null
-
-    if (node is! DominatorTreeNode) {
-      widget.onAnalysisRootChange!(node);
+    if (widget.onToggleNode != null) {
+      widget.onToggleNode!(node);
     }
     if (!node.isExpandable) {
       node.leaf();
