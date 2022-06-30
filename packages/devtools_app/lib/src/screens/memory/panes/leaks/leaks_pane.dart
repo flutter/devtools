@@ -4,6 +4,9 @@ import '../../../../primitives/auto_dispose_mixin.dart';
 import '../../../../shared/globals.dart';
 import 'instrumentation/model.dart';
 
+final DateFormat _formatter = DateFormat.Hms();
+String _timeForConsole(DateTime time) => _formatter.format(time);
+
 class LeaksPane extends StatefulWidget {
   const LeaksPane({Key? key}) : super(key: key);
 
