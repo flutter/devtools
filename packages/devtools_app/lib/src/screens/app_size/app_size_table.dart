@@ -14,8 +14,10 @@ import '../../ui/colors.dart';
 import 'app_size_controller.dart';
 
 class AppSizeAnalysisTable extends StatelessWidget {
-  factory AppSizeAnalysisTable(
-      {required TreemapNode rootNode, required AppSizeController controller}) {
+  factory AppSizeAnalysisTable({
+    required TreemapNode rootNode,
+    required AppSizeController controller,
+  }) {
     final treeColumn = _NameColumn(currentRootLevel: rootNode.level);
     final sizeColumn = _SizeColumn();
     final columns = List<ColumnData<TreemapNode>>.unmodifiable([

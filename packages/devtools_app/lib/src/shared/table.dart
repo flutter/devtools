@@ -13,7 +13,6 @@ import '../primitives/flutter_widgets/linked_scroll_controller.dart';
 import '../primitives/listenable.dart';
 import '../primitives/trees.dart';
 import '../primitives/utils.dart';
-import '../screens/app_size/code_size_attribution.dart';
 import '../ui/colors.dart';
 import '../ui/search.dart';
 import 'collapsible_mixin.dart';
