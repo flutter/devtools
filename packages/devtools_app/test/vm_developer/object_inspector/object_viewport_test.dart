@@ -17,20 +17,23 @@ import '../vm_developer_test_utils.dart';
 void main() {
   late TestObjectInspectorViewController testObjectInspectorViewController;
 
-  final mockClassObject = MockClassObject();
-
-  when(mockClassObject.name).thenReturn('FooClass');
-  when(mockClassObject.ref).thenReturn(fakeClassRef);
-  when(mockClassObject.obj).thenReturn(fakeClass);
-  when(mockClassObject.script).thenReturn(null);
-  when(mockClassObject.instances).thenReturn(null);
-  when(mockClassObject.pos).thenReturn(null);
+  late MockClassObject mockClassObject;
 
   const windowSize = Size(4000.0, 4000.0);
 
   setUp(() {
     setGlobal(IdeTheme, IdeTheme());
+
     testObjectInspectorViewController = TestObjectInspectorViewController();
+
+    mockClassObject = MockClassObject();
+
+    when(mockClassObject.name).thenReturn('FooClass');
+    when(mockClassObject.ref).thenReturn(testClass);
+    when(mockClassObject.obj).thenReturn(testClass);
+    when(mockClassObject.script).thenReturn(null);
+    when(mockClassObject.instances).thenReturn(null);
+    when(mockClassObject.pos).thenReturn(null);
   });
 
   testWidgets('builds object viewport', (WidgetTester tester) async {
@@ -40,7 +43,7 @@ void main() {
     expect(viewportTitle(null), 'No object selected.');
     expect(find.text('No object selected.'), findsOneWidget);
     expect(find.byTooltip('Refresh'), findsOneWidget);
-    expect(find.bySubtype<HistoryViewport<VmObject>>(), findsOneWidget);
+    expect(find.byType(HistoryViewport<VmObject>), findsOneWidget);
   });
 
   testWidgetsWithWindowSize('test for class Object', windowSize,
@@ -52,11 +55,11 @@ void main() {
     );
     expect(viewportTitle(mockClassObject), 'Class FooClass');
     expect(find.text('Class FooClass'), findsOneWidget);
-    expect(find.bySubtype<VmClassDisplay>(), findsOneWidget);
+    expect(find.byType(VmClassDisplay), findsOneWidget);
   });
 
   testWidgets('test for scriptObject', (WidgetTester tester) async {
-    final fakeScript = Script(uri: 'foo.dart', library: fakeLibRef, id: '1234');
+    final fakeScript = Script(uri: 'foo.dart', library: testLib, id: '1234');
     final fakeScriptRef = ScriptRef(uri: 'foo.dart', id: '1234');
     final testScriptObject =
         TestScriptObject(ref: fakeScriptRef, testScript: fakeScript);
@@ -67,12 +70,12 @@ void main() {
     );
     expect(viewportTitle(testScriptObject), 'Script @ foo.dart');
     expect(find.text('Script @ foo.dart'), findsOneWidget);
-    expect(find.bySubtype<VMInfoCard>(), findsOneWidget);
+    expect(find.byType(VMInfoCard), findsOneWidget);
   });
 
   testWidgets('test for Field Object', (WidgetTester tester) async {
     final testFieldObject =
-        TestFieldObject(ref: fakeFieldRef, testField: fakeField);
+        TestFieldObject(ref: testField, testField: testField);
     testObjectInspectorViewController.fakeObjectHistory
         .setCurrentObject(testFieldObject);
     await tester.pumpWidget(
@@ -80,12 +83,12 @@ void main() {
     );
     expect(viewportTitle(testFieldObject), 'Field FooField');
     expect(find.text('Field FooField'), findsOneWidget);
-    expect(find.bySubtype<VMInfoCard>(), findsOneWidget);
+    expect(find.byType(VMInfoCard), findsOneWidget);
   });
 
   testWidgets('test for Library Object', (WidgetTester tester) async {
     final testLibraryObject =
-        TestLibraryObject(ref: fakeLibRef, testLibrary: fakeLib);
+        TestLibraryObject(ref: testLib, testLibrary: testLib);
     testObjectInspectorViewController.fakeObjectHistory
         .setCurrentObject(testLibraryObject);
     await tester.pumpWidget(
@@ -93,12 +96,12 @@ void main() {
     );
     expect(viewportTitle(testLibraryObject), 'Library FooLib');
     expect(find.text('Library FooLib'), findsOneWidget);
-    expect(find.bySubtype<VMInfoCard>(), findsOneWidget);
+    expect(find.byType(VMInfoCard), findsOneWidget);
   });
 
   testWidgets('test for Instance Object', (WidgetTester tester) async {
     final testInstanceObject =
-        TestInstanceObject(ref: fakeInstanceRef, testInstance: fakeInstance);
+        TestInstanceObject(ref: testInstance, testInstance: testInstance);
     testObjectInspectorViewController.fakeObjectHistory
         .setCurrentObject(testInstanceObject);
     await tester.pumpWidget(
@@ -106,12 +109,12 @@ void main() {
     );
     expect(viewportTitle(testInstanceObject), 'Instance FooInstance');
     expect(find.text('Instance FooInstance'), findsOneWidget);
-    expect(find.bySubtype<VMInfoCard>(), findsOneWidget);
+    expect(find.byType(VMInfoCard), findsOneWidget);
   });
 
   testWidgets('test for Func Object', (WidgetTester tester) async {
     final testFuncObject =
-        TestFuncObject(ref: fakeFunctionRef, testFunc: fakeFunction);
+        TestFuncObject(ref: testFunction, testFunc: testFunction);
     testObjectInspectorViewController.fakeObjectHistory
         .setCurrentObject(testFuncObject);
     await tester.pumpWidget(
@@ -119,18 +122,22 @@ void main() {
     );
     expect(viewportTitle(testFuncObject), 'Function FooFunction');
     expect(find.text('Function FooFunction'), findsOneWidget);
-    expect(find.bySubtype<VMInfoCard>(), findsOneWidget);
+    expect(find.byType(VMInfoCard), findsOneWidget);
   });
 
   group('ObjectHistory', () {
     late ObjectHistory history;
 
-    final MockClassObject obj1 = MockClassObject();
-    final MockClassObject obj2 = MockClassObject();
-    final MockClassObject obj3 = MockClassObject();
+    late MockClassObject obj1;
+    late MockClassObject obj2;
+    late MockClassObject obj3;
 
     setUp(() {
       history = ObjectHistory();
+
+      obj1 = MockClassObject();
+      obj2 = MockClassObject();
+      obj3 = MockClassObject();
     });
 
     test('initial values', () {
@@ -147,67 +154,6 @@ void main() {
       expect(history.current.value, obj1);
 
       history.pushEntry(obj2);
-      expect(history.hasNext, false);
-      expect(history.hasPrevious, true);
-      expect(history.current.value, obj2);
-    });
-
-    test('pop entries', () {
-      history.push(obj1);
-      history.push(obj2);
-      history.push(obj3);
-
-      history.pop();
-
-      expect(history.hasNext, false);
-      expect(history.hasPrevious, true);
-      expect(history.current.value, obj2);
-
-      history.pop();
-
-      expect(history.hasNext, false);
-      expect(history.hasPrevious, false);
-      expect(history.current.value, obj1);
-    });
-
-    test('moveBack', () {
-      history.pushEntry(obj1);
-      history.pushEntry(obj2);
-      history.pushEntry(obj3);
-
-      expect(history.hasNext, false);
-      expect(history.hasPrevious, true);
-      expect(history.current.value, obj3);
-
-      history.moveBack();
-
-      expect(history.hasNext, true);
-      expect(history.hasPrevious, true);
-      expect(history.current.value, obj2);
-
-      history.moveBack();
-
-      expect(history.hasNext, true);
-      expect(history.hasPrevious, false);
-      expect(history.current.value, obj1);
-    });
-
-    test('moveForward', () {
-      history.pushEntry(obj1);
-      history.pushEntry(obj2);
-
-      expect(history.hasNext, false);
-      expect(history.hasPrevious, true);
-      expect(history.current.value, obj2);
-
-      history.moveBack();
-
-      expect(history.hasNext, true);
-      expect(history.hasPrevious, false);
-      expect(history.current.value, obj1);
-
-      history.moveForward();
-
       expect(history.hasNext, false);
       expect(history.hasPrevious, true);
       expect(history.current.value, obj2);
@@ -230,23 +176,8 @@ void main() {
 
       history.moveBack();
 
-      expect(history.hasNext, true);
+      expect(history.hasNext, isTrue);
       expect(history.hasPrevious, false);
-      expect(history.current.value, obj1);
-    });
-
-    test('VmObject can be in history twice', () {
-      history.pushEntry(obj1);
-      history.pushEntry(obj2);
-      history.pushEntry(obj1);
-      history.pushEntry(obj2);
-
-      expect(history.current.value, obj2);
-      history.moveBack();
-      expect(history.current.value, obj1);
-      history.moveBack();
-      expect(history.current.value, obj2);
-      history.moveBack();
       expect(history.current.value, obj1);
     });
 

@@ -15,6 +15,7 @@ class VmClassDisplay extends StatelessWidget {
   const VmClassDisplay({
     required this.clazz,
   });
+
   final ClassObject clazz;
 
   @override
@@ -79,12 +80,12 @@ class ClassInfoWidget extends StatelessWidget {
       ],
     );
   }
-}
 
-String? _fileName(String? uri) {
-  if (uri == null) return null;
-  final splitted = uri.split('/');
-  return splitted[splitted.length - 1];
+  String? _fileName(String? uri) {
+    if (uri == null) return null;
+    final splitted = uri.split('/');
+    return splitted[splitted.length - 1];
+  }
 }
 
 /// Displays information on the instances of the Class object.

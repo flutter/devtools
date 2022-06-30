@@ -8,25 +8,33 @@ import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../vm_developer_test_utils.dart';
 
 void main() {
-  final mockClassObject = MockClassObject();
-
-  fakeClass.size = 1024;
-
-  when(mockClassObject.name).thenReturn('FooClass');
-  when(mockClassObject.ref).thenReturn(fakeClassRef);
-  when(mockClassObject.obj).thenReturn(fakeClass);
-  when(mockClassObject.script).thenReturn(fakeScript);
-  when(mockClassObject.instances).thenReturn(fakeInstances);
-  when(mockClassObject.pos).thenReturn(fakePos);
+  late MockClassObject mockClassObject;
 
   const windowSize = Size(4000.0, 4000.0);
 
+  late Class testClassCopy;
+
   setUp(() {
     setGlobal(IdeTheme, IdeTheme());
+
+    mockClassObject = MockClassObject();
+
+    final json = testClass.toJson();
+    testClassCopy = Class.parse(json)!;
+
+    testClassCopy.size = 1024;
+
+    when(mockClassObject.name).thenReturn('FooClass');
+    when(mockClassObject.ref).thenReturn(testClass);
+    when(mockClassObject.obj).thenReturn(testClassCopy);
+    when(mockClassObject.script).thenReturn(testScript);
+    when(mockClassObject.instances).thenReturn(testInstances);
+    when(mockClassObject.pos).thenReturn(testPos);
   });
 
   testWidgetsWithWindowSize('builds class display', windowSize,

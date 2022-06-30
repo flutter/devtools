@@ -5,14 +5,11 @@ import 'package:devtools_app/src/screens/vm_developer/vm_object_model.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-final fakeLibRef =
-    TestLibraryRef(name: 'fooLib', uri: 'fooLib.dart', id: '1234');
-
-final fakeLib = Library(
+final testLib = Library(
   name: 'fooLib',
   uri: 'fooLib.dart',
   debuggable: null,
-  dependencies: null,
+  dependencies: <LibraryDependency>[],
   scripts: null,
   variables: null,
   functions: null,
@@ -20,12 +17,9 @@ final fakeLib = Library(
   id: '1234',
 );
 
-final fakeClassRef =
-    TestClassRef(name: 'fooClass', library: fakeLibRef, id: '1234');
-
-final fakeClass = Class(
+final testClass = Class(
   name: 'fooClass',
-  library: fakeLibRef,
+  library: testLib,
   isAbstract: false,
   isConst: false,
   traceAllocations: false,
@@ -33,26 +27,16 @@ final fakeClass = Class(
   fields: null,
   functions: null,
   subclasses: null,
-  superClass: fakeSuperClass,
-  superType: fakeSuperType,
+  superClass: testSuperClass,
+  superType: testSuperType,
   id: '1234',
 );
 
-final fakeScript =
-    Script(uri: 'fooScript.dart', library: fakeLibRef, id: '1234');
+final testScript = Script(uri: 'fooScript.dart', library: testLib, id: '1234');
 
-final fakeFunctionRef = TestFuncRef(
+final testFunction = Func(
   name: 'FooFunction',
-  owner: fakeLibRef,
-  isStatic: false,
-  isConst: false,
-  implicit: false,
-  id: '1234',
-);
-
-final fakeFunction = Func(
-  name: 'FooFunction',
-  owner: fakeLibRef,
+  owner: testLib,
   isStatic: false,
   isConst: false,
   implicit: false,
@@ -60,7 +44,7 @@ final fakeFunction = Func(
   id: '1234',
 );
 
-final fakeFieldRef = TestFieldRef(
+final testField = Field(
   name: 'fooField',
   owner: null,
   declaredType: null,
@@ -70,24 +54,7 @@ final fakeFieldRef = TestFieldRef(
   id: '1234',
 );
 
-final fakeField = Field(
-  name: 'fooField',
-  owner: null,
-  declaredType: null,
-  isConst: null,
-  isFinal: null,
-  isStatic: null,
-  id: '1234',
-);
-
-final fakeInstanceRef = TestInstanceRef(
-  kind: null,
-  identityHashCode: null,
-  classRef: null,
-  id: '1234',
-);
-
-final fakeInstance = Instance(
+final testInstance = Instance(
   kind: null,
   identityHashCode: null,
   classRef: null,
@@ -95,10 +62,10 @@ final fakeInstance = Instance(
   name: 'fooInstance',
 );
 
-final fakeSuperClass =
-    ClassRef(name: 'fooSuperClass', library: fakeLibRef, id: '1234');
+final testSuperClass =
+    ClassRef(name: 'fooSuperClass', library: testLib, id: '1234');
 
-final fakeSuperType = InstanceRef(
+final testSuperType = InstanceRef(
   kind: '',
   identityHashCode: null,
   classRef: null,
@@ -106,9 +73,9 @@ final fakeSuperType = InstanceRef(
   name: 'fooSuperType',
 );
 
-const fakePos = SourcePosition(line: 10, column: 4);
+const testPos = SourcePosition(line: 10, column: 4);
 
-final fakeInstances = InstanceSet(instances: null, totalCount: 3);
+final testInstances = InstanceSet(instances: null, totalCount: 3);
 
 class TestObjectInspectorViewController extends ObjectInspectorViewController {
   @override
@@ -137,17 +104,6 @@ class TestScriptObject extends ScriptObject {
   Script get obj => testScript;
 }
 
-class TestClassRef extends ClassRef {
-  TestClassRef({
-    required super.name,
-    required super.library,
-    required super.id,
-  });
-
-  @override
-  String get type => 'Class';
-}
-
 class TestFuncObject extends FuncObject {
   TestFuncObject({required super.ref, required this.testFunc});
 
@@ -158,20 +114,6 @@ class TestFuncObject extends FuncObject {
 
   @override
   String? get name => 'FooFunction';
-}
-
-class TestFuncRef extends FuncRef {
-  TestFuncRef({
-    required super.name,
-    required super.owner,
-    required super.isStatic,
-    required super.isConst,
-    required super.implicit,
-    required super.id,
-  });
-
-  @override
-  String get type => 'Function';
 }
 
 class TestFieldObject extends FieldObject {
@@ -186,21 +128,6 @@ class TestFieldObject extends FieldObject {
   String? get name => 'FooField';
 }
 
-class TestFieldRef extends FieldRef {
-  TestFieldRef({
-    required super.name,
-    required super.owner,
-    required super.declaredType,
-    required super.isConst,
-    required super.isFinal,
-    required super.isStatic,
-    required super.id,
-  });
-
-  @override
-  String get type => 'Field';
-}
-
 class TestLibraryObject extends LibraryObject {
   TestLibraryObject({required super.ref, required this.testLibrary});
 
@@ -213,13 +140,6 @@ class TestLibraryObject extends LibraryObject {
   String? get name => 'FooLib';
 }
 
-class TestLibraryRef extends LibraryRef {
-  TestLibraryRef({required super.name, required super.uri, required super.id});
-
-  @override
-  String get type => 'Library';
-}
-
 class TestInstanceObject extends InstanceObject {
   TestInstanceObject({required super.ref, required this.testInstance});
 
@@ -230,15 +150,4 @@ class TestInstanceObject extends InstanceObject {
 
   @override
   String? get name => 'FooInstance';
-}
-
-class TestInstanceRef extends InstanceRef {
-  TestInstanceRef(
-      {required super.kind,
-      required super.identityHashCode,
-      required super.classRef,
-      required super.id});
-
-  @override
-  String get type => 'Instance';
 }

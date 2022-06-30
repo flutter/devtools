@@ -44,8 +44,7 @@ class _ObjectInspectorViewState extends State<_ObjectInspectorView> {
   void initState() {
     super.initState();
     controller = ObjectInspectorViewController();
-    programExplorerController = ProgramExplorerController();
-    programExplorerController.initialize();
+    programExplorerController = ProgramExplorerController()..initialize();
     return;
   }
 

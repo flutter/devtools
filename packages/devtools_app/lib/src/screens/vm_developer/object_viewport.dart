@@ -41,7 +41,7 @@ class ObjectViewport extends StatelessWidget {
         return ValueListenableBuilder<bool>(
           valueListenable: controller.refreshing,
           builder: (context, refreshing, _) {
-            Widget child;
+            late Widget child;
 
             if (refreshing) {
               child = const CenteredCircularProgressIndicator();

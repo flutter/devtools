@@ -12,19 +12,28 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
 void main() {
-  final objectInspector = ObjectInspectorView();
+  late final ObjectInspectorView objectInspector;
 
-  final fakeServiceManager = FakeServiceManager();
-  when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
-  when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
-  setGlobal(ServiceConnectionManager, fakeServiceManager);
-  setGlobal(IdeTheme, IdeTheme());
+  late final FakeServiceManager fakeServiceManager;
+
+  setUp(() {
+    objectInspector = ObjectInspectorView();
+
+    fakeServiceManager = FakeServiceManager();
+
+    when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
+    when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
+
+    setGlobal(ServiceConnectionManager, fakeServiceManager);
+
+    setGlobal(IdeTheme, IdeTheme());
+  });
 
   testWidgets('builds screen', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(Builder(builder: objectInspector.build)));
-    expect(find.bySubtype<Split>(), findsNWidgets(2));
-    expect(find.bySubtype<ProgramExplorer>(), findsOneWidget);
-    expect(find.bySubtype<ObjectViewport>(), findsOneWidget);
+    expect(find.byType(Split), findsNWidgets(2));
+    expect(find.byType(ProgramExplorer), findsOneWidget);
+    expect(find.byType(ObjectViewport), findsOneWidget);
     expect(find.text('Program Explorer'), findsOneWidget);
     expect(find.text('Outline'), findsOneWidget);
     expect(find.text('No object selected.'), findsOneWidget);
