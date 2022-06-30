@@ -510,7 +510,6 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     if (!node.isExpandable) {
       node.leaf();
       _updateItems();
-
       return;
     }
     setState(() {
