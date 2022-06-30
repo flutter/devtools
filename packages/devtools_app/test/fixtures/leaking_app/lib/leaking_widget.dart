@@ -8,7 +8,9 @@ import 'tracked_class.dart';
 
 class MyClass {
   MyTrackedClass? notGCed1 = MyTrackedClass(
-      token: 'not-GCed1', child: MyTrackedClass(token: 'not-GCed2'));
+    token: 'not-GCed1',
+    child: MyTrackedClass(token: 'not-GCed2'),
+  );
 
   void dispose() {
     notGCed1?.dispose();
@@ -42,12 +44,14 @@ class _LeakingWidgetState extends State<LeakingWidget> {
       _isCleaned = true;
     }
 
-    return Column(children: const [
-      SizedBox(
-        width: 200,
-        height: 100,
-        child: Text('I am leaking widget'),
-      ),
-    ]);
+    return Column(
+      children: const [
+        SizedBox(
+          width: 200,
+          height: 100,
+          child: Text('I am leaking widget'),
+        ),
+      ],
+    );
   }
 }
