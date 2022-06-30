@@ -180,13 +180,21 @@ class TrackedObjectInfo {
     if (_disposedGcTime == null || _gcedGcTime == null) return false;
     assert(_gcedTime != null);
     return _shouldDeclareGCLeak(
-        _disposedGcTime, _disposedTime, _gcedGcTime!, _gcedTime!);
+      _disposedGcTime,
+      _disposedTime,
+      _gcedGcTime!,
+      _gcedTime!,
+    );
   }
 
   bool isNotGCedLeak(int gcTime) {
     if (_gcedGcTime != null) return false;
     return _shouldDeclareGCLeak(
-        _disposedGcTime, _disposedTime, gcTime, DateTime.now());
+      _disposedGcTime,
+      _disposedTime,
+      gcTime,
+      DateTime.now(),
+    );
   }
 
   static bool _shouldDeclareGCLeak(
