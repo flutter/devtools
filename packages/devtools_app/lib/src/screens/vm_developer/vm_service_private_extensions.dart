@@ -16,7 +16,7 @@ extension VMPrivateViewExtension on VM {
   int get currentMemory => json!['_currentMemory'];
   int get currentRSS => json!['_currentRSS'];
   int get maxRSS => json!['_maxRSS'];
-  int get nativeZoneMemoryUsage => json!['_nativeZoneMemoryUsage'];
+  int? get nativeZoneMemoryUsage => json!['_nativeZoneMemoryUsage'];
 }
 
 /// An extension on [Isolate] which allows for access to VM internal fields.

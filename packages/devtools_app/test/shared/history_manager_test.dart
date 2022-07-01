@@ -82,6 +82,31 @@ void main() {
       expect(history.current.value, ref1);
     });
 
+    test('pop entries', () {
+      history.push(ref1);
+      history.push(ref2);
+      history.push(ref3);
+
+      expect(history.hasNext, false);
+      expect(history.hasPrevious, true);
+      expect(history.current.value, ref3);
+
+      history.pop();
+      expect(history.hasNext, false);
+      expect(history.hasPrevious, true);
+      expect(history.current.value, ref2);
+
+      history.pop();
+      expect(history.hasNext, false);
+      expect(history.hasPrevious, false);
+      expect(history.current.value, ref1);
+
+      history.pop();
+      expect(history.hasNext, false);
+      expect(history.hasPrevious, false);
+      expect(history.current.value, null);
+    });
+
     test('replaceCurrent empty history', () {
       expect(history.current.value, null);
       history.replaceCurrent(ref1);
