@@ -155,7 +155,7 @@ class HeapTreeViewState extends State<HeapTree>
 
   late List<Tab> _tabs;
   late TabController _tabController;
-  late Set<int> _searchabeleTabs;
+  late Set<int> _searchableTabs;
   final ValueNotifier<int> _currentTab = ValueNotifier(0);
 
   Widget? snapshotDisplay;
@@ -208,7 +208,7 @@ class HeapTreeViewState extends State<HeapTree>
         ),
     ];
 
-    _searchabeleTabs = {0, 1};
+    _searchableTabs = {0, 1};
     _tabController = TabController(length: _tabs.length, vsync: this);
     _tabController.addListener(() => _currentTab.value = _tabController.index);
   }
@@ -446,7 +446,7 @@ class HeapTreeViewState extends State<HeapTree>
                   controller: _tabController,
                   tabs: _tabs,
                 ),
-                if (_searchabeleTabs.contains(index))
+                if (_searchableTabs.contains(index))
                   _buildSearchFilterControls(),
               ],
             ),
