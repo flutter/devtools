@@ -1,12 +1,17 @@
-// Copyright 2021 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:collection/collection.dart';
 
 enum LeakType {
+  /// Not disposed and garbage collected.
   notDisposed,
+
+  /// Disposed and not garbage collected when expected.
   notGCed,
+
+  /// Disposed and garbage collected later than expected.
   gcedLate,
 }
 
