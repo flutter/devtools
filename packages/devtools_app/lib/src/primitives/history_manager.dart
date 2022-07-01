@@ -65,6 +65,11 @@ class HistoryManager<T> {
   void pop() {
     if (_history.isEmpty) throw StateError('no history available');
 
+    if (_history.length == 1) {
+      clear();
+      return;
+    }
+
     _history.removeLast();
 
     // If the currently selected item was popped, update the selection to the
