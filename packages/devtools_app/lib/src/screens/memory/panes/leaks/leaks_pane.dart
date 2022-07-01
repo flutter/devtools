@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../primitives/auto_dispose_mixin.dart';
+import '../../../../primitives/utils.dart';
 import '../../../../shared/globals.dart';
 import 'instrumentation/model.dart';
 
-final DateFormat _formatter = DateFormat.Hms();
-String _timeForConsole(DateTime time) => _formatter.format(time);
+// TODO(polinach): reference this constant in dart SDK, when it gets submitted
+// there.
+// https://github.com/flutter/devtools/issues/3951
+const _extensionKindToRecieveLeaksSummary = 'memory_leaks_summary';
 
 class LeaksPane extends StatefulWidget {
   const LeaksPane({Key? key}) : super(key: key);
@@ -22,13 +24,14 @@ class _LeaksPaneState extends State<LeaksPane> with AutoDisposeMixin {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    cancelStreamSubscriptions();
     _subscribeForMemoryLeaksSummary();
   }
 
   void _subscribeForMemoryLeaksSummary() {
     autoDisposeStreamSubscription(
       serviceManager.service!.onExtensionEventWithHistory.listen((event) async {
-        if (event.extensionKind == 'memory_leaks_summary') {
+        if (event.extensionKind == _extensionKindToRecieveLeaksSummary) {
           final newSummary =
               LeakSummary.fromJson(event.json!['extensionData']!);
           if (newSummary.equals(_lastLeakSummary)) return;
@@ -38,7 +41,7 @@ class _LeaksPaneState extends State<LeaksPane> with AutoDisposeMixin {
               : DateTime.now();
           setState(() {
             _leakSummaryHistory =
-                '${_timeForConsole(time)}: ${newSummary.toMessage()}\n$_leakSummaryHistory';
+                '${formatDateTime(time)}: ${newSummary.toMessage()}\n$_leakSummaryHistory';
           });
         }
       }),
