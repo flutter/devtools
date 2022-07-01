@@ -10,8 +10,11 @@ import '../../shared/screen.dart';
 import '../../shared/theme.dart';
 import '../../shared/utils.dart';
 import 'isolate_statistics_view.dart';
+import 'object_inspector_view.dart';
 import 'vm_developer_tools_controller.dart';
 import 'vm_statistics_view.dart';
+
+const displayObjectInspector = false;
 
 abstract class VMDeveloperView {
   const VMDeveloperView(
@@ -62,9 +65,10 @@ class VMDeveloperToolsScreen extends Screen {
 class VMDeveloperToolsScreenBody extends StatefulWidget {
   const VMDeveloperToolsScreenBody();
 
-  static const List<VMDeveloperView> views = [
-    VMStatisticsView(),
-    IsolateStatisticsView(),
+  static List<VMDeveloperView> views = [
+    const VMStatisticsView(),
+    const IsolateStatisticsView(),
+    if (displayObjectInspector) ObjectInspectorView(),
   ];
 
   @override
