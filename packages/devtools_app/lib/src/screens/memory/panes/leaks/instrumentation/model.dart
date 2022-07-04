@@ -40,13 +40,9 @@ class LeakSummary {
         'GCed late: ${totals[LeakType.gcedLate]}';
   }
 
-  @override
-  bool operator ==(other) =>
-      other is LeakSummary && mapEquals(totals, other.totals);
-
-  @override
-  int get hashCode => totals.hashCode;
-
   Map<String, dynamic> toJson() =>
       totals.map((key, value) => MapEntry(key.toString(), value.toString()));
+
+  bool matches(LeakSummary? other) =>
+      other != null && mapEquals(totals, other.totals);
 }
