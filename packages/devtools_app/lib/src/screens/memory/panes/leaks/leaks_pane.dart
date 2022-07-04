@@ -34,7 +34,7 @@ class _LeaksPaneState extends State<LeaksPane> with AutoDisposeMixin {
         if (event.extensionKind == _extensionKindToRecieveLeaksSummary) {
           final newSummary =
               LeakSummary.fromJson(event.json!['extensionData']!);
-          if (newSummary.equals(_lastLeakSummary)) return;
+          if (newSummary.matches(_lastLeakSummary)) return;
           _lastLeakSummary = newSummary;
           final time = event.timestamp != null
               ? DateTime.fromMicrosecondsSinceEpoch(event.timestamp!)
