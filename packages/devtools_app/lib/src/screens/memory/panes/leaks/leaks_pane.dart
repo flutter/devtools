@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -8,7 +10,7 @@ import '../../../../service/service_extensions.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
 import 'instrumentation/model.dart';
-import 'primitives/processing_status.dart';
+import 'primitives/analysis_status.dart';
 
 // TODO(polina-c): reference this constants in dart SDK, when it gets submitted
 // there.
@@ -59,17 +61,22 @@ class _LeaksPaneState extends State<LeaksPane> with AutoDisposeMixin {
     }
   }
 
-  void _receivedLeaksDetails(Event event) {
+  Future<void> _receivedLeaksDetails(Event event) async {
     if (_analysis.status.value != AnalysisStatus.Ongoing) return;
+    _analysis.message.value = 'Received details. Parsing.';
+    final leakDetails = Leaks.fromJson(event.json!['extensionData']!);
 
-    _analysis.message.value = 'Received details';
     _analysis.status.value = AnalysisStatus.ShowingResult;
 
-    //   try {
-    //     await setHeavyState(() {
-    //       _leakController.message = 'Received leaks. Parsing.';
-    //     });
-    //     final leakDetails = Leaks.fromJson(event.json!['extensionData']!);
+    final notGCed = leakDetails.byType[LeakType.notGCed] ?? [];
+
+    if (notGCed.isNotEmpty) {
+      final task = await getTask(controller, notGCed);
+
+      _analysis.message = 'Getting retaining paths.';
+
+      calculateRetainingPathsOrRetainers(task);
+    }
 
     //   try {
     //     await setHeavyState(() {
@@ -134,7 +141,7 @@ class _LeaksPaneState extends State<LeaksPane> with AutoDisposeMixin {
     autoDisposeStreamSubscription(
       serviceManager.service!.onExtensionEvent.listen((event) async {
         if (event.extensionKind == _extensionKindToReceiveLeaksDetails) {
-          _receivedLeaksDetails(event);
+          await _receivedLeaksDetails(event);
         }
       }),
     );

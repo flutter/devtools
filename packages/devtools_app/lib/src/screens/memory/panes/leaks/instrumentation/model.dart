@@ -46,3 +46,97 @@ class LeakSummary {
   bool matches(LeakSummary? other) =>
       other != null && mapEquals(totals, other.totals);
 }
+
+/// Detailed information about found leaks.
+class Leaks {
+  Leaks(this.byType);
+
+  factory Leaks.fromJson(Map<String, dynamic> json) => Leaks(
+        json.map(
+          (key, value) => MapEntry(
+            _parseLeakType(key),
+            (value as List)
+                .cast<Map<String, dynamic>>()
+                .map((e) => LeakReport.fromJson(e))
+                .toList(growable: false),
+          ),
+        ),
+      );
+  final Map<LeakType, List<LeakReport>> byType;
+
+  List<LeakReport> get notGCed => byType[LeakType.notGCed] ?? [];
+  List<LeakReport> get notDisposed => byType[LeakType.notDisposed] ?? [];
+  List<LeakReport> get gcedLate => byType[LeakType.gcedLate] ?? [];
+
+  Map<String, dynamic> toJson() => byType.map(
+        (key, value) =>
+            MapEntry(key.toString(), value.map((e) => e.toJson()).toList()),
+      );
+}
+
+/// Leak information, passed from application to DevTools and than extended by
+/// DevTools after deeper analysis.
+class LeakReport {
+  LeakReport({
+    required this.token,
+    required this.type,
+    required this.details,
+    required this.code,
+  });
+
+  factory LeakReport.fromJson(Map<String, dynamic> json) => LeakReport(
+        token: json['token'],
+        type: json['type'],
+        details: json['details'],
+        code: json['code'],
+      );
+
+  /// Token, provided by user.
+  final String token;
+  final String type;
+  final String? details;
+  final int code;
+
+  // The fields below do not need serialization as they are populated after
+  // transfer.
+  String? retainingPath;
+  List<String>? detailedPath;
+
+  Map<String, dynamic> toJson() => {
+        'token': token,
+        'type': type,
+        'details': details,
+        'code': code,
+      };
+
+  static String iterableToYaml(
+    String title,
+    Iterable<LeakReport>? leaks, {
+    String indent = '',
+  }) {
+    if (leaks == null || leaks.isEmpty) return '';
+
+    return '''$title:
+$indent  total: ${leaks.length}
+$indent  objects:
+${leaks.map((e) => e.toYaml('$indent    ')).join()}
+''';
+  }
+
+  String toYaml(String indent) {
+    final result = StringBuffer();
+    result.writeln('$indent$type:');
+    result.writeln('$indent  token: $token');
+    result.writeln('$indent  type: $type');
+    result.writeln('$indent  details: $details');
+    result.writeln('$indent  identityHashCode: $code');
+
+    if (detailedPath != null) {
+      result.writeln('$indent  retainingPath:');
+      result.writeln(detailedPath!.map((s) => '$indent    - $s').join('\n'));
+    } else if (retainingPath != null) {
+      result.writeln('$indent  retainingPath: $retainingPath');
+    }
+    return result.toString();
+  }
+}

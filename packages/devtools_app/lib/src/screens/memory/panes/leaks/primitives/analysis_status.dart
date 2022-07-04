@@ -31,9 +31,11 @@ class AnalysisStatusController {
 }
 
 class AnalysisStatusView extends StatefulWidget {
-  const AnalysisStatusView(
-      {Key? key, required this.controller, required this.processStarter})
-      : super(key: key);
+  const AnalysisStatusView({
+    Key? key,
+    required this.controller,
+    required this.processStarter,
+  }) : super(key: key);
   final AnalysisStatusController controller;
   final Widget processStarter;
 
@@ -53,8 +55,9 @@ class _AnalysisStatusViewState extends State<AnalysisStatusView>
   void didChangeDependencies() {
     super.didChangeDependencies();
     addAutoDisposeListener(widget.controller.status, _handleStatusUpdate);
-    addAutoDisposeListener(widget.controller.message, () {
+    addAutoDisposeListener(widget.controller.message, () async {
       setState(() {});
+      await Future.delayed(_delayForUiToHandleState);
     });
   }
 
