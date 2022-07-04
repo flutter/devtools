@@ -31,9 +31,11 @@ class AnalysisStatusController {
 }
 
 class AnalysisStatusView extends StatefulWidget {
-  const AnalysisStatusView({Key? key, required this.controller})
+  const AnalysisStatusView(
+      {Key? key, required this.controller, required this.processStarter})
       : super(key: key);
   final AnalysisStatusController controller;
+  final Widget processStarter;
 
   @override
   State<AnalysisStatusView> createState() => _AnalysisStatusViewState();
@@ -51,10 +53,19 @@ class _AnalysisStatusViewState extends State<AnalysisStatusView>
   void didChangeDependencies() {
     super.didChangeDependencies();
     addAutoDisposeListener(widget.controller.status, _handleStatusUpdate);
+    addAutoDisposeListener(widget.controller.message, () {
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   void _handleStatusUpdate() async {
     setState(() {});
+
     if (widget.controller.status.value == AnalysisStatus.ShowingResult) {
       await Future.delayed(_showingResultDelay);
       setState(
@@ -71,7 +82,7 @@ class _AnalysisStatusViewState extends State<AnalysisStatusView>
     final c = widget.controller;
 
     if (c.status.value == AnalysisStatus.NotStarted) {
-      return const SizedBox.shrink();
+      return widget.processStarter;
     }
 
     return Column(

@@ -5,6 +5,7 @@ import '../../../../config_specific/logger/logger.dart' as logger;
 import '../../../../primitives/auto_dispose_mixin.dart';
 import '../../../../primitives/utils.dart';
 import '../../../../service/service_extensions.dart';
+import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
 import 'instrumentation/model.dart';
 import 'primitives/processing_status.dart';
@@ -59,7 +60,8 @@ class _LeaksPaneState extends State<LeaksPane> with AutoDisposeMixin {
   }
 
   void _receivedLeaksDetails(Event event) {
-    if (_analysis.status.value != AnalysisStatus.NotStarted) return;
+    if (_analysis.status.value != AnalysisStatus.Ongoing) return;
+
     _analysis.message.value = 'Received details';
     _analysis.status.value = AnalysisStatus.ShowingResult;
 
@@ -139,6 +141,9 @@ class _LeaksPaneState extends State<LeaksPane> with AutoDisposeMixin {
   }
 
   Future<void> _requestLeaks() async {
+    _analysis.status.value = AnalysisStatus.Ongoing;
+    _analysis.message.value = 'Requested details from the application.';
+
     await serviceManager.service!.callServiceExtension(
       memoryLeakTracking,
       isolateId: serviceManager.isolateManager.mainIsolate.value!.id!,
@@ -147,9 +152,6 @@ class _LeaksPaneState extends State<LeaksPane> with AutoDisposeMixin {
         // https://github.com/flutter/devtools/issues/3951
         'requestDetails': 'true',
       },
-    );
-    setState(
-      () => _analysis.message.value = 'Requested details from the application.',
     );
   }
 
@@ -160,21 +162,19 @@ class _LeaksPaneState extends State<LeaksPane> with AutoDisposeMixin {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        ValueListenableBuilder<AnalysisStatus>(
-            valueListenable: _analysis.status,
-            builder: (_, value, __) {
-              if (value == AnalysisStatus.NotStarted)
-                return Tooltip(
-                  message: 'Analyze the leaks and save the result\n'
-                      'to the file Downloads/leaks_<time>.yaml.',
-                  child: MaterialButton(
-                    child: const Text('Analyze and Save'),
-                    onPressed: () async => _requestLeaks(),
-                  ),
-                );
-
-              return AnalysisStatusView(controller: _analysis);
-            }),
+        KeepAliveWrapper(
+          child: AnalysisStatusView(
+            controller: _analysis,
+            processStarter: Tooltip(
+              message: 'Analyze the leaks and save the result\n'
+                  'to the file Downloads/leaks_<time>.yaml.',
+              child: MaterialButton(
+                child: const Text('Analyze and Save'),
+                onPressed: () async => _requestLeaks(),
+              ),
+            ),
+          ),
+        ),
         Expanded(
           child: SingleChildScrollView(child: Text(_leakSummaryHistory)),
         ),
