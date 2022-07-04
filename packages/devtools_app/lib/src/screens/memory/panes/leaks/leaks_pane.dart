@@ -17,6 +17,16 @@ const _extensionKindToReceiveLeaksDetails = 'memory_leaks_details';
 
 // TODO(polina-c): review UX with UX specialists
 // https://github.com/flutter/devtools/issues/3951
+import '../../../../primitives/auto_dispose_mixin.dart';
+import '../../../../primitives/utils.dart';
+import '../../../../shared/globals.dart';
+import 'instrumentation/model.dart';
+
+// TODO(polinach): reference this constant in dart SDK, when it gets submitted
+// there.
+// https://github.com/flutter/devtools/issues/3951
+const _extensionKindToRecieveLeaksSummary = 'memory_leaks_summary';
+
 class LeaksPane extends StatefulWidget {
   const LeaksPane({Key? key}) : super(key: key);
 
@@ -174,6 +184,11 @@ class _LeaksPaneState extends State<LeaksPane> with AutoDisposeMixin {
         Expanded(
           child: SingleChildScrollView(child: Text(_leakSummaryHistory)),
         ),
+        if (_leakSummaryHistory.isEmpty) const Text('No information yet.'),
+        if (_leakSummaryHistory.isNotEmpty)
+          Expanded(
+            child: SingleChildScrollView(child: Text(_leakSummaryHistory)),
+          ),
       ],
     );
   }
