@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:memory_tools/model.dart';
-import '../model.dart';
+import '../instrumentation/model.dart';
 import 'heap_analyser.dart';
+import 'model.dart';
 
 NotGCedAnalyzed analyseNotGCed(NotGCedAnalyzerTask task) {
   analyzeHeapAndSetRetainingPaths(task.heap, task.reports);
@@ -11,7 +11,7 @@ NotGCedAnalyzed analyseNotGCed(NotGCedAnalyzerTask task) {
   final byCulprits = findCulprits(withPath);
 
   for (var report in byCulprits.keys) {
-    report.detailedPath = task.heap.detailedPath(report.theIdentityHashCode);
+    report.detailedPath = task.heap.detailedPath(report.code);
   }
 
   return NotGCedAnalyzed(
