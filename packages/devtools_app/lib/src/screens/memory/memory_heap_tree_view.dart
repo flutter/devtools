@@ -155,7 +155,7 @@ class HeapTreeViewState extends State<HeapTree>
 
   late List<Tab> _tabs;
   late TabController _tabController;
-  late Set<int> _searchableTabs;
+  late Set<Key> _searchableTabs;
   final ValueNotifier<int> _currentTab = ValueNotifier(0);
 
   Widget? snapshotDisplay;
@@ -208,10 +208,12 @@ class HeapTreeViewState extends State<HeapTree>
         ),
     ];
 
-    _searchableTabs = {0, 1};
+    _searchableTabs = {dartHeapAnalysisTabKey, dartHeapAllocationsTabKey};
     _tabController = TabController(length: _tabs.length, vsync: this);
-    _tabController.addListener(() => _currentTab.value = _tabController.index);
+    _tabController.addListener(_onTabChanged);
   }
+
+  void _onTabChanged() => _currentTab.value = _tabController.index;
 
   @override
   void didChangeDependencies() {
@@ -298,6 +300,9 @@ class HeapTreeViewState extends State<HeapTree>
   @override
   void dispose() {
     _animation.dispose();
+    _tabController
+      ..removeListener(_onTabChanged)
+      ..dispose();
 
     super.dispose();
   }
@@ -446,7 +451,7 @@ class HeapTreeViewState extends State<HeapTree>
                   controller: _tabController,
                   tabs: _tabs,
                 ),
-                if (_searchableTabs.contains(index))
+                if (_searchableTabs.contains(_tabs[index].key))
                   _buildSearchFilterControls(),
               ],
             ),

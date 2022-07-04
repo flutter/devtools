@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 
 enum LeakType {
   /// Not disposed and garbage collected.
@@ -39,10 +40,12 @@ class LeakSummary {
         'GCed late: ${totals[LeakType.gcedLate]}';
   }
 
-  bool equals(LeakSummary? other) {
-    if (other == null) return false;
-    return const MapEquality().equals(totals, other.totals);
-  }
+  @override
+  bool operator ==(other) =>
+      other is LeakSummary && mapEquals(totals, other.totals);
+
+  @override
+  int get hashCode => totals.hashCode;
 
   Map<String, dynamic> toJson() =>
       totals.map((key, value) => MapEntry(key.toString(), value.toString()));
