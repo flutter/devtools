@@ -16,6 +16,7 @@ import '../../config_specific/file/file.dart';
 import '../../config_specific/logger/logger.dart';
 import '../../primitives/auto_dispose.dart';
 import '../../primitives/utils.dart';
+import '../../service/service_extensions.dart';
 import '../../service/service_manager.dart';
 import '../../shared/globals.dart';
 import '../../shared/table.dart';
@@ -835,7 +836,7 @@ class MemoryController extends DisposableController
 
   void _refreshShouldShowLeaksTab() {
     _shouldShowLeaksTab.value = serviceManager.serviceExtensionManager
-        .hasServiceExtension(memoryLeakTrackingExtensionName)
+        .hasServiceExtension(memoryLeakTracking)
         .value;
   }
 

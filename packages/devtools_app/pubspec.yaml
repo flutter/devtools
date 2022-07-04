@@ -122,4 +122,4 @@ dependency_overrides:
   devtools_shared: #OVERRIDE_FOR_DEVELOPMENT
     path: ../devtools_shared #OVERRIDE_FOR_DEVELOPMENT
   devtools_test: #OVERRIDE_FOR_DEVELOPMENT
-      path: ../devtools_test #OVERRIDE_FOR_DEVELOPMENT
+    path: ../devtools_test #OVERRIDE_FOR_DEVELOPMENT
