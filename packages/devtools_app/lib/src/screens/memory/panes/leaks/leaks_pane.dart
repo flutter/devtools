@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:vm_service/vm_service.dart';
 
+import '../../../../config_specific/logger/logger.dart' as logger;
 import '../../../../primitives/auto_dispose_mixin.dart';
 import '../../../../primitives/utils.dart';
+import '../../../../service/service_extensions.dart';
 import '../../../../shared/globals.dart';
 import 'instrumentation/model.dart';
 import 'primitives/processing_status.dart';
-import '../../config_specific/logger/logger.dart' as logger;
 
-// TODO(polinach): reference this constant in dart SDK, when it gets submitted
+// TODO(polinach): reference this constants in dart SDK, when it gets submitted
 // there.
 // https://github.com/flutter/devtools/issues/3951
 const _extensionKindToReceiveLeaksSummary = 'memory_leaks_summary';
+const _extensionKindToReceiveLeaksDetails = 'memory_leaks_details';
 
 // TODO(polina-c): review UX with UX specialists
 // https://github.com/flutter/devtools/issues/3951
@@ -33,77 +36,100 @@ class _LeaksPaneState extends State<LeaksPane> with AutoDisposeMixin {
     _subscribeForMemoryLeaksMessages();
   }
 
-  // void _subscribeForMemoryLeaksMessages() {
-  //   autoDisposeStreamSubscription(
-  //     serviceManager.service!.onExtensionEventWithHistory.listen((event) async {
-  //       if (event.extensionKind == _extensionKindToReceiveLeaksSummary) {
-  //         final newSummary =
-  //             LeakSummary.fromJson(event.json!['extensionData']!);
-  //         if (newSummary.matches(_lastLeakSummary)) return;
-  //         _lastLeakSummary = newSummary;
-  //         final time = event.timestamp != null
-  //             ? DateTime.fromMicrosecondsSinceEpoch(event.timestamp!)
-  //             : DateTime.now();
-  //         setState(() {
-  //           _leakSummaryHistory =
-  //               '${formatDateTime(time)}: ${newSummary.toMessage()}\n$_leakSummaryHistory';
-  //         });
-  //       }
-  //
-  //       if (event.extensionKind == 'memory_leaks_details') {
-  //         try {
-  //           await setHeavyState(() {
-  //             _leakController.message = 'Received leaks. Parsing.';
-  //           });
-  //           final leakDetails = Leaks.fromJson(event.json!['extensionData']!);
-  //
-  //           await setHeavyState(() {
-  //             _leakController.message = 'Getting retaining paths.';
-  //           });
-  //           final notGCed = leakDetails.leaks[LeakType.notGCed] ?? [];
-  //
-  //           if (notGCed.isNotEmpty) {
-  //             final task = await getTask(controller, notGCed);
-  //             assert(task.reports.isNotEmpty);
-  //
-  //             await setHeavyState(() {
-  //               _leakController.message = 'Getting retaining paths.';
-  //               _leakController.previousAnalysisTask =
-  //                   jsonEncode(task.toJson());
-  //             });
-  //
-  //             calculateRetainingPathsOrRetainers(task);
-  //
-  //             assert(task.reports.first.retainingPath != null ||
-  //                 task.reports.first.retainers != null);
-  //           }
-  //
-  //           setState(
-  //             () => _leakController.message =
-  //                 'Obtained paths. Copying to clipboard',
-  //           );
-  //
-  //           await Clipboard.setData(
-  //             ClipboardData(text: analyzeAndYaml(leakDetails)),
-  //           );
-  //
-  //           setState(() {
-  //             _leakController.message = 'Copied to clipboard';
-  //             _leakController.isComplete = true;
-  //           });
-  //
-  //           await Future.delayed(const Duration(seconds: 1));
-  //
-  //           setState(() {
-  //             _leakController.reset();
-  //           });
-  //         } catch (e, trace) {
-  //           handleError(e, trace);
-  //         }
-  //       }
-  //     }),
-  //   );
-  // }
+  void _receivedLeaksSummary(Event event) {
+    try {
+      final newSummary = LeakSummary.fromJson(event.json!['extensionData']!);
+      final time = event.timestamp != null
+          ? DateTime.fromMicrosecondsSinceEpoch(event.timestamp!)
+          : DateTime.now();
+
+      if (newSummary.matches(_lastLeakSummary)) return;
+      _lastLeakSummary = newSummary;
+      setState(() {
+        _leakSummaryHistory =
+            '${formatDateTime(time)}: ${newSummary.toMessage()}\n$_leakSummaryHistory';
+      });
+    } catch (error, trace) {
+      setState(
+        () => _leakSummaryHistory = 'error: $error\n$_leakSummaryHistory',
+      );
+      logger.log(error);
+      logger.log(trace);
+    }
+  }
+
+  void _receivedLeaksDetails(Event event) {
+    if (_analysis.status.value != AnalysisStatus.NotStarted) return;
+
+    //   try {
+    //     await setHeavyState(() {
+    //       _leakController.message = 'Received leaks. Parsing.';
+    //     });
+    //     final leakDetails = Leaks.fromJson(event.json!['extensionData']!);
+
+    //   try {
+    //     await setHeavyState(() {
+    //       _leakController.message = 'Received leaks. Parsing.';
+    //     });
+    //     final leakDetails = Leaks.fromJson(event.json!['extensionData']!);
+    //
+    //     await setHeavyState(() {
+    //       _leakController.message = 'Getting retaining paths.';
+    //     });
+    //     final notGCed = leakDetails.leaks[LeakType.notGCed] ?? [];
+    //
+    //     if (notGCed.isNotEmpty) {
+    //       final task = await getTask(controller, notGCed);
+    //       assert(task.reports.isNotEmpty);
+    //
+    //       await setHeavyState(() {
+    //         _leakController.message = 'Getting retaining paths.';
+    //         _leakController.previousAnalysisTask =
+    //             jsonEncode(task.toJson());
+    //       });
+    //
+    //       calculateRetainingPathsOrRetainers(task);
+    //
+    //       assert(task.reports.first.retainingPath != null ||
+    //           task.reports.first.retainers != null);
+    //     }
+    //
+    //     setState(
+    //       () => _leakController.message =
+    //           'Obtained paths. Copying to clipboard',
+    //     );
+    //
+    //     await Clipboard.setData(
+    //       ClipboardData(text: analyzeAndYaml(leakDetails)),
+    //     );
+    //
+    //     setState(() {
+    //       _leakController.message = 'Copied to clipboard';
+    //       _leakController.isComplete = true;
+    //     });
+    //
+    //     await Future.delayed(const Duration(seconds: 1));
+    //
+    //     setState(() {
+    //       _leakController.reset();
+    //     });
+    //   } catch (e, trace) {
+    //     handleError(e, trace);
+    //   }
+  }
+
+  void _subscribeForMemoryLeaksMessages() {
+    autoDisposeStreamSubscription(
+      serviceManager.service!.onExtensionEventWithHistory.listen((event) async {
+        if (event.extensionKind == _extensionKindToReceiveLeaksSummary) {
+          _receivedLeaksSummary(event);
+        }
+        if (event.extensionKind == _extensionKindToReceiveLeaksDetails) {
+          _receivedLeaksDetails(event);
+        }
+      }),
+    );
+  }
 
   void _reportError(Object error, StackTrace trace) {
     setState(() {
@@ -115,8 +141,17 @@ class _LeaksPaneState extends State<LeaksPane> with AutoDisposeMixin {
   }
 
   Future<void> _requestLeaks() async {
-    await eval.safeEval('sendLeaks()', isAlive: Stub());
-    print('!!!!!!!!! Requested leaks.');
+    await serviceManager.service!.callServiceExtension(
+      memoryLeakTracking,
+      args: <String, dynamic>{
+        // TODO(polina-c): reference the constant in Flutter
+        // https://github.com/flutter/devtools/issues/3951
+        'requestDetails': 'true',
+      },
+    );
+    setState(
+      () => _analysis.message = 'Requested details from the application.',
+    );
   }
 
   @override
