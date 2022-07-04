@@ -13,7 +13,7 @@ For Google3 applications, follow http://go/detect-memory-leaks-in-g3-flutter-app
 
 Follow [standard Flutter installation process](https://docs.flutter.dev/get-started/install), but,
 instead of downloading or cloning official Flutter, clone `git@github.com:polina-c/flutter.git`,
-then chackout the branch `leak-tracking2`
+then checkout the branch `leak-tracking2`
 and then never run `flutter upgrade` or `flutter channel`.
 
 ## Detect leaks in demo app
