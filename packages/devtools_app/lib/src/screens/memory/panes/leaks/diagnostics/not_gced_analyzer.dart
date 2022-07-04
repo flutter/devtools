@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:memory_tools/model.dart';
 import '../model.dart';
-import 'mt_heap_analyser.dart';
+import 'heap_analyser.dart';
 
 NotGCedAnalyzed analyseNotGCed(NotGCedAnalyzerTask task) {
   analyzeHeapAndSetRetainingPaths(task.heap, task.reports);

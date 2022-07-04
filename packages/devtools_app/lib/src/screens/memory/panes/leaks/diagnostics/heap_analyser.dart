@@ -1,35 +1,35 @@
 import 'package:flutter/material.dart';
-import 'package:memory_tools/model.dart';
 
-import '../model.dart';
+import '../instrumentation/model.dart';
+import 'model.dart';
 
 void analyzeHeapAndSetRetainingPaths(
-  MtHeap heap,
+  AdaptedHeap heap,
   List<LeakReport> notGCedLeaks,
 ) {
   if (!heap.isSpanningTreeBuilt) buildSpanningTree(heap);
 
   for (var l in notGCedLeaks) {
-    l.retainingPath = heap.shortPath(l.theIdentityHashCode);
+    l.retainingPath = heap.shortPath(l.code);
   }
 }
 
-void setDetailedPaths(MtHeap heap, List<LeakReport> notGCedLeaks) {
+void setDetailedPaths(AdaptedHeap heap, List<LeakReport> notGCedLeaks) {
   assert(heap.isSpanningTreeBuilt);
 
   for (var l in notGCedLeaks) {
-    l.detailedPath = heap.detailedPath(l.theIdentityHashCode);
+    l.detailedPath = heap.detailedPath(l.code);
   }
 }
 
 @visibleForTesting
-void buildSpanningTree(MtHeap heap) {
-  final root = heap.objects[MtHeap.rootIndex];
+void buildSpanningTree(AdaptedHeap heap) {
+  final root = heap.objects[AdaptedHeap.rootIndex];
   root.parent = -1;
 
   // Array of all objects where the best distance from root is n.
   // n starts with 0 and increases by 1 on each step of the algorithm.
-  var cut = [MtHeap.rootIndex];
+  var cut = [AdaptedHeap.rootIndex];
 
   // On each step of algorithm we know that all nodes at distance n or closer to
   // root, has parent initialized.
@@ -60,11 +60,6 @@ bool _shouldSkip(String klass) {
   const toSkip = {
     '_WeakReferenceImpl',
     'FinalizerEntry',
-    // 'DiagnosticsProperty',
-    // '_ElementDiagnosticableTreeNode',
-    // '_InspectorReferenceData',
-    // 'DebugCreator',
-    //'_WidgetTicker',
   };
 
   return toSkip.contains(klass);
