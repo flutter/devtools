@@ -9,7 +9,7 @@ import '../../../../shared/globals.dart';
 import 'instrumentation/model.dart';
 import 'primitives/processing_status.dart';
 
-// TODO(polinach): reference this constants in dart SDK, when it gets submitted
+// TODO(polina-c): reference this constants in dart SDK, when it gets submitted
 // there.
 // https://github.com/flutter/devtools/issues/3951
 const _extensionKindToReceiveLeaksSummary = 'memory_leaks_summary';
@@ -17,16 +17,6 @@ const _extensionKindToReceiveLeaksDetails = 'memory_leaks_details';
 
 // TODO(polina-c): review UX with UX specialists
 // https://github.com/flutter/devtools/issues/3951
-import '../../../../primitives/auto_dispose_mixin.dart';
-import '../../../../primitives/utils.dart';
-import '../../../../shared/globals.dart';
-import 'instrumentation/model.dart';
-
-// TODO(polinach): reference this constant in dart SDK, when it gets submitted
-// there.
-// https://github.com/flutter/devtools/issues/3951
-const _extensionKindToRecieveLeaksSummary = 'memory_leaks_summary';
-
 class LeaksPane extends StatefulWidget {
   const LeaksPane({Key? key}) : super(key: key);
 
@@ -70,6 +60,8 @@ class _LeaksPaneState extends State<LeaksPane> with AutoDisposeMixin {
 
   void _receivedLeaksDetails(Event event) {
     if (_analysis.status.value != AnalysisStatus.NotStarted) return;
+    _analysis.message.value = 'Received details';
+    _analysis.status.value = AnalysisStatus.ShowingResult;
 
     //   try {
     //     await setHeavyState(() {
@@ -134,6 +126,11 @@ class _LeaksPaneState extends State<LeaksPane> with AutoDisposeMixin {
         if (event.extensionKind == _extensionKindToReceiveLeaksSummary) {
           _receivedLeaksSummary(event);
         }
+      }),
+    );
+
+    autoDisposeStreamSubscription(
+      serviceManager.service!.onExtensionEvent.listen((event) async {
         if (event.extensionKind == _extensionKindToReceiveLeaksDetails) {
           _receivedLeaksDetails(event);
         }
@@ -141,18 +138,10 @@ class _LeaksPaneState extends State<LeaksPane> with AutoDisposeMixin {
     );
   }
 
-  void _reportError(Object error, StackTrace trace) {
-    setState(() {
-      _analysis.message = 'Processing error: $error';
-      _analysis.status.value = AnalysisStatus.ShowingError;
-    });
-    logger.log(error);
-    logger.log(trace);
-  }
-
   Future<void> _requestLeaks() async {
     await serviceManager.service!.callServiceExtension(
       memoryLeakTracking,
+      isolateId: serviceManager.isolateManager.mainIsolate.value!.id!,
       args: <String, dynamic>{
         // TODO(polina-c): reference the constant in Flutter
         // https://github.com/flutter/devtools/issues/3951
@@ -160,7 +149,7 @@ class _LeaksPaneState extends State<LeaksPane> with AutoDisposeMixin {
       },
     );
     setState(
-      () => _analysis.message = 'Requested details from the application.',
+      () => _analysis.message.value = 'Requested details from the application.',
     );
   }
 
@@ -171,24 +160,24 @@ class _LeaksPaneState extends State<LeaksPane> with AutoDisposeMixin {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        (_analysis.status.value == AnalysisStatus.NotStarted)
-            ? Tooltip(
-                message: 'Analyze the leaks and save the result\n'
-                    'to the file Downloads/leaks_<time>.yaml.',
-                child: MaterialButton(
-                  child: const Text('Analyze and Save'),
-                  onPressed: () async => _requestLeaks(),
-                ),
-              )
-            : AnalysisStatusView(controller: _analysis),
+        ValueListenableBuilder<AnalysisStatus>(
+            valueListenable: _analysis.status,
+            builder: (_, value, __) {
+              if (value == AnalysisStatus.NotStarted)
+                return Tooltip(
+                  message: 'Analyze the leaks and save the result\n'
+                      'to the file Downloads/leaks_<time>.yaml.',
+                  child: MaterialButton(
+                    child: const Text('Analyze and Save'),
+                    onPressed: () async => _requestLeaks(),
+                  ),
+                );
+
+              return AnalysisStatusView(controller: _analysis);
+            }),
         Expanded(
           child: SingleChildScrollView(child: Text(_leakSummaryHistory)),
         ),
-        if (_leakSummaryHistory.isEmpty) const Text('No information yet.'),
-        if (_leakSummaryHistory.isNotEmpty)
-          Expanded(
-            child: SingleChildScrollView(child: Text(_leakSummaryHistory)),
-          ),
       ],
     );
   }

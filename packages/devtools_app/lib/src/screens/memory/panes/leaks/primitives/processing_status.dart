@@ -14,7 +14,7 @@ enum AnalysisStatus {
   ShowingError,
 }
 
-Duration _showingResultDelay = const Duration(seconds: 4);
+Duration _showingResultDelay = const Duration(seconds: 2);
 Duration _delayForUiToHandleState = const Duration(milliseconds: 5);
 
 /// Describes status of the ongoing process.
@@ -22,11 +22,11 @@ class AnalysisStatusController {
   ValueNotifier<AnalysisStatus> status =
       ValueNotifier<AnalysisStatus>(AnalysisStatus.NotStarted);
 
-  String message = '';
+  ValueNotifier<String> message = ValueNotifier('');
 
   void reset() {
     status.value = AnalysisStatus.NotStarted;
-    message = '';
+    message.value = '';
   }
 }
 
@@ -42,40 +42,49 @@ class AnalysisStatusView extends StatefulWidget {
 class _AnalysisStatusViewState extends State<AnalysisStatusView>
     with AutoDisposeMixin {
   @override
+  void initState() {
+    super.initState();
+    _handleStatusUpdate();
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    addAutoDisposeListener(widget.controller.status, _handleStatusUpdate);
+  }
 
-    addAutoDisposeListener(widget.controller.status, () async {
-      setState(() {});
-      if (widget.controller.status.value == AnalysisStatus.ShowingResult) {
-        await Future.delayed(_showingResultDelay);
-        setState(
-          () => widget.controller.reset(),
-        );
-      }
-      // We need this delay, because analysis may include heavy computations,
-      // and we want to give a space for UI thread to show status.
-      await Future.delayed(_delayForUiToHandleState);
-    });
+  void _handleStatusUpdate() async {
+    setState(() {});
+    if (widget.controller.status.value == AnalysisStatus.ShowingResult) {
+      await Future.delayed(_showingResultDelay);
+      setState(
+        () => widget.controller.reset(),
+      );
+    }
+    // We need this delay, because analysis may include heavy computations,
+    // and we want to give a space for UI thread to show status.
+    await Future.delayed(_delayForUiToHandleState);
   }
 
   @override
   Widget build(BuildContext context) {
     final c = widget.controller;
-    if (c.status.value != AnalysisStatus.NotStarted) {
+
+    if (c.status.value == AnalysisStatus.NotStarted) {
       return const SizedBox.shrink();
     }
 
     return Column(
       children: [
-        Text(c.message),
+        Text(c.message.value),
         if (c.status.value == AnalysisStatus.ShowingError)
           Row(
             children: [
               MaterialButton(
                 child: const Icon(Icons.copy),
-                onPressed: () async =>
-                    await Clipboard.setData(ClipboardData(text: c.message)),
+                onPressed: () async => await Clipboard.setData(
+                  ClipboardData(text: c.message.value),
+                ),
               ),
               MaterialButton(
                 child: const Text('OK'),
