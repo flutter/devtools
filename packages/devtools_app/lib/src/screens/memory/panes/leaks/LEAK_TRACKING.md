@@ -9,7 +9,9 @@ This page and functionality are under construction. See https://github.com/flutt
 
 ## Configure environment
 
-For Google3 applications, follow http://go/detect-memory-leaks-in-g3-flutter-app.
+NOTE: For Google3 applications, follow http://go/detect-memory-leaks-in-g3-flutter-app.
+
+While the leak detection functionality is under construction, you will need the forked version of the Flutter framework.
 
 Follow [standard Flutter installation process](https://docs.flutter.dev/get-started/install), but,
 instead of downloading or cloning official Flutter, clone `git@github.com:polina-c/flutter.git`,
@@ -31,8 +33,16 @@ flutter: 1 memory leaks: not disposed: 1, not GCed: 0, GCed late: 0
 flutter: 3 memory leaks: not disposed: 1, not GCed: 2, GCed late: 0
 ```
 
+5. Click "Analyze and Download"
+6. Find two files in the folder "Download": '.yaml' and '.raw.json'. Open '.yaml' to review the leaks. You will need '.raw.json' 
+if only you want to report an issue or perform deeper analysis of the heap yourself.
+
 ## Detect leaks in your Flutter app
 
 
-
 ## Add instrumentation to your classes
+
+
+## Troubleshoot the detected leaks
+
+
