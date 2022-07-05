@@ -1,7 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../../../config_specific/import_export/import_export.dart';
 import '../../../../config_specific/logger/logger.dart' as logger;
 import '../../../../primitives/auto_dispose_mixin.dart';
 import '../../../../primitives/utils.dart';
@@ -21,6 +23,7 @@ import 'primitives/analysis_status.dart';
 // https://github.com/flutter/devtools/issues/3951
 const _extensionKindToReceiveLeaksSummary = 'memory_leaks_summary';
 const _extensionKindToReceiveLeaksDetails = 'memory_leaks_details';
+const _file_prefix = 'memory_leaks';
 
 // TODO(polina-c): review UX with UX specialists
 // https://github.com/flutter/devtools/issues/3951
@@ -38,10 +41,12 @@ class _LeaksPaneState extends State<LeaksPane>
   LeakSummary? _lastLeakSummary;
   String _leakSummaryHistory = '';
   final AnalysisStatusController _analysis = AnalysisStatusController();
+  final _exportController = ExportController();
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    if (!initController()) return;
     cancelStreamSubscriptions();
     _subscribeForMemoryLeaksMessages();
   }
@@ -77,35 +82,71 @@ class _LeaksPaneState extends State<LeaksPane>
 
   Future<void> _receivedLeaksDetails(Event event) async {
     if (_analysis.status.value != AnalysisStatus.Ongoing) return;
-    _analysis.message.value = 'Received details. Parsing.';
-    final leakDetails = Leaks.fromJson(event.json!['extensionData']!);
+    NotGCedAnalyzerTask? task;
 
-    _analysis.status.value = AnalysisStatus.ShowingResult;
+    try {
+      _analysis.message.value = 'Received details. Parsing...';
+      final leakDetails = Leaks.fromJson(event.json!['extensionData']!);
 
-    final notGCed = leakDetails.byType[LeakType.notGCed] ?? [];
+      final notGCed = leakDetails.byType[LeakType.notGCed] ?? [];
 
-    NotGCedAnalyzed? notGCedAnalyzed;
-    if (notGCed.isNotEmpty) {
-      _analysis.message.value = 'Taking heap snapshot.';
-      final task = await _createAnalysisTask(notGCed);
-      _analysis.message.value = 'Detecting retaining paths.';
-      notGCedAnalyzed = analyseNotGCed(task);
+      NotGCedAnalyzed? notGCedAnalyzed;
+      if (notGCed.isNotEmpty) {
+        _analysis.message.value = 'Taking heap snapshot...';
+        task = await _createAnalysisTask(notGCed);
+        _analysis.message.value = 'Detecting retaining paths...';
+        notGCedAnalyzed = analyseNotGCed(task);
+      }
+
+      _analysis.message.value = 'Formatting...';
+
+      final yaml = analyzedLeakToYaml(
+        gcedLate: leakDetails.gcedLate,
+        notDisposed: leakDetails.notDisposed,
+        notGCed: notGCedAnalyzed,
+      );
+
+      _saveResultAndSetStatus(yaml, task);
+    } catch (error, trace) {
+      var message = '${_analysis.message.value}\nError: $error';
+      if (task != null) {
+        final fileName = _saveTask(task, DateTime.now());
+        message += '\nDownloaded raw data to $fileName.';
+        _analysis.message.value = message;
+        _analysis.status.value = AnalysisStatus.ShowingError;
+      }
+      logger.log(error);
+      logger.log(trace);
     }
+  }
 
-    _analysis.message.value = 'Formatting.';
-
-    final yaml = analyzedLeakToYaml(
-      gcedLate: leakDetails.gcedLate,
-      notDisposed: leakDetails.notDisposed,
-      notGCed: notGCedAnalyzed,
+  void _saveResultAndSetStatus(String yaml, NotGCedAnalyzerTask? task) {
+    final now = DateTime.now();
+    final yamlFile = _exportController.generateFileName(
+      time: now,
+      prefix: _file_prefix,
+      extension: 'yaml',
     );
+    _exportController.downloadFile(yaml, fileName: yamlFile);
+    final String? taskFile = _saveTask(task, now);
 
-    await Clipboard.setData(
-      ClipboardData(text: yaml),
-    );
-
-    _analysis.message.value = 'Copied to clipboard';
+    final taskFileMessage = taskFile == null ? '' : ' and $taskFile';
+    _analysis.message.value =
+        'Downloaded the leak analysis to $yamlFile$taskFileMessage.';
     _analysis.status.value = AnalysisStatus.ShowingResult;
+  }
+
+  /// Saves raw analysis task for troubleshooting and deeper analysis.
+  String? _saveTask(NotGCedAnalyzerTask? task, DateTime? now) {
+    if (task == null) return null;
+
+    final json = jsonEncode(task.toJson());
+    final jsonFile = _exportController.generateFileName(
+      time: now,
+      prefix: _file_prefix,
+      extension: 'raw.json',
+    );
+    return _exportController.downloadFile(json, fileName: jsonFile);
   }
 
   void _subscribeForMemoryLeaksMessages() {
@@ -152,10 +193,10 @@ class _LeaksPaneState extends State<LeaksPane>
           child: AnalysisStatusView(
             controller: _analysis,
             processStarter: Tooltip(
-              message: 'Analyze the leaks and save the result\n'
-                  'to the file Downloads/leaks_<time>.yaml.',
+              message: 'Analyze the leaks and download the result\n'
+                  'to leaks_<time>.yaml.',
               child: MaterialButton(
-                child: const Text('Analyze and Save'),
+                child: const Text('Analyze and Download'),
                 onPressed: () async => _requestLeaks(),
               ),
             ),
