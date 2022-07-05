@@ -130,7 +130,6 @@ typedef HeapPath = List<int>;
 class AdaptedHeapObject {
   AdaptedHeapObject({
     required this.code,
-    required this.successors,
     required this.references,
     required this.klass,
     required this.library,
@@ -141,7 +140,6 @@ class AdaptedHeapObject {
     if (library.isEmpty) library = object.klass.libraryUri.toString();
     return AdaptedHeapObject(
       code: object.identityHashCode,
-      successors: object.successors.map((e) => e.identityHashCode).toList(),
       references: List.from(object.references),
       klass: object.klass.name,
       library: library,
@@ -151,7 +149,6 @@ class AdaptedHeapObject {
   factory AdaptedHeapObject.fromJson(Map<String, dynamic> json) =>
       AdaptedHeapObject(
         code: json['code'],
-        successors: (json['successors'] as List<dynamic>).cast<int>(),
         references: (json['references'] as List<dynamic>).cast<int>(),
         klass: json['klass'],
         library: json['library'],
@@ -161,7 +158,6 @@ class AdaptedHeapObject {
   final String klass;
   final String library;
   final IdentityHashCode code;
-  final List<IdentityHashCode> successors;
 
   // Fields for graph analysis.
   final List<int> children = [];
@@ -170,7 +166,6 @@ class AdaptedHeapObject {
 
   Map<String, dynamic> toJson() => {
         'code': code,
-        'successors': successors,
         'references': references,
         'klass': klass,
         'library': library.toString(),

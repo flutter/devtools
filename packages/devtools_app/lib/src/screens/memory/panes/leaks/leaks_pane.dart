@@ -216,10 +216,12 @@ class _LeaksPaneState extends State<LeaksPane>
     );
 
     if (_leakSummaryHistory.isEmpty)
-      return Column(children: [
-        informationButton,
-        const Text('No information about memory leaks yet.'),
-      ]);
+      return Column(
+        children: [
+          informationButton,
+          const Text('No information about memory leaks yet.'),
+        ],
+      );
 
     final analyzeButton = Tooltip(
       message: 'Analyze the leaks and download the result\n'
