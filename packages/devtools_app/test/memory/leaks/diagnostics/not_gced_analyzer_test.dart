@@ -23,7 +23,7 @@ void main() {
       late NotGCedAnalyzerTask task;
 
       setUp(() async {
-        task = await _loadTaskFromFile('$dataDir${t.name}.json');
+        task = await _loadTaskFromFile('$dataDir${t.name}.raw.json');
       });
 
       test('There are many objects and roots.', () {
