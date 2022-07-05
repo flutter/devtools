@@ -3,12 +3,17 @@ import 'package:collection/collection.dart';
 import 'diagnostics/model.dart';
 import 'instrumentation/model.dart';
 
-String analyzedLeakToYaml({
+const linkToGuidance =
+    'https://github.com/flutter/devtools/blob/master/packages/devtools_app/lib/src/screens/memory/panes/leaks/LEAK_TRACKING.md';
+
+String analyzedLeaksToYaml({
   required List<LeakReport>? gcedLate,
   required List<LeakReport>? notDisposed,
   required NotGCedAnalyzed? notGCed,
 }) {
-  return '${LeakReport.iterableToYaml('not-disposed', notDisposed)}'
+  return '# For memory leaks troubleshooting tips see\n'
+      '# $linkToGuidance\n\n'
+      '${LeakReport.iterableToYaml('not-disposed', notDisposed)}'
       '${_notGCedToYaml(notGCed)}'
       '${LeakReport.iterableToYaml('gced-late', gcedLate)}';
 }

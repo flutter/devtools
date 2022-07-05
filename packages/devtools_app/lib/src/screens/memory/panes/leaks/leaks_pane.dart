@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../config_specific/import_export/import_export.dart';
+import '../../../../config_specific/launch_url/launch_url.dart';
 import '../../../../config_specific/logger/logger.dart' as logger;
 import '../../../../primitives/auto_dispose_mixin.dart';
 import '../../../../primitives/utils.dart';
@@ -100,7 +101,7 @@ class _LeaksPaneState extends State<LeaksPane>
 
       _analysis.message.value = 'Formatting...';
 
-      final yaml = analyzedLeakToYaml(
+      final yaml = analyzedLeaksToYaml(
         gcedLate: leakDetails.gcedLate,
         notDisposed: leakDetails.notDisposed,
         notGCed: notGCedAnalyzed,
@@ -171,10 +172,8 @@ class _LeaksPaneState extends State<LeaksPane>
     _analysis.status.value = AnalysisStatus.Ongoing;
     _analysis.message.value = 'Requested details from the application.';
 
-    await serviceManager.service!.callServiceExtension(
-      memoryLeakTracking,
-      isolateId: serviceManager.isolateManager.mainIsolate.value!.id!,
-      args: <String, dynamic>{
+    await _invokeMemoryLeakTrackingExtension(
+      <String, dynamic>{
         // TODO(polina-c): reference the constant in Flutter
         // https://github.com/flutter/devtools/issues/3951
         'requestDetails': 'true',
@@ -182,9 +181,63 @@ class _LeaksPaneState extends State<LeaksPane>
     );
   }
 
+  Future<void> _forceGC() async {
+    _analysis.status.value = AnalysisStatus.Ongoing;
+    _analysis.message.value = 'Forcing full garbage collection...';
+    await _invokeMemoryLeakTrackingExtension(
+      <String, dynamic>{
+        // TODO(polina-c): reference the constant in Flutter
+        // https://github.com/flutter/devtools/issues/3951
+        'forceGC': 'true',
+      },
+    );
+    _analysis.status.value = AnalysisStatus.ShowingResult;
+    _analysis.message.value = 'Full garbage collection initiated.';
+  }
+
+  Future<void> _invokeMemoryLeakTrackingExtension(
+    Map<String, dynamic> args,
+  ) async {
+    await serviceManager.service!.callServiceExtension(
+      memoryLeakTracking,
+      isolateId: serviceManager.isolateManager.mainIsolate.value!.id!,
+      args: args,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (_leakSummaryHistory.isEmpty) return const Text('No information yet.');
+    final informationButton = Tooltip(
+      message: 'Open memory leak tracking guidance.',
+      child: IconButton(
+        icon: const Icon(Icons.help_outline),
+        onPressed: () async => await launchUrl(linkToGuidance, context),
+      ),
+    );
+
+    if (_leakSummaryHistory.isEmpty)
+      return Column(children: [
+        informationButton,
+        const Text('No information about memory leaks yet.'),
+      ]);
+
+    final analyzeButton = Tooltip(
+      message: 'Analyze the leaks and download the result\n'
+          'to ${_file_prefix}_<time>.yaml.',
+      child: MaterialButton(
+        child: const Text('Analyze and Download'),
+        onPressed: () async => _requestLeaks(),
+      ),
+    );
+
+    final forceGCButton = Tooltip(
+      message: 'Force full GC in the application\n'
+          'to make sure to collect everything that can be collected.',
+      child: MaterialButton(
+        child: const Text('Force GC'),
+        onPressed: () async => _forceGC(),
+      ),
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -192,13 +245,12 @@ class _LeaksPaneState extends State<LeaksPane>
         KeepAliveWrapper(
           child: AnalysisStatusView(
             controller: _analysis,
-            processStarter: Tooltip(
-              message: 'Analyze the leaks and download the result\n'
-                  'to leaks_<time>.yaml.',
-              child: MaterialButton(
-                child: const Text('Analyze and Download'),
-                onPressed: () async => _requestLeaks(),
-              ),
+            processStarter: Row(
+              children: [
+                informationButton,
+                analyzeButton,
+                forceGCButton,
+              ],
             ),
           ),
         ),
