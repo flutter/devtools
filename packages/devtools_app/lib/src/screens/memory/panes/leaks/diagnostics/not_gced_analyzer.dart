@@ -3,6 +3,7 @@ import '../instrumentation/model.dart';
 import 'heap_analyser.dart';
 import 'model.dart';
 
+/// Analyzes notGCed leaks and returns result of the analysis.
 NotGCedAnalyzed analyseNotGCed(NotGCedAnalyzerTask task) {
   analyzeHeapAndSetRetainingPaths(task.heap, task.reports);
 
@@ -21,6 +22,10 @@ NotGCedAnalyzed analyseNotGCed(NotGCedAnalyzerTask task) {
   );
 }
 
+/// Out of list of notGCed objects, identifies ones that hold others from
+/// garbage collection (i.e. culprits).
+/// Returns map, where keys are the identified culprits and values are their
+/// victims.
 @visibleForTesting
 Map<LeakReport, List<LeakReport>> findCulprits(
   Iterable<LeakReport> notGCed,
@@ -32,7 +37,7 @@ Map<LeakReport, List<LeakReport>> findCulprits(
   );
 
   final result = <LeakReport, List<LeakReport>>{};
-  String previousPath = '--- not existing path ---';
+  String previousPath = '--- not a path ---';
   late LeakReport previousReport;
   for (var path in byPath.keys.toList()..sort()) {
     final report = byPath[path]!;

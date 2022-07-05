@@ -24,7 +24,9 @@ void setDetailedPaths(AdaptedHeap heap, List<LeakReport> notGCedLeaks) {
   }
 }
 
-/// Set
+/// Sets the field [retainer] for each object in the [heap], that has retaining
+/// path to the root.
+/// The algorithm takes O(number of references in the heap).
 @visibleForTesting
 void buildSpanningTree(AdaptedHeap heap) {
   final root = heap.objects[AdaptedHeap.rootIndex];
@@ -38,15 +40,15 @@ void buildSpanningTree(AdaptedHeap heap) {
   // root, has parent initialized.
   while (true) {
     final nextCut = <int>[];
-    for (var p in cut) {
-      final parent = heap.objects[p];
-      for (var c in parent.references) {
+    for (var r in cut) {
+      final retainer = heap.objects[r];
+      for (var c in retainer.references) {
         final child = heap.objects[c];
 
         if (child.retainer != null) continue;
         if (!_canRetain(child.klass)) continue;
 
-        child.retainer = p;
+        child.retainer = r;
         nextCut.add(c);
       }
     }

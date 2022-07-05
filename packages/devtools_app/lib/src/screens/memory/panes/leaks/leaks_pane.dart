@@ -247,7 +247,7 @@ class _LeaksPaneState extends State<LeaksPane>
         KeepAliveWrapper(
           child: AnalysisStatusView(
             controller: _analysis,
-            processStarter: Row(
+            analysisStarter: Row(
               children: [
                 informationButton,
                 analyzeButton,

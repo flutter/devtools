@@ -6,8 +6,13 @@ import '../instrumentation/model.dart';
 class NotGCedAnalyzed {
   NotGCedAnalyzed(this.byCulprits, this.withoutPath, this.total);
 
+  /// Not GCed objects withretaining path to the root, by culprits.
   final Map<LeakReport, List<LeakReport>> byCulprits;
+
+  /// Not GCed objects without retaining path to the root.
   final List<LeakReport> withoutPath;
+
+  /// Total number of leaks.
   final int total;
 }
 
@@ -100,10 +105,14 @@ class AdaptedHeap {
   }
 }
 
+/// Result of invocation of [inentityHashCode()].
 typedef IdentityHashCode = int;
 
+/// Sequence of ids of objects in the heap.
 typedef HeapPath = List<int>;
 
+/// Contains information from [HeapSnapshotObject], necessary to analyze
+/// memory leaks, plus serialization.
 class AdaptedHeapObject {
   AdaptedHeapObject({
     required this.code,

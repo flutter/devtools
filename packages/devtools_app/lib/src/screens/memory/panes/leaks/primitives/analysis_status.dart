@@ -30,14 +30,20 @@ class AnalysisStatusController {
   }
 }
 
+/// Shows [analysisStarter] if the analysis is not started yet and the status
+/// of the process otherwise.
+/// If process is completed successfully, keeps the status for
+/// [_showingResultDelay] and then shows [analysisStarter].
+/// If the process ended up with error, show the error and two buttons
+/// (Copy ans OK). After user clicks [OK], shows [analysisStarter].
 class AnalysisStatusView extends StatefulWidget {
   const AnalysisStatusView({
     Key? key,
     required this.controller,
-    required this.processStarter,
+    required this.analysisStarter,
   }) : super(key: key);
   final AnalysisStatusController controller;
-  final Widget processStarter;
+  final Widget analysisStarter;
 
   @override
   State<AnalysisStatusView> createState() => _AnalysisStatusViewState();
@@ -85,7 +91,7 @@ class _AnalysisStatusViewState extends State<AnalysisStatusView>
     final c = widget.controller;
 
     if (c.status.value == AnalysisStatus.NotStarted) {
-      return widget.processStarter;
+      return widget.analysisStarter;
     }
 
     return Column(
