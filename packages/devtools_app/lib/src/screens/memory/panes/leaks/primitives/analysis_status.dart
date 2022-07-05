@@ -10,7 +10,7 @@ enum AnalysisStatus {
   /// The process is complete and we want user to see the result.
   ShowingResult,
 
-  /// The process is complete and we want user to see the error.
+  /// The process is complete and we want user to acknowledge the error.
   ShowingError,
 }
 

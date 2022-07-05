@@ -14,6 +14,8 @@ void analyzeHeapAndSetRetainingPaths(
   }
 }
 
+/// Sets retaining path to the root in detailed form to [detailedPath] for each
+/// leak.
 void setDetailedPaths(AdaptedHeap heap, List<LeakReport> notGCedLeaks) {
   assert(heap.isSpanningTreeBuilt);
 

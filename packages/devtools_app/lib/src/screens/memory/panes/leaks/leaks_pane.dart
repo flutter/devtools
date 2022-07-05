@@ -73,7 +73,7 @@ class _LeaksPaneState extends State<LeaksPane> with AutoDisposeMixin {
     if (notGCed.isNotEmpty) {
       final task = await getTask(controller, notGCed);
 
-      _analysis.message = 'Getting retaining paths.';
+      _analysis.message.value = 'Getting retaining paths.';
 
       calculateRetainingPathsOrRetainers(task);
     }
