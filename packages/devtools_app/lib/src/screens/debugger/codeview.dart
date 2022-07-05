@@ -252,13 +252,11 @@ class _CodeViewState extends State<CodeView>
       if (scriptSource.length < 500000) {
         final highlighted = script.highlighter.highlight(context);
 
-        // Look for [TextSpan]s which only contain '\n' to manually break the
+        // Look for [InlineSpan]s which only contain '\n' to manually break the
         // output from the syntax highlighter into individual lines.
-        var currentLine = <TextSpan>[];
+        var currentLine = <InlineSpan>[];
         highlighted.visitChildren((span) {
-          // TODO(elliette): Switch to using TextSpans instead of InlineSpans so
-          // type-casting isn't necessary.
-          currentLine.add(span as TextSpan);
+          currentLine.add(span);
           if (span.toPlainText() == '\n') {
             lines.add(
               TextSpan(
@@ -266,7 +264,7 @@ class _CodeViewState extends State<CodeView>
                 children: currentLine,
               ),
             );
-            currentLine = <TextSpan>[];
+            currentLine = <InlineSpan>[];
           }
           return true;
         });
@@ -420,17 +418,19 @@ class _CodeViewState extends State<CodeView>
 
   Widget buildFileSearchField() {
     return ElevatedCard(
-      child: FileSearchField(
-        debuggerController: widget.controller,
-      ),
       width: extraWideSearchTextWidth,
       height: defaultTextFieldHeight,
       padding: EdgeInsets.zero,
+      child: FileSearchField(
+        debuggerController: widget.controller,
+      ),
     );
   }
 
   Widget buildSearchInFileField() {
     return ElevatedCard(
+      width: wideSearchTextWidth,
+      height: defaultTextFieldHeight + 2 * denseSpacing,
       child: buildSearchField(
         controller: widget.controller,
         searchFieldKey: debuggerCodeViewSearchKey,
@@ -439,8 +439,6 @@ class _CodeViewState extends State<CodeView>
         supportsNavigation: true,
         onClose: () => widget.controller.toggleSearchInFileVisibility(false),
       ),
-      width: wideSearchTextWidth,
-      height: defaultTextFieldHeight + 2 * denseSpacing,
     );
   }
 
@@ -910,9 +908,7 @@ class _LineItemState extends State<LineItem>
   }
 
   TextSpan searchAwareLineContents() {
-    // TODO(elliette): Switch to using TextSpans instead of InlineSpans so
-    // type-casting isn't necessary.
-    final children = widget.lineContents.children as List<TextSpan>?;
+    final children = widget.lineContents.children;
     if (children == null) return const TextSpan();
 
     final activeSearchAwareContents = _activeSearchAwareLineContents(children);
@@ -924,12 +920,12 @@ class _LineItemState extends State<LineItem>
     );
   }
 
-  List<TextSpan> _contentsWithMatch(
-    List<TextSpan> startingContents,
+  List<InlineSpan> _contentsWithMatch(
+    List<InlineSpan> startingContents,
     SourceToken match,
     Color matchColor,
   ) {
-    final contentsWithMatch = <TextSpan>[];
+    final contentsWithMatch = <InlineSpan>[];
     var startColumnForSpan = 0;
     for (final span in startingContents) {
       final spanText = span.toPlainText();
@@ -1000,8 +996,8 @@ class _LineItemState extends State<LineItem>
     return contentsWithMatch;
   }
 
-  List<TextSpan>? _activeSearchAwareLineContents(
-    List<TextSpan> startingContents,
+  List<InlineSpan>? _activeSearchAwareLineContents(
+    List<InlineSpan> startingContents,
   ) {
     final activeSearchMatch = widget.activeSearchMatch;
     if (activeSearchMatch == null) return startingContents;
@@ -1012,8 +1008,8 @@ class _LineItemState extends State<LineItem>
     );
   }
 
-  List<TextSpan> _searchMatchAwareLineContents(
-    List<TextSpan> startingContents,
+  List<InlineSpan> _searchMatchAwareLineContents(
+    List<InlineSpan> startingContents,
   ) {
     final searchMatches = widget.searchMatches;
     if (searchMatches == null || searchMatches.isEmpty) return startingContents;

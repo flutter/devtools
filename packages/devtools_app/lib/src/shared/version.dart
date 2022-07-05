@@ -4,8 +4,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
-
 import 'utils.dart';
 
 class FlutterVersion extends SemanticVersion {
@@ -76,7 +74,7 @@ class FlutterVersion extends SemanticVersion {
   }
 
   @override
-  int get hashCode => hashValues(
+  int get hashCode => Object.hash(
         version,
         channel,
         repositoryUrl,

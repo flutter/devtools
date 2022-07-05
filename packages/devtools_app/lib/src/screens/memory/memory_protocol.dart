@@ -12,7 +12,6 @@ import '../../config_specific/logger/logger.dart' as logger;
 import '../../shared/globals.dart';
 import '../../shared/utils.dart';
 import 'memory_controller.dart';
-import 'memory_screen.dart';
 import 'primitives/memory_timeline.dart';
 
 class MemoryTracker {
@@ -314,21 +313,6 @@ class MemoryTracker {
 
     if (memoryTimeline.anyPendingExtensionEvents) {
       final extensionEvents = memoryTimeline.extensionEvents;
-
-      if (MemoryScreen.isDebuggingEnabled &&
-          extensionEvents?.isNotEmpty == true) {
-        debugLogger(
-          'Receieved Extension Events '
-          '${extensionEvents!.theEvents.length}',
-        );
-        for (var e in extensionEvents.theEvents) {
-          final dt = DateTime.fromMillisecondsSinceEpoch(e.timestamp!);
-          debugLogger(
-            '  ${e.eventKind} ${e.customEventName} '
-            '$dt ${e.data!['param']}',
-          );
-        }
-      }
       return EventSample.extensionEvent(time, extensionEvents);
     }
 

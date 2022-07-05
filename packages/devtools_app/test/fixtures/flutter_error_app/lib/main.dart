@@ -71,8 +71,8 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         const Icon(Icons.star),
         TextButton(
-          child: Text(title),
           onPressed: navigateToDemo,
+          child: Text(title),
         ),
       ],
     );

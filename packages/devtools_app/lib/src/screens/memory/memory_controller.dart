@@ -16,18 +16,19 @@ import '../../config_specific/file/file.dart';
 import '../../config_specific/logger/logger.dart';
 import '../../primitives/auto_dispose.dart';
 import '../../primitives/utils.dart';
+import '../../service/service_extensions.dart';
 import '../../service/service_manager.dart';
 import '../../shared/globals.dart';
 import '../../shared/table.dart';
 import '../../shared/table_data.dart';
 import '../../shared/utils.dart';
 import '../../ui/search.dart';
-import 'memory_android_chart.dart';
-import 'memory_events_pane.dart';
 import 'memory_graph_model.dart';
 import 'memory_protocol.dart';
 import 'memory_snapshot_models.dart';
-import 'memory_vm_chart.dart';
+import 'panes/chart/memory_android_chart.dart';
+import 'panes/chart/memory_events_pane.dart';
+import 'panes/chart/memory_vm_chart.dart';
 import 'primitives/filter_config.dart';
 import 'primitives/memory_timeline.dart';
 
@@ -244,6 +245,18 @@ class ChartControllers {
     vm.reset();
     android.reset();
   }
+
+  /// Recomputes (attaches data to the chart) for either live or offline data
+  /// source.
+  void recomputeChartData() {
+    resetAll();
+    event.setupData();
+    event.dirty = true;
+    vm.setupData();
+    vm.dirty = true;
+    android.setupData();
+    android.dirty = true;
+  }
 }
 
 /// This class contains the business logic for [memory.dart].
@@ -278,6 +291,9 @@ class MemoryController extends DisposableController
   final _advancedSettingsEnabled =
       ValueNotifier<bool>(advancedSettingsEnabledDefault);
 
+  ValueListenable<bool> get autoSnapshotEnabled => _autoSnapshotEnabled;
+  final _autoSnapshotEnabled = ValueNotifier<bool>(false);
+
   // Memory statistics displayed as raw numbers or units (KB, MB, GB).
   static const unitDisplayedDefault = true;
 
@@ -297,6 +313,9 @@ class MemoryController extends DisposableController
   /// Notifies that the source of the memory feed has changed.
   ValueListenable<DateTime?> get selectedSnapshotNotifier =>
       _selectedSnapshotNotifier;
+
+  final _shouldShowLeaksTab = ValueNotifier<bool>(false);
+  ValueListenable<bool> get shouldShowLeaksTab => _shouldShowLeaksTab;
 
   static String formattedTimestamp(DateTime? timestamp) =>
       timestamp != null ? DateFormat('MMM dd HH:mm:ss').format(timestamp) : '';
@@ -815,7 +834,15 @@ class MemoryController extends DisposableController
     // TODO(terry): Need an event on the controller for this too?
   }
 
-  void _handleConnectionStart(ServiceConnectionManager serviceManager) {
+  void _refreshShouldShowLeaksTab() {
+    _shouldShowLeaksTab.value = serviceManager.serviceExtensionManager
+        .hasServiceExtension(memoryLeakTracking)
+        .value;
+  }
+
+  void _handleConnectionStart(ServiceConnectionManager serviceManager) async {
+    _refreshShouldShowLeaksTab();
+
     _memoryTracker = MemoryTracker(this);
     _memoryTracker!.start();
 
@@ -905,10 +932,10 @@ class MemoryController extends DisposableController
   }
 
   Future<HeapSnapshotGraph?> snapshotMemory() async {
-    if (serviceManager.isolateManager.selectedIsolate.value == null)
-      return null;
+    final isolate = serviceManager.isolateManager.selectedIsolate.value;
+    if (isolate == null) return null;
     return await serviceManager.service?.getHeapSnapshotGraph(
-      serviceManager.isolateManager.selectedIsolate.value!,
+      isolate,
     );
   }
 

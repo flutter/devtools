@@ -5,12 +5,12 @@
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 
-import '../../charts/chart_trace.dart';
-import '../../primitives/utils.dart';
-import 'memory_android_chart.dart' as android;
-import 'memory_controller.dart';
-import 'memory_events_pane.dart' as events;
-import 'memory_vm_chart.dart' as vm;
+import '../../../../charts/chart_trace.dart';
+import '../../../../primitives/utils.dart';
+import '../../memory_controller.dart';
+import 'memory_android_chart.dart';
+import 'memory_events_pane.dart';
+import 'memory_vm_chart.dart';
 
 /// Event types handled for hover card.
 const devToolsEvent = 'DevTools.Event';
@@ -113,9 +113,9 @@ class ChartsValues {
 
   final int timestamp;
 
-  final _event = <String, Object>{};
+  final _event = <String, bool>{};
 
-  final _extensionEvents = <Map<String, Object>>[];
+  final _extensionEvents = <Map<String, bool>>[];
 
   Map<String, Object> get vmData => _vm;
 
@@ -158,10 +158,9 @@ class ChartsValues {
   int get extensionEventsLength =>
       hasExtensionEvents ? extensionEvents.length : 0;
 
-  List<Map<String, Object>> get extensionEvents {
+  List<Map<String, bool>> get extensionEvents {
     if (_extensionEvents.isEmpty) {
-      final events =
-          _event[extensionEventsJsonName] as List<Map<String, Object>>;
+      final events = _event[extensionEventsJsonName] as List<Map<String, bool>>;
       _extensionEvents.addAll(events);
     }
     return _extensionEvents;
@@ -250,22 +249,22 @@ class ChartsValues {
     final eventsDisplayed = <String, String>{};
 
     if (hasSnapshot) {
-      eventsDisplayed['Snapshot'] = events.snapshotManualLegend;
+      eventsDisplayed['Snapshot'] = snapshotManualLegend;
     } else if (hasAutoSnapshot) {
-      eventsDisplayed['Auto Snapshot'] = events.snapshotAutoLegend;
+      eventsDisplayed['Auto Snapshot'] = snapshotAutoLegend;
     } else if (hasMonitorStart) {
-      eventsDisplayed['Monitor Start'] = events.monitorLegend;
+      eventsDisplayed['Monitor Start'] = monitorLegend;
     } else if (hasMonitorReset) {
       eventsDisplayed['Monitor Reset'] =
-          isLight ? events.resetLightLegend : events.resetDarkLegend;
+          isLight ? resetLightLegend : resetDarkLegend;
     }
 
     if (hasGc) {
-      eventsDisplayed['GC'] = events.gcVMLegend;
+      eventsDisplayed['GC'] = gcVMLegend;
     }
 
     if (hasManualGc) {
-      eventsDisplayed['User GC'] = events.gcManualLegend;
+      eventsDisplayed['User GC'] = gcManualLegend;
     }
 
     return eventsDisplayed;
@@ -280,7 +279,7 @@ class ChartsValues {
         final displayKey = '$eventLength'
             '${eventLength == 1 ? eventDisplayName : eventsDisplayName}';
         eventsDisplayed[displayKey] =
-            eventLength == 1 ? events.eventLegend : events.eventsLegend;
+            eventLength == 1 ? eventLegend : eventsLegend;
       }
     }
 
@@ -292,39 +291,39 @@ class ChartsValues {
 
     final rssValueDisplay = formatNumeric(vmData[rssJsonName] as num?);
     vmDataDisplayed['$rssDisplay $rssValueDisplay'] = traceRender(
-      color: traces[vm.TraceName.rSS.index].characteristics.color,
+      color: traces[VmTraceName.rSS.index].characteristics.color,
       dashed: true,
     );
 
     final capacityValueDisplay =
         formatNumeric(vmData[capacityJsonName] as num?);
     vmDataDisplayed['$allocatedDisplay $capacityValueDisplay'] = traceRender(
-      color: traces[vm.TraceName.capacity.index].characteristics.color,
+      color: traces[VmTraceName.capacity.index].characteristics.color,
       dashed: true,
     );
 
     final usedValueDisplay = formatNumeric(vmData[usedJsonName] as num?);
     vmDataDisplayed['$usedDisplay $usedValueDisplay'] = traceRender(
-      color: traces[vm.TraceName.used.index].characteristics.color,
+      color: traces[VmTraceName.used.index].characteristics.color,
     );
 
     final externalValueDisplay =
         formatNumeric(vmData[externalJsonName] as num?);
     vmDataDisplayed['$externalDisplay $externalValueDisplay'] = traceRender(
-      color: traces[vm.TraceName.external.index].characteristics.color,
+      color: traces[VmTraceName.external.index].characteristics.color,
     );
 
     final layerValueDisplay =
         formatNumeric(vmData[rasterLayerJsonName] as num?);
     vmDataDisplayed['$layerDisplay $layerValueDisplay'] = traceRender(
-      color: traces[vm.TraceName.rasterLayer.index].characteristics.color,
+      color: traces[VmTraceName.rasterLayer.index].characteristics.color,
       dashed: true,
     );
 
     final pictureValueDisplay =
         formatNumeric(vmData[rasterPictureJsonName] as num?);
     vmDataDisplayed['$pictureDisplay $pictureValueDisplay'] = traceRender(
-      color: traces[vm.TraceName.rasterPicture.index].characteristics.color,
+      color: traces[VmTraceName.rasterPicture.index].characteristics.color,
       dashed: true,
     );
 
@@ -341,7 +340,7 @@ class ChartsValues {
       final totalValueDisplay = formatNumeric(data[adbTotalJsonName] as num?);
       androidDataDisplayed['$androidTotalDisplay $totalValueDisplay'] =
           traceRender(
-        color: traces[android.TraceName.total.index].characteristics.color,
+        color: traces[AndroidTraceName.total.index].characteristics.color,
         dashed: true,
       );
 
@@ -349,7 +348,7 @@ class ChartsValues {
       final otherValueDisplay = formatNumeric(data[adbOtherJsonName] as num?);
       androidDataDisplayed['$androidOtherDisplay $otherValueDisplay'] =
           traceRender(
-        color: traces[android.TraceName.other.index].characteristics.color,
+        color: traces[AndroidTraceName.other.index].characteristics.color,
       );
 
       // Native heap trace
@@ -357,7 +356,7 @@ class ChartsValues {
           formatNumeric(data[adbNativeHeapJsonName] as num?);
       androidDataDisplayed['$androidNativeDisplay $nativeValueDisplay'] =
           traceRender(
-        color: traces[android.TraceName.nativeHeap.index].characteristics.color,
+        color: traces[AndroidTraceName.nativeHeap.index].characteristics.color,
       );
 
       // Graphics trace
@@ -365,28 +364,28 @@ class ChartsValues {
           formatNumeric(data[adbGraphicsJsonName] as num?);
       androidDataDisplayed['$androidGraphicsDisplay $graphicsValueDisplay'] =
           traceRender(
-        color: traces[android.TraceName.graphics.index].characteristics.color,
+        color: traces[AndroidTraceName.graphics.index].characteristics.color,
       );
 
       // Code trace
       final codeValueDisplay = formatNumeric(data[adbCodeJsonName] as num?);
       androidDataDisplayed['$androidCodeDisplay $codeValueDisplay'] =
           traceRender(
-        color: traces[android.TraceName.code.index].characteristics.color,
+        color: traces[AndroidTraceName.code.index].characteristics.color,
       );
 
       // Java heap trace
       final javaValueDisplay = formatNumeric(data[adbJavaHeapJsonName] as num?);
       androidDataDisplayed['$androidJavaDisplay $javaValueDisplay'] =
           traceRender(
-        color: traces[android.TraceName.javaHeap.index].characteristics.color,
+        color: traces[AndroidTraceName.javaHeap.index].characteristics.color,
       );
 
       // Stack trace
       final stackValueDisplay = formatNumeric(data[adbStackJsonName] as num?);
       androidDataDisplayed['$androidStackDisplay $stackValueDisplay'] =
           traceRender(
-        color: traces[android.TraceName.stack.index].characteristics.color,
+        color: traces[AndroidTraceName.stack.index].characteristics.color,
       );
     }
 

@@ -122,8 +122,9 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   @override
   Future<UriList> lookupResolvedPackageUris(
     String isolateId,
-    List<String> uris,
-  ) {
+    List<String> uris, {
+    bool? local,
+  }) {
     return Future.value(
       UriList(
         uris: _reverseResolvedUriMap != null
@@ -191,6 +192,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
     // Simulate a snapshot that takes .5 seconds.
     await Future.delayed(const Duration(milliseconds: 500));
     final result = MockHeapSnapshotGraph();
+    when(result.name).thenReturn('name');
     when(result.classes).thenReturn([]);
     when(result.objects).thenReturn([]);
     when(result.externalProperties).thenReturn([]);

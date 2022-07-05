@@ -11,6 +11,8 @@ abstract class DevToolsExtensionPoints {
 
   Link issueTrackerLink();
 
+  String? username();
+
   String loadingAppSizeDataMessage();
 
   InspectorServiceBase? inspectorServiceProvider();

@@ -526,9 +526,14 @@ final trackRebuildWidgets = ToggleableServiceExtensionDescription<bool>._(
   gaItem: analytics_constants.trackRebuildWidgets,
 );
 
-// This extension should never be displayed as a button so does not need a
-// ServiceExtensionDescription object.
+// This extensions below should never be displayed as a button so does not need
+// a ServiceExtensionDescription object.
 const String didSendFirstFrameEvent = 'ext.flutter.didSendFirstFrameEvent';
+
+// TODO(polinach): reference this constant in dart SDK, when it gets submitted
+// there.
+// https://github.com/flutter/devtools/issues/3951
+const String memoryLeakTracking = 'ext.dart.memoryLeakTracking';
 
 final List<ServiceExtensionDescription> _extensionDescriptions = [
   debugPaint,

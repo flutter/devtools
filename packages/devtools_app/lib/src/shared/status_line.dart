@@ -231,7 +231,6 @@ class IsolateSelector extends StatelessWidget {
       secondListenable: isolateManager.selectedIsolate,
       builder: (context, isolates, selectedIsolateRef, _) {
         return PopupMenuButton<IsolateRef?>(
-          child: IsolateOption(isolateManager.selectedIsolate.value),
           tooltip: 'Selected Isolate',
           initialValue: selectedIsolateRef,
           onSelected: isolateManager.selectIsolate,
@@ -244,6 +243,7 @@ class IsolateSelector extends StatelessWidget {
               );
             },
           ).toList(),
+          child: IsolateOption(isolateManager.selectedIsolate.value),
         );
       },
     );

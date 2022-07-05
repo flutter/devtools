@@ -313,6 +313,7 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
             Expanded(
               child: ArrowWrapper.unidirectional(
                 arrowColor: verticalColor(colorScheme),
+                type: ArrowType.down,
                 child: Truncateable(
                   truncate: maxHeight <= minHeightToAllowTruncating,
                   child: RotatedBox(
@@ -328,7 +329,6 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
                     ),
                   ),
                 ),
-                type: ArrowType.down,
               ),
             ),
             Truncateable(
@@ -350,6 +350,7 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
             Expanded(
               child: ArrowWrapper.unidirectional(
                 arrowColor: horizontalColor(colorScheme),
+                type: ArrowType.right,
                 child: Truncateable(
                   truncate: maxWidth <= minWidthToAllowTruncating,
                   child: Text(
@@ -360,7 +361,6 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
                     style: TextStyle(color: horizontalTextColor(colorScheme)),
                   ),
                 ),
-                type: ArrowType.right,
               ),
             ),
             Truncateable(
@@ -544,8 +544,8 @@ class _VisualizeFlexChildrenState extends State<VisualizeFlexChildren> {
       ),
     );
     return VisualizeWidthAndHeightWithConstraints(
-      child: contents,
       properties: widget.properties,
+      child: contents,
     );
   }
 }
@@ -755,11 +755,11 @@ class FlexChildVisualizer extends StatelessWidget {
               overflowSide: propertiesLocal.overflowSide,
               child: VisualizeWidthAndHeightWithConstraints(
                 arrowHeadSize: arrowHeadSize,
+                properties: propertiesLocal,
                 child: Align(
                   alignment: Alignment.topRight,
                   child: _buildContent(colorScheme),
                 ),
-                properties: propertiesLocal,
               ),
             ),
           ),

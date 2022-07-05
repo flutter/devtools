@@ -165,8 +165,8 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     return MaterialPage(
       child: DevToolsScaffold.withChild(
         key: const Key('not-found'),
-        child: CenteredMessage("'$page' not found."),
         ideTheme: ideTheme,
+        child: CenteredMessage("'$page' not found."),
       ),
     );
   }
@@ -182,13 +182,13 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     if (vmServiceUri?.isEmpty ?? true) {
       return DevToolsScaffold.withChild(
         key: const Key('landing'),
-        child: LandingScreenBody(),
         ideTheme: ideTheme,
         actions: [
           OpenSettingsAction(),
           ReportFeedbackButton(),
           OpenAboutAction(),
         ],
+        child: LandingScreenBody(),
       );
     }
 
@@ -234,12 +234,12 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
             );
           },
           child: DevToolsScaffold.withChild(
+            ideTheme: ideTheme,
             child: CenteredMessage(
               page != null
                   ? 'The "$page" screen is not available for this application.'
                   : 'No tabs available for this application.',
             ),
-            ideTheme: ideTheme,
           ),
         );
       },
@@ -256,25 +256,25 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         final snapshotArgs = SnapshotArguments.fromArgs(args);
         return DevToolsScaffold.withChild(
           key: UniqueKey(),
+          ideTheme: ideTheme,
           child: _providedControllers(
             offline: true,
             child: SnapshotScreenBody(snapshotArgs, _screens),
           ),
-          ideTheme: ideTheme,
         );
       },
       appSizePageId: (_, __, ___) {
         return DevToolsScaffold.withChild(
           key: const Key('appsize'),
-          child: _providedControllers(
-            child: const AppSizeBody(),
-          ),
           ideTheme: ideTheme,
           actions: [
             OpenSettingsAction(),
             ReportFeedbackButton(),
             OpenAboutAction(),
           ],
+          child: _providedControllers(
+            child: const AppSizeBody(),
+          ),
         );
       },
     };
@@ -493,6 +493,7 @@ class SettingsDialog extends StatelessWidget {
   }
 }
 
+// TODO(polinach): consider reusing CheckboxSettings from shared/common_widgets.
 class CheckboxSetting extends StatelessWidget {
   const CheckboxSetting({
     Key? key,

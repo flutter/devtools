@@ -32,6 +32,7 @@ import 'memory_graph_model.dart';
 import 'memory_heap_treemap.dart';
 import 'memory_instance_tree_view.dart';
 import 'memory_snapshot_models.dart';
+import 'panes/leaks/leaks_pane.dart';
 
 const memorySearchFieldKeyName = 'MemorySearchFieldKey';
 
@@ -143,6 +144,8 @@ class HeapTreeViewState extends State<HeapTree>
   static const dartHeapAnalysisTabKey = Key('Dart Heap Analysis Tab');
   @visibleForTesting
   static const dartHeapAllocationsTabKey = Key('Dart Heap Allocations Tab');
+  @visibleForTesting
+  static const leaksTabKey = Key('Leaks Tab');
 
   /// Below constants should match index for Tab index in DartHeapTabs.
   static const int analysisTabIndex = 0;
@@ -150,20 +153,10 @@ class HeapTreeViewState extends State<HeapTree>
 
   static const _gaPrefix = 'memoryTab';
 
-  static final List<Tab> dartHeapTabs = [
-    DevToolsTab.create(
-      key: dartHeapAnalysisTabKey,
-      gaPrefix: _gaPrefix,
-      tabName: 'Analysis',
-    ),
-    DevToolsTab.create(
-      key: dartHeapAllocationsTabKey,
-      gaPrefix: _gaPrefix,
-      tabName: 'Allocations',
-    ),
-  ];
-
+  late List<Tab> _tabs;
   late TabController _tabController;
+  late Set<Key> _searchableTabs;
+  final ValueNotifier<int> _currentTab = ValueNotifier(0);
 
   Widget? snapshotDisplay;
 
@@ -192,11 +185,35 @@ class HeapTreeViewState extends State<HeapTree>
   void initState() {
     super.initState();
 
-    _tabController = TabController(length: dartHeapTabs.length, vsync: this);
-    addAutoDisposeListener(_tabController);
-
     _animation = _setupBubbleAnimationController();
   }
+
+  void _initTabs() {
+    _tabs = [
+      DevToolsTab.create(
+        key: dartHeapAnalysisTabKey,
+        gaPrefix: _gaPrefix,
+        tabName: 'Analysis',
+      ),
+      DevToolsTab.create(
+        key: dartHeapAllocationsTabKey,
+        gaPrefix: _gaPrefix,
+        tabName: 'Allocations',
+      ),
+      if (widget.controller.shouldShowLeaksTab.value)
+        DevToolsTab.create(
+          key: leaksTabKey,
+          gaPrefix: _gaPrefix,
+          tabName: 'Leaks',
+        ),
+    ];
+
+    _searchableTabs = {dartHeapAnalysisTabKey, dartHeapAllocationsTabKey};
+    _tabController = TabController(length: _tabs.length, vsync: this);
+    _tabController.addListener(_onTabChanged);
+  }
+
+  void _onTabChanged() => _currentTab.value = _tabController.index;
 
   @override
   void didChangeDependencies() {
@@ -204,6 +221,14 @@ class HeapTreeViewState extends State<HeapTree>
     if (!initController()) return;
 
     cancelListeners();
+
+    _initTabs();
+
+    addAutoDisposeListener(controller.shouldShowLeaksTab, () {
+      setState(() {
+        _initTabs();
+      });
+    });
 
     addAutoDisposeListener(controller.selectedSnapshotNotifier, () {
       setState(() {
@@ -275,6 +300,9 @@ class HeapTreeViewState extends State<HeapTree>
   @override
   void dispose() {
     _animation.dispose();
+    _tabController
+      ..removeListener(_onTabChanged)
+      ..dispose();
 
     super.dispose();
   }
@@ -285,6 +313,7 @@ class HeapTreeViewState extends State<HeapTree>
 
   /// Detect spike in memory usage if so do an automatic snapshot.
   void autoSnapshot() {
+    if (!controller.autoSnapshotEnabled.value) return;
     final heapSample = controller.memoryTimeline.sampleAddedNotifier.value!;
     final heapSum = heapSample.external + heapSample.used;
     heapMovingAverage.add(heapSum);
@@ -411,17 +440,21 @@ class HeapTreeViewState extends State<HeapTree>
       child: Column(
         children: [
           const SizedBox(height: defaultSpacing),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              TabBar(
-                labelColor: themeData.textTheme.bodyText1!.color,
-                isScrollable: true,
-                controller: _tabController,
-                tabs: HeapTreeViewState.dartHeapTabs,
-              ),
-              _buildSearchFilterControls(),
-            ],
+          ValueListenableBuilder<int>(
+            valueListenable: _currentTab,
+            builder: (context, index, _) => Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TabBar(
+                  labelColor: themeData.textTheme.bodyText1!.color,
+                  isScrollable: true,
+                  controller: _tabController,
+                  tabs: _tabs,
+                ),
+                if (_searchableTabs.contains(_tabs[index].key))
+                  _buildSearchFilterControls(),
+              ],
+            ),
           ),
           const SizedBox(height: densePadding),
           Expanded(
@@ -430,26 +463,34 @@ class HeapTreeViewState extends State<HeapTree>
               controller: _tabController,
               children: [
                 // Analysis Tab
-                Column(
-                  children: [
-                    _buildSnapshotControls(themeData.textTheme),
-                    const SizedBox(height: denseRowSpacing),
-                    Expanded(
-                      child: OutlineDecoration(
+                KeepAliveWrapper(
+                  child: Column(
+                    children: [
+                      _buildSnapshotControls(themeData.textTheme),
+                      const SizedBox(height: denseRowSpacing),
+                      Expanded(
                         child: buildSnapshotTables(snapshotDisplay),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
 
                 // Allocations Tab
-                Column(
-                  children: [
-                    _buildAllocationsControls(),
-                    const SizedBox(height: denseRowSpacing),
-                    const Expanded(child: AllocationTableView()),
-                  ],
+                KeepAliveWrapper(
+                  child: Column(
+                    children: [
+                      _buildAllocationsControls(),
+                      const SizedBox(height: denseRowSpacing),
+                      const Expanded(
+                        child: AllocationTableView(),
+                      ),
+                    ],
+                  ),
                 ),
+
+                // Leaks tab.
+                if (controller.shouldShowLeaksTab.value)
+                  const KeepAliveWrapper(child: LeaksPane()),
               ],
             ),
           ),
@@ -461,14 +502,16 @@ class HeapTreeViewState extends State<HeapTree>
   Widget buildSnapshotTables(Widget? snapshotDisplay) {
     if (snapshotDisplay == null) {
       // Display help text about how to collect data.
-      return Center(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Text('Click the take heap snapshot button '),
-            Icon(Icons.camera),
-            Text(' to collect a graph of memory objects.'),
-          ],
+      return OutlineDecoration(
+        child: Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const [
+              Text('Click the take heap snapshot button '),
+              Icon(Icons.camera),
+              Text(' to collect a graph of memory objects.'),
+            ],
+          ),
         ),
       );
     }
@@ -489,7 +532,7 @@ class HeapTreeViewState extends State<HeapTree>
               // TODO(terry): Need better focus handling between 2 tables & up/down
               //              arrows in the right-side field instance view table.
               snapshotDisplay,
-              rightSideTable,
+              OutlineDecoration(child: rightSideTable),
             ],
           );
   }
@@ -769,8 +812,8 @@ class HeapTreeViewState extends State<HeapTree>
       children: [
         Positioned(
           child: Container(
-            child: Text(text, style: style),
             width: textWidth + 10,
+            child: Text(text, style: style),
           ),
         ),
         Positioned(
@@ -779,11 +822,11 @@ class HeapTreeViewState extends State<HeapTree>
             alignment: Alignment.topRight,
             width: size,
             height: size,
-            child: const Icon(Icons.fiber_manual_record, size: 0),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: Colors.blue[400],
             ),
+            child: const Icon(Icons.fiber_manual_record, size: 0),
           ),
         ),
       ],
@@ -1451,7 +1494,7 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
   @override
   Widget build(BuildContext context) {
     final root = controller.buildTreeFromAllData();
-
+    Widget result;
     if (root != null && root.children.isNotEmpty) {
       // Snapshots and analyses exists display the trees.
       controller.groupByTreeTable = TreeTable<Reference>(
@@ -1464,11 +1507,12 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
         selectionNotifier: controller.selectionSnapshotNotifier,
       );
 
-      return controller.groupByTreeTable;
+      result = controller.groupByTreeTable;
     } else {
       // Nothing collected yet (snapshots/analyses) - return an empty area.
-      return const SizedBox();
+      result = const SizedBox();
     }
+    return OutlineDecoration(child: result);
   }
 }
 
@@ -1502,9 +1546,6 @@ class _LibraryRefColumn extends TreeColumnData<Reference> {
   String getTooltip(Reference dataObject) {
     return dataObject.name ?? '';
   }
-
-  @override
-  double get fixedWidthPx => 250.0;
 }
 
 class _ClassOrInstanceCountColumn extends ColumnData<Reference> {

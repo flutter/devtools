@@ -42,8 +42,8 @@ void main() {
     testWidgets('FlexLayoutProperties.fromJson creates correct value from enum',
         (tester) async {
       final widget = Row(
-        children: const [SizedBox()],
         textDirection: TextDirection.ltr,
+        children: const [SizedBox()],
       );
       final flexProperties =
           await toFlexLayoutProperties(widget, tester: tester);
@@ -58,16 +58,16 @@ void main() {
 
     testWidgets('startIsTopLeft should return false', (tester) async {
       final columnWidget = Column(
-        children: const [SizedBox()],
         verticalDirection: VerticalDirection.up,
+        children: const [SizedBox()],
       );
       final columnProperties =
           await toFlexLayoutProperties(columnWidget, tester: tester);
       expect(columnProperties.startIsTopLeft, false);
 
       final rowWidget = Row(
-        children: const [SizedBox()],
         textDirection: TextDirection.rtl,
+        children: const [SizedBox()],
       );
       final rowProperties =
           await toFlexLayoutProperties(rowWidget, tester: tester);
@@ -93,11 +93,11 @@ void main() {
         'displayChildren is a reversed children when start is not top left',
         (tester) async {
       final widget = Column(
+        verticalDirection: VerticalDirection.up,
         children: [
           const SizedBox(),
           Container(),
         ],
-        verticalDirection: VerticalDirection.up,
       );
       final properties = await toFlexLayoutProperties(widget, tester: tester);
       expect(properties.startIsTopLeft, false);

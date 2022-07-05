@@ -65,6 +65,11 @@ class HistoryManager<T> {
   void pop() {
     if (_history.isEmpty) throw StateError('no history available');
 
+    if (_history.length == 1) {
+      clear();
+      return;
+    }
+
     _history.removeLast();
 
     // If the currently selected item was popped, update the selection to the
@@ -81,5 +86,16 @@ class HistoryManager<T> {
     _history.add(value);
     _historyIndex = _history.length - 1;
     _current.value = _history[_historyIndex];
+  }
+
+  /// Replaces the [current] item with a provided value.
+  /// If history is empty, the value is pushed into the stack.
+  void replaceCurrent(T value) {
+    if (current.value == null) {
+      push(value);
+    } else {
+      _history[_historyIndex] = value;
+      _current.value = _history[_historyIndex];
+    }
   }
 }

@@ -85,8 +85,6 @@ class DebuggerScreenBody extends StatefulWidget {
 
   static final codeViewKey = GlobalKey(debugLabel: 'codeViewKey');
   static final scriptViewKey = GlobalKey(debugLabel: 'scriptViewKey');
-  static final programExplorerKey =
-      GlobalKey(debugLabel: 'programExploreryKey');
   static const callStackCopyButtonKey =
       Key('debugger_call_stack_copy_to_clipboard_button');
 
@@ -138,7 +136,6 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
             children: [
               child!,
               ProgramExplorer(
-                key: DebuggerScreenBody.programExplorerKey,
                 controller: controller.programExplorerController,
                 onSelected: _onLocationSelected,
               ),
@@ -243,12 +240,12 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
           children: [
             BreakpointsCountBadge(breakpoints: breakpoints),
             DevToolsTooltip(
+              message: 'Remove all breakpoints',
               child: ToolbarAction(
                 icon: Icons.delete,
                 onPressed:
                     breakpoints.isNotEmpty ? controller.clearBreakpoints : null,
               ),
-              message: 'Remove all breakpoints',
             ),
           ],
         );
