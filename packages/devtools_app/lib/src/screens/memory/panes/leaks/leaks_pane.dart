@@ -10,6 +10,7 @@ import '../../../../shared/globals.dart';
 import '../../../../shared/utils.dart';
 import '../../memory_controller.dart';
 import 'diagnostics/model.dart';
+import 'diagnostics/not_gced_analyzer.dart';
 import 'instrumentation/model.dart';
 import 'primitives/analysis_status.dart';
 
@@ -81,12 +82,37 @@ class _LeaksPaneState extends State<LeaksPane>
 
     final notGCed = leakDetails.byType[LeakType.notGCed] ?? [];
 
+    NotGCedAnalyzed? notGCedAnalyzed;
     if (notGCed.isNotEmpty) {
       _analysis.message.value = 'Taking heap snapshot.';
       final task = await _createAnalysisTask(notGCed);
-      _analysis.message.value = 'Getting retaining paths.';
-      calculateRetainingPathsOrRetainers(task);
+      _analysis.message.value = 'Detecting retaining paths.';
+      notGCedAnalyzed = analyseNotGCed(task);
     }
+
+    _analysis.message.value = 'Formatting.';
+
+
+    final yaml = analyzedLeakToYaml(
+      gcedLate: leakDetails.gcedLate,
+      notDisposed: leakDetails.notDisposed,
+      notGCed: notGCedAnalyzed,
+    );
+
+    await Clipboard.setData(
+      ClipboardData(text: yaml),
+    );
+
+    setState(() {
+      _leakController.message = 'Copied to clipboard';
+      _leakController.isComplete = true;
+    });
+
+    await Future.delayed(const Duration(seconds: 1));
+
+    setState(() {
+      _leakController.reset();
+    });
 
     //   try {
     //     await setHeavyState(() {
@@ -137,7 +163,7 @@ class _LeaksPaneState extends State<LeaksPane>
     //   } catch (e, trace) {
     //     handleError(e, trace);
     //   }
-  }
+
 
   void _subscribeForMemoryLeaksMessages() {
     autoDisposeStreamSubscription(
