@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../instrumentation/model.dart';
 import 'model.dart';
 
+/// Sets [retainingPath] to each [notGCedLeaks].
 void analyzeHeapAndSetRetainingPaths(
   AdaptedHeap heap,
   List<LeakReport> notGCedLeaks,
@@ -14,8 +15,7 @@ void analyzeHeapAndSetRetainingPaths(
   }
 }
 
-/// Sets retaining path to the root in detailed form to [detailedPath] for each
-/// leak.
+/// Sets [detailedPath] to each leak.
 void setDetailedPaths(AdaptedHeap heap, List<LeakReport> notGCedLeaks) {
   assert(heap.isSpanningTreeBuilt);
 
@@ -24,10 +24,11 @@ void setDetailedPaths(AdaptedHeap heap, List<LeakReport> notGCedLeaks) {
   }
 }
 
+/// Set
 @visibleForTesting
 void buildSpanningTree(AdaptedHeap heap) {
   final root = heap.objects[AdaptedHeap.rootIndex];
-  root.parent = -1;
+  root.retainer = -1;
 
   // Array of all objects where the best distance from root is n.
   // n starts with 0 and increases by 1 on each step of the algorithm.
@@ -42,11 +43,10 @@ void buildSpanningTree(AdaptedHeap heap) {
       for (var c in parent.references) {
         final child = heap.objects[c];
 
-        if (child.parent != null) continue;
-        if (_shouldSkip(child.klass)) continue;
+        if (child.retainer != null) continue;
+        if (!_canRetain(child.klass)) continue;
 
-        child.parent = p;
-        parent.children.add(c);
+        child.retainer = p;
         nextCut.add(c);
       }
     }
@@ -58,11 +58,12 @@ void buildSpanningTree(AdaptedHeap heap) {
   }
 }
 
-bool _shouldSkip(String klass) {
+/// Detects if a class can retain an object from garbage collection.
+bool _canRetain(String klass) {
   const toSkip = {
     '_WeakReferenceImpl',
     'FinalizerEntry',
   };
 
-  return toSkip.contains(klass);
+  return !toSkip.contains(klass);
 }

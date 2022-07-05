@@ -5,7 +5,7 @@ import 'package:devtools_app/src/screens/memory/panes/leaks/instrumentation/mode
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('LeakAnalysisTask serializes.', () {
+  test('$NotGCedAnalyzerTask serializes.', () {
     final task = NotGCedAnalyzerTask(
       reports: [
         LeakReport(
@@ -35,7 +35,7 @@ void main() {
     );
   });
 
-  test('MtHeap serializes.', () {
+  test('$AdaptedHeap serializes.', () {
     final json = AdaptedHeap([
       AdaptedHeapObject(
         code: 1,

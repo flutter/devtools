@@ -2,6 +2,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../instrumentation/model.dart';
 
+/// Result of analysis of [notGCed] memory leaks.
 class NotGCedAnalyzed {
   NotGCedAnalyzed(this.byCulprits, this.withoutPath, this.total);
 
@@ -10,6 +11,7 @@ class NotGCedAnalyzed {
   final int total;
 }
 
+/// Input for analyses of notGCed leaks.
 class NotGCedAnalyzerTask {
   NotGCedAnalyzerTask({
     required this.heap,
@@ -37,6 +39,8 @@ class NotGCedAnalyzerTask {
       };
 }
 
+/// Contains information from [HeapSnapshotGraph], necessary to analyze
+/// memory leaks, plus serialization.
 class AdaptedHeap {
   AdaptedHeap(this.objects);
 
@@ -66,58 +70,31 @@ class AdaptedHeap {
         'objects': objects.map((e) => e.toJson()).toList(),
       };
 
-  String toYaml() {
-    final noPath = objects.where((o) => o.parent == null);
-    final result = StringBuffer();
-
-    result.writeln('with-retaining-path:');
-    result.writeln('  total: ${objects.length - noPath.length}');
-    result.write(_objectToYaml(objects[rootIndex], '  '));
-    result.writeln('without-retaining-path:');
-    result.writeln('  total: ${noPath.length}');
-    result.writeln('  objects:');
-    for (var o in noPath) {
-      result.writeln('    ${o.name}');
-    }
-    return result.toString();
-  }
-
-  String _objectToYaml(AdaptedHeapObject object, String indent) {
-    final firstLine = '$indent${object.name}';
-    if (object.children.isEmpty) return '$firstLine\n';
-
-    final result = StringBuffer();
-    result.writeln('$firstLine:');
-    for (var c in object.children) {
-      final child = objects[c];
-      result.write(_objectToYaml(child, '$indent  '));
-    }
-    return result.toString();
-  }
-
-  HeapPath? _path(IdentityHashCode code) {
+  HeapPath? _retainingPath(IdentityHashCode code) {
     assert(isSpanningTreeBuilt);
     var i = _byCode[code]!;
-    if (objects[i].parent == null) return null;
+    if (objects[i].retainer == null) return null;
 
     final result = <int>[];
 
     while (i >= 0) {
       result.insert(0, i);
-      i = objects[i].parent!;
+      i = objects[i].retainer!;
     }
 
     return result;
   }
 
+  /// Retaining path for the object in string format.
   String? shortPath(IdentityHashCode code) {
-    final path = _path(code);
+    final path = _retainingPath(code);
     if (path == null) return null;
     return '/${path.map((i) => objects[i].shortName).join('/')}/';
   }
 
+  /// Retaining path for the object as an array of the retaining objects.
   List<String>? detailedPath(IdentityHashCode code) {
-    final path = _path(code);
+    final path = _retainingPath(code);
     if (path == null) return null;
     return path.map((i) => objects[i].name).toList();
   }
@@ -159,10 +136,10 @@ class AdaptedHeapObject {
   final String library;
   final IdentityHashCode code;
 
-  // Fields for graph analysis.
-  final List<int> children = [];
-  // null - unknown, -1 - root.
-  int? parent;
+  /// No serialization is needed for the field because the field is used after
+  /// the object transfer.
+  /// [null] - retainer is unknown, -1 - the object is root.
+  int? retainer;
 
   Map<String, dynamic> toJson() => {
         'code': code,

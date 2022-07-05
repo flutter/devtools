@@ -45,16 +45,12 @@ void main() {
         buildSpanningTree(task.heap);
         final appObject =
             task.heap.objects.where((o) => o.klass == t.appClassName).first;
-        expect(appObject.parent, isNotNull, reason: t.name);
-
-        await File(
-          '$dataDir${t.name}.yaml',
-        ).writeAsString(task.heap.toYaml());
+        expect(appObject.retainer, isNotNull, reason: t.name);
       });
 
       // This test does not verify results, because the code is not stable yet.
       // We need the test to make sure (1) the code does not fail and (2)
-      // To see the changes in the output file in code reviews.
+      // to see the changes in the output file in code reviews.
       test('Write result to file.', () async {
         final result = analyseNotGCed(task);
 
