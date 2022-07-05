@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../config_specific/logger/logger.dart' as logger;
@@ -11,6 +12,7 @@ import '../../../../shared/utils.dart';
 import '../../memory_controller.dart';
 import 'diagnostics/model.dart';
 import 'diagnostics/not_gced_analyzer.dart';
+import 'formatter.dart';
 import 'instrumentation/model.dart';
 import 'primitives/analysis_status.dart';
 
@@ -92,7 +94,6 @@ class _LeaksPaneState extends State<LeaksPane>
 
     _analysis.message.value = 'Formatting.';
 
-
     final yaml = analyzedLeakToYaml(
       gcedLate: leakDetails.gcedLate,
       notDisposed: leakDetails.notDisposed,
@@ -103,67 +104,9 @@ class _LeaksPaneState extends State<LeaksPane>
       ClipboardData(text: yaml),
     );
 
-    setState(() {
-      _leakController.message = 'Copied to clipboard';
-      _leakController.isComplete = true;
-    });
-
-    await Future.delayed(const Duration(seconds: 1));
-
-    setState(() {
-      _leakController.reset();
-    });
-
-    //   try {
-    //     await setHeavyState(() {
-    //       _leakController.message = 'Received leaks. Parsing.';
-    //     });
-    //     final leakDetails = Leaks.fromJson(event.json!['extensionData']!);
-    //
-    //     await setHeavyState(() {
-    //       _leakController.message = 'Getting retaining paths.';
-    //     });
-    //     final notGCed = leakDetails.leaks[LeakType.notGCed] ?? [];
-    //
-    //     if (notGCed.isNotEmpty) {
-    //       final task = await getTask(controller, notGCed);
-    //       assert(task.reports.isNotEmpty);
-    //
-    //       await setHeavyState(() {
-    //         _leakController.message = 'Getting retaining paths.';
-    //         _leakController.previousAnalysisTask =
-    //             jsonEncode(task.toJson());
-    //       });
-    //
-    //       calculateRetainingPathsOrRetainers(task);
-    //
-    //       assert(task.reports.first.retainingPath != null ||
-    //           task.reports.first.retainers != null);
-    //     }
-    //
-    //     setState(
-    //       () => _leakController.message =
-    //           'Obtained paths. Copying to clipboard',
-    //     );
-    //
-    //     await Clipboard.setData(
-    //       ClipboardData(text: analyzeAndYaml(leakDetails)),
-    //     );
-    //
-    //     setState(() {
-    //       _leakController.message = 'Copied to clipboard';
-    //       _leakController.isComplete = true;
-    //     });
-    //
-    //     await Future.delayed(const Duration(seconds: 1));
-    //
-    //     setState(() {
-    //       _leakController.reset();
-    //     });
-    //   } catch (e, trace) {
-    //     handleError(e, trace);
-    //   }
-
+    _analysis.message.value = 'Copied to clipboard';
+    _analysis.status.value = AnalysisStatus.ShowingResult;
+  }
 
   void _subscribeForMemoryLeaksMessages() {
     autoDisposeStreamSubscription(
