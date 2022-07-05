@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -9,6 +7,9 @@ import '../../../../primitives/utils.dart';
 import '../../../../service/service_extensions.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
+import '../../../../shared/utils.dart';
+import '../../memory_controller.dart';
+import 'diagnostics/model.dart';
 import 'instrumentation/model.dart';
 import 'primitives/analysis_status.dart';
 
@@ -27,7 +28,10 @@ class LeaksPane extends StatefulWidget {
   State<LeaksPane> createState() => _LeaksPaneState();
 }
 
-class _LeaksPaneState extends State<LeaksPane> with AutoDisposeMixin {
+class _LeaksPaneState extends State<LeaksPane>
+    with
+        AutoDisposeMixin,
+        ProvidedControllerMixin<MemoryController, LeaksPane> {
   LeakSummary? _lastLeakSummary;
   String _leakSummaryHistory = '';
   final AnalysisStatusController _analysis = AnalysisStatusController();
@@ -61,6 +65,13 @@ class _LeaksPaneState extends State<LeaksPane> with AutoDisposeMixin {
     }
   }
 
+  Future<NotGCedAnalyzerTask> _createAnalysisTask(
+    List<LeakReport> reports,
+  ) async {
+    final graph = (await controller.snapshotMemory())!;
+    return NotGCedAnalyzerTask.fromSnapshot(graph, reports);
+  }
+
   Future<void> _receivedLeaksDetails(Event event) async {
     if (_analysis.status.value != AnalysisStatus.Ongoing) return;
     _analysis.message.value = 'Received details. Parsing.';
@@ -71,10 +82,9 @@ class _LeaksPaneState extends State<LeaksPane> with AutoDisposeMixin {
     final notGCed = leakDetails.byType[LeakType.notGCed] ?? [];
 
     if (notGCed.isNotEmpty) {
-      final task = await getTask(controller, notGCed);
-
+      _analysis.message.value = 'Taking heap snapshot.';
+      final task = await _createAnalysisTask(notGCed);
       _analysis.message.value = 'Getting retaining paths.';
-
       calculateRetainingPathsOrRetainers(task);
     }
 
