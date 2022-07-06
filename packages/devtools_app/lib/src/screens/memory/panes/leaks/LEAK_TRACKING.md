@@ -39,6 +39,7 @@ if only you want to report an issue.
 
 ## Detect leaks in your Flutter app
 
+Invoke `ensureInitialized` and `startAppLeakTracking` before `runApp` like [the example app does](https://github.com/polina-c/spikes/blob/master/leaking_app/lib/main.dart#L7) and then follow the steps for demo app. 
 
 ## Add instrumentation to your classes
 
