@@ -78,23 +78,19 @@ class Leaks {
 /// DevTools after deeper analysis.
 class LeakReport {
   LeakReport({
-    required this.token,
     required this.type,
     required this.details,
     required this.code,
   });
 
   factory LeakReport.fromJson(Map<String, dynamic> json) => LeakReport(
-        token: json['token'],
         type: json['type'],
-        details: json['details'],
+        details: (json['details'] as List<dynamic>? ?? []).cast<String>(),
         code: json['code'],
       );
 
-  /// Token, provided by user.
-  final String token;
   final String type;
-  final String? details;
+  final List<String> details;
   final int code;
 
   // The fields below do not need serialization as they are populated after
@@ -103,7 +99,6 @@ class LeakReport {
   List<String>? detailedPath;
 
   Map<String, dynamic> toJson() => {
-        'token': token,
         'type': type,
         'details': details,
         'code': code,
@@ -126,7 +121,6 @@ ${leaks.map((e) => e.toYaml('$indent    ')).join()}
   String toYaml(String indent) {
     final result = StringBuffer();
     result.writeln('$indent$type:');
-    result.writeln('$indent  token: $token');
     result.writeln('$indent  type: $type');
     result.writeln('$indent  details: $details');
     result.writeln('$indent  identityHashCode: $code');

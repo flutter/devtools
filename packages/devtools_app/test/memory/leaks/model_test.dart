@@ -9,9 +9,8 @@ void main() {
     final task = NotGCedAnalyzerTask(
       reports: [
         LeakReport(
-          token: '1',
           type: 'type',
-          details: 'details',
+          details: ['details'],
           code: 2,
         )
       ],

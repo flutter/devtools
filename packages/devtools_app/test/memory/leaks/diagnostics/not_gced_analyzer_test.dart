@@ -68,16 +68,16 @@ void main() {
   }
 
   test('Culprits are found as expected.', () {
-    final culprit1 = _createReport('culprit1', '/1/2/');
-    final culprit2 = _createReport('culprit1', '/1/7/');
+    final culprit1 = _createReport(1, '/1/2/');
+    final culprit2 = _createReport(2, '/1/7/');
 
     final notGCed = [
       culprit1,
-      _createReport('victim11', '/1/2/3/4/5/'),
-      _createReport('victim12', '/1/2/3/'),
+      _createReport(11, '/1/2/3/4/5/'),
+      _createReport(12, '/1/2/3/'),
       culprit2,
-      _createReport('victim21', '/1/7/3/4/5/'),
-      _createReport('victim22', '/1/7/3/'),
+      _createReport(21, '/1/7/3/4/5/'),
+      _createReport(22, '/1/7/3/'),
     ];
 
     final culprits = findCulprits(notGCed);
@@ -90,10 +90,9 @@ void main() {
   });
 }
 
-LeakReport _createReport(String token, String path) => LeakReport(
-      token: token,
+LeakReport _createReport(int code, String path) => LeakReport(
       type: '',
-      details: '',
+      details: ['details'],
       code: 0,
     )..retainingPath = path;
 
