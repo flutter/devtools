@@ -401,7 +401,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   late List<bool> rootsExpanded;
   late FocusNode _focusNode;
 
-  late ValueNotifier<Selection<T>>? selectionNotifier;
+  late ValueNotifier<Selection<T>> selectionNotifier;
 
   FocusNode? get focusNode => _focusNode;
 
