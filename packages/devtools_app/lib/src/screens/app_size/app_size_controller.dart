@@ -49,14 +49,13 @@ class AppSizeController {
   /// The node set as the analysis tab root.
   ///
   /// Used to build the treemap and the tree table for the analysis tab.
-  ValueListenable<Selection<TreemapNode>> get analysisRoot => _analysisRoot;
-  final _analysisRoot =
+  final analysisRoot =
       ValueNotifier<Selection<TreemapNode>>(Selection<TreemapNode>());
 
   void changeAnalysisRoot(TreemapNode? newRoot) {
     if (newRoot == null) return;
 
-    _analysisRoot.value = Selection(node: newRoot, nodeIndex: newRoot.index);
+    analysisRoot.value = Selection(node: newRoot, nodeIndex: newRoot.index);
 
     final programInfoNode =
         _analysisCallGraph?.program.lookup(newRoot.packagePath()) ??
@@ -155,7 +154,7 @@ class AppSizeController {
   }
 
   void _clearAnalysis() {
-    _analysisRoot.value = Selection<TreemapNode>();
+    analysisRoot.value = Selection<TreemapNode>();
     _analysisJsonFile.value = null;
     _analysisCallGraphRoot.value = null;
     _analysisCallGraph = null;
