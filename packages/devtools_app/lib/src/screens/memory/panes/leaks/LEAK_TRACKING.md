@@ -35,7 +35,7 @@ flutter: 3 memory leaks: not disposed: 1, not GCed: 2, GCed late: 0
 
 5. Click "Analyze and Download"
 6. Find two files in the folder "Download": '.yaml' and '.raw.json'. Open '.yaml' to review the leaks. You will need '.raw.json' 
-if only you want to report an issue or perform deeper analysis of the heap yourself.
+if only you want to report an issue.
 
 ## Detect leaks in your Flutter app
 
