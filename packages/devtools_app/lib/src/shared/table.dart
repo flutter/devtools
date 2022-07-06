@@ -763,7 +763,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       // We do not need to scroll into view here because we have manually
       // managed the scrolling in the above checks for `isBelowViewport` and
       // `isAboveViewport`.
-      selectionNotifier!.value = Selection(
+      selectionNotifier.value = Selection(
         node: newSelectedNode,
         nodeIndex: newSelectedNodeIndex,
       );
