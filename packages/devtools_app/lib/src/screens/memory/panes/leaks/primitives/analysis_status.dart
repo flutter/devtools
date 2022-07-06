@@ -14,7 +14,7 @@ enum AnalysisStatus {
   ShowingError,
 }
 
-Duration _showingResultDelay = const Duration(seconds: 3);
+Duration _showingResultDelay = const Duration(seconds: 5);
 Duration _delayForUiToHandleState = const Duration(milliseconds: 5);
 
 /// Describes status of the ongoing process.
