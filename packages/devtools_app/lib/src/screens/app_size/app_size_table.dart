@@ -60,7 +60,8 @@ class AppSizeAnalysisTable extends StatelessWidget {
       keyFactory: (node) => PageStorageKey<String>(node.name),
       sortColumn: sortColumn,
       sortDirection: SortDirection.descending,
-      onToggleNode: (TreemapNode n) => controller.changeAnalysisRoot(n),
+      selectionNotifier:
+          controller.analysisRoot as ValueNotifier<Selection<TreemapNode>>?,
       autoExpandRoots: true,
     );
   }

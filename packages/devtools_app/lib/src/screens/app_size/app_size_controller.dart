@@ -12,6 +12,7 @@ import 'package:vm_snapshot_analysis/v8_profile.dart';
 
 import '../../charts/treemap.dart';
 import '../../primitives/utils.dart';
+import '../../shared/table.dart';
 import 'app_size_screen.dart';
 
 enum DiffTreeType {
@@ -48,12 +49,14 @@ class AppSizeController {
   /// The node set as the analysis tab root.
   ///
   /// Used to build the treemap and the tree table for the analysis tab.
-  ValueListenable<TreemapNode?> get analysisRoot => _analysisRoot;
-  final _analysisRoot = ValueNotifier<TreemapNode?>(null);
+  ValueListenable<Selection<TreemapNode>> get analysisRoot => _analysisRoot;
+  final _analysisRoot =
+      ValueNotifier<Selection<TreemapNode>>(Selection<TreemapNode>());
 
   void changeAnalysisRoot(TreemapNode? newRoot) {
-    _analysisRoot.value = newRoot;
     if (newRoot == null) return;
+
+    _analysisRoot.value = Selection(node: newRoot, nodeIndex: newRoot.index);
 
     final programInfoNode =
         _analysisCallGraph?.program.lookup(newRoot.packagePath()) ??
@@ -152,7 +155,7 @@ class AppSizeController {
   }
 
   void _clearAnalysis() {
-    _analysisRoot.value = null;
+    _analysisRoot.value = Selection<TreemapNode>();
     _analysisJsonFile.value = null;
     _analysisCallGraphRoot.value = null;
     _analysisCallGraph = null;

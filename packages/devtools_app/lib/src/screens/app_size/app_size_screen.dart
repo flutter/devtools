@@ -279,11 +279,11 @@ class _AnalysisViewState extends State<AnalysisView>
     super.didChangeDependencies();
     if (!initController()) return;
 
-    analysisRoot = controller.analysisRoot.value;
+    analysisRoot = controller.analysisRoot.value!.node;
 
     addAutoDisposeListener(controller.analysisRoot, () {
       setState(() {
-        analysisRoot = controller.analysisRoot.value;
+        analysisRoot = controller.analysisRoot.value!.node;
       });
     });
 

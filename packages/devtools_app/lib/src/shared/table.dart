@@ -358,7 +358,6 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
     required this.sortDirection,
     this.secondarySortColumn,
     this.selectionNotifier,
-    this.onToggleNode,
     this.autoExpandRoots = false,
   })  : assert(columns.contains(treeColumn)),
         assert(columns.contains(sortColumn)),
@@ -384,8 +383,6 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
 
   final ValueNotifier<Selection<T>>? selectionNotifier;
 
-  final void Function(T node)? onToggleNode;
-
   final bool autoExpandRoots;
 
   @override
@@ -404,7 +401,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   late List<bool> rootsExpanded;
   late FocusNode _focusNode;
 
-  late ValueNotifier<Selection<T>> selectionNotifier;
+  late ValueNotifier<Selection<T>>? selectionNotifier;
 
   FocusNode? get focusNode => _focusNode;
 
@@ -441,7 +438,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 
     addAutoDisposeListener(selectionNotifier, () {
       setState(() {
-        final node = selectionNotifier.value.node;
+        final node = selectionNotifier!.value.node;
         expandParents(node?.parent);
       });
     });
@@ -494,7 +491,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 
   void _onItemPressed(T node, int nodeIndex) {
     // Rebuilds the table whenever the tree structure has been updated.
-    selectionNotifier.value = Selection(
+    selectionNotifier!.value = Selection(
       node: node,
       nodeIndex: nodeIndex,
     );
@@ -503,9 +500,6 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   }
 
   void _toggleNode(T node) {
-    if (widget.onToggleNode != null) {
-      widget.onToggleNode!(node);
-    }
     if (!node.isExpandable) {
       node.leaf();
       _updateItems();
@@ -610,7 +604,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
         columns: widget.columns,
         columnWidths: columnWidths,
         expandableColumn: widget.treeColumn,
-        isSelected: selectionNotifier.value.node == node,
+        isSelected: selectionNotifier!.value.node == node,
         isExpanded: node.isExpanded,
         isExpandable: node.isExpandable,
         isShown: node.shouldShow(),
@@ -667,15 +661,16 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     ].contains(event.logicalKey)) return KeyEventResult.ignored;
 
     // If there is no selected node, choose the first one.
-    if (selectionNotifier.value.node == null) {
-      selectionNotifier.value = Selection(
+    if (selectionNotifier!.value.node == null) {
+      selectionNotifier!.value = Selection(
         node: items[0],
         nodeIndex: 0,
       );
     }
 
     assert(
-      selectionNotifier.value.node == items[selectionNotifier.value.nodeIndex!],
+      selectionNotifier!.value.node ==
+          items[selectionNotifier!.value.nodeIndex!],
     );
 
     if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
@@ -685,8 +680,8 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     } else if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
       // On left arrow collapse the row if it is expanded. If it is not, move
       // selection to its parent.
-      if (selectionNotifier.value.node!.isExpanded) {
-        _toggleNode(selectionNotifier.value.node!);
+      if (selectionNotifier!.value.node!.isExpanded) {
+        _toggleNode(selectionNotifier!.value.node!);
       } else {
         _moveSelection(
           ScrollKind.parent,
@@ -696,9 +691,9 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       }
     } else if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
       // On right arrow expand the row if possible, otherwise move selection down.
-      if (selectionNotifier.value.node!.isExpandable &&
-          !selectionNotifier.value.node!.isExpanded) {
-        _toggleNode(selectionNotifier.value.node!);
+      if (selectionNotifier!.value.node!.isExpandable &&
+          !selectionNotifier!.value.node!.isExpanded) {
+        _toggleNode(selectionNotifier!.value.node!);
       } else {
         _moveSelection(
           ScrollKind.down,
@@ -728,7 +723,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     final lastItemIndex = firstItemIndex + minCompleteItemsInView - 1;
     late int newSelectedNodeIndex;
 
-    final selectionValue = selectionNotifier.value;
+    final selectionValue = selectionNotifier!.value;
     final selectedNodeIndex = selectionValue.nodeIndex;
     switch (scrollKind) {
       case ScrollKind.down:
@@ -769,7 +764,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       // We do not need to scroll into view here because we have manually
       // managed the scrolling in the above checks for `isBelowViewport` and
       // `isAboveViewport`.
-      selectionNotifier.value = Selection(
+      selectionNotifier!.value = Selection(
         node: newSelectedNode,
         nodeIndex: newSelectedNodeIndex,
       );
