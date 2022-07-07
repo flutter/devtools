@@ -74,6 +74,14 @@ class Leaks {
       );
 }
 
+/// Names for json fields.
+class _JsonFields {
+  static const String type = 'type';
+  static const String details = 'details';
+  static const String code = 'code';
+  static const String disposalStack = 'disposalStack';
+}
+
 /// Leak information, passed from application to DevTools and than extended by
 /// DevTools after deeper analysis.
 class LeakReport {
@@ -85,10 +93,11 @@ class LeakReport {
   });
 
   factory LeakReport.fromJson(Map<String, dynamic> json) => LeakReport(
-        type: json['type'],
-        details: (json['details'] as List<dynamic>? ?? []).cast<String>(),
-        code: json['code'],
-        disposalStack: json['disposalStack'],
+        type: json[_JsonFields.type],
+        details:
+            (json[_JsonFields.details] as List<dynamic>? ?? []).cast<String>(),
+        code: json[_JsonFields.code],
+        disposalStack: json[_JsonFields.disposalStack],
       );
 
   final String type;
@@ -101,10 +110,10 @@ class LeakReport {
   List<String>? detailedPath;
 
   Map<String, dynamic> toJson() => {
-        'type': type,
-        'details': details,
-        'code': code,
-        'disposalStack': disposalStack,
+        _JsonFields.type: type,
+        _JsonFields.details: details,
+        _JsonFields.code: code,
+        _JsonFields.disposalStack: disposalStack,
       };
 
   static String iterableToYaml(

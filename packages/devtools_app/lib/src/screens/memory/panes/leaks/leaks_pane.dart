@@ -45,7 +45,7 @@ class _LeaksPaneState extends State<LeaksPane>
         ProvidedControllerMixin<MemoryController, LeaksPane> {
   LeakSummary? _lastLeakSummary;
   String _leakSummaryHistory = '';
-  final AnalysisStatusController _analysis = AnalysisStatusController();
+  final _analysis = AnalysisStatusController();
   final _exportController = ExportController();
 
   @override
@@ -172,78 +172,16 @@ class _LeaksPaneState extends State<LeaksPane>
     );
   }
 
-  Future<void> _requestLeaks() async {
-    _analysis.status.value = AnalysisStatus.Ongoing;
-    _analysis.message.value = 'Requested details from the application.';
-
-    await _invokeMemoryLeakTrackingExtension(
-      <String, dynamic>{
-        // TODO(polina-c): reference the constant in Flutter
-        // https://github.com/flutter/devtools/issues/3951
-        'requestDetails': 'true',
-      },
-    );
-  }
-
-  Future<void> _forceGC() async {
-    _analysis.status.value = AnalysisStatus.Ongoing;
-    _analysis.message.value = 'Forcing full garbage collection...';
-    await _invokeMemoryLeakTrackingExtension(
-      <String, dynamic>{
-        // TODO(polina-c): reference the constant in Flutter
-        // https://github.com/flutter/devtools/issues/3951
-        'forceGC': 'true',
-      },
-    );
-    _analysis.status.value = AnalysisStatus.ShowingResult;
-    _analysis.message.value = 'Full garbage collection initiated.';
-  }
-
-  Future<void> _invokeMemoryLeakTrackingExtension(
-    Map<String, dynamic> args,
-  ) async {
-    await serviceManager.service!.callServiceExtension(
-      memoryLeakTracking,
-      isolateId: serviceManager.isolateManager.mainIsolate.value!.id!,
-      args: args,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    final informationButton = Tooltip(
-      message: 'Open memory leak tracking guidance.',
-      child: IconButton(
-        icon: const Icon(Icons.help_outline),
-        onPressed: () async => await launchUrl(linkToGuidance, context),
-      ),
-    );
-
-    if (_leakSummaryHistory.isEmpty)
+    if (_leakSummaryHistory.isEmpty) {
       return Column(
-        children: [
-          informationButton,
-          const Text('No information about memory leaks yet.'),
+        children: const [
+          _InformationButton(),
+          Text('No information about memory leaks yet.'),
         ],
       );
-
-    final analyzeButton = Tooltip(
-      message: 'Analyze the leaks and download the result\n'
-          'to ${_file_prefix}_<time>.yaml.',
-      child: MaterialButton(
-        child: const Text('Analyze and Download'),
-        onPressed: () async => _requestLeaks(),
-      ),
-    );
-
-    final forceGCButton = Tooltip(
-      message: 'Force full GC in the application\n'
-          'to make sure to collect everything that can be collected.',
-      child: MaterialButton(
-        child: const Text('Force GC'),
-        onPressed: () async => _forceGC(),
-      ),
-    );
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -253,17 +191,107 @@ class _LeaksPaneState extends State<LeaksPane>
             controller: _analysis,
             analysisStarter: Row(
               children: [
-                informationButton,
-                analyzeButton,
-                forceGCButton,
+                const _InformationButton(),
+                _AnalyzeButton(analysis: _analysis),
+                _ForceGCButton(analysis: _analysis),
               ],
             ),
           ),
         ),
         Expanded(
-          child: SingleChildScrollView(child: Text(_leakSummaryHistory)),
+          child: SingleChildScrollView(
+            child: Text(_leakSummaryHistory),
+          ),
         ),
       ],
     );
   }
+}
+
+class _InformationButton extends StatelessWidget {
+  const _InformationButton({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: 'Open memory leak tracking guidance.',
+      child: IconButton(
+        icon: const Icon(Icons.help_outline),
+        onPressed: () async => await launchUrl(linkToGuidance, context),
+      ),
+    );
+  }
+}
+
+class _AnalyzeButton extends StatelessWidget {
+  const _AnalyzeButton({Key? key, required this.analysis}) : super(key: key);
+
+  final AnalysisStatusController analysis;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: 'Analyze the leaks and download the result\n'
+          'to ${_file_prefix}_<time>.yaml.',
+      child: MaterialButton(
+        child: const Text('Analyze and Download'),
+        onPressed: () async => _requestLeaks(),
+      ),
+    );
+  }
+
+  Future<void> _requestLeaks() async {
+    analysis.status.value = AnalysisStatus.Ongoing;
+    analysis.message.value = 'Requested details from the application.';
+
+    await _invokeMemoryLeakTrackingExtension(
+      <String, dynamic>{
+        // TODO(polina-c): reference the constant in Flutter
+        // https://github.com/flutter/devtools/issues/3951
+        'requestDetails': 'true',
+      },
+    );
+  }
+}
+
+class _ForceGCButton extends StatelessWidget {
+  const _ForceGCButton({Key? key, required this.analysis}) : super(key: key);
+
+  final AnalysisStatusController analysis;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: 'Force full GC in the application\n'
+          'to make sure to collect everything that can be collected.',
+      child: MaterialButton(
+        child: const Text('Force GC'),
+        onPressed: () async => _forceGC(),
+      ),
+    );
+  }
+
+  Future<void> _forceGC() async {
+    analysis.status.value = AnalysisStatus.Ongoing;
+    analysis.message.value = 'Forcing full garbage collection...';
+    await _invokeMemoryLeakTrackingExtension(
+      <String, dynamic>{
+        // TODO(polina-c): reference the constant in Flutter
+        // https://github.com/flutter/devtools/issues/3951
+        'forceGC': 'true',
+      },
+    );
+    analysis.status.value = AnalysisStatus.ShowingResult;
+    analysis.message.value = 'Full garbage collection initiated.';
+  }
+}
+
+Future<void> _invokeMemoryLeakTrackingExtension(
+  Map<String, dynamic> args,
+) async {
+  await serviceManager.service!.callServiceExtension(
+    memoryLeakTracking,
+    isolateId: serviceManager.isolateManager.mainIsolate.value!.id!,
+    args: args,
+  );
 }

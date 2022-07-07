@@ -36,6 +36,7 @@ class AnalysisStatusController {
 
 /// Shows [analysisStarter] if the analysis is not started yet and the status
 /// of the process otherwise.
+///
 /// If process is completed successfully, keeps the status for
 /// [_showingResultDelay] and then shows [analysisStarter].
 /// If the process ended up with error, show the error and two buttons
