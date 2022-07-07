@@ -1,19 +1,37 @@
+// Copyright 2022 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:vm_service/vm_service.dart';
 
 import '../instrumentation/model.dart';
 
 /// Result of analysis of [notGCed] memory leaks.
 class NotGCedAnalyzed {
-  NotGCedAnalyzed(this.byCulprits, this.withoutPath, this.total);
+  NotGCedAnalyzed({
+    required this.leaksByCulprits,
+    required this.leaksWithoutRetainingPath,
+    required this.totalLeaks,
+  });
 
-  /// Not GCed objects withretaining path to the root, by culprits.
-  final Map<LeakReport, List<LeakReport>> byCulprits;
+  /// Not GCed objects with retaining path to the root, by culprits.
+  final Map<LeakReport, List<LeakReport>> leaksByCulprits;
 
   /// Not GCed objects without retaining path to the root.
-  final List<LeakReport> withoutPath;
+  final List<LeakReport> leaksWithoutRetainingPath;
 
-  /// Total number of leaks.
-  final int total;
+  final int totalLeaks;
+}
+
+/// Names for json fields.
+class _JsonFields {
+  static const String reports = 'reports';
+  static const String heap = 'heap';
+  static const String objects = 'objects';
+  static const String code = 'code';
+  static const String references = 'references';
+  static const String klass = 'klass';
+  static const String library = 'library';
 }
 
 /// Input for analyses of notGCed leaks.
@@ -25,11 +43,11 @@ class NotGCedAnalyzerTask {
 
   factory NotGCedAnalyzerTask.fromJson(Map<String, dynamic> json) =>
       NotGCedAnalyzerTask(
-        reports: (json['reports'] as List<dynamic>)
+        reports: (json[_JsonFields.reports] as List<dynamic>)
             .cast<Map<String, dynamic>>()
             .map((e) => LeakReport.fromJson(e))
             .toList(),
-        heap: AdaptedHeap.fromJson(json['heap']),
+        heap: AdaptedHeap.fromJson(json[_JsonFields.heap]),
       );
 
   NotGCedAnalyzerTask.fromSnapshot(HeapSnapshotGraph graph, this.reports)
@@ -39,8 +57,8 @@ class NotGCedAnalyzerTask {
   final List<LeakReport> reports;
 
   Map<String, dynamic> toJson() => {
-        'reports': reports.map((e) => e.toJson()).toList(),
-        'heap': heap.toJson(),
+        _JsonFields.reports: reports.map((e) => e.toJson()).toList(),
+        _JsonFields.heap: heap.toJson(),
       };
 }
 
@@ -50,7 +68,7 @@ class AdaptedHeap {
   AdaptedHeap(this.objects);
 
   factory AdaptedHeap.fromJson(Map<String, dynamic> json) => AdaptedHeap(
-        (json['objects'] as List<dynamic>)
+        (json[_JsonFields.objects] as List<dynamic>)
             .map((e) => AdaptedHeapObject.fromJson(e))
             .toList(),
       );
@@ -65,29 +83,30 @@ class AdaptedHeap {
   final List<AdaptedHeapObject> objects;
   bool isSpanningTreeBuilt = false;
 
-  late final Map<IdentityHashCode, int> _byCode = Map.fromIterable(
+  /// Heap objects by identityHashCode.
+  late final Map<IdentityHashCode, int> _objectsByCode = Map.fromIterable(
     Iterable.generate(objects.length),
     key: (i) => objects[i].code,
     value: (i) => i,
   );
 
   Map<String, dynamic> toJson() => {
-        'objects': objects.map((e) => e.toJson()).toList(),
+        _JsonFields.objects: objects.map((e) => e.toJson()).toList(),
       };
 
   HeapPath? _retainingPath(IdentityHashCode code) {
     assert(isSpanningTreeBuilt);
-    var i = _byCode[code]!;
+    var i = _objectsByCode[code]!;
     if (objects[i].retainer == null) return null;
 
     final result = <int>[];
 
     while (i >= 0) {
-      result.insert(0, i);
+      result.add(i);
       i = objects[i].retainer!;
     }
 
-    return result;
+    return result.reversed.toList(growable: false);
   }
 
   /// Retaining path for the object in string format.
@@ -134,10 +153,10 @@ class AdaptedHeapObject {
 
   factory AdaptedHeapObject.fromJson(Map<String, dynamic> json) =>
       AdaptedHeapObject(
-        code: json['code'],
-        references: (json['references'] as List<dynamic>).cast<int>(),
-        klass: json['klass'],
-        library: json['library'],
+        code: json[_JsonFields.code],
+        references: (json[_JsonFields.references] as List<dynamic>).cast<int>(),
+        klass: json[_JsonFields.klass],
+        library: json[_JsonFields.library],
       );
 
   final List<int> references;
@@ -147,14 +166,14 @@ class AdaptedHeapObject {
 
   /// No serialization is needed for the field because the field is used after
   /// the object transfer.
-  /// [null] - retainer is unknown, -1 - the object is root.
+  /// Special values: [null] - retainer is unknown, -1 - the object is root.
   int? retainer;
 
   Map<String, dynamic> toJson() => {
-        'code': code,
-        'references': references,
-        'klass': klass,
-        'library': library.toString(),
+        _JsonFields.code: code,
+        _JsonFields.references: references,
+        _JsonFields.klass: klass,
+        _JsonFields.library: library.toString(),
       };
 
   String get name => '$library/$shortName';

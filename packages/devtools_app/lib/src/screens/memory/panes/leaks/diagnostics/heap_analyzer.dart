@@ -1,3 +1,7 @@
+// Copyright 2022 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/material.dart';
 
 import '../instrumentation/model.dart';
@@ -26,6 +30,7 @@ void setDetailedPaths(AdaptedHeap heap, List<LeakReport> notGCedLeaks) {
 
 /// Sets the field [retainer] for each object in the [heap], that has retaining
 /// path to the root.
+///
 /// The algorithm takes O(number of references in the heap).
 @visibleForTesting
 void buildSpanningTree(AdaptedHeap heap) {
@@ -34,6 +39,10 @@ void buildSpanningTree(AdaptedHeap heap) {
 
   // Array of all objects where the best distance from root is n.
   // n starts with 0 and increases by 1 on each step of the algorithm.
+  // The objects are ends of the graph cut.
+  // See description of cut:
+  // https://en.wikipedia.org/wiki/Cut_(graph_theory)
+  // On each step the algorithm moves the cut one step further from the root.
   var cut = [AdaptedHeap.rootIndex];
 
   // On each step of algorithm we know that all nodes at distance n or closer to

@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:devtools_app/src/screens/memory/panes/leaks/diagnostics/heap_analyser.dart';
+import 'package:devtools_app/src/screens/memory/panes/leaks/diagnostics/heap_analyzer.dart';
 import 'package:devtools_app/src/screens/memory/panes/leaks/diagnostics/model.dart';
 import 'package:devtools_app/src/screens/memory/panes/leaks/diagnostics/not_gced_analyzer.dart';
 import 'package:devtools_app/src/screens/memory/panes/leaks/formatter.dart';
