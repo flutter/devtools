@@ -54,6 +54,7 @@ class _LeaksPaneController {
   final _exportController = ExportController();
 
   void receivedLeaksSummary(Event event) {
+    leakSummaryReceived.value = true;
     try {
       final newSummary = LeakSummary.fromJson(event.json!['extensionData']!);
       final time = event.timestamp != null
