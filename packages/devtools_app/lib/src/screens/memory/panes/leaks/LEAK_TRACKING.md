@@ -22,26 +22,28 @@ This page and functionality are under construction. See https://github.com/flutt
 
 To detect memory leaks, the tool uses the fact that, with proper memory management, a dart object disposal and GC events should happen sequentially, close to each other.
 
-The tool watches disposal and GC events, and detects different types of leaks:
+By disposal and GC events, the tool detects different types of leaks:
 
-**Not disposed, but GCed (not-disposed)**: a disposable object was GCed, without being disposed. This means that the object's disposable content was allocating memory, after the object became not needed.
+**Not disposed, but GCed (not-disposed)**: a disposable object was GCed, without being disposed. This means that the object's disposable content was allocating memory, after the object became not needed. To fix the leak, invoke `dispose()` when the object is not needed.
 
-**Disposed, but not GCed (not-GCed)**: an object was disposed, but not GCed after number of GC events. This means there is a retaining path that holds the object from being garbage collected, after the object became not needed.
+**Disposed, but not GCed (not-GCed)**: an object was disposed, but not GCed after certain number of GC events. This means there is a retaining path that holds the object from being garbage collected, after the object became not needed. To fix the leak, after disposal assign to null all reachable references to the object:
 
+```
+myField.dispose();
+myField = null;
+```
+
+**Disposed and GCed late (GCed-late)**: an object disposed and then GCed, but GC happened later than expected. This means the retaining path was holding the object in memory for some period, but then disappeared.
 
 ### Culprits and Victims
 
+When we have set of not-GCed objects, some of them (victims) are not GC-ed because they are holded by others (culprits). Normally, to fix the leaks, you need to resolve culprits and victims will follow. 
 
 ### Limitations
 
-
-
-However, sometimes, an object is GC-ed without being disposed, or disposed without ever being GC-ed. Such cases are common sources of memory leaks. 
-
-The goal is to catch cases of not disposed, or not GC-ed objects, for a Flutter application, running in debug/profile mode, and tests.
+The tool detects leaks for disposable and instrumented objects. Some classes in Flutter framework are already instrumented. If youi want your classes to be tracked, tou need to make them disposable and instriment.
 
 ## Use the Leak Tracker
-
 
 ### Configure environment
 
