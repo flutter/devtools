@@ -12,6 +12,7 @@ void main() {
           type: 'type',
           details: ['details'],
           code: 2,
+          disposalStack: 'disposal_stack\ndisposal_stack',
         )
       ],
       heap: AdaptedHeap(

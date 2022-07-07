@@ -59,7 +59,7 @@ String _culpritToYaml(
   List<LeakReport> victims, {
   String indent = '',
 }) {
-  final culpritYaml = culprit.toYaml(indent);
+  final culpritYaml = culprit.toYaml(indent, includeDisposalStack: true);
   if (victims.isEmpty) return culpritYaml;
 
   return '$culpritYaml'

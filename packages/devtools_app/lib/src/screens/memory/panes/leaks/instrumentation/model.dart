@@ -81,20 +81,22 @@ class LeakReport {
     required this.type,
     required this.details,
     required this.code,
+    required this.disposalStack,
   });
 
   factory LeakReport.fromJson(Map<String, dynamic> json) => LeakReport(
         type: json['type'],
         details: (json['details'] as List<dynamic>? ?? []).cast<String>(),
         code: json['code'],
+        disposalStack: json['disposalStack'],
       );
 
   final String type;
   final List<String> details;
   final int code;
+  final String? disposalStack;
 
-  // The fields below do not need serialization as they are populated after
-  // transfer.
+  // The fields below do not need serialization as they are populated after.
   String? retainingPath;
   List<String>? detailedPath;
 
@@ -102,6 +104,7 @@ class LeakReport {
         'type': type,
         'details': details,
         'code': code,
+        'disposalStack': disposalStack,
       };
 
   static String iterableToYaml(
@@ -118,12 +121,21 @@ ${leaks.map((e) => e.toYaml('$indent    ')).join()}
 ''';
   }
 
-  String toYaml(String indent) {
+  String toYaml(String indent, {bool includeDisposalStack = false}) {
     final result = StringBuffer();
     result.writeln('$indent$type:');
     result.writeln('$indent  type: $type');
-    result.writeln('$indent  details: $details');
     result.writeln('$indent  identityHashCode: $code');
+    if (details.isNotEmpty) {
+      result.writeln('$indent  details: $details');
+    }
+
+    if (includeDisposalStack && disposalStack != null) {
+      result.writeln(
+        '$indent  disposalStack:'
+        '${_indentNewLines('\n$disposalStack', '$indent    ')}',
+      );
+    }
 
     if (detailedPath != null) {
       result.writeln('$indent  retainingPath:');
@@ -132,5 +144,9 @@ ${leaks.map((e) => e.toYaml('$indent    ')).join()}
       result.writeln('$indent  retainingPath: $retainingPath');
     }
     return result.toString();
+  }
+
+  static String _indentNewLines(String text, String indent) {
+    return text.replaceAll('\n', '\n$indent').trimRight();
   }
 }
