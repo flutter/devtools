@@ -101,7 +101,10 @@ class _AnalysisStatusViewState extends State<AnalysisStatusView>
 
     return Column(
       children: [
-        Text(c.message.value),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(c.message.value),
+        ),
         if (c.status.value == AnalysisStatus.ShowingError)
           Row(
             children: [
