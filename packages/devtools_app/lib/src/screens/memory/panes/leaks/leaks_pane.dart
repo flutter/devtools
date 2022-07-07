@@ -148,6 +148,10 @@ class _LeaksPaneController {
     );
     return _exportController.downloadFile(json, fileName: jsonFile);
   }
+
+  void dispose() {
+    status.dispose();
+  }
 }
 
 class _LeaksPaneState extends State<LeaksPane>
@@ -163,6 +167,12 @@ class _LeaksPaneState extends State<LeaksPane>
     _controller = _LeaksPaneController(memoryController: controller);
     cancelStreamSubscriptions();
     _subscribeForMemoryLeaksMessages();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   void _subscribeForMemoryLeaksMessages() {
@@ -190,7 +200,7 @@ class _LeaksPaneState extends State<LeaksPane>
     return ValueListenableBuilder<bool>(
       valueListenable: _controller.leakSummaryReceived,
       builder: (_, leakSummaryReceived, __) {
-        if (leakSummaryReceived) {
+        if (!leakSummaryReceived) {
           return Column(
             children: const [
               _InformationButton(),

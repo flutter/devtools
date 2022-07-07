@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../../../primitives/auto_dispose_mixin.dart';
+import '../../../../../../devtools_app.dart';
 
 enum AnalysisStatus {
   NotStarted,
@@ -18,11 +18,18 @@ enum AnalysisStatus {
   ShowingError,
 }
 
-Duration _showingResultDelay = const Duration(seconds: 5);
-Duration _delayForUiToHandleState = const Duration(milliseconds: 5);
+class _Constants {
+  static const Duration showingResultDelay = Duration(seconds: 5);
+  static const Duration delayForUiToHandleState = Duration(milliseconds: 5);
+}
 
 /// Describes status of the ongoing process.
 class AnalysisStatusController {
+  AnalysisStatusController() {
+    status.addListener(_statusChanged);
+    message.addListener(_messageChanged);
+  }
+
   ValueNotifier<AnalysisStatus> status =
       ValueNotifier<AnalysisStatus>(AnalysisStatus.NotStarted);
 
@@ -31,6 +38,22 @@ class AnalysisStatusController {
   void reset() {
     status.value = AnalysisStatus.NotStarted;
     message.value = '';
+  }
+
+  void _statusChanged() async {
+    if (status.value == AnalysisStatus.ShowingResult) {
+      await Future.delayed(_Constants.showingResultDelay);
+      reset();
+    }
+  }
+
+  void _messageChanged() async {
+    await Future.delayed(_Constants.delayForUiToHandleState);
+  }
+
+  void dispose() {
+    status.dispose();
+    message.dispose();
   }
 }
 
@@ -41,7 +64,7 @@ class AnalysisStatusController {
 /// [_showingResultDelay] and then shows [analysisStarter].
 /// If the process ended up with error, show the error and two buttons
 /// (Copy ans OK). After user clicks [OK], shows [analysisStarter].
-class AnalysisStatusView extends StatefulWidget {
+class AnalysisStatusView extends StatelessWidget {
   const AnalysisStatusView({
     Key? key,
     required this.controller,
@@ -51,76 +74,39 @@ class AnalysisStatusView extends StatefulWidget {
   final Widget analysisStarter;
 
   @override
-  State<AnalysisStatusView> createState() => _AnalysisStatusViewState();
-}
-
-class _AnalysisStatusViewState extends State<AnalysisStatusView>
-    with AutoDisposeMixin {
-  @override
-  void initState() {
-    super.initState();
-    _handleStatusUpdate();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    addAutoDisposeListener(widget.controller.status, _handleStatusUpdate);
-    addAutoDisposeListener(widget.controller.message, () async {
-      setState(() {});
-      await Future.delayed(_delayForUiToHandleState);
-    });
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  void _handleStatusUpdate() async {
-    setState(() {});
-
-    if (widget.controller.status.value == AnalysisStatus.ShowingResult) {
-      await Future.delayed(_showingResultDelay);
-      setState(
-        () => widget.controller.reset(),
-      );
-    }
-    // We need this delay, because analysis may include heavy computations,
-    // and we want to give a space for UI thread to show status.
-    await Future.delayed(_delayForUiToHandleState);
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final c = widget.controller;
+    return DualValueListenableBuilder<AnalysisStatus, String>(
+      firstListenable: controller.status,
+      secondListenable: controller.message,
+      builder: (_, status, message, __) {
+        if (status == AnalysisStatus.NotStarted) {
+          return analysisStarter;
+        }
 
-    if (c.status.value == AnalysisStatus.NotStarted) {
-      return widget.analysisStarter;
-    }
-
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text(c.message.value),
-        ),
-        if (c.status.value == AnalysisStatus.ShowingError)
-          Row(
-            children: [
-              MaterialButton(
-                child: const Icon(Icons.copy),
-                onPressed: () async => await Clipboard.setData(
-                  ClipboardData(text: c.message.value),
-                ),
-              ),
-              MaterialButton(
-                child: const Text('OK'),
-                onPressed: () => setState(() => c.reset()),
-              ),
-            ],
-          )
-      ],
+        return Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(message),
+            ),
+            if (status == AnalysisStatus.ShowingError)
+              Row(
+                children: [
+                  MaterialButton(
+                    child: const Icon(Icons.copy),
+                    onPressed: () async => await Clipboard.setData(
+                      ClipboardData(text: message),
+                    ),
+                  ),
+                  MaterialButton(
+                    child: const Text('OK'),
+                    onPressed: () => controller.reset(),
+                  ),
+                ],
+              )
+          ],
+        );
+      },
     );
   }
 }
