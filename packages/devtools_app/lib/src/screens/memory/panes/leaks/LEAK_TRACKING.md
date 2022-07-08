@@ -41,7 +41,9 @@ When we have set of not-GCed objects, some of them (victims) are not GC-ed becau
 
 ### Limitations
 
-The tool detects leaks for disposable and instrumented objects. Some classes in Flutter framework are already instrumented. If youi want your classes to be tracked, tou need to make them disposable and instriment.
+The tool detects leaks for disposable and instrumented classes only (with note that the fixed leak can fis other objects too). 
+
+Some classes in Flutter framework are already instrumented. If you want your classes to be tracked, tou need to make them disposable and instriment.
 
 ## Use the Leak Tracker
 
