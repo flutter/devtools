@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
@@ -10,6 +12,13 @@ import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() async {
+  test('Filename is formatted properly', () async {
+    final controller = ExportController();
+    final filename =
+        controller.generateFileName(time: DateTime(1901, 2, 3, 4, 5, 6, 7));
+    expect(filename, 'dart_devtools_01-02-03_04:05:06.007.json');
+  });
+
   group('ImportControllerTest', () {
     late ImportController importController;
     late TestNotifications notifications;

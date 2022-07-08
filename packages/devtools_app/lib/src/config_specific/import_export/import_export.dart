@@ -5,9 +5,11 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:intl/intl.dart';
 
 import '../../../devtools.dart';
 import '../../primitives/utils.dart';
+import '../../screens/logging/logging_controller.dart';
 import '../../screens/performance/performance_model.dart';
 import '../../screens/performance/performance_screen.dart';
 import '../../shared/connected_app.dart';
@@ -104,8 +106,7 @@ abstract class ExportController {
     DateTime? time,
   }) {
     time ??= DateTime.now();
-    final timestamp =
-        '${time.year}_${time.month}_${time.day}-${time.microsecondsSinceEpoch}';
+    final timestamp = DateFormat('yy-MM-dd_HH:mm:ss.SSS').format(time);
     return '${prefix}_$timestamp.$extension';
   }
 
