@@ -142,8 +142,4 @@ ${leaks.map((e) => e.toYaml('$indent    ')).join()}
     }
     return result.toString();
   }
-
-  static String _indentNewLines(String text, String indent) {
-    return text.replaceAll('\n', '\n$indent').trimRight();
-  }
 }

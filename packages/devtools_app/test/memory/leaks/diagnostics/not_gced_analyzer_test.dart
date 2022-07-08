@@ -98,7 +98,6 @@ LeakReport _createReport(int code, String path) => LeakReport(
       type: '',
       details: ['details'],
       code: 0,
-      disposalStack: 'disposalStack\ndisposalStack',
     )..retainingPath = path;
 
 class _Test {
