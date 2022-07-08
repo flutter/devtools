@@ -37,7 +37,9 @@ myField = null;
 
 ### Culprits and Victims
 
-When we have set of not-GCed objects, some of them (victims) are not GC-ed because they are holded by others (culprits). Normally, to fix the leaks, you need to resolve culprits and victims will follow. 
+If you have a set of not-GCed objects, some of them (victims) may be not GC-ed because they are holded by others (culprits). Normally, to fix the leaks, you need to fix just culprits.
+
+The tool detects culprits, so that you know where to focus.
 
 ### Limitations
 
