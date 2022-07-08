@@ -71,10 +71,11 @@ void buildSpanningTree(AdaptedHeap heap) {
 
 /// Detects if a class can retain an object from garbage collection.
 bool _canRetain(String klass) {
-  const toSkip = {
+  const weakHolders = {
     '_WeakReferenceImpl',
     'FinalizerEntry',
+    '_WeakProperty',
   };
 
-  return !toSkip.contains(klass);
+  return !weakHolders.contains(klass);
 }
