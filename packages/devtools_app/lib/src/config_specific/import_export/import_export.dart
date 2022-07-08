@@ -9,7 +9,6 @@ import 'package:intl/intl.dart';
 
 import '../../../devtools.dart';
 import '../../primitives/utils.dart';
-import '../../screens/logging/logging_controller.dart';
 import '../../screens/performance/performance_model.dart';
 import '../../screens/performance/performance_screen.dart';
 import '../../shared/connected_app.dart';
