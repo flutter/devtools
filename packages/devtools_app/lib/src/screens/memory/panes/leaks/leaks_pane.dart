@@ -56,6 +56,7 @@ class _LeaksPaneController {
   late StreamSubscription summarySubscription;
   late StreamSubscription detailsSubscription;
 
+  /// Subscribes for summary with history and for details without history.
   void _subscribeForMemoryLeaksMessages() {
     detailsSubscription =
         serviceManager.service!.onExtensionEvent.listen(_receivedLeaksDetails);
