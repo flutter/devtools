@@ -22,6 +22,7 @@ void main() async {
 
     final sorted =
         dates.map((t) => controller.generateFileName(time: t)).sorted();
+
     expect(
       sorted,
       [
