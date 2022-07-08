@@ -36,3 +36,25 @@ extension IsolatePrivateViewExtension on Isolate {
 extension ClassPrivateViewExtension on Class {
   String get vmName => json!['_vmName'];
 }
+
+class HeapStats {
+  const HeapStats({
+    required this.count,
+    required this.size,
+    required this.externalSize,
+  });
+
+  HeapStats.parse(List<int> stats)
+      : count = stats[0],
+        size = stats[1],
+        externalSize = stats[2];
+
+  final int count;
+  final int size;
+  final int externalSize;
+}
+
+extension ClassHeapStatsPrivateViewExtension on ClassHeapStats {
+  HeapStats get newSpace => HeapStats.parse(json!['_new'].cast<int>());
+  HeapStats get oldSpace => HeapStats.parse(json!['_old'].cast<int>());
+}

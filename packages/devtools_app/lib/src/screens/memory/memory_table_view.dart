@@ -165,6 +165,7 @@ class FieldSizeColumn extends ColumnData<ClassHeapStats> {
 
   @override
   dynamic getValue(ClassHeapStats dataObject) {
+    print(dataObject.json!.keys);
     switch (heap) {
       case HeapGeneration.newSpace:
         return dataObject.newSpace.size + dataObject.newSpace.externalSize;
@@ -235,65 +236,70 @@ class _MemoryTableViewState extends State<MemoryTableView>
   @override
   Widget build(BuildContext context) {
     final service = serviceManager.service!;
-    return ValueListenableBuilder<IsolateRef?>(
-      valueListenable: serviceManager.isolateManager.selectedIsolate,
-      builder: (context, isolate, _) {
-        return FutureBuilder<AllocationProfile>(
-          future: service.getAllocationProfile(isolate!.id!),
-          builder: (context, snapshot) {
-            if (!snapshot.hasData) {
-              return Container();
-            }
-            return Expanded(
-              child: FlatTable<ClassHeapStats?>(
-                columnGroups: [
-                  ColumnGroup(
-                    title: '',
-                    range: const Range(0, 1),
-                  ),
-                  ColumnGroup(
-                    title: 'Total',
-                    range: const Range(1, 5),
-                  ),
-                  ColumnGroup(
-                    title: 'New Space',
-                    range: const Range(5, 9),
-                  ),
-                  ColumnGroup(
-                    title: 'Old Space',
-                    range: const Range(9, 13),
-                  ),
-                ],
-                columns: _columns,
-                data: snapshot.data!.members!
-                    .where((element) =>
-                        element.bytesCurrent != 0 ||
-                        element.newSpace.externalSize != 0 ||
-                        element.oldSpace.externalSize != 0)
-                    .toList(),
-                sortColumn: _columns.first,
-                sortDirection: SortDirection.ascending,
-                /*tableDataController: TableDataController<ClassHeapStats>(
-                  data: snapshot.data!.members!
-                      .where(
-                        (element) =>
-                            element.bytesCurrent != 0 ||
-                            element.newSpace.externalSize != 0 ||
-                            element.oldSpace.externalSize != 0,
-                      )
-                      .toList(),
+    return Card(
+      elevation: 5,
+      child: ValueListenableBuilder<IsolateRef?>(
+        valueListenable: serviceManager.isolateManager.selectedIsolate,
+        builder: (context, isolate, _) {
+          return FutureBuilder<AllocationProfile>(
+            future: service.getAllocationProfile(isolate!.id!),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return Container();
+              }
+              return Expanded(
+                child: FlatTable<ClassHeapStats?>(
+                  columnGroups: [
+                    ColumnGroup(
+                      title: '',
+                      range: const Range(0, 1),
+                    ),
+                    ColumnGroup(
+                      title: 'Total',
+                      range: const Range(1, 5),
+                    ),
+                    ColumnGroup(
+                      title: 'New Space',
+                      range: const Range(5, 9),
+                    ),
+                    ColumnGroup(
+                      title: 'Old Space',
+                      range: const Range(9, 13),
+                    ),
+                  ],
+                  columns: _columns,
+                  data: snapshot.data!.members!.where(
+                    (element) {
+                      print(element.json!.keys.toList());
+                      return element.bytesCurrent != 0 ||
+                          element.newSpace.externalSize != 0 ||
+                          element.oldSpace.externalSize != 0;
+                    },
+                  ).toList(),
                   sortColumn: _columns.first,
                   sortDirection: SortDirection.ascending,
-                ),*/
-                onItemSelected: (item) => null,
-                keyFactory: (d) => Key(d!.classRef!.name!),
-                /*activeSearchMatchNotifier:
-                    controller.searchMatchMonitorAllocationsNotifier,*/
-              ),
-            );
-          },
-        );
-      },
+                  /*tableDataController: TableDataController<ClassHeapStats>(
+                    data: snapshot.data!.members!
+                        .where(
+                          (element) =>
+                              element.bytesCurrent != 0 ||
+                              element.newSpace.externalSize != 0 ||
+                              element.oldSpace.externalSize != 0,
+                        )
+                        .toList(),
+                    sortColumn: _columns.first,
+                    sortDirection: SortDirection.ascending,
+                  ),*/
+                  onItemSelected: (item) => null,
+                  keyFactory: (d) => Key(d!.classRef!.name!),
+                  /*activeSearchMatchNotifier:
+                      controller.searchMatchMonitorAllocationsNotifier,*/
+                ),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }

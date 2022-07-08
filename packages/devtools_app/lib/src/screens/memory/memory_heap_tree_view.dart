@@ -32,6 +32,7 @@ import 'memory_graph_model.dart';
 import 'memory_heap_treemap.dart';
 import 'memory_instance_tree_view.dart';
 import 'memory_snapshot_models.dart';
+import 'memory_table_view.dart';
 import 'panes/leaks/leaks_pane.dart';
 
 const memorySearchFieldKeyName = 'MemorySearchFieldKey';
@@ -146,6 +147,8 @@ class HeapTreeViewState extends State<HeapTree>
   static const dartHeapAllocationsTabKey = Key('Dart Heap Allocations Tab');
   @visibleForTesting
   static const leaksTabKey = Key('Leaks Tab');
+  @visibleForTesting
+  static const dartHeapTableTabKey = Key('Dart Heap Table Tab');
 
   /// Below constants should match index for Tab index in DartHeapTabs.
   static const int analysisTabIndex = 0;
@@ -206,6 +209,11 @@ class HeapTreeViewState extends State<HeapTree>
           gaPrefix: _gaPrefix,
           tabName: 'Leaks',
         ),
+      DevToolsTab.create(
+        key: dartHeapTableTabKey,
+        tabName: 'Table',
+        gaPrefix: _gaPrefix,
+      ),
     ];
 
     _searchableTabs = {dartHeapAnalysisTabKey, dartHeapAllocationsTabKey};
@@ -487,7 +495,7 @@ class HeapTreeViewState extends State<HeapTree>
                     ],
                   ),
                 ),
-
+                MemoryTableView(),
                 // Leaks tab.
                 if (controller.shouldShowLeaksTab.value)
                   const KeepAliveWrapper(child: LeaksPane()),
