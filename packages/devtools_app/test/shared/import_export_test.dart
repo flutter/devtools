@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
@@ -12,9 +13,24 @@ import 'package:flutter_test/flutter_test.dart';
 void main() async {
   test('Filename is sortable by time', () async {
     final controller = ExportController();
-    final filename =
-        controller.generateFileName(time: DateTime(1901, 2, 3, 4, 5, 6, 7));
-    expect(filename, 'dart_devtools_01-02-03_04:05:06.007.json');
+    final dates = [
+      DateTime(1901, 1, 2, 3, 4, 5, 6),
+      DateTime(1901, 10, 2, 3, 4, 5, 6),
+      DateTime(1901, 10, 20, 3, 4, 5, 6),
+      DateTime(1901, 10, 20, 3, 4, 5, 10),
+    ];
+
+    final sorted =
+        dates.map((t) => controller.generateFileName(time: t)).sorted();
+    expect(
+      sorted,
+      [
+        'dart_devtools_01-01-02_03:04:05.006.json',
+        'dart_devtools_01-10-02_03:04:05.006.json',
+        'dart_devtools_01-10-20_03:04:05.006.json',
+        'dart_devtools_01-10-20_03:04:05.010.json',
+      ],
+    );
   });
 
   test('Filename hours are 0 to 23', () async {
