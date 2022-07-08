@@ -36,8 +36,10 @@ void main() async {
 
   test('Filename hours are 0 to 23', () async {
     final controller = ExportController();
+
     final filename =
         controller.generateFileName(time: DateTime(1901, 2, 3, 14, 5, 6, 7));
+
     expect(filename, 'dart_devtools_01-02-03_14:05:06.007.json');
   });
 
