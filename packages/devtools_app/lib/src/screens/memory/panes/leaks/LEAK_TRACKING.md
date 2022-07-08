@@ -24,7 +24,7 @@ To detect memory leaks, the tool uses the fact that, with proper memory manageme
 
 By disposal and GC events, the tool detects different types of leaks:
 
-**Not disposed, but GCed (not-disposed)**: a disposable object was GCed, without being disposed. This means that the object's disposable content was allocating memory, after the object became not needed. To fix the leak, invoke `dispose()` when the object is not needed.
+**Not disposed, but GCed (not-disposed)**: a disposable object was GCed, without being disposed first. This means that the object's disposable content was allocating memory, after the object became not needed. To fix the leak, invoke `dispose()` when the object is not needed.
 
 **Disposed, but not GCed (not-GCed)**: an object was disposed, but not GCed after certain number of GC events. This means there is a retaining path that holds the object from being garbage collected, after the object became not needed. To fix the leak, after disposal assign to null all reachable references to the object:
 
