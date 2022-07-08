@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -10,7 +11,6 @@ import 'package:vm_service/vm_service.dart';
 import '../../../../config_specific/import_export/import_export.dart';
 import '../../../../config_specific/launch_url/launch_url.dart';
 import '../../../../config_specific/logger/logger.dart' as logger;
-import '../../../../primitives/auto_dispose_mixin.dart';
 import '../../../../primitives/utils.dart';
 import '../../../../service/service_extensions.dart';
 import '../../../../shared/globals.dart';
@@ -22,15 +22,13 @@ import 'formatter.dart';
 import 'instrumentation/model.dart';
 import 'primitives/analysis_status.dart';
 
-class _Constants {
 // TODO(polina-c): reference these constants in dart SDK, when it gets submitted
 // there.
 // https://github.com/flutter/devtools/issues/3951
-  static const extensionKindToReceiveLeaksSummary = 'memory_leaks_summary';
-  static const extensionKindToReceiveLeaksDetails = 'memory_leaks_details';
+const _extensionKindToReceiveLeaksSummary = 'memory_leaks_summary';
+const _extensionKindToReceiveLeaksDetails = 'memory_leaks_details';
 
-  static const file_prefix = 'memory_leaks';
-}
+const _file_prefix = 'memory_leaks';
 
 // TODO(polina-c): review UX with UX specialists
 // https://github.com/flutter/devtools/issues/3951
@@ -42,7 +40,9 @@ class LeaksPane extends StatefulWidget {
 }
 
 class _LeaksPaneController {
-  _LeaksPaneController({required this.memoryController});
+  _LeaksPaneController({required this.memoryController}) {
+    _subscribeForMemoryLeaksMessages();
+  }
 
   final MemoryController memoryController;
   final status = AnalysisStatusController();
@@ -53,7 +53,25 @@ class _LeaksPaneController {
 
   final _exportController = ExportController();
 
-  void receivedLeaksSummary(Event event) {
+  late StreamSubscription summarySubscription;
+  late StreamSubscription detailsSubscription;
+
+  void _subscribeForMemoryLeaksMessages() {
+    detailsSubscription =
+        serviceManager.service!.onExtensionEvent.listen(_receivedLeaksDetails);
+
+    summarySubscription = serviceManager.service!.onExtensionEventWithHistory
+        .listen(_receivedLeaksSummary);
+  }
+
+  void dispose() {
+    summarySubscription.cancel();
+    detailsSubscription.cancel();
+    status.dispose();
+  }
+
+  void _receivedLeaksSummary(Event event) {
+    if (event.extensionKind != _extensionKindToReceiveLeaksSummary) return;
     leakSummaryReceived.value = true;
     try {
       final newSummary = LeakSummary.fromJson(event.json!['extensionData']!);
@@ -80,25 +98,26 @@ class _LeaksPaneController {
     return NotGCedAnalyzerTask.fromSnapshot(graph, reports);
   }
 
-  Future<void> receivedLeaksDetails(Event event) async {
+  Future<void> _receivedLeaksDetails(Event event) async {
+    if (event.extensionKind != _extensionKindToReceiveLeaksDetails) return;
     if (status.status.value != AnalysisStatus.Ongoing) return;
     NotGCedAnalyzerTask? task;
 
     try {
-      status.message.value = 'Received details. Parsing...';
+      await _setMessageWithDelay('Received details. Parsing...');
       final leakDetails = Leaks.fromJson(event.json!['extensionData']!);
 
       final notGCed = leakDetails.byType[LeakType.notGCed] ?? [];
 
       NotGCedAnalyzed? notGCedAnalyzed;
       if (notGCed.isNotEmpty) {
-        status.message.value = 'Taking heap snapshot...';
+        await _setMessageWithDelay('Taking heap snapshot...');
         task = await _createAnalysisTask(notGCed);
-        status.message.value = 'Detecting retaining paths...';
+        await _setMessageWithDelay('Detecting retaining paths...');
         notGCedAnalyzed = analyseNotGCed(task);
       }
 
-      status.message.value = 'Formatting...';
+      await _setMessageWithDelay('Formatting...');
 
       final yaml = analyzedLeaksToYaml(
         gcedLate: leakDetails.gcedLate,
@@ -112,7 +131,7 @@ class _LeaksPaneController {
       if (task != null) {
         final fileName = _saveTask(task, DateTime.now());
         message += '\nDownloaded raw data to $fileName.';
-        status.message.value = message;
+        await _setMessageWithDelay(message);
         status.status.value = AnalysisStatus.ShowingError;
       }
       logger.log(error);
@@ -120,19 +139,20 @@ class _LeaksPaneController {
     }
   }
 
-  void _saveResultAndSetStatus(String yaml, NotGCedAnalyzerTask? task) {
+  void _saveResultAndSetStatus(String yaml, NotGCedAnalyzerTask? task) async {
     final now = DateTime.now();
     final yamlFile = _exportController.generateFileName(
       time: now,
-      prefix: _Constants.file_prefix,
+      prefix: _file_prefix,
       extension: 'yaml',
     );
     _exportController.downloadFile(yaml, fileName: yamlFile);
     final String? taskFile = _saveTask(task, now);
 
     final taskFileMessage = taskFile == null ? '' : ' and $taskFile';
-    status.message.value =
-        'Downloaded the leak analysis to $yamlFile$taskFileMessage.';
+    await _setMessageWithDelay(
+      'Downloaded the leak analysis to $yamlFile$taskFileMessage.',
+    );
     status.status.value = AnalysisStatus.ShowingResult;
   }
 
@@ -143,62 +163,76 @@ class _LeaksPaneController {
     final json = jsonEncode(task.toJson());
     final jsonFile = _exportController.generateFileName(
       time: now,
-      prefix: _Constants.file_prefix,
+      prefix: _file_prefix,
       extension: 'raw.json',
     );
     return _exportController.downloadFile(json, fileName: jsonFile);
   }
 
-  void dispose() {
-    status.dispose();
+  Future<void> _setMessageWithDelay(String message) async {
+    status.message.value = message;
+    await delayForBatchProcessing(micros: 5000);
+  }
+
+  Future<void> forceGC() async {
+    status.status.value = AnalysisStatus.Ongoing;
+    await _setMessageWithDelay('Forcing full garbage collection...');
+    await _invokeMemoryLeakTrackingExtension(
+      <String, dynamic>{
+        // TODO(polina-c): reference the constant in Flutter
+        // https://github.com/flutter/devtools/issues/3951
+        'forceGC': 'true',
+      },
+    );
+    status.status.value = AnalysisStatus.ShowingResult;
+    await _setMessageWithDelay('Full garbage collection initiated.');
+  }
+
+  Future<void> requestLeaks() async {
+    status.status.value = AnalysisStatus.Ongoing;
+    await _setMessageWithDelay('Requested details from the application.');
+
+    await _invokeMemoryLeakTrackingExtension(
+      <String, dynamic>{
+        // TODO(polina-c): reference the constant in Flutter
+        // https://github.com/flutter/devtools/issues/3951
+        'requestDetails': 'true',
+      },
+    );
+  }
+
+  Future<void> _invokeMemoryLeakTrackingExtension(
+    Map<String, dynamic> args,
+  ) async {
+    await serviceManager.service!.callServiceExtension(
+      memoryLeakTracking,
+      isolateId: serviceManager.isolateManager.mainIsolate.value!.id!,
+      args: args,
+    );
   }
 }
 
 class _LeaksPaneState extends State<LeaksPane>
-    with
-        AutoDisposeMixin,
-        ProvidedControllerMixin<MemoryController, LeaksPane> {
-  late _LeaksPaneController _controller;
+    with ProvidedControllerMixin<MemoryController, LeaksPane> {
+  late _LeaksPaneController _leaksController;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!initController()) return;
-    _controller = _LeaksPaneController(memoryController: controller);
-    cancelStreamSubscriptions();
-    _subscribeForMemoryLeaksMessages();
+    _leaksController = _LeaksPaneController(memoryController: controller);
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _leaksController.dispose();
     super.dispose();
-  }
-
-  void _subscribeForMemoryLeaksMessages() {
-    autoDisposeStreamSubscription(
-      serviceManager.service!.onExtensionEventWithHistory.listen((event) async {
-        if (event.extensionKind ==
-            _Constants.extensionKindToReceiveLeaksSummary) {
-          _controller.receivedLeaksSummary(event);
-        }
-      }),
-    );
-
-    autoDisposeStreamSubscription(
-      serviceManager.service!.onExtensionEvent.listen((event) async {
-        if (event.extensionKind ==
-            _Constants.extensionKindToReceiveLeaksDetails) {
-          await _controller.receivedLeaksDetails(event);
-        }
-      }),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
-      valueListenable: _controller.leakSummaryReceived,
+      valueListenable: _leaksController.leakSummaryReceived,
       builder: (_, leakSummaryReceived, __) {
         if (!leakSummaryReceived) {
           return Column(
@@ -213,19 +247,19 @@ class _LeaksPaneState extends State<LeaksPane>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             AnalysisStatusView(
-              controller: _controller.status,
+              controller: _leaksController.status,
               analysisStarter: Row(
                 children: [
                   const _InformationButton(),
-                  _AnalyzeButton(analysis: _controller.status),
-                  _ForceGCButton(analysis: _controller.status),
+                  _AnalyzeButton(leaksController: _leaksController),
+                  _ForceGCButton(leaksController: _leaksController),
                 ],
               ),
             ),
             Expanded(
               child: SingleChildScrollView(
                 child: ValueListenableBuilder<String>(
-                  valueListenable: _controller.leakSummaryHistory,
+                  valueListenable: _leaksController.leakSummaryHistory,
                   builder: (_, value, __) => Text(value),
                 ),
               ),
@@ -253,40 +287,29 @@ class _InformationButton extends StatelessWidget {
 }
 
 class _AnalyzeButton extends StatelessWidget {
-  const _AnalyzeButton({Key? key, required this.analysis}) : super(key: key);
+  const _AnalyzeButton({Key? key, required this.leaksController})
+      : super(key: key);
 
-  final AnalysisStatusController analysis;
+  final _LeaksPaneController leaksController;
 
   @override
   Widget build(BuildContext context) {
     return Tooltip(
       message: 'Analyze the leaks and download the result\n'
-          'to ${_Constants.file_prefix}_<time>.yaml.',
+          'to ${_file_prefix}_<time>.yaml.',
       child: MaterialButton(
         child: const Text('Analyze and Download'),
-        onPressed: () async => _requestLeaks(),
+        onPressed: () async => await leaksController.requestLeaks(),
       ),
-    );
-  }
-
-  Future<void> _requestLeaks() async {
-    analysis.status.value = AnalysisStatus.Ongoing;
-    analysis.message.value = 'Requested details from the application.';
-
-    await _invokeMemoryLeakTrackingExtension(
-      <String, dynamic>{
-        // TODO(polina-c): reference the constant in Flutter
-        // https://github.com/flutter/devtools/issues/3951
-        'requestDetails': 'true',
-      },
     );
   }
 }
 
 class _ForceGCButton extends StatelessWidget {
-  const _ForceGCButton({Key? key, required this.analysis}) : super(key: key);
+  const _ForceGCButton({Key? key, required this.leaksController})
+      : super(key: key);
 
-  final AnalysisStatusController analysis;
+  final _LeaksPaneController leaksController;
 
   @override
   Widget build(BuildContext context) {
@@ -295,32 +318,8 @@ class _ForceGCButton extends StatelessWidget {
           'to make sure to collect everything that can be collected.',
       child: MaterialButton(
         child: const Text('Force GC'),
-        onPressed: () async => _forceGC(),
+        onPressed: () async => leaksController.forceGC(),
       ),
     );
   }
-
-  Future<void> _forceGC() async {
-    analysis.status.value = AnalysisStatus.Ongoing;
-    analysis.message.value = 'Forcing full garbage collection...';
-    await _invokeMemoryLeakTrackingExtension(
-      <String, dynamic>{
-        // TODO(polina-c): reference the constant in Flutter
-        // https://github.com/flutter/devtools/issues/3951
-        'forceGC': 'true',
-      },
-    );
-    analysis.status.value = AnalysisStatus.ShowingResult;
-    analysis.message.value = 'Full garbage collection initiated.';
-  }
-}
-
-Future<void> _invokeMemoryLeakTrackingExtension(
-  Map<String, dynamic> args,
-) async {
-  await serviceManager.service!.callServiceExtension(
-    memoryLeakTracking,
-    isolateId: serviceManager.isolateManager.mainIsolate.value!.id!,
-    args: args,
-  );
 }

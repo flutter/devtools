@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
-import '../../../../../../devtools_app.dart';
+import '../../../../../shared/common_widgets.dart';
+import '../../../../../shared/theme.dart';
 
 enum AnalysisStatus {
   NotStarted,
@@ -18,16 +18,12 @@ enum AnalysisStatus {
   ShowingError,
 }
 
-class _Constants {
-  static const Duration showingResultDelay = Duration(seconds: 5);
-  static const Duration delayForUiToHandleState = Duration(milliseconds: 5);
-}
+const Duration _showingResultDelay = Duration(seconds: 5);
 
 /// Describes status of the ongoing process.
 class AnalysisStatusController {
   AnalysisStatusController() {
     status.addListener(_statusChanged);
-    message.addListener(_messageChanged);
   }
 
   ValueNotifier<AnalysisStatus> status =
@@ -42,13 +38,9 @@ class AnalysisStatusController {
 
   void _statusChanged() async {
     if (status.value == AnalysisStatus.ShowingResult) {
-      await Future.delayed(_Constants.showingResultDelay);
+      await Future.delayed(_showingResultDelay);
       reset();
     }
-  }
-
-  void _messageChanged() async {
-    await Future.delayed(_Constants.delayForUiToHandleState);
   }
 
   void dispose() {
@@ -86,18 +78,13 @@ class AnalysisStatusView extends StatelessWidget {
         return Column(
           children: [
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(denseSpacing),
               child: Text(message),
             ),
             if (status == AnalysisStatus.ShowingError)
               Row(
                 children: [
-                  MaterialButton(
-                    child: const Icon(Icons.copy),
-                    onPressed: () async => await Clipboard.setData(
-                      ClipboardData(text: message),
-                    ),
-                  ),
+                  CopyToClipboardControl(dataProvider: () => message),
                   MaterialButton(
                     child: const Text('OK'),
                     onPressed: () => controller.reset(),
