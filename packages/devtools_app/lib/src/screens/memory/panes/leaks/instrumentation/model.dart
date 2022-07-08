@@ -128,10 +128,18 @@ ${leaks.map((e) => e.toYaml('$indent    ')).join()}
   String toYaml(String indent) {
     final result = StringBuffer();
     result.writeln('$indent$type:');
-    result.writeln('$indent  type: $type');
     result.writeln('$indent  identityHashCode: $code');
     if (details.isNotEmpty) {
-      result.writeln('$indent  details: $details');
+      result.writeln('$indent  details:');
+      final detailsIndent = '$indent    ';
+      result.write(
+        details
+            .map(
+              (t) =>
+                  '$detailsIndent- ${_indentNewLines(t, '  $detailsIndent')}\n',
+            )
+            .join(),
+      );
     }
 
     if (detailedPath != null) {
@@ -141,5 +149,9 @@ ${leaks.map((e) => e.toYaml('$indent    ')).join()}
       result.writeln('$indent  retainingPath: $retainingPath');
     }
     return result.toString();
+  }
+
+  static String _indentNewLines(String text, String indent) {
+    return text.replaceAll('\n', '\n$indent').trimRight();
   }
 }
