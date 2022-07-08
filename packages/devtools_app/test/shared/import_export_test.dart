@@ -14,10 +14,10 @@ void main() async {
   test('Filename is sortable by time', () async {
     final controller = ExportController();
     final dates = [
-      DateTime(1901, 1, 2, 3, 4, 5, 6),
-      DateTime(1901, 10, 2, 3, 4, 5, 6),
-      DateTime(1901, 10, 20, 3, 4, 5, 6),
-      DateTime(1901, 10, 20, 3, 4, 5, 10),
+      DateTime(1901, 2, 3, 4, 5, 6, 7),
+      DateTime(1901, 10, 3, 4, 5, 6, 7),
+      DateTime(1901, 10, 20, 4, 5, 6, 7),
+      DateTime(1901, 10, 20, 4, 5, 6, 10),
     ];
 
     final sorted =
@@ -26,10 +26,10 @@ void main() async {
     expect(
       sorted,
       [
-        'dart_devtools_01-01-02_03:04:05.006.json',
-        'dart_devtools_01-10-02_03:04:05.006.json',
-        'dart_devtools_01-10-20_03:04:05.006.json',
-        'dart_devtools_01-10-20_03:04:05.010.json',
+        'dart_devtools_01-02-03_04:05:06.007.json',
+        'dart_devtools_01-10-03_04:05:06.007.json',
+        'dart_devtools_01-10-20_04:05:06.007.json',
+        'dart_devtools_01-10-20_04:05:06.010.json',
       ],
     );
   });
