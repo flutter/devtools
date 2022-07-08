@@ -10,11 +10,18 @@ import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() async {
-  test('Filename is formatted properly', () async {
+  test('Filename is sortable by time', () async {
     final controller = ExportController();
     final filename =
         controller.generateFileName(time: DateTime(1901, 2, 3, 4, 5, 6, 7));
     expect(filename, 'dart_devtools_01-02-03_04:05:06.007.json');
+  });
+
+  test('Filename hours are 0 to 23', () async {
+    final controller = ExportController();
+    final filename =
+        controller.generateFileName(time: DateTime(1901, 2, 3, 14, 5, 6, 7));
+    expect(filename, 'dart_devtools_01-02-03_14:05:06.007.json');
   });
 
   group('ImportControllerTest', () {
