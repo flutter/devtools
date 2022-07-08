@@ -62,7 +62,7 @@ and then never run `flutter upgrade` or `flutter channel`.
 
 TODO: move the example to test/fixtures when it compiles with stable flutter.
 
-1. Run https://github.com/polina-c/spikes/tree/master/leaking_app in debug or profile mode.
+1. Run https://github.com/polina-c/spikes/tree/master/leaking_app in profile mode (with flag `-profile`).
 2. [Connect](https://docs.flutter.dev/development/tools/devtools/cli#open-devtools-and-connect-to-the-target-app) DevTools to the app 
 3. Open Memory > Leaks
 4. Notice message that reports not-disposed and not-GCed objects. If there are no not-GCed leaks,
