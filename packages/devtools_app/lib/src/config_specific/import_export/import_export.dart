@@ -105,7 +105,7 @@ abstract class ExportController {
     DateTime? time,
   }) {
     time ??= DateTime.now();
-    final timestamp = DateFormat('yy-MM-dd_HH:mm:ss.SSS').format(time);
+    final timestamp = DateFormat('yyyy-MM-dd_HH:mm:ss.SSS').format(time);
     return '${prefix}_$timestamp.$extension';
   }
 

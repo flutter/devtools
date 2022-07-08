@@ -26,10 +26,10 @@ void main() async {
     expect(
       sorted,
       [
-        'dart_devtools_01-02-03_04:05:06.007.json',
-        'dart_devtools_01-10-03_04:05:06.007.json',
-        'dart_devtools_01-10-20_04:05:06.007.json',
-        'dart_devtools_01-10-20_04:05:06.010.json',
+        'dart_devtools_1901-02-03_04:05:06.007.json',
+        'dart_devtools_1901-10-03_04:05:06.007.json',
+        'dart_devtools_1901-10-20_04:05:06.007.json',
+        'dart_devtools_1901-10-20_04:05:06.010.json',
       ],
     );
   });
@@ -40,7 +40,7 @@ void main() async {
     final filename =
         controller.generateFileName(time: DateTime(1901, 2, 3, 14, 5, 6, 7));
 
-    expect(filename, 'dart_devtools_01-02-03_14:05:06.007.json');
+    expect(filename, 'dart_devtools_1901-02-03_14:05:06.007.json');
   });
 
   group('ImportControllerTest', () {
