@@ -8,6 +8,7 @@ import '../../charts/treemap.dart';
 import '../../primitives/utils.dart';
 import '../../shared/table.dart';
 import '../../shared/table_data.dart';
+import '../../shared/theme.dart';
 import '../../shared/utils.dart';
 import '../../ui/colors.dart';
 
@@ -31,7 +32,7 @@ class AppSizeAnalysisTable extends StatelessWidget {
       treeColumn,
       sizeColumn,
       columns,
-      controller,
+      controller
     );
   }
 
@@ -58,6 +59,15 @@ class AppSizeAnalysisTable extends StatelessWidget {
       : controller.selectedNodeIndex.value * defaultRowHeight;
 
   @override
+  void initState() {
+    super.initState();
+    addAutoDisposeListener(
+      controller.selectedNodeIndex,
+      _maybeScrollToSelectedNode,
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     return TreeTable<TreemapNode>(
       dataRoots: [rootNode],
@@ -68,7 +78,25 @@ class AppSizeAnalysisTable extends StatelessWidget {
       sortDirection: SortDirection.descending,
       selectionNotifier: controller.analysisRoot,
       autoExpandRoots: true,
+      scrollController: _scrollController,
     );
+  }
+
+  void _maybeScrollToSelectedNode() {
+    // If the node offset is invalid, don't scroll.
+    if (selectedNodeOffset < 0) return;
+
+    final extentVisible = Range(
+      _scrollController.offset,
+      _scrollController.offset + _scrollController.position.extentInside,
+    );
+    if (!extentVisible.contains(selectedNodeOffset)) {
+      _scrollController.animateTo(
+        selectedNodeOffset - _selectedNodeTopSpacing,
+        duration: longDuration,
+        curve: defaultCurve,
+      );
+    }
   }
 }
 
