@@ -79,7 +79,6 @@ class _JsonFields {
   static const String type = 'type';
   static const String details = 'details';
   static const String code = 'code';
-  static const String disposalStack = 'disposalStack';
 }
 
 /// Leak information, passed from application to DevTools and than extended by
@@ -89,7 +88,6 @@ class LeakReport {
     required this.type,
     required this.details,
     required this.code,
-    required this.disposalStack,
   });
 
   factory LeakReport.fromJson(Map<String, dynamic> json) => LeakReport(
@@ -97,13 +95,11 @@ class LeakReport {
         details:
             (json[_JsonFields.details] as List<dynamic>? ?? []).cast<String>(),
         code: json[_JsonFields.code],
-        disposalStack: json[_JsonFields.disposalStack],
       );
 
   final String type;
   final List<String> details;
   final int code;
-  final String? disposalStack;
 
   // The fields below do not need serialization as they are populated after.
   String? retainingPath;
@@ -113,7 +109,6 @@ class LeakReport {
         _JsonFields.type: type,
         _JsonFields.details: details,
         _JsonFields.code: code,
-        _JsonFields.disposalStack: disposalStack,
       };
 
   static String iterableToYaml(
@@ -130,20 +125,13 @@ ${leaks.map((e) => e.toYaml('$indent    ')).join()}
 ''';
   }
 
-  String toYaml(String indent, {bool includeDisposalStack = false}) {
+  String toYaml(String indent) {
     final result = StringBuffer();
     result.writeln('$indent$type:');
     result.writeln('$indent  type: $type');
     result.writeln('$indent  identityHashCode: $code');
     if (details.isNotEmpty) {
       result.writeln('$indent  details: $details');
-    }
-
-    if (includeDisposalStack && disposalStack != null) {
-      result.writeln(
-        '$indent  disposalStack:'
-        '${_indentNewLines('\n$disposalStack', '$indent    ')}',
-      );
     }
 
     if (detailedPath != null) {
