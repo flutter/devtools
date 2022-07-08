@@ -30,6 +30,7 @@ export 'src/screens/inspector/inspector_screen.dart';
 export 'src/screens/inspector/inspector_service.dart';
 export 'src/screens/inspector/inspector_tree.dart';
 export 'src/screens/inspector/inspector_tree_controller.dart';
+export 'src/screens/inspector/primitives/inspector_common.dart';
 export 'src/screens/logging/logging_controller.dart';
 export 'src/screens/logging/logging_screen.dart';
 export 'src/screens/memory/memory_controller.dart';

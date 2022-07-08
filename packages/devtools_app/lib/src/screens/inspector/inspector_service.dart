@@ -22,6 +22,7 @@ import '../../shared/globals.dart';
 import '../debugger/debugger_model.dart';
 import 'diagnostics_node.dart';
 import 'inspector_service_polyfill.dart';
+import 'primitives/inspector_common.dart';
 
 const inspectorLibraryUri = 'package:flutter/src/widgets/widget_inspector.dart';
 
@@ -1416,12 +1417,6 @@ class ObjectGroup extends ObjectGroupBase {
     final directories = (invocationResult as List?)?.cast<Object>();
     return List.from(directories ?? []);
   }
-}
-
-enum FlutterTreeType {
-  widget, // ('Widget'),
-  renderObject // ('Render');
-// TODO(jacobr): add semantics, and layer trees.
 }
 
 abstract class InspectorServiceClient {
