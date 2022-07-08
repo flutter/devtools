@@ -37,15 +37,15 @@ myField = null;
 
 ### Culprits and Victims
 
-If you have a set of not-GCed objects, some of them (victims) may be not GC-ed because they are holded by others (culprits). Normally, to fix the leaks, you need to fix just culprits.
+If you have a set of not-GCed objects, some of them (victims) may be not GC-ed because they are held by others (culprits). Normally, to fix the leaks, you need to fix just culprits.
 
 The tool detects culprits, so that you know where to focus.
 
 ### Limitations
 
-The tool detects leaks for disposable and instrumented classes only (with note that the fixed leak can fis other objects too). 
+The tool detects leaks for disposable and instrumented classes only (with note that the fixed leak can fix other objects too). 
 
-Some classes in Flutter framework are already instrumented. If you want your classes to be tracked, tou need to make them disposable and instriment.
+Some classes in Flutter framework are already instrumented. If you want your classes to be tracked, you need to make them disposable and instrument.
 
 ## Use the Leak Tracker
 
