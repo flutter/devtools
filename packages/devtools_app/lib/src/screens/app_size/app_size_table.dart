@@ -51,6 +51,12 @@ class AppSizeAnalysisTable extends StatelessWidget {
 
   final AppSizeController controller;
 
+  final ScrollController _scrollController = ScrollController();
+
+  num get selectedNodeOffset => controller.selectedNodeIndex.value == -1
+      ? -1
+      : controller.selectedNodeIndex.value * defaultRowHeight;
+
   @override
   Widget build(BuildContext context) {
     return TreeTable<TreemapNode>(

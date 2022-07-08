@@ -359,6 +359,7 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
     this.secondarySortColumn,
     this.selectionNotifier,
     this.autoExpandRoots = false,
+    this.scrollController,
   })  : assert(columns.contains(treeColumn)),
         assert(columns.contains(sortColumn)),
         super(key: key);
@@ -384,6 +385,8 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
   final ValueNotifier<Selection<T>>? selectionNotifier;
 
   final bool autoExpandRoots;
+
+  final ScrollController? scrollController;
 
   @override
   TreeTableState<T> createState() => TreeTableState<T>();
