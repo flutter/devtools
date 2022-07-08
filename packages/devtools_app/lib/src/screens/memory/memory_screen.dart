@@ -16,6 +16,7 @@ import '../../ui/icons.dart';
 import 'memory_controller.dart';
 import 'memory_heap_tree_view.dart';
 import 'panes/chart/chart_pane.dart';
+import 'panes/chart/chart_pane_controller.dart';
 import 'panes/chart/memory_android_chart.dart';
 import 'panes/chart/memory_events_pane.dart';
 import 'panes/chart/memory_vm_chart.dart';
@@ -57,7 +58,7 @@ class MemoryBodyState extends State<MemoryBody>
         ProvidedControllerMixin<MemoryController, MemoryBody> {
   MemoryController get memoryController => controller;
 
-  late ChartControllers _chartControllers;
+  late MemoryChartPaneController _chartControllers;
 
   final _focusNode = FocusNode(debugLabel: 'memory');
 
@@ -75,7 +76,7 @@ class MemoryBodyState extends State<MemoryBody>
     if (!initController()) return;
 
     final vmChartController = VMChartController(controller);
-    _chartControllers = ChartControllers(
+    _chartControllers = MemoryChartPaneController(
       event: EventChartController(controller),
       vm: vmChartController,
       android: AndroidChartController(
@@ -100,7 +101,7 @@ class MemoryBodyState extends State<MemoryBody>
     return Column(
       key: MemoryChartPane.hoverKey,
       children: [
-        MemoryControlPane(chartControllers: _chartControllers),
+        MemoryControlPane(chartController: _chartControllers),
         const SizedBox(height: denseRowSpacing),
         MemoryChartPane(
           chartControllers: _chartControllers,
