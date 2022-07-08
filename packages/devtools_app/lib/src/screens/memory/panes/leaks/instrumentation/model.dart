@@ -128,7 +128,6 @@ ${leaks.map((e) => e.toYaml('$indent    ')).join()}
   String toYaml(String indent) {
     final result = StringBuffer();
     result.writeln('$indent$type:');
-    result.writeln('$indent  type: $type');
     result.writeln('$indent  identityHashCode: $code');
     if (details.isNotEmpty) {
       result.writeln('$indent  details: $details');
