@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../../../../../../devtools_app.dart';
 import '../instrumentation/model.dart';
 import 'model.dart';
 
@@ -55,7 +56,7 @@ void buildSpanningTree(AdaptedHeap heap) {
         final child = heap.objects[c];
 
         if (child.retainer != null) continue;
-        if (!_canRetain(child.klass)) continue;
+        if (!_canRetain(child.klass, child.library)) continue;
 
         child.retainer = r;
         nextCut.add(c);
@@ -70,12 +71,24 @@ void buildSpanningTree(AdaptedHeap heap) {
 }
 
 /// Detects if a class can retain an object from garbage collection.
-bool _canRetain(String klass) {
+bool _canRetain(String klass, String library) {
+  // Classes that may hold reference to an object without preventing
+  // its collection.
   const weakHolders = {
-    '_WeakProperty',
-    '_WeakReferenceImpl',
-    'FinalizerEntry',
+    '_WeakProperty': 'dart.core',
+    '_WeakReferenceImpl': 'dart.core',
+    'FinalizerEntry': 'dart.core',
   };
 
-  return !weakHolders.contains(klass);
+  if (!weakHolders.containsKey(klass)) return true;
+  if (weakHolders[klass] == library) return false;
+
+  // If a class lives in unexpected library, this can be because of
+  // (1) name collision or (2) bug in this code.
+  // Throwing exception in debug mode to verify option #2.
+  // TODO(polina-c): create a way for users to add their weak classes
+  // or detect weak references automatically, without hard coding
+  // class names.
+  assert(false, 'Unexpected library for $klass: $library.');
+  return true;
 }
