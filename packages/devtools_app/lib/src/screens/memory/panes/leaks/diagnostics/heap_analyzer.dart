@@ -4,7 +4,6 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../../../devtools_app.dart';
 import '../instrumentation/model.dart';
 import 'model.dart';
 
