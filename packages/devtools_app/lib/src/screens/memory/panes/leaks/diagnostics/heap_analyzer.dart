@@ -72,7 +72,7 @@ void buildSpanningTree(AdaptedHeap heap) {
 
 /// Detects if a class can retain an object from garbage collection.
 bool _canRetain(String klass, String library) {
-  // Classes that may hold reference to an object without preventing
+  // Classes that hold reference to an object without preventing
   // its collection.
   const weakHolders = {
     '_WeakProperty': 'dart.core',
