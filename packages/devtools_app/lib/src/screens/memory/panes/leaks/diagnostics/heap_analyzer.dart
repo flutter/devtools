@@ -77,7 +77,7 @@ bool _canRetain(String klass, String library) {
   const weakHolders = {
     '_WeakProperty': 'dart.core',
     '_WeakReferenceImpl': 'dart.core',
-    'FinalizerEntry': 'dart.core',
+    'FinalizerEntry': 'dart._internal',
   };
 
   if (!weakHolders.containsKey(klass)) return true;
