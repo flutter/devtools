@@ -15,23 +15,21 @@ void main() async {
     final controller = ExportController();
     final dates = [
       DateTime(1901, 2, 3, 4, 5, 6, 7),
-      DateTime(1901, 10, 3, 4, 5, 6, 7),
+      DateTime(1902, 1, 3, 4, 5, 6, 7),
+      DateTime(1901, 10, 4, 4, 5, 6, 7),
+      DateTime(1901, 20, 3, 4, 5, 6, 7),
+      DateTime(1901, 20, 4, 2, 5, 6, 7),
       DateTime(1901, 10, 20, 4, 5, 6, 7),
       DateTime(1901, 10, 20, 4, 5, 6, 10),
     ];
 
-    final sorted =
+    final sortedByTime =
+        dates.sorted().map((t) => controller.generateFileName(time: t));
+
+    final sortedByFileName =
         dates.map((t) => controller.generateFileName(time: t)).sorted();
 
-    expect(
-      sorted,
-      [
-        'dart_devtools_1901-02-03_04:05:06.007.json',
-        'dart_devtools_1901-10-03_04:05:06.007.json',
-        'dart_devtools_1901-10-20_04:05:06.007.json',
-        'dart_devtools_1901-10-20_04:05:06.010.json',
-      ],
-    );
+    expect(sortedByTime, sortedByFileName);
   });
 
   test('Filename hours are 0 to 23', () async {
