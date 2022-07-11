@@ -5,6 +5,7 @@
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
+import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../../analytics/analytics.dart' as ga;
 import '../../analytics/constants.dart' as analytics_constants;
@@ -342,22 +343,38 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     preferences.inspector.refreshCustomPubRootDirectories();
+    final theme = Theme.of(context);
     return DevToolsDialog(
       title: dialogTitleText(Theme.of(context), 'Flutter Inspector Settings'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CheckboxSetting(
-            notifier: preferences.inspector.hoverEvalModeEnabled
-                as ValueNotifier<bool?>,
-            title: 'Enable hover inspection',
-            description:
-                'Hovering over any widget displays its properties and values.',
-            gaItem: analytics_constants.inspectorHoverEvalMode,
-          ),
-          PubRootField(),
-        ],
+      content: Container(
+        width: defaultDialogWidth,
+        height: scaleByFontFactor(400.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ...dialogSubHeader(
+              Theme.of(context),
+              'General',
+            ), // TODO: this needs to be more specific
+            CheckboxSetting(
+              notifier: preferences.inspector.hoverEvalModeEnabled
+                  as ValueNotifier<bool?>,
+              title: 'Enable hover inspection',
+              description:
+                  'Hovering over any widget displays its properties and values.',
+              gaItem: analytics_constants.inspectorHoverEvalMode,
+            ),
+            const SizedBox(height: denseSpacing),
+            ...dialogSubHeader(Theme.of(context), 'Package Directories'),
+            Text(
+              'widgets in these directories will show up in your summary tree',
+              style: theme.subtleTextStyle,
+            ),
+            const SizedBox(height: denseSpacing),
+            PubRootField(),
+          ],
+        ),
       ),
       actions: [
         DialogCloseButton(),
@@ -515,5 +532,72 @@ class ErrorNavigator extends StatelessWidget {
     final newIndex = errorIndex == null ? 0 : (errorIndex! + 1) % errors.length;
 
     onSelectError(newIndex);
+  }
+}
+
+class PubRootField extends StatelessWidget {
+  Future<List<String>?> _getUpToDatePubRootDirectories() async {
+    final inspectorService =
+        serviceManager.inspectorService as InspectorService;
+    await preferences.inspector.refreshCustomPubRootDirectories();
+    return inspectorService.getPubRootDirectories();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<List<IsolateRef?>>(
+      valueListenable: serviceManager.isolateManager.isolates,
+      builder: (context, value, child) {
+        return FutureBuilder(
+          // this dies with the buffer
+          future: _getUpToDatePubRootDirectories(),
+          builder: (
+            context,
+            snapshot,
+          ) {
+            if (snapshot.hasData) {
+              return Container(
+                width: double.maxFinite,
+                height: 200.0,
+                child: EditableList(
+                  entries: preferences.inspector.customPubRootDirectories,
+                  onEntryAdded: (p0) =>
+                      preferences.inspector.addPubRootDirectories([p0]),
+                  onEntryRemoved: (p0) =>
+                      preferences.inspector.removePubRootDirectories([p0]),
+                ),
+              );
+            } else if (snapshot.hasError) {
+              // TODO, do we log or report errors somewhere?
+              return Row(
+                children: const [
+                  Icon(
+                    Icons.error_outline,
+                    color: Colors.red,
+                    size: 60,
+                  ),
+                  Text('Error: pub roots are not available'),
+                ],
+              );
+            } else {
+              return Row(
+                children: const [
+                  SizedBox(
+                    width: 60,
+                    height: 60,
+                    child: CircularProgressIndicator(),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(top: 16),
+                    child: Text('Awaiting result...'),
+                  )
+                ],
+              );
+            }
+            return Text('THERE WAS AN ERROR');
+          },
+        );
+      },
+    );
   }
 }

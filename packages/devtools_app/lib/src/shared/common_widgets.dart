@@ -255,54 +255,143 @@ class ClearButton extends IconLabelButton {
         );
 }
 
-class PubRootField extends StatelessWidget {
-  Future<List<String>?> _getUpToDatePubRootDirectories() async {
-    final inspectorService =
-        serviceManager.inspectorService as InspectorService;
-    await preferences.inspector.refreshCustomPubRootDirectories();
-    return inspectorService.getPubRootDirectories();
+class EditableList extends StatefulWidget {
+  const EditableList({
+    required this.entries,
+    this.onEntryAdded,
+    this.onEntryRemoved,
+  });
+
+  final ValueListenable<List<String>> entries;
+  final Function(String)? onEntryAdded;
+  final Function(String)? onEntryRemoved;
+
+  @override
+  State<StatefulWidget> createState() => _EditableListState();
+}
+
+class _EditableListState extends State<EditableList> {
+  @override
+  void initState() {
+    // REMINDER:  generalize later :D
+    /** Use a listvaluenotifier, the helpers can be used to update the list(values) and it will notify */
+    super.initState();
+    textFieldController = TextEditingController();
+  }
+
+  // TODO: does need to be late?
+  late final TextEditingController textFieldController;
+  final FocusNode textFieldFocusNode = FocusNode();
+
+  @override
+  void dispose() {
+    textFieldController.dispose();
+    super.dispose();
+  }
+
+  void _addNewPubRootDirecory() {
+    final value = textFieldController.value.text.trim();
+    textFieldController.clear();
+    if (widget.onEntryAdded != null && value.isNotEmpty) {
+      textFieldController.clear();
+      widget.onEntryAdded!(value);
+    }
+    textFieldFocusNode.requestFocus();
+  }
+
+  Widget _removeDirectoryButton(VoidCallback onPressed) {
+    return inputDecorationSuffixButton(Icons.delete, onPressed);
   }
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<List<IsolateRef?>>(
-      valueListenable: serviceManager.isolateManager.isolates,
+    //Your packages
+    // widgets in these directories will show up in your summary tree
+
+    //Make the dialog width constant, see others
+
+    //taller dialog, make it fixed
+    //have a scrollbar
+
+    //Rounded outline border can help with the outlines for the list
+
+    // network tab filter query can be an example for text field best practices
+
+    // ListValuenotifier instead!!!!
+
+    // buffer the customPubRoot. when adding we can add immediately. when fetching we can just update the values.
+    // Add a fetching spinner to show that we are updating the list
+
+    // refresh widget tree on update
+
+    // Submit on enter as well
+
+    // clear add entry on successful submit
+    return ValueListenableBuilder(
+      valueListenable: widget.entries,
       builder: (context, value, child) {
-        return FutureBuilder(
-          future: _getUpToDatePubRootDirectories(),
-          builder: (
-            context,
-            snapshot,
-          ) {
-            if (snapshot.hasData) {
-              return JSONTextField(snapshot.data as List<String>?);
-            } else if (snapshot.hasError) {
-              // TODO, do we log or report errors somewhere?
-              return Row(
-                children: [
-                  const Icon(
-                    Icons.error_outline,
-                    color: Colors.red,
-                    size: 60,
-                  ),
-                  Text('Error: pub roots are not available'),
-                ],
-              );
-            } else {
-              return Row(children: [
-                SizedBox(
-                  width: 60,
-                  height: 60,
-                  child: CircularProgressIndicator(),
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                      height: defaultTextFieldHeight,
+                      child: TextField(
+                        focusNode: textFieldFocusNode,
+                        controller: textFieldController,
+                        decoration: InputDecoration(
+                          contentPadding: const EdgeInsets.all(denseSpacing),
+                          border: const OutlineInputBorder(),
+                          labelText: 'Enter a new pubRootDirectory',
+                          suffix: TextButton(
+                            onPressed: () {
+                              _addNewPubRootDirecory();
+                            },
+                            child: const Text('Add'),
+                          ),
+                        ),
+                        onSubmitted: (value) {
+                          _addNewPubRootDirecory();
+                        },
+                      )),
                 ),
-                Padding(
-                  padding: EdgeInsets.only(top: 16),
-                  child: Text('Awaiting result...'),
-                )
-              ]);
-            }
-            return Text('THERE WAS AN ERROR');
-          },
+              ],
+            ),
+            Flexible(
+              child: RoundedOutlinedBorder(
+                child: Scrollbar(
+                  child: ListView.builder(
+                    // Could be wrapped in a listenable builder on the listvaluenotifier
+                    itemCount: widget.entries.value.length,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: densePadding),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                  child: Text(widget.entries.value[index])),
+                              _removeDirectoryButton(
+                                () {
+                                  if (widget.onEntryRemoved != null) {
+                                    widget.onEntryRemoved!(
+                                      widget.entries.value[index],
+                                    );
+                                  }
+                                },
+                              ),
+                              const SizedBox(width: denseRowSpacing)
+                            ],
+                          ));
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ],
         );
       },
     );
