@@ -15,6 +15,7 @@ import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../memory_controller.dart';
 import '../../primitives/painting.dart';
+import 'chart_pane_controller.dart';
 import 'memory_android_chart.dart';
 import 'memory_charts.dart';
 import 'memory_events_pane.dart';
@@ -26,7 +27,7 @@ class MemoryChartPane extends StatefulWidget {
     required this.chartControllers,
     required this.keyFocusNode,
   }) : super(key: key);
-  final ChartControllers chartControllers;
+  final MemoryChartPaneController chartControllers;
 
   /// Which widget's key press will be handled by chart.
   final FocusNode keyFocusNode;
