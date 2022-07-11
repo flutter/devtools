@@ -58,7 +58,7 @@ class MemoryBodyState extends State<MemoryBody>
         ProvidedControllerMixin<MemoryController, MemoryBody> {
   MemoryController get memoryController => controller;
 
-  late MemoryChartPaneController _chartControllers;
+  late MemoryChartPaneController _chartController;
 
   final _focusNode = FocusNode(debugLabel: 'memory');
 
@@ -76,7 +76,7 @@ class MemoryBodyState extends State<MemoryBody>
     if (!initController()) return;
 
     final vmChartController = VMChartController(controller);
-    _chartControllers = MemoryChartPaneController(
+    _chartController = MemoryChartPaneController(
       event: EventChartController(controller),
       vm: vmChartController,
       android: AndroidChartController(
@@ -101,10 +101,10 @@ class MemoryBodyState extends State<MemoryBody>
     return Column(
       key: MemoryChartPane.hoverKey,
       children: [
-        MemoryControlPane(chartController: _chartControllers),
+        MemoryControlPane(chartController: _chartController),
         const SizedBox(height: denseRowSpacing),
         MemoryChartPane(
-          chartControllers: _chartControllers,
+          chartControllers: _chartController,
           keyFocusNode: _focusNode,
         ),
         const SizedBox(width: defaultSpacing),
