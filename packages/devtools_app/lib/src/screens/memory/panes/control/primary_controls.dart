@@ -10,16 +10,17 @@ import '../../../../shared/common_widgets.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../memory_controller.dart';
+import '../chart/chart_pane_controller.dart';
 import 'constants.dart';
 import 'interval_dropdown.dart';
 
 class PrimaryControls extends StatefulWidget {
   const PrimaryControls({
     Key? key,
-    required this.chartControllers,
+    required this.chartController,
   }) : super(key: key);
 
-  final ChartControllers chartControllers;
+  final MemoryChartPaneController chartController;
 
   @override
   State<PrimaryControls> createState() => _PrimaryControlsState();
@@ -63,7 +64,7 @@ class _PrimaryControlsState extends State<PrimaryControls>
     controller.selectedLeaf = null;
 
     // Remove history of all plotted data in all charts.
-    widget.chartControllers.resetAll();
+    widget.chartController.resetAll();
   }
 
   @override
@@ -95,7 +96,7 @@ class _PrimaryControlsState extends State<PrimaryControls>
                   primaryControlsMinVerboseWidth,
             ),
             const SizedBox(width: defaultSpacing),
-            IntervalDropdown(chartControllers: widget.chartControllers),
+            IntervalDropdown(chartController: widget.chartController),
           ],
         );
       },
