@@ -862,15 +862,15 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
     addAutoDisposeListener(oldWidget.selectionNotifier, () {
       setState(() {
         final Selection<T> selection = oldWidget.selectionNotifier!.value;
-        if (selection.scrollIntoView) {
-          final int selectedDisplayRow = (selection.node! as dynamic).nodeIndex;
-          // TODO(terry): Optimize selecting row, if row's visible in
-          //              the viewport just select otherwise jumpTo row.
-          final newPos = selectedDisplayRow * defaultRowHeight;
+        // if (selection.scrollIntoView) {
+        final int selectedDisplayRow = (selection.node! as dynamic).nodeIndex;
+        // TODO(terry): Optimize selecting row, if row's visible in
+        //              the viewport just select otherwise jumpTo row.
+        final newPos = selectedDisplayRow * defaultRowHeight;
 
-          // TODO(terry): Should animate factor out _moveSelection to reuse here.
-          scrollController.jumpTo(newPos);
-        }
+        // TODO(terry): Should animate factor out _moveSelection to reuse here.
+        scrollController.jumpTo(newPos);
+        // }
       });
     });
 

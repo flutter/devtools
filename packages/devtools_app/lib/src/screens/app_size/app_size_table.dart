@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 
 import '../../charts/treemap.dart';
+import '../../primitives/auto_dispose_mixin.dart';
 import '../../primitives/utils.dart';
 import '../../shared/table.dart';
 import '../../shared/table_data.dart';
@@ -14,7 +15,7 @@ import '../../ui/colors.dart';
 
 import 'app_size_controller.dart';
 
-class AppSizeAnalysisTable extends StatelessWidget {
+class AppSizeAnalysisTable extends StatefulWidget {
   factory AppSizeAnalysisTable({
     required TreemapNode rootNode,
     required AppSizeController controller,
@@ -28,12 +29,7 @@ class AppSizeAnalysisTable extends StatelessWidget {
     ]);
 
     return AppSizeAnalysisTable._(
-      rootNode,
-      treeColumn,
-      sizeColumn,
-      columns,
-      controller
-    );
+        rootNode, treeColumn, sizeColumn, columns, controller);
   }
 
   const AppSizeAnalysisTable._(
@@ -52,17 +48,24 @@ class AppSizeAnalysisTable extends StatelessWidget {
 
   final AppSizeController controller;
 
+  @override
+  State<AppSizeAnalysisTable> createState() => _AppSizeAnalysisTableState();
+}
+
+class _AppSizeAnalysisTableState extends State<AppSizeAnalysisTable>
+    with AutoDisposeMixin {
   final ScrollController _scrollController = ScrollController();
 
-  num get selectedNodeOffset => controller.selectedNodeIndex.value == -1
-      ? -1
-      : controller.selectedNodeIndex.value * defaultRowHeight;
+  double get selectedNodeOffset =>
+      widget.controller.selectedNodeIndex.value == -1
+          ? -1
+          : widget.controller.selectedNodeIndex.value * defaultRowHeight;
 
   @override
   void initState() {
     super.initState();
     addAutoDisposeListener(
-      controller.selectedNodeIndex,
+      widget.controller.selectedNodeIndex,
       _maybeScrollToSelectedNode,
     );
   }
@@ -70,13 +73,13 @@ class AppSizeAnalysisTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TreeTable<TreemapNode>(
-      dataRoots: [rootNode],
-      columns: columns,
-      treeColumn: treeColumn,
+      dataRoots: [widget.rootNode],
+      columns: widget.columns,
+      treeColumn: widget.treeColumn,
       keyFactory: (node) => PageStorageKey<String>(node.name),
-      sortColumn: sortColumn,
+      sortColumn: widget.sortColumn,
       sortDirection: SortDirection.descending,
-      selectionNotifier: controller.analysisRoot,
+      selectionNotifier: widget.controller.analysisRoot,
       autoExpandRoots: true,
       scrollController: _scrollController,
     );
@@ -92,7 +95,7 @@ class AppSizeAnalysisTable extends StatelessWidget {
     );
     if (!extentVisible.contains(selectedNodeOffset)) {
       _scrollController.animateTo(
-        selectedNodeOffset - _selectedNodeTopSpacing,
+        selectedNodeOffset,
         duration: longDuration,
         curve: defaultCurve,
       );
