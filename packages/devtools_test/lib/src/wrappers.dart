@@ -96,10 +96,15 @@ Widget wrapWithNotifications(Widget child) {
 }
 
 Widget wrapWithInspectorControllers(Widget widget) {
+  final inspectorController = InspectorController(
+    inspectorTree: InspectorTreeController(),
+    detailsTree: InspectorTreeController(),
+    treeType: FlutterTreeType.widget,
+  );
   return wrapWithControllers(
     widget,
     debugger: DebuggerController(),
-    // TODO(jacobr): add inspector controllers.
+    inspector: inspectorController,
   );
 }
 
