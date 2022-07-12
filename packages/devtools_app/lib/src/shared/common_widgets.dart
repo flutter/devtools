@@ -438,66 +438,6 @@ class _EditableListState extends State<EditableList> {
   }
 }
 
-class JSONTextField extends StatefulWidget {
-  JSONTextField(List<String>? initialPubRoots) {
-    _initialPubRoots = initialPubRoots;
-  }
-
-  late final List<String>? _initialPubRoots;
-
-  @override
-  State<StatefulWidget> createState() => _JSONTextFieldState(_initialPubRoots);
-}
-
-class _JSONTextFieldState extends State<JSONTextField> {
-  _JSONTextFieldState(List<String>? initialPubRoots) {
-    _initialPubRoots = initialPubRoots;
-  }
-
-  late final List<String>? _initialPubRoots;
-  bool _invalid = false;
-  late TextEditingController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = TextEditingController(text: jsonEncode(_initialPubRoots));
-  }
-
-  InspectorService get inspectorService =>
-      serviceManager.inspectorService as InspectorService;
-
-  @override
-  Widget build(BuildContext context) {
-    return TextField(
-      controller: _controller,
-      decoration: InputDecoration(
-        labelText: 'List of Pub Roots',
-        errorText: _invalid ? 'Expected valid json for array of strings' : null,
-      ),
-      onChanged: (text) async {
-        try {
-          final newPubRoots = List<String>.from(jsonDecode(text));
-          setState(() {
-            _invalid = false;
-          });
-          await preferences.inspector.setPubRootDirectories(newPubRoots);
-        } on FormatException catch (_) {
-          // Fail if not valid json
-          setState(() {
-            _invalid = true;
-          });
-        } on TypeError catch (_) {
-          // Fail if not an array of strings
-          setState(() {
-            _invalid = true;
-          });
-        }
-      },
-    );
-  }
-}
-
 class RefreshButton extends IconLabelButton {
   const RefreshButton({
     Key? key,
