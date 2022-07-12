@@ -142,14 +142,6 @@ class InspectorPreferencesController {
     await refreshPubRootDirectoriesFromService();
   }
 
-  // TODO: Remove This
-  Future<void> setPubRootDirectories(
-    List<String> pubRootDirectories,
-  ) async {
-    await inspectorService.setPubRootDirectories(pubRootDirectories);
-    await refreshPubRootDirectoriesFromService();
-  }
-
   Future<void> refreshPubRootDirectoriesFromService() async {
     try {
       _refreshCounter.value++;
