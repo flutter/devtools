@@ -342,7 +342,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
 class FlutterInspectorSettingsDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    preferences.inspector.refreshCustomPubRootDirectories();
+    preferences.inspector.loadCustomPubRootDirectoriesFromStorage();
     final theme = Theme.of(context);
     return DevToolsDialog(
       title: dialogTitleText(Theme.of(context), 'Flutter Inspector Settings'),
@@ -539,7 +539,7 @@ class PubRootField extends StatelessWidget {
   Future<List<String>?> _getUpToDatePubRootDirectories() async {
     final inspectorService =
         serviceManager.inspectorService as InspectorService;
-    await preferences.inspector.refreshCustomPubRootDirectories();
+    await preferences.inspector.loadCustomPubRootDirectoriesFromStorage();
     return inspectorService.getPubRootDirectories();
   }
 

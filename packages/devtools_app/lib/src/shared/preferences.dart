@@ -6,6 +6,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 
+import '../primitives/utils.dart';
 import '../screens/inspector/inspector_service.dart';
 import '../service/vm_service_wrapper.dart';
 import 'globals.dart';
@@ -80,7 +81,7 @@ class InspectorPreferencesController {
 
   Future<void> init() async {
     await initHoverEvalMode();
-    initCustomPubRootDirectories();
+    _initCustomPubRootListeners();
     setGlobal(InspectorPreferencesController, this);
   }
 
@@ -100,7 +101,7 @@ class InspectorPreferencesController {
     });
   }
 
-  void initCustomPubRootDirectories() {
+  void _initCustomPubRootListeners() {
     _customPubRootDirectories.addListener(() {
       storage.setValue(
         _customPubRootDirectoriesStorageId,
@@ -109,7 +110,7 @@ class InspectorPreferencesController {
     });
   }
 
-  Future<void> refreshCustomPubRootDirectories() async {
+  Future<void> loadCustomPubRootDirectoriesFromStorage() async {
     final storedCustomPubRootDirectories =
         await storage.getValue(_customPubRootDirectoriesStorageId);
 
@@ -120,36 +121,42 @@ class InspectorPreferencesController {
         ),
       );
     }
-
-    await _persistPubRootDirectoriesInStorage();
   }
 
   Future<void> addPubRootDirectories(
     List<String> pubRootDirectories,
   ) async {
     await inspectorService.addPubRootDirectories(pubRootDirectories);
-    await _persistPubRootDirectoriesInStorage();
+    await refreshPubRootDirectoriesFromService();
   }
 
+  // TODO: Remove This
   Future<void> setPubRootDirectories(
     List<String> pubRootDirectories,
   ) async {
     await inspectorService.setPubRootDirectories(pubRootDirectories);
-    await _persistPubRootDirectoriesInStorage();
+    await refreshPubRootDirectoriesFromService();
+  }
+
+  Future<void> refreshPubRootDirectoriesFromService() async {
+    final freshPubRootDirectories =
+        await inspectorService.getPubRootDirectories();
+    if (freshPubRootDirectories != null) {
+      final newSet = Set<String>.from(freshPubRootDirectories);
+      final oldSet = Set<String>.from(_customPubRootDirectories.value);
+      final directoriesToAdd = newSet.difference(oldSet);
+      final directoriesToRemove = oldSet.difference(newSet);
+
+      _customPubRootDirectories.removeAll(directoriesToRemove);
+      _customPubRootDirectories.addAll(directoriesToAdd);
+    }
   }
 
   Future<void> removePubRootDirectories(
     List<String> pubRootDirectories,
   ) async {
     await inspectorService.removePubRootDirectories(pubRootDirectories);
-    await _persistPubRootDirectoriesInStorage();
-  }
-
-  Future<void> _persistPubRootDirectoriesInStorage() async {
-    final pubRootDirectories = await inspectorService.getPubRootDirectories();
-    if (pubRootDirectories != null) {
-      _customPubRootDirectories.value = pubRootDirectories;
-    }
+    await refreshPubRootDirectoriesFromService();
   }
 
   /// Change the value for the hover eval mode setting.
