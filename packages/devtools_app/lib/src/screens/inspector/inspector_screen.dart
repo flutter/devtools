@@ -175,6 +175,10 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
         ),
       ],
     );
+    preferences.inspector.customPubRootDirectories.addListener(() {
+      _refreshInspector();
+    });
+    preferences.inspector.loadCustomPubRootDirectoriesFromStorage();
     return Column(
       children: <Widget>[
         Row(
@@ -536,66 +540,26 @@ class ErrorNavigator extends StatelessWidget {
 }
 
 class PubRootField extends StatelessWidget {
-  Future<List<String>?> _getUpToDatePubRootDirectories() async {
-    final inspectorService =
-        serviceManager.inspectorService as InspectorService;
-    await preferences.inspector.loadCustomPubRootDirectoriesFromStorage();
-    return inspectorService.getPubRootDirectories();
-  }
-
   @override
   Widget build(BuildContext context) {
+    preferences.inspector.loadCustomPubRootDirectoriesFromStorage();
     return ValueListenableBuilder<List<IsolateRef?>>(
       valueListenable: serviceManager.isolateManager.isolates,
       builder: (context, value, child) {
-        return FutureBuilder(
-          // this dies with the buffer
-          future: _getUpToDatePubRootDirectories(),
-          builder: (
-            context,
-            snapshot,
-          ) {
-            if (snapshot.hasData) {
-              return Container(
-                width: double.maxFinite,
-                height: 200.0,
-                child: EditableList(
-                  entries: preferences.inspector.customPubRootDirectories,
-                  onEntryAdded: (p0) =>
-                      preferences.inspector.addPubRootDirectories([p0]),
-                  onEntryRemoved: (p0) =>
-                      preferences.inspector.removePubRootDirectories([p0]),
-                ),
-              );
-            } else if (snapshot.hasError) {
-              // TODO, do we log or report errors somewhere?
-              return Row(
-                children: const [
-                  Icon(
-                    Icons.error_outline,
-                    color: Colors.red,
-                    size: 60,
-                  ),
-                  Text('Error: pub roots are not available'),
-                ],
-              );
-            } else {
-              return Row(
-                children: const [
-                  SizedBox(
-                    width: 60,
-                    height: 60,
-                    child: CircularProgressIndicator(),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(top: 16),
-                    child: Text('Awaiting result...'),
-                  )
-                ],
-              );
-            }
-            return Text('THERE WAS AN ERROR');
-          },
+        return Container(
+          width: double.maxFinite,
+          height: 200.0,
+          child: EditableList(
+            entries: preferences.inspector.customPubRootDirectories,
+            isRefreshing:
+                preferences.inspector.isRefreshingCustomPubRootDirectories,
+            onEntryAdded: (p0) =>
+                preferences.inspector.addPubRootDirectories([p0]),
+            onEntryRemoved: (p0) =>
+                preferences.inspector.removePubRootDirectories([p0]),
+            onRefresh: () =>
+                preferences.inspector.refreshPubRootDirectoriesFromService(),
+          ),
         );
       },
     );

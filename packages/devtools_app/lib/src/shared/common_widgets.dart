@@ -11,6 +11,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../devtools_app.dart';
 import '../analytics/analytics.dart' as ga;
 import '../config_specific/launch_url/launch_url.dart';
 import '../primitives/auto_dispose_mixin.dart';
@@ -258,13 +259,17 @@ class ClearButton extends IconLabelButton {
 class EditableList extends StatefulWidget {
   const EditableList({
     required this.entries,
+    this.isRefreshing,
     this.onEntryAdded,
     this.onEntryRemoved,
+    this.onRefresh,
   });
 
   final ValueListenable<List<String>> entries;
+  final ValueListenable<bool>? isRefreshing;
   final Function(String)? onEntryAdded;
   final Function(String)? onEntryRemoved;
+  final Function()? onRefresh;
 
   @override
   State<StatefulWidget> createState() => _EditableListState();
@@ -277,15 +282,21 @@ class _EditableListState extends State<EditableList> {
     /** Use a listvaluenotifier, the helpers can be used to update the list(values) and it will notify */
     super.initState();
     textFieldController = TextEditingController();
+    widget.isRefreshing?.addListener(_stateRefresher);
   }
 
   // TODO: does need to be late?
   late final TextEditingController textFieldController;
   final FocusNode textFieldFocusNode = FocusNode();
+  void _stateRefresher() {
+    // trigger a state update when the refreshing state updates
+    setState(() {});
+  }
 
   @override
   void dispose() {
     textFieldController.dispose();
+    widget.isRefreshing?.removeListener(_stateRefresher);
     super.dispose();
   }
 
@@ -300,7 +311,9 @@ class _EditableListState extends State<EditableList> {
   }
 
   Widget _removeDirectoryButton(VoidCallback onPressed) {
-    return inputDecorationSuffixButton(Icons.delete, onPressed);
+    return Container(
+        height: defaultIconSize + denseSpacing,
+        child: inputDecorationSuffixButton(Icons.delete, onPressed));
   }
 
   @override
@@ -322,7 +335,7 @@ class _EditableListState extends State<EditableList> {
     // buffer the customPubRoot. when adding we can add immediately. when fetching we can just update the values.
     // Add a fetching spinner to show that we are updating the list
 
-    // refresh widget tree on update
+    // refresh widget tree on update!!!!!!!!!!!!!!!!!!!!!!!!!
 
     // Submit on enter as well
 
@@ -334,10 +347,12 @@ class _EditableListState extends State<EditableList> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Container(
+            Container(
+              height: defaultTextFieldHeight,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Container(
                       height: defaultTextFieldHeight,
                       child: TextField(
                         focusNode: textFieldFocusNode,
@@ -356,9 +371,27 @@ class _EditableListState extends State<EditableList> {
                         onSubmitted: (value) {
                           _addNewPubRootDirecory();
                         },
-                      )),
-                ),
-              ],
+                      ),
+                    ),
+                  ),
+                  widget.isRefreshing?.value ?? false
+                      ? Container(
+                          width: defaultTextFieldHeight,
+                          height: defaultTextFieldHeight,
+                          child: const Padding(
+                            padding: EdgeInsets.all(iconPadding),
+                            child: CircularProgressIndicator(),
+                          ))
+                      : RefreshButton(
+                          onPressed: () {
+                            if (widget.onRefresh != null) {
+                              widget.onRefresh!();
+                            }
+                          },
+                          minScreenWidthForTextBeforeScaling: double.maxFinite,
+                        ),
+                ],
+              ),
             ),
             Flexible(
               child: RoundedOutlinedBorder(
@@ -368,24 +401,31 @@ class _EditableListState extends State<EditableList> {
                     itemCount: widget.entries.value.length,
                     itemBuilder: (context, index) {
                       return Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: densePadding),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                  child: Text(widget.entries.value[index])),
-                              _removeDirectoryButton(
-                                () {
-                                  if (widget.onEntryRemoved != null) {
-                                    widget.onEntryRemoved!(
-                                      widget.entries.value[index],
-                                    );
-                                  }
-                                },
-                              ),
-                              const SizedBox(width: denseRowSpacing)
-                            ],
-                          ));
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: densePadding,
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(widget.entries.value[index]),
+                            ),
+                            CopyToClipboardControl(
+                              dataProvider: () => widget.entries.value[index],
+                            ),
+                            const SizedBox(width: denseSpacing),
+                            _removeDirectoryButton(
+                              () {
+                                if (widget.onEntryRemoved != null) {
+                                  widget.onEntryRemoved!(
+                                    widget.entries.value[index],
+                                  );
+                                }
+                              },
+                            ),
+                            const SizedBox(width: denseRowSpacing)
+                          ],
+                        ),
+                      );
                     },
                   ),
                 ),

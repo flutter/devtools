@@ -70,11 +70,15 @@ class InspectorPreferencesController {
   ValueListenable<bool> get hoverEvalModeEnabled => _hoverEvalMode;
   ValueListenable<List<String>> get customPubRootDirectories =>
       _customPubRootDirectories;
+  ValueListenable<bool> get isRefreshingCustomPubRootDirectories =>
+      _isRefreshingCustomPubRootDirectories;
   InspectorService get inspectorService =>
       serviceManager.inspectorService as InspectorService;
 
   final _hoverEvalMode = ValueNotifier<bool>(false);
-  final _customPubRootDirectories = ValueNotifier<List<String>>([]);
+  final _customPubRootDirectories = ListValueNotifier<String>([]);
+  final _isRefreshingCustomPubRootDirectories = ValueNotifier<bool>(false);
+  final _refreshCounter = ValueNotifier<int>(0);
   static const _hoverEvalModeStorageId = 'inspector.hoverEvalMode';
   static const _customPubRootDirectoriesStorageId =
       'inspector.customPubRootDirectories';
@@ -108,18 +112,26 @@ class InspectorPreferencesController {
         jsonEncode(_customPubRootDirectories.value),
       );
     });
+    _refreshCounter.addListener(() {
+      _isRefreshingCustomPubRootDirectories.value = _refreshCounter.value != 0;
+    });
   }
 
   Future<void> loadCustomPubRootDirectoriesFromStorage() async {
-    final storedCustomPubRootDirectories =
-        await storage.getValue(_customPubRootDirectoriesStorageId);
+    try {
+      _refreshCounter.value++;
+      final storedCustomPubRootDirectories =
+          await storage.getValue(_customPubRootDirectoriesStorageId);
 
-    if (storedCustomPubRootDirectories != null) {
-      await addPubRootDirectories(
-        List<String>.from(
-          jsonDecode(storedCustomPubRootDirectories),
-        ),
-      );
+      if (storedCustomPubRootDirectories != null) {
+        await addPubRootDirectories(
+          List<String>.from(
+            jsonDecode(storedCustomPubRootDirectories),
+          ),
+        );
+      }
+    } finally {
+      _refreshCounter.value--;
     }
   }
 
@@ -139,16 +151,21 @@ class InspectorPreferencesController {
   }
 
   Future<void> refreshPubRootDirectoriesFromService() async {
-    final freshPubRootDirectories =
-        await inspectorService.getPubRootDirectories();
-    if (freshPubRootDirectories != null) {
-      final newSet = Set<String>.from(freshPubRootDirectories);
-      final oldSet = Set<String>.from(_customPubRootDirectories.value);
-      final directoriesToAdd = newSet.difference(oldSet);
-      final directoriesToRemove = oldSet.difference(newSet);
+    try {
+      _refreshCounter.value++;
+      final freshPubRootDirectories =
+          await inspectorService.getPubRootDirectories();
+      if (freshPubRootDirectories != null) {
+        final newSet = Set<String>.from(freshPubRootDirectories);
+        final oldSet = Set<String>.from(_customPubRootDirectories.value);
+        final directoriesToAdd = newSet.difference(oldSet);
+        final directoriesToRemove = oldSet.difference(newSet);
 
-      _customPubRootDirectories.removeAll(directoriesToRemove);
-      _customPubRootDirectories.addAll(directoriesToAdd);
+        _customPubRootDirectories.removeAll(directoriesToRemove);
+        _customPubRootDirectories.addAll(directoriesToAdd);
+      }
+    } finally {
+      _refreshCounter.value--;
     }
   }
 
