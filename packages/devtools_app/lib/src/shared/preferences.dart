@@ -71,14 +71,14 @@ class InspectorPreferencesController {
   ValueListenable<List<String>> get customPubRootDirectories =>
       _customPubRootDirectories;
   ValueListenable<bool> get isRefreshingCustomPubRootDirectories =>
-      _isRefreshingCustomPubRootDirectories;
+      _customPubRootDirectoriesAreBusy;
   InspectorService get inspectorService =>
       serviceManager.inspectorService as InspectorService;
 
   final _hoverEvalMode = ValueNotifier<bool>(false);
   final _customPubRootDirectories = ListValueNotifier<String>([]);
-  final _isRefreshingCustomPubRootDirectories = ValueNotifier<bool>(false);
-  final _refreshCounter = ValueNotifier<int>(0);
+  final _customPubRootDirectoriesAreBusy = ValueNotifier<bool>(false);
+  final _busyCounter = ValueNotifier<int>(0);
   static const _hoverEvalModeStorageId = 'inspector.hoverEvalMode';
   static const _customPubRootDirectoriesStorageId =
       'inspector.customPubRootDirectories';
@@ -112,14 +112,14 @@ class InspectorPreferencesController {
         jsonEncode(_customPubRootDirectories.value),
       );
     });
-    _refreshCounter.addListener(() {
-      _isRefreshingCustomPubRootDirectories.value = _refreshCounter.value != 0;
+    _busyCounter.addListener(() {
+      _customPubRootDirectoriesAreBusy.value = _busyCounter.value != 0;
     });
   }
 
   Future<void> loadCustomPubRootDirectoriesFromStorage() async {
     try {
-      _refreshCounter.value++;
+      _busyCounter.value++;
       final storedCustomPubRootDirectories =
           await storage.getValue(_customPubRootDirectoriesStorageId);
 
@@ -131,20 +131,25 @@ class InspectorPreferencesController {
         );
       }
     } finally {
-      _refreshCounter.value--;
+      _busyCounter.value--;
     }
   }
 
   Future<void> addPubRootDirectories(
     List<String> pubRootDirectories,
   ) async {
-    await inspectorService.addPubRootDirectories(pubRootDirectories);
-    await refreshPubRootDirectoriesFromService();
+    try {
+      _busyCounter.value++;
+      await inspectorService.addPubRootDirectories(pubRootDirectories);
+      await refreshPubRootDirectoriesFromService();
+    } finally {
+      _busyCounter.value--;
+    }
   }
 
   Future<void> refreshPubRootDirectoriesFromService() async {
     try {
-      _refreshCounter.value++;
+      _busyCounter.value++;
       final freshPubRootDirectories =
           await inspectorService.getPubRootDirectories();
       if (freshPubRootDirectories != null) {
@@ -157,15 +162,20 @@ class InspectorPreferencesController {
         _customPubRootDirectories.addAll(directoriesToAdd);
       }
     } finally {
-      _refreshCounter.value--;
+      _busyCounter.value--;
     }
   }
 
   Future<void> removePubRootDirectories(
     List<String> pubRootDirectories,
   ) async {
-    await inspectorService.removePubRootDirectories(pubRootDirectories);
-    await refreshPubRootDirectoriesFromService();
+    try {
+      _busyCounter.value++;
+      await inspectorService.removePubRootDirectories(pubRootDirectories);
+      await refreshPubRootDirectoriesFromService();
+    } finally {
+      _busyCounter.value--;
+    }
   }
 
   /// Change the value for the hover eval mode setting.
