@@ -465,7 +465,6 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       setState(() {
         final node = selectionNotifier.value.node;
         //offset will need to be modified with new UI table changes
-        final offset = defaultRowHeight;
         expandParents(node?.parent);
 
         node?.select();
