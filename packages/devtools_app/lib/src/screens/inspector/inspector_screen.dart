@@ -380,7 +380,7 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
               style: theme.subtleTextStyle,
             ),
             const SizedBox(height: denseSpacing),
-            PubRootField(),
+            PubRootDirectorySection(),
           ],
         ),
       ),
@@ -543,7 +543,7 @@ class ErrorNavigator extends StatelessWidget {
   }
 }
 
-class PubRootField extends StatelessWidget {
+class PubRootDirectorySection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     preferences.inspector.loadCustomPubRootDirectories();
