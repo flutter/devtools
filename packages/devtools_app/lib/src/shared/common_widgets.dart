@@ -318,28 +318,6 @@ class _EditableListState extends State<EditableList> {
 
   @override
   Widget build(BuildContext context) {
-    //Your packages
-    // widgets in these directories will show up in your summary tree
-
-    //Make the dialog width constant, see others
-
-    //taller dialog, make it fixed
-    //have a scrollbar
-
-    //Rounded outline border can help with the outlines for the list
-
-    // network tab filter query can be an example for text field best practices
-
-    // ListValuenotifier instead!!!!
-
-    // buffer the customPubRoot. when adding we can add immediately. when fetching we can just update the values.
-    // Add a fetching spinner to show that we are updating the list
-
-    // refresh widget tree on update!!!!!!!!!!!!!!!!!!!!!!!!!
-
-    // Submit on enter as well
-
-    // clear add entry on successful submit
     return ValueListenableBuilder(
       valueListenable: widget.entries,
       builder: (context, value, child) {
