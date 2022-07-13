@@ -464,6 +464,8 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     addAutoDisposeListener(selectionNotifier, () {
       setState(() {
         final node = selectionNotifier.value.node;
+        //offset will need to be modified with new UI table changes
+        final offset = defaultRowHeight;
         expandParents(node?.parent);
 
         node?.select();
@@ -474,7 +476,15 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
           includeCollapsedNodes: false,
         );
         final newPos = selectedDisplayRow * defaultRowHeight;
-        scrollController.jumpTo(newPos);
+
+        //TODO Pull this code and _onActiveSearchChange to be shared
+        final indexInView = newPos > scrollController.offset &&
+            newPos <
+                scrollController.offset +
+                    scrollController.position.extentInside;
+
+        //TODO Ensure that jumping does not overjump or underjump and undershooting by 1 right now
+        if (!indexInView) scrollController.jumpTo(newPos);
 
         node.unselect();
       });
