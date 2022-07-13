@@ -7,16 +7,17 @@ import 'package:flutter/material.dart';
 import '../../../../primitives/auto_dispose_mixin.dart';
 import '../../../../shared/utils.dart';
 import '../../memory_controller.dart';
+import '../chart/chart_pane_controller.dart';
 import 'primary_controls.dart';
 import 'secondary_controls.dart';
 
 class MemoryControlPane extends StatefulWidget {
   const MemoryControlPane({
     Key? key,
-    required this.chartControllers,
+    required this.chartController,
   }) : super(key: key);
 
-  final ChartControllers chartControllers;
+  final MemoryChartPaneController chartController;
 
   @override
   State<MemoryControlPane> createState() => _MemoryControlPaneState();
@@ -34,10 +35,10 @@ class _MemoryControlPaneState extends State<MemoryControlPane>
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        PrimaryControls(chartControllers: widget.chartControllers),
+        PrimaryControls(chartController: widget.chartController),
         const Spacer(),
         SecondaryControls(
-          chartControllers: widget.chartControllers,
+          chartController: widget.chartController,
           isAndroidCollection: _isAndroidCollection,
         )
       ],

@@ -428,11 +428,13 @@ class ProgramExplorer extends StatelessWidget {
     required this.controller,
     this.onSelected,
     this.title = 'File Explorer',
-  }) : super(key: key);
+    this.onNodeSelected,
+  });
 
   final ProgramExplorerController controller;
   final void Function(ScriptLocation)? onSelected;
   final String title;
+  final void Function(VMServiceObjectNode)? onNodeSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -516,6 +518,7 @@ class ProgramExplorer extends StatelessWidget {
     }
 
     if (onSelected != null) onSelected!(node.location!);
+    if (onNodeSelected != null) onNodeSelected!(node);
   }
 
   void onItemExpanded(VMServiceObjectNode node) async {

@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/theme.dart';
-import '../../memory_controller.dart';
 import '../../primitives/painting.dart';
+import '../chart/chart_pane_controller.dart';
 import '../chart/memory_android_chart.dart';
 import '../chart/memory_charts.dart';
 import '../chart/memory_events_pane.dart';
@@ -17,12 +17,12 @@ import 'constants.dart';
 class LegendRow extends StatelessWidget {
   const LegendRow({
     Key? key,
-    required this.chartControllers,
+    required this.chartController,
     required this.entry1,
     this.entry2,
   }) : super(key: key);
 
-  final ChartControllers chartControllers;
+  final MemoryChartPaneController chartController;
   final MapEntry<String, Map<String, Object?>> entry1;
   final MapEntry<String, Map<String, Object?>>? entry2;
 

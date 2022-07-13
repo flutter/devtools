@@ -87,4 +87,15 @@ class HistoryManager<T> {
     _historyIndex = _history.length - 1;
     _current.value = _history[_historyIndex];
   }
+
+  /// Replaces the [current] item with a provided value.
+  /// If history is empty, the value is pushed into the stack.
+  void replaceCurrent(T value) {
+    if (current.value == null) {
+      push(value);
+    } else {
+      _history[_historyIndex] = value;
+      _current.value = _history[_historyIndex];
+    }
+  }
 }
