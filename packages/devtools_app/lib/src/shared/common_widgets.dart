@@ -381,7 +381,8 @@ class _EditableListState extends State<EditableList> {
                           child: const Padding(
                             padding: EdgeInsets.all(iconPadding),
                             child: CircularProgressIndicator(),
-                          ))
+                          ),
+                        )
                       : RefreshButton(
                           onPressed: () {
                             if (widget.onRefresh != null) {

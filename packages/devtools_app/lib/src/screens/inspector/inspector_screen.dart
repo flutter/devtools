@@ -144,6 +144,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
         searchPreventClose = false;
       }
     });
+    preferences.inspector.loadCustomPubRootDirectoriesFromStorage();
   }
 
   @override
@@ -178,7 +179,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     preferences.inspector.customPubRootDirectories.addListener(() {
       _refreshInspector();
     });
-    preferences.inspector.loadCustomPubRootDirectoriesFromStorage();
     return Column(
       children: <Widget>[
         Row(
