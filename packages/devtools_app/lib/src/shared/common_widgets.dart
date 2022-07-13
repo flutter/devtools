@@ -278,14 +278,11 @@ class EditableList extends StatefulWidget {
 class _EditableListState extends State<EditableList> {
   @override
   void initState() {
-    // REMINDER:  generalize later :D
-    /** Use a listvaluenotifier, the helpers can be used to update the list(values) and it will notify */
     super.initState();
     textFieldController = TextEditingController();
     widget.isRefreshing?.addListener(_stateRefresher);
   }
 
-  // TODO: does need to be late?
   late final TextEditingController textFieldController;
   final FocusNode textFieldFocusNode = FocusNode();
   void _stateRefresher() {
@@ -376,7 +373,6 @@ class _EditableListState extends State<EditableList> {
               child: RoundedOutlinedBorder(
                 child: Scrollbar(
                   child: ListView.builder(
-                    // Could be wrapped in a listenable builder on the listvaluenotifier
                     itemCount: widget.entries.value.length,
                     itemBuilder: (context, index) {
                       return Padding(
