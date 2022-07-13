@@ -192,24 +192,28 @@ abstract class FlutterTestDriver {
       final dynamic json = _parseFlutterResponse(line);
       if (json == null) {
         return;
-      } else if ((event != null && json['event'] == event) ||
-          (id != null && json['id'] == id)) {
-        await sub.cancel();
-        response.complete(json);
-      } else if (!ignoreAppStopEvent && json['event'] == 'app.stop') {
-        await sub.cancel();
-        final StringBuffer error = StringBuffer();
-        error.write('Received app.stop event while waiting for ');
-        error.write(
-          '${event != null ? '$event event' : 'response to request $id.'}.\n\n',
-        );
-        if (json['params'] != null && json['params']['error'] != null) {
-          error.write('${json['params']['error']}\n\n');
+      } else {
+        print('event: ${json['event']}');
+        if ((event != null && json['event'] == event) ||
+            (id != null && json['id'] == id)) {
+          await sub.cancel();
+          response.complete(json);
         }
-        if (json['params'] != null && json['params']['trace'] != null) {
-          error.write('${json['params']['trace']}\n\n');
+        if (!ignoreAppStopEvent && json['event'] == 'app.stop') {
+          await sub.cancel();
+          final StringBuffer error = StringBuffer();
+          error.write('Received app.stop event while waiting for ');
+          error.write(
+            '${event != null ? '$event event' : 'response to request $id.'}.\n\n',
+          );
+          if (json['params'] != null && json['params']['error'] != null) {
+            error.write('${json['params']['error']}\n\n');
+          }
+          if (json['params'] != null && json['params']['trace'] != null) {
+            error.write('${json['params']['trace']}\n\n');
+          }
+          response.completeError(error.toString());
         }
-        response.completeError(error.toString());
       }
     });
 
