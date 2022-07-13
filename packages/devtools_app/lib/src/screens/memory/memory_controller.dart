@@ -26,9 +26,6 @@ import '../../ui/search.dart';
 import 'memory_graph_model.dart';
 import 'memory_protocol.dart';
 import 'memory_snapshot_models.dart';
-import 'panes/chart/memory_android_chart.dart';
-import 'panes/chart/memory_events_pane.dart';
-import 'panes/chart/memory_vm_chart.dart';
 import 'primitives/filter_config.dart';
 import 'primitives/memory_timeline.dart';
 
@@ -226,36 +223,6 @@ class AllocationSamples {
         );
       }
     }
-  }
-}
-
-class ChartControllers {
-  ChartControllers({
-    required this.event,
-    required this.vm,
-    required this.android,
-  });
-
-  final EventChartController event;
-  final VMChartController vm;
-  final AndroidChartController android;
-
-  void resetAll() {
-    event.reset();
-    vm.reset();
-    android.reset();
-  }
-
-  /// Recomputes (attaches data to the chart) for either live or offline data
-  /// source.
-  void recomputeChartData() {
-    resetAll();
-    event.setupData();
-    event.dirty = true;
-    vm.setupData();
-    vm.dirty = true;
-    android.setupData();
-    android.dirty = true;
   }
 }
 

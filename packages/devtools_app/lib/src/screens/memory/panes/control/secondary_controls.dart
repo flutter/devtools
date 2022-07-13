@@ -13,6 +13,7 @@ import '../../../../shared/notifications.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../memory_controller.dart';
+import '../chart/chart_pane_controller.dart';
 import 'adb_button.dart';
 import 'constants.dart';
 import 'legend.dart';
@@ -24,11 +25,11 @@ class SecondaryControls extends StatefulWidget {
   const SecondaryControls({
     Key? key,
     required this.isAndroidCollection,
-    required this.chartControllers,
+    required this.chartController,
   }) : super(key: key);
 
   final bool isAndroidCollection;
-  final ChartControllers chartControllers;
+  final MemoryChartPaneController chartController;
 
   @override
   State<SecondaryControls> createState() => _SecondaryControlsState();
@@ -107,12 +108,12 @@ class _SecondaryControlsState extends State<SecondaryControls>
         LegendRow(
           entry1: leftEntry,
           entry2: rightEntry,
-          chartControllers: widget.chartControllers,
+          chartController: widget.chartController,
         ),
       );
     }
 
-    final vms = vmLegendContent(widget.chartControllers.vm);
+    final vms = vmLegendContent(widget.chartController.vm);
     legendRows.add(
       Container(
         padding: legendTitlePadding,
@@ -126,13 +127,13 @@ class _SecondaryControlsState extends State<SecondaryControls>
       legendRows.add(
         LegendRow(
           entry1: legendEntry,
-          chartControllers: widget.chartControllers,
+          chartController: widget.chartController,
         ),
       );
     }
 
     if (controller.isAndroidChartVisible) {
-      final androids = androidLegendContent(widget.chartControllers.android);
+      final androids = androidLegendContent(widget.chartController.android);
       legendRows.add(
         Container(
           padding: legendTitlePadding,
@@ -146,7 +147,7 @@ class _SecondaryControlsState extends State<SecondaryControls>
         legendRows.add(
           LegendRow(
             entry1: legendEntry,
-            chartControllers: widget.chartControllers,
+            chartController: widget.chartController,
           ),
         );
       }
