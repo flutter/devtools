@@ -5,31 +5,35 @@
 import 'package:flutter/material.dart';
 
 import '../../charts/treemap.dart';
-import '../../primitives/auto_dispose_mixin.dart';
 import '../../primitives/utils.dart';
 import '../../shared/table.dart';
 import '../../shared/table_data.dart';
-import '../../shared/theme.dart';
 import '../../shared/utils.dart';
 import '../../ui/colors.dart';
 
 import 'app_size_controller.dart';
 
-class AppSizeAnalysisTable extends StatefulWidget {
+class AppSizeAnalysisTable extends StatelessWidget {
   factory AppSizeAnalysisTable({
     required TreemapNode rootNode,
     required AppSizeController controller,
   }) {
-    final treeColumn = _NameColumn(currentRootLevel: rootNode.level);
+    final treeColumn =
+        _NameColumn(currentRootLevel: rootNode.children[0].level);
     final sizeColumn = _SizeColumn();
     final columns = List<ColumnData<TreemapNode>>.unmodifiable([
       treeColumn,
       sizeColumn,
-      _SizePercentageColumn(totalSize: rootNode.root.byteSize),
+      _SizePercentageColumn(totalSize: rootNode.children[0].root.byteSize),
     ]);
 
     return AppSizeAnalysisTable._(
-        rootNode, treeColumn, sizeColumn, columns, controller);
+      rootNode,
+      treeColumn,
+      sizeColumn,
+      columns,
+      controller,
+    );
   }
 
   const AppSizeAnalysisTable._(
@@ -49,57 +53,16 @@ class AppSizeAnalysisTable extends StatefulWidget {
   final AppSizeController controller;
 
   @override
-  State<AppSizeAnalysisTable> createState() => _AppSizeAnalysisTableState();
-}
-
-class _AppSizeAnalysisTableState extends State<AppSizeAnalysisTable>
-    with AutoDisposeMixin {
-  final ScrollController _scrollController = ScrollController();
-
-  double get selectedNodeOffset =>
-      widget.controller.selectedNodeIndex.value == -1
-          ? -1
-          : widget.controller.selectedNodeIndex.value * defaultRowHeight;
-
-  @override
-  void initState() {
-    super.initState();
-    addAutoDisposeListener(
-      widget.controller.selectedNodeIndex,
-      _maybeScrollToSelectedNode,
-    );
-  }
-
-  @override
   Widget build(BuildContext context) {
     return TreeTable<TreemapNode>(
-      dataRoots: [widget.rootNode],
-      columns: widget.columns,
-      treeColumn: widget.treeColumn,
+      dataRoots: rootNode.children,
+      columns: columns,
+      treeColumn: treeColumn,
       keyFactory: (node) => PageStorageKey<String>(node.name),
-      sortColumn: widget.sortColumn,
+      sortColumn: sortColumn,
       sortDirection: SortDirection.descending,
-      selectionNotifier: widget.controller.analysisRoot,
-      autoExpandRoots: true,
-      scrollController: _scrollController,
+      selectionNotifier: controller.analysisRoot,
     );
-  }
-
-  void _maybeScrollToSelectedNode() {
-    // If the node offset is invalid, don't scroll.
-    if (selectedNodeOffset < 0) return;
-
-    final extentVisible = Range(
-      _scrollController.offset,
-      _scrollController.offset + _scrollController.position.extentInside,
-    );
-    if (!extentVisible.contains(selectedNodeOffset)) {
-      _scrollController.animateTo(
-        selectedNodeOffset,
-        duration: longDuration,
-        curve: defaultCurve,
-      );
-    }
   }
 }
 

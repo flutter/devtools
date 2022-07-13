@@ -110,8 +110,10 @@ class FlatTable<T> extends StatefulWidget {
 }
 
 class FlatTableState<T> extends State<FlatTable<T>>
+    with AutoDisposeMixin
     implements SortableTable<T> {
   late List<T> data;
+  final ScrollController scrollController = ScrollController();
 
   @override
   void initState() {
@@ -128,6 +130,24 @@ class FlatTableState<T> extends State<FlatTable<T>>
         !collectionEquals(widget.data, oldWidget.data)) {
       _initData();
     }
+
+    // TODO(kenz): pull this code into a helper and also call from initState.
+    // Detect selection changes but only care about scrollIntoView.
+    addAutoDisposeListener(oldWidget.selectionNotifier, () {
+      setState(() {
+        final Selection<T> selection =
+            oldWidget.selectionNotifier!.value as Selection<T>;
+        if (selection.scrollIntoView) {
+          final int selectedDisplayRow = (selection.node! as dynamic).nodeIndex;
+          // TODO(terry): Optimize selecting row, if row's visible in
+          //              the viewport just select otherwise jumpTo row.
+          final newPos = selectedDisplayRow * defaultRowHeight;
+
+          // TODO(terry): Should animate factor out _moveSelection to reuse here.
+          scrollController.jumpTo(newPos);
+        }
+      });
+    });
   }
 
   void _initData() {
@@ -245,6 +265,7 @@ class FlatTableState<T> extends State<FlatTable<T>>
           onSortChanged: _sortDataAndUpdate,
           activeSearchMatchNotifier: widget.activeSearchMatchNotifier,
           rowItemExtent: defaultRowHeight,
+          scrollController: scrollController,
         );
       },
     );
@@ -403,6 +424,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   late List<double> columnWidths;
   late List<bool> rootsExpanded;
   late FocusNode _focusNode;
+  final ScrollController scrollController = ScrollController();
 
   late ValueNotifier<Selection<T>> selectionNotifier;
 
@@ -443,6 +465,18 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       setState(() {
         final node = selectionNotifier.value.node;
         expandParents(node?.parent);
+
+        node?.select();
+
+        final searchCondition = (T n) => n.isSelected;
+        final int selectedDisplayRow = node!.childCountToMatchingNode(
+          matchingNodeCondition: searchCondition,
+          includeCollapsedNodes: false,
+        );
+        final newPos = selectedDisplayRow * defaultRowHeight;
+        scrollController.jumpTo(newPos);
+
+        node.unselect();
       });
     });
 
@@ -584,6 +618,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       focusNode: _focusNode,
       handleKeyEvent: _handleKeyEvent,
       selectionNotifier: selectionNotifier,
+      scrollController: scrollController,
     );
   }
 
@@ -786,7 +821,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 // TODO(kenz): https://github.com/flutter/devtools/issues/1522. The table code
 // needs to be refactored to support flexible column widths.
 class _Table<T> extends StatefulWidget {
-  const _Table({
+  _Table({
     Key? key,
     required this.data,
     required this.columns,
@@ -803,7 +838,9 @@ class _Table<T> extends StatefulWidget {
     this.selectionNotifier,
     this.activeSearchMatchNotifier,
     this.rowItemExtent,
-  }) : super(key: key);
+    ScrollController? scrollController,
+  })  : scrollController = scrollController ?? ScrollController(),
+        super(key: key);
 
   final List<T> data;
 
@@ -825,6 +862,7 @@ class _Table<T> extends StatefulWidget {
   final TableKeyEventHandler? handleKeyEvent;
   final ValueNotifier<Selection<T>>? selectionNotifier;
   final ValueListenable<T?>? activeSearchMatchNotifier;
+  final ScrollController scrollController;
 
   /// The width to assume for columns that don't specify a width.
   static const defaultColumnWidth = 500.0;
@@ -837,7 +875,6 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
   late LinkedScrollControllerGroup _linkedHorizontalScrollControllerGroup;
   late ColumnData<T> sortColumn;
   late SortDirection sortDirection;
-  late ScrollController scrollController;
 
   @override
   void initState() {
@@ -846,7 +883,6 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
     _linkedHorizontalScrollControllerGroup = LinkedScrollControllerGroup();
     sortColumn = widget.sortColumn;
     sortDirection = widget.sortDirection;
-    scrollController = ScrollController();
 
     _initSearchListener();
   }
@@ -856,23 +892,6 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
     super.didUpdateWidget(oldWidget);
 
     cancelListeners();
-
-    // TODO(kenz): pull this code into a helper and also call from initState.
-    // Detect selection changes but only care about scrollIntoView.
-    addAutoDisposeListener(oldWidget.selectionNotifier, () {
-      setState(() {
-        final Selection<T> selection = oldWidget.selectionNotifier!.value;
-        // if (selection.scrollIntoView) {
-        final int selectedDisplayRow = (selection.node! as dynamic).nodeIndex;
-        // TODO(terry): Optimize selecting row, if row's visible in
-        //              the viewport just select otherwise jumpTo row.
-        final newPos = selectedDisplayRow * defaultRowHeight;
-
-        // TODO(terry): Should animate factor out _moveSelection to reuse here.
-        scrollController.jumpTo(newPos);
-        // }
-      });
-    });
 
     _initSearchListener();
   }
@@ -896,10 +915,12 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
     if (index == -1) return;
 
     final y = index * defaultRowHeight;
-    final indexInView = y > scrollController.offset &&
-        y < scrollController.offset + scrollController.position.extentInside;
+    final indexInView = y > widget.scrollController.offset &&
+        y <
+            widget.scrollController.offset +
+                widget.scrollController.position.extentInside;
     if (!indexInView) {
-      await scrollController.animateTo(
+      await widget.scrollController.animateTo(
         index * defaultRowHeight,
         duration: defaultDuration,
         curve: defaultCurve,
@@ -909,7 +930,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
 
   @override
   void dispose() {
-    scrollController.dispose();
+    widget.scrollController.dispose();
     super.dispose();
   }
 
@@ -939,8 +960,9 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
   Widget build(BuildContext context) {
     // If we're at the end already, scroll to expose the new content.
     if (widget.autoScrollContent) {
-      if (scrollController.hasClients && scrollController.atScrollBottom) {
-        scrollController.autoScrollToBottom();
+      if (widget.scrollController.hasClients &&
+          widget.scrollController.atScrollBottom) {
+        widget.scrollController.autoScrollToBottom();
       }
     }
 
@@ -982,7 +1004,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
               Expanded(
                 child: Scrollbar(
                   thumbVisibility: true,
-                  controller: scrollController,
+                  controller: widget.scrollController,
                   child: GestureDetector(
                     behavior: HitTestBehavior.translucent,
                     onTapDown: (a) => widget.focusNode?.requestFocus(),
@@ -991,13 +1013,13 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
                       onKey: (_, event) => widget.handleKeyEvent != null
                           ? widget.handleKeyEvent!(
                               event,
-                              scrollController,
+                              widget.scrollController,
                               constraints,
                             )
                           : KeyEventResult.ignored,
                       focusNode: widget.focusNode,
                       child: ListView.builder(
-                        controller: scrollController,
+                        controller: widget.scrollController,
                         itemCount: widget.data.length,
                         itemExtent: widget.rowItemExtent,
                         itemBuilder: _buildItem,
