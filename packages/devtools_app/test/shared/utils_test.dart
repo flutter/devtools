@@ -1161,6 +1161,13 @@ void main() {
         expect(notifier.value, equals([1, 3]));
       });
 
+      test('notifies on removeAll', () {
+        setUpWithInitialValue([1, 2, 3, 4]);
+        notifier.removeAll([1, 3]);
+        expect(didNotify, isTrue);
+        expect(notifier.value, equals([2, 4]));
+      });
+
       test('does not notify on remove of missing element', () {
         setUpWithInitialValue([1, 2, 3]);
         notifier.remove(0);
