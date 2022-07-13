@@ -90,19 +90,14 @@ class FlutterTestEnvironment {
     bool force = false,
     FlutterRunConfiguration? config,
   }) async {
-    print('FlutterTestEnvironment.setupEnvironment');
     // Setting up the environment is slow so we reuse the existing environment
     // when possible.
     if (force ||
         _needsSetup ||
         !reuseTestEnvironment ||
         _isNewRunConfig(config)) {
-      print('in first if');
       // If we already have a running test device, stop it before setting up a
       // new one.
-      print(
-        'checking if we need to tear down environment. should we? ${_flutter != null}',
-      );
       if (_flutter != null) await tearDownEnvironment(force: true);
 
       // Update the run configuration if we have a new one.
@@ -112,7 +107,6 @@ class FlutterTestEnvironment {
 
       _flutter = _flutterDriverFactory(Directory(testAppDirectory))
           as FlutterRunTestDriver?;
-      print('about to call _flutter.run');
       await _flutter!.run(
         flutterExecutable: _flutterExe,
         runConfig: _runConfig,
@@ -120,14 +114,10 @@ class FlutterTestEnvironment {
 
       _service = _flutter!.vmService!;
 
-      print('setting all our globals');
       setGlobal(IdeTheme, IdeTheme());
       final preferencesController = PreferencesController();
       setGlobal(Storage, FlutterDesktopStorage());
-      print('before preferences controller init');
       await preferencesController.init();
-      print('after preferences controller init');
-      print('setting ServiceConnectionManager global');
       setGlobal(ServiceConnectionManager, ServiceConnectionManager());
       setGlobal(PreferencesController, preferencesController);
       setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
@@ -137,51 +127,34 @@ class FlutterTestEnvironment {
       // Clear out VM service calls from the test driver.
       // ignore: invalid_use_of_visible_for_testing_member
       _service.clearVmServiceCalls();
-      print('calling vmServiceOpened');
+
       await serviceManager.vmServiceOpened(
         _service,
         onClosed: Completer().future,
       );
 
-      if (_afterNewSetup != null) {
-        print('calling afterNewSetup');
-        await _afterNewSetup!();
-      }
+      if (_afterNewSetup != null) await _afterNewSetup!();
     }
-    if (_afterEverySetup != null) {
-      print('calling afterEverySetup');
-      await _afterEverySetup!();
-    }
+    if (_afterEverySetup != null) await _afterEverySetup!();
   }
 
   Future<void> tearDownEnvironment({bool force = false}) async {
-    print('FlutterTestEnvironment.tearDownEnvironment');
     if (_needsSetup) {
-      print('returning early in _needsSetup');
       // _needsSetup=true means we've never run setup code or already cleaned up
       return;
     }
 
-    if (_beforeEveryTearDown != null) {
-      print('calling beforeEveryTearDown');
-      await _beforeEveryTearDown!();
-    }
+    if (_beforeEveryTearDown != null) await _beforeEveryTearDown!();
 
     if (!force && reuseTestEnvironment) {
-      print('skipping actually tearing down');
       // Skip actually tearing down for better test performance.
       return;
     }
 
-    if (_beforeFinalTearDown != null) {
-      print('calling beforeFinalTearDown');
-      await _beforeFinalTearDown!();
-    }
+    if (_beforeFinalTearDown != null) await _beforeFinalTearDown!();
 
-    print('calling manually disconnect');
     serviceManager.manuallyDisconnect();
 
-    print('awaiting all futures completed');
     await _service.allFuturesCompleted.timeout(
       const Duration(seconds: 20),
       onTimeout: () {
@@ -190,10 +163,8 @@ class FlutterTestEnvironment {
             '  ${_service.activeFutures.map((tf) => tf.name).join('\n  ')}';
       },
     );
-    print('calling _flutter.stop()');
     await _flutter!.stop();
 
-    print('ending tear down');
     _flutter = null;
 
     _needsSetup = true;
