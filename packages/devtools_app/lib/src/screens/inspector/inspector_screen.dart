@@ -360,7 +360,7 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
             ...dialogSubHeader(
               Theme.of(context),
               'General',
-            ), // TODO: this needs to be more specific
+            ),
             CheckboxSetting(
               notifier: preferences.inspector.hoverEvalModeEnabled
                   as ValueNotifier<bool?>,
@@ -551,6 +551,7 @@ class PubRootField extends StatelessWidget {
           height: 200.0,
           child: EditableList(
             entries: preferences.inspector.customPubRootDirectories,
+            label: 'Enter a new pubRootDirectory',
             isRefreshing:
                 preferences.inspector.isRefreshingCustomPubRootDirectories,
             onEntryAdded: (p0) =>

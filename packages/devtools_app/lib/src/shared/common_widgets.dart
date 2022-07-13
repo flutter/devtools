@@ -259,6 +259,7 @@ class ClearButton extends IconLabelButton {
 class EditableList extends StatefulWidget {
   const EditableList({
     required this.entries,
+    required this.label,
     this.isRefreshing,
     this.onEntryAdded,
     this.onEntryRemoved,
@@ -270,6 +271,7 @@ class EditableList extends StatefulWidget {
   final Function(String)? onEntryAdded;
   final Function(String)? onEntryRemoved;
   final Function()? onRefresh;
+  final String label;
 
   @override
   State<StatefulWidget> createState() => _EditableListState();
@@ -335,7 +337,7 @@ class _EditableListState extends State<EditableList> {
                         decoration: InputDecoration(
                           contentPadding: const EdgeInsets.all(denseSpacing),
                           border: const OutlineInputBorder(),
-                          labelText: 'Enter a new pubRootDirectory',
+                          labelText: widget.label,
                           suffix: TextButton(
                             onPressed: () {
                               _addNewPubRootDirecory();
