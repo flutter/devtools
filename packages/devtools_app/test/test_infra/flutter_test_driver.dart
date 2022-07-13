@@ -16,6 +16,7 @@ import 'package:vm_service/vm_service_io.dart';
 /// supporting classes were also copied from flutter/packages/flutter_tools.
 /// Those files are marked as such and live in the parent directory of this file
 /// (flutter_tools/).
+
 // Set this to true for debugging to get JSON written to stdout.
 const bool _printDebugOutputToStdOut = false;
 const Duration defaultTimeout = Duration(seconds: 40);
