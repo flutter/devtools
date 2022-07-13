@@ -213,8 +213,6 @@ class FramePhaseBlock extends StatelessWidget {
   }
 }
 
-// TODO(kenz): provide hints about expensive flutter operations
-// (canvas.saveLayer(), intrinsics, etc.).
 class IntelligentFrameFindings extends StatelessWidget {
   const IntelligentFrameFindings({
     Key? key,
@@ -225,6 +223,8 @@ class IntelligentFrameFindings extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final saveLayerCount = frameAnalysis.saveLayerCount;
+    final intrinsicsCount = frameAnalysis.intrinsicsOperationCount;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -235,6 +235,10 @@ class IntelligentFrameFindings extends StatelessWidget {
             longestPhase: frameAnalysis.longestFramePhase,
           ),
         ),
+        const SizedBox(height: densePadding),
+        if (saveLayerCount > 0) CanvasSaveLayerHint(saveLayerCount),
+        const SizedBox(height: densePadding),
+        if (intrinsicsCount > 0) IntrinsicsHint(intrinsicsCount),
       ],
     );
   }
@@ -361,6 +365,111 @@ class _SmallEnhanceTracingButton extends StatelessWidget {
           label: EnhanceTracingButton.title,
           iconData: EnhanceTracingButton.icon,
           color: Theme.of(context).colorScheme.toggleButtonsTitle,
+        ),
+      ),
+    );
+  }
+}
+
+class _ExpensiveOperationHint extends StatelessWidget {
+  const _ExpensiveOperationHint({
+    Key? key,
+    required this.message,
+    required this.docsUrl,
+  }) : super(key: key);
+
+  final TextSpan message;
+  final String docsUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return RichText(
+      text: TextSpan(
+        children: [
+          message,
+          TextSpan(
+            text: ' This may ',
+            style: theme.regularTextStyle,
+          ),
+          LinkTextSpan(
+            context: context,
+            link: Link(
+              display: 'negatively affect your app\'s performance',
+              url: docsUrl,
+            ),
+          ),
+          TextSpan(
+            text: '.',
+            style: theme.regularTextStyle,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class CanvasSaveLayerHint extends StatelessWidget {
+  const CanvasSaveLayerHint(
+    this.saveLayerCount, {
+    Key? key,
+  }) : super(key: key);
+
+  static const _saveLayerDocs =
+      'https://docs.flutter.dev/perf/best-practices#use-savelayer-thoughtfully';
+
+  final int saveLayerCount;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return _Hint(
+      message: _ExpensiveOperationHint(
+        docsUrl: _saveLayerDocs,
+        message: TextSpan(
+          children: [
+            TextSpan(
+              text: 'Canvas.saveLayer()',
+              style: theme.fixedFontStyle,
+            ),
+            TextSpan(
+              text: ' was called $saveLayerCount times '
+                  'during this frame.',
+              style: theme.regularTextStyle,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class IntrinsicsHint extends StatelessWidget {
+  const IntrinsicsHint(this.intrinsicsCount, {Key? key}) : super(key: key);
+
+  static const _intrinsicsDocs =
+      'https://docs.flutter.dev/perf/best-practices#minimize-layout-passes-caused-by-intrinsic-operations';
+
+  final int intrinsicsCount;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return _Hint(
+      message: _ExpensiveOperationHint(
+        docsUrl: _intrinsicsDocs,
+        message: TextSpan(
+          children: [
+            TextSpan(
+              text: 'Intrinsics',
+              style: theme.fixedFontStyle,
+            ),
+            TextSpan(
+              text: ' passes were performed $intrinsicsCount times during '
+                  'this frame.',
+              style: theme.regularTextStyle,
+            ),
+          ],
         ),
       ),
     );

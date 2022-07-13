@@ -1261,6 +1261,10 @@ class FrameAnalysis {
 
   static const rasterEventName = 'Raster';
 
+  static const saveLayerEventName = 'Canvas::saveLayer';
+
+  static const intrinsicsEventSuffix = ' intrinsics';
+
   ValueListenable<FramePhase?> get selectedPhase => _selectedPhase;
 
   final _selectedPhase = ValueNotifier<FramePhase?>(null);
@@ -1365,6 +1369,55 @@ class FrameAnalysis {
       }
     }
     return longestPhase;
+  }
+
+  bool get hasExpensiveOperations =>
+      saveLayerCount + intrinsicsOperationCount > 0;
+
+  int? _saveLayerCount;
+  int get saveLayerCount {
+    if (_saveLayerCount == null) {
+      _countExpensiveOperations();
+    }
+    return _saveLayerCount!;
+  }
+
+  int? _intrinsicsOperationCount;
+  int get intrinsicsOperationCount {
+    if (_intrinsicsOperationCount == null) {
+      _countExpensiveOperations();
+    }
+    return _intrinsicsOperationCount!;
+  }
+
+  void _countExpensiveOperations() {
+    assert(_saveLayerCount == null);
+    assert(_intrinsicsOperationCount == null);
+    int _saveLayer = 0;
+    for (final paintEvent in paintPhase.events) {
+      breadthFirstTraversal<TimelineEvent>(
+        paintEvent,
+        action: (event) {
+          if (event.name!.caseInsensitiveContains(saveLayerEventName)) {
+            _saveLayer++;
+          }
+        },
+      );
+    }
+    _saveLayerCount = _saveLayer;
+
+    int _intrinsics = 0;
+    for (final layoutEvent in layoutPhase.events) {
+      breadthFirstTraversal<TimelineEvent>(
+        layoutEvent,
+        action: (event) {
+          if (event.name!.caseInsensitiveContains(intrinsicsEventSuffix)) {
+            _intrinsics++;
+          }
+        },
+      );
+    }
+    _intrinsicsOperationCount = _intrinsics;
   }
 
   // TODO(kenz): calculate ratios to use as flex values. This will be a bit
