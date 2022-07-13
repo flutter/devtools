@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../primitives/auto_dispose_mixin.dart';
+import '../../shared/common_widgets.dart';
 import '../../shared/screen.dart';
 import '../../shared/theme.dart';
 import '../../shared/utils.dart';
@@ -14,7 +15,7 @@ import 'object_inspector_view.dart';
 import 'vm_developer_tools_controller.dart';
 import 'vm_statistics_view.dart';
 
-const displayObjectInspector = false;
+const displayObjectInspector = true;
 
 abstract class VMDeveloperView {
   const VMDeveloperView(
@@ -112,8 +113,10 @@ class _VMDeveloperToolsScreenState extends State<VMDeveloperToolsScreenBody>
                 padding: const EdgeInsets.only(
                   left: defaultSpacing,
                 ),
-                child: VMDeveloperToolsScreenBody.views[selectedIndex]
-                    .build(context),
+                child: KeepAliveWrapper(
+                  child: VMDeveloperToolsScreenBody.views[selectedIndex]
+                      .build(context),
+                ),
               ),
             )
           ],

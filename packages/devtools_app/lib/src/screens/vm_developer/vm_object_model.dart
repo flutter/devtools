@@ -8,13 +8,18 @@ import 'package:vm_service/vm_service.dart';
 import '../../service/vm_service_wrapper.dart';
 import '../../shared/globals.dart';
 import '../debugger/debugger_model.dart';
+import '../debugger/program_explorer_model.dart';
 
 /// Wrapper class for storing Dart VM objects with their relevant VM
 /// information.
 abstract class VmObject {
-  VmObject({required this.ref});
+  VmObject({required this.ref, this.scriptNode, this.outlineNode});
 
   final ObjRef ref;
+
+  final ScriptRef? scriptNode;
+
+  final VMServiceObjectNode? outlineNode;
 
   VmServiceWrapper get _service => serviceManager.service!;
 
@@ -60,7 +65,7 @@ abstract class VmObject {
 
 //TODO(mtaylee): finish class implementation.
 class ClassObject extends VmObject {
-  ClassObject({required super.ref});
+  ClassObject({required super.ref, super.scriptNode, super.outlineNode});
 
   Class get obj => _obj as Class;
 
@@ -73,16 +78,72 @@ class ClassObject extends VmObject {
   @override
   SourceLocation? get _sourceLocation => obj.location;
 
+  ValueListenable<bool> get fetchingReachableSize => _fetchingReachableSize;
+  final ValueNotifier<bool> _fetchingReachableSize = ValueNotifier(false);
+  InstanceRef? reachableSize;
+
+  ValueListenable<bool> get fetchingRetainedSize => _fetchingRetainedSize;
+  final ValueNotifier<bool> _fetchingRetainedSize = ValueNotifier(false);
+  InstanceRef? retainedSize;
+
+  ValueListenable<bool> get fetchingRetainingPath => _fetchingRetainingPath;
+  final ValueNotifier<bool> _fetchingRetainingPath = ValueNotifier(false);
+  RetainingPath? get retainingPath => _retainingPath;
+  RetainingPath? _retainingPath;
+
+  ValueListenable<bool> get fetchingInboundRefs => _fetchingInboundRefs;
+  final ValueNotifier<bool> _fetchingInboundRefs = ValueNotifier(false);
+  InboundReferences? get inboundReferences => _inboundReferences;
+  InboundReferences? _inboundReferences;
+
   @override
   Future<void> initialize() async {
     await super.initialize();
     _instances = await _service.getInstances(_isolate!.id!, ref.id!, 100);
   }
+
+  Future<void> requestReachableSize() async {
+    _fetchingReachableSize.value = true;
+    reachableSize = await _service.getReachableSize(_isolate!.id!, ref.id!);
+    _fetchingReachableSize.value = false;
+  }
+
+  Future<void> requestRetainedSize() async {
+    _fetchingRetainedSize.value = true;
+    retainedSize = await _service.getRetainedSize(_isolate!.id!, ref.id!);
+    _fetchingRetainedSize.value = false;
+  }
+
+  Future<void> requestRetainingPath() async {
+    _fetchingRetainingPath.value = true;
+    _retainingPath =
+        await _service.getRetainingPath(_isolate!.id!, ref.id!, 100);
+    _fetchingRetainingPath.value = false;
+  }
+
+  Future<void> requestInboundsRefs() async {
+    _fetchingInboundRefs.value = true;
+    _inboundReferences =
+        await _service.getInboundReferences(_isolate!.id!, ref.id!, 100);
+    _fetchingInboundRefs.value = false;
+  }
 }
+
+// void x() async {
+//     _retainingPath =
+//         await _service.getRetainingPath(_isolate!.id!, ref.id!, 100);
+
+//     _inboundReferences =
+//         await _service.getInboundReferences(_isolate!.id!, ref.id!, 100);
+
+//     void requestInboundReferences() {
+//       _sidePanelVisible.value = !_sidePanelVisible.value;
+//     }
+//   }
 
 //TODO(mtaylee): finish class implementation.
 class FuncObject extends VmObject {
-  FuncObject({required super.ref});
+  FuncObject({required super.ref, super.scriptNode, super.outlineNode});
 
   Func get obj => _obj as Func;
 
@@ -95,7 +156,7 @@ class FuncObject extends VmObject {
 
 //TODO(mtaylee): finish class implementation.
 class FieldObject extends VmObject {
-  FieldObject({required super.ref});
+  FieldObject({required super.ref, super.scriptNode, super.outlineNode});
 
   Field get obj => _obj as Field;
 
@@ -108,7 +169,7 @@ class FieldObject extends VmObject {
 
 //TODO(mtaylee): finish class implementation.
 class LibraryObject extends VmObject {
-  LibraryObject({required super.ref});
+  LibraryObject({required super.ref, super.scriptNode, super.outlineNode});
 
   Library get obj => _obj as Library;
 
@@ -121,7 +182,7 @@ class LibraryObject extends VmObject {
 
 //TODO(mtaylee): finish class implementation.
 class ScriptObject extends VmObject {
-  ScriptObject({required super.ref});
+  ScriptObject({required super.ref, super.scriptNode, super.outlineNode});
 
   Script get obj => _obj as Script;
 
@@ -134,7 +195,7 @@ class ScriptObject extends VmObject {
 
 //TODO(mtaylee): finish class implementation.
 class InstanceObject extends VmObject {
-  InstanceObject({required super.ref});
+  InstanceObject({required super.ref, super.scriptNode, super.outlineNode});
 
   Instance get obj => _obj as Instance;
 

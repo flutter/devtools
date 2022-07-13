@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/shared/common_widgets.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -12,7 +14,7 @@ import 'vm_object_model.dart';
 /// A widget for the object inspector historyViewport displaying information
 /// related to class objects in the Dart VM.
 class VmClassDisplay extends StatelessWidget {
-  const VmClassDisplay({
+  VmClassDisplay({
     required this.clazz,
   });
 
@@ -20,22 +22,70 @@ class VmClassDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return Row(
       children: [
-        Flexible(
-          flex: 5,
-          child: ClassInfoWidget(
-            clazz: clazz,
+        Expanded(
+          child: Column(
+            children: [
+              Flexible(
+                child: ClassInfoWidget(
+                  clazz: clazz,
+                ),
+              ),
+              Flexible(
+                child: ListView(
+                  children: [
+                    ValueListenableBuilder<bool>(
+                      valueListenable: clazz.fetchingRetainingPath,
+                      builder: (context, fetching, child) {
+                        return VmExpansionTile(
+                          title: 'Retaining Path',
+                          onExpanded: _onExpandRetainingPath,
+                          children: clazz.retainingPath == null
+                              ? <Widget>[]
+                              : retainingPathList(
+                                  context,
+                                  clazz.retainingPath!,
+                                ),
+                        );
+                      },
+                    ),
+                    ValueListenableBuilder<bool>(
+                      valueListenable: clazz.fetchingInboundRefs,
+                      builder: (context, fetching, child) {
+                        return VmExpansionTile(
+                          title: 'InboundReferences',
+                          onExpanded: _onExpandInboundRefs,
+                          children: clazz.inboundReferences == null
+                              ? <Widget>[]
+                              : inboundReferencesList(
+                                  context,
+                                  clazz.inboundReferences!,
+                                ),
+                        );
+                      },
+                    )
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
         Flexible(
-          flex: 4,
           child: ClassInstancesWidget(
             instances: clazz.instances,
           ),
         )
       ],
     );
+  }
+
+  void _onExpandRetainingPath(bool expanded) {
+    if (clazz.retainingPath == null) clazz.requestRetainingPath();
+  }
+
+  void _onExpandInboundRefs(bool expanded) {
+    if (clazz.inboundReferences == null) clazz.requestInboundsRefs();
   }
 }
 
@@ -58,13 +108,29 @@ class ClassInfoWidget extends StatelessWidget {
           prettyPrintBytes(
             clazz.obj.size ?? 0,
             includeUnit: true,
-            kbFractionDigits: 3,
+            kbFractionDigits: 1,
+            maxBytes: 512,
           ),
         ),
-        const MapEntry('Reachable Size', 'TO-DO'),
-        const MapEntry('Retained Size', 'TO-DO'),
-        const MapEntry('Retaining path', 'TO-DO'),
-        const MapEntry('Inbound references', 'TO-DO'),
+        MapEntry(
+          'Reachable Size',
+          ValueListenableBuilder<bool>(
+            valueListenable: clazz.fetchingReachableSize,
+            builder: (context, fetching, child) => _reachableSize(fetching),
+          ),
+        ),
+        MapEntry(
+          'Retained Size',
+          ValueListenableBuilder<bool>(
+            valueListenable: clazz.fetchingRetainedSize,
+            builder: (context, fetching, child) => _retainedSize(fetching),
+          ),
+        ),
+        // MapEntry(
+        //   'Retaining path',
+        //   RequestDataButton(onPressed: _retainingPath),
+        // ),
+        // MapEntry('Inbound references', clazz.inboundReferences.toString()),
         MapEntry(
           'Library',
           clazz.obj.library?.name?.isEmpty ?? false
@@ -85,6 +151,50 @@ class ClassInfoWidget extends StatelessWidget {
     if (uri == null) return null;
     final splitted = uri.split('/');
     return splitted[splitted.length - 1];
+  }
+
+  Widget _reachableSize(bool fetchingReachableSize) {
+    if (fetchingReachableSize) return const CircularProgressIndicator();
+    if (clazz.reachableSize == null)
+      return RequestDataButton(onPressed: clazz.requestReachableSize);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Text(
+          clazz.reachableSize!.valueAsString == null
+              ? '--'
+              : prettyPrintBytes(
+                  int.parse(clazz.reachableSize!.valueAsString!),
+                  includeUnit: true,
+                  kbFractionDigits: 1,
+                  maxBytes: 512,
+                )!,
+        ),
+        ToolbarRefresh(onPressed: clazz.requestReachableSize),
+      ],
+    );
+  }
+
+  Widget _retainedSize(bool fetchingRetainedSize) {
+    if (fetchingRetainedSize) return const CircularProgressIndicator();
+    if (clazz.retainedSize == null)
+      return RequestDataButton(onPressed: clazz.requestRetainedSize);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Text(
+          clazz.retainedSize!.valueAsString == null
+              ? '--'
+              : prettyPrintBytes(
+                  int.parse(clazz.retainedSize!.valueAsString!),
+                  includeUnit: true,
+                  kbFractionDigits: 1,
+                  maxBytes: 512,
+                )!,
+        ),
+        ToolbarRefresh(onPressed: clazz.requestRetainedSize),
+      ],
+    );
   }
 }
 
