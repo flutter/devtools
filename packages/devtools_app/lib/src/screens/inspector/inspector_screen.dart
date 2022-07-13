@@ -555,7 +555,7 @@ class PubRootField extends StatelessWidget {
           height: 200.0,
           child: EditableList(
             entries: preferences.inspector.customPubRootDirectories,
-            label: 'Enter a new pubRootDirectory',
+            label: 'Enter a new package directory',
             isRefreshing:
                 preferences.inspector.isRefreshingCustomPubRootDirectories,
             onEntryAdded: (p0) =>

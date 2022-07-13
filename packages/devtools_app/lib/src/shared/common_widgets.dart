@@ -338,18 +338,18 @@ class _EditableListState extends State<EditableList> {
                           contentPadding: const EdgeInsets.all(denseSpacing),
                           border: const OutlineInputBorder(),
                           labelText: widget.label,
-                          suffix: TextButton(
-                            onPressed: () {
-                              _addNewPubRootDirecory();
-                            },
-                            child: const Text('Add'),
-                          ),
                         ),
                         onSubmitted: (value) {
                           _addNewPubRootDirecory();
                         },
                       ),
                     ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      _addNewPubRootDirecory();
+                    },
+                    child: const Text('Add'),
                   ),
                   widget.isRefreshing?.value ?? false
                       ? Container(
