@@ -155,6 +155,8 @@ class HeapTreeViewState extends State<HeapTree>
 
   late List<Tab> _tabs;
   late TabController _tabController;
+  late Set<Key> _searchableTabs;
+  final ValueNotifier<int> _currentTab = ValueNotifier(0);
 
   Widget? snapshotDisplay;
 
@@ -206,8 +208,12 @@ class HeapTreeViewState extends State<HeapTree>
         ),
     ];
 
+    _searchableTabs = {dartHeapAnalysisTabKey, dartHeapAllocationsTabKey};
     _tabController = TabController(length: _tabs.length, vsync: this);
+    _tabController.addListener(_onTabChanged);
   }
+
+  void _onTabChanged() => _currentTab.value = _tabController.index;
 
   @override
   void didChangeDependencies() {
@@ -294,6 +300,9 @@ class HeapTreeViewState extends State<HeapTree>
   @override
   void dispose() {
     _animation.dispose();
+    _tabController
+      ..removeListener(_onTabChanged)
+      ..dispose();
 
     super.dispose();
   }
@@ -431,17 +440,21 @@ class HeapTreeViewState extends State<HeapTree>
       child: Column(
         children: [
           const SizedBox(height: defaultSpacing),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              TabBar(
-                labelColor: themeData.textTheme.bodyText1!.color,
-                isScrollable: true,
-                controller: _tabController,
-                tabs: _tabs,
-              ),
-              _buildSearchFilterControls(),
-            ],
+          ValueListenableBuilder<int>(
+            valueListenable: _currentTab,
+            builder: (context, index, _) => Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TabBar(
+                  labelColor: themeData.textTheme.bodyText1!.color,
+                  isScrollable: true,
+                  controller: _tabController,
+                  tabs: _tabs,
+                ),
+                if (_searchableTabs.contains(_tabs[index].key))
+                  _buildSearchFilterControls(),
+              ],
+            ),
           ),
           const SizedBox(height: densePadding),
           Expanded(

@@ -5,6 +5,7 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:intl/intl.dart';
 
 import '../../../devtools.dart';
 import '../../primitives/utils.dart';
@@ -98,16 +99,19 @@ abstract class ExportController {
 
   const ExportController.impl();
 
-  String generateFileName() {
-    final now = DateTime.now();
-    final timestamp =
-        '${now.year}_${now.month}_${now.day}-${now.microsecondsSinceEpoch}';
-    return 'dart_devtools_$timestamp.json';
+  String generateFileName({
+    String prefix = 'dart_devtools',
+    String extension = 'json',
+    DateTime? time,
+  }) {
+    time ??= DateTime.now();
+    final timestamp = DateFormat('yyyy-MM-dd_HH:mm:ss.SSS').format(time);
+    return '${prefix}_$timestamp.$extension';
   }
 
   /// Downloads a JSON file with [contents] and returns the name of the
   /// downloaded file.
-  String downloadFile(String contents);
+  String downloadFile(String contents, {String? fileName});
 
   String encode(String activeScreenId, Map<String, dynamic> contents) {
     final _contents = {
