@@ -182,6 +182,17 @@ class ProgramExplorerController extends DisposableController
     }
   }
 
+  void resetOutline() {
+    _outlineSelection.value = null;
+
+    for (VMServiceObjectNode node in _outlineNodes.value) {
+      node.collapseCascading();
+      node.unselect();
+    }
+
+    _outlineNodes.notifyListeners();
+  }
+
   /// Updates `node` with a fully populated VM service [Obj].
   ///
   /// If `node.object` is already an instance of [Obj], this function
