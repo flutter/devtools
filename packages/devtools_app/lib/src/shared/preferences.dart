@@ -123,7 +123,7 @@ class InspectorPreferencesController {
     await _customPubRootDirectoryBusyTracker(
       Future<void>(() async {
         await inspectorService.addPubRootDirectories(pubRootDirectories);
-        await refreshPubRootDirectoriesFromService();
+        await _refreshPubRootDirectoriesFromService();
       }),
     );
   }
@@ -134,12 +134,12 @@ class InspectorPreferencesController {
     await _customPubRootDirectoryBusyTracker(
       Future<void>(() async {
         await inspectorService.removePubRootDirectories(pubRootDirectories);
-        await refreshPubRootDirectoriesFromService();
+        await _refreshPubRootDirectoriesFromService();
       }),
     );
   }
 
-  Future<void> refreshPubRootDirectoriesFromService() async {
+  Future<void> _refreshPubRootDirectoriesFromService() async {
     await _customPubRootDirectoryBusyTracker(
       Future<void>(() async {
         final freshPubRootDirectories =
@@ -157,7 +157,7 @@ class InspectorPreferencesController {
     );
   }
 
-  Future<void> loadCustomPubRootDirectoriesFromStorage() async {
+  Future<void> loadCustomPubRootDirectories() async {
     await _customPubRootDirectoryBusyTracker(
       Future<void>(() async {
         final storedCustomPubRootDirectories =

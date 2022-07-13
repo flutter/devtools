@@ -144,7 +144,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
         searchPreventClose = false;
       }
     });
-    preferences.inspector.loadCustomPubRootDirectoriesFromStorage();
+    preferences.inspector.loadCustomPubRootDirectories();
   }
 
   @override
@@ -181,7 +181,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     });
     serviceManager.isolateManager.isolates.addListener(() {
       _refreshInspector();
-      preferences.inspector.loadCustomPubRootDirectoriesFromStorage();
+      preferences.inspector.loadCustomPubRootDirectories();
     });
     return Column(
       children: <Widget>[
@@ -350,7 +350,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
 class FlutterInspectorSettingsDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    preferences.inspector.loadCustomPubRootDirectoriesFromStorage();
+    preferences.inspector.loadCustomPubRootDirectories();
     final theme = Theme.of(context);
     return DevToolsDialog(
       title: dialogTitleText(Theme.of(context), 'Flutter Inspector Settings'),
@@ -546,7 +546,7 @@ class ErrorNavigator extends StatelessWidget {
 class PubRootField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    preferences.inspector.loadCustomPubRootDirectoriesFromStorage();
+    preferences.inspector.loadCustomPubRootDirectories();
     return ValueListenableBuilder<List<IsolateRef?>>(
       valueListenable: serviceManager.isolateManager.isolates,
       builder: (context, value, child) {
@@ -563,7 +563,7 @@ class PubRootField extends StatelessWidget {
             onEntryRemoved: (p0) =>
                 preferences.inspector.removePubRootDirectories([p0]),
             onRefresh: () =>
-                preferences.inspector.refreshPubRootDirectoriesFromService(),
+                preferences.inspector.loadCustomPubRootDirectories(),
           ),
         );
       },
