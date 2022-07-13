@@ -182,12 +182,16 @@ class ProgramExplorerController extends DisposableController
     }
   }
 
+  /// Sets the current [_outlineSelection] value to null, and resets the
+  /// [_outlineNodes] tree for the current [_scriptSelection] by
+  /// collapsing and unselecting all nodes.
   void resetOutline() {
     _outlineSelection.value = null;
 
-    for (VMServiceObjectNode node in _outlineNodes.value) {
-      node.collapseCascading();
-      node.unselect();
+    for (final node in _outlineNodes.value) {
+      node
+        ..collapseCascading()
+        ..unselect();
     }
 
     _outlineNodes.notifyListeners();
