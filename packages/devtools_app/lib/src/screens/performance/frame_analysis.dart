@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../analytics/constants.dart' as analytics_constants;
 import '../../primitives/utils.dart';
@@ -35,6 +36,7 @@ class FlutterFrameAnalysisView extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(defaultSpacing),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           IntelligentFrameFindings(frameAnalysis: frameAnalysis),
           const PaddedDivider(
@@ -223,6 +225,9 @@ class IntelligentFrameFindings extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final performanceController = Provider.of<PerformanceController>(context);
+    final shouldShowHints = frameAnalysis.frame
+        .isJanky(performanceController.displayRefreshRate.value);
     final saveLayerCount = frameAnalysis.saveLayerCount;
     final intrinsicsCount = frameAnalysis.intrinsicsOperationCount;
     return Column(
@@ -230,15 +235,18 @@ class IntelligentFrameFindings extends StatelessWidget {
       children: [
         const Text('Analysis results:'),
         const SizedBox(height: denseSpacing),
-        _Hint(
-          message: _EnhanceTracingHint(
-            longestPhase: frameAnalysis.longestFramePhase,
+        if (shouldShowHints) ...[
+          _Hint(
+            message: _EnhanceTracingHint(
+              longestPhase: frameAnalysis.longestFramePhase,
+            ),
           ),
-        ),
-        const SizedBox(height: densePadding),
-        if (saveLayerCount > 0) CanvasSaveLayerHint(saveLayerCount),
-        const SizedBox(height: densePadding),
-        if (intrinsicsCount > 0) IntrinsicsHint(intrinsicsCount),
+          const SizedBox(height: densePadding),
+          if (saveLayerCount > 0) CanvasSaveLayerHint(saveLayerCount),
+          const SizedBox(height: densePadding),
+          if (intrinsicsCount > 0) IntrinsicsHint(intrinsicsCount),
+        ] else
+          const Text('No suggestions for this frame - no jank detected.'),
       ],
     );
   }
