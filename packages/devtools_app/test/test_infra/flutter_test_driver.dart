@@ -276,6 +276,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     FlutterRunConfiguration runConfig = const FlutterRunConfiguration(),
     File? pidFile,
   }) async {
+    print(' in FlutterRunTestDriver.run');
     final args = <String>[
       'run',
       '--machine',
@@ -287,12 +288,14 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       args.addAll(['-t', runConfig.entryScript ?? '']);
     }
     args.addAll(['-d', 'flutter-tester']);
+    print('about to call setupProcess');
     await setupProcess(
       args,
       flutterExecutable: flutterExecutable,
       runConfig: runConfig,
       pidFile: pidFile,
     );
+    print('end of FlutterRunTestDriver.run');
   }
 
   Future<void> attach(
@@ -333,16 +336,20 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     // Stash the PID so that we can terminate the VM more reliably than using
     // proc.kill() (because proc is a shell, because `flutter` is a shell
     // script).
+    print('waiting for the connected event');
     final Map<String, dynamic> connected =
         await waitFor(event: 'daemon.connected');
+    print('after connected');
     procPid = connected['params']['pid'];
 
     // Set this up now, but we don't wait it yet. We want to make sure we don't
     // miss it while waiting for debugPort below.
+    print('calling waitFor app.started');
     final Future<Map<String, dynamic>> started =
         waitFor(event: 'app.started', timeout: appStartTimeout);
 
     if (runConfig.withDebugger) {
+      print('calling waitFor app.debugPort');
       final Map<String, dynamic> debugPort =
           await waitFor(event: 'app.debugPort', timeout: appStartTimeout);
       final String wsUriString = debugPort['params']['wsUri'];
@@ -351,7 +358,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       // Map to WS URI.
       _vmServiceWsUri =
           convertToWebSocketUrl(serviceProtocolUrl: _vmServiceWsUri);
-
+      print('calling await vmServiceConnectUri');
       vmService = VmServiceWrapper(
         await vmServiceConnectUri(_vmServiceWsUri.toString()),
         _vmServiceWsUri,
@@ -361,11 +368,13 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       final vmServiceLocal = vmService!;
       vmServiceLocal.onSend.listen((String s) => _debugPrint('==> $s'));
       vmServiceLocal.onReceive.listen((String s) => _debugPrint('<== $s'));
+      print('waiting for streams');
       await Future.wait(<Future<Success>>[
         vmServiceLocal.streamListen(EventStreams.kIsolate),
         vmServiceLocal.streamListen(EventStreams.kDebug),
       ]);
 
+      print('after waiting for streams');
       // On hot restarts, the isolate ID we have for the Flutter thread will
       // exit so we need to invalidate our cached ID.
       vmServiceLocal.onIsolateEvent.listen((Event event) {
@@ -378,14 +387,20 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       // Because we start paused, resume so the app is in a "running" state as
       // expected by tests. Tests will reload/restart as required if they need
       // to hit breakpoints, etc.
+      print('waitinf for pause');
       await waitForPause();
+      print('after waiting for pause');
       if (runConfig.pauseOnExceptions) {
+        print('setting isolate pause mode');
         await vmServiceLocal.setIsolatePauseMode(
           await getFlutterIsolateId(),
           exceptionPauseMode: ExceptionPauseMode.kUnhandled,
         );
+        print('after isolate pause mode');
       }
+      print('awaiting resume');
       await resume(wait: false);
+      print('after resume');
     }
 
     // Now await the started event; if it had already happened the future will
