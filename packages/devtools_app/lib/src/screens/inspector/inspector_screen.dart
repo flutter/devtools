@@ -179,6 +179,10 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     preferences.inspector.customPubRootDirectories.addListener(() {
       _refreshInspector();
     });
+    serviceManager.isolateManager.isolates.addListener(() {
+      _refreshInspector();
+      preferences.inspector.loadCustomPubRootDirectoriesFromStorage();
+    });
     return Column(
       children: <Widget>[
         Row(

@@ -177,7 +177,7 @@ class InspectorPreferencesController {
   Future<void> _customPubRootDirectoryBusyTracker(Future<void> callback) async {
     try {
       _busyCounter.value++;
-      await callback;
+      await callback.timeout(const Duration(seconds: 10));
     } finally {
       _busyCounter.value--;
     }
