@@ -1211,9 +1211,7 @@ class ListValueNotifier<T> extends ChangeNotifier
   }
 
   void removeAll(Iterable<T> elements) {
-    elements.forEach((element) {
-      _rawList.remove(element);
-    });
+    elements.forEach(_rawList.remove);
     _listChanged();
   }
 
