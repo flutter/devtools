@@ -120,7 +120,7 @@ class InspectorPreferencesController {
   Future<void> addPubRootDirectories(
     List<String> pubRootDirectories,
   ) async {
-    await customPubRootDirectoryBusyTracker(
+    await _customPubRootDirectoryBusyTracker(
       Future<void>(() async {
         await inspectorService.addPubRootDirectories(pubRootDirectories);
         await refreshPubRootDirectoriesFromService();
@@ -131,7 +131,7 @@ class InspectorPreferencesController {
   Future<void> removePubRootDirectories(
     List<String> pubRootDirectories,
   ) async {
-    await customPubRootDirectoryBusyTracker(
+    await _customPubRootDirectoryBusyTracker(
       Future<void>(() async {
         await inspectorService.removePubRootDirectories(pubRootDirectories);
         await refreshPubRootDirectoriesFromService();
@@ -140,7 +140,7 @@ class InspectorPreferencesController {
   }
 
   Future<void> refreshPubRootDirectoriesFromService() async {
-    await customPubRootDirectoryBusyTracker(
+    await _customPubRootDirectoryBusyTracker(
       Future<void>(() async {
         final freshPubRootDirectories =
             await inspectorService.getPubRootDirectories();
@@ -158,7 +158,7 @@ class InspectorPreferencesController {
   }
 
   Future<void> loadCustomPubRootDirectoriesFromStorage() async {
-    await customPubRootDirectoryBusyTracker(
+    await _customPubRootDirectoryBusyTracker(
       Future<void>(() async {
         final storedCustomPubRootDirectories =
             await storage.getValue(_customPubRootDirectoriesStorageId);
@@ -174,7 +174,7 @@ class InspectorPreferencesController {
     );
   }
 
-  Future<void> customPubRootDirectoryBusyTracker(Future<void> callback) async {
+  Future<void> _customPubRootDirectoryBusyTracker(Future<void> callback) async {
     try {
       _busyCounter.value++;
       await callback;
