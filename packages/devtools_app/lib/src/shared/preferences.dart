@@ -117,62 +117,67 @@ class InspectorPreferencesController {
     });
   }
 
-  Future<void> loadCustomPubRootDirectoriesFromStorage() async {
-    try {
-      _busyCounter.value++;
-      final storedCustomPubRootDirectories =
-          await storage.getValue(_customPubRootDirectoriesStorageId);
-
-      if (storedCustomPubRootDirectories != null) {
-        await addPubRootDirectories(
-          List<String>.from(
-            jsonDecode(storedCustomPubRootDirectories),
-          ),
-        );
-      }
-    } finally {
-      _busyCounter.value--;
-    }
-  }
-
   Future<void> addPubRootDirectories(
     List<String> pubRootDirectories,
   ) async {
-    try {
-      _busyCounter.value++;
-      await inspectorService.addPubRootDirectories(pubRootDirectories);
-      await refreshPubRootDirectoriesFromService();
-    } finally {
-      _busyCounter.value--;
-    }
-  }
-
-  Future<void> refreshPubRootDirectoriesFromService() async {
-    try {
-      _busyCounter.value++;
-      final freshPubRootDirectories =
-          await inspectorService.getPubRootDirectories();
-      if (freshPubRootDirectories != null) {
-        final newSet = Set<String>.from(freshPubRootDirectories);
-        final oldSet = Set<String>.from(_customPubRootDirectories.value);
-        final directoriesToAdd = newSet.difference(oldSet);
-        final directoriesToRemove = oldSet.difference(newSet);
-
-        _customPubRootDirectories.removeAll(directoriesToRemove);
-        _customPubRootDirectories.addAll(directoriesToAdd);
-      }
-    } finally {
-      _busyCounter.value--;
-    }
+    await customPubRootDirectoryBusyTracker(
+      Future<void>(() async {
+        await inspectorService.addPubRootDirectories(pubRootDirectories);
+        await refreshPubRootDirectoriesFromService();
+      }),
+    );
   }
 
   Future<void> removePubRootDirectories(
     List<String> pubRootDirectories,
   ) async {
+    await customPubRootDirectoryBusyTracker(
+      Future<void>(() async {
+        await inspectorService.removePubRootDirectories(pubRootDirectories);
+        await refreshPubRootDirectoriesFromService();
+      }),
+    );
+  }
+
+  Future<void> refreshPubRootDirectoriesFromService() async {
+    await customPubRootDirectoryBusyTracker(
+      Future<void>(() async {
+        final freshPubRootDirectories =
+            await inspectorService.getPubRootDirectories();
+        if (freshPubRootDirectories != null) {
+          final newSet = Set<String>.from(freshPubRootDirectories);
+          final oldSet = Set<String>.from(_customPubRootDirectories.value);
+          final directoriesToAdd = newSet.difference(oldSet);
+          final directoriesToRemove = oldSet.difference(newSet);
+
+          _customPubRootDirectories.removeAll(directoriesToRemove);
+          _customPubRootDirectories.addAll(directoriesToAdd);
+        }
+      }),
+    );
+  }
+
+  Future<void> loadCustomPubRootDirectoriesFromStorage() async {
+    await customPubRootDirectoryBusyTracker(
+      Future<void>(() async {
+        final storedCustomPubRootDirectories =
+            await storage.getValue(_customPubRootDirectoriesStorageId);
+
+        if (storedCustomPubRootDirectories != null) {
+          await addPubRootDirectories(
+            List<String>.from(
+              jsonDecode(storedCustomPubRootDirectories),
+            ),
+          );
+        }
+      }),
+    );
+  }
+
+  Future<void> customPubRootDirectoryBusyTracker(Future<void> callback) async {
     try {
       _busyCounter.value++;
-      await inspectorService.removePubRootDirectories(pubRootDirectories);
-      await refreshPubRootDirectoriesFromService();
+      await callback;
     } finally {
       _busyCounter.value--;
     }
