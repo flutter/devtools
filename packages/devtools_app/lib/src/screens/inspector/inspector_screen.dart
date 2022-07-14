@@ -16,6 +16,7 @@ import '../../service/service_extensions.dart' as extensions;
 import '../../shared/common_widgets.dart';
 import '../../shared/connected_app.dart';
 import '../../shared/dialogs.dart';
+import '../../shared/editable_list.dart';
 import '../../shared/error_badge_manager.dart';
 import '../../shared/globals.dart';
 import '../../shared/screen.dart';
