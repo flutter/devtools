@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../../shared/theme.dart';
+import '../../../shared/theme.dart';
 
 TextStyle unimportant(ColorScheme colorScheme) => TextStyle(
       color: colorScheme.isLight ? Colors.grey.shade500 : Colors.grey.shade600,
@@ -38,3 +38,19 @@ TextStyle unimportantItalic(ColorScheme colorScheme) =>
         fontStyle: FontStyle.italic,
       ),
     );
+
+TextStyle textStyleForLevel(DiagnosticLevel level, ColorScheme colorScheme) {
+  switch (level) {
+    case DiagnosticLevel.hidden:
+      return unimportant(colorScheme);
+    case DiagnosticLevel.warning:
+      return warning(colorScheme);
+    case DiagnosticLevel.error:
+      return error(colorScheme);
+    case DiagnosticLevel.debug:
+    case DiagnosticLevel.info:
+    case DiagnosticLevel.fine:
+    default:
+      return regular;
+  }
+}

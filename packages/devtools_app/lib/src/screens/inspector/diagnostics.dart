@@ -13,9 +13,8 @@ import '../../ui/icons.dart';
 import '../debugger/debugger_controller.dart';
 import '../debugger/variables.dart';
 import 'diagnostics_node.dart';
-import 'inspector_controller.dart';
-import 'inspector_text_styles.dart' as inspector_text_styles;
 import 'inspector_tree.dart';
+import 'primitives/inspector_text_styles.dart' as inspector_text_styles;
 
 final _colorIconMaker = ColorIconMaker();
 final _customIconMaker = CustomIconMaker();
@@ -187,8 +186,12 @@ class DiagnosticsNodeDescription extends StatelessWidget {
 
     final defaultStyle = DefaultTextStyle.of(context).style;
     final baseStyle = style ?? defaultStyle;
-    TextStyle textStyle =
-        baseStyle.merge(textStyleForLevel(diagnosticLocal.level, colorScheme));
+    TextStyle textStyle = baseStyle.merge(
+      inspector_text_styles.textStyleForLevel(
+        diagnosticLocal.level,
+        colorScheme,
+      ),
+    );
     var descriptionTextStyle = textStyle;
     // TODO(jacobr): use TextSpans and SelectableText instead of Text.
     if (diagnosticLocal.isProperty) {
