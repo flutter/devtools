@@ -303,7 +303,6 @@ class _CpuProfilerState extends State<CpuProfiler>
         builder: (context, constraints) {
           return CpuProfileFlameChart(
             data: data,
-            controller: widget.controller,
             width: constraints.maxWidth,
             height: constraints.maxHeight,
             selectionNotifier: widget.controller.selectedCpuStackFrameNotifier,
