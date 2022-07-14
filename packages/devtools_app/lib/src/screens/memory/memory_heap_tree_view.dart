@@ -33,6 +33,7 @@ import 'memory_heap_treemap.dart';
 import 'memory_instance_tree_view.dart';
 import 'memory_snapshot_models.dart';
 import 'panes/leaks/leaks_pane.dart';
+import 'primitives/memory_utils.dart';
 
 const memorySearchFieldKeyName = 'MemorySearchFieldKey';
 
@@ -1042,7 +1043,7 @@ class HeapTreeViewState extends State<HeapTree>
 
     final snapshotTimestamp = DateTime.now();
 
-    final graph = await controller.snapshotMemory();
+    final graph = await snapshotMemory();
 
     // No snapshot collected, disconnected/crash application.
     if (graph == null) {
