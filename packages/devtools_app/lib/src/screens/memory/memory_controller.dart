@@ -898,14 +898,6 @@ class MemoryController extends DisposableController
     );
   }
 
-  Future<HeapSnapshotGraph?> snapshotMemory() async {
-    final isolate = serviceManager.isolateManager.selectedIsolate.value;
-    if (isolate == null) return null;
-    return await serviceManager.service?.getHeapSnapshotGraph(
-      isolate,
-    );
-  }
-
   final _monitorAllocationsNotifier = ValueNotifier<int>(0);
 
   /// Last column sorted and sort direction in allocation monitoring. As table
