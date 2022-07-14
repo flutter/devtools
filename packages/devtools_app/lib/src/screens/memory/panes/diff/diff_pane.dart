@@ -4,6 +4,8 @@
 
 import 'package:flutter/material.dart';
 
+/// Wile this pane is under construction, we do not want our users to see it.
+/// Flip this flag locally to test the pane and flip back before checking in.
 const shouldShowDiffPane = false;
 
 class DiffPane extends StatefulWidget {
