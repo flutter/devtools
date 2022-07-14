@@ -251,7 +251,7 @@ class ClearButton extends IconLabelButton {
 class EditableList extends StatefulWidget {
   const EditableList({
     required this.entries,
-    required this.label,
+    required this.textFieldLabel,
     this.isRefreshing,
     this.onEntryAdded,
     this.onEntryRemoved,
@@ -263,7 +263,7 @@ class EditableList extends StatefulWidget {
   final Function(String)? onEntryAdded;
   final Function(String)? onEntryRemoved;
   final Function()? onRefresh;
-  final String label;
+  final String textFieldLabel;
 
   @override
   State<StatefulWidget> createState() => _EditableListState();
@@ -301,10 +301,25 @@ class _EditableListState extends State<EditableList> {
     textFieldFocusNode.requestFocus();
   }
 
+  Widget _copyDirectoryButton(String value) {
+    return IconButton(
+      padding: const EdgeInsets.all(0.0),
+      onPressed: () {
+        copyToClipboard(value, 'Copied to clipboard.', context);
+      },
+      iconSize: defaultIconSize,
+      splashRadius: defaultIconSize,
+      icon: const Icon(Icons.copy),
+    );
+  }
+
   Widget _removeDirectoryButton(VoidCallback onPressed) {
-    return Container(
-      height: defaultIconSize + denseSpacing,
-      child: inputDecorationSuffixButton(Icons.delete, onPressed),
+    return IconButton(
+      padding: const EdgeInsets.all(0.0),
+      onPressed: onPressed,
+      iconSize: defaultIconSize,
+      splashRadius: defaultIconSize,
+      icon: const Icon(Icons.delete),
     );
   }
 
@@ -330,7 +345,7 @@ class _EditableListState extends State<EditableList> {
                         decoration: InputDecoration(
                           contentPadding: const EdgeInsets.all(denseSpacing),
                           border: const OutlineInputBorder(),
-                          labelText: widget.label,
+                          labelText: widget.textFieldLabel,
                         ),
                         onSubmitted: (value) {
                           _addNewPubRootDirecory();
@@ -379,9 +394,7 @@ class _EditableListState extends State<EditableList> {
                             Expanded(
                               child: Text(widget.entries.value[index]),
                             ),
-                            CopyToClipboardControl(
-                              dataProvider: () => widget.entries.value[index],
-                            ),
+                            _copyDirectoryButton(widget.entries.value[index]),
                             const SizedBox(width: denseSpacing),
                             _removeDirectoryButton(
                               () {
