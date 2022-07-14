@@ -11,14 +11,20 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../devtools_app.dart';
 import '../analytics/analytics.dart' as ga;
 import '../config_specific/launch_url/launch_url.dart';
+import '../primitives/auto_dispose_mixin.dart';
 import '../primitives/flutter_widgets/linked_scroll_controller.dart';
+import '../primitives/utils.dart';
+import '../screens/debugger/debugger_controller.dart';
 import '../screens/debugger/variables.dart';
+import '../ui/icons.dart';
 import '../ui/label.dart';
+import 'globals.dart';
 import 'object_tree.dart';
 import 'scaffold.dart';
+import 'theme.dart';
+import 'utils.dart';
 
 const tooltipWait = Duration(milliseconds: 500);
 const tooltipWaitLong = Duration(milliseconds: 1000);
@@ -364,7 +370,7 @@ class _EditableListState extends State<EditableList> {
                           width: defaultTextFieldHeight,
                           height: defaultTextFieldHeight,
                           child: const Padding(
-                            padding: EdgeInsets.all(iconPadding),
+                            padding: EdgeInsets.all(densePadding),
                             child: CircularProgressIndicator(),
                           ),
                         )
