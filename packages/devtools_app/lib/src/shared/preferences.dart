@@ -6,13 +6,15 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 
+import '../primitives/auto_dispose.dart';
 import '../primitives/utils.dart';
 import '../screens/inspector/inspector_service.dart';
 import '../service/vm_service_wrapper.dart';
 import 'globals.dart';
 
 /// A controller for global application preferences.
-class PreferencesController {
+class PreferencesController extends DisposableController
+    with AutoDisposeControllerMixin {
   final ValueNotifier<bool> _darkModeTheme = ValueNotifier(true);
   final ValueNotifier<bool> _vmDeveloperMode = ValueNotifier(false);
   final ValueNotifier<bool> _denseMode = ValueNotifier(false);
@@ -28,25 +30,31 @@ class PreferencesController {
     // Get the current values and listen for and write back changes.
     String? value = await storage.getValue('ui.darkMode');
     toggleDarkModeTheme(value == null || value == 'true');
-    _darkModeTheme.addListener(() {
+    addAutoDisposeListener(_darkModeTheme, () {
       storage.setValue('ui.darkMode', '${_darkModeTheme.value}');
     });
 
     value = await storage.getValue('ui.vmDeveloperMode');
     toggleVmDeveloperMode(value == 'true');
-    _vmDeveloperMode.addListener(() {
+    addAutoDisposeListener(_vmDeveloperMode, () {
       storage.setValue('ui.vmDeveloperMode', '${_vmDeveloperMode.value}');
     });
 
     value = await storage.getValue('ui.denseMode');
     toggleDenseMode(value == 'true');
-    _denseMode.addListener(() {
+    addAutoDisposeListener(_denseMode, () {
       storage.setValue('ui.denseMode', '${_denseMode.value}');
     });
 
     await _inspector.init();
 
     setGlobal(PreferencesController, this);
+  }
+
+  @override
+  void dispose() {
+    inspector.dispose();
+    super.dispose();
   }
 
   /// Change the value for the dark mode setting.
@@ -66,7 +74,8 @@ class PreferencesController {
   }
 }
 
-class InspectorPreferencesController {
+class InspectorPreferencesController extends DisposableController
+    with AutoDisposeControllerMixin {
   ValueListenable<bool> get hoverEvalModeEnabled => _hoverEvalMode;
   ValueListenable<List<String>> get customPubRootDirectories =>
       _customPubRootDirectories;
@@ -86,7 +95,6 @@ class InspectorPreferencesController {
   Future<void> init() async {
     await initHoverEvalMode();
     _initCustomPubRootListeners();
-    setGlobal(InspectorPreferencesController, this);
   }
 
   Future<void> initHoverEvalMode() async {
@@ -97,7 +105,7 @@ class InspectorPreferencesController {
     hoverEvalModeEnabledValue ??= (!ideTheme.embed).toString();
     setHoverEvalMode(hoverEvalModeEnabledValue == 'true');
 
-    _hoverEvalMode.addListener(() {
+    addAutoDisposeListener(_hoverEvalMode, () {
       storage.setValue(
         _hoverEvalModeStorageId,
         _hoverEvalMode.value.toString(),
@@ -106,13 +114,13 @@ class InspectorPreferencesController {
   }
 
   void _initCustomPubRootListeners() {
-    _customPubRootDirectories.addListener(() {
+    addAutoDisposeListener(_customPubRootDirectories, () {
       storage.setValue(
         _customPubRootDirectoriesStorageId,
         jsonEncode(_customPubRootDirectories.value),
       );
     });
-    _busyCounter.addListener(() {
+    addAutoDisposeListener(_busyCounter, () {
       _customPubRootDirectoriesAreBusy.value = _busyCounter.value != 0;
     });
   }
