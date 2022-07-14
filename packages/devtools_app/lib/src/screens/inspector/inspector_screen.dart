@@ -350,7 +350,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
 class FlutterInspectorSettingsDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    preferences.inspector.loadCustomPubRootDirectories();
     final theme = Theme.of(context);
     return DevToolsDialog(
       title: dialogTitleText(Theme.of(context), 'Flutter Inspector Settings'),
@@ -376,7 +375,11 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
             const SizedBox(height: denseSpacing),
             ...dialogSubHeader(Theme.of(context), 'Package Directories'),
             Text(
-              'widgets in these directories will show up in your summary tree',
+              'Widgets in these directories will show up in your summary tree.',
+              style: theme.subtleTextStyle,
+            ),
+            Text(
+              '(e.g. /absolute/path/to/myPackage)',
               style: theme.subtleTextStyle,
             ),
             const SizedBox(height: denseSpacing),
@@ -546,12 +549,10 @@ class ErrorNavigator extends StatelessWidget {
 class PubRootDirectorySection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    preferences.inspector.loadCustomPubRootDirectories();
-    return ValueListenableBuilder<List<IsolateRef?>>(
-      valueListenable: serviceManager.isolateManager.isolates,
-      builder: (context, value, child) {
+    return ValueListenableBuilder<IsolateRef?>(
+      valueListenable: serviceManager.isolateManager.mainIsolate,
+      builder: (_, __, ___) {
         return Container(
-          width: double.maxFinite,
           height: 200.0,
           child: EditableList(
             entries: preferences.inspector.customPubRootDirectories,
