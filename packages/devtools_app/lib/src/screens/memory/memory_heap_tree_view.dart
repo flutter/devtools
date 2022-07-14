@@ -32,6 +32,7 @@ import 'memory_graph_model.dart';
 import 'memory_heap_treemap.dart';
 import 'memory_instance_tree_view.dart';
 import 'memory_snapshot_models.dart';
+import 'panes/diff/diff_pane.dart';
 import 'panes/leaks/leaks_pane.dart';
 import 'primitives/memory_utils.dart';
 
@@ -147,6 +148,8 @@ class HeapTreeViewState extends State<HeapTree>
   static const dartHeapAllocationsTabKey = Key('Dart Heap Allocations Tab');
   @visibleForTesting
   static const leaksTabKey = Key('Leaks Tab');
+  @visibleForTesting
+  static const diffTabKey = Key('Diff Tab');
 
   /// Below constants should match index for Tab index in DartHeapTabs.
   static const int analysisTabIndex = 0;
@@ -201,6 +204,12 @@ class HeapTreeViewState extends State<HeapTree>
         gaPrefix: _gaPrefix,
         tabName: 'Allocations',
       ),
+      if (shouldShowDiffPane)
+        DevToolsTab.create(
+          key: diffTabKey,
+          gaPrefix: _gaPrefix,
+          tabName: 'Diff',
+        ),
       if (widget.controller.shouldShowLeaksTab.value)
         DevToolsTab.create(
           key: leaksTabKey,
@@ -488,6 +497,10 @@ class HeapTreeViewState extends State<HeapTree>
                     ],
                   ),
                 ),
+
+                // Diff tab.
+                if (shouldShowDiffPane)
+                  const KeepAliveWrapper(child: DiffPane()),
 
                 // Leaks tab.
                 if (controller.shouldShowLeaksTab.value)
