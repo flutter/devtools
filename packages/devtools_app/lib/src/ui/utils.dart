@@ -178,6 +178,24 @@ class _OffsetScrollbarState extends State<OffsetScrollbar> {
   }
 }
 
+void scrollToPosition(
+  ScrollController scrollController,
+  double position,
+) {
+  //TODO I would add padding here so if a row is half out of screen it will still jump
+  final scrollStart = scrollController.offset;
+  final scrollEnd = scrollStart + scrollController.position.extentInside;
+  final alreadyVisible = position >= scrollStart && position <= scrollEnd;
+
+  if (!alreadyVisible) {
+    scrollController.animateTo(
+      position,
+      duration: defaultDuration,
+      curve: defaultCurve,
+    );
+  }
+}
+
 class ColorPair {
   const ColorPair({required this.background, required this.foreground});
 
