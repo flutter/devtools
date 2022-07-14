@@ -344,12 +344,12 @@ class FlatTableState<T> extends State<FlatTable<T>>
 class Selection<T> {
   Selection({
     this.node,
-    this.nodeIndex,
+    this.flatListIndex,
     this.scrollIntoView = false,
   });
 
   final T? node;
-  final int? nodeIndex;
+  final int? flatListIndex;
   final bool scrollIntoView;
 }
 
@@ -464,19 +464,10 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     addAutoDisposeListener(selectionNotifier, () {
       setState(() {
         final node = selectionNotifier.value.node;
-        //offset will need to be modified with new UI table changes
+        final index = selectionNotifier.value.flatListIndex as double;
+
         expandParents(node?.parent);
-
-        final searchCondition = (T n) => n == node;
-
-        final int selectedRowIndex = dataRoots[0].childCountToMatchingNode(
-          matchingNodeCondition: searchCondition,
-          includeCollapsedNodes: false,
-        );
-
-        final newPos =
-            selectedRowIndex * defaultRowHeight - selectedNodePadding;
-        scrollToPosition(scrollController, newPos);
+        scrollToPosition(scrollController, index);
       });
     });
 
@@ -530,7 +521,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     // Rebuilds the table whenever the tree structure has been updated.
     selectionNotifier.value = Selection(
       node: node,
-      nodeIndex: nodeIndex,
+      flatListIndex: nodeIndex,
     );
 
     _toggleNode(node);
@@ -702,12 +693,13 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     if (selectionNotifier.value.node == null) {
       selectionNotifier.value = Selection(
         node: items[0],
-        nodeIndex: 0,
+        flatListIndex: 0,
       );
     }
 
     assert(
-      selectionNotifier.value.node == items[selectionNotifier.value.nodeIndex!],
+      selectionNotifier.value.node ==
+          items[selectionNotifier.value.flatListIndex!],
     );
 
     if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
@@ -761,7 +753,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     late int newSelectedNodeIndex;
 
     final selectionValue = selectionNotifier.value;
-    final selectedNodeIndex = selectionValue.nodeIndex;
+    final selectedNodeIndex = selectionValue.flatListIndex;
     switch (scrollKind) {
       case ScrollKind.down:
         newSelectedNodeIndex = min(selectedNodeIndex! + 1, items.length - 1);
@@ -803,7 +795,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       // `isAboveViewport`.
       selectionNotifier.value = Selection(
         node: newSelectedNode,
-        nodeIndex: newSelectedNodeIndex,
+        flatListIndex: newSelectedNodeIndex,
       );
     });
   }

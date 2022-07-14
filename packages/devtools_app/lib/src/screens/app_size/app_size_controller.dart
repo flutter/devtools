@@ -11,6 +11,7 @@ import 'package:vm_snapshot_analysis/utils.dart';
 import 'package:vm_snapshot_analysis/v8_profile.dart';
 
 import '../../charts/treemap.dart';
+import '../../primitives/trees.dart';
 import '../../primitives/utils.dart';
 import '../../shared/table.dart';
 import 'app_size_screen.dart';
@@ -58,7 +59,14 @@ class AppSizeController {
       return;
     }
 
-    analysisRoot.value = Selection(node: newRoot, nodeIndex: newRoot.index);
+    final searchCondition = (TreemapNode n) => n == newRoot;
+    final int selectedRowIndex = newRoot.root.childCountToMatchingNode(
+      matchingNodeCondition: searchCondition,
+      includeCollapsedNodes: false,
+    );
+    final int newPos = selectedRowIndex * defaultRowHeight as int;
+
+    analysisRoot.value = Selection(node: newRoot, flatListIndex: newPos);
 
     final programInfoNode =
         _analysisCallGraph?.program.lookup(newRoot.packagePath()) ??
