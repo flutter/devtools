@@ -30,6 +30,7 @@ import 'utils.dart';
 /// When rows in the table expand or collapse, they will animate between a
 /// height of 0 and a height of [defaultRowHeight].
 double get defaultRowHeight => scaleByFontFactor(32.0);
+double get selectedNodePadding => defaultRowHeight * .5;
 
 const _columnGroupSpacing = 4.0;
 const _columnGroupSpacingWithPadding = _columnGroupSpacing + 2 * defaultSpacing;
@@ -457,8 +458,6 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   void didUpdateWidget(TreeTable<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (widget == oldWidget) return;
-
     cancelListeners();
 
     addAutoDisposeListener(selectionNotifier, () {
@@ -477,13 +476,28 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
         final newPos = selectedDisplayRow * defaultRowHeight;
 
         //TODO Pull this code and _onActiveSearchChange to be shared
-        final indexInView = newPos > scrollController.offset &&
-            newPos <
-                scrollController.offset +
-                    scrollController.position.extentInside;
-
+        final indexInView =
+            newPos > scrollController.offset + selectedNodePadding &&
+                newPos <
+                    (scrollController.offset +
+                            scrollController.position.extentInside) -
+                        selectedNodePadding;
         //TODO Ensure that jumping does not overjump or underjump and undershooting by 1 right now
-        if (!indexInView) scrollController.jumpTo(newPos);
+
+        final temp = newPos - selectedNodePadding;
+        //need to be careful of overshooting in the opposite way here (so if it is less than 0)
+
+        if (!indexInView) {
+          if (temp >
+              scrollController.position.maxScrollExtent -
+                  scrollController.position.extentInside) {
+            scrollController.jumpTo(
+              scrollController.position.maxScrollExtent -
+                  scrollController.position.extentInside,
+            );
+          } else
+            scrollController.jumpTo(temp);
+        }
 
         node.unselect();
       });
@@ -901,7 +915,6 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
     super.didUpdateWidget(oldWidget);
 
     cancelListeners();
-
     _initSearchListener();
   }
 
