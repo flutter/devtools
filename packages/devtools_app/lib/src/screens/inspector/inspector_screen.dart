@@ -23,10 +23,8 @@ import '../../shared/theme.dart';
 import '../../shared/utils.dart';
 import '../../ui/icons.dart';
 import '../../ui/search.dart';
-import '../debugger/debugger_controller.dart';
 import 'inspector_controller.dart';
 import 'inspector_screen_details_tab.dart';
-import 'inspector_service.dart';
 import 'inspector_tree.dart';
 import 'inspector_tree_controller.dart';
 
@@ -65,17 +63,13 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     with
         BlockingActionMixin,
         AutoDisposeMixin,
-        ProvidedControllerMixin<DebuggerController, InspectorScreenBody>,
+        ProvidedControllerMixin<InspectorController, InspectorScreenBody>,
         SearchFieldMixin<InspectorScreenBody> {
-  late InspectorController inspectorController;
-
   InspectorTreeController get _summaryTreeController =>
-      inspectorController.inspectorTree;
+      controller.inspectorTree;
 
   InspectorTreeController get _detailsTreeController =>
-      inspectorController.details!.inspectorTree;
-
-  DebuggerController get _debuggerController => controller;
+      controller.details!.inspectorTree;
 
   bool searchVisible = false;
 
@@ -94,10 +88,9 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
 
   @override
   void dispose() {
-    inspectorController.inspectorTree.dispose();
-    if (inspectorController.isSummaryTree &&
-        inspectorController.details != null) {
-      inspectorController.details!.inspectorTree.dispose();
+    controller.inspectorTree.dispose();
+    if (controller.isSummaryTree && controller.details != null) {
+      controller.details!.inspectorTree.dispose();
     }
     super.dispose();
   }
@@ -111,19 +104,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       // The app must not be a Flutter app.
       return;
     }
-    final inspectorTreeController = InspectorTreeController();
-    final detailsTree = InspectorTreeController();
-    inspectorController = InspectorController(
-      inspectorTree: inspectorTreeController,
-      detailsTree: detailsTree,
-      treeType: FlutterTreeType.widget,
-    );
-
-    if (!firstInspectorTreeLoadCompleted) {
-      ga.timeStart(InspectorScreen.id, analytics_constants.pageReady);
-    }
-
-    _summaryTreeController.setSearchTarget(searchTarget);
 
     addAutoDisposeListener(searchFieldFocusNode, () {
       // Close the search once focus is lost and following conditions are met:
@@ -148,18 +128,28 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    initController();
+    if (!initController()) return;
+
+    if (serviceManager.inspectorService == null) {
+      // The app must not be a Flutter app.
+      return;
+    }
+
+    if (!controller.firstInspectorTreeLoadCompleted) {
+      ga.timeStart(InspectorScreen.id, analytics_constants.pageReady);
+    }
+
+    _summaryTreeController.setSearchTarget(searchTarget);
   }
 
   @override
   Widget build(BuildContext context) {
-    final summaryTree = _buildSummaryTreeColumn(_debuggerController);
+    final summaryTree = _buildSummaryTreeColumn();
 
     final detailsTree = InspectorTree(
       key: detailsTreeKey,
-      controller: _detailsTreeController,
-      debuggerController: _debuggerController,
-      inspectorTreeController: _summaryTreeController,
+      treeController: _detailsTreeController,
+      summaryTreeController: _summaryTreeController,
     );
 
     final splitAxis = Split.axisFor(context, 0.85);
@@ -170,7 +160,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
         summaryTree,
         InspectorDetails(
           detailsTree: detailsTree,
-          controller: inspectorController,
+          controller: controller,
         ),
       ],
     );
@@ -208,9 +198,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     );
   }
 
-  Widget _buildSummaryTreeColumn(
-    DebuggerController debuggerController,
-  ) {
+  Widget _buildSummaryTreeColumn() {
     return LayoutBuilder(
       builder: (context, constraints) {
         return OutlineDecoration(
@@ -246,23 +234,20 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
                       children: [
                         InspectorTree(
                           key: summaryTreeKey,
-                          controller: _summaryTreeController,
+                          treeController: _summaryTreeController,
                           isSummaryTree: true,
                           widgetErrors: inspectableErrors,
-                          debuggerController: debuggerController,
                         ),
                         if (errors.isNotEmpty)
                           ValueListenableBuilder<int?>(
-                            valueListenable:
-                                inspectorController.selectedErrorIndex,
+                            valueListenable: controller.selectedErrorIndex,
                             builder: (_, selectedErrorIndex, __) => Positioned(
                               top: 0,
                               right: 0,
                               child: ErrorNavigator(
                                 errors: inspectableErrors,
                                 errorIndex: selectedErrorIndex,
-                                onSelectError:
-                                    inspectorController.selectErrorByIndex,
+                                onSelectError: controller.selectErrorByIndex,
                               ),
                             ),
                           ),
@@ -320,7 +305,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       // If the user is force refreshing the inspector before the first load has
       // completed, this could indicate a slow load time or that the inspector
       // failed to load the tree once available.
-      if (!firstInspectorTreeLoadCompleted) {
+      if (!controller.firstInspectorTreeLoadCompleted) {
         // We do not want to complete this timing operation because the force
         // refresh will skew the results.
         ga.cancelTimingOperation(
@@ -331,9 +316,9 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
           analytics_constants.inspector,
           analytics_constants.refreshEmptyTree,
         );
-        firstInspectorTreeLoadCompleted = true;
+        controller.firstInspectorTreeLoadCompleted = true;
       }
-      await inspectorController.onForceRefresh();
+      await controller.onForceRefresh();
     });
   }
 }

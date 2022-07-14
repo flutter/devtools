@@ -1678,7 +1678,7 @@ class _ColumnGroupSpacer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: _columnGroupSpacingWithPadding - _columnGroupSpacing,
+        horizontal: (_columnGroupSpacingWithPadding - _columnGroupSpacing) / 2,
       ),
       child: Container(
         width: _columnGroupSpacing,
