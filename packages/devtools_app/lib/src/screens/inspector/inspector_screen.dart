@@ -144,6 +144,13 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
         searchPreventClose = false;
       }
     });
+    addAutoDisposeListener(preferences.inspector.customPubRootDirectories, () {
+      _refreshInspector();
+    });
+    addAutoDisposeListener(serviceManager.isolateManager.mainIsolate, () {
+      _refreshInspector();
+      preferences.inspector.loadCustomPubRootDirectories();
+    });
     preferences.inspector.loadCustomPubRootDirectories();
   }
 
@@ -176,13 +183,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
         ),
       ],
     );
-    preferences.inspector.customPubRootDirectories.addListener(() {
-      _refreshInspector();
-    });
-    serviceManager.isolateManager.isolates.addListener(() {
-      _refreshInspector();
-      preferences.inspector.loadCustomPubRootDirectories();
-    });
     return Column(
       children: <Widget>[
         Row(
