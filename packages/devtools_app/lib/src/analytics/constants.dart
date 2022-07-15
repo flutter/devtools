@@ -79,12 +79,14 @@ const disableOpacityLayersOption = 'disableOpacityLayers';
 const disableOpacityLayersOptionDocs = 'disableOpacityLayersDocs';
 const disablePhysicalShapeLayersOption = 'disablePhysicalShapeLayers';
 const disablePhysicalShapeLayersOptionDocs = 'disablePhysicalShapeLayersDocs';
+const shaderCompilationDocs = 'shaderCompilationDocs';
 const shaderCompilationDocsTooltipLink = 'shaderCompilationDocsTooltipLink';
 const analyzeSelectedFrame = 'analyzeSelectedFrame';
 const collectRasterStats = 'collectRasterStats';
 
 // CPU profiler UX actions:
 const profileGranularityPrefix = 'profileGranularity';
+const profileGranularityDocs = 'profileGranularityDocs';
 const loadAllCpuSamples = 'loadAllCpuSamples';
 const profileAppStartUp = 'profileAppStartUp';
 const cpuProfileFlameChartHelp = 'cpuProfileFlameChartHelp';
@@ -135,6 +137,7 @@ const export = 'export';
 const expandAll = 'expandAll';
 const collapseAll = 'collapseAll';
 const documentationLink = 'documentationLink';
+const profileModeDocs = 'profileModeDocs';
 // This should track the time from `initState` for a screen to the time when
 // the page data has loaded and is ready to interact with.
 const pageReady = 'pageReady';
