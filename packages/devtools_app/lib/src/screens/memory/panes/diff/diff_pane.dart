@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../../../../../devtools_app.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/split.dart';
 import 'model.dart';
@@ -91,8 +92,6 @@ class _SnapshotList extends StatelessWidget {
   }
 }
 
-const _itemHeight = 28.0;
-
 class _SnapshotListTitle extends StatelessWidget {
   const _SnapshotListTitle(
       {Key? key, required this.item, required this.selected})
@@ -106,18 +105,32 @@ class _SnapshotListTitle extends StatelessWidget {
 
     return Row(
       children: [
-        SizedBox(
-          width: 10,
-          height: _itemHeight,
-          child: selected
-              ? const DecoratedBox(
-                  decoration: BoxDecoration(color: Colors.red),
-                )
-              : null,
-        ),
-        if (itemLocal is SnapshotInformation) const Text('Snapshots'),
-        if (itemLocal is Snapshot) Text(itemLocal.name),
+        SelectionBox(selected: selected),
+        const SizedBox(width: denseRowSpacing),
+        Expanded(child: Text(itemLocal.name, overflow: TextOverflow.ellipsis)),
       ],
+    );
+  }
+}
+
+class SelectionBox extends StatelessWidget {
+  static const _selectionSize = const Size(4.0, 40.0);
+  const SelectionBox({Key? key, required this.selected}) : super(key: key);
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: _selectionSize.width,
+      height: _selectionSize.height,
+      child: selected
+          ? const DecoratedBox(
+              decoration: BoxDecoration(
+                // TODO: get proper blue from theme somewhere.
+                color: Colors.blue,
+              ),
+            )
+          : null,
     );
   }
 }

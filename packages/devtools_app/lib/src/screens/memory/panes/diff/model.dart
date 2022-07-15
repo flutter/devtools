@@ -4,13 +4,18 @@
 
 import 'package:vm_service/vm_service.dart';
 
-abstract class SnapshotListItem {}
-
-class SnapshotInformation extends SnapshotListItem {}
-
-class Snapshot extends SnapshotListItem {
-  Snapshot(this.name, this.graph);
+abstract class SnapshotListItem {
+  SnapshotListItem(this.name);
 
   final String name;
+}
+
+class SnapshotInformation extends SnapshotListItem {
+  SnapshotInformation() : super('Snapshots');
+}
+
+class Snapshot extends SnapshotListItem {
+  Snapshot(super.name, this.graph);
+
   Future<HeapSnapshotGraph> graph;
 }
