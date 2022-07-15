@@ -5,9 +5,10 @@
 import 'package:flutter/material.dart';
 
 import '../../../../shared/common_widgets.dart';
+import '../../../../shared/split.dart';
 import 'model.dart';
 
-/// Wile this pane is under construction, we do not want our users to see it.
+/// While this pane is under construction, we do not want our users to see it.
 /// Flip this flag locally to test the pane and flip back before checking in.
 const shouldShowDiffPane = true;
 
@@ -18,19 +19,102 @@ class DiffPane extends StatefulWidget {
   State<DiffPane> createState() => _DiffPaneState();
 }
 
-class _DiffPaneController {
-  final snapshots = <Snapshot>[];
+/// Will notify if count of items or current index changed.
+class _DiffPaneController with ChangeNotifier {
+  _DiffPaneController() {
+    index.addListener(() => notifyListeners());
+  }
+
+  final snapshots = <SnapshotListItem>[SnapshotInformation()];
+  final index = ValueNotifier<int>(0);
+  SnapshotListItem get selected => snapshots[index.value];
 }
 
 class _DiffPaneState extends State<DiffPane> {
+  final controller = _DiffPaneController();
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    controller.addListener(() => setState(() {}));
+  }
+
   @override
   Widget build(BuildContext context) {
-    return const Text('hello, I am diff pane');
+    return Split(
+      axis: Axis.horizontal,
+      initialFractions: const [0.2, 0.8],
+      children: [
+        Column(children: [
+          _ControlPane(controller: controller),
+          Expanded(
+            child: _SnapshotList(controller: controller),
+          ),
+        ]),
+        _SnapshotListContent(item: controller.selected),
+      ],
+    );
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+}
+
+class _SnapshotList extends StatelessWidget {
+  const _SnapshotList({Key? key, required this.controller}) : super(key: key);
+  final _DiffPaneController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    // return Text('I am list');
+    return ListView.builder(
+      shrinkWrap: true,
+      itemCount: controller.snapshots.length,
+      itemBuilder: (context, index) {
+        return ListTile(
+          title: _SnapshotListTitle(item: controller.snapshots[index]),
+          tileColor: controller.index.value == index ? Colors.blue : null,
+          onTap: () => controller.index.value = index,
+        );
+      },
+    );
+  }
+}
+
+class _SnapshotListTitle extends StatelessWidget {
+  const _SnapshotListTitle({Key? key, required this.item}) : super(key: key);
+  final SnapshotListItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    final itemLocal = item;
+    if (itemLocal is SnapshotInformation) return const Text('Snapshots');
+    if (itemLocal is Snapshot) return Text(itemLocal.name);
+    throw 'Unexpected type of the item: ${itemLocal.runtimeType}';
+  }
+}
+
+class _SnapshotListContent extends StatelessWidget {
+  const _SnapshotListContent({Key? key, required this.item}) : super(key: key);
+  final SnapshotListItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    final itemLocal = item;
+    if (itemLocal is SnapshotInformation)
+      return const Text('Information about snapshots');
+    if (itemLocal is Snapshot) return Text('Content of ${itemLocal.name}.');
+    throw 'Unexpected type of the item: ${itemLocal.runtimeType}';
   }
 }
 
 class _ControlPane extends StatelessWidget {
-  const _ControlPane({Key? key}) : super(key: key);
+  const _ControlPane({Key? key, required this.controller}) : super(key: key);
+
+  final _DiffPaneController controller;
 
   @override
   Widget build(BuildContext context) {
