@@ -68,6 +68,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   final AllocationMemoryJson? _allocationData;
   final Map<String, String>? _resolvedUriMap;
   late final Map<String, String>? _reverseResolvedUriMap;
+  final _gcEventStream = StreamController<Event>.broadcast();
 
   final _flags = <String, dynamic>{
     'flags': <Flag>[
@@ -412,7 +413,16 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   Stream<Event> get onStderrEventWithHistory => const Stream.empty();
 
   @override
-  Stream<Event> get onGCEvent => const Stream.empty();
+  Stream<Event> get onGCEvent => _gcEventStream.stream;
+
+  void emitGCEvent() {
+    _gcEventStream.sink.add(
+      Event(
+        kind: EventKind.kGC,
+        timestamp: null,
+      ),
+    );
+  }
 
   @override
   Stream<Event> get onVMEvent => const Stream.empty();

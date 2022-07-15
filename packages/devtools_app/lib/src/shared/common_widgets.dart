@@ -95,7 +95,9 @@ class OutlinedIconButton extends IconLabelButton {
     required IconData icon,
     required VoidCallback? onPressed,
     String? tooltip,
+    Key? key,
   }) : super(
+          key: key,
           icon: icon,
           label: '',
           tooltip: tooltip,
@@ -893,6 +895,64 @@ class ExportButton extends IconLabelButton {
         );
 }
 
+class ToggleButton extends StatelessWidget {
+  const ToggleButton({
+    Key? key,
+    required this.onPressed,
+    required this.isSelected,
+    required this.message,
+    required this.icon,
+    this.label,
+  }) : super(key: key);
+
+  final String message;
+
+  final VoidCallback onPressed;
+
+  final bool isSelected;
+
+  final IconData icon;
+
+  final Text? label;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return DevToolsTooltip(
+      message: message,
+      // TODO(kenz): this SizedBox wrapper should be unnecessary once
+      // https://github.com/flutter/flutter/issues/79894 is fixed.
+      child: SizedBox(
+        height: defaultButtonHeight,
+        child: OutlinedButton(
+          key: key,
+          onPressed: onPressed,
+          style: TextButton.styleFrom(
+            backgroundColor: isSelected
+                ? theme.colorScheme.toggleButtonBackgroundColor
+                : Colors.transparent,
+          ),
+          child: Row(
+            children: [
+              Icon(
+                icon,
+                size: defaultIconSize,
+                color: isSelected
+                    ? theme.colorScheme.toggleButtonForegroundColor
+                    : theme.colorScheme.contrastForeground,
+              ),
+              if (label != null) ...[
+                const SizedBox(width: denseSpacing),
+                label!,
+              ]
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class FilterButton extends StatelessWidget {
   const FilterButton({
     Key? key,
@@ -906,30 +966,11 @@ class FilterButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return DevToolsTooltip(
+    return ToggleButton(
+      onPressed: onPressed,
+      isSelected: isFilterActive,
       message: 'Filter',
-      // TODO(kenz): this SizedBox wrapper should be unnecessary once
-      // https://github.com/flutter/flutter/issues/79894 is fixed.
-      child: SizedBox(
-        height: defaultButtonHeight,
-        child: OutlinedButton(
-          key: key,
-          onPressed: onPressed,
-          style: TextButton.styleFrom(
-            backgroundColor: isFilterActive
-                ? theme.colorScheme.toggleButtonBackgroundColor
-                : Colors.transparent,
-          ),
-          child: Icon(
-            Icons.filter_list,
-            size: defaultIconSize,
-            color: isFilterActive
-                ? theme.colorScheme.toggleButtonForegroundColor
-                : theme.colorScheme.contrastForeground,
-          ),
-        ),
-      ),
+      icon: Icons.filter_list,
     );
   }
 }

@@ -44,6 +44,11 @@ class HeapStats {
     required this.externalSize,
   });
 
+  const HeapStats.empty()
+      : count = 0,
+        size = 0,
+        externalSize = 0;
+
   HeapStats.parse(List<int> stats)
       : count = stats[0],
         size = stats[1],
@@ -55,6 +60,10 @@ class HeapStats {
 }
 
 extension ClassHeapStatsPrivateViewExtension on ClassHeapStats {
-  HeapStats get newSpace => HeapStats.parse(json!['_new'].cast<int>());
-  HeapStats get oldSpace => HeapStats.parse(json!['_old'].cast<int>());
+  HeapStats get newSpace => json!.containsKey('_new')
+      ? HeapStats.parse(json!['_new'].cast<int>())
+      : const HeapStats.empty();
+  HeapStats get oldSpace => json!.containsKey('_old')
+      ? HeapStats.parse(json!['_old'].cast<int>())
+      : const HeapStats.empty();
 }

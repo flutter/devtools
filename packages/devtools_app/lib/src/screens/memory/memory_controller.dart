@@ -23,6 +23,7 @@ import '../../shared/table.dart';
 import '../../shared/table_data.dart';
 import '../../shared/utils.dart';
 import '../../ui/search.dart';
+import 'allocation_profile_table_view_controller.dart';
 import 'memory_graph_model.dart';
 import 'memory_protocol.dart';
 import 'memory_snapshot_models.dart';
@@ -239,6 +240,9 @@ class MemoryController extends DisposableController
     memoryTimeline = MemoryTimeline(offline);
     memoryLog = MemoryLog(this);
   }
+
+  /// Controller for [AllocationProfileTableView].
+  final allocationProfileController = AllocationProfileTableViewController();
 
   static const logFilenamePrefix = 'memory_log_';
 

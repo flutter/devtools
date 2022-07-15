@@ -24,6 +24,7 @@ import '../../shared/theme.dart';
 import '../../shared/utils.dart';
 import '../../ui/search.dart';
 import '../../ui/tab.dart';
+import 'allocation_profile_table_view.dart';
 import 'memory_allocation_table_view.dart';
 import 'memory_analyzer.dart';
 import 'memory_controller.dart';
@@ -32,8 +33,9 @@ import 'memory_graph_model.dart';
 import 'memory_heap_treemap.dart';
 import 'memory_instance_tree_view.dart';
 import 'memory_snapshot_models.dart';
-import 'memory_table_view.dart';
 import 'panes/leaks/leaks_pane.dart';
+
+const enableNewAllocationProfileTable = true;
 
 const memorySearchFieldKeyName = 'MemorySearchFieldKey';
 
@@ -209,11 +211,12 @@ class HeapTreeViewState extends State<HeapTree>
           gaPrefix: _gaPrefix,
           tabName: 'Leaks',
         ),
-      DevToolsTab.create(
-        key: dartHeapTableTabKey,
-        tabName: 'Table',
-        gaPrefix: _gaPrefix,
-      ),
+      if (enableNewAllocationProfileTable)
+        DevToolsTab.create(
+          key: dartHeapTableTabKey,
+          tabName: 'Profile',
+          gaPrefix: _gaPrefix,
+        ),
     ];
 
     _searchableTabs = {dartHeapAnalysisTabKey, dartHeapAllocationsTabKey};
@@ -464,7 +467,7 @@ class HeapTreeViewState extends State<HeapTree>
               ],
             ),
           ),
-          const SizedBox(height: densePadding),
+          const Divider(),
           Expanded(
             child: TabBarView(
               physics: defaultTabBarViewPhysics,
@@ -495,10 +498,11 @@ class HeapTreeViewState extends State<HeapTree>
                     ],
                   ),
                 ),
-                MemoryTableView(),
                 // Leaks tab.
                 if (controller.shouldShowLeaksTab.value)
                   const KeepAliveWrapper(child: LeaksPane()),
+                if (enableNewAllocationProfileTable)
+                  KeepAliveWrapper(child: AllocationProfileTableView()),
               ],
             ),
           ),
