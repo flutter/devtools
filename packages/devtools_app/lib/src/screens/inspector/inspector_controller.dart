@@ -30,45 +30,11 @@ import '../../shared/globals.dart';
 import 'diagnostics_node.dart';
 import 'inspector_screen.dart';
 import 'inspector_service.dart';
-import 'inspector_text_styles.dart' as inspector_text_styles;
 import 'inspector_tree.dart';
 import 'inspector_tree_controller.dart';
+import 'primitives/inspector_common.dart';
 
 const inspectorRefQueryParam = 'inspectorRef';
-
-// TODO(https://github.com/flutter/devtools/issues/3950): move this field to the
-// [InspectorController] class once the controller is provided by
-// package:provider.
-/// Tracks whether the first load of the inspector tree has been completed.
-///
-/// This field is used to prevent sending multiple analytics events for
-/// inspector tree load timing.
-bool firstInspectorTreeLoadCompleted = false;
-
-TextStyle textStyleForLevel(DiagnosticLevel level, ColorScheme colorScheme) {
-  switch (level) {
-    case DiagnosticLevel.hidden:
-      return inspector_text_styles.unimportant(colorScheme);
-    case DiagnosticLevel.warning:
-      return inspector_text_styles.warning(colorScheme);
-    case DiagnosticLevel.error:
-      return inspector_text_styles.error(colorScheme);
-    case DiagnosticLevel.debug:
-    case DiagnosticLevel.info:
-    case DiagnosticLevel.fine:
-    default:
-      return inspector_text_styles.regular;
-  }
-}
-
-class InspectorSettingsController {
-  /// Whether to only show user defined widgets in the summary tree.
-  final ValueNotifier<bool> showOnlyUserDefined = ValueNotifier(false);
-
-  /// Whether to automatically show all widgets in the current build method even
-  /// if they would otherwise be filtered.
-  final ValueNotifier<bool> expandSelectedBuildMethod = ValueNotifier(true);
-}
 
 /// This class is based on the InspectorPanel class from the Flutter IntelliJ
 /// plugin with some refactors to make it more of a true controller than a view.
@@ -81,15 +47,13 @@ class InspectorController extends DisposableController
     required this.treeType,
     this.parent,
     this.isSummaryTree = true,
-  })  : assert((detailsTree != null) == isSummaryTree),
-        _treeGroups = InspectorObjectGroupManager(
-          serviceManager.inspectorService as InspectorService,
-          'tree',
-        ),
-        _selectionGroups = InspectorObjectGroupManager(
-          serviceManager.inspectorService as InspectorService,
-          'selection',
-        ) {
+  }) : assert((detailsTree != null) == isSummaryTree) {
+    _init(detailsTree: detailsTree);
+  }
+
+  Future<void> _init({
+    InspectorTreeController? detailsTree,
+  }) async {
     _refreshRateLimiter = RateLimiter(refreshFramesPerSecond, refresh);
 
     inspectorTree.config = InspectorTreeConfig(
@@ -111,6 +75,17 @@ class InspectorController extends DisposableController
     } else {
       details = null;
     }
+
+    await serviceManager.onServiceAvailable;
+
+    _treeGroups = InspectorObjectGroupManager(
+      serviceManager.inspectorService as InspectorService,
+      'tree',
+    );
+    _selectionGroups = InspectorObjectGroupManager(
+      serviceManager.inspectorService as InspectorService,
+      'selection',
+    );
 
     addAutoDisposeListener(serviceManager.isolateManager.mainIsolate, () {
       final isolate = serviceManager.isolateManager.mainIsolate.value;
@@ -264,6 +239,12 @@ class InspectorController extends DisposableController
   final ValueNotifier<int?> _selectedErrorIndex = ValueNotifier<int?>(null);
 
   ValueListenable<int?> get selectedErrorIndex => _selectedErrorIndex;
+
+  /// Tracks whether the first load of the inspector tree has been completed.
+  ///
+  /// This field is used to prevent sending multiple analytics events for
+  /// inspector tree load timing.
+  bool firstInspectorTreeLoadCompleted = false;
 
   FlutterTreeType getTreeType() {
     return treeType;
