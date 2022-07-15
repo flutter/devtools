@@ -17,5 +17,5 @@ class SnapshotInformation extends SnapshotListItem {
 class Snapshot extends SnapshotListItem {
   Snapshot(super.name, this.graph);
 
-  Future<HeapSnapshotGraph> graph;
+  Future<HeapSnapshotGraph?> graph;
 }

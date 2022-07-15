@@ -5,8 +5,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../devtools_app.dart';
-import '../../../../shared/common_widgets.dart';
-import '../../../../shared/split.dart';
+import '../../../../ui/colors.dart';
+import '../../primitives/memory_utils.dart';
 import 'model.dart';
 
 /// While this pane is under construction, we do not want our users to see it.
@@ -26,12 +26,56 @@ class _DiffPaneController with ChangeNotifier {
     index.addListener(() => notifyListeners());
   }
 
-  final snapshots = <SnapshotListItem>[
-    SnapshotInformation(),
-    SnapshotInformation()
-  ];
+  final snapshots = <SnapshotListItem>[SnapshotInformation()];
+
   final index = ValueNotifier<int>(0);
+
+  final isProcessing = ValueNotifier<bool>(false);
+
   SnapshotListItem get selected => snapshots[index.value];
+
+  Future<void> takeSnapshot() async {
+    isProcessing.value = true;
+    final future = snapshotMemory();
+    snapshots.add(Snapshot(_generateName(), future));
+
+    notifyListeners();
+    await future;
+    final newElementIndex = snapshots.length - 1;
+    tryMakeVisible(newElementIndex);
+    index.value = newElementIndex;
+    isProcessing.value = false;
+  }
+
+  /// Tries to make the list item visible.
+  ///
+  /// If the context cannot be found, will fail for debug mode and succeed
+  /// for release mode.
+  void tryMakeVisible(int index) {
+    final context =
+        GlobalObjectKey(snapshots[snapshots.length - 1]).currentContext;
+    if (context == null) {
+      assert(false);
+      return;
+    }
+    Scrollable.ensureVisible(context);
+  }
+
+  Future<void> clearSnapshots() async {
+    snapshots.removeRange(1, snapshots.length);
+    index.value = 0;
+    notifyListeners();
+  }
+
+  String _generateName() {
+    final names = Set.from(snapshots.map((e) => e.name));
+    var index = 1;
+    while (true) {
+      final result = 'Snapshot $index';
+      if (!names.contains(result)) return result;
+      index++;
+    }
+  }
 }
 
 class _DiffPaneState extends State<DiffPane> {
@@ -86,6 +130,7 @@ class _SnapshotList extends StatelessWidget {
             selected: index == controller.index.value,
           ),
           onTap: () => controller.index.value = index,
+          key: GlobalObjectKey(controller.snapshots[index]),
         );
       },
     );
@@ -93,9 +138,11 @@ class _SnapshotList extends StatelessWidget {
 }
 
 class _SnapshotListTitle extends StatelessWidget {
-  const _SnapshotListTitle(
-      {Key? key, required this.item, required this.selected})
-      : super(key: key);
+  const _SnapshotListTitle({
+    Key? key,
+    required this.item,
+    required this.selected,
+  }) : super(key: key);
   final SnapshotListItem item;
   final bool selected;
 
@@ -105,7 +152,7 @@ class _SnapshotListTitle extends StatelessWidget {
 
     return Row(
       children: [
-        SelectionBox(selected: selected),
+        _SelectionBox(selected: selected),
         const SizedBox(width: denseRowSpacing),
         Expanded(child: Text(itemLocal.name, overflow: TextOverflow.ellipsis)),
       ],
@@ -113,21 +160,21 @@ class _SnapshotListTitle extends StatelessWidget {
   }
 }
 
-class SelectionBox extends StatelessWidget {
-  static const _selectionSize = const Size(4.0, 40.0);
-  const SelectionBox({Key? key, required this.selected}) : super(key: key);
+/// Blue or transparent square, to mark selected item.
+class _SelectionBox extends StatelessWidget {
+  const _SelectionBox({Key? key, required this.selected}) : super(key: key);
+  static const _boxSize = Size(3.0, 40.0);
   final bool selected;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: _selectionSize.width,
-      height: _selectionSize.height,
+      width: _boxSize.width,
+      height: _boxSize.height,
       child: selected
           ? const DecoratedBox(
               decoration: BoxDecoration(
-                // TODO: get proper blue from theme somewhere.
-                color: Colors.blue,
+                color: defaultSelectionColor,
               ),
             )
           : null,
@@ -143,8 +190,9 @@ class _SnapshotListContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final itemLocal = item;
     if (itemLocal is SnapshotInformation)
-      return const Text('Information about snapshots');
-    if (itemLocal is Snapshot) return Text('Content of ${itemLocal.name}.');
+      return const Text('Information about snapshots will be here.');
+    if (itemLocal is Snapshot)
+      return Text('Content of ${itemLocal.name} will be here.');
     throw 'Unexpected type of the item: ${itemLocal.runtimeType}';
   }
 }
@@ -156,19 +204,21 @@ class _ControlPane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        ToolbarAction(
-          icon: Icons.fiber_manual_record,
-          tooltip: 'Take heap snapshot',
-          onPressed: () {},
-        ),
-        ToolbarAction(
-          icon: Icons.block,
-          tooltip: 'Clear all snapshots',
-          onPressed: () {},
-        )
-      ],
-    );
+    return ValueListenableBuilder<bool>(
+        valueListenable: controller.isProcessing,
+        builder: (_, isProcessing, __) => Row(
+              children: [
+                ToolbarAction(
+                  icon: Icons.fiber_manual_record,
+                  tooltip: 'Take heap snapshot',
+                  onPressed: isProcessing ? null : controller.takeSnapshot,
+                ),
+                ToolbarAction(
+                  icon: Icons.block,
+                  tooltip: 'Clear all snapshots',
+                  onPressed: isProcessing ? null : controller.clearSnapshots,
+                )
+              ],
+            ));
   }
 }
