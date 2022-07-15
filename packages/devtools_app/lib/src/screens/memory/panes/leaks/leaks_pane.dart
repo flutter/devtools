@@ -14,8 +14,7 @@ import '../../../../config_specific/logger/logger.dart' as logger;
 import '../../../../primitives/utils.dart';
 import '../../../../service/service_extensions.dart';
 import '../../../../shared/globals.dart';
-import '../../../../shared/utils.dart';
-import '../../memory_controller.dart';
+import '../../primitives/memory_utils.dart';
 import 'diagnostics/model.dart';
 import 'diagnostics/not_gced_analyzer.dart';
 import 'formatter.dart';
@@ -40,11 +39,10 @@ class LeaksPane extends StatefulWidget {
 }
 
 class _LeaksPaneController {
-  _LeaksPaneController({required this.memoryController}) {
+  _LeaksPaneController() {
     _subscribeForMemoryLeaksMessages();
   }
 
-  final MemoryController memoryController;
   final status = AnalysisStatusController();
 
   final leakSummaryHistory = ValueNotifier<String>('');
@@ -95,7 +93,7 @@ class _LeaksPaneController {
   Future<NotGCedAnalyzerTask> _createAnalysisTask(
     List<LeakReport> reports,
   ) async {
-    final graph = (await memoryController.snapshotMemory())!;
+    final graph = (await snapshotMemory())!;
     return NotGCedAnalyzerTask.fromSnapshot(graph, reports);
   }
 
@@ -214,15 +212,13 @@ class _LeaksPaneController {
   }
 }
 
-class _LeaksPaneState extends State<LeaksPane>
-    with ProvidedControllerMixin<MemoryController, LeaksPane> {
+class _LeaksPaneState extends State<LeaksPane> {
   late _LeaksPaneController _leaksController;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!initController()) return;
-    _leaksController = _LeaksPaneController(memoryController: controller);
+    _leaksController = _LeaksPaneController();
   }
 
   @override
