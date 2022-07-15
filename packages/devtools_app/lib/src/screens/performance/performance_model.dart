@@ -1354,21 +1354,18 @@ class FrameAnalysis {
     ],
   );
 
-  late FramePhase longestFramePhase = _calculateLongestFramePhase();
+  late FramePhase longestUiPhase = _calculateLongestFramePhase();
 
   FramePhase _calculateLongestFramePhase() {
-    if (rasterPhase.duration > frame.buildTime) {
-      return rasterPhase;
-    }
     var longestPhaseTime = Duration.zero;
-    late FramePhase longestPhase;
+    late FramePhase longest;
     for (final block in [buildPhase, layoutPhase, paintPhase]) {
       if (block.duration > longestPhaseTime) {
-        longestPhase = block;
+        longest = block;
         longestPhaseTime = block.duration;
       }
     }
-    return longestPhase;
+    return longest;
   }
 
   bool get hasExpensiveOperations =>

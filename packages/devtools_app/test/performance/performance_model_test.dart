@@ -467,11 +467,7 @@ void main() {
     });
 
     test('longestFramePhase', () {
-      expect(frameAnalysis.longestFramePhase.title, equals('Raster'));
-
-      frame = testFrame0.shallowCopy()..setEventFlow(goldenUiTimelineEvent);
-      frameAnalysis = FrameAnalysis(frame);
-      expect(frameAnalysis.longestFramePhase.title, equals('Layout'));
+      expect(frameAnalysis.longestUiPhase.title, equals('Layout'));
     });
   });
 }

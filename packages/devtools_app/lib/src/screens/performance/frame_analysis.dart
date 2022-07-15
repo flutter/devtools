@@ -16,6 +16,7 @@ import '../../ui/utils.dart';
 import 'enhance_tracing.dart';
 import 'performance_controller.dart';
 import 'performance_model.dart';
+import 'performance_utils.dart';
 
 class FlutterFrameAnalysisView extends StatelessWidget {
   const FlutterFrameAnalysisView({
@@ -74,7 +75,7 @@ class _FrameTimeVisualizerState extends State<FrameTimeVisualizer> {
   void initState() {
     super.initState();
     frameAnalysis = widget.frameAnalysis;
-    frameAnalysis.selectFramePhase(frameAnalysis.longestFramePhase);
+    frameAnalysis.selectFramePhase(frameAnalysis.longestUiPhase);
   }
 
   @override
@@ -226,27 +227,40 @@ class IntelligentFrameFindings extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final performanceController = Provider.of<PerformanceController>(context);
-    final shouldShowHints = frameAnalysis.frame
-        .isJanky(performanceController.displayRefreshRate.value);
+    final frame = frameAnalysis.frame;
+    final displayRefreshRate = performanceController.displayRefreshRate.value;
+    final showUiJankHints = frame.isUiJanky(displayRefreshRate);
+    final showRasterJankHints = frame.isRasterJanky(displayRefreshRate);
+    if (!(showUiJankHints || showRasterJankHints)) {
+      return const Text('No suggestions for this frame - no jank detected.');
+    }
+
     final saveLayerCount = frameAnalysis.saveLayerCount;
     final intrinsicsCount = frameAnalysis.intrinsicsOperationCount;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Analysis results:'),
-        const SizedBox(height: denseSpacing),
-        if (shouldShowHints) ...[
-          _Hint(
-            message: _EnhanceTracingHint(
-              longestPhase: frameAnalysis.longestFramePhase,
-            ),
+        if (showUiJankHints) ...[
+          const Text('UI Jank Detected'),
+          const SizedBox(height: denseSpacing),
+          _EnhanceTracingHint(
+            longestPhase: frameAnalysis.longestUiPhase,
           ),
           const SizedBox(height: densePadding),
-          if (saveLayerCount > 0) CanvasSaveLayerHint(saveLayerCount),
-          const SizedBox(height: densePadding),
           if (intrinsicsCount > 0) IntrinsicsHint(intrinsicsCount),
-        ] else
-          const Text('No suggestions for this frame - no jank detected.'),
+        ],
+        if (showUiJankHints && showRasterJankHints)
+          const SizedBox(height: defaultSpacing),
+        if (showRasterJankHints) ...[
+          const Text('Raster Jank Detected'),
+          const SizedBox(height: denseSpacing),
+          if (saveLayerCount > 0) CanvasSaveLayerHint(saveLayerCount),
+          const SizedBox(height: denseSpacing),
+          if (frame.hasShaderTime)
+            ShaderCompilationHint(shaderTime: frame.shaderDuration),
+          const SizedBox(height: denseSpacing),
+          const RasterMetricsHint(),
+        ],
       ],
     );
   }
@@ -281,23 +295,23 @@ class _EnhanceTracingHint extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final phasePrefix =
-        longestPhase.title != FrameAnalysis.rasterEventName ? 'UI ' : '';
-    return RichText(
-      maxLines: 2,
-      text: TextSpan(
-        text: '',
-        children: [
-          TextSpan(
-            text: longestPhase.title,
-            style: theme.fixedFontStyle,
-          ),
-          TextSpan(
-            text: ' was the longest ${phasePrefix}phase in this frame. ',
-            style: theme.regularTextStyle,
-          ),
-          ..._hintForPhase(longestPhase, theme),
-        ],
+    return _Hint(
+      message: RichText(
+        maxLines: 2,
+        text: TextSpan(
+          text: '',
+          children: [
+            TextSpan(
+              text: longestPhase.title,
+              style: theme.fixedFontStyle,
+            ),
+            TextSpan(
+              text: ' was the longest UI phase in this frame. ',
+              style: theme.regularTextStyle,
+            ),
+            ..._hintForPhase(longestPhase, theme),
+          ],
+        ),
       ),
     );
   }
@@ -384,10 +398,14 @@ class _ExpensiveOperationHint extends StatelessWidget {
     Key? key,
     required this.message,
     required this.docsUrl,
+    required this.gaScreenName,
+    required this.gaSelectedItemDescription,
   }) : super(key: key);
 
   final TextSpan message;
   final String docsUrl;
+  final String gaScreenName;
+  final String gaSelectedItemDescription;
 
   @override
   Widget build(BuildContext context) {
@@ -405,6 +423,8 @@ class _ExpensiveOperationHint extends StatelessWidget {
             link: Link(
               display: 'negatively affect your app\'s performance',
               url: docsUrl,
+              gaScreenName: gaScreenName,
+              gaSelectedItemDescription: gaSelectedItemDescription,
             ),
           ),
           TextSpan(
@@ -412,6 +432,40 @@ class _ExpensiveOperationHint extends StatelessWidget {
             style: theme.regularTextStyle,
           ),
         ],
+      ),
+    );
+  }
+}
+
+class IntrinsicsHint extends StatelessWidget {
+  const IntrinsicsHint(this.intrinsicsCount, {Key? key}) : super(key: key);
+
+  static const _intrinsicsDocs =
+      'https://docs.flutter.dev/perf/best-practices#minimize-layout-passes-caused-by-intrinsic-operations';
+
+  final int intrinsicsCount;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return _Hint(
+      message: _ExpensiveOperationHint(
+        docsUrl: _intrinsicsDocs,
+        gaScreenName: analytics_constants.performance,
+        gaSelectedItemDescription: analytics_constants.shaderCompilationDocs,
+        message: TextSpan(
+          children: [
+            TextSpan(
+              text: 'Intrinsics',
+              style: theme.fixedFontStyle,
+            ),
+            TextSpan(
+              text: ' passes were performed $intrinsicsCount times during '
+                  'this frame.',
+              style: theme.regularTextStyle,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -434,6 +488,8 @@ class CanvasSaveLayerHint extends StatelessWidget {
     return _Hint(
       message: _ExpensiveOperationHint(
         docsUrl: _saveLayerDocs,
+        gaScreenName: analytics_constants.performance,
+        gaSelectedItemDescription: analytics_constants.canvasSaveLayerDocs,
         message: TextSpan(
           children: [
             TextSpan(
@@ -452,29 +508,60 @@ class CanvasSaveLayerHint extends StatelessWidget {
   }
 }
 
-class IntrinsicsHint extends StatelessWidget {
-  const IntrinsicsHint(this.intrinsicsCount, {Key? key}) : super(key: key);
+class ShaderCompilationHint extends StatelessWidget {
+  const ShaderCompilationHint({
+    Key? key,
+    required this.shaderTime,
+  }) : super(key: key);
 
-  static const _intrinsicsDocs =
-      'https://docs.flutter.dev/perf/best-practices#minimize-layout-passes-caused-by-intrinsic-operations';
-
-  final int intrinsicsCount;
+  final Duration shaderTime;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return _Hint(
       message: _ExpensiveOperationHint(
-        docsUrl: _intrinsicsDocs,
+        docsUrl: preCompileShadersDocsUrl,
+        gaScreenName: analytics_constants.performance,
+        gaSelectedItemDescription: analytics_constants.shaderCompilationDocs,
         message: TextSpan(
           children: [
             TextSpan(
-              text: 'Intrinsics',
+              text: '${msText(shaderTime)}',
               style: theme.fixedFontStyle,
             ),
             TextSpan(
-              text: ' passes were performed $intrinsicsCount times during '
-                  'this frame.',
+              text: ' of shader compilation occurred during this frame.',
+              style: theme.regularTextStyle,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class RasterMetricsHint extends StatelessWidget {
+  const RasterMetricsHint({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return _Hint(
+      message: RichText(
+        text: TextSpan(
+          children: [
+            TextSpan(
+              text: 'Consider using the',
+              style: theme.regularTextStyle,
+            ),
+            TextSpan(
+              text: ' Raster Metrics ',
+              style: theme.subtleFixedFontStyle,
+            ),
+            TextSpan(
+              text: 'tab to identify rendering layers that are expensive to '
+                  'rasterize.',
               style: theme.regularTextStyle,
             ),
           ],
