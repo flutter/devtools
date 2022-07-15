@@ -37,8 +37,10 @@ extension ClassPrivateViewExtension on Class {
   String get vmName => json!['_vmName'];
 }
 
+/// An extension on [InboundReferences] which allows for access to
+/// VM internal fields.
 extension InboundReferenceExtension on InboundReferences {
-  int? parentWordOffset(int referenceIndex) {
-    return json!['references'][referenceIndex]['_parentWordOffset'];
+  int? parentWordOffset(int inboundReferenceIndex) {
+    return json!['references'][inboundReferenceIndex]['_parentWordOffset'];
   }
 }

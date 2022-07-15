@@ -186,7 +186,7 @@ class ProgramExplorerController extends DisposableController
     _outlineSelection.value = null;
 
     for (VMServiceObjectNode node in _outlineNodes.value) {
-      node.collapseCascading();
+      node.collapse();
       node.unselect();
     }
 

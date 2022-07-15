@@ -106,7 +106,7 @@ class ClassInfoWidget extends StatelessWidget implements PreferredSizeWidget {
               builder: (context, fetching, child) => fetching
                   ? const CircularProgressIndicator()
                   : RequestableSizeWidget(
-                      reachableSize: clazz.reachableSize,
+                      requestedSize: clazz.reachableSize,
                       requestFunction: clazz.requestReachableSize,
                     ),
             ),
@@ -118,7 +118,7 @@ class ClassInfoWidget extends StatelessWidget implements PreferredSizeWidget {
               builder: (context, fetching, child) => fetching
                   ? const CircularProgressIndicator()
                   : RequestableSizeWidget(
-                      reachableSize: clazz.retainedSize,
+                      requestedSize: clazz.retainedSize,
                       requestFunction: clazz.requestRetainedSize,
                     ),
             ),

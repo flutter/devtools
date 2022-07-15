@@ -128,6 +128,7 @@ Widget _buildAlternatingRow(BuildContext context, int index, Widget row) {
   );
 }
 
+/// A Refresh ToolbarAction button.
 class ToolbarRefresh extends ToolbarAction {
   const ToolbarRefresh({
     super.icon = Icons.refresh,
@@ -136,6 +137,7 @@ class ToolbarRefresh extends ToolbarAction {
   });
 }
 
+/// An IconLabelButton with label 'Request' and a 'call made' icon.
 class RequestDataButton extends IconLabelButton {
   const RequestDataButton({
     required super.onPressed,
@@ -145,28 +147,31 @@ class RequestDataButton extends IconLabelButton {
   });
 }
 
+/// Displays a RequestDataButton if [requestedSize] is null, otherwise displays
+/// the requestable size and a ToolbarRefresh button next to it,
+/// to request that size again if required.
 class RequestableSizeWidget extends StatelessWidget {
   const RequestableSizeWidget({
-    required this.reachableSize,
+    required this.requestedSize,
     required this.requestFunction,
   });
 
-  final InstanceRef? reachableSize;
+  final InstanceRef? requestedSize;
   final void Function()? requestFunction;
 
   @override
   Widget build(BuildContext context) {
-    if (reachableSize == null) {
+    if (requestedSize == null) {
       return RequestDataButton(onPressed: requestFunction);
     } else {
       return Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           Text(
-            reachableSize!.valueAsString == null
+            requestedSize!.valueAsString == null
                 ? '--'
                 : prettyPrintBytes(
-                    int.parse(reachableSize!.valueAsString!),
+                    int.parse(requestedSize!.valueAsString!),
                     includeUnit: true,
                     kbFractionDigits: 1,
                     maxBytes: 512,
@@ -179,6 +184,7 @@ class RequestableSizeWidget extends StatelessWidget {
   }
 }
 
+/// Wrapper to get the name of an ObjRef depending on its type.
 String? _objectName(ObjRef? objectRef) {
   String? objectRefName;
   if (objectRef == null) return null;
@@ -191,6 +197,7 @@ String? _objectName(ObjRef? objectRef) {
   return objectRefName;
 }
 
+/// Recursively gets the full owner name of a field or function object.
 String? _ownerName(ObjRef? ref) {
   if (ref == null) return '';
   if (ref is FuncRef) {
@@ -202,6 +209,8 @@ String? _ownerName(ObjRef? ref) {
   }
 }
 
+/// An ExpansionTile with an AreaPaneHeader as header and custom style
+/// for the VM tools tab.
 class VmExpansionTile extends StatelessWidget {
   const VmExpansionTile({
     required this.title,
@@ -231,7 +240,48 @@ class VmExpansionTile extends StatelessWidget {
   }
 }
 
-List<Widget> retainingPathList(
+/// An expandable list to display the retaining objects for a given RetainingPath.
+class RetainingPathWidget extends StatelessWidget {
+  const RetainingPathWidget({
+    required this.fetching,
+    required this.retainingPath,
+    this.onExpanded,
+  });
+
+  final ValueListenable<bool> fetching;
+  final ValueListenable<RetainingPath?> retainingPath;
+  final void Function(bool)? onExpanded;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: fetching,
+      builder: (context, fetching, child) {
+        return VmExpansionTile(
+          title: 'Retaining Path',
+          onExpanded: onExpanded,
+          children: retainingPath.value == null
+              ? [
+                  SizedBox.fromSize(
+                    size: const Size.fromHeight(
+                      2 * (defaultIconSizeBeforeScaling + denseSpacing),
+                    ),
+                    child: const CenteredCircularProgressIndicator(),
+                  )
+                ]
+              : _retainingPathList(
+                  context,
+                  retainingPath.value!,
+                ),
+        );
+      },
+    );
+  }
+}
+
+/// Returns a list of Widgets that will be the rows in the VmExpansionTile
+/// for RetainingPathWidget.
+List<Widget> _retainingPathList(
   BuildContext context,
   RetainingPath retainingPath,
 ) {
@@ -276,6 +326,8 @@ List<Widget> retainingPathList(
   return <Widget>[...retainingObjectsRows];
 }
 
+/// Describes the given RetainingObject [object] and its parentListIndex,
+/// parentMapKey, and parentField where applicable.
 String _retainingObjectDescription(RetainingObject object) {
   if (object.parentListIndex != null) {
     final ref = object.value as InstanceRef;
@@ -307,106 +359,8 @@ String _retainingObjectDescription(RetainingObject object) {
   return description;
 }
 
-class RetainingPathWidget extends StatelessWidget {
-  const RetainingPathWidget({
-    required this.fetching,
-    required this.retainingPath,
-    this.onExpanded,
-  });
-
-  final ValueListenable<bool> fetching;
-  final ValueListenable<RetainingPath?> retainingPath;
-  final void Function(bool)? onExpanded;
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: fetching,
-      builder: (context, fetching, child) {
-        return VmExpansionTile(
-          title: 'Retaining Path',
-          onExpanded: onExpanded,
-          children: retainingPath.value == null
-              ? [
-                  SizedBox.fromSize(
-                    size: const Size.fromHeight(
-                      2 * (defaultIconSizeBeforeScaling + denseSpacing),
-                    ),
-                    child: const CenteredCircularProgressIndicator(),
-                  )
-                ]
-              : retainingPathList(
-                  context,
-                  retainingPath.value!,
-                ),
-        );
-      },
-    );
-  }
-}
-
-List<Widget> inboundReferencesList(
-  BuildContext context,
-  InboundReferences inboundRefs,
-) {
-  int count = -1;
-
-  final references = <Row>[];
-
-  for (InboundReference inboundRef in inboundRefs.references!) {
-    count++;
-
-    final int? parentWordOffset =
-        inboundRefs.json!['references'][count]['_parentWordOffset'];
-
-    references.add(
-      Row(
-        children: [
-          Flexible(
-            child: SelectableText(
-              _inboundRefDescription(inboundRef, parentWordOffset),
-              style: Theme.of(context).fixedFontStyle,
-            ),
-          )
-        ],
-      ),
-    );
-  }
-
-  final inboundReferenceRows = _prettyRows(context, references);
-
-  return <Widget>[...inboundReferenceRows];
-}
-
-String _inboundRefDescription(InboundReference inboundRef, int? offset) {
-  if (inboundRef.parentListIndex != null) {
-    final ref = inboundRef.source as InstanceRef;
-    return 'Referenced by element [${inboundRef.parentListIndex}] of ${ref.classRef?.name ?? '<parentListName>'}';
-  }
-  String description = 'Referenced by';
-
-  if (offset != null) {
-    description += ' offset $offset of';
-  }
-
-  if (inboundRef.parentField != null) {
-    description += ' ${inboundRef.parentField} of';
-  }
-
-  if (inboundRef.source is FieldRef) {
-    final ref = inboundRef.source as FieldRef;
-    description +=
-        ' ${ref.declaredType?.name ?? 'Field'} ${ref.name} of ${_ownerName(ref.owner) ?? '<Owner>'}';
-  } else if (inboundRef.source is FuncRef) {
-    final ref = inboundRef.source as FuncRef;
-    description += ' ${_ownerName(ref.owner) ?? '<Owner>'}.${ref.name}';
-  } else {
-    description += ' ${_objectName(inboundRef.source!)}';
-  }
-
-  return description;
-}
-
+/// An expandable list to display the inbound references for a given
+/// instance of InboundReferences.
 class InboundReferencesWidget extends StatelessWidget {
   const InboundReferencesWidget({
     required this.fetching,
@@ -443,4 +397,70 @@ class InboundReferencesWidget extends StatelessWidget {
       },
     );
   }
+}
+
+/// Returns a list of Widgets that will be the rows in the VmExpansionTile
+/// for InboundReferencesWidget.
+List<Widget> inboundReferencesList(
+  BuildContext context,
+  InboundReferences inboundRefs,
+) {
+  int count = -1;
+
+  final references = <Row>[];
+
+  for (InboundReference inboundRef in inboundRefs.references!) {
+    count++;
+
+    final int? parentWordOffset =
+        inboundRefs.json!['references'][count]['_parentWordOffset'];
+
+    references.add(
+      Row(
+        children: [
+          Flexible(
+            child: SelectableText(
+              _inboundRefDescription(inboundRef, parentWordOffset),
+              style: Theme.of(context).fixedFontStyle,
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  final inboundReferenceRows = _prettyRows(context, references);
+
+  return <Widget>[...inboundReferenceRows];
+}
+
+/// Describes the given InboundReference [inboundRef] and its parentListIndex,
+/// [offset], and parentField where applicable.
+String _inboundRefDescription(InboundReference inboundRef, int? offset) {
+  if (inboundRef.parentListIndex != null) {
+    final ref = inboundRef.source as InstanceRef;
+    return 'Referenced by element [${inboundRef.parentListIndex}] of ${ref.classRef?.name ?? '<parentListName>'}';
+  }
+  String description = 'Referenced by';
+
+  if (offset != null) {
+    description += ' offset $offset of';
+  }
+
+  if (inboundRef.parentField != null) {
+    description += ' ${inboundRef.parentField} of';
+  }
+
+  if (inboundRef.source is FieldRef) {
+    final ref = inboundRef.source as FieldRef;
+    description +=
+        ' ${ref.declaredType?.name ?? 'Field'} ${ref.name} of ${_ownerName(ref.owner) ?? '<Owner>'}';
+  } else if (inboundRef.source is FuncRef) {
+    final ref = inboundRef.source as FuncRef;
+    description += ' ${_ownerName(ref.owner) ?? '<Owner>'}.${ref.name}';
+  } else {
+    description += ' ${_objectName(inboundRef.source!)}';
+  }
+
+  return description;
 }
