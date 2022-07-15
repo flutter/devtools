@@ -52,6 +52,7 @@ Widget wrapWithAnalytics(
 
 Widget wrapWithControllers(
   Widget widget, {
+  InspectorController? inspector,
   LoggingController? logging,
   MemoryController? memory,
   PerformanceController? performance,
@@ -66,6 +67,8 @@ Widget wrapWithControllers(
     Provider<BannerMessagesController>.value(
       value: bannerMessages ?? MockBannerMessagesController(),
     ),
+    if (inspector != null)
+      Provider<InspectorController>.value(value: inspector),
     if (logging != null) Provider<LoggingController>.value(value: logging),
     if (memory != null) Provider<MemoryController>.value(value: memory),
     if (performance != null)
@@ -93,10 +96,15 @@ Widget wrapWithNotifications(Widget child) {
 }
 
 Widget wrapWithInspectorControllers(Widget widget) {
+  final inspectorController = InspectorController(
+    inspectorTree: InspectorTreeController(),
+    detailsTree: InspectorTreeController(),
+    treeType: FlutterTreeType.widget,
+  );
   return wrapWithControllers(
     widget,
     debugger: DebuggerController(),
-    // TODO(jacobr): add inspector controllers.
+    inspector: inspectorController,
   );
 }
 

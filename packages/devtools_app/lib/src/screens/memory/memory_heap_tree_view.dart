@@ -32,7 +32,9 @@ import 'memory_graph_model.dart';
 import 'memory_heap_treemap.dart';
 import 'memory_instance_tree_view.dart';
 import 'memory_snapshot_models.dart';
+import 'panes/diff/diff_pane.dart';
 import 'panes/leaks/leaks_pane.dart';
+import 'primitives/memory_utils.dart';
 
 const memorySearchFieldKeyName = 'MemorySearchFieldKey';
 
@@ -146,6 +148,8 @@ class HeapTreeViewState extends State<HeapTree>
   static const dartHeapAllocationsTabKey = Key('Dart Heap Allocations Tab');
   @visibleForTesting
   static const leaksTabKey = Key('Leaks Tab');
+  @visibleForTesting
+  static const diffTabKey = Key('Diff Tab');
 
   /// Below constants should match index for Tab index in DartHeapTabs.
   static const int analysisTabIndex = 0;
@@ -155,6 +159,8 @@ class HeapTreeViewState extends State<HeapTree>
 
   late List<Tab> _tabs;
   late TabController _tabController;
+  late Set<Key> _searchableTabs;
+  final ValueNotifier<int> _currentTab = ValueNotifier(0);
 
   Widget? snapshotDisplay;
 
@@ -198,6 +204,12 @@ class HeapTreeViewState extends State<HeapTree>
         gaPrefix: _gaPrefix,
         tabName: 'Allocations',
       ),
+      if (shouldShowDiffPane)
+        DevToolsTab.create(
+          key: diffTabKey,
+          gaPrefix: _gaPrefix,
+          tabName: 'Diff',
+        ),
       if (widget.controller.shouldShowLeaksTab.value)
         DevToolsTab.create(
           key: leaksTabKey,
@@ -206,8 +218,12 @@ class HeapTreeViewState extends State<HeapTree>
         ),
     ];
 
+    _searchableTabs = {dartHeapAnalysisTabKey, dartHeapAllocationsTabKey};
     _tabController = TabController(length: _tabs.length, vsync: this);
+    _tabController.addListener(_onTabChanged);
   }
+
+  void _onTabChanged() => _currentTab.value = _tabController.index;
 
   @override
   void didChangeDependencies() {
@@ -294,6 +310,9 @@ class HeapTreeViewState extends State<HeapTree>
   @override
   void dispose() {
     _animation.dispose();
+    _tabController
+      ..removeListener(_onTabChanged)
+      ..dispose();
 
     super.dispose();
   }
@@ -431,17 +450,21 @@ class HeapTreeViewState extends State<HeapTree>
       child: Column(
         children: [
           const SizedBox(height: defaultSpacing),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              TabBar(
-                labelColor: themeData.textTheme.bodyText1!.color,
-                isScrollable: true,
-                controller: _tabController,
-                tabs: _tabs,
-              ),
-              _buildSearchFilterControls(),
-            ],
+          ValueListenableBuilder<int>(
+            valueListenable: _currentTab,
+            builder: (context, index, _) => Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TabBar(
+                  labelColor: themeData.textTheme.bodyText1!.color,
+                  isScrollable: true,
+                  controller: _tabController,
+                  tabs: _tabs,
+                ),
+                if (_searchableTabs.contains(_tabs[index].key))
+                  _buildSearchFilterControls(),
+              ],
+            ),
           ),
           const SizedBox(height: densePadding),
           Expanded(
@@ -474,6 +497,10 @@ class HeapTreeViewState extends State<HeapTree>
                     ],
                   ),
                 ),
+
+                // Diff tab.
+                if (shouldShowDiffPane)
+                  const KeepAliveWrapper(child: DiffPane()),
 
                 // Leaks tab.
                 if (controller.shouldShowLeaksTab.value)
@@ -1029,7 +1056,7 @@ class HeapTreeViewState extends State<HeapTree>
 
     final snapshotTimestamp = DateTime.now();
 
-    final graph = await controller.snapshotMemory();
+    final graph = await snapshotMemory();
 
     // No snapshot collected, disconnected/crash application.
     if (graph == null) {

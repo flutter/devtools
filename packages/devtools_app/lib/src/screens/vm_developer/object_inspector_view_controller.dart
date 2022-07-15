@@ -86,6 +86,7 @@ class ObjectInspectorViewController extends DisposableController
     if (object != null) {
       objectHistory.pushEntry(object);
     }
+
     _refreshing.value = false;
   }
 

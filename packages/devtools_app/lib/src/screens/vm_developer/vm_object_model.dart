@@ -25,7 +25,7 @@ abstract class VmObject {
 
   IsolateRef? _isolate;
 
-  dynamic obj;
+  dynamic get obj;
   late Obj _obj;
 
   String? get name;
@@ -82,11 +82,13 @@ class ClassObject extends VmObject {
 
   ValueListenable<bool> get fetchingReachableSize => _fetchingReachableSize;
   final ValueNotifier<bool> _fetchingReachableSize = ValueNotifier(false);
-  InstanceRef? reachableSize;
+  InstanceRef? get reachableSize => _reachableSize;
+  InstanceRef? _reachableSize;
 
   ValueListenable<bool> get fetchingRetainedSize => _fetchingRetainedSize;
   final ValueNotifier<bool> _fetchingRetainedSize = ValueNotifier(false);
-  InstanceRef? retainedSize;
+  InstanceRef? get retainedSize => _retainedSize;
+  InstanceRef? _retainedSize;
 
   ValueListenable<bool> get fetchingRetainingPath => _fetchingRetainingPath;
   final ValueNotifier<bool> _fetchingRetainingPath = ValueNotifier(false);
@@ -107,13 +109,13 @@ class ClassObject extends VmObject {
 
   Future<void> requestReachableSize() async {
     _fetchingReachableSize.value = true;
-    reachableSize = await _service.getReachableSize(_isolate!.id!, ref.id!);
+    _reachableSize = await _service.getReachableSize(_isolate!.id!, ref.id!);
     _fetchingReachableSize.value = false;
   }
 
   Future<void> requestRetainedSize() async {
     _fetchingRetainedSize.value = true;
-    retainedSize = await _service.getRetainedSize(_isolate!.id!, ref.id!);
+    _retainedSize = await _service.getRetainedSize(_isolate!.id!, ref.id!);
     _fetchingRetainedSize.value = false;
   }
 

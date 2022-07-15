@@ -2,14 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/shared/common_widgets.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../devtools_app.dart';
 import '../../primitives/utils.dart';
+import '../../shared/common_widgets.dart';
 import '../../shared/table.dart';
+import '../../shared/theme.dart';
 import 'vm_developer_common_widgets.dart';
 import 'vm_object_model.dart';
 

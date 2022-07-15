@@ -11,6 +11,7 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
 import '../../analytics/analytics.dart' as ga;
 import '../../analytics/constants.dart' as analytics_constants;
@@ -22,6 +23,7 @@ import '../../shared/common_widgets.dart';
 import '../../shared/error_badge_manager.dart';
 import '../../shared/globals.dart';
 import '../../shared/theme.dart';
+import '../../shared/utils.dart';
 import '../../ui/colors.dart';
 import '../../ui/search.dart';
 import '../../ui/utils.dart';
@@ -31,8 +33,8 @@ import 'diagnostics_node.dart';
 import 'inspector_breadcrumbs.dart';
 import 'inspector_controller.dart';
 import 'inspector_screen.dart';
-import 'inspector_text_styles.dart' as inspector_text_styles;
 import 'inspector_tree.dart';
+import 'primitives/inspector_text_styles.dart' as inspector_text_styles;
 
 /// Presents a [TreeNode].
 class _InspectorTreeRowWidget extends StatefulWidget {
@@ -75,7 +77,7 @@ class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
         row: widget.row,
         error: widget.error,
         expandArrowAnimation: expandArrowAnimation,
-        controller: widget.inspectorTreeState.controller!,
+        controller: widget.inspectorTreeState.treeController!,
         scrollControllerX: widget.scrollControllerX,
         viewportWidth: widget.viewportWidth,
         onToggle: () {
@@ -94,9 +96,9 @@ class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
     setState(() {
       final row = widget.row;
       if (expanded) {
-        widget.inspectorTreeState.controller!.onExpandRow(row);
+        widget.inspectorTreeState.treeController!.onExpandRow(row);
       } else {
-        widget.inspectorTreeState.controller!.onCollapseRow(row);
+        widget.inspectorTreeState.treeController!.onCollapseRow(row);
       }
     });
   }
@@ -716,17 +718,22 @@ abstract class InspectorControllerClient {
 class InspectorTree extends StatefulWidget {
   const InspectorTree({
     Key? key,
-    required this.controller,
-    required this.debuggerController,
-    this.inspectorTreeController,
+    required this.treeController,
+    this.summaryTreeController,
     this.isSummaryTree = false,
     this.widgetErrors,
-  })  : assert(isSummaryTree == (inspectorTreeController == null)),
+  })  : assert(isSummaryTree == (summaryTreeController == null)),
         super(key: key);
 
-  final InspectorTreeController? controller;
-  final InspectorTreeController? inspectorTreeController;
-  final DebuggerController debuggerController;
+  final InspectorTreeController? treeController;
+
+  /// Stores the summary tree controller when this instance of [InspectorTree]
+  /// is for the details tree (i.e. when [isSummaryTree] is false).
+  ///
+  /// This value should be null when this instance of [InspectorTree] is for the
+  /// summary tree itself.
+  final InspectorTreeController? summaryTreeController;
+
   final bool isSummaryTree;
   final LinkedHashMap<String, InspectableWidgetError>? widgetErrors;
 
@@ -739,11 +746,10 @@ class _InspectorTreeState extends State<InspectorTree>
     with
         SingleTickerProviderStateMixin,
         AutomaticKeepAliveClientMixin<InspectorTree>,
-        AutoDisposeMixin
+        AutoDisposeMixin,
+        ProvidedControllerMixin<InspectorController, InspectorTree>
     implements InspectorControllerClient {
-  InspectorTreeController? get controller => widget.controller;
-
-  bool get _isSummaryTree => widget.isSummaryTree;
+  InspectorTreeController? get treeController => widget.treeController;
 
   late ScrollController _scrollControllerY;
   late ScrollController _scrollControllerX;
@@ -753,6 +759,8 @@ class _InspectorTreeState extends State<InspectorTree>
   AnimationController? _constraintDisplayController;
   late FocusNode _focusNode;
 
+  late DebuggerController _debuggerController;
+
   @override
   void initState() {
     super.initState();
@@ -760,7 +768,7 @@ class _InspectorTreeState extends State<InspectorTree>
     _scrollControllerY = ScrollController();
     // TODO(devoncarew): Commented out as per flutter/devtools/pull/2001.
     //_scrollControllerY.addListener(_onScrollYChange);
-    if (_isSummaryTree) {
+    if (widget.isSummaryTree) {
       _constraintDisplayController = longAnimationController(this);
     }
     _focusNode = FocusNode(debugLabel: 'inspector-tree');
@@ -769,10 +777,17 @@ class _InspectorTreeState extends State<InspectorTree>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _debuggerController = Provider.of<DebuggerController>(context);
+    initController();
+  }
+
+  @override
   void didUpdateWidget(InspectorTree oldWidget) {
-    if (oldWidget.controller != widget.controller) {
-      final InspectorTreeController? oldController = oldWidget.controller;
-      oldController?.removeClient(this);
+    final InspectorTreeController? oldTreeController = oldWidget.treeController;
+    if (oldTreeController != widget.treeController) {
+      oldTreeController?.removeClient(this);
 
       // TODO(elliette): Figure out if we can remove this. See explanation:
       // https://github.com/flutter/devtools/pull/1290/files#r342399899.
@@ -786,7 +801,7 @@ class _InspectorTreeState extends State<InspectorTree>
   @override
   void dispose() {
     super.dispose();
-    controller?.removeClient(this);
+    treeController?.removeClient(this);
     _scrollControllerX.dispose();
     _scrollControllerY.dispose();
     _constraintDisplayController?.dispose();
@@ -819,8 +834,8 @@ class _InspectorTreeState extends State<InspectorTree>
   /// This enables animating the x scroll as the y scroll changes which helps
   /// keep the relevant content in view while scrolling a large list.
   double _computeTargetX(double y) {
-    final controllerLocal = controller!;
-    final rowIndex = controllerLocal.getRowIndex(y);
+    final treeControllerLocal = treeController!;
+    final rowIndex = treeControllerLocal.getRowIndex(y);
     double? requiredOffset;
     double minOffset = double.infinity;
     // TODO(jacobr): use maxOffset as well to better handle the case where the
@@ -829,17 +844,17 @@ class _InspectorTreeState extends State<InspectorTree>
     // TODO(jacobr): if the first or last row is only partially visible, tween
     // between its indent and the next row to more smoothly change the target x
     // as the y coordinate changes.
-    if (rowIndex == controllerLocal.numRows) {
+    if (rowIndex == treeControllerLocal.numRows) {
       return 0;
     }
     final endY = y += safeViewportHeight;
-    for (int i = rowIndex; i < controllerLocal.numRows; i++) {
-      final rowY = controllerLocal.getRowY(i);
+    for (int i = rowIndex; i < treeControllerLocal.numRows; i++) {
+      final rowY = treeControllerLocal.getRowY(i);
       if (rowY >= endY) break;
 
-      final row = controllerLocal.getCachedRow(i);
+      final row = treeControllerLocal.getCachedRow(i);
       if (row == null) continue;
-      final rowOffset = controllerLocal.getRowOffset(i);
+      final rowOffset = treeControllerLocal.getRowOffset(i);
       if (row.isSelected) {
         requiredOffset = rowOffset;
       }
@@ -943,17 +958,19 @@ class _InspectorTreeState extends State<InspectorTree>
   KeyEventResult _handleKeyEvent(FocusNode _, RawKeyEvent event) {
     if (event is! RawKeyDownEvent) return KeyEventResult.ignored;
 
+    final treeControllerLocal = treeController!;
+
     if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
-      controller!.navigateDown();
+      treeControllerLocal.navigateDown();
       return KeyEventResult.handled;
     } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
-      controller!.navigateUp();
+      treeControllerLocal.navigateUp();
       return KeyEventResult.handled;
     } else if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
-      controller!.navigateLeft();
+      treeControllerLocal.navigateLeft();
       return KeyEventResult.handled;
     } else if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
-      controller!.navigateRight();
+      treeControllerLocal.navigateRight();
       return KeyEventResult.handled;
     }
 
@@ -961,7 +978,7 @@ class _InspectorTreeState extends State<InspectorTree>
   }
 
   void _bindToController() {
-    controller?.addClient(this);
+    treeController?.addClient(this);
   }
 
   @override
@@ -972,24 +989,24 @@ class _InspectorTreeState extends State<InspectorTree>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final controllerLocal = controller;
-    if (controllerLocal == null) {
+    final treeControllerLocal = treeController;
+    if (treeControllerLocal == null) {
       // Indicate the tree is loading.
       return const CenteredCircularProgressIndicator();
     }
-    if (controllerLocal.numRows == 0) {
+    if (treeControllerLocal.numRows == 0) {
       // This works around a bug when Scrollbars are present on a short lived
       // widget.
       return const SizedBox();
     }
 
-    if (!firstInspectorTreeLoadCompleted && widget.isSummaryTree) {
+    if (!controller.firstInspectorTreeLoadCompleted && widget.isSummaryTree) {
       ga.timeEnd(InspectorScreen.id, analytics_constants.pageReady);
       serviceManager.sendDwdsEvent(
         screen: InspectorScreen.id,
         action: analytics_constants.pageReady,
       );
-      firstInspectorTreeLoadCompleted = true;
+      controller.firstInspectorTreeLoadCompleted = true;
     }
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -1002,8 +1019,8 @@ class _InspectorTreeState extends State<InspectorTree>
             controller: _scrollControllerX,
             child: ConstrainedBox(
               constraints: BoxConstraints(
-                maxWidth:
-                    controllerLocal.rowWidth + controllerLocal.maxRowIndent,
+                maxWidth: treeControllerLocal.rowWidth +
+                    treeControllerLocal.maxRowIndent,
               ),
               // TODO(kenz): this scrollbar needs to be sticky to the right side of
               // the visible container - right now it is lined up to the right of
@@ -1025,11 +1042,11 @@ class _InspectorTreeState extends State<InspectorTree>
                       itemExtent: rowHeight,
                       childrenDelegate: SliverChildBuilderDelegate(
                         (context, index) {
-                          if (index == controllerLocal.numRows) {
+                          if (index == treeControllerLocal.numRows) {
                             return SizedBox(height: rowHeight);
                           }
                           final InspectorTreeRow row =
-                              controllerLocal.getCachedRow(index)!;
+                              treeControllerLocal.getCachedRow(index)!;
                           final inspectorRef = row.node.diagnostic?.valueRef.id;
                           return _InspectorTreeRowWidget(
                             key: PageStorageKey(row.node),
@@ -1041,10 +1058,10 @@ class _InspectorTreeState extends State<InspectorTree>
                                     inspectorRef != null
                                 ? widget.widgetErrors![inspectorRef]
                                 : null,
-                            debuggerController: widget.debuggerController,
+                            debuggerController: _debuggerController,
                           );
                         },
-                        childCount: controllerLocal.numRows + 1,
+                        childCount: treeControllerLocal.numRows + 1,
                       ),
                       controller: _scrollControllerY,
                     ),
@@ -1057,7 +1074,7 @@ class _InspectorTreeState extends State<InspectorTree>
 
         final bool shouldShowBreadcrumbs = !widget.isSummaryTree;
         if (shouldShowBreadcrumbs) {
-          final inspectorTreeController = widget.inspectorTreeController!;
+          final inspectorTreeController = widget.summaryTreeController!;
 
           final parents =
               inspectorTreeController.getPathFromSelectedRowToRoot();

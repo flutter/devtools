@@ -4,7 +4,6 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../devtools_app.dart';
 import '../../shared/split.dart';
 import '../debugger/debugger_model.dart';
 import '../debugger/program_explorer.dart';

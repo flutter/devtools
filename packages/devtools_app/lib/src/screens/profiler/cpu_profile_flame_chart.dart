@@ -8,13 +8,11 @@ import 'package:flutter/material.dart';
 import '../../charts/flame_chart.dart';
 import '../../ui/colors.dart';
 import '../../ui/utils.dart';
-import 'cpu_profile_controller.dart';
 import 'cpu_profile_model.dart';
 
 class CpuProfileFlameChart extends FlameChart<CpuProfileData, CpuStackFrame?> {
   CpuProfileFlameChart({
     required CpuProfileData data,
-    required this.controller,
     required double width,
     required double height,
     required ValueListenable<CpuStackFrame?> selectionNotifier,
@@ -33,8 +31,6 @@ class CpuProfileFlameChart extends FlameChart<CpuProfileData, CpuStackFrame?> {
           activeSearchMatchNotifier: activeSearchMatchNotifier,
           onDataSelected: onDataSelected,
         );
-
-  final CpuProfilerController controller;
 
   @override
   _CpuProfileFlameChartState createState() => _CpuProfileFlameChartState();
