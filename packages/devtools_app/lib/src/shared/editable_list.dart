@@ -31,20 +31,14 @@ class _EditableListState extends State<EditableList> {
   void initState() {
     super.initState();
     textFieldController = TextEditingController();
-    widget.isRefreshing?.addListener(_stateRefresher);
   }
 
   late final TextEditingController textFieldController;
   final FocusNode textFieldFocusNode = FocusNode();
-  void _stateRefresher() {
-    // trigger a state update when the refreshing state updates
-    setState(() {});
-  }
 
   @override
   void dispose() {
     textFieldController.dispose();
-    widget.isRefreshing?.removeListener(_stateRefresher);
     super.dispose();
   }
 
@@ -82,9 +76,10 @@ class _EditableListState extends State<EditableList> {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: widget.entries,
-      builder: (context, value, child) {
+    return DualValueListenableBuilder(
+      firstListenable: widget.entries,
+      secondListenable: widget.isRefreshing ?? ValueNotifier<bool>(false),
+      builder: (_, __, ___, ____) {
         return Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
