@@ -1181,7 +1181,7 @@ class HeapTreeViewState extends State<HeapTree>
     // Select the snapshot just analyzed.
     controller.selectionSnapshotNotifier.value = Selection(
       node: analyzeSnapshot,
-      flatListIndex: analyzeSnapshot.index,
+      nodeIndex: analyzeSnapshot.index,
       scrollIntoView: true,
     );
   }
@@ -1402,7 +1402,7 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
           // No selected node, then select the snapshot we're searching.
           controller.selectionSnapshotNotifier.value = Selection(
             node: searchRoot,
-            flatListIndex: searchRoot.index,
+            nodeIndex: searchRoot.index,
             scrollIntoView: true,
           );
         }
@@ -1451,7 +1451,7 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
     if (reference.name == search) {
       controller.selectionSnapshotNotifier.value = Selection(
         node: reference,
-        flatListIndex: reference.index,
+        nodeIndex: reference.index,
         scrollIntoView: true,
       );
       controller.clearSearchAutoComplete();

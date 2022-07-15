@@ -64,9 +64,9 @@ class AppSizeController {
       matchingNodeCondition: searchCondition,
       includeCollapsedNodes: false,
     );
-    final int newPos = selectedRowIndex * defaultRowHeight as int;
 
-    analysisRoot.value = Selection(node: newRoot, flatListIndex: newPos);
+    analysisRoot.value = Selection(
+        node: newRoot, nodeIndex: selectedRowIndex, scrollIntoView: true);
 
     final programInfoNode =
         _analysisCallGraph?.program.lookup(newRoot.packagePath()) ??

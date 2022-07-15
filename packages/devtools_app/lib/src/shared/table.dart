@@ -31,7 +31,6 @@ import 'utils.dart';
 /// When rows in the table expand or collapse, they will animate between a
 /// height of 0 and a height of [defaultRowHeight].
 double get defaultRowHeight => scaleByFontFactor(32.0);
-double get selectedNodePadding => defaultRowHeight * .5;
 
 const _columnGroupSpacing = 4.0;
 const _columnGroupSpacingWithPadding = _columnGroupSpacing + 2 * defaultSpacing;
@@ -132,24 +131,6 @@ class FlatTableState<T> extends State<FlatTable<T>>
         !collectionEquals(widget.data, oldWidget.data)) {
       _initData();
     }
-
-    // TODO(kenz): pull this code into a helper and also call from initState.
-    // Detect selection changes but only care about scrollIntoView.
-    addAutoDisposeListener(oldWidget.selectionNotifier, () {
-      setState(() {
-        final Selection<T> selection =
-            oldWidget.selectionNotifier!.value as Selection<T>;
-        if (selection.scrollIntoView) {
-          final int selectedDisplayRow = (selection.node! as dynamic).nodeIndex;
-          // TODO(terry): Optimize selecting row, if row's visible in
-          //              the viewport just select otherwise jumpTo row.
-          final newPos = selectedDisplayRow * defaultRowHeight;
-
-          // TODO(terry): Should animate factor out _moveSelection to reuse here.
-          scrollController.jumpTo(newPos);
-        }
-      });
-    });
   }
 
   void _initData() {
@@ -267,7 +248,6 @@ class FlatTableState<T> extends State<FlatTable<T>>
           onSortChanged: _sortDataAndUpdate,
           activeSearchMatchNotifier: widget.activeSearchMatchNotifier,
           rowItemExtent: defaultRowHeight,
-          scrollController: scrollController,
         );
       },
     );
@@ -344,12 +324,12 @@ class FlatTableState<T> extends State<FlatTable<T>>
 class Selection<T> {
   Selection({
     this.node,
-    this.flatListIndex,
+    this.nodeIndex,
     this.scrollIntoView = false,
   });
 
   final T? node;
-  final int? flatListIndex;
+  final int? nodeIndex;
   final bool scrollIntoView;
 }
 
@@ -464,10 +444,8 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     addAutoDisposeListener(selectionNotifier, () {
       setState(() {
         final node = selectionNotifier.value.node;
-        final index = selectionNotifier.value.flatListIndex as double;
 
         expandParents(node?.parent);
-        scrollToPosition(scrollController, index);
       });
     });
 
@@ -521,7 +499,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     // Rebuilds the table whenever the tree structure has been updated.
     selectionNotifier.value = Selection(
       node: node,
-      flatListIndex: nodeIndex,
+      nodeIndex: nodeIndex,
     );
 
     _toggleNode(node);
@@ -609,7 +587,6 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       focusNode: _focusNode,
       handleKeyEvent: _handleKeyEvent,
       selectionNotifier: selectionNotifier,
-      scrollController: scrollController,
     );
   }
 
@@ -693,13 +670,12 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     if (selectionNotifier.value.node == null) {
       selectionNotifier.value = Selection(
         node: items[0],
-        flatListIndex: 0,
+        nodeIndex: 0,
       );
     }
 
     assert(
-      selectionNotifier.value.node ==
-          items[selectionNotifier.value.flatListIndex!],
+      selectionNotifier.value.node == items[selectionNotifier.value.nodeIndex!],
     );
 
     if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
@@ -753,7 +729,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     late int newSelectedNodeIndex;
 
     final selectionValue = selectionNotifier.value;
-    final selectedNodeIndex = selectionValue.flatListIndex;
+    final selectedNodeIndex = selectionValue.nodeIndex;
     switch (scrollKind) {
       case ScrollKind.down:
         newSelectedNodeIndex = min(selectedNodeIndex! + 1, items.length - 1);
@@ -795,7 +771,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       // `isAboveViewport`.
       selectionNotifier.value = Selection(
         node: newSelectedNode,
-        flatListIndex: newSelectedNodeIndex,
+        nodeIndex: newSelectedNodeIndex,
       );
     });
   }
@@ -830,9 +806,7 @@ class _Table<T> extends StatefulWidget {
     this.selectionNotifier,
     this.activeSearchMatchNotifier,
     this.rowItemExtent,
-    ScrollController? scrollController,
-  })  : scrollController = scrollController ?? ScrollController(),
-        super(key: key);
+  }) : super(key: key);
 
   final List<T> data;
 
@@ -854,7 +828,6 @@ class _Table<T> extends StatefulWidget {
   final TableKeyEventHandler? handleKeyEvent;
   final ValueNotifier<Selection<T>>? selectionNotifier;
   final ValueListenable<T?>? activeSearchMatchNotifier;
-  final ScrollController scrollController;
 
   /// The width to assume for columns that don't specify a width.
   static const defaultColumnWidth = 500.0;
@@ -867,6 +840,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
   late LinkedScrollControllerGroup _linkedHorizontalScrollControllerGroup;
   late ColumnData<T> sortColumn;
   late SortDirection sortDirection;
+  late ScrollController scrollController;
 
   @override
   void initState() {
@@ -875,6 +849,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
     _linkedHorizontalScrollControllerGroup = LinkedScrollControllerGroup();
     sortColumn = widget.sortColumn;
     sortDirection = widget.sortDirection;
+    scrollController = ScrollController();
 
     _initSearchListener();
   }
@@ -884,6 +859,22 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
     super.didUpdateWidget(oldWidget);
 
     cancelListeners();
+
+    // TODO(kenz): pull this code into a helper and also call from initState.
+    // Detect selection changes but only care about scrollIntoView.
+    addAutoDisposeListener(oldWidget.selectionNotifier, () {
+      setState(() {
+        final Selection<T> selection = oldWidget.selectionNotifier!.value;
+        if (selection.scrollIntoView) {
+          final int selectedDisplayRow = selection.nodeIndex!;
+          // TODO(terry): Optimize selecting row, if row's visible in
+          //              the viewport just select otherwise jumpTo row.
+          final newPos = selectedDisplayRow * defaultRowHeight;
+
+          scrollToPosition(scrollController, newPos);
+        }
+      });
+    });
 
     _initSearchListener();
   }
@@ -907,12 +898,10 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
     if (index == -1) return;
 
     final y = index * defaultRowHeight;
-    final indexInView = y > widget.scrollController.offset &&
-        y <
-            widget.scrollController.offset +
-                widget.scrollController.position.extentInside;
+    final indexInView = y > scrollController.offset &&
+        y < scrollController.offset + scrollController.position.extentInside;
     if (!indexInView) {
-      await widget.scrollController.animateTo(
+      await scrollController.animateTo(
         index * defaultRowHeight,
         duration: defaultDuration,
         curve: defaultCurve,
@@ -922,7 +911,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
 
   @override
   void dispose() {
-    widget.scrollController.dispose();
+    scrollController.dispose();
     super.dispose();
   }
 
@@ -952,9 +941,8 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
   Widget build(BuildContext context) {
     // If we're at the end already, scroll to expose the new content.
     if (widget.autoScrollContent) {
-      if (widget.scrollController.hasClients &&
-          widget.scrollController.atScrollBottom) {
-        widget.scrollController.autoScrollToBottom();
+      if (scrollController.hasClients && scrollController.atScrollBottom) {
+        scrollController.autoScrollToBottom();
       }
     }
 
@@ -996,7 +984,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
               Expanded(
                 child: Scrollbar(
                   thumbVisibility: true,
-                  controller: widget.scrollController,
+                  controller: scrollController,
                   child: GestureDetector(
                     behavior: HitTestBehavior.translucent,
                     onTapDown: (a) => widget.focusNode?.requestFocus(),
@@ -1005,13 +993,13 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
                       onKey: (_, event) => widget.handleKeyEvent != null
                           ? widget.handleKeyEvent!(
                               event,
-                              widget.scrollController,
+                              scrollController,
                               constraints,
                             )
                           : KeyEventResult.ignored,
                       focusNode: widget.focusNode,
                       child: ListView.builder(
-                        controller: widget.scrollController,
+                        controller: scrollController,
                         itemCount: widget.data.length,
                         itemExtent: widget.rowItemExtent,
                         itemBuilder: _buildItem,
