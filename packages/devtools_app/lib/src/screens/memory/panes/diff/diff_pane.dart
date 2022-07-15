@@ -25,7 +25,10 @@ class _DiffPaneController with ChangeNotifier {
     index.addListener(() => notifyListeners());
   }
 
-  final snapshots = <SnapshotListItem>[SnapshotInformation()];
+  final snapshots = <SnapshotListItem>[
+    SnapshotInformation(),
+    SnapshotInformation()
+  ];
   final index = ValueNotifier<int>(0);
   SnapshotListItem get selected => snapshots[index.value];
 }
@@ -44,13 +47,16 @@ class _DiffPaneState extends State<DiffPane> {
     return Split(
       axis: Axis.horizontal,
       initialFractions: const [0.2, 0.8],
+      minSizes: const [80, 80],
       children: [
-        Column(children: [
-          _ControlPane(controller: controller),
-          Expanded(
-            child: _SnapshotList(controller: controller),
-          ),
-        ]),
+        Column(
+          children: [
+            _ControlPane(controller: controller),
+            Expanded(
+              child: _SnapshotList(controller: controller),
+            ),
+          ],
+        ),
         _SnapshotListContent(item: controller.selected),
       ],
     );
@@ -69,14 +75,15 @@ class _SnapshotList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // return Text('I am list');
     return ListView.builder(
       shrinkWrap: true,
       itemCount: controller.snapshots.length,
       itemBuilder: (context, index) {
         return ListTile(
-          title: _SnapshotListTitle(item: controller.snapshots[index]),
-          tileColor: controller.index.value == index ? Colors.blue : null,
+          title: _SnapshotListTitle(
+            item: controller.snapshots[index],
+            selected: index == controller.index.value,
+          ),
           onTap: () => controller.index.value = index,
         );
       },
@@ -84,16 +91,34 @@ class _SnapshotList extends StatelessWidget {
   }
 }
 
+const _itemHeight = 28.0;
+
 class _SnapshotListTitle extends StatelessWidget {
-  const _SnapshotListTitle({Key? key, required this.item}) : super(key: key);
+  const _SnapshotListTitle(
+      {Key? key, required this.item, required this.selected})
+      : super(key: key);
   final SnapshotListItem item;
+  final bool selected;
 
   @override
   Widget build(BuildContext context) {
     final itemLocal = item;
-    if (itemLocal is SnapshotInformation) return const Text('Snapshots');
-    if (itemLocal is Snapshot) return Text(itemLocal.name);
-    throw 'Unexpected type of the item: ${itemLocal.runtimeType}';
+
+    return Row(
+      children: [
+        SizedBox(
+          width: 10,
+          height: _itemHeight,
+          child: selected
+              ? const DecoratedBox(
+                  decoration: BoxDecoration(color: Colors.red),
+                )
+              : null,
+        ),
+        if (itemLocal is SnapshotInformation) const Text('Snapshots'),
+        if (itemLocal is Snapshot) Text(itemLocal.name),
+      ],
+    );
   }
 }
 
