@@ -17,9 +17,9 @@ String analyzedLeaksToYaml({
 }) {
   return '# For memory leaks troubleshooting tips see\n'
       '# $linkToGuidance\n\n'
-      '${LeakReport.iterableToYaml('not-disposed', notDisposed as List<LeakReport>?)}'
+      '${LeakReport.iterableToYaml('not-disposed', notDisposed)}'
       '${_notGCedToYaml(notGCed)}'
-      '${LeakReport.iterableToYaml('gced-late', gcedLate as List<LeakReport>?)}';
+      '${LeakReport.iterableToYaml('gced-late', gcedLate)}';
 }
 
 String _notGCedToYaml(NotGCedAnalyzed? notGCed) {
@@ -54,7 +54,7 @@ String _notGCedToYaml(NotGCedAnalyzed? notGCed) {
   result.write(
     LeakReport.iterableToYaml(
       'not-gced-without-path',
-      notGCed.leaksWithoutRetainingPath as List<LeakReport>?,
+      notGCed.leaksWithoutRetainingPath,
     ),
   );
 

@@ -220,7 +220,9 @@ class AllocationProfileTableViewState extends State<AllocationProfileTableView>
           refreshOnGcKey: refreshOnGcKey,
           refreshKey: refreshKey,
         ),
-        const SizedBox(height: denseRowSpacing,),
+        const SizedBox(
+          height: denseRowSpacing,
+        ),
         Expanded(
           child: _AllocationProfileTable(
             allocationProfileController: allocationProfileController,
@@ -346,7 +348,7 @@ class _AllocationProfileTableControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(    
+    return Row(
       children: [
         _ExportAllocationProfileButton(
           allocationProfileController: allocationProfileController,

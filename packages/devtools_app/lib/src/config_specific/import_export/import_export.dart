@@ -107,7 +107,6 @@ enum ExportFileType {
       case yaml:
         return 'yaml';
     }
-    throw UnimplementedError('Unable to convert $this to a string');
   }
 }
 
