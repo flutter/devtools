@@ -236,7 +236,7 @@ class IntelligentFrameFindings extends StatelessWidget {
     }
 
     final saveLayerCount = frameAnalysis.saveLayerCount;
-    final intrinsicsCount = frameAnalysis.intrinsicsOperationCount;
+    final intrinsicOperationsCount = frameAnalysis.intrinsicOperationsCount;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -247,7 +247,8 @@ class IntelligentFrameFindings extends StatelessWidget {
             longestPhase: frameAnalysis.longestUiPhase,
           ),
           const SizedBox(height: densePadding),
-          if (intrinsicsCount > 0) IntrinsicsHint(intrinsicsCount),
+          if (intrinsicOperationsCount > 0)
+            IntrinsicOperationsHint(intrinsicOperationsCount),
         ],
         if (showUiJankHints && showRasterJankHints)
           const SizedBox(height: defaultSpacing),
@@ -437,30 +438,34 @@ class _ExpensiveOperationHint extends StatelessWidget {
   }
 }
 
-class IntrinsicsHint extends StatelessWidget {
-  const IntrinsicsHint(this.intrinsicsCount, {Key? key}) : super(key: key);
+class IntrinsicOperationsHint extends StatelessWidget {
+  const IntrinsicOperationsHint(
+    this.intrinsicOperationsCount, {
+    Key? key,
+  }) : super(key: key);
 
-  static const _intrinsicsDocs =
+  static const _intrinsicOperationsDocs =
       'https://docs.flutter.dev/perf/best-practices#minimize-layout-passes-caused-by-intrinsic-operations';
 
-  final int intrinsicsCount;
+  final int intrinsicOperationsCount;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return _Hint(
       message: _ExpensiveOperationHint(
-        docsUrl: _intrinsicsDocs,
+        docsUrl: _intrinsicOperationsDocs,
         gaScreenName: analytics_constants.performance,
         gaSelectedItemDescription: analytics_constants.shaderCompilationDocs,
         message: TextSpan(
           children: [
             TextSpan(
-              text: 'Intrinsics',
+              text: 'Intrinsic',
               style: theme.fixedFontStyle,
             ),
             TextSpan(
-              text: ' passes were performed $intrinsicsCount times during '
+              text:
+                  ' passes were performed $intrinsicOperationsCount times during '
                   'this frame.',
               style: theme.regularTextStyle,
             ),

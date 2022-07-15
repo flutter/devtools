@@ -1369,7 +1369,7 @@ class FrameAnalysis {
   }
 
   bool get hasExpensiveOperations =>
-      saveLayerCount + intrinsicsOperationCount > 0;
+      saveLayerCount + intrinsicOperationsCount > 0;
 
   int? _saveLayerCount;
   int get saveLayerCount {
@@ -1379,17 +1379,17 @@ class FrameAnalysis {
     return _saveLayerCount!;
   }
 
-  int? _intrinsicsOperationCount;
-  int get intrinsicsOperationCount {
-    if (_intrinsicsOperationCount == null) {
+  int? _intrinsicOperationsCount;
+  int get intrinsicOperationsCount {
+    if (_intrinsicOperationsCount == null) {
       _countExpensiveOperations();
     }
-    return _intrinsicsOperationCount!;
+    return _intrinsicOperationsCount!;
   }
 
   void _countExpensiveOperations() {
     assert(_saveLayerCount == null);
-    assert(_intrinsicsOperationCount == null);
+    assert(_intrinsicOperationsCount == null);
     int _saveLayer = 0;
     for (final paintEvent in paintPhase.events) {
       breadthFirstTraversal<TimelineEvent>(
@@ -1414,7 +1414,7 @@ class FrameAnalysis {
         },
       );
     }
-    _intrinsicsOperationCount = _intrinsics;
+    _intrinsicOperationsCount = _intrinsics;
   }
 
   // TODO(kenz): calculate ratios to use as flex values. This will be a bit

@@ -185,6 +185,18 @@ final finalizeTreeEvent = testSyncTimelineEvent(finalizeTreeTrace)
   ..time.end = const Duration(microseconds: 193938742582)
   ..type = TimelineEventType.ui;
 
+final intrinsicEvent1 = testSyncTimelineEvent(intrinsics1Trace)
+  ..time.end = const Duration(microseconds: 193938741240)
+  ..type = TimelineEventType.ui;
+
+final intrinsicEvent2 = testSyncTimelineEvent(intrinsics2Trace)
+  ..time.end = const Duration(microseconds: 193938741230)
+  ..type = TimelineEventType.ui;
+
+final canvasSaveLayerEvent = testSyncTimelineEvent(canvasSaveLayerTrace)
+  ..time.end = const Duration(microseconds: 193938741430)
+  ..type = TimelineEventType.ui;
+
 final goldenUiTimelineEvent = vsyncEvent
   ..addAllChildren([
     animatorBeginFrameEvent
@@ -204,10 +216,15 @@ final goldenUiTimelineEvent = vsyncEvent
                       ..parent = frameEvent
                       ..addAllChildren([
                         buildEvent..parent = layoutEvent,
-                        buildEvent2..parent = layoutEvent
+                        buildEvent2..parent = layoutEvent,
+                        intrinsicEvent1
+                          ..parent = layoutEvent
+                          ..addChild(intrinsicEvent2..parent = layoutEvent),
                       ]),
                     compositingBitsEvent..parent = frameEvent,
-                    paintEvent..parent = frameEvent,
+                    paintEvent
+                      ..parent = frameEvent
+                      ..addChild(canvasSaveLayerEvent..parent = paintEvent),
                     compositingEvent..parent = frameEvent,
                     semanticsEvent..parent = frameEvent,
                     finalizeTreeEvent..parent = frameEvent,
@@ -226,8 +243,11 @@ const goldenUiString = '  VSYNC [193938741076 μs - 193938742696 μs]\n'
     '            Layout [193938741150 μs - 193938741361 μs]\n'
     '              Build [193938741258 μs - 193938741291 μs]\n'
     '              Build [193938741300 μs - 193938741350 μs]\n'
+    '              RenderFlex intrinsics [193938741160 μs - 193938741240 μs]\n'
+    '                RenderConstrainedBox intrinsics [193938741200 μs - 193938741230 μs]\n'
     '            Compositing bits [193938741362 μs - 193938741364 μs]\n'
     '            Paint [193938741365 μs - 193938741439 μs]\n'
+    '              ui.Canvas::saveLayer (Recorded) [193938741425 μs - 193938741430 μs]\n'
     '            Compositing [193938741440 μs - 193938741734 μs]\n'
     '            Semantics [193938741736 μs - 193938742484 μs]\n'
     '            Finalize tree [193938742493 μs - 193938742582 μs]\n';
@@ -481,6 +501,52 @@ final endEngineBeginFrameTrace = testTraceEventWrapper({
   'ts': 193938742685,
   'ph': 'E',
   'args': {}
+});
+
+final intrinsics1Trace = testTraceEventWrapper({
+  'name': 'RenderFlex intrinsics',
+  'cat': 'Dart',
+  'tid': 42499,
+  'pid': 33036,
+  'ts': 193938741160,
+  'tts': 1760440,
+  'ph': 'B',
+  'args': {
+    'intrinsics dimension': 'maxHeight',
+    'intrinsics argument': '375.0',
+    'isolateId': 'isolates/3152451962062387',
+    'isolateGroupId': 'isolateGroups/12069909095439033329',
+  },
+});
+
+final intrinsics2Trace = testTraceEventWrapper({
+  'name': 'RenderConstrainedBox intrinsics',
+  'cat': 'Dart',
+  'tid': testUiThreadId,
+  'pid': 33036,
+  'ts': 193938741200,
+  'tts': 1763839,
+  'ph': 'B',
+  'args': {
+    'intrinsics dimension': 'maxHeight',
+    'intrinsics argument': '375.0',
+    'isolateId': 'isolates/3152451962062387',
+    'isolateGroupId': 'isolateGroups/12069909095439033329',
+  },
+});
+
+final canvasSaveLayerTrace = testTraceEventWrapper({
+  'name': 'ui.Canvas::saveLayer (Recorded)',
+  'cat': 'Embedder',
+  'tid': 42499,
+  'pid': 33036,
+  'ts': 193938741425,
+  'tts': 1845001,
+  'ph': 'B',
+  'args': {
+    'isolateId': 'isolates/3152451962062387',
+    'isolateGroupId': 'isolateGroups/12069909095439033329',
+  },
 });
 
 // Mark: Raster golden data. This data is abbreviated in comparison to the UI
