@@ -19,7 +19,7 @@ import '../../shared/theme.dart';
 import '../../shared/utils.dart';
 import '../../ui/search.dart';
 import 'diagnostics_node.dart';
-import 'inspector_service.dart';
+import 'primitives/inspector_common.dart';
 
 /// Split text into two groups, word characters at the start of a string and all
 /// other characters.
