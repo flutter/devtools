@@ -26,6 +26,8 @@ class _DiffPaneController with ChangeNotifier {
     index.addListener(() => notifyListeners());
   }
 
+  final scrollController = ScrollController();
+
   final snapshots = <SnapshotListItem>[SnapshotInformation()];
 
   final index = ValueNotifier<int>(0);
@@ -42,23 +44,9 @@ class _DiffPaneController with ChangeNotifier {
     notifyListeners();
     await future;
     final newElementIndex = snapshots.length - 1;
-    tryMakeVisible(newElementIndex);
+    scrollController.autoScrollToBottom();
     index.value = newElementIndex;
     isProcessing.value = false;
-  }
-
-  /// Tries to make the list item visible.
-  ///
-  /// If the context cannot be found, will fail for debug mode and succeed
-  /// for release mode.
-  void tryMakeVisible(int index) {
-    final context =
-        GlobalObjectKey(snapshots[snapshots.length - 1]).currentContext;
-    if (context == null) {
-      assert(false);
-      return;
-    }
-    Scrollable.ensureVisible(context);
   }
 
   Future<void> clearSnapshots() async {
@@ -121,6 +109,7 @@ class _SnapshotList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
+      controller: controller.scrollController,
       shrinkWrap: true,
       itemCount: controller.snapshots.length,
       itemBuilder: (context, index) {
