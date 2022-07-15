@@ -106,6 +106,8 @@ enum ExportFileType {
         return 'csv';
       case yaml:
         return 'yaml';
+      default:
+        throw UnimplementedError('Unable to convert $this to a string');
     }
   }
 }
