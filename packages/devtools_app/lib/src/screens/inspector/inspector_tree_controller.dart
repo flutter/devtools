@@ -889,7 +889,9 @@ class _InspectorTreeState extends State<InspectorTree>
       _scrollControllerY = ScrollController(initialScrollOffset: targetY);
     }
 
-    final targetX = rect.left;
+    // Determine a target X coordinate consistent with the target Y coordinate
+    // we will end up as so we get a smooth animation to the final destination.
+    final targetX = _computeTargetX(targetY);
     if (_scrollControllerX.hasClients) {
       unawaited(
         _scrollControllerX.animateTo(
