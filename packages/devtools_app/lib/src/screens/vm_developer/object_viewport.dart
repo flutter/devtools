@@ -63,7 +63,7 @@ String viewportTitle(VmObject? object) {
     return 'Script @ ${ref?.uri ?? '<uri>'}';
   }
 
-  return '${object.ref.type} ${object.name ?? '<name>'}';
+  return '${object.obj.type} ${object.name ?? '<name>'}';
 }
 
 /// Calls the object VM statistics card builder according to the VM Object type.

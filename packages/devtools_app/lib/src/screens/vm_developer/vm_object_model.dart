@@ -13,11 +13,11 @@ import '../debugger/program_explorer_model.dart';
 /// Wrapper class for storing Dart VM objects with their relevant VM
 /// information.
 abstract class VmObject {
-  VmObject({required this.ref, this.scriptNode, this.outlineNode});
+  VmObject({required this.ref, this.scriptRef, this.outlineNode});
 
   final ObjRef ref;
 
-  final ScriptRef? scriptNode;
+  final ScriptRef? scriptRef;
 
   final VMServiceObjectNode? outlineNode;
 
@@ -25,6 +25,7 @@ abstract class VmObject {
 
   IsolateRef? _isolate;
 
+  dynamic obj;
   late Obj _obj;
 
   String? get name;
@@ -50,7 +51,7 @@ abstract class VmObject {
     if (_sourceLocation != null) {
       _sourceScript = await _service.getObject(
         _isolate!.id!,
-        _sourceLocation!.script!.id!,
+        scriptRef?.id ?? _sourceLocation!.script!.id!,
       ) as Script;
 
       final token = _sourceLocation!.tokenPos!;
@@ -65,8 +66,9 @@ abstract class VmObject {
 
 //TODO(mtaylee): finish class implementation.
 class ClassObject extends VmObject {
-  ClassObject({required super.ref, super.scriptNode, super.outlineNode});
+  ClassObject({required super.ref, super.scriptRef, super.outlineNode});
 
+  @override
   Class get obj => _obj as Class;
 
   @override
@@ -88,13 +90,14 @@ class ClassObject extends VmObject {
 
   ValueListenable<bool> get fetchingRetainingPath => _fetchingRetainingPath;
   final ValueNotifier<bool> _fetchingRetainingPath = ValueNotifier(false);
-  RetainingPath? get retainingPath => _retainingPath;
-  RetainingPath? _retainingPath;
+  ValueListenable<RetainingPath?> get retainingPath => _retainingPath;
+  final _retainingPath = ValueNotifier<RetainingPath?>(null);
 
   ValueListenable<bool> get fetchingInboundRefs => _fetchingInboundRefs;
   final ValueNotifier<bool> _fetchingInboundRefs = ValueNotifier(false);
-  InboundReferences? get inboundReferences => _inboundReferences;
-  InboundReferences? _inboundReferences;
+  ValueListenable<InboundReferences?> get inboundReferences =>
+      _inboundReferences;
+  final _inboundReferences = ValueNotifier<InboundReferences?>(null);
 
   @override
   Future<void> initialize() async {
@@ -116,35 +119,24 @@ class ClassObject extends VmObject {
 
   Future<void> requestRetainingPath() async {
     _fetchingRetainingPath.value = true;
-    _retainingPath =
+    _retainingPath.value =
         await _service.getRetainingPath(_isolate!.id!, ref.id!, 100);
     _fetchingRetainingPath.value = false;
   }
 
   Future<void> requestInboundsRefs() async {
     _fetchingInboundRefs.value = true;
-    _inboundReferences =
+    _inboundReferences.value =
         await _service.getInboundReferences(_isolate!.id!, ref.id!, 100);
     _fetchingInboundRefs.value = false;
   }
 }
 
-// void x() async {
-//     _retainingPath =
-//         await _service.getRetainingPath(_isolate!.id!, ref.id!, 100);
-
-//     _inboundReferences =
-//         await _service.getInboundReferences(_isolate!.id!, ref.id!, 100);
-
-//     void requestInboundReferences() {
-//       _sidePanelVisible.value = !_sidePanelVisible.value;
-//     }
-//   }
-
 //TODO(mtaylee): finish class implementation.
 class FuncObject extends VmObject {
-  FuncObject({required super.ref, super.scriptNode, super.outlineNode});
+  FuncObject({required super.ref, super.scriptRef, super.outlineNode});
 
+  @override
   Func get obj => _obj as Func;
 
   @override
@@ -156,8 +148,9 @@ class FuncObject extends VmObject {
 
 //TODO(mtaylee): finish class implementation.
 class FieldObject extends VmObject {
-  FieldObject({required super.ref, super.scriptNode, super.outlineNode});
+  FieldObject({required super.ref, super.scriptRef, super.outlineNode});
 
+  @override
   Field get obj => _obj as Field;
 
   @override
@@ -169,8 +162,9 @@ class FieldObject extends VmObject {
 
 //TODO(mtaylee): finish class implementation.
 class LibraryObject extends VmObject {
-  LibraryObject({required super.ref, super.scriptNode, super.outlineNode});
+  LibraryObject({required super.ref, super.scriptRef, super.outlineNode});
 
+  @override
   Library get obj => _obj as Library;
 
   @override
@@ -182,8 +176,9 @@ class LibraryObject extends VmObject {
 
 //TODO(mtaylee): finish class implementation.
 class ScriptObject extends VmObject {
-  ScriptObject({required super.ref, super.scriptNode, super.outlineNode});
+  ScriptObject({required super.ref, super.scriptRef, super.outlineNode});
 
+  @override
   Script get obj => _obj as Script;
 
   @override
@@ -195,8 +190,9 @@ class ScriptObject extends VmObject {
 
 //TODO(mtaylee): finish class implementation.
 class InstanceObject extends VmObject {
-  InstanceObject({required super.ref, super.scriptNode, super.outlineNode});
+  InstanceObject({required super.ref, super.scriptRef, super.outlineNode});
 
+  @override
   Instance get obj => _obj as Instance;
 
   @override

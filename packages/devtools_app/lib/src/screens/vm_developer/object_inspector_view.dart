@@ -43,7 +43,7 @@ class _ObjectInspectorViewState extends State<_ObjectInspectorView> {
   @override
   void initState() {
     super.initState();
-    controller = ObjectInspectorViewController()..restartController();
+    controller = ObjectInspectorViewController();
     return;
   }
 

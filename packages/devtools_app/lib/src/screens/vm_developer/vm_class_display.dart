@@ -7,14 +7,18 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../../devtools_app.dart';
 import '../../primitives/utils.dart';
+import '../../shared/table.dart';
 import 'vm_developer_common_widgets.dart';
 import 'vm_object_model.dart';
+
+const displayClassInstances = false;
 
 /// A widget for the object inspector historyViewport displaying information
 /// related to class objects in the Dart VM.
 class VmClassDisplay extends StatelessWidget {
-  VmClassDisplay({
+  const VmClassDisplay({
     required this.clazz,
   });
 
@@ -27,43 +31,21 @@ class VmClassDisplay extends StatelessWidget {
         Expanded(
           child: Column(
             children: [
-              Flexible(
-                child: ClassInfoWidget(
-                  clazz: clazz,
-                ),
+              ClassInfoWidget(
+                clazz: clazz,
               ),
               Flexible(
                 child: ListView(
                   children: [
-                    ValueListenableBuilder<bool>(
-                      valueListenable: clazz.fetchingRetainingPath,
-                      builder: (context, fetching, child) {
-                        return VmExpansionTile(
-                          title: 'Retaining Path',
-                          onExpanded: _onExpandRetainingPath,
-                          children: clazz.retainingPath == null
-                              ? <Widget>[]
-                              : retainingPathList(
-                                  context,
-                                  clazz.retainingPath!,
-                                ),
-                        );
-                      },
+                    RetainingPathWidget(
+                      fetching: clazz.fetchingRetainingPath,
+                      retainingPath: clazz.retainingPath,
+                      onExpanded: _onExpandRetainingPath,
                     ),
-                    ValueListenableBuilder<bool>(
-                      valueListenable: clazz.fetchingInboundRefs,
-                      builder: (context, fetching, child) {
-                        return VmExpansionTile(
-                          title: 'InboundReferences',
-                          onExpanded: _onExpandInboundRefs,
-                          children: clazz.inboundReferences == null
-                              ? <Widget>[]
-                              : inboundReferencesList(
-                                  context,
-                                  clazz.inboundReferences!,
-                                ),
-                        );
-                      },
+                    InboundReferencesWidget(
+                      fetching: clazz.fetchingInboundRefs,
+                      inboundReferences: clazz.inboundReferences,
+                      onExpanded: _onExpandInboundRefs,
                     )
                   ],
                 ),
@@ -71,79 +53,95 @@ class VmClassDisplay extends StatelessWidget {
             ],
           ),
         ),
-        Flexible(
-          child: ClassInstancesWidget(
-            instances: clazz.instances,
-          ),
-        )
+        if (displayClassInstances)
+          Flexible(
+            child: ClassInstancesWidget(
+              instances: clazz.instances,
+            ),
+          )
       ],
     );
   }
 
   void _onExpandRetainingPath(bool expanded) {
-    if (clazz.retainingPath == null) clazz.requestRetainingPath();
+    if (clazz.retainingPath.value == null) clazz.requestRetainingPath();
   }
 
   void _onExpandInboundRefs(bool expanded) {
-    if (clazz.inboundReferences == null) clazz.requestInboundsRefs();
+    if (clazz.inboundReferences.value == null) clazz.requestInboundsRefs();
   }
 }
 
 /// Displays general VM information of the Class Object.
-class ClassInfoWidget extends StatelessWidget {
+class ClassInfoWidget extends StatelessWidget implements PreferredSizeWidget {
   const ClassInfoWidget({
     required this.clazz,
   });
 
   final ClassObject clazz;
 
+  // TODO: change this value if adding/removing rows.
+  static const numberOfRows = 9;
+
   @override
   Widget build(BuildContext context) {
-    return VMInfoCard(
-      title: 'General Information',
-      rowKeyValues: [
-        MapEntry('Object Class', clazz.obj.type),
-        MapEntry(
-          'Shallow Size',
-          prettyPrintBytes(
-            clazz.obj.size ?? 0,
-            includeUnit: true,
-            kbFractionDigits: 1,
-            maxBytes: 512,
+    return SizedBox.fromSize(
+      size: preferredSize,
+      child: VMInfoCard(
+        title: 'General Information',
+        rowKeyValues: [
+          MapEntry('Object Class', clazz.obj.type),
+          MapEntry(
+            'Shallow Size',
+            prettyPrintBytes(
+              clazz.obj.size ?? 0,
+              includeUnit: true,
+              kbFractionDigits: 1,
+              maxBytes: 512,
+            ),
           ),
-        ),
-        MapEntry(
-          'Reachable Size',
-          ValueListenableBuilder<bool>(
-            valueListenable: clazz.fetchingReachableSize,
-            builder: (context, fetching, child) => _reachableSize(fetching),
+          MapEntry(
+            'Reachable Size',
+            ValueListenableBuilder<bool>(
+              valueListenable: clazz.fetchingReachableSize,
+              builder: (context, fetching, child) => fetching
+                  ? const CircularProgressIndicator()
+                  : RequestableSizeWidget(
+                      reachableSize: clazz.reachableSize,
+                      requestFunction: clazz.requestReachableSize,
+                    ),
+            ),
           ),
-        ),
-        MapEntry(
-          'Retained Size',
-          ValueListenableBuilder<bool>(
-            valueListenable: clazz.fetchingRetainedSize,
-            builder: (context, fetching, child) => _retainedSize(fetching),
+          MapEntry(
+            'Retained Size',
+            ValueListenableBuilder<bool>(
+              valueListenable: clazz.fetchingRetainedSize,
+              builder: (context, fetching, child) => fetching
+                  ? const CircularProgressIndicator()
+                  : RequestableSizeWidget(
+                      reachableSize: clazz.retainedSize,
+                      requestFunction: clazz.requestRetainedSize,
+                    ),
+            ),
           ),
-        ),
-        // MapEntry(
-        //   'Retaining path',
-        //   RequestDataButton(onPressed: _retainingPath),
-        // ),
-        // MapEntry('Inbound references', clazz.inboundReferences.toString()),
-        MapEntry(
-          'Library',
-          clazz.obj.library?.name?.isEmpty ?? false
-              ? clazz.script?.uri
-              : clazz.obj.library?.name,
-        ),
-        MapEntry(
-          'Script',
-          '${_fileName(clazz.script?.uri) ?? ''}:${clazz.pos?.toString() ?? ''}',
-        ),
-        MapEntry('Superclass', clazz.obj.superClass?.name),
-        MapEntry('SuperType', clazz.obj.superType?.name),
-      ],
+          MapEntry(
+            'Library',
+            clazz.obj.library?.name?.isEmpty ?? false
+                ? clazz.script?.uri
+                : clazz.obj.library?.name,
+          ),
+          MapEntry(
+            'Script',
+            '${_fileName(clazz.script?.uri) ?? ''}:${clazz.pos?.toString() ?? ''}',
+          ),
+          MapEntry('Superclass', clazz.obj.superClass?.name),
+          MapEntry('SuperType', clazz.obj.superType?.name),
+          MapEntry(
+            'Currently allocated instances',
+            clazz.instances?.totalCount,
+          ),
+        ],
+      ),
     );
   }
 
@@ -153,51 +151,14 @@ class ClassInfoWidget extends StatelessWidget {
     return splitted[splitted.length - 1];
   }
 
-  Widget _reachableSize(bool fetchingReachableSize) {
-    if (fetchingReachableSize) return const CircularProgressIndicator();
-    if (clazz.reachableSize == null)
-      return RequestDataButton(onPressed: clazz.requestReachableSize);
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        Text(
-          clazz.reachableSize!.valueAsString == null
-              ? '--'
-              : prettyPrintBytes(
-                  int.parse(clazz.reachableSize!.valueAsString!),
-                  includeUnit: true,
-                  kbFractionDigits: 1,
-                  maxBytes: 512,
-                )!,
-        ),
-        ToolbarRefresh(onPressed: clazz.requestReachableSize),
-      ],
-    );
-  }
-
-  Widget _retainedSize(bool fetchingRetainedSize) {
-    if (fetchingRetainedSize) return const CircularProgressIndicator();
-    if (clazz.retainedSize == null)
-      return RequestDataButton(onPressed: clazz.requestRetainedSize);
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        Text(
-          clazz.retainedSize!.valueAsString == null
-              ? '--'
-              : prettyPrintBytes(
-                  int.parse(clazz.retainedSize!.valueAsString!),
-                  includeUnit: true,
-                  kbFractionDigits: 1,
-                  maxBytes: 512,
-                )!,
-        ),
-        ToolbarRefresh(onPressed: clazz.requestRetainedSize),
-      ],
-    );
-  }
+  @override
+  Size get preferredSize => Size.fromHeight(
+        areaPaneHeaderHeight + numberOfRows * defaultRowHeight + defaultSpacing,
+      );
 }
 
+// TODO(mtaylee): Finish implementation of widget to display
+// all class instances. When done, remove the last row of the ClassInfoWidget.
 /// Displays information on the instances of the Class object.
 class ClassInstancesWidget extends StatelessWidget {
   const ClassInstancesWidget({

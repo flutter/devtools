@@ -36,3 +36,9 @@ extension IsolatePrivateViewExtension on Isolate {
 extension ClassPrivateViewExtension on Class {
   String get vmName => json!['_vmName'];
 }
+
+extension InboundReferenceExtension on InboundReferences {
+  int? parentWordOffset(int referenceIndex) {
+    return json!['references'][referenceIndex]['_parentWordOffset'];
+  }
+}

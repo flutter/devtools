@@ -150,11 +150,6 @@ class ProgramExplorerController extends DisposableController
     return initialize();
   }
 
-  void restart() {
-    refresh();
-    _isLoadingOutline.value = false;
-  }
-
   /// Marks [node] as the currently selected node, clearing the selection state
   /// of any currently selected node.
   Future<void> selectNode(VMServiceObjectNode node) async {
@@ -182,12 +177,9 @@ class ProgramExplorerController extends DisposableController
     }
     if (_outlineSelection.value != node) {
       node.select();
-      node.expand();
       _outlineSelection.value?.unselect();
       _outlineSelection.value = node;
     }
-
-    _outlineNodes.notifyListeners();
   }
 
   void resetOutline() {
@@ -198,6 +190,11 @@ class ProgramExplorerController extends DisposableController
       node.unselect();
     }
 
+    _outlineNodes.notifyListeners();
+  }
+
+  void expandToNode(VMServiceObjectNode node) {
+    node.expandAscending();
     _outlineNodes.notifyListeners();
   }
 

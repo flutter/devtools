@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/primitives/utils.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -11,6 +12,7 @@ import '../../shared/table.dart';
 import '../../shared/table_data.dart';
 import '../../shared/theme.dart';
 import '../debugger/variables.dart';
+import 'vm_service_private_extensions.dart';
 
 /// A convenience widget used to create non-scrollable information cards.
 ///
@@ -143,33 +145,38 @@ class RequestDataButton extends IconLabelButton {
   });
 }
 
-List<Widget> retainingPathList(
-  BuildContext context,
-  RetainingPath retainingPath,
-) {
-  final retainingObjects = [
-    for (RetainingObject object in retainingPath.elements!)
-      Row(
+class RequestableSizeWidget extends StatelessWidget {
+  const RequestableSizeWidget({
+    required this.reachableSize,
+    required this.requestFunction,
+  });
+
+  final InstanceRef? reachableSize;
+  final void Function()? requestFunction;
+
+  @override
+  Widget build(BuildContext context) {
+    if (reachableSize == null) {
+      return RequestDataButton(onPressed: requestFunction);
+    } else {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          SelectableText(
-            _retainingObjectDescription(object),
-            style: Theme.of(context).fixedFontStyle,
+          Text(
+            reachableSize!.valueAsString == null
+                ? '--'
+                : prettyPrintBytes(
+                    int.parse(reachableSize!.valueAsString!),
+                    includeUnit: true,
+                    kbFractionDigits: 1,
+                    maxBytes: 512,
+                  )!,
           ),
+          ToolbarRefresh(onPressed: requestFunction),
         ],
-      ),
-    Row(
-      children: [
-        SelectableText(
-          'Retained by a GC root of type ${retainingPath.gcRootType ?? '<unknown>'}',
-          style: Theme.of(context).fixedFontStyle,
-        ),
-      ],
-    )
-  ];
-
-  final retainingObjectsRows = _prettyRows(context, retainingObjects);
-
-  return <Widget>[...retainingObjectsRows];
+      );
+    }
+  }
 }
 
 String? _objectName(ObjRef? objectRef) {
@@ -182,85 +189,6 @@ String? _objectName(ObjRef? objectRef) {
   if (objectRef is LibraryRef) objectRefName = objectRef.name;
 
   return objectRefName;
-}
-
-String _retainingObjectDescription(RetainingObject object) {
-  if (object.parentListIndex != null) {
-    final ref = object.value as InstanceRef;
-    return 'Retained by element [${object.parentListIndex}] of ${ref.classRef?.name ?? '<parentListName>'}';
-  }
-
-  if (object.parentMapKey != null) {
-    final ref = object.value as InstanceRef;
-    return 'Retained by element [${object.parentMapKey}] of ${ref.classRef?.name ?? '<parentMapName>'}';
-  }
-
-  String description = 'Retained by';
-
-  if (object.parentField != null) {
-    description += ' ${object.parentField} of ';
-  }
-
-  if (object.value is FieldRef) {
-    final ref = object.value as FieldRef;
-    description +=
-        ' ${ref.declaredType?.name ?? 'Field'} ${ref.name} of ${_ownerName(ref.owner) ?? '<Owner>'}';
-  } else if (object.value is FuncRef) {
-    final ref = object.value as FuncRef;
-    description += ' ${_ownerName(ref.owner) ?? '<Owner>'}.${ref.name}';
-  } else {
-    description += ' ${_objectName(object.value)}';
-  }
-
-  return description;
-}
-
-List<Widget> inboundReferencesList(
-  BuildContext context,
-  InboundReferences inboundRefs,
-) {
-  final references = [
-    for (InboundReference inboundRef in inboundRefs.references!)
-      Row(
-        children: [
-          Flexible(
-            child: SelectableText(
-              _inboundRefDescription(inboundRef),
-              style: Theme.of(context).fixedFontStyle,
-            ),
-          )
-        ],
-      ),
-  ];
-
-  final inboundReferenceRows = _prettyRows(context, references);
-
-  return <Widget>[...inboundReferenceRows];
-}
-
-String _inboundRefDescription(InboundReference inboundRef) {
-  if (inboundRef.parentListIndex != null) {
-    final ref = inboundRef.source as InstanceRef;
-    return 'Referenced by element [${inboundRef.parentListIndex}] of ${ref.classRef?.name ?? '<parentListName>'}';
-  }
-  String description = 'Referenced by';
-
-  if (inboundRef.parentField != null) {
-    description += ' ${inboundRef.parentField} of';
-  }
-
-  if (inboundRef.source is FieldRef) {
-    final ref = inboundRef.source as FieldRef;
-    description +=
-        ' ${ref.declaredType?.name ?? 'Field'} ${ref.name} of ${_ownerName(ref.owner) ?? '<Owner>'}';
-  } else if (inboundRef.source is FuncRef) {
-    final ref = inboundRef.source as FuncRef;
-    description += ' ${_ownerName(ref.owner) ?? '<Owner>'}.${ref.name}';
-  } else {
-    description += ' ${_objectName(inboundRef.source!)}';
-  }
-
-  return description;
 }
 
 String? _ownerName(ObjRef? ref) {
@@ -299,6 +227,220 @@ class VmExpansionTile extends StatelessWidget {
         tilePadding: const EdgeInsets.all(4.0),
         children: children,
       ),
+    );
+  }
+}
+
+List<Widget> retainingPathList(
+  BuildContext context,
+  RetainingPath retainingPath,
+) {
+  final emptyList = SelectableText(
+    'No retaining objects',
+    style: Theme.of(context).fixedFontStyle,
+  );
+  if (retainingPath.elements == null) return [emptyList];
+
+  final firstRetainingObject = retainingPath.elements!.isNotEmpty
+      ? SelectableText(
+          _objectName(retainingPath.elements!.first.value) ??
+              '<RetainingObject>',
+          style: Theme.of(context).fixedFontStyle,
+        )
+      : emptyList;
+
+  final retainingObjects = [
+    Row(children: [firstRetainingObject]),
+    if (retainingPath.elements!.length > 1)
+      for (RetainingObject object in retainingPath.elements!.sublist(1))
+        Row(
+          children: [
+            SelectableText(
+              _retainingObjectDescription(object),
+              style: Theme.of(context).fixedFontStyle,
+            ),
+          ],
+        ),
+    Row(
+      children: [
+        SelectableText(
+          'Retained by a GC root of type ${retainingPath.gcRootType ?? '<unknown>'}',
+          style: Theme.of(context).fixedFontStyle,
+        ),
+      ],
+    )
+  ];
+
+  final retainingObjectsRows = _prettyRows(context, retainingObjects);
+
+  return <Widget>[...retainingObjectsRows];
+}
+
+String _retainingObjectDescription(RetainingObject object) {
+  if (object.parentListIndex != null) {
+    final ref = object.value as InstanceRef;
+    return 'Retained by element [${object.parentListIndex}] of ${ref.classRef?.name ?? '<parentListName>'}';
+  }
+
+  if (object.parentMapKey != null) {
+    final ref = object.value as InstanceRef;
+    return 'Retained by element [${object.parentMapKey}] of ${ref.classRef?.name ?? '<parentMapName>'}';
+  }
+
+  String description = 'Retained by';
+
+  if (object.parentField != null) {
+    description += ' ${object.parentField} of ';
+  }
+
+  if (object.value is FieldRef) {
+    final ref = object.value as FieldRef;
+    description +=
+        ' ${ref.declaredType?.name ?? 'Field'} ${ref.name} of ${_ownerName(ref.owner) ?? '<Owner>'}';
+  } else if (object.value is FuncRef) {
+    final ref = object.value as FuncRef;
+    description += ' ${_ownerName(ref.owner) ?? '<Owner>'}.${ref.name}';
+  } else {
+    description += ' ${_objectName(object.value)}';
+  }
+
+  return description;
+}
+
+class RetainingPathWidget extends StatelessWidget {
+  const RetainingPathWidget({
+    required this.fetching,
+    required this.retainingPath,
+    this.onExpanded,
+  });
+
+  final ValueListenable<bool> fetching;
+  final ValueListenable<RetainingPath?> retainingPath;
+  final void Function(bool)? onExpanded;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: fetching,
+      builder: (context, fetching, child) {
+        return VmExpansionTile(
+          title: 'Retaining Path',
+          onExpanded: onExpanded,
+          children: retainingPath.value == null
+              ? [
+                  SizedBox.fromSize(
+                    size: const Size.fromHeight(
+                      2 * (defaultIconSizeBeforeScaling + denseSpacing),
+                    ),
+                    child: const CenteredCircularProgressIndicator(),
+                  )
+                ]
+              : retainingPathList(
+                  context,
+                  retainingPath.value!,
+                ),
+        );
+      },
+    );
+  }
+}
+
+List<Widget> inboundReferencesList(
+  BuildContext context,
+  InboundReferences inboundRefs,
+) {
+  int count = -1;
+
+  final references = <Row>[];
+
+  for (InboundReference inboundRef in inboundRefs.references!) {
+    count++;
+
+    final int? parentWordOffset =
+        inboundRefs.json!['references'][count]['_parentWordOffset'];
+
+    references.add(
+      Row(
+        children: [
+          Flexible(
+            child: SelectableText(
+              _inboundRefDescription(inboundRef, parentWordOffset),
+              style: Theme.of(context).fixedFontStyle,
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  final inboundReferenceRows = _prettyRows(context, references);
+
+  return <Widget>[...inboundReferenceRows];
+}
+
+String _inboundRefDescription(InboundReference inboundRef, int? offset) {
+  if (inboundRef.parentListIndex != null) {
+    final ref = inboundRef.source as InstanceRef;
+    return 'Referenced by element [${inboundRef.parentListIndex}] of ${ref.classRef?.name ?? '<parentListName>'}';
+  }
+  String description = 'Referenced by';
+
+  if (offset != null) {
+    description += ' offset $offset of';
+  }
+
+  if (inboundRef.parentField != null) {
+    description += ' ${inboundRef.parentField} of';
+  }
+
+  if (inboundRef.source is FieldRef) {
+    final ref = inboundRef.source as FieldRef;
+    description +=
+        ' ${ref.declaredType?.name ?? 'Field'} ${ref.name} of ${_ownerName(ref.owner) ?? '<Owner>'}';
+  } else if (inboundRef.source is FuncRef) {
+    final ref = inboundRef.source as FuncRef;
+    description += ' ${_ownerName(ref.owner) ?? '<Owner>'}.${ref.name}';
+  } else {
+    description += ' ${_objectName(inboundRef.source!)}';
+  }
+
+  return description;
+}
+
+class InboundReferencesWidget extends StatelessWidget {
+  const InboundReferencesWidget({
+    required this.fetching,
+    required this.inboundReferences,
+    this.onExpanded,
+  });
+
+  final ValueListenable<bool> fetching;
+  final ValueListenable<InboundReferences?> inboundReferences;
+  final void Function(bool)? onExpanded;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: fetching,
+      builder: (context, fetching, child) {
+        return VmExpansionTile(
+          title: 'Inbound References',
+          onExpanded: onExpanded,
+          children: inboundReferences.value == null
+              ? [
+                  SizedBox.fromSize(
+                    size: const Size.fromHeight(
+                      2 * (defaultIconSizeBeforeScaling + denseSpacing),
+                    ),
+                    child: const CenteredCircularProgressIndicator(),
+                  )
+                ]
+              : inboundReferencesList(
+                  context,
+                  inboundReferences.value!,
+                ),
+        );
+      },
     );
   }
 }
