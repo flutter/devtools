@@ -129,7 +129,7 @@ abstract class ExportController {
     return '${prefix}_$timestamp$postfix.$type';
   }
 
-  /// Downloads a JSON file with [contents] and returns the name of the
+  /// Downloads a file with [contents] and returns the name of the
   /// downloaded file.
   String downloadFile(
     String contents, {

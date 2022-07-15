@@ -35,7 +35,9 @@ import 'memory_instance_tree_view.dart';
 import 'memory_snapshot_models.dart';
 import 'panes/leaks/leaks_pane.dart';
 
-const enableNewAllocationProfileTable = true;
+// TODO(bkonyi): enable new allocation profile table when we're ready to remove
+// the existing allocations table.
+const enableNewAllocationProfileTable = false;
 
 const memorySearchFieldKeyName = 'MemorySearchFieldKey';
 
