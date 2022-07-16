@@ -41,7 +41,7 @@ class _DiffPaneController with ChangeNotifier {
   Future<void> takeSnapshot() async {
     isProcessing.value = true;
     final future = snapshotMemory();
-    snapshots.add(Snapshot(_generateName(), future));
+    snapshots.add(Snapshot(_generateSnapshotName(), future));
 
     notifyListeners();
     await future;
@@ -57,7 +57,7 @@ class _DiffPaneController with ChangeNotifier {
     notifyListeners();
   }
 
-  String _generateName() {
+  String _generateSnapshotName() {
     final names = Set.from(snapshots.map((e) => e.name));
     var index = 1;
     while (true) {
@@ -65,6 +65,14 @@ class _DiffPaneController with ChangeNotifier {
       if (!names.contains(result)) return result;
       index++;
     }
+  }
+
+  @override
+  void dispose() {
+    for (var e in snapshots) {
+      e.dispose();
+    }
+    super.dispose();
   }
 }
 
@@ -86,7 +94,7 @@ class _DiffPaneState extends State<DiffPane> {
       children: [
         Column(
           children: [
-            _ControlPane(controller: controller),
+            _ListControlPane(controller: controller),
             Expanded(
               child: _SnapshotList(controller: controller),
             ),
@@ -139,17 +147,18 @@ class _SnapshotListTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final itemLocal = item;
-
-    return Row(
-      children: [
-        _SelectionBox(selected: selected),
-        const SizedBox(width: denseRowSpacing),
-        if (item.isProcessing) const _ProgressIndicator(),
-        if (item.isProcessing) const SizedBox(width: denseRowSpacing),
-        Expanded(child: Text(itemLocal.name, overflow: TextOverflow.ellipsis)),
-      ],
-    );
+    return AnimatedBuilder(
+        animation: item,
+        builder: (context, child) => Row(
+              children: [
+                _SelectionBox(selected: selected),
+                const SizedBox(width: denseRowSpacing),
+                if (item.isProcessing) const _ProgressIndicator(),
+                if (item.isProcessing) const SizedBox(width: denseRowSpacing),
+                Expanded(
+                    child: Text(item.name, overflow: TextOverflow.ellipsis)),
+              ],
+            ));
   }
 }
 
@@ -206,8 +215,37 @@ class _SnapshotListContent extends StatelessWidget {
   }
 }
 
-class _ControlPane extends StatelessWidget {
-  const _ControlPane({Key? key, required this.controller}) : super(key: key);
+class _ListControlPane extends StatelessWidget {
+  const _ListControlPane({Key? key, required this.controller})
+      : super(key: key);
+
+  final _DiffPaneController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: controller.isProcessing,
+      builder: (_, isProcessing, __) => Row(
+        children: [
+          ToolbarAction(
+            icon: Icons.fiber_manual_record,
+            tooltip: 'Take heap snapshot',
+            onPressed: isProcessing ? null : controller.takeSnapshot,
+          ),
+          ToolbarAction(
+            icon: Icons.block,
+            tooltip: 'Clear all snapshots',
+            onPressed: isProcessing ? null : controller.clearSnapshots,
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class _SnapshotControlPane extends StatelessWidget {
+  const _SnapshotControlPane({Key? key, required this.controller})
+      : super(key: key);
 
   final _DiffPaneController controller;
 

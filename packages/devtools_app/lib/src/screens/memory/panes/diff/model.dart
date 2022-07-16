@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/widgets.dart';
 import 'package:vm_service/vm_service.dart';
 
-abstract class SnapshotListItem {
+abstract class SnapshotListItem with ChangeNotifier {
   SnapshotListItem(this.name);
 
   final String name;
@@ -18,7 +19,10 @@ class SnapshotInformation extends SnapshotListItem {
 class Snapshot extends SnapshotListItem {
   Snapshot(super.name, this.graph) {
     isProcessing = true;
-    graph.whenComplete(() => isProcessing = false);
+    graph.whenComplete(() {
+      isProcessing = false;
+      notifyListeners();
+    });
   }
 
   Future<HeapSnapshotGraph?> graph;
