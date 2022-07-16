@@ -5,18 +5,18 @@
 import 'package:flutter/widgets.dart';
 import 'package:vm_service/vm_service.dart';
 
-abstract class SnapshotListItem with ChangeNotifier {
-  SnapshotListItem(this.name);
+abstract class DiffListItem with ChangeNotifier {
+  DiffListItem(this.name);
 
   final String name;
   bool isProcessing = false;
 }
 
-class SnapshotInformation extends SnapshotListItem {
+class SnapshotInformation extends DiffListItem {
   SnapshotInformation() : super('Snapshots');
 }
 
-class Snapshot extends SnapshotListItem {
+class Snapshot extends DiffListItem {
   Snapshot(super.name, this.graph) {
     isProcessing = true;
     graph.whenComplete(() {

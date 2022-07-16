@@ -30,13 +30,13 @@ class _DiffPaneController with ChangeNotifier {
 
   final scrollController = ScrollController();
 
-  final snapshots = <SnapshotListItem>[SnapshotInformation()];
+  final snapshots = <DiffListItem>[SnapshotInformation()];
 
   final index = ValueNotifier<int>(0);
 
   final isProcessing = ValueNotifier<bool>(false);
 
-  SnapshotListItem get selected => snapshots[index.value];
+  DiffListItem get selected => snapshots[index.value];
 
   Future<void> takeSnapshot() async {
     isProcessing.value = true;
@@ -59,12 +59,19 @@ class _DiffPaneController with ChangeNotifier {
 
   String _generateSnapshotName() {
     final names = Set.from(snapshots.map((e) => e.name));
-    var index = 1;
+    var number = 1;
     while (true) {
-      final result = 'Snapshot $index';
+      final result = 'Snapshot $number';
       if (!names.contains(result)) return result;
-      index++;
+      number++;
     }
+  }
+
+  void deleteCurrentSnapshot() {
+    assert(index.value > 0);
+    assert(selected is Snapshot);
+    snapshots.removeRange(index.value, index.value + 1);
+    index.value = index.value - 1;
   }
 
   @override
@@ -80,28 +87,33 @@ class _DiffPaneState extends State<DiffPane> {
   final controller = _DiffPaneController();
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    controller.addListener(() => setState(() {}));
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Split(
-      axis: Axis.horizontal,
-      initialFractions: const [0.2, 0.8],
-      minSizes: const [80, 80],
-      children: [
-        Column(
-          children: [
-            _ListControlPane(controller: controller),
-            Expanded(
-              child: _SnapshotList(controller: controller),
-            ),
-          ],
-        ),
-        _SnapshotListContent(item: controller.selected),
-      ],
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (_, __) => Split(
+        axis: Axis.horizontal,
+        initialFractions: const [0.2, 0.8],
+        minSizes: const [80, 80],
+        children: [
+          Column(
+            children: [
+              _ListControlPane(controller: controller),
+              Expanded(
+                child: _SnapshotList(controller: controller),
+              ),
+            ],
+          ),
+          Column(
+            children: [
+              if (controller.selected is Snapshot)
+                _SnapshotControlPane(controller: controller),
+              Expanded(
+                child: _SnapshotListContent(item: controller.selected),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -142,23 +154,25 @@ class _SnapshotListTitle extends StatelessWidget {
     required this.item,
     required this.selected,
   }) : super(key: key);
-  final SnapshotListItem item;
+  final DiffListItem item;
   final bool selected;
 
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-        animation: item,
-        builder: (context, child) => Row(
-              children: [
-                _SelectionBox(selected: selected),
-                const SizedBox(width: denseRowSpacing),
-                if (item.isProcessing) const _ProgressIndicator(),
-                if (item.isProcessing) const SizedBox(width: denseRowSpacing),
-                Expanded(
-                    child: Text(item.name, overflow: TextOverflow.ellipsis)),
-              ],
-            ));
+      animation: item,
+      builder: (context, child) => Row(
+        children: [
+          _SelectionBox(selected: selected),
+          const SizedBox(width: denseRowSpacing),
+          if (item.isProcessing) const _ProgressIndicator(),
+          if (item.isProcessing) const SizedBox(width: denseRowSpacing),
+          Expanded(
+            child: Text(item.name, overflow: TextOverflow.ellipsis),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -202,7 +216,7 @@ class _SelectionBox extends StatelessWidget {
 
 class _SnapshotListContent extends StatelessWidget {
   const _SnapshotListContent({Key? key, required this.item}) : super(key: key);
-  final SnapshotListItem item;
+  final DiffListItem item;
 
   @override
   Widget build(BuildContext context) {
@@ -256,15 +270,10 @@ class _SnapshotControlPane extends StatelessWidget {
       builder: (_, isProcessing, __) => Row(
         children: [
           ToolbarAction(
-            icon: Icons.fiber_manual_record,
-            tooltip: 'Take heap snapshot',
-            onPressed: isProcessing ? null : controller.takeSnapshot,
+            icon: Icons.clear,
+            tooltip: 'Delete snapshot',
+            onPressed: isProcessing ? null : controller.deleteCurrentSnapshot,
           ),
-          ToolbarAction(
-            icon: Icons.block,
-            tooltip: 'Clear all snapshots',
-            onPressed: isProcessing ? null : controller.clearSnapshots,
-          )
         ],
       ),
     );
