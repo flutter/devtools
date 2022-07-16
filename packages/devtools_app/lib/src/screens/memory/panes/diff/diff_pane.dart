@@ -143,8 +143,26 @@ class _SnapshotListTitle extends StatelessWidget {
       children: [
         _SelectionBox(selected: selected),
         const SizedBox(width: denseRowSpacing),
+        if (item.isProcessing) const _ProgressIndicator(),
+        if (item.isProcessing) const SizedBox(width: denseRowSpacing),
         Expanded(child: Text(itemLocal.name, overflow: TextOverflow.ellipsis)),
       ],
+    );
+  }
+}
+
+class _ProgressIndicator extends StatelessWidget {
+  const _ProgressIndicator({Key? key}) : super(key: key);
+  static const _progressIndicatorSize = 16.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: _progressIndicatorSize,
+      height: _progressIndicatorSize,
+      child: CircularProgressIndicator(
+        color: Theme.of(context).textTheme.bodyText1?.color,
+      ),
     );
   }
 }
@@ -194,20 +212,21 @@ class _ControlPane extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
-        valueListenable: controller.isProcessing,
-        builder: (_, isProcessing, __) => Row(
-              children: [
-                ToolbarAction(
-                  icon: Icons.fiber_manual_record,
-                  tooltip: 'Take heap snapshot',
-                  onPressed: isProcessing ? null : controller.takeSnapshot,
-                ),
-                ToolbarAction(
-                  icon: Icons.block,
-                  tooltip: 'Clear all snapshots',
-                  onPressed: isProcessing ? null : controller.clearSnapshots,
-                )
-              ],
-            ));
+      valueListenable: controller.isProcessing,
+      builder: (_, isProcessing, __) => Row(
+        children: [
+          ToolbarAction(
+            icon: Icons.fiber_manual_record,
+            tooltip: 'Take heap snapshot',
+            onPressed: isProcessing ? null : controller.takeSnapshot,
+          ),
+          ToolbarAction(
+            icon: Icons.block,
+            tooltip: 'Clear all snapshots',
+            onPressed: isProcessing ? null : controller.clearSnapshots,
+          )
+        ],
+      ),
+    );
   }
 }

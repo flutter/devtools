@@ -8,6 +8,7 @@ abstract class SnapshotListItem {
   SnapshotListItem(this.name);
 
   final String name;
+  bool isProcessing = false;
 }
 
 class SnapshotInformation extends SnapshotListItem {
@@ -15,7 +16,10 @@ class SnapshotInformation extends SnapshotListItem {
 }
 
 class Snapshot extends SnapshotListItem {
-  Snapshot(super.name, this.graph);
+  Snapshot(super.name, this.graph) {
+    isProcessing = true;
+    graph.whenComplete(() => isProcessing = false);
+  }
 
   Future<HeapSnapshotGraph?> graph;
 }
