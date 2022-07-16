@@ -10,7 +10,9 @@ import '../../primitives/memory_utils.dart';
 import 'model.dart';
 
 /// While this pane is under construction, we do not want our users to see it.
+///
 /// Flip this flag locally to test the pane and flip back before checking in.
+/// TODO: before removing this flag add widget/golden testing for the diff pane.
 const shouldShowDiffPane = true;
 
 class DiffPane extends StatefulWidget {
