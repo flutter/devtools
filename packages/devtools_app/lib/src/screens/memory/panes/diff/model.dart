@@ -6,18 +6,23 @@ import 'package:flutter/widgets.dart';
 import 'package:vm_service/vm_service.dart';
 
 abstract class DiffListItem with ChangeNotifier {
-  DiffListItem(this.name);
-
-  final String name;
+  String get name;
+  int get nameNumber;
   bool isProcessing = false;
 }
 
 class InformationListItem extends DiffListItem {
-  InformationListItem() : super('Snapshots');
+  InformationListItem();
+
+  @override
+  String get name => 'Snapshots';
+
+  @override
+  int get nameNumber => 0;
 }
 
 class SnapshotListItem extends DiffListItem {
-  SnapshotListItem(super.name, this.graph) {
+  SnapshotListItem(this.graph, this.nameNumber) {
     isProcessing = true;
     graph.whenComplete(() {
       isProcessing = false;
@@ -25,5 +30,10 @@ class SnapshotListItem extends DiffListItem {
     });
   }
 
+  @override
+  final int nameNumber;
   Future<HeapSnapshotGraph?> graph;
+
+  @override
+  String get name => 'Snapshot $nameNumber';
 }

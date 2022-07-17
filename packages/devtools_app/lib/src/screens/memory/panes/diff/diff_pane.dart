@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../devtools_app.dart';
@@ -30,18 +31,23 @@ class _DiffPaneController with ChangeNotifier {
 
   final scrollController = ScrollController();
 
+  /// The list contains one item that show information and all others
+  /// are snapshots.
   final snapshots = <DiffListItem>[InformationListItem()];
 
   final index = ValueNotifier<int>(0);
 
+  /// If true, some process is going on.
   final isProcessing = ValueNotifier<bool>(false);
 
   DiffListItem get selected => snapshots[index.value];
 
+  bool get hasSnapshots => snapshots.length > 1;
+
   Future<void> takeSnapshot() async {
     isProcessing.value = true;
     final future = snapshotMemory();
-    snapshots.add(SnapshotListItem(_generateSnapshotName(), future));
+    snapshots.add(SnapshotListItem(future, _nextNameNumber()));
 
     notifyListeners();
     await future;
@@ -57,14 +63,10 @@ class _DiffPaneController with ChangeNotifier {
     notifyListeners();
   }
 
-  String _generateSnapshotName() {
-    final names = Set.from(snapshots.map((e) => e.name));
-    var number = 1;
-    while (true) {
-      final result = 'Snapshot $number';
-      if (!names.contains(result)) return result;
-      number++;
-    }
+  int _nextNameNumber() {
+    final numbers = snapshots.map((e) => e.nameNumber);
+    assert(numbers.isNotEmpty);
+    return numbers.max + 1;
   }
 
   void deleteCurrentSnapshot() {
@@ -105,7 +107,7 @@ class _DiffPaneState extends State<DiffPane> {
           Column(
             children: [
               if (controller.selected is SnapshotListItem)
-                _SnapshotControlPane(controller: controller),
+                _ContentControlPane(controller: controller),
               Expanded(
                 child: _SnapshotListContent(item: controller.selected),
               ),
@@ -238,26 +240,30 @@ class _ListControlPane extends StatelessWidget {
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
       valueListenable: controller.isProcessing,
-      builder: (_, isProcessing, __) => Row(
-        children: [
-          ToolbarAction(
-            icon: Icons.fiber_manual_record,
-            tooltip: 'Take heap snapshot',
-            onPressed: isProcessing ? null : controller.takeSnapshot,
-          ),
-          ToolbarAction(
-            icon: Icons.block,
-            tooltip: 'Clear all snapshots',
-            onPressed: isProcessing ? null : controller.clearSnapshots,
-          )
-        ],
-      ),
+      builder: (_, isProcessing, __) {
+        final showTakeSnapshot = !isProcessing;
+        final showClearAll = !isProcessing & controller.hasSnapshots;
+        return Row(
+          children: [
+            ToolbarAction(
+              icon: Icons.fiber_manual_record,
+              tooltip: 'Take heap snapshot',
+              onPressed: showTakeSnapshot ? controller.takeSnapshot : null,
+            ),
+            ToolbarAction(
+              icon: Icons.block,
+              tooltip: 'Clear all snapshots',
+              onPressed: showClearAll ? controller.clearSnapshots : null,
+            )
+          ],
+        );
+      },
     );
   }
 }
 
-class _SnapshotControlPane extends StatelessWidget {
-  const _SnapshotControlPane({Key? key, required this.controller})
+class _ContentControlPane extends StatelessWidget {
+  const _ContentControlPane({Key? key, required this.controller})
       : super(key: key);
 
   final _DiffPaneController controller;
