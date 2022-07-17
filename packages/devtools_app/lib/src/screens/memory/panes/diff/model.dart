@@ -12,12 +12,12 @@ abstract class DiffListItem with ChangeNotifier {
   bool isProcessing = false;
 }
 
-class SnapshotInformation extends DiffListItem {
-  SnapshotInformation() : super('Snapshots');
+class InformationListItem extends DiffListItem {
+  InformationListItem() : super('Snapshots');
 }
 
-class Snapshot extends DiffListItem {
-  Snapshot(super.name, this.graph) {
+class SnapshotListItem extends DiffListItem {
+  SnapshotListItem(super.name, this.graph) {
     isProcessing = true;
     graph.whenComplete(() {
       isProcessing = false;

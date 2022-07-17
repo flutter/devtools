@@ -30,7 +30,7 @@ class _DiffPaneController with ChangeNotifier {
 
   final scrollController = ScrollController();
 
-  final snapshots = <DiffListItem>[SnapshotInformation()];
+  final snapshots = <DiffListItem>[InformationListItem()];
 
   final index = ValueNotifier<int>(0);
 
@@ -41,7 +41,7 @@ class _DiffPaneController with ChangeNotifier {
   Future<void> takeSnapshot() async {
     isProcessing.value = true;
     final future = snapshotMemory();
-    snapshots.add(Snapshot(_generateSnapshotName(), future));
+    snapshots.add(SnapshotListItem(_generateSnapshotName(), future));
 
     notifyListeners();
     await future;
@@ -68,8 +68,7 @@ class _DiffPaneController with ChangeNotifier {
   }
 
   void deleteCurrentSnapshot() {
-    assert(index.value > 0);
-    assert(selected is Snapshot);
+    assert(selected is SnapshotListItem);
     snapshots.removeRange(index.value, index.value + 1);
     index.value = index.value - 1;
   }
@@ -105,7 +104,7 @@ class _DiffPaneState extends State<DiffPane> {
           ),
           Column(
             children: [
-              if (controller.selected is Snapshot)
+              if (controller.selected is SnapshotListItem)
                 _SnapshotControlPane(controller: controller),
               Expanded(
                 child: _SnapshotListContent(item: controller.selected),
@@ -221,9 +220,9 @@ class _SnapshotListContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final itemLocal = item;
-    if (itemLocal is SnapshotInformation)
+    if (itemLocal is InformationListItem)
       return const Text('Information about snapshots will be here.');
-    if (itemLocal is Snapshot)
+    if (itemLocal is SnapshotListItem)
       return Text('Content of ${itemLocal.name} will be here.');
     throw 'Unexpected type of the item: ${itemLocal.runtimeType}';
   }
