@@ -113,10 +113,8 @@ class _VMDeveloperToolsScreenState extends State<VMDeveloperToolsScreenBody>
                 padding: const EdgeInsets.only(
                   left: defaultSpacing,
                 ),
-                child: KeepAliveWrapper(
-                  child: VMDeveloperToolsScreenBody.views[selectedIndex]
-                      .build(context),
-                ),
+                child: VMDeveloperToolsScreenBody.views[selectedIndex]
+                    .build(context),
               ),
             )
           ],

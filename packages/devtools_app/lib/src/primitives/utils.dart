@@ -66,7 +66,7 @@ String? prettyPrintBytes(
   }
   // TODO(peterdjlee): Generalize to handle different kbFractionDigits.
   // Ensure a small number of bytes does not print as 0 KB.
-  // If bytes >= 52 and kbFractionDigits == 1, it will start rounding to 0.1 KB.
+  // If bytes >= maxBytes and kbFractionDigits == 1, it will start rounding to 0.1 KB.
   if (bytes.abs() < maxBytes && kbFractionDigits == 1) {
     var output = bytes.toString();
     if (includeUnit) {

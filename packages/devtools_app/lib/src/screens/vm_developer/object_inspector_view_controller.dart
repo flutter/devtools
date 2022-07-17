@@ -17,11 +17,6 @@ import 'vm_object_model.dart';
 class ObjectInspectorViewController extends DisposableController
     with AutoDisposeControllerMixin {
   ObjectInspectorViewController() {
-    // addAutoDisposeListener(serviceManager.isolateManager.selectedIsolate,
-    //     () async {
-    //   restartController();
-    // });
-
     addAutoDisposeListener(
       scriptManager.sortedScripts,
       selectAndPushMainScript,
@@ -55,9 +50,10 @@ class ObjectInspectorViewController extends DisposableController
           .selectScriptNode(currentObjectValue.scriptRef);
 
       if (objectHistory.current.value?.outlineNode != null) {
+        final outlineNode = currentObjectValue.outlineNode!;
         programExplorerController
-          ..selectOutlineNode(currentObjectValue.outlineNode!)
-          ..expandToNode(currentObjectValue.outlineNode!);
+          ..selectOutlineNode(outlineNode)
+          ..expandToNode(outlineNode);
       } else {
         programExplorerController.resetOutline();
       }

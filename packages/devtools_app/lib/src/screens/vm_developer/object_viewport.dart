@@ -27,7 +27,9 @@ class ObjectViewport extends StatelessWidget {
   Widget build(BuildContext context) {
     return HistoryViewport<VmObject>(
       history: controller.objectHistory,
-      controls: [ToolbarRefresh(onPressed: controller.refreshObject)],
+      controls: [
+        ToolbarRefresh(onPressed: controller.refreshObject),
+      ],
       generateTitle: viewportTitle,
       contentBuilder: (context, _) {
         return ValueListenableBuilder<bool>(

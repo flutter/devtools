@@ -190,7 +190,7 @@ class ProgramExplorerController extends DisposableController
 
     for (final node in _outlineNodes.value) {
       node
-        ..collapseCascading()
+        ..collapse()
         ..unselect();
     }
 

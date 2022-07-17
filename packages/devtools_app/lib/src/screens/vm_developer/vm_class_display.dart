@@ -12,6 +12,9 @@ import '../../shared/theme.dart';
 import 'vm_developer_common_widgets.dart';
 import 'vm_object_model.dart';
 
+//TODO(mtaylee): Finish implementation of ClassInstancesWidget. When done,
+//remove this constant, and add the ClassInstancesWidget to
+//the class display layout.
 const displayClassInstances = false;
 
 /// A widget for the object inspector historyViewport displaying information
@@ -37,12 +40,10 @@ class VmClassDisplay extends StatelessWidget {
                 child: ListView(
                   children: [
                     RetainingPathWidget(
-                      fetching: clazz.fetchingRetainingPath,
                       retainingPath: clazz.retainingPath,
                       onExpanded: _onExpandRetainingPath,
                     ),
                     InboundReferencesWidget(
-                      fetching: clazz.fetchingInboundRefs,
                       inboundReferences: clazz.inboundReferences,
                       onExpanded: _onExpandInboundRefs,
                     )
@@ -73,73 +74,73 @@ class VmClassDisplay extends StatelessWidget {
 
 /// Displays general VM information of the Class Object.
 class ClassInfoWidget extends StatelessWidget implements PreferredSizeWidget {
-  const ClassInfoWidget({
+  ClassInfoWidget({
     required this.clazz,
   });
 
   final ClassObject clazz;
-
-  // TODO: change this value if adding/removing rows.
-  static const numberOfRows = 9;
+  late final List<MapEntry<String, Object?>> dataRows;
 
   @override
   Widget build(BuildContext context) {
+    dataRows = [
+      MapEntry('Object Class', clazz.obj.type),
+      MapEntry(
+        'Shallow Size',
+        prettyPrintBytes(
+          clazz.obj.size ?? 0,
+          includeUnit: true,
+          kbFractionDigits: 1,
+          maxBytes: 512,
+        ),
+      ),
+      MapEntry(
+        'Reachable Size',
+        ValueListenableBuilder<bool>(
+          valueListenable: clazz.fetchingReachableSize,
+          builder: (context, fetching, child) => fetching
+              ? const CircularProgressIndicator()
+              : RequestableSizeWidget(
+                  requestedSize: clazz.reachableSize,
+                  requestFunction: clazz.requestReachableSize,
+                ),
+        ),
+      ),
+      MapEntry(
+        'Retained Size',
+        ValueListenableBuilder<bool>(
+          valueListenable: clazz.fetchingRetainedSize,
+          builder: (context, fetching, child) => fetching
+              ? const CircularProgressIndicator()
+              : RequestableSizeWidget(
+                  requestedSize: clazz.retainedSize,
+                  requestFunction: clazz.requestRetainedSize,
+                ),
+        ),
+      ),
+      MapEntry(
+        'Library',
+        clazz.obj.library?.name?.isEmpty ?? false
+            ? clazz.script?.uri
+            : clazz.obj.library?.name,
+      ),
+      MapEntry(
+        'Script',
+        '${_fileName(clazz.script?.uri) ?? ''}:${clazz.pos?.toString() ?? ''}',
+      ),
+      MapEntry('Superclass', clazz.obj.superClass?.name),
+      MapEntry('SuperType', clazz.obj.superType?.name),
+      MapEntry(
+        'Currently allocated instances',
+        clazz.instances?.totalCount,
+      ),
+    ];
+
     return SizedBox.fromSize(
       size: preferredSize,
       child: VMInfoCard(
         title: 'General Information',
-        rowKeyValues: [
-          MapEntry('Object Class', clazz.obj.type),
-          MapEntry(
-            'Shallow Size',
-            prettyPrintBytes(
-              clazz.obj.size ?? 0,
-              includeUnit: true,
-              kbFractionDigits: 1,
-              maxBytes: 512,
-            ),
-          ),
-          MapEntry(
-            'Reachable Size',
-            ValueListenableBuilder<bool>(
-              valueListenable: clazz.fetchingReachableSize,
-              builder: (context, fetching, child) => fetching
-                  ? const CircularProgressIndicator()
-                  : RequestableSizeWidget(
-                      requestedSize: clazz.reachableSize,
-                      requestFunction: clazz.requestReachableSize,
-                    ),
-            ),
-          ),
-          MapEntry(
-            'Retained Size',
-            ValueListenableBuilder<bool>(
-              valueListenable: clazz.fetchingRetainedSize,
-              builder: (context, fetching, child) => fetching
-                  ? const CircularProgressIndicator()
-                  : RequestableSizeWidget(
-                      requestedSize: clazz.retainedSize,
-                      requestFunction: clazz.requestRetainedSize,
-                    ),
-            ),
-          ),
-          MapEntry(
-            'Library',
-            clazz.obj.library?.name?.isEmpty ?? false
-                ? clazz.script?.uri
-                : clazz.obj.library?.name,
-          ),
-          MapEntry(
-            'Script',
-            '${_fileName(clazz.script?.uri) ?? ''}:${clazz.pos?.toString() ?? ''}',
-          ),
-          MapEntry('Superclass', clazz.obj.superClass?.name),
-          MapEntry('SuperType', clazz.obj.superType?.name),
-          MapEntry(
-            'Currently allocated instances',
-            clazz.instances?.totalCount,
-          ),
-        ],
+        rowKeyValues: dataRows,
       ),
     );
   }
@@ -152,7 +153,9 @@ class ClassInfoWidget extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Size get preferredSize => Size.fromHeight(
-        areaPaneHeaderHeight + numberOfRows * defaultRowHeight + defaultSpacing,
+        areaPaneHeaderHeight +
+            dataRows.length * defaultRowHeight +
+            defaultSpacing,
       );
 }
 

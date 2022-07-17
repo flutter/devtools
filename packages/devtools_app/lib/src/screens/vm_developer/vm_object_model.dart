@@ -15,8 +15,12 @@ import '../debugger/program_explorer_model.dart';
 abstract class VmObject {
   VmObject({required this.ref, this.scriptRef, this.outlineNode});
 
+  /// The outline node selected on the ProgramExplorer
+  /// corresponding to this VM object.
   final ObjRef ref;
 
+  /// The script node selected on the FileExplorer of the ProgramExplorer
+  /// corresponding to this VM object.
   final ScriptRef? scriptRef;
 
   final VMServiceObjectNode? outlineNode;
@@ -90,13 +94,9 @@ class ClassObject extends VmObject {
   InstanceRef? get retainedSize => _retainedSize;
   InstanceRef? _retainedSize;
 
-  ValueListenable<bool> get fetchingRetainingPath => _fetchingRetainingPath;
-  final ValueNotifier<bool> _fetchingRetainingPath = ValueNotifier(false);
   ValueListenable<RetainingPath?> get retainingPath => _retainingPath;
   final _retainingPath = ValueNotifier<RetainingPath?>(null);
 
-  ValueListenable<bool> get fetchingInboundRefs => _fetchingInboundRefs;
-  final ValueNotifier<bool> _fetchingInboundRefs = ValueNotifier(false);
   ValueListenable<InboundReferences?> get inboundReferences =>
       _inboundReferences;
   final _inboundReferences = ValueNotifier<InboundReferences?>(null);
@@ -120,17 +120,13 @@ class ClassObject extends VmObject {
   }
 
   Future<void> requestRetainingPath() async {
-    _fetchingRetainingPath.value = true;
     _retainingPath.value =
         await _service.getRetainingPath(_isolate!.id!, ref.id!, 100);
-    _fetchingRetainingPath.value = false;
   }
 
   Future<void> requestInboundsRefs() async {
-    _fetchingInboundRefs.value = true;
     _inboundReferences.value =
         await _service.getInboundReferences(_isolate!.id!, ref.id!, 100);
-    _fetchingInboundRefs.value = false;
   }
 }
 
