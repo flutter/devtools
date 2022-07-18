@@ -173,19 +173,21 @@ class _SnapshotListTitle extends StatelessWidget {
         children: [
           _SelectionBox(selected: selected),
           const SizedBox(width: denseRowSpacing),
-          if (theItem.isProcessing) ...[
-            const _ProgressIndicator(),
-            const SizedBox(width: denseRowSpacing)
-          ],
           if (theItem is SnapshotListItem)
             Expanded(
               child: Text(theItem.name, overflow: TextOverflow.ellipsis),
             ),
           if (theItem is InformationListItem) ...[
-            const Text('Snapshots'),
+            const Expanded(
+              child: Text('Snapshots', overflow: TextOverflow.ellipsis),
+            ),
             const SizedBox(width: denseRowSpacing),
             const Icon(Icons.info_outline),
-          ]
+          ],
+          if (theItem.isProcessing) ...[
+            const _ProgressIndicator(),
+            const SizedBox(width: denseRowSpacing)
+          ],
         ],
       ),
     );
