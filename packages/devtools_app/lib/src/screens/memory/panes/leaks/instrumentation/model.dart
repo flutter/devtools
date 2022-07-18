@@ -46,3 +46,112 @@ class LeakSummary {
   bool matches(LeakSummary? other) =>
       other != null && mapEquals(totals, other.totals);
 }
+
+/// Detailed information about found leaks.
+class Leaks {
+  Leaks(this.byType);
+
+  factory Leaks.fromJson(Map<String, dynamic> json) => Leaks(
+        json.map(
+          (key, value) => MapEntry(
+            _parseLeakType(key),
+            (value as List)
+                .cast<Map<String, dynamic>>()
+                .map((e) => LeakReport.fromJson(e))
+                .toList(growable: false),
+          ),
+        ),
+      );
+  final Map<LeakType, List<LeakReport>> byType;
+
+  List<LeakReport> get notGCed => byType[LeakType.notGCed] ?? [];
+  List<LeakReport> get notDisposed => byType[LeakType.notDisposed] ?? [];
+  List<LeakReport> get gcedLate => byType[LeakType.gcedLate] ?? [];
+
+  Map<String, dynamic> toJson() => byType.map(
+        (key, value) =>
+            MapEntry(key.toString(), value.map((e) => e.toJson()).toList()),
+      );
+}
+
+/// Names for json fields.
+class _JsonFields {
+  static const String type = 'type';
+  static const String details = 'details';
+  static const String code = 'code';
+}
+
+/// Leak information, passed from application to DevTools and than extended by
+/// DevTools after deeper analysis.
+class LeakReport {
+  LeakReport({
+    required this.type,
+    required this.details,
+    required this.code,
+  });
+
+  factory LeakReport.fromJson(Map<String, dynamic> json) => LeakReport(
+        type: json[_JsonFields.type],
+        details:
+            (json[_JsonFields.details] as List<dynamic>? ?? []).cast<String>(),
+        code: json[_JsonFields.code],
+      );
+
+  final String type;
+  final List<String> details;
+  final int code;
+
+  // The fields below do not need serialization as they are populated after.
+  String? retainingPath;
+  List<String>? detailedPath;
+
+  Map<String, dynamic> toJson() => {
+        _JsonFields.type: type,
+        _JsonFields.details: details,
+        _JsonFields.code: code,
+      };
+
+  static String iterableToYaml(
+    String title,
+    Iterable<LeakReport>? leaks, {
+    String indent = '',
+  }) {
+    if (leaks == null || leaks.isEmpty) return '';
+
+    return '''$title:
+$indent  total: ${leaks.length}
+$indent  objects:
+${leaks.map((e) => e.toYaml('$indent    ')).join()}
+''';
+  }
+
+  String toYaml(String indent) {
+    final result = StringBuffer();
+    result.writeln('$indent$type:');
+    result.writeln('$indent  identityHashCode: $code');
+    if (details.isNotEmpty) {
+      result.writeln('$indent  details:');
+      final detailsIndent = '$indent    ';
+      result.write(
+        details
+            .map(
+              (t) =>
+                  '$detailsIndent- ${_indentNewLines(t, '  $detailsIndent')}\n',
+            )
+            .join(),
+      );
+    }
+
+    if (detailedPath != null) {
+      result.writeln('$indent  retainingPath:');
+      result.writeln(detailedPath!.map((s) => '$indent    - $s').join('\n'));
+    } else if (retainingPath != null) {
+      result.writeln('$indent  retainingPath: $retainingPath');
+    }
+    return result.toString();
+  }
+
+  static String _indentNewLines(String text, String indent) {
+    return text.replaceAll('\n', '\n$indent').trimRight();
+  }
+}

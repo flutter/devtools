@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../analytics/constants.dart' as analytics_constants;
 import '../primitives/utils.dart';
 import 'common_widgets.dart';
 import 'globals.dart';
@@ -243,12 +244,9 @@ Relaunch your application with the '--profile' argument, or ''',
             fontSize: defaultFontSize,
           ),
         ),
-        LinkTextSpan(
-          link: const Link(
-            display: 'relaunch in profile mode from VS Code or IntelliJ',
-            url: _runInProfileModeDocsUrl,
-          ),
-          context: context,
+        _runInProfileModeTextSpan(
+          context,
+          screenId: screenId,
           style: Theme.of(context).errorMessageLinkStyle,
         ),
         TextSpan(
@@ -317,9 +315,12 @@ To pre-compile shaders, see the instructions at ''',
           ),
         ),
         LinkTextSpan(
-          link: const Link(
+          link: Link(
             display: preCompileShadersDocsUrl,
             url: preCompileShadersDocsUrl,
+            gaScreenName: screenId,
+            gaSelectedItemDescription:
+                analytics_constants.shaderCompilationDocs,
           ),
           context: context,
           style: Theme.of(context).errorMessageLinkStyle,
@@ -358,9 +359,12 @@ You are opting in to a high CPU sampling rate. This may affect the performance o
           ),
         ),
         LinkTextSpan(
-          link: const Link(
+          link: Link(
             display: 'documentation',
             url: _profileGranularityDocsUrl,
+            gaScreenName: screenId,
+            gaSelectedItemDescription:
+                analytics_constants.profileGranularityDocs,
           ),
           context: context,
           style: Theme.of(context).warningMessageLinkStyle,
@@ -396,12 +400,9 @@ For the most accurate absolute memory stats, relaunch your application with the 
             fontSize: defaultFontSize,
           ),
         ),
-        LinkTextSpan(
-          link: const Link(
-            display: 'relaunch in profile mode from VS Code or IntelliJ',
-            url: _runInProfileModeDocsUrl,
-          ),
-          context: context,
+        _runInProfileModeTextSpan(
+          context,
+          screenId: screenId,
           style: Theme.of(context).warningMessageLinkStyle,
         ),
         TextSpan(
@@ -509,4 +510,21 @@ extension BannerMessageThemeExtension on ThemeData {
         color: _BannerError.linkColor,
         fontSize: defaultFontSize,
       );
+}
+
+LinkTextSpan _runInProfileModeTextSpan(
+  BuildContext context, {
+  required String screenId,
+  required TextStyle style,
+}) {
+  return LinkTextSpan(
+    link: Link(
+      display: 'relaunch in profile mode from VS Code or IntelliJ',
+      url: _runInProfileModeDocsUrl,
+      gaScreenName: screenId,
+      gaSelectedItemDescription: analytics_constants.profileModeDocs,
+    ),
+    context: context,
+    style: style,
+  );
 }

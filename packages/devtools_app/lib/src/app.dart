@@ -21,6 +21,8 @@ import 'screens/debugger/debugger_controller.dart';
 import 'screens/debugger/debugger_screen.dart';
 import 'screens/inspector/inspector_controller.dart';
 import 'screens/inspector/inspector_screen.dart';
+import 'screens/inspector/inspector_tree_controller.dart';
+import 'screens/inspector/primitives/inspector_common.dart';
 import 'screens/logging/logging_controller.dart';
 import 'screens/logging/logging_screen.dart';
 import 'screens/memory/memory_controller.dart';
@@ -548,9 +550,13 @@ class CheckboxSetting extends StatelessWidget {
 List<DevToolsScreen> get defaultScreens {
   final vmDeveloperToolsController = VMDeveloperToolsController();
   return <DevToolsScreen>[
-    DevToolsScreen<InspectorSettingsController>(
+    DevToolsScreen<InspectorController>(
       const InspectorScreen(),
-      createController: () => InspectorSettingsController(),
+      createController: () => InspectorController(
+        inspectorTree: InspectorTreeController(),
+        detailsTree: InspectorTreeController(),
+        treeType: FlutterTreeType.widget,
+      ),
     ),
     DevToolsScreen<PerformanceController>(
       const PerformanceScreen(),

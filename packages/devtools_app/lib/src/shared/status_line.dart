@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../devtools.dart' as devtools;
-import '../analytics/analytics.dart' as ga;
 import '../analytics/constants.dart' as analytics_constants;
 import '../service/isolate_manager.dart';
 import '../service/service_manager.dart';
@@ -109,13 +108,9 @@ class StatusLine extends StatelessWidget {
                 ? docPageId
                 : 'flutter.dev/devtools/$docPageId',
             url: 'https://flutter.dev/devtools/$docPageId',
+            gaScreenName: currentScreen.screenId,
+            gaSelectedItemDescription: analytics_constants.documentationLink,
           ),
-          onTap: () {
-            ga.select(
-              currentScreen.screenId,
-              analytics_constants.documentationLink,
-            );
-          },
           context: context,
         ),
       );
