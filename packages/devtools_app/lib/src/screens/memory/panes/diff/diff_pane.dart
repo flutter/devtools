@@ -47,7 +47,8 @@ class _DiffPaneController with ChangeNotifier {
   Future<void> takeSnapshot() async {
     isProcessing.value = true;
     final future = snapshotMemory();
-    snapshots.add(SnapshotListItem(future, _nextNameNumber()));
+    snapshots.add(SnapshotListItem(future, _nextNameNumber(),
+        currentIsolateName ?? '<isolate-not-detected>'));
 
     notifyListeners();
     await future;
@@ -247,7 +248,7 @@ class _ListControlPane extends StatelessWidget {
           children: [
             ToolbarAction(
               icon: Icons.fiber_manual_record,
-              tooltip: 'Take heap snapshot',
+              tooltip: 'Take heap snapshot for the selected isolate',
               onPressed: showTakeSnapshot ? controller.takeSnapshot : null,
             ),
             ToolbarAction(

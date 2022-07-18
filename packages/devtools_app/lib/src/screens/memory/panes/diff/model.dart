@@ -22,7 +22,7 @@ class InformationListItem extends DiffListItem {
 }
 
 class SnapshotListItem extends DiffListItem {
-  SnapshotListItem(this.graph, this.nameNumber) {
+  SnapshotListItem(this.graph, this.nameNumber, this.isolateName) {
     isProcessing = true;
     graph.whenComplete(() {
       isProcessing = false;
@@ -30,10 +30,12 @@ class SnapshotListItem extends DiffListItem {
     });
   }
 
+  final String isolateName;
+
   @override
   final int nameNumber;
   Future<HeapSnapshotGraph?> graph;
 
   @override
-  String get name => 'Snapshot $nameNumber';
+  String get name => '$isolateName-$nameNumber';
 }
