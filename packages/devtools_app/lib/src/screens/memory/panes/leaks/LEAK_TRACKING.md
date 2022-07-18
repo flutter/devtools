@@ -94,4 +94,22 @@ You can pass information, that will help you troubleshoot the leak, to the optio
 
 ### Troubleshoot the detected leaks
 
+#### Provide additional details
 
+It helps to provide the object's details, which you want to be included into the analysis, to the tool. Be careful doing this, because storing additional information for each instance of a class may impact debug/profile performance of the application and thus make user experience
+different from release one.
+
+For example, for not disposed objects, you can provide creation call stack to `startObjectLeakTracking`:
+
+```
+startObjectLeakTracking(
+   this,
+   details: StackTrace.current.toString(),
+);
+```
+
+or, provide some other details in a separate invocation:
+
+```
+addLeakTrackingDetails(this, 'Serves the stream $streamName.');
+```
