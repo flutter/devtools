@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
 import '../primitives/enum_utils.dart';
+import '../primitives/utils.dart';
 import '../shared/theme.dart';
 
 /// Returns a [TextSpan] that only includes the first [length] characters of
@@ -183,13 +184,12 @@ void scrollToPosition(
   double position,
 ) {
   //TODO I would add padding here so if a row is half out of screen it will still jump
-  final scrollStart = scrollController.offset;
-  final scrollEnd = scrollStart + scrollController.position.extentInside;
-  final alreadyVisible = position >= scrollStart && position <= scrollEnd;
+  final extentVisible = Range(scrollController.offset,
+      scrollController.offset + scrollController.position.extentInside);
 
-  if (!alreadyVisible) {
+  if (!extentVisible.contains(position)) {
     scrollController.animateTo(
-      position,
+      position.clamp(0.0, scrollController.position.maxScrollExtent),
       duration: defaultDuration,
       curve: defaultCurve,
     );

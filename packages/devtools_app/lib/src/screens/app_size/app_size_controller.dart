@@ -53,23 +53,26 @@ class AppSizeController {
   final analysisRoot =
       ValueNotifier<Selection<TreemapNode>>(Selection<TreemapNode>());
 
-  void changeAnalysisRoot(TreemapNode? newRoot) {
-    if (newRoot == null) {
+  void changeAnalysisRoot(TreemapNode? newAnalysisRoot) {
+    if (newAnalysisRoot == null) {
       analysisRoot.value = Selection<TreemapNode>();
       return;
     }
 
-    final searchCondition = (TreemapNode n) => n == newRoot;
-    final int selectedRowIndex = newRoot.root.childCountToMatchingNode(
+    final searchCondition = (TreemapNode n) => n == newAnalysisRoot;
+    final int selectedRowIndex = newAnalysisRoot.root.childCountToMatchingNode(
       matchingNodeCondition: searchCondition,
       includeCollapsedNodes: false,
     );
 
     analysisRoot.value = Selection(
-        node: newRoot, nodeIndex: selectedRowIndex, scrollIntoView: true);
+      node: newAnalysisRoot,
+      nodeIndex: selectedRowIndex,
+      scrollIntoView: true,
+    );
 
     final programInfoNode =
-        _analysisCallGraph?.program.lookup(newRoot.packagePath()) ??
+        _analysisCallGraph?.program.lookup(newAnalysisRoot.packagePath()) ??
             _analysisCallGraph?.program.root;
 
     // If [programInfoNode is null, we don't have any call graph information
