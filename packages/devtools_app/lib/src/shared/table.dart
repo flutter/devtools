@@ -401,7 +401,6 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   late List<double> columnWidths;
   late List<bool> rootsExpanded;
   late FocusNode _focusNode;
-  final ScrollController scrollController = ScrollController();
 
   late ValueNotifier<Selection<T>> selectionNotifier;
 
@@ -507,6 +506,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       _updateItems();
       return;
     }
+
     setState(() {
       if (!node.isExpandable) return;
       animatingNode = node;
