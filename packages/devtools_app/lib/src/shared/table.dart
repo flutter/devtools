@@ -111,10 +111,8 @@ class FlatTable<T> extends StatefulWidget {
 }
 
 class FlatTableState<T> extends State<FlatTable<T>>
-    with AutoDisposeMixin
     implements SortableTable<T> {
   late List<T> data;
-  final ScrollController scrollController = ScrollController();
 
   @override
   void initState() {
@@ -362,7 +360,6 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
     this.secondarySortColumn,
     this.selectionNotifier,
     this.autoExpandRoots = false,
-    this.scrollController,
   })  : assert(columns.contains(treeColumn)),
         assert(columns.contains(sortColumn)),
         super(key: key);
@@ -388,8 +385,6 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
   final ValueNotifier<Selection<T>>? selectionNotifier;
 
   final bool autoExpandRoots;
-
-  final ScrollController? scrollController;
 
   @override
   TreeTableState<T> createState() => TreeTableState<T>();
@@ -439,12 +434,13 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   void didUpdateWidget(TreeTable<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
 
+    if (widget == oldWidget) return;
+
     cancelListeners();
 
     addAutoDisposeListener(selectionNotifier, () {
       setState(() {
         final node = selectionNotifier.value.node;
-
         expandParents(node?.parent);
       });
     });
