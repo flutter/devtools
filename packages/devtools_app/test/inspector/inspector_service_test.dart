@@ -79,7 +79,7 @@ void main() async {
         final group = inspectorServiceLocal.createObjectGroup('test-group');
         // These tests are moot if widget creation is not tracked.
         expect(await inspectorServiceLocal.isWidgetCreationTracked(), isTrue);
-        await inspectorServiceLocal.setPubRootDirectories([]);
+        await inspectorServiceLocal.addPubRootDirectories([]);
         final List<String> rootDirectories =
             await inspectorServiceLocal.inferPubRootDirectoryIfNeeded();
         expect(rootDirectories.length, 1);
@@ -94,7 +94,7 @@ void main() async {
         final group = inspectorServiceLocal.createObjectGroup('test-group');
         // These tests are moot if widget creation is not tracked.
         expect(await inspectorServiceLocal.isWidgetCreationTracked(), isTrue);
-        await inspectorServiceLocal.setPubRootDirectories([]);
+        await inspectorServiceLocal.addPubRootDirectories([]);
         final List<String> rootDirectories =
             await inspectorServiceLocal.inferPubRootDirectoryIfNeeded();
         expect(rootDirectories.length, 1);
@@ -118,7 +118,7 @@ void main() async {
           );
 
           await inspectorServiceLocal
-              .setPubRootDirectories(['${rootDirectories.first}/lib/src']);
+              .addPubRootDirectories(['${rootDirectories.first}/lib/src']);
           // Adding src does not change the directory as local classes are
           // computed at the library level.
           expect(
@@ -143,7 +143,7 @@ void main() async {
           );
           expect(inspectorServiceLocal.rootPackagePrefixes.toList(), isEmpty);
 
-          await inspectorServiceLocal.setPubRootDirectories(
+          await inspectorServiceLocal.addPubRootDirectories(
             ['/usr/jacobr/foo/lib', '/usr/jacobr/bar/lib/bla'],
           );
           expect(
@@ -189,7 +189,7 @@ void main() async {
         } finally {
           // Restore.
           await inspectorServiceLocal
-              .setPubRootDirectories(originalRootDirectories);
+              .addPubRootDirectories(originalRootDirectories);
 
           await group.dispose();
         }
@@ -202,12 +202,12 @@ void main() async {
         final group = inspectorServiceLocal.createObjectGroup('test-group');
         // These tests are moot if widget creation is not tracked.
         expect(await inspectorServiceLocal.isWidgetCreationTracked(), isTrue);
-        await inspectorServiceLocal.setPubRootDirectories([]);
+        await inspectorServiceLocal.addPubRootDirectories([]);
         final originalRootDirectories =
             (await inspectorServiceLocal.inferPubRootDirectoryIfNeeded())
                 .toList();
         try {
-          await inspectorServiceLocal.setPubRootDirectories(
+          await inspectorServiceLocal.addPubRootDirectories(
             ['/usr/me/clients/google3/foo/bar/baz/lib/src/bla'],
           );
           expect(
@@ -219,7 +219,7 @@ void main() async {
             equals(['foo.bar.baz.']),
           );
 
-          await inspectorServiceLocal.setPubRootDirectories([
+          await inspectorServiceLocal.addPubRootDirectories([
             '/usr/me/clients/google3/foo/bar/baz/lib/src/bla',
             '/usr/me/clients/google3/foo/core/lib'
           ]);
@@ -237,7 +237,7 @@ void main() async {
           );
 
           // Test bazel directories without a lib directory.
-          await inspectorServiceLocal.setPubRootDirectories([
+          await inspectorServiceLocal.addPubRootDirectories([
             '/usr/me/clients/google3/foo/bar/baz',
             '/usr/me/clients/google3/foo/core/'
           ]);
@@ -253,7 +253,7 @@ void main() async {
               ['foo.bar.baz.', 'foo.core.'],
             ),
           );
-          await inspectorServiceLocal.setPubRootDirectories([
+          await inspectorServiceLocal.addPubRootDirectories([
             '/usr/me/clients/google3/third_party/dart/foo/lib/src/bla',
             '/usr/me/clients/google3/third_party/dart_src/bar/core/lib'
           ]);
@@ -298,7 +298,7 @@ void main() async {
             isFalse,
           );
 
-          await inspectorServiceLocal.setPubRootDirectories([
+          await inspectorServiceLocal.addPubRootDirectories([
             '/usr/me/clients/google3/third_party/dart/foo',
             '/usr/me/clients/google3/third_party/dart_src/bar/core'
           ]);
@@ -313,7 +313,7 @@ void main() async {
         } finally {
           // Restore.
           await inspectorServiceLocal
-              .setPubRootDirectories(originalRootDirectories);
+              .addPubRootDirectories(originalRootDirectories);
 
           await group.dispose();
         }
