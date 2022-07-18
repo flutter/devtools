@@ -47,8 +47,13 @@ class _DiffPaneController with ChangeNotifier {
   Future<void> takeSnapshot() async {
     isProcessing.value = true;
     final future = snapshotMemory();
-    snapshots.add(SnapshotListItem(future, _nextNameNumber(),
-        currentIsolateName ?? '<isolate-not-detected>'));
+    snapshots.add(
+      SnapshotListItem(
+        future,
+        _nextNameNumber(),
+        currentIsolateName ?? '<isolate-not-detected>',
+      ),
+    );
 
     notifyListeners();
     await future;
