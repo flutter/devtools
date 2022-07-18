@@ -1360,7 +1360,7 @@ class FrameAnalysis {
     var longestPhaseTime = Duration.zero;
     late FramePhase longest;
     for (final block in [buildPhase, layoutPhase, paintPhase]) {
-      if (block.duration > longestPhaseTime) {
+      if (block.duration >= longestPhaseTime) {
         longest = block;
         longestPhaseTime = block.duration;
       }
