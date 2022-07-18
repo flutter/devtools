@@ -39,11 +39,29 @@ myField = null;
 
 If you have a set of not-GCed objects, some of them (victims) may be not GC-ed because they are held by others (culprits). Normally, to fix the leaks, you need to fix just culprits.
 
-**Victim**: a leaked object, for which the tool could find other leaked object, that, if fixed, would fix the first leak to.
+**Victim**: a leaked object, for which the tool could find other leaked object, that, if fixed, would fix the first leak too.
 
 **Culprit**: a leaked object that is not detected to be other object victim.
 
 The tool detects which leaked objects are culprits, so you know where to focus.
+
+For example, out of four not-GCed leaks on this diagram, only one is culprit, because, when it is fixed and gets GCed, the objects it referenced, will be also GCed:
+
+
+```mermaid
+   
+   flowchart TD;
+      l1[leak1\nculprit]
+      l2[leak2\nvictim]
+      l3[leak3\nvictim]
+      l4[leak4\nvictim]
+      l1-->l2;
+      l1-->l3;
+      l2-->l4;
+      l3-->l4;
+```
+
+
 
 ### Limitations
 
