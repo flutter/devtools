@@ -166,17 +166,26 @@ class _SnapshotListTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theItem = item;
     return AnimatedBuilder(
-      animation: item,
+      animation: theItem,
       builder: (context, child) => Row(
         children: [
           _SelectionBox(selected: selected),
           const SizedBox(width: denseRowSpacing),
-          if (item.isProcessing) const _ProgressIndicator(),
-          if (item.isProcessing) const SizedBox(width: denseRowSpacing),
-          Expanded(
-            child: Text(item.name, overflow: TextOverflow.ellipsis),
-          ),
+          if (theItem.isProcessing) ...[
+            const _ProgressIndicator(),
+            const SizedBox(width: denseRowSpacing)
+          ],
+          if (theItem is SnapshotListItem)
+            Expanded(
+              child: Text(theItem.name, overflow: TextOverflow.ellipsis),
+            ),
+          if (theItem is InformationListItem) ...[
+            const Text('Snapshots'),
+            const SizedBox(width: denseRowSpacing),
+            const Icon(Icons.info_outline),
+          ]
         ],
       ),
     );

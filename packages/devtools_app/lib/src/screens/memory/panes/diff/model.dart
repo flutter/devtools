@@ -6,8 +6,6 @@ import 'package:flutter/widgets.dart';
 import 'package:vm_service/vm_service.dart';
 
 abstract class DiffListItem with ChangeNotifier {
-  String get name;
-
   /// Number, that, if shown in name, should be unique in the list.
   ///
   /// If the number is not shown, it should be 0.
@@ -17,11 +15,6 @@ abstract class DiffListItem with ChangeNotifier {
 }
 
 class InformationListItem extends DiffListItem {
-  InformationListItem();
-
-  @override
-  String get name => 'Snapshots';
-
   @override
   int get nameNumber => 0;
 }
