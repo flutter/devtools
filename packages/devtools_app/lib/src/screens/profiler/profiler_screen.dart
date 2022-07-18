@@ -160,29 +160,11 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
         ],
       ),
     );
-    // TODO(kenz): remove the note about profiling on iOS after
-    // https://github.com/flutter/flutter/issues/88466 is fixed.
     final emptyProfileView = Center(
       child: RichText(
         textAlign: TextAlign.center,
-        text: TextSpan(
+        text: const TextSpan(
           text: 'No CPU samples recorded.',
-          children: serviceManager.vm?.operatingSystem == 'ios'
-              ? [
-                  const TextSpan(
-                    text: '''
-\n\nIf you are attempting to profile on a real iOS device, you may be hitting a known issue. Try using this ''',
-                  ),
-                  LinkTextSpan(
-                    link: const Link(
-                      display: 'workaround',
-                      url: iosProfilerWorkaround,
-                    ),
-                    context: context,
-                  ),
-                  const TextSpan(text: '.'),
-                ]
-              : [],
         ),
       ),
     );

@@ -74,6 +74,7 @@ class DebuggerController extends DisposableController
     }
     if (currentScriptRef.value != null) {
       await programExplorerController.selectScriptNode(currentScriptRef.value);
+      programExplorerController.resetOutline();
     }
   }
 
@@ -369,6 +370,8 @@ class DebuggerController extends DisposableController
     await _pause(false);
 
     _clearCaches();
+
+    scriptsHistory.clear();
 
     if (ref == null) {
       _breakpoints.value = [];
