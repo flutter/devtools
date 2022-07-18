@@ -9,13 +9,13 @@ This page and functionality are under construction. See https://github.com/flutt
 
 ### Glossary
 
-**GC**: garbage collection
+**GC**: garbage collection.
 
-**Memory Leak**: progressive usage of more and more memory by an application
+**Memory Leak**: progressive usage of more and more memory by an application, for example repetedly creating and not disposing a listener.
 
-**Memory Bloat**: use of more memory than is necessary for optimal performance
+**Memory Bloat**: use of more memory than is necessary for optimal performance, for example using too large images or not canceling a stream.
 
-**Object's Retaining Path**: path from the object to a root object that prevents the object from being GCed
+**Object's Retaining Path**: path from the object to a root object that prevents the object from being GCed.
 
 
 ### Leak Types
@@ -39,7 +39,7 @@ myField = null;
 
 If you have a set of not-GCed objects, some of them (victims) may be not GC-ed because they are held by others (culprits). Normally, to fix the leaks, you need to fix just culprits.
 
-The tool detects culprits, so that you know where to focus.
+The tool detects which leaked objects are culprits, so you know where to focus.
 
 ### Limitations
 
