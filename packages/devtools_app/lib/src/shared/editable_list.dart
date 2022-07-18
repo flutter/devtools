@@ -42,6 +42,36 @@ class _EditableListState extends State<EditableList> {
     super.dispose();
   }
 
+  @override
+  Widget build(BuildContext context) {
+    return DualValueListenableBuilder(
+      firstListenable: widget.entries,
+      secondListenable: widget.isRefreshing ?? ValueNotifier<bool>(false),
+      builder: (_, __, ___, ____) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _EditableListActionBar(
+              textFieldFocusNode: textFieldFocusNode,
+              textFieldController: textFieldController,
+              widget: widget,
+            ),
+            _EditableListContentView(widget: widget),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _EditableListActionBar extends StatelessWidget {
+  const _EditableListActionBar({
+    Key? key,
+    required this.textFieldFocusNode,
+    required this.textFieldController,
+    required this.widget,
+  }) : super(key: key);
   void _addNewPubRootDirecory() {
     final value = textFieldController.value.text.trim();
     textFieldController.clear();
@@ -52,7 +82,71 @@ class _EditableListState extends State<EditableList> {
     textFieldFocusNode.requestFocus();
   }
 
-  Widget _copyDirectoryButton(String value) {
+  final FocusNode textFieldFocusNode;
+  final TextEditingController textFieldController;
+  final EditableList widget;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: defaultTextFieldHeight,
+      child: Row(
+        children: [
+          Expanded(
+            child: Container(
+              height: defaultTextFieldHeight,
+              child: TextField(
+                focusNode: textFieldFocusNode,
+                controller: textFieldController,
+                decoration: InputDecoration(
+                  contentPadding: const EdgeInsets.all(denseSpacing),
+                  border: const OutlineInputBorder(),
+                  labelText: widget.textFieldLabel,
+                ),
+                onSubmitted: (value) {
+                  _addNewPubRootDirecory();
+                },
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              _addNewPubRootDirecory();
+            },
+            child: const Text('Add'),
+          ),
+          widget.isRefreshing?.value ?? false
+              ? Container(
+                  width: defaultTextFieldHeight,
+                  height: defaultTextFieldHeight,
+                  child: const Padding(
+                    padding: EdgeInsets.all(densePadding),
+                    child: CircularProgressIndicator(),
+                  ),
+                )
+              : RefreshButton(
+                  onPressed: () {
+                    if (widget.onRefresh != null) {
+                      widget.onRefresh!();
+                    }
+                  },
+                  minScreenWidthForTextBeforeScaling: double.maxFinite,
+                ),
+        ],
+      ),
+    );
+  }
+}
+
+class _EditableListContentView extends StatelessWidget {
+  const _EditableListContentView({
+    Key? key,
+    required this.widget,
+  }) : super(key: key);
+
+  final EditableList widget;
+
+  Widget _copyDirectoryButton(BuildContext context, String value) {
     return IconButton(
       padding: const EdgeInsets.all(0.0),
       onPressed: () {
@@ -76,99 +170,40 @@ class _EditableListState extends State<EditableList> {
 
   @override
   Widget build(BuildContext context) {
-    return DualValueListenableBuilder(
-      firstListenable: widget.entries,
-      secondListenable: widget.isRefreshing ?? ValueNotifier<bool>(false),
-      builder: (_, __, ___, ____) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              height: defaultTextFieldHeight,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      height: defaultTextFieldHeight,
-                      child: TextField(
-                        focusNode: textFieldFocusNode,
-                        controller: textFieldController,
-                        decoration: InputDecoration(
-                          contentPadding: const EdgeInsets.all(denseSpacing),
-                          border: const OutlineInputBorder(),
-                          labelText: widget.textFieldLabel,
-                        ),
-                        onSubmitted: (value) {
-                          _addNewPubRootDirecory();
-                        },
-                      ),
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      _addNewPubRootDirecory();
-                    },
-                    child: const Text('Add'),
-                  ),
-                  widget.isRefreshing?.value ?? false
-                      ? Container(
-                          width: defaultTextFieldHeight,
-                          height: defaultTextFieldHeight,
-                          child: const Padding(
-                            padding: EdgeInsets.all(densePadding),
-                            child: CircularProgressIndicator(),
-                          ),
-                        )
-                      : RefreshButton(
-                          onPressed: () {
-                            if (widget.onRefresh != null) {
-                              widget.onRefresh!();
-                            }
-                          },
-                          minScreenWidthForTextBeforeScaling: double.maxFinite,
-                        ),
-                ],
-              ),
-            ),
-            Flexible(
-              child: RoundedOutlinedBorder(
-                child: Scrollbar(
-                  child: ListView.builder(
-                    itemCount: widget.entries.value.length,
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: densePadding,
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(widget.entries.value[index]),
-                            ),
-                            _copyDirectoryButton(widget.entries.value[index]),
-                            const SizedBox(width: denseSpacing),
-                            _removeDirectoryButton(
-                              () {
-                                if (widget.onEntryRemoved != null) {
-                                  widget.onEntryRemoved!(
-                                    widget.entries.value[index],
-                                  );
-                                }
-                              },
-                            ),
-                            const SizedBox(width: denseRowSpacing)
-                          ],
-                        ),
-                      );
-                    },
-                  ),
+    return Flexible(
+      child: RoundedOutlinedBorder(
+        child: Scrollbar(
+          child: ListView.builder(
+            itemCount: widget.entries.value.length,
+            itemBuilder: (context, index) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: densePadding,
                 ),
-              ),
-            ),
-          ],
-        );
-      },
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(widget.entries.value[index]),
+                    ),
+                    _copyDirectoryButton(context, widget.entries.value[index]),
+                    const SizedBox(width: denseSpacing),
+                    _removeDirectoryButton(
+                      () {
+                        if (widget.onEntryRemoved != null) {
+                          widget.onEntryRemoved!(
+                            widget.entries.value[index],
+                          );
+                        }
+                      },
+                    ),
+                    const SizedBox(width: denseRowSpacing)
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ),
     );
   }
 }
