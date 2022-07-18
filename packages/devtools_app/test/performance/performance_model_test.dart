@@ -474,7 +474,7 @@ void main() {
       expect(frameAnalysis.saveLayerCount, equals(1));
 
       frame = testFrame0.shallowCopy()
-        ..setEventFlow(vsyncEvent)
+        ..setEventFlow(compositingEvent)
         ..setEventFlow(goldenRasterTimelineEvent);
       frameAnalysis = FrameAnalysis(frame);
       expect(frameAnalysis.saveLayerCount, equals(0));
@@ -484,7 +484,7 @@ void main() {
       expect(frameAnalysis.intrinsicOperationsCount, equals(2));
 
       frame = testFrame0.shallowCopy()
-        ..setEventFlow(vsyncEvent)
+        ..setEventFlow(compositingEvent)
         ..setEventFlow(goldenRasterTimelineEvent);
       frameAnalysis = FrameAnalysis(frame);
       expect(frameAnalysis.intrinsicOperationsCount, equals(0));
@@ -494,7 +494,7 @@ void main() {
       expect(frameAnalysis.hasExpensiveOperations, isTrue);
 
       frame = testFrame0.shallowCopy()
-        ..setEventFlow(vsyncEvent)
+        ..setEventFlow(compositingEvent)
         ..setEventFlow(goldenRasterTimelineEvent);
       frameAnalysis = FrameAnalysis(frame);
       expect(frameAnalysis.hasExpensiveOperations, isFalse);
