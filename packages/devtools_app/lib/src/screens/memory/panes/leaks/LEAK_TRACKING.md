@@ -45,7 +45,7 @@ If you have a set of not-GCed objects, some of them (victims) may be not GC-ed b
 
 The tool detects which leaked objects are culprits, so you know where to focus.
 
-For example, out of four not-GCed leaks on this diagram, only one is culprit, because, when it is fixed and gets GCed, the objects it referenced, will be also GCed:
+For example, out of four not-GCed leaks on this diagram, only one is culprit, because, when the object is fixed and gets GCed, the objects it referenced, will be also GCed:
 
 
 ```mermaid
