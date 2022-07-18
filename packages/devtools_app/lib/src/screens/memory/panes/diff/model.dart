@@ -7,7 +7,11 @@ import 'package:vm_service/vm_service.dart';
 
 abstract class DiffListItem with ChangeNotifier {
   String get name;
+
+  /// Number, that is part of the name for snapshots
+  /// and should be unique inside the list.
   int get nameNumber;
+
   bool isProcessing = false;
 }
 

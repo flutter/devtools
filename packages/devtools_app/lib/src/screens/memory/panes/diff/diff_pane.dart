@@ -224,7 +224,7 @@ class _SnapshotListContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final itemLocal = item;
     if (itemLocal is InformationListItem)
-      return const Text('Information about snapshots will be here.');
+      return const Text('Introduction to snapshot diffing will be here.');
     if (itemLocal is SnapshotListItem)
       return Text('Content of ${itemLocal.name} will be here.');
     throw 'Unexpected type of the item: ${itemLocal.runtimeType}';
