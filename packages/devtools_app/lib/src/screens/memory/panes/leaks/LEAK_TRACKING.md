@@ -67,7 +67,7 @@ For example, out of four not-GCed leaks on this diagram, only one is culprit, be
 
 The tool detects leaks for disposable and instrumented classes only (with note that the fixed leak can fix other objects too). 
 
-Some classes in Flutter framework are already instrumented. If you want your classes to be tracked, you need to make them disposable and instrument.
+Some classes in Flutter framework are already instrumented. If you want your classes to be tracked, you need to make them disposable and [instrument](#instrument).
 
 ## Use the Leak Tracker
 
@@ -107,7 +107,7 @@ As Flutter widgets are instrumented, you just need to turn on the leak tracking.
 
 Invoke `ensureInitialized` and `startAppLeakTracking` before `runApp` like [the example app does](https://github.com/polina-c/spikes/blob/master/leaking_app/lib/main.dart#L7) and then follow the steps for demo app.
 
-### Add instrumentation to your classes
+### Add instrumentation to your classes <a id='instrument'></a>
 
 Invoke `startObjectLeakTracking` in constructor or initializer (that is invoked only once), and `registerDisposal` in the method `dispose`
 like [the example app does](https://github.com/polina-c/spikes/blob/master/leaking_app/lib/tracked_class.dart).
