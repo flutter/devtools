@@ -109,14 +109,18 @@ Invoke `ensureInitialized` and `startAppLeakTracking` before `runApp` like [the 
 
 ### Add instrumentation to your classes <a id='instrument'></a>
 
-Invoke `startObjectLeakTracking` in constructor or initializer (that is invoked only once), and `registerDisposal` in the method `dispose`
+The tool needs to know which objects to track and it needs to know when disposal for these objects happened.
+
+To provide this information to the tool, invoke `startObjectLeakTracking` in constructor or initializer (that is invoked only once), and `registerDisposal` in the method `dispose`
 like [the example app does](https://github.com/polina-c/spikes/blob/master/leaking_app/lib/tracked_class.dart).
 
 You can pass information, that will help you troubleshoot the leak, to the optional parameter `details`.
 
 ### Troubleshoot the detected leaks
 
-#### Provide additional details
+The challenging question of the leak troubleshooting is how to find the detected leak in the code. There are tips that can help.
+
+#### Give additional details to the tool
 
 It helps to provide the object's details, which you want to be included into the analysis, to the tool. Be careful doing this, because storing additional information for each instance of a class may impact debug/profile performance of the application and thus make user experience
 different from release one.
@@ -135,3 +139,7 @@ or, provide some other details in a separate invocation:
 ```
 addLeakTrackingDetails(this, 'Serves the stream $streamName.');
 ```
+#### Evalueate the leaked objects with DevTools Memory Evaluator
+
+the feature is under construction
+
