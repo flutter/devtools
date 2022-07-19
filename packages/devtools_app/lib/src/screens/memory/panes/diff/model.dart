@@ -21,8 +21,11 @@ class InformationListItem extends DiffListItem {
 }
 
 class SnapshotListItem extends DiffListItem {
-  SnapshotListItem(Future<HeapSnapshotGraph?> graphReceiver, this.displayNumber,
-      this._isolateName) {
+  SnapshotListItem(
+    Future<HeapSnapshotGraph?> graphReceiver,
+    this.displayNumber,
+    this._isolateName,
+  ) {
     _isProcessing.value = true;
     graphReceiver.whenComplete(() async {
       _isProcessing.value = false;
