@@ -7,13 +7,9 @@ import 'dart:convert';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 
+import '../../devtools_app.dart';
 import '../config_specific/drag_and_drop/drag_and_drop.dart';
-import '../primitives/utils.dart';
 import '../ui/label.dart';
-import 'common_widgets.dart';
-import 'notifications.dart';
-import 'theme.dart';
-import 'utils.dart';
 
 class FileImportContainer extends StatefulWidget {
   const FileImportContainer({
@@ -354,8 +350,6 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
   }
 
   Widget _buildActionButton() {
-    final notifications = Notifications.of(context)!;
-
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -368,7 +362,7 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
                   ? () => widget.onAction(
                         firstImportedFile!,
                         secondImportedFile!,
-                        (error) => notifications.push(error),
+                        (error) => notificationService.push(error),
                       )
                   : null,
               child: MaterialIconLabel(

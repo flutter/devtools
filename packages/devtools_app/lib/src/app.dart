@@ -131,6 +131,8 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     });
 
     releaseNotesController = ReleaseNotesController();
+
+    setGlobal(NotificationService, Notifications.of(context));
   }
 
   @override

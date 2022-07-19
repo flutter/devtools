@@ -46,7 +46,7 @@ void main() async {
     late TestNotifications notifications;
     setUp(() {
       notifications = TestNotifications();
-      importController = ImportController(notifications, (_) {});
+      importController = ImportController((_) {});
       setGlobal(OfflineModeController, OfflineModeController());
       setGlobal(ServiceConnectionManager, FakeServiceManager());
     });

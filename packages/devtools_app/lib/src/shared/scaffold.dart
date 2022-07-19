@@ -19,7 +19,6 @@ import 'banner_messages.dart';
 import 'common_widgets.dart';
 import 'framework_controller.dart';
 import 'globals.dart';
-import 'notifications.dart';
 import 'routing.dart';
 import 'screen.dart';
 import 'split.dart';
@@ -162,7 +161,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     super.didChangeDependencies();
 
     _importController = ImportController(
-      Notifications.of(context)!,
+      // Notifications.of(context)!,
       _pushSnapshotScreenForImport,
     );
     // This needs to be called at the scaffold level because we need an instance

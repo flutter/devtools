@@ -195,21 +195,20 @@ class _ConnectDialogState extends State<ConnectDialog>
     // intuitive that we don't want to just cancel the route change or
     // notification if we are already on a different screen.
     final routerDelegate = DevToolsRouterDelegate.of(context);
-    final notifications = Notifications.of(context)!;
     final connected = await FrameworkCore.initVmService(
       '',
       explicitUri: uri,
       errorReporter: (message, error) {
-        notifications.push('$message $error');
+        notificationService.push('$message $error');
       },
     );
     if (connected) {
       final connectedUri = serviceManager.service!.connectedUri;
       routerDelegate.updateArgsIfNotCurrent({'uri': '$connectedUri'});
       final shortUri = connectedUri.replace(path: '');
-      notifications.push('Successfully connected to $shortUri.');
+      notificationService.push('Successfully connected to $shortUri.');
     } else if (uri == null) {
-      notifications.push(
+      notificationService.push(
         'Failed to connect to the VM Service at "${connectDialogController.text}".\n'
         'The link was not valid.',
       );
