@@ -334,6 +334,12 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
           const MaterialScrollBehavior().copyWith(scrollbars: !kIsWeb),
     );
   }
+
+  @override
+  void dispose() {
+    setGlobal(NotificationService, null);
+    super.dispose();
+  }
 }
 
 /// DevTools screen wrapper that is responsible for creating and providing the
