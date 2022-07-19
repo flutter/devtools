@@ -53,15 +53,20 @@ class AppSizeAnalysisTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TreeTable<TreemapNode>(
-      dataRoots: [rootNode],
-      columns: columns,
-      treeColumn: treeColumn,
-      keyFactory: (node) => PageStorageKey<String>(node.name),
-      sortColumn: sortColumn,
-      sortDirection: SortDirection.descending,
-      selectionNotifier: controller.analysisRoot,
-      autoExpandRoots: true,
+    return ValueListenableBuilder<Selection<TreemapNode>>(
+      valueListenable: controller.analysisRoot,
+      builder: (context, analysisRootValue, _) {
+        return TreeTable<TreemapNode>(
+          dataRoots: [rootNode],
+          columns: columns,
+          treeColumn: treeColumn,
+          keyFactory: (node) => PageStorageKey<String>(node.name),
+          sortColumn: sortColumn,
+          sortDirection: SortDirection.descending,
+          selectionNotifier: controller.analysisRoot,
+          autoExpandRoots: true,
+        );
+      },
     );
   }
 }

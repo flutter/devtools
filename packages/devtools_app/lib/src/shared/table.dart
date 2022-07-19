@@ -9,20 +9,12 @@ import 'package:flutter/material.dart' hide TableRow;
 import 'package:flutter/services.dart';
 
 import '../../devtools_app.dart';
-import '../primitives/auto_dispose_mixin.dart';
 import '../primitives/flutter_widgets/linked_scroll_controller.dart';
-import '../primitives/listenable.dart';
-import '../primitives/trees.dart';
-import '../primitives/utils.dart';
 import '../ui/colors.dart';
-import '../ui/search.dart';
 import '../ui/utils.dart';
 import 'collapsible_mixin.dart';
-import 'common_widgets.dart';
 import 'table_data.dart';
-import 'theme.dart';
 import 'tree.dart';
-import 'utils.dart';
 
 // TODO(devoncarew): We need to render the selected row with a different
 // background color.
@@ -434,6 +426,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 
   @override
   void didUpdateWidget(TreeTable<T> oldWidget) {
+    print("calling didUPdateWidget");
     super.didUpdateWidget(oldWidget);
 
     if (widget == oldWidget) return;
@@ -442,6 +435,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 
     addAutoDisposeListener(selectionNotifier, () {
       setState(() {
+        print("listening to selectionNotifier");
         final node = selectionNotifier.value.node;
         expandParents(node?.parent);
       });
