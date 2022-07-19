@@ -4,11 +4,14 @@
  * found in the LICENSE file.
  */
 
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
 import '../primitives/enum_utils.dart';
 import '../primitives/utils.dart';
+import '../shared/table.dart';
 import '../shared/theme.dart';
 
 /// Returns a [TextSpan] that only includes the first [length] characters of
@@ -189,8 +192,10 @@ void scrollToPosition(
   );
 
   if (!extentVisible.contains(position)) {
+    final positionToScrollTo = max(0.0, position - defaultRowHeight);
+
     scrollController.animateTo(
-      position.clamp(0.0, scrollController.position.maxScrollExtent),
+      positionToScrollTo,
       duration: defaultDuration,
       curve: defaultCurve,
     );
