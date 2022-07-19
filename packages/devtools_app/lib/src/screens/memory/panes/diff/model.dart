@@ -9,18 +9,18 @@ abstract class DiffListItem with ChangeNotifier {
   /// Number, that, if shown in name, should be unique in the list.
   ///
   /// If the number is not shown, it should be 0.
-  int get nameNumber;
+  int get displayNumber;
 
   bool isProcessing = false;
 }
 
 class InformationListItem extends DiffListItem {
   @override
-  int get nameNumber => 0;
+  int get displayNumber => 0;
 }
 
 class SnapshotListItem extends DiffListItem {
-  SnapshotListItem(this.graph, this.nameNumber, this.isolateName) {
+  SnapshotListItem(this.graph, this.displayNumber, this.isolateName) {
     isProcessing = true;
     graph.whenComplete(() {
       isProcessing = false;
@@ -31,9 +31,9 @@ class SnapshotListItem extends DiffListItem {
   final String isolateName;
 
   @override
-  final int nameNumber;
+  final int displayNumber;
   Future<HeapSnapshotGraph?> graph;
 
   @override
-  String get name => '$isolateName-$nameNumber';
+  String get name => '$isolateName-$displayNumber';
 }
