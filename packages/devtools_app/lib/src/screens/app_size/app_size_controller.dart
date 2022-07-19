@@ -11,7 +11,6 @@ import 'package:vm_snapshot_analysis/utils.dart';
 import 'package:vm_snapshot_analysis/v8_profile.dart';
 
 import '../../charts/treemap.dart';
-import '../../primitives/trees.dart';
 import '../../primitives/utils.dart';
 import '../../shared/table.dart';
 import 'app_size_screen.dart';
@@ -59,15 +58,9 @@ class AppSizeController {
       return;
     }
 
-    final searchCondition = (TreemapNode n) => n == newAnalysisRoot;
-    final int selectedRowIndex = newAnalysisRoot.root.childCountToMatchingNode(
-      matchingNodeCondition: searchCondition,
-      includeCollapsedNodes: false,
-    );
-
     analysisRoot.value = Selection(
       node: newAnalysisRoot,
-      nodeIndex: selectedRowIndex,
+      nodeIndexCalculator: nodeIndexCalculator,
       scrollIntoView: true,
     );
 
@@ -81,6 +74,14 @@ class AppSizeController {
       _analysisCallGraphRoot.value =
           _analysisCallGraph!.lookup(programInfoNode);
     }
+  }
+
+  int nodeIndexCalculator(TreemapNode newAnalysisRoot) {
+    final searchCondition = (TreemapNode n) => n == newAnalysisRoot;
+    return newAnalysisRoot.root.childCountToMatchingNode(
+      matchingNodeCondition: searchCondition,
+      includeCollapsedNodes: false,
+    );
   }
 
   ValueListenable<DevToolsJsonFile?> get analysisJsonFile => _analysisJsonFile;

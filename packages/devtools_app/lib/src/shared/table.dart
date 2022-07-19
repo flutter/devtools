@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide TableRow;
 import 'package:flutter/services.dart';
 
+import '../../devtools_app.dart';
 import '../primitives/auto_dispose_mixin.dart';
 import '../primitives/flutter_widgets/linked_scroll_controller.dart';
 import '../primitives/listenable.dart';
@@ -323,11 +324,13 @@ class Selection<T> {
   Selection({
     this.node,
     this.nodeIndex,
+    this.nodeIndexCalculator,
     this.scrollIntoView = false,
   });
 
   final T? node;
   final int? nodeIndex;
+  final int Function(T)? nodeIndexCalculator;
   final bool scrollIntoView;
 }
 
@@ -785,7 +788,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 // TODO(kenz): https://github.com/flutter/devtools/issues/1522. The table code
 // needs to be refactored to support flexible column widths.
 class _Table<T> extends StatefulWidget {
-  _Table({
+  const _Table({
     Key? key,
     required this.data,
     required this.columns,
@@ -861,10 +864,12 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
     addAutoDisposeListener(oldWidget.selectionNotifier, () {
       setState(() {
         final Selection<T> selection = oldWidget.selectionNotifier!.value;
+
         if (selection.scrollIntoView) {
-          final int selectedDisplayRow = selection.nodeIndex!;
-          // TODO(terry): Optimize selecting row, if row's visible in
-          //              the viewport just select otherwise jumpTo row.
+          final int selectedDisplayRow = selection.nodeIndexCalculator != null
+              ? selection.nodeIndexCalculator!(selection.node!)
+              : selection.nodeIndex!;
+
           final newPos = selectedDisplayRow * defaultRowHeight;
 
           scrollToPosition(scrollController, newPos);
