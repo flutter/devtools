@@ -39,13 +39,13 @@ myField = null;
 
 If you have a set of not-GCed objects, some of them (victims) may be not GC-ed because they are held by others (culprits). Normally, to fix the leaks, you need to fix just culprits.
 
-**Victim**: a leaked object, for which the tool could find other leaked object, that, if fixed, would fix the first leak too.
+**Victim**: a leaked object, for which the tool could find another leaked object, that, if fixed, would fix the first leak too.
 
-**Culprit**: a leaked object that is not detected to be other object victim.
+**Culprit**: a leaked object that is not detected to be the victim of another object.
 
 The tool detects which leaked objects are culprits, so you know where to focus.
 
-For example, out of four not-GCed leaks on this diagram, only one is culprit, because, when the object is fixed and gets GCed, the objects it referenced, will be also GCed:
+For example, out of four not-GCed leaks on this diagram, only one is the culprit, because, when the object is fixed and gets GCed, the victims it referenced, will be also GCed:
 
 
 ```mermaid
@@ -67,7 +67,7 @@ For example, out of four not-GCed leaks on this diagram, only one is culprit, be
 
 The tool detects leaks for disposable and instrumented classes only (with note that the fixed leak can fix other objects too). 
 
-Some classes in Flutter framework are already instrumented. If you want your classes to be tracked, you need to make them disposable and [instrument](#instrument).
+Some classes in Flutter framework are already instrumented. If you want your classes to be tracked, you need to make them disposable and [instrument](#instrument them).
 
 ## Use the Leak Tracker
 
@@ -111,14 +111,14 @@ Invoke `ensureInitialized` and `startAppLeakTracking` before `runApp` like [the 
 
 The tool needs to know which objects to track and it needs to know when disposal for these objects happened.
 
-To provide this information to the tool, invoke `startObjectLeakTracking` in constructor or initializer (that is invoked only once), and `registerDisposal` in the method `dispose`
+To provide this information for objects of a certain class to the tool, invoke `startObjectLeakTracking` in constructor or initializer (that is invoked only once), and invoke `registerDisposal` in the method `dispose`
 like [the example app does](https://github.com/polina-c/spikes/blob/master/leaking_app/lib/tracked_class.dart).
 
 You can pass information, that will help you troubleshoot the leak, to the optional parameter `details`.
 
 ### Troubleshoot the detected leaks
 
-The challenging question of the leak troubleshooting is how to find the detected leak in the code. There are tips that can help.
+The challenging question of the leak troubleshooting is how to find the detected leak in the code. Here are some tips that may help.
 
 #### Give additional details to the tool
 
@@ -139,7 +139,7 @@ or, provide some other details in a separate invocation:
 ```
 addLeakTrackingDetails(this, 'Serves the stream $streamName.');
 ```
-#### Evalueate the leaked objects with DevTools Memory Evaluator
+#### Evaluate the leaked objects with DevTools Memory Evaluator
 
 the feature is under construction
 
