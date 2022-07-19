@@ -472,9 +472,9 @@ class IntrinsicOperationsHint extends StatelessWidget {
               style: theme.fixedFontStyle,
             ),
             TextSpan(
-              text:
-                  ' passes were performed $intrinsicOperationsCount times during '
-                  'this frame.',
+              text: ' passes were performed $intrinsicOperationsCount '
+                  '${pluralize('time', intrinsicOperationsCount)} during this '
+                  'frame.',
               style: theme.regularTextStyle,
             ),
           ],
@@ -514,8 +514,8 @@ class CanvasSaveLayerHint extends StatelessWidget {
               style: theme.fixedFontStyle,
             ),
             TextSpan(
-              text: ' was called $saveLayerCount times '
-                  'during this frame.',
+              text: ' was called $saveLayerCount '
+                  '${pluralize('time', saveLayerCount)} during this frame.',
               style: theme.regularTextStyle,
             ),
           ],
