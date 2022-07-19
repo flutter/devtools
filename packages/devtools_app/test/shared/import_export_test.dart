@@ -7,6 +7,7 @@ import 'package:devtools_app/src/config_specific/import_export/import_export.dar
 import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/notifications.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -44,11 +45,13 @@ void main() async {
   group('ImportControllerTest', () {
     late ImportController importController;
     late TestNotifications notifications;
+
     setUp(() {
       notifications = TestNotifications();
       importController = ImportController((_) {});
       setGlobal(OfflineModeController, OfflineModeController());
       setGlobal(ServiceConnectionManager, FakeServiceManager());
+      setGlobal(NotificationService, notifications);
     });
 
     test('importData pushes proper notifications', () async {
