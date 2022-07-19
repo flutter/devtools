@@ -183,7 +183,6 @@ void scrollToPosition(
   ScrollController scrollController,
   double position,
 ) {
-  //TODO Add padding so if a row is half out of screen it will still jump
   final extentVisible = Range(
     scrollController.offset,
     scrollController.offset + scrollController.position.extentInside,
@@ -191,8 +190,7 @@ void scrollToPosition(
 
   if (!extentVisible.contains(position)) {
     scrollController.animateTo(
-      //TODO: Position should be position.clamp(0.0, scrollController.position.maxScrollExtent) but maxScrollExtent is not being updated
-      position,
+      position.clamp(0.0, scrollController.position.maxScrollExtent),
       duration: defaultDuration,
       curve: defaultCurve,
     );

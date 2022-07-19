@@ -58,8 +58,6 @@ class AppSizeController {
       return;
     }
 
-    print("changing selectionNotifier");
-
     analysisRoot.value = Selection(
       node: newAnalysisRoot,
       nodeIndexCalculator: nodeIndexCalculator,

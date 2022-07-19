@@ -405,6 +405,16 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   void initState() {
     super.initState();
     _initData();
+
+    addAutoDisposeListener(selectionNotifier, () {
+      setState(() {
+        final node = selectionNotifier.value.node;
+        if (node != null) {
+          expandParents(node.parent);
+        }
+      });
+    });
+
     rootsExpanded =
         List.generate(dataRoots.length, (index) => dataRoots[index].isExpanded);
     _updateItems();
@@ -426,20 +436,10 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 
   @override
   void didUpdateWidget(TreeTable<T> oldWidget) {
-    print("calling didUPdateWidget");
     super.didUpdateWidget(oldWidget);
 
     if (widget == oldWidget) return;
 
-    cancelListeners();
-
-    addAutoDisposeListener(selectionNotifier, () {
-      setState(() {
-        print("listening to selectionNotifier");
-        final node = selectionNotifier.value.node;
-        expandParents(node?.parent);
-      });
-    });
 
     if (widget.sortColumn != oldWidget.sortColumn ||
         widget.sortDirection != oldWidget.sortDirection ||
@@ -843,35 +843,28 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
     sortColumn = widget.sortColumn;
     sortDirection = widget.sortDirection;
     scrollController = ScrollController();
-
+    _addScrollListener(widget.selectionNotifier);
     _initSearchListener();
   }
 
-  @override
-  void didUpdateWidget(_Table<T> oldWidget) {
-    super.didUpdateWidget(oldWidget);
 
-    cancelListeners();
+  void _addScrollListener(ValueNotifier<Selection<T>>? selectionNotifier) {
+    if (selectionNotifier != null) {
+      addAutoDisposeListener(selectionNotifier, () {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          final Selection<T> selection = selectionNotifier.value;
+          if (selection.scrollIntoView) {
+            final int selectedDisplayRow = selection.nodeIndexCalculator != null
+                ? selection.nodeIndexCalculator!(selection.node!)
+                : selection.nodeIndex!;
 
-    // TODO(kenz): pull this code into a helper and also call from initState.
-    // Detect selection changes but only care about scrollIntoView.
-    addAutoDisposeListener(oldWidget.selectionNotifier, () {
-      setState(() {
-        final Selection<T> selection = oldWidget.selectionNotifier!.value;
+            final newPos = selectedDisplayRow * defaultRowHeight;
 
-        if (selection.scrollIntoView) {
-          final int selectedDisplayRow = selection.nodeIndexCalculator != null
-              ? selection.nodeIndexCalculator!(selection.node!)
-              : selection.nodeIndex!;
-
-          final newPos = selectedDisplayRow * defaultRowHeight;
-
-          scrollToPosition(scrollController, newPos);
-        }
+            scrollToPosition(scrollController, newPos);
+          }
+        });
       });
-    });
-
-    _initSearchListener();
+    }
   }
 
   void _initSearchListener() {
