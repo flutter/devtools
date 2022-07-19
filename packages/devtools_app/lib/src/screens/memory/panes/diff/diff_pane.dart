@@ -5,7 +5,10 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../../devtools_app.dart';
+import '../../../../primitives/utils.dart';
+import '../../../../shared/common_widgets.dart';
+import '../../../../shared/split.dart';
+import '../../../../shared/theme.dart';
 import '../../../../ui/colors.dart';
 import '../../primitives/memory_utils.dart';
 import 'model.dart';
@@ -23,26 +26,21 @@ class DiffPane extends StatefulWidget {
   State<DiffPane> createState() => _DiffPaneState();
 }
 
-/// Will notify if count of items or current index changed.
-class _DiffPaneController with ChangeNotifier {
-  _DiffPaneController() {
-    index.addListener(() => notifyListeners());
-  }
-
+class _DiffPaneController {
   final scrollController = ScrollController();
 
   /// The list contains one item that show information and all others
   /// are snapshots.
-  final snapshots = <DiffListItem>[InformationListItem()];
+  final snapshots = ListValueNotifier(<DiffListItem>[InformationListItem()]);
 
   final index = ValueNotifier<int>(0);
 
   /// If true, some process is going on.
   final isProcessing = ValueNotifier<bool>(false);
 
-  DiffListItem get selected => snapshots[index.value];
+  DiffListItem get selected => snapshots.value[index.value];
 
-  bool get hasSnapshots => snapshots.length > 1;
+  bool get hasSnapshots => snapshots.value.length > 1;
 
   Future<void> takeSnapshot() async {
     isProcessing.value = true;
@@ -55,22 +53,20 @@ class _DiffPaneController with ChangeNotifier {
       ),
     );
 
-    notifyListeners();
     await future;
-    final newElementIndex = snapshots.length - 1;
+    final newElementIndex = snapshots.value.length - 1;
     scrollController.autoScrollToBottom();
     index.value = newElementIndex;
     isProcessing.value = false;
   }
 
   Future<void> clearSnapshots() async {
-    snapshots.removeRange(1, snapshots.length);
+    snapshots.removeRange(1, snapshots.value.length);
     index.value = 0;
-    notifyListeners();
   }
 
   int _nextNameNumber() {
-    final numbers = snapshots.map((e) => e.nameNumber);
+    final numbers = snapshots.value.map((e) => e.nameNumber);
     assert(numbers.isNotEmpty);
     return numbers.max + 1;
   }
@@ -81,12 +77,10 @@ class _DiffPaneController with ChangeNotifier {
     index.value = index.value - 1;
   }
 
-  @override
   void dispose() {
-    for (var e in snapshots) {
+    for (var e in snapshots.value) {
       e.dispose();
     }
-    super.dispose();
   }
 }
 
@@ -95,32 +89,35 @@ class _DiffPaneState extends State<DiffPane> {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: controller,
-      builder: (_, __) => Split(
-        axis: Axis.horizontal,
-        initialFractions: const [0.2, 0.8],
-        minSizes: const [80, 80],
-        children: [
-          Column(
-            children: [
-              _ListControlPane(controller: controller),
-              Expanded(
-                child: _SnapshotList(controller: controller),
-              ),
-            ],
-          ),
-          Column(
-            children: [
-              if (controller.selected is SnapshotListItem)
-                _ContentControlPane(controller: controller),
-              Expanded(
-                child: _SnapshotListContent(item: controller.selected),
-              ),
-            ],
-          ),
-        ],
-      ),
+    return DualValueListenableBuilder(
+      firstListenable: controller.snapshots,
+      secondListenable: controller.index,
+      builder: (_, snapshots, index, __) {
+        return Split(
+          axis: Axis.horizontal,
+          initialFractions: const [0.2, 0.8],
+          minSizes: const [80, 80],
+          children: [
+            Column(
+              children: [
+                _ListControlPane(controller: controller),
+                Expanded(
+                  child: _SnapshotList(controller: controller),
+                ),
+              ],
+            ),
+            Column(
+              children: [
+                if (controller.selected is SnapshotListItem)
+                  _ContentControlPane(controller: controller),
+                Expanded(
+                  child: _SnapshotListContent(item: controller.selected),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -140,15 +137,15 @@ class _SnapshotList extends StatelessWidget {
     return ListView.builder(
       controller: controller.scrollController,
       shrinkWrap: true,
-      itemCount: controller.snapshots.length,
+      itemCount: controller.snapshots.value.length,
       itemBuilder: (context, index) {
         return ListTile(
           title: _SnapshotListTitle(
-            item: controller.snapshots[index],
+            item: controller.snapshots.value[index],
             selected: index == controller.index.value,
           ),
           onTap: () => controller.index.value = index,
-          key: GlobalObjectKey(controller.snapshots[index]),
+          key: GlobalObjectKey(controller.snapshots.value[index]),
         );
       },
     );
@@ -196,13 +193,12 @@ class _SnapshotListTitle extends StatelessWidget {
 
 class _ProgressIndicator extends StatelessWidget {
   const _ProgressIndicator({Key? key}) : super(key: key);
-  static const _progressIndicatorSize = 16.0;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: _progressIndicatorSize,
-      height: _progressIndicatorSize,
+      width: smallProgressSize,
+      height: smallProgressSize,
       child: CircularProgressIndicator(
         color: Theme.of(context).textTheme.bodyText1?.color,
       ),
