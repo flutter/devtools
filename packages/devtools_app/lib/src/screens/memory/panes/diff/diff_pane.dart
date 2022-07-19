@@ -167,7 +167,6 @@ class _SnapshotListTitle extends StatelessWidget {
       valueListenable: theItem.isProcessing,
       builder: (_, isProcessing, __) => Row(
         children: [
-          //_SelectionBox(selected: selected),
           const SizedBox(width: denseRowSpacing),
           if (theItem is SnapshotListItem)
             Expanded(
@@ -204,28 +203,6 @@ class _ProgressIndicator extends StatelessWidget {
     );
   }
 }
-
-// /// Blue or transparent square, to mark selected item.
-// class _SelectionBox extends StatelessWidget {
-//   const _SelectionBox({Key? key, required this.selected}) : super(key: key);
-//   static const _boxSize = Size(3.0, 40.0);
-//   final bool selected;
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return SizedBox(
-//       width: _boxSize.width,
-//       height: _boxSize.height,
-//       child: selected
-//           ? const DecoratedBox(
-//               decoration: BoxDecoration(
-//                 color: defaultSelectionColor,
-//               ),
-//             )
-//           : null,
-//     );
-//   }
-// }
 
 class _SnapshotListContent extends StatelessWidget {
   const _SnapshotListContent({Key? key, required this.item}) : super(key: key);
