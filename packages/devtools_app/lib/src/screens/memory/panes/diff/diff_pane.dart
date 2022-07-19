@@ -18,7 +18,7 @@ import 'model.dart';
 ///
 /// Flip this flag locally to test the pane and flip back before checking in.
 /// TODO: before removing this flag add widget/golden testing for the diff pane.
-const shouldShowDiffPane = true;
+const shouldShowDiffPane = false;
 
 class _DiffPaneController {
   final scrollController = ScrollController();
