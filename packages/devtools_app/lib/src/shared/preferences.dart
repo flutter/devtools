@@ -128,28 +128,23 @@ class InspectorPreferencesController extends DisposableController
   Future<void> addPubRootDirectories(
     List<String> pubRootDirectories,
   ) async {
-    await _customPubRootDirectoryBusyTracker(
-      Future<void>(() async {
+    await _customPubRootDirectoryBusyTracker(() async {
         await inspectorService.addPubRootDirectories(pubRootDirectories);
         await _refreshPubRootDirectoriesFromService();
-      }),
-    );
+    });
   }
 
   Future<void> removePubRootDirectories(
     List<String> pubRootDirectories,
   ) async {
-    await _customPubRootDirectoryBusyTracker(
-      Future<void>(() async {
+    await _customPubRootDirectoryBusyTracker(() async {
         await inspectorService.removePubRootDirectories(pubRootDirectories);
         await _refreshPubRootDirectoriesFromService();
-      }),
-    );
+    });
   }
 
   Future<void> _refreshPubRootDirectoriesFromService() async {
-    await _customPubRootDirectoryBusyTracker(
-      Future<void>(() async {
+    await _customPubRootDirectoryBusyTracker(() async {
         final freshPubRootDirectories =
             await inspectorService.getPubRootDirectories();
         if (freshPubRootDirectories != null) {
@@ -161,13 +156,11 @@ class InspectorPreferencesController extends DisposableController
           _customPubRootDirectories.removeAll(directoriesToRemove);
           _customPubRootDirectories.addAll(directoriesToAdd);
         }
-      }),
-    );
+    });
   }
 
   Future<void> loadCustomPubRootDirectories() async {
-    await _customPubRootDirectoryBusyTracker(
-      Future<void>(() async {
+    await _customPubRootDirectoryBusyTracker(() async {
         final storedCustomPubRootDirectories =
             await storage.getValue(_customPubRootDirectoriesStorageId);
 
@@ -178,14 +171,15 @@ class InspectorPreferencesController extends DisposableController
             ),
           );
         }
-      }),
-    );
+    });
   }
 
-  Future<void> _customPubRootDirectoryBusyTracker(Future<void> callback) async {
+  Future<void> _customPubRootDirectoryBusyTracker(
+    Future<void> Function() callback,
+  ) async {
     try {
       _busyCounter.value++;
-      await callback.timeout(const Duration(seconds: 10));
+      await callback();
     } finally {
       _busyCounter.value--;
     }
