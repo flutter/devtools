@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import '../../../../primitives/utils.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/split.dart';
+import '../../../../shared/table.dart';
 import '../../../../shared/theme.dart';
 import '../../primitives/memory_utils.dart';
 import 'model.dart';
@@ -134,15 +135,19 @@ class _SnapshotList extends StatelessWidget {
       shrinkWrap: true,
       itemCount: controller.snapshots.value.length,
       itemBuilder: (context, index) {
-        return ListTile(
-          tileColor: controller.selectedIndex.value == index
+        return Container(
+          height: defaultRowHeight,
+          color: controller.selectedIndex.value == index
               ? Theme.of(context).selectedRowColor
               : null,
-          title: _SnapshotListTitle(
-            item: controller.snapshots.value[index],
-            selected: index == controller.selectedIndex.value,
+          child: InkWell(
+            canRequestFocus: false,
+            onTap: () => controller.selectedIndex.value = index,
+            child: _SnapshotListTitle(
+              item: controller.snapshots.value[index],
+              selected: index == controller.selectedIndex.value,
+            ),
           ),
-          onTap: () => controller.selectedIndex.value = index,
         );
       },
     );
@@ -177,7 +182,8 @@ class _SnapshotListTitle extends StatelessWidget {
               child: Text('Snapshots', overflow: TextOverflow.ellipsis),
             ),
             const SizedBox(width: denseRowSpacing),
-            const Icon(Icons.info_outline),
+            const Text('\u{24D8}'),
+            const SizedBox(width: denseRowSpacing),
           ],
           if (isProcessing) ...[
             const _ProgressIndicator(),
