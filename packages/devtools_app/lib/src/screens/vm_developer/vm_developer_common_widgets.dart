@@ -10,6 +10,7 @@ import '../../primitives/utils.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/table.dart';
 import '../../shared/theme.dart';
+import 'vm_service_private_extensions.dart';
 
 /// A convenience widget used to create non-scrollable information cards.
 ///
@@ -125,15 +126,6 @@ Widget _buildAlternatingRow(BuildContext context, int index, Widget row) {
   );
 }
 
-/// A Refresh ToolbarAction button.
-class ToolbarRefresh extends ToolbarAction {
-  const ToolbarRefresh({
-    super.icon = Icons.refresh,
-    required super.onPressed,
-    super.tooltip = 'Refresh',
-  });
-}
-
 /// An IconLabelButton with label 'Request' and a 'call made' icon.
 class RequestDataButton extends IconLabelButton {
   const RequestDataButton({
@@ -154,21 +146,22 @@ class RequestableSizeWidget extends StatelessWidget {
   });
 
   final InstanceRef? requestedSize;
-  final void Function()? requestFunction;
+  final void Function() requestFunction;
 
   @override
   Widget build(BuildContext context) {
-    if (requestedSize == null) {
+    final size = requestedSize;
+    if (size == null) {
       return RequestDataButton(onPressed: requestFunction);
     } else {
       return Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           Text(
-            requestedSize!.valueAsString == null
+            size.valueAsString == null
                 ? '--'
                 : prettyPrintBytes(
-                    int.parse(requestedSize!.valueAsString!),
+                    int.parse(size.valueAsString!),
                     includeUnit: true,
                     kbFractionDigits: 1,
                     maxBytes: 512,
@@ -198,13 +191,26 @@ String? _objectName(ObjRef? objectRef) {
 
 /// Recursively gets the full owner name of a field or function object.
 String? _ownerName(ObjRef? ref) {
-  if (ref == null) return '';
+  if (ref == null) return null;
   if (ref is FuncRef) {
     return '${_ownerName(ref.owner)}.${_objectName(ref)}';
   } else if (ref is FieldRef) {
     return '${_ownerName(ref.owner)}.${_objectName(ref)}';
   } else {
     return _objectName(ref) ?? '<unknown>';
+  }
+}
+
+// Returns a description of the object containing its name and owner.
+String? _objectDescription(ObjRef? object) {
+  if (object == null) {
+    return null;
+  } else if (object is FieldRef) {
+    return ' ${object.declaredType?.name ?? 'Field'} ${object.name} of ${_ownerName(object.owner) ?? '<Owner>'}';
+  } else if (object is FuncRef) {
+    return ' ${_ownerName(object.owner) ?? '<Owner>'}.${object.name}';
+  } else {
+    return ' ${_objectName(object)}';
   }
 }
 
@@ -232,9 +238,21 @@ class VmExpansionTile extends StatelessWidget {
       child: ExpansionTile(
         title: titleRow,
         onExpansionChanged: onExpanded,
-        tilePadding: const EdgeInsets.all(4.0),
+        tilePadding: const EdgeInsets.all(densePadding),
         children: children,
       ),
+    );
+  }
+}
+
+class SizedCircularProgressIndicator extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox.fromSize(
+      size: const Size.fromHeight(
+        2 * (defaultIconSizeBeforeScaling + denseSpacing),
+      ),
+      child: const CenteredCircularProgressIndicator(),
     );
   }
 }
@@ -253,23 +271,28 @@ class RetainingPathWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return ValueListenableBuilder<RetainingPath?>(
       valueListenable: retainingPath,
-      builder: (context, retainingPath, child) {
+      builder: (context, retainingPath, _) {
+        final retainingObjects = retainingPath == null
+            ? <Widget>[]
+            : _retainingPathList(
+                context,
+                retainingPath,
+              );
         return VmExpansionTile(
           title: 'Retaining Path',
           onExpanded: onExpanded,
           children: retainingPath == null
               ? [
-                  SizedBox.fromSize(
-                    size: const Size.fromHeight(
-                      2 * (defaultIconSizeBeforeScaling + denseSpacing),
-                    ),
-                    child: const CenteredCircularProgressIndicator(),
-                  )
+                  SizedCircularProgressIndicator(),
                 ]
-              : _retainingPathList(
-                  context,
-                  retainingPath,
-                ),
+              : [
+                  SizedBox.fromSize(
+                    size: Size.fromHeight(
+                      retainingObjects.length * defaultRowHeight,
+                    ),
+                    child: Column(children: retainingObjects),
+                  ),
+                ],
         );
       },
     );
@@ -296,7 +319,11 @@ class RetainingPathWidget extends StatelessWidget {
         : emptyList;
 
     final retainingObjects = [
-      Row(children: [firstRetainingObject]),
+      Row(
+        children: [
+          firstRetainingObject,
+        ],
+      ),
       if (retainingPath.elements!.length > 1)
         for (RetainingObject object in retainingPath.elements!.sublist(1))
           Row(
@@ -317,9 +344,7 @@ class RetainingPathWidget extends StatelessWidget {
       )
     ];
 
-    final retainingObjectsRows = _prettyRows(context, retainingObjects);
-
-    return <Widget>[...retainingObjectsRows];
+    return _prettyRows(context, retainingObjects);
   }
 
   /// Describes the given RetainingObject [object] and its parentListIndex,
@@ -335,24 +360,17 @@ class RetainingPathWidget extends StatelessWidget {
       return 'Retained by element [${object.parentMapKey}] of ${ref.classRef?.name ?? '<parentMapName>'}';
     }
 
-    String description = 'Retained by';
+    final description = StringBuffer('Retained by');
 
     if (object.parentField != null) {
-      description += ' ${object.parentField} of ';
+      description.write(' ${object.parentField} of ');
     }
 
-    if (object.value is FieldRef) {
-      final ref = object.value as FieldRef;
-      description +=
-          ' ${ref.declaredType?.name ?? 'Field'} ${ref.name} of ${_ownerName(ref.owner) ?? '<Owner>'}';
-    } else if (object.value is FuncRef) {
-      final ref = object.value as FuncRef;
-      description += ' ${_ownerName(ref.owner) ?? '<Owner>'}.${ref.name}';
-    } else {
-      description += ' ${_objectName(object.value)}';
-    }
+    description.write(
+      _objectDescription(object.value),
+    );
 
-    return description;
+    return description.toString();
   }
 }
 
@@ -371,23 +389,26 @@ class InboundReferencesWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return ValueListenableBuilder<InboundReferences?>(
       valueListenable: inboundReferences,
-      builder: (context, inboundReferences, child) {
+      builder: (context, inboundReferences, _) {
+        final references = inboundReferences == null
+            ? <Widget>[]
+            : _inboundReferencesList(context, inboundReferences);
+
         return VmExpansionTile(
           title: 'Inbound References',
           onExpanded: onExpanded,
           children: inboundReferences == null
               ? [
-                  SizedBox.fromSize(
-                    size: const Size.fromHeight(
-                      2 * (defaultIconSizeBeforeScaling + denseSpacing),
-                    ),
-                    child: const CenteredCircularProgressIndicator(),
-                  )
+                  SizedCircularProgressIndicator(),
                 ]
-              : inboundReferencesList(
-                  context,
-                  inboundReferences,
-                ),
+              : [
+                  SizedBox.fromSize(
+                    size: Size.fromHeight(
+                      references.length * defaultRowHeight,
+                    ),
+                    child: Column(children: references),
+                  ),
+                ],
         );
       },
     );
@@ -395,17 +416,16 @@ class InboundReferencesWidget extends StatelessWidget {
 
   /// Returns a list of Widgets that will be the rows in the VmExpansionTile
   /// for InboundReferencesWidget.
-  List<Widget> inboundReferencesList(
+  List<Widget> _inboundReferencesList(
     BuildContext context,
     InboundReferences inboundRefs,
   ) {
-    int count = 0;
+    int index = 0;
 
     final references = <Row>[];
 
     for (final inboundRef in inboundRefs.references!) {
-      final int? parentWordOffset =
-          inboundRefs.json!['references'][count]['_parentWordOffset'];
+      final int? parentWordOffset = inboundRefs.parentWordOffset(index);
 
       references.add(
         Row(
@@ -420,12 +440,10 @@ class InboundReferencesWidget extends StatelessWidget {
         ),
       );
 
-      count++;
+      index++;
     }
 
-    final inboundReferenceRows = _prettyRows(context, references);
-
-    return <Widget>[...inboundReferenceRows];
+    return _prettyRows(context, references);
   }
 
   /// Describes the given InboundReference [inboundRef] and its parentListIndex,
@@ -435,27 +453,25 @@ class InboundReferencesWidget extends StatelessWidget {
       final ref = inboundRef.source as InstanceRef;
       return 'Referenced by element [${inboundRef.parentListIndex}] of ${ref.classRef?.name ?? '<parentListName>'}';
     }
-    String description = 'Referenced by';
+
+    final description = StringBuffer('Referenced by');
 
     if (offset != null) {
-      description += ' offset $offset of';
+      description.write(
+        ' offset $offset of',
+      );
     }
 
     if (inboundRef.parentField != null) {
-      description += ' ${inboundRef.parentField} of';
+      description.write(
+        ' ${inboundRef.parentField} of',
+      );
     }
 
-    if (inboundRef.source is FieldRef) {
-      final ref = inboundRef.source as FieldRef;
-      description +=
-          ' ${ref.declaredType?.name ?? 'Field'} ${ref.name} of ${_ownerName(ref.owner) ?? '<Owner>'}';
-    } else if (inboundRef.source is FuncRef) {
-      final ref = inboundRef.source as FuncRef;
-      description += ' ${_ownerName(ref.owner) ?? '<Owner>'}.${ref.name}';
-    } else {
-      description += ' ${_objectName(inboundRef.source!)}';
-    }
+    description.write(
+      _objectDescription(inboundRef.source),
+    );
 
-    return description;
+    return description.toString();
   }
 }

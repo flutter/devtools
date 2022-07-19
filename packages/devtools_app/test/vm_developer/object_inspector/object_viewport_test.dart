@@ -19,21 +19,46 @@ void main() {
 
   late MockClassObject mockClassObject;
 
+  late FakeServiceManager fakeServiceManager;
+
+  late MockScriptManager scriptManager;
+
   const windowSize = Size(4000.0, 4000.0);
 
   setUp(() {
+    fakeServiceManager = FakeServiceManager();
+
+    scriptManager = MockScriptManager();
+    when(scriptManager.sortedScripts).thenReturn(ValueNotifier(<ScriptRef>[]));
+
+    setGlobal(ServiceConnectionManager, fakeServiceManager);
+    setGlobal(ScriptManager, scriptManager);
     setGlobal(IdeTheme, IdeTheme());
 
     testObjectInspectorViewController = TestObjectInspectorViewController();
 
     mockClassObject = MockClassObject();
 
+    when(mockClassObject.outlineNode).thenReturn(null);
+    when(mockClassObject.scriptRef).thenReturn(null);
     when(mockClassObject.name).thenReturn('FooClass');
     when(mockClassObject.ref).thenReturn(testClass);
     when(mockClassObject.obj).thenReturn(testClass);
     when(mockClassObject.script).thenReturn(null);
     when(mockClassObject.instances).thenReturn(null);
     when(mockClassObject.pos).thenReturn(null);
+    when(mockClassObject.fetchingReachableSize)
+        .thenReturn(ValueNotifier<bool>(false));
+    when(mockClassObject.reachableSize).thenReturn(null);
+    when(mockClassObject.fetchingRetainedSize)
+        .thenReturn(ValueNotifier<bool>(false));
+    when(mockClassObject.retainedSize).thenReturn(null);
+    when(mockClassObject.retainingPath).thenReturn(
+      ValueNotifier<RetainingPath?>(null),
+    );
+    when(mockClassObject.inboundReferences).thenReturn(
+      ValueNotifier<InboundReferences?>(null),
+    );
   });
 
   testWidgets('builds object viewport', (WidgetTester tester) async {

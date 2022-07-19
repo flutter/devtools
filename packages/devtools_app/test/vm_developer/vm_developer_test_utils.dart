@@ -3,9 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/screens/debugger/debugger_model.dart';
+import 'package:devtools_app/src/screens/debugger/program_explorer_controller.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector_view_controller.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_viewport.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_object_model.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -81,11 +83,96 @@ const testPos = SourcePosition(line: 10, column: 4);
 
 final testInstances = InstanceSet(instances: null, totalCount: 3);
 
+final testRequestableSize = InstanceRef(
+  kind: '',
+  identityHashCode: null,
+  classRef: null,
+  id: '1234',
+  name: 'requestedSize',
+  valueAsString: '128',
+);
+
+final testParentMapKey = InstanceRef(
+  kind: '',
+  identityHashCode: null,
+  classRef: null,
+  id: '1234',
+  name: 'fooParentMapKey',
+);
+
+final testParentField = Field(
+  name: 'fooParentField',
+  owner: null,
+  declaredType: null,
+  isConst: null,
+  isFinal: null,
+  isStatic: null,
+  id: '1234',
+);
+
+final testRetainingPath = RetainingPath(
+  length: 1,
+  gcRootType: '<root type>',
+  elements: testRetainingObjects,
+);
+
+final testRetainingObjects = [
+  RetainingObject(
+    value: testFunction,
+    parentListIndex: 1,
+    parentField: 'fooParentField',
+  ),
+  RetainingObject(
+    value: testInstance,
+    parentMapKey: testParentMapKey,
+    parentField: 'fooParentField',
+  ),
+  RetainingObject(
+    value: testInstance,
+    parentField: 'fooParentField',
+  ),
+];
+
+final testInboundRefs = TestInboundReferences(
+  references: testInboundRefList,
+);
+
+final testInboundRefList = [
+  InboundReference(
+    source: testFunction,
+  ),
+  InboundReference(
+    source: testField,
+    parentField: testParentField,
+  ),
+  InboundReference(
+    source: testInstance,
+    parentListIndex: 1,
+    parentField: testParentField,
+  ),
+];
+
+class TestInboundReferences extends InboundReferences {
+  TestInboundReferences({required super.references});
+
+  @override
+  Map<String, dynamic>? get json => <String, dynamic>{};
+}
+
+class TestProgramExplorerController extends ProgramExplorerController {}
+
 class TestObjectInspectorViewController extends ObjectInspectorViewController {
   @override
   ObjectHistory get objectHistory => fakeObjectHistory;
 
+  @override
+  ProgramExplorerController get programExplorerController =>
+      mockProgramExplorerController;
+
   final fakeObjectHistory = FakeObjectHistory();
+
+  final mockProgramExplorerController =
+      createMockProgramExplorerControllerWithDefaults();
 }
 
 class FakeObjectHistory extends ObjectHistory {

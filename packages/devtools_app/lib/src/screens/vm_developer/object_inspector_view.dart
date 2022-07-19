@@ -5,9 +5,7 @@
 import 'package:flutter/material.dart';
 
 import '../../shared/split.dart';
-import '../debugger/debugger_model.dart';
 import '../debugger/program_explorer.dart';
-import '../debugger/program_explorer_controller.dart';
 import '../debugger/program_explorer_model.dart';
 import 'object_inspector_view_controller.dart';
 import 'object_viewport.dart';
@@ -42,7 +40,7 @@ class _ObjectInspectorViewState extends State<_ObjectInspectorView> {
   @override
   void initState() {
     super.initState();
-    controller = ObjectInspectorViewController();
+    controller = ObjectInspectorViewController()..init();
     return;
   }
 
@@ -54,7 +52,6 @@ class _ObjectInspectorViewState extends State<_ObjectInspectorView> {
       children: [
         ProgramExplorer(
           controller: controller.programExplorerController,
-          onSelected: _onLocationSelected,
           onNodeSelected: _onNodeSelected,
           title: 'Program Explorer',
         ),
@@ -67,13 +64,13 @@ class _ObjectInspectorViewState extends State<_ObjectInspectorView> {
 
   void _onNodeSelected(VMServiceObjectNode node) {
     final objRef = node.object;
+    final location = node.location;
+
     if (objRef != null &&
         objRef != controller.objectHistory.current.value?.ref) {
       controller.pushObject(objRef);
     }
-  }
 
-  void _onLocationSelected(ScriptLocation? location) {
     if (location != null) {
       controller.setCurrentScript(location.scriptRef);
     }

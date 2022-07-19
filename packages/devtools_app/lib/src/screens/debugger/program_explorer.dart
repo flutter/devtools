@@ -426,13 +426,11 @@ class ProgramExplorer extends StatelessWidget {
   const ProgramExplorer({
     Key? key,
     required this.controller,
-    this.onSelected,
     this.title = 'File Explorer',
     this.onNodeSelected,
   });
 
   final ProgramExplorerController controller;
-  final void Function(ScriptLocation)? onSelected;
   final String title;
   final void Function(VMServiceObjectNode)? onNodeSelected;
 
@@ -517,7 +515,6 @@ class ProgramExplorer extends StatelessWidget {
       node.expand();
     }
 
-    if (onSelected != null) onSelected!(node.location!);
     if (onNodeSelected != null) onNodeSelected!(node);
   }
 

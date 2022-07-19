@@ -12,9 +12,9 @@ import '../../shared/theme.dart';
 import 'vm_developer_common_widgets.dart';
 import 'vm_object_model.dart';
 
-//TODO(mtaylee): Finish implementation of ClassInstancesWidget. When done,
-//remove this constant, and add the ClassInstancesWidget to
-//the class display layout.
+// TODO(mtaylee): Finish implementation of ClassInstancesWidget. When done,
+// remove this constant, and add the ClassInstancesWidget to
+// the class display layout.
 const displayClassInstances = false;
 
 /// A widget for the object inspector historyViewport displaying information
@@ -46,7 +46,7 @@ class VmClassDisplay extends StatelessWidget {
                     InboundReferencesWidget(
                       inboundReferences: clazz.inboundReferences,
                       onExpanded: _onExpandInboundRefs,
-                    )
+                    ),
                   ],
                 ),
               ),
@@ -58,7 +58,7 @@ class VmClassDisplay extends StatelessWidget {
             child: ClassInstancesWidget(
               instances: clazz.instances,
             ),
-          )
+          ),
       ],
     );
   }
@@ -98,7 +98,7 @@ class ClassInfoWidget extends StatelessWidget implements PreferredSizeWidget {
         'Reachable Size',
         ValueListenableBuilder<bool>(
           valueListenable: clazz.fetchingReachableSize,
-          builder: (context, fetching, child) => fetching
+          builder: (context, fetching, _) => fetching
               ? const CircularProgressIndicator()
               : RequestableSizeWidget(
                   requestedSize: clazz.reachableSize,
@@ -110,7 +110,7 @@ class ClassInfoWidget extends StatelessWidget implements PreferredSizeWidget {
         'Retained Size',
         ValueListenableBuilder<bool>(
           valueListenable: clazz.fetchingRetainedSize,
-          builder: (context, fetching, child) => fetching
+          builder: (context, fetching, _) => fetching
               ? const CircularProgressIndicator()
               : RequestableSizeWidget(
                   requestedSize: clazz.retainedSize,

@@ -22,34 +22,39 @@ class ObjectInspectorViewController extends DisposableController
       selectAndPushMainScript,
     );
 
-    objectHistory.current.addListener(_onCurrentObjectChanged);
+    addAutoDisposeListener(
+      objectHistory.current,
+      _onCurrentObjectChanged,
+    );
   }
 
-  final programExplorerController = ProgramExplorerController()
-    ..initialize()
-    ..initListeners();
+  final programExplorerController = ProgramExplorerController();
 
   final objectHistory = ObjectHistory();
 
   Isolate? isolate;
 
-  final _currentScriptRef = ValueNotifier<ScriptRef?>(null);
-
-  ValueListenable<ScriptRef?> get currentScriptRef => _currentScriptRef;
+  ScriptRef? _currentScriptRef;
 
   ValueListenable<bool> get refreshing => _refreshing;
   final _refreshing = ValueNotifier<bool>(false);
 
+  void init() {
+    programExplorerController
+      ..initialize()
+      ..initListeners();
+  }
+
   Future<void> _onCurrentObjectChanged() async {
     final currentObjectValue = objectHistory.current.value;
 
-    _currentScriptRef.value = currentObjectValue?.scriptRef;
+    _currentScriptRef = currentObjectValue?.scriptRef;
 
     if (currentObjectValue != null) {
       await programExplorerController
           .selectScriptNode(currentObjectValue.scriptRef);
 
-      if (objectHistory.current.value?.outlineNode != null) {
+      if (currentObjectValue.outlineNode != null) {
         final outlineNode = currentObjectValue.outlineNode!;
         programExplorerController
           ..selectOutlineNode(outlineNode)
@@ -57,6 +62,8 @@ class ObjectInspectorViewController extends DisposableController
       } else {
         programExplorerController.resetOutline();
       }
+    } else {
+      programExplorerController.resetOutline();
     }
   }
 
@@ -89,44 +96,42 @@ class ObjectInspectorViewController extends DisposableController
   Future<VmObject?> createVmObject(ObjRef objRef) async {
     VmObject? object;
 
-    final fileExplorerScriptRef = currentScriptRef.value;
-
     final outlineSelection = programExplorerController.outlineSelection.value;
 
     if (objRef is ClassRef) {
       object = ClassObject(
         ref: objRef,
-        scriptRef: fileExplorerScriptRef,
+        scriptRef: _currentScriptRef,
         outlineNode: outlineSelection,
       );
     } else if (objRef is FuncRef) {
       object = FuncObject(
         ref: objRef,
-        scriptRef: fileExplorerScriptRef,
+        scriptRef: _currentScriptRef,
         outlineNode: outlineSelection,
       );
     } else if (objRef is FieldRef) {
       object = FieldObject(
         ref: objRef,
-        scriptRef: fileExplorerScriptRef,
+        scriptRef: _currentScriptRef,
         outlineNode: outlineSelection,
       );
     } else if (objRef is LibraryRef) {
       object = LibraryObject(
         ref: objRef,
-        scriptRef: fileExplorerScriptRef,
+        scriptRef: _currentScriptRef,
         outlineNode: outlineSelection,
       );
     } else if (objRef is ScriptRef) {
       object = ScriptObject(
         ref: objRef,
-        scriptRef: fileExplorerScriptRef,
+        scriptRef: _currentScriptRef,
         outlineNode: outlineSelection,
       );
     } else if (objRef is InstanceRef) {
       object = InstanceObject(
         ref: objRef,
-        scriptRef: fileExplorerScriptRef,
+        scriptRef: _currentScriptRef,
         outlineNode: outlineSelection,
       );
     }
@@ -151,7 +156,7 @@ class ObjectInspectorViewController extends DisposableController
     });
 
     if (mainScriptRef != null) {
-      _currentScriptRef.value = mainScriptRef;
+      _currentScriptRef = mainScriptRef;
 
       final parts = mainScriptRef.uri!.split('/')..removeLast();
 
@@ -172,6 +177,6 @@ class ObjectInspectorViewController extends DisposableController
   }
 
   void setCurrentScript(ScriptRef scriptRef) {
-    _currentScriptRef.value = scriptRef;
+    _currentScriptRef = scriptRef;
   }
 }

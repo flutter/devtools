@@ -15,14 +15,14 @@ import '../debugger/program_explorer_model.dart';
 abstract class VmObject {
   VmObject({required this.ref, this.scriptRef, this.outlineNode});
 
-  /// The outline node selected on the ProgramExplorer
-  /// corresponding to this VM object.
   final ObjRef ref;
 
   /// The script node selected on the FileExplorer of the ProgramExplorer
   /// corresponding to this VM object.
   final ScriptRef? scriptRef;
 
+  /// The outline node selected on the ProgramExplorer
+  /// corresponding to this VM object.
   final VMServiceObjectNode? outlineNode;
 
   VmServiceWrapper get _service => serviceManager.service!;
@@ -86,11 +86,13 @@ class ClassObject extends VmObject {
 
   ValueListenable<bool> get fetchingReachableSize => _fetchingReachableSize;
   final ValueNotifier<bool> _fetchingReachableSize = ValueNotifier(false);
+
   InstanceRef? get reachableSize => _reachableSize;
   InstanceRef? _reachableSize;
 
   ValueListenable<bool> get fetchingRetainedSize => _fetchingRetainedSize;
   final ValueNotifier<bool> _fetchingRetainedSize = ValueNotifier(false);
+
   InstanceRef? get retainedSize => _retainedSize;
   InstanceRef? _retainedSize;
 
