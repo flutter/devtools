@@ -6,7 +6,7 @@ import 'theme.dart';
 import 'utils.dart';
 
 class EditableList extends StatefulWidget {
-  const EditableList({
+  EditableList({
     required this.entries,
     required this.textFieldLabel,
     this.isRefreshing,
@@ -21,6 +21,10 @@ class EditableList extends StatefulWidget {
   final Function(String)? onEntryRemoved;
   final Function()? onRefresh;
   final String textFieldLabel;
+  final GlobalKey textFieldKey = GlobalKey();
+  final GlobalKey addEntryButtonKey = GlobalKey();
+  final GlobalKey removeEntryButtonKey = GlobalKey();
+  final GlobalKey refreshButtonKey = GlobalKey();
 
   @override
   State<StatefulWidget> createState() => _EditableListState();
@@ -57,7 +61,9 @@ class _EditableListState extends State<EditableList> {
               textFieldController: textFieldController,
               widget: widget,
             ),
-            _EditableListContentView(widget: widget),
+            _EditableListContentView(
+              widget: widget,
+            ),
           ],
         );
       },
@@ -96,6 +102,7 @@ class _EditableListActionBar extends StatelessWidget {
             child: Container(
               height: defaultTextFieldHeight,
               child: TextField(
+                key: widget.textFieldKey,
                 focusNode: textFieldFocusNode,
                 controller: textFieldController,
                 decoration: InputDecoration(
@@ -110,6 +117,7 @@ class _EditableListActionBar extends StatelessWidget {
             ),
           ),
           TextButton(
+            key: widget.addEntryButtonKey,
             onPressed: () {
               _addNewPubRootDirecory();
             },
@@ -125,6 +133,7 @@ class _EditableListActionBar extends StatelessWidget {
                   ),
                 )
               : RefreshButton(
+                  key: widget.refreshButtonKey,
                   onPressed: () {
                     if (widget.onRefresh != null) {
                       widget.onRefresh!();
@@ -138,6 +147,30 @@ class _EditableListActionBar extends StatelessWidget {
   }
 }
 
+Widget _removeDirectoryButton(GlobalKey key, VoidCallback onPressed) {
+  return IconButton(
+    key: key,
+    padding: const EdgeInsets.all(0.0),
+    onPressed: onPressed,
+    iconSize: defaultIconSize,
+    splashRadius: defaultIconSize,
+    icon: const Icon(Icons.delete),
+  );
+}
+
+Widget _copyDirectoryButton(Key key, BuildContext context, String value) {
+  return IconButton(
+    key: key,
+    padding: const EdgeInsets.all(0.0),
+    onPressed: () {
+      copyToClipboard(value, 'Copied to clipboard.', context);
+    },
+    iconSize: defaultIconSize,
+    splashRadius: defaultIconSize,
+    icon: const Icon(Icons.copy),
+  );
+}
+
 class _EditableListContentView extends StatelessWidget {
   const _EditableListContentView({
     Key? key,
@@ -145,28 +178,6 @@ class _EditableListContentView extends StatelessWidget {
   }) : super(key: key);
 
   final EditableList widget;
-
-  Widget _copyDirectoryButton(BuildContext context, String value) {
-    return IconButton(
-      padding: const EdgeInsets.all(0.0),
-      onPressed: () {
-        copyToClipboard(value, 'Copied to clipboard.', context);
-      },
-      iconSize: defaultIconSize,
-      splashRadius: defaultIconSize,
-      icon: const Icon(Icons.copy),
-    );
-  }
-
-  Widget _removeDirectoryButton(VoidCallback onPressed) {
-    return IconButton(
-      padding: const EdgeInsets.all(0.0),
-      onPressed: onPressed,
-      iconSize: defaultIconSize,
-      splashRadius: defaultIconSize,
-      icon: const Icon(Icons.delete),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -176,33 +187,59 @@ class _EditableListContentView extends StatelessWidget {
           child: ListView.builder(
             itemCount: widget.entries.value.length,
             itemBuilder: (context, index) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: densePadding,
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(widget.entries.value[index]),
-                    ),
-                    _copyDirectoryButton(context, widget.entries.value[index]),
-                    const SizedBox(width: denseSpacing),
-                    _removeDirectoryButton(
-                      () {
-                        if (widget.onEntryRemoved != null) {
-                          widget.onEntryRemoved!(
-                            widget.entries.value[index],
-                          );
-                        }
-                      },
-                    ),
-                    const SizedBox(width: denseRowSpacing)
-                  ],
-                ),
+              return EditableListRow(
+                widget: widget,
+                index: index,
               );
             },
           ),
         ),
+      ),
+    );
+  }
+}
+
+class EditableListRow extends StatelessWidget {
+  EditableListRow({
+    Key? key,
+    required this.widget,
+    required this.index,
+  }) : super(key: key);
+
+  final EditableList widget;
+  final int index;
+  final copyButtonKey = GlobalKey();
+  final removeButtonKey = GlobalKey();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: densePadding,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(widget.entries.value[index]),
+          ),
+          _copyDirectoryButton(
+            copyButtonKey,
+            context,
+            widget.entries.value[index],
+          ),
+          const SizedBox(width: denseSpacing),
+          _removeDirectoryButton(
+            removeButtonKey,
+            () {
+              if (widget.onEntryRemoved != null) {
+                widget.onEntryRemoved!(
+                  widget.entries.value[index],
+                );
+              }
+            },
+          ),
+          const SizedBox(width: denseRowSpacing)
+        ],
       ),
     );
   }
