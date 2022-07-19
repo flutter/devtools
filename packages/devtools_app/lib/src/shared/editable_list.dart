@@ -61,8 +61,10 @@ class _EditableListState extends State<EditableList> {
               textFieldController: textFieldController,
               widget: widget,
             ),
-            _EditableListContentView(
-              widget: widget,
+            Flexible(
+              child: _EditableListContentView(
+                widget: widget,
+              ),
             ),
           ],
         );
@@ -78,7 +80,12 @@ class _EditableListActionBar extends StatelessWidget {
     required this.textFieldController,
     required this.widget,
   }) : super(key: key);
-  void _addNewPubRootDirecory() {
+
+  final FocusNode textFieldFocusNode;
+  final TextEditingController textFieldController;
+  final EditableList widget;
+
+  void _addNewItem() {
     final value = textFieldController.value.text.trim();
     textFieldController.clear();
     if (widget.onEntryAdded != null && value.isNotEmpty) {
@@ -87,10 +94,6 @@ class _EditableListActionBar extends StatelessWidget {
     }
     textFieldFocusNode.requestFocus();
   }
-
-  final FocusNode textFieldFocusNode;
-  final TextEditingController textFieldController;
-  final EditableList widget;
 
   @override
   Widget build(BuildContext context) {
@@ -111,7 +114,7 @@ class _EditableListActionBar extends StatelessWidget {
                   labelText: widget.textFieldLabel,
                 ),
                 onSubmitted: (value) {
-                  _addNewPubRootDirecory();
+                  _addNewItem();
                 },
               ),
             ),
@@ -119,7 +122,7 @@ class _EditableListActionBar extends StatelessWidget {
           TextButton(
             key: widget.addEntryButtonKey,
             onPressed: () {
-              _addNewPubRootDirecory();
+              _addNewItem();
             },
             child: const Text('Add'),
           ),
@@ -181,18 +184,16 @@ class _EditableListContentView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Flexible(
-      child: RoundedOutlinedBorder(
-        child: Scrollbar(
-          child: ListView.builder(
-            itemCount: widget.entries.value.length,
-            itemBuilder: (context, index) {
-              return EditableListRow(
-                widget: widget,
-                index: index,
-              );
-            },
-          ),
+    return RoundedOutlinedBorder(
+      child: Scrollbar(
+        child: ListView.builder(
+          itemCount: widget.entries.value.length,
+          itemBuilder: (context, index) {
+            return EditableListRow(
+              widget: widget,
+              index: index,
+            );
+          },
         ),
       ),
     );
