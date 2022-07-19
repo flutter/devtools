@@ -95,22 +95,26 @@ class _DiffPaneState extends State<DiffPane> {
           initialFractions: const [0.2, 0.8],
           minSizes: const [80, 80],
           children: [
-            Column(
-              children: [
-                _ListControlPane(controller: controller),
-                Expanded(
-                  child: _SnapshotList(controller: controller),
-                ),
-              ],
+            OutlineDecoration(
+              child: Column(
+                children: [
+                  _ListControlPane(controller: controller),
+                  Expanded(
+                    child: _SnapshotList(controller: controller),
+                  ),
+                ],
+              ),
             ),
-            Column(
-              children: [
-                if (controller.selected is SnapshotListItem)
-                  _ContentControlPane(controller: controller),
-                Expanded(
-                  child: _SnapshotListContent(item: controller.selected),
-                ),
-              ],
+            OutlineDecoration(
+              child: Column(
+                children: [
+                  if (controller.selected is SnapshotListItem)
+                    _ContentControlPane(controller: controller),
+                  Expanded(
+                    child: _SnapshotListContent(item: controller.selected),
+                  ),
+                ],
+              ),
             ),
           ],
         );
