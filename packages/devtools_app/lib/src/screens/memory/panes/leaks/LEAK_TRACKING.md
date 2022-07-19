@@ -9,13 +9,13 @@ This page and functionality are under construction. See https://github.com/flutt
 
 ### Glossary
 
-**GC**: garbage collection
+**GC**: garbage collection.
 
-**Memory Leak**: progressive usage of more and more memory by an application
+**Memory Leak**: progressive usage of more and more memory by an application, for example repetedly creating and not disposing a listener.
 
-**Memory Bloat**: use of more memory than is necessary for optimal performance
+**Memory Bloat**: use of more memory than is necessary for optimal performance, for example using too large images or not canceling a stream.
 
-**Object's Retaining Path**: path from the object to a root object that prevents the object from being GCed
+**Object's Retaining Path**: path from the object to a root object that prevents the object from being GCed.
 
 
 ### Leak Types
@@ -39,13 +39,35 @@ myField = null;
 
 If you have a set of not-GCed objects, some of them (victims) may be not GC-ed because they are held by others (culprits). Normally, to fix the leaks, you need to fix just culprits.
 
-The tool detects culprits, so that you know where to focus.
+**Victim**: a leaked object, for which the tool could find another leaked object, that, if fixed, would fix the first leak too.
+
+**Culprit**: a leaked object that is not detected to be the victim of another object.
+
+The tool detects which leaked objects are culprits, so you know where to focus.
+
+For example, out of four not-GCed leaks on this diagram, only one is the culprit, because, when the object is fixed and gets GCed, the victims it referenced, will be also GCed:
+
+
+```mermaid
+   
+   flowchart TD;
+      l1[leak1\nculprit]
+      l2[leak2\nvictim]
+      l3[leak3\nvictim]
+      l4[leak4\nvictim]
+      l1-->l2;
+      l1-->l3;
+      l2-->l4;
+      l3-->l4;
+```
+
+
 
 ### Limitations
 
 The tool detects leaks for disposable and instrumented classes only (with note that the fixed leak can fix other objects too). 
 
-Some classes in Flutter framework are already instrumented. If you want your classes to be tracked, you need to make them disposable and instrument.
+Some classes in Flutter framework are already instrumented. If you want your classes to be tracked, you need to make them disposable and [instrument](#instrument them).
 
 ## Use the Leak Tracker
 
@@ -85,13 +107,39 @@ As Flutter widgets are instrumented, you just need to turn on the leak tracking.
 
 Invoke `ensureInitialized` and `startAppLeakTracking` before `runApp` like [the example app does](https://github.com/polina-c/spikes/blob/master/leaking_app/lib/main.dart#L7) and then follow the steps for demo app.
 
-### Add instrumentation to your classes
+### Add instrumentation to your classes <a id='instrument'></a>
 
-Invoke `startObjectLeakTracking` in constructor or initializer (that is invoked only once), and `registerDisposal` in the method `dispose`
+The tool needs to know which objects to track and it needs to know when disposal for these objects happened.
+
+To provide this information for objects of a certain class to the tool, invoke `startObjectLeakTracking` in constructor or initializer (that is invoked only once), and invoke `registerDisposal` in the method `dispose`
 like [the example app does](https://github.com/polina-c/spikes/blob/master/leaking_app/lib/tracked_class.dart).
 
 You can pass information, that will help you troubleshoot the leak, to the optional parameter `details`.
 
 ### Troubleshoot the detected leaks
 
+The challenging question of the leak troubleshooting is how to find the detected leak in the code. Here are some tips that may help.
+
+#### Give additional details to the tool
+
+It helps to provide the object's details, which you want to be included into the analysis, to the tool. Be careful doing this, because storing additional information for each instance of a class may impact debug/profile performance of the application and thus make user experience
+different from release one.
+
+For example, for not disposed objects, you can provide creation call stack to `startObjectLeakTracking`:
+
+```
+startObjectLeakTracking(
+   this,
+   details: StackTrace.current.toString(),
+);
+```
+
+or, provide some other details in a separate invocation:
+
+```
+addLeakTrackingDetails(this, 'Serves the stream $streamName.');
+```
+#### Evaluate the leaked objects with DevTools Memory Evaluator
+
+the feature is under construction
 
