@@ -237,31 +237,39 @@ class IntelligentFrameFindings extends StatelessWidget {
 
     final saveLayerCount = frameAnalysis.saveLayerCount;
     final intrinsicOperationsCount = frameAnalysis.intrinsicOperationsCount;
+
+    final uiHints = showUiJankHints
+        ? [
+            const Text('UI Jank Detected'),
+            const SizedBox(height: denseSpacing),
+            _EnhanceTracingHint(
+              longestPhase: frameAnalysis.longestUiPhase,
+            ),
+            const SizedBox(height: densePadding),
+            if (intrinsicOperationsCount > 0)
+              IntrinsicOperationsHint(intrinsicOperationsCount),
+          ]
+        : [];
+    final rasterHints = showRasterJankHints
+        ? [
+            const Text('Raster Jank Detected'),
+            const SizedBox(height: denseSpacing),
+            if (saveLayerCount > 0) CanvasSaveLayerHint(saveLayerCount),
+            const SizedBox(height: denseSpacing),
+            if (frame.hasShaderTime)
+              ShaderCompilationHint(shaderTime: frame.shaderDuration),
+            const SizedBox(height: denseSpacing),
+            const RasterMetricsHint(),
+          ]
+        : [];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (showUiJankHints) ...[
-          const Text('UI Jank Detected'),
-          const SizedBox(height: denseSpacing),
-          _EnhanceTracingHint(
-            longestPhase: frameAnalysis.longestUiPhase,
-          ),
-          const SizedBox(height: densePadding),
-          if (intrinsicOperationsCount > 0)
-            IntrinsicOperationsHint(intrinsicOperationsCount),
-        ],
+        ...uiHints,
         if (showUiJankHints && showRasterJankHints)
           const SizedBox(height: defaultSpacing),
-        if (showRasterJankHints) ...[
-          const Text('Raster Jank Detected'),
-          const SizedBox(height: denseSpacing),
-          if (saveLayerCount > 0) CanvasSaveLayerHint(saveLayerCount),
-          const SizedBox(height: denseSpacing),
-          if (frame.hasShaderTime)
-            ShaderCompilationHint(shaderTime: frame.shaderDuration),
-          const SizedBox(height: denseSpacing),
-          const RasterMetricsHint(),
-        ],
+        ...rasterHints,
       ],
     );
   }
@@ -476,6 +484,10 @@ class IntrinsicOperationsHint extends StatelessWidget {
   }
 }
 
+// TODO(kenz): if the 'profileRenderObjectPaints' service extension is disabled,
+// suggest that the user turn it on to get information about the render objects
+// that are calling saveLayer. If the event has render object information in the
+// args, display it in the hint.
 class CanvasSaveLayerHint extends StatelessWidget {
   const CanvasSaveLayerHint(
     this.saveLayerCount, {
