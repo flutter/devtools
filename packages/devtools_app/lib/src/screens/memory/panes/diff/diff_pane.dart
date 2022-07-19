@@ -30,8 +30,8 @@ class _DiffPaneController {
   final selectedIndex = ValueNotifier<int>(0);
 
   /// If true, some process is going on.
-  final _isProcessing = ValueNotifier<bool>(false);
   ValueListenable<bool> get isProcessing => _isProcessing;
+  final _isProcessing = ValueNotifier<bool>(false);
 
   DiffListItem get selected => snapshots.value[selectedIndex.value];
 
@@ -183,7 +183,7 @@ class _SnapshotListTitle extends StatelessWidget {
               child: Text('Snapshots', overflow: TextOverflow.ellipsis),
             ),
             const SizedBox(width: denseRowSpacing),
-            const Text('\u{24D8}'),
+            const Text('ⓘ'),
             const SizedBox(width: denseRowSpacing),
           ],
           if (isProcessing) ...[

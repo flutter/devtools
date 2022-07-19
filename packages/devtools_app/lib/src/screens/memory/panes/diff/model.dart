@@ -11,8 +11,8 @@ abstract class DiffListItem {
   /// If the number is not shown, it should be 0.
   int get displayNumber;
 
-  final _isProcessing = ValueNotifier<bool>(false);
   ValueListenable<bool> get isProcessing => _isProcessing;
+  final _isProcessing = ValueNotifier<bool>(false);
 }
 
 class InformationListItem extends DiffListItem {
@@ -28,8 +28,8 @@ class SnapshotListItem extends DiffListItem {
   ) {
     _isProcessing.value = true;
     graphReceiver.whenComplete(() async {
-      _isProcessing.value = false;
       graph = await graphReceiver;
+      _isProcessing.value = false;
     });
   }
 
