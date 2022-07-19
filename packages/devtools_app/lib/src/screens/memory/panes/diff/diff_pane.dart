@@ -124,9 +124,10 @@ class _DiffPaneState extends State<DiffPane> {
 }
 
 class _SnapshotList extends StatelessWidget {
-  const _SnapshotList({Key? key, required this.controller}) : super(key: key);
+  _SnapshotList({Key? key, required this.controller}) : super(key: key);
 
   final _DiffPaneController controller;
+  final headerHeight = 1.20 * defaultRowHeight;
 
   @override
   Widget build(BuildContext context) {
@@ -136,7 +137,7 @@ class _SnapshotList extends StatelessWidget {
       itemCount: controller.snapshots.value.length,
       itemBuilder: (context, index) {
         return Container(
-          height: defaultRowHeight,
+          height: headerHeight,
           color: controller.selectedIndex.value == index
               ? Theme.of(context).selectedRowColor
               : null,
