@@ -2,16 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-abstract class DiffListItem with ChangeNotifier {
+abstract class DiffListItem {
   /// Number, that, if shown in name, should be unique in the list.
   ///
   /// If the number is not shown, it should be 0.
   int get displayNumber;
 
-  bool isProcessing = false;
+  final _isProcessing = ValueNotifier<bool>(false);
+  ValueListenable<bool> get isProcessing => _isProcessing;
 }
 
 class InformationListItem extends DiffListItem {
@@ -20,20 +21,21 @@ class InformationListItem extends DiffListItem {
 }
 
 class SnapshotListItem extends DiffListItem {
-  SnapshotListItem(this.graph, this.displayNumber, this.isolateName) {
-    isProcessing = true;
-    graph.whenComplete(() {
-      isProcessing = false;
-      notifyListeners();
+  SnapshotListItem(Future<HeapSnapshotGraph?> graphReceiver, this.displayNumber,
+      this._isolateName) {
+    _isProcessing.value = true;
+    graphReceiver.whenComplete(() async {
+      _isProcessing.value = false;
+      graph = await graphReceiver;
     });
   }
 
-  final String isolateName;
+  final String _isolateName;
+
+  HeapSnapshotGraph? graph;
 
   @override
   final int displayNumber;
-  Future<HeapSnapshotGraph?> graph;
 
-  @override
-  String get name => '$isolateName-$displayNumber';
+  String get name => '$_isolateName-$displayNumber';
 }

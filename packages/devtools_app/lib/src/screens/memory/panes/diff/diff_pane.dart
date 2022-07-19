@@ -72,12 +72,6 @@ class _DiffPaneController {
     snapshots.removeRange(selectedIndex.value, selectedIndex.value + 1);
     selectedIndex.value = selectedIndex.value - 1;
   }
-
-  void dispose() {
-    for (var e in snapshots.value) {
-      e.dispose();
-    }
-  }
 }
 
 class DiffPane extends StatefulWidget {
@@ -123,12 +117,6 @@ class _DiffPaneState extends State<DiffPane> {
       },
     );
   }
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
-  }
 }
 
 class _SnapshotList extends StatelessWidget {
@@ -149,7 +137,6 @@ class _SnapshotList extends StatelessWidget {
             selected: index == controller.selectedIndex.value,
           ),
           onTap: () => controller.selectedIndex.value = index,
-          key: GlobalObjectKey(controller.snapshots.value[index]),
         );
       },
     );
@@ -162,15 +149,17 @@ class _SnapshotListTitle extends StatelessWidget {
     required this.item,
     required this.selected,
   }) : super(key: key);
+
   final DiffListItem item;
+
   final bool selected;
 
   @override
   Widget build(BuildContext context) {
     final theItem = item;
-    return AnimatedBuilder(
-      animation: theItem,
-      builder: (context, child) => Row(
+    return ValueListenableBuilder<bool>(
+      valueListenable: theItem.isProcessing,
+      builder: (_, isProcessing, __) => Row(
         children: [
           _SelectionBox(selected: selected),
           const SizedBox(width: denseRowSpacing),
@@ -185,7 +174,7 @@ class _SnapshotListTitle extends StatelessWidget {
             const SizedBox(width: denseRowSpacing),
             const Icon(Icons.info_outline),
           ],
-          if (theItem.isProcessing) ...[
+          if (isProcessing) ...[
             const _ProgressIndicator(),
             const SizedBox(width: denseRowSpacing)
           ],
@@ -239,10 +228,12 @@ class _SnapshotListContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final itemLocal = item;
-    if (itemLocal is InformationListItem)
+    if (itemLocal is InformationListItem) {
       return const Text('Introduction to snapshot diffing will be here.');
-    if (itemLocal is SnapshotListItem)
+    }
+    if (itemLocal is SnapshotListItem) {
       return Text('Content of ${itemLocal.name} will be here.');
+    }
     throw 'Unexpected type of the item: ${itemLocal.runtimeType}';
   }
 }
