@@ -195,7 +195,7 @@ void scrollToPosition(
     final positionToScrollTo = max(0.0, position - defaultRowHeight);
 
     scrollController.animateTo(
-      //TODO: should be positionToScrollTo.clamp(0.0, scrollController.position.maxScrollExtent) but maxScrollExtent is not being updated
+      //TODO (carolynqu): should be positionToScrollTo.clamp(0.0, scrollController.position.maxScrollExtent) but maxScrollExtent is not being updated, https://github.com/flutter/devtools/issues/4264
       positionToScrollTo,
       duration: defaultDuration,
       curve: defaultCurve,

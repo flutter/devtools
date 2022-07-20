@@ -440,7 +440,6 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 
     if (widget == oldWidget) return;
 
-
     if (widget.sortColumn != oldWidget.sortColumn ||
         widget.sortDirection != oldWidget.sortDirection ||
         !collectionEquals(widget.dataRoots, oldWidget.dataRoots)) {
@@ -847,16 +846,20 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
     _initSearchListener();
   }
 
-
   void _addScrollListener(ValueNotifier<Selection<T>>? selectionNotifier) {
     if (selectionNotifier != null) {
       addAutoDisposeListener(selectionNotifier, () {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           final Selection<T> selection = selectionNotifier.value;
-          if (selection.scrollIntoView) {
-            final int selectedDisplayRow = selection.nodeIndexCalculator != null
-                ? selection.nodeIndexCalculator!(selection.node!)
-                : selection.nodeIndex!;
+          final T? node = selection.node;
+          final int Function(T)? nodeIndexCalculator =
+              selection.nodeIndexCalculator;
+          final int? nodeIndex = selection.nodeIndex;
+
+          if (selection.scrollIntoView && node != null) {
+            final int selectedDisplayRow = nodeIndexCalculator != null
+                ? nodeIndexCalculator(node)
+                : nodeIndex!;
 
             final newPos = selectedDisplayRow * defaultRowHeight;
 
