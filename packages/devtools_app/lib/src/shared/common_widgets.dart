@@ -1657,24 +1657,35 @@ class LinkTextSpan extends TextSpan {
     required Link link,
     required BuildContext context,
     TextStyle? style,
-    VoidCallback? onTap,
   }) : super(
           text: link.display,
           style: style ?? Theme.of(context).linkTextStyle,
           recognizer: TapGestureRecognizer()
             ..onTap = () async {
-              if (onTap != null) onTap();
+              ga.select(
+                link.gaScreenName,
+                link.gaSelectedItemDescription,
+              );
               await launchUrl(link.url, context);
             },
         );
 }
 
 class Link {
-  const Link({required this.display, required this.url});
+  const Link({
+    required this.display,
+    required this.url,
+    required this.gaScreenName,
+    required this.gaSelectedItemDescription,
+  });
 
   final String display;
 
   final String url;
+
+  final String gaScreenName;
+
+  final String gaSelectedItemDescription;
 }
 
 Widget maybeWrapWithTooltip({

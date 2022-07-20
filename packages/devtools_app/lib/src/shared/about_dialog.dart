@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../devtools.dart' as devtools;
-import '../analytics/analytics.dart' as ga;
 import '../analytics/constants.dart' as analytics_constants;
 import 'common_widgets.dart';
 import 'dialogs.dart';
@@ -60,12 +59,6 @@ class _FeedbackLink extends StatelessWidget {
       text: LinkTextSpan(
         link: devToolsExtensionPoints.issueTrackerLink(),
         context: context,
-        onTap: () {
-          ga.select(
-            analytics_constants.devToolsMain,
-            analytics_constants.feedbackLink,
-          );
-        },
       ),
     );
   }
@@ -84,14 +77,10 @@ class _DiscordLink extends StatelessWidget {
         link: const Link(
           display: 'Discord',
           url: _channelLink,
+          gaScreenName: analytics_constants.devToolsMain,
+          gaSelectedItemDescription: analytics_constants.discordLink,
         ),
         context: context,
-        onTap: () {
-          ga.select(
-            analytics_constants.devToolsMain,
-            analytics_constants.discordLink,
-          );
-        },
       ),
     );
   }
