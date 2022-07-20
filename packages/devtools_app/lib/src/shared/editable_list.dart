@@ -150,30 +150,6 @@ class _EditableListActionBar extends StatelessWidget {
   }
 }
 
-Widget _removeDirectoryButton(GlobalKey key, VoidCallback onPressed) {
-  return IconButton(
-    key: key,
-    padding: const EdgeInsets.all(0.0),
-    onPressed: onPressed,
-    iconSize: defaultIconSize,
-    splashRadius: defaultIconSize,
-    icon: const Icon(Icons.delete),
-  );
-}
-
-Widget _copyDirectoryButton(Key key, BuildContext context, String value) {
-  return IconButton(
-    key: key,
-    padding: const EdgeInsets.all(0.0),
-    onPressed: () {
-      copyToClipboard(value, 'Copied to clipboard.', context);
-    },
-    iconSize: defaultIconSize,
-    splashRadius: defaultIconSize,
-    icon: const Icon(Icons.copy),
-  );
-}
-
 class _EditableListContentView extends StatelessWidget {
   const _EditableListContentView({
     Key? key,
@@ -223,15 +199,14 @@ class EditableListRow extends StatelessWidget {
           Expanded(
             child: Text(widget.entries.value[index]),
           ),
-          _copyDirectoryButton(
-            copyButtonKey,
-            context,
-            widget.entries.value[index],
+          _CopyDirectoryButton(
+            key: copyButtonKey,
+            value: widget.entries.value[index],
           ),
           const SizedBox(width: denseSpacing),
-          _removeDirectoryButton(
-            removeButtonKey,
-            () {
+          _RemoveDirectoryButton(
+            key: removeButtonKey,
+            onPressed: () {
               if (widget.onEntryRemoved != null) {
                 widget.onEntryRemoved!(
                   widget.entries.value[index],
@@ -242,6 +217,47 @@ class EditableListRow extends StatelessWidget {
           const SizedBox(width: denseRowSpacing)
         ],
       ),
+    );
+  }
+}
+
+class _CopyDirectoryButton extends StatelessWidget {
+  const _CopyDirectoryButton({
+    super.key,
+    required this.value,
+  });
+
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      key: key,
+      padding: const EdgeInsets.all(0.0),
+      onPressed: () {
+        copyToClipboard(value, 'Copied to clipboard.', context);
+      },
+      iconSize: defaultIconSize,
+      splashRadius: defaultIconSize,
+      icon: const Icon(Icons.copy),
+    );
+  }
+}
+
+class _RemoveDirectoryButton extends StatelessWidget {
+  const _RemoveDirectoryButton({super.key, this.onPressed});
+
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      key: key,
+      padding: const EdgeInsets.all(0.0),
+      onPressed: onPressed,
+      iconSize: defaultIconSize,
+      splashRadius: defaultIconSize,
+      icon: const Icon(Icons.delete),
     );
   }
 }
