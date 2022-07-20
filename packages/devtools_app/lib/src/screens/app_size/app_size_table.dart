@@ -13,6 +13,8 @@ import '../../ui/colors.dart';
 
 import 'app_size_controller.dart';
 
+const deferredLoadingSupport = false;
+
 class AppSizeAnalysisTable extends StatelessWidget {
   factory AppSizeAnalysisTable({
     required TreemapNode rootNode,
