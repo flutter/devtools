@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../config_specific/import_export/import_export.dart';
-import '../../../../config_specific/launch_url/launch_url.dart';
 import '../../../../config_specific/logger/logger.dart' as logger;
 import '../../../../primitives/utils.dart';
 import '../../../../service/service_extensions.dart';
