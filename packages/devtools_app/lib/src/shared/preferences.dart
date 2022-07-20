@@ -25,10 +25,7 @@ class PreferencesController extends DisposableController
 
   InspectorPreferencesController get inspector => _inspector;
 
-  @visibleForTesting
-  set inspector(v) => _inspector = v;
-
-  var _inspector = InspectorPreferencesController();
+  final _inspector = InspectorPreferencesController();
 
   Future<void> init() async {
     // Get the current values and listen for and write back changes.
