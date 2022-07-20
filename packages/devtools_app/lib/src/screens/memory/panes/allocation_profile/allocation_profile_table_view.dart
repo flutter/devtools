@@ -181,14 +181,6 @@ class AllocationProfileTableView extends StatefulWidget {
 
 class AllocationProfileTableViewState extends State<AllocationProfileTableView>
     with ProvidedControllerMixin<MemoryController, AllocationProfileTableView> {
-  @visibleForTesting
-  static const refreshOnGcKey = Key('Refresh on GC Key');
-  @visibleForTesting
-  static const refreshKey = Key('Refresh Allocation Profile Key');
-  @visibleForTesting
-  static final searchFieldKey =
-      GlobalKey(debugLabel: 'Allocation Profile Search Field Key');
-
   late AllocationProfileTableViewController allocationProfileController;
 
   @override
@@ -207,8 +199,6 @@ class AllocationProfileTableViewState extends State<AllocationProfileTableView>
       children: [
         _AllocationProfileTableControls(
           allocationProfileController: allocationProfileController,
-          refreshOnGcKey: refreshOnGcKey,
-          refreshKey: refreshKey,
         ),
         const SizedBox(
           height: denseRowSpacing,
@@ -328,13 +318,9 @@ class _AllocationProfileTableControls extends StatelessWidget {
   const _AllocationProfileTableControls({
     Key? key,
     required this.allocationProfileController,
-    this.refreshOnGcKey,
-    this.refreshKey,
   }) : super(key: key);
 
   final AllocationProfileTableViewController allocationProfileController;
-  final Key? refreshOnGcKey;
-  final Key? refreshKey;
 
   @override
   Widget build(BuildContext context) {
@@ -345,14 +331,12 @@ class _AllocationProfileTableControls extends StatelessWidget {
         ),
         const SizedBox(width: denseSpacing),
         OutlinedIconButton(
-          key: refreshKey,
           icon: Icons.refresh,
           onPressed: allocationProfileController.refresh,
         ),
         const SizedBox(width: denseSpacing),
         _RefreshOnGCToggleButton(
           allocationProfileController: allocationProfileController,
-          refreshOnGcKey: refreshOnGcKey,
         ),
         const Spacer(),
         const InformationButton(
@@ -403,11 +387,9 @@ class _RefreshOnGCToggleButton extends StatelessWidget {
   const _RefreshOnGCToggleButton({
     Key? key,
     required this.allocationProfileController,
-    this.refreshOnGcKey,
   }) : super(key: key);
 
   final AllocationProfileTableViewController allocationProfileController;
-  final Key? refreshOnGcKey;
 
   @override
   Widget build(BuildContext context) {
@@ -415,7 +397,6 @@ class _RefreshOnGCToggleButton extends StatelessWidget {
       valueListenable: allocationProfileController.refreshOnGc,
       builder: (context, refreshOnGc, _) {
         return ToggleButton(
-          key: refreshOnGcKey,
           message: 'Auto-refresh on garbage collection',
           label: const Text('Refresh on GC'),
           icon: Icons.autorenew_outlined,

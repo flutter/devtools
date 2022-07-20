@@ -7,7 +7,6 @@ import 'package:devtools_app/src/config_specific/import_export/import_export.dar
 import 'package:devtools_app/src/screens/memory/memory_controller.dart';
 import 'package:devtools_app/src/screens/memory/memory_heap_tree_view.dart';
 import 'package:devtools_app/src/screens/memory/memory_screen.dart';
-import 'package:devtools_app/src/screens/memory/panes/allocation_profile/allocation_profile_table_view.dart';
 import 'package:devtools_app/src/screens/memory/panes/allocation_profile/allocation_profile_table_view_controller.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
@@ -15,7 +14,6 @@ import 'package:devtools_app/src/shared/preferences.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
@@ -152,7 +150,7 @@ void main() {
 
       // Refresh the profile.
       await tester.tap(
-        find.byKey(AllocationProfileTableViewState.refreshKey).first,
+        find.byIcon(Icons.refresh).first,
       );
       await tester.pumpAndSettle();
 
@@ -189,7 +187,7 @@ void main() {
 
       // Enable "Refresh on GC" functionality.
       await tester.tap(
-        find.byKey(AllocationProfileTableViewState.refreshOnGcKey).first,
+        find.text('Refresh on GC').first,
       );
       await tester.pump();
 
