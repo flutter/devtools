@@ -169,7 +169,16 @@ class TestNotifications implements NotificationService {
   final List<String> messages = [];
 
   @override
-  void push(String message) {
+  void dismiss(String message) {}
+
+  @override
+  bool push(
+    String message, {
+    List<Widget> actions = const [],
+    Duration duration = Notifications.defaultDuration,
+    bool allowDuplicates = true,
+  }) {
     messages.add(message);
+    return true;
   }
 }

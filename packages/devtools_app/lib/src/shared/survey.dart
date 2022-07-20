@@ -12,6 +12,7 @@ import '../config_specific/launch_url/launch_url.dart';
 import '../config_specific/logger/logger.dart';
 import '../config_specific/server/server.dart' as server;
 import '../primitives/utils.dart';
+import 'globals.dart';
 import 'notifications.dart';
 
 class SurveyService {
@@ -71,7 +72,7 @@ class SurveyService {
         ),
       ];
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        final didPush = Notifications.of(context)!.push(
+        final didPush = notificationService.push(
           message,
           actions: actions,
           duration: _notificationDuration,

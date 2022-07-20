@@ -19,7 +19,7 @@ void main() {
           child: Builder(
             builder: (context) {
               return ElevatedButton(
-                onPressed: () => Notifications.of(context)!.push(text),
+                onPressed: () => notificationService.push(text),
                 child: const SizedBox(),
               );
             },
@@ -64,7 +64,7 @@ void main() {
               return ElevatedButton(
                 onPressed: () {
                   if (timesPressed == 0) {
-                    Notifications.of(context)!.push(notification);
+                    notificationService.push(notification);
                   } else {
                     Navigator.of(context).pushNamed('/details');
                   }

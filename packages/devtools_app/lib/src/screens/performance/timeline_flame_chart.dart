@@ -15,7 +15,7 @@ import '../../primitives/geometry.dart';
 import '../../primitives/trace_event.dart';
 import '../../primitives/utils.dart';
 import '../../shared/common_widgets.dart';
-import '../../shared/notifications.dart';
+import '../../shared/globals.dart';
 import '../../shared/theme.dart';
 import '../../shared/utils.dart';
 import '../../ui/colors.dart';
@@ -270,7 +270,7 @@ class TimelineFlameChartState
     // button when there are no more events out of view for the group. Leave
     // this here as a fallback though, so that we do not give the user a
     // completely broken experience if we regress or if there is a race.
-    Notifications.of(context)!.push(
+    notificationService.push(
       'There are no events on this thread that occurred before this time range.',
     );
   }
@@ -328,7 +328,7 @@ class TimelineFlameChartState
     // button when there are no more events out of view for the group. Leave
     // this here as a fallback though, so that we do not give the user a
     // completely broken experience if we regress or if there is a race.
-    Notifications.of(context)!.push(
+    notificationService.push(
       'There are no events on this thread that occurred after this time range.',
     );
   }
@@ -355,7 +355,7 @@ class TimelineFlameChartState
         if (controller.firstWellFormedFrameMicros != null &&
             _selected.timeFromFrameTiming.start!.inMicroseconds <
                 controller.firstWellFormedFrameMicros!) {
-          Notifications.of(context)!.push(
+          notificationService.push(
             'No timeline events available for the selected frame. Timeline '
             'events occurred too long ago before DevTools could access them. '
             'To avoid this, open the DevTools Performance page sooner.',
@@ -363,7 +363,7 @@ class TimelineFlameChartState
           return;
         }
         // TODO(kenz): should we zoom to the latest available frame?
-        Notifications.of(context)!
+        notificationService
             .push('No timeline events available for the selected frame');
         return;
       }

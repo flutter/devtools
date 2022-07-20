@@ -16,7 +16,6 @@ import '../ui/label.dart';
 import 'common_widgets.dart';
 import 'file_import.dart';
 import 'globals.dart';
-import 'notifications.dart';
 import 'routing.dart';
 import 'theme.dart';
 import 'utils.dart';
@@ -183,7 +182,7 @@ class _ConnectDialogState extends State<ConnectDialog>
       analytics_constants.connectToApp,
     );
     if (connectDialogController.text.isEmpty) {
-      Notifications.of(context)!.push('Please enter a VM Service URL.');
+      notificationService.push('Please enter a VM Service URL.');
       return;
     }
 

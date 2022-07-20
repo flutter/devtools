@@ -25,7 +25,15 @@ final _notificationWidth = _notificationHeight * goldenRatio;
 /// instead of widget tests.
 abstract class NotificationService {
   /// Pushes a notification [message].
-  void push(String message);
+  bool push(
+    String message, {
+    List<Widget> actions = const [],
+    Duration duration = Notifications.defaultDuration,
+    bool allowDuplicates = true,
+  });
+
+  /// Dismisses all notifications with a matching message.
+  void dismiss(String message);
 }
 
 /// Manager for notifications in the app.
@@ -138,6 +146,7 @@ class NotificationsState extends State<_NotificationsProvider>
   }
 
   /// Dismisses all notifications with a matching message.
+  @override
   void dismiss(String message) {
     bool didDismiss = false;
     // Make a copy so we do not remove a notification from [_notifications]

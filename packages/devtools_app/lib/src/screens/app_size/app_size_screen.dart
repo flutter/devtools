@@ -15,7 +15,6 @@ import '../../primitives/utils.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/file_import.dart';
 import '../../shared/globals.dart';
-import '../../shared/notifications.dart';
 import '../../shared/screen.dart';
 import '../../shared/split.dart';
 import '../../shared/theme.dart';
@@ -154,7 +153,7 @@ class _AppSizeBodyState extends State<AppSizeBody>
   }
 
   void _pushErrorMessage(String error) {
-    if (mounted) Notifications.of(context)!.push(error);
+    if (mounted) notificationService.push(error);
   }
 
   @override
@@ -393,7 +392,7 @@ class _AnalysisViewState extends State<AnalysisView>
                     controller.loadTreeFromJsonFile(
                       jsonFile: jsonFile,
                       onError: (error) {
-                        if (mounted) Notifications.of(context)!.push(error);
+                        if (mounted) notificationService.push(error);
                       },
                     );
                   },
