@@ -131,7 +131,7 @@ class SurveyService {
     required BuildContext context,
   }) async {
     await server.setSurveyActionTaken();
-    Notifications.of(context)!.dismiss(message);
+    notificationService.dismiss(message);
   }
 
   void _takeSurveyPressed({
@@ -141,7 +141,7 @@ class SurveyService {
   }) async {
     await launchUrl(surveyUrl, context);
     await server.setSurveyActionTaken();
-    Notifications.of(context)!.dismiss(message);
+    notificationService.dismiss(message);
   }
 }
 

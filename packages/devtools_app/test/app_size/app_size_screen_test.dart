@@ -30,6 +30,7 @@ void main() {
   setUp(() {
     setGlobal(ServiceConnectionManager, FakeServiceManager());
     setGlobal(IdeTheme, IdeTheme());
+    setGlobal(NotificationService, TestNotifications());
   });
 
   final lastModifiedTime = DateTime.parse('2020-07-28 13:29:00');
@@ -336,8 +337,6 @@ void main() {
   });
 
   group('AppSizeController', () {
-    late BuildContext buildContext;
-
     setUp(() async {
       screen = const AppSizeScreen();
       appSizeController = AppSizeTestController();
@@ -353,7 +352,6 @@ void main() {
             builder: (context, child) => Notifications(child: child!),
             home: Builder(
               builder: (context) {
-                buildContext = context;
                 return const AppSizeBody();
               },
             ),
@@ -381,7 +379,7 @@ void main() {
           lastModifiedTime: lastModifiedTime,
           data: json.decode(secondFile),
         ),
-        onError: (error) => Notifications.of(buildContext)!.push(error),
+        onError: (error) => notificationService.push(error),
       );
       await tester.pumpAndSettle();
     }
@@ -400,7 +398,7 @@ void main() {
           lastModifiedTime: lastModifiedTime,
           data: unsupportedFile,
         ),
-        onError: (error) => Notifications.of(buildContext)!.push(error),
+        onError: (error) => notificationService.push(error),
       );
       await tester.pumpAndSettle();
       expect(

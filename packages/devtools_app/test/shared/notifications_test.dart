@@ -5,12 +5,14 @@
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Notifications', () {
     setGlobal(IdeTheme, IdeTheme());
+    setGlobal(NotificationService, TestNotifications());
 
     Widget buildNotificationsWithButtonToPush(String text) {
       return Directionality(

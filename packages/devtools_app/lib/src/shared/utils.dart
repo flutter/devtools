@@ -34,7 +34,7 @@ Future<void> copyToClipboard(
     ),
   );
 
-  Notifications.of(context)?.push(successMessage);
+  notificationService.push(successMessage);
 }
 
 /// Logging to debug console only in debug runs.
