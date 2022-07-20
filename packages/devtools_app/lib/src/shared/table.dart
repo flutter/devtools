@@ -8,13 +8,20 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide TableRow;
 import 'package:flutter/services.dart';
 
-import '../../devtools_app.dart';
+import '../primitives/auto_dispose_mixin.dart';
 import '../primitives/flutter_widgets/linked_scroll_controller.dart';
+import '../primitives/listenable.dart';
+import '../primitives/trees.dart';
+import '../primitives/utils.dart';
 import '../ui/colors.dart';
+import '../ui/search.dart';
 import '../ui/utils.dart';
 import 'collapsible_mixin.dart';
+import 'common_widgets.dart';
 import 'table_data.dart';
+import 'theme.dart';
 import 'tree.dart';
+import 'utils.dart';
 
 // TODO(devoncarew): We need to render the selected row with a different
 // background color.
@@ -318,9 +325,16 @@ class Selection<T> {
     this.nodeIndex,
     this.nodeIndexCalculator,
     this.scrollIntoView = false,
-  });
+  }) : assert(nodeIndex != null || nodeIndexCalculator != null);
+
+  Selection.empty()
+      : node = null,
+        nodeIndex = null,
+        nodeIndexCalculator = null,
+        scrollIntoView = false;
 
   final T? node;
+  // TODO (carolynqu): get rid of nodeIndex and only use nodeIndexCalculator, https://github.com/flutter/devtools/issues/4266
   final int? nodeIndex;
   final int Function(T)? nodeIndexCalculator;
   final bool scrollIntoView;
@@ -465,8 +479,8 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       secondarySortColumn: widget.secondarySortColumn,
     );
 
-    selectionNotifier =
-        widget.selectionNotifier ?? ValueNotifier<Selection<T>>(Selection<T>());
+    selectionNotifier = widget.selectionNotifier ??
+        ValueNotifier<Selection<T>>(Selection.empty());
   }
 
   void _updateItems() {
@@ -863,7 +877,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
 
             final newPos = selectedDisplayRow * defaultRowHeight;
 
-            scrollToPosition(scrollController, newPos);
+            maybeScrollToPosition(scrollController, newPos);
           }
         });
       });

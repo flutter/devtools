@@ -600,7 +600,7 @@ class MemoryController extends DisposableController
   final SettingsModel settings = SettingsModel();
 
   final selectionSnapshotNotifier =
-      ValueNotifier<Selection<Reference>>(Selection<Reference>());
+      ValueNotifier<Selection<Reference>>(Selection.empty());
 
   /// Tree to view Libary/Class/Instance (grouped by)
   late TreeTable<Reference> groupByTreeTable;
