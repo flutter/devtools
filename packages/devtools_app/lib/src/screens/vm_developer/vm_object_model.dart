@@ -29,7 +29,7 @@ abstract class VmObject {
 
   IsolateRef? _isolate;
 
-  dynamic get obj;
+  Obj get obj;
   late Obj _obj;
 
   String? get name;
