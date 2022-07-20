@@ -51,8 +51,10 @@ class ObjectInspectorViewController extends DisposableController
     _currentScriptRef = currentObjectValue?.scriptRef;
 
     if (currentObjectValue != null) {
-      await programExplorerController
-          .selectScriptNode(currentObjectValue.scriptRef);
+      if (_currentScriptRef != null) {
+        await programExplorerController
+            .selectScriptNode(currentObjectValue.scriptRef);
+      }
 
       if (currentObjectValue.outlineNode != null) {
         final outlineNode = currentObjectValue.outlineNode!;

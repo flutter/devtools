@@ -233,13 +233,18 @@ class VmExpansionTile extends StatelessWidget {
       title: Text(title),
       needsTopBorder: false,
     );
-    return Theme(
-      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-      child: ExpansionTile(
-        title: titleRow,
-        onExpansionChanged: onExpanded,
-        tilePadding: const EdgeInsets.all(densePadding),
-        children: children,
+    return Card(
+      child: ListTileTheme(
+        data: ListTileTheme.of(context).copyWith(dense: true),
+        child: ExpansionTile(
+          title: titleRow,
+          onExpansionChanged: onExpanded,
+          tilePadding: const EdgeInsets.only(
+            left: densePadding,
+            right: defaultSpacing,
+          ),
+          children: children,
+        ),
       ),
     );
   }
@@ -288,7 +293,7 @@ class RetainingPathWidget extends StatelessWidget {
               : [
                   SizedBox.fromSize(
                     size: Size.fromHeight(
-                      retainingObjects.length * defaultRowHeight,
+                      retainingObjects.length * defaultRowHeight + densePadding,
                     ),
                     child: Column(children: retainingObjects),
                   ),
@@ -404,7 +409,7 @@ class InboundReferencesWidget extends StatelessWidget {
               : [
                   SizedBox.fromSize(
                     size: Size.fromHeight(
-                      references.length * defaultRowHeight,
+                      references.length * defaultRowHeight + densePadding,
                     ),
                     child: Column(children: references),
                   ),
@@ -435,7 +440,7 @@ class InboundReferencesWidget extends StatelessWidget {
                 _inboundRefDescription(inboundRef, parentWordOffset),
                 style: Theme.of(context).fixedFontStyle,
               ),
-            )
+            ),
           ],
         ),
       );
