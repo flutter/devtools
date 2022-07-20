@@ -331,7 +331,7 @@ class Selection<T> {
       : node = null,
         nodeIndex = null,
         nodeIndexCalculator = null,
-        scrollIntoView = false;
+        scrollIntoView = true;
 
   final T? node;
   // TODO (carolynqu): get rid of nodeIndex and only use nodeIndexCalculator, https://github.com/flutter/devtools/issues/4266
