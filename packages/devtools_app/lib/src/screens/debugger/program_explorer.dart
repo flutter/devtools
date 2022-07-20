@@ -245,6 +245,9 @@ class ProgramStructureIcon extends StatelessWidget {
     } else if (object is ScriptRef) {
       icon = libraryIcon;
       color = colorScheme.stringSyntaxColor;
+    } else if (object is CodeRef) {
+      icon = Icons.code;
+      color = colorScheme.controlFlowSyntaxColor;
     } else {
       icon = containerIcon;
     }
@@ -429,12 +432,14 @@ class ProgramExplorer extends StatelessWidget {
     this.onSelected,
     this.title = 'File Explorer',
     this.onNodeSelected,
+    this.displayCodeNodes = false,
   });
 
   final ProgramExplorerController controller;
   final void Function(ScriptLocation)? onSelected;
   final String title;
   final void Function(VMServiceObjectNode)? onNodeSelected;
+  final bool displayCodeNodes;
 
   @override
   Widget build(BuildContext context) {

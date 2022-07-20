@@ -15,6 +15,12 @@ import 'program_explorer_model.dart';
 
 class ProgramExplorerController extends DisposableController
     with AutoDisposeControllerMixin {
+  /// [showCodeNodes] controls whether or not [Code] nodes are displayed in the
+  /// outline view.
+  ProgramExplorerController({
+    this.showCodeNodes = false,
+  });
+
   /// The outline view nodes for the currently selected library.
   ValueListenable<List<VMServiceObjectNode>> get outlineNodes => _outlineNodes;
   final _outlineNodes = ListValueNotifier<VMServiceObjectNode>([]);
@@ -44,6 +50,9 @@ class ProgramExplorerController extends DisposableController
   ValueListenable<bool> get initialized => _initialized;
   final _initialized = ValueNotifier<bool>(false);
   bool _initializing = false;
+
+  /// Controls whether or not [Code] nodes are displayed in the outline view.
+  final bool showCodeNodes;
 
   /// Returns true if [function] is a getter or setter that was not explicitly
   /// defined (e.g., `int foo` creates `int get foo` and `set foo(int)`).
@@ -218,10 +227,21 @@ class ProgramExplorerController extends DisposableController
       Iterable<FuncRef> funcs,
       Iterable<FieldRef>? fields,
     ) async {
-      final res = await getObjects(
-        funcs.where(
-          (f) => !_isSyntheticAccessor(f, fields as List<FieldRef>),
-        ),
+      final res = await Future.wait<Func>(
+        funcs
+            .where((f) => !_isSyntheticAccessor(f, fields as List<FieldRef>))
+            .map<Future<Func>>(
+              (f) => service!.getObject(isolateId!, f.id!).then((f) async {
+                final func = f as Func;
+                final codeRef = func.code;
+                if (showCodeNodes && codeRef != null) {
+                  final code =
+                      await service.getObject(isolateId, codeRef.id!) as Code;
+                  func.code = code;
+                }
+                return func;
+              }),
+            ),
       );
       return res.cast<Func>();
     }

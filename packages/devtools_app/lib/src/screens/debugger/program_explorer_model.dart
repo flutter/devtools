@@ -293,8 +293,18 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
 
   void updateObject(Obj object) {
     if (this.object is! Class && object is Class) {
-      for (final function in object.functions ?? []) {
-        _createChild(function.name, function);
+      for (final function in object.functions ?? <Func>[]) {
+        final node = _createChild(function.name, function);
+        final code = (function as Func).code;
+        if (code != null) {
+        node.addChild(
+          VMServiceObjectNode(
+            controller,
+            code.name,
+            code,
+          ),
+        );
+        }
       }
       for (final field in object.fields ?? []) {
         _createChild(field.name, field);
@@ -343,6 +353,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     final classNodes = <VMServiceObjectNode>[];
     final functionNodes = <VMServiceObjectNode>[];
     final variableNodes = <VMServiceObjectNode>[];
+    final codeNodes = <VMServiceObjectNode>[];
 
     final packageAndCoreLibLibraryNodes = <VMServiceObjectNode>[];
     final packageAndCoreLibDirectoryNodes = <VMServiceObjectNode>[];
@@ -384,6 +395,10 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
           case FieldRef:
           case Field:
             variableNodes.add(child);
+            break;
+          case CodeRef:
+          case Code:
+            codeNodes.add(child);
             break;
           default:
             throw StateError('Unexpected type: ${child.object.runtimeType}');
@@ -439,6 +454,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
         ...classNodes,
         ...functionNodes,
         ...variableNodes,
+        ...codeNodes,
         // We treat core libraries and packages as their own category as users
         // are likely more interested in code within their own project.
         // TODO(bkonyi): do we need custom google3 heuristics here?
