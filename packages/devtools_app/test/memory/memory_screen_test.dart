@@ -5,8 +5,6 @@
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
-import 'package:devtools_app/src/screens/memory/allocation_profile_table_view.dart';
-import 'package:devtools_app/src/screens/memory/allocation_profile_table_view_controller.dart';
 import 'package:devtools_app/src/screens/memory/memory_controller.dart';
 import 'package:devtools_app/src/screens/memory/memory_heap_tree_view.dart';
 import 'package:devtools_app/src/screens/memory/memory_screen.dart';
@@ -17,7 +15,6 @@ import 'package:devtools_app/src/screens/memory/panes/control/source_dropdown.da
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/common_widgets.dart';
 import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/preferences.dart';
 import 'package:devtools_app/src/ui/search.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -797,140 +794,5 @@ void main() {
       },
       skip: true,
     );
-
-    group('Allocation Profile Table', skip: !enableNewAllocationProfileTable,
-        () {
-      setUp(() async {
-        fakeServiceManager = FakeServiceManager();
-        setGlobal(ServiceConnectionManager, fakeServiceManager);
-        setGlobal(OfflineModeController, OfflineModeController());
-        setGlobal(IdeTheme, IdeTheme());
-        setGlobal(PreferencesController, PreferencesController());
-      });
-
-      Future<void> navigateToAllocationProfile(
-        WidgetTester tester,
-        AllocationProfileTableViewController allocationProfileController,
-      ) async {
-        expect(
-          allocationProfileController.currentAllocationProfile.value,
-          isNull,
-        );
-
-        await tester.tap(find.byKey(HeapTreeViewState.dartHeapTableTabKey));
-        await tester.pumpAndSettle();
-
-        // We should have requested an allocation profile by navigating to the tab.
-        expect(
-          allocationProfileController.currentAllocationProfile.value,
-          isNotNull,
-        );
-      }
-
-      testWidgetsWithWindowSize(
-          'respects VM Developer Mode setting', windowSize,
-          (WidgetTester tester) async {
-        await pumpMemoryScreen(tester);
-        _setUpServiceManagerForMemory();
-
-        final allocationProfileController =
-            controller.allocationProfileController;
-
-        preferences.toggleVmDeveloperMode(false);
-        await navigateToAllocationProfile(tester, allocationProfileController);
-
-        // Only "total" statistics are shown when VM Developer Mode is disabled.
-        expect(preferences.vmDeveloperModeEnabled.value, isFalse);
-        expect(find.text('Class'), findsOneWidget);
-        expect(find.text('Instances'), findsOneWidget);
-        expect(find.text('Size'), findsOneWidget);
-        expect(find.text('Internal'), findsOneWidget);
-        expect(find.text('External'), findsOneWidget);
-        expect(find.text('Total'), findsOneWidget);
-        expect(find.text('Old Space'), findsNothing);
-        expect(find.text('New Space'), findsNothing);
-
-        // Enable VM Developer Mode to display new/old space column groups.
-        preferences.toggleVmDeveloperMode(true);
-        await tester.pumpAndSettle();
-
-        expect(preferences.vmDeveloperModeEnabled.value, isTrue);
-        expect(find.text('Class'), findsOneWidget);
-        expect(find.text('Instances'), findsNWidgets(3));
-        expect(find.text('Size'), findsNWidgets(3));
-        expect(find.text('Internal'), findsNWidgets(3));
-        expect(find.text('External'), findsNWidgets(3));
-        expect(find.text('Total'), findsOneWidget);
-        expect(find.text('Old Space'), findsOneWidget);
-        expect(find.text('New Space'), findsOneWidget);
-      });
-
-      testWidgetsWithWindowSize('manually refreshes', windowSize,
-          (WidgetTester tester) async {
-        await pumpMemoryScreen(tester);
-        _setUpServiceManagerForMemory();
-
-        final allocationProfileController =
-            controller.allocationProfileController;
-        await navigateToAllocationProfile(tester, allocationProfileController);
-
-        // We'll clear it for now so we can tell when it's refreshed.
-        allocationProfileController.clearCurrentProfile();
-        await tester.pump();
-
-        // Refresh the profile.
-        await tester.tap(
-          find.byKey(AllocationProfileTableViewState.refreshKey).first,
-        );
-        await tester.pumpAndSettle();
-
-        // Ensure that we have populated the current allocation profile.
-        expect(
-          allocationProfileController.currentAllocationProfile.value,
-          isNotNull,
-        );
-
-        expect(find.text('Class'), findsOneWidget);
-      });
-
-      testWidgetsWithWindowSize('refreshes on GC', windowSize,
-          (WidgetTester tester) async {
-        await pumpMemoryScreen(tester);
-        _setUpServiceManagerForMemory();
-
-        final allocationProfileController =
-            controller.allocationProfileController;
-
-        await navigateToAllocationProfile(tester, allocationProfileController);
-
-        // We'll clear it for now so we can tell when it's refreshed.
-        allocationProfileController.clearCurrentProfile();
-        await tester.pump();
-
-        // Emit a GC event and confirm we don't perform a refresh.
-        final fakeService = fakeServiceManager.service as FakeVmServiceWrapper;
-        fakeService.emitGCEvent();
-        expect(
-          allocationProfileController.currentAllocationProfile.value,
-          isNull,
-        );
-
-        // Enable "Refresh on GC" functionality.
-        await tester.tap(
-          find.byKey(AllocationProfileTableViewState.refreshOnGcKey).first,
-        );
-        await tester.pump();
-
-        // Emit a GC event to trigger a refresh.
-        fakeService.emitGCEvent();
-        await tester.pumpAndSettle();
-
-        // Ensure that we have populated the current allocation profile.
-        expect(
-          allocationProfileController.currentAllocationProfile.value,
-          isNotNull,
-        );
-      });
-    });
   });
 }

@@ -60,10 +60,13 @@ class HeapStats {
 }
 
 extension ClassHeapStatsPrivateViewExtension on ClassHeapStats {
-  HeapStats get newSpace => json!.containsKey('_new')
-      ? HeapStats.parse(json!['_new'].cast<int>())
+  static const newSpaceKey = '_new';
+  static const oldSpaceKey = '_old';
+
+  HeapStats get newSpace => json!.containsKey(newSpaceKey)
+      ? HeapStats.parse(json![newSpaceKey].cast<int>())
       : const HeapStats.empty();
-  HeapStats get oldSpace => json!.containsKey('_old')
-      ? HeapStats.parse(json!['_old'].cast<int>())
+  HeapStats get oldSpace => json!.containsKey(oldSpaceKey)
+      ? HeapStats.parse(json![oldSpaceKey].cast<int>())
       : const HeapStats.empty();
 }

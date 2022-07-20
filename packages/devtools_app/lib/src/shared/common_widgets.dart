@@ -895,6 +895,33 @@ class ExportButton extends IconLabelButton {
         );
 }
 
+/// Button to open related information / documentation.
+///
+/// [tooltip] specifies the hover text for the button.
+/// [link] is the link that should be opened when the button is clicked.
+class InformationButton extends StatelessWidget {
+  const InformationButton({
+    Key? key,
+    required this.tooltip,
+    required this.link,
+  }) : super(key: key);
+
+  final String tooltip;
+
+  final String link;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: IconButton(
+        icon: const Icon(Icons.help_outline),
+        onPressed: () async => await launchUrl(link, context),
+      ),
+    );
+  }
+}
+
 class ToggleButton extends StatelessWidget {
   const ToggleButton({
     Key? key,

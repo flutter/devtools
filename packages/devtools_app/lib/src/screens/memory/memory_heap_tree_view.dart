@@ -24,7 +24,6 @@ import '../../shared/theme.dart';
 import '../../shared/utils.dart';
 import '../../ui/search.dart';
 import '../../ui/tab.dart';
-import 'allocation_profile_table_view.dart';
 import 'memory_allocation_table_view.dart';
 import 'memory_analyzer.dart';
 import 'memory_controller.dart';
@@ -33,13 +32,15 @@ import 'memory_graph_model.dart';
 import 'memory_heap_treemap.dart';
 import 'memory_instance_tree_view.dart';
 import 'memory_snapshot_models.dart';
+import 'panes/allocation_profile/allocation_profile_table_view.dart';
 import 'panes/diff/diff_pane.dart';
 import 'panes/leaks/leaks_pane.dart';
 import 'primitives/memory_utils.dart';
 
 // TODO(bkonyi): enable new allocation profile table when we're ready to remove
 // the existing allocations table.
-const enableNewAllocationProfileTable = false;
+@visibleForTesting
+bool enableNewAllocationProfileTable = false;
 
 const memorySearchFieldKeyName = 'MemorySearchFieldKey';
 

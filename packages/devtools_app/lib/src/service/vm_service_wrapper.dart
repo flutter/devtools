@@ -225,6 +225,7 @@ class VmServiceWrapper implements VmService {
     return trackFuture(
       'getAllocationProfile',
       _vmService.callMethod(
+        // TODO(bkonyi): add _new and _old to public response.
         '_getAllocationProfile',
         isolateId: isolateId,
         args: <String, dynamic>{

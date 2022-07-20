@@ -1568,9 +1568,6 @@ class _TableRowState<T> extends State<TableRow<T>>
                 widget.columnWidths[current],
               );
             case _TableRowPartDisplayType.columnSpacer:
-              // TODO(kenz): consider adding column divider lines like we do for
-              // column groups. We'll have to make sure that column divider
-              // lines with column group divider lines doesn't look too busy.
               return const SizedBox(
                 width: _columnSpacing,
                 child: VerticalDivider(width: _columnSpacing),
@@ -1637,39 +1634,37 @@ class _ColumnGroupHeaderRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
       decoration: BoxDecoration(
         border: Border(
           bottom: defaultBorderSide(Theme.of(context)),
         ),
       ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-        child: ListView.builder(
-          scrollDirection: Axis.horizontal,
-          controller: scrollController,
-          itemCount: groups.length + groups.numSpacers,
-          itemBuilder: (context, int i) {
-            if (i % 2 == 1) {
-              return const _ColumnGroupSpacer();
-            }
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        controller: scrollController,
+        itemCount: groups.length + groups.numSpacers,
+        itemBuilder: (context, int i) {
+          if (i % 2 == 1) {
+            return const _ColumnGroupSpacer();
+          }
 
-            final group = groups[i ~/ 2];
-            final groupRange = group.range;
-            double groupWidth = 0.0;
-            for (int j = groupRange.begin as int; j < groupRange.end; j++) {
-              final columnWidth = columnWidths[j];
-              groupWidth += columnWidth;
-              if (j < groupRange.end - 1) {
-                groupWidth += _columnSpacing;
-              }
+          final group = groups[i ~/ 2];
+          final groupRange = group.range;
+          double groupWidth = 0.0;
+          for (int j = groupRange.begin as int; j < groupRange.end; j++) {
+            final columnWidth = columnWidths[j];
+            groupWidth += columnWidth;
+            if (j < groupRange.end - 1) {
+              groupWidth += _columnSpacing;
             }
-            return Container(
-              alignment: Alignment.center,
-              width: groupWidth,
-              child: Text(group.title),
-            );
-          },
-        ),
+          }
+          return Container(
+            alignment: Alignment.center,
+            width: groupWidth,
+            child: Text(group.title),
+          );
+        },
       ),
     );
   }

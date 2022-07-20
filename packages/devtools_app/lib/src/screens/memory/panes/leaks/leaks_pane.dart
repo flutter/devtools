@@ -13,6 +13,7 @@ import '../../../../config_specific/launch_url/launch_url.dart';
 import '../../../../config_specific/logger/logger.dart' as logger;
 import '../../../../primitives/utils.dart';
 import '../../../../service/service_extensions.dart';
+import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
 import '../../primitives/memory_utils.dart';
 import 'diagnostics/model.dart';
@@ -232,10 +233,14 @@ class _LeaksPaneState extends State<LeaksPane> {
     return ValueListenableBuilder<bool>(
       valueListenable: _leaksController.leakSummaryReceived,
       builder: (_, leakSummaryReceived, __) {
+        const infoButton = InformationButton(
+          tooltip: 'Open memory leak tracking guidance.',
+          link: linkToGuidance,
+        );
         if (!leakSummaryReceived) {
           return Column(
             children: const [
-              _InformationButton(),
+              infoButton,
               Text('No information about memory leaks yet.'),
             ],
           );
@@ -248,7 +253,7 @@ class _LeaksPaneState extends State<LeaksPane> {
               controller: _leaksController.status,
               analysisStarter: Row(
                 children: [
-                  const _InformationButton(),
+                  infoButton,
                   _AnalyzeButton(leaksController: _leaksController),
                   _ForceGCButton(leaksController: _leaksController),
                 ],
@@ -265,21 +270,6 @@ class _LeaksPaneState extends State<LeaksPane> {
           ],
         );
       },
-    );
-  }
-}
-
-class _InformationButton extends StatelessWidget {
-  const _InformationButton({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Tooltip(
-      message: 'Open memory leak tracking guidance.',
-      child: IconButton(
-        icon: const Icon(Icons.help_outline),
-        onPressed: () async => await launchUrl(linkToGuidance, context),
-      ),
     );
   }
 }

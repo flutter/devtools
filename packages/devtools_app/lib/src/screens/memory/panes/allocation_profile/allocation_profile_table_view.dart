@@ -5,21 +5,23 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../devtools_app.dart';
-import '../../config_specific/import_export/import_export.dart';
-import '../../shared/table.dart';
-import '../../shared/table_data.dart';
-
-import '../vm_developer/vm_service_private_extensions.dart';
+import '../../../../../devtools_app.dart';
+import '../../../../config_specific/import_export/import_export.dart';
+import '../../../../shared/table.dart';
+import '../../../../shared/table_data.dart';
+import '../../../vm_developer/vm_service_private_extensions.dart';
+import '../control/constants.dart';
 import 'allocation_profile_table_view_controller.dart';
-import 'panes/control/constants.dart';
+
+// TODO(bkonyi): ensure data displayed in this view is included in the full
+// memory page export and is serializable/deserializable.
 
 /// The default width for columns containing *mostly* numeric data (e.g.,
 /// instances, memory).
 const _defaultNumberFieldWidth = 80.0;
 
-class FieldClassName extends ColumnData<ClassHeapStats> {
-  FieldClassName()
+class _FieldClassName extends ColumnData<ClassHeapStats> {
+  _FieldClassName()
       : super(
           'Class',
           fixedWidthPx: scaleByFontFactor(200),
@@ -29,14 +31,12 @@ class FieldClassName extends ColumnData<ClassHeapStats> {
   String? getValue(ClassHeapStats dataObject) => dataObject.classRef!.name;
 
   @override
-  String getDisplayValue(ClassHeapStats dataObject) =>
-      '${getValue(dataObject)}';
-
-  @override
   bool get supportsSorting => true;
 }
 
-enum HeapGeneration {
+/// For more information on the Dart GC implementation, see:
+/// https://medium.com/flutter/flutter-dont-fear-the-garbage-collector-d69b3ff1ca30
+enum _HeapGeneration {
   newSpace,
   oldSpace,
   total;
@@ -44,18 +44,18 @@ enum HeapGeneration {
   @override
   String toString() {
     switch (this) {
-      case HeapGeneration.newSpace:
+      case _HeapGeneration.newSpace:
         return 'New Space';
-      case HeapGeneration.oldSpace:
+      case _HeapGeneration.oldSpace:
         return 'Old Space';
-      case HeapGeneration.total:
+      case _HeapGeneration.total:
         return 'Total';
     }
   }
 }
 
-class FieldInstanceCountColumn extends ColumnData<ClassHeapStats> {
-  FieldInstanceCountColumn({required this.heap})
+class _FieldInstanceCountColumn extends ColumnData<ClassHeapStats> {
+  _FieldInstanceCountColumn({required this.heap})
       : super(
           'Instances',
           titleTooltip: 'The number of instances of the class in the heap',
@@ -63,33 +63,26 @@ class FieldInstanceCountColumn extends ColumnData<ClassHeapStats> {
           fixedWidthPx: scaleByFontFactor(_defaultNumberFieldWidth),
         );
 
-  final HeapGeneration heap;
+  final _HeapGeneration heap;
 
   @override
   dynamic getValue(ClassHeapStats dataObject) {
     switch (heap) {
-      case HeapGeneration.newSpace:
+      case _HeapGeneration.newSpace:
         return dataObject.newSpace.count;
-      case HeapGeneration.oldSpace:
+      case _HeapGeneration.oldSpace:
         return dataObject.oldSpace.count;
-      case HeapGeneration.total:
+      case _HeapGeneration.total:
         return dataObject.instancesCurrent;
     }
   }
 
   @override
-  String getDisplayValue(ClassHeapStats dataObject) =>
-      '${getValue(dataObject)}';
-
-  @override
   bool get numeric => true;
-
-  @override
-  bool get supportsSorting => true;
 }
 
-class FieldExternalSizeColumn extends FieldSizeColumn {
-  FieldExternalSizeColumn({required super.heap})
+class _FieldExternalSizeColumn extends _FieldSizeColumn {
+  _FieldExternalSizeColumn({required super.heap})
       : super._(
           title: 'External',
           titleTooltip: 'Portion of memory allocated outside of the Dart heap',
@@ -98,19 +91,19 @@ class FieldExternalSizeColumn extends FieldSizeColumn {
   @override
   dynamic getValue(ClassHeapStats dataObject) {
     switch (heap) {
-      case HeapGeneration.newSpace:
+      case _HeapGeneration.newSpace:
         return dataObject.newSpace.externalSize;
-      case HeapGeneration.oldSpace:
+      case _HeapGeneration.oldSpace:
         return dataObject.oldSpace.externalSize;
-      case HeapGeneration.total:
+      case _HeapGeneration.total:
         return dataObject.newSpace.externalSize +
             dataObject.oldSpace.externalSize;
     }
   }
 }
 
-class FieldInternalSizeColumn extends FieldSizeColumn {
-  FieldInternalSizeColumn({required super.heap})
+class _FieldInternalSizeColumn extends _FieldSizeColumn {
+  _FieldInternalSizeColumn({required super.heap})
       : super._(
           title: 'Internal',
           titleTooltip: 'Portion of memory allocated within the Dart heap',
@@ -119,24 +112,24 @@ class FieldInternalSizeColumn extends FieldSizeColumn {
   @override
   dynamic getValue(ClassHeapStats dataObject) {
     switch (heap) {
-      case HeapGeneration.newSpace:
+      case _HeapGeneration.newSpace:
         return dataObject.newSpace.size;
-      case HeapGeneration.oldSpace:
+      case _HeapGeneration.oldSpace:
         return dataObject.oldSpace.size;
-      case HeapGeneration.total:
+      case _HeapGeneration.total:
         return dataObject.bytesCurrent!;
     }
   }
 }
 
-class FieldSizeColumn extends ColumnData<ClassHeapStats> {
-  factory FieldSizeColumn({required heap}) => FieldSizeColumn._(
+class _FieldSizeColumn extends ColumnData<ClassHeapStats> {
+  factory _FieldSizeColumn({required heap}) => _FieldSizeColumn._(
         title: 'Size',
         titleTooltip: 'Total memory allocated',
         heap: heap,
       );
 
-  FieldSizeColumn._({
+  _FieldSizeColumn._({
     required String title,
     required String titleTooltip,
     required this.heap,
@@ -147,16 +140,16 @@ class FieldSizeColumn extends ColumnData<ClassHeapStats> {
           fixedWidthPx: scaleByFontFactor(_defaultNumberFieldWidth),
         );
 
-  final HeapGeneration heap;
+  final _HeapGeneration heap;
 
   @override
   dynamic getValue(ClassHeapStats dataObject) {
     switch (heap) {
-      case HeapGeneration.newSpace:
+      case _HeapGeneration.newSpace:
         return dataObject.newSpace.size + dataObject.newSpace.externalSize;
-      case HeapGeneration.oldSpace:
+      case _HeapGeneration.oldSpace:
         return dataObject.oldSpace.size + dataObject.oldSpace.externalSize;
-      case HeapGeneration.total:
+      case _HeapGeneration.total:
         return dataObject.bytesCurrent! +
             dataObject.newSpace.externalSize +
             dataObject.oldSpace.externalSize;
@@ -175,9 +168,6 @@ class FieldSizeColumn extends ColumnData<ClassHeapStats> {
 
   @override
   bool get numeric => true;
-
-  @override
-  bool get supportsSorting => true;
 }
 
 /// Displays data from an [AllocationProfile] in a tabular format, with support
@@ -252,11 +242,11 @@ class _AllocationProfileTable extends StatelessWidget {
   ];
 
   static final _columns = [
-    FieldClassName(),
-    FieldInstanceCountColumn(heap: HeapGeneration.total),
-    FieldSizeColumn(heap: HeapGeneration.total),
-    FieldInternalSizeColumn(heap: HeapGeneration.total),
-    FieldExternalSizeColumn(heap: HeapGeneration.total),
+    _FieldClassName(),
+    _FieldInstanceCountColumn(heap: _HeapGeneration.total),
+    _FieldSizeColumn(heap: _HeapGeneration.total),
+    _FieldInternalSizeColumn(heap: _HeapGeneration.total),
+    _FieldExternalSizeColumn(heap: _HeapGeneration.total),
   ];
 
   /// Columns for data that is only displayed with VM developer mode enabled.
@@ -272,14 +262,14 @@ class _AllocationProfileTable extends StatelessWidget {
   ];
 
   static final _vmDeveloperModeColumns = [
-    FieldInstanceCountColumn(heap: HeapGeneration.newSpace),
-    FieldSizeColumn(heap: HeapGeneration.newSpace),
-    FieldInternalSizeColumn(heap: HeapGeneration.newSpace),
-    FieldExternalSizeColumn(heap: HeapGeneration.newSpace),
-    FieldInstanceCountColumn(heap: HeapGeneration.oldSpace),
-    FieldSizeColumn(heap: HeapGeneration.oldSpace),
-    FieldInternalSizeColumn(heap: HeapGeneration.oldSpace),
-    FieldExternalSizeColumn(heap: HeapGeneration.oldSpace),
+    _FieldInstanceCountColumn(heap: _HeapGeneration.newSpace),
+    _FieldSizeColumn(heap: _HeapGeneration.newSpace),
+    _FieldInternalSizeColumn(heap: _HeapGeneration.newSpace),
+    _FieldExternalSizeColumn(heap: _HeapGeneration.newSpace),
+    _FieldInstanceCountColumn(heap: _HeapGeneration.oldSpace),
+    _FieldSizeColumn(heap: _HeapGeneration.oldSpace),
+    _FieldInternalSizeColumn(heap: _HeapGeneration.oldSpace),
+    _FieldExternalSizeColumn(heap: _HeapGeneration.oldSpace),
   ];
 
   final AllocationProfileTableViewController allocationProfileController;
@@ -299,7 +289,7 @@ class _AllocationProfileTable extends StatelessWidget {
           valueListenable: preferences.vmDeveloperModeEnabled,
           builder: (context, vmDeveloperModeEnabled, _) {
             return ElevatedCard(
-              padding: const EdgeInsets.only(),
+              padding: EdgeInsets.zero,
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   return FlatTable<ClassHeapStats?>(
@@ -322,7 +312,7 @@ class _AllocationProfileTable extends StatelessWidget {
                     sortColumn: _columns.first,
                     sortDirection: SortDirection.ascending,
                     onItemSelected: (item) => null,
-                    keyFactory: (d) => Key(d!.classRef!.name!),
+                    keyFactory: (element) => Key(element!.classRef!.name!),
                   );
                 },
               ),
@@ -357,12 +347,19 @@ class _AllocationProfileTableControls extends StatelessWidget {
         OutlinedIconButton(
           key: refreshKey,
           icon: Icons.refresh,
-          onPressed: () => allocationProfileController.refresh(),
+          onPressed: allocationProfileController.refresh,
         ),
         const SizedBox(width: denseSpacing),
         _RefreshOnGCToggleButton(
           allocationProfileController: allocationProfileController,
           refreshOnGcKey: refreshOnGcKey,
+        ),
+        const Spacer(),
+        const InformationButton(
+          tooltip: 'View documentation for the allocation profile table.',
+          link: 'https://github.com/flutter/devtools/blob/master/'
+              'packages/devtools_app/lib/src/screens/memory/panes/'
+              'allocation_profile/ALLOCATION_PROFILE.md',
         ),
       ],
     );
@@ -379,18 +376,25 @@ class _ExportAllocationProfileButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ExportButton(
-      onPressed: () {
-        final profile =
-            allocationProfileController.currentAllocationProfile.value;
-        if (profile == null) {
-          return;
-        }
-        final file =
-            allocationProfileController.downloadMemoryTableCsv(profile);
-        Notifications.of(context)!.push(successfulExportMessage(file));
+    return ValueListenableBuilder<AllocationProfile?>(
+      valueListenable: allocationProfileController.currentAllocationProfile,
+      builder: (context, currentAllocationProfile, _) {
+        return IconLabelButton(
+          label: 'CSV',
+          icon: Icons.download,
+          tooltip: 'Download allocation profile data in CSV format',
+          onPressed: currentAllocationProfile == null
+              ? null
+              : () {
+                  final file = allocationProfileController
+                      .downloadMemoryTableCsv(currentAllocationProfile);
+                  Notifications.of(context)!.push(
+                    successfulExportMessage(file),
+                  );
+                },
+          minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
+        );
       },
-      minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
     );
   }
 }

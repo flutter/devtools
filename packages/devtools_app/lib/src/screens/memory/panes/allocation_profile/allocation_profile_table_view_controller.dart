@@ -5,10 +5,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../config_specific/import_export/import_export.dart';
-import '../../primitives/auto_dispose.dart';
-import '../../shared/globals.dart';
-import '../vm_developer/vm_service_private_extensions.dart';
+import '../../../../config_specific/import_export/import_export.dart';
+import '../../../../primitives/auto_dispose.dart';
+import '../../../../shared/globals.dart';
+import '../../../vm_developer/vm_service_private_extensions.dart';
 
 class AllocationProfileTableViewController extends DisposableController
     with AutoDisposeControllerMixin {
