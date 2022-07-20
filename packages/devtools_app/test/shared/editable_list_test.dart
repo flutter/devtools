@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:ui';
 
 import 'package:devtools_app/devtools_app.dart';
@@ -24,9 +23,11 @@ void main() {
   group('EditableList', () {
     testWidgetsWithWindowSize('shows the label', windowSize,
         (WidgetTester tester) async {
-      await tester.pumpWidget(wrap(
-        EditableList(entries: entries([]), textFieldLabel: label),
-      ));
+      await tester.pumpWidget(
+        wrap(
+          EditableList(entries: entries([]), textFieldLabel: label),
+        ),
+      );
       expect(find.text(label), findsOneWidget);
     });
 
