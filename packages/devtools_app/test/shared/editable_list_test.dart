@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/editable_list.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -46,8 +44,15 @@ void main() {
         wrap(widget),
       );
 
-      final textField = find.byKey(widget.textFieldKey);
-      final addEntryButton = find.byKey(widget.addEntryButtonKey);
+      final actionBar = find.byType(EditableListActionBar);
+      final textField = find.descendant(
+        of: actionBar,
+        matching: find.byType(TextField),
+      );
+      final addEntryButton = find.descendant(
+        of: actionBar,
+        matching: find.text('Add'),
+      );
       await tester.enterText(textField, valueToAdd);
       await tester.tap(addEntryButton);
       await tester.pump();
@@ -68,7 +73,7 @@ void main() {
       await tester.pumpWidget(
         wrap(widget),
       );
-      final refreshButton = find.byKey(widget.refreshButtonKey);
+      final refreshButton = find.byType(RefreshButton);
 
       await tester.tap(refreshButton);
       await tester.pump();
@@ -91,10 +96,9 @@ void main() {
         wrap(widget),
       );
       final row = find.byType(EditableListRow);
-      final rowWidget = tester.firstWidget(row) as EditableListRow;
       final removeButton = find.descendant(
         of: row,
-        matching: find.byKey(rowWidget.removeButtonKey),
+        matching: find.byType(EditableListRemoveDirectoryButton),
       );
 
       await tester.tap(removeButton);
@@ -120,10 +124,9 @@ void main() {
         wrap(widget),
       );
       final row = find.byType(EditableListRow);
-      final rowWidget = tester.firstWidget(row) as EditableListRow;
       final copyButton = find.descendant(
         of: row,
-        matching: find.byKey(rowWidget.copyButtonKey),
+        matching: find.byType(EditableListCopyDirectoryButton),
       );
 
       await tester.tap(copyButton);

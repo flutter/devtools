@@ -6,7 +6,7 @@ import 'theme.dart';
 import 'utils.dart';
 
 class EditableList extends StatefulWidget {
-  EditableList({
+  const EditableList({
     required this.entries,
     required this.textFieldLabel,
     this.isRefreshing,
@@ -21,10 +21,6 @@ class EditableList extends StatefulWidget {
   final Function(String)? onEntryRemoved;
   final Function()? onRefresh;
   final String textFieldLabel;
-  final GlobalKey textFieldKey = GlobalKey();
-  final GlobalKey addEntryButtonKey = GlobalKey();
-  final GlobalKey removeEntryButtonKey = GlobalKey();
-  final GlobalKey refreshButtonKey = GlobalKey();
 
   @override
   State<StatefulWidget> createState() => _EditableListState();
@@ -56,14 +52,11 @@ class _EditableListState extends State<EditableList> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _EditableListActionBar(
+            EditableListActionBar(
               textFieldFocusNode: textFieldFocusNode,
               textFieldController: textFieldController,
               isRefreshing: widget.isRefreshing,
               textFieldLabel: widget.textFieldLabel,
-              textFieldKey: widget.textFieldKey,
-              addEntryButtonKey: widget.addEntryButtonKey,
-              refreshButtonKey: widget.refreshButtonKey,
               onEntryAdded: widget.onEntryAdded,
               onRefresh: widget.onRefresh,
             ),
@@ -80,16 +73,14 @@ class _EditableListState extends State<EditableList> {
   }
 }
 
-class _EditableListActionBar extends StatelessWidget {
-  const _EditableListActionBar({
+@visibleForTesting
+class EditableListActionBar extends StatelessWidget {
+  const EditableListActionBar({
     Key? key,
     required this.textFieldFocusNode,
     required this.textFieldController,
     required this.isRefreshing,
     required this.textFieldLabel,
-    required this.textFieldKey,
-    required this.addEntryButtonKey,
-    required this.refreshButtonKey,
     required this.onEntryAdded,
     required this.onRefresh,
   }) : super(key: key);
@@ -98,9 +89,6 @@ class _EditableListActionBar extends StatelessWidget {
   final TextEditingController textFieldController;
   final ValueListenable<bool>? isRefreshing;
   final String textFieldLabel;
-  final GlobalKey textFieldKey;
-  final GlobalKey addEntryButtonKey;
-  final GlobalKey refreshButtonKey;
   final Function(String)? onEntryAdded;
   final Function()? onRefresh;
 
@@ -124,7 +112,6 @@ class _EditableListActionBar extends StatelessWidget {
             child: Container(
               height: defaultTextFieldHeight,
               child: TextField(
-                key: textFieldKey,
                 focusNode: textFieldFocusNode,
                 controller: textFieldController,
                 decoration: InputDecoration(
@@ -139,7 +126,6 @@ class _EditableListActionBar extends StatelessWidget {
             ),
           ),
           TextButton(
-            key: addEntryButtonKey,
             onPressed: () {
               _addNewItem();
             },
@@ -155,7 +141,6 @@ class _EditableListActionBar extends StatelessWidget {
                   ),
                 )
               : RefreshButton(
-                  key: refreshButtonKey,
                   onPressed: () {
                     if (onRefresh != null) {
                       onRefresh!();
@@ -197,15 +182,14 @@ class _EditableListContentView extends StatelessWidget {
   }
 }
 
+@visibleForTesting
 class EditableListRow extends StatelessWidget {
-  EditableListRow({
+  const EditableListRow({
     Key? key,
     required this.entry,
     required this.onEntryRemoved,
   }) : super(key: key);
 
-  final copyButtonKey = GlobalKey();
-  final removeButtonKey = GlobalKey();
   final String entry;
   final Function(String)? onEntryRemoved;
 
@@ -220,13 +204,11 @@ class EditableListRow extends StatelessWidget {
           Expanded(
             child: Text(entry),
           ),
-          _CopyDirectoryButton(
-            key: copyButtonKey,
+          EditableListCopyDirectoryButton(
             value: entry,
           ),
           const SizedBox(width: denseSpacing),
-          _RemoveDirectoryButton(
-            key: removeButtonKey,
+          EditableListRemoveDirectoryButton(
             onPressed: () {
               if (onEntryRemoved != null) {
                 onEntryRemoved!(
@@ -242,8 +224,9 @@ class EditableListRow extends StatelessWidget {
   }
 }
 
-class _CopyDirectoryButton extends StatelessWidget {
-  const _CopyDirectoryButton({
+@visibleForTesting
+class EditableListCopyDirectoryButton extends StatelessWidget {
+  const EditableListCopyDirectoryButton({
     super.key,
     required this.value,
   });
@@ -265,8 +248,9 @@ class _CopyDirectoryButton extends StatelessWidget {
   }
 }
 
-class _RemoveDirectoryButton extends StatelessWidget {
-  const _RemoveDirectoryButton({super.key, this.onPressed});
+@visibleForTesting
+class EditableListRemoveDirectoryButton extends StatelessWidget {
+  const EditableListRemoveDirectoryButton({super.key, this.onPressed});
 
   final VoidCallback? onPressed;
 
