@@ -254,7 +254,7 @@ class _CopyDirectoryButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconButton(
       key: key,
-      padding: const EdgeInsets.all(0.0),
+      padding: EdgeInsets.zero,
       onPressed: () {
         copyToClipboard(value, 'Copied to clipboard.', context);
       },
@@ -274,7 +274,7 @@ class _RemoveDirectoryButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconButton(
       key: key,
-      padding: const EdgeInsets.all(0.0),
+      padding: EdgeInsets.zero,
       onPressed: onPressed,
       iconSize: defaultIconSize,
       splashRadius: defaultIconSize,
