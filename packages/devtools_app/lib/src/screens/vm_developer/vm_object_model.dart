@@ -42,6 +42,25 @@ abstract class VmObject {
   SourcePosition? get pos => _pos;
   SourcePosition? _pos;
 
+  ValueListenable<bool> get fetchingReachableSize => _fetchingReachableSize;
+  final ValueNotifier<bool> _fetchingReachableSize = ValueNotifier(false);
+
+  InstanceRef? get reachableSize => _reachableSize;
+  InstanceRef? _reachableSize;
+
+  ValueListenable<bool> get fetchingRetainedSize => _fetchingRetainedSize;
+  final ValueNotifier<bool> _fetchingRetainedSize = ValueNotifier(false);
+
+  InstanceRef? get retainedSize => _retainedSize;
+  InstanceRef? _retainedSize;
+
+  ValueListenable<RetainingPath?> get retainingPath => _retainingPath;
+  final _retainingPath = ValueNotifier<RetainingPath?>(null);
+
+  ValueListenable<InboundReferences?> get inboundReferences =>
+      _inboundReferences;
+  final _inboundReferences = ValueNotifier<InboundReferences?>(null);
+
   Future<void> fetchObject() async {
     final isolateRef = serviceManager.isolateManager.selectedIsolate.value!;
     _isolate = await _service.getIsolate(isolateRef.id!);
@@ -66,48 +85,6 @@ abstract class VmObject {
       );
     }
   }
-}
-
-//TODO(mtaylee): finish class implementation.
-class ClassObject extends VmObject {
-  ClassObject({required super.ref, super.scriptRef, super.outlineNode});
-
-  @override
-  Class get obj => _obj as Class;
-
-  @override
-  String? get name => obj.name;
-
-  InstanceSet? get instances => _instances;
-  InstanceSet? _instances;
-
-  @override
-  SourceLocation? get _sourceLocation => obj.location;
-
-  ValueListenable<bool> get fetchingReachableSize => _fetchingReachableSize;
-  final ValueNotifier<bool> _fetchingReachableSize = ValueNotifier(false);
-
-  InstanceRef? get reachableSize => _reachableSize;
-  InstanceRef? _reachableSize;
-
-  ValueListenable<bool> get fetchingRetainedSize => _fetchingRetainedSize;
-  final ValueNotifier<bool> _fetchingRetainedSize = ValueNotifier(false);
-
-  InstanceRef? get retainedSize => _retainedSize;
-  InstanceRef? _retainedSize;
-
-  ValueListenable<RetainingPath?> get retainingPath => _retainingPath;
-  final _retainingPath = ValueNotifier<RetainingPath?>(null);
-
-  ValueListenable<InboundReferences?> get inboundReferences =>
-      _inboundReferences;
-  final _inboundReferences = ValueNotifier<InboundReferences?>(null);
-
-  @override
-  Future<void> initialize() async {
-    await super.initialize();
-    _instances = await _service.getInstances(_isolate!.id!, ref.id!, 100);
-  }
 
   Future<void> requestReachableSize() async {
     _fetchingReachableSize.value = true;
@@ -129,6 +106,29 @@ class ClassObject extends VmObject {
   Future<void> requestInboundsRefs() async {
     _inboundReferences.value =
         await _service.getInboundReferences(_isolate!.id!, ref.id!, 100);
+  }
+}
+
+//TODO(mtaylee): finish class implementation.
+class ClassObject extends VmObject {
+  ClassObject({required super.ref, super.scriptRef, super.outlineNode});
+
+  @override
+  Class get obj => _obj as Class;
+
+  @override
+  String? get name => obj.name;
+
+  InstanceSet? get instances => _instances;
+  InstanceSet? _instances;
+
+  @override
+  SourceLocation? get _sourceLocation => obj.location;
+
+  @override
+  Future<void> initialize() async {
+    await super.initialize();
+    _instances = await _service.getInstances(_isolate!.id!, ref.id!, 100);
   }
 }
 
