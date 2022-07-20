@@ -12,12 +12,7 @@ import 'package:vm_service/vm_service.dart';
 final testLib = Library(
   name: 'fooLib',
   uri: 'fooLib.dart',
-  debuggable: null,
   dependencies: <LibraryDependency>[],
-  scripts: null,
-  variables: null,
-  functions: null,
-  classes: null,
   id: '1234',
 );
 
@@ -27,10 +22,6 @@ final testClass = Class(
   isAbstract: false,
   isConst: false,
   traceAllocations: false,
-  interfaces: null,
-  fields: null,
-  functions: null,
-  subclasses: null,
   superClass: testSuperClass,
   superType: testSuperType,
   id: '1234',
@@ -44,24 +35,15 @@ final testFunction = Func(
   isStatic: false,
   isConst: false,
   implicit: false,
-  signature: null,
   id: '1234',
 );
 
 final testField = Field(
   name: 'fooField',
-  owner: null,
-  declaredType: null,
-  isConst: null,
-  isFinal: null,
-  isStatic: null,
   id: '1234',
 );
 
 final testInstance = Instance(
-  kind: null,
-  identityHashCode: null,
-  classRef: null,
   id: '1234',
   name: 'fooInstance',
 );
@@ -71,15 +53,13 @@ final testSuperClass =
 
 final testSuperType = InstanceRef(
   kind: '',
-  identityHashCode: null,
-  classRef: null,
   id: '1234',
   name: 'fooSuperType',
 );
 
 const testPos = SourcePosition(line: 10, column: 4);
 
-final testInstances = InstanceSet(instances: null, totalCount: 3);
+final testInstances = InstanceSet(totalCount: 3);
 
 class TestObjectInspectorViewController extends ObjectInspectorViewController {
   @override

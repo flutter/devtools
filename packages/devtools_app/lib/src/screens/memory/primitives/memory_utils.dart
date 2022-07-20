@@ -13,3 +13,6 @@ Future<HeapSnapshotGraph?> snapshotMemory() async {
     isolate,
   );
 }
+
+String? get currentIsolateName =>
+    serviceManager.isolateManager.selectedIsolate.value?.name;
