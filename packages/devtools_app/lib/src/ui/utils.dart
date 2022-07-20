@@ -182,6 +182,7 @@ class _OffsetScrollbarState extends State<OffsetScrollbar> {
   }
 }
 
+/// Scrolls to [position] if [position] is not already visible in the scroll view.
 void maybeScrollToPosition(
   ScrollController scrollController,
   double position,
@@ -191,7 +192,6 @@ void maybeScrollToPosition(
     scrollController.offset + scrollController.position.extentInside,
   );
 
-  // Scroll to position if not in view already
   if (!extentVisible.contains(position)) {
     final positionToScrollTo = max(0.0, position - defaultRowHeight);
 

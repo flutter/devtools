@@ -325,7 +325,7 @@ class Selection<T> {
     this.nodeIndex,
     this.nodeIndexCalculator,
     this.scrollIntoView = false,
-  }) : assert(nodeIndex != null || nodeIndexCalculator != null);
+  }) : assert(nodeIndex == null || nodeIndexCalculator == null);
 
   Selection.empty()
       : node = null,
