@@ -59,11 +59,18 @@ class _EditableListState extends State<EditableList> {
             _EditableListActionBar(
               textFieldFocusNode: textFieldFocusNode,
               textFieldController: textFieldController,
-              widget: widget,
+              isRefreshing: widget.isRefreshing,
+              textFieldLabel: widget.textFieldLabel,
+              textFieldKey: widget.textFieldKey,
+              addEntryButtonKey: widget.addEntryButtonKey,
+              refreshButtonKey: widget.refreshButtonKey,
+              onEntryAdded: widget.onEntryAdded,
+              onRefresh: widget.onRefresh,
             ),
             Flexible(
               child: _EditableListContentView(
-                widget: widget,
+                entries: widget.entries,
+                onEntryRemoved: widget.onEntryRemoved,
               ),
             ),
           ],
@@ -78,19 +85,31 @@ class _EditableListActionBar extends StatelessWidget {
     Key? key,
     required this.textFieldFocusNode,
     required this.textFieldController,
-    required this.widget,
+    required this.isRefreshing,
+    required this.textFieldLabel,
+    required this.textFieldKey,
+    required this.addEntryButtonKey,
+    required this.refreshButtonKey,
+    required this.onEntryAdded,
+    required this.onRefresh,
   }) : super(key: key);
 
   final FocusNode textFieldFocusNode;
   final TextEditingController textFieldController;
-  final EditableList widget;
+  final ValueListenable<bool>? isRefreshing;
+  final String textFieldLabel;
+  final GlobalKey textFieldKey;
+  final GlobalKey addEntryButtonKey;
+  final GlobalKey refreshButtonKey;
+  final Function(String)? onEntryAdded;
+  final Function()? onRefresh;
 
   void _addNewItem() {
     final value = textFieldController.value.text.trim();
     textFieldController.clear();
-    if (widget.onEntryAdded != null && value.isNotEmpty) {
+    if (onEntryAdded != null && value.isNotEmpty) {
       textFieldController.clear();
-      widget.onEntryAdded!(value);
+      onEntryAdded!(value);
     }
     textFieldFocusNode.requestFocus();
   }
@@ -105,13 +124,13 @@ class _EditableListActionBar extends StatelessWidget {
             child: Container(
               height: defaultTextFieldHeight,
               child: TextField(
-                key: widget.textFieldKey,
+                key: textFieldKey,
                 focusNode: textFieldFocusNode,
                 controller: textFieldController,
                 decoration: InputDecoration(
                   contentPadding: const EdgeInsets.all(denseSpacing),
                   border: const OutlineInputBorder(),
-                  labelText: widget.textFieldLabel,
+                  labelText: textFieldLabel,
                 ),
                 onSubmitted: (value) {
                   _addNewItem();
@@ -120,13 +139,13 @@ class _EditableListActionBar extends StatelessWidget {
             ),
           ),
           TextButton(
-            key: widget.addEntryButtonKey,
+            key: addEntryButtonKey,
             onPressed: () {
               _addNewItem();
             },
             child: const Text('Add'),
           ),
-          widget.isRefreshing?.value ?? false
+          isRefreshing?.value ?? false
               ? Container(
                   width: defaultTextFieldHeight,
                   height: defaultTextFieldHeight,
@@ -136,10 +155,10 @@ class _EditableListActionBar extends StatelessWidget {
                   ),
                 )
               : RefreshButton(
-                  key: widget.refreshButtonKey,
+                  key: refreshButtonKey,
                   onPressed: () {
-                    if (widget.onRefresh != null) {
-                      widget.onRefresh!();
+                    if (onRefresh != null) {
+                      onRefresh!();
                     }
                   },
                   minScreenWidthForTextBeforeScaling: double.maxFinite,
@@ -153,21 +172,23 @@ class _EditableListActionBar extends StatelessWidget {
 class _EditableListContentView extends StatelessWidget {
   const _EditableListContentView({
     Key? key,
-    required this.widget,
+    required this.entries,
+    required this.onEntryRemoved,
   }) : super(key: key);
 
-  final EditableList widget;
+  final ValueListenable<List<String>> entries;
+  final Function(String)? onEntryRemoved;
 
   @override
   Widget build(BuildContext context) {
     return RoundedOutlinedBorder(
       child: Scrollbar(
         child: ListView.builder(
-          itemCount: widget.entries.value.length,
+          itemCount: entries.value.length,
           itemBuilder: (context, index) {
             return EditableListRow(
-              widget: widget,
-              index: index,
+              entry: entries.value[index],
+              onEntryRemoved: onEntryRemoved,
             );
           },
         ),
@@ -179,14 +200,14 @@ class _EditableListContentView extends StatelessWidget {
 class EditableListRow extends StatelessWidget {
   EditableListRow({
     Key? key,
-    required this.widget,
-    required this.index,
+    required this.entry,
+    required this.onEntryRemoved,
   }) : super(key: key);
 
-  final EditableList widget;
-  final int index;
   final copyButtonKey = GlobalKey();
   final removeButtonKey = GlobalKey();
+  final String entry;
+  final Function(String)? onEntryRemoved;
 
   @override
   Widget build(BuildContext context) {
@@ -197,19 +218,19 @@ class EditableListRow extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: Text(widget.entries.value[index]),
+            child: Text(entry),
           ),
           _CopyDirectoryButton(
             key: copyButtonKey,
-            value: widget.entries.value[index],
+            value: entry,
           ),
           const SizedBox(width: denseSpacing),
           _RemoveDirectoryButton(
             key: removeButtonKey,
             onPressed: () {
-              if (widget.onEntryRemoved != null) {
-                widget.onEntryRemoved!(
-                  widget.entries.value[index],
+              if (onEntryRemoved != null) {
+                onEntryRemoved!(
+                  entry,
                 );
               }
             },
