@@ -263,7 +263,8 @@ class RefreshButton extends IconLabelButton {
     double? minScreenWidthForTextBeforeScaling,
     String? tooltip,
     required VoidCallback? onPressed,
-  }) : super(
+  })  : isIconButton = false,
+        super(
           key: key,
           icon: Icons.refresh,
           label: label,
@@ -272,6 +273,32 @@ class RefreshButton extends IconLabelButton {
           tooltip: tooltip,
           onPressed: onPressed,
         );
+
+  const RefreshButton.icon({
+    Key? key,
+    String? tooltip,
+    required VoidCallback? onPressed,
+  })  : isIconButton = true,
+        super(
+          key: key,
+          icon: Icons.refresh,
+          label: '',
+          tooltip: tooltip,
+          onPressed: onPressed,
+        );
+
+  final bool isIconButton;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!isIconButton) {
+      return super.build(context);
+    }
+    return OutlinedIconButton(
+      onPressed: onPressed,
+      icon: icon!,
+    );
+  }
 }
 
 /// Button to start recording data.

@@ -330,8 +330,7 @@ class _AllocationProfileTableControls extends StatelessWidget {
           allocationProfileController: allocationProfileController,
         ),
         const SizedBox(width: denseSpacing),
-        OutlinedIconButton(
-          icon: Icons.refresh,
+        RefreshButton.icon(
           onPressed: allocationProfileController.refresh,
         ),
         const SizedBox(width: denseSpacing),
