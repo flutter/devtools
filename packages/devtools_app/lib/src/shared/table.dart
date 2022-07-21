@@ -1423,14 +1423,15 @@ class _TableRowState<T> extends State<TableRow<T>>
         final headerContent = Row(
           mainAxisAlignment: _mainAxisAlignmentFor(column),
           children: [
-            if (isSortColumn)
+            if (isSortColumn && column.supportsSorting) ...[
               Icon(
                 widget.sortDirection == SortDirection.ascending
                     ? Icons.expand_less
                     : Icons.expand_more,
                 size: defaultIconSize,
               ),
-            if (isSortColumn) const SizedBox(width: densePadding),
+              const SizedBox(width: densePadding),
+            ],
             // TODO: This Flexible wrapper was added to get the
             // network_profiler_test.dart tests to pass.
             Flexible(
@@ -1448,10 +1449,12 @@ class _TableRowState<T> extends State<TableRow<T>>
         content = column.includeHeader
             ? InkWell(
                 canRequestFocus: false,
-                onTap: () => _handleSortChange(
-                  column,
-                  secondarySortColumn: widget.secondarySortColumn,
-                ),
+                onTap: column.supportsSorting
+                    ? () => _handleSortChange(
+                          column,
+                          secondarySortColumn: widget.secondarySortColumn,
+                        )
+                    : null,
                 child: headerContent,
               )
             : headerContent;
