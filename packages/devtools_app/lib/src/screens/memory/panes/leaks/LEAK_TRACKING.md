@@ -13,29 +13,30 @@ See https://github.com/flutter/devtools/issues/3951.
 **GC**: garbage collection. The process of reclaiming memory that is no
 longer being used.
 
-**Memory Leak**: progressive use of more and more memory by an application,
+**Memory Leak**: Progressive use of more and more memory by an application,
 for example, by repeatedly creating (but not disposing of) a listener.
 
-**Memory Bloat**: using more memory than is necessary for optimal performance,
-for example, by using overly large images or not canceling a stream.
+**Memory Bloat**: Using more memory than is necessary for optimal performance,
+for example, by using overly large images or not closing a stream.
 
-**Object's Retaining Path**: references to an object from a root object that
-prevents the object from being GCed.
+**Object's Retaining Path**: Sequence of references from the root object
+that prevents the object from being GCed.
 
 
-### Leak Types
+### Leak types
 
 To detect memory leaks, the tool assumes that, with proper memory management,
-an object's disposal and collection should happen sequentially, close to each other.
+an object's disposal and garbage collection should happen sequentially,
+close to each other.
 
 By monitoring disposal and GC events, the tool detects different types of leaks:
 
-**Not disposed of, but GCed (not-disposed)**: a disposable object was GCed,
+**Not disposed, but GCed (not-disposed)**: a disposable object was GCed,
 without being disposed first. This means that the object's disposable content
-is using memory after the object was no longer needed.
-To fix the leak, invoke `dispose()` to free up the unneeded object.
+is using memory after the object is no longer needed.
+To fix the leak, invoke `dispose()` to free up the memory.
 
-**Disposed of, but not GCed (not-GCed)**: an object was disposed,
+**Disposed, but not GCed (not-GCed)**: an object was disposed,
 but not GCed after certain number of GC events. This means that
 a reference to the object is preventing it from being
 garbage collected after it's no longer needed.
@@ -47,7 +48,7 @@ myField.dispose();
 myField = null;
 ```
 
-**Disposed of and GCed late (GCed-late)**: an object disposed of and then GCed,
+**Disposed and GCed late (GCed-late)**: an object disposed of and then GCed,
 but GC happened later than expected. This means the retaining path was
 holding the object in memory for some period, but then disappeared.
 
@@ -67,7 +68,7 @@ The tool detects which leaked objects are culprits, so you know where to focus.
 
 For example, out of four not-GCed leaks on the following diagram,
 only one is the culprit, because, when the object is fixed
-and gets GCed, the victims it referenced will be also GCed:
+and GCed, the victims it referenced will be also GCed:
 
 
 ```mermaid
@@ -170,7 +171,7 @@ because storing additional information for each instance of a class
 might impact debug/profile performance of the application and therefore
 make the user experience different from the released app.
 
-For example, for not-disposed-of objects, you can
+For example, for not-disposed objects, you can
 provide the creation call stack to `startObjectLeakTracking`:
 
 ```
