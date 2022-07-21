@@ -1113,6 +1113,8 @@ abstract class ObjectGroupBase implements Disposable {
       false,
     );
   }
+
+  Future<Object?> screenShot(InspectorInstanceRef selection);
 }
 
 /// Class managing a group of inspector objects that can be freed by
@@ -1416,6 +1418,24 @@ class ObjectGroup extends ObjectGroupBase {
     );
     final directories = (invocationResult as List?)?.cast<Object>();
     return List.from(directories ?? []);
+  }
+
+  @override
+  Future<Object?> screenShot(InspectorInstanceRef selection) {
+    if (disposed) {
+      return Future.value();
+    }
+    if (useDaemonApi) {
+      return invokeServiceMethodDaemonParams('screenshot', {
+        'id': selection.id,
+        'width': 480,
+        'height': 640,
+      });
+    } else {
+      //Todo: Requires framework modification
+      return invokeServiceMethodObservatoryInspectorRef(
+          'screenshot', selection);
+    }
   }
 }
 

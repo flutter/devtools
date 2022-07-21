@@ -7,6 +7,7 @@ library inspector_tree;
 import 'dart:async';
 import 'dart:collection';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -30,6 +31,7 @@ import '../../ui/utils.dart';
 import '../debugger/debugger_controller.dart';
 import 'diagnostics.dart';
 import 'diagnostics_node.dart';
+import 'easy_image_provider.dart';
 import 'inspector_breadcrumbs.dart';
 import 'inspector_controller.dart';
 import 'inspector_screen.dart';
@@ -80,6 +82,7 @@ class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
         controller: widget.inspectorTreeState.treeController!,
         scrollControllerX: widget.scrollControllerX,
         viewportWidth: widget.viewportWidth,
+        isSummaryTree: widget.inspectorTreeState.widget.isSummaryTree,
         onToggle: () {
           setExpanded(!isExpanded);
         },
@@ -143,6 +146,10 @@ class InspectorTreeController extends Object
     for (var client in _clients) {
       client.requestFocus();
     }
+  }
+
+  Future<List<int>>? screenShot(InspectorTreeRow row) {
+    return row.node.diagnostic?.screenShot();
   }
 
   InspectorTreeNode? get root => _root;
@@ -1181,6 +1188,7 @@ class InspectorRowContent extends StatelessWidget {
     this.error,
     required this.scrollControllerX,
     required this.viewportWidth,
+    required this.isSummaryTree,
     required this.debuggerController,
   });
 
@@ -1191,6 +1199,7 @@ class InspectorRowContent extends StatelessWidget {
   final Animation<double> expandArrowAnimation;
   final ScrollController scrollControllerX;
   final double viewportWidth;
+  final bool isSummaryTree;
 
   /// A [DevToolsError] that applies to the widget in this row.
   ///
@@ -1256,6 +1265,23 @@ class InspectorRowContent extends StatelessWidget {
                         // we wouldn't need this.
                         controller.requestFocus();
                       },
+                      onDoubleTap: isSummaryTree ? () async {
+                        controller.requestFocus();
+                        final List<int>? data =
+                            await controller.screenShot(row);
+                        unawaited(showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              if (data == null || data.isEmpty) {
+                                return Text("no data");
+                              }
+                              return  Container(
+                                width: 480,
+                                height: 600,
+                                child: Image(image: EasyImageProvider(data as Uint8List ,'screen_shot')),
+                              );
+                            }));
+                      } : null,
                       child: Container(
                         height: rowHeight,
                         child: DiagnosticsNodeDescription(

@@ -5,6 +5,8 @@
 library diagnostics_node;
 
 import 'dart:async';
+import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -694,7 +696,17 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
       await objectGroup.setSelectionInspector(valueRef, uiAlreadyUpdated);
     }
   }
+
+  Future<List<int>> screenShot() async {
+    final String? data = await inspectorService?.screenShot(valueRef) as String?;
+    if (data == null) {
+      return Uint8List.fromList([]);
+    } else {
+      return base64.decoder.convert(data);
+    }
+  }
 }
+
 
 class InspectorSourceLocation {
   InspectorSourceLocation(this.json, this.parent);
