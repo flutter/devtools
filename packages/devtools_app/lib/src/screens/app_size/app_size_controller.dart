@@ -234,10 +234,14 @@ class AppSizeController {
 
     changeAnalysisJsonFile(jsonFile);
 
-    // Set deferred app flag or set name for root node.
-    processedJson['n'] == 'Dummy Root'
-        ? isDeferredApp = true
-        : processedJson['n'] = 'Root';
+    // Set deferred app flag and root name.
+    if (processedJson['n'] == 'Dummy Root') {
+      isDeferredApp = true;
+      processedJson['n'] = 'Entire App';
+    } else {
+      isDeferredApp = false;
+      processedJson['n'] = 'Root';
+    }
 
     // Build a tree with [TreemapNode] from [processedJsonMap].
     final newRoot = generateTree(processedJson)!;
