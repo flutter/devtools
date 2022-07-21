@@ -64,7 +64,7 @@ class _EditableListState extends State<EditableList> {
               onEntryAdded: widget.onEntryAdded,
               onRefresh: widget.onRefresh,
             ),
-            Flexible(
+            Expanded(
               child: _EditableListContentView(
                 entries: widget.entries,
                 onEntryRemoved: widget.onEntryRemoved,

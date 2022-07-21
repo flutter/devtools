@@ -337,11 +337,12 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final dialogHeight = scaleByFontFactor(400.0);
     return DevToolsDialog(
       title: dialogTitleText(Theme.of(context), 'Flutter Inspector Settings'),
       content: Container(
         width: defaultDialogWidth,
-        height: scaleByFontFactor(400.0),
+        height: dialogHeight,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
