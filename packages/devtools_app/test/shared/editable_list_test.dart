@@ -100,10 +100,7 @@ void main() {
         wrap(widget),
       );
       final row = find.byType(EditableListRow);
-      final removeButton = find.descendant(
-        of: row,
-        matching: find.byType(EditableListRemoveDirectoryButton),
-      );
+      final removeButton = find.byType(EditableListRemoveDirectoryButton);
 
       await tester.tap(removeButton);
       await tester.pump();
