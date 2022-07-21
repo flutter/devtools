@@ -177,7 +177,6 @@ class RequestableSizeWidget extends StatelessWidget {
 /// Wrapper to get the name of an ObjRef depending on its type.
 String? _objectName(ObjRef? objectRef) {
   String? objectRefName;
-  if (objectRef == null) return null;
 
   if (objectRef is ClassRef ||
       objectRef is FuncRef ||
@@ -187,18 +186,20 @@ String? _objectName(ObjRef? objectRef) {
   } else if (objectRef is InstanceRef) {
     objectRefName = objectRef.name ??
         'Instance of ${objectRef.classRef?.name ?? '<Class>'}';
+  } else {
+    objectRefName = objectRef?.vmType;
   }
 
   return objectRefName;
 }
 
 /// Recursively gets the full owner name of a field or function object.
-String? _ownerName(ObjRef? ref) {
+String? ownerName(ObjRef? ref) {
   if (ref == null) return null;
   if (ref is FuncRef) {
-    return '${_ownerName(ref.owner)}.${_objectName(ref)}';
+    return '${ownerName(ref.owner)}.${_objectName(ref)}';
   } else if (ref is FieldRef) {
-    return '${_ownerName(ref.owner)}.${_objectName(ref)}';
+    return '${ownerName(ref.owner)}.${_objectName(ref)}';
   } else {
     return _objectName(ref) ?? '<unknown>';
   }
@@ -209,9 +210,9 @@ String? _objectDescription(ObjRef? object) {
   if (object == null) {
     return null;
   } else if (object is FieldRef) {
-    return '${object.declaredType?.name ?? 'Field'} ${object.name} of ${_ownerName(object.owner) ?? '<Owner>'}';
+    return '${object.declaredType?.name ?? 'Field'} ${object.name} of ${ownerName(object.owner) ?? '<Owner>'}';
   } else if (object is FuncRef) {
-    return '${_ownerName(object.owner) ?? '<Owner>'}.${object.name}';
+    return '${ownerName(object.owner) ?? '<Owner>'}.${object.name}';
   } else {
     return '${_objectName(object)}';
   }
@@ -473,7 +474,7 @@ class InboundReferencesWidget extends StatelessWidget {
     }
 
     description.write(
-      _objectDescription(inboundRef.source),
+      _objectDescription(inboundRef.source) ?? '<object>',
     );
 
     return description.toString();
