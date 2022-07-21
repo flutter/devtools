@@ -14,7 +14,6 @@ import '../../charts/treemap.dart';
 import '../../primitives/utils.dart';
 import '../../shared/table.dart';
 import 'app_size_screen.dart';
-import 'app_size_table.dart';
 
 //Temporary feature flag for deferred loading.
 const deferredLoadingSupport = true;
@@ -55,7 +54,7 @@ class AppSizeController {
   /// Used to build the treemap and the tree table for the analysis tab.
   final analysisRoot = ValueNotifier<Selection<TreemapNode>>(Selection.empty());
 
-  late final bool isDeferredApp;
+  late bool isDeferredApp;
 
   void changeAnalysisRoot(TreemapNode? newAnalysisRoot) {
     if (newAnalysisRoot == null) {
