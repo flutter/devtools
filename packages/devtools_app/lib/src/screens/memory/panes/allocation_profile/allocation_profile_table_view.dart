@@ -5,11 +5,17 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../../../devtools_app.dart';
 import '../../../../config_specific/import_export/import_export.dart';
+import '../../../../primitives/utils.dart';
+import '../../../../shared/common_widgets.dart';
+import '../../../../shared/globals.dart';
+import '../../../../shared/notifications.dart';
 import '../../../../shared/table.dart';
 import '../../../../shared/table_data.dart';
+import '../../../../shared/theme.dart';
+import '../../../../shared/utils.dart';
 import '../../../vm_developer/vm_service_private_extensions.dart';
+import '../../memory_controller.dart';
 import '../control/constants.dart';
 import 'allocation_profile_table_view_controller.dart';
 

@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -15,7 +15,6 @@ import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
 
 import '../../test_data/memory_allocation.dart';
 
@@ -33,13 +32,12 @@ void main() {
         allocationData: allocationJson,
       ),
     );
-    when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
-    when(fakeServiceManager.connectedApp!.isFlutterAppNow).thenReturn(true);
-    when(fakeServiceManager.connectedApp!.isDartCliAppNow).thenReturn(false);
-    when(fakeServiceManager.connectedApp!.isDebugFlutterAppNow)
-        .thenReturn(false);
-    when(fakeServiceManager.connectedApp!.isDartWebApp)
-        .thenAnswer((_) => Future.value(false));
+    mockConnectedApp(
+      fakeServiceManager.connectedApp!,
+      isFlutterApp: true,
+      isProfileBuild: false,
+      isWebApp: false,
+    );
     setGlobal(ServiceConnectionManager, fakeServiceManager);
   }
 
@@ -72,11 +70,10 @@ void main() {
     tearDownAll(() => enableNewAllocationProfileTable = false);
 
     setUp(() async {
-      fakeServiceManager = FakeServiceManager();
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(OfflineModeController, OfflineModeController());
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(PreferencesController, PreferencesController());
+      _setUpServiceManagerForMemory();
     });
 
     Future<void> navigateToAllocationProfile(
@@ -101,7 +98,6 @@ void main() {
     testWidgetsWithWindowSize('respects VM Developer Mode setting', windowSize,
         (WidgetTester tester) async {
       await pumpMemoryScreen(tester);
-      _setUpServiceManagerForMemory();
 
       final allocationProfileController =
           controller.allocationProfileController;
@@ -138,7 +134,6 @@ void main() {
     testWidgetsWithWindowSize('manually refreshes', windowSize,
         (WidgetTester tester) async {
       await pumpMemoryScreen(tester);
-      _setUpServiceManagerForMemory();
 
       final allocationProfileController =
           controller.allocationProfileController;
@@ -166,7 +161,6 @@ void main() {
     testWidgetsWithWindowSize('refreshes on GC', windowSize,
         (WidgetTester tester) async {
       await pumpMemoryScreen(tester);
-      _setUpServiceManagerForMemory();
 
       final allocationProfileController =
           controller.allocationProfileController;
