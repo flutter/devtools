@@ -78,7 +78,7 @@ class PreferencesController extends DisposableController
 class InspectorPreferencesController extends DisposableController
     with AutoDisposeControllerMixin {
   ValueListenable<bool> get hoverEvalModeEnabled => _hoverEvalMode;
-  ValueListenable<List<String>> get customPubRootDirectories =>
+  ListValueNotifier<String> get customPubRootDirectories =>
       _customPubRootDirectories;
   ValueListenable<bool> get isRefreshingCustomPubRootDirectories =>
       _customPubRootDirectoriesAreBusy;

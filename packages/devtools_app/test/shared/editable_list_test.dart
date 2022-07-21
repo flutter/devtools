@@ -5,7 +5,6 @@
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/editable_list.dart';
 import 'package:devtools_test/devtools_test.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -14,7 +13,7 @@ import '../test_utils/test_utils.dart';
 void main() {
   const windowSize = Size(1000.0, 1000.0);
   const label = 'This is the EditableList label';
-  ValueListenable<List<String>> entries([
+  ListValueNotifier<String> entries([
     List<String> values = const <String>[],
   ]) {
     return ListValueNotifier<String>(values);
@@ -99,7 +98,6 @@ void main() {
       await tester.pumpWidget(
         wrap(widget),
       );
-      final row = find.byType(EditableListRow);
       final removeButton = find.byType(EditableListRemoveDirectoryButton);
 
       await tester.tap(removeButton);
@@ -134,6 +132,57 @@ void main() {
       await tester.pump();
 
       expect(clipboardContents, equals(valueToCopy));
+    });
+
+    group('defaults', () {
+      testWidgetsWithWindowSize(
+          'performs the default add when none provided', windowSize,
+          (WidgetTester tester) async {
+        const valueToAdd = 'this is the value that will be added';
+        final entryList = entries();
+        final widget = EditableList(
+          entries: entryList,
+          textFieldLabel: label,
+        );
+        await tester.pumpWidget(
+          wrap(widget),
+        );
+
+        final actionBar = find.byType(EditableListActionBar);
+        final textField = find.descendant(
+          of: actionBar,
+          matching: find.byType(TextField),
+        );
+        final addEntryButton = find.descendant(
+          of: actionBar,
+          matching: find.text('Add'),
+        );
+        await tester.enterText(textField, valueToAdd);
+        await tester.tap(addEntryButton);
+        await tester.pump();
+
+        expect(entryList.value, contains(valueToAdd));
+      });
+
+      testWidgetsWithWindowSize(
+          'performs the default remove when no remove callback provided',
+          windowSize, (WidgetTester tester) async {
+        const valueToRemove = 'this is the value that will be removed';
+        final entryList = entries([valueToRemove]);
+        final widget = EditableList(
+          entries: entryList,
+          textFieldLabel: label,
+        );
+        await tester.pumpWidget(
+          wrap(widget),
+        );
+        final removeButton = find.byType(EditableListRemoveDirectoryButton);
+
+        await tester.tap(removeButton);
+        await tester.pump();
+
+        expect(entryList.value, isNot(contains(valueToRemove)));
+      });
     });
   });
 }

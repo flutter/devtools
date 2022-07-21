@@ -5,24 +5,28 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../primitives/utils.dart';
 import 'common_widgets.dart';
 import 'theme.dart';
 import 'utils.dart';
 
 class EditableList extends StatefulWidget {
-  const EditableList({
+  EditableList({
     required this.entries,
     required this.textFieldLabel,
     this.isRefreshing,
-    this.onEntryAdded,
-    this.onEntryRemoved,
+    Function(String)? onEntryAdded,
+    Function(String)? onEntryRemoved,
     this.onRefresh,
-  });
+  }) {
+    this.onEntryAdded = onEntryAdded ?? (entry) => entries.add(entry);
+    this.onEntryRemoved = onEntryRemoved ?? (entry) => entries.remove(entry);
+  }
 
-  final ValueListenable<List<String>> entries;
+  final ListValueNotifier<String> entries;
   final ValueListenable<bool>? isRefreshing;
-  final Function(String)? onEntryAdded;
-  final Function(String)? onEntryRemoved;
+  late final Function(String)? onEntryAdded;
+  late final Function(String)? onEntryRemoved;
   final Function()? onRefresh;
   final String textFieldLabel;
 
@@ -165,7 +169,7 @@ class _EditableListContentView extends StatelessWidget {
     required this.onEntryRemoved,
   }) : super(key: key);
 
-  final ValueListenable<List<String>> entries;
+  final ListValueNotifier<String> entries;
   final Function(String)? onEntryRemoved;
 
   @override
