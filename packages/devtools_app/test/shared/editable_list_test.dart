@@ -122,11 +122,7 @@ void main() {
       await tester.pumpWidget(
         wrap(widget),
       );
-      final row = find.byType(EditableListRow);
-      final copyButton = find.descendant(
-        of: row,
-        matching: find.byType(EditableListCopyDirectoryButton),
-      );
+      final copyButton = find.byType(EditableListCopyDirectoryButton);
 
       await tester.tap(copyButton);
       await tester.pump();
