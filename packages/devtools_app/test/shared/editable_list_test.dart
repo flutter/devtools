@@ -69,7 +69,7 @@ void main() {
       final widget = EditableList(
         entries: entries(),
         textFieldLabel: label,
-        onRefresh: () {
+        onRefreshTriggered: () {
           refreshWasCalled = true;
         },
       );

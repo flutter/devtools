@@ -10,25 +10,51 @@ import 'common_widgets.dart';
 import 'theme.dart';
 import 'utils.dart';
 
+/// A widget that displays the contents of [entries].
+///
+/// It provides an interface that allows for removing, adding,
+/// and refreshing entries.
 class EditableList extends StatefulWidget {
   EditableList({
     required this.entries,
     required this.textFieldLabel,
     this.isRefreshing,
+    this.onRefreshTriggered,
     Function(String)? onEntryAdded,
     Function(String)? onEntryRemoved,
-    this.onRefresh,
   }) {
     this.onEntryAdded = onEntryAdded ?? (entry) => entries.add(entry);
     this.onEntryRemoved = onEntryRemoved ?? (entry) => entries.remove(entry);
   }
 
+  /// The values that will be displayed in the editable list.
+  ///
+  /// If [onEntryAdded] or [onEntryRemoved] are left with their defaults, then
+  /// [entries] will automatically have the values added or removed, when
+  /// entries are added or removed in the interface.
   final ListValueNotifier<String> entries;
-  final ValueListenable<bool>? isRefreshing;
-  late final Function(String)? onEntryAdded;
-  late final Function(String)? onEntryRemoved;
-  final Function()? onRefresh;
+
+  /// The description label for textfield where new entries
+  /// will be typed.
   final String textFieldLabel;
+
+  /// A listenable that will replace the refresh button with a spinner, when
+  /// set to true.
+  final ValueListenable<bool>? isRefreshing;
+
+  /// Triggered when an entry is added, using the interface.
+  ///
+  /// When not overriden, the default behaviour adds the entry to [entries]
+  late final Function(String)? onEntryAdded;
+
+  /// Triggered when an entry is removed, using the interface.
+  ///
+  /// When not overriden, the default behaviour removes the entry
+  /// from [entries].
+  late final Function(String)? onEntryRemoved;
+
+  /// Triggered when the refresh is triggered, using the interface.
+  final Function()? onRefreshTriggered;
 
   @override
   State<StatefulWidget> createState() => _EditableListState();
@@ -66,7 +92,7 @@ class _EditableListState extends State<EditableList> {
               isRefreshing: widget.isRefreshing,
               textFieldLabel: widget.textFieldLabel,
               onEntryAdded: widget.onEntryAdded,
-              onRefresh: widget.onRefresh,
+              onRefresh: widget.onRefreshTriggered,
             ),
             Expanded(
               child: _EditableListContentView(

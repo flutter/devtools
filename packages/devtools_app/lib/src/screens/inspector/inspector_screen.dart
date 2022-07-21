@@ -550,7 +550,7 @@ class PubRootDirectorySection extends StatelessWidget {
                 preferences.inspector.addPubRootDirectories([p0]),
             onEntryRemoved: (p0) =>
                 preferences.inspector.removePubRootDirectories([p0]),
-            onRefresh: () =>
+            onRefreshTriggered: () =>
                 preferences.inspector.loadCustomPubRootDirectories(),
           ),
         );
