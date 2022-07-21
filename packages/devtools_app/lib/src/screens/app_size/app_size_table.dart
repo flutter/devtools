@@ -14,7 +14,7 @@ import '../../ui/colors.dart';
 import 'app_size_controller.dart';
 
 //Temporary feature flag for deferred loading.
-const deferredLoadingSupport = true;
+bool get deferredLoadingSupport => true;
 
 class AppSizeAnalysisTable extends StatelessWidget {
   factory AppSizeAnalysisTable({
@@ -22,7 +22,7 @@ class AppSizeAnalysisTable extends StatelessWidget {
     required AppSizeController controller,
   }) {
     final treeColumn = _NameColumn(
-      currentRootLevel: controller.isDeferredApp
+      currentRootLevel: deferredLoadingSupport && controller.isDeferredApp
           ? rootNode.children[0].level
           : rootNode.level,
     );
@@ -31,7 +31,7 @@ class AppSizeAnalysisTable extends StatelessWidget {
       treeColumn,
       sizeColumn,
       _SizePercentageColumn(
-        totalSize: controller.isDeferredApp
+        totalSize: deferredLoadingSupport && controller.isDeferredApp
             ? rootNode.children[0].root.byteSize
             : rootNode.root.byteSize,
       ),
@@ -65,7 +65,9 @@ class AppSizeAnalysisTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TreeTable<TreemapNode>(
-      dataRoots: controller.isDeferredApp ? rootNode.children : [rootNode],
+      dataRoots: deferredLoadingSupport && controller.isDeferredApp
+          ? rootNode.children
+          : [rootNode],
       columns: columns,
       treeColumn: treeColumn,
       keyFactory: (node) => PageStorageKey<String>(node.name),

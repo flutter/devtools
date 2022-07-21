@@ -14,6 +14,7 @@ import '../../charts/treemap.dart';
 import '../../primitives/utils.dart';
 import '../../shared/table.dart';
 import 'app_size_screen.dart';
+import 'app_size_table.dart';
 
 enum DiffTreeType {
   increaseOnly,
@@ -84,7 +85,7 @@ class AppSizeController {
       matchingNodeCondition: searchCondition,
       includeCollapsedNodes: false,
     );
-    return isDeferredApp ? nodeIndex - 1 : nodeIndex;
+    return deferredLoadingSupport && isDeferredApp ? nodeIndex - 1 : nodeIndex;
   }
 
   ValueListenable<DevToolsJsonFile?> get analysisJsonFile => _analysisJsonFile;
