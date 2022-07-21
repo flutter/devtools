@@ -13,6 +13,7 @@ import '../../ui/colors.dart';
 
 import 'app_size_controller.dart';
 
+//temporary feature flag for deferred loading
 const deferredLoadingSupport = true;
 
 class AppSizeAnalysisTable extends StatelessWidget {
@@ -20,9 +21,6 @@ class AppSizeAnalysisTable extends StatelessWidget {
     required TreemapNode rootNode,
     required AppSizeController controller,
   }) {
-    // print(rootNode.children[0].level);
-    // print(rootNode.index);
-    // print(rootNode);
     final treeColumn = _NameColumn(
       currentRootLevel:
           deferredLoadingSupport ? rootNode.children[0].level : rootNode.level,
