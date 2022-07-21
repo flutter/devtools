@@ -88,6 +88,37 @@ void main() async {
         await group.dispose();
       });
 
+      test('pub root directory operations', () async {
+        await env.setupEnvironment();
+        final inspectorServiceLocal = inspectorService!;
+        const testPubRootDirectory = '/alpha/bravo/charlie';
+
+        // Empty the pubroot directories.
+        final initialPubRootDirectories =
+            await inspectorServiceLocal.getPubRootDirectories();
+        await inspectorServiceLocal
+            .removePubRootDirectories(initialPubRootDirectories!);
+        expect(await inspectorServiceLocal.getPubRootDirectories(), equals([]));
+
+        // Can add a new pub root directory.
+        await inspectorServiceLocal
+            .addPubRootDirectories([testPubRootDirectory]);
+        expect(
+          await inspectorServiceLocal.getPubRootDirectories(),
+          equals([
+            testPubRootDirectory,
+          ]),
+        );
+
+        // Can remove the new pub root directory.
+        await inspectorServiceLocal
+            .removePubRootDirectories([testPubRootDirectory]);
+        expect(
+          await inspectorServiceLocal.getPubRootDirectories(),
+          equals([]),
+        );
+      });
+
       test('local classes', () async {
         await env.setupEnvironment();
         final inspectorServiceLocal = inspectorService!;
