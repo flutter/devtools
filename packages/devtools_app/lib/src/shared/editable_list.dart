@@ -45,13 +45,13 @@ class EditableList extends StatefulWidget {
   /// Triggered when an entry is added, using the interface.
   ///
   /// When not overriden, the default behaviour adds the entry to [entries]
-  late final Function(String)? onEntryAdded;
+  late final Function(String) onEntryAdded;
 
   /// Triggered when an entry is removed, using the interface.
   ///
   /// When not overriden, the default behaviour removes the entry
   /// from [entries].
-  late final Function(String)? onEntryRemoved;
+  late final Function(String) onEntryRemoved;
 
   /// Triggered when the refresh is triggered, using the interface.
   final Function()? onRefreshTriggered;
@@ -123,15 +123,15 @@ class EditableListActionBar extends StatelessWidget {
   final TextEditingController textFieldController;
   final ValueListenable<bool>? isRefreshing;
   final String textFieldLabel;
-  final Function(String)? onEntryAdded;
+  final Function(String) onEntryAdded;
   final Function()? onRefresh;
 
   void _addNewItem() {
     final value = textFieldController.value.text.trim();
     textFieldController.clear();
-    if (onEntryAdded != null && value.isNotEmpty) {
+    if (value.isNotEmpty) {
       textFieldController.clear();
-      onEntryAdded!(value);
+      onEntryAdded(value);
     }
     textFieldFocusNode.requestFocus();
   }
@@ -196,7 +196,7 @@ class _EditableListContentView extends StatelessWidget {
   }) : super(key: key);
 
   final ListValueNotifier<String> entries;
-  final Function(String)? onEntryRemoved;
+  final Function(String) onEntryRemoved;
 
   @override
   Widget build(BuildContext context) {
@@ -225,7 +225,7 @@ class EditableListRow extends StatelessWidget {
   }) : super(key: key);
 
   final String entry;
-  final Function(String)? onEntryRemoved;
+  final Function(String) onEntryRemoved;
 
   @override
   Widget build(BuildContext context) {
@@ -244,11 +244,9 @@ class EditableListRow extends StatelessWidget {
           const SizedBox(width: denseSpacing),
           EditableListRemoveDirectoryButton(
             onPressed: () {
-              if (onEntryRemoved != null) {
-                onEntryRemoved!(
-                  entry,
-                );
-              }
+              onEntryRemoved(
+                entry,
+              );
             },
           ),
           const SizedBox(width: denseRowSpacing)
