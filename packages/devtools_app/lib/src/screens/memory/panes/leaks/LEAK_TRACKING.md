@@ -48,7 +48,7 @@ myField.dispose();
 myField = null;
 ```
 
-**Disposed and GCed late (GCed-late)**: an object disposed of and then GCed,
+**Disposed and GCed late (GCed-late)**: an object disposed and then GCed,
 but GC happened later than expected. This means the retaining path was
 holding the object in memory for some period, but then disappeared.
 
@@ -59,7 +59,7 @@ might not be GC-ed because they are held by others (culprits).
 Normally, to fix the leaks, you need to only fix the culprits.
 
 **Victim**: a leaked object, for which the tool could find another
-leaked object that, if fixed, would fix the first leak too.
+leaked object that, if fixed, would also fix the first leak.
 
 **Culprit**: a leaked object that is not detected to be the victim
 of another object.
@@ -89,7 +89,7 @@ and GCed, the victims it referenced will be also GCed:
 ### Limitations
 
 The tool detects leaks for disposable and instrumented classes only
-(noting that the fixed leak can fix other objects too). 
+(noting that the fixed leak can also fix other objects). 
 
 Some classes in Flutter framework are already instrumented.
 If you want your classes to be tracked, you need to make them
@@ -139,7 +139,7 @@ flutter: 3 memory leaks: not disposed: 1, not GCed: 2, GCed late: 0
 As Flutter widgets are instrumented, you just need to turn on the leak tracking.
 
 Invoke `ensureInitialized` and `startAppLeakTracking` before
-`runApp`, as show n in
+`runApp`, as shown in
 [the example app,](https://github.com/polina-c/spikes/blob/master/leaking_app/lib/main.dart#L7)
 and then follow the steps for the demo app.
 
