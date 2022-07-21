@@ -9,6 +9,7 @@ import '../../service/vm_service_wrapper.dart';
 import '../../shared/globals.dart';
 import '../debugger/debugger_model.dart';
 import '../debugger/program_explorer_model.dart';
+import 'vm_service_private_extensions.dart';
 
 /// Wrapper class for storing Dart VM objects with their relevant VM
 /// information.
@@ -158,6 +159,24 @@ class FieldObject extends VmObject {
 
   @override
   SourceLocation? get _sourceLocation => obj.location;
+
+  bool? guardNullable;
+
+  Class? guardClass;
+
+  String? guardClassKind;
+
+  @override
+  Future<void> initialize() async {
+    await super.initialize();
+
+    guardNullable = obj.guardNullable;
+    guardClassKind = obj.guardClassKind();
+
+    if (guardClassKind == FieldPrivateViewExtension.guardClassSingle) {
+      guardClass = await obj.guardClass;
+    }
+  }
 }
 
 //TODO(mtaylee): finish class implementation.

@@ -11,6 +11,7 @@ import '../../shared/table.dart';
 import '../../shared/theme.dart';
 import 'vm_developer_common_widgets.dart';
 import 'vm_object_model.dart';
+import 'vm_service_private_extensions.dart';
 
 /// A widget for the object inspector historyViewport displaying information
 /// related to field objects in the Dart VM.
@@ -28,18 +29,18 @@ class VmFieldDisplay extends StatelessWidget {
         Expanded(
           child: Column(
             children: [
-              ClassInfoWidget(
+              FieldInfoWidget(
                 field: field,
               ),
               Flexible(
                 child: ListView(
                   children: [
                     RetainingPathWidget(
-                      retainingPath: clazz.retainingPath,
+                      retainingPath: field.retainingPath,
                       onExpanded: _onExpandRetainingPath,
                     ),
                     InboundReferencesWidget(
-                      inboundReferences: clazz.inboundReferences,
+                      inboundReferences: field.inboundReferences,
                       onExpanded: _onExpandInboundRefs,
                     ),
                   ],
@@ -48,22 +49,16 @@ class VmFieldDisplay extends StatelessWidget {
             ],
           ),
         ),
-        if (displayClassInstances)
-          Flexible(
-            child: ClassInstancesWidget(
-              instances: clazz.instances,
-            ),
-          ),
       ],
     );
   }
 
   void _onExpandRetainingPath(bool expanded) {
-    if (clazz.retainingPath.value == null) clazz.requestRetainingPath();
+    if (field.retainingPath.value == null) field.requestRetainingPath();
   }
 
   void _onExpandInboundRefs(bool expanded) {
-    if (clazz.inboundReferences.value == null) clazz.requestInboundsRefs();
+    if (field.inboundReferences.value == null) field.requestInboundsRefs();
   }
 }
 
@@ -104,31 +99,32 @@ class FieldInfoWidget extends StatelessWidget implements PreferredSizeWidget {
       MapEntry(
         'Retained Size',
         ValueListenableBuilder<bool>(
-          valueListenable: clazz.fetchingRetainedSize,
+          valueListenable: field.fetchingRetainedSize,
           builder: (context, fetching, _) => fetching
               ? const CircularProgressIndicator()
               : RequestableSizeWidget(
-                  requestedSize: clazz.retainedSize,
-                  requestFunction: clazz.requestRetainedSize,
+                  requestedSize: field.retainedSize,
+                  requestFunction: field.requestRetainedSize,
                 ),
         ),
       ),
       MapEntry(
-        'Library',
-        clazz.obj.library?.name?.isEmpty ?? false
-            ? clazz.script?.uri
-            : clazz.obj.library?.name,
+        'Owner',
+        ownerName(field.obj.owner),
       ),
       MapEntry(
         'Script',
-        '${_fileName(clazz.script?.uri) ?? ''}:${clazz.pos?.toString() ?? ''}',
+        '${_fileName(field.script?.uri) ?? ''}:${field.pos?.toString() ?? ''}',
       ),
-      MapEntry('Superclass', clazz.obj.superClass?.name),
-      MapEntry('SuperType', clazz.obj.superType?.name),
       MapEntry(
-        'Currently allocated instances',
-        clazz.instances?.totalCount,
+        'Observed types',
+        _observedTypes(field),
       ),
+      if (field.obj.staticValue != null && field.obj.staticValue! is Sentinel)
+        MapEntry(
+          'Static Value',
+          (field.obj.staticValue as InstanceRef).name,
+        ),
     ];
 
     return SizedBox.fromSize(
@@ -152,31 +148,22 @@ class FieldInfoWidget extends StatelessWidget implements PreferredSizeWidget {
             dataRows.length * defaultRowHeight +
             defaultSpacing,
       );
-}
 
-// TODO(mtaylee): Finish implementation of widget to display
-// all class instances. When done, remove the last row of the ClassInfoWidget.
-/// Displays information on the instances of the Class object.
-class ClassInstancesWidget extends StatelessWidget {
-  const ClassInstancesWidget({
-    required this.instances,
-  });
+  String _observedTypes(FieldObject field) {
+    late String type;
 
-  final InstanceSet? instances;
+    if (field.guardClassKind == FieldPrivateViewExtension.guardClassSingle) {
+      type = field.guardClass!.name ?? '<Observed Type Name>';
+    } else if (field.guardClassKind ==
+        FieldPrivateViewExtension.guardClassUnknown) {
+      type = 'none';
+    } else if (field.guardClassKind ==
+        FieldPrivateViewExtension.guardClassDynamic) {
+      type = FieldPrivateViewExtension.guardClassDynamic;
+    } else {
+      type = 'Observed types not found';
+    }
 
-  @override
-  Widget build(BuildContext context) {
-    return VMInfoCard(
-      title: 'Class Instances',
-      rowKeyValues: [
-        MapEntry('Currently allocated', instances?.totalCount),
-        const MapEntry('Strongly reachable', 'TO-DO'),
-        const MapEntry('All direct instances', 'TO-DO'),
-        const MapEntry('All instances of subclasses', 'TO-DO'),
-        const MapEntry('All instances of implementors', 'TO-DO'),
-        const MapEntry('Reachable size', 'TO-DO'),
-        const MapEntry('Retained size', 'TO-DO'),
-      ],
-    );
+    return '$type - null ${field.guardNullable == true ? '' : 'not'} observed';
   }
 }
