@@ -118,7 +118,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     controller.onFirstDebuggerScreenLoad();
   }
 
-  void _onLocationSelected(VMServiceObjectNode? node) {
+  void _onNodeSelected(VMServiceObjectNode? node) {
     final location = node?.location;
     if (location != null) {
       controller.showScriptLocation(location);
@@ -139,7 +139,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
               child!,
               ProgramExplorer(
                 controller: controller.programExplorerController,
-                onNodeSelected: _onLocationSelected,
+                onNodeSelected: _onNodeSelected,
               ),
             ],
           );
