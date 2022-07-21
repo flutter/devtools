@@ -297,7 +297,11 @@ abstract class TreeNode<T extends TreeNode<T>> {
       returnCondition: matchingNodeCondition,
       exploreChildrenCondition:
           includeCollapsedNodes ? null : (T node) => node.isExpanded,
-      action: (T _) => index++,
+      action: (T node) {
+        // print(node);
+        // print(node.children.length);
+        index++;
+      },
     );
     if (matchingNode != null) return index;
     return -1;

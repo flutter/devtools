@@ -420,6 +420,8 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     super.initState();
     _initData();
 
+    // print("data root ${dataRoots[0]} level ${dataRoots[0].index}");
+
     addAutoDisposeListener(selectionNotifier, () {
       setState(() {
         final node = selectionNotifier.value.node;
