@@ -16,6 +16,9 @@ import '../../shared/table.dart';
 import 'app_size_screen.dart';
 import 'app_size_table.dart';
 
+//Temporary feature flag for deferred loading.
+const deferredLoadingSupport = true;
+
 enum DiffTreeType {
   increaseOnly,
   decreaseOnly,
@@ -234,8 +237,8 @@ class AppSizeController {
 
     changeAnalysisJsonFile(jsonFile);
 
-    // Set deferred app flag and root name.
-    if (processedJson['n'] == 'Dummy Root') {
+    // Set deferred app flag and root name if deferred app and support is on.
+    if (processedJson['n'] == 'Dummy Root' && deferredLoadingSupport) {
       isDeferredApp = true;
       processedJson['n'] = 'Entire App';
     } else {
