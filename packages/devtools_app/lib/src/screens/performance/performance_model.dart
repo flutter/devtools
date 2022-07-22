@@ -14,6 +14,7 @@ import '../../primitives/utils.dart';
 import '../../service/service_manager.dart';
 import '../../ui/search.dart';
 import '../profiler/cpu_profile_model.dart';
+import 'panes/controls/enhance_tracing/enhance_tracing_controller.dart';
 import 'performance_utils.dart';
 import 'timeline_event_processor.dart';
 
@@ -490,6 +491,14 @@ class FlutterFrame {
 
   /// Timeline event data for this [FlutterFrame].
   final FrameTimelineEventData timelineEventData = FrameTimelineEventData();
+
+  /// The [EnhanceTracingState] at the time that this frame object was created
+  /// (e.g. when the 'Flutter.Frame' event for this frame was received).
+  ///
+  /// If we did not have [EnhanceTracingState] information at the time that this
+  /// frame was drawn (e.g. the DevTools performancd page was not opened and
+  /// listening for frames yet), this value will be null.
+  EnhanceTracingState? enhanceTracingState;
 
   FrameAnalysis? get frameAnalysis {
     final frameAnalysis_ = _frameAnalysis;
@@ -1253,14 +1262,6 @@ class FrameAnalysis {
 
   final FlutterFrame frame;
 
-  static const buildEventName = 'Build';
-
-  static const layoutEventName = 'Layout';
-
-  static const paintEventName = 'Paint';
-
-  static const rasterEventName = 'Raster';
-
   static const saveLayerEventName = 'Canvas::saveLayer';
 
   static const intrinsicsEventSuffix = ' intrinsics';
@@ -1292,7 +1293,10 @@ class FrameAnalysis {
     }
     final buildEvents = uiEvent
         .childrenWithCondition(
-          (event) => event.name?.caseInsensitiveEquals(buildEventName) ?? false,
+          (event) =>
+              event.name
+                  ?.caseInsensitiveEquals(FramePhaseType.build.eventName) ??
+              false,
         )
         .cast<SyncTimelineEvent>();
     return FramePhase.build(events: buildEvents);
@@ -1315,7 +1319,9 @@ class FrameAnalysis {
       return FramePhase.layout(events: <SyncTimelineEvent>[]);
     }
     final layoutEvent = uiEvent.firstChildWithCondition(
-      (event) => event.name?.caseInsensitiveEquals(layoutEventName) ?? false,
+      (event) =>
+          event.name?.caseInsensitiveEquals(FramePhaseType.layout.eventName) ??
+          false,
     );
     return FramePhase.layout(
       events: <SyncTimelineEvent>[
@@ -1335,7 +1341,9 @@ class FrameAnalysis {
       return FramePhase.paint(events: <SyncTimelineEvent>[]);
     }
     final paintEvent = uiEvent.firstChildWithCondition(
-      (event) => event.name?.caseInsensitiveEquals(paintEventName) ?? false,
+      (event) =>
+          event.name?.caseInsensitiveEquals(FramePhaseType.paint.eventName) ??
+          false,
     );
     return FramePhase.paint(
       events: <SyncTimelineEvent>[
@@ -1446,12 +1454,41 @@ class FrameAnalysis {
   // }
 }
 
+enum FramePhaseType {
+  build,
+  layout,
+  paint,
+  raster;
+
+  static const _buildEventName = 'Build';
+
+  static const _layoutEventName = 'Layout';
+
+  static const _paintEventName = 'Paint';
+
+  static const _rasterEventName = 'Raster';
+
+  String get eventName {
+    switch (this) {
+      case build:
+        return _buildEventName;
+      case layout:
+        return _layoutEventName;
+      case paint:
+        return _paintEventName;
+      case raster:
+        return _rasterEventName;
+    }
+  }
+}
+
 class FramePhase {
   FramePhase._({
-    required this.title,
+    required this.type,
     required this.events,
     Duration? duration,
-  }) : duration = duration ??
+  })  : title = type.eventName,
+        duration = duration ??
             events.fold(Duration.zero, (previous, SyncTimelineEvent event) {
               return previous + event.time.duration;
             });
@@ -1461,7 +1498,7 @@ class FramePhase {
     Duration? duration,
   }) {
     return FramePhase._(
-      title: FrameAnalysis.buildEventName,
+      type: FramePhaseType.build,
       events: events,
       duration: duration,
     );
@@ -1472,7 +1509,7 @@ class FramePhase {
     Duration? duration,
   }) {
     return FramePhase._(
-      title: FrameAnalysis.layoutEventName,
+      type: FramePhaseType.layout,
       events: events,
       duration: duration,
     );
@@ -1483,7 +1520,7 @@ class FramePhase {
     Duration? duration,
   }) {
     return FramePhase._(
-      title: FrameAnalysis.paintEventName,
+      type: FramePhaseType.paint,
       events: events,
       duration: duration,
     );
@@ -1494,12 +1531,15 @@ class FramePhase {
     Duration? duration,
   }) {
     return FramePhase._(
-      title: FrameAnalysis.rasterEventName,
+      type: FramePhaseType.raster,
       events: events,
       duration: duration,
     );
   }
+
   final String title;
+
+  final FramePhaseType type;
 
   final List<SyncTimelineEvent> events;
 

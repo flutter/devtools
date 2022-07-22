@@ -253,6 +253,7 @@ class IntelligentFrameFindings extends StatelessWidget {
             const SizedBox(height: denseSpacing),
             _EnhanceTracingHint(
               longestPhase: frameAnalysis.longestUiPhase,
+              enhanceTracingState: frameAnalysis.frame.enhanceTracingState,
               enhanceTracingController: enhanceTracingController,
             ),
             const SizedBox(height: densePadding),
@@ -309,11 +310,16 @@ class _EnhanceTracingHint extends StatelessWidget {
   const _EnhanceTracingHint({
     Key? key,
     required this.longestPhase,
+    required this.enhanceTracingState,
     required this.enhanceTracingController,
   }) : super(key: key);
 
   /// The longest [FramePhase] for the [FlutterFrame] this hint is for.
   final FramePhase longestPhase;
+
+  /// The [EnhanceTracingState] that was active while drawing the [FlutterFrame]
+  /// that this hint is for.
+  final EnhanceTracingState? enhanceTracingState;
 
   final EnhanceTracingController enhanceTracingController;
 
@@ -345,35 +351,51 @@ class _EnhanceTracingHint extends StatelessWidget {
     FramePhase phase,
     ThemeData theme,
   ) {
-    switch (phase.title) {
-      case FrameAnalysis.buildEventName:
+    final phaseType = phase.type;
+    final tracingEnhanced =
+        enhanceTracingState?.enhancedFor(phaseType) ?? false;
+    switch (phaseType) {
+      case FramePhaseType.build:
         return _enhanceTracingHint(
-          extensions.profileWidgetBuilds.title,
-          theme,
+          settingTitle: extensions.profileWidgetBuilds.title,
+          eventDescription: 'widget built',
+          tracingEnhanced: tracingEnhanced,
+          theme: theme,
         );
-      case FrameAnalysis.layoutEventName:
+      case FramePhaseType.layout:
         return _enhanceTracingHint(
-          extensions.profileRenderObjectLayouts.title,
-          theme,
+          settingTitle: extensions.profileRenderObjectLayouts.title,
+          eventDescription: 'render object laid out',
+          tracingEnhanced: tracingEnhanced,
+          theme: theme,
         );
-      case FrameAnalysis.paintEventName:
+      case FramePhaseType.paint:
         return _enhanceTracingHint(
-          extensions.profileRenderObjectPaints.title,
-          theme,
+          settingTitle: extensions.profileRenderObjectPaints.title,
+          eventDescription: 'render object painted',
+          tracingEnhanced: tracingEnhanced,
+          theme: theme,
         );
-      case FrameAnalysis.rasterEventName:
-        // TODO(kenz): link to shader compilation docs. In the future, integrate
-        // with the work @iskakaushik is doing.
-        return [];
       default:
         return [];
     }
   }
 
-  List<InlineSpan> _enhanceTracingHint(
-    String settingTitle,
-    ThemeData theme,
-  ) {
+  List<InlineSpan> _enhanceTracingHint({
+    required String settingTitle,
+    required String eventDescription,
+    required bool tracingEnhanced,
+    required ThemeData theme,
+  }) {
+    if (tracingEnhanced) {
+      return [
+        TextSpan(
+          text: 'Since "$settingTitle" was enabled while this frame was drawn, '
+              'you should be able to see timeline events for each '
+              '$eventDescription.',
+        ),
+      ];
+    }
     final enhanceTracingButton = WidgetSpan(
       alignment: PlaceholderAlignment.middle,
       child: Padding(
