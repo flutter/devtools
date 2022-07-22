@@ -273,6 +273,15 @@ class _AnalysisViewState extends State<AnalysisView>
         AutoDisposeMixin,
         ProvidedControllerMixin<AppSizeController, AnalysisView> {
   TreemapNode? analysisRoot;
+  late TreemapNode? openNode;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => controller.changeAnalysisRoot(openNode),
+    );
+  }
 
   @override
   void didChangeDependencies() {
@@ -305,6 +314,7 @@ class _AnalysisViewState extends State<AnalysisView>
 
   Widget _buildTreemapAndTableSplitView() {
     final analysisCallGraphRoot = controller.analysisCallGraphRoot.value;
+
     return OutlineDecoration(
       child: Column(
         children: [

@@ -23,6 +23,7 @@ class Treemap extends StatefulWidget {
     required this.width,
     required this.height,
     required this.onRootChangedCallback,
+    this.node,
   }) : assert((rootNode == null) != (nodes == null));
 
   const Treemap.fromNodes({
@@ -33,11 +34,14 @@ class Treemap extends StatefulWidget {
     required this.width,
     required this.height,
     required this.onRootChangedCallback,
+    this.node,
   }) : assert((rootNode == null) != (nodes == null));
 
   final TreemapNode? rootNode;
 
   final List<TreemapNode>? nodes;
+
+  final TreemapNode? node;
 
   /// The depth of children visible from this Treemap widget.
   ///
