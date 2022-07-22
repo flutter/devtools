@@ -374,7 +374,7 @@ class _EnhanceTracingHint extends StatelessWidget {
     String settingTitle,
     ThemeData theme,
   ) {
-    const enhanceTracingButton = WidgetSpan(
+    final enhanceTracingButton = WidgetSpan(
       alignment: PlaceholderAlignment.middle,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: denseSpacing),

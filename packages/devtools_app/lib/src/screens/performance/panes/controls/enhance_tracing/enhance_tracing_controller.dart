@@ -9,7 +9,6 @@ import 'package:flutter/foundation.dart';
 import '../../../../../primitives/auto_dispose.dart';
 import '../../../../../service/service_extensions.dart' as extensions;
 import '../../../../../shared/globals.dart';
-import '../../../performance_model.dart';
 
 final enhanceTracingExtensions = [
   extensions.profileWidgetBuilds,
