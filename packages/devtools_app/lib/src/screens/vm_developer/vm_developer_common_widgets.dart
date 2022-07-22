@@ -184,6 +184,9 @@ String? _objectName(ObjRef? objectRef) {
       objectRef is FieldRef ||
       objectRef is LibraryRef) {
     objectRefName = (objectRef as dynamic).name;
+  } else if (objectRef is InstanceRef) {
+    objectRefName = objectRef.name ??
+        'Instance of ${objectRef.classRef?.name ?? '<Class>'}';
   }
 
   return objectRefName;
