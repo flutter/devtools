@@ -22,10 +22,8 @@ class EditableList extends StatefulWidget {
     this.onRefreshTriggered,
     Function(String)? onEntryAdded,
     Function(String)? onEntryRemoved,
-  }) {
-    this.onEntryAdded = onEntryAdded ?? (entry) => entries.add(entry);
-    this.onEntryRemoved = onEntryRemoved ?? (entry) => entries.remove(entry);
-  }
+  })  : onEntryAdded = onEntryAdded ?? ((entry) => entries.add(entry)),
+        onEntryRemoved = onEntryRemoved ?? ((entry) => entries.remove(entry));
 
   /// The values that will be displayed in the editable list.
   ///
