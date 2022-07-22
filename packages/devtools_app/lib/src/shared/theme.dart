@@ -606,8 +606,8 @@ bool includeText(
 
 ButtonStyle denseAwareOutlinedButtonStyle(
   BuildContext context,
-  double? minScreenWidthForTextBeforeScaling, {
-}) {
+  double? minScreenWidthForTextBeforeScaling,
+) {
   final buttonStyle =
       Theme.of(context).outlinedButtonTheme.style ?? const ButtonStyle();
   return _generateButtonStyle(
@@ -619,8 +619,8 @@ ButtonStyle denseAwareOutlinedButtonStyle(
 
 ButtonStyle denseAwareTextButtonStyle(
   BuildContext context,
-  double? minScreenWidthForTextBeforeScaling, {
-}) {
+  double? minScreenWidthForTextBeforeScaling,
+) {
   final buttonStyle =
       Theme.of(context).textButtonTheme.style ?? const ButtonStyle();
   return _generateButtonStyle(
