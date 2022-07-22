@@ -120,7 +120,7 @@ class FieldInfoWidget extends StatelessWidget implements PreferredSizeWidget {
         'Observed types',
         _observedTypes(field),
       ),
-      if (field.obj.staticValue != null && field.obj.staticValue! is Sentinel)
+      if (field.obj.staticValue != null && field.obj.staticValue is! Sentinel)
         MapEntry(
           'Static Value',
           (field.obj.staticValue as InstanceRef).name,
@@ -142,13 +142,6 @@ class FieldInfoWidget extends StatelessWidget implements PreferredSizeWidget {
     return splitted[splitted.length - 1];
   }
 
-  @override
-  Size get preferredSize => Size.fromHeight(
-        areaPaneHeaderHeight +
-            dataRows.length * defaultRowHeight +
-            defaultSpacing,
-      );
-
   String _observedTypes(FieldObject field) {
     late String type;
 
@@ -166,4 +159,11 @@ class FieldInfoWidget extends StatelessWidget implements PreferredSizeWidget {
 
     return '$type - null ${field.guardNullable == true ? '' : 'not'} observed';
   }
+
+  @override
+  Size get preferredSize => Size.fromHeight(
+        areaPaneHeaderHeight +
+            dataRows.length * defaultRowHeight +
+            defaultSpacing,
+      );
 }
