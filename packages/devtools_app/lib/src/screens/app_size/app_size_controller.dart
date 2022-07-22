@@ -240,7 +240,7 @@ class AppSizeController {
     isDeferredApp =
         deferredLoadingSupportEnabled && processedJson['n'] == 'ArtificialRoot';
 
-    //Set root name.
+    // Set root name.
     processedJson['n'] = isDeferredApp ? 'Entire app' : 'Root';
 
     // Build a tree with [TreemapNode] from [processedJsonMap].
