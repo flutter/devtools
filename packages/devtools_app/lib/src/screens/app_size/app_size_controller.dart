@@ -15,8 +15,8 @@ import '../../primitives/utils.dart';
 import '../../shared/table.dart';
 import 'app_size_screen.dart';
 
-//Temporary feature flag for deferred loading.
-const deferredLoadingSupport = true;
+// Temporary feature flag for deferred loading.
+const deferredLoadingSupportEnabled = true;
 
 enum DiffTreeType {
   increaseOnly,
@@ -87,7 +87,7 @@ class AppSizeController {
       matchingNodeCondition: searchCondition,
       includeCollapsedNodes: false,
     );
-    return deferredLoadingSupport && isDeferredApp ? nodeIndex - 1 : nodeIndex;
+    return isDeferredApp ? nodeIndex - 1 : nodeIndex;
   }
 
   ValueListenable<DevToolsJsonFile?> get analysisJsonFile => _analysisJsonFile;
@@ -237,13 +237,9 @@ class AppSizeController {
     changeAnalysisJsonFile(jsonFile);
 
     // Set deferred app flag and root name if deferred app and support is on.
-    if (processedJson['n'] == 'Dummy Root' && deferredLoadingSupport) {
-      isDeferredApp = true;
-      processedJson['n'] = 'Entire App';
-    } else {
-      isDeferredApp = false;
-      processedJson['n'] = 'Root';
-    }
+    final isDeferredApp =
+        deferredLoadingSupportEnabled && processedJson['n'] == 'ArtificialRoot';
+    processedJson['n'] = isDeferredApp ? 'Entire app' : 'Root';
 
     // Build a tree with [TreemapNode] from [processedJsonMap].
     final newRoot = generateTree(processedJson)!;
