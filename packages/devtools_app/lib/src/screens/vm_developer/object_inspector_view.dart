@@ -66,13 +66,13 @@ class _ObjectInspectorViewState extends State<_ObjectInspectorView> {
     final objRef = node.object;
     final location = node.location;
 
+    if (location != null) {
+      controller.setCurrentScript(location.scriptRef);
+    }
+
     if (objRef != null &&
         objRef != controller.objectHistory.current.value?.ref) {
       controller.pushObject(objRef);
-    }
-
-    if (location != null) {
-      controller.setCurrentScript(location.scriptRef);
     }
   }
 }

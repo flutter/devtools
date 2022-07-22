@@ -48,16 +48,16 @@ class ObjectInspectorViewController extends DisposableController
   Future<void> _onCurrentObjectChanged() async {
     final currentObjectValue = objectHistory.current.value;
 
-    _currentScriptRef = currentObjectValue?.scriptRef;
-
     if (currentObjectValue != null) {
-      if (_currentScriptRef != null) {
-        await programExplorerController
-            .selectScriptNode(currentObjectValue.scriptRef);
+      final scriptRef = currentObjectValue.scriptRef;
+
+      if (scriptRef != null) {
+        await programExplorerController.selectScriptNode(scriptRef);
       }
 
       if (currentObjectValue.outlineNode != null) {
         final outlineNode = currentObjectValue.outlineNode!;
+
         programExplorerController
           ..selectOutlineNode(outlineNode)
           ..expandToNode(outlineNode);
@@ -122,19 +122,15 @@ class ObjectInspectorViewController extends DisposableController
       object = LibraryObject(
         ref: objRef,
         scriptRef: _currentScriptRef,
-        outlineNode: outlineSelection,
       );
     } else if (objRef is ScriptRef) {
       object = ScriptObject(
         ref: objRef,
         scriptRef: _currentScriptRef,
-        outlineNode: outlineSelection,
       );
     } else if (objRef is InstanceRef) {
       object = InstanceObject(
         ref: objRef,
-        scriptRef: _currentScriptRef,
-        outlineNode: outlineSelection,
       );
     }
 
