@@ -17,10 +17,13 @@ MockPerformanceController createMockPerformanceControllerWithDefaults() {
   when(controller.searchInProgressNotifier)
       .thenReturn(const FixedValueListenable<bool>(false));
   when(controller.matchIndex).thenReturn(ValueNotifier<int>(0));
+  when(controller.enhanceTracingController)
+      .thenReturn(EnhanceTracingController());
   when(controller.rasterMetricsController)
       .thenReturn(RasterMetricsController());
   when(controller.selectedFrame)
       .thenReturn(const FixedValueListenable<FlutterFrame?>(null));
+  when(controller.displayRefreshRate).thenReturn(ValueNotifier<double>(60.0));
   return controller;
 }
 

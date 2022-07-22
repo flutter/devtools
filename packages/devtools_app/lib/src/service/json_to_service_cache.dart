@@ -22,7 +22,6 @@ class JsonToServiceCache {
     identityHashCode: -1,
     classRef: ClassRef(
       name: 'bool',
-      library: null,
       id: 'json-cache-bool',
     ),
     valueAsString: 'true',
@@ -34,7 +33,6 @@ class JsonToServiceCache {
     identityHashCode: -1,
     classRef: ClassRef(
       name: 'bool',
-      library: null,
       id: 'json-cache-bool',
     ),
     valueAsString: 'false',
@@ -46,7 +44,6 @@ class JsonToServiceCache {
     identityHashCode: -1,
     classRef: ClassRef(
       name: 'Null',
-      library: null,
       id: 'json-cache-null-cls',
     ),
     id: 'json-cache-null',
@@ -54,13 +51,11 @@ class JsonToServiceCache {
 
   static final _kListClass = ClassRef(
     name: 'List',
-    library: null,
     id: 'json-cache-list-class',
   );
 
   static final _kMapClass = ClassRef(
     name: 'Map',
-    library: null,
     id: 'json-cache-map-class',
   );
 
@@ -200,7 +195,6 @@ class JsonToServiceCache {
         identityHashCode: -1,
         classRef: ClassRef(
           name: 'String',
-          library: null,
           id: 'json-cache-string',
         ),
         id: _nextId(),
@@ -212,7 +206,6 @@ class JsonToServiceCache {
         identityHashCode: json,
         classRef: ClassRef(
           name: 'int',
-          library: null,
           id: 'json-cache-int',
         ),
         valueAsString: json.toString(),
@@ -224,7 +217,6 @@ class JsonToServiceCache {
         identityHashCode: -1,
         classRef: ClassRef(
           name: 'double',
-          library: null,
           id: 'json-cache-double',
         ),
         valueAsString: json.toString(),

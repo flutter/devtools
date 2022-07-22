@@ -9,10 +9,10 @@ import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../config_specific/import_export/import_export.dart';
-import '../../../../config_specific/launch_url/launch_url.dart';
 import '../../../../config_specific/logger/logger.dart' as logger;
 import '../../../../primitives/utils.dart';
 import '../../../../service/service_extensions.dart';
+import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
 import '../../primitives/memory_utils.dart';
 import 'diagnostics/model.dart';
@@ -27,7 +27,7 @@ import 'primitives/analysis_status.dart';
 const _extensionKindToReceiveLeaksSummary = 'memory_leaks_summary';
 const _extensionKindToReceiveLeaksDetails = 'memory_leaks_details';
 
-const _file_prefix = 'memory_leaks';
+const _filePrefix = 'memory_leaks';
 
 // TODO(polina-c): review UX with UX specialists
 // https://github.com/flutter/devtools/issues/3951
@@ -142,8 +142,8 @@ class _LeaksPaneController {
     final now = DateTime.now();
     final yamlFile = _exportController.generateFileName(
       time: now,
-      prefix: _file_prefix,
-      extension: 'yaml',
+      prefix: _filePrefix,
+      type: ExportFileType.yaml,
     );
     _exportController.downloadFile(yaml, fileName: yamlFile);
     final String? taskFile = _saveTask(task, now);
@@ -162,8 +162,9 @@ class _LeaksPaneController {
     final json = jsonEncode(task.toJson());
     final jsonFile = _exportController.generateFileName(
       time: now,
-      prefix: _file_prefix,
-      extension: 'raw.json',
+      prefix: _filePrefix,
+      postfix: '.raw',
+      type: ExportFileType.json,
     );
     return _exportController.downloadFile(json, fileName: jsonFile);
   }
@@ -231,10 +232,14 @@ class _LeaksPaneState extends State<LeaksPane> {
     return ValueListenableBuilder<bool>(
       valueListenable: _leaksController.leakSummaryReceived,
       builder: (_, leakSummaryReceived, __) {
+        const infoButton = InformationButton(
+          tooltip: 'Open memory leak tracking guidance.',
+          link: linkToGuidance,
+        );
         if (!leakSummaryReceived) {
           return Column(
             children: const [
-              _InformationButton(),
+              infoButton,
               Text('No information about memory leaks yet.'),
             ],
           );
@@ -247,7 +252,7 @@ class _LeaksPaneState extends State<LeaksPane> {
               controller: _leaksController.status,
               analysisStarter: Row(
                 children: [
-                  const _InformationButton(),
+                  infoButton,
                   _AnalyzeButton(leaksController: _leaksController),
                   _ForceGCButton(leaksController: _leaksController),
                 ],
@@ -268,21 +273,6 @@ class _LeaksPaneState extends State<LeaksPane> {
   }
 }
 
-class _InformationButton extends StatelessWidget {
-  const _InformationButton({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Tooltip(
-      message: 'Open memory leak tracking guidance.',
-      child: IconButton(
-        icon: const Icon(Icons.help_outline),
-        onPressed: () async => await launchUrl(linkToGuidance, context),
-      ),
-    );
-  }
-}
-
 class _AnalyzeButton extends StatelessWidget {
   const _AnalyzeButton({Key? key, required this.leaksController})
       : super(key: key);
@@ -293,7 +283,7 @@ class _AnalyzeButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Tooltip(
       message: 'Analyze the leaks and download the result\n'
-          'to ${_file_prefix}_<time>.yaml.',
+          'to ${_filePrefix}_<time>.yaml.',
       child: MaterialButton(
         child: const Text('Analyze and Download'),
         onPressed: () async => await leaksController.requestLeaks(),

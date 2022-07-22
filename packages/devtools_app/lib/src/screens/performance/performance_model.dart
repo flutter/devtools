@@ -1261,6 +1261,10 @@ class FrameAnalysis {
 
   static const rasterEventName = 'Raster';
 
+  static const saveLayerEventName = 'Canvas::saveLayer';
+
+  static const intrinsicsEventSuffix = ' intrinsics';
+
   ValueListenable<FramePhase?> get selectedPhase => _selectedPhase;
 
   final _selectedPhase = ValueNotifier<FramePhase?>(null);
@@ -1350,21 +1354,67 @@ class FrameAnalysis {
     ],
   );
 
-  late FramePhase longestFramePhase = _calculateLongestFramePhase();
+  late FramePhase longestUiPhase = _calculateLongestFramePhase();
 
   FramePhase _calculateLongestFramePhase() {
-    if (rasterPhase.duration > frame.buildTime) {
-      return rasterPhase;
-    }
     var longestPhaseTime = Duration.zero;
-    late FramePhase longestPhase;
+    late FramePhase longest;
     for (final block in [buildPhase, layoutPhase, paintPhase]) {
-      if (block.duration > longestPhaseTime) {
-        longestPhase = block;
+      if (block.duration >= longestPhaseTime) {
+        longest = block;
         longestPhaseTime = block.duration;
       }
     }
-    return longestPhase;
+    return longest;
+  }
+
+  bool get hasExpensiveOperations =>
+      saveLayerCount + intrinsicOperationsCount > 0;
+
+  int? _saveLayerCount;
+  int get saveLayerCount {
+    if (_saveLayerCount == null) {
+      _countExpensiveOperations();
+    }
+    return _saveLayerCount!;
+  }
+
+  int? _intrinsicOperationsCount;
+  int get intrinsicOperationsCount {
+    if (_intrinsicOperationsCount == null) {
+      _countExpensiveOperations();
+    }
+    return _intrinsicOperationsCount!;
+  }
+
+  void _countExpensiveOperations() {
+    assert(_saveLayerCount == null);
+    assert(_intrinsicOperationsCount == null);
+    int _saveLayer = 0;
+    for (final paintEvent in paintPhase.events) {
+      breadthFirstTraversal<TimelineEvent>(
+        paintEvent,
+        action: (event) {
+          if (event.name!.caseInsensitiveContains(saveLayerEventName)) {
+            _saveLayer++;
+          }
+        },
+      );
+    }
+    _saveLayerCount = _saveLayer;
+
+    int _intrinsics = 0;
+    for (final layoutEvent in layoutPhase.events) {
+      breadthFirstTraversal<TimelineEvent>(
+        layoutEvent,
+        action: (event) {
+          if (event.name!.caseInsensitiveContains(intrinsicsEventSuffix)) {
+            _intrinsics++;
+          }
+        },
+      );
+    }
+    _intrinsicOperationsCount = _intrinsics;
   }
 
   // TODO(kenz): calculate ratios to use as flex values. This will be a bit
