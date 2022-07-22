@@ -21,6 +21,7 @@ MockPerformanceController createMockPerformanceControllerWithDefaults() {
       .thenReturn(RasterMetricsController());
   when(controller.selectedFrame)
       .thenReturn(const FixedValueListenable<FlutterFrame?>(null));
+  when(controller.displayRefreshRate).thenReturn(ValueNotifier<double>(60.0));
   return controller;
 }
 

@@ -69,7 +69,6 @@ import 'dart:ui' show Canvas, Offset;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/src/widgets/app.dart';
 import 'package:flutter/src/widgets/binding.dart';
 import 'package:flutter/src/widgets/debug.dart';

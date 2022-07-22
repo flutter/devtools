@@ -12,6 +12,7 @@ import 'package:vm_snapshot_analysis/v8_profile.dart';
 
 import '../../charts/treemap.dart';
 import '../../primitives/utils.dart';
+import '../../shared/table.dart';
 import 'app_size_screen.dart';
 
 enum DiffTreeType {
@@ -48,15 +49,22 @@ class AppSizeController {
   /// The node set as the analysis tab root.
   ///
   /// Used to build the treemap and the tree table for the analysis tab.
-  ValueListenable<TreemapNode?> get analysisRoot => _analysisRoot;
-  final _analysisRoot = ValueNotifier<TreemapNode?>(null);
+  final analysisRoot = ValueNotifier<Selection<TreemapNode>>(Selection.empty());
 
-  void changeAnalysisRoot(TreemapNode? newRoot) {
-    _analysisRoot.value = newRoot;
-    if (newRoot == null) return;
+  void changeAnalysisRoot(TreemapNode? newAnalysisRoot) {
+    if (newAnalysisRoot == null) {
+      analysisRoot.value = Selection.empty();
+      return;
+    }
+
+    analysisRoot.value = Selection(
+      node: newAnalysisRoot,
+      nodeIndexCalculator: nodeIndexCalculator,
+      scrollIntoView: true,
+    );
 
     final programInfoNode =
-        _analysisCallGraph?.program.lookup(newRoot.packagePath()) ??
+        _analysisCallGraph?.program.lookup(newAnalysisRoot.packagePath()) ??
             _analysisCallGraph?.program.root;
 
     // If [programInfoNode is null, we don't have any call graph information
@@ -65,6 +73,14 @@ class AppSizeController {
       _analysisCallGraphRoot.value =
           _analysisCallGraph!.lookup(programInfoNode);
     }
+  }
+
+  int nodeIndexCalculator(TreemapNode newAnalysisRoot) {
+    final searchCondition = (TreemapNode n) => n == newAnalysisRoot;
+    return newAnalysisRoot.root.childCountToMatchingNode(
+      matchingNodeCondition: searchCondition,
+      includeCollapsedNodes: false,
+    );
   }
 
   ValueListenable<DevToolsJsonFile?> get analysisJsonFile => _analysisJsonFile;
@@ -152,7 +168,7 @@ class AppSizeController {
   }
 
   void _clearAnalysis() {
-    _analysisRoot.value = null;
+    analysisRoot.value = Selection.empty();
     _analysisJsonFile.value = null;
     _analysisCallGraphRoot.value = null;
     _analysisCallGraph = null;
