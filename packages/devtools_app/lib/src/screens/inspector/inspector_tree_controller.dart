@@ -331,8 +331,8 @@ class InspectorTreeController extends Object
     return (depth + 1) * columnWidth + horizontalPadding;
   }
 
-  double getRowY(int index) {
-    return rowHeight * index + verticalPadding;
+  double determineYForTopOfRow(int index) {
+    return rowHeight * index;
   }
 
   void nodeChanged(InspectorTreeNode node) {
@@ -383,7 +383,8 @@ class InspectorTreeController extends Object
 
   int get numRows => root?.subtreeSize ?? 0;
 
-  int getRowIndex(double y) => max(0, (y - verticalPadding) ~/ rowHeight);
+  int getRowIndex(double y) =>
+      max(0, (y + indexCalculationOffset) ~/ rowHeight);
 
   InspectorTreeRow? getRowForNode(InspectorTreeNode node) {
     final rootLocal = root;
@@ -434,15 +435,15 @@ class InspectorTreeController extends Object
     // nodes will be displayed rather than where they are currently displayed.
     return Rect.fromLTWH(
       getDepthIndent(row.depth),
-      getRowY(row.index),
+      determineYForTopOfRow(row.index),
       rowWidth,
       rowHeight,
     );
   }
 
-  void scrollToRect(Rect targetRect, int? firstRowIndex) {
+  void scrollToRect(Rect targetRect) {
     for (var client in _clients) {
-      client.scrollToRect(targetRect, firstRowIndex);
+      client.scrollToRect(targetRect);
     }
   }
 
@@ -483,8 +484,7 @@ class InspectorTreeController extends Object
 
     if (targetRect == null || targetRect.isEmpty) return;
 
-    targetRect = targetRect.inflate(20.0);
-    scrollToRect(targetRect, firstRowIndex);
+    scrollToRect(targetRect);
   }
 
   bool expandPropertiesByDefault(DiagnosticsTreeStyle style) {
@@ -710,7 +710,7 @@ extension RemoteDiagnosticsNodeExtension on RemoteDiagnosticsNode {
 abstract class InspectorControllerClient {
   void onChanged();
 
-  void scrollToRect(Rect rect, int? firstRowIndex);
+  void scrollToRect(Rect rect);
 
   void requestFocus();
 }
@@ -838,7 +838,7 @@ class _InspectorTreeState extends State<InspectorTree>
   }
 
   @override
-  Future<void> scrollToRect(Rect rect, int? firstRowIndex) async {
+  Future<void> scrollToRect(Rect rect) async {
     if (rect == _currentAnimateTarget) {
       // We are in the middle of an animation to this exact rectangle.
       return;
@@ -853,20 +853,16 @@ class _InspectorTreeState extends State<InspectorTree>
         ? _scrollControllerX.offset
         : _scrollControllerX.initialScrollOffset;
 
-    final viewPortRect = Rect.fromLTWH(
+    final viewPortInScrollControllerSpace = Rect.fromLTWH(
       xOffsetAtViewportLeft,
       yOffsetAtViewportTop,
       safeViewportWidth,
       safeViewportHeight,
     );
-    print('ViewportRect $viewPortRect');
-    print('rect $rect');
 
     // TODO: the getRowIndex seems to get the wrong index by 1
     // make sure it is more accurate
-    final fallbackRowIndex = treeController!.getRowIndex(rect.top) + 1;
-
-    final rowIndex = firstRowIndex ?? fallbackRowIndex;
+    final rowIndex = treeController!.getRowIndex(rect.top);
 
     final row = treeController!.getCachedRow(rowIndex);
     final node = row?.node;
@@ -895,8 +891,9 @@ class _InspectorTreeState extends State<InspectorTree>
       rect.bottom,
     );
 
-    final isRectInViewPort = viewPortRect.contains(rect.topLeft) &&
-        viewPortRect.contains(rect.bottomRight);
+    final isRectInViewPort =
+        viewPortInScrollControllerSpace.contains(rect.topLeft) &&
+            viewPortInScrollControllerSpace.contains(rect.bottomRight);
     if (isRectInViewPort) {
       // The rect is already in view, don't scroll
       return;

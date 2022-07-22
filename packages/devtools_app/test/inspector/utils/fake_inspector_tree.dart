@@ -19,7 +19,7 @@ class FakeInspectorTree extends InspectorTreeController {
   Rect getBoundingBox(InspectorTreeRow row) {
     return Rect.fromLTWH(
       getDepthIndent(row.depth),
-      getRowY(row.index),
+      determineYForTopOfRow(row.index),
       fakeRowWidth,
       rowHeight,
     );
