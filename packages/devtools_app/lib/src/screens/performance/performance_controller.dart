@@ -201,8 +201,6 @@ class PerformanceController extends DisposableController
           await serviceManager.queryDisplayRefreshRate ?? defaultRefreshRate;
       data?.displayRefreshRate = _displayRefreshRate.value;
 
-      enhanceTracingController.init();
-
       // Listen for Flutter.Frame events with frame timing data.
       // Listen for Flutter.RebuiltWidgets events.
       autoDisposeStreamSubscription(
