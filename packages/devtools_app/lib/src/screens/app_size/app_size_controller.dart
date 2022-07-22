@@ -236,9 +236,11 @@ class AppSizeController {
 
     changeAnalysisJsonFile(jsonFile);
 
-    // Set deferred app flag and root name if deferred app and support is on.
+    // Set deferred app flag.
     isDeferredApp =
         deferredLoadingSupportEnabled && processedJson['n'] == 'ArtificialRoot';
+
+    //Set root name.
     processedJson['n'] = isDeferredApp ? 'Entire app' : 'Root';
 
     // Build a tree with [TreemapNode] from [processedJsonMap].
