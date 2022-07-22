@@ -370,7 +370,9 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
               style: theme.subtleTextStyle,
             ),
             const SizedBox(height: denseSpacing),
-            PubRootDirectorySection(),
+            Expanded(
+              child: PubRootDirectorySection(),
+            ),
           ],
         ),
       ),
