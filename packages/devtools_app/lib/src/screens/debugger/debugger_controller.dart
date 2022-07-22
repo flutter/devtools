@@ -993,9 +993,6 @@ class DebuggerController extends DisposableController
         BoundVariable(
           name: '<exception>',
           value: reportedException,
-          scopeStartTokenPos: null,
-          scopeEndTokenPos: null,
-          declarationTokenPos: null,
         ),
         ...frame.vars ?? []
       ];

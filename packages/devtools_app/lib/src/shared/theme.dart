@@ -98,14 +98,14 @@ ThemeData _baseTheme({
     colorScheme: theme.colorScheme.copyWith(background: backgroundColor),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
-        primary: theme.colorScheme.contrastForeground,
+        foregroundColor: theme.colorScheme.contrastForeground,
         minimumSize: Size(buttonMinWidth, defaultButtonHeight),
         fixedSize: Size.fromHeight(defaultButtonHeight),
       ),
     ),
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
-        primary: theme.colorScheme.contrastForeground,
+        foregroundColor: theme.colorScheme.contrastForeground,
         minimumSize: Size(buttonMinWidth, defaultButtonHeight),
         fixedSize: Size.fromHeight(defaultButtonHeight),
       ),

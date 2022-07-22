@@ -467,11 +467,37 @@ void main() {
     });
 
     test('longestFramePhase', () {
-      expect(frameAnalysis.longestFramePhase.title, equals('Raster'));
+      expect(frameAnalysis.longestUiPhase.title, equals('Layout'));
+    });
 
-      frame = testFrame0.shallowCopy()..setEventFlow(goldenUiTimelineEvent);
+    test('saveLayerCount', () {
+      expect(frameAnalysis.saveLayerCount, equals(1));
+
+      frame = testFrame0.shallowCopy()
+        ..setEventFlow(compositingEvent)
+        ..setEventFlow(goldenRasterTimelineEvent);
       frameAnalysis = FrameAnalysis(frame);
-      expect(frameAnalysis.longestFramePhase.title, equals('Layout'));
+      expect(frameAnalysis.saveLayerCount, equals(0));
+    });
+
+    test('intrinsicOperationsCount', () {
+      expect(frameAnalysis.intrinsicOperationsCount, equals(2));
+
+      frame = testFrame0.shallowCopy()
+        ..setEventFlow(compositingEvent)
+        ..setEventFlow(goldenRasterTimelineEvent);
+      frameAnalysis = FrameAnalysis(frame);
+      expect(frameAnalysis.intrinsicOperationsCount, equals(0));
+    });
+
+    test('hasExpensiveOperations', () {
+      expect(frameAnalysis.hasExpensiveOperations, isTrue);
+
+      frame = testFrame0.shallowCopy()
+        ..setEventFlow(compositingEvent)
+        ..setEventFlow(goldenRasterTimelineEvent);
+      frameAnalysis = FrameAnalysis(frame);
+      expect(frameAnalysis.hasExpensiveOperations, isFalse);
     });
   });
 }
