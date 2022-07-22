@@ -471,7 +471,6 @@ class InspectorTreeController extends Object
 
   void animateToTargets(List<InspectorTreeNode> targets) {
     Rect? targetRect;
-    final firstRowIndex = getRowForNode(targets[0])?.index;
     for (InspectorTreeNode target in targets) {
       final row = getRowForNode(target);
       if (row != null) {
@@ -760,6 +759,9 @@ class _InspectorTreeState extends State<InspectorTree>
 
   late DebuggerController _debuggerController;
 
+  /// When autoscrolling, the number of rows to pad the target location with.
+  final _scrollToTargetPaddingCount = 3;
+
   @override
   void initState() {
     super.initState();
@@ -828,21 +830,13 @@ class _InspectorTreeState extends State<InspectorTree>
 //    );
 //  }
 
-  /// Compute the goal x scroll given a y scroll value.
-  ///
-  /// This enables animating the x scroll as the y scroll changes which helps
-  /// keep the relevant content in view while scrolling a large list.
-  double _computeTargetX({required double initialX}) {
-    return initialX - columnWidth * 3;
-  }
-
   @override
   Future<void> scrollToRect(Rect rect) async {
     if (rect == _currentAnimateTarget) {
       // We are in the middle of an animation to this exact rectangle.
       return;
     }
-    // TODO: What if we are already scrolling past the entry?
+
     final initialX = rect.left;
     final initialY = rect.top;
     final yOffsetAtViewportTop = _scrollControllerY.hasClients
@@ -859,8 +853,6 @@ class _InspectorTreeState extends State<InspectorTree>
       safeViewportHeight,
     );
 
-    // TODO: the getRowIndex seems to get the wrong index by 1
-    // make sure it is more accurate
     final rowIndex = treeController!.getRowIndex(rect.top);
 
     final row = treeController!.getCachedRow(rowIndex);
@@ -900,7 +892,7 @@ class _InspectorTreeState extends State<InspectorTree>
 
     _currentAnimateTarget = rect;
 
-    final targetY = _computeTargetOffsetY(initialY: initialY);
+    final targetY = _padTargetY(initialY: initialY);
     if (_scrollControllerY.hasClients) {
       _currentAnimateY = _scrollControllerY.animateTo(
         targetY,
@@ -914,7 +906,7 @@ class _InspectorTreeState extends State<InspectorTree>
 
     // Determine a target X coordinate consistent with the target Y coordinate
     // we will end up as so we get a smooth animation to the final destination.
-    final targetX = _computeTargetX(initialX: initialX);
+    final targetX = _padTargetX(initialX: initialX);
     if (_scrollControllerX.hasClients) {
       unawaited(
         _scrollControllerX.animateTo(
@@ -955,9 +947,18 @@ class _InspectorTreeState extends State<InspectorTree>
         : _placeholderViewportWidth;
   }
 
-  /// Animate so that the entire range minOffset to maxOffset is within view.
-  double _computeTargetOffsetY({required double initialY}) {
-    return initialY - rowHeight * 3;
+  /// Compute the x scroll given an [initialX] scroll value.
+  ///
+  /// The value is padded with [_scrollToTargetPaddingCount] indent widths
+  double _padTargetX({required double initialX}) {
+    return initialX - columnWidth * _scrollToTargetPaddingCount;
+  }
+
+  /// Compute the  y scroll given an [initialY] scroll value.
+  ///
+  /// The value is padded with [_scrollToTargetPaddingCount] row heights
+  double _padTargetY({required double initialY}) {
+    return initialY - rowHeight * _scrollToTargetPaddingCount;
   }
 
   /// Handle arrow keys for the InspectorTree. Ignore other key events so that
