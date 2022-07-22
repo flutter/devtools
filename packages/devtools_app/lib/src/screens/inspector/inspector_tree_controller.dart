@@ -383,8 +383,7 @@ class InspectorTreeController extends Object
 
   int get numRows => root?.subtreeSize ?? 0;
 
-  int getRowIndex(double y) =>
-      max(0, (y + indexCalculationOffset) ~/ rowHeight);
+  int getRowIndex(double y) => max(0, y ~/ rowHeight);
 
   InspectorTreeRow? getRowForNode(InspectorTreeNode node) {
     final rootLocal = root;
