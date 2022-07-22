@@ -419,6 +419,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
     _gcEventStream.sink.add(
       Event(
         kind: EventKind.kGC,
+        timestamp: null,
       ),
     );
   }

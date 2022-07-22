@@ -24,7 +24,7 @@ class ClassHeapDetailStats {
     final className = json['class']['name'];
 
     return ClassHeapDetailStats(
-      ClassRef(id: classId, name: className),
+      ClassRef(id: classId, name: className, library: null),
       bytes: json['bytesCurrent'] as int,
       deltaBytes: json['bytesDelta'] as int,
       instances: json['instancesCurrent'] as int,
