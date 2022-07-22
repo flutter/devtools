@@ -120,10 +120,11 @@ class FieldInfoWidget extends StatelessWidget implements PreferredSizeWidget {
         'Observed types',
         _observedTypes(field),
       ),
-      if (field.obj.staticValue != null && field.obj.staticValue is! Sentinel)
+      if (field.obj.staticValue is InstanceRef)
         MapEntry(
           'Static Value',
-          (field.obj.staticValue as InstanceRef).name,
+          (field.obj.staticValue as InstanceRef).name ??
+              'Instance of ${(field.obj.staticValue as InstanceRef).classRef?.name ?? '<Class>'}',
         ),
     ];
 
