@@ -92,6 +92,26 @@ class ImportController {
   }
 }
 
+enum ExportFileType {
+  json,
+  csv,
+  yaml;
+
+  @override
+  String toString() {
+    switch (this) {
+      case json:
+        return 'json';
+      case csv:
+        return 'csv';
+      case yaml:
+        return 'yaml';
+      default:
+        throw UnimplementedError('Unable to convert $this to a string');
+    }
+  }
+}
+
 abstract class ExportController {
   factory ExportController() {
     return createExportController();
@@ -101,17 +121,22 @@ abstract class ExportController {
 
   String generateFileName({
     String prefix = 'dart_devtools',
-    String extension = 'json',
+    String postfix = '',
+    required ExportFileType type,
     DateTime? time,
   }) {
     time ??= DateTime.now();
     final timestamp = DateFormat('yyyy-MM-dd_HH:mm:ss.SSS').format(time);
-    return '${prefix}_$timestamp.$extension';
+    return '${prefix}_$timestamp$postfix.$type';
   }
 
-  /// Downloads a JSON file with [contents] and returns the name of the
+  /// Downloads a file with [contents] and returns the name of the
   /// downloaded file.
-  String downloadFile(String contents, {String? fileName});
+  String downloadFile(
+    String contents, {
+    String? fileName,
+    ExportFileType type = ExportFileType.json,
+  });
 
   String encode(String activeScreenId, Map<String, dynamic> contents) {
     final _contents = {

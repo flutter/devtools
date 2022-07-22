@@ -149,7 +149,6 @@ class FlatTableState<T> extends State<FlatTable<T>>
     maxWidth -= numColumnSpacers * _columnSpacing;
     maxWidth -= numColumnGroupSpacers * _columnGroupSpacingWithPadding;
     maxWidth = max(0, maxWidth);
-
     double available = maxWidth;
     // Columns sorted by increasing minWidth.
     final List<ColumnData<T>> sortedColumns = widget.columns.toList()
@@ -1581,10 +1580,10 @@ class _TableRowState<T> extends State<TableRow<T>>
                 widget.columnWidths[current],
               );
             case _TableRowPartDisplayType.columnSpacer:
-              // TODO(kenz): consider adding column divider lines like we do for
-              // column groups. We'll have to make sure that column divider
-              // lines with column group divider lines doesn't look too busy.
-              return const SizedBox(width: _columnSpacing);
+              return const SizedBox(
+                width: _columnSpacing,
+                child: VerticalDivider(width: _columnSpacing),
+              );
             case _TableRowPartDisplayType.columnGroupSpacer:
               return const _ColumnGroupSpacer();
           }
@@ -1646,8 +1645,13 @@ class _ColumnGroupHeaderRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return Container(
       padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: defaultBorderSide(Theme.of(context)),
+        ),
+      ),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         controller: scrollController,
@@ -1670,11 +1674,6 @@ class _ColumnGroupHeaderRow extends StatelessWidget {
           return Container(
             alignment: Alignment.center,
             width: groupWidth,
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: defaultBorderSide(Theme.of(context)),
-              ),
-            ),
             child: Text(group.title),
           );
         },
