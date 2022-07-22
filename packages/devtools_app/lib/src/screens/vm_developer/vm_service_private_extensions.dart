@@ -64,7 +64,9 @@ extension FieldPrivateViewExtension on Field {
   }
 
   String? guardClassKind() {
-    final guardClassType = json![guardClassKey]?['type'];
+    final String? guardClassType =
+        json![guardClassKey] is Map ? json![guardClassKey]['type'] : null;
+
     if (guardClassType == '@Class' || guardClassType == 'Class') {
       return guardClassSingle;
     } else if (json![guardClassKey] == guardClassDynamic) {
