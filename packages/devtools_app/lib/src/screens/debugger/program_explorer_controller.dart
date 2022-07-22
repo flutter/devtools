@@ -11,6 +11,7 @@ import '../../primitives/auto_dispose.dart';
 import '../../primitives/trees.dart';
 import '../../primitives/utils.dart';
 import '../../shared/globals.dart';
+import '../vm_developer/vm_service_private_extensions.dart';
 import 'program_explorer_model.dart';
 
 class ProgramExplorerController extends DisposableController
@@ -234,10 +235,24 @@ class ProgramExplorerController extends DisposableController
               (f) => service!.getObject(isolateId!, f.id!).then((f) async {
                 final func = f as Func;
                 final codeRef = func.code;
+
+                // Populate the [Code] objects in each function if we want to
+                // show code nodes in the outline.
                 if (showCodeNodes && codeRef != null) {
                   final code =
                       await service.getObject(isolateId, codeRef.id!) as Code;
                   func.code = code;
+                  Code unoptimizedCode = code;
+                  // `func.code` could be unoptimized code, so don't bother
+                  // fetching it again.
+                  if (func.unoptimizedCode != null &&
+                      func.unoptimizedCode?.id! != code.id!) {
+                    unoptimizedCode = await service.getObject(
+                      isolateId,
+                      func.unoptimizedCode!.id!,
+                    ) as Code;
+                  }
+                  func.unoptimizedCode = unoptimizedCode;
                 }
                 return func;
               }),

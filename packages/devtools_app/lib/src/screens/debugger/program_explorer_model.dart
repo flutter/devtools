@@ -6,6 +6,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../primitives/trees.dart';
 import '../../shared/globals.dart';
+import '../vm_developer/vm_service_private_extensions.dart';
 import 'debugger_model.dart';
 import 'program_explorer_controller.dart';
 
@@ -18,6 +19,7 @@ import 'program_explorer_controller.dart';
 ///   - Class
 ///   - Field
 ///   - Function
+///   - Code
 class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
   VMServiceObjectNode(
     this.controller,
@@ -120,6 +122,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
           function,
         );
         await controller.populateNode(node);
+        _buildCodeNodes(node.object as Func, node);
         root.addChild(node);
       }
     }
@@ -240,6 +243,34 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     return node;
   }
 
+  void _buildCodeNodes(Func function, VMServiceObjectNode node) {
+    if (!node.controller.showCodeNodes) {
+      return;
+    }
+    final code = function.code;
+    if (code != null) {
+      node.addChild(
+        VMServiceObjectNode(
+          controller,
+          code.name,
+          code,
+        ),
+      );
+      final unoptimizedCode = function.unoptimizedCode;
+      // It's possible for `function.code` to be unoptimized code, so don't
+      // create a duplicate node in that situation.
+      if (unoptimizedCode != null && unoptimizedCode.id! != code.id!) {
+        node.addChild(
+          VMServiceObjectNode(
+            controller,
+            unoptimizedCode.name,
+            unoptimizedCode,
+          ),
+        );
+      }
+    }
+  }
+
   VMServiceObjectNode _lookupOrCreateChild(
     String name,
     ObjRef? object, {
@@ -293,18 +324,9 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
 
   void updateObject(Obj object) {
     if (this.object is! Class && object is Class) {
-      for (final function in object.functions ?? <Func>[]) {
+      for (final function in object.functions?.cast<Func>() ?? <Func>[]) {
         final node = _createChild(function.name, function);
-        final code = (function as Func).code;
-        if (code != null) {
-        node.addChild(
-          VMServiceObjectNode(
-            controller,
-            code.name,
-            code,
-          ),
-        );
-        }
+        _buildCodeNodes(function, node);
       }
       for (final field in object.fields ?? []) {
         _createChild(field.name, field);

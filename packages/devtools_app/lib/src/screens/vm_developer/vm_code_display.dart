@@ -3,11 +3,129 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:vm_service/vm_service.dart';
 
+import '../../primitives/utils.dart';
+import '../../shared/table.dart';
+import '../../shared/table_data.dart';
 import 'vm_object_model.dart';
+import 'vm_service_private_extensions.dart';
+
+// TODO(bkonyi): remove once profile ticks are populated for instructions.
+const profilerTicksEnabled = false;
+
+abstract class _CodeColumnData extends ColumnData<Instruction> {
+  _CodeColumnData(super.title, {required super.fixedWidthPx});
+  _CodeColumnData.wide(super.title) : super.wide();
+
+  @override
+  bool get supportsSorting => false;
+}
+
+class _AddressColumn extends _CodeColumnData {
+  _AddressColumn()
+      : super(
+          'Address',
+          fixedWidthPx: 160,
+        );
+
+  @override
+  int getValue(Instruction dataObject) {
+    return int.parse(dataObject.address, radix: 16);
+  }
+
+  @override
+  String getDisplayValue(Instruction dataObject) {
+    final value = getValue(dataObject);
+    return '0x${value.toRadixString(16).toUpperCase().padLeft(8)}';
+  }
+}
+
+class _ProfileTicksColumn extends _CodeColumnData {
+  _ProfileTicksColumn(super.title) : super(fixedWidthPx: 80);
+
+  @override
+  Object? getValue(Instruction dataObject) {
+    return '';
+  }
+}
+
+class _InstructionColumn extends _CodeColumnData {
+  _InstructionColumn()
+      : super(
+          'Disassembly',
+          fixedWidthPx: 240,
+        );
+
+  @override
+  Object? getValue(Instruction dataObject) {
+    return dataObject.instruction;
+  }
+}
+
+class _DartObjectColumn extends _CodeColumnData {
+  _DartObjectColumn() : super.wide('Object');
+
+  @override
+  String getValue(Instruction dataObject) => _objectToDisplayValue(dataObject.object);
+
+  // TODO(bkonyi): verify this covers all cases.
+  String _objectToDisplayValue(Object? object) {
+    if (object is InstanceRef) {
+      final instance = object;
+      switch (instance.kind!) {
+        case InstanceKind.kNull:
+          return 'null';
+        case InstanceKind.kBool:
+          return instance.valueAsString!;
+        case InstanceKind.kList:
+          return 'List(${instance.length})';
+        case InstanceKind.kString:
+          return '"${instance.valueAsString}"';
+        case InstanceKind.kPlainInstance:
+          return 'TODO(PlainInstance)';
+        case InstanceKind.kClosure:
+          return instance.closureFunction!.name!;
+      }
+    }
+
+    if (object is FuncRef) {
+      final func = object;
+      return '${func.owner.name}.${func.name!}';
+    }
+
+    if (object is CodeRef) {
+      final code = object;
+      return code.name!;
+    }
+
+    if (object is FieldRef) {
+      final field = object;
+      return '${field.declaredType!.name} ${field.name}';
+    }
+
+    if (object is TypeArgumentsRef) {
+      final typeArgsRef = object;
+      return 'TypeArguments(${typeArgsRef.name!})';
+    }
+
+    // Note: this check should be last as [ObjRef] is a super type to most
+    // other types in package:vm_service.
+    if (object is ObjRef) {
+      final objRef = object;
+      if (objRef.isICData) {
+        final icData = objRef.asICData;
+        return 'ICData (${icData.selector})';
+      }
+      return objRef.vmType;
+    }
+
+    return object?.toString() ?? '';
+  }
+}
 
 /// A widget for the object inspector historyViewport displaying information
-/// related to class objects in the Dart VM.
+/// related to [Code] objects in the Dart VM.
 class VmCodeDisplay extends StatelessWidget {
   const VmCodeDisplay({
     required this.code,
@@ -17,8 +135,42 @@ class VmCodeDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [],
+    return CodeTable(code: code);
+  }
+}
+
+class CodeTable extends StatelessWidget {
+  CodeTable({
+    Key? key,
+    required this.code,
+  }) : super(key: key);
+
+  final columns = <ColumnData<Instruction>>[
+    _AddressColumn(),
+    _InstructionColumn(),
+    _DartObjectColumn(),
+    if (profilerTicksEnabled) ...[
+      _ProfileTicksColumn('Inclusive'),
+      _ProfileTicksColumn('Exclusive'),
+    ],
+  ];
+
+  final CodeObject code;
+
+  @override
+  Widget build(BuildContext context) {
+    return FlatTable<Instruction>(
+      columnGroups: [
+        ColumnGroup(title: 'Instructions', range: const Range(0, 3)),
+        if (profilerTicksEnabled)
+          ColumnGroup(title: 'Profiler Ticks', range: const Range(4, 6)),
+      ],
+      columns: columns,
+      data: code.obj.disassembly.instructions,
+      keyFactory: (instruction) => Key(instruction.address),
+      onItemSelected: (_) => null,
+      sortColumn: columns[0],
+      sortDirection: SortDirection.ascending,
     );
   }
 }
