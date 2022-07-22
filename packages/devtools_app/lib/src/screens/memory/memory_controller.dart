@@ -26,6 +26,7 @@ import '../../ui/search.dart';
 import 'memory_graph_model.dart';
 import 'memory_protocol.dart';
 import 'memory_snapshot_models.dart';
+import 'panes/allocation_profile/allocation_profile_table_view_controller.dart';
 import 'primitives/filter_config.dart';
 import 'primitives/memory_timeline.dart';
 
@@ -239,6 +240,9 @@ class MemoryController extends DisposableController
     memoryTimeline = MemoryTimeline(offline);
     memoryLog = MemoryLog(this);
   }
+
+  /// Controller for [AllocationProfileTableView].
+  final allocationProfileController = AllocationProfileTableViewController();
 
   static const logFilenamePrefix = 'memory_log_';
 
@@ -602,7 +606,7 @@ class MemoryController extends DisposableController
 
       final classRef = foundClass.classRef;
       _setTracking(classRef, enable).catchError((e) {
-        debugLogger('ERROR: ${e.message}');
+        debugLogger('ERROR: ${e.tooltip}');
       }).whenComplete(
         () {
           changeStackTraces();

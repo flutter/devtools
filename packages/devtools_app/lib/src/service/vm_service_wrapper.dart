@@ -224,7 +224,15 @@ class VmServiceWrapper implements VmService {
   }) async {
     return trackFuture(
       'getAllocationProfile',
-      _vmService.getAllocationProfile(isolateId, reset: reset, gc: gc),
+      _vmService.callMethod(
+        // TODO(bkonyi): add _new and _old to public response.
+        '_getAllocationProfile',
+        isolateId: isolateId,
+        args: <String, dynamic>{
+          if (reset != null && reset) 'reset': reset,
+          if (gc != null && gc) 'gc': gc,
+        },
+      ).then((r) => r as AllocationProfile),
     );
   }
 
