@@ -15,6 +15,9 @@ import '../../primitives/utils.dart';
 import '../../shared/table.dart';
 import 'app_size_screen.dart';
 
+// Temporary feature flag for deferred loading.
+const deferredLoadingSupportEnabled = false;
+
 enum DiffTreeType {
   increaseOnly,
   decreaseOnly,
@@ -51,6 +54,8 @@ class AppSizeController {
   /// Used to build the treemap and the tree table for the analysis tab.
   final analysisRoot = ValueNotifier<Selection<TreemapNode>>(Selection.empty());
 
+  late bool isDeferredApp;
+
   void changeAnalysisRoot(TreemapNode? newAnalysisRoot) {
     if (newAnalysisRoot == null) {
       analysisRoot.value = Selection.empty();
@@ -77,10 +82,12 @@ class AppSizeController {
 
   int nodeIndexCalculator(TreemapNode newAnalysisRoot) {
     final searchCondition = (TreemapNode n) => n == newAnalysisRoot;
-    return newAnalysisRoot.root.childCountToMatchingNode(
+    if (!newAnalysisRoot.root.isExpanded) newAnalysisRoot.root.expand();
+    final nodeIndex = newAnalysisRoot.root.childCountToMatchingNode(
       matchingNodeCondition: searchCondition,
       includeCollapsedNodes: false,
     );
+    return isDeferredApp ? nodeIndex - 1 : nodeIndex;
   }
 
   ValueListenable<DevToolsJsonFile?> get analysisJsonFile => _analysisJsonFile;
@@ -229,8 +236,12 @@ class AppSizeController {
 
     changeAnalysisJsonFile(jsonFile);
 
-    // Set name for root node.
-    processedJson['n'] = 'Root';
+    // Set deferred app flag.
+    isDeferredApp =
+        deferredLoadingSupportEnabled && processedJson['n'] == 'ArtificialRoot';
+
+    // Set root name.
+    processedJson['n'] = isDeferredApp ? 'Entire app' : 'Root';
 
     // Build a tree with [TreemapNode] from [processedJsonMap].
     final newRoot = generateTree(processedJson)!;
