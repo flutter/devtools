@@ -16,7 +16,7 @@ import '../../shared/table.dart';
 import 'app_size_screen.dart';
 
 // Temporary feature flag for deferred loading.
-const deferredLoadingSupportEnabled = false;
+const deferredLoadingSupportEnabled = true;
 
 enum DiffTreeType {
   increaseOnly,
@@ -333,7 +333,12 @@ class AppSizeController {
     changeOldDiffFile(oldFile);
     changeNewDiffFile(newFile);
 
-    diffMap['n'] = 'Root';
+    // Set deferred app flag.
+    isDeferredApp =
+        deferredLoadingSupportEnabled && diffMap['n'] == 'ArtificialRoot';
+
+    // Set root name.
+    diffMap['n'] = isDeferredApp ? 'Entire app' : 'Root';
 
     // TODO(peterdjlee): Try to move the non-active tree generation to separate isolates.
     _combinedDiffTreeRoot = generateDiffTree(

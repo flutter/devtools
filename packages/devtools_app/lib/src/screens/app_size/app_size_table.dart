@@ -156,8 +156,15 @@ class _SizePercentageColumn extends ColumnData<TreemapNode> {
 }
 
 class AppSizeDiffTable extends StatelessWidget {
-  factory AppSizeDiffTable({required TreemapNode rootNode}) {
-    final treeColumn = _NameColumn(currentRootLevel: rootNode.level);
+  factory AppSizeDiffTable({
+    required TreemapNode rootNode,
+    required AppSizeController controller,
+  }) {
+    final treeColumn = _NameColumn(
+      currentRootLevel: controller.isDeferredApp
+          ? rootNode.children[0].level
+          : rootNode.level,
+    );
     final diffColumn = _DiffColumn();
     final columns = List<ColumnData<TreemapNode>>.unmodifiable([
       treeColumn,
@@ -169,6 +176,7 @@ class AppSizeDiffTable extends StatelessWidget {
       treeColumn,
       diffColumn,
       columns,
+      controller,
     );
   }
 
@@ -177,6 +185,7 @@ class AppSizeDiffTable extends StatelessWidget {
     this.treeColumn,
     this.sortColumn,
     this.columns,
+    this.controller,
   );
 
   final TreemapNode rootNode;
@@ -185,12 +194,14 @@ class AppSizeDiffTable extends StatelessWidget {
   final ColumnData<TreemapNode> sortColumn;
   final List<ColumnData<TreemapNode>> columns;
 
+  final AppSizeController controller;
+
   // TODO(petedjlee): Ensure the sort column is descending with the absolute value of the size
   //                  if the table is only showing negative values.
   @override
   Widget build(BuildContext context) {
     return TreeTable<TreemapNode>(
-      dataRoots: [rootNode],
+      dataRoots: controller.isDeferredApp ? rootNode.children : [rootNode],
       columns: columns,
       treeColumn: treeColumn,
       keyFactory: (node) => PageStorageKey<String>(node.name),
