@@ -6,21 +6,27 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../primitives/auto_dispose_mixin.dart';
-import '../../service/service_extension_manager.dart';
-import '../../service/service_extension_widgets.dart';
-import '../../service/service_extensions.dart' as extensions;
-import '../../shared/common_widgets.dart';
-import '../../shared/globals.dart';
-import '../../shared/theme.dart';
-import 'performance_screen.dart';
+import '../../../../../primitives/auto_dispose_mixin.dart';
+import '../../../../../service/service_extension_manager.dart';
+import '../../../../../service/service_extension_widgets.dart';
+import '../../../../../service/service_extensions.dart' as extensions;
+import '../../../../../shared/common_widgets.dart';
+import '../../../../../shared/globals.dart';
+import '../../../../../shared/theme.dart';
+import '../../../performance_screen.dart';
+import 'enhance_tracing_controller.dart';
 
 class EnhanceTracingButton extends StatelessWidget {
-  const EnhanceTracingButton({Key? key}) : super(key: key);
+  const EnhanceTracingButton(
+    this.enhanceTracingController, {
+    Key? key,
+  }) : super(key: key);
 
   static const title = 'Enhance Tracing';
 
   static const icon = Icons.auto_awesome;
+
+  final EnhanceTracingController enhanceTracingController;
 
   @override
   Widget build(BuildContext context) {
@@ -32,12 +38,9 @@ class EnhanceTracingButton extends StatelessWidget {
       tooltip: 'Add more detail to the Timeline trace',
       minScreenWidthForTextBeforeScaling:
           SecondaryPerformanceControls.minScreenWidthForTextBeforeScaling,
-      extensions: [
-        extensions.profileWidgetBuilds,
-        extensions.profileUserWidgetBuilds,
-        extensions.profileRenderObjectLayouts,
-        extensions.profileRenderObjectPaints,
-      ],
+      extensions: enhanceTracingExtensions,
+      forceShowOverlayController:
+          enhanceTracingController.showMenuStreamController,
       customExtensionUi: {
         extensions.profileWidgetBuilds.extension:
             const TrackWidgetBuildsSetting(),

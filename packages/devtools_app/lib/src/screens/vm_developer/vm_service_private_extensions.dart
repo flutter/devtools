@@ -47,3 +47,37 @@ extension InboundReferenceExtension on InboundReferences {
     return json![referencesKey]?[inboundReferenceIndex]?[parentWordOffsetKey];
   }
 }
+
+class HeapStats {
+  const HeapStats({
+    required this.count,
+    required this.size,
+    required this.externalSize,
+  });
+
+  const HeapStats.empty()
+      : count = 0,
+        size = 0,
+        externalSize = 0;
+
+  HeapStats.parse(List<int> stats)
+      : count = stats[0],
+        size = stats[1],
+        externalSize = stats[2];
+
+  final int count;
+  final int size;
+  final int externalSize;
+}
+
+extension ClassHeapStatsPrivateViewExtension on ClassHeapStats {
+  static const newSpaceKey = '_new';
+  static const oldSpaceKey = '_old';
+
+  HeapStats get newSpace => json!.containsKey(newSpaceKey)
+      ? HeapStats.parse(json![newSpaceKey].cast<int>())
+      : const HeapStats.empty();
+  HeapStats get oldSpace => json!.containsKey(oldSpaceKey)
+      ? HeapStats.parse(json![oldSpaceKey].cast<int>())
+      : const HeapStats.empty();
+}

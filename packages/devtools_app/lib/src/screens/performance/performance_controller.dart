@@ -26,6 +26,7 @@ import '../profiler/cpu_profile_controller.dart';
 import '../profiler/cpu_profile_service.dart';
 import '../profiler/cpu_profile_transformer.dart';
 import '../profiler/profile_granularity.dart';
+import 'panes/controls/enhance_tracing/enhance_tracing_controller.dart';
 import 'performance_model.dart';
 import 'performance_screen.dart';
 import 'performance_utils.dart';
@@ -61,6 +62,8 @@ class PerformanceController extends DisposableController
 
   final cpuProfilerController =
       CpuProfilerController(analyticsScreenId: analytics_constants.performance);
+
+  final enhanceTracingController = EnhanceTracingController();
 
   final rasterMetricsController = RasterMetricsController();
 
@@ -879,6 +882,7 @@ class PerformanceController extends DisposableController
     _pollingTimer?.cancel();
     _timelinePollingRateLimiter?.dispose();
     cpuProfilerController.dispose();
+    enhanceTracingController.dispose();
     super.dispose();
   }
 }

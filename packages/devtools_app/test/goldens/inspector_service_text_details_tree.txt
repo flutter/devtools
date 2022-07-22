@@ -9,8 +9,8 @@ Text
  │ maxLines: null
  │ textWidthBasis: null
  │ textHeightBehavior: null
- │ dependencies: [DefaultSelectionStyle, MediaQuery,
- │   DefaultTextStyle]
+ │ dependencies: [DefaultSelectionStyle, DefaultTextStyle,
+ │   MediaQuery]
  │
  └─RichText
      softWrap: wrapping at box width
