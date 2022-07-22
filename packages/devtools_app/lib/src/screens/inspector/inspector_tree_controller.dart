@@ -849,6 +849,7 @@ class _InspectorTreeState extends State<InspectorTree>
 
     final initialX = rect.left;
     final initialY = rect.top;
+
     final yOffsetAtViewportTop = _scrollControllerY.hasClients
         ? _scrollControllerY.offset
         : _scrollControllerY.initialScrollOffset;
@@ -856,7 +857,7 @@ class _InspectorTreeState extends State<InspectorTree>
         ? _scrollControllerX.offset
         : _scrollControllerX.initialScrollOffset;
 
-    final viewPortInScrollControllerSpace = Rect.fromLTWH(
+    final viewPortRectInScrollControllerSpace = Rect.fromLTWH(
       xOffsetAtViewportLeft,
       yOffsetAtViewportTop,
       safeViewportWidth,
@@ -864,7 +865,6 @@ class _InspectorTreeState extends State<InspectorTree>
     );
 
     final rowIndex = treeController!.getRowIndex(rect.top);
-
     final row = treeController!.getCachedRow(rowIndex);
     final node = row?.node;
     final textPreviewJson = node?.diagnostic?.json['textPreview'];
@@ -888,10 +888,10 @@ class _InspectorTreeState extends State<InspectorTree>
 
     // Add 3 columnwidths of padding to account for the caret, icon,
     // and bit extra off the end
+    descriptionSize += columnWidth * 3;
 
-    // if(showname and hasName)
-    // descriptionSize += columnWidth * 3;
-
+    // Change the right side of the rectangle so it is only as wide
+    // as the node text.
     // rect = Rect.fromLTRB(
     //   rect.left,
     //   rect.top,
@@ -900,8 +900,9 @@ class _InspectorTreeState extends State<InspectorTree>
     // );
 
     final isRectInViewPort =
-        viewPortInScrollControllerSpace.contains(rect.topLeft) &&
-            viewPortInScrollControllerSpace.contains(rect.bottomRight);
+        viewPortRectInScrollControllerSpace.contains(rect.topLeft) &&
+            viewPortRectInScrollControllerSpace.contains(rect.bottomRight);
+
     if (isRectInViewPort) {
       // The rect is already in view, don't scroll
       return;
