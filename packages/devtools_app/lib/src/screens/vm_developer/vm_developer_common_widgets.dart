@@ -206,11 +206,11 @@ String? _objectDescription(ObjRef? object) {
   if (object == null) {
     return null;
   } else if (object is FieldRef) {
-    return ' ${object.declaredType?.name ?? 'Field'} ${object.name} of ${_ownerName(object.owner) ?? '<Owner>'}';
+    return '${object.declaredType?.name ?? 'Field'} ${object.name} of ${_ownerName(object.owner) ?? '<Owner>'}';
   } else if (object is FuncRef) {
-    return ' ${_ownerName(object.owner) ?? '<Owner>'}.${object.name}';
+    return '${_ownerName(object.owner) ?? '<Owner>'}.${object.name}';
   } else {
-    return ' ${_objectName(object)}';
+    return '${_objectName(object)}';
   }
 }
 
@@ -278,7 +278,7 @@ class RetainingPathWidget extends StatelessWidget {
       valueListenable: retainingPath,
       builder: (context, retainingPath, _) {
         final retainingObjects = retainingPath == null
-            ? <Widget>[]
+            ? const <Widget>[]
             : _retainingPathList(
                 context,
                 retainingPath,
@@ -286,18 +286,16 @@ class RetainingPathWidget extends StatelessWidget {
         return VmExpansionTile(
           title: 'Retaining Path',
           onExpanded: onExpanded,
-          children: retainingPath == null
-              ? [
-                  SizedCircularProgressIndicator(),
-                ]
-              : [
-                  SizedBox.fromSize(
+          children: [
+            retainingPath == null
+                ? SizedCircularProgressIndicator()
+                : SizedBox.fromSize(
                     size: Size.fromHeight(
                       retainingObjects.length * defaultRowHeight + densePadding,
                     ),
                     child: Column(children: retainingObjects),
                   ),
-                ],
+          ],
         );
       },
     );
@@ -362,13 +360,13 @@ class RetainingPathWidget extends StatelessWidget {
 
     if (object.parentMapKey != null) {
       final ref = object.value as InstanceRef;
-      return 'Retained by element [${object.parentMapKey}] of ${ref.classRef?.name ?? '<parentMapName>'}';
+      return 'Retained by element at [${_objectName(object.parentMapKey)}] of ${ref.classRef?.name ?? '<parentMapName>'}';
     }
 
-    final description = StringBuffer('Retained by');
+    final description = StringBuffer('Retained by ');
 
     if (object.parentField != null) {
-      description.write(' ${object.parentField} of ');
+      description.write('${object.parentField} of ');
     }
 
     description.write(
@@ -396,24 +394,22 @@ class InboundReferencesWidget extends StatelessWidget {
       valueListenable: inboundReferences,
       builder: (context, inboundReferences, _) {
         final references = inboundReferences == null
-            ? <Widget>[]
+            ? const <Widget>[]
             : _inboundReferencesList(context, inboundReferences);
 
         return VmExpansionTile(
           title: 'Inbound References',
           onExpanded: onExpanded,
-          children: inboundReferences == null
-              ? [
-                  SizedCircularProgressIndicator(),
-                ]
-              : [
-                  SizedBox.fromSize(
+          children: [
+            inboundReferences == null
+                ? SizedCircularProgressIndicator()
+                : SizedBox.fromSize(
                     size: Size.fromHeight(
                       references.length * defaultRowHeight + densePadding,
                     ),
                     child: Column(children: references),
                   ),
-                ],
+          ],
         );
       },
     );
@@ -459,17 +455,17 @@ class InboundReferencesWidget extends StatelessWidget {
       return 'Referenced by element [${inboundRef.parentListIndex}] of ${ref.classRef?.name ?? '<parentListName>'}';
     }
 
-    final description = StringBuffer('Referenced by');
+    final description = StringBuffer('Referenced by ');
 
     if (offset != null) {
       description.write(
-        ' offset $offset of',
+        'offset $offset of ',
       );
     }
 
     if (inboundRef.parentField != null) {
       description.write(
-        ' ${inboundRef.parentField} of',
+        '${_objectName(inboundRef.parentField)} of ',
       );
     }
 

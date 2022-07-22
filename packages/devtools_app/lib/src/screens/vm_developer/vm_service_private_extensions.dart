@@ -9,9 +9,6 @@ import 'package:vm_service/vm_service.dart';
 /// fashion. Objects and extensions in this class should not be used outside of
 /// the `vm_developer` directory.
 
-const referencesKey = 'references';
-const parentWordOffsetKey = '_parentWordOffset';
-
 /// An extension on [VM] which allows for access to VM internal fields.
 extension VMPrivateViewExtension on VM {
   String get embedder => json!['_embedder'];
@@ -43,6 +40,9 @@ extension ClassPrivateViewExtension on Class {
 /// An extension on [InboundReferences] which allows for access to
 /// VM internal fields.
 extension InboundReferenceExtension on InboundReferences {
+  static const referencesKey = 'references';
+  static const parentWordOffsetKey = '_parentWordOffset';
+
   int? parentWordOffset(int inboundReferenceIndex) {
     return json![referencesKey]?[inboundReferenceIndex]?[parentWordOffsetKey];
   }

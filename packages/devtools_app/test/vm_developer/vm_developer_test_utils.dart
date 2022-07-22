@@ -14,12 +14,7 @@ import 'package:vm_service/vm_service.dart';
 final testLib = Library(
   name: 'fooLib',
   uri: 'fooLib.dart',
-  debuggable: null,
   dependencies: <LibraryDependency>[],
-  scripts: null,
-  variables: null,
-  functions: null,
-  classes: null,
   id: '1234',
 );
 
@@ -29,10 +24,6 @@ final testClass = Class(
   isAbstract: false,
   isConst: false,
   traceAllocations: false,
-  interfaces: null,
-  fields: null,
-  functions: null,
-  subclasses: null,
   superClass: testSuperClass,
   superType: testSuperType,
   id: '1234',
@@ -41,29 +32,21 @@ final testClass = Class(
 final testScript = Script(uri: 'fooScript.dart', library: testLib, id: '1234');
 
 final testFunction = Func(
-  name: 'FooFunction',
+  name: 'fooFunction',
   owner: testLib,
   isStatic: false,
   isConst: false,
   implicit: false,
-  signature: null,
   id: '1234',
 );
 
 final testField = Field(
   name: 'fooField',
-  owner: null,
-  declaredType: null,
-  isConst: null,
-  isFinal: null,
-  isStatic: null,
+  owner: testLib,
   id: '1234',
 );
 
 final testInstance = Instance(
-  kind: null,
-  identityHashCode: null,
-  classRef: null,
   id: '1234',
   name: 'fooInstance',
 );
@@ -73,62 +56,48 @@ final testSuperClass =
 
 final testSuperType = InstanceRef(
   kind: '',
-  identityHashCode: null,
-  classRef: null,
   id: '1234',
   name: 'fooSuperType',
 );
 
 const testPos = SourcePosition(line: 10, column: 4);
 
-final testInstances = InstanceSet(instances: null, totalCount: 3);
+final testInstances = InstanceSet(totalCount: 3);
 
 final testRequestableSize = InstanceRef(
   kind: '',
-  identityHashCode: null,
-  classRef: null,
   id: '1234',
   name: 'requestedSize',
   valueAsString: '128',
 );
 
-final testParentMapKey = InstanceRef(
-  kind: '',
-  identityHashCode: null,
-  classRef: null,
-  id: '1234',
-  name: 'fooParentMapKey',
-);
-
 final testParentField = Field(
   name: 'fooParentField',
-  owner: null,
-  declaredType: null,
-  isConst: null,
-  isFinal: null,
-  isStatic: null,
   id: '1234',
 );
 
 final testRetainingPath = RetainingPath(
   length: 1,
-  gcRootType: '<root type>',
+  gcRootType: 'class table',
   elements: testRetainingObjects,
 );
 
 final testRetainingObjects = [
   RetainingObject(
-    value: testFunction,
+    value: testClass,
+  ),
+  RetainingObject(
+    value: testInstance,
     parentListIndex: 1,
     parentField: 'fooParentField',
   ),
   RetainingObject(
     value: testInstance,
-    parentMapKey: testParentMapKey,
+    parentMapKey: testField,
     parentField: 'fooParentField',
   ),
   RetainingObject(
-    value: testInstance,
+    value: testField,
     parentField: 'fooParentField',
   ),
 ];
