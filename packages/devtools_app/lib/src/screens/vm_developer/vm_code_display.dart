@@ -67,7 +67,8 @@ class _DartObjectColumn extends _CodeColumnData {
   _DartObjectColumn() : super.wide('Object');
 
   @override
-  String getValue(Instruction dataObject) => _objectToDisplayValue(dataObject.object);
+  String getValue(Instruction dataObject) =>
+      _objectToDisplayValue(dataObject.object);
 
   // TODO(bkonyi): verify this covers all cases.
   String _objectToDisplayValue(Object? object) {
