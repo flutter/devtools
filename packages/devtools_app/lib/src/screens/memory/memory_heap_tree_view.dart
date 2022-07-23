@@ -202,6 +202,12 @@ class HeapTreeViewState extends State<HeapTree>
 
   void _initTabs() {
     _tabs = [
+      if (enableNewAllocationProfileTable)
+        DevToolsTab.create(
+          key: dartHeapTableTabKey,
+          tabName: 'Profile',
+          gaPrefix: _gaPrefix,
+        ),
       DevToolsTab.create(
         key: dartHeapAnalysisTabKey,
         gaPrefix: _gaPrefix,
@@ -223,12 +229,6 @@ class HeapTreeViewState extends State<HeapTree>
           key: leaksTabKey,
           gaPrefix: _gaPrefix,
           tabName: 'Leaks',
-        ),
-      if (enableNewAllocationProfileTable)
-        DevToolsTab.create(
-          key: dartHeapTableTabKey,
-          tabName: 'Profile',
-          gaPrefix: _gaPrefix,
         ),
     ];
 
@@ -486,6 +486,9 @@ class HeapTreeViewState extends State<HeapTree>
               physics: defaultTabBarViewPhysics,
               controller: _tabController,
               children: [
+                // Profile Tab
+                if (enableNewAllocationProfileTable)
+                  KeepAliveWrapper(child: AllocationProfileTableView()),
                 // Analysis Tab
                 KeepAliveWrapper(
                   child: Column(
@@ -517,8 +520,6 @@ class HeapTreeViewState extends State<HeapTree>
                 // Leaks tab.
                 if (controller.shouldShowLeaksTab.value)
                   const KeepAliveWrapper(child: LeaksPane()),
-                if (enableNewAllocationProfileTable)
-                  KeepAliveWrapper(child: AllocationProfileTableView()),
               ],
             ),
           ),

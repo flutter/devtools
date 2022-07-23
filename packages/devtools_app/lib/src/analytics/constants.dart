@@ -139,6 +139,7 @@ const export = 'export';
 const expandAll = 'expandAll';
 const collapseAll = 'collapseAll';
 const documentationLink = 'documentationLink';
+String topicDocumentationLink(String topic) => '${topic}DocumentationLink';
 const profileModeDocs = 'profileModeDocs';
 // This should track the time from `initState` for a screen to the time when
 // the page data has loaded and is ready to interact with.

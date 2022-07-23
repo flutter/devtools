@@ -2150,3 +2150,31 @@ class _KeepAliveWrapperState extends State<KeepAliveWrapper>
     return widget.child;
   }
 }
+
+class DocumentationLink extends StatelessWidget {
+  const DocumentationLink({
+    Key? key,
+    required this.url,
+    required this.gaScreenName,
+    required this.gaSelectedItemDescription,
+  }) : super(key: key);
+
+  final String url;
+  final String gaScreenName;
+  final String gaSelectedItemDescription;
+
+  @override
+  Widget build(BuildContext context) {
+    return RichText(
+      text: LinkTextSpan(
+        link: Link(
+          display: '?',
+          url: url,
+          gaScreenName: gaScreenName,
+          gaSelectedItemDescription: gaSelectedItemDescription,
+        ),
+        context: context,
+      ),
+    );
+  }
+}

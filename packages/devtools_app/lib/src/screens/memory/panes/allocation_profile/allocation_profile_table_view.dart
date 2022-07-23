@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../../../analytics/constants.dart' as analytics_constants;
 import '../../../../config_specific/import_export/import_export.dart';
 import '../../../../primitives/utils.dart';
 import '../../../../shared/common_widgets.dart';
@@ -16,7 +17,7 @@ import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../../vm_developer/vm_service_private_extensions.dart';
 import '../../memory_controller.dart';
-import '../control/constants.dart';
+import '../../primitives/ui.dart';
 import 'allocation_profile_table_view_controller.dart';
 
 // TODO(bkonyi): ensure data displayed in this view is included in the full
@@ -343,13 +344,8 @@ class _AllocationProfileTableControls extends StatelessWidget {
         _RefreshOnGCToggleButton(
           allocationProfileController: allocationProfileController,
         ),
-        const Spacer(),
-        const InformationButton(
-          tooltip: 'View documentation for the allocation profile table.',
-          link: 'https://github.com/flutter/devtools/blob/master/'
-              'packages/devtools_app/lib/src/screens/memory/panes/'
-              'allocation_profile/ALLOCATION_PROFILE.md',
-        ),
+        const SizedBox(width: 2 * denseSpacing),
+        _ProfileHelpLink(),
       ],
     );
   }
@@ -409,6 +405,22 @@ class _RefreshOnGCToggleButton extends StatelessWidget {
           onPressed: allocationProfileController.toggleRefreshOnGc,
         );
       },
+    );
+  }
+}
+
+class _ProfileHelpLink extends StatelessWidget {
+  const _ProfileHelpLink({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return DocumentationLink(
+      url: 'https://github.com/flutter/devtools/blob/master/'
+          'packages/devtools_app/lib/src/screens/memory/panes/'
+          'allocation_profile/ALLOCATION_PROFILE.md',
+      gaScreenName: analytics_constants.memory,
+      gaSelectedItemDescription:
+          analytics_constants.topicDocumentationLink('profile'),
     );
   }
 }
