@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/screens/performance/enhance_tracing.dart';
+import 'package:devtools_app/src/screens/performance/panes/controls/enhance_tracing/enhance_tracing.dart';
 import 'package:devtools_app/src/service/service_extensions.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/common_widgets.dart';
