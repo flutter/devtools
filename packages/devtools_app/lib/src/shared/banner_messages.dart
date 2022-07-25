@@ -9,7 +9,6 @@ import 'package:provider/provider.dart';
 
 import '../analytics/constants.dart' as analytics_constants;
 import '../primitives/utils.dart';
-import '../screens/performance/performance_utils.dart';
 import 'common_widgets.dart';
 import 'globals.dart';
 import 'screen.dart';
@@ -21,6 +20,9 @@ const _runInProfileModeDocsUrl =
 
 const _profileGranularityDocsUrl =
     'https://flutter.dev/docs/development/tools/devtools/performance#profile-granularity';
+
+const preCompileShadersDocsUrl =
+    'https://flutter.dev/docs/perf/rendering/shader#how-to-use-sksl-warmup';
 
 class BannerMessagesController {
   final _messages = <String, ValueNotifier<List<BannerMessage>>>{};

@@ -39,13 +39,18 @@ void main() {
     final instance = Instance(
       kind: InstanceKind.kUint8ClampedList,
       id: objectId,
+      classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
+      identityHashCode: null,
       length: 4,
     );
     final variable = DartObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
+        declarationTokenPos: null,
+        scopeEndTokenPos: null,
+        scopeStartTokenPos: null,
       ),
       isolateRef,
     );
@@ -70,13 +75,18 @@ void main() {
     final instance = Instance(
       kind: InstanceKind.kUint8List,
       id: objectId,
+      classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
+      identityHashCode: null,
       length: 4,
     );
     final variable = DartObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
+        declarationTokenPos: null,
+        scopeEndTokenPos: null,
+        scopeStartTokenPos: null,
       ),
       isolateRef,
     );
@@ -100,13 +110,18 @@ void main() {
     final instance = Instance(
       kind: InstanceKind.kUint16List,
       id: objectId,
+      classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
+      identityHashCode: null,
       length: 4,
     );
     final variable = DartObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
+        declarationTokenPos: null,
+        scopeEndTokenPos: null,
+        scopeStartTokenPos: null,
       ),
       isolateRef,
     );
@@ -130,13 +145,18 @@ void main() {
     final instance = Instance(
       kind: InstanceKind.kUint32List,
       id: objectId,
+      classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
+      identityHashCode: null,
       length: 4,
     );
     final variable = DartObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
+        declarationTokenPos: null,
+        scopeEndTokenPos: null,
+        scopeStartTokenPos: null,
       ),
       isolateRef,
     );
@@ -163,13 +183,18 @@ void main() {
       final instance = Instance(
         kind: InstanceKind.kUint64List,
         id: objectId,
+        classRef: null,
         bytes: base64.encode(bytes.buffer.asUint8List()),
+        identityHashCode: null,
         length: 4,
       );
       final variable = DartObjectNode.create(
         BoundVariable(
           name: 'test',
           value: instance,
+          declarationTokenPos: null,
+          scopeEndTokenPos: null,
+          scopeStartTokenPos: null,
         ),
         isolateRef,
       );
@@ -195,13 +220,18 @@ void main() {
     final instance = Instance(
       kind: InstanceKind.kInt8List,
       id: objectId,
+      classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
+      identityHashCode: null,
       length: 4,
     );
     final variable = DartObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
+        declarationTokenPos: null,
+        scopeEndTokenPos: null,
+        scopeStartTokenPos: null,
       ),
       isolateRef,
     );
@@ -225,13 +255,18 @@ void main() {
     final instance = Instance(
       kind: InstanceKind.kInt16List,
       id: objectId,
+      classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
+      identityHashCode: null,
       length: 4,
     );
     final variable = DartObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
+        declarationTokenPos: null,
+        scopeEndTokenPos: null,
+        scopeStartTokenPos: null,
       ),
       isolateRef,
     );
@@ -255,13 +290,18 @@ void main() {
     final instance = Instance(
       kind: InstanceKind.kInt32List,
       id: objectId,
+      classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
+      identityHashCode: null,
       length: 4,
     );
     final variable = DartObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
+        declarationTokenPos: null,
+        scopeEndTokenPos: null,
+        scopeStartTokenPos: null,
       ),
       isolateRef,
     );
@@ -288,13 +328,18 @@ void main() {
       final instance = Instance(
         kind: InstanceKind.kInt64List,
         id: objectId,
+        classRef: null,
         bytes: base64.encode(bytes.buffer.asUint8List()),
+        identityHashCode: null,
         length: 4,
       );
       final variable = DartObjectNode.create(
         BoundVariable(
           name: 'test',
           value: instance,
+          declarationTokenPos: null,
+          scopeEndTokenPos: null,
+          scopeStartTokenPos: null,
         ),
         isolateRef,
       );
@@ -321,13 +366,18 @@ void main() {
     final instance = Instance(
       kind: InstanceKind.kFloat32List,
       id: objectId,
+      classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
+      identityHashCode: null,
       length: 4,
     );
     final variable = DartObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
+        declarationTokenPos: null,
+        scopeEndTokenPos: null,
+        scopeStartTokenPos: null,
       ),
       isolateRef,
     );
@@ -350,7 +400,9 @@ void main() {
     final instance = Instance(
       kind: InstanceKind.kFloat64List,
       id: objectId,
+      classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
+      identityHashCode: null,
       length: 4,
     );
 
@@ -358,6 +410,9 @@ void main() {
       BoundVariable(
         name: 'test',
         value: instance,
+        declarationTokenPos: null,
+        scopeEndTokenPos: null,
+        scopeStartTokenPos: null,
       ),
       isolateRef,
     );
@@ -381,7 +436,9 @@ void main() {
     final instance = Instance(
       kind: InstanceKind.kInt32x4List,
       id: objectId,
+      classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
+      identityHashCode: null,
       length: 4,
     );
 
@@ -389,6 +446,9 @@ void main() {
       BoundVariable(
         name: 'test',
         value: instance,
+        declarationTokenPos: null,
+        scopeEndTokenPos: null,
+        scopeStartTokenPos: null,
       ),
       isolateRef,
     );
@@ -418,7 +478,9 @@ void main() {
     final instance = Instance(
       kind: InstanceKind.kFloat32x4List,
       id: objectId,
+      classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
+      identityHashCode: null,
       length: 4,
     );
 
@@ -426,6 +488,9 @@ void main() {
       BoundVariable(
         name: 'test',
         value: instance,
+        declarationTokenPos: null,
+        scopeEndTokenPos: null,
+        scopeStartTokenPos: null,
       ),
       isolateRef,
     );
@@ -453,7 +518,9 @@ void main() {
     final instance = Instance(
       kind: InstanceKind.kFloat64x2List,
       id: objectId,
+      classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
+      identityHashCode: null,
       length: 4,
     );
 
@@ -461,6 +528,9 @@ void main() {
       BoundVariable(
         name: 'test',
         value: instance,
+        declarationTokenPos: null,
+        scopeEndTokenPos: null,
+        scopeStartTokenPos: null,
       ),
       isolateRef,
     );
@@ -489,12 +559,17 @@ void main() {
     final instance = Instance(
       kind: InstanceKind.kUint8ClampedList,
       id: objectId,
+      classRef: null,
+      identityHashCode: null,
       length: 332,
     );
     final variable = DartObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
+        declarationTokenPos: null,
+        scopeEndTokenPos: null,
+        scopeStartTokenPos: null,
       ),
       isolateRef,
     );
@@ -514,12 +589,17 @@ void main() {
     final instance = Instance(
       kind: InstanceKind.kUint8ClampedList,
       id: objectId,
+      classRef: null,
+      identityHashCode: null,
       length: 300,
     );
     final variable = DartObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
+        declarationTokenPos: null,
+        scopeEndTokenPos: null,
+        scopeStartTokenPos: null,
       ),
       isolateRef,
     );

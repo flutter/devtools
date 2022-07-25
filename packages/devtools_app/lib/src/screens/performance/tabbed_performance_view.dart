@@ -66,7 +66,6 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
     if (selectedFrame != null) {
       frameAnalysisView = FlutterFrameAnalysisView(
         frameAnalysis: selectedFrame.frameAnalysis,
-        enhanceTracingController: controller.enhanceTracingController,
       );
     } else {
       frameAnalysisView = const Center(

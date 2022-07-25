@@ -81,13 +81,12 @@ void main() {
       }
 
       await tester.pumpWidget(
-        wrapWithControllers(
+        wrap(
           TabbedPerformanceView(
             controller: controller,
             processing: false,
             processingProgress: 0.0,
           ),
-          performance: controller,
         ),
       );
       await tester.pumpAndSettle();

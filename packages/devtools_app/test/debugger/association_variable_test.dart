@@ -34,21 +34,27 @@ void main() {
     final instance = Instance(
       kind: InstanceKind.kMap,
       id: objectId,
+      classRef: null,
       length: 2,
       associations: [
         MapAssociation(
           key: InstanceRef(
+            classRef: null,
             id: '4',
             kind: InstanceKind.kString,
             valueAsString: 'Hey',
+            identityHashCode: null,
           ),
           value: InstanceRef(
+            classRef: null,
             id: '5',
             kind: InstanceKind.kDouble,
             valueAsString: '12.34',
+            identityHashCode: null,
           ),
         ),
       ],
+      identityHashCode: null,
     );
     final isolateRef = IsolateRef(
       id: isolateId,
@@ -60,6 +66,9 @@ void main() {
       BoundVariable(
         name: 'test',
         value: instance,
+        declarationTokenPos: null,
+        scopeEndTokenPos: null,
+        scopeStartTokenPos: null,
       ),
       isolateRef,
     );
@@ -86,26 +95,35 @@ void main() {
     final instance = Instance(
       kind: InstanceKind.kMap,
       id: objectId,
+      classRef: null,
       length: 2,
       associations: [
         MapAssociation(
           key: InstanceRef(
+            classRef: null,
             id: '4',
             kind: InstanceKind.kInt,
             valueAsString: '1',
+            identityHashCode: null,
           ),
           value: InstanceRef(
+            classRef: null,
             id: '5',
             kind: InstanceKind.kDouble,
             valueAsString: '12.34',
+            identityHashCode: null,
           ),
         ),
       ],
+      identityHashCode: null,
     );
     final variable = DartObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
+        declarationTokenPos: null,
+        scopeEndTokenPos: null,
+        scopeStartTokenPos: null,
       ),
       isolateRef,
     );
@@ -132,6 +150,7 @@ void main() {
     final instance = Instance(
       kind: InstanceKind.kMap,
       id: objectId,
+      classRef: null,
       length: 2,
       associations: [
         MapAssociation(
@@ -139,19 +158,26 @@ void main() {
             classRef: ClassRef(id: 'a', name: 'Foo', library: libraryRef),
             id: '4',
             kind: InstanceKind.kPlainInstance,
+            identityHashCode: null,
           ),
           value: InstanceRef(
+            classRef: null,
             id: '5',
             kind: InstanceKind.kDouble,
             valueAsString: '12.34',
+            identityHashCode: null,
           ),
         ),
       ],
+      identityHashCode: null,
     );
     final variable = DartObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
+        declarationTokenPos: null,
+        scopeEndTokenPos: null,
+        scopeStartTokenPos: null,
       ),
       isolateRef,
     );

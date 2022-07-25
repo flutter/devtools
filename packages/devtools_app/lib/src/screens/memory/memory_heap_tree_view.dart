@@ -32,15 +32,9 @@ import 'memory_graph_model.dart';
 import 'memory_heap_treemap.dart';
 import 'memory_instance_tree_view.dart';
 import 'memory_snapshot_models.dart';
-import 'panes/allocation_profile/allocation_profile_table_view.dart';
 import 'panes/diff/diff_pane.dart';
 import 'panes/leaks/leaks_pane.dart';
 import 'primitives/memory_utils.dart';
-
-// TODO(bkonyi): enable new allocation profile table when we're ready to remove
-// the existing allocations table.
-@visibleForTesting
-bool enableNewAllocationProfileTable = false;
 
 const memorySearchFieldKeyName = 'MemorySearchFieldKey';
 
@@ -155,8 +149,6 @@ class HeapTreeViewState extends State<HeapTree>
   @visibleForTesting
   static const leaksTabKey = Key('Leaks Tab');
   @visibleForTesting
-  static const dartHeapTableTabKey = Key('Dart Heap Table Tab');
-  @visibleForTesting
   static const diffTabKey = Key('Diff Tab');
 
   /// Below constants should match index for Tab index in DartHeapTabs.
@@ -223,12 +215,6 @@ class HeapTreeViewState extends State<HeapTree>
           key: leaksTabKey,
           gaPrefix: _gaPrefix,
           tabName: 'Leaks',
-        ),
-      if (enableNewAllocationProfileTable)
-        DevToolsTab.create(
-          key: dartHeapTableTabKey,
-          tabName: 'Profile',
-          gaPrefix: _gaPrefix,
         ),
     ];
 
@@ -480,7 +466,7 @@ class HeapTreeViewState extends State<HeapTree>
               ],
             ),
           ),
-          const Divider(),
+          const SizedBox(height: densePadding),
           Expanded(
             child: TabBarView(
               physics: defaultTabBarViewPhysics,
@@ -511,14 +497,14 @@ class HeapTreeViewState extends State<HeapTree>
                     ],
                   ),
                 ),
+
                 // Diff tab.
                 if (shouldShowDiffPane)
                   const KeepAliveWrapper(child: DiffPane()),
+
                 // Leaks tab.
                 if (controller.shouldShowLeaksTab.value)
                   const KeepAliveWrapper(child: LeaksPane()),
-                if (enableNewAllocationProfileTable)
-                  KeepAliveWrapper(child: AllocationProfileTableView()),
               ],
             ),
           ),

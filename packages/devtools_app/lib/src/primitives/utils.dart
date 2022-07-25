@@ -1243,15 +1243,6 @@ class ListValueNotifier<T> extends ChangeNotifier
     _listChanged();
     return true;
   }
-
-  /// Removes a range of elements from the list.
-  ///
-  /// https://api.flutter.dev/flutter/dart-core/List/removeRange.html
-  void removeRange(int start, int end) {
-    _rawList = _rawList.toList();
-    _rawList.removeRange(start, end);
-    _listChanged();
-  }
 }
 
 /// Wrapper for a list that prevents any modification of the list's content.

@@ -4,14 +4,10 @@
  * found in the LICENSE file.
  */
 
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
 import '../primitives/enum_utils.dart';
-import '../primitives/utils.dart';
-import '../shared/table.dart';
 import '../shared/theme.dart';
 
 /// Returns a [TextSpan] that only includes the first [length] characters of
@@ -178,28 +174,6 @@ class _OffsetScrollbarState extends State<OffsetScrollbar> {
         );
       },
       child: widget.child,
-    );
-  }
-}
-
-/// Scrolls to [position] if [position] is not already visible in the scroll view.
-void maybeScrollToPosition(
-  ScrollController scrollController,
-  double position,
-) {
-  final extentVisible = Range(
-    scrollController.offset,
-    scrollController.offset + scrollController.position.extentInside,
-  );
-
-  if (!extentVisible.contains(position)) {
-    final positionToScrollTo = max(0.0, position - defaultRowHeight);
-
-    scrollController.animateTo(
-      //TODO (carolynqu): should be positionToScrollTo.clamp(0.0, scrollController.position.maxScrollExtent) but maxScrollExtent is not being updated, https://github.com/flutter/devtools/issues/4264
-      positionToScrollTo,
-      duration: defaultDuration,
-      curve: defaultCurve,
     );
   }
 }

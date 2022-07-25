@@ -259,7 +259,7 @@ class EvalOnDartLibrary extends DisposableController
         log('RPCError: $e', LogLevel.error);
         break;
       case Error:
-        log('${e.kind}: ${e.tooltip}', LogLevel.error);
+        log('${e.kind}: ${e.message}', LogLevel.error);
         break;
       default:
         log('Unrecognized error: $e', LogLevel.error);

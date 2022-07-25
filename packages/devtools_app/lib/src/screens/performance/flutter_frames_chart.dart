@@ -24,7 +24,6 @@ import '../../ui/utils.dart';
 import 'performance_controller.dart';
 import 'performance_model.dart';
 import 'performance_screen.dart';
-import 'performance_utils.dart';
 
 // Turn this flag on to see when flutter frames are linked with timeline events.
 bool debugFrames = false;

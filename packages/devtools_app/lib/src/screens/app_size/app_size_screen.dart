@@ -279,11 +279,10 @@ class _AnalysisViewState extends State<AnalysisView>
     super.didChangeDependencies();
     if (!initController()) return;
 
-    analysisRoot = controller.analysisRoot.value.node;
-
+    analysisRoot = controller.analysisRoot.value;
     addAutoDisposeListener(controller.analysisRoot, () {
       setState(() {
-        analysisRoot = controller.analysisRoot.value.node;
+        analysisRoot = controller.analysisRoot.value;
       });
     });
 
@@ -325,10 +324,7 @@ class _AnalysisViewState extends State<AnalysisView>
                 Row(
                   children: [
                     Flexible(
-                      child: AppSizeAnalysisTable(
-                        rootNode: analysisRoot!.root,
-                        controller: controller,
-                      ),
+                      child: AppSizeAnalysisTable(rootNode: analysisRoot!),
                     ),
                     if (analysisCallGraphRoot != null)
                       Flexible(

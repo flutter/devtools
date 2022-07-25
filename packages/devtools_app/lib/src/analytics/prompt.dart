@@ -129,7 +129,7 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt>
             // This will also hide the prompt.
             controller.toggleAnalyticsEnabled(false);
           },
-          style: ElevatedButton.styleFrom(backgroundColor: Colors.grey),
+          style: ElevatedButton.styleFrom(primary: Colors.grey),
           child: const Text('No thanks.'),
         ),
         const Padding(

@@ -144,7 +144,7 @@ class NotificationsState extends State<_NotificationsProvider>
     // while iterating over it.
     final notifications = List.from(_notifications);
     for (final notification in notifications) {
-      if (notification.tooltip == message) {
+      if (notification.message == message) {
         _notifications.remove(notification);
         didDismiss = true;
       }

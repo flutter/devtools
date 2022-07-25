@@ -135,7 +135,7 @@ class ProgramExplorerController extends DisposableController
       );
       if (matchingNode != null) return index;
     }
-    // If the node wasn't found, return -1.
+    // If the node wasn't found, return 0.
     return -1;
   }
 

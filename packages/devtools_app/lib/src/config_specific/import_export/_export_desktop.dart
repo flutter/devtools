@@ -15,12 +15,8 @@ class ExportControllerDesktop extends ExportController {
   static final _fs = FileIO();
 
   @override
-  String downloadFile(
-    String contents, {
-    String? fileName,
-    ExportFileType type = ExportFileType.json,
-  }) {
-    fileName ??= generateFileName(type: type);
+  String downloadFile(String contents, {String? fileName}) {
+    fileName ??= generateFileName();
     _fs.writeStringToFile(fileName, contents);
     return fileName;
   }

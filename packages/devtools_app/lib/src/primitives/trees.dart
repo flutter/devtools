@@ -286,22 +286,6 @@ abstract class TreeNode<T extends TreeNode<T>> {
 
     return walkAndCopy(this as T);
   }
-
-  int childCountToMatchingNode({
-    bool matchingNodeCondition(T node)?,
-    bool includeCollapsedNodes = true,
-  }) {
-    var index = 0;
-    final matchingNode = depthFirstTraversal<T>(
-      root,
-      returnCondition: matchingNodeCondition,
-      exploreChildrenCondition:
-          includeCollapsedNodes ? null : (T node) => node.isExpanded,
-      action: (T _) => index++,
-    );
-    if (matchingNode != null) return index;
-    return -1;
-  }
 }
 
 /// Traverses a tree in breadth-first order.

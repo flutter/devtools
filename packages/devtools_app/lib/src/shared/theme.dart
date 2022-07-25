@@ -98,14 +98,14 @@ ThemeData _baseTheme({
     colorScheme: theme.colorScheme.copyWith(background: backgroundColor),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
-        foregroundColor: theme.colorScheme.contrastForeground,
+        primary: theme.colorScheme.contrastForeground,
         minimumSize: Size(buttonMinWidth, defaultButtonHeight),
         fixedSize: Size.fromHeight(defaultButtonHeight),
       ),
     ),
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
-        foregroundColor: theme.colorScheme.contrastForeground,
+        primary: theme.colorScheme.contrastForeground,
         minimumSize: Size(buttonMinWidth, defaultButtonHeight),
         fixedSize: Size.fromHeight(defaultButtonHeight),
       ),
@@ -608,33 +608,8 @@ ButtonStyle denseAwareOutlinedButtonStyle(
   BuildContext context,
   double? minScreenWidthForTextBeforeScaling,
 ) {
-  final buttonStyle =
+  ButtonStyle buttonStyle =
       Theme.of(context).outlinedButtonTheme.style ?? const ButtonStyle();
-  return _generateButtonStyle(
-    context: context,
-    buttonStyle: buttonStyle,
-    minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
-  );
-}
-
-ButtonStyle denseAwareTextButtonStyle(
-  BuildContext context,
-  double? minScreenWidthForTextBeforeScaling,
-) {
-  final buttonStyle =
-      Theme.of(context).textButtonTheme.style ?? const ButtonStyle();
-  return _generateButtonStyle(
-    context: context,
-    buttonStyle: buttonStyle,
-    minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
-  );
-}
-
-ButtonStyle _generateButtonStyle({
-  required BuildContext context,
-  required ButtonStyle buttonStyle,
-  double? minScreenWidthForTextBeforeScaling,
-}) {
   if (!includeText(context, minScreenWidthForTextBeforeScaling)) {
     buttonStyle = buttonStyle.copyWith(
       padding: MaterialStateProperty.resolveWith<EdgeInsets>((_) {

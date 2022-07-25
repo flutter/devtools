@@ -15,7 +15,6 @@ import '../primitives/trees.dart';
 import '../primitives/utils.dart';
 import '../ui/colors.dart';
 import '../ui/search.dart';
-import '../ui/utils.dart';
 import 'collapsible_mixin.dart';
 import 'common_widgets.dart';
 import 'table_data.dart';
@@ -149,6 +148,7 @@ class FlatTableState<T> extends State<FlatTable<T>>
     maxWidth -= numColumnSpacers * _columnSpacing;
     maxWidth -= numColumnGroupSpacers * _columnGroupSpacingWithPadding;
     maxWidth = max(0, maxWidth);
+
     double available = maxWidth;
     // Columns sorted by increasing minWidth.
     final List<ColumnData<T>> sortedColumns = widget.columns.toList()
@@ -322,20 +322,11 @@ class Selection<T> {
   Selection({
     this.node,
     this.nodeIndex,
-    this.nodeIndexCalculator,
     this.scrollIntoView = false,
-  }) : assert(nodeIndex == null || nodeIndexCalculator == null);
-
-  Selection.empty()
-      : node = null,
-        nodeIndex = null,
-        nodeIndexCalculator = null,
-        scrollIntoView = true;
+  });
 
   final T? node;
-  // TODO (carolynqu): get rid of nodeIndex and only use nodeIndexCalculator, https://github.com/flutter/devtools/issues/4266
   final int? nodeIndex;
-  final int Function(T)? nodeIndexCalculator;
   final bool scrollIntoView;
 }
 
@@ -418,16 +409,6 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   void initState() {
     super.initState();
     _initData();
-
-    addAutoDisposeListener(selectionNotifier, () {
-      setState(() {
-        final node = selectionNotifier.value.node;
-        if (node != null) {
-          expandParents(node.parent);
-        }
-      });
-    });
-
     rootsExpanded =
         List.generate(dataRoots.length, (index) => dataRoots[index].isExpanded);
     _updateItems();
@@ -452,6 +433,15 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     super.didUpdateWidget(oldWidget);
 
     if (widget == oldWidget) return;
+
+    cancelListeners();
+
+    addAutoDisposeListener(selectionNotifier, () {
+      setState(() {
+        final node = selectionNotifier.value.node;
+        expandParents(node?.parent);
+      });
+    });
 
     if (widget.sortColumn != oldWidget.sortColumn ||
         widget.sortDirection != oldWidget.sortDirection ||
@@ -478,8 +468,8 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       secondarySortColumn: widget.secondarySortColumn,
     );
 
-    selectionNotifier = widget.selectionNotifier ??
-        ValueNotifier<Selection<T>>(Selection.empty());
+    selectionNotifier =
+        widget.selectionNotifier ?? ValueNotifier<Selection<T>>(Selection<T>());
   }
 
   void _updateItems() {
@@ -855,32 +845,34 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
     sortColumn = widget.sortColumn;
     sortDirection = widget.sortDirection;
     scrollController = ScrollController();
-    _addScrollListener(widget.selectionNotifier);
+
     _initSearchListener();
   }
 
-  void _addScrollListener(ValueNotifier<Selection<T>>? selectionNotifier) {
-    if (selectionNotifier != null) {
-      addAutoDisposeListener(selectionNotifier, () {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          final Selection<T> selection = selectionNotifier.value;
-          final T? node = selection.node;
-          final int Function(T)? nodeIndexCalculator =
-              selection.nodeIndexCalculator;
-          final int? nodeIndex = selection.nodeIndex;
+  @override
+  void didUpdateWidget(_Table<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
 
-          if (selection.scrollIntoView && node != null) {
-            final int selectedDisplayRow = nodeIndexCalculator != null
-                ? nodeIndexCalculator(node)
-                : nodeIndex!;
+    cancelListeners();
 
-            final newPos = selectedDisplayRow * defaultRowHeight;
+    // TODO(kenz): pull this code into a helper and also call from initState.
+    // Detect selection changes but only care about scrollIntoView.
+    addAutoDisposeListener(oldWidget.selectionNotifier, () {
+      setState(() {
+        final Selection<T> selection = oldWidget.selectionNotifier!.value;
+        if (selection.scrollIntoView) {
+          final int selectedDisplayRow = (selection.node! as dynamic).nodeIndex;
+          // TODO(terry): Optimize selecting row, if row's visible in
+          //              the viewport just select otherwise jumpTo row.
+          final newPos = selectedDisplayRow * defaultRowHeight;
 
-            maybeScrollToPosition(scrollController, newPos);
-          }
-        });
+          // TODO(terry): Should animate factor out _moveSelection to reuse here.
+          scrollController.jumpTo(newPos);
+        }
       });
-    }
+    });
+
+    _initSearchListener();
   }
 
   void _initSearchListener() {
@@ -1422,15 +1414,14 @@ class _TableRowState<T> extends State<TableRow<T>>
         final headerContent = Row(
           mainAxisAlignment: _mainAxisAlignmentFor(column),
           children: [
-            if (isSortColumn && column.supportsSorting) ...[
+            if (isSortColumn)
               Icon(
                 widget.sortDirection == SortDirection.ascending
                     ? Icons.expand_less
                     : Icons.expand_more,
                 size: defaultIconSize,
               ),
-              const SizedBox(width: densePadding),
-            ],
+            if (isSortColumn) const SizedBox(width: densePadding),
             // TODO: This Flexible wrapper was added to get the
             // network_profiler_test.dart tests to pass.
             Flexible(
@@ -1448,12 +1439,10 @@ class _TableRowState<T> extends State<TableRow<T>>
         content = column.includeHeader
             ? InkWell(
                 canRequestFocus: false,
-                onTap: column.supportsSorting
-                    ? () => _handleSortChange(
-                          column,
-                          secondarySortColumn: widget.secondarySortColumn,
-                        )
-                    : null,
+                onTap: () => _handleSortChange(
+                  column,
+                  secondarySortColumn: widget.secondarySortColumn,
+                ),
                 child: headerContent,
               )
             : headerContent;
@@ -1580,10 +1569,10 @@ class _TableRowState<T> extends State<TableRow<T>>
                 widget.columnWidths[current],
               );
             case _TableRowPartDisplayType.columnSpacer:
-              return const SizedBox(
-                width: _columnSpacing,
-                child: VerticalDivider(width: _columnSpacing),
-              );
+              // TODO(kenz): consider adding column divider lines like we do for
+              // column groups. We'll have to make sure that column divider
+              // lines with column group divider lines doesn't look too busy.
+              return const SizedBox(width: _columnSpacing);
             case _TableRowPartDisplayType.columnGroupSpacer:
               return const _ColumnGroupSpacer();
           }
@@ -1645,13 +1634,8 @@ class _ColumnGroupHeaderRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return Padding(
       padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: defaultBorderSide(Theme.of(context)),
-        ),
-      ),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         controller: scrollController,
@@ -1674,6 +1658,11 @@ class _ColumnGroupHeaderRow extends StatelessWidget {
           return Container(
             alignment: Alignment.center,
             width: groupWidth,
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: defaultBorderSide(Theme.of(context)),
+              ),
+            ),
             child: Text(group.title),
           );
         },

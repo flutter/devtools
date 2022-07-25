@@ -14,13 +14,9 @@ class ExportControllerWeb extends ExportController {
   ExportControllerWeb() : super.impl();
 
   @override
-  String downloadFile(
-    String contents, {
-    String? fileName,
-    ExportFileType type = ExportFileType.json,
-  }) {
+  String downloadFile(String contents, {String? fileName}) {
     final element = document.createElement('a');
-    fileName ??= generateFileName(type: type);
+    fileName ??= generateFileName();
     element.setAttribute('href', Url.createObjectUrl(Blob([contents])));
     element.setAttribute('download', fileName);
     element.style.display = 'none';

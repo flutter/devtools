@@ -25,9 +25,9 @@ import '../../shared/utils.dart';
 import '../../shared/version.dart';
 import '../../ui/icons.dart';
 import '../../ui/vm_flag_widgets.dart';
+import 'enhance_tracing.dart';
 import 'event_details.dart';
 import 'flutter_frames_chart.dart';
-import 'panes/controls/enhance_tracing/enhance_tracing.dart';
 import 'performance_controller.dart';
 import 'performance_model.dart';
 import 'tabbed_performance_view.dart';
@@ -314,7 +314,7 @@ class SecondaryPerformanceControls extends StatelessWidget {
             ],
           ),
           const SizedBox(width: denseSpacing),
-          EnhanceTracingButton(controller.enhanceTracingController),
+          const EnhanceTracingButton(),
           const SizedBox(width: denseSpacing),
           const MoreDebuggingOptionsButton(),
         ],

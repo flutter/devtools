@@ -135,7 +135,7 @@ class TreeTracker {
   TreeColumnData<Tracker> treeColumn = _TrackerClassColumn();
 
   final selectionNotifier =
-      ValueNotifier<Selection<Tracker>>(Selection.empty());
+      ValueNotifier<Selection<Tracker>>(Selection<Tracker>());
 
   /// Rebuild list of classes to track.
   void createTrackerTree(
