@@ -14,6 +14,7 @@ import '../../ui/colors.dart';
 import '../../ui/utils.dart';
 import 'panes/controls/enhance_tracing/enhance_tracing.dart';
 import 'panes/controls/enhance_tracing/enhance_tracing_controller.dart';
+import 'panes/controls/enhance_tracing/enhance_tracing_model.dart';
 import 'performance_controller.dart';
 import 'performance_model.dart';
 import 'performance_utils.dart';

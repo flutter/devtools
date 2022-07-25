@@ -4,12 +4,10 @@
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
-
 import '../../../../../primitives/auto_dispose.dart';
 import '../../../../../service/service_extensions.dart' as extensions;
 import '../../../../../shared/globals.dart';
-import '../../../performance_model.dart';
+import 'enhance_tracing_model.dart';
 
 final enhanceTracingExtensions = [
   extensions.profileWidgetBuilds,
@@ -68,33 +66,5 @@ class EnhanceTracingController extends DisposableController
   void dispose() {
     showMenuStreamController.close();
     super.dispose();
-  }
-}
-
-@immutable
-class EnhanceTracingState {
-  const EnhanceTracingState({
-    required this.builds,
-    required this.layouts,
-    required this.paints,
-  });
-
-  final bool builds;
-  final bool layouts;
-  final bool paints;
-
-  bool get enhanced => builds || layouts || paints;
-
-  bool enhancedFor(FramePhaseType type) {
-    switch (type) {
-      case FramePhaseType.build:
-        return builds;
-      case FramePhaseType.layout:
-        return layouts;
-      case FramePhaseType.paint:
-        return paints;
-      default:
-        return false;
-    }
   }
 }

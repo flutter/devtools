@@ -14,7 +14,7 @@ import '../../primitives/utils.dart';
 import '../../service/service_manager.dart';
 import '../../ui/search.dart';
 import '../profiler/cpu_profile_model.dart';
-import 'panes/controls/enhance_tracing/enhance_tracing_controller.dart';
+import 'panes/controls/enhance_tracing/enhance_tracing_model.dart';
 import 'performance_utils.dart';
 import 'timeline_event_processor.dart';
 
