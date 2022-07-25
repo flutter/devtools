@@ -77,7 +77,7 @@ const treemapDecreaseColor = Color(0xFF77102F);
 const tableIncreaseColor = Color(0xFF73BF43);
 const tableDecreaseColor = Color(0xFFEE284F);
 
-const treemapDeferredColor = Color(0xFFC5CAE9);
+const treemapDeferredColor = Color(0xFFBDBDBD);
 
 const appCodeColor = ThemedColorPair(
   background: ThemedColor(
