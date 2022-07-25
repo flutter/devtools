@@ -9,8 +9,8 @@ import '../../../../shared/common_widgets.dart';
 import '../../../../shared/theme.dart';
 import '../../../../ui/colors.dart';
 import '../../../../ui/utils.dart';
-import '../../performance_model.dart';
 import '../controls/enhance_tracing/enhance_tracing_controller.dart';
+import 'frame_analysis_model.dart';
 import 'frame_hints.dart';
 
 class FlutterFrameAnalysisView extends StatelessWidget {

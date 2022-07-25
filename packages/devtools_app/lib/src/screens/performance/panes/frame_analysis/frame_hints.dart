@@ -16,6 +16,7 @@ import '../../performance_utils.dart';
 import '../controls/enhance_tracing/enhance_tracing.dart';
 import '../controls/enhance_tracing/enhance_tracing_controller.dart';
 import '../controls/enhance_tracing/enhance_tracing_model.dart';
+import 'frame_analysis_model.dart';
 
 class FrameHints extends StatelessWidget {
   const FrameHints({
