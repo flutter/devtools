@@ -472,7 +472,9 @@ class _TreemapState extends State<Treemap> {
   Container buildCell() {
     return Container(
       decoration: BoxDecoration(
-        color: widget.rootNode!.displayColor,
+        color: widget.rootNode!.isDeferred
+            ? Colors.grey
+            : widget.rootNode!.displayColor,
         border: Border.all(color: Colors.black87),
       ),
       child: Center(
