@@ -3,11 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:string_scanner/string_scanner.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../primitives/utils.dart';
 import '../../shared/table.dart';
 import '../../shared/table_data.dart';
+import '../../shared/theme.dart';
 import 'vm_object_model.dart';
 import 'vm_service_private_extensions.dart';
 
@@ -50,7 +52,8 @@ class _ProfileTicksColumn extends _CodeColumnData {
   }
 }
 
-class _InstructionColumn extends _CodeColumnData {
+class _InstructionColumn extends _CodeColumnData
+    implements ColumnRenderer<Instruction> {
   _InstructionColumn()
       : super(
           'Disassembly',
@@ -60,6 +63,94 @@ class _InstructionColumn extends _CodeColumnData {
   @override
   Object? getValue(Instruction dataObject) {
     return dataObject.instruction;
+  }
+
+  @override
+  Widget build(
+    BuildContext context,
+    Instruction data, {
+    bool isRowSelected = false,
+    VoidCallback? onPressed,
+  }) {
+    final theme = Theme.of(context);
+    return Text.rich(
+      style: theme.fixedFontStyle,
+      _highlightAssemblyCode(
+        context,
+        data.instruction,
+      ),
+    );
+  }
+
+  String _getLastMatch(StringScanner scanner) {
+    final match = scanner.lastMatch!;
+    return scanner.substring(match.start, match.end);
+  }
+
+  TextSpan _buildInstructionSpanRegExp(
+      ColorScheme colorScheme, StringScanner scanner) {
+    return TextSpan(
+      text: _getLastMatch(scanner),
+      style: TextStyle(
+        color: colorScheme.controlFlowSyntaxColor,
+      ),
+    );
+  }
+
+  TextSpan _buildRegisterSpan(ColorScheme colorScheme, StringScanner scanner) {
+    return TextSpan(
+      text: _getLastMatch(scanner),
+      style: TextStyle(
+        color: colorScheme.variableSyntaxColor,
+      ),
+    );
+  }
+
+  TextSpan _buildNumericSpan(
+    ColorScheme colorScheme,
+    StringScanner scanner, {
+    required bool isHex,
+  }) {
+    final match = _getLastMatch(scanner);
+    return TextSpan(
+      text: isHex ? '0x${match.substring(2).toUpperCase()}' : match,
+      style: TextStyle(
+        color: colorScheme.numericConstantSyntaxColor,
+      ),
+    );
+  }
+
+  TextSpan _highlightAssemblyCode(BuildContext context, String instruction) {
+    final instructionSpan = RegExp(r'[a-zA-Z]+');
+    final registerRegExp = RegExp(r'[a-zA-Z0-9]{2,3}');
+    final addressRegExp = RegExp(r'0x[a-fA-F0-9]+');
+    final numericRegExp = RegExp(r'\d+');
+    final spans = <TextSpan>[];
+    
+    final scanner = StringScanner(instruction);
+    final colorScheme = Theme.of(context).colorScheme;
+
+    // The instruction (e.g., push, movq, jl, etc) will always be first, if
+    // it's present.
+    if (scanner.scan(instructionSpan)) {
+      spans.add(_buildInstructionSpanRegExp(colorScheme, scanner));
+    }
+    while (!scanner.isDone) {
+      if (scanner.scan(addressRegExp)) {
+        spans.add(_buildNumericSpan(colorScheme, scanner, isHex: true));
+      } else if (scanner.scan(numericRegExp)) {
+        spans.add(_buildNumericSpan(colorScheme, scanner, isHex: false));
+      } else if (scanner.scan(registerRegExp)) {
+        spans.add(_buildRegisterSpan(colorScheme, scanner));
+      } else {
+        spans.add(
+          TextSpan(
+            text: String.fromCharCode(scanner.readChar()),
+          ),
+        );
+      }
+    }
+    return TextSpan(children: spans);
   }
 }
 
