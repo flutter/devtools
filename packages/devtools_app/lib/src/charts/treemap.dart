@@ -745,6 +745,7 @@ class MultiCellPainter extends CustomPainter {
     );
 
     final rectPaint = Paint();
+    //CAROLYN - here I would change the rectPainColor if node is deferred - need to add a checker
     rectPaint.color = node.displayColor;
     canvas.drawRect(bounds, rectPaint);
 
