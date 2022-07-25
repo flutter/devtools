@@ -605,10 +605,7 @@ class TreemapNode extends TreeNode<TreemapNode> {
 
   Color get displayColor {
     if (!showDiff) {
-      if (isDeferred)
-        return Colors.grey;
-      else
-        return mainUiColor;
+      return isDeferred ? treemapDeferredColor : mainUiColor;
     }
     if (byteSize < 0) {
       return treemapDecreaseColor;
