@@ -19,10 +19,6 @@ import '../test_infra/flutter_test_environment.dart';
 // reduced to under 1 second without introducing flakes.
 const inspectorChangeSettleTime = Duration(seconds: 2);
 
-// TODO(https://github.com/flutter/devtools/issues/4081): investigate why
-// inspector golden images are inconsistent.
-const _temporarilySkipGoldens = true;
-
 void main() async {
   // We need to use real async in this test so we need to use this binding.
   initializeLiveTestWidgetsFlutterBindingWithAssets();
@@ -77,50 +73,42 @@ void main() async {
       }
       // Give time for the initial animation to complete.
       await tester.pumpAndSettle(inspectorChangeSettleTime);
-      if (!_temporarilySkipGoldens) {
-        await expectLater(
-          find.byType(InspectorScreenBody),
-          matchesDevToolsGolden(
-            '../goldens/integration_inspector_initial_load.png',
-          ),
-        );
-      }
+      await expectLater(
+        find.byType(InspectorScreenBody),
+        matchesDevToolsGolden(
+          '../goldens/integration_inspector_initial_load.png',
+        ),
+      );
 
       // Click on the Center widget (row index #5)
       await tester.tap(find.richText('Center'));
       await tester.pumpAndSettle(inspectorChangeSettleTime);
-      if (!_temporarilySkipGoldens) {
-        await expectLater(
-          find.byType(InspectorScreenBody),
-          matchesDevToolsGolden(
-            '../goldens/integration_inspector_select_center.png',
-          ),
-        );
-      }
+      await expectLater(
+        find.byType(InspectorScreenBody),
+        matchesDevToolsGolden(
+          '../goldens/integration_inspector_select_center.png',
+        ),
+      );
 
       // Select the details tree.
       await tester.tap(find.text('Widget Details Tree'));
       await tester.pumpAndSettle(inspectorChangeSettleTime);
-      if (!_temporarilySkipGoldens) {
-        await expectLater(
-          find.byType(InspectorScreenBody),
-          matchesDevToolsGolden(
-            '../goldens/integration_inspector_select_center_details_tree.png',
-          ),
-        );
-      }
+      await expectLater(
+        find.byType(InspectorScreenBody),
+        matchesDevToolsGolden(
+          '../goldens/integration_inspector_select_center_details_tree.png',
+        ),
+      );
 
       // Select the RichText row.
       await tester.tap(find.richText('RichText'));
       await tester.pumpAndSettle(inspectorChangeSettleTime);
-      if (!_temporarilySkipGoldens) {
-        await expectLater(
-          find.byType(InspectorScreenBody),
-          matchesDevToolsGolden(
-            '../goldens/integration_inspector_richtext_selected.png',
-          ),
-        );
-      }
+      await expectLater(
+        find.byType(InspectorScreenBody),
+        matchesDevToolsGolden(
+          '../goldens/integration_inspector_richtext_selected.png',
+        ),
+      );
 
       // Test hovering over the icon shown when a property has its default
       // value.
@@ -137,28 +125,24 @@ void main() async {
       await tester.pumpAndSettle(inspectorChangeSettleTime);
       // This tree is huge. If there is a change to package:flutter it may
       // change. If this happens don't panic and rebaseline the golden.
-      if (!_temporarilySkipGoldens) {
-        await expectLater(
-          find.byType(InspectorScreenBody),
-          matchesDevToolsGolden(
-            '../goldens/integration_inspector_scaffold_selected.png',
-          ),
-        );
-      }
+      await expectLater(
+        find.byType(InspectorScreenBody),
+        matchesDevToolsGolden(
+          '../goldens/integration_inspector_scaffold_selected.png',
+        ),
+      );
 
       // The important thing about this is that the details tree should scroll
       // instead of re-rooting as the selected row is already visible in the
       // details tree.
       await tester.tap(find.richText('AnimatedPhysicalModel'));
       await tester.pumpAndSettle(inspectorChangeSettleTime);
-      if (!_temporarilySkipGoldens) {
-        await expectLater(
-          find.byType(InspectorScreenBody),
-          matchesDevToolsGolden(
-            '../goldens/integration_animated_physical_model_selected.png',
-          ),
-        );
-      }
+      await expectLater(
+        find.byType(InspectorScreenBody),
+        matchesDevToolsGolden(
+          '../goldens/integration_animated_physical_model_selected.png',
+        ),
+      );
 
       await env.tearDownEnvironment();
     });
@@ -446,28 +430,24 @@ void main() async {
       await env.flutter!.hotReload();
       // Give time for the initial animation to complete.
       await tester.pumpAndSettle(inspectorChangeSettleTime);
-      if (!_temporarilySkipGoldens) {
-        await expectLater(
-          find.byType(InspectorScreenBody),
-          matchesDevToolsGolden(
-            '../goldens/integration_inspector_errors_1_initial_load.png',
-          ),
-        );
-      }
+      await expectLater(
+        find.byType(InspectorScreenBody),
+        matchesDevToolsGolden(
+          '../goldens/integration_inspector_errors_1_initial_load.png',
+        ),
+      );
 
       // Navigate so one of the errors is selected.
       for (var i = 0; i < 2; i++) {
         await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
         await tester.pumpAndSettle(inspectorChangeSettleTime);
       }
-      if (!_temporarilySkipGoldens) {
-        await expectLater(
-          find.byType(InspectorScreenBody),
-          matchesDevToolsGolden(
-            '../goldens/integration_inspector_errors_2_error_selected.png',
-          ),
-        );
-      }
+      await expectLater(
+        find.byType(InspectorScreenBody),
+        matchesDevToolsGolden(
+          '../goldens/integration_inspector_errors_2_error_selected.png',
+        ),
+      );
 
       await env.tearDownEnvironment();
     });
