@@ -171,6 +171,10 @@ addLeakTrackingDetails(this, 'Serves the stream $streamName.');
 
 TODO(polina-c): add content
 
+### Detect leaks in regression testing
+
+TODO(polina-c): add content
+
 ### Understand performance impact
 
 TODO(polina-c): add content
