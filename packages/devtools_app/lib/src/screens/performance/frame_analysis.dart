@@ -11,9 +11,9 @@ import '../../service/service_extensions.dart' as extensions;
 import '../../shared/common_widgets.dart';
 import '../../shared/theme.dart';
 import '../../ui/colors.dart';
-import '../../ui/label.dart';
 import '../../ui/utils.dart';
-import 'enhance_tracing.dart';
+import 'panes/controls/enhance_tracing/enhance_tracing.dart';
+import 'panes/controls/enhance_tracing/enhance_tracing_controller.dart';
 import 'performance_controller.dart';
 import 'performance_model.dart';
 import 'performance_utils.dart';
@@ -22,9 +22,12 @@ class FlutterFrameAnalysisView extends StatelessWidget {
   const FlutterFrameAnalysisView({
     Key? key,
     required this.frameAnalysis,
+    required this.enhanceTracingController,
   }) : super(key: key);
 
   final FrameAnalysis? frameAnalysis;
+
+  final EnhanceTracingController enhanceTracingController;
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +42,10 @@ class FlutterFrameAnalysisView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          IntelligentFrameFindings(frameAnalysis: frameAnalysis),
+          IntelligentFrameFindings(
+            frameAnalysis: frameAnalysis,
+            enhanceTracingController: enhanceTracingController,
+          ),
           const PaddedDivider(
             padding: EdgeInsets.only(
               top: denseSpacing,
@@ -220,9 +226,12 @@ class IntelligentFrameFindings extends StatelessWidget {
   const IntelligentFrameFindings({
     Key? key,
     required this.frameAnalysis,
+    required this.enhanceTracingController,
   }) : super(key: key);
 
   final FrameAnalysis frameAnalysis;
+
+  final EnhanceTracingController enhanceTracingController;
 
   @override
   Widget build(BuildContext context) {
@@ -244,6 +253,7 @@ class IntelligentFrameFindings extends StatelessWidget {
             const SizedBox(height: denseSpacing),
             _EnhanceTracingHint(
               longestPhase: frameAnalysis.longestUiPhase,
+              enhanceTracingController: enhanceTracingController,
             ),
             const SizedBox(height: densePadding),
             if (intrinsicOperationsCount > 0)
@@ -296,10 +306,16 @@ class _Hint extends StatelessWidget {
 }
 
 class _EnhanceTracingHint extends StatelessWidget {
-  const _EnhanceTracingHint({Key? key, required this.longestPhase})
-      : super(key: key);
+  const _EnhanceTracingHint({
+    Key? key,
+    required this.longestPhase,
+    required this.enhanceTracingController,
+  }) : super(key: key);
 
+  /// The longest [FramePhase] for the [FlutterFrame] this hint is for.
   final FramePhase longestPhase;
+
+  final EnhanceTracingController enhanceTracingController;
 
   @override
   Widget build(BuildContext context) {
@@ -358,11 +374,13 @@ class _EnhanceTracingHint extends StatelessWidget {
     String settingTitle,
     ThemeData theme,
   ) {
-    const enhanceTracingButton = WidgetSpan(
+    final enhanceTracingButton = WidgetSpan(
       alignment: PlaceholderAlignment.middle,
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: denseSpacing),
-        child: _SmallEnhanceTracingButton(),
+        padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
+        child: _SmallEnhanceTracingButton(
+          enhanceTracingController: enhanceTracingController,
+        ),
       ),
     );
     return [
@@ -380,24 +398,20 @@ class _EnhanceTracingHint extends StatelessWidget {
 }
 
 class _SmallEnhanceTracingButton extends StatelessWidget {
-  const _SmallEnhanceTracingButton({Key? key}) : super(key: key);
+  const _SmallEnhanceTracingButton({
+    Key? key,
+    required this.enhanceTracingController,
+  }) : super(key: key);
 
-  static const labelPadding = 6.0;
+  final EnhanceTracingController enhanceTracingController;
 
   @override
   Widget build(BuildContext context) {
-    // TODO(kenz): find a way to handle taps on this widget and redirect to
-    // simulate a tap gesture on the Enhance Tracing button at the top of the
-    // screen.
-    return RoundedOutlinedBorder(
-      child: Padding(
-        padding: const EdgeInsets.all(labelPadding),
-        child: MaterialIconLabel(
-          label: EnhanceTracingButton.title,
-          iconData: EnhanceTracingButton.icon,
-          color: Theme.of(context).colorScheme.toggleButtonsTitle,
-        ),
-      ),
+    return IconLabelButton(
+      label: EnhanceTracingButton.title,
+      icon: EnhanceTracingButton.icon,
+      color: Theme.of(context).colorScheme.toggleButtonsTitle,
+      onPressed: enhanceTracingController.showEnhancedTracingMenu,
     );
   }
 }
