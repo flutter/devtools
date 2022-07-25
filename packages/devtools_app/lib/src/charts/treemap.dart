@@ -472,9 +472,7 @@ class _TreemapState extends State<Treemap> {
   Container buildCell() {
     return Container(
       decoration: BoxDecoration(
-        color: widget.rootNode!.isDeferred
-            ? Colors.grey
-            : widget.rootNode!.displayColor,
+        color: widget.rootNode!.displayColor,
         border: Border.all(color: Colors.black87),
       ),
       child: Center(
@@ -606,7 +604,12 @@ class TreemapNode extends TreeNode<TreemapNode> {
   int get unsignedByteSize => byteSize.abs();
 
   Color get displayColor {
-    if (!showDiff) return mainUiColor;
+    if (!showDiff) {
+      if (isDeferred)
+        return Colors.grey;
+      else
+        return mainUiColor;
+    }
     if (byteSize < 0) {
       return treemapDecreaseColor;
     } else {
@@ -749,8 +752,7 @@ class MultiCellPainter extends CustomPainter {
     );
 
     final rectPaint = Paint();
-    final paintColor = node.isDeferred ? Colors.grey : node.displayColor;
-    rectPaint.color = paintColor;
+    rectPaint.color = node.displayColor;
     canvas.drawRect(bounds, rectPaint);
 
     final borderPaint = Paint()

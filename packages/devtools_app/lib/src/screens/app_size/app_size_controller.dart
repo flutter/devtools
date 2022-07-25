@@ -489,7 +489,8 @@ class AppSizeController {
       childrenMap[child.name] = child;
     }
 
-    final bool isDeferred = treeJson['isDeferred'] != null;
+    final bool isDeferred =
+        treeJson['isDeferred'] != null && treeJson['isDeferred'];
 
     return TreemapNode(
       name: name,
