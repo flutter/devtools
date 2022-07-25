@@ -246,7 +246,13 @@ class AppSizeController {
     // Build a tree with [TreemapNode] from [processedJsonMap].
     final newRoot = generateTree(processedJson)!;
 
-    changeAnalysisRoot(newRoot);
+    // Open Treemap to main app.
+    isDeferredApp
+        ? changeAnalysisRoot(
+            newRoot.childrenMap.values
+                .firstWhere((node) => node.name == 'Root'),
+          )
+        : changeAnalysisRoot(newRoot);
 
     _processingNotifier.value = false;
   }
