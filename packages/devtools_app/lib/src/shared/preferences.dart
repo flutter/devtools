@@ -115,12 +115,16 @@ class InspectorPreferencesController extends DisposableController
   }
 
   void _initCustomPubRootListeners() {
+    // TODO(CoderDake): add _customPubRootDirectories listener back when
+    // finalizing https://github.com/flutter/devtools/issues/3941
+    /*
     addAutoDisposeListener(_customPubRootDirectories, () {
       storage.setValue(
         _customPubRootDirectoriesStorageId,
         jsonEncode(_customPubRootDirectories.value),
       );
     });
+    */
     addAutoDisposeListener(_busyCounter, () {
       _customPubRootDirectoriesAreBusy.value = _busyCounter.value != 0;
     });

@@ -359,6 +359,9 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
                   'Hovering over any widget displays its properties and values.',
               gaItem: analytics_constants.inspectorHoverEvalMode,
             ),
+            // TODO(CoderDake): add PubRootDirectory section back when
+            // finalizing https://github.com/flutter/devtools/issues/3941
+            /*
             const SizedBox(height: denseSpacing),
             ...dialogSubHeader(Theme.of(context), 'Package Directories'),
             Text(
@@ -371,8 +374,9 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
             ),
             const SizedBox(height: denseSpacing),
             Expanded(
-              child: PubRootDirectorySection(),
+               child: PubRootDirectorySection(),
             ),
+            */
           ],
         ),
       ),
