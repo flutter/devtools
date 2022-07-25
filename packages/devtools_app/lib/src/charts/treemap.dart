@@ -591,6 +591,7 @@ class TreemapNode extends TreeNode<TreemapNode> {
     this.byteSize = 0,
     this.childrenMap = const <String, TreemapNode>{},
     this.showDiff = false,
+    this.isDeferred = false,
   });
 
   final String name;
@@ -598,6 +599,7 @@ class TreemapNode extends TreeNode<TreemapNode> {
   int byteSize;
 
   final bool showDiff;
+  final bool isDeferred;
 
   int get unsignedByteSize => byteSize.abs();
 
@@ -745,8 +747,8 @@ class MultiCellPainter extends CustomPainter {
     );
 
     final rectPaint = Paint();
-    //CAROLYN - here I would change the rectPainColor if node is deferred - need to add a checker
-    rectPaint.color = node.displayColor;
+    final paintColor = node.isDeferred ? Colors.grey : node.displayColor;
+    rectPaint.color = paintColor;
     canvas.drawRect(bounds, rectPaint);
 
     final borderPaint = Paint()

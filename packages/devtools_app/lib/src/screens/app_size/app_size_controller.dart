@@ -489,11 +489,14 @@ class AppSizeController {
       childrenMap[child.name] = child;
     }
 
+    final bool isDeferred = treeJson['isDeferred'] != null;
+
     return TreemapNode(
       name: name,
       byteSize: byteSize,
       childrenMap: childrenMap,
       showDiff: showDiff,
+      isDeferred: isDeferred,
     )..addAllChildren(children);
   }
 }
