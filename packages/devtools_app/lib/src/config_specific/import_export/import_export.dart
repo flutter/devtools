@@ -5,6 +5,7 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:intl/intl.dart';
 
 import '../../../devtools.dart';
 import '../../primitives/utils.dart';
@@ -79,13 +80,35 @@ class ImportController {
     final devToolsSnapshot = _json;
     // TODO(kenz): support imports for more than one screen at a time.
     final activeScreenId = devToolsSnapshot[activeScreenIdKey];
+    final connectedApp =
+        (devToolsSnapshot[connectedAppKey] ?? <String, Object>{})
+            .cast<String, Object>();
     offlineController
       ..enterOfflineMode()
       ..offlineDataJson = devToolsSnapshot;
-    serviceManager.connectedApp =
-        OfflineConnectedApp.parse(devToolsSnapshot[connectedAppKey]);
+    serviceManager.connectedApp = OfflineConnectedApp.parse(connectedApp);
     _notifications.push(attemptingToImportMessage(activeScreenId));
     _pushSnapshotScreenForImport(activeScreenId);
+  }
+}
+
+enum ExportFileType {
+  json,
+  csv,
+  yaml;
+
+  @override
+  String toString() {
+    switch (this) {
+      case json:
+        return 'json';
+      case csv:
+        return 'csv';
+      case yaml:
+        return 'yaml';
+      default:
+        throw UnimplementedError('Unable to convert $this to a string');
+    }
   }
 }
 
@@ -96,16 +119,24 @@ abstract class ExportController {
 
   const ExportController.impl();
 
-  String generateFileName() {
-    final now = DateTime.now();
-    final timestamp =
-        '${now.year}_${now.month}_${now.day}-${now.microsecondsSinceEpoch}';
-    return 'dart_devtools_$timestamp.json';
+  String generateFileName({
+    String prefix = 'dart_devtools',
+    String postfix = '',
+    required ExportFileType type,
+    DateTime? time,
+  }) {
+    time ??= DateTime.now();
+    final timestamp = DateFormat('yyyy-MM-dd_HH:mm:ss.SSS').format(time);
+    return '${prefix}_$timestamp$postfix.$type';
   }
 
-  /// Downloads a JSON file with [contents] and returns the name of the
+  /// Downloads a file with [contents] and returns the name of the
   /// downloaded file.
-  String downloadFile(String contents);
+  String downloadFile(
+    String contents, {
+    String? fileName,
+    ExportFileType type = ExportFileType.json,
+  });
 
   String encode(String activeScreenId, Map<String, dynamic> contents) {
     final _contents = {

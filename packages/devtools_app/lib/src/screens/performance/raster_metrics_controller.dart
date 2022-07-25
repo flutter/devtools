@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -24,6 +23,8 @@ class RasterMetricsController {
   ValueListenable<List<LayerSnapshot>> get layerSnapshots => _layerSnapshots;
 
   final _layerSnapshots = ValueNotifier<List<LayerSnapshot>>([]);
+
+  Size? originalFrameSize;
 
   ValueListenable<LayerSnapshot?> get selectedSnapshot => _selectedSnapshot;
 
@@ -56,12 +57,18 @@ class RasterMetricsController {
 
   void clear() {
     _layerSnapshots.value = <LayerSnapshot>[];
+    originalFrameSize = null;
     _selectedSnapshot.value = null;
     _sumRasterTime = Duration.zero;
   }
 
   @visibleForTesting
   Future<void> initDataFromJson(Map<String, Object?> json) async {
+    originalFrameSize = Size(
+      (json['frame_width'] as int).toDouble(),
+      (json['frame_height'] as int).toDouble(),
+    );
+
     final snapshotsFromJson =
         (json[_snapshotsJsonKey] as List).cast<Map<String, dynamic>>();
     final snapshots = <LayerSnapshot>[];
@@ -71,10 +78,20 @@ class RasterMetricsController {
       final imageBytes = Uint8List.fromList(
         (snapshot[_snapshotJsonKey] as List<dynamic>).cast<int>(),
       );
+      final size = Size(
+        (snapshot['width'] as int).toDouble(),
+        (snapshot['height'] as int).toDouble(),
+      );
+      final offset = Offset(
+        (snapshot['left'] as int).toDouble(),
+        (snapshot['top'] as int).toDouble(),
+      );
       final image = await imageFromBytes(imageBytes);
       final layerSnapshot = LayerSnapshot(
         id: id,
         duration: dur,
+        size: size,
+        offset: offset,
         image: image,
         bytes: imageBytes,
       );
@@ -105,6 +122,8 @@ class LayerSnapshot {
   LayerSnapshot({
     required this.id,
     required this.duration,
+    required this.size,
+    required this.offset,
     required this.image,
     required this.bytes,
   });
@@ -112,6 +131,10 @@ class LayerSnapshot {
   final int id;
 
   final Duration duration;
+
+  final Size size;
+
+  final Offset offset;
 
   final ui.Image image;
 

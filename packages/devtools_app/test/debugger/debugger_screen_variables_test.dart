@@ -4,11 +4,11 @@
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
-import 'package:devtools_app/src/screens/debugger/debugger_model.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_screen.dart';
 import 'package:devtools_app/src/scripts/script_manager.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/object_tree.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -273,11 +273,7 @@ DartObjectNode _buildParentListVariable({int length = 2}) {
           library: _libraryRef,
         ),
         length: length,
-        identityHashCode: null,
       ),
-      declarationTokenPos: null,
-      scopeEndTokenPos: null,
-      scopeStartTokenPos: null,
     ),
     _isolateRef,
   );
@@ -301,11 +297,7 @@ DartObjectNode _buildListVariable({int length = 2}) {
             ),
             valueAsString: '$i',
             valueAsStringIsTruncated: false,
-            identityHashCode: null,
           ),
-          declarationTokenPos: null,
-          scopeEndTokenPos: null,
-          scopeStartTokenPos: null,
         ),
         _isolateRef,
       ),
@@ -328,11 +320,7 @@ DartObjectNode _buildParentMapVariable({int length = 2}) {
           library: _libraryRef,
         ),
         length: length,
-        identityHashCode: null,
       ),
-      declarationTokenPos: null,
-      scopeEndTokenPos: null,
-      scopeStartTokenPos: null,
     ),
     _isolateRef,
   );
@@ -356,11 +344,7 @@ DartObjectNode _buildMapVariable({int length = 2}) {
             ),
             valueAsString: '${i + 1}.0',
             valueAsStringIsTruncated: false,
-            identityHashCode: null,
           ),
-          declarationTokenPos: null,
-          scopeEndTokenPos: null,
-          scopeStartTokenPos: null,
         ),
         _isolateRef,
       ),
@@ -384,11 +368,7 @@ DartObjectNode _buildStringVariable(String value) {
         ),
         valueAsString: value,
         valueAsStringIsTruncated: true,
-        identityHashCode: null,
       ),
-      declarationTokenPos: null,
-      scopeEndTokenPos: null,
-      scopeStartTokenPos: null,
     ),
     _isolateRef,
   );
@@ -408,11 +388,7 @@ DartObjectNode _buildBooleanVariable(bool value) {
         ),
         valueAsString: '$value',
         valueAsStringIsTruncated: false,
-        identityHashCode: null,
       ),
-      declarationTokenPos: null,
-      scopeEndTokenPos: null,
-      scopeStartTokenPos: null,
     ),
     _isolateRef,
   );

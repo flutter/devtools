@@ -7,14 +7,14 @@ import '../../shared/table_data.dart';
 import '../../shared/utils.dart';
 import 'cpu_profile_model.dart';
 
-const _timeColumnWidthPx = 180.0;
+const timeColumnWidthPx = 180.0;
 
 class SelfTimeColumn extends ColumnData<CpuStackFrame> {
   SelfTimeColumn({String? titleTooltip})
       : super(
           'Self Time',
           titleTooltip: titleTooltip,
-          fixedWidthPx: scaleByFontFactor(_timeColumnWidthPx),
+          fixedWidthPx: scaleByFontFactor(timeColumnWidthPx),
         );
 
   @override
@@ -48,7 +48,7 @@ class TotalTimeColumn extends ColumnData<CpuStackFrame> {
       : super(
           'Total Time',
           titleTooltip: titleTooltip,
-          fixedWidthPx: scaleByFontFactor(_timeColumnWidthPx),
+          fixedWidthPx: scaleByFontFactor(timeColumnWidthPx),
         );
 
   @override
@@ -79,17 +79,11 @@ class TotalTimeColumn extends ColumnData<CpuStackFrame> {
 
 class MethodNameColumn extends TreeColumnData<CpuStackFrame> {
   MethodNameColumn() : super('Method');
-
-  static const maxMethodNameLength = 75;
-
   @override
   dynamic getValue(CpuStackFrame dataObject) => dataObject.name;
 
   @override
   String getDisplayValue(CpuStackFrame dataObject) {
-    if (dataObject.name.length > maxMethodNameLength) {
-      return dataObject.name.substring(0, maxMethodNameLength) + '...';
-    }
     return dataObject.name;
   }
 

@@ -17,6 +17,7 @@ import '../../primitives/utils.dart';
 import '../../service/isolate_state.dart';
 import '../../service/vm_service_wrapper.dart';
 import '../../shared/globals.dart';
+import '../../shared/object_tree.dart';
 import '../../ui/search.dart';
 import 'debugger_model.dart';
 import 'program_explorer_controller.dart';
@@ -73,6 +74,7 @@ class DebuggerController extends DisposableController
     }
     if (currentScriptRef.value != null) {
       await programExplorerController.selectScriptNode(currentScriptRef.value);
+      programExplorerController.resetOutline();
     }
   }
 
@@ -368,6 +370,8 @@ class DebuggerController extends DisposableController
     await _pause(false);
 
     _clearCaches();
+
+    scriptsHistory.clear();
 
     if (ref == null) {
       _breakpoints.value = [];
@@ -989,9 +993,6 @@ class DebuggerController extends DisposableController
         BoundVariable(
           name: '<exception>',
           value: reportedException,
-          scopeStartTokenPos: null,
-          scopeEndTokenPos: null,
-          declarationTokenPos: null,
         ),
         ...frame.vars ?? []
       ];

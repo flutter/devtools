@@ -9,7 +9,6 @@ import 'package:collection/collection.dart' show IterableExtension;
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 
 import '../../analytics/analytics.dart' as ga;
 import '../../analytics/constants.dart' as analytics_constants;
@@ -33,6 +32,15 @@ import 'memory_graph_model.dart';
 import 'memory_heap_treemap.dart';
 import 'memory_instance_tree_view.dart';
 import 'memory_snapshot_models.dart';
+import 'panes/allocation_profile/allocation_profile_table_view.dart';
+import 'panes/diff/diff_pane.dart';
+import 'panes/leaks/leaks_pane.dart';
+import 'primitives/memory_utils.dart';
+
+// TODO(bkonyi): enable new allocation profile table when we're ready to remove
+// the existing allocations table.
+@visibleForTesting
+bool enableNewAllocationProfileTable = false;
 
 const memorySearchFieldKeyName = 'MemorySearchFieldKey';
 
@@ -133,6 +141,7 @@ final String knownClassesRegExs = buildRegExs(knowClassesToAnalyzeForImages);
 class HeapTreeViewState extends State<HeapTree>
     with
         AutoDisposeMixin,
+        ProvidedControllerMixin<MemoryController, HeapTree>,
         SearchFieldMixin<HeapTree>,
         TickerProviderStateMixin {
   @visibleForTesting
@@ -143,6 +152,12 @@ class HeapTreeViewState extends State<HeapTree>
   static const dartHeapAnalysisTabKey = Key('Dart Heap Analysis Tab');
   @visibleForTesting
   static const dartHeapAllocationsTabKey = Key('Dart Heap Allocations Tab');
+  @visibleForTesting
+  static const leaksTabKey = Key('Leaks Tab');
+  @visibleForTesting
+  static const dartHeapTableTabKey = Key('Dart Heap Table Tab');
+  @visibleForTesting
+  static const diffTabKey = Key('Diff Tab');
 
   /// Below constants should match index for Tab index in DartHeapTabs.
   static const int analysisTabIndex = 0;
@@ -150,24 +165,10 @@ class HeapTreeViewState extends State<HeapTree>
 
   static const _gaPrefix = 'memoryTab';
 
-  static final List<Tab> dartHeapTabs = [
-    DevToolsTab.create(
-      key: dartHeapAnalysisTabKey,
-      gaPrefix: _gaPrefix,
-      tabName: 'Analysis',
-    ),
-    DevToolsTab.create(
-      key: dartHeapAllocationsTabKey,
-      gaPrefix: _gaPrefix,
-      tabName: 'Allocations',
-    ),
-  ];
-
-  bool _controllerInitialized = false;
-
-  late MemoryController _controller;
-
+  late List<Tab> _tabs;
   late TabController _tabController;
+  late Set<Key> _searchableTabs;
+  final ValueNotifier<int> _currentTab = ValueNotifier(0);
 
   Widget? snapshotDisplay;
 
@@ -196,93 +197,136 @@ class HeapTreeViewState extends State<HeapTree>
   void initState() {
     super.initState();
 
-    _tabController = TabController(length: dartHeapTabs.length, vsync: this);
-    addAutoDisposeListener(_tabController);
-
     _animation = _setupBubbleAnimationController();
   }
+
+  void _initTabs() {
+    _tabs = [
+      DevToolsTab.create(
+        key: dartHeapAnalysisTabKey,
+        gaPrefix: _gaPrefix,
+        tabName: 'Analysis',
+      ),
+      DevToolsTab.create(
+        key: dartHeapAllocationsTabKey,
+        gaPrefix: _gaPrefix,
+        tabName: 'Allocations',
+      ),
+      if (shouldShowDiffPane)
+        DevToolsTab.create(
+          key: diffTabKey,
+          gaPrefix: _gaPrefix,
+          tabName: 'Diff',
+        ),
+      if (widget.controller.shouldShowLeaksTab.value)
+        DevToolsTab.create(
+          key: leaksTabKey,
+          gaPrefix: _gaPrefix,
+          tabName: 'Leaks',
+        ),
+      if (enableNewAllocationProfileTable)
+        DevToolsTab.create(
+          key: dartHeapTableTabKey,
+          tabName: 'Profile',
+          gaPrefix: _gaPrefix,
+        ),
+    ];
+
+    _searchableTabs = {dartHeapAnalysisTabKey, dartHeapAllocationsTabKey};
+    _tabController = TabController(length: _tabs.length, vsync: this);
+    _tabController.addListener(_onTabChanged);
+  }
+
+  void _onTabChanged() => _currentTab.value = _tabController.index;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
-    final newController = Provider.of<MemoryController>(context);
-    if (_controllerInitialized && newController == _controller) return;
-    _controllerInitialized = true;
-    _controller = newController;
+    if (!initController()) return;
 
     cancelListeners();
 
-    addAutoDisposeListener(_controller.selectedSnapshotNotifier, () {
+    _initTabs();
+
+    addAutoDisposeListener(controller.shouldShowLeaksTab, () {
       setState(() {
-        _controller.computeAllLibraries(rebuild: true);
+        _initTabs();
       });
     });
 
-    addAutoDisposeListener(_controller.selectionSnapshotNotifier, () {
+    addAutoDisposeListener(controller.selectedSnapshotNotifier, () {
       setState(() {
-        _controller.computeAllLibraries(rebuild: true);
+        controller.computeAllLibraries(rebuild: true);
       });
     });
 
-    addAutoDisposeListener(_controller.filterNotifier, () {
+    addAutoDisposeListener(controller.selectionSnapshotNotifier, () {
       setState(() {
-        _controller.computeAllLibraries(rebuild: true);
+        controller.computeAllLibraries(rebuild: true);
       });
     });
 
-    addAutoDisposeListener(_controller.leafSelectedNotifier, () {
+    addAutoDisposeListener(controller.filterNotifier, () {
       setState(() {
-        _controller.computeRoot();
+        controller.computeAllLibraries(rebuild: true);
       });
     });
 
-    addAutoDisposeListener(_controller.leafAnalysisSelectedNotifier, () {
+    addAutoDisposeListener(controller.leafSelectedNotifier, () {
       setState(() {
-        _controller.computeAnalysisInstanceRoot();
+        controller.computeRoot();
       });
     });
 
-    addAutoDisposeListener(_controller.searchNotifier, () {
-      _controller.closeAutoCompleteOverlay();
-      _controller..setCurrentHoveredIndexValue(0);
+    addAutoDisposeListener(controller.leafAnalysisSelectedNotifier, () {
+      setState(() {
+        controller.computeAnalysisInstanceRoot();
+      });
     });
 
-    addAutoDisposeListener(_controller.searchAutoCompleteNotifier, () {
+    addAutoDisposeListener(controller.searchNotifier, () {
+      controller.closeAutoCompleteOverlay();
+      controller..setCurrentHoveredIndexValue(0);
+    });
+
+    addAutoDisposeListener(controller.searchAutoCompleteNotifier, () {
       ga.select(
         analytics_constants.memory,
         analytics_constants.snapshotFilterDialog,
       );
-      _controller.handleAutoCompleteOverlay(
+      controller.handleAutoCompleteOverlay(
         context: context,
         searchFieldKey: memorySearchFieldKey,
         onTap: selectTheMatch,
       );
     });
 
-    addAutoDisposeListener(_controller.monitorAllocationsNotifier, () {
+    addAutoDisposeListener(controller.monitorAllocationsNotifier, () {
       setState(() {
-        _controller.computeAllLibraries(rebuild: true);
+        controller.computeAllLibraries(rebuild: true);
       });
     });
 
-    addAutoDisposeListener(_controller.memoryTimeline.sampleAddedNotifier, () {
+    addAutoDisposeListener(controller.memoryTimeline.sampleAddedNotifier, () {
       autoSnapshot();
     });
 
-    treeMapVisible = _controller.treeMapVisible.value;
-    addAutoDisposeListener(_controller.treeMapVisible, () {
+    treeMapVisible = controller.treeMapVisible.value;
+    addAutoDisposeListener(controller.treeMapVisible, () {
       setState(() {
-        treeMapVisible = _controller.treeMapVisible.value;
+        treeMapVisible = controller.treeMapVisible.value;
       });
     });
 
-    addAutoDisposeListener(_controller.lastMonitorTimestamp);
+    addAutoDisposeListener(controller.lastMonitorTimestamp);
   }
 
   @override
   void dispose() {
     _animation.dispose();
+    _tabController
+      ..removeListener(_onTabChanged)
+      ..dispose();
 
     super.dispose();
   }
@@ -293,7 +337,8 @@ class HeapTreeViewState extends State<HeapTree>
 
   /// Detect spike in memory usage if so do an automatic snapshot.
   void autoSnapshot() {
-    final heapSample = _controller.memoryTimeline.sampleAddedNotifier.value!;
+    if (!controller.autoSnapshotEnabled.value) return;
+    final heapSample = controller.memoryTimeline.sampleAddedNotifier.value!;
     final heapSum = heapSample.external + heapSample.used;
     heapMovingAverage.add(heapSum);
 
@@ -407,9 +452,9 @@ class HeapTreeViewState extends State<HeapTree>
           ),
         ],
       );
-    } else if (_controller.snapshotByLibraryData != null) {
+    } else if (controller.snapshotByLibraryData != null) {
       snapshotDisplay =
-          treeMapVisible ? MemoryHeapTreemap(_controller) : MemoryHeapTable();
+          treeMapVisible ? const MemoryHeapTreemap() : MemoryHeapTable();
     } else {
       snapshotDisplay = null;
     }
@@ -419,45 +464,61 @@ class HeapTreeViewState extends State<HeapTree>
       child: Column(
         children: [
           const SizedBox(height: defaultSpacing),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              TabBar(
-                labelColor: themeData.textTheme.bodyText1!.color,
-                isScrollable: true,
-                controller: _tabController,
-                tabs: HeapTreeViewState.dartHeapTabs,
-              ),
-              _buildSearchFilterControls(),
-            ],
+          ValueListenableBuilder<int>(
+            valueListenable: _currentTab,
+            builder: (context, index, _) => Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TabBar(
+                  labelColor: themeData.textTheme.bodyText1!.color,
+                  isScrollable: true,
+                  controller: _tabController,
+                  tabs: _tabs,
+                ),
+                if (_searchableTabs.contains(_tabs[index].key))
+                  _buildSearchFilterControls(),
+              ],
+            ),
           ),
-          const SizedBox(height: densePadding),
+          const Divider(),
           Expanded(
             child: TabBarView(
               physics: defaultTabBarViewPhysics,
               controller: _tabController,
               children: [
                 // Analysis Tab
-                Column(
-                  children: [
-                    _buildSnapshotControls(themeData.textTheme),
-                    const SizedBox(height: denseRowSpacing),
-                    Expanded(
-                      child: OutlineDecoration(
+                KeepAliveWrapper(
+                  child: Column(
+                    children: [
+                      _buildSnapshotControls(themeData.textTheme),
+                      const SizedBox(height: denseRowSpacing),
+                      Expanded(
                         child: buildSnapshotTables(snapshotDisplay),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
 
                 // Allocations Tab
-                Column(
-                  children: [
-                    _buildAllocationsControls(),
-                    const SizedBox(height: denseRowSpacing),
-                    const Expanded(child: AllocationTableView()),
-                  ],
+                KeepAliveWrapper(
+                  child: Column(
+                    children: [
+                      _buildAllocationsControls(),
+                      const SizedBox(height: denseRowSpacing),
+                      const Expanded(
+                        child: AllocationTableView(),
+                      ),
+                    ],
+                  ),
                 ),
+                // Diff tab.
+                if (shouldShowDiffPane)
+                  const KeepAliveWrapper(child: DiffPane()),
+                // Leaks tab.
+                if (controller.shouldShowLeaksTab.value)
+                  const KeepAliveWrapper(child: LeaksPane()),
+                if (enableNewAllocationProfileTable)
+                  KeepAliveWrapper(child: AllocationProfileTableView()),
               ],
             ),
           ),
@@ -469,21 +530,23 @@ class HeapTreeViewState extends State<HeapTree>
   Widget buildSnapshotTables(Widget? snapshotDisplay) {
     if (snapshotDisplay == null) {
       // Display help text about how to collect data.
-      return Center(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Text('Click the take heap snapshot button '),
-            Icon(Icons.camera),
-            Text(' to collect a graph of memory objects.'),
-          ],
+      return OutlineDecoration(
+        child: Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const [
+              Text('Click the take heap snapshot button '),
+              Icon(Icons.camera),
+              Text(' to collect a graph of memory objects.'),
+            ],
+          ),
         ),
       );
     }
 
-    final rightSideTable = _controller.isLeafSelected
+    final rightSideTable = controller.isLeafSelected
         ? InstanceTreeView()
-        : _controller.isAnalysisLeafSelected
+        : controller.isAnalysisLeafSelected
             ? Expanded(child: AnalysisInstanceViewTable())
             : helpScreen();
 
@@ -497,7 +560,7 @@ class HeapTreeViewState extends State<HeapTree>
               // TODO(terry): Need better focus handling between 2 tables & up/down
               //              arrows in the right-side field instance view table.
               snapshotDisplay,
-              rightSideTable,
+              OutlineDecoration(child: rightSideTable),
             ],
           );
   }
@@ -563,7 +626,7 @@ class HeapTreeViewState extends State<HeapTree>
       child: DropdownButton<String>(
         key: groupByMenuButtonKey,
         style: textTheme.bodyText2,
-        value: _controller.groupingBy.value,
+        value: controller.groupingBy.value,
         onChanged: (String? newValue) {
           setState(
             () {
@@ -571,9 +634,9 @@ class HeapTreeViewState extends State<HeapTree>
                 analytics_constants.memory,
                 '${analytics_constants.groupByPrefix}$newValue',
               );
-              _controller.selectedLeaf = null;
-              _controller.groupingBy.value = newValue!;
-              if (_controller.snapshots.isNotEmpty) {
+              controller.selectedLeaf = null;
+              controller.groupingBy.value = newValue!;
+              if (controller.snapshots.isNotEmpty) {
                 doGroupBy();
               }
             },
@@ -602,14 +665,14 @@ class HeapTreeViewState extends State<HeapTree>
               const Text('Treemap'),
               Switch(
                 value: treeMapVisible,
-                onChanged: _controller.snapshotByLibraryData != null
+                onChanged: controller.snapshotByLibraryData != null
                     ? (value) {
                         ga.select(
                           analytics_constants.memory,
                           '${analytics_constants.treemapToggle}-'
                           '${value ? 'show' : 'hide'}',
                         );
-                        _controller.toggleTreeMapVisible(value);
+                        controller.toggleTreeMapVisible(value);
                       }
                     : null,
               ),
@@ -628,13 +691,13 @@ class HeapTreeViewState extends State<HeapTree>
                   analytics_constants.expandAll,
                 );
                 if (snapshotDisplay is MemoryHeapTable) {
-                  _controller.groupByTreeTable.dataRoots.every((element) {
+                  controller.groupByTreeTable.dataRoots.every((element) {
                     element.expandCascading();
                     return true;
                   });
                 }
                 // All nodes expanded - signal tree state  changed.
-                _controller.treeChanged();
+                controller.treeChanged();
               },
             ),
             const SizedBox(width: denseSpacing),
@@ -645,16 +708,16 @@ class HeapTreeViewState extends State<HeapTree>
                   analytics_constants.collapseAll,
                 );
                 if (snapshotDisplay is MemoryHeapTable) {
-                  _controller.groupByTreeTable.dataRoots.every((element) {
+                  controller.groupByTreeTable.dataRoots.every((element) {
                     element.collapseCascading();
                     return true;
                   });
-                  if (_controller.instanceFieldsTreeTable != null) {
+                  if (controller.instanceFieldsTreeTable != null) {
                     // We're collapsing close the fields table.
-                    _controller.selectedLeaf = null;
+                    controller.selectedLeaf = null;
                   }
                   // All nodes collapsed - signal tree state changed.
-                  _controller.treeChanged();
+                  controller.treeChanged();
                 }
               },
             ),
@@ -705,18 +768,17 @@ class HeapTreeViewState extends State<HeapTree>
           removeUpdateBubble?.cancel();
 
           removeUpdateBubble = Timer(const Duration(seconds: 5), () {
-            _controller.lastMonitorTimestamp.value =
-                _controller.monitorTimestamp;
+            controller.lastMonitorTimestamp.value = controller.monitorTimestamp;
             removeUpdateBubble = null;
           });
         }
         final circleWidget = textWidgetWithUpdateCircle(
-          _controller.monitorTimestamp == null
+          controller.monitorTimestamp == null
               ? 'No allocations tracked'
-              : 'Allocations Tracked at ${MemoryController.formattedTimestamp(_controller.monitorTimestamp)}',
+              : 'Allocations Tracked at ${MemoryController.formattedTimestamp(controller.monitorTimestamp)}',
           style: Theme.of(context).colorScheme.italicTextStyle,
-          size: _controller.lastMonitorTimestamp.value ==
-                  _controller.monitorTimestamp
+          size: controller.lastMonitorTimestamp.value ==
+                  controller.monitorTimestamp
               ? 0
               : circleSize,
         );
@@ -778,8 +840,8 @@ class HeapTreeViewState extends State<HeapTree>
       children: [
         Positioned(
           child: Container(
-            child: Text(text, style: style),
             width: textWidth + 10,
+            child: Text(text, style: style),
           ),
         ),
         Positioned(
@@ -788,11 +850,11 @@ class HeapTreeViewState extends State<HeapTree>
             alignment: Alignment.topRight,
             width: size,
             height: size,
-            child: const Icon(Icons.fiber_manual_record, size: 0),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: Colors.blue[400],
             ),
+            child: const Icon(Icons.fiber_manual_record, size: 0),
           ),
         ),
       ],
@@ -840,19 +902,18 @@ class HeapTreeViewState extends State<HeapTree>
   Future<void> _allocationStart() async {
     // TODO(terry): Look at grouping by library or classes also filtering e.g.,
     // await controller.computeLibraries();
-    _controller.memoryTimeline.addMonitorStartEvent();
+    controller.memoryTimeline.addMonitorStartEvent();
 
     final allocationtimestamp = DateTime.now();
-    final currentAllocations = await _controller.getAllocationProfile();
+    final currentAllocations = await controller.getAllocationProfile();
 
-    if (_controller.monitorAllocations.isNotEmpty) {
-      final previousSize = _controller.monitorAllocations.length;
+    if (controller.monitorAllocations.isNotEmpty) {
+      final previousSize = controller.monitorAllocations.length;
       int previousIndex = 0;
       final currentSize = currentAllocations.length;
       int currentIndex = 0;
       while (currentIndex < currentSize && previousIndex < previousSize) {
-        final previousAllocation =
-            _controller.monitorAllocations[previousIndex];
+        final previousAllocation = controller.monitorAllocations[previousIndex];
         final currentAllocation = currentAllocations[currentIndex];
 
         if (previousAllocation.classRef.id == currentAllocation.classRef.id) {
@@ -886,7 +947,7 @@ class HeapTreeViewState extends State<HeapTree>
           // active in previousAllocations.
           final currentClassId = currentAllocation.classRef.id;
           final ClassHeapDetailStats? first =
-              _controller.monitorAllocations.firstWhereOrNull(
+              controller.monitorAllocations.firstWhereOrNull(
             (element) => element.classRef.id == currentClassId,
           );
           if (first != null) {
@@ -905,15 +966,15 @@ class HeapTreeViewState extends State<HeapTree>
       assert(currentSize == currentIndex, '$currentSize == $currentIndex');
     }
 
-    _controller.monitorTimestamp = allocationtimestamp;
-    _controller.monitorAllocations = currentAllocations;
+    controller.monitorTimestamp = allocationtimestamp;
+    controller.monitorAllocations = currentAllocations;
 
-    _controller.treeChanged();
+    controller.treeChanged();
   }
 
   Future<void> _allocationReset() async {
-    _controller.memoryTimeline.addMonitorResetEvent();
-    final currentAllocations = await _controller.resetAllocationProfile();
+    controller.memoryTimeline.addMonitorResetEvent();
+    final currentAllocations = await controller.resetAllocationProfile();
 
     // Reset all accumulators to zero.
     for (final classAllocation in currentAllocations) {
@@ -921,7 +982,7 @@ class HeapTreeViewState extends State<HeapTree>
       classAllocation.instancesDelta = 0;
     }
 
-    _controller.monitorAllocations = currentAllocations;
+    controller.monitorAllocations = currentAllocations;
   }
 
   /// Match, found,  select it and process via ValueNotifiers.
@@ -933,32 +994,32 @@ class HeapTreeViewState extends State<HeapTree>
 
     setState(() {
       if (_tabController.index == allocationsTabIndex) {
-        _controller.selectItemInAllocationTable(foundName);
+        controller.selectItemInAllocationTable(foundName);
       } else if (_tabController.index == analysisTabIndex &&
           snapshotDisplay is MemoryHeapTable) {
-        _controller.groupByTreeTable.dataRoots.every((element) {
+        controller.groupByTreeTable.dataRoots.every((element) {
           element.collapseCascading();
           return true;
         });
       }
     });
 
-    selectFromSearchField(_controller, foundName);
-    clearSearchField(_controller);
+    selectFromSearchField(controller, foundName);
+    clearSearchField(controller);
   }
 
   bool get _isSearchable {
     // Analysis tab and Snapshot exist or 'Allocations' tab allocations are monitored.
     return (_tabController.index == analysisTabIndex && !treeMapVisible) ||
         (_tabController.index == allocationsTabIndex &&
-            _controller.monitorAllocations.isNotEmpty);
+            controller.monitorAllocations.isNotEmpty);
   }
 
   Widget _buildSearchWidget(GlobalKey<State<StatefulWidget>> key) => Container(
         width: wideSearchTextWidth,
         height: defaultTextFieldHeight,
         child: buildAutoCompleteSearchField(
-          controller: _controller,
+          controller: controller,
           searchFieldKey: key,
           searchFieldEnabled: _isSearchable,
           shouldRequestFocus: _isSearchable,
@@ -1001,7 +1062,7 @@ class HeapTreeViewState extends State<HeapTree>
       return;
     }
 
-    _controller.memoryTimeline.addSnapshotEvent(auto: !userGenerated);
+    controller.memoryTimeline.addSnapshotEvent(auto: !userGenerated);
 
     setState(() {
       snapshotState = SnapshotStatus.streaming;
@@ -1009,14 +1070,14 @@ class HeapTreeViewState extends State<HeapTree>
 
     final snapshotTimestamp = DateTime.now();
 
-    final graph = await _controller.snapshotMemory();
+    final graph = await snapshotMemory();
 
     // No snapshot collected, disconnected/crash application.
     if (graph == null) {
       setState(() {
         snapshotState = SnapshotStatus.done;
       });
-      _controller.selectedSnapshotTimestamp = DateTime.now();
+      controller.selectedSnapshotTimestamp = DateTime.now();
       return;
     }
 
@@ -1028,8 +1089,8 @@ class HeapTreeViewState extends State<HeapTree>
 
     // To debug particular classes add their names to the last
     // parameter classNamesToMonitor e.g., ['AppStateModel', 'Terry', 'TerryEntry']
-    _controller.heapGraph = convertHeapGraph(
-      _controller,
+    controller.heapGraph = convertHeapGraph(
+      controller.filterConfig,
       graph,
       [],
     );
@@ -1041,9 +1102,9 @@ class HeapTreeViewState extends State<HeapTree>
 
     await doGroupBy();
 
-    final root = _controller.computeAllLibraries(graph: graph)!;
+    final root = controller.computeAllLibraries(graph: graph)!;
 
-    final snapshot = _controller.storeSnapshot(
+    final snapshot = controller.storeSnapshot(
       snapshotTimestamp,
       graph,
       root,
@@ -1052,7 +1113,7 @@ class HeapTreeViewState extends State<HeapTree>
 
     final snapshotDoneTime = DateTime.now();
 
-    _controller.selectedSnapshotTimestamp = snapshotTimestamp;
+    controller.selectedSnapshotTimestamp = snapshotTimestamp;
 
     debugLogger(
       'Total Snapshot completed in'
@@ -1075,12 +1136,12 @@ class HeapTreeViewState extends State<HeapTree>
       snapshotState = SnapshotStatus.done;
     });
 
-    _controller.buildTreeFromAllData();
+    controller.buildTreeFromAllData();
     _analyze(snapshot: snapshot);
   }
 
   Future<void> doGroupBy() async {
-    _controller.heapGraph!
+    controller.heapGraph!
       ..computeInstancesForClasses()
       ..computeRawGroups()
       ..computeFilteredGroups();
@@ -1097,7 +1158,7 @@ class HeapTreeViewState extends State<HeapTree>
     // Pressing either the Apply or Cancel button will dismiss.
     showDialog(
       context: context,
-      builder: (BuildContext context) => SnapshotFilterDialog(_controller),
+      builder: (BuildContext context) => SnapshotFilterDialog(controller),
       barrierDismissible: false,
     );
   }
@@ -1107,7 +1168,7 @@ class HeapTreeViewState extends State<HeapTree>
     assert(
       () {
         // Analysis already completed we're done.
-        final foundMatch = _controller.completedAnalyses.firstWhereOrNull(
+        final foundMatch = controller.completedAnalyses.firstWhereOrNull(
           (element) => element.dateTime.compareTo(currentSnapDateTime) == 0,
         );
         if (foundMatch != null) {
@@ -1124,9 +1185,9 @@ class HeapTreeViewState extends State<HeapTree>
   }
 
   void _analyze({Snapshot? snapshot}) {
-    final AnalysesReference analysesNode = _controller.findAnalysesNode()!;
+    final AnalysesReference analysesNode = controller.findAnalysesNode()!;
 
-    snapshot ??= _controller.computeSnapshotToAnalyze!;
+    snapshot ??= controller.computeSnapshotToAnalyze!;
     final DateTime currentSnapDateTime = snapshot.collectedTimestamp;
 
     _debugCheckAnalyses(currentSnapDateTime);
@@ -1143,15 +1204,15 @@ class HeapTreeViewState extends State<HeapTree>
     analysesNode.addChild(analyzeSnapshot);
 
     // Analyze this snapshot.
-    final collectedData = collect(_controller, snapshot);
+    final collectedData = collect(controller, snapshot);
 
     // Analyze the collected data.
 
     // 1. Analysis of memory image usage.
-    imageAnalysis(_controller, analyzeSnapshot, collectedData);
+    imageAnalysis(controller, analyzeSnapshot, collectedData);
 
     // Add to our list of completed analyses.
-    _controller.completedAnalyses.add(analyzeSnapshot);
+    controller.completedAnalyses.add(analyzeSnapshot);
 
     // Expand the 'Analysis' node.
     if (!analysesNode.isExpanded) {
@@ -1159,7 +1220,7 @@ class HeapTreeViewState extends State<HeapTree>
     }
 
     // Select the snapshot just analyzed.
-    _controller.selectionSnapshotNotifier.value = Selection(
+    controller.selectionSnapshotNotifier.value = Selection(
       node: analyzeSnapshot,
       nodeIndex: analyzeSnapshot.index,
       scrollIntoView: true,
@@ -1180,11 +1241,11 @@ class MemoryHeapTable extends StatefulWidget {
 
 /// A table of the Memory graph class top-down call tree.
 class MemoryHeapTableState extends State<MemoryHeapTable>
-    with AutoDisposeMixin {
-  late MemoryController _controller;
-  bool _controllerInitialized = false;
-
+    with
+        AutoDisposeMixin,
+        ProvidedControllerMixin<MemoryController, MemoryHeapTable> {
   final TreeColumnData<Reference> _treeColumn = _LibraryRefColumn();
+
   final List<ColumnData<Reference>> _columns = [];
 
   @override
@@ -1205,61 +1266,57 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
-    final newController = Provider.of<MemoryController>(context);
-    if (_controllerInitialized && newController == _controller) return;
-    _controller = newController;
-    _controllerInitialized = true;
+    if (!initController()) return;
 
     cancelListeners();
 
     // Update the tree when the tree state changes e.g., expand, collapse, etc.
-    addAutoDisposeListener(_controller.treeChangedNotifier, () {
-      if (_controller.isTreeChanged) {
+    addAutoDisposeListener(controller.treeChangedNotifier, () {
+      if (controller.isTreeChanged) {
         setState(() {});
       }
     });
 
     // Update the tree when the memorySource changes.
-    addAutoDisposeListener(_controller.selectedSnapshotNotifier, () {
+    addAutoDisposeListener(controller.selectedSnapshotNotifier, () {
       setState(() {
-        _controller.computeAllLibraries(rebuild: true);
+        controller.computeAllLibraries(rebuild: true);
       });
     });
 
-    addAutoDisposeListener(_controller.filterNotifier, () {
+    addAutoDisposeListener(controller.filterNotifier, () {
       setState(() {
-        _controller.computeAllLibraries(rebuild: true);
+        controller.computeAllLibraries(rebuild: true);
       });
     });
 
-    addAutoDisposeListener(_controller.searchAutoCompleteNotifier);
+    addAutoDisposeListener(controller.searchAutoCompleteNotifier);
 
-    addAutoDisposeListener(_controller.selectTheSearchNotifier, _handleSearch);
+    addAutoDisposeListener(controller.selectTheSearchNotifier, _handleSearch);
 
-    addAutoDisposeListener(_controller.searchNotifier, _handleSearch);
+    addAutoDisposeListener(controller.searchNotifier, _handleSearch);
   }
 
   void _handleSearch() {
-    final searchingValue = _controller.search;
+    final searchingValue = controller.search;
     if (searchingValue.isNotEmpty) {
-      if (_controller.selectTheSearch) {
+      if (controller.selectTheSearch) {
         // Found an exact match.
         selectItemInTree(searchingValue);
-        _controller.selectTheSearch = false;
-        _controller.resetSearch();
+        controller.selectTheSearch = false;
+        controller.resetSearch();
         return;
       }
 
       // No exact match, return the list of possible matches.
-      _controller.clearSearchAutoComplete();
+      controller.clearSearchAutoComplete();
 
       final matches = _snapshotMatches(searchingValue);
 
       // Remove duplicates and sort the matches.
       final normalizedMatches = matches.toSet().toList()..sort();
       // Use the top 10 matches:
-      _controller.searchAutoComplete.value = normalizedMatches
+      controller.searchAutoComplete.value = normalizedMatches
           .sublist(
             0,
             min(
@@ -1278,9 +1335,9 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
     final externalMatches = <String>[];
     final filteredMatches = <String>[];
 
-    switch (_controller.groupingBy.value) {
+    switch (controller.groupingBy.value) {
       case MemoryController.groupByLibrary:
-        final searchRoot = _controller.activeSnapshot;
+        final searchRoot = controller.activeSnapshot;
         for (final reference in searchRoot.children) {
           if (reference.isLibrary) {
             matches.addAll(
@@ -1311,7 +1368,7 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
       case MemoryController.groupByClass:
         matches.addAll(
           matchClasses(
-            _controller.groupByTreeTable.dataRoots,
+            controller.groupByTreeTable.dataRoots,
             searchingValue,
           ),
         );
@@ -1379,12 +1436,12 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
   /// Returns `true` if [searchingValue] is found in the tree.
   bool selectItemInTree(String searchingValue) {
     // Search the snapshots.
-    switch (_controller.groupingBy.value) {
+    switch (controller.groupingBy.value) {
       case MemoryController.groupByLibrary:
-        final searchRoot = _controller.activeSnapshot;
-        if (_controller.selectionSnapshotNotifier.value.node == null) {
+        final searchRoot = controller.activeSnapshot;
+        if (controller.selectionSnapshotNotifier.value.node == null) {
           // No selected node, then select the snapshot we're searching.
-          _controller.selectionSnapshotNotifier.value = Selection(
+          controller.selectionSnapshotNotifier.value = Selection(
             node: searchRoot,
             nodeIndex: searchRoot.index,
             scrollIntoView: true,
@@ -1417,7 +1474,7 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
         }
         break;
       case MemoryController.groupByClass:
-        for (final reference in _controller.groupByTreeTable.dataRoots) {
+        for (final reference in controller.groupByTreeTable.dataRoots) {
           if (reference.isClass) {
             return _selecteClassInTree(reference, searchingValue);
           }
@@ -1433,12 +1490,12 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
 
   bool _selectInTree(Reference reference, search) {
     if (reference.name == search) {
-      _controller.selectionSnapshotNotifier.value = Selection(
+      controller.selectionSnapshotNotifier.value = Selection(
         node: reference,
         nodeIndex: reference.index,
         scrollIntoView: true,
       );
-      _controller.clearSearchAutoComplete();
+      controller.clearSearchAutoComplete();
       return true;
     }
     return false;
@@ -1464,25 +1521,26 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
 
   @override
   Widget build(BuildContext context) {
-    final root = _controller.buildTreeFromAllData();
-
+    final root = controller.buildTreeFromAllData();
+    Widget result;
     if (root != null && root.children.isNotEmpty) {
       // Snapshots and analyses exists display the trees.
-      _controller.groupByTreeTable = TreeTable<Reference>(
+      controller.groupByTreeTable = TreeTable<Reference>(
         dataRoots: root.children,
         columns: _columns,
         treeColumn: _treeColumn,
         keyFactory: (libRef) => PageStorageKey<String?>(libRef.name),
         sortColumn: _columns[0],
         sortDirection: SortDirection.ascending,
-        selectionNotifier: _controller.selectionSnapshotNotifier,
+        selectionNotifier: controller.selectionSnapshotNotifier,
       );
 
-      return _controller.groupByTreeTable;
+      result = controller.groupByTreeTable;
     } else {
       // Nothing collected yet (snapshots/analyses) - return an empty area.
-      return const SizedBox();
+      result = const SizedBox();
     }
+    return OutlineDecoration(child: result);
   }
 }
 
@@ -1516,9 +1574,6 @@ class _LibraryRefColumn extends TreeColumnData<Reference> {
   String getTooltip(Reference dataObject) {
     return dataObject.name ?? '';
   }
-
-  @override
-  double get fixedWidthPx => 250.0;
 }
 
 class _ClassOrInstanceCountColumn extends ColumnData<Reference> {
@@ -1730,7 +1785,11 @@ class _ShallowSizeColumn extends ColumnData<Reference> {
             dataObject.isAllocation) &&
         value is! int) return '';
 
-    return NumberFormat.compact().format(value);
+    return prettyPrintBytes(
+      value as int,
+      kbFractionDigits: 1,
+      includeUnit: true,
+    )!;
   }
 
   @override

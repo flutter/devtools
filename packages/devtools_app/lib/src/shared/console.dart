@@ -4,7 +4,6 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../primitives/auto_dispose_mixin.dart';
 import '../primitives/utils.dart';
@@ -13,6 +12,7 @@ import '../screens/debugger/variables.dart';
 import 'common_widgets.dart';
 import 'console_service.dart';
 import 'theme.dart';
+import 'utils.dart';
 
 // TODO(devoncarew): Allow scrolling horizontally as well.
 
@@ -122,7 +122,9 @@ class _ConsoleOutput extends StatefulWidget {
 }
 
 class _ConsoleOutputState extends State<_ConsoleOutput>
-    with AutoDisposeMixin<_ConsoleOutput> {
+    with
+        AutoDisposeMixin<_ConsoleOutput>,
+        ProvidedControllerMixin<DebuggerController, _ConsoleOutput> {
   // The scroll controller must survive ConsoleOutput re-renders
   // to work as intended, so it must be part of the "state".
   final ScrollController _scroll = ScrollController();
@@ -133,8 +135,6 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
   bool _scrollToBottom = true;
   bool _considerScrollAtBottom = true;
   double _lastScrollOffset = 0.0;
-
-  late DebuggerController _debuggerController;
 
   @override
   void initState() {
@@ -196,7 +196,7 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _debuggerController = Provider.of<DebuggerController>(context);
+    initController();
   }
 
   @override
@@ -250,7 +250,7 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
           } else if (line is VariableConsoleLine) {
             return ExpandableVariable(
               variable: line.variable,
-              debuggerController: _debuggerController,
+              debuggerController: controller,
             );
           } else {
             assert(

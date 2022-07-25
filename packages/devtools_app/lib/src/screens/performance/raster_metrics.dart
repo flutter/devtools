@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../primitives/utils.dart';
@@ -12,6 +14,7 @@ import '../../shared/table.dart';
 import '../../shared/table_data.dart';
 import '../../shared/theme.dart';
 import '../../shared/utils.dart';
+import '../../ui/colors.dart';
 import 'raster_metrics_controller.dart';
 
 class RenderingLayerVisualizer extends StatelessWidget {
@@ -51,6 +54,7 @@ class RenderingLayerVisualizer extends StatelessWidget {
               builder: (context, snapshot, _) {
                 return LayerImage(
                   snapshot: snapshot,
+                  originalFrameSize: rasterMetricsController.originalFrameSize,
                   includeFullscreenButton: true,
                 );
               },
@@ -136,10 +140,13 @@ class LayerImage extends StatelessWidget {
   const LayerImage({
     Key? key,
     required this.snapshot,
+    required this.originalFrameSize,
     this.includeFullscreenButton = false,
   }) : super(key: key);
 
   final LayerSnapshot? snapshot;
+
+  final Size? originalFrameSize;
 
   final bool includeFullscreenButton;
 
@@ -149,9 +156,9 @@ class LayerImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = Theme.of(context).focusColor;
     final snapshot = this.snapshot;
-    if (snapshot == null) {
+    final originalFrameSize = this.originalFrameSize;
+    if (snapshot == null || originalFrameSize == null) {
       return const Icon(
         Icons.image,
         size: _placeholderImageSize,
@@ -167,9 +174,36 @@ class LayerImage extends StatelessWidget {
         ),
         Flexible(
           child: Container(
-            color: color,
+            color: Theme.of(context).focusColor,
             margin: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-            child: Image.memory(snapshot.bytes),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final scaleFactor = _calculateScaleFactor(
+                  constraints,
+                  originalFrameSize,
+                );
+                final scaledSize = _scaledLayerSize(scaleFactor);
+                final scaledOffset = _scaledLayerOffset(scaleFactor);
+                return Stack(
+                  children: [
+                    Image.memory(snapshot.bytes),
+                    Positioned(
+                      left: scaledOffset.dx,
+                      top: scaledOffset.dy,
+                      child: Container(
+                        height: scaledSize.height,
+                        width: scaledSize.width,
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: defaultSelectionColor,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
           ),
         ),
         includeFullscreenButton
@@ -186,6 +220,7 @@ class LayerImage extends StatelessWidget {
                       context: context,
                       builder: (context) => LayerImageDialog(
                         snapshot: snapshot,
+                        originalFrameSize: originalFrameSize,
                       ),
                     );
                   },
@@ -195,12 +230,41 @@ class LayerImage extends StatelessWidget {
       ],
     );
   }
+
+  double _calculateScaleFactor(
+    BoxConstraints constraints,
+    Size originalFrameSize,
+  ) {
+    final widthScaleFactor = constraints.maxWidth / originalFrameSize.width;
+    final heightScaleFactor = constraints.maxHeight / originalFrameSize.height;
+    return math.min(widthScaleFactor, heightScaleFactor);
+  }
+
+  Size _scaledLayerSize(double scale) {
+    final layerSnapshot = snapshot!;
+    final scaledWidth = layerSnapshot.size.width * scale;
+    final scaledHeight = layerSnapshot.size.height * scale;
+    return Size(scaledWidth, scaledHeight);
+  }
+
+  Offset _scaledLayerOffset(double scale) {
+    final layerSnapshot = snapshot!;
+    final scaledDx = layerSnapshot.offset.dx * scale;
+    final scaledDy = layerSnapshot.offset.dy * scale;
+    return Offset(scaledDx, scaledDy);
+  }
 }
 
 class LayerImageDialog extends StatelessWidget {
-  const LayerImageDialog({Key? key, required this.snapshot}) : super(key: key);
+  const LayerImageDialog({
+    Key? key,
+    required this.snapshot,
+    required this.originalFrameSize,
+  }) : super(key: key);
 
   final LayerSnapshot snapshot;
+
+  final Size originalFrameSize;
 
   static const _padding = 300.0;
 
@@ -217,6 +281,7 @@ class LayerImageDialog extends StatelessWidget {
         height: mediaHeight - _padding,
         child: LayerImage(
           snapshot: snapshot,
+          originalFrameSize: originalFrameSize,
         ),
       ),
       actions: [

@@ -3,73 +3,89 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
+import 'dart:async';
+
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/primitives/trace_event.dart';
 import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/screens/performance/performance_controller.dart';
 import 'package:devtools_app/src/screens/performance/performance_model.dart';
+import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../test_data/performance.dart';
-import '../test_infra/flutter_test_driver.dart' show FlutterRunConfiguration;
-import '../test_infra/flutter_test_environment.dart';
 
 void main() async {
   initializeLiveTestWidgetsFlutterBindingWithAssets();
 
-  final FlutterTestEnvironment env = FlutterTestEnvironment(
-    const FlutterRunConfiguration(withDebugger: true),
+  late PerformanceController performanceController;
+  final ServiceConnectionManager fakeServiceManager = FakeServiceManager(
+    service: FakeServiceManager.createFakeService(
+      timelineData: vm_service.Timeline.parse(testTimelineJson)!,
+    ),
   );
 
-  late PerformanceController performanceController;
-  env.afterNewSetup = () async {
-    setGlobal(OfflineModeController, OfflineModeController());
-    performanceController = PerformanceController()..data = PerformanceData();
-    await performanceController.initialized;
-  };
-
   group('PerformanceController', () {
-    tearDownAll(() async {
-      await env.tearDownEnvironment(force: true);
+    setUpAll(() {
+      when(fakeServiceManager.connectedApp!.isProfileBuild)
+          .thenAnswer((realInvocation) => Future.value(false));
+      final initializedCompleter = Completer<bool>();
+      initializedCompleter.complete(true);
+      when(fakeServiceManager.connectedApp!.initialized)
+          .thenReturn(initializedCompleter);
+      setGlobal(ServiceConnectionManager, fakeServiceManager);
     });
 
-    test('processOfflineData', () async {
-      await env.setupEnvironment();
-      offlineController.enterOfflineMode();
-      final offlineTimelineData =
-          OfflinePerformanceData.parse(offlinePerformanceDataJson);
-      await performanceController.processOfflineData(offlineTimelineData);
-      expect(
-        isPerformanceDataEqual(
-          performanceController.data!,
-          offlineTimelineData,
-        ),
-        isTrue,
-      );
-      expect(
-        isPerformanceDataEqual(
-          performanceController.offlinePerformanceData!,
-          offlineTimelineData,
-        ),
-        isTrue,
-      );
-      expect(
-        performanceController.processor.uiThreadId,
-        equals(testUiThreadId),
-      );
-      expect(
-        performanceController.processor.rasterThreadId,
-        equals(testRasterThreadId),
-      );
-
-      await env.tearDownEnvironment();
+    setUp(() async {
+      setGlobal(OfflineModeController, OfflineModeController());
+      performanceController = PerformanceController()..data = PerformanceData();
+      await performanceController.initialized;
+      // This flag should never be turned on in production.
+      expect(debugSimpleTrace, isFalse);
     });
+
+    test(
+      'processOfflineData',
+      () async {
+        offlineController.enterOfflineMode();
+        final offlinePerformanceData =
+            OfflinePerformanceData.parse(offlinePerformanceDataJson);
+        await performanceController.processOfflineData(offlinePerformanceData);
+        expect(
+          isPerformanceDataEqual(
+            performanceController.data!,
+            offlinePerformanceData,
+          ),
+          isTrue,
+        );
+        expect(
+          isPerformanceDataEqual(
+            performanceController.offlinePerformanceData!,
+            offlinePerformanceData,
+          ),
+          isTrue,
+        );
+        expect(
+          performanceController.processor.uiThreadId,
+          equals(testUiThreadId),
+        );
+        expect(
+          performanceController.processor.rasterThreadId,
+          equals(testRasterThreadId),
+        );
+        expect(
+          performanceController.displayRefreshRate.value,
+          equals(offlinePerformanceData.displayRefreshRate),
+        );
+      },
+      timeout: const Timeout.factor(8),
+    );
 
     test('frame selection', () async {
-      await env.setupEnvironment();
-
       final frame0 = testFrame0.shallowCopy()
         ..setEventFlow(goldenUiTimelineEvent)
         ..setEventFlow(goldenRasterTimelineEvent);
@@ -110,8 +126,6 @@ void main() async {
         equals(frame1UiEvent),
       );
       expect(data.cpuProfileData, isNotNull);
-
-      await env.tearDownEnvironment();
     });
 
     test(
@@ -150,7 +164,6 @@ void main() async {
     });
 
     test('add frame', () async {
-      await env.setupEnvironment();
       await performanceController.clearData();
 
       final data = performanceController.data!;
@@ -160,12 +173,9 @@ void main() async {
         data.frames.length,
         equals(1),
       );
-      await env.tearDownEnvironment();
     });
 
     test('matchesForSearch', () async {
-      await env.setupEnvironment();
-
       // Verify an empty list is returned for bad input.
       expect(performanceController.matchesForSearch(''), isEmpty);
 
@@ -182,13 +192,9 @@ void main() async {
       expect(matches[1].name, equals('Framework Workload'));
       expect(matches[2].name, equals('Engine::BeginFrame'));
       expect(matches[3].name, equals('Frame'));
-
-      await env.tearDownEnvironment();
     });
 
     test('search query searches through previous matches', () async {
-      await env.setupEnvironment();
-
       await performanceController.clearData();
       performanceController.addTimelineEvent(goldenUiTimelineEvent..deepCopy());
 
@@ -224,8 +230,6 @@ void main() async {
         data.timelineEvents,
         matches,
       );
-
-      await env.tearDownEnvironment();
     });
   });
 }

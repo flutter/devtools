@@ -26,12 +26,17 @@ import '../profiler/cpu_profile_controller.dart';
 import '../profiler/cpu_profile_service.dart';
 import '../profiler/cpu_profile_transformer.dart';
 import '../profiler/profile_granularity.dart';
+import 'panes/controls/enhance_tracing/enhance_tracing_controller.dart';
 import 'performance_model.dart';
 import 'performance_screen.dart';
 import 'performance_utils.dart';
 import 'raster_metrics_controller.dart';
 import 'rebuild_counts.dart';
+import 'simple_trace_example.dart';
 import 'timeline_event_processor.dart';
+
+/// Debugging flag to load sample trace events from [simple_trace_example.dart].
+bool debugSimpleTrace = false;
 
 /// Flag to hide the frame analysis feature while it is under development.
 bool frameAnalysisSupported = false;
@@ -57,6 +62,8 @@ class PerformanceController extends DisposableController
 
   final cpuProfilerController =
       CpuProfilerController(analyticsScreenId: analytics_constants.performance);
+
+  final enhanceTracingController = EnhanceTracingController();
 
   final rasterMetricsController = RasterMetricsController();
 
@@ -634,6 +641,20 @@ class PerformanceController extends DisposableController
     List<TraceEventWrapper> traceEvents, {
     int startIndex = 0,
   }) async {
+    if (debugSimpleTrace) {
+      traceEvents = simpleTraceEvents['traceEvents']!
+          .where(
+            (json) => json.containsKey(TraceEvent.timestampKey),
+          ) // thread_name events
+          .map(
+            (e) => TraceEventWrapper(
+              TraceEvent(e),
+              DateTime.now().microsecondsSinceEpoch,
+            ),
+          )
+          .toList();
+    }
+
     if (data == null) {
       await _initData();
     }
@@ -780,6 +801,8 @@ class PerformanceController extends DisposableController
         storeAsUserTagNone: true,
       );
     }
+
+    _displayRefreshRate.value = _offlineData.displayRefreshRate;
   }
 
   /// Exports the current timeline data to a .json file.
@@ -859,6 +882,7 @@ class PerformanceController extends DisposableController
     _pollingTimer?.cancel();
     _timelinePollingRateLimiter?.dispose();
     cpuProfilerController.dispose();
+    enhanceTracingController.dispose();
     super.dispose();
   }
 }

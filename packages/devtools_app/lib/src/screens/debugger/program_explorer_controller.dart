@@ -135,7 +135,7 @@ class ProgramExplorerController extends DisposableController
       );
       if (matchingNode != null) return index;
     }
-    // If the node wasn't found, return 0.
+    // If the node wasn't found, return -1.
     return -1;
   }
 
@@ -180,6 +180,21 @@ class ProgramExplorerController extends DisposableController
       _outlineSelection.value?.unselect();
       _outlineSelection.value = node;
     }
+  }
+
+  /// Sets the current [_outlineSelection] value to null, and resets the
+  /// [_outlineNodes] tree for the current [_scriptSelection] by
+  /// collapsing and unselecting all nodes.
+  void resetOutline() {
+    _outlineSelection.value = null;
+
+    for (final node in _outlineNodes.value) {
+      node
+        ..collapseCascading()
+        ..unselect();
+    }
+
+    _outlineNodes.notifyListeners();
   }
 
   /// Updates `node` with a fully populated VM service [Obj].

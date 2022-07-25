@@ -4,10 +4,16 @@
 
 const renderStats = {
   'type': 'RenderFrameWithRasterStats',
+  'frame_width': 100,
+  'frame_height': 200,
   'snapshots': [
     {
       'layer_unique_id': 12731,
       'duration_micros': 389,
+      'width': 50,
+      'height': 50,
+      'left': 25,
+      'top': 25,
       'snapshot': [
         137,
         80,
@@ -4002,6 +4008,10 @@ const renderStats = {
     {
       'layer_unique_id': 12734,
       'duration_micros': 105,
+      'width': 20,
+      'height': 40,
+      'left': 35,
+      'top': 30,
       'snapshot': [
         137,
         80,

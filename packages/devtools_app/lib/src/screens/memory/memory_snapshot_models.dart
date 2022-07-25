@@ -8,6 +8,7 @@ import 'package:vm_service/vm_service.dart';
 import '../../primitives/trees.dart';
 import 'memory_controller.dart';
 import 'memory_graph_model.dart';
+import 'primitives/predefined_classes.dart';
 
 /// Consolidated list of libraries.  External is the external heap
 /// and Filtered is the sum of all filtered (hidden) libraries.
@@ -377,8 +378,8 @@ class SnapshotReference extends Reference {
     final timestamp = snapshot.collectedTimestamp;
     final displayTimestamp = MemoryController.formattedTimestamp(timestamp);
     return snapshot.autoSnapshot
-        ? 'Snapshot $displayTimestamp Auto'
-        : 'Snapshot $displayTimestamp';
+        ? 'Snapshot (${snapshot.snapshotGraph.name}) $displayTimestamp Auto'
+        : 'Snapshot (${snapshot.snapshotGraph.name}) $displayTimestamp';
   }
 
   final Snapshot snapshot;

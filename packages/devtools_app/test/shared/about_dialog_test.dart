@@ -11,6 +11,7 @@ import 'package:devtools_app/src/shared/about_dialog.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 
 void main() {
   late DevToolsAboutDialog aboutDialog;
@@ -18,8 +19,16 @@ void main() {
   group('About Dialog', () {
     setUp(() {
       aboutDialog = DevToolsAboutDialog();
+      final fakeServiceManager = FakeServiceManager();
+      when(fakeServiceManager.vm.version).thenReturn('1.9.1');
+      mockConnectedApp(
+        fakeServiceManager.connectedApp!,
+        isFlutterApp: true,
+        isProfileBuild: false,
+        isWebApp: false,
+      );
+      setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
-      setGlobal(ServiceConnectionManager, FakeServiceManager());
       setGlobal(IdeTheme, IdeTheme());
     });
 
@@ -39,6 +48,10 @@ void main() {
       expect(find.text('Feedback'), findsOneWidget);
       expect(
         findSubstring(aboutDialog, 'github.com/flutter/devtools'),
+        findsOneWidget,
+      );
+      expect(
+        findSubstring(aboutDialog, 'Discord'),
         findsOneWidget,
       );
     });

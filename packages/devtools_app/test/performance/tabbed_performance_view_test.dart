@@ -2,11 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:devtools_app/src/charts/flame_chart.dart';
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
+import 'package:devtools_app/src/primitives/listenable.dart';
 import 'package:devtools_app/src/screens/performance/frame_analysis.dart';
 import 'package:devtools_app/src/screens/performance/performance_controller.dart';
 import 'package:devtools_app/src/screens/performance/performance_model.dart';
@@ -28,8 +27,8 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 import '../test_data/performance.dart';
 
 void main() {
-  FakeServiceManager fakeServiceManager;
-  late PerformanceController controller;
+  late FakeServiceManager fakeServiceManager;
+  late MockPerformanceController controller;
 
   Future<void> _setUpServiceManagerWithTimeline(
     Map<String, dynamic> timelineJson,
@@ -40,15 +39,16 @@ void main() {
       ),
     );
     final app = fakeServiceManager.connectedApp!;
-    when(app.initialized).thenReturn(Completer()..complete(true));
-    when(app.isDartWebAppNow).thenReturn(false);
-    when(app.isFlutterAppNow).thenReturn(true);
+    mockConnectedApp(
+      app,
+      isFlutterApp: true,
+      isProfileBuild: true,
+      isWebApp: false,
+    );
     when(app.flutterVersionNow).thenReturn(
       FlutterVersion.parse((await fakeServiceManager.flutterVersion).json!),
     );
-    when(app.isProfileBuild).thenAnswer((_) => Future.value(true));
-    when(app.isDartCliAppNow).thenReturn(false);
-    when(app.isDebugFlutterAppNow).thenReturn(false);
+
     setGlobal(ServiceConnectionManager, fakeServiceManager);
     setGlobal(OfflineModeController, OfflineModeController());
     when(serviceManager.connectedApp!.isDartWebApp)
@@ -60,14 +60,14 @@ void main() {
       await _setUpServiceManagerWithTimeline(testTimelineJson);
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(PreferencesController, PreferencesController());
-      controller = PerformanceController()..data = PerformanceData();
+      controller = createMockPerformanceControllerWithDefaults();
       frameAnalysisSupported = true;
       rasterMetricsSupported = true;
     });
 
     Future<void> pumpView(
       WidgetTester tester, {
-      PerformanceController? performanceController,
+      MockPerformanceController? performanceController,
       bool runAsync = false,
     }) async {
       if (performanceController != null) {
@@ -81,12 +81,13 @@ void main() {
       }
 
       await tester.pumpWidget(
-        wrap(
+        wrapWithControllers(
           TabbedPerformanceView(
             controller: controller,
             processing: false,
             processingProgress: 0.0,
           ),
+          performance: controller,
         ),
       );
       await tester.pumpAndSettle();
@@ -136,8 +137,9 @@ void main() {
           ..setEventFlow(animatorBeginFrameEvent)
           ..setEventFlow(goldenRasterTimelineEvent);
 
-        controller = PerformanceController()..data = PerformanceData();
-        await controller.toggleSelectedFrame(frame0);
+        controller = createMockPerformanceControllerWithDefaults();
+        when(controller.selectedFrame)
+            .thenReturn(FixedValueListenable<FlutterFrame?>(frame0));
 
         await pumpView(tester, performanceController: controller);
 
@@ -187,6 +189,30 @@ void main() {
         expect(find.byType(RenderingLayerVisualizer), findsOneWidget);
         expect(find.text('Take Snapshot'), findsOneWidget);
         expect(find.byType(ClearButton), findsOneWidget);
+      });
+    });
+
+    testWidgetsWithWindowSize(
+        'only shows Timeline Events tab for non-flutter app', windowSize,
+        (WidgetTester tester) async {
+      await tester.runAsync(() async {
+        await _setUpServiceManagerWithTimeline({});
+        final app = fakeServiceManager.connectedApp!;
+        mockConnectedApp(
+          app,
+          isFlutterApp: false,
+          isProfileBuild: false,
+          isWebApp: false,
+        );
+        when(app.flutterVersionNow).thenReturn(null);
+
+        await pumpView(tester);
+        await tester.pumpAndSettle();
+        expect(find.byType(AnalyticsTabbedView), findsOneWidget);
+        expect(find.byType(DevToolsTab), findsOneWidget);
+        expect(find.text('Timeline Events'), findsOneWidget);
+        expect(find.text('Frame Analysis'), findsNothing);
+        expect(find.text('Raster Metrics'), findsNothing);
       });
     });
   });

@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/screens/debugger/debugger_model.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/object_tree.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -34,27 +34,21 @@ void main() {
     final instance = Instance(
       kind: InstanceKind.kMap,
       id: objectId,
-      classRef: null,
       length: 2,
       associations: [
         MapAssociation(
           key: InstanceRef(
-            classRef: null,
             id: '4',
             kind: InstanceKind.kString,
             valueAsString: 'Hey',
-            identityHashCode: null,
           ),
           value: InstanceRef(
-            classRef: null,
             id: '5',
             kind: InstanceKind.kDouble,
             valueAsString: '12.34',
-            identityHashCode: null,
           ),
         ),
       ],
-      identityHashCode: null,
     );
     final isolateRef = IsolateRef(
       id: isolateId,
@@ -66,9 +60,6 @@ void main() {
       BoundVariable(
         name: 'test',
         value: instance,
-        declarationTokenPos: null,
-        scopeEndTokenPos: null,
-        scopeStartTokenPos: null,
       ),
       isolateRef,
     );
@@ -79,13 +70,8 @@ void main() {
 
     await buildVariablesTree(variable);
 
-    expect(variable.children.first.children, [
-      matchesVariable(name: '[key]', value: '\'Hey\''),
-      matchesVariable(name: '[value]', value: '12.34'),
-    ]);
-
     expect(variable.children, [
-      matchesVariable(name: null, value: '[Entry 0]'),
+      matchesVariable(name: 'Hey', value: '12.34'),
     ]);
   });
 
@@ -100,35 +86,26 @@ void main() {
     final instance = Instance(
       kind: InstanceKind.kMap,
       id: objectId,
-      classRef: null,
       length: 2,
       associations: [
         MapAssociation(
           key: InstanceRef(
-            classRef: null,
             id: '4',
             kind: InstanceKind.kInt,
             valueAsString: '1',
-            identityHashCode: null,
           ),
           value: InstanceRef(
-            classRef: null,
             id: '5',
             kind: InstanceKind.kDouble,
             valueAsString: '12.34',
-            identityHashCode: null,
           ),
         ),
       ],
-      identityHashCode: null,
     );
     final variable = DartObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
-        declarationTokenPos: null,
-        scopeEndTokenPos: null,
-        scopeStartTokenPos: null,
       ),
       isolateRef,
     );
@@ -140,11 +117,7 @@ void main() {
     await buildVariablesTree(variable);
 
     expect(variable.children, [
-      matchesVariable(name: null, value: '[Entry 0]'),
-    ]);
-    expect(variable.children.first.children, [
-      matchesVariable(name: '[key]', value: '1'),
-      matchesVariable(name: '[value]', value: '12.34'),
+      matchesVariable(name: '1', value: '12.34'),
     ]);
   });
 
@@ -159,7 +132,6 @@ void main() {
     final instance = Instance(
       kind: InstanceKind.kMap,
       id: objectId,
-      classRef: null,
       length: 2,
       associations: [
         MapAssociation(
@@ -167,26 +139,19 @@ void main() {
             classRef: ClassRef(id: 'a', name: 'Foo', library: libraryRef),
             id: '4',
             kind: InstanceKind.kPlainInstance,
-            identityHashCode: null,
           ),
           value: InstanceRef(
-            classRef: null,
             id: '5',
             kind: InstanceKind.kDouble,
             valueAsString: '12.34',
-            identityHashCode: null,
           ),
         ),
       ],
-      identityHashCode: null,
     );
     final variable = DartObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
-        declarationTokenPos: null,
-        scopeEndTokenPos: null,
-        scopeStartTokenPos: null,
       ),
       isolateRef,
     );

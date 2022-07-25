@@ -35,7 +35,14 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
               'pid': 54321,
               'functions': [],
               'samples': [],
-            });
+            }) {
+    _reverseResolvedUriMap = <String, String>{};
+    if (_resolvedUriMap != null) {
+      for (var e in _resolvedUriMap!.entries) {
+        _reverseResolvedUriMap![e.value] = e.key;
+      }
+    }
+  }
 
   CpuSamples? cpuSamples;
 
@@ -60,6 +67,8 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   final SamplesMemoryJson? _memoryData;
   final AllocationMemoryJson? _allocationData;
   final Map<String, String>? _resolvedUriMap;
+  late final Map<String, String>? _reverseResolvedUriMap;
+  final _gcEventStream = StreamController<Event>.broadcast();
 
   final _flags = <String, dynamic>{
     'flags': <Flag>[
@@ -106,6 +115,21 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
       UriList(
         uris: _resolvedUriMap != null
             ? (uris.map((e) => _resolvedUriMap![e]).toList())
+            : null,
+      ),
+    );
+  }
+
+  @override
+  Future<UriList> lookupResolvedPackageUris(
+    String isolateId,
+    List<String> uris, {
+    bool? local,
+  }) {
+    return Future.value(
+      UriList(
+        uris: _reverseResolvedUriMap != null
+            ? (uris.map((e) => _reverseResolvedUriMap![e]).toList())
             : null,
       ),
     );
@@ -169,6 +193,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
     // Simulate a snapshot that takes .5 seconds.
     await Future.delayed(const Duration(milliseconds: 500));
     final result = MockHeapSnapshotGraph();
+    when(result.name).thenReturn('name');
     when(result.classes).thenReturn([]);
     when(result.objects).thenReturn([]);
     when(result.externalProperties).thenReturn([]);
@@ -367,6 +392,9 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   }
 
   @override
+  final fakeServiceCache = JsonToServiceCache();
+
+  @override
   Future<Timestamp> getVMTimelineMicros() async => Timestamp(timestamp: 0);
 
   @override
@@ -385,7 +413,15 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   Stream<Event> get onStderrEventWithHistory => const Stream.empty();
 
   @override
-  Stream<Event> get onGCEvent => const Stream.empty();
+  Stream<Event> get onGCEvent => _gcEventStream.stream;
+
+  void emitGCEvent() {
+    _gcEventStream.sink.add(
+      Event(
+        kind: EventKind.kGC,
+      ),
+    );
+  }
 
   @override
   Stream<Event> get onVMEvent => const Stream.empty();

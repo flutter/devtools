@@ -20,6 +20,7 @@ import '../shared/console_service.dart';
 import '../shared/error_badge_manager.dart';
 import '../shared/globals.dart';
 import '../shared/title.dart';
+import '../shared/utils.dart';
 import 'isolate_manager.dart';
 import 'resolved_uri_manager.dart';
 import 'service_extension_manager.dart';
@@ -282,11 +283,7 @@ class ServiceConnectionManager {
 
     _connectedState.value = const ConnectedState(true);
 
-    final isolates = <IsolateRef>[
-      ...vm?.isolates ?? [],
-      if (preferences.vmDeveloperModeEnabled.value) ...vm?.systemIsolates ?? [],
-    ];
-
+    final isolates = vm?.isolatesForDevToolsMode() ?? <IsolateRef>[];
     await isolateManager.init(isolates);
     if (service != this.service) {
       // A different service has been opened.
@@ -500,8 +497,8 @@ class ServiceConnectionManager {
     if (uri == null) return false;
     assert(_serviceAvailable.isCompleted);
     assert(serviceManager.isolateManager.mainIsolate.value != null);
-    final isolate = isolateManager.mainIsolateDebuggerState!.isolateNow!;
-    return (isolate.libraries ?? [])
+    final isolate = isolateManager.mainIsolateDebuggerState!.isolateNow;
+    return (isolate?.libraries ?? [])
         .map((ref) => ref.uri)
         .toList()
         .any((u) => u?.startsWith(uri) == true);

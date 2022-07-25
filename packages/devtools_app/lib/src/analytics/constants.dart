@@ -37,6 +37,7 @@ const appDisconnected = 'appDisconnected';
 // Main bar UX actions:
 const feedbackLink = 'feedback';
 const feedbackButton = 'feedbackButton';
+const discordLink = 'discord';
 
 // Inspector UX actions:
 const refresh = 'refresh';
@@ -78,12 +79,16 @@ const disableOpacityLayersOption = 'disableOpacityLayers';
 const disableOpacityLayersOptionDocs = 'disableOpacityLayersDocs';
 const disablePhysicalShapeLayersOption = 'disablePhysicalShapeLayers';
 const disablePhysicalShapeLayersOptionDocs = 'disablePhysicalShapeLayersDocs';
+const canvasSaveLayerDocs = 'canvasSaveLayerDocs';
+const intrinsicOperationsDocs = 'intrinsicOperationsDocs';
+const shaderCompilationDocs = 'shaderCompilationDocs';
 const shaderCompilationDocsTooltipLink = 'shaderCompilationDocsTooltipLink';
 const analyzeSelectedFrame = 'analyzeSelectedFrame';
 const collectRasterStats = 'collectRasterStats';
 
 // CPU profiler UX actions:
 const profileGranularityPrefix = 'profileGranularity';
+const profileGranularityDocs = 'profileGranularityDocs';
 const loadAllCpuSamples = 'loadAllCpuSamples';
 const profileAppStartUp = 'profileAppStartUp';
 const cpuProfileFlameChartHelp = 'cpuProfileFlameChartHelp';
@@ -120,6 +125,7 @@ const darkTheme = 'darkTheme';
 const denseMode = 'denseMode';
 const analytics = 'analytics';
 const vmDeveloperMode = 'vmDeveloperMode';
+const inspectorHoverEvalMode = 'inspectorHoverEvalMode';
 
 // Common actions shared across screens.
 // These actions will be tracked per screen, so they will still be
@@ -133,6 +139,7 @@ const export = 'export';
 const expandAll = 'expandAll';
 const collapseAll = 'collapseAll';
 const documentationLink = 'documentationLink';
+const profileModeDocs = 'profileModeDocs';
 // This should track the time from `initState` for a screen to the time when
 // the page data has loaded and is ready to interact with.
 const pageReady = 'pageReady';

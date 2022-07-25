@@ -14,7 +14,6 @@ import 'package:devtools_app/src/ui/colors.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
 
 import '../test_data/performance.dart';
 
@@ -36,11 +35,19 @@ void main() {
   group('FlutterFramesChart', () {
     setUp(() async {
       final fakeServiceManager = FakeServiceManager();
-      when(fakeServiceManager.connectedApp!.isFlutterAppNow).thenReturn(true);
+      mockConnectedApp(
+        fakeServiceManager.connectedApp!,
+        isFlutterApp: true,
+        isProfileBuild: true,
+        isWebApp: false,
+      );
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(OfflineModeController, OfflineModeController());
       setGlobal(IdeTheme, IdeTheme());
       frameAnalysisSupported = true;
+
+      // This flag should never be turned on in production.
+      expect(debugFrames, isFalse);
     });
 
     testWidgets('builds with no frames', (WidgetTester tester) async {
@@ -140,7 +147,7 @@ void main() {
                 OverlayEntry(
                   builder: (context) {
                     return FlutterFramesChartItem(
-                      controller: MockPerformanceController(),
+                      controller: createMockPerformanceControllerWithDefaults(),
                       frame: testFrame0,
                       selected: true,
                       msPerPx: 1,

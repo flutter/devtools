@@ -4,14 +4,17 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../shared/screen.dart';
 import '../../shared/theme.dart';
+import '../../shared/utils.dart';
 import 'isolate_statistics_view.dart';
+import 'object_inspector_view.dart';
 import 'vm_developer_tools_controller.dart';
 import 'vm_statistics_view.dart';
+
+const displayObjectInspector = false;
 
 abstract class VMDeveloperView {
   const VMDeveloperView(
@@ -62,9 +65,10 @@ class VMDeveloperToolsScreen extends Screen {
 class VMDeveloperToolsScreenBody extends StatefulWidget {
   const VMDeveloperToolsScreenBody();
 
-  static const List<VMDeveloperView> views = [
-    VMStatisticsView(),
-    IsolateStatisticsView(),
+  static List<VMDeveloperView> views = [
+    const VMStatisticsView(),
+    const IsolateStatisticsView(),
+    if (displayObjectInspector) ObjectInspectorView(),
   ];
 
   @override
@@ -72,18 +76,14 @@ class VMDeveloperToolsScreenBody extends StatefulWidget {
 }
 
 class _VMDeveloperToolsScreenState extends State<VMDeveloperToolsScreenBody>
-    with AutoDisposeMixin {
-  bool initialized = false;
-  late VMDeveloperToolsController controller;
-
+    with
+        AutoDisposeMixin,
+        ProvidedControllerMixin<VMDeveloperToolsController,
+            VMDeveloperToolsScreenBody> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final newController = Provider.of<VMDeveloperToolsController>(context);
-    // Don't access `controller` if we haven't already initialized it.
-    if (initialized && newController == controller) return;
-    controller = newController;
-    initialized = true;
+    initController();
   }
 
   @override

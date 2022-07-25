@@ -54,6 +54,7 @@ ThemeData _darkTheme(IdeTheme ideTheme) {
     backgroundColor: background,
     indicatorColor: devtoolsBlue[400]!,
     selectedRowColor: devtoolsGrey[600]!,
+    textSelectionColor: Colors.black,
   );
 }
 
@@ -69,6 +70,7 @@ ThemeData _lightTheme(IdeTheme ideTheme) {
     backgroundColor: background,
     indicatorColor: Colors.yellowAccent[400]!,
     selectedRowColor: devtoolsBlue[600]!,
+    textSelectionColor: Colors.white,
   );
 }
 
@@ -79,6 +81,7 @@ ThemeData _baseTheme({
   required Color backgroundColor,
   required Color indicatorColor,
   required Color selectedRowColor,
+  required Color textSelectionColor,
 }) {
   return theme.copyWith(
     primaryColor: primaryColor,
@@ -90,20 +93,19 @@ ThemeData _baseTheme({
     // ignore: deprecated_member_use
     accentColor: devtoolsBlue[400],
     backgroundColor: devtoolsGrey[600],
-    toggleableActiveColor: devtoolsBlue[400],
     canvasColor: backgroundColor,
     scaffoldBackgroundColor: backgroundColor,
     colorScheme: theme.colorScheme.copyWith(background: backgroundColor),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
-        primary: theme.colorScheme.contrastForeground,
+        foregroundColor: theme.colorScheme.contrastForeground,
         minimumSize: Size(buttonMinWidth, defaultButtonHeight),
         fixedSize: Size.fromHeight(defaultButtonHeight),
       ),
     ),
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
-        primary: theme.colorScheme.contrastForeground,
+        foregroundColor: theme.colorScheme.contrastForeground,
         minimumSize: Size(buttonMinWidth, defaultButtonHeight),
         fixedSize: Size.fromHeight(defaultButtonHeight),
       ),
@@ -113,6 +115,43 @@ ThemeData _baseTheme({
         minimumSize: Size(buttonMinWidth, defaultButtonHeight),
         fixedSize: Size.fromHeight(defaultButtonHeight),
       ),
+    ),
+    switchTheme: SwitchThemeData(
+      thumbColor: MaterialStateProperty.resolveWith((states) {
+        if (states.contains(MaterialState.selected) &&
+            !states.contains(MaterialState.disabled)) {
+          return devtoolsBlue[400];
+        }
+        return null;
+      }),
+      trackColor: MaterialStateProperty.resolveWith((states) {
+        if (states.contains(MaterialState.selected) &&
+            !states.contains(MaterialState.disabled)) {
+          return devtoolsBlue[400]!.withAlpha(0x80);
+        }
+        return null;
+      }),
+    ),
+    radioTheme: RadioThemeData(
+      fillColor: MaterialStateProperty.resolveWith((states) {
+        if (states.contains(MaterialState.selected) &&
+            !states.contains(MaterialState.disabled)) {
+          return devtoolsBlue[400];
+        }
+        return null;
+      }),
+    ),
+    checkboxTheme: CheckboxThemeData(
+      fillColor: MaterialStateProperty.resolveWith((states) {
+        if (states.contains(MaterialState.selected) &&
+            !states.contains(MaterialState.disabled)) {
+          return devtoolsBlue[400];
+        }
+        return null;
+      }),
+    ),
+    textSelectionTheme: TextSelectionThemeData(
+      selectionColor: textSelectionColor,
     ),
   );
 }
@@ -173,7 +212,7 @@ double get defaultListItemHeight => scaleByFontFactor(28.0);
 // TODO(jacobr) define a more sophisticated formula for chart height.
 // The chart height does need to increase somewhat to leave room for the legend
 // and tick marks but does not need to scale linearly with the font factor.
-double get defaultChartHeight => scaleByFontFactor(150.0);
+double get defaultChartHeight => scaleByFontFactor(120.0);
 
 /// Width of all settings dialogs.
 double get dialogSettingsWidth => scaleByFontFactor(700.0);
@@ -426,6 +465,9 @@ extension ThemeDataExtension on ThemeData {
         fontSize: defaultFontSize,
       );
 
+  TextStyle get subtleErrorTextStyle =>
+      subtleTextStyle.copyWith(color: colorScheme.errorTextColor);
+
   TextStyle get selectedTextStyle => TextStyle(
         color: textSelectionTheme.selectionColor,
         fontSize: defaultFontSize,
@@ -566,8 +608,33 @@ ButtonStyle denseAwareOutlinedButtonStyle(
   BuildContext context,
   double? minScreenWidthForTextBeforeScaling,
 ) {
-  ButtonStyle buttonStyle =
+  final buttonStyle =
       Theme.of(context).outlinedButtonTheme.style ?? const ButtonStyle();
+  return _generateButtonStyle(
+    context: context,
+    buttonStyle: buttonStyle,
+    minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
+  );
+}
+
+ButtonStyle denseAwareTextButtonStyle(
+  BuildContext context,
+  double? minScreenWidthForTextBeforeScaling,
+) {
+  final buttonStyle =
+      Theme.of(context).textButtonTheme.style ?? const ButtonStyle();
+  return _generateButtonStyle(
+    context: context,
+    buttonStyle: buttonStyle,
+    minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
+  );
+}
+
+ButtonStyle _generateButtonStyle({
+  required BuildContext context,
+  required ButtonStyle buttonStyle,
+  double? minScreenWidthForTextBeforeScaling,
+}) {
   if (!includeText(context, minScreenWidthForTextBeforeScaling)) {
     buttonStyle = buttonStyle.copyWith(
       padding: MaterialStateProperty.resolveWith<EdgeInsets>((_) {

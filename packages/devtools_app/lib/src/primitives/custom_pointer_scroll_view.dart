@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -34,7 +33,9 @@ abstract class CustomPointerScrollView extends BoxScrollView {
     int? semanticChildCount,
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
     this.customPointerSignalHandler,
-  }) : super(
+  })  : _primary = primary ??
+            controller == null && identical(scrollDirection, Axis.vertical),
+        super(
           key: key,
           scrollDirection: scrollDirection,
           reverse: reverse,
@@ -50,13 +51,22 @@ abstract class CustomPointerScrollView extends BoxScrollView {
 
   final void Function(PointerSignalEvent event)? customPointerSignalHandler;
 
+  // TODO(Piinks): Restore once PSC changes have landed, or keep to maintain
+  // original primary behavior.
+  final bool _primary;
+
   @override
   Widget build(BuildContext context) {
     final List<Widget> slivers = buildSlivers(context);
     final AxisDirection axisDirection = getDirection(context);
 
     final ScrollController? scrollController =
-        primary ? PrimaryScrollController.of(context) : controller;
+        _primary ? PrimaryScrollController.of(context) : controller;
+
+    assert(
+      scrollController != null,
+      'No ScrollController has been provided to the CustomPointerScrollView.',
+    );
     final CustomPointerScrollable scrollable = CustomPointerScrollable(
       dragStartBehavior: dragStartBehavior,
       axisDirection: axisDirection,
@@ -68,7 +78,7 @@ abstract class CustomPointerScrollView extends BoxScrollView {
       },
       customPointerSignalHandler: customPointerSignalHandler,
     );
-    return primary && scrollController != null
+    return _primary
         ? PrimaryScrollController.none(child: scrollable)
         : scrollable;
   }
@@ -650,11 +660,11 @@ class _CustomPointerScrollableState extends State<CustomPointerScrollable>
     if (!widget.excludeFromSemantics) {
       result = _ScrollSemantics(
         key: _scrollSemanticsKey,
-        child: result,
         position: position!,
         allowImplicitScrolling: widget.physics?.allowImplicitScrolling ??
             _physics!.allowImplicitScrolling,
         semanticChildCount: widget.semanticChildCount,
+        child: result,
       );
     }
 

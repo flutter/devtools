@@ -9,15 +9,19 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../analytics/analytics.dart' as ga;
 import '../config_specific/launch_url/launch_url.dart';
 import '../primitives/auto_dispose_mixin.dart';
 import '../primitives/flutter_widgets/linked_scroll_controller.dart';
 import '../primitives/utils.dart';
+import '../screens/debugger/debugger_controller.dart';
+import '../screens/debugger/variables.dart';
 import '../ui/icons.dart';
 import '../ui/label.dart';
 import 'globals.dart';
+import 'object_tree.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 import 'utils.dart';
@@ -27,8 +31,6 @@ const tooltipWaitLong = Duration(milliseconds: 1000);
 
 /// The width of the package:flutter_test debugger device.
 const debuggerDeviceWidth = 800.0;
-
-const mediumDeviceWidth = 1000.0;
 
 const defaultDialogRadius = 20.0;
 double get areaPaneHeaderHeight => scaleByFontFactor(36.0);
@@ -93,7 +95,9 @@ class OutlinedIconButton extends IconLabelButton {
     required IconData icon,
     required VoidCallback? onPressed,
     String? tooltip,
+    Key? key,
   }) : super(
+          key: key,
           icon: icon,
           label: '',
           tooltip: tooltip,
@@ -188,11 +192,11 @@ class IconLabelButton extends StatelessWidget {
               )
             : TextButton(
                 onPressed: onPressed,
-                child: iconLabel,
-                style: denseAwareOutlinedButtonStyle(
+                style: denseAwareTextButtonStyle(
                   context,
                   minScreenWidthForTextBeforeScaling,
                 ),
+                child: iconLabel,
               ),
       ),
     );
@@ -259,7 +263,8 @@ class RefreshButton extends IconLabelButton {
     double? minScreenWidthForTextBeforeScaling,
     String? tooltip,
     required VoidCallback? onPressed,
-  }) : super(
+  })  : isIconButton = false,
+        super(
           key: key,
           icon: Icons.refresh,
           label: label,
@@ -268,6 +273,32 @@ class RefreshButton extends IconLabelButton {
           tooltip: tooltip,
           onPressed: onPressed,
         );
+
+  const RefreshButton.icon({
+    Key? key,
+    String? tooltip,
+    required VoidCallback? onPressed,
+  })  : isIconButton = true,
+        super(
+          key: key,
+          icon: Icons.refresh,
+          label: '',
+          tooltip: tooltip,
+          onPressed: onPressed,
+        );
+
+  final bool isIconButton;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!isIconButton) {
+      return super.build(context);
+    }
+    return OutlinedIconButton(
+      onPressed: onPressed,
+      icon: icon!,
+    );
+  }
 }
 
 /// Button to start recording data.
@@ -323,7 +354,6 @@ class StopRecordingButton extends IconLabelButton {
 class SettingsOutlinedButton extends OutlinedIconButton {
   const SettingsOutlinedButton({
     required VoidCallback onPressed,
-    required String label,
     String? tooltip,
   }) : super(
           onPressed: onPressed,
@@ -863,9 +893,9 @@ class DevToolsToggleButtonGroup extends StatelessWidget {
         minWidth: defaultButtonHeight,
         minHeight: defaultButtonHeight,
       ),
-      children: children,
       isSelected: selectedStates,
       onPressed: onPressed,
+      children: children,
     );
   }
 }
@@ -892,6 +922,91 @@ class ExportButton extends IconLabelButton {
         );
 }
 
+/// Button to open related information / documentation.
+///
+/// [tooltip] specifies the hover text for the button.
+/// [link] is the link that should be opened when the button is clicked.
+class InformationButton extends StatelessWidget {
+  const InformationButton({
+    Key? key,
+    required this.tooltip,
+    required this.link,
+  }) : super(key: key);
+
+  final String tooltip;
+
+  final String link;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: IconButton(
+        icon: const Icon(Icons.help_outline),
+        onPressed: () async => await launchUrl(link, context),
+      ),
+    );
+  }
+}
+
+class ToggleButton extends StatelessWidget {
+  const ToggleButton({
+    Key? key,
+    required this.onPressed,
+    required this.isSelected,
+    required this.message,
+    required this.icon,
+    this.label,
+  }) : super(key: key);
+
+  final String message;
+
+  final VoidCallback onPressed;
+
+  final bool isSelected;
+
+  final IconData icon;
+
+  final Text? label;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return DevToolsTooltip(
+      message: message,
+      // TODO(kenz): this SizedBox wrapper should be unnecessary once
+      // https://github.com/flutter/flutter/issues/79894 is fixed.
+      child: SizedBox(
+        height: defaultButtonHeight,
+        child: OutlinedButton(
+          key: key,
+          onPressed: onPressed,
+          style: TextButton.styleFrom(
+            backgroundColor: isSelected
+                ? theme.colorScheme.toggleButtonBackgroundColor
+                : Colors.transparent,
+          ),
+          child: Row(
+            children: [
+              Icon(
+                icon,
+                size: defaultIconSize,
+                color: isSelected
+                    ? theme.colorScheme.toggleButtonForegroundColor
+                    : theme.colorScheme.contrastForeground,
+              ),
+              if (label != null) ...[
+                const SizedBox(width: denseSpacing),
+                label!,
+              ]
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class FilterButton extends StatelessWidget {
   const FilterButton({
     Key? key,
@@ -905,30 +1020,11 @@ class FilterButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return DevToolsTooltip(
+    return ToggleButton(
+      onPressed: onPressed,
+      isSelected: isFilterActive,
       message: 'Filter',
-      // TODO(kenz): this SizedBox wrapper should be unnecessary once
-      // https://github.com/flutter/flutter/issues/79894 is fixed.
-      child: SizedBox(
-        height: defaultButtonHeight,
-        child: OutlinedButton(
-          key: key,
-          onPressed: onPressed,
-          style: TextButton.styleFrom(
-            backgroundColor: isFilterActive
-                ? theme.colorScheme.toggleButtonBackgroundColor
-                : Colors.transparent,
-          ),
-          child: Icon(
-            Icons.filter_list,
-            size: defaultIconSize,
-            color: isFilterActive
-                ? theme.colorScheme.toggleButtonForegroundColor
-                : theme.colorScheme.contrastForeground,
-          ),
-        ),
-      ),
+      icon: Icons.filter_list,
     );
   }
 }
@@ -1398,6 +1494,7 @@ class _BreadcrumbPainter extends CustomPainter {
   }
 }
 
+// TODO(bkonyi): replace uses of this class with `JsonViewer`.
 class FormattedJson extends StatelessWidget {
   const FormattedJson({
     this.json,
@@ -1420,6 +1517,86 @@ class FormattedJson extends StatelessWidget {
     return SelectableText(
       json != null ? encoder.convert(json) : formattedString!,
       style: useSubtleStyle ? theme.subtleFixedFontStyle : theme.fixedFontStyle,
+    );
+  }
+}
+
+class JsonViewer extends StatefulWidget {
+  const JsonViewer({
+    required this.encodedJson,
+  });
+
+  final String encodedJson;
+
+  @override
+  State<JsonViewer> createState() => _JsonViewerState();
+}
+
+class _JsonViewerState extends State<JsonViewer>
+    with ProvidedControllerMixin<DebuggerController, JsonViewer> {
+  late Future<void> _initializeTree;
+  late DartObjectNode variable;
+
+  @override
+  void initState() {
+    super.initState();
+    assert(widget.encodedJson.isNotEmpty);
+    final responseJson = json.decode(widget.encodedJson);
+    // Insert the JSON data into the fake service cache so we can use it with
+    // the `ExpandableVariable` widget.
+    final root =
+        serviceManager.service!.fakeServiceCache.insertJsonObject(responseJson);
+    variable = DartObjectNode.fromValue(
+      name: '[root]',
+      value: root,
+      artificialName: true,
+      isolateRef: IsolateRef(
+        id: 'fake-isolate',
+        number: 'fake-isolate',
+        name: 'local-cache',
+        isSystemIsolate: true,
+      ),
+    );
+    _initializeTree = buildVariablesTree(variable);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    // Remove the JSON object from the fake service cache to avoid holding on
+    // to large objects indefinitely.
+    serviceManager.service!.fakeServiceCache
+        .removeJsonObject(variable.value as Instance);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Currently a redundant check, but adding it anyway to prevent future
+    // bugs being introduced.
+    if (!initController()) {
+      return;
+    }
+    // Any additional initialization code should be added after this line.
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(denseSpacing),
+      child: SingleChildScrollView(
+        child: FutureBuilder(
+          future: _initializeTree,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState != ConnectionState.done)
+              return Container();
+            return ExpandableVariable(
+              variable: variable,
+              debuggerController: controller,
+            );
+          },
+        ),
+      ),
     );
   }
 }
@@ -1480,24 +1657,35 @@ class LinkTextSpan extends TextSpan {
     required Link link,
     required BuildContext context,
     TextStyle? style,
-    VoidCallback? onTap,
   }) : super(
           text: link.display,
           style: style ?? Theme.of(context).linkTextStyle,
           recognizer: TapGestureRecognizer()
             ..onTap = () async {
-              if (onTap != null) onTap();
+              ga.select(
+                link.gaScreenName,
+                link.gaSelectedItemDescription,
+              );
               await launchUrl(link.url, context);
             },
         );
 }
 
 class Link {
-  const Link({required this.display, required this.url});
+  const Link({
+    required this.display,
+    required this.url,
+    required this.gaScreenName,
+    required this.gaSelectedItemDescription,
+  });
 
   final String display;
 
   final String url;
+
+  final String gaScreenName;
+
+  final String gaSelectedItemDescription;
 }
 
 Widget maybeWrapWithTooltip({
@@ -1925,11 +2113,40 @@ class ElevatedCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(defaultBorderRadius),
       ),
       child: Container(
-        child: child,
         width: width,
         height: height,
         padding: padding ?? const EdgeInsets.all(denseSpacing),
+        child: child,
       ),
     );
+  }
+}
+
+/// A convenience wrapper for a [StatefulWidget] that uses the
+/// [AutomaticKeepAliveClientMixin] on its [State].
+///
+/// Wrap a widget in this class if you want [child] to stay alive, and avoid
+/// rebuilding. This is useful for children of [TabView]s. When wrapped in this
+/// wrapper, [child] will not be destroyed and rebuilt when switching tabs.
+///
+/// See [AutomaticKeepAliveClientMixin] for more information.
+class KeepAliveWrapper extends StatefulWidget {
+  const KeepAliveWrapper({Key? key, required this.child}) : super(key: key);
+
+  final Widget child;
+
+  @override
+  State<KeepAliveWrapper> createState() => _KeepAliveWrapperState();
+}
+
+class _KeepAliveWrapperState extends State<KeepAliveWrapper>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool wantKeepAlive = true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return widget.child;
   }
 }

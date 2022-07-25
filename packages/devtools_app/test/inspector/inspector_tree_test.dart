@@ -5,9 +5,9 @@
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_breadcrumbs.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_controller.dart';
-import 'package:devtools_app/src/screens/inspector/inspector_service.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_tree.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_tree_controller.dart';
+import 'package:devtools_app/src/screens/inspector/primitives/inspector_common.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/preferences.dart';
@@ -20,10 +20,10 @@ import 'utils/inspector_tree.dart';
 
 void main() {
   late FakeServiceManager fakeServiceManager;
+  late InspectorController inspectorController;
 
   setUp(() {
     fakeServiceManager = FakeServiceManager();
-    firstInspectorTreeLoadCompleted = true;
     final app = fakeServiceManager.connectedApp!;
     when(app.isFlutterAppNow).thenReturn(true);
     when(app.isProfileBuildNow).thenReturn(false);
@@ -31,55 +31,73 @@ void main() {
     setGlobal(ServiceConnectionManager, fakeServiceManager);
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(PreferencesController, PreferencesController());
-    mockIsFlutterApp(serviceManager.connectedApp!);
+    mockConnectedApp(
+      fakeServiceManager.connectedApp!,
+      isFlutterApp: true,
+      isProfileBuild: false,
+      isWebApp: false,
+    );
+
+    inspectorController = InspectorController(
+      inspectorTree: InspectorTreeController(),
+      detailsTree: InspectorTreeController(),
+      treeType: FlutterTreeType.widget,
+    )..firstInspectorTreeLoadCompleted = true;
   });
+
+  Future<void> pumpInspectorTree(
+    WidgetTester tester, {
+    required InspectorTreeController treeController,
+    bool isSummaryTree = false,
+  }) async {
+    final debuggerController = TestDebuggerController();
+    final summaryTreeController =
+        isSummaryTree ? null : InspectorTreeController();
+    await tester.pumpWidget(
+      wrapWithControllers(
+        inspector: inspectorController,
+        debugger: debuggerController,
+        InspectorTree(
+          treeController: treeController,
+          summaryTreeController: summaryTreeController,
+          isSummaryTree: isSummaryTree,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+  }
 
   group('InspectorTreeController', () {
     testWidgets('Row with negative index regression test',
         (WidgetTester tester) async {
-      final controller = InspectorTreeController()
+      final treeController = InspectorTreeController()
         ..config = InspectorTreeConfig(
           summaryTree: false,
           treeType: FlutterTreeType.widget,
           onNodeAdded: (_, __) {},
           onClientActiveChange: (_) {},
         );
-      final debuggerController = TestDebuggerController();
-      await tester.pumpWidget(
-        wrap(
-          InspectorTree(
-            controller: controller,
-            debuggerController: debuggerController,
-            inspectorTreeController: InspectorTreeController(),
-          ),
-        ),
-      );
+      await pumpInspectorTree(tester, treeController: treeController);
 
-      expect(controller.getRow(const Offset(0, -100.0)), isNull);
-      expect(controller.getRowOffset(-1), equals(0));
+      expect(treeController.getRow(const Offset(0, -100.0)), isNull);
+      expect(treeController.getRowOffset(-1), equals(0));
 
-      expect(controller.getRow(const Offset(0, 0.0)), isNull);
-      expect(controller.getRowOffset(0), equals(0));
+      expect(treeController.getRow(const Offset(0, 0.0)), isNull);
+      expect(treeController.getRowOffset(0), equals(0));
 
-      controller.root = InspectorTreeNode()..appendChild(InspectorTreeNode());
-      await tester.pumpWidget(
-        wrap(
-          InspectorTree(
-            controller: controller,
-            debuggerController: debuggerController,
-            inspectorTreeController: InspectorTreeController(),
-          ),
-        ),
-      );
+      treeController.root = InspectorTreeNode()
+        ..appendChild(InspectorTreeNode());
 
-      expect(controller.getRow(const Offset(0, -20))!.index, 0);
-      expect(controller.getRowOffset(-1), equals(0));
-      expect(controller.getRow(const Offset(0, 0.0)), isNotNull);
-      expect(controller.getRowOffset(0), equals(0));
+      await pumpInspectorTree(tester, treeController: treeController);
+
+      expect(treeController.getRow(const Offset(0, -20))!.index, 0);
+      expect(treeController.getRowOffset(-1), equals(0));
+      expect(treeController.getRow(const Offset(0, 0.0)), isNotNull);
+      expect(treeController.getRowOffset(0), equals(0));
 
       // This operation would previously throw an exception in debug builds
       // and infinite loop in release builds.
-      controller.scrollToRect(const Rect.fromLTWH(0, -20, 100, 100));
+      treeController.scrollToRect(const Rect.fromLTWH(0, -20, 100, 100));
     });
   });
 
@@ -91,15 +109,7 @@ void main() {
       );
 
       final treeController = inspectorTreeControllerFromNode(diagnosticNode);
-      await tester.pumpWidget(
-        wrap(
-          InspectorTree(
-            controller: treeController,
-            debuggerController: TestDebuggerController(),
-            inspectorTreeController: InspectorTreeController(),
-          ),
-        ),
-      );
+      await pumpInspectorTree(tester, treeController: treeController);
 
       expect(find.richText('Text: "Content"'), findsOneWidget);
     });
@@ -118,15 +128,7 @@ void main() {
       );
 
       final treeController = inspectorTreeControllerFromNode(diagnosticNode);
-      await tester.pumpWidget(
-        wrap(
-          InspectorTree(
-            controller: treeController,
-            debuggerController: TestDebuggerController(),
-            inspectorTreeController: InspectorTreeController(),
-          ),
-        ),
-      );
+      await pumpInspectorTree(tester, treeController: treeController);
 
       expect(find.richText('Text: "Rich text"'), findsOneWidget);
     });
@@ -139,16 +141,7 @@ void main() {
       );
 
       final treeController = inspectorTreeControllerFromNode(diagnosticNode);
-
-      await tester.pumpWidget(
-        wrap(
-          InspectorTree(
-            controller: treeController,
-            debuggerController: TestDebuggerController(),
-            inspectorTreeController: InspectorTreeController(),
-          ),
-        ),
-      );
+      await pumpInspectorTree(tester, treeController: treeController);
 
       expect(find.richText('Text: "Multiline text  content"'), findsOneWidget);
     });
@@ -159,18 +152,8 @@ void main() {
         tester: tester,
       );
 
-      final controller = inspectorTreeControllerFromNode(diagnosticNode);
-      await tester.pumpWidget(
-        wrap(
-          InspectorTree(
-            controller: controller,
-            debuggerController: TestDebuggerController(),
-            inspectorTreeController: InspectorTreeController(),
-            // ignore: avoid_redundant_argument_values
-            isSummaryTree: false,
-          ),
-        ),
-      );
+      final treeController = inspectorTreeControllerFromNode(diagnosticNode);
+      await pumpInspectorTree(tester, treeController: treeController);
 
       expect(find.byType(InspectorBreadcrumbNavigator), findsOneWidget);
     });
@@ -181,15 +164,11 @@ void main() {
         tester: tester,
       );
 
-      final controller = inspectorTreeControllerFromNode(diagnosticNode);
-      await tester.pumpWidget(
-        wrap(
-          InspectorTree(
-            controller: controller,
-            debuggerController: TestDebuggerController(),
-            isSummaryTree: true,
-          ),
-        ),
+      final treeController = inspectorTreeControllerFromNode(diagnosticNode);
+      await pumpInspectorTree(
+        tester,
+        treeController: treeController,
+        isSummaryTree: true,
       );
 
       expect(find.byType(InspectorBreadcrumbNavigator), findsNothing);

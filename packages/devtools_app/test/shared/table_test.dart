@@ -15,6 +15,33 @@ import 'package:flutter/material.dart' hide TableRow;
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+class _NonSortableFlatNameColumn extends ColumnData<TestData> {
+  _NonSortableFlatNameColumn.wide(super.title) : super.wide();
+
+  @override
+  String getValue(TestData dataObject) {
+    return dataObject.name;
+  }
+
+  @override
+  bool get supportsSorting => false;
+}
+
+class _NonSortableFlatNumColumn extends ColumnData<TestData> {
+  _NonSortableFlatNumColumn.wide(super.title) : super.wide();
+
+  @override
+  int getValue(TestData dataObject) {
+    return dataObject.number;
+  }
+
+  @override
+  bool get supportsSorting => false;
+
+  @override
+  bool get numeric => true;
+}
+
 void main() {
   setUp(() {
     setGlobal(ServiceConnectionManager, FakeServiceManager());
@@ -51,6 +78,9 @@ void main() {
       );
       await tester.pumpWidget(wrap(table));
       expect(find.byWidget(table), findsOneWidget);
+      debugDumpApp();
+      expect(find.text('FlatName'), findsOneWidget);
+
       final FlatTableState state = tester.state(find.byWidget(table));
       final columnWidths = state.computeColumnWidths(1000);
       expect(columnWidths.length, 1);
@@ -74,6 +104,58 @@ void main() {
       );
       await tester.pumpWidget(wrap(table));
       expect(find.byWidget(table), findsOneWidget);
+
+      // Column headers.
+      expect(find.text('FlatName'), findsOneWidget);
+      expect(find.text('Number'), findsOneWidget);
+
+      // Table data.
+      expect(find.byKey(const Key('Foo')), findsOneWidget);
+      expect(find.byKey(const Key('Bar')), findsOneWidget);
+      // Note that two keys with the same name are allowed but not necessarily a
+      // good idea. We should be using unique identifiers for keys.
+      expect(find.byKey(const Key('Baz')), findsNWidgets(2));
+      expect(find.byKey(const Key('Qux')), findsNWidgets(2));
+      expect(find.byKey(const Key('Snap')), findsOneWidget);
+      expect(find.byKey(const Key('Crackle')), findsOneWidget);
+      expect(find.byKey(const Key('Pop')), findsOneWidget);
+    });
+
+    testWidgetsWithWindowSize(
+        'displays with column groups', const Size(800.0, 1200.0),
+        (WidgetTester tester) async {
+      final table = FlatTable<TestData>(
+        columns: [
+          flatNameColumn,
+          _NumberColumn(),
+        ],
+        columnGroups: [
+          ColumnGroup(
+            title: 'Group 1',
+            range: const Range(0, 1),
+          ),
+          ColumnGroup(
+            title: 'Group 2',
+            range: const Range(1, 2),
+          ),
+        ],
+        data: flatData,
+        onItemSelected: noop,
+        keyFactory: (d) => Key(d.name),
+        sortColumn: flatNameColumn,
+        sortDirection: SortDirection.ascending,
+      );
+      await tester.pumpWidget(wrap(table));
+      expect(find.byWidget(table), findsOneWidget);
+      // Column group headers.
+      expect(find.text('Group 1'), findsOneWidget);
+      expect(find.text('Group 2'), findsOneWidget);
+
+      // Column headers.
+      expect(find.text('FlatName'), findsOneWidget);
+      expect(find.text('Number'), findsOneWidget);
+
+      // Table data.
       expect(find.byKey(const Key('Foo')), findsOneWidget);
       expect(find.byKey(const Key('Bar')), findsOneWidget);
       // Note that two keys with the same name are allowed but not necessarily a
@@ -171,6 +253,63 @@ void main() {
       expect(data[6].name, equals('Crackle'));
       expect(data[7].name, equals('Baz'));
       expect(data[8].name, equals('Qux'));
+    });
+
+    testWidgets('does not sort with supportsSorting == false',
+        (WidgetTester tester) async {
+      final nonSortableFlatNameColumn =
+          _NonSortableFlatNameColumn.wide('FlatName');
+      final nonSortableFlatNumColumn = _NonSortableFlatNumColumn.wide('Number');
+      final table = FlatTable<TestData>(
+        columns: [
+          nonSortableFlatNameColumn,
+          nonSortableFlatNumColumn,
+        ],
+        data: flatData,
+        onItemSelected: noop,
+        keyFactory: (d) => Key(d.name),
+        sortColumn: flatNameColumn,
+        sortDirection: SortDirection.ascending,
+      );
+      await tester.pumpWidget(wrap(table));
+      final FlatTableState state = tester.state(find.byWidget(table));
+      final data = state.data;
+      expect(data[0].name, equals('Bar'));
+      expect(data[1].name, equals('Baz'));
+      expect(data[2].name, equals('Baz'));
+      expect(data[3].name, equals('Crackle'));
+      expect(data[4].name, equals('Foo'));
+      expect(data[5].name, equals('Pop'));
+      expect(data[6].name, equals('Qux'));
+      expect(data[7].name, equals('Qux'));
+      expect(data[8].name, equals('Snap'));
+
+      // Attempt to reverse the sort direction.
+      await tester.tap(find.text('FlatName'));
+      await tester.pumpAndSettle();
+
+      expect(data[0].name, equals('Bar'));
+      expect(data[1].name, equals('Baz'));
+      expect(data[2].name, equals('Baz'));
+      expect(data[3].name, equals('Crackle'));
+      expect(data[4].name, equals('Foo'));
+      expect(data[5].name, equals('Pop'));
+      expect(data[6].name, equals('Qux'));
+      expect(data[7].name, equals('Qux'));
+      expect(data[8].name, equals('Snap'));
+
+      // Attempt to change the sort column.
+      await tester.tap(find.text('Number'));
+      await tester.pumpAndSettle();
+      expect(data[0].name, equals('Bar'));
+      expect(data[1].name, equals('Baz'));
+      expect(data[2].name, equals('Baz'));
+      expect(data[3].name, equals('Crackle'));
+      expect(data[4].name, equals('Foo'));
+      expect(data[5].name, equals('Pop'));
+      expect(data[6].name, equals('Qux'));
+      expect(data[7].name, equals('Qux'));
+      expect(data[8].name, equals('Snap'));
     });
 
     testWidgets('sorts data by column and secondary column',

@@ -8,9 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../devtools.dart' as devtools;
-import '../analytics/analytics.dart' as ga;
 import '../analytics/constants.dart' as analytics_constants;
-import '../info/info_controller.dart';
 import '../service/isolate_manager.dart';
 import '../service/service_manager.dart';
 import '../ui/utils.dart';
@@ -68,22 +66,22 @@ class StatusLine extends StatelessWidget {
   }
 
   List<Widget> _getStatusItems(BuildContext context, bool showIsolateSelector) {
-    final isExtraNarrow = ScreenSize(context).width == MediaSize.xxs;
-    final isNarrow = isExtraNarrow || ScreenSize(context).width == MediaSize.xs;
+    final screenWidth = ScreenSize(context).width;
     final Widget? pageStatus = currentScreen.buildStatus(context);
+    final widerThanXxs = screenWidth > MediaSize.xxs;
     return [
-      buildHelpUrlStatus(context, currentScreen, isNarrow),
+      buildHelpUrlStatus(context, currentScreen, screenWidth),
       const BulletSpacer(),
-      if (!isExtraNarrow && showIsolateSelector) ...[
+      if (widerThanXxs && showIsolateSelector) ...[
         const IsolateSelector(),
         const BulletSpacer(),
       ],
-      if (!isNarrow && pageStatus != null) ...[
+      if (screenWidth > MediaSize.xs && pageStatus != null) ...[
         pageStatus,
         const BulletSpacer(),
       ],
-      buildConnectionStatus(context, isExtraNarrow),
-      if (isEmbedded && !isExtraNarrow) ...[
+      buildConnectionStatus(context, screenWidth),
+      if (widerThanXxs && isEmbedded) ...[
         const BulletSpacer(),
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
@@ -99,22 +97,20 @@ class StatusLine extends StatelessWidget {
   Widget buildHelpUrlStatus(
     BuildContext context,
     Screen currentScreen,
-    bool isNarrow,
+    MediaSize screenWidth,
   ) {
     final String? docPageId = currentScreen.docPageId;
     if (docPageId != null) {
       return RichText(
         text: LinkTextSpan(
           link: Link(
-            display: isNarrow ? docPageId : 'flutter.dev/devtools/$docPageId',
+            display: screenWidth <= MediaSize.xs
+                ? docPageId
+                : 'flutter.dev/devtools/$docPageId',
             url: 'https://flutter.dev/devtools/$docPageId',
+            gaScreenName: currentScreen.screenId,
+            gaSelectedItemDescription: analytics_constants.documentationLink,
           ),
-          onTap: () {
-            ga.select(
-              currentScreen.screenId,
-              analytics_constants.documentationLink,
-            );
-          },
           context: context,
         ),
       );
@@ -122,14 +118,14 @@ class StatusLine extends StatelessWidget {
       // Use a placeholder for pages with no explicit documentation.
       return Flexible(
         child: Text(
-          '${isNarrow ? '' : 'DevTools '}${devtools.version}',
+          '${screenWidth <= MediaSize.xs ? '' : 'DevTools '}${devtools.version}',
           overflow: TextOverflow.ellipsis,
         ),
       );
     }
   }
 
-  Widget buildConnectionStatus(BuildContext context, bool isExtraNarrow) {
+  Widget buildConnectionStatus(BuildContext context, MediaSize screenWidth) {
     final textTheme = Theme.of(context).textTheme;
     const noConnectionMsg = 'No client connection';
     return ValueListenableBuilder<ConnectedState>(
@@ -142,9 +138,8 @@ class StatusLine extends StatelessWidget {
           if (!app.isRunningOnDartVM!) {
             description = 'web app';
           } else {
-            final VM vm = serviceManager.vm!;
-            description =
-                '${vm.targetCPU}-${vm.architectureBits} ${vm.operatingSystem}';
+            final vm = serviceManager.vm!;
+            description = vm.deviceDisplay;
           }
 
           final color = textTheme.bodyText2!.color;
@@ -171,15 +166,11 @@ class StatusLine extends StatelessWidget {
                 message: 'Device Info',
                 child: InkWell(
                   onTap: () async {
-                    final flutterVersion =
-                        await InfoController.getFlutterVersion();
-
                     unawaited(
                       showDialog(
                         context: context,
                         builder: (context) => DeviceDialog(
                           connectedApp: app,
-                          flutterVersion: flutterVersion,
                         ),
                       ),
                     );
@@ -190,7 +181,7 @@ class StatusLine extends StatelessWidget {
                         Icons.info_outline,
                         size: actionsIconSize,
                       ),
-                      if (!isExtraNarrow) ...[
+                      if (screenWidth > MediaSize.xxs) ...[
                         const SizedBox(width: denseSpacing),
                         Text(
                           description,
@@ -208,7 +199,7 @@ class StatusLine extends StatelessWidget {
           return child!;
         }
       },
-      child: isExtraNarrow
+      child: screenWidth <= MediaSize.xxs
           ? DevToolsTooltip(
               message: noConnectionMsg,
               child: Icon(
@@ -235,7 +226,6 @@ class IsolateSelector extends StatelessWidget {
       secondListenable: isolateManager.selectedIsolate,
       builder: (context, isolates, selectedIsolateRef, _) {
         return PopupMenuButton<IsolateRef?>(
-          child: IsolateOption(isolateManager.selectedIsolate.value),
           tooltip: 'Selected Isolate',
           initialValue: selectedIsolateRef,
           onSelected: isolateManager.selectIsolate,
@@ -248,6 +238,7 @@ class IsolateSelector extends StatelessWidget {
               );
             },
           ).toList(),
+          child: IsolateOption(isolateManager.selectedIsolate.value),
         );
       },
     );

@@ -5,7 +5,6 @@
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../primitives/auto_dispose_mixin.dart';
@@ -532,11 +531,11 @@ class AnalysisInstanceViewTable extends StatefulWidget {
 
 /// Table of the fields of an instance (type, name and value).
 class AnalysisInstanceViewState extends State<AnalysisInstanceViewTable>
-    with AutoDisposeMixin {
-  bool _initialized = false;
-  late MemoryController _controller;
-
+    with
+        AutoDisposeMixin,
+        ProvidedControllerMixin<MemoryController, AnalysisInstanceViewTable> {
   final TreeColumnData<AnalysisField> _treeColumn = _AnalysisFieldNameColumn();
+
   final _columns = <ColumnData<AnalysisField>>[];
 
   @override
@@ -554,25 +553,21 @@ class AnalysisInstanceViewState extends State<AnalysisInstanceViewTable>
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    final newController = Provider.of<MemoryController>(context);
-    if (_initialized && newController == _controller) return;
-    _initialized = true;
-    _controller = newController;
-
+    if (!initController()) return;
     cancelListeners();
 
     // Update the chart when the memorySource changes.
-    addAutoDisposeListener(_controller.selectedSnapshotNotifier, () {
+    addAutoDisposeListener(controller.selectedSnapshotNotifier, () {
       setState(() {
-        _controller.computeAllLibraries(rebuild: true);
+        controller.computeAllLibraries(rebuild: true);
       });
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    _controller.analysisFieldsTreeTable = TreeTable<AnalysisField>(
-      dataRoots: _controller.analysisInstanceRoot!,
+    controller.analysisFieldsTreeTable = TreeTable<AnalysisField>(
+      dataRoots: controller.analysisInstanceRoot!,
       columns: _columns,
       treeColumn: _treeColumn,
       keyFactory: (typeRef) => PageStorageKey<String>(typeRef.name ?? ''),
@@ -580,7 +575,7 @@ class AnalysisInstanceViewState extends State<AnalysisInstanceViewTable>
       sortDirection: SortDirection.ascending,
     );
 
-    return _controller.analysisFieldsTreeTable;
+    return controller.analysisFieldsTreeTable;
   }
 }
 

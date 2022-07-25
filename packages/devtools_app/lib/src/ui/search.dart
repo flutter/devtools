@@ -285,6 +285,10 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
         )
         .toList();
 
+    // When there are no tiles present, we don't need to display the
+    // auto complete list.
+    if (tileContents.isEmpty) return const SizedBox.shrink();
+
     final tileEntryHeight = tileContents.isEmpty
         ? 0.0
         : calculateTextSpanHeight(tileContents.first) + denseSpacing;
@@ -352,8 +356,8 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
           child: ListView(
             padding: EdgeInsets.zero,
             shrinkWrap: true,
-            children: autoCompleteTiles,
             itemExtent: tileEntryHeight,
+            children: autoCompleteTiles,
           ),
         ),
       ),
@@ -492,6 +496,14 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
 
   final _currentHoveredIndex = ValueNotifier<int>(0);
 
+  String? get currentHoveredText => searchAutoComplete.value.isNotEmpty
+      ? searchAutoComplete.value[currentHoveredIndex.value].text
+      : null;
+
+  ValueListenable<String?> get currentSuggestion => _currentSuggestionNotifier;
+
+  final _currentSuggestionNotifier = ValueNotifier<String?>(null);
+
   static const minPopupWidth = 300.0;
 
   void setCurrentHoveredIndexValue(int index) {
@@ -503,6 +515,23 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
 
     // Default index is 0.
     setCurrentHoveredIndexValue(0);
+  }
+
+  void updateCurrentSuggestion(String activeWord) {
+    final hoveredText = currentHoveredText;
+    final suggestion =
+        hoveredText?.substring(min(activeWord.length, hoveredText.length));
+
+    if (suggestion == null || suggestion.isEmpty) {
+      clearCurrentSuggestion();
+      return;
+    }
+
+    _currentSuggestionNotifier.value = suggestion;
+  }
+
+  void clearCurrentSuggestion() {
+    _currentSuggestionNotifier.value = null;
   }
 
   /// [bottom] if false placed above TextField (search field).
@@ -674,11 +703,56 @@ typedef OverlayXPositionBuilder = double Function(
   TextStyle? inputStyle,
 );
 
+class SearchTextEditingController extends TextEditingController {
+  String? _suggestionText;
+
+  String? get suggestionText {
+    if (_suggestionText == null) return null;
+    if (selection.end < text.length) return null;
+
+    return _suggestionText;
+  }
+
+  set suggestionText(String? suggestionText) {
+    _suggestionText = suggestionText;
+    notifyListeners();
+  }
+
+  bool get isAtEnd => text.length <= selection.end;
+
+  @override
+  TextSpan buildTextSpan({
+    required BuildContext context,
+    TextStyle? style,
+    required bool withComposing,
+  }) {
+    if (suggestionText == null) {
+      // If no `suggestionText` is provided, use the default implementation of `buildTextSpan`
+      return super.buildTextSpan(
+        context: context,
+        style: style,
+        withComposing: withComposing,
+      );
+    }
+
+    return TextSpan(
+      children: [
+        TextSpan(text: text),
+        TextSpan(
+          text: suggestionText,
+          style: style?.copyWith(color: Theme.of(context).colorScheme.grey),
+        )
+      ],
+      style: style,
+    );
+  }
+}
+
 // TODO(elliette) Consider refactoring this mixin to be a widget. See discussion
 // at https://github.com/flutter/devtools/pull/3532#discussion_r767015567.
 mixin SearchFieldMixin<T extends StatefulWidget>
     on AutoDisposeMixin<T>, State<T> {
-  late final TextEditingController searchTextFieldController;
+  late final SearchTextEditingController searchTextFieldController;
   late FocusNode _searchFieldFocusNode;
   late FocusNode _rawKeyboardFocusNode;
   late SelectAutoComplete _onSelection;
@@ -693,7 +767,7 @@ mixin SearchFieldMixin<T extends StatefulWidget>
     autoDisposeFocusNode(_searchFieldFocusNode);
     autoDisposeFocusNode(_rawKeyboardFocusNode);
 
-    searchTextFieldController = TextEditingController();
+    searchTextFieldController = SearchTextEditingController();
   }
 
   void callOnSelection(String foundMatch) {
@@ -735,6 +809,7 @@ mixin SearchFieldMixin<T extends StatefulWidget>
     Set<LogicalKeyboardKey> keyEventsToPropagate = const {},
     VoidCallback? onClose,
     VoidCallback? onFocusLost,
+    TextStyle? style,
   }) {
     _onSelection = onSelection;
 
@@ -749,6 +824,7 @@ mixin SearchFieldMixin<T extends StatefulWidget>
       label: label,
       overlayXPositionBuilder: overlayXPositionBuilder,
       onClose: onClose,
+      style: style,
     );
 
     return _AutoCompleteSearchField(
@@ -839,6 +915,7 @@ class _SearchField extends StatelessWidget {
     this.overlayXPositionBuilder,
     this.prefix,
     this.suffix,
+    this.style,
   });
 
   final SearchControllerMixin controller;
@@ -846,7 +923,7 @@ class _SearchField extends StatelessWidget {
   final bool searchFieldEnabled;
   final bool shouldRequestFocus;
   final FocusNode searchFieldFocusNode;
-  final TextEditingController searchTextFieldController;
+  final SearchTextEditingController searchTextFieldController;
   final String label;
   final bool supportsNavigation;
   final InputDecoration? decoration;
@@ -854,10 +931,12 @@ class _SearchField extends StatelessWidget {
   final OverlayXPositionBuilder? overlayXPositionBuilder;
   final Widget? prefix;
   final Widget? suffix;
+  final TextStyle? style;
 
   @override
   Widget build(BuildContext context) {
-    final textStyle = Theme.of(context).textTheme.subtitle1;
+    final textStyle = style ?? Theme.of(context).textTheme.subtitle1;
+
     final searchField = TextField(
       key: searchFieldKey,
       autofocus: true,
@@ -977,6 +1056,9 @@ class _AutoCompleteSearchFieldState extends State<_AutoCompleteSearchField>
 
   int get tab => LogicalKeyboardKey.tab.keyId & LogicalKeyboardKey.valueMask;
 
+  int get arrowRight =>
+      LogicalKeyboardKey.arrowRight.keyId & LogicalKeyboardKey.valueMask;
+
   HighlightAutoComplete get _highlightDropdown =>
       widget.onHighlightDropdown != null
           ? widget.onHighlightDropdown as HighlightAutoComplete
@@ -1034,8 +1116,11 @@ class _AutoCompleteSearchFieldState extends State<_AutoCompleteSearchField>
           widget.keyEventsToPropagate,
         );
       } else if (widget.controller.autoCompleteOverlay != null) {
-        if (key == enter || key == tab) {
-          // Enter / Tab pressed.
+        if (key == enter ||
+            key == tab ||
+            (key == arrowRight &&
+                widget.searchField.searchTextFieldController.isAtEnd)) {
+          // Enter / Tab pressed OR right arrow pressed while text field is at the end
           String? foundExact;
 
           // What the user has typed in so far.

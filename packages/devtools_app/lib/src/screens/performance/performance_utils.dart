@@ -82,3 +82,5 @@ void debugTraceEventCallback(VoidCallback callback) {
     callback();
   }
 }
+
+const preCompileShadersDocsUrl = 'https://docs.flutter.dev/perf/shader';

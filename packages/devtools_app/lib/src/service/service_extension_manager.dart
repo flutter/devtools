@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:core';
-import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
@@ -571,7 +570,7 @@ class ServiceExtensionState {
   }
 
   @override
-  int get hashCode => hashValues(
+  int get hashCode => Object.hash(
         enabled,
         value,
       );

@@ -2,11 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/primitives/utils.dart';
+import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/utils.dart';
 import 'package:devtools_shared/devtools_test_utils.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   group('utils', () {
@@ -1156,6 +1161,20 @@ void main() {
         expect(notifier.value, equals([1, 3]));
       });
 
+      test('notifies on removeAll', () {
+        setUpWithInitialValue([1, 2, 3, 4]);
+        notifier.removeAll([1, 3]);
+        expect(didNotify, isTrue);
+        expect(notifier.value, equals([2, 4]));
+      });
+
+      test('notifies on removeRange', () {
+        setUpWithInitialValue([1, 2, 3, 4]);
+        notifier.removeRange(1, 3);
+        expect(didNotify, isTrue);
+        expect(notifier.value, equals([1, 4]));
+      });
+
       test('does not notify on remove of missing element', () {
         setUpWithInitialValue([1, 2, 3]);
         notifier.remove(0);
@@ -1371,7 +1390,82 @@ void main() {
         expect(false.boolCompare(true), equals(1));
       });
     });
+
+    group('ProvidedControllerMixin', () {
+      setUp(() {
+        setGlobal(IdeTheme, IdeTheme());
+      });
+
+      testWidgets('updates controller when provided controller changes',
+          (WidgetTester tester) async {
+        final controller1 = TestProvidedController('id_1');
+        final controller2 = TestProvidedController('id_2');
+        final controllerNotifier =
+            ValueNotifier<TestProvidedController>(controller1);
+
+        final provider = ValueListenableBuilder<TestProvidedController>(
+          valueListenable: controllerNotifier,
+          builder: (context, controller, _) {
+            return Provider<TestProvidedController>.value(
+              value: controller,
+              child: Builder(
+                builder: (context) {
+                  return wrap(
+                    const TestStatefulWidget(),
+                  );
+                },
+              ),
+            );
+          },
+        );
+
+        await tester.pumpWidget(provider);
+        expect(find.text('Value 1'), findsOneWidget);
+        expect(find.text('Controller id_1'), findsOneWidget);
+
+        controllerNotifier.value = controller2;
+        await tester.pumpAndSettle();
+
+        expect(find.text('Value 2'), findsOneWidget);
+        expect(find.text('Controller id_2'), findsOneWidget);
+      });
+    });
   });
+}
+
+class TestProvidedController {
+  TestProvidedController(this.id);
+
+  final String id;
+}
+
+class TestStatefulWidget extends StatefulWidget {
+  const TestStatefulWidget({Key? key}) : super(key: key);
+
+  @override
+  State<TestStatefulWidget> createState() => _TestStatefulWidgetState();
+}
+
+class _TestStatefulWidgetState extends State<TestStatefulWidget>
+    with ProvidedControllerMixin<TestProvidedController, TestStatefulWidget> {
+  int _value = 0;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!initController()) return;
+    _value++;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text('Value $_value'),
+        Text('Controller ${controller.id}'),
+      ],
+    );
+  }
 }
 
 // This was generated from a canvas with font size 14.0.

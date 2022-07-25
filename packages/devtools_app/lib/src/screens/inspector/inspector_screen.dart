@@ -5,15 +5,18 @@
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../../analytics/analytics.dart' as ga;
 import '../../analytics/constants.dart' as analytics_constants;
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../primitives/blocking_action_mixin.dart';
+import '../../service/service_extension_widgets.dart';
 import '../../service/service_extensions.dart' as extensions;
 import '../../shared/common_widgets.dart';
 import '../../shared/connected_app.dart';
+import '../../shared/dialogs.dart';
+import '../../shared/editable_list.dart';
 import '../../shared/error_badge_manager.dart';
 import '../../shared/globals.dart';
 import '../../shared/screen.dart';
@@ -22,11 +25,8 @@ import '../../shared/theme.dart';
 import '../../shared/utils.dart';
 import '../../ui/icons.dart';
 import '../../ui/search.dart';
-import '../../ui/service_extension_widgets.dart';
-import '../debugger/debugger_controller.dart';
 import 'inspector_controller.dart';
 import 'inspector_screen_details_tab.dart';
-import 'inspector_service.dart';
 import 'inspector_tree.dart';
 import 'inspector_tree_controller.dart';
 
@@ -65,17 +65,13 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     with
         BlockingActionMixin,
         AutoDisposeMixin,
+        ProvidedControllerMixin<InspectorController, InspectorScreenBody>,
         SearchFieldMixin<InspectorScreenBody> {
-  late InspectorController inspectorController;
-
   InspectorTreeController get _summaryTreeController =>
-      inspectorController.inspectorTree;
+      controller.inspectorTree;
 
   InspectorTreeController get _detailsTreeController =>
-      inspectorController.details!.inspectorTree;
-
-  late DebuggerController _debuggerController;
-  bool _isDebuggerControllerInitialized = false;
+      controller.details!.inspectorTree;
 
   bool searchVisible = false;
 
@@ -94,10 +90,9 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
 
   @override
   void dispose() {
-    inspectorController.inspectorTree.dispose();
-    if (inspectorController.isSummaryTree &&
-        inspectorController.details != null) {
-      inspectorController.details!.inspectorTree.dispose();
+    controller.inspectorTree.dispose();
+    if (controller.isSummaryTree && controller.details != null) {
+      controller.details!.inspectorTree.dispose();
     }
     super.dispose();
   }
@@ -111,19 +106,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       // The app must not be a Flutter app.
       return;
     }
-    final inspectorTreeController = InspectorTreeController();
-    final detailsTree = InspectorTreeController();
-    inspectorController = InspectorController(
-      inspectorTree: inspectorTreeController,
-      detailsTree: detailsTree,
-      treeType: FlutterTreeType.widget,
-    );
-
-    if (!firstInspectorTreeLoadCompleted) {
-      ga.timeStart(InspectorScreen.id, analytics_constants.pageReady);
-    }
-
-    _summaryTreeController.setSearchTarget(searchTarget);
 
     addAutoDisposeListener(searchFieldFocusNode, () {
       // Close the search once focus is lost and following conditions are met:
@@ -143,28 +125,41 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
         searchPreventClose = false;
       }
     });
+    addAutoDisposeListener(preferences.inspector.customPubRootDirectories, () {
+      _refreshInspector();
+    });
+    addAutoDisposeListener(serviceManager.isolateManager.mainIsolate, () {
+      _refreshInspector();
+      preferences.inspector.loadCustomPubRootDirectories();
+    });
+    preferences.inspector.loadCustomPubRootDirectories();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    if (!initController()) return;
 
-    final newDebuggerController = Provider.of<DebuggerController>(context);
-    if (_isDebuggerControllerInitialized &&
-        _debuggerController == newDebuggerController) return;
-    _isDebuggerControllerInitialized = true;
-    _debuggerController = newDebuggerController;
+    if (serviceManager.inspectorService == null) {
+      // The app must not be a Flutter app.
+      return;
+    }
+
+    if (!controller.firstInspectorTreeLoadCompleted) {
+      ga.timeStart(InspectorScreen.id, analytics_constants.pageReady);
+    }
+
+    _summaryTreeController.setSearchTarget(searchTarget);
   }
 
   @override
   Widget build(BuildContext context) {
-    final summaryTree = _buildSummaryTreeColumn(_debuggerController);
+    final summaryTree = _buildSummaryTreeColumn();
 
     final detailsTree = InspectorTree(
       key: detailsTreeKey,
-      controller: _detailsTreeController,
-      debuggerController: _debuggerController,
-      inspectorTreeController: _summaryTreeController,
+      treeController: _detailsTreeController,
+      summaryTreeController: _summaryTreeController,
     );
 
     final splitAxis = Split.axisFor(context, 0.85);
@@ -175,7 +170,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
         summaryTree,
         InspectorDetails(
           detailsTree: detailsTree,
-          controller: inspectorController,
+          controller: controller,
         ),
       ],
     );
@@ -213,9 +208,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     );
   }
 
-  Widget _buildSummaryTreeColumn(
-    DebuggerController debuggerController,
-  ) {
+  Widget _buildSummaryTreeColumn() {
     return LayoutBuilder(
       builder: (context, constraints) {
         return OutlineDecoration(
@@ -251,23 +244,20 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
                       children: [
                         InspectorTree(
                           key: summaryTreeKey,
-                          controller: _summaryTreeController,
+                          treeController: _summaryTreeController,
                           isSummaryTree: true,
                           widgetErrors: inspectableErrors,
-                          debuggerController: debuggerController,
                         ),
                         if (errors.isNotEmpty)
                           ValueListenableBuilder<int?>(
-                            valueListenable:
-                                inspectorController.selectedErrorIndex,
+                            valueListenable: controller.selectedErrorIndex,
                             builder: (_, selectedErrorIndex, __) => Positioned(
                               top: 0,
                               right: 0,
                               child: ErrorNavigator(
                                 errors: inspectableErrors,
                                 errorIndex: selectedErrorIndex,
-                                onSelectError:
-                                    inspectorController.selectErrorByIndex,
+                                onSelectError: controller.selectErrorByIndex,
                               ),
                             ),
                           ),
@@ -304,6 +294,16 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
           extensions.invertOversizedImages,
         ],
       ),
+      const SizedBox(width: defaultSpacing),
+      SettingsOutlinedButton(
+        tooltip: 'Flutter Inspector Settings',
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (context) => FlutterInspectorSettingsDialog(),
+          );
+        },
+      ),
       // TODO(jacobr): implement TogglePlatformSelector.
       //  TogglePlatformSelector().selector
     ];
@@ -315,7 +315,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       // If the user is force refreshing the inspector before the first load has
       // completed, this could indicate a slow load time or that the inspector
       // failed to load the tree once available.
-      if (!firstInspectorTreeLoadCompleted) {
+      if (!controller.firstInspectorTreeLoadCompleted) {
         // We do not want to complete this timing operation because the force
         // refresh will skew the results.
         ga.cancelTimingOperation(
@@ -326,10 +326,66 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
           analytics_constants.inspector,
           analytics_constants.refreshEmptyTree,
         );
-        firstInspectorTreeLoadCompleted = true;
+        controller.firstInspectorTreeLoadCompleted = true;
       }
-      await inspectorController.onForceRefresh();
+      await controller.onForceRefresh();
     });
+  }
+}
+
+class FlutterInspectorSettingsDialog extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    const showPackageDirectorySection = false;
+    final theme = Theme.of(context);
+    final dialogHeight = scaleByFontFactor(400.0);
+    return DevToolsDialog(
+      title: dialogTitleText(Theme.of(context), 'Flutter Inspector Settings'),
+      content: Container(
+        width: defaultDialogWidth,
+        height: dialogHeight,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ...dialogSubHeader(
+              Theme.of(context),
+              'General',
+            ),
+            CheckboxSetting(
+              notifier: preferences.inspector.hoverEvalModeEnabled
+                  as ValueNotifier<bool?>,
+              title: 'Enable hover inspection',
+              description:
+                  'Hovering over any widget displays its properties and values.',
+              gaItem: analytics_constants.inspectorHoverEvalMode,
+            ),
+            // TODO(CoderDake): add PubRootDirectory section back when
+            // finalizing https://github.com/flutter/devtools/issues/3941
+            // ignore: dead_code
+            if (showPackageDirectorySection) ...[
+              const SizedBox(height: denseSpacing),
+              ...dialogSubHeader(Theme.of(context), 'Package Directories'),
+              Text(
+                'Widgets in these directories will show up in your summary tree.',
+                style: theme.subtleTextStyle,
+              ),
+              Text(
+                '(e.g. /absolute/path/to/myPackage)',
+                style: theme.subtleTextStyle,
+              ),
+              const SizedBox(height: denseSpacing),
+              Expanded(
+                child: PubRootDirectorySection(),
+              ),
+            ]
+          ],
+        ),
+      ),
+      actions: [
+        DialogCloseButton(),
+      ],
+    );
   }
 }
 
@@ -482,5 +538,31 @@ class ErrorNavigator extends StatelessWidget {
     final newIndex = errorIndex == null ? 0 : (errorIndex! + 1) % errors.length;
 
     onSelectError(newIndex);
+  }
+}
+
+class PubRootDirectorySection extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<IsolateRef?>(
+      valueListenable: serviceManager.isolateManager.mainIsolate,
+      builder: (_, __, ___) {
+        return Container(
+          height: 200.0,
+          child: EditableList(
+            entries: preferences.inspector.customPubRootDirectories,
+            textFieldLabel: 'Enter a new package directory',
+            isRefreshing:
+                preferences.inspector.isRefreshingCustomPubRootDirectories,
+            onEntryAdded: (p0) =>
+                preferences.inspector.addPubRootDirectories([p0]),
+            onEntryRemoved: (p0) =>
+                preferences.inspector.removePubRootDirectories([p0]),
+            onRefreshTriggered: () =>
+                preferences.inspector.loadCustomPubRootDirectories(),
+          ),
+        );
+      },
+    );
   }
 }

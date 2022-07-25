@@ -6,10 +6,8 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../../config_specific/logger/logger.dart';
@@ -20,6 +18,7 @@ import '../../shared/common_widgets.dart';
 import '../../shared/dialogs.dart';
 import '../../shared/globals.dart';
 import '../../shared/history_viewport.dart';
+import '../../shared/object_tree.dart';
 import '../../shared/theme.dart';
 import '../../shared/utils.dart';
 import '../../ui/colors.dart';
@@ -252,13 +251,11 @@ class _CodeViewState extends State<CodeView>
       if (scriptSource.length < 500000) {
         final highlighted = script.highlighter.highlight(context);
 
-        // Look for [TextSpan]s which only contain '\n' to manually break the
+        // Look for [InlineSpan]s which only contain '\n' to manually break the
         // output from the syntax highlighter into individual lines.
-        var currentLine = <TextSpan>[];
+        var currentLine = <InlineSpan>[];
         highlighted.visitChildren((span) {
-          // TODO(elliette): Switch to using TextSpans instead of InlineSpans so
-          // type-casting isn't necessary.
-          currentLine.add(span as TextSpan);
+          currentLine.add(span);
           if (span.toPlainText() == '\n') {
             lines.add(
               TextSpan(
@@ -266,7 +263,7 @@ class _CodeViewState extends State<CodeView>
                 children: currentLine,
               ),
             );
-            currentLine = <TextSpan>[];
+            currentLine = <InlineSpan>[];
           }
           return true;
         });
@@ -420,17 +417,19 @@ class _CodeViewState extends State<CodeView>
 
   Widget buildFileSearchField() {
     return ElevatedCard(
-      child: FileSearchField(
-        debuggerController: widget.controller,
-      ),
       width: extraWideSearchTextWidth,
       height: defaultTextFieldHeight,
       padding: EdgeInsets.zero,
+      child: FileSearchField(
+        debuggerController: widget.controller,
+      ),
     );
   }
 
   Widget buildSearchInFileField() {
     return ElevatedCard(
+      width: wideSearchTextWidth,
+      height: defaultTextFieldHeight + 2 * denseSpacing,
       child: buildSearchField(
         controller: widget.controller,
         searchFieldKey: debuggerCodeViewSearchKey,
@@ -439,8 +438,6 @@ class _CodeViewState extends State<CodeView>
         supportsNavigation: true,
         onClose: () => widget.controller.toggleSearchInFileVisibility(false),
       ),
-      width: wideSearchTextWidth,
-      height: defaultTextFieldHeight + 2 * denseSpacing,
     );
   }
 
@@ -757,7 +754,8 @@ class LineItem extends StatefulWidget {
   _LineItemState createState() => _LineItemState();
 }
 
-class _LineItemState extends State<LineItem> {
+class _LineItemState extends State<LineItem>
+    with ProvidedControllerMixin<DebuggerController, LineItem> {
   /// A timer that shows a [HoverCard] with an evaluation result when completed.
   Timer? _showTimer;
 
@@ -766,8 +764,6 @@ class _LineItemState extends State<LineItem> {
 
   /// Displays the evaluation result of a source code item.
   HoverCard? _hoverCard;
-
-  late DebuggerController _debuggerController;
 
   String _previousHoverWord = '';
   bool _hasMouseExited = false;
@@ -785,7 +781,7 @@ class _LineItemState extends State<LineItem> {
     _showTimer?.cancel();
     _removeTimer?.cancel();
     _hasMouseExited = false;
-    if (!_debuggerController.isPaused.value) return;
+    if (!controller.isPaused.value) return;
     _showTimer = Timer(LineItem._hoverDelay, () async {
       final word = wordForHover(
         event.localPosition.dx,
@@ -796,8 +792,8 @@ class _LineItemState extends State<LineItem> {
       _hoverCard?.remove();
       if (word != '') {
         try {
-          final response = await _debuggerController.evalAtCurrentFrame(word);
-          final isolateRef = _debuggerController.isolateRef;
+          final response = await controller.evalAtCurrentFrame(word);
+          final isolateRef = controller.isolateRef;
           if (response is! InstanceRef) return;
           final variable = DartObjectNode.fromValue(
             value: response,
@@ -809,7 +805,7 @@ class _LineItemState extends State<LineItem> {
           _hoverCard = HoverCard.fromHoverEvent(
             contents: Material(
               child: ExpandableVariable(
-                debuggerController: _debuggerController,
+                debuggerController: controller,
                 variable: variable,
               ),
             ),
@@ -826,6 +822,12 @@ class _LineItemState extends State<LineItem> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    initController();
+  }
+
+  @override
   void dispose() {
     _showTimer?.cancel();
     _removeTimer?.cancel();
@@ -837,7 +839,6 @@ class _LineItemState extends State<LineItem> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final darkTheme = theme.brightness == Brightness.dark;
-    _debuggerController = Provider.of<DebuggerController>(context);
 
     Widget child;
     final column = widget.pausedFrame?.column;
@@ -906,9 +907,7 @@ class _LineItemState extends State<LineItem> {
   }
 
   TextSpan searchAwareLineContents() {
-    // TODO(elliette): Switch to using TextSpans instead of InlineSpans so
-    // type-casting isn't necessary.
-    final children = widget.lineContents.children as List<TextSpan>?;
+    final children = widget.lineContents.children;
     if (children == null) return const TextSpan();
 
     final activeSearchAwareContents = _activeSearchAwareLineContents(children);
@@ -920,12 +919,12 @@ class _LineItemState extends State<LineItem> {
     );
   }
 
-  List<TextSpan> _contentsWithMatch(
-    List<TextSpan> startingContents,
+  List<InlineSpan> _contentsWithMatch(
+    List<InlineSpan> startingContents,
     SourceToken match,
     Color matchColor,
   ) {
-    final contentsWithMatch = <TextSpan>[];
+    final contentsWithMatch = <InlineSpan>[];
     var startColumnForSpan = 0;
     for (final span in startingContents) {
       final spanText = span.toPlainText();
@@ -996,8 +995,8 @@ class _LineItemState extends State<LineItem> {
     return contentsWithMatch;
   }
 
-  List<TextSpan>? _activeSearchAwareLineContents(
-    List<TextSpan> startingContents,
+  List<InlineSpan>? _activeSearchAwareLineContents(
+    List<InlineSpan> startingContents,
   ) {
     final activeSearchMatch = widget.activeSearchMatch;
     if (activeSearchMatch == null) return startingContents;
@@ -1008,8 +1007,8 @@ class _LineItemState extends State<LineItem> {
     );
   }
 
-  List<TextSpan> _searchMatchAwareLineContents(
-    List<TextSpan> startingContents,
+  List<InlineSpan> _searchMatchAwareLineContents(
+    List<InlineSpan> startingContents,
   ) {
     final searchMatches = widget.searchMatches;
     if (searchMatches == null || searchMatches.isEmpty) return startingContents;
@@ -1126,18 +1125,55 @@ class ScriptPopupMenuOption {
 }
 
 final defaultScriptPopupMenuOptions = [
-  copyScriptNameOption,
+  copyPackagePathOption,
+  copyFilePathOption,
   goToLineOption,
   openFileOption,
 ];
 
-final copyScriptNameOption = ScriptPopupMenuOption(
-  label: 'Copy filename',
+final copyPackagePathOption = ScriptPopupMenuOption(
+  label: 'Copy package path',
   icon: Icons.content_copy,
   onSelected: (_, controller) => Clipboard.setData(
     ClipboardData(text: controller.scriptLocation.value?.scriptRef.uri),
   ),
 );
+
+final copyFilePathOption = ScriptPopupMenuOption(
+  label: 'Copy file path',
+  icon: Icons.content_copy,
+  onSelected: (_, controller) async {
+    return Clipboard.setData(
+      ClipboardData(text: await fetchScriptLocationFullFilePath(controller)),
+    );
+  },
+);
+
+@visibleForTesting
+Future<String?> fetchScriptLocationFullFilePath(
+  DebuggerController controller,
+) async {
+  String? filePath;
+  final packagePath = controller.scriptLocation.value!.scriptRef.uri;
+  if (packagePath != null) {
+    final isolateId = serviceManager.isolateManager.selectedIsolate.value!.id!;
+    filePath = serviceManager.resolvedUriManager.lookupFileUri(
+      isolateId,
+      packagePath,
+    );
+    if (filePath == null) {
+      await serviceManager.resolvedUriManager.fetchFileUris(
+        isolateId,
+        [packagePath],
+      );
+      filePath = serviceManager.resolvedUriManager.lookupFileUri(
+        isolateId,
+        packagePath,
+      );
+    }
+  }
+  return filePath;
+}
 
 void showGoToLineDialog(BuildContext context, DebuggerController controller) {
   showDialog(

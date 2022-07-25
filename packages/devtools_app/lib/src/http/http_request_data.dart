@@ -12,7 +12,6 @@ import 'package:vm_service/vm_service.dart';
 import '../config_specific/logger/logger.dart';
 import '../primitives/utils.dart';
 import '../screens/network/network_model.dart';
-import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
 import 'http.dart';
 
@@ -264,11 +263,6 @@ class DartIOHttpRequestData extends NetworkRequest {
       if (!_request.isResponseComplete) return null;
       if (_responseBody != null) return _responseBody;
       _responseBody = utf8.decode(fullRequest.responseBody!);
-      if (contentType != null && contentType!.contains('json')) {
-        _responseBody = FormattedJson.encoder.convert(
-          json.decode(_responseBody!),
-        );
-      }
       return _responseBody;
     } on FormatException {
       return '<binary data>';
@@ -293,6 +287,7 @@ class DartIOHttpRequestData extends NetworkRequest {
       final acceptedMethods = {'POST', 'PUT', 'PATCH'};
       if (!acceptedMethods.contains(_request.method)) return null;
       if (_requestBody != null) return _requestBody;
+      if (fullRequest.requestBody == null) return null;
       _requestBody = utf8.decode(fullRequest.requestBody!);
       return _requestBody;
     } on FormatException {
@@ -321,7 +316,7 @@ class DartIOHttpRequestData extends NetworkRequest {
   }
 
   @override
-  int get hashCode => hashValues(
+  int get hashCode => Object.hash(
         wrapperId,
         method,
         uri,

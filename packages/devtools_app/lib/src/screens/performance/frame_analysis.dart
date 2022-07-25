@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../analytics/constants.dart' as analytics_constants;
 import '../../primitives/utils.dart';
@@ -10,19 +11,23 @@ import '../../service/service_extensions.dart' as extensions;
 import '../../shared/common_widgets.dart';
 import '../../shared/theme.dart';
 import '../../ui/colors.dart';
-import '../../ui/label.dart';
 import '../../ui/utils.dart';
-import 'enhance_tracing.dart';
+import 'panes/controls/enhance_tracing/enhance_tracing.dart';
+import 'panes/controls/enhance_tracing/enhance_tracing_controller.dart';
 import 'performance_controller.dart';
 import 'performance_model.dart';
+import 'performance_utils.dart';
 
 class FlutterFrameAnalysisView extends StatelessWidget {
   const FlutterFrameAnalysisView({
     Key? key,
     required this.frameAnalysis,
+    required this.enhanceTracingController,
   }) : super(key: key);
 
   final FrameAnalysis? frameAnalysis;
+
+  final EnhanceTracingController enhanceTracingController;
 
   @override
   Widget build(BuildContext context) {
@@ -35,8 +40,12 @@ class FlutterFrameAnalysisView extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(defaultSpacing),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          IntelligentFrameFindings(frameAnalysis: frameAnalysis),
+          IntelligentFrameFindings(
+            frameAnalysis: frameAnalysis,
+            enhanceTracingController: enhanceTracingController,
+          ),
           const PaddedDivider(
             padding: EdgeInsets.only(
               top: denseSpacing,
@@ -72,7 +81,7 @@ class _FrameTimeVisualizerState extends State<FrameTimeVisualizer> {
   void initState() {
     super.initState();
     frameAnalysis = widget.frameAnalysis;
-    frameAnalysis.selectFramePhase(frameAnalysis.longestFramePhase);
+    frameAnalysis.selectFramePhase(frameAnalysis.longestUiPhase);
   }
 
   @override
@@ -213,28 +222,64 @@ class FramePhaseBlock extends StatelessWidget {
   }
 }
 
-// TODO(kenz): provide hints about expensive flutter operations
-// (canvas.saveLayer(), intrinsics, etc.).
 class IntelligentFrameFindings extends StatelessWidget {
   const IntelligentFrameFindings({
     Key? key,
     required this.frameAnalysis,
+    required this.enhanceTracingController,
   }) : super(key: key);
 
   final FrameAnalysis frameAnalysis;
 
+  final EnhanceTracingController enhanceTracingController;
+
   @override
   Widget build(BuildContext context) {
+    final performanceController = Provider.of<PerformanceController>(context);
+    final frame = frameAnalysis.frame;
+    final displayRefreshRate = performanceController.displayRefreshRate.value;
+    final showUiJankHints = frame.isUiJanky(displayRefreshRate);
+    final showRasterJankHints = frame.isRasterJanky(displayRefreshRate);
+    if (!(showUiJankHints || showRasterJankHints)) {
+      return const Text('No suggestions for this frame - no jank detected.');
+    }
+
+    final saveLayerCount = frameAnalysis.saveLayerCount;
+    final intrinsicOperationsCount = frameAnalysis.intrinsicOperationsCount;
+
+    final uiHints = showUiJankHints
+        ? [
+            const Text('UI Jank Detected'),
+            const SizedBox(height: denseSpacing),
+            _EnhanceTracingHint(
+              longestPhase: frameAnalysis.longestUiPhase,
+              enhanceTracingController: enhanceTracingController,
+            ),
+            const SizedBox(height: densePadding),
+            if (intrinsicOperationsCount > 0)
+              IntrinsicOperationsHint(intrinsicOperationsCount),
+          ]
+        : [];
+    final rasterHints = showRasterJankHints
+        ? [
+            const Text('Raster Jank Detected'),
+            const SizedBox(height: denseSpacing),
+            if (saveLayerCount > 0) CanvasSaveLayerHint(saveLayerCount),
+            const SizedBox(height: denseSpacing),
+            if (frame.hasShaderTime)
+              ShaderCompilationHint(shaderTime: frame.shaderDuration),
+            const SizedBox(height: denseSpacing),
+            const RasterMetricsHint(),
+          ]
+        : [];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Analysis results:'),
-        const SizedBox(height: denseSpacing),
-        _Hint(
-          message: _EnhanceTracingHint(
-            longestPhase: frameAnalysis.longestFramePhase,
-          ),
-        ),
+        ...uiHints,
+        if (showUiJankHints && showRasterJankHints)
+          const SizedBox(height: defaultSpacing),
+        ...rasterHints,
       ],
     );
   }
@@ -261,31 +306,37 @@ class _Hint extends StatelessWidget {
 }
 
 class _EnhanceTracingHint extends StatelessWidget {
-  const _EnhanceTracingHint({Key? key, required this.longestPhase})
-      : super(key: key);
+  const _EnhanceTracingHint({
+    Key? key,
+    required this.longestPhase,
+    required this.enhanceTracingController,
+  }) : super(key: key);
 
+  /// The longest [FramePhase] for the [FlutterFrame] this hint is for.
   final FramePhase longestPhase;
+
+  final EnhanceTracingController enhanceTracingController;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final phasePrefix =
-        longestPhase.title != FrameAnalysis.rasterEventName ? 'UI ' : '';
-    return RichText(
-      maxLines: 2,
-      text: TextSpan(
-        text: '',
-        children: [
-          TextSpan(
-            text: longestPhase.title,
-            style: theme.fixedFontStyle,
-          ),
-          TextSpan(
-            text: ' was the longest ${phasePrefix}phase in this frame. ',
-            style: theme.regularTextStyle,
-          ),
-          ..._hintForPhase(longestPhase, theme),
-        ],
+    return _Hint(
+      message: RichText(
+        maxLines: 2,
+        text: TextSpan(
+          text: '',
+          children: [
+            TextSpan(
+              text: longestPhase.title,
+              style: theme.fixedFontStyle,
+            ),
+            TextSpan(
+              text: ' was the longest UI phase in this frame. ',
+              style: theme.regularTextStyle,
+            ),
+            ..._hintForPhase(longestPhase, theme),
+          ],
+        ),
       ),
     );
   }
@@ -323,11 +374,13 @@ class _EnhanceTracingHint extends StatelessWidget {
     String settingTitle,
     ThemeData theme,
   ) {
-    const enhanceTracingButton = WidgetSpan(
+    final enhanceTracingButton = WidgetSpan(
       alignment: PlaceholderAlignment.middle,
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: denseSpacing),
-        child: _SmallEnhanceTracingButton(),
+        padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
+        child: _SmallEnhanceTracingButton(
+          enhanceTracingController: enhanceTracingController,
+        ),
       ),
     );
     return [
@@ -345,22 +398,204 @@ class _EnhanceTracingHint extends StatelessWidget {
 }
 
 class _SmallEnhanceTracingButton extends StatelessWidget {
-  const _SmallEnhanceTracingButton({Key? key}) : super(key: key);
+  const _SmallEnhanceTracingButton({
+    Key? key,
+    required this.enhanceTracingController,
+  }) : super(key: key);
 
-  static const labelPadding = 6.0;
+  final EnhanceTracingController enhanceTracingController;
 
   @override
   Widget build(BuildContext context) {
-    // TODO(kenz): find a way to handle taps on this widget and redirect to
-    // simulate a tap gesture on the Enhance Tracing button at the top of the
-    // screen.
-    return RoundedOutlinedBorder(
-      child: Padding(
-        padding: const EdgeInsets.all(labelPadding),
-        child: MaterialIconLabel(
-          label: EnhanceTracingButton.title,
-          iconData: EnhanceTracingButton.icon,
-          color: Theme.of(context).colorScheme.toggleButtonsTitle,
+    return IconLabelButton(
+      label: EnhanceTracingButton.title,
+      icon: EnhanceTracingButton.icon,
+      color: Theme.of(context).colorScheme.toggleButtonsTitle,
+      onPressed: enhanceTracingController.showEnhancedTracingMenu,
+    );
+  }
+}
+
+class _ExpensiveOperationHint extends StatelessWidget {
+  const _ExpensiveOperationHint({
+    Key? key,
+    required this.message,
+    required this.docsUrl,
+    required this.gaScreenName,
+    required this.gaSelectedItemDescription,
+  }) : super(key: key);
+
+  final TextSpan message;
+  final String docsUrl;
+  final String gaScreenName;
+  final String gaSelectedItemDescription;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return RichText(
+      text: TextSpan(
+        children: [
+          message,
+          TextSpan(
+            text: ' This may ',
+            style: theme.regularTextStyle,
+          ),
+          LinkTextSpan(
+            context: context,
+            link: Link(
+              display: 'negatively affect your app\'s performance',
+              url: docsUrl,
+              gaScreenName: gaScreenName,
+              gaSelectedItemDescription: gaSelectedItemDescription,
+            ),
+          ),
+          TextSpan(
+            text: '.',
+            style: theme.regularTextStyle,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class IntrinsicOperationsHint extends StatelessWidget {
+  const IntrinsicOperationsHint(
+    this.intrinsicOperationsCount, {
+    Key? key,
+  }) : super(key: key);
+
+  static const _intrinsicOperationsDocs =
+      'https://docs.flutter.dev/perf/best-practices#minimize-layout-passes-caused-by-intrinsic-operations';
+
+  final int intrinsicOperationsCount;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return _Hint(
+      message: _ExpensiveOperationHint(
+        docsUrl: _intrinsicOperationsDocs,
+        gaScreenName: analytics_constants.performance,
+        gaSelectedItemDescription: analytics_constants.shaderCompilationDocs,
+        message: TextSpan(
+          children: [
+            TextSpan(
+              text: 'Intrinsic',
+              style: theme.fixedFontStyle,
+            ),
+            TextSpan(
+              text: ' passes were performed $intrinsicOperationsCount '
+                  '${pluralize('time', intrinsicOperationsCount)} during this '
+                  'frame.',
+              style: theme.regularTextStyle,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// TODO(kenz): if the 'profileRenderObjectPaints' service extension is disabled,
+// suggest that the user turn it on to get information about the render objects
+// that are calling saveLayer. If the event has render object information in the
+// args, display it in the hint.
+class CanvasSaveLayerHint extends StatelessWidget {
+  const CanvasSaveLayerHint(
+    this.saveLayerCount, {
+    Key? key,
+  }) : super(key: key);
+
+  static const _saveLayerDocs =
+      'https://docs.flutter.dev/perf/best-practices#use-savelayer-thoughtfully';
+
+  final int saveLayerCount;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return _Hint(
+      message: _ExpensiveOperationHint(
+        docsUrl: _saveLayerDocs,
+        gaScreenName: analytics_constants.performance,
+        gaSelectedItemDescription: analytics_constants.canvasSaveLayerDocs,
+        message: TextSpan(
+          children: [
+            TextSpan(
+              text: 'Canvas.saveLayer()',
+              style: theme.fixedFontStyle,
+            ),
+            TextSpan(
+              text: ' was called $saveLayerCount '
+                  '${pluralize('time', saveLayerCount)} during this frame.',
+              style: theme.regularTextStyle,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ShaderCompilationHint extends StatelessWidget {
+  const ShaderCompilationHint({
+    Key? key,
+    required this.shaderTime,
+  }) : super(key: key);
+
+  final Duration shaderTime;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return _Hint(
+      message: _ExpensiveOperationHint(
+        docsUrl: preCompileShadersDocsUrl,
+        gaScreenName: analytics_constants.performance,
+        gaSelectedItemDescription: analytics_constants.shaderCompilationDocs,
+        message: TextSpan(
+          children: [
+            TextSpan(
+              text: '${msText(shaderTime)}',
+              style: theme.fixedFontStyle,
+            ),
+            TextSpan(
+              text: ' of shader compilation occurred during this frame.',
+              style: theme.regularTextStyle,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class RasterMetricsHint extends StatelessWidget {
+  const RasterMetricsHint({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return _Hint(
+      message: RichText(
+        text: TextSpan(
+          children: [
+            TextSpan(
+              text: 'Consider using the',
+              style: theme.regularTextStyle,
+            ),
+            TextSpan(
+              text: ' Raster Metrics ',
+              style: theme.subtleFixedFontStyle,
+            ),
+            TextSpan(
+              text: 'tab to identify rendering layers that are expensive to '
+                  'rasterize.',
+              style: theme.regularTextStyle,
+            ),
+          ],
         ),
       ),
     );

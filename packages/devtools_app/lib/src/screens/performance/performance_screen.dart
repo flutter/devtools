@@ -5,13 +5,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../analytics/analytics.dart' as ga;
 import '../../analytics/analytics_common.dart';
 import '../../analytics/constants.dart' as analytics_constants;
 import '../../config_specific/import_export/import_export.dart';
 import '../../primitives/auto_dispose_mixin.dart';
+import '../../service/service_extension_widgets.dart';
 import '../../service/service_extensions.dart' as extensions;
 import '../../shared/banner_messages.dart';
 import '../../shared/common_widgets.dart';
@@ -21,13 +21,13 @@ import '../../shared/notifications.dart';
 import '../../shared/screen.dart';
 import '../../shared/split.dart';
 import '../../shared/theme.dart';
+import '../../shared/utils.dart';
 import '../../shared/version.dart';
 import '../../ui/icons.dart';
-import '../../ui/service_extension_widgets.dart';
 import '../../ui/vm_flag_widgets.dart';
-import 'enhance_tracing.dart';
 import 'event_details.dart';
 import 'flutter_frames_chart.dart';
+import 'panes/controls/enhance_tracing/enhance_tracing.dart';
 import 'performance_controller.dart';
 import 'performance_model.dart';
 import 'tabbed_performance_view.dart';
@@ -64,11 +64,8 @@ class PerformanceScreenBody extends StatefulWidget {
 class PerformanceScreenBodyState extends State<PerformanceScreenBody>
     with
         AutoDisposeMixin,
-        OfflineScreenMixin<PerformanceScreenBody, OfflinePerformanceData> {
-  PerformanceController get controller => _controller!;
-
-  PerformanceController? _controller;
-
+        OfflineScreenMixin<PerformanceScreenBody, OfflinePerformanceData>,
+        ProvidedControllerMixin<PerformanceController, PerformanceScreenBody> {
   bool processing = false;
 
   double processingProgress = 0.0;
@@ -98,9 +95,7 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
     );
     maybePushDebugModePerformanceMessage(context, PerformanceScreen.id);
 
-    final newController = Provider.of<PerformanceController>(context);
-    if (newController == _controller) return;
-    _controller = newController;
+    if (!initController()) return;
 
     cancelListeners();
 
@@ -319,7 +314,7 @@ class SecondaryPerformanceControls extends StatelessWidget {
             ],
           ),
           const SizedBox(width: denseSpacing),
-          const EnhanceTracingButton(),
+          EnhanceTracingButton(controller.enhanceTracingController),
           const SizedBox(width: denseSpacing),
           const MoreDebuggingOptionsButton(),
         ],
@@ -338,7 +333,6 @@ class SecondaryPerformanceControls extends StatelessWidget {
         const SizedBox(width: denseSpacing),
         SettingsOutlinedButton(
           onPressed: () => _openSettingsDialog(context),
-          label: 'Performance Settings',
         ),
       ],
     );
@@ -380,12 +374,28 @@ class MoreDebuggingOptionsButton extends StatelessWidget {
         extensions.disableOpacityLayers,
         extensions.disablePhysicalShapeLayers,
       ],
-      overlayDescription: Text(
-        'When toggling on/off a rendering layer, you will need '
-        'to reproduce activity in your app to see the effects of the '
-        'debugging option. All layers are rendered by default - disabling a '
-        'layer may help you identify expensive operations in your app.',
-        style: Theme.of(context).subtleTextStyle,
+      overlayDescription: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'After toggling a rendering layer on/off, '
+            'reproduce the activity in your app to see the effects. '
+            'All layers are rendered by default - disabling a '
+            'layer might help identify expensive operations in your app.',
+            style: Theme.of(context).subtleTextStyle,
+          ),
+          if (serviceManager.connectedApp!.isProfileBuildNow!) ...[
+            const SizedBox(height: denseSpacing),
+            RichText(
+              text: TextSpan(
+                text:
+                    "These debugging options aren't available in profile mode. "
+                    'To use them, run your app in debug mode.',
+                style: Theme.of(context).subtleErrorTextStyle,
+              ),
+            )
+          ]
+        ],
       ),
       overlayWidthBeforeScaling: _width,
     );

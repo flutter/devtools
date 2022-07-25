@@ -584,7 +584,7 @@ class TimeRange {
   }
 
   @override
-  int get hashCode => hashValues(start, end);
+  int get hashCode => Object.hash(start, end);
 }
 
 String formatDateTime(DateTime time) {
@@ -748,7 +748,7 @@ class Range {
   }
 
   @override
-  int get hashCode => hashValues(begin, end);
+  int get hashCode => Object.hash(begin, end);
 }
 
 enum SortDirection {
@@ -1210,6 +1210,11 @@ class ListValueNotifier<T> extends ChangeNotifier
     _listChanged();
   }
 
+  void removeAll(Iterable<T> elements) {
+    elements.forEach(_rawList.remove);
+    _listChanged();
+  }
+
   /// Clears the list and notifies listeners.
   void clear() {
     _rawList = <T>[];
@@ -1241,6 +1246,15 @@ class ListValueNotifier<T> extends ChangeNotifier
     _rawList.removeAt(index);
     _listChanged();
     return true;
+  }
+
+  /// Removes a range of elements from the list.
+  ///
+  /// https://api.flutter.dev/flutter/dart-core/List/removeRange.html
+  void removeRange(int start, int end) {
+    _rawList = _rawList.toList();
+    _rawList.removeRange(start, end);
+    _listChanged();
   }
 }
 
@@ -1412,4 +1426,12 @@ extension UriExtension on Uri {
 
 Iterable<T> removeNullValues<T>(Iterable<T?> values) {
   return values.whereType<T>();
+}
+
+bool isPrimativeInstanceKind(String? kind) {
+  return kind == InstanceKind.kBool ||
+      kind == InstanceKind.kDouble ||
+      kind == InstanceKind.kInt ||
+      kind == InstanceKind.kNull ||
+      kind == InstanceKind.kString;
 }

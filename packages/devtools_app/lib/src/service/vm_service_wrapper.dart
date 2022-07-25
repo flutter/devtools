@@ -4,16 +4,22 @@
 
 import 'dart:async';
 
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:dds_service_extensions/dds_service_extensions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
+
+import '../primitives/utils.dart';
+import 'json_to_service_cache.dart';
 
 class VmServiceWrapper implements VmService {
   VmServiceWrapper(
     this._vmService,
     this._connectedUri, {
     this.trackFutures = false,
-  });
+  }) {
+    _initSupportedProtocols();
+  }
 
   VmServiceWrapper.fromNewVmService(
     Stream<dynamic> /*String|List<int>*/ inStream,
@@ -29,7 +35,26 @@ class VmServiceWrapper implements VmService {
       log: log,
       disposeHandler: disposeHandler,
     );
+    _initSupportedProtocols();
   }
+
+  // TODO(https://github.com/dart-lang/sdk/issues/49072): in the long term, do
+  // not support diverging DevTools functionality based on whether the DDS
+  // protocol is supported. Conditional logic around [_ddsSupported] was added
+  // in https://github.com/flutter/devtools/pull/4119 as a workaround for
+  // profiling the analysis server.
+  Future<void> _initSupportedProtocols() async {
+    final supportedProtocols = await getSupportedProtocols();
+    final ddsProtocol = supportedProtocols.protocols?.firstWhereOrNull(
+      (Protocol p) => p.protocolName?.caseInsensitiveEquals('DDS') ?? false,
+    );
+    _ddsSupported = ddsProtocol != null;
+    _supportedProtocolsInitialized.complete();
+  }
+
+  final _supportedProtocolsInitialized = Completer<void>();
+
+  bool _ddsSupported = false;
 
   late final VmService _vmService;
 
@@ -47,6 +72,10 @@ class VmServiceWrapper implements VmService {
     ..complete(true);
 
   Future<void> get allFuturesCompleted => _allFuturesCompleter.future;
+
+  // A local cache of "fake" service objects. Used to convert JSON objects to
+  // VM service response formats to be used with APIs that require them.
+  final fakeServiceCache = JsonToServiceCache();
 
   /// Executes `callback` for each isolate, and waiting for all callbacks to
   /// finish before completing.
@@ -195,7 +224,15 @@ class VmServiceWrapper implements VmService {
   }) async {
     return trackFuture(
       'getAllocationProfile',
-      _vmService.getAllocationProfile(isolateId, reset: reset, gc: gc),
+      _vmService.callMethod(
+        // TODO(bkonyi): add _new and _old to public response.
+        '_getAllocationProfile',
+        isolateId: isolateId,
+        args: <String, dynamic>{
+          if (reset != null && reset) 'reset': reset,
+          if (gc != null && gc) 'gc': gc,
+        },
+      ).then((r) => r as AllocationProfile),
     );
   }
 
@@ -260,6 +297,14 @@ class VmServiceWrapper implements VmService {
     int? offset,
     int? count,
   }) {
+    final cachedObj = fakeServiceCache.getObject(
+      objectId: objectId,
+      offset: offset,
+      count: count,
+    );
+    if (cachedObj != null) {
+      return Future.value(cachedObj);
+    }
     return trackFuture(
       'getObject',
       _vmService.getObject(
@@ -290,6 +335,7 @@ class VmServiceWrapper implements VmService {
     int? endTokenPos,
     bool? forceCompile,
     bool? reportLines,
+    List<String>? libraryFilters,
   }) async {
     return trackFuture(
       'getSourceReport',
@@ -301,6 +347,7 @@ class VmServiceWrapper implements VmService {
         endTokenPos: endTokenPos,
         forceCompile: forceCompile,
         reportLines: reportLines,
+        libraryFilters: libraryFilters,
       ),
     );
   }
@@ -330,109 +377,6 @@ class VmServiceWrapper implements VmService {
     );
   }
 
-  // TODO(kenz): move this method to
-  // https://github.com/dart-lang/sdk/blob/master/pkg/vm_service/lib/src/dart_io_extensions.dart
-  Future<bool> isHttpTimelineLoggingAvailable(String isolateId) async {
-    final Isolate isolate = await getIsolate(isolateId);
-    final rpcs = isolate.extensionRPCs ?? [];
-    return rpcs.contains('ext.dart.io.httpEnableTimelineLogging');
-  }
-
-  Future<HttpTimelineLoggingState> httpEnableTimelineLogging(
-    String isolateId, [
-    bool? enabled,
-  ]) async {
-    assert(await isHttpTimelineLoggingAvailable(isolateId));
-    return trackFuture(
-      'httpEnableTimelineLogging',
-      _vmService.httpEnableTimelineLogging(isolateId, enabled),
-    );
-  }
-
-  // TODO(bkonyi): move this method to
-  // https://github.com/dart-lang/sdk/blob/master/pkg/vm_service/lib/src/dart_io_extensions.dart
-  Future<bool> isHttpProfilingAvailable(String isolateId) async {
-    final Isolate isolate = await getIsolate(isolateId);
-    return (isolate.extensionRPCs ?? []).contains('ext.dart.io.getHttpProfile');
-  }
-
-  /// The `getHttpProfile` RPC is used to retrieve HTTP profiling information
-  /// for requests made via `dart:io`'s `HttpClient`.
-  ///
-  /// The returned [HttpProfile] will only include requests issued after
-  /// [httpTimelineLogging] has been enabled or after the last
-  /// [clearHttpProfile] invocation.
-  Future<HttpProfile> getHttpProfile(
-    String isolateId, {
-    int? updatedSince,
-  }) async {
-    assert(await isHttpProfilingAvailable(isolateId));
-    return trackFuture(
-      'getHttpProfile',
-      _vmService.getHttpProfile(
-        isolateId,
-        updatedSince: updatedSince,
-      ),
-    );
-  }
-
-  Future<HttpProfileRequest> getHttpProfileRequest(
-    String isolateId,
-    int id,
-  ) async {
-    assert(await isHttpProfilingAvailable(isolateId));
-    return trackFuture(
-      'getHttpProfileRequest',
-      _vmService.getHttpProfileRequest(isolateId, id),
-    );
-  }
-
-  /// The `clearHttpProfile` RPC is used to clear previously recorded HTTP
-  /// requests from the HTTP profiler state. Requests still in-flight after
-  /// clearing the profiler state will be ignored by the profiler.
-  Future<Success> clearHttpProfile(String isolateId) async {
-    assert(await isHttpProfilingAvailable(isolateId));
-    return trackFuture(
-      'clearHttpProfile',
-      _vmService.clearHttpProfile(isolateId),
-    );
-  }
-
-  // TODO(kenz): move this method to
-  // https://github.com/dart-lang/sdk/blob/master/pkg/vm_service/lib/src/dart_io_extensions.dart
-  Future<bool> isSocketProfilingAvailable(String isolateId) async {
-    final Isolate isolate = await getIsolate(isolateId);
-    return (isolate.extensionRPCs ?? [])
-        .contains('ext.dart.io.getSocketProfile');
-  }
-
-  Future<SocketProfilingState> socketProfilingEnabled(
-    String isolateId, [
-    bool? enabled,
-  ]) async {
-    assert(await isSocketProfilingAvailable(isolateId));
-    return trackFuture(
-      'socketProfilingEnabled',
-      _vmService.socketProfilingEnabled(isolateId, enabled),
-    );
-  }
-
-  Future<Success> clearSocketProfile(String isolateId) async {
-    assert(await isSocketProfilingAvailable(isolateId));
-    return trackFuture(
-      'clearSocketProfile',
-      _vmService.clearSocketProfile(isolateId),
-    );
-  }
-
-  Future<SocketProfile> getSocketProfile(String isolateId) async {
-    assert(await isSocketProfilingAvailable(isolateId));
-    return trackFuture(
-      'getSocketProfile',
-      _vmService.getSocketProfile(isolateId),
-    );
-  }
-
   @override
   Future<TimelineFlags> getVMTimelineFlags() {
     return trackFuture('getVMTimelineFlags', _vmService.getVMTimelineFlags());
@@ -450,9 +394,6 @@ class VmServiceWrapper implements VmService {
   Future<Version> getVersion() async {
     return trackFuture('getVersion', _vmService.getVersion());
   }
-
-  Future<Version> getDartIOVersion(String isolateId) =>
-      trackFuture('_getDartIOVersion', _vmService.getDartIOVersion(isolateId));
 
   @override
   Future<MemoryUsage> getMemoryUsage(String isolateId) =>
@@ -507,9 +448,6 @@ class VmServiceWrapper implements VmService {
   @override
   Stream<Event> get onExtensionEvent => _vmService.onExtensionEvent;
 
-  Stream<Event> get onExtensionEventWithHistory =>
-      _vmService.onExtensionEventWithHistory;
-
   @override
   Stream<Event> get onGCEvent => _vmService.onGCEvent;
 
@@ -518,9 +456,6 @@ class VmServiceWrapper implements VmService {
 
   @override
   Stream<Event> get onLoggingEvent => _vmService.onLoggingEvent;
-
-  Stream<Event> get onLoggingEventWithHistory =>
-      _vmService.onLoggingEventWithHistory;
 
   @override
   Stream<Event> get onTimelineEvent => _vmService.onTimelineEvent;
@@ -537,14 +472,8 @@ class VmServiceWrapper implements VmService {
   @override
   Stream<Event> get onStderrEvent => _vmService.onStderrEvent;
 
-  Stream<Event> get onStderrEventWithHistory =>
-      _vmService.onStderrEventWithHistory;
-
   @override
   Stream<Event> get onStdoutEvent => _vmService.onStdoutEvent;
-
-  Stream<Event> get onStdoutEventWithHistory =>
-      _vmService.onStdoutEventWithHistory;
 
   @override
   Stream<Event> get onVMEvent => _vmService.onVMEvent;
@@ -782,13 +711,167 @@ class VmServiceWrapper implements VmService {
   @override
   Future<UriList> lookupResolvedPackageUris(
     String isolateId,
-    List<String> uris,
-  ) async {
+    List<String> uris, {
+    bool? local,
+  }) async {
     return trackFuture(
       'lookupResolvedPackageUris',
-      _vmService.lookupResolvedPackageUris(isolateId, uris),
+      _vmService.lookupResolvedPackageUris(isolateId, uris, local: local),
     );
   }
+
+  // Mark: Overrides for [DdsExtension]. It would help with logical grouping to
+  // make these extension methods, but that makes testing more difficult due to
+  // mocking limitations for extension methods.
+  Stream<Event> get onExtensionEventWithHistory {
+    return _maybeReturnStreamWithHistory(
+      _vmService.onExtensionEventWithHistory,
+      fallbackStream: onExtensionEvent,
+    );
+  }
+
+  Stream<Event> get onLoggingEventWithHistory {
+    return _maybeReturnStreamWithHistory(
+      _vmService.onLoggingEventWithHistory,
+      fallbackStream: onLoggingEvent,
+    );
+  }
+
+  Stream<Event> get onStderrEventWithHistory {
+    return _maybeReturnStreamWithHistory(
+      _vmService.onStderrEventWithHistory,
+      fallbackStream: onStderrEvent,
+    );
+  }
+
+  Stream<Event> get onStdoutEventWithHistory {
+    return _maybeReturnStreamWithHistory(
+      _vmService.onStdoutEventWithHistory,
+      fallbackStream: onStdoutEvent,
+    );
+  }
+
+  Stream<Event> _maybeReturnStreamWithHistory(
+    Stream<Event> ddsStream, {
+    required Stream<Event> fallbackStream,
+  }) {
+    assert(_supportedProtocolsInitialized.isCompleted);
+    if (_ddsSupported) {
+      return ddsStream;
+    }
+    return fallbackStream;
+  }
+  // Mark: end overrides for the [DdsExtension].
+
+  // Mark: Overrides for [DartIOExtension]. It would help with logical grouping
+  // to make these extension methods, but that makes testing more difficult due
+  // to mocking limitations for extension methods.
+  Future<Version> getDartIOVersion(String isolateId) =>
+      trackFuture('_getDartIOVersion', _vmService.getDartIOVersion(isolateId));
+
+  Future<SocketProfilingState> socketProfilingEnabled(
+    String isolateId, [
+    bool? enabled,
+  ]) async {
+    assert(await isSocketProfilingAvailable(isolateId));
+    return trackFuture(
+      'socketProfilingEnabled',
+      _vmService.socketProfilingEnabled(isolateId, enabled),
+    );
+  }
+
+  Future<Success> clearSocketProfile(String isolateId) async {
+    assert(await isSocketProfilingAvailable(isolateId));
+    return trackFuture(
+      'clearSocketProfile',
+      _vmService.clearSocketProfile(isolateId),
+    );
+  }
+
+  Future<SocketProfile> getSocketProfile(String isolateId) async {
+    assert(await isSocketProfilingAvailable(isolateId));
+    return trackFuture(
+      'getSocketProfile',
+      _vmService.getSocketProfile(isolateId),
+    );
+  }
+
+  Future<HttpTimelineLoggingState> httpEnableTimelineLogging(
+    String isolateId, [
+    bool? enabled,
+  ]) async {
+    assert(await isHttpTimelineLoggingAvailable(isolateId));
+    return trackFuture(
+      'httpEnableTimelineLogging',
+      _vmService.httpEnableTimelineLogging(isolateId, enabled),
+    );
+  }
+
+  /// The `getHttpProfile` RPC is used to retrieve HTTP profiling information
+  /// for requests made via `dart:io`'s `HttpClient`.
+  ///
+  /// The returned [HttpProfile] will only include requests issued after
+  /// [httpTimelineLogging] has been enabled or after the last
+  /// [clearHttpProfile] invocation.
+  Future<HttpProfile> getHttpProfile(
+    String isolateId, {
+    int? updatedSince,
+  }) async {
+    assert(await isHttpProfilingAvailable(isolateId));
+    return trackFuture(
+      'getHttpProfile',
+      _vmService.getHttpProfile(
+        isolateId,
+        updatedSince: updatedSince,
+      ),
+    );
+  }
+
+  Future<HttpProfileRequest> getHttpProfileRequest(
+    String isolateId,
+    int id,
+  ) async {
+    assert(await isHttpProfilingAvailable(isolateId));
+    return trackFuture(
+      'getHttpProfileRequest',
+      _vmService.getHttpProfileRequest(isolateId, id),
+    );
+  }
+
+  /// The `clearHttpProfile` RPC is used to clear previously recorded HTTP
+  /// requests from the HTTP profiler state. Requests still in-flight after
+  /// clearing the profiler state will be ignored by the profiler.
+  Future<Success> clearHttpProfile(String isolateId) async {
+    assert(await isHttpProfilingAvailable(isolateId));
+    return trackFuture(
+      'clearHttpProfile',
+      _vmService.clearHttpProfile(isolateId),
+    );
+  }
+
+  // TODO(kenz): move this method to
+  // https://github.com/dart-lang/sdk/blob/master/pkg/vm_service/lib/src/dart_io_extensions.dart
+  Future<bool> isSocketProfilingAvailable(String isolateId) async {
+    final Isolate isolate = await getIsolate(isolateId);
+    return (isolate.extensionRPCs ?? [])
+        .contains('ext.dart.io.getSocketProfile');
+  }
+
+  // TODO(kenz): move this method to
+  // https://github.com/dart-lang/sdk/blob/master/pkg/vm_service/lib/src/dart_io_extensions.dart
+  Future<bool> isHttpTimelineLoggingAvailable(String isolateId) async {
+    final Isolate isolate = await getIsolate(isolateId);
+    final rpcs = isolate.extensionRPCs ?? [];
+    return rpcs.contains('ext.dart.io.httpEnableTimelineLogging');
+  }
+
+  // TODO(bkonyi): move this method to
+  // https://github.com/dart-lang/sdk/blob/master/pkg/vm_service/lib/src/dart_io_extensions.dart
+  Future<bool> isHttpProfilingAvailable(String isolateId) async {
+    final Isolate isolate = await getIsolate(isolateId);
+    return (isolate.extensionRPCs ?? []).contains('ext.dart.io.getHttpProfile');
+  }
+  // Mark: end overrides for the [DartIOExtension].
 
   /// Testing only method to indicate that we don't really need to await all
   /// currently pending futures.
