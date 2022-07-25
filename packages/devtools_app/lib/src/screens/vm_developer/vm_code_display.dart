@@ -88,7 +88,9 @@ class _InstructionColumn extends _CodeColumnData
   }
 
   TextSpan _buildInstructionSpanRegExp(
-      ColorScheme colorScheme, StringScanner scanner) {
+    ColorScheme colorScheme,
+    StringScanner scanner,
+  ) {
     return TextSpan(
       text: _getLastMatch(scanner),
       style: TextStyle(
