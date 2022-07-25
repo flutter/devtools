@@ -126,7 +126,7 @@ class _InstructionColumn extends _CodeColumnData
     final addressRegExp = RegExp(r'0x[a-fA-F0-9]+');
     final numericRegExp = RegExp(r'\d+');
     final spans = <TextSpan>[];
-    
+
     final scanner = StringScanner(instruction);
     final colorScheme = Theme.of(context).colorScheme;
 
