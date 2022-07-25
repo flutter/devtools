@@ -275,13 +275,13 @@ class _AnalysisViewState extends State<AnalysisView>
   TreemapNode? analysisRoot;
   late TreemapNode? openNode;
 
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) => controller.changeAnalysisRoot(openNode),
-    );
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   WidgetsBinding.instance.addPostFrameCallback(
+  //     (_) => controller.changeAnalysisRoot(openNode),
+  //   );
+  // }
 
   @override
   void didChangeDependencies() {
