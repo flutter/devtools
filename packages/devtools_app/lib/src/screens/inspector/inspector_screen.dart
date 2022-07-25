@@ -336,6 +336,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
 class FlutterInspectorSettingsDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    const showPackageDirectorySection = false;
     final theme = Theme.of(context);
     final dialogHeight = scaleByFontFactor(400.0);
     return DevToolsDialog(
@@ -361,22 +362,23 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
             ),
             // TODO(CoderDake): add PubRootDirectory section back when
             // finalizing https://github.com/flutter/devtools/issues/3941
-            /*
-            const SizedBox(height: denseSpacing),
-            ...dialogSubHeader(Theme.of(context), 'Package Directories'),
-            Text(
-              'Widgets in these directories will show up in your summary tree.',
-              style: theme.subtleTextStyle,
-            ),
-            Text(
-              '(e.g. /absolute/path/to/myPackage)',
-              style: theme.subtleTextStyle,
-            ),
-            const SizedBox(height: denseSpacing),
-            Expanded(
-               child: PubRootDirectorySection(),
-            ),
-            */
+            // ignore: dead_code
+            if (showPackageDirectorySection) ...[
+              const SizedBox(height: denseSpacing),
+              ...dialogSubHeader(Theme.of(context), 'Package Directories'),
+              Text(
+                'Widgets in these directories will show up in your summary tree.',
+                style: theme.subtleTextStyle,
+              ),
+              Text(
+                '(e.g. /absolute/path/to/myPackage)',
+                style: theme.subtleTextStyle,
+              ),
+              const SizedBox(height: denseSpacing),
+              Expanded(
+                child: PubRootDirectorySection(),
+              ),
+            ]
           ],
         ),
       ),
