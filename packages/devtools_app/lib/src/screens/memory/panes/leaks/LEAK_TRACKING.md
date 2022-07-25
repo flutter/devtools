@@ -116,6 +116,8 @@ like [the example app does](https://github.com/polina-c/spikes/blob/master/leaki
 
 You can pass information, that will help you troubleshoot the leak, to the optional parameter `details`.
 
+TODO(polina-c): explain how to choose which classes to instrument.
+
 ### Detect leaks in your Dart app
 
 For Dart appliocations: 
@@ -167,5 +169,8 @@ addLeakTrackingDetails(this, 'Serves the stream $streamName.');
 ```
 #### Evaluate the leaked objects with DevTools Memory Evaluator
 
-the feature is under construction
+TODO(polina-c): add content
 
+### Understand performance impact
+
+TODO(polina-c): add content
