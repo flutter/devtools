@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_developer_common_widgets.dart';
+import 'package:devtools_app/src/shared/common_widgets.dart';
+import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../vm_developer_test_utils.dart';
@@ -14,55 +17,39 @@ import '../vm_developer_test_utils.dart';
 void main() {
   const windowSize = Size(4000.0, 4000.0);
 
+  late MockClassObject mockClassObject;
+
   late InstanceRef requestedSize;
 
-  int size = 0;
+  final retainingPathNotifier = ValueNotifier<RetainingPath?>(null);
 
-  late void Function() requestFunction;
-
-  bool fetchRetainingPath = false;
-
-  late ValueNotifier<RetainingPath?> retainingPathNotifier;
-
-  late void Function(bool) fetchRetainingPathFunc;
-
-  bool fetchInboundRefs = false;
-
-  late ValueNotifier<InboundReferences?> inboundRefsNotifier;
-
-  late void Function(bool) fetchinboundRefsFunc;
+  final inboundRefsNotifier = ValueNotifier<InboundReferences?>(null);
 
   setUp(() {
     setGlobal(IdeTheme, IdeTheme());
 
+    mockClassObject = MockClassObject();
+
     final json = testInstance.toJson();
     requestedSize = Instance.parse(json)!;
-    requestedSize.valueAsString = '1024';
 
-    requestFunction = () {
-      requestedSize.valueAsString = size.toString();
-      size++;
-    };
+    when(mockClassObject.reachableSize).thenReturn(requestedSize);
 
-    retainingPathNotifier = ValueNotifier<RetainingPath?>(null);
+    when(mockClassObject.requestReachableSize()).thenAnswer((_) async {
+      requestedSize.valueAsString = '1024';
+    });
 
-    fetchRetainingPathFunc = (bool) {
-      if (fetchRetainingPath) {
-        retainingPathNotifier.value = testRetainingPath;
-      } else {
-        fetchRetainingPath = true;
-      }
-    };
+    when(mockClassObject.retainingPath).thenReturn(retainingPathNotifier);
 
-    inboundRefsNotifier = ValueNotifier<InboundReferences?>(null);
+    when(mockClassObject.requestRetainingPath()).thenAnswer((_) async {
+      retainingPathNotifier.value = testRetainingPath;
+    });
 
-    fetchinboundRefsFunc = (bool) {
-      if (fetchInboundRefs) {
-        inboundRefsNotifier.value = testInboundRefs;
-      } else {
-        fetchInboundRefs = true;
-      }
-    };
+    when(mockClassObject.inboundReferences).thenReturn(inboundRefsNotifier);
+
+    when(mockClassObject.requestInboundsRefs()).thenAnswer((_) async {
+      inboundRefsNotifier.value = testInboundRefs;
+    });
   });
 
   testWidgets('test RequestableSizeWidget with null data',
@@ -71,7 +58,7 @@ void main() {
       wrap(
         RequestableSizeWidget(
           requestedSize: null,
-          requestFunction: requestFunction,
+          requestFunction: mockClassObject.requestReachableSize,
         ),
       ),
     );
@@ -80,54 +67,51 @@ void main() {
 
     await tester.tap(find.byType(RequestDataButton));
 
-    expect(size, 1);
+    expect(requestedSize.valueAsString, '1024');
   });
 
   testWidgets('test RequestableSizeWidget with data',
       (WidgetTester tester) async {
-    size = 100;
+    requestedSize.valueAsString = '128';
+
+    final sizeNotifier = ValueNotifier<InstanceRef?>(requestedSize);
+
     await tester.pumpWidget(
       wrap(
-        RequestableSizeWidget(
-          requestedSize: requestedSize,
-          requestFunction: requestFunction,
+        ValueListenableBuilder(
+          valueListenable: sizeNotifier,
+          builder: (context, size, _) {
+            return RequestableSizeWidget(
+              requestedSize: requestedSize,
+              requestFunction: () {
+                mockClassObject.requestReachableSize();
+                sizeNotifier.notifyListeners();
+              },
+            );
+          },
         ),
       ),
     );
 
     expect(find.byType(Text), findsOneWidget);
-    expect(find.text('1 KB'), findsOneWidget);
+    expect(find.text('128 B'), findsOneWidget);
     expect(find.byType(ToolbarRefresh), findsOneWidget);
 
     await tester.tap(find.byType(ToolbarRefresh));
 
-    await tester.pumpWidget(
-      wrap(
-        RequestableSizeWidget(
-          requestedSize: requestedSize,
-          requestFunction: requestFunction,
-        ),
-      ),
-    );
+    await tester.pumpAndSettle();
 
-    expect(find.text('100 B'), findsOneWidget);
-
-    expect(size, 101);
+    expect(find.text('1 KB'), findsOneWidget);
   });
 
-  testWidgetsWithWindowSize('test RetainingPathWidget', windowSize,
+  testWidgetsWithWindowSize(
+      'test RetainingPathWidget with null data', windowSize,
       (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
-        Column(
-          children: [
-            Flexible(
-              child: RetainingPathWidget(
-                retainingPath: retainingPathNotifier,
-                onExpanded: fetchRetainingPathFunc,
-              ),
-            )
-          ],
+        RetainingPathWidget(
+          retainingPath: mockClassObject.retainingPath,
+          onExpanded: (bool) => null,
         ),
       ),
     );
@@ -141,9 +125,24 @@ void main() {
     await tester.pump();
 
     expect(find.byType(CenteredCircularProgressIndicator), findsOneWidget);
+  });
 
-    //collapse then expand to show the retaining path rows
-    await tester.tap(find.byType(AreaPaneHeader));
+  testWidgetsWithWindowSize(
+      'test RetainingPathWidget with fetched data', windowSize,
+      (WidgetTester tester) async {
+    retainingPathNotifier.value = null;
+
+    await tester.pumpWidget(
+      wrap(
+        RetainingPathWidget(
+          retainingPath: mockClassObject.retainingPath,
+          onExpanded: (bool) {
+            mockClassObject.requestRetainingPath();
+          },
+        ),
+      ),
+    );
+
     await tester.tap(find.byType(AreaPaneHeader));
 
     await tester.pumpAndSettle();
@@ -168,19 +167,16 @@ void main() {
     );
   });
 
-  testWidgetsWithWindowSize('test InboundReferencesWidget', windowSize,
+  testWidgetsWithWindowSize(
+      'test InboundReferencesWidget with null data', windowSize,
       (WidgetTester tester) async {
+    inboundRefsNotifier.value = null;
+
     await tester.pumpWidget(
       wrap(
-        Column(
-          children: [
-            Flexible(
-              child: InboundReferencesWidget(
-                inboundReferences: inboundRefsNotifier,
-                onExpanded: fetchinboundRefsFunc,
-              ),
-            )
-          ],
+        InboundReferencesWidget(
+          inboundReferences: mockClassObject.inboundReferences,
+          onExpanded: (bool) => null,
         ),
       ),
     );
@@ -194,9 +190,20 @@ void main() {
     await tester.pump();
 
     expect(find.byType(CenteredCircularProgressIndicator), findsOneWidget);
+  });
 
-    //collapse then expand to show the rows of inbound references
-    await tester.tap(find.byType(AreaPaneHeader));
+  testWidgetsWithWindowSize(
+      'test InboundReferencesWidget with data', windowSize,
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrap(
+        InboundReferencesWidget(
+          inboundReferences: mockClassObject.inboundReferences,
+          onExpanded: (bool) => mockClassObject.requestInboundsRefs(),
+        ),
+      ),
+    );
+
     await tester.tap(find.byType(AreaPaneHeader));
 
     await tester.pumpAndSettle();
