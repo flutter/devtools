@@ -7,9 +7,9 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../config_specific/logger/logger.dart' as logger;
-import '../../primitives/utils.dart';
-import '../../shared/globals.dart';
+import '../../../../config_specific/logger/logger.dart' as logger;
+import '../../../../primitives/utils.dart';
+import '../../../../shared/globals.dart';
 
 class RasterMetricsController {
   static const _snapshotsJsonKey = 'snapshots';

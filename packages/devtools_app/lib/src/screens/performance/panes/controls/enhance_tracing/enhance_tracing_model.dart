@@ -4,7 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 
-import '../../../performance_model.dart';
+import '../../frame_analysis/frame_analysis_model.dart';
 
 @immutable
 class EnhanceTracingState {
