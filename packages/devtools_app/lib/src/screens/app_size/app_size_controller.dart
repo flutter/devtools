@@ -16,7 +16,7 @@ import '../../shared/table.dart';
 import 'app_size_screen.dart';
 
 // Temporary feature flag for deferred loading.
-const deferredLoadingSupportEnabled = true;
+const deferredLoadingSupportEnabled = false;
 
 enum DiffTreeType {
   increaseOnly,
