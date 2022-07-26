@@ -10,8 +10,8 @@ import '../../../../shared/common_widgets.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../memory_controller.dart';
+import '../../primitives/ui.dart';
 import '../chart/chart_pane_controller.dart';
-import 'constants.dart';
 import 'interval_dropdown.dart';
 
 class PrimaryControls extends StatefulWidget {
