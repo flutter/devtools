@@ -289,7 +289,7 @@ class _LeaksHelpLink extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          const Text('The memory leak detection tab helps to detect\n'
+          const Text('Use the memory leak detection tab to detect\n'
               'and troubleshoot some types of memory leaks.'),
           MoreInfoLink(
             url: linkToGuidance,
