@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-
 import '../../../../primitives/trees.dart';
 import '../../../../primitives/utils.dart';
 import '../../performance_model.dart';
@@ -16,14 +14,6 @@ class FrameAnalysis {
   static const saveLayerEventName = 'Canvas::saveLayer';
 
   static const intrinsicsEventSuffix = ' intrinsics';
-
-  ValueListenable<FramePhase?> get selectedPhase => _selectedPhase;
-
-  final _selectedPhase = ValueNotifier<FramePhase?>(null);
-
-  void selectFramePhase(FramePhase block) {
-    _selectedPhase.value = block;
-  }
 
   /// Data for the build phase of [frame].
   ///
@@ -114,6 +104,18 @@ class FrameAnalysis {
   );
 
   late FramePhase longestUiPhase = _calculateLongestFramePhase();
+
+  bool get hasUiData => _hasUiData ??= [
+        ...buildPhase.events,
+        ...layoutPhase.events,
+        ...paintPhase.events
+      ].isNotEmpty;
+
+  bool? _hasUiData;
+
+  bool get hasRasterData => _hasRasterData ??= rasterPhase.events.isNotEmpty;
+
+  bool? _hasRasterData;
 
   FramePhase _calculateLongestFramePhase() {
     var longestPhaseTime = Duration.zero;

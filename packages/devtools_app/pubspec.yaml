@@ -19,6 +19,7 @@ dependencies:
   # See https://github.com/flutter/devtools/issues/2530
   ansicolor: ^2.0.0
   async: ^2.0.0
+  charts_flutter: ^0.12.0
   codicon: ^1.0.0
   collection: ^1.15.0
   dds: ^2.2.2
