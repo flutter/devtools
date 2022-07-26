@@ -591,6 +591,7 @@ class TreemapNode extends TreeNode<TreemapNode> {
     this.byteSize = 0,
     this.childrenMap = const <String, TreemapNode>{},
     this.showDiff = false,
+    this.isDeferred = false,
   });
 
   final String name;
@@ -598,11 +599,14 @@ class TreemapNode extends TreeNode<TreemapNode> {
   int byteSize;
 
   final bool showDiff;
+  final bool isDeferred;
 
   int get unsignedByteSize => byteSize.abs();
 
   Color get displayColor {
-    if (!showDiff) return mainUiColor;
+    if (!showDiff) {
+      return isDeferred ? treemapDeferredColor : mainUiColor;
+    }
     if (byteSize < 0) {
       return treemapDecreaseColor;
     } else {
