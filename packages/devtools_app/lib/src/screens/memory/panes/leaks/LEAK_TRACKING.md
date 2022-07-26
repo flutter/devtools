@@ -122,11 +122,13 @@ TODO(polina-c): explain how to choose which classes to instrument.
 
 For Dart appliocations: 
 
-1. Reference [memory_leak_tracker](https://github.com/polina-c/spikes/blob/master/memory_leak_tracker/README.md):
+1. Reference [memory_leak_tracker](https://github.com/polina-c/spikes/blob/master/memory_leak_tracker/README.md) in your pubspec.yaml:
 
 TODO(polina-c): productize the library `memory_leak_tracker`.
 
 ```
+dependencies:
+  ...
   memory_leak_tracker:
     git:
       url: git://github.com/polina-c/spikes.git
@@ -137,11 +139,11 @@ TODO(polina-c): productize the library `memory_leak_tracker`.
 
 3. Run your app with additional flags: `dart --observe:8181 main.dart`, find the line `The Dart VM service is listening on` in console and copy URL like `http://127.0.0.1:8181/etNluJDHZwE=/`.
 
-4. Start [DevTools](https://github.com/flutter/devtools) at master: `flutter run -d macos` and connet to the app with the copyed URL. 
+4. Start [DevTools](https://github.com/flutter/devtools) at master: `flutter run -d macos` and connect to the app with the copyed URL. 
  
 TODO(polina-c): update this step to use released version. 
 
-5. Follow [the guidance for demo Flutter app](demo_flutter), starting at [the step to open the memory screen](memory-leaks-page).
+5. Follow [the guidance for the demo Flutter app](demo_flutter), starting at [the step to open the memory screen](memory-leaks-page).
 
 
 ### Troubleshoot the detected leaks
