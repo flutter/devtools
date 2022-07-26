@@ -2,5 +2,5 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Width of application when memory buttons lose their text.
+/// Width of application window when memory buttons lose their text.
 const primaryControlsMinVerboseWidth = 1100.0;
