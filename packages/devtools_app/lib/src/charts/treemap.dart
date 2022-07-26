@@ -591,7 +591,8 @@ class TreemapNode extends TreeNode<TreemapNode> {
     this.byteSize = 0,
     this.childrenMap = const <String, TreemapNode>{},
     this.showDiff = false,
-    this.isDeferred = false,
+    this.backgroundColor,
+    this.caption,
   });
 
   final String name;
@@ -599,13 +600,14 @@ class TreemapNode extends TreeNode<TreemapNode> {
   int byteSize;
 
   final bool showDiff;
-  final bool isDeferred;
+  final Color? backgroundColor;
+  final String? caption;
 
   int get unsignedByteSize => byteSize.abs();
 
   Color get displayColor {
     if (!showDiff) {
-      return isDeferred ? treemapDeferredColor : mainUiColor;
+      return backgroundColor ?? mainUiColor;
     }
     if (byteSize < 0) {
       return treemapDecreaseColor;
@@ -629,8 +631,7 @@ class TreemapNode extends TreeNode<TreemapNode> {
       }
     }
     final separator = oneLine ? ' ' : '\n';
-    final deferred = isDeferred ? 'deferred' : '';
-    return '$displayName$separator[${prettyByteSize()}]$separator$deferred';
+    return '$displayName$separator[${prettyByteSize()}]';
   }
 
   String prettyByteSize() {
@@ -760,12 +761,20 @@ class MultiCellPainter extends CustomPainter {
 
     if (positionedCell.width! > Treemap.minWidthToDisplayCellText &&
         positionedCell.height! > Treemap.minHeightToDisplayCellText) {
+      final textColor = node.showDiff ? Colors.white : Colors.black;
       final textPainter = TextPainter(
         text: TextSpan(
           text: node.displayText(oneLine: false),
           style: TextStyle(
-            color: node.showDiff ? Colors.white : Colors.black,
+            color: textColor,
           ),
+          children: [
+            if (node.caption != null)
+              TextSpan(
+                text: '\n${node.caption}',
+                style: TextStyle(fontStyle: FontStyle.italic, color: textColor),
+              ),
+          ],
         ),
         textDirection: TextDirection.ltr,
         textAlign: TextAlign.center,
