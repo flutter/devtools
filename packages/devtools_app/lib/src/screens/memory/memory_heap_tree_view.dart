@@ -40,7 +40,7 @@ import 'primitives/memory_utils.dart';
 // TODO(bkonyi): enable new allocation profile table when we're ready to remove
 // the existing allocations table.
 @visibleForTesting
-bool enableNewAllocationProfileTable = true;
+bool enableNewAllocationProfileTable = false;
 
 const memorySearchFieldKeyName = 'MemorySearchFieldKey';
 
