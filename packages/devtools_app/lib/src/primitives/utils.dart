@@ -122,9 +122,22 @@ String msText(
   Duration dur, {
   bool includeUnit = true,
   int fractionDigits = 1,
+  bool allowZeroValues = true,
 }) {
-  return '${(dur.inMicroseconds / 1000).toStringAsFixed(fractionDigits)}'
-      '${includeUnit ? ' ms' : ''}';
+  var durationStr = (dur.inMicroseconds / 1000).toStringAsFixed(fractionDigits);
+
+  if (!allowZeroValues) {
+    final zeroRegexp = RegExp(r'[0]+[.][0]+');
+    if (zeroRegexp.hasMatch(durationStr)) {
+      final buf = StringBuffer('< 0.');
+      for (int i = 1; i < fractionDigits; i++) {
+        buf.write('0');
+      }
+      buf.write('1');
+      durationStr = buf.toString();
+    }
+  }
+  return '$durationStr${includeUnit ? ' ms' : ''}';
 }
 
 /// Render the given [Duration] to text using either seconds or milliseconds as
