@@ -86,16 +86,37 @@ class InspectorPreferencesController extends DisposableController
       serviceManager.inspectorService as InspectorService;
 
   final _hoverEvalMode = ValueNotifier<bool>(false);
-  final _customPubRootDirectories = ListValueNotifier<String>([]);
+  ListValueNotifier<String> _customPubRootDirectories =
+      ListValueNotifier<String>([]);
   final _customPubRootDirectoriesAreBusy = ValueNotifier<bool>(false);
   final _busyCounter = ValueNotifier<int>(0);
   static const _hoverEvalModeStorageId = 'inspector.hoverEvalMode';
-  static const _customPubRootDirectoriesStorageId =
+  static const _customPubRootDirectoriesStoragePrefix =
       'inspector.customPubRootDirectories';
+  bool isConnectingToNewService = false;
+  String? _mainScriptDir;
+  VoidCallback? isolateListener;
+
+  Future<void> _updateMainScriptRef() async {
+    final isolateRef = serviceManager.isolateManager.mainIsolate.value!;
+    if (isolateRef.id != null) {
+      final isolate = await serviceManager.service?.getIsolate(isolateRef.id!);
+      final rootLibUri = Uri.parse(isolate?.rootLib?.uri ?? '');
+      final directorySegments = rootLibUri.pathSegments
+          .sublist(0, rootLibUri.pathSegments.length - 1);
+      final rootLibDirectory = rootLibUri.replace(
+        pathSegments: directorySegments,
+      );
+      _mainScriptDir = rootLibDirectory.path;
+    }
+  }
 
   Future<void> init() async {
     await initHoverEvalMode();
-    _initCustomPubRootListeners();
+    autoDisposeStreamSubscription(
+      serviceManager.onConnectionAvailable
+          .listen(_handleConnectionToNewService),
+    );
   }
 
   Future<void> initHoverEvalMode() async {
@@ -114,20 +135,38 @@ class InspectorPreferencesController extends DisposableController
     });
   }
 
-  void _initCustomPubRootListeners() {
-    // TODO(CoderDake): add _customPubRootDirectories listener back when
-    // finalizing https://github.com/flutter/devtools/issues/3941
-    /*
+  Future<void> _handleConnectionToNewService(VmServiceWrapper wrapper) async {
+    await _updateMainScriptRef();
+
+    await _resetCustomPubRootDirectories();
+
+    // Only setup the isolate listener the first time we connect to a service
+    if (isolateListener == null) {
+      isolateListener = () {
+        preferences.inspector.loadCustomPubRootDirectories();
+      };
+      addAutoDisposeListener(
+        serviceManager.isolateManager.mainIsolate,
+        isolateListener,
+      );
+    }
+  }
+
+  Future<void> _resetCustomPubRootDirectories() async {
+    _customPubRootDirectories.dispose();
+    _customPubRootDirectories = ListValueNotifier<String>([]);
+
     addAutoDisposeListener(_customPubRootDirectories, () {
       storage.setValue(
-        _customPubRootDirectoriesStorageId,
+        _customPubRootStorageId(),
         jsonEncode(_customPubRootDirectories.value),
       );
     });
-    */
     addAutoDisposeListener(_busyCounter, () {
       _customPubRootDirectoriesAreBusy.value = _busyCounter.value != 0;
     });
+
+    await loadCustomPubRootDirectories();
   }
 
   Future<void> addPubRootDirectories(
@@ -164,10 +203,16 @@ class InspectorPreferencesController extends DisposableController
     });
   }
 
+  String _customPubRootStorageId() {
+    assert(_mainScriptDir != null);
+    final packageId = _mainScriptDir ?? '_fallback';
+    return '$_customPubRootDirectoriesStoragePrefix:$packageId';
+  }
+
   Future<void> loadCustomPubRootDirectories() async {
     await _customPubRootDirectoryBusyTracker(() async {
       final storedCustomPubRootDirectories =
-          await storage.getValue(_customPubRootDirectoriesStorageId);
+          await storage.getValue(_customPubRootStorageId());
 
       if (storedCustomPubRootDirectories != null) {
         await addPubRootDirectories(
@@ -176,6 +221,7 @@ class InspectorPreferencesController extends DisposableController
           ),
         );
       }
+      await _refreshPubRootDirectoriesFromService();
     });
   }
 
