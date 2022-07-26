@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:flutter/foundation.dart';

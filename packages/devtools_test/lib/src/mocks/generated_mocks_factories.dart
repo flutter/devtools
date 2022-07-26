@@ -17,6 +17,8 @@ MockPerformanceController createMockPerformanceControllerWithDefaults() {
   when(controller.searchInProgressNotifier)
       .thenReturn(const FixedValueListenable<bool>(false));
   when(controller.matchIndex).thenReturn(ValueNotifier<int>(0));
+  when(controller.enhanceTracingController)
+      .thenReturn(EnhanceTracingController());
   when(controller.rasterMetricsController)
       .thenReturn(RasterMetricsController());
   when(controller.selectedFrame)

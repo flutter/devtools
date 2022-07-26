@@ -197,7 +197,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'owner': null,
         'static': false,
         'const': false,
-        'implicit': false
+        'implicit': false,
+        'abstract': false
       }
     },
     {
@@ -212,7 +213,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'owner': null,
         'static': false,
         'const': false,
-        'implicit': false
+        'implicit': false,
+        'abstract': false
       }
     },
     {
@@ -228,7 +230,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'owner': null,
         'static': false,
         'const': false,
-        'implicit': false
+        'implicit': false,
+        'abstract': false
       }
     },
     {
@@ -244,7 +247,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'owner': null,
         'static': false,
         'const': false,
-        'implicit': false
+        'implicit': false,
+        'abstract': false
       }
     },
     {
@@ -260,7 +264,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'owner': null,
         'static': false,
         'const': false,
-        'implicit': false
+        'implicit': false,
+        'abstract': false
       }
     },
     {
@@ -277,6 +282,7 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'static': false,
         'const': false,
         'implicit': false,
+        'abstract': false,
         'location': {
           'type': 'SourceLocation',
           'script': null,
@@ -298,7 +304,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'owner': null,
         'static': false,
         'const': false,
-        'implicit': false
+        'implicit': false,
+        'abstract': false
       }
     },
     {
@@ -313,7 +320,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'owner': null,
         'static': false,
         'const': false,
-        'implicit': false
+        'implicit': false,
+        'abstract': false
       }
     },
     {
@@ -328,7 +336,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'owner': null,
         'static': false,
         'const': false,
-        'implicit': false
+        'implicit': false,
+        'abstract': false
       }
     },
     {
@@ -344,7 +353,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'owner': null,
         'static': false,
         'const': false,
-        'implicit': false
+        'implicit': false,
+        'abstract': false
       }
     },
     {
@@ -360,7 +370,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'owner': null,
         'static': false,
         'const': false,
-        'implicit': false
+        'implicit': false,
+        'abstract': false
       }
     },
     {
@@ -376,7 +387,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'owner': null,
         'static': false,
         'const': false,
-        'implicit': false
+        'implicit': false,
+        'abstract': false
       }
     },
     {
@@ -392,7 +404,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'owner': null,
         'static': false,
         'const': false,
-        'implicit': false
+        'implicit': false,
+        'abstract': false
       }
     },
     {
@@ -408,7 +421,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'owner': null,
         'static': false,
         'const': false,
-        'implicit': false
+        'implicit': false,
+        'abstract': false
       }
     },
     {
@@ -424,7 +438,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'owner': null,
         'static': false,
         'const': false,
-        'implicit': false
+        'implicit': false,
+        'abstract': false
       }
     },
     {
@@ -440,7 +455,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'owner': null,
         'static': false,
         'const': false,
-        'implicit': false
+        'implicit': false,
+        'abstract': false
       }
     },
     {
@@ -456,7 +472,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'owner': null,
         'static': false,
         'const': false,
-        'implicit': false
+        'implicit': false,
+        'abstract': false
       }
     }
   ],

@@ -128,6 +128,10 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     addAutoDisposeListener(preferences.inspector.customPubRootDirectories, () {
       _refreshInspector();
     });
+    addAutoDisposeListener(serviceManager.isolateManager.mainIsolate, () {
+      _refreshInspector();
+      preferences.inspector.loadCustomPubRootDirectories();
+    });
     preferences.inspector.loadCustomPubRootDirectories();
   }
 
