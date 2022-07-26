@@ -629,7 +629,8 @@ class TreemapNode extends TreeNode<TreemapNode> {
       }
     }
     final separator = oneLine ? ' ' : '\n';
-    return '$displayName$separator[${prettyByteSize()}]';
+    final deferred = isDeferred ? 'deferred' : '';
+    return '$displayName$separator[${prettyByteSize()}]$separator$deferred';
   }
 
   String prettyByteSize() {
