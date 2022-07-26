@@ -72,7 +72,7 @@ void main() {
       expect(printMB(1000 * mb, fractionDigits: 2), '1000.00');
     });
 
-    test('msAsText', () {
+    test('msText', () {
       expect(msText(const Duration(microseconds: 3111)), equals('3.1 ms'));
       expect(
         msText(const Duration(microseconds: 3199), includeUnit: false),
@@ -89,6 +89,22 @@ void main() {
       expect(
         msText(const Duration(milliseconds: 3)),
         equals('3.0 ms'),
+      );
+      expect(
+        msText(const Duration(microseconds: 1)),
+        equals('0.0 ms'),
+      );
+      expect(
+        msText(const Duration(microseconds: 1), allowZeroValues: false),
+        equals('< 0.1 ms'),
+      );
+      expect(
+        msText(
+          const Duration(microseconds: 1),
+          fractionDigits: 2,
+          allowZeroValues: false,
+        ),
+        equals('< 0.01 ms'),
       );
     });
 
