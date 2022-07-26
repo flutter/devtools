@@ -423,8 +423,7 @@ class _ProfileHelpLink extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          const Text(
-              'The allocation profile tab displays information about\n'
+          const Text('The allocation profile tab displays information about\n'
               'allocated objects in the Dart heap of the selected\n'
               'isolate.'),
           MoreInfoLink(
