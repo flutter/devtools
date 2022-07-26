@@ -5,7 +5,7 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:devtools_app/src/screens/performance/raster_metrics_controller.dart';
+import 'package:devtools_app/src/screens/performance/panes/raster_metrics/raster_metrics_controller.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';

@@ -5,6 +5,7 @@
 @TestOn('vm')
 import 'dart:async';
 
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/primitives/trace_event.dart';
 import 'package:devtools_app/src/primitives/utils.dart';
@@ -38,6 +39,7 @@ void main() async {
       when(fakeServiceManager.connectedApp!.initialized)
           .thenReturn(initializedCompleter);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(IdeTheme, IdeTheme());
     });
 
     setUp(() async {

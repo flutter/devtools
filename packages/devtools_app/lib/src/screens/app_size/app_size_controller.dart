@@ -244,8 +244,12 @@ class AppSizeController {
     processedJson['n'] = isDeferredApp ? 'Entire app' : 'Root';
 
     // Build a tree with [TreemapNode] from [processedJsonMap].
-    final newRoot = generateTree(processedJson)!;
+    final jsonRoot = generateTree(processedJson)!;
 
+    // Determine the correct root node.
+    final newRoot = isDeferredApp
+        ? jsonRoot.childrenMap.values.firstWhere((node) => node.name == 'Root')
+        : jsonRoot;
     changeAnalysisRoot(newRoot);
 
     _processingNotifier.value = false;
@@ -489,11 +493,15 @@ class AppSizeController {
       childrenMap[child.name] = child;
     }
 
+    final bool isDeferred =
+        treeJson['isDeferred'] != null && treeJson['isDeferred'];
+
     return TreemapNode(
       name: name,
       byteSize: byteSize,
       childrenMap: childrenMap,
       showDiff: showDiff,
+      isDeferred: isDeferred,
     )..addAllChildren(children);
   }
 }
