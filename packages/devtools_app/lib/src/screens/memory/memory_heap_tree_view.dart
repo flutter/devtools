@@ -155,7 +155,7 @@ class HeapTreeViewState extends State<HeapTree>
   @visibleForTesting
   static const leaksTabKey = Key('Leaks Tab');
   @visibleForTesting
-  static const dartHeapTableTabKey = Key('Dart Heap Table Tab');
+  static const dartHeapTableProfileKey = Key('Dart Heap Profile Tab');
   @visibleForTesting
   static const diffTabKey = Key('Diff Tab');
 
@@ -204,7 +204,7 @@ class HeapTreeViewState extends State<HeapTree>
     _tabs = [
       if (enableNewAllocationProfileTable)
         DevToolsTab.create(
-          key: dartHeapTableTabKey,
+          key: dartHeapTableProfileKey,
           tabName: 'Profile',
           gaPrefix: _gaPrefix,
         ),
@@ -501,7 +501,6 @@ class HeapTreeViewState extends State<HeapTree>
                     ],
                   ),
                 ),
-
                 // Allocations Tab
                 KeepAliveWrapper(
                   child: Column(
