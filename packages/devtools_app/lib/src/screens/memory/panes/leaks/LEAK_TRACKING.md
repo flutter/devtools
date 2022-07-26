@@ -67,7 +67,7 @@ For example, out of four not-GCed leaks on this diagram, only one is the culprit
 
 The tool detects leaks for disposable and instrumented classes only (with note that the fixed leak can fix other objects too). 
 
-Some classes in Flutter framework are already instrumented. If you want your classes to be tracked, you need to make them disposable and [instrument](#instrument them).
+Some classes in Flutter framework are already instrumented. If you want your classes to be tracked, you need to make them disposable and [instrument them](#instrument).
 
 ## Use the Leak Tracker
 
@@ -82,13 +82,13 @@ instead of downloading or cloning official Flutter, clone `git@github.com:polina
 then checkout the branch `leak-tracking2`
 and then never run `flutter upgrade` or `flutter channel`.
 
-### Detect leaks in demo app
+### Detect leaks in demo Flutter app <a id='demo_flutter'></a>
 
 TODO: move the example to test/fixtures when it compiles with stable flutter.
 
 1. Run https://github.com/polina-c/spikes/tree/master/leaking_app in profile mode (with flag `-profile`).
 2. [Connect](https://docs.flutter.dev/development/tools/devtools/cli#open-devtools-and-connect-to-the-target-app) DevTools to the app 
-3. Open Memory > Leaks
+3. Open Memory > Leaks <a id='memory-leaks-page'></a>
 4. Notice message that reports not-disposed and not-GCed objects. If there are no not-GCed leaks,
 resize the app window, to trigger GC events, and the message should show up:
    
@@ -116,6 +116,36 @@ like [the example app does](https://github.com/polina-c/spikes/blob/master/leaki
 
 You can pass information, that will help you troubleshoot the leak, to the optional parameter `details`.
 
+TODO(polina-c): explain how to choose which classes to instrument.
+
+### Detect leaks in your Dart app
+
+For Dart appliocations: 
+
+1. Reference [memory_leak_tracker](https://github.com/polina-c/spikes/blob/master/memory_leak_tracker/README.md) in your pubspec.yaml:
+
+TODO(polina-c): productize the library `memory_leak_tracker`.
+
+```
+dependencies:
+  ...
+  memory_leak_tracker:
+    git:
+      url: git://github.com/polina-c/spikes.git
+      path: memory_leak_tracker
+```
+
+2. [Instrument](#instrument) your classes.
+
+3. Run your app with additional flags: `dart --observe:8181 main.dart`, find the line `The Dart VM service is listening on` in console and copy URL like `http://127.0.0.1:8181/etNluJDHZwE=/`.
+
+4. Start [DevTools](https://github.com/flutter/devtools) at master: `flutter run -d macos` and connect to the app with the copyed URL. 
+ 
+TODO(polina-c): update this step to use released version. 
+
+5. Follow [the guidance for the demo Flutter app](demo_flutter), starting at [the step to open the memory screen](memory-leaks-page).
+
+
 ### Troubleshoot the detected leaks
 
 The challenging question of the leak troubleshooting is how to find the detected leak in the code. Here are some tips that may help.
@@ -141,5 +171,12 @@ addLeakTrackingDetails(this, 'Serves the stream $streamName.');
 ```
 #### Evaluate the leaked objects with DevTools Memory Evaluator
 
-the feature is under construction
+TODO(polina-c): add content
 
+### Detect leaks in regression testing
+
+TODO(polina-c): add content
+
+### Understand performance impact
+
+TODO(polina-c): add content
