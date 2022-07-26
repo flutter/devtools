@@ -254,7 +254,6 @@ class _LeaksPaneState extends State<LeaksPane> {
                   _AnalyzeButton(leaksController: _leaksController),
                   const SizedBox(width: denseSpacing),
                   _ForceGCButton(leaksController: _leaksController),
-                  const SizedBox(width: 2 * denseSpacing),
                   const _LeaksHelpLink(),
                 ],
               ),
@@ -278,13 +277,28 @@ class _LeaksPaneState extends State<LeaksPane> {
 class _LeaksHelpLink extends StatelessWidget {
   const _LeaksHelpLink({Key? key}) : super(key: key);
 
+  static const _documentationTopic = 'leaks';
+
   @override
   Widget build(BuildContext context) {
-    return DocumentationLink(
-      url: linkToGuidance,
-      gaScreenName: analytics_constants.memory,
-      gaSelectedItemDescription:
-          analytics_constants.topicDocumentationLink('leaks'),
+    return HelpButtonWithDialog(
+      gaScreen: analytics_constants.memory,
+      gaSelection:
+          analytics_constants.topicDocumentationButton(_documentationTopic),
+      dialogTitle: 'Memory Leak Detection Help',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          const Text('The memory leak detection tab helps to detect\n'
+              'and troubleshoot some types of memory leaks.'),
+          MoreInfoLink(
+            url: linkToGuidance,
+            gaScreenName: analytics_constants.memory,
+            gaSelectedItemDescription:
+                analytics_constants.topicDocumentationLink(_documentationTopic),
+          )
+        ],
+      ),
     );
   }
 }

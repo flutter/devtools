@@ -344,7 +344,6 @@ class _AllocationProfileTableControls extends StatelessWidget {
         _RefreshOnGCToggleButton(
           allocationProfileController: allocationProfileController,
         ),
-        const SizedBox(width: 2 * denseSpacing),
         _ProfileHelpLink(),
       ],
     );
@@ -412,15 +411,32 @@ class _RefreshOnGCToggleButton extends StatelessWidget {
 class _ProfileHelpLink extends StatelessWidget {
   const _ProfileHelpLink({Key? key}) : super(key: key);
 
+  static const _documentationTopic = 'profile';
+
   @override
   Widget build(BuildContext context) {
-    return DocumentationLink(
-      url: 'https://github.com/flutter/devtools/blob/master/'
-          'packages/devtools_app/lib/src/screens/memory/panes/'
-          'allocation_profile/ALLOCATION_PROFILE.md',
-      gaScreenName: analytics_constants.memory,
-      gaSelectedItemDescription:
-          analytics_constants.topicDocumentationLink('profile'),
+    return HelpButtonWithDialog(
+      gaScreen: analytics_constants.memory,
+      gaSelection:
+          analytics_constants.topicDocumentationButton(_documentationTopic),
+      dialogTitle: 'Memory Allocation Profile Help',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          const Text(
+              'The allocation profile tab displays information about currently\n'
+              'allocated objects in the Dart heap of the currently selected\n'
+              'isolate.'),
+          MoreInfoLink(
+            url: 'https://github.com/flutter/devtools/blob/master/'
+                'packages/devtools_app/lib/src/screens/memory/panes/'
+                'allocation_profile/ALLOCATION_PROFILE.md',
+            gaScreenName: '',
+            gaSelectedItemDescription:
+                analytics_constants.topicDocumentationLink(_documentationTopic),
+          )
+        ],
+      ),
     );
   }
 }

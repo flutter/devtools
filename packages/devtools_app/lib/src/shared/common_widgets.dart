@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:devtools_app/src/shared/dialogs.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -2151,30 +2152,43 @@ class _KeepAliveWrapperState extends State<KeepAliveWrapper>
   }
 }
 
-class DocumentationLink extends StatelessWidget {
-  const DocumentationLink({
-    Key? key,
-    required this.url,
-    required this.gaScreenName,
-    required this.gaSelectedItemDescription,
-  }) : super(key: key);
+/// Help button, that opens a dialog on click.
+class HelpButtonWithDialog extends StatelessWidget {
+  const HelpButtonWithDialog({
+    required this.gaScreen,
+    required this.gaSelection,
+    required this.dialogTitle,
+    required this.child,
+  });
 
-  final String url;
-  final String gaScreenName;
-  final String gaSelectedItemDescription;
+  final String gaScreen;
+
+  final String gaSelection;
+
+  final String dialogTitle;
+
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    return RichText(
-      text: LinkTextSpan(
-        link: Link(
-          display: '?',
-          url: url,
-          gaScreenName: gaScreenName,
-          gaSelectedItemDescription: gaSelectedItemDescription,
-        ),
-        context: context,
-      ),
+    final theme = Theme.of(context);
+    return HelpButton(
+      onPressed: () {
+        ga.select(gaScreen, gaSelection);
+        showDialog(
+          context: context,
+          builder: (context) => DevToolsDialog(
+            title: dialogTitleText(theme, dialogTitle),
+            includeDivider: false,
+            content: child,
+            actions: [
+              DialogCloseButton(),
+            ],
+          ),
+        );
+      },
+      gaScreen: gaScreen,
+      gaSelection: gaSelection,
     );
   }
 }
