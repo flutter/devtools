@@ -118,6 +118,14 @@ String printGB(num bytes, {int fractionDigits = 1, bool includeUnit = false}) {
   return output;
 }
 
+/// Converts a [Duration] into a readable text representation in milliseconds.
+///
+/// [includeUnit] - whether to include 'ms' at the end of the returned value
+/// [fractionDigits] - how many fraction digits should appear after the decimal
+/// [allowZeroValues] - when true, this method may return zero (e.g. '0.0 ms').
+/// When false, this method will return a minimum value with the less than
+/// operator (e.g. '< 0.1 ms'). The value returned will always respect the
+/// specified [fractionDigits].
 String msText(
   Duration dur, {
   bool includeUnit = true,
