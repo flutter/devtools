@@ -11,7 +11,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../analytics/analytics.dart' as ga;
 import '../primitives/auto_dispose_mixin.dart';
 import '../primitives/extent_delegate_list.dart';
 import '../primitives/flutter_widgets/linked_scroll_controller.dart';

@@ -344,7 +344,7 @@ class _AllocationProfileTableControls extends StatelessWidget {
         _RefreshOnGCToggleButton(
           allocationProfileController: allocationProfileController,
         ),
-        _ProfileHelpLink(),
+        const _ProfileHelpLink(),
       ],
     );
   }

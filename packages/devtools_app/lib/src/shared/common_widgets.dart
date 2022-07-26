@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:devtools_app/src/shared/dialogs.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +20,7 @@ import '../screens/debugger/debugger_controller.dart';
 import '../screens/debugger/variables.dart';
 import '../ui/icons.dart';
 import '../ui/label.dart';
+import 'dialogs.dart';
 import 'globals.dart';
 import 'object_tree.dart';
 import 'scaffold.dart';
