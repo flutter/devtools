@@ -126,11 +126,15 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       }
     });
     addAutoDisposeListener(preferences.inspector.customPubRootDirectories, () {
-      _refreshInspector();
+      if (serviceManager.hasConnection) {
+        _refreshInspector();
+      }
     });
     addAutoDisposeListener(serviceManager.isolateManager.mainIsolate, () {
-      _refreshInspector();
-      preferences.inspector.loadCustomPubRootDirectories();
+      if (serviceManager.hasConnection) {
+        _refreshInspector();
+        preferences.inspector.loadCustomPubRootDirectories();
+      }
     });
     preferences.inspector.loadCustomPubRootDirectories();
   }

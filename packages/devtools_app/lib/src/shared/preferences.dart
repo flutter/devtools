@@ -86,7 +86,7 @@ class InspectorPreferencesController extends DisposableController
       serviceManager.inspectorService as InspectorService;
 
   final _hoverEvalMode = ValueNotifier<bool>(false);
-  ListValueNotifier<String> _customPubRootDirectories =
+  final ListValueNotifier<String> _customPubRootDirectories =
       ListValueNotifier<String>([]);
   final _customPubRootDirectoriesAreBusy = ValueNotifier<bool>(false);
   final _busyCounter = ValueNotifier<int>(0);
@@ -112,14 +112,11 @@ class InspectorPreferencesController extends DisposableController
   }
 
   Future<void> init() async {
-    await initHoverEvalMode();
-    autoDisposeStreamSubscription(
-      serviceManager.onConnectionAvailable
-          .listen(_handleConnectionToNewService),
-    );
+    await _initHoverEvalMode();
+    await _initCustomPubRootDirectories();
   }
 
-  Future<void> initHoverEvalMode() async {
+  Future<void> _initHoverEvalMode() async {
     String? hoverEvalModeEnabledValue =
         await storage.getValue(_hoverEvalModeStorageId);
 
@@ -135,10 +132,30 @@ class InspectorPreferencesController extends DisposableController
     });
   }
 
+  Future<void> _initCustomPubRootDirectories() async {
+    autoDisposeStreamSubscription(
+      serviceManager.onConnectionAvailable
+          .listen(_handleConnectionToNewService),
+    );
+    autoDisposeStreamSubscription(
+      serviceManager.onConnectionClosed.listen(_handleConnectionClosed),
+    );
+    addAutoDisposeListener(_busyCounter, () {
+      _customPubRootDirectoriesAreBusy.value = _busyCounter.value != 0;
+    });
+  }
+
+  void _handleConnectionClosed(dynamic _) async {
+    _mainScriptDir = null;
+    _customPubRootDirectories.clear();
+  }
+
   Future<void> _handleConnectionToNewService(VmServiceWrapper wrapper) async {
     await _updateMainScriptRef();
 
-    await _resetCustomPubRootDirectories();
+    _customPubRootDirectories.clear();
+
+    await loadCustomPubRootDirectories();
 
     // Only setup the isolate listener the first time we connect to a service
     if (isolateListener == null) {
@@ -152,26 +169,17 @@ class InspectorPreferencesController extends DisposableController
     }
   }
 
-  Future<void> _resetCustomPubRootDirectories() async {
-    _customPubRootDirectories.dispose();
-    _customPubRootDirectories = ListValueNotifier<String>([]);
-
-    addAutoDisposeListener(_customPubRootDirectories, () {
-      storage.setValue(
-        _customPubRootStorageId(),
-        jsonEncode(_customPubRootDirectories.value),
-      );
-    });
-    addAutoDisposeListener(_busyCounter, () {
-      _customPubRootDirectoriesAreBusy.value = _busyCounter.value != 0;
-    });
-
-    await loadCustomPubRootDirectories();
+  void _persistCustomPubRootDirectoriesToStorage() {
+    storage.setValue(
+      _customPubRootStorageId(),
+      jsonEncode(_customPubRootDirectories.value),
+    );
   }
 
   Future<void> addPubRootDirectories(
     List<String> pubRootDirectories,
   ) async {
+    if (!serviceManager.hasConnection) return;
     await _customPubRootDirectoryBusyTracker(() async {
       await inspectorService.addPubRootDirectories(pubRootDirectories);
       await _refreshPubRootDirectoriesFromService();
@@ -181,6 +189,7 @@ class InspectorPreferencesController extends DisposableController
   Future<void> removePubRootDirectories(
     List<String> pubRootDirectories,
   ) async {
+    if (!serviceManager.hasConnection) return;
     await _customPubRootDirectoryBusyTracker(() async {
       await inspectorService.removePubRootDirectories(pubRootDirectories);
       await _refreshPubRootDirectoriesFromService();
@@ -199,6 +208,8 @@ class InspectorPreferencesController extends DisposableController
 
         _customPubRootDirectories.removeAll(directoriesToRemove);
         _customPubRootDirectories.addAll(directoriesToAdd);
+
+        _persistCustomPubRootDirectoriesToStorage();
       }
     });
   }
@@ -210,6 +221,8 @@ class InspectorPreferencesController extends DisposableController
   }
 
   Future<void> loadCustomPubRootDirectories() async {
+    if (!serviceManager.hasConnection) return;
+
     await _customPubRootDirectoryBusyTracker(() async {
       final storedCustomPubRootDirectories =
           await storage.getValue(_customPubRootStorageId());
