@@ -483,7 +483,12 @@ class _MultilineMatcher extends _Matcher {
   ) {
     if (contentName == null || (customCaptures ?? captures) != null) {
       return _applyCapture(
-          grammar, scanner, customCaptures ?? captures, line, column);
+        grammar,
+        scanner,
+        customCaptures ?? captures,
+        line,
+        column,
+      );
     } else {
       // If there's no explicit captures and contentName is provided, don't
       // create a span for the match.
