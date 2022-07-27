@@ -478,6 +478,8 @@ class _TreemapState extends State<Treemap> {
       child: Center(
         child: widget.height > Treemap.minHeightToDisplayCellText
             ? buildNameAndSizeText(
+                textColor:
+                    widget.rootNode!.showDiff ? Colors.white : Colors.black,
                 oneLine: false,
               )
             : const SizedBox(),
@@ -497,6 +499,9 @@ class _TreemapState extends State<Treemap> {
             border: Border.all(color: Colors.black87),
           ),
           child: buildNameAndSizeText(
+            textColor:
+                (Theme.of(context).textTheme.bodyText2 ?? const TextStyle())
+                    .color,
             oneLine: true,
           ),
         ),
@@ -506,8 +511,13 @@ class _TreemapState extends State<Treemap> {
 
   RichText buildNameAndSizeText({
     required bool oneLine,
+    required Color? textColor,
   }) {
-    return RichText(text: widget.rootNode!.displayText(oneLine: oneLine));
+    return RichText(
+        text: widget.rootNode!.displayText(oneLine: oneLine, color: textColor),
+        selectionColor: textColor,
+        textAlign: TextAlign.center,
+        overflow: TextOverflow.ellipsis);
   }
 
   Widget buildBreadcrumbNavigator() {
@@ -605,9 +615,13 @@ class TreemapNode extends TreeNode<TreemapNode> {
     }
   }
 
-  TextSpan displayText({bool oneLine = true}) {
+  TextSpan displayText({Color? color, bool oneLine = true}) {
     var displayName = name;
-    final textColor = showDiff ? Colors.white : Colors.black;
+    final textColor = color == null
+        ? showDiff
+            ? Colors.white
+            : Colors.black
+        : color;
 
     // Trim beginning of the name of [this] if it starts with its parent's name.
     // If the parent node and the child node's name are exactly the same,
