@@ -514,10 +514,11 @@ class _TreemapState extends State<Treemap> {
     required Color? textColor,
   }) {
     return RichText(
-        text: widget.rootNode!.displayText(oneLine: oneLine, color: textColor),
-        selectionColor: textColor,
-        textAlign: TextAlign.center,
-        overflow: TextOverflow.ellipsis);
+      text: widget.rootNode!.displayText(oneLine: oneLine, color: textColor),
+      selectionColor: textColor,
+      textAlign: TextAlign.center,
+      overflow: TextOverflow.ellipsis,
+    );
   }
 
   Widget buildBreadcrumbNavigator() {
