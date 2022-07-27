@@ -20,6 +20,7 @@ import '../screens/debugger/debugger_controller.dart';
 import '../screens/debugger/variables.dart';
 import '../ui/icons.dart';
 import '../ui/label.dart';
+import 'dialogs.dart';
 import 'globals.dart';
 import 'object_tree.dart';
 import 'scaffold.dart';
@@ -2148,5 +2149,46 @@ class _KeepAliveWrapperState extends State<KeepAliveWrapper>
   Widget build(BuildContext context) {
     super.build(context);
     return widget.child;
+  }
+}
+
+/// Help button, that opens a dialog on click.
+class HelpButtonWithDialog extends StatelessWidget {
+  const HelpButtonWithDialog({
+    required this.gaScreen,
+    required this.gaSelection,
+    required this.dialogTitle,
+    required this.child,
+  });
+
+  final String gaScreen;
+
+  final String gaSelection;
+
+  final String dialogTitle;
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return HelpButton(
+      onPressed: () {
+        ga.select(gaScreen, gaSelection);
+        showDialog(
+          context: context,
+          builder: (context) => DevToolsDialog(
+            title: dialogTitleText(theme, dialogTitle),
+            includeDivider: false,
+            content: child,
+            actions: [
+              DialogCloseButton(),
+            ],
+          ),
+        );
+      },
+      gaScreen: gaScreen,
+      gaSelection: gaSelection,
+    );
   }
 }
