@@ -93,7 +93,6 @@ class InspectorPreferencesController extends DisposableController
   static const _hoverEvalModeStorageId = 'inspector.hoverEvalMode';
   static const _customPubRootDirectoriesStoragePrefix =
       'inspector.customPubRootDirectories';
-  bool isConnectingToNewService = false;
   String? _mainScriptDir;
   VoidCallback? isolateListener;
 
