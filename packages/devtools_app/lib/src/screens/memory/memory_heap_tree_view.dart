@@ -488,7 +488,11 @@ class HeapTreeViewState extends State<HeapTree>
               children: [
                 // Profile Tab
                 if (enableNewAllocationProfileTable)
-                  KeepAliveWrapper(child: AllocationProfileTableView()),
+                  KeepAliveWrapper(
+                    child: AllocationProfileTableView(
+                      controller: controller.allocationProfileController,
+                    ),
+                  ),
                 // Analysis Tab
                 KeepAliveWrapper(
                   child: Column(
