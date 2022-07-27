@@ -509,16 +509,18 @@ class _TreemapState extends State<Treemap> {
     }
   }
 
-  Text buildNameAndSizeText({
+  RichText buildNameAndSizeText({
     required Color? textColor,
     required bool oneLine,
   }) {
-    return Text(
-      widget.rootNode!.displayText(oneLine: oneLine).toPlainText(),
-      style: TextStyle(color: textColor),
-      textAlign: TextAlign.center,
-      overflow: TextOverflow.ellipsis,
-    );
+    return RichText(text: widget.rootNode!.displayText(oneLine: oneLine));
+
+    // Text(
+    //   widget.rootNode!.displayText(oneLine: oneLine).toPlainText(),
+    //   style: TextStyle(color: textColor),
+    //   textAlign: TextAlign.center,
+    //   overflow: TextOverflow.ellipsis,
+    // );
   }
 
   Widget buildBreadcrumbNavigator() {
@@ -775,12 +777,7 @@ class MultiCellPainter extends CustomPainter {
         positionedCell.height! > Treemap.minHeightToDisplayCellText) {
       final textColor = node.showDiff ? Colors.white : Colors.black;
       final textPainter = TextPainter(
-        text: TextSpan(
-          text: node.displayText(oneLine: false).toPlainText(),
-          style: TextStyle(
-            color: textColor,
-          ),
-        ),
+        text: node.displayText(),
         textDirection: TextDirection.ltr,
         textAlign: TextAlign.center,
         ellipsis: '...',
