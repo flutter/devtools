@@ -80,15 +80,11 @@ class _NameColumn extends TreeColumnData<TreemapNode> {
   final int currentRootLevel;
 
   @override
-  TextSpan getValue(TreemapNode dataObject) => TextSpan(
-        text: dataObject.name,
-        children: [
-          TextSpan(
-            text: dataObject.caption != null ? dataObject.caption : '',
-            style: const TextStyle(fontStyle: FontStyle.italic),
-          )
-        ],
-      );
+  String getValue(TreemapNode dataObject) => dataObject.name;
+
+  @override
+  String? getCaption(TreemapNode dataObject) =>
+      dataObject.caption != null ? dataObject.caption : '';
 
   @override
   bool get supportsSorting => true;

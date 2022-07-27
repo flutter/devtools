@@ -1471,11 +1471,22 @@ class _TableRowState<T> extends State<TableRow<T>>
             onPressed: onPressed,
           );
         } else {
-          content = Text(
-            column.getDisplayValue(node),
-            overflow: TextOverflow.ellipsis,
-            style: contentTextStyle(column),
+          content = RichText(
+            text: TextSpan(
+              text: column.getDisplayValue(node),
+              children: [
+                if (column.getCaption(node) != null)
+                  TextSpan(
+                    text: column.getCaption(node),
+                    style: const TextStyle(
+                      fontStyle: FontStyle.italic,
+                    ),
+                  )
+              ],
+              style: contentTextStyle(column),
+            ),
             maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             textAlign: _textAlignmentFor(column),
           );
         }
