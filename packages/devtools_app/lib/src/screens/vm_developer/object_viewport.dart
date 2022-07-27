@@ -10,6 +10,7 @@ import '../../shared/common_widgets.dart';
 import '../../shared/history_viewport.dart';
 import 'object_inspector_view_controller.dart';
 import 'vm_class_display.dart';
+import 'vm_code_display.dart';
 import 'vm_developer_common_widgets.dart';
 import 'vm_object_model.dart';
 
@@ -96,6 +97,11 @@ Widget buildObjectDisplay(VmObject obj) {
   }
   if (obj is InstanceObject) {
     return const VMInfoCard(title: 'TO-DO: Display Instance object data');
+  }
+  if (obj is CodeObject) {
+    return VmCodeDisplay(
+      code: obj,
+    );
   }
   return const SizedBox.shrink();
 }

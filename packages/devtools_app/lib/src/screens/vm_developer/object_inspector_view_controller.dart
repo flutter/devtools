@@ -56,6 +56,8 @@ class ObjectInspectorViewController extends DisposableController
       object = ScriptObject(ref: objRef);
     } else if (objRef is InstanceRef) {
       object = InstanceObject(ref: objRef);
+    } else if (objRef is CodeRef) {
+      object = CodeObject(ref: objRef);
     }
 
     await object?.initialize();
