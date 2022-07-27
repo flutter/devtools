@@ -40,7 +40,13 @@ class _ObjectInspectorViewState extends State<_ObjectInspectorView> {
   @override
   void initState() {
     super.initState();
+<<<<<<< HEAD
     controller = ObjectInspectorViewController()..init();
+=======
+    controller = ObjectInspectorViewController();
+    programExplorerController = ProgramExplorerController(showCodeNodes: true)
+      ..initialize();
+>>>>>>> master
     return;
   }
 

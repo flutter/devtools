@@ -201,3 +201,15 @@ class InstanceObject extends VmObject {
   @override
   String? get name => obj.name;
 }
+
+class CodeObject extends VmObject {
+  CodeObject({required super.ref});
+
+  Code get obj => _obj as Code;
+
+  @override
+  SourceLocation? get _sourceLocation => null;
+
+  @override
+  String? get name => obj.name;
+}

@@ -28,7 +28,8 @@ class ObjectInspectorViewController extends DisposableController
     );
   }
 
-  final programExplorerController = ProgramExplorerController();
+  final programExplorerController =
+      ProgramExplorerController(showCodeNodes: true);
 
   final objectHistory = ObjectHistory();
 
@@ -132,6 +133,8 @@ class ObjectInspectorViewController extends DisposableController
       object = InstanceObject(
         ref: objRef,
       );
+    } else if (objRef is CodeRef) {
+      object = CodeObject(ref: objRef);
     }
 
     await object?.initialize();

@@ -11,10 +11,17 @@ import '../../primitives/auto_dispose.dart';
 import '../../primitives/trees.dart';
 import '../../primitives/utils.dart';
 import '../../shared/globals.dart';
+import '../vm_developer/vm_service_private_extensions.dart';
 import 'program_explorer_model.dart';
 
 class ProgramExplorerController extends DisposableController
     with AutoDisposeControllerMixin {
+  /// [showCodeNodes] controls whether or not [Code] nodes are displayed in the
+  /// outline view.
+  ProgramExplorerController({
+    this.showCodeNodes = false,
+  });
+
   /// The outline view nodes for the currently selected library.
   ValueListenable<List<VMServiceObjectNode>> get outlineNodes => _outlineNodes;
   final _outlineNodes = ListValueNotifier<VMServiceObjectNode>([]);
@@ -44,6 +51,9 @@ class ProgramExplorerController extends DisposableController
   ValueListenable<bool> get initialized => _initialized;
   final _initialized = ValueNotifier<bool>(false);
   bool _initializing = false;
+
+  /// Controls whether or not [Code] nodes are displayed in the outline view.
+  final bool showCodeNodes;
 
   /// Returns true if [function] is a getter or setter that was not explicitly
   /// defined (e.g., `int foo` creates `int get foo` and `set foo(int)`).
@@ -228,10 +238,35 @@ class ProgramExplorerController extends DisposableController
       Iterable<FuncRef> funcs,
       Iterable<FieldRef>? fields,
     ) async {
-      final res = await getObjects(
-        funcs.where(
-          (f) => !_isSyntheticAccessor(f, fields as List<FieldRef>),
-        ),
+      final res = await Future.wait<Func>(
+        funcs
+            .where((f) => !_isSyntheticAccessor(f, fields as List<FieldRef>))
+            .map<Future<Func>>(
+              (f) => service!.getObject(isolateId!, f.id!).then((f) async {
+                final func = f as Func;
+                final codeRef = func.code;
+
+                // Populate the [Code] objects in each function if we want to
+                // show code nodes in the outline.
+                if (showCodeNodes && codeRef != null) {
+                  final code =
+                      await service.getObject(isolateId, codeRef.id!) as Code;
+                  func.code = code;
+                  Code unoptimizedCode = code;
+                  // `func.code` could be unoptimized code, so don't bother
+                  // fetching it again.
+                  if (func.unoptimizedCode != null &&
+                      func.unoptimizedCode?.id! != code.id!) {
+                    unoptimizedCode = await service.getObject(
+                      isolateId,
+                      func.unoptimizedCode!.id!,
+                    ) as Code;
+                  }
+                  func.unoptimizedCode = unoptimizedCode;
+                }
+                return func;
+              }),
+            ),
       );
       return res.cast<Func>();
     }
