@@ -478,8 +478,6 @@ class _TreemapState extends State<Treemap> {
       child: Center(
         child: widget.height > Treemap.minHeightToDisplayCellText
             ? buildNameAndSizeText(
-                textColor:
-                    widget.rootNode!.showDiff ? Colors.white : Colors.black,
                 oneLine: false,
               )
             : const SizedBox(),
@@ -499,9 +497,6 @@ class _TreemapState extends State<Treemap> {
             border: Border.all(color: Colors.black87),
           ),
           child: buildNameAndSizeText(
-            textColor:
-                (Theme.of(context).textTheme.bodyText2 ?? const TextStyle())
-                    .color,
             oneLine: true,
           ),
         ),
@@ -510,17 +505,9 @@ class _TreemapState extends State<Treemap> {
   }
 
   RichText buildNameAndSizeText({
-    required Color? textColor,
     required bool oneLine,
   }) {
     return RichText(text: widget.rootNode!.displayText(oneLine: oneLine));
-
-    // Text(
-    //   widget.rootNode!.displayText(oneLine: oneLine).toPlainText(),
-    //   style: TextStyle(color: textColor),
-    //   textAlign: TextAlign.center,
-    //   overflow: TextOverflow.ellipsis,
-    // );
   }
 
   Widget buildBreadcrumbNavigator() {
@@ -775,7 +762,6 @@ class MultiCellPainter extends CustomPainter {
 
     if (positionedCell.width! > Treemap.minWidthToDisplayCellText &&
         positionedCell.height! > Treemap.minHeightToDisplayCellText) {
-      final textColor = node.showDiff ? Colors.white : Colors.black;
       final textPainter = TextPainter(
         text: node.displayText(),
         textDirection: TextDirection.ltr,
