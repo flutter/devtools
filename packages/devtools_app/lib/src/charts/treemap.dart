@@ -641,10 +641,11 @@ class TreemapNode extends TreeNode<TreemapNode> {
     return TextSpan(
       text: '$displayName$separator[${prettyByteSize()}]',
       children: [
-        TextSpan(
-          text: '${caption != null ? '$separator$caption' : ''}',
-          style: TextStyle(fontStyle: FontStyle.italic, color: textColor),
-        )
+        if (caption != null)
+          TextSpan(
+            text: '$separator$caption',
+            style: TextStyle(fontStyle: FontStyle.italic, color: textColor),
+          )
       ],
       style: TextStyle(color: textColor),
     );
