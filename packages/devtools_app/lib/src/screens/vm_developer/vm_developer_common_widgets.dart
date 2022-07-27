@@ -479,3 +479,9 @@ class InboundReferencesWidget extends StatelessWidget {
     return description.toString();
   }
 }
+
+String? fileNameFromUri(String? uri) {
+  if (uri == null) return null;
+  final splitted = uri.split('/');
+  return splitted[splitted.length - 1];
+}

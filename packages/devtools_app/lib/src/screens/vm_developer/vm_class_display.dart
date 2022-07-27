@@ -34,7 +34,7 @@ class VmClassDisplay extends StatelessWidget {
           child: Column(
             children: [
               ClassInfoWidget(
-                clazz: clazz,
+                classDataRows: _classDataRows(clazz),
               ),
               Flexible(
                 child: ListView(
@@ -74,89 +74,84 @@ class VmClassDisplay extends StatelessWidget {
 
 /// Displays general VM information of the Class Object.
 class ClassInfoWidget extends StatelessWidget implements PreferredSizeWidget {
-  ClassInfoWidget({
-    required this.clazz,
+  const ClassInfoWidget({
+    required this.classDataRows,
   });
 
-  final ClassObject clazz;
-  late final List<MapEntry<String, Object?>> dataRows;
+  final List<MapEntry<String, Object?>> classDataRows;
 
   @override
   Widget build(BuildContext context) {
-    dataRows = [
-      MapEntry('Object Class', clazz.obj.type),
-      MapEntry(
-        'Shallow Size',
-        prettyPrintBytes(
-          clazz.obj.size ?? 0,
-          includeUnit: true,
-          kbFractionDigits: 1,
-          maxBytes: 512,
-        ),
-      ),
-      MapEntry(
-        'Reachable Size',
-        ValueListenableBuilder<bool>(
-          valueListenable: clazz.fetchingReachableSize,
-          builder: (context, fetching, _) => fetching
-              ? const CircularProgressIndicator()
-              : RequestableSizeWidget(
-                  requestedSize: clazz.reachableSize,
-                  requestFunction: clazz.requestReachableSize,
-                ),
-        ),
-      ),
-      MapEntry(
-        'Retained Size',
-        ValueListenableBuilder<bool>(
-          valueListenable: clazz.fetchingRetainedSize,
-          builder: (context, fetching, _) => fetching
-              ? const CircularProgressIndicator()
-              : RequestableSizeWidget(
-                  requestedSize: clazz.retainedSize,
-                  requestFunction: clazz.requestRetainedSize,
-                ),
-        ),
-      ),
-      MapEntry(
-        'Library',
-        clazz.obj.library?.name?.isEmpty ?? false
-            ? clazz.script?.uri
-            : clazz.obj.library?.name,
-      ),
-      MapEntry(
-        'Script',
-        '${_fileName(clazz.script?.uri) ?? ''}:${clazz.pos?.toString() ?? ''}',
-      ),
-      MapEntry('Superclass', clazz.obj.superClass?.name),
-      MapEntry('SuperType', clazz.obj.superType?.name),
-      MapEntry(
-        'Currently allocated instances',
-        clazz.instances?.totalCount,
-      ),
-    ];
-
     return SizedBox.fromSize(
       size: preferredSize,
       child: VMInfoCard(
         title: 'General Information',
-        rowKeyValues: dataRows,
+        rowKeyValues: classDataRows,
       ),
     );
-  }
-
-  String? _fileName(String? uri) {
-    if (uri == null) return null;
-    final splitted = uri.split('/');
-    return splitted[splitted.length - 1];
   }
 
   @override
   Size get preferredSize => Size.fromHeight(
         areaPaneHeaderHeight +
-            dataRows.length * defaultRowHeight +
+            classDataRows.length * defaultRowHeight +
             defaultSpacing,
       );
+}
+
+List<MapEntry<String, Object?>> _classDataRows(ClassObject clazz) {
+  return [
+    MapEntry('Object Class', clazz.obj.type),
+    MapEntry(
+      'Shallow Size',
+      prettyPrintBytes(
+        clazz.obj.size ?? 0,
+        includeUnit: true,
+        kbFractionDigits: 1,
+        maxBytes: 512,
+      ),
+    ),
+    MapEntry(
+      'Reachable Size',
+      ValueListenableBuilder<bool>(
+        valueListenable: clazz.fetchingReachableSize,
+        builder: (context, fetching, _) => fetching
+            ? const CircularProgressIndicator()
+            : RequestableSizeWidget(
+                requestedSize: clazz.reachableSize,
+                requestFunction: clazz.requestReachableSize,
+              ),
+      ),
+    ),
+    MapEntry(
+      'Retained Size',
+      ValueListenableBuilder<bool>(
+        valueListenable: clazz.fetchingRetainedSize,
+        builder: (context, fetching, _) => fetching
+            ? const CircularProgressIndicator()
+            : RequestableSizeWidget(
+                requestedSize: clazz.retainedSize,
+                requestFunction: clazz.requestRetainedSize,
+              ),
+      ),
+    ),
+    MapEntry(
+      'Library',
+      clazz.obj.library?.name?.isEmpty ?? false
+          ? clazz.script?.uri
+          : clazz.obj.library?.name,
+    ),
+    MapEntry(
+      'Script',
+      '${fileNameFromUri(clazz.script?.uri) ?? ''}:${clazz.pos?.toString() ?? ''}',
+    ),
+    MapEntry('Superclass', clazz.obj.superClass?.name),
+    MapEntry('SuperType', clazz.obj.superType?.name),
+    MapEntry(
+      'Currently allocated instances',
+      clazz.instances?.totalCount,
+    ),
+  ];
 }
 
 // TODO(mtaylee): Finish implementation of widget to display

@@ -14,7 +14,6 @@ import '../../shared/globals.dart';
 import '../../shared/theme.dart';
 import '../../shared/tree.dart';
 import '../../shared/utils.dart';
-import 'debugger_model.dart';
 import 'program_explorer_controller.dart';
 import 'program_explorer_model.dart';
 

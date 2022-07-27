@@ -203,8 +203,9 @@ class InstanceObject extends VmObject {
 }
 
 class CodeObject extends VmObject {
-  CodeObject({required super.ref});
+  CodeObject({required super.ref, super.scriptRef, super.outlineNode});
 
+  @override
   Code get obj => _obj as Code;
 
   @override

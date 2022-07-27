@@ -134,7 +134,11 @@ class ObjectInspectorViewController extends DisposableController
         ref: objRef,
       );
     } else if (objRef is CodeRef) {
-      object = CodeObject(ref: objRef);
+      object = CodeObject(
+        ref: objRef,
+        scriptRef: _currentScriptRef,
+        outlineNode: outlineSelection,
+      );
     }
 
     await object?.initialize();
