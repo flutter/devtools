@@ -385,12 +385,12 @@ class _TreemapState extends State<Treemap> {
           // If this is the second to the last level, paint all cells in the last level
           // instead of creating widgets to improve performance.
 
-          final tooltipMessage = hoveredNode?.displayText() ?? '';
+          final tooltipMessage = hoveredNode?.displayText();
           return DevToolsTooltip(
             // A key is required to force a rebuild of the tooltips for each cell.
             // Use tooltipMessage as the key to prevent rebuilds within a cell.
-            key: Key(tooltipMessage),
-            message: tooltipMessage,
+            key: Key(tooltipMessage?.toPlainText() ?? ''),
+            richMessage: tooltipMessage ?? const TextSpan(text: ''),
             waitDuration: tooltipWaitLong,
             child: MouseRegion(
               onHover: (event) => _onHover(event, positionedChildren),
@@ -514,7 +514,7 @@ class _TreemapState extends State<Treemap> {
     required bool oneLine,
   }) {
     return Text(
-      widget.rootNode!.displayText(oneLine: oneLine),
+      widget.rootNode!.displayText(oneLine: oneLine).toPlainText(),
       style: TextStyle(color: textColor),
       textAlign: TextAlign.center,
       overflow: TextOverflow.ellipsis,
@@ -532,7 +532,7 @@ class _TreemapState extends State<Treemap> {
           return Breadcrumb(
             text: index < pathFromRoot.length - 1
                 ? node.name
-                : node.displayText(),
+                : node.displayText().toPlainText(),
             isRoot: index == 0,
             onPressed: () => widget.onRootChangedCallback(node),
           );
@@ -550,7 +550,7 @@ class _TreemapState extends State<Treemap> {
   Widget buildSelectable({required Widget child, TreemapNode? newRoot}) {
     newRoot ??= widget.rootNode;
     return DevToolsTooltip(
-      message: widget.rootNode!.displayText(),
+      message: widget.rootNode!.displayText().toPlainText(),
       waitDuration: tooltipWaitLong,
       child: InkWell(
         onTap: () {
@@ -601,7 +601,7 @@ class TreemapNode extends TreeNode<TreemapNode> {
 
   final bool showDiff;
   final Color? backgroundColor;
-  final TextSpan? caption;
+  final String? caption;
 
   int get unsignedByteSize => byteSize.abs();
 
@@ -616,8 +616,9 @@ class TreemapNode extends TreeNode<TreemapNode> {
     }
   }
 
-  String displayText({bool oneLine = true}) {
+  TextSpan displayText({bool oneLine = true}) {
     var displayName = name;
+    final textColor = showDiff ? Colors.white : Colors.black;
 
     // Trim beginning of the name of [this] if it starts with its parent's name.
     // If the parent node and the child node's name are exactly the same,
@@ -632,7 +633,17 @@ class TreemapNode extends TreeNode<TreemapNode> {
     }
 
     final separator = oneLine ? ' ' : '\n';
-    return '$displayName$separator[${prettyByteSize()}]${caption != null ? caption : ''}';
+
+    return TextSpan(
+      text: '$displayName$separator[${prettyByteSize()}]',
+      children: [
+        TextSpan(
+          text: '${caption != null ? '\n $caption' : ''}',
+          style: TextStyle(fontStyle: FontStyle.italic, color: textColor),
+        )
+      ],
+      style: TextStyle(color: textColor),
+    );
   }
 
   String prettyByteSize() {
@@ -765,17 +776,10 @@ class MultiCellPainter extends CustomPainter {
       final textColor = node.showDiff ? Colors.white : Colors.black;
       final textPainter = TextPainter(
         text: TextSpan(
-          text: node.displayText(oneLine: false),
+          text: node.displayText(oneLine: false).toPlainText(),
           style: TextStyle(
             color: textColor,
           ),
-          // children: [
-          // if (node.caption != null)
-          //   TextSpan(
-          //     text: '\n${node.caption}',
-          //     style: TextStyle(fontStyle: FontStyle.italic, color: textColor),
-          //   ),
-          // ],
         ),
         textDirection: TextDirection.ltr,
         textAlign: TextAlign.center,

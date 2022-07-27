@@ -80,14 +80,14 @@ class _NameColumn extends TreeColumnData<TreemapNode> {
   final int currentRootLevel;
 
   @override
-  String getValue(TreemapNode dataObject) =>
-      '${dataObject.name} ${dataObject.caption != null ? dataObject.caption : ''}';
+  String getValue(TreemapNode dataObject) => '${dataObject.name}';
 
   @override
   bool get supportsSorting => true;
 
   @override
-  String getTooltip(TreemapNode dataObject) => dataObject.displayText();
+  String getTooltip(TreemapNode dataObject) =>
+      dataObject.displayText().toPlainText();
 
   @override
   double getNodeIndentPx(TreemapNode dataObject) {

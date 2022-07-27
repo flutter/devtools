@@ -504,13 +504,7 @@ class AppSizeController {
       childrenMap: childrenMap,
       showDiff: showDiff,
       backgroundColor: isDeferred ? treemapDeferredColor : null,
-      caption: isDeferred
-          ? const TextSpan(
-              text: 'Deferred',
-              style:
-                  TextStyle(fontStyle: FontStyle.italic, color: Colors.black),
-            )
-          : null,
+      caption: isDeferred ? 'Deferred' : null,
     )..addAllChildren(children);
   }
 }
