@@ -627,7 +627,7 @@ class TreemapNode extends TreeNode<TreemapNode> {
       text: '$displayName$separator[${prettyByteSize()}]',
       children: [
         TextSpan(
-          text: '${caption != null ? '\n $caption' : ''}',
+          text: '${caption != null ? '$separator$caption' : ''}',
           style: TextStyle(fontStyle: FontStyle.italic, color: textColor),
         )
       ],
