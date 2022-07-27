@@ -1477,7 +1477,7 @@ class _TableRowState<T> extends State<TableRow<T>>
               children: [
                 if (column.getCaption(node) != null)
                   TextSpan(
-                    text: column.getCaption(node),
+                    text: ' ${column.getCaption(node)}',
                     style: const TextStyle(
                       fontStyle: FontStyle.italic,
                     ),
