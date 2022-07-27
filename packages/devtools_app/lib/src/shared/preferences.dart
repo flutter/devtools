@@ -94,6 +94,7 @@ class InspectorPreferencesController extends DisposableController
   static const _customPubRootDirectoriesStoragePrefix =
       'inspector.customPubRootDirectories';
   String? _mainScriptDir;
+  VoidCallback? isolateListener;
 
   Future<void> _updateMainScriptRef() async {
     final isolateRef = serviceManager.isolateManager.mainIsolate.value!;
@@ -141,10 +142,6 @@ class InspectorPreferencesController extends DisposableController
     addAutoDisposeListener(_busyCounter, () {
       _customPubRootDirectoriesAreBusy.value = _busyCounter.value != 0;
     });
-    addAutoDisposeListener(
-      serviceManager.isolateManager.mainIsolate,
-      () => preferences.inspector.loadCustomPubRootDirectories(),
-    );
   }
 
   void _handleConnectionClosed(dynamic _) async {
@@ -158,6 +155,17 @@ class InspectorPreferencesController extends DisposableController
     _customPubRootDirectories.clear();
 
     await loadCustomPubRootDirectories();
+
+    // Only setup the isolate listener the first time we connect to a service
+    if (isolateListener == null) {
+      isolateListener = () {
+        preferences.inspector.loadCustomPubRootDirectories();
+      };
+      addAutoDisposeListener(
+        serviceManager.isolateManager.mainIsolate,
+        isolateListener,
+      );
+    }
   }
 
   void _persistCustomPubRootDirectoriesToStorage() {
