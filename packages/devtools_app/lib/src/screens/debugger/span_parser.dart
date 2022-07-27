@@ -15,16 +15,10 @@ abstract class SpanParser {
     final scanner = LineScanner(src);
     final spans = <ScopeSpan>[];
     while (!scanner.isDone) {
-      bool foundMatch = false;
-      for (final pattern in grammar.topLevelMatchers!) {
-        final result = pattern.scan(grammar, scanner);
-        if (result != null) {
-          spans.addAll(result);
-          foundMatch = true;
-          break;
-        }
-      }
-      if (!foundMatch && !scanner.isDone) {
+      final result = grammar.topLevelMatcher!.scan(grammar, scanner);
+      if (result != null) {
+        spans.addAll(result);
+      } else if (!scanner.isDone) {
         // Found no match, move forward by a character and try again.
         scanner.readChar();
       }
@@ -47,11 +41,7 @@ class Grammar {
     return Grammar._(
       name: json['name'],
       scopeName: json['scopeName'],
-      topLevelMatchers: json['patterns']
-          ?.cast<Map<String, dynamic>>()
-          ?.map((e) => _Matcher.parse(e))
-          ?.toList()
-          ?.cast<_Matcher>(),
+      topLevelMatcher: _Matcher.parse(json),
       repository: Repository.build(json),
     );
   }
@@ -59,7 +49,7 @@ class Grammar {
   Grammar._({
     this.name,
     this.scopeName,
-    this.topLevelMatchers,
+    this.topLevelMatcher,
     this.repository,
   });
 
@@ -67,7 +57,7 @@ class Grammar {
 
   final String? scopeName;
 
-  final List<_Matcher>? topLevelMatchers;
+  final _Matcher? topLevelMatcher;
 
   final Repository? repository;
 
@@ -76,7 +66,7 @@ class Grammar {
     return const JsonEncoder.withIndent('  ').convert({
       'name': name,
       'scopeName': scopeName,
-      'patterns': topLevelMatchers!.map((e) => e.toJson()).toList(),
+      'patterns': topLevelMatcher?.toJson(),
       'repository': repository!.toJson(),
     });
   }
@@ -125,6 +115,8 @@ class ScopeSpan {
 
   static final ListQueue<String?> _scopeStack = ListQueue<String?>();
 
+  int get start => _start;
+  int get end => _end;
   int get length => _end - _start;
 
   final int _start;
@@ -208,21 +200,16 @@ class Repository {
       return;
     }
     for (final subRepo in repositoryJson.keys) {
-      patterns[subRepo] = <_Matcher>[
-        for (final pattern
-            in repositoryJson[subRepo]['patterns'].cast<Map<String, dynamic>>())
-          _Matcher.parse(pattern),
-      ];
+      matchers[subRepo] = _Matcher.parse(repositoryJson[subRepo]);
     }
   }
 
-  final patterns = <String?, List<_Matcher>>{};
+  final matchers = <String?, _Matcher>{};
 
   Map<String, dynamic> toJson() {
     return {
-      for (final entry in patterns.entries)
-        if (entry.key != null)
-          entry.key!: entry.value.map((e) => e.toJson()).toList(),
+      for (final entry in matchers.entries)
+        if (entry.key != null) entry.key!: entry.value.toJson(),
     };
   }
 }
@@ -235,8 +222,10 @@ abstract class _Matcher {
       return _SimpleMatcher(json);
     } else if (_MultilineMatcher.isType(json)) {
       return _MultilineMatcher(json);
+    } else if (_PatternMatcher.isType(json)) {
+      return _PatternMatcher(json);
     }
-    throw StateError('Unknown pattern type: $json');
+    throw StateError('Unknown matcher type: $json');
   }
 
   _Matcher._(Map<String, dynamic> json) : name = json['name'];
@@ -246,6 +235,7 @@ abstract class _Matcher {
   List<ScopeSpan>? scan(Grammar grammar, LineScanner scanner);
 
   List<ScopeSpan> _applyCapture(
+    Grammar grammar,
     LineScanner scanner,
     Map<String, dynamic>? captures,
     int line,
@@ -256,36 +246,44 @@ abstract class _Matcher {
     final start = lastMatch.start;
     final end = lastMatch.end;
     if (captures != null) {
-      if (lastMatch.groupCount <= 1) {
-        spans.add(
-          ScopeSpan(
-            scope: captures['0']['name'],
-            start: start,
-            end: end,
-            // Lines and columns are 0 indexed.
-            line: line + 1,
-            column: column + 1,
-          ),
-        );
-      } else {
-        final match = scanner.substring(start, end);
-        for (int i = 1; i <= scanner.lastMatch!.groupCount; ++i) {
-          if (captures.containsKey(i.toString())) {
-            final capture = scanner.lastMatch!.group(i);
-            if (capture == null) {
-              continue;
-            }
-            final startOffset = match.indexOf(capture);
+      final match = scanner.substring(start, end);
+      for (int i = 0; i <= lastMatch.groupCount; ++i) {
+        if (captures.containsKey(i.toString())) {
+          final captureText = lastMatch.group(i);
+          if (captureText == null) {
+            continue;
+          }
+          final startOffset = match.indexOf(captureText);
+          final capture = captures[i.toString()] as Map<String, Object?>;
+          final captureStart = start + startOffset;
+          final captureEnd = start + startOffset + captureText.length;
+          final captureName = capture['name'] as String?;
+
+          // Handle named capture.
+          if (captureName != null) {
             spans.add(
               ScopeSpan(
-                scope: captures[i.toString()]['name'],
-                start: start + startOffset,
-                end: start + startOffset + capture.length,
+                scope: captureName,
+                start: captureStart,
+                end: captureEnd,
                 // Lines and columns are 0 indexed.
                 line: line + 1,
                 column: column + startOffset + 1,
               ),
             );
+          }
+
+          // Handle captures that have nested pattern matchers.
+          if (capture.containsKey('patterns')) {
+            final captureScanner = LineScanner(
+              scanner.substring(0, captureEnd),
+              position: captureStart,
+            );
+            final nestedSpans =
+                _Matcher.parse(capture).scan(grammar, captureScanner);
+            if (nestedSpans != null) {
+              spans.addAll(nestedSpans);
+            }
           }
         }
       }
@@ -330,7 +328,7 @@ class _SimpleMatcher extends _Matcher {
     if (scanner.scan(match)) {
       final result = ScopeSpan.applyScope(
         this,
-        () => _applyCapture(scanner, captures, line, column),
+        () => _applyCapture(grammar, scanner, captures, line, column),
       );
       return result;
     }
@@ -413,7 +411,7 @@ class _MultilineMatcher extends _Matcher {
 
   final List<_Matcher>? patterns;
 
-  List<ScopeSpan> _scanBegin(LineScanner scanner) {
+  List<ScopeSpan> _scanBegin(Grammar grammar, LineScanner scanner) {
     final line = scanner.line;
     final column = scanner.column;
     if (!scanner.scan(begin)) {
@@ -421,7 +419,7 @@ class _MultilineMatcher extends _Matcher {
       // the beginning of the string.
       throw StateError('Expected ${begin.pattern} to match.');
     }
-    return _processCaptureHelper(scanner, beginCaptures, line, column);
+    return _processCaptureHelper(grammar, scanner, beginCaptures, line, column);
   }
 
   List<ScopeSpan> _scanToEndOfLine(Grammar grammar, LineScanner scanner) {
@@ -467,23 +465,25 @@ class _MultilineMatcher extends _Matcher {
     return results;
   }
 
-  List<ScopeSpan>? _scanEnd(LineScanner scanner) {
+  List<ScopeSpan>? _scanEnd(Grammar grammar, LineScanner scanner) {
     final line = scanner.line;
     final column = scanner.column;
     if (end != null && !scanner.scan(end!)) {
       return null;
     }
-    return _processCaptureHelper(scanner, beginCaptures, line, column);
+    return _processCaptureHelper(grammar, scanner, beginCaptures, line, column);
   }
 
   List<ScopeSpan> _processCaptureHelper(
+    Grammar grammar,
     LineScanner scanner,
     Map<String, dynamic>? customCaptures,
     int line,
     int column,
   ) {
     if (contentName == null || (customCaptures ?? captures) != null) {
-      return _applyCapture(scanner, customCaptures ?? captures, line, column);
+      return _applyCapture(
+          grammar, scanner, customCaptures ?? captures, line, column);
     } else {
       // If there's no explicit captures and contentName is provided, don't
       // create a span for the match.
@@ -497,7 +497,7 @@ class _MultilineMatcher extends _Matcher {
       return null;
     }
     return ScopeSpan.applyScope(this, () {
-      final beginSpans = _scanBegin(scanner);
+      final beginSpans = _scanBegin(grammar, scanner);
       final results = <ScopeSpan>[
         if (contentName == null) ...beginSpans,
       ];
@@ -526,7 +526,7 @@ class _MultilineMatcher extends _Matcher {
         } else {
           results.addAll(_scanUpToEndMatch(grammar, scanner));
         }
-        final endSpans = _scanEnd(scanner);
+        final endSpans = _scanEnd(grammar, scanner);
 
         // If beginSpans is not empty and there's no captures specified, there
         // will only be a single span with a scope that covers [beginMatch.start,
@@ -610,6 +610,44 @@ class _MultilineMatcher extends _Matcher {
   }
 }
 
+class _PatternMatcher extends _Matcher {
+  _PatternMatcher(Map<String, dynamic> json)
+      : patterns = json['patterns']
+            ?.cast<Map<String, dynamic>>()
+            ?.map((e) => _Matcher.parse(e))
+            ?.toList()
+            ?.cast<_Matcher>(),
+        super._(json);
+
+  static bool isType(Map<String, dynamic> json) {
+    return json.containsKey('patterns');
+  }
+
+  final List<_Matcher>? patterns;
+
+  @override
+  List<ScopeSpan>? scan(Grammar grammar, LineScanner scanner) {
+    // Try each rule in the include and return the result from the first
+    // successful match.
+    for (final pattern in patterns!) {
+      final result = pattern.scan(grammar, scanner);
+      if (result != null) {
+        return result;
+      }
+    }
+    return null;
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      if (name != null) 'name': name,
+      if (patterns != null)
+        'patterns': patterns!.map((e) => e.toJson()).toList(),
+    };
+  }
+}
+
 /// A [_Matcher] that corresponds to an `include` rule referenced in a
 /// `patterns` array. Allows for executing rules defined within a
 /// [Repository].
@@ -626,19 +664,11 @@ class _IncludeMatcher extends _Matcher {
 
   @override
   List<ScopeSpan>? scan(Grammar grammar, LineScanner scanner) {
-    final patterns = grammar.repository?.patterns[include];
-    if (patterns == null) {
+    final pattern = grammar.repository?.matchers[include];
+    if (pattern == null) {
       throw StateError('Could not find $include in the repository.');
     }
-    // Try each rule in the include and return the result from the first
-    // successful match.
-    for (final pattern in patterns) {
-      final result = pattern.scan(grammar, scanner);
-      if (result != null) {
-        return result;
-      }
-    }
-    return null;
+    return pattern.scan(grammar, scanner);
   }
 
   @override

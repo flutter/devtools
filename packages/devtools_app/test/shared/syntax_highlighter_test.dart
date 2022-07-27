@@ -127,6 +127,10 @@ const variableReferenceInString = '''
 '\$i: \${foo[i] == bar[i]}'
 ''';
 
+const typeArgs = '''
+void f<T extends String>() {}
+''';
+
 void main() {
   late Grammar grammar;
   setUp(() async {
@@ -441,21 +445,77 @@ void main() {
                   spanTester(
                     context,
                     children[2] as TextSpan,
-                    ': \${',
+                    ': ',
                     stringSyntaxColor,
                   );
 
                   spanTester(
                     context,
                     children[3] as TextSpan,
-                    'foo[i] == bar[i]',
-                    variableSyntaxColor,
+                    '\${',
+                    stringSyntaxColor,
                   );
 
                   spanTester(
                     context,
                     children[4] as TextSpan,
-                    '}\'',
+                    'foo',
+                    variableSyntaxColor,
+                  );
+
+                  spanTester(
+                    context,
+                    children[5] as TextSpan,
+                    '[',
+                    stringSyntaxColor,
+                  );
+
+                  spanTester(
+                    context,
+                    children[6] as TextSpan,
+                    'i',
+                    variableSyntaxColor,
+                  );
+
+                  spanTester(
+                    context,
+                    children[7] as TextSpan,
+                    '] == ',
+                    stringSyntaxColor,
+                  );
+
+                  spanTester(
+                    context,
+                    children[8] as TextSpan,
+                    'bar',
+                    variableSyntaxColor,
+                  );
+
+                  spanTester(
+                    context,
+                    children[9] as TextSpan,
+                    '[',
+                    stringSyntaxColor,
+                  );
+
+                  spanTester(
+                    context,
+                    children[10] as TextSpan,
+                    'i',
+                    variableSyntaxColor,
+                  );
+
+                  spanTester(
+                    context,
+                    children[11] as TextSpan,
+                    ']}',
+                    stringSyntaxColor,
+                  );
+
+                  spanTester(
+                    context,
+                    children[12] as TextSpan,
+                    '\'',
                     stringSyntaxColor,
                   );
                 },
@@ -537,6 +597,81 @@ void main() {
                 numericConstantSyntaxColor,
               );
             }
+          },
+        );
+
+        testWidgetsWithContext(
+          'type args smoke',
+          (WidgetTester tester) async {
+            final highlighter = SyntaxHighlighter.withGrammar(
+              grammar: grammar,
+              source: typeArgs,
+            );
+
+            await tester.pumpWidget(
+              buildSyntaxHighlightingTestContext(
+                (context) {
+                  final highlighted = highlighter.highlight(context);
+                  final children = highlighted.children!;
+
+                  spanTester(
+                    context,
+                    children[0] as TextSpan,
+                    'void',
+                    modifierSyntaxColor,
+                  );
+                  expect(children[1].toPlainText(), ' ');
+                  spanTester(
+                    context,
+                    children[2] as TextSpan,
+                    'f',
+                    functionSyntaxColor,
+                  );
+                  spanTester(
+                    context,
+                    children[3] as TextSpan,
+                    '<',
+                    defaultTextColor,
+                  );
+                  spanTester(
+                    context,
+                    children[4] as TextSpan,
+                    'T',
+                    declarationSyntaxColor,
+                  );
+                  expect(children[5].toPlainText(), ' ');
+                  spanTester(
+                    context,
+                    children[6] as TextSpan,
+                    'extends',
+                    modifierSyntaxColor,
+                  );
+                  expect(children[7].toPlainText(), ' ');
+                  spanTester(
+                    context,
+                    children[8] as TextSpan,
+                    'String',
+                    declarationSyntaxColor,
+                  );
+                  spanTester(
+                    context,
+                    children[9] as TextSpan,
+                    '>',
+                    defaultTextColor,
+                  );
+                  spanTester(
+                    context,
+                    children[10] as TextSpan,
+                    '() {}',
+                    defaultTextColor,
+                  );
+
+                  expect(children[11].toPlainText(), '\n');
+
+                  return Container();
+                },
+              ),
+            );
           },
         );
       },
