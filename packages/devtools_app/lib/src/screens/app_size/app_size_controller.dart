@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:vm_snapshot_analysis/precompiler_trace.dart';
 import 'package:vm_snapshot_analysis/program_info.dart';
@@ -17,7 +18,7 @@ import '../../ui/colors.dart';
 import 'app_size_screen.dart';
 
 // Temporary feature flag for deferred loading.
-const deferredLoadingSupportEnabled = false;
+const deferredLoadingSupportEnabled = true;
 
 enum DiffTreeType {
   increaseOnly,
@@ -503,7 +504,13 @@ class AppSizeController {
       childrenMap: childrenMap,
       showDiff: showDiff,
       backgroundColor: isDeferred ? treemapDeferredColor : null,
-      caption: isDeferred ? 'Deferred' : null,
+      caption: isDeferred
+          ? const TextSpan(
+              text: 'Deferred',
+              style:
+                  TextStyle(fontStyle: FontStyle.italic, color: Colors.black),
+            )
+          : null,
     )..addAllChildren(children);
   }
 }

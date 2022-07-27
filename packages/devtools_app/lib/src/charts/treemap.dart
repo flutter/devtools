@@ -601,7 +601,7 @@ class TreemapNode extends TreeNode<TreemapNode> {
 
   final bool showDiff;
   final Color? backgroundColor;
-  final String? caption;
+  final TextSpan? caption;
 
   int get unsignedByteSize => byteSize.abs();
 
@@ -630,8 +630,9 @@ class TreemapNode extends TreeNode<TreemapNode> {
         displayName = displayName.replaceFirst('/', '');
       }
     }
+
     final separator = oneLine ? ' ' : '\n';
-    return '$displayName$separator[${prettyByteSize()}]';
+    return '$displayName$separator[${prettyByteSize()}]${caption != null ? caption : ''}';
   }
 
   String prettyByteSize() {
@@ -768,13 +769,13 @@ class MultiCellPainter extends CustomPainter {
           style: TextStyle(
             color: textColor,
           ),
-          children: [
-            if (node.caption != null)
-              TextSpan(
-                text: '\n${node.caption}',
-                style: TextStyle(fontStyle: FontStyle.italic, color: textColor),
-              ),
-          ],
+          // children: [
+          // if (node.caption != null)
+          //   TextSpan(
+          //     text: '\n${node.caption}',
+          //     style: TextStyle(fontStyle: FontStyle.italic, color: textColor),
+          //   ),
+          // ],
         ),
         textDirection: TextDirection.ltr,
         textAlign: TextAlign.center,
