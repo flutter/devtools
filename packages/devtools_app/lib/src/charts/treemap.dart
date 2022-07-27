@@ -763,7 +763,7 @@ class MultiCellPainter extends CustomPainter {
     if (positionedCell.width! > Treemap.minWidthToDisplayCellText &&
         positionedCell.height! > Treemap.minHeightToDisplayCellText) {
       final textPainter = TextPainter(
-        text: node.displayText(),
+        text: node.displayText(oneLine: false),
         textDirection: TextDirection.ltr,
         textAlign: TextAlign.center,
         ellipsis: '...',

@@ -503,7 +503,7 @@ class AppSizeController {
       childrenMap: childrenMap,
       showDiff: showDiff,
       backgroundColor: isDeferred ? treemapDeferredColor : null,
-      caption: isDeferred ? 'Deferred' : null,
+      caption: isDeferred ? '(Deferred)' : null,
     )..addAllChildren(children);
   }
 }
