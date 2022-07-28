@@ -95,7 +95,7 @@ void main() {
         equals('0.0 ms'),
       );
       expect(
-        msText(const Duration(microseconds: 0), allowRoundingToZero: false),
+        msText(Duration.zero, allowRoundingToZero: false),
         equals('0.0 ms'),
       );
       expect(
