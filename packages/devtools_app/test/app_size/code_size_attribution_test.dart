@@ -120,7 +120,8 @@ void main() {
       expect(toTable.data.length, equals(17));
 
       // Tap to re-root call graph.
-      await tester.tap(find.text('dart:math'));
+      String text = 'dart:math';
+      await tester.tap(textFinder(text));
       await tester.pumpAndSettle();
 
       fromTable = find.byKey(CallGraphView.fromTableKey).evaluate().first.widget
@@ -203,4 +204,8 @@ void main() {
       }
     });
   });
+}
+
+Finder textFinder(String text) {
+  return find.textContaining(text, findRichText: true);
 }
