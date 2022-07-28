@@ -86,7 +86,8 @@ class _NameColumn extends TreeColumnData<TreemapNode> {
   bool get supportsSorting => true;
 
   @override
-  String getTooltip(TreemapNode dataObject) => dataObject.displayText();
+  String getTooltip(TreemapNode dataObject) =>
+      dataObject.displayText().toPlainText();
 
   @override
   double getNodeIndentPx(TreemapNode dataObject) {
