@@ -95,7 +95,7 @@ extension ObjRefPrivateViewExtension on ObjRef {
   ///
   /// The type of non-public service objects can be determined using this
   /// value.
-  String get vmType => json!['_vmType']!;
+  String? get vmType => json!['_vmType'];
 
   /// `true` if this object is an instance of [ICData].
   bool get isICData => vmType == _icDataType;

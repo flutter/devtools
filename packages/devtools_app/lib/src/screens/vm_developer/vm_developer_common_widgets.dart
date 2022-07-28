@@ -177,31 +177,40 @@ class RequestableSizeWidget extends StatelessWidget {
 /// Wrapper to get the name of an ObjRef depending on its type.
 String? _objectName(ObjRef? objectRef) {
   String? objectRefName;
-  if (objectRef == null) return null;
 
-  if (objectRef is ClassRef ||
-      objectRef is FuncRef ||
-      objectRef is FieldRef ||
-      objectRef is LibraryRef) {
+  if (objectRef is ClassRef || objectRef is FuncRef || objectRef is FieldRef) {
     objectRefName = (objectRef as dynamic).name;
+  } else if (objectRef is LibraryRef) {
+    objectRefName =
+        objectRef.name?.isEmpty ?? false ? objectRef.uri : objectRef.name;
+  } else if (objectRef is ScriptRef) {
+    objectRefName = fileNameFromUri(objectRef.uri);
   } else if (objectRef is InstanceRef) {
     objectRefName = objectRef.name ??
         'Instance of ${objectRef.classRef?.name ?? '<Class>'}';
+  } else {
+    objectRefName = objectRef?.vmType;
   }
 
   return objectRefName;
 }
 
-/// Recursively gets the full owner name of a field or function object.
-String? _ownerName(ObjRef? ref) {
+/// Recursively gets the name of a function, qualified with its full owner name,
+/// excluding the owner library.
+String? qualifiedName(ObjRef? ref) {
   if (ref == null) return null;
-  if (ref is FuncRef) {
-    return '${_ownerName(ref.owner)}.${_objectName(ref)}';
-  } else if (ref is FieldRef) {
-    return '${_ownerName(ref.owner)}.${_objectName(ref)}';
-  } else {
-    return _objectName(ref) ?? '<unknown>';
+
+  if (ref is ClassRef) {
+    return '${ref.name}';
+  } else if (ref is FuncRef) {
+    if (ref.owner is! LibraryRef) {
+      return '${qualifiedName(ref.owner)}.${ref.name}';
+    } else {
+      return '${ref.name}';
+    }
   }
+
+  return '';
 }
 
 // Returns a description of the object containing its name and owner.
@@ -209,9 +218,9 @@ String? _objectDescription(ObjRef? object) {
   if (object == null) {
     return null;
   } else if (object is FieldRef) {
-    return '${object.declaredType?.name ?? 'Field'} ${object.name} of ${_ownerName(object.owner) ?? '<Owner>'}';
+    return '${object.declaredType?.name ?? 'Field'} ${object.name} of ${_objectName(object.owner) ?? '<Owner>'}';
   } else if (object is FuncRef) {
-    return '${_ownerName(object.owner) ?? '<Owner>'}.${object.name}';
+    return '${qualifiedName(object) ?? '<Function Name>'}';
   } else {
     return '${_objectName(object)}';
   }
@@ -334,9 +343,11 @@ class RetainingPathWidget extends StatelessWidget {
         for (RetainingObject object in retainingPath.elements!.sublist(1))
           Row(
             children: [
-              SelectableText(
-                _retainingObjectDescription(object),
-                style: Theme.of(context).fixedFontStyle,
+              Flexible(
+                child: SelectableText(
+                  _retainingObjectDescription(object),
+                  style: Theme.of(context).fixedFontStyle,
+                ),
               ),
             ],
           ),
@@ -373,7 +384,7 @@ class RetainingPathWidget extends StatelessWidget {
     }
 
     description.write(
-      _objectDescription(object.value),
+      _objectDescription(object.value) ?? '<object>',
     );
 
     return description.toString();
@@ -473,7 +484,7 @@ class InboundReferencesWidget extends StatelessWidget {
     }
 
     description.write(
-      _objectDescription(inboundRef.source),
+      _objectDescription(inboundRef.source) ?? '<object>',
     );
 
     return description.toString();
