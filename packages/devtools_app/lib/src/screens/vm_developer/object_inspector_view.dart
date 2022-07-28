@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 
 import '../../shared/split.dart';
 import '../debugger/program_explorer.dart';
-import '../debugger/program_explorer_controller.dart';
 import '../debugger/program_explorer_model.dart';
 import 'object_inspector_view_controller.dart';
 import 'object_viewport.dart';
@@ -38,13 +37,10 @@ class _ObjectInspectorView extends StatefulWidget {
 class _ObjectInspectorViewState extends State<_ObjectInspectorView> {
   late final ObjectInspectorViewController controller;
 
-  late final ProgramExplorerController programExplorerController;
-
   @override
   void initState() {
     super.initState();
-    controller = ObjectInspectorViewController();
-    programExplorerController = ProgramExplorerController()..initialize();
+    controller = ObjectInspectorViewController()..init();
     return;
   }
 
@@ -55,7 +51,7 @@ class _ObjectInspectorViewState extends State<_ObjectInspectorView> {
       initialFractions: const [0.20, 0.80],
       children: [
         ProgramExplorer(
-          controller: programExplorerController,
+          controller: controller.programExplorerController,
           onNodeSelected: _onNodeSelected,
           title: 'Program Explorer',
         ),
@@ -68,6 +64,12 @@ class _ObjectInspectorViewState extends State<_ObjectInspectorView> {
 
   void _onNodeSelected(VMServiceObjectNode node) {
     final objRef = node.object;
+    final location = node.location;
+
+    if (location != null) {
+      controller.setCurrentScript(location.scriptRef);
+    }
+
     if (objRef != null &&
         objRef != controller.objectHistory.current.value?.ref) {
       controller.pushObject(objRef);
