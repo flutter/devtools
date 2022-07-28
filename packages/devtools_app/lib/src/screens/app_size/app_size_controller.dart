@@ -281,11 +281,12 @@ class AppSizeController {
     if (oldFile.isAnalyzeSizeFile && newFile.isAnalyzeSizeFile) {
       final oldApkProgramInfo = ProgramInfo();
       final oldFileJson = oldFile.data as Map<String, dynamic>;
-      _apkJsonToProgramInfo(
-        program: oldApkProgramInfo,
-        parent: oldApkProgramInfo.root,
-        json: oldFileJson,
-      );
+      if (oldFileJson['n'] == 'ArtificalRoot')
+        _apkJsonToProgramInfo(
+          program: oldApkProgramInfo,
+          parent: oldApkProgramInfo.root,
+          json: oldFileJson,
+        );
 
       // Extract the precompiler trace from the old file, if it exists, and
       // generate a call graph.
