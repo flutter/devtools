@@ -95,14 +95,18 @@ void main() {
         equals('0.0 ms'),
       );
       expect(
-        msText(const Duration(microseconds: 1), allowZeroValues: false),
+        msText(const Duration(microseconds: 0), allowRoundingToZero: false),
+        equals('0.0 ms'),
+      );
+      expect(
+        msText(const Duration(microseconds: 1), allowRoundingToZero: false),
         equals('< 0.1 ms'),
       );
       expect(
         msText(
           const Duration(microseconds: 1),
           fractionDigits: 2,
-          allowZeroValues: false,
+          allowRoundingToZero: false,
         ),
         equals('< 0.01 ms'),
       );
