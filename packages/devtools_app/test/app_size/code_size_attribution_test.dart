@@ -120,7 +120,7 @@ void main() {
       expect(toTable.data.length, equals(17));
 
       // Tap to re-root call graph.
-      String text = 'dart:math';
+      const text = 'dart:math';
       await tester.tap(textFinder(text));
       await tester.pumpAndSettle();
 
