@@ -10,7 +10,7 @@ import 'package:devtools_app/src/screens/debugger/span_parser.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const helloWorld = '''
-void main() {
+Future<void> main() async {
   print('hello world');
 }
 ''';
@@ -204,37 +204,84 @@ void main() {
   group('SpanParser:', () {
     test('Hello world', () {
       final spans = SpanParser.parse(grammar, helloWorld);
-      expect(spans.length, 5);
-      // void
+
+      expect(spans.length, 10);
+
+      // Future<void>
       spanTester(
         span: spans[0],
-        scopes: ['storage.type.primitive.dart'],
+        scopes: ['support.class.dart'],
         line: 1,
         column: 1,
+        length: 12,
+      );
+
+      // <
+      spanTester(
+        span: spans[1],
+        scopes: ['other.source.dart'],
+        line: 1,
+        column: 7,
+        length: 1,
+      );
+
+      // void
+      spanTester(
+        span: spans[2],
+        scopes: ['support.class.dart'],
+        line: 1,
+        column: 8,
         length: 4,
+      );
+
+      // void
+      spanTester(
+        span: spans[3],
+        scopes: ['storage.type.primitive.dart'],
+        line: 1,
+        column: 8,
+        length: 4,
+      );
+
+      // >
+      spanTester(
+        span: spans[4],
+        scopes: ['other.source.dart'],
+        line: 1,
+        column: 12,
+        length: 1,
       );
 
       // main
       spanTester(
-        span: spans[1],
+        span: spans[5],
         scopes: ['entity.name.function.dart'],
         line: 1,
-        column: 6,
+        column: 14,
         length: 4,
+      );
+
+      // async
+      spanTester(
+        span: spans[6],
+        scopes: ['keyword.control.dart'],
+        line: 1,
+        column: 21,
+        length: 5,
       );
 
       // print
       spanTester(
-        span: spans[2],
+        span: spans[7],
         scopes: ['entity.name.function.dart'],
         line: 2,
         column: 3,
         length: 5,
       );
 
-      // '
+      // 'hello world'
       spanTester(
-        span: spans[3],
+        span: spans[8],
         scopes: ['string.interpolated.single.dart'],
         line: 2,
         column: 9,
@@ -243,7 +290,7 @@ void main() {
 
       // ;
       spanTester(
-        span: spans[4],
+        span: spans[9],
         scopes: ['punctuation.terminator.dart'],
         line: 2,
         column: 23,
@@ -254,6 +301,8 @@ void main() {
     test('Meaning of life', () {
       final spans = SpanParser.parse(grammar, meaningOfLife);
 
+      expect(spans.length, 18);
+
       // void
       spanTester(
         span: spans[0],
@@ -272,7 +321,7 @@ void main() {
         length: 4,
       );
 
-      // //
+      // // 42
       spanTester(
         span: spans[2],
         scopes: ['comment.line.double-slash.dart'],
@@ -344,7 +393,7 @@ void main() {
         length: 1,
       );
 
-      // /*
+      // /* print the meaning of life */
       spanTester(
         span: spans[10],
         scopes: ['comment.block.dart'],
@@ -362,7 +411,7 @@ void main() {
         length: 5,
       );
 
-      // '
+      // 'The meaning of life is $meaning, not ${meaning + 1}'
       spanTester(
         span: spans[12],
         scopes: ['string.interpolated.single.dart'],
@@ -371,7 +420,7 @@ void main() {
         length: 53,
       );
 
-      // $meaning
+      // meaning
       spanTester(
         span: spans[13],
         scopes: [
@@ -388,16 +437,42 @@ void main() {
         span: spans[14],
         scopes: [
           'string.interpolated.single.dart',
+          'string.interpolated.expression.dart',
+        ],
+        line: 6,
+        column: 47,
+        length: 14,
+      );
+
+      // meaning
+      spanTester(
+        span: spans[15],
+        scopes: [
+          'string.interpolated.single.dart',
+          'string.interpolated.expression.dart',
           'variable.parameter.dart',
         ],
         line: 6,
         column: 49,
-        length: 11,
+        length: 7,
+      );
+
+      // 1
+      spanTester(
+        span: spans[16],
+        scopes: [
+          'string.interpolated.single.dart',
+          'string.interpolated.expression.dart',
+          'constant.numeric.dart',
+        ],
+        line: 6,
+        column: 59,
+        length: 1,
       );
 
       // ;
       spanTester(
-        span: spans[15],
+        span: spans[17],
         scopes: ['punctuation.terminator.dart'],
         line: 6,
         column: 63,
@@ -446,10 +521,10 @@ void main() {
         column: 1,
         length: 10,
       );
-
       // /// multiline
       // ///
       // /// comment
+
       spanTester(
         span: spans[4],
         scopes: ['comment.block.documentation.dart'],
@@ -473,7 +548,12 @@ void main() {
     test('handles dartdoc', () {
       final spans = SpanParser.parse(grammar, dartdoc);
 
-      // Covers block of lines starting with '///'
+      expect(spans.length, 5);
+
+      // /// [Foo] is a test class, used in the following manner:
+      // /// ```
+      // /// Foo.test(bar);
+      // /// ```
       spanTester(
         span: spans[0],
         scopes: ['comment.block.documentation.dart'],
@@ -494,7 +574,7 @@ void main() {
         length: 5,
       );
 
-      // Whitespace after ```
+      // Whitespace
       spanTester(
         span: spans[2],
         scopes: [
@@ -518,7 +598,7 @@ void main() {
         length: 16,
       );
 
-      // Whitespace after ```
+      // Whitespace
       spanTester(
         span: spans[4],
         scopes: [
@@ -538,9 +618,15 @@ void main() {
     // the last line that matched the 'while' condition.
     test("handles 'while' rules", () {
       final spans = SpanParser.parse(grammar, whileRuleApplication);
+
       expect(spans.length, 4);
 
       // /// multiline
+      // /// ```
+      // /// doc
+      // /// ```
+      // /// comment
+      // /// test
       spanTester(
         span: spans[0],
         scopes: ['comment.block.documentation.dart'],
@@ -549,7 +635,7 @@ void main() {
         length: 59,
       );
 
-      // \n/// doc\n///
+      // Whitespace
       spanTester(
         span: spans[1],
         scopes: [
@@ -561,6 +647,7 @@ void main() {
         length: 1,
       );
 
+      //  doc
       spanTester(
         span: spans[2],
         scopes: [
@@ -572,6 +659,7 @@ void main() {
         length: 5,
       );
 
+      // Whitespace
       spanTester(
         span: spans[3],
         scopes: [
