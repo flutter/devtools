@@ -170,10 +170,9 @@ void main() {
       expect(breadcrumbs.length, 1);
       expect(breadcrumbs.first.text, equals('Root [6.0 MB]'));
       expect(find.byType(BreadcrumbNavigator), findsOneWidget);
-      String text = 'package:flutter';
-      expect(find.richText(text), findsOneWidget);
-      text = 'dart:core';
-      expect(find.richText(text), findsOneWidget);
+
+      expect(find.richText('package:flutter'), findsOneWidget);
+      expect(find.richText('dart:core'), findsOneWidget);
 
       expect(find.byType(AppSizeAnalysisTable), findsOneWidget);
       expect(find.byType(AppSizeDiffTable), findsNothing);
@@ -280,10 +279,8 @@ void main() {
           .toList();
       expect(breadcrumbs.length, 1);
       expect(breadcrumbs.first.text, equals('Root [+1.5 MB]'));
-      String text = 'package:pointycastle';
-      expect(find.richText(text), findsOneWidget);
-      text = 'package:flutter';
-      expect(find.richText(text), findsOneWidget);
+      expect(find.richText('package:pointycastle'), findsOneWidget);
+      expect(find.richText('package:flutter'), findsOneWidget);
 
       expect(find.byType(AppSizeAnalysisTable), findsNothing);
       expect(find.byType(AppSizeDiffTable), findsOneWidget);
@@ -308,10 +305,9 @@ void main() {
           .toList();
       expect(breadcrumbs.length, 1);
       expect(breadcrumbs.first.text, equals('Root [+1.6 MB]'));
-      String text = 'package:pointycastle';
-      expect(find.richText(text), findsOneWidget);
-      text = 'package:flutter';
-      expect(find.richText(text), findsOneWidget);
+
+      expect(find.richText('package:pointycastle'), findsOneWidget);
+      expect(find.richText('package:flutter'), findsOneWidget);
 
       await tester.tap(find.byKey(AppSizeScreen.dropdownKey));
       await tester.pumpAndSettle();
@@ -319,12 +315,9 @@ void main() {
       await tester.tap(find.text('Decrease Only').hitTestable());
       await tester.pumpAndSettle();
 
-      text = 'Root';
-      expect(find.richText(text), findsOneWidget);
-      text = 'package:memory';
-      expect(find.richText(text), findsOneWidget);
-      text = 'package:flutter';
-      expect(find.richText(text), findsOneWidget);
+      expect(find.richText('Root'), findsOneWidget);
+      expect(find.richText('package:memory'), findsOneWidget);
+      expect(find.richText('package:flutter'), findsOneWidget);
     });
 
     testWidgetsWithWindowSize('clears data', windowSize,

@@ -120,8 +120,7 @@ void main() {
       expect(toTable.data.length, equals(17));
 
       // Tap to re-root call graph.
-      const text = 'dart:math';
-      await tester.tap(find.richText(text));
+      await tester.tap(find.richText('dart:math'));
       await tester.pumpAndSettle();
 
       fromTable = find.byKey(CallGraphView.fromTableKey).evaluate().first.widget

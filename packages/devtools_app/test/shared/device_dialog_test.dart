@@ -275,11 +275,8 @@ void main() {
       );
 
       await tester.pumpWidget(wrap(vmFlagsDialog));
-      String text = 'VM Flags';
-      expect(find.richText(text), findsOneWidget);
-
-      text = 'flag 1 name';
-      expect(find.richText(text), findsOneWidget);
+      expect(find.richText('VM Flags'), findsOneWidget);
+      expect(find.richText('flag 1 name'), findsOneWidget);
       final RichText commentText = tester.firstWidget<RichText>(
         findSubstring(vmFlagsDialog, 'flag 1 comment'),
       );

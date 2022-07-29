@@ -142,23 +142,20 @@ void main() {
         const treemapKey = Key('Treemap');
         await pumpTreemapWidget(tester, treemapKey);
 
-        String text = 'dart:_internal [0.3 KB]';
-        expect(find.richText(text), findsOneWidget);
-        await tester.tap(find.richText(text));
+        expect(find.richText('dart:_internal [0.3 KB]'), findsOneWidget);
+        await tester.tap(find.richText('dart:_internal [0.3 KB]'));
         await tester.pumpAndSettle();
 
         await pumpTreemapWidget(tester, treemapKey);
 
-        text = 'CastIterable [0.2 KB]';
-        expect(find.richText(text), findsOneWidget);
-        await tester.tap(find.richText(text));
+        expect(find.richText('CastIterable [0.2 KB]'), findsOneWidget);
+        await tester.tap(find.richText('CastIterable [0.2 KB]'));
         await tester.pumpAndSettle();
 
         await pumpTreemapWidget(tester, treemapKey);
 
-        text = 'new CastIterable.\n[0.2 KB]';
-        expect(find.richText(text), findsOneWidget);
-        await tester.tap(find.richText(text));
+        expect(find.richText('new CastIterable.\n[0.2 KB]'), findsOneWidget);
+        await tester.tap(find.richText('new CastIterable.\n[0.2 KB]'));
         await tester.pumpAndSettle();
 
         await pumpTreemapWidget(tester, treemapKey);

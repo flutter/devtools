@@ -298,18 +298,12 @@ void main() {
           equals(250),
         );
 
-        String text = 'Frame1';
-        expect(find.richText(text), findsOneWidget);
-        text = 'Frame2';
-        expect(find.richText(text), findsOneWidget);
-        text = 'Frame3';
-        expect(find.richText(text), findsOneWidget);
-        text = 'Frame4';
-        expect(find.richText(text), findsOneWidget);
-        text = 'Frame5';
-        expect(find.richText(text), findsOneWidget);
-        text = 'Frame6';
-        expect(find.richText(text), findsOneWidget);
+        expect(find.richText('Frame1'), findsOneWidget);
+        expect(find.richText('Frame2'), findsOneWidget);
+        expect(find.richText('Frame3'), findsOneWidget);
+        expect(find.richText('Frame4'), findsOneWidget);
+        expect(find.richText('Frame5'), findsOneWidget);
+        expect(find.richText('Frame6'), findsOneWidget);
 
         await tester.tap(find.byType(UserTagDropdown));
         await tester.pumpAndSettle();
@@ -323,12 +317,10 @@ void main() {
           equals(100),
         );
         expect(find.text('Frame1'), findsNothing);
-        text = 'Frame2';
-        expect(find.richText(text), findsOneWidget);
+        expect(find.richText('Frame2'), findsOneWidget);
         expect(find.text('Frame3'), findsNothing);
         expect(find.text('Frame4'), findsNothing);
-        text = 'Frame5';
-        expect(find.richText(text), findsOneWidget);
+        expect(find.richText('Frame5'), findsOneWidget);
         expect(find.text('Frame6'), findsNothing);
 
         await tester.tap(find.byType(UserTagDropdown));
@@ -343,8 +335,7 @@ void main() {
           equals(50),
         );
         expect(find.text('Frame1'), findsNothing);
-        text = 'Frame2';
-        expect(find.richText(text), findsOneWidget);
+        expect(find.richText('Frame2'), findsOneWidget);
         expect(find.text('Frame3'), findsNothing);
         expect(find.text('Frame4'), findsNothing);
         expect(find.text('Frame5'), findsNothing);
@@ -365,10 +356,8 @@ void main() {
         expect(find.text('Frame2'), findsNothing);
         expect(find.text('Frame3'), findsNothing);
         expect(find.text('Frame4'), findsNothing);
-        text = 'Frame5';
-        expect(find.richText(text), findsOneWidget);
-        text = 'Frame6';
-        expect(find.richText(text), findsOneWidget);
+        expect(find.richText('Frame5'), findsOneWidget);
+        expect(find.richText('Frame6'), findsOneWidget);
       });
     });
   });
