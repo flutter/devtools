@@ -11,7 +11,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../analytics/analytics.dart' as ga;
 import '../primitives/auto_dispose_mixin.dart';
 import '../primitives/extent_delegate_list.dart';
 import '../primitives/flutter_widgets/linked_scroll_controller.dart';
@@ -1466,38 +1465,14 @@ class TimelineGridPainter extends FlameChartPainter {
 
 class FlameChartHelpButton extends StatelessWidget {
   const FlameChartHelpButton({
+    Key? key,
     required this.gaScreen,
     required this.gaSelection,
     this.additionalInfo = const <Widget>[],
-  });
+  }) : super(key: key);
 
   final String gaScreen;
-
   final String gaSelection;
-
-  final List<Widget> additionalInfo;
-
-  @override
-  Widget build(BuildContext context) {
-    return HelpButton(
-      onPressed: () {
-        ga.select(gaScreen, gaSelection);
-        showDialog(
-          context: context,
-          builder: (context) => _FlameChartHelpDialog(
-            additionalInfo: additionalInfo,
-          ),
-        );
-      },
-      gaScreen: gaScreen,
-      gaSelection: gaSelection,
-    );
-  }
-}
-
-class _FlameChartHelpDialog extends StatelessWidget {
-  const _FlameChartHelpDialog({this.additionalInfo = const <Widget>[]});
-
   final List<Widget> additionalInfo;
 
   /// A fixed width for the first column in the help dialog to ensure that the
@@ -1507,10 +1482,11 @@ class _FlameChartHelpDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return DevToolsDialog(
-      title: dialogTitleText(theme, 'Flame Chart Help'),
-      includeDivider: false,
-      content: Column(
+    return HelpButtonWithDialog(
+      gaScreen: gaScreen,
+      gaSelection: gaSelection,
+      dialogTitle: 'Flame Chart Help',
+      child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1523,9 +1499,6 @@ class _FlameChartHelpDialog extends StatelessWidget {
           ...additionalInfo,
         ],
       ),
-      actions: [
-        DialogCloseButton(),
-      ],
     );
   }
 

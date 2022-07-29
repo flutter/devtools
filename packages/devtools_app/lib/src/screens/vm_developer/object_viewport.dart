@@ -10,6 +10,7 @@ import '../../shared/common_widgets.dart';
 import '../../shared/history_viewport.dart';
 import 'object_inspector_view_controller.dart';
 import 'vm_class_display.dart';
+import 'vm_code_display.dart';
 import 'vm_developer_common_widgets.dart';
 import 'vm_object_model.dart';
 
@@ -28,13 +29,7 @@ class ObjectViewport extends StatelessWidget {
     return HistoryViewport<VmObject>(
       history: controller.objectHistory,
       controls: [
-        ToolbarAction(
-          icon: Icons.refresh,
-          onPressed: () {
-            controller.refreshObject();
-          },
-          tooltip: 'Refresh',
-        )
+        ToolbarRefresh(onPressed: controller.refreshObject),
       ],
       generateTitle: viewportTitle,
       contentBuilder: (context, _) {
@@ -71,7 +66,7 @@ String viewportTitle(VmObject? object) {
     return 'Script @ ${ref?.uri ?? '<uri>'}';
   }
 
-  return '${object.ref.type} ${object.name ?? '<name>'}';
+  return '${object.obj.type} ${object.name ?? '<name>'}';
 }
 
 /// Calls the object VM statistics card builder according to the VM Object type.
@@ -96,6 +91,11 @@ Widget buildObjectDisplay(VmObject obj) {
   }
   if (obj is InstanceObject) {
     return const VMInfoCard(title: 'TO-DO: Display Instance object data');
+  }
+  if (obj is CodeObject) {
+    return VmCodeDisplay(
+      code: obj,
+    );
   }
   return const SizedBox.shrink();
 }

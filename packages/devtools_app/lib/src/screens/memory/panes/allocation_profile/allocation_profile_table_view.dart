@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../../../analytics/constants.dart' as analytics_constants;
 import '../../../../config_specific/import_export/import_export.dart';
 import '../../../../primitives/utils.dart';
 import '../../../../shared/common_widgets.dart';
@@ -15,8 +16,7 @@ import '../../../../shared/table_data.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../../vm_developer/vm_service_private_extensions.dart';
-import '../../memory_controller.dart';
-import '../control/constants.dart';
+import '../../primitives/ui.dart';
 import 'allocation_profile_table_view_controller.dart';
 
 // TODO(bkonyi): ensure data displayed in this view is included in the full
@@ -180,23 +180,21 @@ class _FieldSizeColumn extends ColumnData<ClassHeapStats> {
 /// for refreshing the data on a garbage collection (GC) event and exporting
 /// [AllocationProfile]'s to a CSV formatted file.
 class AllocationProfileTableView extends StatefulWidget {
+  const AllocationProfileTableView({super.key, required this.controller});
+
   @override
   State<AllocationProfileTableView> createState() =>
       AllocationProfileTableViewState();
+
+  final AllocationProfileTableViewController controller;
 }
 
-class AllocationProfileTableViewState extends State<AllocationProfileTableView>
-    with ProvidedControllerMixin<MemoryController, AllocationProfileTableView> {
-  late AllocationProfileTableViewController allocationProfileController;
-
+class AllocationProfileTableViewState
+    extends State<AllocationProfileTableView> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!initController()) {
-      return;
-    }
-    allocationProfileController = controller.allocationProfileController
-      ..initialize();
+    widget.controller.initialize();
   }
 
   @override
@@ -204,14 +202,14 @@ class AllocationProfileTableViewState extends State<AllocationProfileTableView>
     return Column(
       children: [
         _AllocationProfileTableControls(
-          allocationProfileController: allocationProfileController,
+          allocationProfileController: widget.controller,
         ),
         const SizedBox(
           height: denseRowSpacing,
         ),
         Expanded(
           child: _AllocationProfileTable(
-            allocationProfileController: allocationProfileController,
+            allocationProfileController: widget.controller,
           ),
         ),
       ],
@@ -343,13 +341,7 @@ class _AllocationProfileTableControls extends StatelessWidget {
         _RefreshOnGCToggleButton(
           allocationProfileController: allocationProfileController,
         ),
-        const Spacer(),
-        const InformationButton(
-          tooltip: 'View documentation for the allocation profile table.',
-          link: 'https://github.com/flutter/devtools/blob/master/'
-              'packages/devtools_app/lib/src/screens/memory/panes/'
-              'allocation_profile/ALLOCATION_PROFILE.md',
-        ),
+        const _ProfileHelpLink(),
       ],
     );
   }
@@ -409,6 +401,38 @@ class _RefreshOnGCToggleButton extends StatelessWidget {
           onPressed: allocationProfileController.toggleRefreshOnGc,
         );
       },
+    );
+  }
+}
+
+class _ProfileHelpLink extends StatelessWidget {
+  const _ProfileHelpLink({Key? key}) : super(key: key);
+
+  static const _documentationTopic = 'allocationProfile';
+
+  @override
+  Widget build(BuildContext context) {
+    return HelpButtonWithDialog(
+      gaScreen: analytics_constants.memory,
+      gaSelection:
+          analytics_constants.topicDocumentationButton(_documentationTopic),
+      dialogTitle: 'Memory Allocation Profile Help',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          const Text('The allocation profile tab displays information about\n'
+              'allocated objects in the Dart heap of the selected\n'
+              'isolate.'),
+          MoreInfoLink(
+            url: 'https://github.com/flutter/devtools/blob/master/'
+                'packages/devtools_app/lib/src/screens/memory/panes/'
+                'allocation_profile/ALLOCATION_PROFILE.md',
+            gaScreenName: '',
+            gaSelectedItemDescription:
+                analytics_constants.topicDocumentationLink(_documentationTopic),
+          )
+        ],
+      ),
     );
   }
 }

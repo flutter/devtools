@@ -6,15 +6,15 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../../primitives/utils.dart';
-import '../../shared/common_widgets.dart';
-import '../../shared/dialogs.dart';
-import '../../shared/split.dart';
-import '../../shared/table.dart';
-import '../../shared/table_data.dart';
-import '../../shared/theme.dart';
-import '../../shared/utils.dart';
-import '../../ui/colors.dart';
+import '../../../../primitives/utils.dart';
+import '../../../../shared/common_widgets.dart';
+import '../../../../shared/dialogs.dart';
+import '../../../../shared/split.dart';
+import '../../../../shared/table.dart';
+import '../../../../shared/table_data.dart';
+import '../../../../shared/theme.dart';
+import '../../../../shared/utils.dart';
+import '../../../../ui/colors.dart';
 import 'raster_metrics_controller.dart';
 
 class RenderingLayerVisualizer extends StatelessWidget {

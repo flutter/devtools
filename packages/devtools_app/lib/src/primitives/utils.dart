@@ -59,14 +59,15 @@ String? prettyPrintBytes(
   int gbFractionDigits = 1,
   bool includeUnit = false,
   num roundingPoint = 1.0,
+  int maxBytes = 52,
 }) {
   if (bytes == null) {
     return null;
   }
   // TODO(peterdjlee): Generalize to handle different kbFractionDigits.
   // Ensure a small number of bytes does not print as 0 KB.
-  // If bytes >= 52 and kbFractionDigits == 1, it will start rounding to 0.1 KB.
-  if (bytes.abs() < 52 && kbFractionDigits == 1) {
+  // If bytes >= maxBytes and kbFractionDigits == 1, it will start rounding to 0.1 KB.
+  if (bytes.abs() < maxBytes && kbFractionDigits == 1) {
     var output = bytes.toString();
     if (includeUnit) {
       output += ' B';
@@ -118,13 +119,34 @@ String printGB(num bytes, {int fractionDigits = 1, bool includeUnit = false}) {
   return output;
 }
 
+/// Converts a [Duration] into a readable text representation in milliseconds.
+///
+/// [includeUnit] - whether to include 'ms' at the end of the returned value
+/// [fractionDigits] - how many fraction digits should appear after the decimal
+/// [allowRoundingToZero] - when true, this method may return zero for a very
+/// small number (e.g. '0.0 ms'). When false, this method will return a minimum
+/// value with the less than operator for very small values (e.g. '< 0.1 ms').
+/// The value returned will always respect the specified [fractionDigits].
 String msText(
   Duration dur, {
   bool includeUnit = true,
   int fractionDigits = 1,
+  bool allowRoundingToZero = true,
 }) {
-  return '${(dur.inMicroseconds / 1000).toStringAsFixed(fractionDigits)}'
-      '${includeUnit ? ' ms' : ''}';
+  var durationStr = (dur.inMicroseconds / 1000).toStringAsFixed(fractionDigits);
+
+  if (dur != Duration.zero && !allowRoundingToZero) {
+    final zeroRegexp = RegExp(r'[0]+[.][0]+');
+    if (zeroRegexp.hasMatch(durationStr)) {
+      final buf = StringBuffer('< 0.');
+      for (int i = 1; i < fractionDigits; i++) {
+        buf.write('0');
+      }
+      buf.write('1');
+      durationStr = buf.toString();
+    }
+  }
+  return '$durationStr${includeUnit ? ' ms' : ''}';
 }
 
 /// Render the given [Duration] to text using either seconds or milliseconds as
