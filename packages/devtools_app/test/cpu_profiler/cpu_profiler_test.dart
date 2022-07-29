@@ -297,12 +297,19 @@ void main() {
               .cpuProfileData!.profileMetaData.time!.duration.inMicroseconds,
           equals(250),
         );
-        expect(find.text('Frame1'), findsOneWidget);
-        expect(find.text('Frame2'), findsOneWidget);
-        expect(find.text('Frame3'), findsOneWidget);
-        expect(find.text('Frame4'), findsOneWidget);
-        expect(find.text('Frame5'), findsOneWidget);
-        expect(find.text('Frame6'), findsOneWidget);
+
+        String text = 'Frame1';
+        expect(textFinder(text), findsOneWidget);
+        text = 'Frame2';
+        expect(textFinder(text), findsOneWidget);
+        text = 'Frame3';
+        expect(textFinder(text), findsOneWidget);
+        text = 'Frame4';
+        expect(textFinder(text), findsOneWidget);
+        text = 'Frame5';
+        expect(textFinder(text), findsOneWidget);
+        text = 'Frame6';
+        expect(textFinder(text), findsOneWidget);
 
         await tester.tap(find.byType(UserTagDropdown));
         await tester.pumpAndSettle();
@@ -316,10 +323,12 @@ void main() {
           equals(100),
         );
         expect(find.text('Frame1'), findsNothing);
-        expect(find.text('Frame2'), findsOneWidget);
+        text = 'Frame2';
+        expect(textFinder(text), findsOneWidget);
         expect(find.text('Frame3'), findsNothing);
         expect(find.text('Frame4'), findsNothing);
-        expect(find.text('Frame5'), findsOneWidget);
+        text = 'Frame5';
+        expect(textFinder(text), findsOneWidget);
         expect(find.text('Frame6'), findsNothing);
 
         await tester.tap(find.byType(UserTagDropdown));
@@ -334,7 +343,8 @@ void main() {
           equals(50),
         );
         expect(find.text('Frame1'), findsNothing);
-        expect(find.text('Frame2'), findsOneWidget);
+        text = 'Frame2';
+        expect(textFinder(text), findsOneWidget);
         expect(find.text('Frame3'), findsNothing);
         expect(find.text('Frame4'), findsNothing);
         expect(find.text('Frame5'), findsNothing);
@@ -355,9 +365,15 @@ void main() {
         expect(find.text('Frame2'), findsNothing);
         expect(find.text('Frame3'), findsNothing);
         expect(find.text('Frame4'), findsNothing);
-        expect(find.text('Frame5'), findsOneWidget);
-        expect(find.text('Frame6'), findsOneWidget);
+        text = 'Frame5';
+        expect(textFinder(text), findsOneWidget);
+        text = 'Frame6';
+        expect(textFinder(text), findsOneWidget);
       });
     });
   });
+}
+
+Finder textFinder(String text) {
+  return find.textContaining(text, findRichText: true);
 }
