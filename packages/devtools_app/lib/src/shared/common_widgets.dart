@@ -20,6 +20,7 @@ import '../screens/debugger/debugger_controller.dart';
 import '../screens/debugger/variables.dart';
 import '../ui/icons.dart';
 import '../ui/label.dart';
+import 'dialogs.dart';
 import 'globals.dart';
 import 'object_tree.dart';
 import 'scaffold.dart';
@@ -95,7 +96,9 @@ class OutlinedIconButton extends IconLabelButton {
     required IconData icon,
     required VoidCallback? onPressed,
     String? tooltip,
+    Key? key,
   }) : super(
+          key: key,
           icon: icon,
           label: '',
           tooltip: tooltip,
@@ -190,7 +193,7 @@ class IconLabelButton extends StatelessWidget {
               )
             : TextButton(
                 onPressed: onPressed,
-                style: denseAwareOutlinedButtonStyle(
+                style: denseAwareTextButtonStyle(
                   context,
                   minScreenWidthForTextBeforeScaling,
                 ),
@@ -261,7 +264,8 @@ class RefreshButton extends IconLabelButton {
     double? minScreenWidthForTextBeforeScaling,
     String? tooltip,
     required VoidCallback? onPressed,
-  }) : super(
+  })  : isIconButton = false,
+        super(
           key: key,
           icon: Icons.refresh,
           label: label,
@@ -270,6 +274,41 @@ class RefreshButton extends IconLabelButton {
           tooltip: tooltip,
           onPressed: onPressed,
         );
+
+  const RefreshButton.icon({
+    Key? key,
+    String? tooltip,
+    required VoidCallback? onPressed,
+  })  : isIconButton = true,
+        super(
+          key: key,
+          icon: Icons.refresh,
+          label: '',
+          tooltip: tooltip,
+          onPressed: onPressed,
+        );
+
+  final bool isIconButton;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!isIconButton) {
+      return super.build(context);
+    }
+    return OutlinedIconButton(
+      onPressed: onPressed,
+      icon: icon!,
+    );
+  }
+}
+
+/// A Refresh ToolbarAction button.
+class ToolbarRefresh extends ToolbarAction {
+  const ToolbarRefresh({
+    super.icon = Icons.refresh,
+    required super.onPressed,
+    super.tooltip = 'Refresh',
+  });
 }
 
 /// Button to start recording data.
@@ -893,6 +932,91 @@ class ExportButton extends IconLabelButton {
         );
 }
 
+/// Button to open related information / documentation.
+///
+/// [tooltip] specifies the hover text for the button.
+/// [link] is the link that should be opened when the button is clicked.
+class InformationButton extends StatelessWidget {
+  const InformationButton({
+    Key? key,
+    required this.tooltip,
+    required this.link,
+  }) : super(key: key);
+
+  final String tooltip;
+
+  final String link;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: IconButton(
+        icon: const Icon(Icons.help_outline),
+        onPressed: () async => await launchUrl(link, context),
+      ),
+    );
+  }
+}
+
+class ToggleButton extends StatelessWidget {
+  const ToggleButton({
+    Key? key,
+    required this.onPressed,
+    required this.isSelected,
+    required this.message,
+    required this.icon,
+    this.label,
+  }) : super(key: key);
+
+  final String message;
+
+  final VoidCallback onPressed;
+
+  final bool isSelected;
+
+  final IconData icon;
+
+  final Text? label;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return DevToolsTooltip(
+      message: message,
+      // TODO(kenz): this SizedBox wrapper should be unnecessary once
+      // https://github.com/flutter/flutter/issues/79894 is fixed.
+      child: SizedBox(
+        height: defaultButtonHeight,
+        child: OutlinedButton(
+          key: key,
+          onPressed: onPressed,
+          style: TextButton.styleFrom(
+            backgroundColor: isSelected
+                ? theme.colorScheme.toggleButtonBackgroundColor
+                : Colors.transparent,
+          ),
+          child: Row(
+            children: [
+              Icon(
+                icon,
+                size: defaultIconSize,
+                color: isSelected
+                    ? theme.colorScheme.toggleButtonForegroundColor
+                    : theme.colorScheme.contrastForeground,
+              ),
+              if (label != null) ...[
+                const SizedBox(width: denseSpacing),
+                label!,
+              ]
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class FilterButton extends StatelessWidget {
   const FilterButton({
     Key? key,
@@ -906,30 +1030,11 @@ class FilterButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return DevToolsTooltip(
+    return ToggleButton(
+      onPressed: onPressed,
+      isSelected: isFilterActive,
       message: 'Filter',
-      // TODO(kenz): this SizedBox wrapper should be unnecessary once
-      // https://github.com/flutter/flutter/issues/79894 is fixed.
-      child: SizedBox(
-        height: defaultButtonHeight,
-        child: OutlinedButton(
-          key: key,
-          onPressed: onPressed,
-          style: TextButton.styleFrom(
-            backgroundColor: isFilterActive
-                ? theme.colorScheme.toggleButtonBackgroundColor
-                : Colors.transparent,
-          ),
-          child: Icon(
-            Icons.filter_list,
-            size: defaultIconSize,
-            color: isFilterActive
-                ? theme.colorScheme.toggleButtonForegroundColor
-                : theme.colorScheme.contrastForeground,
-          ),
-        ),
-      ),
+      icon: Icons.filter_list,
     );
   }
 }
@@ -2053,5 +2158,46 @@ class _KeepAliveWrapperState extends State<KeepAliveWrapper>
   Widget build(BuildContext context) {
     super.build(context);
     return widget.child;
+  }
+}
+
+/// Help button, that opens a dialog on click.
+class HelpButtonWithDialog extends StatelessWidget {
+  const HelpButtonWithDialog({
+    required this.gaScreen,
+    required this.gaSelection,
+    required this.dialogTitle,
+    required this.child,
+  });
+
+  final String gaScreen;
+
+  final String gaSelection;
+
+  final String dialogTitle;
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return HelpButton(
+      onPressed: () {
+        ga.select(gaScreen, gaSelection);
+        showDialog(
+          context: context,
+          builder: (context) => DevToolsDialog(
+            title: dialogTitleText(theme, dialogTitle),
+            includeDivider: false,
+            content: child,
+            actions: [
+              DialogCloseButton(),
+            ],
+          ),
+        );
+      },
+      gaScreen: gaScreen,
+      gaSelection: gaSelection,
+    );
   }
 }

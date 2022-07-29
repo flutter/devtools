@@ -28,6 +28,7 @@ import 'debugger_controller.dart';
 import 'debugger_model.dart';
 import 'key_sets.dart';
 import 'program_explorer.dart';
+import 'program_explorer_model.dart';
 import 'variables.dart';
 
 class DebuggerScreen extends Screen {
@@ -117,7 +118,8 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     controller.onFirstDebuggerScreenLoad();
   }
 
-  void _onLocationSelected(ScriptLocation? location) {
+  void _onNodeSelected(VMServiceObjectNode? node) {
+    final location = node?.location;
     if (location != null) {
       controller.showScriptLocation(location);
     }
@@ -137,7 +139,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
               child!,
               ProgramExplorer(
                 controller: controller.programExplorerController,
-                onSelected: _onLocationSelected,
+                onNodeSelected: _onNodeSelected,
               ),
             ],
           );

@@ -7,7 +7,7 @@
 
 class AnsiUp {
   AnsiUp()
-      : bold = false,
+      : style = StyledText.NONE,
         ansiColors = [
           [
             AnsiUpColor(rgb: [0, 0, 0], className: 'ansi-black'),
@@ -35,7 +35,7 @@ class AnsiUp {
   }
 
   late String _text;
-  bool bold;
+  int style;
   List<List<AnsiUpColor>> ansiColors;
   List<AnsiUpColor> palette256;
   AnsiUpColor? fg;
@@ -228,11 +228,37 @@ class AnsiUp {
       final num = int.tryParse(sgrCmdStr, radix: 10);
       if (num == null || num == 0) {
         fg = bg = null;
-        bold = false;
+        style = StyledText.NONE;
       } else if (num == 1) {
-        bold = true;
+        style = style | StyledText.BOLD;
+      } else if (num == 2) {
+        style = style | StyledText.DIM;
+      } else if (num == 3) {
+        style = style | StyledText.ITALIC;
+      } else if (num == 4) {
+        style = style | StyledText.UNDERLINE;
+      } else if (num == 5) {
+        style = style | StyledText.BLINK;
+      } else if (num == 7) {
+        style = style | StyledText.REVERSE;
+      } else if (num == 8) {
+        style = style | StyledText.INVISIBLE;
+      } else if (num == 9) {
+        style = style | StyledText.STRIKETHROUGH;
       } else if (num == 22) {
-        bold = false;
+        style = style & ~(StyledText.BOLD | StyledText.DIM);
+      } else if (num == 23) {
+        style = style & ~StyledText.ITALIC;
+      } else if (num == 24) {
+        style = style & ~StyledText.UNDERLINE;
+      } else if (num == 25) {
+        style = style & ~StyledText.BLINK;
+      } else if (num == 27) {
+        style = style & ~StyledText.REVERSE;
+      } else if (num == 28) {
+        style = style & ~StyledText.INVISIBLE;
+      } else if (num == 29) {
+        style = style & ~StyledText.STRIKETHROUGH;
       } else if (num == 39) {
         fg = null;
       } else if (num == 49) {
@@ -283,16 +309,17 @@ class AnsiUp {
   }
 
   _TextWithAttr _withState(_TextPacket packet) {
-    return _TextWithAttr(bold: bold, fg: fg, bg: bg, text: packet.text);
+    return _TextWithAttr(style: style, fg: fg, bg: bg, text: packet.text);
   }
 }
 
 class _TextWithAttr {
-  _TextWithAttr({this.fg, this.bg, this.bold = false, this.text = ''});
+  _TextWithAttr(
+      {this.fg, this.bg, this.style = StyledText.NONE, this.text = '',});
 
   final AnsiUpColor? fg;
   final AnsiUpColor? bg;
-  final bool bold;
+  final int style;
   final String text;
 }
 
@@ -337,7 +364,7 @@ class StyledText {
     this.text, {
     this.fgColor,
     this.bgColor,
-    this.bold = false,
+    this.textStyle = NONE,
     this.url = '',
   });
 
@@ -346,26 +373,57 @@ class StyledText {
       fragment.text,
       fgColor: fragment.fg?.rgb?.toList(),
       bgColor: fragment.bg?.rgb?.toList(),
-      bold: fragment.bold == true,
+      textStyle: fragment.style,
     );
   }
+
+  static const int NONE = 0;
+  static const int BOLD = 1;
+  static const int DIM = 2;
+  static const int ITALIC = 4;
+  static const int UNDERLINE = 8;
+  static const int STRIKETHROUGH = 16;
+  static const int BLINK = 32;
+  static const int REVERSE = 64;
+  static const int INVISIBLE = 128;
 
   final String text;
   final List<int>? fgColor;
   final List<int>? bgColor;
-  final bool bold;
+  final int textStyle;
   final String url;
 
+  bool get bold => (textStyle & BOLD) == BOLD;
+  bool get dim => (textStyle & DIM) == DIM;
+  bool get italic => (textStyle & ITALIC) == ITALIC;
+  bool get underline => (textStyle & UNDERLINE) == UNDERLINE;
+  bool get strikethrough => (textStyle & STRIKETHROUGH) == STRIKETHROUGH;
+  bool get blink => (textStyle & BLINK) == BLINK;
+  bool get reverse => (textStyle & REVERSE) == REVERSE;
+  bool get invisible => (textStyle & INVISIBLE) == INVISIBLE;
+
   String get style {
-    if (fgColor == null && bgColor == null && !bold) {
+    if (fgColor == null && bgColor == null && textStyle == NONE) {
       return '';
     }
+
+    String? decoration;
+    if (underline) {
+      decoration = (decoration == null) ? 'underline' : '$decoration underline';
+    }
+    if (strikethrough) {
+      decoration =
+          (decoration == null) ? 'line-through' : '$decoration line-through';
+    }
+
     final _bgColor = bgColor;
     final _fgColor = fgColor;
     return <String>[
       if (_bgColor != null) 'background-color: ${_colorToCss(_bgColor)}',
       if (_fgColor != null) 'color: ${_colorToCss(_fgColor)}',
       if (bold) 'font-weight: bold',
+      if (italic) 'font-style: italic',
+      if (decoration != null) 'text-decoration: $decoration',
     ].join(';');
   }
 }

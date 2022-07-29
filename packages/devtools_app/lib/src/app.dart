@@ -134,6 +134,15 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   }
 
   @override
+  void dispose() {
+    // preferences is initialized in main() to avoid flash of content with
+    // incorrect theme.
+    preferences.dispose();
+
+    super.dispose();
+  }
+
+  @override
   void didUpdateWidget(DevToolsApp oldWidget) {
     super.didUpdateWidget(oldWidget);
     _clearCachedRoutes();
