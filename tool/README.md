@@ -97,6 +97,9 @@ third_party/devtools/update.sh 8881a7caa9067471008a8e00750b161f53cdb843
 
 ### Update the DevTools hash in the Dart SDK
 
+Navigate to your local checkout of the Dart SDK (for getting started instructions,
+see [sdk/CONTRIBUTING.md](https://github.com/dart-lang/sdk/blob/main/CONTRIBUTING.md)).
+
 Create new branch for your changes:
 ```shell
 git new-branch dt-release
