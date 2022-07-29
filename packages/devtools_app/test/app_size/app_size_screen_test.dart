@@ -170,8 +170,10 @@ void main() {
       expect(breadcrumbs.length, 1);
       expect(breadcrumbs.first.text, equals('Root [6.0 MB]'));
       expect(find.byType(BreadcrumbNavigator), findsOneWidget);
-      expect(find.text('package:flutter'), findsOneWidget);
-      expect(find.text('dart:core'), findsOneWidget);
+      String text = 'package:flutter';
+      expect(textFinder(text), findsOneWidget);
+      text = 'dart:core';
+      expect(textFinder(text), findsOneWidget);
 
       expect(find.byType(AppSizeAnalysisTable), findsOneWidget);
       expect(find.byType(AppSizeDiffTable), findsNothing);
@@ -469,4 +471,8 @@ class AppSizeTestController extends AppSizeController {
       onError: onError,
     );
   }
+}
+
+Finder textFinder(String text) {
+  return find.textContaining(text, findRichText: true);
 }
