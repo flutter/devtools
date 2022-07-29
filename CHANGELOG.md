@@ -1,5 +1,7 @@
 ## 2.16.0
-* Prepare for 2.16.0 release [TODO]
+* Prepare for 2.16.0 release [#4311](https://github.com/flutter/devtools/pull/4311)
+* Fix shader time calculation with `shallowNodesWithCondition` TreeNode method [#4309](https://github.com/flutter/devtools/pull/4309)
+* Fix bug with msText util [#4310](https://github.com/flutter/devtools/pull/4310)
 * Remove dependency on memory_controller from allocation profile pane [#4301](https://github.com/flutter/devtools/pull/4301)
 * Adding deferred indicator on the treemap [#4297](https://github.com/flutter/devtools/pull/4297)
 * Class display [#4256](https://github.com/flutter/devtools/pull/4256)
