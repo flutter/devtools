@@ -123,19 +123,19 @@ String printGB(num bytes, {int fractionDigits = 1, bool includeUnit = false}) {
 ///
 /// [includeUnit] - whether to include 'ms' at the end of the returned value
 /// [fractionDigits] - how many fraction digits should appear after the decimal
-/// [allowZeroValues] - when true, this method may return zero (e.g. '0.0 ms').
-/// When false, this method will return a minimum value with the less than
-/// operator (e.g. '< 0.1 ms'). The value returned will always respect the
-/// specified [fractionDigits].
+/// [allowRoundingToZero] - when true, this method may return zero for a very
+/// small number (e.g. '0.0 ms'). When false, this method will return a minimum
+/// value with the less than operator for very small values (e.g. '< 0.1 ms').
+/// The value returned will always respect the specified [fractionDigits].
 String msText(
   Duration dur, {
   bool includeUnit = true,
   int fractionDigits = 1,
-  bool allowZeroValues = true,
+  bool allowRoundingToZero = true,
 }) {
   var durationStr = (dur.inMicroseconds / 1000).toStringAsFixed(fractionDigits);
 
-  if (!allowZeroValues) {
+  if (dur != Duration.zero && !allowRoundingToZero) {
     final zeroRegexp = RegExp(r'[0]+[.][0]+');
     if (zeroRegexp.hasMatch(durationStr)) {
       final buf = StringBuffer('< 0.');

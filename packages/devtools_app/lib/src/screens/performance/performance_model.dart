@@ -517,23 +517,13 @@ class FlutterFrame {
   Duration get shaderDuration {
     if (_shaderTime != null) return _shaderTime!;
     if (timelineEventData.rasterEvent == null) return Duration.zero;
-    int sumShaderMicros = 0;
-    // TODO(kenz): add a helper class for performing efficient time interval
-    // union computation. This code is currently broken if there were non-shader
-    // events interleaved with shader events. The time reported would be
-    // inaccurately large.
-    breadthFirstTraversal<TimelineEvent>(
-      timelineEventData.rasterEvent!,
-      action: (TimelineEvent event) {
-        // Shader events with a shader event parent should not be included in the
-        // sum because the parent event will encompass the time of [event].
-        if (event.isShaderEvent &&
-            (event.parent == null || !event.parent!.isShaderEvent)) {
-          sumShaderMicros += event.time.duration.inMicroseconds;
-        }
-      },
-    );
-    return _shaderTime = Duration(microseconds: sumShaderMicros);
+    final shaderEvents = timelineEventData.rasterEvent!
+        .shallowNodesWithCondition((event) => event.isShaderEvent);
+    final duration =
+        shaderEvents.fold<Duration>(Duration.zero, (previous, event) {
+      return previous + event.time.duration;
+    });
+    return _shaderTime = duration;
   }
 
   Duration? _shaderTime;
