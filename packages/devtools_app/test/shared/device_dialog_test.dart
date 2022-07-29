@@ -276,18 +276,14 @@ void main() {
 
       await tester.pumpWidget(wrap(vmFlagsDialog));
       String text = 'VM Flags';
-      expect(textFinder(text), findsOneWidget);
+      expect(find.richText(text), findsOneWidget);
 
       text = 'flag 1 name';
-      expect(textFinder(text), findsOneWidget);
+      expect(find.richText(text), findsOneWidget);
       final RichText commentText = tester.firstWidget<RichText>(
         findSubstring(vmFlagsDialog, 'flag 1 comment'),
       );
       expect(commentText, isNotNull);
     });
   });
-}
-
-Finder textFinder(String text) {
-  return find.richText(text);
 }

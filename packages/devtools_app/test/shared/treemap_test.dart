@@ -143,22 +143,22 @@ void main() {
         await pumpTreemapWidget(tester, treemapKey);
 
         String text = 'dart:_internal [0.3 KB]';
-        expect(textFinder(text), findsOneWidget);
-        await tester.tap(textFinder(text));
+        expect(find.richText(text), findsOneWidget);
+        await tester.tap(find.richText(text));
         await tester.pumpAndSettle();
 
         await pumpTreemapWidget(tester, treemapKey);
 
         text = 'CastIterable [0.2 KB]';
-        expect(textFinder(text), findsOneWidget);
-        await tester.tap(textFinder(text));
+        expect(find.richText(text), findsOneWidget);
+        await tester.tap(find.richText(text));
         await tester.pumpAndSettle();
 
         await pumpTreemapWidget(tester, treemapKey);
 
         text = 'new CastIterable.\n[0.2 KB]';
-        expect(textFinder(text), findsOneWidget);
-        await tester.tap(textFinder(text));
+        expect(find.richText(text), findsOneWidget);
+        await tester.tap(find.richText(text));
         await tester.pumpAndSettle();
 
         await pumpTreemapWidget(tester, treemapKey);
@@ -241,8 +241,4 @@ void main() {
       skip: kIsWeb,
     );
   });
-}
-
-Finder textFinder(String text) {
-  return find.richText(text);
 }

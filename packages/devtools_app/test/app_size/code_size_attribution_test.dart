@@ -121,7 +121,7 @@ void main() {
 
       // Tap to re-root call graph.
       const text = 'dart:math';
-      await tester.tap(textFinder(text));
+      await tester.tap(find.richText(text));
       await tester.pumpAndSettle();
 
       fromTable = find.byKey(CallGraphView.fromTableKey).evaluate().first.widget
@@ -204,8 +204,4 @@ void main() {
       }
     });
   });
-}
-
-Finder textFinder(String text) {
-  return find.richText(text);
 }
