@@ -10,21 +10,29 @@ import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+import 'package:vm_service/vm_service.dart';
 
 void main() {
   late final ObjectInspectorView objectInspector;
 
   late final FakeServiceManager fakeServiceManager;
 
+  late MockScriptManager scriptManager;
+
   setUp(() {
     objectInspector = ObjectInspectorView();
 
     fakeServiceManager = FakeServiceManager();
 
+    scriptManager = MockScriptManager();
+    when(scriptManager.sortedScripts).thenReturn(ValueNotifier(<ScriptRef>[]));
+
     when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
     when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
 
     setGlobal(ServiceConnectionManager, fakeServiceManager);
+
+    setGlobal(ScriptManager, scriptManager);
 
     setGlobal(IdeTheme, IdeTheme());
   });
