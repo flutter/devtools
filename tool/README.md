@@ -65,8 +65,8 @@ Launch DevTools and verify that everything generally works.
   generally work and that there are no exceptions in the chrome devtools log
 
 If you find any release blocking issues, fix them before releasing. Then 
-use the latest commit hash that includes the Prep PR as well as the bug fixes for the
-following steps.
+grab the latest commit hash that includes both the release prep commit and the bug fixes,
+and use this commit hash for the following steps.
 
 Once the build is in good shape, you can revert any local changes and proceed to the next step.
 ```shell
@@ -76,9 +76,9 @@ git clean -f -d
 
 ### Tag the release
 Checkout the commit from which you want to release DevTools (likely the
-commit for the PR you just landed). Run the `tag_version.sh` script to create
-a tag on the `flutter/devtools` repo for this release. This script will
-automatically determine the version from `packages/devtools/pubspec.yaml`
+commit for the PR you just landed). You can run `git log -v` to see the commits.
+Run the `tag_version.sh` script to create a tag on the `flutter/devtools` repo for this
+release. This script will automatically determine the version from `packages/devtools/pubspec.yaml`
 so there is no need to manually enter the version.
 ```shell
 tool/tag_version.sh
@@ -97,6 +97,11 @@ third_party/devtools/update.sh 8881a7caa9067471008a8e00750b161f53cdb843
 
 ### Update the DevTools hash in the Dart SDK
 
+Create new branch for your changes:
+```shell
+git new-branch dt-release
+```
+
 Update the `devtools_rev` entry in the Dart SDK 
 [DEPS file](https://github.com/dart-lang/sdk/blob/master/DEPS)
 with the git commit hash you just built DevTools from (this is
@@ -112,10 +117,17 @@ gclient sync -D
 out/ReleaseX64/dart-sdk/bin/dart devtools  # On OSX replace 'out' with 'xcodebuild'
 ```
 
+If the version of DevTools you just published to CIPD loads properly, push up the SDK CL for review.
+```shell
+git add .
+git commit -m "Bump DevTools DEP to 2.16.0"
+git cl upload -s
+```
+
 ### Publish package:devtools_shared on pub
 
 `package:devtools_shared` is the only DevTools package that is published on pub.
-From the devtools/packages/devtools_shared directory, run:
+From the `devtools/packages/devtools_shared` directory, run:
 ```shell
 pub publish
 ```
