@@ -182,7 +182,7 @@ String? _objectName(ObjRef? objectRef) {
     objectRefName = (objectRef as dynamic).name;
   } else if (objectRef is LibraryRef) {
     objectRefName =
-        objectRef.name?.isEmpty ?? false ? objectRef.uri : objectRef.name;
+        (objectRef.name?.isEmpty ?? false) ? objectRef.uri : objectRef.name;
   } else if (objectRef is ScriptRef) {
     objectRefName = fileNameFromUri(objectRef.uri);
   } else if (objectRef is InstanceRef) {
@@ -195,8 +195,14 @@ String? _objectName(ObjRef? objectRef) {
   return objectRefName;
 }
 
-/// Recursively gets the name of a function, qualified with its full owner name,
-/// excluding the owner library.
+/// Returns the name of a function, qualified with the name of
+/// its owner added as a prefix, separated by a period.
+/// For example: for function build with owner class Foo,
+/// the qualified name would be Foo.build.
+/// If the owner of a function is another function, qualifiedName will
+/// recursively call itself until it reaches the owner class.
+/// If the owner is a library instead, the library name will not be
+/// included in the qualified name.
 String? qualifiedName(ObjRef? ref) {
   if (ref == null) return null;
 
@@ -210,7 +216,7 @@ String? qualifiedName(ObjRef? ref) {
     }
   }
 
-  return '';
+  throw Exception('Unexpected owner type: ${ref.type}');
 }
 
 // Returns a description of the object containing its name and owner.
