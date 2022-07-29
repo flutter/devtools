@@ -33,7 +33,9 @@ myField.dispose();
 myField = null;
 ```
 
-**Disposed and GCed late (GCed-late)**: an object disposed and then GCed, but GC happened later than expected. This means the retaining path was holding the object in memory for some period, but then disappeared.
+**Disposed and GCed late (GCed-late)**: an object was disposed and then GCed, but GC happened later than expected. This means the retaining path was holding the object in memory for some period, but then disappeared.
+
+**Disposed, but not GCed, without path (not-GCed-without-path)**: an object was disposed and not GCed when expected, but retaining path is not detected, that means that the object will be most likely GCed in the next GC cycle, and the leak will convert to **GCed-late** leak. 
 
 ### Culprits and Victims
 
@@ -86,7 +88,7 @@ and then never run `flutter upgrade` or `flutter channel`.
 
 TODO: move the example to test/fixtures when it compiles with stable flutter.
 
-1. Run https://github.com/polina-c/spikes/tree/master/leaking_app in profile mode (with flag `-profile`).
+1. Run https://github.com/polina-c/spikes/tree/master/leaking_app in profile or debug mode.
 2. [Connect](https://docs.flutter.dev/development/tools/devtools/cli#open-devtools-and-connect-to-the-target-app) DevTools to the app 
 3. Open Memory > Leaks <a id='memory-leaks-page'></a>
 4. Notice message that reports not-disposed and not-GCed objects. If there are no not-GCed leaks,
@@ -152,8 +154,7 @@ The challenging question of the leak troubleshooting is how to find the detected
 
 #### Give additional details to the tool
 
-It helps to provide the object's details, which you want to be included into the analysis, to the tool. Be careful doing this, because storing additional information for each instance of a class may impact debug/profile performance of the application and thus make user experience
-different from release one.
+It helps to provide the object's details, which you want to be included into the analysis, to the tool. Be careful doing this, because storing additional information for each instance of a class may impact the performance of the application (if leak tracking is enabled).
 
 For example, for not disposed objects, you can provide creation call stack to `startObjectLeakTracking`:
 
