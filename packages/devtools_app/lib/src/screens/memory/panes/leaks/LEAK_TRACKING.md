@@ -35,6 +35,8 @@ myField = null;
 
 **Disposed and GCed late (GCed-late)**: an object disposed and then GCed, but GC happened later than expected. This means the retaining path was holding the object in memory for some period, but then disappeared.
 
+**Disposed, but not GCed, without path (not-GCed-without-path)**: an object disposed and not GCed when expected, but retaining path is not detected, that means the object will be GCed in next GC cycle, and the leak will convert to **GCed-late** leak. 
+
 ### Culprits and Victims
 
 If you have a set of not-GCed objects, some of them (victims) may be not GC-ed because they are held by others (culprits). Normally, to fix the leaks, you need to fix just culprits.
