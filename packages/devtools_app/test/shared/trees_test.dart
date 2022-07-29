@@ -9,7 +9,8 @@ void main() {
   group('TreeNode', () {
     test('depth', () {
       expect(testTreeNode.depth, equals(4));
-      expect(treeNode2.depth, equals(1));
+      expect(treeNode1.depth, equals(1));
+      expect(treeNode2.depth, equals(2));
       expect(treeNode3.depth, equals(3));
     });
 
@@ -111,24 +112,44 @@ void main() {
       expect(child.parent, equals(parent));
     });
 
-    test('childrenWithCondition', () {
-      var nodes = testTreeNode.childrenWithCondition((TestTreeNode node) {
+    test('nodesWithCondition', () {
+      var nodes = testTreeNode.nodesWithCondition((TestTreeNode node) {
         return node.id.isEven;
       });
       var nodeIds = nodes.map((TestTreeNode node) => node.id).toList();
-      expect(nodeIds, equals([0, 2, 4, 6, 8]));
+      expect(nodeIds, equals([0, 2, 10, 12, 4, 6, 8]));
 
-      nodes = testTreeNode.childrenWithCondition((TestTreeNode node) {
+      nodes = testTreeNode.nodesWithCondition((TestTreeNode node) {
         return node.tag == 'test-tag';
       });
       nodeIds = nodes.map((TestTreeNode node) => node.id).toList();
       expect(nodeIds, equals([0, 3, 9]));
 
-      nodes = testTreeNode.childrenWithCondition((TestTreeNode node) {
+      nodes = testTreeNode.nodesWithCondition((TestTreeNode node) {
         return node.parent?.id == 5;
       });
       nodeIds = nodes.map((TestTreeNode node) => node.id).toList();
       expect(nodeIds, equals([6, 7, 8, 9]));
+    });
+
+    test('shallowNodesWithCondition', () {
+      var nodes = testTreeNode.shallowNodesWithCondition((TestTreeNode node) {
+        return node.id.isEven;
+      });
+      var nodeIds = nodes.map((TestTreeNode node) => node.id).toList();
+      expect(nodeIds, equals([0]));
+
+      nodes = testTreeNode.shallowNodesWithCondition((TestTreeNode node) {
+        return node.id.isEven && node.id != 0;
+      });
+      nodeIds = nodes.map((TestTreeNode node) => node.id).toList();
+      expect(nodeIds, equals([2, 4, 6, 8]));
+
+      nodes = testTreeNode.shallowNodesWithCondition((TestTreeNode node) {
+        return node.id.isOdd;
+      });
+      nodeIds = nodes.map((TestTreeNode node) => node.id).toList();
+      expect(nodeIds, equals([1, 11, 3]));
     });
 
     test('containsChildWithCondition', () {
@@ -155,7 +176,7 @@ void main() {
     test('firstSubNodeAtLevel', () {
       expect(testTreeNode.firstChildNodeAtLevel(0), equals(treeNode0));
       expect(testTreeNode.firstChildNodeAtLevel(1), equals(treeNode1));
-      expect(testTreeNode.firstChildNodeAtLevel(2), equals(treeNode4));
+      expect(testTreeNode.firstChildNodeAtLevel(2), equals(treeNode10));
       expect(testTreeNode.firstChildNodeAtLevel(3), equals(treeNode6));
       expect(testTreeNode.firstChildNodeAtLevel(4), isNull);
 
@@ -189,6 +210,8 @@ void main() {
           '''
 0
   2
+    10
+    12
   4
   6
   8
@@ -200,15 +223,24 @@ void main() {
     test('filterTree when root should be filtered out', () {
       final List<TestTreeNode> filteredTreeRoots =
           testTreeNode.filterWhere((node) => node.id.isOdd);
-      expect(filteredTreeRoots.length, equals(2));
-      final firstRoot = filteredTreeRoots.first;
-      final lastRoot = filteredTreeRoots.last;
+      expect(filteredTreeRoots.length, equals(3));
+      final firstRoot = filteredTreeRoots[0];
+      final middleRoot = filteredTreeRoots[1];
+      final lastRoot = filteredTreeRoots[2];
 
       expect(
         firstRoot.toString(),
         equals(
           '''
 1
+''',
+        ),
+      );
+      expect(
+        middleRoot.toString(),
+        equals(
+          '''
+11
 ''',
         ),
       );
@@ -227,7 +259,7 @@ void main() {
 
     test('filterTree when zero nodes match', () {
       final List<TestTreeNode> filteredTreeRoots =
-          testTreeNode.filterWhere((node) => node.id > 10);
+          testTreeNode.filterWhere((node) => node.id > 15);
       expect(filteredTreeRoots, isEmpty);
     });
 
@@ -411,10 +443,18 @@ final treeNode6 = TestTreeNode(6);
 final treeNode7 = TestTreeNode(7);
 final treeNode8 = TestTreeNode(8);
 final treeNode9 = TestTreeNode(9, tag: 'test-tag');
+final treeNode10 = TestTreeNode(10);
+final treeNode11 = TestTreeNode(11);
+final treeNode12 = TestTreeNode(12);
 final TestTreeNode testTreeNode = treeNode0
   ..addAllChildren([
     treeNode1,
-    treeNode2,
+    treeNode2
+      ..addAllChildren([
+        treeNode10,
+        treeNode11,
+        treeNode12,
+      ]),
     treeNode3
       ..addAllChildren([
         treeNode4,
