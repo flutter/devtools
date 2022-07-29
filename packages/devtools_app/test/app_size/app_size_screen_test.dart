@@ -171,9 +171,9 @@ void main() {
       expect(breadcrumbs.first.text, equals('Root [6.0 MB]'));
       expect(find.byType(BreadcrumbNavigator), findsOneWidget);
       String text = 'package:flutter';
-      expect(textFinder(text), findsOneWidget);
+      expect(textFinder(text), findsNWidgets(2));
       text = 'dart:core';
-      expect(textFinder(text), findsOneWidget);
+      expect(textFinder(text), findsNWidgets(2));
 
       expect(find.byType(AppSizeAnalysisTable), findsOneWidget);
       expect(find.byType(AppSizeDiffTable), findsNothing);
@@ -281,8 +281,9 @@ void main() {
       expect(breadcrumbs.length, 1);
       expect(breadcrumbs.first.text, equals('Root [+1.5 MB]'));
       String text = 'package:pointycastle';
-      expect(textFinder(text), findsOneWidget);
-      expect(find.text('package:flutter'), findsOneWidget);
+      expect(textFinder(text), findsNWidgets(2));
+      text = 'package:flutter';
+      expect(textFinder(text), findsNWidgets(2));
 
       expect(find.byType(AppSizeAnalysisTable), findsNothing);
       expect(find.byType(AppSizeDiffTable), findsOneWidget);
@@ -307,8 +308,10 @@ void main() {
           .toList();
       expect(breadcrumbs.length, 1);
       expect(breadcrumbs.first.text, equals('Root [+1.6 MB]'));
-      expect(find.text('package:pointycastle'), findsOneWidget);
-      expect(find.text('package:flutter'), findsOneWidget);
+      String text = 'package:pointycastle';
+      expect(textFinder(text), findsNWidgets(2));
+      text = 'package:flutter';
+      expect(textFinder(text), findsNWidgets(2));
 
       await tester.tap(find.byKey(AppSizeScreen.dropdownKey));
       await tester.pumpAndSettle();
@@ -316,9 +319,12 @@ void main() {
       await tester.tap(find.text('Decrease Only').hitTestable());
       await tester.pumpAndSettle();
 
-      expect(find.text('Root'), findsOneWidget);
-      expect(find.text('package:memory'), findsOneWidget);
-      expect(find.text('package:flutter'), findsOneWidget);
+      text = 'Root';
+      expect(textFinder(text), findsOneWidget);
+      text = 'package:memory';
+      expect(textFinder(text), findsNWidgets(2));
+      text = 'package:flutter';
+      expect(textFinder(text), findsNWidgets(2));
     });
 
     testWidgetsWithWindowSize('clears data', windowSize,
