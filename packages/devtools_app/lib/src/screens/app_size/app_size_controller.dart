@@ -17,12 +17,18 @@ import '../../ui/colors.dart';
 import 'app_size_screen.dart';
 
 // Temporary feature flag for deferred loading.
-const deferredLoadingSupportEnabled = false;
+const deferredLoadingSupportEnabled = true;
 
 enum DiffTreeType {
   increaseOnly,
   decreaseOnly,
   combined,
+}
+
+enum AppSegment {
+  mainOnly,
+  deferredOnly,
+  entireApp,
 }
 
 class AppSizeController {
@@ -55,7 +61,8 @@ class AppSizeController {
   /// Used to build the treemap and the tree table for the analysis tab.
   final analysisRoot = ValueNotifier<Selection<TreemapNode>>(Selection.empty());
 
-  late bool isDeferredApp;
+  ValueListenable<bool> get isDeferredApp => _isDeferredApp;
+  final _isDeferredApp = ValueNotifier<bool>(false);
 
   void changeAnalysisRoot(TreemapNode? newAnalysisRoot) {
     if (newAnalysisRoot == null) {
@@ -88,7 +95,7 @@ class AppSizeController {
       matchingNodeCondition: searchCondition,
       includeCollapsedNodes: false,
     );
-    return isDeferredApp ? nodeIndex - 1 : nodeIndex;
+    return isDeferredApp.value ? nodeIndex - 1 : nodeIndex;
   }
 
   ValueListenable<DevToolsJsonFile?> get analysisJsonFile => _analysisJsonFile;
@@ -138,6 +145,22 @@ class AppSizeController {
   TreemapNode? _increasedDiffTreeRoot;
   TreemapNode? _decreasedDiffTreeRoot;
   TreemapNode? _combinedDiffTreeRoot;
+
+  Map<String, dynamic>? get _activeAppSegment {
+    switch (_selectedAppSegment.value) {
+      case AppSegment.deferredOnly:
+        return _deferredOnly;
+      case AppSegment.mainOnly:
+        return _mainOnly;
+      case AppSegment.entireApp:
+      default:
+        return _entireApp;
+    }
+  }
+
+  Map<String, dynamic>? _deferredOnly;
+  Map<String, dynamic>? _mainOnly;
+  Map<String, dynamic>? _entireApp;
 
   ValueListenable<DevToolsJsonFile?> get oldDiffJsonFile => _oldDiffJsonFile;
 
@@ -195,6 +218,15 @@ class AppSizeController {
     changeDiffRoot(_activeDiffRoot);
   }
 
+  /// The selected app segment to analyze (for deferred apps only).
+  ValueListenable<AppSegment> get selectedAppSegment => _selectedAppSegment;
+  final _selectedAppSegment = ValueNotifier<AppSegment>(AppSegment.entireApp);
+
+  void changeSelectedAppSegment(AppSegment appSegment) {
+    _selectedAppSegment.value = appSegment;
+    _loadApp(_activeAppSegment!);
+  }
+
   /// Notifies that the json files are currently being processed.
   ValueListenable<bool> get processingNotifier => _processingNotifier;
   final _processingNotifier = ValueNotifier<bool>(false);
@@ -238,22 +270,58 @@ class AppSizeController {
     changeAnalysisJsonFile(jsonFile);
 
     // Set deferred app flag.
-    isDeferredApp =
-        deferredLoadingSupportEnabled && processedJson['n'] == 'ArtificialRoot';
+    _isDeferredApp.value =
+        deferredLoadingSupportEnabled && _hasDeferredInfo(processedJson);
 
-    // Set root name.
-    processedJson['n'] = isDeferredApp ? 'Entire app' : 'Root';
-
-    // Build a tree with [TreemapNode] from [processedJsonMap].
-    final jsonRoot = generateTree(processedJson)!;
-
-    // Determine the correct root node.
-    final newRoot = isDeferredApp
-        ? jsonRoot.childrenMap.values.firstWhere((node) => node.name == 'Root')
-        : jsonRoot;
-    changeAnalysisRoot(newRoot);
+    if (isDeferredApp.value) {
+      _deferredOnly = _extractDeferredSegments({...processedJson});
+      _mainOnly = _extractMainSegment({...processedJson});
+      _entireApp = _includeEntireApp({...processedJson});
+      _loadApp(_activeAppSegment!);
+    } else {
+      _loadApp(processedJson);
+    }
 
     _processingNotifier.value = false;
+  }
+
+  void _loadApp(Map<String, dynamic> appData) {
+    // Build a tree with [TreemapNode] from [appData].
+    final appRoot = generateTree(appData)!;
+    changeAnalysisRoot(appRoot);
+  }
+
+  bool _hasDeferredInfo(Map<String, dynamic> jsonFile) {
+    return jsonFile['n'] == 'ArtificialRoot';
+  }
+
+  Map<String, dynamic> _extractMainSegment(Map<String, dynamic> jsonFile) {
+    if (_hasDeferredInfo(jsonFile)) {
+      final children = jsonFile['children'] as List<dynamic>;
+      final main = children.firstWhere(
+        (child) => child['n'] == 'Main',
+        orElse: () => jsonFile,
+      ) as Map<String, dynamic>;
+      return main;
+    }
+    return jsonFile;
+  }
+
+  Map<String, dynamic> _extractDeferredSegments(
+      Map<String, dynamic> jsonFile) {
+    if (_hasDeferredInfo(jsonFile)) {
+      final children = jsonFile['children'] as List<dynamic>;
+      jsonFile['children'] = children.where((child) => child['isDeferred'] == true);
+      jsonFile['n'] = 'Deferred';
+    }
+    return jsonFile;
+  }
+
+  Map<String, dynamic> _includeEntireApp(Map<String, dynamic> jsonFile) {
+    if (_hasDeferredInfo(jsonFile)) {
+      jsonFile['n'] = 'Entire App';
+    }
+    return jsonFile;
   }
 
   // TODO(peterdjlee): Spawn an isolate to run parts of this function to
