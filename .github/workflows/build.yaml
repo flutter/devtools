@@ -89,6 +89,50 @@ jobs:
           name: test-image-failures-${{ matrix.os }} # Name for the artifact
           path: packages/devtools_app/test/failures # Path to upload
 
+  macos-test:
+    name: macos ${{ matrix.bot }} - (flutter ${{ matrix.flutter-test-env }})
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        bot:
+          - test_dart2js
+        flutter-test-env:
+          - pinned
+    steps:
+      - name: git clone
+        uses: actions/checkout@v2
+
+      - name: tool/bots.sh
+        env:
+          BOT: ${{ matrix.bot }}
+          PLATFORM: vm
+          FLUTTER_TEST_ENV: ${{ matrix.flutter-test-env }}
+        run: ./tool/bots.sh
+
+# TODO(https://github.com/flutter/devtools/issues/1715): add a windows compatible version of tool/bots.sh
+# and run it from this job.
+#  windows-test:
+#    name: windows ${{ matrix.bot }} - (flutter ${{ matrix.flutter-test-env }})
+#    runs-on: windows-latest
+#    strategy:
+#      fail-fast: false
+#      matrix:
+#        bot:
+#          - test_dart2js
+#        flutter-test-env:
+#          - pinned
+#    steps:
+#      - name: git clone
+#        uses: actions/checkout@v2
+#
+#      - name: tool/bots.sh
+#        env:
+#          BOT: ${{ matrix.bot }}
+#          PLATFORM: vm
+#          FLUTTER_TEST_ENV: ${{ matrix.flutter-test-env }}
+#        run: ./tool/bots.sh
+
 # TODO(https://github.com/flutter/devtools/issues/1987): rewrite integration tests.
 #  integration:
 #    name: integration ${{ matrix.bot }} - (flutter ${{ matrix.flutter-test-env }})
