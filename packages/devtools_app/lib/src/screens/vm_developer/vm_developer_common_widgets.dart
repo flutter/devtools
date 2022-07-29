@@ -197,6 +197,7 @@ String? _objectName(ObjRef? objectRef) {
 
 /// Returns the name of a function, qualified with the name of
 /// its owner added as a prefix, separated by a period.
+///
 /// For example: for function build with owner class Foo,
 /// the qualified name would be Foo.build.
 /// If the owner of a function is another function, qualifiedName will
