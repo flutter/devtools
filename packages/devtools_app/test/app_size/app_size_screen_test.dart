@@ -280,7 +280,8 @@ void main() {
           .toList();
       expect(breadcrumbs.length, 1);
       expect(breadcrumbs.first.text, equals('Root [+1.5 MB]'));
-      expect(find.text('package:pointycastle'), findsOneWidget);
+      String text = 'package:pointycastle';
+      expect(textFinder(text), findsOneWidget);
       expect(find.text('package:flutter'), findsOneWidget);
 
       expect(find.byType(AppSizeAnalysisTable), findsNothing);
