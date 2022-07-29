@@ -171,9 +171,9 @@ void main() {
       expect(breadcrumbs.first.text, equals('Root [6.0 MB]'));
       expect(find.byType(BreadcrumbNavigator), findsOneWidget);
       String text = 'package:flutter';
-      expect(textFinder(text), findsNWidgets(2));
+      expect(textFinder(text), findsOneWidget);
       text = 'dart:core';
-      expect(textFinder(text), findsNWidgets(2));
+      expect(textFinder(text), findsOneWidget);
 
       expect(find.byType(AppSizeAnalysisTable), findsOneWidget);
       expect(find.byType(AppSizeDiffTable), findsNothing);
@@ -281,9 +281,9 @@ void main() {
       expect(breadcrumbs.length, 1);
       expect(breadcrumbs.first.text, equals('Root [+1.5 MB]'));
       String text = 'package:pointycastle';
-      expect(textFinder(text), findsNWidgets(2));
+      expect(textFinder(text), findsOneWidget);
       text = 'package:flutter';
-      expect(textFinder(text), findsNWidgets(2));
+      expect(textFinder(text), findsOneWidget);
 
       expect(find.byType(AppSizeAnalysisTable), findsNothing);
       expect(find.byType(AppSizeDiffTable), findsOneWidget);
@@ -309,9 +309,9 @@ void main() {
       expect(breadcrumbs.length, 1);
       expect(breadcrumbs.first.text, equals('Root [+1.6 MB]'));
       String text = 'package:pointycastle';
-      expect(textFinder(text), findsNWidgets(2));
+      expect(textFinder(text), findsOneWidget);
       text = 'package:flutter';
-      expect(textFinder(text), findsNWidgets(2));
+      expect(textFinder(text), findsOneWidget);
 
       await tester.tap(find.byKey(AppSizeScreen.dropdownKey));
       await tester.pumpAndSettle();
@@ -322,9 +322,9 @@ void main() {
       text = 'Root';
       expect(textFinder(text), findsOneWidget);
       text = 'package:memory';
-      expect(textFinder(text), findsNWidgets(2));
+      expect(textFinder(text), findsOneWidget);
       text = 'package:flutter';
-      expect(textFinder(text), findsNWidgets(2));
+      expect(textFinder(text), findsOneWidget);
     });
 
     testWidgetsWithWindowSize('clears data', windowSize,
@@ -481,5 +481,5 @@ class AppSizeTestController extends AppSizeController {
 }
 
 Finder textFinder(String text) {
-  return find.textContaining(text, findRichText: true);
+  return find.richText(text);
 }

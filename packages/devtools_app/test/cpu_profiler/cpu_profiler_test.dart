@@ -375,5 +375,5 @@ void main() {
 }
 
 Finder textFinder(String text) {
-  return find.textContaining(text, findRichText: true);
+  return find.richText(text);
 }

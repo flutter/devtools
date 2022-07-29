@@ -280,13 +280,14 @@ void main() {
 
       text = 'flag 1 name';
       expect(textFinder(text), findsOneWidget);
-      final Text commentText = tester
-          .firstWidget<Text>(findSubstring(vmFlagsDialog, 'flag 1 comment'));
+      final RichText commentText = tester.firstWidget<RichText>(
+        findSubstring(vmFlagsDialog, 'flag 1 comment'),
+      );
       expect(commentText, isNotNull);
     });
   });
 }
 
 Finder textFinder(String text) {
-  return find.textContaining(text, findRichText: true);
+  return find.richText(text);
 }
