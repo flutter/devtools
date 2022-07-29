@@ -297,21 +297,21 @@ class AppSizeController {
 
   Map<String, dynamic> _extractMainSegment(Map<String, dynamic> jsonFile) {
     if (_hasDeferredInfo(jsonFile)) {
-      final children = jsonFile['children'] as List<dynamic>;
-      final main = children.firstWhere(
+      final main = _extractChildren(jsonFile).firstWhere(
         (child) => child['n'] == 'Main',
         orElse: () => jsonFile,
-      ) as Map<String, dynamic>;
+      );
       return main;
     }
     return jsonFile;
   }
 
   Map<String, dynamic> _extractDeferredSegments(
-      Map<String, dynamic> jsonFile) {
+    Map<String, dynamic> jsonFile,
+  ) {
     if (_hasDeferredInfo(jsonFile)) {
-      final children = jsonFile['children'] as List<dynamic>;
-      jsonFile['children'] = children.where((child) => child['isDeferred'] == true);
+      jsonFile['children'] = _extractChildren(jsonFile)
+          .where((child) => child['isDeferred'] == true);
       jsonFile['n'] = 'Deferred';
     }
     return jsonFile;
@@ -322,6 +322,12 @@ class AppSizeController {
       jsonFile['n'] = 'Entire App';
     }
     return jsonFile;
+  }
+
+  List<Map<String, dynamic>> _extractChildren(Map<String, dynamic> jsonFile) {
+    return (jsonFile['children'] as Iterable)
+        .whereType<Map<String, dynamic>>()
+        .toList();
   }
 
   // TODO(peterdjlee): Spawn an isolate to run parts of this function to
