@@ -19,7 +19,7 @@ final testLib = Library(
 );
 
 final testClass = Class(
-  name: 'fooClass',
+  name: 'FooClass',
   library: testLib,
   isAbstract: false,
   isConst: false,

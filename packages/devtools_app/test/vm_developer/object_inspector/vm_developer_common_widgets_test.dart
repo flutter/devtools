@@ -148,7 +148,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(SelectableText), findsNWidgets(5));
-    expect(find.text('fooClass'), findsOneWidget);
+    expect(find.text('FooClass'), findsOneWidget);
     expect(
       find.text('Retained by element [1] of <parentListName>'),
       findsOneWidget,

@@ -4,6 +4,8 @@
 
 import 'package:vm_service/vm_service.dart';
 
+import '../../shared/globals.dart';
+
 /// NOTE: this file contains extensions to classes provided by
 /// `package:vm_service` in order to expose VM internal fields in a controlled
 /// fashion. Objects and extensions in this class should not be used in
@@ -172,7 +174,6 @@ class Disassembly {
 }
 
 /// An extension on [Func] which allows for access to VM internal fields.
-
 extension FunctionPrivateViewExtension on Func {
   static const _unoptimizedCodeKey = '_unoptimizedCode';
 
@@ -182,7 +183,6 @@ extension FunctionPrivateViewExtension on Func {
 }
 
 /// An extension on [Code] which allows for access to VM internal fields.
-
 extension CodePrivateViewExtension on Code {
   static const _disassemblyKey = '_disassembly';
 
@@ -191,4 +191,52 @@ extension CodePrivateViewExtension on Code {
   Disassembly get disassembly => Disassembly.parse(json![_disassemblyKey]);
   set disassembly(Disassembly disassembly) =>
       json![_disassemblyKey] = disassembly.toJson();
+}
+
+/// An extension on [Field] which allows for access to VM internal fields.
+extension FieldPrivateViewExtension on Field {
+  static const guardClassKey = '_guardClass';
+  static const guardClassSingle = 'single';
+  static const guardClassDynamic = 'various';
+  static const guardClassUnknown = 'unknown';
+
+  bool? get guardNullable => json!['_guardNullable'];
+
+  Future<Class?> get guardClass async {
+    if (_guardClassIsClass()) {
+      final service = serviceManager.service!;
+      final isolate = serviceManager.isolateManager.selectedIsolate.value;
+
+      return await service.getObject(isolate!.id!, json![guardClassKey]['id'])
+          as Class;
+    }
+
+    return null;
+  }
+
+  String? guardClassKind() {
+    if (_guardClassIsClass()) {
+      return guardClassSingle;
+    } else if (json![guardClassKey] == guardClassDynamic) {
+      return guardClassDynamic;
+    } else if (json![guardClassKey] == guardClassUnknown) {
+      return guardClassUnknown;
+    }
+
+    return null;
+  }
+
+  bool _guardClassIsClass() {
+    String? guardClassType;
+
+    if (json![guardClassKey] is Map) {
+      guardClassType = json![guardClassKey]['type'];
+    }
+
+    if (guardClassType == '@Class' || guardClassType == 'Class') {
+      return true;
+    } else {
+      return false;
+    }
+  }
 }
