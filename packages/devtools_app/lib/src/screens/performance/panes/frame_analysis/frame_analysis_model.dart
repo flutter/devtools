@@ -43,7 +43,7 @@ class FrameAnalysis {
       return FramePhase.build(events: <SyncTimelineEvent>[]);
     }
     final buildEvents = uiEvent
-        .childrenWithCondition(
+        .nodesWithCondition(
           (event) =>
               event.name
                   ?.caseInsensitiveEquals(FramePhaseType.build.eventName) ??

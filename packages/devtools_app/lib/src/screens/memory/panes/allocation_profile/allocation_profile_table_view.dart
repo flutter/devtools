@@ -16,7 +16,6 @@ import '../../../../shared/table_data.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../../vm_developer/vm_service_private_extensions.dart';
-import '../../memory_controller.dart';
 import '../../primitives/ui.dart';
 import 'allocation_profile_table_view_controller.dart';
 
@@ -181,23 +180,21 @@ class _FieldSizeColumn extends ColumnData<ClassHeapStats> {
 /// for refreshing the data on a garbage collection (GC) event and exporting
 /// [AllocationProfile]'s to a CSV formatted file.
 class AllocationProfileTableView extends StatefulWidget {
+  const AllocationProfileTableView({super.key, required this.controller});
+
   @override
   State<AllocationProfileTableView> createState() =>
       AllocationProfileTableViewState();
+
+  final AllocationProfileTableViewController controller;
 }
 
-class AllocationProfileTableViewState extends State<AllocationProfileTableView>
-    with ProvidedControllerMixin<MemoryController, AllocationProfileTableView> {
-  late AllocationProfileTableViewController allocationProfileController;
-
+class AllocationProfileTableViewState
+    extends State<AllocationProfileTableView> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!initController()) {
-      return;
-    }
-    allocationProfileController = controller.allocationProfileController
-      ..initialize();
+    widget.controller.initialize();
   }
 
   @override
@@ -205,14 +202,14 @@ class AllocationProfileTableViewState extends State<AllocationProfileTableView>
     return Column(
       children: [
         _AllocationProfileTableControls(
-          allocationProfileController: allocationProfileController,
+          allocationProfileController: widget.controller,
         ),
         const SizedBox(
           height: denseRowSpacing,
         ),
         Expanded(
           child: _AllocationProfileTable(
-            allocationProfileController: allocationProfileController,
+            allocationProfileController: widget.controller,
           ),
         ),
       ],
