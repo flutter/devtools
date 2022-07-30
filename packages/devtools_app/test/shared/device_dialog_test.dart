@@ -275,11 +275,11 @@ void main() {
       );
 
       await tester.pumpWidget(wrap(vmFlagsDialog));
-      expect(find.text('VM Flags'), findsOneWidget);
-
-      expect(find.text('flag 1 name'), findsOneWidget);
-      final Text commentText = tester
-          .firstWidget<Text>(findSubstring(vmFlagsDialog, 'flag 1 comment'));
+      expect(find.richText('VM Flags'), findsOneWidget);
+      expect(find.richText('flag 1 name'), findsOneWidget);
+      final RichText commentText = tester.firstWidget<RichText>(
+        findSubstring(vmFlagsDialog, 'flag 1 comment'),
+      );
       expect(commentText, isNotNull);
     });
   });
