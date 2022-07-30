@@ -96,9 +96,19 @@ and GCed, the victims it referenced will be also GCed:
 The tool detects leaks for disposable and instrumented classes only
 (note that fix those objects can also fix other objects).
 
-Some classes in the Flutter framework are already instrumented.
-If you want your classes to be tracked, you need to make them
+Some classes in the Flutter framework and Dart SDK are already instrumented.
+If your application is leaking these classes, the leaks will be
+detected without additional effort.
+
+If you want your classes to be leak tracked, you need to make them
 disposable and [instrument](#instrument) them.
+
+### Performance impact
+
+The Leak Tracker stores a small additional record for each tracked alive object and for each
+detected leak, that creates minor increase of the memory footprint.
+
+
 
 ## Use the Leak Tracker
 
