@@ -48,7 +48,7 @@ myField.dispose();
 myField = null;
 ```
 
-**Disposed and GCed late (GCed-late)**: an object disposed and then GCed,
+**Disposed and GCed late (GCed-late)**: an object was disposed and then GCed,
 but GC happened later than expected. This means the retaining path was
 holding the object in memory for some period, but then disappeared.
 
@@ -93,8 +93,8 @@ and GCed, the victims it referenced will be also GCed:
 
 ### Limitations
 
-The tool detects leaks for disposable and instrumented classes only.
-(Note that fixing the leak can also fix other objects.)
+The tool detects leaks for disposable and instrumented classes only
+(note that fix those objects can also fix other objects).
 
 Some classes in the Flutter framework are already instrumented.
 If you want your classes to be tracked, you need to make them
