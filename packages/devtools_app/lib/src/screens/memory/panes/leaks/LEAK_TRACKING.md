@@ -106,8 +106,11 @@ disposable and [instrument](#instrument) them.
 ### Performance impact
 
 The Leak Tracker stores a small additional record for each tracked alive object and for each
-detected leak, that creates minor increase of the memory footprint.
+detected leak, that increases the memory footprint.
 
+For the [Gallery application](https://github.com/flutter/gallery) in profile mode on `macos`
+the leak tracking increased memory footprint of the home page by 400 KB that is 0.5% of
+the total.
 
 
 ## Use the Leak Tracker
