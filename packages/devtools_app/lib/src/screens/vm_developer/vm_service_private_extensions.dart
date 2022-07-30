@@ -4,6 +4,8 @@
 
 import 'package:vm_service/vm_service.dart';
 
+import '../../shared/globals.dart';
+
 /// NOTE: this file contains extensions to classes provided by
 /// `package:vm_service` in order to expose VM internal fields in a controlled
 /// fashion. Objects and extensions in this class should not be used in
@@ -175,10 +177,62 @@ class Disassembly {
 
 extension FunctionPrivateViewExtension on Func {
   static const _unoptimizedCodeKey = '_unoptimizedCode';
+  static const kindKey = '_kind';
+  static const deoptimizationsKey = '_deoptimizations';
+  static const optimizableKey = '_optimizable';
+  static const inlinableKey = '_inlinable';
+  static const intrinsicKey = '_intrinsic';
+  static const recognizedKey = '_recognized';
+  static const nativeKey = '_native';
+  static const icDataArrayKey = '_icDataArray';
+
+  static const recognizedFunctionKinds = {
+    'RegularFunction',
+    'ClosureFunction',
+    'ImplicitClosureFunction',
+    'GetterFunction',
+    'SetterFunction',
+    'Constructor',
+    'ImplicitGetter',
+    'ImplicitSetter',
+    'ImplicitStaticGetter',
+    'FieldInitializer',
+    'IrregexpFunction',
+    'MethodExtractor',
+    'NoSuchMethodDispatcher',
+    'InvokeFieldDispatcher',
+    'Collected',
+    'Native',
+    'FfiTrampoline',
+    'Stub',
+    'Tag',
+    'DynamicInvocationForwarder'
+  };
 
   /// The unoptimized [CodeRef] associated with the [Func].
   CodeRef? get unoptimizedCode => CodeRef.parse(json![_unoptimizedCodeKey]);
   set unoptimizedCode(CodeRef? code) => json![_unoptimizedCodeKey] = code?.json;
+
+  String? get kind => json![kindKey];
+  int? get deoptimizations => json![deoptimizationsKey];
+  bool? get optimizable => json![optimizableKey];
+  bool? get inlinable => json![inlinableKey];
+  bool? get intrinsic => json![intrinsicKey];
+  bool? get recognized => json![recognizedKey];
+  bool? get native => json![nativeKey];
+  String? get vmName => json!['_vmName'];
+
+  Future<Instance?> get icDataArray async {
+    final String? icDataArrayId = json![icDataArrayKey]?['id'];
+    if (icDataArrayId != null) {
+      final service = serviceManager.service!;
+      final isolate = serviceManager.isolateManager.selectedIsolate.value;
+
+      return await service.getObject(isolate!.id!, icDataArrayId) as Instance;
+    } else {
+      return null;
+    }
+  }
 }
 
 /// An extension on [Code] which allows for access to VM internal fields.

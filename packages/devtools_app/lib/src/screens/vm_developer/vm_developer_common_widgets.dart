@@ -189,7 +189,7 @@ String? _objectName(ObjRef? objectRef) {
     objectRefName = objectRef.name ??
         'Instance of ${objectRef.classRef?.name ?? '<Class>'}';
   } else {
-    objectRefName = objectRef?.vmType;
+    objectRefName = objectRef?.vmType ?? objectRef?.type;
   }
 
   return objectRefName;
@@ -375,13 +375,25 @@ class RetainingPathWidget extends StatelessWidget {
   /// parentMapKey, and parentField where applicable.
   String _retainingObjectDescription(RetainingObject object) {
     if (object.parentListIndex != null) {
-      final ref = object.value as InstanceRef;
-      return 'Retained by element [${object.parentListIndex}] of ${ref.classRef?.name ?? '<parentListName>'}';
+      final ref = object.value;
+      if (ref is InstanceRef) {
+        return 'Retained by element [${object.parentListIndex}] of'
+            ' ${ref.classRef?.name ?? '<parentListName>'}';
+      } else {
+        return 'Retained by element [${object.parentListIndex}] of '
+            '${_objectName(ref) ?? '<unknown>'}';
+      }
     }
 
     if (object.parentMapKey != null) {
-      final ref = object.value as InstanceRef;
-      return 'Retained by element at [${_objectName(object.parentMapKey)}] of ${ref.classRef?.name ?? '<parentMapName>'}';
+      final ref = object.value;
+      if (ref is InstanceRef) {
+        return 'Retained by element at [${_objectName(object.parentMapKey)}] of'
+            ' ${ref.classRef?.name ?? '<parentMapName>'}';
+      } else {
+        return 'Retained by element at [${_objectName(object.parentMapKey)}] of '
+            '${_objectName(ref) ?? '<unknown>'}';
+      }
     }
 
     final description = StringBuffer('Retained by ');
@@ -472,8 +484,14 @@ class InboundReferencesWidget extends StatelessWidget {
   /// [offset], and parentField where applicable.
   String _inboundRefDescription(InboundReference inboundRef, int? offset) {
     if (inboundRef.parentListIndex != null) {
-      final ref = inboundRef.source as InstanceRef;
-      return 'Referenced by element [${inboundRef.parentListIndex}] of ${ref.classRef?.name ?? '<parentListName>'}';
+      final ref = inboundRef.source;
+      if (ref is InstanceRef) {
+        return 'Referenced by element [${inboundRef.parentListIndex}] of '
+            '${ref.classRef?.name ?? '<parentListName>'}';
+      } else {
+        return 'Referenced by element [${inboundRef.parentListIndex}] of '
+            '${_objectName(ref) ?? '<unknown>'}';
+      }
     }
 
     final description = StringBuffer('Referenced by ');

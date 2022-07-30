@@ -9,6 +9,7 @@ import '../../service/vm_service_wrapper.dart';
 import '../../shared/globals.dart';
 import '../debugger/debugger_model.dart';
 import '../debugger/program_explorer_model.dart';
+import 'vm_service_private_extensions.dart';
 
 /// Wrapper class for storing Dart VM objects with their relevant VM
 /// information.
@@ -144,6 +145,47 @@ class FuncObject extends VmObject {
 
   @override
   SourceLocation? get _sourceLocation => obj.location;
+
+  late final String? kind;
+
+  late final int? deoptimizations;
+
+  late final bool? isOptimizable;
+
+  late final bool? isInlinable;
+
+  late final bool? hasIntrinsic;
+
+  late final bool? isRecognized;
+
+  late final bool? isNative;
+
+  late final String? vmName;
+
+  late final Instance? icDataArray;
+
+  @override
+  Future<void> initialize() async {
+    await super.initialize();
+
+    kind = obj.kind;
+
+    deoptimizations = obj.deoptimizations;
+
+    isOptimizable = obj.intrinsic;
+
+    isInlinable = obj.inlinable;
+
+    hasIntrinsic = obj.intrinsic;
+
+    isRecognized = obj.recognized;
+
+    isNative = obj.native;
+
+    vmName = obj.vmName;
+
+    icDataArray = await obj.icDataArray;
+  }
 }
 
 //TODO(mtaylee): finish class implementation.
