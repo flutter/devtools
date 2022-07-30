@@ -52,6 +52,11 @@ myField = null;
 but GC happened later than expected. This means the retaining path was
 holding the object in memory for some period, but then disappeared.
 
+**Disposed, but not GCed, without path (not-GCed-without-path)**: an object
+was disposed and not GCed when expected, but retaining path is not detected,
+that means that the object will be most likely GCed in the next GC cycle,
+and the leak will convert to **GCed-late** leak. 
+
 ### Culprits and victims
 
 If you have a set of not-GCed objects, some of them (victims)
@@ -116,7 +121,7 @@ and then never run `flutter upgrade` or `flutter channel`.
 TODO: move the example to test/fixtures when it compiles with stable flutter.
 
 1. Run https://github.com/polina-c/spikes/tree/master/leaking_app
-   in profile mode (with flag `-profile`).
+   in profile or debug mode.
 2. [Connect](https://docs.flutter.dev/development/tools/devtools/cli#open-devtools-and-connect-to-the-target-app)
    DevTools to the app 
 3. Open Memory > Leaks <a id='memory-leaks-page'></a>
@@ -203,8 +208,7 @@ The following tips might help.
 It helps to provide the object's details to the tool,
 that you want to include into the analysis. Be careful doing this,
 because storing additional information for each instance of a class
-might impact debug/profile performance of the application and therefore
-make the user experience different from the released app.
+might impact performance of the application.
 
 For example, for not-disposed objects, you can
 provide the creation call stack to `startObjectLeakTracking`:
