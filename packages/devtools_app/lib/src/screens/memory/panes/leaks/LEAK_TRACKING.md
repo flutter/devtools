@@ -94,7 +94,8 @@ and GCed, the victims it referenced will be also GCed:
 ### Limitations
 
 The tool detects leaks for disposable and instrumented classes only
-(note that fix those objects can also fix other objects).
+(note that a fix for those detected leaks can also fix some not detected
+leaks).
 
 Some classes in the Flutter framework and Dart SDK are already instrumented.
 If your application is leaking these classes, the leaks will be
