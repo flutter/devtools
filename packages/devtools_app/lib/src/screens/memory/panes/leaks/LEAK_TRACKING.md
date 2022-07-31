@@ -1,4 +1,4 @@
-# Dart DevTools memory leak tracker
+# Dart memory leak tracker
 
 This page and functionality are under construction.
 See https://github.com/flutter/devtools/issues/3951.
@@ -113,7 +113,6 @@ For the [Gallery application](https://github.com/flutter/gallery) in profile mod
 the leak tracking increased memory footprint of the home page by ~400 KB that is ~0.5% of
 the total.
 
-
 ## Use the Leak Tracker
 
 ### Configure environment
@@ -152,6 +151,13 @@ flutter: 3 memory leaks: not disposed: 1, not GCed: 2, GCed late: 0
 6. Find two files in the folder "Download": '.yaml' and '.raw.json'.
    Open '.yaml' to review the leaks. You'll only need '.raw.json'
    if you report an issue.
+
+
+### Choose build mode
+
+[Read more](https://docs.flutter.dev/testing/build-modes) about build modes.
+
+TODO(polina-c): add content
 
 ### Detect leaks in your Flutter app
 
@@ -248,6 +254,3 @@ TODO(polina-c): add content
 
 TODO(polina-c): add content
 
-### Understand performance impact
-
-TODO(polina-c): add content
