@@ -130,6 +130,13 @@ class AppSizeController {
     }
   }
 
+  void changeDiffRootState() {
+    if (_activeAppSegment == _mainOnly) {
+      //temporary placement until deferred can be seen
+      changeDiffRoot(diffRoot.value!.children[0]);
+    }
+  }
+
   TreemapNode? get _activeDiffRoot {
     switch (_activeDiffTreeType.value) {
       case DiffTreeType.increaseOnly:
@@ -225,6 +232,7 @@ class AppSizeController {
   void changeSelectedAppSegment(AppSegment appSegment) {
     _selectedAppSegment.value = appSegment;
     _loadApp(_activeAppSegment!);
+    changeDiffRootState();
   }
 
   /// Notifies that the json files are currently being processed.
