@@ -106,12 +106,27 @@ disposable and [instrument](#instrument) them.
 
 ### Performance impact
 
+#### Memory
+
 The Leak Tracker stores a small additional record for each tracked alive object and for each
 detected leak, that increases the memory footprint.
 
 For the [Gallery application](https://github.com/flutter/gallery) in profile mode on `macos`
 the leak tracking increased memory footprint of the home page by ~400 KB that is ~0.5% of
 the total.
+
+#### CPU
+
+Leak tracking impacts CPU in two areas:
+
+1. Per object tracking.
+   Added ~0.05 of millisecond (~2.7%) to the total load time of 
+   [Gallery](https://github.com/flutter/gallery) home page in profile mode on `macos`.
+
+2. Regular asyncronous analysis of the tracked objects.
+   Took ~2.5 millisectonds for [Gallery](https://github.com/flutter/gallery) home page in
+   profile mode on `macos`. 
+   
 
 ## Use the Leak Tracker
 
