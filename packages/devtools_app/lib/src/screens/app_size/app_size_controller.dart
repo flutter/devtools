@@ -362,8 +362,28 @@ class AppSizeController {
 
     Map<String, dynamic> diffMap;
     if (oldFile.isAnalyzeSizeFile && newFile.isAnalyzeSizeFile) {
+      var oldFileJson = oldFile.data as Map<String, dynamic>;
+      var newFileJson = newFile.data as Map<String, dynamic>;
+
+      if (!(oldFileJson['n'] == 'ArtificialRoot') ==
+          (newFileJson['n'] == 'ArtificialRoot')) {
+        if (oldFileJson['n'] != 'ArtificialRoot') {
+          oldFileJson = <String, dynamic>{
+            'n': 'ArtificialRoot',
+            'children': [oldFileJson]
+          };
+        } else {
+          newFileJson = <String, dynamic>{
+            'n': 'ArtificialRoot',
+            'children': [newFileJson]
+          };
+        }
+      }
+
       final oldApkProgramInfo = ProgramInfo();
-      final oldFileJson = oldFile.data as Map<String, dynamic>;
+
+      print(oldApkProgramInfo.root);
+
       _apkJsonToProgramInfo(
         program: oldApkProgramInfo,
         parent: oldApkProgramInfo.root,
@@ -381,7 +401,6 @@ class AppSizeController {
       }
 
       final newApkProgramInfo = ProgramInfo();
-      final newFileJson = newFile.data as Map<String, dynamic>;
       _apkJsonToProgramInfo(
         program: newApkProgramInfo,
         parent: newApkProgramInfo.root,
@@ -549,7 +568,13 @@ class AppSizeController {
 
     // If none of the children matched the diff tree type
     if (totalByteSize == 0) {
-      return null;
+      // return null;
+      return _buildNode(
+        treeJson,
+        totalByteSize,
+        children: treemapNodeChildren,
+        showDiff: showDiff,
+      );
     } else {
       return _buildNode(
         treeJson,
