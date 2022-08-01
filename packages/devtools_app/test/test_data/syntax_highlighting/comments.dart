@@ -42,5 +42,3 @@ var g;
 /// Dartdoc with reference to [a].
 /// And a link to [example.org](http://example.org/).
 var h;
-
-/** Unterminated comment
