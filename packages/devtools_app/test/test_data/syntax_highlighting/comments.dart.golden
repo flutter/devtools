@@ -95,6 +95,3 @@
 #^^^ storage.type.primitive.dart
 #     ^ punctuation.terminator.dart
 >
->/** Unterminated comment
-#^^^^^^^^^^^^^^^^^^^^^^^^^ comment.block.documentation.dart
->
