@@ -1,4 +1,4 @@
-# Dart DevTools memory leak tracker
+# Dart memory leak tracker
 
 This page and functionality are under construction.
 See https://github.com/flutter/devtools/issues/3951.
@@ -48,7 +48,7 @@ myField.dispose();
 myField = null;
 ```
 
-**Disposed and GCed late (GCed-late)**: an object disposed and then GCed,
+**Disposed and GCed late (GCed-late)**: an object was disposed and then GCed,
 but GC happened later than expected. This means the retaining path was
 holding the object in memory for some period, but then disappeared.
 
@@ -93,12 +93,40 @@ and GCed, the victims it referenced will be also GCed:
 
 ### Limitations
 
-The tool detects leaks for disposable and instrumented classes only.
-(Note that fixing the leak can also fix other objects.)
+The tool detects leaks for disposable and instrumented classes only
+(note that a fix for those detected leaks can also fix some not detected
+leaks).
 
-Some classes in the Flutter framework are already instrumented.
-If you want your classes to be tracked, you need to make them
+Some classes in the Flutter framework and Dart SDK are already instrumented.
+If your application is leaking these classes, the leaks will be
+detected without additional effort.
+
+If you want your classes to be leak tracked, you need to make them
 disposable and [instrument](#instrument) them.
+
+### Performance impact
+
+#### Memory
+
+The Leak Tracker stores a small additional record for each tracked alive object and for each
+detected leak, that increases the memory footprint.
+
+For the [Gallery application](https://github.com/flutter/gallery) in profile mode on `macos`
+the leak tracking increased memory footprint of the home page by ~400 KB that is ~0.5% of
+the total.
+
+#### CPU
+
+Leak tracking impacts CPU in two areas:
+
+1. Per object tracking.
+   Added ~0.05 of millisecond (~2.7%) to the total load time of 
+   [Gallery](https://github.com/flutter/gallery) home page in profile mode on `macos`.
+
+2. Regular asyncronous analysis of the tracked objects.
+   Took ~2.5 millisectonds for [Gallery](https://github.com/flutter/gallery) home page in
+   profile mode on `macos`. 
+   
 
 ## Use the Leak Tracker
 
@@ -138,6 +166,13 @@ flutter: 3 memory leaks: not disposed: 1, not GCed: 2, GCed late: 0
 6. Find two files in the folder "Download": '.yaml' and '.raw.json'.
    Open '.yaml' to review the leaks. You'll only need '.raw.json'
    if you report an issue.
+
+
+### Choose build mode
+
+[Read more](https://docs.flutter.dev/testing/build-modes) about build modes.
+
+TODO(polina-c): add content
 
 ### Detect leaks in your Flutter app
 
@@ -234,6 +269,3 @@ TODO(polina-c): add content
 
 TODO(polina-c): add content
 
-### Understand performance impact
-
-TODO(polina-c): add content
