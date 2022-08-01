@@ -83,6 +83,10 @@ class _NameColumn extends TreeColumnData<TreemapNode> {
   String getValue(TreemapNode dataObject) => dataObject.name;
 
   @override
+  String? getCaption(TreemapNode dataObject) =>
+      dataObject.caption != null ? dataObject.caption : null;
+
+  @override
   bool get supportsSorting => true;
 
   @override
