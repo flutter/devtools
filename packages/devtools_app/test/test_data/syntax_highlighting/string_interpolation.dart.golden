@@ -1,0 +1,74 @@
+>void values() {
+#^^^^ storage.type.primitive.dart
+#     ^^^^^^ entity.name.function.dart
+>  final i = 1;
+#  ^^^^^ storage.modifier.dart
+#          ^ keyword.operator.assignment.dart
+#            ^ constant.numeric.dart
+#             ^ punctuation.terminator.dart
+>  final j = 2;
+#  ^^^^^ storage.modifier.dart
+#          ^ keyword.operator.assignment.dart
+#            ^ constant.numeric.dart
+#             ^ punctuation.terminator.dart
+>
+>  print('the value of \$i is $i');
+#  ^^^^^ entity.name.function.dart
+#        ^^^^^^^^^^^^^^^^^^^^^^^^ string.interpolated.single.dart
+#                      ^^ string.interpolated.single.dart constant.character.escape.dart
+#                              ^ string.interpolated.single.dart variable.parameter.dart
+#                                 ^ punctuation.terminator.dart
+>  print('the value after \$i is ${i + 1}');
+#  ^^^^^ entity.name.function.dart
+#        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ string.interpolated.single.dart
+#                         ^^ string.interpolated.single.dart constant.character.escape.dart
+#                                  ^^^^^ string.interpolated.single.dart variable.parameter.dart
+#                                          ^ punctuation.terminator.dart
+>  print('the value of \$i + \$j is ${i + j}');
+#  ^^^^^ entity.name.function.dart
+#        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ string.interpolated.single.dart
+#                      ^^ string.interpolated.single.dart constant.character.escape.dart
+#                            ^^ string.interpolated.single.dart constant.character.escape.dart
+#                                     ^^^^^ string.interpolated.single.dart variable.parameter.dart
+#                                             ^ punctuation.terminator.dart
+>}
+>
+>void functions() {
+#^^^^ storage.type.primitive.dart
+#     ^^^^^^^^^ entity.name.function.dart
+>  print('${() {
+#  ^^^^^ entity.name.function.dart
+#        ^^^^^^^^ string.interpolated.single.dart
+#               ^ string.interpolated.single.dart invalid.string.newline
+>    return 'Hello';
+#            ^^^^^ support.class.dart
+#                 ^^^ string.interpolated.single.dart
+#                   ^ string.interpolated.single.dart invalid.string.newline
+#^^^^^^^^^^^^ string.interpolated.single.dart
+>  }}');
+#      ^ punctuation.terminator.dart
+#^^^^^ string.interpolated.single.dart
+>  print('print(${() {
+#  ^^^^^ entity.name.function.dart
+#        ^^^^^^^^^^^^^^ string.interpolated.single.dart
+#                     ^ string.interpolated.single.dart invalid.string.newline
+>    return 'Hello';
+#            ^^^^^ support.class.dart
+#                 ^^^ string.interpolated.single.dart
+#                   ^ string.interpolated.single.dart invalid.string.newline
+#^^^^^^^^^^^^ string.interpolated.single.dart
+>  }()})');
+#         ^ punctuation.terminator.dart
+#^^^^^^^^ string.interpolated.single.dart
+>  print('${() => 'Hello'}');
+#  ^^^^^ entity.name.function.dart
+#        ^^^^^^^^^^^^^^^^^^ string.interpolated.single.dart
+#           ^^^^^^^^^^^^^ string.interpolated.single.dart variable.parameter.dart
+#                           ^ punctuation.terminator.dart
+>  print('print(${(() => 'Hello')()})');
+#  ^^^^^ entity.name.function.dart
+#        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ string.interpolated.single.dart
+#                 ^^^^^^^^^^^^^^^^^ string.interpolated.single.dart variable.parameter.dart
+#                                      ^ punctuation.terminator.dart
+>}
+>

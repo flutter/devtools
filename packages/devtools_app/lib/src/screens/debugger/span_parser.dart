@@ -125,6 +125,8 @@ class ScopeSpan {
 
   static final ListQueue<String?> _scopeStack = ListQueue<String?>();
 
+  int get start => _start;
+  int get end => _end;
   int get length => _end - _start;
 
   final int _start;

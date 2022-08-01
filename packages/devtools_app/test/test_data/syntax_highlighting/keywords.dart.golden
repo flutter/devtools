@@ -1,0 +1,447 @@
+>library foo;
+#^^^^^^^ meta.declaration.dart keyword.other.import.dart
+#           ^ meta.declaration.dart keyword.other.import.dart
+>
+>import 'dart:async' deferred as deferredAsync show Future;
+#^^^^^^ meta.declaration.dart keyword.other.import.dart
+#       ^^^^^^^^^^^^ meta.declaration.dart string.interpolated.single.dart
+#                             ^^ meta.declaration.dart keyword.other.import.dart
+#                                              ^^^^ meta.declaration.dart keyword.other.import.dart
+#                                                         ^ meta.declaration.dart keyword.other.import.dart
+>import 'dart:io' as a show File hide Directory;
+#^^^^^^ meta.declaration.dart keyword.other.import.dart
+#       ^^^^^^^^^ meta.declaration.dart string.interpolated.single.dart
+#                 ^^ meta.declaration.dart keyword.other.import.dart
+#                      ^^^^ meta.declaration.dart keyword.other.import.dart
+#                                ^^^^ meta.declaration.dart keyword.other.import.dart
+#                                              ^ meta.declaration.dart keyword.other.import.dart
+>export 'dart:io';
+#^^^^^^ meta.declaration.dart keyword.other.import.dart
+#       ^^^^^^^^^ meta.declaration.dart string.interpolated.single.dart
+#                ^ meta.declaration.dart keyword.other.import.dart
+>
+>abstract class A {}
+#^^^^^^^^ keyword.declaration.dart
+#         ^^^^^ keyword.declaration.dart
+#               ^ support.class.dart
+>
+>class B extends A {
+#^^^^^ keyword.declaration.dart
+#      ^ support.class.dart
+#        ^^^^^^^ keyword.declaration.dart
+#                ^ support.class.dart
+>  B();
+#  ^ support.class.dart
+#     ^ punctuation.terminator.dart
+>  B.named();
+#  ^ support.class.dart
+#   ^ punctuation.dot.dart
+#    ^^^^^ entity.name.function.dart
+#           ^ punctuation.terminator.dart
+>  B.other() {}
+#  ^ support.class.dart
+#   ^ punctuation.dot.dart
+#    ^^^^^ entity.name.function.dart
+>
+>  static late final _b = B();
+#  ^^^^^^ storage.modifier.dart
+#         ^^^^ storage.modifier.dart
+#              ^^^^^ storage.modifier.dart
+#                       ^ keyword.operator.assignment.dart
+#                         ^ support.class.dart
+#                            ^ punctuation.terminator.dart
+>  factory B.single() {
+#  ^^^^^^^ keyword.declaration.dart
+#          ^ support.class.dart
+#           ^ punctuation.dot.dart
+#            ^^^^^^ entity.name.function.dart
+>    return _b;
+#    ^^^^^^ keyword.control.dart
+#             ^ punctuation.terminator.dart
+>  }
+>
+>  String get foo => '';
+#  ^^^^^^ support.class.dart
+#         ^^^ keyword.declaration.dart
+#             ^^^ entity.name.function.dart
+#                    ^^ string.interpolated.single.dart
+#                      ^ punctuation.terminator.dart
+>  set foo(String value) {}
+#  ^^^ keyword.declaration.dart
+#      ^^^ entity.name.function.dart
+#          ^^^^^^ support.class.dart
+>
+>  @override
+#  ^^^^^^^^^ storage.type.annotation.dart
+>  bool operator ==(other) {
+#  ^^^^ support.class.dart
+#       ^^^^^^^^ keyword.declaration.dart
+#                ^^ keyword.operator.comparison.dart
+>    return false;
+#    ^^^^^^ keyword.control.dart
+#           ^^^^^ constant.language.dart
+#                ^ punctuation.terminator.dart
+>  }
+>}
+>
+>class C<T extends B> implements A {}
+#^^^^^ keyword.declaration.dart
+#      ^ support.class.dart
+#       ^ keyword.operator.comparison.dart
+#        ^ support.class.dart
+#          ^^^^^^^ keyword.declaration.dart
+#                  ^ support.class.dart
+#                   ^ keyword.operator.comparison.dart
+#                     ^^^^^^^^^^ keyword.declaration.dart
+#                                ^ support.class.dart
+>
+>mixin D on A {}
+#^^^^^ keyword.declaration.dart
+#      ^ support.class.dart
+#        ^^ keyword.control.catch-exception.dart
+#           ^ support.class.dart
+>
+>class E extends A with D {}
+#^^^^^ keyword.declaration.dart
+#      ^ support.class.dart
+#        ^^^^^^^ keyword.declaration.dart
+#                ^ support.class.dart
+#                  ^^^^ keyword.declaration.dart
+#                       ^ support.class.dart
+>
+>extension on E {}
+#^^^^^^^^^ keyword.declaration.dart
+#          ^^ keyword.control.catch-exception.dart
+#             ^ support.class.dart
+>
+>extension EExtension on E {}
+#^^^^^^^^^ keyword.declaration.dart
+#          ^^^^^^^^^^ support.class.dart
+#                     ^^ keyword.control.catch-exception.dart
+#                        ^ support.class.dart
+>
+>external int get externalInt;
+#^^^^^^^^ keyword.declaration.dart
+#         ^^^ support.class.dart
+#             ^^^ keyword.declaration.dart
+#                            ^ punctuation.terminator.dart
+>
+>typedef StringAlias = String;
+#^^^^^^^ keyword.declaration.dart
+#        ^^^^^^^^^^^ support.class.dart
+#                    ^ keyword.operator.assignment.dart
+#                      ^^^^^^ support.class.dart
+#                            ^ punctuation.terminator.dart
+>typedef void FunctionAlias1(String a, String b);
+#^^^^^^^ keyword.declaration.dart
+#        ^^^^ storage.type.primitive.dart
+#             ^^^^^^^^^^^^^^ support.class.dart
+#                            ^^^^^^ support.class.dart
+#                                    ^ punctuation.comma.dart
+#                                      ^^^^^^ support.class.dart
+#                                               ^ punctuation.terminator.dart
+>typedef FunctionAlias2 = void Function(String a, String b);
+#^^^^^^^ keyword.declaration.dart
+#        ^^^^^^^^^^^^^^ support.class.dart
+#                       ^ keyword.operator.assignment.dart
+#                         ^^^^ storage.type.primitive.dart
+#                              ^^^^^^^^ support.class.dart
+#                                       ^^^^^^ support.class.dart
+#                                               ^ punctuation.comma.dart
+#                                                 ^^^^^^ support.class.dart
+#                                                          ^ punctuation.terminator.dart
+>
+>Future<void> e() async {
+#^^^^^^ support.class.dart
+#      ^ keyword.operator.comparison.dart
+#       ^^^^ storage.type.primitive.dart
+#           ^ keyword.operator.comparison.dart
+#             ^ entity.name.function.dart
+#                 ^^^^^ keyword.control.dart
+>  await Future.delayed(const Duration(seconds: 1));
+#  ^^^^^ keyword.control.dart
+#        ^^^^^^ support.class.dart
+#              ^ punctuation.dot.dart
+#               ^^^^^^^ entity.name.function.dart
+#                       ^^^^^ storage.modifier.dart
+#                             ^^^^^^^^ support.class.dart
+#                                             ^ keyword.operator.ternary.dart
+#                                               ^ constant.numeric.dart
+#                                                  ^ punctuation.terminator.dart
+>}
+>
+>void returns() {
+#^^^^ storage.type.primitive.dart
+#     ^^^^^^^ entity.name.function.dart
+>  return;
+#  ^^^^^^ keyword.control.dart
+#        ^ punctuation.terminator.dart
+>}
+>
+>Iterable<String> syncYield() sync* {
+#^^^^^^^^ support.class.dart
+#        ^ keyword.operator.comparison.dart
+#         ^^^^^^ support.class.dart
+#               ^ keyword.operator.comparison.dart
+#                 ^^^^^^^^^ entity.name.function.dart
+#                             ^^^^ keyword.control.dart
+#                                 ^ keyword.operator.arithmetic.dart
+>  yield '';
+#  ^^^^^ keyword.control.dart
+#        ^^ string.interpolated.single.dart
+#          ^ punctuation.terminator.dart
+>}
+>
+>Iterable<String> syncYieldStar() sync* {
+#^^^^^^^^ support.class.dart
+#        ^ keyword.operator.comparison.dart
+#         ^^^^^^ support.class.dart
+#               ^ keyword.operator.comparison.dart
+#                 ^^^^^^^^^^^^^ entity.name.function.dart
+#                                 ^^^^ keyword.control.dart
+#                                     ^ keyword.operator.arithmetic.dart
+>  yield* syncYield();
+#  ^^^^^ keyword.control.dart
+#       ^ keyword.operator.arithmetic.dart
+#         ^^^^^^^^^ entity.name.function.dart
+#                    ^ punctuation.terminator.dart
+>}
+>
+>Stream<String> asyncYield() async* {
+#^^^^^^ support.class.dart
+#      ^ keyword.operator.comparison.dart
+#       ^^^^^^ support.class.dart
+#             ^ keyword.operator.comparison.dart
+#               ^^^^^^^^^^ entity.name.function.dart
+#                            ^^^^^ keyword.control.dart
+#                                 ^ keyword.operator.arithmetic.dart
+>  await Future.delayed(const Duration(seconds: 1));
+#  ^^^^^ keyword.control.dart
+#        ^^^^^^ support.class.dart
+#              ^ punctuation.dot.dart
+#               ^^^^^^^ entity.name.function.dart
+#                       ^^^^^ storage.modifier.dart
+#                             ^^^^^^^^ support.class.dart
+#                                             ^ keyword.operator.ternary.dart
+#                                               ^ constant.numeric.dart
+#                                                  ^ punctuation.terminator.dart
+>  yield '';
+#  ^^^^^ keyword.control.dart
+#        ^^ string.interpolated.single.dart
+#          ^ punctuation.terminator.dart
+>}
+>
+>Stream<String> asyncYieldStar() async* {
+#^^^^^^ support.class.dart
+#      ^ keyword.operator.comparison.dart
+#       ^^^^^^ support.class.dart
+#             ^ keyword.operator.comparison.dart
+#               ^^^^^^^^^^^^^^ entity.name.function.dart
+#                                ^^^^^ keyword.control.dart
+#                                     ^ keyword.operator.arithmetic.dart
+>  await Future.delayed(const Duration(seconds: 1));
+#  ^^^^^ keyword.control.dart
+#        ^^^^^^ support.class.dart
+#              ^ punctuation.dot.dart
+#               ^^^^^^^ entity.name.function.dart
+#                       ^^^^^ storage.modifier.dart
+#                             ^^^^^^^^ support.class.dart
+#                                             ^ keyword.operator.ternary.dart
+#                                               ^ constant.numeric.dart
+#                                                  ^ punctuation.terminator.dart
+>  yield* asyncYield();
+#  ^^^^^ keyword.control.dart
+#       ^ keyword.operator.arithmetic.dart
+#         ^^^^^^^^^^ entity.name.function.dart
+#                     ^ punctuation.terminator.dart
+>}
+>
+>void err() {
+#^^^^ storage.type.primitive.dart
+#     ^^^ entity.name.function.dart
+>  try {
+#  ^^^ keyword.control.catch-exception.dart
+>    throw '';
+#    ^^^^^ keyword.control.catch-exception.dart
+#          ^^ string.interpolated.single.dart
+#            ^ punctuation.terminator.dart
+>  } on ArgumentError {
+#    ^^ keyword.control.catch-exception.dart
+#       ^^^^^^^^^^^^^ support.class.dart
+>    rethrow;
+#    ^^^^^^^ keyword.control.catch-exception.dart
+#           ^ punctuation.terminator.dart
+>  } catch (e) {
+#    ^^^^^ keyword.control.catch-exception.dart
+>    print('e');
+#    ^^^^^ entity.name.function.dart
+#          ^^^ string.interpolated.single.dart
+#              ^ punctuation.terminator.dart
+>  }
+>}
+>
+>void loops() {
+#^^^^ storage.type.primitive.dart
+#     ^^^^^ entity.name.function.dart
+>  while (1 > 2) {
+#  ^^^^^ keyword.control.dart
+#         ^ constant.numeric.dart
+#           ^ keyword.operator.comparison.dart
+#             ^ constant.numeric.dart
+>    if (3 > 4) {
+#    ^^ keyword.control.dart
+#        ^ constant.numeric.dart
+#          ^ keyword.operator.comparison.dart
+#            ^ constant.numeric.dart
+>      continue;
+#      ^^^^^^^^ keyword.control.dart
+#              ^ punctuation.terminator.dart
+>    } else {
+#      ^^^^ keyword.control.dart
+>      break;
+#      ^^^^^ keyword.control.dart
+#           ^ punctuation.terminator.dart
+>    }
+>    return;
+#    ^^^^^^ keyword.control.dart
+#          ^ punctuation.terminator.dart
+>  }
+>
+>  do {
+#  ^^ keyword.control.dart
+>    print('');
+#    ^^^^^ entity.name.function.dart
+#          ^^ string.interpolated.single.dart
+#             ^ punctuation.terminator.dart
+>  } while (1 > 2);
+#    ^^^^^ keyword.control.dart
+#           ^ constant.numeric.dart
+#             ^ keyword.operator.comparison.dart
+#               ^ constant.numeric.dart
+#                 ^ punctuation.terminator.dart
+>}
+>
+>void switches() {
+#^^^^ storage.type.primitive.dart
+#     ^^^^^^^^ entity.name.function.dart
+>  Object? i = 1;
+#  ^^^^^^ support.class.dart
+#        ^ keyword.operator.ternary.dart
+#            ^ keyword.operator.assignment.dart
+#              ^ constant.numeric.dart
+#               ^ punctuation.terminator.dart
+>  switch (i as int) {
+#  ^^^^^^ keyword.control.dart
+#            ^^ keyword.cast.dart
+#               ^^^ support.class.dart
+>    case 1:
+#    ^^^^ keyword.control.dart
+#         ^ constant.numeric.dart
+#          ^ keyword.operator.ternary.dart
+>      break;
+#      ^^^^^ keyword.control.dart
+#           ^ punctuation.terminator.dart
+>    default:
+#    ^^^^^^^ keyword.control.dart
+#           ^ keyword.operator.ternary.dart
+>      return;
+#      ^^^^^^ keyword.control.dart
+#            ^ punctuation.terminator.dart
+>  }
+>}
+>
+>void conditions() {
+#^^^^ storage.type.primitive.dart
+#     ^^^^^^^^^^ entity.name.function.dart
+>  if (1 > 2) {
+#  ^^ keyword.control.dart
+#      ^ constant.numeric.dart
+#        ^ keyword.operator.comparison.dart
+#          ^ constant.numeric.dart
+>  } else if (3 > 4) {
+#    ^^^^ keyword.control.dart
+#         ^^ keyword.control.dart
+#             ^ constant.numeric.dart
+#               ^ keyword.operator.comparison.dart
+#                 ^ constant.numeric.dart
+>  } else {}
+#    ^^^^ keyword.control.dart
+>}
+>
+>void misc(int a, {required int b}) {
+#^^^^ storage.type.primitive.dart
+#     ^^^^ entity.name.function.dart
+#          ^^^ support.class.dart
+#               ^ punctuation.comma.dart
+#                  ^^^^^^^^ storage.modifier.dart
+#                           ^^^ support.class.dart
+>  assert(true);
+#  ^^^^^^ keyword.control.dart
+#         ^^^^ constant.language.dart
+#              ^ punctuation.terminator.dart
+>  assert(1 == 1, 'fail');
+#  ^^^^^^ keyword.control.dart
+#         ^ constant.numeric.dart
+#           ^^ keyword.operator.comparison.dart
+#              ^ constant.numeric.dart
+#               ^ punctuation.comma.dart
+#                 ^^^^^^ string.interpolated.single.dart
+#                        ^ punctuation.terminator.dart
+>
+>  var a = new String.fromCharCode(1);
+#  ^^^ storage.type.primitive.dart
+#        ^ keyword.operator.assignment.dart
+#          ^^^ keyword.control.new.dart
+#              ^^^^^^ support.class.dart
+#                    ^ punctuation.dot.dart
+#                     ^^^^^^^^^^^^ entity.name.function.dart
+#                                  ^ constant.numeric.dart
+#                                    ^ punctuation.terminator.dart
+>  const b = int.fromEnvironment('');
+#  ^^^^^ storage.modifier.dart
+#          ^ keyword.operator.assignment.dart
+#            ^^^ support.class.dart
+#               ^ punctuation.dot.dart
+#                ^^^^^^^^^^^^^^^ entity.name.function.dart
+#                                ^^ string.interpolated.single.dart
+#                                   ^ punctuation.terminator.dart
+>  final c = '';
+#  ^^^^^ storage.modifier.dart
+#          ^ keyword.operator.assignment.dart
+#            ^^ string.interpolated.single.dart
+#              ^ punctuation.terminator.dart
+>  late final d = '';
+#  ^^^^ storage.modifier.dart
+#       ^^^^^ storage.modifier.dart
+#               ^ keyword.operator.assignment.dart
+#                 ^^ string.interpolated.single.dart
+#                   ^ punctuation.terminator.dart
+>  print(d is String);
+#  ^^^^^ entity.name.function.dart
+#          ^^ keyword.operator.dart
+#             ^^^^^^ support.class.dart
+#                    ^ punctuation.terminator.dart
+>  print(d is! String);
+#  ^^^^^ entity.name.function.dart
+#          ^^ keyword.operator.dart
+#            ^ keyword.operator.logical.dart
+#              ^^^^^^ support.class.dart
+#                     ^ punctuation.terminator.dart
+>}
+>
+>class Covariance<T> {
+#^^^^^ keyword.declaration.dart
+#      ^^^^^^^^^^ support.class.dart
+#                ^ keyword.operator.comparison.dart
+#                 ^ support.class.dart
+#                  ^ keyword.operator.comparison.dart
+>  void covariance(covariant List<T> items) {}
+#  ^^^^ storage.type.primitive.dart
+#       ^^^^^^^^^^ entity.name.function.dart
+#                  ^^^^^^^^^ keyword.declaration.dart
+#                            ^^^^ support.class.dart
+#                                ^ keyword.operator.comparison.dart
+#                                 ^ support.class.dart
+#                                  ^ keyword.operator.comparison.dart
+>}
+>
