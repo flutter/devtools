@@ -228,6 +228,7 @@ class FrameAnalysis {
   }
 
   int _calculateFlex(int numeratorMicros, int denominatorMicros) {
+    if (numeratorMicros == 0 && denominatorMicros == 0) return 1;
     return ((numeratorMicros / denominatorMicros) * 100).round();
   }
 }
