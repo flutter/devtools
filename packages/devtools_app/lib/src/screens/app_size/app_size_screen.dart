@@ -208,9 +208,7 @@ class _AppSizeBodyState extends State<AppSizeBody>
                   ),
                   Row(
                     children: [
-                      if (currentTab.key == AppSizeScreen.analysisTabKey &&
-                          isDeferredApp)
-                        _buildAppSegmentDropdown(),
+                      if (isDeferredApp) _buildAppSegmentDropdown(),
                       if (currentTab.key == AppSizeScreen.diffTabKey)
                         _buildDiffTreeTypeDropdown(),
                       const SizedBox(width: defaultSpacing),

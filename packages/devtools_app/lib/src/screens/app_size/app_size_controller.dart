@@ -289,6 +289,7 @@ class AppSizeController {
     // Build a tree with [TreemapNode] from [appData].
     final appRoot = generateTree(appData)!;
     changeAnalysisRoot(appRoot);
+    changeDiffRoot(appRoot);
   }
 
   bool _hasDeferredInfo(Map<String, dynamic> jsonFile) {
