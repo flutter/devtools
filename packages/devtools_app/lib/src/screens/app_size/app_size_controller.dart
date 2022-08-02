@@ -224,10 +224,11 @@ class AppSizeController {
 
   void changeSelectedAppSegment(AppSegment appSegment) {
     _selectedAppSegment.value = appSegment;
-    print(appSegment);
-    print(_activeAppSegment);
-    _loadApp(_activeAppSegment!);
-    // generateDeferredDiffTree(_activeAppSegment!, appSegment);
+    // _loadApp(_activeAppSegment!);
+
+    final TreemapNode? newRoot =
+        generateDeferredDiffTree(_activeAppSegment!, appSegment);
+    changeDiffRoot(newRoot);
   }
 
   /// Notifies that the json files are currently being processed.
@@ -290,9 +291,8 @@ class AppSizeController {
 
   void _loadApp(Map<String, dynamic> appData) {
     // Build a tree with [TreemapNode] from [appData].
-    if (appData == null) print('no');
-    // final appRoot = generateTree(appData)!;
-    // changeAnalysisRoot(appRoot);
+    final appRoot = generateTree(appData)!;
+    changeAnalysisRoot(appRoot);
   }
 
   bool _hasDeferredInfo(Map<String, dynamic> jsonFile) {
@@ -380,8 +380,6 @@ class AppSizeController {
 
       final oldApkProgramInfo = ProgramInfo();
 
-      print(oldApkProgramInfo.root);
-
       _apkJsonToProgramInfo(
         program: oldApkProgramInfo,
         parent: oldApkProgramInfo.root,
@@ -437,7 +435,7 @@ class AppSizeController {
     changeOldDiffFile(oldFile);
     changeNewDiffFile(newFile);
 
-    diffMap['n'] = 'Root';
+    diffMap['n'] = 'EntireApp';
 
     // TODO(peterdjlee): Try to move the non-active tree generation to separate isolates.
     _combinedDiffTreeRoot = generateDiffTree(
@@ -454,6 +452,16 @@ class AppSizeController {
     );
 
     changeDiffRoot(_activeDiffRoot);
+
+    //temp set all the deferred things
+    if (isDeferredApp.value) {
+      _deferredOnly = _extractDeferredSegments({...diffMap});
+      _mainOnly = _extractMainSegment({...diffMap});
+      _entireApp = _includeEntireApp({...diffMap});
+      _loadApp(_activeAppSegment!);
+    } else {
+      _loadApp(diffMap);
+    }
 
     _processingNotifier.value = false;
   }
@@ -499,18 +507,12 @@ class AppSizeController {
     Map<String, dynamic> treeJson,
     AppSegment appSegment,
   ) {
-    final isLeafNode = treeJson['children'] == null;
-    if (!isLeafNode) {
-      return _buildNodeWithChildren(
-        treeJson,
-        showDiff: true,
-      );
-    } else {
-      if (appSegment == AppSegment.mainOnly) {
-        for (TreemapNode child in treeJson['children']) {
-          if (child.name == 'Root') {
-            break;
-          }
+    if (appSegment == AppSegment.mainOnly) {
+      for (Map<String, dynamic> child in treeJson['children']) {
+        if (child['n'] == 'Root') {
+          final byteSize = treeJson['value'];
+          //need to now build the treemapnode then pass it to changeDiffRoot
+          return _buildNodeWithChildren(treeJson);
         }
       }
     }
