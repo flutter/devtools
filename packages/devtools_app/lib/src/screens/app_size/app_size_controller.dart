@@ -606,11 +606,6 @@ class AppSizeController {
       caption: isDeferred ? '(Deferred)' : null,
     )..addAllChildren(children);
   }
-
-  @visibleForTesting
-  void setDeferredLoadingSupportEnabled(bool enabled) {
-    deferredLoadingSupportEnabled = enabled;
-  }
 }
 
 extension AppSizeJsonFileExtension on DevToolsJsonFile {

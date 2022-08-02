@@ -69,7 +69,7 @@ void main() {
         appSize: controller,
       ),
     );
-    controller.setDeferredLoadingSupportEnabled(true);
+    deferredLoadingSupportEnabled = true;
     await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(find.byType(AppSizeBody), findsOneWidget);
   }
@@ -400,7 +400,7 @@ void main() {
           appSize: controller,
         ),
       );
-      controller.setDeferredLoadingSupportEnabled(true);
+      deferredLoadingSupportEnabled = true;
       await tester.pumpAndSettle(const Duration(seconds: 1));
       expect(find.byType(AppSizeBody), findsOneWidget);
     }
