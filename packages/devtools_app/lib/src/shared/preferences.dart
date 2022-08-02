@@ -235,7 +235,6 @@ class InspectorPreferencesController extends DisposableController
   }
 
   Future<void> loadCustomPubRootDirectories() async {
-    print('loadCustomPubRootDirectories');
     if (!serviceManager.hasConnection) return;
 
     await _customPubRootDirectoryBusyTracker(() async {
