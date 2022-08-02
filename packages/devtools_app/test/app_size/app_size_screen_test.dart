@@ -21,6 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
+import '../test_data/app_size/deferred_app.dart';
 import '../test_data/app_size/new_v8.dart';
 import '../test_data/app_size/old_v8.dart';
 import '../test_data/app_size/sizes.dart';
@@ -46,6 +47,12 @@ void main() {
     data: json.decode(newV8),
   );
 
+  final deferredAppFile = DevToolsJsonFile(
+    name: 'lib/src/app_size/stub_data/deferred_app.dart',
+    lastModifiedTime: lastModifiedTime,
+    data: json.decode(deferredApp),
+  );
+
   late AppSizeScreen screen;
   late AppSizeTestController appSizeController;
   FakeServiceManager fakeServiceManager;
@@ -54,7 +61,7 @@ void main() {
 
   Future<void> pumpAppSizeScreen(
     WidgetTester tester, {
-    AppSizeTestController? controller,
+    required AppSizeTestController controller,
   }) async {
     await tester.pumpWidget(
       wrapWithControllers(
@@ -62,6 +69,7 @@ void main() {
         appSize: controller,
       ),
     );
+    controller.setDeferredLoadingSupportEnabled(true);
     await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(find.byType(AppSizeBody), findsOneWidget);
   }
@@ -120,6 +128,34 @@ void main() {
       expect(splitter.initialFractions[0], equals(0.67));
       expect(splitter.initialFractions[1], equals(0.33));
     });
+
+    testWidgetsWithWindowSize('builds deferred content', windowSize,
+        (WidgetTester tester) async {
+      await pumpAppSizeScreen(
+        tester,
+        controller: appSizeController,
+      );
+
+      expect(find.byType(AppSizeBody), findsOneWidget);
+      expect(find.byType(TabBar), findsOneWidget);
+
+      expect(find.byKey(AppSizeScreen.analysisTabKey), findsOneWidget);
+      expect(find.byKey(AppSizeScreen.diffTabKey), findsOneWidget);
+
+      await loadDataAndPump(tester, data: deferredAppFile);
+
+      // Verify the state of the splitter.
+      final splitFinder = find.byType(Split);
+      expect(splitFinder, findsOneWidget);
+      final Split splitter = tester.widget(splitFinder);
+      expect(splitter.initialFractions[0], equals(0.67));
+      expect(splitter.initialFractions[1], equals(0.33));
+
+      // Verify the dropdown for selecting deferred units exists.
+      final appUnitDropdownFinder =
+          find.byKey(AppSizeScreen.appUnitDropdownKey);
+      expect(appUnitDropdownFinder, findsOneWidget);
+    });
   });
 
   group('SnapshotView', () {
@@ -135,7 +171,7 @@ void main() {
         controller: appSizeController,
       );
 
-      expect(find.byKey(AppSizeScreen.dropdownKey), findsNothing);
+      expect(find.byKey(AppSizeScreen.diffTypeDropdownKey), findsNothing);
       expect(find.byType(ClearButton), findsOneWidget);
 
       expect(find.byType(FileImportContainer), findsOneWidget);
@@ -228,7 +264,7 @@ void main() {
         (WidgetTester tester) async {
       await loadDiffTabAndSettle(tester);
 
-      expect(find.byKey(AppSizeScreen.dropdownKey), findsOneWidget);
+      expect(find.byKey(AppSizeScreen.diffTypeDropdownKey), findsOneWidget);
       expect(find.byType(ClearButton), findsOneWidget);
 
       expect(find.byType(DualFileImportContainer), findsOneWidget);
@@ -293,7 +329,7 @@ void main() {
 
       await loadDiffDataAndPump(tester, oldV8JsonFile, newV8JsonFile);
 
-      await tester.tap(find.byKey(AppSizeScreen.dropdownKey));
+      await tester.tap(find.byKey(AppSizeScreen.diffTypeDropdownKey));
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('Increase Only').hitTestable());
@@ -309,7 +345,7 @@ void main() {
       expect(find.richText('package:pointycastle'), findsOneWidget);
       expect(find.richText('package:flutter'), findsOneWidget);
 
-      await tester.tap(find.byKey(AppSizeScreen.dropdownKey));
+      await tester.tap(find.byKey(AppSizeScreen.diffTypeDropdownKey));
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('Decrease Only').hitTestable());
@@ -347,7 +383,7 @@ void main() {
 
     Future<void> pumpAppSizeScreenWithContext(
       WidgetTester tester, {
-      AppSizeTestController? controller,
+      required AppSizeTestController controller,
     }) async {
       await tester.pumpWidget(
         wrapWithControllers(
@@ -363,6 +399,7 @@ void main() {
           appSize: controller,
         ),
       );
+      controller.setDeferredLoadingSupportEnabled(true);
       await tester.pumpAndSettle(const Duration(seconds: 1));
       expect(find.byType(AppSizeBody), findsOneWidget);
     }

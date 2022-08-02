@@ -17,7 +17,7 @@ import '../../ui/colors.dart';
 import 'app_size_screen.dart';
 
 // Temporary feature flag for deferred loading.
-const deferredLoadingSupportEnabled = false;
+bool deferredLoadingSupportEnabled = false;
 
 enum DiffTreeType {
   increaseOnly,
@@ -279,6 +279,8 @@ class AppSizeController {
       _entireApp = _includeEntireApp({...processedJson});
       _loadApp(_activeAppUnit!);
     } else {
+      // Set root name for non-deferred apps.
+      processedJson['n'] = 'Root';
       _loadApp(processedJson);
     }
 
@@ -579,6 +581,11 @@ class AppSizeController {
       backgroundColor: isDeferred ? treemapDeferredColor : null,
       caption: isDeferred ? '(Deferred)' : null,
     )..addAllChildren(children);
+  }
+
+  @visibleForTesting
+  void setDeferredLoadingSupportEnabled(bool enabled) {
+    deferredLoadingSupportEnabled = enabled;
   }
 }
 
