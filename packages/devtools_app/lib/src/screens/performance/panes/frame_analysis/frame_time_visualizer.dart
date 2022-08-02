@@ -191,7 +191,7 @@ class _FrameBlockGroup extends StatelessWidget {
   ///
   /// The adjusted widths will ensure each block is at least
   /// [_FramePhaseBlock.minBlockWidth] wide, and will modify surrounding block
-  /// widths to accomodate. f
+  /// widths to accomodate.
   List<double> adjustedWidthsForBlocks(
     BoxConstraints constraints,
     int totalFlex,
@@ -215,16 +215,16 @@ class _FrameBlockGroup extends StatelessWidget {
       }
     }
 
-    final adjustedBlockWidths = <double>[];
-    for (var i = 0; i < unadjustedBlockWidths.length; i++) {
-      final blockWidth = unadjustedBlockWidths[i];
-      var adjustedWidth = blockWidth;
-      if (i == widestBlockIndex) {
-        adjustedWidth -= adjustment;
-      }
-      adjustedWidth = math.max(adjustedWidth, _FramePhaseBlock.minBlockWidth);
-      adjustedBlockWidths.add(adjustedWidth);
-    }
+    final adjustedBlockWidths = unadjustedBlockWidths
+        .map(
+          (blockWidth) => math.max(blockWidth, _FramePhaseBlock.minBlockWidth),
+        )
+        .toList();
+    final widest = adjustedBlockWidths[widestBlockIndex];
+    adjustedBlockWidths[widestBlockIndex] = math.max(
+      widest - adjustment,
+      _FramePhaseBlock.minBlockWidth,
+    );
 
     return adjustedBlockWidths;
   }
