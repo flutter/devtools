@@ -298,9 +298,9 @@ class AppSizeController {
         deferredLoadingSupportEnabled && _hasDeferredInfo(processedJson);
 
     if (isDeferredApp.value) {
-      _deferredOnly = _extractDeferredUnits({...processedJson});
-      _mainOnly = _extractMainUnit({...processedJson});
-      _entireApp = _includeEntireApp({...processedJson});
+      _deferredOnly = _extractDeferredUnits(Map.from(processedJson));
+      _mainOnly = _extractMainUnit(Map.from(processedJson));
+      _entireApp = _includeEntireApp(Map.from(processedJson));
       _loadApp(_dataForAppUnit!);
     } else {
       // Set root name for non-deferred apps.
