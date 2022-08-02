@@ -437,6 +437,13 @@ class AppSizeController {
 
     diffMap['n'] = 'EntireApp';
 
+    //temp making an assumption that anything not main is deferred
+    for (var v in diffMap['children']) {
+      if (v['n'] != 'Main') {
+        v['isDeferred'] = true;
+      }
+    }
+
     // TODO(peterdjlee): Try to move the non-active tree generation to separate isolates.
     _combinedDiffTreeRoot = generateDiffTree(
       diffMap,
