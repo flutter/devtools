@@ -296,7 +296,7 @@ class AppSizeController {
   }
 
   bool _hasDeferredInfo(Map<String, dynamic> jsonFile) {
-    return jsonFile['n'] == 'ArtificialRoot';
+    return jsonFile['n'] == 'ArtificialRoot' || jsonFile['n'] == 'EntireApp';
   }
 
   Map<String, dynamic> _extractMainSegment(Map<String, dynamic> jsonFile) {
@@ -507,14 +507,17 @@ class AppSizeController {
     Map<String, dynamic> treeJson,
     AppSegment appSegment,
   ) {
-    if (appSegment == AppSegment.mainOnly) {
-      for (Map<String, dynamic> child in treeJson['children']) {
-        if (child['n'] == 'Root') {
-          final byteSize = treeJson['value'];
-          //need to now build the treemapnode then pass it to changeDiffRoot
-          return _buildNodeWithChildren(treeJson);
-        }
-      }
+    final isLeafNode = treeJson['children'] == null;
+    if (!isLeafNode) {
+      //need to now build the treemapnode then pass it to changeDiffRoot
+      return _buildNodeWithChildren(
+        treeJson,
+        showDiff: true,
+        diffTreeType: _activeDiffTreeType.value,
+      );
+    } else {
+      final byteSize = treeJson['value'];
+      return _buildNode(treeJson, byteSize, showDiff: true);
     }
   }
 
