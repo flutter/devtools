@@ -27,7 +27,7 @@ void main(List<String> args) async {
     [],
     workingDirectory: mainDevToolsDirectory.path,
   );
-  _printToConsole(buildProcess);
+  _forwardOutputStreams(buildProcess);
   await buildProcess.exitCode;
 
   final devToolsBuildLocation =
@@ -41,20 +41,23 @@ void main(List<String> args) async {
     [
       'pkg/dds/tool/devtools_server/serve_local.dart',
       '--devtools-build=$devToolsBuildLocation',
+      // Pass any args that were provided to our script along. This allows IDEs
+      // to pass `--machine` (etc.) so that this script can behave the same as
+      // the "dart devtools" command for testing local DevTools/server changes.
+      ...args,
     ],
     workingDirectory: localDartSdkLocation,
   );
-  _printToConsole(serveProcess);
+  _forwardOutputStreams(serveProcess);
+  _forwardInputStream(serveProcess);
   await serveProcess.exitCode;
 }
 
-void _printToConsole(Process process) {
-  _transformToLines(process.stdout).listen(print);
-  _transformToLines(process.stderr).listen(print);
+void _forwardOutputStreams(Process process) {
+  process.stdout.listen(stdout.add);
+  process.stderr.listen(stdout.add);
 }
 
-Stream<String> _transformToLines(Stream<List<int>> byteStream) {
-  return byteStream
-      .transform<String>(utf8.decoder)
-      .transform<String>(const LineSplitter());
+void _forwardInputStream(Process process) {
+  stdin.listen(process.stdin.add);
 }
