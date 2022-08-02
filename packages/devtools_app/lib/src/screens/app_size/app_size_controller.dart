@@ -112,8 +112,9 @@ class AppSizeController {
   final _diffRoot = ValueNotifier<TreemapNode?>(null);
 
   void changeDiffRoot(TreemapNode? newRoot) {
-    _diffRoot.value = newRoot;
     if (newRoot == null) return;
+
+    _diffRoot.value = newRoot;
 
     final packagePath = newRoot.packagePath();
     final newProgramInfoNode = _newDiffCallGraph?.program.lookup(packagePath);
@@ -293,7 +294,7 @@ class AppSizeController {
       changeAnalysisRoot(appRoot);
     } else if (activeTabKey == AppSizeScreen.diffTabKey) {
       // Diff view only.
-      final TreemapNode? newRoot = generateDeferredDiffTree(_activeAppSegment!);
+      final TreemapNode? newRoot = generateDeferredDiffTree(appData);
       changeDiffRoot(newRoot);
     }
   }
@@ -524,6 +525,9 @@ class AppSizeController {
       );
     } else {
       final byteSize = treeJson['value'];
+      if (byteSize == null) {
+        return null;
+      }
       return _buildNode(treeJson, byteSize, showDiff: true);
     }
   }
