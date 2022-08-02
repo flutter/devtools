@@ -40,10 +40,6 @@ void spanTester({
 }
 
 void main() {
-  final updateGoldens = autoUpdateGoldenFiles;
-
-  final Directory goldenDirectory =
-      Directory(path.join('test', 'test_data', 'syntax_highlighting')).absolute;
   final grammarFile = File(path.join('assets', 'dart_syntax.json')).absolute;
   late Grammar grammar;
   setUpAll(() async {
@@ -151,18 +147,30 @@ void main() {
     });
 
     group('golden', () {
+      final updateGoldens = autoUpdateGoldenFiles;
+      final Directory testDataDirectory =
+          Directory(path.join('test', 'test_data', 'syntax_highlighting'))
+              .absolute;
+      final Directory goldenDirectory =
+          Directory(path.join('test', 'goldens', 'syntax_highlighting'))
+              .absolute;
+
       // Perform golden tests on the test_data/syntax_highlighting folder.
       // These goldens are updated using the usual Flutter --update-goldens
       // flag:
       //
       //     flutter test test/shared/span_parser_test.dart --update-goldens
-      final testFiles = goldenDirectory
+      final testFiles = testDataDirectory
           .listSync()
           .whereType<File>()
           .where((file) => path.extension(file.path) == '.dart');
 
       for (final testFile in testFiles) {
-        final goldenFile = File('${testFile.path}.golden');
+        final goldenPath = path.join(
+          goldenDirectory.path,
+          '${path.basename(testFile.path)}.golden',
+        );
+        final goldenFile = File(goldenPath);
         test(path.basename(testFile.path), () {
           if (!goldenFile.existsSync() && !updateGoldens) {
             fail('Missing golden file: ${goldenFile.path}');
