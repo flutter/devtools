@@ -418,13 +418,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   void initState() {
     super.initState();
 
-    dataRoots = List.generate(widget.dataRoots.length, (index) {
-      final root = widget.dataRoots[index];
-      if (widget.autoExpandRoots) {
-        root.expand();
-      }
-      return root;
-    });
+    expandRoots();
 
     _initData();
 
@@ -460,6 +454,8 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   void didUpdateWidget(TreeTable<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
 
+    expandRoots();
+
     if (widget == oldWidget) return;
 
     if (widget.sortColumn != oldWidget.sortColumn ||
@@ -469,6 +465,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     }
     rootsExpanded =
         List.generate(dataRoots.length, (index) => dataRoots[index].isExpanded);
+
     _updateItems();
   }
 
@@ -482,6 +479,16 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 
     selectionNotifier = widget.selectionNotifier ??
         ValueNotifier<Selection<T>>(Selection.empty());
+  }
+
+  void expandRoots() {
+    dataRoots = List.generate(widget.dataRoots.length, (index) {
+      final root = widget.dataRoots[index];
+      if (widget.autoExpandRoots && !root.isExpanded) {
+        root.expand();
+      }
+      return root;
+    });
   }
 
   void _updateItems() {
