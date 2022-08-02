@@ -93,7 +93,6 @@ class InspectorPreferencesController extends DisposableController
   static const _customPubRootDirectoriesStoragePrefix =
       'inspector.customPubRootDirectories';
   String? _mainScriptDir;
-  VoidCallback? isolateListener;
 
   Future<void> _updateMainScriptRef() async {
     final isolateRef = serviceManager.isolateManager.mainIsolate.value!;
@@ -141,6 +140,35 @@ class InspectorPreferencesController extends DisposableController
     addAutoDisposeListener(_busyCounter, () {
       _customPubRootDirectoriesAreBusy.value = _busyCounter.value != 0;
     });
+    addAutoDisposeListener(
+      serviceManager.isolateManager.mainIsolate,
+      () {
+        if (_mainScriptDir != null &&
+            serviceManager.isolateManager.mainIsolate.value != null) {
+          final debuggerState =
+              serviceManager.isolateManager.mainIsolateDebuggerState;
+
+          if (debuggerState?.isPaused.value == false) {
+            // the isolate is already unpaused, we can try to load
+            // the directories
+            preferences.inspector.loadCustomPubRootDirectories();
+          } else {
+            late Function() pausedListener;
+
+            pausedListener = () {
+              if (debuggerState?.isPaused.value == false) {
+                preferences.inspector.loadCustomPubRootDirectories();
+
+                debuggerState?.isPaused.removeListener(pausedListener);
+              }
+            };
+
+            // The isolate is still paused, listen for when it becomes unpaused.
+            debuggerState?.isPaused.addListener(pausedListener);
+          }
+        }
+      },
+    );
   }
 
   void _handleConnectionClosed(dynamic _) async {
@@ -152,19 +180,7 @@ class InspectorPreferencesController extends DisposableController
     await _updateMainScriptRef();
 
     _customPubRootDirectories.clear();
-
     await loadCustomPubRootDirectories();
-
-    // Only setup the isolate listener the first time we connect to a service
-    if (isolateListener == null) {
-      isolateListener = () {
-        preferences.inspector.loadCustomPubRootDirectories();
-      };
-      addAutoDisposeListener(
-        serviceManager.isolateManager.mainIsolate,
-        isolateListener,
-      );
-    }
   }
 
   void _persistCustomPubRootDirectoriesToStorage() {
@@ -219,6 +235,7 @@ class InspectorPreferencesController extends DisposableController
   }
 
   Future<void> loadCustomPubRootDirectories() async {
+    print('loadCustomPubRootDirectories');
     if (!serviceManager.hasConnection) return;
 
     await _customPubRootDirectoryBusyTracker(() async {

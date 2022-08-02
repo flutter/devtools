@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
@@ -11,6 +12,7 @@ import '../../analytics/analytics.dart' as ga;
 import '../../analytics/constants.dart' as analytics_constants;
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../primitives/blocking_action_mixin.dart';
+import '../../primitives/debouncer.dart';
 import '../../service/service_extension_widgets.dart';
 import '../../service/service_extensions.dart' as extensions;
 import '../../shared/common_widgets.dart';
@@ -87,13 +89,15 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   static const minScreenWidthForTextBeforeScaling = 900.0;
   static const unscaledIncludeRefreshTreeWidth = 1255.0;
   static const serviceExtensionButtonsIncludeTextWidth = 1160.0;
-
+  final _customPubRootDirectoriesRefreshDebouncer =
+      Debouncer(milliseconds: 500);
   @override
   void dispose() {
     controller.inspectorTree.dispose();
     if (controller.isSummaryTree && controller.details != null) {
       controller.details!.inspectorTree.dispose();
     }
+    _customPubRootDirectoriesRefreshDebouncer.dispose();
     super.dispose();
   }
 
@@ -127,16 +131,9 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     });
     addAutoDisposeListener(preferences.inspector.customPubRootDirectories, () {
       if (serviceManager.hasConnection) {
-        _refreshInspector();
+        _customPubRootDirectoriesRefreshDebouncer(() => _refreshInspector());
       }
     });
-    addAutoDisposeListener(serviceManager.isolateManager.mainIsolate, () {
-      if (serviceManager.hasConnection) {
-        _refreshInspector();
-        preferences.inspector.loadCustomPubRootDirectories();
-      }
-    });
-    preferences.inspector.loadCustomPubRootDirectories();
   }
 
   @override
