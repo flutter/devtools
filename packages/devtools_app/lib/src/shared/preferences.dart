@@ -215,7 +215,7 @@ class InspectorPreferencesController extends DisposableController
   String _customPubRootStorageId() {
     assert(_mainScriptDir != null);
     final packageId = _mainScriptDir ?? '_fallback';
-    return '$_customPubRootDirectoriesStoragePrefix:$packageId';
+    return '${_customPubRootDirectoriesStoragePrefix}_$packageId';
   }
 
   Future<void> loadCustomPubRootDirectories() async {
