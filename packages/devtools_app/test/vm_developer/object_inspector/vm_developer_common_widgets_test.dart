@@ -210,7 +210,7 @@ void main() {
 
     expect(find.byType(SelectableText), findsNWidgets(3));
     expect(
-      find.text('Referenced by fooLib.fooFunction'),
+      find.text('Referenced by fooFunction'),
       findsOneWidget,
     );
     expect(

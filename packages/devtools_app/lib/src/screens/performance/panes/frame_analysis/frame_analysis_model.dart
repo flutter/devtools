@@ -57,7 +57,9 @@ class FrameAnalysis {
   ///
   /// This is drawn from the "Layout" timeline event on the UI thread. This data
   /// may overlap with a portion of the [buildPhase] if "Build" timeline events
-  /// are children of the "Layout" event.
+  /// are children of the "Layout" event. If this is the case, the
+  /// [FramePhase.duration] for this phase will only include time that is spent
+  /// in the Layout event, outside of the Build events.
   ///
   /// Example:
   /// [-----------------Layout-----------------]
@@ -66,19 +68,30 @@ class FrameAnalysis {
 
   FramePhase _generateLayoutPhase() {
     final uiEvent = frame.timelineEventData.uiEvent;
-    if (uiEvent == null) {
-      return FramePhase.layout(events: <SyncTimelineEvent>[]);
+    if (uiEvent != null) {
+      final layoutEvent = uiEvent.firstChildWithCondition(
+        (event) =>
+            event.name
+                ?.caseInsensitiveEquals(FramePhaseType.layout.eventName) ??
+            false,
+      );
+
+      if (layoutEvent != null) {
+        final _buildChildren = layoutEvent.shallowNodesWithCondition(
+          (event) => event.name == FramePhaseType.build.eventName,
+        );
+        final buildDuration = _buildChildren.fold<Duration>(Duration.zero,
+            (previous, TimelineEvent event) {
+          return previous + event.time.duration;
+        });
+
+        return FramePhase.layout(
+          events: <SyncTimelineEvent>[layoutEvent as SyncTimelineEvent],
+          duration: layoutEvent.time.duration - buildDuration,
+        );
+      }
     }
-    final layoutEvent = uiEvent.firstChildWithCondition(
-      (event) =>
-          event.name?.caseInsensitiveEquals(FramePhaseType.layout.eventName) ??
-          false,
-    );
-    return FramePhase.layout(
-      events: <SyncTimelineEvent>[
-        if (layoutEvent != null) layoutEvent as SyncTimelineEvent,
-      ],
-    );
+    return FramePhase.layout(events: <SyncTimelineEvent>[]);
   }
 
   /// Data for the Paint phase of [frame].

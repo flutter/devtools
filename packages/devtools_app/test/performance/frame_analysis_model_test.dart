@@ -29,7 +29,7 @@ void main() {
     test('layoutPhase', () {
       final layoutPhase = frameAnalysis.layoutPhase;
       expect(layoutPhase.events.length, equals(1));
-      expect(layoutPhase.duration.inMicroseconds, equals(211));
+      expect(layoutPhase.duration.inMicroseconds, equals(128));
     });
 
     test('paintPhase', () {
