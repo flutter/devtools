@@ -16,7 +16,7 @@ import '../../shared/table.dart';
 import 'app_size_screen.dart';
 
 // Temporary feature flag for deferred loading.
-const deferredLoadingSupportEnabled = false;
+const deferredLoadingSupportEnabled = true;
 
 enum DiffTreeType {
   increaseOnly,
@@ -295,11 +295,10 @@ class AppSizeController {
             'children': [newFileJson]
           };
         }
+        isDeferredApp = deferredLoadingSupportEnabled;
       }
 
       final oldApkProgramInfo = ProgramInfo();
-
-      print(oldApkProgramInfo.root);
 
       _apkJsonToProgramInfo(
         program: oldApkProgramInfo,
@@ -375,6 +374,12 @@ class AppSizeController {
     changeDiffRoot(_activeDiffRoot);
 
     _processingNotifier.value = false;
+  }
+
+  bool isDeferredFormat(
+      Map<String, dynamic> fileJson) {
+        return fileJson['n'] == 'ArtificialRoot';
+    }
   }
 
   ProgramInfoNode _apkJsonToProgramInfo({
