@@ -265,6 +265,7 @@ void main() {
       await loadDiffTabAndSettle(tester);
 
       expect(find.byKey(AppSizeScreen.diffTypeDropdownKey), findsOneWidget);
+      expect(find.byKey(AppSizeScreen.appUnitDropdownKey), findsNothing);
       expect(find.byType(ClearButton), findsOneWidget);
 
       expect(find.byType(DualFileImportContainer), findsOneWidget);

@@ -22,13 +22,37 @@ bool deferredLoadingSupportEnabled = false;
 enum DiffTreeType {
   increaseOnly,
   decreaseOnly,
-  combined,
+  combined;
+
+  String get display {
+    switch (this) {
+      case DiffTreeType.increaseOnly:
+        return 'Increase Only';
+      case DiffTreeType.decreaseOnly:
+        return 'Decrease Only';
+      case DiffTreeType.combined:
+      default:
+        return 'Combined';
+    }
+  }
 }
 
 enum AppUnit {
   mainOnly,
   deferredOnly,
-  entireApp,
+  entireApp;
+
+  String get display {
+    switch (this) {
+      case AppUnit.deferredOnly:
+        return 'Deferred';
+      case AppUnit.mainOnly:
+        return 'Main';
+      case AppUnit.entireApp:
+      default:
+        return 'Entire App';
+    }
+  }
 }
 
 class AppSizeController {
@@ -146,7 +170,7 @@ class AppSizeController {
   TreemapNode? _decreasedDiffTreeRoot;
   TreemapNode? _combinedDiffTreeRoot;
 
-  Map<String, dynamic>? get _activeAppUnit {
+  Map<String, dynamic>? get _dataForAppUnit {
     switch (_selectedAppUnit.value) {
       case AppUnit.deferredOnly:
         return _deferredOnly;
@@ -224,7 +248,7 @@ class AppSizeController {
 
   void changeSelectedAppUnit(AppUnit appUnit) {
     _selectedAppUnit.value = appUnit;
-    _loadApp(_activeAppUnit!);
+    _loadApp(_dataForAppUnit!);
   }
 
   /// Notifies that the json files are currently being processed.
@@ -277,7 +301,7 @@ class AppSizeController {
       _deferredOnly = _extractDeferredUnits({...processedJson});
       _mainOnly = _extractMainUnit({...processedJson});
       _entireApp = _includeEntireApp({...processedJson});
-      _loadApp(_activeAppUnit!);
+      _loadApp(_dataForAppUnit!);
     } else {
       // Set root name for non-deferred apps.
       processedJson['n'] = 'Root';

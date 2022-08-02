@@ -615,31 +615,3 @@ class _DiffViewState extends State<DiffView>
     );
   }
 }
-
-extension DiffTreeTypeExtension on DiffTreeType {
-  String get display {
-    switch (this) {
-      case DiffTreeType.increaseOnly:
-        return 'Increase Only';
-      case DiffTreeType.decreaseOnly:
-        return 'Decrease Only';
-      case DiffTreeType.combined:
-      default:
-        return 'Combined';
-    }
-  }
-}
-
-extension AppUnitExtension on AppUnit {
-  String get display {
-    switch (this) {
-      case AppUnit.deferredOnly:
-        return 'Deferred';
-      case AppUnit.mainOnly:
-        return 'Main';
-      case AppUnit.entireApp:
-      default:
-        return 'Entire App';
-    }
-  }
-}
