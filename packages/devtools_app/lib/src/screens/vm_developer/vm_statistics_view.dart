@@ -124,10 +124,10 @@ class GeneralVMStatisticsWidget extends StatelessWidget {
     return VMInfoCard(
       title: 'VM',
       rowKeyValues: [
-        MapEntry('Name', vm?.name),
-        MapEntry('Version', vm?.version),
-        MapEntry('Embedder', vm?.embedder),
-        MapEntry(
+        stringWidgetMapEntry('Name', vm?.name),
+        stringWidgetMapEntry('Version', vm?.version),
+        stringWidgetMapEntry('Embedder', vm?.embedder),
+        stringWidgetMapEntry(
           'Started',
           vm == null
               ? null
@@ -135,8 +135,8 @@ class GeneralVMStatisticsWidget extends StatelessWidget {
                   DateTime.fromMillisecondsSinceEpoch(vm.startTime!),
                 ),
         ),
-        MapEntry('Profiler Mode', vm?.profilerMode),
-        MapEntry(
+        stringWidgetMapEntry('Profiler Mode', vm?.profilerMode),
+        stringWidgetMapEntry(
           'Current Memory',
           prettyPrintBytes(
             vm?.currentMemory,
@@ -166,28 +166,28 @@ class ProcessStatisticsWidget extends StatelessWidget {
     return VMInfoCard(
       title: 'Process',
       rowKeyValues: [
-        MapEntry('PID', vm?.pid),
-        MapEntry(
+        stringWidgetMapEntry('PID', vm?.pid?.toString()),
+        stringWidgetMapEntry(
           'Host CPU',
           vm == null ? null : '${vm.hostCPU} (${vm.architectureBits}-bits)',
         ),
-        MapEntry('Target CPU', vm?.targetCPU),
-        MapEntry('Operating System', vm?.operatingSystem),
-        MapEntry(
+        stringWidgetMapEntry('Target CPU', vm?.targetCPU),
+        stringWidgetMapEntry('Operating System', vm?.operatingSystem),
+        stringWidgetMapEntry(
           'Max Memory (RSS)',
           prettyPrintBytes(
             vm?.maxRSS,
             includeUnit: true,
           ),
         ),
-        MapEntry(
+        stringWidgetMapEntry(
           'Current Memory (RSS)',
           prettyPrintBytes(
             vm?.currentRSS,
             includeUnit: true,
           ),
         ),
-        MapEntry(
+        stringWidgetMapEntry(
           'Zone Memory',
           prettyPrintBytes(
             vm?.nativeZoneMemoryUsage,

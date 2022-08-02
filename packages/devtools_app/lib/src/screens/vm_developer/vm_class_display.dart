@@ -78,7 +78,7 @@ class ClassInfoWidget extends StatelessWidget implements PreferredSizeWidget {
     required this.classDataRows,
   });
 
-  final List<MapEntry<String, Object?>> classDataRows;
+  final List<MapEntry<String, Widget>> classDataRows;
 
   @override
   Widget build(BuildContext context) {
@@ -99,10 +99,10 @@ class ClassInfoWidget extends StatelessWidget implements PreferredSizeWidget {
       );
 }
 
-List<MapEntry<String, Object?>> _classDataRows(ClassObject clazz) {
+List<MapEntry<String, Widget>> _classDataRows(ClassObject clazz) {
   return [
-    MapEntry('Object Class', clazz.obj.type),
-    MapEntry(
+    stringWidgetMapEntry('Object Class', clazz.obj.type),
+    stringWidgetMapEntry(
       'Shallow Size',
       prettyPrintBytes(
         clazz.obj.size ?? 0,
@@ -135,21 +135,21 @@ List<MapEntry<String, Object?>> _classDataRows(ClassObject clazz) {
               ),
       ),
     ),
-    MapEntry(
+    stringWidgetMapEntry(
       'Library',
       clazz.obj.library?.name?.isEmpty ?? false
           ? clazz.script?.uri
           : clazz.obj.library?.name,
     ),
-    MapEntry(
+    stringWidgetMapEntry(
       'Script',
       '${fileNameFromUri(clazz.script?.uri) ?? ''}:${clazz.pos?.toString() ?? ''}',
     ),
-    MapEntry('Superclass', clazz.obj.superClass?.name),
-    MapEntry('SuperType', clazz.obj.superType?.name),
-    MapEntry(
+    stringWidgetMapEntry('Superclass', clazz.obj.superClass?.name),
+    stringWidgetMapEntry('SuperType', clazz.obj.superType?.name),
+    stringWidgetMapEntry(
       'Currently allocated instances',
-      clazz.instances?.totalCount,
+      clazz.instances?.totalCount?.toString(),
     ),
   ];
 }
@@ -169,13 +169,14 @@ class ClassInstancesWidget extends StatelessWidget {
     return VMInfoCard(
       title: 'Class Instances',
       rowKeyValues: [
-        MapEntry('Currently allocated', instances?.totalCount),
-        const MapEntry('Strongly reachable', 'TO-DO'),
-        const MapEntry('All direct instances', 'TO-DO'),
-        const MapEntry('All instances of subclasses', 'TO-DO'),
-        const MapEntry('All instances of implementors', 'TO-DO'),
-        const MapEntry('Reachable size', 'TO-DO'),
-        const MapEntry('Retained size', 'TO-DO'),
+        stringWidgetMapEntry(
+            'Currently allocated', instances?.totalCount?.toString()),
+        stringWidgetMapEntry('Strongly reachable', 'TO-DO'),
+        stringWidgetMapEntry('All direct instances', 'TO-DO'),
+        stringWidgetMapEntry('All instances of subclasses', 'TO-DO'),
+        stringWidgetMapEntry('All instances of implementors', 'TO-DO'),
+        stringWidgetMapEntry('Reachable size', 'TO-DO'),
+        stringWidgetMapEntry('Retained size', 'TO-DO'),
       ],
     );
   }
