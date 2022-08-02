@@ -62,7 +62,8 @@ class AppSizeAnalysisTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TreeTable<TreemapNode>(
-      dataRoots: controller.isDeferredApp.value ? rootNode.children : [rootNode],
+      dataRoots:
+          controller.isDeferredApp.value ? rootNode.children : [rootNode],
       columns: columns,
       treeColumn: treeColumn,
       keyFactory: (node) => PageStorageKey<String>(node.name),
