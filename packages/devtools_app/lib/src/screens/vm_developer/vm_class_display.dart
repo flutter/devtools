@@ -170,7 +170,9 @@ class ClassInstancesWidget extends StatelessWidget {
       title: 'Class Instances',
       rowKeyValues: [
         stringWidgetMapEntry(
-            'Currently allocated', instances?.totalCount?.toString()),
+          'Currently allocated',
+          instances?.totalCount?.toString(),
+        ),
         stringWidgetMapEntry('Strongly reachable', 'TO-DO'),
         stringWidgetMapEntry('All direct instances', 'TO-DO'),
         stringWidgetMapEntry('All instances of subclasses', 'TO-DO'),
