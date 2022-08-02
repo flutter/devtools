@@ -166,7 +166,7 @@ class FieldObject extends VmObject {
 
   late final Class? guardClass;
 
-  late final String? guardClassKind;
+  late final GuardClassKind? guardClassKind;
 
   @override
   Future<void> initialize() async {
@@ -175,7 +175,7 @@ class FieldObject extends VmObject {
     guardNullable = obj.guardNullable;
     guardClassKind = obj.guardClassKind();
 
-    if (guardClassKind == FieldPrivateViewExtension.guardClassSingle) {
+    if (guardClassKind == GuardClassKind.single) {
       guardClass = await obj.guardClass;
     } else {
       guardClass = null;

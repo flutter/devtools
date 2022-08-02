@@ -535,8 +535,8 @@ String? _fileNameFromUri(String? uri) {
 class VmObjectDisplayBasicLayout extends StatelessWidget {
   const VmObjectDisplayBasicLayout({
     required this.object,
-    this.generalInfoTitle = 'General Information',
     required this.generalDataRows,
+    this.generalInfoTitle = 'General Information',
     this.sideCardTitle = 'Object Details',
     this.sideCardDataRows,
     this.expandableWidgets,
@@ -595,11 +595,15 @@ class VmObjectDisplayBasicLayout extends StatelessWidget {
   }
 
   void _onExpandRetainingPath(bool expanded) {
-    if (object.retainingPath.value == null) object.requestRetainingPath();
+    if (object.retainingPath.value == null) {
+      object.requestRetainingPath();
+    }
   }
 
   void _onExpandInboundRefs(bool expanded) {
-    if (object.inboundReferences.value == null) object.requestInboundsRefs();
+    if (object.inboundReferences.value == null) {
+      object.requestInboundsRefs();
+    }
   }
 }
 

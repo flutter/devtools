@@ -51,16 +51,21 @@ List<MapEntry<String, Object?>> _fieldDataRows(FieldObject field) {
 String _fieldObservedTypes(FieldObject field) {
   late String type;
 
-  if (field.guardClassKind == FieldPrivateViewExtension.guardClassSingle) {
-    type = field.guardClass!.name ?? '<Observed Type>';
-  } else if (field.guardClassKind ==
-      FieldPrivateViewExtension.guardClassUnknown) {
-    type = 'none';
-  } else if (field.guardClassKind ==
-      FieldPrivateViewExtension.guardClassDynamic) {
-    type = FieldPrivateViewExtension.guardClassDynamic;
-  } else {
-    type = 'Observed types not found';
+  final kind = field.guardClassKind;
+
+  switch (kind) {
+    case GuardClassKind.single:
+      type = field.guardClass!.name ?? '<Observed Type>';
+      break;
+    case GuardClassKind.dynamic:
+      type = GuardClassKind.dynamic.toString();
+      break;
+    case GuardClassKind.unknown:
+      type = 'none';
+      break;
+    case null:
+      type = 'Observed types not found';
+      break;
   }
 
   final nullable = field.guardNullable == null

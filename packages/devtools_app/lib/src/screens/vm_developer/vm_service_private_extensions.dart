@@ -196,9 +196,6 @@ extension CodePrivateViewExtension on Code {
 /// An extension on [Field] which allows for access to VM internal fields.
 extension FieldPrivateViewExtension on Field {
   static const guardClassKey = '_guardClass';
-  static const guardClassSingle = 'single';
-  static const guardClassDynamic = 'various';
-  static const guardClassUnknown = 'unknown';
 
   bool? get guardNullable => json!['_guardNullable'];
 
@@ -214,13 +211,14 @@ extension FieldPrivateViewExtension on Field {
     return null;
   }
 
-  String? guardClassKind() {
+//This is effectively returning an enum. Let's create an enum GuardClassKind (see the section on enhanced enums in the 2.17 release notes).
+  GuardClassKind? guardClassKind() {
     if (_guardClassIsClass()) {
-      return guardClassSingle;
-    } else if (json![guardClassKey] == guardClassDynamic) {
-      return guardClassDynamic;
-    } else if (json![guardClassKey] == guardClassUnknown) {
-      return guardClassUnknown;
+      return GuardClassKind.single;
+    } else if (json![guardClassKey] == GuardClassKind.dynamic.toString()) {
+      return GuardClassKind.dynamic;
+    } else if (json![guardClassKey] == GuardClassKind.unknown.toString()) {
+      return GuardClassKind.unknown;
     }
 
     return null;
@@ -237,6 +235,26 @@ extension FieldPrivateViewExtension on Field {
       return true;
     } else {
       return false;
+    }
+  }
+}
+
+/// The kinds of Guard Class that determine whether a Field object has
+/// [single], [dynamic], or [unknown] observed types.
+enum GuardClassKind {
+  single,
+  dynamic,
+  unknown;
+
+  @override
+  String toString() {
+    switch (this) {
+      case GuardClassKind.single:
+        return 'single';
+      case GuardClassKind.dynamic:
+        return 'various';
+      case GuardClassKind.unknown:
+        return 'unknown';
     }
   }
 }
