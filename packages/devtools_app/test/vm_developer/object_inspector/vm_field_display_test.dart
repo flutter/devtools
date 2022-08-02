@@ -73,6 +73,7 @@ void main() {
       await tester.pumpWidget(wrap(VmFieldDisplay(field: mockFieldObject)));
 
       expect(find.byType(VmObjectDisplayBasicLayout), findsOneWidget);
+      expect(find.byType(VMInfoCard), findsOneWidget);
       expect(find.text('General Information'), findsOneWidget);
       expect(find.text('Field'), findsOneWidget);
       expect(find.text('256 B'), findsOneWidget);
@@ -94,8 +95,7 @@ void main() {
         (WidgetTester tester) async {
       when(mockFieldObject.guardClass).thenReturn(testClass);
       when(mockFieldObject.guardNullable).thenReturn(true);
-      when(mockFieldObject.guardClassKind)
-          .thenReturn(FieldPrivateViewExtension.guardClassSingle);
+      when(mockFieldObject.guardClassKind).thenReturn(GuardClassKind.single);
 
       await tester.pumpWidget(wrap(VmFieldDisplay(field: mockFieldObject)));
       expect(find.text('FooClass - null observed'), findsOneWidget);
@@ -106,8 +106,7 @@ void main() {
         (WidgetTester tester) async {
       when(mockFieldObject.guardClass).thenReturn(null);
       when(mockFieldObject.guardNullable).thenReturn(false);
-      when(mockFieldObject.guardClassKind)
-          .thenReturn(FieldPrivateViewExtension.guardClassDynamic);
+      when(mockFieldObject.guardClassKind).thenReturn(GuardClassKind.dynamic);
 
       await tester.pumpWidget(wrap(VmFieldDisplay(field: mockFieldObject)));
       expect(find.text('various - null not observed'), findsOneWidget);
@@ -118,8 +117,7 @@ void main() {
         (WidgetTester tester) async {
       when(mockFieldObject.guardClass).thenReturn(null);
       when(mockFieldObject.guardNullable).thenReturn(null);
-      when(mockFieldObject.guardClassKind)
-          .thenReturn(FieldPrivateViewExtension.guardClassUnknown);
+      when(mockFieldObject.guardClassKind).thenReturn(GuardClassKind.unknown);
 
       await tester.pumpWidget(wrap(VmFieldDisplay(field: mockFieldObject)));
       expect(
