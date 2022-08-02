@@ -86,8 +86,7 @@ class InspectorPreferencesController extends DisposableController
       serviceManager.inspectorService as InspectorService;
 
   final _hoverEvalMode = ValueNotifier<bool>(false);
-  final ListValueNotifier<String> _customPubRootDirectories =
-      ListValueNotifier<String>([]);
+  final _customPubRootDirectories = ListValueNotifier<String>([]);
   final _customPubRootDirectoriesAreBusy = ValueNotifier<bool>(false);
   final _busyCounter = ValueNotifier<int>(0);
   static const _hoverEvalModeStorageId = 'inspector.hoverEvalMode';
