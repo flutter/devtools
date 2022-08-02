@@ -130,13 +130,6 @@ class AppSizeController {
     }
   }
 
-  void changeDiffRootState() {
-    if (_activeAppSegment == _mainOnly) {
-      //temporary placement until deferred can be seen
-      changeDiffRoot(diffRoot.value!.children[0]);
-    }
-  }
-
   TreemapNode? get _activeDiffRoot {
     switch (_activeDiffTreeType.value) {
       case DiffTreeType.increaseOnly:
@@ -231,8 +224,10 @@ class AppSizeController {
 
   void changeSelectedAppSegment(AppSegment appSegment) {
     _selectedAppSegment.value = appSegment;
+    print(appSegment);
+    print(_activeAppSegment);
     _loadApp(_activeAppSegment!);
-    changeDiffRootState();
+    // generateDeferredDiffTree(_activeAppSegment!, appSegment);
   }
 
   /// Notifies that the json files are currently being processed.
@@ -295,8 +290,9 @@ class AppSizeController {
 
   void _loadApp(Map<String, dynamic> appData) {
     // Build a tree with [TreemapNode] from [appData].
-    final appRoot = generateTree(appData)!;
-    changeAnalysisRoot(appRoot);
+    if (appData == null) print('no');
+    // final appRoot = generateTree(appData)!;
+    // changeAnalysisRoot(appRoot);
   }
 
   bool _hasDeferredInfo(Map<String, dynamic> jsonFile) {
@@ -378,6 +374,8 @@ class AppSizeController {
             'children': [newFileJson]
           };
         }
+        //temp set deferredApp to true
+        _isDeferredApp.value = deferredLoadingSupportEnabled;
       }
 
       final oldApkProgramInfo = ProgramInfo();
@@ -494,6 +492,27 @@ class AppSizeController {
         return null;
       }
       return _buildNode(treeJson, byteSize);
+    }
+  }
+
+  TreemapNode? generateDeferredDiffTree(
+    Map<String, dynamic> treeJson,
+    AppSegment appSegment,
+  ) {
+    final isLeafNode = treeJson['children'] == null;
+    if (!isLeafNode) {
+      return _buildNodeWithChildren(
+        treeJson,
+        showDiff: true,
+      );
+    } else {
+      if (appSegment == AppSegment.mainOnly) {
+        for (TreemapNode child in treeJson['children']) {
+          if (child.name == 'Root') {
+            break;
+          }
+        }
+      }
     }
   }
 

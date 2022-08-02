@@ -521,7 +521,10 @@ class _DiffViewState extends State<DiffView>
                 Row(
                   children: [
                     Flexible(
-                      child: AppSizeDiffTable(rootNode: diffRoot!),
+                      child: AppSizeDiffTable(
+                        rootNode: diffRoot!,
+                        controller: controller,
+                      ),
                     ),
                     if (diffCallGraphRoot != null)
                       Flexible(
