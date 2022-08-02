@@ -78,7 +78,7 @@ class ClassInfoWidget extends StatelessWidget implements PreferredSizeWidget {
     required this.classDataRows,
   });
 
-  final List<MapEntry<String, Widget>> classDataRows;
+  final List<MapEntry<String, Widget Function(BuildContext)>> classDataRows;
 
   @override
   Widget build(BuildContext context) {
@@ -99,10 +99,12 @@ class ClassInfoWidget extends StatelessWidget implements PreferredSizeWidget {
       );
 }
 
-List<MapEntry<String, Widget>> _classDataRows(ClassObject clazz) {
+List<MapEntry<String, Widget Function(BuildContext)>> _classDataRows(
+  ClassObject clazz,
+) {
   return [
-    selectableTextMapEntry('Object Class', clazz.obj.type),
-    selectableTextMapEntry(
+    selectableTextBuilderMapEntry('Object Class', clazz.obj.type),
+    selectableTextBuilderMapEntry(
       'Shallow Size',
       prettyPrintBytes(
         clazz.obj.size ?? 0,
@@ -113,7 +115,7 @@ List<MapEntry<String, Widget>> _classDataRows(ClassObject clazz) {
     ),
     MapEntry(
       'Reachable Size',
-      ValueListenableBuilder<bool>(
+      (context) => ValueListenableBuilder<bool>(
         valueListenable: clazz.fetchingReachableSize,
         builder: (context, fetching, _) => fetching
             ? const CircularProgressIndicator()
@@ -125,7 +127,7 @@ List<MapEntry<String, Widget>> _classDataRows(ClassObject clazz) {
     ),
     MapEntry(
       'Retained Size',
-      ValueListenableBuilder<bool>(
+      (context) => ValueListenableBuilder<bool>(
         valueListenable: clazz.fetchingRetainedSize,
         builder: (context, fetching, _) => fetching
             ? const CircularProgressIndicator()
@@ -135,19 +137,19 @@ List<MapEntry<String, Widget>> _classDataRows(ClassObject clazz) {
               ),
       ),
     ),
-    selectableTextMapEntry(
+    selectableTextBuilderMapEntry(
       'Library',
       clazz.obj.library?.name?.isEmpty ?? false
           ? clazz.script?.uri
           : clazz.obj.library?.name,
     ),
-    selectableTextMapEntry(
+    selectableTextBuilderMapEntry(
       'Script',
       '${fileNameFromUri(clazz.script?.uri) ?? ''}:${clazz.pos?.toString() ?? ''}',
     ),
-    selectableTextMapEntry('Superclass', clazz.obj.superClass?.name),
-    selectableTextMapEntry('SuperType', clazz.obj.superType?.name),
-    selectableTextMapEntry(
+    selectableTextBuilderMapEntry('Superclass', clazz.obj.superClass?.name),
+    selectableTextBuilderMapEntry('SuperType', clazz.obj.superType?.name),
+    selectableTextBuilderMapEntry(
       'Currently allocated instances',
       clazz.instances?.totalCount?.toString(),
     ),
@@ -169,16 +171,16 @@ class ClassInstancesWidget extends StatelessWidget {
     return VMInfoCard(
       title: 'Class Instances',
       rowKeyValues: [
-        selectableTextMapEntry(
+        selectableTextBuilderMapEntry(
           'Currently allocated',
           instances?.totalCount?.toString(),
         ),
-        selectableTextMapEntry('Strongly reachable', 'TO-DO'),
-        selectableTextMapEntry('All direct instances', 'TO-DO'),
-        selectableTextMapEntry('All instances of subclasses', 'TO-DO'),
-        selectableTextMapEntry('All instances of implementors', 'TO-DO'),
-        selectableTextMapEntry('Reachable size', 'TO-DO'),
-        selectableTextMapEntry('Retained size', 'TO-DO'),
+        selectableTextBuilderMapEntry('Strongly reachable', 'TO-DO'),
+        selectableTextBuilderMapEntry('All direct instances', 'TO-DO'),
+        selectableTextBuilderMapEntry('All instances of subclasses', 'TO-DO'),
+        selectableTextBuilderMapEntry('All instances of implementors', 'TO-DO'),
+        selectableTextBuilderMapEntry('Reachable size', 'TO-DO'),
+        selectableTextBuilderMapEntry('Retained size', 'TO-DO'),
       ],
     );
   }

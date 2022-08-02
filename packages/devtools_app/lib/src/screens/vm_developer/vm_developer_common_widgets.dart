@@ -29,7 +29,7 @@ class VMInfoCard extends StatelessWidget implements PreferredSizeWidget {
   });
 
   final String title;
-  final List<MapEntry<String, Widget>>? rowKeyValues;
+  final List<MapEntry<String, Widget Function(BuildContext)>>? rowKeyValues;
   final Widget? table;
 
   @override
@@ -56,17 +56,15 @@ class VMInfoCard extends StatelessWidget implements PreferredSizeWidget {
   }
 }
 
-MapEntry<String, Widget> selectableTextMapEntry(
+MapEntry<String, Widget Function(BuildContext)> selectableTextBuilderMapEntry(
   String key,
   String? value,
 ) {
   return MapEntry(
     key,
-    Builder(
-      builder: (context) => SelectableText(
-        value ?? '--',
-        style: Theme.of(context).fixedFontStyle,
-      ),
+    (context) => SelectableText(
+      value ?? '--',
+      style: Theme.of(context).fixedFontStyle,
     ),
   );
 }
@@ -79,7 +77,7 @@ class VMInfoList extends StatelessWidget {
   });
 
   final String title;
-  final List<MapEntry<String, Widget>>? rowKeyValues;
+  final List<MapEntry<String, Widget Function(BuildContext)>>? rowKeyValues;
   final Widget? table;
 
   @override
@@ -115,7 +113,7 @@ class VMInfoList extends StatelessWidget {
                           ),
                           const SizedBox(width: denseSpacing),
                           Flexible(
-                            child: row.value,
+                            child: Builder(builder: row.value),
                           ),
                         ],
                       )
