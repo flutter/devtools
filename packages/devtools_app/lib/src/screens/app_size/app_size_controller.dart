@@ -17,7 +17,7 @@ import '../../ui/colors.dart';
 import 'app_size_screen.dart';
 
 // Temporary feature flag for deferred loading.
-const deferredLoadingSupportEnabled = false;
+const deferredLoadingSupportEnabled = true;
 
 enum DiffTreeType {
   increaseOnly,
@@ -25,7 +25,7 @@ enum DiffTreeType {
   combined,
 }
 
-enum AppSegment {
+enum AppUnit {
   mainOnly,
   deferredOnly,
   entireApp,
@@ -146,13 +146,13 @@ class AppSizeController {
   TreemapNode? _decreasedDiffTreeRoot;
   TreemapNode? _combinedDiffTreeRoot;
 
-  Map<String, dynamic>? get _activeAppSegment {
-    switch (_selectedAppSegment.value) {
-      case AppSegment.deferredOnly:
+  Map<String, dynamic>? get _activeAppUnit {
+    switch (_selectedAppUnit.value) {
+      case AppUnit.deferredOnly:
         return _deferredOnly;
-      case AppSegment.mainOnly:
+      case AppUnit.mainOnly:
         return _mainOnly;
-      case AppSegment.entireApp:
+      case AppUnit.entireApp:
       default:
         return _entireApp;
     }
@@ -219,12 +219,12 @@ class AppSizeController {
   }
 
   /// The selected app segment to analyze (for deferred apps only).
-  ValueListenable<AppSegment> get selectedAppSegment => _selectedAppSegment;
-  final _selectedAppSegment = ValueNotifier<AppSegment>(AppSegment.entireApp);
+  ValueListenable<AppUnit> get selectedAppUnit => _selectedAppUnit;
+  final _selectedAppUnit = ValueNotifier<AppUnit>(AppUnit.entireApp);
 
-  void changeSelectedAppSegment(AppSegment appSegment) {
-    _selectedAppSegment.value = appSegment;
-    _loadApp(_activeAppSegment!);
+  void changeSelectedAppUnit(AppUnit appUnit) {
+    _selectedAppUnit.value = appUnit;
+    _loadApp(_activeAppUnit!);
   }
 
   /// Notifies that the json files are currently being processed.
@@ -274,10 +274,10 @@ class AppSizeController {
         deferredLoadingSupportEnabled && _hasDeferredInfo(processedJson);
 
     if (isDeferredApp.value) {
-      _deferredOnly = _extractDeferredSegments({...processedJson});
-      _mainOnly = _extractMainSegment({...processedJson});
+      _deferredOnly = _extractDeferredUnits({...processedJson});
+      _mainOnly = _extractMainUnit({...processedJson});
       _entireApp = _includeEntireApp({...processedJson});
-      _loadApp(_activeAppSegment!);
+      _loadApp(_activeAppUnit!);
     } else {
       _loadApp(processedJson);
     }
@@ -295,7 +295,7 @@ class AppSizeController {
     return jsonFile['n'] == 'ArtificialRoot';
   }
 
-  Map<String, dynamic> _extractMainSegment(Map<String, dynamic> jsonFile) {
+  Map<String, dynamic> _extractMainUnit(Map<String, dynamic> jsonFile) {
     if (_hasDeferredInfo(jsonFile)) {
       final main = _extractChildren(jsonFile).firstWhere(
         (child) => child['n'] == 'Main',
@@ -306,7 +306,7 @@ class AppSizeController {
     return jsonFile;
   }
 
-  Map<String, dynamic> _extractDeferredSegments(
+  Map<String, dynamic> _extractDeferredUnits(
     Map<String, dynamic> jsonFile,
   ) {
     if (_hasDeferredInfo(jsonFile)) {

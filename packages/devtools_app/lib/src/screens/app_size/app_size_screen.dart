@@ -51,7 +51,7 @@ class AppSizeScreen extends Screen {
   static const diffTypeDropdownKey = Key('Diff Tree Type Dropdown');
 
   @visibleForTesting
-  static const appSegmentDropdownKey = Key('App Segment Dropdown');
+  static const appUnitDropdownKey = Key('App Segment Dropdown');
 
   @visibleForTesting
   static const analysisViewTreemapKey = Key('Analysis View Treemap');
@@ -210,7 +210,7 @@ class _AppSizeBodyState extends State<AppSizeBody>
                     children: [
                       if (currentTab.key == AppSizeScreen.analysisTabKey &&
                           isDeferredApp)
-                        _buildAppSegmentDropdown(),
+                        _buildAppUnitDropdown(),
                       if (currentTab.key == AppSizeScreen.diffTabKey)
                         _buildDiffTreeTypeDropdown(),
                       const SizedBox(width: defaultSpacing),
@@ -253,19 +253,19 @@ class _AppSizeBodyState extends State<AppSizeBody>
     );
   }
 
-  DropdownButtonHideUnderline _buildAppSegmentDropdown() {
+  DropdownButtonHideUnderline _buildAppUnitDropdown() {
     return DropdownButtonHideUnderline(
-      key: AppSizeScreen.appSegmentDropdownKey,
-      child: DropdownButton<AppSegment>(
-        value: controller.selectedAppSegment.value,
+      key: AppSizeScreen.appUnitDropdownKey,
+      child: DropdownButton<AppUnit>(
+        value: controller.selectedAppUnit.value,
         items: [
-          _buildAppSegmentMenuItem(AppSegment.entireApp),
-          _buildAppSegmentMenuItem(AppSegment.mainOnly),
-          _buildAppSegmentMenuItem(AppSegment.deferredOnly),
+          _buildAppUnitMenuItem(AppUnit.entireApp),
+          _buildAppUnitMenuItem(AppUnit.mainOnly),
+          _buildAppUnitMenuItem(AppUnit.deferredOnly),
         ],
-        onChanged: (newAppSegment) {
+        onChanged: (newAppUnit) {
           setState(() {
-            controller.changeSelectedAppSegment(newAppSegment!);
+            controller.changeSelectedAppUnit(newAppUnit!);
           });
         },
       ),
@@ -281,10 +281,10 @@ class _AppSizeBodyState extends State<AppSizeBody>
     );
   }
 
-  DropdownMenuItem<AppSegment> _buildAppSegmentMenuItem(AppSegment appSegment) {
-    return DropdownMenuItem<AppSegment>(
-      value: appSegment,
-      child: Text(appSegment.display),
+  DropdownMenuItem<AppUnit> _buildAppUnitMenuItem(AppUnit appUnit) {
+    return DropdownMenuItem<AppUnit>(
+      value: appUnit,
+      child: Text(appUnit.display),
     );
   }
 
@@ -630,14 +630,14 @@ extension DiffTreeTypeExtension on DiffTreeType {
   }
 }
 
-extension AppSegmentExtension on AppSegment {
+extension AppUnitExtension on AppUnit {
   String get display {
     switch (this) {
-      case AppSegment.deferredOnly:
+      case AppUnit.deferredOnly:
         return 'Deferred';
-      case AppSegment.mainOnly:
+      case AppUnit.mainOnly:
         return 'Main';
-      case AppSegment.entireApp:
+      case AppUnit.entireApp:
       default:
         return 'Entire App';
     }
