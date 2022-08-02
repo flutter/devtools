@@ -13,6 +13,7 @@ import 'package:vm_service/vm_service.dart';
 @GenerateMocks([
   ConnectedApp,
   DebuggerController,
+  EnhanceTracingController,
   ErrorBadgeManager,
   HeapSnapshotGraph,
   PerformanceController,
@@ -23,6 +24,7 @@ import 'package:vm_service/vm_service.dart';
   VmServiceWrapper,
   ObjectGroupBase,
   ClassObject,
+  CodeObject,
   ui.Image,
 ])
 void main() {}

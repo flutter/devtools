@@ -8,6 +8,7 @@ import 'dart:math' as math;
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/foundation.dart';
 import 'package:pedantic/pedantic.dart';
+import 'package:vm_service/vm_service.dart' show Event;
 
 import '../../analytics/analytics.dart' as ga;
 import '../../analytics/constants.dart' as analytics_constants;
@@ -26,10 +27,11 @@ import '../profiler/cpu_profile_controller.dart';
 import '../profiler/cpu_profile_service.dart';
 import '../profiler/cpu_profile_transformer.dart';
 import '../profiler/profile_granularity.dart';
+import 'panes/controls/enhance_tracing/enhance_tracing_controller.dart';
+import 'panes/raster_metrics/raster_metrics_controller.dart';
 import 'performance_model.dart';
 import 'performance_screen.dart';
 import 'performance_utils.dart';
-import 'raster_metrics_controller.dart';
 import 'rebuild_counts.dart';
 import 'simple_trace_example.dart';
 import 'timeline_event_processor.dart';
@@ -37,6 +39,8 @@ import 'timeline_event_processor.dart';
 /// Debugging flag to load sample trace events from [simple_trace_example.dart].
 bool debugSimpleTrace = false;
 
+// TODO(https://github.com/flutter/devtools/issues/4287): add more tests before
+// enabling this feature.
 /// Flag to hide the frame analysis feature while it is under development.
 bool frameAnalysisSupported = false;
 
@@ -61,6 +65,8 @@ class PerformanceController extends DisposableController
 
   final cpuProfilerController =
       CpuProfilerController(analyticsScreenId: analytics_constants.performance);
+
+  final enhanceTracingController = EnhanceTracingController();
 
   final rasterMetricsController = RasterMetricsController();
 
@@ -198,12 +204,24 @@ class PerformanceController extends DisposableController
           await serviceManager.queryDisplayRefreshRate ?? defaultRefreshRate;
       data?.displayRefreshRate = _displayRefreshRate.value;
 
+      enhanceTracingController.init();
+
+      // Listen for the first 'Flutter.Frame' event we receive from this point
+      // on so that we know the start id for frames that we can assign the
+      // current [FlutterFrame.enhanceTracingState].
+      _listenForFirstLiveFrame();
+
       // Listen for Flutter.Frame events with frame timing data.
       // Listen for Flutter.RebuiltWidgets events.
       autoDisposeStreamSubscription(
         serviceManager.service!.onExtensionEventWithHistory.listen((event) {
           if (event.extensionKind == 'Flutter.Frame') {
             final frame = FlutterFrame.parse(event.extensionData!.data);
+            // We can only assign [FlutterFrame.enhanceTracingState] for frames
+            // with ids after [_firstLiveFrameId].
+            if (_firstLiveFrameId != null && frame.id >= _firstLiveFrameId!) {
+              frame.enhanceTracingState = enhanceTracingController.tracingState;
+            }
             addFrame(frame);
           } else if (event.extensionKind == 'Flutter.RebuiltWidgets') {
             rebuildCountModel.processRebuildEvent(event.extensionData!.data);
@@ -248,6 +266,42 @@ class PerformanceController extends DisposableController
             displayRefreshRate: await serviceManager.queryDisplayRefreshRate,
           )
         : PerformanceData();
+  }
+
+  /// The id of the first 'Flutter.Frame' event that occurs after the DevTools
+  /// performance page is opened.
+  ///
+  /// For frames with this id and greater, we can assign
+  /// [FlutterFrame.enhanceTracingState]. For frames with an earlier id, we
+  /// do not know the value of [FlutterFrame.enhanceTracingState], and we will
+  /// use other heuristics.
+  int? _firstLiveFrameId;
+
+  /// Stream subscription on the 'Extension' stream that listens for the first
+  /// 'Flutter.Frame' event.
+  ///
+  /// This stream should be initialized and cancelled in
+  /// [_listenForFirstLiveFrame], unless we never receive any 'Flutter.Frame'
+  /// events, in which case the subscription will be canceled in [dispose].
+  StreamSubscription<Event>? _firstFrameEventSubscription;
+
+  /// Listens on the 'Extension' stream (without history) for 'Flutter.Frame'
+  /// events.
+  ///
+  /// This method assigns [_firstLiveFrameId] when the first 'Flutter.Frame'
+  /// event is received, and then cancels the stream subscription.
+  void _listenForFirstLiveFrame() {
+    _firstFrameEventSubscription =
+        serviceManager.service!.onExtensionEvent.listen(
+      (event) {
+        if (event.extensionKind == 'Flutter.Frame' &&
+            _firstLiveFrameId == null) {
+          _firstLiveFrameId = FlutterFrame.parse(event.extensionData!.data).id;
+          _firstFrameEventSubscription!.cancel();
+          _firstFrameEventSubscription = null;
+        }
+      },
+    );
   }
 
   Future<void> _pullTraceEventsFromVmTimeline({
@@ -879,6 +933,8 @@ class PerformanceController extends DisposableController
     _pollingTimer?.cancel();
     _timelinePollingRateLimiter?.dispose();
     cpuProfilerController.dispose();
+    enhanceTracingController.dispose();
+    _firstFrameEventSubscription?.cancel();
     super.dispose();
   }
 }

@@ -429,18 +429,41 @@ class InspectorService extends InspectorServiceBase {
     return false;
   }
 
-  Future<void> setPubRootDirectories(List<String> rootDirectories) async {
-    await _setPubRootDirectories(rootDirectories);
+  Future<void> addPubRootDirectories(List<String> rootDirectories) async {
+    await _addPubRootDirectories(rootDirectories);
     await _onRootDirectoriesChanged(rootDirectories);
   }
 
-  Future<void> _setPubRootDirectories(List<String> rootDirectories) {
-    // No need to call this from a breakpoint.
+  Future<void> removePubRootDirectories(List<String> rootDirectories) async {
+    await _removePubRootDirectories(rootDirectories);
+    await _onRootDirectoriesChanged(rootDirectories);
+  }
+
+  Future<void> _addPubRootDirectories(List<String> pubDirectories) {
     assert(useDaemonApi);
     return invokeServiceMethodDaemonNoGroupArgs(
-      'setPubRootDirectories',
-      rootDirectories,
+      'addPubRootDirectories',
+      pubDirectories,
     );
+  }
+
+  Future<void> _removePubRootDirectories(List<String> pubDirectories) {
+    assert(useDaemonApi);
+    return invokeServiceMethodDaemonNoGroupArgs(
+      'removePubRootDirectories',
+      pubDirectories,
+    );
+  }
+
+  Future<List<String>?> getPubRootDirectories() async {
+    assert(useDaemonApi);
+    final response = await invokeServiceMethodDaemonNoGroupArgs(
+      'getPubRootDirectories',
+    );
+
+    return (response as List<dynamic>)
+        .map<String>((e) => e.toString())
+        .toList();
   }
 
   /// As we aren't running from an IDE, we don't know exactly what the pub root
@@ -511,7 +534,7 @@ class InspectorService extends InspectorServiceBase {
     }
     pubRootDirectory ??= (parts..removeLast()).join('/');
 
-    await _setPubRootDirectories([pubRootDirectory]);
+    await _addPubRootDirectories([pubRootDirectory]);
     await group.dispose();
     return pubRootDirectory;
   }

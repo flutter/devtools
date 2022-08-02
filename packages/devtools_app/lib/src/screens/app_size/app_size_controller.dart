@@ -13,7 +13,11 @@ import 'package:vm_snapshot_analysis/v8_profile.dart';
 import '../../charts/treemap.dart';
 import '../../primitives/utils.dart';
 import '../../shared/table.dart';
+import '../../ui/colors.dart';
 import 'app_size_screen.dart';
+
+// Temporary feature flag for deferred loading.
+const deferredLoadingSupportEnabled = false;
 
 enum DiffTreeType {
   increaseOnly,
@@ -51,6 +55,8 @@ class AppSizeController {
   /// Used to build the treemap and the tree table for the analysis tab.
   final analysisRoot = ValueNotifier<Selection<TreemapNode>>(Selection.empty());
 
+  late bool isDeferredApp;
+
   void changeAnalysisRoot(TreemapNode? newAnalysisRoot) {
     if (newAnalysisRoot == null) {
       analysisRoot.value = Selection.empty();
@@ -77,10 +83,12 @@ class AppSizeController {
 
   int nodeIndexCalculator(TreemapNode newAnalysisRoot) {
     final searchCondition = (TreemapNode n) => n == newAnalysisRoot;
-    return newAnalysisRoot.root.childCountToMatchingNode(
+    if (!newAnalysisRoot.root.isExpanded) newAnalysisRoot.root.expand();
+    final nodeIndex = newAnalysisRoot.root.childCountToMatchingNode(
       matchingNodeCondition: searchCondition,
       includeCollapsedNodes: false,
     );
+    return isDeferredApp ? nodeIndex - 1 : nodeIndex;
   }
 
   ValueListenable<DevToolsJsonFile?> get analysisJsonFile => _analysisJsonFile;
@@ -229,12 +237,20 @@ class AppSizeController {
 
     changeAnalysisJsonFile(jsonFile);
 
-    // Set name for root node.
-    processedJson['n'] = 'Root';
+    // Set deferred app flag.
+    isDeferredApp =
+        deferredLoadingSupportEnabled && processedJson['n'] == 'ArtificialRoot';
+
+    // Set root name.
+    processedJson['n'] = isDeferredApp ? 'Entire app' : 'Root';
 
     // Build a tree with [TreemapNode] from [processedJsonMap].
-    final newRoot = generateTree(processedJson)!;
+    final jsonRoot = generateTree(processedJson)!;
 
+    // Determine the correct root node.
+    final newRoot = isDeferredApp
+        ? jsonRoot.childrenMap.values.firstWhere((node) => node.name == 'Root')
+        : jsonRoot;
     changeAnalysisRoot(newRoot);
 
     _processingNotifier.value = false;
@@ -478,11 +494,16 @@ class AppSizeController {
       childrenMap[child.name] = child;
     }
 
+    final bool isDeferred =
+        treeJson['isDeferred'] != null && treeJson['isDeferred'];
+
     return TreemapNode(
       name: name,
       byteSize: byteSize,
       childrenMap: childrenMap,
       showDiff: showDiff,
+      backgroundColor: isDeferred ? treemapDeferredColor : null,
+      caption: isDeferred ? '(Deferred)' : null,
     )..addAllChildren(children);
   }
 }

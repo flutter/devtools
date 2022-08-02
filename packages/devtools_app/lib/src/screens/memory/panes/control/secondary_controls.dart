@@ -13,6 +13,7 @@ import '../../../../shared/globals.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../memory_controller.dart';
+import '../../primitives/ui.dart';
 import '../chart/chart_pane_controller.dart';
 import 'adb_button.dart';
 import 'constants.dart';
