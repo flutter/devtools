@@ -21,7 +21,7 @@ import 'vm_service_private_extensions.dart';
 ///
 /// `table` is a widget (typically a table) that is to be displayed after the
 /// rows specified for `rowKeyValues`.
-class VMInfoCard extends StatelessWidget {
+class VMInfoCard extends StatelessWidget implements PreferredSizeWidget {
   const VMInfoCard({
     required this.title,
     this.rowKeyValues,
@@ -29,7 +29,7 @@ class VMInfoCard extends StatelessWidget {
   });
 
   final String title;
-  final List<MapEntry>? rowKeyValues;
+  final List<MapEntry<String, Widget Function(BuildContext)>>? rowKeyValues;
   final Widget? table;
 
   @override
@@ -42,6 +42,31 @@ class VMInfoCard extends StatelessWidget {
       ),
     );
   }
+
+  @override
+  Size get preferredSize {
+    if (table != null) {
+      return Size.infinite;
+    }
+    return Size.fromHeight(
+      areaPaneHeaderHeight +
+          (rowKeyValues?.length ?? 0) * defaultRowHeight +
+          defaultSpacing,
+    );
+  }
+}
+
+MapEntry<String, Widget Function(BuildContext)> selectableTextBuilderMapEntry(
+  String key,
+  String? value,
+) {
+  return MapEntry(
+    key,
+    (context) => SelectableText(
+      value ?? '--',
+      style: Theme.of(context).fixedFontStyle,
+    ),
+  );
 }
 
 class VMInfoList extends StatelessWidget {
@@ -52,7 +77,7 @@ class VMInfoList extends StatelessWidget {
   });
 
   final String title;
-  final List<MapEntry>? rowKeyValues;
+  final List<MapEntry<String, Widget Function(BuildContext)>>? rowKeyValues;
   final Widget? table;
 
   @override
@@ -88,12 +113,7 @@ class VMInfoList extends StatelessWidget {
                           ),
                           const SizedBox(width: denseSpacing),
                           Flexible(
-                            child: row.value is Widget
-                                ? row.value
-                                : SelectableText(
-                                    row.value?.toString() ?? '--',
-                                    style: theme.fixedFontStyle,
-                                  ),
+                            child: Builder(builder: row.value),
                           ),
                         ],
                       )
