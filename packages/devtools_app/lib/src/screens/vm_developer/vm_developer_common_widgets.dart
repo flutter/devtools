@@ -35,11 +35,14 @@ class VMInfoCard extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: VMInfoList(
-        title: title,
-        rowKeyValues: rowKeyValues,
-        table: table,
+    return SizedBox.fromSize(
+      size: preferredSize,
+      child: Card(
+        child: VMInfoList(
+          title: title,
+          rowKeyValues: rowKeyValues,
+          table: table,
+        ),
       ),
     );
   }
@@ -556,26 +559,24 @@ class VmObjectDisplayBasicLayout extends StatelessWidget {
   const VmObjectDisplayBasicLayout({
     required this.object,
     required this.generalDataRows,
+    this.sideCardDataRows,
     this.generalInfoTitle = 'General Information',
     this.sideCardTitle = 'Object Details',
-    this.sideCardDataRows,
     this.expandableWidgets,
   });
 
   final VmObject object;
-  final String generalInfoTitle;
   final List<MapEntry<String, Widget Function(BuildContext)>> generalDataRows;
-  final String sideCardTitle;
   final List<MapEntry<String, Widget Function(BuildContext)>>? sideCardDataRows;
-
+  final String generalInfoTitle;
+  final String sideCardTitle;
   final List<Widget>? expandableWidgets;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // TO-DO(mtaylee): change Flexible to IntrinsicHeight when PR #4329 is merged.
-        Flexible(
+        IntrinsicHeight(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -591,7 +592,7 @@ class VmObjectDisplayBasicLayout extends StatelessWidget {
                     title: sideCardTitle,
                     rowKeyValues: sideCardDataRows,
                   ),
-                )
+                ),
             ],
           ),
         ),
