@@ -27,15 +27,16 @@ class VmFieldDisplay extends StatelessWidget {
 
 /// Generates a list of key-value pairs (map entries) containing the general
 /// information of the field object [field].
-List<MapEntry<String, Object?>> _fieldDataRows(FieldObject field) {
+List<MapEntry<String, Widget Function(BuildContext)>> _fieldDataRows(
+    FieldObject field) {
   return [
     ...vmObjectGeneralDataRows(field),
-    MapEntry(
+    selectableTextBuilderMapEntry(
       'Observed types',
       _fieldObservedTypes(field),
     ),
     if (field.obj.staticValue is InstanceRef)
-      MapEntry(
+      selectableTextBuilderMapEntry(
         'Static Value',
         '${field.obj.staticValue.name ?? field.obj.staticValue.classRef.name}: '
             '${field.obj.staticValue.valueAsString ?? 'Unknown value'}',

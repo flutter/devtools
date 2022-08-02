@@ -6,7 +6,7 @@ import 'package:devtools_app/src/screens/performance/panes/frame_analysis/frame_
 import 'package:devtools_app/src/screens/performance/performance_model.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../test_data/performance.dart';
+import '../../test_data/performance.dart';
 
 void main() {
   group('FrameAnalysis', () {
@@ -29,7 +29,7 @@ void main() {
     test('layoutPhase', () {
       final layoutPhase = frameAnalysis.layoutPhase;
       expect(layoutPhase.events.length, equals(1));
-      expect(layoutPhase.duration.inMicroseconds, equals(211));
+      expect(layoutPhase.duration.inMicroseconds, equals(128));
     });
 
     test('paintPhase', () {
@@ -76,6 +76,35 @@ void main() {
         ..setEventFlow(goldenRasterTimelineEvent);
       frameAnalysis = FrameAnalysis(frame);
       expect(frameAnalysis.hasExpensiveOperations, isFalse);
+    });
+
+    test('calculateFramePhaseFlexValues', () {
+      expect(frameAnalysis.buildFlex, isNull);
+      expect(frameAnalysis.layoutFlex, isNull);
+      expect(frameAnalysis.paintFlex, isNull);
+      expect(frameAnalysis.rasterFlex, isNull);
+      expect(frameAnalysis.shaderCompilationFlex, isNull);
+
+      frameAnalysis.calculateFramePhaseFlexValues();
+
+      expect(frameAnalysis.buildFlex, equals(29));
+      expect(frameAnalysis.layoutFlex, equals(45));
+      expect(frameAnalysis.paintFlex, equals(26));
+      expect(frameAnalysis.rasterFlex, equals(1));
+      expect(frameAnalysis.shaderCompilationFlex, isNull);
+
+      frame = testFrame0.shallowCopy()
+        ..setEventFlow(goldenUiTimelineEvent)
+        ..setEventFlow(rasterTimelineEventWithSubtleShaderJank);
+      frameAnalysis = FrameAnalysis(frame);
+
+      frameAnalysis.calculateFramePhaseFlexValues();
+
+      expect(frameAnalysis.buildFlex, equals(29));
+      expect(frameAnalysis.layoutFlex, equals(45));
+      expect(frameAnalysis.paintFlex, equals(26));
+      expect(frameAnalysis.rasterFlex, equals(67));
+      expect(frameAnalysis.shaderCompilationFlex, equals(33));
     });
   });
 }

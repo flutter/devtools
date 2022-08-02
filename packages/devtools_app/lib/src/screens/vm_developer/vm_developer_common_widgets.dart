@@ -22,7 +22,7 @@ import 'vm_service_private_extensions.dart';
 ///
 /// `table` is a widget (typically a table) that is to be displayed after the
 /// rows specified for `rowKeyValues`.
-class VMInfoCard extends StatelessWidget {
+class VMInfoCard extends StatelessWidget implements PreferredSizeWidget {
   const VMInfoCard({
     required this.title,
     this.rowKeyValues,
@@ -30,7 +30,7 @@ class VMInfoCard extends StatelessWidget {
   });
 
   final String title;
-  final List<MapEntry>? rowKeyValues;
+  final List<MapEntry<String, Widget Function(BuildContext)>>? rowKeyValues;
   final Widget? table;
 
   @override
@@ -43,6 +43,31 @@ class VMInfoCard extends StatelessWidget {
       ),
     );
   }
+
+  @override
+  Size get preferredSize {
+    if (table != null) {
+      return Size.infinite;
+    }
+    return Size.fromHeight(
+      areaPaneHeaderHeight +
+          (rowKeyValues?.length ?? 0) * defaultRowHeight +
+          defaultSpacing,
+    );
+  }
+}
+
+MapEntry<String, Widget Function(BuildContext)> selectableTextBuilderMapEntry(
+  String key,
+  String? value,
+) {
+  return MapEntry(
+    key,
+    (context) => SelectableText(
+      value ?? '--',
+      style: Theme.of(context).fixedFontStyle,
+    ),
+  );
 }
 
 class VMInfoList extends StatelessWidget {
@@ -53,7 +78,7 @@ class VMInfoList extends StatelessWidget {
   });
 
   final String title;
-  final List<MapEntry>? rowKeyValues;
+  final List<MapEntry<String, Widget Function(BuildContext)>>? rowKeyValues;
   final Widget? table;
 
   @override
@@ -89,12 +114,7 @@ class VMInfoList extends StatelessWidget {
                           ),
                           const SizedBox(width: denseSpacing),
                           Flexible(
-                            child: row.value is Widget
-                                ? row.value
-                                : SelectableText(
-                                    row.value?.toString() ?? '--',
-                                    style: theme.fixedFontStyle,
-                                  ),
+                            child: Builder(builder: row.value),
                           ),
                         ],
                       )
@@ -544,9 +564,9 @@ class VmObjectDisplayBasicLayout extends StatelessWidget {
 
   final VmObject object;
   final String generalInfoTitle;
-  final List<MapEntry<String, Object?>> generalDataRows;
+  final List<MapEntry<String, Widget Function(BuildContext)>> generalDataRows;
   final String sideCardTitle;
-  final List<MapEntry<String, Object?>>? sideCardDataRows;
+  final List<MapEntry<String, Widget Function(BuildContext)>>? sideCardDataRows;
 
   final List<Widget>? expandableWidgets;
 
@@ -607,10 +627,11 @@ class VmObjectDisplayBasicLayout extends StatelessWidget {
   }
 }
 
-List<MapEntry<String, Object?>> vmObjectGeneralDataRows(VmObject object) {
+List<MapEntry<String, Widget Function(BuildContext)>> vmObjectGeneralDataRows(
+    VmObject object) {
   return [
-    MapEntry('Object Class', object.obj.type),
-    MapEntry(
+    selectableTextBuilderMapEntry('Object Class', object.obj.type),
+    selectableTextBuilderMapEntry(
       'Shallow Size',
       prettyPrintBytes(
         object.obj.size ?? 0,
@@ -621,7 +642,7 @@ List<MapEntry<String, Object?>> vmObjectGeneralDataRows(VmObject object) {
     ),
     MapEntry(
       'Reachable Size',
-      ValueListenableBuilder<bool>(
+      (context) => ValueListenableBuilder<bool>(
         valueListenable: object.fetchingReachableSize,
         builder: (context, fetching, _) => fetching
             ? const CircularProgressIndicator()
@@ -633,7 +654,7 @@ List<MapEntry<String, Object?>> vmObjectGeneralDataRows(VmObject object) {
     ),
     MapEntry(
       'Retained Size',
-      ValueListenableBuilder<bool>(
+      (context) => ValueListenableBuilder<bool>(
         valueListenable: object.fetchingRetainedSize,
         builder: (context, fetching, _) => fetching
             ? const CircularProgressIndicator()
@@ -644,17 +665,17 @@ List<MapEntry<String, Object?>> vmObjectGeneralDataRows(VmObject object) {
       ),
     ),
     if (object is ClassObject)
-      MapEntry(
+      selectableTextBuilderMapEntry(
         'Library',
         _objectName(object.obj.library),
       ),
     if (object is FieldObject || object is FuncObject)
-      MapEntry(
+      selectableTextBuilderMapEntry(
         'Owner',
         _ownerName(object),
       ),
     if (object is! ScriptObject && object is! LibraryObject)
-      MapEntry(
+      selectableTextBuilderMapEntry(
         'Script',
         '${_fileNameFromUri(object.script?.uri) ?? ''}:${object.pos?.toString() ?? ''}',
       ),

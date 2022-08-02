@@ -13,6 +13,7 @@ import 'package:vm_service/vm_service.dart';
 @GenerateMocks([
   ConnectedApp,
   DebuggerController,
+  EnhanceTracingController,
   ErrorBadgeManager,
   HeapSnapshotGraph,
   PerformanceController,

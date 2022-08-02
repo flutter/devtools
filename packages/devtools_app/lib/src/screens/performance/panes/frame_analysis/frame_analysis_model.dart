@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-
 import '../../../../primitives/trees.dart';
 import '../../../../primitives/utils.dart';
 import '../../performance_model.dart';
@@ -16,14 +14,6 @@ class FrameAnalysis {
   static const saveLayerEventName = 'Canvas::saveLayer';
 
   static const intrinsicsEventSuffix = ' intrinsics';
-
-  ValueListenable<FramePhase?> get selectedPhase => _selectedPhase;
-
-  final _selectedPhase = ValueNotifier<FramePhase?>(null);
-
-  void selectFramePhase(FramePhase block) {
-    _selectedPhase.value = block;
-  }
 
   /// Data for the build phase of [frame].
   ///
@@ -57,7 +47,9 @@ class FrameAnalysis {
   ///
   /// This is drawn from the "Layout" timeline event on the UI thread. This data
   /// may overlap with a portion of the [buildPhase] if "Build" timeline events
-  /// are children of the "Layout" event.
+  /// are children of the "Layout" event. If this is the case, the
+  /// [FramePhase.duration] for this phase will only include time that is spent
+  /// in the Layout event, outside of the Build events.
   ///
   /// Example:
   /// [-----------------Layout-----------------]
@@ -66,19 +58,30 @@ class FrameAnalysis {
 
   FramePhase _generateLayoutPhase() {
     final uiEvent = frame.timelineEventData.uiEvent;
-    if (uiEvent == null) {
-      return FramePhase.layout(events: <SyncTimelineEvent>[]);
+    if (uiEvent != null) {
+      final layoutEvent = uiEvent.firstChildWithCondition(
+        (event) =>
+            event.name
+                ?.caseInsensitiveEquals(FramePhaseType.layout.eventName) ??
+            false,
+      );
+
+      if (layoutEvent != null) {
+        final _buildChildren = layoutEvent.shallowNodesWithCondition(
+          (event) => event.name == FramePhaseType.build.eventName,
+        );
+        final buildDuration = _buildChildren.fold<Duration>(Duration.zero,
+            (previous, TimelineEvent event) {
+          return previous + event.time.duration;
+        });
+
+        return FramePhase.layout(
+          events: <SyncTimelineEvent>[layoutEvent as SyncTimelineEvent],
+          duration: layoutEvent.time.duration - buildDuration,
+        );
+      }
     }
-    final layoutEvent = uiEvent.firstChildWithCondition(
-      (event) =>
-          event.name?.caseInsensitiveEquals(FramePhaseType.layout.eventName) ??
-          false,
-    );
-    return FramePhase.layout(
-      events: <SyncTimelineEvent>[
-        if (layoutEvent != null) layoutEvent as SyncTimelineEvent,
-      ],
-    );
+    return FramePhase.layout(events: <SyncTimelineEvent>[]);
   }
 
   /// Data for the Paint phase of [frame].
@@ -114,6 +117,18 @@ class FrameAnalysis {
   );
 
   late FramePhase longestUiPhase = _calculateLongestFramePhase();
+
+  bool get hasUiData => _hasUiData ??= [
+        ...buildPhase.events,
+        ...layoutPhase.events,
+        ...paintPhase.events
+      ].isNotEmpty;
+
+  bool? _hasUiData;
+
+  bool get hasRasterData => _hasRasterData ??= rasterPhase.events.isNotEmpty;
+
+  bool? _hasRasterData;
 
   FramePhase _calculateLongestFramePhase() {
     var longestPhaseTime = Duration.zero;
@@ -176,33 +191,46 @@ class FrameAnalysis {
     _intrinsicOperationsCount = _intrinsics;
   }
 
-// TODO(kenz): calculate ratios to use as flex values. This will be a bit
-// tricky because sometimes the Build event(s) are children of Layout.
-// int buildTimeRatio() {
-//   final totalBuildEventTimeMicros = buildTime.inMicroseconds;
-//   final uiEvent = frame.timelineEventData.uiEvent;
-//   if (uiEvent == null) return 1;
-//   final totalUiTimeMicros = uiEvent.time.duration.inMicroseconds;
-//   return ((totalBuildEventTimeMicros / totalUiTimeMicros) * 1000000).round();
-// }
-//
-// int layoutTimeRatio() {
-//   final totalLayoutTimeMicros = layoutTime.inMicroseconds;
-//   final uiEvent = frame.timelineEventData.uiEvent;
-//   if (uiEvent == null) return 1;
-//   final totalUiTimeMicros =
-//       frame.timelineEventData.uiEvent.time.duration.inMicroseconds;
-//   return ((totalLayoutTimeMicros / totalUiTimeMicros) * 1000000).round();
-// }
-//
-// int paintTimeRatio() {
-//   final totalPaintTimeMicros = paintTime.inMicroseconds;
-//   final uiEvent = frame.timelineEventData.uiEvent;
-//   if (uiEvent == null) return 1;
-//   final totalUiTimeMicros =
-//       frame.timelineEventData.uiEvent.time.duration.inMicroseconds;
-//   return ((totalPaintTimeMicros / totalUiTimeMicros) * 1000000).round();
-// }
+  int? buildFlex;
+
+  int? layoutFlex;
+
+  int? paintFlex;
+
+  int? rasterFlex;
+
+  int? shaderCompilationFlex;
+
+  void calculateFramePhaseFlexValues() {
+    final totalUiTimeMicros =
+        (buildPhase.duration + layoutPhase.duration + paintPhase.duration)
+            .inMicroseconds;
+    buildFlex = _flexForPhase(buildPhase, totalUiTimeMicros);
+    layoutFlex = _flexForPhase(layoutPhase, totalUiTimeMicros);
+    paintFlex = _flexForPhase(paintPhase, totalUiTimeMicros);
+
+    if (frame.hasShaderTime) {
+      final totalRasterMicros = frame.rasterTime.inMicroseconds;
+      final shaderMicros = frame.shaderDuration.inMicroseconds;
+      final otherRasterMicros = totalRasterMicros - shaderMicros;
+      shaderCompilationFlex = _calculateFlex(shaderMicros, totalRasterMicros);
+      rasterFlex = _calculateFlex(otherRasterMicros, totalRasterMicros);
+    } else {
+      rasterFlex = 1;
+    }
+  }
+
+  int _flexForPhase(FramePhase phase, int totalTimeMicros) {
+    final totalPaintTimeMicros = phase.duration.inMicroseconds;
+    final uiEvent = frame.timelineEventData.uiEvent;
+    if (uiEvent == null) return 1;
+    return _calculateFlex(totalPaintTimeMicros, totalTimeMicros);
+  }
+
+  int _calculateFlex(int numeratorMicros, int denominatorMicros) {
+    if (numeratorMicros == 0 && denominatorMicros == 0) return 1;
+    return ((numeratorMicros / denominatorMicros) * 100).round();
+  }
 }
 
 enum FramePhaseType {
@@ -240,7 +268,7 @@ class FramePhase {
     Duration? duration,
   })  : title = type.eventName,
         duration = duration ??
-            events.fold(Duration.zero, (previous, SyncTimelineEvent event) {
+            events.fold<Duration>(Duration.zero, (previous, event) {
               return previous + event.time.duration;
             });
 

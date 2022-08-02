@@ -47,14 +47,15 @@ class VmClassDisplay extends StatelessWidget {
 // ClassInstancesWidget implementation is completed.
 /// Generates a list of key-value pairs (map entries) containing the general
 /// information of the class object [clazz].
-List<MapEntry<String, Object?>> _classDataRows(ClassObject clazz) {
+List<MapEntry<String, Widget Function(BuildContext)>> _classDataRows(
+    ClassObject clazz) {
   return [
     ...vmObjectGeneralDataRows(clazz),
-    MapEntry('Superclass', clazz.obj.superClass?.name),
-    MapEntry('SuperType', clazz.obj.superType?.name),
-    MapEntry(
+    selectableTextBuilderMapEntry('Superclass', clazz.obj.superClass?.name),
+    selectableTextBuilderMapEntry('SuperType', clazz.obj.superType?.name),
+    selectableTextBuilderMapEntry(
       'Currently allocated instances',
-      clazz.instances?.totalCount,
+      clazz.instances?.totalCount?.toString(),
     ),
   ];
 }
@@ -74,13 +75,16 @@ class ClassInstancesWidget extends StatelessWidget {
     return VMInfoCard(
       title: 'Class Instances',
       rowKeyValues: [
-        MapEntry('Currently allocated', instances?.totalCount),
-        const MapEntry('Strongly reachable', 'TO-DO'),
-        const MapEntry('All direct instances', 'TO-DO'),
-        const MapEntry('All instances of subclasses', 'TO-DO'),
-        const MapEntry('All instances of implementors', 'TO-DO'),
-        const MapEntry('Reachable size', 'TO-DO'),
-        const MapEntry('Retained size', 'TO-DO'),
+        selectableTextBuilderMapEntry(
+          'Currently allocated',
+          instances?.totalCount?.toString(),
+        ),
+        selectableTextBuilderMapEntry('Strongly reachable', 'TO-DO'),
+        selectableTextBuilderMapEntry('All direct instances', 'TO-DO'),
+        selectableTextBuilderMapEntry('All instances of subclasses', 'TO-DO'),
+        selectableTextBuilderMapEntry('All instances of implementors', 'TO-DO'),
+        selectableTextBuilderMapEntry('Reachable size', 'TO-DO'),
+        selectableTextBuilderMapEntry('Retained size', 'TO-DO'),
       ],
     );
   }
