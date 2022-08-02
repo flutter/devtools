@@ -57,7 +57,7 @@ void main() {
       (WidgetTester tester) async {
     await tester.pumpWidget(wrap(VmClassDisplay(clazz: mockClassObject)));
 
-    expect(find.byType(ClassInfoWidget), findsOneWidget);
+    expect(find.byType(VmObjectDisplayBasicLayout), findsOneWidget);
     expect(find.text('General Information'), findsOneWidget);
     expect(find.text('1 KB'), findsOneWidget);
     expect(find.text('fooLib'), findsOneWidget);

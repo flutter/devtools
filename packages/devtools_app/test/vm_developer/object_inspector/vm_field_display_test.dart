@@ -72,7 +72,7 @@ void main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(wrap(VmFieldDisplay(field: mockFieldObject)));
 
-      expect(find.byType(FieldInfoWidget), findsOneWidget);
+      expect(find.byType(VmObjectDisplayBasicLayout), findsOneWidget);
       expect(find.text('General Information'), findsOneWidget);
       expect(find.text('Field'), findsOneWidget);
       expect(find.text('256 B'), findsOneWidget);
