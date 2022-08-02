@@ -101,8 +101,8 @@ class ClassInfoWidget extends StatelessWidget implements PreferredSizeWidget {
 
 List<MapEntry<String, Widget>> _classDataRows(ClassObject clazz) {
   return [
-    stringWidgetMapEntry('Object Class', clazz.obj.type),
-    stringWidgetMapEntry(
+    selectableTextMapEntry('Object Class', clazz.obj.type),
+    selectableTextMapEntry(
       'Shallow Size',
       prettyPrintBytes(
         clazz.obj.size ?? 0,
@@ -135,19 +135,19 @@ List<MapEntry<String, Widget>> _classDataRows(ClassObject clazz) {
               ),
       ),
     ),
-    stringWidgetMapEntry(
+    selectableTextMapEntry(
       'Library',
       clazz.obj.library?.name?.isEmpty ?? false
           ? clazz.script?.uri
           : clazz.obj.library?.name,
     ),
-    stringWidgetMapEntry(
+    selectableTextMapEntry(
       'Script',
       '${fileNameFromUri(clazz.script?.uri) ?? ''}:${clazz.pos?.toString() ?? ''}',
     ),
-    stringWidgetMapEntry('Superclass', clazz.obj.superClass?.name),
-    stringWidgetMapEntry('SuperType', clazz.obj.superType?.name),
-    stringWidgetMapEntry(
+    selectableTextMapEntry('Superclass', clazz.obj.superClass?.name),
+    selectableTextMapEntry('SuperType', clazz.obj.superType?.name),
+    selectableTextMapEntry(
       'Currently allocated instances',
       clazz.instances?.totalCount?.toString(),
     ),
@@ -169,16 +169,16 @@ class ClassInstancesWidget extends StatelessWidget {
     return VMInfoCard(
       title: 'Class Instances',
       rowKeyValues: [
-        stringWidgetMapEntry(
+        selectableTextMapEntry(
           'Currently allocated',
           instances?.totalCount?.toString(),
         ),
-        stringWidgetMapEntry('Strongly reachable', 'TO-DO'),
-        stringWidgetMapEntry('All direct instances', 'TO-DO'),
-        stringWidgetMapEntry('All instances of subclasses', 'TO-DO'),
-        stringWidgetMapEntry('All instances of implementors', 'TO-DO'),
-        stringWidgetMapEntry('Reachable size', 'TO-DO'),
-        stringWidgetMapEntry('Retained size', 'TO-DO'),
+        selectableTextMapEntry('Strongly reachable', 'TO-DO'),
+        selectableTextMapEntry('All direct instances', 'TO-DO'),
+        selectableTextMapEntry('All instances of subclasses', 'TO-DO'),
+        selectableTextMapEntry('All instances of implementors', 'TO-DO'),
+        selectableTextMapEntry('Reachable size', 'TO-DO'),
+        selectableTextMapEntry('Retained size', 'TO-DO'),
       ],
     );
   }

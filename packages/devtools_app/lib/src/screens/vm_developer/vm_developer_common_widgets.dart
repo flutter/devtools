@@ -56,7 +56,7 @@ class VMInfoCard extends StatelessWidget implements PreferredSizeWidget {
   }
 }
 
-MapEntry<String, Widget> stringWidgetMapEntry(
+MapEntry<String, Widget> selectableTextMapEntry(
   String key,
   String? value,
 ) {

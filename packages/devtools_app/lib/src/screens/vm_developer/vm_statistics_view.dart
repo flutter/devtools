@@ -124,10 +124,10 @@ class GeneralVMStatisticsWidget extends StatelessWidget {
     return VMInfoCard(
       title: 'VM',
       rowKeyValues: [
-        stringWidgetMapEntry('Name', vm?.name),
-        stringWidgetMapEntry('Version', vm?.version),
-        stringWidgetMapEntry('Embedder', vm?.embedder),
-        stringWidgetMapEntry(
+        selectableTextMapEntry('Name', vm?.name),
+        selectableTextMapEntry('Version', vm?.version),
+        selectableTextMapEntry('Embedder', vm?.embedder),
+        selectableTextMapEntry(
           'Started',
           vm == null
               ? null
@@ -135,8 +135,8 @@ class GeneralVMStatisticsWidget extends StatelessWidget {
                   DateTime.fromMillisecondsSinceEpoch(vm.startTime!),
                 ),
         ),
-        stringWidgetMapEntry('Profiler Mode', vm?.profilerMode),
-        stringWidgetMapEntry(
+        selectableTextMapEntry('Profiler Mode', vm?.profilerMode),
+        selectableTextMapEntry(
           'Current Memory',
           prettyPrintBytes(
             vm?.currentMemory,
@@ -166,28 +166,28 @@ class ProcessStatisticsWidget extends StatelessWidget {
     return VMInfoCard(
       title: 'Process',
       rowKeyValues: [
-        stringWidgetMapEntry('PID', vm?.pid?.toString()),
-        stringWidgetMapEntry(
+        selectableTextMapEntry('PID', vm?.pid?.toString()),
+        selectableTextMapEntry(
           'Host CPU',
           vm == null ? null : '${vm.hostCPU} (${vm.architectureBits}-bits)',
         ),
-        stringWidgetMapEntry('Target CPU', vm?.targetCPU),
-        stringWidgetMapEntry('Operating System', vm?.operatingSystem),
-        stringWidgetMapEntry(
+        selectableTextMapEntry('Target CPU', vm?.targetCPU),
+        selectableTextMapEntry('Operating System', vm?.operatingSystem),
+        selectableTextMapEntry(
           'Max Memory (RSS)',
           prettyPrintBytes(
             vm?.maxRSS,
             includeUnit: true,
           ),
         ),
-        stringWidgetMapEntry(
+        selectableTextMapEntry(
           'Current Memory (RSS)',
           prettyPrintBytes(
             vm?.currentRSS,
             includeUnit: true,
           ),
         ),
-        stringWidgetMapEntry(
+        selectableTextMapEntry(
           'Zone Memory',
           prettyPrintBytes(
             vm?.nativeZoneMemoryUsage,
