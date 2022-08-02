@@ -48,7 +48,8 @@ class VmClassDisplay extends StatelessWidget {
 /// Generates a list of key-value pairs (map entries) containing the general
 /// information of the class object [clazz].
 List<MapEntry<String, Widget Function(BuildContext)>> _classDataRows(
-    ClassObject clazz) {
+  ClassObject clazz,
+) {
   return [
     ...vmObjectGeneralDataRows(clazz),
     selectableTextBuilderMapEntry('Superclass', clazz.obj.superClass?.name),

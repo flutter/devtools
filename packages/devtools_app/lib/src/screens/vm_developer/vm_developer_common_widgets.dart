@@ -629,7 +629,8 @@ class VmObjectDisplayBasicLayout extends StatelessWidget {
 }
 
 List<MapEntry<String, Widget Function(BuildContext)>> vmObjectGeneralDataRows(
-    VmObject object) {
+  VmObject object,
+) {
   return [
     selectableTextBuilderMapEntry('Object Class', object.obj.type),
     selectableTextBuilderMapEntry(
