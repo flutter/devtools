@@ -222,13 +222,9 @@ class AppSizeController {
   ValueListenable<AppSegment> get selectedAppSegment => _selectedAppSegment;
   final _selectedAppSegment = ValueNotifier<AppSegment>(AppSegment.entireApp);
 
-  void changeSelectedAppSegment(AppSegment appSegment) {
+  void changeSelectedAppSegment(AppSegment appSegment, Key activeTabKey) {
     _selectedAppSegment.value = appSegment;
-    // _loadApp(_activeAppSegment!);
-
-    final TreemapNode? newRoot =
-        generateDeferredDiffTree(_activeAppSegment!, appSegment);
-    changeDiffRoot(newRoot);
+    _loadApp(_activeAppSegment!, activeTabKey);
   }
 
   /// Notifies that the json files are currently being processed.
@@ -281,18 +277,25 @@ class AppSizeController {
       _deferredOnly = _extractDeferredSegments({...processedJson});
       _mainOnly = _extractMainSegment({...processedJson});
       _entireApp = _includeEntireApp({...processedJson});
-      _loadApp(_activeAppSegment!);
+      _loadApp(_activeAppSegment!, AppSizeScreen.analysisTabKey);
     } else {
-      _loadApp(processedJson);
+      _loadApp(processedJson, AppSizeScreen.analysisTabKey);
     }
 
     _processingNotifier.value = false;
   }
 
-  void _loadApp(Map<String, dynamic> appData) {
+  void _loadApp(Map<String, dynamic> appData, Key activeTabKey) {
     // Build a tree with [TreemapNode] from [appData].
-    final appRoot = generateTree(appData)!;
-    changeAnalysisRoot(appRoot);
+    if (activeTabKey == AppSizeScreen.analysisTabKey) {
+      // Analysis view only.
+      final appRoot = generateTree(appData)!;
+      changeAnalysisRoot(appRoot);
+    } else if (activeTabKey == AppSizeScreen.diffTabKey) {
+      // Diff view only.
+      final TreemapNode? newRoot = generateDeferredDiffTree(_activeAppSegment!);
+      changeDiffRoot(newRoot);
+    }
   }
 
   bool _hasDeferredInfo(Map<String, dynamic> jsonFile) {
@@ -465,9 +468,9 @@ class AppSizeController {
       _deferredOnly = _extractDeferredSegments({...diffMap});
       _mainOnly = _extractMainSegment({...diffMap});
       _entireApp = _includeEntireApp({...diffMap});
-      _loadApp(_activeAppSegment!);
+      _loadApp(_activeAppSegment!, AppSizeScreen.diffTabKey);
     } else {
-      _loadApp(diffMap);
+      _loadApp(diffMap, AppSizeScreen.diffTabKey);
     }
 
     _processingNotifier.value = false;
@@ -510,10 +513,7 @@ class AppSizeController {
     }
   }
 
-  TreemapNode? generateDeferredDiffTree(
-    Map<String, dynamic> treeJson,
-    AppSegment appSegment,
-  ) {
+  TreemapNode? generateDeferredDiffTree(Map<String, dynamic> treeJson) {
     final isLeafNode = treeJson['children'] == null;
     if (!isLeafNode) {
       //need to now build the treemapnode then pass it to changeDiffRoot
