@@ -170,8 +170,9 @@ void main() {
       expect(breadcrumbs.length, 1);
       expect(breadcrumbs.first.text, equals('Root [6.0 MB]'));
       expect(find.byType(BreadcrumbNavigator), findsOneWidget);
-      expect(find.text('package:flutter'), findsOneWidget);
-      expect(find.text('dart:core'), findsOneWidget);
+
+      expect(find.richText('package:flutter'), findsOneWidget);
+      expect(find.richText('dart:core'), findsOneWidget);
 
       expect(find.byType(AppSizeAnalysisTable), findsOneWidget);
       expect(find.byType(AppSizeDiffTable), findsNothing);
@@ -278,8 +279,8 @@ void main() {
           .toList();
       expect(breadcrumbs.length, 1);
       expect(breadcrumbs.first.text, equals('Root [+1.5 MB]'));
-      expect(find.text('package:pointycastle'), findsOneWidget);
-      expect(find.text('package:flutter'), findsOneWidget);
+      expect(find.richText('package:pointycastle'), findsOneWidget);
+      expect(find.richText('package:flutter'), findsOneWidget);
 
       expect(find.byType(AppSizeAnalysisTable), findsNothing);
       expect(find.byType(AppSizeDiffTable), findsOneWidget);
@@ -304,8 +305,9 @@ void main() {
           .toList();
       expect(breadcrumbs.length, 1);
       expect(breadcrumbs.first.text, equals('Root [+1.6 MB]'));
-      expect(find.text('package:pointycastle'), findsOneWidget);
-      expect(find.text('package:flutter'), findsOneWidget);
+
+      expect(find.richText('package:pointycastle'), findsOneWidget);
+      expect(find.richText('package:flutter'), findsOneWidget);
 
       await tester.tap(find.byKey(AppSizeScreen.dropdownKey));
       await tester.pumpAndSettle();
@@ -313,9 +315,9 @@ void main() {
       await tester.tap(find.text('Decrease Only').hitTestable());
       await tester.pumpAndSettle();
 
-      expect(find.text('Root'), findsOneWidget);
-      expect(find.text('package:memory'), findsOneWidget);
-      expect(find.text('package:flutter'), findsOneWidget);
+      expect(find.richText('Root'), findsOneWidget);
+      expect(find.richText('package:memory'), findsOneWidget);
+      expect(find.richText('package:flutter'), findsOneWidget);
     });
 
     testWidgetsWithWindowSize('clears data', windowSize,

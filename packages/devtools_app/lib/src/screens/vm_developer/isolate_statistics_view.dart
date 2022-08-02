@@ -148,11 +148,11 @@ class GeneralIsolateStatisticsWidget extends StatelessWidget {
     return VMInfoCard(
       title: 'General',
       rowKeyValues: [
-        MapEntry('Name', isolate?.name),
-        MapEntry('Started at', _startTime(isolate)),
-        MapEntry('Uptime', _uptime(isolate)),
-        MapEntry('Root Library', isolate?.rootLib?.uri),
-        MapEntry('ID', isolate?.id),
+        selectableTextBuilderMapEntry('Name', isolate?.name),
+        selectableTextBuilderMapEntry('Started at', _startTime(isolate)),
+        selectableTextBuilderMapEntry('Uptime', _uptime(isolate)),
+        selectableTextBuilderMapEntry('Root Library', isolate?.rootLib?.uri),
+        selectableTextBuilderMapEntry('ID', isolate?.id),
       ],
     );
   }
@@ -183,21 +183,21 @@ class IsolateMemoryStatisticsWidget extends StatelessWidget {
           child: VMInfoCard(
             title: 'Memory',
             rowKeyValues: [
-              MapEntry(
+              selectableTextBuilderMapEntry(
                 'Dart Heap',
                 _buildMemoryString(
                   isolate?.dartHeapSize,
                   isolate?.dartHeapCapacity,
                 ),
               ),
-              MapEntry(
+              selectableTextBuilderMapEntry(
                 'New Space',
                 _buildMemoryString(
                   isolate?.newSpaceUsage,
                   isolate?.newSpaceUsage,
                 ),
               ),
-              MapEntry(
+              selectableTextBuilderMapEntry(
                 'Old Space',
                 _buildMemoryString(
                   isolate?.oldSpaceUsage,

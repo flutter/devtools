@@ -297,12 +297,13 @@ void main() {
               .cpuProfileData!.profileMetaData.time!.duration.inMicroseconds,
           equals(250),
         );
-        expect(find.text('Frame1'), findsOneWidget);
-        expect(find.text('Frame2'), findsOneWidget);
-        expect(find.text('Frame3'), findsOneWidget);
-        expect(find.text('Frame4'), findsOneWidget);
-        expect(find.text('Frame5'), findsOneWidget);
-        expect(find.text('Frame6'), findsOneWidget);
+
+        expect(find.richText('Frame1'), findsOneWidget);
+        expect(find.richText('Frame2'), findsOneWidget);
+        expect(find.richText('Frame3'), findsOneWidget);
+        expect(find.richText('Frame4'), findsOneWidget);
+        expect(find.richText('Frame5'), findsOneWidget);
+        expect(find.richText('Frame6'), findsOneWidget);
 
         await tester.tap(find.byType(UserTagDropdown));
         await tester.pumpAndSettle();
@@ -316,10 +317,10 @@ void main() {
           equals(100),
         );
         expect(find.text('Frame1'), findsNothing);
-        expect(find.text('Frame2'), findsOneWidget);
+        expect(find.richText('Frame2'), findsOneWidget);
         expect(find.text('Frame3'), findsNothing);
         expect(find.text('Frame4'), findsNothing);
-        expect(find.text('Frame5'), findsOneWidget);
+        expect(find.richText('Frame5'), findsOneWidget);
         expect(find.text('Frame6'), findsNothing);
 
         await tester.tap(find.byType(UserTagDropdown));
@@ -334,7 +335,7 @@ void main() {
           equals(50),
         );
         expect(find.text('Frame1'), findsNothing);
-        expect(find.text('Frame2'), findsOneWidget);
+        expect(find.richText('Frame2'), findsOneWidget);
         expect(find.text('Frame3'), findsNothing);
         expect(find.text('Frame4'), findsNothing);
         expect(find.text('Frame5'), findsNothing);
@@ -355,8 +356,8 @@ void main() {
         expect(find.text('Frame2'), findsNothing);
         expect(find.text('Frame3'), findsNothing);
         expect(find.text('Frame4'), findsNothing);
-        expect(find.text('Frame5'), findsOneWidget);
-        expect(find.text('Frame6'), findsOneWidget);
+        expect(find.richText('Frame5'), findsOneWidget);
+        expect(find.richText('Frame6'), findsOneWidget);
       });
     });
   });
