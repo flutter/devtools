@@ -131,7 +131,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     });
     addAutoDisposeListener(preferences.inspector.customPubRootDirectories, () {
       if (serviceManager.hasConnection) {
-        _customPubRootDirectoriesRefreshDebouncer(() => _refreshInspector());
+        _refreshInspector();
       }
     });
   }
