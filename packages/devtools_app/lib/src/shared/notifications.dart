@@ -32,7 +32,7 @@ class NotificationsView extends StatelessWidget {
     return Overlay(
       initialEntries: [
         OverlayEntry(
-          builder: (context) => _NotificationsProvider(child: child),
+          builder: (context) => _NotificationsContent(child: child),
           maintainState: true,
           opaque: true,
         ),
@@ -41,17 +41,17 @@ class NotificationsView extends StatelessWidget {
   }
 }
 
-class _NotificationsProvider extends StatefulWidget {
-  const _NotificationsProvider({Key? key, required this.child})
+class _NotificationsContent extends StatefulWidget {
+  const _NotificationsContent({Key? key, required this.child})
       : super(key: key);
 
   final Widget child;
 
   @override
-  State<_NotificationsProvider> createState() => _NotificationsProviderState();
+  State<_NotificationsContent> createState() => _NotificationsContentState();
 }
 
-class _NotificationsProviderState extends State<_NotificationsProvider> {
+class _NotificationsContentState extends State<_NotificationsContent> {
   OverlayEntry? _overlayEntry;
 
   final List<_Notification> _notifications = [];
