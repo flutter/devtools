@@ -206,8 +206,12 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
         children: [
           MaterialButton(
             onPressed: () {
-              final didPush = notificationService
-                  .pushRichMessage(NotificationMessage('hello'));
+              final didPush = notificationService.pushRichMessage(
+                NotificationMessage(
+                  'hello',
+                  allowDuplicates: false,
+                ),
+              );
               print('!!!! didPush = $didPush');
             },
             child: const Text('Test Notifications'),

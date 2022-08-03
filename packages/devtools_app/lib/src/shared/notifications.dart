@@ -7,8 +7,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
+import '../primitives/auto_dispose_mixin.dart';
+import '../primitives/notifications.dart';
 import '../primitives/utils.dart';
 import 'common_widgets.dart';
+import 'globals.dart';
 import 'status_line.dart' as status_line;
 import 'theme.dart';
 import 'utils.dart';
@@ -32,7 +35,7 @@ class NotificationsView extends StatelessWidget {
     return Overlay(
       initialEntries: [
         OverlayEntry(
-          builder: (context) => _NotificationsContent(child: child),
+          builder: (context) => _Notifications(child: child),
           maintainState: true,
           opaque: true,
         ),
@@ -41,17 +44,16 @@ class NotificationsView extends StatelessWidget {
   }
 }
 
-class _NotificationsContent extends StatefulWidget {
-  const _NotificationsContent({Key? key, required this.child})
-      : super(key: key);
+class _Notifications extends StatefulWidget {
+  const _Notifications({Key? key, required this.child}) : super(key: key);
 
   final Widget child;
 
   @override
-  State<_NotificationsContent> createState() => _NotificationsContentState();
+  State<_Notifications> createState() => _NotificationsState();
 }
 
-class _NotificationsContentState extends State<_NotificationsContent> {
+class _NotificationsState extends State<_Notifications> with AutoDisposeMixin {
   OverlayEntry? _overlayEntry;
 
   final List<_Notification> _notifications = [];
@@ -69,6 +71,16 @@ class _NotificationsContentState extends State<_NotificationsContent> {
         Overlay.of(context)!.insert(_overlayEntry!);
       });
     }
+
+    addAutoDisposeListener(
+      notificationService.toPush,
+      () => _push(notificationService.toPush.value),
+    );
+
+    addAutoDisposeListener(
+      notificationService.toDismiss,
+      () => _dismiss(notificationService.toDismiss.value),
+    );
   }
 
   @override
@@ -80,42 +92,28 @@ class _NotificationsContentState extends State<_NotificationsContent> {
   // TODO(peterdjlee): Support clickable links in notification text. See #2268.
   /// Pushes a notification [message], and returns whether the notification was
   /// successfully pushed.
-  @override
-  bool push(
-    String message, {
-    List<Widget> actions = const [],
-    Duration duration = NotificationsView.defaultDuration,
-    bool allowDuplicates = true,
-  }) {
-    if (!allowDuplicates &&
-        _notifications.isNotEmpty &&
-        _notifications.where((n) => n.message == message).isNotEmpty) {
-      return false;
-    }
+  void _push(NotificationMessage message) {
     setState(() {
       _notifications.add(
         _Notification(
           message: message,
-          actions: actions,
           remove: _removeNotification,
-          duration: duration,
         ),
       );
       _overlayEntry?.markNeedsBuild();
     });
-    return true;
   }
 
   /// Dismisses all notifications with a matching message.
-  @override
-  void dismiss(String message) {
+  void _dismiss(String message) {
     bool didDismiss = false;
     // Make a copy so we do not remove a notification from [_notifications]
     // while iterating over it.
-    final notifications = List.from(_notifications);
+    final notifications = List.from(_notifications).cast<_Notification>();
     for (final notification in notifications) {
-      if (notification.tooltip == message) {
+      if (notification.message.text == message) {
         _notifications.remove(notification);
+        notificationService.markComplete(notification.message);
         didDismiss = true;
       }
     }
@@ -129,6 +127,7 @@ class _NotificationsContentState extends State<_NotificationsContent> {
   void _removeNotification(_Notification notification) {
     setState(() {
       final didRemove = _notifications.remove(notification);
+      notificationService.markComplete(notification.message);
       if (didRemove) {
         _overlayEntry?.markNeedsBuild();
       }
@@ -169,14 +168,10 @@ class _Notification extends StatefulWidget {
   const _Notification({
     Key? key,
     required this.message,
-    this.actions = const [],
-    this.duration = NotificationsView.defaultDuration,
     required this.remove,
   }) : super(key: key);
 
-  final Duration duration;
-  final String message;
-  final List<Widget> actions;
+  final NotificationMessage message;
   final void Function(_Notification) remove;
 
   @override
@@ -204,7 +199,7 @@ class _NotificationState extends State<_Notification>
     // to remove itself when the exit animation is completed.
     // We can do this because the NotificationsState is directly controlling
     // the life cycle of each _Notification widget presented in the overlay.
-    _dismissTimer = Timer(widget.duration, () {
+    _dismissTimer = Timer(widget.message.duration, () {
       controller.addStatusListener((status) {
         if (status == AnimationStatus.dismissed) {
           widget.remove(widget);
@@ -259,7 +254,7 @@ class _NotificationState extends State<_Notification>
 
   Widget _buildMessage() {
     return Text(
-      widget.message,
+      widget.message.text,
       style: Theme.of(context).textTheme.bodyText1,
       overflow: TextOverflow.visible,
       maxLines: 6,
@@ -267,10 +262,11 @@ class _NotificationState extends State<_Notification>
   }
 
   Widget _buildActions() {
-    if (widget.actions.isEmpty) return const SizedBox();
+    if (widget.message.actions.isEmpty) return const SizedBox();
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
-      children: widget.actions.joinWith(const SizedBox(width: denseSpacing)),
+      children:
+          widget.message.actions.joinWith(const SizedBox(width: denseSpacing)),
     );
   }
 }

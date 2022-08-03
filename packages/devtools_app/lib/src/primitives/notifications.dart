@@ -43,9 +43,10 @@ class NotificationService {
   /// Dismisses all notifications with a matching message.
   void dismiss(String message) => toDismiss.value = message;
 
-  /// Marks the message as shown, so that the messages not allowing duplicates,
+  /// Marks the message as complete, so that the messages not
+  /// allowing duplicates,
   /// with the same text, do not get rejected.
-  void markAsShown(NotificationMessage message) {
+  void markComplete(NotificationMessage message) {
     _showingNow.removeWhere((element) => element == message);
   }
 
