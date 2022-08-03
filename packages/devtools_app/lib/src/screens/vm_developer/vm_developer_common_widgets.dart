@@ -30,7 +30,7 @@ class VMInfoCard extends StatelessWidget implements PreferredSizeWidget {
   });
 
   final String title;
-  final List<MapEntry<String, Widget Function(BuildContext)>>? rowKeyValues;
+  final List<MapEntry<String, WidgetBuilder>>? rowKeyValues;
   final Widget? table;
 
   @override
@@ -60,7 +60,7 @@ class VMInfoCard extends StatelessWidget implements PreferredSizeWidget {
   }
 }
 
-MapEntry<String, Widget Function(BuildContext)> selectableTextBuilderMapEntry(
+MapEntry<String, WidgetBuilder> selectableTextBuilderMapEntry(
   String key,
   String? value,
 ) {
@@ -81,7 +81,7 @@ class VMInfoList extends StatelessWidget {
   });
 
   final String title;
-  final List<MapEntry<String, Widget Function(BuildContext)>>? rowKeyValues;
+  final List<MapEntry<String, WidgetBuilder>>? rowKeyValues;
   final Widget? table;
 
   @override
@@ -566,8 +566,8 @@ class VmObjectDisplayBasicLayout extends StatelessWidget {
   });
 
   final VmObject object;
-  final List<MapEntry<String, Widget Function(BuildContext)>> generalDataRows;
-  final List<MapEntry<String, Widget Function(BuildContext)>>? sideCardDataRows;
+  final List<MapEntry<String, WidgetBuilder>> generalDataRows;
+  final List<MapEntry<String, WidgetBuilder>>? sideCardDataRows;
   final String generalInfoTitle;
   final String sideCardTitle;
   final List<Widget>? expandableWidgets;
@@ -628,7 +628,7 @@ class VmObjectDisplayBasicLayout extends StatelessWidget {
   }
 }
 
-List<MapEntry<String, Widget Function(BuildContext)>> vmObjectGeneralDataRows(
+List<MapEntry<String, WidgetBuilder>> vmObjectGeneralDataRows(
   VmObject object,
 ) {
   return [

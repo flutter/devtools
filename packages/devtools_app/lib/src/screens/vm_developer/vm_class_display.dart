@@ -47,7 +47,7 @@ class VmClassDisplay extends StatelessWidget {
 // ClassInstancesWidget implementation is completed.
 /// Generates a list of key-value pairs (map entries) containing the general
 /// information of the class object [clazz].
-List<MapEntry<String, Widget Function(BuildContext)>> _classDataRows(
+List<MapEntry<String, WidgetBuilder>> _classDataRows(
   ClassObject clazz,
 ) {
   return [
