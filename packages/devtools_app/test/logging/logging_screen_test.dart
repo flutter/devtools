@@ -6,6 +6,8 @@
 
 import 'package:ansicolor/ansicolor.dart';
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/framework/notifications.dart';
+import 'package:devtools_app/src/primitives/notifications.dart';
 import 'package:devtools_app/src/screens/logging/_log_details.dart';
 import 'package:devtools_app/src/screens/logging/_logs_table.dart';
 import 'package:devtools_app/src/screens/logging/_message_column.dart';
@@ -33,6 +35,7 @@ void main() async {
   when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
   when(fakeServiceManager.errorBadgeManager.errorCountNotifier('logging'))
       .thenReturn(ValueNotifier<int>(0));
+  setGlobal(NotificationService, NotificationController());
 
   group('Logging Screen', () {
     Future<void> pumpLoggingScreen(WidgetTester tester) async {

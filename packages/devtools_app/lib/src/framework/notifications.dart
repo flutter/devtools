@@ -107,8 +107,6 @@ class _NotificationsState extends State<_Notifications> with AutoDisposeMixin {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    controller = notificationService as NotificationController;
-
     if (_overlayEntry == null) {
       _overlayEntry = OverlayEntry(
         maintainState: true,
@@ -117,17 +115,19 @@ class _NotificationsState extends State<_Notifications> with AutoDisposeMixin {
       SchedulerBinding.instance.scheduleFrameCallback((_) {
         Overlay.of(context)!.insert(_overlayEntry!);
       });
+
+      controller = notificationService as NotificationController;
+
+      addAutoDisposeListener(
+        controller.toPush,
+        () => _push(controller.toPush.value),
+      );
+
+      addAutoDisposeListener(
+        controller.toDismiss,
+        () => _dismiss(controller.toDismiss.value.text),
+      );
     }
-
-    addAutoDisposeListener(
-      controller.toPush,
-      () => _push(controller.toPush.value),
-    );
-
-    addAutoDisposeListener(
-      controller.toDismiss,
-      () => _dismiss(controller.toDismiss.value.text),
-    );
   }
 
   @override
