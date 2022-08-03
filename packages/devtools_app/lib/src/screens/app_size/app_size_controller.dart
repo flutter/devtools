@@ -477,10 +477,6 @@ class AppSizeController {
 
     _processingNotifier.value = false;
   }
-
-  bool isDeferredFormat(Map<String, dynamic> fileJson) {
-    return fileJson['n'] == 'ArtificialRoot';
-  }
 }
 
 ProgramInfoNode _apkJsonToProgramInfo({
