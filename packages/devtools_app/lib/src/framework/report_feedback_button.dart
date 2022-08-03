@@ -9,7 +9,6 @@ import '../analytics/constants.dart' as analytics_constants;
 import '../config_specific/launch_url/launch_url.dart';
 import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
-import 'scaffold.dart';
 import '../shared/theme.dart';
 
 class ReportFeedbackButton extends StatelessWidget {

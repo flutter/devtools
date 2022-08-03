@@ -11,7 +11,6 @@ import '../analytics/constants.dart' as analytics_constants;
 import '../shared/common_widgets.dart';
 import '../shared/dialogs.dart';
 import '../shared/globals.dart';
-import 'scaffold.dart';
 import '../shared/theme.dart';
 
 class DevToolsAboutDialog extends StatelessWidget {

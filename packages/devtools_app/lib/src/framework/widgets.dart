@@ -5,7 +5,6 @@
 import 'package:flutter/material.dart';
 
 import '../shared/theme.dart';
-import '../shared/utils.dart';
 
 /// Display a single bullet character in order to act as a stylized spacer
 /// component.

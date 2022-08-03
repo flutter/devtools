@@ -9,10 +9,8 @@ import 'package:provider/provider.dart';
 import '../analytics/analytics.dart' as ga;
 import '../analytics/constants.dart' as analytics_constants;
 import '../config_specific/import_export/import_export.dart';
-import 'framework_core.dart';
 import '../primitives/blocking_action_mixin.dart';
 import '../primitives/utils.dart';
-import '../ui/label.dart';
 import '../shared/common_widgets.dart';
 import '../shared/file_import.dart';
 import '../shared/globals.dart';
@@ -20,6 +18,8 @@ import '../shared/notifications.dart';
 import '../shared/routing.dart';
 import '../shared/theme.dart';
 import '../shared/utils.dart';
+import '../ui/label.dart';
+import 'framework_core.dart';
 
 /// The landing screen when starting Dart DevTools without being connected to an
 /// app.

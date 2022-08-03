@@ -9,7 +9,6 @@ import 'package:flutter/scheduler.dart';
 
 import '../primitives/utils.dart';
 import 'common_widgets.dart';
-import '../framework/status_line.dart' as status_line;
 import 'theme.dart';
 import 'utils.dart';
 
@@ -173,7 +172,7 @@ class NotificationsState extends State<_NotificationsProvider>
         // high enough up that we don't obscure the status line.
         padding: EdgeInsets.only(
           right: defaultSpacing,
-          bottom: status_line.statusLineHeight + defaultSpacing,
+          bottom: statusLineHeight + defaultSpacing,
         ),
         child: SizedBox(
           width: _notificationWidth,

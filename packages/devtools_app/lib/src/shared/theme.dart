@@ -230,6 +230,8 @@ double get consoleLineHeight => scaleByFontFactor(18.0);
 
 double get actionWidgetSize => scaleByFontFactor(48.0);
 
+double get statusLineHeight => scaleByFontFactor(24.0);
+
 const chartTextFontSize = 10.0;
 
 /// Branded grey color.
