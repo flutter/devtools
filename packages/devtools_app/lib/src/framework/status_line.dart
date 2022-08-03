@@ -20,7 +20,6 @@ import '../shared/utils.dart';
 import '../ui/utils.dart';
 import 'about_dialog.dart';
 import 'report_feedback_button.dart';
-import 'widgets.dart';
 
 /// The status line widget displayed at the bottom of DevTools.
 ///
