@@ -211,13 +211,12 @@ extension FieldPrivateViewExtension on Field {
     return null;
   }
 
-//This is effectively returning an enum. Let's create an enum GuardClassKind (see the section on enhanced enums in the 2.17 release notes).
   GuardClassKind? guardClassKind() {
     if (_guardClassIsClass()) {
       return GuardClassKind.single;
-    } else if (json![guardClassKey] == GuardClassKind.dynamic.toString()) {
+    } else if (json![guardClassKey] == GuardClassKind.dynamic.jsonValue()) {
       return GuardClassKind.dynamic;
-    } else if (json![guardClassKey] == GuardClassKind.unknown.toString()) {
+    } else if (json![guardClassKey] == GuardClassKind.unknown.jsonValue()) {
       return GuardClassKind.unknown;
     }
 
@@ -240,21 +239,20 @@ extension FieldPrivateViewExtension on Field {
 }
 
 /// The kinds of Guard Class that determine whether a Field object has
-/// [single], [dynamic], or [unknown] observed types.
+/// a unique observed type [single], various observed types [dynamic],
+/// or if the field type has not been observed yet [unknown].
 enum GuardClassKind {
   single,
   dynamic,
   unknown;
 
-  @override
-  String toString() {
+  String jsonValue() {
     switch (this) {
-      case GuardClassKind.single:
-        return 'single';
       case GuardClassKind.dynamic:
         return 'various';
+      case GuardClassKind.single:
       case GuardClassKind.unknown:
-        return 'unknown';
+        return toString().split('.').last;
     }
   }
 }

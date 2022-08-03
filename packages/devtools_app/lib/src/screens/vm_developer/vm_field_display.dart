@@ -60,7 +60,7 @@ String _fieldObservedTypes(FieldObject field) {
       type = field.guardClass!.name ?? '<Observed Type>';
       break;
     case GuardClassKind.dynamic:
-      type = GuardClassKind.dynamic.toString();
+      type = GuardClassKind.dynamic.jsonValue();
       break;
     case GuardClassKind.unknown:
       type = 'none';
