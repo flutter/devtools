@@ -117,8 +117,8 @@ class FlutterTestEnvironment {
       setGlobal(IdeTheme, IdeTheme());
       final preferencesController = PreferencesController();
       setGlobal(Storage, FlutterDesktopStorage());
-      await preferencesController.init();
       setGlobal(ServiceConnectionManager, ServiceConnectionManager());
+      await preferencesController.init();
       setGlobal(PreferencesController, preferencesController);
       setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
       setGlobal(MessageBus, MessageBus());
