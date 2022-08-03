@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -14,7 +15,7 @@ import 'vm_object_model.dart';
 import 'vm_service_private_extensions.dart';
 
 // TODO(mtaylee): Finish implementation of [ICDataArrayWidget] and add it to
-// the [VmFuncDisplay] build method.
+// the [VmFuncDisplay].
 
 /// A widget for the object inspector historyViewport displaying information
 /// related to 'Func' (function) objects in the Dart VM.
@@ -26,179 +27,26 @@ class VmFuncDisplay extends StatelessWidget {
   final FuncObject function;
 
   @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: Column(
-            children: [
-              Flexible(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Flexible(
-                      child: FuncInfoWidget(
-                        fieldDataRows: _functionDataRows(function),
-                      ),
-                    ),
-                    Flexible(
-                      child: FuncDetailsWidget(
-                        detailRows: _functionDetailRows(function),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Flexible(
-                child: ListView(
-                  children: [
-                    RetainingPathWidget(
-                      retainingPath: function.retainingPath,
-                      onExpanded: _onExpandRetainingPath,
-                    ),
-                    InboundReferencesWidget(
-                      inboundReferences: function.inboundReferences,
-                      onExpanded: _onExpandInboundRefs,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  void _onExpandRetainingPath(bool expanded) {
-    if (function.retainingPath.value == null) function.requestRetainingPath();
-  }
-
-  void _onExpandInboundRefs(bool expanded) {
-    if (function.inboundReferences.value == null)
-      function.requestInboundsRefs();
-  }
-}
-
-/// Displays general VM information of the Function Object.
-class FuncInfoWidget extends StatelessWidget implements PreferredSizeWidget {
-  const FuncInfoWidget({
-    required this.fieldDataRows,
-  });
-
-  final List<MapEntry<String, Object?>> fieldDataRows;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox.fromSize(
-      size: preferredSize,
-      child: VMInfoCard(
-        title: 'General Information',
-        rowKeyValues: fieldDataRows,
-      ),
-    );
-  }
-
-  @override
-  Size get preferredSize => Size.fromHeight(
-        areaPaneHeaderHeight +
-            fieldDataRows.length * defaultRowHeight +
-            defaultSpacing,
-      );
-}
-
-/// Displays detailed information of the VM Function Object.
-class FuncDetailsWidget extends StatelessWidget implements PreferredSizeWidget {
-  const FuncDetailsWidget({
-    required this.detailRows,
-  });
-
-  final List<MapEntry<String, Object?>> detailRows;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox.fromSize(
-      size: preferredSize,
-      child: VMInfoCard(
-        title: 'Function Details',
-        rowKeyValues: detailRows,
-      ),
-    );
-  }
-
-  @override
-  Size get preferredSize => Size.fromHeight(
-        areaPaneHeaderHeight +
-            detailRows.length * defaultRowHeight +
-            defaultSpacing,
+  Widget build(BuildContext context) => VmObjectDisplayBasicLayout(
+        object: function,
+        generalDataRows: vmObjectGeneralDataRows(function),
+        sideCardDataRows: _functionDetailRows(function),
+        sideCardTitle: 'Function Details',
       );
 }
 
 /// Returns a list of key-value pairs (map entries)
-/// containing the general information related to a VM Func object [function].
-List<MapEntry<String, Object?>> _functionDataRows(FuncObject function) {
-  String functionOwner(ObjRef? owner) {
-    if (owner is LibraryRef) {
-      return owner.name ?? owner.uri ?? 'Unknown Library';
-    } else {
-      return qualifiedName(owner) ?? function.script?.uri ?? 'Unknown';
-    }
-  }
-
-  return [
-    MapEntry('Object Class', function.obj.type),
-    MapEntry(
-      'Shallow Size',
-      prettyPrintBytes(
-        function.obj.size ?? 0,
-        includeUnit: true,
-        kbFractionDigits: 1,
-        maxBytes: 512,
-      ),
-    ),
-    MapEntry(
-      'Reachable Size',
-      ValueListenableBuilder<bool>(
-        valueListenable: function.fetchingReachableSize,
-        builder: (context, fetching, _) => fetching
-            ? const CircularProgressIndicator()
-            : RequestableSizeWidget(
-                requestedSize: function.reachableSize,
-                requestFunction: function.requestReachableSize,
-              ),
-      ),
-    ),
-    MapEntry(
-      'Retained Size',
-      ValueListenableBuilder<bool>(
-        valueListenable: function.fetchingRetainedSize,
-        builder: (context, fetching, _) => fetching
-            ? const CircularProgressIndicator()
-            : RequestableSizeWidget(
-                requestedSize: function.retainedSize,
-                requestFunction: function.requestRetainedSize,
-              ),
-      ),
-    ),
-    MapEntry(
-      'Owner',
-      functionOwner(function.obj.owner),
-    ),
-    MapEntry(
-      'Script',
-      '${fileNameFromUri(function.script?.uri) ?? ''}:${function.pos?.toString() ?? ''}',
-    ),
-  ];
-}
-
-/// Returns a list of key-value pairs (map entries)
-/// containing detailed information of a VM Func object [function]..
-List<MapEntry<String, Object?>> _functionDetailRows(FuncObject function) {
+/// containing detailed information of a VM Func object [function].
+List<MapEntry<String, Widget Function(BuildContext)>> _functionDetailRows(
+  FuncObject function,
+) {
   String? kindDescription(String? kindValue) {
     if (kindValue == null) return null;
 
-    if (!FunctionPrivateViewExtension.recognizedFunctionKinds
-        .contains(kindValue)) {
+    final funcKind = FunctionKind.values
+        .firstWhereOrNull((element) => element.kind() == kindValue);
+
+    if (funcKind == null) {
       return 'Unrecognized function kind: $kindValue';
     }
 
@@ -232,14 +80,35 @@ List<MapEntry<String, Object?>> _functionDetailRows(FuncObject function) {
   }
 
   return [
-    MapEntry('Kind', kindDescription(function.kind)),
-    MapEntry('Deoptimizations', function.deoptimizations?.toString()),
-    MapEntry('Optimizable', boolYesOrNo(function.isOptimizable)),
-    MapEntry('Inlinable', boolYesOrNo(function.isInlinable)),
-    MapEntry('Intrinsic', boolYesOrNo(function.hasIntrinsic)),
-    MapEntry('Recognized', boolYesOrNo(function.isRecognized)),
-    MapEntry('Native', boolYesOrNo(function.isNative)),
-    MapEntry('VM Name', function.vmName),
+    selectableTextBuilderMapEntry(
+      'Kind',
+      kindDescription(function.kind),
+    ),
+    selectableTextBuilderMapEntry(
+      'Deoptimizations',
+      function.deoptimizations?.toString(),
+    ),
+    selectableTextBuilderMapEntry(
+      'Optimizable',
+      boolYesOrNo(function.isOptimizable),
+    ),
+    selectableTextBuilderMapEntry(
+      'Inlinable',
+      boolYesOrNo(function.isInlinable),
+    ),
+    selectableTextBuilderMapEntry(
+      'Intrinsic',
+      boolYesOrNo(function.hasIntrinsic),
+    ),
+    selectableTextBuilderMapEntry(
+      'Recognized',
+      boolYesOrNo(function.isRecognized),
+    ),
+    selectableTextBuilderMapEntry(
+      'Native',
+      boolYesOrNo(function.isNative),
+    ),
+    selectableTextBuilderMapEntry('VM Name', function.vmName),
   ];
 }
 

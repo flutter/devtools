@@ -186,29 +186,6 @@ extension FunctionPrivateViewExtension on Func {
   static const nativeKey = '_native';
   static const icDataArrayKey = '_icDataArray';
 
-  static const recognizedFunctionKinds = {
-    'RegularFunction',
-    'ClosureFunction',
-    'ImplicitClosureFunction',
-    'GetterFunction',
-    'SetterFunction',
-    'Constructor',
-    'ImplicitGetter',
-    'ImplicitSetter',
-    'ImplicitStaticGetter',
-    'FieldInitializer',
-    'IrregexpFunction',
-    'MethodExtractor',
-    'NoSuchMethodDispatcher',
-    'InvokeFieldDispatcher',
-    'Collected',
-    'Native',
-    'FfiTrampoline',
-    'Stub',
-    'Tag',
-    'DynamicInvocationForwarder'
-  };
-
   /// The unoptimized [CodeRef] associated with the [Func].
   CodeRef? get unoptimizedCode => CodeRef.parse(json![_unoptimizedCodeKey]);
   set unoptimizedCode(CodeRef? code) => json![_unoptimizedCodeKey] = code?.json;
@@ -232,6 +209,34 @@ extension FunctionPrivateViewExtension on Func {
     } else {
       return null;
     }
+  }
+}
+
+/// The function kinds recognized by the Dart VM.
+enum FunctionKind {
+  RegularFunction,
+  ClosureFunction,
+  ImplicitClosureFunction,
+  GetterFunction,
+  SetterFunction,
+  Constructor,
+  ImplicitGetter,
+  ImplicitSetter,
+  ImplicitStaticGetter,
+  FieldInitializer,
+  IrregexpFunction,
+  MethodExtractor,
+  NoSuchMethodDispatcher,
+  InvokeFieldDispatcher,
+  Collected,
+  Native,
+  FfiTrampoline,
+  Stub,
+  Tag,
+  DynamicInvocationForwarder;
+
+  String kind() {
+    return toString().split('.').last;
   }
 }
 
