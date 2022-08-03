@@ -15,6 +15,8 @@ import 'package:vm_service/vm_service.dart';
   DebuggerController,
   EnhanceTracingController,
   ErrorBadgeManager,
+  FrameAnalysis,
+  FramePhase,
   HeapSnapshotGraph,
   PerformanceController,
   ProgramExplorerController,
