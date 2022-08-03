@@ -15,9 +15,9 @@ import '../../config_specific/launch_url/launch_url.dart';
 import '../../config_specific/logger/logger.dart' as logger;
 import '../../config_specific/server/server.dart' as server;
 import '../../primitives/auto_dispose_mixin.dart';
-import '../common_widgets.dart';
-import '../theme.dart';
-import '../version.dart';
+import '../../shared/common_widgets.dart';
+import '../../shared/theme.dart';
+import '../../shared/version.dart';
 
 const debugTestReleaseNotes = false;
 
