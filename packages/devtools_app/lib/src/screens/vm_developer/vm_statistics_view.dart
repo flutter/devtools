@@ -124,10 +124,10 @@ class GeneralVMStatisticsWidget extends StatelessWidget {
     return VMInfoCard(
       title: 'VM',
       rowKeyValues: [
-        MapEntry('Name', vm?.name),
-        MapEntry('Version', vm?.version),
-        MapEntry('Embedder', vm?.embedder),
-        MapEntry(
+        selectableTextBuilderMapEntry('Name', vm?.name),
+        selectableTextBuilderMapEntry('Version', vm?.version),
+        selectableTextBuilderMapEntry('Embedder', vm?.embedder),
+        selectableTextBuilderMapEntry(
           'Started',
           vm == null
               ? null
@@ -135,8 +135,8 @@ class GeneralVMStatisticsWidget extends StatelessWidget {
                   DateTime.fromMillisecondsSinceEpoch(vm.startTime!),
                 ),
         ),
-        MapEntry('Profiler Mode', vm?.profilerMode),
-        MapEntry(
+        selectableTextBuilderMapEntry('Profiler Mode', vm?.profilerMode),
+        selectableTextBuilderMapEntry(
           'Current Memory',
           prettyPrintBytes(
             vm?.currentMemory,
@@ -166,28 +166,28 @@ class ProcessStatisticsWidget extends StatelessWidget {
     return VMInfoCard(
       title: 'Process',
       rowKeyValues: [
-        MapEntry('PID', vm?.pid),
-        MapEntry(
+        selectableTextBuilderMapEntry('PID', vm?.pid?.toString()),
+        selectableTextBuilderMapEntry(
           'Host CPU',
           vm == null ? null : '${vm.hostCPU} (${vm.architectureBits}-bits)',
         ),
-        MapEntry('Target CPU', vm?.targetCPU),
-        MapEntry('Operating System', vm?.operatingSystem),
-        MapEntry(
+        selectableTextBuilderMapEntry('Target CPU', vm?.targetCPU),
+        selectableTextBuilderMapEntry('Operating System', vm?.operatingSystem),
+        selectableTextBuilderMapEntry(
           'Max Memory (RSS)',
           prettyPrintBytes(
             vm?.maxRSS,
             includeUnit: true,
           ),
         ),
-        MapEntry(
+        selectableTextBuilderMapEntry(
           'Current Memory (RSS)',
           prettyPrintBytes(
             vm?.currentRSS,
             includeUnit: true,
           ),
         ),
-        MapEntry(
+        selectableTextBuilderMapEntry(
           'Zone Memory',
           prettyPrintBytes(
             vm?.nativeZoneMemoryUsage,

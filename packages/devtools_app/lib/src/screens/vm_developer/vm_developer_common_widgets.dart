@@ -21,7 +21,7 @@ import 'vm_service_private_extensions.dart';
 ///
 /// `table` is a widget (typically a table) that is to be displayed after the
 /// rows specified for `rowKeyValues`.
-class VMInfoCard extends StatelessWidget {
+class VMInfoCard extends StatelessWidget implements PreferredSizeWidget {
   const VMInfoCard({
     required this.title,
     this.rowKeyValues,
@@ -29,7 +29,7 @@ class VMInfoCard extends StatelessWidget {
   });
 
   final String title;
-  final List<MapEntry>? rowKeyValues;
+  final List<MapEntry<String, Widget Function(BuildContext)>>? rowKeyValues;
   final Widget? table;
 
   @override
@@ -42,6 +42,31 @@ class VMInfoCard extends StatelessWidget {
       ),
     );
   }
+
+  @override
+  Size get preferredSize {
+    if (table != null) {
+      return Size.infinite;
+    }
+    return Size.fromHeight(
+      areaPaneHeaderHeight +
+          (rowKeyValues?.length ?? 0) * defaultRowHeight +
+          defaultSpacing,
+    );
+  }
+}
+
+MapEntry<String, Widget Function(BuildContext)> selectableTextBuilderMapEntry(
+  String key,
+  String? value,
+) {
+  return MapEntry(
+    key,
+    (context) => SelectableText(
+      value ?? '--',
+      style: Theme.of(context).fixedFontStyle,
+    ),
+  );
 }
 
 class VMInfoList extends StatelessWidget {
@@ -52,7 +77,7 @@ class VMInfoList extends StatelessWidget {
   });
 
   final String title;
-  final List<MapEntry>? rowKeyValues;
+  final List<MapEntry<String, Widget Function(BuildContext)>>? rowKeyValues;
   final Widget? table;
 
   @override
@@ -88,12 +113,7 @@ class VMInfoList extends StatelessWidget {
                           ),
                           const SizedBox(width: denseSpacing),
                           Flexible(
-                            child: row.value is Widget
-                                ? row.value
-                                : SelectableText(
-                                    row.value?.toString() ?? '--',
-                                    style: theme.fixedFontStyle,
-                                  ),
+                            child: Builder(builder: row.value),
                           ),
                         ],
                       )
@@ -177,31 +197,47 @@ class RequestableSizeWidget extends StatelessWidget {
 /// Wrapper to get the name of an ObjRef depending on its type.
 String? _objectName(ObjRef? objectRef) {
   String? objectRefName;
-  if (objectRef == null) return null;
 
-  if (objectRef is ClassRef ||
-      objectRef is FuncRef ||
-      objectRef is FieldRef ||
-      objectRef is LibraryRef) {
+  if (objectRef is ClassRef || objectRef is FuncRef || objectRef is FieldRef) {
     objectRefName = (objectRef as dynamic).name;
+  } else if (objectRef is LibraryRef) {
+    objectRefName =
+        (objectRef.name?.isEmpty ?? false) ? objectRef.uri : objectRef.name;
+  } else if (objectRef is ScriptRef) {
+    objectRefName = fileNameFromUri(objectRef.uri);
   } else if (objectRef is InstanceRef) {
     objectRefName = objectRef.name ??
         'Instance of ${objectRef.classRef?.name ?? '<Class>'}';
+  } else {
+    objectRefName = objectRef?.vmType;
   }
 
   return objectRefName;
 }
 
-/// Recursively gets the full owner name of a field or function object.
-String? _ownerName(ObjRef? ref) {
+/// Returns the name of a function, qualified with the name of
+/// its owner added as a prefix, separated by a period.
+///
+/// For example: for function build with owner class Foo,
+/// the qualified name would be Foo.build.
+/// If the owner of a function is another function, qualifiedName will
+/// recursively call itself until it reaches the owner class.
+/// If the owner is a library instead, the library name will not be
+/// included in the qualified name.
+String? qualifiedName(ObjRef? ref) {
   if (ref == null) return null;
-  if (ref is FuncRef) {
-    return '${_ownerName(ref.owner)}.${_objectName(ref)}';
-  } else if (ref is FieldRef) {
-    return '${_ownerName(ref.owner)}.${_objectName(ref)}';
-  } else {
-    return _objectName(ref) ?? '<unknown>';
+
+  if (ref is ClassRef) {
+    return '${ref.name}';
+  } else if (ref is FuncRef) {
+    if (ref.owner is! LibraryRef) {
+      return '${qualifiedName(ref.owner)}.${ref.name}';
+    } else {
+      return '${ref.name}';
+    }
   }
+
+  throw Exception('Unexpected owner type: ${ref.type}');
 }
 
 // Returns a description of the object containing its name and owner.
@@ -209,9 +245,9 @@ String? _objectDescription(ObjRef? object) {
   if (object == null) {
     return null;
   } else if (object is FieldRef) {
-    return '${object.declaredType?.name ?? 'Field'} ${object.name} of ${_ownerName(object.owner) ?? '<Owner>'}';
+    return '${object.declaredType?.name ?? 'Field'} ${object.name} of ${_objectName(object.owner) ?? '<Owner>'}';
   } else if (object is FuncRef) {
-    return '${_ownerName(object.owner) ?? '<Owner>'}.${object.name}';
+    return '${qualifiedName(object) ?? '<Function Name>'}';
   } else {
     return '${_objectName(object)}';
   }
@@ -334,9 +370,11 @@ class RetainingPathWidget extends StatelessWidget {
         for (RetainingObject object in retainingPath.elements!.sublist(1))
           Row(
             children: [
-              SelectableText(
-                _retainingObjectDescription(object),
-                style: Theme.of(context).fixedFontStyle,
+              Flexible(
+                child: SelectableText(
+                  _retainingObjectDescription(object),
+                  style: Theme.of(context).fixedFontStyle,
+                ),
               ),
             ],
           ),
@@ -373,7 +411,7 @@ class RetainingPathWidget extends StatelessWidget {
     }
 
     description.write(
-      _objectDescription(object.value),
+      _objectDescription(object.value) ?? '<object>',
     );
 
     return description.toString();
@@ -473,7 +511,7 @@ class InboundReferencesWidget extends StatelessWidget {
     }
 
     description.write(
-      _objectDescription(inboundRef.source),
+      _objectDescription(inboundRef.source) ?? '<object>',
     );
 
     return description.toString();

@@ -167,17 +167,41 @@ abstract class TreeNode<T extends TreeNode<T>> {
     return childWithCondition != null;
   }
 
-  List<T> childrenWithCondition(bool condition(T node)) {
-    final _children = <T>[];
+  /// Returns a list of nodes in this tree that match [condition].
+  ///
+  /// This list may include the root.
+  List<T> nodesWithCondition(bool condition(T node)) {
+    final _nodes = <T>[];
     breadthFirstTraversal<T>(
       this as T,
       action: (node) {
         if (condition(node)) {
-          _children.add(node);
+          _nodes.add(node);
         }
       },
     );
-    return _children;
+    return _nodes;
+  }
+
+  /// Returns a list of shallow nodes that match [condition], meaning that if
+  /// a node matches [condition], none of its children will be included in the
+  /// returned list, even if those children happen to match [condition].
+  ///
+  /// In other words, only the top-most node in each tree branch that matches
+  /// [condition] will be included in the returned list. This list may include
+  /// the root.
+  List<T> shallowNodesWithCondition(bool condition(T node)) {
+    final _nodes = <T>[];
+    depthFirstTraversal<T>(
+      this as T,
+      action: (T node) {
+        if (condition(node)) {
+          _nodes.add(node);
+        }
+      },
+      exploreChildrenCondition: (T node) => !condition(node),
+    );
+    return _nodes;
   }
 
   T? firstChildWithCondition(bool condition(T node)) {

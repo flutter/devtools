@@ -211,7 +211,9 @@ class _DartObjectColumn extends _CodeColumnData {
         final icData = objRef.asICData;
         return 'ICData (${icData.selector})';
       }
-      return objRef.vmType;
+      if (objRef.vmType != null) {
+        return objRef.vmType!;
+      }
     }
 
     return object?.toString() ?? '';

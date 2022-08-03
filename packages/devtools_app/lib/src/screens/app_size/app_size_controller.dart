@@ -13,15 +13,46 @@ import 'package:vm_snapshot_analysis/v8_profile.dart';
 import '../../charts/treemap.dart';
 import '../../primitives/utils.dart';
 import '../../shared/table.dart';
+import '../../ui/colors.dart';
 import 'app_size_screen.dart';
 
 // Temporary feature flag for deferred loading.
-const deferredLoadingSupportEnabled = true;
+bool deferredLoadingSupportEnabled = false;
 
 enum DiffTreeType {
   increaseOnly,
   decreaseOnly,
-  combined,
+  combined;
+
+  String get display {
+    switch (this) {
+      case DiffTreeType.increaseOnly:
+        return 'Increase Only';
+      case DiffTreeType.decreaseOnly:
+        return 'Decrease Only';
+      case DiffTreeType.combined:
+      default:
+        return 'Combined';
+    }
+  }
+}
+
+enum AppUnit {
+  mainOnly,
+  deferredOnly,
+  entireApp;
+
+  String get display {
+    switch (this) {
+      case AppUnit.deferredOnly:
+        return 'Deferred';
+      case AppUnit.mainOnly:
+        return 'Main';
+      case AppUnit.entireApp:
+      default:
+        return 'Entire App';
+    }
+  }
 }
 
 class AppSizeController {
@@ -54,7 +85,8 @@ class AppSizeController {
   /// Used to build the treemap and the tree table for the analysis tab.
   final analysisRoot = ValueNotifier<Selection<TreemapNode>>(Selection.empty());
 
-  late bool isDeferredApp;
+  ValueListenable<bool> get isDeferredApp => _isDeferredApp;
+  final _isDeferredApp = ValueNotifier<bool>(false);
 
   void changeAnalysisRoot(TreemapNode? newAnalysisRoot) {
     if (newAnalysisRoot == null) {
@@ -87,7 +119,7 @@ class AppSizeController {
       matchingNodeCondition: searchCondition,
       includeCollapsedNodes: false,
     );
-    return isDeferredApp ? nodeIndex - 1 : nodeIndex;
+    return isDeferredApp.value ? nodeIndex - 1 : nodeIndex;
   }
 
   ValueListenable<DevToolsJsonFile?> get analysisJsonFile => _analysisJsonFile;
@@ -137,6 +169,22 @@ class AppSizeController {
   TreemapNode? _increasedDiffTreeRoot;
   TreemapNode? _decreasedDiffTreeRoot;
   TreemapNode? _combinedDiffTreeRoot;
+
+  Map<String, dynamic>? get _dataForAppUnit {
+    switch (_selectedAppUnit.value) {
+      case AppUnit.deferredOnly:
+        return _deferredOnly;
+      case AppUnit.mainOnly:
+        return _mainOnly;
+      case AppUnit.entireApp:
+      default:
+        return _entireApp;
+    }
+  }
+
+  Map<String, dynamic>? _deferredOnly;
+  Map<String, dynamic>? _mainOnly;
+  Map<String, dynamic>? _entireApp;
 
   ValueListenable<DevToolsJsonFile?> get oldDiffJsonFile => _oldDiffJsonFile;
 
@@ -194,6 +242,15 @@ class AppSizeController {
     changeDiffRoot(_activeDiffRoot);
   }
 
+  /// The selected app segment to analyze (for deferred apps only).
+  ValueListenable<AppUnit> get selectedAppUnit => _selectedAppUnit;
+  final _selectedAppUnit = ValueNotifier<AppUnit>(AppUnit.entireApp);
+
+  void changeSelectedAppUnit(AppUnit appUnit) {
+    _selectedAppUnit.value = appUnit;
+    _loadApp(_dataForAppUnit!);
+  }
+
   /// Notifies that the json files are currently being processed.
   ValueListenable<bool> get processingNotifier => _processingNotifier;
   final _processingNotifier = ValueNotifier<bool>(false);
@@ -237,22 +294,66 @@ class AppSizeController {
     changeAnalysisJsonFile(jsonFile);
 
     // Set deferred app flag.
-    isDeferredApp =
-        deferredLoadingSupportEnabled && processedJson['n'] == 'ArtificialRoot';
+    _isDeferredApp.value =
+        deferredLoadingSupportEnabled && _hasDeferredInfo(processedJson);
 
-    // Set root name.
-    processedJson['n'] = isDeferredApp ? 'Entire app' : 'Root';
-
-    // Build a tree with [TreemapNode] from [processedJsonMap].
-    final jsonRoot = generateTree(processedJson)!;
-
-    // Determine the correct root node.
-    final newRoot = isDeferredApp
-        ? jsonRoot.childrenMap.values.firstWhere((node) => node.name == 'Root')
-        : jsonRoot;
-    changeAnalysisRoot(newRoot);
+    if (isDeferredApp.value) {
+      _deferredOnly = _extractDeferredUnits(Map.from(processedJson));
+      _mainOnly = _extractMainUnit(Map.from(processedJson));
+      _entireApp = _includeEntireApp(Map.from(processedJson));
+      _loadApp(_dataForAppUnit!);
+    } else {
+      // Set root name for non-deferred apps.
+      processedJson['n'] = 'Root';
+      _loadApp(processedJson);
+    }
 
     _processingNotifier.value = false;
+  }
+
+  void _loadApp(Map<String, dynamic> appData) {
+    // Build a tree with [TreemapNode] from [appData].
+    final appRoot = generateTree(appData)!;
+    changeAnalysisRoot(appRoot);
+  }
+
+  bool _hasDeferredInfo(Map<String, dynamic> jsonFile) {
+    return jsonFile['n'] == 'ArtificialRoot';
+  }
+
+  Map<String, dynamic> _extractMainUnit(Map<String, dynamic> jsonFile) {
+    if (_hasDeferredInfo(jsonFile)) {
+      final main = _extractChildren(jsonFile).firstWhere(
+        (child) => child['n'] == 'Main',
+        orElse: () => jsonFile,
+      );
+      return main;
+    }
+    return jsonFile;
+  }
+
+  Map<String, dynamic> _extractDeferredUnits(
+    Map<String, dynamic> jsonFile,
+  ) {
+    if (_hasDeferredInfo(jsonFile)) {
+      jsonFile['children'] = _extractChildren(jsonFile)
+          .where((child) => child['isDeferred'] == true);
+      jsonFile['n'] = 'Deferred';
+    }
+    return jsonFile;
+  }
+
+  Map<String, dynamic> _includeEntireApp(Map<String, dynamic> jsonFile) {
+    if (_hasDeferredInfo(jsonFile)) {
+      jsonFile['n'] = 'Entire App';
+    }
+    return jsonFile;
+  }
+
+  List<Map<String, dynamic>> _extractChildren(Map<String, dynamic> jsonFile) {
+    return (jsonFile['children'] as Iterable)
+        .whereType<Map<String, dynamic>>()
+        .toList();
   }
 
   // TODO(peterdjlee): Spawn an isolate to run parts of this function to
@@ -278,24 +379,25 @@ class AppSizeController {
     await delayForBatchProcessing(micros: 10000);
 
     Map<String, dynamic> diffMap;
+
     if (oldFile.isAnalyzeSizeFile && newFile.isAnalyzeSizeFile) {
       var oldFileJson = oldFile.data as Map<String, dynamic>;
       var newFileJson = newFile.data as Map<String, dynamic>;
 
-      if (!(oldFileJson['n'] == 'ArtificialRoot') ==
-          (newFileJson['n'] == 'ArtificialRoot')) {
-        if (oldFileJson['n'] != 'ArtificialRoot') {
+      if (_hasDeferredInfo(oldFileJson) || _hasDeferredInfo(newFileJson)) {
+        _isDeferredApp.value = deferredLoadingSupportEnabled;
+
+        if (!_hasDeferredInfo(oldFileJson)) {
           oldFileJson = <String, dynamic>{
             'n': 'ArtificialRoot',
             'children': [oldFileJson]
           };
-        } else {
+        } else if (!_hasDeferredInfo(newFileJson)) {
           newFileJson = <String, dynamic>{
             'n': 'ArtificialRoot',
             'children': [newFileJson]
           };
         }
-        isDeferredApp = deferredLoadingSupportEnabled;
       }
 
       final oldApkProgramInfo = ProgramInfo();
@@ -376,158 +478,156 @@ class AppSizeController {
     _processingNotifier.value = false;
   }
 
-  bool isDeferredFormat(
-      Map<String, dynamic> fileJson) {
-        return fileJson['n'] == 'ArtificialRoot';
-    }
+  bool isDeferredFormat(Map<String, dynamic> fileJson) {
+    return fileJson['n'] == 'ArtificialRoot';
   }
+}
 
-  ProgramInfoNode _apkJsonToProgramInfo({
-    required ProgramInfo program,
-    required ProgramInfoNode parent,
-    required Map<String, dynamic> json,
-  }) {
-    final bool isLeafNode = json['children'] == null;
-    final node = program.makeNode(
-      name: json['n'],
-      parent: parent,
-      type: NodeType.other,
-    );
+ProgramInfoNode _apkJsonToProgramInfo({
+  required ProgramInfo program,
+  required ProgramInfoNode parent,
+  required Map<String, dynamic> json,
+}) {
+  final bool isLeafNode = json['children'] == null;
+  final node = program.makeNode(
+    name: json['n'],
+    parent: parent,
+    type: NodeType.other,
+  );
 
-    if (!isLeafNode) {
-      final List<dynamic> rawChildren = json['children'] as List<dynamic>;
-      for (final childJson in rawChildren.cast<Map<String, dynamic>>()) {
-        _apkJsonToProgramInfo(program: program, parent: node, json: childJson);
-      }
-    } else {
-      node.size = json['value'] ?? 0;
+  if (!isLeafNode) {
+    final List<dynamic> rawChildren = json['children'] as List<dynamic>;
+    for (final childJson in rawChildren.cast<Map<String, dynamic>>()) {
+      _apkJsonToProgramInfo(program: program, parent: node, json: childJson);
     }
-    return node;
+  } else {
+    node.size = json['value'] ?? 0;
   }
+  return node;
+}
 
-  TreemapNode? generateTree(Map<String, dynamic> treeJson) {
-    final isLeafNode = treeJson['children'] == null;
-    if (!isLeafNode) {
-      return _buildNodeWithChildren(treeJson);
-    } else {
-      // TODO(peterdjlee): Investigate why there are leaf nodes with size of null.
-      final byteSize = treeJson['value'];
-      if (byteSize == null) {
-        return null;
-      }
-      return _buildNode(treeJson, byteSize);
-    }
-  }
-
-  /// Recursively generates a diff tree from [treeJson] that contains the difference
-  /// between an old size analysis file and a new size analysis file.
-  ///
-  /// Each node in the resulting tree represents a change in size for the given node.
-  ///
-  /// The tree can be filtered with different [DiffTreeType] values:
-  /// * [DiffTreeType.increaseOnly]: returns a tree with nodes with positive [byteSize].
-  /// * [DiffTreeType.decreaseOnly]: returns a tree with nodes with negative [byteSize].
-  /// * [DiffTreeType.combined]: returns a tree with all nodes.
-  TreemapNode? generateDiffTree(
-    Map<String, dynamic> treeJson,
-    DiffTreeType diffTreeType,
-  ) {
-    final isLeafNode = treeJson['children'] == null;
-    if (!isLeafNode) {
-      return _buildNodeWithChildren(
-        treeJson,
-        showDiff: true,
-        diffTreeType: diffTreeType,
-      );
-    } else {
-      // TODO(peterdjlee): Investigate why there are leaf nodes with size of null.
-      final byteSize = treeJson['value'];
-      if (byteSize == null) {
-        return null;
-      }
-      // Only add nodes that match the diff tree type.
-      switch (diffTreeType) {
-        case DiffTreeType.increaseOnly:
-          if (byteSize < 0) {
-            return null;
-          }
-          break;
-        case DiffTreeType.decreaseOnly:
-          if (byteSize > 0) {
-            return null;
-          }
-          break;
-        case DiffTreeType.combined:
-          break;
-      }
-      return _buildNode(treeJson, byteSize, showDiff: true);
-    }
-  }
-
-  /// Builds a node by recursively building all of its children first
-  /// in order to calculate the sum of its children's sizes.
-  TreemapNode? _buildNodeWithChildren(
-    Map<String, dynamic> treeJson, {
-    bool showDiff = false,
-    DiffTreeType? diffTreeType,
-  }) {
-    assert(showDiff ? diffTreeType != null : true);
-    final rawChildren = treeJson['children'];
-    final treemapNodeChildren = <TreemapNode>[];
-    int totalByteSize = 0;
-
-    // Given a child, build its subtree.
-    for (Map<String, dynamic> child in rawChildren) {
-      final childTreemapNode = showDiff
-          ? generateDiffTree(child, diffTreeType!)
-          : generateTree(child);
-      if (childTreemapNode == null) {
-        continue;
-      }
-      treemapNodeChildren.add(childTreemapNode);
-      totalByteSize += childTreemapNode.byteSize;
-    }
-
-    // If none of the children matched the diff tree type
-    if (totalByteSize == 0) {
+TreemapNode? generateTree(Map<String, dynamic> treeJson) {
+  final isLeafNode = treeJson['children'] == null;
+  if (!isLeafNode) {
+    return _buildNodeWithChildren(treeJson);
+  } else {
+    // TODO(peterdjlee): Investigate why there are leaf nodes with size of null.
+    final byteSize = treeJson['value'];
+    if (byteSize == null) {
       return null;
-    } else {
-      return _buildNode(
-        treeJson,
-        totalByteSize,
-        children: treemapNodeChildren,
-        showDiff: showDiff,
-      );
     }
+    return _buildNode(treeJson, byteSize);
+  }
+}
+
+/// Recursively generates a diff tree from [treeJson] that contains the difference
+/// between an old size analysis file and a new size analysis file.
+///
+/// Each node in the resulting tree represents a change in size for the given node.
+///
+/// The tree can be filtered with different [DiffTreeType] values:
+/// * [DiffTreeType.increaseOnly]: returns a tree with nodes with positive [byteSize].
+/// * [DiffTreeType.decreaseOnly]: returns a tree with nodes with negative [byteSize].
+/// * [DiffTreeType.combined]: returns a tree with all nodes.
+TreemapNode? generateDiffTree(
+  Map<String, dynamic> treeJson,
+  DiffTreeType diffTreeType,
+) {
+  final isLeafNode = treeJson['children'] == null;
+  if (!isLeafNode) {
+    return _buildNodeWithChildren(
+      treeJson,
+      showDiff: true,
+      diffTreeType: diffTreeType,
+    );
+  } else {
+    // TODO(peterdjlee): Investigate why there are leaf nodes with size of null.
+    final byteSize = treeJson['value'];
+    if (byteSize == null) {
+      return null;
+    }
+    // Only add nodes that match the diff tree type.
+    switch (diffTreeType) {
+      case DiffTreeType.increaseOnly:
+        if (byteSize < 0) {
+          return null;
+        }
+        break;
+      case DiffTreeType.decreaseOnly:
+        if (byteSize > 0) {
+          return null;
+        }
+        break;
+      case DiffTreeType.combined:
+        break;
+    }
+    return _buildNode(treeJson, byteSize, showDiff: true);
+  }
+}
+
+/// Builds a node by recursively building all of its children first
+/// in order to calculate the sum of its children's sizes.
+TreemapNode? _buildNodeWithChildren(
+  Map<String, dynamic> treeJson, {
+  bool showDiff = false,
+  DiffTreeType? diffTreeType,
+}) {
+  assert(showDiff ? diffTreeType != null : true);
+  final rawChildren = treeJson['children'];
+  final treemapNodeChildren = <TreemapNode>[];
+  int totalByteSize = 0;
+
+  // Given a child, build its subtree.
+  for (Map<String, dynamic> child in rawChildren) {
+    final childTreemapNode =
+        showDiff ? generateDiffTree(child, diffTreeType!) : generateTree(child);
+    if (childTreemapNode == null) {
+      continue;
+    }
+    treemapNodeChildren.add(childTreemapNode);
+    totalByteSize += childTreemapNode.byteSize;
   }
 
-  TreemapNode _buildNode(
-    Map<String, dynamic> treeJson,
-    int byteSize, {
-    List<TreemapNode> children = const [],
-    bool showDiff = false,
-  }) {
-    var name = treeJson['n'];
-    if (name == '') {
-      name = 'Unnamed';
-    }
-    final childrenMap = <String, TreemapNode>{};
-
-    for (TreemapNode child in children) {
-      childrenMap[child.name] = child;
-    }
-
-    final bool isDeferred =
-        treeJson['isDeferred'] != null && treeJson['isDeferred'];
-
-    return TreemapNode(
-      name: name,
-      byteSize: byteSize,
-      childrenMap: childrenMap,
+  // If none of the children matched the diff tree type
+  if (totalByteSize == 0) {
+    return null;
+  } else {
+    return _buildNode(
+      treeJson,
+      totalByteSize,
+      children: treemapNodeChildren,
       showDiff: showDiff,
-      isDeferred: isDeferred,
-    )..addAllChildren(children);
+    );
   }
+}
+
+TreemapNode _buildNode(
+  Map<String, dynamic> treeJson,
+  int byteSize, {
+  List<TreemapNode> children = const [],
+  bool showDiff = false,
+}) {
+  var name = treeJson['n'];
+  if (name == '') {
+    name = 'Unnamed';
+  }
+  final childrenMap = <String, TreemapNode>{};
+
+  for (TreemapNode child in children) {
+    childrenMap[child.name] = child;
+  }
+
+  final bool isDeferred =
+      treeJson['isDeferred'] != null && treeJson['isDeferred'];
+
+  return TreemapNode(
+    name: name,
+    byteSize: byteSize,
+    childrenMap: childrenMap,
+    showDiff: showDiff,
+    backgroundColor: isDeferred ? treemapDeferredColor : null,
+    caption: isDeferred ? '(Deferred)' : null,
+  )..addAllChildren(children);
 }
 
 extension AppSizeJsonFileExtension on DevToolsJsonFile {
