@@ -4,6 +4,7 @@
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
+import 'package:devtools_app/src/primitives/notifications.dart';
 import 'package:devtools_app/src/screens/memory/memory_controller.dart';
 import 'package:devtools_app/src/screens/memory/memory_heap_tree_view.dart';
 import 'package:devtools_app/src/screens/memory/memory_screen.dart';
@@ -59,6 +60,7 @@ void main() {
 
   // Set a wide enough screen width that we do not run into overflow.
   const windowSize = Size(2225.0, 1000.0);
+  setGlobal(NotificationService, NotificationController());
 
   test('Allocation profile disabled by default', () {
     // TODO(bkonyi): remove this check once we enable the tab by default.
