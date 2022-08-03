@@ -4,6 +4,8 @@
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
+import 'package:devtools_app/src/framework/notifications.dart';
+import 'package:devtools_app/src/primitives/notifications.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/framework_controller.dart';
 import 'package:devtools_app/src/shared/globals.dart';
@@ -33,6 +35,7 @@ void main() {
   setGlobal(SurveyService, SurveyService());
   setGlobal(OfflineModeController, OfflineModeController());
   setGlobal(IdeTheme, IdeTheme());
+  setGlobal(NotificationService, NotificationController());
 
   Widget wrapScaffold(Widget child) {
     return wrap(wrapWithAnalytics(child));
