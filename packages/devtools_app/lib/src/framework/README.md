@@ -1,1 +1,1 @@
-This folder contains code, used for the application window, and not used by screens.
+This folder contains the code not used by screens.
