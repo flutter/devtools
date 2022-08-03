@@ -328,7 +328,8 @@ class AppSizeController {
   }
 
   final _currentCombination = ValueNotifier<CombinedDiffTypeAppUnit>(
-      CombinedDiffTypeAppUnit.entireCombined);
+    CombinedDiffTypeAppUnit.entireCombined,
+  );
 
   void changeCombination(CombinedDiffTypeAppUnit newCombination) {
     _currentCombination.value = newCombination;
@@ -381,11 +382,15 @@ class AppSizeController {
     _isDeferredApp.value =
         deferredLoadingSupportEnabled && _hasDeferredInfo(processedJson);
 
+    //analysisTable only
     if (isDeferredApp.value) {
-      _deferredOnly = _extractDeferredUnits(Map.from(processedJson));
-      _mainOnly = _extractMainUnit(Map.from(processedJson));
-      _entireApp = _includeEntireApp(Map.from(processedJson));
-      _loadApp(_dataForAppUnit!);
+      _mainCombined = _extractMainUnit(Map.from(processedJson));
+      _deferredCombined = _extractDeferredUnits(Map.from(processedJson));
+      _entireCombined = _includeEntireApp(Map.from(processedJson));
+      // _deferredOnly = _extractDeferredUnits(Map.from(processedJson));
+      // _mainOnly = _extractMainUnit(Map.from(processedJson));
+      // _entireApp = _includeEntireApp(Map.from(processedJson));
+      _loadApp(_combinedDiffTypeAppUnit!);
     } else {
       // Set root name for non-deferred apps.
       processedJson['n'] = 'Root';
@@ -542,20 +547,37 @@ class AppSizeController {
     diffMap['n'] = isDeferredApp.value ? 'Entire App' : 'Root';
 
     // TODO(peterdjlee): Try to move the non-active tree generation to separate isolates.
-    _combinedDiffTreeRoot = generateDiffTree(
+    // _combinedDiffTreeRoot = generateDiffTree(
+    //   diffMap,
+    //   DiffTreeType.combined,
+    // );
+    // _increasedDiffTreeRoot = generateDiffTree(
+    //   diffMap,
+    //   DiffTreeType.increaseOnly,
+    // );
+    // _decreasedDiffTreeRoot = generateDiffTree(
+    //   diffMap,
+    //   DiffTreeType.decreaseOnly,
+    // );
+
+    _entireCombined = generateDiffTree(
       diffMap,
-      DiffTreeType.combined,
+      CombinedDiffTypeAppUnit.entireCombined,
     );
-    _increasedDiffTreeRoot = generateDiffTree(
+    _entireIncrease = generateDiffTree(
       diffMap,
-      DiffTreeType.increaseOnly,
+      CombinedDiffTypeAppUnit.entireIncrease,
     );
-    _decreasedDiffTreeRoot = generateDiffTree(
+    _entireDecrease = generateDiffTree(
       diffMap,
-      DiffTreeType.decreaseOnly,
+      CombinedDiffTypeAppUnit.entireDecrease,
     );
 
-    changeDiffRoot(_activeDiffRoot);
+    if (_isDeferredApp.value) {}
+
+    // changeDiffRoot(_activeDiffRoot);
+
+    _loadApp(_combinedDiffTypeAppUnit!);
 
     _processingNotifier.value = false;
   }
@@ -608,7 +630,7 @@ class AppSizeController {
   /// * [DiffTreeType.combined]: returns a tree with all nodes.
   TreemapNode? generateDiffTree(
     Map<String, dynamic> treeJson,
-    DiffTreeType diffTreeType,
+    CombinedDiffTypeAppUnit diffTreeType,
   ) {
     final isLeafNode = treeJson['children'] == null;
     if (!isLeafNode) {
@@ -625,17 +647,17 @@ class AppSizeController {
       }
       // Only add nodes that match the diff tree type.
       switch (diffTreeType) {
-        case DiffTreeType.increaseOnly:
+        case CombinedDiffTypeAppUnit.entireIncrease:
           if (byteSize < 0) {
             return null;
           }
           break;
-        case DiffTreeType.decreaseOnly:
+        case CombinedDiffTypeAppUnit.entireDecrease:
           if (byteSize > 0) {
             return null;
           }
           break;
-        case DiffTreeType.combined:
+        case CombinedDiffTypeAppUnit.entireCombined:
           break;
       }
       return _buildNode(treeJson, byteSize, showDiff: true);
