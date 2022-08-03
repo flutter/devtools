@@ -45,28 +45,24 @@
 #     ^^^^^^^^^ entity.name.function.dart
 >  print('${() {
 #  ^^^^^ entity.name.function.dart
-#        ^^^^^^^^ string.interpolated.single.dart
-#               ^ string.interpolated.single.dart invalid.string.newline
+#        ^^^^^^^ string.interpolated.single.dart
 >    return 'Hello';
 #            ^^^^^ support.class.dart
-#                 ^^^ string.interpolated.single.dart
-#                   ^ string.interpolated.single.dart invalid.string.newline
-#^^^^^^^^^^^^ string.interpolated.single.dart
+#                 ^^ string.interpolated.single.dart
+#^^^^^^^^^^^^^ string.interpolated.single.dart
 >  }}');
 #      ^ punctuation.terminator.dart
-#^^^^^ string.interpolated.single.dart
+#^^^^^^ string.interpolated.single.dart
 >  print('print(${() {
 #  ^^^^^ entity.name.function.dart
-#        ^^^^^^^^^^^^^^ string.interpolated.single.dart
-#                     ^ string.interpolated.single.dart invalid.string.newline
+#        ^^^^^^^^^^^^^ string.interpolated.single.dart
 >    return 'Hello';
 #            ^^^^^ support.class.dart
-#                 ^^^ string.interpolated.single.dart
-#                   ^ string.interpolated.single.dart invalid.string.newline
-#^^^^^^^^^^^^ string.interpolated.single.dart
+#                 ^^ string.interpolated.single.dart
+#^^^^^^^^^^^^^ string.interpolated.single.dart
 >  }()})');
 #         ^ punctuation.terminator.dart
-#^^^^^^^^ string.interpolated.single.dart
+#^^^^^^^^^ string.interpolated.single.dart
 >  print('${() => 'Hello'}');
 #  ^^^^^ entity.name.function.dart
 #        ^^^^^^^^^^^^^^^^^^ string.interpolated.single.dart

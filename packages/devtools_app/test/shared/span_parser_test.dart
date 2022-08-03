@@ -5,6 +5,7 @@
 @TestOn('vm')
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:devtools_app/src/screens/debugger/span_parser.dart';
@@ -201,7 +202,8 @@ String _buildGoldenText(String content, List<ScopeSpan> spans) {
     final line = lines[i];
     // We need the line length to wrap. If this isn't the last line, account for
     // the \n we split by.
-    final lineLength = line.length + (i == lines.length - 1 ? 0 : 1);
+    final newlineLength = i == lines.length - 1 ? 0 : 1;
+    final lineLengthWithNewline = line.length + newlineLength;
 
     buffer.writeln('>$line');
     final lineSpans = spansByLine[i];
@@ -212,8 +214,8 @@ String _buildGoldenText(String content, List<ScopeSpan> spans) {
 
         // Spans may roll over onto the next line, so truncate them and insert
         // the remainder into the next.
-        if (col + length > lineLength) {
-          final thisLineLength = lineLength - col;
+        if (col + length > lineLengthWithNewline) {
+          final thisLineLength = line.length - col;
           length = thisLineLength;
           spansByLine[i + 1] ??= [];
           spansByLine[i + 1]!.add(
@@ -222,9 +224,18 @@ String _buildGoldenText(String content, List<ScopeSpan> spans) {
               start: span.start + thisLineLength,
               end: span.end,
               line: span.line! + 1,
-              column: 0,
+              column: 1,
             ),
           );
+        } else if (col + length > line.length) {
+          // Truncate any spans that include the trailing newline.
+          length = line.length - col;
+        }
+
+        // If this span just covers the trailing newline, skip it
+        // as it doesn't produce any useful output.
+        if (col == line.length) {
+          continue;
         }
 
         buffer.write('#');
