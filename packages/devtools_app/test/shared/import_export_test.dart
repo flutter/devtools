@@ -56,10 +56,10 @@ void main() async {
 
   group('ImportControllerTest', () {
     late ImportController importController;
-    late NotificationsController notifications;
+    late NotificationController notifications;
 
     setUp(() {
-      notifications = NotificationsController();
+      notifications = NotificationController();
       importController = ImportController((_) {});
       setGlobal(OfflineModeController, OfflineModeController());
       setGlobal(ServiceConnectionManager, FakeServiceManager());

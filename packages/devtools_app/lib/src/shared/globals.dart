@@ -38,8 +38,7 @@ OfflineModeController get offlineController => globals[OfflineModeController];
 
 IdeTheme get ideTheme => globals[IdeTheme];
 
-NotificationsController get notificationService =>
-    globals[NotificationsController];
+NotificationService get notificationService => globals[NotificationService];
 
 void setGlobal(Type clazz, dynamic instance) {
   globals[clazz] = instance;

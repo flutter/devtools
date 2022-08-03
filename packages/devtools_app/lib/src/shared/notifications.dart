@@ -57,10 +57,13 @@ class _NotificationsState extends State<_Notifications> with AutoDisposeMixin {
   OverlayEntry? _overlayEntry;
 
   final List<_Notification> _notifications = [];
+  late NotificationController controller;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
+    controller = notificationService as NotificationController;
 
     if (_overlayEntry == null) {
       _overlayEntry = OverlayEntry(
@@ -73,13 +76,13 @@ class _NotificationsState extends State<_Notifications> with AutoDisposeMixin {
     }
 
     addAutoDisposeListener(
-      notificationService.toPush,
-      () => _push(notificationService.toPush.value),
+      controller.toPush,
+      () => _push(controller.toPush.value),
     );
 
     addAutoDisposeListener(
-      notificationService.toDismiss,
-      () => _dismiss(notificationService.toDismiss.value.text),
+      controller.toDismiss,
+      () => _dismiss(controller.toDismiss.value.text),
     );
   }
 
@@ -115,7 +118,7 @@ class _NotificationsState extends State<_Notifications> with AutoDisposeMixin {
       if (notification.message.text == message) {
         print('dismiss invoked - notification found');
         _notifications.remove(notification);
-        notificationService.markComplete(notification.message);
+        controller.markComplete(notification.message);
         didDismiss = true;
       }
     }
@@ -129,7 +132,7 @@ class _NotificationsState extends State<_Notifications> with AutoDisposeMixin {
   void _removeNotification(_Notification notification) {
     setState(() {
       final didRemove = _notifications.remove(notification);
-      notificationService.markComplete(notification.message);
+      controller.markComplete(notification.message);
       if (didRemove) {
         _overlayEntry?.markNeedsBuild();
       }

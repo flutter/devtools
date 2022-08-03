@@ -23,7 +23,7 @@ void main() {
   when(mockServiceManager.serviceExtensionManager)
       .thenReturn(FakeServiceExtensionManager());
   setGlobal(ServiceConnectionManager, mockServiceManager);
-  setGlobal(NotificationService, NotificationsController());
+  setGlobal(NotificationService, NotificationController());
 
   group('Hot Reload Button', () {
     int reloads = 0;

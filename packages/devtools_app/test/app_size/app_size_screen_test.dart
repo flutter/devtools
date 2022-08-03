@@ -31,7 +31,7 @@ void main() {
   setUp(() {
     setGlobal(ServiceConnectionManager, FakeServiceManager());
     setGlobal(IdeTheme, IdeTheme());
-    setGlobal(NotificationService, NotificationsController());
+    setGlobal(NotificationService, NotificationController());
   });
 
   final lastModifiedTime = DateTime.parse('2020-07-28 13:29:00');

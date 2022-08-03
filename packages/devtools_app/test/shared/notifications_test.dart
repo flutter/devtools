@@ -11,9 +11,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Notifications', () {
-    setGlobal(IdeTheme, IdeTheme());
-    setGlobal(NotificationService, NotificationsController());
-
     Widget buildNotificationsWithButtonToPush(String text) {
       return Directionality(
         textDirection: TextDirection.ltr,
@@ -29,6 +26,11 @@ void main() {
         ),
       );
     }
+
+    setUp(() {
+      setGlobal(IdeTheme, IdeTheme());
+      setGlobal(NotificationService, NotificationController());
+    });
 
     testWidgets('displays notifications', (WidgetTester tester) async {
       const notification = 'This is a notification!';

@@ -125,7 +125,7 @@ void main() {
           .thenReturn(ValueNotifier<int>(0));
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(IdeTheme, IdeTheme());
-      setGlobal(NotificationService, NotificationsController());
+      setGlobal(NotificationService, NotificationController());
       screen = const MemoryScreen();
     });
 

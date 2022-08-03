@@ -33,7 +33,7 @@ abstract class NotificationService {
   void dismiss(String message);
 }
 
-class NotificationsController implements NotificationService {
+class NotificationController implements NotificationService {
   final toPush = ValueNotifier<NotificationMessage>(NotificationMessage(''));
   final toDismiss = ValueNotifier<NotificationMessage>(NotificationMessage(''));
 
