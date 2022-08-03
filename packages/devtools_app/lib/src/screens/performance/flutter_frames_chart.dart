@@ -15,7 +15,7 @@ import '../../primitives/utils.dart';
 import '../../shared/banner_messages.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
-import '../../shared/scaffold.dart';
+import '../../framework/scaffold.dart';
 import '../../shared/theme.dart';
 import '../../shared/utils.dart';
 import '../../ui/colors.dart';

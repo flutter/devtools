@@ -39,15 +39,15 @@ import 'screens/provider/provider_screen.dart';
 import 'screens/vm_developer/vm_developer_tools_controller.dart';
 import 'screens/vm_developer/vm_developer_tools_screen.dart';
 import 'service/service_extension_widgets.dart';
-import 'shared/about_dialog.dart';
+import 'framework/about_dialog.dart';
 import 'shared/common_widgets.dart';
 import 'shared/dialogs.dart';
 import 'shared/globals.dart';
-import 'shared/landing_screen.dart';
+import 'framework/landing_screen.dart';
 import 'shared/notifications.dart';
-import 'shared/report_feedback_button.dart';
+import 'framework/report_feedback_button.dart';
 import 'shared/routing.dart';
-import 'shared/scaffold.dart';
+import 'framework/scaffold.dart';
 import 'shared/screen.dart';
 import 'shared/snapshot_screen.dart';
 import 'shared/theme.dart';
@@ -446,8 +446,8 @@ class OpenSettingsAction extends StatelessWidget {
           );
         },
         child: Container(
-          width: DevToolsScaffold.actionWidgetSize,
-          height: DevToolsScaffold.actionWidgetSize,
+          width: actionWidgetSize,
+          height: actionWidgetSize,
           alignment: Alignment.center,
           child: Icon(
             Icons.settings,

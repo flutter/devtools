@@ -9,7 +9,7 @@ import 'package:flutter/scheduler.dart';
 
 import '../primitives/utils.dart';
 import 'common_widgets.dart';
-import 'status_line.dart' as status_line;
+import '../framework/status_line.dart' as status_line;
 import 'theme.dart';
 import 'utils.dart';
 
