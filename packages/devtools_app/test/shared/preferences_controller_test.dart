@@ -12,7 +12,6 @@ import 'package:flutter_test/flutter_test.dart';
 import '../test_infra/flutter_test_storage.dart';
 
 void main() {
-  setGlobal(ServiceConnectionManager, ServiceConnectionManager());
   group('PreferencesController', () {
     late PreferencesController controller;
 
