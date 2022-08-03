@@ -7,7 +7,6 @@ import 'package:flutter/services.dart';
 
 import '../../../../charts/chart_controller.dart';
 import '../../../../primitives/auto_dispose_mixin.dart';
-import '../../../../primitives/notifications.dart';
 import '../../../../primitives/utils.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
@@ -204,24 +203,6 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
       autofocus: true,
       child: Column(
         children: [
-          MaterialButton(
-            onPressed: () {
-              final didPush = notificationService.smartPush(
-                NotificationMessage(
-                  'hello',
-                ),
-                allowDuplicates: false,
-              );
-              print('!!!! didPush = $didPush');
-            },
-            child: const Text('Push Notifications'),
-          ),
-          MaterialButton(
-            onPressed: () {
-              notificationService.dismiss('hello');
-            },
-            child: const Text('Dismiss Notifications'),
-          ),
           // TODO(polinach): explain why we need SizedBox here.
           // And put 70 into a named const that describes what it is.
           SizedBox(

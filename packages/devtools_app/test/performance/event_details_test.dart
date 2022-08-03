@@ -4,6 +4,8 @@
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
+import 'package:devtools_app/src/framework/notifications.dart';
+import 'package:devtools_app/src/primitives/notifications.dart';
 import 'package:devtools_app/src/screens/performance/event_details.dart';
 import 'package:devtools_app/src/screens/performance/performance_controller.dart';
 import 'package:devtools_app/src/screens/performance/performance_model.dart';
@@ -43,6 +45,7 @@ void main() {
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(OfflineModeController, OfflineModeController());
       setGlobal(IdeTheme, IdeTheme());
+      setGlobal(NotificationService, NotificationController());
       when(serviceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
     });
 

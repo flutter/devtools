@@ -11,7 +11,6 @@ import '../analytics/analytics.dart' as ga;
 import '../config_specific/launch_url/launch_url.dart';
 import '../config_specific/logger/logger.dart';
 import '../config_specific/server/server.dart' as server;
-import '../framework/notifications.dart';
 import '../primitives/notifications.dart';
 import '../primitives/utils.dart';
 import 'globals.dart';

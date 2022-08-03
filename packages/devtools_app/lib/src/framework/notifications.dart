@@ -319,27 +319,3 @@ class _NotificationState extends State<_Notification>
     );
   }
 }
-
-class NotificationAction extends StatelessWidget {
-  const NotificationAction(this.label, this.onAction, {this.isPrimary = false});
-
-  final String label;
-
-  final VoidCallback onAction;
-
-  final bool isPrimary;
-
-  @override
-  Widget build(BuildContext context) {
-    final labelText = Text(label);
-    return isPrimary
-        ? ElevatedButton(
-            onPressed: onAction,
-            child: labelText,
-          )
-        : OutlinedButton(
-            onPressed: onAction,
-            child: labelText,
-          );
-  }
-}

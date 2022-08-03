@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 class NotificationMessage {
   NotificationMessage(
@@ -29,4 +29,28 @@ abstract class NotificationService {
 
   /// Dismisses all notifications with a matching message.
   void dismiss(String message);
+}
+
+class NotificationAction extends StatelessWidget {
+  const NotificationAction(this.label, this.onAction, {this.isPrimary = false});
+
+  final String label;
+
+  final VoidCallback onAction;
+
+  final bool isPrimary;
+
+  @override
+  Widget build(BuildContext context) {
+    final labelText = Text(label);
+    return isPrimary
+        ? ElevatedButton(
+            onPressed: onAction,
+            child: labelText,
+          )
+        : OutlinedButton(
+            onPressed: onAction,
+            child: labelText,
+          );
+  }
 }
