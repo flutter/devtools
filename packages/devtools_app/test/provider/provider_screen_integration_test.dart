@@ -111,7 +111,7 @@ void main() async {
       );
       // TODO(rrousselGit) unskip test once hot-restart works properly (https://github.com/flutter/devtools/issues/3007)
     },
-    timeout: const Timeout.factor(8),
+    timeout: const Timeout.factor(12),
     skip: true,
   );
 
@@ -187,7 +187,7 @@ void main() async {
           ]),
         );
       },
-      timeout: const Timeout.factor(8),
+      timeout: const Timeout.factor(12),
     );
 
     group('rawInstanceProvider', () {
@@ -765,7 +765,7 @@ void main() async {
             ]),
           );
         },
-        timeout: const Timeout.factor(8),
+        timeout: const Timeout.factor(12),
       );
 
       test(
@@ -811,7 +811,7 @@ void main() async {
             ),
           );
         },
-        timeout: const Timeout.factor(8),
+        timeout: const Timeout.factor(12),
       );
     });
   });
@@ -897,6 +897,6 @@ void main() async {
         );
       });
     },
-    timeout: const Timeout.factor(8),
+    timeout: const Timeout.factor(12),
   );
 }

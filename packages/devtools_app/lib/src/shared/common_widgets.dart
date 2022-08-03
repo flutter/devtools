@@ -302,6 +302,15 @@ class RefreshButton extends IconLabelButton {
   }
 }
 
+/// A Refresh ToolbarAction button.
+class ToolbarRefresh extends ToolbarAction {
+  const ToolbarRefresh({
+    super.icon = Icons.refresh,
+    required super.onPressed,
+    super.tooltip = 'Refresh',
+  });
+}
+
 /// Button to start recording data.
 ///
 /// * `recording`: Whether recording is in progress.
