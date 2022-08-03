@@ -457,7 +457,7 @@ class AppSizeController {
     changeOldDiffFile(oldFile);
     changeNewDiffFile(newFile);
 
-    diffMap['n'] = 'Root';
+    diffMap['n'] = isDeferredApp.value ? 'Entire App' : 'Root';
 
     // TODO(peterdjlee): Try to move the non-active tree generation to separate isolates.
     _combinedDiffTreeRoot = generateDiffTree(
