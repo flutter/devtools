@@ -19,38 +19,74 @@ import 'app_size_screen.dart';
 // Temporary feature flag for deferred loading.
 bool deferredLoadingSupportEnabled = false;
 
-enum DiffTreeType {
-  increaseOnly,
-  decreaseOnly,
-  combined;
+// enum DiffTreeType {
+//   increaseOnly,
+//   decreaseOnly,
+//   combined;
+
+//   String get display {
+//     switch (this) {
+//       case DiffTreeType.increaseOnly:
+//         return 'Increase Only';
+//       case DiffTreeType.decreaseOnly:
+//         return 'Decrease Only';
+//       case DiffTreeType.combined:
+//       default:
+//         return 'Combined';
+//     }
+//   }
+// }
+
+// enum AppUnit {
+//   mainOnly,
+//   deferredOnly,
+//   entireApp;
+
+//   String get display {
+//     switch (this) {
+//       case AppUnit.deferredOnly:
+//         return 'Deferred';
+//       case AppUnit.mainOnly:
+//         return 'Main';
+//       case AppUnit.entireApp:
+//       default:
+//         return 'Entire App';
+//     }
+//   }
+// }
+
+enum CombinedDiffTypeAppUnit {
+  entireIncrease,
+  entireDecrease,
+  mainCombined,
+  mainIncrease,
+  mainDecrease,
+  deferredCombined,
+  deferredIncrease,
+  deferredDecrease,
+  entireCombined;
 
   String get display {
     switch (this) {
-      case DiffTreeType.increaseOnly:
-        return 'Increase Only';
-      case DiffTreeType.decreaseOnly:
-        return 'Decrease Only';
-      case DiffTreeType.combined:
+      case CombinedDiffTypeAppUnit.entireIncrease:
+        return 'entireIncrease';
+      case CombinedDiffTypeAppUnit.entireDecrease:
+        return 'entireDecrease';
+      case CombinedDiffTypeAppUnit.mainCombined:
+        return 'mainCombined';
+      case CombinedDiffTypeAppUnit.mainIncrease:
+        return 'mainIncrease';
+      case CombinedDiffTypeAppUnit.mainDecrease:
+        return 'mainDecrease';
+      case CombinedDiffTypeAppUnit.deferredCombined:
+        return 'deferredCombined';
+      case CombinedDiffTypeAppUnit.deferredIncrease:
+        return 'deferredIncrease';
+      case CombinedDiffTypeAppUnit.deferredDecrease:
+        return 'deferredDecrease';
+      case CombinedDiffTypeAppUnit.entireCombined:
       default:
-        return 'Combined';
-    }
-  }
-}
-
-enum AppUnit {
-  mainOnly,
-  deferredOnly,
-  entireApp;
-
-  String get display {
-    switch (this) {
-      case AppUnit.deferredOnly:
-        return 'Deferred';
-      case AppUnit.mainOnly:
-        return 'Main';
-      case AppUnit.entireApp:
-      default:
-        return 'Entire App';
+        return 'entireCombined';
     }
   }
 }
@@ -156,37 +192,71 @@ class AppSizeController {
     }
   }
 
-  TreemapNode? get _activeDiffRoot {
-    switch (_activeDiffTreeType.value) {
-      case DiffTreeType.increaseOnly:
-        return _increasedDiffTreeRoot;
-      case DiffTreeType.decreaseOnly:
-        return _decreasedDiffTreeRoot;
-      case DiffTreeType.combined:
+  // TreemapNode? get _activeDiffRoot {
+  //   switch (_activeDiffTreeType.value) {
+  //     case DiffTreeType.increaseOnly:
+  //       return _increasedDiffTreeRoot;
+  //     case DiffTreeType.decreaseOnly:
+  //       return _decreasedDiffTreeRoot;
+  //     case DiffTreeType.combined:
+  //     default:
+  //       return _combinedDiffTreeRoot;
+  //   }
+  // }
+
+  // TreemapNode? _increasedDiffTreeRoot;
+  // TreemapNode? _decreasedDiffTreeRoot;
+  // TreemapNode? _combinedDiffTreeRoot;
+
+  // Map<String, dynamic>? get _dataForAppUnit {
+  //   switch (_selectedAppUnit.value) {
+  //     case AppUnit.deferredOnly:
+  //       return _deferredOnly;
+  //     case AppUnit.mainOnly:
+  //       return _mainOnly;
+  //     case AppUnit.entireApp:
+  //     default:
+  //       return _entireApp;
+  //   }
+  // }
+
+  // Map<String, dynamic>? _deferredOnly;
+  // Map<String, dynamic>? _mainOnly;
+  // Map<String, dynamic>? _entireApp;
+
+  Map<String, dynamic>? get _combinedDiffTypeAppUnit {
+    switch (_currentCombination.value) {
+      case CombinedDiffTypeAppUnit.entireIncrease:
+        return _entireIncrease;
+      case CombinedDiffTypeAppUnit.entireDecrease:
+        return _entireDecrease;
+      case CombinedDiffTypeAppUnit.mainCombined:
+        return _mainCombined;
+      case CombinedDiffTypeAppUnit.mainIncrease:
+        return _entireIncrease;
+      case CombinedDiffTypeAppUnit.mainDecrease:
+        return _mainDecrease;
+      case CombinedDiffTypeAppUnit.deferredCombined:
+        return _deferredCombined;
+      case CombinedDiffTypeAppUnit.deferredIncrease:
+        return _deferredIncrease;
+      case CombinedDiffTypeAppUnit.deferredDecrease:
+        return _deferredDecrease;
+      case CombinedDiffTypeAppUnit.entireCombined:
       default:
-        return _combinedDiffTreeRoot;
+        return _entireCombined;
     }
   }
 
-  TreemapNode? _increasedDiffTreeRoot;
-  TreemapNode? _decreasedDiffTreeRoot;
-  TreemapNode? _combinedDiffTreeRoot;
-
-  Map<String, dynamic>? get _dataForAppUnit {
-    switch (_selectedAppUnit.value) {
-      case AppUnit.deferredOnly:
-        return _deferredOnly;
-      case AppUnit.mainOnly:
-        return _mainOnly;
-      case AppUnit.entireApp:
-      default:
-        return _entireApp;
-    }
-  }
-
-  Map<String, dynamic>? _deferredOnly;
-  Map<String, dynamic>? _mainOnly;
-  Map<String, dynamic>? _entireApp;
+  Map<String, dynamic>? _entireIncrease;
+  Map<String, dynamic>? _entireDecrease;
+  Map<String, dynamic>? _mainCombined;
+  Map<String, dynamic>? _mainIncrease;
+  Map<String, dynamic>? _mainDecrease;
+  Map<String, dynamic>? _deferredCombined;
+  Map<String, dynamic>? _deferredIncrease;
+  Map<String, dynamic>? _deferredDecrease;
+  Map<String, dynamic>? _entireCombined;
 
   ValueListenable<DevToolsJsonFile?> get oldDiffJsonFile => _oldDiffJsonFile;
 
@@ -231,26 +301,38 @@ class AppSizeController {
     _analysisCallGraph = null;
   }
 
-  /// The active diff tree type used to build the diff treemap.
-  ValueListenable<DiffTreeType> get activeDiffTreeType {
-    return _activeDiffTreeType;
+  // /// The active diff tree type used to build the diff treemap.
+  // ValueListenable<DiffTreeType> get activeDiffTreeType {
+  //   return _activeDiffTreeType;
+  // }
+
+  // final _activeDiffTreeType =
+  //     ValueNotifier<DiffTreeType>(DiffTreeType.combined);
+
+  // void changeActiveDiffTreeType(DiffTreeType newDiffTreeType) {
+  //   _activeDiffTreeType.value = newDiffTreeType;
+  //   changeDiffRoot(_activeDiffRoot);
+  // }
+
+  // /// The selected app segment to analyze (for deferred apps only).
+  // ValueListenable<AppUnit> get selectedAppUnit => _selectedAppUnit;
+  // final _selectedAppUnit = ValueNotifier<AppUnit>(AppUnit.entireApp);
+
+  // void changeSelectedAppUnit(AppUnit appUnit) {
+  //   _selectedAppUnit.value = appUnit;
+  //   _loadApp(_dataForAppUnit!);
+  // }
+
+  ValueListenable<CombinedDiffTypeAppUnit> get currentCombination {
+    return _currentCombination;
   }
 
-  final _activeDiffTreeType =
-      ValueNotifier<DiffTreeType>(DiffTreeType.combined);
+  final _currentCombination = ValueNotifier<CombinedDiffTypeAppUnit>(
+      CombinedDiffTypeAppUnit.entireCombined);
 
-  void changeActiveDiffTreeType(DiffTreeType newDiffTreeType) {
-    _activeDiffTreeType.value = newDiffTreeType;
-    changeDiffRoot(_activeDiffRoot);
-  }
-
-  /// The selected app segment to analyze (for deferred apps only).
-  ValueListenable<AppUnit> get selectedAppUnit => _selectedAppUnit;
-  final _selectedAppUnit = ValueNotifier<AppUnit>(AppUnit.entireApp);
-
-  void changeSelectedAppUnit(AppUnit appUnit) {
-    _selectedAppUnit.value = appUnit;
-    _loadApp(_dataForAppUnit!);
+  void changeCombination(CombinedDiffTypeAppUnit newCombination) {
+    _currentCombination.value = newCombination;
+    _loadApp(_combinedDiffTypeAppUnit!);
   }
 
   /// Notifies that the json files are currently being processed.
