@@ -47,7 +47,7 @@ class PreferencesController extends DisposableController
       storage.setValue('ui.denseMode', '${_denseMode.value}');
     });
 
-    await _inspector.init();
+    await inspector.init();
 
     setGlobal(PreferencesController, this);
   }

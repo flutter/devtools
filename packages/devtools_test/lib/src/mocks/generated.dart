@@ -25,6 +25,7 @@ import 'package:vm_service/vm_service.dart';
   ObjectGroupBase,
   ClassObject,
   CodeObject,
+  InspectorPreferencesController,
   ui.Image,
 ])
 void main() {}
