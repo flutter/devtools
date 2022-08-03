@@ -7,7 +7,6 @@ import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/screens/provider/instance_viewer/instance_details.dart';
 import 'package:devtools_app/src/screens/provider/instance_viewer/instance_providers.dart';
 import 'package:devtools_app/src/screens/provider/provider_nodes.dart';
-import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/eval_on_dart_library.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -28,7 +27,6 @@ void main() async {
   late Disposable isAlive;
 
   setUp(() async {
-    setGlobal(ServiceConnectionManager, ServiceConnectionManager());
     setGlobal(IdeTheme, getIdeTheme());
     await env.setupEnvironment(
       config: const FlutterRunConfiguration(withDebugger: true),
