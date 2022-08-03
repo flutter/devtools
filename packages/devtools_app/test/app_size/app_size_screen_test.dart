@@ -351,7 +351,7 @@ void main() {
       await tester.pumpWidget(
         wrapWithControllers(
           MaterialApp(
-            builder: (context, child) => Notifications(child: child!),
+            builder: (context, child) => NotificationsView(child: child!),
             home: Builder(
               builder: (context) {
                 return const AppSizeBody();

@@ -92,7 +92,7 @@ Widget wrapWithControllers(
 }
 
 Widget wrapWithNotifications(Widget child) {
-  return Notifications(child: child);
+  return NotificationsView(child: child);
 }
 
 Widget wrapWithInspectorControllers(Widget widget) {
@@ -175,7 +175,7 @@ class TestNotifications implements NotificationService {
   bool push(
     String message, {
     List<Widget> actions = const [],
-    Duration duration = Notifications.defaultDuration,
+    Duration duration = NotificationsView.defaultDuration,
     bool allowDuplicates = true,
   }) {
     messages.add(message);

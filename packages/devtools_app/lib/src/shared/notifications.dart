@@ -16,31 +16,11 @@ import 'utils.dart';
 double get _notificationHeight => scaleByFontFactor(175.0);
 final _notificationWidth = _notificationHeight * goldenRatio;
 
-// /// Interface for pushing notifications in the app.
-// ///
-// /// Use this interface in controllers that need to show notifications.
-// ///
-// /// Using the interface instead of the [NotificationsState] implementation
-// /// will allow you to write unit tests for the controller that consumes it
-// /// instead of widget tests.
-// abstract class NotificationService {
-//   /// Pushes a notification [message].
-//   bool push(
-//     String message, {
-//     List<Widget> actions = const [],
-//     Duration duration = Notifications.defaultDuration,
-//     bool allowDuplicates = true,
-//   });
-//
-//   /// Dismisses all notifications with a matching message.
-//   void dismiss(String message);
-// }
-
 /// Manager for notifications in the app.
 ///
 /// Must be inside of an [Overlay].
-class Notifications extends StatelessWidget {
-  const Notifications({Key? key, required this.child}) : super(key: key);
+class NotificationsView extends StatelessWidget {
+  const NotificationsView({Key? key, required this.child}) : super(key: key);
 
   final Widget child;
 
@@ -68,22 +48,10 @@ class _NotificationsProvider extends StatefulWidget {
   final Widget child;
 
   @override
-  NotificationsState createState() => NotificationsState();
+  State<_NotificationsProvider> createState() => _NotificationsProviderState();
 }
 
-class _InheritedNotifications extends InheritedWidget {
-  const _InheritedNotifications({required this.data, required Widget child})
-      : super(child: child);
-
-  final NotificationsState data;
-
-  @override
-  bool updateShouldNotify(_InheritedNotifications oldWidget) {
-    return oldWidget.data != data;
-  }
-}
-
-class NotificationsState extends State<_NotificationsProvider> {
+class _NotificationsProviderState extends State<_NotificationsProvider> {
   OverlayEntry? _overlayEntry;
 
   final List<_Notification> _notifications = [];
@@ -116,7 +84,7 @@ class NotificationsState extends State<_NotificationsProvider> {
   bool push(
     String message, {
     List<Widget> actions = const [],
-    Duration duration = Notifications.defaultDuration,
+    Duration duration = NotificationsView.defaultDuration,
     bool allowDuplicates = true,
   }) {
     if (!allowDuplicates &&
@@ -193,7 +161,7 @@ class NotificationsState extends State<_NotificationsProvider> {
 
   @override
   Widget build(BuildContext context) {
-    return _InheritedNotifications(data: this, child: widget.child);
+    return widget.child;
   }
 }
 
@@ -202,7 +170,7 @@ class _Notification extends StatefulWidget {
     Key? key,
     required this.message,
     this.actions = const [],
-    this.duration = Notifications.defaultDuration,
+    this.duration = NotificationsView.defaultDuration,
     required this.remove,
   }) : super(key: key);
 

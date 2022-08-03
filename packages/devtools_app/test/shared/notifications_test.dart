@@ -17,7 +17,7 @@ void main() {
     Widget buildNotificationsWithButtonToPush(String text) {
       return Directionality(
         textDirection: TextDirection.ltr,
-        child: Notifications(
+        child: NotificationsView(
           child: Builder(
             builder: (context) {
               return ElevatedButton(
@@ -50,7 +50,7 @@ void main() {
       expect(find.text(notification), findsOneWidget);
 
       // Wait for the notification to disappear.
-      await tester.pumpAndSettle(Notifications.defaultDuration);
+      await tester.pumpAndSettle(NotificationsView.defaultDuration);
       expect(find.text(notification), findsNothing);
     });
 
@@ -60,7 +60,7 @@ void main() {
       var timesPressed = 0;
       Widget build() {
         return MaterialApp(
-          builder: (context, child) => Notifications(child: child!),
+          builder: (context, child) => NotificationsView(child: child!),
           routes: {
             '/': (context) {
               return ElevatedButton(

@@ -330,7 +330,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       builder: (context, child) {
         return Provider<AnalyticsController>.value(
           value: widget.analyticsController,
-          child: Notifications(
+          child: NotificationsView(
             child: ReleaseNotesViewer(
               releaseNotesController: releaseNotesController,
               child: child,
