@@ -59,12 +59,6 @@ class Notifications extends StatelessWidget {
       ],
     );
   }
-
-  static NotificationsState? of(BuildContext context) {
-    final provider =
-        context.dependOnInheritedWidgetOfExactType<_InheritedNotifications>();
-    return provider?.data;
-  }
 }
 
 class _NotificationsProvider extends StatefulWidget {

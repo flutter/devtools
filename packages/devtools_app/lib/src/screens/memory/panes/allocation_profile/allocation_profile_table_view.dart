@@ -369,9 +369,7 @@ class _ExportAllocationProfileButton extends StatelessWidget {
               : () {
                   final file = allocationProfileController
                       .downloadMemoryTableCsv(currentAllocationProfile);
-                  Notifications.of(context)!.push(
-                    successfulExportMessage(file),
-                  );
+                  notificationService.push(successfulExportMessage(file));
                 },
           minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
         );
