@@ -15,6 +15,7 @@ import 'config_specific/server/server.dart';
 import 'example/conditional_screen.dart';
 import 'framework/framework_core.dart';
 import 'primitives/auto_dispose_mixin.dart';
+import 'primitives/notifications.dart';
 import 'screens/app_size/app_size_controller.dart';
 import 'screens/app_size/app_size_screen.dart';
 import 'screens/debugger/debugger_controller.dart';
@@ -132,7 +133,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
 
     releaseNotesController = ReleaseNotesController();
 
-    setGlobal(NotificationService, Notifications.of(context));
+    setGlobal(NotificationService, NotificationService());
   }
 
   @override
@@ -141,6 +142,8 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     // incorrect theme.
     preferences.dispose();
 
+    notificationService.dispose();
+    setGlobal(NotificationService, null);
     super.dispose();
   }
 
@@ -342,12 +345,6 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       scrollBehavior:
           const MaterialScrollBehavior().copyWith(scrollbars: !kIsWeb),
     );
-  }
-
-  @override
-  void dispose() {
-    setGlobal(NotificationService, null);
-    super.dispose();
   }
 }
 

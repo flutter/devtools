@@ -16,25 +16,25 @@ import 'utils.dart';
 double get _notificationHeight => scaleByFontFactor(175.0);
 final _notificationWidth = _notificationHeight * goldenRatio;
 
-/// Interface for pushing notifications in the app.
-///
-/// Use this interface in controllers that need to show notifications.
-///
-/// Using the interface instead of the [NotificationsState] implementation
-/// will allow you to write unit tests for the controller that consumes it
-/// instead of widget tests.
-abstract class NotificationService {
-  /// Pushes a notification [message].
-  bool push(
-    String message, {
-    List<Widget> actions = const [],
-    Duration duration = Notifications.defaultDuration,
-    bool allowDuplicates = true,
-  });
-
-  /// Dismisses all notifications with a matching message.
-  void dismiss(String message);
-}
+// /// Interface for pushing notifications in the app.
+// ///
+// /// Use this interface in controllers that need to show notifications.
+// ///
+// /// Using the interface instead of the [NotificationsState] implementation
+// /// will allow you to write unit tests for the controller that consumes it
+// /// instead of widget tests.
+// abstract class NotificationService {
+//   /// Pushes a notification [message].
+//   bool push(
+//     String message, {
+//     List<Widget> actions = const [],
+//     Duration duration = Notifications.defaultDuration,
+//     bool allowDuplicates = true,
+//   });
+//
+//   /// Dismisses all notifications with a matching message.
+//   void dismiss(String message);
+// }
 
 /// Manager for notifications in the app.
 ///

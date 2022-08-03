@@ -6,6 +6,7 @@ import '../config_specific/ide_theme/ide_theme.dart';
 import '../config_specific/import_export/import_export.dart';
 import '../extension_points/extensions_base.dart';
 import '../primitives/message_bus.dart';
+import '../primitives/notifications.dart';
 import '../primitives/storage.dart';
 import '../scripts/script_manager.dart';
 import '../service/service_manager.dart';
