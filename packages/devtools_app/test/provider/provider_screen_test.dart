@@ -4,6 +4,8 @@
 
 @TestOn('vm')
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/framework/notifications.dart';
+import 'package:devtools_app/src/primitives/notifications.dart';
 import 'package:devtools_app/src/screens/provider/instance_viewer/instance_details.dart';
 import 'package:devtools_app/src/screens/provider/instance_viewer/instance_providers.dart';
 import 'package:devtools_app/src/screens/provider/provider_list.dart';
@@ -31,6 +33,7 @@ void main() {
   setUp(() {
     setGlobal(IdeTheme, getIdeTheme());
     setGlobal(ServiceConnectionManager, FakeServiceManager());
+    setGlobal(NotificationService, NotificationController());
   });
 
   setUp(() {
