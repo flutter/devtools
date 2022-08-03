@@ -48,7 +48,10 @@ class AppSizeScreen extends Screen {
   static const id = 'app-size';
 
   @visibleForTesting
-  static const dropdownKey = Key('Diff Tree Type Dropdown');
+  static const diffTypeDropdownKey = Key('Diff Tree Type Dropdown');
+
+  @visibleForTesting
+  static const appUnitDropdownKey = Key('App Segment Dropdown');
 
   @visibleForTesting
   static const analysisViewTreemapKey = Key('Analysis View Treemap');
@@ -169,71 +172,79 @@ class _AppSizeBodyState extends State<AppSizeBody>
 
   @override
   Widget build(BuildContext context) {
-    if (_preLoadingData) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              devToolsExtensionPoints.loadingAppSizeDataMessage(),
-              textAlign: TextAlign.center,
+    return ValueListenableBuilder<bool>(
+      valueListenable: controller.isDeferredApp,
+      builder: (context, isDeferredApp, _) {
+        if (_preLoadingData) {
+          return Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  devToolsExtensionPoints.loadingAppSizeDataMessage(),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: defaultSpacing),
+                const CircularProgressIndicator(),
+              ],
             ),
-            const SizedBox(height: defaultSpacing),
-            const CircularProgressIndicator(),
-          ],
-        ),
-      );
-    }
-    final currentTab = tabs[_tabController.index];
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          height: defaultButtonHeight,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              TabBar(
-                labelColor: Theme.of(context).textTheme.bodyText1!.color,
-                isScrollable: true,
-                controller: _tabController,
-                tabs: tabs,
-              ),
-              Row(
+          );
+        }
+        final currentTab = tabs[_tabController.index];
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              height: defaultButtonHeight,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  if (currentTab.key == AppSizeScreen.diffTabKey)
-                    _buildDiffTreeTypeDropdown(),
-                  const SizedBox(width: defaultSpacing),
-                  _buildClearButton(currentTab.key!),
+                  TabBar(
+                    labelColor: Theme.of(context).textTheme.bodyText1!.color,
+                    isScrollable: true,
+                    controller: _tabController,
+                    tabs: tabs,
+                  ),
+                  Row(
+                    children: [
+                      if (currentTab.key == AppSizeScreen.analysisTabKey &&
+                          isDeferredApp)
+                        _buildAppUnitDropdown(),
+                      if (currentTab.key == AppSizeScreen.diffTabKey)
+                        _buildDiffTreeTypeDropdown(),
+                      const SizedBox(width: defaultSpacing),
+                      _buildClearButton(currentTab.key!),
+                    ],
+                  ),
                 ],
               ),
-            ],
-          ),
-        ),
-        Expanded(
-          child: TabBarView(
-            physics: defaultTabBarViewPhysics,
-            controller: _tabController,
-            children: const [
-              AnalysisView(),
-              DiffView(),
-            ],
-          ),
-        ),
-      ],
+            ),
+            Expanded(
+              child: TabBarView(
+                physics: defaultTabBarViewPhysics,
+                controller: _tabController,
+                children: const [
+                  AnalysisView(),
+                  DiffView(),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
   DropdownButtonHideUnderline _buildDiffTreeTypeDropdown() {
     return DropdownButtonHideUnderline(
-      key: AppSizeScreen.dropdownKey,
+      key: AppSizeScreen.diffTypeDropdownKey,
       child: DropdownButton<DiffTreeType>(
         value: controller.activeDiffTreeType.value,
         items: [
-          _buildMenuItem(DiffTreeType.combined),
-          _buildMenuItem(DiffTreeType.increaseOnly),
-          _buildMenuItem(DiffTreeType.decreaseOnly),
+          _buildDiffTreeTypeMenuItem(DiffTreeType.combined),
+          _buildDiffTreeTypeMenuItem(DiffTreeType.increaseOnly),
+          _buildDiffTreeTypeMenuItem(DiffTreeType.decreaseOnly),
         ],
         onChanged: (newDiffTreeType) {
           controller.changeActiveDiffTreeType(newDiffTreeType!);
@@ -242,10 +253,38 @@ class _AppSizeBodyState extends State<AppSizeBody>
     );
   }
 
-  DropdownMenuItem<DiffTreeType> _buildMenuItem(DiffTreeType diffTreeType) {
+  DropdownButtonHideUnderline _buildAppUnitDropdown() {
+    return DropdownButtonHideUnderline(
+      key: AppSizeScreen.appUnitDropdownKey,
+      child: DropdownButton<AppUnit>(
+        value: controller.selectedAppUnit.value,
+        items: [
+          _buildAppUnitMenuItem(AppUnit.entireApp),
+          _buildAppUnitMenuItem(AppUnit.mainOnly),
+          _buildAppUnitMenuItem(AppUnit.deferredOnly),
+        ],
+        onChanged: (newAppUnit) {
+          setState(() {
+            controller.changeSelectedAppUnit(newAppUnit!);
+          });
+        },
+      ),
+    );
+  }
+
+  DropdownMenuItem<DiffTreeType> _buildDiffTreeTypeMenuItem(
+    DiffTreeType diffTreeType,
+  ) {
     return DropdownMenuItem<DiffTreeType>(
       value: diffTreeType,
       child: Text(diffTreeType.display),
+    );
+  }
+
+  DropdownMenuItem<AppUnit> _buildAppUnitMenuItem(AppUnit appUnit) {
+    return DropdownMenuItem<AppUnit>(
+      value: appUnit,
+      child: Text(appUnit.display),
     );
   }
 
@@ -574,19 +613,5 @@ class _DiffViewState extends State<DiffView>
         );
       },
     );
-  }
-}
-
-extension DiffTreeTypeExtension on DiffTreeType {
-  String get display {
-    switch (this) {
-      case DiffTreeType.increaseOnly:
-        return 'Increase Only';
-      case DiffTreeType.decreaseOnly:
-        return 'Decrease Only';
-      case DiffTreeType.combined:
-      default:
-        return 'Combined';
-    }
   }
 }
