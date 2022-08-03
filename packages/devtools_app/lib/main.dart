@@ -13,10 +13,10 @@ import 'src/config_specific/url/url.dart';
 import 'src/config_specific/url_strategy/url_strategy.dart';
 import 'src/extension_points/extensions_base.dart';
 import 'src/extension_points/extensions_external.dart';
+import 'src/framework/app_error_handling.dart';
 import 'src/primitives/url_utils.dart';
 import 'src/screens/debugger/syntax_highlighter.dart';
 import 'src/screens/provider/riverpod_error_logger_observer.dart';
-import 'src/framework/app_error_handling.dart';
 import 'src/shared/globals.dart';
 import 'src/shared/preferences.dart';
 
