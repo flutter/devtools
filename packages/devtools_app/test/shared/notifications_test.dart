@@ -53,7 +53,7 @@ void main() {
       expect(find.text(notification), findsOneWidget);
 
       // Wait for the notification to disappear.
-      await tester.pumpAndSettle(NotificationsView.defaultDuration);
+      await tester.pumpAndSettle(NotificationMessage.defaultDuration);
       expect(find.text(notification), findsNothing);
     });
 

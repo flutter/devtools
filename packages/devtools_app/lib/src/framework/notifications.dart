@@ -27,9 +27,6 @@ class NotificationsView extends StatelessWidget {
 
   final Widget child;
 
-  /// The default duration for notifications to show.
-  static const Duration defaultDuration = Duration(seconds: 7);
-
   @override
   Widget build(BuildContext context) {
     return Overlay(
@@ -56,6 +53,9 @@ class NotificationController implements NotificationService {
   bool push(String message) => smartPush(NotificationMessage(message));
 
   /// Pushes a notification [message].
+  ///
+  /// Ignores the message if [allowDuplicates] is false and a message with the
+  /// same text is currently displayed to the user.
   @override
   bool smartPush(
     NotificationMessage message, {
