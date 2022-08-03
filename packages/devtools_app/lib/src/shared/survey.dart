@@ -14,7 +14,7 @@ import '../config_specific/server/server.dart' as server;
 import '../primitives/notifications.dart';
 import '../primitives/utils.dart';
 import 'globals.dart';
-import 'notifications.dart';
+import '../framework/notifications.dart';
 
 class SurveyService {
   static const _noThanksLabel = 'NO THANKS';

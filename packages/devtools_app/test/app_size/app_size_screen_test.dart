@@ -14,7 +14,7 @@ import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/common_widgets.dart';
 import 'package:devtools_app/src/shared/file_import.dart';
 import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/notifications.dart';
+import 'package:devtools_app/src/framework/notifications.dart';
 import 'package:devtools_app/src/shared/split.dart';
 import 'package:devtools_shared/devtools_test_utils.dart';
 import 'package:devtools_test/devtools_test.dart';

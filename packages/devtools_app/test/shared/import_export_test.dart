@@ -4,6 +4,7 @@
 
 import 'package:collection/collection.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
+import 'package:devtools_app/src/framework/notifications.dart';
 import 'package:devtools_app/src/primitives/notifications.dart';
 import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
