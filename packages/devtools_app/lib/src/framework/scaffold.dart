@@ -16,6 +16,7 @@ import '../primitives/auto_dispose_mixin.dart';
 import '../screens/debugger/console.dart';
 import '../screens/debugger/debugger_screen.dart';
 import '../shared/banner_messages.dart';
+import '../shared/common_widgets.dart';
 import '../shared/framework_controller.dart';
 import '../shared/globals.dart';
 import '../shared/notifications.dart';
@@ -26,7 +27,6 @@ import '../shared/theme.dart';
 import '../shared/title.dart';
 import '../shared/utils.dart';
 import 'status_line.dart';
-import 'widgets.dart';
 
 /// Scaffolding for a screen and navigation in the DevTools App.
 ///
