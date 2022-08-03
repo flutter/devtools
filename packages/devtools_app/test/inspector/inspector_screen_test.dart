@@ -5,6 +5,8 @@
 import 'dart:convert';
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/framework/notifications.dart';
+import 'package:devtools_app/src/primitives/notifications.dart';
 import 'package:devtools_app/src/primitives/storage.dart';
 import 'package:devtools_app/src/screens/inspector/diagnostics_node.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_controller.dart';
@@ -60,6 +62,7 @@ void main() {
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(Storage, FlutterTestStorage());
+    setGlobal(NotificationService, NotificationController());
     fakeServiceManager.consoleService.ensureServiceInitialized();
 
     inspectorController = InspectorController(

@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/framework/notifications.dart';
+import 'package:devtools_app/src/primitives/notifications.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_breadcrumbs.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_controller.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_tree.dart';
@@ -31,6 +33,7 @@ void main() {
     setGlobal(ServiceConnectionManager, fakeServiceManager);
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(PreferencesController, PreferencesController());
+    setGlobal(NotificationService, NotificationController());
     mockConnectedApp(
       fakeServiceManager.connectedApp!,
       isFlutterApp: true,
