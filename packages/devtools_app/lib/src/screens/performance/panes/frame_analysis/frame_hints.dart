@@ -47,7 +47,7 @@ class FrameHints extends StatelessWidget {
         ? [
             const Text('UI Jank Detected'),
             const SizedBox(height: denseSpacing),
-            _EnhanceTracingHint(
+            EnhanceTracingHint(
               longestPhase: frameAnalysis.longestUiPhase,
               enhanceTracingState: frameAnalysis.frame.enhanceTracingState,
               enhanceTracingController: enhanceTracingController,
@@ -102,8 +102,9 @@ class _Hint extends StatelessWidget {
   }
 }
 
-class _EnhanceTracingHint extends StatelessWidget {
-  const _EnhanceTracingHint({
+@visibleForTesting
+class EnhanceTracingHint extends StatelessWidget {
+  const EnhanceTracingHint({
     Key? key,
     required this.longestPhase,
     required this.enhanceTracingState,
@@ -199,7 +200,7 @@ class _EnhanceTracingHint extends StatelessWidget {
       alignment: PlaceholderAlignment.middle,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
-        child: _SmallEnhanceTracingButton(
+        child: SmallEnhanceTracingButton(
           enhanceTracingController: enhanceTracingController,
         ),
       ),
@@ -218,8 +219,9 @@ class _EnhanceTracingHint extends StatelessWidget {
   }
 }
 
-class _SmallEnhanceTracingButton extends StatelessWidget {
-  const _SmallEnhanceTracingButton({
+@visibleForTesting
+class SmallEnhanceTracingButton extends StatelessWidget {
+  const SmallEnhanceTracingButton({
     Key? key,
     required this.enhanceTracingController,
   }) : super(key: key);
@@ -233,6 +235,152 @@ class _SmallEnhanceTracingButton extends StatelessWidget {
       icon: EnhanceTracingButton.icon,
       color: Theme.of(context).colorScheme.toggleButtonsTitle,
       onPressed: enhanceTracingController.showEnhancedTracingMenu,
+    );
+  }
+}
+
+@visibleForTesting
+class IntrinsicOperationsHint extends StatelessWidget {
+  const IntrinsicOperationsHint(
+    this.intrinsicOperationsCount, {
+    Key? key,
+  }) : super(key: key);
+
+  static const _intrinsicOperationsDocs =
+      'https://docs.flutter.dev/perf/best-practices#minimize-layout-passes-caused-by-intrinsic-operations';
+
+  final int intrinsicOperationsCount;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return _Hint(
+      message: _ExpensiveOperationHint(
+        docsUrl: _intrinsicOperationsDocs,
+        gaScreenName: analytics_constants.performance,
+        gaSelectedItemDescription: analytics_constants.shaderCompilationDocs,
+        message: TextSpan(
+          children: [
+            TextSpan(
+              text: 'Intrinsic',
+              style: theme.fixedFontStyle,
+            ),
+            TextSpan(
+              text: ' passes were performed $intrinsicOperationsCount '
+                  '${pluralize('time', intrinsicOperationsCount)} during this '
+                  'frame.',
+              style: theme.regularTextStyle,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// TODO(kenz): if the 'profileRenderObjectPaints' service extension is disabled,
+// suggest that the user turn it on to get information about the render objects
+// that are calling saveLayer. If the event has render object information in the
+// args, display it in the hint.
+@visibleForTesting
+class CanvasSaveLayerHint extends StatelessWidget {
+  const CanvasSaveLayerHint(
+    this.saveLayerCount, {
+    Key? key,
+  }) : super(key: key);
+
+  static const _saveLayerDocs =
+      'https://docs.flutter.dev/perf/best-practices#use-savelayer-thoughtfully';
+
+  final int saveLayerCount;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return _Hint(
+      message: _ExpensiveOperationHint(
+        docsUrl: _saveLayerDocs,
+        gaScreenName: analytics_constants.performance,
+        gaSelectedItemDescription: analytics_constants.canvasSaveLayerDocs,
+        message: TextSpan(
+          children: [
+            TextSpan(
+              text: 'Canvas.saveLayer()',
+              style: theme.fixedFontStyle,
+            ),
+            TextSpan(
+              text: ' was called $saveLayerCount '
+                  '${pluralize('time', saveLayerCount)} during this frame.',
+              style: theme.regularTextStyle,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+@visibleForTesting
+class ShaderCompilationHint extends StatelessWidget {
+  const ShaderCompilationHint({
+    Key? key,
+    required this.shaderTime,
+  }) : super(key: key);
+
+  final Duration shaderTime;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return _Hint(
+      message: _ExpensiveOperationHint(
+        docsUrl: preCompileShadersDocsUrl,
+        gaScreenName: analytics_constants.performance,
+        gaSelectedItemDescription: analytics_constants.shaderCompilationDocs,
+        message: TextSpan(
+          children: [
+            TextSpan(
+              text: '${msText(shaderTime)}',
+              style: theme.fixedFontStyle,
+            ),
+            TextSpan(
+              text: ' of shader compilation occurred during this frame.',
+              style: theme.regularTextStyle,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+@visibleForTesting
+class RasterMetricsHint extends StatelessWidget {
+  const RasterMetricsHint({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return _Hint(
+      message: RichText(
+        text: TextSpan(
+          children: [
+            TextSpan(
+              text: 'Consider using the',
+              style: theme.regularTextStyle,
+            ),
+            TextSpan(
+              text: ' Raster Metrics ',
+              style: theme.subtleFixedFontStyle,
+            ),
+            TextSpan(
+              text: 'tab to identify rendering layers that are expensive to '
+                  'rasterize.',
+              style: theme.regularTextStyle,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -276,148 +424,6 @@ class _ExpensiveOperationHint extends StatelessWidget {
             style: theme.regularTextStyle,
           ),
         ],
-      ),
-    );
-  }
-}
-
-class IntrinsicOperationsHint extends StatelessWidget {
-  const IntrinsicOperationsHint(
-    this.intrinsicOperationsCount, {
-    Key? key,
-  }) : super(key: key);
-
-  static const _intrinsicOperationsDocs =
-      'https://docs.flutter.dev/perf/best-practices#minimize-layout-passes-caused-by-intrinsic-operations';
-
-  final int intrinsicOperationsCount;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return _Hint(
-      message: _ExpensiveOperationHint(
-        docsUrl: _intrinsicOperationsDocs,
-        gaScreenName: analytics_constants.performance,
-        gaSelectedItemDescription: analytics_constants.shaderCompilationDocs,
-        message: TextSpan(
-          children: [
-            TextSpan(
-              text: 'Intrinsic',
-              style: theme.fixedFontStyle,
-            ),
-            TextSpan(
-              text: ' passes were performed $intrinsicOperationsCount '
-                  '${pluralize('time', intrinsicOperationsCount)} during this '
-                  'frame.',
-              style: theme.regularTextStyle,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// TODO(kenz): if the 'profileRenderObjectPaints' service extension is disabled,
-// suggest that the user turn it on to get information about the render objects
-// that are calling saveLayer. If the event has render object information in the
-// args, display it in the hint.
-class CanvasSaveLayerHint extends StatelessWidget {
-  const CanvasSaveLayerHint(
-    this.saveLayerCount, {
-    Key? key,
-  }) : super(key: key);
-
-  static const _saveLayerDocs =
-      'https://docs.flutter.dev/perf/best-practices#use-savelayer-thoughtfully';
-
-  final int saveLayerCount;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return _Hint(
-      message: _ExpensiveOperationHint(
-        docsUrl: _saveLayerDocs,
-        gaScreenName: analytics_constants.performance,
-        gaSelectedItemDescription: analytics_constants.canvasSaveLayerDocs,
-        message: TextSpan(
-          children: [
-            TextSpan(
-              text: 'Canvas.saveLayer()',
-              style: theme.fixedFontStyle,
-            ),
-            TextSpan(
-              text: ' was called $saveLayerCount '
-                  '${pluralize('time', saveLayerCount)} during this frame.',
-              style: theme.regularTextStyle,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class ShaderCompilationHint extends StatelessWidget {
-  const ShaderCompilationHint({
-    Key? key,
-    required this.shaderTime,
-  }) : super(key: key);
-
-  final Duration shaderTime;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return _Hint(
-      message: _ExpensiveOperationHint(
-        docsUrl: preCompileShadersDocsUrl,
-        gaScreenName: analytics_constants.performance,
-        gaSelectedItemDescription: analytics_constants.shaderCompilationDocs,
-        message: TextSpan(
-          children: [
-            TextSpan(
-              text: '${msText(shaderTime)}',
-              style: theme.fixedFontStyle,
-            ),
-            TextSpan(
-              text: ' of shader compilation occurred during this frame.',
-              style: theme.regularTextStyle,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class RasterMetricsHint extends StatelessWidget {
-  const RasterMetricsHint({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return _Hint(
-      message: RichText(
-        text: TextSpan(
-          children: [
-            TextSpan(
-              text: 'Consider using the',
-              style: theme.regularTextStyle,
-            ),
-            TextSpan(
-              text: ' Raster Metrics ',
-              style: theme.subtleFixedFontStyle,
-            ),
-            TextSpan(
-              text: 'tab to identify rendering layers that are expensive to '
-                  'rasterize.',
-              style: theme.regularTextStyle,
-            ),
-          ],
-        ),
       ),
     );
   }
