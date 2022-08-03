@@ -73,13 +73,13 @@ class SurveyService {
         ),
       ];
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        final didPush = notificationService.pushRichMessage(
+        final didPush = notificationService.smartPush(
           NotificationMessage(
             message,
             actions: actions,
             duration: _notificationDuration,
-            allowDuplicates: false,
           ),
+          allowDuplicates: false,
         );
         if (didPush) {
           server.incrementSurveyShownCount();

@@ -3,16 +3,16 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/primitives/notifications.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
-import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Notifications', () {
     setGlobal(IdeTheme, IdeTheme());
-    setGlobal(NotificationService, TestNotifications());
+    setGlobal(NotificationService, NotificationsController());
 
     Widget buildNotificationsWithButtonToPush(String text) {
       return Directionality(
@@ -33,6 +33,7 @@ void main() {
     testWidgets('displays notifications', (WidgetTester tester) async {
       const notification = 'This is a notification!';
       await tester.pumpWidget(buildNotificationsWithButtonToPush(notification));
+      await tester.pumpAndSettle();
       await tester.tap(find.byType(ElevatedButton));
       await tester.pumpAndSettle();
       expect(find.text(notification), findsOneWidget);

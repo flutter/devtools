@@ -7,10 +7,11 @@ import 'package:flutter/widgets.dart';
 import 'utils.dart';
 
 class NotificationMessage {
-  NotificationMessage(this.text,
-      {this.actions = const [],
-      this.duration = defaultDuration,
-      this.allowDuplicates = true});
+  NotificationMessage(
+    this.text, {
+    this.actions = const [],
+    this.duration = defaultDuration,
+  });
 
   /// The default duration for notifications to show.
   static const Duration defaultDuration = Duration(seconds: 7);
@@ -18,36 +19,56 @@ class NotificationMessage {
   final String text;
   final List<Widget> actions;
   final Duration duration;
-  final bool allowDuplicates;
 }
 
-class NotificationService {
+abstract class NotificationService {
+  /// Pushes a notification [message].
+  bool push(String message);
+  bool smartPush(
+    NotificationMessage message, {
+    bool allowDuplicates = true,
+  });
+
+  /// Dismisses all notifications with a matching message.
+  void dismiss(String message);
+}
+
+class NotificationsController implements NotificationService {
   final toPush = ValueNotifier<NotificationMessage>(NotificationMessage(''));
-  final toDismiss = ValueNotifier<String>('');
-  final _showingNow = <NotificationMessage>[];
+  final toDismiss = ValueNotifier<NotificationMessage>(NotificationMessage(''));
+
+  @visibleForTesting
+  final inProcess = <NotificationMessage>[];
 
   /// Pushes a notification [message].
-  bool push(String message) => pushRichMessage(NotificationMessage(message));
+  @override
+  bool push(String message) => smartPush(NotificationMessage(message));
 
   /// Pushes a notification [message].
-  bool pushRichMessage(NotificationMessage message) {
-    if (!message.allowDuplicates &&
-        _showingNow.containsWhere((m) => m.text == message.text)) {
+  @override
+  bool smartPush(
+    NotificationMessage message, {
+    bool allowDuplicates = true,
+  }) {
+    if (!allowDuplicates &&
+        inProcess.containsWhere((m) => m.text == message.text)) {
       return false;
     }
-    _showingNow.add(message);
+    inProcess.add(message);
     toPush.value = message;
     return true;
   }
 
   /// Dismisses all notifications with a matching message.
-  void dismiss(String message) => toDismiss.value = message;
+  @override
+  void dismiss(String message) =>
+      toDismiss.value = NotificationMessage(message);
 
   /// Marks the message as complete, so that the messages not
   /// allowing duplicates,
   /// with the same text, do not get rejected.
   void markComplete(NotificationMessage message) {
-    _showingNow.removeWhere((element) => element == message);
+    inProcess.removeWhere((element) => element == message);
   }
 
   void dispose() {

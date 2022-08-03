@@ -4,10 +4,10 @@
 
 import 'package:collection/collection.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
+import 'package:devtools_app/src/primitives/notifications.dart';
 import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/notifications.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -56,10 +56,10 @@ void main() async {
 
   group('ImportControllerTest', () {
     late ImportController importController;
-    late TestNotifications notifications;
+    late NotificationsController notifications;
 
     setUp(() {
-      notifications = TestNotifications();
+      notifications = NotificationsController();
       importController = ImportController((_) {});
       setGlobal(OfflineModeController, OfflineModeController());
       setGlobal(ServiceConnectionManager, FakeServiceManager());
@@ -67,10 +67,13 @@ void main() async {
     });
 
     test('importData pushes proper notifications', () async {
-      expect(notifications.messages, isEmpty);
+      expect(notifications.inProcess, isEmpty);
       importController.importData(nonDevToolsFileJson);
-      expect(notifications.messages.length, equals(1));
-      expect(notifications.messages, contains(nonDevToolsFileMessage));
+      expect(notifications.inProcess.length, equals(1));
+      expect(
+        notifications.inProcess.first.text,
+        equals(nonDevToolsFileMessage),
+      );
 
       await Future.delayed(
         const Duration(
@@ -78,8 +81,8 @@ void main() async {
         ),
       );
       importController.importData(nonDevToolsFileJsonWithListData);
-      expect(notifications.messages.length, equals(2));
-      expect(notifications.messages, contains(nonDevToolsFileMessage));
+      expect(notifications.inProcess.length, equals(2));
+      expect(notifications.inProcess[1].text, equals(nonDevToolsFileMessage));
 
       await Future.delayed(
         const Duration(
@@ -87,10 +90,10 @@ void main() async {
         ),
       );
       importController.importData(devToolsFileJson);
-      expect(notifications.messages.length, equals(3));
+      expect(notifications.inProcess.length, equals(3));
       expect(
-        notifications.messages,
-        contains(attemptingToImportMessage('example')),
+        notifications.inProcess[2],
+        equals(attemptingToImportMessage('example')),
       );
     });
   });

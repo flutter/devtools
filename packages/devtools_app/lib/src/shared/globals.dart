@@ -11,7 +11,6 @@ import '../primitives/storage.dart';
 import '../scripts/script_manager.dart';
 import '../service/service_manager.dart';
 import 'framework_controller.dart';
-import 'notifications.dart';
 import 'preferences.dart';
 import 'survey.dart';
 
@@ -39,7 +38,8 @@ OfflineModeController get offlineController => globals[OfflineModeController];
 
 IdeTheme get ideTheme => globals[IdeTheme];
 
-NotificationService get notificationService => globals[NotificationService];
+NotificationsController get notificationService =>
+    globals[NotificationsController];
 
 void setGlobal(Type clazz, dynamic instance) {
   globals[clazz] = instance;

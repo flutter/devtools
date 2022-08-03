@@ -206,15 +206,21 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
         children: [
           MaterialButton(
             onPressed: () {
-              final didPush = notificationService.pushRichMessage(
+              final didPush = notificationService.smartPush(
                 NotificationMessage(
                   'hello',
-                  allowDuplicates: false,
                 ),
+                allowDuplicates: false,
               );
               print('!!!! didPush = $didPush');
             },
-            child: const Text('Test Notifications'),
+            child: const Text('Push Notifications'),
+          ),
+          MaterialButton(
+            onPressed: () {
+              notificationService.dismiss('hello');
+            },
+            child: const Text('Dismiss Notifications'),
           ),
           // TODO(polinach): explain why we need SizedBox here.
           // And put 70 into a named const that describes what it is.

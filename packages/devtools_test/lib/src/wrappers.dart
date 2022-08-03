@@ -162,23 +162,3 @@ Future<void> _setWindowSize(Size windowSize) async {
 Future<void> _resetWindowSize() async {
   await _setWindowSize(const Size(800.0, 600.0));
 }
-
-/// A test-friendly [NotificationService] that can be run in unit tests
-/// instead of widget tests.
-class TestNotifications implements NotificationService {
-  final List<String> messages = [];
-
-  @override
-  void dismiss(String message) {}
-
-  @override
-  bool push(
-    String message, {
-    List<Widget> actions = const [],
-    Duration duration = NotificationsView.defaultDuration,
-    bool allowDuplicates = true,
-  }) {
-    messages.add(message);
-    return true;
-  }
-}

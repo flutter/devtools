@@ -5,6 +5,7 @@
 import 'dart:convert';
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/primitives/notifications.dart';
 import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/screens/app_size/app_size_controller.dart';
 import 'package:devtools_app/src/screens/app_size/app_size_screen.dart';
@@ -30,7 +31,7 @@ void main() {
   setUp(() {
     setGlobal(ServiceConnectionManager, FakeServiceManager());
     setGlobal(IdeTheme, IdeTheme());
-    setGlobal(NotificationService, TestNotifications());
+    setGlobal(NotificationService, NotificationsController());
   });
 
   final lastModifiedTime = DateTime.parse('2020-07-28 13:29:00');

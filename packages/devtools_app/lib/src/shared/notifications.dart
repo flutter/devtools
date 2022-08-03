@@ -79,7 +79,7 @@ class _NotificationsState extends State<_Notifications> with AutoDisposeMixin {
 
     addAutoDisposeListener(
       notificationService.toDismiss,
-      () => _dismiss(notificationService.toDismiss.value),
+      () => _dismiss(notificationService.toDismiss.value.text),
     );
   }
 
@@ -106,12 +106,14 @@ class _NotificationsState extends State<_Notifications> with AutoDisposeMixin {
 
   /// Dismisses all notifications with a matching message.
   void _dismiss(String message) {
+    print('dismiss invoked');
     bool didDismiss = false;
     // Make a copy so we do not remove a notification from [_notifications]
     // while iterating over it.
     final notifications = List.from(_notifications).cast<_Notification>();
     for (final notification in notifications) {
       if (notification.message.text == message) {
+        print('dismiss invoked - notification found');
         _notifications.remove(notification);
         notificationService.markComplete(notification.message);
         didDismiss = true;
