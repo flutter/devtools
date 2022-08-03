@@ -89,8 +89,7 @@ class _InheritedNotifications extends InheritedWidget {
   }
 }
 
-class NotificationsState extends State<_NotificationsProvider>
-    implements NotificationService {
+class NotificationsState extends State<_NotificationsProvider> {
   OverlayEntry? _overlayEntry;
 
   final List<_Notification> _notifications = [];

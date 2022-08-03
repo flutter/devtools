@@ -11,6 +11,7 @@ import '../analytics/analytics.dart' as ga;
 import '../config_specific/launch_url/launch_url.dart';
 import '../config_specific/logger/logger.dart';
 import '../config_specific/server/server.dart' as server;
+import '../primitives/notifications.dart';
 import '../primitives/utils.dart';
 import 'globals.dart';
 import 'notifications.dart';
@@ -72,11 +73,13 @@ class SurveyService {
         ),
       ];
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        final didPush = notificationService.push(
-          message,
-          actions: actions,
-          duration: _notificationDuration,
-          allowDuplicates: false,
+        final didPush = notificationService.pushRichMessage(
+          NotificationMessage(
+            message,
+            actions: actions,
+            duration: _notificationDuration,
+            allowDuplicates: false,
+          ),
         );
         if (didPush) {
           server.incrementSurveyShownCount();
