@@ -67,6 +67,8 @@ class AppSizeController {
   static const identicalFilesError =
       'Failed to load diff: OLD and NEW files are identical.';
 
+  static const deferredRootName = 'ArtificialRoot';
+
   CallGraph? _analysisCallGraph;
 
   ValueListenable<CallGraphNode?> get analysisCallGraphRoot =>
@@ -318,7 +320,7 @@ class AppSizeController {
   }
 
   bool _hasDeferredInfo(Map<String, dynamic> jsonFile) {
-    return jsonFile['n'] == 'ArtificialRoot';
+    return jsonFile['n'] == deferredRootName;
   }
 
   Map<String, dynamic> _extractMainUnit(Map<String, dynamic> jsonFile) {
@@ -380,8 +382,26 @@ class AppSizeController {
 
     Map<String, dynamic> diffMap;
     if (oldFile.isAnalyzeSizeFile && newFile.isAnalyzeSizeFile) {
+      var oldFileJson = oldFile.data as Map<String, dynamic>;
+      var newFileJson = newFile.data as Map<String, dynamic>;
+
+      if (_hasDeferredInfo(oldFileJson) || _hasDeferredInfo(newFileJson)) {
+        _isDeferredApp.value = deferredLoadingSupportEnabled;
+
+        if (!_hasDeferredInfo(oldFileJson)) {
+          oldFileJson = <String, dynamic>{
+            'n': deferredRootName,
+            'children': [oldFileJson]
+          };
+        } else if (!_hasDeferredInfo(newFileJson)) {
+          newFileJson = <String, dynamic>{
+            'n': deferredRootName,
+            'children': [newFileJson]
+          };
+        }
+      }
+
       final oldApkProgramInfo = ProgramInfo();
-      final oldFileJson = oldFile.data as Map<String, dynamic>;
       _apkJsonToProgramInfo(
         program: oldApkProgramInfo,
         parent: oldApkProgramInfo.root,
@@ -399,7 +419,6 @@ class AppSizeController {
       }
 
       final newApkProgramInfo = ProgramInfo();
-      final newFileJson = newFile.data as Map<String, dynamic>;
       _apkJsonToProgramInfo(
         program: newApkProgramInfo,
         parent: newApkProgramInfo.root,
