@@ -135,26 +135,57 @@ void main() {
         tester,
         controller: appSizeController,
       );
-
-      expect(find.byType(AppSizeBody), findsOneWidget);
-      expect(find.byType(TabBar), findsOneWidget);
-
-      expect(find.byKey(AppSizeScreen.analysisTabKey), findsOneWidget);
-      expect(find.byKey(AppSizeScreen.diffTabKey), findsOneWidget);
-
       await loadDataAndPump(tester, data: deferredAppFile);
 
-      // Verify the state of the splitter.
-      final splitFinder = find.byType(Split);
-      expect(splitFinder, findsOneWidget);
-      final Split splitter = tester.widget(splitFinder);
-      expect(splitter.initialFractions[0], equals(0.67));
-      expect(splitter.initialFractions[1], equals(0.33));
-
-      // Verify the dropdown for selecting deferred units exists.
-      final appUnitDropdownFinder =
-          find.byKey(AppSizeScreen.appUnitDropdownKey);
+      // Verify the dropdown for selecting app units exists.
+      final appUnitDropdownFinder = _findDropdownButton<AppUnit>();
       expect(appUnitDropdownFinder, findsOneWidget);
+
+      // Verify the entire app is shown.
+      final breadcrumbs = _fetchBreadcrumbs(tester);
+      expect(breadcrumbs.length, 1);
+      expect(breadcrumbs.first.text, equals('Entire App [39.8 MB]'));
+      expect(find.richText('Main [39.5 MB]'), findsOneWidget);
+
+      // Open the dropdown.
+      await tester.tap(appUnitDropdownFinder);
+      await tester.pumpAndSettle();
+
+      // Verify the menu items in the dropdown are expected.
+      final entireAppMenuItemFinder =
+          _findMenuItemWithText<AppUnit>('Entire App');
+      expect(entireAppMenuItemFinder, findsOneWidget);
+      final mainMenuItemFinder = _findMenuItemWithText<AppUnit>('Main');
+      expect(mainMenuItemFinder, findsOneWidget);
+      final deferredMenuItemFinder = _findMenuItemWithText<AppUnit>('Deferred');
+      expect(deferredMenuItemFinder, findsOneWidget);
+
+      // Select the main unit.
+      await tester.tap(find.text('Main').hitTestable());
+      await tester.pumpAndSettle();
+
+      // Verify the main unit is shown.
+      final mainBreadcrumbs = _fetchBreadcrumbs(tester);
+      expect(mainBreadcrumbs.length, 1);
+      expect(mainBreadcrumbs.first.text, equals('Main [39.5 MB]'));
+      expect(find.richText('appsize_app.app [39.5 MB]'), findsOneWidget);
+
+      // Open the dropdown.
+      await tester.tap(appUnitDropdownFinder);
+      await tester.pumpAndSettle();
+
+      // Select the deferred units.
+      await tester.tap(find.text('Deferred').hitTestable());
+      await tester.pumpAndSettle();
+
+      // Verify the deferred units are shown.
+      final deferredBreadcrumbs = _fetchBreadcrumbs(tester);
+      expect(deferredBreadcrumbs.length, 1);
+      expect(deferredBreadcrumbs.first.text, equals('Deferred [344.3 KB]'));
+      expect(
+        find.richText('flutter_assets [344.3 KB] (Deferred)'),
+        findsOneWidget,
+      );
     });
   });
 
@@ -199,10 +230,7 @@ void main() {
       );
       expect(find.byKey(AppSizeScreen.analysisViewTreemapKey), findsOneWidget);
 
-      final List<Breadcrumb> breadcrumbs = tester
-          .widgetList(find.byType(Breadcrumb))
-          .map((widget) => widget as Breadcrumb)
-          .toList();
+      final breadcrumbs = _fetchBreadcrumbs(tester);
       expect(breadcrumbs.length, 1);
       expect(breadcrumbs.first.text, equals('Root [6.0 MB]'));
       expect(find.byType(BreadcrumbNavigator), findsOneWidget);
@@ -310,10 +338,7 @@ void main() {
         findsNothing,
       );
 
-      final List<Breadcrumb> breadcrumbs = tester
-          .widgetList(find.byType(Breadcrumb))
-          .map((widget) => widget as Breadcrumb)
-          .toList();
+      final breadcrumbs = _fetchBreadcrumbs(tester);
       expect(breadcrumbs.length, 1);
       expect(breadcrumbs.first.text, equals('Root [+1.5 MB]'));
       expect(find.richText('package:pointycastle'), findsOneWidget);
@@ -336,10 +361,7 @@ void main() {
       await tester.tap(find.text('Increase Only').hitTestable());
       await tester.pumpAndSettle();
 
-      final List<Breadcrumb> breadcrumbs = tester
-          .widgetList(find.byType(Breadcrumb))
-          .map((widget) => widget as Breadcrumb)
-          .toList();
+      final breadcrumbs = _fetchBreadcrumbs(tester);
       expect(breadcrumbs.length, 1);
       expect(breadcrumbs.first.text, equals('Root [+1.6 MB]'));
 
@@ -509,4 +531,22 @@ class AppSizeTestController extends AppSizeController {
       onError: onError,
     );
   }
+}
+
+List<Breadcrumb> _fetchBreadcrumbs(WidgetTester tester) {
+  return tester
+      .widgetList(find.byType(Breadcrumb))
+      .map((widget) => widget as Breadcrumb)
+      .toList();
+}
+
+Finder _findDropdownButton<T>() {
+  return find.byType(DropdownButton<T>);
+}
+
+Finder _findMenuItemWithText<T>(String text) {
+  return find.ancestor(
+    of: find.widgetWithText(DropdownMenuItem<T>, text),
+    matching: _findDropdownButton<T>(),
+  );
 }
