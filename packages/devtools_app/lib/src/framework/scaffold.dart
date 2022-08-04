@@ -15,18 +15,18 @@ import '../config_specific/import_export/import_export.dart';
 import '../primitives/auto_dispose_mixin.dart';
 import '../screens/debugger/console.dart';
 import '../screens/debugger/debugger_screen.dart';
-import 'banner_messages.dart';
-import 'common_widgets.dart';
-import 'framework_controller.dart';
-import 'globals.dart';
-import 'notifications.dart';
-import 'routing.dart';
-import 'screen.dart';
-import 'split.dart';
+import '../shared/banner_messages.dart';
+import '../shared/common_widgets.dart';
+import '../shared/framework_controller.dart';
+import '../shared/globals.dart';
+import '../shared/notifications.dart';
+import '../shared/routing.dart';
+import '../shared/screen.dart';
+import '../shared/split.dart';
+import '../shared/theme.dart';
+import '../shared/title.dart';
+import '../shared/utils.dart';
 import 'status_line.dart';
-import 'theme.dart';
-import 'title.dart';
-import 'utils.dart';
 
 /// Scaffolding for a screen and navigation in the DevTools App.
 ///
@@ -61,9 +61,6 @@ class DevToolsScaffold extends StatefulWidget {
 
   /// A [Key] that indicates the scaffold is showing in full-width mode.
   static const Key fullWidthKey = Key('Full-width Scaffold');
-
-  /// The size that all actions on this widget are expected to have.
-  static double get actionWidgetSize => scaleByFontFactor(48.0);
 
   /// The padding around the content in the DevTools UI.
   EdgeInsets get appPadding => EdgeInsets.fromLTRB(
@@ -407,8 +404,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
           ? 0.0
           : math.max(
               0.0,
-              DevToolsScaffold.actionWidgetSize * (actions.length) -
-                  rightAdjust,
+              actionWidgetSize * (actions.length) - rightAdjust,
             );
 
       flexibleSpace = Align(
@@ -470,8 +466,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     }
     final actionsLength = widget.actions?.length ?? 0;
     if (actionsLength > 0) {
-      wideWidth += actionsLength * DevToolsScaffold.actionWidgetSize +
-          BulletSpacer.width;
+      wideWidth += actionsLength * actionWidgetSize + BulletSpacer.width;
     }
     return wideWidth;
   }
