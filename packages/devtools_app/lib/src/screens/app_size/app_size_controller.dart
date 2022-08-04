@@ -622,7 +622,7 @@ extension AppSizeJsonFileExtension on DevToolsJsonFile {
     'macos',
     'windows',
     'linux',
-    if (deferredLoadingSupportEnabled) 'web'
+    'web'
   ];
 
   bool get isAnalyzeSizeFile {
