@@ -160,19 +160,21 @@ class RequestDataButton extends IconLabelButton {
   });
 }
 
-/// Displays a RequestDataButton if [requestedSize] is null, otherwise displays
-/// the requestable size and a ToolbarRefresh button next to it,
-/// to request that size again if required. Displays a CircularProgressIndicator
-/// if the data is being requested (value of [fetching] is true).
+/// Displays a RequestDataButton if the data provided by [sizeProvider] is null,
+/// otherwise displays the size data and a ToolbarRefresh button next
+/// to it, to request that data again if required.
+///
+/// When the data is being requested (the value of [fetching] is true),
+/// a CircularProgressIndicator will be displayed.
 class RequestableSizeWidget extends StatelessWidget {
   const RequestableSizeWidget({
     required this.fetching,
-    required this.requestedSize,
+    required this.sizeProvider,
     required this.requestFunction,
   });
 
   final ValueListenable<bool> fetching;
-  final ValueListenable<InstanceRef?> requestedSize;
+  final InstanceRef? Function() sizeProvider;
   final void Function() requestFunction;
 
   @override
@@ -189,7 +191,7 @@ class RequestableSizeWidget extends StatelessWidget {
             ),
           );
         } else {
-          final size = requestedSize.value;
+          final size = sizeProvider();
           return size == null
               ? RequestDataButton(onPressed: requestFunction)
               : Row(
@@ -662,7 +664,7 @@ List<MapEntry<String, WidgetBuilder>> vmObjectGeneralDataRows(
       'Reachable Size',
       (context) => RequestableSizeWidget(
         fetching: object.fetchingReachableSize,
-        requestedSize: object.reachableSize,
+        sizeProvider: () => object.reachableSize,
         requestFunction: object.requestReachableSize,
       ),
     ),
@@ -670,7 +672,7 @@ List<MapEntry<String, WidgetBuilder>> vmObjectGeneralDataRows(
       'Retained Size',
       (context) => RequestableSizeWidget(
         fetching: object.fetchingRetainedSize,
-        requestedSize: object.retainedSize,
+        sizeProvider: () => object.retainedSize,
         requestFunction: object.requestRetainedSize,
       ),
     ),

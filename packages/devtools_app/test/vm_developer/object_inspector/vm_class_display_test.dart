@@ -41,10 +41,10 @@ void main() {
     when(mockClassObject.pos).thenReturn(testPos);
     when(mockClassObject.fetchingReachableSize)
         .thenReturn(ValueNotifier<bool>(false));
-    when(mockClassObject.reachableSize).thenReturn(ValueNotifier(null));
+    when(mockClassObject.reachableSize).thenReturn(null);
     when(mockClassObject.fetchingRetainedSize)
         .thenReturn(ValueNotifier<bool>(false));
-    when(mockClassObject.retainedSize).thenReturn(ValueNotifier(null));
+    when(mockClassObject.retainedSize).thenReturn(null);
     when(mockClassObject.retainingPath).thenReturn(
       ValueNotifier<RetainingPath?>(testRetainingPath),
     );

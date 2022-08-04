@@ -23,8 +23,6 @@ void main() {
 
   final fetchingSizeNotifier = ValueNotifier<bool>(false);
 
-  final requestedSizeNotifier = ValueNotifier<InstanceRef?>(null);
-
   final retainingPathNotifier = ValueNotifier<RetainingPath?>(null);
 
   final inboundRefsNotifier = ValueNotifier<InboundReferences?>(null);
@@ -37,13 +35,13 @@ void main() {
     final json = testInstance.toJson();
     requestedSize = Instance.parse(json)!;
 
-    when(mockClassObject.reachableSize).thenReturn(requestedSizeNotifier);
-    when(mockClassObject.retainedSize).thenReturn(ValueNotifier(null));
+    when(mockClassObject.reachableSize).thenReturn(null);
+    when(mockClassObject.retainedSize).thenReturn(null);
 
     when(mockClassObject.requestReachableSize()).thenAnswer((_) async {
       fetchingSizeNotifier.value = true;
 
-      if (requestedSizeNotifier.value == null) {
+      if (requestedSize.valueAsString == null) {
         requestedSize.valueAsString = '1024';
       } else {
         int value = int.parse(requestedSize.valueAsString!);
@@ -51,7 +49,6 @@ void main() {
         requestedSize.valueAsString = value.toString();
       }
 
-      requestedSizeNotifier.value = requestedSize;
       fetchingSizeNotifier.value = false;
     });
 
@@ -74,7 +71,7 @@ void main() {
       wrap(
         RequestableSizeWidget(
           fetching: ValueNotifier(true),
-          requestedSize: mockClassObject.reachableSize,
+          sizeProvider: () => mockClassObject.reachableSize,
           requestFunction: mockClassObject.requestReachableSize,
         ),
       ),
@@ -90,13 +87,15 @@ void main() {
       wrap(
         RequestableSizeWidget(
           fetching: fetchingSizeNotifier,
-          requestedSize: mockClassObject.reachableSize,
+          sizeProvider: () => mockClassObject.reachableSize,
           requestFunction: mockClassObject.requestReachableSize,
         ),
       ),
     );
 
     expect(find.byType(RequestDataButton), findsOneWidget);
+
+    when(mockClassObject.reachableSize).thenReturn(requestedSize);
 
     await tester.tap(find.byType(RequestDataButton));
 
