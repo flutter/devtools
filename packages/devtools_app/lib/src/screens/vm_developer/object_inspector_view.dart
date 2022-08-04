@@ -18,7 +18,7 @@ class ObjectInspectorView extends VMDeveloperView {
       : super(
           id,
           title: 'Objects',
-          icon: Icons.data_object,
+          icon: Icons.data_object_outlined,
         );
   static const id = 'object-inspector-view';
 
