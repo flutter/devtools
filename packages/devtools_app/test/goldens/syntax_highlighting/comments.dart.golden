@@ -24,7 +24,6 @@
 >var a;
 #^^^ storage.type.primitive.dart
 #     ^ punctuation.terminator.dart
-#^^^^^^ comment.block.documentation.dart
 >
 >/*
 #^^ comment.block.dart
@@ -39,7 +38,6 @@
 >var b;
 #^^^ storage.type.primitive.dart
 #     ^ punctuation.terminator.dart
-#^^^^ comment.block.dart
 >
 >/* Inline block comment */
 #^^^^^^^^^^^^^^^^^^^^^^^^^^ comment.block.dart
@@ -60,15 +58,13 @@
 #^^^^^^^^^^^^^^^^^^ comment.block.documentation.dart comment.block.documentation.dart
 #^^^^^^^^^^^^^^^^^^ comment.block.documentation.dart
 > *  */
-#^^^^^^ comment.block.documentation.dart comment.block.documentation.dart
+#^^^ comment.block.documentation.dart comment.block.documentation.dart
 #^^^^^^ comment.block.documentation.dart
 > */
-#^^ comment.block.documentation.dart comment.block.documentation.dart
 #^^^ comment.block.documentation.dart
 >var d;
 #^^^ storage.type.primitive.dart
 #     ^ punctuation.terminator.dart
-#^^^^^^ comment.block.documentation.dart
 >
 >/**
 #^^^ comment.block.documentation.dart
@@ -84,7 +80,6 @@
 >var e;
 #^^^ storage.type.primitive.dart
 #     ^ punctuation.terminator.dart
-#^^^^ comment.block.documentation.dart
 >
 >/* Nested /* Inline */ */
 #^^^^^^^^^^^^^^^^^^^^^^^^^ comment.block.dart
@@ -108,5 +103,3 @@
 >var h;
 #^^^ storage.type.primitive.dart
 #     ^ punctuation.terminator.dart
-#^^ comment.block.documentation.dart
->

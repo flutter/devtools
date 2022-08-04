@@ -196,7 +196,7 @@ String _buildGoldenText(String content, List<ScopeSpan> spans) {
   final buffer = StringBuffer();
   final spansByLine = groupBy(spans, (ScopeSpan s) => s.line! - 1);
 
-  final lines = content.split('\n');
+  final lines = content.trim().split('\n');
   for (var i = 0; i < lines.length; i++) {
     final line = lines[i];
     // We need the line length to wrap. If this isn't the last line, account for
@@ -220,7 +220,7 @@ String _buildGoldenText(String content, List<ScopeSpan> spans) {
           spansByLine[i + 1]!.add(
             ScopeSpan.copy(
               scopes: span.scopes,
-              start: span.start + thisLineLength,
+              start: span.start + lineLengthWithNewline,
               end: span.end,
               line: span.line! + 1,
               column: 1,
