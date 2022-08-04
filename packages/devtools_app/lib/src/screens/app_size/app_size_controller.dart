@@ -233,7 +233,7 @@ class AppSizeController {
       case CombinedDiffTypeAppUnit.mainCombined:
         return _mainCombined;
       case CombinedDiffTypeAppUnit.mainIncrease:
-        return _entireIncrease;
+        return _mainIncrease;
       case CombinedDiffTypeAppUnit.mainDecrease:
         return _mainDecrease;
       case CombinedDiffTypeAppUnit.deferredCombined:
@@ -289,7 +289,7 @@ class AppSizeController {
     _entireIncrease = null;
     _entireDecrease = null;
     _mainCombined = null;
-    _entireIncrease = null;
+    _mainIncrease = null;
     _mainDecrease = null;
     _deferredCombined = null;
     _deferredIncrease = null;
