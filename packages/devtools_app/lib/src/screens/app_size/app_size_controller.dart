@@ -67,6 +67,10 @@ class AppSizeController {
   static const identicalFilesError =
       'Failed to load diff: OLD and NEW files are identical.';
 
+  static const artificialRootNodeName = 'ArtificialRoot';
+
+  static const mainNodeName = 'Main';
+
   CallGraph? _analysisCallGraph;
 
   ValueListenable<CallGraphNode?> get analysisCallGraphRoot =>
@@ -318,13 +322,13 @@ class AppSizeController {
   }
 
   bool _hasDeferredInfo(Map<String, dynamic> jsonFile) {
-    return jsonFile['n'] == 'ArtificialRoot';
+    return jsonFile['n'] == artificialRootNodeName;
   }
 
   Map<String, dynamic> _extractMainUnit(Map<String, dynamic> jsonFile) {
     if (_hasDeferredInfo(jsonFile)) {
       final main = _extractChildren(jsonFile).firstWhere(
-        (child) => child['n'] == 'Main',
+        (child) => child['n'] == mainNodeName,
         orElse: () => jsonFile,
       );
       return main;
@@ -380,8 +384,20 @@ class AppSizeController {
 
     Map<String, dynamic> diffMap;
     if (oldFile.isAnalyzeSizeFile && newFile.isAnalyzeSizeFile) {
+      var oldFileJson = oldFile.data as Map<String, dynamic>;
+      var newFileJson = newFile.data as Map<String, dynamic>;
+
+      if (_hasDeferredInfo(oldFileJson) || _hasDeferredInfo(newFileJson)) {
+        _isDeferredApp.value = deferredLoadingSupportEnabled;
+
+        if (!_hasDeferredInfo(oldFileJson)) {
+          oldFileJson = _wrapInArtificialRoot(oldFileJson);
+        } else if (!_hasDeferredInfo(newFileJson)) {
+          newFileJson = _wrapInArtificialRoot(newFileJson);
+        }
+      }
+
       final oldApkProgramInfo = ProgramInfo();
-      final oldFileJson = oldFile.data as Map<String, dynamic>;
       _apkJsonToProgramInfo(
         program: oldApkProgramInfo,
         parent: oldApkProgramInfo.root,
@@ -399,7 +415,6 @@ class AppSizeController {
       }
 
       final newApkProgramInfo = ProgramInfo();
-      final newFileJson = newFile.data as Map<String, dynamic>;
       _apkJsonToProgramInfo(
         program: newApkProgramInfo,
         parent: newApkProgramInfo.root,
@@ -438,25 +453,36 @@ class AppSizeController {
     changeOldDiffFile(oldFile);
     changeNewDiffFile(newFile);
 
-    diffMap['n'] = 'Root';
+    diffMap['n'] = isDeferredApp.value ? 'Entire App' : 'Root';
 
     // TODO(peterdjlee): Try to move the non-active tree generation to separate isolates.
     _combinedDiffTreeRoot = generateDiffTree(
       diffMap,
       DiffTreeType.combined,
+      skipNodesWithNoByteSizeChange: !isDeferredApp.value,
     );
     _increasedDiffTreeRoot = generateDiffTree(
       diffMap,
       DiffTreeType.increaseOnly,
+      skipNodesWithNoByteSizeChange: !isDeferredApp.value,
     );
     _decreasedDiffTreeRoot = generateDiffTree(
       diffMap,
       DiffTreeType.decreaseOnly,
+      skipNodesWithNoByteSizeChange: !isDeferredApp.value,
     );
 
     changeDiffRoot(_activeDiffRoot);
 
     _processingNotifier.value = false;
+  }
+
+  Map<String, dynamic> _wrapInArtificialRoot(Map<String, dynamic> json) {
+    json['n'] = mainNodeName;
+    return <String, dynamic>{
+      'n': artificialRootNodeName,
+      'children': [json],
+    };
   }
 
   ProgramInfoNode _apkJsonToProgramInfo({
@@ -507,14 +533,16 @@ class AppSizeController {
   /// * [DiffTreeType.combined]: returns a tree with all nodes.
   TreemapNode? generateDiffTree(
     Map<String, dynamic> treeJson,
-    DiffTreeType diffTreeType,
-  ) {
+    DiffTreeType diffTreeType, {
+    bool skipNodesWithNoByteSizeChange = true,
+  }) {
     final isLeafNode = treeJson['children'] == null;
     if (!isLeafNode) {
       return _buildNodeWithChildren(
         treeJson,
         showDiff: true,
         diffTreeType: diffTreeType,
+        skipNodesWithNoByteSizeChange: skipNodesWithNoByteSizeChange,
       );
     } else {
       // TODO(peterdjlee): Investigate why there are leaf nodes with size of null.
@@ -547,6 +575,7 @@ class AppSizeController {
     Map<String, dynamic> treeJson, {
     bool showDiff = false,
     DiffTreeType? diffTreeType,
+    bool skipNodesWithNoByteSizeChange = true,
   }) {
     assert(showDiff ? diffTreeType != null : true);
     final rawChildren = treeJson['children'];
@@ -566,7 +595,7 @@ class AppSizeController {
     }
 
     // If none of the children matched the diff tree type
-    if (totalByteSize == 0) {
+    if (totalByteSize == 0 && skipNodesWithNoByteSizeChange) {
       return null;
     } else {
       return _buildNode(
