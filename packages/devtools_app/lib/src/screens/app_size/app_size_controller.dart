@@ -25,6 +25,11 @@ enum DiffTreeType {
   combined,
 }
 
+const artificialRootNodeName = 'ArtificialRoot';
+const entireAppNodeName = 'Entire app';
+const mainNodeName = 'Main';
+const rootNodeName = 'Root';
+
 class AppSizeController {
   static const unsupportedFileTypeError =
       'Failed to load size analysis file: file type not supported.\n\n'
@@ -238,18 +243,20 @@ class AppSizeController {
     changeAnalysisJsonFile(jsonFile);
 
     // Set deferred app flag.
-    isDeferredApp =
-        deferredLoadingSupportEnabled && processedJson['n'] == 'ArtificialRoot';
+    isDeferredApp = deferredLoadingSupportEnabled &&
+        processedJson['n'] == artificialRootNodeName;
 
     // Set root name.
-    processedJson['n'] = isDeferredApp ? 'Entire app' : 'Root';
+    processedJson['n'] = isDeferredApp ? entireAppNodeName : rootNodeName;
 
     // Build a tree with [TreemapNode] from [processedJsonMap].
     final jsonRoot = generateTree(processedJson)!;
 
     // Determine the correct root node.
     final newRoot = isDeferredApp
-        ? jsonRoot.childrenMap.values.firstWhere((node) => node.name == 'Root')
+        ? jsonRoot.childrenMap.values.firstWhere(
+            (node) => node.name.caseInsensitiveEquals(mainNodeName),
+          )
         : jsonRoot;
     changeAnalysisRoot(newRoot);
 
@@ -515,7 +522,8 @@ extension AppSizeJsonFileExtension on DevToolsJsonFile {
     'ios',
     'macos',
     'windows',
-    'linux'
+    'linux',
+    if (deferredLoadingSupportEnabled) 'web'
   ];
 
   bool get isAnalyzeSizeFile {
