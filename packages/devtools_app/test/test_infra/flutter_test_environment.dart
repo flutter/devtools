@@ -123,7 +123,6 @@ class FlutterTestEnvironment {
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(Storage, FlutterDesktopStorage());
       setGlobal(ServiceConnectionManager, ServiceConnectionManager());
-      await _preferencesController.init();
       setGlobal(PreferencesController, _preferencesController);
       setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
       setGlobal(MessageBus, MessageBus());
@@ -137,6 +136,7 @@ class FlutterTestEnvironment {
         _service,
         onClosed: Completer().future,
       );
+      await _preferencesController.init();
 
       if (_afterNewSetup != null) await _afterNewSetup!();
     }
