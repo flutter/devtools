@@ -17,7 +17,7 @@ import '../../ui/colors.dart';
 import 'app_size_screen.dart';
 
 // Temporary feature flag for deferred loading.
-bool deferredLoadingSupportEnabled = false;
+bool deferredLoadingSupportEnabled = true;
 
 enum DiffTreeType {
   increaseOnly,
@@ -585,7 +585,7 @@ class AppSizeController {
     }
 
     // If none of the children matched the diff tree type
-    if (totalByteSize == 0) {
+    if (totalByteSize == 0 && !isDeferredApp.value) {
       return null;
     } else {
       return _buildNode(
