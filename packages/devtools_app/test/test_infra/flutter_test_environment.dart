@@ -29,8 +29,11 @@ class FlutterTestEnvironment {
     this._runConfig, {
     this.testAppDirectory = 'test/fixtures/flutter_app',
     FlutterDriverFactory? flutterDriverFactory,
+    PreferencesController? preferencesController,
   })  : _flutterDriverFactory = flutterDriverFactory ?? defaultFlutterRunDriver,
-        _flutterExe = _parseFlutterExeFromEnv();
+        _flutterExe = _parseFlutterExeFromEnv(),
+        _preferencesController =
+            preferencesController ?? FakePreferencesController();
 
   static String _parseFlutterExeFromEnv() {
     const flutterExe = String.fromEnvironment('FLUTTER_CMD');
@@ -87,6 +90,8 @@ class FlutterTestEnvironment {
   // Switch this flag to false to debug issues with non-atomic test behavior.
   bool reuseTestEnvironment = true;
 
+  final PreferencesController _preferencesController;
+
   Future<void> setupEnvironment({
     bool force = false,
     FlutterRunConfiguration? config,
@@ -116,11 +121,10 @@ class FlutterTestEnvironment {
       _service = _flutter!.vmService!;
 
       setGlobal(IdeTheme, IdeTheme());
-      final preferencesController = FakePreferencesController();
       setGlobal(Storage, FlutterDesktopStorage());
       setGlobal(ServiceConnectionManager, ServiceConnectionManager());
-      await preferencesController.init();
-      setGlobal(PreferencesController, preferencesController);
+      await _preferencesController.init();
+      setGlobal(PreferencesController, _preferencesController);
       setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
       setGlobal(MessageBus, MessageBus());
       setGlobal(ScriptManager, ScriptManager());
