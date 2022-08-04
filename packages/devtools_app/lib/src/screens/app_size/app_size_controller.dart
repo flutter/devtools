@@ -17,43 +17,43 @@ import '../../ui/colors.dart';
 import 'app_size_screen.dart';
 
 // Temporary feature flag for deferred loading.
-bool deferredLoadingSupportEnabled = false;
+bool deferredLoadingSupportEnabled = true;
 
-// enum DiffTreeType {
-//   increaseOnly,
-//   decreaseOnly,
-//   combined;
+enum DiffTreeType {
+  increaseOnly,
+  decreaseOnly,
+  combined;
 
-//   String get display {
-//     switch (this) {
-//       case DiffTreeType.increaseOnly:
-//         return 'Increase Only';
-//       case DiffTreeType.decreaseOnly:
-//         return 'Decrease Only';
-//       case DiffTreeType.combined:
-//       default:
-//         return 'Combined';
-//     }
-//   }
-// }
+  String get display {
+    switch (this) {
+      case DiffTreeType.increaseOnly:
+        return 'Increase Only';
+      case DiffTreeType.decreaseOnly:
+        return 'Decrease Only';
+      case DiffTreeType.combined:
+      default:
+        return 'Combined';
+    }
+  }
+}
 
-// enum AppUnit {
-//   mainOnly,
-//   deferredOnly,
-//   entireApp;
+enum AppUnit {
+  mainOnly,
+  deferredOnly,
+  entireApp;
 
-//   String get display {
-//     switch (this) {
-//       case AppUnit.deferredOnly:
-//         return 'Deferred';
-//       case AppUnit.mainOnly:
-//         return 'Main';
-//       case AppUnit.entireApp:
-//       default:
-//         return 'Entire App';
-//     }
-//   }
-// }
+  String get display {
+    switch (this) {
+      case AppUnit.deferredOnly:
+        return 'Deferred';
+      case AppUnit.mainOnly:
+        return 'Main';
+      case AppUnit.entireApp:
+      default:
+        return 'Entire App';
+    }
+  }
+}
 
 enum CombinedDiffTypeAppUnit {
   entireIncrease,
@@ -192,39 +192,39 @@ class AppSizeController {
     }
   }
 
-  // TreemapNode? get _activeDiffRoot {
-  //   switch (_activeDiffTreeType.value) {
-  //     case DiffTreeType.increaseOnly:
-  //       return _increasedDiffTreeRoot;
-  //     case DiffTreeType.decreaseOnly:
-  //       return _decreasedDiffTreeRoot;
-  //     case DiffTreeType.combined:
-  //     default:
-  //       return _combinedDiffTreeRoot;
-  //   }
-  // }
+  TreemapNode? get _activeDiffRoot {
+    switch (_activeDiffTreeType.value) {
+      case DiffTreeType.increaseOnly:
+        return _increasedDiffTreeRoot;
+      case DiffTreeType.decreaseOnly:
+        return _decreasedDiffTreeRoot;
+      case DiffTreeType.combined:
+      default:
+        return _combinedDiffTreeRoot;
+    }
+  }
 
-  // TreemapNode? _increasedDiffTreeRoot;
-  // TreemapNode? _decreasedDiffTreeRoot;
-  // TreemapNode? _combinedDiffTreeRoot;
+  TreemapNode? _increasedDiffTreeRoot;
+  TreemapNode? _decreasedDiffTreeRoot;
+  TreemapNode? _combinedDiffTreeRoot;
 
-  // Map<String, dynamic>? get _dataForAppUnit {
-  //   switch (_selectedAppUnit.value) {
-  //     case AppUnit.deferredOnly:
-  //       return _deferredOnly;
-  //     case AppUnit.mainOnly:
-  //       return _mainOnly;
-  //     case AppUnit.entireApp:
-  //     default:
-  //       return _entireApp;
-  //   }
-  // }
+  Map<String, dynamic>? get _dataForAppUnit {
+    switch (_selectedAppUnit.value) {
+      case AppUnit.deferredOnly:
+        return _deferredOnly;
+      case AppUnit.mainOnly:
+        return _mainOnly;
+      case AppUnit.entireApp:
+      default:
+        return _entireApp;
+    }
+  }
 
-  // Map<String, dynamic>? _deferredOnly;
-  // Map<String, dynamic>? _mainOnly;
-  // Map<String, dynamic>? _entireApp;
+  Map<String, dynamic>? _deferredOnly;
+  Map<String, dynamic>? _mainOnly;
+  Map<String, dynamic>? _entireApp;
 
-  Map<String, dynamic>? get _combinedDiffTypeAppUnit {
+  TreemapNode? get _combinedDiffTypeAppUnit {
     switch (_currentCombination.value) {
       case CombinedDiffTypeAppUnit.entireIncrease:
         return _entireIncrease;
@@ -248,15 +248,15 @@ class AppSizeController {
     }
   }
 
-  Map<String, dynamic>? _entireIncrease;
-  Map<String, dynamic>? _entireDecrease;
-  Map<String, dynamic>? _mainCombined;
-  Map<String, dynamic>? _mainIncrease;
-  Map<String, dynamic>? _mainDecrease;
-  Map<String, dynamic>? _deferredCombined;
-  Map<String, dynamic>? _deferredIncrease;
-  Map<String, dynamic>? _deferredDecrease;
-  Map<String, dynamic>? _entireCombined;
+  TreemapNode? _entireIncrease;
+  TreemapNode? _entireDecrease;
+  TreemapNode? _mainCombined;
+  TreemapNode? _mainIncrease;
+  TreemapNode? _mainDecrease;
+  TreemapNode? _deferredCombined;
+  TreemapNode? _deferredIncrease;
+  TreemapNode? _deferredDecrease;
+  TreemapNode? _entireCombined;
 
   ValueListenable<DevToolsJsonFile?> get oldDiffJsonFile => _oldDiffJsonFile;
 
@@ -286,9 +286,18 @@ class AppSizeController {
     _diffRoot.value = null;
     _oldDiffJsonFile.value = null;
     _newDiffJsonFile.value = null;
-    _increasedDiffTreeRoot = null;
-    _decreasedDiffTreeRoot = null;
-    _combinedDiffTreeRoot = null;
+    _entireIncrease = null;
+    _entireDecrease = null;
+    _mainCombined = null;
+    _entireIncrease = null;
+    _mainDecrease = null;
+    _deferredCombined = null;
+    _deferredIncrease = null;
+    _deferredDecrease = null;
+    _entireCombined = null;
+    // _increasedDiffTreeRoot = null;
+    // _decreasedDiffTreeRoot = null;
+    // _combinedDiffTreeRoot = null;
     _diffCallGraphRoot.value = null;
     _oldDiffCallGraph = null;
     _newDiffCallGraph = null;
@@ -301,27 +310,65 @@ class AppSizeController {
     _analysisCallGraph = null;
   }
 
-  // /// The active diff tree type used to build the diff treemap.
-  // ValueListenable<DiffTreeType> get activeDiffTreeType {
-  //   return _activeDiffTreeType;
-  // }
+  /// The active diff tree type used to build the diff treemap.
+  ValueListenable<DiffTreeType> get activeDiffTreeType {
+    return _activeDiffTreeType;
+  }
 
-  // final _activeDiffTreeType =
-  //     ValueNotifier<DiffTreeType>(DiffTreeType.combined);
+  final _activeDiffTreeType =
+      ValueNotifier<DiffTreeType>(DiffTreeType.combined);
 
-  // void changeActiveDiffTreeType(DiffTreeType newDiffTreeType) {
-  //   _activeDiffTreeType.value = newDiffTreeType;
-  //   changeDiffRoot(_activeDiffRoot);
-  // }
+  void changeActiveDiffTreeType(DiffTreeType newDiffTreeType) {
+    _activeDiffTreeType.value = newDiffTreeType;
+    calculateCombination();
+    changeDiffRoot(_combinedDiffTypeAppUnit);
+  }
 
-  // /// The selected app segment to analyze (for deferred apps only).
-  // ValueListenable<AppUnit> get selectedAppUnit => _selectedAppUnit;
-  // final _selectedAppUnit = ValueNotifier<AppUnit>(AppUnit.entireApp);
+  void calculateCombination() {
+    if (_selectedAppUnit.value == AppUnit.entireApp &&
+        _activeDiffTreeType.value == DiffTreeType.increaseOnly) {
+      _currentCombination.value = CombinedDiffTypeAppUnit.entireIncrease;
+    } else if (_selectedAppUnit.value == AppUnit.entireApp &&
+        _activeDiffTreeType.value == DiffTreeType.decreaseOnly) {
+      _currentCombination.value = CombinedDiffTypeAppUnit.entireDecrease;
+    } else if (_selectedAppUnit.value == AppUnit.mainOnly &&
+        _activeDiffTreeType.value == DiffTreeType.combined) {
+      _currentCombination.value = CombinedDiffTypeAppUnit.mainCombined;
+    } else if (_selectedAppUnit.value == AppUnit.mainOnly &&
+        _activeDiffTreeType.value == DiffTreeType.increaseOnly) {
+      _currentCombination.value = CombinedDiffTypeAppUnit.mainIncrease;
+    } else if (_selectedAppUnit.value == AppUnit.mainOnly &&
+        _activeDiffTreeType.value == DiffTreeType.decreaseOnly) {
+      _currentCombination.value = CombinedDiffTypeAppUnit.mainDecrease;
+    } else if (_selectedAppUnit.value == AppUnit.deferredOnly &&
+        _activeDiffTreeType.value == DiffTreeType.combined) {
+      _currentCombination.value = CombinedDiffTypeAppUnit.deferredCombined;
+    } else if (_selectedAppUnit.value == AppUnit.deferredOnly &&
+        _activeDiffTreeType.value == DiffTreeType.increaseOnly) {
+      _currentCombination.value = CombinedDiffTypeAppUnit.deferredIncrease;
+    } else if (_selectedAppUnit.value == AppUnit.deferredOnly &&
+        _activeDiffTreeType.value == DiffTreeType.decreaseOnly) {
+      _currentCombination.value = CombinedDiffTypeAppUnit.deferredDecrease;
+    } else if (_selectedAppUnit.value == AppUnit.entireApp &&
+        _activeDiffTreeType.value == DiffTreeType.combined) {
+      _currentCombination.value = CombinedDiffTypeAppUnit.entireCombined;
+    }
+  }
 
-  // void changeSelectedAppUnit(AppUnit appUnit) {
-  //   _selectedAppUnit.value = appUnit;
-  //   _loadApp(_dataForAppUnit!);
-  // }
+  /// The selected app segment to analyze (for deferred apps only).
+  ValueListenable<AppUnit> get selectedAppUnit => _selectedAppUnit;
+  final _selectedAppUnit = ValueNotifier<AppUnit>(AppUnit.entireApp);
+
+  void changeSelectedAppUnit(AppUnit appUnit, Key activeTabKey) {
+    _selectedAppUnit.value = appUnit;
+    calculateCombination();
+
+    if (activeTabKey == AppSizeScreen.analysisTabKey) {
+      _loadApp(_combinedDiffTypeAppUnit!);
+    } else if (activeTabKey == AppSizeScreen.diffTabKey) {
+      changeDiffRoot(_combinedDiffTypeAppUnit!);
+    }
+  }
 
   ValueListenable<CombinedDiffTypeAppUnit> get currentCombination {
     return _currentCombination;
@@ -330,11 +377,6 @@ class AppSizeController {
   final _currentCombination = ValueNotifier<CombinedDiffTypeAppUnit>(
     CombinedDiffTypeAppUnit.entireCombined,
   );
-
-  void changeCombination(CombinedDiffTypeAppUnit newCombination) {
-    _currentCombination.value = newCombination;
-    _loadApp(_combinedDiffTypeAppUnit!);
-  }
 
   /// Notifies that the json files are currently being processed.
   ValueListenable<bool> get processingNotifier => _processingNotifier;
@@ -384,9 +426,11 @@ class AppSizeController {
 
     //analysisTable only
     if (isDeferredApp.value) {
-      _mainCombined = _extractMainUnit(Map.from(processedJson));
-      _deferredCombined = _extractDeferredUnits(Map.from(processedJson));
-      _entireCombined = _includeEntireApp(Map.from(processedJson));
+      _mainCombined = generateTree(_extractMainUnit(Map.from(processedJson)));
+      _deferredCombined =
+          generateTree(_extractDeferredUnits(Map.from(processedJson)));
+      _entireCombined =
+          generateTree(_includeEntireApp(Map.from(processedJson)));
       // _deferredOnly = _extractDeferredUnits(Map.from(processedJson));
       // _mainOnly = _extractMainUnit(Map.from(processedJson));
       // _entireApp = _includeEntireApp(Map.from(processedJson));
@@ -394,16 +438,17 @@ class AppSizeController {
     } else {
       // Set root name for non-deferred apps.
       processedJson['n'] = 'Root';
-      _loadApp(processedJson);
+      _loadApp(generateTree(processedJson)!);
     }
 
     _processingNotifier.value = false;
   }
 
-  void _loadApp(Map<String, dynamic> appData) {
+  void _loadApp(TreemapNode appData) {
     // Build a tree with [TreemapNode] from [appData].
-    final appRoot = generateTree(appData)!;
-    changeAnalysisRoot(appRoot);
+    // final appRoot = generateTree(appData)!;
+    //need also changeDiffRoot check
+    changeAnalysisRoot(appData);
   }
 
   bool _hasDeferredInfo(Map<String, dynamic> jsonFile) {
@@ -573,11 +618,36 @@ class AppSizeController {
       CombinedDiffTypeAppUnit.entireDecrease,
     );
 
-    if (_isDeferredApp.value) {}
+    if (_isDeferredApp.value) {
+      _mainCombined = generateDiffTree(
+        _extractMainUnit(diffMap),
+        CombinedDiffTypeAppUnit.mainCombined,
+      );
+      _mainIncrease = generateDiffTree(
+        _extractMainUnit(diffMap),
+        CombinedDiffTypeAppUnit.mainIncrease,
+      );
+      _mainDecrease = generateDiffTree(
+        _extractMainUnit(diffMap),
+        CombinedDiffTypeAppUnit.mainDecrease,
+      );
+      _deferredCombined = generateDiffTree(
+        _extractMainUnit(diffMap),
+        CombinedDiffTypeAppUnit.deferredCombined,
+      );
+      _deferredIncrease = generateDiffTree(
+        _extractMainUnit(diffMap),
+        CombinedDiffTypeAppUnit.deferredIncrease,
+      );
+      _deferredDecrease = generateDiffTree(
+        _extractMainUnit(diffMap),
+        CombinedDiffTypeAppUnit.deferredDecrease,
+      );
+    }
 
     // changeDiffRoot(_activeDiffRoot);
 
-    _loadApp(_combinedDiffTypeAppUnit!);
+    changeDiffRoot(_combinedDiffTypeAppUnit!);
 
     _processingNotifier.value = false;
   }
@@ -648,16 +718,22 @@ class AppSizeController {
       // Only add nodes that match the diff tree type.
       switch (diffTreeType) {
         case CombinedDiffTypeAppUnit.entireIncrease:
+        case CombinedDiffTypeAppUnit.mainIncrease:
+        case CombinedDiffTypeAppUnit.deferredIncrease:
           if (byteSize < 0) {
             return null;
           }
           break;
         case CombinedDiffTypeAppUnit.entireDecrease:
+        case CombinedDiffTypeAppUnit.mainDecrease:
+        case CombinedDiffTypeAppUnit.deferredDecrease:
           if (byteSize > 0) {
             return null;
           }
           break;
         case CombinedDiffTypeAppUnit.entireCombined:
+        case CombinedDiffTypeAppUnit.mainCombined:
+        case CombinedDiffTypeAppUnit.deferredCombined:
           break;
       }
       return _buildNode(treeJson, byteSize, showDiff: true);
@@ -669,7 +745,7 @@ class AppSizeController {
   TreemapNode? _buildNodeWithChildren(
     Map<String, dynamic> treeJson, {
     bool showDiff = false,
-    DiffTreeType? diffTreeType,
+    CombinedDiffTypeAppUnit? diffTreeType,
   }) {
     assert(showDiff ? diffTreeType != null : true);
     final rawChildren = treeJson['children'];
@@ -689,7 +765,7 @@ class AppSizeController {
     }
 
     // If none of the children matched the diff tree type
-    if (totalByteSize == 0) {
+    if (totalByteSize == 0 && !isDeferredApp.value) {
       return null;
     } else {
       return _buildNode(
