@@ -5,7 +5,6 @@
 @TestOn('vm')
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:devtools_app/src/screens/debugger/span_parser.dart';
