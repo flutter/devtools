@@ -116,6 +116,5 @@ void main() {
         );
       });
     });
-    // TODO: Add custom pubrootdir tests
   });
 }
