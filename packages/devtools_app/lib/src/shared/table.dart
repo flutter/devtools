@@ -418,8 +418,6 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   void initState() {
     super.initState();
 
-    expandRoots();
-
     _initData();
 
     addAutoDisposeListener(selectionNotifier, () {
@@ -454,11 +452,9 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   void didUpdateWidget(TreeTable<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    expandRoots();
-
     if (widget == oldWidget) return;
 
-    if (widget.sortColumn != oldWidget.sortColumn ||
+    if (widget.sortColumn.title != oldWidget.sortColumn.title ||
         widget.sortDirection != oldWidget.sortDirection ||
         !collectionEquals(widget.dataRoots, oldWidget.dataRoots)) {
       _initData();
@@ -470,6 +466,14 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   }
 
   void _initData() {
+    dataRoots = List.generate(widget.dataRoots.length, (index) {
+      final root = widget.dataRoots[index];
+      if (widget.autoExpandRoots && !root.isExpanded) {
+        root.expand();
+      }
+      return root;
+    });
+
     dataRoots = List.from(widget.dataRoots);
     sortData(
       widget.sortColumn,
@@ -479,16 +483,6 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 
     selectionNotifier = widget.selectionNotifier ??
         ValueNotifier<Selection<T>>(Selection.empty());
-  }
-
-  void expandRoots() {
-    dataRoots = List.generate(widget.dataRoots.length, (index) {
-      final root = widget.dataRoots[index];
-      if (widget.autoExpandRoots && !root.isExpanded) {
-        root.expand();
-      }
-      return root;
-    });
   }
 
   void _updateItems() {
