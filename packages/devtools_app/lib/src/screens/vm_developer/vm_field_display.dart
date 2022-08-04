@@ -51,7 +51,7 @@ List<MapEntry<String, WidgetBuilder>> _fieldDataRows(
 /// (guardClassDynamic), or a type that has not been observed yet
 /// (guardClassUnknown).
 String _fieldObservedTypes(FieldObject field) {
-  late String type;
+  String type;
 
   final kind = field.guardClassKind;
 
@@ -65,9 +65,8 @@ String _fieldObservedTypes(FieldObject field) {
     case GuardClassKind.unknown:
       type = 'none';
       break;
-    case null:
+    default:
       type = 'Observed types not found';
-      break;
   }
 
   final nullable = field.guardNullable == null
