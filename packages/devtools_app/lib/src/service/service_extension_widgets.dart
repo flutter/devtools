@@ -303,8 +303,8 @@ class _RegisteredServiceExtensionButtonState
       }),
       child: Container(
         constraints: BoxConstraints.tightFor(
-          width: DevToolsScaffold.actionWidgetSize,
-          height: DevToolsScaffold.actionWidgetSize,
+          width: actionWidgetSize,
+          height: actionWidgetSize,
         ),
         alignment: Alignment.center,
         // TODO(djshuckerow): Just make these icons the right size to fit this

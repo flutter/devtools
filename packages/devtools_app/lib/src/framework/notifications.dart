@@ -191,7 +191,7 @@ class _NotificationsState extends State<_Notifications> with AutoDisposeMixin {
         // high enough up that we don't obscure the status line.
         padding: EdgeInsets.only(
           right: defaultSpacing,
-          bottom: status_line.statusLineHeight + defaultSpacing,
+          bottom: statusLineHeight + defaultSpacing,
         ),
         child: SizedBox(
           width: _notificationWidth,

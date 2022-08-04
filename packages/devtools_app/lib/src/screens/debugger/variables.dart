@@ -208,23 +208,18 @@ class VariableSelectionControls extends MaterialTextSelectionControls {
     Offset selectionMidpoint,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
-    ClipboardStatusNotifier? clipboardStatus,
+    ValueNotifier<ClipboardStatus>? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   ) {
-    final clipboardStatusNotifier = clipboardStatus!;
     return _TextSelectionControlsToolbar(
       globalEditableRegion: globalEditableRegion,
       textLineHeight: textLineHeight,
       selectionMidpoint: selectionMidpoint,
       endpoints: endpoints,
       delegate: delegate,
-      clipboardStatus: clipboardStatusNotifier,
-      handleCut: canCut(delegate)
-          ? () => handleCut(delegate, clipboardStatusNotifier)
-          : null,
-      handleCopy: canCopy(delegate)
-          ? () => handleCopy(delegate, clipboardStatusNotifier)
-          : null,
+      clipboardStatus: clipboardStatus!,
+      handleCut: canCut(delegate) ? () => handleCut(delegate) : null,
+      handleCopy: canCopy(delegate) ? () => handleCopy(delegate) : null,
       handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
       handleSelectAll:
           canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
@@ -251,7 +246,7 @@ class _TextSelectionControlsToolbar extends StatefulWidget {
     required this.textLineHeight,
   }) : super(key: key);
 
-  final ClipboardStatusNotifier clipboardStatus;
+  final ValueNotifier<ClipboardStatus> clipboardStatus;
   final TextSelectionDelegate delegate;
   final List<TextSelectionPoint> endpoints;
   final Rect globalEditableRegion;
@@ -287,7 +282,6 @@ class _TextSelectionControlsToolbarState
   void initState() {
     super.initState();
     widget.clipboardStatus.addListener(_onChangedClipboardStatus);
-    widget.clipboardStatus.update();
   }
 
   @override
@@ -297,17 +291,12 @@ class _TextSelectionControlsToolbarState
       widget.clipboardStatus.addListener(_onChangedClipboardStatus);
       oldWidget.clipboardStatus.removeListener(_onChangedClipboardStatus);
     }
-    widget.clipboardStatus.update();
   }
 
   @override
   void dispose() {
     super.dispose();
-    // When used in an Overlay, it can happen that this is disposed after its
-    // creator has already disposed _clipboardStatus.
-    if (!widget.clipboardStatus.disposed) {
-      widget.clipboardStatus.removeListener(_onChangedClipboardStatus);
-    }
+    widget.clipboardStatus.removeListener(_onChangedClipboardStatus);
   }
 
   @override
