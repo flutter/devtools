@@ -417,7 +417,6 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   @override
   void initState() {
     super.initState();
-
     _initData();
 
     addAutoDisposeListener(selectionNotifier, () {
@@ -461,7 +460,6 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     }
     rootsExpanded =
         List.generate(dataRoots.length, (index) => dataRoots[index].isExpanded);
-
     _updateItems();
   }
 
@@ -473,7 +471,6 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       }
       return root;
     });
-
     dataRoots = List.from(widget.dataRoots);
     sortData(
       widget.sortColumn,
