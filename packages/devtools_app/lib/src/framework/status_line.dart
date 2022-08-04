@@ -11,17 +11,15 @@ import '../../devtools.dart' as devtools;
 import '../analytics/constants.dart' as analytics_constants;
 import '../service/isolate_manager.dart';
 import '../service/service_manager.dart';
+import '../shared/common_widgets.dart';
+import '../shared/device_dialog.dart';
+import '../shared/globals.dart';
+import '../shared/screen.dart';
+import '../shared/theme.dart';
+import '../shared/utils.dart';
 import '../ui/utils.dart';
 import 'about_dialog.dart';
-import 'common_widgets.dart';
-import 'device_dialog.dart';
-import 'globals.dart';
 import 'report_feedback_button.dart';
-import 'screen.dart';
-import 'theme.dart';
-import 'utils.dart';
-
-double get statusLineHeight => scaleByFontFactor(24.0);
 
 /// The status line widget displayed at the bottom of DevTools.
 ///

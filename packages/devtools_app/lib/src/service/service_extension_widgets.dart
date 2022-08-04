@@ -16,7 +16,6 @@ import '../primitives/utils.dart';
 import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
 import '../shared/notifications.dart';
-import '../shared/scaffold.dart';
 import '../shared/theme.dart';
 import '../shared/utils.dart';
 import '../ui/hover.dart';
@@ -304,8 +303,8 @@ class _RegisteredServiceExtensionButtonState
       }),
       child: Container(
         constraints: BoxConstraints.tightFor(
-          width: DevToolsScaffold.actionWidgetSize,
-          height: DevToolsScaffold.actionWidgetSize,
+          width: actionWidgetSize,
+          height: actionWidgetSize,
         ),
         alignment: Alignment.center,
         // TODO(djshuckerow): Just make these icons the right size to fit this

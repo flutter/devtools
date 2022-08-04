@@ -5,10 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../primitives/utils.dart';
-import '../../shared/common_widgets.dart';
-import '../../shared/table.dart';
-import '../../shared/theme.dart';
 import 'vm_developer_common_widgets.dart';
 import 'vm_object_model.dart';
 
@@ -30,27 +26,10 @@ class VmClassDisplay extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Expanded(
-          child: Column(
-            children: [
-              ClassInfoWidget(
-                classDataRows: _classDataRows(clazz),
-              ),
-              Flexible(
-                child: ListView(
-                  children: [
-                    RetainingPathWidget(
-                      retainingPath: clazz.retainingPath,
-                      onExpanded: _onExpandRetainingPath,
-                    ),
-                    InboundReferencesWidget(
-                      inboundReferences: clazz.inboundReferences,
-                      onExpanded: _onExpandInboundRefs,
-                    ),
-                  ],
-                ),
-              ),
-            ],
+        Flexible(
+          child: VmObjectDisplayBasicLayout(
+            object: clazz,
+            generalDataRows: _classDataRows(clazz),
           ),
         ),
         if (displayClassInstances)
@@ -62,83 +41,17 @@ class VmClassDisplay extends StatelessWidget {
       ],
     );
   }
-
-  void _onExpandRetainingPath(bool expanded) {
-    if (clazz.retainingPath.value == null) clazz.requestRetainingPath();
-  }
-
-  void _onExpandInboundRefs(bool expanded) {
-    if (clazz.inboundReferences.value == null) clazz.requestInboundsRefs();
-  }
 }
 
-/// Displays general VM information of the Class Object.
-class ClassInfoWidget extends StatelessWidget implements PreferredSizeWidget {
-  const ClassInfoWidget({
-    required this.classDataRows,
-  });
-
-  final List<MapEntry<String, Widget Function(BuildContext)>> classDataRows;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox.fromSize(
-      size: preferredSize,
-      child: VMInfoCard(
-        title: 'General Information',
-        rowKeyValues: classDataRows,
-      ),
-    );
-  }
-
-  @override
-  Size get preferredSize => Size.fromHeight(
-        areaPaneHeaderHeight +
-            classDataRows.length * defaultRowHeight +
-            defaultSpacing,
-      );
-}
-
-List<MapEntry<String, Widget Function(BuildContext)>> _classDataRows(
+// TODO(mtaylee): Delete 'Currently allocated instances' row when
+// ClassInstancesWidget implementation is completed.
+/// Generates a list of key-value pairs (map entries) containing the general
+/// information of the class object [clazz].
+List<MapEntry<String, WidgetBuilder>> _classDataRows(
   ClassObject clazz,
 ) {
   return [
-    selectableTextBuilderMapEntry('Object Class', clazz.obj.type),
-    selectableTextBuilderMapEntry(
-      'Shallow Size',
-      prettyPrintBytes(
-        clazz.obj.size ?? 0,
-        includeUnit: true,
-        kbFractionDigits: 1,
-        maxBytes: 512,
-      ),
-    ),
-    MapEntry(
-      'Reachable Size',
-      (context) => RequestableSizeWidget(
-        fetching: clazz.fetchingReachableSize,
-        requestedSize: clazz.reachableSize,
-        requestFunction: clazz.requestReachableSize,
-      ),
-    ),
-    MapEntry(
-      'Retained Size',
-      (context) => RequestableSizeWidget(
-        fetching: clazz.fetchingRetainedSize,
-        requestedSize: clazz.retainedSize,
-        requestFunction: clazz.requestRetainedSize,
-      ),
-    ),
-    selectableTextBuilderMapEntry(
-      'Library',
-      clazz.obj.library?.name?.isEmpty ?? false
-          ? clazz.script?.uri
-          : clazz.obj.library?.name,
-    ),
-    selectableTextBuilderMapEntry(
-      'Script',
-      '${fileNameFromUri(clazz.script?.uri) ?? ''}:${clazz.pos?.toString() ?? ''}',
-    ),
+    ...vmObjectGeneralDataRows(clazz),
     selectableTextBuilderMapEntry('Superclass', clazz.obj.superClass?.name),
     selectableTextBuilderMapEntry('SuperType', clazz.obj.superType?.name),
     selectableTextBuilderMapEntry(
