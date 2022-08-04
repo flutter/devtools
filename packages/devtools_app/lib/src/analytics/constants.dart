@@ -73,6 +73,7 @@ const trackPaints = 'trackPaints';
 const trackPaintsDocs = 'trackPaintsDocs';
 const trackLayouts = 'trackLayouts';
 const trackLayoutsDocs = 'trackLayoutsDocs';
+const smallEnhanceTracingButton = 'enhanceTracingButtonSmall';
 const disableClipLayersOption = 'disableClipLayers';
 const disableClipLayersOptionDocs = 'disableClipLayersDocs';
 const disableOpacityLayersOption = 'disableOpacityLayers';

@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../analytics/analytics.dart' as ga;
 import '../../../../analytics/constants.dart' as analytics_constants;
 import '../../../../primitives/utils.dart';
 import '../../../../service/service_extensions.dart' as extensions;
@@ -234,7 +235,13 @@ class SmallEnhanceTracingButton extends StatelessWidget {
       label: EnhanceTracingButton.title,
       icon: EnhanceTracingButton.icon,
       color: Theme.of(context).colorScheme.toggleButtonsTitle,
-      onPressed: enhanceTracingController.showEnhancedTracingMenu,
+      onPressed: () {
+        ga.select(
+          analytics_constants.performance,
+          analytics_constants.smallEnhanceTracingButton,
+        );
+        enhanceTracingController.showEnhancedTracingMenu();
+      },
     );
   }
 }
@@ -416,7 +423,8 @@ class _ExpensiveOperationHint extends StatelessWidget {
               display: 'negatively affect your app\'s performance',
               url: docsUrl,
               gaScreenName: gaScreenName,
-              gaSelectedItemDescription: gaSelectedItemDescription,
+              gaSelectedItemDescription:
+                  'frameAnalysis_$gaSelectedItemDescription',
             ),
           ),
           TextSpan(
