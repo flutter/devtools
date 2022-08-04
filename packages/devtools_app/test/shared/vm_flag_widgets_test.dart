@@ -4,8 +4,6 @@
 
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/framework/notifications.dart';
-import 'package:devtools_app/src/primitives/notifications.dart';
 import 'package:devtools_app/src/screens/profiler/profile_granularity.dart';
 import 'package:devtools_app/src/screens/profiler/profiler_screen.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
@@ -13,6 +11,7 @@ import 'package:devtools_app/src/service/vm_flags.dart' as vm_flags;
 import 'package:devtools_app/src/shared/banner_messages.dart';
 import 'package:devtools_app/src/shared/common_widgets.dart';
 import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/notifications.dart';
 import 'package:devtools_app/src/shared/theme.dart';
 import 'package:devtools_app/src/ui/vm_flag_widgets.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -31,7 +30,7 @@ void main() {
       fakeServiceManager = FakeServiceManager();
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(IdeTheme, IdeTheme());
-      setGlobal(NotificationService, NotificationController());
+      setGlobal(NotificationService, NotificationService());
       await fakeServiceManager.flagsInitialized.future;
       dropdown = ProfileGranularityDropdown(
         screenId: ProfilerScreen.id,

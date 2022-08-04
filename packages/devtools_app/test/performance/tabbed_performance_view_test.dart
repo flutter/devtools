@@ -5,9 +5,7 @@
 import 'package:devtools_app/src/charts/flame_chart.dart';
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
-import 'package:devtools_app/src/framework/notifications.dart';
 import 'package:devtools_app/src/primitives/listenable.dart';
-import 'package:devtools_app/src/primitives/notifications.dart';
 import 'package:devtools_app/src/screens/performance/panes/frame_analysis/frame_analysis.dart';
 import 'package:devtools_app/src/screens/performance/panes/raster_metrics/raster_metrics.dart';
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/timeline_flame_chart.dart';
@@ -17,6 +15,7 @@ import 'package:devtools_app/src/screens/performance/tabbed_performance_view.dar
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/common_widgets.dart';
 import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/notifications.dart';
 import 'package:devtools_app/src/shared/preferences.dart';
 import 'package:devtools_app/src/shared/version.dart';
 import 'package:devtools_app/src/ui/tab.dart';
@@ -62,7 +61,7 @@ void main() {
       await _setUpServiceManagerWithTimeline(testTimelineJson);
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(PreferencesController, PreferencesController());
-      setGlobal(NotificationService, NotificationController());
+      setGlobal(NotificationService, NotificationService());
       controller = createMockPerformanceControllerWithDefaults();
       frameAnalysisSupported = true;
       rasterMetricsSupported = true;

@@ -8,10 +8,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
 import '../primitives/auto_dispose_mixin.dart';
-import '../primitives/notifications.dart';
 import '../primitives/utils.dart';
 import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
+import '../shared/notifications.dart';
 import '../shared/theme.dart';
 import '../shared/utils.dart';
 
@@ -40,53 +40,6 @@ class NotificationsView extends StatelessWidget {
   }
 }
 
-class NotificationController implements NotificationService {
-  final toPush = ValueNotifier<NotificationMessage>(NotificationMessage(''));
-  final toDismiss = ValueNotifier<NotificationMessage>(NotificationMessage(''));
-
-  @visibleForTesting
-  final inProcess = <NotificationMessage>[];
-
-  /// Pushes a notification [message].
-  @override
-  bool push(String message) => smartPush(NotificationMessage(message));
-
-  /// Pushes a notification [message].
-  ///
-  /// Ignores the message if [allowDuplicates] is false and a message with the
-  /// same text is currently displayed to the user.
-  @override
-  bool smartPush(
-    NotificationMessage message, {
-    bool allowDuplicates = true,
-  }) {
-    if (!allowDuplicates &&
-        inProcess.containsWhere((m) => m.text == message.text)) {
-      return false;
-    }
-    inProcess.add(message);
-    toPush.value = message;
-    return true;
-  }
-
-  /// Dismisses all notifications with a matching message.
-  @override
-  void dismiss(String message) =>
-      toDismiss.value = NotificationMessage(message);
-
-  /// Marks the message as complete, so that the messages not
-  /// allowing duplicates,
-  /// with the same text, do not get rejected.
-  void markComplete(NotificationMessage message) {
-    inProcess.removeWhere((element) => element == message);
-  }
-
-  void dispose() {
-    toPush.dispose();
-    toDismiss.dispose();
-  }
-}
-
 class _Notifications extends StatefulWidget {
   const _Notifications({Key? key, required this.child}) : super(key: key);
 
@@ -100,7 +53,7 @@ class _NotificationsState extends State<_Notifications> with AutoDisposeMixin {
   OverlayEntry? _overlayEntry;
 
   final List<_Notification> _notifications = [];
-  late NotificationController controller;
+  late NotificationService controller;
 
   @override
   void didChangeDependencies() {
@@ -115,17 +68,23 @@ class _NotificationsState extends State<_Notifications> with AutoDisposeMixin {
         Overlay.of(context)!.insert(_overlayEntry!);
       });
 
-      controller = notificationService as NotificationController;
+      controller = notificationService;
 
       addAutoDisposeListener(
-        controller.toPush,
-        () => _push(controller.toPush.value),
+        controller.messagesAdded,
+        _processQueues,
       );
+    }
 
-      addAutoDisposeListener(
-        controller.toDismiss,
-        () => _dismiss(controller.toDismiss.value.text),
-      );
+    _processQueues();
+  }
+
+  void _processQueues() {
+    while (controller.toDismiss.isNotEmpty) {
+      _dismiss(controller.toDismiss.removeFirst().text);
+    }
+    while (controller.toPush.isNotEmpty) {
+      _push(controller.toPush.removeFirst());
     }
   }
 

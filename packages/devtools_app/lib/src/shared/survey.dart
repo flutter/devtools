@@ -11,8 +11,8 @@ import '../analytics/analytics.dart' as ga;
 import '../config_specific/launch_url/launch_url.dart';
 import '../config_specific/logger/logger.dart';
 import '../config_specific/server/server.dart' as server;
-import '../primitives/notifications.dart';
 import '../primitives/utils.dart';
+import '../shared/notifications.dart';
 import 'globals.dart';
 
 class SurveyService {
@@ -72,7 +72,7 @@ class SurveyService {
         ),
       ];
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        final didPush = notificationService.smartPush(
+        final didPush = notificationService.pushNotification(
           NotificationMessage(
             message,
             actions: actions,

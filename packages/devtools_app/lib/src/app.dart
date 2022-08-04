@@ -138,9 +138,6 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     // preferences is initialized in main() to avoid flash of content with
     // incorrect theme.
     preferences.dispose();
-
-    (notificationService as NotificationController).dispose();
-    setGlobal(NotificationController, null);
     super.dispose();
   }
 
