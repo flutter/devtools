@@ -8,7 +8,6 @@ import 'dart:io';
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/config_specific/framework_initialize/_framework_initialize_desktop.dart';
 import 'package:devtools_app/src/primitives/message_bus.dart';
-import 'package:devtools_test/devtools_test.dart';
 
 import 'flutter_test_driver.dart';
 
