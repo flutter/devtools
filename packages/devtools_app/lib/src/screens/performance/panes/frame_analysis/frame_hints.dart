@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../analytics/analytics.dart' as ga;
 import '../../../../analytics/constants.dart' as analytics_constants;
 import '../../../../primitives/utils.dart';
 import '../../../../service/service_extensions.dart' as extensions;
@@ -47,7 +48,7 @@ class FrameHints extends StatelessWidget {
         ? [
             const Text('UI Jank Detected'),
             const SizedBox(height: denseSpacing),
-            _EnhanceTracingHint(
+            EnhanceTracingHint(
               longestPhase: frameAnalysis.longestUiPhase,
               enhanceTracingState: frameAnalysis.frame.enhanceTracingState,
               enhanceTracingController: enhanceTracingController,
@@ -102,8 +103,9 @@ class _Hint extends StatelessWidget {
   }
 }
 
-class _EnhanceTracingHint extends StatelessWidget {
-  const _EnhanceTracingHint({
+@visibleForTesting
+class EnhanceTracingHint extends StatelessWidget {
+  const EnhanceTracingHint({
     Key? key,
     required this.longestPhase,
     required this.enhanceTracingState,
@@ -199,7 +201,7 @@ class _EnhanceTracingHint extends StatelessWidget {
       alignment: PlaceholderAlignment.middle,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
-        child: _SmallEnhanceTracingButton(
+        child: SmallEnhanceTracingButton(
           enhanceTracingController: enhanceTracingController,
         ),
       ),
@@ -218,8 +220,9 @@ class _EnhanceTracingHint extends StatelessWidget {
   }
 }
 
-class _SmallEnhanceTracingButton extends StatelessWidget {
-  const _SmallEnhanceTracingButton({
+@visibleForTesting
+class SmallEnhanceTracingButton extends StatelessWidget {
+  const SmallEnhanceTracingButton({
     Key? key,
     required this.enhanceTracingController,
   }) : super(key: key);
@@ -232,55 +235,18 @@ class _SmallEnhanceTracingButton extends StatelessWidget {
       label: EnhanceTracingButton.title,
       icon: EnhanceTracingButton.icon,
       color: Theme.of(context).colorScheme.toggleButtonsTitle,
-      onPressed: enhanceTracingController.showEnhancedTracingMenu,
+      onPressed: () {
+        ga.select(
+          analytics_constants.performance,
+          analytics_constants.smallEnhanceTracingButton,
+        );
+        enhanceTracingController.showEnhancedTracingMenu();
+      },
     );
   }
 }
 
-class _ExpensiveOperationHint extends StatelessWidget {
-  const _ExpensiveOperationHint({
-    Key? key,
-    required this.message,
-    required this.docsUrl,
-    required this.gaScreenName,
-    required this.gaSelectedItemDescription,
-  }) : super(key: key);
-
-  final TextSpan message;
-  final String docsUrl;
-  final String gaScreenName;
-  final String gaSelectedItemDescription;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return RichText(
-      text: TextSpan(
-        children: [
-          message,
-          TextSpan(
-            text: ' This may ',
-            style: theme.regularTextStyle,
-          ),
-          LinkTextSpan(
-            context: context,
-            link: Link(
-              display: 'negatively affect your app\'s performance',
-              url: docsUrl,
-              gaScreenName: gaScreenName,
-              gaSelectedItemDescription: gaSelectedItemDescription,
-            ),
-          ),
-          TextSpan(
-            text: '.',
-            style: theme.regularTextStyle,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
+@visibleForTesting
 class IntrinsicOperationsHint extends StatelessWidget {
   const IntrinsicOperationsHint(
     this.intrinsicOperationsCount, {
@@ -323,6 +289,7 @@ class IntrinsicOperationsHint extends StatelessWidget {
 // suggest that the user turn it on to get information about the render objects
 // that are calling saveLayer. If the event has render object information in the
 // args, display it in the hint.
+@visibleForTesting
 class CanvasSaveLayerHint extends StatelessWidget {
   const CanvasSaveLayerHint(
     this.saveLayerCount, {
@@ -360,6 +327,7 @@ class CanvasSaveLayerHint extends StatelessWidget {
   }
 }
 
+@visibleForTesting
 class ShaderCompilationHint extends StatelessWidget {
   const ShaderCompilationHint({
     Key? key,
@@ -393,6 +361,7 @@ class ShaderCompilationHint extends StatelessWidget {
   }
 }
 
+@visibleForTesting
 class RasterMetricsHint extends StatelessWidget {
   const RasterMetricsHint({Key? key}) : super(key: key);
 
@@ -418,6 +387,51 @@ class RasterMetricsHint extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _ExpensiveOperationHint extends StatelessWidget {
+  const _ExpensiveOperationHint({
+    Key? key,
+    required this.message,
+    required this.docsUrl,
+    required this.gaScreenName,
+    required this.gaSelectedItemDescription,
+  }) : super(key: key);
+
+  final TextSpan message;
+  final String docsUrl;
+  final String gaScreenName;
+  final String gaSelectedItemDescription;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return RichText(
+      text: TextSpan(
+        children: [
+          message,
+          TextSpan(
+            text: ' This may ',
+            style: theme.regularTextStyle,
+          ),
+          LinkTextSpan(
+            context: context,
+            link: Link(
+              display: 'negatively affect your app\'s performance',
+              url: docsUrl,
+              gaScreenName: gaScreenName,
+              gaSelectedItemDescription:
+                  'frameAnalysis_$gaSelectedItemDescription',
+            ),
+          ),
+          TextSpan(
+            text: '.',
+            style: theme.regularTextStyle,
+          ),
+        ],
       ),
     );
   }

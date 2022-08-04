@@ -15,6 +15,8 @@ import 'package:vm_service/vm_service.dart';
   DebuggerController,
   EnhanceTracingController,
   ErrorBadgeManager,
+  FrameAnalysis,
+  FramePhase,
   HeapSnapshotGraph,
   PerformanceController,
   ProgramExplorerController,
@@ -25,6 +27,7 @@ import 'package:vm_service/vm_service.dart';
   ObjectGroupBase,
   ClassObject,
   CodeObject,
+  FieldObject,
   ui.Image,
 ])
 void main() {}

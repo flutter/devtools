@@ -10,7 +10,6 @@ import 'package:flutter/material.dart';
 
 import '../primitives/listenable.dart';
 import 'globals.dart';
-import 'scaffold.dart';
 import 'theme.dart';
 import 'version.dart';
 

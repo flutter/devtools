@@ -174,7 +174,6 @@ class Disassembly {
 }
 
 /// An extension on [Func] which allows for access to VM internal fields.
-
 extension FunctionPrivateViewExtension on Func {
   static const _unoptimizedCodeKey = '_unoptimizedCode';
   static const kindKey = '_kind';
@@ -241,7 +240,6 @@ enum FunctionKind {
 }
 
 /// An extension on [Code] which allows for access to VM internal fields.
-
 extension CodePrivateViewExtension on Code {
   static const _disassemblyKey = '_disassembly';
 
@@ -250,4 +248,68 @@ extension CodePrivateViewExtension on Code {
   Disassembly get disassembly => Disassembly.parse(json![_disassemblyKey]);
   set disassembly(Disassembly disassembly) =>
       json![_disassemblyKey] = disassembly.toJson();
+}
+
+/// An extension on [Field] which allows for access to VM internal fields.
+extension FieldPrivateViewExtension on Field {
+  static const guardClassKey = '_guardClass';
+
+  bool? get guardNullable => json!['_guardNullable'];
+
+  Future<Class?> get guardClass async {
+    if (_guardClassIsClass()) {
+      final service = serviceManager.service!;
+      final isolate = serviceManager.isolateManager.selectedIsolate.value;
+
+      return await service.getObject(isolate!.id!, json![guardClassKey]['id'])
+          as Class;
+    }
+
+    return null;
+  }
+
+  GuardClassKind? guardClassKind() {
+    if (_guardClassIsClass()) {
+      return GuardClassKind.single;
+    } else if (json![guardClassKey] == GuardClassKind.dynamic.jsonValue()) {
+      return GuardClassKind.dynamic;
+    } else if (json![guardClassKey] == GuardClassKind.unknown.jsonValue()) {
+      return GuardClassKind.unknown;
+    }
+
+    return null;
+  }
+
+  bool _guardClassIsClass() {
+    String? guardClassType;
+
+    if (json![guardClassKey] is Map) {
+      guardClassType = json![guardClassKey]['type'];
+    }
+
+    if (guardClassType == '@Class' || guardClassType == 'Class') {
+      return true;
+    } else {
+      return false;
+    }
+  }
+}
+
+/// The kinds of Guard Class that determine whether a Field object has
+/// a unique observed type [single], various observed types [dynamic],
+/// or if the field type has not been observed yet [unknown].
+enum GuardClassKind {
+  single,
+  dynamic,
+  unknown;
+
+  String jsonValue() {
+    switch (this) {
+      case GuardClassKind.dynamic:
+        return 'various';
+      case GuardClassKind.single:
+      case GuardClassKind.unknown:
+        return toString().split('.').last;
+    }
+  }
 }

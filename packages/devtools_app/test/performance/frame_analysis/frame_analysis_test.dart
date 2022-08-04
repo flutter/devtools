@@ -35,7 +35,14 @@ void main() {
       mockEnhanceTracingController = MockEnhanceTracingController();
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(OfflineModeController, OfflineModeController());
-      setGlobal(ServiceConnectionManager, FakeServiceManager());
+      final fakeServiceManager = FakeServiceManager();
+      setGlobal(ServiceConnectionManager, fakeServiceManager);
+      mockConnectedApp(
+        fakeServiceManager.connectedApp!,
+        isFlutterApp: true,
+        isProfileBuild: true,
+        isWebApp: false,
+      );
     });
 
     Future<void> pumpAnalysisView(
@@ -76,10 +83,6 @@ void main() {
       );
       expect(find.byType(FrameHints), findsOneWidget);
       expect(find.byType(FrameTimeVisualizer), findsOneWidget);
-    });
-
-    group('FrameHints', () {
-      // TODO(kenz): write tests for FrameHints widget.
     });
 
     group('FrameTimeVisualizer', () {

@@ -70,12 +70,12 @@ class VMStatisticsWidget extends StatelessWidget {
           flex: 3,
           child: Column(
             children: [
-              Flexible(
+              Expanded(
                 child: GeneralVMStatisticsWidget(
                   controller: controller,
                 ),
               ),
-              Flexible(
+              Expanded(
                 child: ProcessStatisticsWidget(
                   controller: controller,
                 ),
