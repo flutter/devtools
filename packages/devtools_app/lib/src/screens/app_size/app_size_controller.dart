@@ -471,7 +471,8 @@ class AppSizeController {
   ) {
     if (_hasDeferredInfo(jsonFile)) {
       jsonFile['children'] = _extractChildren(jsonFile)
-          .where((child) => child['isDeferred'] == true);
+          .where((child) => child['isDeferred'] == true)
+          .toList();
       jsonFile['n'] = 'Deferred';
     }
     return jsonFile;
@@ -512,37 +513,94 @@ class AppSizeController {
     // size screen does not get updated.
     await delayForBatchProcessing(micros: 10000);
 
-    Map<String, dynamic> diffMap;
-    if (oldFile.isAnalyzeSizeFile && newFile.isAnalyzeSizeFile) {
-      var oldFileJson = oldFile.data as Map<String, dynamic>;
-      var newFileJson = newFile.data as Map<String, dynamic>;
+    // Creating 3 different diffMaps (mainOnly, deferredOnly, entireApp)
 
-      if (_hasDeferredInfo(oldFileJson) || _hasDeferredInfo(newFileJson)) {
+    Map<String, dynamic>? diffMapMain;
+    Map<String, dynamic>? diffMapDeferred;
+    Map<String, dynamic> diffMapEntire;
+
+    if (oldFile.isAnalyzeSizeFile && newFile.isAnalyzeSizeFile) {
+      var oldFileJsonEntire = oldFile.data as Map<String, dynamic>;
+      var newFileJsonEntire = newFile.data as Map<String, dynamic>;
+
+      if (_hasDeferredInfo(oldFileJsonEntire) ||
+          _hasDeferredInfo(newFileJsonEntire)) {
         _isDeferredApp.value = deferredLoadingSupportEnabled;
 
-        if (!_hasDeferredInfo(oldFileJson)) {
-          oldFileJson = <String, dynamic>{
+        if (!_hasDeferredInfo(oldFileJsonEntire)) {
+          oldFileJsonEntire = <String, dynamic>{
             'n': deferredRootName,
-            'children': [oldFileJson]
+            'children': [oldFileJsonEntire]
           };
-        } else if (!_hasDeferredInfo(newFileJson)) {
-          newFileJson = <String, dynamic>{
+        } else if (!_hasDeferredInfo(newFileJsonEntire)) {
+          newFileJsonEntire = <String, dynamic>{
             'n': deferredRootName,
-            'children': [newFileJson]
+            'children': [newFileJsonEntire]
           };
         }
       }
 
-      final oldApkProgramInfo = ProgramInfo();
+      if (isDeferredApp.value) {
+        final oldFileJsonMain = _extractMainUnit(oldFileJsonEntire);
+        final newFileJsonMain = _extractMainUnit(newFileJsonEntire);
+
+        final oldApkProgramInfoMain = ProgramInfo();
+        _apkJsonToProgramInfo(
+          program: oldApkProgramInfoMain,
+          parent: oldApkProgramInfoMain.root,
+          json: oldFileJsonMain,
+        );
+
+        final newApkProgramInfoMain = ProgramInfo();
+        _apkJsonToProgramInfo(
+          program: newApkProgramInfoMain,
+          parent: newApkProgramInfoMain.root,
+          json: newFileJsonMain,
+        );
+
+        diffMapMain =
+            compareProgramInfo(oldApkProgramInfoMain, newApkProgramInfoMain);
+
+        //deferred
+
+        final oldFileJsonDeferred = _extractDeferredUnits(oldFileJsonEntire);
+        final newFileJsonDeferred = _extractDeferredUnits(newFileJsonEntire);
+
+        final oldApkProgramInfoDeferred = ProgramInfo();
+        if (oldFileJsonDeferred.isNotEmpty) {
+          _apkJsonToProgramInfo(
+            program: oldApkProgramInfoDeferred,
+            parent: oldApkProgramInfoDeferred.root,
+            json: oldFileJsonDeferred,
+          );
+        }
+
+        final newApkProgramInfoDeferred = ProgramInfo();
+        _apkJsonToProgramInfo(
+          program: newApkProgramInfoDeferred,
+          parent: newApkProgramInfoDeferred.root,
+          json: newFileJsonDeferred,
+        );
+
+        diffMapDeferred = compareProgramInfo(
+          oldApkProgramInfoDeferred,
+          newApkProgramInfoDeferred,
+        );
+      } else {
+        diffMapMain = null;
+        diffMapDeferred = null;
+      }
+
+      final oldApkProgramInfoEntire = ProgramInfo();
       _apkJsonToProgramInfo(
-        program: oldApkProgramInfo,
-        parent: oldApkProgramInfo.root,
-        json: oldFileJson,
+        program: oldApkProgramInfoEntire,
+        parent: oldApkProgramInfoEntire.root,
+        json: oldFileJsonEntire,
       );
 
       // Extract the precompiler trace from the old file, if it exists, and
       // generate a call graph.
-      final oldPrecompilerTrace = oldFileJson.remove('precompiler-trace');
+      final oldPrecompilerTrace = oldFileJsonEntire.remove('precompiler-trace');
       if (oldPrecompilerTrace != null) {
         _oldDiffCallGraph = generateCallGraphWithDominators(
           oldPrecompilerTrace,
@@ -550,16 +608,16 @@ class AppSizeController {
         );
       }
 
-      final newApkProgramInfo = ProgramInfo();
+      final newApkProgramInfoEntire = ProgramInfo();
       _apkJsonToProgramInfo(
-        program: newApkProgramInfo,
-        parent: newApkProgramInfo.root,
-        json: newFileJson,
+        program: newApkProgramInfoEntire,
+        parent: newApkProgramInfoEntire.root,
+        json: newFileJsonEntire,
       );
 
       // Extract the precompiler trace from the new file, if it exists, and
       // generate a call graph.
-      final newPrecompilerTrace = newFileJson.remove('precompiler-trace');
+      final newPrecompilerTrace = newFileJsonEntire.remove('precompiler-trace');
       if (newPrecompilerTrace != null) {
         _newDiffCallGraph = generateCallGraphWithDominators(
           newPrecompilerTrace,
@@ -567,10 +625,13 @@ class AppSizeController {
         );
       }
 
-      diffMap = compareProgramInfo(oldApkProgramInfo, newApkProgramInfo);
+      diffMapEntire =
+          compareProgramInfo(oldApkProgramInfoEntire, newApkProgramInfoEntire);
     } else {
       try {
-        diffMap = buildComparisonTreemap(oldFile.data, newFile.data);
+        diffMapEntire = buildComparisonTreemap(oldFile.data, newFile.data);
+        diffMapMain = buildComparisonTreemap(oldFile.data, newFile.data);
+        diffMapDeferred = buildComparisonTreemap(oldFile.data, newFile.data);
       } catch (error) {
         // TODO(peterdjlee): Include link to docs when hyperlink support is added to the
         //                    Notifications class. See #2268.
@@ -580,7 +641,8 @@ class AppSizeController {
       }
     }
 
-    if ((diffMap['children'] as List).isEmpty) {
+    //may need to add main and deferred checks
+    if ((diffMapEntire['children'] as List).isEmpty) {
       onError(identicalFilesError);
       _processingNotifier.value = false;
       return;
@@ -589,7 +651,7 @@ class AppSizeController {
     changeOldDiffFile(oldFile);
     changeNewDiffFile(newFile);
 
-    diffMap['n'] = isDeferredApp.value ? 'Entire App' : 'Root';
+    diffMapEntire['n'] = isDeferredApp.value ? 'Entire App' : 'Root';
 
     // TODO(peterdjlee): Try to move the non-active tree generation to separate isolates.
     // _combinedDiffTreeRoot = generateDiffTree(
@@ -606,41 +668,41 @@ class AppSizeController {
     // );
 
     _entireCombined = generateDiffTree(
-      diffMap,
+      diffMapEntire,
       CombinedDiffTypeAppUnit.entireCombined,
     );
     _entireIncrease = generateDiffTree(
-      diffMap,
+      diffMapEntire,
       CombinedDiffTypeAppUnit.entireIncrease,
     );
     _entireDecrease = generateDiffTree(
-      diffMap,
+      diffMapEntire,
       CombinedDiffTypeAppUnit.entireDecrease,
     );
 
-    if (_isDeferredApp.value) {
+    if (isDeferredApp.value) {
       _mainCombined = generateDiffTree(
-        _extractMainUnit(diffMap),
+        diffMapMain!,
         CombinedDiffTypeAppUnit.mainCombined,
       );
       _mainIncrease = generateDiffTree(
-        _extractMainUnit(diffMap),
+        diffMapMain,
         CombinedDiffTypeAppUnit.mainIncrease,
       );
       _mainDecrease = generateDiffTree(
-        _extractMainUnit(diffMap),
+        diffMapMain,
         CombinedDiffTypeAppUnit.mainDecrease,
       );
       _deferredCombined = generateDiffTree(
-        _extractMainUnit(diffMap),
+        diffMapDeferred!,
         CombinedDiffTypeAppUnit.deferredCombined,
       );
       _deferredIncrease = generateDiffTree(
-        _extractMainUnit(diffMap),
+        diffMapDeferred,
         CombinedDiffTypeAppUnit.deferredIncrease,
       );
       _deferredDecrease = generateDiffTree(
-        _extractMainUnit(diffMap),
+        diffMapDeferred,
         CombinedDiffTypeAppUnit.deferredDecrease,
       );
     }
