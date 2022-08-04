@@ -19,7 +19,6 @@ import '../shared/banner_messages.dart';
 import '../shared/common_widgets.dart';
 import '../shared/framework_controller.dart';
 import '../shared/globals.dart';
-import '../shared/notifications.dart';
 import '../shared/routing.dart';
 import '../shared/screen.dart';
 import '../shared/split.dart';

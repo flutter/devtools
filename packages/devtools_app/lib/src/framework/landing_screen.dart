@@ -14,17 +14,10 @@ import '../primitives/utils.dart';
 import '../shared/common_widgets.dart';
 import '../shared/file_import.dart';
 import '../shared/globals.dart';
-import '../shared/notifications.dart';
 import '../shared/routing.dart';
 import '../shared/theme.dart';
 import '../shared/utils.dart';
 import '../ui/label.dart';
-import 'common_widgets.dart';
-import 'file_import.dart';
-import 'globals.dart';
-import 'routing.dart';
-import 'theme.dart';
-import 'utils.dart';
 import 'framework_core.dart';
 
 /// The landing screen when starting Dart DevTools without being connected to an
