@@ -115,26 +115,18 @@ List<MapEntry<String, Widget Function(BuildContext)>> _classDataRows(
     ),
     MapEntry(
       'Reachable Size',
-      (context) => ValueListenableBuilder<bool>(
-        valueListenable: clazz.fetchingReachableSize,
-        builder: (context, fetching, _) => fetching
-            ? const CircularProgressIndicator()
-            : RequestableSizeWidget(
-                requestedSize: clazz.reachableSize,
-                requestFunction: clazz.requestReachableSize,
-              ),
+      (context) => RequestableSizeWidget(
+        fetching: clazz.fetchingReachableSize,
+        requestedSize: clazz.reachableSize,
+        requestFunction: clazz.requestReachableSize,
       ),
     ),
     MapEntry(
       'Retained Size',
-      (context) => ValueListenableBuilder<bool>(
-        valueListenable: clazz.fetchingRetainedSize,
-        builder: (context, fetching, _) => fetching
-            ? const CircularProgressIndicator()
-            : RequestableSizeWidget(
-                requestedSize: clazz.retainedSize,
-                requestFunction: clazz.requestRetainedSize,
-              ),
+      (context) => RequestableSizeWidget(
+        fetching: clazz.fetchingRetainedSize,
+        requestedSize: clazz.retainedSize,
+        requestFunction: clazz.requestRetainedSize,
       ),
     ),
     selectableTextBuilderMapEntry(

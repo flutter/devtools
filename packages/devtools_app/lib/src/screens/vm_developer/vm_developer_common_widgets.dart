@@ -158,39 +158,55 @@ class RequestDataButton extends IconLabelButton {
 
 /// Displays a RequestDataButton if [requestedSize] is null, otherwise displays
 /// the requestable size and a ToolbarRefresh button next to it,
-/// to request that size again if required.
+/// to request that size again if required. Displays a CircularProgressIndicator
+/// if the data is being requested (value of [fetching] is true).
 class RequestableSizeWidget extends StatelessWidget {
   const RequestableSizeWidget({
+    required this.fetching,
     required this.requestedSize,
     required this.requestFunction,
   });
 
-  final InstanceRef? requestedSize;
+  final ValueListenable<bool> fetching;
+  final ValueListenable<InstanceRef?> requestedSize;
   final void Function() requestFunction;
 
   @override
   Widget build(BuildContext context) {
-    final size = requestedSize;
-    if (size == null) {
-      return RequestDataButton(onPressed: requestFunction);
-    } else {
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Text(
-            size.valueAsString == null
-                ? '--'
-                : prettyPrintBytes(
-                    int.parse(size.valueAsString!),
-                    includeUnit: true,
-                    kbFractionDigits: 1,
-                    maxBytes: 512,
-                  )!,
-          ),
-          ToolbarRefresh(onPressed: requestFunction),
-        ],
-      );
-    }
+    return ValueListenableBuilder<bool>(
+      valueListenable: fetching,
+      builder: (context, fetching, _) {
+        if (fetching) {
+          return const AspectRatio(
+            aspectRatio: 1,
+            child: Padding(
+              padding: EdgeInsets.all(densePadding),
+              child: CircularProgressIndicator(),
+            ),
+          );
+        } else {
+          final size = requestedSize.value;
+          return size == null
+              ? RequestDataButton(onPressed: requestFunction)
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    SelectableText(
+                      size.valueAsString == null
+                          ? '--'
+                          : prettyPrintBytes(
+                              int.parse(size.valueAsString!),
+                              includeUnit: true,
+                              kbFractionDigits: 1,
+                              maxBytes: 512,
+                            )!,
+                    ),
+                    ToolbarRefresh(onPressed: requestFunction),
+                  ],
+                );
+        }
+      },
+    );
   }
 }
 
