@@ -460,14 +460,12 @@ class InspectorService extends InspectorServiceBase {
     final response = await invokeServiceMethodDaemonNoGroupArgs(
       'getPubRootDirectories',
     );
-    if (response.runtimeType == List) {
-      return (response as List<dynamic>)
-          .map<String>((e) => e.toString())
-          .toList();
-    } else {
-      // TODO: should this throw an error?
-      return [];
-    }
+
+    if (response.runtimeType != List) return [];
+
+    return (response as List<dynamic>)
+        .map<String>((e) => e.toString())
+        .toList();
   }
 
   /// As we aren't running from an IDE, we don't know exactly what the pub root
