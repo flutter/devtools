@@ -12,7 +12,6 @@ import '../primitives/notifications.dart';
 import '../primitives/utils.dart';
 import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
-import '../shared/status_line.dart' as status_line;
 import '../shared/theme.dart';
 import '../shared/utils.dart';
 
