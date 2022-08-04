@@ -33,7 +33,7 @@ class FlutterTestEnvironment {
   })  : _flutterDriverFactory = flutterDriverFactory ?? defaultFlutterRunDriver,
         _flutterExe = _parseFlutterExeFromEnv(),
         _preferencesController =
-            preferencesController ?? FakePreferencesController();
+            preferencesController ?? PreferencesController();
 
   static String _parseFlutterExeFromEnv() {
     const flutterExe = String.fromEnvironment('FLUTTER_CMD');
