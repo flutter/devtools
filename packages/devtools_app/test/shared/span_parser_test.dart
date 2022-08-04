@@ -201,7 +201,7 @@ String _buildGoldenText(String content, List<ScopeSpan> spans) {
     final line = lines[i];
     // We need the line length to wrap. If this isn't the last line, account for
     // the \n we split by.
-    final newlineLength = i == lines.length - 1 ? 0 : 1;
+    final newlineLength = (i == lines.length - 1) ? 0 : 1;
     final lineLengthWithNewline = line.length + newlineLength;
 
     buffer.writeln('>$line');
