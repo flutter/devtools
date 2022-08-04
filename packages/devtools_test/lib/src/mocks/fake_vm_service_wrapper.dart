@@ -204,12 +204,14 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
 
   @override
   Future<Isolate> getIsolate(String isolateId) {
-    return Future.value(Isolate.parse({
-      'rootLib': LibraryRef.parse({
-        'name': 'fake_isolate_name',
-        'uri': 'package:fake_uri_root/main.dart'
-      })
-    }));
+    return Future.value(
+      Isolate.parse({
+        'rootLib': LibraryRef.parse({
+          'name': 'fake_isolate_name',
+          'uri': 'package:fake_uri_root/main.dart'
+        })
+      }),
+    );
   }
 
   @override
