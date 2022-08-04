@@ -19,6 +19,12 @@ import 'app_size_screen.dart';
 // Temporary feature flag for deferred loading.
 bool deferredLoadingSupportEnabled = false;
 
+const artificialRootNodeName = 'ArtificialRoot';
+const entireAppNodeName = 'Entire App';
+const deferredNodeName = 'Deferred';
+const mainNodeName = 'Main';
+const rootNodeName = 'Root';
+
 enum DiffTreeType {
   increaseOnly,
   decreaseOnly,
@@ -45,20 +51,15 @@ enum AppUnit {
   String get display {
     switch (this) {
       case AppUnit.deferredOnly:
-        return 'Deferred';
+        return deferredNodeName;
       case AppUnit.mainOnly:
-        return 'Main';
+        return mainNodeName;
       case AppUnit.entireApp:
       default:
-        return 'Entire App';
+        return entireAppNodeName;
     }
   }
 }
-
-const artificialRootNodeName = 'ArtificialRoot';
-const entireAppNodeName = 'Entire app';
-const mainNodeName = 'Main';
-const rootNodeName = 'Root';
 
 class AppSizeController {
   static const unsupportedFileTypeError =
@@ -309,7 +310,7 @@ class AppSizeController {
       _loadApp(_dataForAppUnit!);
     } else {
       // Set root name for non-deferred apps.
-      processedJson['n'] = 'Root';
+      processedJson['n'] = rootNodeName;
       _loadApp(processedJson);
     }
 
@@ -323,13 +324,13 @@ class AppSizeController {
   }
 
   bool _hasDeferredInfo(Map<String, dynamic> jsonFile) {
-    return jsonFile['n'] == 'ArtificialRoot';
+    return jsonFile['n'] == artificialRootNodeName;
   }
 
   Map<String, dynamic> _extractMainUnit(Map<String, dynamic> jsonFile) {
     if (_hasDeferredInfo(jsonFile)) {
       final main = _extractChildren(jsonFile).firstWhere(
-        (child) => child['n'] == 'Main',
+        (child) => mainNodeName.caseInsensitiveEquals(child['n']),
         orElse: () => jsonFile,
       );
       return main;
@@ -343,14 +344,14 @@ class AppSizeController {
     if (_hasDeferredInfo(jsonFile)) {
       jsonFile['children'] = _extractChildren(jsonFile)
           .where((child) => child['isDeferred'] == true);
-      jsonFile['n'] = 'Deferred';
+      jsonFile['n'] = deferredNodeName;
     }
     return jsonFile;
   }
 
   Map<String, dynamic> _includeEntireApp(Map<String, dynamic> jsonFile) {
     if (_hasDeferredInfo(jsonFile)) {
-      jsonFile['n'] = 'Entire App';
+      jsonFile['n'] = entireAppNodeName;
     }
     return jsonFile;
   }
@@ -443,7 +444,7 @@ class AppSizeController {
     changeOldDiffFile(oldFile);
     changeNewDiffFile(newFile);
 
-    diffMap['n'] = 'Root';
+    diffMap['n'] = rootNodeName;
 
     // TODO(peterdjlee): Try to move the non-active tree generation to separate isolates.
     _combinedDiffTreeRoot = generateDiffTree(
