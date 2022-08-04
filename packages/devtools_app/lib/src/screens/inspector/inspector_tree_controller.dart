@@ -331,7 +331,7 @@ class InspectorTreeController extends Object
     return (depth + 1) * columnWidth + horizontalPadding;
   }
 
-  double determineYForTopOfRow(int index) {
+  double rowYTop(int index) {
     return rowHeight * index;
   }
 
@@ -434,7 +434,7 @@ class InspectorTreeController extends Object
     // nodes will be displayed rather than where they are currently displayed.
     return Rect.fromLTWH(
       getDepthIndent(row.depth),
-      determineYForTopOfRow(row.index),
+      rowYTop(row.index),
       rowWidth,
       rowHeight,
     );
@@ -760,7 +760,7 @@ class _InspectorTreeState extends State<InspectorTree>
   late DebuggerController _debuggerController;
 
   /// When autoscrolling, the number of rows to pad the target location with.
-  final _scrollToTargetPaddingCount = 3;
+  final _scrollRowPadding = 3;
 
   @override
   void initState() {
@@ -932,33 +932,32 @@ class _InspectorTreeState extends State<InspectorTree>
   // before it is available so we don't need this approximation.
   /// Placeholder viewport height to use if we don't yet know the real
   /// viewport height.
-  static const _placeholderViewportHeight = 1000.0;
-  static const _placeholderViewportWidth = 1000.0;
+  static const _placeholderViewportSize = 1000.0;
 
   double get safeViewportHeight {
     return _scrollControllerY.hasClients
         ? _scrollControllerY.position.viewportDimension
-        : _placeholderViewportHeight;
+        : _placeholderViewportSize;
   }
 
   double get safeViewportWidth {
     return _scrollControllerX.hasClients
         ? _scrollControllerX.position.viewportDimension
-        : _placeholderViewportWidth;
+        : _placeholderViewportSize;
   }
 
   /// Compute the x scroll given an [initialX] scroll value.
   ///
-  /// The value is padded with [_scrollToTargetPaddingCount] indent widths
+  /// The value is padded with [_scrollRowPadding] indent widths
   double _padTargetX({required double initialX}) {
-    return initialX - columnWidth * _scrollToTargetPaddingCount;
+    return initialX - columnWidth * _scrollRowPadding;
   }
 
   /// Compute the  y scroll given an [initialY] scroll value.
   ///
-  /// The value is padded with [_scrollToTargetPaddingCount] row heights
+  /// The value is padded with [_scrollRowPadding] row heights
   double _padTargetY({required double initialY}) {
-    return initialY - rowHeight * _scrollToTargetPaddingCount;
+    return initialY - rowHeight * _scrollRowPadding;
   }
 
   /// Handle arrow keys for the InspectorTree. Ignore other key events so that
