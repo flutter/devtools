@@ -39,6 +39,7 @@ export 'src/screens/network/network_controller.dart';
 export 'src/screens/network/network_model.dart';
 export 'src/screens/network/network_screen.dart';
 export 'src/screens/performance/panes/controls/enhance_tracing/enhance_tracing_controller.dart';
+export 'src/screens/performance/panes/frame_analysis/frame_analysis_model.dart';
 export 'src/screens/performance/panes/raster_metrics/raster_metrics_controller.dart';
 export 'src/screens/performance/performance_controller.dart';
 export 'src/screens/performance/performance_model.dart';

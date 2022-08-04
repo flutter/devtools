@@ -10,6 +10,7 @@ import '../../primitives/utils.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/table.dart';
 import '../../shared/theme.dart';
+import 'vm_object_model.dart';
 import 'vm_service_private_extensions.dart';
 
 /// A convenience widget used to create non-scrollable information cards.
@@ -21,7 +22,7 @@ import 'vm_service_private_extensions.dart';
 ///
 /// `table` is a widget (typically a table) that is to be displayed after the
 /// rows specified for `rowKeyValues`.
-class VMInfoCard extends StatelessWidget {
+class VMInfoCard extends StatelessWidget implements PreferredSizeWidget {
   const VMInfoCard({
     required this.title,
     this.rowKeyValues,
@@ -29,19 +30,47 @@ class VMInfoCard extends StatelessWidget {
   });
 
   final String title;
-  final List<MapEntry>? rowKeyValues;
+  final List<MapEntry<String, WidgetBuilder>>? rowKeyValues;
   final Widget? table;
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: VMInfoList(
-        title: title,
-        rowKeyValues: rowKeyValues,
-        table: table,
+    return SizedBox.fromSize(
+      size: preferredSize,
+      child: Card(
+        child: VMInfoList(
+          title: title,
+          rowKeyValues: rowKeyValues,
+          table: table,
+        ),
       ),
     );
   }
+
+  @override
+  Size get preferredSize {
+    if (table != null) {
+      return Size.infinite;
+    }
+    return Size.fromHeight(
+      areaPaneHeaderHeight +
+          (rowKeyValues?.length ?? 0) * defaultRowHeight +
+          defaultSpacing,
+    );
+  }
+}
+
+MapEntry<String, WidgetBuilder> selectableTextBuilderMapEntry(
+  String key,
+  String? value,
+) {
+  return MapEntry(
+    key,
+    (context) => SelectableText(
+      value ?? '--',
+      style: Theme.of(context).fixedFontStyle,
+    ),
+  );
 }
 
 class VMInfoList extends StatelessWidget {
@@ -52,7 +81,7 @@ class VMInfoList extends StatelessWidget {
   });
 
   final String title;
-  final List<MapEntry>? rowKeyValues;
+  final List<MapEntry<String, WidgetBuilder>>? rowKeyValues;
   final Widget? table;
 
   @override
@@ -88,12 +117,7 @@ class VMInfoList extends StatelessWidget {
                           ),
                           const SizedBox(width: denseSpacing),
                           Flexible(
-                            child: row.value is Widget
-                                ? row.value
-                                : SelectableText(
-                                    row.value?.toString() ?? '--',
-                                    style: theme.fixedFontStyle,
-                                  ),
+                            child: Builder(builder: row.value),
                           ),
                         ],
                       )
@@ -184,7 +208,7 @@ String? _objectName(ObjRef? objectRef) {
     objectRefName =
         (objectRef.name?.isEmpty ?? false) ? objectRef.uri : objectRef.name;
   } else if (objectRef is ScriptRef) {
-    objectRefName = fileNameFromUri(objectRef.uri);
+    objectRefName = _fileNameFromUri(objectRef.uri);
   } else if (objectRef is InstanceRef) {
     objectRefName = objectRef.name ??
         'Instance of ${objectRef.classRef?.name ?? '<Class>'}';
@@ -193,6 +217,31 @@ String? _objectName(ObjRef? objectRef) {
   }
 
   return objectRefName;
+}
+
+/// Returns the owner name of a Field or Func object, if [object] is a
+/// FuncObject, it returns the complete (qualified) name of the owner.
+String? _ownerName(VmObject object) {
+  assert(object is FieldObject || object is FuncObject);
+  final owner = (object as dynamic).obj.owner as ObjRef?;
+
+  if (owner == null) {
+    return object.script?.uri;
+  }
+
+  if (object is FieldObject) {
+    if (owner is ClassRef || owner is LibraryRef) {
+      return _objectName(owner);
+    }
+  } else if (object is FuncObject) {
+    if (owner is LibraryRef) {
+      return _objectName(owner);
+    } else {
+      return qualifiedName(owner);
+    }
+  }
+
+  throw Exception('Unexpected owner type: ${owner.type}');
 }
 
 /// Returns the name of a function, qualified with the name of
@@ -498,8 +547,139 @@ class InboundReferencesWidget extends StatelessWidget {
   }
 }
 
-String? fileNameFromUri(String? uri) {
+String? _fileNameFromUri(String? uri) {
   if (uri == null) return null;
   final splitted = uri.split('/');
   return splitted[splitted.length - 1];
+}
+
+/// A widget for the object inspector historyViewport containing the main
+/// layout of information widgets related to VM object types.
+class VmObjectDisplayBasicLayout extends StatelessWidget {
+  const VmObjectDisplayBasicLayout({
+    required this.object,
+    required this.generalDataRows,
+    this.sideCardDataRows,
+    this.generalInfoTitle = 'General Information',
+    this.sideCardTitle = 'Object Details',
+    this.expandableWidgets,
+  });
+
+  final VmObject object;
+  final List<MapEntry<String, WidgetBuilder>> generalDataRows;
+  final List<MapEntry<String, WidgetBuilder>>? sideCardDataRows;
+  final String generalInfoTitle;
+  final String sideCardTitle;
+  final List<Widget>? expandableWidgets;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Flexible(
+                child: VMInfoCard(
+                  title: generalInfoTitle,
+                  rowKeyValues: generalDataRows,
+                ),
+              ),
+              if (sideCardDataRows != null)
+                Flexible(
+                  child: VMInfoCard(
+                    title: sideCardTitle,
+                    rowKeyValues: sideCardDataRows,
+                  ),
+                ),
+            ],
+          ),
+        ),
+        Flexible(
+          child: ListView(
+            children: [
+              RetainingPathWidget(
+                retainingPath: object.retainingPath,
+                onExpanded: _onExpandRetainingPath,
+              ),
+              InboundReferencesWidget(
+                inboundReferences: object.inboundReferences,
+                onExpanded: _onExpandInboundRefs,
+              ),
+              ...?expandableWidgets,
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _onExpandRetainingPath(bool expanded) {
+    if (object.retainingPath.value == null) {
+      object.requestRetainingPath();
+    }
+  }
+
+  void _onExpandInboundRefs(bool expanded) {
+    if (object.inboundReferences.value == null) {
+      object.requestInboundsRefs();
+    }
+  }
+}
+
+List<MapEntry<String, WidgetBuilder>> vmObjectGeneralDataRows(
+  VmObject object,
+) {
+  return [
+    selectableTextBuilderMapEntry('Object Class', object.obj.type),
+    selectableTextBuilderMapEntry(
+      'Shallow Size',
+      prettyPrintBytes(
+        object.obj.size ?? 0,
+        includeUnit: true,
+        kbFractionDigits: 1,
+        maxBytes: 512,
+      ),
+    ),
+    MapEntry(
+      'Reachable Size',
+      (context) => ValueListenableBuilder<bool>(
+        valueListenable: object.fetchingReachableSize,
+        builder: (context, fetching, _) => fetching
+            ? const CircularProgressIndicator()
+            : RequestableSizeWidget(
+                requestedSize: object.reachableSize,
+                requestFunction: object.requestReachableSize,
+              ),
+      ),
+    ),
+    MapEntry(
+      'Retained Size',
+      (context) => ValueListenableBuilder<bool>(
+        valueListenable: object.fetchingRetainedSize,
+        builder: (context, fetching, _) => fetching
+            ? const CircularProgressIndicator()
+            : RequestableSizeWidget(
+                requestedSize: object.retainedSize,
+                requestFunction: object.requestRetainedSize,
+              ),
+      ),
+    ),
+    if (object is ClassObject)
+      selectableTextBuilderMapEntry(
+        'Library',
+        _objectName(object.obj.library),
+      ),
+    if (object is FieldObject || object is FuncObject)
+      selectableTextBuilderMapEntry(
+        'Owner',
+        _ownerName(object),
+      ),
+    if (object is! ScriptObject && object is! LibraryObject)
+      selectableTextBuilderMapEntry(
+        'Script',
+        '${_fileNameFromUri(object.script?.uri) ?? ''}:${object.pos?.toString() ?? ''}',
+      ),
+  ];
 }
