@@ -17,7 +17,7 @@ import '../../ui/colors.dart';
 import 'app_size_screen.dart';
 
 // Temporary feature flag for deferred loading.
-bool deferredLoadingSupportEnabled = false;
+bool deferredLoadingSupportEnabled = true;
 
 const _artificialRootNodeName = 'ArtificialRoot';
 const _entireAppNodeName = 'Entire App';
@@ -61,6 +61,42 @@ enum AppUnit {
   }
 }
 
+enum CombinedDiffTypeAppUnit {
+  entireIncrease,
+  entireDecrease,
+  mainCombined,
+  mainIncrease,
+  mainDecrease,
+  deferredCombined,
+  deferredIncrease,
+  deferredDecrease,
+  entireCombined;
+
+  String get display {
+    switch (this) {
+      case CombinedDiffTypeAppUnit.entireIncrease:
+        return 'entireIncrease';
+      case CombinedDiffTypeAppUnit.entireDecrease:
+        return 'entireDecrease';
+      case CombinedDiffTypeAppUnit.mainCombined:
+        return 'mainCombined';
+      case CombinedDiffTypeAppUnit.mainIncrease:
+        return 'mainIncrease';
+      case CombinedDiffTypeAppUnit.mainDecrease:
+        return 'mainDecrease';
+      case CombinedDiffTypeAppUnit.deferredCombined:
+        return 'deferredCombined';
+      case CombinedDiffTypeAppUnit.deferredIncrease:
+        return 'deferredIncrease';
+      case CombinedDiffTypeAppUnit.deferredDecrease:
+        return 'deferredDecrease';
+      case CombinedDiffTypeAppUnit.entireCombined:
+      default:
+        return 'entireCombined';
+    }
+  }
+}
+
 class AppSizeController {
   static const unsupportedFileTypeError =
       'Failed to load size analysis file: file type not supported.\n\n'
@@ -72,6 +108,8 @@ class AppSizeController {
 
   static const identicalFilesError =
       'Failed to load diff: OLD and NEW files are identical.';
+
+  static const deferredRootName = 'ArtificialRoot';
 
   CallGraph? _analysisCallGraph;
 
@@ -192,6 +230,40 @@ class AppSizeController {
   Map<String, dynamic>? _mainOnly;
   Map<String, dynamic>? _entireApp;
 
+  TreemapNode? get _combinedDiffTypeAppUnit {
+    switch (_currentCombination.value) {
+      case CombinedDiffTypeAppUnit.entireIncrease:
+        return _entireIncrease;
+      case CombinedDiffTypeAppUnit.entireDecrease:
+        return _entireDecrease;
+      case CombinedDiffTypeAppUnit.mainCombined:
+        return _mainCombined;
+      case CombinedDiffTypeAppUnit.mainIncrease:
+        return _mainIncrease;
+      case CombinedDiffTypeAppUnit.mainDecrease:
+        return _mainDecrease;
+      case CombinedDiffTypeAppUnit.deferredCombined:
+        return _deferredCombined;
+      case CombinedDiffTypeAppUnit.deferredIncrease:
+        return _deferredIncrease;
+      case CombinedDiffTypeAppUnit.deferredDecrease:
+        return _deferredDecrease;
+      case CombinedDiffTypeAppUnit.entireCombined:
+      default:
+        return _entireCombined;
+    }
+  }
+
+  TreemapNode? _entireIncrease;
+  TreemapNode? _entireDecrease;
+  TreemapNode? _mainCombined;
+  TreemapNode? _mainIncrease;
+  TreemapNode? _mainDecrease;
+  TreemapNode? _deferredCombined;
+  TreemapNode? _deferredIncrease;
+  TreemapNode? _deferredDecrease;
+  TreemapNode? _entireCombined;
+
   ValueListenable<DevToolsJsonFile?> get oldDiffJsonFile => _oldDiffJsonFile;
 
   final _oldDiffJsonFile = ValueNotifier<DevToolsJsonFile?>(null);
@@ -220,9 +292,18 @@ class AppSizeController {
     _diffRoot.value = null;
     _oldDiffJsonFile.value = null;
     _newDiffJsonFile.value = null;
-    _increasedDiffTreeRoot = null;
-    _decreasedDiffTreeRoot = null;
-    _combinedDiffTreeRoot = null;
+    _entireIncrease = null;
+    _entireDecrease = null;
+    _mainCombined = null;
+    _mainIncrease = null;
+    _mainDecrease = null;
+    _deferredCombined = null;
+    _deferredIncrease = null;
+    _deferredDecrease = null;
+    _entireCombined = null;
+    // _increasedDiffTreeRoot = null;
+    // _decreasedDiffTreeRoot = null;
+    // _combinedDiffTreeRoot = null;
     _diffCallGraphRoot.value = null;
     _oldDiffCallGraph = null;
     _newDiffCallGraph = null;
@@ -245,17 +326,63 @@ class AppSizeController {
 
   void changeActiveDiffTreeType(DiffTreeType newDiffTreeType) {
     _activeDiffTreeType.value = newDiffTreeType;
-    changeDiffRoot(_activeDiffRoot);
+    calculateCombination();
+    changeDiffRoot(_combinedDiffTypeAppUnit);
+  }
+
+  void calculateCombination() {
+    if (_selectedAppUnit.value == AppUnit.entireApp &&
+        _activeDiffTreeType.value == DiffTreeType.increaseOnly) {
+      _currentCombination.value = CombinedDiffTypeAppUnit.entireIncrease;
+    } else if (_selectedAppUnit.value == AppUnit.entireApp &&
+        _activeDiffTreeType.value == DiffTreeType.decreaseOnly) {
+      _currentCombination.value = CombinedDiffTypeAppUnit.entireDecrease;
+    } else if (_selectedAppUnit.value == AppUnit.mainOnly &&
+        _activeDiffTreeType.value == DiffTreeType.combined) {
+      _currentCombination.value = CombinedDiffTypeAppUnit.mainCombined;
+    } else if (_selectedAppUnit.value == AppUnit.mainOnly &&
+        _activeDiffTreeType.value == DiffTreeType.increaseOnly) {
+      _currentCombination.value = CombinedDiffTypeAppUnit.mainIncrease;
+    } else if (_selectedAppUnit.value == AppUnit.mainOnly &&
+        _activeDiffTreeType.value == DiffTreeType.decreaseOnly) {
+      _currentCombination.value = CombinedDiffTypeAppUnit.mainDecrease;
+    } else if (_selectedAppUnit.value == AppUnit.deferredOnly &&
+        _activeDiffTreeType.value == DiffTreeType.combined) {
+      _currentCombination.value = CombinedDiffTypeAppUnit.deferredCombined;
+    } else if (_selectedAppUnit.value == AppUnit.deferredOnly &&
+        _activeDiffTreeType.value == DiffTreeType.increaseOnly) {
+      _currentCombination.value = CombinedDiffTypeAppUnit.deferredIncrease;
+    } else if (_selectedAppUnit.value == AppUnit.deferredOnly &&
+        _activeDiffTreeType.value == DiffTreeType.decreaseOnly) {
+      _currentCombination.value = CombinedDiffTypeAppUnit.deferredDecrease;
+    } else if (_selectedAppUnit.value == AppUnit.entireApp &&
+        _activeDiffTreeType.value == DiffTreeType.combined) {
+      _currentCombination.value = CombinedDiffTypeAppUnit.entireCombined;
+    }
   }
 
   /// The selected app segment to analyze (for deferred apps only).
   ValueListenable<AppUnit> get selectedAppUnit => _selectedAppUnit;
   final _selectedAppUnit = ValueNotifier<AppUnit>(AppUnit.entireApp);
 
-  void changeSelectedAppUnit(AppUnit appUnit) {
+  void changeSelectedAppUnit(AppUnit appUnit, Key activeTabKey) {
     _selectedAppUnit.value = appUnit;
-    _loadApp(_dataForAppUnit!);
+    calculateCombination();
+
+    if (activeTabKey == AppSizeScreen.analysisTabKey) {
+      _loadApp(_combinedDiffTypeAppUnit!);
+    } else if (activeTabKey == AppSizeScreen.diffTabKey) {
+      changeDiffRoot(_combinedDiffTypeAppUnit!);
+    }
   }
+
+  ValueListenable<CombinedDiffTypeAppUnit> get currentCombination {
+    return _currentCombination;
+  }
+
+  final _currentCombination = ValueNotifier<CombinedDiffTypeAppUnit>(
+    CombinedDiffTypeAppUnit.entireCombined,
+  );
 
   /// Notifies that the json files are currently being processed.
   ValueListenable<bool> get processingNotifier => _processingNotifier;
@@ -303,24 +430,31 @@ class AppSizeController {
     _isDeferredApp.value =
         deferredLoadingSupportEnabled && _hasDeferredInfo(processedJson);
 
+    //analysisTable only
     if (isDeferredApp.value) {
-      _deferredOnly = _extractDeferredUnits(Map.from(processedJson));
-      _mainOnly = _extractMainUnit(Map.from(processedJson));
-      _entireApp = _includeEntireApp(Map.from(processedJson));
-      _loadApp(_dataForAppUnit!);
+      _mainCombined = generateTree(_extractMainUnit(Map.from(processedJson)));
+      _deferredCombined =
+          generateTree(_extractDeferredUnits(Map.from(processedJson)));
+      _entireCombined =
+          generateTree(_includeEntireApp(Map.from(processedJson)));
+      // _deferredOnly = _extractDeferredUnits(Map.from(processedJson));
+      // _mainOnly = _extractMainUnit(Map.from(processedJson));
+      // _entireApp = _includeEntireApp(Map.from(processedJson));
+      _loadApp(_combinedDiffTypeAppUnit!);
     } else {
       // Set root name for non-deferred apps.
       processedJson['n'] = _rootNodeName;
-      _loadApp(processedJson);
+      _loadApp(generateTree(processedJson)!);
     }
 
     _processingNotifier.value = false;
   }
 
-  void _loadApp(Map<String, dynamic> appData) {
+  void _loadApp(TreemapNode appData) {
     // Build a tree with [TreemapNode] from [appData].
-    final appRoot = generateTree(appData)!;
-    changeAnalysisRoot(appRoot);
+    // final appRoot = generateTree(appData)!;
+    //need also changeDiffRoot check
+    changeAnalysisRoot(appData);
   }
 
   bool _hasDeferredInfo(Map<String, dynamic> jsonFile) {
@@ -343,7 +477,8 @@ class AppSizeController {
   ) {
     if (_hasDeferredInfo(jsonFile)) {
       jsonFile['children'] = _extractChildren(jsonFile)
-          .where((child) => child['isDeferred'] == true);
+          .where((child) => child['isDeferred'] == true)
+          .toList();
       jsonFile['n'] = _deferredNodeName;
     }
     return jsonFile;
@@ -384,31 +519,88 @@ class AppSizeController {
     // size screen does not get updated.
     await delayForBatchProcessing(micros: 10000);
 
-    Map<String, dynamic> diffMap;
-    if (oldFile.isAnalyzeSizeFile && newFile.isAnalyzeSizeFile) {
-      var oldFileJson = oldFile.data as Map<String, dynamic>;
-      var newFileJson = newFile.data as Map<String, dynamic>;
+    // Creating 3 different diffMaps (mainOnly, deferredOnly, entireApp)
 
-      if (_hasDeferredInfo(oldFileJson) || _hasDeferredInfo(newFileJson)) {
+    Map<String, dynamic>? diffMapMain;
+    Map<String, dynamic>? diffMapDeferred;
+    Map<String, dynamic> diffMapEntire;
+
+    if (oldFile.isAnalyzeSizeFile && newFile.isAnalyzeSizeFile) {
+      var oldFileJsonEntire = oldFile.data as Map<String, dynamic>;
+      var newFileJsonEntire = newFile.data as Map<String, dynamic>;
+
+      if (_hasDeferredInfo(oldFileJsonEntire) ||
+          _hasDeferredInfo(newFileJsonEntire)) {
         _isDeferredApp.value = deferredLoadingSupportEnabled;
 
-        if (!_hasDeferredInfo(oldFileJson)) {
-          oldFileJson = _wrapInArtificialRoot(oldFileJson);
-        } else if (!_hasDeferredInfo(newFileJson)) {
-          newFileJson = _wrapInArtificialRoot(newFileJson);
+        if (!_hasDeferredInfo(oldFileJsonEntire)) {
+          oldFileJsonEntire = _wrapInArtificialRoot(oldFileJsonEntire);
+        } else if (!_hasDeferredInfo(newFileJsonEntire)) {
+          newFileJsonEntire = _wrapInArtificialRoot(newFileJsonEntire);
         }
       }
 
-      final oldApkProgramInfo = ProgramInfo();
+      if (isDeferredApp.value) {
+        final oldFileJsonMain = _extractMainUnit(oldFileJsonEntire);
+        final newFileJsonMain = _extractMainUnit(newFileJsonEntire);
+
+        final oldApkProgramInfoMain = ProgramInfo();
+        _apkJsonToProgramInfo(
+          program: oldApkProgramInfoMain,
+          parent: oldApkProgramInfoMain.root,
+          json: oldFileJsonMain,
+        );
+
+        final newApkProgramInfoMain = ProgramInfo();
+        _apkJsonToProgramInfo(
+          program: newApkProgramInfoMain,
+          parent: newApkProgramInfoMain.root,
+          json: newFileJsonMain,
+        );
+
+        diffMapMain =
+            compareProgramInfo(oldApkProgramInfoMain, newApkProgramInfoMain);
+
+        //deferred
+
+        final oldFileJsonDeferred = _extractDeferredUnits(oldFileJsonEntire);
+        final newFileJsonDeferred = _extractDeferredUnits(newFileJsonEntire);
+
+        final oldApkProgramInfoDeferred = ProgramInfo();
+        if (oldFileJsonDeferred.isNotEmpty) {
+          _apkJsonToProgramInfo(
+            program: oldApkProgramInfoDeferred,
+            parent: oldApkProgramInfoDeferred.root,
+            json: oldFileJsonDeferred,
+          );
+        }
+
+        final newApkProgramInfoDeferred = ProgramInfo();
+        _apkJsonToProgramInfo(
+          program: newApkProgramInfoDeferred,
+          parent: newApkProgramInfoDeferred.root,
+          json: newFileJsonDeferred,
+        );
+
+        diffMapDeferred = compareProgramInfo(
+          oldApkProgramInfoDeferred,
+          newApkProgramInfoDeferred,
+        );
+      } else {
+        diffMapMain = null;
+        diffMapDeferred = null;
+      }
+
+      final oldApkProgramInfoEntire = ProgramInfo();
       _apkJsonToProgramInfo(
-        program: oldApkProgramInfo,
-        parent: oldApkProgramInfo.root,
-        json: oldFileJson,
+        program: oldApkProgramInfoEntire,
+        parent: oldApkProgramInfoEntire.root,
+        json: oldFileJsonEntire,
       );
 
       // Extract the precompiler trace from the old file, if it exists, and
       // generate a call graph.
-      final oldPrecompilerTrace = oldFileJson.remove('precompiler-trace');
+      final oldPrecompilerTrace = oldFileJsonEntire.remove('precompiler-trace');
       if (oldPrecompilerTrace != null) {
         _oldDiffCallGraph = generateCallGraphWithDominators(
           oldPrecompilerTrace,
@@ -416,16 +608,16 @@ class AppSizeController {
         );
       }
 
-      final newApkProgramInfo = ProgramInfo();
+      final newApkProgramInfoEntire = ProgramInfo();
       _apkJsonToProgramInfo(
-        program: newApkProgramInfo,
-        parent: newApkProgramInfo.root,
-        json: newFileJson,
+        program: newApkProgramInfoEntire,
+        parent: newApkProgramInfoEntire.root,
+        json: newFileJsonEntire,
       );
 
       // Extract the precompiler trace from the new file, if it exists, and
       // generate a call graph.
-      final newPrecompilerTrace = newFileJson.remove('precompiler-trace');
+      final newPrecompilerTrace = newFileJsonEntire.remove('precompiler-trace');
       if (newPrecompilerTrace != null) {
         _newDiffCallGraph = generateCallGraphWithDominators(
           newPrecompilerTrace,
@@ -433,10 +625,13 @@ class AppSizeController {
         );
       }
 
-      diffMap = compareProgramInfo(oldApkProgramInfo, newApkProgramInfo);
+      diffMapEntire =
+          compareProgramInfo(oldApkProgramInfoEntire, newApkProgramInfoEntire);
     } else {
       try {
-        diffMap = buildComparisonTreemap(oldFile.data, newFile.data);
+        diffMapEntire = buildComparisonTreemap(oldFile.data, newFile.data);
+        diffMapMain = buildComparisonTreemap(oldFile.data, newFile.data);
+        diffMapDeferred = buildComparisonTreemap(oldFile.data, newFile.data);
       } catch (error) {
         // TODO(peterdjlee): Include link to docs when hyperlink support is added to the
         //                    Notifications class. See #2268.
@@ -446,7 +641,8 @@ class AppSizeController {
       }
     }
 
-    if ((diffMap['children'] as List).isEmpty) {
+    //may need to add main and deferred checks
+    if ((diffMapEntire['children'] as List).isEmpty) {
       onError(identicalFilesError);
       _processingNotifier.value = false;
       return;
@@ -455,26 +651,68 @@ class AppSizeController {
     changeOldDiffFile(oldFile);
     changeNewDiffFile(newFile);
 
-    diffMap['n'] = isDeferredApp.value ? _entireAppNodeName : _rootNodeName;
+    diffMapEntire['n'] = isDeferredApp.value ? 'Entire App' : 'Root';
 
     // TODO(peterdjlee): Try to move the non-active tree generation to separate isolates.
-    _combinedDiffTreeRoot = generateDiffTree(
-      diffMap,
-      DiffTreeType.combined,
+    // _combinedDiffTreeRoot = generateDiffTree(
+    //   diffMap,
+    //   DiffTreeType.combined,
+    // );
+    // _increasedDiffTreeRoot = generateDiffTree(
+    //   diffMap,
+    //   DiffTreeType.increaseOnly,
+    // );
+    // _decreasedDiffTreeRoot = generateDiffTree(
+    //   diffMap,
+    //   DiffTreeType.decreaseOnly,
+    // );
+
+    _entireCombined = generateDiffTree(
+      diffMapEntire,
+      CombinedDiffTypeAppUnit.entireCombined,
       skipNodesWithNoByteSizeChange: !isDeferredApp.value,
     );
-    _increasedDiffTreeRoot = generateDiffTree(
-      diffMap,
-      DiffTreeType.increaseOnly,
+    _entireIncrease = generateDiffTree(
+      diffMapEntire,
+      CombinedDiffTypeAppUnit.entireIncrease,
       skipNodesWithNoByteSizeChange: !isDeferredApp.value,
     );
-    _decreasedDiffTreeRoot = generateDiffTree(
-      diffMap,
-      DiffTreeType.decreaseOnly,
+    _entireDecrease = generateDiffTree(
+      diffMapEntire,
+      CombinedDiffTypeAppUnit.entireDecrease,
       skipNodesWithNoByteSizeChange: !isDeferredApp.value,
     );
 
-    changeDiffRoot(_activeDiffRoot);
+    if (isDeferredApp.value) {
+      _mainCombined = generateDiffTree(
+        diffMapMain!,
+        CombinedDiffTypeAppUnit.mainCombined,
+      );
+      _mainIncrease = generateDiffTree(
+        diffMapMain,
+        CombinedDiffTypeAppUnit.mainIncrease,
+      );
+      _mainDecrease = generateDiffTree(
+        diffMapMain,
+        CombinedDiffTypeAppUnit.mainDecrease,
+      );
+      _deferredCombined = generateDiffTree(
+        diffMapDeferred!,
+        CombinedDiffTypeAppUnit.deferredCombined,
+      );
+      _deferredIncrease = generateDiffTree(
+        diffMapDeferred,
+        CombinedDiffTypeAppUnit.deferredIncrease,
+      );
+      _deferredDecrease = generateDiffTree(
+        diffMapDeferred,
+        CombinedDiffTypeAppUnit.deferredDecrease,
+      );
+    }
+
+    // changeDiffRoot(_activeDiffRoot);
+
+    changeDiffRoot(_combinedDiffTypeAppUnit!);
 
     _processingNotifier.value = false;
   }
@@ -535,7 +773,7 @@ class AppSizeController {
   /// * [DiffTreeType.combined]: returns a tree with all nodes.
   TreemapNode? generateDiffTree(
     Map<String, dynamic> treeJson,
-    DiffTreeType diffTreeType, {
+    CombinedDiffTypeAppUnit diffTreeType, {
     bool skipNodesWithNoByteSizeChange = true,
   }) {
     final isLeafNode = treeJson['children'] == null;
@@ -554,17 +792,23 @@ class AppSizeController {
       }
       // Only add nodes that match the diff tree type.
       switch (diffTreeType) {
-        case DiffTreeType.increaseOnly:
+        case CombinedDiffTypeAppUnit.entireIncrease:
+        case CombinedDiffTypeAppUnit.mainIncrease:
+        case CombinedDiffTypeAppUnit.deferredIncrease:
           if (byteSize < 0) {
             return null;
           }
           break;
-        case DiffTreeType.decreaseOnly:
+        case CombinedDiffTypeAppUnit.entireDecrease:
+        case CombinedDiffTypeAppUnit.mainDecrease:
+        case CombinedDiffTypeAppUnit.deferredDecrease:
           if (byteSize > 0) {
             return null;
           }
           break;
-        case DiffTreeType.combined:
+        case CombinedDiffTypeAppUnit.entireCombined:
+        case CombinedDiffTypeAppUnit.mainCombined:
+        case CombinedDiffTypeAppUnit.deferredCombined:
           break;
       }
       return _buildNode(treeJson, byteSize, showDiff: true);
@@ -576,7 +820,7 @@ class AppSizeController {
   TreemapNode? _buildNodeWithChildren(
     Map<String, dynamic> treeJson, {
     bool showDiff = false,
-    DiffTreeType? diffTreeType,
+    CombinedDiffTypeAppUnit? diffTreeType,
     bool skipNodesWithNoByteSizeChange = true,
   }) {
     assert(showDiff ? diffTreeType != null : true);
