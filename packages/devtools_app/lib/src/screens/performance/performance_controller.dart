@@ -39,10 +39,8 @@ import 'timeline_event_processor.dart';
 /// Debugging flag to load sample trace events from [simple_trace_example.dart].
 bool debugSimpleTrace = false;
 
-// TODO(https://github.com/flutter/devtools/issues/4287): add more tests before
-// enabling this feature.
 /// Flag to hide the frame analysis feature while it is under development.
-bool frameAnalysisSupported = false;
+bool frameAnalysisSupported = true;
 
 /// Flag to hide the raster metrics feature while it is under development.
 bool rasterMetricsSupported = true;
