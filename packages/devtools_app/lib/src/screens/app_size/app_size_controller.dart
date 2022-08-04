@@ -17,7 +17,7 @@ import '../../ui/colors.dart';
 import 'app_size_screen.dart';
 
 // Temporary feature flag for deferred loading.
-bool deferredLoadingSupportEnabled = true;
+bool deferredLoadingSupportEnabled = false;
 
 enum DiffTreeType {
   increaseOnly,
@@ -538,10 +538,12 @@ class AppSizeController {
   }) {
     final isLeafNode = treeJson['children'] == null;
     if (!isLeafNode) {
-      return _buildNodeWithChildren(treeJson,
-          showDiff: true,
-          diffTreeType: diffTreeType,
-          skipNodesWithNoByteSizeChange: skipNodesWithNoByteSizeChange);
+      return _buildNodeWithChildren(
+        treeJson,
+        showDiff: true,
+        diffTreeType: diffTreeType,
+        skipNodesWithNoByteSizeChange: skipNodesWithNoByteSizeChange,
+      );
     } else {
       // TODO(peterdjlee): Investigate why there are leaf nodes with size of null.
       final byteSize = treeJson['value'];
