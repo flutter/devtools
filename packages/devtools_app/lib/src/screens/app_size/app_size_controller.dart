@@ -615,7 +615,7 @@ class AppSizeController {
 }
 
 extension AppSizeJsonFileExtension on DevToolsJsonFile {
-  static final _supportedAnalyzeSizePlatforms = [
+  static const _supportedAnalyzeSizePlatforms = [
     'apk',
     'aab',
     'ios',
