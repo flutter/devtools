@@ -115,6 +115,8 @@ void main() {
           newHoverModeValue.toString(),
         );
       });
+      // TODO(https://github.com/flutter/devtools/issues/4342): make inspector
+      // preferences testable, then test it
     });
   });
 }
