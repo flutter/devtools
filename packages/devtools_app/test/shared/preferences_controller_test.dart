@@ -4,13 +4,17 @@
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/primitives/storage.dart';
+import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/preferences.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../test_infra/flutter_test_storage.dart';
 
 void main() {
+  setGlobal(ServiceConnectionManager, FakeServiceManager());
+
   group('PreferencesController', () {
     late PreferencesController controller;
 
@@ -112,5 +116,6 @@ void main() {
         );
       });
     });
+    // TODO: Add custom pubrootdir tests
   });
 }
