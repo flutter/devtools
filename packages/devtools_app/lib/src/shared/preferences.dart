@@ -164,7 +164,7 @@ class InspectorPreferencesController extends DisposableController
             };
 
             // The isolate is still paused, listen for when it becomes unpaused.
-            debuggerState?.isPaused.addListener(pausedListener);
+            addAutoDisposeListener(debuggerState?.isPaused, pausedListener);
           }
         }
       },
