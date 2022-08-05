@@ -42,7 +42,7 @@ class NotificationsView extends StatelessWidget {
 //  and the _Notifications widget since this one is so minimal and that would
 //  eliminate some unnecessary boilerplate. Especially since the
 //  _NotificationsState build method just returns return widget.child.
-// However, the merge of these classes does not work for some reasons.
+// However, the direct merge of these classes does not work for some reasons.
 // It would be great to figure it out.
 class _Notifications extends StatefulWidget {
   const _Notifications({Key? key, required this.child}) : super(key: key);
