@@ -549,8 +549,8 @@ class InboundReferencesWidget extends StatelessWidget {
 
 String? _fileNameFromUri(String? uri) {
   if (uri == null) return null;
-  final splitted = uri.split('/');
-  return splitted[splitted.length - 1];
+  final parts = uri.split('/');
+  return parts[parts.length - 1];
 }
 
 /// A widget for the object inspector historyViewport containing the main
