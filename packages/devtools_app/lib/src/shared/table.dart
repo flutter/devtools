@@ -453,7 +453,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 
     if (widget == oldWidget) return;
 
-    if (widget.sortColumn != oldWidget.sortColumn ||
+    if (widget.sortColumn.title != oldWidget.sortColumn.title ||
         widget.sortDirection != oldWidget.sortDirection ||
         !collectionEquals(widget.dataRoots, oldWidget.dataRoots)) {
       _initData();
@@ -466,7 +466,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   void _initData() {
     dataRoots = List.generate(widget.dataRoots.length, (index) {
       final root = widget.dataRoots[index];
-      if (widget.autoExpandRoots) {
+      if (widget.autoExpandRoots && !root.isExpanded) {
         root.expand();
       }
       return root;

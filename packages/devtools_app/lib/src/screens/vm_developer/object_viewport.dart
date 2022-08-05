@@ -12,6 +12,7 @@ import 'object_inspector_view_controller.dart';
 import 'vm_class_display.dart';
 import 'vm_code_display.dart';
 import 'vm_developer_common_widgets.dart';
+import 'vm_field_display.dart';
 import 'vm_object_model.dart';
 
 /// Displays the VM information for the currently selected object in the
@@ -81,7 +82,7 @@ Widget buildObjectDisplay(VmObject obj) {
     return const VMInfoCard(title: 'TO-DO: Display Function object data');
   }
   if (obj is FieldObject) {
-    return const VMInfoCard(title: 'TO-DO: Display Field object data');
+    return VmFieldDisplay(field: obj);
   }
   if (obj is LibraryObject) {
     return const VMInfoCard(title: 'TO-DO: Display Library object data');

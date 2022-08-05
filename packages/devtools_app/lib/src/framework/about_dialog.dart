@@ -8,11 +8,10 @@ import 'package:flutter/material.dart';
 
 import '../../devtools.dart' as devtools;
 import '../analytics/constants.dart' as analytics_constants;
-import 'common_widgets.dart';
-import 'dialogs.dart';
-import 'globals.dart';
-import 'scaffold.dart';
-import 'theme.dart';
+import '../shared/common_widgets.dart';
+import '../shared/dialogs.dart';
+import '../shared/globals.dart';
+import '../shared/theme.dart';
 
 class DevToolsAboutDialog extends StatelessWidget {
   @override
@@ -101,8 +100,8 @@ class OpenAboutAction extends StatelessWidget {
           );
         },
         child: Container(
-          width: DevToolsScaffold.actionWidgetSize,
-          height: DevToolsScaffold.actionWidgetSize,
+          width: actionWidgetSize,
+          height: actionWidgetSize,
           alignment: Alignment.center,
           child: Icon(
             Icons.help_outline,
