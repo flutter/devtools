@@ -86,7 +86,7 @@ class FlutterTestEnvironment {
   // Switch this flag to false to debug issues with non-atomic test behavior.
   bool reuseTestEnvironment = true;
 
-  PreferencesController _preferencesController = PreferencesController();
+  final PreferencesController _preferencesController = PreferencesController();
 
   Future<void> setupEnvironment({
     bool force = false,
