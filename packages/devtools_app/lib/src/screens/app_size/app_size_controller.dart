@@ -175,20 +175,63 @@ class AppSizeController {
   }
 
   TreemapNode? get _activeDiffRoot {
-    switch (_activeDiffTreeType.value) {
-      case DiffTreeType.increaseOnly:
-        return _increasedDiffTreeRoot;
-      case DiffTreeType.decreaseOnly:
-        return _decreasedDiffTreeRoot;
-      case DiffTreeType.combined:
-      default:
-        return _combinedDiffTreeRoot;
+    final isDeferred = _isDeferredApp.value;
+    final diffTreeType = _activeDiffTreeType.value;
+
+    if (!isDeferred) {
+      switch (diffTreeType) {
+        case DiffTreeType.increaseOnly:
+          return _increasedDiffTreeRoot;
+        case DiffTreeType.decreaseOnly:
+          return _decreasedDiffTreeRoot;
+        case DiffTreeType.combined:
+        default:
+          return _combinedDiffTreeRoot;
+      }
+    } else {
+      final appUnit = _selectedAppUnit.value;
+      switch (diffTreeType) {
+        case DiffTreeType.increaseOnly:
+          if (appUnit == AppUnit.mainOnly) {
+            return _mainIncreasedDiffTreeRoot;
+          } else if (appUnit == AppUnit.deferredOnly) {
+            return _deferredIncreasedDiffTreeRoot;
+          } else {
+            return _increasedDiffTreeRoot;
+          }
+        case DiffTreeType.decreaseOnly:
+          if (appUnit == AppUnit.mainOnly) {
+            return _mainDecreasedDiffTreeRoot;
+          } else if (appUnit == AppUnit.deferredOnly) {
+            return _deferredDecreasedDiffTreeRoot;
+          } else {
+            return _decreasedDiffTreeRoot;
+          }
+        case DiffTreeType.combined:
+          if (appUnit == AppUnit.mainOnly) {
+            return _mainCombinedDiffTreeRoot;
+          } else if (appUnit == AppUnit.deferredOnly) {
+            return _deferredCombinedDiffTreeRoot;
+          } else {
+            return _combinedDiffTreeRoot;
+          }
+        default:
+          return _combinedDiffTreeRoot;
+      }
     }
   }
 
   TreemapNode? _increasedDiffTreeRoot;
   TreemapNode? _decreasedDiffTreeRoot;
   TreemapNode? _combinedDiffTreeRoot;
+
+  TreemapNode? _mainIncreasedDiffTreeRoot;
+  TreemapNode? _mainDecreasedDiffTreeRoot;
+  TreemapNode? _mainCombinedDiffTreeRoot;
+
+  TreemapNode? _deferredIncreasedDiffTreeRoot;
+  TreemapNode? _deferredDecreasedDiffTreeRoot;
+  TreemapNode? _deferredCombinedDiffTreeRoot;
 
   Map<String, dynamic>? get _dataForAppUnit {
     switch (_selectedAppUnit.value) {
@@ -271,7 +314,7 @@ class AppSizeController {
     if (tabKey == AppSizeScreen.analysisTabKey) {
       _loadApp(_dataForAppUnit!);
     } else {
-      print('selected $appUnit in diff view');
+      changeDiffRoot(_activeDiffRoot);
     }
   }
 
@@ -404,8 +447,8 @@ class AppSizeController {
     await delayForBatchProcessing(micros: 10000);
 
     Map<String, dynamic> diffMap;
-    Map<String, dynamic> mainDiffMap;
-    Map<String, dynamic> deferredDiffMap;
+    Map<String, dynamic>? mainDiffMap;
+    Map<String, dynamic>? deferredDiffMap;
 
     if (oldFile.isAnalyzeSizeFile && newFile.isAnalyzeSizeFile) {
       final oldFileJson = oldFile.data as Map<String, dynamic>;
@@ -427,13 +470,15 @@ class AppSizeController {
           newEntireAppFileJson = _wrapInArtificialRoot(newFileJson);
         }
 
-        final oldMainOnlyFileJson = _extractMainUnit(oldEntireAppFileJson);
-        final newMainOnlyFileJson = _extractMainUnit(newEntireAppFileJson);
+        final oldMainOnlyFileJson =
+            _extractMainUnit(Map.from(oldEntireAppFileJson));
+        final newMainOnlyFileJson =
+            _extractMainUnit(Map.from(newEntireAppFileJson));
 
         final oldDeferredOnlyFileJson =
-            _extractDeferredUnits(oldEntireAppFileJson);
+            _extractDeferredUnits(Map.from(oldEntireAppFileJson));
         final newDeferredOnlyFileJson =
-            _extractDeferredUnits(newEntireAppFileJson);
+            _extractDeferredUnits(Map.from(newEntireAppFileJson));
 
         diffMap = _generateDiffMapFromAnalyzeSizeFiles(
           oldFileJson: oldEntireAppFileJson,
@@ -474,10 +519,25 @@ class AppSizeController {
     diffMap['n'] = isDeferredApp.value ? _entireAppNodeName : _rootNodeName;
 
     // TODO(peterdjlee): Try to move the non-active tree generation to separate isolates.
+    // Entire app or root (for non-deferred):
     final diffTreeMap = _generateDiffTrees(diffMap);
     _combinedDiffTreeRoot = diffTreeMap.combined;
     _increasedDiffTreeRoot = diffTreeMap.increaseOnly;
     _decreasedDiffTreeRoot = diffTreeMap.decreaseOnly;
+
+    if (isDeferredApp.value) {
+      // For main only:
+      final mainDiffTreeMap = _generateDiffTrees(mainDiffMap!);
+      _mainCombinedDiffTreeRoot = mainDiffTreeMap.combined;
+      _mainIncreasedDiffTreeRoot = mainDiffTreeMap.increaseOnly;
+      _mainDecreasedDiffTreeRoot = mainDiffTreeMap.decreaseOnly;
+
+      // For deferred only:
+      final deferredDiffTreeMap = _generateDiffTrees(deferredDiffMap!);
+      _deferredCombinedDiffTreeRoot = deferredDiffTreeMap.combined;
+      _deferredIncreasedDiffTreeRoot = deferredDiffTreeMap.increaseOnly;
+      _deferredDecreasedDiffTreeRoot = deferredDiffTreeMap.decreaseOnly;
+    }
 
     changeDiffRoot(_activeDiffRoot);
 
