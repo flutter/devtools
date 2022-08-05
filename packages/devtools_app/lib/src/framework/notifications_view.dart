@@ -19,16 +19,36 @@ double get _notificationHeight => scaleByFontFactor(175.0);
 final _notificationWidth = _notificationHeight * goldenRatio;
 
 /// Manager for notifications in the app.
-class NotificationsView extends StatefulWidget {
+///
+/// Must be inside of an [Overlay].
+class NotificationsView extends StatelessWidget {
   const NotificationsView({Key? key, required this.child}) : super(key: key);
+  final Widget child;
+  @override
+  Widget build(BuildContext context) {
+    return Overlay(
+      initialEntries: [
+        OverlayEntry(
+          builder: (context) => _NotificationsView(child: child),
+          maintainState: true,
+          opaque: true,
+        ),
+      ],
+    );
+  }
+}
+
+/// Manager for notifications in the app.
+class _NotificationsView extends StatefulWidget {
+  const _NotificationsView({Key? key, required this.child}) : super(key: key);
 
   final Widget child;
 
   @override
-  State<NotificationsView> createState() => _NotificationsViewState();
+  State<_NotificationsView> createState() => _NotificationsViewState();
 }
 
-class _NotificationsViewState extends State<NotificationsView>
+class _NotificationsViewState extends State<_NotificationsView>
     with AutoDisposeMixin {
   OverlayEntry? _overlayEntry;
 
