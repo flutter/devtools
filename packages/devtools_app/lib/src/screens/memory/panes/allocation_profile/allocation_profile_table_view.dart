@@ -361,7 +361,7 @@ class _ExportAllocationProfileButton extends StatelessWidget {
       builder: (context, currentAllocationProfile, _) {
         return IconLabelButton(
           label: 'CSV',
-          icon: Icons.download,
+          icon: Icons.file_download,
           tooltip: 'Download allocation profile data in CSV format',
           onPressed: currentAllocationProfile == null
               ? null
