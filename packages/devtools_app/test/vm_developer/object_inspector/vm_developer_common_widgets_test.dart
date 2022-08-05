@@ -21,6 +21,8 @@ void main() {
 
   late InstanceRef requestedSize;
 
+  final fetchingSizeNotifier = ValueNotifier<bool>(false);
+
   final retainingPathNotifier = ValueNotifier<RetainingPath?>(null);
 
   final inboundRefsNotifier = ValueNotifier<InboundReferences?>(null);
@@ -33,10 +35,21 @@ void main() {
     final json = testInstance.toJson();
     requestedSize = Instance.parse(json)!;
 
-    when(mockClassObject.reachableSize).thenReturn(requestedSize);
+    when(mockClassObject.reachableSize).thenReturn(null);
+    when(mockClassObject.retainedSize).thenReturn(null);
 
     when(mockClassObject.requestReachableSize()).thenAnswer((_) async {
-      requestedSize.valueAsString = '1024';
+      fetchingSizeNotifier.value = true;
+
+      if (requestedSize.valueAsString == null) {
+        requestedSize.valueAsString = '1024';
+      } else {
+        int value = int.parse(requestedSize.valueAsString!);
+        value += 512;
+        requestedSize.valueAsString = value.toString();
+      }
+
+      fetchingSizeNotifier.value = false;
     });
 
     when(mockClassObject.retainingPath).thenReturn(retainingPathNotifier);
@@ -52,12 +65,29 @@ void main() {
     });
   });
 
-  testWidgets('test RequestableSizeWidget with null data',
+  testWidgets('test RequestableSizeWidget while fetching data',
       (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
         RequestableSizeWidget(
-          requestedSize: null,
+          fetching: ValueNotifier(true),
+          sizeProvider: () => mockClassObject.reachableSize,
+          requestFunction: mockClassObject.requestReachableSize,
+        ),
+      ),
+    );
+
+    await tester.pump();
+
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+  });
+
+  testWidgets('test RequestableSizeWidget', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrap(
+        RequestableSizeWidget(
+          fetching: fetchingSizeNotifier,
+          sizeProvider: () => mockClassObject.reachableSize,
           requestFunction: mockClassObject.requestReachableSize,
         ),
       ),
@@ -65,43 +95,25 @@ void main() {
 
     expect(find.byType(RequestDataButton), findsOneWidget);
 
+    when(mockClassObject.reachableSize).thenReturn(requestedSize);
+
     await tester.tap(find.byType(RequestDataButton));
 
+    await tester.pumpAndSettle();
+
     expect(requestedSize.valueAsString, '1024');
-  });
-
-  testWidgets('test RequestableSizeWidget with data',
-      (WidgetTester tester) async {
-    requestedSize.valueAsString = '128';
-
-    final sizeNotifier = ValueNotifier<InstanceRef?>(requestedSize);
-
-    await tester.pumpWidget(
-      wrap(
-        ValueListenableBuilder(
-          valueListenable: sizeNotifier,
-          builder: (context, size, _) {
-            return RequestableSizeWidget(
-              requestedSize: requestedSize,
-              requestFunction: () {
-                mockClassObject.requestReachableSize();
-                sizeNotifier.notifyListeners();
-              },
-            );
-          },
-        ),
-      ),
-    );
-
-    expect(find.byType(Text), findsOneWidget);
-    expect(find.text('128 B'), findsOneWidget);
+    expect(find.byType(SelectableText), findsOneWidget);
+    expect(find.text('1 KB'), findsOneWidget);
     expect(find.byType(ToolbarRefresh), findsOneWidget);
 
     await tester.tap(find.byType(ToolbarRefresh));
 
     await tester.pumpAndSettle();
 
-    expect(find.text('1 KB'), findsOneWidget);
+    expect(requestedSize.valueAsString, '1536');
+    expect(find.byType(SelectableText), findsOneWidget);
+    expect(find.text('1.5 KB'), findsOneWidget);
+    expect(find.byType(ToolbarRefresh), findsOneWidget);
   });
 
   testWidgetsWithWindowSize(

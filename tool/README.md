@@ -139,5 +139,5 @@ pub publish
 Release notes should contain details about the user-facing changes included in the release.
 These notes are shown directly in DevTools when a user opens a new version of DevTools. Please
 see the release notes
-[README.md](https://github.com/flutter/devtools/blob/master/packages/devtools_app/lib/src/shared/release_notes/README.md)
+[README.md](https://github.com/flutter/devtools/blob/master/packages/devtools_app/lib/src/framework/release_notes/README.md)
 for details on where to add release notes and how to test them.

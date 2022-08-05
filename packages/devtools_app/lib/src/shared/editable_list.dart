@@ -273,7 +273,7 @@ class EditableListCopyDirectoryButton extends StatelessWidget {
       },
       iconSize: defaultIconSize,
       splashRadius: defaultIconSize,
-      icon: const Icon(Icons.copy),
+      icon: const Icon(Icons.copy_outlined),
     );
   }
 }

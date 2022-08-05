@@ -313,7 +313,7 @@ class _AnalyzeButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconLabelButton(
       label: 'Analyze and Download',
-      icon: Icons.download,
+      icon: Icons.file_download,
       tooltip: 'Analyze the leaks and download the result\n'
           'to ${_filePrefix}_<time>.yaml.',
       onPressed: () async => await leaksController.requestLeaks(),
