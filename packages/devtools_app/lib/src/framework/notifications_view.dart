@@ -38,12 +38,11 @@ class NotificationsView extends StatelessWidget {
   }
 }
 
-// TODO(polina-c): it seems it would be better to combine the NotificationsView
-//  and the _Notifications widget since this one is so minimal and that would
-//  eliminate some unnecessary boilerplate. Especially since the
-//  _NotificationsState build method just returns return widget.child.
-// However, the direct merge of these classes does not work for some reasons.
-// It would be great to figure it out.
+/// _Notifications is not combined with NotificationsView.
+/// because we are calling Overlay.of(context) from lifecycle methods
+/// in _NotificationsState, which would fail if the Overlay widget is defined
+/// in _NotificationsState.build because there would be no Overlay in the tree
+/// at the time Overlay.of(context) is called.
 class _Notifications extends StatefulWidget {
   const _Notifications({Key? key, required this.child}) : super(key: key);
 
@@ -57,7 +56,6 @@ class _NotificationsState extends State<_Notifications> with AutoDisposeMixin {
   OverlayEntry? _overlayEntry;
 
   final List<_Notification> _notifications = [];
-  late NotificationService controller;
 
   @override
   void didChangeDependencies() {
@@ -72,10 +70,8 @@ class _NotificationsState extends State<_Notifications> with AutoDisposeMixin {
         Overlay.of(context)!.insert(_overlayEntry!);
       });
 
-      controller = notificationService;
-
       addAutoDisposeListener(
-        controller.newTasks,
+        notificationService.newTasks,
         _processQueues,
       );
     }
@@ -84,11 +80,11 @@ class _NotificationsState extends State<_Notifications> with AutoDisposeMixin {
   }
 
   void _processQueues() {
-    while (controller.toDismiss.isNotEmpty) {
-      _dismiss(controller.toDismiss.removeFirst().text);
+    while (notificationService.toDismiss.isNotEmpty) {
+      _dismiss(notificationService.toDismiss.removeFirst().text);
     }
-    while (controller.toPush.isNotEmpty) {
-      _push(controller.toPush.removeFirst());
+    while (notificationService.toPush.isNotEmpty) {
+      _push(notificationService.toPush.removeFirst());
     }
   }
 
@@ -122,7 +118,7 @@ class _NotificationsState extends State<_Notifications> with AutoDisposeMixin {
     for (final notification in notifications) {
       if (notification.message.text == message) {
         _notifications.remove(notification);
-        controller.markComplete(notification.message);
+        notificationService.markComplete(notification.message);
         didDismiss = true;
       }
     }
@@ -136,7 +132,7 @@ class _NotificationsState extends State<_Notifications> with AutoDisposeMixin {
   void _removeNotification(_Notification notification) {
     setState(() {
       final didRemove = _notifications.remove(notification);
-      controller.markComplete(notification.message);
+      notificationService.markComplete(notification.message);
       if (didRemove) {
         _overlayEntry?.markNeedsBuild();
       }
