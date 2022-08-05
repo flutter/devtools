@@ -28,11 +28,8 @@ class FlutterTestEnvironment {
     this._runConfig, {
     this.testAppDirectory = 'test/fixtures/flutter_app',
     FlutterDriverFactory? flutterDriverFactory,
-    PreferencesController? preferencesController,
   })  : _flutterDriverFactory = flutterDriverFactory ?? defaultFlutterRunDriver,
-        _flutterExe = _parseFlutterExeFromEnv(),
-        _preferencesController =
-            preferencesController ?? PreferencesController();
+        _flutterExe = _parseFlutterExeFromEnv();
 
   static String _parseFlutterExeFromEnv() {
     const flutterExe = String.fromEnvironment('FLUTTER_CMD');
@@ -89,7 +86,7 @@ class FlutterTestEnvironment {
   // Switch this flag to false to debug issues with non-atomic test behavior.
   bool reuseTestEnvironment = true;
 
-  final PreferencesController _preferencesController;
+  PreferencesController _preferencesController = PreferencesController();
 
   Future<void> setupEnvironment({
     bool force = false,
@@ -168,6 +165,7 @@ class FlutterTestEnvironment {
       },
     );
     await _flutter!.stop();
+    _preferencesController.dispose();
 
     _flutter = null;
 
