@@ -34,12 +34,6 @@ class VmScriptDisplay extends StatelessWidget {
         script.obj.uri,
       ),
       selectableTextBuilderMapEntry(
-        'Library',
-        script.obj.library?.name?.isEmpty ?? false
-            ? script.obj.uri
-            : script.obj.library?.name,
-      ),
-      selectableTextBuilderMapEntry(
         'Load time',
         script.loadTime.toString(),
       ),

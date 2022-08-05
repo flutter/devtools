@@ -666,10 +666,10 @@ List<MapEntry<String, WidgetBuilder>> vmObjectGeneralDataRows(
               ),
       ),
     ),
-    if (object is ClassObject)
+    if (object is ClassObject || object is ScriptObject)
       selectableTextBuilderMapEntry(
         'Library',
-        _objectName(object.obj.library),
+        _objectName((object.obj as dynamic).library),
       ),
     if (object is FieldObject || object is FuncObject)
       selectableTextBuilderMapEntry(
