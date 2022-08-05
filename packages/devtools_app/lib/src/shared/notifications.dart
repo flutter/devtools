@@ -32,7 +32,7 @@ class NotificationService {
   /// Notifies about added messages or dismissals.
   final ValueNotifier<int> newTasks = ValueNotifier(0);
 
-  /// Messages that are currently shown in UI.
+  /// Messages that are planned to be shown or are currently shown in UI.
   @visibleForTesting
   final activeMessages = <NotificationMessage>[];
 
@@ -59,8 +59,14 @@ class NotificationService {
 
   /// Dismisses all notifications with a matching message.
   void dismiss(String message) {
-    toPush.removeWhere((element) => element.text == message);
+    // Remove those that were not picked up yet by UI.
+    final toRemove = toPush.where((e) => e.text == message).toList();
+    for (var messageToRemove in toRemove) {
+      toPush.remove(messageToRemove);
+      activeMessages.remove(messageToRemove);
+    }
 
+    // Add task to dismiss for those that were picked up by UI.
     if (activeMessages.containsWhere((element) => element.text == message)) {
       toDismiss.addLast(NotificationMessage(message));
       newTasks.value++;
