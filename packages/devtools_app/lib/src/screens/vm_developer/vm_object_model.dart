@@ -196,14 +196,7 @@ class LibraryObject extends VmObject {
   @override
   String? get name => obj.name;
 
-  late final String? vmName;
-
-  @override
-  Future<void> initialize() async {
-    await super.initialize();
-
-    vmName = obj.vmName;
-  }
+  String? get vmName => obj.vmName;
 }
 
 //TODO(mtaylee): finish class implementation.

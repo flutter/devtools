@@ -61,24 +61,19 @@ class LibraryDependencies extends StatelessWidget {
   final List<LibraryDependency> dependencies;
 
   List<Row> dependencyRows(BuildContext context) {
-    final rows = <Row>[];
-
-    for (final dep in dependencies) {
-      final row = Row(
-        children: [
-          Flexible(
-            child: SelectableText(
-              _dependencyDescription(dep),
-              style: Theme.of(context).fixedFontStyle,
+    return <Row>[
+      for (final dep in dependencies)
+        Row(
+          children: [
+            Flexible(
+              child: SelectableText(
+                _dependencyDescription(dep),
+                style: Theme.of(context).fixedFontStyle,
+              ),
             ),
-          ),
-        ],
-      );
-
-      rows.add(row);
-    }
-
-    return rows;
+          ],
+        )
+    ];
   }
 
   String _dependencyDescription(LibraryDependency dependency) {
@@ -110,7 +105,10 @@ class LibraryDependencies extends StatelessWidget {
   Widget build(BuildContext context) {
     return VmExpansionTile(
       title: 'Dependencies (${dependencies.length})',
-      children: prettyRows(context, dependencyRows(context)),
+      children: prettyRows(
+        context,
+        dependencyRows(context),
+      ),
     );
   }
 }
