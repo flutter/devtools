@@ -14,11 +14,18 @@ In the flutter/website directory, open [_config.yml](https://github.com/flutter/
 and replace `https://docs.flutter.dev` with `https://flutter-website-dt-staging.web.app` (line 2).
 
 Then run the following rom the `website/` directory:
-```dart
-make setup;
-DISABLE_TESTS=1 make build;
+```shell
+make setup
+```
+```shell
+DISABLE_TESTS=1 make build
+```
+```shell
 firebase deploy --project devtools-staging --only hosting
 ```
+
+If the firebase command gives an authentication error, try running `firebase logout` and `firebase login`,
+and then retry the `firebase deploy` command.
 
 Once you see this message, the deployment was successful and now you can move on to the next step.
 ```shell

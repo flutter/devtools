@@ -160,41 +160,59 @@ class RequestDataButton extends IconLabelButton {
   });
 }
 
-/// Displays a RequestDataButton if [requestedSize] is null, otherwise displays
-/// the requestable size and a ToolbarRefresh button next to it,
-/// to request that size again if required.
+/// Displays a RequestDataButton if the data provided by [sizeProvider] is null,
+/// otherwise displays the size data and a ToolbarRefresh button next
+/// to it, to request that data again if required.
+///
+/// When the data is being requested (the value of [fetching] is true),
+/// a CircularProgressIndicator will be displayed.
 class RequestableSizeWidget extends StatelessWidget {
   const RequestableSizeWidget({
-    required this.requestedSize,
+    required this.fetching,
+    required this.sizeProvider,
     required this.requestFunction,
   });
 
-  final InstanceRef? requestedSize;
+  final ValueListenable<bool> fetching;
+  final InstanceRef? Function() sizeProvider;
   final void Function() requestFunction;
 
   @override
   Widget build(BuildContext context) {
-    final size = requestedSize;
-    if (size == null) {
-      return RequestDataButton(onPressed: requestFunction);
-    } else {
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Text(
-            size.valueAsString == null
-                ? '--'
-                : prettyPrintBytes(
-                    int.parse(size.valueAsString!),
-                    includeUnit: true,
-                    kbFractionDigits: 1,
-                    maxBytes: 512,
-                  )!,
-          ),
-          ToolbarRefresh(onPressed: requestFunction),
-        ],
-      );
-    }
+    return ValueListenableBuilder<bool>(
+      valueListenable: fetching,
+      builder: (context, fetching, _) {
+        if (fetching) {
+          return const AspectRatio(
+            aspectRatio: 1,
+            child: Padding(
+              padding: EdgeInsets.all(densePadding),
+              child: CircularProgressIndicator(),
+            ),
+          );
+        } else {
+          final size = sizeProvider();
+          return size == null
+              ? RequestDataButton(onPressed: requestFunction)
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    SelectableText(
+                      size.valueAsString == null
+                          ? '--'
+                          : prettyPrintBytes(
+                              int.parse(size.valueAsString!),
+                              includeUnit: true,
+                              kbFractionDigits: 1,
+                              maxBytes: 512,
+                            )!,
+                    ),
+                    ToolbarRefresh(onPressed: requestFunction),
+                  ],
+                );
+        }
+      },
+    );
   }
 }
 
@@ -658,26 +676,18 @@ List<MapEntry<String, WidgetBuilder>> vmObjectGeneralDataRows(
     ),
     MapEntry(
       'Reachable Size',
-      (context) => ValueListenableBuilder<bool>(
-        valueListenable: object.fetchingReachableSize,
-        builder: (context, fetching, _) => fetching
-            ? const CircularProgressIndicator()
-            : RequestableSizeWidget(
-                requestedSize: object.reachableSize,
-                requestFunction: object.requestReachableSize,
-              ),
+      (context) => RequestableSizeWidget(
+        fetching: object.fetchingReachableSize,
+        sizeProvider: () => object.reachableSize,
+        requestFunction: object.requestReachableSize,
       ),
     ),
     MapEntry(
       'Retained Size',
-      (context) => ValueListenableBuilder<bool>(
-        valueListenable: object.fetchingRetainedSize,
-        builder: (context, fetching, _) => fetching
-            ? const CircularProgressIndicator()
-            : RequestableSizeWidget(
-                requestedSize: object.retainedSize,
-                requestFunction: object.requestRetainedSize,
-              ),
+      (context) => RequestableSizeWidget(
+        fetching: object.fetchingRetainedSize,
+        sizeProvider: () => object.retainedSize,
+        requestFunction: object.requestRetainedSize,
       ),
     ),
     if (object is ClassObject)
