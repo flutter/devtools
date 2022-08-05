@@ -7,6 +7,7 @@ import 'package:devtools_app/src/screens/vm_developer/object_viewport.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_class_display.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_developer_common_widgets.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_field_display.dart';
+import 'package:devtools_app/src/screens/vm_developer/vm_function_display.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_object_model.dart';
 import 'package:devtools_app/src/scripts/script_manager.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
@@ -26,6 +27,10 @@ void main() {
 
   late MockFieldObject mockFieldObject;
 
+  late MockFuncObject mockFuncObject;
+
+  late Func testFunctionCopy;
+
   late FakeServiceManager fakeServiceManager;
 
   late MockScriptManager scriptManager;
@@ -43,6 +48,8 @@ void main() {
     setGlobal(IdeTheme, IdeTheme());
 
     testObjectInspectorViewController = TestObjectInspectorViewController();
+
+    // MockClassObject setUp
 
     mockClassObject = MockClassObject();
 
@@ -64,6 +71,8 @@ void main() {
         .thenReturn(ValueNotifier<RetainingPath?>(null));
     when(mockClassObject.inboundReferences)
         .thenReturn(ValueNotifier<InboundReferences?>(null));
+
+    // MockFieldObject setUp
 
     mockFieldObject = MockFieldObject();
 
@@ -87,6 +96,42 @@ void main() {
         .thenReturn(ValueNotifier<RetainingPath?>(null));
     when(mockFieldObject.inboundReferences)
         .thenReturn(ValueNotifier<InboundReferences?>(null));
+
+    // MockFuncObject setUp
+
+    mockFuncObject = MockFuncObject();
+
+    final funcJson = testFunction.toJson();
+    testFunctionCopy = Func.parse(funcJson)!;
+
+    when(mockFuncObject.outlineNode).thenReturn(null);
+    when(mockFuncObject.scriptRef).thenReturn(null);
+    when(mockFuncObject.name).thenReturn(testFunctionCopy.name);
+    when(mockFuncObject.ref).thenReturn(testFunctionCopy);
+    when(mockFuncObject.obj).thenReturn(testFunctionCopy);
+    when(mockFuncObject.script).thenReturn(null);
+    when(mockFuncObject.pos).thenReturn(null);
+    when(mockFuncObject.kind).thenReturn(null);
+    when(mockFuncObject.deoptimizations).thenReturn(null);
+    when(mockFuncObject.isOptimizable).thenReturn(null);
+    when(mockFuncObject.isInlinable).thenReturn(null);
+    when(mockFuncObject.hasIntrinsic).thenReturn(null);
+    when(mockFuncObject.isRecognized).thenReturn(null);
+    when(mockFuncObject.isNative).thenReturn(null);
+    when(mockFuncObject.vmName).thenReturn(null);
+    when(mockFuncObject.icDataArray).thenReturn(null);
+    when(mockFuncObject.fetchingReachableSize)
+        .thenReturn(ValueNotifier<bool>(false));
+    when(mockFuncObject.reachableSize).thenReturn(testRequestableSize);
+    when(mockFuncObject.fetchingRetainedSize)
+        .thenReturn(ValueNotifier<bool>(false));
+    when(mockFuncObject.retainedSize).thenReturn(testRequestableSize);
+    when(mockFuncObject.retainingPath).thenReturn(
+      ValueNotifier<RetainingPath?>(testRetainingPath),
+    );
+    when(mockFuncObject.inboundReferences).thenReturn(
+      ValueNotifier<InboundReferences?>(testInboundRefs),
+    );
   });
 
   testWidgets('builds object viewport', (WidgetTester tester) async {
@@ -166,16 +211,16 @@ void main() {
   });
 
   testWidgets('test for Func Object', (WidgetTester tester) async {
-    final testFuncObject =
-        TestFuncObject(ref: testFunction, testFunc: testFunction);
     testObjectInspectorViewController.fakeObjectHistory
-        .setCurrentObject(testFuncObject);
+        .setCurrentObject(mockFuncObject);
+
     await tester.pumpWidget(
       wrap(ObjectViewport(controller: testObjectInspectorViewController)),
     );
-    expect(viewportTitle(testFuncObject), 'Function FooFunction');
-    expect(find.text('Function FooFunction'), findsOneWidget);
-    expect(find.byType(VMInfoCard), findsOneWidget);
+
+    expect(viewportTitle(mockFuncObject), 'Function fooFunction');
+    expect(find.text('Function fooFunction'), findsOneWidget);
+    expect(find.byType(VmFuncDisplay), findsOneWidget);
   });
 
   group('ObjectHistory', () {

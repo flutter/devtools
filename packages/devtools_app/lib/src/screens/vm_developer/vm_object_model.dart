@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -134,7 +135,8 @@ class ClassObject extends VmObject {
   }
 }
 
-//TODO(mtaylee): finish class implementation.
+/// Stores a 'Func' (function) VM object and provides an interface for
+/// obtaining the Dart VM information related to this object.
 class FuncObject extends VmObject {
   FuncObject({required super.ref, super.scriptRef, super.outlineNode});
 
@@ -147,7 +149,7 @@ class FuncObject extends VmObject {
   @override
   SourceLocation? get _sourceLocation => obj.location;
 
-  late final String? kind;
+  late final FunctionKind? kind;
 
   late final int? deoptimizations;
 
@@ -169,7 +171,11 @@ class FuncObject extends VmObject {
   Future<void> initialize() async {
     await super.initialize();
 
-    kind = obj.kind;
+    final funcKind = obj.kind;
+    kind = funcKind == null
+        ? null
+        : FunctionKind.values
+            .firstWhereOrNull((element) => element.kind() == funcKind);
 
     deoptimizations = obj.deoptimizations;
 

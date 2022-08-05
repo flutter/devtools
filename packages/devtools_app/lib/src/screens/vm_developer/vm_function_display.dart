@@ -2,14 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../primitives/utils.dart';
-import '../../shared/common_widgets.dart';
-import '../../shared/table.dart';
-import '../../shared/theme.dart';
 import 'vm_developer_common_widgets.dart';
 import 'vm_object_model.dart';
 import 'vm_service_private_extensions.dart';
@@ -33,21 +28,54 @@ class VmFuncDisplay extends StatelessWidget {
         sideCardDataRows: _functionDetailRows(function),
         sideCardTitle: 'Function Details',
       );
-}
 
-/// Returns a list of key-value pairs (map entries)
-/// containing detailed information of a VM Func object [function].
-List<MapEntry<String, Widget Function(BuildContext)>> _functionDetailRows(
-  FuncObject function,
-) {
-  String? kindDescription(String? kindValue) {
-    if (kindValue == null) return null;
+  /// Returns a list of key-value pairs (map entries)
+  /// containing detailed information of a VM Func object [function].
+  List<MapEntry<String, Widget Function(BuildContext)>> _functionDetailRows(
+    FuncObject function,
+  ) {
+    String? boolYesOrNo(bool? condition) {
+      if (condition == true) return 'Yes';
+      if (condition == false) return 'No';
+      return null;
+    }
 
-    final funcKind = FunctionKind.values
-        .firstWhereOrNull((element) => element.kind() == kindValue);
+    return [
+      selectableTextBuilderMapEntry(
+        'Kind',
+        _kindDescription(function.kind),
+      ),
+      selectableTextBuilderMapEntry(
+        'Deoptimizations',
+        function.deoptimizations?.toString(),
+      ),
+      selectableTextBuilderMapEntry(
+        'Optimizable',
+        boolYesOrNo(function.isOptimizable),
+      ),
+      selectableTextBuilderMapEntry(
+        'Inlinable',
+        boolYesOrNo(function.isInlinable),
+      ),
+      selectableTextBuilderMapEntry(
+        'Intrinsic',
+        boolYesOrNo(function.hasIntrinsic),
+      ),
+      selectableTextBuilderMapEntry(
+        'Recognized',
+        boolYesOrNo(function.isRecognized),
+      ),
+      selectableTextBuilderMapEntry(
+        'Native',
+        boolYesOrNo(function.isNative),
+      ),
+      selectableTextBuilderMapEntry('VM Name', function.vmName),
+    ];
+  }
 
+  String? _kindDescription(FunctionKind? funcKind) {
     if (funcKind == null) {
-      return 'Unrecognized function kind: $kindValue';
+      return 'Unrecognized function kind: ${function.obj.kind}';
     }
 
     final camelCase = RegExp(r'(?<=[a-z])[A-Z]');
@@ -55,14 +83,20 @@ List<MapEntry<String, Widget Function(BuildContext)>> _functionDetailRows(
     final kind = StringBuffer();
 
     if (function.obj.isStatic == true) {
-      kind.write('static ');
-    }
-    if (function.obj.isConst == true) {
-      kind.write('const ');
+      kind.write('static');
     }
 
+    kind.write(kind.isNotEmpty ? ' ' : '');
+
+    if (function.obj.isConst == true) {
+      kind.write('const');
+    }
+
+    kind.write(kind.isNotEmpty ? ' ' : '');
+
     kind.write(
-      kindValue
+      funcKind
+          .kind()
           .replaceAllMapped(
             camelCase,
             (Match m) => ' ${m.group(0)!}',
@@ -72,44 +106,6 @@ List<MapEntry<String, Widget Function(BuildContext)>> _functionDetailRows(
 
     return kind.toString();
   }
-
-  String? boolYesOrNo(bool? condition) {
-    if (condition == true) return 'Yes';
-    if (condition == false) return 'No';
-    return null;
-  }
-
-  return [
-    selectableTextBuilderMapEntry(
-      'Kind',
-      kindDescription(function.kind),
-    ),
-    selectableTextBuilderMapEntry(
-      'Deoptimizations',
-      function.deoptimizations?.toString(),
-    ),
-    selectableTextBuilderMapEntry(
-      'Optimizable',
-      boolYesOrNo(function.isOptimizable),
-    ),
-    selectableTextBuilderMapEntry(
-      'Inlinable',
-      boolYesOrNo(function.isInlinable),
-    ),
-    selectableTextBuilderMapEntry(
-      'Intrinsic',
-      boolYesOrNo(function.hasIntrinsic),
-    ),
-    selectableTextBuilderMapEntry(
-      'Recognized',
-      boolYesOrNo(function.isRecognized),
-    ),
-    selectableTextBuilderMapEntry(
-      'Native',
-      boolYesOrNo(function.isNative),
-    ),
-    selectableTextBuilderMapEntry('VM Name', function.vmName),
-  ];
 }
 
 // TODO(mtaylee): Finish widget implementation.

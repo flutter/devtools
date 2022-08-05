@@ -565,11 +565,7 @@ class InboundReferencesWidget extends StatelessWidget {
   }
 }
 
-String? _fileNameFromUri(String? uri) {
-  if (uri == null) return null;
-  final splitted = uri.split('/');
-  return splitted[splitted.length - 1];
-}
+String? _fileNameFromUri(String? uri) => uri?.split('/').last;
 
 /// A widget for the object inspector historyViewport containing the main
 /// layout of information widgets related to VM object types.

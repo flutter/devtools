@@ -41,24 +41,24 @@ class VmClassDisplay extends StatelessWidget {
       ],
     );
   }
-}
 
 // TODO(mtaylee): Delete 'Currently allocated instances' row when
 // ClassInstancesWidget implementation is completed.
-/// Generates a list of key-value pairs (map entries) containing the general
-/// information of the class object [clazz].
-List<MapEntry<String, WidgetBuilder>> _classDataRows(
-  ClassObject clazz,
-) {
-  return [
-    ...vmObjectGeneralDataRows(clazz),
-    selectableTextBuilderMapEntry('Superclass', clazz.obj.superClass?.name),
-    selectableTextBuilderMapEntry('SuperType', clazz.obj.superType?.name),
-    selectableTextBuilderMapEntry(
-      'Currently allocated instances',
-      clazz.instances?.totalCount?.toString(),
-    ),
-  ];
+  /// Generates a list of key-value pairs (map entries) containing the general
+  /// information of the class object [clazz].
+  List<MapEntry<String, WidgetBuilder>> _classDataRows(
+    ClassObject clazz,
+  ) {
+    return [
+      ...vmObjectGeneralDataRows(clazz),
+      selectableTextBuilderMapEntry('Superclass', clazz.obj.superClass?.name),
+      selectableTextBuilderMapEntry('SuperType', clazz.obj.superType?.name),
+      selectableTextBuilderMapEntry(
+        'Currently allocated instances',
+        clazz.instances?.totalCount?.toString(),
+      ),
+    ];
+  }
 }
 
 // TODO(mtaylee): Finish implementation of widget to display
