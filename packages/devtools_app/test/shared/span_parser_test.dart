@@ -215,12 +215,13 @@ String _buildGoldenText(String content, List<ScopeSpan> spans) {
         // the remainder into the next.
         if (col + length > lineLengthWithNewline) {
           final thisLineLength = line.length - col;
+          final offsetToStartOfNextLine = lineLengthWithNewline - col;
           length = thisLineLength;
           spansByLine[i + 1] ??= [];
           spansByLine[i + 1]!.add(
             ScopeSpan.copy(
               scopes: span.scopes,
-              start: span.start + lineLengthWithNewline,
+              start: span.start + offsetToStartOfNextLine,
               end: span.end,
               line: span.line! + 1,
               column: 1,

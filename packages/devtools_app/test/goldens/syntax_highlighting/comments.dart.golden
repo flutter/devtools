@@ -58,7 +58,7 @@
 #^^^^^^^^^^^^^^^^^^ comment.block.documentation.dart comment.block.documentation.dart
 #^^^^^^^^^^^^^^^^^^ comment.block.documentation.dart
 > *  */
-#^^^ comment.block.documentation.dart comment.block.documentation.dart
+#^^^^^^ comment.block.documentation.dart comment.block.documentation.dart
 #^^^^^^ comment.block.documentation.dart
 > */
 #^^^ comment.block.documentation.dart
