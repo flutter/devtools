@@ -86,7 +86,7 @@ class FlutterTestEnvironment {
   // Switch this flag to false to debug issues with non-atomic test behavior.
   bool reuseTestEnvironment = true;
 
-  final PreferencesController _preferencesController = PreferencesController();
+  PreferencesController? _preferencesController;
 
   Future<void> setupEnvironment({
     bool force = false,
@@ -116,6 +116,8 @@ class FlutterTestEnvironment {
 
       _service = _flutter!.vmService!;
 
+      _preferencesController = PreferencesController();
+
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(Storage, FlutterDesktopStorage());
       setGlobal(ServiceConnectionManager, ServiceConnectionManager());
@@ -132,7 +134,7 @@ class FlutterTestEnvironment {
         _service,
         onClosed: Completer().future,
       );
-      await _preferencesController.init();
+      await _preferencesController!.init();
 
       if (_afterNewSetup != null) await _afterNewSetup!();
     }
@@ -165,7 +167,8 @@ class FlutterTestEnvironment {
       },
     );
     await _flutter!.stop();
-    _preferencesController.dispose();
+    _preferencesController?.dispose();
+    _preferencesController = null;
 
     _flutter = null;
 
