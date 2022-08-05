@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/framework/notifications.dart';
+import 'package:devtools_app/src/framework/notifications_view.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
 import 'package:flutter/material.dart';

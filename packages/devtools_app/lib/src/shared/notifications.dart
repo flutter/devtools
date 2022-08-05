@@ -23,12 +23,14 @@ class NotificationMessage {
   final Duration duration;
 }
 
+/// Collects tasks to show or dismiss notifications in UI.
 class NotificationService {
   final toPush = Queue<NotificationMessage>();
+
   final toDismiss = Queue<NotificationMessage>();
 
   /// Notifies about added messages or dismissals.
-  final ValueNotifier<int> messagesAdded = ValueNotifier(0);
+  final ValueNotifier<int> newTasks = ValueNotifier(0);
 
   /// Messages that are currently shown in UI.
   @visibleForTesting
@@ -51,7 +53,7 @@ class NotificationService {
     }
     activeMessages.add(message);
     toPush.add(message);
-    messagesAdded.value++;
+    newTasks.value++;
     return true;
   }
 
@@ -61,7 +63,7 @@ class NotificationService {
 
     if (activeMessages.containsWhere((element) => element.text == message)) {
       toDismiss.addLast(NotificationMessage(message));
-      messagesAdded.value++;
+      newTasks.value++;
     }
   }
 
@@ -73,7 +75,7 @@ class NotificationService {
   }
 
   void dispose() {
-    messagesAdded.dispose();
+    newTasks.dispose();
   }
 }
 

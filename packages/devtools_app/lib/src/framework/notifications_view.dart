@@ -19,37 +19,17 @@ double get _notificationHeight => scaleByFontFactor(175.0);
 final _notificationWidth = _notificationHeight * goldenRatio;
 
 /// Manager for notifications in the app.
-///
-/// Must be inside of an [Overlay].
-class NotificationsView extends StatelessWidget {
+class NotificationsView extends StatefulWidget {
   const NotificationsView({Key? key, required this.child}) : super(key: key);
 
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
-    return Overlay(
-      initialEntries: [
-        OverlayEntry(
-          builder: (context) => _Notifications(child: child),
-          maintainState: true,
-          opaque: true,
-        ),
-      ],
-    );
-  }
+  State<NotificationsView> createState() => _NotificationsViewState();
 }
 
-class _Notifications extends StatefulWidget {
-  const _Notifications({Key? key, required this.child}) : super(key: key);
-
-  final Widget child;
-
-  @override
-  State<_Notifications> createState() => _NotificationsState();
-}
-
-class _NotificationsState extends State<_Notifications> with AutoDisposeMixin {
+class _NotificationsViewState extends State<NotificationsView>
+    with AutoDisposeMixin {
   OverlayEntry? _overlayEntry;
 
   final List<_Notification> _notifications = [];
@@ -71,7 +51,7 @@ class _NotificationsState extends State<_Notifications> with AutoDisposeMixin {
       controller = notificationService;
 
       addAutoDisposeListener(
-        controller.messagesAdded,
+        controller.newTasks,
         _processQueues,
       );
     }
@@ -111,14 +91,12 @@ class _NotificationsState extends State<_Notifications> with AutoDisposeMixin {
 
   /// Dismisses all notifications with a matching message.
   void _dismiss(String message) {
-    print('dismiss invoked');
     bool didDismiss = false;
     // Make a copy so we do not remove a notification from [_notifications]
     // while iterating over it.
-    final notifications = List.from(_notifications).cast<_Notification>();
+    final notifications = List<_Notification>.from(_notifications);
     for (final notification in notifications) {
       if (notification.message.text == message) {
-        print('dismiss invoked - notification found');
         _notifications.remove(notification);
         controller.markComplete(notification.message);
         didDismiss = true;

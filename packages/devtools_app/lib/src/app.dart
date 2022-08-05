@@ -17,7 +17,7 @@ import 'framework/about_dialog.dart';
 import 'framework/framework_core.dart';
 import 'framework/initializer.dart';
 import 'framework/landing_screen.dart';
-import 'framework/notifications.dart';
+import 'framework/notifications_view.dart';
 import 'framework/release_notes/release_notes.dart';
 import 'framework/report_feedback_button.dart';
 import 'framework/scaffold.dart';
