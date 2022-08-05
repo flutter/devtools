@@ -197,7 +197,8 @@ class LibraryObject extends VmObject {
   String? get name => obj.name;
 }
 
-//TODO(mtaylee): finish class implementation.
+/// Stores a 'Script' VM object and provides an interface for obtaining the
+/// Dart VM information related to this object.
 class ScriptObject extends VmObject {
   ScriptObject({required super.ref, super.scriptRef, super.outlineNode});
 
@@ -208,7 +209,18 @@ class ScriptObject extends VmObject {
   SourceLocation? get _sourceLocation => null;
 
   @override
-  String? get name => null;
+  String? get name => (obj.uri ?? scriptRef?.uri)?.split('/').last;
+
+  late final DateTime? loadTime;
+
+  @override
+  Future<void> initialize() async {
+    await super.initialize();
+
+    if (obj.loadTime != null) {
+      loadTime = DateTime.fromMillisecondsSinceEpoch(obj.loadTime!);
+    }
+  }
 }
 
 //TODO(mtaylee): finish class implementation.
