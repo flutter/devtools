@@ -256,3 +256,8 @@ enum GuardClassKind {
     }
   }
 }
+
+/// An extension on [Library] which allows for access to VM internal fields.
+extension LibraryPrivateExtension on Library {
+  String? get vmName => json!['_vmName'];
+}

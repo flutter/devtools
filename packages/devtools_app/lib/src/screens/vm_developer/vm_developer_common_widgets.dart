@@ -139,6 +139,10 @@ List<Widget> _prettyRows(BuildContext context, List<Row> rows) {
   ];
 }
 
+List<Widget> prettyRows(BuildContext context, List<Row> rows) {
+  return <Widget>[..._prettyRows(context, rows)];
+}
+
 Widget _buildAlternatingRow(BuildContext context, int index, Widget row) {
   return Container(
     color: alternatingColorForIndex(index, Theme.of(context).colorScheme),
