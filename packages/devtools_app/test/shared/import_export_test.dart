@@ -95,7 +95,7 @@ void main() async {
       importController.importData(devToolsFileJson);
       expect(notifications.activeMessages.length, equals(3));
       expect(
-        notifications.activeMessages[2],
+        notifications.activeMessages[2].text,
         equals(attemptingToImportMessage('example')),
       );
     });
