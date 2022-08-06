@@ -18,7 +18,6 @@ import '../../devtools.dart' as devtools;
 import '../config_specific/logger/logger.dart' as logger;
 import 'connected_app.dart';
 import 'globals.dart';
-import 'notifications.dart';
 
 /// Attempts to copy a String of `data` to the clipboard.
 ///
@@ -34,7 +33,7 @@ Future<void> copyToClipboard(
     ),
   );
 
-  Notifications.of(context)?.push(successMessage);
+  notificationService.push(successMessage);
 }
 
 /// Logging to debug console only in debug runs.

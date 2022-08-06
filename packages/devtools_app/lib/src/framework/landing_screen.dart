@@ -14,7 +14,6 @@ import '../primitives/utils.dart';
 import '../shared/common_widgets.dart';
 import '../shared/file_import.dart';
 import '../shared/globals.dart';
-import '../shared/notifications.dart';
 import '../shared/routing.dart';
 import '../shared/theme.dart';
 import '../shared/utils.dart';
@@ -183,7 +182,7 @@ class _ConnectDialogState extends State<ConnectDialog>
       analytics_constants.connectToApp,
     );
     if (connectDialogController.text.isEmpty) {
-      Notifications.of(context)!.push('Please enter a VM Service URL.');
+      notificationService.push('Please enter a VM Service URL.');
       return;
     }
 
@@ -195,21 +194,20 @@ class _ConnectDialogState extends State<ConnectDialog>
     // intuitive that we don't want to just cancel the route change or
     // notification if we are already on a different screen.
     final routerDelegate = DevToolsRouterDelegate.of(context);
-    final notifications = Notifications.of(context)!;
     final connected = await FrameworkCore.initVmService(
       '',
       explicitUri: uri,
       errorReporter: (message, error) {
-        notifications.push('$message $error');
+        notificationService.push('$message $error');
       },
     );
     if (connected) {
       final connectedUri = serviceManager.service!.connectedUri;
       routerDelegate.updateArgsIfNotCurrent({'uri': '$connectedUri'});
       final shortUri = connectedUri.replace(path: '');
-      notifications.push('Successfully connected to $shortUri.');
+      notificationService.push('Successfully connected to $shortUri.');
     } else if (uri == null) {
-      notifications.push(
+      notificationService.push(
         'Failed to connect to the VM Service at "${connectDialogController.text}".\n'
         'The link was not valid.',
       );

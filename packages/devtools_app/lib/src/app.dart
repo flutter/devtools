@@ -17,6 +17,7 @@ import 'framework/about_dialog.dart';
 import 'framework/framework_core.dart';
 import 'framework/initializer.dart';
 import 'framework/landing_screen.dart';
+import 'framework/notifications_view.dart';
 import 'framework/release_notes/release_notes.dart';
 import 'framework/report_feedback_button.dart';
 import 'framework/scaffold.dart';
@@ -46,7 +47,6 @@ import 'service/service_extension_widgets.dart';
 import 'shared/common_widgets.dart';
 import 'shared/dialogs.dart';
 import 'shared/globals.dart';
-import 'shared/notifications.dart';
 import 'shared/routing.dart';
 import 'shared/screen.dart';
 import 'shared/snapshot_screen.dart';
@@ -138,7 +138,6 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     // preferences is initialized in main() to avoid flash of content with
     // incorrect theme.
     preferences.dispose();
-
     super.dispose();
   }
 
@@ -325,7 +324,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       builder: (context, child) {
         return Provider<AnalyticsController>.value(
           value: widget.analyticsController,
-          child: Notifications(
+          child: NotificationsView(
             child: ReleaseNotesViewer(
               releaseNotesController: releaseNotesController,
               child: child,
