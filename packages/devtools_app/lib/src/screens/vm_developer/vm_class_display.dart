@@ -42,8 +42,8 @@ class VmClassDisplay extends StatelessWidget {
     );
   }
 
-// TODO(mtaylee): Delete 'Currently allocated instances' row when
-// ClassInstancesWidget implementation is completed.
+  // TODO(mtaylee): Delete 'Currently allocated instances' row when
+  // ClassInstancesWidget implementation is completed.
   /// Generates a list of key-value pairs (map entries) containing the general
   /// information of the class object [clazz].
   List<MapEntry<String, WidgetBuilder>> _classDataRows(

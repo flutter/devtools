@@ -19,10 +19,12 @@ class VmFieldDisplay extends StatelessWidget {
   final FieldObject field;
 
   @override
-  Widget build(BuildContext context) => VmObjectDisplayBasicLayout(
-        object: field,
-        generalDataRows: _fieldDataRows(field),
-      );
+  Widget build(BuildContext context) {
+    return VmObjectDisplayBasicLayout(
+      object: field,
+      generalDataRows: _fieldDataRows(field),
+    );
+  }
 
   /// Generates a list of key-value pairs (map entries) containing the general
   /// information of the field object [field].

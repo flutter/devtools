@@ -13,7 +13,7 @@ import 'vm_service_private_extensions.dart';
 // the [VmFuncDisplay].
 
 /// A widget for the object inspector historyViewport displaying information
-/// related to 'Func' (function) objects in the Dart VM.
+/// related to function (Func type) objects in the Dart VM.
 class VmFuncDisplay extends StatelessWidget {
   const VmFuncDisplay({
     required this.function,
@@ -22,12 +22,14 @@ class VmFuncDisplay extends StatelessWidget {
   final FuncObject function;
 
   @override
-  Widget build(BuildContext context) => VmObjectDisplayBasicLayout(
-        object: function,
-        generalDataRows: vmObjectGeneralDataRows(function),
-        sideCardDataRows: _functionDetailRows(function),
-        sideCardTitle: 'Function Details',
-      );
+  Widget build(BuildContext context) {
+    return VmObjectDisplayBasicLayout(
+      object: function,
+      generalDataRows: vmObjectGeneralDataRows(function),
+      sideCardDataRows: _functionDetailRows(function),
+      sideCardTitle: 'Function Details',
+    );
+  }
 
   /// Returns a list of key-value pairs (map entries)
   /// containing detailed information of a VM Func object [function].
@@ -35,9 +37,10 @@ class VmFuncDisplay extends StatelessWidget {
     FuncObject function,
   ) {
     String? boolYesOrNo(bool? condition) {
-      if (condition == true) return 'Yes';
-      if (condition == false) return 'No';
-      return null;
+      if (condition == null) {
+        return null;
+      }
+      return condition == true ? 'Yes' : 'No';
     }
 
     return [
@@ -78,30 +81,26 @@ class VmFuncDisplay extends StatelessWidget {
       return 'Unrecognized function kind: ${function.obj.kind}';
     }
 
-    final camelCase = RegExp(r'(?<=[a-z])[A-Z]');
-
     final kind = StringBuffer();
+
+    final void Function() addSpace = () {
+      kind.write(kind.isNotEmpty ? ' ' : '');
+    };
 
     if (function.obj.isStatic == true) {
       kind.write('static');
     }
 
-    kind.write(kind.isNotEmpty ? ' ' : '');
+    addSpace();
 
     if (function.obj.isConst == true) {
       kind.write('const');
     }
 
-    kind.write(kind.isNotEmpty ? ' ' : '');
+    addSpace();
 
     kind.write(
-      funcKind
-          .kind()
-          .replaceAllMapped(
-            camelCase,
-            (Match m) => ' ${m.group(0)!}',
-          )
-          .toLowerCase(),
+      funcKind.kindDescription().toLowerCase(),
     );
 
     return kind.toString();

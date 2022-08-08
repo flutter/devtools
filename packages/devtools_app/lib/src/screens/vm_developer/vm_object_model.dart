@@ -135,7 +135,7 @@ class ClassObject extends VmObject {
   }
 }
 
-/// Stores a 'Func' (function) VM object and provides an interface for
+/// Stores a function (Func type) VM object and provides an interface for
 /// obtaining the Dart VM information related to this object.
 class FuncObject extends VmObject {
   FuncObject({required super.ref, super.scriptRef, super.outlineNode});
@@ -151,19 +151,19 @@ class FuncObject extends VmObject {
 
   late final FunctionKind? kind;
 
-  late final int? deoptimizations;
+  int? get deoptimizations => obj.deoptimizations;
 
-  late final bool? isOptimizable;
+  bool? get isOptimizable => obj.optimizable;
 
-  late final bool? isInlinable;
+  bool? get isInlinable => obj.inlinable;
 
-  late final bool? hasIntrinsic;
+  bool? get hasIntrinsic => obj.intrinsic;
 
-  late final bool? isRecognized;
+  bool? get isRecognized => obj.recognized;
 
-  late final bool? isNative;
+  bool? get isNative => obj.native;
 
-  late final String? vmName;
+  String? get vmName => obj.vmName;
 
   late final Instance? icDataArray;
 
@@ -176,20 +176,6 @@ class FuncObject extends VmObject {
         ? null
         : FunctionKind.values
             .firstWhereOrNull((element) => element.kind() == funcKind);
-
-    deoptimizations = obj.deoptimizations;
-
-    isOptimizable = obj.intrinsic;
-
-    isInlinable = obj.inlinable;
-
-    hasIntrinsic = obj.intrinsic;
-
-    isRecognized = obj.recognized;
-
-    isNative = obj.native;
-
-    vmName = obj.vmName;
 
     icDataArray = await obj.icDataArray;
   }
@@ -209,7 +195,7 @@ class FieldObject extends VmObject {
   @override
   SourceLocation? get _sourceLocation => obj.location;
 
-  late final bool? guardNullable;
+  bool? get guardNullable => obj.guardNullable;
 
   late final Class? guardClass;
 
@@ -219,7 +205,6 @@ class FieldObject extends VmObject {
   Future<void> initialize() async {
     await super.initialize();
 
-    guardNullable = obj.guardNullable;
     guardClassKind = obj.guardClassKind();
 
     if (guardClassKind == GuardClassKind.single) {

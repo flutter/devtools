@@ -218,6 +218,10 @@ class RequestableSizeWidget extends StatelessWidget {
 
 /// Wrapper to get the name of an ObjRef depending on its type.
 String? _objectName(ObjRef? objectRef) {
+  if (objectRef == null) {
+    return null;
+  }
+
   String? objectRefName;
 
   if (objectRef is ClassRef || objectRef is FuncRef || objectRef is FieldRef) {
@@ -231,7 +235,11 @@ String? _objectName(ObjRef? objectRef) {
     objectRefName = objectRef.name ??
         'Instance of ${objectRef.classRef?.name ?? '<Class>'}';
   } else {
-    objectRefName = objectRef?.vmType ?? objectRef?.type;
+    objectRefName = objectRef.vmType ?? objectRef.type;
+
+    if (objectRefName.startsWith('@')) {
+      objectRefName = objectRefName.substring(1, objectRefName.length);
+    }
   }
 
   return objectRefName;
@@ -443,24 +451,20 @@ class RetainingPathWidget extends StatelessWidget {
   String _retainingObjectDescription(RetainingObject object) {
     if (object.parentListIndex != null) {
       final ref = object.value;
-      if (ref is InstanceRef) {
-        return 'Retained by element [${object.parentListIndex}] of'
-            ' ${ref.classRef?.name ?? '<parentListName>'}';
-      } else {
-        return 'Retained by element [${object.parentListIndex}] of '
-            '${_objectName(ref) ?? '<unknown>'}';
-      }
+      final parentListIndex = object.parentListIndex;
+
+      final parentListName = _containerClass(ref) ?? '<parentListName>';
+
+      return 'Retained by element [$parentListIndex] of $parentListName';
     }
 
     if (object.parentMapKey != null) {
       final ref = object.value;
-      if (ref is InstanceRef) {
-        return 'Retained by element at [${_objectName(object.parentMapKey)}] of'
-            ' ${ref.classRef?.name ?? '<parentMapName>'}';
-      } else {
-        return 'Retained by element at [${_objectName(object.parentMapKey)}] of '
-            '${_objectName(ref) ?? '<unknown>'}';
-      }
+      final parentMapKey = _objectName(object.parentMapKey);
+
+      final parentMapName = _containerClass(ref) ?? '<parentMapName>';
+
+      return 'Retained by element at [$parentMapKey] of $parentMapName';
     }
 
     final description = StringBuffer('Retained by ');
@@ -475,6 +479,14 @@ class RetainingPathWidget extends StatelessWidget {
 
     return description.toString();
   }
+}
+
+String? _containerClass(ObjRef? object) {
+  if (object == null) {
+    return null;
+  }
+
+  return object is InstanceRef ? object.classRef?.name : _objectName(object);
 }
 
 /// An expandable list to display the inbound references for a given
@@ -552,13 +564,11 @@ class InboundReferencesWidget extends StatelessWidget {
   String _inboundRefDescription(InboundReference inboundRef, int? offset) {
     if (inboundRef.parentListIndex != null) {
       final ref = inboundRef.source;
-      if (ref is InstanceRef) {
-        return 'Referenced by element [${inboundRef.parentListIndex}] of '
-            '${ref.classRef?.name ?? '<parentListName>'}';
-      } else {
-        return 'Referenced by element [${inboundRef.parentListIndex}] of '
-            '${_objectName(ref) ?? '<unknown>'}';
-      }
+      final parentListIndex = inboundRef.parentListIndex;
+
+      final parentListName = _containerClass(ref) ?? '<parentListName>';
+
+      return 'Referenced by element [$parentListIndex] of $parentListName';
     }
 
     final description = StringBuffer('Referenced by ');
