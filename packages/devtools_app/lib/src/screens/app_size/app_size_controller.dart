@@ -175,63 +175,42 @@ class AppSizeController {
   }
 
   TreemapNode? get _activeDiffRoot {
-    final isDeferred = _isDeferredApp.value;
     final diffTreeType = _activeDiffTreeType.value;
+    final appUnit = _selectedAppUnit.value;
 
-    if (!isDeferred) {
-      switch (diffTreeType) {
-        case DiffTreeType.increaseOnly:
-          return _increasedDiffTreeRoot;
-        case DiffTreeType.decreaseOnly:
-          return _decreasedDiffTreeRoot;
-        case DiffTreeType.combined:
-        default:
-          return _combinedDiffTreeRoot;
-      }
-    } else {
-      final appUnit = _selectedAppUnit.value;
-      switch (diffTreeType) {
-        case DiffTreeType.increaseOnly:
-          if (appUnit == AppUnit.mainOnly) {
-            return _mainIncreasedDiffTreeRoot;
-          } else if (appUnit == AppUnit.deferredOnly) {
-            return _deferredIncreasedDiffTreeRoot;
-          } else {
-            return _increasedDiffTreeRoot;
-          }
-        case DiffTreeType.decreaseOnly:
-          if (appUnit == AppUnit.mainOnly) {
-            return _mainDecreasedDiffTreeRoot;
-          } else if (appUnit == AppUnit.deferredOnly) {
-            return _deferredDecreasedDiffTreeRoot;
-          } else {
-            return _decreasedDiffTreeRoot;
-          }
-        case DiffTreeType.combined:
-          if (appUnit == AppUnit.mainOnly) {
-            return _mainCombinedDiffTreeRoot;
-          } else if (appUnit == AppUnit.deferredOnly) {
-            return _deferredCombinedDiffTreeRoot;
-          } else {
-            return _combinedDiffTreeRoot;
-          }
-        default:
-          return _combinedDiffTreeRoot;
-      }
+    switch (diffTreeType) {
+      case DiffTreeType.increaseOnly:
+        if (appUnit == AppUnit.mainOnly) {
+          return _mainDiffTreeMap!.increaseOnly;
+        } else if (appUnit == AppUnit.deferredOnly) {
+          return _deferredDiffTreeMap!.decreaseOnly;
+        } else {
+          return _diffTreeMap!.increaseOnly;
+        }
+      case DiffTreeType.decreaseOnly:
+        if (appUnit == AppUnit.mainOnly) {
+          return _mainDiffTreeMap!.increaseOnly;
+        } else if (appUnit == AppUnit.deferredOnly) {
+          return _deferredDiffTreeMap!.decreaseOnly;
+        } else {
+          return _diffTreeMap!.decreaseOnly;
+        }
+      case DiffTreeType.combined:
+        if (appUnit == AppUnit.mainOnly) {
+          return _mainDiffTreeMap!.combined;
+        } else if (appUnit == AppUnit.deferredOnly) {
+          return _deferredDiffTreeMap!.combined;
+        } else {
+          return _diffTreeMap!.combined;
+        }
+      default:
+        return _diffTreeMap!.combined;
     }
   }
 
-  TreemapNode? _increasedDiffTreeRoot;
-  TreemapNode? _decreasedDiffTreeRoot;
-  TreemapNode? _combinedDiffTreeRoot;
-
-  TreemapNode? _mainIncreasedDiffTreeRoot;
-  TreemapNode? _mainDecreasedDiffTreeRoot;
-  TreemapNode? _mainCombinedDiffTreeRoot;
-
-  TreemapNode? _deferredIncreasedDiffTreeRoot;
-  TreemapNode? _deferredDecreasedDiffTreeRoot;
-  TreemapNode? _deferredCombinedDiffTreeRoot;
+  DiffTreeMap? _diffTreeMap;
+  DiffTreeMap? _mainDiffTreeMap;
+  DiffTreeMap? _deferredDiffTreeMap;
 
   Map<String, dynamic>? get _dataForAppUnit {
     switch (_selectedAppUnit.value) {
@@ -277,9 +256,9 @@ class AppSizeController {
     _diffRoot.value = null;
     _oldDiffJsonFile.value = null;
     _newDiffJsonFile.value = null;
-    _increasedDiffTreeRoot = null;
-    _decreasedDiffTreeRoot = null;
-    _combinedDiffTreeRoot = null;
+    _diffTreeMap = null;
+    _mainDiffTreeMap = null;
+    _deferredDiffTreeMap = null;
     _diffCallGraphRoot.value = null;
     _oldDiffCallGraph = null;
     _newDiffCallGraph = null;
@@ -520,23 +499,14 @@ class AppSizeController {
 
     // TODO(peterdjlee): Try to move the non-active tree generation to separate isolates.
     // Entire app or root (for non-deferred):
-    final diffTreeMap = _generateDiffTrees(diffMap);
-    _combinedDiffTreeRoot = diffTreeMap.combined;
-    _increasedDiffTreeRoot = diffTreeMap.increaseOnly;
-    _decreasedDiffTreeRoot = diffTreeMap.decreaseOnly;
+    _diffTreeMap = _generateDiffTrees(diffMap);
 
     if (isDeferredApp.value) {
       // For main only:
-      final mainDiffTreeMap = _generateDiffTrees(mainDiffMap!);
-      _mainCombinedDiffTreeRoot = mainDiffTreeMap.combined;
-      _mainIncreasedDiffTreeRoot = mainDiffTreeMap.increaseOnly;
-      _mainDecreasedDiffTreeRoot = mainDiffTreeMap.decreaseOnly;
+      _mainDiffTreeMap = _generateDiffTrees(mainDiffMap!);
 
       // For deferred only:
-      final deferredDiffTreeMap = _generateDiffTrees(deferredDiffMap!);
-      _deferredCombinedDiffTreeRoot = deferredDiffTreeMap.combined;
-      _deferredIncreasedDiffTreeRoot = deferredDiffTreeMap.increaseOnly;
-      _deferredDecreasedDiffTreeRoot = deferredDiffTreeMap.decreaseOnly;
+      _deferredDiffTreeMap = _generateDiffTrees(deferredDiffMap!);
     }
 
     changeDiffRoot(_activeDiffRoot);
