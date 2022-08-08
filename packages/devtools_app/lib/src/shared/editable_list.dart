@@ -42,12 +42,12 @@ class EditableList extends StatefulWidget {
 
   /// Triggered when an entry is added, using the interface.
   ///
-  /// When not overriden, the default behaviour adds the entry to [entries]
+  /// When not overridden, the default behaviour adds the entry to [entries]
   late final Function(String) onEntryAdded;
 
   /// Triggered when an entry is removed, using the interface.
   ///
-  /// When not overriden, the default behaviour removes the entry
+  /// When not overridden, the default behaviour removes the entry
   /// from [entries].
   late final Function(String) onEntryRemoved;
 
