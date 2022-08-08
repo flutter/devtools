@@ -196,12 +196,13 @@ String _buildGoldenText(String content, List<ScopeSpan> spans) {
   final buffer = StringBuffer();
   final spansByLine = groupBy(spans, (ScopeSpan s) => s.line! - 1);
 
-  final lines = content.split('\n');
+  final lines = content.trim().split('\n');
   for (var i = 0; i < lines.length; i++) {
     final line = lines[i];
     // We need the line length to wrap. If this isn't the last line, account for
     // the \n we split by.
-    final lineLength = line.length + (i == lines.length - 1 ? 0 : 1);
+    final newlineLength = (i == lines.length - 1) ? 0 : 1;
+    final lineLengthWithNewline = line.length + newlineLength;
 
     buffer.writeln('>$line');
     final lineSpans = spansByLine[i];
@@ -212,19 +213,29 @@ String _buildGoldenText(String content, List<ScopeSpan> spans) {
 
         // Spans may roll over onto the next line, so truncate them and insert
         // the remainder into the next.
-        if (col + length > lineLength) {
-          final thisLineLength = lineLength - col;
+        if (col + length > lineLengthWithNewline) {
+          final thisLineLength = line.length - col;
+          final offsetToStartOfNextLine = lineLengthWithNewline - col;
           length = thisLineLength;
           spansByLine[i + 1] ??= [];
           spansByLine[i + 1]!.add(
             ScopeSpan.copy(
               scopes: span.scopes,
-              start: span.start + thisLineLength,
+              start: span.start + offsetToStartOfNextLine,
               end: span.end,
               line: span.line! + 1,
-              column: 0,
+              column: 1,
             ),
           );
+        } else if (col + length > line.length) {
+          // Truncate any spans that include the trailing newline.
+          length = line.length - col;
+        }
+
+        // If this span just covers the trailing newline, skip it
+        // as it doesn't produce any useful output.
+        if (col == line.length) {
+          continue;
         }
 
         buffer.write('#');
