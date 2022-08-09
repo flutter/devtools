@@ -12,14 +12,12 @@ abstract class SpanParser {
   /// Takes a TextMate [Grammar] and a [String] and outputs a list of
   /// [ScopeSpan]s corresponding to the parsed input.
   static List<ScopeSpan> parse(Grammar grammar, String src) {
+    final scopeStack = ScopeStack();
     final scanner = LineScanner(src);
-    final spans = <ScopeSpan>[];
     while (!scanner.isDone) {
       bool foundMatch = false;
       for (final pattern in grammar.topLevelMatchers!) {
-        final result = pattern.scan(grammar, scanner);
-        if (result != null) {
-          spans.addAll(result);
+        if (pattern.scan(grammar, scanner, scopeStack)) {
           foundMatch = true;
           break;
         }
@@ -29,7 +27,8 @@ abstract class SpanParser {
         scanner.readChar();
       }
     }
-    return spans;
+    scopeStack.popAll(scanner.location);
+    return scopeStack.spans;
   }
 }
 
@@ -85,61 +84,30 @@ class Grammar {
 /// A representation of a span of text which has `scope` applied to it.
 class ScopeSpan {
   ScopeSpan({
-    String? scope,
-    required int start,
-    required int end,
-    this.line,
-    this.column,
-  })  : scopes = [
-          ..._scopeStack.toList(),
-          if (scope != null) scope,
-        ],
-        _start = start,
-        _end = end;
+    required this.scopes,
+    required ScopeStackLocation startLocation,
+    required ScopeStackLocation endLocation,
+  })  : _startLocation = startLocation,
+        _endLocation = endLocation;
 
-  ScopeSpan.copy({
-    this.scopes,
-    required int start,
-    required int end,
-    this.line,
-    this.column,
-  })  : _start = start,
-        _end = end;
+  ScopeStackLocation get startLocation => _startLocation;
+  ScopeStackLocation get endLocation => _endLocation;
+  int get start => _startLocation.position;
+  int get end => _endLocation.position;
+  int get length => end - start;
 
-  /// Adds [matcher.name] to the scope stack, if non-null. This scope will be
-  /// included in each [ScopeSpan] created within [callback].
-  static List<ScopeSpan> applyScope(
-    _Matcher matcher,
-    List<ScopeSpan> Function() callback,
-  ) {
-    if (matcher.name != null) {
-      _scopeStack.addLast(matcher.name);
-    }
-    final result = callback();
+  final ScopeStackLocation _startLocation;
+  ScopeStackLocation _endLocation;
 
-    if (matcher.name != null) {
-      _scopeStack.removeLast();
-    }
-    return result;
-  }
+  /// The one-based line number.
+  int get line => startLocation.line + 1;
 
-  static final ListQueue<String?> _scopeStack = ListQueue<String?>();
-
-  int get start => _start;
-  int get end => _end;
-  int get length => _end - _start;
-
-  final int _start;
-
-  int _end;
-
-  final int? line;
-
-  final int? column;
+  /// The one-based column number.
+  int get column => startLocation.column + 1;
 
   final List<String?>? scopes;
 
-  bool contains(int token) => (_start <= token) && (token < _end);
+  bool contains(int token) => (start <= token) && (token < end);
 
   /// Splits the current [ScopeSpan] into multiple spans separated by [cond].
   /// This is useful for post-processing the results from a rule with a while
@@ -148,39 +116,35 @@ class ScopeSpan {
   List<ScopeSpan> split(LineScanner scanner, RegExp cond) {
     final splitSpans = <ScopeSpan>[];
 
-    // Create a temporary scanner, copying [0, _end] to ensure that line/column
+    // Create a temporary scanner, copying [0, end] to ensure that line/column
     // information is consistent with the original scanner.
     final splitScanner = LineScanner(
-      scanner.substring(0, _end),
-      position: _start,
+      scanner.substring(0, end),
+      position: start,
     );
 
     // Start with a copy of the original span
-    ScopeSpan current = ScopeSpan.copy(
+    ScopeSpan current = ScopeSpan(
       scopes: scopes!.toList(),
-      start: _start,
-      end: _end,
-      line: line,
-      column: column,
+      startLocation: startLocation,
+      endLocation: endLocation,
     );
 
     while (!splitScanner.isDone) {
       if (splitScanner.matches(cond)) {
         // Update the end position for this span as it's been fully processed.
-        current._end = splitScanner.position;
+        current._endLocation = splitScanner.location;
         splitSpans.add(current);
 
         // Move the scanner position past the matched condition.
         splitScanner.scan(cond);
 
         // Create a new span based on the current position.
-        current = ScopeSpan.copy(
+        current = ScopeSpan(
           scopes: scopes!.toList(),
-          start: splitScanner.position,
-          end: -1, // Updated later.
-          // Lines and columns are 0-based.
-          line: splitScanner.line + 1,
-          column: splitScanner.column + 1,
+          startLocation: splitScanner.location,
+          // Will be updated later.
+          endLocation: ScopeStackLocation.zero,
         );
       } else {
         // Move scanner position forward.
@@ -189,7 +153,7 @@ class ScopeSpan {
     }
     // Finish processing the last span, which will always have the same end
     // position as the span we're splitting.
-    current._end = _end;
+    current._endLocation = endLocation;
     splitSpans.add(current);
 
     return splitSpans;
@@ -197,7 +161,7 @@ class ScopeSpan {
 
   @override
   String toString() {
-    return '[$_start, $_end, $line:$column (len: $length)] = $scopes';
+    return '[$start, $end, $line:$column (len: $length)] = $scopes';
   }
 }
 
@@ -245,29 +209,26 @@ abstract class _Matcher {
 
   final String? name;
 
-  List<ScopeSpan>? scan(Grammar grammar, LineScanner scanner);
+  bool scan(Grammar grammar, LineScanner scanner, ScopeStack scopeStack);
 
   List<ScopeSpan> _applyCapture(
     LineScanner scanner,
+    ScopeStack scopeStack,
     Map<String, dynamic>? captures,
-    int line,
-    int column,
+    ScopeStackLocation location,
   ) {
     final spans = <ScopeSpan>[];
     final lastMatch = scanner.lastMatch!;
     final start = lastMatch.start;
     final end = lastMatch.end;
+    final matchStartLocation = location;
+    final matchEndLocation = scanner.location;
     if (captures != null) {
       if (lastMatch.groupCount <= 1) {
-        spans.add(
-          ScopeSpan(
-            scope: captures['0']['name'],
-            start: start,
-            end: end,
-            // Lines and columns are 0 indexed.
-            line: line + 1,
-            column: column + 1,
-          ),
+        scopeStack.add(
+          captures['0']['name'],
+          start: matchStartLocation,
+          end: matchEndLocation,
         );
       } else {
         final match = scanner.substring(start, end);
@@ -278,31 +239,14 @@ abstract class _Matcher {
               continue;
             }
             final startOffset = match.indexOf(capture);
-            spans.add(
-              ScopeSpan(
-                scope: captures[i.toString()]['name'],
-                start: start + startOffset,
-                end: start + startOffset + capture.length,
-                // Lines and columns are 0 indexed.
-                line: line + 1,
-                column: column + startOffset + 1,
-              ),
+            scopeStack.add(
+              captures[i.toString()]['name'],
+              start: matchStartLocation.offset(startOffset),
+              end: matchStartLocation.offset(startOffset + capture.length),
             );
           }
         }
       }
-    } else {
-      // Don't include the scope name here if we're not applying captures. This
-      // is already included in the scope stack.
-      spans.add(
-        ScopeSpan(
-          start: start,
-          end: end,
-          // Lines and columns are 0 indexed.
-          line: line + 1,
-          column: column + 1,
-        ),
-      );
     }
     return spans;
   }
@@ -326,17 +270,15 @@ class _SimpleMatcher extends _Matcher {
   final Map<String, dynamic>? captures;
 
   @override
-  List<ScopeSpan>? scan(Grammar grammar, LineScanner scanner) {
-    final line = scanner.line;
-    final column = scanner.column;
+  bool scan(Grammar grammar, LineScanner scanner, ScopeStack scopeStack) {
+    final location = scanner.location;
     if (scanner.scan(match)) {
-      final result = ScopeSpan.applyScope(
-        this,
-        () => _applyCapture(scanner, captures, line, column),
-      );
-      return result;
+      scopeStack.push(name, location);
+      _applyCapture(scanner, scopeStack, captures, location);
+      scopeStack.pop(name, scanner.location);
+      return true;
     }
-    return null;
+    return false;
   }
 
   @override
@@ -415,29 +357,29 @@ class _MultilineMatcher extends _Matcher {
 
   final List<_Matcher>? patterns;
 
-  List<ScopeSpan> _scanBegin(LineScanner scanner) {
-    final line = scanner.line;
-    final column = scanner.column;
+  void _scanBegin(LineScanner scanner, ScopeStack scopeStack) {
+    final location = scanner.location;
     if (!scanner.scan(begin)) {
       // This shouldn't happen since we've already checked that `begin` matches
       // the beginning of the string.
       throw StateError('Expected ${begin.pattern} to match.');
     }
-    return _processCaptureHelper(scanner, beginCaptures, line, column);
+    _processCaptureHelper(scanner, scopeStack, beginCaptures, location);
   }
 
-  List<ScopeSpan> _scanToEndOfLine(Grammar grammar, LineScanner scanner) {
-    final results = <ScopeSpan>[];
+  void _scanToEndOfLine(
+    Grammar grammar,
+    LineScanner scanner,
+    ScopeStack scopeStack,
+  ) {
     while (!scanner.isDone) {
       if (String.fromCharCode(scanner.peekChar()!) == '\n') {
         scanner.readChar();
         break;
       }
       bool foundMatch = false;
-      for (final pattern in patterns ?? []) {
-        final result = pattern.scan(grammar, scanner);
-        if (result != null) {
-          results.addAll(result);
+      for (final pattern in patterns ?? <_Matcher>[]) {
+        if (pattern.scan(grammar, scanner, scopeStack)) {
           foundMatch = true;
           break;
         }
@@ -446,17 +388,17 @@ class _MultilineMatcher extends _Matcher {
         scanner.readChar();
       }
     }
-    return results;
   }
 
-  List<ScopeSpan> _scanUpToEndMatch(Grammar grammar, LineScanner scanner) {
-    final results = <ScopeSpan>[];
+  void _scanUpToEndMatch(
+    Grammar grammar,
+    LineScanner scanner,
+    ScopeStack scopeStack,
+  ) {
     while (!scanner.isDone && end != null && !scanner.matches(end!)) {
       bool foundMatch = false;
-      for (final pattern in patterns ?? []) {
-        final result = pattern.scan(grammar, scanner);
-        if (result != null) {
-          results.addAll(result);
+      for (final pattern in patterns ?? <_Matcher>[]) {
+        if (pattern.scan(grammar, scanner, scopeStack)) {
           foundMatch = true;
           break;
         }
@@ -466,131 +408,82 @@ class _MultilineMatcher extends _Matcher {
         scanner.readChar();
       }
     }
-    return results;
   }
 
-  List<ScopeSpan>? _scanEnd(LineScanner scanner) {
-    final line = scanner.line;
-    final column = scanner.column;
+  void _scanEnd(LineScanner scanner, ScopeStack scopeStack) {
+    final location = scanner.location;
     if (end != null && !scanner.scan(end!)) {
       return null;
     }
-    return _processCaptureHelper(scanner, endCaptures, line, column);
+    _processCaptureHelper(scanner, scopeStack, endCaptures, location);
   }
 
-  List<ScopeSpan> _processCaptureHelper(
+  void _processCaptureHelper(
     LineScanner scanner,
+    ScopeStack scopeStack,
     Map<String, dynamic>? customCaptures,
-    int line,
-    int column,
+    ScopeStackLocation location,
   ) {
     if (contentName == null || (customCaptures ?? captures) != null) {
-      return _applyCapture(scanner, customCaptures ?? captures, line, column);
-    } else {
-      // If there's no explicit captures and contentName is provided, don't
-      // create a span for the match.
-      return [];
+      _applyCapture(scanner, scopeStack, customCaptures ?? captures, location);
     }
   }
 
   @override
-  List<ScopeSpan>? scan(Grammar grammar, LineScanner scanner) {
+  bool scan(Grammar grammar, LineScanner scanner, ScopeStack scopeStack) {
     if (!scanner.matches(begin)) {
-      return null;
+      return false;
     }
-    return ScopeSpan.applyScope(this, () {
-      final beginSpans = _scanBegin(scanner);
-      final results = <ScopeSpan>[
-        if (contentName == null) ...beginSpans,
-      ];
-      if (end != null) {
-        // If contentName is provided, the scope is applied to the contents
-        // between the begin/end matches, not the matches themselves.
-        if (contentName != null) {
-          // Lines and columns are 0 indexed.
-          final line = scanner.line + 1;
-          final column = scanner.column + 1;
-          final start = scanner.position;
-          // TODO(bkonyi): this method tries to parse the contents to find
-          // additional spans even though we'll just ignore them. Consider
-          // disabling this for cases where we only care about moving the
-          // scanner forward.
-          _scanUpToEndMatch(grammar, scanner);
-          results.add(
-            ScopeSpan(
-              scope: contentName,
-              column: column,
-              line: line,
-              start: start,
-              end: scanner.position,
-            ),
-          );
-        } else {
-          results.addAll(_scanUpToEndMatch(grammar, scanner));
-        }
-        final endSpans = _scanEnd(scanner);
 
-        // If beginSpans is not empty and there's no captures specified, there
-        // will only be a single span with a scope that covers [beginMatch.start,
-        // endMatch.end).
-        if (beginSpans.isNotEmpty &&
-            (captures ?? endCaptures ?? beginCaptures) == null) {
-          assert(beginSpans.length == 1);
-          beginSpans.first._end = scanner.position;
-        } else if (endSpans != null) {
-          // endSpans can be null if we reach EOF and haven't completed a match.
-          results.addAll(endSpans);
-        }
-        return results;
-      } else if (whileCond != null) {
-        // Find the range of the string that is matched by the while condition.
-        final start = scanner.position;
+    scopeStack.push(name, scanner.location);
+    _scanBegin(scanner, scopeStack);
+    if (end != null) {
+      scopeStack.push(contentName, scanner.location);
+      _scanUpToEndMatch(grammar, scanner, scopeStack);
+      scopeStack.pop(contentName, scanner.location);
+      _scanEnd(scanner, scopeStack);
+    } else if (whileCond != null) {
+      // Find the range of the string that is matched by the while condition.
+      final start = scanner.position;
+      _skipLine(scanner);
+      while (!scanner.isDone && whileCond != null && scanner.scan(whileCond!)) {
         _skipLine(scanner);
-        while (
-            !scanner.isDone && whileCond != null && scanner.scan(whileCond!)) {
-          _skipLine(scanner);
-        }
-        final end = scanner.position;
-
-        // Create a temporary scanner to ensure that rules that don't find an
-        // end match don't try and match all the way to the end of the file.
-        final contentScanner = LineScanner(
-          scanner.substring(0, end),
-          position: start,
-        );
-
-        final contentResults = <ScopeSpan>[];
-        // Finish scanning the line matched by `begin`.
-        contentResults.addAll(_scanToEndOfLine(grammar, contentScanner));
-
-        // Process each line until the `while` condition fails.
-        while (!contentScanner.isDone &&
-            whileCond != null &&
-            contentScanner.scan(whileCond!)) {
-          contentResults.addAll(_scanToEndOfLine(grammar, contentScanner));
-        }
-
-        // Split the results on the while condition to ensure that formatting
-        // isn't applied to characters matching the loop condition (e.g.,
-        // comment blocks with inline code samples shouldn't apply inline code
-        // formatting to the leading '///').
-        results.addAll(
-          contentResults.expand(
-            (e) => e.split(scanner, whileCond!),
-          ),
-        );
-
-        if (beginSpans.isNotEmpty) {
-          assert(beginSpans.length == 1);
-          beginSpans.first._end = end;
-        }
-        return results;
-      } else {
-        throw StateError(
-          "One of 'end' or 'while' must be provided for rule: $name",
-        );
       }
-    });
+      final end = scanner.position;
+
+      // Create a temporary scanner to ensure that rules that don't find an
+      // end match don't try and match all the way to the end of the file.
+      final contentScanner = LineScanner(
+        scanner.substring(0, end),
+        position: start,
+      );
+
+      // Capture a marker for where the contents start, used later to split
+      // spans.
+      final whileContentBeginMarker = scopeStack.marker();
+
+      _scanToEndOfLine(grammar, contentScanner, scopeStack);
+
+      // Process each line until the `while` condition fails.
+      while (!contentScanner.isDone &&
+          whileCond != null &&
+          contentScanner.scan(whileCond!)) {
+        _scanToEndOfLine(grammar, contentScanner, scopeStack);
+      }
+
+      // Now, split any spans produced whileContentBeginMarker by `whileCond`.
+      scopeStack.splitFromMarker(
+        scanner,
+        whileContentBeginMarker,
+        whileCond!,
+      );
+    } else {
+      throw StateError(
+        "One of 'end' or 'while' must be provided for rule: $name",
+      );
+    }
+    scopeStack.pop(name, scanner.location);
+    return true;
   }
 
   void _skipLine(LineScanner scanner) {
@@ -627,20 +520,18 @@ class _IncludeMatcher extends _Matcher {
   }
 
   @override
-  List<ScopeSpan>? scan(Grammar grammar, LineScanner scanner) {
+  bool scan(Grammar grammar, LineScanner scanner, ScopeStack scopeStack) {
     final patterns = grammar.repository?.patterns[include];
     if (patterns == null) {
       throw StateError('Could not find $include in the repository.');
     }
-    // Try each rule in the include and return the result from the first
-    // successful match.
+    // Try each rule in the include until one matches.
     for (final pattern in patterns) {
-      final result = pattern.scan(grammar, scanner);
-      if (result != null) {
-        return result;
+      if (pattern.scan(grammar, scanner, scopeStack)) {
+        return true;
       }
     }
-    return null;
+    return false;
   }
 
   @override
@@ -649,4 +540,189 @@ class _IncludeMatcher extends _Matcher {
       'include': include,
     };
   }
+}
+
+/// Tracks the current scope stack, producing [ScopeSpan]s as the contents
+/// change.
+class ScopeStack {
+  ScopeStack();
+
+  final Queue<ScopeStackItem> stack = Queue();
+  final List<ScopeSpan> spans = [];
+
+  /// Location where the next produced span should begin.
+  ScopeStackLocation _nextLocation = ScopeStackLocation.zero;
+
+  /// Adds a scope for a given region.
+  ///
+  /// This method is the same as calling [push] and then [pop] with the same
+  /// args.
+  void add(
+    String? scope, {
+    required ScopeStackLocation start,
+    required ScopeStackLocation end,
+  }) {
+    push(scope, start);
+    pop(scope, end);
+  }
+
+  /// Pushes a new scope onto the stack starting at [start].
+  void push(String? scope, ScopeStackLocation location) {
+    if (scope == null) return;
+
+    // If the stack is empty, seed the position which is used for the start
+    // of the next produced token.
+    if (stack.isEmpty) {
+      _nextLocation = location;
+    }
+
+    // Whenever we push a new item, produce a span for the region between the
+    // last started scope and the new current position...
+    if (location.position > _nextLocation.position) {
+      final scopes = stack.map((item) => item.scope).toSet();
+      // ... unless this scope is not new, in which case we can just keep the
+      // previous span open.
+      if (!scopes.contains(scope)) {
+        _produceSpan(scopes, end: location);
+      }
+    }
+
+    // Add this new scope to the stack, but don't produce its token yet. We will
+    // do that when the next item is pushed (in which case we'll fill the gap),
+    // or when this item is popped (in which case we'll produce a span for that
+    // full region).
+    stack.add(ScopeStackItem(scope, location));
+  }
+
+  /// Pops the last scope off the stack, producing a token if necessary up until
+  /// [end].
+  void pop(String? scope, ScopeStackLocation end) {
+    if (scope == null) return null;
+    assert(stack.isNotEmpty);
+
+    final scopes = stack.map((item) => item.scope).toSet();
+    final last = stack.removeLast();
+    assert(last.scope == scope);
+    assert(last.location.position <= end.position);
+
+    _produceSpan(scopes, end: end);
+  }
+
+  void popAll(ScopeStackLocation location) {
+    while (stack.isNotEmpty) {
+      pop(stack.last.scope, location);
+    }
+  }
+
+  /// Captures a marker to identify spans produced before/after this call.
+  ScopeStackMarker marker() {
+    return ScopeStackMarker(spanIndex: spans.length, location: _nextLocation);
+  }
+
+  /// Splits all spans created since [begin] by [condition].
+  ///
+  /// This is used to handle multiline spans that use begin/end such as
+  /// capturing triple-backtick code blocks that would have captured the leading
+  /// '/// ', which should not be included.
+  void splitFromMarker(
+    LineScanner scanner,
+    ScopeStackMarker begin,
+    RegExp condition,
+  ) {
+    // Remove the spans to be split. We will push new spans after splitting.
+    final spansToSplit = spans.sublist(begin.spanIndex);
+    if (spansToSplit.isEmpty) return;
+    spans.removeRange(begin.spanIndex, spans.length);
+
+    // Also rewind the last positions to the start place.
+    _nextLocation = begin.location;
+
+    // Add the split spans individually.
+    for (final span in spansToSplit
+        .expand((spanToSplit) => spanToSplit.split(scanner, condition))) {
+      // To handler spans with multiple scopes, we need to push each scope, and
+      // then pop each scope. We cannot use `add`.
+      for (final scope in span.scopes ?? <String?>[]) {
+        push(scope, span.startLocation);
+      }
+      for (final scope in span.scopes?.reversed ?? const <String?>[]) {
+        pop(scope, span.endLocation);
+      }
+    }
+  }
+
+  void _produceSpan(
+    Set<String> scopes, {
+    required ScopeStackLocation end,
+  }) {
+    // Don't produce zero-width spans.
+    if (end.position == _nextLocation.position) return;
+
+    final span = ScopeSpan(
+      scopes: scopes.toList(),
+      startLocation: _nextLocation,
+      endLocation: end,
+    );
+    spans.add(span);
+    _nextLocation = end;
+  }
+}
+
+/// An item pushed onto the scope stack, consisting of a [String] scope and a
+/// location.
+class ScopeStackItem {
+  ScopeStackItem(this.scope, this.location);
+
+  final String scope;
+  final ScopeStackLocation location;
+}
+
+/// A marker tracking a position in the list of produced tokens.
+///
+/// Used for back-tracking when handling nested multiline tokens.
+class ScopeStackMarker {
+  ScopeStackMarker({
+    required this.spanIndex,
+    required this.location,
+  });
+
+  final int spanIndex;
+  final ScopeStackLocation location;
+}
+
+/// A location (including offset, line, column) in the code parsed for scopes.
+class ScopeStackLocation {
+  const ScopeStackLocation({
+    required this.position,
+    required this.line,
+    required this.column,
+  });
+
+  static const zero = ScopeStackLocation(position: 0, line: 0, column: 0);
+
+  /// 0-based offset in content.
+  final int position;
+
+  /// 0-based line number of [position].
+  final int line;
+
+  /// 0-based column number of [position].
+  final int column;
+
+  /// Returns a location offset by [offset] characters.
+  ///
+  /// This method does not handle line wrapping so should only be used where it
+  /// is known that the offset does not wrap across a line boundary.
+  ScopeStackLocation offset(int offset) {
+    return ScopeStackLocation(
+      position: position + offset,
+      line: line,
+      column: column + offset,
+    );
+  }
+}
+
+extension LineScannerExtension on LineScanner {
+  ScopeStackLocation get location =>
+      ScopeStackLocation(position: position, line: line, column: column);
 }
