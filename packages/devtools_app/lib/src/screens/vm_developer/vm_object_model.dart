@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../primitives/utils.dart';
 import '../../service/vm_service_wrapper.dart';
 import '../../shared/globals.dart';
 import '../debugger/debugger_model.dart';
@@ -209,17 +210,12 @@ class ScriptObject extends VmObject {
   SourceLocation? get _sourceLocation => null;
 
   @override
-  String? get name => (obj.uri ?? scriptRef?.uri)?.split('/').last;
+  String? get name => fileNameFromUri(obj.uri ?? scriptRef?.uri);
 
-  late final DateTime? loadTime;
+  DateTime? get loadTime {
+    final time = obj.loadTime;
 
-  @override
-  Future<void> initialize() async {
-    await super.initialize();
-
-    if (obj.loadTime != null) {
-      loadTime = DateTime.fromMillisecondsSinceEpoch(obj.loadTime!);
-    }
+    return time == null ? null : DateTime.fromMillisecondsSinceEpoch(time);
   }
 }
 

@@ -1457,3 +1457,7 @@ bool isPrimativeInstanceKind(String? kind) {
       kind == InstanceKind.kNull ||
       kind == InstanceKind.kString;
 }
+
+// TODO(mtaylee): Prefer to use this helper method whenever a call to
+// .split('/').last is made on a String, especially on URIs.
+String? fileNameFromUri(String? uri) => uri?.split('/').last;

@@ -17,10 +17,12 @@ class VmScriptDisplay extends StatelessWidget {
   final ScriptObject script;
 
   @override
-  Widget build(BuildContext context) => VmObjectDisplayBasicLayout(
-        object: script,
-        generalDataRows: _scriptDataRows(script),
-      );
+  Widget build(BuildContext context) {
+    return VmObjectDisplayBasicLayout(
+      object: script,
+      generalDataRows: _scriptDataRows(script),
+    );
+  }
 
   /// Generates a list of key-value pairs (map entries) containing the general
   /// VM information of the Script object [script].
