@@ -89,9 +89,8 @@ class VmFuncDisplay extends StatelessWidget {
       kind.write('static');
     }
 
-    addSpace();
-
     if (function.obj.isConst == true) {
+      addSpace();
       kind.write('const');
     }
 
