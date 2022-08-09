@@ -45,6 +45,16 @@ mixin ProfilableDataMixin<T extends TreeNode<T>> on TreeNode<T> {
         (selfTimeRatio * profileMetaData.time!.duration.inMicroseconds).round(),
   );
 
+  double get inclusiveSampleRatio => safeDivide(
+        inclusiveSampleCount,
+        profileMetaData.sampleCount,
+      );
+
+  double get exclusiveSampleRatio => safeDivide(
+        exclusiveSampleCount,
+        profileMetaData.sampleCount,
+      );
+
   /// Returns the number of samples this data node is a part of.
   ///
   /// This will be equal to the number of leaf nodes under this data node.

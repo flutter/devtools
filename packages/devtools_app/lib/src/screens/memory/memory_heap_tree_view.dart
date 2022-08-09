@@ -33,6 +33,7 @@ import 'memory_heap_treemap.dart';
 import 'memory_instance_tree_view.dart';
 import 'memory_snapshot_models.dart';
 import 'panes/allocation_profile/allocation_profile_table_view.dart';
+import 'panes/allocation_tracing/allocation_profile_tracing_view.dart';
 import 'panes/diff/diff_pane.dart';
 import 'panes/leaks/leaks_pane.dart';
 import 'primitives/memory_utils.dart';
@@ -40,7 +41,7 @@ import 'primitives/memory_utils.dart';
 // TODO(bkonyi): enable new allocation profile table when we're ready to remove
 // the existing allocations table.
 @visibleForTesting
-bool enableNewAllocationProfileTable = false;
+bool enableNewAllocationProfileTable = true;
 
 const memorySearchFieldKeyName = 'MemorySearchFieldKey';
 
@@ -157,6 +158,8 @@ class HeapTreeViewState extends State<HeapTree>
   @visibleForTesting
   static const dartHeapTableProfileKey = Key('Dart Heap Profile Tab');
   @visibleForTesting
+  static const dartHeapAllocationTracingKey = Key('Dart Heap Allocation Tracing Tab');
+  @visibleForTesting
   static const diffTabKey = Key('Diff Tab');
 
   /// Below constants should match index for Tab index in DartHeapTabs.
@@ -202,12 +205,18 @@ class HeapTreeViewState extends State<HeapTree>
 
   void _initTabs() {
     _tabs = [
-      if (enableNewAllocationProfileTable)
+      if (enableNewAllocationProfileTable) ...[
         DevToolsTab.create(
           key: dartHeapTableProfileKey,
           tabName: 'Profile',
           gaPrefix: _gaPrefix,
         ),
+        DevToolsTab.create(
+          key: dartHeapAllocationTracingKey,
+          tabName: 'Tracing',
+          gaPrefix: _gaPrefix,
+        ),
+      ],
       DevToolsTab.create(
         key: dartHeapAnalysisTabKey,
         gaPrefix: _gaPrefix,
@@ -487,12 +496,18 @@ class HeapTreeViewState extends State<HeapTree>
               controller: _tabController,
               children: [
                 // Profile Tab
-                if (enableNewAllocationProfileTable)
+                if (enableNewAllocationProfileTable) ...[
                   KeepAliveWrapper(
                     child: AllocationProfileTableView(
                       controller: controller.allocationProfileController,
                     ),
                   ),
+                  KeepAliveWrapper(
+                    child: AllocationProfileTracingView(
+                      controller: controller.allocationTracingController,
+                    ),
+                  ),
+                ],
                 // Analysis Tab
                 KeepAliveWrapper(
                   child: Column(

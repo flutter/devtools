@@ -1,0 +1,116 @@
+// Copyright 2022 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'package:flutter/material.dart';
+
+import '../../../../analytics/constants.dart' as analytics_constants;
+import '../../../../shared/common_widgets.dart';
+import '../../../../shared/split.dart';
+import '../../../../shared/theme.dart';
+import 'allocation_profile_class_table.dart';
+import 'allocation_profile_tracing_tree.dart';
+import 'allocation_profile_tracing_view_controller.dart';
+
+class AllocationProfileTracingView extends StatefulWidget {
+  const AllocationProfileTracingView({
+    Key? key,
+    required this.controller,
+  }) : super(key: key);
+
+  final AllocationProfileTracingViewController controller;
+
+  @override
+  State<AllocationProfileTracingView> createState() =>
+      _AllocationProfileTracingViewState();
+}
+
+class _AllocationProfileTracingViewState
+    extends State<AllocationProfileTracingView> {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    widget.controller.initialize();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            RefreshButton(
+              onPressed: () async {
+                await widget.controller.refresh();
+              },
+            ),
+            const _ProfileHelpLink(),
+          ],
+        ),
+        const SizedBox(
+          height: denseRowSpacing,
+        ),
+        Expanded(
+          child: Split(
+            axis: Axis.horizontal,
+            initialFractions: const [0.25, 0.75],
+            children: [
+              OutlineDecoration(
+                child: AllocationTracingTable(
+                  controller: widget.controller,
+                ),
+              ),
+              OutlineDecoration(
+                child: AllocationTracingTree(
+                  controller: widget.controller,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ProfileHelpLink extends StatelessWidget {
+  const _ProfileHelpLink({Key? key}) : super(key: key);
+
+  static const _documentationTopic = 'allocationTracing';
+
+  @override
+  Widget build(BuildContext context) {
+    return HelpButtonWithDialog(
+      gaScreen: analytics_constants.memory,
+      gaSelection:
+          analytics_constants.topicDocumentationButton(_documentationTopic),
+      dialogTitle: 'Memory Allocation Tracing Help',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          const Text(
+            'The allocation tracing tab allows for toggling allocation\n'
+            'tracing for specific types, which records the locations of\n'
+            'allocations of instances of traced types within the\n'
+            'currently selected isolate.\n'
+            '\n'
+            'Allocation sites of traced types can be viewed by refreshing\n'
+            'the tracing profile before selecting the traced type from the\n'
+            'list, displaying a condensed view of locations where objects\n'
+            'were allocated.',
+          ),
+          // TODO(bkonyi): update link
+          MoreInfoLink(
+            url: 'https://github.com/flutter/devtools/blob/master/'
+                'packages/devtools_app/lib/src/screens/memory/panes/'
+                'allocation_profile/ALLOCATION_PROFILE.md',
+            gaScreenName: '',
+            gaSelectedItemDescription:
+                analytics_constants.topicDocumentationLink(_documentationTopic),
+          )
+        ],
+      ),
+    );
+  }
+}
