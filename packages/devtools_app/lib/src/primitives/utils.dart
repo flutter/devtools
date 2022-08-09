@@ -1460,4 +1460,6 @@ bool isPrimativeInstanceKind(String? kind) {
 
 // TODO(mtaylee): Prefer to use this helper method whenever a call to
 // .split('/').last is made on a String (usually on URIs).
+/// Returns the file name from a URI or path string, by splitting the [uri] at
+/// the directory separators '/', and returning the last element.
 String? fileNameFromUri(String? uri) => uri?.split('/').last;
