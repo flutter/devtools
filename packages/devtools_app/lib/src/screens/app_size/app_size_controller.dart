@@ -192,15 +192,19 @@ class AppSizeController {
     final diffTreeType = _activeDiffTreeType.value;
     final diffMap = _activeDiffMap;
 
+    if (diffMap == null) {
+      return null;
+    }
+
     switch (diffTreeType) {
       case DiffTreeType.increaseOnly:
-        return diffMap!.increaseOnly;
+        return diffMap.increaseOnly;
       case DiffTreeType.decreaseOnly:
-        return diffMap!.decreaseOnly;
+        return diffMap.decreaseOnly;
       case DiffTreeType.combined:
-        return diffMap!.combined;
+        return diffMap.combined;
       default:
-        return diffMap!.combined;
+        return diffMap.combined;
     }
   }
 
