@@ -17,7 +17,7 @@ import '../../ui/colors.dart';
 import 'app_size_screen.dart';
 
 // Temporary feature flag for deferred loading.
-bool deferredLoadingSupportEnabled = false;
+bool deferredLoadingSupportEnabled = true;
 
 const _artificialRootNodeName = 'ArtificialRoot';
 const _entireAppNodeName = 'Entire App';
