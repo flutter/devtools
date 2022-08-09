@@ -13,7 +13,14 @@ import 'analytics/analytics_controller.dart';
 import 'analytics/constants.dart' as analytics_constants;
 import 'config_specific/server/server.dart';
 import 'example/conditional_screen.dart';
+import 'framework/about_dialog.dart';
 import 'framework/framework_core.dart';
+import 'framework/initializer.dart';
+import 'framework/landing_screen.dart';
+import 'framework/notifications_view.dart';
+import 'framework/release_notes/release_notes.dart';
+import 'framework/report_feedback_button.dart';
+import 'framework/scaffold.dart';
 import 'primitives/auto_dispose_mixin.dart';
 import 'screens/app_size/app_size_controller.dart';
 import 'screens/app_size/app_size_screen.dart';
@@ -37,17 +44,10 @@ import 'screens/provider/provider_screen.dart';
 import 'screens/vm_developer/vm_developer_tools_controller.dart';
 import 'screens/vm_developer/vm_developer_tools_screen.dart';
 import 'service/service_extension_widgets.dart';
-import 'shared/about_dialog.dart';
 import 'shared/common_widgets.dart';
 import 'shared/dialogs.dart';
 import 'shared/globals.dart';
-import 'shared/initializer.dart';
-import 'shared/landing_screen.dart';
-import 'shared/notifications.dart';
-import 'shared/release_notes/release_notes.dart';
-import 'shared/report_feedback_button.dart';
 import 'shared/routing.dart';
-import 'shared/scaffold.dart';
 import 'shared/screen.dart';
 import 'shared/snapshot_screen.dart';
 import 'shared/theme.dart';
@@ -138,7 +138,6 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     // preferences is initialized in main() to avoid flash of content with
     // incorrect theme.
     preferences.dispose();
-
     super.dispose();
   }
 
@@ -325,7 +324,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       builder: (context, child) {
         return Provider<AnalyticsController>.value(
           value: widget.analyticsController,
-          child: Notifications(
+          child: NotificationsView(
             child: ReleaseNotesViewer(
               releaseNotesController: releaseNotesController,
               child: child,
@@ -446,8 +445,8 @@ class OpenSettingsAction extends StatelessWidget {
           );
         },
         child: Container(
-          width: DevToolsScaffold.actionWidgetSize,
-          height: DevToolsScaffold.actionWidgetSize,
+          width: actionWidgetSize,
+          height: actionWidgetSize,
           alignment: Alignment.center,
           child: Icon(
             Icons.settings,

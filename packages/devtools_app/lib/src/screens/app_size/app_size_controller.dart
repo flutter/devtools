@@ -13,15 +13,52 @@ import 'package:vm_snapshot_analysis/v8_profile.dart';
 import '../../charts/treemap.dart';
 import '../../primitives/utils.dart';
 import '../../shared/table.dart';
+import '../../ui/colors.dart';
 import 'app_size_screen.dart';
 
 // Temporary feature flag for deferred loading.
-const deferredLoadingSupportEnabled = false;
+bool deferredLoadingSupportEnabled = false;
+
+const _artificialRootNodeName = 'ArtificialRoot';
+const _entireAppNodeName = 'Entire App';
+const _deferredNodeName = 'Deferred';
+const _mainNodeName = 'Main';
+const _rootNodeName = 'Root';
 
 enum DiffTreeType {
   increaseOnly,
   decreaseOnly,
-  combined,
+  combined;
+
+  String get display {
+    switch (this) {
+      case DiffTreeType.increaseOnly:
+        return 'Increase Only';
+      case DiffTreeType.decreaseOnly:
+        return 'Decrease Only';
+      case DiffTreeType.combined:
+      default:
+        return 'Combined';
+    }
+  }
+}
+
+enum AppUnit {
+  mainOnly,
+  deferredOnly,
+  entireApp;
+
+  String get display {
+    switch (this) {
+      case AppUnit.deferredOnly:
+        return _deferredNodeName;
+      case AppUnit.mainOnly:
+        return _mainNodeName;
+      case AppUnit.entireApp:
+      default:
+        return _entireAppNodeName;
+    }
+  }
 }
 
 class AppSizeController {
@@ -54,7 +91,8 @@ class AppSizeController {
   /// Used to build the treemap and the tree table for the analysis tab.
   final analysisRoot = ValueNotifier<Selection<TreemapNode>>(Selection.empty());
 
-  late bool isDeferredApp;
+  ValueListenable<bool> get isDeferredApp => _isDeferredApp;
+  final _isDeferredApp = ValueNotifier<bool>(false);
 
   void changeAnalysisRoot(TreemapNode? newAnalysisRoot) {
     if (newAnalysisRoot == null) {
@@ -87,7 +125,7 @@ class AppSizeController {
       matchingNodeCondition: searchCondition,
       includeCollapsedNodes: false,
     );
-    return isDeferredApp ? nodeIndex - 1 : nodeIndex;
+    return isDeferredApp.value ? nodeIndex - 1 : nodeIndex;
   }
 
   ValueListenable<DevToolsJsonFile?> get analysisJsonFile => _analysisJsonFile;
@@ -137,6 +175,22 @@ class AppSizeController {
   TreemapNode? _increasedDiffTreeRoot;
   TreemapNode? _decreasedDiffTreeRoot;
   TreemapNode? _combinedDiffTreeRoot;
+
+  Map<String, dynamic>? get _dataForAppUnit {
+    switch (_selectedAppUnit.value) {
+      case AppUnit.deferredOnly:
+        return _deferredOnly;
+      case AppUnit.mainOnly:
+        return _mainOnly;
+      case AppUnit.entireApp:
+      default:
+        return _entireApp;
+    }
+  }
+
+  Map<String, dynamic>? _deferredOnly;
+  Map<String, dynamic>? _mainOnly;
+  Map<String, dynamic>? _entireApp;
 
   ValueListenable<DevToolsJsonFile?> get oldDiffJsonFile => _oldDiffJsonFile;
 
@@ -194,6 +248,15 @@ class AppSizeController {
     changeDiffRoot(_activeDiffRoot);
   }
 
+  /// The selected app segment to analyze (for deferred apps only).
+  ValueListenable<AppUnit> get selectedAppUnit => _selectedAppUnit;
+  final _selectedAppUnit = ValueNotifier<AppUnit>(AppUnit.entireApp);
+
+  void changeSelectedAppUnit(AppUnit appUnit) {
+    _selectedAppUnit.value = appUnit;
+    _loadApp(_dataForAppUnit!);
+  }
+
   /// Notifies that the json files are currently being processed.
   ValueListenable<bool> get processingNotifier => _processingNotifier;
   final _processingNotifier = ValueNotifier<bool>(false);
@@ -237,22 +300,66 @@ class AppSizeController {
     changeAnalysisJsonFile(jsonFile);
 
     // Set deferred app flag.
-    isDeferredApp =
-        deferredLoadingSupportEnabled && processedJson['n'] == 'ArtificialRoot';
+    _isDeferredApp.value =
+        deferredLoadingSupportEnabled && _hasDeferredInfo(processedJson);
 
-    // Set root name.
-    processedJson['n'] = isDeferredApp ? 'Entire app' : 'Root';
-
-    // Build a tree with [TreemapNode] from [processedJsonMap].
-    final jsonRoot = generateTree(processedJson)!;
-
-    // Determine the correct root node.
-    final newRoot = isDeferredApp
-        ? jsonRoot.childrenMap.values.firstWhere((node) => node.name == 'Root')
-        : jsonRoot;
-    changeAnalysisRoot(newRoot);
+    if (isDeferredApp.value) {
+      _deferredOnly = _extractDeferredUnits(Map.from(processedJson));
+      _mainOnly = _extractMainUnit(Map.from(processedJson));
+      _entireApp = _includeEntireApp(Map.from(processedJson));
+      _loadApp(_dataForAppUnit!);
+    } else {
+      // Set root name for non-deferred apps.
+      processedJson['n'] = _rootNodeName;
+      _loadApp(processedJson);
+    }
 
     _processingNotifier.value = false;
+  }
+
+  void _loadApp(Map<String, dynamic> appData) {
+    // Build a tree with [TreemapNode] from [appData].
+    final appRoot = generateTree(appData)!;
+    changeAnalysisRoot(appRoot);
+  }
+
+  bool _hasDeferredInfo(Map<String, dynamic> jsonFile) {
+    return jsonFile['n'] == _artificialRootNodeName;
+  }
+
+  Map<String, dynamic> _extractMainUnit(Map<String, dynamic> jsonFile) {
+    if (_hasDeferredInfo(jsonFile)) {
+      final main = _extractChildren(jsonFile).firstWhere(
+        (child) => child['n'] == _mainNodeName,
+        orElse: () => jsonFile,
+      );
+      return main;
+    }
+    return jsonFile;
+  }
+
+  Map<String, dynamic> _extractDeferredUnits(
+    Map<String, dynamic> jsonFile,
+  ) {
+    if (_hasDeferredInfo(jsonFile)) {
+      jsonFile['children'] = _extractChildren(jsonFile)
+          .where((child) => child['isDeferred'] == true);
+      jsonFile['n'] = _deferredNodeName;
+    }
+    return jsonFile;
+  }
+
+  Map<String, dynamic> _includeEntireApp(Map<String, dynamic> jsonFile) {
+    if (_hasDeferredInfo(jsonFile)) {
+      jsonFile['n'] = _entireAppNodeName;
+    }
+    return jsonFile;
+  }
+
+  List<Map<String, dynamic>> _extractChildren(Map<String, dynamic> jsonFile) {
+    return (jsonFile['children'] as Iterable)
+        .whereType<Map<String, dynamic>>()
+        .toList();
   }
 
   // TODO(peterdjlee): Spawn an isolate to run parts of this function to
@@ -279,8 +386,20 @@ class AppSizeController {
 
     Map<String, dynamic> diffMap;
     if (oldFile.isAnalyzeSizeFile && newFile.isAnalyzeSizeFile) {
+      var oldFileJson = oldFile.data as Map<String, dynamic>;
+      var newFileJson = newFile.data as Map<String, dynamic>;
+
+      if (_hasDeferredInfo(oldFileJson) || _hasDeferredInfo(newFileJson)) {
+        _isDeferredApp.value = deferredLoadingSupportEnabled;
+
+        if (!_hasDeferredInfo(oldFileJson)) {
+          oldFileJson = _wrapInArtificialRoot(oldFileJson);
+        } else if (!_hasDeferredInfo(newFileJson)) {
+          newFileJson = _wrapInArtificialRoot(newFileJson);
+        }
+      }
+
       final oldApkProgramInfo = ProgramInfo();
-      final oldFileJson = oldFile.data as Map<String, dynamic>;
       _apkJsonToProgramInfo(
         program: oldApkProgramInfo,
         parent: oldApkProgramInfo.root,
@@ -298,7 +417,6 @@ class AppSizeController {
       }
 
       final newApkProgramInfo = ProgramInfo();
-      final newFileJson = newFile.data as Map<String, dynamic>;
       _apkJsonToProgramInfo(
         program: newApkProgramInfo,
         parent: newApkProgramInfo.root,
@@ -337,25 +455,36 @@ class AppSizeController {
     changeOldDiffFile(oldFile);
     changeNewDiffFile(newFile);
 
-    diffMap['n'] = 'Root';
+    diffMap['n'] = isDeferredApp.value ? _entireAppNodeName : _rootNodeName;
 
     // TODO(peterdjlee): Try to move the non-active tree generation to separate isolates.
     _combinedDiffTreeRoot = generateDiffTree(
       diffMap,
       DiffTreeType.combined,
+      skipNodesWithNoByteSizeChange: !isDeferredApp.value,
     );
     _increasedDiffTreeRoot = generateDiffTree(
       diffMap,
       DiffTreeType.increaseOnly,
+      skipNodesWithNoByteSizeChange: !isDeferredApp.value,
     );
     _decreasedDiffTreeRoot = generateDiffTree(
       diffMap,
       DiffTreeType.decreaseOnly,
+      skipNodesWithNoByteSizeChange: !isDeferredApp.value,
     );
 
     changeDiffRoot(_activeDiffRoot);
 
     _processingNotifier.value = false;
+  }
+
+  Map<String, dynamic> _wrapInArtificialRoot(Map<String, dynamic> json) {
+    json['n'] = _mainNodeName;
+    return <String, dynamic>{
+      'n': _artificialRootNodeName,
+      'children': [json],
+    };
   }
 
   ProgramInfoNode _apkJsonToProgramInfo({
@@ -406,14 +535,16 @@ class AppSizeController {
   /// * [DiffTreeType.combined]: returns a tree with all nodes.
   TreemapNode? generateDiffTree(
     Map<String, dynamic> treeJson,
-    DiffTreeType diffTreeType,
-  ) {
+    DiffTreeType diffTreeType, {
+    bool skipNodesWithNoByteSizeChange = true,
+  }) {
     final isLeafNode = treeJson['children'] == null;
     if (!isLeafNode) {
       return _buildNodeWithChildren(
         treeJson,
         showDiff: true,
         diffTreeType: diffTreeType,
+        skipNodesWithNoByteSizeChange: skipNodesWithNoByteSizeChange,
       );
     } else {
       // TODO(peterdjlee): Investigate why there are leaf nodes with size of null.
@@ -446,6 +577,7 @@ class AppSizeController {
     Map<String, dynamic> treeJson, {
     bool showDiff = false,
     DiffTreeType? diffTreeType,
+    bool skipNodesWithNoByteSizeChange = true,
   }) {
     assert(showDiff ? diffTreeType != null : true);
     final rawChildren = treeJson['children'];
@@ -465,7 +597,7 @@ class AppSizeController {
     }
 
     // If none of the children matched the diff tree type
-    if (totalByteSize == 0) {
+    if (totalByteSize == 0 && skipNodesWithNoByteSizeChange) {
       return null;
     } else {
       return _buildNode(
@@ -501,7 +633,8 @@ class AppSizeController {
       byteSize: byteSize,
       childrenMap: childrenMap,
       showDiff: showDiff,
-      isDeferred: isDeferred,
+      backgroundColor: isDeferred ? treemapDeferredColor : null,
+      caption: isDeferred ? '(Deferred)' : null,
     )..addAllChildren(children);
   }
 }
@@ -513,7 +646,8 @@ extension AppSizeJsonFileExtension on DevToolsJsonFile {
     'ios',
     'macos',
     'windows',
-    'linux'
+    'linux',
+    'web'
   ];
 
   bool get isAnalyzeSizeFile {

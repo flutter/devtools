@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/framework/notifications_view.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
 import 'package:flutter/material.dart';
@@ -10,16 +11,14 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Notifications', () {
-    setGlobal(IdeTheme, IdeTheme());
-
     Widget buildNotificationsWithButtonToPush(String text) {
       return Directionality(
         textDirection: TextDirection.ltr,
-        child: Notifications(
+        child: NotificationsView(
           child: Builder(
             builder: (context) {
               return ElevatedButton(
-                onPressed: () => Notifications.of(context)!.push(text),
+                onPressed: () => notificationService.push(text),
                 child: const SizedBox(),
               );
             },
@@ -28,9 +27,15 @@ void main() {
       );
     }
 
+    setUp(() {
+      setGlobal(IdeTheme, IdeTheme());
+      setGlobal(NotificationService, NotificationService());
+    });
+
     testWidgets('displays notifications', (WidgetTester tester) async {
       const notification = 'This is a notification!';
       await tester.pumpWidget(buildNotificationsWithButtonToPush(notification));
+      await tester.pumpAndSettle();
       await tester.tap(find.byType(ElevatedButton));
       await tester.pumpAndSettle();
       expect(find.text(notification), findsOneWidget);
@@ -48,7 +53,7 @@ void main() {
       expect(find.text(notification), findsOneWidget);
 
       // Wait for the notification to disappear.
-      await tester.pumpAndSettle(Notifications.defaultDuration);
+      await tester.pumpAndSettle(NotificationMessage.defaultDuration);
       expect(find.text(notification), findsNothing);
     });
 
@@ -58,13 +63,13 @@ void main() {
       var timesPressed = 0;
       Widget build() {
         return MaterialApp(
-          builder: (context, child) => Notifications(child: child!),
+          builder: (context, child) => NotificationsView(child: child!),
           routes: {
             '/': (context) {
               return ElevatedButton(
                 onPressed: () {
                   if (timesPressed == 0) {
-                    Notifications.of(context)!.push(notification);
+                    notificationService.push(notification);
                   } else {
                     Navigator.of(context).pushNamed('/details');
                   }

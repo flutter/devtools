@@ -199,11 +199,21 @@ class ProgramExplorerController extends DisposableController
     _outlineSelection.value = null;
 
     for (final node in _outlineNodes.value) {
-      node
-        ..collapseCascading()
-        ..unselect();
+      breadthFirstTraversal<VMServiceObjectNode>(
+        node,
+        action: (VMServiceObjectNode node) {
+          node
+            ..collapse()
+            ..unselect();
+        },
+      );
     }
 
+    _outlineNodes.notifyListeners();
+  }
+
+  void expandToNode(VMServiceObjectNode node) {
+    node.expandAscending();
     _outlineNodes.notifyListeners();
   }
 

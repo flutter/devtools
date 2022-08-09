@@ -4,6 +4,8 @@
 
 import 'package:vm_service/vm_service.dart';
 
+import '../../shared/globals.dart';
+
 /// NOTE: this file contains extensions to classes provided by
 /// `package:vm_service` in order to expose VM internal fields in a controlled
 /// fashion. Objects and extensions in this class should not be used in
@@ -38,6 +40,17 @@ extension IsolatePrivateViewExtension on Isolate {
 extension ClassPrivateViewExtension on Class {
   /// The internal name of the [Class].
   String get vmName => json!['_vmName'];
+}
+
+/// An extension on [InboundReferences] which allows for access to
+/// VM internal fields.
+extension InboundReferenceExtension on InboundReferences {
+  static const referencesKey = 'references';
+  static const parentWordOffsetKey = '_parentWordOffset';
+
+  int? parentWordOffset(int inboundReferenceIndex) {
+    return json![referencesKey]?[inboundReferenceIndex]?[parentWordOffsetKey];
+  }
 }
 
 class HeapStats {
@@ -84,7 +97,7 @@ extension ObjRefPrivateViewExtension on ObjRef {
   ///
   /// The type of non-public service objects can be determined using this
   /// value.
-  String get vmType => json!['_vmType']!;
+  String? get vmType => json!['_vmType'];
 
   /// `true` if this object is an instance of [ICData].
   bool get isICData => vmType == _icDataType;
@@ -161,7 +174,6 @@ class Disassembly {
 }
 
 /// An extension on [Func] which allows for access to VM internal fields.
-
 extension FunctionPrivateViewExtension on Func {
   static const _unoptimizedCodeKey = '_unoptimizedCode';
 
@@ -171,7 +183,6 @@ extension FunctionPrivateViewExtension on Func {
 }
 
 /// An extension on [Code] which allows for access to VM internal fields.
-
 extension CodePrivateViewExtension on Code {
   static const _disassemblyKey = '_disassembly';
 
@@ -180,4 +191,68 @@ extension CodePrivateViewExtension on Code {
   Disassembly get disassembly => Disassembly.parse(json![_disassemblyKey]);
   set disassembly(Disassembly disassembly) =>
       json![_disassemblyKey] = disassembly.toJson();
+}
+
+/// An extension on [Field] which allows for access to VM internal fields.
+extension FieldPrivateViewExtension on Field {
+  static const guardClassKey = '_guardClass';
+
+  bool? get guardNullable => json!['_guardNullable'];
+
+  Future<Class?> get guardClass async {
+    if (_guardClassIsClass()) {
+      final service = serviceManager.service!;
+      final isolate = serviceManager.isolateManager.selectedIsolate.value;
+
+      return await service.getObject(isolate!.id!, json![guardClassKey]['id'])
+          as Class;
+    }
+
+    return null;
+  }
+
+  GuardClassKind? guardClassKind() {
+    if (_guardClassIsClass()) {
+      return GuardClassKind.single;
+    } else if (json![guardClassKey] == GuardClassKind.dynamic.jsonValue()) {
+      return GuardClassKind.dynamic;
+    } else if (json![guardClassKey] == GuardClassKind.unknown.jsonValue()) {
+      return GuardClassKind.unknown;
+    }
+
+    return null;
+  }
+
+  bool _guardClassIsClass() {
+    String? guardClassType;
+
+    if (json![guardClassKey] is Map) {
+      guardClassType = json![guardClassKey]['type'];
+    }
+
+    if (guardClassType == '@Class' || guardClassType == 'Class') {
+      return true;
+    } else {
+      return false;
+    }
+  }
+}
+
+/// The kinds of Guard Class that determine whether a Field object has
+/// a unique observed type [single], various observed types [dynamic],
+/// or if the field type has not been observed yet [unknown].
+enum GuardClassKind {
+  single,
+  dynamic,
+  unknown;
+
+  String jsonValue() {
+    switch (this) {
+      case GuardClassKind.dynamic:
+        return 'various';
+      case GuardClassKind.single:
+      case GuardClassKind.unknown:
+        return toString().split('.').last;
+    }
+  }
 }

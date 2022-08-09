@@ -4,6 +4,7 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/editable_list.dart';
+import 'package:devtools_app/src/shared/notifications.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -20,6 +21,7 @@ void main() {
   }
 
   setGlobal(IdeTheme, getIdeTheme());
+  setGlobal(NotificationService, NotificationService());
 
   group('EditableList', () {
     testWidgetsWithWindowSize('shows the label', windowSize,

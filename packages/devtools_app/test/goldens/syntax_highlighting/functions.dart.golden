@@ -1,0 +1,46 @@
+>// Copyright 2022 The Chromium Authors. All rights reserved.
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ comment.line.double-slash.dart
+>// Use of this source code is governed by a BSD-style license that can be
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ comment.line.double-slash.dart
+>// found in the LICENSE file.
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ comment.line.double-slash.dart
+>
+>void simplePrint() {
+#^^^^ storage.type.primitive.dart
+#     ^^^^^^^^^^^ entity.name.function.dart
+>  print('hello world');
+#  ^^^^^ entity.name.function.dart
+#        ^^^^^^^^^^^^^ string.interpolated.single.dart
+#                      ^ punctuation.terminator.dart
+>}
+>
+>noReturnValue() {
+#^^^^^^^^^^^^^ entity.name.function.dart
+>  print('hello world');
+#  ^^^^^ entity.name.function.dart
+#        ^^^^^^^^^^^^^ string.interpolated.single.dart
+#                      ^ punctuation.terminator.dart
+>}
+>
+>Future<void> asyncPrint() async {
+#^^^^^^ support.class.dart
+#      ^ keyword.operator.comparison.dart
+#       ^^^^ storage.type.primitive.dart
+#           ^ keyword.operator.comparison.dart
+#             ^^^^^^^^^^ entity.name.function.dart
+#                          ^^^^^ keyword.control.dart
+>  await Future.delayed(const Duration(seconds: 1));
+#  ^^^^^ keyword.control.dart
+#        ^^^^^^ support.class.dart
+#              ^ punctuation.dot.dart
+#               ^^^^^^^ entity.name.function.dart
+#                       ^^^^^ storage.modifier.dart
+#                             ^^^^^^^^ support.class.dart
+#                                             ^ keyword.operator.ternary.dart
+#                                               ^ constant.numeric.dart
+#                                                  ^ punctuation.terminator.dart
+>  print('hello world');
+#  ^^^^^ entity.name.function.dart
+#        ^^^^^^^^^^^^^ string.interpolated.single.dart
+#                      ^ punctuation.terminator.dart
+>}

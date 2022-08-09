@@ -17,6 +17,7 @@ import 'package:devtools_app/src/screens/profiler/profiler_screen_controller.dar
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/common_widgets.dart';
 import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/notifications.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -46,6 +47,7 @@ void main() {
 
     setGlobal(ServiceConnectionManager, fakeServiceManager);
     setGlobal(OfflineModeController, OfflineModeController());
+    setGlobal(NotificationService, NotificationService());
     setGlobal(IdeTheme, IdeTheme());
   });
 
@@ -297,12 +299,13 @@ void main() {
               .cpuProfileData!.profileMetaData.time!.duration.inMicroseconds,
           equals(250),
         );
-        expect(find.text('Frame1'), findsOneWidget);
-        expect(find.text('Frame2'), findsOneWidget);
-        expect(find.text('Frame3'), findsOneWidget);
-        expect(find.text('Frame4'), findsOneWidget);
-        expect(find.text('Frame5'), findsOneWidget);
-        expect(find.text('Frame6'), findsOneWidget);
+
+        expect(find.richText('Frame1'), findsOneWidget);
+        expect(find.richText('Frame2'), findsOneWidget);
+        expect(find.richText('Frame3'), findsOneWidget);
+        expect(find.richText('Frame4'), findsOneWidget);
+        expect(find.richText('Frame5'), findsOneWidget);
+        expect(find.richText('Frame6'), findsOneWidget);
 
         await tester.tap(find.byType(UserTagDropdown));
         await tester.pumpAndSettle();
@@ -316,10 +319,10 @@ void main() {
           equals(100),
         );
         expect(find.text('Frame1'), findsNothing);
-        expect(find.text('Frame2'), findsOneWidget);
+        expect(find.richText('Frame2'), findsOneWidget);
         expect(find.text('Frame3'), findsNothing);
         expect(find.text('Frame4'), findsNothing);
-        expect(find.text('Frame5'), findsOneWidget);
+        expect(find.richText('Frame5'), findsOneWidget);
         expect(find.text('Frame6'), findsNothing);
 
         await tester.tap(find.byType(UserTagDropdown));
@@ -334,7 +337,7 @@ void main() {
           equals(50),
         );
         expect(find.text('Frame1'), findsNothing);
-        expect(find.text('Frame2'), findsOneWidget);
+        expect(find.richText('Frame2'), findsOneWidget);
         expect(find.text('Frame3'), findsNothing);
         expect(find.text('Frame4'), findsNothing);
         expect(find.text('Frame5'), findsNothing);
@@ -355,8 +358,8 @@ void main() {
         expect(find.text('Frame2'), findsNothing);
         expect(find.text('Frame3'), findsNothing);
         expect(find.text('Frame4'), findsNothing);
-        expect(find.text('Frame5'), findsOneWidget);
-        expect(find.text('Frame6'), findsOneWidget);
+        expect(find.richText('Frame5'), findsOneWidget);
+        expect(find.richText('Frame6'), findsOneWidget);
       });
     });
   });

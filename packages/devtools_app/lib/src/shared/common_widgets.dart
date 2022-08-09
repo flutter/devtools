@@ -23,7 +23,6 @@ import '../ui/label.dart';
 import 'dialogs.dart';
 import 'globals.dart';
 import 'object_tree.dart';
-import 'scaffold.dart';
 import 'theme.dart';
 import 'utils.dart';
 
@@ -300,6 +299,15 @@ class RefreshButton extends IconLabelButton {
       icon: icon!,
     );
   }
+}
+
+/// A Refresh ToolbarAction button.
+class ToolbarRefresh extends ToolbarAction {
+  const ToolbarRefresh({
+    super.icon = Icons.refresh,
+    required super.onPressed,
+    super.tooltip = 'Refresh',
+  });
 }
 
 /// Button to start recording data.
@@ -591,41 +599,6 @@ class ExitOfflineButton extends IconLabelButton {
           label: 'Exit offline mode',
           icon: Icons.clear,
         );
-}
-
-/// Display a single bullet character in order to act as a stylized spacer
-/// component.
-class BulletSpacer extends StatelessWidget {
-  const BulletSpacer({this.useAccentColor = false});
-
-  final bool useAccentColor;
-
-  static double get width => DevToolsScaffold.actionWidgetSize / 2;
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-
-    late TextStyle? textStyle;
-    if (useAccentColor) {
-      textStyle = theme.appBarTheme.toolbarTextStyle ??
-          theme.primaryTextTheme.bodyText2;
-    } else {
-      textStyle = theme.textTheme.bodyText2;
-    }
-
-    final mutedColor = textStyle?.color?.withAlpha(0x90);
-
-    return Container(
-      width: width,
-      height: DevToolsScaffold.actionWidgetSize,
-      alignment: Alignment.center,
-      child: Text(
-        '•',
-        style: textStyle?.copyWith(color: mutedColor),
-      ),
-    );
-  }
 }
 
 /// A small element containing some accessory information, often a numeric
@@ -2189,6 +2162,41 @@ class HelpButtonWithDialog extends StatelessWidget {
       },
       gaScreen: gaScreen,
       gaSelection: gaSelection,
+    );
+  }
+}
+
+/// Display a single bullet character in order to act as a stylized spacer
+/// component.
+class BulletSpacer extends StatelessWidget {
+  const BulletSpacer({this.useAccentColor = false});
+
+  final bool useAccentColor;
+
+  static double get width => actionWidgetSize / 2;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+
+    late TextStyle? textStyle;
+    if (useAccentColor) {
+      textStyle = theme.appBarTheme.toolbarTextStyle ??
+          theme.primaryTextTheme.bodyText2;
+    } else {
+      textStyle = theme.textTheme.bodyText2;
+    }
+
+    final mutedColor = textStyle?.color?.withAlpha(0x90);
+
+    return Container(
+      width: width,
+      height: actionWidgetSize,
+      alignment: Alignment.center,
+      child: Text(
+        '•',
+        style: textStyle?.copyWith(color: mutedColor),
+      ),
     );
   }
 }

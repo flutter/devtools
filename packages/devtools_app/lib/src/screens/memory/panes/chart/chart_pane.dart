@@ -10,7 +10,6 @@ import '../../../../primitives/auto_dispose_mixin.dart';
 import '../../../../primitives/utils.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
-import '../../../../shared/notifications.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../memory_controller.dart';
@@ -166,27 +165,6 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
     // There is no listener passed, so SetState will be invoked.
     addAutoDisposeListener(controller.androidChartVisibleNotifier);
-
-    // Update the chart when the memorySource changes.
-    addAutoDisposeListener(controller.memorySourceNotifier, () async {
-      try {
-        await controller.updatedMemorySource();
-      } catch (e) {
-        final errorMessage = '$e';
-        controller.memorySource = MemoryController.liveFeed;
-        // Display toast, unable to load the saved memory JSON payload.
-        final notificationsState = Notifications.of(context);
-        if (notificationsState != null) {
-          notificationsState.push(errorMessage);
-        } else {
-          // Running in test harness, unexpected error.
-          throw OfflineFileException(errorMessage);
-        }
-        return;
-      }
-
-      controller.refreshAllCharts();
-    });
 
     _updateListeningState();
   }

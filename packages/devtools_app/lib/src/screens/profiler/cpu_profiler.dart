@@ -11,7 +11,7 @@ import '../../charts/flame_chart.dart';
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/dialogs.dart';
-import '../../shared/notifications.dart';
+import '../../shared/globals.dart';
 import '../../shared/theme.dart';
 import '../../shared/utils.dart';
 import '../../ui/colors.dart';
@@ -462,7 +462,7 @@ class UserTagDropdown extends StatelessWidget {
     try {
       await controller.loadDataWithTag(newTag);
     } catch (e) {
-      Notifications.of(context)!.push(e.toString());
+      notificationService.push(e.toString());
     }
   }
 }

@@ -125,6 +125,8 @@ class ScopeSpan {
 
   static final ListQueue<String?> _scopeStack = ListQueue<String?>();
 
+  int get start => _start;
+  int get end => _end;
   int get length => _end - _start;
 
   final int _start;
@@ -473,7 +475,7 @@ class _MultilineMatcher extends _Matcher {
     if (end != null && !scanner.scan(end!)) {
       return null;
     }
-    return _processCaptureHelper(scanner, beginCaptures, line, column);
+    return _processCaptureHelper(scanner, endCaptures, line, column);
   }
 
   List<ScopeSpan> _processCaptureHelper(

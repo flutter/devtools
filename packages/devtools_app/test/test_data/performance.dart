@@ -720,7 +720,17 @@ final endGpuRasterizerDrawWithShaderJankTrace = testTraceEventWrapper({
 final rasterTimelineEventWithSubtleShaderJank =
     testSyncTimelineEvent(gpuRasterizerDrawWithSubtleShaderJankTrace)
       ..type = TimelineEventType.raster
-      ..addEndEvent(endGpuRasterizerDrawWithSubtleShaderJankTrace);
+      ..addEndEvent(endGpuRasterizerDrawWithSubtleShaderJankTrace)
+      ..addChild(
+        subtleShaderJankChildEvent..addChild(subtleShaderJankGrandchildEvent),
+      );
+final subtleShaderJankChildEvent = testSyncTimelineEvent(shaderJankChildTrace)
+  ..type = TimelineEventType.raster
+  ..addEndEvent(endShaderJankChildTrace);
+final subtleShaderJankGrandchildEvent =
+    testSyncTimelineEvent(shaderJankGrandchildTrace)
+      ..type = TimelineEventType.raster
+      ..addEndEvent(endShaderJankGrandchildTrace);
 final gpuRasterizerDrawWithSubtleShaderJankTrace = testTraceEventWrapper({
   'name': 'GPURasterizer::Draw',
   'cat': 'Embedder',
@@ -738,6 +748,44 @@ final endGpuRasterizerDrawWithSubtleShaderJankTrace = testTraceEventWrapper({
   'tid': testRasterThreadId,
   'pid': 94955,
   'ts': 173938744000,
+  'ph': 'E',
+  'args': {}
+});
+final shaderJankChildTrace = testTraceEventWrapper({
+  'name': 'GPURasterizer::Draw',
+  'cat': 'Embedder',
+  'tid': testRasterThreadId,
+  'pid': 94955,
+  'ts': 173938741000,
+  'ph': 'B',
+  'args': {}
+});
+final endShaderJankChildTrace = testTraceEventWrapper({
+  'name': 'GPURasterizer::Draw',
+  'cat': 'Embedder',
+  'tid': testRasterThreadId,
+  'pid': 94955,
+  'ts': 173938743000,
+  'ph': 'E',
+  'args': {}
+});
+final shaderJankGrandchildTrace = testTraceEventWrapper({
+  'name': 'GPURasterizer::Draw',
+  'cat': 'Embedder',
+  'tid': testRasterThreadId,
+  'pid': 94955,
+  'ts': 173938741500,
+  'ph': 'B',
+  'args': {
+    'devtoolsTag': 'shaders',
+  }
+});
+final endShaderJankGrandchildTrace = testTraceEventWrapper({
+  'name': 'GPURasterizer::Draw',
+  'cat': 'Embedder',
+  'tid': testRasterThreadId,
+  'pid': 94955,
+  'ts': 173938742500,
   'ph': 'E',
   'args': {}
 });

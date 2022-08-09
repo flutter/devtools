@@ -12,7 +12,8 @@ import '../config_specific/launch_url/launch_url.dart';
 import '../config_specific/logger/logger.dart';
 import '../config_specific/server/server.dart' as server;
 import '../primitives/utils.dart';
-import 'notifications.dart';
+import '../shared/notifications.dart';
+import 'globals.dart';
 
 class SurveyService {
   static const _noThanksLabel = 'NO THANKS';
@@ -71,10 +72,12 @@ class SurveyService {
         ),
       ];
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        final didPush = Notifications.of(context)!.push(
-          message,
-          actions: actions,
-          duration: _notificationDuration,
+        final didPush = notificationService.pushNotification(
+          NotificationMessage(
+            message,
+            actions: actions,
+            duration: _notificationDuration,
+          ),
           allowDuplicates: false,
         );
         if (didPush) {
@@ -130,7 +133,7 @@ class SurveyService {
     required BuildContext context,
   }) async {
     await server.setSurveyActionTaken();
-    Notifications.of(context)!.dismiss(message);
+    notificationService.dismiss(message);
   }
 
   void _takeSurveyPressed({
@@ -140,7 +143,7 @@ class SurveyService {
   }) async {
     await launchUrl(surveyUrl, context);
     await server.setSurveyActionTaken();
-    Notifications.of(context)!.dismiss(message);
+    notificationService.dismiss(message);
   }
 }
 

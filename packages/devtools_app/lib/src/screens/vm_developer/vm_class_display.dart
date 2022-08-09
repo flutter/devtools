@@ -5,9 +5,13 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../primitives/utils.dart';
 import 'vm_developer_common_widgets.dart';
 import 'vm_object_model.dart';
+
+// TODO(mtaylee): Finish implementation of ClassInstancesWidget. When done,
+// remove this constant, and add the ClassInstancesWidget to
+// the class display layout.
+const displayClassInstances = false;
 
 /// A widget for the object inspector historyViewport displaying information
 /// related to class objects in the Dart VM.
@@ -20,74 +24,45 @@ class VmClassDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return Row(
       children: [
         Flexible(
-          flex: 5,
-          child: ClassInfoWidget(
-            clazz: clazz,
+          child: VmObjectDisplayBasicLayout(
+            object: clazz,
+            generalDataRows: _classDataRows(clazz),
           ),
         ),
-        Flexible(
-          flex: 4,
-          child: ClassInstancesWidget(
-            instances: clazz.instances,
+        if (displayClassInstances)
+          Flexible(
+            child: ClassInstancesWidget(
+              instances: clazz.instances,
+            ),
           ),
-        )
       ],
     );
   }
 }
 
-/// Displays general VM information of the Class Object.
-class ClassInfoWidget extends StatelessWidget {
-  const ClassInfoWidget({
-    required this.clazz,
-  });
-
-  final ClassObject clazz;
-
-  @override
-  Widget build(BuildContext context) {
-    return VMInfoCard(
-      title: 'General Information',
-      rowKeyValues: [
-        MapEntry('Object Class', clazz.obj.type),
-        MapEntry(
-          'Shallow Size',
-          prettyPrintBytes(
-            clazz.obj.size ?? 0,
-            includeUnit: true,
-            kbFractionDigits: 3,
-          ),
-        ),
-        const MapEntry('Reachable Size', 'TO-DO'),
-        const MapEntry('Retained Size', 'TO-DO'),
-        const MapEntry('Retaining path', 'TO-DO'),
-        const MapEntry('Inbound references', 'TO-DO'),
-        MapEntry(
-          'Library',
-          clazz.obj.library?.name?.isEmpty ?? false
-              ? clazz.script?.uri
-              : clazz.obj.library?.name,
-        ),
-        MapEntry(
-          'Script',
-          '${_fileName(clazz.script?.uri) ?? ''}:${clazz.pos?.toString() ?? ''}',
-        ),
-        MapEntry('Superclass', clazz.obj.superClass?.name),
-        MapEntry('SuperType', clazz.obj.superType?.name),
-      ],
-    );
-  }
-
-  String? _fileName(String? uri) {
-    if (uri == null) return null;
-    final splitted = uri.split('/');
-    return splitted[splitted.length - 1];
-  }
+// TODO(mtaylee): Delete 'Currently allocated instances' row when
+// ClassInstancesWidget implementation is completed.
+/// Generates a list of key-value pairs (map entries) containing the general
+/// information of the class object [clazz].
+List<MapEntry<String, WidgetBuilder>> _classDataRows(
+  ClassObject clazz,
+) {
+  return [
+    ...vmObjectGeneralDataRows(clazz),
+    selectableTextBuilderMapEntry('Superclass', clazz.obj.superClass?.name),
+    selectableTextBuilderMapEntry('SuperType', clazz.obj.superType?.name),
+    selectableTextBuilderMapEntry(
+      'Currently allocated instances',
+      clazz.instances?.totalCount?.toString(),
+    ),
+  ];
 }
 
+// TODO(mtaylee): Finish implementation of widget to display
+// all class instances. When done, remove the last row of the ClassInfoWidget.
 /// Displays information on the instances of the Class object.
 class ClassInstancesWidget extends StatelessWidget {
   const ClassInstancesWidget({
@@ -101,13 +76,16 @@ class ClassInstancesWidget extends StatelessWidget {
     return VMInfoCard(
       title: 'Class Instances',
       rowKeyValues: [
-        MapEntry('Currently allocated', instances?.totalCount),
-        const MapEntry('Strongly reachable', 'TO-DO'),
-        const MapEntry('All direct instances', 'TO-DO'),
-        const MapEntry('All instances of subclasses', 'TO-DO'),
-        const MapEntry('All instances of implementors', 'TO-DO'),
-        const MapEntry('Reachable size', 'TO-DO'),
-        const MapEntry('Retained size', 'TO-DO'),
+        selectableTextBuilderMapEntry(
+          'Currently allocated',
+          instances?.totalCount?.toString(),
+        ),
+        selectableTextBuilderMapEntry('Strongly reachable', 'TO-DO'),
+        selectableTextBuilderMapEntry('All direct instances', 'TO-DO'),
+        selectableTextBuilderMapEntry('All instances of subclasses', 'TO-DO'),
+        selectableTextBuilderMapEntry('All instances of implementors', 'TO-DO'),
+        selectableTextBuilderMapEntry('Reachable size', 'TO-DO'),
+        selectableTextBuilderMapEntry('Retained size', 'TO-DO'),
       ],
     );
   }

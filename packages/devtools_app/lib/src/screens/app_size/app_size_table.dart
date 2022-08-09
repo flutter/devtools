@@ -19,7 +19,7 @@ class AppSizeAnalysisTable extends StatelessWidget {
     required AppSizeController controller,
   }) {
     final treeColumn = _NameColumn(
-      currentRootLevel: controller.isDeferredApp
+      currentRootLevel: controller.isDeferredApp.value
           ? rootNode.children[0].level
           : rootNode.level,
     );
@@ -28,7 +28,7 @@ class AppSizeAnalysisTable extends StatelessWidget {
       treeColumn,
       sizeColumn,
       _SizePercentageColumn(
-        totalSize: controller.isDeferredApp
+        totalSize: controller.isDeferredApp.value
             ? rootNode.children[0].root.byteSize
             : rootNode.root.byteSize,
       ),
@@ -62,7 +62,8 @@ class AppSizeAnalysisTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TreeTable<TreemapNode>(
-      dataRoots: controller.isDeferredApp ? rootNode.children : [rootNode],
+      dataRoots:
+          controller.isDeferredApp.value ? rootNode.children : [rootNode],
       columns: columns,
       treeColumn: treeColumn,
       keyFactory: (node) => PageStorageKey<String>(node.name),
@@ -83,10 +84,15 @@ class _NameColumn extends TreeColumnData<TreemapNode> {
   String getValue(TreemapNode dataObject) => dataObject.name;
 
   @override
+  String? getCaption(TreemapNode dataObject) =>
+      dataObject.caption != null ? dataObject.caption : null;
+
+  @override
   bool get supportsSorting => true;
 
   @override
-  String getTooltip(TreemapNode dataObject) => dataObject.displayText();
+  String getTooltip(TreemapNode dataObject) =>
+      dataObject.displayText().toPlainText();
 
   @override
   double getNodeIndentPx(TreemapNode dataObject) {
