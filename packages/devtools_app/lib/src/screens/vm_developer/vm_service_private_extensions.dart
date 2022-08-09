@@ -260,5 +260,5 @@ enum GuardClassKind {
 /// An extension on [Script] which allows for access to VM internal fields.
 extension ScriptPrivateViewExtension on Script {
   static const _loadTimeKey = '_loadTime';
-  int? get loadTime => json![_loadTimeKey];
+  int get loadTime => json![_loadTimeKey]!;
 }
