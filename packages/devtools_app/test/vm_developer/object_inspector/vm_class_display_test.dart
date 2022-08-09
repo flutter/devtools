@@ -32,10 +32,7 @@ void main() {
     testClassCopy.size = 1024;
 
     mockVmObject(mockClassObject);
-    when(mockClassObject.name).thenReturn(testClass.name);
-    when(mockClassObject.ref).thenReturn(testClassCopy);
     when(mockClassObject.obj).thenReturn(testClassCopy);
-    when(mockClassObject.instances).thenReturn(testInstances);
   });
 
   testWidgetsWithWindowSize('builds class display', windowSize,

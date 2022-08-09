@@ -453,7 +453,7 @@ class RetainingPathWidget extends StatelessWidget {
       final ref = object.value;
       final parentListIndex = object.parentListIndex;
 
-      final parentListName = _containerClass(ref) ?? '<parentListName>';
+      final parentListName = _instanceClass(ref) ?? '<parentListName>';
 
       return 'Retained by element [$parentListIndex] of $parentListName';
     }
@@ -462,7 +462,7 @@ class RetainingPathWidget extends StatelessWidget {
       final ref = object.value;
       final parentMapKey = _objectName(object.parentMapKey);
 
-      final parentMapName = _containerClass(ref) ?? '<parentMapName>';
+      final parentMapName = _instanceClass(ref) ?? '<parentMapName>';
 
       return 'Retained by element at [$parentMapKey] of $parentMapName';
     }
@@ -481,7 +481,7 @@ class RetainingPathWidget extends StatelessWidget {
   }
 }
 
-String? _containerClass(ObjRef? object) {
+String? _instanceClass(ObjRef? object) {
   if (object == null) {
     return null;
   }
@@ -566,7 +566,7 @@ class InboundReferencesWidget extends StatelessWidget {
       final ref = inboundRef.source;
       final parentListIndex = inboundRef.parentListIndex;
 
-      final parentListName = _containerClass(ref) ?? '<parentListName>';
+      final parentListName = _instanceClass(ref) ?? '<parentListName>';
 
       return 'Referenced by element [$parentListIndex] of $parentListName';
     }

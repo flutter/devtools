@@ -39,8 +39,9 @@ class VmFuncDisplay extends StatelessWidget {
     String? boolYesOrNo(bool? condition) {
       if (condition == null) {
         return null;
+      } else {
+        return condition ? 'Yes' : 'No';
       }
-      return condition == true ? 'Yes' : 'No';
     }
 
     return [
@@ -83,7 +84,7 @@ class VmFuncDisplay extends StatelessWidget {
 
     final kind = StringBuffer();
 
-    final addSpace = () => kind.write(kind.isNotEmpty ? ' ' : '');
+    void addSpace() => kind.write(kind.isNotEmpty ? ' ' : '');
 
     if (function.obj.isStatic == true) {
       kind.write('static');

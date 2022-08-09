@@ -35,8 +35,6 @@ void main() {
     testFunctionCopy.isConst = true;
 
     mockVmObject(mockFuncObject);
-    when(mockFuncObject.name).thenReturn(testFunctionCopy.name);
-    when(mockFuncObject.ref).thenReturn(testFunctionCopy);
     when(mockFuncObject.obj).thenReturn(testFunctionCopy);
     when(mockFuncObject.kind).thenReturn(FunctionKind.ImplicitClosureFunction);
     when(mockFuncObject.deoptimizations).thenReturn(3);
@@ -46,7 +44,6 @@ void main() {
     when(mockFuncObject.isRecognized).thenReturn(false);
     when(mockFuncObject.isNative).thenReturn(null);
     when(mockFuncObject.vmName).thenReturn('DartVM');
-    when(mockFuncObject.icDataArray).thenReturn(null);
   });
 
   group('function display test', () {

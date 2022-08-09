@@ -228,4 +228,35 @@ void mockVmObject(VmObject object) {
   when(object.inboundReferences).thenReturn(
     ValueNotifier<InboundReferences?>(testInboundRefs),
   );
+
+  if (object is ClassObject) {
+    when(object.name).thenReturn(testClass.name);
+    when(object.ref).thenReturn(testClass);
+    when(object.obj).thenReturn(testClass);
+    when(object.instances).thenReturn(testInstances);
+  }
+
+  if (object is FieldObject) {
+    when(object.name).thenReturn(testField.name);
+    when(object.ref).thenReturn(testField);
+    when(object.obj).thenReturn(testField);
+    when(object.guardClass).thenReturn(null);
+    when(object.guardNullable).thenReturn(null);
+    when(object.guardClassKind).thenReturn(null);
+  }
+
+  if (object is FuncObject) {
+    when(object.name).thenReturn(testFunction.name);
+    when(object.ref).thenReturn(testFunction);
+    when(object.obj).thenReturn(testFunction);
+    when(object.kind).thenReturn(null);
+    when(object.deoptimizations).thenReturn(null);
+    when(object.isOptimizable).thenReturn(null);
+    when(object.isInlinable).thenReturn(null);
+    when(object.hasIntrinsic).thenReturn(null);
+    when(object.isRecognized).thenReturn(null);
+    when(object.isNative).thenReturn(null);
+    when(object.vmName).thenReturn(null);
+    when(object.icDataArray).thenReturn(null);
+  }
 }

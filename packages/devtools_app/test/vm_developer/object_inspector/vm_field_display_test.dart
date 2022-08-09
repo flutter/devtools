@@ -42,12 +42,7 @@ void main() {
     testFieldCopy.staticValue = fieldStaticValue;
 
     mockVmObject(mockFieldObject);
-    when(mockFieldObject.name).thenReturn(testFieldCopy.name);
-    when(mockFieldObject.ref).thenReturn(testFieldCopy);
     when(mockFieldObject.obj).thenReturn(testFieldCopy);
-    when(mockFieldObject.guardClass).thenReturn(null);
-    when(mockFieldObject.guardNullable).thenReturn(null);
-    when(mockFieldObject.guardClassKind).thenReturn(null);
   });
 
   group('field data display tests', () {

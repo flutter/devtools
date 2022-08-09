@@ -57,10 +57,6 @@ void main() {
       mockClassObject = MockClassObject();
 
       mockVmObject(mockClassObject);
-      when(mockClassObject.name).thenReturn(testClass.name);
-      when(mockClassObject.ref).thenReturn(testClass);
-      when(mockClassObject.obj).thenReturn(testClass);
-      when(mockClassObject.instances).thenReturn(null);
     });
 
     testWidgets('viewport shows class display', (WidgetTester tester) async {
@@ -82,12 +78,6 @@ void main() {
       mockFieldObject = MockFieldObject();
 
       mockVmObject(mockFieldObject);
-      when(mockFieldObject.name).thenReturn(testField.name);
-      when(mockFieldObject.ref).thenReturn(testField);
-      when(mockFieldObject.obj).thenReturn(testField);
-      when(mockFieldObject.guardClass).thenReturn(null);
-      when(mockFieldObject.guardNullable).thenReturn(null);
-      when(mockFieldObject.guardClassKind).thenReturn(null);
     });
 
     testWidgets('viewport shows field display', (WidgetTester tester) async {
@@ -116,20 +106,8 @@ void main() {
       testFunctionCopy = Func.parse(funcJson)!;
 
       mockVmObject(mockFuncObject);
-      when(mockFuncObject.name).thenReturn(testFunctionCopy.name);
-      when(mockFuncObject.ref).thenReturn(testFunctionCopy);
       when(mockFuncObject.obj).thenReturn(testFunctionCopy);
-      when(mockFuncObject.kind).thenReturn(null);
-      when(mockFuncObject.deoptimizations).thenReturn(null);
-      when(mockFuncObject.isOptimizable).thenReturn(null);
-      when(mockFuncObject.isInlinable).thenReturn(null);
-      when(mockFuncObject.hasIntrinsic).thenReturn(null);
-      when(mockFuncObject.isRecognized).thenReturn(null);
-      when(mockFuncObject.isNative).thenReturn(null);
-      when(mockFuncObject.vmName).thenReturn(null);
-      when(mockFuncObject.icDataArray).thenReturn(null);
     });
-
     testWidgets('viewport shows function display', (WidgetTester tester) async {
       testObjectInspectorViewController.fakeObjectHistory
           .setCurrentObject(mockFuncObject);
@@ -144,45 +122,53 @@ void main() {
     });
   });
 
-  testWidgets('test for scriptObject', (WidgetTester tester) async {
-    final fakeScript = Script(uri: 'foo.dart', library: testLib, id: '1234');
-    final fakeScriptRef = ScriptRef(uri: 'foo.dart', id: '1234');
-    final testScriptObject =
-        TestScriptObject(ref: fakeScriptRef, testScript: fakeScript);
-    testObjectInspectorViewController.fakeObjectHistory
-        .setCurrentObject(testScriptObject);
-    await tester.pumpWidget(
-      wrap(ObjectViewport(controller: testObjectInspectorViewController)),
-    );
-    expect(viewportTitle(testScriptObject), 'Script @ foo.dart');
-    expect(find.text('Script @ foo.dart'), findsOneWidget);
-    expect(find.byType(VMInfoCard), findsOneWidget);
+  group('test for script object:', () {
+    testWidgets('builds display for scriptObject', (WidgetTester tester) async {
+      final fakeScript = Script(uri: 'foo.dart', library: testLib, id: '1234');
+      final fakeScriptRef = ScriptRef(uri: 'foo.dart', id: '1234');
+      final testScriptObject =
+          TestScriptObject(ref: fakeScriptRef, testScript: fakeScript);
+      testObjectInspectorViewController.fakeObjectHistory
+          .setCurrentObject(testScriptObject);
+      await tester.pumpWidget(
+        wrap(ObjectViewport(controller: testObjectInspectorViewController)),
+      );
+      expect(viewportTitle(testScriptObject), 'Script @ foo.dart');
+      expect(find.text('Script @ foo.dart'), findsOneWidget);
+      expect(find.byType(VMInfoCard), findsOneWidget);
+    });
   });
 
-  testWidgets('test for Library Object', (WidgetTester tester) async {
-    final testLibraryObject =
-        TestLibraryObject(ref: testLib, testLibrary: testLib);
-    testObjectInspectorViewController.fakeObjectHistory
-        .setCurrentObject(testLibraryObject);
-    await tester.pumpWidget(
-      wrap(ObjectViewport(controller: testObjectInspectorViewController)),
-    );
-    expect(viewportTitle(testLibraryObject), 'Library FooLib');
-    expect(find.text('Library FooLib'), findsOneWidget);
-    expect(find.byType(VMInfoCard), findsOneWidget);
+  group('test for library object:', () {
+    testWidgets('builds display for LibraryObject',
+        (WidgetTester tester) async {
+      final testLibraryObject =
+          TestLibraryObject(ref: testLib, testLibrary: testLib);
+      testObjectInspectorViewController.fakeObjectHistory
+          .setCurrentObject(testLibraryObject);
+      await tester.pumpWidget(
+        wrap(ObjectViewport(controller: testObjectInspectorViewController)),
+      );
+      expect(viewportTitle(testLibraryObject), 'Library FooLib');
+      expect(find.text('Library FooLib'), findsOneWidget);
+      expect(find.byType(VMInfoCard), findsOneWidget);
+    });
   });
 
-  testWidgets('test for Instance Object', (WidgetTester tester) async {
-    final testInstanceObject =
-        TestInstanceObject(ref: testInstance, testInstance: testInstance);
-    testObjectInspectorViewController.fakeObjectHistory
-        .setCurrentObject(testInstanceObject);
-    await tester.pumpWidget(
-      wrap(ObjectViewport(controller: testObjectInspectorViewController)),
-    );
-    expect(viewportTitle(testInstanceObject), 'Instance FooInstance');
-    expect(find.text('Instance FooInstance'), findsOneWidget);
-    expect(find.byType(VMInfoCard), findsOneWidget);
+  group('test for instance object:', () {
+    testWidgets('builds display for Instance Object',
+        (WidgetTester tester) async {
+      final testInstanceObject =
+          TestInstanceObject(ref: testInstance, testInstance: testInstance);
+      testObjectInspectorViewController.fakeObjectHistory
+          .setCurrentObject(testInstanceObject);
+      await tester.pumpWidget(
+        wrap(ObjectViewport(controller: testObjectInspectorViewController)),
+      );
+      expect(viewportTitle(testInstanceObject), 'Instance FooInstance');
+      expect(find.text('Instance FooInstance'), findsOneWidget);
+      expect(find.byType(VMInfoCard), findsOneWidget);
+    });
   });
 
   group('test ObjectHistory', () {
