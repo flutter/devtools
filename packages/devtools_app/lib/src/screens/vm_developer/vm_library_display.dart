@@ -52,7 +52,7 @@ class VmLibraryDisplay extends StatelessWidget {
   }
 }
 
-// An expandable tile displaying a list of library dependencies
+/// An expandable tile displaying a list of library dependencies
 class LibraryDependencies extends StatelessWidget {
   const LibraryDependencies({
     required this.dependencies,
@@ -61,14 +61,16 @@ class LibraryDependencies extends StatelessWidget {
   final List<LibraryDependency> dependencies;
 
   List<Row> dependencyRows(BuildContext context) {
+    final textStyle = Theme.of(context).fixedFontStyle;
+
     return <Row>[
       for (final dep in dependencies)
         Row(
           children: [
             Flexible(
               child: SelectableText(
-                _dependencyDescription(dep),
-                style: Theme.of(context).fixedFontStyle,
+                dependencyDescription(dep),
+                style: textStyle,
               ),
             ),
           ],
@@ -76,26 +78,36 @@ class LibraryDependencies extends StatelessWidget {
     ];
   }
 
-  String _dependencyDescription(LibraryDependency dependency) {
+  @visibleForTesting
+  String dependencyDescription(LibraryDependency dependency) {
     final description = StringBuffer();
+    final void Function() addSpace =
+        () => description.write(description.isEmpty ? '' : ' ');
 
     if (dependency.isImport != null) {
-      description.write(dependency.isImport! ? 'import ' : 'export ');
+      description.write(dependency.isImport! ? 'import' : 'export');
     }
+
+    addSpace();
 
     description.write(
       dependency.target?.name ?? dependency.target?.uri ?? '<Library name>',
     );
 
-    if (dependency.prefix != null) {
-      final prefix = dependency.prefix!;
+    addSpace();
+
+    final prefix = dependency.prefix;
+
+    if (prefix != null) {
       if (prefix.isNotEmpty) {
-        description.write(' as $prefix');
+        description.write('as $prefix');
       }
     }
 
+    addSpace();
+
     if (dependency.isDeferred == true) {
-      description.write(' deferred');
+      description.write('deferred');
     }
 
     return description.toString();
