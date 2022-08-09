@@ -55,13 +55,13 @@ void main() {
     data: json.decode(deferredApp),
   );
 
-  final diffDeferredAppFile = DevToolsJsonFile(
+  DevToolsJsonFile(
     name: 'lib/src/app_size/stub_data/diff_deferred_app.dart',
     lastModifiedTime: lastModifiedTime,
     data: json.decode(diffDeferredApp),
   );
 
-  final diffNonDeferredAppFile = DevToolsJsonFile(
+  DevToolsJsonFile(
     name: 'lib/src/app_size/stub_data/diff_no_deferred_app.dart',
     lastModifiedTime: lastModifiedTime,
     data: json.decode(diffNonDeferredApp),
