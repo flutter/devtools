@@ -174,37 +174,33 @@ class AppSizeController {
     }
   }
 
+  DiffTreeMap? get _activeDiffMap {
+    final appUnit = _selectedAppUnit.value;
+
+    switch (appUnit) {
+      case AppUnit.mainOnly:
+        return _mainDiffTreeMap;
+      case AppUnit.deferredOnly:
+        return _deferredDiffTreeMap;
+      case AppUnit.entireApp:
+      default:
+        return _diffTreeMap;
+    }
+  }
+
   TreemapNode? get _activeDiffRoot {
     final diffTreeType = _activeDiffTreeType.value;
-    final appUnit = _selectedAppUnit.value;
+    final diffMap = _activeDiffMap;
 
     switch (diffTreeType) {
       case DiffTreeType.increaseOnly:
-        if (appUnit == AppUnit.mainOnly) {
-          return _mainDiffTreeMap!.increaseOnly;
-        } else if (appUnit == AppUnit.deferredOnly) {
-          return _deferredDiffTreeMap!.decreaseOnly;
-        } else {
-          return _diffTreeMap!.increaseOnly;
-        }
+        return diffMap!.increaseOnly;
       case DiffTreeType.decreaseOnly:
-        if (appUnit == AppUnit.mainOnly) {
-          return _mainDiffTreeMap!.increaseOnly;
-        } else if (appUnit == AppUnit.deferredOnly) {
-          return _deferredDiffTreeMap!.decreaseOnly;
-        } else {
-          return _diffTreeMap!.decreaseOnly;
-        }
+        return diffMap!.decreaseOnly;
       case DiffTreeType.combined:
-        if (appUnit == AppUnit.mainOnly) {
-          return _mainDiffTreeMap!.combined;
-        } else if (appUnit == AppUnit.deferredOnly) {
-          return _deferredDiffTreeMap!.combined;
-        } else {
-          return _diffTreeMap!.combined;
-        }
+        return diffMap!.combined;
       default:
-        return _diffTreeMap!.combined;
+        return diffMap!.combined;
     }
   }
 
