@@ -34,14 +34,10 @@ void main() {
     testFunctionCopy.isStatic = true;
     testFunctionCopy.isConst = true;
 
-    when(mockFuncObject.outlineNode).thenReturn(null);
-    when(mockFuncObject.scriptRef).thenReturn(null);
+    mockVmObject(mockFuncObject);
     when(mockFuncObject.name).thenReturn(testFunctionCopy.name);
     when(mockFuncObject.ref).thenReturn(testFunctionCopy);
     when(mockFuncObject.obj).thenReturn(testFunctionCopy);
-    when(mockFuncObject.script).thenReturn(testScript);
-    when(mockFuncObject.pos).thenReturn(testPos);
-
     when(mockFuncObject.kind).thenReturn(FunctionKind.ImplicitClosureFunction);
     when(mockFuncObject.deoptimizations).thenReturn(3);
     when(mockFuncObject.isOptimizable).thenReturn(true);
@@ -51,19 +47,6 @@ void main() {
     when(mockFuncObject.isNative).thenReturn(null);
     when(mockFuncObject.vmName).thenReturn('DartVM');
     when(mockFuncObject.icDataArray).thenReturn(null);
-
-    when(mockFuncObject.fetchingReachableSize)
-        .thenReturn(ValueNotifier<bool>(false));
-    when(mockFuncObject.reachableSize).thenReturn(testRequestableSize);
-    when(mockFuncObject.fetchingRetainedSize)
-        .thenReturn(ValueNotifier<bool>(false));
-    when(mockFuncObject.retainedSize).thenReturn(testRequestableSize);
-    when(mockFuncObject.retainingPath).thenReturn(
-      ValueNotifier<RetainingPath?>(testRetainingPath),
-    );
-    when(mockFuncObject.inboundReferences).thenReturn(
-      ValueNotifier<InboundReferences?>(testInboundRefs),
-    );
   });
 
   group('function display test', () {

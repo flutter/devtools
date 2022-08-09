@@ -83,9 +83,7 @@ class VmFuncDisplay extends StatelessWidget {
 
     final kind = StringBuffer();
 
-    final void Function() addSpace = () {
-      kind.write(kind.isNotEmpty ? ' ' : '');
-    };
+    final addSpace = () => kind.write(kind.isNotEmpty ? ' ' : '');
 
     if (function.obj.isStatic == true) {
       kind.write('static');

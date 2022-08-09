@@ -149,7 +149,13 @@ class FuncObject extends VmObject {
   @override
   SourceLocation? get _sourceLocation => obj.location;
 
-  late final FunctionKind? kind;
+  FunctionKind? get kind {
+    final funcKind = obj.kind;
+    return funcKind == null
+        ? null
+        : FunctionKind.values
+            .firstWhereOrNull((element) => element.kind() == funcKind);
+  }
 
   int? get deoptimizations => obj.deoptimizations;
 
@@ -170,12 +176,6 @@ class FuncObject extends VmObject {
   @override
   Future<void> initialize() async {
     await super.initialize();
-
-    final funcKind = obj.kind;
-    kind = funcKind == null
-        ? null
-        : FunctionKind.values
-            .firstWhereOrNull((element) => element.kind() == funcKind);
 
     icDataArray = await obj.icDataArray;
   }
