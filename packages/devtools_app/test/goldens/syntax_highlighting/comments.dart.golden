@@ -12,11 +12,11 @@
 >/// ```
 #^^^^^^^ comment.block.documentation.dart
 >/// doc
+#^^^^^^^ comment.block.documentation.dart
 #   ^^^^ comment.block.documentation.dart variable.other.source.dart
-#^^^^^^^ comment.block.documentation.dart
 >/// ```
-#   ^ comment.block.documentation.dart variable.other.source.dart
 #^^^^^^^ comment.block.documentation.dart
+#   ^ comment.block.documentation.dart variable.other.source.dart
 >///
 #^^^ comment.block.documentation.dart
 >/// ...
@@ -52,14 +52,14 @@
 > *
 #^^ comment.block.documentation.dart
 > * /**
-#   ^^^ comment.block.documentation.dart comment.block.documentation.dart
 #^^^^^^ comment.block.documentation.dart
+#   ^^^ comment.block.documentation.dart comment.block.documentation.dart
 > *  * Nested block
 #^^^^^^^^^^^^^^^^^^ comment.block.documentation.dart comment.block.documentation.dart
 #^^^^^^^^^^^^^^^^^^ comment.block.documentation.dart
 > *  */
-#^^^^^^ comment.block.documentation.dart comment.block.documentation.dart
 #^^^^^^ comment.block.documentation.dart
+#^^^^^^ comment.block.documentation.dart comment.block.documentation.dart
 > */
 #^^^ comment.block.documentation.dart
 >var d;
@@ -73,8 +73,8 @@
 > *
 #^^ comment.block.documentation.dart
 > * /* Inline */
-#   ^^^^^^^^^^^^ comment.block.documentation.dart comment.block.dart
 #^^^^^^^^^^^^^^^ comment.block.documentation.dart
+#   ^^^^^^^^^^^^ comment.block.documentation.dart comment.block.dart
 > */
 #^^^ comment.block.documentation.dart
 >var e;
@@ -98,8 +98,8 @@
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ comment.block.documentation.dart
 #                              ^^^ comment.block.documentation.dart variable.name.source.dart
 >/// And a link to [example.org](http://example.org/).
-#                  ^^^^^^^^^^^^^ comment.block.documentation.dart variable.name.source.dart
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ comment.block.documentation.dart
+#                  ^^^^^^^^^^^^^ comment.block.documentation.dart variable.name.source.dart
 >var h;
 #^^^ storage.type.primitive.dart
 #     ^ punctuation.terminator.dart

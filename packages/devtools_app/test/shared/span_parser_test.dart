@@ -218,7 +218,10 @@ String _buildGoldenText(String content, List<ScopeSpan> spans) {
           final offsetToStartOfNextLine = lineLengthWithNewline - col;
           length = thisLineLength;
           spansByLine[i + 1] ??= [];
-          spansByLine[i + 1]!.add(
+          // Insert the wrapped span before other spans on the next line so the
+          // order is preserved.
+          spansByLine[i + 1]!.insert(
+            0,
             ScopeSpan.copy(
               scopes: span.scopes,
               start: span.start + offsetToStartOfNextLine,

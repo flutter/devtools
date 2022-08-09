@@ -47,22 +47,22 @@
 #  ^^^^^ entity.name.function.dart
 #        ^^^^^^^ string.interpolated.single.dart
 >    return 'Hello';
+#^^^^^^^^^^^^ string.interpolated.single.dart
 #            ^^^^^ support.class.dart
 #                 ^^ string.interpolated.single.dart
-#^^^^^^^^^^^^ string.interpolated.single.dart
 >  }}');
-#      ^ punctuation.terminator.dart
 #^^^^^ string.interpolated.single.dart
+#      ^ punctuation.terminator.dart
 >  print('print(${() {
 #  ^^^^^ entity.name.function.dart
 #        ^^^^^^^^^^^^^ string.interpolated.single.dart
 >    return 'Hello';
+#^^^^^^^^^^^^ string.interpolated.single.dart
 #            ^^^^^ support.class.dart
 #                 ^^ string.interpolated.single.dart
-#^^^^^^^^^^^^ string.interpolated.single.dart
 >  }()})');
-#         ^ punctuation.terminator.dart
 #^^^^^^^^ string.interpolated.single.dart
+#         ^ punctuation.terminator.dart
 >  print('${() => 'Hello'}');
 #  ^^^^^ entity.name.function.dart
 #        ^^^^^^^^^^^^^^^^^^ string.interpolated.single.dart
