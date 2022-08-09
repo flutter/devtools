@@ -449,20 +449,19 @@ class RetainingPathWidget extends StatelessWidget {
   /// Describes the given RetainingObject [object] and its parentListIndex,
   /// parentMapKey, and parentField where applicable.
   String _retainingObjectDescription(RetainingObject object) {
-    if (object.parentListIndex != null) {
-      final ref = object.value;
-      final parentListIndex = object.parentListIndex;
-
-      final parentListName = _instanceClass(ref) ?? '<parentListName>';
-
-      return 'Retained by element [$parentListIndex] of $parentListName';
+    final parentListIndex = object.parentListIndex;
+    if (parentListIndex != null) {
+      return 'Retained by ${_parentListElementDescription(
+        parentListIndex,
+        object.value,
+      )}';
     }
 
     if (object.parentMapKey != null) {
       final ref = object.value;
       final parentMapKey = _objectName(object.parentMapKey);
 
-      final parentMapName = _instanceClass(ref) ?? '<parentMapName>';
+      final parentMapName = _instanceClassName(ref) ?? '<parentMapName>';
 
       return 'Retained by element at [$parentMapKey] of $parentMapName';
     }
@@ -481,12 +480,17 @@ class RetainingPathWidget extends StatelessWidget {
   }
 }
 
-String? _instanceClass(ObjRef? object) {
+String? _instanceClassName(ObjRef? object) {
   if (object == null) {
     return null;
   }
 
   return object is InstanceRef ? object.classRef?.name : _objectName(object);
+}
+
+String _parentListElementDescription(int listIndex, ObjRef? obj) {
+  final parentListName = _instanceClassName(obj) ?? '<parentListName>';
+  return 'element [$listIndex] of $parentListName';
 }
 
 /// An expandable list to display the inbound references for a given
@@ -562,13 +566,12 @@ class InboundReferencesWidget extends StatelessWidget {
   /// Describes the given InboundReference [inboundRef] and its parentListIndex,
   /// [offset], and parentField where applicable.
   String _inboundRefDescription(InboundReference inboundRef, int? offset) {
-    if (inboundRef.parentListIndex != null) {
-      final ref = inboundRef.source;
-      final parentListIndex = inboundRef.parentListIndex;
-
-      final parentListName = _instanceClass(ref) ?? '<parentListName>';
-
-      return 'Referenced by element [$parentListIndex] of $parentListName';
+    final parentListIndex = inboundRef.parentListIndex;
+    if (parentListIndex != null) {
+      return 'Referenced by ${_parentListElementDescription(
+        parentListIndex,
+        inboundRef.source,
+      )}';
     }
 
     final description = StringBuffer('Referenced by ');

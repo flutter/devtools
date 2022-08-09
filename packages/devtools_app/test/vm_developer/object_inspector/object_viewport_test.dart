@@ -122,37 +122,32 @@ void main() {
     });
   });
 
-  group('test for script object:', () {
-    testWidgets('builds display for scriptObject', (WidgetTester tester) async {
-      final fakeScript = Script(uri: 'foo.dart', library: testLib, id: '1234');
-      final fakeScriptRef = ScriptRef(uri: 'foo.dart', id: '1234');
-      final testScriptObject =
-          TestScriptObject(ref: fakeScriptRef, testScript: fakeScript);
-      testObjectInspectorViewController.fakeObjectHistory
-          .setCurrentObject(testScriptObject);
-      await tester.pumpWidget(
-        wrap(ObjectViewport(controller: testObjectInspectorViewController)),
-      );
-      expect(viewportTitle(testScriptObject), 'Script @ foo.dart');
-      expect(find.text('Script @ foo.dart'), findsOneWidget);
-      expect(find.byType(VMInfoCard), findsOneWidget);
-    });
+  testWidgets('test for scriptObject', (WidgetTester tester) async {
+    final fakeScript = Script(uri: 'foo.dart', library: testLib, id: '1234');
+    final fakeScriptRef = ScriptRef(uri: 'foo.dart', id: '1234');
+    final testScriptObject =
+        TestScriptObject(ref: fakeScriptRef, testScript: fakeScript);
+    testObjectInspectorViewController.fakeObjectHistory
+        .setCurrentObject(testScriptObject);
+    await tester.pumpWidget(
+      wrap(ObjectViewport(controller: testObjectInspectorViewController)),
+    );
+    expect(viewportTitle(testScriptObject), 'Script @ foo.dart');
+    expect(find.text('Script @ foo.dart'), findsOneWidget);
+    expect(find.byType(VMInfoCard), findsOneWidget);
   });
 
-  group('test for library object:', () {
-    testWidgets('builds display for LibraryObject',
-        (WidgetTester tester) async {
-      final testLibraryObject =
-          TestLibraryObject(ref: testLib, testLibrary: testLib);
-      testObjectInspectorViewController.fakeObjectHistory
-          .setCurrentObject(testLibraryObject);
-      await tester.pumpWidget(
-        wrap(ObjectViewport(controller: testObjectInspectorViewController)),
-      );
-      expect(viewportTitle(testLibraryObject), 'Library FooLib');
-      expect(find.text('Library FooLib'), findsOneWidget);
-      expect(find.byType(VMInfoCard), findsOneWidget);
-    });
+  testWidgets('test for Library Object', (WidgetTester tester) async {
+    final testLibraryObject =
+        TestLibraryObject(ref: testLib, testLibrary: testLib);
+    testObjectInspectorViewController.fakeObjectHistory
+        .setCurrentObject(testLibraryObject);
+    await tester.pumpWidget(
+      wrap(ObjectViewport(controller: testObjectInspectorViewController)),
+    );
+    expect(viewportTitle(testLibraryObject), 'Library FooLib');
+    expect(find.text('Library FooLib'), findsOneWidget);
+    expect(find.byType(VMInfoCard), findsOneWidget);
   });
 
   group('test for instance object:', () {

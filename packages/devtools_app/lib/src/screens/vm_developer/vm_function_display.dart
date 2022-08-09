@@ -39,9 +39,8 @@ class VmFuncDisplay extends StatelessWidget {
     String? boolYesOrNo(bool? condition) {
       if (condition == null) {
         return null;
-      } else {
-        return condition ? 'Yes' : 'No';
       }
+      return condition ? 'Yes' : 'No';
     }
 
     return [
