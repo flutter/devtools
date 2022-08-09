@@ -475,7 +475,7 @@ class _MultilineMatcher extends _Matcher {
     if (end != null && !scanner.scan(end!)) {
       return null;
     }
-    return _processCaptureHelper(scanner, beginCaptures, line, column);
+    return _processCaptureHelper(scanner, endCaptures, line, column);
   }
 
   List<ScopeSpan> _processCaptureHelper(
