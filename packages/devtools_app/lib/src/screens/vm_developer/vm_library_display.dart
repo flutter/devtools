@@ -81,11 +81,11 @@ class LibraryDependencies extends StatelessWidget {
   @visibleForTesting
   String dependencyDescription(LibraryDependency dependency) {
     final description = StringBuffer();
-    final void Function() addSpace =
-        () => description.write(description.isEmpty ? '' : ' ');
+    void addSpace() => description.write(description.isEmpty ? '' : ' ');
 
-    if (dependency.isImport != null) {
-      description.write(dependency.isImport! ? 'import' : 'export');
+    final isImport = dependency.isImport;
+    if (isImport != null) {
+      description.write(isImport ? 'import' : 'export');
     }
 
     addSpace();
@@ -94,19 +94,14 @@ class LibraryDependencies extends StatelessWidget {
       dependency.target?.name ?? dependency.target?.uri ?? '<Library name>',
     );
 
-    addSpace();
-
     final prefix = dependency.prefix;
 
-    if (prefix != null) {
-      if (prefix.isNotEmpty) {
-        description.write('as $prefix');
-      }
+    if (prefix != null && prefix.isNotEmpty) {
+      addSpace();
+      description.write('as $prefix');
     }
-
-    addSpace();
-
     if (dependency.isDeferred == true) {
+      addSpace();
       description.write('deferred');
     }
 

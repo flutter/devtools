@@ -7,6 +7,7 @@ import 'package:devtools_app/src/screens/vm_developer/object_viewport.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_class_display.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_developer_common_widgets.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_field_display.dart';
+import 'package:devtools_app/src/screens/vm_developer/vm_library_display.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_object_model.dart';
 import 'package:devtools_app/src/scripts/script_manager.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
@@ -139,17 +140,25 @@ void main() {
     expect(find.byType(VmFieldDisplay), findsOneWidget);
   });
 
-  testWidgets('test for Library Object', (WidgetTester tester) async {
-    final testLibraryObject =
-        TestLibraryObject(ref: testLib, testLibrary: testLib);
-    testObjectInspectorViewController.fakeObjectHistory
-        .setCurrentObject(testLibraryObject);
-    await tester.pumpWidget(
-      wrap(ObjectViewport(controller: testObjectInspectorViewController)),
-    );
-    expect(viewportTitle(testLibraryObject), 'Library FooLib');
-    expect(find.text('Library FooLib'), findsOneWidget);
-    expect(find.byType(VMInfoCard), findsOneWidget);
+  group('test for library object:', () {
+    late MockLibraryObject mockLibraryObject;
+
+    setUp(() {
+      mockLibraryObject = MockLibraryObject();
+
+      mockVmObject(mockLibraryObject);
+    });
+
+    testWidgets('viewport shows library display', (WidgetTester tester) async {
+      testObjectInspectorViewController.fakeObjectHistory
+          .setCurrentObject(mockLibraryObject);
+      await tester.pumpWidget(
+        wrap(ObjectViewport(controller: testObjectInspectorViewController)),
+      );
+      expect(viewportTitle(mockLibraryObject), 'Library fooLib');
+      expect(find.text('Library fooLib'), findsOneWidget);
+      expect(find.byType(VmLibraryDisplay), findsOneWidget);
+    });
   });
 
   testWidgets('test for Instance Object', (WidgetTester tester) async {

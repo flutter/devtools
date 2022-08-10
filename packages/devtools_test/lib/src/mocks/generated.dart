@@ -29,6 +29,7 @@ import 'package:vm_service/vm_service.dart';
   ClassObject,
   CodeObject,
   FieldObject,
+  LibraryObject,
   ui.Image,
 ])
 void main() {}

@@ -226,7 +226,7 @@ String? _objectName(ObjRef? objectRef) {
     objectRefName =
         (objectRef.name?.isEmpty ?? false) ? objectRef.uri : objectRef.name;
   } else if (objectRef is ScriptRef) {
-    objectRefName = _fileNameFromUri(objectRef.uri);
+    objectRefName = fileNameFromUri(objectRef.uri);
   } else if (objectRef is InstanceRef) {
     objectRefName = objectRef.name ??
         'Instance of ${objectRef.classRef?.name ?? '<Class>'}';
@@ -565,12 +565,6 @@ class InboundReferencesWidget extends StatelessWidget {
   }
 }
 
-String? _fileNameFromUri(String? uri) {
-  if (uri == null) return null;
-  final parts = uri.split('/');
-  return parts[parts.length - 1];
-}
-
 /// A widget for the object inspector historyViewport containing the main
 /// layout of information widgets related to VM object types.
 class VmObjectDisplayBasicLayout extends StatelessWidget {
@@ -689,7 +683,7 @@ List<MapEntry<String, WidgetBuilder>> vmObjectGeneralDataRows(
     if (object is! ScriptObject && object is! LibraryObject)
       selectableTextBuilderMapEntry(
         'Script',
-        '${_fileNameFromUri(object.script?.uri) ?? ''}:${object.pos?.toString() ?? ''}',
+        '${fileNameFromUri(object.script?.uri) ?? ''}:${object.pos?.toString() ?? ''}',
       ),
   ];
 }
