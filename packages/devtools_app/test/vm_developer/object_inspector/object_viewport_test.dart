@@ -8,6 +8,7 @@ import 'package:devtools_app/src/screens/vm_developer/vm_class_display.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_developer_common_widgets.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_field_display.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_object_model.dart';
+import 'package:devtools_app/src/screens/vm_developer/vm_script_display.dart';
 import 'package:devtools_app/src/scripts/script_manager.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
@@ -111,19 +112,25 @@ void main() {
     expect(find.byType(VmClassDisplay), findsOneWidget);
   });
 
-  testWidgets('test for scriptObject', (WidgetTester tester) async {
-    final fakeScript = Script(uri: 'foo.dart', library: testLib, id: '1234');
-    final fakeScriptRef = ScriptRef(uri: 'foo.dart', id: '1234');
-    final testScriptObject =
-        TestScriptObject(ref: fakeScriptRef, testScript: fakeScript);
-    testObjectInspectorViewController.fakeObjectHistory
-        .setCurrentObject(testScriptObject);
-    await tester.pumpWidget(
-      wrap(ObjectViewport(controller: testObjectInspectorViewController)),
-    );
-    expect(viewportTitle(testScriptObject), 'Script @ foo.dart');
-    expect(find.text('Script @ foo.dart'), findsOneWidget);
-    expect(find.byType(VMInfoCard), findsOneWidget);
+  group('test for script object:', () {
+    late MockScriptObject mockScriptObject;
+
+    setUp(() {
+      mockScriptObject = MockScriptObject();
+
+      mockVmObject(mockScriptObject);
+    });
+
+    testWidgets('viewport shows script display', (WidgetTester tester) async {
+      testObjectInspectorViewController.fakeObjectHistory
+          .setCurrentObject(mockScriptObject);
+      await tester.pumpWidget(
+        wrap(ObjectViewport(controller: testObjectInspectorViewController)),
+      );
+      expect(viewportTitle(mockScriptObject), 'Script fooScript.dart');
+      expect(find.text('Script fooScript.dart'), findsOneWidget);
+      expect(find.byType(VmScriptDisplay), findsOneWidget);
+    });
   });
 
   testWidgets('test for Field Object', (WidgetTester tester) async {
