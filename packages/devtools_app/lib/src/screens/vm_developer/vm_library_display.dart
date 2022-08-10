@@ -99,6 +99,7 @@ class LibraryDependencies extends StatelessWidget {
       addSpace();
       description.write('as $prefix');
     }
+
     if (dependency.isDeferred == true) {
       addSpace();
       description.write('deferred');
