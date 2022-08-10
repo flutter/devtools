@@ -19,36 +19,31 @@ const double _countColumnWidth = 130;
 
 /// Displays an allocation profile as a tree of stack frames, displaying
 /// inclusive and exclusive allocation counts.
-class AllocationTracingTree extends StatefulWidget {
+class AllocationTracingTree extends StatelessWidget {
   const AllocationTracingTree({required this.controller});
 
   final AllocationProfileTracingViewController controller;
 
   @override
-  State<AllocationTracingTree> createState() => AllocationTracingTreeState();
-}
-
-class AllocationTracingTreeState extends State<AllocationTracingTree> {
-  @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<TracedClass?>(
-      valueListenable: widget.controller.selectedTracedClass,
+      valueListenable: controller.selectedTracedClass,
       builder: (context, selection, _) {
         Widget? errorColumn;
         if (selection == null) {
-          errorColumn = _allocationTrackingInstructions(context);
+          errorColumn = _allocationTracingInstructions(context);
         } else if (!selection.traceAllocations) {
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'Allocation tracking is not enabled for class ${selection.cls.name}.\n',
+                'Allocation tracing is not enabled for class ${selection.cls.name}.\n',
               ),
-              _allocationTrackingInstructions(context),
+              _allocationTracingInstructions(context),
             ],
           );
         } else if (selection.traceAllocations &&
-            widget.controller.selectedTracedClassAllocationData!.isEmpty) {
+            controller.selectedTracedClassAllocationData!.isEmpty) {
           errorColumn = Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -61,7 +56,7 @@ class AllocationTracingTreeState extends State<AllocationTracingTree> {
         if (errorColumn != null) {
           return errorColumn;
         }
-
+        late Function(Function()) updateTreeStateCallback;
         final theme = Theme.of(context);
         return Column(
           children: [
@@ -74,8 +69,7 @@ class AllocationTracingTreeState extends State<AllocationTracingTree> {
                     ),
                     TextSpan(
                       style: theme.fixedFontStyle,
-                      text: widget
-                          .controller.selectedTracedClass.value?.cls.name!,
+                      text: controller.selectedTracedClass.value?.cls.name!,
                     ),
                   ],
                 ),
@@ -84,14 +78,13 @@ class AllocationTracingTreeState extends State<AllocationTracingTree> {
               needsTopBorder: false,
               actions: [
                 ExpandAllButton(
-                  onPressed: () => setState(
+                  onPressed: () => updateTreeStateCallback(
                     () {
-                      final data =
-                          widget.controller.selectedTracedClassAllocationData;
+                      final data = controller.selectedTracedClassAllocationData;
                       if (data == null) {
                         return;
                       }
-                      for (final root in data.callTreeRoots) {
+                      for (final root in data.bottomUpRoots) {
                         root.expandCascading();
                       }
                     },
@@ -99,14 +92,13 @@ class AllocationTracingTreeState extends State<AllocationTracingTree> {
                 ),
                 const SizedBox(width: denseSpacing),
                 CollapseAllButton(
-                  onPressed: () => setState(
+                  onPressed: () => updateTreeStateCallback(
                     () {
-                      final data =
-                          widget.controller.selectedTracedClassAllocationData;
+                      final data = controller.selectedTracedClassAllocationData;
                       if (data == null) {
                         return;
                       }
-                      for (final root in data.callTreeRoots) {
+                      for (final root in data.bottomUpRoots) {
                         root.collapseCascading();
                       }
                     },
@@ -115,11 +107,16 @@ class AllocationTracingTreeState extends State<AllocationTracingTree> {
               ],
             ),
             Expanded(
-              child: _AllocationProfileTracingCallTreeTable(
-                cls: selection!.cls,
-                // TODO(bkonyi): support call stack and bottom up views.
-                dataRoots: widget.controller.selectedTracedClassAllocationData!
-                    .bottomUpRoots,
+              child: StatefulBuilder(
+                builder: (context, setState) {
+                  updateTreeStateCallback = setState;
+                  return _AllocationProfileTracingCallTreeTable(
+                    cls: selection!.cls,
+                    // TODO(bkonyi): support call stack and bottom up views.
+                    dataRoots: controller
+                        .selectedTracedClassAllocationData!.bottomUpRoots,
+                  );
+                },
               ),
             ),
           ],
@@ -128,12 +125,12 @@ class AllocationTracingTreeState extends State<AllocationTracingTree> {
     );
   }
 
-  Widget _allocationTrackingInstructions(BuildContext context) {
+  Widget _allocationTracingInstructions(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const Text(
-          'To track allocations for a class, enable the '
+          'To trace allocations for a class, enable the '
           'checkbox for that class in the table.',
         ),
         Row(
@@ -243,7 +240,6 @@ class _AllocationProfileTracingCallTreeTable extends StatefulWidget {
 
 class _AllocationProfileTracingCallTreeTableState
     extends State<_AllocationProfileTracingCallTreeTable> {
-
   static final treeColumn = MethodNameColumn();
   static final startingSortColumn = _InclusiveCountColumn();
   static final columns = List<ColumnData<CpuStackFrame>>.unmodifiable([

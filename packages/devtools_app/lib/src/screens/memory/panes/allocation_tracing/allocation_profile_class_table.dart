@@ -1,3 +1,7 @@
+// Copyright 2022 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/material.dart';
 
 import '../../../../primitives/utils.dart';
@@ -10,14 +14,15 @@ import 'allocation_profile_tracing_view_controller.dart';
 /// instances, memory).
 const _defaultNumberFieldWidth = 80.0;
 
-class _TrackCheckBox extends ColumnData<TracedClass>
+class _TraceCheckBox extends ColumnData<TracedClass>
     implements ColumnRenderer<TracedClass> {
-  _TrackCheckBox({
+  _TraceCheckBox({
     required this.controller,
     required this.setState,
   }) : super(
-          'Track',
-          titleTooltip: 'Track Class Allocations',
+          'Trace',
+          titleTooltip:
+              'Enable or disable allocation tracing for a specific type',
           fixedWidthPx: scaleByFontFactor(55.0),
           alignment: ColumnAlignment.left,
         );
@@ -109,7 +114,7 @@ class _AllocationTracingTableState extends State<AllocationTracingTable> {
   void initState() {
     super.initState();
     columns = <ColumnData<TracedClass>>[
-      _TrackCheckBox(
+      _TraceCheckBox(
         controller: widget.controller,
         setState: setState,
       ),

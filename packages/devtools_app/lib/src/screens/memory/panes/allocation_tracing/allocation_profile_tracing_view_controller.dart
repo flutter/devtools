@@ -10,6 +10,9 @@ import '../../../../shared/globals.dart';
 import '../../../profiler/cpu_profile_model.dart';
 import '../../../profiler/cpu_profile_transformer.dart';
 
+// TODO(bkonyi): make compatible with ClassHeapDetailStats for serialization /
+// deserialization support.
+/// A representation of a class and it's allocation tracing state.
 class TracedClass {
   TracedClass({
     required this.cls,
@@ -41,18 +44,24 @@ class TracedClass {
 
 class AllocationProfileTracingViewController extends DisposableController
     with AutoDisposeControllerMixin {
+  /// Set to `true` if the controller has not yet finished initializing.
   ValueListenable<bool> get initializing => _initializing;
   final _initializing = ValueNotifier<bool>(true);
 
+  /// Set to `true` when `refresh()` has been called and allocation profiles
+  /// are being updated, before then being set again to `false`.
   ValueListenable<bool> get refreshing => _refreshing;
   final _refreshing = ValueNotifier<bool>(false);
 
+  /// The list of classes for the currently selected isolate.
   List<TracedClass> get classList => _tracedClasses.values.toList();
 
-  ValueListenable<TracedClass?> get selectedTracedClass =>
-      _selectedTracedClass;
+  /// The current class selection in the [AllocationTracingTable]
+  ValueListenable<TracedClass?> get selectedTracedClass => _selectedTracedClass;
   final _selectedTracedClass = ValueNotifier<TracedClass?>(null);
 
+  /// The allocation profile data for the current class selection in the
+  /// [AllocationTracingTable].
   CpuProfileData? get selectedTracedClassAllocationData =>
       _tracedClassesProfiles[selectedTracedClass.value?.cls.id!];
 
@@ -168,8 +177,8 @@ class AllocationProfileTracingViewController extends DisposableController
   }
 
   /// Updates `selectedTracedClass` with the current selection from the
-  /// `AllocationTracingTable`. 
+  /// `AllocationTracingTable`.
   void selectTracedClass(TracedClass? traced) {
-      _selectedTracedClass.value = traced;
+    _selectedTracedClass.value = traced;
   }
 }

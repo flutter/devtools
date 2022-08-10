@@ -100,11 +100,10 @@ class _ProfileHelpLink extends StatelessWidget {
             'list, displaying a condensed view of locations where objects\n'
             'were allocated.',
           ),
-          // TODO(bkonyi): update link
           MoreInfoLink(
             url: 'https://github.com/flutter/devtools/blob/master/'
                 'packages/devtools_app/lib/src/screens/memory/panes/'
-                'allocation_profile/ALLOCATION_PROFILE.md',
+                'allocation_tracing/ALLOCATION_TRACING.md',
             gaScreenName: '',
             gaSelectedItemDescription:
                 analytics_constants.topicDocumentationLink(_documentationTopic),
