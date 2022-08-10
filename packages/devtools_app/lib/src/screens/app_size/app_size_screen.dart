@@ -209,8 +209,10 @@ class _AppSizeBodyState extends State<AppSizeBody>
                   Row(
                     children: [
                       if (isDeferredApp) _buildAppUnitDropdown(currentTab.key!),
-                      if (currentTab.key == AppSizeScreen.diffTabKey)
+                      if (currentTab.key == AppSizeScreen.diffTabKey) ...[
+                        const SizedBox(width: defaultSpacing),
                         _buildDiffTreeTypeDropdown(),
+                      ],
                       const SizedBox(width: defaultSpacing),
                       _buildClearButton(currentTab.key!),
                     ],
