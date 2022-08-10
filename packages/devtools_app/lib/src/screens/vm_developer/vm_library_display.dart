@@ -78,7 +78,6 @@ class LibraryDependencies extends StatelessWidget {
     ];
   }
 
-  @visibleForTesting
   String dependencyDescription(LibraryDependency dependency) {
     final description = StringBuffer();
     void addSpace() => description.write(description.isEmpty ? '' : ' ');
