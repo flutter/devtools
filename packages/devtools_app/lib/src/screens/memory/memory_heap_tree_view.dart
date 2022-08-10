@@ -158,7 +158,8 @@ class HeapTreeViewState extends State<HeapTree>
   @visibleForTesting
   static const dartHeapTableProfileKey = Key('Dart Heap Profile Tab');
   @visibleForTesting
-  static const dartHeapAllocationTracingKey = Key('Dart Heap Allocation Tracing Tab');
+  static const dartHeapAllocationTracingKey =
+      Key('Dart Heap Allocation Tracing Tab');
   @visibleForTesting
   static const diffTabKey = Key('Diff Tab');
 
