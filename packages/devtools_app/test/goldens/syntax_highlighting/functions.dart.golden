@@ -24,9 +24,9 @@
 >
 >Future<void> asyncPrint() async {
 #^^^^^^ support.class.dart
-#      ^ keyword.operator.comparison.dart
+#      ^ other.source.dart
 #       ^^^^ storage.type.primitive.dart
-#           ^ keyword.operator.comparison.dart
+#           ^ other.source.dart
 #             ^^^^^^^^^^ entity.name.function.dart
 #                          ^^^^^ keyword.control.dart
 >  await Future.delayed(const Duration(seconds: 1));
