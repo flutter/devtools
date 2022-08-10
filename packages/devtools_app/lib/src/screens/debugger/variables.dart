@@ -11,7 +11,6 @@ import '../../primitives/listenable.dart';
 import '../../primitives/utils.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
-import '../../shared/notifications.dart';
 import '../../shared/object_tree.dart';
 import '../../shared/routing.dart';
 import '../../shared/theme.dart';
@@ -166,7 +165,6 @@ Widget displayProvider(
             ? (delegate) async {
                 delegate.hideToolbar();
                 final router = DevToolsRouterDelegate.of(context);
-                final notifications = Notifications.of(context);
                 final inspectorService = serviceManager.inspectorService;
                 if (await variable.inspectWidget()) {
                   router.navigateIfNotCurrent(InspectorScreen.id);
@@ -175,11 +173,11 @@ Widget displayProvider(
                   final isInspectable = await variable.isInspectable;
                   if (inspectorService.isDisposed) return;
                   if (isInspectable) {
-                    notifications?.push(
+                    notificationService.push(
                       'Widget is already the current inspector selection.',
                     );
                   } else {
-                    notifications?.push(
+                    notificationService.push(
                       'Only Elements and RenderObjects can currently be inspected',
                     );
                   }

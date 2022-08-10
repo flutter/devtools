@@ -10,7 +10,6 @@ import '../../../../config_specific/import_export/import_export.dart';
 import '../../../../primitives/utils.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
-import '../../../../shared/notifications.dart';
 import '../../../../shared/table.dart';
 import '../../../../shared/table_data.dart';
 import '../../../../shared/theme.dart';
@@ -369,9 +368,7 @@ class _ExportAllocationProfileButton extends StatelessWidget {
               : () {
                   final file = allocationProfileController
                       .downloadMemoryTableCsv(currentAllocationProfile);
-                  Notifications.of(context)!.push(
-                    successfulExportMessage(file),
-                  );
+                  notificationService.push(successfulExportMessage(file));
                 },
           minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
         );
