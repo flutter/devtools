@@ -123,7 +123,7 @@ final testInboundRefList = [
   ),
 ];
 
-final testLoadTime = DateTime(2022, 8, 10, 3, 33);
+final testLoadTime = DateTime(2022, 8, 10, 6, 30);
 
 class TestInboundReferences extends InboundReferences {
   TestInboundReferences({required super.references});

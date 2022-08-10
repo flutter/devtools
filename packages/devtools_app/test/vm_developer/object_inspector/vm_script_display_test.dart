@@ -48,7 +48,7 @@ void main() {
     expect(find.text('URI:'), findsOneWidget);
     expect(find.text('fooScript.dart'), findsOneWidget);
     expect(find.text('Load time:'), findsOneWidget);
-    expect(find.text('2022-08-10 03:33:00.000'), findsOneWidget);
+    expect(find.text('2022-08-10 06:30:00.000'), findsOneWidget);
 
     expect(find.byType(RequestableSizeWidget), findsNWidgets(2));
 
