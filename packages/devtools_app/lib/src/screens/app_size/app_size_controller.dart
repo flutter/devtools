@@ -262,6 +262,7 @@ class AppSizeController {
     _diffCallGraphRoot.value = null;
     _oldDiffCallGraph = null;
     _newDiffCallGraph = null;
+    _isDeferredApp.value = false;
   }
 
   void _clearAnalysis() {
@@ -269,6 +270,7 @@ class AppSizeController {
     _analysisJsonFile.value = null;
     _analysisCallGraphRoot.value = null;
     _analysisCallGraph = null;
+    _isDeferredApp.value = false;
   }
 
   /// The active diff tree type used to build the diff treemap.
