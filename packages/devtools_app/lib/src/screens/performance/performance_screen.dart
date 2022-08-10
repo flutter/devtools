@@ -16,7 +16,6 @@ import '../../service/service_extensions.dart' as extensions;
 import '../../shared/banner_messages.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
-import '../../shared/notifications.dart';
 import '../../shared/screen.dart';
 import '../../shared/split.dart';
 import '../../shared/theme.dart';
@@ -346,7 +345,7 @@ class SecondaryPerformanceControls extends StatelessWidget {
     // download always successful?
     // TODO(peterdjlee): find a way to push the notification logic into the
     // export controller.
-    Notifications.of(context)!.push(successfulExportMessage(exportedFile));
+    notificationService.push(successfulExportMessage(exportedFile));
   }
 
   void _openSettingsDialog(BuildContext context) {

@@ -18,6 +18,7 @@ import 'package:vm_service/vm_service.dart';
   FrameAnalysis,
   FramePhase,
   HeapSnapshotGraph,
+  InspectorController,
   PerformanceController,
   ProgramExplorerController,
   ScriptManager,

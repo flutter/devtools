@@ -168,6 +168,9 @@ class DevToolsServerConnection {
       case 'notify':
         notify();
         return;
+      case 'ping':
+        ping();
+        return;
       default:
         print('Unknown request $method from server');
     }
@@ -207,5 +210,11 @@ class DevToolsServerConnection {
       'key': key,
       'value': value,
     });
+  }
+
+  /// Allows the server to ping the client to see that it is definitely still
+  /// active and doesn't just appear to be connected because of SSE timeouts.
+  void ping() {
+    _callMethod('pingResponse');
   }
 }

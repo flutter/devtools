@@ -126,13 +126,10 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       }
     });
     addAutoDisposeListener(preferences.inspector.customPubRootDirectories, () {
-      _refreshInspector();
+      if (serviceManager.hasConnection) {
+        _refreshInspector();
+      }
     });
-    addAutoDisposeListener(serviceManager.isolateManager.mainIsolate, () {
-      _refreshInspector();
-      preferences.inspector.loadCustomPubRootDirectories();
-    });
-    preferences.inspector.loadCustomPubRootDirectories();
   }
 
   @override
@@ -336,7 +333,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
 class FlutterInspectorSettingsDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    const showPackageDirectorySection = false;
     final theme = Theme.of(context);
     final dialogHeight = scaleByFontFactor(400.0);
     return DevToolsDialog(
@@ -360,25 +356,20 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
                   'Hovering over any widget displays its properties and values.',
               gaItem: analytics_constants.inspectorHoverEvalMode,
             ),
-            // TODO(CoderDake): add PubRootDirectory section back when
-            // finalizing https://github.com/flutter/devtools/issues/3941
-            // ignore: dead_code
-            if (showPackageDirectorySection) ...[
-              const SizedBox(height: denseSpacing),
-              ...dialogSubHeader(Theme.of(context), 'Package Directories'),
-              Text(
-                'Widgets in these directories will show up in your summary tree.',
-                style: theme.subtleTextStyle,
-              ),
-              Text(
-                '(e.g. /absolute/path/to/myPackage)',
-                style: theme.subtleTextStyle,
-              ),
-              const SizedBox(height: denseSpacing),
-              Expanded(
-                child: PubRootDirectorySection(),
-              ),
-            ]
+            const SizedBox(height: denseSpacing),
+            ...dialogSubHeader(Theme.of(context), 'Package Directories'),
+            Text(
+              'Widgets in these directories will show up in your summary tree.',
+              style: theme.subtleTextStyle,
+            ),
+            Text(
+              '(e.g. /absolute/path/to/myPackage)',
+              style: theme.subtleTextStyle,
+            ),
+            const SizedBox(height: denseSpacing),
+            Expanded(
+              child: PubRootDirectorySection(),
+            ),
           ],
         ),
       ),

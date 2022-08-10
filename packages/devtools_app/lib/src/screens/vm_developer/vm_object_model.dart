@@ -45,13 +45,13 @@ abstract class VmObject {
   SourcePosition? _pos;
 
   ValueListenable<bool> get fetchingReachableSize => _fetchingReachableSize;
-  final ValueNotifier<bool> _fetchingReachableSize = ValueNotifier(false);
+  final _fetchingReachableSize = ValueNotifier<bool>(false);
 
   InstanceRef? get reachableSize => _reachableSize;
   InstanceRef? _reachableSize;
 
   ValueListenable<bool> get fetchingRetainedSize => _fetchingRetainedSize;
-  final ValueNotifier<bool> _fetchingRetainedSize = ValueNotifier(false);
+  final _fetchingRetainedSize = ValueNotifier<bool>(false);
 
   InstanceRef? get retainedSize => _retainedSize;
   InstanceRef? _retainedSize;

@@ -15,6 +15,7 @@ import 'package:devtools_app/src/screens/memory/panes/control/source_dropdown.da
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/common_widgets.dart';
 import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/notifications.dart';
 import 'package:devtools_app/src/ui/search.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -124,6 +125,7 @@ void main() {
           .thenReturn(ValueNotifier<int>(0));
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(IdeTheme, IdeTheme());
+      setGlobal(NotificationService, NotificationService());
       screen = const MemoryScreen();
     });
 

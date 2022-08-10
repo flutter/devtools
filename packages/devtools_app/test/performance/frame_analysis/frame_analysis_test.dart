@@ -12,6 +12,7 @@ import 'package:devtools_app/src/screens/performance/performance_controller.dart
 import 'package:devtools_app/src/screens/performance/performance_model.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/notifications.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -37,6 +38,7 @@ void main() {
       setGlobal(OfflineModeController, OfflineModeController());
       final fakeServiceManager = FakeServiceManager();
       setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(NotificationService, NotificationService());
       mockConnectedApp(
         fakeServiceManager.connectedApp!,
         isFlutterApp: true,
