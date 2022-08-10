@@ -212,11 +212,7 @@ class ScriptObject extends VmObject {
   @override
   String? get name => fileNameFromUri(obj.uri ?? scriptRef?.uri);
 
-  DateTime? get loadTime {
-    final time = obj.loadTime;
-
-    return time == null ? null : DateTime.fromMillisecondsSinceEpoch(time);
-  }
+  DateTime get loadTime => DateTime.fromMillisecondsSinceEpoch(obj.loadTime);
 }
 
 //TODO(mtaylee): finish class implementation.
