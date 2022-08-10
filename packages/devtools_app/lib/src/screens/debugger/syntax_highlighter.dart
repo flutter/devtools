@@ -67,7 +67,7 @@ class SyntaxHighlighter {
     }
     final scopes = _spanStack.last.scopes;
 
-    if (scopes == null || scopes.isEmpty) {
+    if (scopes.isEmpty) {
       return const TextStyle();
     } else if (scopes.length == 1) {
       return _scopeStyles[scopes.first!] ?? const TextStyle();
