@@ -168,7 +168,7 @@ String _buildGoldenText(String content, List<ScopeSpan> spans) {
         buffer.write(' ' * col);
         buffer.write('^' * length);
         buffer.write(' ');
-        buffer.writeln(span.scopes!.join(' '));
+        buffer.writeln(span.scopes.join(' '));
       }
     }
   }

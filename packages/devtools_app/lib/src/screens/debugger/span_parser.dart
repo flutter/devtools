@@ -5,6 +5,7 @@
 import 'dart:collection';
 import 'dart:convert';
 
+import 'package:collection/collection.dart';
 import 'package:string_scanner/string_scanner.dart';
 
 // ignore: avoid_classes_with_only_static_members
@@ -105,7 +106,7 @@ class ScopeSpan {
   /// The one-based column number.
   int get column => startLocation.column + 1;
 
-  final List<String?>? scopes;
+  final List<String?> scopes;
 
   bool contains(int token) => (start <= token) && (token < end);
 
@@ -125,7 +126,7 @@ class ScopeSpan {
 
     // Start with a copy of the original span
     ScopeSpan current = ScopeSpan(
-      scopes: scopes!.toList(),
+      scopes: scopes.toList(),
       startLocation: startLocation,
       endLocation: endLocation,
     );
@@ -141,7 +142,7 @@ class ScopeSpan {
 
         // Create a new span based on the current position.
         current = ScopeSpan(
-          scopes: scopes!.toList(),
+          scopes: scopes.toList(),
           startLocation: splitScanner.location,
           // Will be updated later.
           endLocation: ScopeStackLocation.zero,
@@ -577,14 +578,10 @@ class ScopeStack {
     }
 
     // Whenever we push a new item, produce a span for the region between the
-    // last started scope and the new current position...
+    // last started scope and the new current position.
     if (location.position > _nextLocation.position) {
       final scopes = stack.map((item) => item.scope).toSet();
-      // ... unless this scope is not new, in which case we can just keep the
-      // previous span open.
-      if (!scopes.contains(scope)) {
-        _produceSpan(scopes, end: location);
-      }
+      _produceSpan(scopes, end: location);
     }
 
     // Add this new scope to the stack, but don't produce its token yet. We will
@@ -605,11 +602,7 @@ class ScopeStack {
     assert(last.scope == scope);
     assert(last.location.position <= end.position);
 
-    // Only produce a span if the scope we're popping is not still in the stack
-    // somewhere.
-    if (!stack.any((item) => item.scope == scope)) {
-      _produceSpan(scopes, end: end);
-    }
+    _produceSpan(scopes, end: end);
   }
 
   void popAll(ScopeStackLocation location) {
@@ -646,10 +639,10 @@ class ScopeStack {
         .expand((spanToSplit) => spanToSplit.split(scanner, condition))) {
       // To handler spans with multiple scopes, we need to push each scope, and
       // then pop each scope. We cannot use `add`.
-      for (final scope in span.scopes ?? <String?>[]) {
+      for (final scope in span.scopes) {
         push(scope, span.startLocation);
       }
-      for (final scope in span.scopes?.reversed ?? const <String?>[]) {
+      for (final scope in span.scopes.reversed) {
         pop(scope, span.endLocation);
       }
     }
@@ -662,12 +655,29 @@ class ScopeStack {
     // Don't produce zero-width spans.
     if (end.position == _nextLocation.position) return;
 
-    final span = ScopeSpan(
-      scopes: scopes.toList(),
-      startLocation: _nextLocation,
-      endLocation: end,
-    );
-    spans.add(span);
+    // If the new span starts at the same place that the previous one ends and
+    // has the same scopes, we can replace the previous one with a single new
+    // larger span.
+    final newScopes = scopes.toList();
+    final lastSpan = spans.lastOrNull;
+    if (lastSpan != null &&
+        lastSpan.endLocation.position == _nextLocation.position &&
+        lastSpan.scopes.equals(newScopes)) {
+      final span = ScopeSpan(
+        scopes: newScopes,
+        startLocation: lastSpan.startLocation,
+        endLocation: end,
+      );
+      // Replace the last span with this one.
+      spans[spans.length - 1] = span;
+    } else {
+      final span = ScopeSpan(
+        scopes: newScopes,
+        startLocation: _nextLocation,
+        endLocation: end,
+      );
+      spans.add(span);
+    }
     _nextLocation = end;
   }
 }
