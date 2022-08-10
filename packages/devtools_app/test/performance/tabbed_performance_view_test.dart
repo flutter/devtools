@@ -15,6 +15,7 @@ import 'package:devtools_app/src/screens/performance/tabbed_performance_view.dar
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/common_widgets.dart';
 import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/notifications.dart';
 import 'package:devtools_app/src/shared/preferences.dart';
 import 'package:devtools_app/src/shared/version.dart';
 import 'package:devtools_app/src/ui/tab.dart';
@@ -60,6 +61,7 @@ void main() {
       await _setUpServiceManagerWithTimeline(testTimelineJson);
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(PreferencesController, PreferencesController());
+      setGlobal(NotificationService, NotificationService());
       controller = createMockPerformanceControllerWithDefaults();
       frameAnalysisSupported = true;
       rasterMetricsSupported = true;

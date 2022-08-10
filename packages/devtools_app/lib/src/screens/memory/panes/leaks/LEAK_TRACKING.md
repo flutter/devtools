@@ -123,7 +123,7 @@ Leak tracking impacts CPU in two areas:
    Added ~0.05 of millisecond (~2.7%) to the total load time of 
    [Gallery](https://github.com/flutter/gallery) home page in profile mode on `macos`.
 
-2. Regular asyncronous analysis of the tracked objects.
+2. Regular asynchronous analysis of the tracked objects.
    Took ~2.5 millisectonds for [Gallery](https://github.com/flutter/gallery) home page in
    profile mode on `macos`. 
    

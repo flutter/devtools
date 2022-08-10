@@ -13,7 +13,6 @@ import '../primitives/auto_dispose_mixin.dart';
 import '../primitives/utils.dart';
 import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
-import '../shared/notifications.dart';
 import '../shared/routing.dart';
 import '../shared/theme.dart';
 import 'framework_core.dart';
@@ -123,7 +122,7 @@ class _InitializerState extends State<Initializer>
       '',
       explicitUri: uri,
       errorReporter: (message, error) =>
-          Notifications.of(context)!.push('$message, $error'),
+          notificationService.push('$message, $error'),
     );
 
     if (!connected) {

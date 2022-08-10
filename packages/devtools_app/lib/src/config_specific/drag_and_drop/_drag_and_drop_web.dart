@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:html';
 
 import '../../primitives/utils.dart';
+import '../../shared/globals.dart';
 import 'drag_and_drop.dart';
 
 DragAndDropManagerWeb createDragAndDropManager() {
@@ -61,13 +62,13 @@ class DragAndDropManagerWeb extends DragAndDropManager {
 
     final List<File> files = event.dataTransfer.files!;
     if (files.length > 1) {
-      activeState!.notifications.push('You cannot import more than one file.');
+      notificationService.push('You cannot import more than one file.');
       return;
     }
 
     final droppedFile = files.first;
     if (droppedFile.type != 'application/json') {
-      activeState!.notifications.push(
+      notificationService.push(
         '${droppedFile.type} is not a supported file type. Please import '
         'a .json file that was exported from Dart DevTools.',
       );
@@ -85,7 +86,7 @@ class DragAndDropManagerWeb extends DragAndDropManager {
         );
         activeState!.widget.handleDrop!(devToolsJsonFile);
       } on FormatException catch (e) {
-        activeState!.notifications.push(
+        notificationService.push(
           'JSON syntax error in imported file: "$e". Please make sure the '
           'imported file is a Dart DevTools file, and check that it has not '
           'been modified.',
@@ -97,7 +98,7 @@ class DragAndDropManagerWeb extends DragAndDropManager {
     try {
       reader.readAsText(droppedFile);
     } catch (e) {
-      activeState!.notifications.push('Could not import file: $e');
+      notificationService.push('Could not import file: $e');
     }
   }
 }

@@ -239,6 +239,19 @@ class MemoryController extends DisposableController
   MemoryController() {
     memoryTimeline = MemoryTimeline(offline);
     memoryLog = MemoryLog(this);
+
+    // Update the chart when the memorySource changes.
+    addAutoDisposeListener(memorySourceNotifier, () async {
+      try {
+        await updatedMemorySource();
+      } catch (e) {
+        final errorMessage = '$e';
+        memorySource = MemoryController.liveFeed;
+        notificationService.push(errorMessage);
+      }
+
+      refreshAllCharts();
+    });
   }
 
   /// Controller for [AllocationProfileTableView].

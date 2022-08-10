@@ -5,14 +5,10 @@
 @TestOn('vm')
 
 import 'package:ansicolor/ansicolor.dart';
-import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/logging/_log_details.dart';
 import 'package:devtools_app/src/screens/logging/_logs_table.dart';
-import 'package:devtools_app/src/screens/logging/logging_controller.dart';
-import 'package:devtools_app/src/screens/logging/logging_screen.dart';
-import 'package:devtools_app/src/service/service_manager.dart';
-import 'package:devtools_app/src/shared/common_widgets.dart';
-import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/notifications.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -39,6 +35,7 @@ void main() async {
   when(fakeServiceManager.errorBadgeManager.errorCountNotifier('logging'))
       .thenReturn(ValueNotifier<int>(0));
   setGlobal(ServiceConnectionManager, fakeServiceManager);
+  setGlobal(NotificationService, NotificationService());
   setGlobal(IdeTheme, IdeTheme());
 
   setUp(() {

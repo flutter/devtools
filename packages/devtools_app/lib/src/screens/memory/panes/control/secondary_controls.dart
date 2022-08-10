@@ -9,7 +9,7 @@ import '../../../../analytics/constants.dart' as analytics_constants;
 import '../../../../config_specific/logger/logger.dart';
 import '../../../../primitives/auto_dispose_mixin.dart';
 import '../../../../shared/common_widgets.dart';
-import '../../../../shared/notifications.dart';
+import '../../../../shared/globals.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../memory_controller.dart';
@@ -253,12 +253,9 @@ class _SecondaryControlsState extends State<SecondaryControls>
 
   void _exportToFile() {
     final outputPath = controller.memoryLog.exportMemory();
-    final notificationsState = Notifications.of(context);
-    if (notificationsState != null) {
-      notificationsState.push(
-        'Successfully exported file ${outputPath.last} to ${outputPath.first} directory',
-      );
-    }
+    notificationService.push(
+      'Successfully exported file ${outputPath.last} to ${outputPath.first} directory',
+    );
   }
 
   Future<void> _gc() async {

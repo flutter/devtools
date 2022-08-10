@@ -17,7 +17,6 @@ import '../../primitives/listenable.dart';
 import '../../shared/banner_messages.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
-import '../../shared/notifications.dart';
 import '../../shared/screen.dart';
 import '../../shared/theme.dart';
 import '../../shared/utils.dart';
@@ -427,7 +426,7 @@ class _SecondaryControls extends StatelessWidget {
     // download always successful?
     // TODO(peterdjlee): find a way to push the notification logic into the
     // export controller.
-    Notifications.of(context)!.push(successfulExportMessage(exportedFile));
+    notificationService.push(successfulExportMessage(exportedFile));
   }
 }
 

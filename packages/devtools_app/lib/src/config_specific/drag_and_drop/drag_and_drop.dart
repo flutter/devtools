@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 import '../../primitives/utils.dart';
-import '../../shared/notifications.dart';
 import '_drag_and_drop_stub.dart'
     if (dart.library.html) '_drag_and_drop_web.dart'
     if (dart.library.io) '_drag_and_drop_desktop.dart';
@@ -110,20 +109,12 @@ class DragAndDrop extends StatefulWidget {
 class DragAndDropState extends State<DragAndDrop> {
   final _dragging = ValueNotifier<bool>(false);
 
-  late NotificationsState notifications;
-
   bool _isActive = false;
 
   @override
   void initState() {
     super.initState();
     DragAndDropManager.instance.registerDragAndDrop(this);
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    notifications = Notifications.of(context)!;
   }
 
   @override

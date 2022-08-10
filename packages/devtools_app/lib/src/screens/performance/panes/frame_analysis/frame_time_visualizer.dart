@@ -191,7 +191,7 @@ class _FrameBlockGroup extends StatelessWidget {
   ///
   /// The adjusted widths will ensure each block is at least
   /// [_FramePhaseBlock.minBlockWidth] wide, and will modify surrounding block
-  /// widths to accomodate.
+  /// widths to accommodate.
   List<double> adjustedWidthsForBlocks(
     BoxConstraints constraints,
     int totalFlex,
