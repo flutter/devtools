@@ -170,7 +170,9 @@ void main() {
       expect(find.text('import dart:core as core deferred'), findsOneWidget);
       expect(find.text('export dart:math as math deferred'), findsOneWidget);
       expect(
-          find.text('dart:collection as collection deferred'), findsOneWidget);
+        find.text('dart:collection as collection deferred'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('libraries deferred', (WidgetTester tester) async {
