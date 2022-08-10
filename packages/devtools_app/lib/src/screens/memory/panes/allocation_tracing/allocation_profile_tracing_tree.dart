@@ -43,7 +43,7 @@ class AllocationTracingTree extends StatelessWidget {
             ],
           );
         } else if (selection.traceAllocations &&
-            controller.selectedTracedClassAllocationData!.isEmpty) {
+            controller.selectedTracedClassAllocationData == null) {
           errorColumn = Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
