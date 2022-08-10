@@ -42,18 +42,20 @@ void main() {
   });
 
   group('SpanParser', () {
+    final updateGoldens = autoUpdateGoldenFiles;
+
     /// Expects parsing [content] using produces the output in [goldenFile].
     void expectSpansMatchGolden(
       String content,
       List<ScopeSpan> spans,
       File goldenFile,
     ) {
-      if (!goldenFile.existsSync() && !autoUpdateGoldenFiles) {
+      if (!goldenFile.existsSync() && !updateGoldens) {
         fail('Missing golden file: ${goldenFile.path}');
       }
 
       final actual = _buildGoldenText(content, spans);
-      if (autoUpdateGoldenFiles) {
+      if (updateGoldens) {
         goldenFile.writeAsStringSync(actual);
       } else {
         final expected = goldenFile.readAsStringSync();

@@ -605,7 +605,11 @@ class ScopeStack {
     assert(last.scope == scope);
     assert(last.location.position <= end.position);
 
-    _produceSpan(scopes, end: end);
+    // Only produce a span if the scope we're popping is not still in the stack
+    // somewhere.
+    if (!stack.any((item) => item.scope == scope)) {
+      _produceSpan(scopes, end: end);
+    }
   }
 
   void popAll(ScopeStackLocation location) {

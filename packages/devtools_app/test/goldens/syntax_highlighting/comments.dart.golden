@@ -80,8 +80,7 @@
 #     ^ punctuation.terminator.dart
 >
 >/* Nested /* Inline */ */
-#^^^^^^^^^^^^^^^^^^^^^^ comment.block.dart
-#                      ^^^ comment.block.dart
+#^^^^^^^^^^^^^^^^^^^^^^^^^ comment.block.dart
 >var f;
 #^^^ storage.type.primitive.dart
 #     ^ punctuation.terminator.dart
