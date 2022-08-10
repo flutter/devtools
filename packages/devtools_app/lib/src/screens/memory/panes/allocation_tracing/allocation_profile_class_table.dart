@@ -3,36 +3,30 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../primitives/utils.dart';
+import '../../../../shared/common_widgets.dart';
 import '../../../../shared/table.dart';
 import '../../../../shared/table_data.dart';
 import '../../../../shared/utils.dart';
+import '../../memory_controller.dart';
 import 'allocation_profile_tracing_view_controller.dart';
 
 /// The default width for columns containing *mostly* numeric data (e.g.,
 /// instances, memory).
 const _defaultNumberFieldWidth = 80.0;
 
-class _TraceCheckBox extends ColumnData<TracedClass>
+class _TraceCheckBoxColumn extends ColumnData<TracedClass>
     implements ColumnRenderer<TracedClass> {
-  _TraceCheckBox({
-    required this.controller,
-    required this.setState,
-  }) : super(
+  _TraceCheckBoxColumn()
+      : super(
           'Trace',
           titleTooltip:
               'Enable or disable allocation tracing for a specific type',
           fixedWidthPx: scaleByFontFactor(55.0),
           alignment: ColumnAlignment.left,
         );
-
-  final AllocationProfileTracingViewController controller;
-
-  /// The `setState` function for [AllocationTracingTable], used to trigger a
-  /// rebuild of the table when allocation tracing is enabled or disabled as a
-  /// result of a checkbox state change in this column.
-  final Function(Function()) setState;
 
   @override
   bool get supportsSorting => false;
@@ -44,13 +38,12 @@ class _TraceCheckBox extends ColumnData<TracedClass>
     bool isRowSelected = false,
     VoidCallback? onPressed,
   }) {
+    final controller =
+        Provider.of<MemoryController>(context).allocationTracingController;
     return Checkbox(
       value: controller.isAllocationTracingEnabledForClass(item.cls),
       onChanged: (value) async {
-        // Do the async work before calling `setState`, otherwise we'll get
-        // flaky behavior.
         await controller.setAllocationTracingForClass(item.cls, value!);
-        setState(() {});
       },
     );
   }
@@ -67,10 +60,7 @@ class _TraceCheckBox extends ColumnData<TracedClass>
 }
 
 class _AllocationTracingTableClassName extends ColumnData<TracedClass> {
-  _AllocationTracingTableClassName()
-      : super.wide(
-          'Class',
-        );
+  _AllocationTracingTableClassName() : super.wide('Class');
 
   @override
   String? getValue(TracedClass stats) => stats.cls.name;
@@ -105,43 +95,31 @@ class AllocationTracingTable extends StatefulWidget {
 }
 
 class _AllocationTracingTableState extends State<AllocationTracingTable> {
-  late final List<ColumnData<TracedClass>> columns;
   SortDirection sortDirection = SortDirection.ascending;
-  late ColumnData<TracedClass> trackColumn;
-  late ColumnData<TracedClass> secondarySortColumn;
+  ColumnData<TracedClass> secondarySortColumn = _classNameColumn;
 
-  @override
-  void initState() {
-    super.initState();
-    columns = <ColumnData<TracedClass>>[
-      _TraceCheckBox(
-        controller: widget.controller,
-        setState: setState,
-      ),
-      _AllocationTracingTableClassName(),
-      _AllocationTracingTableInstances(),
-    ];
-    trackColumn = columns[0];
-    secondarySortColumn = columns[1];
-  }
+  static final _checkboxColumn = _TraceCheckBoxColumn();
+  static final _classNameColumn = _AllocationTracingTableClassName();
+  static final _instancesColumn = _AllocationTracingTableInstances();
+
+  static final columns = <ColumnData<TracedClass>>[
+    _checkboxColumn,
+    _classNameColumn,
+    _instancesColumn,
+  ];
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: widget.controller.refreshing,
-      builder: (context, _, __) {
+    return DualValueListenableBuilder<bool, List<TracedClass>>(
+      firstListenable: widget.controller.refreshing,
+      secondListenable: widget.controller.classList,
+      builder: (context, _, classList, __) {
         return FlatTable<TracedClass>(
           columns: columns,
-          data: widget.controller.classList,
+          data: classList,
           keyFactory: (e) => Key(e.cls.id!),
-          onItemSelected: (stats) {
-            final selected = widget.controller.selectedTracedClass.value;
-            // Clear the selection if the current selection is clicked again.
-            widget.controller.selectTracedClass(
-              selected == stats ? null : stats,
-            );
-          },
-          sortColumn: trackColumn,
+          onItemSelected: widget.controller.selectTracedClass,
+          sortColumn: _checkboxColumn,
           secondarySortColumn: secondarySortColumn,
           sortDirection: sortDirection,
           selectionNotifier: widget.controller.selectedTracedClass,

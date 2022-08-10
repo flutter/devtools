@@ -48,9 +48,7 @@ class _AllocationProfileTracingViewState
             const _ProfileHelpLink(),
           ],
         ),
-        const SizedBox(
-          height: denseRowSpacing,
-        ),
+        const SizedBox(height: denseRowSpacing),
         Expanded(
           child: Split(
             axis: Axis.horizontal,
@@ -104,7 +102,7 @@ class _ProfileHelpLink extends StatelessWidget {
             url: 'https://github.com/flutter/devtools/blob/master/'
                 'packages/devtools_app/lib/src/screens/memory/panes/'
                 'allocation_tracing/ALLOCATION_TRACING.md',
-            gaScreenName: '',
+            gaScreenName: analytics_constants.memory,
             gaSelectedItemDescription:
                 analytics_constants.topicDocumentationLink(_documentationTopic),
           )

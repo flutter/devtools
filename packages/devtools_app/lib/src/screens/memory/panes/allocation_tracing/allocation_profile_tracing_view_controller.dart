@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../primitives/auto_dispose.dart';
+import '../../../../primitives/utils.dart';
 import '../../../../shared/globals.dart';
 import '../../../profiler/cpu_profile_model.dart';
 import '../../../profiler/cpu_profile_transformer.dart';
@@ -54,7 +55,8 @@ class AllocationProfileTracingViewController extends DisposableController
   final _refreshing = ValueNotifier<bool>(false);
 
   /// The list of classes for the currently selected isolate.
-  List<TracedClass> get classList => _tracedClasses.values.toList();
+  ValueListenable<List<TracedClass>> get classList => _classList;
+  final _classList = ListValueNotifier<TracedClass>([]);
 
   /// The current class selection in the [AllocationTracingTable]
   ValueListenable<TracedClass?> get selectedTracedClass => _selectedTracedClass;
@@ -72,6 +74,18 @@ class AllocationProfileTracingViewController extends DisposableController
 
   Future<void> initialize() async {
     _initializing.value = true;
+
+    final isolateId = serviceManager.isolateManager.selectedIsolate.value!.id!;
+
+    // TODO(bkonyi): we don't need to request this unless we've had a hot reload.
+    // We generally need to rebuild this data if we've had a hot reload or
+    // switched the currently selected isolate.
+    final classList = await serviceManager.service!.getClassList(isolateId);
+    for (final cls in classList.classes!) {
+      _tracedClasses[cls.id!] = TracedClass(cls: cls);
+    }
+    _classList.addAll(_tracedClasses.values);
+
     await refresh();
     _initializing.value = false;
   }
@@ -79,20 +93,9 @@ class AllocationProfileTracingViewController extends DisposableController
   /// Refreshes the allocation profiles for the currently traced classes.
   Future<void> refresh() async {
     _refreshing.value = true;
-    final isolateId = serviceManager.isolateManager.selectedIsolate.value!.id!;
-
-    // TODO(bkonyi): we don't need to request this unless we've had a hot reload.
-    // We generally need to rebuild this data if we've had a hot reload or
-    // switched the currently selected isolate.
-    final classList = await serviceManager.service!.getClassList(isolateId);
 
     final profileRequests = <Future<void>>[];
-    for (final cls in classList.classes!) {
-      final tracedClass = _tracedClasses.putIfAbsent(
-        cls.id!,
-        () => TracedClass(cls: cls),
-      );
-
+    for (final tracedClass in _classList.value) {
       // If allocation tracing is enabled for this class, request an updated
       // profile.
       if (tracedClass.traceAllocations) {
@@ -115,9 +118,11 @@ class AllocationProfileTracingViewController extends DisposableController
     // Only update if the tracing state has changed for `cls`.
     if (tracedClass.traceAllocations != enabled) {
       await service.setTraceClassAllocation(isolate.id!, cls.id!, enabled);
-      _tracedClasses[cls.id!] = tracedClass.copyWith(
+      final update = tracedClass.copyWith(
         traceAllocations: enabled,
       );
+      _tracedClasses[cls.id!] = update;
+      _classList.replace(tracedClass, update);
     }
   }
 
@@ -179,6 +184,11 @@ class AllocationProfileTracingViewController extends DisposableController
   /// Updates `selectedTracedClass` with the current selection from the
   /// `AllocationTracingTable`.
   void selectTracedClass(TracedClass? traced) {
+    // Clear the selection if the user tries to select the currently selected
+    // class.
+    if (_selectedTracedClass.value == traced) {
+      traced = null;
+    }
     _selectedTracedClass.value = traced;
   }
 }

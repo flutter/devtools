@@ -41,7 +41,7 @@ import 'primitives/memory_utils.dart';
 // TODO(bkonyi): enable new allocation profile table when we're ready to remove
 // the existing allocations table.
 @visibleForTesting
-bool enableNewAllocationProfileTable = false;
+bool enableNewAllocationProfileTable = true;
 
 const memorySearchFieldKeyName = 'MemorySearchFieldKey';
 
@@ -214,7 +214,7 @@ class HeapTreeViewState extends State<HeapTree>
         ),
         DevToolsTab.create(
           key: dartHeapAllocationTracingKey,
-          tabName: 'Tracing',
+          tabName: 'Allocation Tracing',
           gaPrefix: _gaPrefix,
         ),
       ],

@@ -251,6 +251,7 @@ class _AllocationProfileTracingCallTreeTableState
 
   // TODO(bkonyi): this is a common pattern when creating tables that can be
   // refreshed. Consider pulling this state into a "TableController".
+  // See: https://github.com/flutter/devtools/issues/4365
   ColumnData<CpuStackFrame> sortColumn = startingSortColumn;
   SortDirection sortDirection = SortDirection.descending;
 
