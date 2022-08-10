@@ -43,7 +43,7 @@ void main() {
     when(mockFuncObject.hasIntrinsic).thenReturn(false);
     when(mockFuncObject.isRecognized).thenReturn(false);
     when(mockFuncObject.isNative).thenReturn(null);
-    when(mockFuncObject.vmName).thenReturn('DartVM');
+    when(mockFuncObject.vmName).thenReturn('fooDartFunction');
   });
 
   group('function display test', () {
@@ -77,7 +77,7 @@ void main() {
       expect(find.text('No'), findsNWidgets(2));
       expect(find.text('--'), findsOneWidget);
       expect(find.text('VM Name:'), findsOneWidget);
-      expect(find.text('DartVM'), findsOneWidget);
+      expect(find.text('fooDartFunction'), findsOneWidget);
 
       expect(find.byType(RequestableSizeWidget), findsNWidgets(2));
 
