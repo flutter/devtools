@@ -41,7 +41,7 @@ class _TraceCheckBoxColumn extends ColumnData<TracedClass>
     final controller =
         Provider.of<MemoryController>(context).allocationTracingController;
     return Checkbox(
-      value: controller.isAllocationTracingEnabledForClass(item.cls),
+      value: item.traceAllocations,
       onChanged: (value) async {
         await controller.setAllocationTracingForClass(item.cls, value!);
       },

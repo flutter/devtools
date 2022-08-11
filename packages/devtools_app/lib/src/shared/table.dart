@@ -795,13 +795,11 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   }) {
     sortData(column, direction, secondarySortColumn: secondarySortColumn);
     _updateItems();
-    if (widget.onSortChanged != null) {
-      widget.onSortChanged!(
-        column,
-        direction,
-        secondarySortColumn: secondarySortColumn,
-      );
-    }
+    widget.onSortChanged?.call(
+      column,
+      direction,
+      secondarySortColumn: secondarySortColumn,
+    );
   }
 }
 

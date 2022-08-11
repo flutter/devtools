@@ -121,9 +121,18 @@ class AllocationProfileTracingViewController extends DisposableController
       final update = tracedClass.copyWith(
         traceAllocations: enabled,
       );
-      _tracedClasses[cls.id!] = update;
-      _classList.replace(tracedClass, update);
+      _updateClassState(tracedClass, update);
     }
+  }
+
+  void _updateClassState(TracedClass original, TracedClass updated) {
+    final cls = original.cls;
+    // Update the currently selected class, if it's still being traced.
+    if (_selectedTracedClass.value?.cls.id == cls.id) {
+      _selectedTracedClass.value = updated;
+    }
+    _tracedClasses[cls.id!] = updated;
+    _classList.replace(original, updated);
   }
 
   Future<CpuProfileData> _getAllocationProfileForClass(
@@ -156,9 +165,10 @@ class AllocationProfileTracingViewController extends DisposableController
     await transformer.processData(profileData, processId: '');
 
     // Update the traced class data with the updated profile length.
-    _tracedClasses[cls.id!] = tracedClass.copyWith(
+    final updated = tracedClass.copyWith(
       instances: profileData.cpuSamples.length,
     );
+    _tracedClasses[cls.id!] = updated;
 
     // Expand all profiles by default. We may want to revisit this if
     // we don't want trees to be automatically expanded or we want to
@@ -168,27 +178,19 @@ class AllocationProfileTracingViewController extends DisposableController
     }
     _tracedClassesProfiles[cls.id!] = profileData;
 
-    // Update the currently selected class, if it's still being traced.
-    if (_selectedTracedClass.value?.cls.id == cls.id) {
-      _selectedTracedClass.value = tracedClass;
-    }
-
+    _updateClassState(tracedClass, updated);
     return profileData;
-  }
-
-  /// Returns `true` if allocations of [cls] are currently being traced.
-  bool isAllocationTracingEnabledForClass(ClassRef cls) {
-    return _tracedClasses[cls.id!]?.traceAllocations ?? false;
   }
 
   /// Updates `selectedTracedClass` with the current selection from the
   /// `AllocationTracingTable`.
-  void selectTracedClass(TracedClass? traced) {
+  void selectTracedClass(TracedClass traced) {
+    TracedClass? update = traced;
     // Clear the selection if the user tries to select the currently selected
     // class.
     if (_selectedTracedClass.value == traced) {
-      traced = null;
+      update = null;
     }
-    _selectedTracedClass.value = traced;
+    _selectedTracedClass.value = update;
   }
 }
