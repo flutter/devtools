@@ -3,19 +3,13 @@ import 'dart:convert';
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/ui/hover.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('DiagnosticsNodeDescription', () {
-    setUp(() {
-      setGlobal(PreferencesController, PreferencesController());
-      setGlobal(IdeTheme, IdeTheme());
-      setGlobal(ServiceConnectionManager, FakeServiceManager());
-    });
-
-    group('hover eval', () {
-      final renderObjectJson = jsonDecode(
-        '''
+    final renderObjectJson = jsonDecode(
+      '''
         {
           "properties": [
             {
@@ -45,7 +39,14 @@ void main() {
           ]
         }
       ''',
-      );
+    );
+    setUp(() {
+      setGlobal(PreferencesController, PreferencesController());
+      setGlobal(IdeTheme, IdeTheme());
+      setGlobal(ServiceConnectionManager, FakeServiceManager());
+    });
+
+    group('hover eval', () {
       final nodeJson = <String, Object?>{
         'widgetRuntimeType': 'Row',
         'renderObject': renderObjectJson,
@@ -108,6 +109,40 @@ void main() {
             tester.widget(find.byType(HoverCardTooltip)) as HoverCardTooltip;
         expect(hoverCardTooltip.enabled(), false);
       });
+    });
+
+    testWidgets('approximateNodeWidth', (WidgetTester tester) async {
+      final nodeJson = <String, Object?>{
+        'widgetRuntimeType': 'Row',
+        'renderObject': renderObjectJson,
+        'hasChildren': false,
+        'children': [],
+        'showName': true,
+        'name': 'THE NAME',
+      };
+      final diagnosticWithoutService = RemoteDiagnosticsNode(
+        nodeJson,
+        null,
+        false,
+        null,
+      );
+      final diagnosticsNodeDescription = DiagnosticsNodeDescription(
+        diagnosticWithoutService,
+        debuggerController: MockDebuggerController(),
+      );
+      await tester.pumpWidget(wrap(diagnosticsNodeDescription));
+
+      final aproximateWidth = DiagnosticsNodeDescription.approximateNodeWidth(
+        diagnosticWithoutService,
+      );
+      final nodeSize = tester.getSize(find.descendant(
+        of: find.byType(MouseRegion),
+        matching: find.byType(
+          RichText,
+        ),
+      ));
+      debugDumpApp();
+      expect(nodeSize.width, moreOrLessEquals(aproximateWidth, epsilon: 10.0));
     });
   });
 }

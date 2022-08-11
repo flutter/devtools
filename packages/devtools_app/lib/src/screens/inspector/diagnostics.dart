@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/ui/utils.dart';
 import 'package:flutter/material.dart';
 
 import '../../primitives/utils.dart';
@@ -58,10 +59,41 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     );
   }
 
-  Iterable<TextSpan> _buildDescriptionTextSpans(
+  static double approximateNodeWidth(
+    RemoteDiagnosticsNode? diagnostic,
+  ) {
+    final spans = DiagnosticsNodeDescription.buildDescriptionTextSpans(
+      diagnostic?.description ?? '',
+      const TextStyle(),
+      const ColorScheme.dark(),
+      diagnostic,
+      null,
+      null,
+    );
+
+    var spanWidth = spans.fold<double>(
+        0, (sum, span) => sum + calculateTextSpanWidth(span));
+    final name = diagnostic?.name;
+    final iconWidth = 5.0; //TODO: get a better approx for this
+    if (diagnostic?.showName == true && name != null) {
+      // The diagnostic will show it's name instead of an icon so add an
+      // approximate name width.
+      spanWidth += calculateTextSpanWidth(TextSpan(text: name));
+    } else {
+      // The diagnostic will show an icon so add two column widths of padding
+      // to account for this.
+      spanWidth += iconWidth;
+    }
+    return spanWidth;
+  }
+
+  static Iterable<TextSpan> buildDescriptionTextSpans(
     String description,
     TextStyle textStyle,
     ColorScheme colorScheme,
+    RemoteDiagnosticsNode? diagnostic,
+    String? searchValue,
+    TextStyle? nodeDescriptionHighlightStyle,
   ) sync* {
     final diagnosticLocal = diagnostic!;
     if (diagnosticLocal.isDiagnosticableValue) {
@@ -115,12 +147,18 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     TextStyle textStyle,
     BuildContext context,
     ColorScheme colorScheme,
+    RemoteDiagnosticsNode? diagnostic,
+    String? searchValue,
+    TextStyle? nodeDescriptionHighlightStyle,
   ) {
     final textSpan = TextSpan(
-      children: _buildDescriptionTextSpans(
+      children: buildDescriptionTextSpans(
         description,
         textStyle,
         colorScheme,
+        diagnostic,
+        searchValue,
+        nodeDescriptionHighlightStyle,
       ).toList(),
     );
 
@@ -267,6 +305,9 @@ class DiagnosticsNodeDescription extends StatelessWidget {
             descriptionTextStyle,
             context,
             colorScheme,
+            diagnostic,
+            searchValue,
+            nodeDescriptionHighlightStyle,
           ),
         ),
       );
@@ -322,6 +363,9 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         descriptionTextStyle,
         context,
         colorScheme,
+        diagnostic,
+        searchValue,
+        nodeDescriptionHighlightStyle,
       );
 
       if (errorText != null) {
@@ -386,7 +430,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     );
   }
 
-  TextSpan _buildHighlightedSearchPreview(
+  static TextSpan _buildHighlightedSearchPreview(
     String textPreview,
     String? searchValue,
     TextStyle textStyle,

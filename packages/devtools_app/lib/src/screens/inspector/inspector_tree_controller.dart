@@ -432,10 +432,13 @@ class InspectorTreeController extends Object
     // positions after the current animations are complete so that computations
     // to start animations to show specific widget scroll to where the target
     // nodes will be displayed rather than where they are currently displayed.
+    final diagnostic = row.node.diagnostic;
+    final approximateNodeWidth =
+        DiagnosticsNodeDescription.approximateNodeWidth(diagnostic);
     return Rect.fromLTWH(
       getDepthIndent(row.depth),
       rowYTop(row.index),
-      rowWidth,
+      approximateNodeWidth,
       rowHeight,
     );
   }
@@ -865,22 +868,29 @@ class _InspectorTreeState extends State<InspectorTree>
     ];
 
     final descriptionText = descriptions.join(': ');
-    var descriptionSize = descriptionText.isNotEmpty
-        ? calculateTextSpanWidth(
-            TextSpan(text: descriptionText),
-          )
-        : 150;
+    // var descriptionSize = descriptionText.isNotEmpty
+    //     ? calculateTextSpanWidth(
+    //         TextSpan(text: descriptionText),
+    //       )
+    //     : 150;
+
+    // We should be able to tell which tree we are in, if we are in summary do our caret padding below
+    // Otherwise: check showname and name and add that instead if those are present. Close enough.
+
+    // For testing we can generate a row and make sure that we are within a certain epsilon
 
     // Add 3 columnwidths of padding to account for the caret, icon,
     // and bit extra off the end
-    descriptionSize += columnWidth * 3;
 
-    rect = Rect.fromLTRB(
-      rect.left,
-      rect.top,
-      rect.left + descriptionSize,
-      rect.bottom,
-    );
+    // if(showname and hasName)
+    // descriptionSize += columnWidth * 3;
+
+    // rect = Rect.fromLTRB(
+    //   rect.left,
+    //   rect.top,
+    //   rect.left + descriptionSize,
+    //   rect.bottom,
+    // );
 
     final isRectInViewPort =
         viewPortInScrollControllerSpace.contains(rect.topLeft) &&

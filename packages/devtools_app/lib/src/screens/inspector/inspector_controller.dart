@@ -718,18 +718,6 @@ class InspectorController extends DisposableController
     // a node is selected, its properties will also be selected as by
     // convention properties are the first children of a node and properties
     // typically do not have children and are never expanded by default.
-    for (InspectorTreeNode child in node.children) {
-      final RemoteDiagnosticsNode? diagnosticsNode = child.diagnostic;
-      targets.add(child);
-      if (!child.isLeaf && child.isExpanded) {
-        // Stop if we get to expanded children as they might be too large
-        // to try to scroll into view.
-        break;
-      }
-      if (diagnosticsNode != null && !diagnosticsNode.isProperty) {
-        break;
-      }
-    }
     inspectorTree.animateToTargets(targets);
   }
 
