@@ -27,7 +27,6 @@ import 'memory_graph_model.dart';
 import 'memory_protocol.dart';
 import 'memory_snapshot_models.dart';
 import 'panes/allocation_profile/allocation_profile_table_view_controller.dart';
-import 'panes/allocation_tracing/allocation_profile_tracing_view_controller.dart';
 import 'primitives/filter_config.dart';
 import 'primitives/memory_timeline.dart';
 
