@@ -73,15 +73,13 @@ void main() {
     });
   });
 
-  group('test LibraryDependencies widget: ', () {
+  group('test LibraryDependencyExtension description method: ', () {
     late Library targetLib1;
     late Library targetLib2;
     late Library targetLib3;
     late LibraryDependency dependency1;
     late LibraryDependency dependency2;
     late LibraryDependency dependency3;
-
-    late List<LibraryDependency> dependencies;
 
     setUpAll(() {
       final libJson = testLib.toJson();
@@ -110,105 +108,80 @@ void main() {
 
       dependency1.target = targetLib1;
       dependency2.target = targetLib2;
-
-      dependencies = [
-        dependency1,
-        dependency2,
-        dependency3,
-      ];
     });
 
-    testWidgets('just the libraries', (WidgetTester tester) async {
-      await tester
-          .pumpWidget(wrap(LibraryDependencies(dependencies: dependencies)));
-
-      expect(find.text('Dependencies (3)'), findsOneWidget);
-
-      await tester.tap(find.byType(AreaPaneHeader));
-
-      await tester.pumpAndSettle();
-
-      expect(find.text('import dart:core'), findsOneWidget);
-      expect(find.text('export dart:math'), findsOneWidget);
-      expect(find.text('dart:collection'), findsOneWidget);
+    test('just the libraries', () {
+      expect(dependency1.description, 'import dart:core');
+      expect(dependency2.description, 'export dart:math');
+      expect(dependency3.description, 'dart:collection');
     });
 
-    testWidgets('libraries with prefix', (WidgetTester tester) async {
+    test('libraries with prefix', () {
       dependency1.prefix = 'core';
       dependency2.prefix = 'math';
       dependency3.prefix = 'collection';
 
-      await tester
-          .pumpWidget(wrap(LibraryDependencies(dependencies: dependencies)));
-
-      expect(find.text('Dependencies (3)'), findsOneWidget);
-
-      await tester.tap(find.byType(AreaPaneHeader));
-
-      await tester.pumpAndSettle();
-
-      expect(find.text('import dart:core as core'), findsOneWidget);
-      expect(find.text('export dart:math as math'), findsOneWidget);
-      expect(find.text('dart:collection as collection'), findsOneWidget);
+      expect(dependency1.description, 'import dart:core as core');
+      expect(dependency2.description, 'export dart:math as math');
+      expect(dependency3.description, 'dart:collection as collection');
     });
 
-    testWidgets('libraries with prefix and deferred',
-        (WidgetTester tester) async {
+    test('libraries with prefix and deferred', () {
       dependency1.isDeferred = true;
       dependency2.isDeferred = true;
       dependency3.isDeferred = true;
 
-      await tester
-          .pumpWidget(wrap(LibraryDependencies(dependencies: dependencies)));
-
-      expect(find.text('Dependencies (3)'), findsOneWidget);
-
-      await tester.tap(find.byType(AreaPaneHeader));
-
-      await tester.pumpAndSettle();
-
-      expect(find.text('import dart:core as core deferred'), findsOneWidget);
-      expect(find.text('export dart:math as math deferred'), findsOneWidget);
-      expect(
-        find.text('dart:collection as collection deferred'),
-        findsOneWidget,
-      );
+      expect(dependency1.description, 'import dart:core as core deferred');
+      expect(dependency2.description, 'export dart:math as math deferred');
+      expect(dependency3.description, 'dart:collection as collection deferred');
     });
 
-    testWidgets('libraries deferred', (WidgetTester tester) async {
+    test('libraries deferred', () {
       dependency1.prefix = null;
       dependency2.prefix = null;
       dependency3.prefix = null;
 
+      expect(dependency1.description, 'import dart:core deferred');
+      expect(dependency2.description, 'export dart:math deferred');
+      expect(dependency3.description, 'dart:collection deferred');
+    });
+
+    test('target library is missing', () {
+      dependency1.target = null;
+      dependency1.prefix = 'foo';
+      dependency1.isDeferred = null;
+
+      expect(dependency1.description, 'import <Library name> as foo');
+    });
+  });
+
+  group('test LibraryDependencies widget: ', () {
+    late LibraryDependency dependency;
+
+    late List<LibraryDependency> dependencies;
+
+    setUpAll(() {
+      dependency = LibraryDependency(
+        isImport: true,
+        target: testLib,
+      );
+
+      dependencies = [dependency, dependency, dependency];
+    });
+
+    testWidgets('builds widget', (WidgetTester tester) async {
       await tester
           .pumpWidget(wrap(LibraryDependencies(dependencies: dependencies)));
 
+      expect(find.byType(VmExpansionTile), findsOneWidget);
+      expect(find.byType(AreaPaneHeader), findsOneWidget);
       expect(find.text('Dependencies (3)'), findsOneWidget);
 
       await tester.tap(find.byType(AreaPaneHeader));
 
       await tester.pumpAndSettle();
 
-      expect(find.text('import dart:core deferred'), findsOneWidget);
-      expect(find.text('export dart:math deferred'), findsOneWidget);
-      expect(find.text('dart:collection deferred'), findsOneWidget);
-    });
-
-    testWidgets('target library is missing', (WidgetTester tester) async {
-      dependency1.target = null;
-      dependency1.prefix = 'foo';
-      dependency1.isDeferred = null;
-
-      await tester
-          .pumpWidget(wrap(LibraryDependencies(dependencies: [dependency1])));
-
-      expect(find.text('Dependencies (1)'), findsOneWidget);
-
-      await tester.tap(find.byType(AreaPaneHeader));
-
-      await tester.pumpAndSettle();
-
-      expect(find.text('import <Library name> as foo'), findsOneWidget);
+      expect(find.byType(SelectableText), findsNWidgets(3));
     });
   });
 }

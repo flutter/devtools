@@ -69,43 +69,13 @@ class LibraryDependencies extends StatelessWidget {
           children: [
             Flexible(
               child: SelectableText(
-                dependencyDescription(dep),
+                dep.description,
                 style: textStyle,
               ),
             ),
           ],
         )
     ];
-  }
-
-  String dependencyDescription(LibraryDependency dependency) {
-    final description = StringBuffer();
-    void addSpace() => description.write(description.isEmpty ? '' : ' ');
-
-    final isImport = dependency.isImport;
-    if (isImport != null) {
-      description.write(isImport ? 'import' : 'export');
-    }
-
-    addSpace();
-
-    description.write(
-      dependency.target?.name ?? dependency.target?.uri ?? '<Library name>',
-    );
-
-    final prefix = dependency.prefix;
-
-    if (prefix != null && prefix.isNotEmpty) {
-      addSpace();
-      description.write('as $prefix');
-    }
-
-    if (dependency.isDeferred == true) {
-      addSpace();
-      description.write('deferred');
-    }
-
-    return description.toString();
   }
 
   @override
@@ -117,5 +87,37 @@ class LibraryDependencies extends StatelessWidget {
         dependencyRows(context),
       ),
     );
+  }
+}
+
+extension LibraryDependencyExtension on LibraryDependency {
+  String get description {
+    final description = StringBuffer();
+    void addSpace() => description.write(description.isEmpty ? '' : ' ');
+
+    final libIsImport = isImport;
+    if (libIsImport != null) {
+      description.write(libIsImport ? 'import' : 'export');
+    }
+
+    addSpace();
+
+    description.write(
+      target?.name ?? target?.uri ?? '<Library name>',
+    );
+
+    final libPrefix = prefix;
+
+    if (libPrefix != null && libPrefix.isNotEmpty) {
+      addSpace();
+      description.write('as $libPrefix');
+    }
+
+    if (isDeferred == true) {
+      addSpace();
+      description.write('deferred');
+    }
+
+    return description.toString();
   }
 }
