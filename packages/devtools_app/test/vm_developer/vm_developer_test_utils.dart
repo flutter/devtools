@@ -9,6 +9,7 @@ import 'package:devtools_app/src/screens/vm_developer/object_viewport.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_object_model.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/foundation.dart';
+import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
 final testLib = Library(
@@ -210,4 +211,52 @@ class TestInstanceObject extends InstanceObject {
 
   @override
   String? get name => 'FooInstance';
+}
+
+void mockVmObject(VmObject object) {
+  when(object.outlineNode).thenReturn(null);
+  when(object.scriptRef).thenReturn(null);
+  when(object.script).thenReturn(testScript);
+  when(object.pos).thenReturn(testPos);
+  when(object.fetchingReachableSize).thenReturn(ValueNotifier<bool>(false));
+  when(object.reachableSize).thenReturn(testRequestableSize);
+  when(object.fetchingRetainedSize).thenReturn(ValueNotifier<bool>(false));
+  when(object.retainedSize).thenReturn(null);
+  when(object.retainingPath).thenReturn(
+    ValueNotifier<RetainingPath?>(testRetainingPath),
+  );
+  when(object.inboundReferences).thenReturn(
+    ValueNotifier<InboundReferences?>(testInboundRefs),
+  );
+
+  if (object is ClassObject) {
+    when(object.name).thenReturn(testClass.name);
+    when(object.ref).thenReturn(testClass);
+    when(object.obj).thenReturn(testClass);
+    when(object.instances).thenReturn(testInstances);
+  }
+
+  if (object is FieldObject) {
+    when(object.name).thenReturn(testField.name);
+    when(object.ref).thenReturn(testField);
+    when(object.obj).thenReturn(testField);
+    when(object.guardClass).thenReturn(null);
+    when(object.guardNullable).thenReturn(null);
+    when(object.guardClassKind).thenReturn(null);
+  }
+
+  if (object is FuncObject) {
+    when(object.name).thenReturn(testFunction.name);
+    when(object.ref).thenReturn(testFunction);
+    when(object.obj).thenReturn(testFunction);
+    when(object.kind).thenReturn(null);
+    when(object.deoptimizations).thenReturn(null);
+    when(object.isOptimizable).thenReturn(null);
+    when(object.isInlinable).thenReturn(null);
+    when(object.hasIntrinsic).thenReturn(null);
+    when(object.isRecognized).thenReturn(null);
+    when(object.isNative).thenReturn(null);
+    when(object.vmName).thenReturn(null);
+    when(object.icDataArray).thenReturn(null);
+  }
 }

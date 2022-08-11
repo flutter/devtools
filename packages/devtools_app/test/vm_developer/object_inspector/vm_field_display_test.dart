@@ -41,30 +41,8 @@ void main() {
     testFieldCopy.size = 256;
     testFieldCopy.staticValue = fieldStaticValue;
 
-    when(mockFieldObject.outlineNode).thenReturn(null);
-    when(mockFieldObject.scriptRef).thenReturn(null);
-    when(mockFieldObject.name).thenReturn(testFieldCopy.name);
-    when(mockFieldObject.ref).thenReturn(testFieldCopy);
+    mockVmObject(mockFieldObject);
     when(mockFieldObject.obj).thenReturn(testFieldCopy);
-    when(mockFieldObject.script).thenReturn(testScript);
-    when(mockFieldObject.pos).thenReturn(testPos);
-
-    when(mockFieldObject.guardClass).thenReturn(null);
-    when(mockFieldObject.guardNullable).thenReturn(null);
-    when(mockFieldObject.guardClassKind).thenReturn(null);
-
-    when(mockFieldObject.fetchingReachableSize)
-        .thenReturn(ValueNotifier<bool>(false));
-    when(mockFieldObject.reachableSize).thenReturn(testRequestableSize);
-    when(mockFieldObject.fetchingRetainedSize)
-        .thenReturn(ValueNotifier<bool>(false));
-    when(mockFieldObject.retainedSize).thenReturn(testRequestableSize);
-    when(mockFieldObject.retainingPath).thenReturn(
-      ValueNotifier<RetainingPath?>(testRetainingPath),
-    );
-    when(mockFieldObject.inboundReferences).thenReturn(
-      ValueNotifier<InboundReferences?>(testInboundRefs),
-    );
   });
 
   group('field data display tests', () {
