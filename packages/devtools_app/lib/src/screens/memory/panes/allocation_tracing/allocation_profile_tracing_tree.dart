@@ -29,9 +29,8 @@ class AllocationTracingTree extends StatelessWidget {
     return ValueListenableBuilder<TracedClass?>(
       valueListenable: controller.selectedTracedClass,
       builder: (context, selection, _) {
-        Widget? errorColumn;
         if (selection == null) {
-          errorColumn = _allocationTracingInstructions(context);
+          return const _AllocationTracingInstructions();
         } else if (!selection.traceAllocations) {
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -39,12 +38,12 @@ class AllocationTracingTree extends StatelessWidget {
               Text(
                 'Allocation tracing is not enabled for class ${selection.cls.name}.\n',
               ),
-              _allocationTracingInstructions(context),
+              const _AllocationTracingInstructions(),
             ],
           );
         } else if (selection.traceAllocations &&
             controller.selectedTracedClassAllocationData == null) {
-          errorColumn = Column(
+          return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
@@ -53,79 +52,38 @@ class AllocationTracingTree extends StatelessWidget {
             ],
           );
         }
-        if (errorColumn != null) {
-          return errorColumn;
-        }
-        late Function(Function()) updateTreeStateCallback;
-        final theme = Theme.of(context);
-        return Column(
-          children: [
-            AreaPaneHeader(
-              title: Text.rich(
-                TextSpan(
-                  children: [
-                    const TextSpan(
-                      text: 'Traced allocations for: ',
-                    ),
-                    TextSpan(
-                      style: theme.fixedFontStyle,
-                      text: controller.selectedTracedClass.value?.cls.name!,
-                    ),
-                  ],
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Column(
+              children: [
+                _AllocationProfileTracingTreeHeader(
+                  controller: controller,
+                  updateTreeStateCallback: setState,
                 ),
-              ),
-              tall: true,
-              needsTopBorder: false,
-              actions: [
-                ExpandAllButton(
-                  onPressed: () => updateTreeStateCallback(
-                    () {
-                      final data = controller.selectedTracedClassAllocationData;
-                      if (data == null) {
-                        return;
-                      }
-                      for (final root in data.bottomUpRoots) {
-                        root.expandCascading();
-                      }
-                    },
-                  ),
-                ),
-                const SizedBox(width: denseSpacing),
-                CollapseAllButton(
-                  onPressed: () => updateTreeStateCallback(
-                    () {
-                      final data = controller.selectedTracedClassAllocationData;
-                      if (data == null) {
-                        return;
-                      }
-                      for (final root in data.bottomUpRoots) {
-                        root.collapseCascading();
-                      }
-                    },
-                  ),
-                ),
-              ],
-            ),
-            Expanded(
-              child: StatefulBuilder(
-                builder: (context, setState) {
-                  updateTreeStateCallback = setState;
-                  return _AllocationProfileTracingCallTreeTable(
-                    cls: selection!.cls,
+                Expanded(
+                  child: _AllocationProfileTracingBottomUpTable(
+                    cls: selection.cls,
                     // TODO(bkonyi): support call stack and bottom up views.
                     dataRoots: controller
                         .selectedTracedClassAllocationData!.bottomUpRoots,
-                  );
-                },
-              ),
-            ),
-          ],
+                  ),
+                ),
+              ],
+            );
+          },
         );
       },
     );
   }
+}
 
-  Widget _allocationTracingInstructions(BuildContext context) {
+class _AllocationTracingInstructions extends StatelessWidget {
+  const _AllocationTracingInstructions({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -149,6 +107,62 @@ class AllocationTracingTree extends StatelessWidget {
         const Text(
           'to view the tree of collected stack '
           'traces of constructor calls.',
+        ),
+      ],
+    );
+  }
+}
+
+class _AllocationProfileTracingTreeHeader extends StatelessWidget {
+  const _AllocationProfileTracingTreeHeader({
+    Key? key,
+    required this.controller,
+    required this.updateTreeStateCallback,
+  }) : super(key: key);
+
+  final AllocationProfileTracingViewController controller;
+  final Function(VoidCallback) updateTreeStateCallback;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return AreaPaneHeader(
+      title: Text.rich(
+        TextSpan(
+          children: [
+            const TextSpan(
+              text: 'Traced allocations for: ',
+            ),
+            TextSpan(
+              style: theme.fixedFontStyle,
+              text: controller.selectedTracedClass.value?.cls.name!,
+            ),
+          ],
+        ),
+      ),
+      tall: true,
+      needsTopBorder: false,
+      actions: [
+        ExpandAllButton(
+          onPressed: () => updateTreeStateCallback(
+            () {
+              final data = controller.selectedTracedClassAllocationData!;
+              for (final root in data.bottomUpRoots) {
+                root.expandCascading();
+              }
+            },
+          ),
+        ),
+        const SizedBox(width: denseSpacing),
+        CollapseAllButton(
+          onPressed: () => updateTreeStateCallback(
+            () {
+              final data = controller.selectedTracedClassAllocationData!;
+              for (final root in data.bottomUpRoots) {
+                root.collapseCascading();
+              }
+            },
+          ),
         ),
       ],
     );
@@ -222,8 +236,8 @@ class _ExclusiveCountColumn extends ColumnData<CpuStackFrame> {
 }
 
 /// A table of the bottom-up allocation profile tree.
-class _AllocationProfileTracingCallTreeTable extends StatefulWidget {
-  const _AllocationProfileTracingCallTreeTable({
+class _AllocationProfileTracingBottomUpTable extends StatefulWidget {
+  const _AllocationProfileTracingBottomUpTable({
     Key? key,
     required this.cls,
     required this.dataRoots,
@@ -233,13 +247,13 @@ class _AllocationProfileTracingCallTreeTable extends StatefulWidget {
   final List<CpuStackFrame> dataRoots;
 
   @override
-  State<_AllocationProfileTracingCallTreeTable> createState() {
-    return _AllocationProfileTracingCallTreeTableState();
+  State<_AllocationProfileTracingBottomUpTable> createState() {
+    return _AllocationProfileTracingBottomUpTableState();
   }
 }
 
-class _AllocationProfileTracingCallTreeTableState
-    extends State<_AllocationProfileTracingCallTreeTable> {
+class _AllocationProfileTracingBottomUpTableState
+    extends State<_AllocationProfileTracingBottomUpTable> {
   static final treeColumn = MethodNameColumn();
   static final startingSortColumn = _InclusiveCountColumn();
   static final columns = List<ColumnData<CpuStackFrame>>.unmodifiable([
@@ -252,8 +266,15 @@ class _AllocationProfileTracingCallTreeTableState
   // TODO(bkonyi): this is a common pattern when creating tables that can be
   // refreshed. Consider pulling this state into a "TableController".
   // See: https://github.com/flutter/devtools/issues/4365
-  ColumnData<CpuStackFrame> sortColumn = startingSortColumn;
-  SortDirection sortDirection = SortDirection.descending;
+  late ColumnData<CpuStackFrame> sortColumn;
+  late SortDirection sortDirection;
+
+  @override
+  void initState() {
+    super.initState();
+    sortColumn = startingSortColumn;
+    sortDirection = SortDirection.descending;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -265,9 +286,10 @@ class _AllocationProfileTracingCallTreeTableState
       sortColumn: sortColumn,
       sortDirection: sortDirection,
       onSortChanged: (column, direction, {secondarySortColumn}) {
-        sortColumn = column;
-        sortDirection = direction;
-        secondarySortColumn = secondarySortColumn;
+        setState(() {
+          sortColumn = column;
+          sortDirection = direction;
+        });
       },
     );
   }

@@ -15,10 +15,7 @@ import 'allocation_profile_tracing_view_controller.dart';
 class AllocationProfileTracingView extends StatefulWidget {
   const AllocationProfileTracingView({
     Key? key,
-    required this.controller,
   }) : super(key: key);
-
-  final AllocationProfileTracingViewController controller;
 
   @override
   State<AllocationProfileTracingView> createState() =>
@@ -27,10 +24,12 @@ class AllocationProfileTracingView extends StatefulWidget {
 
 class _AllocationProfileTracingViewState
     extends State<AllocationProfileTracingView> {
+  late final AllocationProfileTracingViewController controller;
+
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    widget.controller.initialize();
+  void initState() {
+    super.initState();
+    controller = AllocationProfileTracingViewController()..initialize();
   }
 
   @override
@@ -42,7 +41,7 @@ class _AllocationProfileTracingViewState
           children: [
             RefreshButton(
               onPressed: () async {
-                await widget.controller.refresh();
+                await controller.refresh();
               },
             ),
             const _ProfileHelpLink(),
@@ -56,12 +55,12 @@ class _AllocationProfileTracingViewState
             children: [
               OutlineDecoration(
                 child: AllocationTracingTable(
-                  controller: widget.controller,
+                  controller: controller,
                 ),
               ),
               OutlineDecoration(
                 child: AllocationTracingTree(
-                  controller: widget.controller,
+                  controller: controller,
                 ),
               ),
             ],

@@ -258,9 +258,6 @@ class MemoryController extends DisposableController
   /// Controller for [AllocationProfileTableView].
   final allocationProfileController = AllocationProfileTableViewController();
 
-  /// Controller for [AllocationTracingView].
-  final allocationTracingController = AllocationProfileTracingViewController();
-
   static const logFilenamePrefix = 'memory_log_';
 
   // Default state of Android ADB collection.

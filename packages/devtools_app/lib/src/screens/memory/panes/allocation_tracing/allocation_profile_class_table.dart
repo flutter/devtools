@@ -10,7 +10,6 @@ import '../../../../shared/common_widgets.dart';
 import '../../../../shared/table.dart';
 import '../../../../shared/table_data.dart';
 import '../../../../shared/utils.dart';
-import '../../memory_controller.dart';
 import 'allocation_profile_tracing_view_controller.dart';
 
 /// The default width for columns containing *mostly* numeric data (e.g.,
@@ -39,7 +38,7 @@ class _TraceCheckBoxColumn extends ColumnData<TracedClass>
     VoidCallback? onPressed,
   }) {
     final controller =
-        Provider.of<MemoryController>(context).allocationTracingController;
+        Provider.of<AllocationProfileTracingViewController>(context);
     return Checkbox(
       value: item.traceAllocations,
       onChanged: (value) async {
@@ -59,8 +58,8 @@ class _TraceCheckBoxColumn extends ColumnData<TracedClass>
   }
 }
 
-class _AllocationTracingTableClassName extends ColumnData<TracedClass> {
-  _AllocationTracingTableClassName() : super.wide('Class');
+class _ClassNameColumn extends ColumnData<TracedClass> {
+  _ClassNameColumn() : super.wide('Class');
 
   @override
   String? getValue(TracedClass stats) => stats.cls.name;
@@ -69,8 +68,8 @@ class _AllocationTracingTableClassName extends ColumnData<TracedClass> {
   bool get supportsSorting => true;
 }
 
-class _AllocationTracingTableInstances extends ColumnData<TracedClass> {
-  _AllocationTracingTableInstances()
+class _InstancesColumn extends ColumnData<TracedClass> {
+  _InstancesColumn()
       : super(
           'Instances',
           fixedWidthPx: scaleByFontFactor(_defaultNumberFieldWidth),
@@ -95,12 +94,12 @@ class AllocationTracingTable extends StatefulWidget {
 }
 
 class _AllocationTracingTableState extends State<AllocationTracingTable> {
-  SortDirection sortDirection = SortDirection.ascending;
-  ColumnData<TracedClass> secondarySortColumn = _classNameColumn;
+  late SortDirection sortDirection;
+  late ColumnData<TracedClass> secondarySortColumn;
 
   static final _checkboxColumn = _TraceCheckBoxColumn();
-  static final _classNameColumn = _AllocationTracingTableClassName();
-  static final _instancesColumn = _AllocationTracingTableInstances();
+  static final _classNameColumn = _ClassNameColumn();
+  static final _instancesColumn = _InstancesColumn();
 
   static final columns = <ColumnData<TracedClass>>[
     _checkboxColumn,
@@ -109,30 +108,40 @@ class _AllocationTracingTableState extends State<AllocationTracingTable> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    sortDirection = SortDirection.ascending;
+    secondarySortColumn = _classNameColumn;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return DualValueListenableBuilder<bool, List<TracedClass>>(
-      firstListenable: widget.controller.refreshing,
-      secondListenable: widget.controller.classList,
-      builder: (context, _, classList, __) {
-        return FlatTable<TracedClass>(
-          columns: columns,
-          data: classList,
-          keyFactory: (e) => Key(e.cls.id!),
-          onItemSelected: widget.controller.selectTracedClass,
-          sortColumn: _checkboxColumn,
-          secondarySortColumn: secondarySortColumn,
-          sortDirection: sortDirection,
-          selectionNotifier: widget.controller.selectedTracedClass,
-          onSortChanged: (column, direction, {secondarySortColumn}) {
-            // Keep track of sorting state so it doesn't get reset when
-            // `controller.refreshing` changes.
-            setState(() {
-              sortDirection = direction;
-              secondarySortColumn = secondarySortColumn;
-            });
-          },
-        );
-      },
+    return Provider<AllocationProfileTracingViewController>.value(
+      value: widget.controller,
+      child: DualValueListenableBuilder<bool, List<TracedClass>>(
+        firstListenable: widget.controller.refreshing,
+        secondListenable: widget.controller.classList,
+        builder: (context, _, classList, __) {
+          return FlatTable<TracedClass>(
+            columns: columns,
+            data: classList,
+            keyFactory: (e) => Key(e.cls.id!),
+            onItemSelected: widget.controller.selectTracedClass,
+            sortColumn: _checkboxColumn,
+            secondarySortColumn: secondarySortColumn,
+            sortDirection: sortDirection,
+            selectionNotifier: widget.controller.selectedTracedClass,
+            onSortChanged: (column, direction, {secondarySortColumn}) {
+              // Keep track of sorting state so it doesn't get reset when
+              // `controller.refreshing` changes.
+              setState(() {
+                sortDirection = direction;
+                secondarySortColumn = secondarySortColumn;
+              });
+            },
+          );
+        },
+      ),
     );
   }
 }

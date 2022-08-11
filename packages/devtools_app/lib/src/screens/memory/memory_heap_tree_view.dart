@@ -503,10 +503,8 @@ class HeapTreeViewState extends State<HeapTree>
                       controller: controller.allocationProfileController,
                     ),
                   ),
-                  KeepAliveWrapper(
-                    child: AllocationProfileTracingView(
-                      controller: controller.allocationTracingController,
-                    ),
+                  const KeepAliveWrapper(
+                    child: AllocationProfileTracingView(),
                   ),
                 ],
                 // Analysis Tab

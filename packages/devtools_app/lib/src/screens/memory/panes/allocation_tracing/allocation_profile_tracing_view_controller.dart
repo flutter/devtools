@@ -169,13 +169,6 @@ class AllocationProfileTracingViewController extends DisposableController
       instances: profileData.cpuSamples.length,
     );
     _tracedClasses[cls.id!] = updated;
-
-    // Expand all profiles by default. We may want to revisit this if
-    // we don't want trees to be automatically expanded or we want to
-    // keep expansion state for existing profiles.
-    for (final root in profileData.bottomUpRoots) {
-      root.expandCascading();
-    }
     _tracedClassesProfiles[cls.id!] = profileData;
 
     _updateClassState(tracedClass, updated);
