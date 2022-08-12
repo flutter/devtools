@@ -9,7 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_riverpod: ^2.0.0-dev.5
+  flutter_riverpod: 
+    path: /Users/adson.leal/dev/personal/riverpod/packages/flutter_riverpod # TODO: need to use an actual version
   flutter_test:
     sdk: flutter
 

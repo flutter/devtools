@@ -8,4 +8,11 @@ class ContainerNode {
 
   final String id;
   final List<RiverpodNode> providers;
+
+  ContainerNode copy({required List<RiverpodNode> providers}) {
+    return ContainerNode(
+      id: id,
+      providers: providers,
+    );
+  }
 }

@@ -3,22 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../devtools_app.dart';
 import 'container_list.dart';
-import 'riverpod_eval.dart';
 import 'selected_provider.dart';
-
-final _supportsDevToolProvider = FutureProvider.autoDispose<bool>(
-  (ref) async {
-    try {
-      final riverpodEval = await ref.watch(riverpodEvalFunctionProvider.future);
-      final supportsDevToolRef = await riverpodEval('supportsDevTool');
-
-      return supportsDevToolRef.valueAsString == 'true';
-    } catch (_) {
-      return false;
-    }
-  },
-  name: '_supportsDevToolProvider',
-);
 
 class RiverpodScreen extends Screen {
   const RiverpodScreen()
@@ -43,14 +28,12 @@ class RiverpodScreenWrapper extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return ref.watch(_supportsDevToolProvider).maybeWhen(
-          orElse: () => const Text('Loading...'),
+    return ref.watch(supportsDevToolProvider).when(
+          loading: () => const Text('Loading...'),
+          error: (_, __) => const _UnsupportedMessage(),
           data: (supportsDevTool) {
             if (!supportsDevTool) {
-              return const Text(
-                "The version of riverpod package that you're using does not "
-                'support devtools, please update to a compatible version.',
-              );
+              return const _UnsupportedMessage();
             }
 
             final splitAxis = Split.axisFor(context, 0.85);
@@ -77,5 +60,20 @@ class RiverpodScreenWrapper extends ConsumerWidget {
             );
           },
         );
+  }
+}
+
+class _UnsupportedMessage extends StatelessWidget {
+  const _UnsupportedMessage()
+      : super(
+          key: const Key('riverpod-unsupported-message'),
+        );
+
+  @override
+  Widget build(BuildContext context) {
+    return const Text(
+      "The version of riverpod package that you're using does not "
+      'support devtools, please update to a compatible version.',
+    );
   }
 }

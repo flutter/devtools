@@ -8,6 +8,8 @@ import 'nodes/container_node.dart';
 import 'providers_list.dart';
 import 'riverpod_eval.dart';
 
+const _maxSupportedBindingVersion = 1;
+
 final _containerIdsProvider = AutoDisposeFutureProvider<List<String>>(
   (ref) async {
     // recompute the list of containers on hot-restart
@@ -24,6 +26,16 @@ final _containerIdsProvider = AutoDisposeFutureProvider<List<String>>(
     ];
   },
   name: '_containerIdsProvider',
+);
+
+final supportsDevToolProvider = FutureProvider.autoDispose(
+  (ref) async {
+    final riverpodEval = await ref.watch(riverpodEvalFunctionProvider.future);
+    final bindingVersionInstance = await riverpodEval('bindingVersion');
+    final bindingVersion = int.parse(bindingVersionInstance.valueAsString!);
+    return bindingVersion >= _maxSupportedBindingVersion;
+  },
+  name: 'supportsDevToolProvider',
 );
 
 const _riverpodEvents = [
@@ -84,7 +96,7 @@ final _containerNodeProvider =
 );
 
 /// Combines [_containerIdsProvider] with [_containerNodeProvider] to obtain all
-/// the [ContainerNode]s at once.
+/// the [ContainerNode]s at once, with their providers sorted by title.
 final containerNodesProvider = AutoDisposeFutureProvider<List<ContainerNode>>(
   (ref) async {
     final ids = await ref.watch(_containerIdsProvider.future);
@@ -93,7 +105,13 @@ final containerNodesProvider = AutoDisposeFutureProvider<List<ContainerNode>>(
       ids.map((id) => ref.watch(_containerNodeProvider(id).future)),
     );
 
-    return nodes.toList();
+    return nodes
+        .map(
+          (n) => n.copy(
+            providers: n.providers..sort((a, b) => a.title.compareTo(b.title)),
+          ),
+        )
+        .toList();
   },
   name: 'containerNodesProvider',
 );

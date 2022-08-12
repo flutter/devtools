@@ -37,6 +37,7 @@ class _StateInspectorSettingsDialog extends ConsumerWidget {
     return DevToolsDialog(
       title: dialogTitleText(theme, title),
       content: Column(
+        key: const Key('state-inspector-settings-dialog'),
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

@@ -14,13 +14,14 @@ class RefreshNotifier {
   void refresh() => _controller.add(null);
 }
 
-final _refreshNotifierProvider = Provider(
+@visibleForTesting
+final refreshNotifierProvider = Provider(
   (ref) => RefreshNotifier(),
-  name: '_refreshNotifierProvider',
+  name: 'refreshNotifierProvider',
 );
 
 final refreshProvider = StreamProvider(
-  (ref) => ref.read(_refreshNotifierProvider).stream,
+  (ref) => ref.read(refreshNotifierProvider).stream,
   name: 'refreshProvider',
 );
 
@@ -36,7 +37,7 @@ class RefreshStateButton extends ConsumerWidget {
       child: OutlinedIconButton(
         icon: Icons.refresh,
         onPressed: () {
-          ref.read(_refreshNotifierProvider).refresh();
+          ref.read(refreshNotifierProvider).refresh();
         },
       ),
     );

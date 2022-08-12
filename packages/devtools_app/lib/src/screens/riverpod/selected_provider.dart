@@ -15,7 +15,8 @@ final selectedNodeStateProvider = StateProvider<RiverpodNode?>(
   name: 'selectedNodeStateProvider',
 );
 
-final _updatedRiverpodNodeProvider =
+@visibleForTesting
+final updatedRiverpodNodeProvider =
     FutureProvider.autoDispose.family<RiverpodNode?, RiverpodNode>(
   (ref, RiverpodNode node) async {
     // recompute the value on hot restart
@@ -30,20 +31,21 @@ final _updatedRiverpodNodeProvider =
 
     return ref.watch(evalRiverpodNodeProvider(nodeRef).future);
   },
-  name: '_updatedRiverpodNodeProvider',
+  name: 'updatedRiverpodNodeProvider',
 );
 
-final _selectedNodeProvider = Provider.autoDispose(
+@visibleForTesting
+final selectedNodeProvider = Provider.autoDispose(
   (ref) {
     final selectedNode = ref.watch(selectedNodeStateProvider);
     if (selectedNode == null) {
       return null;
     }
     final refreshedNode =
-        ref.watch(_updatedRiverpodNodeProvider(selectedNode)).valueOrNull;
+        ref.watch(updatedRiverpodNodeProvider(selectedNode)).valueOrNull;
     return refreshedNode;
   },
-  name: '_selectedNodeProvider',
+  name: 'selectedNodeProvider',
 );
 
 class SelectedProviderPanel extends ConsumerWidget {
@@ -53,7 +55,7 @@ class SelectedProviderPanel extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selectedNode = ref.watch(_selectedNodeProvider);
+    final selectedNode = ref.watch(selectedNodeProvider);
     final detailsTitleText =
         selectedNode != null ? selectedNode.title : '[No provider selected]';
 

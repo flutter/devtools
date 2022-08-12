@@ -21,7 +21,10 @@ void main() {
   );
 }
 
-final counterProvider = StateNotifierProvider<Counter, int>((ref) => Counter());
+final counterProvider = StateNotifierProvider<Counter, int>(
+  (ref) => Counter(),
+  name: 'counterProvider',
+);
 
 class MyApp extends ConsumerWidget {
   @override

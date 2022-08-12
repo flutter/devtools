@@ -19,4 +19,15 @@ class RiverpodNode {
     final typeString = '$type()';
     return name != null ? '$name - $typeString' : typeString;
   }
+
+  RiverpodNode copy({required String stateId}) {
+    return RiverpodNode(
+      id: id,
+      containerId: containerId,
+      stateId: stateId,
+      type: type,
+      name: name,
+      mightBeOutdated: mightBeOutdated,
+    );
+  }
 }
