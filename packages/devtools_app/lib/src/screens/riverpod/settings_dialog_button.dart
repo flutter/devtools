@@ -42,8 +42,9 @@ class _StateInspectorSettingsDialog extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           InkWell(
-            onTap: () =>
-                ref.read(showInternalsProvider.notifier).update((state) => !state),
+            onTap: () => ref
+                .read(showInternalsProvider.notifier)
+                .update((state) => !state),
             child: Row(
               children: [
                 Checkbox(
