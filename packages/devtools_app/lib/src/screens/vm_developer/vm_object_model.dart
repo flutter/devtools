@@ -6,6 +6,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../primitives/utils.dart';
 import '../../service/vm_service_wrapper.dart';
 import '../../shared/globals.dart';
 import '../debugger/debugger_model.dart';
@@ -229,7 +230,8 @@ class LibraryObject extends VmObject {
   String? get name => obj.name;
 }
 
-//TODO(mtaylee): finish class implementation.
+/// Stores a 'Script' VM object and provides an interface for obtaining the
+/// Dart VM information related to this object.
 class ScriptObject extends VmObject {
   ScriptObject({required super.ref, super.scriptRef, super.outlineNode});
 
@@ -240,7 +242,9 @@ class ScriptObject extends VmObject {
   SourceLocation? get _sourceLocation => null;
 
   @override
-  String? get name => null;
+  String? get name => fileNameFromUri(obj.uri ?? scriptRef?.uri);
+
+  DateTime get loadTime => DateTime.fromMillisecondsSinceEpoch(obj.loadTime);
 }
 
 //TODO(mtaylee): finish class implementation.
