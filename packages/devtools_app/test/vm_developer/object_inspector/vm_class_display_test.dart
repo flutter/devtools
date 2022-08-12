@@ -31,26 +31,8 @@ void main() {
 
     testClassCopy.size = 1024;
 
-    when(mockClassObject.outlineNode).thenReturn(null);
-    when(mockClassObject.scriptRef).thenReturn(null);
-    when(mockClassObject.name).thenReturn('FooClass');
-    when(mockClassObject.ref).thenReturn(testClass);
+    mockVmObject(mockClassObject);
     when(mockClassObject.obj).thenReturn(testClassCopy);
-    when(mockClassObject.script).thenReturn(testScript);
-    when(mockClassObject.instances).thenReturn(testInstances);
-    when(mockClassObject.pos).thenReturn(testPos);
-    when(mockClassObject.fetchingReachableSize)
-        .thenReturn(ValueNotifier<bool>(false));
-    when(mockClassObject.reachableSize).thenReturn(testRequestableSize);
-    when(mockClassObject.fetchingRetainedSize)
-        .thenReturn(ValueNotifier<bool>(false));
-    when(mockClassObject.retainedSize).thenReturn(testRequestableSize);
-    when(mockClassObject.retainingPath).thenReturn(
-      ValueNotifier<RetainingPath?>(testRetainingPath),
-    );
-    when(mockClassObject.inboundReferences).thenReturn(
-      ValueNotifier<InboundReferences?>(testInboundRefs),
-    );
   });
 
   testWidgetsWithWindowSize('builds class display', windowSize,

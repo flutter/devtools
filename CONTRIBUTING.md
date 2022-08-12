@@ -84,6 +84,26 @@ When you make changes on disk, you can hit `r` in your command-line to rebuild t
 refresh in your browser to see the changes. Hit `q` in the command line to terminate both the
 `flutter run` instance and the devtools server instance.
 
+## Development (VS Code Integration)
+
+To test integration with VS Code, you can instruct the Dart extension to run DevTools and the server from local code. You will need to have the Dart SDK source set up (see [dart-lang/sdk/CONTRIBUTING.md](https://github.com/dart-lang/sdk/blob/main/CONTRIBUTING.md#getting-the-code)) and you will need version v3.47 or newer of the Dart extension for VS Code.
+
+Open your VS Code settings (Run the **Preferences: Open User Settings (JSON)** command from the command palette (`F1`)) and add the following to your settings:
+
+```js
+"dart.customDevTools": {
+	"script": "/path/to/devtools/tool/build_e2e.dart",
+	"cwd": "/path/to/devtools",
+	"env": {
+		"LOCAL_DART_SDK": "/path/to/dart-sdk/sdk"
+	}
+},
+```
+
+This instructs VS Code to run the `tool/build_e2e.dart` script instead of running `dart devtools`. You must set the `cwd` and `LOCAL_DART_SDK` env variable correctly for the script to work.
+
+Next, restart VS Code (or run the **Developer: Reload Window** command from the command palette (`F1`)) and DevTools will be run from your local code. After making any code changes to DevTools or the server, you will need to re-run the **Developer: Reload Window** command to rebuild and restart the server.
+
 ### Desktop Embedder
 
 You can also run the app in the Flutter desktop embedder on linux or macos.

@@ -12,6 +12,7 @@ import 'vm_class_display.dart';
 import 'vm_code_display.dart';
 import 'vm_developer_common_widgets.dart';
 import 'vm_field_display.dart';
+import 'vm_function_display.dart';
 import 'vm_object_model.dart';
 import 'vm_script_display.dart';
 
@@ -74,7 +75,7 @@ Widget buildObjectDisplay(VmObject obj) {
     );
   }
   if (obj is FuncObject) {
-    return const VMInfoCard(title: 'TO-DO: Display Function object data');
+    return VmFuncDisplay(function: obj);
   }
   if (obj is FieldObject) {
     return VmFieldDisplay(field: obj);

@@ -248,6 +248,21 @@ void mockVmObject(VmObject object) {
     when(object.guardClassKind).thenReturn(null);
   }
 
+  if (object is FuncObject) {
+    when(object.name).thenReturn(testFunction.name);
+    when(object.ref).thenReturn(testFunction);
+    when(object.obj).thenReturn(testFunction);
+    when(object.kind).thenReturn(null);
+    when(object.deoptimizations).thenReturn(null);
+    when(object.isOptimizable).thenReturn(null);
+    when(object.isInlinable).thenReturn(null);
+    when(object.hasIntrinsic).thenReturn(null);
+    when(object.isRecognized).thenReturn(null);
+    when(object.isNative).thenReturn(null);
+    when(object.vmName).thenReturn(null);
+    when(object.icDataArray).thenReturn(null);
+  }
+
   if (object is ScriptObject) {
     when(object.name).thenReturn(fileNameFromUri(testScript.uri));
     when(object.ref).thenReturn(testScript);

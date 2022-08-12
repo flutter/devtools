@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
@@ -208,7 +209,7 @@ class VariableSelectionControls extends MaterialTextSelectionControls {
     Offset selectionMidpoint,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
-    ValueNotifier<ClipboardStatus>? clipboardStatus,
+    ValueListenable<ClipboardStatus>? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   ) {
     return _TextSelectionControlsToolbar(
@@ -246,7 +247,7 @@ class _TextSelectionControlsToolbar extends StatefulWidget {
     required this.textLineHeight,
   }) : super(key: key);
 
-  final ValueNotifier<ClipboardStatus> clipboardStatus;
+  final ValueListenable<ClipboardStatus> clipboardStatus;
   final TextSelectionDelegate delegate;
   final List<TextSelectionPoint> endpoints;
   final Rect globalEditableRegion;

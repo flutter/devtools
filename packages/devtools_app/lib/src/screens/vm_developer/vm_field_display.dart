@@ -19,59 +19,61 @@ class VmFieldDisplay extends StatelessWidget {
   final FieldObject field;
 
   @override
-  Widget build(BuildContext context) => VmObjectDisplayBasicLayout(
-        object: field,
-        generalDataRows: _fieldDataRows(field),
-      );
-}
-
-/// Generates a list of key-value pairs (map entries) containing the general
-/// information of the field object [field].
-List<MapEntry<String, WidgetBuilder>> _fieldDataRows(
-  FieldObject field,
-) {
-  return [
-    ...vmObjectGeneralDataRows(field),
-    selectableTextBuilderMapEntry(
-      'Observed types',
-      _fieldObservedTypes(field),
-    ),
-    if (field.obj.staticValue is InstanceRef)
-      selectableTextBuilderMapEntry(
-        'Static Value',
-        '${field.obj.staticValue.name ?? field.obj.staticValue.classRef.name}: '
-            '${field.obj.staticValue.valueAsString ?? 'Unknown value'}',
-      ),
-  ];
-}
-
-/// Returns the observed types of a field object, including null.
-///
-/// The observed types can be a single type (guardClassSingle), various types
-/// (guardClassDynamic), or a type that has not been observed yet
-/// (guardClassUnknown).
-String _fieldObservedTypes(FieldObject field) {
-  String type;
-
-  final kind = field.guardClassKind;
-
-  switch (kind) {
-    case GuardClassKind.single:
-      type = field.guardClass!.name ?? '<Observed Type>';
-      break;
-    case GuardClassKind.dynamic:
-      type = GuardClassKind.dynamic.jsonValue();
-      break;
-    case GuardClassKind.unknown:
-      type = 'none';
-      break;
-    default:
-      type = 'Observed types not found';
+  Widget build(BuildContext context) {
+    return VmObjectDisplayBasicLayout(
+      object: field,
+      generalDataRows: _fieldDataRows(field),
+    );
   }
 
-  final nullable = field.guardNullable == null
-      ? ''
-      : ' - null ${field.guardNullable! ? '' : 'not '}observed';
+  /// Generates a list of key-value pairs (map entries) containing the general
+  /// information of the field object [field].
+  List<MapEntry<String, WidgetBuilder>> _fieldDataRows(
+    FieldObject field,
+  ) {
+    return [
+      ...vmObjectGeneralDataRows(field),
+      selectableTextBuilderMapEntry(
+        'Observed types',
+        _fieldObservedTypes(field),
+      ),
+      if (field.obj.staticValue is InstanceRef)
+        selectableTextBuilderMapEntry(
+          'Static Value',
+          '${field.obj.staticValue.name ?? field.obj.staticValue.classRef.name}: '
+              '${field.obj.staticValue.valueAsString ?? 'Unknown value'}',
+        ),
+    ];
+  }
 
-  return '$type$nullable';
+  /// Returns the observed types of a field object, including null.
+  ///
+  /// The observed types can be a single type (guardClassSingle), various types
+  /// (guardClassDynamic), or a type that has not been observed yet
+  /// (guardClassUnknown).
+  String _fieldObservedTypes(FieldObject field) {
+    String type;
+
+    final kind = field.guardClassKind;
+
+    switch (kind) {
+      case GuardClassKind.single:
+        type = field.guardClass!.name ?? '<Observed Type>';
+        break;
+      case GuardClassKind.dynamic:
+        type = GuardClassKind.dynamic.jsonValue();
+        break;
+      case GuardClassKind.unknown:
+        type = 'none';
+        break;
+      default:
+        type = 'Observed types not found';
+    }
+
+    final nullable = field.guardNullable == null
+        ? ''
+        : ' - null ${field.guardNullable! ? '' : 'not '}observed';
+
+    return '$type$nullable';
+  }
 }
