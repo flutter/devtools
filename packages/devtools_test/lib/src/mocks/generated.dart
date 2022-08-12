@@ -29,6 +29,8 @@ import 'package:vm_service/vm_service.dart';
   ClassObject,
   CodeObject,
   FieldObject,
+  FuncObject,
+  ScriptObject,
   LibraryObject,
   ui.Image,
 ])

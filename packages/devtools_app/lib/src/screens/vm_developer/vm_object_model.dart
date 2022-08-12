@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../primitives/utils.dart';
 import '../../service/vm_service_wrapper.dart';
 import '../../shared/globals.dart';
 import '../debugger/debugger_model.dart';
@@ -134,7 +136,8 @@ class ClassObject extends VmObject {
   }
 }
 
-//TODO(mtaylee): finish class implementation.
+/// Stores a function (Func type) VM object and provides an interface for
+/// obtaining the Dart VM information related to this object.
 class FuncObject extends VmObject {
   FuncObject({required super.ref, super.scriptRef, super.outlineNode});
 
@@ -146,6 +149,37 @@ class FuncObject extends VmObject {
 
   @override
   SourceLocation? get _sourceLocation => obj.location;
+
+  FunctionKind? get kind {
+    final funcKind = obj.kind;
+    return funcKind == null
+        ? null
+        : FunctionKind.values
+            .firstWhereOrNull((element) => element.kind() == funcKind);
+  }
+
+  int? get deoptimizations => obj.deoptimizations;
+
+  bool? get isOptimizable => obj.optimizable;
+
+  bool? get isInlinable => obj.inlinable;
+
+  bool? get hasIntrinsic => obj.intrinsic;
+
+  bool? get isRecognized => obj.recognized;
+
+  bool? get isNative => obj.native;
+
+  String? get vmName => obj.vmName;
+
+  late final Instance? icDataArray;
+
+  @override
+  Future<void> initialize() async {
+    await super.initialize();
+
+    icDataArray = await obj.icDataArray;
+  }
 }
 
 /// Stores a 'Field' VM object and provides an interface for obtaining the
@@ -162,7 +196,7 @@ class FieldObject extends VmObject {
   @override
   SourceLocation? get _sourceLocation => obj.location;
 
-  late final bool? guardNullable;
+  bool? get guardNullable => obj.guardNullable;
 
   late final Class? guardClass;
 
@@ -172,7 +206,6 @@ class FieldObject extends VmObject {
   Future<void> initialize() async {
     await super.initialize();
 
-    guardNullable = obj.guardNullable;
     guardClassKind = obj.guardClassKind();
 
     if (guardClassKind == GuardClassKind.single) {
@@ -199,7 +232,8 @@ class LibraryObject extends VmObject {
   String? get vmName => obj.vmName;
 }
 
-//TODO(mtaylee): finish class implementation.
+/// Stores a 'Script' VM object and provides an interface for obtaining the
+/// Dart VM information related to this object.
 class ScriptObject extends VmObject {
   ScriptObject({required super.ref, super.scriptRef, super.outlineNode});
 
@@ -210,7 +244,9 @@ class ScriptObject extends VmObject {
   SourceLocation? get _sourceLocation => null;
 
   @override
-  String? get name => null;
+  String? get name => fileNameFromUri(obj.uri ?? scriptRef?.uri);
+
+  DateTime get loadTime => DateTime.fromMillisecondsSinceEpoch(obj.loadTime);
 }
 
 //TODO(mtaylee): finish class implementation.

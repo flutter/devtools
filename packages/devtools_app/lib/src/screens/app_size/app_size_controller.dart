@@ -61,6 +61,20 @@ enum AppUnit {
   }
 }
 
+class DiffTreeMap {
+  const DiffTreeMap({
+    required this.combined,
+    required this.increaseOnly,
+    required this.decreaseOnly,
+  });
+
+  final TreemapNode? combined;
+
+  final TreemapNode? increaseOnly;
+
+  final TreemapNode? decreaseOnly;
+}
+
 class AppSizeController {
   static const unsupportedFileTypeError =
       'Failed to load size analysis file: file type not supported.\n\n'
@@ -160,21 +174,43 @@ class AppSizeController {
     }
   }
 
-  TreemapNode? get _activeDiffRoot {
-    switch (_activeDiffTreeType.value) {
-      case DiffTreeType.increaseOnly:
-        return _increasedDiffTreeRoot;
-      case DiffTreeType.decreaseOnly:
-        return _decreasedDiffTreeRoot;
-      case DiffTreeType.combined:
+  DiffTreeMap? get _activeDiffMap {
+    final appUnit = _selectedAppUnit.value;
+
+    switch (appUnit) {
+      case AppUnit.mainOnly:
+        return _mainDiffTreeMap;
+      case AppUnit.deferredOnly:
+        return _deferredDiffTreeMap;
+      case AppUnit.entireApp:
       default:
-        return _combinedDiffTreeRoot;
+        return _diffTreeMap;
     }
   }
 
-  TreemapNode? _increasedDiffTreeRoot;
-  TreemapNode? _decreasedDiffTreeRoot;
-  TreemapNode? _combinedDiffTreeRoot;
+  TreemapNode? get _activeDiffRoot {
+    final diffTreeType = _activeDiffTreeType.value;
+    final diffMap = _activeDiffMap;
+
+    if (diffMap == null) {
+      return null;
+    }
+
+    switch (diffTreeType) {
+      case DiffTreeType.increaseOnly:
+        return diffMap.increaseOnly;
+      case DiffTreeType.decreaseOnly:
+        return diffMap.decreaseOnly;
+      case DiffTreeType.combined:
+        return diffMap.combined;
+      default:
+        return diffMap.combined;
+    }
+  }
+
+  DiffTreeMap? _diffTreeMap;
+  DiffTreeMap? _mainDiffTreeMap;
+  DiffTreeMap? _deferredDiffTreeMap;
 
   Map<String, dynamic>? get _dataForAppUnit {
     switch (_selectedAppUnit.value) {
@@ -220,9 +256,9 @@ class AppSizeController {
     _diffRoot.value = null;
     _oldDiffJsonFile.value = null;
     _newDiffJsonFile.value = null;
-    _increasedDiffTreeRoot = null;
-    _decreasedDiffTreeRoot = null;
-    _combinedDiffTreeRoot = null;
+    _diffTreeMap = null;
+    _mainDiffTreeMap = null;
+    _deferredDiffTreeMap = null;
     _diffCallGraphRoot.value = null;
     _oldDiffCallGraph = null;
     _newDiffCallGraph = null;
@@ -252,9 +288,13 @@ class AppSizeController {
   ValueListenable<AppUnit> get selectedAppUnit => _selectedAppUnit;
   final _selectedAppUnit = ValueNotifier<AppUnit>(AppUnit.entireApp);
 
-  void changeSelectedAppUnit(AppUnit appUnit) {
+  void changeSelectedAppUnit(AppUnit appUnit, Key tabKey) {
     _selectedAppUnit.value = appUnit;
-    _loadApp(_dataForAppUnit!);
+    if (tabKey == AppSizeScreen.analysisTabKey) {
+      _loadApp(_dataForAppUnit!);
+    } else {
+      changeDiffRoot(_activeDiffRoot);
+    }
   }
 
   /// Notifies that the json files are currently being processed.
@@ -343,7 +383,8 @@ class AppSizeController {
   ) {
     if (_hasDeferredInfo(jsonFile)) {
       jsonFile['children'] = _extractChildren(jsonFile)
-          .where((child) => child['isDeferred'] == true);
+          .where((child) => child['isDeferred'] == true)
+          .toList();
       jsonFile['n'] = _deferredNodeName;
     }
     return jsonFile;
@@ -385,55 +426,54 @@ class AppSizeController {
     await delayForBatchProcessing(micros: 10000);
 
     Map<String, dynamic> diffMap;
-    if (oldFile.isAnalyzeSizeFile && newFile.isAnalyzeSizeFile) {
-      var oldFileJson = oldFile.data as Map<String, dynamic>;
-      var newFileJson = newFile.data as Map<String, dynamic>;
+    Map<String, dynamic>? mainDiffMap;
+    Map<String, dynamic>? deferredDiffMap;
 
-      if (_hasDeferredInfo(oldFileJson) || _hasDeferredInfo(newFileJson)) {
+    if (oldFile.isAnalyzeSizeFile && newFile.isAnalyzeSizeFile) {
+      final oldFileJson = oldFile.data as Map<String, dynamic>;
+      final newFileJson = newFile.data as Map<String, dynamic>;
+
+      if (!_hasDeferredInfo(oldFileJson) && !_hasDeferredInfo(newFileJson)) {
+        diffMap = _generateDiffMapFromAnalyzeSizeFiles(
+          oldFileJson: oldFileJson,
+          newFileJson: newFileJson,
+        );
+      } else {
         _isDeferredApp.value = deferredLoadingSupportEnabled;
+        Map<String, dynamic> oldEntireAppFileJson = oldFileJson;
+        Map<String, dynamic> newEntireAppFileJson = newFileJson;
 
         if (!_hasDeferredInfo(oldFileJson)) {
-          oldFileJson = _wrapInArtificialRoot(oldFileJson);
+          oldEntireAppFileJson = _wrapInArtificialRoot(oldFileJson);
         } else if (!_hasDeferredInfo(newFileJson)) {
-          newFileJson = _wrapInArtificialRoot(newFileJson);
+          newEntireAppFileJson = _wrapInArtificialRoot(newFileJson);
         }
-      }
 
-      final oldApkProgramInfo = ProgramInfo();
-      _apkJsonToProgramInfo(
-        program: oldApkProgramInfo,
-        parent: oldApkProgramInfo.root,
-        json: oldFileJson,
-      );
+        final oldMainOnlyFileJson =
+            _extractMainUnit(Map.from(oldEntireAppFileJson));
+        final newMainOnlyFileJson =
+            _extractMainUnit(Map.from(newEntireAppFileJson));
 
-      // Extract the precompiler trace from the old file, if it exists, and
-      // generate a call graph.
-      final oldPrecompilerTrace = oldFileJson.remove('precompiler-trace');
-      if (oldPrecompilerTrace != null) {
-        _oldDiffCallGraph = generateCallGraphWithDominators(
-          oldPrecompilerTrace,
-          NodeType.packageNode,
+        final oldDeferredOnlyFileJson =
+            _extractDeferredUnits(Map.from(oldEntireAppFileJson));
+        final newDeferredOnlyFileJson =
+            _extractDeferredUnits(Map.from(newEntireAppFileJson));
+
+        diffMap = _generateDiffMapFromAnalyzeSizeFiles(
+          oldFileJson: oldEntireAppFileJson,
+          newFileJson: newEntireAppFileJson,
+        );
+
+        mainDiffMap = _generateDiffMapFromAnalyzeSizeFiles(
+          oldFileJson: oldMainOnlyFileJson,
+          newFileJson: newMainOnlyFileJson,
+        );
+
+        deferredDiffMap = _generateDiffMapFromAnalyzeSizeFiles(
+          oldFileJson: oldDeferredOnlyFileJson,
+          newFileJson: newDeferredOnlyFileJson,
         );
       }
-
-      final newApkProgramInfo = ProgramInfo();
-      _apkJsonToProgramInfo(
-        program: newApkProgramInfo,
-        parent: newApkProgramInfo.root,
-        json: newFileJson,
-      );
-
-      // Extract the precompiler trace from the new file, if it exists, and
-      // generate a call graph.
-      final newPrecompilerTrace = newFileJson.remove('precompiler-trace');
-      if (newPrecompilerTrace != null) {
-        _newDiffCallGraph = generateCallGraphWithDominators(
-          newPrecompilerTrace,
-          NodeType.packageNode,
-        );
-      }
-
-      diffMap = compareProgramInfo(oldApkProgramInfo, newApkProgramInfo);
     } else {
       try {
         diffMap = buildComparisonTreemap(oldFile.data, newFile.data);
@@ -458,25 +498,82 @@ class AppSizeController {
     diffMap['n'] = isDeferredApp.value ? _entireAppNodeName : _rootNodeName;
 
     // TODO(peterdjlee): Try to move the non-active tree generation to separate isolates.
-    _combinedDiffTreeRoot = generateDiffTree(
-      diffMap,
-      DiffTreeType.combined,
-      skipNodesWithNoByteSizeChange: !isDeferredApp.value,
-    );
-    _increasedDiffTreeRoot = generateDiffTree(
-      diffMap,
-      DiffTreeType.increaseOnly,
-      skipNodesWithNoByteSizeChange: !isDeferredApp.value,
-    );
-    _decreasedDiffTreeRoot = generateDiffTree(
-      diffMap,
-      DiffTreeType.decreaseOnly,
-      skipNodesWithNoByteSizeChange: !isDeferredApp.value,
-    );
+    // Entire app or root (for non-deferred):
+    _diffTreeMap = _generateDiffTrees(diffMap);
+
+    if (isDeferredApp.value) {
+      // For main only:
+      _mainDiffTreeMap = _generateDiffTrees(mainDiffMap!);
+
+      // For deferred only:
+      _deferredDiffTreeMap = _generateDiffTrees(deferredDiffMap!);
+    }
 
     changeDiffRoot(_activeDiffRoot);
 
     _processingNotifier.value = false;
+  }
+
+  DiffTreeMap _generateDiffTrees(Map<String, dynamic> diffMap) {
+    // TODO(peterdjlee): Try to move the non-active tree generation to separate isolates.
+    return DiffTreeMap(
+      combined: generateDiffTree(
+        diffMap,
+        DiffTreeType.combined,
+        skipNodesWithNoByteSizeChange: !isDeferredApp.value,
+      ),
+      increaseOnly: generateDiffTree(
+        diffMap,
+        DiffTreeType.increaseOnly,
+        skipNodesWithNoByteSizeChange: !isDeferredApp.value,
+      ),
+      decreaseOnly: generateDiffTree(
+        diffMap,
+        DiffTreeType.decreaseOnly,
+        skipNodesWithNoByteSizeChange: !isDeferredApp.value,
+      ),
+    );
+  }
+
+  Map<String, dynamic> _generateDiffMapFromAnalyzeSizeFiles({
+    required Map<String, dynamic> oldFileJson,
+    required Map<String, dynamic> newFileJson,
+  }) {
+    final oldApkProgramInfo = ProgramInfo();
+    _apkJsonToProgramInfo(
+      program: oldApkProgramInfo,
+      parent: oldApkProgramInfo.root,
+      json: oldFileJson,
+    );
+
+    // Extract the precompiler trace from the old file, if it exists, and
+    // generate a call graph.
+    final oldPrecompilerTrace = oldFileJson.remove('precompiler-trace');
+    if (oldPrecompilerTrace != null) {
+      _oldDiffCallGraph = generateCallGraphWithDominators(
+        oldPrecompilerTrace,
+        NodeType.packageNode,
+      );
+    }
+
+    final newApkProgramInfo = ProgramInfo();
+    _apkJsonToProgramInfo(
+      program: newApkProgramInfo,
+      parent: newApkProgramInfo.root,
+      json: newFileJson,
+    );
+
+    // Extract the precompiler trace from the new file, if it exists, and
+    // generate a call graph.
+    final newPrecompilerTrace = newFileJson.remove('precompiler-trace');
+    if (newPrecompilerTrace != null) {
+      _newDiffCallGraph = generateCallGraphWithDominators(
+        newPrecompilerTrace,
+        NodeType.packageNode,
+      );
+    }
+
+    return compareProgramInfo(oldApkProgramInfo, newApkProgramInfo);
   }
 
   Map<String, dynamic> _wrapInArtificialRoot(Map<String, dynamic> json) {

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_model.dart';
 import 'package:devtools_app/src/screens/debugger/program_explorer_controller.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector_view_controller.dart';
@@ -121,6 +122,8 @@ final testInboundRefList = [
     parentField: testParentField,
   ),
 ];
+
+final testLoadTime = DateTime(2022, 8, 10, 6, 30);
 
 class TestInboundReferences extends InboundReferences {
   TestInboundReferences({required super.references});
@@ -243,6 +246,28 @@ void mockVmObject(VmObject object) {
     when(object.guardClass).thenReturn(null);
     when(object.guardNullable).thenReturn(null);
     when(object.guardClassKind).thenReturn(null);
+  }
+
+  if (object is FuncObject) {
+    when(object.name).thenReturn(testFunction.name);
+    when(object.ref).thenReturn(testFunction);
+    when(object.obj).thenReturn(testFunction);
+    when(object.kind).thenReturn(null);
+    when(object.deoptimizations).thenReturn(null);
+    when(object.isOptimizable).thenReturn(null);
+    when(object.isInlinable).thenReturn(null);
+    when(object.hasIntrinsic).thenReturn(null);
+    when(object.isRecognized).thenReturn(null);
+    when(object.isNative).thenReturn(null);
+    when(object.vmName).thenReturn(null);
+    when(object.icDataArray).thenReturn(null);
+  }
+
+  if (object is ScriptObject) {
+    when(object.name).thenReturn(fileNameFromUri(testScript.uri));
+    when(object.ref).thenReturn(testScript);
+    when(object.obj).thenReturn(testScript);
+    when(object.loadTime).thenReturn(testLoadTime);
   }
 
   if (object is LibraryObject) {

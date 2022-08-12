@@ -207,11 +207,11 @@ class _AppSizeBodyState extends State<AppSizeBody>
                   ),
                   Row(
                     children: [
-                      if (currentTab.key == AppSizeScreen.analysisTabKey &&
-                          isDeferredApp)
-                        _buildAppUnitDropdown(),
-                      if (currentTab.key == AppSizeScreen.diffTabKey)
+                      if (isDeferredApp) _buildAppUnitDropdown(currentTab.key!),
+                      if (currentTab.key == AppSizeScreen.diffTabKey) ...[
+                        const SizedBox(width: defaultSpacing),
                         _buildDiffTreeTypeDropdown(),
+                      ],
                       const SizedBox(width: defaultSpacing),
                       _buildClearButton(currentTab.key!),
                     ],
@@ -252,7 +252,7 @@ class _AppSizeBodyState extends State<AppSizeBody>
     );
   }
 
-  DropdownButtonHideUnderline _buildAppUnitDropdown() {
+  DropdownButtonHideUnderline _buildAppUnitDropdown(Key tabKey) {
     return DropdownButtonHideUnderline(
       key: AppSizeScreen.appUnitDropdownKey,
       child: DropdownButton<AppUnit>(
@@ -264,7 +264,7 @@ class _AppSizeBodyState extends State<AppSizeBody>
         ],
         onChanged: (newAppUnit) {
           setState(() {
-            controller.changeSelectedAppUnit(newAppUnit!);
+            controller.changeSelectedAppUnit(newAppUnit!, tabKey);
           });
         },
       ),
