@@ -27,9 +27,6 @@ class _MemoryControlPaneState extends State<MemoryControlPane>
     with
         AutoDisposeMixin,
         ProvidedControllerMixin<MemoryController, MemoryControlPane> {
-  /// Updated when the MemoryController's _androidCollectionEnabled ValueNotifier changes.
-  bool _isAndroidCollection = MemoryController.androidADBDefault;
-
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -39,28 +36,8 @@ class _MemoryControlPaneState extends State<MemoryControlPane>
         const Spacer(),
         SecondaryControls(
           chartController: widget.chartController,
-          isAndroidCollection: _isAndroidCollection,
         )
       ],
     );
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!initController()) return;
-
-    // TODO(polinach): do we need this listener?
-    // https://github.com/flutter/devtools/pull/4136#discussion_r881773861
-    addAutoDisposeListener(controller.androidCollectionEnabled, () {
-      _isAndroidCollection = controller.androidCollectionEnabled.value;
-      setState(() {
-        if (!_isAndroidCollection && controller.isAndroidChartVisible) {
-          // If we're no longer collecting android stats then hide the
-          // chart and disable the Android Memory button.
-          controller.toggleAndroidChartVisibility();
-        }
-      });
-    });
   }
 }

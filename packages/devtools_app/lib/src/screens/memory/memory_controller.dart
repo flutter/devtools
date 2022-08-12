@@ -259,14 +259,6 @@ class MemoryController extends DisposableController
 
   static const logFilenamePrefix = 'memory_log_';
 
-  // Default state of Android ADB collection.
-  static const androidADBDefault = true;
-
-  ValueListenable<bool> get androidCollectionEnabled =>
-      _androidCollectionEnabled;
-
-  final _androidCollectionEnabled = ValueNotifier<bool>(androidADBDefault);
-
   // Default state of advanced settings enabled.
   static const advancedSettingsEnabledDefault = false;
 
@@ -567,15 +559,8 @@ class MemoryController extends DisposableController
 
   bool get isPaused => _paused.value;
 
-  final _androidChartVisibleNotifier = ValueNotifier<bool>(false);
-
-  ValueListenable get androidChartVisibleNotifier =>
-      _androidChartVisibleNotifier;
-
-  bool get isAndroidChartVisible => _androidChartVisibleNotifier.value;
-
-  bool toggleAndroidChartVisibility() =>
-      _androidChartVisibleNotifier.value = !_androidChartVisibleNotifier.value;
+  final ValueNotifier<bool> isAndroidChartVisibleNotifier =
+      ValueNotifier<bool>(false);
 
   bool get isAdvancedSettingsVisible => _advancedSettingsEnabled.value;
 
@@ -886,6 +871,15 @@ class MemoryController extends DisposableController
         _memoryTracker!.stop();
         _memoryTracker = null;
       },
+    );
+
+    bool _isAndroidChartVisible() =>
+        preferences.memory.androidCollectionEnabled.value &&
+        isConnectedDeviceAndroid;
+    print('!!! handling connection start: ${_isAndroidChartVisible()}');
+    isAndroidChartVisibleNotifier.value = _isAndroidChartVisible();
+    preferences.memory.androidCollectionEnabled.addListener(
+      () => isAndroidChartVisibleNotifier.value = _isAndroidChartVisible(),
     );
   }
 

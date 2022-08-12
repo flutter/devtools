@@ -164,7 +164,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     });
 
     // There is no listener passed, so SetState will be invoked.
-    addAutoDisposeListener(controller.androidChartVisibleNotifier);
+    addAutoDisposeListener(controller.isAndroidChartVisibleNotifier);
 
     _updateListeningState();
   }
@@ -212,7 +212,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
           SizedBox(
             child: MemoryVMChart(widget.chartControllers.vm),
           ),
-          if (controller.isAndroidChartVisible)
+          if (controller.isAndroidChartVisibleNotifier.value)
             SizedBox(
               height: defaultChartHeight,
               child: MemoryAndroidChart(
@@ -240,7 +240,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     const dividerLineHorizontalSpace = 20.0;
     const totalDividerLineHorizontalSpace = dividerLineHorizontalSpace * 2;
 
-    if (!controller.isAndroidChartVisible) return [];
+    if (!controller.isAndroidChartVisibleNotifier.value) return [];
 
     final androidDataDisplayed = chartsValues
         .androidDataToDisplay(widget.chartControllers.android.traces);
@@ -288,7 +288,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
     double totalHoverHeight;
     int totalTraces;
-    if (controller.isAndroidChartVisible) {
+    if (controller.isAndroidChartVisibleNotifier.value) {
       totalTraces = chartsValues.vmData.entries.length -
           1 +
           chartsValues.androidData.entries.length;
