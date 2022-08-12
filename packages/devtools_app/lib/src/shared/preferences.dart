@@ -5,6 +5,9 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import '../analytics/analytics.dart' as ga;
+
+import '../analytics/constants.dart' as analytics_constants;
 
 import '../primitives/auto_dispose.dart';
 import '../primitives/utils.dart';
@@ -24,6 +27,12 @@ class PreferencesController extends DisposableController
   ValueListenable<bool> get denseModeEnabled => _denseMode;
 
   InspectorPreferencesController get inspector => _inspector;
+
+  MemoryPreferencesController get memory => _memory;
+  final _memory = MemoryPreferencesController();
+
+  MemoryPreferencesController get memoryPreferences => _memoryPreferences;
+  final _memoryPreferences = MemoryPreferencesController();
 
   final _inspector = InspectorPreferencesController();
 
@@ -48,6 +57,7 @@ class PreferencesController extends DisposableController
     });
 
     await inspector.init();
+    await memory.init();
 
     setGlobal(PreferencesController, this);
   }
@@ -55,6 +65,7 @@ class PreferencesController extends DisposableController
   @override
   void dispose() {
     inspector.dispose();
+    // memory.dispose();
     super.dispose();
   }
 
@@ -266,5 +277,39 @@ class InspectorPreferencesController extends DisposableController
   /// Change the value for the hover eval mode setting.
   void setHoverEvalMode(bool enableHoverEvalMode) {
     _hoverEvalMode.value = enableHoverEvalMode;
+  }
+}
+
+class MemoryPreferencesController {
+  ValueListenable<bool> get androidCollectionEnabled =>
+      _androidCollectionEnabled;
+
+  final _androidCollectionEnabled = ValueNotifier<bool>(false);
+  static const _androidCollectionEnabledStorageId =
+      'memory.androidCollectionEnabled';
+
+  Future<void> init() async {
+    final androidCollectionEnabledValue =
+        await storage.getValue(_androidCollectionEnabledStorageId);
+
+    setAndroidCollectionEnabled(androidCollectionEnabledValue == 'true');
+
+    _androidCollectionEnabled.addListener(() {
+      storage.setValue(
+        _androidCollectionEnabledStorageId,
+        _androidCollectionEnabled.value.toString(),
+      );
+    });
+    print('loaded memory preferences: ${androidCollectionEnabled.value}');
+  }
+
+  void setAndroidCollectionEnabled(bool enable) {
+    _androidCollectionEnabled.value = enable;
+    if (enable) {
+      ga.select(
+        analytics_constants.memory,
+        analytics_constants.androidChart,
+      );
+    }
   }
 }
