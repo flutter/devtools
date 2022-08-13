@@ -160,21 +160,21 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
     setupTraces();
     _chartController.setupData();
 
-    if (_memoryTimeline.sampleAddedNotifier.value != null) {
-      addAutoDisposeListener(_memoryTimeline.sampleAddedNotifier, () {
+    addAutoDisposeListener(_memoryTimeline.sampleAddedNotifier, () {
+      if (_memoryTimeline.sampleAddedNotifier.value != null) {
         _processHeapSample(_memoryTimeline.sampleAddedNotifier.value!);
-      });
-    }
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_chartController.timestamps.isNotEmpty) {
-      return Container(
-        height: defaultChartHeight,
-        child: Chart(_chartController),
-      );
-    }
+    //if (_chartController.timestamps.isNotEmpty) {
+    return Container(
+      height: defaultChartHeight,
+      child: Chart(_chartController),
+    );
+    // }
 
     return const SizedBox(width: denseSpacing);
   }
