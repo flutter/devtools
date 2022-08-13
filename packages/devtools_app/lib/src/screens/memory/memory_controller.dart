@@ -853,7 +853,6 @@ class MemoryController extends DisposableController
     bool _isAndroidChartVisible() =>
         preferences.memory.androidCollectionEnabled.value &&
         isConnectedDeviceAndroid;
-    print('!!! handling connection start: ${_isAndroidChartVisible()}');
     isAndroidChartVisibleNotifier.value = _isAndroidChartVisible();
     preferences.memory.androidCollectionEnabled.addListener(
       () => isAndroidChartVisibleNotifier.value = _isAndroidChartVisible(),

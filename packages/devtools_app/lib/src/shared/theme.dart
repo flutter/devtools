@@ -86,12 +86,16 @@ ThemeData _baseTheme({
   return theme.copyWith(
     primaryColor: primaryColor,
     indicatorColor: indicatorColor,
+    selectedRowColor: selectedRowColor,
     // Same values for both light and dark themes.
     primaryColorDark: devtoolsBlue[700],
     primaryColorLight: devtoolsBlue[400],
+    // ignore: deprecated_member_use
+    accentColor: devtoolsBlue[400],
     backgroundColor: devtoolsGrey[600],
     canvasColor: backgroundColor,
     scaffoldBackgroundColor: backgroundColor,
+    colorScheme: theme.colorScheme.copyWith(background: backgroundColor),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         foregroundColor: theme.colorScheme.contrastForeground,
@@ -148,7 +152,7 @@ ThemeData _baseTheme({
     ),
     textSelectionTheme: TextSelectionThemeData(
       selectionColor: textSelectionColor,
-    ), colorScheme: theme.colorScheme.copyWith(background: backgroundColor).copyWith(secondary: devtoolsBlue[400]),
+    ),
   );
 }
 

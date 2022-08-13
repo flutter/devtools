@@ -97,7 +97,7 @@ class _ConnectDialogState extends State<ConnectDialog>
   @override
   void initState() {
     super.initState();
-    connectDialogController = TextEditingController(text: 'hello');
+    connectDialogController = TextEditingController();
   }
 
   @override

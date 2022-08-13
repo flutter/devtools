@@ -333,9 +333,6 @@ class ChartsValues {
   Map<String, Map<String, Object?>> androidDataToDisplay(List<Trace> traces) {
     final androidDataDisplayed = <String, Map<String, Object?>>{};
 
-    print(
-      '!!!! checking in androidDataToDisplay: ${controller.isAndroidChartVisibleNotifier.value}',
-    );
     if (controller.isAndroidChartVisibleNotifier.value) {
       final data = androidData;
 
