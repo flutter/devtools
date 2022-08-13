@@ -334,7 +334,7 @@ class ChartsValues {
     final androidDataDisplayed = <String, Map<String, Object?>>{};
 
     print(
-        '!!!! checking in androidDataToDisplay: ${controller.isAndroidChartVisibleNotifier.value}');
+        '!!!! checking in androidDataToDisplay: ${controller.isAndroidChartVisibleNotifier.value}',);
     if (controller.isAndroidChartVisibleNotifier.value) {
       final data = androidData;
 
