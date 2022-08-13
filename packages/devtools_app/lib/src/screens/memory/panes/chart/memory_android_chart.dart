@@ -169,14 +169,10 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
 
   @override
   Widget build(BuildContext context) {
-    //if (_chartController.timestamps.isNotEmpty) {
     return Container(
       height: defaultChartHeight,
       child: Chart(_chartController),
     );
-    // }
-
-    return const SizedBox(width: denseSpacing);
   }
 
   /// TODO(terry): Colors used in charts (move to theme).
