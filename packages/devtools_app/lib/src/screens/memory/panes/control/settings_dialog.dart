@@ -28,31 +28,17 @@ class MemorySettingsDialog extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ...dialogSubHeader(theme, 'Android'),
-            Column(
-              children: [
-                CheckboxSetting(
-                  notifier: preferences.memory.androidCollectionEnabled
-                      as ValueNotifier<bool?>,
-                  title: 'Show Android memory chart',
-                ),
-                CheckboxSetting(
-                  notifier: controller.unitDisplayed as ValueNotifier<bool?>,
-                  title: 'Display Data In Units (B, KB, MB, and GB)',
-                ),
-              ],
+            CheckboxSetting(
+              notifier: preferences.memory.androidCollectionEnabled
+                  as ValueNotifier<bool?>,
+              title: 'Show Android memory chart',
             ),
             const SizedBox(
               height: defaultSpacing,
             ),
-            ...dialogSubHeader(theme, 'General'),
             CheckboxSetting(
-              notifier:
-                  controller.advancedSettingsEnabled as ValueNotifier<bool?>,
-              title: 'Enable advanced memory settings',
-            ),
-            CheckboxSetting(
-              notifier: controller.autoSnapshotEnabled as ValueNotifier<bool?>,
+              notifier: preferences.memory.autoSnapshotEnabled
+                  as ValueNotifier<bool?>,
               title: 'Automatically take snapshot when memory usage spikes',
             ),
           ],

@@ -147,9 +147,7 @@ void main() {
 
       expect(controller.memorySource, MemoryController.liveFeed);
 
-      controller.isAdvancedSettingsVisible == false
-          ? expect(find.text('GC'), findsNothing)
-          : expect(find.text('GC'), findsOneWidget);
+      expect(find.text('GC'), findsOneWidget);
 
       expect(find.byType(MemoryVMChart), findsOneWidget);
 

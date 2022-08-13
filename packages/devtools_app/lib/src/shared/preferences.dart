@@ -283,24 +283,34 @@ class InspectorPreferencesController extends DisposableController
 class MemoryPreferencesController {
   ValueListenable<bool> get androidCollectionEnabled =>
       _androidCollectionEnabled;
-
   final _androidCollectionEnabled = ValueNotifier<bool>(false);
   static const _androidCollectionEnabledStorageId =
       'memory.androidCollectionEnabled';
 
+  ValueListenable<bool> get autoSnapshotEnabled => _autoSnapshotEnabled;
+  final _autoSnapshotEnabled = ValueNotifier<bool>(false);
+  static const _autoSnapshotEnabledStorageId = 'memory.autoSnapshotEnabled';
+
   Future<void> init() async {
     final androidCollectionEnabledValue =
         await storage.getValue(_androidCollectionEnabledStorageId);
-
     setAndroidCollectionEnabled(androidCollectionEnabledValue == 'true');
-
     _androidCollectionEnabled.addListener(() {
       storage.setValue(
         _androidCollectionEnabledStorageId,
         _androidCollectionEnabled.value.toString(),
       );
     });
-    print('loaded memory preferences: ${androidCollectionEnabled.value}');
+
+    final autoSnapshotEnabledValue =
+        await storage.getValue(_autoSnapshotEnabledStorageId);
+    setAutoSnapshotEnabled(autoSnapshotEnabledValue == 'true');
+    _autoSnapshotEnabled.addListener(() {
+      storage.setValue(
+        _autoSnapshotEnabledStorageId,
+        _autoSnapshotEnabled.value.toString(),
+      );
+    });
   }
 
   void setAndroidCollectionEnabled(bool enable) {
@@ -309,6 +319,16 @@ class MemoryPreferencesController {
       ga.select(
         analytics_constants.memory,
         analytics_constants.androidChart,
+      );
+    }
+  }
+
+  void setAutoSnapshotEnabled(bool enable) {
+    _autoSnapshotEnabled.value = enable;
+    if (enable) {
+      ga.select(
+        analytics_constants.memory,
+        analytics_constants.autoSnapshot,
       );
     }
   }

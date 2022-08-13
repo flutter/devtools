@@ -196,24 +196,17 @@ class _SecondaryControlsState extends State<SecondaryControls>
         const MemorySourceDropdown(),
         const SizedBox(width: defaultSpacing),
         const SizedBox(width: denseSpacing),
-        ValueListenableBuilder<bool>(
-          valueListenable: controller.advancedSettingsEnabled,
-          builder: (context, paused, _) {
-            return controller.isAdvancedSettingsVisible
-                ? Row(
-                    children: [
-                      IconLabelButton(
-                        onPressed: controller.isGcing ? null : _gc,
-                        icon: Icons.delete,
-                        label: 'GC',
-                        minScreenWidthForTextBeforeScaling:
-                            primaryControlsMinVerboseWidth,
-                      ),
-                      const SizedBox(width: denseSpacing),
-                    ],
-                  )
-                : const SizedBox();
-          },
+        Row(
+          children: [
+            IconLabelButton(
+              onPressed: controller.isGcing ? null : _gc,
+              icon: Icons.delete,
+              label: 'GC',
+              minScreenWidthForTextBeforeScaling:
+                  primaryControlsMinVerboseWidth,
+            ),
+            const SizedBox(width: denseSpacing),
+          ],
         ),
         ExportButton(
           onPressed: controller.offline.value ? null : _exportToFile,

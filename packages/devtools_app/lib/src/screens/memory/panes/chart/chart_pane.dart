@@ -374,7 +374,6 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
           dashed: dashedLine == true,
           image: image,
           hasNumeric: true,
-          hasUnit: controller.unitDisplayed.value,
           scaleImage: true,
         ),
       );
@@ -390,7 +389,6 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     bool dashed = false,
     bool bold = true,
     bool hasNumeric = false,
-    bool hasUnit = false,
     bool scaleImage = false,
     double leftPadding = 5.0,
   }) {
@@ -411,13 +409,13 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
       String displayValue = ' ';
       if (hasNumeric) {
         int startOfNumber = name.lastIndexOf(' ');
-        if (hasUnit) {
-          final unitOrValue = name.substring(startOfNumber + 1);
-          if (int.tryParse(unitOrValue) == null) {
-            // Got a unit.
-            startOfNumber = name.lastIndexOf(' ', startOfNumber - 1);
-          }
+
+        final unitOrValue = name.substring(startOfNumber + 1);
+        if (int.tryParse(unitOrValue) == null) {
+          // Got a unit.
+          startOfNumber = name.lastIndexOf(' ', startOfNumber - 1);
         }
+
         displayName = '${name.substring(0, startOfNumber)} ';
         displayValue = name.substring(startOfNumber + 1);
       }

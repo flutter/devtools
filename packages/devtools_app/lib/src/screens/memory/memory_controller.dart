@@ -259,24 +259,6 @@ class MemoryController extends DisposableController
 
   static const logFilenamePrefix = 'memory_log_';
 
-  // Default state of advanced settings enabled.
-  static const advancedSettingsEnabledDefault = false;
-
-  ValueListenable<bool> get advancedSettingsEnabled => _advancedSettingsEnabled;
-
-  final _advancedSettingsEnabled =
-      ValueNotifier<bool>(advancedSettingsEnabledDefault);
-
-  ValueListenable<bool> get autoSnapshotEnabled => _autoSnapshotEnabled;
-  final _autoSnapshotEnabled = ValueNotifier<bool>(false);
-
-  // Memory statistics displayed as raw numbers or units (KB, MB, GB).
-  static const unitDisplayedDefault = true;
-
-  ValueListenable<bool> get unitDisplayed => _unitDisplayed;
-
-  final _unitDisplayed = ValueNotifier<bool>(unitDisplayedDefault);
-
   final List<Snapshot> snapshots = [];
 
   Snapshot? get lastSnapshot => snapshots.safeLast;
@@ -561,11 +543,6 @@ class MemoryController extends DisposableController
 
   final ValueNotifier<bool> isAndroidChartVisibleNotifier =
       ValueNotifier<bool>(false);
-
-  bool get isAdvancedSettingsVisible => _advancedSettingsEnabled.value;
-
-  bool toggleAdvancedSettingsVisibility() =>
-      _advancedSettingsEnabled.value = !_advancedSettingsEnabled.value;
 
   final SettingsModel settings = SettingsModel();
 

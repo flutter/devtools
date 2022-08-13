@@ -334,7 +334,8 @@ class ChartsValues {
     final androidDataDisplayed = <String, Map<String, Object?>>{};
 
     print(
-        '!!!! checking in androidDataToDisplay: ${controller.isAndroidChartVisibleNotifier.value}',);
+      '!!!! checking in androidDataToDisplay: ${controller.isAndroidChartVisibleNotifier.value}',
+    );
     if (controller.isAndroidChartVisibleNotifier.value) {
       final data = androidData;
 
@@ -394,13 +395,11 @@ class ChartsValues {
     return androidDataDisplayed;
   }
 
-  String? formatNumeric(num? number) => controller.unitDisplayed.value
-      ? prettyPrintBytes(
-          number,
-          kbFractionDigits: 1,
-          mbFractionDigits: 2,
-          includeUnit: true,
-          roundingPoint: 0.7,
-        )
-      : nf.format(number);
+  String? formatNumeric(num? number) => prettyPrintBytes(
+        number,
+        kbFractionDigits: 1,
+        mbFractionDigits: 2,
+        includeUnit: true,
+        roundingPoint: 0.7,
+      );
 }

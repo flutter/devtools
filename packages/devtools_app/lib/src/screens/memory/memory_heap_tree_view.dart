@@ -337,7 +337,7 @@ class HeapTreeViewState extends State<HeapTree>
 
   /// Detect spike in memory usage if so do an automatic snapshot.
   void autoSnapshot() {
-    if (!controller.autoSnapshotEnabled.value) return;
+    if (!preferences.memory.autoSnapshotEnabled.value) return;
     final heapSample = controller.memoryTimeline.sampleAddedNotifier.value!;
     final heapSum = heapSample.external + heapSample.used;
     heapMovingAverage.add(heapSum);
