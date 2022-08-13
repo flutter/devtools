@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
+import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
