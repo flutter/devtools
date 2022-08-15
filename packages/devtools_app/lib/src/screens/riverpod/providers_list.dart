@@ -67,7 +67,12 @@ class ContrainerProviderNodeElement extends ConsumerWidget {
         padding: tilePadding,
         child: Row(
           children: [
-            Expanded(child: Text(node.name)),
+            Expanded(
+              child: Text(
+                node.name,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
             if (node.mightBeOutdated)
               const Padding(
                 padding: EdgeInsets.only(left: 8.0),

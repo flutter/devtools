@@ -175,7 +175,10 @@ class _ContainerListState extends ConsumerState<ContainerList> {
                       key: Key('container-${node.id}'),
                       padding: tilePadding,
                       child: Expanded(
-                        child: Text('Container #${node.id}'),
+                        child: Text(
+                          'Container #${node.id}',
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                     ),
                   ProvidersList(
