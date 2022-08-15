@@ -5,13 +5,20 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
+import 'package:devtools_app/src/primitives/trees.dart';
+import 'package:devtools_app/src/screens/memory/memory_controller.dart';
 import 'package:devtools_app/src/screens/memory/memory_heap_tree_view.dart';
+import 'package:devtools_app/src/screens/memory/memory_screen.dart';
 import 'package:devtools_app/src/screens/memory/panes/allocation_tracing/allocation_profile_tracing_tree.dart';
 import 'package:devtools_app/src/screens/memory/panes/allocation_tracing/allocation_profile_tracing_view.dart';
 import 'package:devtools_app/src/screens/memory/panes/allocation_tracing/allocation_profile_tracing_view_controller.dart';
+import 'package:devtools_app/src/screens/profiler/cpu_profile_model.dart';
+import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
+import 'package:devtools_app/src/shared/preferences.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
@@ -66,7 +73,6 @@ void main() {
 
   // Set a wide enough screen width that we do not run into overflow.
   const windowSize = Size(2225.0, 1000.0);
-  setGlobal(NotificationService, NotificationService());
 
   test('Allocation tracing disabled by default', () {
     // TODO(bkonyi): remove this check once we enable the tab by default.
@@ -75,16 +81,19 @@ void main() {
 
   group('Allocation Tracing', () {
     late final CpuSamples allocationTracingProfile;
+
     setUpAll(() {
       enableNewAllocationProfileTable = true;
       final rawProfile = File(
-        'test/test_data/allocation_trace.json',
+        'test/test_data/memory/allocation_tracing/allocation_trace.json',
       ).readAsStringSync();
       allocationTracingProfile = CpuSamples.parse(jsonDecode(rawProfile))!;
     });
+
     tearDownAll(() => enableNewAllocationProfileTable = false);
 
     setUp(() async {
+      setGlobal(NotificationService, NotificationService());
       setGlobal(OfflineModeController, OfflineModeController());
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(PreferencesController, PreferencesController());

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../../../primitives/utils.dart';
 import '../../../../shared/common_widgets.dart';
@@ -18,7 +17,7 @@ const _defaultNumberFieldWidth = 80.0;
 
 class _TraceCheckBoxColumn extends ColumnData<TracedClass>
     implements ColumnRenderer<TracedClass> {
-  _TraceCheckBoxColumn()
+  _TraceCheckBoxColumn({required this.controller})
       : super(
           'Trace',
           titleTooltip:
@@ -26,6 +25,8 @@ class _TraceCheckBoxColumn extends ColumnData<TracedClass>
           fixedWidthPx: scaleByFontFactor(55.0),
           alignment: ColumnAlignment.left,
         );
+
+  final AllocationProfileTracingViewController controller;
 
   @override
   bool get supportsSorting => false;
@@ -37,8 +38,6 @@ class _TraceCheckBoxColumn extends ColumnData<TracedClass>
     bool isRowSelected = false,
     VoidCallback? onPressed,
   }) {
-    final controller =
-        Provider.of<AllocationProfileTracingViewController>(context);
     return Checkbox(
       value: item.traceAllocations,
       onChanged: (value) async {
@@ -97,51 +96,50 @@ class _AllocationTracingTableState extends State<AllocationTracingTable> {
   late SortDirection sortDirection;
   late ColumnData<TracedClass> secondarySortColumn;
 
-  static final _checkboxColumn = _TraceCheckBoxColumn();
+  late final _TraceCheckBoxColumn _checkboxColumn;
   static final _classNameColumn = _ClassNameColumn();
   static final _instancesColumn = _InstancesColumn();
 
-  static final columns = <ColumnData<TracedClass>>[
-    _checkboxColumn,
-    _classNameColumn,
-    _instancesColumn,
-  ];
+  late final List<ColumnData<TracedClass>> columns;
 
   @override
   void initState() {
     super.initState();
+    _checkboxColumn = _TraceCheckBoxColumn(controller: widget.controller);
+    columns = <ColumnData<TracedClass>>[
+      _checkboxColumn,
+      _classNameColumn,
+      _instancesColumn,
+    ];
     sortDirection = SortDirection.ascending;
     secondarySortColumn = _classNameColumn;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Provider<AllocationProfileTracingViewController>.value(
-      value: widget.controller,
-      child: DualValueListenableBuilder<bool, List<TracedClass>>(
-        firstListenable: widget.controller.refreshing,
-        secondListenable: widget.controller.classList,
-        builder: (context, _, classList, __) {
-          return FlatTable<TracedClass>(
-            columns: columns,
-            data: classList,
-            keyFactory: (e) => Key(e.cls.id!),
-            onItemSelected: widget.controller.selectTracedClass,
-            sortColumn: _checkboxColumn,
-            secondarySortColumn: secondarySortColumn,
-            sortDirection: sortDirection,
-            selectionNotifier: widget.controller.selectedTracedClass,
-            onSortChanged: (column, direction, {secondarySortColumn}) {
-              // Keep track of sorting state so it doesn't get reset when
-              // `controller.refreshing` changes.
-              setState(() {
-                sortDirection = direction;
-                secondarySortColumn = secondarySortColumn;
-              });
-            },
-          );
-        },
-      ),
+    return DualValueListenableBuilder<bool, List<TracedClass>>(
+      firstListenable: widget.controller.refreshing,
+      secondListenable: widget.controller.classList,
+      builder: (context, _, classList, __) {
+        return FlatTable<TracedClass>(
+          columns: columns,
+          data: classList,
+          keyFactory: (e) => Key(e.cls.id!),
+          onItemSelected: widget.controller.selectTracedClass,
+          sortColumn: _checkboxColumn,
+          secondarySortColumn: secondarySortColumn,
+          sortDirection: sortDirection,
+          selectionNotifier: widget.controller.selectedTracedClass,
+          onSortChanged: (column, direction, {secondarySortColumn}) {
+            // Keep track of sorting state so it doesn't get reset when
+            // `controller.refreshing` changes.
+            setState(() {
+              sortDirection = direction;
+              secondarySortColumn = secondarySortColumn;
+            });
+          },
+        );
+      },
     );
   }
 }

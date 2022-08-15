@@ -36,6 +36,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
       }
     }
   }
+  
   static final _defaultProfile = CpuSamples.parse({
     'samplePeriod': 50,
     'maxStackDepth': 12,
