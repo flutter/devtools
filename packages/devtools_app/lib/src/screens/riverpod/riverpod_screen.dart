@@ -52,7 +52,7 @@ class RiverpodScreenWrapper extends ConsumerWidget {
                         title: Text(
                           multiContainer.maybeWhen(
                             data: (multiContainer) =>
-                                multiContainer ? 'Containers' : 'Providers',
+                                multiContainer ? 'ProviderContainers' : 'Providers',
                             orElse: () => '',
                           ),
                         ),
