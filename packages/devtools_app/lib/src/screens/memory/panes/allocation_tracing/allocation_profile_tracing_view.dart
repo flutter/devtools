@@ -19,10 +19,10 @@ class AllocationProfileTracingView extends StatefulWidget {
 
   @override
   State<AllocationProfileTracingView> createState() =>
-      _AllocationProfileTracingViewState();
+      AllocationProfileTracingViewState();
 }
 
-class _AllocationProfileTracingViewState
+class AllocationProfileTracingViewState
     extends State<AllocationProfileTracingView> {
   late final AllocationProfileTracingViewController controller;
 

@@ -42,7 +42,9 @@ class AllocationTracingTree extends StatelessWidget {
             ],
           );
         } else if (selection.traceAllocations &&
-            controller.selectedTracedClassAllocationData == null) {
+            (controller.selectedTracedClassAllocationData == null ||
+                controller.selectedTracedClassAllocationData!.bottomUpRoots
+                    .isEmpty)) {
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -61,7 +63,7 @@ class AllocationTracingTree extends StatelessWidget {
                   updateTreeStateCallback: setState,
                 ),
                 Expanded(
-                  child: _AllocationProfileTracingBottomUpTable(
+                  child: AllocationProfileTracingBottomUpTable(
                     cls: selection.cls,
                     // TODO(bkonyi): support call stack and bottom up views.
                     dataRoots: controller
@@ -236,8 +238,8 @@ class _ExclusiveCountColumn extends ColumnData<CpuStackFrame> {
 }
 
 /// A table of the bottom-up allocation profile tree.
-class _AllocationProfileTracingBottomUpTable extends StatefulWidget {
-  const _AllocationProfileTracingBottomUpTable({
+class AllocationProfileTracingBottomUpTable extends StatefulWidget {
+  const AllocationProfileTracingBottomUpTable({
     Key? key,
     required this.cls,
     required this.dataRoots,
@@ -247,13 +249,13 @@ class _AllocationProfileTracingBottomUpTable extends StatefulWidget {
   final List<CpuStackFrame> dataRoots;
 
   @override
-  State<_AllocationProfileTracingBottomUpTable> createState() {
+  State<AllocationProfileTracingBottomUpTable> createState() {
     return _AllocationProfileTracingBottomUpTableState();
   }
 }
 
 class _AllocationProfileTracingBottomUpTableState
-    extends State<_AllocationProfileTracingBottomUpTable> {
+    extends State<AllocationProfileTracingBottomUpTable> {
   static final treeColumn = MethodNameColumn();
   static final startingSortColumn = _InclusiveCountColumn();
   static final columns = List<ColumnData<CpuStackFrame>>.unmodifiable([

@@ -41,6 +41,17 @@ class TracedClass {
   final ClassRef cls;
   final int instances;
   final bool traceAllocations;
+
+  @override
+  bool operator ==(Object other) {
+    if (other is! TracedClass) return false;
+    return cls == other.cls &&
+        instances == other.instances &&
+        traceAllocations == other.traceAllocations;
+  }
+
+  @override
+  int get hashCode => Object.hash(cls, instances, traceAllocations);
 }
 
 class AllocationProfileTracingViewController extends DisposableController
