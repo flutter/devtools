@@ -461,11 +461,11 @@ class InspectorService extends InspectorServiceBase {
       'getPubRootDirectories',
     );
 
-    if (response.runtimeType != List) return [];
+    if (response is! List<dynamic>) {
+      return [];
+    }
 
-    return (response as List<dynamic>)
-        .map<String>((e) => e.toString())
-        .toList();
+    return response.map<String>((e) => e.toString()).toList();
   }
 
   /// As we aren't running from an IDE, we don't know exactly what the pub root
