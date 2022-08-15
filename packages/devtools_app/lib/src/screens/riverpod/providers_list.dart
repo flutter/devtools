@@ -10,26 +10,32 @@ class ProvidersList extends StatelessWidget {
   const ProvidersList({
     Key? key,
     required this.nodes,
+    required this.addPadding,
   }) : super(key: key);
 
   final List<RiverpodNode> nodes;
+  final bool addPadding;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          for (final node in nodes)
-            ContrainerProviderNodeElement(
-              index: nodes.indexOf(node),
-              key: Key('riverpod-${node.id}'),
-              node: node,
-            )
-        ],
-      ),
+    final child = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (final node in nodes)
+          ContrainerProviderNodeElement(
+            index: nodes.indexOf(node),
+            key: Key('riverpod-${node.id}'),
+            node: node,
+          )
+      ],
     );
+
+    return addPadding
+        ? Padding(
+            padding: const EdgeInsets.only(left: 20),
+            child: child,
+          )
+        : child;
   }
 }
 
@@ -61,7 +67,7 @@ class ContrainerProviderNodeElement extends ConsumerWidget {
         padding: tilePadding,
         child: Row(
           children: [
-            Text(node.title),
+            Text(node.name),
             if (node.mightBeOutdated)
               const Padding(
                 padding: EdgeInsets.only(left: 8.0),

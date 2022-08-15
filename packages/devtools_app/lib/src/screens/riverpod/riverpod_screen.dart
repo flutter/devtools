@@ -28,6 +28,8 @@ class RiverpodScreenWrapper extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final multiContainer = ref.watch(multiContainerProvider);
+
     return ref.watch(supportsDevToolProvider).when(
           loading: () => const Text('Loading...'),
           error: (_, __) => const _UnsupportedMessage(),
@@ -44,12 +46,18 @@ class RiverpodScreenWrapper extends ConsumerWidget {
               children: [
                 OutlineDecoration(
                   child: Column(
-                    children: const [
+                    children: [
                       AreaPaneHeader(
                         needsTopBorder: false,
-                        title: Text('Containers'),
+                        title: Text(
+                          multiContainer.maybeWhen(
+                            data: (multiContainer) =>
+                                multiContainer ? 'Containers' : 'Providers',
+                            orElse: () => '',
+                          ),
+                        ),
                       ),
-                      Expanded(
+                      const Expanded(
                         child: ContainerList(),
                       ),
                     ],

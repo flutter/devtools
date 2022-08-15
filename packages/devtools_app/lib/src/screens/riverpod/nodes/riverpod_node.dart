@@ -3,7 +3,7 @@ class RiverpodNode {
     required this.id,
     required this.containerId,
     required this.stateId,
-    required this.type,
+    required this.argumentId,
     required this.name,
     required this.mightBeOutdated,
   });
@@ -11,21 +11,16 @@ class RiverpodNode {
   final String id;
   final String containerId;
   final String stateId;
-  final String type;
-  final String? name;
+  final String? argumentId;
+  final String name;
   final bool mightBeOutdated;
-
-  String get title {
-    final typeString = '$type()';
-    return name != null ? '$name - $typeString' : typeString;
-  }
 
   RiverpodNode copy({required String stateId}) {
     return RiverpodNode(
       id: id,
       containerId: containerId,
       stateId: stateId,
-      type: type,
+      argumentId: argumentId,
       name: name,
       mightBeOutdated: mightBeOutdated,
     );

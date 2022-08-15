@@ -57,7 +57,7 @@ class SelectedProviderPanel extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedNode = ref.watch(selectedNodeProvider);
     final detailsTitleText =
-        selectedNode != null ? selectedNode.title : '[No provider selected]';
+        selectedNode != null ? selectedNode.name : '[No provider selected]';
 
     return OutlineDecoration(
       child: Column(
@@ -70,16 +70,87 @@ class SelectedProviderPanel extends ConsumerWidget {
               RefreshStateButton(),
             ],
           ),
-          if (selectedNode != null)
-            Expanded(
-              child: InstanceViewer(
-                rootPath: InstancePath.fromInstanceId(
-                  selectedNode.stateId,
-                ),
-                showInternalProperties: ref.watch(showInternalsProvider),
-              ),
-            )
+          if (selectedNode != null) _Content(selectedNode: selectedNode),
         ],
+      ),
+    );
+  }
+}
+
+class _Content extends ConsumerWidget {
+  const _Content({
+    Key? key,
+    required this.selectedNode,
+  }) : super(key: key);
+
+  final RiverpodNode selectedNode;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return selectedNode.argumentId != null
+        ? Expanded(
+            child: Split(
+              axis: Axis.vertical,
+              initialFractions: const [0.2, 0.8],
+              children: [
+                _ViewerWithLabel(
+                  instanceId: selectedNode.argumentId!,
+                  label: 'Family argument:',
+                ),
+                _ViewerWithLabel(
+                  instanceId: selectedNode.stateId,
+                  label: 'State:',
+                )
+              ],
+            ),
+          )
+        : _ViewerBody(
+            instanceId: selectedNode.stateId,
+          );
+  }
+}
+
+class _ViewerWithLabel extends ConsumerWidget {
+  const _ViewerWithLabel({
+    Key? key,
+    required this.instanceId,
+    required this.label,
+  }) : super(key: key);
+
+  final String instanceId;
+  final String label;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(label),
+        ),
+        _ViewerBody(instanceId: instanceId),
+      ],
+    );
+  }
+}
+
+class _ViewerBody extends ConsumerWidget {
+  const _ViewerBody({
+    Key? key,
+    required this.instanceId,
+  }) : super(key: key);
+
+  final String instanceId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Expanded(
+      child: InstanceViewer(
+        rootPath: InstancePath.fromInstanceId(
+          instanceId,
+        ),
+        showInternalProperties: ref.watch(showInternalsProvider),
       ),
     );
   }

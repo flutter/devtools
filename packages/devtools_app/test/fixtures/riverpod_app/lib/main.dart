@@ -26,6 +26,11 @@ final counterProvider = StateNotifierProvider<Counter, int>(
   name: 'counterProvider',
 );
 
+final secondCounterProvider = StateNotifierProvider<Counter, int>(
+  (ref) => Counter(),
+  name: 'secondCounterProvider',
+);
+
 class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -41,6 +46,10 @@ class MyApp extends ConsumerWidget {
               const Text('You clicked this many times on the button:'),
               Text(
                 ref.watch(counterProvider).toString(),
+                style: Theme.of(context).textTheme.headline4,
+              ),
+              Text(
+                ref.watch(secondCounterProvider).toString(),
                 style: Theme.of(context).textTheme.headline4,
               ),
             ],

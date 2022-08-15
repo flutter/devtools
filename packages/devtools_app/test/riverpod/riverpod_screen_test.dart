@@ -56,24 +56,24 @@ void main() {
 
   group('ProviderScreen', () {
     testWidgetsWithWindowSize(
-      'shows multiple containers',
+      'shows multiple containers with header',
       windowSize,
       (tester) async {
         final provider0 = RiverpodNode(
           id: '0',
           containerId: '0',
           stateId: 'stateId',
-          type: 'String',
           name: 'provider0',
           mightBeOutdated: false,
+          argumentId: null,
         );
         final provider1 = RiverpodNode(
           id: '1',
           containerId: '1',
           stateId: 'stateId',
-          type: 'String',
           name: 'provider1',
           mightBeOutdated: false,
+          argumentId: null,
         );
         await tester.pumpWidget(
           ProviderScope(
@@ -97,7 +97,12 @@ void main() {
             child: riverpodScreen,
           ),
         );
+        await tester.pumpAndSettle();
 
+        await expectLater(
+          find.text('Containers'),
+          findsOneWidget,
+        );
         await expectLater(
           find.text('Container #0'),
           findsOneWidget,
@@ -107,11 +112,70 @@ void main() {
           findsOneWidget,
         );
         await expectLater(
-          find.text(provider0.title),
+          find.text(provider0.name),
           findsOneWidget,
         );
         await expectLater(
-          find.text(provider1.title),
+          find.text(provider1.name),
+          findsOneWidget,
+        );
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'shows single container with header',
+      windowSize,
+      (tester) async {
+        final provider0 = RiverpodNode(
+          id: '0',
+          containerId: '0',
+          stateId: 'stateId',
+          name: 'provider0',
+          mightBeOutdated: false,
+          argumentId: null,
+        );
+        final provider1 = RiverpodNode(
+          id: '1',
+          containerId: '1',
+          stateId: 'stateId',
+          name: 'provider1',
+          mightBeOutdated: false,
+          argumentId: null,
+        );
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              supportsDevToolProvider.overrideWithValue(
+                const AsyncValue.data(true),
+              ),
+              containerNodesProvider.overrideWithValue(
+                AsyncValue.data([
+                  ContainerNode(
+                    id: '0',
+                    providers: [provider0, provider1],
+                  ),
+                ]),
+              ),
+            ],
+            child: riverpodScreen,
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        await expectLater(
+          find.text('Providers'),
+          findsOneWidget,
+        );
+        await expectLater(
+          find.text('Container #0'),
+          findsNothing,
+        );
+        await expectLater(
+          find.text(provider0.name),
+          findsOneWidget,
+        );
+        await expectLater(
+          find.text(provider1.name),
           findsOneWidget,
         );
       },
@@ -136,9 +200,9 @@ void main() {
                         id: '0',
                         containerId: '0',
                         stateId: 'stateId',
-                        type: 'String',
                         name: 'provider0',
                         mightBeOutdated: true,
+                        argumentId: null,
                       )
                     ],
                   ),
@@ -278,9 +342,9 @@ void main() {
           id: '0',
           containerId: '0',
           stateId: instanceId,
-          type: 'String',
           name: 'firstProvider',
           mightBeOutdated: false,
+          argumentId: null,
         );
 
         await tester.pumpWidget(
@@ -312,12 +376,86 @@ void main() {
         );
 
         await expectLater(
-          find.text(provider.title),
+          find.text(provider.name),
           findsNWidgets(2),
         );
         await expectLater(
           find.byType(InstanceViewer),
           findsOneWidget,
+        );
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'shows selected family provider value and argument',
+      windowSize,
+      (tester) async {
+        const instanceId = 'fake_state';
+        const argumentId = 'fake_argument';
+        const state = 'this is a fake value';
+        final provider = RiverpodNode(
+          id: '0',
+          containerId: '0',
+          stateId: instanceId,
+          name: 'firstProvider',
+          mightBeOutdated: false,
+          argumentId: argumentId,
+        );
+
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              supportsDevToolProvider.overrideWithValue(
+                const AsyncValue.data(true),
+              ),
+              containerNodesProvider.overrideWithValue(
+                AsyncValue.data([
+                  ContainerNode(id: '0', providers: [provider])
+                ]),
+              ),
+              selectedNodeProvider.overrideWithValue(provider),
+              instanceProvider(
+                const InstancePath.fromInstanceId(instanceId),
+              ).overrideWithValue(
+                AsyncValue.data(
+                  InstanceDetails.string(
+                    state,
+                    instanceRefId: instanceId,
+                    setter: null,
+                  ),
+                ),
+              ),
+              instanceProvider(
+                const InstancePath.fromInstanceId(argumentId),
+              ).overrideWithValue(
+                AsyncValue.data(
+                  InstanceDetails.string(
+                    state,
+                    instanceRefId: argumentId,
+                    setter: null,
+                  ),
+                ),
+              )
+            ],
+            child: riverpodScreen,
+          ),
+        );
+
+        await expectLater(
+          find.text(provider.name),
+          findsNWidgets(2),
+        );
+        await expectLater(
+          find.text('State:'),
+          findsOneWidget,
+        );
+        await expectLater(
+          find.text('Family argument:'),
+          findsOneWidget,
+        );
+        await expectLater(
+          find.byType(InstanceViewer),
+          findsNWidgets(2),
         );
       },
     );
@@ -333,9 +471,9 @@ void main() {
           id: '0',
           containerId: '0',
           stateId: instanceId,
-          type: 'String',
           name: 'firstProvider',
           mightBeOutdated: false,
+          argumentId: null,
         );
 
         await tester.pumpWidget(
@@ -384,9 +522,9 @@ void main() {
           id: '0',
           containerId: '0',
           stateId: instanceId,
-          type: 'String',
           name: 'firstProvider',
           mightBeOutdated: false,
+          argumentId: null,
         );
 
         await tester.pumpWidget(
@@ -437,9 +575,9 @@ void main() {
         id: '0',
         containerId: '0',
         stateId: firstStateId,
-        type: 'String',
         name: 'provider0',
         mightBeOutdated: false,
+        argumentId: null,
       );
       final updatedProvider = provider.copy(stateId: secondStateId);
 

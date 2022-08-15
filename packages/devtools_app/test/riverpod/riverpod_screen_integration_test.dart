@@ -61,8 +61,6 @@ void main() async {
         (prev, next) {},
       );
 
-      await tapIncrement();
-
       await expectLater(
         sub.read(),
         completion([
@@ -72,14 +70,12 @@ void main() async {
               matchRiverpodNode(
                 id: '0',
                 containerId: '0',
-                title:
-                    'counterProvider - StateNotifierProvider<Counter, int>()',
+                name: 'counterProvider',
               ),
               matchRiverpodNode(
                 id: '1',
                 containerId: '0',
-                title:
-                    'counterProvider.notifier - _NotifierProvider<Counter, int>()',
+                name: 'secondCounterProvider',
               ),
             ],
           ),

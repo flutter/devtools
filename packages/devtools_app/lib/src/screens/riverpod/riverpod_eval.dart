@@ -56,11 +56,11 @@ final evalRiverpodNodeProvider = FutureProvider.autoDispose.family(
     return RiverpodNode(
       id: fieldsMap['id']!.valueAsString!,
       containerId: fieldsMap['containerId']!.valueAsString!,
-      name: fieldsMap['name']!.kind == InstanceKind.kNull
-          ? null
-          : fieldsMap['name']!.valueAsString,
-      type: fieldsMap['type']!.valueAsString!,
+      name: fieldsMap['name']!.valueAsString!,
       stateId: fieldsMap['state']!.id!,
+      argumentId: fieldsMap['argument']?.kind == InstanceKind.kNull
+          ? null
+          : fieldsMap['argument']?.id,
       mightBeOutdated: fieldsMap['mightBeOutdated']!.valueAsString == 'true',
     );
   },

@@ -97,7 +97,7 @@ final _containerNodeProvider =
 
 /// Combines [_containerIdsProvider] with [_containerNodeProvider] to obtain all
 /// the [ContainerNode]s at once, with their providers sorted by title.
-final containerNodesProvider = AutoDisposeFutureProvider<List<ContainerNode>>(
+final containerNodesProvider = FutureProvider.autoDispose<List<ContainerNode>>(
   (ref) async {
     final ids = await ref.watch(_containerIdsProvider.future);
 
@@ -108,13 +108,19 @@ final containerNodesProvider = AutoDisposeFutureProvider<List<ContainerNode>>(
     return nodes
         .map(
           (n) => n.copy(
-            providers: n.providers..sort((a, b) => a.title.compareTo(b.title)),
+            providers: n.providers..sort((a, b) => a.name.compareTo(b.name)),
           ),
         )
         .toList();
   },
   name: 'containerNodesProvider',
 );
+
+/// Returns `true` if the application is using more than one container.
+final multiContainerProvider = FutureProvider.autoDispose<bool>((ref) async {
+  final containers = await ref.watch(containerNodesProvider.future);
+  return containers.length > 1;
+});
 
 const tilePadding = EdgeInsets.only(
   left: defaultSpacing,
@@ -142,6 +148,8 @@ class _ContainerListState extends ConsumerState<ContainerList> {
   @override
   Widget build(BuildContext context) {
     final nodes = ref.watch(containerNodesProvider);
+    final multiContainer =
+        ref.watch(multiContainerProvider).valueOrNull ?? false;
 
     return nodes.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -162,12 +170,16 @@ class _ContainerListState extends ConsumerState<ContainerList> {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    key: Key('container-${node.id}'),
-                    padding: tilePadding,
-                    child: Text('Container #${node.id}'),
+                  if (multiContainer)
+                    Container(
+                      key: Key('container-${node.id}'),
+                      padding: tilePadding,
+                      child: Text('Container #${node.id}'),
+                    ),
+                  ProvidersList(
+                    nodes: node.providers,
+                    addPadding: multiContainer,
                   ),
-                  ProvidersList(nodes: node.providers)
                 ],
               );
             },

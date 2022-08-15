@@ -14,16 +14,16 @@ TypeMatcher<ContainerNode> matchContainerNode({
 TypeMatcher<RiverpodNode> matchRiverpodNode({
   required String id,
   required String containerId,
-  required String title,
+  required String name,
 }) {
   return isA<RiverpodNode>()
       .having((r) => r.id, 'id', equals(id))
       .having((r) => r.containerId, 'containerId', equals(containerId))
       .having(
-        (r) => r.title,
-        'title',
+        (r) => r.name,
+        'name',
         equals(
-          title,
+          name,
         ),
       );
 }
