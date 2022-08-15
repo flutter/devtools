@@ -94,6 +94,7 @@ class _Content extends ConsumerWidget {
               initialFractions: const [0.2, 0.8],
               children: [
                 _ViewerWithLabel(
+                  editable: false,
                   instanceId: selectedNode.argumentId!,
                   label: 'Family argument:',
                 ),
@@ -115,10 +116,12 @@ class _ViewerWithLabel extends ConsumerWidget {
     Key? key,
     required this.instanceId,
     required this.label,
+    this.editable = true,
   }) : super(key: key);
 
   final String instanceId;
   final String label;
+  final bool editable;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -129,7 +132,7 @@ class _ViewerWithLabel extends ConsumerWidget {
           padding: const EdgeInsets.all(8.0),
           child: Text(label),
         ),
-        _ViewerBody(instanceId: instanceId),
+        _ViewerBody(instanceId: instanceId, editable: editable),
       ],
     );
   }
@@ -139,14 +142,17 @@ class _ViewerBody extends ConsumerWidget {
   const _ViewerBody({
     Key? key,
     required this.instanceId,
+    this.editable = true,
   }) : super(key: key);
 
   final String instanceId;
+  final bool editable;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Expanded(
       child: InstanceViewer(
+        editable: editable,
         rootPath: InstancePath.fromInstanceId(
           instanceId,
         ),

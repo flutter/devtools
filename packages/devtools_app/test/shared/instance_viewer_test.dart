@@ -286,6 +286,8 @@ void main() {
 
       await tester.pump();
 
+      await expectLater(find.byType(TextField), findsOneWidget);
+
       await expectLater(
         find.byType(MaterialApp),
         matchesDevToolsGolden('../goldens/instance_viewer/edit.png'),
@@ -300,6 +302,72 @@ void main() {
         find.byType(MaterialApp),
         matchesDevToolsGolden('../goldens/instance_viewer/edit_esc.png'),
       );
+    });
+
+    testWidgets('should disable edit when editable is false', (tester) async {
+      const objPath = InstancePath.fromInstanceId('obj');
+      final propertyPath = objPath.pathForChild(
+        const PathToProperty.objectProperty(
+          name: 'first',
+          ownerUri: '',
+          ownerName: '',
+        ),
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            instanceProvider(objPath).overrideWithValue(
+              AsyncValue.data(
+                ObjectInstance(
+                  [
+                    ObjectField(
+                      name: 'first',
+                      isFinal: false,
+                      ownerName: '',
+                      ownerUri: '',
+                      eval: FakeEvalOnDartLibrary(),
+                      ref: Result.error(Error(), StackTrace.empty),
+                      isDefinedByDependency: false,
+                    ),
+                  ],
+                  hash: 0,
+                  instanceRefId: 'object',
+                  setter: null,
+                  evalForInstance: FakeEvalOnDartLibrary(),
+                  type: 'MyClass',
+                ),
+              ),
+            ),
+            instanceProvider(propertyPath).overrideWithValue(
+              AsyncValue.data(
+                InstanceDetails.number(
+                  '0',
+                  instanceRefId: '0',
+                  setter: (value) async {},
+                ),
+              ),
+            ),
+          ],
+          child: const MaterialApp(
+            home: Scaffold(
+              body: InstanceViewer(
+                editable: false,
+                showInternalProperties: true,
+                rootPath: objPath,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(ValueKey(propertyPath)));
+
+      await tester.pump();
+
+      await expectLater(find.byType(TextField), findsNothing);
     });
 
     testWidgets('renders <loading> while an instance is fetched',

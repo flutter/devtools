@@ -98,10 +98,13 @@ class InstanceViewer extends ConsumerStatefulWidget {
     Key? key,
     required this.rootPath,
     required this.showInternalProperties,
+    this.editable = true,
   }) : super(key: key);
 
   final InstancePath rootPath;
   final bool showInternalProperties;
+  /// If `false` disables editing capability, defaults to `true`.
+  final bool editable;
 
   @override
   _InstanceViewerState createState() => _InstanceViewerState();
@@ -187,6 +190,7 @@ class _InstanceViewerState extends ConsumerState<InstanceViewer> {
       isExpanded: isExpanded,
       title: instance.map(
         enumeration: (instance) => _EditableField(
+          editable: widget.editable,
           setter: instance.setter,
           initialEditString: '${instance.type}.${instance.value}',
           child: Text.rich(
@@ -202,11 +206,13 @@ class _InstanceViewerState extends ConsumerState<InstanceViewer> {
           ),
         ),
         nill: (instance) => _EditableField(
+          editable: widget.editable,
           setter: instance.setter,
           initialEditString: 'null',
           child: const Text('null', style: TextStyle(color: nullColor)),
         ),
         string: (instance) => _EditableField(
+          editable: widget.editable,
           setter: instance.setter,
           initialEditString: '"${instance.displayString}"',
           child: Text.rich(
@@ -223,6 +229,7 @@ class _InstanceViewerState extends ConsumerState<InstanceViewer> {
           ),
         ),
         number: (instance) => _EditableField(
+          editable: widget.editable,
           setter: instance.setter,
           initialEditString: instance.displayString,
           child: Text(
@@ -231,6 +238,7 @@ class _InstanceViewerState extends ConsumerState<InstanceViewer> {
           ),
         ),
         boolean: (instance) => _EditableField(
+          editable: widget.editable,
           setter: instance.setter,
           initialEditString: instance.displayString,
           child: Text(
@@ -475,11 +483,13 @@ class _EditableField extends StatefulWidget {
     required this.setter,
     required this.child,
     required this.initialEditString,
+    required this.editable,
   }) : super(key: key);
 
   final Widget child;
   final String initialEditString;
   final Future<void> Function(String)? setter;
+  final bool editable;
 
   @override
   _EditableFieldState createState() => _EditableFieldState();
@@ -504,7 +514,7 @@ class _EditableFieldState extends State<_EditableField> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.setter == null) return widget.child;
+    if (!widget.editable || widget.setter == null) return widget.child;
 
     final colorScheme = Theme.of(context).colorScheme;
 
