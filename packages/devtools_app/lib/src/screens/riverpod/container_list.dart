@@ -174,7 +174,9 @@ class _ContainerListState extends ConsumerState<ContainerList> {
                     Container(
                       key: Key('container-${node.id}'),
                       padding: tilePadding,
-                      child: Text('Container #${node.id}'),
+                      child: Expanded(
+                        child: Text('Container #${node.id}'),
+                      ),
                     ),
                   ProvidersList(
                     nodes: node.providers,
