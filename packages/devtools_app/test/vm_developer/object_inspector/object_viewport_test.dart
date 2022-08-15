@@ -262,29 +262,3 @@ void main() {
     });
   });
 }
-
-// testWidgets('test for Field Object', (WidgetTester tester) async {
-//     testObjectInspectorViewController.fakeObjectHistory
-//         .setCurrentObject(mockFieldObject);
-
-//     await tester.pumpWidget(
-//       wrap(ObjectViewport(controller: testObjectInspectorViewController)),
-//     );
-
-//     expect(viewportTitle(mockFieldObject), 'Field fooField');
-//     expect(find.text('Field fooField'), findsOneWidget);
-//     expect(find.byType(VmFieldDisplay), findsOneWidget);
-//   });
-
-//   testWidgets('test for Library Object', (WidgetTester tester) async {
-//     final testLibraryObject =
-//         TestLibraryObject(ref: testLib, testLibrary: testLib);
-//     testObjectInspectorViewController.fakeObjectHistory
-//         .setCurrentObject(testLibraryObject);
-//     await tester.pumpWidget(
-//       wrap(ObjectViewport(controller: testObjectInspectorViewController)),
-//     );
-//     expect(viewportTitle(testLibraryObject), 'Library FooLib');
-//     expect(find.text('Library FooLib'), findsOneWidget);
-//     expect(find.byType(VMInfoCard), findsOneWidget);
-//   });
