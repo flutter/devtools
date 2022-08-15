@@ -367,6 +367,7 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
     required this.sortDirection,
     this.secondarySortColumn,
     this.selectionNotifier,
+    this.onSortChanged,
     this.autoExpandRoots = false,
   })  : assert(columns.contains(treeColumn)),
         assert(columns.contains(sortColumn)),
@@ -391,6 +392,12 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
   final ColumnData<T>? secondarySortColumn;
 
   final ValueNotifier<Selection<T>>? selectionNotifier;
+
+  final Function(
+    ColumnData<T> column,
+    SortDirection direction, {
+    ColumnData<T>? secondarySortColumn,
+  })? onSortChanged;
 
   final bool autoExpandRoots;
 
@@ -788,6 +795,11 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   }) {
     sortData(column, direction, secondarySortColumn: secondarySortColumn);
     _updateItems();
+    widget.onSortChanged?.call(
+      column,
+      direction,
+      secondarySortColumn: secondarySortColumn,
+    );
   }
 }
 
