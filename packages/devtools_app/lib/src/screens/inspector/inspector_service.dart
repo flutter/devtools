@@ -461,8 +461,6 @@ class InspectorService extends InspectorServiceBase {
       'getPubRootDirectories',
     );
 
-    if (response.runtimeType != List) return [];
-
     return (response as List<dynamic>)
         .map<String>((e) => e.toString())
         .toList();
