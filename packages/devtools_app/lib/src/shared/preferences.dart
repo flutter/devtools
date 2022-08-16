@@ -6,7 +6,6 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 
-import '../analytics/constants.dart';
 import '../primitives/auto_dispose.dart';
 import '../primitives/utils.dart';
 import '../screens/inspector/inspector_service.dart';
