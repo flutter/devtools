@@ -82,7 +82,7 @@ class InspectorPreferencesController extends DisposableController
       _customPubRootDirectories;
   ValueListenable<bool> get isRefreshingCustomPubRootDirectories =>
       _customPubRootDirectoriesAreBusy;
-  InspectorService get inspectorService =>
+  InspectorService? get inspectorService =>
       serviceManager.inspectorService as InspectorService;
 
   final _hoverEvalMode = ValueNotifier<bool>(false);
@@ -195,7 +195,8 @@ class InspectorPreferencesController extends DisposableController
   ) async {
     if (!serviceManager.hasConnection) return;
     await _customPubRootDirectoryBusyTracker(() async {
-      await inspectorService.addPubRootDirectories(pubRootDirectories);
+      if (inspectorService == null) return;
+      await inspectorService!.addPubRootDirectories(pubRootDirectories);
       await _refreshPubRootDirectoriesFromService();
     });
   }
@@ -205,15 +206,17 @@ class InspectorPreferencesController extends DisposableController
   ) async {
     if (!serviceManager.hasConnection) return;
     await _customPubRootDirectoryBusyTracker(() async {
-      await inspectorService.removePubRootDirectories(pubRootDirectories);
+      if (inspectorService == null) return;
+      await inspectorService!.removePubRootDirectories(pubRootDirectories);
       await _refreshPubRootDirectoriesFromService();
     });
   }
 
   Future<void> _refreshPubRootDirectoriesFromService() async {
     await _customPubRootDirectoryBusyTracker(() async {
+      if (inspectorService == null) return;
       final freshPubRootDirectories =
-          await inspectorService.getPubRootDirectories();
+          await inspectorService!.getPubRootDirectories();
       if (freshPubRootDirectories != null) {
         final newSet = Set<String>.from(freshPubRootDirectories);
         final oldSet = Set<String>.from(_customPubRootDirectories.value);
