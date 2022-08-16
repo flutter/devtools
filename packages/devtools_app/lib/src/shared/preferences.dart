@@ -82,8 +82,8 @@ class InspectorPreferencesController extends DisposableController
       _customPubRootDirectories;
   ValueListenable<bool> get isRefreshingCustomPubRootDirectories =>
       _customPubRootDirectoriesAreBusy;
-  InspectorService get inspectorService =>
-      serviceManager.inspectorService as InspectorService;
+  InspectorService? get _inspectorService =>
+      serviceManager.inspectorService as InspectorService?;
 
   final _hoverEvalMode = ValueNotifier<bool>(false);
   final _customPubRootDirectories = ListValueNotifier<String>([]);
@@ -195,6 +195,9 @@ class InspectorPreferencesController extends DisposableController
   ) async {
     if (!serviceManager.hasConnection) return;
     await _customPubRootDirectoryBusyTracker(() async {
+      final inspectorService = _inspectorService;
+      if (inspectorService == null) return;
+
       await inspectorService.addPubRootDirectories(pubRootDirectories);
       await _refreshPubRootDirectoriesFromService();
     });
@@ -205,15 +208,21 @@ class InspectorPreferencesController extends DisposableController
   ) async {
     if (!serviceManager.hasConnection) return;
     await _customPubRootDirectoryBusyTracker(() async {
-      await inspectorService.removePubRootDirectories(pubRootDirectories);
+      final localInspectorService = _inspectorService;
+      if (localInspectorService == null) return;
+
+      await localInspectorService.removePubRootDirectories(pubRootDirectories);
       await _refreshPubRootDirectoriesFromService();
     });
   }
 
   Future<void> _refreshPubRootDirectoriesFromService() async {
     await _customPubRootDirectoryBusyTracker(() async {
+      final localInspectorService = _inspectorService;
+      if (localInspectorService == null) return;
+
       final freshPubRootDirectories =
-          await inspectorService.getPubRootDirectories();
+          await localInspectorService.getPubRootDirectories();
       if (freshPubRootDirectories != null) {
         final newSet = Set<String>.from(freshPubRootDirectories);
         final oldSet = Set<String>.from(_customPubRootDirectories.value);
