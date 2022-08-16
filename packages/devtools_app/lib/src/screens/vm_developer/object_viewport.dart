@@ -13,6 +13,7 @@ import 'vm_code_display.dart';
 import 'vm_developer_common_widgets.dart';
 import 'vm_field_display.dart';
 import 'vm_function_display.dart';
+import 'vm_library_display.dart';
 import 'vm_object_model.dart';
 import 'vm_script_display.dart';
 
@@ -81,7 +82,7 @@ Widget buildObjectDisplay(VmObject obj) {
     return VmFieldDisplay(field: obj);
   }
   if (obj is LibraryObject) {
-    return const VMInfoCard(title: 'TO-DO: Display Library object data');
+    return VmLibraryDisplay(library: obj);
   }
   if (obj is ScriptObject) {
     return VmScriptDisplay(script: obj);

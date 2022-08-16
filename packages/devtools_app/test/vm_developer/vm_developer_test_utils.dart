@@ -269,4 +269,11 @@ void mockVmObject(VmObject object) {
     when(object.obj).thenReturn(testScript);
     when(object.loadTime).thenReturn(testLoadTime);
   }
+
+  if (object is LibraryObject) {
+    when(object.name).thenReturn(testLib.name);
+    when(object.ref).thenReturn(testLib);
+    when(object.obj).thenReturn(testLib);
+    when(object.vmName).thenReturn(null);
+  }
 }

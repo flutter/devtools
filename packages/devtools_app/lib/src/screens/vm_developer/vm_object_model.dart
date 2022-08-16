@@ -228,6 +228,8 @@ class LibraryObject extends VmObject {
 
   @override
   String? get name => obj.name;
+
+  String? get vmName => obj.vmName;
 }
 
 /// Stores a 'Script' VM object and provides an interface for obtaining the
