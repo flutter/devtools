@@ -84,7 +84,7 @@ class InspectorPreferencesController extends DisposableController
   ValueListenable<bool> get isRefreshingCustomPubRootDirectories =>
       _customPubRootDirectoriesAreBusy;
   InspectorService? get _inspectorService =>
-      serviceManager.inspectorService as InspectorService;
+      serviceManager.inspectorService as InspectorService?;
 
   final _hoverEvalMode = ValueNotifier<bool>(false);
   final _customPubRootDirectories = ListValueNotifier<String>([]);
