@@ -6,6 +6,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 
+import '../analytics/constants.dart';
 import '../primitives/auto_dispose.dart';
 import '../primitives/utils.dart';
 import '../screens/inspector/inspector_service.dart';
@@ -82,7 +83,7 @@ class InspectorPreferencesController extends DisposableController
       _customPubRootDirectories;
   ValueListenable<bool> get isRefreshingCustomPubRootDirectories =>
       _customPubRootDirectoriesAreBusy;
-  InspectorService? get inspectorService =>
+  InspectorService? get _inspectorService =>
       serviceManager.inspectorService as InspectorService;
 
   final _hoverEvalMode = ValueNotifier<bool>(false);
@@ -195,8 +196,10 @@ class InspectorPreferencesController extends DisposableController
   ) async {
     if (!serviceManager.hasConnection) return;
     await _customPubRootDirectoryBusyTracker(() async {
+      final inspectorService = _inspectorService;
       if (inspectorService == null) return;
-      await inspectorService!.addPubRootDirectories(pubRootDirectories);
+
+      await inspectorService.addPubRootDirectories(pubRootDirectories);
       await _refreshPubRootDirectoriesFromService();
     });
   }
@@ -206,17 +209,21 @@ class InspectorPreferencesController extends DisposableController
   ) async {
     if (!serviceManager.hasConnection) return;
     await _customPubRootDirectoryBusyTracker(() async {
-      if (inspectorService == null) return;
-      await inspectorService!.removePubRootDirectories(pubRootDirectories);
+      final localInspectorService = _inspectorService;
+      if (localInspectorService == null) return;
+
+      await localInspectorService.removePubRootDirectories(pubRootDirectories);
       await _refreshPubRootDirectoriesFromService();
     });
   }
 
   Future<void> _refreshPubRootDirectoriesFromService() async {
     await _customPubRootDirectoryBusyTracker(() async {
-      if (inspectorService == null) return;
+      final localInspectorService = _inspectorService;
+      if (localInspectorService == null) return;
+
       final freshPubRootDirectories =
-          await inspectorService!.getPubRootDirectories();
+          await localInspectorService.getPubRootDirectories();
       if (freshPubRootDirectories != null) {
         final newSet = Set<String>.from(freshPubRootDirectories);
         final oldSet = Set<String>.from(_customPubRootDirectories.value);
