@@ -8,7 +8,9 @@ import '../../../../primitives/utils.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/table.dart';
 import '../../../../shared/table_data.dart';
+import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
+import '../../../../ui/icons.dart';
 import 'allocation_profile_tracing_view_controller.dart';
 
 /// The default width for columns containing *mostly* numeric data (e.g.,
@@ -117,29 +119,92 @@ class _AllocationTracingTableState extends State<AllocationTracingTable> {
 
   @override
   Widget build(BuildContext context) {
-    return DualValueListenableBuilder<bool, List<TracedClass>>(
-      firstListenable: widget.controller.refreshing,
-      secondListenable: widget.controller.classList,
-      builder: (context, _, classList, __) {
-        return FlatTable<TracedClass>(
-          columns: columns,
-          data: classList,
-          keyFactory: (e) => Key(e.cls.id!),
-          onItemSelected: widget.controller.selectTracedClass,
-          sortColumn: _checkboxColumn,
-          secondarySortColumn: secondarySortColumn,
-          sortDirection: sortDirection,
-          selectionNotifier: widget.controller.selectedTracedClass,
-          onSortChanged: (column, direction, {secondarySortColumn}) {
-            // Keep track of sorting state so it doesn't get reset when
-            // `controller.refreshing` changes.
-            setState(() {
-              sortDirection = direction;
-              secondarySortColumn = secondarySortColumn;
-            });
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: densePadding),
+          child: ClassFilterTextField(
+            controller: widget.controller,
+          ),
+        ),
+        DualValueListenableBuilder<bool, List<TracedClass>>(
+          firstListenable: widget.controller.refreshing,
+          secondListenable: widget.controller.classList,
+          builder: (context, _, classList, __) {
+            return Expanded(
+              child: OutlineDecoration(
+                child: FlatTable<TracedClass>(
+                  columns: columns,
+                  data: classList,
+                  keyFactory: (e) => Key(e.cls.id!),
+                  onItemSelected: widget.controller.selectTracedClass,
+                  sortColumn: _checkboxColumn,
+                  secondarySortColumn: secondarySortColumn,
+                  sortDirection: sortDirection,
+                  selectionNotifier: widget.controller.selectedTracedClass,
+                  onSortChanged: (column, direction, {secondarySortColumn}) {
+                    // Keep track of sorting state so it doesn't get reset when
+                    // `controller.refreshing` changes.
+                    setState(() {
+                      sortDirection = direction;
+                      secondarySortColumn = secondarySortColumn;
+                    });
+                  },
+                ),
+              ),
+            );
           },
-        );
-      },
+        ),
+      ],
+    );
+  }
+
+  ThemedImageIcon resetImage(BuildContext context) {
+    return const ThemedImageIcon(
+      darkModeAsset: 'icons/memory/reset_icon_white.png',
+      lightModeAsset: 'icons/memory/reset_icon_black.png',
+    );
+  }
+}
+
+class ClassFilterTextField extends StatelessWidget {
+  ClassFilterTextField({
+    Key? key,
+    required this.controller,
+  }) : super(key: key);
+
+  final AllocationProfileTracingViewController controller;
+  final _textEditingController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: _textEditingController,
+      decoration: InputDecoration(
+        constraints: const BoxConstraints(
+          // Forces the row and clear icon to be dense. Default is 48, as per
+          // Flutter documentation. For more details, see:
+          // https://api.flutter.dev/flutter/material/InputDecoration/prefixIconConstraints.html
+          minHeight: 32,
+          maxHeight: 32,
+        ),
+        contentPadding: const EdgeInsets.all(denseSpacing),
+        border: const OutlineInputBorder(),
+        labelText: 'Class Filter',
+        hintText: 'Filter by class name',
+        suffixIcon: IconButton(
+          tooltip: 'Clears the class filter',
+          icon: const Icon(Icons.clear),
+          onPressed: () {
+            _textEditingController.clear();
+            controller.updateClassFilter(_textEditingController.text);
+          },
+        ),
+        // Required to set the constraints less than 48 width / height.
+        isDense: true,
+      ),
+      autofocus: true,
+      onChanged: controller.updateClassFilter,
     );
   }
 }

@@ -68,6 +68,9 @@ class AllocationProfileTracingViewController extends DisposableController
   /// The list of classes for the currently selected isolate.
   ValueListenable<List<TracedClass>> get classList => _classList;
   final _classList = ListValueNotifier<TracedClass>([]);
+  final _unfilteredClassList = <TracedClass>[];
+
+  String _currentFilter = '';
 
   /// The current class selection in the [AllocationTracingTable]
   ValueListenable<TracedClass?> get selectedTracedClass => _selectedTracedClass;
@@ -83,6 +86,18 @@ class AllocationProfileTracingViewController extends DisposableController
   final _tracedClasses = <String, TracedClass>{};
   final _tracedClassesProfiles = <String, CpuProfileData>{};
 
+  void updateClassFilter(String value) {
+    if (value.isEmpty && _currentFilter.isEmpty) return;
+    _currentFilter = value;
+    final updatedFilter = _unfilteredClassList
+        .where(
+          (e) => e.cls.name!.contains(value),
+        )
+        .map((e) => _tracedClasses[e.cls.id!]!)
+        .toList();
+    _classList.replaceAll(updatedFilter);
+  }
+
   Future<void> initialize() async {
     _initializing.value = true;
 
@@ -96,6 +111,7 @@ class AllocationProfileTracingViewController extends DisposableController
       _tracedClasses[cls.id!] = TracedClass(cls: cls);
     }
     _classList.addAll(_tracedClasses.values);
+    _unfilteredClassList.addAll(_tracedClasses.values);
 
     await refresh();
     _initializing.value = false;

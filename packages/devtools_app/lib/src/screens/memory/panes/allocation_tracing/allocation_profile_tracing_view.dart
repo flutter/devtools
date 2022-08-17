@@ -53,10 +53,8 @@ class AllocationProfileTracingViewState
             axis: Axis.horizontal,
             initialFractions: const [0.25, 0.75],
             children: [
-              OutlineDecoration(
-                child: AllocationTracingTable(
-                  controller: controller,
-                ),
+              AllocationTracingTable(
+                controller: controller,
               ),
               OutlineDecoration(
                 child: AllocationTracingTree(

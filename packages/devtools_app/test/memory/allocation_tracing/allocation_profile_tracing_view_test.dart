@@ -11,6 +11,7 @@ import 'package:devtools_app/src/primitives/trees.dart';
 import 'package:devtools_app/src/screens/memory/memory_controller.dart';
 import 'package:devtools_app/src/screens/memory/memory_heap_tree_view.dart';
 import 'package:devtools_app/src/screens/memory/memory_screen.dart';
+import 'package:devtools_app/src/screens/memory/panes/allocation_tracing/allocation_profile_class_table.dart';
 import 'package:devtools_app/src/screens/memory/panes/allocation_tracing/allocation_profile_tracing_tree.dart';
 import 'package:devtools_app/src/screens/memory/panes/allocation_tracing/allocation_profile_tracing_view.dart';
 import 'package:devtools_app/src/screens/memory/panes/allocation_tracing/allocation_profile_tracing_view_controller.dart';
@@ -30,18 +31,19 @@ import '../../test_data/memory_allocation.dart';
 void main() {
   late FakeServiceManager fakeServiceManager;
 
+  final classList = ClassList(
+    classes: [
+      ClassRef(id: 'cls/1', name: 'ClassA'),
+      ClassRef(id: 'cls/2', name: 'ClassB'),
+      ClassRef(id: 'cls/3', name: 'ClassC'),
+      ClassRef(id: 'cls/4', name: 'Foo'),
+    ],
+  );
+
   void _setUpServiceManager() {
     // Load canned data testHeapSampleData.
     final allocationJson =
         AllocationMemoryJson.decode(argJsonString: testAllocationData);
-
-    final classList = ClassList(
-      classes: [
-        ClassRef(id: 'cls/1', name: 'ClassA'),
-        ClassRef(id: 'cls/2', name: 'ClassB'),
-        ClassRef(id: 'cls/3', name: 'ClassC'),
-      ],
-    );
 
     fakeServiceManager = FakeServiceManager(
       service: FakeServiceManager.createFakeService(
@@ -69,6 +71,19 @@ void main() {
     // Delay to ensure the memory profiler has collected data.
     await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(find.byType(MemoryBody), findsOneWidget);
+  }
+
+  /// Clears the class filter text field.
+  Future<void> clearFilter(
+    WidgetTester tester,
+    AllocationProfileTracingViewController controller,
+  ) async {
+    final originalClassCount = classList.classes!.length;
+    final clearFilterButton = find.byIcon(Icons.clear);
+    expect(clearFilterButton, findsOneWidget);
+    await tester.tap(clearFilterButton);
+    await tester.pumpAndSettle();
+    expect(controller.classList.value.length, originalClassCount);
   }
 
   // Set a wide enough screen width that we do not run into overflow.
@@ -132,8 +147,8 @@ void main() {
       expect(find.text('Class'), findsOneWidget);
       expect(find.text('Instances'), findsOneWidget);
 
-      // There should be three classes in the example class list.
-      expect(find.byType(Checkbox), findsNWidgets(3));
+      // There should be classes in the example class list.
+      expect(find.byType(Checkbox), findsNWidgets(classList.classes!.length));
       for (final cls in controller.classList.value) {
         expect(find.byKey(Key(cls.cls.id!)), findsOneWidget);
       }
@@ -225,6 +240,106 @@ void main() {
           },
         );
       }
+    });
+
+    group('filtering', () {
+      final originalClassCount = classList.classes!.length;
+
+      testWidgetsWithWindowSize('simple', windowSize, (tester) async {
+        await pumpMemoryScreen(tester);
+
+        final controller = await navigateToAllocationTracing(tester);
+
+        final filterTextField = find.byType(ClassFilterTextField);
+        expect(filterTextField, findsOneWidget);
+
+        // Filter for 'F'
+        await tester.enterText(filterTextField, 'F');
+        await tester.pumpAndSettle();
+        expect(controller.classList.value.length, 1);
+        expect(controller.classList.value.first.cls.name, 'Foo');
+
+        // Filter for 'Fooo'
+        await tester.enterText(filterTextField, 'Fooo');
+        await tester.pumpAndSettle();
+        expect(controller.classList.value.isEmpty, true);
+
+        // Clear filter
+        await clearFilter(tester, controller);
+      });
+
+      testWidgetsWithWindowSize('persisted tracing state', windowSize,
+          (tester) async {
+        await pumpMemoryScreen(tester);
+
+        final controller = await navigateToAllocationTracing(tester);
+
+        final checkboxes = find.byType(Checkbox);
+        expect(checkboxes, findsNWidgets(originalClassCount));
+
+        // Enable allocation tracing for one of them
+        await tester.tap(checkboxes.first);
+        await tester.pumpAndSettle();
+
+        final tracedClassList = controller.classList.value
+            .where((e) => e.traceAllocations)
+            .toList();
+        expect(tracedClassList.length, 1);
+        expect(tracedClassList.first.cls, classList.classes!.first);
+
+        // Filter out all classes and then clear the filter
+        final filterTextField = find.byType(ClassFilterTextField);
+        expect(filterTextField, findsOneWidget);
+
+        await tester.enterText(filterTextField, 'Garbage');
+        await tester.pumpAndSettle();
+        expect(controller.classList.value.isEmpty, true);
+
+        await clearFilter(tester, controller);
+
+        // Check tracing state wasn't corrupted
+        final updatedTracedClassList = controller.classList.value
+            .where((e) => e.traceAllocations)
+            .toList();
+        expect(updatedTracedClassList, containsAll(tracedClassList));
+        expect(updatedTracedClassList.first.traceAllocations, true);
+      });
+
+      testWidgetsWithWindowSize('persisted selection state', windowSize,
+          (tester) async {
+        await pumpMemoryScreen(tester);
+
+        final controller = await navigateToAllocationTracing(tester);
+
+        expect(controller.selectedTracedClass.value, isNull);
+
+        // Select one of the class entries.
+        final selection = find.richTextContaining(
+          classList.classes!.last.name!,
+        );
+        expect(selection, findsOneWidget);
+
+        await tester.tap(selection);
+        await tester.pumpAndSettle();
+
+        expect(controller.selectedTracedClass.value, isNotNull);
+        final originalSelection = controller.selectedTracedClass.value;
+
+        // Filter out all classes, ensure the selection is still valid, then
+        // clear the filter and check again.
+        final filterTextField = find.byType(ClassFilterTextField);
+        expect(filterTextField, findsOneWidget);
+
+        await tester.enterText(filterTextField, 'Garbage');
+        await tester.pumpAndSettle();
+        expect(controller.classList.value.isEmpty, true);
+
+        expect(controller.selectedTracedClass.value, originalSelection);
+
+        await clearFilter(tester, controller);
+
+        expect(controller.selectedTracedClass.value, originalSelection);
+      });
     });
   });
 }
