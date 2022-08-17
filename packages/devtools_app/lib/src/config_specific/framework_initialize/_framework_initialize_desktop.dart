@@ -55,7 +55,7 @@ class FlutterDesktopStorage implements Storage {
   }
 
   static File get _preferencesFile =>
-      File(path.join(_userHomeDir(), '.devtools'));
+      File(path.join(_userHomeDir(), '.flutter-devtools/.devtools'));
 
   static String _userHomeDir() {
     final String envKey =
