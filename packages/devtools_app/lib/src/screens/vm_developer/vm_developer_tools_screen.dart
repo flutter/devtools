@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../primitives/auto_dispose_mixin.dart';
+import '../../shared/common_widgets.dart';
 import '../../shared/screen.dart';
 import '../../shared/theme.dart';
 import '../../shared/utils.dart';
@@ -78,47 +79,67 @@ class VMDeveloperToolsScreenBody extends StatefulWidget {
 class _VMDeveloperToolsScreenState extends State<VMDeveloperToolsScreenBody>
     with
         AutoDisposeMixin,
+        AutomaticKeepAliveClientMixin<VMDeveloperToolsScreenBody>,
         ProvidedControllerMixin<VMDeveloperToolsController,
             VMDeveloperToolsScreenBody> {
+  int _selectedIndex = 0;
+  late List<Widget> _views;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     initController();
   }
 
+  void onDestinationSelected(int i) {
+    setState(() => _selectedIndex = i);
+    controller.onSelectedIndex(i);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _views = [
+      for (final view in VMDeveloperToolsScreenBody.views) view.build(context)
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<int>(
-      valueListenable: controller.selectedIndex,
-      builder: (context, selectedIndex, _) {
-        return Row(
-          children: [
-            if (VMDeveloperToolsScreenBody.views.length > 1)
-              NavigationRail(
-                selectedIndex: selectedIndex,
-                elevation: 10.0,
-                labelType: NavigationRailLabelType.all,
-                onDestinationSelected: controller.selectIndex,
-                destinations: [
-                  for (final view in VMDeveloperToolsScreenBody.views)
-                    NavigationRailDestination(
-                      label: Text(view.title),
-                      icon: Icon(view.icon),
-                    )
-                ],
+    super.build(context);
+    return KeepAliveWrapper(
+      child: Row(
+        children: [
+          if (VMDeveloperToolsScreenBody.views.length > 1)
+            NavigationRail(
+              selectedIndex: _selectedIndex,
+              elevation: 10.0,
+              labelType: NavigationRailLabelType.all,
+              onDestinationSelected: onDestinationSelected,
+              destinations: [
+                for (final view in VMDeveloperToolsScreenBody.views)
+                  NavigationRailDestination(
+                    label: Text(view.title),
+                    icon: Icon(view.icon),
+                  )
+              ],
+            ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(
+                left: defaultSpacing,
               ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(
-                  left: defaultSpacing,
-                ),
-                child: VMDeveloperToolsScreenBody.views[selectedIndex]
-                    .build(context),
+              child: IndexedStack(
+                index: _selectedIndex,
+                children: _views,
               ),
-            )
-          ],
-        );
-      },
+            ),
+          )
+        ],
+      ),
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }

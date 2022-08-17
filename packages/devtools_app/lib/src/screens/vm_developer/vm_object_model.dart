@@ -64,15 +64,13 @@ abstract class VmObject {
       _inboundReferences;
   final _inboundReferences = ValueNotifier<InboundReferences?>(null);
 
-  Future<void> fetchObject() async {
-    final isolateRef = serviceManager.isolateManager.selectedIsolate.value!;
-    _isolate = await _service.getIsolate(isolateRef.id!);
-    _obj = await _service.getObject(_isolate!.id!, ref.id!);
-  }
-
   @mustCallSuper
   Future<void> initialize() async {
-    await fetchObject();
+    _isolate = serviceManager.isolateManager.selectedIsolate.value!;
+
+    _obj = ref is Obj
+        ? ref as Obj
+        : await _service.getObject(_isolate!.id!, ref.id!);
 
     if (_sourceLocation != null) {
       _sourceScript = await _service.getObject(
@@ -216,7 +214,8 @@ class FieldObject extends VmObject {
   }
 }
 
-//TODO(mtaylee): finish class implementation.
+/// Stores a 'Library' VM object and provides an interface for obtaining the
+/// Dart VM information related to this object.
 class LibraryObject extends VmObject {
   LibraryObject({required super.ref, super.scriptRef, super.outlineNode});
 
