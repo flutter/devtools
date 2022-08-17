@@ -12,6 +12,8 @@ import '../../shared/globals.dart';
 /// contexts where [PreferencesController.vmDeveloperModeEnabled] is not set to
 /// `true`.
 
+const _vmNameKey = '_vmName';
+
 /// An extension on [VM] which allows for access to VM internal fields.
 extension VMPrivateViewExtension on VM {
   String get embedder => json!['_embedder'];
@@ -39,7 +41,7 @@ extension IsolatePrivateViewExtension on Isolate {
 /// An extension on [Class] which allows for access to VM internal fields.
 extension ClassPrivateViewExtension on Class {
   /// The internal name of the [Class].
-  String get vmName => json!['_vmName'];
+  String get vmName => json![_vmNameKey];
 }
 
 /// An extension on [InboundReferences] which allows for access to
@@ -339,4 +341,9 @@ enum GuardClassKind {
 extension ScriptPrivateViewExtension on Script {
   static const _loadTimeKey = '_loadTime';
   int get loadTime => json![_loadTimeKey]!;
+}
+
+/// An extension on [Library] which allows for access to VM internal fields.
+extension LibraryPrivateExtension on Library {
+  String? get vmName => json![_vmNameKey];
 }
