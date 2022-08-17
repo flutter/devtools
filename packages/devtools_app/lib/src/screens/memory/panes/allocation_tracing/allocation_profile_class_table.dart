@@ -10,7 +10,6 @@ import '../../../../shared/table.dart';
 import '../../../../shared/table_data.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
-import '../../../../ui/icons.dart';
 import 'allocation_profile_tracing_view_controller.dart';
 
 /// The default width for columns containing *mostly* numeric data (e.g.,
