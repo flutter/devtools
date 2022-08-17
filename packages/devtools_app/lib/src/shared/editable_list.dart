@@ -190,7 +190,7 @@ class EditableListActionBar extends StatelessWidget {
 }
 
 class _EditableListContentView extends StatelessWidget {
-  const _EditableListContentView({
+  _EditableListContentView({
     Key? key,
     required this.entries,
     required this.onEntryRemoved,
@@ -198,10 +198,12 @@ class _EditableListContentView extends StatelessWidget {
 
   final ListValueNotifier<String> entries;
   final Function(String) onEntryRemoved;
+  final ScrollController _listContentScrollController = ScrollController();
 
   @override
   Widget build(BuildContext context) {
     return Scrollbar(
+      controller: _listContentScrollController,
       thumbVisibility: true,
       child: ListView.builder(
         itemCount: entries.value.length,
