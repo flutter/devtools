@@ -7,7 +7,11 @@ import 'package:flutter/foundation.dart';
 import 'vm_developer_tools_screen.dart';
 
 class VMDeveloperToolsController {
-  void onSelectedIndex(int index) {
+  ValueListenable<int> get selectedIndex => _selectedIndex;
+  final _selectedIndex = ValueNotifier<int>(0);
+
+  void selectIndex(int index) {
+    _selectedIndex.value = index;
     _showIsolateSelector.value =
         VMDeveloperToolsScreenBody.views[index].showIsolateSelector;
   }
