@@ -158,13 +158,6 @@ class _AllocationTracingTableState extends State<AllocationTracingTable> {
       ],
     );
   }
-
-  ThemedImageIcon resetImage(BuildContext context) {
-    return const ThemedImageIcon(
-      darkModeAsset: 'icons/memory/reset_icon_white.png',
-      lightModeAsset: 'icons/memory/reset_icon_black.png',
-    );
-  }
 }
 
 class ClassFilterTextField extends StatelessWidget {
