@@ -200,6 +200,13 @@ class InspectorPreferencesController extends DisposableController
   Future<void> addPubRootDirectories(
     List<String> pubRootDirectories,
   ) async {
+    // TODO(https://github.com/flutter/devtools/issues/4380):
+    // Add validation to EditableList Input.
+    // Directories of just / will break the inspector tree local package checks.
+    pubRootDirectories.removeWhere(
+      (element) => element.replaceAll(RegExp('\/'), '').trim() == '',
+    );
+
     if (!serviceManager.hasConnection) return;
     await _customPubRootDirectoryBusyTracker(() async {
       final inspectorService = _inspectorService;
