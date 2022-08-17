@@ -121,7 +121,7 @@ class _VMDeveloperToolsScreenState extends State<VMDeveloperToolsScreenBody>
                   NavigationRailDestination(
                     label: Text(view.title),
                     icon: Icon(view.icon),
-                  )
+                  ),
               ],
             ),
           Expanded(
@@ -134,7 +134,7 @@ class _VMDeveloperToolsScreenState extends State<VMDeveloperToolsScreenBody>
                 children: _views,
               ),
             ),
-          )
+          ),
         ],
       ),
     );
