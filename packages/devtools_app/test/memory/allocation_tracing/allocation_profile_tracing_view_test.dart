@@ -243,7 +243,6 @@ void main() {
     });
 
     group('filtering', () {
-
       testWidgetsWithWindowSize('simple', windowSize, (tester) async {
         await pumpMemoryScreen(tester);
 
