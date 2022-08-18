@@ -912,6 +912,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
   late ColumnData<T> sortColumn;
   late SortDirection sortDirection;
   late ScrollController scrollController;
+  late ScrollController pinnedScrollController;
 
   @override
   void initState() {
@@ -921,6 +922,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
     sortColumn = widget.sortColumn;
     sortDirection = widget.sortDirection;
     scrollController = ScrollController();
+    pinnedScrollController = ScrollController();
     _addScrollListener(widget.selectionNotifier);
     _initSearchListener();
   }
@@ -982,6 +984,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
   @override
   void dispose() {
     scrollController.dispose();
+    pinnedScrollController.dispose();
     super.dispose();
   }
 
@@ -1070,7 +1073,9 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
                   ),
                   child: Scrollbar(
                     thumbVisibility: true,
+                    controller: pinnedScrollController,
                     child: ListView.builder(
+                      controller: pinnedScrollController,
                       itemCount: widget.pinnedData.length,
                       itemExtent: widget.rowItemExtent,
                       itemBuilder: _buildItemPinned,
