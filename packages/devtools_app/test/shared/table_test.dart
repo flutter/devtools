@@ -631,6 +631,124 @@ void main() {
       await tester.tap(find.byKey(key));
       expect(selected, testData);
     });
+
+    testWidgets('can pin items (original)', (WidgetTester tester) async {
+      final column = _PinnableFlatNameColumn();
+      final testData = [
+        for (int i = 0; i < 10; ++i)
+          PinnableTestData(name: i.toString(), enabled: i % 2 == 0),
+      ];
+
+      final table = FlatTable<PinnableTestData>(
+        columns: [column],
+        data: testData,
+        keyFactory: (d) => Key(d.name),
+        onItemSelected: (_) => null,
+        sortColumn: column,
+        sortDirection: SortDirection.ascending,
+        pinBehavior: FlatTablePinBehavior.pinOriginalToTop,
+      );
+      await tester.pumpWidget(wrap(table));
+
+      expect(find.byWidget(table), findsOneWidget);
+
+      final FlatTableState<PinnableTestData> state = tester.state(
+        find.byWidget(table),
+      );
+
+      expect(state.pinnedData.length, testData.length / 2);
+      for (int i = 0; i < state.pinnedData.length; ++i) {
+        expect(state.pinnedData[i].name, (i * 2).toString());
+        expect(state.pinnedData[i].enabled, true);
+      }
+      expect(state.data.length, testData.length / 2);
+      for (int i = 0; i < state.data.length; ++i) {
+        expect(state.data[i].name, ((i * 2) + 1).toString());
+        expect(state.data[i].enabled, false);
+      }
+
+      // Sorting should apply to both pinned and unpinned items.
+      await tester.tap(find.text(column.title));
+      await tester.pumpAndSettle();
+
+      expect(state.pinnedData.length, testData.length / 2);
+      for (int i = 0; i < state.pinnedData.length; ++i) {
+        final index = state.data.length - i - 1;
+        expect(
+          state.pinnedData[i].name,
+          (index * 2).toString(),
+        );
+        expect(state.pinnedData[i].enabled, true);
+      }
+      expect(state.data.length, testData.length / 2);
+      for (int i = 0; i < state.data.length; ++i) {
+        final index = state.data.length - i - 1;
+        expect(
+          state.data[i].name,
+          ((index * 2) + 1).toString(),
+        );
+        expect(state.data[i].enabled, false);
+      }
+    });
+
+    testWidgets('can pin items (copy)', (WidgetTester tester) async {
+      final column = _PinnableFlatNameColumn();
+      final testData = [
+        for (int i = 0; i < 10; ++i)
+          PinnableTestData(name: i.toString(), enabled: i % 2 == 0),
+      ];
+
+      final table = FlatTable<PinnableTestData>(
+        columns: [column],
+        data: testData,
+        keyFactory: (d) => Key(d.name),
+        onItemSelected: (_) => null,
+        sortColumn: column,
+        sortDirection: SortDirection.ascending,
+        pinBehavior: FlatTablePinBehavior.pinCopyToTop,
+      );
+      await tester.pumpWidget(wrap(table));
+
+      expect(find.byWidget(table), findsOneWidget);
+
+      final FlatTableState<PinnableTestData> state = tester.state(
+        find.byWidget(table),
+      );
+
+      expect(state.pinnedData.length, testData.length / 2);
+      for (int i = 0; i < state.pinnedData.length; ++i) {
+        expect(state.pinnedData[i].name, (i * 2).toString());
+        expect(state.pinnedData[i].enabled, true);
+      }
+      expect(state.data.length, testData.length);
+      for (int i = 0; i < state.data.length; ++i) {
+        expect(state.data[i].name, i.toString());
+        expect(state.data[i].enabled, i % 2 == 0);
+      }
+
+      // Sorting should apply to both pinned and unpinned items.
+      await tester.tap(find.text(column.title));
+      await tester.pumpAndSettle();
+
+      expect(state.pinnedData.length, testData.length / 2);
+      for (int i = 0; i < state.pinnedData.length; ++i) {
+        final index = state.pinnedData.length - i - 1;
+        expect(
+          state.pinnedData[i].name,
+          (index * 2).toString(),
+        );
+        expect(state.pinnedData[i].enabled, true);
+      }
+      expect(state.data.length, testData.length);
+      for (int i = 0; i < state.data.length; ++i) {
+        final index = state.data.length - i - 1;
+        expect(
+          state.data[i].name,
+          index.toString(),
+        );
+        expect(state.data[i].enabled, index % 2 == 0);
+      }
+    });
   });
 
   group('TreeTable view', () {
@@ -1120,6 +1238,22 @@ class TestData extends TreeNode<TestData> {
   }
 }
 
+class PinnableTestData implements PinnableListEntry {
+  PinnableTestData({
+    required this.name,
+    required this.enabled,
+  });
+
+  final String name;
+  bool enabled;
+
+  @override
+  bool get pinToTop => enabled;
+
+  @override
+  String toString() => name;
+}
+
 class _NameColumn extends TreeColumnData<TestData> {
   _NameColumn() : super('Name');
 
@@ -1153,6 +1287,20 @@ class _FlatNameColumn extends ColumnData<TestData> {
 
   @override
   String getValue(TestData dataObject) => dataObject.name;
+
+  @override
+  bool get supportsSorting => true;
+}
+
+class _PinnableFlatNameColumn extends ColumnData<PinnableTestData> {
+  _PinnableFlatNameColumn()
+      : super(
+          'FlatName',
+          fixedWidthPx: 300.0,
+        );
+
+  @override
+  String getValue(PinnableTestData dataObject) => dataObject.name;
 
   @override
   bool get supportsSorting => true;
