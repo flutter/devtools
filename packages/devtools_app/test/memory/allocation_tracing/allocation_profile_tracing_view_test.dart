@@ -83,7 +83,7 @@ void main() {
     expect(clearFilterButton, findsOneWidget);
     await tester.tap(clearFilterButton);
     await tester.pumpAndSettle();
-    expect(controller.classList.value.length, originalClassCount);
+    expect(controller.filteredClassList.value.length, originalClassCount);
   }
 
   // Set a wide enough screen width that we do not run into overflow.
@@ -134,7 +134,7 @@ void main() {
       await pumpMemoryScreen(tester);
 
       final controller = await navigateToAllocationTracing(tester);
-      expect(controller.classList.value.isNotEmpty, isTrue);
+      expect(controller.filteredClassList.value.isNotEmpty, isTrue);
       expect(controller.initializing.value, isFalse);
       expect(controller.refreshing.value, isFalse);
       expect(controller.selectedTracedClass.value, isNull);
@@ -149,7 +149,7 @@ void main() {
 
       // There should be classes in the example class list.
       expect(find.byType(Checkbox), findsNWidgets(classList.classes!.length));
-      for (final cls in controller.classList.value) {
+      for (final cls in controller.filteredClassList.value) {
         expect(find.byKey(Key(cls.cls.id!)), findsOneWidget);
       }
 
@@ -158,14 +158,14 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-        controller.classList.value
+        controller.filteredClassList.value
             .map((e) => e.traceAllocations)
             .where((e) => e)
             .length,
         1,
       );
 
-      final selectedTrace = controller.classList.value.firstWhere(
+      final selectedTrace = controller.filteredClassList.value.firstWhere(
         (e) => e.traceAllocations,
       );
 
@@ -243,7 +243,6 @@ void main() {
     });
 
     group('filtering', () {
-      final originalClassCount = classList.classes!.length;
 
       testWidgetsWithWindowSize('simple', windowSize, (tester) async {
         await pumpMemoryScreen(tester);
@@ -256,13 +255,13 @@ void main() {
         // Filter for 'F'
         await tester.enterText(filterTextField, 'F');
         await tester.pumpAndSettle();
-        expect(controller.classList.value.length, 1);
-        expect(controller.classList.value.first.cls.name, 'Foo');
+        expect(controller.filteredClassList.value.length, 1);
+        expect(controller.filteredClassList.value.first.cls.name, 'Foo');
 
         // Filter for 'Fooo'
         await tester.enterText(filterTextField, 'Fooo');
         await tester.pumpAndSettle();
-        expect(controller.classList.value.isEmpty, true);
+        expect(controller.filteredClassList.value.isEmpty, true);
 
         // Clear filter
         await clearFilter(tester, controller);
@@ -275,13 +274,13 @@ void main() {
         final controller = await navigateToAllocationTracing(tester);
 
         final checkboxes = find.byType(Checkbox);
-        expect(checkboxes, findsNWidgets(originalClassCount));
+        expect(checkboxes, findsNWidgets(classList.classes!.length));
 
         // Enable allocation tracing for one of them
         await tester.tap(checkboxes.first);
         await tester.pumpAndSettle();
 
-        final tracedClassList = controller.classList.value
+        final tracedClassList = controller.filteredClassList.value
             .where((e) => e.traceAllocations)
             .toList();
         expect(tracedClassList.length, 1);
@@ -293,12 +292,12 @@ void main() {
 
         await tester.enterText(filterTextField, 'Garbage');
         await tester.pumpAndSettle();
-        expect(controller.classList.value.isEmpty, true);
+        expect(controller.filteredClassList.value.isEmpty, true);
 
         await clearFilter(tester, controller);
 
         // Check tracing state wasn't corrupted
-        final updatedTracedClassList = controller.classList.value
+        final updatedTracedClassList = controller.filteredClassList.value
             .where((e) => e.traceAllocations)
             .toList();
         expect(updatedTracedClassList, containsAll(tracedClassList));
@@ -332,7 +331,7 @@ void main() {
 
         await tester.enterText(filterTextField, 'Garbage');
         await tester.pumpAndSettle();
-        expect(controller.classList.value.isEmpty, true);
+        expect(controller.filteredClassList.value.isEmpty, true);
 
         expect(controller.selectedTracedClass.value, originalSelection);
 

@@ -126,12 +126,12 @@ class _AllocationTracingTableState extends State<AllocationTracingTable> {
             controller: widget.controller,
           ),
         ),
-        DualValueListenableBuilder<bool, List<TracedClass>>(
-          firstListenable: widget.controller.refreshing,
-          secondListenable: widget.controller.classList,
-          builder: (context, _, classList, __) {
-            return Expanded(
-              child: OutlineDecoration(
+        Expanded(
+          child: DualValueListenableBuilder<bool, List<TracedClass>>(
+            firstListenable: widget.controller.refreshing,
+            secondListenable: widget.controller.filteredClassList,
+            builder: (context, _, classList, __) {
+              return OutlineDecoration(
                 child: FlatTable<TracedClass>(
                   columns: columns,
                   data: classList,
@@ -150,9 +150,9 @@ class _AllocationTracingTableState extends State<AllocationTracingTable> {
                     });
                   },
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ],
     );
