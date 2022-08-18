@@ -204,7 +204,7 @@ class InspectorPreferencesController extends DisposableController
     // Add validation to EditableList Input.
     // Directories of just / will break the inspector tree local package checks.
     pubRootDirectories.removeWhere(
-      (element) => element.replaceAll(RegExp('\/'), '').trim() == '',
+      (element) => RegExp('^[/\\s]*\$').firstMatch(element) != null,
     );
 
     if (!serviceManager.hasConnection) return;
