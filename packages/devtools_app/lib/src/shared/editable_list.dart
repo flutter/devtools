@@ -206,6 +206,7 @@ class _EditableListContentView extends StatelessWidget {
       controller: _listContentScrollController,
       thumbVisibility: true,
       child: ListView.builder(
+        controller: _listContentScrollController,
         itemCount: entries.value.length,
         itemBuilder: (context, index) {
           return EditableListRow(
