@@ -216,43 +216,51 @@ void main() {
       );
       await tester.pumpWidget(wrap(table));
       final FlatTableState state = tester.state(find.byWidget(table));
-      final data = state.data;
-      expect(data[0].name, equals('Bar'));
-      expect(data[1].name, equals('Baz'));
-      expect(data[2].name, equals('Baz'));
-      expect(data[3].name, equals('Crackle'));
-      expect(data[4].name, equals('Foo'));
-      expect(data[5].name, equals('Pop'));
-      expect(data[6].name, equals('Qux'));
-      expect(data[7].name, equals('Qux'));
-      expect(data[8].name, equals('Snap'));
-
+      {
+        final data = state.data;
+        expect(data[0].name, equals('Bar'));
+        expect(data[1].name, equals('Baz'));
+        expect(data[2].name, equals('Baz'));
+        expect(data[3].name, equals('Crackle'));
+        expect(data[4].name, equals('Foo'));
+        expect(data[5].name, equals('Pop'));
+        expect(data[6].name, equals('Qux'));
+        expect(data[7].name, equals('Qux'));
+        expect(data[8].name, equals('Snap'));
+      }
       // Reverse the sort direction.
       await tester.tap(find.text('FlatName'));
       await tester.pumpAndSettle();
 
-      expect(data[8].name, equals('Bar'));
-      expect(data[7].name, equals('Baz'));
-      expect(data[6].name, equals('Baz'));
-      expect(data[5].name, equals('Crackle'));
-      expect(data[4].name, equals('Foo'));
-      expect(data[3].name, equals('Pop'));
-      expect(data[2].name, equals('Qux'));
-      expect(data[1].name, equals('Qux'));
-      expect(data[0].name, equals('Snap'));
+      {
+        final data = state.data;
+        expect(data[8].name, equals('Bar'));
+        expect(data[7].name, equals('Baz'));
+        expect(data[6].name, equals('Baz'));
+        expect(data[5].name, equals('Crackle'));
+        expect(data[4].name, equals('Foo'));
+        expect(data[3].name, equals('Pop'));
+        expect(data[2].name, equals('Qux'));
+        expect(data[1].name, equals('Qux'));
+        expect(data[0].name, equals('Snap'));
+      }
 
       // Change the sort column.
       await tester.tap(find.text('Number'));
       await tester.pumpAndSettle();
-      expect(data[0].name, equals('Foo'));
-      expect(data[1].name, equals('Bar'));
-      expect(data[2].name, equals('Baz'));
-      expect(data[3].name, equals('Qux'));
-      expect(data[4].name, equals('Snap'));
-      expect(data[5].name, equals('Pop'));
-      expect(data[6].name, equals('Crackle'));
-      expect(data[7].name, equals('Baz'));
-      expect(data[8].name, equals('Qux'));
+
+      {
+        final data = state.data;
+        expect(data[0].name, equals('Foo'));
+        expect(data[1].name, equals('Bar'));
+        expect(data[2].name, equals('Baz'));
+        expect(data[3].name, equals('Qux'));
+        expect(data[4].name, equals('Snap'));
+        expect(data[5].name, equals('Crackle'));
+        expect(data[6].name, equals('Pop'));
+        expect(data[7].name, equals('Baz'));
+        expect(data[8].name, equals('Qux'));
+      }
     });
 
     testWidgets('does not sort with supportsSorting == false',
@@ -273,43 +281,51 @@ void main() {
       );
       await tester.pumpWidget(wrap(table));
       final FlatTableState state = tester.state(find.byWidget(table));
-      final data = state.data;
-      expect(data[0].name, equals('Bar'));
-      expect(data[1].name, equals('Baz'));
-      expect(data[2].name, equals('Baz'));
-      expect(data[3].name, equals('Crackle'));
-      expect(data[4].name, equals('Foo'));
-      expect(data[5].name, equals('Pop'));
-      expect(data[6].name, equals('Qux'));
-      expect(data[7].name, equals('Qux'));
-      expect(data[8].name, equals('Snap'));
+      {
+        final data = state.data;
+        expect(data[0].name, equals('Bar'));
+        expect(data[1].name, equals('Baz'));
+        expect(data[2].name, equals('Baz'));
+        expect(data[3].name, equals('Crackle'));
+        expect(data[4].name, equals('Foo'));
+        expect(data[5].name, equals('Pop'));
+        expect(data[6].name, equals('Qux'));
+        expect(data[7].name, equals('Qux'));
+        expect(data[8].name, equals('Snap'));
+      }
 
       // Attempt to reverse the sort direction.
       await tester.tap(find.text('FlatName'));
       await tester.pumpAndSettle();
 
-      expect(data[0].name, equals('Bar'));
-      expect(data[1].name, equals('Baz'));
-      expect(data[2].name, equals('Baz'));
-      expect(data[3].name, equals('Crackle'));
-      expect(data[4].name, equals('Foo'));
-      expect(data[5].name, equals('Pop'));
-      expect(data[6].name, equals('Qux'));
-      expect(data[7].name, equals('Qux'));
-      expect(data[8].name, equals('Snap'));
+      {
+        final data = state.data;
+        expect(data[0].name, equals('Bar'));
+        expect(data[1].name, equals('Baz'));
+        expect(data[2].name, equals('Baz'));
+        expect(data[3].name, equals('Crackle'));
+        expect(data[4].name, equals('Foo'));
+        expect(data[5].name, equals('Pop'));
+        expect(data[6].name, equals('Qux'));
+        expect(data[7].name, equals('Qux'));
+        expect(data[8].name, equals('Snap'));
+      }
 
       // Attempt to change the sort column.
       await tester.tap(find.text('Number'));
       await tester.pumpAndSettle();
-      expect(data[0].name, equals('Bar'));
-      expect(data[1].name, equals('Baz'));
-      expect(data[2].name, equals('Baz'));
-      expect(data[3].name, equals('Crackle'));
-      expect(data[4].name, equals('Foo'));
-      expect(data[5].name, equals('Pop'));
-      expect(data[6].name, equals('Qux'));
-      expect(data[7].name, equals('Qux'));
-      expect(data[8].name, equals('Snap'));
+      {
+        final data = state.data;
+        expect(data[0].name, equals('Bar'));
+        expect(data[1].name, equals('Baz'));
+        expect(data[2].name, equals('Baz'));
+        expect(data[3].name, equals('Crackle'));
+        expect(data[4].name, equals('Foo'));
+        expect(data[5].name, equals('Pop'));
+        expect(data[6].name, equals('Qux'));
+        expect(data[7].name, equals('Qux'));
+        expect(data[8].name, equals('Snap'));
+      }
     });
 
     testWidgets('sorts data by column and secondary column',
@@ -339,43 +355,51 @@ void main() {
       );
       await tester.pumpWidget(wrap(table));
       final FlatTableState state = tester.state(find.byWidget(table));
-      final data = state.data;
-      expect(data[0].name, equals('Foo'));
-      expect(data[1].name, equals('1 Bar'));
-      expect(data[2].name, equals('# Baz'));
-      expect(data[3].name, equals('Qux'));
-      expect(data[4].name, equals('Bang'));
-      expect(data[5].name, equals('Crackle'));
-      expect(data[6].name, equals('Pop'));
-      expect(data[7].name, equals('Snap'));
-      expect(data[8].name, equals('Qux'));
+      {
+        final data = state.data;
+        expect(data[0].name, equals('Foo'));
+        expect(data[1].name, equals('1 Bar'));
+        expect(data[2].name, equals('# Baz'));
+        expect(data[3].name, equals('Qux'));
+        expect(data[4].name, equals('Bang'));
+        expect(data[5].name, equals('Crackle'));
+        expect(data[6].name, equals('Pop'));
+        expect(data[7].name, equals('Snap'));
+        expect(data[8].name, equals('Qux'));
+      }
 
       // Reverse the sort direction.
       await tester.tap(find.text('Number'));
       await tester.pumpAndSettle();
 
-      expect(data[8].name, equals('Foo'));
-      expect(data[7].name, equals('1 Bar'));
-      expect(data[6].name, equals('# Baz'));
-      expect(data[5].name, equals('Qux'));
-      expect(data[4].name, equals('Bang'));
-      expect(data[3].name, equals('Crackle'));
-      expect(data[2].name, equals('Pop'));
-      expect(data[1].name, equals('Snap'));
-      expect(data[0].name, equals('Qux'));
-
+      {
+        final data = state.data;
+        expect(data[8].name, equals('Foo'));
+        expect(data[7].name, equals('1 Bar'));
+        expect(data[6].name, equals('# Baz'));
+        expect(data[5].name, equals('Qux'));
+        expect(data[4].name, equals('Bang'));
+        expect(data[3].name, equals('Crackle'));
+        expect(data[2].name, equals('Pop'));
+        expect(data[1].name, equals('Snap'));
+        expect(data[0].name, equals('Qux'));
+      }
       // Change the sort column.
       await tester.tap(find.text('FlatName'));
       await tester.pumpAndSettle();
-      expect(data[0].name, equals('# Baz'));
-      expect(data[1].name, equals('1 Bar'));
-      expect(data[2].name, equals('Bang'));
-      expect(data[3].name, equals('Crackle'));
-      expect(data[4].name, equals('Foo'));
-      expect(data[5].name, equals('Pop'));
-      expect(data[6].name, equals('Qux'));
-      expect(data[7].name, equals('Qux'));
-      expect(data[8].name, equals('Snap'));
+
+      {
+        final data = state.data;
+        expect(data[0].name, equals('# Baz'));
+        expect(data[1].name, equals('1 Bar'));
+        expect(data[2].name, equals('Bang'));
+        expect(data[3].name, equals('Crackle'));
+        expect(data[4].name, equals('Foo'));
+        expect(data[5].name, equals('Pop'));
+        expect(data[6].name, equals('Qux'));
+        expect(data[7].name, equals('Qux'));
+        expect(data[8].name, equals('Snap'));
+      }
     });
 
     testWidgets('displays with many columns', (WidgetTester tester) async {
