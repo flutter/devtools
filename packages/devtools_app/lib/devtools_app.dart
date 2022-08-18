@@ -69,6 +69,7 @@ export 'src/shared/connected_app.dart';
 export 'src/shared/console_service.dart';
 export 'src/shared/error_badge_manager.dart';
 export 'src/shared/globals.dart';
+export 'src/shared/notifications.dart';
 export 'src/shared/preferences.dart';
 export 'src/shared/routing.dart';
 export 'src/shared/screen.dart';
