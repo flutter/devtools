@@ -23,10 +23,10 @@ function toggleTheme(messageEvent) {
 
   const theme = messageEvent.data.theme;
   if (theme !== 'light' && theme !== 'dark') {
-    console.warn("Cannot change Perfetto theme. Expected 'light' or 'dark' but got " + theme);
+    console.warn(`Cannot change Perfetto theme. Expected 'light' or 'dark' but got $theme.`);
     return;
   }
-  var sheet = document.getElementById('devtools-style');
+  const sheet = document.getElementById('devtools-style');
   if (theme === 'light') {
     sheet.setAttribute('href', 'devtools_light.css');
   } else {
