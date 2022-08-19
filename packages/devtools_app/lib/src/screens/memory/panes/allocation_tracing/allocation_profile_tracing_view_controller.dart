@@ -70,8 +70,12 @@ class AllocationProfileTracingViewController extends DisposableController
   final _refreshing = ValueNotifier<bool>(false);
 
   /// The list of classes for the currently selected isolate.
-  ValueListenable<List<TracedClass>> get classList => _classList;
-  final _classList = ListValueNotifier<TracedClass>([]);
+  ValueListenable<List<TracedClass>> get filteredClassList =>
+      _filteredClassList;
+  final _filteredClassList = ListValueNotifier<TracedClass>([]);
+  final _unfilteredClassList = <TracedClass>[];
+
+  String _currentFilter = '';
 
   /// The current class selection in the [AllocationTracingTable]
   ValueListenable<TracedClass?> get selectedTracedClass => _selectedTracedClass;
@@ -87,6 +91,21 @@ class AllocationProfileTracingViewController extends DisposableController
   final _tracedClasses = <String, TracedClass>{};
   final _tracedClassesProfiles = <String, CpuProfileData>{};
 
+  void updateClassFilter(String value) {
+    if (value.isEmpty && _currentFilter.isEmpty) return;
+    final updatedFilter = (value.contains(_currentFilter)
+            ? _filteredClassList.value
+            : _unfilteredClassList)
+        .where(
+          (e) => e.cls.name!.contains(value),
+        )
+        .map((e) => _tracedClasses[e.cls.id!]!)
+        .toList();
+
+    _filteredClassList.replaceAll(updatedFilter);
+    _currentFilter = value;
+  }
+
   Future<void> initialize() async {
     _initializing.value = true;
 
@@ -99,7 +118,8 @@ class AllocationProfileTracingViewController extends DisposableController
     for (final cls in classList.classes!) {
       _tracedClasses[cls.id!] = TracedClass(cls: cls);
     }
-    _classList.addAll(_tracedClasses.values);
+    _filteredClassList.addAll(_tracedClasses.values);
+    _unfilteredClassList.addAll(_tracedClasses.values);
 
     await refresh();
     _initializing.value = false;
@@ -110,7 +130,7 @@ class AllocationProfileTracingViewController extends DisposableController
     _refreshing.value = true;
 
     final profileRequests = <Future<void>>[];
-    for (final tracedClass in _classList.value) {
+    for (final tracedClass in _filteredClassList.value) {
       // If allocation tracing is enabled for this class, request an updated
       // profile.
       if (tracedClass.traceAllocations) {
@@ -147,7 +167,7 @@ class AllocationProfileTracingViewController extends DisposableController
       _selectedTracedClass.value = updated;
     }
     _tracedClasses[cls.id!] = updated;
-    _classList.replace(original, updated);
+    _filteredClassList.replace(original, updated);
   }
 
   Future<CpuProfileData> _getAllocationProfileForClass(

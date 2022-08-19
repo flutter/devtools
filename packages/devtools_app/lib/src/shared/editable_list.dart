@@ -92,6 +92,7 @@ class _EditableListState extends State<EditableList> {
               onEntryAdded: widget.onEntryAdded,
               onRefresh: widget.onRefreshTriggered,
             ),
+            const SizedBox(height: denseSpacing),
             Expanded(
               child: _EditableListContentView(
                 entries: widget.entries,
@@ -161,7 +162,9 @@ class EditableListActionBar extends StatelessWidget {
             onPressed: () {
               _addNewItem();
             },
-            child: const Text('Add'),
+            child: const Text(
+              'Add',
+            ), // TODO:(https://github.com/flutter/devtools/issues/4381)
           ),
           isRefreshing?.value ?? false
               ? Container(
@@ -187,7 +190,7 @@ class EditableListActionBar extends StatelessWidget {
 }
 
 class _EditableListContentView extends StatelessWidget {
-  const _EditableListContentView({
+  _EditableListContentView({
     Key? key,
     required this.entries,
     required this.onEntryRemoved,
@@ -195,20 +198,22 @@ class _EditableListContentView extends StatelessWidget {
 
   final ListValueNotifier<String> entries;
   final Function(String) onEntryRemoved;
+  final ScrollController _listContentScrollController = ScrollController();
 
   @override
   Widget build(BuildContext context) {
-    return RoundedOutlinedBorder(
-      child: Scrollbar(
-        child: ListView.builder(
-          itemCount: entries.value.length,
-          itemBuilder: (context, index) {
-            return EditableListRow(
-              entry: entries.value[index],
-              onEntryRemoved: onEntryRemoved,
-            );
-          },
-        ),
+    return Scrollbar(
+      controller: _listContentScrollController,
+      thumbVisibility: true,
+      child: ListView.builder(
+        controller: _listContentScrollController,
+        itemCount: entries.value.length,
+        itemBuilder: (context, index) {
+          return EditableListRow(
+            entry: entries.value[index],
+            onEntryRemoved: onEntryRemoved,
+          );
+        },
       ),
     );
   }

@@ -181,6 +181,13 @@ class InspectorPreferencesController extends DisposableController
 
     _customPubRootDirectories.clear();
     await loadCustomPubRootDirectories();
+
+    if (_customPubRootDirectories.value.isEmpty) {
+      // If there are no pub root directories set on the first connection
+      // then try inferring them.
+      await _inspectorService?.inferPubRootDirectoryIfNeeded();
+      await loadCustomPubRootDirectories();
+    }
   }
 
   void _persistCustomPubRootDirectoriesToStorage() {
@@ -193,6 +200,13 @@ class InspectorPreferencesController extends DisposableController
   Future<void> addPubRootDirectories(
     List<String> pubRootDirectories,
   ) async {
+    // TODO(https://github.com/flutter/devtools/issues/4380):
+    // Add validation to EditableList Input.
+    // Directories of just / will break the inspector tree local package checks.
+    pubRootDirectories.removeWhere(
+      (element) => RegExp('^[/\\s]*\$').firstMatch(element) != null,
+    );
+
     if (!serviceManager.hasConnection) return;
     await _customPubRootDirectoryBusyTracker(() async {
       final inspectorService = _inspectorService;
