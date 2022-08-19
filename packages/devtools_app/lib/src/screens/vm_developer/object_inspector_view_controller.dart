@@ -16,6 +16,18 @@ import 'vm_object_model.dart';
 /// the object history and the object viewport.
 class ObjectInspectorViewController extends DisposableController
     with AutoDisposeControllerMixin {
+  ObjectInspectorViewController() {
+    addAutoDisposeListener(
+      scriptManager.sortedScripts,
+      selectAndPushMainScript,
+    );
+
+    addAutoDisposeListener(
+      objectHistory.current,
+      _onCurrentObjectChanged,
+    );
+  }
+
   final programExplorerController =
       ProgramExplorerController(showCodeNodes: true);
 
@@ -28,30 +40,16 @@ class ObjectInspectorViewController extends DisposableController
   ValueListenable<bool> get refreshing => _refreshing;
   final _refreshing = ValueNotifier<bool>(false);
 
-  ValueListenable<bool> get initialized => _initialized;
-  final _initialized = ValueNotifier<bool>(false);
+  bool _initialized = false;
 
   void init() {
-    if (!initialized.value) {
+    if (!_initialized) {
       programExplorerController
         ..initialize()
         ..initListeners();
-      initListeners();
       selectAndPushMainScript();
-      _initialized.value = true;
+      _initialized = true;
     }
-  }
-
-  void initListeners() {
-    addAutoDisposeListener(
-      scriptManager.sortedScripts,
-      selectAndPushMainScript,
-    );
-
-    addAutoDisposeListener(
-      objectHistory.current,
-      _onCurrentObjectChanged,
-    );
   }
 
   Future<void> _onCurrentObjectChanged() async {

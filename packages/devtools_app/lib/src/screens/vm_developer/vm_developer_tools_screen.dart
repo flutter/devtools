@@ -41,9 +41,8 @@ abstract class VMDeveloperView {
 }
 
 class VMDeveloperToolsScreen extends Screen {
-  const VMDeveloperToolsScreen({
-    required this.controller,
-  }) : super.conditional(
+  const VMDeveloperToolsScreen()
+      : super.conditional(
           id: id,
           title: 'VM Tools',
           icon: Icons.settings_applications,
@@ -52,11 +51,9 @@ class VMDeveloperToolsScreen extends Screen {
 
   static const id = 'vm-tools';
 
-  final VMDeveloperToolsController controller;
-
   @override
   ValueListenable<bool> get showIsolateSelector =>
-      controller.showIsolateSelector;
+      VMDeveloperToolsController.showIsolateSelector;
 
   @override
   Widget build(BuildContext context) => const VMDeveloperToolsScreenBody();

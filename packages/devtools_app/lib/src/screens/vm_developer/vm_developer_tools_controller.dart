@@ -16,10 +16,9 @@ class VMDeveloperToolsController {
 
   void selectIndex(int index) {
     _selectedIndex.value = index;
-    _showIsolateSelector.value =
+    showIsolateSelector.value =
         VMDeveloperToolsScreenBody.views[index].showIsolateSelector;
   }
 
-  ValueListenable<bool> get showIsolateSelector => _showIsolateSelector;
-  final _showIsolateSelector = ValueNotifier<bool>(false);
+  static final showIsolateSelector = ValueNotifier<bool>(false);
 }
