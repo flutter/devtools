@@ -15,6 +15,7 @@ import '../../ui/search.dart';
 import '../../ui/tab.dart';
 import 'panes/frame_analysis/frame_analysis.dart';
 import 'panes/raster_metrics/raster_metrics.dart';
+import 'panes/timeline_events/perfetto/perfetto.dart';
 import 'panes/timeline_events/timeline_flame_chart.dart';
 import 'performance_controller.dart';
 import 'performance_model.dart';
@@ -82,13 +83,19 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
 
     final isFlutterApp = serviceManager.connectedApp!.isFlutterAppNow!;
     final tabViews = [
-      KeepAliveWrapper(
-        child: TimelineEventsView(
-          controller: controller,
-          processing: widget.processing,
-          processingProgress: widget.processingProgress,
-        ),
-      ),
+      embeddedPerfettoEnabled
+          ? KeepAliveWrapper(
+              child: EmbeddedPerfetto(
+                perfettoController: controller.perfettoController,
+              ),
+            )
+          : KeepAliveWrapper(
+              child: TimelineEventsView(
+                controller: controller,
+                processing: widget.processing,
+                processingProgress: widget.processingProgress,
+              ),
+            ),
       if (frameAnalysisSupported && isFlutterApp)
         KeepAliveWrapper(
           child: frameAnalysisView,
@@ -116,11 +123,13 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
         trailing: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            _buildSearchField(searchFieldEnabled),
-            const FlameChartHelpButton(
-              gaScreen: PerformanceScreen.id,
-              gaSelection: analytics_constants.timelineFlameChartHelp,
-            ),
+            if (!embeddedPerfettoEnabled) ...[
+              _buildSearchField(searchFieldEnabled),
+              const FlameChartHelpButton(
+                gaScreen: PerformanceScreen.id,
+                gaSelection: analytics_constants.timelineFlameChartHelp,
+              ),
+            ],
             RefreshTimelineEventsButton(controller: controller),
           ],
         ),

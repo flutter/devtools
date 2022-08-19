@@ -140,6 +140,11 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
         controller.offlinePerformanceData != null &&
         controller.offlinePerformanceData!.frames.isNotEmpty;
 
+    final tabbedPerformanceView = TabbedPerformanceView(
+      controller: controller,
+      processing: processing,
+      processingProgress: processingProgress,
+    );
     final performanceScreen = Column(
       children: [
         if (!offlineController.offlineMode.value) _buildPerformanceControls(),
@@ -158,23 +163,21 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
             },
           ),
         Expanded(
-          child: Split(
-            axis: Axis.vertical,
-            initialFractions: const [0.7, 0.3],
-            children: [
-              TabbedPerformanceView(
-                controller: controller,
-                processing: processing,
-                processingProgress: processingProgress,
-              ),
-              ValueListenableBuilder<TimelineEvent?>(
-                valueListenable: controller.selectedTimelineEvent,
-                builder: (context, selectedEvent, _) {
-                  return EventDetails(selectedEvent);
-                },
-              ),
-            ],
-          ),
+          child: embeddedPerfettoEnabled
+              ? tabbedPerformanceView
+              : Split(
+                  axis: Axis.vertical,
+                  initialFractions: const [0.7, 0.3],
+                  children: [
+                    tabbedPerformanceView,
+                    ValueListenableBuilder<TimelineEvent?>(
+                      valueListenable: controller.selectedTimelineEvent,
+                      builder: (context, selectedEvent, _) {
+                        return EventDetails(selectedEvent);
+                      },
+                    ),
+                  ],
+                ),
         ),
       ],
     );

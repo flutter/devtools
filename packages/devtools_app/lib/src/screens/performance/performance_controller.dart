@@ -29,6 +29,7 @@ import '../profiler/cpu_profile_transformer.dart';
 import '../profiler/profile_granularity.dart';
 import 'panes/controls/enhance_tracing/enhance_tracing_controller.dart';
 import 'panes/raster_metrics/raster_metrics_controller.dart';
+import 'panes/timeline_events/perfetto/perfetto.dart';
 import 'performance_model.dart';
 import 'performance_screen.dart';
 import 'performance_utils.dart';
@@ -38,6 +39,9 @@ import 'timeline_event_processor.dart';
 
 /// Debugging flag to load sample trace events from [simple_trace_example.dart].
 bool debugSimpleTrace = false;
+
+/// Flag to enable the embedded perfetto trace viewer.
+bool embeddedPerfettoEnabled = false;
 
 /// Flag to hide the frame analysis feature while it is under development.
 bool frameAnalysisSupported = true;
@@ -67,6 +71,8 @@ class PerformanceController extends DisposableController
   final enhanceTracingController = EnhanceTracingController();
 
   final rasterMetricsController = RasterMetricsController();
+
+  final perfettoController = createPerfettoController();
 
   final _exportController = ExportController();
 
@@ -180,6 +186,10 @@ class PerformanceController extends DisposableController
   }
 
   Future<void> _initHelper() async {
+    if (embeddedPerfettoEnabled) {
+      perfettoController.init();
+    }
+
     if (!offlineController.offlineMode.value) {
       await serviceManager.onServiceAvailable;
       await _initData();
@@ -931,6 +941,9 @@ class PerformanceController extends DisposableController
     _pollingTimer?.cancel();
     _timelinePollingRateLimiter?.dispose();
     cpuProfilerController.dispose();
+    if (embeddedPerfettoEnabled) {
+      perfettoController.dispose();
+    }
     enhanceTracingController.dispose();
     _firstFrameEventSubscription?.cancel();
     super.dispose();
