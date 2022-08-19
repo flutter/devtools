@@ -42,6 +42,8 @@ class PerfettoController extends DisposableController
   void init() {
     _perfettoReady = Completer();
     _perfettoIFrame = html.IFrameElement()
+      // This url is safe because we built it ourselves and it does not include
+      // any user input.
       // ignore: unsafe_html
       ..src = perfettoUrl
       ..allow = 'usb';
