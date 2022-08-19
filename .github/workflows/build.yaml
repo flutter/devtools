@@ -33,7 +33,7 @@ jobs:
           - pinned
     steps:
       - name: git clone
-        uses: actions/checkout@d171c3b028d844f2bf14e9fdec0c58114451e4bf
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
       - name: tool/bots.sh
         env:
           BOT: main
@@ -50,7 +50,7 @@ jobs:
           - pinned
     steps:
       - name: git clone
-        uses: actions/checkout@d171c3b028d844f2bf14e9fdec0c58114451e4bf
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
       - name: tool/bots.sh
         env:
           BOT: packages
@@ -71,7 +71,7 @@ jobs:
           - master
     steps:
       - name: git clone
-        uses: actions/checkout@d171c3b028d844f2bf14e9fdec0c58114451e4bf
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
 
       - name: tool/bots.sh
         env:
@@ -101,7 +101,7 @@ jobs:
           - pinned
     steps:
       - name: git clone
-        uses: actions/checkout@v2
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
 
       - name: tool/bots.sh
         env:
@@ -124,7 +124,7 @@ jobs:
 #          - pinned
 #    steps:
 #      - name: git clone
-#        uses: actions/checkout@v2
+#        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
 #
 #      - name: tool/bots.sh
 #        env:
@@ -148,7 +148,7 @@ jobs:
 #          - master
 #    steps:
 #      - name: git clone
-#        uses: actions/checkout@d171c3b028d844f2bf14e9fdec0c58114451e4bf
+#        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
 #      - name: tool/bots.sh
 #        env:
 #          BOT: ${{ matrix.bot }}
