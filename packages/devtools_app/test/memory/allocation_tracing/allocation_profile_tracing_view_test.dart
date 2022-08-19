@@ -5,6 +5,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/primitives/trees.dart';
@@ -248,7 +249,7 @@ void main() {
 
         final controller = await navigateToAllocationTracing(tester);
 
-        final filterTextField = find.byType(ClassFilterTextField);
+        final filterTextField = find.byType(DevToolsClearableTextField);
         expect(filterTextField, findsOneWidget);
 
         // Filter for 'F'
@@ -286,7 +287,7 @@ void main() {
         expect(tracedClassList.first.cls, classList.classes!.first);
 
         // Filter out all classes and then clear the filter
-        final filterTextField = find.byType(ClassFilterTextField);
+        final filterTextField = find.byType(DevToolsClearableTextField);
         expect(filterTextField, findsOneWidget);
 
         await tester.enterText(filterTextField, 'Garbage');
@@ -325,7 +326,7 @@ void main() {
 
         // Filter out all classes, ensure the selection is still valid, then
         // clear the filter and check again.
-        final filterTextField = find.byType(ClassFilterTextField);
+        final filterTextField = find.byType(DevToolsClearableTextField);
         expect(filterTextField, findsOneWidget);
 
         await tester.enterText(filterTextField, 'Garbage');
