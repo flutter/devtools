@@ -101,7 +101,7 @@ enum ColumnAlignment {
   center,
 }
 
-abstract class PinnableListEntry {
+mixin PinnableListEntry {
   /// Determines if the row should be pinned to the top of the table.
   bool get pinToTop => false;
 }

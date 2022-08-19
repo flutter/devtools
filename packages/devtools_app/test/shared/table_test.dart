@@ -1269,7 +1269,7 @@ class PinnableTestData implements PinnableListEntry {
   });
 
   final String name;
-  bool enabled;
+  final bool enabled;
 
   @override
   bool get pinToTop => enabled;

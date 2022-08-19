@@ -37,13 +37,13 @@ const _columnGroupSpacing = 4.0;
 const _columnGroupSpacingWithPadding = _columnGroupSpacing + 2 * defaultSpacing;
 const _columnSpacing = defaultSpacing;
 
-typedef IndexedScrollableWidgetBuilder = Widget Function(
-  BuildContext,
-  LinkedScrollControllerGroup linkedScrollControllerGroup,
-  int index,
-  List<double> columnWidths,
-  bool isPinned,
-);
+typedef IndexedScrollableWidgetBuilder = Widget Function({
+  required BuildContext context,
+  required LinkedScrollControllerGroup linkedScrollControllerGroup,
+  required int index,
+  required List<double> columnWidths,
+  required bool isPinned,
+});
 
 typedef TableKeyEventHandler = KeyEventResult Function(
   RawKeyEvent event,
@@ -282,13 +282,13 @@ class FlatTableState<T> extends State<FlatTable<T>>
     );
   }
 
-  Widget _buildRow(
-    BuildContext context,
-    LinkedScrollControllerGroup linkedScrollControllerGroup,
-    int index,
-    List<double> columnWidths,
-    bool isPinned,
-  ) {
+  Widget _buildRow({
+    required BuildContext context,
+    required LinkedScrollControllerGroup linkedScrollControllerGroup,
+    required int index,
+    required List<double> columnWidths,
+    required bool isPinned,
+  }) {
     final node = (isPinned ? pinnedData : data)[index];
     final selectionNotifier =
         widget.selectionNotifier ?? FixedValueListenable<T?>(null);
@@ -363,8 +363,7 @@ class FlatTableState<T> extends State<FlatTable<T>>
           dataCopy.add(entry);
         }
       }
-      data.clear();
-      data.addAll(dataCopy);
+      data = dataCopy;
     }
   }
 }
@@ -653,13 +652,13 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     );
   }
 
-  Widget _buildRow(
-    BuildContext context,
-    LinkedScrollControllerGroup linkedScrollControllerGroup,
-    int index,
-    List<double> columnWidths,
-    bool isPinned,
-  ) {
+  Widget _buildRow({
+    required BuildContext context,
+    required LinkedScrollControllerGroup linkedScrollControllerGroup,
+    required int index,
+    required List<double> columnWidths,
+    required bool isPinned,
+  }) {
     Widget rowForNode(T node) {
       node.index = index;
       return TableRow<T>(
@@ -914,6 +913,8 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
   late ScrollController scrollController;
   late ScrollController pinnedScrollController;
 
+  static const double pinnedItemDividerHeight = 5;
+
   @override
   void initState() {
     super.initState();
@@ -1001,23 +1002,13 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
     return tableWidth;
   }
 
-  Widget _buildItemPinned(BuildContext context, int index) {
+  Widget _buildItem(BuildContext context, int index, {bool isPinned = false}) {
     return widget.rowBuilder(
-      context,
-      _linkedHorizontalScrollControllerGroup,
-      index,
-      widget.columnWidths,
-      true,
-    );
-  }
-
-  Widget _buildItem(BuildContext context, int index) {
-    return widget.rowBuilder(
-      context,
-      _linkedHorizontalScrollControllerGroup,
-      index,
-      widget.columnWidths,
-      false,
+      context: context,
+      linkedScrollControllerGroup: _linkedHorizontalScrollControllerGroup,
+      index: index,
+      columnWidths: widget.columnWidths,
+      isPinned: isPinned,
     );
   }
 
@@ -1078,13 +1069,17 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
                       controller: pinnedScrollController,
                       itemCount: widget.pinnedData.length,
                       itemExtent: widget.rowItemExtent,
-                      itemBuilder: _buildItemPinned,
+                      itemBuilder: (context, index) => _buildItem(
+                        context,
+                        index,
+                        isPinned: true,
+                      ),
                     ),
                   ),
                 ),
                 const Divider(
-                  thickness: 5,
-                  height: 5,
+                  thickness: pinnedItemDividerHeight,
+                  height: pinnedItemDividerHeight,
                 ),
               ],
               Expanded(
