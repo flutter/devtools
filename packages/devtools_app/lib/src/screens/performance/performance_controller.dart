@@ -41,7 +41,7 @@ import 'timeline_event_processor.dart';
 bool debugSimpleTrace = false;
 
 /// Flag to enable the embedded perfetto trace viewer.
-bool embeddedPerfettoEnabled = false;
+bool embeddedPerfettoEnabled = true;
 
 /// Flag to hide the frame analysis feature while it is under development.
 bool frameAnalysisSupported = true;
@@ -696,10 +696,17 @@ class PerformanceController extends DisposableController
     }
   }
 
-  FutureOr<void> processTraceEvents(
-    List<TraceEventWrapper> traceEvents, {
-    int startIndex = 0,
-  }) async {
+  FutureOr<void> processTraceEvents(List<TraceEventWrapper> traceEvents) async {
+    if (embeddedPerfettoEnabled) {
+      await perfettoController.loadTrace(traceEvents);
+    } else {
+      await _processTraceEvents(traceEvents);
+    }
+  }
+
+  FutureOr<void> _processTraceEvents(
+    List<TraceEventWrapper> traceEvents,
+  ) async {
     if (debugSimpleTrace) {
       traceEvents = simpleTraceEvents['traceEvents']!
           .where(
@@ -930,6 +937,9 @@ class PerformanceController extends DisposableController
     _selectedFrameNotifier.value = null;
     _processing.value = false;
     serviceManager.errorBadgeManager.clearErrors(PerformanceScreen.id);
+    if (embeddedPerfettoEnabled) {
+      await perfettoController.clear();
+    }
   }
 
   void recordTrace(Map<String, dynamic> trace) {
