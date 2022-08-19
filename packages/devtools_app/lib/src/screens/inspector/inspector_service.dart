@@ -388,25 +388,26 @@ class InspectorService extends InspectorServiceBase {
   }
 
   Future<void> _updateLocalClasses() async {
-    localClasses.clear();
-    if (_rootDirectories.value.isNotEmpty) {
-      final isolate = inspectorLibrary.isolate!;
-      for (var libraryRef in isolate.libraries!) {
-        if (isLocalUri(libraryRef.uri!)) {
-          try {
-            final Library library = await inspectorLibrary.service
-                .getObject(isolate.id!, libraryRef.id!) as Library;
-            for (var classRef in library.classes!) {
-              localClasses[classRef.name!] = classRef;
-            }
-          } catch (e) {
-            // Workaround until https://github.com/flutter/devtools/issues/3110
-            // is fixed.
-            assert(serviceManager.connectedApp!.isDartWebAppNow!);
-          }
-        }
-      }
-    }
+    // TODO(https://github.com/flutter/devtools/issues/4393)
+    // localClasses.clear();
+    // if (_rootDirectories.value.isNotEmpty) {
+    //   final isolate = inspectorLibrary.isolate!;
+    //   for (var libraryRef in isolate.libraries!) {
+    //     if (isLocalUri(libraryRef.uri!)) {
+    //       try {
+    //         final Library library = await inspectorLibrary.service
+    //             .getObject(isolate.id!, libraryRef.id!) as Library;
+    //         for (var classRef in library.classes!) {
+    //           localClasses[classRef.name!] = classRef;
+    //         }
+    //       } catch (e) {
+    //         // Workaround until https://github.com/flutter/devtools/issues/3110
+    //         // is fixed.
+    //         assert(serviceManager.connectedApp!.isDartWebAppNow!);
+    //       }
+    //     }
+    //   }
+    // }
   }
 
   @visibleForTesting
