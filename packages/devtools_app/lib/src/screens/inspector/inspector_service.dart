@@ -254,6 +254,8 @@ class InspectorService extends InspectorServiceBase {
 
   @override
   bool isLocalClass(RemoteDiagnosticsNode node) {
+    // TODO(https://github.com/flutter/devtools/issues/4393): localClasses is
+    // not currently being filled.
     if (node.widgetRuntimeType == null) return false;
     // widgetRuntimeType may contain some generic type arguments which we need
     // to strip out. If widgetRuntimeType is "FooWidget<Bar>" then we are only
