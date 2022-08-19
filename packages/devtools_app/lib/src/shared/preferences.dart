@@ -185,8 +185,10 @@ class InspectorPreferencesController extends DisposableController
     if (_customPubRootDirectories.value.isEmpty) {
       // If there are no pub root directories set on the first connection
       // then try inferring them.
-      await _inspectorService?.inferPubRootDirectoryIfNeeded();
-      await loadCustomPubRootDirectories();
+      await _customPubRootDirectoryBusyTracker(() async {
+        await _inspectorService?.inferPubRootDirectoryIfNeeded();
+        await loadCustomPubRootDirectories();
+      });
     }
   }
 
