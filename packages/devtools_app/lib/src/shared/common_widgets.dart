@@ -1052,6 +1052,52 @@ class RoundedDropDownButton<T> extends StatelessWidget {
   }
 }
 
+class DevToolsClearableTextField extends StatelessWidget {
+  DevToolsClearableTextField({
+    Key? key,
+    required this.labelText,
+    TextEditingController? controller,
+    this.hintText,
+    this.onChanged,
+    this.autofocus = false,
+  })  : controller = controller ?? TextEditingController(),
+        super(key: key);
+
+  final TextEditingController controller;
+  final String? hintText;
+  final String labelText;
+  final Function(String)? onChanged;
+  final bool autofocus;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      autofocus: autofocus,
+      controller: controller,
+      onChanged: onChanged,
+      decoration: InputDecoration(
+        contentPadding: const EdgeInsets.all(denseSpacing),
+        constraints: BoxConstraints(
+          minHeight: defaultTextFieldHeight,
+          maxHeight: defaultTextFieldHeight,
+        ),
+        border: const OutlineInputBorder(),
+        labelText: labelText,
+        hintText: hintText,
+        suffixIcon: IconButton(
+          tooltip: 'Clear',
+          icon: const Icon(Icons.clear),
+          onPressed: () {
+            controller.clear();
+            onChanged?.call('');
+          },
+        ),
+        isDense: true,
+      ),
+    );
+  }
+}
+
 Widget clearInputButton(VoidCallback onPressed) {
   return inputDecorationSuffixButton(Icons.clear, onPressed);
 }

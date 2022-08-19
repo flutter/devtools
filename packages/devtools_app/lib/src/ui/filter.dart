@@ -96,7 +96,11 @@ class _FilterDialogState<T>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (widget.includeQueryFilter) ...[
-              _buildQueryTextField(),
+              DevToolsClearableTextField(
+                autofocus: true,
+                labelText: 'Filter Query',
+                controller: queryTextFieldController,
+              ),
               const SizedBox(height: defaultSpacing),
               _buildQueryInstructions(),
               const SizedBox(height: defaultSpacing),
@@ -140,22 +144,6 @@ class _FilterDialogState<T>
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildQueryTextField() {
-    return Container(
-      height: defaultTextFieldHeight,
-      child: TextField(
-        autofocus: true,
-        controller: queryTextFieldController,
-        decoration: InputDecoration(
-          contentPadding: const EdgeInsets.all(denseSpacing),
-          border: const OutlineInputBorder(),
-          labelText: 'Filter query',
-          suffix: clearInputButton(queryTextFieldController.clear),
-        ),
-      ),
     );
   }
 
