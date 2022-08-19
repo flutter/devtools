@@ -122,8 +122,10 @@ class _AllocationTracingTableState extends State<AllocationTracingTable> {
       children: [
         Padding(
           padding: const EdgeInsets.only(bottom: densePadding),
-          child: ClassFilterTextField(
-            controller: widget.controller,
+          child: DevToolsClearableTextField(
+            labelText: 'Class Filter',
+            hintText: 'Filter by class name',
+            onChanged: widget.controller.updateClassFilter,
           ),
         ),
         Expanded(
@@ -155,48 +157,6 @@ class _AllocationTracingTableState extends State<AllocationTracingTable> {
           ),
         ),
       ],
-    );
-  }
-}
-
-class ClassFilterTextField extends StatelessWidget {
-  ClassFilterTextField({
-    Key? key,
-    required this.controller,
-  }) : super(key: key);
-
-  final AllocationProfileTracingViewController controller;
-  final _textEditingController = TextEditingController();
-
-  @override
-  Widget build(BuildContext context) {
-    return TextField(
-      controller: _textEditingController,
-      decoration: InputDecoration(
-        constraints: const BoxConstraints(
-          // Forces the row and clear icon to be dense. Default is 48, as per
-          // Flutter documentation. For more details, see:
-          // https://api.flutter.dev/flutter/material/InputDecoration/prefixIconConstraints.html
-          minHeight: 32,
-          maxHeight: 32,
-        ),
-        contentPadding: const EdgeInsets.all(denseSpacing),
-        border: const OutlineInputBorder(),
-        labelText: 'Class Filter',
-        hintText: 'Filter by class name',
-        suffixIcon: IconButton(
-          tooltip: 'Clears the class filter',
-          icon: const Icon(Icons.clear),
-          onPressed: () {
-            _textEditingController.clear();
-            controller.updateClassFilter(_textEditingController.text);
-          },
-        ),
-        // Required to set the constraints less than 48 width / height.
-        isDense: true,
-      ),
-      autofocus: true,
-      onChanged: controller.updateClassFilter,
     );
   }
 }
