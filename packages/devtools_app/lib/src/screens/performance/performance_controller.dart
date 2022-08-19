@@ -41,7 +41,7 @@ import 'timeline_event_processor.dart';
 bool debugSimpleTrace = false;
 
 /// Flag to enable the embedded perfetto trace viewer.
-bool embeddedPerfettoEnabled = true;
+bool embeddedPerfettoEnabled = false;
 
 /// Flag to hide the frame analysis feature while it is under development.
 bool frameAnalysisSupported = true;
