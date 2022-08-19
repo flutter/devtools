@@ -81,7 +81,7 @@ jobs:
         run: ./tool/bots.sh
 
       - name: image failures
-        uses: actions/upload-artifact@34622df80861c3ed63eb2bff892de2f1fbf4c9da
+        uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
         if: failure() # Only if failure then failures directory exists.
         with:
           # TODO(terry): matrix.os currently empty. If we run tests on other
