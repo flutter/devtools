@@ -96,8 +96,7 @@ class PerfettoController extends DisposableController
     while (!_perfettoReady.isCompleted) {
       await Future.delayed(const Duration(microseconds: 100), () async {
         // Once the Perfetto UI is ready, Perfetto will receive this 'PING'
-        // message and return a 'PONG' message, handled in [_handleMessage]
-        // below.
+        // message and return a 'PONG' message, handled in [_handleMessage].
         _postMessage(_perfettoPing);
       });
     }
