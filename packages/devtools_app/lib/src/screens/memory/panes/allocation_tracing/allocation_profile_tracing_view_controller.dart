@@ -8,13 +8,14 @@ import 'package:vm_service/vm_service.dart';
 import '../../../../primitives/auto_dispose.dart';
 import '../../../../primitives/utils.dart';
 import '../../../../shared/globals.dart';
+import '../../../../shared/table_data.dart';
 import '../../../profiler/cpu_profile_model.dart';
 import '../../../profiler/cpu_profile_transformer.dart';
 
 // TODO(bkonyi): make compatible with ClassHeapDetailStats for serialization /
 // deserialization support.
 /// A representation of a class and it's allocation tracing state.
-class TracedClass {
+class TracedClass with PinnableListEntry {
   TracedClass({
     required this.cls,
   })  : traceAllocations = false,
@@ -52,6 +53,9 @@ class TracedClass {
 
   @override
   int get hashCode => Object.hash(cls, instances, traceAllocations);
+
+  @override
+  bool get pinToTop => traceAllocations;
 }
 
 class AllocationProfileTracingViewController extends DisposableController

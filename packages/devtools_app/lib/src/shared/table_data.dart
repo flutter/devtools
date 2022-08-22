@@ -101,6 +101,11 @@ enum ColumnAlignment {
   center,
 }
 
+mixin PinnableListEntry {
+  /// Determines if the row should be pinned to the top of the table.
+  bool get pinToTop => false;
+}
+
 /// Defines a group of columns for use in a table.
 ///
 /// Use a column group when multiple columns should be grouped together in the

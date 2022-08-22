@@ -4,6 +4,7 @@
 
 import 'dart:math';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide TableRow;
 import 'package:flutter/services.dart';
@@ -36,12 +37,13 @@ const _columnGroupSpacing = 4.0;
 const _columnGroupSpacingWithPadding = _columnGroupSpacing + 2 * defaultSpacing;
 const _columnSpacing = defaultSpacing;
 
-typedef IndexedScrollableWidgetBuilder = Widget Function(
-  BuildContext,
-  LinkedScrollControllerGroup linkedScrollControllerGroup,
-  int index,
-  List<double> columnWidths,
-);
+typedef IndexedScrollableWidgetBuilder = Widget Function({
+  required BuildContext context,
+  required LinkedScrollControllerGroup linkedScrollControllerGroup,
+  required int index,
+  required List<double> columnWidths,
+  required bool isPinned,
+});
 
 typedef TableKeyEventHandler = KeyEventResult Function(
   RawKeyEvent event,
@@ -49,7 +51,25 @@ typedef TableKeyEventHandler = KeyEventResult Function(
   BoxConstraints constraints,
 );
 
-enum ScrollKind { up, down, parent }
+enum ScrollKind {
+  up,
+  down,
+  parent,
+}
+
+/// Represents the various pinning modes for [FlatTable]:
+///
+///   - [FlatTablePinBehavior.none] disables item pinning
+///   - [FlatTablePinBehavior.pinOriginalToTop] moves the original item from
+///     the list of unpinned items to the list of pinned items.
+///   - [FlatTablePinBehavior.pinCopyToTop] creates a copy of the original item
+///     and inserts it into the list of pinned items, leaving the original item
+///     in the list of unpinned items.
+enum FlatTablePinBehavior {
+  none,
+  pinOriginalToTop,
+  pinCopyToTop,
+}
 
 /// A table that displays in a collection of [data], based on a collection of
 /// [ColumnData].
@@ -67,6 +87,7 @@ class FlatTable<T> extends StatefulWidget {
     required this.onItemSelected,
     required this.sortColumn,
     required this.sortDirection,
+    this.pinBehavior = FlatTablePinBehavior.none,
     this.secondarySortColumn,
     this.onSortChanged,
     this.searchMatchesNotifier,
@@ -87,6 +108,11 @@ class FlatTable<T> extends StatefulWidget {
   final Key Function(T data) keyFactory;
 
   final ItemCallback<T> onItemSelected;
+
+  /// Determines how elements that request to be pinned are displayed.
+  ///
+  /// Defaults to [FlatTablePinBehavior.none], which disables pinnning.
+  final FlatTablePinBehavior pinBehavior;
 
   final ColumnData<T> sortColumn;
 
@@ -113,11 +139,16 @@ class FlatTable<T> extends StatefulWidget {
 class FlatTableState<T> extends State<FlatTable<T>>
     implements SortableTable<T> {
   late List<T> data;
+  late List<T> pinnedData;
+  late UnmodifiableListView<T> _originalData;
 
   @override
   void initState() {
     super.initState();
-
+    if (widget.pinBehavior != FlatTablePinBehavior.none &&
+        this is! State<FlatTable<PinnableListEntry>>) {
+      throw StateError('$T must implement PinnableListEntry');
+    }
     _initData();
   }
 
@@ -132,7 +163,7 @@ class FlatTableState<T> extends State<FlatTable<T>>
   }
 
   void _initData() {
-    data = List.from(widget.data);
+    _originalData = UnmodifiableListView(List.from(widget.data));
     sortData(
       widget.sortColumn,
       widget.sortDirection,
@@ -234,6 +265,7 @@ class FlatTableState<T> extends State<FlatTable<T>>
 
         return _Table<T>(
           data: data,
+          pinnedData: pinnedData,
           columns: widget.columns,
           columnGroups: widget.columnGroups,
           columnWidths: columnWidths,
@@ -250,14 +282,14 @@ class FlatTableState<T> extends State<FlatTable<T>>
     );
   }
 
-  Widget _buildRow(
-    BuildContext context,
-    LinkedScrollControllerGroup linkedScrollControllerGroup,
-    int index,
-    List<double> columnWidths,
-  ) {
-    final node = data[index];
-
+  Widget _buildRow({
+    required BuildContext context,
+    required LinkedScrollControllerGroup linkedScrollControllerGroup,
+    required int index,
+    required List<double> columnWidths,
+    required bool isPinned,
+  }) {
+    final node = (isPinned ? pinnedData : data)[index];
     final selectionNotifier =
         widget.selectionNotifier ?? FixedValueListenable<T?>(null);
     return ValueListenableBuilder<T?>(
@@ -306,6 +338,8 @@ class FlatTableState<T> extends State<FlatTable<T>>
     SortDirection direction, {
     ColumnData<T>? secondarySortColumn,
   }) {
+    data = List.from(_originalData);
+    pinnedData = <T>[];
     data.sort(
       (T a, T b) => _compareData<T>(
         a,
@@ -315,6 +349,22 @@ class FlatTableState<T> extends State<FlatTable<T>>
         secondarySortColumn: secondarySortColumn,
       ),
     );
+    if (widget.pinBehavior != FlatTablePinBehavior.none) {
+      // Collect the list of pinned entries. We don't need to sort again since
+      // we've already sorted the original data.
+      final dataCopy = <T>[];
+      for (final entry in data) {
+        final pinnableEntry = entry as PinnableListEntry;
+        if (pinnableEntry.pinToTop) {
+          pinnedData.add(entry);
+        }
+        if (!pinnableEntry.pinToTop ||
+            widget.pinBehavior == FlatTablePinBehavior.pinCopyToTop) {
+          dataCopy.add(entry);
+        }
+      }
+      data = dataCopy;
+    }
   }
 }
 
@@ -602,12 +652,13 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     );
   }
 
-  Widget _buildRow(
-    BuildContext context,
-    LinkedScrollControllerGroup linkedScrollControllerGroup,
-    int index,
-    List<double> columnWidths,
-  ) {
+  Widget _buildRow({
+    required BuildContext context,
+    required LinkedScrollControllerGroup linkedScrollControllerGroup,
+    required int index,
+    required List<double> columnWidths,
+    required bool isPinned,
+  }) {
     Widget rowForNode(T node) {
       node.index = index;
       return TableRow<T>(
@@ -809,6 +860,7 @@ class _Table<T> extends StatefulWidget {
   const _Table({
     Key? key,
     required this.data,
+    this.pinnedData = const [],
     required this.columns,
     required this.columnWidths,
     required this.rowBuilder,
@@ -826,6 +878,7 @@ class _Table<T> extends StatefulWidget {
   }) : super(key: key);
 
   final List<T> data;
+  final List<T> pinnedData;
 
   final bool autoScrollContent;
   final List<ColumnData<T>> columns;
@@ -858,6 +911,9 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
   late ColumnData<T> sortColumn;
   late SortDirection sortDirection;
   late ScrollController scrollController;
+  late ScrollController pinnedScrollController;
+
+  static const double pinnedItemDividerHeight = 5;
 
   @override
   void initState() {
@@ -867,6 +923,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
     sortColumn = widget.sortColumn;
     sortDirection = widget.sortDirection;
     scrollController = ScrollController();
+    pinnedScrollController = ScrollController();
     _addScrollListener(widget.selectionNotifier);
     _initSearchListener();
   }
@@ -928,6 +985,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
   @override
   void dispose() {
     scrollController.dispose();
+    pinnedScrollController.dispose();
     super.dispose();
   }
 
@@ -944,12 +1002,13 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
     return tableWidth;
   }
 
-  Widget _buildItem(BuildContext context, int index) {
+  Widget _buildItem(BuildContext context, int index, {bool isPinned = false}) {
     return widget.rowBuilder(
-      context,
-      _linkedHorizontalScrollControllerGroup,
-      index,
-      widget.columnWidths,
+      context: context,
+      linkedScrollControllerGroup: _linkedHorizontalScrollControllerGroup,
+      index: index,
+      columnWidths: widget.columnWidths,
+      isPinned: isPinned,
     );
   }
 
@@ -997,6 +1056,32 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
                 secondarySortColumn: widget.secondarySortColumn,
                 onSortChanged: _sortData,
               ),
+              if (widget.pinnedData.isNotEmpty) ...[
+                SizedBox(
+                  height: min(
+                    widget.rowItemExtent! * widget.pinnedData.length,
+                    constraints.maxHeight / 2,
+                  ),
+                  child: Scrollbar(
+                    thumbVisibility: true,
+                    controller: pinnedScrollController,
+                    child: ListView.builder(
+                      controller: pinnedScrollController,
+                      itemCount: widget.pinnedData.length,
+                      itemExtent: widget.rowItemExtent,
+                      itemBuilder: (context, index) => _buildItem(
+                        context,
+                        index,
+                        isPinned: true,
+                      ),
+                    ),
+                  ),
+                ),
+                const Divider(
+                  thickness: pinnedItemDividerHeight,
+                  height: pinnedItemDividerHeight,
+                ),
+              ],
               Expanded(
                 child: Scrollbar(
                   thumbVisibility: true,

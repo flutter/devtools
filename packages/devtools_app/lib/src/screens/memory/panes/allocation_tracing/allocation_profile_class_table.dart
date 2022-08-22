@@ -95,7 +95,7 @@ class AllocationTracingTable extends StatefulWidget {
 
 class _AllocationTracingTableState extends State<AllocationTracingTable> {
   late SortDirection sortDirection;
-  late ColumnData<TracedClass> secondarySortColumn;
+  late ColumnData<TracedClass> sortColumn;
 
   late final _TraceCheckBoxColumn _checkboxColumn;
   static final _classNameColumn = _ClassNameColumn();
@@ -112,8 +112,8 @@ class _AllocationTracingTableState extends State<AllocationTracingTable> {
       _classNameColumn,
       _instancesColumn,
     ];
+    sortColumn = _classNameColumn;
     sortDirection = SortDirection.ascending;
-    secondarySortColumn = _classNameColumn;
   }
 
   @override
@@ -129,18 +129,17 @@ class _AllocationTracingTableState extends State<AllocationTracingTable> {
           ),
         ),
         Expanded(
-          child: DualValueListenableBuilder<bool, List<TracedClass>>(
-            firstListenable: widget.controller.refreshing,
-            secondListenable: widget.controller.filteredClassList,
-            builder: (context, _, classList, __) {
-              return OutlineDecoration(
-                child: FlatTable<TracedClass>(
+          child: OutlineDecoration(
+            child: DualValueListenableBuilder<bool, List<TracedClass>>(
+              firstListenable: widget.controller.refreshing,
+              secondListenable: widget.controller.filteredClassList,
+              builder: (context, _, filteredClassList, __) {
+                return FlatTable<TracedClass>(
                   columns: columns,
-                  data: classList,
+                  data: filteredClassList,
                   keyFactory: (e) => Key(e.cls.id!),
                   onItemSelected: widget.controller.selectTracedClass,
-                  sortColumn: _checkboxColumn,
-                  secondarySortColumn: secondarySortColumn,
+                  sortColumn: _classNameColumn,
                   sortDirection: sortDirection,
                   selectionNotifier: widget.controller.selectedTracedClass,
                   onSortChanged: (column, direction, {secondarySortColumn}) {
@@ -148,12 +147,13 @@ class _AllocationTracingTableState extends State<AllocationTracingTable> {
                     // `controller.refreshing` changes.
                     setState(() {
                       sortDirection = direction;
-                      secondarySortColumn = secondarySortColumn;
+                      sortColumn = column;
                     });
                   },
-                ),
-              );
-            },
+                  pinBehavior: FlatTablePinBehavior.pinOriginalToTop,
+                );
+              },
+            ),
           ),
         ),
       ],
