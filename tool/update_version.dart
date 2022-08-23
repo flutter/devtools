@@ -254,7 +254,6 @@ class ManualUpdateCommand extends Command {
 
   @override
   void run() {
-    if (argResults!['help'] != null) return;
     final newVersion = argResults!['new-version'].toString();
     final currentVersion =
         argResults!['current-version']?.toString() ?? versionFromPubspecFile();
@@ -292,7 +291,6 @@ class AutoUpdateCommand extends Command {
 
   @override
   void run() {
-    if (argResults!['help'] != null) return;
     final type = argResults!['type'].toString();
     final currentVersion = versionFromPubspecFile();
     String? newVersion;
