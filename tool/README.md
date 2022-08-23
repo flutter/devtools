@@ -13,7 +13,7 @@ git checkout -b release_2.7.0
 
 #### Update the DevTools version number
 
-Run the `tool/update_version.dart` script to update the devtools version.
+Run the `tool/update_version.dart` script to update the DevTools version.
 ```shell
 # To manually set the version.
 dart tool/update_version.dart manual --new-version 1.2.3
