@@ -353,11 +353,13 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
         offset: Offset(xCoord, yCoord),
         child: Material(
           elevation: defaultElevation,
-          child: ListView(
-            padding: EdgeInsets.zero,
-            shrinkWrap: true,
-            itemExtent: tileEntryHeight,
-            children: autoCompleteTiles,
+          child: TextFieldTapRegion(
+            child: ListView(
+              padding: EdgeInsets.zero,
+              shrinkWrap: true,
+              itemExtent: tileEntryHeight,
+              children: autoCompleteTiles,
+            ),
           ),
         ),
       ),
