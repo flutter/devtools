@@ -195,6 +195,10 @@ void main() {
       obj1 = MockClassObject();
       obj2 = MockClassObject();
       obj3 = MockClassObject();
+
+      when(obj1.obj).thenReturn(Class(id: '1'));
+      when(obj2.obj).thenReturn(Class(id: '2'));
+      when(obj3.obj).thenReturn(Class(id: '3'));
     });
 
     test('initial values', () {

@@ -132,8 +132,6 @@ class TestInboundReferences extends InboundReferences {
   Map<String, dynamic>? get json => <String, dynamic>{};
 }
 
-class TestProgramExplorerController extends ProgramExplorerController {}
-
 class TestObjectInspectorViewController extends ObjectInspectorViewController {
   @override
   ObjectHistory get objectHistory => fakeObjectHistory;
@@ -157,51 +155,6 @@ class FakeObjectHistory extends ObjectHistory {
   void setCurrentObject(VmObject object) {
     _current = object;
   }
-}
-
-class TestScriptObject extends ScriptObject {
-  TestScriptObject({required super.ref, required this.testScript});
-
-  Script testScript;
-
-  @override
-  Script get obj => testScript;
-}
-
-class TestFuncObject extends FuncObject {
-  TestFuncObject({required super.ref, required this.testFunc});
-
-  Func testFunc;
-
-  @override
-  Func get obj => testFunc;
-
-  @override
-  String? get name => 'FooFunction';
-}
-
-class TestFieldObject extends FieldObject {
-  TestFieldObject({required super.ref, required this.testField});
-
-  Field testField;
-
-  @override
-  Field get obj => testField;
-
-  @override
-  String? get name => 'FooField';
-}
-
-class TestLibraryObject extends LibraryObject {
-  TestLibraryObject({required super.ref, required this.testLibrary});
-
-  Library testLibrary;
-
-  @override
-  Library get obj => testLibrary;
-
-  @override
-  String? get name => 'FooLib';
 }
 
 class TestInstanceObject extends InstanceObject {

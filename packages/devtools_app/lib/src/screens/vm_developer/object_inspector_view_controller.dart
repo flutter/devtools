@@ -40,10 +40,16 @@ class ObjectInspectorViewController extends DisposableController
   ValueListenable<bool> get refreshing => _refreshing;
   final _refreshing = ValueNotifier<bool>(false);
 
+  bool _initialized = false;
+
   void init() {
-    programExplorerController
-      ..initialize()
-      ..initListeners();
+    if (!_initialized) {
+      programExplorerController
+        ..initialize()
+        ..initListeners();
+      selectAndPushMainScript();
+      _initialized = true;
+    }
   }
 
   Future<void> _onCurrentObjectChanged() async {
