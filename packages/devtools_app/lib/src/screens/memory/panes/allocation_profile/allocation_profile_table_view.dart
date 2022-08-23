@@ -23,7 +23,7 @@ import 'allocation_profile_table_view_controller.dart';
 
 /// The default width for columns containing *mostly* numeric data (e.g.,
 /// instances, memory).
-const _defaultNumberFieldWidth = 80.0;
+const _defaultNumberFieldWidth = 90.0;
 
 class _FieldClassName extends ColumnData<ClassHeapStats> {
   _FieldClassName()
@@ -208,7 +208,7 @@ class AllocationProfileTableViewState
         ),
         Expanded(
           child: _AllocationProfileTable(
-            allocationProfileController: widget.controller,
+            controller: widget.controller,
           ),
         ),
       ],
@@ -216,10 +216,10 @@ class AllocationProfileTableViewState
   }
 }
 
-class _AllocationProfileTable extends StatelessWidget {
+class _AllocationProfileTable extends StatefulWidget {
   const _AllocationProfileTable({
     Key? key,
-    required this.allocationProfileController,
+    required this.controller,
   }) : super(key: key);
 
   /// List of columns that are displayed regardless of VM developer mode state.
@@ -234,10 +234,14 @@ class _AllocationProfileTable extends StatelessWidget {
     ),
   ];
 
+  static final _initialSortColumn = _FieldSizeColumn(
+    heap: _HeapGeneration.total,
+  );
+
   static final _columns = [
     _FieldClassName(),
     _FieldInstanceCountColumn(heap: _HeapGeneration.total),
-    _FieldSizeColumn(heap: _HeapGeneration.total),
+    _initialSortColumn,
     _FieldInternalSizeColumn(heap: _HeapGeneration.total),
     _FieldExternalSizeColumn(heap: _HeapGeneration.total),
   ];
@@ -265,12 +269,28 @@ class _AllocationProfileTable extends StatelessWidget {
     _FieldExternalSizeColumn(heap: _HeapGeneration.oldSpace),
   ];
 
-  final AllocationProfileTableViewController allocationProfileController;
+  final AllocationProfileTableViewController controller;
+
+  @override
+  State<_AllocationProfileTable> createState() =>
+      _AllocationProfileTableState();
+}
+
+class _AllocationProfileTableState extends State<_AllocationProfileTable> {
+  late SortDirection sortDirection;
+  late ColumnData<ClassHeapStats> sortColumn;
+
+  @override
+  void initState() {
+    super.initState();
+    sortColumn = _AllocationProfileTable._initialSortColumn;
+    sortDirection = SortDirection.descending;
+  }
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<AllocationProfile?>(
-      valueListenable: allocationProfileController.currentAllocationProfile,
+      valueListenable: widget.controller.currentAllocationProfile,
       builder: (context, profile, _) {
         // TODO(bkonyi): make this an overlay so the table doesn't
         // disappear when we're retrieving new data, especially since the
@@ -287,13 +307,14 @@ class _AllocationProfileTable extends StatelessWidget {
                 builder: (context, constraints) {
                   return FlatTable<ClassHeapStats?>(
                     columnGroups: [
-                      ..._columnGroups,
+                      ..._AllocationProfileTable._columnGroups,
                       if (vmDeveloperModeEnabled)
-                        ..._vmDeveloperModeColumnGroups,
+                        ..._AllocationProfileTable._vmDeveloperModeColumnGroups,
                     ],
                     columns: [
-                      ..._columns,
-                      if (vmDeveloperModeEnabled) ..._vmDeveloperModeColumns,
+                      ..._AllocationProfileTable._columns,
+                      if (vmDeveloperModeEnabled)
+                        ..._AllocationProfileTable._vmDeveloperModeColumns,
                     ],
                     data: profile.members!.where(
                       (element) {
@@ -302,8 +323,16 @@ class _AllocationProfileTable extends StatelessWidget {
                             element.oldSpace.externalSize != 0;
                       },
                     ).toList(),
-                    sortColumn: _columns.first,
-                    sortDirection: SortDirection.ascending,
+                    sortColumn: sortColumn,
+                    sortDirection: sortDirection,
+                    onSortChanged: (
+                      sortColumn,
+                      direction, {
+                      secondarySortColumn,
+                    }) {
+                      sortColumn = sortColumn;
+                      sortDirection = direction;
+                    },
                     onItemSelected: (item) => null,
                     keyFactory: (element) => Key(element!.classRef!.name!),
                   );
