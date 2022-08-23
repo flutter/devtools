@@ -8,17 +8,15 @@ import 'dart:io';
 // This script must be executed from the top level devtools/ directory.
 // TODO(kenz): If changes are made to this script, first consider refactoring to
 // use https://github.com/dart-lang/pubspec_parse.
+final _pubspecs = [
+  'packages/devtools_app/pubspec.yaml',
+  'packages/devtools_test/pubspec.yaml',
+  'packages/devtools_shared/pubspec.yaml',
+].map((path) => File(path)).toList();
 
 void main(List<String> args) async {
-  final pubspecs = [
-    'packages/devtools_app/pubspec.yaml',
-    'packages/devtools_test/pubspec.yaml',
-    'packages/devtools_shared/pubspec.yaml',
-  ].map((path) => File(path)).toList();
-
-  final currentVersion = args.isNotEmpty && args.length > 1
-      ? args[1]
-      : versionFromPubspecFile(pubspecs.first);
+  final currentVersion =
+      args.isNotEmpty && args.length > 1 ? args[1] : versionFromPubspecFile();
 
   if (currentVersion == null) {
     print('Could not resolve current version number. Please explicitly pass in '
@@ -34,24 +32,28 @@ void main(List<String> args) async {
     print('Something went wrong. Could not resolve version number.');
     return;
   }
+  performTheVersionUpdate(currentVersion: currentVersion, newVersion: version);
+}
 
-  print('Updating pubspecs to version $version...');
-  for (final pubspec in pubspecs) {
-    writeVersionToPubspec(pubspec, version);
+Future<void> performTheVersionUpdate(
+    {required String currentVersion, required String newVersion}) async {
+  print('Updating pubspecs to version $newVersion...');
+  for (final pubspec in _pubspecs) {
+    writeVersionToPubspec(pubspec, newVersion);
   }
 
-  print('Updating devtools.dart to version $version...');
+  print('Updating devtools.dart to version $newVersion...');
   writeVersionToVersionFile(
     File('packages/devtools_app/lib/devtools.dart'),
-    version,
+    newVersion,
   );
 
-  print('Updating CHANGELOG to version $version...');
-  writeVersionToChangelog(File('CHANGELOG.md'), version);
+  print('Updating CHANGELOG to version $newVersion...');
+  writeVersionToChangelog(File('CHANGELOG.md'), newVersion);
 
-  print('Updating index.html to version $version...');
+  print('Updating index.html to version $newVersion...');
   writeVersionToIndexHtml(
-      File('packages/devtools_app/web/index.html'), currentVersion, version);
+      File('packages/devtools_app/web/index.html'), currentVersion, newVersion);
 
   final process = await Process.start('./tool/pub_upgrade.sh', []);
   process.stdout.asBroadcastStream().listen((event) {
@@ -78,7 +80,8 @@ String? incrementVersion(String oldVersion) {
   return [parts[0], parts[1], nextPatch].join('.');
 }
 
-String? versionFromPubspecFile(File pubspec) {
+String? versionFromPubspecFile() {
+  final pubspec = _pubspecs.first;
   final lines = pubspec.readAsLinesSync();
   for (final line in lines) {
     if (line.startsWith(pubspecVersionPrefix)) {
