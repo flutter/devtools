@@ -287,7 +287,7 @@ class AutoUpdateCommand extends Command {
           'major': 'bumps the version to the next major value',
         },
         mandatory: true,
-        help: 'Bumps the version to the next dev pre-release value.');
+        help: 'Bumps the devtools version by the selected type.');
   }
 
   @override
