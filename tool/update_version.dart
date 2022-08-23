@@ -28,14 +28,13 @@ void main(List<String> args) async {
     print(error);
     exit(64); // Exit code 64 indicates a usage error.
   });
-  ;
   return;
 }
 
 Future<void> performTheVersionUpdate(
     {required String currentVersion, required String newVersion}) async {
   print('Updating pubspecs from $currentVersion to version $newVersion...');
-  return;
+
   for (final pubspec in _pubspecs) {
     writeVersionToPubspec(pubspec, newVersion);
   }
