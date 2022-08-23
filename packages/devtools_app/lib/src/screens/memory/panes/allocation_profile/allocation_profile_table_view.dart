@@ -330,8 +330,10 @@ class _AllocationProfileTableState extends State<_AllocationProfileTable> {
                       direction, {
                       secondarySortColumn,
                     }) {
-                      sortColumn = sortColumn;
-                      sortDirection = direction;
+                      setState(() {
+                        sortColumn = sortColumn;
+                        sortDirection = direction;
+                      });
                     },
                     onItemSelected: (item) => null,
                     keyFactory: (element) => Key(element!.classRef!.name!),
