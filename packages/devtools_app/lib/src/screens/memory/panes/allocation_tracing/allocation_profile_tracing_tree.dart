@@ -309,7 +309,7 @@ class _ExclusiveCountColumn extends ColumnData<CpuStackFrame> {
   }
 }
 
-/// A table of the bottom-up allocation profile tree.
+/// A table of an allocation profile tree.
 class AllocationProfileTracingTable extends StatefulWidget {
   const AllocationProfileTracingTable({
     Key? key,
