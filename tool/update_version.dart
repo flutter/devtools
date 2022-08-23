@@ -16,88 +16,6 @@ final _pubspecs = [
   'packages/devtools_shared/pubspec.yaml',
 ].map((path) => File(path)).toList();
 
-class ManualUpdateCommand extends Command {
-  @override
-  final name = 'manual';
-  @override
-  final description = 'Manually update the command version.';
-
-  ManualUpdateCommand() {
-    argParser.addOption(
-      'new-version',
-      abbr: 'n',
-      mandatory: true,
-      help: 'The new version code that devtools will be set to.',
-    );
-    argParser.addOption(
-      'current-version',
-      abbr: 'c',
-      help: '''The current devtools version, this should be set to the version
-          inside the index.html. This is only necessary to set this if automatic
-          detection is failing.''',
-    );
-  }
-
-  @override
-  void run() {
-    final newVersion = argResults!['new-version'].toString();
-    final currentVersion =
-        argResults!['current-version']?.toString() ?? versionFromPubspecFile();
-
-    if (currentVersion == null) {
-      throw 'Could not determine the version, please set the current-version or determine why getting the version is failing.';
-    }
-
-    performTheVersionUpdate(
-      currentVersion: currentVersion,
-      newVersion: newVersion,
-    );
-  }
-}
-
-class AutoUpdateCommand extends Command {
-  @override
-  final name = 'auto';
-  @override
-  final description = 'Automatically bump devtools to a new version.';
-  AutoUpdateCommand() {
-    argParser.addOption('type',
-        abbr: 't',
-        allowed: ['dev', 'patch', 'minor', 'major'],
-        allowedHelp: {
-          'dev': 'bumps the version to the next dev pre-release value',
-          'patch': 'bumps the version to the next patch value',
-          'minor': 'bumps the version to the next minor value',
-          'major': 'bumps the version to the next major value',
-        },
-        mandatory: true,
-        help: 'Bumps the version to the next dev pre-release value.');
-  }
-  @override
-  void run() {
-    final type = argResults!['type'].toString();
-    final currentVersion = versionFromPubspecFile();
-    String? newVersion;
-    if (currentVersion == null) {
-      throw 'Could not automatically determine current version.';
-    }
-    switch (type) {
-      case 'dev':
-        newVersion = incrementDevVersion(currentVersion);
-        break;
-      default:
-        newVersion = incrementVersionByType(currentVersion, type);
-    }
-    if (newVersion == null) {
-      throw 'Failed to determine the newVersion.';
-    }
-    performTheVersionUpdate(
-      currentVersion: currentVersion,
-      newVersion: newVersion,
-    );
-  }
-}
-
 void main(List<String> args) async {
   final runner = CommandRunner(
     'update_version.dart',
@@ -304,5 +222,89 @@ const devToolsDependencyPrefixes = [
 extension JoinExtension on List<String> {
   String joinWithNewLine() {
     return '${join('\n')}\n';
+  }
+}
+
+class ManualUpdateCommand extends Command {
+  @override
+  final name = 'manual';
+  @override
+  final description = 'Manually update devtools to a new version.';
+
+  ManualUpdateCommand() {
+    argParser.addOption(
+      'new-version',
+      abbr: 'n',
+      mandatory: true,
+      help: 'The new version code that devtools will be set to.',
+    );
+    argParser.addOption(
+      'current-version',
+      abbr: 'c',
+      help: '''The current devtools version, this should be set to the version
+          inside the index.html. This is only necessary to set this if automatic
+          detection is failing.''',
+    );
+  }
+
+  @override
+  void run() {
+    final newVersion = argResults!['new-version'].toString();
+    final currentVersion =
+        argResults!['current-version']?.toString() ?? versionFromPubspecFile();
+
+    if (currentVersion == null) {
+      throw 'Could not determine the version, please set the current-version or determine why getting the version is failing.';
+    }
+
+    performTheVersionUpdate(
+      currentVersion: currentVersion,
+      newVersion: newVersion,
+    );
+  }
+}
+
+class AutoUpdateCommand extends Command {
+  @override
+  final name = 'auto';
+  @override
+  final description = 'Automatically update devtools to a new version.';
+
+  AutoUpdateCommand() {
+    argParser.addOption('type',
+        abbr: 't',
+        allowed: ['dev', 'patch', 'minor', 'major'],
+        allowedHelp: {
+          'dev': 'bumps the version to the next dev pre-release value',
+          'patch': 'bumps the version to the next patch value',
+          'minor': 'bumps the version to the next minor value',
+          'major': 'bumps the version to the next major value',
+        },
+        mandatory: true,
+        help: 'Bumps the version to the next dev pre-release value.');
+  }
+
+  @override
+  void run() {
+    final type = argResults!['type'].toString();
+    final currentVersion = versionFromPubspecFile();
+    String? newVersion;
+    if (currentVersion == null) {
+      throw 'Could not automatically determine current version.';
+    }
+    switch (type) {
+      case 'dev':
+        newVersion = incrementDevVersion(currentVersion);
+        break;
+      default:
+        newVersion = incrementVersionByType(currentVersion, type);
+    }
+    if (newVersion == null) {
+      throw 'Failed to determine the newVersion.';
+    }
+    performTheVersionUpdate(
+      currentVersion: currentVersion,
+      newVersion: newVersion,
+    );
   }
 }
