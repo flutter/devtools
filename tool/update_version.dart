@@ -23,13 +23,19 @@ void main(List<String> args) async {
   )
     ..addCommand(ManualUpdateCommand())
     ..addCommand(AutoUpdateCommand());
-  runner.run(args);
+  runner.run(args).catchError((error) {
+    if (error is! UsageException) throw error;
+    print(error);
+    exit(64); // Exit code 64 indicates a usage error.
+  });
+  ;
   return;
 }
 
 Future<void> performTheVersionUpdate(
     {required String currentVersion, required String newVersion}) async {
   print('Updating pubspecs from $currentVersion to version $newVersion...');
+  return;
   for (final pubspec in _pubspecs) {
     writeVersionToPubspec(pubspec, newVersion);
   }
@@ -249,6 +255,7 @@ class ManualUpdateCommand extends Command {
 
   @override
   void run() {
+    if (argResults!['help'] != null) return;
     final newVersion = argResults!['new-version'].toString();
     final currentVersion =
         argResults!['current-version']?.toString() ?? versionFromPubspecFile();
@@ -286,6 +293,7 @@ class AutoUpdateCommand extends Command {
 
   @override
   void run() {
+    if (argResults!['help'] != null) return;
     final type = argResults!['type'].toString();
     final currentVersion = versionFromPubspecFile();
     String? newVersion;
