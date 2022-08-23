@@ -152,8 +152,10 @@ class _CpuProfilerState extends State<CpuProfiler>
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
     final colorScheme = theme.colorScheme;
-    final currentTab =
-        widget.tabs.isNotEmpty ? widget.tabs[_tabController.index] : null;
+    if (widget.tabs.isEmpty) {
+      return Container();
+    }
+    final currentTab = widget.tabs[_tabController.index];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -171,7 +173,7 @@ class _CpuProfilerState extends State<CpuProfiler>
           actions: [
             Row(
               children: [
-                if (currentTab!.key != CpuProfiler.summaryTab) ...[
+                if (currentTab.key != CpuProfiler.summaryTab) ...[
                   FilterButton(
                     onPressed: _showFilterDialog,
                     isFilterActive: widget.controller.isToggleFilterActive,
