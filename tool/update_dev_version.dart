@@ -2,11 +2,13 @@ import 'update_version.dart' as update_version;
 
 void main() async {
   final currentVersion = update_version.versionFromPubspecFile();
+
   if (currentVersion == null) {
     throw 'Version could not be determined from pubspec file';
   }
+
   final newVersion = incrementDevVersion(currentVersion);
-  print('oldversion: $currentVersion newVersion: $newVersion');
+
   update_version.performTheVersionUpdate(
     currentVersion: currentVersion,
     newVersion: newVersion,
