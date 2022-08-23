@@ -21,6 +21,7 @@ dart tool/update_version.dart 2.7.0
 # To automatically bump the current version to a new dev version
 dart tool/update_dev_version.dart
 ```
+
 Verify that this script updated the pubspecs under packages/
 and updated all references to those packages. These packages always have their
 version numbers updated in lock, so we don't have to worry about
