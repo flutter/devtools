@@ -11,6 +11,7 @@ import '../../../../shared/table.dart';
 import '../../../../shared/table_data.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
+import '../../../../ui/tab.dart';
 import '../../../profiler/cpu_profile_columns.dart';
 import '../../../profiler/cpu_profile_model.dart';
 import 'allocation_profile_tracing_view_controller.dart';
@@ -19,15 +20,53 @@ const double _countColumnWidth = 130;
 
 /// Displays an allocation profile as a tree of stack frames, displaying
 /// inclusive and exclusive allocation counts.
-class AllocationTracingTree extends StatelessWidget {
+class AllocationTracingTree extends StatefulWidget {
   const AllocationTracingTree({required this.controller});
 
   final AllocationProfileTracingViewController controller;
 
+  static final _bottomUpTab = _buildTab(tabName: 'Bottom Up');
+  static final _callTreeTab = _buildTab(tabName: 'Call Tree');
+  static final tabs = [
+    _bottomUpTab,
+    _callTreeTab,
+  ];
+
+  static DevToolsTab _buildTab({Key? key, required String tabName}) {
+    return DevToolsTab.create(
+      key: key,
+      tabName: tabName,
+      gaPrefix: 'memoryAllocationTracingTab',
+    );
+  }
+
+  @override
+  State<AllocationTracingTree> createState() => _AllocationTracingTreeState();
+}
+
+class _AllocationTracingTreeState extends State<AllocationTracingTree>
+    with TickerProviderStateMixin {
+  late final TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(
+      length: AllocationTracingTree.tabs.length,
+      vsync: this,
+    );
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<TracedClass?>(
-      valueListenable: controller.selectedTracedClass,
+      valueListenable: widget.controller.selectedTracedClass,
       builder: (context, selection, _) {
         if (selection == null) {
           return const _AllocationTracingInstructions();
@@ -42,9 +81,9 @@ class AllocationTracingTree extends StatelessWidget {
             ],
           );
         } else if (selection.traceAllocations &&
-            (controller.selectedTracedClassAllocationData == null ||
-                controller.selectedTracedClassAllocationData!.bottomUpRoots
-                    .isEmpty)) {
+            (widget.controller.selectedTracedClassAllocationData == null ||
+                widget.controller.selectedTracedClassAllocationData!
+                    .bottomUpRoots.isEmpty)) {
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -54,25 +93,35 @@ class AllocationTracingTree extends StatelessWidget {
             ],
           );
         }
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return Column(
-              children: [
-                _AllocationProfileTracingTreeHeader(
-                  controller: controller,
-                  updateTreeStateCallback: setState,
-                ),
-                Expanded(
-                  child: AllocationProfileTracingBottomUpTable(
+        return Column(
+          children: [
+            _AllocationProfileTracingTreeHeader(
+              controller: widget.controller,
+              tabController: _tabController,
+              tabs: AllocationTracingTree.tabs,
+              updateTreeStateCallback: setState,
+            ),
+            Expanded(
+              child: TabBarView(
+                physics: defaultTabBarViewPhysics,
+                controller: _tabController,
+                children: [
+                  // Bottom-up tree view
+                  AllocationProfileTracingTable(
                     cls: selection.cls,
-                    // TODO(bkonyi): support call stack and bottom up views.
-                    dataRoots: controller
+                    dataRoots: widget.controller
                         .selectedTracedClassAllocationData!.bottomUpRoots,
                   ),
-                ),
-              ],
-            );
-          },
+                  // Call tree view
+                  AllocationProfileTracingTable(
+                    cls: selection.cls,
+                    dataRoots: widget.controller
+                        .selectedTracedClassAllocationData!.callTreeRoots,
+                  ),
+                ],
+              ),
+            ),
+          ],
         );
       },
     );
@@ -119,15 +168,21 @@ class _AllocationProfileTracingTreeHeader extends StatelessWidget {
   const _AllocationProfileTracingTreeHeader({
     Key? key,
     required this.controller,
+    required this.tabController,
+    required this.tabs,
     required this.updateTreeStateCallback,
   }) : super(key: key);
 
   final AllocationProfileTracingViewController controller;
   final Function(VoidCallback) updateTreeStateCallback;
+  final TabController tabController;
+  final List<DevToolsTab> tabs;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
     return AreaPaneHeader(
       title: Text.rich(
         TextSpan(
@@ -145,11 +200,24 @@ class _AllocationProfileTracingTreeHeader extends StatelessWidget {
       tall: true,
       needsTopBorder: false,
       actions: [
+        const Spacer(),
+        TabBar(
+          labelColor:
+              textTheme.bodyText1?.color ?? colorScheme.defaultForeground,
+          tabs: tabs,
+          isScrollable: true,
+          controller: tabController,
+        ),
+        const SizedBox(width: denseSpacing),
         ExpandAllButton(
           onPressed: () => updateTreeStateCallback(
             () {
+              final isBottomUp = tabs[tabController.index] ==
+                  AllocationTracingTree._bottomUpTab;
               final data = controller.selectedTracedClassAllocationData!;
-              for (final root in data.bottomUpRoots) {
+              final roots =
+                  isBottomUp ? data.bottomUpRoots : data.callTreeRoots;
+              for (final root in roots) {
                 root.expandCascading();
               }
             },
@@ -159,8 +227,12 @@ class _AllocationProfileTracingTreeHeader extends StatelessWidget {
         CollapseAllButton(
           onPressed: () => updateTreeStateCallback(
             () {
+              final isBottomUp = tabs[tabController.index] ==
+                  AllocationTracingTree._bottomUpTab;
               final data = controller.selectedTracedClassAllocationData!;
-              for (final root in data.bottomUpRoots) {
+              final roots =
+                  isBottomUp ? data.bottomUpRoots : data.callTreeRoots;
+              for (final root in roots) {
                 root.collapseCascading();
               }
             },
@@ -238,8 +310,8 @@ class _ExclusiveCountColumn extends ColumnData<CpuStackFrame> {
 }
 
 /// A table of the bottom-up allocation profile tree.
-class AllocationProfileTracingBottomUpTable extends StatefulWidget {
-  const AllocationProfileTracingBottomUpTable({
+class AllocationProfileTracingTable extends StatefulWidget {
+  const AllocationProfileTracingTable({
     Key? key,
     required this.cls,
     required this.dataRoots,
@@ -249,13 +321,13 @@ class AllocationProfileTracingBottomUpTable extends StatefulWidget {
   final List<CpuStackFrame> dataRoots;
 
   @override
-  State<AllocationProfileTracingBottomUpTable> createState() {
-    return _AllocationProfileTracingBottomUpTableState();
+  State<AllocationProfileTracingTable> createState() {
+    return _AllocationProfileTracingTableState();
   }
 }
 
-class _AllocationProfileTracingBottomUpTableState
-    extends State<AllocationProfileTracingBottomUpTable> {
+class _AllocationProfileTracingTableState
+    extends State<AllocationProfileTracingTable> {
   static final treeColumn = MethodNameColumn();
   static final startingSortColumn = _InclusiveCountColumn();
   static final columns = List<ColumnData<CpuStackFrame>>.unmodifiable([
