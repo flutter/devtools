@@ -3,12 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../shared/split.dart';
 import '../debugger/program_explorer.dart';
 import '../debugger/program_explorer_model.dart';
 import 'object_inspector_view_controller.dart';
 import 'object_viewport.dart';
+import 'vm_developer_tools_controller.dart';
 import 'vm_developer_tools_screen.dart';
 
 /// Displays a program explorer and a history viewport that displays
@@ -38,10 +40,12 @@ class _ObjectInspectorViewState extends State<_ObjectInspectorView> {
   late final ObjectInspectorViewController controller;
 
   @override
-  void initState() {
-    super.initState();
-    controller = ObjectInspectorViewController()..init();
-    return;
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final vmDeveloperToolsController =
+        Provider.of<VMDeveloperToolsController>(context);
+    controller = vmDeveloperToolsController.objectInspectorViewController!
+      ..init();
   }
 
   @override

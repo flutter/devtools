@@ -102,7 +102,7 @@ Widget buildObjectDisplay(VmObject obj) {
 /// HistoryViewport.
 class ObjectHistory extends HistoryManager<VmObject> {
   void pushEntry(VmObject object) {
-    if (object == current.value) return;
+    if (object.obj == current.value?.obj) return;
 
     while (hasNext) {
       pop();

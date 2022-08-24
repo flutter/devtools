@@ -5,53 +5,53 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:args/command_runner.dart';
+
 // This script must be executed from the top level devtools/ directory.
 // TODO(kenz): If changes are made to this script, first consider refactoring to
 // use https://github.com/dart-lang/pubspec_parse.
 
+final _pubspecs = [
+  'packages/devtools_app/pubspec.yaml',
+  'packages/devtools_test/pubspec.yaml',
+  'packages/devtools_shared/pubspec.yaml',
+].map((path) => File(path)).toList();
+
 void main(List<String> args) async {
-  final pubspecs = [
-    'packages/devtools_app/pubspec.yaml',
-    'packages/devtools_test/pubspec.yaml',
-    'packages/devtools_shared/pubspec.yaml',
-  ].map((path) => File(path)).toList();
+  final runner = CommandRunner(
+    'update_version.dart',
+    'A program for updating the devtools version',
+  )
+    ..addCommand(ManualUpdateCommand())
+    ..addCommand(AutoUpdateCommand());
+  runner.run(args).catchError((error) {
+    if (error is! UsageException) throw error;
+    print(error);
+    exit(64); // Exit code 64 indicates a usage error.
+  });
+  return;
+}
 
-  final currentVersion = args.isNotEmpty && args.length > 1
-      ? args[1]
-      : versionFromPubspecFile(pubspecs.first);
+Future<void> performTheVersionUpdate(
+    {required String currentVersion, required String newVersion}) async {
+  print('Updating pubspecs from $currentVersion to version $newVersion...');
 
-  if (currentVersion == null) {
-    print('Could not resolve current version number. Please explicitly pass in '
-        'the current version as the second argument, eg'
-        'dart tool/update_version.dart 2.7.1 2.7.0');
-    return;
+  for (final pubspec in _pubspecs) {
+    writeVersionToPubspec(pubspec, newVersion);
   }
 
-  final version =
-      args.isNotEmpty ? args.first : incrementVersion(currentVersion);
-
-  if (version == null) {
-    print('Something went wrong. Could not resolve version number.');
-    return;
-  }
-
-  print('Updating pubspecs to version $version...');
-  for (final pubspec in pubspecs) {
-    writeVersionToPubspec(pubspec, version);
-  }
-
-  print('Updating devtools.dart to version $version...');
+  print('Updating devtools.dart to version $newVersion...');
   writeVersionToVersionFile(
     File('packages/devtools_app/lib/devtools.dart'),
-    version,
+    newVersion,
   );
 
-  print('Updating CHANGELOG to version $version...');
-  writeVersionToChangelog(File('CHANGELOG.md'), version);
+  print('Updating CHANGELOG to version $newVersion...');
+  writeVersionToChangelog(File('CHANGELOG.md'), newVersion);
 
-  print('Updating index.html to version $version...');
+  print('Updating index.html to version $newVersion...');
   writeVersionToIndexHtml(
-      File('packages/devtools_app/web/index.html'), currentVersion, version);
+      File('packages/devtools_app/web/index.html'), currentVersion, newVersion);
 
   final process = await Process.start('./tool/pub_upgrade.sh', []);
   process.stdout.asBroadcastStream().listen((event) {
@@ -59,26 +59,37 @@ void main(List<String> args) async {
   });
 }
 
-String? incrementVersion(String oldVersion) {
-  final semVer = RegExp(r'[0-9]+\.[0-9]\.[0-9]+').firstMatch(oldVersion)![0];
-
-  const devTag = '-dev';
-  final isDevVersion = oldVersion.contains(devTag);
-  if (isDevVersion) {
-    return semVer;
+String? incrementVersionByType(String version, String type) {
+  final semVerMatch = RegExp(r'^(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)')
+      .firstMatch(version);
+  if (semVerMatch == null) {
+    throw 'Version format is unexpected';
+  }
+  var major = int.parse(semVerMatch.namedGroup('major')!, radix: 10);
+  var minor = int.parse(semVerMatch.namedGroup('minor')!, radix: 10);
+  var patch = int.parse(semVerMatch.namedGroup('patch')!, radix: 10);
+  switch (type) {
+    case 'major':
+      major++;
+      minor = 0;
+      patch = 0;
+      break;
+    case 'minor':
+      minor++;
+      patch = 0;
+      break;
+    case 'patch':
+      patch++;
+      break;
+    default:
+      return null;
   }
 
-  final parts = semVer!.split('.');
-
-  // Versions should have the form 'x.y.z'.
-  if (parts.length != 3) return null;
-
-  final patch = int.parse(parts.last);
-  final nextPatch = patch + 1;
-  return [parts[0], parts[1], nextPatch].join('.');
+  return '$major.$minor.$patch';
 }
 
-String? versionFromPubspecFile(File pubspec) {
+String? versionFromPubspecFile() {
+  final pubspec = _pubspecs.first;
   final lines = pubspec.readAsLinesSync();
   for (final line in lines) {
     if (line.startsWith(pubspecVersionPrefix)) {
@@ -178,6 +189,29 @@ void writeVersionToIndexHtml(
   indexHtml.writeAsStringSync(revisedLines.joinWithNewLine());
 }
 
+String incrementDevVersion(String currentVersion) {
+  final alreadyHasDevVersion = RegExp(r'-dev\.\d+').hasMatch(currentVersion);
+  if (alreadyHasDevVersion) {
+    final devVerMatch = RegExp(
+            r'^(?<prefix>\d+\.\d+\.\d+.*-dev\.)(?<devVersion>\d+)(?<suffix>.*)$')
+        .firstMatch(currentVersion);
+
+    if (devVerMatch == null) {
+      throw 'Invalid version, could not increment dev version';
+    } else {
+      final prefix = devVerMatch.namedGroup('prefix')!;
+      final devVersion = devVerMatch.namedGroup('devVersion')!;
+      final suffix = devVerMatch.namedGroup('suffix')!;
+      final bumpedDevVersion = int.parse(devVersion, radix: 10) + 1;
+      final newVersion = '$prefix$bumpedDevVersion$suffix';
+
+      return newVersion;
+    }
+  } else {
+    return '$currentVersion-dev.0';
+  }
+}
+
 const pubspecVersionPrefix = 'version:';
 const editablePubspecSections = [
   pubspecVersionPrefix,
@@ -194,5 +228,89 @@ const devToolsDependencyPrefixes = [
 extension JoinExtension on List<String> {
   String joinWithNewLine() {
     return '${join('\n')}\n';
+  }
+}
+
+class ManualUpdateCommand extends Command {
+  @override
+  final name = 'manual';
+  @override
+  final description = 'Manually update devtools to a new version.';
+
+  ManualUpdateCommand() {
+    argParser.addOption(
+      'new-version',
+      abbr: 'n',
+      mandatory: true,
+      help: 'The new version code that devtools will be set to.',
+    );
+    argParser.addOption(
+      'current-version',
+      abbr: 'c',
+      help: '''The current devtools version, this should be set to the version
+          inside the index.html. This is only necessary to set this if automatic
+          detection is failing.''',
+    );
+  }
+
+  @override
+  void run() {
+    final newVersion = argResults!['new-version'].toString();
+    final currentVersion =
+        argResults!['current-version']?.toString() ?? versionFromPubspecFile();
+
+    if (currentVersion == null) {
+      throw 'Could not determine the version, please set the current-version or determine why getting the version is failing.';
+    }
+
+    performTheVersionUpdate(
+      currentVersion: currentVersion,
+      newVersion: newVersion,
+    );
+  }
+}
+
+class AutoUpdateCommand extends Command {
+  @override
+  final name = 'auto';
+  @override
+  final description = 'Automatically update devtools to a new version.';
+
+  AutoUpdateCommand() {
+    argParser.addOption('type',
+        abbr: 't',
+        allowed: ['dev', 'patch', 'minor', 'major'],
+        allowedHelp: {
+          'dev': 'bumps the version to the next dev pre-release value',
+          'patch': 'bumps the version to the next patch value',
+          'minor': 'bumps the version to the next minor value',
+          'major': 'bumps the version to the next major value',
+        },
+        mandatory: true,
+        help: 'Bumps the devtools version by the selected type.');
+  }
+
+  @override
+  void run() {
+    final type = argResults!['type'].toString();
+    final currentVersion = versionFromPubspecFile();
+    String? newVersion;
+    if (currentVersion == null) {
+      throw 'Could not automatically determine current version.';
+    }
+    switch (type) {
+      case 'dev':
+        newVersion = incrementDevVersion(currentVersion);
+        break;
+      default:
+        newVersion = incrementVersionByType(currentVersion, type);
+    }
+    if (newVersion == null) {
+      throw 'Failed to determine the newVersion.';
+    }
+    performTheVersionUpdate(
+      currentVersion: currentVersion,
+      newVersion: newVersion,
+    );
   }
 }
