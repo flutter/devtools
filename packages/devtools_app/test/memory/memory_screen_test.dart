@@ -400,10 +400,10 @@ void main() {
         matchesDevToolsGolden('../goldens/memory_heap_tree.png'),
       );
 
-      // Await delay for golden comparison.
-      await tester.pumpAndSettle(const Duration(seconds: 2));
-
       // TODO(polina-c): create test for android chart before merge.
+      // Await delay for golden comparison.
+      // await tester.pumpAndSettle(const Duration(seconds: 2));
+      //
       // expect(find.text('Android Memory'), findsOneWidget);
       //
       // // Bring up the Android chart.
