@@ -25,8 +25,8 @@ import 'allocation_profile_table_view_controller.dart';
 /// instances, memory).
 const _defaultNumberFieldWidth = 90.0;
 
-class _FieldClassName extends ColumnData<ClassHeapStats> {
-  _FieldClassName()
+class _FieldClassNameColumn extends ColumnData<ClassHeapStats> {
+  _FieldClassNameColumn()
       : super(
           'Class',
           fixedWidthPx: scaleByFontFactor(200),
@@ -239,7 +239,7 @@ class _AllocationProfileTable extends StatefulWidget {
   );
 
   static final _columns = [
-    _FieldClassName(),
+    _FieldClassNameColumn(),
     _FieldInstanceCountColumn(heap: _HeapGeneration.total),
     _initialSortColumn,
     _FieldInternalSizeColumn(heap: _HeapGeneration.total),
@@ -277,14 +277,14 @@ class _AllocationProfileTable extends StatefulWidget {
 }
 
 class _AllocationProfileTableState extends State<_AllocationProfileTable> {
-  late SortDirection sortDirection;
-  late ColumnData<ClassHeapStats> sortColumn;
+  late SortDirection _sortDirection;
+  late ColumnData<ClassHeapStats> _sortColumn;
 
   @override
   void initState() {
     super.initState();
-    sortColumn = _AllocationProfileTable._initialSortColumn;
-    sortDirection = SortDirection.descending;
+    _sortColumn = _AllocationProfileTable._initialSortColumn;
+    _sortDirection = SortDirection.descending;
   }
 
   @override
@@ -323,8 +323,8 @@ class _AllocationProfileTableState extends State<_AllocationProfileTable> {
                             element.oldSpace.externalSize != 0;
                       },
                     ).toList(),
-                    sortColumn: sortColumn,
-                    sortDirection: sortDirection,
+                    sortColumn: _sortColumn,
+                    sortDirection: _sortDirection,
                     onSortChanged: (
                       sortColumn,
                       direction, {
@@ -332,7 +332,7 @@ class _AllocationProfileTableState extends State<_AllocationProfileTable> {
                     }) {
                       setState(() {
                         sortColumn = sortColumn;
-                        sortDirection = direction;
+                        _sortDirection = direction;
                       });
                     },
                     onItemSelected: (item) => null,
