@@ -713,7 +713,6 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     int? sourceLine,
     CpuProfileMetaData? profileMetaData,
     bool copySampleCountsAndTags = true,
-    bool resetInclusiveSampleCount = true,
   }) {
     final copy = CpuStackFrame._(
       id: id ?? this.id,
@@ -729,8 +728,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     if (copySampleCountsAndTags) {
       copy
         ..exclusiveSampleCount = exclusiveSampleCount
-        ..inclusiveSampleCount =
-            resetInclusiveSampleCount ? null : inclusiveSampleCount;
+        ..inclusiveSampleCount = inclusiveSampleCount;
       for (final entry in _userTagSampleCount.entries) {
         copy.incrementTagSampleCount(entry.key, increment: entry.value);
       }
@@ -743,7 +741,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
   /// The returned copy stack frame will have a null parent.
   @override
   CpuStackFrame deepCopy() {
-    final copy = shallowCopy(resetInclusiveSampleCount: false);
+    final copy = shallowCopy();
     for (CpuStackFrame child in children) {
       copy.addChild(child.deepCopy());
     }

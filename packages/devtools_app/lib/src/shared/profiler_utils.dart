@@ -113,9 +113,6 @@ class BottomUpTransformer<T extends ProfilableDataMixin<T>> {
       bottomUpRoots: <T>[],
     );
 
-    // Set the bottom up sample counts for each sample.
-    bottomUpRoots.forEach(cascadeSampleCounts);
-
     // Merge samples when possible starting at the root (the leaf node of the
     // original sample).
     mergeSamples(bottomUpRoots);
@@ -128,8 +125,7 @@ class BottomUpTransformer<T extends ProfilableDataMixin<T>> {
   ///
   /// Each root is a leaf from the original [ProfilableDataMixin] tree, and its
   /// children will be the reverse stack of the original profile sample. The
-  /// stack returned will not be merged to combine common roots, and the sample
-  /// counts will not reflect the bottom up sample counts. These steps will
+  /// stack returned will not be merged to combine common roots. Merging will
   /// occur later in the bottom-up conversion process.
   @visibleForTesting
   List<T> generateBottomUpRoots({
@@ -158,20 +154,5 @@ class BottomUpTransformer<T extends ProfilableDataMixin<T>> {
       );
     }
     return bottomUpRoots;
-  }
-
-  /// Sets sample counts of [node] and all children to [exclusiveSampleCount].
-  ///
-  /// This is necessary for the transformation of a [ProfilableDataMixin] to its
-  /// bottom-up representation. This is an intermediate step between
-  /// [generateBottomUpRoots] and the [mergeSamples] callback passed to
-  /// [bottomUpRootsFor].
-  @visibleForTesting
-  void cascadeSampleCounts(T node) {
-    node.inclusiveSampleCount = node.exclusiveSampleCount;
-    for (final child in node.children.cast<T>()) {
-      child.exclusiveSampleCount = node.exclusiveSampleCount;
-      cascadeSampleCounts(child);
-    }
   }
 }
