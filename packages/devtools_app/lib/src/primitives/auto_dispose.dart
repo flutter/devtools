@@ -77,6 +77,9 @@ class Disposer {
     _focusNodes.clear();
   }
 
+  /// Adds a [listener] to [listenable] that will either dispose
+  /// when [listenableForEarlyDispose] gets set to true, or when
+  /// the [cancelListeners] is called.
   void addConditionalAutoDisposeListener({
     required ValueListenable<bool>? listenableForEarlyDispose,
     required Listenable? listenable,
