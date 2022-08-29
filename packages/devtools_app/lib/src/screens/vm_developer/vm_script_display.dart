@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:vm_service/vm_service.dart';
 
+import 'object_inspector_view_controller.dart';
 import 'vm_developer_common_widgets.dart';
 import 'vm_object_model.dart';
 
@@ -12,28 +14,36 @@ import 'vm_object_model.dart';
 class VmScriptDisplay extends StatelessWidget {
   const VmScriptDisplay({
     required this.script,
+    required this.controller,
   });
 
   final ScriptObject script;
+  final ObjectInspectorViewController controller;
 
   @override
   Widget build(BuildContext context) {
     return VmObjectDisplayBasicLayout(
       object: script,
-      generalDataRows: _scriptDataRows(script),
+      generalDataRows: _scriptDataRows(context, script),
     );
   }
 
   /// Generates a list of key-value pairs (map entries) containing the general
   /// VM information of the Script object [script].
   List<MapEntry<String, WidgetBuilder>> _scriptDataRows(
+    BuildContext context,
     ScriptObject field,
   ) {
     return [
-      ...vmObjectGeneralDataRows(field),
-      selectableTextBuilderMapEntry(
-        'URI',
-        script.obj.uri,
+      ...vmObjectGeneralDataRows(
+        context,
+        controller,
+        field,
+      ),
+      serviceObjectLinkBuilderMapEntry<ScriptRef>(
+        controller: controller,
+        key: 'URI',
+        object: script.obj,
       ),
       selectableTextBuilderMapEntry(
         'Load time',

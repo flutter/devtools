@@ -59,7 +59,7 @@ class ObjectInspectorViewController extends DisposableController
       final scriptRef = currentObjectValue.scriptRef ??
           (await programExplorerController
                   .searchFileExplorer(currentObjectValue.obj))
-              ?.script;
+              .script;
 
       if (scriptRef != null) {
         await programExplorerController.selectScriptNode(scriptRef);
@@ -163,11 +163,10 @@ class ObjectInspectorViewController extends DisposableController
     objectHistory.clear();
 
     final scriptRefs = scriptManager.sortedScripts.value;
-
     final service = serviceManager.service!;
-
-    final isolate = await service
-        .getIsolate(serviceManager.isolateManager.selectedIsolate.value!.id!);
+    final isolate = await service.getIsolate(
+      serviceManager.isolateManager.selectedIsolate.value!.id!,
+    );
 
     final mainScriptRef = scriptRefs.firstWhereOrNull((ref) {
       return ref.uri == isolate.rootLib?.uri;
@@ -175,11 +174,9 @@ class ObjectInspectorViewController extends DisposableController
 
     if (mainScriptRef != null) {
       _currentScriptRef = mainScriptRef;
-
-      final parts = mainScriptRef.uri!.split('/')..removeLast();
-
       await programExplorerController.selectScriptNode(mainScriptRef);
 
+      final parts = mainScriptRef.uri!.split('/')..removeLast();
       final libraries = isolate.libraries!;
 
       if (parts.isEmpty) {
@@ -189,12 +186,17 @@ class ObjectInspectorViewController extends DisposableController
           }
         }
       }
-
       await pushObject(mainScriptRef);
     }
   }
 
   void setCurrentScript(ScriptRef scriptRef) {
     _currentScriptRef = scriptRef;
+  }
+
+  Future<void> findAndSelectNodeForObject(ObjRef obj) async {
+    final node = await programExplorerController.searchFileExplorer(obj);
+    setCurrentScript(node.location!.scriptRef);
+    await pushObject(obj);
   }
 }

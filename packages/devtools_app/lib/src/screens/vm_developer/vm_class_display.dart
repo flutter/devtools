@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
+import 'object_inspector_view_controller.dart';
 import 'vm_developer_common_widgets.dart';
 import 'vm_object_model.dart';
 
@@ -17,9 +18,11 @@ const displayClassInstances = false;
 /// related to class objects in the Dart VM.
 class VmClassDisplay extends StatelessWidget {
   const VmClassDisplay({
+    required this.controller,
     required this.clazz,
   });
 
+  final ObjectInspectorViewController controller;
   final ClassObject clazz;
 
   @override
@@ -29,7 +32,7 @@ class VmClassDisplay extends StatelessWidget {
         Flexible(
           child: VmObjectDisplayBasicLayout(
             object: clazz,
-            generalDataRows: _classDataRows(clazz),
+            generalDataRows: _classDataRows(context, clazz),
           ),
         ),
         if (displayClassInstances)
@@ -47,11 +50,22 @@ class VmClassDisplay extends StatelessWidget {
   /// Generates a list of key-value pairs (map entries) containing the general
   /// information of the class object [clazz].
   List<MapEntry<String, WidgetBuilder>> _classDataRows(
+    BuildContext context,
     ClassObject clazz,
   ) {
+    final superClass = clazz.obj.superClass;
     return [
-      ...vmObjectGeneralDataRows(clazz),
-      selectableTextBuilderMapEntry('Superclass', clazz.obj.superClass?.name),
+      ...vmObjectGeneralDataRows(
+        context,
+        controller,
+        clazz,
+      ),
+      if (superClass != null)
+        serviceObjectLinkBuilderMapEntry<ClassRef>(
+          controller: controller,
+          key: 'Superclass',
+          object: superClass,
+        ),
       selectableTextBuilderMapEntry('SuperType', clazz.obj.superType?.name),
       selectableTextBuilderMapEntry(
         'Currently allocated instances',

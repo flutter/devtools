@@ -46,7 +46,7 @@ void main() {
     await tester.pumpWidget(
       wrap(ObjectViewport(controller: testObjectInspectorViewController)),
     );
-    expect(viewportTitle(null), 'No object selected.');
+    expect(ObjectViewport.viewportTitle(null), 'No object selected.');
     expect(find.text('No object selected.'), findsOneWidget);
     expect(find.byTooltip('Refresh'), findsOneWidget);
     expect(find.byType(HistoryViewport<VmObject>), findsOneWidget);
@@ -67,7 +67,7 @@ void main() {
       await tester.pumpWidget(
         wrap(ObjectViewport(controller: testObjectInspectorViewController)),
       );
-      expect(viewportTitle(mockClassObject), 'Class FooClass');
+      expect(ObjectViewport.viewportTitle(mockClassObject), 'Class FooClass');
       expect(find.text('Class FooClass'), findsOneWidget);
       expect(find.byType(VmClassDisplay), findsOneWidget);
     });
@@ -90,7 +90,7 @@ void main() {
         wrap(ObjectViewport(controller: testObjectInspectorViewController)),
       );
 
-      expect(viewportTitle(mockFieldObject), 'Field fooField');
+      expect(ObjectViewport.viewportTitle(mockFieldObject), 'Field fooField');
       expect(find.text('Field fooField'), findsOneWidget);
       expect(find.byType(VmFieldDisplay), findsOneWidget);
     });
@@ -118,7 +118,10 @@ void main() {
         wrap(ObjectViewport(controller: testObjectInspectorViewController)),
       );
 
-      expect(viewportTitle(mockFuncObject), 'Function fooFunction');
+      expect(
+        ObjectViewport.viewportTitle(mockFuncObject),
+        'Function fooFunction',
+      );
       expect(find.text('Function fooFunction'), findsOneWidget);
       expect(find.byType(VmFuncDisplay), findsOneWidget);
     });
@@ -139,7 +142,10 @@ void main() {
       await tester.pumpWidget(
         wrap(ObjectViewport(controller: testObjectInspectorViewController)),
       );
-      expect(viewportTitle(mockScriptObject), 'Script fooScript.dart');
+      expect(
+        ObjectViewport.viewportTitle(mockScriptObject),
+        'Script fooScript.dart',
+      );
       expect(find.text('Script fooScript.dart'), findsOneWidget);
       expect(find.byType(VmScriptDisplay), findsOneWidget);
     });
@@ -160,7 +166,7 @@ void main() {
       await tester.pumpWidget(
         wrap(ObjectViewport(controller: testObjectInspectorViewController)),
       );
-      expect(viewportTitle(mockLibraryObject), 'Library fooLib');
+      expect(ObjectViewport.viewportTitle(mockLibraryObject), 'Library fooLib');
       expect(find.text('Library fooLib'), findsOneWidget);
       expect(find.byType(VmLibraryDisplay), findsOneWidget);
     });
@@ -176,7 +182,10 @@ void main() {
       await tester.pumpWidget(
         wrap(ObjectViewport(controller: testObjectInspectorViewController)),
       );
-      expect(viewportTitle(testInstanceObject), 'Instance FooInstance');
+      expect(
+        ObjectViewport.viewportTitle(testInstanceObject),
+        'Instance FooInstance',
+      );
       expect(find.text('Instance FooInstance'), findsOneWidget);
       expect(find.byType(VMInfoCard), findsOneWidget);
     });

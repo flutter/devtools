@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
+import 'object_inspector_view_controller.dart';
 import 'vm_developer_common_widgets.dart';
 import 'vm_object_model.dart';
 import 'vm_service_private_extensions.dart';
@@ -13,26 +14,33 @@ import 'vm_service_private_extensions.dart';
 /// related to field objects in the Dart VM.
 class VmFieldDisplay extends StatelessWidget {
   const VmFieldDisplay({
+    required this.controller,
     required this.field,
   });
 
+  final ObjectInspectorViewController controller;
   final FieldObject field;
 
   @override
   Widget build(BuildContext context) {
     return VmObjectDisplayBasicLayout(
       object: field,
-      generalDataRows: _fieldDataRows(field),
+      generalDataRows: _fieldDataRows(context, field),
     );
   }
 
   /// Generates a list of key-value pairs (map entries) containing the general
   /// information of the field object [field].
   List<MapEntry<String, WidgetBuilder>> _fieldDataRows(
+    BuildContext context,
     FieldObject field,
   ) {
     return [
-      ...vmObjectGeneralDataRows(field),
+      ...vmObjectGeneralDataRows(
+        context,
+        controller,
+        field,
+      ),
       selectableTextBuilderMapEntry(
         'Observed types',
         _fieldObservedTypes(field),
