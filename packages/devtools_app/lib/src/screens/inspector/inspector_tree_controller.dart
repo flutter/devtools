@@ -760,6 +760,8 @@ class _InspectorTreeState extends State<InspectorTree>
   late FocusNode _focusNode;
 
   late DebuggerController _debuggerController;
+  final ValueNotifier<bool> _doneBindingToController =
+      ValueNotifier<bool>(false);
 
   @override
   void initState() {
@@ -773,6 +775,12 @@ class _InspectorTreeState extends State<InspectorTree>
     }
     _focusNode = FocusNode(debugLabel: 'inspector-tree');
     autoDisposeFocusNode(_focusNode);
+    addConditionalAutoDisposeListener(
+      listenableForEarlyDispose: _doneBindingToController,
+      listenable:
+          serviceManager.isolateManager.mainIsolateDebuggerState?.isPaused,
+      listener: _bindToController,
+    );
     _bindToController();
   }
 
@@ -978,10 +986,12 @@ class _InspectorTreeState extends State<InspectorTree>
   }
 
   void _bindToController() {
-    final isPaused =
-        serviceManager.isolateManager.mainIsolateDebuggerState?.isPaused.value;
-    if (isPaused != null && !isPaused) {
+    final isPaused = serviceManager
+            .isolateManager.mainIsolateDebuggerState?.isPaused.value ??
+        true;
+    if (!isPaused) {
       treeController?.addClient(this);
+      _doneBindingToController.value = true;
     }
   }
 

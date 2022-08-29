@@ -204,6 +204,30 @@ void main() {
         expect(values.length, equals(2));
         expect(values.last, equals(15));
       });
+
+      testWidgets('early disposes immediately when early dispose true',
+          (WidgetTester tester) async {
+        final disposer = Disposer();
+        final earlyDisposeNotifier = ValueNotifier<bool>(true);
+        final notifier = ValueNotifier<int>(42);
+        final values = <int>[];
+        disposer.addConditionalAutoDisposeListener(
+          listenableForEarlyDispose: earlyDisposeNotifier,
+          listenable: notifier,
+          listener: () {
+            values.add(notifier.value);
+          },
+        );
+
+        // ignore: invalid_use_of_protected_member
+        expect(notifier.hasListeners, isFalse);
+        // ignore: invalid_use_of_protected_member
+        expect(earlyDisposeNotifier.hasListeners, isFalse);
+
+        // ignore: invalid_use_of_protected_member
+        notifier.value = 13;
+        expect(values.length, equals(0));
+      });
     });
   });
 
