@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'auto_dispose.dart';
@@ -37,6 +38,36 @@ mixin AutoDisposeMixin<T extends StatefulWidget> on State<T>
     VoidCallback? listener,
   ]) {
     _delegate.addAutoDisposeListener(listenable, listener ?? _refresh);
+  }
+
+  void addConditionalAutoDisposeListener({
+    required ValueListenable<bool>? listenableForEarlyDispose,
+    required Listenable? listenable,
+    required VoidCallback? listener,
+  }) {
+    VoidCallback? earlyDisposeCallback;
+    earlyDisposeCallback = () {
+      // When listenableForEarlyDispose turns true, it is time to dispose the
+      // listener
+      if (listenableForEarlyDispose?.value == true &&
+          earlyDisposeCallback != null &&
+          listener != null) {
+        listenableForEarlyDispose?.removeListener(listener);
+        listenableForEarlyDispose?.removeListener(earlyDisposeCallback!);
+        earlyDisposeCallback = null;
+      }
+    };
+    _delegate.addAutoDisposeListener(
+      listenableForEarlyDispose,
+      earlyDisposeCallback,
+    );
+    _delegate.addAutoDisposeListener(listenable, listener ?? _refresh);
+
+    // Call the early dispose callback once in case the listenable value
+    // is already true
+    if (earlyDisposeCallback != null) {
+      earlyDisposeCallback!();
+    }
   }
 
   @override

@@ -978,7 +978,11 @@ class _InspectorTreeState extends State<InspectorTree>
   }
 
   void _bindToController() {
-    treeController?.addClient(this);
+    final isPaused =
+        serviceManager.isolateManager.mainIsolateDebuggerState?.isPaused.value;
+    if (isPaused != null && !isPaused) {
+      treeController?.addClient(this);
+    }
   }
 
   @override
