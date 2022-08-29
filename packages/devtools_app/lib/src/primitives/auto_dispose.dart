@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 /// Provides functionality to simplify listening to streams and ValueNotifiers,
@@ -75,6 +76,33 @@ class Disposer {
     }
     _focusNodes.clear();
   }
+
+  void addConditionalAutoDisposeListener({
+    required ValueListenable<bool>? listenableForEarlyDispose,
+    required Listenable? listenable,
+    required VoidCallback? listener,
+  }) {
+    VoidCallback? earlyDisposeCallback;
+    earlyDisposeCallback = () {
+      // When listenableForEarlyDispose turns true, it is time to dispose the
+      // listener
+      if (listenableForEarlyDispose?.value == true &&
+          earlyDisposeCallback != null &&
+          listener != null) {
+        listenable?.removeListener(listener);
+        listenableForEarlyDispose?.removeListener(earlyDisposeCallback!);
+        earlyDisposeCallback = null;
+      }
+    };
+    addAutoDisposeListener(
+      listenableForEarlyDispose,
+      earlyDisposeCallback,
+    );
+    addAutoDisposeListener(listenable, listener);
+    if (earlyDisposeCallback != null) {
+      earlyDisposeCallback!();
+    }
+  }
 }
 
 /// Base class for controllers that need to manage their lifecycle.
@@ -134,5 +162,18 @@ mixin AutoDisposeControllerMixin on DisposableController implements Disposer {
   @override
   void cancelFocusNodes() {
     _delegate.cancelFocusNodes();
+  }
+
+  @override
+  void addConditionalAutoDisposeListener({
+    required ValueListenable<bool>? listenableForEarlyDispose,
+    required Listenable? listenable,
+    required VoidCallback? listener,
+  }) {
+    _delegate.addConditionalAutoDisposeListener(
+      listenableForEarlyDispose: listenableForEarlyDispose,
+      listenable: listenable,
+      listener: listener,
+    );
   }
 }

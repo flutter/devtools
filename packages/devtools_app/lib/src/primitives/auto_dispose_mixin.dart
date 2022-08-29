@@ -40,34 +40,17 @@ mixin AutoDisposeMixin<T extends StatefulWidget> on State<T>
     _delegate.addAutoDisposeListener(listenable, listener ?? _refresh);
   }
 
+  @override
   void addConditionalAutoDisposeListener({
     required ValueListenable<bool>? listenableForEarlyDispose,
     required Listenable? listenable,
     required VoidCallback? listener,
   }) {
-    VoidCallback? earlyDisposeCallback;
-    earlyDisposeCallback = () {
-      // When listenableForEarlyDispose turns true, it is time to dispose the
-      // listener
-      if (listenableForEarlyDispose?.value == true &&
-          earlyDisposeCallback != null &&
-          listener != null) {
-        listenableForEarlyDispose?.removeListener(listener);
-        listenableForEarlyDispose?.removeListener(earlyDisposeCallback!);
-        earlyDisposeCallback = null;
-      }
-    };
-    _delegate.addAutoDisposeListener(
-      listenableForEarlyDispose,
-      earlyDisposeCallback,
+    _delegate.addConditionalAutoDisposeListener(
+      listenableForEarlyDispose: listenableForEarlyDispose,
+      listenable: listenable,
+      listener: listener,
     );
-    _delegate.addAutoDisposeListener(listenable, listener ?? _refresh);
-
-    // Call the early dispose callback once in case the listenable value
-    // is already true
-    if (earlyDisposeCallback != null) {
-      earlyDisposeCallback!();
-    }
   }
 
   @override

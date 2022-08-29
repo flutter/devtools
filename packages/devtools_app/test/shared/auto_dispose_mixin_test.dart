@@ -118,6 +118,93 @@ void main() {
       expect(values.length, equals(3));
       expect(values.last, equals(19));
     });
+
+    group('conditional auto dispose', () {
+      testWidgets('can early dispose', (WidgetTester tester) async {
+        final disposer = Disposer();
+        final earlyDisposeNotifier = ValueNotifier<bool>(false);
+        final notifier = ValueNotifier<int>(42);
+        final values = <int>[];
+        disposer.addConditionalAutoDisposeListener(
+          listenableForEarlyDispose: earlyDisposeNotifier,
+          listenable: notifier,
+          listener: () {
+            values.add(notifier.value);
+          },
+        );
+
+        // ignore: invalid_use_of_protected_member
+        expect(notifier.hasListeners, isTrue);
+        notifier.value = 13;
+        expect(values.length, equals(1));
+        expect(values.last, equals(13));
+        notifier.value = 15;
+        expect(values.length, equals(2));
+        expect(values.last, equals(15));
+
+        // ignore: invalid_use_of_protected_member
+        expect(notifier.hasListeners, isTrue);
+        // ignore: invalid_use_of_protected_member
+        expect(earlyDisposeNotifier.hasListeners, isTrue);
+
+        // Trigger the early dispose
+        earlyDisposeNotifier.value = true;
+
+        await tester.pump();
+
+        // ignore: invalid_use_of_protected_member
+        expect(notifier.hasListeners, isFalse);
+        // ignore: invalid_use_of_protected_member
+        expect(earlyDisposeNotifier.hasListeners, isFalse);
+
+        notifier.value = 17;
+
+        // Verify listener not fired.
+        expect(values.length, equals(2));
+        expect(values.last, equals(15));
+      });
+
+      testWidgets('can auto dispose', (WidgetTester tester) async {
+        final disposer = Disposer();
+        final earlyDisposeNotifier = ValueNotifier<bool>(false);
+        final notifier = ValueNotifier<int>(42);
+        final values = <int>[];
+        disposer.addConditionalAutoDisposeListener(
+          listenableForEarlyDispose: earlyDisposeNotifier,
+          listenable: notifier,
+          listener: () {
+            values.add(notifier.value);
+          },
+        );
+
+        // ignore: invalid_use_of_protected_member
+        expect(notifier.hasListeners, isTrue);
+        notifier.value = 13;
+        expect(values.length, equals(1));
+        expect(values.last, equals(13));
+        notifier.value = 15;
+        expect(values.length, equals(2));
+        expect(values.last, equals(15));
+
+        // ignore: invalid_use_of_protected_member
+        expect(notifier.hasListeners, isTrue);
+        // ignore: invalid_use_of_protected_member
+        expect(earlyDisposeNotifier.hasListeners, isTrue);
+
+        disposer.cancelListeners();
+
+        // ignore: invalid_use_of_protected_member
+        expect(notifier.hasListeners, isFalse);
+        // ignore: invalid_use_of_protected_member
+        expect(earlyDisposeNotifier.hasListeners, isFalse);
+
+        notifier.value = 17;
+
+        // Verify listener not fired.
+        expect(values.length, equals(2));
+        expect(values.last, equals(15));
+      });
+    });
   });
 
   testWidgets('Test stream auto dispose', (WidgetTester tester) async {
