@@ -10,6 +10,7 @@ import '../../primitives/utils.dart';
 import '../../shared/table.dart';
 import '../../shared/table_data.dart';
 import '../../shared/theme.dart';
+import 'object_inspector_view_controller.dart';
 import 'vm_object_model.dart';
 import 'vm_service_private_extensions.dart';
 
@@ -224,9 +225,11 @@ class _DartObjectColumn extends _CodeColumnData {
 /// related to [Code] objects in the Dart VM.
 class VmCodeDisplay extends StatelessWidget {
   const VmCodeDisplay({
+    required this.controller,
     required this.code,
   });
 
+  final ObjectInspectorViewController controller;
   final CodeObject code;
 
   @override

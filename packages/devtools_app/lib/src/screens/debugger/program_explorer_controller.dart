@@ -302,73 +302,69 @@ class ProgramExplorerController extends DisposableController
 
   /// Searches and returns the script or library node in the FileExplorer
   /// which is the source location of the target [object].
-  Future<VMServiceObjectNode?> searchFileExplorer(ObjRef object) async {
+  Future<VMServiceObjectNode> searchFileExplorer(ObjRef object) async {
     final service = serviceManager.service!;
     final isolateId = serviceManager.isolateManager.selectedIsolate.value!.id!;
 
-    LibraryRef? targetLib;
     ScriptRef? targetScript;
-    VMServiceObjectNode? libNode;
 
-    VMServiceObjectNode? _searchRootObjectNodes(ObjRef obj) {
-      for (final rootNode in rootObjectNodes.value) {
-        if (rootNode.object?.id == obj.id) {
-          return rootNode;
-        }
-      }
-      return null;
+    // If `object` is a library, it will always be a root node and is simple to
+    // find.
+    if (object is LibraryRef) {
+      final result = _searchRootObjectNodes(object)!;
+      await result.populateLocation();
+      return result;
     }
 
-    if (object is LibraryRef) {
-      libNode = _searchRootObjectNodes(object);
-
-      libNode ??= breadthFirstSearchObject(object, rootObjectNodes.value);
-
-      return libNode;
-    } else if (object is ClassRef || object is FieldRef || object is FuncRef) {
-      final source = (object as dynamic).location as SourceLocation?;
-      targetScript = source?.script;
+    // Otherwise, we need to find the target script to determine the library
+    // the target node is listed under.
+    if (object is ClassRef) {
+      targetScript = object.location?.script;
+    } else if (object is FieldRef) {
+      targetScript = object.location?.script;
+    } else if (object is FuncRef) {
+      targetScript = object.location?.script;
     } else if (object is Code) {
       final ownerFunction = object.function;
-      final source = ownerFunction?.location;
-      targetScript = source?.script;
+      targetScript = ownerFunction?.location?.script;
     } else if (object is ScriptRef) {
       targetScript = object;
     } else if (object is InstanceRef) {
       // Since instances are not currently supported, it will search for
       // the node of the class it belongs to.
-      final source = object.classRef?.location;
-      targetScript = source?.script;
+      targetScript = object.classRef?.location?.script;
+    }
+    if (targetScript == null) {
+      throw StateError('Could not find script }');
     }
 
-    if (targetScript != null) {
-      final scriptObj = await service.getObject(isolateId, targetScript.id!);
-      targetLib = (scriptObj as Script).library;
+    final scriptObj =
+        await service.getObject(isolateId, targetScript.id!) as Script;
+    final LibraryRef targetLib = scriptObj.library!;
 
-      if (targetLib != null) {
-        // Search targetLib only on the root level nodes
-        libNode = _searchRootObjectNodes(targetLib);
+    // Search targetLib only on the root level nodes
+    final libNode = _searchRootObjectNodes(targetLib)!;
 
-        // If the object sourceLocation script uri is the same as the target
-        // library uri, return the library node.
-        if (targetLib.uri == targetScript.uri && libNode != null) {
-          return libNode;
-        }
+    // If the object's owning script URI is the same as the target library URI,
+    // return the library node as the match.
+    if (targetLib.uri == targetScript.uri) {
+      return libNode;
+    }
 
-        //search targetScript in library if libNode is not null
-        if (libNode != null) {
-          final scriptNode = breadthFirstSearchObject(
-            targetScript,
-            [libNode],
-          );
-          if (scriptNode != null) {
-            return scriptNode;
-          }
-        }
+    // Find the script node nested under the library.
+    final scriptNode = breadthFirstSearchObject(
+      targetScript,
+      [libNode],
+    )!;
+    await scriptNode.populateLocation();
+    return scriptNode;
+  }
+
+  VMServiceObjectNode? _searchRootObjectNodes(ObjRef obj) {
+    for (final rootNode in rootObjectNodes.value) {
+      if (rootNode.object?.id == obj.id) {
+        return rootNode;
       }
-
-      //If targetScript was not found in the targetLib, search all nodes
-      return breadthFirstSearchObject(targetScript, rootObjectNodes.value);
     }
     return null;
   }
@@ -379,22 +375,15 @@ class ProgramExplorerController extends DisposableController
     ObjRef obj,
     List<VMServiceObjectNode> roots,
   ) {
-    VMServiceObjectNode? match;
-
     for (final root in roots) {
-      breadthFirstTraversal<VMServiceObjectNode>(
+      final match = breadthFirstTraversal<VMServiceObjectNode>(
         root,
-        action: (node) {
-          if (node.object?.id == obj.id) {
-            match = node;
-          }
-        },
+        returnCondition: (node) => node.object?.id == obj.id,
       );
       if (match != null) {
-        break;
+        return match;
       }
     }
-
-    return match;
+    return null;
   }
 }

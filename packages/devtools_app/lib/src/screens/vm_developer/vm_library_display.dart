@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../shared/theme.dart';
+import 'object_inspector_view_controller.dart';
 import 'vm_developer_common_widgets.dart';
 import 'vm_object_model.dart';
 
@@ -14,16 +15,18 @@ import 'vm_object_model.dart';
 class VmLibraryDisplay extends StatelessWidget {
   const VmLibraryDisplay({
     required this.library,
+    required this.controller,
   });
 
   final LibraryObject library;
+  final ObjectInspectorViewController controller;
 
   @override
   Widget build(BuildContext context) {
     final dependencies = library.obj.dependencies;
     return VmObjectDisplayBasicLayout(
       object: library,
-      generalDataRows: _libraryDataRows(library),
+      generalDataRows: _libraryDataRows(context, library),
       expandableWidgets: [
         if (dependencies != null)
           LibraryDependencies(dependencies: dependencies)
@@ -34,15 +37,21 @@ class VmLibraryDisplay extends StatelessWidget {
   /// Generates a list of key-value pairs (map entries) containing the general
   /// information of the library object [library].
   List<MapEntry<String, WidgetBuilder>> _libraryDataRows(
+    BuildContext context,
     LibraryObject library,
   ) {
     return [
-      ...vmObjectGeneralDataRows(library),
-      selectableTextBuilderMapEntry(
-        'URI',
-        (library.obj.uri?.isEmpty ?? false)
-            ? library.script?.uri
-            : library.obj.uri,
+      ...vmObjectGeneralDataRows(
+        context,
+        controller,
+        library,
+      ),
+      serviceObjectLinkBuilderMapEntry<ObjRef>(
+        controller: controller,
+        key: 'URI',
+        preferUri: true,
+        object:
+            (library.obj.uri?.isEmpty ?? false) ? library.script! : library.obj,
       ),
       selectableTextBuilderMapEntry(
         'VM Name',
