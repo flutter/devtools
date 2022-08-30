@@ -22,6 +22,7 @@ export 'src/screens/app_size/app_size_screen.dart';
 export 'src/screens/debugger/debugger_controller.dart';
 export 'src/screens/debugger/debugger_screen.dart';
 export 'src/screens/debugger/program_explorer_controller.dart';
+export 'src/screens/debugger/program_explorer_model.dart';
 export 'src/screens/debugger/span_parser.dart';
 export 'src/screens/debugger/syntax_highlighter.dart';
 export 'src/screens/inspector/diagnostics.dart';

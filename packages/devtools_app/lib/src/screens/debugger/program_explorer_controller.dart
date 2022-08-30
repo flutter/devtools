@@ -20,7 +20,10 @@ class ProgramExplorerController extends DisposableController
   /// outline view.
   ProgramExplorerController({
     this.showCodeNodes = false,
-  });
+    ListValueNotifier<VMServiceObjectNode>? rootObjectNodesOverride,
+  })  : 
+        _rootObjectNodes =
+            rootObjectNodesOverride ?? ListValueNotifier<VMServiceObjectNode>([]);
 
   /// The outline view nodes for the currently selected library.
   ValueListenable<List<VMServiceObjectNode>> get outlineNodes => _outlineNodes;
@@ -30,6 +33,8 @@ class ProgramExplorerController extends DisposableController
   final _isLoadingOutline = ValueNotifier<bool>(false);
 
   /// The currently selected node in the Program Explorer file picker.
+  @visibleForTesting
+  VMServiceObjectNode? get scriptSelection => _scriptSelection;
   VMServiceObjectNode? _scriptSelection;
 
   /// The currently selected node in the Program Explorer outline.
@@ -40,7 +45,7 @@ class ProgramExplorerController extends DisposableController
   /// The processed roots of the tree.
   ValueListenable<List<VMServiceObjectNode>> get rootObjectNodes =>
       _rootObjectNodes;
-  final _rootObjectNodes = ListValueNotifier<VMServiceObjectNode>([]);
+  final ListValueNotifier<VMServiceObjectNode> _rootObjectNodes;
 
   ValueListenable<int> get selectedNodeIndex => _selectedNodeIndex;
   final _selectedNodeIndex = ValueNotifier<int>(0);
