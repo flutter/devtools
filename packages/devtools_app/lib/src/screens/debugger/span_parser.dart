@@ -106,7 +106,7 @@ class ScopeSpan {
   /// The one-based column number.
   int get column => startLocation.column + 1;
 
-  final List<String?> scopes;
+  final List<String> scopes;
 
   bool contains(int token) => (start <= token) && (token < end);
 
@@ -548,8 +548,8 @@ class _IncludeMatcher extends _Matcher {
 class ScopeStack {
   ScopeStack();
 
-  final Queue<ScopeStackItem> stack = Queue();
-  final List<ScopeSpan> spans = [];
+  final stack = Queue<ScopeStackItem>();
+  final spans = <ScopeSpan>[];
 
   /// Location where the next produced span should begin.
   ScopeStackLocation _nextLocation = ScopeStackLocation.zero;

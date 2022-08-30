@@ -70,11 +70,11 @@ class SyntaxHighlighter {
     if (scopes.isEmpty) {
       return const TextStyle();
     } else if (scopes.length == 1) {
-      return _scopeStyles[scopes.first!] ?? const TextStyle();
+      return _scopeStyles[scopes.first] ?? const TextStyle();
     } else {
       var style = const TextStyle();
       for (final scope in scopes) {
-        style = style.merge(_scopeStyles[scope!] ?? const TextStyle());
+        style = style.merge(_scopeStyles[scope] ?? const TextStyle());
       }
       return style;
     }
