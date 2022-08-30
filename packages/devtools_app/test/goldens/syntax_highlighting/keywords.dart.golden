@@ -7,23 +7,34 @@
 >
 >library foo;
 #^^^^^^^ meta.declaration.dart keyword.other.import.dart
+#       ^^^^ meta.declaration.dart
 #           ^ meta.declaration.dart punctuation.terminator.dart
 >
 >import 'dart:async' deferred as deferredAsync show Future;
 #^^^^^^ meta.declaration.dart keyword.other.import.dart
+#      ^ meta.declaration.dart
 #       ^^^^^^^^^^^^ meta.declaration.dart string.interpolated.single.dart
+#                   ^^^^^^^^^^ meta.declaration.dart
 #                             ^^ meta.declaration.dart keyword.other.import.dart
+#                               ^^^^^^^^^^^^^^^ meta.declaration.dart
 #                                              ^^^^ meta.declaration.dart keyword.other.import.dart
+#                                                  ^^^^^^^ meta.declaration.dart
 #                                                         ^ meta.declaration.dart punctuation.terminator.dart
 >import 'dart:io' as a show File hide Directory;
 #^^^^^^ meta.declaration.dart keyword.other.import.dart
+#      ^ meta.declaration.dart
 #       ^^^^^^^^^ meta.declaration.dart string.interpolated.single.dart
+#                ^ meta.declaration.dart
 #                 ^^ meta.declaration.dart keyword.other.import.dart
+#                   ^^^ meta.declaration.dart
 #                      ^^^^ meta.declaration.dart keyword.other.import.dart
+#                          ^^^^^^ meta.declaration.dart
 #                                ^^^^ meta.declaration.dart keyword.other.import.dart
+#                                    ^^^^^^^^^^ meta.declaration.dart
 #                                              ^ meta.declaration.dart punctuation.terminator.dart
 >export 'dart:io';
 #^^^^^^ meta.declaration.dart keyword.other.import.dart
+#      ^ meta.declaration.dart
 #       ^^^^^^^^^ meta.declaration.dart string.interpolated.single.dart
 #                ^ meta.declaration.dart punctuation.terminator.dart
 >
