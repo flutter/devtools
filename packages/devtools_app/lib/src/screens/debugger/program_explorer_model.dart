@@ -55,9 +55,9 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
 
   List<VMServiceObjectNode>? _outline;
   Future<List<VMServiceObjectNode>?> get outline async {
-    /*if (_outline != null) {
+    if (_outline != null) {
       return _outline;
-    }*/
+    }
 
     final root = VMServiceObjectNode(
       controller,
