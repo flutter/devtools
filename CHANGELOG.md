@@ -1,4 +1,5 @@
 ## 2.17.0
+* Prepare for 2.17.0 release [#4428](https://github.com/flutter/devtools/pull/4428)
 * Revert perfetto bundle [#4422](https://github.com/flutter/devtools/pull/4422)
 * Handle nested scopes better when parsing code for syntax highlighting [#4363](https://github.com/flutter/devtools/pull/4363)
 * Make fixes for internal checks [#4415](https://github.com/flutter/devtools/pull/4415)
