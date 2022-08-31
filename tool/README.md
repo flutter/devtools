@@ -54,8 +54,10 @@ git commit -m “Prepare for 2.7.0 release.”
 git push origin release_2.7.0
 ```
 
-From the git GUI tool or from github.com directly, create a PR, send for review,
-then squash and commit after receiving an LGTM.
+From the git GUI tool or from github.com directly:
+1. Create a PR.
+2. Add the entry about the created PR to the CHANGELOG.md manually.
+3  Receiving an LGTM, squash and commit.
 
 ### Test the release
 Checkout the commit you just created, or remain on the branch you just landed the prep PR from.
