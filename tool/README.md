@@ -33,7 +33,7 @@ version numbers updated in lock, so we don't have to worry about
 versioning. Also make sure that the version constant in
 `packages/devtools_app/lib/devtools.dart` was updated.
 
-#### Update the CHANGELOG.md
+#### Update the CHANGELOG.md (for non-dev releases)
 
 Use the tool `generate-changelog` to automatically update the `packages/devtools/CHANGELOG.md` file.
 
