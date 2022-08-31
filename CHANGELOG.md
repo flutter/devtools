@@ -67,9 +67,6 @@
 * Add MacOS bot to the CI [#4078](https://github.com/flutter/devtools/pull/4078)
 * Improve helper functions in vm_developer_common_widgets [#4312](https://github.com/flutter/devtools/pull/4312)
 
-## 2.17.0
-TODO: update changelog
-
 ## 2.16.0-dev.0
 * Upgrade to latest Flutter beta [#4410](https://github.com/flutter/devtools/pull/4410)
 * Update helper for bumping versions [#4406](https://github.com/flutter/devtools/pull/4406)
