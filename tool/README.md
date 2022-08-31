@@ -1,6 +1,14 @@
 ## How to release the next version of DevTools
 
-Create a branch for your release.
+### Configure environment
+
+Make sure you have local checkout of the Dart SDK (for getting started instructions, see [sdk/CONTRIBUTING.md](https://github.com/dart-lang/sdk/blob/main/CONTRIBUTING.md)).
+
+To verify it `echo $LOCAL_DART_SDK`.
+
+### Prepare the release
+
+#### Create a branch for your release.
 
 ```shell
 cd ~/path/to/devtools
@@ -8,8 +16,6 @@ git checkout master
 git pull upstream master
 git checkout -b release_2.7.0
 ```
-
-### Prepare the release
 
 #### Update the DevTools version number
 
@@ -67,6 +73,7 @@ git checkout 8881a7caa9067471008a8e00750b161f53cdb843
 
 Build the DevTools binary and run it from your local Dart SDK. From the main devtools/ directory.
 ```shell
+./tool/update_flutter_sdk.sh
 dart ./tool/build_e2e.dart
 ```
 
