@@ -9,7 +9,7 @@ Make sure:
 4. Your Flutter version is equal to one in flutter_version.txt. If not fix it by one of two ways:
     - Run `./tool/update_flutter_sdk.sh` id devtools directory
     - Switch Flutter version by running 'git checkout <version in flutter_version.txt>' in Flutter directory.
-5. You goma is [configured](https://g3doc.corp.google.com/devtools/goma/g3doc/how-to-use-goma/how-to-install-goma-mac.md). 
+5. You goma is [configured](http://go/ma-mac-setup). 
 
 ### Prepare the release
 
