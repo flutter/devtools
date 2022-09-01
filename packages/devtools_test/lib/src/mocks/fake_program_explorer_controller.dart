@@ -7,20 +7,9 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 class TestProgramExplorerController extends ProgramExplorerController {
-  factory TestProgramExplorerController({
-    required Function(TestProgramExplorerController) initializer,
-  }) =>
-      TestProgramExplorerController._(
-        initializer: initializer,
-        rootObjectNodesOverride: ListValueNotifier<VMServiceObjectNode>([]),
-      );
-
-  TestProgramExplorerController._({
+  TestProgramExplorerController({
     required this.initializer,
-    required super.rootObjectNodesOverride,
-  }) : rootObjectNodesOverride = rootObjectNodesOverride!;
-
-  final ListValueNotifier<VMServiceObjectNode> rootObjectNodesOverride;
+  });
 
   @override
   ValueListenable<bool> get initialized => _initialized;

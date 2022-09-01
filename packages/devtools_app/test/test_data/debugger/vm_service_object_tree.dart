@@ -25,6 +25,10 @@ final testClassRef = ClassRef(
   id: '1234',
   name: 'FooClass',
   library: testLibRef,
+  location: SourceLocation(
+    script: testScript,
+    tokenPos: 0,
+  ),
 );
 
 final testClass = Class(
@@ -37,8 +41,8 @@ final testClass = Class(
   superType: testSuperType,
   fields: [testField],
   functions: [testFunction],
-  location: SourceLocation(script: testScript),
   id: '1234',
+  location: testClassRef.location,
 );
 
 final testScript = Script(
@@ -54,13 +58,18 @@ final testFunction = Func(
   isConst: false,
   implicit: false,
   location: SourceLocation(script: testScript),
+  signature: InstanceRef(id: '1234'),
   id: '1234',
 );
 
 final testField = Field(
   name: 'fooField',
   location: SourceLocation(script: testScript),
+  declaredType: InstanceRef(id: '1234'),
   owner: testClassRef,
+  isStatic: false,
+  isConst: false,
+  isFinal: false,
   id: '1234',
 );
 

@@ -7,6 +7,7 @@ import 'package:devtools_app/src/primitives/listenable.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_model.dart';
 import 'package:devtools_app/src/screens/debugger/program_explorer.dart';
 import 'package:devtools_app/src/screens/debugger/program_explorer_model.dart';
+import 'package:devtools_app/src/scripts/script_manager.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/common_widgets.dart';
 import 'package:devtools_app/src/shared/flex_split_column.dart';
@@ -18,7 +19,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../test_data/vm_service_object_tree.dart';
+import '../test_data/debugger/vm_service_object_tree.dart';
 import '../test_utils/tree_utils.dart';
 
 void main() {
@@ -76,6 +77,12 @@ void main() {
           .thenReturn(false);
       when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
 
+      final mockScriptManager = MockScriptManager();
+      when(mockScriptManager.getScript(any)).thenAnswer(
+        (_) => Future<Script>.value(testScript),
+      );
+
+      setGlobal(ScriptManager, mockScriptManager);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(NotificationService, NotificationService());
@@ -90,7 +97,7 @@ void main() {
               VMServiceObjectNode(controller, 'fooLib', testLib);
           libraryNode.script = testScript;
           libraryNode.location = ScriptLocation(testScript);
-          controller.rootObjectNodesOverride.add(libraryNode);
+          controller.rootObjectNodesInternal.add(libraryNode);
         },
       );
       final explorer = ProgramExplorer(controller: programExplorerController);
@@ -144,7 +151,11 @@ void main() {
         expect(programExplorerController.outlineSelection.value, isNull);
 
         // Select the library node and ensure the outline is populated.
-        await programExplorerController.selectNode(libNode);
+        final libNodeFinder = find.text(libNode.name);
+        expect(libNodeFinder, findsOneWidget);
+        await tester.tap(libNodeFinder);
+        await tester.pumpAndSettle();
+
         expect(programExplorerController.scriptSelection, libNode);
         expect(programExplorerController.outlineSelection.value, isNull);
 
@@ -155,14 +166,13 @@ void main() {
         // Select one of them and check that the outline selection has been
         // updated.
         final outlineNode = programExplorerController.outlineNodes.value.first;
-        programExplorerController.selectOutlineNode(outlineNode);
+        final outlineNodeFinder = find.text(outlineNode.name);
+        expect(outlineNodeFinder, findsOneWidget);
+        await tester.tap(outlineNodeFinder);
+        await tester.pumpAndSettle();
+
         expect(programExplorerController.scriptSelection, libNode);
         expect(programExplorerController.outlineSelection.value, outlineNode);
-
-        // Ensure that the outline view can be reset.
-        programExplorerController.resetOutline();
-        expect(programExplorerController.scriptSelection, libNode);
-        expect(programExplorerController.outlineSelection.value, isNull);
       },
     );
   });
