@@ -30,6 +30,8 @@ class ProgramExplorerController extends DisposableController
   final _isLoadingOutline = ValueNotifier<bool>(false);
 
   /// The currently selected node in the Program Explorer file picker.
+  @visibleForTesting
+  VMServiceObjectNode? get scriptSelection => _scriptSelection;
   VMServiceObjectNode? _scriptSelection;
 
   /// The currently selected node in the Program Explorer outline.
@@ -39,8 +41,9 @@ class ProgramExplorerController extends DisposableController
 
   /// The processed roots of the tree.
   ValueListenable<List<VMServiceObjectNode>> get rootObjectNodes =>
-      _rootObjectNodes;
-  final _rootObjectNodes = ListValueNotifier<VMServiceObjectNode>([]);
+      rootObjectNodesInternal;
+  @visibleForTesting
+  final rootObjectNodesInternal = ListValueNotifier<VMServiceObjectNode>([]);
 
   ValueListenable<int> get selectedNodeIndex => _selectedNodeIndex;
   final _selectedNodeIndex = ValueNotifier<int>(0);
@@ -86,7 +89,7 @@ class ProgramExplorerController extends DisposableController
       this,
       libraries,
     );
-    _rootObjectNodes.replaceAll(nodes);
+    rootObjectNodesInternal.replaceAll(nodes);
     _initialized.value = true;
   }
 
@@ -104,8 +107,8 @@ class ProgramExplorerController extends DisposableController
     if (!initialized.value) {
       return;
     }
-    await _selectScriptNode(script, _rootObjectNodes.value);
-    _rootObjectNodes.notifyListeners();
+    await _selectScriptNode(script, rootObjectNodesInternal.value);
+    rootObjectNodesInternal.notifyListeners();
   }
 
   Future<void> _selectScriptNode(
@@ -134,7 +137,7 @@ class ProgramExplorerController extends DisposableController
     // Index tracks the position of the node in the flat-list representation of
     // the tree:
     var index = 0;
-    for (final node in _rootObjectNodes.value) {
+    for (final node in rootObjectNodesInternal.value) {
       final matchingNode = depthFirstTraversal(
         node,
         returnCondition: matchingNodeCondition,
