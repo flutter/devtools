@@ -212,12 +212,7 @@ class _AllocationProfileTracingTreeHeader extends StatelessWidget {
         ExpandAllButton(
           onPressed: () => updateTreeStateCallback(
             () {
-              final isBottomUp = tabs[tabController.index] ==
-                  AllocationTracingTree._bottomUpTab;
-              final data = controller.selectedTracedClassAllocationData!;
-              final roots =
-                  isBottomUp ? data.bottomUpRoots : data.callTreeRoots;
-              for (final root in roots) {
+              for (final root in _currentDataRoots) {
                 root.expandCascading();
               }
             },
@@ -227,12 +222,7 @@ class _AllocationProfileTracingTreeHeader extends StatelessWidget {
         CollapseAllButton(
           onPressed: () => updateTreeStateCallback(
             () {
-              final isBottomUp = tabs[tabController.index] ==
-                  AllocationTracingTree._bottomUpTab;
-              final data = controller.selectedTracedClassAllocationData!;
-              final roots =
-                  isBottomUp ? data.bottomUpRoots : data.callTreeRoots;
-              for (final root in roots) {
+              for (final root in _currentDataRoots) {
                 root.collapseCascading();
               }
             },
@@ -240,6 +230,13 @@ class _AllocationProfileTracingTreeHeader extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  List<CpuStackFrame> get _currentDataRoots {
+    final isBottomUp =
+        tabs[tabController.index] == AllocationTracingTree._bottomUpTab;
+    final data = controller.selectedTracedClassAllocationData!;
+    return isBottomUp ? data.bottomUpRoots : data.callTreeRoots;
   }
 }
 
