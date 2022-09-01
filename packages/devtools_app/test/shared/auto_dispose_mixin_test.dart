@@ -83,7 +83,6 @@ void main() {
       disposer.addAutoDisposeListener(notifier, () {
         values.add(notifier.value);
       });
-      // ignore: invalid_use_of_protected_member
       expect(notifier.hasListeners, isTrue);
       notifier.value = 13;
       expect(values.length, equals(1));
@@ -91,10 +90,8 @@ void main() {
       notifier.value = 15;
       expect(values.length, equals(2));
       expect(values.last, equals(15));
-      // ignore: invalid_use_of_protected_member
       expect(notifier.hasListeners, isTrue);
       disposer.cancelListeners();
-      // ignore: invalid_use_of_protected_member
       expect(notifier.hasListeners, isFalse);
       notifier.value = 17;
       // Verify listener not fired.
@@ -105,14 +102,12 @@ void main() {
       disposer.addAutoDisposeListener(notifier, () {
         values.add(notifier.value);
       });
-      // ignore: invalid_use_of_protected_member
       expect(notifier.hasListeners, isTrue);
       notifier.value = 19;
       expect(values.length, equals(3));
       expect(values.last, equals(19));
       disposer.cancelListeners();
 
-      // ignore: invalid_use_of_protected_member
       expect(notifier.hasListeners, isFalse);
       notifier.value = 21;
       expect(values.length, equals(3));
@@ -125,7 +120,7 @@ void main() {
           testWidgets('triggers callback and cancels listeners when ready ',
               (WidgetTester tester) async {
             final disposer = Disposer();
-            final trigger = ValueNotifier<bool>(!readyWhen);
+            final trigger = ValueNotifier<bool?>(!readyWhen);
             final callbackEntries = <int>[];
             int counter = 0;
 
@@ -140,15 +135,18 @@ void main() {
 
             expect(callbackEntries, equals([]));
 
-            // ignore: invalid_use_of_protected_member
-            expect(trigger.hasListeners, isTrue);
+            // Set a value that won't trigger the callback.
+            trigger.value = null;
 
-            // Trigger the callback
+            await tester.pump();
+            expect(trigger.hasListeners, isTrue);
+            expect(callbackEntries, equals([]));
+
+            // Set a value that will trigger the callback.
             trigger.value = readyWhen;
 
             await tester.pump();
 
-            // ignore: invalid_use_of_protected_member
             expect(trigger.hasListeners, isFalse);
 
             // Check that we ran the callback.
@@ -156,7 +154,7 @@ void main() {
 
             // Keep changing the isReady value to make sure we don't trigger again.
             trigger.value = true;
-            trigger.value = false;
+            trigger.value = null;
 
             await tester.pump();
 
@@ -180,13 +178,11 @@ void main() {
               },
             );
 
-            // ignore: invalid_use_of_protected_member
             expect(trigger.hasListeners, isTrue);
             expect(callbackEntries, equals([]));
 
             disposer.cancelListeners();
 
-            // ignore: invalid_use_of_protected_member
             expect(trigger.hasListeners, isFalse);
 
             // Change the isReady value to make sure we don't trigger again.
@@ -199,14 +195,13 @@ void main() {
           });
 
           testWidgets(
-              'runs callback immediately if starting ready in the ready state',
+              'runs callback immediately if starting in the ready state',
               (WidgetTester tester) async {
             final disposer = Disposer();
             final trigger = ValueNotifier<bool>(readyWhen);
             final callbackEntries = <int>[];
             int counter = 0;
 
-            // ignore: invalid_use_of_protected_member
             expect(trigger.hasListeners, isFalse);
 
             disposer.callOnceWhenReady(
@@ -218,7 +213,6 @@ void main() {
               },
             );
 
-            // ignore: invalid_use_of_protected_member
             expect(trigger.hasListeners, isFalse);
             expect(callbackEntries, equals([1]));
 
@@ -267,7 +261,6 @@ void main() {
     controller.addAutoDisposeListener(notifier, () {
       values.add(notifier.value);
     });
-    // ignore: invalid_use_of_protected_member
     expect(notifier.hasListeners, isTrue);
     notifier.value = 13;
     expect(values.length, equals(1));
@@ -275,10 +268,8 @@ void main() {
     notifier.value = 15;
     expect(values.length, equals(2));
     expect(values.last, equals(15));
-    // ignore: invalid_use_of_protected_member
     expect(notifier.hasListeners, isTrue);
     controller.cancelListeners();
-    // ignore: invalid_use_of_protected_member
     expect(notifier.hasListeners, isFalse);
     notifier.value = 17;
     // Verify listener not fired.
