@@ -6,6 +6,9 @@ Make sure:
 1. You have local checkout of the Dart SDK (for getting started instructions, see [sdk/CONTRIBUTING.md](https://github.com/dart-lang/sdk/blob/main/CONTRIBUTING.md)). 
 2. `echo $LOCAL_DART_SDK` gives you path to the local checkout
 2. The local chackout is at `main` branch: `git rebase-update`.
+3. Your Flutter version is equal to one in flutter_version.txt. If not fix it by one of two ways:
+    - Run `./tool/update_flutter_sdk.sh` id devtools directory
+    - Switch Flutter version by running 'git checkout <version in flutter_version.txt>' in Flutter directory.
 
 ### Prepare the release
 
@@ -72,10 +75,6 @@ Checkout the commit you just created, or remain on the branch you just landed th
 git checkout 8881a7caa9067471008a8e00750b161f53cdb843
 ```
 
-If your Flutter version is not equal to one in flutter_version.txt, fix it by one of two ways:
-1. Run `./tool/update_flutter_sdk.sh` id devtools directory
-2. Switch Flutter version by running 'git checkout <version in flutter_version.txt>' in Flutter directory.
-
 Build the DevTools binary and run it from your local Dart SDK. From the main devtools/ directory.
 ```shell
 dart ./tool/build_e2e.dart
@@ -113,18 +112,16 @@ commit hash for the tag you just created) and the [update.sh](https://github.com
 script, build and upload the DevTools binary to CIPD.
 
 ```shell
-cd path/to/dart-sdk/sdk
+cd $LOCAL_DART_SDK
 git rebase-update
-third_party/devtools/update.sh 8881a7caa9067471008a8e00750b161f53cdb843
+third_party/devtools/update.sh <your commit hash like 8881a7caa9067471008a8e00750b161f53cdb843>
 ```
 
 ### Update the DevTools hash in the Dart SDK
 
-Navigate to your local checkout of the Dart SDK (for getting started instructions,
-see [sdk/CONTRIBUTING.md](https://github.com/dart-lang/sdk/blob/main/CONTRIBUTING.md)).
-
 Create new branch for your changes:
 ```shell
+cd $LOCAL_DART_SDK
 git new-branch dt-release
 ```
 
