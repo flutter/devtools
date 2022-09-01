@@ -177,27 +177,29 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
           ),
         const SizedBox(height: denseRowSpacing),
         Expanded(
-          child: ValueListenableBuilder<CpuProfileData?>(
-            valueListenable: controller.cpuProfilerController.dataNotifier,
-            builder: (context, cpuProfileData, _) {
-              if (cpuProfileData ==
-                      CpuProfilerController.baseStateCpuProfileData ||
-                  cpuProfileData == null) {
-                return _buildRecordingInfo();
-              }
-              if (cpuProfileData ==
-                  CpuProfilerController.emptyAppStartUpProfile) {
-                return emptyAppStartUpProfileView;
-              }
-              if (cpuProfileData.isEmpty) {
-                return emptyProfileView;
-              }
-              return CpuProfiler(
-                data: cpuProfileData,
-                controller: controller.cpuProfilerController,
-                searchFieldKey: profilerScreenSearchFieldKey,
-              );
-            },
+          child: OutlineDecoration(
+            child: ValueListenableBuilder<CpuProfileData?>(
+              valueListenable: controller.cpuProfilerController.dataNotifier,
+              builder: (context, cpuProfileData, _) {
+                if (cpuProfileData ==
+                        CpuProfilerController.baseStateCpuProfileData ||
+                    cpuProfileData == null) {
+                  return _buildRecordingInfo();
+                }
+                if (cpuProfileData ==
+                    CpuProfilerController.emptyAppStartUpProfile) {
+                  return emptyAppStartUpProfileView;
+                }
+                if (cpuProfileData.isEmpty) {
+                  return emptyProfileView;
+                }
+                return CpuProfiler(
+                  data: cpuProfileData,
+                  controller: controller.cpuProfilerController,
+                  searchFieldKey: profilerScreenSearchFieldKey,
+                );
+              },
+            ),
           ),
         ),
       ],
