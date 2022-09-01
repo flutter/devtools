@@ -23,7 +23,7 @@ void main() {
   late Class testClassCopy;
 
   setUp(() {
-    setUpProgramExplorerDependencies();
+    setUpMockScriptManager();
     setGlobal(IdeTheme, IdeTheme());
     mockClassObject = MockClassObject();
 

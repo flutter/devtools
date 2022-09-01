@@ -26,7 +26,7 @@ void main() {
   late InstanceRef fieldStaticValue;
 
   setUp(() {
-    setUpProgramExplorerDependencies();
+    setUpMockScriptManager();
     setGlobal(IdeTheme, IdeTheme());
 
     mockFieldObject = MockFieldObject();
