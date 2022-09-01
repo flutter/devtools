@@ -50,13 +50,14 @@ class MyGetHttpDataState extends State<MyGetHttpData> {
 
   // Function to get the JSON data
   Future<String> getJSONData() async {
-    logs.add(api.uri());
+    // Encode the url
+    final uri = Uri.encodeFull(api.uri());
+    logs.add(uri);
 
     final startTime = DateTime.now();
 
     final response = await http.get(
-      // Encode the url
-      Uri.encodeFull(api.uri()),
+      Uri.parse(uri),
       // Only accept JSON response
       headers: {'Accept': 'application/json'},
     );
