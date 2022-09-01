@@ -277,6 +277,8 @@ class _AllocationProfileTable extends StatefulWidget {
 }
 
 class _AllocationProfileTableState extends State<_AllocationProfileTable> {
+  // TODO(bkonyi): pull state into a TableController class.
+  // See https://github.com/flutter/devtools/issues/4365
   late SortDirection _sortDirection;
   late ColumnData<ClassHeapStats> _sortColumn;
 
