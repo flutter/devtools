@@ -64,7 +64,7 @@ void main() {
         searchFieldKey: searchFieldKey,
       );
       await tester.pumpWidget(wrap(cpuProfiler));
-      expect(find.byType(TabBar), findsOneWidget);
+      expect(find.byType(TabBar), findsNothing);
       expect(find.byKey(CpuProfiler.dataProcessingKey), findsNothing);
       expect(find.byType(CpuProfileFlameChart), findsNothing);
       expect(find.byType(CpuCallTreeTable), findsNothing);
