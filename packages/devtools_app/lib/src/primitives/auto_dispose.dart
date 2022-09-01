@@ -77,12 +77,13 @@ class Disposer {
     _focusNodes.clear();
   }
 
-  /// Assign a [callback] to [trigger], such that the [callback] will run
-  /// once when [trigger] is equal to [readyWhen].
+  /// Runs [callback] when [trigger]'s value satisfies the [readyWhen] function.
   ///
   /// When calling [callOnceWhenReady] :
-  ///     - If [trigger] is equal to [readyWhen], then the [callback] will be immediately triggered
-  ///     - Otherwise, the [callback] will be triggered when [trigger] changes to equal [readyWhen]
+  ///     - If [trigger]'s value satisfies [readyWhen], then the [callback] will
+  ///       be immediately triggered.
+  ///     - Otherwise, the [callback] will be triggered when [trigger]'s value
+  ///       changes to equal [readyWhen].
   ///
   /// Any listeners set by [callOnceWhenReady] will auto dispose, or be removed after the callback is run.
   void callOnceWhenReady<T>({
