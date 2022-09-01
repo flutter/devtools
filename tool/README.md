@@ -134,7 +134,7 @@ the id for the CIPD upload in the previous step). See this
 Verify that running `dart devtools` launches the version of DevTools you just released. You'll
 need to build the dart sdk locally to do this.
 ```shell
-cd path/to/dart-sdk/sdk
+cd $LOCAL_DART_SDK
 gclient sync -D
 ./tools/build.py -mrelease -ax64 create_sdk
 out/ReleaseX64/dart-sdk/bin/dart devtools  # On OSX replace 'out' with 'xcodebuild'
