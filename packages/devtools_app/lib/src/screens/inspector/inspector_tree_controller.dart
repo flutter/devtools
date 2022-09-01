@@ -760,8 +760,6 @@ class _InspectorTreeState extends State<InspectorTree>
   late FocusNode _focusNode;
 
   late DebuggerController _debuggerController;
-  final ValueNotifier<bool> _doneBindingToController =
-      ValueNotifier<bool>(false);
 
   @override
   void initState() {
