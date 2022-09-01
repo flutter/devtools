@@ -120,7 +120,7 @@ void main() {
     });
 
     group('callOnceWhenReady', () {
-      for (var readyWhen in [false, true]) {
+      for (bool readyWhen in [false, true]) {
         group('readyWhen=$readyWhen', () {
           testWidgets('triggers callback and cancels listeners when ready ',
               (WidgetTester tester) async {
@@ -130,8 +130,8 @@ void main() {
             int counter = 0;
 
             disposer.callOnceWhenReady(
-              readyTrigger: trigger,
-              readyWhen: readyWhen,
+              trigger: trigger,
+              readyWhen: (triggerValue) => triggerValue == readyWhen,
               callback: () {
                 counter++;
                 callbackEntries.add(counter);
@@ -172,8 +172,8 @@ void main() {
             int counter = 0;
 
             disposer.callOnceWhenReady(
-              readyTrigger: trigger,
-              readyWhen: readyWhen,
+              trigger: trigger,
+              readyWhen: (triggerValue) => triggerValue == readyWhen,
               callback: () {
                 counter++;
                 callbackEntries.add(counter);
@@ -210,8 +210,8 @@ void main() {
             expect(trigger.hasListeners, isFalse);
 
             disposer.callOnceWhenReady(
-              readyTrigger: trigger,
-              readyWhen: readyWhen,
+              trigger: trigger,
+              readyWhen: (triggerValue) => triggerValue == readyWhen,
               callback: () {
                 counter++;
                 callbackEntries.add(counter);

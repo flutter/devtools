@@ -77,31 +77,31 @@ class Disposer {
     _focusNodes.clear();
   }
 
-  /// Assign a [callback] to [readyTrigger], such that the [callback] will run
-  /// once when [readyTrigger] is equal to [readyWhen].
+  /// Assign a [callback] to [trigger], such that the [callback] will run
+  /// once when [trigger] is equal to [readyWhen].
   ///
   /// When calling [callOnceWhenReady] :
-  ///     - If [readyTrigger] is equal to [readyWhen], then the [callback] will be immediately triggered
-  ///     - Otherwise, the [callback] will be triggered when [readyTrigger] changes to equal [readyWhen]
+  ///     - If [trigger] is equal to [readyWhen], then the [callback] will be immediately triggered
+  ///     - Otherwise, the [callback] will be triggered when [trigger] changes to equal [readyWhen]
   ///
   /// Any listeners set by [callOnceWhenReady] will auto dispose, or be removed after the callback is run.
-  void callOnceWhenReady({
+  void callOnceWhenReady<T>({
     required VoidCallback callback,
-    required ValueListenable<bool> readyTrigger,
-    bool readyWhen = true,
+    required ValueListenable<T> trigger,
+    required bool Function(T triggerValue) readyWhen,
   }) {
-    if (readyTrigger.value == readyWhen)
+    if (readyWhen(trigger.value)) {
       callback();
-    else {
+    } else {
       // do the stuff to add the listener and remove it when appropriate
       VoidCallback? earlyDisposeCallback;
       earlyDisposeCallback = () {
-        if (readyTrigger.value == readyWhen) {
+        if (readyWhen(trigger.value)) {
           callback();
-          readyTrigger.removeListener(earlyDisposeCallback!);
+          trigger.removeListener(earlyDisposeCallback!);
         }
       };
-      addAutoDisposeListener(readyTrigger, earlyDisposeCallback);
+      addAutoDisposeListener(trigger, earlyDisposeCallback);
     }
   }
 }
@@ -166,14 +166,14 @@ mixin AutoDisposeControllerMixin on DisposableController implements Disposer {
   }
 
   @override
-  void callOnceWhenReady({
+  void callOnceWhenReady<T>({
     required VoidCallback callback,
-    required ValueListenable<bool> readyTrigger,
-    bool readyWhen = true,
+    required ValueListenable<T> trigger,
+    required bool Function(T triggerValue) readyWhen,
   }) {
     _delegate.callOnceWhenReady(
       callback: callback,
-      readyTrigger: readyTrigger,
+      trigger: trigger,
       readyWhen: readyWhen,
     );
   }

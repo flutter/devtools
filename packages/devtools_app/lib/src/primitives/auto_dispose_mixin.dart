@@ -41,14 +41,14 @@ mixin AutoDisposeMixin<T extends StatefulWidget> on State<T>
   }
 
   @override
-  void callOnceWhenReady({
+  void callOnceWhenReady<T>({
     required VoidCallback callback,
-    required ValueListenable<bool> readyTrigger,
-    bool readyWhen = true,
+    required ValueListenable<T> trigger,
+    required bool Function(T triggerValue) readyWhen,
   }) {
     _delegate.callOnceWhenReady(
       callback: callback,
-      readyTrigger: readyTrigger,
+      trigger: trigger,
       readyWhen: readyWhen,
     );
   }
