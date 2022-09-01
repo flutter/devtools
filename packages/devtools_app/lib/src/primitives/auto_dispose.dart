@@ -99,6 +99,9 @@ class Disposer {
         if (readyWhen(trigger.value)) {
           callback();
           trigger.removeListener(triggerListener!);
+
+          _listenables.remove(trigger);
+          _listeners.remove(triggerListener);
         }
       };
       addAutoDisposeListener(trigger, triggerListener);
