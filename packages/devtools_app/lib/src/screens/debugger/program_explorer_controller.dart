@@ -21,9 +21,8 @@ class ProgramExplorerController extends DisposableController
   ProgramExplorerController({
     this.showCodeNodes = false,
     ListValueNotifier<VMServiceObjectNode>? rootObjectNodesOverride,
-  })  : 
-        _rootObjectNodes =
-            rootObjectNodesOverride ?? ListValueNotifier<VMServiceObjectNode>([]);
+  }) : _rootObjectNodes = rootObjectNodesOverride ??
+            ListValueNotifier<VMServiceObjectNode>([]);
 
   /// The outline view nodes for the currently selected library.
   ValueListenable<List<VMServiceObjectNode>> get outlineNodes => _outlineNodes;
