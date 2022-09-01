@@ -781,6 +781,7 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
     this.leftPadding = defaultSpacing,
     this.rightPadding = densePadding,
     this.tall = false,
+    this.backgroundColor,
   }) : super(key: key);
 
   final Widget title;
@@ -792,6 +793,7 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
   final double leftPadding;
   final double rightPadding;
   final bool tall;
+  final Color? backgroundColor;
 
   @override
   Widget build(BuildContext context) {
@@ -806,7 +808,7 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
                 needsBottomBorder ? defaultBorderSide(theme) : BorderSide.none,
             left: needsLeftBorder ? defaultBorderSide(theme) : BorderSide.none,
           ),
-          color: theme.titleSolidBackgroundColor,
+          color: backgroundColor ?? theme.titleSolidBackgroundColor,
         ),
         padding: EdgeInsets.only(left: leftPadding, right: rightPadding),
         alignment: Alignment.centerLeft,
