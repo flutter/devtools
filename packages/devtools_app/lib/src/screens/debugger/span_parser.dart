@@ -38,10 +38,10 @@ abstract class SpanParser {
 ///       https://www.apeth.com/nonblog/stories/textmatebundle.html
 ///
 class Grammar {
-  factory Grammar.fromJson(Map<String, dynamic> json) {
+  factory Grammar.fromJson(Map<String, Object?> json) {
     return Grammar._(
-      name: json['name'],
-      scopeName: json['scopeName'],
+      name: json['name'] as String,
+      scopeName: json['scopeName'] as String,
       topLevelMatcher: _Matcher.parse(json),
       repository: Repository.build(json),
     );
@@ -160,19 +160,20 @@ class ScopeSpan {
 /// A top-level repository of rules that can be referenced within other rules
 /// using the 'includes' keyword.
 class Repository {
-  Repository.build(Map<String, dynamic> grammarJson) {
-    final repositoryJson = grammarJson['repository'].cast<String, dynamic>();
+  Repository.build(Map<String, Object?> grammarJson) {
+    final repositoryJson = (grammarJson['repository'] as Map<String, Object?>?)
+        ?.cast<String, Map<String, Object?>>();
     if (repositoryJson == null) {
       return;
     }
     for (final subRepo in repositoryJson.keys) {
-      matchers[subRepo] = _Matcher.parse(repositoryJson[subRepo]);
+      matchers[subRepo] = _Matcher.parse(repositoryJson[subRepo]!);
     }
   }
 
   final matchers = <String?, _Matcher>{};
 
-  Map<String, dynamic> toJson() {
+  Map<String, Object?> toJson() {
     return {
       for (final entry in matchers.entries)
         if (entry.key != null) entry.key!: entry.value.toJson(),
@@ -181,9 +182,9 @@ class Repository {
 }
 
 abstract class _Matcher {
-  factory _Matcher.parse(Map<String, dynamic> json) {
+  factory _Matcher.parse(Map<String, Object?> json) {
     if (_IncludeMatcher.isType(json)) {
-      return _IncludeMatcher(json['include']);
+      return _IncludeMatcher(json['include'] as String);
     } else if (_SimpleMatcher.isType(json)) {
       return _SimpleMatcher(json);
     } else if (_MultilineMatcher.isType(json)) {
@@ -194,7 +195,7 @@ abstract class _Matcher {
     throw StateError('Unknown matcher type: $json');
   }
 
-  _Matcher._(Map<String, dynamic> json) : name = json['name'];
+  _Matcher._(Map<String, Object?> json) : name = json['name'] as String?;
 
   final String? name;
 
@@ -204,7 +205,7 @@ abstract class _Matcher {
     Grammar grammar,
     LineScanner scanner,
     ScopeStack scopeStack,
-    Map<String, dynamic>? captures,
+    Map<String, Object?>? captures,
     ScopeStackLocation location,
   ) {
     final lastMatch = scanner.lastMatch!;
@@ -243,23 +244,24 @@ abstract class _Matcher {
     }
   }
 
-  Map<String, dynamic> toJson();
+  Map<String, Object?> toJson();
 }
 
 /// A simple matcher which matches a single line.
 class _SimpleMatcher extends _Matcher {
-  _SimpleMatcher(Map<String, dynamic> json)
-      : match = RegExp(json['match'], multiLine: true),
-        captures = json['captures'],
+  _SimpleMatcher(Map<String, Object?> json)
+      : match = RegExp(json['match'] as String, multiLine: true),
+        captures = (json['captures'] as Map<String, Object?>?)
+            ?.cast<String, Map<String, Object?>>(),
         super._(json);
 
-  static bool isType(Map<String, dynamic> json) {
+  static bool isType(Map<String, Object?> json) {
     return json.containsKey('match');
   }
 
   final RegExp match;
 
-  final Map<String, dynamic>? captures;
+  final Map<String, Object?>? captures;
 
   @override
   bool scan(Grammar grammar, LineScanner scanner, ScopeStack scopeStack) {
@@ -274,7 +276,7 @@ class _SimpleMatcher extends _Matcher {
   }
 
   @override
-  Map<String, dynamic> toJson() {
+  Map<String, Object?> toJson() {
     return {
       if (name != null) 'name': name,
       'match': match.pattern,
@@ -284,24 +286,26 @@ class _SimpleMatcher extends _Matcher {
 }
 
 class _MultilineMatcher extends _Matcher {
-  _MultilineMatcher(Map<String, dynamic> json)
-      : begin = RegExp(json['begin'], multiLine: true),
-        beginCaptures = json['beginCaptures'],
-        contentName = json['contentName'],
-        end = json['end'] == null ? null : RegExp(json['end'], multiLine: true),
-        endCaptures = json['endCaptures'],
-        captures = json['captures'],
+  _MultilineMatcher(Map<String, Object?> json)
+      : begin = RegExp(json['begin'] as String, multiLine: true),
+        beginCaptures = json['beginCaptures'] as Map<String, Object?>?,
+        contentName = json['contentName'] as String?,
+        end = json['end'] == null
+            ? null
+            : RegExp(json['end'] as String, multiLine: true),
+        endCaptures = json['endCaptures'] as Map<String, Object?>?,
+        captures = json['captures'] as Map<String, Object?>?,
         whileCond = json['while'] == null
             ? null
-            : RegExp(json['while'], multiLine: true),
-        patterns = json['patterns']
-            ?.cast<Map<String, dynamic>>()
-            ?.map((e) => _Matcher.parse(e))
-            ?.toList()
-            ?.cast<_Matcher>(),
+            : RegExp(json['while'] as String, multiLine: true),
+        patterns = (json['patterns'] as List<Object?>?)
+            ?.cast<Map<String, Object?>>()
+            .map((e) => _Matcher.parse(e))
+            .toList()
+            .cast<_Matcher>(),
         super._(json);
 
-  static bool isType(Map<String, dynamic> json) {
+  static bool isType(Map<String, Object?> json) {
     return json.containsKey('begin') &&
         (json.containsKey('end') || json.containsKey('while'));
   }
@@ -313,7 +317,7 @@ class _MultilineMatcher extends _Matcher {
 
   /// A set of scopes to apply to groups captured by `begin`. `captures` should
   /// be null if this property is provided.
-  final Map<String, dynamic>? beginCaptures;
+  final Map<String, Object?>? beginCaptures;
 
   /// The scope that applies to the content between the matches found by
   /// `begin` and `end`.
@@ -326,7 +330,7 @@ class _MultilineMatcher extends _Matcher {
 
   /// A set of scopes to apply to groups captured by `begin`. `captures` should
   /// be null if this property is provided.
-  final Map<String, dynamic>? endCaptures;
+  final Map<String, Object?>? endCaptures;
 
   /// A regular expression corresponding with the `while` property used to
   /// determine if the next line should have the current rule applied. If
@@ -345,7 +349,7 @@ class _MultilineMatcher extends _Matcher {
   /// Providing this property is the equivalent of setting `beginCaptures` and
   /// `endCaptures` to the same value. `beginCaptures` and `endCaptures` should
   /// be null if this property is provided.
-  final Map<String, dynamic>? captures;
+  final Map<String, Object?>? captures;
 
   final List<_Matcher>? patterns;
 
@@ -420,7 +424,7 @@ class _MultilineMatcher extends _Matcher {
     Grammar grammar,
     LineScanner scanner,
     ScopeStack scopeStack,
-    Map<String, dynamic>? customCaptures,
+    Map<String, Object?>? customCaptures,
     ScopeStackLocation location,
   ) {
     if (contentName == null || (customCaptures ?? captures) != null) {
@@ -496,7 +500,7 @@ class _MultilineMatcher extends _Matcher {
   }
 
   @override
-  Map<String, dynamic> toJson() {
+  Map<String, Object?> toJson() {
     return {
       if (name != null) 'name': name,
       'begin': begin.pattern,
@@ -511,15 +515,15 @@ class _MultilineMatcher extends _Matcher {
 }
 
 class _PatternMatcher extends _Matcher {
-  _PatternMatcher(Map<String, dynamic> json)
-      : patterns = json['patterns']
-            ?.cast<Map<String, dynamic>>()
-            ?.map((e) => _Matcher.parse(e))
-            ?.toList()
-            ?.cast<_Matcher>(),
+  _PatternMatcher(Map<String, Object?> json)
+      : patterns = (json['patterns'] as List<Object?>?)
+            ?.cast<Map<String, Object?>>()
+            .map((e) => _Matcher.parse(e))
+            .toList()
+            .cast<_Matcher>(),
         super._(json);
 
-  static bool isType(Map<String, dynamic> json) {
+  static bool isType(Map<String, Object?> json) {
     return json.containsKey('patterns');
   }
 
@@ -537,7 +541,7 @@ class _PatternMatcher extends _Matcher {
   }
 
   @override
-  Map<String, dynamic> toJson() {
+  Map<String, Object?> toJson() {
     return {
       if (name != null) 'name': name,
       if (patterns != null)
@@ -556,7 +560,7 @@ class _IncludeMatcher extends _Matcher {
 
   final String include;
 
-  static bool isType(Map<String, dynamic> json) {
+  static bool isType(Map<String, Object?> json) {
     return json.containsKey('include');
   }
 
@@ -570,7 +574,7 @@ class _IncludeMatcher extends _Matcher {
   }
 
   @override
-  Map<String, dynamic> toJson() {
+  Map<String, Object?> toJson() {
     return {
       'include': include,
     };
