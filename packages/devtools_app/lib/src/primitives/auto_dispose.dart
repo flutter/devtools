@@ -94,15 +94,14 @@ class Disposer {
     if (readyWhen(trigger.value)) {
       callback();
     } else {
-      // do the stuff to add the listener and remove it when appropriate
-      VoidCallback? earlyDisposeCallback;
-      earlyDisposeCallback = () {
+      VoidCallback? triggerListener;
+      triggerListener = () {
         if (readyWhen(trigger.value)) {
           callback();
-          trigger.removeListener(earlyDisposeCallback!);
+          trigger.removeListener(triggerListener!);
         }
       };
-      addAutoDisposeListener(trigger, earlyDisposeCallback);
+      addAutoDisposeListener(trigger, triggerListener);
     }
   }
 }
