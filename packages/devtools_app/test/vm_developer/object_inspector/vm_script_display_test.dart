@@ -24,7 +24,7 @@ void main() {
 
   setUp(() {
     setGlobal(IdeTheme, IdeTheme());
-
+    setUpMockScriptManager();
     mockScriptObject = MockScriptObject();
 
     final json = testScript.toJson();

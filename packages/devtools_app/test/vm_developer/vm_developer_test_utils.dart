@@ -172,7 +172,7 @@ class TestInstanceObject extends InstanceObject {
   String? get name => 'FooInstance';
 }
 
-void setUpProgramExplorerDependencies() {
+void setUpMockScriptManager() {
   final mockScriptManager = MockScriptManager();
   when(mockScriptManager.sortedScripts).thenReturn(
     FixedValueListenable<List<ScriptRef>>([testScript]),

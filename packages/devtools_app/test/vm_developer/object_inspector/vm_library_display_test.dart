@@ -28,7 +28,7 @@ void main() {
     const windowSize = Size(4000.0, 4000.0);
 
     setUpAll(() {
-      setUpProgramExplorerDependencies();
+      setUpMockScriptManager();
       mockLibraryObject = MockLibraryObject();
 
       final json = testLib.toJson();

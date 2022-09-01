@@ -25,7 +25,7 @@ void main() {
 
   group('VmCodeDisplay', () {
     setUp(() {
-      setUpProgramExplorerDependencies();
+      setUpMockScriptManager();
       setGlobal(IdeTheme, IdeTheme());
 
       mockCodeObject = MockCodeObject();

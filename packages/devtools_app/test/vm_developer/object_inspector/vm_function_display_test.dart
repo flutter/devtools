@@ -24,7 +24,7 @@ void main() {
   late Func testFunctionCopy;
 
   setUp(() {
-    setUpProgramExplorerDependencies();
+    setUpMockScriptManager();
     setGlobal(IdeTheme, IdeTheme());
 
     mockFuncObject = MockFuncObject();
