@@ -171,76 +171,72 @@ class _CpuProfilerState extends State<CpuProfiler>
             tabs: widget.tabs,
           ),
           actions: [
-            Row(
-              children: [
-                if (currentTab.key != CpuProfiler.summaryTab) ...[
-                  FilterButton(
-                    onPressed: _showFilterDialog,
-                    isFilterActive: widget.controller.isToggleFilterActive,
-                  ),
-                  const SizedBox(width: denseSpacing),
-                  UserTagDropdown(widget.controller),
-                  const SizedBox(width: denseSpacing),
-                ],
-                // TODO(kenz): support search for call tree and bottom up tabs as
-                // well. This will require implementing search for tree tables.
-                if (currentTab.key == CpuProfiler.flameChartTab) ...[
-                  if (widget.searchFieldKey != null) _buildSearchField(),
-                  FlameChartHelpButton(
-                    gaScreen: widget.standaloneProfiler
-                        ? analytics_constants.cpuProfiler
-                        : analytics_constants.performance,
-                    gaSelection: analytics_constants.cpuProfileFlameChartHelp,
-                    additionalInfo: [
-                      ...dialogSubHeader(Theme.of(context), 'Legend'),
-                      Legend(
-                        entries: [
-                          LegendEntry(
-                            'App code (code from your app and imported packages)',
-                            appCodeColor.background.colorFor(colorScheme),
-                          ),
-                          LegendEntry(
-                            'Native code (code from the native runtime - Android, iOS, etc.)',
-                            nativeCodeColor.background.colorFor(colorScheme),
-                          ),
-                          LegendEntry(
-                            'Dart core libraries (code from the Dart SDK)',
-                            dartCoreColor.background.colorFor(colorScheme),
-                          ),
-                          LegendEntry(
-                            'Flutter Framework (code from the Flutter SDK)',
-                            flutterCoreColor.background.colorFor(colorScheme),
-                          ),
-                        ],
+            if (currentTab.key != CpuProfiler.summaryTab) ...[
+              FilterButton(
+                onPressed: _showFilterDialog,
+                isFilterActive: widget.controller.isToggleFilterActive,
+              ),
+              const SizedBox(width: denseSpacing),
+              UserTagDropdown(widget.controller),
+              const SizedBox(width: denseSpacing),
+            ],
+            // TODO(kenz): support search for call tree and bottom up tabs as
+            // well. This will require implementing search for tree tables.
+            if (currentTab.key == CpuProfiler.flameChartTab) ...[
+              if (widget.searchFieldKey != null) _buildSearchField(),
+              FlameChartHelpButton(
+                gaScreen: widget.standaloneProfiler
+                    ? analytics_constants.cpuProfiler
+                    : analytics_constants.performance,
+                gaSelection: analytics_constants.cpuProfileFlameChartHelp,
+                additionalInfo: [
+                  ...dialogSubHeader(Theme.of(context), 'Legend'),
+                  Legend(
+                    entries: [
+                      LegendEntry(
+                        'App code (code from your app and imported packages)',
+                        appCodeColor.background.colorFor(colorScheme),
+                      ),
+                      LegendEntry(
+                        'Native code (code from the native runtime - Android, iOS, etc.)',
+                        nativeCodeColor.background.colorFor(colorScheme),
+                      ),
+                      LegendEntry(
+                        'Dart core libraries (code from the Dart SDK)',
+                        dartCoreColor.background.colorFor(colorScheme),
+                      ),
+                      LegendEntry(
+                        'Flutter Framework (code from the Flutter SDK)',
+                        flutterCoreColor.background.colorFor(colorScheme),
                       ),
                     ],
                   ),
                 ],
-                if (currentTab.key != CpuProfiler.flameChartTab &&
-                    currentTab.key != CpuProfiler.summaryTab) ...[
-                  // TODO(kenz): add a switch to order samples by user tag here
-                  // instead of using the filter control. This will allow users
-                  // to see all the tags side by side in the tree tables.
-                  ExpandAllButton(
-                    onPressed: () {
-                      _performOnDataRoots(
-                        (root) => root.expandCascading(),
-                        currentTab,
-                      );
-                    },
-                  ),
-                  const SizedBox(width: denseSpacing),
-                  CollapseAllButton(
-                    onPressed: () {
-                      _performOnDataRoots(
-                        (root) => root.collapseCascading(),
-                        currentTab,
-                      );
-                    },
-                  ),
-                ],
-              ],
-            ),
+              ),
+            ],
+            if (currentTab.key != CpuProfiler.flameChartTab &&
+                currentTab.key != CpuProfiler.summaryTab) ...[
+              // TODO(kenz): add a switch to order samples by user tag here
+              // instead of using the filter control. This will allow users
+              // to see all the tags side by side in the tree tables.
+              ExpandAllButton(
+                onPressed: () {
+                  _performOnDataRoots(
+                    (root) => root.expandCascading(),
+                    currentTab,
+                  );
+                },
+              ),
+              const SizedBox(width: denseSpacing),
+              CollapseAllButton(
+                onPressed: () {
+                  _performOnDataRoots(
+                    (root) => root.collapseCascading(),
+                    currentTab,
+                  );
+                },
+              ),
+            ],
           ],
         ),
         Expanded(
