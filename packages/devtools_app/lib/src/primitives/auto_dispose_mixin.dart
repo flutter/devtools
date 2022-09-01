@@ -41,15 +41,15 @@ mixin AutoDisposeMixin<T extends StatefulWidget> on State<T>
   }
 
   @override
-  void addConditionalAutoDisposeListener({
-    required ValueListenable<bool>? listenableForEarlyDispose,
-    required Listenable? listenable,
-    required VoidCallback? listener,
+  void callOnceWhenReady({
+    required VoidCallback callback,
+    required ValueListenable<bool> readyTrigger,
+    bool readyWhen = true,
   }) {
-    _delegate.addConditionalAutoDisposeListener(
-      listenableForEarlyDispose: listenableForEarlyDispose,
-      listenable: listenable,
-      listener: listener,
+    _delegate.callOnceWhenReady(
+      callback: callback,
+      readyTrigger: readyTrigger,
+      readyWhen: readyWhen,
     );
   }
 

@@ -42,7 +42,7 @@ class Disposer {
     if (listenable == null || listener == null) return;
     _listenables.add(listenable);
     _listeners.add(listener);
-    listenable.addListener(listener);
+    listenable.add///Listener(listener);
   }
 
   /// Cancel all stream subscriptions added.
@@ -76,34 +76,31 @@ class Disposer {
     }
     _focusNodes.clear();
   }
-
-  /// Adds a [listener] to [listenable] that will either dispose
-  /// when [listenableForEarlyDispose] gets set to true, or when
-  /// the [cancelListeners] is called.
-  void addConditionalAutoDisposeListener({
-    required ValueListenable<bool>? listenableForEarlyDispose,
-    required Listenable? listenable,
-    required VoidCallback? listener,
+  /// Assign a [callback] to [readyTrigger], such that the [callback] will run
+  /// once when [readyTrigger] is equal to [readyWhen].
+  /// 
+  /// When calling [callOnceWhenReady] :
+  ///     - If [readyTrigger] is equal to [readyWhen], then the [callback] will be immediately triggered  
+  ///     - Otherwise, the [callback] will be triggered when [readyTrigger] changes to equal [readyWhen]
+  /// 
+  /// Any listeners set by [callOnceWhenReady] will auto dispose, or be removed after the callback is run.
+  void callOnceWhenReady({
+    required VoidCallback callback,
+    required ValueListenable<bool> readyTrigger,
+    bool readyWhen = true,
   }) {
-    VoidCallback? earlyDisposeCallback;
-    earlyDisposeCallback = () {
-      // When listenableForEarlyDispose turns true, it is time to dispose the
-      // listener
-      if (listenableForEarlyDispose?.value == true &&
-          earlyDisposeCallback != null &&
-          listener != null) {
-        listenable?.removeListener(listener);
-        listenableForEarlyDispose?.removeListener(earlyDisposeCallback!);
-        earlyDisposeCallback = null;
-      }
-    };
-    addAutoDisposeListener(
-      listenableForEarlyDispose,
-      earlyDisposeCallback,
-    );
-    addAutoDisposeListener(listenable, listener);
-    if (earlyDisposeCallback != null) {
-      earlyDisposeCallback!();
+    if (readyTrigger.value == readyWhen)
+      callback();
+    else {
+      // do the stuff to add the listener and remove it when appropriate
+      VoidCallback? earlyDisposeCallback;
+      earlyDisposeCallback = () {
+        if (readyTrigger.value == readyWhen) {
+          callback();
+          readyTrigger.removeListener(earlyDisposeCallback!);
+        }
+      };
+      addAutoDisposeListener(readyTrigger, earlyDisposeCallback);
     }
   }
 }
@@ -168,15 +165,15 @@ mixin AutoDisposeControllerMixin on DisposableController implements Disposer {
   }
 
   @override
-  void addConditionalAutoDisposeListener({
-    required ValueListenable<bool>? listenableForEarlyDispose,
-    required Listenable? listenable,
-    required VoidCallback? listener,
+  void callOnceWhenReady({
+    required VoidCallback callback,
+    required ValueListenable<bool> readyTrigger,
+    bool readyWhen = true,
   }) {
-    _delegate.addConditionalAutoDisposeListener(
-      listenableForEarlyDispose: listenableForEarlyDispose,
-      listenable: listenable,
-      listener: listener,
+    _delegate.callOnceWhenReady(
+      callback: callback,
+      readyTrigger: readyTrigger,
+      readyWhen: readyWhen,
     );
   }
 }

@@ -119,115 +119,119 @@ void main() {
       expect(values.last, equals(19));
     });
 
-    group('conditional auto dispose', () {
-      testWidgets('can early dispose', (WidgetTester tester) async {
-        final disposer = Disposer();
-        final earlyDisposeNotifier = ValueNotifier<bool>(false);
-        final notifier = ValueNotifier<int>(42);
-        final values = <int>[];
-        disposer.addConditionalAutoDisposeListener(
-          listenableForEarlyDispose: earlyDisposeNotifier,
-          listenable: notifier,
-          listener: () {
-            values.add(notifier.value);
-          },
-        );
+    group('callOnceWhenReady', () {
+      for (var readyWhen in [false, true]) {
+        group('readyWhen=$readyWhen', () {
+          testWidgets('triggers callback and cancels listeners when ready ',
+              (WidgetTester tester) async {
+            final disposer = Disposer();
+            final trigger = ValueNotifier<bool>(!readyWhen);
+            final callbackEntries = <int>[];
+            int counter = 0;
 
-        // ignore: invalid_use_of_protected_member
-        expect(notifier.hasListeners, isTrue);
-        notifier.value = 13;
-        expect(values.length, equals(1));
-        expect(values.last, equals(13));
-        notifier.value = 15;
-        expect(values.length, equals(2));
-        expect(values.last, equals(15));
+            disposer.callOnceWhenReady(
+              readyTrigger: trigger,
+              readyWhen: readyWhen,
+              callback: () {
+                counter++;
+                callbackEntries.add(counter);
+              },
+            );
 
-        // ignore: invalid_use_of_protected_member
-        expect(notifier.hasListeners, isTrue);
-        // ignore: invalid_use_of_protected_member
-        expect(earlyDisposeNotifier.hasListeners, isTrue);
+            expect(callbackEntries, equals([]));
 
-        // Trigger the early dispose
-        earlyDisposeNotifier.value = true;
+            // ignore: invalid_use_of_protected_member
+            expect(trigger.hasListeners, isTrue);
 
-        await tester.pump();
+            // Trigger the callback
+            trigger.value = readyWhen;
 
-        // ignore: invalid_use_of_protected_member
-        expect(notifier.hasListeners, isFalse);
-        // ignore: invalid_use_of_protected_member
-        expect(earlyDisposeNotifier.hasListeners, isFalse);
+            await tester.pump();
 
-        notifier.value = 17;
+            // ignore: invalid_use_of_protected_member
+            expect(trigger.hasListeners, isFalse);
 
-        // Verify listener not fired.
-        expect(values.length, equals(2));
-        expect(values.last, equals(15));
-      });
+            // Check that we ran the callback.
+            expect(callbackEntries, equals([1]));
 
-      testWidgets('can auto dispose', (WidgetTester tester) async {
-        final disposer = Disposer();
-        final earlyDisposeNotifier = ValueNotifier<bool>(false);
-        final notifier = ValueNotifier<int>(42);
-        final values = <int>[];
-        disposer.addConditionalAutoDisposeListener(
-          listenableForEarlyDispose: earlyDisposeNotifier,
-          listenable: notifier,
-          listener: () {
-            values.add(notifier.value);
-          },
-        );
+            // Keep changing the isReady value to make sure we don't trigger again.
+            trigger.value = true;
+            trigger.value = false;
 
-        // ignore: invalid_use_of_protected_member
-        expect(notifier.hasListeners, isTrue);
-        notifier.value = 13;
-        expect(values.length, equals(1));
-        expect(values.last, equals(13));
-        notifier.value = 15;
-        expect(values.length, equals(2));
-        expect(values.last, equals(15));
+            await tester.pump();
 
-        // ignore: invalid_use_of_protected_member
-        expect(notifier.hasListeners, isTrue);
-        // ignore: invalid_use_of_protected_member
-        expect(earlyDisposeNotifier.hasListeners, isTrue);
+            // Verify callback not fired again.
+            expect(callbackEntries, equals([1]));
+          });
 
-        disposer.cancelListeners();
+          testWidgets('removes listeners when disposer cancels',
+              (WidgetTester tester) async {
+            final disposer = Disposer();
+            final trigger = ValueNotifier<bool>(!readyWhen);
+            final callbackEntries = <int>[];
+            int counter = 0;
 
-        // ignore: invalid_use_of_protected_member
-        expect(notifier.hasListeners, isFalse);
-        // ignore: invalid_use_of_protected_member
-        expect(earlyDisposeNotifier.hasListeners, isFalse);
+            disposer.callOnceWhenReady(
+              readyTrigger: trigger,
+              readyWhen: readyWhen,
+              callback: () {
+                counter++;
+                callbackEntries.add(counter);
+              },
+            );
 
-        notifier.value = 17;
+            // ignore: invalid_use_of_protected_member
+            expect(trigger.hasListeners, isTrue);
+            expect(callbackEntries, equals([]));
 
-        // Verify listener not fired.
-        expect(values.length, equals(2));
-        expect(values.last, equals(15));
-      });
+            disposer.cancelListeners();
 
-      testWidgets('early disposes immediately when early dispose true',
-          (WidgetTester tester) async {
-        final disposer = Disposer();
-        final earlyDisposeNotifier = ValueNotifier<bool>(true);
-        final notifier = ValueNotifier<int>(42);
-        final values = <int>[];
-        disposer.addConditionalAutoDisposeListener(
-          listenableForEarlyDispose: earlyDisposeNotifier,
-          listenable: notifier,
-          listener: () {
-            values.add(notifier.value);
-          },
-        );
+            // ignore: invalid_use_of_protected_member
+            expect(trigger.hasListeners, isFalse);
 
-        // ignore: invalid_use_of_protected_member
-        expect(notifier.hasListeners, isFalse);
-        // ignore: invalid_use_of_protected_member
-        expect(earlyDisposeNotifier.hasListeners, isFalse);
+            // Change the isReady value to make sure we don't trigger again.
+            trigger.value = readyWhen;
 
-        // ignore: invalid_use_of_protected_member
-        notifier.value = 13;
-        expect(values.length, equals(0));
-      });
+            await tester.pump();
+
+            // Verify callback not fired again.
+            expect(callbackEntries, equals([]));
+          });
+
+          testWidgets(
+              'runs callback immediately if starting ready in the ready state',
+              (WidgetTester tester) async {
+            final disposer = Disposer();
+            final trigger = ValueNotifier<bool>(readyWhen);
+            final callbackEntries = <int>[];
+            int counter = 0;
+
+            // ignore: invalid_use_of_protected_member
+            expect(trigger.hasListeners, isFalse);
+
+            disposer.callOnceWhenReady(
+              readyTrigger: trigger,
+              readyWhen: readyWhen,
+              callback: () {
+                counter++;
+                callbackEntries.add(counter);
+              },
+            );
+
+            // ignore: invalid_use_of_protected_member
+            expect(trigger.hasListeners, isFalse);
+            expect(callbackEntries, equals([1]));
+
+            // Change the isReady value to make sure we don't trigger again.
+            trigger.value = !trigger.value;
+
+            await tester.pump();
+
+            // Verify callback not fired again.
+            expect(callbackEntries, equals([1]));
+          });
+        });
+      }
     });
   });
 
