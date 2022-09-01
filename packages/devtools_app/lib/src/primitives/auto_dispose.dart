@@ -42,7 +42,7 @@ class Disposer {
     if (listenable == null || listener == null) return;
     _listenables.add(listenable);
     _listeners.add(listener);
-    listenable.add///Listener(listener);
+    listenable.addListener(listener);
   }
 
   /// Cancel all stream subscriptions added.
@@ -76,13 +76,14 @@ class Disposer {
     }
     _focusNodes.clear();
   }
+
   /// Assign a [callback] to [readyTrigger], such that the [callback] will run
   /// once when [readyTrigger] is equal to [readyWhen].
-  /// 
+  ///
   /// When calling [callOnceWhenReady] :
-  ///     - If [readyTrigger] is equal to [readyWhen], then the [callback] will be immediately triggered  
+  ///     - If [readyTrigger] is equal to [readyWhen], then the [callback] will be immediately triggered
   ///     - Otherwise, the [callback] will be triggered when [readyTrigger] changes to equal [readyWhen]
-  /// 
+  ///
   /// Any listeners set by [callOnceWhenReady] will auto dispose, or be removed after the callback is run.
   void callOnceWhenReady({
     required VoidCallback callback,
