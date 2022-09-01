@@ -1,14 +1,15 @@
 ## How to release the next version of DevTools
 
-### Refresh environment
+### Configure/Refresh environment
 
 Make sure:
 1. You have local checkout of the Dart SDK (for getting started instructions, see [sdk/CONTRIBUTING.md](https://github.com/dart-lang/sdk/blob/main/CONTRIBUTING.md)). 
 2. `echo $LOCAL_DART_SDK` gives you path to the local checkout
-2. The local chackout is at `main` branch: `git rebase-update`.
-3. Your Flutter version is equal to one in flutter_version.txt. If not fix it by one of two ways:
+3. The local chackout is at `main` branch: `git rebase-update`.
+4. Your Flutter version is equal to one in flutter_version.txt. If not fix it by one of two ways:
     - Run `./tool/update_flutter_sdk.sh` id devtools directory
     - Switch Flutter version by running 'git checkout <version in flutter_version.txt>' in Flutter directory.
+5. You goma is [configured](https://g3doc.corp.google.com/devtools/goma/g3doc/how-to-use-goma/how-to-install-goma-mac.md). 
 
 ### Prepare the release
 
@@ -152,7 +153,7 @@ git cl upload -s
 `package:devtools_shared` is the only DevTools package that is published on pub.
 From the `devtools/packages/devtools_shared` directory, run:
 ```shell
-pub publish
+flutter pub publish
 ```
 
 ### Write release notes for the release
