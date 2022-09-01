@@ -153,7 +153,7 @@ git cl upload -s
 `package:devtools_shared` is the only DevTools package that is published on pub.
 From the `devtools/packages/devtools_shared` directory, run:
 ```shell
-flutter pub publish
+pub publish
 ```
 
 ### Write release notes for the release
