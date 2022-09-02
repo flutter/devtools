@@ -126,6 +126,9 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
     super.didChangeDependencies();
     if (!initController()) return;
     controller.startRecording();
+
+    cancelListeners();
+
     addAutoDisposeListener(serviceManager.isolateManager.mainIsolate, () {
       if (serviceManager.isolateManager.mainIsolate.value != null) {
         controller.startRecording();
