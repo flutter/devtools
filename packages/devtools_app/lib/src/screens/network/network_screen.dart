@@ -126,6 +126,11 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
     super.didChangeDependencies();
     if (!initController()) return;
     controller.startRecording();
+    addAutoDisposeListener(serviceManager.isolateManager.mainIsolate, () {
+      if (serviceManager.isolateManager.mainIsolate.value != null) {
+        controller.startRecording();
+      }
+    });
   }
 
   @override
@@ -138,11 +143,6 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
 
   @override
   Widget build(BuildContext context) {
-    addAutoDisposeListener(serviceManager.isolateManager.mainIsolate, () {
-      if (serviceManager.isolateManager.mainIsolate.value != null) {
-        controller.startRecording();
-      }
-    });
     return Column(
       children: [
         _NetworkProfilerControls(controller: controller),
