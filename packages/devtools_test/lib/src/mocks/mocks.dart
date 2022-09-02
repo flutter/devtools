@@ -30,6 +30,11 @@ class FakeIsolateManager extends Fake implements IsolateManager {
     return _isolates!;
   }
 
+  @override
+  IsolateState? get mainIsolateDebuggerState {
+    return MockIsolateState();
+  }
+
   ValueNotifier<List<IsolateRef>>? _isolates;
 
   @override
@@ -122,7 +127,10 @@ class FakeVM extends Fake implements VM {
   };
 }
 
-class MockIsolateState extends Mock implements IsolateState {}
+class MockIsolateState extends Mock implements IsolateState {
+  @override
+  ValueListenable<bool?> get isPaused => ValueNotifier<bool>(false);
+}
 
 class MockIsolate extends Mock implements Isolate {}
 

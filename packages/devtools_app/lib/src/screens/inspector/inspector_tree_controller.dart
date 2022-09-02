@@ -773,7 +773,12 @@ class _InspectorTreeState extends State<InspectorTree>
     }
     _focusNode = FocusNode(debugLabel: 'inspector-tree');
     autoDisposeFocusNode(_focusNode);
-    _bindToController();
+
+    callOnceWhenReady(
+      trigger: serviceManager.isolateManager.mainIsolateDebuggerState!.isPaused,
+      callback: _bindToController,
+      readyWhen: (triggerValue) => triggerValue == false,
+    );
   }
 
   @override
