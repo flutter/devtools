@@ -28,9 +28,7 @@ class AllocationProfileTableViewController extends DisposableController
 
   void initialize() {
     if (_initialized) {
-      throw StateError(
-        "'AllocationProfileController' has already been initialized.",
-      );
+      return;
     }
     autoDisposeStreamSubscription(
       serviceManager.service!.onGCEvent.listen((event) {

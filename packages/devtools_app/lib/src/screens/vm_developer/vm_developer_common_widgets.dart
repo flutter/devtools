@@ -326,18 +326,31 @@ class VmExpansionTile extends StatelessWidget {
     final titleRow = AreaPaneHeader(
       title: Text(title),
       needsTopBorder: false,
+      needsBottomBorder: false,
+      // We'll set the color in the Card so the InkWell shows a consistent
+      // color when the user hovers over the ExpansionTile.
+      backgroundColor: Colors.transparent,
     );
+    final theme = Theme.of(context);
     return Card(
+      color: theme.titleSolidBackgroundColor,
       child: ListTileTheme(
-        data: ListTileTheme.of(context).copyWith(dense: true),
-        child: ExpansionTile(
-          title: titleRow,
-          onExpansionChanged: onExpanded,
-          tilePadding: const EdgeInsets.only(
-            left: densePadding,
-            right: defaultSpacing,
+        data: ListTileTheme.of(context).copyWith(
+          dense: true,
+        ),
+        child: Theme(
+          // Prevents divider lines appearing at the top and bottom of the
+          // expanded ExpansionTile.
+          data: theme.copyWith(dividerColor: Colors.transparent),
+          child: ExpansionTile(
+            title: titleRow,
+            onExpansionChanged: onExpanded,
+            tilePadding: const EdgeInsets.only(
+              left: densePadding,
+              right: defaultSpacing,
+            ),
+            children: children,
           ),
-          children: children,
         ),
       ),
     );

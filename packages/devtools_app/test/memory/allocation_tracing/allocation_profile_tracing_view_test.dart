@@ -169,7 +169,7 @@ void main() {
         (e) => e.traceAllocations,
       );
 
-      expect(find.byType(AllocationProfileTracingBottomUpTable), findsNothing);
+      expect(find.byType(AllocationProfileTracingTable), findsNothing);
       final traceElement = find.byKey(Key(selectedTrace.cls.id!));
       expect(traceElement, findsOneWidget);
 
@@ -196,12 +196,14 @@ void main() {
       await tester.tap(refresh);
       await tester.pumpAndSettle();
       expect(
-        find.byType(AllocationProfileTracingBottomUpTable),
+        find.byType(AllocationProfileTracingTable),
         findsOneWidget,
       );
 
       // Verify the expected widget components are present.
       expect(find.textContaining('Traced allocations for: '), findsOneWidget);
+      expect(find.text('Bottom Up'), findsOneWidget);
+      expect(find.text('Call Tree'), findsOneWidget);
       expect(find.text('Expand All'), findsOneWidget);
       expect(find.text('Collapse All'), findsOneWidget);
       expect(find.text('Inclusive'), findsOneWidget);
@@ -211,14 +213,19 @@ void main() {
 
       final bottomUpRoots =
           controller.selectedTracedClassAllocationData!.bottomUpRoots;
+      final callTreeRoots =
+          controller.selectedTracedClassAllocationData!.callTreeRoots;
       for (final root in bottomUpRoots) {
+        expect(root.isExpanded, false);
+      }
+      for (final root in callTreeRoots) {
         expect(root.isExpanded, false);
       }
 
       await tester.tap(find.text('Expand All'));
       await tester.pumpAndSettle();
 
-      // Check all nodes have been expanded.
+      // Check all nodes in the bottom up tree have been expanded.
       for (final root in bottomUpRoots) {
         breadthFirstTraversal<CpuStackFrame>(
           root,
@@ -228,11 +235,52 @@ void main() {
         );
       }
 
+      // But also make sure that the call tree nodes haven't been expanded.
+      for (final root in callTreeRoots) {
+        expect(root.isExpanded, false);
+      }
+
       await tester.tap(find.text('Collapse All'));
       await tester.pumpAndSettle();
 
       // Check all nodes have been collapsed.
       for (final root in bottomUpRoots) {
+        breadthFirstTraversal<CpuStackFrame>(
+          root,
+          action: (e) {
+            expect(e.isExpanded, false);
+          },
+        );
+      }
+
+      // Switch from bottom up view to call tree view.
+      await tester.tap(find.text('Call Tree'));
+      await tester.pumpAndSettle();
+
+      // Expand the call tree.
+      await tester.tap(find.text('Expand All'));
+      await tester.pumpAndSettle();
+
+      // Check all nodes in the call tree have been expanded.
+      for (final root in callTreeRoots) {
+        breadthFirstTraversal<CpuStackFrame>(
+          root,
+          action: (e) {
+            expect(e.isExpanded, true);
+          },
+        );
+      }
+
+      // But also make sure that the bottom up tree nodes haven't been expanded.
+      for (final root in bottomUpRoots) {
+        expect(root.isExpanded, false);
+      }
+
+      await tester.tap(find.text('Collapse All'));
+      await tester.pumpAndSettle();
+
+      // Check all nodes have been collapsed.
+      for (final root in callTreeRoots) {
         breadthFirstTraversal<CpuStackFrame>(
           root,
           action: (e) {
