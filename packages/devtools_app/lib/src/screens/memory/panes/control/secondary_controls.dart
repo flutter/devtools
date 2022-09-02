@@ -194,20 +194,14 @@ class _SecondaryControlsState extends State<SecondaryControls>
       mainAxisSize: MainAxisSize.min,
       children: [
         const MemorySourceDropdown(),
-        const SizedBox(width: defaultSpacing),
         const SizedBox(width: denseSpacing),
-        Row(
-          children: [
-            IconLabelButton(
-              onPressed: controller.isGcing ? null : _gc,
-              icon: Icons.delete,
-              label: 'GC',
-              minScreenWidthForTextBeforeScaling:
-                  primaryControlsMinVerboseWidth,
-            ),
-            const SizedBox(width: denseSpacing),
-          ],
+        IconLabelButton(
+          onPressed: controller.isGcing ? null : _gc,
+          icon: Icons.delete,
+          label: 'GC',
+          minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
         ),
+        const SizedBox(width: denseSpacing),
         ExportButton(
           onPressed: controller.offline.value ? null : _exportToFile,
           minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,

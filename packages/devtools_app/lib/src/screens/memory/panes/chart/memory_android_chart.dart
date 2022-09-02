@@ -169,7 +169,7 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: defaultChartHeight,
       child: Chart(_chartController),
     );

@@ -541,10 +541,9 @@ class MemoryController extends DisposableController
 
   bool get isPaused => _paused.value;
 
-  final ValueNotifier<bool> isAndroidChartVisibleNotifier =
-      ValueNotifier<bool>(false);
+  final isAndroidChartVisibleNotifier = ValueNotifier<bool>(false);
 
-  final SettingsModel settings = SettingsModel();
+  final settings = SettingsModel();
 
   final selectionSnapshotNotifier =
       ValueNotifier<Selection<Reference>>(Selection.empty());
@@ -854,7 +853,8 @@ class MemoryController extends DisposableController
         preferences.memory.androidCollectionEnabled.value &&
         isConnectedDeviceAndroid;
     isAndroidChartVisibleNotifier.value = _isAndroidChartVisible();
-    preferences.memory.androidCollectionEnabled.addListener(
+    addAutoDisposeListener(
+      preferences.memory.androidCollectionEnabled,
       () => isAndroidChartVisibleNotifier.value = _isAndroidChartVisible(),
     );
   }

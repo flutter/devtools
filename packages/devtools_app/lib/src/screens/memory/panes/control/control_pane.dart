@@ -11,7 +11,7 @@ import '../chart/chart_pane_controller.dart';
 import 'primary_controls.dart';
 import 'secondary_controls.dart';
 
-class MemoryControlPane extends StatefulWidget {
+class MemoryControlPane extends StatelessWidget {
   const MemoryControlPane({
     Key? key,
     required this.chartController,
@@ -20,22 +20,14 @@ class MemoryControlPane extends StatefulWidget {
   final MemoryChartPaneController chartController;
 
   @override
-  State<MemoryControlPane> createState() => _MemoryControlPaneState();
-}
-
-class _MemoryControlPaneState extends State<MemoryControlPane>
-    with
-        AutoDisposeMixin,
-        ProvidedControllerMixin<MemoryController, MemoryControlPane> {
-  @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        PrimaryControls(chartController: widget.chartController),
+        PrimaryControls(chartController: chartController),
         const Spacer(),
         SecondaryControls(
-          chartController: widget.chartController,
+          chartController: chartController,
         )
       ],
     );

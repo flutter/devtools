@@ -27,14 +27,10 @@ class PreferencesController extends DisposableController
   ValueListenable<bool> get denseModeEnabled => _denseMode;
 
   InspectorPreferencesController get inspector => _inspector;
+  final _inspector = InspectorPreferencesController();
 
   MemoryPreferencesController get memory => _memory;
   final _memory = MemoryPreferencesController();
-
-  MemoryPreferencesController get memoryPreferences => _memoryPreferences;
-  final _memoryPreferences = MemoryPreferencesController();
-
-  final _inspector = InspectorPreferencesController();
 
   Future<void> init() async {
     // Get the current values and listen for and write back changes.
@@ -65,7 +61,7 @@ class PreferencesController extends DisposableController
   @override
   void dispose() {
     inspector.dispose();
-    // memory.dispose();
+    memory.dispose();
     super.dispose();
   }
 
@@ -305,7 +301,8 @@ class InspectorPreferencesController extends DisposableController
   }
 }
 
-class MemoryPreferencesController {
+class MemoryPreferencesController extends DisposableController
+    with AutoDisposeControllerMixin {
   ValueListenable<bool> get androidCollectionEnabled =>
       _androidCollectionEnabled;
   final _androidCollectionEnabled = ValueNotifier<bool>(false);
@@ -317,44 +314,40 @@ class MemoryPreferencesController {
   static const _autoSnapshotEnabledStorageId = 'memory.autoSnapshotEnabled';
 
   Future<void> init() async {
-    final androidCollectionEnabledValue =
-        await storage.getValue(_androidCollectionEnabledStorageId);
-    setAndroidCollectionEnabled(androidCollectionEnabledValue == 'true');
-    _androidCollectionEnabled.addListener(() {
-      storage.setValue(
-        _androidCollectionEnabledStorageId,
-        _androidCollectionEnabled.value.toString(),
-      );
-    });
+    addAutoDisposeListener(
+      _androidCollectionEnabled,
+      () {
+        storage.setValue(
+          _androidCollectionEnabledStorageId,
+          _androidCollectionEnabled.value.toString(),
+        );
+        if (_androidCollectionEnabled.value) {
+          ga.select(
+            analytics_constants.memory,
+            analytics_constants.androidChart,
+          );
+        }
+      },
+    );
+    _androidCollectionEnabled.value =
+        await storage.getValue(_androidCollectionEnabledStorageId) == 'true';
 
-    final autoSnapshotEnabledValue =
-        await storage.getValue(_autoSnapshotEnabledStorageId);
-    setAutoSnapshotEnabled(autoSnapshotEnabledValue == 'true');
-    _autoSnapshotEnabled.addListener(() {
-      storage.setValue(
-        _autoSnapshotEnabledStorageId,
-        _autoSnapshotEnabled.value.toString(),
-      );
-    });
-  }
-
-  void setAndroidCollectionEnabled(bool enable) {
-    _androidCollectionEnabled.value = enable;
-    if (enable) {
-      ga.select(
-        analytics_constants.memory,
-        analytics_constants.androidChart,
-      );
-    }
-  }
-
-  void setAutoSnapshotEnabled(bool enable) {
-    _autoSnapshotEnabled.value = enable;
-    if (enable) {
-      ga.select(
-        analytics_constants.memory,
-        analytics_constants.autoSnapshot,
-      );
-    }
+    addAutoDisposeListener(
+      _autoSnapshotEnabled,
+      () {
+        storage.setValue(
+          _autoSnapshotEnabledStorageId,
+          _autoSnapshotEnabled.value.toString(),
+        );
+        if (_autoSnapshotEnabled.value) {
+          ga.select(
+            analytics_constants.memory,
+            analytics_constants.autoSnapshot,
+          );
+        }
+      },
+    );
+    _autoSnapshotEnabled.value =
+        await storage.getValue(_autoSnapshotEnabledStorageId) == 'true';
   }
 }
