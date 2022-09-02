@@ -13,6 +13,7 @@ import '../../http/http_request_data.dart';
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../primitives/utils.dart';
 import '../../shared/common_widgets.dart';
+import '../../shared/globals.dart';
 import '../../shared/screen.dart';
 import '../../shared/split.dart';
 import '../../shared/table.dart';
@@ -137,6 +138,11 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
 
   @override
   Widget build(BuildContext context) {
+    addAutoDisposeListener(serviceManager.isolateManager.mainIsolate, () {
+      if (serviceManager.isolateManager.mainIsolate.value != null) {
+        controller.startRecording();
+      }
+    });
     return Column(
       children: [
         _NetworkProfilerControls(controller: controller),
