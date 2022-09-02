@@ -2,8 +2,10 @@
 
 This directory stores pre-built assets of the
 [Perfetto UI](https://github.com/google/perfetto/tree/master/ui) web app, along
-with some additional files authored by the DevTools team to support custom
-styling for the Perfetto UI.
+with some additional files authored by the DevTools team, to support custom
+styling for the Perfetto UI. We embed this web app in an iFrame on the DevTools
+Performance page. This allows us to leverage the first-in-class trace viewer for
+viewing Dart and Flutter timeline traces.
 
 ## Why is this included in `assets/`?
 
