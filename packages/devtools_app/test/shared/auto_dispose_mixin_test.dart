@@ -116,17 +116,17 @@ void main() {
     });
 
     group('callOnceWhenReady', () {
-      for (bool readyWhen in [false, true]) {
-        group('readyWhen=$readyWhen', () {
+      for (bool isReady in [false, true]) {
+        group('readyWhen=$isReady', () {
           testWidgets('triggers callback and cancels listeners when ready ',
               (WidgetTester tester) async {
             final disposer = Disposer();
-            final trigger = ValueNotifier<bool?>(!readyWhen);
+            final trigger = ValueNotifier<bool?>(!isReady);
             int callbackCounter = 0;
 
             disposer.callOnceWhenReady(
               trigger: trigger,
-              readyWhen: (triggerValue) => triggerValue == readyWhen,
+              readyWhen: (triggerValue) => triggerValue == isReady,
               callback: () {
                 callbackCounter++;
               },
@@ -146,7 +146,7 @@ void main() {
             expect(disposer.listeners.length, equals(1));
 
             // Set a value that will trigger the callback.
-            trigger.value = readyWhen;
+            trigger.value = isReady;
 
             await tester.pump();
 
@@ -170,12 +170,12 @@ void main() {
           testWidgets('removes listeners when disposer cancels',
               (WidgetTester tester) async {
             final disposer = Disposer();
-            final trigger = ValueNotifier<bool>(!readyWhen);
+            final trigger = ValueNotifier<bool>(!isReady);
             int callbackCounter = 0;
 
             disposer.callOnceWhenReady(
               trigger: trigger,
-              readyWhen: (triggerValue) => triggerValue == readyWhen,
+              readyWhen: (triggerValue) => triggerValue == isReady,
               callback: () {
                 callbackCounter++;
               },
@@ -193,7 +193,7 @@ void main() {
             expect(disposer.listeners.length, equals(0));
 
             // Change the isReady value to make sure we don't trigger again.
-            trigger.value = readyWhen;
+            trigger.value = isReady;
 
             await tester.pump();
 
@@ -205,14 +205,14 @@ void main() {
               'runs callback immediately if starting in the ready state',
               (WidgetTester tester) async {
             final disposer = Disposer();
-            final trigger = ValueNotifier<bool>(readyWhen);
+            final trigger = ValueNotifier<bool>(isReady);
             int callbackCounter = 0;
 
             expect(trigger.hasListeners, isFalse);
 
             disposer.callOnceWhenReady(
               trigger: trigger,
-              readyWhen: (triggerValue) => triggerValue == readyWhen,
+              readyWhen: (triggerValue) => triggerValue == isReady,
               callback: () {
                 callbackCounter++;
               },
