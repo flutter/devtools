@@ -10,6 +10,8 @@ import 'package:devtools_app/src/primitives/auto_dispose_mixin.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../fixtures/debugging_app_async.dart';
+
 class AutoDisposedWidget extends StatefulWidget {
   const AutoDisposedWidget(this.stream, {Key? key}) : super(key: key);
 
@@ -118,8 +120,7 @@ void main() {
     group('callOnceWhenReady', () {
       for (bool isReady in [false, true]) {
         group('readyWhen=$isReady', () {
-          testWidgets('triggers callback and cancels listeners when ready ',
-              (WidgetTester tester) async {
+          test('triggers callback and cancels listeners when ready ', () async {
             final disposer = Disposer();
             final trigger = ValueNotifier<bool?>(!isReady);
             int callbackCounter = 0;
@@ -139,7 +140,8 @@ void main() {
             // Set a value that won't trigger the callback.
             trigger.value = null;
 
-            await tester.pump();
+            await delay();
+
             expect(trigger.hasListeners, isTrue);
             expect(callbackCounter, equals(0));
             expect(disposer.listenables.length, equals(1));
@@ -148,7 +150,7 @@ void main() {
             // Set a value that will trigger the callback.
             trigger.value = isReady;
 
-            await tester.pump();
+            await delay();
 
             expect(trigger.hasListeners, isFalse);
             expect(disposer.listenables.length, equals(0));
@@ -161,14 +163,13 @@ void main() {
             trigger.value = true;
             trigger.value = null;
 
-            await tester.pump();
+            await delay();
 
             // Verify callback not fired again.
             expect(callbackCounter, equals(1));
           });
 
-          testWidgets('removes listeners when disposer cancels',
-              (WidgetTester tester) async {
+          test('removes listeners when disposer cancels', () async {
             final disposer = Disposer();
             final trigger = ValueNotifier<bool>(!isReady);
             int callbackCounter = 0;
@@ -195,15 +196,14 @@ void main() {
             // Change the isReady value to make sure we don't trigger again.
             trigger.value = isReady;
 
-            await tester.pump();
+            await delay();
 
             // Verify callback not fired again.
             expect(callbackCounter, equals(0));
           });
 
-          testWidgets(
-              'runs callback immediately if starting in the ready state',
-              (WidgetTester tester) async {
+          test('runs callback immediately if starting in the ready state',
+              () async {
             final disposer = Disposer();
             final trigger = ValueNotifier<bool>(isReady);
             int callbackCounter = 0;
@@ -226,7 +226,7 @@ void main() {
             // Change the isReady value to make sure we don't trigger again.
             trigger.value = !trigger.value;
 
-            await tester.pump();
+            await delay();
 
             // Verify callback not fired again.
             expect(callbackCounter, equals(1));
