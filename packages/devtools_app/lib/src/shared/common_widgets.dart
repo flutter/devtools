@@ -781,6 +781,7 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
     this.leftPadding = defaultSpacing,
     this.rightPadding = densePadding,
     this.tall = false,
+    this.backgroundColor,
   }) : super(key: key);
 
   final Widget title;
@@ -792,6 +793,7 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
   final double leftPadding;
   final double rightPadding;
   final bool tall;
+  final Color? backgroundColor;
 
   @override
   Widget build(BuildContext context) {
@@ -806,7 +808,7 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
                 needsBottomBorder ? defaultBorderSide(theme) : BorderSide.none,
             left: needsLeftBorder ? defaultBorderSide(theme) : BorderSide.none,
           ),
-          color: theme.titleSolidBackgroundColor,
+          color: backgroundColor ?? theme.titleSolidBackgroundColor,
         ),
         padding: EdgeInsets.only(left: leftPadding, right: rightPadding),
         alignment: Alignment.centerLeft,
@@ -1047,6 +1049,52 @@ class RoundedDropDownButton<T> extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class DevToolsClearableTextField extends StatelessWidget {
+  DevToolsClearableTextField({
+    Key? key,
+    required this.labelText,
+    TextEditingController? controller,
+    this.hintText,
+    this.onChanged,
+    this.autofocus = false,
+  })  : controller = controller ?? TextEditingController(),
+        super(key: key);
+
+  final TextEditingController controller;
+  final String? hintText;
+  final String labelText;
+  final Function(String)? onChanged;
+  final bool autofocus;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      autofocus: autofocus,
+      controller: controller,
+      onChanged: onChanged,
+      decoration: InputDecoration(
+        contentPadding: const EdgeInsets.all(denseSpacing),
+        constraints: BoxConstraints(
+          minHeight: defaultTextFieldHeight,
+          maxHeight: defaultTextFieldHeight,
+        ),
+        border: const OutlineInputBorder(),
+        labelText: labelText,
+        hintText: hintText,
+        suffixIcon: IconButton(
+          tooltip: 'Clear',
+          icon: const Icon(Icons.clear),
+          onPressed: () {
+            controller.clear();
+            onChanged?.call('');
+          },
+        ),
+        isDense: true,
       ),
     );
   }

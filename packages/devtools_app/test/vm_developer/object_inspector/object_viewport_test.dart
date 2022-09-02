@@ -8,6 +8,7 @@ import 'package:devtools_app/src/screens/vm_developer/vm_class_display.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_developer_common_widgets.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_field_display.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_function_display.dart';
+import 'package:devtools_app/src/screens/vm_developer/vm_library_display.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_object_model.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_script_display.dart';
 import 'package:devtools_app/src/scripts/script_manager.dart';
@@ -144,17 +145,25 @@ void main() {
     });
   });
 
-  testWidgets('test for Library Object', (WidgetTester tester) async {
-    final testLibraryObject =
-        TestLibraryObject(ref: testLib, testLibrary: testLib);
-    testObjectInspectorViewController.fakeObjectHistory
-        .setCurrentObject(testLibraryObject);
-    await tester.pumpWidget(
-      wrap(ObjectViewport(controller: testObjectInspectorViewController)),
-    );
-    expect(viewportTitle(testLibraryObject), 'Library FooLib');
-    expect(find.text('Library FooLib'), findsOneWidget);
-    expect(find.byType(VMInfoCard), findsOneWidget);
+  group('test for library object:', () {
+    late MockLibraryObject mockLibraryObject;
+
+    setUp(() {
+      mockLibraryObject = MockLibraryObject();
+
+      mockVmObject(mockLibraryObject);
+    });
+
+    testWidgets('viewport shows library display', (WidgetTester tester) async {
+      testObjectInspectorViewController.fakeObjectHistory
+          .setCurrentObject(mockLibraryObject);
+      await tester.pumpWidget(
+        wrap(ObjectViewport(controller: testObjectInspectorViewController)),
+      );
+      expect(viewportTitle(mockLibraryObject), 'Library fooLib');
+      expect(find.text('Library fooLib'), findsOneWidget);
+      expect(find.byType(VmLibraryDisplay), findsOneWidget);
+    });
   });
 
   group('test for instance object:', () {
@@ -186,6 +195,10 @@ void main() {
       obj1 = MockClassObject();
       obj2 = MockClassObject();
       obj3 = MockClassObject();
+
+      when(obj1.obj).thenReturn(Class(id: '1'));
+      when(obj2.obj).thenReturn(Class(id: '2'));
+      when(obj3.obj).thenReturn(Class(id: '3'));
     });
 
     test('initial values', () {

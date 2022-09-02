@@ -104,7 +104,7 @@ class VMInfoList extends StatelessWidget {
               controller: listScrollController,
               child: ListView(
                 controller: listScrollController,
-                children: _prettyRows(
+                children: prettyRows(
                   context,
                   [
                     for (final row in rowKeyValues)
@@ -132,7 +132,7 @@ class VMInfoList extends StatelessWidget {
   }
 }
 
-List<Widget> _prettyRows(BuildContext context, List<Row> rows) {
+List<Widget> prettyRows(BuildContext context, List<Row> rows) {
   return [
     for (int i = 0; i < rows.length; ++i)
       _buildAlternatingRow(context, i, rows[i]),
@@ -326,18 +326,31 @@ class VmExpansionTile extends StatelessWidget {
     final titleRow = AreaPaneHeader(
       title: Text(title),
       needsTopBorder: false,
+      needsBottomBorder: false,
+      // We'll set the color in the Card so the InkWell shows a consistent
+      // color when the user hovers over the ExpansionTile.
+      backgroundColor: Colors.transparent,
     );
+    final theme = Theme.of(context);
     return Card(
+      color: theme.titleSolidBackgroundColor,
       child: ListTileTheme(
-        data: ListTileTheme.of(context).copyWith(dense: true),
-        child: ExpansionTile(
-          title: titleRow,
-          onExpansionChanged: onExpanded,
-          tilePadding: const EdgeInsets.only(
-            left: densePadding,
-            right: defaultSpacing,
+        data: ListTileTheme.of(context).copyWith(
+          dense: true,
+        ),
+        child: Theme(
+          // Prevents divider lines appearing at the top and bottom of the
+          // expanded ExpansionTile.
+          data: theme.copyWith(dividerColor: Colors.transparent),
+          child: ExpansionTile(
+            title: titleRow,
+            onExpansionChanged: onExpanded,
+            tilePadding: const EdgeInsets.only(
+              left: densePadding,
+              right: defaultSpacing,
+            ),
+            children: children,
           ),
-          children: children,
         ),
       ),
     );
@@ -443,7 +456,7 @@ class RetainingPathWidget extends StatelessWidget {
       )
     ];
 
-    return _prettyRows(context, retainingObjects);
+    return prettyRows(context, retainingObjects);
   }
 
   /// Describes the given RetainingObject [object] and its parentListIndex,
@@ -560,7 +573,7 @@ class InboundReferencesWidget extends StatelessWidget {
       index++;
     }
 
-    return _prettyRows(context, references);
+    return prettyRows(context, references);
   }
 
   /// Describes the given InboundReference [inboundRef] and its parentListIndex,

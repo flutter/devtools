@@ -23,10 +23,10 @@ import 'allocation_profile_table_view_controller.dart';
 
 /// The default width for columns containing *mostly* numeric data (e.g.,
 /// instances, memory).
-const _defaultNumberFieldWidth = 80.0;
+const _defaultNumberFieldWidth = 90.0;
 
-class _FieldClassName extends ColumnData<ClassHeapStats> {
-  _FieldClassName()
+class _FieldClassNameColumn extends ColumnData<ClassHeapStats> {
+  _FieldClassNameColumn()
       : super(
           'Class',
           fixedWidthPx: scaleByFontFactor(200),
@@ -208,7 +208,7 @@ class AllocationProfileTableViewState
         ),
         Expanded(
           child: _AllocationProfileTable(
-            allocationProfileController: widget.controller,
+            controller: widget.controller,
           ),
         ),
       ],
@@ -216,10 +216,10 @@ class AllocationProfileTableViewState
   }
 }
 
-class _AllocationProfileTable extends StatelessWidget {
+class _AllocationProfileTable extends StatefulWidget {
   const _AllocationProfileTable({
     Key? key,
-    required this.allocationProfileController,
+    required this.controller,
   }) : super(key: key);
 
   /// List of columns that are displayed regardless of VM developer mode state.
@@ -234,10 +234,14 @@ class _AllocationProfileTable extends StatelessWidget {
     ),
   ];
 
+  static final _initialSortColumn = _FieldSizeColumn(
+    heap: _HeapGeneration.total,
+  );
+
   static final _columns = [
-    _FieldClassName(),
+    _FieldClassNameColumn(),
     _FieldInstanceCountColumn(heap: _HeapGeneration.total),
-    _FieldSizeColumn(heap: _HeapGeneration.total),
+    _initialSortColumn,
     _FieldInternalSizeColumn(heap: _HeapGeneration.total),
     _FieldExternalSizeColumn(heap: _HeapGeneration.total),
   ];
@@ -265,12 +269,30 @@ class _AllocationProfileTable extends StatelessWidget {
     _FieldExternalSizeColumn(heap: _HeapGeneration.oldSpace),
   ];
 
-  final AllocationProfileTableViewController allocationProfileController;
+  final AllocationProfileTableViewController controller;
+
+  @override
+  State<_AllocationProfileTable> createState() =>
+      _AllocationProfileTableState();
+}
+
+class _AllocationProfileTableState extends State<_AllocationProfileTable> {
+  // TODO(bkonyi): pull state into a TableController class.
+  // See https://github.com/flutter/devtools/issues/4365
+  late SortDirection _sortDirection;
+  late ColumnData<ClassHeapStats> _sortColumn;
+
+  @override
+  void initState() {
+    super.initState();
+    _sortColumn = _AllocationProfileTable._initialSortColumn;
+    _sortDirection = SortDirection.descending;
+  }
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<AllocationProfile?>(
-      valueListenable: allocationProfileController.currentAllocationProfile,
+      valueListenable: widget.controller.currentAllocationProfile,
       builder: (context, profile, _) {
         // TODO(bkonyi): make this an overlay so the table doesn't
         // disappear when we're retrieving new data, especially since the
@@ -287,13 +309,14 @@ class _AllocationProfileTable extends StatelessWidget {
                 builder: (context, constraints) {
                   return FlatTable<ClassHeapStats?>(
                     columnGroups: [
-                      ..._columnGroups,
+                      ..._AllocationProfileTable._columnGroups,
                       if (vmDeveloperModeEnabled)
-                        ..._vmDeveloperModeColumnGroups,
+                        ..._AllocationProfileTable._vmDeveloperModeColumnGroups,
                     ],
                     columns: [
-                      ..._columns,
-                      if (vmDeveloperModeEnabled) ..._vmDeveloperModeColumns,
+                      ..._AllocationProfileTable._columns,
+                      if (vmDeveloperModeEnabled)
+                        ..._AllocationProfileTable._vmDeveloperModeColumns,
                     ],
                     data: profile.members!.where(
                       (element) {
@@ -302,8 +325,18 @@ class _AllocationProfileTable extends StatelessWidget {
                             element.oldSpace.externalSize != 0;
                       },
                     ).toList(),
-                    sortColumn: _columns.first,
-                    sortDirection: SortDirection.ascending,
+                    sortColumn: _sortColumn,
+                    sortDirection: _sortDirection,
+                    onSortChanged: (
+                      sortColumn,
+                      direction, {
+                      secondarySortColumn,
+                    }) {
+                      setState(() {
+                        sortColumn = sortColumn;
+                        _sortDirection = direction;
+                      });
+                    },
                     onItemSelected: (item) => null,
                     keyFactory: (element) => Key(element!.classRef!.name!),
                   );

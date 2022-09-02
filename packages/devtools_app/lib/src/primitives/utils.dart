@@ -1217,6 +1217,19 @@ class ListValueNotifier<T> extends ChangeNotifier
     _listChanged();
   }
 
+  /// Replaces the first occurrence of [value] in this list.
+  ///
+  /// Runtime is O(n).
+  bool replace(T existing, T replacement) {
+    final index = _rawList.indexOf(existing);
+    if (index == -1) return false;
+    _rawList = _rawList.toList();
+    _rawList.removeAt(index);
+    _rawList.insert(index, replacement);
+    _listChanged();
+    return true;
+  }
+
   /// Replaces all elements in the list and notifies listeners. It's preferred
   /// to calling .clear() then .addAll(), because it only notifies listeners
   /// once.

@@ -54,7 +54,9 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
     AllocationMemoryJson? allocationData,
     CpuProfileData? cpuProfileData,
     CpuSamples? cpuSamples,
+    CpuSamples? allocationSamples,
     Map<String, String>? resolvedUriMap,
+    ClassList? classList,
   }) =>
       FakeVmServiceWrapper(
         _flagManager,
@@ -64,7 +66,9 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
         memoryData,
         allocationData,
         cpuSamples,
+        allocationSamples,
         resolvedUriMap,
+        classList,
       );
 
   final List<String> availableServices;

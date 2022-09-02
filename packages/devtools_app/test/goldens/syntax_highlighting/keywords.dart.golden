@@ -7,23 +7,34 @@
 >
 >library foo;
 #^^^^^^^ meta.declaration.dart keyword.other.import.dart
+#       ^^^^ meta.declaration.dart
 #           ^ meta.declaration.dart punctuation.terminator.dart
 >
 >import 'dart:async' deferred as deferredAsync show Future;
 #^^^^^^ meta.declaration.dart keyword.other.import.dart
+#      ^ meta.declaration.dart
 #       ^^^^^^^^^^^^ meta.declaration.dart string.interpolated.single.dart
+#                   ^^^^^^^^^^ meta.declaration.dart
 #                             ^^ meta.declaration.dart keyword.other.import.dart
+#                               ^^^^^^^^^^^^^^^ meta.declaration.dart
 #                                              ^^^^ meta.declaration.dart keyword.other.import.dart
+#                                                  ^^^^^^^ meta.declaration.dart
 #                                                         ^ meta.declaration.dart punctuation.terminator.dart
 >import 'dart:io' as a show File hide Directory;
 #^^^^^^ meta.declaration.dart keyword.other.import.dart
+#      ^ meta.declaration.dart
 #       ^^^^^^^^^ meta.declaration.dart string.interpolated.single.dart
+#                ^ meta.declaration.dart
 #                 ^^ meta.declaration.dart keyword.other.import.dart
+#                   ^^^ meta.declaration.dart
 #                      ^^^^ meta.declaration.dart keyword.other.import.dart
+#                          ^^^^^^ meta.declaration.dart
 #                                ^^^^ meta.declaration.dart keyword.other.import.dart
+#                                    ^^^^^^^^^^ meta.declaration.dart
 #                                              ^ meta.declaration.dart punctuation.terminator.dart
 >export 'dart:io';
 #^^^^^^ meta.declaration.dart keyword.other.import.dart
+#      ^ meta.declaration.dart
 #       ^^^^^^^^^ meta.declaration.dart string.interpolated.single.dart
 #                ^ meta.declaration.dart punctuation.terminator.dart
 >
@@ -94,11 +105,11 @@
 >class C<T extends B> implements A {}
 #^^^^^ keyword.declaration.dart
 #      ^ support.class.dart
-#       ^ keyword.operator.comparison.dart
+#       ^ other.source.dart
 #        ^ support.class.dart
 #          ^^^^^^^ keyword.declaration.dart
 #                  ^ support.class.dart
-#                   ^ keyword.operator.comparison.dart
+#                   ^ other.source.dart
 #                     ^^^^^^^^^^ keyword.declaration.dart
 #                                ^ support.class.dart
 >
@@ -160,9 +171,9 @@
 >
 >Future<void> e() async {
 #^^^^^^ support.class.dart
-#      ^ keyword.operator.comparison.dart
+#      ^ other.source.dart
 #       ^^^^ storage.type.primitive.dart
-#           ^ keyword.operator.comparison.dart
+#           ^ other.source.dart
 #             ^ entity.name.function.dart
 #                 ^^^^^ keyword.control.dart
 >  await Future.delayed(const Duration(seconds: 1));
@@ -187,9 +198,9 @@
 >
 >Iterable<String> syncYield() sync* {
 #^^^^^^^^ support.class.dart
-#        ^ keyword.operator.comparison.dart
+#        ^ other.source.dart
 #         ^^^^^^ support.class.dart
-#               ^ keyword.operator.comparison.dart
+#               ^ other.source.dart
 #                 ^^^^^^^^^ entity.name.function.dart
 #                             ^^^^ keyword.control.dart
 #                                 ^ keyword.operator.arithmetic.dart
@@ -201,9 +212,9 @@
 >
 >Iterable<String> syncYieldStar() sync* {
 #^^^^^^^^ support.class.dart
-#        ^ keyword.operator.comparison.dart
+#        ^ other.source.dart
 #         ^^^^^^ support.class.dart
-#               ^ keyword.operator.comparison.dart
+#               ^ other.source.dart
 #                 ^^^^^^^^^^^^^ entity.name.function.dart
 #                                 ^^^^ keyword.control.dart
 #                                     ^ keyword.operator.arithmetic.dart
@@ -216,9 +227,9 @@
 >
 >Stream<String> asyncYield() async* {
 #^^^^^^ support.class.dart
-#      ^ keyword.operator.comparison.dart
+#      ^ other.source.dart
 #       ^^^^^^ support.class.dart
-#             ^ keyword.operator.comparison.dart
+#             ^ other.source.dart
 #               ^^^^^^^^^^ entity.name.function.dart
 #                            ^^^^^ keyword.control.dart
 #                                 ^ keyword.operator.arithmetic.dart
@@ -240,9 +251,9 @@
 >
 >Stream<String> asyncYieldStar() async* {
 #^^^^^^ support.class.dart
-#      ^ keyword.operator.comparison.dart
+#      ^ other.source.dart
 #       ^^^^^^ support.class.dart
-#             ^ keyword.operator.comparison.dart
+#             ^ other.source.dart
 #               ^^^^^^^^^^^^^^ entity.name.function.dart
 #                                ^^^^^ keyword.control.dart
 #                                     ^ keyword.operator.arithmetic.dart
@@ -439,15 +450,15 @@
 >class Covariance<T> {
 #^^^^^ keyword.declaration.dart
 #      ^^^^^^^^^^ support.class.dart
-#                ^ keyword.operator.comparison.dart
+#                ^ other.source.dart
 #                 ^ support.class.dart
-#                  ^ keyword.operator.comparison.dart
+#                  ^ other.source.dart
 >  void covariance(covariant List<T> items) {}
 #  ^^^^ storage.type.primitive.dart
 #       ^^^^^^^^^^ entity.name.function.dart
 #                  ^^^^^^^^^ keyword.declaration.dart
 #                            ^^^^ support.class.dart
-#                                ^ keyword.operator.comparison.dart
+#                                ^ other.source.dart
 #                                 ^ support.class.dart
-#                                  ^ keyword.operator.comparison.dart
+#                                  ^ other.source.dart
 >}

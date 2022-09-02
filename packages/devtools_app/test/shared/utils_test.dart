@@ -1140,6 +1140,24 @@ void main() {
         expect(notifier.value, equals([1]));
       });
 
+      test('notifies on replace', () {
+        final initialList = [1, 2, 3, 4, 5];
+        setUpWithInitialValue(initialList);
+        final result = notifier.replace(3, -1);
+        expect(result, true);
+        expect(didNotify, isTrue);
+        expect(notifier.value, equals([1, 2, -1, 4, 5]));
+      });
+
+      test('does not notify on invalid replace', () {
+        final initialList = [1, 2, 3, 4, 5];
+        setUpWithInitialValue(initialList);
+        final result = notifier.replace(6, -1);
+        expect(result, false);
+        expect(didNotify, isFalse);
+        expect(notifier.value, equals([1, 2, 3, 4, 5]));
+      });
+
       test('notifies on addAll', () {
         notifier.addAll([1, 2]);
         expect(didNotify, isTrue);

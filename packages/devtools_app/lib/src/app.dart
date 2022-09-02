@@ -598,7 +598,7 @@ List<DevToolsScreen> get defaultScreens {
       createController: () => AppSizeController(),
     ),
     DevToolsScreen<VMDeveloperToolsController>(
-      VMDeveloperToolsScreen(controller: vmDeveloperToolsController),
+      const VMDeveloperToolsScreen(),
       controller: vmDeveloperToolsController,
     ),
     // Show the sample DevTools screen.

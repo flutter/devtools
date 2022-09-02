@@ -13,17 +13,27 @@ git checkout -b release_2.7.0
 
 #### Update the DevTools version number
 
-Run the `update_version.dart` script with the new DevTools version.
+Run the `tool/update_version.dart` script to update the DevTools version.
+For monthly releases use `auto --type minor`.
+
 ```shell
-dart tool/update_version.dart 2.7.0
+# To manually set the version:
+dart tool/update_version.dart manual --new-version 1.2.3
+
+# To automatically update the version by `major`, `minor`, `patch`, or `dev`:
+dart tool/update_version.dart auto --type patch
+
+# For regular monthly releases, use `minor`:
+dart tool/update_version.dart auto --type minor
 ```
+
 Verify that this script updated the pubspecs under packages/
 and updated all references to those packages. These packages always have their
 version numbers updated in lock, so we don't have to worry about
 versioning. Also make sure that the version constant in
 `packages/devtools_app/lib/devtools.dart` was updated.
 
-#### Update the CHANGELOG.md
+#### Update the CHANGELOG.md (for non-dev releases)
 
 Use the tool `generate-changelog` to automatically update the `packages/devtools/CHANGELOG.md` file.
 
@@ -44,8 +54,10 @@ git commit -m “Prepare for 2.7.0 release.”
 git push origin release_2.7.0
 ```
 
-From the git GUI tool or from github.com directly, create a PR, send for review,
-then squash and commit after receiving an LGTM.
+From the git GUI tool or from github.com directly:
+1. Create a PR.
+2. Add the entry about the created PR to the CHANGELOG.md manually, and push to the PR.
+3. Receive an LGTM, squash and commit.
 
 ### Test the release
 Checkout the commit you just created, or remain on the branch you just landed the prep PR from.
@@ -132,7 +144,7 @@ git cl upload -s
 `package:devtools_shared` is the only DevTools package that is published on pub.
 From the `devtools/packages/devtools_shared` directory, run:
 ```shell
-pub publish
+flutter pub publish
 ```
 
 ### Write release notes for the release

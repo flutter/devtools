@@ -23,7 +23,7 @@ import 'program_explorer_controller.dart';
 class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
   VMServiceObjectNode(
     this.controller,
-    name,
+    String? name,
     this.object, {
     this.isSelectable = true,
   }) : name = name ?? '';
@@ -58,6 +58,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     if (_outline != null) {
       return _outline;
     }
+
     final root = VMServiceObjectNode(
       controller,
       '<root>',
@@ -113,7 +114,6 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
         root.addChild(clazzNode);
       }
     }
-
     for (final function in lib.functions!) {
       if (function.location?.script?.uri == uri) {
         final node = VMServiceObjectNode(
@@ -322,8 +322,8 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     return this;
   }
 
-  void updateObject(Obj object) {
-    if (this.object is! Class && object is Class) {
+  void updateObject(Obj object, {bool forceUpdate = false}) {
+    if ((this.object is! Class || forceUpdate) && object is Class) {
       for (final function in object.functions?.cast<Func>() ?? <Func>[]) {
         final node = _createChild(function.name, function);
         _buildCodeNodes(function, node);
@@ -337,6 +337,9 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
   }
 
   Future<void> populateLocation() async {
+    if (location != null) {
+      return;
+    }
     ScriptRef? scriptRef = script;
     int? tokenPos = 0;
     if (object != null &&

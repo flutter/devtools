@@ -254,6 +254,8 @@ class InspectorService extends InspectorServiceBase {
 
   @override
   bool isLocalClass(RemoteDiagnosticsNode node) {
+    // TODO(https://github.com/flutter/devtools/issues/4393): localClasses is
+    // not currently being filled.
     if (node.widgetRuntimeType == null) return false;
     // widgetRuntimeType may contain some generic type arguments which we need
     // to strip out. If widgetRuntimeType is "FooWidget<Bar>" then we are only
@@ -388,25 +390,26 @@ class InspectorService extends InspectorServiceBase {
   }
 
   Future<void> _updateLocalClasses() async {
-    localClasses.clear();
-    if (_rootDirectories.value.isNotEmpty) {
-      final isolate = inspectorLibrary.isolate!;
-      for (var libraryRef in isolate.libraries!) {
-        if (isLocalUri(libraryRef.uri!)) {
-          try {
-            final Library library = await inspectorLibrary.service
-                .getObject(isolate.id!, libraryRef.id!) as Library;
-            for (var classRef in library.classes!) {
-              localClasses[classRef.name!] = classRef;
-            }
-          } catch (e) {
-            // Workaround until https://github.com/flutter/devtools/issues/3110
-            // is fixed.
-            assert(serviceManager.connectedApp!.isDartWebAppNow!);
-          }
-        }
-      }
-    }
+    // TODO(https://github.com/flutter/devtools/issues/4393)
+    // localClasses.clear();
+    // if (_rootDirectories.value.isNotEmpty) {
+    //   final isolate = inspectorLibrary.isolate!;
+    //   for (var libraryRef in isolate.libraries!) {
+    //     if (isLocalUri(libraryRef.uri!)) {
+    //       try {
+    //         final Library library = await inspectorLibrary.service
+    //             .getObject(isolate.id!, libraryRef.id!) as Library;
+    //         for (var classRef in library.classes!) {
+    //           localClasses[classRef.name!] = classRef;
+    //         }
+    //       } catch (e) {
+    //         // Workaround until https://github.com/flutter/devtools/issues/3110
+    //         // is fixed.
+    //         assert(serviceManager.connectedApp!.isDartWebAppNow!);
+    //       }
+    //     }
+    //   }
+    // }
   }
 
   @visibleForTesting
@@ -461,11 +464,11 @@ class InspectorService extends InspectorServiceBase {
       'getPubRootDirectories',
     );
 
-    if (response.runtimeType != List) return [];
+    if (response is! List<dynamic>) {
+      return [];
+    }
 
-    return (response as List<dynamic>)
-        .map<String>((e) => e.toString())
-        .toList();
+    return response.map<String>((e) => e.toString()).toList();
   }
 
   /// As we aren't running from an IDE, we don't know exactly what the pub root

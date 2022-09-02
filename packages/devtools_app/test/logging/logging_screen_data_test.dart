@@ -8,7 +8,6 @@ import 'package:ansicolor/ansicolor.dart';
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/logging/_log_details.dart';
 import 'package:devtools_app/src/screens/logging/_logs_table.dart';
-import 'package:devtools_app/src/shared/notifications.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';

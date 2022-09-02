@@ -58,8 +58,7 @@
 #                              ^ constant.numeric.dart
 #                               ^ punctuation.terminator.dart
 >  a ??= b;
-#    ^ keyword.operator.ternary.dart
-#     ^ keyword.operator.ternary.dart
+#    ^^ keyword.operator.ternary.dart
 #      ^ keyword.operator.assignment.dart
 #         ^ punctuation.terminator.dart
 >  b += 1;
@@ -200,11 +199,9 @@
 #        ^ keyword.operator.assignment.dart
 #          ^ keyword.operator.logical.dart
 #              ^^ keyword.operator.comparison.dart
-#                   ^ keyword.operator.bitwise.dart
-#                    ^ keyword.operator.bitwise.dart
+#                   ^^ keyword.operator.bitwise.dart
 #                      ^^^^^ constant.language.dart
-#                            ^ keyword.operator.bitwise.dart
-#                             ^ keyword.operator.bitwise.dart
+#                            ^^ keyword.operator.bitwise.dart
 #                               ^^^^ constant.language.dart
 #                                    ^ punctuation.terminator.dart
 >}
