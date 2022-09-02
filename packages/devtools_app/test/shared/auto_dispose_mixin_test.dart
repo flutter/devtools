@@ -122,26 +122,28 @@ void main() {
               (WidgetTester tester) async {
             final disposer = Disposer();
             final trigger = ValueNotifier<bool?>(!readyWhen);
-            final callbackEntries = <int>[];
-            int counter = 0;
+            int callbackCounter = 0;
 
             disposer.callOnceWhenReady(
               trigger: trigger,
               readyWhen: (triggerValue) => triggerValue == readyWhen,
               callback: () {
-                counter++;
-                callbackEntries.add(counter);
+                callbackCounter++;
               },
             );
 
-            expect(callbackEntries, equals([]));
+            expect(callbackCounter, equals(0));
+            expect(disposer.listenables.length, equals(1));
+            expect(disposer.listeners.length, equals(1));
 
             // Set a value that won't trigger the callback.
             trigger.value = null;
 
             await tester.pump();
             expect(trigger.hasListeners, isTrue);
-            expect(callbackEntries, equals([]));
+            expect(callbackCounter, equals(0));
+            expect(disposer.listenables.length, equals(1));
+            expect(disposer.listeners.length, equals(1));
 
             // Set a value that will trigger the callback.
             trigger.value = readyWhen;
@@ -149,9 +151,11 @@ void main() {
             await tester.pump();
 
             expect(trigger.hasListeners, isFalse);
+            expect(disposer.listenables.length, equals(0));
+            expect(disposer.listeners.length, equals(0));
 
             // Check that we ran the callback.
-            expect(callbackEntries, equals([1]));
+            expect(callbackCounter, equals(1));
 
             // Keep changing the isReady value to make sure we don't trigger again.
             trigger.value = true;
@@ -160,31 +164,33 @@ void main() {
             await tester.pump();
 
             // Verify callback not fired again.
-            expect(callbackEntries, equals([1]));
+            expect(callbackCounter, equals(1));
           });
 
           testWidgets('removes listeners when disposer cancels',
               (WidgetTester tester) async {
             final disposer = Disposer();
             final trigger = ValueNotifier<bool>(!readyWhen);
-            final callbackEntries = <int>[];
-            int counter = 0;
+            int callbackCounter = 0;
 
             disposer.callOnceWhenReady(
               trigger: trigger,
               readyWhen: (triggerValue) => triggerValue == readyWhen,
               callback: () {
-                counter++;
-                callbackEntries.add(counter);
+                callbackCounter++;
               },
             );
 
             expect(trigger.hasListeners, isTrue);
-            expect(callbackEntries, equals([]));
+            expect(disposer.listenables.length, equals(1));
+            expect(disposer.listeners.length, equals(1));
+            expect(callbackCounter, equals(0));
 
             disposer.cancelListeners();
 
             expect(trigger.hasListeners, isFalse);
+            expect(disposer.listenables.length, equals(0));
+            expect(disposer.listeners.length, equals(0));
 
             // Change the isReady value to make sure we don't trigger again.
             trigger.value = readyWhen;
@@ -192,7 +198,7 @@ void main() {
             await tester.pump();
 
             // Verify callback not fired again.
-            expect(callbackEntries, equals([]));
+            expect(callbackCounter, equals(0));
           });
 
           testWidgets(
@@ -200,8 +206,7 @@ void main() {
               (WidgetTester tester) async {
             final disposer = Disposer();
             final trigger = ValueNotifier<bool>(readyWhen);
-            final callbackEntries = <int>[];
-            int counter = 0;
+            int callbackCounter = 0;
 
             expect(trigger.hasListeners, isFalse);
 
@@ -209,13 +214,14 @@ void main() {
               trigger: trigger,
               readyWhen: (triggerValue) => triggerValue == readyWhen,
               callback: () {
-                counter++;
-                callbackEntries.add(counter);
+                callbackCounter++;
               },
             );
 
             expect(trigger.hasListeners, isFalse);
-            expect(callbackEntries, equals([1]));
+            expect(callbackCounter, equals(1));
+            expect(disposer.listenables.length, equals(0));
+            expect(disposer.listeners.length, equals(0));
 
             // Change the isReady value to make sure we don't trigger again.
             trigger.value = !trigger.value;
@@ -223,7 +229,7 @@ void main() {
             await tester.pump();
 
             // Verify callback not fired again.
-            expect(callbackEntries, equals([1]));
+            expect(callbackCounter, equals(1));
           });
         });
       }

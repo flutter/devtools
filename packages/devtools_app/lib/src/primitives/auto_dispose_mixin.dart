@@ -23,6 +23,13 @@ mixin AutoDisposeMixin<T extends StatefulWidget> on State<T>
   final Disposer _delegate = Disposer();
 
   @override
+  @visibleForTesting
+  List<Listenable> get listenables => _delegate.listenables;
+  @override
+  @visibleForTesting
+  List<VoidCallback> get listeners => _delegate.listeners;
+
+  @override
   void dispose() {
     cancelStreamSubscriptions();
     cancelListeners();

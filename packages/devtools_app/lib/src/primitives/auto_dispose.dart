@@ -19,6 +19,13 @@ class Disposer {
   final List<StreamSubscription> _subscriptions = [];
   final List<FocusNode> _focusNodes = [];
 
+  @protected
+  @visibleForTesting
+  List<Listenable> get listenables => _listenables;
+  @protected
+  @visibleForTesting
+  List<VoidCallback> get listeners => _listeners;
+
   final List<Listenable> _listenables = [];
   final List<VoidCallback> _listeners = [];
 
@@ -126,6 +133,14 @@ abstract class DisposableController {
 ///   [StatefulWidget].
 mixin AutoDisposeControllerMixin on DisposableController implements Disposer {
   final Disposer _delegate = Disposer();
+
+  @override
+  @visibleForTesting
+  List<Listenable> get listenables => _delegate.listenables;
+
+  @override
+  @visibleForTesting
+  List<VoidCallback> get listeners => _delegate.listeners;
 
   @override
   void dispose() {
