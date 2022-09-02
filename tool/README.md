@@ -1,6 +1,19 @@
 ## How to release the next version of DevTools
 
-Create a branch for your release.
+### Configure/Refresh environment
+
+Make sure:
+1. You have a local checkout of the Dart SDK (for getting started instructions, see [sdk/CONTRIBUTING.md](https://github.com/dart-lang/sdk/blob/main/CONTRIBUTING.md)). 
+2. `echo $LOCAL_DART_SDK` gives you path to the local checkout
+3. The local chackout is at `main` branch: `git rebase-update`.
+4. Your Flutter version is equal to the one in flutter_version.txt. If not, fix it using one of:
+    - Run `./tool/update_flutter_sdk.sh` from the main devtools directory
+    - Switch Flutter version by running 'git checkout <version in flutter_version.txt>' in Flutter directory.
+5. You have goma [configured](http://go/ma-mac-setup). 
+
+### Prepare the release
+
+#### Create a branch for your release.
 
 ```shell
 cd ~/path/to/devtools
@@ -8,8 +21,6 @@ git checkout master
 git pull upstream master
 git checkout -b release_2.7.0
 ```
-
-### Prepare the release
 
 #### Update the DevTools version number
 
@@ -102,18 +113,16 @@ commit hash for the tag you just created) and the [update.sh](https://github.com
 script, build and upload the DevTools binary to CIPD.
 
 ```shell
-cd path/to/dart-sdk/sdk
+cd $LOCAL_DART_SDK
 git rebase-update
-third_party/devtools/update.sh 8881a7caa9067471008a8e00750b161f53cdb843
+third_party/devtools/update.sh <your commit hash like 8881a7caa9067471008a8e00750b161f53cdb843>
 ```
 
 ### Update the DevTools hash in the Dart SDK
 
-Navigate to your local checkout of the Dart SDK (for getting started instructions,
-see [sdk/CONTRIBUTING.md](https://github.com/dart-lang/sdk/blob/main/CONTRIBUTING.md)).
-
 Create new branch for your changes:
 ```shell
+cd $LOCAL_DART_SDK
 git new-branch dt-release
 ```
 
@@ -126,7 +135,7 @@ the id for the CIPD upload in the previous step). See this
 Verify that running `dart devtools` launches the version of DevTools you just released. You'll
 need to build the dart sdk locally to do this.
 ```shell
-cd path/to/dart-sdk/sdk
+cd $LOCAL_DART_SDK
 gclient sync -D
 ./tools/build.py -mrelease -ax64 create_sdk
 out/ReleaseX64/dart-sdk/bin/dart devtools  # On OSX replace 'out' with 'xcodebuild'

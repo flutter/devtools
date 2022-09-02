@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 /// Provides functionality to simplify listening to streams and ValueNotifiers,
@@ -17,6 +18,13 @@ import 'package:flutter/material.dart';
 class Disposer {
   final List<StreamSubscription> _subscriptions = [];
   final List<FocusNode> _focusNodes = [];
+
+  @protected
+  @visibleForTesting
+  List<Listenable> get listenables => _listenables;
+  @protected
+  @visibleForTesting
+  List<VoidCallback> get listeners => _listeners;
 
   final List<Listenable> _listenables = [];
   final List<VoidCallback> _listeners = [];
@@ -75,6 +83,37 @@ class Disposer {
     }
     _focusNodes.clear();
   }
+
+  /// Runs [callback] when [trigger]'s value satisfies the [readyWhen] function.
+  ///
+  /// When calling [callOnceWhenReady] :
+  ///     - If [trigger]'s value satisfies [readyWhen], then the [callback] will
+  ///       be immediately triggered.
+  ///     - Otherwise, the [callback] will be triggered when [trigger]'s value
+  ///       changes to equal [readyWhen].
+  ///
+  /// Any listeners set by [callOnceWhenReady] will auto dispose, or be removed after the callback is run.
+  void callOnceWhenReady<T>({
+    required VoidCallback callback,
+    required ValueListenable<T> trigger,
+    required bool Function(T triggerValue) readyWhen,
+  }) {
+    if (readyWhen(trigger.value)) {
+      callback();
+    } else {
+      VoidCallback? triggerListener;
+      triggerListener = () {
+        if (readyWhen(trigger.value)) {
+          callback();
+          trigger.removeListener(triggerListener!);
+
+          _listenables.remove(trigger);
+          _listeners.remove(triggerListener);
+        }
+      };
+      addAutoDisposeListener(trigger, triggerListener);
+    }
+  }
 }
 
 /// Base class for controllers that need to manage their lifecycle.
@@ -94,6 +133,14 @@ abstract class DisposableController {
 ///   [StatefulWidget].
 mixin AutoDisposeControllerMixin on DisposableController implements Disposer {
   final Disposer _delegate = Disposer();
+
+  @override
+  @visibleForTesting
+  List<Listenable> get listenables => _delegate.listenables;
+
+  @override
+  @visibleForTesting
+  List<VoidCallback> get listeners => _delegate.listeners;
 
   @override
   void dispose() {
@@ -134,5 +181,18 @@ mixin AutoDisposeControllerMixin on DisposableController implements Disposer {
   @override
   void cancelFocusNodes() {
     _delegate.cancelFocusNodes();
+  }
+
+  @override
+  void callOnceWhenReady<T>({
+    required VoidCallback callback,
+    required ValueListenable<T> trigger,
+    required bool Function(T triggerValue) readyWhen,
+  }) {
+    _delegate.callOnceWhenReady(
+      callback: callback,
+      trigger: trigger,
+      readyWhen: readyWhen,
+    );
   }
 }

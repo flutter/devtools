@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'auto_dispose.dart';
@@ -22,6 +23,13 @@ mixin AutoDisposeMixin<T extends StatefulWidget> on State<T>
   final Disposer _delegate = Disposer();
 
   @override
+  @visibleForTesting
+  List<Listenable> get listenables => _delegate.listenables;
+  @override
+  @visibleForTesting
+  List<VoidCallback> get listeners => _delegate.listeners;
+
+  @override
   void dispose() {
     cancelStreamSubscriptions();
     cancelListeners();
@@ -37,6 +45,19 @@ mixin AutoDisposeMixin<T extends StatefulWidget> on State<T>
     VoidCallback? listener,
   ]) {
     _delegate.addAutoDisposeListener(listenable, listener ?? _refresh);
+  }
+
+  @override
+  void callOnceWhenReady<T>({
+    required VoidCallback callback,
+    required ValueListenable<T> trigger,
+    required bool Function(T triggerValue) readyWhen,
+  }) {
+    _delegate.callOnceWhenReady(
+      callback: callback,
+      trigger: trigger,
+      readyWhen: readyWhen,
+    );
   }
 
   @override
