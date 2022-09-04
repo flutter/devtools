@@ -158,7 +158,15 @@ flutter pub publish
 
 ### Write release notes for the release
 Release notes should contain details about the user-facing changes included in the release.
-These notes are shown directly in DevTools when a user opens a new version of DevTools. Please
-see the release notes
+These notes are shown directly in DevTools when a user opens a new version of DevTools.
+
+1. Request the team to verify their changes are documented in 
+   [release-notes-next.md][1].
+
+2. See the release notes
 [README.md](https://github.com/flutter/devtools/blob/master/packages/devtools_app/lib/src/framework/release_notes/README.md)
-for details on where to add release notes and how to test them.
+for details on where to add DevTools release notes to Flutter website and how to test them.
+   
+3. Update [release-notes-next.md][1] to contain template for the next release.
+
+[1]: ../packages/devtools_app/lib/src/framework/release_notes/release-notes-next.md
