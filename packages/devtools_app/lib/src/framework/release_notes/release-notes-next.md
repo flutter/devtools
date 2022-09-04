@@ -1,4 +1,4 @@
-This is draft for future release notes, that are going to land the
+This is draft for future release notes, that are going to land on
 [the Flutter website](https://docs.flutter.dev/development/tools/devtools/release-notes).
 
 # DevTools 2.18.0 release notes
