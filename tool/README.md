@@ -160,7 +160,7 @@ flutter pub publish
 Release notes should contain details about the user-facing changes included in the release.
 These notes are shown directly in DevTools when a user opens a new version of DevTools.
 
-1. Request the team to verify their changes are documented in 
+1. Request the team to verify their important user facing changes are documented in 
    [release-notes-next.md][1].
 
 2. See the release notes
