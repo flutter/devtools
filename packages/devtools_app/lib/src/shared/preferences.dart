@@ -303,25 +303,22 @@ class InspectorPreferencesController extends DisposableController
 
 class MemoryPreferencesController extends DisposableController
     with AutoDisposeControllerMixin {
-  ValueListenable<bool> get androidCollectionEnabled =>
-      _androidCollectionEnabled;
-  final _androidCollectionEnabled = ValueNotifier<bool>(false);
+  final androidCollectionEnabled = ValueNotifier<bool>(false);
   static const _androidCollectionEnabledStorageId =
       'memory.androidCollectionEnabled';
 
-  ValueListenable<bool> get autoSnapshotEnabled => _autoSnapshotEnabled;
-  final _autoSnapshotEnabled = ValueNotifier<bool>(false);
+  final autoSnapshotEnabled = ValueNotifier<bool>(false);
   static const _autoSnapshotEnabledStorageId = 'memory.autoSnapshotEnabled';
 
   Future<void> init() async {
     addAutoDisposeListener(
-      _androidCollectionEnabled,
+      androidCollectionEnabled,
       () {
         storage.setValue(
           _androidCollectionEnabledStorageId,
-          _androidCollectionEnabled.value.toString(),
+          androidCollectionEnabled.value.toString(),
         );
-        if (_androidCollectionEnabled.value) {
+        if (androidCollectionEnabled.value) {
           ga.select(
             analytics_constants.memory,
             analytics_constants.androidChart,
@@ -329,17 +326,17 @@ class MemoryPreferencesController extends DisposableController
         }
       },
     );
-    _androidCollectionEnabled.value =
+    androidCollectionEnabled.value =
         await storage.getValue(_androidCollectionEnabledStorageId) == 'true';
 
     addAutoDisposeListener(
-      _autoSnapshotEnabled,
+      autoSnapshotEnabled,
       () {
         storage.setValue(
           _autoSnapshotEnabledStorageId,
-          _autoSnapshotEnabled.value.toString(),
+          autoSnapshotEnabled.value.toString(),
         );
-        if (_autoSnapshotEnabled.value) {
+        if (autoSnapshotEnabled.value) {
           ga.select(
             analytics_constants.memory,
             analytics_constants.autoSnapshot,
@@ -347,7 +344,7 @@ class MemoryPreferencesController extends DisposableController
         }
       },
     );
-    _autoSnapshotEnabled.value =
+    autoSnapshotEnabled.value =
         await storage.getValue(_autoSnapshotEnabledStorageId) == 'true';
   }
 }

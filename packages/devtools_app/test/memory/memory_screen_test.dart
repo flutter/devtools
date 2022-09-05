@@ -79,7 +79,8 @@ void main() {
     when(fakeServiceManager.connectedApp!.isDartWebApp)
         .thenAnswer((_) => Future.value(false));
     setGlobal(ServiceConnectionManager, fakeServiceManager);
-    setGlobal(PreferencesController, PreferencesController());
+    setGlobal(PreferencesController,
+        PreferencesController()..memory.androidCollectionEnabled.value = true);
 
     controller.offline.value = true;
     controller.memoryTimeline.offlineData.clear();
@@ -314,9 +315,10 @@ void main() {
       expect(find.byType(MemoryVMChart), findsOneWidget);
 
       expect(controller.memoryTimeline.liveData.isEmpty, isTrue);
-      expect(controller.memoryTimeline.offlineData.isEmpty, isFalse);
+      expect(controller.memoryTimeline.offlineData.isNotEmpty, isTrue);
 
       controller.refreshAllCharts();
+      expect(controller.isAndroidChartVisibleNotifier.value, true);
 
       // Await charts to update.
       await tester.pumpAndSettle(const Duration(seconds: 2));
@@ -395,27 +397,12 @@ void main() {
         lessThan(DateTime.now().millisecondsSinceEpoch),
       );
 
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+
       await expectLater(
         find.byType(MemoryVMChart),
-        matchesDevToolsGolden('../goldens/memory_heap_tree.png'),
+        matchesDevToolsGolden('../goldens/memory_heap_android.png'),
       );
-
-      // TODO(polina-c): create test for android chart before merge.
-      // Await delay for golden comparison.
-      // await tester.pumpAndSettle(const Duration(seconds: 2));
-      //
-      // expect(find.text('Android Memory'), findsOneWidget);
-      //
-      // // Bring up the Android chart.
-      // await tester.tap(find.text('Android Memory'));
-      // await tester.pump();
-      //
-      // await tester.pumpAndSettle(const Duration(seconds: 2));
-      //
-      // await expectLater(
-      //   find.byType(MemoryVMChart),
-      //   matchesDevToolsGolden('../goldens/memory_heap_android.png'),
-      // );
 
       // Await delay for golden comparison.
       await tester.pumpAndSettle(const Duration(seconds: 2));

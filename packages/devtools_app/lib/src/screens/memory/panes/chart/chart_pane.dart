@@ -191,8 +191,6 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
   @override
   Widget build(BuildContext context) {
-    // TODO(polinach): Can Flutter's focus system be used instead of listening to keyboard?
-    // See debugger page on how to keys can be handled better.
     return RawKeyboardListener(
       focusNode: widget.keyFocusNode,
       onKey: (RawKeyEvent event) {
@@ -203,7 +201,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
       autofocus: true,
       child: Column(
         children: [
-          // TODO(polinach): explain why we need SizedBox here.
+          // TODO(polina-c): explain why we need SizedBox here.
           // And put 70 into a named const that describes what it is.
           SizedBox(
             height: scaleByFontFactor(70),

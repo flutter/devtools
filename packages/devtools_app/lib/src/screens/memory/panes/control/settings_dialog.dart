@@ -29,16 +29,14 @@ class MemorySettingsDialog extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             CheckboxSetting(
-              notifier: preferences.memory.androidCollectionEnabled
-                  as ValueNotifier<bool?>,
+              notifier: preferences.memory.androidCollectionEnabled,
               title: 'Show Android memory chart',
             ),
             const SizedBox(
               height: defaultSpacing,
             ),
             CheckboxSetting(
-              notifier: preferences.memory.autoSnapshotEnabled
-                  as ValueNotifier<bool?>,
+              notifier: preferences.memory.autoSnapshotEnabled,
               title: 'Automatically take snapshot when memory usage spikes',
             ),
           ],

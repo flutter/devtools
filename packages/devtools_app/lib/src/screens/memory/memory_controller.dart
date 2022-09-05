@@ -455,6 +455,7 @@ class MemoryController extends DisposableController
 
   void refreshAllCharts() {
     _refreshCharts.value++;
+    _updateAndroidChartVisibility();
   }
 
   /// Starting chunk for slider based on the intervalDurationInMs.
@@ -525,6 +526,8 @@ class MemoryController extends DisposableController
         throw OfflineFileException(e.toString());
       });
     }
+
+    _updateAndroidChartVisibility();
   }
 
   final _paused = ValueNotifier<bool>(false);
@@ -849,14 +852,19 @@ class MemoryController extends DisposableController
       },
     );
 
-    bool _isAndroidChartVisible() =>
-        preferences.memory.androidCollectionEnabled.value &&
-        isConnectedDeviceAndroid;
-    isAndroidChartVisibleNotifier.value = _isAndroidChartVisible();
+    _updateAndroidChartVisibility();
     addAutoDisposeListener(
       preferences.memory.androidCollectionEnabled,
-      () => isAndroidChartVisibleNotifier.value = _isAndroidChartVisible(),
+      _updateAndroidChartVisibility,
     );
+  }
+
+  void _updateAndroidChartVisibility() {
+    isAndroidChartVisibleNotifier.value =
+        (preferences.memory.androidCollectionEnabled.value &&
+                isConnectedDeviceAndroid) ||
+            isOfflineAndAndroidData;
+    print('!!!! updated to ${isAndroidChartVisibleNotifier.value}');
   }
 
   void _handleConnectionStop(dynamic event) {

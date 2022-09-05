@@ -4,9 +4,6 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../primitives/auto_dispose_mixin.dart';
-import '../../../../shared/utils.dart';
-import '../../memory_controller.dart';
 import '../chart/chart_pane_controller.dart';
 import 'primary_controls.dart';
 import 'secondary_controls.dart';
