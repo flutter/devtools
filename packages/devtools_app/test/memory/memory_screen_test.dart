@@ -79,10 +79,7 @@ void main() {
     when(fakeServiceManager.connectedApp!.isDartWebApp)
         .thenAnswer((_) => Future.value(false));
     setGlobal(ServiceConnectionManager, fakeServiceManager);
-    setGlobal(
-      PreferencesController,
-      PreferencesController()..memory.androidCollectionEnabled.value = true,
-    );
+    setGlobal(PreferencesController, PreferencesController());
 
     controller.offline.value = true;
     controller.memoryTimeline.offlineData.clear();
