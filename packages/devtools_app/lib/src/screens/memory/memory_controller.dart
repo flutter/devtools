@@ -864,7 +864,6 @@ class MemoryController extends DisposableController
         (preferences.memory.androidCollectionEnabled.value &&
                 isConnectedDeviceAndroid) ||
             isOfflineAndAndroidData;
-    print('!!!! updated to ${isAndroidChartVisibleNotifier.value}');
   }
 
   void _handleConnectionStop(dynamic event) {
