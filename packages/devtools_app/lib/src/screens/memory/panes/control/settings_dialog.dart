@@ -10,6 +10,12 @@ import '../../../../shared/globals.dart';
 import '../../../../shared/theme.dart';
 import '../../memory_controller.dart';
 
+/// The dialog keys for testing purposes.
+class MemorySettingDialogKeys {
+  static const Key showAndroidChartCheckBox = ValueKey('showAndroidChart');
+  static const Key autoSnapshotCheckbox = ValueKey('autoSnapshotCheckbox');
+}
+
 class MemorySettingsDialog extends StatelessWidget {
   const MemorySettingsDialog(this.controller);
 
@@ -31,6 +37,7 @@ class MemorySettingsDialog extends StatelessWidget {
             CheckboxSetting(
               notifier: preferences.memory.androidCollectionEnabled,
               title: 'Show Android memory chart',
+              checkboxKey: MemorySettingDialogKeys.showAndroidChartCheckBox,
             ),
             const SizedBox(
               height: defaultSpacing,
@@ -38,6 +45,7 @@ class MemorySettingsDialog extends StatelessWidget {
             CheckboxSetting(
               notifier: preferences.memory.autoSnapshotEnabled,
               title: 'Automatically take snapshot when memory usage spikes',
+              checkboxKey: MemorySettingDialogKeys.autoSnapshotCheckbox,
             ),
           ],
         ),
