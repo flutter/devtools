@@ -790,9 +790,10 @@ class MemoryController extends DisposableController
 
   void _handleConnectionStart(ServiceConnectionManager serviceManager) async {
     _refreshShouldShowLeaksTab();
-
-    _memoryTracker = MemoryTracker(this);
-    _memoryTracker!.start();
+    if (_memoryTracker == null) {
+      _memoryTracker = MemoryTracker(this);
+      _memoryTracker!.start();
+    }
 
     // Log Flutter extension events.
     // Note: We do not need to listen to event history here because we do not
@@ -847,7 +848,7 @@ class MemoryController extends DisposableController
       (_) {},
       onDone: () {
         // Stop polling and reset memoryTracker.
-        _memoryTracker!.stop();
+        _memoryTracker?.stop();
         _memoryTracker = null;
       },
     );
@@ -895,6 +896,10 @@ class MemoryController extends DisposableController
     autoDisposeStreamSubscription(
       serviceManager.onConnectionClosed.listen(_handleConnectionStop),
     );
+  }
+
+  void stopTimeLine() {
+    _memoryTracker?.stop();
   }
 
   final _monitorAllocationsNotifier = ValueNotifier<int>(0);
@@ -1356,6 +1361,7 @@ class MemoryController extends DisposableController
     _memorySourceNotifier.dispose();
     _disconnectController.close();
     _memoryTrackerController.close();
+    _memoryTracker?.dispose();
   }
 }
 

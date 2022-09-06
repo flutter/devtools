@@ -225,6 +225,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
   @override
   void dispose() {
     _hideHover(); // hover will leak if not hide
+    controller.stopTimeLine();
     super.dispose();
   }
 

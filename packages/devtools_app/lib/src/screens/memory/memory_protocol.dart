@@ -57,12 +57,16 @@ class MemoryTracker {
 
   void stop() {
     _updateLiveDataPolling();
+    _cleanListenersAndTimers();
+  }
+
+  void _cleanListenersAndTimers() {
     memoryController.paused.removeListener(_updateLiveDataPolling);
 
     _pollingTimer?.cancel();
     _gcStreamListener?.cancel();
-    _gcStreamListener = null;
     _pollingTimer = null;
+    _gcStreamListener = null;
   }
 
   void _handleGCEvent(Event event) {
@@ -317,6 +321,10 @@ class MemoryTracker {
     }
 
     return null;
+  }
+
+  void dispose() {
+    _cleanListenersAndTimers();
   }
 }
 
