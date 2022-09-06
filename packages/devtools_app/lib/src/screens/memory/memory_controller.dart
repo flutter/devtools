@@ -860,10 +860,15 @@ class MemoryController extends DisposableController
   }
 
   void _updateAndroidChartVisibility() {
+    final bool isOfflineAndAndroidData =
+        offline.value && memoryTimeline.data.first.adbMemoryInfo.realtime > 0;
+
+    final bool isConnectedToAndroidAndAndroidEnabled =
+        isConnectedDeviceAndroid &&
+            preferences.memory.androidCollectionEnabled.value;
+
     isAndroidChartVisibleNotifier.value =
-        (preferences.memory.androidCollectionEnabled.value &&
-                isConnectedDeviceAndroid) ||
-            isOfflineAndAndroidData;
+        isOfflineAndAndroidData || isConnectedToAndroidAndAndroidEnabled;
   }
 
   void _handleConnectionStop(dynamic event) {
@@ -1014,16 +1019,6 @@ class MemoryController extends DisposableController
     }
 
     return allocations;
-  }
-
-  /// If viewing offline data (Android collected) the connection may not be
-  /// Android.
-  ///
-  /// If offline and if any Android collected data then we can view the Android
-  /// data.
-  bool get isOfflineAndAndroidData {
-    return offline.value &&
-        memoryTimeline.data.first.adbMemoryInfo.realtime > 0;
   }
 
   bool get isConnectedDeviceAndroid {
