@@ -167,6 +167,7 @@ These notes are shown directly in DevTools when a user opens a new version of De
 [README.md](https://github.com/flutter/devtools/blob/master/packages/devtools_app/lib/src/framework/release_notes/README.md)
 for details on where to add DevTools release notes to Flutter website and how to test them.
    
-3. Update [release-notes-next.md][1] to contain template for the next release.
+3. Copy the content of [release-notes-template.md](../packages/devtools_app/lib/src/framework/release_notes/release-notes-template.md) to [release-notes-next.md][1], to contain
+   draft for the next release.
 
 [1]: ../packages/devtools_app/lib/src/framework/release_notes/release-notes-next.md
