@@ -32,9 +32,16 @@ import 'memory_graph_model.dart';
 import 'memory_heap_treemap.dart';
 import 'memory_instance_tree_view.dart';
 import 'memory_snapshot_models.dart';
+import 'panes/allocation_profile/allocation_profile_table_view.dart';
+import 'panes/allocation_tracing/allocation_profile_tracing_view.dart';
 import 'panes/diff/diff_pane.dart';
 import 'panes/leaks/leaks_pane.dart';
 import 'primitives/memory_utils.dart';
+
+// TODO(bkonyi): enable new allocation profile table when we're ready to remove
+// the existing allocations table.
+@visibleForTesting
+bool enableNewAllocationProfileTable = false;
 
 const memorySearchFieldKeyName = 'MemorySearchFieldKey';
 
@@ -149,6 +156,11 @@ class HeapTreeViewState extends State<HeapTree>
   @visibleForTesting
   static const leaksTabKey = Key('Leaks Tab');
   @visibleForTesting
+  static const dartHeapTableProfileKey = Key('Dart Heap Profile Tab');
+  @visibleForTesting
+  static const dartHeapAllocationTracingKey =
+      Key('Dart Heap Allocation Tracing Tab');
+  @visibleForTesting
   static const diffTabKey = Key('Diff Tab');
 
   /// Below constants should match index for Tab index in DartHeapTabs.
@@ -194,6 +206,18 @@ class HeapTreeViewState extends State<HeapTree>
 
   void _initTabs() {
     _tabs = [
+      if (enableNewAllocationProfileTable) ...[
+        DevToolsTab.create(
+          key: dartHeapTableProfileKey,
+          tabName: 'Profile',
+          gaPrefix: _gaPrefix,
+        ),
+        DevToolsTab.create(
+          key: dartHeapAllocationTracingKey,
+          tabName: 'Allocation Tracing',
+          gaPrefix: _gaPrefix,
+        ),
+      ],
       DevToolsTab.create(
         key: dartHeapAnalysisTabKey,
         gaPrefix: _gaPrefix,
@@ -466,12 +490,23 @@ class HeapTreeViewState extends State<HeapTree>
               ],
             ),
           ),
-          const SizedBox(height: densePadding),
+          const Divider(),
           Expanded(
             child: TabBarView(
               physics: defaultTabBarViewPhysics,
               controller: _tabController,
               children: [
+                // Profile Tab
+                if (enableNewAllocationProfileTable) ...[
+                  KeepAliveWrapper(
+                    child: AllocationProfileTableView(
+                      controller: controller.allocationProfileController,
+                    ),
+                  ),
+                  const KeepAliveWrapper(
+                    child: AllocationProfileTracingView(),
+                  ),
+                ],
                 // Analysis Tab
                 KeepAliveWrapper(
                   child: Column(
@@ -484,7 +519,6 @@ class HeapTreeViewState extends State<HeapTree>
                     ],
                   ),
                 ),
-
                 // Allocations Tab
                 KeepAliveWrapper(
                   child: Column(
@@ -497,11 +531,9 @@ class HeapTreeViewState extends State<HeapTree>
                     ],
                   ),
                 ),
-
                 // Diff tab.
                 if (shouldShowDiffPane)
                   const KeepAliveWrapper(child: DiffPane()),
-
                 // Leaks tab.
                 if (controller.shouldShowLeaksTab.value)
                   const KeepAliveWrapper(child: LeaksPane()),

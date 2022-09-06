@@ -13,7 +13,6 @@ import '../../screens/performance/performance_model.dart';
 import '../../screens/performance/performance_screen.dart';
 import '../../shared/connected_app.dart';
 import '../../shared/globals.dart';
-import '../../shared/notifications.dart';
 import '_export_stub.dart'
     if (dart.library.html) '_export_web.dart'
     if (dart.library.io) '_export_desktop.dart';
@@ -42,15 +41,12 @@ String successfulExportMessage(String exportedFile) {
 // TODO(kenz): we should support a file picker import for desktop.
 class ImportController {
   ImportController(
-    this._notifications,
     this._pushSnapshotScreenForImport,
   );
 
   static const repeatImportTimeBufferMs = 500;
 
   final void Function(String screenId) _pushSnapshotScreenForImport;
-
-  final NotificationService _notifications;
 
   DateTime? previousImportTime;
 
@@ -73,7 +69,7 @@ class ImportController {
     final isDevToolsSnapshot =
         _json is Map<String, dynamic> && _json[devToolsSnapshotKey] == true;
     if (!isDevToolsSnapshot) {
-      _notifications.push(nonDevToolsFileMessage);
+      notificationService.push(nonDevToolsFileMessage);
       return;
     }
 
@@ -87,8 +83,28 @@ class ImportController {
       ..enterOfflineMode()
       ..offlineDataJson = devToolsSnapshot;
     serviceManager.connectedApp = OfflineConnectedApp.parse(connectedApp);
-    _notifications.push(attemptingToImportMessage(activeScreenId));
+    notificationService.push(attemptingToImportMessage(activeScreenId));
     _pushSnapshotScreenForImport(activeScreenId);
+  }
+}
+
+enum ExportFileType {
+  json,
+  csv,
+  yaml;
+
+  @override
+  String toString() {
+    switch (this) {
+      case json:
+        return 'json';
+      case csv:
+        return 'csv';
+      case yaml:
+        return 'yaml';
+      default:
+        throw UnimplementedError('Unable to convert $this to a string');
+    }
   }
 }
 
@@ -101,17 +117,22 @@ abstract class ExportController {
 
   String generateFileName({
     String prefix = 'dart_devtools',
-    String extension = 'json',
+    String postfix = '',
+    required ExportFileType type,
     DateTime? time,
   }) {
     time ??= DateTime.now();
     final timestamp = DateFormat('yyyy-MM-dd_HH:mm:ss.SSS').format(time);
-    return '${prefix}_$timestamp.$extension';
+    return '${prefix}_$timestamp$postfix.$type';
   }
 
-  /// Downloads a JSON file with [contents] and returns the name of the
+  /// Downloads a file with [contents] and returns the name of the
   /// downloaded file.
-  String downloadFile(String contents, {String? fileName});
+  String downloadFile(
+    String contents, {
+    String? fileName,
+    ExportFileType type = ExportFileType.json,
+  });
 
   String encode(String activeScreenId, Map<String, dynamic> contents) {
     final _contents = {

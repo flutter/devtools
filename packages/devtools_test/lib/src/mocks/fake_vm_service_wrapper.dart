@@ -22,20 +22,13 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
     this._memoryData,
     this._allocationData,
     CpuSamples? cpuSamples,
+    CpuSamples? allocationSamples,
     this._resolvedUriMap,
+    this._classList,
   )   : _startingSockets = _socketProfile?.sockets ?? [],
         _startingRequests = _httpProfile?.requests ?? [],
-        cpuSamples = cpuSamples ??
-            CpuSamples.parse({
-              'samplePeriod': 50,
-              'maxStackDepth': 12,
-              'sampleCount': 0,
-              'timeOriginMicros': 47377796685,
-              'timeExtentMicros': 3000,
-              'pid': 54321,
-              'functions': [],
-              'samples': [],
-            }) {
+        cpuSamples = cpuSamples ?? _defaultProfile,
+        allocationSamples = allocationSamples ?? _defaultProfile {
     _reverseResolvedUriMap = <String, String>{};
     if (_resolvedUriMap != null) {
       for (var e in _resolvedUriMap!.entries) {
@@ -43,8 +36,21 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
       }
     }
   }
+  
+  static final _defaultProfile = CpuSamples.parse({
+    'samplePeriod': 50,
+    'maxStackDepth': 12,
+    'sampleCount': 0,
+    'timeOriginMicros': 47377796685,
+    'timeExtentMicros': 3000,
+    'pid': 54321,
+    'functions': [],
+    'samples': [],
+  });
 
   CpuSamples? cpuSamples;
+
+  CpuSamples? allocationSamples;
 
   /// Specifies the return value of `httpEnableTimelineLogging`.
   bool httpEnableTimelineLoggingResult = true;
@@ -67,7 +73,9 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   final SamplesMemoryJson? _memoryData;
   final AllocationMemoryJson? _allocationData;
   final Map<String, String>? _resolvedUriMap;
+  final ClassList? _classList;
   late final Map<String, String>? _reverseResolvedUriMap;
+  final _gcEventStream = StreamController<Event>.broadcast();
 
   final _flags = <String, dynamic>{
     'flags': <Flag>[
@@ -180,6 +188,16 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   }
 
   @override
+  Future<CpuSamples> getAllocationTraces(
+    String isolateId, {
+    int? timeOriginMicros,
+    int? timeExtentMicros,
+    String? classId,
+  }) async {
+    return allocationSamples!;
+  }
+
+  @override
   Future<Success> setTraceClassAllocation(
     String isolateId,
     String classId,
@@ -203,7 +221,14 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
 
   @override
   Future<Isolate> getIsolate(String isolateId) {
-    return Future.value(MockIsolate());
+    return Future.value(
+      Isolate.parse({
+        'rootLib': LibraryRef.parse({
+          'name': 'fake_isolate_name',
+          'uri': 'package:fake_uri_root/main.dart'
+        })
+      }),
+    );
   }
 
   @override
@@ -305,6 +330,11 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
 
   @override
   Future<Success> clearVMTimeline() => Future.value(Success());
+
+  @override
+  Future<ClassList> getClassList(String isolateId) async {
+    return _classList ?? ClassList(classes: []);
+  }
 
   @override
   Future<bool> isSocketProfilingAvailable(String isolateId) {
@@ -412,7 +442,15 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   Stream<Event> get onStderrEventWithHistory => const Stream.empty();
 
   @override
-  Stream<Event> get onGCEvent => const Stream.empty();
+  Stream<Event> get onGCEvent => _gcEventStream.stream;
+
+  void emitGCEvent() {
+    _gcEventStream.sink.add(
+      Event(
+        kind: EventKind.kGC,
+      ),
+    );
+  }
 
   @override
   Stream<Event> get onVMEvent => const Stream.empty();

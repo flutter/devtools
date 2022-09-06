@@ -17,7 +17,6 @@ import '../../primitives/listenable.dart';
 import '../../shared/banner_messages.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
-import '../../shared/notifications.dart';
 import '../../shared/screen.dart';
 import '../../shared/theme.dart';
 import '../../shared/utils.dart';
@@ -178,27 +177,29 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
           ),
         const SizedBox(height: denseRowSpacing),
         Expanded(
-          child: ValueListenableBuilder<CpuProfileData?>(
-            valueListenable: controller.cpuProfilerController.dataNotifier,
-            builder: (context, cpuProfileData, _) {
-              if (cpuProfileData ==
-                      CpuProfilerController.baseStateCpuProfileData ||
-                  cpuProfileData == null) {
-                return _buildRecordingInfo();
-              }
-              if (cpuProfileData ==
-                  CpuProfilerController.emptyAppStartUpProfile) {
-                return emptyAppStartUpProfileView;
-              }
-              if (cpuProfileData.isEmpty) {
-                return emptyProfileView;
-              }
-              return CpuProfiler(
-                data: cpuProfileData,
-                controller: controller.cpuProfilerController,
-                searchFieldKey: profilerScreenSearchFieldKey,
-              );
-            },
+          child: OutlineDecoration(
+            child: ValueListenableBuilder<CpuProfileData?>(
+              valueListenable: controller.cpuProfilerController.dataNotifier,
+              builder: (context, cpuProfileData, _) {
+                if (cpuProfileData ==
+                        CpuProfilerController.baseStateCpuProfileData ||
+                    cpuProfileData == null) {
+                  return _buildRecordingInfo();
+                }
+                if (cpuProfileData ==
+                    CpuProfilerController.emptyAppStartUpProfile) {
+                  return emptyAppStartUpProfileView;
+                }
+                if (cpuProfileData.isEmpty) {
+                  return emptyProfileView;
+                }
+                return CpuProfiler(
+                  data: cpuProfileData,
+                  controller: controller.cpuProfilerController,
+                  searchFieldKey: profilerScreenSearchFieldKey,
+                );
+              },
+            ),
           ),
         ),
       ],
@@ -427,7 +428,7 @@ class _SecondaryControls extends StatelessWidget {
     // download always successful?
     // TODO(peterdjlee): find a way to push the notification logic into the
     // export controller.
-    Notifications.of(context)!.push(successfulExportMessage(exportedFile));
+    notificationService.push(successfulExportMessage(exportedFile));
   }
 }
 

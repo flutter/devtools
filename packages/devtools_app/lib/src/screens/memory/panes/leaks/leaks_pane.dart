@@ -8,13 +8,16 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../../../analytics/constants.dart' as analytics_constants;
 import '../../../../config_specific/import_export/import_export.dart';
-import '../../../../config_specific/launch_url/launch_url.dart';
 import '../../../../config_specific/logger/logger.dart' as logger;
 import '../../../../primitives/utils.dart';
 import '../../../../service/service_extensions.dart';
+import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
+import '../../../../shared/theme.dart';
 import '../../primitives/memory_utils.dart';
+import '../../primitives/ui.dart';
 import 'diagnostics/model.dart';
 import 'diagnostics/not_gced_analyzer.dart';
 import 'formatter.dart';
@@ -27,7 +30,7 @@ import 'primitives/analysis_status.dart';
 const _extensionKindToReceiveLeaksSummary = 'memory_leaks_summary';
 const _extensionKindToReceiveLeaksDetails = 'memory_leaks_details';
 
-const _file_prefix = 'memory_leaks';
+const _filePrefix = 'memory_leaks';
 
 // TODO(polina-c): review UX with UX specialists
 // https://github.com/flutter/devtools/issues/3951
@@ -142,8 +145,8 @@ class _LeaksPaneController {
     final now = DateTime.now();
     final yamlFile = _exportController.generateFileName(
       time: now,
-      prefix: _file_prefix,
-      extension: 'yaml',
+      prefix: _filePrefix,
+      type: ExportFileType.yaml,
     );
     _exportController.downloadFile(yaml, fileName: yamlFile);
     final String? taskFile = _saveTask(task, now);
@@ -162,8 +165,9 @@ class _LeaksPaneController {
     final json = jsonEncode(task.toJson());
     final jsonFile = _exportController.generateFileName(
       time: now,
-      prefix: _file_prefix,
-      extension: 'raw.json',
+      prefix: _filePrefix,
+      postfix: '.raw',
+      type: ExportFileType.json,
     );
     return _exportController.downloadFile(json, fileName: jsonFile);
   }
@@ -234,7 +238,7 @@ class _LeaksPaneState extends State<LeaksPane> {
         if (!leakSummaryReceived) {
           return Column(
             children: const [
-              _InformationButton(),
+              _LeaksHelpLink(),
               Text('No information about memory leaks yet.'),
             ],
           );
@@ -247,12 +251,14 @@ class _LeaksPaneState extends State<LeaksPane> {
               controller: _leaksController.status,
               analysisStarter: Row(
                 children: [
-                  const _InformationButton(),
                   _AnalyzeButton(leaksController: _leaksController),
+                  const SizedBox(width: denseSpacing),
                   _ForceGCButton(leaksController: _leaksController),
+                  const _LeaksHelpLink(),
                 ],
               ),
             ),
+            const SizedBox(height: denseSpacing),
             Expanded(
               child: SingleChildScrollView(
                 child: ValueListenableBuilder<String>(
@@ -268,16 +274,30 @@ class _LeaksPaneState extends State<LeaksPane> {
   }
 }
 
-class _InformationButton extends StatelessWidget {
-  const _InformationButton({Key? key}) : super(key: key);
+class _LeaksHelpLink extends StatelessWidget {
+  const _LeaksHelpLink({Key? key}) : super(key: key);
+
+  static const _documentationTopic = 'leaks';
 
   @override
   Widget build(BuildContext context) {
-    return Tooltip(
-      message: 'Open memory leak tracking guidance.',
-      child: IconButton(
-        icon: const Icon(Icons.help_outline),
-        onPressed: () async => await launchUrl(linkToGuidance, context),
+    return HelpButtonWithDialog(
+      gaScreen: analytics_constants.memory,
+      gaSelection:
+          analytics_constants.topicDocumentationButton(_documentationTopic),
+      dialogTitle: 'Memory Leak Detection Help',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          const Text('Use the memory leak detection tab to detect\n'
+              'and troubleshoot some types of memory leaks.'),
+          MoreInfoLink(
+            url: linkToGuidance,
+            gaScreenName: analytics_constants.memory,
+            gaSelectedItemDescription:
+                analytics_constants.topicDocumentationLink(_documentationTopic),
+          )
+        ],
       ),
     );
   }
@@ -291,13 +311,13 @@ class _AnalyzeButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Tooltip(
-      message: 'Analyze the leaks and download the result\n'
-          'to ${_file_prefix}_<time>.yaml.',
-      child: MaterialButton(
-        child: const Text('Analyze and Download'),
-        onPressed: () async => await leaksController.requestLeaks(),
-      ),
+    return IconLabelButton(
+      label: 'Analyze and Download',
+      icon: Icons.file_download,
+      tooltip: 'Analyze the leaks and download the result\n'
+          'to ${_filePrefix}_<time>.yaml.',
+      onPressed: () async => await leaksController.requestLeaks(),
+      minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
     );
   }
 }
@@ -310,13 +330,13 @@ class _ForceGCButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Tooltip(
-      message: 'Force full GC in the application\n'
+    return IconLabelButton(
+      label: 'Force GC',
+      icon: Icons.delete,
+      tooltip: 'Force full GC in the application\n'
           'to make sure to collect everything that can be collected.',
-      child: MaterialButton(
-        child: const Text('Force GC'),
-        onPressed: () async => leaksController.forceGC(),
-      ),
+      onPressed: () async => await leaksController.forceGC(),
+      minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
     );
   }
 }

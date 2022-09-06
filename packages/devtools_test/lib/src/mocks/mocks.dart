@@ -30,6 +30,11 @@ class FakeIsolateManager extends Fake implements IsolateManager {
     return _isolates!;
   }
 
+  @override
+  IsolateState? get mainIsolateDebuggerState {
+    return MockIsolateState();
+  }
+
   ValueNotifier<List<IsolateRef>>? _isolates;
 
   @override
@@ -43,6 +48,7 @@ class FakeIsolateManager extends Fake implements IsolateManager {
 }
 
 class FakeInspectorService extends Fake implements InspectorService {
+  final pubRootDirectories = <String>{};
   @override
   ObjectGroup createObjectGroup(String debugName) {
     return ObjectGroup(debugName, this);
@@ -56,6 +62,23 @@ class FakeInspectorService extends Fake implements InspectorService {
   @override
   Future<List<String>> inferPubRootDirectoryIfNeeded() async {
     return ['/some/directory'];
+  }
+
+  @override
+  Future<List<String>?> getPubRootDirectories() {
+    return Future.value(pubRootDirectories.toList());
+  }
+
+  @override
+  Future<void> addPubRootDirectories(List<String> rootDirectories) {
+    pubRootDirectories.addAll(rootDirectories);
+    return Future<void>.value();
+  }
+
+  @override
+  Future<void> removePubRootDirectories(List<String> rootDirectories) {
+    pubRootDirectories.removeAll(rootDirectories);
+    return Future<void>.value();
   }
 
   @override
@@ -104,7 +127,10 @@ class FakeVM extends Fake implements VM {
   };
 }
 
-class MockIsolateState extends Mock implements IsolateState {}
+class MockIsolateState extends Mock implements IsolateState {
+  @override
+  ValueListenable<bool?> get isPaused => ValueNotifier<bool>(false);
+}
 
 class MockIsolate extends Mock implements Isolate {}
 

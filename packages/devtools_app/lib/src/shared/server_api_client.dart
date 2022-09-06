@@ -168,6 +168,9 @@ class DevToolsServerConnection {
       case 'notify':
         notify();
         return;
+      case 'ping':
+        ping();
+        return;
       default:
         print('Unknown request $method from server');
     }
@@ -196,16 +199,26 @@ class DevToolsServerConnection {
     _callMethod('disconnected');
   }
 
+  /// Retrieves a preference value from the DevTools configuration file at
+  /// ~/.flutter-devtools/.devtools.
   Future<String> getPreferenceValue(String key) {
     return _callMethod('getPreferenceValue', {
       'key': key,
     });
   }
 
+  /// Sets a preference value in the DevTools configuration file at
+  /// ~/.flutter-devtools/.devtools.
   Future setPreferenceValue(String key, String value) async {
     await _callMethod('setPreferenceValue', {
       'key': key,
       'value': value,
     });
+  }
+
+  /// Allows the server to ping the client to see that it is definitely still
+  /// active and doesn't just appear to be connected because of SSE timeouts.
+  void ping() {
+    _callMethod('pingResponse');
   }
 }

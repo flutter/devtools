@@ -4,18 +4,21 @@
 
 import 'package:flutter/foundation.dart';
 
+import 'object_inspector_view_controller.dart';
 import 'vm_developer_tools_screen.dart';
 
 class VMDeveloperToolsController {
   ValueListenable<int> get selectedIndex => _selectedIndex;
   final _selectedIndex = ValueNotifier<int>(0);
 
+  final objectInspectorViewController =
+      displayObjectInspector ? ObjectInspectorViewController() : null;
+
   void selectIndex(int index) {
     _selectedIndex.value = index;
-    _showIsolateSelector.value =
+    showIsolateSelector.value =
         VMDeveloperToolsScreenBody.views[index].showIsolateSelector;
   }
 
-  ValueListenable<bool> get showIsolateSelector => _showIsolateSelector;
-  final _showIsolateSelector = ValueNotifier<bool>(false);
+  static final showIsolateSelector = ValueNotifier<bool>(false);
 }

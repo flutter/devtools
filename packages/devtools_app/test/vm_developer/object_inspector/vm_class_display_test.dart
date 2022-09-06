@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_class_display.dart';
+import 'package:devtools_app/src/screens/vm_developer/vm_developer_common_widgets.dart';
+import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -29,28 +31,31 @@ void main() {
 
     testClassCopy.size = 1024;
 
-    when(mockClassObject.name).thenReturn('FooClass');
-    when(mockClassObject.ref).thenReturn(testClass);
+    mockVmObject(mockClassObject);
     when(mockClassObject.obj).thenReturn(testClassCopy);
-    when(mockClassObject.script).thenReturn(testScript);
-    when(mockClassObject.instances).thenReturn(testInstances);
-    when(mockClassObject.pos).thenReturn(testPos);
   });
 
   testWidgetsWithWindowSize('builds class display', windowSize,
       (WidgetTester tester) async {
     await tester.pumpWidget(wrap(VmClassDisplay(clazz: mockClassObject)));
 
-    expect(find.byType(ClassInfoWidget), findsOneWidget);
+    expect(find.byType(VmObjectDisplayBasicLayout), findsOneWidget);
+    expect(find.byType(VMInfoCard), findsOneWidget);
     expect(find.text('General Information'), findsOneWidget);
     expect(find.text('1 KB'), findsOneWidget);
     expect(find.text('fooLib'), findsOneWidget);
     expect(find.text('fooScript.dart:10:4'), findsOneWidget);
     expect(find.text('fooSuperClass'), findsOneWidget);
     expect(find.text('fooSuperType'), findsOneWidget);
-
-    expect(find.byType(ClassInstancesWidget), findsOneWidget);
-    expect(find.text('Class Instances'), findsOneWidget);
+    expect(find.text('Currently allocated instances:'), findsOneWidget);
     expect(find.text('3'), findsOneWidget);
+
+    expect(find.byType(RequestableSizeWidget), findsNWidgets(2));
+
+    expect(find.byType(RetainingPathWidget), findsOneWidget);
+
+    expect(find.byType(InboundReferencesWidget), findsOneWidget);
+
+    // TODO(mtaylee): test ClassInstancesWidget when implemented
   });
 }

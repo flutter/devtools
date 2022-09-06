@@ -5,6 +5,7 @@
 import 'dart:convert';
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/primitives/storage.dart';
 import 'package:devtools_app/src/screens/inspector/diagnostics_node.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_controller.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_screen.dart';
@@ -17,11 +18,14 @@ import 'package:devtools_app/src/service/service_extensions.dart' as extensions;
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/common_widgets.dart';
 import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/notifications.dart';
 import 'package:devtools_app/src/shared/preferences.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart' hide Fake;
 import 'package:mockito/mockito.dart';
+
+import '../test_infra/flutter_test_storage.dart';
 
 void main() {
   const screen = InspectorScreen();
@@ -56,6 +60,8 @@ void main() {
     setGlobal(ServiceConnectionManager, fakeServiceManager);
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(PreferencesController, PreferencesController());
+    setGlobal(Storage, FlutterTestStorage());
+    setGlobal(NotificationService, NotificationService());
     fakeServiceManager.consoleService.ensureServiceInitialized();
 
     inspectorController = InspectorController(

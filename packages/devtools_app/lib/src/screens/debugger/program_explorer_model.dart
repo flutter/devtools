@@ -6,6 +6,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../primitives/trees.dart';
 import '../../shared/globals.dart';
+import '../vm_developer/vm_service_private_extensions.dart';
 import 'debugger_model.dart';
 import 'program_explorer_controller.dart';
 
@@ -18,10 +19,11 @@ import 'program_explorer_controller.dart';
 ///   - Class
 ///   - Field
 ///   - Function
+///   - Code
 class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
   VMServiceObjectNode(
     this.controller,
-    name,
+    String? name,
     this.object, {
     this.isSelectable = true,
   }) : name = name ?? '';
@@ -56,6 +58,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     if (_outline != null) {
       return _outline;
     }
+
     final root = VMServiceObjectNode(
       controller,
       '<root>',
@@ -111,7 +114,6 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
         root.addChild(clazzNode);
       }
     }
-
     for (final function in lib.functions!) {
       if (function.location?.script?.uri == uri) {
         final node = VMServiceObjectNode(
@@ -120,6 +122,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
           function,
         );
         await controller.populateNode(node);
+        _buildCodeNodes(node.object as Func, node);
         root.addChild(node);
       }
     }
@@ -240,6 +243,34 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     return node;
   }
 
+  void _buildCodeNodes(Func function, VMServiceObjectNode node) {
+    if (!node.controller.showCodeNodes) {
+      return;
+    }
+    final code = function.code;
+    if (code != null) {
+      node.addChild(
+        VMServiceObjectNode(
+          controller,
+          code.name,
+          code,
+        ),
+      );
+      final unoptimizedCode = function.unoptimizedCode;
+      // It's possible for `function.code` to be unoptimized code, so don't
+      // create a duplicate node in that situation.
+      if (unoptimizedCode != null && unoptimizedCode.id! != code.id!) {
+        node.addChild(
+          VMServiceObjectNode(
+            controller,
+            unoptimizedCode.name,
+            unoptimizedCode,
+          ),
+        );
+      }
+    }
+  }
+
   VMServiceObjectNode _lookupOrCreateChild(
     String name,
     ObjRef? object, {
@@ -291,10 +322,11 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     return this;
   }
 
-  void updateObject(Obj object) {
-    if (this.object is! Class && object is Class) {
-      for (final function in object.functions ?? []) {
-        _createChild(function.name, function);
+  void updateObject(Obj object, {bool forceUpdate = false}) {
+    if ((this.object is! Class || forceUpdate) && object is Class) {
+      for (final function in object.functions?.cast<Func>() ?? <Func>[]) {
+        final node = _createChild(function.name, function);
+        _buildCodeNodes(function, node);
       }
       for (final field in object.fields ?? []) {
         _createChild(field.name, field);
@@ -305,6 +337,9 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
   }
 
   Future<void> populateLocation() async {
+    if (location != null) {
+      return;
+    }
     ScriptRef? scriptRef = script;
     int? tokenPos = 0;
     if (object != null &&
@@ -343,6 +378,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     final classNodes = <VMServiceObjectNode>[];
     final functionNodes = <VMServiceObjectNode>[];
     final variableNodes = <VMServiceObjectNode>[];
+    final codeNodes = <VMServiceObjectNode>[];
 
     final packageAndCoreLibLibraryNodes = <VMServiceObjectNode>[];
     final packageAndCoreLibDirectoryNodes = <VMServiceObjectNode>[];
@@ -384,6 +420,10 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
           case FieldRef:
           case Field:
             variableNodes.add(child);
+            break;
+          case CodeRef:
+          case Code:
+            codeNodes.add(child);
             break;
           default:
             throw StateError('Unexpected type: ${child.object.runtimeType}');
@@ -439,6 +479,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
         ...classNodes,
         ...functionNodes,
         ...variableNodes,
+        ...codeNodes,
         // We treat core libraries and packages as their own category as users
         // are likely more interested in code within their own project.
         // TODO(bkonyi): do we need custom google3 heuristics here?

@@ -11,10 +11,17 @@ import '../../primitives/auto_dispose.dart';
 import '../../primitives/trees.dart';
 import '../../primitives/utils.dart';
 import '../../shared/globals.dart';
+import '../vm_developer/vm_service_private_extensions.dart';
 import 'program_explorer_model.dart';
 
 class ProgramExplorerController extends DisposableController
     with AutoDisposeControllerMixin {
+  /// [showCodeNodes] controls whether or not [Code] nodes are displayed in the
+  /// outline view.
+  ProgramExplorerController({
+    this.showCodeNodes = false,
+  });
+
   /// The outline view nodes for the currently selected library.
   ValueListenable<List<VMServiceObjectNode>> get outlineNodes => _outlineNodes;
   final _outlineNodes = ListValueNotifier<VMServiceObjectNode>([]);
@@ -23,6 +30,8 @@ class ProgramExplorerController extends DisposableController
   final _isLoadingOutline = ValueNotifier<bool>(false);
 
   /// The currently selected node in the Program Explorer file picker.
+  @visibleForTesting
+  VMServiceObjectNode? get scriptSelection => _scriptSelection;
   VMServiceObjectNode? _scriptSelection;
 
   /// The currently selected node in the Program Explorer outline.
@@ -32,8 +41,9 @@ class ProgramExplorerController extends DisposableController
 
   /// The processed roots of the tree.
   ValueListenable<List<VMServiceObjectNode>> get rootObjectNodes =>
-      _rootObjectNodes;
-  final _rootObjectNodes = ListValueNotifier<VMServiceObjectNode>([]);
+      rootObjectNodesInternal;
+  @visibleForTesting
+  final rootObjectNodesInternal = ListValueNotifier<VMServiceObjectNode>([]);
 
   ValueListenable<int> get selectedNodeIndex => _selectedNodeIndex;
   final _selectedNodeIndex = ValueNotifier<int>(0);
@@ -44,6 +54,9 @@ class ProgramExplorerController extends DisposableController
   ValueListenable<bool> get initialized => _initialized;
   final _initialized = ValueNotifier<bool>(false);
   bool _initializing = false;
+
+  /// Controls whether or not [Code] nodes are displayed in the outline view.
+  final bool showCodeNodes;
 
   /// Returns true if [function] is a getter or setter that was not explicitly
   /// defined (e.g., `int foo` creates `int get foo` and `set foo(int)`).
@@ -76,7 +89,7 @@ class ProgramExplorerController extends DisposableController
       this,
       libraries,
     );
-    _rootObjectNodes.replaceAll(nodes);
+    rootObjectNodesInternal.replaceAll(nodes);
     _initialized.value = true;
   }
 
@@ -94,8 +107,8 @@ class ProgramExplorerController extends DisposableController
     if (!initialized.value) {
       return;
     }
-    await _selectScriptNode(script, _rootObjectNodes.value);
-    _rootObjectNodes.notifyListeners();
+    await _selectScriptNode(script, rootObjectNodesInternal.value);
+    rootObjectNodesInternal.notifyListeners();
   }
 
   Future<void> _selectScriptNode(
@@ -124,7 +137,7 @@ class ProgramExplorerController extends DisposableController
     // Index tracks the position of the node in the flat-list representation of
     // the tree:
     var index = 0;
-    for (final node in _rootObjectNodes.value) {
+    for (final node in rootObjectNodesInternal.value) {
       final matchingNode = depthFirstTraversal(
         node,
         returnCondition: matchingNodeCondition,
@@ -189,11 +202,21 @@ class ProgramExplorerController extends DisposableController
     _outlineSelection.value = null;
 
     for (final node in _outlineNodes.value) {
-      node
-        ..collapseCascading()
-        ..unselect();
+      breadthFirstTraversal<VMServiceObjectNode>(
+        node,
+        action: (VMServiceObjectNode node) {
+          node
+            ..collapse()
+            ..unselect();
+        },
+      );
     }
 
+    _outlineNodes.notifyListeners();
+  }
+
+  void expandToNode(VMServiceObjectNode node) {
+    node.expandAscending();
     _outlineNodes.notifyListeners();
   }
 
@@ -218,10 +241,35 @@ class ProgramExplorerController extends DisposableController
       Iterable<FuncRef> funcs,
       Iterable<FieldRef>? fields,
     ) async {
-      final res = await getObjects(
-        funcs.where(
-          (f) => !_isSyntheticAccessor(f, fields as List<FieldRef>),
-        ),
+      final res = await Future.wait<Func>(
+        funcs
+            .where((f) => !_isSyntheticAccessor(f, fields as List<FieldRef>))
+            .map<Future<Func>>(
+              (f) => service!.getObject(isolateId!, f.id!).then((f) async {
+                final func = f as Func;
+                final codeRef = func.code;
+
+                // Populate the [Code] objects in each function if we want to
+                // show code nodes in the outline.
+                if (showCodeNodes && codeRef != null) {
+                  final code =
+                      await service.getObject(isolateId, codeRef.id!) as Code;
+                  func.code = code;
+                  Code unoptimizedCode = code;
+                  // `func.code` could be unoptimized code, so don't bother
+                  // fetching it again.
+                  if (func.unoptimizedCode != null &&
+                      func.unoptimizedCode?.id! != code.id!) {
+                    unoptimizedCode = await service.getObject(
+                      isolateId,
+                      func.unoptimizedCode!.id!,
+                    ) as Code;
+                  }
+                  func.unoptimizedCode = unoptimizedCode;
+                }
+                return func;
+              }),
+            ),
       );
       return res.cast<Func>();
     }

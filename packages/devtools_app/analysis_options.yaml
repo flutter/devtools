@@ -5,3 +5,8 @@ analyzer:
     - build/**
     - lib/generated_plugin_registrant.dart
     - macos/
+    # Syntax highlighting test files may include or lint-violating code
+    # for testing so should be ignored. Uncomment this while modifying
+    # these files if you want to ensure code is not invalid except where
+    # expected.
+    - test/test_data/syntax_highlighting/**

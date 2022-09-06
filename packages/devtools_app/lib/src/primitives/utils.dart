@@ -59,14 +59,15 @@ String? prettyPrintBytes(
   int gbFractionDigits = 1,
   bool includeUnit = false,
   num roundingPoint = 1.0,
+  int maxBytes = 52,
 }) {
   if (bytes == null) {
     return null;
   }
   // TODO(peterdjlee): Generalize to handle different kbFractionDigits.
   // Ensure a small number of bytes does not print as 0 KB.
-  // If bytes >= 52 and kbFractionDigits == 1, it will start rounding to 0.1 KB.
-  if (bytes.abs() < 52 && kbFractionDigits == 1) {
+  // If bytes >= maxBytes and kbFractionDigits == 1, it will start rounding to 0.1 KB.
+  if (bytes.abs() < maxBytes && kbFractionDigits == 1) {
     var output = bytes.toString();
     if (includeUnit) {
       output += ' B';
@@ -118,13 +119,34 @@ String printGB(num bytes, {int fractionDigits = 1, bool includeUnit = false}) {
   return output;
 }
 
+/// Converts a [Duration] into a readable text representation in milliseconds.
+///
+/// [includeUnit] - whether to include 'ms' at the end of the returned value
+/// [fractionDigits] - how many fraction digits should appear after the decimal
+/// [allowRoundingToZero] - when true, this method may return zero for a very
+/// small number (e.g. '0.0 ms'). When false, this method will return a minimum
+/// value with the less than operator for very small values (e.g. '< 0.1 ms').
+/// The value returned will always respect the specified [fractionDigits].
 String msText(
   Duration dur, {
   bool includeUnit = true,
   int fractionDigits = 1,
+  bool allowRoundingToZero = true,
 }) {
-  return '${(dur.inMicroseconds / 1000).toStringAsFixed(fractionDigits)}'
-      '${includeUnit ? ' ms' : ''}';
+  var durationStr = (dur.inMicroseconds / 1000).toStringAsFixed(fractionDigits);
+
+  if (dur != Duration.zero && !allowRoundingToZero) {
+    final zeroRegexp = RegExp(r'[0]+[.][0]+');
+    if (zeroRegexp.hasMatch(durationStr)) {
+      final buf = StringBuffer('< 0.');
+      for (int i = 1; i < fractionDigits; i++) {
+        buf.write('0');
+      }
+      buf.write('1');
+      durationStr = buf.toString();
+    }
+  }
+  return '$durationStr${includeUnit ? ' ms' : ''}';
 }
 
 /// Render the given [Duration] to text using either seconds or milliseconds as
@@ -1195,6 +1217,19 @@ class ListValueNotifier<T> extends ChangeNotifier
     _listChanged();
   }
 
+  /// Replaces the first occurrence of [value] in this list.
+  ///
+  /// Runtime is O(n).
+  bool replace(T existing, T replacement) {
+    final index = _rawList.indexOf(existing);
+    if (index == -1) return false;
+    _rawList = _rawList.toList();
+    _rawList.removeAt(index);
+    _rawList.insert(index, replacement);
+    _listChanged();
+    return true;
+  }
+
   /// Replaces all elements in the list and notifies listeners. It's preferred
   /// to calling .clear() then .addAll(), because it only notifies listeners
   /// once.
@@ -1207,6 +1242,11 @@ class ListValueNotifier<T> extends ChangeNotifier
   /// Adds elements to the list and notifies listeners.
   void addAll(Iterable<T> elements) {
     _rawList.addAll(elements);
+    _listChanged();
+  }
+
+  void removeAll(Iterable<T> elements) {
+    elements.forEach(_rawList.remove);
     _listChanged();
   }
 
@@ -1430,3 +1470,10 @@ bool isPrimativeInstanceKind(String? kind) {
       kind == InstanceKind.kNull ||
       kind == InstanceKind.kString;
 }
+
+// TODO(mtaylee): Prefer to use this helper method whenever a call to
+// .split('/').last is made on a String (usually on URIs).
+// See https://github.com/flutter/devtools/issues/4360.
+/// Returns the file name from a URI or path string, by splitting the [uri] at
+/// the directory separators '/', and returning the last element.
+String? fileNameFromUri(String? uri) => uri?.split('/').last;

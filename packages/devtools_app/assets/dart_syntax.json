@@ -1,5 +1,6 @@
 {
 	"name": "Dart",
+	"version": "1.0.1",
 	"fileTypes": [
 		"dart"
 	],
@@ -37,6 +38,10 @@
 				{
 					"name": "keyword.other.import.dart",
 					"match": "\\b(as|show|hide)\\b"
+				},
+				{
+					"name": "keyword.control.dart",
+					"match": "\\b(if)\\b"
 				}
 			]
 		},
@@ -107,9 +112,6 @@
 							"name": "variable.other.source.dart"
 						}
 					}
-				},
-				{
-					"match": "(\\*    .*)$"
 				}
 			]
 		},
@@ -221,16 +223,83 @@
 					"match": "(?<!\\$)\\b((0(x|X)[0-9a-fA-F]*)|(([0-9]+\\.?[0-9]*)|(\\.[0-9]+))((e|E)(\\+|-)?[0-9]+)?)\\b(?!\\$)"
 				},
 				{
-					"name": "support.class.dart",
-					"match": "(?<![a-zA-Z0-9_$])([_$]*[A-Z][a-zA-Z0-9_$]*|bool\\b|num\\b|int\\b|double\\b|dynamic\\b)"
+					"include": "#class-identifier"
 				},
 				{
-					"match": "([_$]*[a-z][a-zA-Z0-9_$]*)(<|\\(|\\s+=>)",
+					"include": "#function-identifier"
+				}
+
+			]
+		},
+		"class-identifier": {
+			"patterns": [
+				{
+					"name": "storage.type.primitive.dart",
+					"match": "\\bvoid\\b"
+				},
+				{
+					"name": "support.class.dart",
+					"match": "\\b(bool|num|int|double|dynamic)\\b"
+				},
+				{
+					"match": "\\b([_$]*[A-Z][a-zA-Z0-9_$]*)(<(?:[a-zA-Z0-9_$<>?]|,\\s*|\\s+extends\\s+)+>)?",
+					"captures": {
+						"1": {
+							"name": "support.class.dart"
+						},
+						"2": {
+							"patterns": [
+								{
+									"include": "#type-args"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		"function-identifier": {
+			"patterns": [
+				{
+					"match": "([_$]*[a-z][a-zA-Z0-9_$]*)(<(?:[a-zA-Z0-9_$<>?]|,\\s*|\\s+extends\\s+)+>)?[!?]?(\\(|\\s+=>)",
 					"captures": {
 						"1": {
 							"name": "entity.name.function.dart"
+						},
+						"2": {
+							"patterns": [
+								{
+									"include": "#type-args"
+								}
+							]
 						}
 					}
+				}
+			]
+		},
+		"type-args": {
+			"begin": "(<)",
+			"end": "(>)",
+			"beginCaptures": {
+				"1": {
+					"name": "other.source.dart"
+				}
+			},
+			"endCaptures": {
+				"1": {
+					"name": "other.source.dart"
+				}
+			},
+			"patterns": [
+				{
+					"include": "#class-identifier"
+				},
+				{
+					"match": "[\\s,]+"
+				},
+				{
+					"name": "keyword.declaration.dart",
+					"match": "extends"
 				}
 			]
 		},
@@ -321,15 +390,30 @@
 		"string-interp": {
 			"patterns": [
 				{
-					"match": "\\$((\\w+)|\\{([^{}]+)\\})",
+					"match": "\\$([a-zA-Z0-9_]+)",
 					"captures": {
-						"2": {
-							"name": "variable.parameter.dart"
-						},
-						"3": {
+						"1": {
 							"name": "variable.parameter.dart"
 						}
 					}
+				},
+				{
+					"name": "string.interpolated.expression.dart",
+					"begin": "\\$\\{",
+					"end": "\\}",
+					"patterns": [
+						{
+							"include": "#constants-and-special-vars",
+							"name": "variable.parameter.dart"
+						},
+						{
+							"include": "#strings"
+						},
+						{
+							"name": "variable.parameter.dart",
+							"match": "[a-zA-Z0-9_]+"
+						}
+					]
 				},
 				{
 					"name": "constant.character.escape.dart",

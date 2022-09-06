@@ -9,12 +9,13 @@ import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/screens/performance/event_details.dart';
 import 'package:devtools_app/src/screens/performance/flutter_frames_chart.dart';
+import 'package:devtools_app/src/screens/performance/panes/timeline_events/timeline_flame_chart.dart';
 import 'package:devtools_app/src/screens/performance/performance_controller.dart';
 import 'package:devtools_app/src/screens/performance/performance_screen.dart';
-import 'package:devtools_app/src/screens/performance/timeline_flame_chart.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/common_widgets.dart';
 import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/notifications.dart';
 import 'package:devtools_app/src/shared/preferences.dart';
 import 'package:devtools_app/src/shared/split.dart';
 import 'package:devtools_app/src/shared/version.dart';
@@ -57,6 +58,7 @@ void main() {
     when(app.isDartWebApp).thenAnswer((_) async => false);
     when(app.isProfileBuild).thenAnswer((_) async => false);
     setGlobal(ServiceConnectionManager, fakeServiceManager);
+    setGlobal(NotificationService, NotificationService());
   }
 
   Future<void> pumpPerformanceScreen(

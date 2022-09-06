@@ -2,10 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_viewport.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_class_display.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_developer_common_widgets.dart';
+import 'package:devtools_app/src/screens/vm_developer/vm_field_display.dart';
+import 'package:devtools_app/src/screens/vm_developer/vm_function_display.dart';
+import 'package:devtools_app/src/screens/vm_developer/vm_library_display.dart';
+import 'package:devtools_app/src/screens/vm_developer/vm_object_model.dart';
+import 'package:devtools_app/src/screens/vm_developer/vm_script_display.dart';
+import 'package:devtools_app/src/scripts/script_manager.dart';
+import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/history_viewport.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
@@ -17,23 +25,21 @@ import '../vm_developer_test_utils.dart';
 void main() {
   late TestObjectInspectorViewController testObjectInspectorViewController;
 
-  late MockClassObject mockClassObject;
+  late FakeServiceManager fakeServiceManager;
 
-  const windowSize = Size(4000.0, 4000.0);
+  late MockScriptManager scriptManager;
 
   setUp(() {
+    fakeServiceManager = FakeServiceManager();
+
+    scriptManager = MockScriptManager();
+    when(scriptManager.sortedScripts).thenReturn(ValueNotifier(<ScriptRef>[]));
+
+    setGlobal(ServiceConnectionManager, fakeServiceManager);
+    setGlobal(ScriptManager, scriptManager);
     setGlobal(IdeTheme, IdeTheme());
 
     testObjectInspectorViewController = TestObjectInspectorViewController();
-
-    mockClassObject = MockClassObject();
-
-    when(mockClassObject.name).thenReturn('FooClass');
-    when(mockClassObject.ref).thenReturn(testClass);
-    when(mockClassObject.obj).thenReturn(testClass);
-    when(mockClassObject.script).thenReturn(null);
-    when(mockClassObject.instances).thenReturn(null);
-    when(mockClassObject.pos).thenReturn(null);
   });
 
   testWidgets('builds object viewport', (WidgetTester tester) async {
@@ -46,86 +52,137 @@ void main() {
     expect(find.byType(HistoryViewport<VmObject>), findsOneWidget);
   });
 
-  testWidgetsWithWindowSize('test for class Object', windowSize,
-      (WidgetTester tester) async {
-    testObjectInspectorViewController.fakeObjectHistory
-        .setCurrentObject(mockClassObject);
-    await tester.pumpWidget(
-      wrap(ObjectViewport(controller: testObjectInspectorViewController)),
-    );
-    expect(viewportTitle(mockClassObject), 'Class FooClass');
-    expect(find.text('Class FooClass'), findsOneWidget);
-    expect(find.byType(VmClassDisplay), findsOneWidget);
+  group('test for class object:', () {
+    late MockClassObject mockClassObject;
+
+    setUp(() {
+      mockClassObject = MockClassObject();
+
+      mockVmObject(mockClassObject);
+    });
+
+    testWidgets('viewport shows class display', (WidgetTester tester) async {
+      testObjectInspectorViewController.fakeObjectHistory
+          .setCurrentObject(mockClassObject);
+      await tester.pumpWidget(
+        wrap(ObjectViewport(controller: testObjectInspectorViewController)),
+      );
+      expect(viewportTitle(mockClassObject), 'Class FooClass');
+      expect(find.text('Class FooClass'), findsOneWidget);
+      expect(find.byType(VmClassDisplay), findsOneWidget);
+    });
   });
 
-  testWidgets('test for scriptObject', (WidgetTester tester) async {
-    final fakeScript = Script(uri: 'foo.dart', library: testLib, id: '1234');
-    final fakeScriptRef = ScriptRef(uri: 'foo.dart', id: '1234');
-    final testScriptObject =
-        TestScriptObject(ref: fakeScriptRef, testScript: fakeScript);
-    testObjectInspectorViewController.fakeObjectHistory
-        .setCurrentObject(testScriptObject);
-    await tester.pumpWidget(
-      wrap(ObjectViewport(controller: testObjectInspectorViewController)),
-    );
-    expect(viewportTitle(testScriptObject), 'Script @ foo.dart');
-    expect(find.text('Script @ foo.dart'), findsOneWidget);
-    expect(find.byType(VMInfoCard), findsOneWidget);
+  group('test for field object:', () {
+    late MockFieldObject mockFieldObject;
+
+    setUp(() {
+      mockFieldObject = MockFieldObject();
+
+      mockVmObject(mockFieldObject);
+    });
+
+    testWidgets('viewport shows field display', (WidgetTester tester) async {
+      testObjectInspectorViewController.fakeObjectHistory
+          .setCurrentObject(mockFieldObject);
+
+      await tester.pumpWidget(
+        wrap(ObjectViewport(controller: testObjectInspectorViewController)),
+      );
+
+      expect(viewportTitle(mockFieldObject), 'Field fooField');
+      expect(find.text('Field fooField'), findsOneWidget);
+      expect(find.byType(VmFieldDisplay), findsOneWidget);
+    });
   });
 
-  testWidgets('test for Field Object', (WidgetTester tester) async {
-    final testFieldObject =
-        TestFieldObject(ref: testField, testField: testField);
-    testObjectInspectorViewController.fakeObjectHistory
-        .setCurrentObject(testFieldObject);
-    await tester.pumpWidget(
-      wrap(ObjectViewport(controller: testObjectInspectorViewController)),
-    );
-    expect(viewportTitle(testFieldObject), 'Field FooField');
-    expect(find.text('Field FooField'), findsOneWidget);
-    expect(find.byType(VMInfoCard), findsOneWidget);
+  group('test for function object:', () {
+    late MockFuncObject mockFuncObject;
+
+    late Func testFunctionCopy;
+
+    setUp(() {
+      mockFuncObject = MockFuncObject();
+
+      final funcJson = testFunction.toJson();
+      testFunctionCopy = Func.parse(funcJson)!;
+
+      mockVmObject(mockFuncObject);
+      when(mockFuncObject.obj).thenReturn(testFunctionCopy);
+    });
+    testWidgets('viewport shows function display', (WidgetTester tester) async {
+      testObjectInspectorViewController.fakeObjectHistory
+          .setCurrentObject(mockFuncObject);
+
+      await tester.pumpWidget(
+        wrap(ObjectViewport(controller: testObjectInspectorViewController)),
+      );
+
+      expect(viewportTitle(mockFuncObject), 'Function fooFunction');
+      expect(find.text('Function fooFunction'), findsOneWidget);
+      expect(find.byType(VmFuncDisplay), findsOneWidget);
+    });
   });
 
-  testWidgets('test for Library Object', (WidgetTester tester) async {
-    final testLibraryObject =
-        TestLibraryObject(ref: testLib, testLibrary: testLib);
-    testObjectInspectorViewController.fakeObjectHistory
-        .setCurrentObject(testLibraryObject);
-    await tester.pumpWidget(
-      wrap(ObjectViewport(controller: testObjectInspectorViewController)),
-    );
-    expect(viewportTitle(testLibraryObject), 'Library FooLib');
-    expect(find.text('Library FooLib'), findsOneWidget);
-    expect(find.byType(VMInfoCard), findsOneWidget);
+  group('test for script object:', () {
+    late MockScriptObject mockScriptObject;
+
+    setUp(() {
+      mockScriptObject = MockScriptObject();
+
+      mockVmObject(mockScriptObject);
+    });
+
+    testWidgets('viewport shows script display', (WidgetTester tester) async {
+      testObjectInspectorViewController.fakeObjectHistory
+          .setCurrentObject(mockScriptObject);
+      await tester.pumpWidget(
+        wrap(ObjectViewport(controller: testObjectInspectorViewController)),
+      );
+      expect(viewportTitle(mockScriptObject), 'Script fooScript.dart');
+      expect(find.text('Script fooScript.dart'), findsOneWidget);
+      expect(find.byType(VmScriptDisplay), findsOneWidget);
+    });
   });
 
-  testWidgets('test for Instance Object', (WidgetTester tester) async {
-    final testInstanceObject =
-        TestInstanceObject(ref: testInstance, testInstance: testInstance);
-    testObjectInspectorViewController.fakeObjectHistory
-        .setCurrentObject(testInstanceObject);
-    await tester.pumpWidget(
-      wrap(ObjectViewport(controller: testObjectInspectorViewController)),
-    );
-    expect(viewportTitle(testInstanceObject), 'Instance FooInstance');
-    expect(find.text('Instance FooInstance'), findsOneWidget);
-    expect(find.byType(VMInfoCard), findsOneWidget);
+  group('test for library object:', () {
+    late MockLibraryObject mockLibraryObject;
+
+    setUp(() {
+      mockLibraryObject = MockLibraryObject();
+
+      mockVmObject(mockLibraryObject);
+    });
+
+    testWidgets('viewport shows library display', (WidgetTester tester) async {
+      testObjectInspectorViewController.fakeObjectHistory
+          .setCurrentObject(mockLibraryObject);
+      await tester.pumpWidget(
+        wrap(ObjectViewport(controller: testObjectInspectorViewController)),
+      );
+      expect(viewportTitle(mockLibraryObject), 'Library fooLib');
+      expect(find.text('Library fooLib'), findsOneWidget);
+      expect(find.byType(VmLibraryDisplay), findsOneWidget);
+    });
   });
 
-  testWidgets('test for Func Object', (WidgetTester tester) async {
-    final testFuncObject =
-        TestFuncObject(ref: testFunction, testFunc: testFunction);
-    testObjectInspectorViewController.fakeObjectHistory
-        .setCurrentObject(testFuncObject);
-    await tester.pumpWidget(
-      wrap(ObjectViewport(controller: testObjectInspectorViewController)),
-    );
-    expect(viewportTitle(testFuncObject), 'Function FooFunction');
-    expect(find.text('Function FooFunction'), findsOneWidget);
-    expect(find.byType(VMInfoCard), findsOneWidget);
+  group('test for instance object:', () {
+    testWidgets('builds display for Instance Object',
+        (WidgetTester tester) async {
+      final testInstanceObject =
+          TestInstanceObject(ref: testInstance, testInstance: testInstance);
+      testObjectInspectorViewController.fakeObjectHistory
+          .setCurrentObject(testInstanceObject);
+      await tester.pumpWidget(
+        wrap(ObjectViewport(controller: testObjectInspectorViewController)),
+      );
+      expect(viewportTitle(testInstanceObject), 'Instance FooInstance');
+      expect(find.text('Instance FooInstance'), findsOneWidget);
+      expect(find.byType(VMInfoCard), findsOneWidget);
+    });
   });
 
-  group('ObjectHistory', () {
+  group('test ObjectHistory', () {
     late ObjectHistory history;
 
     late MockClassObject obj1;
@@ -138,6 +195,10 @@ void main() {
       obj1 = MockClassObject();
       obj2 = MockClassObject();
       obj3 = MockClassObject();
+
+      when(obj1.obj).thenReturn(Class(id: '1'));
+      when(obj2.obj).thenReturn(Class(id: '2'));
+      when(obj3.obj).thenReturn(Class(id: '3'));
     });
 
     test('initial values', () {

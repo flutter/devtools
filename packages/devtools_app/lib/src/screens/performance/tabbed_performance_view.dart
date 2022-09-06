@@ -13,12 +13,13 @@ import '../../shared/globals.dart';
 import '../../shared/theme.dart';
 import '../../ui/search.dart';
 import '../../ui/tab.dart';
-import 'frame_analysis.dart';
+import 'panes/frame_analysis/frame_analysis.dart';
+import 'panes/raster_metrics/raster_metrics.dart';
+import 'panes/timeline_events/perfetto/perfetto.dart';
+import 'panes/timeline_events/timeline_flame_chart.dart';
 import 'performance_controller.dart';
 import 'performance_model.dart';
 import 'performance_screen.dart';
-import 'raster_metrics.dart';
-import 'timeline_flame_chart.dart';
 
 final timelineSearchFieldKey = GlobalKey(debugLabel: 'TimelineSearchFieldKey');
 
@@ -66,6 +67,7 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
     if (selectedFrame != null) {
       frameAnalysisView = FlutterFrameAnalysisView(
         frameAnalysis: selectedFrame.frameAnalysis,
+        enhanceTracingController: controller.enhanceTracingController,
       );
     } else {
       frameAnalysisView = const Center(
@@ -81,13 +83,19 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
 
     final isFlutterApp = serviceManager.connectedApp!.isFlutterAppNow!;
     final tabViews = [
-      KeepAliveWrapper(
-        child: TimelineEventsView(
-          controller: controller,
-          processing: widget.processing,
-          processingProgress: widget.processingProgress,
-        ),
-      ),
+      embeddedPerfettoEnabled
+          ? KeepAliveWrapper(
+              child: EmbeddedPerfetto(
+                perfettoController: controller.perfettoController,
+              ),
+            )
+          : KeepAliveWrapper(
+              child: TimelineEventsView(
+                controller: controller,
+                processing: widget.processing,
+                processingProgress: widget.processingProgress,
+              ),
+            ),
       if (frameAnalysisSupported && isFlutterApp)
         KeepAliveWrapper(
           child: frameAnalysisView,
@@ -115,11 +123,13 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
         trailing: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            _buildSearchField(searchFieldEnabled),
-            const FlameChartHelpButton(
-              gaScreen: PerformanceScreen.id,
-              gaSelection: analytics_constants.timelineFlameChartHelp,
-            ),
+            if (!embeddedPerfettoEnabled) ...[
+              _buildSearchField(searchFieldEnabled),
+              const FlameChartHelpButton(
+                gaScreen: PerformanceScreen.id,
+                gaSelection: analytics_constants.timelineFlameChartHelp,
+              ),
+            ],
             RefreshTimelineEventsButton(controller: controller),
           ],
         ),
@@ -180,6 +190,27 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
       tabName: tabName,
       gaPrefix: _gaPrefix,
       trailing: trailing,
+    );
+  }
+}
+
+@visibleForTesting
+class RefreshTimelineEventsButton extends StatelessWidget {
+  const RefreshTimelineEventsButton({
+    Key? key,
+    required this.controller,
+  }) : super(key: key);
+
+  final PerformanceController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return DevToolsIconButton(
+      iconData: Icons.refresh,
+      onPressed: controller.processAvailableEvents,
+      tooltip: 'Refresh timeline events',
+      gaScreen: analytics_constants.performance,
+      gaSelection: analytics_constants.refreshTimelineEvents,
     );
   }
 }

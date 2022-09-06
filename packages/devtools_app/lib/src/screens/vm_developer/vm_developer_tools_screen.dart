@@ -14,7 +14,7 @@ import 'object_inspector_view.dart';
 import 'vm_developer_tools_controller.dart';
 import 'vm_statistics_view.dart';
 
-const displayObjectInspector = false;
+bool displayObjectInspector = false;
 
 abstract class VMDeveloperView {
   const VMDeveloperView(
@@ -41,9 +41,8 @@ abstract class VMDeveloperView {
 }
 
 class VMDeveloperToolsScreen extends Screen {
-  const VMDeveloperToolsScreen({
-    required this.controller,
-  }) : super.conditional(
+  const VMDeveloperToolsScreen()
+      : super.conditional(
           id: id,
           title: 'VM Tools',
           icon: Icons.settings_applications,
@@ -52,11 +51,9 @@ class VMDeveloperToolsScreen extends Screen {
 
   static const id = 'vm-tools';
 
-  final VMDeveloperToolsController controller;
-
   @override
   ValueListenable<bool> get showIsolateSelector =>
-      controller.showIsolateSelector;
+      VMDeveloperToolsController.showIsolateSelector;
 
   @override
   Widget build(BuildContext context) => const VMDeveloperToolsScreenBody();
@@ -112,8 +109,13 @@ class _VMDeveloperToolsScreenState extends State<VMDeveloperToolsScreenBody>
                 padding: const EdgeInsets.only(
                   left: defaultSpacing,
                 ),
-                child: VMDeveloperToolsScreenBody.views[selectedIndex]
-                    .build(context),
+                child: IndexedStack(
+                  index: selectedIndex,
+                  children: [
+                    for (final view in VMDeveloperToolsScreenBody.views)
+                      view.build(context)
+                  ],
+                ),
               ),
             )
           ],

@@ -20,7 +20,7 @@ permissions: read-all
 # track the latest Flutter dev release. Dev releases come out ~weekly;
 # the versions can be viewed at https://github.com/flutter/flutter/tags.
 env:
-  PINNED_FLUTTER_CHANNEL: 3.3.0-0.0.pre
+  PINNED_FLUTTER_CHANNEL: 3.3.0-0.4.pre
 
 jobs:
   main:
@@ -33,7 +33,7 @@ jobs:
           - pinned
     steps:
       - name: git clone
-        uses: actions/checkout@d171c3b028d844f2bf14e9fdec0c58114451e4bf
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
       - name: tool/bots.sh
         env:
           BOT: main
@@ -50,7 +50,7 @@ jobs:
           - pinned
     steps:
       - name: git clone
-        uses: actions/checkout@d171c3b028d844f2bf14e9fdec0c58114451e4bf
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
       - name: tool/bots.sh
         env:
           BOT: packages
@@ -71,7 +71,7 @@ jobs:
           - master
     steps:
       - name: git clone
-        uses: actions/checkout@d171c3b028d844f2bf14e9fdec0c58114451e4bf
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
 
       - name: tool/bots.sh
         env:
@@ -81,13 +81,57 @@ jobs:
         run: ./tool/bots.sh
 
       - name: image failures
-        uses: actions/upload-artifact@34622df80861c3ed63eb2bff892de2f1fbf4c9da
+        uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
         if: failure() # Only if failure then failures directory exists.
         with:
           # TODO(terry): matrix.os currently empty. If we run tests on other
           #              platforms this will be used.
           name: test-image-failures-${{ matrix.os }} # Name for the artifact
           path: packages/devtools_app/test/failures # Path to upload
+
+  macos-test:
+    name: macos ${{ matrix.bot }} - (flutter ${{ matrix.flutter-test-env }})
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        bot:
+          - test_dart2js
+        flutter-test-env:
+          - pinned
+    steps:
+      - name: git clone
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
+
+      - name: tool/bots.sh
+        env:
+          BOT: ${{ matrix.bot }}
+          PLATFORM: vm
+          FLUTTER_TEST_ENV: ${{ matrix.flutter-test-env }}
+        run: ./tool/bots.sh
+
+# TODO(https://github.com/flutter/devtools/issues/1715): add a windows compatible version of tool/bots.sh
+# and run it from this job.
+#  windows-test:
+#    name: windows ${{ matrix.bot }} - (flutter ${{ matrix.flutter-test-env }})
+#    runs-on: windows-latest
+#    strategy:
+#      fail-fast: false
+#      matrix:
+#        bot:
+#          - test_dart2js
+#        flutter-test-env:
+#          - pinned
+#    steps:
+#      - name: git clone
+#        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
+#
+#      - name: tool/bots.sh
+#        env:
+#          BOT: ${{ matrix.bot }}
+#          PLATFORM: vm
+#          FLUTTER_TEST_ENV: ${{ matrix.flutter-test-env }}
+#        run: ./tool/bots.sh
 
 # TODO(https://github.com/flutter/devtools/issues/1987): rewrite integration tests.
 #  integration:
@@ -104,7 +148,7 @@ jobs:
 #          - master
 #    steps:
 #      - name: git clone
-#        uses: actions/checkout@d171c3b028d844f2bf14e9fdec0c58114451e4bf
+#        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
 #      - name: tool/bots.sh
 #        env:
 #          BOT: ${{ matrix.bot }}

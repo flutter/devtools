@@ -5,6 +5,7 @@
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
+import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../../analytics/analytics.dart' as ga;
 import '../../analytics/constants.dart' as analytics_constants;
@@ -15,6 +16,7 @@ import '../../service/service_extensions.dart' as extensions;
 import '../../shared/common_widgets.dart';
 import '../../shared/connected_app.dart';
 import '../../shared/dialogs.dart';
+import '../../shared/editable_list.dart';
 import '../../shared/error_badge_manager.dart';
 import '../../shared/globals.dart';
 import '../../shared/screen.dart';
@@ -121,6 +123,12 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       // Focus is returned automatically once the Dropdown menu is closed.
       if (searchFieldFocusNode.hasFocus) {
         searchPreventClose = false;
+      }
+    });
+    addAutoDisposeListener(preferences.inspector.customPubRootDirectories, () {
+      if (serviceManager.hasConnection &&
+          controller.firstInspectorTreeLoadCompleted) {
+        _refreshInspector();
       }
     });
   }
@@ -326,21 +334,45 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
 class FlutterInspectorSettingsDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final dialogHeight = scaleByFontFactor(400.0);
     return DevToolsDialog(
       title: dialogTitleText(Theme.of(context), 'Flutter Inspector Settings'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CheckboxSetting(
-            notifier: preferences.inspector.hoverEvalModeEnabled
-                as ValueNotifier<bool?>,
-            title: 'Enable hover inspection',
-            description:
-                'Hovering over any widget displays its properties and values.',
-            gaItem: analytics_constants.inspectorHoverEvalMode,
-          ),
-        ],
+      content: Container(
+        width: defaultDialogWidth,
+        height: dialogHeight,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ...dialogSubHeader(
+              Theme.of(context),
+              'General',
+            ),
+            CheckboxSetting(
+              notifier: preferences.inspector.hoverEvalModeEnabled
+                  as ValueNotifier<bool?>,
+              title: 'Enable hover inspection',
+              description:
+                  'Hovering over any widget displays its properties and values.',
+              gaItem: analytics_constants.inspectorHoverEvalMode,
+            ),
+            const SizedBox(height: denseSpacing),
+            ...dialogSubHeader(Theme.of(context), 'Package Directories'),
+            Text(
+              'Widgets in these directories will show up in your summary tree.',
+              style: theme.subtleTextStyle,
+            ),
+            Text(
+              '(e.g. /absolute/path/to/myPackage)',
+              style: theme.subtleTextStyle,
+            ),
+            const SizedBox(height: denseSpacing),
+            Expanded(
+              child: PubRootDirectorySection(),
+            ),
+          ],
+        ),
       ),
       actions: [
         DialogCloseButton(),
@@ -498,5 +530,31 @@ class ErrorNavigator extends StatelessWidget {
     final newIndex = errorIndex == null ? 0 : (errorIndex! + 1) % errors.length;
 
     onSelectError(newIndex);
+  }
+}
+
+class PubRootDirectorySection extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<IsolateRef?>(
+      valueListenable: serviceManager.isolateManager.mainIsolate,
+      builder: (_, __, ___) {
+        return Container(
+          height: 200.0,
+          child: EditableList(
+            entries: preferences.inspector.customPubRootDirectories,
+            textFieldLabel: 'Enter a new package directory',
+            isRefreshing:
+                preferences.inspector.isRefreshingCustomPubRootDirectories,
+            onEntryAdded: (p0) =>
+                preferences.inspector.addPubRootDirectories([p0]),
+            onEntryRemoved: (p0) =>
+                preferences.inspector.removePubRootDirectories([p0]),
+            onRefreshTriggered: () =>
+                preferences.inspector.loadCustomPubRootDirectories(),
+          ),
+        );
+      },
+    );
   }
 }

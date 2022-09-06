@@ -15,6 +15,7 @@ import '../service/service_manager.dart';
 import '../service/vm_service_wrapper.dart';
 import '../shared/framework_controller.dart';
 import '../shared/globals.dart';
+import '../shared/notifications.dart';
 import '../shared/survey.dart';
 
 typedef ErrorReporter = void Function(String title, dynamic error);
@@ -28,6 +29,7 @@ class FrameworkCore {
     setGlobal(SurveyService, SurveyService());
     setGlobal(OfflineModeController, OfflineModeController());
     setGlobal(ScriptManager, ScriptManager());
+    setGlobal(NotificationService, NotificationService());
   }
 
   static void init() {

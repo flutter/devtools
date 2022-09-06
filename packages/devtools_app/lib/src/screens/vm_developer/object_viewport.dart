@@ -3,15 +3,19 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../../primitives/history_manager.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/history_viewport.dart';
 import 'object_inspector_view_controller.dart';
 import 'vm_class_display.dart';
+import 'vm_code_display.dart';
 import 'vm_developer_common_widgets.dart';
+import 'vm_field_display.dart';
+import 'vm_function_display.dart';
+import 'vm_library_display.dart';
 import 'vm_object_model.dart';
+import 'vm_script_display.dart';
 
 /// Displays the VM information for the currently selected object in the
 /// program explorer.
@@ -28,13 +32,7 @@ class ObjectViewport extends StatelessWidget {
     return HistoryViewport<VmObject>(
       history: controller.objectHistory,
       controls: [
-        ToolbarAction(
-          icon: Icons.refresh,
-          onPressed: () {
-            controller.refreshObject();
-          },
-          tooltip: 'Refresh',
-        )
+        ToolbarRefresh(onPressed: controller.refreshObject),
       ],
       generateTitle: viewportTitle,
       contentBuilder: (context, _) {
@@ -66,12 +64,7 @@ String viewportTitle(VmObject? object) {
     return 'No object selected.';
   }
 
-  if (object is ScriptObject) {
-    final ref = object.ref as ScriptRef?;
-    return 'Script @ ${ref?.uri ?? '<uri>'}';
-  }
-
-  return '${object.ref.type} ${object.name ?? '<name>'}';
+  return '${object.obj.type} ${object.name ?? '<name>'}';
 }
 
 /// Calls the object VM statistics card builder according to the VM Object type.
@@ -83,19 +76,24 @@ Widget buildObjectDisplay(VmObject obj) {
     );
   }
   if (obj is FuncObject) {
-    return const VMInfoCard(title: 'TO-DO: Display Function object data');
+    return VmFuncDisplay(function: obj);
   }
   if (obj is FieldObject) {
-    return const VMInfoCard(title: 'TO-DO: Display Field object data');
+    return VmFieldDisplay(field: obj);
   }
   if (obj is LibraryObject) {
-    return const VMInfoCard(title: 'TO-DO: Display Library object data');
+    return VmLibraryDisplay(library: obj);
   }
   if (obj is ScriptObject) {
-    return const VMInfoCard(title: 'TO-DO: Display Script object data');
+    return VmScriptDisplay(script: obj);
   }
   if (obj is InstanceObject) {
     return const VMInfoCard(title: 'TO-DO: Display Instance object data');
+  }
+  if (obj is CodeObject) {
+    return VmCodeDisplay(
+      code: obj,
+    );
   }
   return const SizedBox.shrink();
 }
@@ -104,7 +102,7 @@ Widget buildObjectDisplay(VmObject obj) {
 /// HistoryViewport.
 class ObjectHistory extends HistoryManager<VmObject> {
   void pushEntry(VmObject object) {
-    if (object == current.value) return;
+    if (object.obj == current.value?.obj) return;
 
     while (hasNext) {
       pop();

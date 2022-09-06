@@ -385,12 +385,12 @@ class _TreemapState extends State<Treemap> {
           // If this is the second to the last level, paint all cells in the last level
           // instead of creating widgets to improve performance.
 
-          final tooltipMessage = hoveredNode?.displayText() ?? '';
+          final tooltipMessage = hoveredNode?.displayText();
           return DevToolsTooltip(
             // A key is required to force a rebuild of the tooltips for each cell.
             // Use tooltipMessage as the key to prevent rebuilds within a cell.
-            key: Key(tooltipMessage),
-            message: tooltipMessage,
+            key: Key(tooltipMessage?.toPlainText() ?? ''),
+            richMessage: tooltipMessage ?? const TextSpan(text: ''),
             waitDuration: tooltipWaitLong,
             child: MouseRegion(
               onHover: (event) => _onHover(event, positionedChildren),
@@ -509,13 +509,13 @@ class _TreemapState extends State<Treemap> {
     }
   }
 
-  Text buildNameAndSizeText({
-    required Color? textColor,
+  RichText buildNameAndSizeText({
     required bool oneLine,
+    required Color? textColor,
   }) {
-    return Text(
-      widget.rootNode!.displayText(oneLine: oneLine),
-      style: TextStyle(color: textColor),
+    return RichText(
+      text: widget.rootNode!.displayText(oneLine: oneLine, color: textColor),
+      selectionColor: textColor,
       textAlign: TextAlign.center,
       overflow: TextOverflow.ellipsis,
     );
@@ -532,7 +532,7 @@ class _TreemapState extends State<Treemap> {
           return Breadcrumb(
             text: index < pathFromRoot.length - 1
                 ? node.name
-                : node.displayText(),
+                : node.displayText().toPlainText(),
             isRoot: index == 0,
             onPressed: () => widget.onRootChangedCallback(node),
           );
@@ -550,7 +550,7 @@ class _TreemapState extends State<Treemap> {
   Widget buildSelectable({required Widget child, TreemapNode? newRoot}) {
     newRoot ??= widget.rootNode;
     return DevToolsTooltip(
-      message: widget.rootNode!.displayText(),
+      message: widget.rootNode!.displayText().toPlainText(),
       waitDuration: tooltipWaitLong,
       child: InkWell(
         onTap: () {
@@ -591,6 +591,8 @@ class TreemapNode extends TreeNode<TreemapNode> {
     this.byteSize = 0,
     this.childrenMap = const <String, TreemapNode>{},
     this.showDiff = false,
+    this.backgroundColor,
+    this.caption,
   });
 
   final String name;
@@ -598,11 +600,15 @@ class TreemapNode extends TreeNode<TreemapNode> {
   int byteSize;
 
   final bool showDiff;
+  final Color? backgroundColor;
+  final String? caption;
 
   int get unsignedByteSize => byteSize.abs();
 
   Color get displayColor {
-    if (!showDiff) return mainUiColor;
+    if (!showDiff) {
+      return backgroundColor ?? mainUiColor;
+    }
     if (byteSize < 0) {
       return treemapDecreaseColor;
     } else {
@@ -610,8 +616,13 @@ class TreemapNode extends TreeNode<TreemapNode> {
     }
   }
 
-  String displayText({bool oneLine = true}) {
+  TextSpan displayText({Color? color, bool oneLine = true}) {
     var displayName = name;
+    final textColor = color == null
+        ? showDiff
+            ? Colors.white
+            : Colors.black
+        : color;
 
     // Trim beginning of the name of [this] if it starts with its parent's name.
     // If the parent node and the child node's name are exactly the same,
@@ -624,8 +635,20 @@ class TreemapNode extends TreeNode<TreemapNode> {
         displayName = displayName.replaceFirst('/', '');
       }
     }
+
     final separator = oneLine ? ' ' : '\n';
-    return '$displayName$separator[${prettyByteSize()}]';
+
+    return TextSpan(
+      text: '$displayName$separator[${prettyByteSize()}]',
+      children: [
+        if (caption != null)
+          TextSpan(
+            text: '$separator$caption',
+            style: TextStyle(fontStyle: FontStyle.italic, color: textColor),
+          )
+      ],
+      style: TextStyle(color: textColor),
+    );
   }
 
   String prettyByteSize() {
@@ -756,12 +779,7 @@ class MultiCellPainter extends CustomPainter {
     if (positionedCell.width! > Treemap.minWidthToDisplayCellText &&
         positionedCell.height! > Treemap.minHeightToDisplayCellText) {
       final textPainter = TextPainter(
-        text: TextSpan(
-          text: node.displayText(oneLine: false),
-          style: TextStyle(
-            color: node.showDiff ? Colors.white : Colors.black,
-          ),
-        ),
+        text: node.displayText(oneLine: false),
         textDirection: TextDirection.ltr,
         textAlign: TextAlign.center,
         ellipsis: '...',

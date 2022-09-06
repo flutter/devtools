@@ -62,6 +62,7 @@ Widget wrapWithControllers(
   BannerMessagesController? bannerMessages,
   AppSizeController? appSize,
   AnalyticsController? analytics,
+  VMDeveloperToolsController? vmDeveloperTools,
 }) {
   final _providers = [
     Provider<BannerMessagesController>.value(
@@ -80,6 +81,8 @@ Widget wrapWithControllers(
     if (appSize != null) Provider<AppSizeController>.value(value: appSize),
     if (analytics != null)
       Provider<AnalyticsController>.value(value: analytics),
+    if (vmDeveloperTools != null)
+      Provider<VMDeveloperToolsController>.value(value: vmDeveloperTools),
   ];
   return wrap(
     wrapWithNotifications(
@@ -92,7 +95,7 @@ Widget wrapWithControllers(
 }
 
 Widget wrapWithNotifications(Widget child) {
-  return Notifications(child: child);
+  return NotificationsView(child: child);
 }
 
 Widget wrapWithInspectorControllers(Widget widget) {
@@ -161,15 +164,4 @@ Future<void> _setWindowSize(Size windowSize) async {
 
 Future<void> _resetWindowSize() async {
   await _setWindowSize(const Size(800.0, 600.0));
-}
-
-/// A test-friendly [NotificationService] that can be run in unit tests
-/// instead of widget tests.
-class TestNotifications implements NotificationService {
-  final List<String> messages = [];
-
-  @override
-  void push(String message) {
-    messages.add(message);
-  }
 }

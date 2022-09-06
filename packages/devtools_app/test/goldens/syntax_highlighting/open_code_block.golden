@@ -1,0 +1,16 @@
+>/// This is an open code block:
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ comment.block.documentation.dart
+>/// ```dart
+#^^^^^^^^^^^ comment.block.documentation.dart
+>///
+#^^^ comment.block.documentation.dart
+>/// This should not cause parsing to fail.
+#^^^ comment.block.documentation.dart
+#   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ comment.block.documentation.dart variable.other.source.dart
+>
+>void main() {
+#^^^^ storage.type.primitive.dart
+#     ^^^^ entity.name.function.dart
+>  // But scope should end when parent scope is closed.
+#  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ comment.line.double-slash.dart
+>}

@@ -2,11 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_model.dart';
+import 'package:devtools_app/src/screens/debugger/program_explorer_controller.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector_view_controller.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_viewport.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_object_model.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/foundation.dart';
+import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
 final testLib = Library(
@@ -17,7 +21,7 @@ final testLib = Library(
 );
 
 final testClass = Class(
-  name: 'fooClass',
+  name: 'FooClass',
   library: testLib,
   isAbstract: false,
   isConst: false,
@@ -30,7 +34,7 @@ final testClass = Class(
 final testScript = Script(uri: 'fooScript.dart', library: testLib, id: '1234');
 
 final testFunction = Func(
-  name: 'FooFunction',
+  name: 'fooFunction',
   owner: testLib,
   isStatic: false,
   isConst: false,
@@ -40,6 +44,7 @@ final testFunction = Func(
 
 final testField = Field(
   name: 'fooField',
+  owner: testLib,
   id: '1234',
 );
 
@@ -61,11 +66,84 @@ const testPos = SourcePosition(line: 10, column: 4);
 
 final testInstances = InstanceSet(totalCount: 3);
 
+final testRequestableSize = InstanceRef(
+  kind: '',
+  id: '1234',
+  name: 'requestedSize',
+  valueAsString: '128',
+);
+
+final testParentField = Field(
+  name: 'fooParentField',
+  id: '1234',
+);
+
+final testRetainingPath = RetainingPath(
+  length: 1,
+  gcRootType: 'class table',
+  elements: testRetainingObjects,
+);
+
+final testRetainingObjects = [
+  RetainingObject(
+    value: testClass,
+  ),
+  RetainingObject(
+    value: testInstance,
+    parentListIndex: 1,
+    parentField: 'fooParentField',
+  ),
+  RetainingObject(
+    value: testInstance,
+    parentMapKey: testField,
+    parentField: 'fooParentField',
+  ),
+  RetainingObject(
+    value: testField,
+    parentField: 'fooParentField',
+  ),
+];
+
+final testInboundRefs = TestInboundReferences(
+  references: testInboundRefList,
+);
+
+final testInboundRefList = [
+  InboundReference(
+    source: testFunction,
+  ),
+  InboundReference(
+    source: testField,
+    parentField: testParentField,
+  ),
+  InboundReference(
+    source: testInstance,
+    parentListIndex: 1,
+    parentField: testParentField,
+  ),
+];
+
+final testLoadTime = DateTime(2022, 8, 10, 6, 30);
+
+class TestInboundReferences extends InboundReferences {
+  TestInboundReferences({required super.references});
+
+  @override
+  Map<String, dynamic>? get json => <String, dynamic>{};
+}
+
 class TestObjectInspectorViewController extends ObjectInspectorViewController {
   @override
   ObjectHistory get objectHistory => fakeObjectHistory;
 
+  @override
+  ProgramExplorerController get programExplorerController =>
+      mockProgramExplorerController;
+
   final fakeObjectHistory = FakeObjectHistory();
+
+  final mockProgramExplorerController =
+      createMockProgramExplorerControllerWithDefaults();
 }
 
 class FakeObjectHistory extends ObjectHistory {
@@ -79,51 +157,6 @@ class FakeObjectHistory extends ObjectHistory {
   }
 }
 
-class TestScriptObject extends ScriptObject {
-  TestScriptObject({required super.ref, required this.testScript});
-
-  Script testScript;
-
-  @override
-  Script get obj => testScript;
-}
-
-class TestFuncObject extends FuncObject {
-  TestFuncObject({required super.ref, required this.testFunc});
-
-  Func testFunc;
-
-  @override
-  Func get obj => testFunc;
-
-  @override
-  String? get name => 'FooFunction';
-}
-
-class TestFieldObject extends FieldObject {
-  TestFieldObject({required super.ref, required this.testField});
-
-  Field testField;
-
-  @override
-  Field get obj => testField;
-
-  @override
-  String? get name => 'FooField';
-}
-
-class TestLibraryObject extends LibraryObject {
-  TestLibraryObject({required super.ref, required this.testLibrary});
-
-  Library testLibrary;
-
-  @override
-  Library get obj => testLibrary;
-
-  @override
-  String? get name => 'FooLib';
-}
-
 class TestInstanceObject extends InstanceObject {
   TestInstanceObject({required super.ref, required this.testInstance});
 
@@ -134,4 +167,66 @@ class TestInstanceObject extends InstanceObject {
 
   @override
   String? get name => 'FooInstance';
+}
+
+void mockVmObject(VmObject object) {
+  when(object.outlineNode).thenReturn(null);
+  when(object.scriptRef).thenReturn(null);
+  when(object.script).thenReturn(testScript);
+  when(object.pos).thenReturn(testPos);
+  when(object.fetchingReachableSize).thenReturn(ValueNotifier<bool>(false));
+  when(object.reachableSize).thenReturn(testRequestableSize);
+  when(object.fetchingRetainedSize).thenReturn(ValueNotifier<bool>(false));
+  when(object.retainedSize).thenReturn(null);
+  when(object.retainingPath).thenReturn(
+    ValueNotifier<RetainingPath?>(testRetainingPath),
+  );
+  when(object.inboundReferences).thenReturn(
+    ValueNotifier<InboundReferences?>(testInboundRefs),
+  );
+
+  if (object is ClassObject) {
+    when(object.name).thenReturn(testClass.name);
+    when(object.ref).thenReturn(testClass);
+    when(object.obj).thenReturn(testClass);
+    when(object.instances).thenReturn(testInstances);
+  }
+
+  if (object is FieldObject) {
+    when(object.name).thenReturn(testField.name);
+    when(object.ref).thenReturn(testField);
+    when(object.obj).thenReturn(testField);
+    when(object.guardClass).thenReturn(null);
+    when(object.guardNullable).thenReturn(null);
+    when(object.guardClassKind).thenReturn(null);
+  }
+
+  if (object is FuncObject) {
+    when(object.name).thenReturn(testFunction.name);
+    when(object.ref).thenReturn(testFunction);
+    when(object.obj).thenReturn(testFunction);
+    when(object.kind).thenReturn(null);
+    when(object.deoptimizations).thenReturn(null);
+    when(object.isOptimizable).thenReturn(null);
+    when(object.isInlinable).thenReturn(null);
+    when(object.hasIntrinsic).thenReturn(null);
+    when(object.isRecognized).thenReturn(null);
+    when(object.isNative).thenReturn(null);
+    when(object.vmName).thenReturn(null);
+    when(object.icDataArray).thenReturn(null);
+  }
+
+  if (object is ScriptObject) {
+    when(object.name).thenReturn(fileNameFromUri(testScript.uri));
+    when(object.ref).thenReturn(testScript);
+    when(object.obj).thenReturn(testScript);
+    when(object.loadTime).thenReturn(testLoadTime);
+  }
+
+  if (object is LibraryObject) {
+    when(object.name).thenReturn(testLib.name);
+    when(object.ref).thenReturn(testLib);
+    when(object.obj).thenReturn(testLib);
+    when(object.vmName).thenReturn(null);
+  }
 }

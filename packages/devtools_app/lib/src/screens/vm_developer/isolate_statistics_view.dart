@@ -78,12 +78,12 @@ class IsolateStatisticsViewBody extends StatelessWidget {
         Flexible(
           child: Column(
             children: [
-              Flexible(
+              Expanded(
                 child: GeneralIsolateStatisticsWidget(
                   controller: controller,
                 ),
               ),
-              Flexible(
+              Expanded(
                 child: IsolateMemoryStatisticsWidget(
                   controller: controller,
                 ),
@@ -148,11 +148,11 @@ class GeneralIsolateStatisticsWidget extends StatelessWidget {
     return VMInfoCard(
       title: 'General',
       rowKeyValues: [
-        MapEntry('Name', isolate?.name),
-        MapEntry('Started at', _startTime(isolate)),
-        MapEntry('Uptime', _uptime(isolate)),
-        MapEntry('Root Library', isolate?.rootLib?.uri),
-        MapEntry('ID', isolate?.id),
+        selectableTextBuilderMapEntry('Name', isolate?.name),
+        selectableTextBuilderMapEntry('Started at', _startTime(isolate)),
+        selectableTextBuilderMapEntry('Uptime', _uptime(isolate)),
+        selectableTextBuilderMapEntry('Root Library', isolate?.rootLib?.uri),
+        selectableTextBuilderMapEntry('ID', isolate?.id),
       ],
     );
   }
@@ -177,34 +177,28 @@ class IsolateMemoryStatisticsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isolate = controller.isolate;
-    return Column(
-      children: [
-        Flexible(
-          child: VMInfoCard(
-            title: 'Memory',
-            rowKeyValues: [
-              MapEntry(
-                'Dart Heap',
-                _buildMemoryString(
-                  isolate?.dartHeapSize,
-                  isolate?.dartHeapCapacity,
-                ),
-              ),
-              MapEntry(
-                'New Space',
-                _buildMemoryString(
-                  isolate?.newSpaceUsage,
-                  isolate?.newSpaceUsage,
-                ),
-              ),
-              MapEntry(
-                'Old Space',
-                _buildMemoryString(
-                  isolate?.oldSpaceUsage,
-                  isolate?.oldSpaceCapacity,
-                ),
-              ),
-            ],
+    return VMInfoCard(
+      title: 'Memory',
+      rowKeyValues: [
+        selectableTextBuilderMapEntry(
+          'Dart Heap',
+          _buildMemoryString(
+            isolate?.dartHeapSize,
+            isolate?.dartHeapCapacity,
+          ),
+        ),
+        selectableTextBuilderMapEntry(
+          'New Space',
+          _buildMemoryString(
+            isolate?.newSpaceUsage,
+            isolate?.newSpaceUsage,
+          ),
+        ),
+        selectableTextBuilderMapEntry(
+          'Old Space',
+          _buildMemoryString(
+            isolate?.oldSpaceUsage,
+            isolate?.oldSpaceCapacity,
           ),
         ),
       ],

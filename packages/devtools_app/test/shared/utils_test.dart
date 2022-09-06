@@ -72,7 +72,7 @@ void main() {
       expect(printMB(1000 * mb, fractionDigits: 2), '1000.00');
     });
 
-    test('msAsText', () {
+    test('msText', () {
       expect(msText(const Duration(microseconds: 3111)), equals('3.1 ms'));
       expect(
         msText(const Duration(microseconds: 3199), includeUnit: false),
@@ -89,6 +89,26 @@ void main() {
       expect(
         msText(const Duration(milliseconds: 3)),
         equals('3.0 ms'),
+      );
+      expect(
+        msText(const Duration(microseconds: 1)),
+        equals('0.0 ms'),
+      );
+      expect(
+        msText(Duration.zero, allowRoundingToZero: false),
+        equals('0.0 ms'),
+      );
+      expect(
+        msText(const Duration(microseconds: 1), allowRoundingToZero: false),
+        equals('< 0.1 ms'),
+      );
+      expect(
+        msText(
+          const Duration(microseconds: 1),
+          fractionDigits: 2,
+          allowRoundingToZero: false,
+        ),
+        equals('< 0.01 ms'),
       );
     });
 
@@ -1120,6 +1140,24 @@ void main() {
         expect(notifier.value, equals([1]));
       });
 
+      test('notifies on replace', () {
+        final initialList = [1, 2, 3, 4, 5];
+        setUpWithInitialValue(initialList);
+        final result = notifier.replace(3, -1);
+        expect(result, true);
+        expect(didNotify, isTrue);
+        expect(notifier.value, equals([1, 2, -1, 4, 5]));
+      });
+
+      test('does not notify on invalid replace', () {
+        final initialList = [1, 2, 3, 4, 5];
+        setUpWithInitialValue(initialList);
+        final result = notifier.replace(6, -1);
+        expect(result, false);
+        expect(didNotify, isFalse);
+        expect(notifier.value, equals([1, 2, 3, 4, 5]));
+      });
+
       test('notifies on addAll', () {
         notifier.addAll([1, 2]);
         expect(didNotify, isTrue);
@@ -1159,6 +1197,13 @@ void main() {
         notifier.remove(2);
         expect(didNotify, isTrue);
         expect(notifier.value, equals([1, 3]));
+      });
+
+      test('notifies on removeAll', () {
+        setUpWithInitialValue([1, 2, 3, 4]);
+        notifier.removeAll([1, 3]);
+        expect(didNotify, isTrue);
+        expect(notifier.value, equals([2, 4]));
       });
 
       test('notifies on removeRange', () {

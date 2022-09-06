@@ -14,7 +14,6 @@ import '../../shared/globals.dart';
 import '../../shared/theme.dart';
 import '../../shared/tree.dart';
 import '../../shared/utils.dart';
-import 'debugger_model.dart';
 import 'program_explorer_controller.dart';
 import 'program_explorer_model.dart';
 
@@ -245,6 +244,9 @@ class ProgramStructureIcon extends StatelessWidget {
     } else if (object is ScriptRef) {
       icon = libraryIcon;
       color = colorScheme.stringSyntaxColor;
+    } else if (object is CodeRef) {
+      icon = Icons.code;
+      color = colorScheme.controlFlowSyntaxColor;
     } else {
       icon = containerIcon;
     }
@@ -426,15 +428,15 @@ class ProgramExplorer extends StatelessWidget {
   const ProgramExplorer({
     Key? key,
     required this.controller,
-    this.onSelected,
     this.title = 'File Explorer',
     this.onNodeSelected,
+    this.displayCodeNodes = false,
   });
 
   final ProgramExplorerController controller;
-  final void Function(ScriptLocation)? onSelected;
   final String title;
   final void Function(VMServiceObjectNode)? onNodeSelected;
+  final bool displayCodeNodes;
 
   @override
   Widget build(BuildContext context) {
@@ -517,7 +519,6 @@ class ProgramExplorer extends StatelessWidget {
       node.expand();
     }
 
-    if (onSelected != null) onSelected!(node.location!);
     if (onNodeSelected != null) onNodeSelected!(node);
   }
 

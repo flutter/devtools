@@ -14,7 +14,6 @@ import 'package:vm_service/vm_service.dart';
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../primitives/utils.dart';
 import '../../shared/globals.dart';
-import '../../shared/notifications.dart';
 import '../../shared/theme.dart';
 import '../../ui/search.dart';
 import '../../ui/utils.dart';
@@ -303,7 +302,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
     // Only try to eval if we are paused.
     if (!serviceManager
         .isolateManager.mainIsolateDebuggerState!.isPaused.value!) {
-      Notifications.of(context)!
+      notificationService
           .push('Application must be paused to support expression evaluation.');
       return;
     }

@@ -15,9 +15,7 @@ import '../../service/service_extension_widgets.dart';
 import '../../service/service_extensions.dart' as extensions;
 import '../../shared/banner_messages.dart';
 import '../../shared/common_widgets.dart';
-import '../../shared/dialogs.dart';
 import '../../shared/globals.dart';
-import '../../shared/notifications.dart';
 import '../../shared/screen.dart';
 import '../../shared/split.dart';
 import '../../shared/theme.dart';
@@ -25,9 +23,11 @@ import '../../shared/utils.dart';
 import '../../shared/version.dart';
 import '../../ui/icons.dart';
 import '../../ui/vm_flag_widgets.dart';
-import 'enhance_tracing.dart';
 import 'event_details.dart';
 import 'flutter_frames_chart.dart';
+import 'panes/controls/enhance_tracing/enhance_tracing.dart';
+import 'panes/controls/layer_debugging_options.dart';
+import 'panes/controls/performance_settings.dart';
 import 'performance_controller.dart';
 import 'performance_model.dart';
 import 'tabbed_performance_view.dart';
@@ -140,6 +140,11 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
         controller.offlinePerformanceData != null &&
         controller.offlinePerformanceData!.frames.isNotEmpty;
 
+    final tabbedPerformanceView = TabbedPerformanceView(
+      controller: controller,
+      processing: processing,
+      processingProgress: processingProgress,
+    );
     final performanceScreen = Column(
       children: [
         if (!offlineController.offlineMode.value) _buildPerformanceControls(),
@@ -158,23 +163,21 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
             },
           ),
         Expanded(
-          child: Split(
-            axis: Axis.vertical,
-            initialFractions: const [0.7, 0.3],
-            children: [
-              TabbedPerformanceView(
-                controller: controller,
-                processing: processing,
-                processingProgress: processingProgress,
-              ),
-              ValueListenableBuilder<TimelineEvent?>(
-                valueListenable: controller.selectedTimelineEvent,
-                builder: (context, selectedEvent, _) {
-                  return EventDetails(selectedEvent);
-                },
-              ),
-            ],
-          ),
+          child: embeddedPerfettoEnabled
+              ? tabbedPerformanceView
+              : Split(
+                  axis: Axis.vertical,
+                  initialFractions: const [0.7, 0.3],
+                  children: [
+                    tabbedPerformanceView,
+                    ValueListenableBuilder<TimelineEvent?>(
+                      valueListenable: controller.selectedTimelineEvent,
+                      builder: (context, selectedEvent, _) {
+                        return EventDetails(selectedEvent);
+                      },
+                    ),
+                  ],
+                ),
         ),
       ],
     );
@@ -314,7 +317,7 @@ class SecondaryPerformanceControls extends StatelessWidget {
             ],
           ),
           const SizedBox(width: denseSpacing),
-          const EnhanceTracingButton(),
+          EnhanceTracingButton(controller.enhanceTracingController),
           const SizedBox(width: denseSpacing),
           const MoreDebuggingOptionsButton(),
         ],
@@ -345,191 +348,13 @@ class SecondaryPerformanceControls extends StatelessWidget {
     // download always successful?
     // TODO(peterdjlee): find a way to push the notification logic into the
     // export controller.
-    Notifications.of(context)!.push(successfulExportMessage(exportedFile));
+    notificationService.push(successfulExportMessage(exportedFile));
   }
 
   void _openSettingsDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) => PerformanceSettingsDialog(controller),
-    );
-  }
-}
-
-class MoreDebuggingOptionsButton extends StatelessWidget {
-  const MoreDebuggingOptionsButton({Key? key}) : super(key: key);
-
-  static const _width = 720.0;
-
-  @override
-  Widget build(BuildContext context) {
-    return ServiceExtensionCheckboxGroupButton(
-      title: 'More debugging options',
-      icon: Icons.build,
-      tooltip: 'Opens a list of options you can use to help debug performance',
-      minScreenWidthForTextBeforeScaling:
-          SecondaryPerformanceControls.minScreenWidthForTextBeforeScaling,
-      extensions: [
-        extensions.disableClipLayers,
-        extensions.disableOpacityLayers,
-        extensions.disablePhysicalShapeLayers,
-      ],
-      overlayDescription: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'After toggling a rendering layer on/off, '
-            'reproduce the activity in your app to see the effects. '
-            'All layers are rendered by default - disabling a '
-            'layer might help identify expensive operations in your app.',
-            style: Theme.of(context).subtleTextStyle,
-          ),
-          if (serviceManager.connectedApp!.isProfileBuildNow!) ...[
-            const SizedBox(height: denseSpacing),
-            RichText(
-              text: TextSpan(
-                text:
-                    "These debugging options aren't available in profile mode. "
-                    'To use them, run your app in debug mode.',
-                style: Theme.of(context).subtleErrorTextStyle,
-              ),
-            )
-          ]
-        ],
-      ),
-      overlayWidthBeforeScaling: _width,
-    );
-  }
-}
-
-class PerformanceSettingsDialog extends StatelessWidget {
-  const PerformanceSettingsDialog(this.controller);
-
-  final PerformanceController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return DevToolsDialog(
-      title: dialogTitleText(theme, 'Performance Settings'),
-      includeDivider: false,
-      content: Container(
-        width: defaultDialogWidth,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TimelineStreamSettings(controller: controller),
-            if (serviceManager.connectedApp!.isFlutterAppNow!) ...[
-              const SizedBox(height: denseSpacing),
-              FlutterSettings(controller: controller),
-            ],
-          ],
-        ),
-      ),
-      actions: [
-        DialogCloseButton(),
-      ],
-    );
-  }
-}
-
-class TimelineStreamSettings extends StatelessWidget {
-  const TimelineStreamSettings({
-    Key? key,
-    required this.controller,
-  }) : super(key: key);
-
-  final PerformanceController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        ...dialogSubHeader(theme, 'Recorded Timeline Streams'),
-        ..._defaultRecordedStreams(theme),
-        ..._advancedStreams(theme),
-      ],
-    );
-  }
-
-  List<Widget> _defaultRecordedStreams(ThemeData theme) {
-    return [
-      RichText(
-        text: TextSpan(
-          text: 'Default',
-          style: theme.subtleTextStyle,
-        ),
-      ),
-      ..._timelineStreams(theme, advanced: false),
-      // Special case "Network Traffic" because it is not implemented as a
-      // Timeline recorded stream in the VM. The user does not need to be aware of
-      // the distinction, however.
-      CheckboxSetting(
-        title: 'Network',
-        description: 'Http traffic',
-        notifier: controller.httpTimelineLoggingEnabled as ValueNotifier<bool?>,
-        onChanged: (value) =>
-            controller.toggleHttpRequestLogging(value ?? false),
-      ),
-    ];
-  }
-
-  List<Widget> _advancedStreams(ThemeData theme) {
-    return [
-      RichText(
-        text: TextSpan(
-          text: 'Advanced',
-          style: theme.subtleTextStyle,
-        ),
-      ),
-      ..._timelineStreams(theme, advanced: true),
-    ];
-  }
-
-  List<Widget> _timelineStreams(
-    ThemeData theme, {
-    required bool advanced,
-  }) {
-    final streams = advanced
-        ? serviceManager.timelineStreamManager.advancedStreams
-        : serviceManager.timelineStreamManager.basicStreams;
-    final settings = streams
-        .map(
-          (stream) => CheckboxSetting(
-            title: stream.name,
-            description: stream.description,
-            notifier: stream.recorded as ValueNotifier<bool?>,
-            onChanged: (newValue) =>
-                serviceManager.timelineStreamManager.updateTimelineStream(
-              stream,
-              newValue ?? false,
-            ),
-          ),
-        )
-        .toList();
-    return settings;
-  }
-}
-
-class FlutterSettings extends StatelessWidget {
-  const FlutterSettings({Key? key, required this.controller}) : super(key: key);
-
-  final PerformanceController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        ...dialogSubHeader(Theme.of(context), 'Additional Settings'),
-        CheckboxSetting(
-          notifier: controller.badgeTabForJankyFrames as ValueNotifier<bool?>,
-          title: 'Badge Performance tab when Flutter UI jank is detected',
-        ),
-      ],
     );
   }
 }
