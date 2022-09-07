@@ -47,8 +47,8 @@ class RasterMetricsController {
       final response = await serviceManager.renderFrameWithRasterStats;
       final json = response?.json ?? <String, Object?>{};
       await initDataFromJson(json);
-    } catch (e) {
-      logger.log('Error collecting raster stats: $e');
+    } catch (e, st) {
+      logger.log('Error collecting raster stats: $e\n\n$st');
       clear();
     } finally {
       _loadingSnapshot.value = false;
@@ -65,8 +65,8 @@ class RasterMetricsController {
   @visibleForTesting
   Future<void> initDataFromJson(Map<String, Object?> json) async {
     originalFrameSize = Size(
-      (json['frame_width'] as int).toDouble(),
-      (json['frame_height'] as int).toDouble(),
+      (json['frame_width'] as num).toDouble(),
+      (json['frame_height'] as num).toDouble(),
     );
 
     final snapshotsFromJson =
@@ -79,12 +79,12 @@ class RasterMetricsController {
         (snapshot[_snapshotJsonKey] as List<dynamic>).cast<int>(),
       );
       final size = Size(
-        (snapshot['width'] as int).toDouble(),
-        (snapshot['height'] as int).toDouble(),
+        (snapshot['width'] as num).toDouble(),
+        (snapshot['height'] as num).toDouble(),
       );
       final offset = Offset(
-        (snapshot['left'] as int).toDouble(),
-        (snapshot['top'] as int).toDouble(),
+        (snapshot['left'] as num).toDouble(),
+        (snapshot['top'] as num).toDouble(),
       );
       final image = await imageFromBytes(imageBytes);
       final layerSnapshot = LayerSnapshot(
