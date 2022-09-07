@@ -48,7 +48,7 @@ class SyntaxHighlighter {
   /// Returns the highlighted [source] in [TextSpan] form.
   ///
   /// If [lineRange] is provided, only the lines between
-  /// `[lineRange.begin, lineRange.end)` will be returned.
+  /// `[lineRange.begin, lineRange.end]` will be returned.
   TextSpan highlight(BuildContext context, {LineRange? lineRange}) {
     // Generate the styling for the various scopes based on the current theme.
     _scopeStyles = _buildSyntaxColorTable(Theme.of(context));
@@ -57,7 +57,7 @@ class SyntaxHighlighter {
     if (lineRange != null) {
       _processedSource = _processedSource
           .split('\n')
-          .sublist(lineRange.begin - 1, lineRange.end - 1)
+          .sublist(lineRange.begin - 1, lineRange.end)
           .join('\n');
     }
     return TextSpan(
