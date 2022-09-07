@@ -214,6 +214,14 @@ class DebuggerController extends DisposableController
     scriptsHistory.current.addListener(_scriptHistoryListener);
   }
 
+  /// Resets the current script information before invoking [showScriptLocation].
+  void resetScriptLocation(ScriptLocation scriptLocation) {
+    _scriptLocation.value = null;
+    _currentScriptRef.value = null;
+    parsedScript.value = null;
+    showScriptLocation(scriptLocation);
+  }
+
   /// Show the given script location (without updating the script navigation
   /// history).
   void _showScriptLocation(ScriptLocation scriptLocation) {

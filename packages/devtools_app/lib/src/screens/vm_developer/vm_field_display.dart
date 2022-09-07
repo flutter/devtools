@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../shared/common_widgets.dart';
+import '../../shared/split.dart';
 import 'object_inspector_view_controller.dart';
 import 'vm_developer_common_widgets.dart';
 import 'vm_object_model.dart';
@@ -23,9 +25,23 @@ class VmFieldDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return VmObjectDisplayBasicLayout(
-      object: field,
-      generalDataRows: _fieldDataRows(field),
+    final debuggerController = controller.debuggerController;
+    return Split(
+      axis: Axis.vertical,
+      initialFractions: const [0.5, 0.5],
+      children: [
+        OutlineDecoration.onlyBottom(
+          child: VmObjectDisplayBasicLayout(
+            object: field,
+            generalDataRows: _fieldDataRows(field),
+          ),
+        ),
+        ObjectInspectorCodeView(
+          debuggerController: debuggerController,
+          script: field.scriptRef!,
+          object: field.obj,
+        ),
+      ],
     );
   }
 

@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../shared/common_widgets.dart';
+import '../../shared/split.dart';
 import '../../shared/theme.dart';
 import 'object_inspector_view_controller.dart';
 import 'vm_developer_common_widgets.dart';
@@ -14,22 +16,36 @@ import 'vm_object_model.dart';
 /// related to library objects in the Dart VM.
 class VmLibraryDisplay extends StatelessWidget {
   const VmLibraryDisplay({
-    required this.library,
     required this.controller,
+    required this.library,
   });
 
-  final LibraryObject library;
   final ObjectInspectorViewController controller;
+  final LibraryObject library;
 
   @override
   Widget build(BuildContext context) {
+    final debuggerController = controller.debuggerController;
     final dependencies = library.obj.dependencies;
-    return VmObjectDisplayBasicLayout(
-      object: library,
-      generalDataRows: _libraryDataRows(library),
-      expandableWidgets: [
-        if (dependencies != null)
-          LibraryDependencies(dependencies: dependencies)
+    return Split(
+      axis: Axis.vertical,
+      initialFractions: const [0.5, 0.5],
+      children: [
+        OutlineDecoration.onlyBottom(
+          child: VmObjectDisplayBasicLayout(
+            object: library,
+            generalDataRows: _libraryDataRows(library),
+            expandableWidgets: [
+              if (dependencies != null)
+                LibraryDependencies(dependencies: dependencies)
+            ],
+          ),
+        ),
+        ObjectInspectorCodeView(
+          debuggerController: debuggerController,
+          script: library.scriptRef!,
+          object: library.obj,
+        ),
       ],
     );
   }

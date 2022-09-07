@@ -13,6 +13,9 @@ import '../../primitives/utils.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/table.dart';
 import '../../shared/theme.dart';
+import '../debugger/codeview.dart';
+import '../debugger/debugger_controller.dart';
+import '../debugger/debugger_model.dart';
 import 'object_inspector_view_controller.dart';
 import 'vm_object_model.dart';
 import 'vm_service_private_extensions.dart';
@@ -795,4 +798,90 @@ List<MapEntry<String, WidgetBuilder>> vmObjectGeneralDataRows(
         },
       ),
   ];
+}
+
+/// Creates a simple [CodeView] which displays the code relevant to [object] in
+/// [script]. If [object] is synthetic and doesn't have actual token positions,
+/// [object]'s owner's code will be displayed instead.
+class ObjectInspectorCodeView extends StatefulWidget {
+  ObjectInspectorCodeView({
+    required this.debuggerController,
+    required this.script,
+    required this.object,
+  }) : super(key: ValueKey(object));
+
+  final DebuggerController debuggerController;
+  final ScriptRef script;
+  final ObjRef object;
+
+  @override
+  State<ObjectInspectorCodeView> createState() =>
+      _ObjectInspectorCodeViewState();
+}
+
+class _ObjectInspectorCodeViewState extends State<ObjectInspectorCodeView> {
+  @override
+  void didChangeDependencies() async {
+    super.didChangeDependencies();
+    if (widget.script != widget.debuggerController.currentScriptRef.value) {
+      widget.debuggerController.resetScriptLocation(
+        ScriptLocation(widget.script),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<ParsedScript?>(
+      valueListenable: widget.debuggerController.currentParsedScript,
+      builder: (context, currentParsedScript, _) {
+        LineRange? lineRange;
+        if (currentParsedScript != null) {
+          final obj = widget.object;
+          SourceLocation? location;
+          if (obj is ClassRef || obj is FuncRef || obj is FieldRef) {
+            final dynObj = obj as dynamic;
+            location = dynObj.location!;
+            // If there's no line associated with the location, we're likely
+            // dealing with an artificial field / method like a constructor.
+            // We'll display the owner's code instead of showing nothing,
+            // although showing a "No Source Available" message is another
+            // option.
+            if (location!.line == null) {
+              location = dynObj.owner.location;
+            }
+          }
+
+          if (location != null && location.line != null) {
+            final script = currentParsedScript.script;
+            final startLine = location.line!;
+            final endLine = script.getLineNumberFromTokenPos(
+              location.endTokenPos!,
+            )!;
+            lineRange = LineRange(startLine, endLine);
+          }
+        }
+
+        return Column(
+          children: [
+            const AreaPaneHeader(
+              title: Text('Code Preview'),
+            ),
+            Expanded(
+              child: CodeView(
+                controller: widget.debuggerController,
+                scriptRef: widget.script,
+                parsedScript: currentParsedScript,
+                enableFileExplorer: false,
+                enableHistory: false,
+                enableSearch: false,
+                lineRange: lineRange,
+                onSelected: widget.debuggerController.toggleBreakpoint,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
 }

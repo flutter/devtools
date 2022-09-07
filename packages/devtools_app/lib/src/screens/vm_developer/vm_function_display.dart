@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../shared/common_widgets.dart';
+import '../../shared/split.dart';
 import 'object_inspector_view_controller.dart';
 import 'vm_developer_common_widgets.dart';
 import 'vm_object_model.dart';
@@ -26,14 +28,26 @@ class VmFuncDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return VmObjectDisplayBasicLayout(
-      object: function,
-      generalDataRows: vmObjectGeneralDataRows(
-        controller,
-        function,
-      ),
-      sideCardDataRows: _functionDetailRows(function),
-      sideCardTitle: 'Function Details',
+
+    final debuggerController = controller.debuggerController;
+    return Split(
+      axis: Axis.vertical,
+      initialFractions: const [0.5, 0.5],
+      children: [
+        OutlineDecoration.onlyBottom(
+          child: VmObjectDisplayBasicLayout(
+            object: function,
+            generalDataRows: vmObjectGeneralDataRows(controller, function),
+            sideCardDataRows: _functionDetailRows(function),
+            sideCardTitle: 'Function Details',
+          ),
+        ),
+        ObjectInspectorCodeView(
+          debuggerController: debuggerController,
+          script: function.scriptRef!,
+          object: function.obj,
+        ),
+      ],
     );
   }
 

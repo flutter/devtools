@@ -778,6 +778,19 @@ enum SortDirection {
   descending,
 }
 
+class LineRange extends Range {
+  const LineRange(super.begin, super.end);
+
+  @override
+  int get begin => super.begin.toInt();
+
+  @override
+  int get end => super.end.toInt();
+
+  @override
+  int get size => end - begin + 1;
+}
+
 extension SortDirectionExtension on SortDirection {
   SortDirection reverse() {
     return this == SortDirection.ascending
