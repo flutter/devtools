@@ -23,6 +23,11 @@ file.
 
 - Pull the code from the upstream DevTools and refresh local code: `sh tool/pull_and_refresh.sh`
 
+### Announcing your changes
+
+If your improvement is user-facing, document it in
+[release-notes-next.md](packages/devtools_app/lib/src/framework/release_notes/release-notes-next.md).
+
 ## Development prep
 
 1. If you haven't already, follow the [instructions](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh) to generate a new SSH key and connect to Github with SSH
