@@ -28,33 +28,6 @@ void main() {
   late FakeServiceManager fakeServiceManager;
   late PreferencesController preferencesController;
 
-  void _setUpServiceManagerForMemory() {
-    // Load canned data testHeapSampleData.
-    final memoryJson =
-        SamplesMemoryJson.decode(argJsonString: testHeapSampleData);
-    final allocationJson =
-        AllocationMemoryJson.decode(argJsonString: testAllocationData);
-
-    fakeServiceManager = FakeServiceManager(
-      service: FakeServiceManager.createFakeService(
-        memoryData: memoryJson,
-        allocationData: allocationJson,
-      ),
-    );
-    when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
-    when(fakeServiceManager.connectedApp!.isFlutterAppNow).thenReturn(true);
-    when(fakeServiceManager.connectedApp!.isDartCliAppNow).thenReturn(false);
-    when(fakeServiceManager.connectedApp!.isDebugFlutterAppNow)
-        .thenReturn(false);
-    when(fakeServiceManager.connectedApp!.isDartWebApp)
-        .thenAnswer((_) => Future.value(false));
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
-
-    controller.offline.value = true;
-    controller.memoryTimeline.offlineData.clear();
-    controller.memoryTimeline.offlineData.addAll(memoryJson.data);
-  }
-
   Future<void> pumpMemoryScreen(
     WidgetTester tester, {
     MemoryController? memoryController,
@@ -78,28 +51,43 @@ void main() {
     setUp(() async {
       await ensureInspectorDependencies();
       setGlobal(OfflineModeController, OfflineModeController());
-      fakeServiceManager = FakeServiceManager();
-      when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
-      when(fakeServiceManager.connectedApp!.isDebugFlutterAppNow)
-          .thenReturn(false);
-      when(fakeServiceManager.vm.operatingSystem).thenReturn('android');
-      when(fakeServiceManager.connectedApp!.isDartWebApp)
-          .thenAnswer((_) => Future.value(false));
-      when(fakeServiceManager.errorBadgeManager.errorCountNotifier('memory'))
-          .thenReturn(ValueNotifier<int>(0));
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(NotificationService, NotificationService());
       setGlobal(
         PreferencesController,
         preferencesController = PreferencesController(),
       );
+
+      // Load canned data testHeapSampleData.
+      final memoryJson =
+          SamplesMemoryJson.decode(argJsonString: testHeapSampleData);
+      final allocationJson =
+          AllocationMemoryJson.decode(argJsonString: testAllocationData);
+
+      fakeServiceManager = FakeServiceManager(
+        service: FakeServiceManager.createFakeService(
+          memoryData: memoryJson,
+          allocationData: allocationJson,
+        ),
+      );
+      final app = fakeServiceManager.connectedApp!;
+      mockConnectedApp(
+        app,
+        isFlutterApp: true,
+        isProfileBuild: true,
+        isWebApp: false,
+      );
+      setGlobal(ServiceConnectionManager, fakeServiceManager);
+
+      controller = MemoryController()
+        ..offline.value = true
+        ..memoryTimeline.offlineData.clear()
+        ..memoryTimeline.offlineData.addAll(memoryJson.data);
     });
 
     testWidgetsWithWindowSize('settings update preferences', windowSize,
         (WidgetTester tester) async {
-      await pumpMemoryScreen(tester);
-      _setUpServiceManagerForMemory();
+      await pumpMemoryScreen(tester, memoryController: controller);
 
       // Open the dialog.
       await tester.tap(find.byType(SettingsOutlinedButton));

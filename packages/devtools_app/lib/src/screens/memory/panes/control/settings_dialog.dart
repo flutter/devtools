@@ -11,6 +11,7 @@ import '../../../../shared/theme.dart';
 import '../../memory_controller.dart';
 
 /// The dialog keys for testing purposes.
+@visibleForTesting
 class MemorySettingDialogKeys {
   static const Key showAndroidChartCheckBox = ValueKey('showAndroidChart');
   static const Key autoSnapshotCheckbox = ValueKey('autoSnapshotCheckbox');
