@@ -29,7 +29,7 @@ void main() {
     await tester.pumpWidget(
       wrapWithControllers(
         const MemoryBody(),
-        memory: controller = controller,
+        memory: controller,
       ),
     );
 
