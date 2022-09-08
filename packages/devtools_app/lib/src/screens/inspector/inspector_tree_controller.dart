@@ -476,6 +476,7 @@ class InspectorTreeController extends Object
 
   void animateToTargets(List<InspectorTreeNode> targets) {
     Rect? targetRect;
+
     for (InspectorTreeNode target in targets) {
       final row = getRowForNode(target);
       if (row != null) {
@@ -765,7 +766,7 @@ class _InspectorTreeState extends State<InspectorTree>
   late DebuggerController _debuggerController;
 
   /// When autoscrolling, the number of rows to pad the target location with.
-  final _scrollRowPadding = 3;
+  static const int _scrollRowPadding = 3;
 
   @override
   void initState() {
@@ -849,7 +850,6 @@ class _InspectorTreeState extends State<InspectorTree>
 
     final initialX = rect.left;
     final initialY = rect.top;
-
     final yOffsetAtViewportTop = _scrollControllerY.hasClients
         ? _scrollControllerY.offset
         : _scrollControllerY.initialScrollOffset;
@@ -857,52 +857,16 @@ class _InspectorTreeState extends State<InspectorTree>
         ? _scrollControllerX.offset
         : _scrollControllerX.initialScrollOffset;
 
-    final viewPortRectInScrollControllerSpace = Rect.fromLTWH(
+    final viewPortInScrollControllerSpace = Rect.fromLTWH(
       xOffsetAtViewportLeft,
       yOffsetAtViewportTop,
       safeViewportWidth,
       safeViewportHeight,
     );
 
-    final rowIndex = treeController!.getRowIndex(rect.top);
-    final row = treeController!.getCachedRow(rowIndex);
-    final node = row?.node;
-    final textPreviewJson = node?.diagnostic?.json['textPreview'];
-    final textDescription = node?.diagnostic?.description;
-    final descriptions = <String>[
-      if (textDescription != null) textDescription,
-      if (textPreviewJson != null) '$textPreviewJson',
-    ];
-
-    final descriptionText = descriptions.join(': ');
-    // var descriptionSize = descriptionText.isNotEmpty
-    //     ? calculateTextSpanWidth(
-    //         TextSpan(text: descriptionText),
-    //       )
-    //     : 150;
-
-    // We should be able to tell which tree we are in, if we are in summary do our caret padding below
-    // Otherwise: check showname and name and add that instead if those are present. Close enough.
-
-    // For testing we can generate a row and make sure that we are within a certain epsilon
-
-    // Add 3 columnwidths of padding to account for the caret, icon,
-    // and bit extra off the end
-    descriptionSize += columnWidth * 3;
-
-    // Change the right side of the rectangle so it is only as wide
-    // as the node text.
-    // rect = Rect.fromLTRB(
-    //   rect.left,
-    //   rect.top,
-    //   rect.left + descriptionSize,
-    //   rect.bottom,
-    // );
-
     final isRectInViewPort =
-        viewPortRectInScrollControllerSpace.contains(rect.topLeft) &&
-            viewPortRectInScrollControllerSpace.contains(rect.bottomRight);
-
+        viewPortInScrollControllerSpace.contains(rect.topLeft) &&
+            viewPortInScrollControllerSpace.contains(rect.bottomRight);
     if (isRectInViewPort) {
       // The rect is already in view, don't scroll
       return;
@@ -922,8 +886,6 @@ class _InspectorTreeState extends State<InspectorTree>
       _scrollControllerY = ScrollController(initialScrollOffset: targetY);
     }
 
-    // Determine a target X coordinate consistent with the target Y coordinate
-    // we will end up as so we get a smooth animation to the final destination.
     final targetX = _padTargetX(initialX: initialX);
     if (_scrollControllerX.hasClients) {
       unawaited(
@@ -950,32 +912,34 @@ class _InspectorTreeState extends State<InspectorTree>
   // before it is available so we don't need this approximation.
   /// Placeholder viewport height to use if we don't yet know the real
   /// viewport height.
-  static const _placeholderViewportSize = 1000.0;
+  static const _placeholderViewportSize = Size(1000.0, 1000.0);
 
   double get safeViewportHeight {
     return _scrollControllerY.hasClients
         ? _scrollControllerY.position.viewportDimension
-        : _placeholderViewportSize;
+        : _placeholderViewportSize.height;
   }
 
   double get safeViewportWidth {
     return _scrollControllerX.hasClients
         ? _scrollControllerX.position.viewportDimension
-        : _placeholderViewportSize;
+        : _placeholderViewportSize.width;
   }
 
-  /// Compute the x scroll given an [initialX] scroll value.
-  ///
-  /// The value is padded with [_scrollRowPadding] indent widths
-  double _padTargetX({required double initialX}) {
-    return initialX - columnWidth * _scrollRowPadding;
+  /// Pad [initialX] with the horizontal indentation of [padCount] rows.
+  double _padTargetX({
+    required double initialX,
+    int padCount = _scrollRowPadding,
+  }) {
+    return initialX - columnWidth * padCount;
   }
 
-  /// Compute the  y scroll given an [initialY] scroll value.
-  ///
-  /// The value is padded with [_scrollRowPadding] row heights
-  double _padTargetY({required double initialY}) {
-    return initialY - rowHeight * _scrollRowPadding;
+  /// Pad [initialY] with the vertical height of [padCount] rows.
+  double _padTargetY({
+    required double initialY,
+    int padCount = _scrollRowPadding,
+  }) {
+    return initialY - rowHeight * padCount;
   }
 
   /// Handle arrow keys for the InspectorTree. Ignore other key events so that
