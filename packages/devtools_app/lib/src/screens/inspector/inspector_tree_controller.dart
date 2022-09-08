@@ -766,7 +766,7 @@ class _InspectorTreeState extends State<InspectorTree>
   late DebuggerController _debuggerController;
 
   /// When autoscrolling, the number of rows to pad the target location with.
-  static const int _scrollRowPadding = 3;
+  static const int _scrollPadCount = 3;
 
   @override
   void initState() {
@@ -929,7 +929,7 @@ class _InspectorTreeState extends State<InspectorTree>
   /// Pad [initialX] with the horizontal indentation of [padCount] rows.
   double _padTargetX({
     required double initialX,
-    int padCount = _scrollRowPadding,
+    int padCount = _scrollPadCount,
   }) {
     return initialX - columnWidth * padCount;
   }
@@ -937,7 +937,7 @@ class _InspectorTreeState extends State<InspectorTree>
   /// Pad [initialY] with the vertical height of [padCount] rows.
   double _padTargetY({
     required double initialY,
-    int padCount = _scrollRowPadding,
+    int padCount = _scrollPadCount,
   }) {
     return initialY - rowHeight * padCount;
   }
