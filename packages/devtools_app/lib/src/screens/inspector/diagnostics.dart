@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/ui/utils.dart';
 import 'package:flutter/material.dart';
 
 import '../../primitives/utils.dart';
@@ -11,6 +10,7 @@ import '../../shared/object_tree.dart';
 import '../../shared/theme.dart';
 import '../../ui/hover.dart';
 import '../../ui/icons.dart';
+import '../../ui/utils.dart';
 import '../debugger/debugger_controller.dart';
 import '../debugger/variables.dart';
 import 'diagnostics_node.dart';
