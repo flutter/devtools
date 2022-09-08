@@ -190,7 +190,7 @@ void main() {
       expect(controller.memoryTimeline.offlineData.isEmpty, isFalse);
 
       controller.refreshAllCharts();
-      await tester.pumpAndSettle(const Duration(seconds: 2));
+      await tester.pumpAndSettle();
 
       expect(controller.memoryTimeline.data.isEmpty, isFalse);
 
@@ -199,7 +199,9 @@ void main() {
       // Total number of collected HeapSamples.
       expect(data.length, 104);
 
-      await tester.pumpAndSettle(const Duration(seconds: 2));
+      for (var _ in Iterable.generate(6)) {
+        await tester.pumpAndSettle();
+      }
 
       // TODO(terry): Need to fix hover not appearing.
       /*
@@ -224,9 +226,6 @@ void main() {
         find.byType(MemoryVMChart),
         matchesDevToolsGolden('../goldens/memory_hover_card.png'),
       );
-
-      // Await delay for golden comparison.
-      await tester.pumpAndSettle(const Duration(seconds: 3));
     });
 
     testWidgetsWithWindowSize('export current memory profile', windowSize,
