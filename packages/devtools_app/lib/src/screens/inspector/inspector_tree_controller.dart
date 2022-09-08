@@ -433,6 +433,8 @@ class InspectorTreeController extends Object
     // to start animations to show specific widget scroll to where the target
     // nodes will be displayed rather than where they are currently displayed.
     final diagnostic = row.node.diagnostic;
+    // The node width is approximated since the widgets are not available at the
+    // time of calculating the bounding box.
     final approximateNodeWidth =
         DiagnosticsNodeDescription.approximateNodeWidth(diagnostic);
     return Rect.fromLTWH(

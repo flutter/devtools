@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/ui/hover.dart';
+import 'package:devtools_app/src/ui/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -111,38 +112,120 @@ void main() {
       });
     });
 
-    testWidgets('approximateNodeWidth', (WidgetTester tester) async {
-      final nodeJson = <String, Object?>{
-        'widgetRuntimeType': 'Row',
-        'renderObject': renderObjectJson,
-        'hasChildren': false,
-        'children': [],
-        'showName': true,
-        'name': 'THE NAME',
-      };
-      final diagnosticWithoutService = RemoteDiagnosticsNode(
-        nodeJson,
-        null,
-        false,
-        null,
-      );
-      final diagnosticsNodeDescription = DiagnosticsNodeDescription(
-        diagnosticWithoutService,
-        debuggerController: MockDebuggerController(),
-      );
-      await tester.pumpWidget(wrap(diagnosticsNodeDescription));
+    group('approximateNodeWidth', () {
+      testWidgets('property diagnostics node with name and description',
+          (WidgetTester tester) async {
+        final nodeJson = <String, Object?>{
+          'widgetRuntimeType': 'Row',
+          'renderObject': renderObjectJson,
+          'hasChildren': false,
+          'children': [],
+          'description':
+              'this is a showname description, which will show up after the name',
+          'showName': true,
+          'name': 'THE NAME to be shown',
+        };
+        final diagnosticWithoutService = RemoteDiagnosticsNode(
+          nodeJson,
+          null,
+          true,
+          null,
+        );
+        final diagnosticsNodeDescription = DiagnosticsNodeDescription(
+          diagnosticWithoutService,
+          debuggerController: MockDebuggerController(),
+        );
 
-      final aproximateWidth = DiagnosticsNodeDescription.approximateNodeWidth(
-        diagnosticWithoutService,
-      );
-      final nodeSize = tester.getSize(find.descendant(
-        of: find.byType(MouseRegion),
-        matching: find.byType(
-          RichText,
-        ),
-      ));
-      debugDumpApp();
-      expect(nodeSize.width, moreOrLessEquals(aproximateWidth, epsilon: 10.0));
+        await tester.pumpWidget(wrap(diagnosticsNodeDescription));
+
+        final approximatedWidth =
+            DiagnosticsNodeDescription.approximateNodeWidth(
+          diagnosticWithoutService,
+        );
+
+        final diagnosticsNodeFind = find.byType(DiagnosticsNodeDescription);
+        // There are many rich texts, containg the name, and description.
+        final allRichTexts = find
+            .descendant(
+              of: diagnosticsNodeFind,
+              matching: find.byType(RichText),
+            )
+            .evaluate()
+            .map((e) => e.widget as RichText);
+        final measuredWidthOfAllRichTexts = allRichTexts.fold<double>(
+          0,
+          (previousValue, richText) =>
+              previousValue +
+              calculateTextSpanWidth(
+                richText.text as TextSpan,
+              ),
+        );
+        expect(
+          approximatedWidth,
+          moreOrLessEquals(measuredWidthOfAllRichTexts, epsilon: 5.0),
+        );
+      });
+
+      testWidgets('diagnostics node with icon and description',
+          (WidgetTester tester) async {
+        final nodeJson = <String, Object?>{
+          'widgetRuntimeType': 'Row',
+          'renderObject': renderObjectJson,
+          'hasChildren': false,
+          'description': 'This is the description',
+          'children': [],
+          'showName': false,
+        };
+        final diagnosticWithoutService = RemoteDiagnosticsNode(
+          nodeJson,
+          null,
+          false,
+          null,
+        );
+        final diagnosticsNodeDescription = DiagnosticsNodeDescription(
+          diagnosticWithoutService,
+          debuggerController: MockDebuggerController(),
+        );
+
+        await tester.pumpWidget(wrap(diagnosticsNodeDescription));
+
+        final approximatedTextWidth =
+            DiagnosticsNodeDescription.approximateNodeWidth(
+          diagnosticWithoutService,
+        );
+
+        final diagnosticsNodeFind = find.byType(DiagnosticsNodeDescription);
+        // The icon is part of the clickable width, so we include it.
+        final measuredIconWidth = tester
+            .getSize(
+              find.descendant(
+                of: diagnosticsNodeFind,
+                matching: find.byType(AssetImageIcon),
+              ),
+            )
+            .width;
+
+        // There is only one rich text widget, containing the description.
+        final richTextWidget = find
+            .descendant(
+              of: diagnosticsNodeFind,
+              matching: find.byType(RichText),
+            )
+            .first
+            .evaluate()
+            .first
+            .widget as RichText;
+        final measuredTextWidth =
+            calculateTextSpanWidth(richTextWidget.text as TextSpan);
+
+        expect(
+          approximatedTextWidth,
+          moreOrLessEquals(
+            measuredTextWidth + measuredIconWidth,
+            epsilon: 5.0,
+          ),
+        );
+      });
     });
   });
 }

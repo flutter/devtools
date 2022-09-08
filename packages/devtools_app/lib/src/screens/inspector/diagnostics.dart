@@ -59,6 +59,8 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     );
   }
 
+  /// Approximates the width of the elements inside a [RemoteDiagnosticsNode]
+  /// widget.
   static double approximateNodeWidth(
     RemoteDiagnosticsNode? diagnostic,
   ) {
@@ -72,17 +74,30 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     );
 
     var spanWidth = spans.fold<double>(
-        0, (sum, span) => sum + calculateTextSpanWidth(span));
-    final name = diagnostic?.name;
-    final iconWidth = 5.0; //TODO: get a better approx for this
+      0,
+      (sum, span) => sum + calculateTextSpanWidth(span),
+    );
+    String? name = diagnostic?.name;
+
+    // An Icon is approximately the width of 1 character
+    final approximateIconWidth = calculateTextSpanWidth(
+      const TextSpan(
+        text: 'A',
+      ),
+    );
+
     if (diagnostic?.showName == true && name != null) {
       // The diagnostic will show it's name instead of an icon so add an
       // approximate name width.
+
+      if (diagnostic?.description != null) {
+        // If there is a description then a separator will show with the name.
+        name += ': ';
+      }
       spanWidth += calculateTextSpanWidth(TextSpan(text: name));
     } else {
-      // The diagnostic will show an icon so add two column widths of padding
-      // to account for this.
-      spanWidth += iconWidth;
+      // When there is no name, an icon will be shown with the text spans.
+      spanWidth += approximateIconWidth;
     }
     return spanWidth;
   }
