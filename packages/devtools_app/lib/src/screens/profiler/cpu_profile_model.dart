@@ -685,6 +685,24 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     ].join(' - ');
   }
 
+  /// [copyExclusiveSampleCount] and [copyInclusiveSampleCount] control whether
+  /// or not the resulting [CpuStackFrame] will have [exclusiveSampleCount] and
+  /// [inclusiveSampleCount] initialized.
+  ///
+  /// By default, a shallow copy will copy the exclusive sample count from the
+  /// original [CpuStackFrame], but will set `_inclusiveSampleCount` to null,
+  /// causing it to be re-initialized the first time [inclusiveSampleCount] is
+  /// accessed. This is the default behavior as, in contexts where we're
+  /// creating a non-filtered copy of the tree (i.e., the tree contains the
+  /// same number of samples), the exclusive count for each node will always be
+  /// the same, whereas the inclusive count may change based on how the tree is
+  /// rooted (i.e., call tree vs bottom up view).
+  ///
+  /// Exclusive sample counts should only be reset when building a filtered
+  /// view of the full set of samples, as some stacks may no longer be included
+  /// in the profile, changing the exclusive counts.
+  ///
+  /// Inclusive sample counts should only be copied when performing a deep copy.
   @override
   CpuStackFrame shallowCopy({
     String? id,
