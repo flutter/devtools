@@ -199,7 +199,7 @@ void main() {
       // Total number of collected HeapSamples.
       expect(data.length, 104);
 
-      for (var _ in Iterable.generate(6)) {
+      for (var _ in Iterable.generate(20)) {
         await tester.pumpAndSettle();
       }
 
