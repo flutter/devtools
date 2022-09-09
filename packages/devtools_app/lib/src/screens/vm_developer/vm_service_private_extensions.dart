@@ -264,6 +264,7 @@ enum FunctionKind {
 
 /// An extension on [Code] which allows for access to VM internal fields.
 extension CodePrivateViewExtension on Code {
+  static const _functionKey = 'function';
   static const _disassemblyKey = '_disassembly';
 
   /// Returns the disassembly of the [Code], which is the generated assembly
@@ -274,7 +275,7 @@ extension CodePrivateViewExtension on Code {
 
   /// Returns the function from which this code object was generated.
   FuncRef? get function {
-    final functionJson = json!['function'] as Map<String, dynamic>;
+    final functionJson = json![_functionKey] as Map<String, dynamic>;
     return FuncRef.parse(functionJson);
   }
 }

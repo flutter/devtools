@@ -29,7 +29,6 @@ class VmFuncDisplay extends StatelessWidget {
     return VmObjectDisplayBasicLayout(
       object: function,
       generalDataRows: vmObjectGeneralDataRows(
-        context,
         controller,
         function,
       ),
