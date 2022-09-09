@@ -259,32 +259,6 @@ class MemoryController extends DisposableController
 
   static const logFilenamePrefix = 'memory_log_';
 
-  // Default state of Android ADB collection.
-  static const androidADBDefault = true;
-
-  ValueListenable<bool> get androidCollectionEnabled =>
-      _androidCollectionEnabled;
-
-  final _androidCollectionEnabled = ValueNotifier<bool>(androidADBDefault);
-
-  // Default state of advanced settings enabled.
-  static const advancedSettingsEnabledDefault = false;
-
-  ValueListenable<bool> get advancedSettingsEnabled => _advancedSettingsEnabled;
-
-  final _advancedSettingsEnabled =
-      ValueNotifier<bool>(advancedSettingsEnabledDefault);
-
-  ValueListenable<bool> get autoSnapshotEnabled => _autoSnapshotEnabled;
-  final _autoSnapshotEnabled = ValueNotifier<bool>(false);
-
-  // Memory statistics displayed as raw numbers or units (KB, MB, GB).
-  static const unitDisplayedDefault = true;
-
-  ValueListenable<bool> get unitDisplayed => _unitDisplayed;
-
-  final _unitDisplayed = ValueNotifier<bool>(unitDisplayedDefault);
-
   final List<Snapshot> snapshots = [];
 
   Snapshot? get lastSnapshot => snapshots.safeLast;
@@ -481,6 +455,7 @@ class MemoryController extends DisposableController
 
   void refreshAllCharts() {
     _refreshCharts.value++;
+    _updateAndroidChartVisibility();
   }
 
   /// Starting chunk for slider based on the intervalDurationInMs.
@@ -551,6 +526,8 @@ class MemoryController extends DisposableController
         throw OfflineFileException(e.toString());
       });
     }
+
+    _updateAndroidChartVisibility();
   }
 
   final _paused = ValueNotifier<bool>(false);
@@ -567,22 +544,9 @@ class MemoryController extends DisposableController
 
   bool get isPaused => _paused.value;
 
-  final _androidChartVisibleNotifier = ValueNotifier<bool>(false);
+  final isAndroidChartVisibleNotifier = ValueNotifier<bool>(false);
 
-  ValueListenable get androidChartVisibleNotifier =>
-      _androidChartVisibleNotifier;
-
-  bool get isAndroidChartVisible => _androidChartVisibleNotifier.value;
-
-  bool toggleAndroidChartVisibility() =>
-      _androidChartVisibleNotifier.value = !_androidChartVisibleNotifier.value;
-
-  bool get isAdvancedSettingsVisible => _advancedSettingsEnabled.value;
-
-  bool toggleAdvancedSettingsVisibility() =>
-      _advancedSettingsEnabled.value = !_advancedSettingsEnabled.value;
-
-  final SettingsModel settings = SettingsModel();
+  final settings = SettingsModel();
 
   final selectionSnapshotNotifier =
       ValueNotifier<Selection<Reference>>(Selection.empty());
@@ -826,9 +790,10 @@ class MemoryController extends DisposableController
 
   void _handleConnectionStart(ServiceConnectionManager serviceManager) async {
     _refreshShouldShowLeaksTab();
-
-    _memoryTracker = MemoryTracker(this);
-    _memoryTracker!.start();
+    if (_memoryTracker == null) {
+      _memoryTracker = MemoryTracker(this);
+      _memoryTracker!.start();
+    }
 
     // Log Flutter extension events.
     // Note: We do not need to listen to event history here because we do not
@@ -883,10 +848,28 @@ class MemoryController extends DisposableController
       (_) {},
       onDone: () {
         // Stop polling and reset memoryTracker.
-        _memoryTracker!.stop();
+        _memoryTracker?.stop();
         _memoryTracker = null;
       },
     );
+
+    _updateAndroidChartVisibility();
+    addAutoDisposeListener(
+      preferences.memory.androidCollectionEnabled,
+      _updateAndroidChartVisibility,
+    );
+  }
+
+  void _updateAndroidChartVisibility() {
+    final bool isOfflineAndAndroidData =
+        offline.value && memoryTimeline.data.first.adbMemoryInfo.realtime > 0;
+
+    final bool isConnectedToAndroidAndAndroidEnabled =
+        isConnectedDeviceAndroid &&
+            preferences.memory.androidCollectionEnabled.value;
+
+    isAndroidChartVisibleNotifier.value =
+        isOfflineAndAndroidData || isConnectedToAndroidAndAndroidEnabled;
   }
 
   void _handleConnectionStop(dynamic event) {
@@ -913,6 +896,10 @@ class MemoryController extends DisposableController
     autoDisposeStreamSubscription(
       serviceManager.onConnectionClosed.listen(_handleConnectionStop),
     );
+  }
+
+  void stopTimeLine() {
+    _memoryTracker?.stop();
   }
 
   final _monitorAllocationsNotifier = ValueNotifier<int>(0);
@@ -1037,16 +1024,6 @@ class MemoryController extends DisposableController
     }
 
     return allocations;
-  }
-
-  /// If viewing offline data (Android collected) the connection may not be
-  /// Android.
-  ///
-  /// If offline and if any Android collected data then we can view the Android
-  /// data.
-  bool get isOfflineAndAndroidData {
-    return offline.value &&
-        memoryTimeline.data.first.adbMemoryInfo.realtime > 0;
   }
 
   bool get isConnectedDeviceAndroid {
@@ -1384,6 +1361,7 @@ class MemoryController extends DisposableController
     _memorySourceNotifier.dispose();
     _disconnectController.close();
     _memoryTrackerController.close();
+    _memoryTracker?.dispose();
   }
 }
 

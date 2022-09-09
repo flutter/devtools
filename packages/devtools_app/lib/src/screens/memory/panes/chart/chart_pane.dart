@@ -164,7 +164,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     });
 
     // There is no listener passed, so SetState will be invoked.
-    addAutoDisposeListener(controller.androidChartVisibleNotifier);
+    addAutoDisposeListener(controller.isAndroidChartVisibleNotifier);
 
     _updateListeningState();
   }
@@ -191,8 +191,6 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
   @override
   Widget build(BuildContext context) {
-    // TODO(polinach): Can Flutter's focus system be used instead of listening to keyboard?
-    // See debugger page on how to keys can be handled better.
     return RawKeyboardListener(
       focusNode: widget.keyFocusNode,
       onKey: (RawKeyEvent event) {
@@ -203,7 +201,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
       autofocus: true,
       child: Column(
         children: [
-          // TODO(polinach): explain why we need SizedBox here.
+          // TODO(polina-c): explain why we need SizedBox here.
           // And put 70 into a named const that describes what it is.
           SizedBox(
             height: scaleByFontFactor(70),
@@ -212,7 +210,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
           SizedBox(
             child: MemoryVMChart(widget.chartControllers.vm),
           ),
-          if (controller.isAndroidChartVisible)
+          if (controller.isAndroidChartVisibleNotifier.value)
             SizedBox(
               height: defaultChartHeight,
               child: MemoryAndroidChart(
@@ -227,6 +225,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
   @override
   void dispose() {
     _hideHover(); // hover will leak if not hide
+    controller.stopTimeLine();
     super.dispose();
   }
 
@@ -240,7 +239,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     const dividerLineHorizontalSpace = 20.0;
     const totalDividerLineHorizontalSpace = dividerLineHorizontalSpace * 2;
 
-    if (!controller.isAndroidChartVisible) return [];
+    if (!controller.isAndroidChartVisibleNotifier.value) return [];
 
     final androidDataDisplayed = chartsValues
         .androidDataToDisplay(widget.chartControllers.android.traces);
@@ -288,7 +287,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
     double totalHoverHeight;
     int totalTraces;
-    if (controller.isAndroidChartVisible) {
+    if (controller.isAndroidChartVisibleNotifier.value) {
       totalTraces = chartsValues.vmData.entries.length -
           1 +
           chartsValues.androidData.entries.length;
@@ -374,7 +373,6 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
           dashed: dashedLine == true,
           image: image,
           hasNumeric: true,
-          hasUnit: controller.unitDisplayed.value,
           scaleImage: true,
         ),
       );
@@ -390,7 +388,6 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     bool dashed = false,
     bool bold = true,
     bool hasNumeric = false,
-    bool hasUnit = false,
     bool scaleImage = false,
     double leftPadding = 5.0,
   }) {
@@ -411,13 +408,13 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
       String displayValue = ' ';
       if (hasNumeric) {
         int startOfNumber = name.lastIndexOf(' ');
-        if (hasUnit) {
-          final unitOrValue = name.substring(startOfNumber + 1);
-          if (int.tryParse(unitOrValue) == null) {
-            // Got a unit.
-            startOfNumber = name.lastIndexOf(' ', startOfNumber - 1);
-          }
+
+        final unitOrValue = name.substring(startOfNumber + 1);
+        if (int.tryParse(unitOrValue) == null) {
+          // Got a unit.
+          startOfNumber = name.lastIndexOf(' ', startOfNumber - 1);
         }
+
         displayName = '${name.substring(0, startOfNumber)} ';
         displayValue = name.substring(startOfNumber + 1);
       }
