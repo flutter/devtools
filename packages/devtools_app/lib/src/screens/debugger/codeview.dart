@@ -376,7 +376,10 @@ class _CodeViewState extends State<CodeView>
                                   controller: horizontalController,
                                   child: SizedBox(
                                     height: constraints.maxHeight,
-                                    width: fileWidth,
+                                    width: math.max(
+                                      constraints.maxWidth,
+                                      fileWidth,
+                                    ),
                                     child: Lines(
                                       height: constraints.maxHeight,
                                       debugController: widget.controller,
