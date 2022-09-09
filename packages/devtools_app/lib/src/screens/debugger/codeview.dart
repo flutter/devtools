@@ -365,6 +365,7 @@ class _CodeViewState extends State<CodeView>
                               final double fileWidth = calculateTextSpanWidth(
                                 findLongestTextSpan(lines),
                               );
+
                               return Scrollbar(
                                 key: CodeView
                                     .debuggerCodeViewHorizontalScrollbarKey,
