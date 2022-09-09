@@ -100,6 +100,7 @@ const gc = 'gc';
 const memoryLegend = 'memoryLegend';
 const memorySettings = 'memorySettings';
 const androidChart = 'androidChart';
+const autoSnapshot = 'autoSnapshot';
 const groupByPrefix = 'groupBy';
 const trackAllocations = 'trackAllocations';
 const resetAllocationAccumulators = 'resetAllocationAccumulators';

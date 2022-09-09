@@ -333,7 +333,7 @@ class ChartsValues {
   Map<String, Map<String, Object?>> androidDataToDisplay(List<Trace> traces) {
     final androidDataDisplayed = <String, Map<String, Object?>>{};
 
-    if (controller.isAndroidChartVisible) {
+    if (controller.isAndroidChartVisibleNotifier.value) {
       final data = androidData;
 
       // Total trace
@@ -392,13 +392,11 @@ class ChartsValues {
     return androidDataDisplayed;
   }
 
-  String? formatNumeric(num? number) => controller.unitDisplayed.value
-      ? prettyPrintBytes(
-          number,
-          kbFractionDigits: 1,
-          mbFractionDigits: 2,
-          includeUnit: true,
-          roundingPoint: 0.7,
-        )
-      : nf.format(number);
+  String? formatNumeric(num? number) => prettyPrintBytes(
+        number,
+        kbFractionDigits: 1,
+        mbFractionDigits: 2,
+        includeUnit: true,
+        roundingPoint: 0.7,
+      );
 }

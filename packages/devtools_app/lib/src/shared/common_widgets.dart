@@ -1817,6 +1817,7 @@ class NotifierCheckbox extends StatelessWidget {
     required this.notifier,
     this.onChanged,
     this.enabled = true,
+    this.checkboxKey,
   }) : super(key: key);
 
   /// The notifier this [NotifierCheckbox] is responsible for listening to and
@@ -1829,6 +1830,9 @@ class NotifierCheckbox extends StatelessWidget {
 
   /// Whether this checkbox should be enabled for interaction.
   final bool enabled;
+
+  /// Key to assign to the checkbox, for testing purposes.
+  final Key? checkboxKey;
 
   void _updateValue(bool? value) {
     if (notifier.value != value) {
@@ -1848,6 +1852,7 @@ class NotifierCheckbox extends StatelessWidget {
           materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           value: value,
           onChanged: enabled ? _updateValue : null,
+          key: checkboxKey,
         );
       },
     );
@@ -1865,6 +1870,7 @@ class CheckboxSetting extends StatelessWidget {
     this.enabled = true,
     this.gaScreenName,
     this.gaItem,
+    this.checkboxKey,
   }) : super(key: key);
 
   final ValueNotifier<bool?> notifier;
@@ -1883,6 +1889,8 @@ class CheckboxSetting extends StatelessWidget {
   final String? gaScreenName;
 
   final String? gaItem;
+
+  final Key? checkboxKey;
 
   @override
   Widget build(BuildContext context) {
@@ -1930,6 +1938,7 @@ class CheckboxSetting extends StatelessWidget {
             }
           },
           enabled: enabled,
+          checkboxKey: checkboxKey,
         ),
         Flexible(
           child: textContent,
