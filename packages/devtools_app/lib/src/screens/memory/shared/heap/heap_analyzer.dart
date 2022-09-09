@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../instrumentation/model.dart';
+import '../../panes/leaks/instrumentation/model.dart';
 import 'model.dart';
 
 /// Sets [retainingPath] to each [notGCedLeaks].

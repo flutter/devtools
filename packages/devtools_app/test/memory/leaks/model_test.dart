@@ -6,6 +6,7 @@ import 'dart:convert';
 
 import 'package:devtools_app/src/screens/memory/panes/leaks/diagnostics/model.dart';
 import 'package:devtools_app/src/screens/memory/panes/leaks/instrumentation/model.dart';
+import 'package:devtools_app/src/screens/memory/shared/heap/model.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

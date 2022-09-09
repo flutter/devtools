@@ -5,11 +5,12 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:devtools_app/src/screens/memory/panes/leaks/diagnostics/heap_analyzer.dart';
 import 'package:devtools_app/src/screens/memory/panes/leaks/diagnostics/model.dart';
 import 'package:devtools_app/src/screens/memory/panes/leaks/diagnostics/not_gced_analyzer.dart';
 import 'package:devtools_app/src/screens/memory/panes/leaks/formatter.dart';
 import 'package:devtools_app/src/screens/memory/panes/leaks/instrumentation/model.dart';
+import 'package:devtools_app/src/screens/memory/shared/heap/heap_analyzer.dart';
+import 'package:devtools_app/src/screens/memory/shared/heap/model.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
