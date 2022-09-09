@@ -176,7 +176,7 @@ class CpuProfileData {
 
       while (currentStackFrame != null) {
         stackFramesWithTag[currentId!] = currentStackFrame.shallowCopy(
-          copyExclusiveSampleCount: false,
+          copySampleCounts: false,
           profileMetaData: metaData,
         );
         final parentId = currentStackFrame.parentId;
@@ -246,8 +246,20 @@ class CpuProfileData {
       return null;
     }
 
+    final originalTime = originalData.profileMetaData.time!.duration;
+    final microsPerSample =
+        originalTime.inMicroseconds / originalData.profileMetaData.sampleCount;
     final updatedMetaData = originalData.profileMetaData.copyWith(
       sampleCount: filteredCpuSamples.length,
+      // The start time is zero because only `TimeRange.duration` will matter
+      // for this profile data, and the samples included in this data could be
+      // sparse over the original profile's time range, so true start and end
+      // times wouldn't be helpful.
+      time: TimeRange()
+        ..start = const Duration()
+        ..end = Duration(
+          microseconds: (filteredCpuSamples.length * microsPerSample).round(),
+        ),
     );
 
     void walkAndFilter(CpuStackFrame stackFrame) {
@@ -256,7 +268,7 @@ class CpuProfileData {
         final filteredParentId = filteredParentStackFrameId(parent);
         filteredStackFrames[stackFrame.id] = stackFrame.shallowCopy(
           parentId: filteredParentId,
-          copyExclusiveSampleCount: false,
+          copySampleCounts: false,
           profileMetaData: updatedMetaData,
         );
         if (filteredParentId != null) {
@@ -685,24 +697,12 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     ].join(' - ');
   }
 
-  /// [copyExclusiveSampleCount] and [copyInclusiveSampleCount] control whether
-  /// or not the resulting [CpuStackFrame] will have [exclusiveSampleCount] and
-  /// [inclusiveSampleCount] initialized.
+  /// [copySampleCounts] control whether or not the resulting [CpuStackFrame]
+  /// will have [exclusiveSampleCount] and [inclusiveSampleCount] initialized.
   ///
-  /// By default, a shallow copy will copy the exclusive sample count from the
-  /// original [CpuStackFrame], but will set `_inclusiveSampleCount` to null,
-  /// causing it to be re-initialized the first time [inclusiveSampleCount] is
-  /// accessed. This is the default behavior as, in contexts where we're
-  /// creating a non-filtered copy of the tree (i.e., the tree contains the
-  /// same number of samples), the exclusive count for each node will always be
-  /// the same, whereas the inclusive count may change based on how the tree is
-  /// rooted (i.e., call tree vs bottom up view).
-  ///
-  /// Exclusive sample counts should only be reset when building a filtered
-  /// view of the full set of samples, as some stacks may no longer be included
-  /// in the profile, changing the exclusive counts.
-  ///
-  /// Inclusive sample counts should only be copied when performing a deep copy.
+  /// Sample counts should only be reset when building a filtered view of the
+  /// full set of samples, as some stacks may no longer be included in the
+  /// profile, changing the exclusive counts.
   @override
   CpuStackFrame shallowCopy({
     String? id,
@@ -714,8 +714,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     String? parentId,
     int? sourceLine,
     CpuProfileMetaData? profileMetaData,
-    bool copyExclusiveSampleCount = true,
-    bool copyInclusiveSampleCount = false,
+    bool copySampleCounts = true,
   }) {
     final copy = CpuStackFrame._(
       id: id ?? this.id,
@@ -728,11 +727,11 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
       parentId: parentId ?? this.parentId,
       profileMetaData: profileMetaData ?? this.profileMetaData,
     );
-    copy
-      ..exclusiveSampleCount =
-          copyExclusiveSampleCount ? exclusiveSampleCount : 0
-      ..inclusiveSampleCount =
-          copyInclusiveSampleCount ? inclusiveSampleCount : null;
+    if (copySampleCounts) {
+      copy
+        ..exclusiveSampleCount = exclusiveSampleCount
+        ..inclusiveSampleCount = inclusiveSampleCount;
+    }
     return copy;
   }
 
@@ -741,7 +740,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
   /// The returned copy stack frame will have a null parent.
   @override
   CpuStackFrame deepCopy() {
-    final copy = shallowCopy(copyInclusiveSampleCount: true);
+    final copy = shallowCopy();
     for (CpuStackFrame child in children) {
       copy.addChild(child.deepCopy());
     }
