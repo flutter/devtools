@@ -3,8 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import '../instrumentation/model.dart';
+
 import '../../../shared/heap/heap_analyzer.dart';
+import '../instrumentation/model.dart';
 import 'model.dart';
 
 /// Analyzes notGCed leaks and returns result of the analysis.
