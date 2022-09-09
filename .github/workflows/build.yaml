@@ -121,7 +121,7 @@ jobs:
         if: failure()
         with: 
           name: golden_image_failures
-          path: packages/devtools_app/test/**/failures/
+          path: packages/devtools_app/test/**/failures/*.png
 
 
 # TODO(https://github.com/flutter/devtools/issues/1715): add a windows compatible version of tool/bots.sh
