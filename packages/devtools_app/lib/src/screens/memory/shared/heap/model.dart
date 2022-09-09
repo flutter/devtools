@@ -124,6 +124,9 @@ class AdaptedHeapObject {
   /// the object transfer.
   /// Special values: [null] - retainer is unknown, -1 - the object is root.
   int? retainer;
+
+  /// Total shallow size of objects, where this object is retainer, recursively,
+  /// plus shallow size of this object.
   int? retainedSize;
 
   Map<String, dynamic> toJson() => {
