@@ -67,6 +67,10 @@ class CodeView extends StatefulWidget {
   final ScriptLocation? initialPosition;
   final ScriptRef? scriptRef;
   final ParsedScript? parsedScript;
+  // TODO(bkonyi): consider changing this to (or adding support for)
+  // `highlightedLineRange`, which would tell the code view to display the
+  // the script's source in its entirety, with lines outside of the range being
+  // rendered as if they have been greyed out.
   final LineRange? lineRange;
   final bool enableFileExplorer;
   final bool enableSearch;

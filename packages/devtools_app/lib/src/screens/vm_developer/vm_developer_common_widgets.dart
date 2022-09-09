@@ -839,16 +839,29 @@ class _ObjectInspectorCodeViewState extends State<ObjectInspectorCodeView> {
         if (currentParsedScript != null) {
           final obj = widget.object;
           SourceLocation? location;
-          if (obj is ClassRef || obj is FuncRef || obj is FieldRef) {
-            final dynObj = obj as dynamic;
-            location = dynObj.location!;
+          if (obj is ClassRef) {
+            location = obj.location!;
+          } else if (obj is FuncRef) {
+            location = obj.location!;
             // If there's no line associated with the location, we're likely
             // dealing with an artificial field / method like a constructor.
             // We'll display the owner's code instead of showing nothing,
             // although showing a "No Source Available" message is another
             // option.
-            if (location!.line == null) {
-              location = dynObj.owner.location;
+            final owner = obj.owner;
+            if (location.line == null && obj.owner is ClassRef) {
+              location = owner!.location;
+            }
+          } else if (obj is FieldRef) {
+            location = obj.location!;
+            // If there's no line associated with the location, we're likely
+            // dealing with an artificial field / method like a constructor.
+            // We'll display the owner's code instead of showing nothing,
+            // although showing a "No Source Available" message is another
+            // option.
+            final owner = obj.owner;
+            if (location.line == null && owner is ClassRef) {
+              location = owner.location;
             }
           }
 
