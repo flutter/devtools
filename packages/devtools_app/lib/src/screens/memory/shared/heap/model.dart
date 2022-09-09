@@ -120,8 +120,9 @@ class AdaptedHeapObject {
   final IdentityHashCode code;
   final int shallowSize;
 
-  /// No serialization is needed for the fields because the field is used after
-  /// the object transfer.
+  // No serialization is needed for the fields below, because the fields are
+  // used after the object transfer.
+
   /// Special values: [null] - retainer is unknown, -1 - the object is root.
   int? retainer;
 
