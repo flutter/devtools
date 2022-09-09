@@ -93,7 +93,7 @@ jobs:
         uses: actions/upload-artifact@v3
         if: failure()
         with: 
-          name: golden_image_failures-${{ matrix.bot }}-${{ matrix.flutter-test-env }}
+          name: golden_image_failures.${{ matrix.bot }}.${{ matrix.flutter-test-env }}
           path: packages/devtools_app/test/**/failures/*.png
 
   macos-test:
@@ -121,7 +121,7 @@ jobs:
         uses: actions/upload-artifact@v3
         if: failure()
         with: 
-          name: golden_image_failures-${{ matrix.bot }}-${{ matrix.flutter-test-env }}
+          name: golden_image_failures.${{ matrix.bot }}.${{ matrix.flutter-test-env }}
           path: packages/devtools_app/test/**/failures/*.png
 
 
