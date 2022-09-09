@@ -23,78 +23,79 @@ env:
   PINNED_FLUTTER_CHANNEL: 3.3.0-0.4.pre
 
 jobs:
-  # main:
-  #   name: main
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       flutter-test-env:
-  #         - pinned
-  #   steps:
-  #     - name: git clone
-  #       uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
-  #     - name: tool/bots.sh
-  #       env:
-  #         BOT: main
-  #         FLUTTER_TEST_ENV: ${{ matrix.flutter-test-env }}
-  #       run: ./tool/bots.sh
+  main:
+    name: main
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        flutter-test-env:
+          - pinned
+    steps:
+      - name: git clone
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
+      - name: tool/bots.sh
+        env:
+          BOT: main
+          FLUTTER_TEST_ENV: ${{ matrix.flutter-test-env }}
+        run: ./tool/bots.sh
 
-  # packages:
-  #   name: packages
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       flutter-test-env:
-  #         - pinned
-  #   steps:
-  #     - name: git clone
-  #       uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
-  #     - name: tool/bots.sh
-  #       env:
-  #         BOT: packages
-  #         FLUTTER_TEST_ENV: ${{ matrix.flutter-test-env }}
-  #       run: ./tool/bots.sh
+  packages:
+    name: packages
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        flutter-test-env:
+          - pinned
+    steps:
+      - name: git clone
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
+      - name: tool/bots.sh
+        env:
+          BOT: packages
+          FLUTTER_TEST_ENV: ${{ matrix.flutter-test-env }}
+        run: ./tool/bots.sh
 
-  # test:
-  #   name: test ${{ matrix.bot }} - (flutter ${{ matrix.flutter-test-env }})
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       bot:
-  #         - test_ddc
-  #         - test_dart2js
-  #       flutter-test-env:
-  #         - pinned
-  #         - master
-  #   steps:
-  #     - name: git clone
-  #       uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
+  test:
+    name: test ${{ matrix.bot }} - (flutter ${{ matrix.flutter-test-env }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        bot:
+          - test_ddc
+          - test_dart2js
+        flutter-test-env:
+          - pinned
+          - master
+    steps:
+      - name: git clone
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
 
-  #     - name: tool/bots.sh
-  #       env:
-  #         BOT: ${{ matrix.bot }}
-  #         PLATFORM: vm
-  #         FLUTTER_TEST_ENV: ${{ matrix.flutter-test-env }}
-  #       run: ./tool/bots.sh
+      - name: tool/bots.sh
+        env:
+          BOT: ${{ matrix.bot }}
+          PLATFORM: vm
+          FLUTTER_TEST_ENV: ${{ matrix.flutter-test-env }}
+        run: ./tool/bots.sh
 
-  #     - name: image failures
-  #       uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
-  #       if: failure() # Only if failure then failures directory exists.
-  #       with:
-  #         # TODO(terry): matrix.os currently empty. If we run tests on other
-  #         #              platforms this will be used.
-  #         name: test-image-failures-${{ matrix.os }} # Name for the artifact
-  #         path: packages/devtools_app/test/failures # Path to upload
+      - name: image failures
+        uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
+        if: failure() # Only if failure then failures directory exists.
+        with:
+          # TODO(terry): matrix.os currently empty. If we run tests on other
+          #              platforms this will be used.
+          name: test-image-failures-${{ matrix.os }} # Name for the artifact
+          path: packages/devtools_app/test/failures # Path to upload
+                
+      - name: Upload Golden Failure Artifacts
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with: 
+          name: golden_image_failures-${{ matrix.bot }}-${{ matrix.flutter-test-env }}
+          path: packages/devtools_app/test/**/failures/*.png
 
-  #     - name: Upload Golden artifacts code coverage results
-  #       uses: actions/upload-artifact@v3
-  #       if: failure()
-  #       with: 
-  #         name: golden_image_failures
-  #         path: packages/devtools_app/test/**/failures/
   macos-test:
     name: macos ${{ matrix.bot }} - (flutter ${{ matrix.flutter-test-env }})
     runs-on: macos-latest
@@ -116,11 +117,11 @@ jobs:
           FLUTTER_TEST_ENV: ${{ matrix.flutter-test-env }}
         run: ./tool/bots.sh
   
-      - name: Upload Golden artifacts code coverage results
+      - name: Upload Golden Failure Artifacts
         uses: actions/upload-artifact@v3
         if: failure()
         with: 
-          name: golden_image_failures
+          name: golden_image_failures-${{ matrix.bot }}-${{ matrix.flutter-test-env }}
           path: packages/devtools_app/test/**/failures/*.png
 
 
