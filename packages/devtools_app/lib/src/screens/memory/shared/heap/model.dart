@@ -11,6 +11,7 @@ class _JsonFields {
   static const String references = 'references';
   static const String klass = 'klass';
   static const String library = 'library';
+  static const String shallowSize = 'shallowSize';
 }
 
 /// Contains information from [HeapSnapshotGraph],
@@ -89,6 +90,7 @@ class AdaptedHeapObject {
     required this.references,
     required this.klass,
     required this.library,
+    required this.shallowSize,
   });
 
   factory AdaptedHeapObject.fromHeapSnapshotObject(HeapSnapshotObject object) {
@@ -99,6 +101,7 @@ class AdaptedHeapObject {
       references: List.from(object.references),
       klass: object.klass.name,
       library: library,
+      shallowSize: object.shallowSize,
     );
   }
 
@@ -108,23 +111,27 @@ class AdaptedHeapObject {
         references: (json[_JsonFields.references] as List<dynamic>).cast<int>(),
         klass: json[_JsonFields.klass],
         library: json[_JsonFields.library],
+        shallowSize: json[_JsonFields.shallowSize] ?? 0,
       );
 
   final List<int> references;
   final String klass;
   final String library;
   final IdentityHashCode code;
+  final int shallowSize;
 
-  /// No serialization is needed for the field because the field is used after
+  /// No serialization is needed for the fields because the field is used after
   /// the object transfer.
   /// Special values: [null] - retainer is unknown, -1 - the object is root.
   int? retainer;
+  int? retainedSize;
 
   Map<String, dynamic> toJson() => {
         _JsonFields.code: code,
         _JsonFields.references: references,
         _JsonFields.klass: klass,
         _JsonFields.library: library.toString(),
+        _JsonFields.shallowSize: shallowSize,
       };
 
   String get name => '$library/$shortName';

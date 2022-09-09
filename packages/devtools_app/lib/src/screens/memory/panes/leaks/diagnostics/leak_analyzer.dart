@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../shared/heap/heap_analyzer.dart';
+import '../../../shared/heap/model.dart';
 import '../instrumentation/model.dart';
 import 'model.dart';
 
@@ -25,6 +26,27 @@ NotGCedAnalyzed analyseNotGCed(NotGCedAnalyzerTask task) {
     leaksWithoutRetainingPath: leaksWithoutPath.toList(),
     totalLeaks: task.reports.length,
   );
+}
+
+/// Sets [retainingPath] to each [notGCedLeaks].
+void analyzeHeapAndSetRetainingPaths(
+  AdaptedHeap heap,
+  List<LeakReport> notGCedLeaks,
+) {
+  if (!heap.isSpanningTreeBuilt) buildSpanningTree(heap);
+
+  for (var l in notGCedLeaks) {
+    l.retainingPath = heap.shortPath(l.code);
+  }
+}
+
+/// Sets [detailedPath] to each leak.
+void setDetailedPaths(AdaptedHeap heap, List<LeakReport> notGCedLeaks) {
+  assert(heap.isSpanningTreeBuilt);
+
+  for (var l in notGCedLeaks) {
+    l.detailedPath = heap.detailedPath(l.code);
+  }
 }
 
 /// Out of list of notGCed objects, identifies ones that hold others from
