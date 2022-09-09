@@ -2,61 +2,29 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:devtools_app/src/screens/memory/panes/leaks/diagnostics/leak_analyzer.dart';
 import 'package:devtools_app/src/screens/memory/panes/leaks/diagnostics/model.dart';
 import 'package:devtools_app/src/screens/memory/panes/leaks/formatter.dart';
 import 'package:devtools_app/src/screens/memory/panes/leaks/instrumentation/model.dart';
-import 'package:devtools_app/src/screens/memory/shared/heap/heap_analyzer.dart';
-import 'package:devtools_app/src/screens/memory/shared/heap/model.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../../test_data/memory/heap/heap_data.dart';
+
 void main() {
-  const dataDir = 'test/test_data/memory/leaks/';
-
-  final tests = [
-    _Test(
-      name: 'leaking_demo_app',
-      appClassName: 'MyApp',
-    ),
-  ];
-
-  for (var t in tests) {
+  for (var t in heapTests) {
     group(t.name, () {
       late NotGCedAnalyzerTask task;
 
       setUp(() async {
-        task = await _loadTaskFromFile('$dataDir${t.name}.raw.json');
-      });
-
-      test('There are many objects and roots.', () {
-        expect(task.heap.objects.length, greaterThan(1000));
-        expect(
-          task.heap.objects[AdaptedHeap.rootIndex].references.length,
-          greaterThan(1000),
-          reason: t.name,
-        );
-      });
-
-      test('There is exactly one object of type ${t.appClassName}.', () {
-        final appObjects =
-            task.heap.objects.where((o) => o.klass == t.appClassName);
-        expect(appObjects, hasLength(1), reason: t.name);
-      });
-
-      test('There is path to the object of type ${t.appClassName}.', () async {
-        buildSpanningTree(task.heap);
-        final appObject =
-            task.heap.objects.where((o) => o.klass == t.appClassName).first;
-        expect(appObject.retainer, isNotNull, reason: t.name);
+        task = await t.task();
       });
 
       // This test does not verify results, because the code is not stable yet.
       // We need the test to make sure (1) the code does not fail and (2)
       // to see the changes in the output file in code reviews.
-      test('Write result to file.', () async {
+      test('Write leak details to file.', () async {
         final result = analyseNotGCed(task);
 
         final yaml = analyzedLeaksToYaml(
@@ -65,9 +33,7 @@ void main() {
           notGCed: result,
         );
 
-        await File(
-          '$dataDir${t.name}.yaml',
-        ).writeAsString(yaml);
+        await File(t.pathForLeakDetails).writeAsString(yaml);
       });
     });
   }
@@ -100,22 +66,3 @@ LeakReport _createReport(int code, String path) => LeakReport(
       details: ['details'],
       code: 0,
     )..retainingPath = path;
-
-class _Test {
-  _Test({
-    required this.name,
-    required this.appClassName,
-  });
-
-  final String name;
-  final String appClassName;
-}
-
-Future<NotGCedAnalyzerTask> _loadTaskFromFile(
-  String fileNameFromProjectRoot,
-) async {
-  final json = jsonDecode(
-    await File(fileNameFromProjectRoot).readAsString(),
-  );
-  return NotGCedAnalyzerTask.fromJson(json);
-}

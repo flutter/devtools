@@ -4,13 +4,16 @@
 
 import 'model.dart';
 
-/// Sets the field [retainer] for each object in the [heap], that has retaining
-/// path to the root.
-///
-/// The algorithm takes O(number of references in the heap).
+/// Sets the field retainer and retainedSize for each object in the [heap], that
+/// has retaining path to the root.
 void buildSpanningTree(AdaptedHeap heap) {
-  final root = heap.objects[AdaptedHeap.rootIndex];
-  root.retainer = -1;
+  _setRetainers(heap);
+  heap.isSpanningTreeBuilt = true;
+}
+
+/// The algorithm takes O(number of references in the heap).
+void _setRetainers(AdaptedHeap heap) {
+  heap.objects[AdaptedHeap.rootIndex].retainer = -1;
 
   // Array of all objects where the best distance from root is n.
   // n starts with 0 and increases by 1 on each step of the algorithm.
@@ -30,17 +33,30 @@ void buildSpanningTree(AdaptedHeap heap) {
         final child = heap.objects[c];
 
         if (child.retainer != null) continue;
-        if (!_canRetain(child.klass, child.library)) continue;
-
         child.retainer = r;
+        if (child.references.isEmpty) _processLeafSize(child, heap);
+        if (!_canRetain(child.klass, child.library)) continue;
         nextCut.add(c);
       }
     }
-    if (nextCut.isEmpty) {
-      heap.isSpanningTreeBuilt = true;
-      return;
-    }
+    if (nextCut.isEmpty) return;
     cut = nextCut;
+  }
+}
+
+/// Assuming the [object] is leaf, initializes its retained size
+/// and adds the size to all its retainers.
+void _processLeafSize(AdaptedHeapObject object, AdaptedHeap heap) {
+  assert(object.retainer != null);
+  final addedSize = object.shallowSize;
+
+  object.retainedSize = addedSize;
+  while (object.retainer != -1) {
+    final retainer = heap.objects[object.retainer!];
+    assert(retainer.retainer != null);
+    assert(retainer != object);
+    retainer.retainedSize = retainer.retainedSize ?? 0 + addedSize;
+    object = retainer;
   }
 }
 
