@@ -362,6 +362,9 @@ class _CodeViewState extends State<CodeView>
                         Expanded(
                           child: LayoutBuilder(
                             builder: (context, constraints) {
+                              final double fileWidth = calculateTextSpanWidth(
+                                findLongestTextSpan(lines),
+                              );
                               return Scrollbar(
                                 key: CodeView
                                     .debuggerCodeViewHorizontalScrollbarKey,
@@ -372,7 +375,10 @@ class _CodeViewState extends State<CodeView>
                                   controller: horizontalController,
                                   child: SizedBox(
                                     height: constraints.maxHeight,
-                                    width: constraints.maxWidth,
+                                    width: math.max(
+                                      constraints.maxWidth,
+                                      fileWidth,
+                                    ),
                                     child: Lines(
                                       height: constraints.maxHeight,
                                       debugController: widget.controller,
