@@ -32,7 +32,7 @@ class VmClassDisplay extends StatelessWidget {
         Flexible(
           child: VmObjectDisplayBasicLayout(
             object: clazz,
-            generalDataRows: _classDataRows(context, clazz),
+            generalDataRows: _classDataRows(clazz),
           ),
         ),
         if (displayClassInstances)
@@ -50,13 +50,11 @@ class VmClassDisplay extends StatelessWidget {
   /// Generates a list of key-value pairs (map entries) containing the general
   /// information of the class object [clazz].
   List<MapEntry<String, WidgetBuilder>> _classDataRows(
-    BuildContext context,
     ClassObject clazz,
   ) {
     final superClass = clazz.obj.superClass;
     return [
       ...vmObjectGeneralDataRows(
-        context,
         controller,
         clazz,
       ),

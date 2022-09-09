@@ -26,7 +26,7 @@ class VmLibraryDisplay extends StatelessWidget {
     final dependencies = library.obj.dependencies;
     return VmObjectDisplayBasicLayout(
       object: library,
-      generalDataRows: _libraryDataRows(context, library),
+      generalDataRows: _libraryDataRows(library),
       expandableWidgets: [
         if (dependencies != null)
           LibraryDependencies(dependencies: dependencies)
@@ -37,12 +37,10 @@ class VmLibraryDisplay extends StatelessWidget {
   /// Generates a list of key-value pairs (map entries) containing the general
   /// information of the library object [library].
   List<MapEntry<String, WidgetBuilder>> _libraryDataRows(
-    BuildContext context,
     LibraryObject library,
   ) {
     return [
       ...vmObjectGeneralDataRows(
-        context,
         controller,
         library,
       ),

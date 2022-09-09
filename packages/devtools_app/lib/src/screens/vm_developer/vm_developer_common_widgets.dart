@@ -631,7 +631,8 @@ class VmServiceObjectLink<T> extends StatelessWidget {
         if (lib.uri!.startsWith('dart') || preferUri) {
           text = lib.uri!;
         } else {
-          text = lib.name!.isEmpty ? lib.uri! : lib.name!;
+          final name = lib.name;
+          text = name!.isEmpty ? lib.uri! : name;
         }
       } else if (object is FieldRef) {
         final field = object as FieldRef;
@@ -742,7 +743,6 @@ class VmObjectDisplayBasicLayout extends StatelessWidget {
 }
 
 List<MapEntry<String, WidgetBuilder>> vmObjectGeneralDataRows(
-  BuildContext context,
   ObjectInspectorViewController controller,
   VmObject object,
 ) {

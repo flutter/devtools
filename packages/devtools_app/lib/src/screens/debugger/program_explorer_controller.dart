@@ -306,8 +306,6 @@ class ProgramExplorerController extends DisposableController
     final service = serviceManager.service!;
     final isolateId = serviceManager.isolateManager.selectedIsolate.value!.id!;
 
-    ScriptRef? targetScript;
-
     // If `object` is a library, it will always be a root node and is simple to
     // find.
     if (object is LibraryRef) {
@@ -318,6 +316,7 @@ class ProgramExplorerController extends DisposableController
 
     // Otherwise, we need to find the target script to determine the library
     // the target node is listed under.
+    ScriptRef? targetScript;
     if (object is ClassRef) {
       targetScript = object.location?.script;
     } else if (object is FieldRef) {
@@ -335,7 +334,7 @@ class ProgramExplorerController extends DisposableController
       targetScript = object.classRef?.location?.script;
     }
     if (targetScript == null) {
-      throw StateError('Could not find script }');
+      throw StateError('Could not find script');
     }
 
     final scriptObj =
