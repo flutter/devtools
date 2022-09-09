@@ -121,7 +121,7 @@ class AdaptedHeapObject {
   final int shallowSize;
 
   // No serialization is needed for the fields below, because the fields are
-  // used after the object transfer.
+  // calculated after the heap deserialization.
 
   /// Special values: [null] - retainer is unknown, -1 - the object is root.
   int? retainer;
