@@ -88,7 +88,7 @@ jobs:
           #              platforms this will be used.
           name: test-image-failures-${{ matrix.os }} # Name for the artifact
           path: packages/devtools_app/test/failures # Path to upload
-
+                
   macos-test:
     name: macos ${{ matrix.bot }} - (flutter ${{ matrix.flutter-test-env }})
     runs-on: macos-latest
@@ -109,6 +109,14 @@ jobs:
           PLATFORM: vm
           FLUTTER_TEST_ENV: ${{ matrix.flutter-test-env }}
         run: ./tool/bots.sh
+  
+      - name: Upload Golden Failure Artifacts
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with: 
+          name: golden_image_failures.${{ matrix.bot }}.${{ matrix.flutter-test-env }}
+          path: packages/devtools_app/test/**/failures/*.png
+
 
 # TODO(https://github.com/flutter/devtools/issues/1715): add a windows compatible version of tool/bots.sh
 # and run it from this job.
