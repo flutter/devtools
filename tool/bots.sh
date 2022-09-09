@@ -83,11 +83,55 @@ echo `pwd`
 
 if [ "$BOT" = "main" ]; then
 
-    echo "skipping"
+    # Provision our packages.
+    flutter pub get
+
+    # Verify that dart format has been run.
+    echo "Checking formatting..."
+    # Here, we use the dart instance from the flutter sdk.
+    $(dirname $(which flutter))/dart format --output=none --set-exit-if-changed .
+
+    # Make sure the app versions are in sync.
+    repo_tool repo-check
+
+    # Analyze the source.
+    dart analyze --fatal-infos
+
+    # Ensure we can build the app.
+    flutter build web --release
+
+    # Test the devtools_shared package tests on the main bot.
+    popd
+    pushd packages/devtools_shared
+    echo `pwd`
+
+    flutter test test/
+    popd
+
+    # Change the directory back to devtools_app.
+    pushd packages/devtools_app
+    echo `pwd`
+
 elif [ "$BOT" = "test_ddc" ]; then
 
-    echo "skipping"
+    # Provision our packages.
+    flutter pub get
 
+    # TODO(https://github.com/flutter/flutter/issues/43538): Remove workaround.
+    flutter config --enable-web
+    flutter build web --pwa-strategy=none --no-tree-shake-icons
+
+    # TODO(https://github.com/flutter/devtools/issues/1987): once this issue is fixed,
+    # we may need to explicitly exclude running integration_tests here (this is what we
+    # used to do when integration tests were enabled).
+    if [ "$PLATFORM" = "vm" ]; then
+        flutter test $DART_DEFINE_ARGS test/
+    elif [ "$PLATFORM" = "chrome" ]; then
+        flutter test --platform chrome $DART_DEFINE_ARGS test/
+    else
+        echo "unknown test platform"
+        exit 1
+    fi
 elif [ "$BOT" = "test_dart2js" ]; then
     flutter pub get
 
@@ -99,11 +143,9 @@ elif [ "$BOT" = "test_dart2js" ]; then
     # we may need to explicitly exclude running integration_tests here (this is what we
     # used to do when integration tests were enabled).
     if [ "$PLATFORM" = "vm" ]; then
-        echo "!!!!!!!!!!!!!!!!!!"
-        echo "$DART_DEFINE_ARGS"
-        WEBDEV_RELEASE=true flutter test $DART_DEFINE_ARGS test/memory/memory_screen_test.dart?name="Chart Select Hover Test"
+        WEBDEV_RELEASE=true flutter test $DART_DEFINE_ARGS test/
     elif [ "$PLATFORM" = "chrome" ]; then
-        echo "skipping"
+        WEBDEV_RELEASE=true flutter test --platform chrome $DART_DEFINE_ARGS test/
     else
         echo "unknown test platform"
         exit 1
@@ -112,15 +154,34 @@ elif [ "$BOT" = "test_dart2js" ]; then
 
 elif [ "$BOT" = "integration_ddc" ]; then
 
-   echo "skipping"
+    # Provision our packages.
+    flutter pub get
+    flutter config --enable-web
+
+    # TODO(https://github.com/flutter/devtools/issues/1987): rewrite integration tests.
+    # We need to run integration tests with -j1 to run with no concurrency.
+    # flutter test -j1 $DART_DEFINE_ARGS test/integration_tests/
 
 elif [ "$BOT" = "integration_dart2js" ]; then
 
-    echo "skipping"
+    flutter pub get
+    flutter config --enable-web
+
+    # TODO(https://github.com/flutter/devtools/issues/1987): rewrite integration tests.
+    # We need to run integration tests with -j1 to run with no concurrency.
+    # WEBDEV_RELEASE=true flutter test -j1 $DART_DEFINE_ARGS test/integration_tests/
 
 elif [ "$BOT" = "packages" ]; then
 
-    echo "skipping"
+    popd
+
+    # Get packages
+    repo_tool packages-get
+
+    # Analyze the code
+    repo_tool analyze
+
+    pushd packages/devtools_app
 
 else
 
