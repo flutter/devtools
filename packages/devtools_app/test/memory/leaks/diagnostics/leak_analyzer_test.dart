@@ -24,7 +24,7 @@ void main() {
       // This test does not verify results, because the code is not stable yet.
       // We need the test to make sure (1) the code does not fail and (2)
       // to see the changes in the output file in code reviews.
-      test('Write leak details to file.', () async {
+      test('has leaks.', () async {
         final result = analyseNotGCed(task);
 
         final yaml = analyzedLeaksToYaml(

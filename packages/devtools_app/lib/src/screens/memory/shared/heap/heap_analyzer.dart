@@ -9,11 +9,12 @@ import 'model.dart';
 void buildSpanningTree(AdaptedHeap heap) {
   _setRetainers(heap);
   heap.isSpanningTreeBuilt = true;
+  assert(_verifyHeapIntegrity(heap));
 }
 
 /// The algorithm takes O(number of references in the heap).
 void _setRetainers(AdaptedHeap heap) {
-  heap.objects[AdaptedHeap.rootIndex].retainer = -1;
+  heap.objects[heap.rootIndex].retainer = -1;
 
   // Array of all objects where the best distance from root is n.
   // n starts with 0 and increases by 1 on each step of the algorithm.
@@ -21,7 +22,7 @@ void _setRetainers(AdaptedHeap heap) {
   // See description of cut:
   // https://en.wikipedia.org/wiki/Cut_(graph_theory)
   // On each step the algorithm moves the cut one step further from the root.
-  var cut = [AdaptedHeap.rootIndex];
+  var cut = [heap.rootIndex];
 
   // On each step of algorithm we know that all nodes at distance n or closer to
   // root, has parent initialized.
@@ -80,5 +81,26 @@ bool _canRetain(String klass, String library) {
   // or detect weak references automatically, without hard coding
   // class names.
   assert(false, 'Unexpected library for $klass: $library.');
+  return true;
+}
+
+/// Verifies heap integrity rules.
+///
+/// 1. Nullness of 'retainedSize' and 'retainer' should be equal.
+///
+/// 2. Root's 'retainedSize' should be sum of shallow sizes of all reachable
+/// objects.
+bool _verifyHeapIntegrity(AdaptedHeap heap) {
+  var totalReachableSize = 0;
+
+  for (var object in heap.objects) {
+    assert((object.retainedSize == null) == (object.retainer == null));
+    if (object.retainer != null) totalReachableSize += object.shallowSize;
+  }
+
+  assert(
+    heap.root.retainedSize == totalReachableSize,
+    '${heap.root.retainedSize} should be equal to $totalReachableSize',
+  );
   return true;
 }

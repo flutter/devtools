@@ -17,7 +17,11 @@ class _JsonFields {
 /// Contains information from [HeapSnapshotGraph],
 /// needed for memory screen.
 class AdaptedHeap {
-  AdaptedHeap(this.objects);
+  /// Default value for rootIndex is taken from
+  /// https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/heap_snapshot.md#object-ids
+  AdaptedHeap(this.objects, {this.rootIndex = 1})
+      : assert(objects.isNotEmpty),
+        assert(objects.length > rootIndex);
 
   factory AdaptedHeap.fromJson(Map<String, dynamic> json) => AdaptedHeap(
         (json[_JsonFields.objects] as List<dynamic>)
@@ -31,9 +35,13 @@ class AdaptedHeap {
             .toList(),
       );
 
-  static const rootIndex = 1;
+  final int rootIndex;
+
   final List<AdaptedHeapObject> objects;
+
   bool isSpanningTreeBuilt = false;
+
+  AdaptedHeapObject get root => objects[rootIndex];
 
   /// Heap objects by identityHashCode.
   late final Map<IdentityHashCode, int> _objectsByCode = Map.fromIterable(
@@ -123,11 +131,14 @@ class AdaptedHeapObject {
   // No serialization is needed for the fields below, because the fields are
   // calculated after the heap deserialization.
 
-  /// Special values: [null] - retainer is unknown, -1 - the object is root.
+  /// Special values: `null` - the object is not reachable,
+  /// `-1` - the object is root.
   int? retainer;
 
   /// Total shallow size of objects, where this object is retainer, recursively,
   /// plus shallow size of this object.
+  ///
+  /// Null, if object is not reachable.
   int? retainedSize;
 
   Map<String, dynamic> toJson() => {
