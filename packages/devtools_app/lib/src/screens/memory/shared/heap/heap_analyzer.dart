@@ -14,7 +14,8 @@ void buildSpanningTree(AdaptedHeap heap) {
 
 /// The algorithm takes O(number of references in the heap).
 void _setRetainers(AdaptedHeap heap) {
-  heap.objects[heap.rootIndex].retainer = -1;
+  heap.root.retainer = -1;
+  heap.root.retainedSize = heap.root.shallowSize;
 
   // Array of all objects where the best distance from root is n.
   // n starts with 0 and increases by 1 on each step of the algorithm.
@@ -56,7 +57,8 @@ void _processLeafSize(AdaptedHeapObject object, AdaptedHeap heap) {
     final retainer = heap.objects[object.retainer!];
     assert(retainer.retainer != null);
     assert(retainer != object);
-    retainer.retainedSize = retainer.retainedSize ?? 0 + addedSize;
+    retainer.retainedSize =
+        (retainer.retainedSize ?? retainer.shallowSize) + addedSize;
     object = retainer;
   }
 }
@@ -94,13 +96,16 @@ bool _verifyHeapIntegrity(AdaptedHeap heap) {
   var totalReachableSize = 0;
 
   for (var object in heap.objects) {
-    assert((object.retainedSize == null) == (object.retainer == null));
+    assert(
+      (object.retainedSize == null) == (object.retainer == null),
+      'retainedSize = ${object.retainedSize}, retainer = ${object.retainer}',
+    );
     if (object.retainer != null) totalReachableSize += object.shallowSize;
   }
 
   assert(
     heap.root.retainedSize == totalReachableSize,
-    '${heap.root.retainedSize} should be equal to $totalReachableSize',
+    '${heap.root.retainedSize} not equal to $totalReachableSize',
   );
   return true;
 }

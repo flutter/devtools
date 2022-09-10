@@ -100,7 +100,7 @@ final _sizeTests = [
     unreachableSize: 0,
   ),
   _SizeTest(
-    name: 'One unreachable object',
+    name: 'One unreachable object heap',
     heap: AdaptedHeap(
       [
         _createOneByteObject(0, []),
@@ -112,7 +112,7 @@ final _sizeTests = [
     unreachableSize: 1,
   ),
   _SizeTest(
-    name: 'Many unreachable objects',
+    name: 'Many unreachable objects heap',
     heap: AdaptedHeap(
       [
         // Reachable:
