@@ -109,19 +109,11 @@ final _sizeTests = [
   // Heaps with weak objects:
   _SizeTest(
     name: 'One weak object heap',
-    heap: AdaptedHeap(
-      [
-        _createOneByteObject(0, [1]),
-        _createOneByteWeakObject(1, [2]),
-        _createOneByteObject(2, []),
-      ],
-      rootIndex: 0,
-    ),
-    rootRetainedSize: 2,
-    unreachableSize: 1,
-  ),
-  _SizeTest(
-    name: 'Two weak objects heap',
+    //  0
+    //  | \
+    //  1w 2
+    //  |
+    //  3
     heap: AdaptedHeap(
       [
         _createOneByteObject(0, [1, 2]),
@@ -133,6 +125,26 @@ final _sizeTests = [
     ),
     rootRetainedSize: 3,
     unreachableSize: 1,
+  ),
+  _SizeTest(
+    name: 'Two weak objects heap',
+    //  0
+    //  | \
+    //  1w 2w
+    //  |   \
+    //  3   4
+    heap: AdaptedHeap(
+      [
+        _createOneByteObject(0, [1, 2]),
+        _createOneByteWeakObject(1, [3]),
+        _createOneByteWeakObject(2, [4]),
+        _createOneByteObject(3, []),
+        _createOneByteObject(4, []),
+      ],
+      rootIndex: 0,
+    ),
+    rootRetainedSize: 3,
+    unreachableSize: 2,
   ),
 
   // Non-tree heaps.
@@ -187,6 +199,24 @@ final _sizeTests = [
     ),
     rootRetainedSize: 5,
     unreachableSize: 0,
+  ),
+  _SizeTest(
+    name: 'Hanged very weak diamond',
+    //  \
+    //  |\
+    //  \|
+    heap: AdaptedHeap(
+      [
+        _createOneByteObject(0, [1]),
+        _createOneByteObject(1, [2, 3]),
+        _createOneByteWeakObject(2, [4]),
+        _createOneByteWeakObject(3, [4]),
+        _createOneByteObject(4, []),
+      ],
+      rootIndex: 0,
+    ),
+    rootRetainedSize: 4,
+    unreachableSize: 1,
   ),
 ];
 
