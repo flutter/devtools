@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart';
+
 import 'model.dart';
 
 /// Sets the field retainer and retainedSize for each object in the [heap], that
 /// has retaining path to the root.
 void buildSpanningTree(AdaptedHeap heap) {
+  assert(!heap.isSpanningTreeBuilt);
   _setRetainers(heap);
   heap.isSpanningTreeBuilt = true;
   assert(_verifyHeapIntegrity(heap));
@@ -36,9 +39,13 @@ void _setRetainers(AdaptedHeap heap) {
 
         if (child.retainer != null) continue;
         child.retainer = r;
-        if (child.references.isEmpty) _processLeafSize(child, heap);
-        if (!_canRetain(child.klass, child.library)) continue;
-        nextCut.add(c);
+        child.retainedSize = child.shallowSize;
+
+        if (_isRetainer(child)) {
+          nextCut.add(c);
+        } else {
+          _processLeafSize(child, heap);
+        }
       }
     }
     if (nextCut.isEmpty) return;
@@ -57,14 +64,19 @@ void _processLeafSize(AdaptedHeapObject object, AdaptedHeap heap) {
     final retainer = heap.objects[object.retainer!];
     assert(retainer.retainer != null);
     assert(retainer != object);
-    retainer.retainedSize =
-        (retainer.retainedSize ?? retainer.shallowSize) + addedSize;
+    retainer.retainedSize = retainer.retainedSize! + addedSize;
     object = retainer;
   }
 }
 
+bool _isRetainer(AdaptedHeapObject object) {
+  if (isWeakEntry(object.klass, object.library)) return false;
+  return object.references.isNotEmpty;
+}
+
 /// Detects if a class can retain an object from garbage collection.
-bool _canRetain(String klass, String library) {
+@visibleForTesting
+bool isWeakEntry(String klass, String library) {
   // Classes that hold reference to an object without preventing
   // its collection.
   const weakHolders = {
@@ -73,8 +85,8 @@ bool _canRetain(String klass, String library) {
     'FinalizerEntry': 'dart._internal',
   };
 
-  if (!weakHolders.containsKey(klass)) return true;
-  if (weakHolders[klass] == library) return false;
+  if (!weakHolders.containsKey(klass)) return false;
+  if (weakHolders[klass] == library) return true;
 
   // If a class lives in unexpected library, this can be because of
   // (1) name collision or (2) bug in this code.
@@ -83,7 +95,7 @@ bool _canRetain(String klass, String library) {
   // or detect weak references automatically, without hard coding
   // class names.
   assert(false, 'Unexpected library for $klass: $library.');
-  return true;
+  return false;
 }
 
 /// Verifies heap integrity rules.

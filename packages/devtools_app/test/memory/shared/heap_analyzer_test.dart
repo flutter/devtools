@@ -62,6 +62,8 @@ void main() {
 }
 
 final _sizeTests = [
+  // Heaps without unreachable objects:
+
   _SizeTest(
     name: 'One object heap',
     heap: AdaptedHeap(
@@ -99,6 +101,9 @@ final _sizeTests = [
     rootRetainedSize: 4,
     unreachableSize: 0,
   ),
+
+  // Heaps with unreachable objects:
+
   _SizeTest(
     name: 'One unreachable object heap',
     heap: AdaptedHeap(
@@ -132,17 +137,36 @@ final _sizeTests = [
     rootRetainedSize: 4,
     unreachableSize: 4,
   ),
+
+  // Heaps with weak objects:
+  _SizeTest(
+    name: 'One unreachable object heap',
+    heap: AdaptedHeap(
+      [
+        _createOneByteObject(0, [1]),
+        _createOneByteWeakObject(1, [2]),
+        _createOneByteObject(2, []),
+      ],
+      rootIndex: 0,
+    ),
+    rootRetainedSize: 2,
+    unreachableSize: 1,
+  ),
 ];
 
 class _SizeTest {
   _SizeTest({
     required this.name,
     required this.heap,
+
+    /// Retained size of the root.
     required this.rootRetainedSize,
+
+    /// Total size of all unreachable objects.
     required this.unreachableSize,
   }) : assert(_assertHeapIndexIsCode(heap));
 
-  /// For convenience of testing each each heap object has code equal to the
+  /// For convenience of testing each heap object has code equal to the
   /// index in array.
   final AdaptedHeap heap;
 
@@ -164,6 +188,21 @@ AdaptedHeapObject _createOneByteObject(
       library: '',
       shallowSize: 1,
     );
+
+AdaptedHeapObject _createOneByteWeakObject(
+  int codeAndIndex,
+  List<int> references,
+) {
+  final result = AdaptedHeapObject(
+    code: codeAndIndex,
+    references: references,
+    klass: '_WeakProperty',
+    library: 'dart.core',
+    shallowSize: 1,
+  );
+  assert(isWeakEntry(result.klass, result.library), isTrue);
+  return result;
+}
 
 bool _assertHeapIndexIsCode(AdaptedHeap heap) => heap.objects
     .asMap()

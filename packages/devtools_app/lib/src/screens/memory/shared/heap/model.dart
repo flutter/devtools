@@ -17,7 +17,7 @@ class _JsonFields {
 /// Contains information from [HeapSnapshotGraph],
 /// needed for memory screen.
 class AdaptedHeap {
-  /// Default value for rootIndex is taken from
+  /// Default value for rootIndex is taken from the doc:
   /// https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/heap_snapshot.md#object-ids
   AdaptedHeap(this.objects, {this.rootIndex = 1})
       : assert(objects.isNotEmpty),
