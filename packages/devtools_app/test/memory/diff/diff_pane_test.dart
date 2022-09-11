@@ -11,6 +11,7 @@ import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../matchers/matchers.dart';
 import '../../scenes/memory/connected.dart';
 
 void main() {
@@ -20,6 +21,7 @@ void main() {
 
   group('Diff pane', () {
     late MemoryConnectedScene scene;
+    final finder = find.byType(DiffPane);
 
     Future<void> pumpDiffTab(WidgetTester tester) async {
       await tester.pumpWidget(scene.build());
@@ -44,11 +46,58 @@ void main() {
       scene.tearDown();
     });
 
-    testWidgetsWithWindowSize('records snapshots', windowSize,
-        (WidgetTester tester) async {
-      await pumpDiffTab(tester);
-      await tester.tap(find.byIcon(Icons.fiber_manual_record));
-      await tester.pumpAndSettle();
-    });
+    try {
+      try {
+        try {
+          testWidgetsWithWindowSize('records and deletes snapshots', windowSize,
+              (WidgetTester tester) async {
+            await pumpDiffTab(tester);
+
+            // Check initial golden.
+            await expectLater(
+              finder,
+              matchesDevToolsGolden('../../goldens/memory_diff_empty.png'),
+            );
+
+            // Record three snapshots.
+            for (var i in Iterable.generate(3)) {
+              await tester.tap(find.byIcon(Icons.fiber_manual_record));
+              await tester.pumpAndSettle();
+              expect(find.text('main-${i + 1}'), findsOneWidget);
+            }
+            await expectLater(
+              finder,
+              matchesDevToolsGolden(
+                  '../../goldens/memory_diff_three_snapshots.png'),
+            );
+
+            // Delete and take a snapshot.
+            await tester.tap(find.byTooltip('Delete snapshot'));
+            await tester.pumpAndSettle();
+            await tester.tap(find.byIcon(Icons.fiber_manual_record));
+            await tester.pumpAndSettle();
+            await expectLater(
+              finder,
+              matchesDevToolsGolden(
+                  '../../goldens/memory_diff_three_snapshots.png'),
+            );
+
+            // Clear all
+            await tester.tap(find.byTooltip('Clear all snapshots'));
+            await tester.pumpAndSettle();
+            await expectLater(
+              finder,
+              matchesDevToolsGolden('../../goldens/memory_diff_empty.png'),
+            );
+          });
+        } catch (e, s) {
+          print(s);
+        }
+      } catch (e, s) {
+        print(s);
+      }
+    } catch (e, s) {
+      print(s);
+    }
   });
 }
