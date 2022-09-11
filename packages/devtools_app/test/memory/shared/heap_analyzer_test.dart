@@ -10,38 +10,6 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../test_data/memory/heap/heap_data.dart';
 
 void main() {
-  for (var t in heapTests) {
-    group(t.name, () {
-      late NotGCedAnalyzerTask task;
-
-      setUp(() async {
-        task = await t.task();
-      });
-
-      test('has many objects and roots.', () {
-        expect(task.heap.objects.length, greaterThan(1000));
-        expect(
-          task.heap.objects[task.heap.rootIndex].references.length,
-          greaterThan(1000),
-          reason: t.name,
-        );
-      });
-
-      test('has exactly one object of type ${t.appClassName}.', () {
-        final appObjects =
-            task.heap.objects.where((o) => o.klass == t.appClassName);
-        expect(appObjects, hasLength(1), reason: t.name);
-      });
-
-      test('has path to the object of type ${t.appClassName}.', () async {
-        buildSpanningTree(task.heap);
-        final appObject =
-            task.heap.objects.where((o) => o.klass == t.appClassName).first;
-        expect(appObject.retainer, isNotNull, reason: t.name);
-      });
-    });
-  }
-
   for (var t in _sizeTests) {
     group(t.name, () {
       test('has expected root and unreachable sizes.', () {
@@ -140,7 +108,7 @@ final _sizeTests = [
 
   // Heaps with weak objects:
   _SizeTest(
-    name: 'One unreachable object heap',
+    name: 'One weak object heap',
     heap: AdaptedHeap(
       [
         _createOneByteObject(0, [1]),
@@ -151,6 +119,74 @@ final _sizeTests = [
     ),
     rootRetainedSize: 2,
     unreachableSize: 1,
+  ),
+  _SizeTest(
+    name: 'Two weak objects heap',
+    heap: AdaptedHeap(
+      [
+        _createOneByteObject(0, [1, 2]),
+        _createOneByteWeakObject(1, [3]),
+        _createOneByteObject(2, []),
+        _createOneByteObject(3, []),
+      ],
+      rootIndex: 0,
+    ),
+    rootRetainedSize: 3,
+    unreachableSize: 1,
+  ),
+
+  // Non-tree heaps.
+  _SizeTest(
+    name: 'Diamond',
+    //  |\
+    //  \|
+    heap: AdaptedHeap(
+      [
+        _createOneByteObject(0, [1, 2]),
+        _createOneByteObject(1, [3]),
+        _createOneByteObject(2, [3]),
+        _createOneByteObject(3, []),
+      ],
+      rootIndex: 0,
+    ),
+    rootRetainedSize: 4,
+    unreachableSize: 0,
+  ),
+  _SizeTest(
+    name: 'Hanged diamond',
+    //  \
+    //  |\
+    //  \|
+    heap: AdaptedHeap(
+      [
+        _createOneByteObject(0, [1]),
+        _createOneByteObject(1, [2, 3]),
+        _createOneByteObject(2, [4]),
+        _createOneByteObject(3, [4]),
+        _createOneByteObject(4, []),
+      ],
+      rootIndex: 0,
+    ),
+    rootRetainedSize: 5,
+    unreachableSize: 0,
+  ),
+  _SizeTest(
+    name: 'Hanged weak diamond',
+    //  \
+    //  |\
+    //  \|
+    heap: AdaptedHeap(
+      [
+        _createOneByteObject(0, [1]),
+        _createOneByteObject(1, [2, 3]),
+        _createOneByteWeakObject(2, [4]),
+        _createOneByteObject(3, [4]),
+        _createOneByteObject(4, []),
+      ],
+      rootIndex: 0,
+    ),
+    rootRetainedSize: 5,
+    unreachableSize: 0,
   ),
 ];
 

@@ -41,10 +41,10 @@ void _setRetainers(AdaptedHeap heap) {
         child.retainer = r;
         child.retainedSize = child.shallowSize;
 
+        _propagateSize(child, heap);
+
         if (_isRetainer(child)) {
           nextCut.add(c);
-        } else {
-          _processLeafSize(child, heap);
         }
       }
     }
@@ -55,11 +55,11 @@ void _setRetainers(AdaptedHeap heap) {
 
 /// Assuming the [object] is leaf, initializes its retained size
 /// and adds the size to all its retainers.
-void _processLeafSize(AdaptedHeapObject object, AdaptedHeap heap) {
+void _propagateSize(AdaptedHeapObject object, AdaptedHeap heap) {
   assert(object.retainer != null);
+  assert(object.retainedSize == object.shallowSize);
   final addedSize = object.shallowSize;
 
-  object.retainedSize = addedSize;
   while (object.retainer != -1) {
     final retainer = heap.objects[object.retainer!];
     assert(retainer.retainer != null);

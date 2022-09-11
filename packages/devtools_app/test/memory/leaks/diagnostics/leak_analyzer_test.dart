@@ -13,7 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../../test_data/memory/heap/heap_data.dart';
 
 void main() {
-  for (var t in heapTests) {
+  for (var t in goldenHeapTests) {
     group(t.name, () {
       late NotGCedAnalyzerTask task;
 

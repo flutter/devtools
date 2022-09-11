@@ -9,8 +9,8 @@ import 'package:devtools_app/src/screens/memory/panes/leaks/diagnostics/model.da
 
 const _dataDir = 'test/test_data/memory/heap/';
 
-class HeapTest {
-  HeapTest({
+class GoldenHeapTest {
+  GoldenHeapTest({
     required this.name,
     required this.appClassName,
   });
@@ -27,8 +27,8 @@ class HeapTest {
   }
 }
 
-final heapTests = [
-  HeapTest(
+final goldenHeapTests = [
+  GoldenHeapTest(
     name: 'leaking_demo_app',
     appClassName: 'MyApp',
   ),
