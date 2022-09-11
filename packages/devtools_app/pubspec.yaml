@@ -63,7 +63,7 @@ dev_dependencies:
   stager:
     git:
       url: git@github.com:bryanoltman/stager.git
-      ref: main
+      ref: main # name of branch
 
 flutter:
   uses-material-design: true
