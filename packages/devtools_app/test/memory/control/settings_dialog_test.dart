@@ -32,6 +32,10 @@ void main() {
     await scene.setUp();
   });
 
+  tearDown(() async {
+    scene.tearDown();
+  });
+
   testWidgetsWithWindowSize('settings update preferences', windowSize,
       (WidgetTester tester) async {
     await pumpMemoryScreen(tester);
