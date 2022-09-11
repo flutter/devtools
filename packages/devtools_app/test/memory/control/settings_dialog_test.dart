@@ -12,10 +12,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../matchers/matchers.dart';
-import '../../scenes/memory/offline.dart';
+import '../../scenes/memory/connected.dart';
 
 void main() {
-  late MemoryOfflineScene scene;
+  late MemoryConnectedScene scene;
 
   Future<void> pumpMemoryScreen(WidgetTester tester) async {
     await tester.pumpWidget(scene.build());
@@ -28,7 +28,7 @@ void main() {
   const windowSize = Size(2225.0, 1000.0);
 
   setUp(() async {
-    scene = MemoryOfflineScene();
+    scene = MemoryConnectedScene();
     await scene.setUp();
   });
 

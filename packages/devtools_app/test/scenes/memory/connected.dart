@@ -17,8 +17,9 @@ import '../../test_data/memory_allocation.dart';
 
 /// To run:
 /// `flutter run -t test/scenes/memory/offline.stager_app.dart -d macos`.
-class MemoryOfflineScene extends Scene {
+class MemoryConnectedScene extends Scene {
   late MemoryController controller;
+  late FakeServiceManager fakeServiceManager;
 
   @override
   Widget build() {
@@ -42,7 +43,7 @@ class MemoryOfflineScene extends Scene {
     final allocationJson =
         AllocationMemoryJson.decode(argJsonString: testAllocationData);
 
-    final fakeServiceManager = FakeServiceManager(
+    fakeServiceManager = FakeServiceManager(
       service: FakeServiceManager.createFakeService(
         memoryData: memoryJson,
         allocationData: allocationJson,
@@ -64,5 +65,5 @@ class MemoryOfflineScene extends Scene {
   }
 
   @override
-  String get title => '$MemoryOfflineScene';
+  String get title => '$MemoryConnectedScene';
 }
