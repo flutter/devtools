@@ -15,8 +15,9 @@ import 'generated_mocks_factories.dart';
 class FakeIsolateManager extends Fake implements IsolateManager {
   @override
   ValueListenable<IsolateRef?> get selectedIsolate => _selectedIsolate;
-  final _selectedIsolate =
-      ValueNotifier(IsolateRef.parse({'id': 'fake_isolate_id'}));
+  final _selectedIsolate = ValueNotifier(
+    IsolateRef.parse({'id': 'fake_isolate_id', 'name': 'main'}),
+  );
 
   @override
   ValueListenable<IsolateRef?> get mainIsolate => _mainIsolate;

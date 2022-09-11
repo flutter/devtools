@@ -239,19 +239,19 @@ class _ListControlPane extends StatelessWidget {
     return ValueListenableBuilder<bool>(
       valueListenable: controller.isProcessing,
       builder: (_, isProcessing, __) {
-        final showTakeSnapshot = !isProcessing;
-        final showClearAll = !isProcessing & controller.hasSnapshots;
+        final takeSnapshotEnabled = !isProcessing;
+        final clearAllEnabled = !isProcessing & controller.hasSnapshots;
         return Row(
           children: [
             ToolbarAction(
               icon: Icons.fiber_manual_record,
               tooltip: 'Take heap snapshot for the selected isolate',
-              onPressed: showTakeSnapshot ? controller.takeSnapshot : null,
+              onPressed: takeSnapshotEnabled ? controller.takeSnapshot : null,
             ),
             ToolbarAction(
               icon: Icons.block,
               tooltip: 'Clear all snapshots',
-              onPressed: showClearAll ? controller.clearSnapshots : null,
+              onPressed: clearAllEnabled ? controller.clearSnapshots : null,
             )
           ],
         );
