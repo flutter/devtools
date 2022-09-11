@@ -2,37 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
-import 'package:devtools_app/src/screens/memory/memory_controller.dart';
 import 'package:devtools_app/src/screens/memory/memory_screen.dart';
 import 'package:devtools_app/src/screens/memory/panes/control/settings_dialog.dart';
-import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/common_widgets.dart';
 import 'package:devtools_app/src/shared/dialogs.dart';
 import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/notifications.dart';
-import 'package:devtools_app/src/shared/preferences.dart';
-import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../matchers/matchers.dart';
-import '../../test_data/memory.dart';
-import '../../test_data/memory_allocation.dart';
+import '../../scenes/memory/offline.dart';
 
 void main() {
-  late MemoryController controller;
+  late MemoryOfflineScene scene;
 
   Future<void> pumpMemoryScreen(WidgetTester tester) async {
-    await tester.pumpWidget(
-      wrapWithControllers(
-        const MemoryBody(),
-        memory: controller,
-      ),
-    );
-
+    await tester.pumpWidget(scene.build());
     // Delay to ensure the memory profiler has collected data.
     await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(find.byType(MemoryBody), findsOneWidget);
@@ -42,37 +28,8 @@ void main() {
   const windowSize = Size(2225.0, 1000.0);
 
   setUp(() async {
-    await ensureInspectorDependencies();
-    setGlobal(OfflineModeController, OfflineModeController());
-    setGlobal(IdeTheme, IdeTheme());
-    setGlobal(NotificationService, NotificationService());
-    setGlobal(PreferencesController, PreferencesController());
-
-    // Load canned data testHeapSampleData.
-    final memoryJson =
-        SamplesMemoryJson.decode(argJsonString: testHeapSampleData);
-    final allocationJson =
-        AllocationMemoryJson.decode(argJsonString: testAllocationData);
-
-    final fakeServiceManager = FakeServiceManager(
-      service: FakeServiceManager.createFakeService(
-        memoryData: memoryJson,
-        allocationData: allocationJson,
-      ),
-    );
-    final app = fakeServiceManager.connectedApp!;
-    mockConnectedApp(
-      app,
-      isFlutterApp: true,
-      isProfileBuild: true,
-      isWebApp: false,
-    );
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
-
-    controller = MemoryController()
-      ..offline.value = true
-      ..memoryTimeline.offlineData.clear()
-      ..memoryTimeline.offlineData.addAll(memoryJson.data);
+    scene = MemoryOfflineScene();
+    await scene.setUp();
   });
 
   testWidgetsWithWindowSize('settings update preferences', windowSize,
