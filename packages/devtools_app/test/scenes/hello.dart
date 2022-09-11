@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:stager/stager.dart';
 
-/// To run: `flutter run -t test/scenes/hello.stager_app.dart -d macos`.
+/// To run:
+/// flutter run -t test/scenes/hello.stager_app.dart -d macos
 class HelloScene extends Scene {
   @override
   Widget build() {
-    return const MaterialApp(
+    return MaterialApp(
       home: Card(
-        child: Text('hello, world'),
+        child: Text('Hello, I am $title.'),
       ),
     );
   }
@@ -16,5 +17,5 @@ class HelloScene extends Scene {
   Future<void> setUp() async {}
 
   @override
-  String get title => '$HelloScene';
+  String get title => '$runtimeType';
 }
