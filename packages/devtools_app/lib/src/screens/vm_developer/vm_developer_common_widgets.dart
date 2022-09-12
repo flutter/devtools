@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -10,6 +13,7 @@ import '../../primitives/utils.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/table.dart';
 import '../../shared/theme.dart';
+import 'object_inspector_view_controller.dart';
 import 'vm_object_model.dart';
 import 'vm_service_private_extensions.dart';
 
@@ -69,6 +73,27 @@ MapEntry<String, WidgetBuilder> selectableTextBuilderMapEntry(
     (context) => SelectableText(
       value ?? '--',
       style: Theme.of(context).fixedFontStyle,
+    ),
+  );
+}
+
+MapEntry<String, WidgetBuilder>
+    serviceObjectLinkBuilderMapEntry<T extends ObjRef>({
+  required ObjectInspectorViewController controller,
+  required String key,
+  required T object,
+  bool preferUri = false,
+  String Function(T)? textBuilder,
+}) {
+  return MapEntry(
+    key,
+    (context) => VmServiceObjectLink<T>(
+      object: object,
+      textBuilder: textBuilder,
+      preferUri: preferUri,
+      onTap: (object) async {
+        await controller.findAndSelectNodeForObject(object);
+      },
     ),
   );
 }
@@ -243,31 +268,6 @@ String? _objectName(ObjRef? objectRef) {
   }
 
   return objectRefName;
-}
-
-/// Returns the owner name of a Field or Func object, if [object] is a
-/// FuncObject, it returns the complete (qualified) name of the owner.
-String? _ownerName(VmObject object) {
-  assert(object is FieldObject || object is FuncObject);
-  final owner = (object as dynamic).obj.owner as ObjRef?;
-
-  if (owner == null) {
-    return object.script?.uri;
-  }
-
-  if (object is FieldObject) {
-    if (owner is ClassRef || owner is LibraryRef) {
-      return _objectName(owner);
-    }
-  } else if (object is FuncObject) {
-    if (owner is LibraryRef) {
-      return _objectName(owner);
-    } else {
-      return qualifiedName(owner);
-    }
-  }
-
-  throw Exception('Unexpected owner type: ${owner.type}');
 }
 
 /// Returns the name of a function, qualified with the name of
@@ -609,6 +609,64 @@ class InboundReferencesWidget extends StatelessWidget {
   }
 }
 
+class VmServiceObjectLink<T> extends StatelessWidget {
+  const VmServiceObjectLink({
+    required this.object,
+    required this.onTap,
+    this.preferUri = false,
+    this.textBuilder,
+  });
+
+  final T object;
+  final bool preferUri;
+  final String Function(T)? textBuilder;
+  final FutureOr<void> Function(T) onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    String text = '';
+    if (textBuilder == null) {
+      if (object is LibraryRef) {
+        final lib = object as LibraryRef;
+        if (lib.uri!.startsWith('dart') || preferUri) {
+          text = lib.uri!;
+        } else {
+          final name = lib.name;
+          text = name!.isEmpty ? lib.uri! : name;
+        }
+      } else if (object is FieldRef) {
+        final field = object as FieldRef;
+        text = field.name!;
+      } else if (object is FuncRef) {
+        final func = object as FuncRef;
+        text = func.name!;
+      } else if (object is ScriptRef) {
+        final script = object as ScriptRef;
+        text = script.uri!;
+      } else if (object is ClassRef) {
+        final cls = object as ClassRef;
+        text = cls.name!;
+      }
+    } else {
+      text = textBuilder!(object);
+    }
+
+    final theme = Theme.of(context);
+    return SelectableText.rich(
+      TextSpan(
+        text: text,
+        style: theme.linkTextStyle.apply(
+          fontFamily: theme.fixedFontStyle.fontFamily,
+        ),
+        recognizer: TapGestureRecognizer()
+          ..onTap = () async {
+            await onTap(object);
+          },
+      ),
+    );
+  }
+}
+
 /// A widget for the object inspector historyViewport containing the main
 /// layout of information widgets related to VM object types.
 class VmObjectDisplayBasicLayout extends StatelessWidget {
@@ -685,6 +743,7 @@ class VmObjectDisplayBasicLayout extends StatelessWidget {
 }
 
 List<MapEntry<String, WidgetBuilder>> vmObjectGeneralDataRows(
+  ObjectInspectorViewController controller,
   VmObject object,
 ) {
   return [
@@ -715,19 +774,25 @@ List<MapEntry<String, WidgetBuilder>> vmObjectGeneralDataRows(
       ),
     ),
     if (object is ClassObject || object is ScriptObject)
-      selectableTextBuilderMapEntry(
-        'Library',
-        _objectName((object.obj as dynamic).library),
+      serviceObjectLinkBuilderMapEntry<LibraryRef>(
+        controller: controller,
+        key: 'Library',
+        object: (object.obj as dynamic).library,
       ),
     if (object is FieldObject || object is FuncObject)
-      selectableTextBuilderMapEntry(
-        'Owner',
-        _ownerName(object),
+      serviceObjectLinkBuilderMapEntry<ObjRef>(
+        controller: controller,
+        key: 'Owner',
+        object: (object.obj as dynamic).owner,
       ),
     if (object is! ScriptObject && object is! LibraryObject)
-      selectableTextBuilderMapEntry(
-        'Script',
-        '${fileNameFromUri(object.script?.uri) ?? ''}:${object.pos?.toString() ?? ''}',
+      serviceObjectLinkBuilderMapEntry<ScriptRef>(
+        controller: controller,
+        key: 'Script',
+        object: object.script!,
+        textBuilder: (script) {
+          return '${fileNameFromUri(script.uri) ?? ''}:${object.pos?.toString() ?? ''}';
+        },
       ),
   ];
 }

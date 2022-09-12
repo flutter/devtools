@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/screens/vm_developer/object_inspector_view_controller.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_developer_common_widgets.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_function_display.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_service_private_extensions.dart';
@@ -23,6 +24,7 @@ void main() {
   late Func testFunctionCopy;
 
   setUp(() {
+    setUpMockScriptManager();
     setGlobal(IdeTheme, IdeTheme());
 
     mockFuncObject = MockFuncObject();
@@ -49,7 +51,14 @@ void main() {
   group('function display test', () {
     testWidgetsWithWindowSize('basic layout', windowSize,
         (WidgetTester tester) async {
-      await tester.pumpWidget(wrap(VmFuncDisplay(function: mockFuncObject)));
+      await tester.pumpWidget(
+        wrap(
+          VmFuncDisplay(
+            function: mockFuncObject,
+            controller: ObjectInspectorViewController(),
+          ),
+        ),
+      );
 
       expect(find.byType(VmObjectDisplayBasicLayout), findsOneWidget);
       expect(find.byType(VMInfoCard), findsNWidgets(2));
@@ -90,7 +99,14 @@ void main() {
         (WidgetTester tester) async {
       when(mockFuncObject.kind).thenReturn(null);
 
-      await tester.pumpWidget(wrap(VmFuncDisplay(function: mockFuncObject)));
+      await tester.pumpWidget(
+        wrap(
+          VmFuncDisplay(
+            function: mockFuncObject,
+            controller: ObjectInspectorViewController(),
+          ),
+        ),
+      );
 
       expect(find.text('Unrecognized function kind: null'), findsOneWidget);
     });

@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
+import 'object_inspector_view_controller.dart';
 import 'vm_developer_common_widgets.dart';
 import 'vm_object_model.dart';
 import 'vm_service_private_extensions.dart';
@@ -13,9 +14,11 @@ import 'vm_service_private_extensions.dart';
 /// related to field objects in the Dart VM.
 class VmFieldDisplay extends StatelessWidget {
   const VmFieldDisplay({
+    required this.controller,
     required this.field,
   });
 
+  final ObjectInspectorViewController controller;
   final FieldObject field;
 
   @override
@@ -32,7 +35,10 @@ class VmFieldDisplay extends StatelessWidget {
     FieldObject field,
   ) {
     return [
-      ...vmObjectGeneralDataRows(field),
+      ...vmObjectGeneralDataRows(
+        controller,
+        field,
+      ),
       selectableTextBuilderMapEntry(
         'Observed types',
         _fieldObservedTypes(field),

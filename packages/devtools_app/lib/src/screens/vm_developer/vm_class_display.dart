@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
+import 'object_inspector_view_controller.dart';
 import 'vm_developer_common_widgets.dart';
 import 'vm_object_model.dart';
 
@@ -17,9 +18,11 @@ const displayClassInstances = false;
 /// related to class objects in the Dart VM.
 class VmClassDisplay extends StatelessWidget {
   const VmClassDisplay({
+    required this.controller,
     required this.clazz,
   });
 
+  final ObjectInspectorViewController controller;
   final ClassObject clazz;
 
   @override
@@ -49,9 +52,18 @@ class VmClassDisplay extends StatelessWidget {
   List<MapEntry<String, WidgetBuilder>> _classDataRows(
     ClassObject clazz,
   ) {
+    final superClass = clazz.obj.superClass;
     return [
-      ...vmObjectGeneralDataRows(clazz),
-      selectableTextBuilderMapEntry('Superclass', clazz.obj.superClass?.name),
+      ...vmObjectGeneralDataRows(
+        controller,
+        clazz,
+      ),
+      if (superClass != null)
+        serviceObjectLinkBuilderMapEntry<ClassRef>(
+          controller: controller,
+          key: 'Superclass',
+          object: superClass,
+        ),
       selectableTextBuilderMapEntry('SuperType', clazz.obj.superType?.name),
       selectableTextBuilderMapEntry(
         'Currently allocated instances',

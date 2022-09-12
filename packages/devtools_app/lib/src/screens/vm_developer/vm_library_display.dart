@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../shared/theme.dart';
+import 'object_inspector_view_controller.dart';
 import 'vm_developer_common_widgets.dart';
 import 'vm_object_model.dart';
 
@@ -14,9 +15,11 @@ import 'vm_object_model.dart';
 class VmLibraryDisplay extends StatelessWidget {
   const VmLibraryDisplay({
     required this.library,
+    required this.controller,
   });
 
   final LibraryObject library;
+  final ObjectInspectorViewController controller;
 
   @override
   Widget build(BuildContext context) {
@@ -37,12 +40,16 @@ class VmLibraryDisplay extends StatelessWidget {
     LibraryObject library,
   ) {
     return [
-      ...vmObjectGeneralDataRows(library),
-      selectableTextBuilderMapEntry(
-        'URI',
-        (library.obj.uri?.isEmpty ?? false)
-            ? library.script?.uri
-            : library.obj.uri,
+      ...vmObjectGeneralDataRows(
+        controller,
+        library,
+      ),
+      serviceObjectLinkBuilderMapEntry<ObjRef>(
+        controller: controller,
+        key: 'URI',
+        preferUri: true,
+        object:
+            (library.obj.uri?.isEmpty ?? false) ? library.script! : library.obj,
       ),
       selectableTextBuilderMapEntry(
         'VM Name',

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/screens/vm_developer/object_inspector_view_controller.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_developer_common_widgets.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_script_display.dart';
 import 'package:devtools_app/src/shared/globals.dart';
@@ -23,7 +24,7 @@ void main() {
 
   setUp(() {
     setGlobal(IdeTheme, IdeTheme());
-
+    setUpMockScriptManager();
     mockScriptObject = MockScriptObject();
 
     final json = testScript.toJson();
@@ -37,7 +38,15 @@ void main() {
 
   testWidgetsWithWindowSize('builds script display', windowSize,
       (WidgetTester tester) async {
-    await tester.pumpWidget(wrap(VmScriptDisplay(script: mockScriptObject)));
+    final controller = ObjectInspectorViewController();
+    await tester.pumpWidget(
+      wrap(
+        VmScriptDisplay(
+          controller: controller,
+          script: mockScriptObject,
+        ),
+      ),
+    );
 
     expect(find.byType(VmObjectDisplayBasicLayout), findsOneWidget);
     expect(find.byType(VMInfoCard), findsOneWidget);
