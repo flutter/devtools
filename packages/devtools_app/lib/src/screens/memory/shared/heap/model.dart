@@ -12,6 +12,7 @@ class _JsonFields {
   static const String klass = 'klass';
   static const String library = 'library';
   static const String shallowSize = 'shallowSize';
+  static const String rootIndex = 'rootIndex';
 }
 
 /// Contains information from [HeapSnapshotGraph],
@@ -19,7 +20,7 @@ class _JsonFields {
 class AdaptedHeap {
   /// Default value for rootIndex is taken from the doc:
   /// https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/heap_snapshot.md#object-ids
-  AdaptedHeap(this.objects, {this.rootIndex = 1})
+  AdaptedHeap(this.objects, {this.rootIndex = _defaultRootIndex})
       : assert(objects.isNotEmpty),
         assert(objects.length > rootIndex);
 
@@ -27,6 +28,7 @@ class AdaptedHeap {
         (json[_JsonFields.objects] as List<dynamic>)
             .map((e) => AdaptedHeapObject.fromJson(e))
             .toList(),
+        rootIndex: json[_JsonFields.rootIndex] ?? _defaultRootIndex,
       );
 
   factory AdaptedHeap.fromHeapSnapshot(HeapSnapshotGraph graph) => AdaptedHeap(
@@ -34,6 +36,8 @@ class AdaptedHeap {
             .map((e) => AdaptedHeapObject.fromHeapSnapshotObject(e))
             .toList(),
       );
+
+  static const int _defaultRootIndex = 1;
 
   final int rootIndex;
 
@@ -52,6 +56,7 @@ class AdaptedHeap {
 
   Map<String, dynamic> toJson() => {
         _JsonFields.objects: objects.map((e) => e.toJson()).toList(),
+        _JsonFields.rootIndex: rootIndex,
       };
 
   HeapPath? _retainingPath(IdentityHashCode code) {
