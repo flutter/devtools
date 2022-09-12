@@ -2257,3 +2257,21 @@ class BulletSpacer extends StatelessWidget {
     );
   }
 }
+
+class Progress extends StatelessWidget {
+  Progress({Key? key, double? size})
+      : size = size ?? smallProgressSize,
+        super(key: key);
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: smallProgressSize,
+      height: smallProgressSize,
+      child: CircularProgressIndicator(
+        color: Theme.of(context).textTheme.bodyText1?.color,
+      ),
+    );
+  }
+}

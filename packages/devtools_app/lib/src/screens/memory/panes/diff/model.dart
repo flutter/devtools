@@ -5,6 +5,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../shared/heap/heap_analyzer.dart';
+import '../../shared/heap/model.dart';
+
 abstract class DiffListItem {
   /// Number, that, if shown in name, should be unique in the list.
   ///
@@ -28,14 +31,17 @@ class SnapshotListItem extends DiffListItem {
   ) {
     _isProcessing.value = true;
     graphReceiver.whenComplete(() async {
-      graph = await graphReceiver;
+      final graph = await graphReceiver;
+      if (graph != null) {
+        stats = heapStats(AdaptedHeap.fromHeapSnapshot(graph));
+      }
       _isProcessing.value = false;
     });
   }
 
   final String _isolateName;
 
-  HeapSnapshotGraph? graph;
+  late final HeapStats? stats;
 
   @override
   final int displayNumber;

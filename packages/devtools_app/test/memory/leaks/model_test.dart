@@ -22,7 +22,7 @@ void main() {
       heap: AdaptedHeap(
         [
           AdaptedHeapObject(
-            klass: 'class',
+            className: 'class',
             references: [2, 3, 4],
             code: 6,
             library: 'library',
@@ -45,7 +45,7 @@ void main() {
       AdaptedHeapObject(
         code: 1,
         references: [3, 4, 5],
-        klass: 'klass',
+        className: 'klass',
         library: 'library',
         shallowSize: 1,
       )

@@ -2,77 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:collection/collection.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../primitives/utils.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/split.dart';
 import '../../../../shared/table.dart';
 import '../../../../shared/theme.dart';
-import '../../primitives/memory_utils.dart';
+import 'diff_pane_controller.dart';
 import 'model.dart';
+import 'snapshot_view.dart';
 
 /// While this pane is under construction, we do not want our users to see it.
 ///
 /// Flip this flag locally to test the pane and flip back before checking in.
 /// TODO: before removing this flag add widget/golden testing for the diff pane.
 bool shouldShowDiffPane = false;
-
-class _DiffPaneController {
-  final scrollController = ScrollController();
-
-  /// The list contains one item that show information and all others
-  /// are snapshots.
-  final snapshots = ListValueNotifier(<DiffListItem>[InformationListItem()]);
-
-  final selectedIndex = ValueNotifier<int>(0);
-
-  /// If true, some process is going on.
-  ValueListenable<bool> get isProcessing => _isProcessing;
-  final _isProcessing = ValueNotifier<bool>(false);
-
-  DiffListItem get selected => snapshots.value[selectedIndex.value];
-
-  /// True, if the list contains snapshots, i.e. items beyond the first
-  /// informational item.
-  bool get hasSnapshots => snapshots.value.length > 1;
-
-  Future<void> takeSnapshot() async {
-    _isProcessing.value = true;
-    final future = snapshotMemory();
-    snapshots.add(
-      SnapshotListItem(
-        future,
-        _nextDisplayNumber(),
-        currentIsolateName ?? '<isolate-not-detected>',
-      ),
-    );
-    await future;
-    final newElementIndex = snapshots.value.length - 1;
-    scrollController.autoScrollToBottom();
-    selectedIndex.value = newElementIndex;
-    _isProcessing.value = false;
-  }
-
-  Future<void> clearSnapshots() async {
-    snapshots.removeRange(1, snapshots.value.length);
-    selectedIndex.value = 0;
-  }
-
-  int _nextDisplayNumber() {
-    final numbers = snapshots.value.map((e) => e.displayNumber);
-    assert(numbers.isNotEmpty);
-    return numbers.max + 1;
-  }
-
-  void deleteCurrentSnapshot() {
-    assert(selected is SnapshotListItem);
-    snapshots.removeRange(selectedIndex.value, selectedIndex.value + 1);
-    selectedIndex.value = selectedIndex.value - 1;
-  }
-}
 
 class DiffPane extends StatefulWidget {
   const DiffPane({Key? key}) : super(key: key);
@@ -82,7 +26,7 @@ class DiffPane extends StatefulWidget {
 }
 
 class _DiffPaneState extends State<DiffPane> {
-  final controller = _DiffPaneController();
+  final controller = DiffPaneController();
 
   @override
   Widget build(BuildContext context) {
@@ -126,7 +70,7 @@ class _DiffPaneState extends State<DiffPane> {
 class _SnapshotList extends StatelessWidget {
   _SnapshotList({Key? key, required this.controller}) : super(key: key);
 
-  final _DiffPaneController controller;
+  final DiffPaneController controller;
   final headerHeight = 1.20 * defaultRowHeight;
 
   @override
@@ -187,25 +131,10 @@ class _SnapshotListTitle extends StatelessWidget {
             const SizedBox(width: denseRowSpacing),
           ],
           if (isProcessing) ...[
-            const _ProgressIndicator(),
+            Progress(),
             const SizedBox(width: denseRowSpacing)
           ],
         ],
-      ),
-    );
-  }
-}
-
-class _ProgressIndicator extends StatelessWidget {
-  const _ProgressIndicator({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: smallProgressSize,
-      height: smallProgressSize,
-      child: CircularProgressIndicator(
-        color: Theme.of(context).textTheme.bodyText1?.color,
       ),
     );
   }
@@ -217,14 +146,14 @@ class _SnapshotListContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final itemLocal = item;
-    if (itemLocal is InformationListItem) {
+    final theItem = item;
+    if (theItem is InformationListItem) {
       return const Text('Introduction to snapshot diffing will be here.');
     }
-    if (itemLocal is SnapshotListItem) {
-      return Text('Content of ${itemLocal.name} will be here.');
+    if (theItem is SnapshotListItem) {
+      return SnapshotView(item: theItem);
     }
-    throw 'Unexpected type of the item: ${itemLocal.runtimeType}';
+    throw 'Unexpected type of the item: ${theItem.runtimeType}';
   }
 }
 
@@ -232,7 +161,7 @@ class _ListControlPane extends StatelessWidget {
   const _ListControlPane({Key? key, required this.controller})
       : super(key: key);
 
-  final _DiffPaneController controller;
+  final DiffPaneController controller;
 
   @override
   Widget build(BuildContext context) {
@@ -264,7 +193,7 @@ class _ContentControlPane extends StatelessWidget {
   const _ContentControlPane({Key? key, required this.controller})
       : super(key: key);
 
-  final _DiffPaneController controller;
+  final DiffPaneController controller;
 
   @override
   Widget build(BuildContext context) {

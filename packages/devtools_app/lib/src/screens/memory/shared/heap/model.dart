@@ -96,7 +96,7 @@ class AdaptedHeapObject {
   AdaptedHeapObject({
     required this.code,
     required this.references,
-    required this.klass,
+    required this.className,
     required this.library,
     required this.shallowSize,
   });
@@ -107,7 +107,7 @@ class AdaptedHeapObject {
     return AdaptedHeapObject(
       code: object.identityHashCode,
       references: List.from(object.references),
-      klass: object.klass.name,
+      className: object.klass.name,
       library: library,
       shallowSize: object.shallowSize,
     );
@@ -117,13 +117,13 @@ class AdaptedHeapObject {
       AdaptedHeapObject(
         code: json[_JsonFields.code],
         references: (json[_JsonFields.references] as List<dynamic>).cast<int>(),
-        klass: json[_JsonFields.klass],
+        className: json[_JsonFields.klass],
         library: json[_JsonFields.library],
         shallowSize: json[_JsonFields.shallowSize] ?? 0,
       );
 
   final List<int> references;
-  final String klass;
+  final String className;
   final String library;
   final IdentityHashCode code;
   final int shallowSize;
@@ -144,11 +144,29 @@ class AdaptedHeapObject {
   Map<String, dynamic> toJson() => {
         _JsonFields.code: code,
         _JsonFields.references: references,
-        _JsonFields.klass: klass,
+        _JsonFields.klass: className,
         _JsonFields.library: library.toString(),
         _JsonFields.shallowSize: shallowSize,
       };
 
+  String get shortName => '$className-$code';
   String get name => '$library/$shortName';
-  String get shortName => '$klass-$code';
+  String get fullClassName => _fullClassName(library, className);
 }
+
+class HeapStatsRecord {
+  HeapStatsRecord({required this.className, required this.library});
+
+  final String className;
+  final String library;
+  int shallowSize = 0;
+  int retainedSize = 0;
+  int instanceCount = 0;
+
+  String get fullClassName => _fullClassName(library, className);
+}
+
+typedef HeapStats = Map<String, HeapStatsRecord>;
+
+String _fullClassName(String library, String className) =>
+    '$library/$className';

@@ -4,7 +4,6 @@
 
 import 'package:devtools_app/src/screens/memory/panes/leaks/diagnostics/model.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/heap_analyzer.dart';
-import 'package:devtools_app/src/screens/memory/shared/heap/model.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../test_data/memory/heap/heap_data.dart';
@@ -29,14 +28,14 @@ void main() {
 
       test('has exactly one object of type ${t.appClassName}.', () {
         final appObjects =
-            task.heap.objects.where((o) => o.klass == t.appClassName);
+            task.heap.objects.where((o) => o.className == t.appClassName);
         expect(appObjects, hasLength(1), reason: t.name);
       });
 
       test('has path to the object of type ${t.appClassName}.', () async {
         buildSpanningTree(task.heap);
         final appObject =
-            task.heap.objects.where((o) => o.klass == t.appClassName).first;
+            task.heap.objects.where((o) => o.className == t.appClassName).first;
         expect(appObject.retainer, isNotNull, reason: t.name);
       });
     });

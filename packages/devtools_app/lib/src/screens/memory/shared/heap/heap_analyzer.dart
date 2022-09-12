@@ -15,6 +15,25 @@ void buildSpanningTree(AdaptedHeap heap) {
   assert(_verifyHeapIntegrity(heap));
 }
 
+HeapStats heapStats(AdaptedHeap? heap) {
+  final result = <String, HeapStatsRecord>{};
+  if (heap == null) return result;
+  if (!heap.isSpanningTreeBuilt) buildSpanningTree(heap);
+  for (var object in heap.objects) {
+    if (!result.containsKey(object.fullClassName)) {
+      result[object.fullClassName] = HeapStatsRecord(
+        className: object.className,
+        library: object.library,
+      );
+    }
+    final stats = result[object.fullClassName]!;
+    stats.retainedSize += object.retainedSize ?? 0;
+    stats.shallowSize += object.shallowSize;
+    stats.instanceCount++;
+  }
+  return result;
+}
+
 /// The algorithm takes O(number of references in the heap).
 void _setRetainers(AdaptedHeap heap) {
   heap.root.retainer = -1;
@@ -70,7 +89,7 @@ void _propagateSize(AdaptedHeapObject object, AdaptedHeap heap) {
 }
 
 bool _isRetainer(AdaptedHeapObject object) {
-  if (isWeakEntry(object.klass, object.library)) return false;
+  if (isWeakEntry(object.className, object.library)) return false;
   return object.references.isNotEmpty;
 }
 
