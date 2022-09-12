@@ -2,25 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/screens/memory/panes/leaks/diagnostics/model.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/heap_analyzer.dart';
+import 'package:devtools_app/src/screens/memory/shared/heap/model.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../test_data/memory/heap/heap_data.dart';
 
-void main() {
-  for (var t in goldenHeapTests) {
+void main() async {
+  for (var t in await goldenHeapTests()) {
     group(t.name, () {
-      late NotGCedAnalyzerTask task;
+      late AdaptedHeap heap;
 
       setUp(() async {
-        task = await t.task();
+        heap = await t.heapLoader();
       });
 
       test('has many objects and roots.', () {
-        expect(task.heap.objects.length, greaterThan(1000));
+        expect(heap.objects.length, greaterThan(1000));
         expect(
-          task.heap.objects[task.heap.rootIndex].references.length,
+          heap.objects[heap.rootIndex].references.length,
           greaterThan(1000),
           reason: t.name,
         );
@@ -28,14 +28,14 @@ void main() {
 
       test('has exactly one object of type ${t.appClassName}.', () {
         final appObjects =
-            task.heap.objects.where((o) => o.className == t.appClassName);
+            heap.objects.where((o) => o.className == t.appClassName);
         expect(appObjects, hasLength(1), reason: t.name);
       });
 
       test('has path to the object of type ${t.appClassName}.', () async {
-        buildSpanningTree(task.heap);
+        buildSpanningTree(heap);
         final appObject =
-            task.heap.objects.where((o) => o.className == t.appClassName).first;
+            heap.objects.where((o) => o.className == t.appClassName).first;
         expect(appObject.retainer, isNotNull, reason: t.name);
       });
     });
