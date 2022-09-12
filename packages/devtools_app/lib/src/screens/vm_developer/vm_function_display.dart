@@ -28,7 +28,6 @@ class VmFuncDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     final debuggerController = controller.debuggerController;
     return Split(
       axis: Axis.vertical,

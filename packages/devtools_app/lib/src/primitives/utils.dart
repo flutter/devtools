@@ -801,6 +801,7 @@ class LineRange {
   @override
   int get hashCode => Object.hash(begin, end);
 }
+
 extension SortDirectionExtension on SortDirection {
   SortDirection reverse() {
     return this == SortDirection.ascending
