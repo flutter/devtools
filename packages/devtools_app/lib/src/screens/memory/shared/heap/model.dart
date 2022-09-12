@@ -4,6 +4,8 @@
 
 import 'package:vm_service/vm_service.dart';
 
+import '../../primitives/memory_utils.dart';
+
 /// Names for json fields.
 class _JsonFields {
   static const String objects = 'objects';
@@ -175,3 +177,11 @@ typedef HeapStats = Map<String, HeapStatsRecord>;
 
 String _fullClassName(String library, String className) =>
     '$library/$className';
+
+class SnapshotTaker {
+  Future<AdaptedHeap?> take() async {
+    final snapshot = await snapshotMemory();
+    if (snapshot == null) return null;
+    return AdaptedHeap.fromHeapSnapshot(snapshot);
+  }
+}

@@ -533,7 +533,11 @@ class HeapTreeViewState extends State<HeapTree>
                 ),
                 // Diff tab.
                 if (shouldShowDiffPane)
-                  const KeepAliveWrapper(child: DiffPane()),
+                  KeepAliveWrapper(
+                    child: DiffPane(
+                      snapshotTaker: controller.snapshotTaker,
+                    ),
+                  ),
                 // Leaks tab.
                 if (controller.shouldShowLeaksTab.value)
                   const KeepAliveWrapper(child: LeaksPane()),

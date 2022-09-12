@@ -12,7 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../matchers/matchers.dart';
-import '../../scenes/memory/connected.dart';
+import '../../scenes/memory/offline.dart';
 
 void main() {
   late MemoryConnectedScene scene;

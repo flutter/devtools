@@ -8,6 +8,7 @@ import '../../../../shared/common_widgets.dart';
 import '../../../../shared/split.dart';
 import '../../../../shared/table.dart';
 import '../../../../shared/theme.dart';
+import '../../shared/heap/model.dart';
 import 'diff_pane_controller.dart';
 import 'model.dart';
 import 'snapshot_view.dart';
@@ -19,14 +20,21 @@ import 'snapshot_view.dart';
 bool shouldShowDiffPane = false;
 
 class DiffPane extends StatefulWidget {
-  const DiffPane({Key? key}) : super(key: key);
+  const DiffPane({Key? key, required this.snapshotTaker}) : super(key: key);
+  final SnapshotTaker snapshotTaker;
 
   @override
   State<DiffPane> createState() => _DiffPaneState();
 }
 
 class _DiffPaneState extends State<DiffPane> {
-  final controller = DiffPaneController();
+  late DiffPaneController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = DiffPaneController(widget.snapshotTaker);
+  }
 
   @override
   Widget build(BuildContext context) {

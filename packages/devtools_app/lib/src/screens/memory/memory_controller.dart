@@ -29,6 +29,7 @@ import 'memory_snapshot_models.dart';
 import 'panes/allocation_profile/allocation_profile_table_view_controller.dart';
 import 'primitives/filter_config.dart';
 import 'primitives/memory_timeline.dart';
+import 'shared/heap/model.dart';
 
 enum ChartType {
   DartHeaps,
@@ -236,9 +237,10 @@ class MemoryController extends DisposableController
         AutoDisposeControllerMixin,
         SearchControllerMixin,
         AutoCompleteSearchControllerMixin {
-  MemoryController() {
+  MemoryController({SnapshotTaker? snapshotTaker}) {
     memoryTimeline = MemoryTimeline(offline);
     memoryLog = MemoryLog(this);
+    this.snapshotTaker = snapshotTaker ?? SnapshotTaker();
 
     // Update the chart when the memorySource changes.
     addAutoDisposeListener(memorySourceNotifier, () async {
@@ -253,6 +255,8 @@ class MemoryController extends DisposableController
       refreshAllCharts();
     });
   }
+
+  late SnapshotTaker snapshotTaker;
 
   /// Controller for [AllocationProfileTableView].
   final allocationProfileController = AllocationProfileTableViewController();

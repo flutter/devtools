@@ -4,6 +4,7 @@ import 'package:devtools_app/src/screens/memory/memory_controller.dart';
 import 'package:devtools_app/src/screens/memory/memory_heap_tree_view.dart';
 import 'package:devtools_app/src/screens/memory/memory_screen.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/diff_pane.dart';
+import 'package:devtools_app/src/screens/memory/shared/heap/model.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
@@ -15,6 +16,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:stager/stager.dart';
 
 import '../../test_data/memory.dart';
+import '../../test_data/memory/heap/heap_data.dart';
 import '../../test_data/memory_allocation.dart';
 
 /// To run:
@@ -63,7 +65,7 @@ class MemoryConnectedScene extends Scene {
     );
     setGlobal(ServiceConnectionManager, fakeServiceManager);
 
-    controller = MemoryController()
+    controller = MemoryController(snapshotTaker: _TestSnapshotTaker())
       ..offline.value = true
       ..memoryTimeline.offlineData.clear()
       ..memoryTimeline.offlineData.addAll(memoryJson.data);
@@ -75,5 +77,23 @@ class MemoryConnectedScene extends Scene {
   void tearDown() {
     enableNewAllocationProfileTable = false;
     shouldShowDiffPane = false;
+  }
+}
+
+/// Provides snapshots based on test data. First time returns null.
+class _TestSnapshotTaker implements SnapshotTaker {
+  final List<GoldenHeapTest> tests = goldenHeapTests;
+  int index = -1;
+
+  @override
+  Future<AdaptedHeap?> take() async {
+    if (index < 0) {
+      index = 0;
+      return null;
+    }
+
+    final result = await tests[index].loadHeap();
+    index = index % tests.length;
+    return result;
   }
 }

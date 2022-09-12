@@ -5,7 +5,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:devtools_app/src/screens/memory/panes/leaks/diagnostics/model.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/model.dart';
 
 import '../leaks/leaks_data.dart';
@@ -15,57 +14,46 @@ const _dataDir = 'test/test_data/memory/heap/';
 typedef HeapLoader = Future<AdaptedHeap> Function();
 
 class GoldenHeapTest {
-  GoldenHeapTest.fromFile({
+  GoldenHeapTest({
+    HeapLoader? heapLoader,
     required this.name,
     required this.appClassName,
-  }) : heapLoader = _heapFromFile(name);
-
-  GoldenHeapTest.fromLeaksTask({
-    required NotGCedAnalyzerTask task,
-    required this.name,
-    required this.appClassName,
-  }) : heapLoader = _heapFromTask(task);
+  }) : loadHeap = heapLoader ?? _loaderFromFile('$_dataDir$name.json');
 
   final String name;
   final String appClassName;
-  final HeapLoader heapLoader;
+  late HeapLoader loadHeap;
 
-  static HeapLoader _heapFromFile(String name) => () async {
-        final path = '$_dataDir$name.json';
-        final json = jsonDecode(await File(path).readAsString());
+  static HeapLoader _loaderFromFile(String fileName) => () async {
+        final json = jsonDecode(await File(fileName).readAsString());
         return AdaptedHeap.fromJson(json);
       };
-
-  static HeapLoader _heapFromTask(NotGCedAnalyzerTask task) =>
-      () async => task.heap;
 }
 
-Future<Iterable<GoldenHeapTest>> goldenHeapTests() async => <GoldenHeapTest>[
-      GoldenHeapTest.fromFile(
-        name: 'counter_snapshot1',
-        appClassName: 'MyApp',
-      ),
-      GoldenHeapTest.fromFile(
-        name: 'counter_snapshot2',
-        appClassName: 'MyApp',
-      ),
-      GoldenHeapTest.fromFile(
-        name: 'counter_snapshot3',
-        appClassName: 'MyApp',
-      ),
-      GoldenHeapTest.fromFile(
-        name: 'counter_snapshot4',
-        appClassName: 'MyApp',
-      ),
-      ...await _heapTestsFromLeakTests(),
-    ];
+List<GoldenHeapTest> goldenHeapTests = <GoldenHeapTest>[
+  GoldenHeapTest(
+    name: 'counter_snapshot1',
+    appClassName: 'MyApp',
+  ),
+  GoldenHeapTest(
+    name: 'counter_snapshot2',
+    appClassName: 'MyApp',
+  ),
+  GoldenHeapTest(
+    name: 'counter_snapshot3',
+    appClassName: 'MyApp',
+  ),
+  GoldenHeapTest(
+    name: 'counter_snapshot4',
+    appClassName: 'MyApp',
+  ),
+  ..._heapsFromLeakTests(),
+];
 
-Future<Iterable<GoldenHeapTest>> _heapTestsFromLeakTests() async => Future.wait(
-      goldenLeakTests.map(
-        (t) async => GoldenHeapTest.fromLeaksTask(
-          task: await t.task(),
-          name: t.name,
-          appClassName: t.appClassName,
-        ),
+Iterable<GoldenHeapTest> _heapsFromLeakTests() => goldenLeakTests.map(
+      (t) => GoldenHeapTest(
+        heapLoader: () async => (await t.task()).heap,
+        name: t.name,
+        appClassName: t.appClassName,
       ),
     );

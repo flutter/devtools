@@ -2,38 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../config_specific/import_export/import_export.dart';
 import '../../../../primitives/utils.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../primitives/memory_utils.dart';
 import '../../shared/heap/model.dart';
 import 'model.dart';
 
-class SnapshotTaker {
-  /// Takes snapshot and downloads it to file if [download] is true.
-  ///
-  /// Download is needed to save snapshot json in order to deserialize
-  /// it later in test fakes.
-  Future<AdaptedHeap?> take({bool download = false}) async {
-    final snapshot = await snapshotMemory();
-    if (snapshot == null) return null;
-    final result = AdaptedHeap.fromHeapSnapshot(snapshot);
-    if (download) {
-      ExportController().downloadFile(jsonEncode(result.toJson()));
-    }
-    return result;
-  }
-}
-
 class DiffPaneController {
-  DiffPaneController({SnapshotTaker? snapshotTaker})
-      : snapshotTaker = snapshotTaker ?? SnapshotTaker();
+  DiffPaneController(this.snapshotTaker);
 
   final listScrollController = ScrollController();
 
@@ -57,7 +37,7 @@ class DiffPaneController {
 
   Future<void> takeSnapshot() async {
     _isProcessing.value = true;
-    final future = snapshotTaker.take(download: true);
+    final future = snapshotTaker.take();
     snapshots.add(
       SnapshotListItem(
         future,

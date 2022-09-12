@@ -9,12 +9,12 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../test_data/memory/heap/heap_data.dart';
 
 void main() async {
-  for (var t in await goldenHeapTests()) {
+  for (var t in goldenHeapTests) {
     group(t.name, () {
       late AdaptedHeap heap;
 
       setUp(() async {
-        heap = await t.heapLoader();
+        heap = await t.loadHeap();
       });
 
       test('has many objects and roots.', () {
