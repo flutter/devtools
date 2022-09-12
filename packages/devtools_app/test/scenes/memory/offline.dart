@@ -19,7 +19,7 @@ import '../../test_data/memory_allocation.dart';
 
 /// To run:
 /// flutter run -t test/scenes/memory/connected.stager_app.dart -d macos
-class MemoryConnectedScene extends Scene {
+class MemoryOfflineScene extends Scene {
   late MemoryController controller;
   late FakeServiceManager fakeServiceManager;
 
@@ -70,7 +70,7 @@ class MemoryConnectedScene extends Scene {
   }
 
   @override
-  String get title => '$MemoryConnectedScene';
+  String get title => '$MemoryOfflineScene';
 
   void tearDown() {
     enableNewAllocationProfileTable = false;
