@@ -133,10 +133,6 @@ class CpuProfileTransformer {
       );
       if (stackFrame != null) {
         stackFrame.exclusiveSampleCount++;
-        final userTag = sample.userTag;
-        if (userTag != null) {
-          stackFrame.incrementTagSampleCount(userTag);
-        }
       }
     }
   }
