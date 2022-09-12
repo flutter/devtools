@@ -704,9 +704,10 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
   /// full set of samples, as some stacks may no longer be included in the
   /// profile, changing the exclusive counts.
   ///
-  /// Inclusive sample counts are also reset by default, unless
-  /// [resetInclusiveSampleCounts] is set to false. Inclusive sample counts
-  /// should only be copied as part of a deep copy of a tree.
+  /// When [copySampleCounts] is true, inclusive sample counts are also reset
+  /// by default, unless [resetInclusiveSampleCount] is also set to false. 
+  /// Inclusive sample counts should only be copied as part of a deep copy of
+  /// a tree.
   @override
   CpuStackFrame shallowCopy({
     String? id,
@@ -719,7 +720,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     int? sourceLine,
     CpuProfileMetaData? profileMetaData,
     bool copySampleCounts = true,
-    bool resetInclusiveSampleCounts = true,
+    bool resetInclusiveSampleCount = true,
   }) {
     final copy = CpuStackFrame._(
       id: id ?? this.id,
@@ -736,7 +737,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
       copy
         ..exclusiveSampleCount = exclusiveSampleCount
         ..inclusiveSampleCount =
-            resetInclusiveSampleCounts ? null : inclusiveSampleCount;
+            resetInclusiveSampleCount ? null : inclusiveSampleCount;
     }
     return copy;
   }
@@ -746,7 +747,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
   /// The returned copy stack frame will have a null parent.
   @override
   CpuStackFrame deepCopy() {
-    final copy = shallowCopy(resetInclusiveSampleCounts: false);
+    final copy = shallowCopy(resetInclusiveSampleCount: false);
     for (CpuStackFrame child in children) {
       copy.addChild(child.deepCopy());
     }

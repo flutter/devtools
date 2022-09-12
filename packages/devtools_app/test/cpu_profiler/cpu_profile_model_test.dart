@@ -240,7 +240,7 @@ void main() {
       expect(stackFrameD.children.length, equals(2));
       expect(stackFrameD.parent, equals(stackFrameB));
       CpuStackFrame copy =
-          stackFrameD.shallowCopy(resetInclusiveSampleCounts: false);
+          stackFrameD.shallowCopy(resetInclusiveSampleCount: false);
       expect(copy.children, isEmpty);
       expect(copy.parent, isNull);
       expect(
