@@ -16,7 +16,7 @@ import 'snapshot_view.dart';
 ///
 /// Flip this flag locally to test the pane and flip back before checking in.
 /// TODO: before removing this flag add widget/golden testing for the diff pane.
-bool shouldShowDiffPane = false;
+bool shouldShowDiffPane = true;
 
 class DiffPane extends StatefulWidget {
   const DiffPane({Key? key}) : super(key: key);
@@ -76,7 +76,7 @@ class _SnapshotList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      controller: controller.scrollController,
+      controller: controller.listScrollController,
       shrinkWrap: true,
       itemCount: controller.snapshots.value.length,
       itemBuilder: (context, index) {
