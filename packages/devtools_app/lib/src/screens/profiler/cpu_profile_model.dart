@@ -705,7 +705,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
   /// profile, changing the exclusive counts.
   ///
   /// When [copySampleCounts] is true, inclusive sample counts are also reset
-  /// by default, unless [resetInclusiveSampleCount] is also set to false. 
+  /// by default, unless [resetInclusiveSampleCount] is also set to false.
   /// Inclusive sample counts should only be copied as part of a deep copy of
   /// a tree.
   @override
