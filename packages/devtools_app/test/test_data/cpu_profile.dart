@@ -1253,64 +1253,64 @@ const String testStackFrameStringGolden = '''
 
 const String bottomUpPreMergeGolden = '''
   C - children: 1 - excl: 2 - incl: 2
-    B - children: 1 - excl: 0 - incl: 10
-      A - children: 0 - excl: 0 - incl: 10
+    B - children: 1 - excl: 2 - incl: 2
+      A - children: 0 - excl: 2 - incl: 2
 
-  D - children: 1 - excl: 2 - incl: 8
-    B - children: 1 - excl: 0 - incl: 10
-      A - children: 0 - excl: 0 - incl: 10
+  D - children: 1 - excl: 2 - incl: 2
+    B - children: 1 - excl: 2 - incl: 2
+      A - children: 0 - excl: 2 - incl: 2
 
-  E - children: 1 - excl: 1 - incl: 2
-    D - children: 1 - excl: 2 - incl: 8
-      B - children: 1 - excl: 0 - incl: 10
-        A - children: 0 - excl: 0 - incl: 10
-
-  C - children: 1 - excl: 1 - incl: 1
-    F - children: 1 - excl: 0 - incl: 1
-      E - children: 1 - excl: 1 - incl: 2
-        D - children: 1 - excl: 2 - incl: 8
-          B - children: 1 - excl: 0 - incl: 10
-            A - children: 0 - excl: 0 - incl: 10
-
-  F - children: 1 - excl: 3 - incl: 4
-    D - children: 1 - excl: 2 - incl: 8
-      B - children: 1 - excl: 0 - incl: 10
-        A - children: 0 - excl: 0 - incl: 10
+  E - children: 1 - excl: 1 - incl: 1
+    D - children: 1 - excl: 1 - incl: 1
+      B - children: 1 - excl: 1 - incl: 1
+        A - children: 0 - excl: 1 - incl: 1
 
   C - children: 1 - excl: 1 - incl: 1
-    F - children: 1 - excl: 3 - incl: 4
-      D - children: 1 - excl: 2 - incl: 8
-        B - children: 1 - excl: 0 - incl: 10
-          A - children: 0 - excl: 0 - incl: 10
+    F - children: 1 - excl: 1 - incl: 1
+      E - children: 1 - excl: 1 - incl: 1
+        D - children: 1 - excl: 1 - incl: 1
+          B - children: 1 - excl: 1 - incl: 1
+            A - children: 0 - excl: 1 - incl: 1
+
+  F - children: 1 - excl: 3 - incl: 3
+    D - children: 1 - excl: 3 - incl: 3
+      B - children: 1 - excl: 3 - incl: 3
+        A - children: 0 - excl: 3 - incl: 3
+
+  C - children: 1 - excl: 1 - incl: 1
+    F - children: 1 - excl: 1 - incl: 1
+      D - children: 1 - excl: 1 - incl: 1
+        B - children: 1 - excl: 1 - incl: 1
+          A - children: 0 - excl: 1 - incl: 1
 
 ''';
 
 const String bottomUpGolden = '''
   C - children: 2 - excl: 4 - incl: 4
-    B - children: 1 - excl: 0 - incl: 10
-      A - children: 0 - excl: 0 - incl: 10
-    F - children: 2 - excl: 3 - incl: 5
-      E - children: 1 - excl: 1 - incl: 2
-        D - children: 1 - excl: 2 - incl: 8
-          B - children: 1 - excl: 0 - incl: 10
-            A - children: 0 - excl: 0 - incl: 10
-      D - children: 1 - excl: 2 - incl: 8
-        B - children: 1 - excl: 0 - incl: 10
-          A - children: 0 - excl: 0 - incl: 10
+    B - children: 1 - excl: 2 - incl: 2
+      A - children: 0 - excl: 2 - incl: 2
+    F - children: 2 - excl: 2 - incl: 2
+      E - children: 1 - excl: 1 - incl: 1
+        D - children: 1 - excl: 1 - incl: 1
+          B - children: 1 - excl: 1 - incl: 1
+            A - children: 0 - excl: 1 - incl: 1
+      D - children: 1 - excl: 1 - incl: 1
+        B - children: 1 - excl: 1 - incl: 1
+          A - children: 0 - excl: 1 - incl: 1
 
-  D - children: 1 - excl: 2 - incl: 8
-    B - children: 1 - excl: 0 - incl: 10
-      A - children: 0 - excl: 0 - incl: 10
+  D - children: 1 - excl: 2 - incl: 2
+    B - children: 1 - excl: 2 - incl: 2
+      A - children: 0 - excl: 2 - incl: 2
 
-  E - children: 1 - excl: 1 - incl: 2
-    D - children: 1 - excl: 2 - incl: 8
-      B - children: 1 - excl: 0 - incl: 10
-        A - children: 0 - excl: 0 - incl: 10
+  E - children: 1 - excl: 1 - incl: 1
+    D - children: 1 - excl: 1 - incl: 1
+      B - children: 1 - excl: 1 - incl: 1
+        A - children: 0 - excl: 1 - incl: 1
 
-  F - children: 1 - excl: 3 - incl: 4
-    D - children: 1 - excl: 2 - incl: 8
-      B - children: 1 - excl: 0 - incl: 10
-        A - children: 0 - excl: 0 - incl: 10
+  F - children: 1 - excl: 3 - incl: 3
+    D - children: 1 - excl: 3 - incl: 3
+      B - children: 1 - excl: 3 - incl: 3
+        A - children: 0 - excl: 3 - incl: 3
 
 ''';
 

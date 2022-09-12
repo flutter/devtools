@@ -70,6 +70,21 @@ void main() {
       transformer = BottomUpTransformer<CpuStackFrame>();
     });
 
+    test('cascadeSampleCounts', () {
+      void verifySampleCount(CpuStackFrame stackFrame, int targetCount) {
+        expect(stackFrame.exclusiveSampleCount, equals(0));
+        expect(stackFrame.inclusiveSampleCount, equals(0));
+        for (CpuStackFrame child in stackFrame.children) {
+          verifySampleCount(child, targetCount);
+        }
+      }
+
+      final stackFrame = testStackFrame.deepCopy();
+      transformer.cascadeSampleCounts(stackFrame);
+
+      verifySampleCount(stackFrame, 0);
+    });
+
     test('processData step by step', () {
       expect(
         testStackFrame.profileAsString(),
@@ -89,6 +104,9 @@ void main() {
       );
 
       expect(bottomUpRoots.length, equals(6));
+
+      // Set the bottom up sample counts for the roots.
+      bottomUpRoots.forEach(transformer.cascadeSampleCounts);
 
       final buf = StringBuffer();
       for (CpuStackFrame stackFrame in bottomUpRoots) {
