@@ -160,8 +160,11 @@ class CpuProfileData {
       // times wouldn't be helpful.
       time: TimeRange()
         ..start = const Duration()
-        ..end =
-            Duration(microseconds: (newSampleCount * microsPerSample).round()),
+        ..end = Duration(
+          microseconds: microsPerSample.isInfinite
+              ? 0
+              : (newSampleCount * microsPerSample).round(),
+        ),
     );
 
     // Use a SplayTreeMap so that map iteration will be in sorted key order.
@@ -258,7 +261,9 @@ class CpuProfileData {
       time: TimeRange()
         ..start = const Duration()
         ..end = Duration(
-          microseconds: (filteredCpuSamples.length * microsPerSample).round(),
+          microseconds: microsPerSample.isInfinite
+              ? 0
+              : (filteredCpuSamples.length * microsPerSample).round(),
         ),
     );
 
