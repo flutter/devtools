@@ -56,15 +56,22 @@ class ObjectInspectorViewController extends DisposableController
     final currentObjectValue = objectHistory.current.value;
 
     if (currentObjectValue != null) {
-      final scriptRef = currentObjectValue.scriptRef;
+      final scriptRef = currentObjectValue.scriptRef ??
+          (await programExplorerController
+                  .searchFileExplorer(currentObjectValue.obj))
+              ?.script;
 
       if (scriptRef != null) {
         await programExplorerController.selectScriptNode(scriptRef);
       }
 
-      if (currentObjectValue.outlineNode != null) {
-        final outlineNode = currentObjectValue.outlineNode!;
+      final outlineNode = currentObjectValue.outlineNode ??
+          programExplorerController.breadthFirstSearchObject(
+            currentObjectValue.obj,
+            programExplorerController.outlineNodes.value,
+          );
 
+      if (outlineNode != null) {
         programExplorerController
           ..selectOutlineNode(outlineNode)
           ..expandToNode(outlineNode);

@@ -299,4 +299,102 @@ class ProgramExplorerController extends DisposableController
       node.updateObject(obj);
     }
   }
+
+  /// Searches and returns the script or library node in the FileExplorer
+  /// which is the source location of the target [object].
+  Future<VMServiceObjectNode?> searchFileExplorer(ObjRef object) async {
+    final service = serviceManager.service!;
+    final isolateId = serviceManager.isolateManager.selectedIsolate.value!.id!;
+
+    LibraryRef? targetLib;
+    ScriptRef? targetScript;
+    VMServiceObjectNode? libNode;
+
+    VMServiceObjectNode? _searchRootObjectNodes(ObjRef obj) {
+      for (final rootNode in rootObjectNodes.value) {
+        if (rootNode.object?.id == obj.id) {
+          return rootNode;
+        }
+      }
+      return null;
+    }
+
+    if (object is LibraryRef) {
+      libNode = _searchRootObjectNodes(object);
+
+      libNode ??= breadthFirstSearchObject(object, rootObjectNodes.value);
+
+      return libNode;
+    } else if (object is ClassRef || object is FieldRef || object is FuncRef) {
+      final source = (object as dynamic).location as SourceLocation?;
+      targetScript = source?.script;
+    } else if (object is Code) {
+      final ownerFunction = object.function;
+      final source = ownerFunction?.location;
+      targetScript = source?.script;
+    } else if (object is ScriptRef) {
+      targetScript = object;
+    } else if (object is InstanceRef) {
+      // Since instances are not currently supported, it will search for
+      // the node of the class it belongs to.
+      final source = object.classRef?.location;
+      targetScript = source?.script;
+    }
+
+    if (targetScript != null) {
+      final scriptObj = await service.getObject(isolateId, targetScript.id!);
+      targetLib = (scriptObj as Script).library;
+
+      if (targetLib != null) {
+        // Search targetLib only on the root level nodes
+        libNode = _searchRootObjectNodes(targetLib);
+
+        // If the object sourceLocation script uri is the same as the target
+        // library uri, return the library node.
+        if (targetLib.uri == targetScript.uri && libNode != null) {
+          return libNode;
+        }
+
+        //search targetScript in library if libNode is not null
+        if (libNode != null) {
+          final scriptNode = breadthFirstSearchObject(
+            targetScript,
+            [libNode],
+          );
+          if (scriptNode != null) {
+            return scriptNode;
+          }
+        }
+      }
+
+      //If targetScript was not found in the targetLib, search all nodes
+      return breadthFirstSearchObject(targetScript, rootObjectNodes.value);
+    }
+    return null;
+  }
+
+  /// Performs a breath first search on the list of roots and returns the
+  /// first node whose object is the same as the target [obj].
+  VMServiceObjectNode? breadthFirstSearchObject(
+    ObjRef obj,
+    List<VMServiceObjectNode> roots,
+  ) {
+    VMServiceObjectNode? match;
+
+    for (final root in roots) {
+      breadthFirstTraversal<VMServiceObjectNode>(
+        root,
+        action: (node) {
+          if (node.object?.id == obj.id) {
+            match = node;
+          }
+        },
+      );
+      if (match != null) {
+        break;
+      }
+    }
+
+    return match;
+  }
 }

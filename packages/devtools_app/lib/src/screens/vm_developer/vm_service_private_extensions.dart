@@ -271,6 +271,12 @@ extension CodePrivateViewExtension on Code {
   Disassembly get disassembly => Disassembly.parse(json![_disassemblyKey]);
   set disassembly(Disassembly disassembly) =>
       json![_disassemblyKey] = disassembly.toJson();
+
+  /// Returns the function from which this code object was generated.
+  FuncRef? get function {
+    final functionJson = json!['function'] as Map<String, dynamic>;
+    return FuncRef.parse(functionJson);
+  }
 }
 
 /// An extension on [Field] which allows for access to VM internal fields.
