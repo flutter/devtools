@@ -38,7 +38,7 @@ class SnapshotListItem extends DiffListItem {
 
   final String _isolateName;
 
-  late final HeapStats? stats;
+  HeapStats? stats;
 
   @override
   final int displayNumber;
