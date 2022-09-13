@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/screens/vm_developer/object_inspector_view_controller.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_developer_common_widgets.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_library_display.dart';
 import 'package:devtools_app/src/shared/common_widgets.dart';
@@ -27,6 +28,7 @@ void main() {
     const windowSize = Size(4000.0, 4000.0);
 
     setUpAll(() {
+      setUpMockScriptManager();
       mockLibraryObject = MockLibraryObject();
 
       final json = testLib.toJson();
@@ -41,8 +43,14 @@ void main() {
 
     testWidgetsWithWindowSize(' - basic layout', windowSize,
         (WidgetTester tester) async {
-      await tester
-          .pumpWidget(wrap(VmLibraryDisplay(library: mockLibraryObject)));
+      await tester.pumpWidget(
+        wrap(
+          VmLibraryDisplay(
+            library: mockLibraryObject,
+            controller: ObjectInspectorViewController(),
+          ),
+        ),
+      );
 
       expect(find.byType(VmObjectDisplayBasicLayout), findsOneWidget);
       expect(find.byType(VMInfoCard), findsOneWidget);
@@ -66,8 +74,14 @@ void main() {
         (WidgetTester tester) async {
       testLibCopy.dependencies = null;
 
-      await tester
-          .pumpWidget(wrap(VmLibraryDisplay(library: mockLibraryObject)));
+      await tester.pumpWidget(
+        wrap(
+          VmLibraryDisplay(
+            library: mockLibraryObject,
+            controller: ObjectInspectorViewController(),
+          ),
+        ),
+      );
 
       expect(find.byType(LibraryDependencies), findsNothing);
     });

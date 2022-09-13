@@ -65,7 +65,7 @@ class MemoryOfflineScene extends Scene {
     );
     setGlobal(ServiceConnectionManager, fakeServiceManager);
 
-    controller = MemoryController(snapshotTaker: _TestSnapshotTaker())
+    controller = MemoryController()
       ..offline.value = true
       ..memoryTimeline.offlineData.clear()
       ..memoryTimeline.offlineData.addAll(memoryJson.data);
@@ -77,23 +77,5 @@ class MemoryOfflineScene extends Scene {
   void tearDown() {
     enableNewAllocationProfileTable = false;
     shouldShowDiffPane = false;
-  }
-}
-
-/// Provides snapshots based on test data. First time returns null.
-class _TestSnapshotTaker implements SnapshotTaker {
-  final List<GoldenHeapTest> tests = goldenHeapTests;
-  int index = -1;
-
-  @override
-  Future<AdaptedHeap?> take() async {
-    if (index < 0) {
-      index = 0;
-      return null;
-    }
-
-    final result = await tests[index].loadHeap();
-    index = index % tests.length;
-    return result;
   }
 }
