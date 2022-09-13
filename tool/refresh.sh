@@ -11,6 +11,7 @@ echo "Refreshing local clone..."
 
 pushd packages/devtools_app
 flutter pub upgrade
+flutter pub get
 popd
 
 pushd packages/devtools_test
