@@ -20,7 +20,7 @@ permissions: read-all
 # track the latest Flutter dev release. Dev releases come out ~weekly;
 # the versions can be viewed at https://github.com/flutter/flutter/tags.
 env:
-  PINNED_FLUTTER_CHANNEL: 3.3.0-0.4.pre
+  PINNED_FLUTTER_CHANNEL: 3.3.0-0.5.pre
 
 jobs:
   main:
