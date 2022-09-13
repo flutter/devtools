@@ -64,9 +64,14 @@ class DiagnosticsNodeDescription extends StatelessWidget {
   static double approximateNodeWidth(
     RemoteDiagnosticsNode? diagnostic,
   ) {
+    // If we have rendered this node, then we know it's text style,
+    // otherwise assume defaultFontSize for the TextStyle.
+    final textStyle = diagnostic?.descriptionTextStyleFromBuild ??
+        TextStyle(fontSize: defaultFontSize);
+
     final spans = DiagnosticsNodeDescription.buildDescriptionTextSpans(
       description: diagnostic?.description ?? '',
-      textStyle: const TextStyle(),
+      textStyle: textStyle,
       colorScheme: const ColorScheme.dark(),
       diagnostic: diagnostic,
     );
@@ -164,6 +169,10 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     String? searchValue,
     TextStyle? nodeDescriptionHighlightStyle,
   ) {
+    // Store the textStyle of the built widget so that it can be used in
+    // [approximateNodeWidth] later.
+    diagnostic?.descriptionTextStyleFromBuild = textStyle;
+
     final textSpan = TextSpan(
       children: buildDescriptionTextSpans(
         description: description,
