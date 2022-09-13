@@ -20,6 +20,7 @@ List<HeapStatsRecord> heapStats(AdaptedHeap? heap) {
   if (heap == null) return [];
   if (!heap.isSpanningTreeBuilt) buildSpanningTree(heap);
   for (var object in heap.objects) {
+    // We do not show objects that will be garbage collected soon.
     if (object.retainedSize == null) continue;
     if (!result.containsKey(object.fullClassName)) {
       result[object.fullClassName] = HeapStatsRecord(

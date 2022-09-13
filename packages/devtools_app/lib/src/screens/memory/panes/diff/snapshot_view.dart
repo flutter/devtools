@@ -51,8 +51,9 @@ class _ClassNameColumn extends ColumnData<HeapStatsRecord> {
 class _InstanceColumn extends ColumnData<HeapStatsRecord> {
   _InstanceColumn()
       : super(
-          'Instances',
-          titleTooltip: 'Number of instances of the class',
+          'Retained\nInstances',
+          titleTooltip: 'Number of instances of the class, '
+              'that have retaining references from the root.',
           fixedWidthPx: scaleByFontFactor(85.0),
           alignment: ColumnAlignment.right,
         );
@@ -71,7 +72,7 @@ class _ShallowSizeColumn extends ColumnData<HeapStatsRecord> {
   _ShallowSizeColumn()
       : super(
           'Shallow\nSize',
-          titleTooltip: 'Total shallow size of the objects.',
+          titleTooltip: 'Total shallow Dart (not native) size of objects.',
           fixedWidthPx: scaleByFontFactor(85.0),
           alignment: ColumnAlignment.right,
         );
