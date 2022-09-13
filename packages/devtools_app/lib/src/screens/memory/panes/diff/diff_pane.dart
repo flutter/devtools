@@ -158,10 +158,6 @@ class _SnapshotListContent extends StatelessWidget {
     if (theItem is InformationListItem) {
       return const Text('''
       Introduction to snapshot diffing is under construction.
-
-      We do not show objects without retaining path in the table,
-      because they will be garbage collected soon and thus they do not
-      need to be analyzed.
       ''');
     }
     if (theItem is SnapshotListItem) {

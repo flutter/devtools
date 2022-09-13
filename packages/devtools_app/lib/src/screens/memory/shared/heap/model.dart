@@ -160,12 +160,7 @@ class AdaptedHeapObject {
   String get name => '$library/$shortName';
   String get fullClassName => _fullClassName(library, className);
 
-  bool get isSentinel {
-    final result = className == 'Sentinel';
-
-    if (result) print('!!!! sentinel lib: $library');
-    return result;
-  }
+  bool get isSentinel => className == 'Sentinel' && library.isEmpty;
 }
 
 class HeapStatsRecord {

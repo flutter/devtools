@@ -19,13 +19,7 @@ List<HeapStatsRecord> heapStats(AdaptedHeap? heap) {
   final result = <String, HeapStatsRecord>{};
   if (heap == null) return [];
   if (!heap.isSpanningTreeBuilt) buildSpanningTree(heap);
-  for (var entry in heap.objects.asMap().entries) {
-    final object = entry.value;
-
-    if (object.isSentinel) {
-      print('!!! sentinel index: ${entry.key}');
-    }
-
+  for (var object in heap.objects) {
     // We do not show objects that will be garbage collected soon.
     if (object.retainedSize == null || object.isSentinel) continue;
 

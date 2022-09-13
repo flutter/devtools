@@ -4,6 +4,7 @@ import 'package:devtools_app/src/screens/memory/memory_controller.dart';
 import 'package:devtools_app/src/screens/memory/memory_heap_tree_view.dart';
 import 'package:devtools_app/src/screens/memory/memory_screen.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/diff_pane.dart';
+import 'package:devtools_app/src/screens/memory/shared/heap/model.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
@@ -15,13 +16,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:stager/stager.dart';
 
 import '../../test_data/memory.dart';
+import '../../test_data/memory/heap/heap_data.dart';
 import '../../test_data/memory_allocation.dart';
 
 /// To run:
 /// flutter run -t test/scenes/memory/connected.stager_app.dart -d macos
 class MemoryOfflineScene extends Scene {
   late MemoryController controller;
-  late FakeServiceManager fakeServiceManager;
 
   @override
   Widget build() {
@@ -48,7 +49,7 @@ class MemoryOfflineScene extends Scene {
     final allocationJson =
         AllocationMemoryJson.decode(argJsonString: testAllocationData);
 
-    fakeServiceManager = FakeServiceManager(
+    final fakeServiceManager = FakeServiceManager(
       service: FakeServiceManager.createFakeService(
         memoryData: memoryJson,
         allocationData: allocationJson,
@@ -63,7 +64,9 @@ class MemoryOfflineScene extends Scene {
     );
     setGlobal(ServiceConnectionManager, fakeServiceManager);
 
-    controller = MemoryController()
+    controller = MemoryController(
+      snapshotTaker: _TestSnapshotTaker(),
+    )
       ..offline.value = true
       ..memoryTimeline.offlineData.clear()
       ..memoryTimeline.offlineData.addAll(memoryJson.data);
@@ -75,5 +78,25 @@ class MemoryOfflineScene extends Scene {
   void tearDown() {
     enableNewAllocationProfileTable = false;
     shouldShowDiffPane = false;
+  }
+}
+
+/// Provides snapshots based on test data. First time returns null.
+class _TestSnapshotTaker implements SnapshotTaker {
+  final List<GoldenHeapTest> tests = goldenHeapTests;
+  int index = -1;
+
+  @override
+  Future<AdaptedHeap?> take() async {
+    // This delay is needed for UI to start showing the progress indicator.
+    await Future.delayed(const Duration(milliseconds: 100));
+    if (index < 0) {
+      index = 0;
+      return null;
+    }
+
+    final result = await tests[index].loadHeap();
+    index = index % tests.length;
+    return result;
   }
 }

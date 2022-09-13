@@ -53,7 +53,7 @@ class _InstanceColumn extends ColumnData<HeapStatsRecord> {
       : super(
           'Retained\nInstances',
           titleTooltip: 'Number of instances of the class, '
-              'that have retaining references from the root.',
+              'that have retaining path from the root.',
           fixedWidthPx: scaleByFontFactor(85.0),
           alignment: ColumnAlignment.right,
         );
