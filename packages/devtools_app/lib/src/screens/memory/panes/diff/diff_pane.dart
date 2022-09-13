@@ -156,7 +156,11 @@ class _SnapshotListContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final theItem = item;
     if (theItem is InformationListItem) {
-      return const Text('Introduction to snapshot diffing will be here.');
+      return const Text('''
+      Introduction to snapshot diffing is under construction.
+      
+      We do not show objects without retaining path in the table.
+      ''');
     }
     if (theItem is SnapshotListItem) {
       return SnapshotView(item: theItem);

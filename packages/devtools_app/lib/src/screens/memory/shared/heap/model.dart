@@ -173,8 +173,6 @@ class HeapStatsRecord {
   String get fullClassName => _fullClassName(library, className);
 }
 
-typedef HeapStats = Map<String, HeapStatsRecord>;
-
 String _fullClassName(String library, String className) =>
     '$library/$className';
 

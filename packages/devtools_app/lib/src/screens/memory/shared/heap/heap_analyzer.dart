@@ -15,11 +15,12 @@ void buildSpanningTree(AdaptedHeap heap) {
   assert(_verifyHeapIntegrity(heap));
 }
 
-HeapStats heapStats(AdaptedHeap? heap) {
+List<HeapStatsRecord> heapStats(AdaptedHeap? heap) {
   final result = <String, HeapStatsRecord>{};
-  if (heap == null) return result;
+  if (heap == null) return [];
   if (!heap.isSpanningTreeBuilt) buildSpanningTree(heap);
   for (var object in heap.objects) {
+    if (object.retainedSize == null) continue;
     if (!result.containsKey(object.fullClassName)) {
       result[object.fullClassName] = HeapStatsRecord(
         className: object.className,
@@ -31,7 +32,7 @@ HeapStats heapStats(AdaptedHeap? heap) {
     stats.shallowSize += object.shallowSize;
     stats.instanceCount++;
   }
-  return result;
+  return result.values.toList();
 }
 
 /// The algorithm takes O(number of references in the heap).
