@@ -934,12 +934,12 @@ class _InspectorTreeState extends State<InspectorTree>
     return initialX - columnWidth * padCount;
   }
 
-  /// Pad [initialY] with the vertical height of [padCount] rows.
+  /// Pad [initialY] so that a row would be placed in the vertical centre of
+  /// the screen.
   double _padTargetY({
     required double initialY,
-    int padCount = _scrollPadCount,
   }) {
-    return initialY - rowHeight * padCount;
+    return initialY - (safeViewportHeight / 2) + rowHeight / 2;
   }
 
   /// Handle arrow keys for the InspectorTree. Ignore other key events so that
