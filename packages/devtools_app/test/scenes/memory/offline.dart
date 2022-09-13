@@ -4,7 +4,6 @@ import 'package:devtools_app/src/screens/memory/memory_controller.dart';
 import 'package:devtools_app/src/screens/memory/memory_heap_tree_view.dart';
 import 'package:devtools_app/src/screens/memory/memory_screen.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/diff_pane.dart';
-import 'package:devtools_app/src/screens/memory/shared/heap/model.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
@@ -16,7 +15,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:stager/stager.dart';
 
 import '../../test_data/memory.dart';
-import '../../test_data/memory/heap/heap_data.dart';
 import '../../test_data/memory_allocation.dart';
 
 /// To run:

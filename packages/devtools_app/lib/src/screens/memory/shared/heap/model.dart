@@ -163,7 +163,7 @@ class AdaptedHeapObject {
   bool get isSentinel {
     final result = className == 'Sentinel';
 
-    if (result) print('!!!! sentinel lib: ${library}');
+    if (result) print('!!!! sentinel lib: $library');
     return result;
   }
 }
