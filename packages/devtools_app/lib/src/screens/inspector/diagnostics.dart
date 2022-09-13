@@ -65,12 +65,10 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     RemoteDiagnosticsNode? diagnostic,
   ) {
     final spans = DiagnosticsNodeDescription.buildDescriptionTextSpans(
-      diagnostic?.description ?? '',
-      const TextStyle(),
-      const ColorScheme.dark(),
-      diagnostic,
-      null,
-      null,
+      description: diagnostic?.description ?? '',
+      textStyle: const TextStyle(),
+      colorScheme: const ColorScheme.dark(),
+      diagnostic: diagnostic,
     );
 
     var spanWidth = spans.fold<double>(
@@ -102,14 +100,14 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     return spanWidth;
   }
 
-  static Iterable<TextSpan> buildDescriptionTextSpans(
-    String description,
-    TextStyle textStyle,
-    ColorScheme colorScheme,
+  static Iterable<TextSpan> buildDescriptionTextSpans({
+    required String description,
+    required TextStyle textStyle,
+    required ColorScheme colorScheme,
     RemoteDiagnosticsNode? diagnostic,
     String? searchValue,
     TextStyle? nodeDescriptionHighlightStyle,
-  ) sync* {
+  }) sync* {
     final diagnosticLocal = diagnostic!;
     if (diagnosticLocal.isDiagnosticableValue) {
       final match = treeNodePrimaryDescriptionPattern.firstMatch(description);
@@ -168,12 +166,12 @@ class DiagnosticsNodeDescription extends StatelessWidget {
   ) {
     final textSpan = TextSpan(
       children: buildDescriptionTextSpans(
-        description,
-        textStyle,
-        colorScheme,
-        diagnostic,
-        searchValue,
-        nodeDescriptionHighlightStyle,
+        description: description,
+        textStyle: textStyle,
+        colorScheme: colorScheme,
+        diagnostic: diagnostic,
+        searchValue: searchValue,
+        nodeDescriptionHighlightStyle: nodeDescriptionHighlightStyle,
       ).toList(),
     );
 
