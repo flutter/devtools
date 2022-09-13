@@ -142,7 +142,7 @@ class _StatsTableState extends State<StatsTable> {
       keyFactory: (e) => Key(e.fullClassName),
       onItemSelected: (r) {},
       sortColumn: _retainedSizeColumn,
-      sortDirection: SortDirection.ascending,
+      sortDirection: SortDirection.descending,
     );
   }
 }
