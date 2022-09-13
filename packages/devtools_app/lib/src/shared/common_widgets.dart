@@ -2267,8 +2267,8 @@ class Progress extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: smallProgressSize,
-      height: smallProgressSize,
+      width: size,
+      height: size,
       child: CircularProgressIndicator(
         color: Theme.of(context).textTheme.bodyText1?.color,
       ),
