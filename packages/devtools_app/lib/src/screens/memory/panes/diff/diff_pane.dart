@@ -156,12 +156,14 @@ class _SnapshotListContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final theItem = item;
     if (theItem is InformationListItem) {
-      return const Text('''
-      Introduction to snapshot diffing is under construction.
-      ''');
+      return const Center(
+        child: Text('''
+        Introduction to snapshot diffing is under construction.
+        '''),
+      );
     }
     if (theItem is SnapshotListItem) {
-      return SnapshotView(item: theItem);
+      return SnapshotView(item: theItem, key: ObjectKey(theItem.name));
     }
     throw 'Unexpected type of the item: ${theItem.runtimeType}';
   }

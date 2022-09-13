@@ -24,7 +24,9 @@ class SnapshotView extends StatelessWidget {
         if (isProcessing) return const SizedBox.shrink();
 
         final stats = item.stats;
-        if (stats == null) return const Text('Could not take snapshot.');
+        if (stats == null) {
+          return const Center(child: Text('Could not take snapshot.'));
+        }
 
         return StatsTable(data: stats);
       },
