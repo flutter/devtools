@@ -18,7 +18,7 @@ void main() {
   });
 
   group('Diff pane', () {
-    late MemoryConnectedScene scene;
+    late MemoryOfflineScene scene;
     final finder = find.byType(DiffPane);
 
     Future<void> pumpDiffTab(WidgetTester tester) async {
@@ -36,7 +36,7 @@ void main() {
     const windowSize = Size(2225.0, 1000.0);
 
     setUp(() async {
-      scene = MemoryConnectedScene();
+      scene = MemoryOfflineScene();
       await scene.setUp();
     });
 
