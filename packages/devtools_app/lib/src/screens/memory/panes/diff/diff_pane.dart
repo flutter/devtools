@@ -12,67 +12,14 @@ import '../../../../shared/split.dart';
 import '../../../../shared/table.dart';
 import '../../../../shared/theme.dart';
 import '../../primitives/memory_utils.dart';
-import 'model.dart';
+import 'controller/diff_pane_controller.dart';
+import 'controller/model.dart';
 
 /// While this pane is under construction, we do not want our users to see it.
 ///
 /// Flip this flag locally to test the pane and flip back before checking in.
 /// TODO: before removing this flag add widget/golden testing for the diff pane.
 bool shouldShowDiffPane = false;
-
-class _DiffPaneController {
-  final scrollController = ScrollController();
-
-  /// The list contains one item that show information and all others
-  /// are snapshots.
-  final snapshots = ListValueNotifier(<DiffListItem>[InformationListItem()]);
-
-  final selectedIndex = ValueNotifier<int>(0);
-
-  /// If true, some process is going on.
-  ValueListenable<bool> get isProcessing => _isProcessing;
-  final _isProcessing = ValueNotifier<bool>(false);
-
-  DiffListItem get selected => snapshots.value[selectedIndex.value];
-
-  /// True, if the list contains snapshots, i.e. items beyond the first
-  /// informational item.
-  bool get hasSnapshots => snapshots.value.length > 1;
-
-  Future<void> takeSnapshot() async {
-    _isProcessing.value = true;
-    final future = snapshotMemory();
-    snapshots.add(
-      SnapshotListItem(
-        future,
-        _nextDisplayNumber(),
-        currentIsolateName ?? '<isolate-not-detected>',
-      ),
-    );
-    await future;
-    final newElementIndex = snapshots.value.length - 1;
-    scrollController.autoScrollToBottom();
-    selectedIndex.value = newElementIndex;
-    _isProcessing.value = false;
-  }
-
-  Future<void> clearSnapshots() async {
-    snapshots.removeRange(1, snapshots.value.length);
-    selectedIndex.value = 0;
-  }
-
-  int _nextDisplayNumber() {
-    final numbers = snapshots.value.map((e) => e.displayNumber);
-    assert(numbers.isNotEmpty);
-    return numbers.max + 1;
-  }
-
-  void deleteCurrentSnapshot() {
-    assert(selected is SnapshotListItem);
-    snapshots.removeRange(selectedIndex.value, selectedIndex.value + 1);
-    selectedIndex.value = selectedIndex.value - 1;
-  }
-}
 
 class DiffPane extends StatefulWidget {
   const DiffPane({Key? key}) : super(key: key);
@@ -82,7 +29,7 @@ class DiffPane extends StatefulWidget {
 }
 
 class _DiffPaneState extends State<DiffPane> {
-  final controller = _DiffPaneController();
+  final controller = DiffPaneController();
 
   @override
   Widget build(BuildContext context) {
@@ -126,7 +73,7 @@ class _DiffPaneState extends State<DiffPane> {
 class _SnapshotList extends StatelessWidget {
   _SnapshotList({Key? key, required this.controller}) : super(key: key);
 
-  final _DiffPaneController controller;
+  final DiffPaneController controller;
   final headerHeight = 1.20 * defaultRowHeight;
 
   @override
@@ -232,7 +179,7 @@ class _ListControlPane extends StatelessWidget {
   const _ListControlPane({Key? key, required this.controller})
       : super(key: key);
 
-  final _DiffPaneController controller;
+  final DiffPaneController controller;
 
   @override
   Widget build(BuildContext context) {
@@ -264,7 +211,7 @@ class _ContentControlPane extends StatelessWidget {
   const _ContentControlPane({Key? key, required this.controller})
       : super(key: key);
 
-  final _DiffPaneController controller;
+  final DiffPaneController controller;
 
   @override
   Widget build(BuildContext context) {
