@@ -934,7 +934,7 @@ class _InspectorTreeState extends State<InspectorTree>
     return initialX - columnWidth * padCount;
   }
 
-  /// Pad [initialY] so that a row would be placed in the vertical centre of
+  /// Pad [initialY] so that a row would be placed in the vertical center of
   /// the screen.
   double _padTargetY({
     required double initialY,
