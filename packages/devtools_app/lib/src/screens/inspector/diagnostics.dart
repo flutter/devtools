@@ -162,15 +162,15 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     }
   }
 
-  Widget buildDescription(
-    String description,
-    TextStyle textStyle,
-    BuildContext context,
-    ColorScheme colorScheme,
+  Widget buildDescription({
+    required String description,
+    required TextStyle textStyle,
+    required BuildContext context,
+    required ColorScheme colorScheme,
     RemoteDiagnosticsNode? diagnostic,
     String? searchValue,
     TextStyle? nodeDescriptionHighlightStyle,
-  ) {
+  }) {
     // Store the textStyle of the built widget so that it can be used in
     // [approximateNodeWidth] later.
     diagnostic?.descriptionTextStyleFromBuild = textStyle;
@@ -325,13 +325,13 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       children.add(
         Flexible(
           child: buildDescription(
-            description,
-            descriptionTextStyle,
-            context,
-            colorScheme,
-            diagnostic,
-            searchValue,
-            nodeDescriptionHighlightStyle,
+            description: description,
+            textStyle: descriptionTextStyle,
+            context: context,
+            colorScheme: colorScheme,
+            diagnostic: diagnostic,
+            searchValue: searchValue,
+            nodeDescriptionHighlightStyle: nodeDescriptionHighlightStyle,
           ),
         ),
       );
@@ -383,13 +383,13 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       }
 
       var diagnosticDescription = buildDescription(
-        diagnosticLocal.description ?? '',
-        descriptionTextStyle,
-        context,
-        colorScheme,
-        diagnostic,
-        searchValue,
-        nodeDescriptionHighlightStyle,
+        description: diagnosticLocal.description ?? '',
+        textStyle: descriptionTextStyle,
+        context: context,
+        colorScheme: colorScheme,
+        diagnostic: diagnostic,
+        searchValue: searchValue,
+        nodeDescriptionHighlightStyle: nodeDescriptionHighlightStyle,
       );
 
       if (errorText != null) {
