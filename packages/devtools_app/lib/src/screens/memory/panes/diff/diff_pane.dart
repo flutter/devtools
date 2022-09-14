@@ -163,7 +163,10 @@ class _SnapshotListContent extends StatelessWidget {
       );
     }
     if (theItem is SnapshotListItem) {
-      return SnapshotView(item: theItem, key: ObjectKey(theItem.name));
+      return SnapshotView(
+        item: theItem,
+        key: ObjectKey(theItem),
+      );
     }
     throw 'Unexpected type of the item: ${theItem.runtimeType}';
   }

@@ -176,7 +176,7 @@ class HeapStatsRecord {
 }
 
 String _fullClassName(String library, String className) =>
-    '$library/$className';
+    library.isNotEmpty ? '$library/$className' : className;
 
 class SnapshotTaker {
   Future<AdaptedHeap?> take() async {

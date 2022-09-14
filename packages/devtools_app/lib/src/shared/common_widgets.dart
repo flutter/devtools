@@ -1376,7 +1376,8 @@ extension ColorExtension on Color {
 
 /// Gets an alternating color to use for indexed UI elements.
 Color alternatingColorForIndex(int index, ColorScheme colorScheme) {
-  return index % 2 == 1
+  // First row should be 0, not 1, to contrast with header.
+  return index % 2 == 0
       ? colorScheme.defaultBackgroundColor
       : colorScheme.alternatingBackgroundColor;
 }

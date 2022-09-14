@@ -12,7 +12,7 @@ import '../../shared/heap/model.dart';
 import 'model.dart';
 
 class SnapshotView extends StatelessWidget {
-  const SnapshotView({Key? key, required this.item}) : super(key: key);
+  SnapshotView({Key? key, required this.item}) : super(key: key);
 
   final SnapshotListItem item;
 
@@ -28,7 +28,7 @@ class SnapshotView extends StatelessWidget {
           return const Center(child: Text('Could not take snapshot.'));
         }
 
-        return StatsTable(data: stats);
+        return StatsTable(data: stats, key: ObjectKey(item.name));
       },
     );
   }
@@ -48,6 +48,9 @@ class _ClassNameColumn extends ColumnData<HeapStatsRecord> {
 
   @override
   bool get supportsSorting => true;
+
+  @override
+  String getTooltip(HeapStatsRecord record) => record.fullClassName;
 }
 
 class _InstanceColumn extends ColumnData<HeapStatsRecord> {
@@ -87,15 +90,21 @@ class _ShallowSizeColumn extends ColumnData<HeapStatsRecord> {
 
   @override
   bool get numeric => true;
+
+  @override
+  String getDisplayValue(HeapStatsRecord record) => prettyPrintBytes(
+        getValue(record),
+        includeUnit: true,
+        kbFractionDigits: 1,
+      )!;
 }
 
 class _RetainedSizeColumn extends ColumnData<HeapStatsRecord> {
   _RetainedSizeColumn()
       : super(
           'Retained\nSize',
-          titleTooltip:
-              'Total size of objects plus objects they retain in the memory, '
-              'taking to account only shortest retaining path for the referenced objects.',
+          titleTooltip: 'Total size of objects plus objects they retain, '
+              'taking to account only the shortest retaining path for the referenced objects.',
           fixedWidthPx: scaleByFontFactor(85.0),
           alignment: ColumnAlignment.right,
         );
@@ -108,6 +117,13 @@ class _RetainedSizeColumn extends ColumnData<HeapStatsRecord> {
 
   @override
   bool get numeric => true;
+
+  @override
+  String getDisplayValue(HeapStatsRecord record) => prettyPrintBytes(
+        getValue(record),
+        includeUnit: true,
+        kbFractionDigits: 1,
+      )!;
 }
 
 class StatsTable extends StatefulWidget {
@@ -119,30 +135,61 @@ class StatsTable extends StatefulWidget {
 }
 
 class _StatsTableState extends State<StatsTable> {
-  late final List<ColumnData<HeapStatsRecord>> columns;
-  final _retainedSizeColumn = _RetainedSizeColumn();
+  late final List<ColumnData<HeapStatsRecord>> _columns;
+  var _sortDirection = SortDirection.descending;
+  late ColumnData<HeapStatsRecord> _sortColumn;
 
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
 
-    columns = <ColumnData<HeapStatsRecord>>[
+    final retainedSizeColumn = _RetainedSizeColumn();
+
+    _columns = <ColumnData<HeapStatsRecord>>[
       _ClassNameColumn(),
       _InstanceColumn(),
       _ShallowSizeColumn(),
-      _retainedSizeColumn,
+      retainedSizeColumn,
     ];
+
+    _sortColumn = retainedSizeColumn;
   }
 
   @override
   Widget build(BuildContext context) {
-    return FlatTable<HeapStatsRecord>(
-      columns: columns,
+    return
+        // Column(
+        // children: [
+        //   Text('$_sortColumn'),
+        //   Text('$_sortDirection'),
+        //   Text('${widget.key}'),
+        //   Text('${identityHashCode(widget.data)}'),
+        //   SizedBox(
+        //     width: 500,
+        //     height: 250,
+        //     child:
+
+        FlatTable<HeapStatsRecord>(
+      columns: _columns,
       data: widget.data,
       keyFactory: (e) => Key(e.fullClassName),
       onItemSelected: (r) {},
-      sortColumn: _retainedSizeColumn,
-      sortDirection: SortDirection.descending,
+      sortColumn: _sortColumn,
+      sortDirection: _sortDirection,
+      onSortChanged: (
+        sortColumn,
+        direction, {
+        secondarySortColumn,
+      }) {
+        print('sort changed');
+        setState(() {
+          _sortColumn = sortColumn;
+          _sortDirection = direction;
+        });
+      },
+      //     ),
+      //   ),
+      // ],
     );
   }
 }
