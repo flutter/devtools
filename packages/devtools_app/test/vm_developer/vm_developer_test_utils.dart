@@ -10,7 +10,6 @@ import 'package:devtools_app/src/screens/vm_developer/object_inspector_view_cont
 import 'package:devtools_app/src/screens/vm_developer/object_viewport.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_object_model.dart';
 import 'package:devtools_app/src/scripts/script_manager.dart';
-import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/foundation.dart';

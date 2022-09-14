@@ -161,7 +161,9 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
                         parsedScript != null &&
                         !_shownFirstScript) {
                       ga.timeEnd(
-                          DebuggerScreen.id, analytics_constants.pageReady);
+                        DebuggerScreen.id,
+                        analytics_constants.pageReady,
+                      );
                       serviceManager.sendDwdsEvent(
                         screen: DebuggerScreen.id,
                         action: analytics_constants.pageReady,
