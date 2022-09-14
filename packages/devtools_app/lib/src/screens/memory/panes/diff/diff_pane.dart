@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/screens/memory/panes/diff/widgets/snapshot_control.dart';
+import 'package:devtools_app/src/screens/memory/panes/diff/widgets/snapshot_list.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../shared/common_widgets.dart';
@@ -11,7 +13,7 @@ import '../../../../shared/theme.dart';
 import '../../shared/heap/model.dart';
 import 'diff_pane_controller.dart';
 import 'model.dart';
-import 'snapshot_view.dart';
+import 'widgets/snapshot_view.dart';
 
 /// While this pane is under construction, we do not want our users to see it.
 ///
@@ -38,6 +40,20 @@ class _DiffPaneState extends State<DiffPane> {
 
   @override
   Widget build(BuildContext context) {
+    late Widget listContent;
+    final item = controller.selected;
+
+    if (item is InformationListItem) {
+      listContent = const _SnapshotDoc();
+    } else if (item is SnapshotListItem) {
+      listContent = _SnapshotContent(
+        item: item,
+        controller: controller,
+      );
+    } else {
+      throw Exception('Unexpected type of item: ${item.runtimeType}.');
+    }
+
     return DualValueListenableBuilder(
       firstListenable: controller.snapshots,
       secondListenable: controller.selectedIndex,
@@ -48,25 +64,10 @@ class _DiffPaneState extends State<DiffPane> {
           minSizes: const [80, 80],
           children: [
             OutlineDecoration(
-              child: Column(
-                children: [
-                  _ListControlPane(controller: controller),
-                  Expanded(
-                    child: _SnapshotList(controller: controller),
-                  ),
-                ],
-              ),
+              child: SnapshotList(controller: controller),
             ),
             OutlineDecoration(
-              child: Column(
-                children: [
-                  if (controller.selected is SnapshotListItem)
-                    _ContentControlPane(controller: controller),
-                  Expanded(
-                    child: _SnapshotListContent(item: controller.selected),
-                  ),
-                ],
-              ),
+              child: listContent,
             ),
           ],
         );
@@ -75,154 +76,36 @@ class _DiffPaneState extends State<DiffPane> {
   }
 }
 
-class _SnapshotList extends StatelessWidget {
-  _SnapshotList({Key? key, required this.controller}) : super(key: key);
-
-  final DiffPaneController controller;
-  final headerHeight = 1.20 * defaultRowHeight;
+class _SnapshotDoc extends StatelessWidget {
+  const _SnapshotDoc({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      controller: controller.listScrollController,
-      shrinkWrap: true,
-      itemCount: controller.snapshots.value.length,
-      itemBuilder: (context, index) {
-        return Container(
-          height: headerHeight,
-          color: controller.selectedIndex.value == index
-              ? Theme.of(context).selectedRowColor
-              : null,
-          child: InkWell(
-            canRequestFocus: false,
-            onTap: () => controller.selectedIndex.value = index,
-            child: _SnapshotListTitle(
-              item: controller.snapshots.value[index],
-              selected: index == controller.selectedIndex.value,
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _SnapshotListTitle extends StatelessWidget {
-  const _SnapshotListTitle({
-    Key? key,
-    required this.item,
-    required this.selected,
-  }) : super(key: key);
-
-  final DiffListItem item;
-
-  final bool selected;
-
-  @override
-  Widget build(BuildContext context) {
-    final theItem = item;
-    return ValueListenableBuilder<bool>(
-      valueListenable: theItem.isProcessing,
-      builder: (_, isProcessing, __) => Row(
-        children: [
-          const SizedBox(width: denseRowSpacing),
-          if (theItem is SnapshotListItem)
-            Expanded(
-              child: Text(theItem.name, overflow: TextOverflow.ellipsis),
-            ),
-          if (theItem is InformationListItem) ...[
-            const Expanded(
-              child: Text('Snapshots', overflow: TextOverflow.ellipsis),
-            ),
-            const SizedBox(width: denseRowSpacing),
-            const Text('ⓘ'),
-            const SizedBox(width: denseRowSpacing),
-          ],
-          if (isProcessing) ...[
-            Progress(),
-            const SizedBox(width: denseRowSpacing)
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _SnapshotListContent extends StatelessWidget {
-  const _SnapshotListContent({Key? key, required this.item}) : super(key: key);
-  final DiffListItem item;
-
-  @override
-  Widget build(BuildContext context) {
-    final theItem = item;
-    if (theItem is InformationListItem) {
-      return const Center(
-        child: Text('''
+    return const Center(
+      child: Text('''
         Introduction to snapshot diffing is under construction.
         '''),
-      );
-    }
-    if (theItem is SnapshotListItem) {
-      return SnapshotView(
-        item: theItem,
-        key: ObjectKey(theItem),
-      );
-    }
-    throw 'Unexpected type of the item: ${theItem.runtimeType}';
-  }
-}
-
-class _ListControlPane extends StatelessWidget {
-  const _ListControlPane({Key? key, required this.controller})
-      : super(key: key);
-
-  final DiffPaneController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: controller.isProcessing,
-      builder: (_, isProcessing, __) {
-        final takeSnapshotEnabled = !isProcessing;
-        final clearAllEnabled = !isProcessing & controller.hasSnapshots;
-        return Row(
-          children: [
-            ToolbarAction(
-              icon: Icons.fiber_manual_record,
-              tooltip: 'Take heap snapshot for the selected isolate',
-              onPressed: takeSnapshotEnabled ? controller.takeSnapshot : null,
-            ),
-            ToolbarAction(
-              icon: Icons.block,
-              tooltip: 'Clear all snapshots',
-              onPressed: clearAllEnabled ? controller.clearSnapshots : null,
-            )
-          ],
-        );
-      },
     );
   }
 }
 
-class _ContentControlPane extends StatelessWidget {
-  const _ContentControlPane({Key? key, required this.controller})
-      : super(key: key);
+class _SnapshotContent extends StatelessWidget {
+  _SnapshotContent({Key? key, required this.item, required this.controller})
+      : assert(controller.selected == item),
+        super(key: key);
 
+  final SnapshotListItem item;
   final DiffPaneController controller;
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: controller.isProcessing,
-      builder: (_, isProcessing, __) => Row(
-        children: [
-          ToolbarAction(
-            icon: Icons.clear,
-            tooltip: 'Delete snapshot',
-            onPressed: isProcessing ? null : controller.deleteCurrentSnapshot,
-          ),
-        ],
-      ),
+    return Column(
+      children: [
+        SnapshotControlPane(controller: controller),
+        Expanded(
+          child: SnapshotView(item: item),
+        ),
+      ],
     );
   }
 }

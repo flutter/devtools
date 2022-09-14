@@ -4,12 +4,12 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../primitives/utils.dart';
-import '../../../../shared/table.dart';
-import '../../../../shared/table_data.dart';
-import '../../../../shared/utils.dart';
-import '../../shared/heap/model.dart';
-import 'model.dart';
+import '../../../../../primitives/utils.dart';
+import '../../../../../shared/table.dart';
+import '../../../../../shared/table_data.dart';
+import '../../../../../shared/utils.dart';
+import '../../../shared/heap/model.dart';
+import '../model.dart';
 
 class SnapshotView extends StatelessWidget {
   SnapshotView({Key? key, required this.item}) : super(key: key);
