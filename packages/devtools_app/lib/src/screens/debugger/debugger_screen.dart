@@ -121,13 +121,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
 
   @override
   Widget build(BuildContext context) {
-    final codeArea = CodeArea(
-      controller: controller.debuggerCodeViewController,
-      debuggerController: controller,
-    );
-
     final codeViewController = controller.debuggerCodeViewController;
-
     return Split(
       axis: Axis.horizontal,
       initialFractions: const [0.25, 0.75],
@@ -163,8 +157,6 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
                   firstListenable: codeViewController.currentScriptRef,
                   secondListenable: codeViewController.currentParsedScript,
                   builder: (context, scriptRef, parsedScript, _) {
-                    // TODO(bkonyi)
-
                     if (scriptRef != null &&
                         parsedScript != null &&
                         !_shownFirstScript) {
