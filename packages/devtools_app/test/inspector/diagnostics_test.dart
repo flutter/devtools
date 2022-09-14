@@ -230,6 +230,8 @@ void main() {
 
       testWidgets('error node with different fontSize',
           (WidgetTester tester) async {
+        // Nodes with normal levels default to using the default fontSize, so
+        // using an error level node allows us to test different font sizes.
         final nodeJson = <String, Object?>{
           'widgetRuntimeType': 'Row',
           'renderObject': renderObjectJson,
@@ -247,6 +249,8 @@ void main() {
           false,
           null,
         );
+
+        //Use a textStyle that is much larger than the normal style
         const textStyle = TextStyle(fontSize: 24.0, fontFamily: 'Roboto');
         final diagnosticsNodeDescription = DiagnosticsNodeDescription(
           diagnosticWithoutService,
@@ -256,7 +260,6 @@ void main() {
 
         await tester.pumpWidget(wrap(diagnosticsNodeDescription));
 
-        print('STEP 1:');
         final approximatedWidth =
             DiagnosticsNodeDescription.approximateNodeWidth(
           diagnosticWithoutService,
@@ -271,9 +274,7 @@ void main() {
             )
             .evaluate()
             .map((e) => e.widget as RichText);
-        print('STEP 2:');
-        final allTextSpansFromRichTexts =
-            allRichTexts.map((e) => e.text as TextSpan).toList();
+
         final measuredWidthOfAllRichTexts =
             allRichTexts.fold<double>(0, (previousValue, richText) {
           final originalTextSpan = richText.text as TextSpan;
@@ -283,21 +284,7 @@ void main() {
                 originalTextSpan,
               );
         });
-        // double measuredWidthOfAllRichTexts = 0;
-        // for (var i = 0; i < allTextSpansFromRichTexts.length; i++) {
-        //   final originalTextSpan = allTextSpansFromRichTexts[i];
-        //   final textSpan = TextSpan(
-        //     text: originalTextSpan.text,
-        //     style: textStyle,
-        //   );
-        //   if (originalTextSpan.children != null) {
-        //     allTextSpansFromRichTexts
-        //         .addAll(originalTextSpan.children!.map((e) => e as TextSpan));
-        //   }
-        //   measuredWidthOfAllRichTexts += calculateTextSpanWidth(
-        //     textSpan,
-        //   );
-        // }
+
         expect(
           approximatedWidth,
           moreOrLessEquals(measuredWidthOfAllRichTexts, epsilon: epsilon),
