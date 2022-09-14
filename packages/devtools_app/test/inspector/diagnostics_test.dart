@@ -113,6 +113,7 @@ void main() {
     });
 
     group('approximateNodeWidth', () {
+      final epsilon = 5.0;
       testWidgets('property diagnostics node with name and description',
           (WidgetTester tester) async {
         final nodeJson = <String, Object?>{
@@ -162,7 +163,7 @@ void main() {
         );
         expect(
           approximatedWidth,
-          moreOrLessEquals(measuredWidthOfAllRichTexts, epsilon: 5.0),
+          moreOrLessEquals(measuredWidthOfAllRichTexts, epsilon: epsilon),
         );
       });
 
@@ -222,7 +223,7 @@ void main() {
           approximatedTextWidth,
           moreOrLessEquals(
             measuredTextWidth + measuredIconWidth,
-            epsilon: 5.0,
+            epsilon: epsilon,
           ),
         );
       });
@@ -299,7 +300,7 @@ void main() {
         // }
         expect(
           approximatedWidth,
-          moreOrLessEquals(measuredWidthOfAllRichTexts, epsilon: 5.0),
+          moreOrLessEquals(measuredWidthOfAllRichTexts, epsilon: epsilon),
         );
       });
     });
