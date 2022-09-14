@@ -36,7 +36,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
       }
     }
   }
-  
+
   static final _defaultProfile = CpuSamples.parse({
     'samplePeriod': 50,
     'maxStackDepth': 12,
@@ -418,6 +418,20 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
     return Future.value(
       HttpTimelineLoggingState(enabled: httpEnableTimelineLoggingResult),
     );
+  }
+
+  @override
+  Future<SourceReport> getSourceReport(
+    String isolateId,
+    List<String> reports, {
+    String? scriptId,
+    int? tokenPos,
+    int? endTokenPos,
+    bool? forceCompile,
+    bool? reportLines,
+    List<String>? libraryFilters,
+  }) async {
+    return SourceReport(ranges: [], scripts: []);
   }
 
   @override

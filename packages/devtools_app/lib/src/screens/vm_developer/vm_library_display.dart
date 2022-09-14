@@ -25,7 +25,6 @@ class VmLibraryDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final debuggerController = controller.debuggerController;
     final dependencies = library.obj.dependencies;
     return Split(
       axis: Axis.vertical,
@@ -42,7 +41,7 @@ class VmLibraryDisplay extends StatelessWidget {
           ),
         ),
         ObjectInspectorCodeView(
-          debuggerController: debuggerController,
+          codeViewController: controller.codeViewController,
           script: library.scriptRef!,
           object: library.obj,
         ),

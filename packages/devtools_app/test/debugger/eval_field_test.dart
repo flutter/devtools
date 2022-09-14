@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/screens/debugger/breakpoint_manager.dart';
 import 'package:devtools_app/src/screens/debugger/evaluate.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +20,7 @@ void main() {
       manager = FakeServiceManager(service: service);
       setGlobal(ServiceConnectionManager, manager);
       setGlobal(IdeTheme, getIdeTheme());
+      setGlobal(BreakpointManager, BreakpointManager());
     });
 
     testWidgets(
@@ -226,7 +228,7 @@ Future<_EvalFieldTestObjects> _setupEvalFieldObjects(
   WidgetTester tester,
 ) async {
   final debuggerController =
-      TestDebuggerController(initialSwitchToIsolate: false);
+      DebuggerController(initialSwitchToIsolate: false);
 
   final evalField = ExpressionEvalField(
     controller: debuggerController,

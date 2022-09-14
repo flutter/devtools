@@ -52,7 +52,7 @@ class VmClassDisplay extends StatelessWidget {
           ),
         ),
         ObjectInspectorCodeView(
-          debuggerController: controller.debuggerController,
+          codeViewController: controller.codeViewController,
           script: clazz.scriptRef!,
           object: clazz.ref,
         ),

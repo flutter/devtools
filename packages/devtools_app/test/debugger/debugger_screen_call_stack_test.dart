@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/screens/debugger/breakpoint_manager.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_model.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_screen.dart';
@@ -31,6 +32,7 @@ void main() {
     setGlobal(ServiceConnectionManager, fakeServiceManager);
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(NotificationService, NotificationService());
+    setGlobal(BreakpointManager, BreakpointManager());
     setGlobal(ScriptManager, scriptManager);
     fakeServiceManager.consoleService.ensureServiceInitialized();
     when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
@@ -128,7 +130,8 @@ void main() {
     when(debuggerController.stackFramesWithLocation)
         .thenReturn(ValueNotifier(stackFramesWithLocation));
     when(debuggerController.isPaused).thenReturn(ValueNotifier(true));
-    when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
+    final codeViewController = debuggerController.debuggerCodeViewController;
+    when(codeViewController.showFileOpener).thenReturn(ValueNotifier(false));
     await pumpDebuggerScreen(tester, debuggerController);
 
     expect(find.text('Call Stack'), findsOneWidget);

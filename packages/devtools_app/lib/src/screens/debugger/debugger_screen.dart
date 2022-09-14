@@ -118,56 +118,11 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     controller.onFirstDebuggerScreenLoad();
   }
 
-  void _onNodeSelected(VMServiceObjectNode? node) {
-    final location = node?.location;
-    if (location != null) {
-      controller.showScriptLocation(location);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final codeArea = ValueListenableBuilder<bool>(
-      valueListenable: controller.fileExplorerVisible,
-      builder: (context, visible, child) {
-        if (visible) {
-          // TODO(devoncarew): Animate this opening and closing.
-          return Split(
-            axis: Axis.horizontal,
-            initialFractions: const [0.70, 0.30],
-            children: [
-              child!,
-              ProgramExplorer(
-                controller: controller.programExplorerController,
-                onNodeSelected: _onNodeSelected,
-              ),
-            ],
-          );
-        } else {
-          return child!;
-        }
-      },
-      child: DualValueListenableBuilder<ScriptRef?, ParsedScript?>(
-        firstListenable: controller.currentScriptRef,
-        secondListenable: controller.currentParsedScript,
-        builder: (context, scriptRef, parsedScript, _) {
-          if (scriptRef != null && parsedScript != null && !_shownFirstScript) {
-            ga.timeEnd(DebuggerScreen.id, analytics_constants.pageReady);
-            serviceManager.sendDwdsEvent(
-              screen: DebuggerScreen.id,
-              action: analytics_constants.pageReady,
-            );
-            _shownFirstScript = true;
-          }
-          return CodeView(
-            key: DebuggerScreenBody.codeViewKey,
-            controller: controller,
-            scriptRef: scriptRef,
-            parsedScript: parsedScript,
-            onSelected: controller.toggleBreakpoint,
-          );
-        },
-      ),
+    final codeArea = CodeArea(
+      controller: controller.debuggerCodeViewController,
+      debuggerController: controller,
     );
 
     return Split(
@@ -236,7 +191,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
 
   Widget _breakpointsRightChild() {
     return ValueListenableBuilder<List<BreakpointAndSourcePosition>>(
-      valueListenable: controller.breakpointsWithLocation,
+      valueListenable: breakpointManager.breakpointsWithLocation,
       builder: (context, breakpoints, _) {
         return Row(
           children: [
@@ -245,8 +200,9 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
               message: 'Remove all breakpoints',
               child: ToolbarAction(
                 icon: Icons.delete,
-                onPressed:
-                    breakpoints.isNotEmpty ? controller.clearBreakpoints : null,
+                onPressed: breakpoints.isNotEmpty
+                    ? breakpointManager.clearBreakpoints
+                    : null,
               ),
             ),
           ],
@@ -266,9 +222,13 @@ class GoToLineNumberIntent extends Intent {
 class GoToLineNumberAction extends Action<GoToLineNumberIntent> {
   @override
   void invoke(GoToLineNumberIntent intent) {
-    showGoToLineDialog(intent._context, intent._controller);
-    intent._controller.toggleFileOpenerVisibility(false);
-    intent._controller.toggleSearchInFileVisibility(false);
+    showGoToLineDialog(
+      intent._context,
+      intent._controller.debuggerCodeViewController,
+    );
+    intent._controller.debuggerCodeViewController
+      ..toggleFileOpenerVisibility(false)
+      ..toggleSearchInFileVisibility(false);
   }
 }
 
@@ -281,8 +241,9 @@ class SearchInFileIntent extends Intent {
 class SearchInFileAction extends Action<SearchInFileIntent> {
   @override
   void invoke(SearchInFileIntent intent) {
-    intent._controller.toggleSearchInFileVisibility(true);
-    intent._controller.toggleFileOpenerVisibility(false);
+    intent._controller.debuggerCodeViewController
+      ..toggleSearchInFileVisibility(true)
+      ..toggleFileOpenerVisibility(false);
   }
 }
 
@@ -295,8 +256,9 @@ class EscapeIntent extends Intent {
 class EscapeAction extends Action<EscapeIntent> {
   @override
   void invoke(EscapeIntent intent) {
-    intent._controller.toggleSearchInFileVisibility(false);
-    intent._controller.toggleFileOpenerVisibility(false);
+    intent._controller.debuggerCodeViewController
+      ..toggleSearchInFileVisibility(false)
+      ..toggleFileOpenerVisibility(false);
   }
 }
 
@@ -309,8 +271,9 @@ class OpenFileIntent extends Intent {
 class OpenFileAction extends Action<OpenFileIntent> {
   @override
   void invoke(OpenFileIntent intent) {
-    intent._controller.toggleFileOpenerVisibility(true);
-    intent._controller.toggleSearchInFileVisibility(false);
+    intent._controller.debuggerCodeViewController
+      ..toggleFileOpenerVisibility(true)
+      ..toggleSearchInFileVisibility(false);
   }
 }
 

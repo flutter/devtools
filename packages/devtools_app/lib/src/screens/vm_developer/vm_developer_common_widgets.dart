@@ -11,10 +11,11 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../primitives/utils.dart';
 import '../../shared/common_widgets.dart';
+import '../../shared/globals.dart';
 import '../../shared/table.dart';
 import '../../shared/theme.dart';
 import '../debugger/codeview.dart';
-import '../debugger/debugger_controller.dart';
+import '../debugger/codeview_controller.dart';
 import '../debugger/debugger_model.dart';
 import 'object_inspector_view_controller.dart';
 import 'vm_object_model.dart';
@@ -805,12 +806,12 @@ List<MapEntry<String, WidgetBuilder>> vmObjectGeneralDataRows(
 /// [object]'s owner's code will be displayed instead.
 class ObjectInspectorCodeView extends StatefulWidget {
   ObjectInspectorCodeView({
-    required this.debuggerController,
+    required this.codeViewController,
     required this.script,
     required this.object,
   }) : super(key: ValueKey(object));
 
-  final DebuggerController debuggerController;
+  final CodeViewController codeViewController;
   final ScriptRef script;
   final ObjRef object;
 
@@ -823,8 +824,8 @@ class _ObjectInspectorCodeViewState extends State<ObjectInspectorCodeView> {
   @override
   void didChangeDependencies() async {
     super.didChangeDependencies();
-    if (widget.script != widget.debuggerController.currentScriptRef.value) {
-      widget.debuggerController.resetScriptLocation(
+    if (widget.script != widget.codeViewController.currentScriptRef.value) {
+      widget.codeViewController.resetScriptLocation(
         ScriptLocation(widget.script),
       );
     }
@@ -833,7 +834,7 @@ class _ObjectInspectorCodeViewState extends State<ObjectInspectorCodeView> {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<ParsedScript?>(
-      valueListenable: widget.debuggerController.currentParsedScript,
+      valueListenable: widget.codeViewController.currentParsedScript,
       builder: (context, currentParsedScript, _) {
         LineRange? lineRange;
         if (currentParsedScript != null) {
@@ -882,14 +883,14 @@ class _ObjectInspectorCodeViewState extends State<ObjectInspectorCodeView> {
             ),
             Expanded(
               child: CodeView(
-                controller: widget.debuggerController,
+                codeViewController: widget.codeViewController,
                 scriptRef: widget.script,
                 parsedScript: currentParsedScript,
                 enableFileExplorer: false,
                 enableHistory: false,
                 enableSearch: false,
                 lineRange: lineRange,
-                onSelected: widget.debuggerController.toggleBreakpoint,
+                onSelected: breakpointManager.toggleBreakpoint,
               ),
             ),
           ],

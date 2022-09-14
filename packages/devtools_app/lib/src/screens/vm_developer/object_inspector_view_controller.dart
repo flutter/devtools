@@ -8,7 +8,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../primitives/auto_dispose.dart';
 import '../../shared/globals.dart';
-import '../debugger/debugger_controller.dart';
+import '../debugger/codeview_controller.dart';
 import '../debugger/program_explorer_controller.dart';
 import 'object_viewport.dart';
 import 'vm_object_model.dart';
@@ -32,7 +32,7 @@ class ObjectInspectorViewController extends DisposableController
   final programExplorerController =
       ProgramExplorerController(showCodeNodes: true);
 
-  final debuggerController = DebuggerController();
+  final codeViewController = CodeViewController();
 
   final objectHistory = ObjectHistory();
 
@@ -50,7 +50,8 @@ class ObjectInspectorViewController extends DisposableController
       programExplorerController
         ..initialize()
         ..initListeners();
-      debuggerController.initialize();
+        // TODO(bkonyi):
+//      codeViewController.initialize();
       selectAndPushMainScript();
       _initialized = true;
     }

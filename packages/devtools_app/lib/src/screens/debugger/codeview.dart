@@ -20,6 +20,7 @@ import '../../shared/dialogs.dart';
 import '../../shared/globals.dart';
 import '../../shared/history_viewport.dart';
 import '../../shared/object_tree.dart';
+import '../../shared/split.dart';
 import '../../shared/theme.dart';
 import '../../shared/utils.dart';
 import '../../ui/colors.dart';
@@ -27,25 +28,96 @@ import '../../ui/hover.dart';
 import '../../ui/search.dart';
 import '../../ui/utils.dart';
 import 'breakpoints.dart';
+import 'codeview_controller.dart';
 import 'common.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
+import 'debugger_screen.dart';
 import 'file_search.dart';
 import 'key_sets.dart';
+import 'program_explorer.dart';
 import 'program_explorer_model.dart';
 import 'variables.dart';
 
 final debuggerCodeViewSearchKey =
     GlobalKey(debugLabel: 'DebuggerCodeViewSearchKey');
 
+class CodeArea extends StatelessWidget {
+  const CodeArea({
+    required this.controller,
+    this.debuggerController,
+  });
+
+  final CodeViewController controller;
+  final DebuggerController? debuggerController;
+
+  void _onNodeSelected(VMServiceObjectNode? node) {
+    final location = node?.location;
+    if (location != null) {
+      controller.showScriptLocation(location);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: controller.fileExplorerVisible,
+      builder: (context, visible, child) {
+        if (visible) {
+          // TODO(devoncarew): Animate this opening and closing.
+          return Split(
+            axis: Axis.horizontal,
+            initialFractions: const [0.70, 0.30],
+            children: [
+              child!,
+              ProgramExplorer(
+                controller: controller.programExplorerController,
+                onNodeSelected: _onNodeSelected,
+              ),
+            ],
+          );
+        } else {
+          return child!;
+        }
+      },
+      child: DualValueListenableBuilder<ScriptRef?, ParsedScript?>(
+        firstListenable: controller.currentScriptRef,
+        secondListenable: controller.currentParsedScript,
+        builder: (context, scriptRef, parsedScript, _) {
+          // TODO(bkonyi)
+          /*
+          if (scriptRef != null && parsedScript != null && !_shownFirstScript) {
+            ga.timeEnd(DebuggerScreen.id, analytics_constants.pageReady);
+            serviceManager.sendDwdsEvent(
+              screen: DebuggerScreen.id,
+              action: analytics_constants.pageReady,
+            );
+            _shownFirstScript = true;
+          }
+          */
+          return CodeView(
+            key: DebuggerScreenBody.codeViewKey,
+            codeViewController: controller,
+            debuggerController: debuggerController,
+            scriptRef: scriptRef,
+            parsedScript: parsedScript,
+            onSelected: breakpointManager.toggleBreakpoint,
+          );
+        },
+      ),
+    );
+  }
+}
+
 // TODO(kenz): consider moving lines / pausedPositions calculations to the
 // controller.
 class CodeView extends StatefulWidget {
   const CodeView({
     Key? key,
-    required this.controller,
+    required this.codeViewController,
     required this.scriptRef,
     required this.parsedScript,
+    this.debuggerController,
     this.lineRange,
     this.initialPosition,
     this.onSelected,
@@ -63,7 +135,8 @@ class CodeView extends StatefulWidget {
   static double get rowHeight => scaleByFontFactor(20.0);
   static double get assumedCharacterWidth => scaleByFontFactor(16.0);
 
-  final DebuggerController controller;
+  final CodeViewController codeViewController;
+  final DebuggerController? debuggerController;
   final ScriptLocation? initialPosition;
   final ScriptRef? scriptRef;
   final ParsedScript? parsedScript;
@@ -121,23 +194,9 @@ class _CodeViewState extends State<CodeView>
     }
 
     addAutoDisposeListener(
-      widget.controller.scriptLocation,
+      widget.codeViewController.scriptLocation,
       _handleScriptLocationChanged,
     );
-  }
-
-  @override
-  void didUpdateWidget(CodeView oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    if (widget.controller != oldWidget.controller) {
-      cancelListeners();
-
-      addAutoDisposeListener(
-        widget.controller.scriptLocation,
-        _handleScriptLocationChanged,
-      );
-    }
   }
 
   @override
@@ -145,7 +204,7 @@ class _CodeViewState extends State<CodeView>
     gutterController.dispose();
     textController.dispose();
     horizontalController.dispose();
-    widget.controller.scriptLocation
+    widget.codeViewController.scriptLocation
         .removeListener(_handleScriptLocationChanged);
     super.dispose();
   }
@@ -157,7 +216,7 @@ class _CodeViewState extends State<CodeView>
   }
 
   void _updateScrollPosition({bool animate = true}) {
-    if (widget.controller.scriptLocation.value?.scriptRef.uri !=
+    if (widget.codeViewController.scriptLocation.value?.scriptRef.uri !=
         scriptRef?.uri) {
       return;
     }
@@ -167,7 +226,7 @@ class _CodeViewState extends State<CodeView>
       log('LinkedScrollControllerGroup has no attached controllers');
       return;
     }
-    final line = widget.controller.scriptLocation.value?.location?.line;
+    final line = widget.codeViewController.scriptLocation.value?.location?.line;
     if (line == null) {
       // Don't scroll to top if we're just rebuilding the code view for the
       // same script.
@@ -227,10 +286,10 @@ class _CodeViewState extends State<CodeView>
     return DualValueListenableBuilder<bool, bool>(
       firstListenable: widget.enableFileExplorer
           ? const FixedValueListenable<bool>(false)
-          : widget.controller.showFileOpener,
+          : widget.codeViewController.showFileOpener,
       secondListenable: widget.enableSearch
           ? const FixedValueListenable<bool>(false)
-          : widget.controller.showSearchInFileField,
+          : widget.codeViewController.showSearchInFileField,
       builder: (context, showFileOpener, showSearch, _) {
         return Stack(
           children: [
@@ -329,7 +388,10 @@ class _CodeViewState extends State<CodeView>
               notificationPredicate: (ScrollNotification notification) =>
                   notification.depth == 1,
               child: ValueListenableBuilder<StackFrameAndSourcePosition?>(
-                valueListenable: widget.controller.selectedStackFrame,
+                valueListenable: widget
+                        .debuggerController?.selectedStackFrame ??
+                    const FixedValueListenable<StackFrameAndSourcePosition?>(
+                        null),
                 builder: (context, frame, _) {
                   final pausedFrame = frame == null
                       ? null
@@ -339,7 +401,7 @@ class _CodeViewState extends State<CodeView>
                     children: [
                       ValueListenableBuilder<List<BreakpointAndSourcePosition>>(
                         valueListenable:
-                            widget.controller.breakpointsWithLocation,
+                            breakpointManager.breakpointsWithLocation,
                         builder: (context, breakpoints, _) {
                           return Gutter(
                             gutterWidth: gutterWidth,
@@ -355,8 +417,8 @@ class _CodeViewState extends State<CodeView>
                                 : <int>{},
                             onPressed: _onPressed,
                             // Disable dots for possible breakpoint locations.
-                            allowInteraction:
-                                !widget.controller.isSystemIsolate,
+                            allowInteraction: 
+                            !(widget.debuggerController?.isSystemIsolate ?? false),
                           );
                         },
                       ),
@@ -384,14 +446,15 @@ class _CodeViewState extends State<CodeView>
                                   ),
                                   child: Lines(
                                     height: constraints.maxHeight,
-                                    debugController: widget.controller,
+                                    codeViewController:
+                                        widget.codeViewController,
                                     scrollController: textController,
                                     lines: lines,
                                     pausedFrame: pausedFrame,
                                     searchMatchesNotifier:
-                                        widget.controller.searchMatches,
-                                    activeSearchMatchNotifier:
-                                        widget.controller.activeSearchMatch,
+                                        widget.codeViewController.searchMatches,
+                                    activeSearchMatchNotifier: widget
+                                        .codeViewController.activeSearchMatch,
                                   ),
                                 ),
                               ),
@@ -411,7 +474,7 @@ class _CodeViewState extends State<CodeView>
           child: Center(
             child: Text(
               'No source available',
-              style: theme.textTheme.subtitle1,
+              style: theme.textTheme.titleMedium,
             ),
           ),
         );
@@ -419,21 +482,23 @@ class _CodeViewState extends State<CodeView>
     };
     if (widget.enableHistory) {
       return HistoryViewport(
-        history: widget.controller.scriptsHistory,
+        history: widget.codeViewController.scriptsHistory,
         generateTitle: (ScriptRef? script) {
           final scriptUri = script?.uri;
           if (scriptUri == null) return '';
           return scriptUri;
         },
-        onTitleTap: () => widget.controller.toggleFileOpenerVisibility(true),
+        onTitleTap: () =>
+            widget.codeViewController.toggleFileOpenerVisibility(true),
         controls: [
-          ScriptPopupMenu(widget.controller),
+          ScriptPopupMenu(widget.codeViewController),
           ScriptHistoryPopupMenu(
             itemBuilder: _buildScriptMenuFromHistory,
             onSelected: (scriptRef) {
-              widget.controller.showScriptLocation(ScriptLocation(scriptRef));
+              widget.codeViewController
+                  .showScriptLocation(ScriptLocation(scriptRef));
             },
-            enabled: widget.controller.scriptsHistory.hasScripts,
+            enabled: widget.codeViewController.scriptsHistory.hasScripts,
           ),
         ],
         contentBuilder: contentBuilder,
@@ -453,7 +518,7 @@ class _CodeViewState extends State<CodeView>
       height: defaultTextFieldHeight,
       padding: EdgeInsets.zero,
       child: FileSearchField(
-        debuggerController: widget.controller,
+        codeViewController: widget.codeViewController,
       ),
     );
   }
@@ -463,12 +528,13 @@ class _CodeViewState extends State<CodeView>
       width: wideSearchTextWidth,
       height: defaultTextFieldHeight + 2 * denseSpacing,
       child: buildSearchField(
-        controller: widget.controller,
+        controller: widget.codeViewController,
         searchFieldKey: debuggerCodeViewSearchKey,
         searchFieldEnabled: parsedScript != null,
         shouldRequestFocus: true,
         supportsNavigation: true,
-        onClose: () => widget.controller.toggleSearchInFileVisibility(false),
+        onClose: () =>
+            widget.codeViewController.toggleSearchInFileVisibility(false),
       ),
     );
   }
@@ -479,7 +545,8 @@ class _CodeViewState extends State<CodeView>
     return Center(
       child: ElevatedButton(
         autofocus: true,
-        onPressed: () => widget.controller.toggleFileOpenerVisibility(true),
+        onPressed: () =>
+            widget.codeViewController.toggleFileOpenerVisibility(true),
         child: Text(
           'Open a file ($openFileKeySetDescription)',
           style: theme.textTheme.titleMedium,
@@ -493,7 +560,7 @@ class _CodeViewState extends State<CodeView>
   ) {
     const scriptHistorySize = 16;
 
-    return widget.controller.scriptsHistory.openedScripts
+    return widget.codeViewController.scriptsHistory.openedScripts
         .take(scriptHistorySize)
         .map((scriptRef) {
       return PopupMenuItem(
@@ -661,7 +728,7 @@ class Lines extends StatefulWidget {
   const Lines({
     Key? key,
     required this.height,
-    required this.debugController,
+    required this.codeViewController,
     required this.scrollController,
     required this.lines,
     required this.pausedFrame,
@@ -670,7 +737,7 @@ class Lines extends StatefulWidget {
   }) : super(key: key);
 
   final double height;
-  final DebuggerController debugController;
+  final CodeViewController codeViewController;
   final ScrollController scrollController;
   final List<TextSpan> lines;
   final StackFrameAndSourcePosition? pausedFrame;
@@ -738,8 +805,8 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
         final lineNum = index + 1;
         final isPausedLine = pausedLine == lineNum;
         return ValueListenableBuilder<VMServiceObjectNode?>(
-          valueListenable:
-              widget.debugController.programExplorerController.outlineSelection,
+          valueListenable: widget
+              .codeViewController.programExplorerController.outlineSelection,
           builder: (context, outlineNode, _) {
             final isFocusedLine =
                 (outlineNode?.location?.location?.line ?? -1) == lineNum;
@@ -1074,7 +1141,7 @@ class _LineItemState extends State<LineItem>
 class ScriptPopupMenu extends StatelessWidget {
   const ScriptPopupMenu(this._controller);
 
-  final DebuggerController _controller;
+  final CodeViewController _controller;
 
   @override
   Widget build(BuildContext context) {
@@ -1136,7 +1203,7 @@ class ScriptPopupMenuOption {
 
   final String label;
 
-  final void Function(BuildContext, DebuggerController) onSelected;
+  final void Function(BuildContext, CodeViewController) onSelected;
 
   final IconData? icon;
 
@@ -1185,7 +1252,7 @@ final copyFilePathOption = ScriptPopupMenuOption(
 
 @visibleForTesting
 Future<String?> fetchScriptLocationFullFilePath(
-  DebuggerController controller,
+  CodeViewController controller,
 ) async {
   String? filePath;
   final packagePath = controller.scriptLocation.value!.scriptRef.uri;
@@ -1209,7 +1276,7 @@ Future<String?> fetchScriptLocationFullFilePath(
   return filePath;
 }
 
-void showGoToLineDialog(BuildContext context, DebuggerController controller) {
+void showGoToLineDialog(BuildContext context, CodeViewController controller) {
   showDialog(
     context: context,
     builder: (context) => GoToLineDialog(controller),
@@ -1222,7 +1289,7 @@ final goToLineOption = ScriptPopupMenuOption(
   onSelected: showGoToLineDialog,
 );
 
-void showFileOpener(BuildContext context, DebuggerController controller) {
+void showFileOpener(BuildContext context, CodeViewController controller) {
   controller.toggleFileOpenerVisibility(true);
 }
 
@@ -1233,9 +1300,9 @@ final openFileOption = ScriptPopupMenuOption(
 );
 
 class GoToLineDialog extends StatelessWidget {
-  const GoToLineDialog(this._debuggerController);
+  const GoToLineDialog(this._codeViewController);
 
-  final DebuggerController _debuggerController;
+  final CodeViewController _codeViewController;
 
   @override
   Widget build(BuildContext context) {
@@ -1249,11 +1316,11 @@ class GoToLineDialog extends StatelessWidget {
             autofocus: true,
             onSubmitted: (value) {
               final scriptRef =
-                  _debuggerController.scriptLocation.value?.scriptRef;
+                  _codeViewController.scriptLocation.value?.scriptRef;
               if (value.isNotEmpty && scriptRef != null) {
                 Navigator.of(context).pop(dialogDefaultContext);
                 final line = int.parse(value);
-                _debuggerController.showScriptLocation(
+                _codeViewController.showScriptLocation(
                   ScriptLocation(
                     scriptRef,
                     location: SourcePosition(line: line, column: 0),

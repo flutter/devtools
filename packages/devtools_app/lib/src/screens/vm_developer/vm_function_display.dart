@@ -28,7 +28,6 @@ class VmFuncDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final debuggerController = controller.debuggerController;
     return Split(
       axis: Axis.vertical,
       initialFractions: const [0.5, 0.5],
@@ -42,7 +41,7 @@ class VmFuncDisplay extends StatelessWidget {
           ),
         ),
         ObjectInspectorCodeView(
-          debuggerController: debuggerController,
+          codeViewController: controller.codeViewController,
           script: function.scriptRef!,
           object: function.obj,
         ),
