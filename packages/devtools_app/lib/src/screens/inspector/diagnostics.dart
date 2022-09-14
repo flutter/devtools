@@ -83,12 +83,6 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     String? name = diagnostic?.name;
 
     // An Icon is approximately the width of 1 character
-    final approximateIconWidth = calculateTextSpanWidth(
-      TextSpan(
-        text: 'A',
-        style: textStyle,
-      ),
-    );
 
     if (diagnostic?.showName == true && name != null) {
       // The diagnostic will show it's name instead of an icon so add an
@@ -101,6 +95,13 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       spanWidth +=
           calculateTextSpanWidth(TextSpan(text: name, style: textStyle));
     } else {
+      final approximateIconWidth = calculateTextSpanWidth(
+        TextSpan(
+          text: 'A',
+          style: textStyle,
+        ),
+      );
+
       // When there is no name, an icon will be shown with the text spans.
       spanWidth += approximateIconWidth;
     }
