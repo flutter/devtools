@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/table.dart';
 import '../../../../../shared/theme.dart';
-import '../diff_pane_controller.dart';
-import '../model.dart';
+import '../controller/diff_pane_controller.dart';
+import '../controller/model.dart';
 
 class SnapshotList extends StatelessWidget {
   const SnapshotList({Key? key, required this.controller}) : super(key: key);

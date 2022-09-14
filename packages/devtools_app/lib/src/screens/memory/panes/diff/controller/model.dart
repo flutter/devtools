@@ -4,8 +4,8 @@
 
 import 'package:flutter/foundation.dart';
 
-import '../../shared/heap/heap_analyzer.dart';
-import '../../shared/heap/model.dart';
+import '../../../shared/heap/heap_analyzer.dart';
+import '../../../shared/heap/model.dart';
 
 abstract class DiffListItem {
   /// Number, that, if shown in name, should be unique in the list.

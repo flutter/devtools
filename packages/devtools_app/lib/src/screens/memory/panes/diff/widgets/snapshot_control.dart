@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../shared/common_widgets.dart';
-import '../diff_pane_controller.dart';
+import '../controller/diff_pane_controller.dart';
 
 class SnapshotControlPane extends StatelessWidget {
   const SnapshotControlPane({Key? key, required this.controller})
