@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 
+import '../../../../../primitives/utils.dart';
 import '../../../shared/heap/heap_analyzer.dart';
 import '../../../shared/heap/model.dart';
 
@@ -44,4 +45,12 @@ class SnapshotListItem extends DiffListItem {
   final int displayNumber;
 
   String get name => '$_isolateName-$displayNumber';
+
+  var sorting = ColumnSorting();
+}
+
+class ColumnSorting {
+  bool initialized = false;
+  SortDirection direction = SortDirection.ascending;
+  int columnIndex = 0;
 }

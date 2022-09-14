@@ -28,7 +28,10 @@ class SnapshotView extends StatelessWidget {
           return const Center(child: Text('Could not take snapshot.'));
         }
 
-        return StatsTable(data: stats, key: ObjectKey(item.name));
+        return _StatsTable(
+          data: stats,
+          sorting: item.sorting,
+        );
       },
     );
   }
@@ -126,56 +129,52 @@ class _RetainedSizeColumn extends ColumnData<HeapStatsRecord> {
       )!;
 }
 
-class StatsTable extends StatefulWidget {
-  const StatsTable({Key? key, required this.data}) : super(key: key);
+class _StatsTable extends StatefulWidget {
+  const _StatsTable({
+    Key? key,
+    required this.data,
+    required this.sorting,
+  }) : super(key: key);
   final List<HeapStatsRecord> data;
+  final ColumnSorting sorting;
 
   @override
-  State<StatsTable> createState() => _StatsTableState();
+  State<_StatsTable> createState() => _StatsTableState();
 }
 
-class _StatsTableState extends State<StatsTable> {
+class _StatsTableState extends State<_StatsTable> {
   late final List<ColumnData<HeapStatsRecord>> _columns;
-  var _sortDirection = SortDirection.descending;
-  late ColumnData<HeapStatsRecord> _sortColumn;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    final retainedSizeColumn = _RetainedSizeColumn();
+    final _shallowSizeColumn = _ShallowSizeColumn();
 
     _columns = <ColumnData<HeapStatsRecord>>[
       _ClassNameColumn(),
       _InstanceColumn(),
-      _ShallowSizeColumn(),
-      retainedSizeColumn,
+      _shallowSizeColumn,
+      _RetainedSizeColumn(),
     ];
 
-    _sortColumn = retainedSizeColumn;
+    if (!widget.sorting.initialized) {
+      widget.sorting
+        ..direction = SortDirection.descending
+        ..columnIndex = _columns.indexOf(_shallowSizeColumn)
+        ..initialized = true;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return
-        // Column(
-        // children: [
-        //   Text('$_sortColumn'),
-        //   Text('$_sortDirection'),
-        //   Text('${widget.key}'),
-        //   Text('${identityHashCode(widget.data)}'),
-        //   SizedBox(
-        //     width: 500,
-        //     height: 250,
-        //     child:
-
-        FlatTable<HeapStatsRecord>(
+    return FlatTable<HeapStatsRecord>(
       columns: _columns,
       data: widget.data,
       keyFactory: (e) => Key(e.fullClassName),
       onItemSelected: (r) {},
-      sortColumn: _sortColumn,
-      sortDirection: _sortDirection,
+      sortColumn: _columns[widget.sorting.columnIndex],
+      sortDirection: widget.sorting.direction,
       onSortChanged: (
         sortColumn,
         direction, {
@@ -183,13 +182,10 @@ class _StatsTableState extends State<StatsTable> {
       }) {
         print('sort changed');
         setState(() {
-          _sortColumn = sortColumn;
-          _sortDirection = direction;
+          widget.sorting.columnIndex = _columns.indexOf(sortColumn);
+          widget.sorting.direction = direction;
         });
       },
-      //     ),
-      //   ),
-      // ],
     );
   }
 }

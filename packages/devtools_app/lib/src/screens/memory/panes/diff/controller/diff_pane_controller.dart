@@ -66,6 +66,8 @@ class DiffPaneController {
   void deleteCurrentSnapshot() {
     assert(selected is SnapshotListItem);
     snapshots.removeRange(selectedIndex.value, selectedIndex.value + 1);
+    // We must change the selectedIndex, because otherwise the content will
+    // not be re-rendered.
     selectedIndex.value = selectedIndex.value - 1;
   }
 }

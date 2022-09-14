@@ -38,10 +38,9 @@ class _DiffPaneState extends State<DiffPane> {
 
   @override
   Widget build(BuildContext context) {
-    return DualValueListenableBuilder(
-      firstListenable: controller.snapshots,
-      secondListenable: controller.selectedIndex,
-      builder: (_, snapshots, index, __) {
+    return ValueListenableBuilder<int>(
+      valueListenable: controller.selectedIndex,
+      builder: (_, index, __) {
         late Widget listContent;
         final item = controller.selected;
 
