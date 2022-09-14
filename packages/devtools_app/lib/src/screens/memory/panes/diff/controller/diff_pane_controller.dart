@@ -8,9 +8,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../../primitives/utils.dart';
 import '../../../../../shared/common_widgets.dart';
-import '../../../../../shared/split.dart';
-import '../../../../../shared/table.dart';
-import '../../../../../shared/theme.dart';
 import '../../../primitives/memory_utils.dart';
 import 'model.dart';
 

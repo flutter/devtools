@@ -4,11 +4,15 @@
 
 import 'package:flutter/widgets.dart';
 
+import '../controller/model.dart';
+
 class SnapshotView extends StatelessWidget {
-  const SnapshotView({Key? key}) : super(key: key);
+  const SnapshotView({Key? key, required this.item}) : super(key: key);
+
+  final SnapshotListItem item;
 
   @override
   Widget build(BuildContext context) {
-    return const Text('Snapshot content will be here');
+    return Text('Content of ${item.name} will be here');
   }
 }
