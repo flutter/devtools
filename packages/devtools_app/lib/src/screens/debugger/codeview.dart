@@ -378,104 +378,100 @@ class _CodeViewState extends State<CodeView>
       if (lines.isNotEmpty) {
         return DefaultTextStyle(
           style: theme.fixedFontStyle,
-          child: Expanded(
-            child: Scrollbar(
-              key: CodeView.debuggerCodeViewVerticalScrollbarKey,
-              controller: textController,
-              thumbVisibility: true,
-              // Only listen for vertical scroll notifications (ignore those
-              // from the nested horizontal SingleChildScrollView):
-              notificationPredicate: (ScrollNotification notification) =>
-                  notification.depth == 1,
-              child: ValueListenableBuilder<StackFrameAndSourcePosition?>(
-                valueListenable: widget
-                        .debuggerController?.selectedStackFrame ??
-                    const FixedValueListenable<StackFrameAndSourcePosition?>(
-                        null),
-                builder: (context, frame, _) {
-                  final pausedFrame = frame == null
-                      ? null
-                      : (frame.scriptRef == scriptRef ? frame : null);
+          child: Scrollbar(
+            key: CodeView.debuggerCodeViewVerticalScrollbarKey,
+            controller: textController,
+            thumbVisibility: true,
+            // Only listen for vertical scroll notifications (ignore those
+            // from the nested horizontal SingleChildScrollView):
+            notificationPredicate: (ScrollNotification notification) =>
+                notification.depth == 1,
+            child: ValueListenableBuilder<StackFrameAndSourcePosition?>(
+              valueListenable: widget.debuggerController?.selectedStackFrame ??
+                  const FixedValueListenable<StackFrameAndSourcePosition?>(
+                    null,
+                  ),
+              builder: (context, frame, _) {
+                final pausedFrame = frame == null
+                    ? null
+                    : (frame.scriptRef == scriptRef ? frame : null);
 
-                  return Row(
-                    children: [
-                      ValueListenableBuilder<List<BreakpointAndSourcePosition>>(
-                        valueListenable:
-                            breakpointManager.breakpointsWithLocation,
-                        builder: (context, breakpoints, _) {
-                          return Gutter(
-                            gutterWidth: gutterWidth,
-                            scrollController: gutterController,
-                            lineCount: widget.lineRange?.size ?? lines.length,
-                            lineOffset: (widget.lineRange?.begin ?? 1) - 1,
-                            pausedFrame: pausedFrame,
-                            breakpoints: breakpoints
-                                .where((bp) => bp.scriptRef == scriptRef)
-                                .toList(),
-                            executableLines: parsedScript != null
-                                ? parsedScript!.executableLines
-                                : <int>{},
-                            onPressed: _onPressed,
-                            // Disable dots for possible breakpoint locations.
-                            allowInteraction: 
-                            !(widget.debuggerController?.isSystemIsolate ?? false),
+                return Row(
+                  children: [
+                    ValueListenableBuilder<List<BreakpointAndSourcePosition>>(
+                      valueListenable:
+                          breakpointManager.breakpointsWithLocation,
+                      builder: (context, breakpoints, _) {
+                        return Gutter(
+                          gutterWidth: gutterWidth,
+                          scrollController: gutterController,
+                          lineCount: widget.lineRange?.size ?? lines.length,
+                          lineOffset: (widget.lineRange?.begin ?? 1) - 1,
+                          pausedFrame: pausedFrame,
+                          breakpoints: breakpoints
+                              .where((bp) => bp.scriptRef == scriptRef)
+                              .toList(),
+                          executableLines: parsedScript != null
+                              ? parsedScript!.executableLines
+                              : <int>{},
+                          onPressed: _onPressed,
+                          // Disable dots for possible breakpoint locations.
+                          allowInteraction:
+                              !(widget.debuggerController?.isSystemIsolate ??
+                                  false),
+                        );
+                      },
+                    ),
+                    const SizedBox(width: denseSpacing),
+                    Expanded(
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          final double fileWidth = calculateTextSpanWidth(
+                            findLongestTextSpan(lines),
+                          );
+
+                          return Scrollbar(
+                            key:
+                                CodeView.debuggerCodeViewHorizontalScrollbarKey,
+                            thumbVisibility: true,
+                            controller: horizontalController,
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              controller: horizontalController,
+                              child: SizedBox(
+                                height: constraints.maxHeight,
+                                width: math.max(
+                                  constraints.maxWidth,
+                                  fileWidth,
+                                ),
+                                child: Lines(
+                                  height: constraints.maxHeight,
+                                  codeViewController: widget.codeViewController,
+                                  scrollController: textController,
+                                  lines: lines,
+                                  pausedFrame: pausedFrame,
+                                  searchMatchesNotifier:
+                                      widget.codeViewController.searchMatches,
+                                  activeSearchMatchNotifier: widget
+                                      .codeViewController.activeSearchMatch,
+                                ),
+                              ),
+                            ),
                           );
                         },
                       ),
-                      const SizedBox(width: denseSpacing),
-                      Expanded(
-                        child: LayoutBuilder(
-                          builder: (context, constraints) {
-                            final double fileWidth = calculateTextSpanWidth(
-                              findLongestTextSpan(lines),
-                            );
-
-                            return Scrollbar(
-                              key: CodeView
-                                  .debuggerCodeViewHorizontalScrollbarKey,
-                              thumbVisibility: true,
-                              controller: horizontalController,
-                              child: SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                controller: horizontalController,
-                                child: SizedBox(
-                                  height: constraints.maxHeight,
-                                  width: math.max(
-                                    constraints.maxWidth,
-                                    fileWidth,
-                                  ),
-                                  child: Lines(
-                                    height: constraints.maxHeight,
-                                    codeViewController:
-                                        widget.codeViewController,
-                                    scrollController: textController,
-                                    lines: lines,
-                                    pausedFrame: pausedFrame,
-                                    searchMatchesNotifier:
-                                        widget.codeViewController.searchMatches,
-                                    activeSearchMatchNotifier: widget
-                                        .codeViewController.activeSearchMatch,
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              ),
+                    ),
+                  ],
+                );
+              },
             ),
           ),
         );
       } else {
-        return Expanded(
-          child: Center(
-            child: Text(
-              'No source available',
-              style: theme.textTheme.titleMedium,
-            ),
+        return Center(
+          child: Text(
+            'No source available',
+            style: theme.textTheme.titleMedium,
           ),
         );
       }
@@ -501,15 +497,14 @@ class _CodeViewState extends State<CodeView>
             enabled: widget.codeViewController.scriptsHistory.hasScripts,
           ),
         ],
-        contentBuilder: contentBuilder,
+        contentBuilder: (context, ScriptRef? scriptRef) {
+          return Expanded(
+            child: contentBuilder(context, scriptRef),
+          );
+        },
       );
     }
-    // TODO(bkonyi): this is a hack to deal with some Expanded elements
-    return Column(
-      children: [
-        contentBuilder(context, widget.scriptRef),
-      ],
-    );
+    return contentBuilder(context, widget.scriptRef);
   }
 
   Widget buildFileSearchField() {
