@@ -47,6 +47,14 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     this.parent,
   );
 
+  /// Stores the [TextStyle] that was used when building the description.
+  ///
+  /// When not set, then the description has not been built yet.
+  /// This style is used when approximating the length of the
+  /// [DiagnosticsNodeDescription], to ensure we are approximating the content
+  /// area using the right style.
+  TextStyle? descriptionTextStyleFromBuild;
+
   static final CustomIconMaker iconMaker = CustomIconMaker();
 
   static BoxConstraints deserializeConstraints(Map<String, Object?> json) {
