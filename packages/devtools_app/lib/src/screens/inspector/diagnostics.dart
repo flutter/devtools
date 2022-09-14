@@ -52,7 +52,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
   final DebuggerController debuggerController;
   final TextStyle? nodeDescriptionHighlightStyle;
 
-  Widget _paddedIcon(Widget icon) {
+  static Widget _paddedIcon(Widget icon) {
     return Padding(
       padding: const EdgeInsets.only(right: iconPadding),
       child: icon,
@@ -95,12 +95,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       spanWidth +=
           calculateTextSpanWidth(TextSpan(text: name, style: textStyle));
     } else {
-      final approximateIconWidth = calculateTextSpanWidth(
-        TextSpan(
-          text: 'A',
-          style: textStyle,
-        ),
-      );
+      final approximateIconWidth = IconKind.info.icon.width + iconPadding;
 
       // When there is no name, an icon will be shown with the text spans.
       spanWidth += approximateIconWidth;
