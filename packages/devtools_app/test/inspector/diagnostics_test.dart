@@ -226,6 +226,82 @@ void main() {
           ),
         );
       });
+
+      testWidgets('error node with different fontSize',
+          (WidgetTester tester) async {
+        final nodeJson = <String, Object?>{
+          'widgetRuntimeType': 'Row',
+          'renderObject': renderObjectJson,
+          'hasChildren': false,
+          'children': [],
+          'description':
+              'this is a showname description, which will show up after the name',
+          'showName': true,
+          'name': 'THE NAME to be shown',
+          'level': 'error',
+        };
+        final diagnosticWithoutService = RemoteDiagnosticsNode(
+          nodeJson,
+          null,
+          false,
+          null,
+        );
+        const textStyle = TextStyle(fontSize: 24.0, fontFamily: 'Roboto');
+        final diagnosticsNodeDescription = DiagnosticsNodeDescription(
+          diagnosticWithoutService,
+          debuggerController: MockDebuggerController(),
+          style: textStyle,
+        );
+
+        await tester.pumpWidget(wrap(diagnosticsNodeDescription));
+
+        print('STEP 1:');
+        final approximatedWidth =
+            DiagnosticsNodeDescription.approximateNodeWidth(
+          diagnosticWithoutService,
+        );
+
+        final diagnosticsNodeFind = find.byType(DiagnosticsNodeDescription);
+        // There are many rich texts, containg the name, and description.
+        final allRichTexts = find
+            .descendant(
+              of: diagnosticsNodeFind,
+              matching: find.byType(RichText),
+            )
+            .evaluate()
+            .map((e) => e.widget as RichText);
+        print('STEP 2:');
+        final allTextSpansFromRichTexts =
+            allRichTexts.map((e) => e.text as TextSpan).toList();
+        final measuredWidthOfAllRichTexts =
+            allRichTexts.fold<double>(0, (previousValue, richText) {
+          final originalTextSpan = richText.text as TextSpan;
+
+          return previousValue +
+              calculateTextSpanWidth(
+                originalTextSpan,
+              );
+        });
+        // double measuredWidthOfAllRichTexts = 0;
+        // for (var i = 0; i < allTextSpansFromRichTexts.length; i++) {
+        //   final originalTextSpan = allTextSpansFromRichTexts[i];
+        //   final textSpan = TextSpan(
+        //     text: originalTextSpan.text,
+        //     style: textStyle,
+        //   );
+        //   if (originalTextSpan.children != null) {
+        //     allTextSpansFromRichTexts
+        //         .addAll(originalTextSpan.children!.map((e) => e as TextSpan));
+        //   }
+        //   measuredWidthOfAllRichTexts += calculateTextSpanWidth(
+        //     textSpan,
+        //   );
+        // }
+        expect(
+          approximatedWidth,
+          moreOrLessEquals(measuredWidthOfAllRichTexts, epsilon: 5.0),
+        );
+      });
     });
   });
 }

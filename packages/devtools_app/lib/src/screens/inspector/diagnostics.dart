@@ -84,8 +84,9 @@ class DiagnosticsNodeDescription extends StatelessWidget {
 
     // An Icon is approximately the width of 1 character
     final approximateIconWidth = calculateTextSpanWidth(
-      const TextSpan(
+      TextSpan(
         text: 'A',
+        style: textStyle,
       ),
     );
 
@@ -97,7 +98,8 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         // If there is a description then a separator will show with the name.
         name += ': ';
       }
-      spanWidth += calculateTextSpanWidth(TextSpan(text: name));
+      spanWidth +=
+          calculateTextSpanWidth(TextSpan(text: name, style: textStyle));
     } else {
       // When there is no name, an icon will be shown with the text spans.
       spanWidth += approximateIconWidth;
