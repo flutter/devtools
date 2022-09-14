@@ -54,7 +54,8 @@ void main() {
     )
   ];
   final codeViewController = debuggerController.debuggerCodeViewController;
-  when(mockBreakpointManager.breakpoints).thenReturn(ValueNotifier(breakpoints));
+  when(mockBreakpointManager.breakpoints)
+      .thenReturn(ValueNotifier(breakpoints));
   when(mockBreakpointManager.breakpointsWithLocation)
       .thenReturn(ValueNotifier(breakpointsWithLocation));
 

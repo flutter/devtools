@@ -12,7 +12,6 @@ import '../../shared/globals.dart';
 import 'debugger_model.dart';
 
 class BreakpointManager extends Disposer {
-
   BreakpointManager({this.initialSwitchToIsolate = true});
 
   final bool initialSwitchToIsolate;

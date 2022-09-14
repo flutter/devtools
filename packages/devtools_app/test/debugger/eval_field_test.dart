@@ -227,8 +227,7 @@ class _EvalFieldTestObjects {
 Future<_EvalFieldTestObjects> _setupEvalFieldObjects(
   WidgetTester tester,
 ) async {
-  final debuggerController =
-      DebuggerController(initialSwitchToIsolate: false);
+  final debuggerController = DebuggerController(initialSwitchToIsolate: false);
 
   final evalField = ExpressionEvalField(
     controller: debuggerController,
