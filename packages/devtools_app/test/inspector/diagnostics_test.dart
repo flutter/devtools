@@ -113,7 +113,7 @@ void main() {
     });
 
     group('approximateNodeWidth', () {
-      final epsilon = 5.0;
+      const epsilon = 5.0;
       testWidgets('property diagnostics node with name and description',
           (WidgetTester tester) async {
         final nodeJson = <String, Object?>{
