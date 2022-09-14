@@ -31,6 +31,7 @@ class SnapshotView extends StatelessWidget {
         return _StatsTable(
           data: stats,
           sorting: item.sorting,
+          key: ObjectKey(item),
         );
       },
     );
@@ -59,10 +60,10 @@ class _ClassNameColumn extends ColumnData<HeapStatsRecord> {
 class _InstanceColumn extends ColumnData<HeapStatsRecord> {
   _InstanceColumn()
       : super(
-          'Retained\nInstances',
+          'Non GC-able\nInstances',
           titleTooltip: 'Number of instances of the class, '
               'that have retaining path from the root.',
-          fixedWidthPx: scaleByFontFactor(85.0),
+          fixedWidthPx: scaleByFontFactor(110.0),
           alignment: ColumnAlignment.right,
         );
 
