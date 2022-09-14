@@ -81,22 +81,62 @@ class MemoryOfflineScene extends Scene {
   }
 }
 
-/// Provides snapshots based on test data. First time returns null.
+/// Provides test snapshots. First time returns null.
 class _TestSnapshotTaker implements SnapshotTaker {
-  final List<GoldenHeapTest> tests = goldenHeapTests;
+  bool firstTime = true;
   int index = -1;
 
   @override
   Future<AdaptedHeap?> take() async {
     // This delay is needed for UI to start showing the progress indicator.
     await Future.delayed(const Duration(milliseconds: 100));
-    if (index < 0) {
-      index = 0;
+
+    // Return null if it is the first time.
+    if (firstTime) {
+      firstTime = false;
       return null;
     }
 
-    final result = await tests[index].loadHeap();
-    index = index % tests.length;
-    return result;
+    index = (index + 1) % (_simpleHeapTests.length + goldenHeapTests.length);
+
+    // Return simple test.
+    if (index < _simpleHeapTests.length) return _simpleHeapTests[index];
+
+    return await goldenHeapTests[index - _simpleHeapTests.length].loadHeap();
   }
 }
+
+final _simpleHeapTests = <AdaptedHeap>[
+  _createHeap({'A': 1, 'B': 2}),
+  _createHeap({'B': 1, 'C': 2, 'D': 3}),
+];
+
+AdaptedHeap _createHeap(Map<String, int> classToInstance) {
+  const rootIndex = 0;
+  final objects = <AdaptedHeapObject>[_createObject('root')];
+  var leafCount = 0;
+
+  // Create objects.
+  for (var entry in classToInstance.entries) {
+    for (var _ in Iterable.generate(entry.value)) {
+      objects.add(_createObject(entry.key));
+      leafCount++;
+    }
+  }
+
+  // Reference each object from root, so that it is visible in the
+  // snapshot view.
+  for (var i in Iterable.generate(leafCount)) {
+    objects[rootIndex].references.add(i + 1);
+  }
+
+  return AdaptedHeap(objects, rootIndex: rootIndex);
+}
+
+AdaptedHeapObject _createObject(String className) => AdaptedHeapObject(
+      code: 0,
+      references: [],
+      className: className,
+      library: 'my_lib',
+      shallowSize: 80, // 10 bytes
+    );

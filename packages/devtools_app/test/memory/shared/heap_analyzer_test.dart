@@ -247,8 +247,8 @@ AdaptedHeapObject _createOneByteObject(
     AdaptedHeapObject(
       code: codeAndIndex,
       references: references,
-      className: '',
-      library: '',
+      className: 'MyClass',
+      library: 'my_lib',
       shallowSize: 1,
     );
 

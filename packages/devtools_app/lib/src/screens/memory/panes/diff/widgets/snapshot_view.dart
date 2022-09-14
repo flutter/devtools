@@ -179,13 +179,11 @@ class _StatsTableState extends State<_StatsTable> {
         sortColumn,
         direction, {
         secondarySortColumn,
-      }) {
-        print('sort changed');
-        setState(() {
-          widget.sorting.columnIndex = _columns.indexOf(sortColumn);
-          widget.sorting.direction = direction;
-        });
-      },
+      }) =>
+          setState(() {
+        widget.sorting.columnIndex = _columns.indexOf(sortColumn);
+        widget.sorting.direction = direction;
+      }),
     );
   }
 }
