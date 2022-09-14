@@ -12,7 +12,7 @@ import '../../../shared/heap/model.dart';
 import '../model.dart';
 
 class SnapshotView extends StatelessWidget {
-  SnapshotView({Key? key, required this.item}) : super(key: key);
+  const SnapshotView({Key? key, required this.item}) : super(key: key);
 
   final SnapshotListItem item;
 

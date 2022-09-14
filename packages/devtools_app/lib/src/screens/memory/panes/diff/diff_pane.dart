@@ -2,17 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/screens/memory/panes/diff/widgets/snapshot_control.dart';
-import 'package:devtools_app/src/screens/memory/panes/diff/widgets/snapshot_list.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/split.dart';
-import '../../../../shared/table.dart';
-import '../../../../shared/theme.dart';
 import '../../shared/heap/model.dart';
 import 'diff_pane_controller.dart';
 import 'model.dart';
+import 'widgets/snapshot_control.dart';
+import 'widgets/snapshot_list.dart';
 import 'widgets/snapshot_view.dart';
 
 /// While this pane is under construction, we do not want our users to see it.
@@ -40,24 +38,24 @@ class _DiffPaneState extends State<DiffPane> {
 
   @override
   Widget build(BuildContext context) {
-    late Widget listContent;
-    final item = controller.selected;
-
-    if (item is InformationListItem) {
-      listContent = const _SnapshotDoc();
-    } else if (item is SnapshotListItem) {
-      listContent = _SnapshotContent(
-        item: item,
-        controller: controller,
-      );
-    } else {
-      throw Exception('Unexpected type of item: ${item.runtimeType}.');
-    }
-
     return DualValueListenableBuilder(
       firstListenable: controller.snapshots,
       secondListenable: controller.selectedIndex,
       builder: (_, snapshots, index, __) {
+        late Widget listContent;
+        final item = controller.selected;
+
+        if (item is InformationListItem) {
+          listContent = const _SnapshotDoc();
+        } else if (item is SnapshotListItem) {
+          listContent = _SnapshotContent(
+            item: item,
+            controller: controller,
+          );
+        } else {
+          throw Exception('Unexpected type of item: ${item.runtimeType}.');
+        }
+
         return Split(
           axis: Axis.horizontal,
           initialFractions: const [0.2, 0.8],
