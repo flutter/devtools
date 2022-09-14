@@ -20,7 +20,6 @@ import '../../shared/dialogs.dart';
 import '../../shared/globals.dart';
 import '../../shared/history_viewport.dart';
 import '../../shared/object_tree.dart';
-import '../../shared/split.dart';
 import '../../shared/theme.dart';
 import '../../shared/utils.dart';
 import '../../ui/colors.dart';
@@ -32,82 +31,13 @@ import 'codeview_controller.dart';
 import 'common.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
-import 'debugger_screen.dart';
 import 'file_search.dart';
 import 'key_sets.dart';
-import 'program_explorer.dart';
 import 'program_explorer_model.dart';
 import 'variables.dart';
 
 final debuggerCodeViewSearchKey =
     GlobalKey(debugLabel: 'DebuggerCodeViewSearchKey');
-
-class CodeArea extends StatelessWidget {
-  const CodeArea({
-    required this.controller,
-    this.debuggerController,
-  });
-
-  final CodeViewController controller;
-  final DebuggerController? debuggerController;
-
-  void _onNodeSelected(VMServiceObjectNode? node) {
-    final location = node?.location;
-    if (location != null) {
-      controller.showScriptLocation(location);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: controller.fileExplorerVisible,
-      builder: (context, visible, child) {
-        if (visible) {
-          // TODO(devoncarew): Animate this opening and closing.
-          return Split(
-            axis: Axis.horizontal,
-            initialFractions: const [0.70, 0.30],
-            children: [
-              child!,
-              ProgramExplorer(
-                controller: controller.programExplorerController,
-                onNodeSelected: _onNodeSelected,
-              ),
-            ],
-          );
-        } else {
-          return child!;
-        }
-      },
-      child: DualValueListenableBuilder<ScriptRef?, ParsedScript?>(
-        firstListenable: controller.currentScriptRef,
-        secondListenable: controller.currentParsedScript,
-        builder: (context, scriptRef, parsedScript, _) {
-          // TODO(bkonyi)
-          /*
-          if (scriptRef != null && parsedScript != null && !_shownFirstScript) {
-            ga.timeEnd(DebuggerScreen.id, analytics_constants.pageReady);
-            serviceManager.sendDwdsEvent(
-              screen: DebuggerScreen.id,
-              action: analytics_constants.pageReady,
-            );
-            _shownFirstScript = true;
-          }
-          */
-          return CodeView(
-            key: DebuggerScreenBody.codeViewKey,
-            codeViewController: controller,
-            debuggerController: debuggerController,
-            scriptRef: scriptRef,
-            parsedScript: parsedScript,
-            onSelected: breakpointManager.toggleBreakpoint,
-          );
-        },
-      ),
-    );
-  }
-}
 
 // TODO(kenz): consider moving lines / pausedPositions calculations to the
 // controller.

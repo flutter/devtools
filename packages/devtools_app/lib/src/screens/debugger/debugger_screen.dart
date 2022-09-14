@@ -23,6 +23,7 @@ import '../../ui/icons.dart';
 import 'breakpoints.dart';
 import 'call_stack.dart';
 import 'codeview.dart';
+import 'codeview_controller.dart';
 import 'controls.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
@@ -125,6 +126,8 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
       debuggerController: controller,
     );
 
+    final codeViewController = controller.debuggerCodeViewController;
+
     return Split(
       axis: Axis.horizontal,
       initialFractions: const [0.25, 0.75],
@@ -135,12 +138,68 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
             const DebuggingControls(),
             const SizedBox(height: denseRowSpacing),
             Expanded(
-              child: codeArea,
+              child: ValueListenableBuilder<bool>(
+                valueListenable: codeViewController.fileExplorerVisible,
+                builder: (context, visible, child) {
+                  if (visible) {
+                    // TODO(devoncarew): Animate this opening and closing.
+                    return Split(
+                      axis: Axis.horizontal,
+                      initialFractions: const [0.70, 0.30],
+                      children: [
+                        child!,
+                        ProgramExplorer(
+                          controller:
+                              codeViewController.programExplorerController,
+                          onNodeSelected: _onNodeSelected,
+                        ),
+                      ],
+                    );
+                  } else {
+                    return child!;
+                  }
+                },
+                child: DualValueListenableBuilder<ScriptRef?, ParsedScript?>(
+                  firstListenable: codeViewController.currentScriptRef,
+                  secondListenable: codeViewController.currentParsedScript,
+                  builder: (context, scriptRef, parsedScript, _) {
+                    // TODO(bkonyi)
+
+                    if (scriptRef != null &&
+                        parsedScript != null &&
+                        !_shownFirstScript) {
+                      ga.timeEnd(
+                          DebuggerScreen.id, analytics_constants.pageReady);
+                      serviceManager.sendDwdsEvent(
+                        screen: DebuggerScreen.id,
+                        action: analytics_constants.pageReady,
+                      );
+                      _shownFirstScript = true;
+                    }
+
+                    return CodeView(
+                      key: DebuggerScreenBody.codeViewKey,
+                      codeViewController: codeViewController,
+                      debuggerController: controller,
+                      scriptRef: scriptRef,
+                      parsedScript: parsedScript,
+                      onSelected: breakpointManager.toggleBreakpoint,
+                    );
+                  },
+                ),
+              ),
             ),
           ],
         ),
       ],
     );
+  }
+
+  void _onNodeSelected(VMServiceObjectNode? node) {
+    final location = node?.location;
+    if (location != null) {
+      controller.debuggerCodeViewController.showScriptLocation(location);
+    }
   }
 
   Widget debuggerPanes() {
