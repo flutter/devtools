@@ -21,6 +21,7 @@ bool shouldShowDiffPane = true;
 
 class DiffPane extends StatefulWidget {
   const DiffPane({Key? key, required this.snapshotTaker}) : super(key: key);
+
   final SnapshotTaker snapshotTaker;
 
   @override
