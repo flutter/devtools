@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 
 import '../../primitives/utils.dart';
+import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
 import '../../shared/object_tree.dart';
 import '../../shared/theme.dart';
@@ -51,7 +52,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
   final TextStyle? style;
   final DebuggerController debuggerController;
   final TextStyle? nodeDescriptionHighlightStyle;
-
+  // final late AnimationController controller;
   static Widget _paddedIcon(Widget icon) {
     return Padding(
       padding: const EdgeInsets.only(right: iconPadding),
@@ -198,19 +199,25 @@ class DiagnosticsNodeDescription extends StatelessWidget {
           isolateRef: inspectorService.isolateRef,
           diagnostic: diagnosticLocal,
         );
-        await buildVariablesTree(variable);
-        for (var child in variable.children) {
-          await buildVariablesTree(child);
-        }
-        variable.expand();
-        // TODO(jacobr): should we ensure the hover has not yet been cancelled?
-
         return HoverCardData(
           title: diagnosticLocal.toStringShort(),
           contents: Material(
-            child: ExpandableVariable(
-              debuggerController: debuggerController,
-              variable: variable,
+            child: FutureBuilder<void>(
+              future: _buildVariablesTreeForHoverCard(variable),
+              builder: (context, snapshot) {
+                print(snapshot.connectionState);
+                if (snapshot.connectionState == ConnectionState.done) {
+                  return Material(
+                    child: ExpandableVariable(
+                      debuggerController: debuggerController,
+                      variable: variable,
+                    ),
+                  );
+                }
+                return const Center(
+                  child: CenteredCircularProgressIndicator(),
+                );
+              },
             ),
           ),
         );
@@ -222,6 +229,14 @@ class DiagnosticsNodeDescription extends StatelessWidget {
               text: textSpan,
             ),
     );
+  }
+
+  Future<void> _buildVariablesTreeForHoverCard(DartObjectNode variable) async {
+    await buildVariablesTree(variable);
+    for (var child in variable.children) {
+      await buildVariablesTree(child);
+    }
+    variable.expand();
   }
 
   @override
