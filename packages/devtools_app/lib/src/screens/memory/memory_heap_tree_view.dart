@@ -14,6 +14,7 @@ import '../../analytics/analytics.dart' as ga;
 import '../../analytics/constants.dart' as analytics_constants;
 import '../../config_specific/logger/logger.dart' as logger;
 import '../../primitives/auto_dispose_mixin.dart';
+import '../../primitives/feature_flags.dart';
 import '../../primitives/utils.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
@@ -37,11 +38,6 @@ import 'panes/allocation_tracing/allocation_profile_tracing_view.dart';
 import 'panes/diff/diff_pane.dart';
 import 'panes/leaks/leaks_pane.dart';
 import 'primitives/memory_utils.dart';
-
-// TODO(bkonyi): enable new allocation profile table when we're ready to remove
-// the existing allocations table.
-@visibleForTesting
-bool enableNewAllocationProfileTable = false;
 
 const memorySearchFieldKeyName = 'MemorySearchFieldKey';
 
@@ -206,7 +202,7 @@ class HeapTreeViewState extends State<HeapTree>
 
   void _initTabs() {
     _tabs = [
-      if (enableNewAllocationProfileTable) ...[
+      if (FeatureFlags.newAllocationProfileTable) ...[
         DevToolsTab.create(
           key: dartHeapTableProfileKey,
           tabName: 'Profile',
@@ -228,7 +224,7 @@ class HeapTreeViewState extends State<HeapTree>
         gaPrefix: _gaPrefix,
         tabName: 'Allocations',
       ),
-      if (shouldShowDiffPane)
+      if (FeatureFlags.memoryDiffing)
         DevToolsTab.create(
           key: diffTabKey,
           gaPrefix: _gaPrefix,
@@ -497,7 +493,7 @@ class HeapTreeViewState extends State<HeapTree>
               controller: _tabController,
               children: [
                 // Profile Tab
-                if (enableNewAllocationProfileTable) ...[
+                if (FeatureFlags.newAllocationProfileTable) ...[
                   KeepAliveWrapper(
                     child: AllocationProfileTableView(
                       controller: controller.allocationProfileController,
@@ -532,7 +528,7 @@ class HeapTreeViewState extends State<HeapTree>
                   ),
                 ),
                 // Diff tab.
-                if (shouldShowDiffPane)
+                if (FeatureFlags.memoryDiffing)
                   const KeepAliveWrapper(child: DiffPane()),
                 // Leaks tab.
                 if (controller.shouldShowLeaksTab.value)

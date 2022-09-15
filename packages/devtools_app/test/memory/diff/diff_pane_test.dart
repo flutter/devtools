@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/screens/memory/panes/diff/diff_pane.dart';
+import 'package:devtools_app/src/primitives/feature_flags.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('Diff tab is off yet.', () {
-    expect(shouldShowDiffPane, false);
+    expect(FeatureFlags.memoryDiffing, false);
   });
 }
