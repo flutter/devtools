@@ -7,8 +7,8 @@
 /// Flags to hide features under construction.
 class FeatureFlags {
   /// https://github.com/flutter/devtools/issues/4335
-  static bool newAllocationProfileTable = false;
+  static bool newAllocationProfileTable = true;
 
   /// https://github.com/flutter/devtools/issues/3949
-  static bool memoryDiffing = false;
+  static bool memoryDiffing = true;
 }
