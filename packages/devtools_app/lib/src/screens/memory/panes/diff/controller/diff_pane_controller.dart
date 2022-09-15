@@ -2,20 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 
 import '../../../../../primitives/utils.dart';
-import '../../../../../shared/common_widgets.dart';
 import '../../../primitives/memory_utils.dart';
 import '../../../shared/heap/model.dart';
 import 'model.dart';
 
 class DiffPaneController {
   DiffPaneController(this.snapshotTaker);
-
-  final listScrollController = ScrollController();
 
   final SnapshotTaker snapshotTaker;
 
@@ -47,7 +45,6 @@ class DiffPaneController {
     );
     await future;
     final newElementIndex = snapshots.value.length - 1;
-    listScrollController.autoScrollToBottom();
     selectedIndex.value = newElementIndex;
     _isProcessing.value = false;
   }
@@ -68,6 +65,6 @@ class DiffPaneController {
     snapshots.removeRange(selectedIndex.value, selectedIndex.value + 1);
     // We must change the selectedIndex, because otherwise the content will
     // not be re-rendered.
-    selectedIndex.value = selectedIndex.value - 1;
+    selectedIndex.value = max(selectedIndex.value - 1, 0);
   }
 }

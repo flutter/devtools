@@ -40,37 +40,36 @@ class _DiffPaneState extends State<DiffPane> {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<int>(
+    final Widget itemContent = ValueListenableBuilder<int>(
       valueListenable: controller.selectedIndex,
       builder: (_, index, __) {
-        late Widget listContent;
         final item = controller.selected;
 
         if (item is InformationListItem) {
-          listContent = const _SnapshotDoc();
+          return const _SnapshotDoc();
         } else if (item is SnapshotListItem) {
-          listContent = _SnapshotContent(
+          return _SnapshotContent(
             item: item,
             controller: controller,
           );
         } else {
           throw Exception('Unexpected type of item: ${item.runtimeType}.');
         }
-
-        return Split(
-          axis: Axis.horizontal,
-          initialFractions: const [0.2, 0.8],
-          minSizes: const [80, 80],
-          children: [
-            OutlineDecoration(
-              child: SnapshotList(controller: controller),
-            ),
-            OutlineDecoration(
-              child: listContent,
-            ),
-          ],
-        );
       },
+    );
+
+    return Split(
+      axis: Axis.horizontal,
+      initialFractions: const [0.2, 0.8],
+      minSizes: const [80, 80],
+      children: [
+        OutlineDecoration(
+          child: SnapshotList(controller: controller),
+        ),
+        OutlineDecoration(
+          child: itemContent,
+        ),
+      ],
     );
   }
 }
