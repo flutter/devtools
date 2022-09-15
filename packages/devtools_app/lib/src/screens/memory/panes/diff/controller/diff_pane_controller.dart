@@ -16,8 +16,6 @@ class DiffPaneController {
 
   final selectedIndex = ValueNotifier<int>(0);
 
-  final scrollToLastSnapshot = ValueNotifier<int>(0);
-
   /// If true, some process is going on.
   ValueListenable<bool> get isProcessing => _isProcessing;
   final _isProcessing = ValueNotifier<bool>(false);
@@ -40,7 +38,6 @@ class DiffPaneController {
     );
     await future;
     final newElementIndex = snapshots.value.length - 1;
-    scrollToLastSnapshot.value++;
     selectedIndex.value = newElementIndex;
     _isProcessing.value = false;
   }

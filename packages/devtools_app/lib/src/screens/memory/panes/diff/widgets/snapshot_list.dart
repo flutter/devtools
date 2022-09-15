@@ -115,17 +115,23 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
     with AutoDisposeMixin {
   final _headerHeight = 1.20 * defaultRowHeight;
   final _scrollController = ScrollController();
+  late int _currentSnapshotsLength;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    addAutoDisposeListener(widget.controller.snapshots);
-    addAutoDisposeListener(widget.controller.selectedIndex);
-    addAutoDisposeListener(widget.controller.scrollToLastSnapshot, () {
-      _scrollController.autoScrollToBottom();
-      setState(() {});
+    _currentSnapshotsLength = widget.controller.snapshots.value.length;
+    addAutoDisposeListener(widget.controller.snapshots, () {
+      final newSnapshotsLength = widget.controller.snapshots.value.length;
+      if (newSnapshotsLength > _currentSnapshotsLength) {
+        // If new snapshot added, scroll to bottom.
+        setState(() => _scrollController.autoScrollToBottom());
+      }
+      _currentSnapshotsLength = newSnapshotsLength;
     });
+
+    addAutoDisposeListener(widget.controller.selectedIndex);
   }
 
   @override
