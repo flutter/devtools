@@ -152,6 +152,12 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
       },
     );
   }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 }
 
 class _ProgressIndicator extends StatelessWidget {
