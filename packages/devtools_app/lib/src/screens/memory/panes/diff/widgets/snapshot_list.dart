@@ -20,7 +20,7 @@ class SnapshotList extends StatelessWidget {
       children: [
         _ListControlPane(controller: controller),
         Expanded(
-          child: SnapshotListItems(controller: controller),
+          child: _SnapshotListItems(controller: controller),
         ),
       ],
     );
@@ -59,8 +59,8 @@ class _ListControlPane extends StatelessWidget {
   }
 }
 
-class SnapshotListItems extends StatelessWidget {
-  SnapshotListItems({Key? key, required this.controller}) : super(key: key);
+class _SnapshotListItems extends StatelessWidget {
+  _SnapshotListItems({Key? key, required this.controller}) : super(key: key);
 
   final DiffPaneController controller;
   final headerHeight = 1.20 * defaultRowHeight;

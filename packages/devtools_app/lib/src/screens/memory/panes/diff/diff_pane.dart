@@ -9,7 +9,7 @@ import '../../../../shared/split.dart';
 import '../../shared/heap/model.dart';
 import 'controller/diff_pane_controller.dart';
 import 'controller/model.dart';
-import 'widgets/snapshot_control.dart';
+import 'widgets/snapshot_control_pane.dart';
 import 'widgets/snapshot_list.dart';
 import 'widgets/snapshot_view.dart';
 
@@ -21,6 +21,7 @@ bool shouldShowDiffPane = true;
 
 class DiffPane extends StatefulWidget {
   const DiffPane({Key? key, required this.snapshotTaker}) : super(key: key);
+
   final SnapshotTaker snapshotTaker;
 
   @override

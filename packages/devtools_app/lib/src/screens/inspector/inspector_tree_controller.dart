@@ -331,8 +331,8 @@ class InspectorTreeController extends Object
     return (depth + 1) * columnWidth + horizontalPadding;
   }
 
-  double getRowY(int index) {
-    return rowHeight * index + verticalPadding;
+  double rowYTop(int index) {
+    return rowHeight * index;
   }
 
   void nodeChanged(InspectorTreeNode node) {
@@ -383,7 +383,7 @@ class InspectorTreeController extends Object
 
   int get numRows => root?.subtreeSize ?? 0;
 
-  int getRowIndex(double y) => max(0, (y - verticalPadding) ~/ rowHeight);
+  int getRowIndex(double y) => max(0, y ~/ rowHeight);
 
   InspectorTreeRow? getRowForNode(InspectorTreeNode node) {
     final rootLocal = root;
@@ -432,10 +432,15 @@ class InspectorTreeController extends Object
     // positions after the current animations are complete so that computations
     // to start animations to show specific widget scroll to where the target
     // nodes will be displayed rather than where they are currently displayed.
+    final diagnostic = row.node.diagnostic;
+    // The node width is approximated since the widgets are not available at the
+    // time of calculating the bounding box.
+    final approximateNodeWidth =
+        DiagnosticsNodeDescription.approximateNodeWidth(diagnostic);
     return Rect.fromLTWH(
       getDepthIndent(row.depth),
-      getRowY(row.index),
-      rowWidth,
+      rowYTop(row.index),
+      approximateNodeWidth,
       rowHeight,
     );
   }
@@ -483,7 +488,6 @@ class InspectorTreeController extends Object
 
     if (targetRect == null || targetRect.isEmpty) return;
 
-    targetRect = targetRect.inflate(20.0);
     scrollToRect(targetRect);
   }
 
@@ -761,6 +765,9 @@ class _InspectorTreeState extends State<InspectorTree>
 
   late DebuggerController _debuggerController;
 
+  /// When autoscrolling, the number of rows to pad the target location with.
+  static const int _scrollPadCount = 3;
+
   @override
   void initState() {
     super.initState();
@@ -834,55 +841,40 @@ class _InspectorTreeState extends State<InspectorTree>
 //    );
 //  }
 
-  /// Compute the goal x scroll given a y scroll value.
-  ///
-  /// This enables animating the x scroll as the y scroll changes which helps
-  /// keep the relevant content in view while scrolling a large list.
-  double _computeTargetX(double y) {
-    final treeControllerLocal = treeController!;
-    final rowIndex = treeControllerLocal.getRowIndex(y);
-    double? requiredOffset;
-    double minOffset = double.infinity;
-    // TODO(jacobr): use maxOffset as well to better handle the case where the
-    // previous row has a significantly larger indent.
-
-    // TODO(jacobr): if the first or last row is only partially visible, tween
-    // between its indent and the next row to more smoothly change the target x
-    // as the y coordinate changes.
-    if (rowIndex == treeControllerLocal.numRows) {
-      return 0;
-    }
-    final endY = y += safeViewportHeight;
-    for (int i = rowIndex; i < treeControllerLocal.numRows; i++) {
-      final rowY = treeControllerLocal.getRowY(i);
-      if (rowY >= endY) break;
-
-      final row = treeControllerLocal.getCachedRow(i);
-      if (row == null) continue;
-      final rowOffset = treeControllerLocal.getRowOffset(i);
-      if (row.isSelected) {
-        requiredOffset = rowOffset;
-      }
-      minOffset = min(minOffset, rowOffset);
-    }
-    if (requiredOffset == null) {
-      return minOffset;
-    }
-
-    return minOffset;
-  }
-
   @override
   Future<void> scrollToRect(Rect rect) async {
     if (rect == _currentAnimateTarget) {
       // We are in the middle of an animation to this exact rectangle.
       return;
     }
-    _currentAnimateTarget = rect;
-    final targetY = _computeTargetOffsetY(
-      rect.top,
-      rect.bottom,
+
+    final initialX = rect.left;
+    final initialY = rect.top;
+    final yOffsetAtViewportTop = _scrollControllerY.hasClients
+        ? _scrollControllerY.offset
+        : _scrollControllerY.initialScrollOffset;
+    final xOffsetAtViewportLeft = _scrollControllerX.hasClients
+        ? _scrollControllerX.offset
+        : _scrollControllerX.initialScrollOffset;
+
+    final viewPortInScrollControllerSpace = Rect.fromLTWH(
+      xOffsetAtViewportLeft,
+      yOffsetAtViewportTop,
+      safeViewportWidth,
+      safeViewportHeight,
     );
+
+    final isRectInViewPort =
+        viewPortInScrollControllerSpace.contains(rect.topLeft) &&
+            viewPortInScrollControllerSpace.contains(rect.bottomRight);
+    if (isRectInViewPort) {
+      // The rect is already in view, don't scroll
+      return;
+    }
+
+    _currentAnimateTarget = rect;
+
+    final targetY = _padTargetY(initialY: initialY);
     if (_scrollControllerY.hasClients) {
       _currentAnimateY = _scrollControllerY.animateTo(
         targetY,
@@ -894,9 +886,7 @@ class _InspectorTreeState extends State<InspectorTree>
       _scrollControllerY = ScrollController(initialScrollOffset: targetY);
     }
 
-    // Determine a target X coordinate consistent with the target Y coordinate
-    // we will end up as so we get a smooth animation to the final destination.
-    final targetX = _computeTargetX(targetY);
+    final targetX = _padTargetX(initialX: initialX);
     if (_scrollControllerX.hasClients) {
       unawaited(
         _scrollControllerX.animateTo(
@@ -922,40 +912,34 @@ class _InspectorTreeState extends State<InspectorTree>
   // before it is available so we don't need this approximation.
   /// Placeholder viewport height to use if we don't yet know the real
   /// viewport height.
-  static const _placeholderViewportHeight = 1000.0;
+  static const _placeholderViewportSize = Size(1000.0, 1000.0);
 
   double get safeViewportHeight {
     return _scrollControllerY.hasClients
         ? _scrollControllerY.position.viewportDimension
-        : _placeholderViewportHeight;
+        : _placeholderViewportSize.height;
   }
 
-  /// Animate so that the entire range minOffset to maxOffset is within view.
-  double _computeTargetOffsetY(
-    double minOffset,
-    double maxOffset,
-  ) {
-    final currentOffset = _scrollControllerY.hasClients
-        ? _scrollControllerY.offset
-        : _scrollControllerY.initialScrollOffset;
-    final viewportDimension = safeViewportHeight;
-    final currentEndOffset = viewportDimension + currentOffset;
+  double get safeViewportWidth {
+    return _scrollControllerX.hasClients
+        ? _scrollControllerX.position.viewportDimension
+        : _placeholderViewportSize.width;
+  }
 
-    // If the requested range is larger than what the viewport can show at once,
-    // prioritize showing the start of the range.
-    maxOffset = min(viewportDimension + minOffset, maxOffset);
-    if (currentOffset <= minOffset && currentEndOffset >= maxOffset) {
-      return currentOffset; // Nothing to do. The whole range is already in view.
-    }
-    if (currentOffset > minOffset) {
-      // Need to scroll so the minOffset is in view.
-      return minOffset;
-    }
+  /// Pad [initialX] with the horizontal indentation of [padCount] rows.
+  double _padTargetX({
+    required double initialX,
+    int padCount = _scrollPadCount,
+  }) {
+    return initialX - columnWidth * padCount;
+  }
 
-    assert(currentEndOffset < maxOffset);
-    // Need to scroll so the maxOffset is in view at the very bottom of the
-    // list view.
-    return maxOffset - viewportDimension;
+  /// Pad [initialY] so that a row would be placed in the vertical center of
+  /// the screen.
+  double _padTargetY({
+    required double initialY,
+  }) {
+    return initialY - (safeViewportHeight / 2) + rowHeight / 2;
   }
 
   /// Handle arrow keys for the InspectorTree. Ignore other key events so that
