@@ -40,7 +40,7 @@ class _ListControlPane extends StatelessWidget {
       valueListenable: controller.isProcessing,
       builder: (_, isProcessing, __) {
         final takeSnapshotEnabled = !isProcessing;
-        final clearAllEnabled = !isProcessing & controller.hasSnapshots;
+        final clearAllEnabled = !isProcessing && controller.hasSnapshots;
         return Row(
           children: [
             ToolbarAction(

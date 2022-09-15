@@ -29,9 +29,10 @@ class SnapshotView extends StatelessWidget {
         }
 
         return _StatsTable(
+          // The key is passed to persist state.
+          key: ObjectKey(item),
           data: stats,
           sorting: item.sorting,
-          key: ObjectKey(item),
         );
       },
     );
@@ -62,7 +63,7 @@ class _InstanceColumn extends ColumnData<HeapStatsRecord> {
       : super(
           'Non GC-able\nInstances',
           titleTooltip: 'Number of instances of the class, '
-              'that have retaining path from the root.',
+              'that have a retaining path from the root.',
           fixedWidthPx: scaleByFontFactor(110.0),
           alignment: ColumnAlignment.right,
         );
@@ -81,7 +82,8 @@ class _ShallowSizeColumn extends ColumnData<HeapStatsRecord> {
   _ShallowSizeColumn()
       : super(
           'Shallow\nSize',
-          titleTooltip: 'Total shallow Dart (not native) size of objects.',
+          titleTooltip: 'Total shallow size (sum of all references '
+              'to the fields) of objects.',
           fixedWidthPx: scaleByFontFactor(85.0),
           alignment: ColumnAlignment.right,
         );
@@ -108,7 +110,7 @@ class _RetainedSizeColumn extends ColumnData<HeapStatsRecord> {
       : super(
           'Retained\nSize',
           titleTooltip: 'Total size of objects plus objects they retain, '
-              'taking to account only the shortest retaining path for the referenced objects.',
+              'taking into account only the shortest retaining path for the referenced objects.',
           fixedWidthPx: scaleByFontFactor(85.0),
           alignment: ColumnAlignment.right,
         );
