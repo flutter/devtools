@@ -5,7 +5,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../../../../../primitives/utils.dart';
-import '../../../shared/heap/heap_analyzer.dart';
+import '../../../shared/heap/heap_analysis.dart';
 import '../../../shared/heap/model.dart';
 
 abstract class DiffListItem {

@@ -4,8 +4,8 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../shared/heap/heap_analyzer.dart';
 import '../../../shared/heap/model.dart';
+import '../../../shared/heap/spanning_tree.dart';
 import '../instrumentation/model.dart';
 import 'model.dart';
 
