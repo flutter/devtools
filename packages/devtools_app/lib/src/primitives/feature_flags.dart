@@ -7,6 +7,9 @@
 /// Flags to hide features under construction.
 ///
 class FeatureFlags {
+  /// https://github.com/flutter/devtools/issues/4335
   static bool newAllocationProfileTable = false;
+
+  /// https://github.com/flutter/devtools/issues/3949
   static bool memoryDiffing = false;
 }
