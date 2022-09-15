@@ -130,6 +130,20 @@ class _CodeViewState extends State<CodeView>
   }
 
   @override
+  void didUpdateWidget(CodeView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.codeViewController != oldWidget.codeViewController) {
+      cancelListeners();
+
+      addAutoDisposeListener(
+        widget.codeViewController.scriptLocation,
+        _handleScriptLocationChanged,
+      );
+    }
+  }
+
+  @override
   void dispose() {
     gutterController.dispose();
     textController.dispose();

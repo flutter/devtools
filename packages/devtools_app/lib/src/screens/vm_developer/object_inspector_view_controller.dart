@@ -50,8 +50,6 @@ class ObjectInspectorViewController extends DisposableController
       programExplorerController
         ..initialize()
         ..initListeners();
-      // TODO(bkonyi):
-//      codeViewController.initialize();
       selectAndPushMainScript();
       _initialized = true;
     }
