@@ -114,12 +114,13 @@ class _SnapshotListItems extends StatefulWidget {
 class _SnapshotListItemsState extends State<_SnapshotListItems>
     with AutoDisposeMixin {
   final _headerHeight = 1.20 * defaultRowHeight;
-  final _scrollController = ScrollController();
+  late ScrollController _scrollController;
   late int _currentSnapshotsLength;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _scrollController = ScrollController();
 
     _currentSnapshotsLength = widget.controller.snapshots.value.length;
     addAutoDisposeListener(widget.controller.snapshots, () {
