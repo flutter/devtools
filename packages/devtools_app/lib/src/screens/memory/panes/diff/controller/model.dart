@@ -47,6 +47,8 @@ class SnapshotListItem extends DiffListItem {
   String get name => '$_isolateName-$displayNumber';
 
   var sorting = ColumnSorting();
+
+  final diffWith = ValueNotifier<SnapshotListItem?>(null);
 }
 
 class ColumnSorting {

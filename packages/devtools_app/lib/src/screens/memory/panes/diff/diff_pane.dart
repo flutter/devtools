@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/split.dart';
+import '../../../../shared/theme.dart';
 import '../../shared/heap/model.dart';
 import 'controller/diff_pane_controller.dart';
 import 'controller/model.dart';
@@ -99,7 +100,9 @@ class _SnapshotContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        const SizedBox(height: denseRowSpacing),
         SnapshotControlPane(controller: controller),
+        const SizedBox(height: denseRowSpacing),
         Expanded(
           child: SnapshotView(item: item),
         ),
