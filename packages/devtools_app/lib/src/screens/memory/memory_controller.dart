@@ -256,6 +256,7 @@ class MemoryController extends DisposableController
     });
   }
 
+  /// Memory snapshot taker, that is convinient to mock for testing.
   late SnapshotTaker snapshotTaker;
 
   /// Controller for [AllocationProfileTableView].
