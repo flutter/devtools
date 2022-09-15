@@ -46,12 +46,21 @@ class SnapshotControlPane extends StatelessWidget {
 }
 
 class _DiffDropdown extends StatelessWidget {
-  const _DiffDropdown({
+  _DiffDropdown({
     Key? key,
     required this.list,
     required this.current,
     required this.isProcessing,
-  }) : super(key: key);
+  }) : super(key: key) {
+    final diffWith = current.diffWith.value;
+    // Check if diffWith was deleted from list.
+    if (diffWith != null &&
+        diffWith != current &&
+        !list.value.contains(diffWith)) {
+      current.diffWith.value = null;
+    }
+  }
+
   final ListValueNotifier<DiffListItem> list;
   final SnapshotListItem current;
   final ValueListenable<bool> isProcessing;
