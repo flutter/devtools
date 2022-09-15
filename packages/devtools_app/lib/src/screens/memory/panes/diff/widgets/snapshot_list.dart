@@ -118,9 +118,14 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
   late int _currentSnapshotsLength;
 
   @override
+  void initState() {
+    _scrollController = ScrollController();
+    super.initState();
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _scrollController = ScrollController();
 
     _currentSnapshotsLength = widget.controller.snapshots.value.length;
     addAutoDisposeListener(widget.controller.snapshots, () {
