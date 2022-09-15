@@ -209,10 +209,6 @@ class MockDebuggerControllerLegacy extends Mock implements DebuggerController {
     when(debuggerController.variables).thenReturn(ValueNotifier([]));
     return debuggerController;
   }
-
-  @override
-  final ProgramExplorerController programExplorerController =
-      MockProgramExplorerControllerLegacy.withDefaults();
 }
 
 class MockScriptManagerLegacy extends Mock implements ScriptManager {}
