@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../../../../../primitives/auto_dispose_mixin.dart';
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/table.dart';
 import '../../../../../shared/theme.dart';
@@ -100,40 +101,74 @@ class _SnapshotListTitle extends StatelessWidget {
   }
 }
 
-class _SnapshotListItems extends StatelessWidget {
-  _SnapshotListItems({Key? key, required this.controller}) : super(key: key);
+class _SnapshotListItems extends StatefulWidget {
+  const _SnapshotListItems({Key? key, required this.controller})
+      : super(key: key);
 
   final DiffPaneController controller;
-  final headerHeight = 1.20 * defaultRowHeight;
+
+  @override
+  State<_SnapshotListItems> createState() => _SnapshotListItemsState();
+}
+
+class _SnapshotListItemsState extends State<_SnapshotListItems>
+    with AutoDisposeMixin {
+  final _headerHeight = 1.20 * defaultRowHeight;
+  late ScrollController _scrollController;
+  late int _currentSnapshotsLength;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    _currentSnapshotsLength = widget.controller.snapshots.value.length;
+    addAutoDisposeListener(widget.controller.snapshots, () {
+      final newSnapshotsLength = widget.controller.snapshots.value.length;
+      if (newSnapshotsLength > _currentSnapshotsLength) {
+        // If new snapshot added, scroll to bottom.
+        setState(() => _scrollController.autoScrollToBottom());
+      }
+      _currentSnapshotsLength = newSnapshotsLength;
+    });
+
+    addAutoDisposeListener(widget.controller.selectedIndex);
+  }
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<List<DiffListItem>>(
-      valueListenable: controller.snapshots,
-      builder: (_, list, __) {
-        return ListView.builder(
-          controller: controller.scrollController,
-          shrinkWrap: true,
-          itemCount: controller.snapshots.value.length,
-          itemBuilder: (context, index) {
-            return Container(
-              height: headerHeight,
-              color: controller.selectedIndex.value == index
-                  ? Theme.of(context).selectedRowColor
-                  : null,
-              child: InkWell(
-                canRequestFocus: false,
-                onTap: () => controller.selectedIndex.value = index,
-                child: _SnapshotListTitle(
-                  item: controller.snapshots.value[index],
-                  selected: index == controller.selectedIndex.value,
-                ),
-              ),
-            );
-          },
+    return ListView.builder(
+      controller: _scrollController,
+      shrinkWrap: true,
+      itemCount: widget.controller.snapshots.value.length,
+      itemBuilder: (context, index) {
+        return Container(
+          height: _headerHeight,
+          color: widget.controller.selectedIndex.value == index
+              ? Theme.of(context).selectedRowColor
+              : null,
+          child: InkWell(
+            canRequestFocus: false,
+            onTap: () => widget.controller.selectedIndex.value = index,
+            child: _SnapshotListTitle(
+              item: widget.controller.snapshots.value[index],
+              selected: index == widget.controller.selectedIndex.value,
+            ),
+          ),
         );
       },
     );
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 }
 

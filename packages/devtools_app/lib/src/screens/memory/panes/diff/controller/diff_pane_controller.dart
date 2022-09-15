@@ -4,16 +4,12 @@
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 
 import '../../../../../primitives/utils.dart';
-import '../../../../../shared/common_widgets.dart';
 import '../../../primitives/memory_utils.dart';
 import 'model.dart';
 
 class DiffPaneController {
-  final scrollController = ScrollController();
-
   /// The list contains one item that show information and all others
   /// are snapshots.
   final snapshots = ListValueNotifier(<DiffListItem>[InformationListItem()]);
@@ -42,7 +38,6 @@ class DiffPaneController {
     );
     await future;
     final newElementIndex = snapshots.value.length - 1;
-    scrollController.autoScrollToBottom();
     selectedIndex.value = newElementIndex;
     _isProcessing.value = false;
   }
