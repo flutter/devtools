@@ -1,7 +1,7 @@
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
+import 'package:devtools_app/src/primitives/feature_flags.dart';
 import 'package:devtools_app/src/screens/memory/memory_controller.dart';
-import 'package:devtools_app/src/screens/memory/memory_heap_tree_view.dart';
 import 'package:devtools_app/src/screens/memory/memory_screen.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/diff_pane.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/model.dart';
@@ -34,8 +34,8 @@ class MemoryOfflineScene extends Scene {
 
   @override
   Future<void> setUp() async {
-    enableNewAllocationProfileTable = true;
-    shouldShowDiffPane = true;
+    FeatureFlags.newAllocationProfileTable = true;
+    FeatureFlags.memoryDiffing = true;
 
     await ensureInspectorDependencies();
     setGlobal(OfflineModeController, OfflineModeController());
@@ -76,8 +76,8 @@ class MemoryOfflineScene extends Scene {
   String get title => '$MemoryOfflineScene';
 
   void tearDown() {
-    enableNewAllocationProfileTable = false;
-    shouldShowDiffPane = false;
+    FeatureFlags.newAllocationProfileTable = false;
+    FeatureFlags.memoryDiffing = false;
   }
 }
 

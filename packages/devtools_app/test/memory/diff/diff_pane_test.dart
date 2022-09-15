@@ -7,6 +7,7 @@ import 'package:devtools_app/src/screens/memory/memory_screen.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/diff_pane.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
+import 'package:devtools_app/src/primitives/feature_flags.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../matchers/matchers.dart';
@@ -14,7 +15,7 @@ import '../../scenes/memory/offline.dart';
 
 void main() {
   test('Diff tab is off yet.', () {
-    expect(shouldShowDiffPane, false);
+    expect(FeatureFlags.memoryDiffing, false);
   });
 
   group('Diff pane', () {

@@ -13,12 +13,6 @@ import 'widgets/snapshot_control_pane.dart';
 import 'widgets/snapshot_list.dart';
 import 'widgets/snapshot_view.dart';
 
-/// While this pane is under construction, we do not want our users to see it.
-///
-/// Flip this flag locally to test the pane and flip back before checking in.
-/// TODO: before removing this flag add widget/golden testing for the diff pane.
-bool shouldShowDiffPane = true;
-
 class DiffPane extends StatefulWidget {
   const DiffPane({Key? key, required this.snapshotTaker}) : super(key: key);
 
