@@ -119,8 +119,8 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
 
   @override
   void initState() {
-    _scrollController = ScrollController();
     super.initState();
+    _scrollController = ScrollController();
   }
 
   @override
