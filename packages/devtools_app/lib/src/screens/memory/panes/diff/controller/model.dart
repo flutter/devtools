@@ -37,7 +37,7 @@ class SnapshotListItem extends DiffListItem with AutoDisposeControllerMixin {
       _isProcessing.value = false;
     });
 
-    addAutoDisposeListener(diffWith, _handleDiffWithChange);
+    addAutoDisposeListener(diffWith, _handleDiff);
   }
 
   final String _isolateName;
@@ -54,7 +54,7 @@ class SnapshotListItem extends DiffListItem with AutoDisposeControllerMixin {
 
   final diffWith = ValueNotifier<SnapshotListItem?>(null);
 
-  void _handleDiffWithChange() {}
+  void _handleDiff() {}
 }
 
 class ColumnSorting {
