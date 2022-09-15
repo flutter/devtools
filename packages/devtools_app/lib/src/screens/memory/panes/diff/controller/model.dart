@@ -4,11 +4,12 @@
 
 import 'package:flutter/foundation.dart';
 
+import '../../../../../primitives/auto_dispose.dart';
 import '../../../../../primitives/utils.dart';
 import '../../../shared/heap/heap_analyzer.dart';
 import '../../../shared/heap/model.dart';
 
-abstract class DiffListItem {
+abstract class DiffListItem extends DisposableController {
   /// Number, that, if shown in name, should be unique in the list.
   ///
   /// If the number is not shown, it should be 0.
@@ -23,7 +24,7 @@ class InformationListItem extends DiffListItem {
   int get displayNumber => 0;
 }
 
-class SnapshotListItem extends DiffListItem {
+class SnapshotListItem extends DiffListItem with AutoDisposeControllerMixin {
   SnapshotListItem(
     Future<AdaptedHeap?> receiver,
     this.displayNumber,
@@ -35,11 +36,14 @@ class SnapshotListItem extends DiffListItem {
       if (heap != null) stats = heapStats(heap);
       _isProcessing.value = false;
     });
+
+    addAutoDisposeListener(diffWith, _handleDiffWithChange);
   }
 
   final String _isolateName;
 
   List<HeapStatsRecord>? stats;
+  List<HeapStatsRecord>? diff;
 
   @override
   final int displayNumber;
@@ -49,6 +53,8 @@ class SnapshotListItem extends DiffListItem {
   var sorting = ColumnSorting();
 
   final diffWith = ValueNotifier<SnapshotListItem?>(null);
+
+  void _handleDiffWithChange() {}
 }
 
 class ColumnSorting {
