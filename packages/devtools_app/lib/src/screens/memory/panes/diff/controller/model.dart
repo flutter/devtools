@@ -42,8 +42,8 @@ class SnapshotListItem extends DiffListItem with AutoDisposeControllerMixin {
 
   final String _isolateName;
 
-  List<HeapStatsRecord>? stats;
-  List<HeapStatsRecord>? diff;
+  HeapStatistics? stats;
+  HeapStatistics? diff;
 
   @override
   final int displayNumber;

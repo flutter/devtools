@@ -15,6 +15,7 @@ class _JsonFields {
   static const String library = 'library';
   static const String shallowSize = 'shallowSize';
   static const String rootIndex = 'rootIndex';
+  static const String created = 'created';
 }
 
 /// Contains information from [HeapSnapshotGraph],
@@ -22,14 +23,20 @@ class _JsonFields {
 class AdaptedHeap {
   /// Default value for rootIndex is taken from the doc:
   /// https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/heap_snapshot.md#object-ids
-  AdaptedHeap(this.objects, {this.rootIndex = _defaultRootIndex})
-      : assert(objects.isNotEmpty),
-        assert(objects.length > rootIndex);
+  AdaptedHeap(
+    this.objects, {
+    DateTime? created,
+    this.rootIndex = _defaultRootIndex,
+  })  : assert(objects.isNotEmpty),
+        assert(objects.length > rootIndex) {
+    this.created = created ?? DateTime.now();
+  }
 
   factory AdaptedHeap.fromJson(Map<String, dynamic> json) => AdaptedHeap(
         (json[_JsonFields.objects] as List<dynamic>)
             .map((e) => AdaptedHeapObject.fromJson(e))
             .toList(),
+        created: json[_JsonFields.created] ?? DateTime.now(),
         rootIndex: json[_JsonFields.rootIndex] ?? _defaultRootIndex,
       );
 
@@ -37,17 +44,19 @@ class AdaptedHeap {
         graph.objects
             .map((e) => AdaptedHeapObject.fromHeapSnapshotObject(e))
             .toList(),
+        created: DateTime.now(),
       );
 
   static const int _defaultRootIndex = 1;
 
   final int rootIndex;
+  AdaptedHeapObject get root => objects[rootIndex];
 
   final List<AdaptedHeapObject> objects;
 
   bool isSpanningTreeBuilt = false;
 
-  AdaptedHeapObject get root => objects[rootIndex];
+  late DateTime created;
 
   /// Heap objects by identityHashCode.
   late final Map<IdentityHashCode, int> _objectsByCode = Map.fromIterable(
@@ -59,6 +68,7 @@ class AdaptedHeap {
   Map<String, dynamic> toJson() => {
         _JsonFields.objects: objects.map((e) => e.toJson()).toList(),
         _JsonFields.rootIndex: rootIndex,
+        _JsonFields.created: created,
       };
 
   HeapPath? _retainingPath(IdentityHashCode code) {
@@ -173,6 +183,16 @@ class HeapStatsRecord {
   int instanceCount = 0;
 
   String get fullClassName => _fullClassName(library, className);
+  bool get isZero =>
+      shallowSize == 0 && retainedSize == 0 && instanceCount == 0;
+}
+
+class HeapStatistics {
+  HeapStatistics(this.map);
+
+  /// Maps full class name to stats record of this class.
+  final Map<String, HeapStatsRecord> map;
+  late final List<HeapStatsRecord> list = map.values.toList(growable: false);
 }
 
 String _fullClassName(String library, String className) =>

@@ -136,7 +136,7 @@ class _StatsTable extends StatefulWidget {
     required this.data,
     required this.sorting,
   }) : super(key: key);
-  final List<HeapStatsRecord> data;
+  final HeapStatistics data;
   final ColumnSorting sorting;
 
   @override
@@ -171,7 +171,7 @@ class _StatsTableState extends State<_StatsTable> {
   Widget build(BuildContext context) {
     return FlatTable<HeapStatsRecord>(
       columns: _columns,
-      data: widget.data,
+      data: widget.data.list,
       keyFactory: (e) => Key(e.fullClassName),
       onItemSelected: (r) {},
       sortColumn: _columns[widget.sorting.columnIndex],
