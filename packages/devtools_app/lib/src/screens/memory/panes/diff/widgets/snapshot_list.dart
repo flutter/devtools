@@ -20,41 +20,9 @@ class SnapshotList extends StatelessWidget {
       children: [
         _ListControlPane(controller: controller),
         Expanded(
-          child: SnapshotListItems(controller: controller),
+          child: _SnapshotListItems(controller: controller),
         ),
       ],
-    );
-  }
-}
-
-class SnapshotListItems extends StatelessWidget {
-  SnapshotListItems({Key? key, required this.controller}) : super(key: key);
-
-  final DiffPaneController controller;
-  final headerHeight = 1.20 * defaultRowHeight;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-      controller: controller.scrollController,
-      shrinkWrap: true,
-      itemCount: controller.snapshots.value.length,
-      itemBuilder: (context, index) {
-        return Container(
-          height: headerHeight,
-          color: controller.selectedIndex.value == index
-              ? Theme.of(context).selectedRowColor
-              : null,
-          child: InkWell(
-            canRequestFocus: false,
-            onTap: () => controller.selectedIndex.value = index,
-            child: _SnapshotListTitle(
-              item: controller.snapshots.value[index],
-              selected: index == controller.selectedIndex.value,
-            ),
-          ),
-        );
-      },
     );
   }
 }
@@ -128,6 +96,43 @@ class _SnapshotListTitle extends StatelessWidget {
           ],
         ],
       ),
+    );
+  }
+}
+
+class _SnapshotListItems extends StatelessWidget {
+  _SnapshotListItems({Key? key, required this.controller}) : super(key: key);
+
+  final DiffPaneController controller;
+  final headerHeight = 1.20 * defaultRowHeight;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<List<DiffListItem>>(
+      valueListenable: controller.snapshots,
+      builder: (_, list, __) {
+        return ListView.builder(
+          controller: controller.scrollController,
+          shrinkWrap: true,
+          itemCount: controller.snapshots.value.length,
+          itemBuilder: (context, index) {
+            return Container(
+              height: headerHeight,
+              color: controller.selectedIndex.value == index
+                  ? Theme.of(context).selectedRowColor
+                  : null,
+              child: InkWell(
+                canRequestFocus: false,
+                onTap: () => controller.selectedIndex.value = index,
+                child: _SnapshotListTitle(
+                  item: controller.snapshots.value[index],
+                  selected: index == controller.selectedIndex.value,
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

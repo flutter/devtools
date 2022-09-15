@@ -30,57 +30,38 @@ class _DiffPaneState extends State<DiffPane> {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<int>(
+    final Widget listContent = ValueListenableBuilder<int>(
       valueListenable: controller.selectedIndex,
       builder: (_, index, __) {
-        late Widget listContent;
         final item = controller.selected;
-
         if (item is InformationListItem) {
-          listContent = const _SnapshotDoc();
+          return const _SnapshotDoc();
         } else if (item is SnapshotListItem) {
-          listContent = _SnapshotContent(
+          return _SnapshotContent(
             item: item,
             controller: controller,
           );
         } else {
           throw Exception('Unexpected type of item: ${item.runtimeType}.');
         }
-
-        return Split(
-          axis: Axis.horizontal,
-          initialFractions: const [0.2, 0.8],
-          minSizes: const [80, 80],
-          children: [
-            OutlineDecoration(
-              child: SnapshotList(controller: controller),
-            ),
-            OutlineDecoration(
-              child: listContent,
-            ),
-          ],
-        );
       },
+    );
+
+    return Split(
+      axis: Axis.horizontal,
+      initialFractions: const [0.2, 0.8],
+      minSizes: const [80, 80],
+      children: [
+        OutlineDecoration(
+          child: SnapshotList(controller: controller),
+        ),
+        OutlineDecoration(
+          child: listContent,
+        ),
+      ],
     );
   }
 }
-
-// class _SnapshotListContent extends StatelessWidget {
-//   const _SnapshotListContent({Key? key, required this.item}) : super(key: key);
-//   final DiffListItem item;
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     final itemLocal = item;
-//     if (itemLocal is InformationListItem) {
-//       return const Text('Introduction to snapshot diffing will be here.');
-//     }
-//     if (itemLocal is SnapshotListItem) {
-//       return Text('Content of ${itemLocal.name} will be here.');
-//     }
-//     throw 'Unexpected type of the item: ${itemLocal.runtimeType}';
-//   }
-// }
 
 class _SnapshotDoc extends StatelessWidget {
   const _SnapshotDoc({Key? key}) : super(key: key);
