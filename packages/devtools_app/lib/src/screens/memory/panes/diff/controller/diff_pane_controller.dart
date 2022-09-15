@@ -4,21 +4,19 @@
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 
 import '../../../../../primitives/utils.dart';
-import '../../../../../shared/common_widgets.dart';
 import '../../../primitives/memory_utils.dart';
 import 'model.dart';
 
 class DiffPaneController {
-  final scrollController = ScrollController();
-
   /// The list contains one item that show information and all others
   /// are snapshots.
   final snapshots = ListValueNotifier(<DiffListItem>[InformationListItem()]);
 
   final selectedIndex = ValueNotifier<int>(0);
+
+  final scrollToLastSnapshot = ValueNotifier<int>(0);
 
   /// If true, some process is going on.
   ValueListenable<bool> get isProcessing => _isProcessing;
@@ -42,7 +40,7 @@ class DiffPaneController {
     );
     await future;
     final newElementIndex = snapshots.value.length - 1;
-    scrollController.autoScrollToBottom();
+    scrollToLastSnapshot.value++;
     selectedIndex.value = newElementIndex;
     _isProcessing.value = false;
   }

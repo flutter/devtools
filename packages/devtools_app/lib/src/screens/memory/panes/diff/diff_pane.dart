@@ -30,7 +30,7 @@ class _DiffPaneState extends State<DiffPane> {
 
   @override
   Widget build(BuildContext context) {
-    final Widget listContent = ValueListenableBuilder<int>(
+    final Widget itemContent = ValueListenableBuilder<int>(
       valueListenable: controller.selectedIndex,
       builder: (_, index, __) {
         final item = controller.selected;
@@ -56,7 +56,7 @@ class _DiffPaneState extends State<DiffPane> {
           child: SnapshotList(controller: controller),
         ),
         OutlineDecoration(
-          child: listContent,
+          child: itemContent,
         ),
       ],
     );
