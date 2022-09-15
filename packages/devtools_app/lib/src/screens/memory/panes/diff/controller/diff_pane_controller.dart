@@ -4,18 +4,14 @@
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 
 import '../../../../../primitives/utils.dart';
-import '../../../../../shared/common_widgets.dart';
 import '../../../primitives/memory_utils.dart';
 import '../../../shared/heap/model.dart';
 import 'model.dart';
 
 class DiffPaneController {
   DiffPaneController(this.snapshotTaker);
-
-  final listScrollController = ScrollController();
 
   final SnapshotTaker snapshotTaker;
 
@@ -47,7 +43,6 @@ class DiffPaneController {
     );
     await future;
     final newElementIndex = snapshots.value.length - 1;
-    listScrollController.autoScrollToBottom();
     selectedIndex.value = newElementIndex;
     _isProcessing.value = false;
   }

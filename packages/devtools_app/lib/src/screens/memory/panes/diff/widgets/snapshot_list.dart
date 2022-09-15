@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../../../../../primitives/auto_dispose_mixin.dart';
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/table.dart';
 import '../../../../../shared/theme.dart';
