@@ -18,7 +18,7 @@ final enhanceTracingExtensions = [
 
 class EnhanceTracingController extends DisposableController
     with AutoDisposeControllerMixin {
-  final showMenuStreamController = StreamController<void>();
+  final showMenuStreamController = StreamController<void>.broadcast();
 
   late EnhanceTracingState tracingState;
 

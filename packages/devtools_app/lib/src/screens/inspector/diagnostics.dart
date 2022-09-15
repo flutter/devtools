@@ -10,6 +10,7 @@ import '../../shared/object_tree.dart';
 import '../../shared/theme.dart';
 import '../../ui/hover.dart';
 import '../../ui/icons.dart';
+import '../../ui/utils.dart';
 import '../debugger/debugger_controller.dart';
 import '../debugger/variables.dart';
 import 'diagnostics_node.dart';
@@ -51,18 +52,65 @@ class DiagnosticsNodeDescription extends StatelessWidget {
   final DebuggerController debuggerController;
   final TextStyle? nodeDescriptionHighlightStyle;
 
-  Widget _paddedIcon(Widget icon) {
+  static Widget _paddedIcon(Widget icon) {
     return Padding(
       padding: const EdgeInsets.only(right: iconPadding),
       child: icon,
     );
   }
 
-  Iterable<TextSpan> _buildDescriptionTextSpans(
-    String description,
-    TextStyle textStyle,
-    ColorScheme colorScheme,
-  ) sync* {
+  /// Approximates the width of the elements inside a [RemoteDiagnosticsNode]
+  /// widget.
+  static double approximateNodeWidth(
+    RemoteDiagnosticsNode? diagnostic,
+  ) {
+    // If we have rendered this node, then we know it's text style,
+    // otherwise assume defaultFontSize for the TextStyle.
+    final textStyle = diagnostic?.descriptionTextStyleFromBuild ??
+        TextStyle(fontSize: defaultFontSize);
+
+    final spans = DiagnosticsNodeDescription.buildDescriptionTextSpans(
+      description: diagnostic?.description ?? '',
+      textStyle: textStyle,
+      colorScheme: const ColorScheme.dark(),
+      diagnostic: diagnostic,
+    );
+
+    var spanWidth = spans.fold<double>(
+      0,
+      (sum, span) => sum + calculateTextSpanWidth(span),
+    );
+    String? name = diagnostic?.name;
+
+    // An Icon is approximately the width of 1 character
+
+    if (diagnostic?.showName == true && name != null) {
+      // The diagnostic will show it's name instead of an icon so add an
+      // approximate name width.
+
+      if (diagnostic?.description != null) {
+        // If there is a description then a separator will show with the name.
+        name += ': ';
+      }
+      spanWidth +=
+          calculateTextSpanWidth(TextSpan(text: name, style: textStyle));
+    } else {
+      final approximateIconWidth = IconKind.info.icon.width + iconPadding;
+
+      // When there is no name, an icon will be shown with the text spans.
+      spanWidth += approximateIconWidth;
+    }
+    return spanWidth;
+  }
+
+  static Iterable<TextSpan> buildDescriptionTextSpans({
+    required String description,
+    required TextStyle textStyle,
+    required ColorScheme colorScheme,
+    RemoteDiagnosticsNode? diagnostic,
+    String? searchValue,
+    TextStyle? nodeDescriptionHighlightStyle,
+  }) sync* {
     final diagnosticLocal = diagnostic!;
     if (diagnosticLocal.isDiagnosticableValue) {
       final match = treeNodePrimaryDescriptionPattern.firstMatch(description);
@@ -110,17 +158,27 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     }
   }
 
-  Widget buildDescription(
-    String description,
-    TextStyle textStyle,
-    BuildContext context,
-    ColorScheme colorScheme,
-  ) {
+  Widget buildDescription({
+    required String description,
+    required TextStyle textStyle,
+    required BuildContext context,
+    required ColorScheme colorScheme,
+    RemoteDiagnosticsNode? diagnostic,
+    String? searchValue,
+    TextStyle? nodeDescriptionHighlightStyle,
+  }) {
+    // Store the textStyle of the built widget so that it can be used in
+    // [approximateNodeWidth] later.
+    diagnostic?.descriptionTextStyleFromBuild = textStyle;
+
     final textSpan = TextSpan(
-      children: _buildDescriptionTextSpans(
-        description,
-        textStyle,
-        colorScheme,
+      children: buildDescriptionTextSpans(
+        description: description,
+        textStyle: textStyle,
+        colorScheme: colorScheme,
+        diagnostic: diagnostic,
+        searchValue: searchValue,
+        nodeDescriptionHighlightStyle: nodeDescriptionHighlightStyle,
       ).toList(),
     );
 
@@ -263,10 +321,13 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       children.add(
         Flexible(
           child: buildDescription(
-            description,
-            descriptionTextStyle,
-            context,
-            colorScheme,
+            description: description,
+            textStyle: descriptionTextStyle,
+            context: context,
+            colorScheme: colorScheme,
+            diagnostic: diagnostic,
+            searchValue: searchValue,
+            nodeDescriptionHighlightStyle: nodeDescriptionHighlightStyle,
           ),
         ),
       );
@@ -318,10 +379,13 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       }
 
       var diagnosticDescription = buildDescription(
-        diagnosticLocal.description ?? '',
-        descriptionTextStyle,
-        context,
-        colorScheme,
+        description: diagnosticLocal.description ?? '',
+        textStyle: descriptionTextStyle,
+        context: context,
+        colorScheme: colorScheme,
+        diagnostic: diagnostic,
+        searchValue: searchValue,
+        nodeDescriptionHighlightStyle: nodeDescriptionHighlightStyle,
       );
 
       if (errorText != null) {
@@ -386,7 +450,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     );
   }
 
-  TextSpan _buildHighlightedSearchPreview(
+  static TextSpan _buildHighlightedSearchPreview(
     String textPreview,
     String? searchValue,
     TextStyle textStyle,
