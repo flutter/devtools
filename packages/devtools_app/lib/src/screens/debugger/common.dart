@@ -25,7 +25,7 @@ Container debuggerSectionTitle(ThemeData theme, {String? text, Widget? child}) {
     alignment: Alignment.centerLeft,
     height: areaPaneHeaderHeight,
     child:
-        child != null ? child : Text(text!, style: theme.textTheme.subtitle2),
+        child != null ? child : Text(text!, style: theme.textTheme.titleSmall),
   );
 }
 

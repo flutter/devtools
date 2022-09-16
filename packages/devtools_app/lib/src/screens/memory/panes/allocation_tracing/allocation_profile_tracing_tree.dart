@@ -203,7 +203,7 @@ class _AllocationProfileTracingTreeHeader extends StatelessWidget {
         const Spacer(),
         TabBar(
           labelColor:
-              textTheme.bodyText1?.color ?? colorScheme.defaultForeground,
+              textTheme.bodyLarge?.color ?? colorScheme.defaultForeground,
           tabs: tabs,
           isScrollable: true,
           controller: tabController,

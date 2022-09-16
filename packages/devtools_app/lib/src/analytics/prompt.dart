@@ -66,7 +66,7 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt>
                 children: [
                   Text(
                     'Send usage statistics for DevTools?',
-                    style: textTheme.headline5,
+                    style: textTheme.headlineSmall,
                   ),
                   CircularIconButton(
                     icon: Icons.close,
@@ -97,12 +97,12 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt>
             text: 'DevTools reports feature usage statistics and basic '
                 'crash reports to Google in order to help Google improve '
                 'the tool over time. See Google\'s ',
-            style: textTheme.subtitle1,
+            style: textTheme.titleMedium,
           ),
           TextSpan(
             text: 'privacy policy',
             style:
-                textTheme.subtitle1?.copyWith(color: const Color(0xFF54C1EF)),
+                textTheme.titleMedium?.copyWith(color: const Color(0xFF54C1EF)),
             recognizer: TapGestureRecognizer()
               ..onTap = () {
                 launchUrl(
@@ -113,7 +113,7 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt>
           ),
           TextSpan(
             text: '.',
-            style: textTheme.subtitle1,
+            style: textTheme.titleMedium,
           ),
         ],
       ),

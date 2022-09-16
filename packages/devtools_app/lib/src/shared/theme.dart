@@ -460,7 +460,7 @@ extension ThemeDataExtension on ThemeData {
   bool get isDarkTheme => brightness == Brightness.dark;
 
   TextStyle get regularTextStyle => TextStyle(
-        color: textTheme.bodyText2!.color,
+        color: textTheme.bodyMedium!.color,
         fontSize: defaultFontSize,
       );
 
@@ -478,7 +478,7 @@ extension ThemeDataExtension on ThemeData {
       );
 
   TextStyle get fixedFontStyle =>
-      textTheme.bodyText2!.copyWith(fontFamily: 'RobotoMono');
+      textTheme.bodyMedium!.copyWith(fontFamily: 'RobotoMono');
 
   TextStyle get subtleFixedFontStyle =>
       fixedFontStyle.copyWith(color: unselectedWidgetColor);
@@ -488,7 +488,7 @@ extension ThemeDataExtension on ThemeData {
       );
 
   TextStyle get devToolsTitleStyle =>
-      textTheme.headline6!.copyWith(color: Colors.white);
+      textTheme.titleLarge!.copyWith(color: Colors.white);
 
   Color get titleSolidBackgroundColor => colorScheme.isLight
       ? colorScheme.alternatingBackgroundColor

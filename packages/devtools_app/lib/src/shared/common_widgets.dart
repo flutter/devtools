@@ -628,7 +628,7 @@ class Badge extends StatelessWidget {
       child: Text(
         text,
         // Use a slightly smaller font for the badge.
-        style: (theme.primaryTextTheme.bodyText2 ?? const TextStyle())
+        style: (theme.primaryTextTheme.bodyMedium ?? const TextStyle())
             .apply(fontSizeDelta: -1),
       ),
     );
@@ -818,7 +818,7 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
               child: DefaultTextStyle(
                 maxLines: maxLines,
                 overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.subtitle2!,
+                style: theme.textTheme.titleSmall!,
                 child: title,
               ),
             ),
@@ -864,7 +864,7 @@ class DevToolsToggleButtonGroup extends StatelessWidget {
       color: theme.colorScheme.toggleButtonsTitle,
       selectedColor: theme.colorScheme.toggleButtonsTitleSelected,
       fillColor: theme.colorScheme.toggleButtonsFillSelected,
-      textStyle: theme.textTheme.bodyText1,
+      textStyle: theme.textTheme.bodyLarge,
       constraints: BoxConstraints(
         minWidth: defaultButtonHeight,
         minHeight: defaultButtonHeight,
@@ -1222,7 +1222,7 @@ class CenteredMessage extends StatelessWidget {
     return Center(
       child: Text(
         message,
-        style: Theme.of(context).textTheme.headline6,
+        style: Theme.of(context).textTheme.titleLarge,
       ),
     );
   }
@@ -2239,9 +2239,9 @@ class BulletSpacer extends StatelessWidget {
     late TextStyle? textStyle;
     if (useAccentColor) {
       textStyle = theme.appBarTheme.toolbarTextStyle ??
-          theme.primaryTextTheme.bodyText2;
+          theme.primaryTextTheme.bodyMedium;
     } else {
-      textStyle = theme.textTheme.bodyText2;
+      textStyle = theme.textTheme.bodyMedium;
     }
 
     final mutedColor = textStyle?.color?.withAlpha(0x90);

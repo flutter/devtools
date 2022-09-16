@@ -64,7 +64,7 @@ class ProfileGranularityDropdown extends StatelessWidget {
         return RoundedDropDownButton<String>(
           key: ProfileGranularityDropdown.dropdownKey,
           isDense: true,
-          style: Theme.of(context).textTheme.bodyText2,
+          style: Theme.of(context).textTheme.bodyMedium,
           value: safeValue,
           items: [
             _buildMenuItem(ProfileGranularity.low),

@@ -238,7 +238,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
               // Disable ligatures, so the suggestions of the auto complete work correcly.
               style: Theme.of(context)
                   .textTheme
-                  .subtitle1
+                  .titleMedium
                   ?.copyWith(fontFeatures: [const FontFeature.disable('liga')]),
             ),
           ),
