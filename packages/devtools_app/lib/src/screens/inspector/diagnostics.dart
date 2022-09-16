@@ -5,7 +5,6 @@
 import 'package:flutter/material.dart';
 
 import '../../primitives/utils.dart';
-import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
 import '../../shared/object_tree.dart';
 import '../../shared/theme.dart';
@@ -21,7 +20,6 @@ import 'primitives/inspector_text_styles.dart' as inspector_text_styles;
 final _colorIconMaker = ColorIconMaker();
 final _customIconMaker = CustomIconMaker();
 final defaultIcon = _customIconMaker.fromInfo('Default');
-
 const _showRenderObjectPropertiesAsLinks = false;
 
 /// Presents the content of a single [RemoteDiagnosticsNode].
@@ -42,6 +40,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     this.style,
     required this.debuggerController,
     this.nodeDescriptionHighlightStyle,
+    this.hoverCardTooltipController,
   });
 
   final RemoteDiagnosticsNode? diagnostic;
@@ -52,7 +51,8 @@ class DiagnosticsNodeDescription extends StatelessWidget {
   final TextStyle? style;
   final DebuggerController debuggerController;
   final TextStyle? nodeDescriptionHighlightStyle;
-  // final late AnimationController controller;
+  final HoverCardTooltipController? hoverCardTooltipController;
+
   static Widget _paddedIcon(Widget icon) {
     return Padding(
       padding: const EdgeInsets.only(right: iconPadding),
@@ -191,6 +191,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
           preferences.inspector.hoverEvalModeEnabled.value &&
           diagnosticLocal.inspectorService != null,
       onHover: (event) async {
+        await Future.delayed(Duration(seconds: 5));
         final group = inspectorService.createObjectGroup('hover');
         final value =
             await group.toObservatoryInstanceRef(diagnosticLocal.valueRef);
@@ -199,29 +200,24 @@ class DiagnosticsNodeDescription extends StatelessWidget {
           isolateRef: inspectorService.isolateRef,
           diagnostic: diagnosticLocal,
         );
+        await buildVariablesTree(variable);
+        for (var child in variable.children) {
+          await buildVariablesTree(child);
+        }
+        variable.expand();
+        // TODO(jacobr): should we ensure the hover has not yet been cancelled?
+
         return HoverCardData(
           title: diagnosticLocal.toStringShort(),
           contents: Material(
-            child: FutureBuilder<void>(
-              future: _buildVariablesTreeForHoverCard(variable),
-              builder: (context, snapshot) {
-                print(snapshot.connectionState);
-                if (snapshot.connectionState == ConnectionState.done) {
-                  return Material(
-                    child: ExpandableVariable(
-                      debuggerController: debuggerController,
-                      variable: variable,
-                    ),
-                  );
-                }
-                return const Center(
-                  child: CenteredCircularProgressIndicator(),
-                );
-              },
+            child: ExpandableVariable(
+              debuggerController: debuggerController,
+              variable: variable,
             ),
           ),
         );
       },
+      hoverCardTooltipController: hoverCardTooltipController,
       child: multiline
           ? SelectableText.rich(textSpan)
           : RichText(
@@ -229,14 +225,6 @@ class DiagnosticsNodeDescription extends StatelessWidget {
               text: textSpan,
             ),
     );
-  }
-
-  Future<void> _buildVariablesTreeForHoverCard(DartObjectNode variable) async {
-    await buildVariablesTree(variable);
-    for (var child in variable.children) {
-      await buildVariablesTree(child);
-    }
-    variable.expand();
   }
 
   @override

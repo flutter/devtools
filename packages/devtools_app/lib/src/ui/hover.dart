@@ -8,6 +8,7 @@ import 'dart:math' as math;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
+import '../../devtools_app.dart';
 import '../shared/eval_on_dart_library.dart';
 import '../shared/theme.dart';
 import '../shared/utils.dart';
@@ -215,14 +216,35 @@ class HoverCard {
   }
 }
 
+class HoverCardTooltipController {
+  HoverCard? _hoverCard;
+  int counter = 0;
+  void set(HoverCard card) {
+    _hoverCard?.remove();
+    _hoverCard = card;
+  }
+
+  void maybeRemove() {
+    _hoverCard?.maybeRemove();
+    _hoverCard = null;
+  }
+
+  void clear() {
+    _hoverCard?.remove();
+    _hoverCard = null;
+  }
+}
+
 /// A hover card based tooltip.
 class HoverCardTooltip extends StatefulWidget {
-  const HoverCardTooltip({
+  HoverCardTooltip({
     required this.enabled,
     required this.onHover,
     required this.child,
     this.disposable,
-  });
+    hoverCardTooltipController,
+  }) : hoverCardTooltipController =
+            hoverCardTooltipController ?? HoverCardTooltipController();
 
   static const _hoverDelay = Duration(milliseconds: 500);
   static double get defaultHoverWidth => scaleByFontFactor(450.0);
@@ -237,6 +259,7 @@ class HoverCardTooltip extends StatefulWidget {
 
   /// Disposable object to be disposed when the group is closed.
   final Disposable? disposable;
+  final HoverCardTooltipController hoverCardTooltipController;
 
   @override
   _HoverCardTooltipState createState() => _HoverCardTooltipState();
@@ -249,13 +272,10 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
   /// A timer that removes a [HoverCard] when completed.
   Timer? _removeTimer;
 
-  /// Displays the evaluation result of a source code item.
-  HoverCard? _hoverCard;
-
   void _onHoverExit() {
     _showTimer?.cancel();
     _removeTimer = Timer(HoverCardTooltip._hoverDelay, () {
-      _hoverCard?.maybeRemove();
+      widget.hoverCardTooltipController.maybeRemove();
     });
   }
 
@@ -267,26 +287,42 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
 
     if (!widget.enabled()) return;
     _showTimer = Timer(HoverCardTooltip._hoverDelay, () async {
-      _hoverCard?.remove();
-      _hoverCard = null;
-      final hoverCardData = await widget.onHover(event);
-      if (!mounted) return;
-      if (hoverCardData.position == HoverCardPosition.cursor) {
-        _hoverCard = HoverCard.fromHoverEvent(
+      final ourCounter = ++widget.hoverCardTooltipController.counter;
+      widget.hoverCardTooltipController.set(
+        HoverCard.fromHoverEvent(
           context: context,
-          title: hoverCardData.title,
-          contents: hoverCardData.contents,
-          width: hoverCardData.width,
+          contents: const CircularProgressIndicator(),
+          width: HoverCardTooltip.defaultHoverWidth,
           event: event,
-        );
-      } else {
-        _hoverCard = HoverCard(
-          context: context,
-          title: hoverCardData.title,
-          contents: hoverCardData.contents,
-          width: hoverCardData.width,
-          position: _calculateTooltipPosition(hoverCardData.width),
-        );
+        ),
+      );
+
+      final hoverCardData = await widget.onHover(event);
+
+      if (ourCounter == widget.hoverCardTooltipController.counter) {
+        // We are still the most fresh card, so we can still post our hover
+        if (!mounted) return;
+        if (hoverCardData.position == HoverCardPosition.cursor) {
+          widget.hoverCardTooltipController.set(
+            HoverCard.fromHoverEvent(
+              context: context,
+              title: hoverCardData.title,
+              contents: hoverCardData.contents,
+              width: hoverCardData.width,
+              event: event,
+            ),
+          );
+        } else {
+          widget.hoverCardTooltipController.set(
+            HoverCard(
+              context: context,
+              title: hoverCardData.title,
+              contents: hoverCardData.contents,
+              width: hoverCardData.width,
+              position: _calculateTooltipPosition(hoverCardData.width),
+            ),
+          );
+        }
       }
     });
   }
@@ -314,7 +350,7 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
   void dispose() {
     _showTimer?.cancel();
     _removeTimer?.cancel();
-    _hoverCard?.remove();
+    widget.hoverCardTooltipController.clear();
     widget.disposable?.dispose();
     super.dispose();
   }

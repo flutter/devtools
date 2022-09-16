@@ -25,6 +25,7 @@ import '../../shared/globals.dart';
 import '../../shared/theme.dart';
 import '../../shared/utils.dart';
 import '../../ui/colors.dart';
+import '../../ui/hover.dart';
 import '../../ui/search.dart';
 import '../../ui/utils.dart';
 import '../debugger/debugger_controller.dart';
@@ -116,6 +117,8 @@ class InspectorTreeController extends Object
 
   SearchTargetType _searchTarget = SearchTargetType.widget;
 
+  final HoverCardTooltipController hoverCardTooltipController =
+      HoverCardTooltipController();
   void addClient(InspectorControllerClient value) {
     final firstClient = _clients.isEmpty;
     _clients.add(value);
@@ -1259,6 +1262,8 @@ class InspectorRowContent extends StatelessWidget {
                                   : row.isSelected
                                       ? theme.searchMatchHighlightStyleFocused
                                       : theme.searchMatchHighlightStyle,
+                          hoverCardTooltipController:
+                              controller.hoverCardTooltipController,
                         ),
                       ),
                     ),
