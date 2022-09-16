@@ -409,7 +409,7 @@ class _CodeViewState extends State<CodeView>
             child: Center(
               child: Text(
                 'No source available',
-                style: theme.textTheme.subtitle1,
+                style: theme.textTheme.titleMedium,
               ),
             ),
           );
@@ -453,7 +453,7 @@ class _CodeViewState extends State<CodeView>
         onPressed: () => widget.controller.toggleFileOpenerVisibility(true),
         child: Text(
           'Open a file ($openFileKeySetDescription)',
-          style: theme.textTheme.subtitle1,
+          style: theme.textTheme.titleMedium,
         ),
       ),
     );
