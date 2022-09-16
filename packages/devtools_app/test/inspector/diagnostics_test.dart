@@ -68,6 +68,7 @@ void main() {
         diagnosticsNodeDescription = DiagnosticsNodeDescription(
           diagnostic,
           debuggerController: MockDebuggerController(),
+          hoverCardTooltipController: HoverCardTooltipController(),
         );
       });
 
@@ -102,6 +103,7 @@ void main() {
         diagnosticsNodeDescription = DiagnosticsNodeDescription(
           diagnosticWithoutService,
           debuggerController: MockDebuggerController(),
+          hoverCardTooltipController: HoverCardTooltipController(),
         );
 
         await tester.pumpWidget(wrap(diagnosticsNodeDescription));
@@ -135,6 +137,7 @@ void main() {
         final diagnosticsNodeDescription = DiagnosticsNodeDescription(
           diagnosticWithoutService,
           debuggerController: MockDebuggerController(),
+          hoverCardTooltipController: HoverCardTooltipController(),
         );
 
         await tester.pumpWidget(wrap(diagnosticsNodeDescription));
@@ -186,6 +189,7 @@ void main() {
         final diagnosticsNodeDescription = DiagnosticsNodeDescription(
           diagnosticWithoutService,
           debuggerController: MockDebuggerController(),
+          hoverCardTooltipController: HoverCardTooltipController(),
         );
 
         await tester.pumpWidget(wrap(diagnosticsNodeDescription));
@@ -255,6 +259,7 @@ void main() {
         final diagnosticsNodeDescription = DiagnosticsNodeDescription(
           diagnosticWithoutService,
           debuggerController: MockDebuggerController(),
+          hoverCardTooltipController: HoverCardTooltipController(),
           style: textStyle,
         );
 

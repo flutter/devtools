@@ -221,39 +221,60 @@ class HoverCard {
   }
 }
 
+/// Ensures that only one [HoverCard] is ever displayed at a time.
 class HoverCardTooltipController {
+  /// The card that is currenty being displayed
   HoverCard? _hoverCard;
+
+  /// A new token is given to each [HoverCard].
+  ///
+  /// If [_freshnessToken] matches the [HoverCard.freshnessToken] then it is the
+  /// most recently displayed [HoverCard].
   int _freshnessToken = 0;
 
+  /// Sets [hoverCard] as the most recently displayed [HoverCard].
+  ///
+  /// This methods sets a unique [hoverCard.freshnessToken], as a way to track whether
+  /// [hoverCard] is the most recently displayed [HoverCard].
   void set({required HoverCard hoverCard}) {
     _hoverCard?.remove();
     hoverCard.freshnessToken = _newFreshnessToken();
     _hoverCard = hoverCard;
   }
 
+  /// If the mouse is outside of [_hoverCard] then then it will be removed.
   void maybeRemoveHoverCard() {
     final wasRemoved = _hoverCard?.maybeRemove();
     if (wasRemoved == true) {
+      // Only one hovercard is ever shown on screen. So if the
+      // mouse has moved outside, then no other hovercards are meant to pop up
+      // any more. Invalidating the freshness token means all current hover
+      // cards, that are still generating data, will exit quietly once the data
+      // is available.
       _invalidateFreshnessToken();
       _hoverCard = null;
     }
   }
 
-  void clearHoverCard() {
+  /// Remove the [HoverCard] being displayed, if there is one.
+  void removeHoverCard() {
     _invalidateFreshnessToken();
     _hoverCard?.remove();
     _hoverCard = null;
   }
 
+  /// Create increment the freshness token and return the new value.
   int _newFreshnessToken() {
-    print(_freshnessToken);
     return ++_freshnessToken;
   }
 
+  /// Helper for incrementing the freshness token.
   void _invalidateFreshnessToken() {
     _newFreshnessToken();
   }
 
+  /// Check's that a [hoverCard.freshnessToken] is the same as the active
+  /// freshness token.
   bool isHoverCardStillFresh(HoverCard hoverCard) {
     return hoverCard.freshnessToken == _freshnessToken;
   }
@@ -261,14 +282,32 @@ class HoverCardTooltipController {
 
 /// A hover card based tooltip.
 class HoverCardTooltip extends StatefulWidget {
-  HoverCardTooltip({
+  /// A [HoverCardTooltip] that generates it's [HoverCardData] asynchronously.
+  ///
+  /// [asyncGenerateHoverCardData] is used to generate the data that will
+  /// display in the final [HoverCard]. While that data is being generated,
+  /// a [HoverCard] with a spinner will show. If any [HoverCardData] returned
+  /// from [asyncGenerateHoverCardData] the spinner [HoverCard] will be replaced
+  /// with one containing the generated [HoverCardData].
+  const HoverCardTooltip({
     required this.enabled,
-    required this.onHover,
+    required this.asyncGenerateHoverCardData,
     required this.child,
     this.disposable,
-    hoverCardTooltipController,
-  }) : hoverCardTooltipController =
-            hoverCardTooltipController ?? HoverCardTooltipController();
+    required this.hoverCardTooltipController,
+  }) : generateHoverCardData = null;
+
+  /// A [HoverCardTooltip] that generates it's [HoverCardData] synchronously.
+  ///
+  /// The [HoverCardData] generated from [generateHoverCardData] will be
+  /// displayed in a [HoverCard].
+  const HoverCardTooltip.sync({
+    required this.enabled,
+    required this.generateHoverCardData,
+    required this.child,
+    this.disposable,
+    required this.hoverCardTooltipController,
+  }) : asyncGenerateHoverCardData = null;
 
   static const _hoverDelay = Duration(milliseconds: 500);
   static double get defaultHoverWidth => scaleByFontFactor(450.0);
@@ -276,16 +315,24 @@ class HoverCardTooltip extends StatefulWidget {
   /// Whether the tooltip is currently enabled.
   final bool Function() enabled;
 
-  /// Data to display when hovering over a particular point.
+  /// The callback that is used when the [HoverCard]'s data is only available
+  /// asynchronously.
   final Future<HoverCardData?> Function(
     PointerHoverEvent event,
     bool Function() isHoverStale,
-  ) onHover;
+  )? asyncGenerateHoverCardData;
+
+  /// The callback that is used when the [HoverCard]'s data is available
+  /// synchronously.
+  final HoverCardData Function(
+    PointerHoverEvent event,
+  )? generateHoverCardData;
 
   final Widget child;
 
   /// Disposable object to be disposed when the group is closed.
   final Disposable? disposable;
+
   final HoverCardTooltipController hoverCardTooltipController;
 
   @override
@@ -314,28 +361,46 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
 
     if (!widget.enabled()) return;
     _showTimer = Timer(HoverCardTooltip._hoverDelay, () async {
-      final HoverCard spinnerHoverCard = HoverCard.fromHoverEvent(
-        context: context,
-        contents: const CenteredCircularProgressIndicator(),
-        width: HoverCardTooltip.defaultHoverWidth,
-        event: event,
-      );
+      HoverCardData? hoverCardData;
 
-      widget.hoverCardTooltipController.set(
-        hoverCard: spinnerHoverCard,
-      );
+      if (widget.asyncGenerateHoverCardData != null) {
+        assert(widget.generateHoverCardData == null);
+        // The data on the card is fetched asynchronously, so show a spinner
+        // while we wait for it.
+        final spinnerHoverCard = HoverCard.fromHoverEvent(
+          context: context,
+          contents: const CenteredCircularProgressIndicator(),
+          width: HoverCardTooltip.defaultHoverWidth,
+          event: event,
+        );
 
-      final hoverCardData = await widget.onHover(
-        event,
-        () => !widget.hoverCardTooltipController
-            .isHoverCardStillFresh(spinnerHoverCard),
-      );
+        widget.hoverCardTooltipController.set(
+          hoverCard: spinnerHoverCard,
+        );
 
-      if (widget.hoverCardTooltipController
-              .isHoverCardStillFresh(spinnerHoverCard) &&
-          hoverCardData != null) {
-        // We are still the most fresh card, so we can still post our hover
+        // The spinner showing, we can now generate the HoverCardData
+        hoverCardData = await widget.asyncGenerateHoverCardData!(
+          event,
+          () => !widget.hoverCardTooltipController
+              .isHoverCardStillFresh(spinnerHoverCard),
+        );
+
+        if (!widget.hoverCardTooltipController
+            .isHoverCardStillFresh(spinnerHoverCard)) {
+          // The hovercard became stale while fetching it's data. So it should
+          // no longer be shown.
+          return;
+        }
+      } else {
+        assert(widget.generateHoverCardData != null);
+        assert(widget.asyncGenerateHoverCardData == null);
+
+        hoverCardData = widget.generateHoverCardData!(event);
+      }
+
+      if (hoverCardData != null) {
         if (!mounted) return;
+
         if (hoverCardData.position == HoverCardPosition.cursor) {
           widget.hoverCardTooltipController.set(
             hoverCard: HoverCard.fromHoverEvent(
@@ -384,7 +449,7 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
   void dispose() {
     _showTimer?.cancel();
     _removeTimer?.cancel();
-    widget.hoverCardTooltipController.clearHoverCard();
+    widget.hoverCardTooltipController.removeHoverCard();
     widget.disposable?.dispose();
     super.dispose();
   }

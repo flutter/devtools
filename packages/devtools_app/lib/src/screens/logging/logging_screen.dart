@@ -130,7 +130,9 @@ class _LoggingScreenState extends State<LoggingScreenBody>
       children: [
         ClearButton(onPressed: controller.clear),
         const Spacer(),
-        StructuredErrorsToggle(),
+        StructuredErrorsToggle(
+          hoverCardTooltipController: controller.hoverCardTooltipController,
+        ),
         const SizedBox(width: denseSpacing),
         // TODO(kenz): fix focus issue when state is refreshed
         Container(

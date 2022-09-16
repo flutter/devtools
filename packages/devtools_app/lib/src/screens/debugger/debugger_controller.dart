@@ -18,6 +18,7 @@ import '../../service/isolate_state.dart';
 import '../../service/vm_service_wrapper.dart';
 import '../../shared/globals.dart';
 import '../../shared/object_tree.dart';
+import '../../ui/hover.dart';
 import '../../ui/search.dart';
 import 'debugger_model.dart';
 import 'program_explorer_controller.dart';
@@ -51,6 +52,8 @@ class DebuggerController extends DisposableController
   }
 
   bool _firstDebuggerScreenLoaded = false;
+  final HoverCardTooltipController hoverCardTooltipController =
+      HoverCardTooltipController();
 
   /// Callback to be called when the debugger screen is first loaded.
   ///

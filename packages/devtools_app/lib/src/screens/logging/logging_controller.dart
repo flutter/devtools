@@ -19,6 +19,7 @@ import '../../primitives/utils.dart';
 import '../../service/vm_service_wrapper.dart';
 import '../../shared/globals.dart';
 import '../../ui/filter.dart';
+import '../../ui/hover.dart';
 import '../../ui/search.dart';
 import '../inspector/diagnostics_node.dart';
 import '../inspector/inspector_service.dart';
@@ -179,6 +180,8 @@ class LoggingController extends DisposableController
 
   final StreamController<String> _logStatusController =
       StreamController.broadcast();
+  final HoverCardTooltipController hoverCardTooltipController =
+      HoverCardTooltipController();
 
   /// A stream of events for the textual description of the log contents.
   ///

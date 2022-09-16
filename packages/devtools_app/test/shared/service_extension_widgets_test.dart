@@ -12,6 +12,7 @@ import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/service/service_registrations.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
+import 'package:devtools_app/src/ui/hover.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -151,7 +152,9 @@ void main() {
               as FakeServiceExtensionManager)
           .fakeAddServiceExtension(structuredErrors.extension);
 
-      final button = StructuredErrorsToggle();
+      final button = StructuredErrorsToggle(
+        hoverCardTooltipController: HoverCardTooltipController(),
+      );
       await tester.pumpWidget(wrap(Scaffold(body: Center(child: button))));
       expect(find.byWidget(button), findsOneWidget);
       await tester.tap(find.byWidget(button));
@@ -170,7 +173,9 @@ void main() {
       await (mockServiceManager.serviceExtensionManager
               as FakeServiceExtensionManager)
           .fakeAddServiceExtension(structuredErrors.extension);
-      final button = StructuredErrorsToggle();
+      final button = StructuredErrorsToggle(
+        hoverCardTooltipController: HoverCardTooltipController(),
+      );
       await tester.pumpWidget(wrap(Scaffold(body: Center(child: button))));
       expect(find.byWidget(button), findsOneWidget);
 

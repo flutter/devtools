@@ -22,6 +22,7 @@ import '../../primitives/trees.dart';
 import '../../primitives/utils.dart';
 import '../../service/service_manager.dart';
 import '../../shared/globals.dart';
+import '../../ui/hover.dart';
 import '../../ui/search.dart';
 import '../profiler/cpu_profile_controller.dart';
 import '../profiler/cpu_profile_service.dart';
@@ -107,6 +108,9 @@ class PerformanceController extends DisposableController
   final _badgeTabForJankyFrames = ValueNotifier<bool>(false);
 
   final threadNamesById = <int, String>{};
+
+  final HoverCardTooltipController hoverCardTooltipController =
+      HoverCardTooltipController();
 
   /// Active timeline data.
   ///

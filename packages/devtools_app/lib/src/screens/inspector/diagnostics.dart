@@ -40,7 +40,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     this.style,
     required this.debuggerController,
     this.nodeDescriptionHighlightStyle,
-    this.hoverCardTooltipController,
+    required this.hoverCardTooltipController,
   });
 
   final RemoteDiagnosticsNode? diagnostic;
@@ -51,7 +51,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
   final TextStyle? style;
   final DebuggerController debuggerController;
   final TextStyle? nodeDescriptionHighlightStyle;
-  final HoverCardTooltipController? hoverCardTooltipController;
+  final HoverCardTooltipController hoverCardTooltipController;
 
   static Widget _paddedIcon(Widget icon) {
     return Padding(
@@ -190,7 +190,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       enabled: () =>
           preferences.inspector.hoverEvalModeEnabled.value &&
           diagnosticLocal.inspectorService != null,
-      onHover: (event, isHoverStale) async {
+      asyncGenerateHoverCardData: (event, isHoverStale) async {
         final group = inspectorService.createObjectGroup('hover');
 
         if (isHoverStale()) return Future.value();

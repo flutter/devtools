@@ -191,6 +191,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
                   ],
                   minScreenWidthForTextBeforeScaling:
                       minScreenWidthForTextBeforeScaling,
+                  hoverCardTooltipController:
+                      controller.hoverCardTooltipController,
                 );
               },
             ),
@@ -291,6 +293,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
           extensions.repaintRainbow,
           extensions.invertOversizedImages,
         ],
+        hoverCardTooltipController: controller.hoverCardTooltipController,
       ),
       const SizedBox(width: defaultSpacing),
       SettingsOutlinedButton(

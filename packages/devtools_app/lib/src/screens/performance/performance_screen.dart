@@ -315,6 +315,7 @@ class SecondaryPerformanceControls extends StatelessWidget {
               // values.
               //trackRebuildWidgets,
             ],
+            hoverCardTooltipController: controller.hoverCardTooltipController,
           ),
           const SizedBox(width: denseSpacing),
           EnhanceTracingButton(controller.enhanceTracingController),
