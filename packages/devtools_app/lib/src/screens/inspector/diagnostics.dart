@@ -190,11 +190,10 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       enabled: () =>
           preferences.inspector.hoverEvalModeEnabled.value &&
           diagnosticLocal.inspectorService != null,
-      onHover: (event, isHoverStillMostRecent) async {
-        await Future.delayed(Duration(seconds: 5));
+      onHover: (event, isHoverStale) async {
         final group = inspectorService.createObjectGroup('hover');
 
-        if (!isHoverStillMostRecent()) return Future.value();
+        if (isHoverStale()) return Future.value();
         final value =
             await group.toObservatoryInstanceRef(diagnosticLocal.valueRef);
 
@@ -204,15 +203,14 @@ class DiagnosticsNodeDescription extends StatelessWidget {
           diagnostic: diagnosticLocal,
         );
 
-        if (!isHoverStillMostRecent()) return Future.value();
+        if (isHoverStale()) return Future.value();
         await buildVariablesTree(variable);
         for (var child in variable.children) {
-          if (!isHoverStillMostRecent()) return Future.value();
+          if (isHoverStale()) return Future.value();
           await buildVariablesTree(child);
         }
 
         variable.expand();
-        // TODO(jacobr): should we ensure the hover has not yet been cancelled?
 
         return HoverCardData(
           title: diagnosticLocal.toStringShort(),

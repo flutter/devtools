@@ -10,8 +10,6 @@ import 'package:flutter/material.dart';
 
 import '../../devtools_app.dart';
 import '../shared/eval_on_dart_library.dart';
-import '../shared/theme.dart';
-import '../shared/utils.dart';
 import 'utils.dart';
 
 /// Regex for valid Dart identifiers.
@@ -281,7 +279,7 @@ class HoverCardTooltip extends StatefulWidget {
   /// Data to display when hovering over a particular point.
   final Future<HoverCardData?> Function(
     PointerHoverEvent event,
-    bool Function() isHoverStillMostRecent,
+    bool Function() isHoverStale,
   ) onHover;
 
   final Widget child;
@@ -329,7 +327,7 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
 
       final hoverCardData = await widget.onHover(
         event,
-        () => widget.hoverCardTooltipController
+        () => !widget.hoverCardTooltipController
             .isHoverCardStillFresh(spinnerHoverCard),
       );
 
