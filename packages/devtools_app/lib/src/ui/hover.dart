@@ -194,6 +194,8 @@ class HoverCard {
           title: title,
         );
 
+  int? freshnessToken;
+
   late OverlayEntry _overlayEntry;
 
   bool _isRemoved = false;
@@ -204,8 +206,13 @@ class HoverCard {
   ///
   /// The HoverCard will not be removed if the mouse is currently inside the
   /// widget.
-  void maybeRemove() {
-    if (!_hasMouseEntered) remove();
+  /// Returns whether or not the HoverCard was removed
+  bool maybeRemove() {
+    if (!_hasMouseEntered) {
+      remove();
+      return true;
+    }
+    return false;
   }
 
   /// Removes the HoverCard even if the mouse is in the corresponding mouse
@@ -222,25 +229,35 @@ class HoverCardTooltipController {
 
   void set({required HoverCard hoverCard}) {
     _hoverCard?.remove();
+    hoverCard.freshnessToken = _newFreshnessToken();
     _hoverCard = hoverCard;
   }
 
   void maybeRemoveHoverCard() {
-    _hoverCard?.maybeRemove();
-    _hoverCard = null;
+    final wasRemoved = _hoverCard?.maybeRemove();
+    if (wasRemoved == true) {
+      _invalidateFreshnessToken();
+      _hoverCard = null;
+    }
   }
 
   void clearHoverCard() {
+    _invalidateFreshnessToken();
     _hoverCard?.remove();
     _hoverCard = null;
   }
 
-  int newFreshnessToken() {
+  int _newFreshnessToken() {
+    print(_freshnessToken);
     return ++_freshnessToken;
   }
 
-  bool isTokenStillFresh(int token) {
-    return token == _freshnessToken;
+  void _invalidateFreshnessToken() {
+    _newFreshnessToken();
+  }
+
+  bool isHoverCardStillFresh(HoverCard hoverCard) {
+    return hoverCard.freshnessToken == _freshnessToken;
   }
 }
 
@@ -287,10 +304,6 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
   void _onHoverExit() {
     _showTimer?.cancel();
     _removeTimer = Timer(HoverCardTooltip._hoverDelay, () {
-      // Invalidate the current counter so we know that our HoverCard is no
-      // longer fresh.
-      widget.hoverCardTooltipController.newFreshnessToken();
-
       widget.hoverCardTooltipController.maybeRemoveHoverCard();
     });
   }
@@ -303,24 +316,25 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
 
     if (!widget.enabled()) return;
     _showTimer = Timer(HoverCardTooltip._hoverDelay, () async {
-      final freshnessToken =
-          widget.hoverCardTooltipController.newFreshnessToken();
+      final HoverCard spinnerHoverCard = HoverCard.fromHoverEvent(
+        context: context,
+        contents: const CenteredCircularProgressIndicator(),
+        width: HoverCardTooltip.defaultHoverWidth,
+        event: event,
+      );
+
       widget.hoverCardTooltipController.set(
-        hoverCard: HoverCard.fromHoverEvent(
-          context: context,
-          contents: const CircularProgressIndicator(),
-          width: HoverCardTooltip.defaultHoverWidth,
-          event: event,
-        ),
+        hoverCard: spinnerHoverCard,
       );
 
       final hoverCardData = await widget.onHover(
         event,
-        () =>
-            widget.hoverCardTooltipController.isTokenStillFresh(freshnessToken),
+        () => widget.hoverCardTooltipController
+            .isHoverCardStillFresh(spinnerHoverCard),
       );
 
-      if (widget.hoverCardTooltipController.isTokenStillFresh(freshnessToken) &&
+      if (widget.hoverCardTooltipController
+              .isHoverCardStillFresh(spinnerHoverCard) &&
           hoverCardData != null) {
         // We are still the most fresh card, so we can still post our hover
         if (!mounted) return;

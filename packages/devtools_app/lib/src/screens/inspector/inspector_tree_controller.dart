@@ -49,6 +49,7 @@ class _InspectorTreeRowWidget extends StatefulWidget {
     required this.scrollControllerX,
     required this.viewportWidth,
     required this.debuggerController,
+    required this.hoverCardTooltipController,
   }) : super(key: key);
 
   final _InspectorTreeState inspectorTreeState;
@@ -58,6 +59,7 @@ class _InspectorTreeRowWidget extends StatefulWidget {
   final DebuggerController debuggerController;
   final ScrollController scrollControllerX;
   final double viewportWidth;
+  final HoverCardTooltipController hoverCardTooltipController;
 
   /// A [DevToolsError] that applies to the widget in this row.
   ///
@@ -85,6 +87,7 @@ class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
           setExpanded(!isExpanded);
         },
         debuggerController: widget.debuggerController,
+        hoverCardTooltipController: widget.hoverCardTooltipController,
       ),
     );
   }
@@ -117,8 +120,6 @@ class InspectorTreeController extends Object
 
   SearchTargetType _searchTarget = SearchTargetType.widget;
 
-  final HoverCardTooltipController hoverCardTooltipController =
-      HoverCardTooltipController();
   void addClient(InspectorControllerClient value) {
     final firstClient = _clients.isEmpty;
     _clients.add(value);
@@ -1051,6 +1052,8 @@ class _InspectorTreeState extends State<InspectorTree>
                                 ? widget.widgetErrors![inspectorRef]
                                 : null,
                             debuggerController: _debuggerController,
+                            hoverCardTooltipController:
+                                controller.hoverCardTooltipController,
                           );
                         },
                         childCount: treeControllerLocal.numRows + 1,
@@ -1174,6 +1177,7 @@ class InspectorRowContent extends StatelessWidget {
     required this.scrollControllerX,
     required this.viewportWidth,
     required this.debuggerController,
+    required this.hoverCardTooltipController,
   });
 
   final InspectorTreeRow row;
@@ -1183,6 +1187,7 @@ class InspectorRowContent extends StatelessWidget {
   final Animation<double> expandArrowAnimation;
   final ScrollController scrollControllerX;
   final double viewportWidth;
+  final HoverCardTooltipController hoverCardTooltipController;
 
   /// A [DevToolsError] that applies to the widget in this row.
   ///
@@ -1263,7 +1268,7 @@ class InspectorRowContent extends StatelessWidget {
                                       ? theme.searchMatchHighlightStyleFocused
                                       : theme.searchMatchHighlightStyle,
                           hoverCardTooltipController:
-                              controller.hoverCardTooltipController,
+                              hoverCardTooltipController,
                         ),
                       ),
                     ),

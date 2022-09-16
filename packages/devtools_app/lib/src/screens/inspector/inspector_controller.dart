@@ -27,6 +27,7 @@ import '../../primitives/auto_dispose.dart';
 import '../../primitives/utils.dart';
 import '../../service/service_extensions.dart' as extensions;
 import '../../shared/globals.dart';
+import '../../ui/hover.dart';
 import 'diagnostics_node.dart';
 import 'inspector_screen.dart';
 import 'inspector_service.dart';
@@ -245,6 +246,9 @@ class InspectorController extends DisposableController
   /// This field is used to prevent sending multiple analytics events for
   /// inspector tree load timing.
   bool firstInspectorTreeLoadCompleted = false;
+
+  final HoverCardTooltipController hoverCardTooltipController =
+      HoverCardTooltipController();
 
   FlutterTreeType getTreeType() {
     return treeType;
