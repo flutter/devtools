@@ -81,9 +81,9 @@ class _InstanceColumn extends ColumnData<HeapStatsRecord> {
 class _ShallowSizeColumn extends ColumnData<HeapStatsRecord> {
   _ShallowSizeColumn()
       : super(
-          'Shallow\nSize',
-          titleTooltip: 'Total shallow size (sum of all references '
-              'to the fields) of objects.',
+          'Shallow\n Dart Size',
+          titleTooltip: 'Total shallow Dart size (sum of all references '
+              "to the Dart object's fields) of objects.",
           fixedWidthPx: scaleByFontFactor(85.0),
           alignment: ColumnAlignment.right,
         );
@@ -108,8 +108,9 @@ class _ShallowSizeColumn extends ColumnData<HeapStatsRecord> {
 class _RetainedSizeColumn extends ColumnData<HeapStatsRecord> {
   _RetainedSizeColumn()
       : super(
-          'Retained\nSize',
-          titleTooltip: 'Total size of objects plus objects they retain, '
+          'Retained\nDart Size',
+          titleTooltip:
+              'Total shallow Dart size of objects plus shallow Dart size of objects they retain,\n'
               'taking into account only the shortest retaining path for the referenced objects.',
           fixedWidthPx: scaleByFontFactor(85.0),
           alignment: ColumnAlignment.right,
@@ -138,7 +139,9 @@ class _StatsTable extends StatefulWidget {
     required this.data,
     required this.sorting,
   }) : super(key: key);
+
   final List<HeapStatsRecord> data;
+
   final ColumnSorting sorting;
 
   @override
@@ -149,8 +152,8 @@ class _StatsTableState extends State<_StatsTable> {
   late final List<ColumnData<HeapStatsRecord>> _columns;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  void initState() {
+    super.initState();
 
     final _shallowSizeColumn = _ShallowSizeColumn();
 
