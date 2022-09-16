@@ -447,7 +447,7 @@ class FlutterFrameTooltip extends StatelessWidget {
   Widget build(BuildContext context) {
     return HoverCardTooltip(
       enabled: () => true,
-      onHover: (_) => _buildCardData(context),
+      onHover: (_, __) => _buildCardData(context),
       child: child,
     );
   }

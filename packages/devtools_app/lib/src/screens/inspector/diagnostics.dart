@@ -190,20 +190,27 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       enabled: () =>
           preferences.inspector.hoverEvalModeEnabled.value &&
           diagnosticLocal.inspectorService != null,
-      onHover: (event) async {
+      onHover: (event, isHoverStillMostRecent) async {
         await Future.delayed(Duration(seconds: 5));
         final group = inspectorService.createObjectGroup('hover');
+
+        if (!isHoverStillMostRecent()) return Future.value();
         final value =
             await group.toObservatoryInstanceRef(diagnosticLocal.valueRef);
+
         final variable = DartObjectNode.fromValue(
           value: value,
           isolateRef: inspectorService.isolateRef,
           diagnostic: diagnosticLocal,
         );
+
+        if (!isHoverStillMostRecent()) return Future.value();
         await buildVariablesTree(variable);
         for (var child in variable.children) {
+          if (!isHoverStillMostRecent()) return Future.value();
           await buildVariablesTree(child);
         }
+
         variable.expand();
         // TODO(jacobr): should we ensure the hover has not yet been cancelled?
 

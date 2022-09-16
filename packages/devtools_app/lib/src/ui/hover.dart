@@ -218,20 +218,29 @@ class HoverCard {
 
 class HoverCardTooltipController {
   HoverCard? _hoverCard;
-  int counter = 0;
-  void set(HoverCard card) {
+  int _freshnessToken = 0;
+
+  void set({required HoverCard hoverCard}) {
     _hoverCard?.remove();
-    _hoverCard = card;
+    _hoverCard = hoverCard;
   }
 
-  void maybeRemove() {
+  void maybeRemoveHoverCard() {
     _hoverCard?.maybeRemove();
     _hoverCard = null;
   }
 
-  void clear() {
+  void clearHoverCard() {
     _hoverCard?.remove();
     _hoverCard = null;
+  }
+
+  int newFreshnessToken() {
+    return ++_freshnessToken;
+  }
+
+  bool isTokenStillFresh(int token) {
+    return token == _freshnessToken;
   }
 }
 
@@ -253,7 +262,10 @@ class HoverCardTooltip extends StatefulWidget {
   final bool Function() enabled;
 
   /// Data to display when hovering over a particular point.
-  final Future<HoverCardData> Function(PointerHoverEvent event) onHover;
+  final Future<HoverCardData?> Function(
+    PointerHoverEvent event,
+    bool Function() isHoverStillMostRecent,
+  ) onHover;
 
   final Widget child;
 
@@ -275,7 +287,11 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
   void _onHoverExit() {
     _showTimer?.cancel();
     _removeTimer = Timer(HoverCardTooltip._hoverDelay, () {
-      widget.hoverCardTooltipController.maybeRemove();
+      // Invalidate the current counter so we know that our HoverCard is no
+      // longer fresh.
+      widget.hoverCardTooltipController.newFreshnessToken();
+
+      widget.hoverCardTooltipController.maybeRemoveHoverCard();
     });
   }
 
@@ -287,9 +303,10 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
 
     if (!widget.enabled()) return;
     _showTimer = Timer(HoverCardTooltip._hoverDelay, () async {
-      final ourCounter = ++widget.hoverCardTooltipController.counter;
+      final freshnessToken =
+          widget.hoverCardTooltipController.newFreshnessToken();
       widget.hoverCardTooltipController.set(
-        HoverCard.fromHoverEvent(
+        hoverCard: HoverCard.fromHoverEvent(
           context: context,
           contents: const CircularProgressIndicator(),
           width: HoverCardTooltip.defaultHoverWidth,
@@ -297,14 +314,19 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
         ),
       );
 
-      final hoverCardData = await widget.onHover(event);
+      final hoverCardData = await widget.onHover(
+        event,
+        () =>
+            widget.hoverCardTooltipController.isTokenStillFresh(freshnessToken),
+      );
 
-      if (ourCounter == widget.hoverCardTooltipController.counter) {
+      if (widget.hoverCardTooltipController.isTokenStillFresh(freshnessToken) &&
+          hoverCardData != null) {
         // We are still the most fresh card, so we can still post our hover
         if (!mounted) return;
         if (hoverCardData.position == HoverCardPosition.cursor) {
           widget.hoverCardTooltipController.set(
-            HoverCard.fromHoverEvent(
+            hoverCard: HoverCard.fromHoverEvent(
               context: context,
               title: hoverCardData.title,
               contents: hoverCardData.contents,
@@ -314,7 +336,7 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
           );
         } else {
           widget.hoverCardTooltipController.set(
-            HoverCard(
+            hoverCard: HoverCard(
               context: context,
               title: hoverCardData.title,
               contents: hoverCardData.contents,
@@ -350,7 +372,7 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
   void dispose() {
     _showTimer?.cancel();
     _removeTimer?.cancel();
-    widget.hoverCardTooltipController.clear();
+    widget.hoverCardTooltipController.clearHoverCard();
     widget.disposable?.dispose();
     super.dispose();
   }
