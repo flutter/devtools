@@ -11,7 +11,7 @@ import '../../test_data/memory/heap/heap_data.dart';
 void main() async {
   for (var t in goldenHeapTests) {
     group(t.name, () {
-      late AdaptedHeap heap;
+      late AdaptedHeapData heap;
 
       setUp(() async {
         heap = await t.loadHeap();
@@ -28,14 +28,15 @@ void main() async {
 
       test('has exactly one object of type ${t.appClassName}.', () {
         final appObjects =
-            heap.objects.where((o) => o.className == t.appClassName);
+            heap.objects.where((o) => o.heapClass.className == t.appClassName);
         expect(appObjects, hasLength(1), reason: t.name);
       });
 
       test('has path to the object of type ${t.appClassName}.', () async {
         buildSpanningTree(heap);
-        final appObject =
-            heap.objects.where((o) => o.className == t.appClassName).first;
+        final appObject = heap.objects
+            .where((o) => o.heapClass.className == t.appClassName)
+            .first;
         expect(appObject.retainer, isNotNull, reason: t.name);
       });
     });

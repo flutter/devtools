@@ -31,7 +31,7 @@ final _sizeTests = [
 
   _SizeTest(
     name: 'One object heap',
-    heap: AdaptedHeap(
+    heap: AdaptedHeapData(
       [
         _createOneByteObject(0, []),
       ],
@@ -42,7 +42,7 @@ final _sizeTests = [
   ),
   _SizeTest(
     name: 'Two objects heap',
-    heap: AdaptedHeap(
+    heap: AdaptedHeapData(
       [
         _createOneByteObject(0, [1]),
         _createOneByteObject(1, []),
@@ -54,7 +54,7 @@ final _sizeTests = [
   ),
   _SizeTest(
     name: 'Four objects heap',
-    heap: AdaptedHeap(
+    heap: AdaptedHeapData(
       [
         _createOneByteObject(0, [1, 2, 3]),
         _createOneByteObject(1, []),
@@ -71,7 +71,7 @@ final _sizeTests = [
 
   _SizeTest(
     name: 'One unreachable object heap',
-    heap: AdaptedHeap(
+    heap: AdaptedHeapData(
       [
         _createOneByteObject(0, []),
         _createOneByteObject(1, []),
@@ -83,7 +83,7 @@ final _sizeTests = [
   ),
   _SizeTest(
     name: 'Many unreachable objects heap',
-    heap: AdaptedHeap(
+    heap: AdaptedHeapData(
       [
         // Reachable:
         _createOneByteObject(0, [1, 2, 3]),
@@ -111,7 +111,7 @@ final _sizeTests = [
     //  1w 2
     //  |
     //  3
-    heap: AdaptedHeap(
+    heap: AdaptedHeapData(
       [
         _createOneByteObject(0, [1, 2]),
         _createOneByteWeakObject(1, [3]),
@@ -130,7 +130,7 @@ final _sizeTests = [
     //  1w 2w
     //  |   \
     //  3   4
-    heap: AdaptedHeap(
+    heap: AdaptedHeapData(
       [
         _createOneByteObject(0, [1, 2]),
         _createOneByteWeakObject(1, [3]),
@@ -149,7 +149,7 @@ final _sizeTests = [
     name: 'Diamond',
     //  |\
     //  \|
-    heap: AdaptedHeap(
+    heap: AdaptedHeapData(
       [
         _createOneByteObject(0, [1, 2]),
         _createOneByteObject(1, [3]),
@@ -166,7 +166,7 @@ final _sizeTests = [
     //  \
     //  |\
     //  \|
-    heap: AdaptedHeap(
+    heap: AdaptedHeapData(
       [
         _createOneByteObject(0, [1]),
         _createOneByteObject(1, [2, 3]),
@@ -184,7 +184,7 @@ final _sizeTests = [
     //  \
     //  |\
     //  \|
-    heap: AdaptedHeap(
+    heap: AdaptedHeapData(
       [
         _createOneByteObject(0, [1]),
         _createOneByteObject(1, [2, 3]),
@@ -202,7 +202,7 @@ final _sizeTests = [
     //  \
     //  |\
     //  \|
-    heap: AdaptedHeap(
+    heap: AdaptedHeapData(
       [
         _createOneByteObject(0, [1]),
         _createOneByteObject(1, [2, 3]),
@@ -231,7 +231,7 @@ class _SizeTest {
 
   /// For convenience of testing each heap object has code equal to the
   /// index in array.
-  final AdaptedHeap heap;
+  final AdaptedHeapData heap;
 
   final String name;
 
@@ -247,8 +247,10 @@ AdaptedHeapObject _createOneByteObject(
     AdaptedHeapObject(
       code: codeAndIndex,
       references: references,
-      className: 'MyClass',
-      library: 'my_lib',
+      heapClass: HeapClass(
+        className: 'MyClass',
+        library: 'my_lib',
+      ),
       shallowSize: 1,
     );
 
@@ -259,15 +261,17 @@ AdaptedHeapObject _createOneByteWeakObject(
   final result = AdaptedHeapObject(
     code: codeAndIndex,
     references: references,
-    className: '_WeakProperty',
-    library: 'dart.core',
+    heapClass: HeapClass(
+      className: '_WeakProperty',
+      library: 'dart.core',
+    ),
     shallowSize: 1,
   );
-  assert(isWeakEntry(result.className, result.library), isTrue);
+  assert(result.heapClass.isWeakEntry, isTrue);
   return result;
 }
 
-bool _assertHeapIndexIsCode(AdaptedHeap heap) => heap.objects
+bool _assertHeapIndexIsCode(AdaptedHeapData heap) => heap.objects
     .asMap()
     .entries
     .every((entry) => entry.key == entry.value.code);

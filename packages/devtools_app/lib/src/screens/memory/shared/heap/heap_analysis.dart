@@ -5,21 +5,18 @@
 import 'model.dart';
 import 'spanning_tree.dart';
 
-List<HeapStatsRecord> heapStats(AdaptedHeap? heap) {
+List<HeapStatsRecord> heapStats(AdaptedHeapData? heap) {
   final result = <String, HeapStatsRecord>{};
   if (heap == null) return [];
   if (!heap.isSpanningTreeBuilt) buildSpanningTree(heap);
   for (var object in heap.objects) {
     // We do not show objects that will be garbage collected soon.
-    if (object.retainedSize == null || object.isSentinel) continue;
+    if (object.retainedSize == null || object.heapClass.isSentinel) continue;
 
-    if (!result.containsKey(object.fullClassName)) {
-      result[object.fullClassName] = HeapStatsRecord(
-        className: object.className,
-        library: object.library,
-      );
+    if (!result.containsKey(object.heapClass.fullName)) {
+      result[object.heapClass.fullName] = HeapStatsRecord(object.heapClass);
     }
-    final stats = result[object.fullClassName]!;
+    final stats = result[object.heapClass.fullName]!;
     stats.retainedSize += object.retainedSize ?? 0;
     stats.shallowSize += object.shallowSize;
     stats.instanceCount++;

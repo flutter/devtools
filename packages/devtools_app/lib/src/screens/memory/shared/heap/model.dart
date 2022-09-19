@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../primitives/memory_utils.dart';
@@ -19,21 +20,23 @@ class _JsonFields {
 
 /// Contains information from [HeapSnapshotGraph],
 /// needed for memory screen.
-class AdaptedHeap {
+class AdaptedHeapData {
   /// Default value for rootIndex is taken from the doc:
   /// https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/heap_snapshot.md#object-ids
-  AdaptedHeap(this.objects, {this.rootIndex = _defaultRootIndex})
+  AdaptedHeapData(this.objects, {this.rootIndex = _defaultRootIndex})
       : assert(objects.isNotEmpty),
         assert(objects.length > rootIndex);
 
-  factory AdaptedHeap.fromJson(Map<String, dynamic> json) => AdaptedHeap(
+  factory AdaptedHeapData.fromJson(Map<String, dynamic> json) =>
+      AdaptedHeapData(
         (json[_JsonFields.objects] as List<dynamic>)
             .map((e) => AdaptedHeapObject.fromJson(e))
             .toList(),
         rootIndex: json[_JsonFields.rootIndex] ?? _defaultRootIndex,
       );
 
-  factory AdaptedHeap.fromHeapSnapshot(HeapSnapshotGraph graph) => AdaptedHeap(
+  factory AdaptedHeapData.fromHeapSnapshot(HeapSnapshotGraph graph) =>
+      AdaptedHeapData(
         graph.objects
             .map((e) => AdaptedHeapObject.fromHeapSnapshotObject(e))
             .toList(),
@@ -103,8 +106,7 @@ class AdaptedHeapObject {
   AdaptedHeapObject({
     required this.code,
     required this.references,
-    required this.className,
-    required this.library,
+    required this.heapClass,
     required this.shallowSize,
   });
 
@@ -114,8 +116,7 @@ class AdaptedHeapObject {
     return AdaptedHeapObject(
       code: object.identityHashCode,
       references: List.from(object.references),
-      className: object.klass.name,
-      library: library,
+      heapClass: HeapClass(className: object.klass.name, library: library),
       shallowSize: object.shallowSize,
     );
   }
@@ -124,14 +125,15 @@ class AdaptedHeapObject {
       AdaptedHeapObject(
         code: json[_JsonFields.code],
         references: (json[_JsonFields.references] as List<dynamic>).cast<int>(),
-        className: json[_JsonFields.klass],
-        library: json[_JsonFields.library],
+        heapClass: HeapClass(
+          className: json[_JsonFields.klass],
+          library: json[_JsonFields.library],
+        ),
         shallowSize: json[_JsonFields.shallowSize] ?? 0,
       );
 
   final List<int> references;
-  final String className;
-  final String library;
+  final HeapClass heapClass;
   final IdentityHashCode code;
   final int shallowSize;
 
@@ -151,38 +153,63 @@ class AdaptedHeapObject {
   Map<String, dynamic> toJson() => {
         _JsonFields.code: code,
         _JsonFields.references: references,
-        _JsonFields.klass: className,
-        _JsonFields.library: library.toString(),
+        _JsonFields.klass: heapClass.className,
+        _JsonFields.library: heapClass.library,
         _JsonFields.shallowSize: shallowSize,
       };
 
-  String get shortName => '$className-$code';
-  String get name => '$library/$shortName';
-  String get fullClassName => _fullClassName(library, className);
-
-  bool get isSentinel => className == 'Sentinel' && library.isEmpty;
+  String get shortName => '${heapClass.className}-$code';
+  String get name => '${heapClass.library}/$shortName';
 }
 
 class HeapStatsRecord {
-  HeapStatsRecord({required this.className, required this.library});
+  HeapStatsRecord(this.heapClass);
 
-  final String className;
-  final String library;
+  final HeapClass heapClass;
   int shallowSize = 0;
   int retainedSize = 0;
   int instanceCount = 0;
-
-  String get fullClassName => _fullClassName(library, className);
 }
-
-String _fullClassName(String library, String className) =>
-    library.isNotEmpty ? '$library/$className' : className;
 
 /// This class is needed to make snapshot taking mockable.
 class SnapshotTaker {
-  Future<AdaptedHeap?> take() async {
+  Future<AdaptedHeapData?> take() async {
     final snapshot = await snapshotMemory();
     if (snapshot == null) return null;
-    return AdaptedHeap.fromHeapSnapshot(snapshot);
+    return AdaptedHeapData.fromHeapSnapshot(snapshot);
+  }
+}
+
+class HeapClass {
+  HeapClass({required this.className, required this.library});
+
+  final String className;
+  final String library;
+
+  String get fullName => library.isNotEmpty ? '$library/$className' : className;
+
+  bool get isSentinel => className == 'Sentinel' && library.isEmpty;
+
+  /// Detects if a class can retain an object from garbage collection.
+  bool get isWeakEntry {
+    // Classes that hold reference to an object without preventing
+    // its collection.
+    const weakHolders = {
+      '_WeakProperty': 'dart.core',
+      '_WeakReferenceImpl': 'dart.core',
+      'FinalizerEntry': 'dart._internal',
+    };
+
+    if (!weakHolders.containsKey(className)) return false;
+    if (weakHolders[className] == library) return true;
+
+    // If a class lives in unexpected library, this can be because of
+    // (1) name collision or (2) bug in this code.
+    // Throwing exception in debug mode to verify option #2.
+    // TODO(polina-c): create a way for users to add their weak classes
+    // or detect weak references automatically, without hard coding
+    // class names.
+    assert(false, 'Unexpected library for $className: $library.');
+    return false;
   }
 }

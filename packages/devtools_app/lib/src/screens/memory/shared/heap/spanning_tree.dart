@@ -8,7 +8,7 @@ import 'model.dart';
 
 /// Sets the field retainer and retainedSize for each object in the [heap], that
 /// has retaining path to the root.
-void buildSpanningTree(AdaptedHeap heap) {
+void buildSpanningTree(AdaptedHeapData heap) {
   assert(!heap.isSpanningTreeBuilt);
   _setRetainers(heap);
   heap.isSpanningTreeBuilt = true;
@@ -16,7 +16,7 @@ void buildSpanningTree(AdaptedHeap heap) {
 }
 
 /// The algorithm takes O(number of references in the heap).
-void _setRetainers(AdaptedHeap heap) {
+void _setRetainers(AdaptedHeapData heap) {
   heap.root.retainer = -1;
   heap.root.retainedSize = heap.root.shallowSize;
 
@@ -55,7 +55,7 @@ void _setRetainers(AdaptedHeap heap) {
 
 /// Assuming the [object] is leaf, initializes its retained size
 /// and adds the size to all its retainers.
-void _propagateSize(AdaptedHeapObject object, AdaptedHeap heap) {
+void _propagateSize(AdaptedHeapObject object, AdaptedHeapData heap) {
   assert(object.retainer != null);
   assert(object.retainedSize == object.shallowSize);
   final addedSize = object.shallowSize;
@@ -70,32 +70,8 @@ void _propagateSize(AdaptedHeapObject object, AdaptedHeap heap) {
 }
 
 bool _isRetainer(AdaptedHeapObject object) {
-  if (isWeakEntry(object.className, object.library)) return false;
+  if (object.heapClass.isWeakEntry) return false;
   return object.references.isNotEmpty;
-}
-
-/// Detects if a class can retain an object from garbage collection.
-@visibleForTesting
-bool isWeakEntry(String klass, String library) {
-  // Classes that hold reference to an object without preventing
-  // its collection.
-  const weakHolders = {
-    '_WeakProperty': 'dart.core',
-    '_WeakReferenceImpl': 'dart.core',
-    'FinalizerEntry': 'dart._internal',
-  };
-
-  if (!weakHolders.containsKey(klass)) return false;
-  if (weakHolders[klass] == library) return true;
-
-  // If a class lives in unexpected library, this can be because of
-  // (1) name collision or (2) bug in this code.
-  // Throwing exception in debug mode to verify option #2.
-  // TODO(polina-c): create a way for users to add their weak classes
-  // or detect weak references automatically, without hard coding
-  // class names.
-  assert(false, 'Unexpected library for $klass: $library.');
-  return false;
 }
 
 /// Verifies heap integrity rules.
@@ -104,7 +80,7 @@ bool isWeakEntry(String klass, String library) {
 ///
 /// 2. Root's 'retainedSize' should be sum of shallow sizes of all reachable
 /// objects.
-void _verifyHeapIntegrity(AdaptedHeap heap) {
+void _verifyHeapIntegrity(AdaptedHeapData heap) {
   assert(() {
     var totalReachableSize = 0;
 

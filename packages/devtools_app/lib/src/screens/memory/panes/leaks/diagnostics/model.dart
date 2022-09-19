@@ -43,13 +43,13 @@ class NotGCedAnalyzerTask {
             .cast<Map<String, dynamic>>()
             .map((e) => LeakReport.fromJson(e))
             .toList(),
-        heap: AdaptedHeap.fromJson(json[_JsonFields.heap]),
+        heap: AdaptedHeapData.fromJson(json[_JsonFields.heap]),
       );
 
   NotGCedAnalyzerTask.fromSnapshot(HeapSnapshotGraph graph, this.reports)
-      : heap = AdaptedHeap.fromHeapSnapshot(graph);
+      : heap = AdaptedHeapData.fromHeapSnapshot(graph);
 
-  final AdaptedHeap heap;
+  final AdaptedHeapData heap;
   final List<LeakReport> reports;
 
   Map<String, dynamic> toJson() => {

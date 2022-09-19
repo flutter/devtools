@@ -50,13 +50,13 @@ class _ClassNameColumn extends ColumnData<HeapStatsRecord> {
         );
 
   @override
-  String? getValue(HeapStatsRecord record) => record.className;
+  String? getValue(HeapStatsRecord record) => record.heapClass.className;
 
   @override
   bool get supportsSorting => true;
 
   @override
-  String getTooltip(HeapStatsRecord record) => record.fullClassName;
+  String getTooltip(HeapStatsRecord record) => record.heapClass.fullName;
 }
 
 class _InstanceColumn extends ColumnData<HeapStatsRecord> {
@@ -180,7 +180,7 @@ class _StatsTableState extends State<_StatsTable> {
     return FlatTable<HeapStatsRecord>(
       columns: _columns,
       data: widget.data,
-      keyFactory: (e) => Key(e.fullClassName),
+      keyFactory: (e) => Key(e.heapClass.fullName),
       onItemSelected: (r) => widget.selectedRecord.value = r,
       selectionNotifier: widget.selectedRecord,
       sortColumn: _columns[widget.sorting.columnIndex],

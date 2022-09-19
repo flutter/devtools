@@ -25,7 +25,7 @@ class InformationListItem extends DiffListItem {
 
 class SnapshotListItem extends DiffListItem {
   SnapshotListItem(
-    Future<AdaptedHeap?> receiver,
+    Future<AdaptedHeapData?> receiver,
     this.displayNumber,
     this._isolateName,
   ) {
