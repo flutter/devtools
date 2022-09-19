@@ -137,22 +137,24 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
 
   @override
   Widget build(BuildContext context) {
+    final selectedIndex = widget.controller.selectedIndex.value;
+    final snapshots = widget.controller.snapshots.value;
     return ListView.builder(
       controller: _scrollController,
       shrinkWrap: true,
-      itemCount: widget.controller.snapshots.value.length,
+      itemCount: snapshots.length,
       itemBuilder: (context, index) {
         return Container(
           height: _headerHeight,
-          color: widget.controller.selectedIndex.value == index
+          color: selectedIndex == index
               ? Theme.of(context).selectedRowColor
               : null,
           child: InkWell(
             canRequestFocus: false,
             onTap: () => widget.controller.select(index),
             child: _SnapshotListTitle(
-              item: widget.controller.snapshots.value[index],
-              selected: index == widget.controller.selectedIndex.value,
+              item: snapshots[index],
+              selected: index == selectedIndex,
             ),
           ),
         );
