@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/primitives/feature_flags.dart';
 import 'package:devtools_app/src/screens/memory/memory_heap_tree_view.dart';
 import 'package:devtools_app/src/screens/memory/memory_screen.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/diff_pane.dart';
@@ -10,15 +11,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../matchers/matchers.dart';
-import '../../scenes/memory/offline.dart';
+import '../../scenes/memory/default.dart';
 
 void main() {
   test('Diff tab is off yet.', () {
-    expect(shouldShowDiffPane, false);
+    expect(FeatureFlags.memoryDiffing, false);
   });
 
   group('Diff pane', () {
-    late MemoryOfflineScene scene;
+    late MemoryDefaultScene scene;
     final finder = find.byType(DiffPane);
 
     Future<void> pumpDiffTab(WidgetTester tester) async {
@@ -36,7 +37,7 @@ void main() {
     const windowSize = Size(2225.0, 1000.0);
 
     setUp(() async {
-      scene = MemoryOfflineScene();
+      scene = MemoryDefaultScene();
       await scene.setUp();
     });
 
@@ -46,6 +47,9 @@ void main() {
 
     testWidgetsWithWindowSize('records and deletes snapshots', windowSize,
         (WidgetTester tester) async {
+      final snapshots = scene.controller.diffPaneController.snapshots;
+      // Check the list contains only documentation item.
+      expect(snapshots.value.length, equals(1));
       await pumpDiffTab(tester);
 
       // Check initial golden.
@@ -58,22 +62,27 @@ void main() {
       for (var i in Iterable.generate(3)) {
         await tester.tap(find.byIcon(Icons.fiber_manual_record));
         await tester.pumpAndSettle();
-        expect(find.text('main-${i + 1}'), findsOneWidget);
+        expect(find.text('selected-isolate-${i + 1}'), findsOneWidget);
       }
       await expectLater(
         finder,
         matchesDevToolsGolden('../../goldens/memory_diff_three_snapshots.png'),
       );
+      expect(snapshots.value.length, equals(1 + 3));
 
-      // Delete and take a snapshot.
+      // Delete a snapshot.
       await tester.tap(find.byTooltip('Delete snapshot'));
       await tester.pumpAndSettle();
+      expect(snapshots.value.length, equals(1 + 3 - 1));
+
+      // Record snapshot
       await tester.tap(find.byIcon(Icons.fiber_manual_record));
       await tester.pumpAndSettle();
       await expectLater(
         finder,
         matchesDevToolsGolden('../../goldens/memory_diff_three_snapshots.png'),
       );
+      expect(snapshots.value.length, equals(1 + 3 - 1 + 1));
 
       // Clear all
       await tester.tap(find.byTooltip('Clear all snapshots'));
@@ -82,6 +91,7 @@ void main() {
         finder,
         matchesDevToolsGolden('../../goldens/memory_diff_empty.png'),
       );
+      expect(snapshots.value.length, equals(1));
     });
   });
 }

@@ -2,8 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/screens/debugger/breakpoint_manager.dart';
+import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/screens/debugger/evaluate.dart';
+import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/ui/search.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -19,6 +24,7 @@ void main() {
       manager = FakeServiceManager(service: service);
       setGlobal(ServiceConnectionManager, manager);
       setGlobal(IdeTheme, getIdeTheme());
+      setGlobal(BreakpointManager, BreakpointManager());
     });
 
     testWidgets(
@@ -225,8 +231,7 @@ class _EvalFieldTestObjects {
 Future<_EvalFieldTestObjects> _setupEvalFieldObjects(
   WidgetTester tester,
 ) async {
-  final debuggerController =
-      TestDebuggerController(initialSwitchToIsolate: false);
+  final debuggerController = DebuggerController(initialSwitchToIsolate: false);
 
   final evalField = ExpressionEvalField(
     controller: debuggerController,

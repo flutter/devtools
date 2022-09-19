@@ -9,6 +9,7 @@ import '../config_specific/import_export/import_export.dart';
 import '../config_specific/logger/logger.dart';
 import '../primitives/message_bus.dart';
 import '../primitives/utils.dart';
+import '../screens/debugger/breakpoint_manager.dart';
 import '../scripts/script_manager.dart';
 import '../service/service.dart';
 import '../service/service_manager.dart';
@@ -30,6 +31,7 @@ class FrameworkCore {
     setGlobal(OfflineModeController, OfflineModeController());
     setGlobal(ScriptManager, ScriptManager());
     setGlobal(NotificationService, NotificationService());
+    setGlobal(BreakpointManager, BreakpointManager());
   }
 
   static void init() {
@@ -60,6 +62,7 @@ class FrameworkCore {
           service,
           onClosed: finishedCompleter.future,
         );
+        breakpointManager.initialize();
         return true;
       } catch (e, st) {
         log('$e\n$st', LogLevel.error);

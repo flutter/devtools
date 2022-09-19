@@ -23,9 +23,14 @@ class VmFieldDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return VmObjectDisplayBasicLayout(
-      object: field,
-      generalDataRows: _fieldDataRows(field),
+    return ObjectInspectorCodeView(
+      codeViewController: controller.codeViewController,
+      script: field.scriptRef!,
+      object: field.obj,
+      child: VmObjectDisplayBasicLayout(
+        object: field,
+        generalDataRows: _fieldDataRows(field),
+      ),
     );
   }
 

@@ -41,6 +41,8 @@ class SnapshotListItem extends DiffListItem {
 
   List<HeapStatsRecord>? stats;
 
+  final selectedRecord = ValueNotifier<HeapStatsRecord?>(null);
+
   @override
   final int displayNumber;
 

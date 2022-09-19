@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/screens/debugger/breakpoint_manager.dart';
+import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_breadcrumbs.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_controller.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_tree.dart';
@@ -33,6 +35,7 @@ void main() {
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(NotificationService, NotificationService());
+    setGlobal(BreakpointManager, BreakpointManager());
     mockConnectedApp(
       fakeServiceManager.connectedApp!,
       isFlutterApp: true,
@@ -52,7 +55,7 @@ void main() {
     required InspectorTreeController treeController,
     bool isSummaryTree = false,
   }) async {
-    final debuggerController = TestDebuggerController();
+    final debuggerController = DebuggerController();
     final summaryTreeController =
         isSummaryTree ? null : InspectorTreeController();
     await tester.pumpWidget(

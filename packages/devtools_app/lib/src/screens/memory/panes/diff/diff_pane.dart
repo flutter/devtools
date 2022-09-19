@@ -6,50 +6,35 @@ import 'package:flutter/material.dart';
 
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/split.dart';
-import '../../shared/heap/model.dart';
 import 'controller/diff_pane_controller.dart';
 import 'controller/model.dart';
 import 'widgets/snapshot_control_pane.dart';
 import 'widgets/snapshot_list.dart';
 import 'widgets/snapshot_view.dart';
 
-/// While this pane is under construction, we do not want our users to see it.
-///
-/// Flip this flag locally to test the pane and flip back before checking in.
-/// TODO: before removing this flag add widget/golden testing for the diff pane.
-bool shouldShowDiffPane = true;
-
 class DiffPane extends StatefulWidget {
-  const DiffPane({Key? key, required this.snapshotTaker}) : super(key: key);
+  const DiffPane({Key? key, required this.controller}) : super(key: key);
 
-  final SnapshotTaker snapshotTaker;
+  final DiffPaneController controller;
 
   @override
   State<DiffPane> createState() => _DiffPaneState();
 }
 
 class _DiffPaneState extends State<DiffPane> {
-  late DiffPaneController controller;
-
-  @override
-  void initState() {
-    super.initState();
-    controller = DiffPaneController(widget.snapshotTaker);
-  }
-
   @override
   Widget build(BuildContext context) {
     final Widget itemContent = ValueListenableBuilder<int>(
-      valueListenable: controller.selectedIndex,
+      valueListenable: widget.controller.selectedIndex,
       builder: (_, index, __) {
-        final item = controller.selected;
+        final item = widget.controller.selected;
 
         if (item is InformationListItem) {
           return const _SnapshotDoc();
         } else if (item is SnapshotListItem) {
           return _SnapshotContent(
             item: item,
-            controller: controller,
+            controller: widget.controller,
           );
         } else {
           throw Exception('Unexpected type of item: ${item.runtimeType}.');
@@ -63,7 +48,7 @@ class _DiffPaneState extends State<DiffPane> {
       minSizes: const [80, 80],
       children: [
         OutlineDecoration(
-          child: SnapshotList(controller: controller),
+          child: SnapshotList(controller: widget.controller),
         ),
         OutlineDecoration(
           child: itemContent,

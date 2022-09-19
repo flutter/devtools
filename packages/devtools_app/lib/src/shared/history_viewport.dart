@@ -77,7 +77,7 @@ class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
     final title = widget.generateTitle == null
         ? '  '
         : widget.generateTitle!(widget.history.current.value);
-    final defaultTitleStyle = theme.textTheme.subtitle2 ?? const TextStyle();
+    final defaultTitleStyle = theme.textTheme.titleSmall ?? const TextStyle();
     return debuggerSectionTitle(
       theme,
       child: Row(
@@ -136,7 +136,7 @@ class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
                       onTap: widget.onTitleTap,
                       child: Text(
                         title,
-                        style: _titleStyle ?? theme.textTheme.subtitle2,
+                        style: _titleStyle ?? theme.textTheme.titleSmall,
                       ),
                     ),
                   ),

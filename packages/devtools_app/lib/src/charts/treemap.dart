@@ -500,7 +500,7 @@ class _TreemapState extends State<Treemap> {
           ),
           child: buildNameAndSizeText(
             textColor:
-                (Theme.of(context).textTheme.bodyText2 ?? const TextStyle())
+                (Theme.of(context).textTheme.bodyMedium ?? const TextStyle())
                     .color,
             oneLine: true,
           ),

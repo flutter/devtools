@@ -58,7 +58,7 @@ class _IntervalDropdownState extends State<IntervalDropdown>
 
     return RoundedDropDownButton<String>(
       isDense: true,
-      style: textTheme.bodyText2,
+      style: textTheme.bodyMedium,
       value: displayDuration(controller.displayInterval),
       onChanged: (String? newValue) {
         setState(() {

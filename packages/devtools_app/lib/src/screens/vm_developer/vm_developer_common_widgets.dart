@@ -11,8 +11,13 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../primitives/utils.dart';
 import '../../shared/common_widgets.dart';
+import '../../shared/globals.dart';
+import '../../shared/split.dart';
 import '../../shared/table.dart';
 import '../../shared/theme.dart';
+import '../debugger/codeview.dart';
+import '../debugger/codeview_controller.dart';
+import '../debugger/debugger_model.dart';
 import 'object_inspector_view_controller.dart';
 import 'vm_object_model.dart';
 import 'vm_service_private_extensions.dart';
@@ -795,4 +800,126 @@ List<MapEntry<String, WidgetBuilder>> vmObjectGeneralDataRows(
         },
       ),
   ];
+}
+
+/// Creates a simple [CodeView] which displays the code relevant to [object] in
+/// [script].
+///
+/// If [object] is synthetic and doesn't have actual token positions,
+/// [object]'s owner's code will be displayed instead.
+class ObjectInspectorCodeView extends StatefulWidget {
+  ObjectInspectorCodeView({
+    required this.codeViewController,
+    required this.script,
+    required this.object,
+    required this.child,
+  }) : super(key: ValueKey(object));
+
+  final CodeViewController codeViewController;
+  final ScriptRef script;
+  final ObjRef object;
+  final Widget child;
+
+  @override
+  State<ObjectInspectorCodeView> createState() =>
+      _ObjectInspectorCodeViewState();
+}
+
+class _ObjectInspectorCodeViewState extends State<ObjectInspectorCodeView> {
+  @override
+  void didChangeDependencies() async {
+    super.didChangeDependencies();
+    if (widget.script != widget.codeViewController.currentScriptRef.value) {
+      widget.codeViewController.resetScriptLocation(
+        ScriptLocation(widget.script),
+      );
+    }
+  }
+
+  @override
+  void didUpdateWidget(ObjectInspectorCodeView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.script != widget.codeViewController.currentScriptRef.value) {
+      widget.codeViewController.resetScriptLocation(
+        ScriptLocation(widget.script),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<ParsedScript?>(
+      valueListenable: widget.codeViewController.currentParsedScript,
+      builder: (context, currentParsedScript, _) {
+        LineRange? lineRange;
+        if (currentParsedScript != null) {
+          final obj = widget.object;
+          SourceLocation? location;
+          if (obj is ClassRef) {
+            location = obj.location!;
+          } else if (obj is FuncRef) {
+            location = obj.location!;
+            // If there's no line associated with the location, we're likely
+            // dealing with an artificial field / method like a constructor.
+            // We'll display the owner's code instead of showing nothing,
+            // although showing a "No Source Available" message is another
+            // option.
+            final owner = obj.owner;
+            if (location.line == null && obj.owner is ClassRef) {
+              location = owner!.location;
+            }
+          } else if (obj is FieldRef) {
+            location = obj.location!;
+            // If there's no line associated with the location, we're likely
+            // dealing with an artificial field / method like a constructor.
+            // We'll display the owner's code instead of showing nothing,
+            // although showing a "No Source Available" message is another
+            // option.
+            final owner = obj.owner;
+            if (location.line == null && owner is ClassRef) {
+              location = owner.location;
+            }
+          }
+
+          if (location != null && location.line != null) {
+            final script = currentParsedScript.script;
+            final startLine = location.line!;
+            final endLine = script.getLineNumberFromTokenPos(
+              location.endTokenPos!,
+            )!;
+            lineRange = LineRange(startLine, endLine);
+          }
+        }
+
+        return Split(
+          axis: Axis.vertical,
+          initialFractions: const [0.5, 0.5],
+          children: [
+            OutlineDecoration.onlyBottom(
+              child: widget.child,
+            ),
+            Column(
+              children: [
+                const AreaPaneHeader(
+                  title: Text('Code Preview'),
+                ),
+                Expanded(
+                  child: CodeView(
+                    codeViewController: widget.codeViewController,
+                    scriptRef: widget.script,
+                    parsedScript: currentParsedScript,
+                    enableFileExplorer: false,
+                    enableHistory: false,
+                    enableSearch: false,
+                    lineRange: lineRange,
+                    onSelected: breakpointManager.toggleBreakpoint,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
 }

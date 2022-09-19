@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/screens/debugger/breakpoint_manager.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_screen.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_service.dart';
 import 'package:devtools_app/src/shared/globals.dart';
@@ -47,6 +48,7 @@ void main() async {
     }
   };
 
+  setGlobal(BreakpointManager, BreakpointManager());
   setGlobal(IdeTheme, IdeTheme());
   setGlobal(NotificationService, NotificationService());
 

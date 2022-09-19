@@ -40,7 +40,7 @@ class _ListControlPane extends StatelessWidget {
       valueListenable: controller.isProcessing,
       builder: (_, isProcessing, __) {
         final takeSnapshotEnabled = !isProcessing;
-        final clearAllEnabled = !isProcessing & controller.hasSnapshots;
+        final clearAllEnabled = !isProcessing && controller.hasSnapshots;
         return Row(
           children: [
             ToolbarAction(
@@ -128,16 +128,19 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
     super.didChangeDependencies();
 
     _currentSnapshotsLength = widget.controller.snapshots.value.length;
-    addAutoDisposeListener(widget.controller.snapshots, () {
+
+    addAutoDisposeListener(widget.controller.snapshots);
+
+    addAutoDisposeListener(widget.controller.selectedIndex, () async {
+      setState(() {});
+
       final newSnapshotsLength = widget.controller.snapshots.value.length;
       if (newSnapshotsLength > _currentSnapshotsLength) {
-        // If new snapshot added, scroll to bottom.
-        setState(() => _scrollController.autoScrollToBottom());
+        _currentSnapshotsLength = newSnapshotsLength;
+        await _scrollController.autoScrollToBottom();
+        setState(() {});
       }
-      _currentSnapshotsLength = newSnapshotsLength;
     });
-
-    addAutoDisposeListener(widget.controller.selectedIndex);
   }
 
   @override
