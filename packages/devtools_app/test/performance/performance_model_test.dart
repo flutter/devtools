@@ -6,6 +6,7 @@ import 'dart:convert';
 
 import 'package:devtools_app/src/primitives/trace_event.dart';
 import 'package:devtools_app/src/primitives/utils.dart';
+import 'package:devtools_app/src/screens/performance/panes/raster_stats/raster_stats_model.dart';
 import 'package:devtools_app/src/screens/performance/performance_model.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
@@ -13,6 +14,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../test_data/cpu_profile.dart';
 import '../test_data/performance.dart';
+import '../test_data/performance_raster_stats.dart';
+
 import '../test_utils/test_utils.dart';
 
 void main() {
@@ -111,6 +114,7 @@ void main() {
         selectedEvent: vsyncEvent,
         selectedFrame: testFrame0,
         cpuProfileData: CpuProfileData.parse(jsonDecode(jsonEncode({}))),
+        rasterStats: RasterStats.parse(rasterStatsFromService),
       );
       expect(performanceData.traceEvents, isNotEmpty);
       expect(performanceData.frames, isNotEmpty);
@@ -120,6 +124,7 @@ void main() {
       expect(performanceData.displayRefreshRate, equals(120));
       expect(performanceData.cpuProfileData, isNotNull);
       expect(performanceData.timelineEvents, isNotEmpty);
+      expect(performanceData.rasterStats, isNotEmpty);
 
       performanceData.clear();
       expect(performanceData.traceEvents, isEmpty);
@@ -129,6 +134,7 @@ void main() {
       expect(performanceData.selectedEvent, isNull);
       expect(performanceData.cpuProfileData, isNull);
       expect(performanceData.timelineEvents, isEmpty);
+      expect(performanceData.rasterStats, isNull);
     });
 
     test('initializeEventGroups', () {
@@ -193,6 +199,7 @@ void main() {
       expect(offlineData.selectedEvent, isNull);
       expect(offlineData.displayRefreshRate, equals(60.0));
       expect(offlineData.cpuProfileData, isNull);
+      expect(offlineData.rasterStats, isNull);
 
       offlineData = OfflinePerformanceData.parse(offlinePerformanceDataJson);
       expect(
@@ -220,6 +227,7 @@ void main() {
         offlineData.cpuProfileData!.toJson,
         equals(goldenCpuProfileDataJson),
       );
+      expect(offlineData.rasterStats!.json, equals(rasterStatsFromDevTools));
     });
 
     test('shallowClone', () {
@@ -233,6 +241,7 @@ void main() {
       expect(offlineData.selectedEvent, equals(clone.selectedEvent));
       expect(offlineData.displayRefreshRate, equals(clone.displayRefreshRate));
       expect(offlineData.cpuProfileData, equals(clone.cpuProfileData));
+      expect(offlineData.rasterStats, equals(clone.rasterStats));
       expect(identical(offlineData, clone), isFalse);
     });
   });

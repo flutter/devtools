@@ -4,6 +4,15 @@
 
 const rasterStatsFromService = {
   'type': 'RenderFrameWithRasterStats',
+  ..._rasterStatsCommon,
+};
+
+const rasterStatsFromDevTools = {
+  ..._rasterStatsCommon,
+  'selectedId': 12734,
+};
+
+const _rasterStatsCommon = {
   'frame_width': 100,
   'frame_height': 200,
   'snapshots': [

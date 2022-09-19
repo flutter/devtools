@@ -21,11 +21,39 @@ void main() {
       expect(rasterStats.totalRasterTime, equals(Duration.zero));
     });
 
-    test('parse constructor', () {
+    test('parse from service data', () {
       rasterStats = RasterStats.parse(rasterStatsFromService);
       expect(rasterStats.layerSnapshots.length, equals(2));
       expect(rasterStats.selectedSnapshot, isNotNull);
       expect(rasterStats.selectedSnapshot!.id, equals(12731));
+      expect(rasterStats.originalFrameSize, equals(const Size(100.0, 200.0)));
+      expect(
+        rasterStats.totalRasterTime,
+        equals(const Duration(microseconds: 494)),
+      );
+
+      // verify each of the [LayerSnapshot]s were parsed correctly
+      final first = rasterStats.layerSnapshots[0];
+      final second = rasterStats.layerSnapshots[1];
+      expect(first.id, equals(12731));
+      expect(first.duration.inMicroseconds, equals(389));
+      expect(first.totalRenderingDuration!.inMicroseconds, equals(494));
+      expect(first.percentRenderingTimeDisplay, equals('78.74%'));
+      expect(first.size, equals(const Size(50, 50)));
+      expect(first.offset, equals(const Offset(25, 25)));
+      expect(second.id, equals(12734));
+      expect(second.duration.inMicroseconds, equals(105));
+      expect(second.totalRenderingDuration!.inMicroseconds, equals(494));
+      expect(second.percentRenderingTimeDisplay, equals('21.26%'));
+      expect(second.size, equals(const Size(20, 40)));
+      expect(second.offset, equals(const Offset(35, 30)));
+    });
+
+    test('parse from devtools data', () {
+      rasterStats = RasterStats.parse(rasterStatsFromDevTools);
+      expect(rasterStats.layerSnapshots.length, equals(2));
+      expect(rasterStats.selectedSnapshot, isNotNull);
+      expect(rasterStats.selectedSnapshot!.id, equals(12734));
       expect(rasterStats.originalFrameSize, equals(const Size(100.0, 200.0)));
       expect(
         rasterStats.totalRasterTime,
