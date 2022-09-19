@@ -239,7 +239,7 @@ class _NotificationState extends State<_Notification>
           color: theme.snackBarTheme.backgroundColor,
           child: DefaultTextStyle(
             style: theme.snackBarTheme.contentTextStyle ??
-                theme.primaryTextTheme.subtitle1!,
+                theme.primaryTextTheme.titleMedium!,
             child: Padding(
               padding: const EdgeInsets.all(denseSpacing),
               child: Column(
@@ -260,7 +260,7 @@ class _NotificationState extends State<_Notification>
   Widget _buildMessage() {
     return Text(
       widget.message.text,
-      style: Theme.of(context).textTheme.bodyText1,
+      style: Theme.of(context).textTheme.bodyLarge,
       overflow: TextOverflow.visible,
       maxLines: 6,
     );

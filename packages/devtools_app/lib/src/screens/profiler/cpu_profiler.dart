@@ -165,7 +165,7 @@ class _CpuProfilerState extends State<CpuProfiler>
           tall: true,
           title: TabBar(
             labelColor:
-                textTheme.bodyText1?.color ?? colorScheme.defaultForeground,
+                textTheme.bodyLarge?.color ?? colorScheme.defaultForeground,
             isScrollable: true,
             controller: _tabController,
             tabs: widget.tabs,
@@ -403,7 +403,7 @@ class UserTagDropdown extends StatelessWidget {
             message: tooltip,
             child: RoundedDropDownButton<String>(
               isDense: true,
-              style: Theme.of(context).textTheme.bodyText2,
+              style: Theme.of(context).textTheme.bodyMedium,
               value: userTag,
               items: [
                 _buildMenuItem(

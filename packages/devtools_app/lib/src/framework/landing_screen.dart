@@ -73,7 +73,7 @@ class LandingScreenSection extends StatelessWidget {
       children: [
         Text(
           title,
-          style: textTheme.headline5,
+          style: textTheme.headlineSmall,
         ),
         const PaddedDivider(),
         child,
@@ -115,12 +115,12 @@ class _ConnectDialogState extends State<ConnectDialog>
         children: [
           Text(
             'Connect to a Running App',
-            style: Theme.of(context).textTheme.subtitle1,
+            style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: denseRowSpacing),
           Text(
             'Enter a URL to a running Dart or Flutter application',
-            style: Theme.of(context).textTheme.caption,
+            style: Theme.of(context).textTheme.bodySmall,
           ),
           const Padding(padding: EdgeInsets.only(top: 20.0)),
           _buildConnectInput(),
@@ -164,7 +164,7 @@ class _ConnectDialogState extends State<ConnectDialog>
           child: Text(
             '(e.g., http://127.0.0.1:12345/auth_code=...)',
             textAlign: TextAlign.start,
-            style: Theme.of(context).textTheme.caption,
+            style: Theme.of(context).textTheme.bodySmall,
           ),
         ),
       ],
@@ -227,13 +227,13 @@ class ImportFileInstructions extends StatelessWidget {
         children: [
           Text(
             'Import a data file to use DevTools without an app connection.',
-            style: Theme.of(context).textTheme.subtitle1,
+            style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: denseRowSpacing),
           Text(
             'At this time, DevTools only supports importing files that were originally'
             ' exported from DevTools.',
-            style: Theme.of(context).textTheme.caption,
+            style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: defaultSpacing),
           ElevatedButton(
@@ -276,13 +276,13 @@ class AppSizeToolingInstructions extends StatelessWidget {
         children: [
           Text(
             'Analyze and view diffs for your app\'s size',
-            style: Theme.of(context).textTheme.subtitle1,
+            style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: denseRowSpacing),
           Text(
             'Load Dart AOT snapshots or app size analysis files to '
             'track down size issues in your app.',
-            style: Theme.of(context).textTheme.caption,
+            style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: defaultSpacing),
           ElevatedButton(

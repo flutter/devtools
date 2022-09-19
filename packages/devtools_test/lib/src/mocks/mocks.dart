@@ -185,10 +185,7 @@ class MockProfilerScreenController extends Mock
 
 class MockStorage extends Mock implements Storage {}
 
-class TestDebuggerController extends DebuggerController {
-  TestDebuggerController({bool initialSwitchToIsolate = true})
-      : super(initialSwitchToIsolate: initialSwitchToIsolate);
-
+class TestCodeViewController extends CodeViewController {
   @override
   ProgramExplorerController get programExplorerController =>
       _explorerController;
@@ -204,31 +201,18 @@ class MockDebuggerControllerLegacy extends Mock implements DebuggerController {
     final debuggerController = MockDebuggerControllerLegacy();
     when(debuggerController.isPaused).thenReturn(ValueNotifier(false));
     when(debuggerController.resuming).thenReturn(ValueNotifier(false));
-    when(debuggerController.breakpoints).thenReturn(ValueNotifier([]));
     when(debuggerController.isSystemIsolate).thenReturn(false);
-    when(debuggerController.breakpointsWithLocation)
-        .thenReturn(ValueNotifier([]));
-    when(debuggerController.fileExplorerVisible)
-        .thenReturn(ValueNotifier(false));
-    when(debuggerController.currentScriptRef).thenReturn(ValueNotifier(null));
     when(debuggerController.selectedBreakpoint).thenReturn(ValueNotifier(null));
     when(debuggerController.stackFramesWithLocation)
         .thenReturn(ValueNotifier([]));
     when(debuggerController.selectedStackFrame).thenReturn(ValueNotifier(null));
     when(debuggerController.hasTruncatedFrames)
         .thenReturn(ValueNotifier(false));
-    when(debuggerController.scriptLocation).thenReturn(ValueNotifier(null));
     when(debuggerController.exceptionPauseMode)
         .thenReturn(ValueNotifier('Unhandled'));
     when(debuggerController.variables).thenReturn(ValueNotifier([]));
-    when(debuggerController.currentParsedScript)
-        .thenReturn(ValueNotifier<ParsedScript?>(null));
     return debuggerController;
   }
-
-  @override
-  final ProgramExplorerController programExplorerController =
-      MockProgramExplorerControllerLegacy.withDefaults();
 }
 
 class MockScriptManagerLegacy extends Mock implements ScriptManager {}

@@ -81,7 +81,7 @@ class NetworkRequestInspector extends StatelessWidget {
                     child: Text(
                       'No request selected',
                       key: NetworkRequestInspector.noRequestSelectedKey,
-                      style: Theme.of(context).textTheme.headline6,
+                      style: Theme.of(context).textTheme.titleLarge,
                     ),
                   )
                 : AnalyticsTabbedView(

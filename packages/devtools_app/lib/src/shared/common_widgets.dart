@@ -628,7 +628,7 @@ class Badge extends StatelessWidget {
       child: Text(
         text,
         // Use a slightly smaller font for the badge.
-        style: (theme.primaryTextTheme.bodyText2 ?? const TextStyle())
+        style: (theme.primaryTextTheme.bodyMedium ?? const TextStyle())
             .apply(fontSizeDelta: -1),
       ),
     );
@@ -818,7 +818,7 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
               child: DefaultTextStyle(
                 maxLines: maxLines,
                 overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.subtitle2!,
+                style: theme.textTheme.titleSmall!,
                 child: title,
               ),
             ),
@@ -864,7 +864,7 @@ class DevToolsToggleButtonGroup extends StatelessWidget {
       color: theme.colorScheme.toggleButtonsTitle,
       selectedColor: theme.colorScheme.toggleButtonsTitleSelected,
       fillColor: theme.colorScheme.toggleButtonsFillSelected,
-      textStyle: theme.textTheme.bodyText1,
+      textStyle: theme.textTheme.bodyLarge,
       constraints: BoxConstraints(
         minWidth: defaultButtonHeight,
         minHeight: defaultButtonHeight,
@@ -1156,15 +1156,66 @@ class OutlinedRowGroup extends StatelessWidget {
 }
 
 class OutlineDecoration extends StatelessWidget {
-  const OutlineDecoration({Key? key, this.child}) : super(key: key);
+  const OutlineDecoration({
+    Key? key,
+    this.child,
+    this.showTop = true,
+    this.showBottom = true,
+    this.showLeft = true,
+    this.showRight = true,
+  }) : super(key: key);
+
+  factory OutlineDecoration.onlyBottom({required Widget? child}) =>
+      OutlineDecoration(
+        showTop: false,
+        showLeft: false,
+        showRight: false,
+        child: child,
+      );
+
+  factory OutlineDecoration.onlyTop({required Widget? child}) =>
+      OutlineDecoration(
+        showBottom: false,
+        showLeft: false,
+        showRight: false,
+        child: child,
+      );
+
+  factory OutlineDecoration.onlyLeft({required Widget? child}) =>
+      OutlineDecoration(
+        showBottom: false,
+        showTop: false,
+        showRight: false,
+        child: child,
+      );
+
+  factory OutlineDecoration.onlyRight({required Widget? child}) =>
+      OutlineDecoration(
+        showBottom: false,
+        showTop: false,
+        showLeft: false,
+        child: child,
+      );
+
+  final bool showTop;
+  final bool showBottom;
+  final bool showLeft;
+  final bool showRight;
 
   final Widget? child;
 
   @override
   Widget build(BuildContext context) {
+    final color = Theme.of(context).focusColor;
+    final border = BorderSide(color: color);
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: Theme.of(context).focusColor),
+        border: Border(
+          left: showLeft ? border : BorderSide.none,
+          right: showRight ? border : BorderSide.none,
+          top: showTop ? border : BorderSide.none,
+          bottom: showBottom ? border : BorderSide.none,
+        ),
       ),
       child: child,
     );
@@ -1222,7 +1273,7 @@ class CenteredMessage extends StatelessWidget {
     return Center(
       child: Text(
         message,
-        style: Theme.of(context).textTheme.headline6,
+        style: Theme.of(context).textTheme.titleLarge,
       ),
     );
   }
@@ -2239,9 +2290,9 @@ class BulletSpacer extends StatelessWidget {
     late TextStyle? textStyle;
     if (useAccentColor) {
       textStyle = theme.appBarTheme.toolbarTextStyle ??
-          theme.primaryTextTheme.bodyText2;
+          theme.primaryTextTheme.bodyMedium;
     } else {
-      textStyle = theme.textTheme.bodyText2;
+      textStyle = theme.textTheme.bodyMedium;
     }
 
     final mutedColor = textStyle?.color?.withAlpha(0x90);

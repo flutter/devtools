@@ -27,21 +27,26 @@ class VmClassDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Flexible(
-          child: VmObjectDisplayBasicLayout(
-            object: clazz,
-            generalDataRows: _classDataRows(clazz),
-          ),
-        ),
-        if (displayClassInstances)
+    return ObjectInspectorCodeView(
+      codeViewController: controller.codeViewController,
+      script: clazz.scriptRef!,
+      object: clazz.ref,
+      child: Row(
+        children: [
           Flexible(
-            child: ClassInstancesWidget(
-              instances: clazz.instances,
+            child: VmObjectDisplayBasicLayout(
+              object: clazz,
+              generalDataRows: _classDataRows(clazz),
             ),
           ),
-      ],
+          if (displayClassInstances)
+            Flexible(
+              child: ClassInstancesWidget(
+                instances: clazz.instances,
+              ),
+            ),
+        ],
+      ),
     );
   }
 

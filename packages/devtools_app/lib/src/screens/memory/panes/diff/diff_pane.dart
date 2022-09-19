@@ -12,12 +12,6 @@ import 'widgets/snapshot_control_pane.dart';
 import 'widgets/snapshot_list.dart';
 import 'widgets/snapshot_view.dart';
 
-/// While this pane is under construction, we do not want our users to see it.
-///
-/// Flip this flag locally to test the pane and flip back before checking in.
-/// TODO: before removing this flag add widget/golden testing for the diff pane.
-bool shouldShowDiffPane = false;
-
 class DiffPane extends StatefulWidget {
   const DiffPane({Key? key}) : super(key: key);
 
@@ -30,7 +24,7 @@ class _DiffPaneState extends State<DiffPane> {
 
   @override
   Widget build(BuildContext context) {
-    final Widget listContent = ValueListenableBuilder<int>(
+    final Widget itemContent = ValueListenableBuilder<int>(
       valueListenable: controller.selectedIndex,
       builder: (_, index, __) {
         final item = controller.selected;
@@ -56,7 +50,7 @@ class _DiffPaneState extends State<DiffPane> {
           child: SnapshotList(controller: controller),
         ),
         OutlineDecoration(
-          child: listContent,
+          child: itemContent,
         ),
       ],
     );

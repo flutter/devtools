@@ -935,7 +935,7 @@ class _SearchField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textStyle = style ?? Theme.of(context).textTheme.subtitle1;
+    final textStyle = style ?? Theme.of(context).textTheme.titleMedium;
 
     final searchField = TextField(
       key: searchFieldKey,
@@ -1254,7 +1254,7 @@ class SearchNavigationControls extends StatelessWidget {
                     child: isSearchInProgress
                         ? SmallCircularProgressIndicator(
                             valueColor: AlwaysStoppedAnimation<Color?>(
-                              Theme.of(context).textTheme.bodyText2!.color,
+                              Theme.of(context).textTheme.bodyMedium!.color,
                             ),
                           )
                         : const SizedBox(),

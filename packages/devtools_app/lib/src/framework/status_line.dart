@@ -140,7 +140,7 @@ class StatusLine extends StatelessWidget {
             description = vm.deviceDisplay;
           }
 
-          final color = textTheme.bodyText2!.color;
+          final color = textTheme.bodyMedium!.color;
 
           return Row(
             mainAxisAlignment: MainAxisAlignment.end,
@@ -183,7 +183,7 @@ class StatusLine extends StatelessWidget {
                         const SizedBox(width: denseSpacing),
                         Text(
                           description,
-                          style: textTheme.bodyText2,
+                          style: textTheme.bodyMedium,
                           overflow: TextOverflow.clip,
                         ),
                       ]
@@ -207,7 +207,7 @@ class StatusLine extends StatelessWidget {
             )
           : Text(
               noConnectionMsg,
-              style: textTheme.bodyText2,
+              style: textTheme.bodyMedium,
             ),
     );
   }
@@ -261,7 +261,7 @@ class IsolateOption extends StatelessWidget {
         const SizedBox(width: denseSpacing),
         Text(
           ref == null ? 'isolate' : _isolateName(ref!),
-          style: textTheme.bodyText2,
+          style: textTheme.bodyMedium,
         ),
       ],
     );
