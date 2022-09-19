@@ -127,7 +127,7 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
 
     addAutoDisposeListener(
       widget.controller.selectedIndex,
-      () => setState(() {/* selectedIndex changed  */}),
+      () => setState(() {/* selectedIndex changed */}),
     );
 
     addAutoDisposeListener(widget.controller.itemAdded, () async {
