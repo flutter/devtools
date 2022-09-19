@@ -67,7 +67,7 @@ class HttpRequestHeadersView extends StatelessWidget {
         children: [
           SelectableText(
             '$key: ',
-            style: Theme.of(context).textTheme.subtitle2,
+            style: Theme.of(context).textTheme.titleSmall,
           ),
           Expanded(
             child: SelectableText(
@@ -253,7 +253,7 @@ class ImageResponseView extends StatelessWidget {
         children: [
           SelectableText(
             '$key: ',
-            style: Theme.of(context).textTheme.subtitle2,
+            style: Theme.of(context).textTheme.titleSmall,
           ),
           Expanded(
             child: SelectableText(
@@ -328,10 +328,10 @@ class HttpRequestCookiesView extends StatelessWidget {
             // https://github.com/flutter/flutter/issues/82722 is fixed.
             // TODO(kenz): add overflow after flutter 2.3.0 is stable. It was
             // added in commit 65388ee2eeaf0d2cf087eaa4a325e3689020c46a.
-            // style: theme.textTheme.subtitle1.copyWith(
+            // style: theme.textTheme.titleMedium.copyWith(
             //   overflow: TextOverflow.fade,
             // ),
-            style: theme.textTheme.subtitle1,
+            style: theme.textTheme.titleMedium,
           ),
         ),
         numeric: numeric,
@@ -697,7 +697,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
           width: _keyWidth,
           child: SelectableText(
             title.isEmpty ? '' : '$title: ',
-            style: Theme.of(context).textTheme.subtitle2,
+            style: Theme.of(context).textTheme.titleSmall,
           ),
         ),
         Expanded(

@@ -30,6 +30,8 @@ class ProgramExplorerController extends DisposableController
   final _isLoadingOutline = ValueNotifier<bool>(false);
 
   /// The currently selected node in the Program Explorer file picker.
+  @visibleForTesting
+  VMServiceObjectNode? get scriptSelection => _scriptSelection;
   VMServiceObjectNode? _scriptSelection;
 
   /// The currently selected node in the Program Explorer outline.
@@ -39,8 +41,9 @@ class ProgramExplorerController extends DisposableController
 
   /// The processed roots of the tree.
   ValueListenable<List<VMServiceObjectNode>> get rootObjectNodes =>
-      _rootObjectNodes;
-  final _rootObjectNodes = ListValueNotifier<VMServiceObjectNode>([]);
+      rootObjectNodesInternal;
+  @visibleForTesting
+  final rootObjectNodesInternal = ListValueNotifier<VMServiceObjectNode>([]);
 
   ValueListenable<int> get selectedNodeIndex => _selectedNodeIndex;
   final _selectedNodeIndex = ValueNotifier<int>(0);
@@ -86,7 +89,7 @@ class ProgramExplorerController extends DisposableController
       this,
       libraries,
     );
-    _rootObjectNodes.replaceAll(nodes);
+    rootObjectNodesInternal.replaceAll(nodes);
     _initialized.value = true;
   }
 
@@ -104,8 +107,8 @@ class ProgramExplorerController extends DisposableController
     if (!initialized.value) {
       return;
     }
-    await _selectScriptNode(script, _rootObjectNodes.value);
-    _rootObjectNodes.notifyListeners();
+    await _selectScriptNode(script, rootObjectNodesInternal.value);
+    rootObjectNodesInternal.notifyListeners();
   }
 
   Future<void> _selectScriptNode(
@@ -134,7 +137,7 @@ class ProgramExplorerController extends DisposableController
     // Index tracks the position of the node in the flat-list representation of
     // the tree:
     var index = 0;
-    for (final node in _rootObjectNodes.value) {
+    for (final node in rootObjectNodesInternal.value) {
       final matchingNode = depthFirstTraversal(
         node,
         returnCondition: matchingNodeCondition,
@@ -295,5 +298,91 @@ class ProgramExplorerController extends DisposableController
       final obj = await service!.getObject(isolateId!, object.id!);
       node.updateObject(obj);
     }
+  }
+
+  /// Searches and returns the script or library node in the FileExplorer
+  /// which is the source location of the target [object].
+  Future<VMServiceObjectNode> searchFileExplorer(ObjRef object) async {
+    final service = serviceManager.service!;
+    final isolateId = serviceManager.isolateManager.selectedIsolate.value!.id!;
+
+    // If `object` is a library, it will always be a root node and is simple to
+    // find.
+    if (object is LibraryRef) {
+      final result = _searchRootObjectNodes(object)!;
+      await result.populateLocation();
+      return result;
+    }
+
+    // Otherwise, we need to find the target script to determine the library
+    // the target node is listed under.
+    ScriptRef? targetScript;
+    if (object is ClassRef) {
+      targetScript = object.location?.script;
+    } else if (object is FieldRef) {
+      targetScript = object.location?.script;
+    } else if (object is FuncRef) {
+      targetScript = object.location?.script;
+    } else if (object is Code) {
+      final ownerFunction = object.function;
+      targetScript = ownerFunction?.location?.script;
+    } else if (object is ScriptRef) {
+      targetScript = object;
+    } else if (object is InstanceRef) {
+      // Since instances are not currently supported, it will search for
+      // the node of the class it belongs to.
+      targetScript = object.classRef?.location?.script;
+    }
+    if (targetScript == null) {
+      throw StateError('Could not find script');
+    }
+
+    final scriptObj =
+        await service.getObject(isolateId, targetScript.id!) as Script;
+    final LibraryRef targetLib = scriptObj.library!;
+
+    // Search targetLib only on the root level nodes
+    final libNode = _searchRootObjectNodes(targetLib)!;
+
+    // If the object's owning script URI is the same as the target library URI,
+    // return the library node as the match.
+    if (targetLib.uri == targetScript.uri) {
+      return libNode;
+    }
+
+    // Find the script node nested under the library.
+    final scriptNode = breadthFirstSearchObject(
+      targetScript,
+      [libNode],
+    )!;
+    await scriptNode.populateLocation();
+    return scriptNode;
+  }
+
+  VMServiceObjectNode? _searchRootObjectNodes(ObjRef obj) {
+    for (final rootNode in rootObjectNodes.value) {
+      if (rootNode.object?.id == obj.id) {
+        return rootNode;
+      }
+    }
+    return null;
+  }
+
+  /// Performs a breath first search on the list of roots and returns the
+  /// first node whose object is the same as the target [obj].
+  VMServiceObjectNode? breadthFirstSearchObject(
+    ObjRef obj,
+    List<VMServiceObjectNode> roots,
+  ) {
+    for (final root in roots) {
+      final match = breadthFirstTraversal<VMServiceObjectNode>(
+        root,
+        returnCondition: (node) => node.object?.id == obj.id,
+      );
+      if (match != null) {
+        return match;
+      }
+    }
+    return null;
   }
 }

@@ -56,6 +56,60 @@ class ObjectViewport extends StatelessWidget {
       },
     );
   }
+
+  @visibleForTesting
+  static String viewportTitle(VmObject? object) {
+    if (object == null) {
+      return 'No object selected.';
+    }
+
+    return '${object.obj.type} ${object.name ?? '<name>'}';
+  }
+
+  /// Calls the object VM statistics card builder according to the VM Object type.
+  @visibleForTesting
+  Widget buildObjectDisplay(VmObject obj) {
+    if (obj is ClassObject) {
+      return VmClassDisplay(
+        controller: controller,
+        clazz: obj,
+      );
+    }
+    if (obj is FuncObject) {
+      return VmFuncDisplay(
+        controller: controller,
+        function: obj,
+      );
+    }
+    if (obj is FieldObject) {
+      return VmFieldDisplay(
+        controller: controller,
+        field: obj,
+      );
+    }
+    if (obj is LibraryObject) {
+      return VmLibraryDisplay(
+        controller: controller,
+        library: obj,
+      );
+    }
+    if (obj is ScriptObject) {
+      return VmScriptDisplay(
+        controller: controller,
+        script: obj,
+      );
+    }
+    if (obj is InstanceObject) {
+      return const VMInfoCard(title: 'TO-DO: Display Instance object data');
+    }
+    if (obj is CodeObject) {
+      return VmCodeDisplay(
+        controller: controller,
+        code: obj,
+      );
+    }
+    return const SizedBox.shrink();
+  }
 }
 
 @visibleForTesting
@@ -69,29 +123,46 @@ String viewportTitle(VmObject? object) {
 
 /// Calls the object VM statistics card builder according to the VM Object type.
 @visibleForTesting
-Widget buildObjectDisplay(VmObject obj) {
+Widget buildObjectDisplay(
+  ObjectInspectorViewController controller,
+  VmObject obj,
+) {
   if (obj is ClassObject) {
     return VmClassDisplay(
+      controller: controller,
       clazz: obj,
     );
   }
   if (obj is FuncObject) {
-    return VmFuncDisplay(function: obj);
+    return VmFuncDisplay(
+      controller: controller,
+      function: obj,
+    );
   }
   if (obj is FieldObject) {
-    return VmFieldDisplay(field: obj);
+    return VmFieldDisplay(
+      controller: controller,
+      field: obj,
+    );
   }
   if (obj is LibraryObject) {
-    return VmLibraryDisplay(library: obj);
+    return VmLibraryDisplay(
+      controller: controller,
+      library: obj,
+    );
   }
   if (obj is ScriptObject) {
-    return VmScriptDisplay(script: obj);
+    return VmScriptDisplay(
+      controller: controller,
+      script: obj,
+    );
   }
   if (obj is InstanceObject) {
     return const VMInfoCard(title: 'TO-DO: Display Instance object data');
   }
   if (obj is CodeObject) {
     return VmCodeDisplay(
+      controller: controller,
       code: obj,
     );
   }
@@ -103,11 +174,9 @@ Widget buildObjectDisplay(VmObject obj) {
 class ObjectHistory extends HistoryManager<VmObject> {
   void pushEntry(VmObject object) {
     if (object.obj == current.value?.obj) return;
-
     while (hasNext) {
       pop();
     }
-
     push(object);
   }
 }

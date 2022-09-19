@@ -2,37 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
-
-import '../instrumentation/model.dart';
 import 'model.dart';
-
-/// Sets [retainingPath] to each [notGCedLeaks].
-void analyzeHeapAndSetRetainingPaths(
-  AdaptedHeap heap,
-  List<LeakReport> notGCedLeaks,
-) {
-  if (!heap.isSpanningTreeBuilt) buildSpanningTree(heap);
-
-  for (var l in notGCedLeaks) {
-    l.retainingPath = heap.shortPath(l.code);
-  }
-}
-
-/// Sets [detailedPath] to each leak.
-void setDetailedPaths(AdaptedHeap heap, List<LeakReport> notGCedLeaks) {
-  assert(heap.isSpanningTreeBuilt);
-
-  for (var l in notGCedLeaks) {
-    l.detailedPath = heap.detailedPath(l.code);
-  }
-}
 
 /// Sets the field [retainer] for each object in the [heap], that has retaining
 /// path to the root.
 ///
 /// The algorithm takes O(number of references in the heap).
-@visibleForTesting
 void buildSpanningTree(AdaptedHeap heap) {
   final root = heap.objects[AdaptedHeap.rootIndex];
   root.retainer = -1;

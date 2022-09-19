@@ -183,7 +183,7 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         TabBar(
-          labelColor: theme.textTheme.bodyText1?.color,
+          labelColor: theme.textTheme.bodyLarge?.color,
           controller: _tabController,
           tabs: widget.tabs,
           isScrollable: true,

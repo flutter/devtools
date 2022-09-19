@@ -39,34 +39,49 @@ MockProgramExplorerController
   return controller;
 }
 
-MockDebuggerController createMockDebuggerControllerWithDefaults({
+MockCodeViewController createMockCodeViewControllerWithDefaults({
   MockProgramExplorerController? mockProgramExplorerController,
+}) {
+  final codeViewController = MockCodeViewController();
+  when(codeViewController.fileExplorerVisible).thenReturn(ValueNotifier(false));
+  when(codeViewController.currentScriptRef).thenReturn(ValueNotifier(null));
+  when(codeViewController.scriptLocation).thenReturn(ValueNotifier(null));
+  when(codeViewController.currentParsedScript)
+      .thenReturn(ValueNotifier<ParsedScript?>(null));
+  when(codeViewController.searchMatches).thenReturn(ValueNotifier([]));
+  when(codeViewController.activeSearchMatch).thenReturn(ValueNotifier(null));
+  mockProgramExplorerController ??=
+      createMockProgramExplorerControllerWithDefaults();
+  when(codeViewController.programExplorerController).thenReturn(
+    mockProgramExplorerController,
+  );
+
+  return codeViewController;
+}
+
+MockDebuggerController createMockDebuggerControllerWithDefaults({
+  MockCodeViewController? mockCodeViewController,
 }) {
   final debuggerController = MockDebuggerController();
   when(debuggerController.isPaused).thenReturn(ValueNotifier(false));
   when(debuggerController.resuming).thenReturn(ValueNotifier(false));
-  when(debuggerController.breakpoints).thenReturn(ValueNotifier([]));
   when(debuggerController.isSystemIsolate).thenReturn(false);
-  when(debuggerController.breakpointsWithLocation)
-      .thenReturn(ValueNotifier([]));
-  when(debuggerController.fileExplorerVisible).thenReturn(ValueNotifier(false));
-  when(debuggerController.currentScriptRef).thenReturn(ValueNotifier(null));
+
   when(debuggerController.selectedBreakpoint).thenReturn(ValueNotifier(null));
   when(debuggerController.stackFramesWithLocation)
       .thenReturn(ValueNotifier([]));
   when(debuggerController.selectedStackFrame).thenReturn(ValueNotifier(null));
   when(debuggerController.hasTruncatedFrames).thenReturn(ValueNotifier(false));
-  when(debuggerController.scriptLocation).thenReturn(ValueNotifier(null));
+
   when(debuggerController.exceptionPauseMode)
       .thenReturn(ValueNotifier('Unhandled'));
   when(debuggerController.variables).thenReturn(ValueNotifier([]));
-  when(debuggerController.currentParsedScript)
-      .thenReturn(ValueNotifier<ParsedScript?>(null));
-  mockProgramExplorerController ??=
-      createMockProgramExplorerControllerWithDefaults();
-  when(debuggerController.programExplorerController).thenReturn(
-    mockProgramExplorerController,
+
+  mockCodeViewController ??= createMockCodeViewControllerWithDefaults();
+  when(debuggerController.codeViewController).thenReturn(
+    mockCodeViewController,
   );
+
   return debuggerController;
 }
 

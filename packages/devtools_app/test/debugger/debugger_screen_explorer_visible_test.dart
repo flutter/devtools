@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/screens/debugger/breakpoint_manager.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_screen.dart';
 import 'package:devtools_app/src/screens/debugger/program_explorer_model.dart';
@@ -27,13 +28,17 @@ void main() {
   setGlobal(IdeTheme, IdeTheme());
   setGlobal(NotificationService, NotificationService());
   setGlobal(ScriptManager, scriptManager);
+  setGlobal(BreakpointManager, BreakpointManager());
   fakeServiceManager.consoleService.ensureServiceInitialized();
   when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
       .thenReturn(ValueNotifier<int>(0));
   final mockProgramExplorerController =
       createMockProgramExplorerControllerWithDefaults();
-  final debuggerController = createMockDebuggerControllerWithDefaults(
+  final mockCodeViewController = createMockCodeViewControllerWithDefaults(
     mockProgramExplorerController: mockProgramExplorerController,
+  );
+  final debuggerController = createMockDebuggerControllerWithDefaults(
+    mockCodeViewController: mockCodeViewController,
   );
   final scripts = [
     ScriptRef(uri: 'package:test/script.dart', id: 'test-script')
@@ -45,17 +50,18 @@ void main() {
     ValueNotifier(
       [
         VMServiceObjectNode(
-          debuggerController.programExplorerController,
+          mockCodeViewController.programExplorerController,
           'package:test',
           null,
         ),
       ],
     ),
   );
-  when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
+  when(mockCodeViewController.showFileOpener).thenReturn(ValueNotifier(false));
 
   // File Explorer view is shown
-  when(debuggerController.fileExplorerVisible).thenReturn(ValueNotifier(true));
+  when(mockCodeViewController.fileExplorerVisible)
+      .thenReturn(ValueNotifier(true));
 
   Future<void> pumpDebuggerScreen(
     WidgetTester tester,

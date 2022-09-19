@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
+import 'object_inspector_view_controller.dart';
 import 'vm_developer_common_widgets.dart';
 import 'vm_object_model.dart';
 import 'vm_service_private_extensions.dart';
@@ -16,18 +17,25 @@ import 'vm_service_private_extensions.dart';
 /// related to function (Func type) objects in the Dart VM.
 class VmFuncDisplay extends StatelessWidget {
   const VmFuncDisplay({
+    required this.controller,
     required this.function,
   });
 
+  final ObjectInspectorViewController controller;
   final FuncObject function;
 
   @override
   Widget build(BuildContext context) {
-    return VmObjectDisplayBasicLayout(
-      object: function,
-      generalDataRows: vmObjectGeneralDataRows(function),
-      sideCardDataRows: _functionDetailRows(function),
-      sideCardTitle: 'Function Details',
+    return ObjectInspectorCodeView(
+      codeViewController: controller.codeViewController,
+      script: function.scriptRef!,
+      object: function.obj,
+      child: VmObjectDisplayBasicLayout(
+        object: function,
+        generalDataRows: vmObjectGeneralDataRows(controller, function),
+        sideCardDataRows: _functionDetailRows(function),
+        sideCardTitle: 'Function Details',
+      ),
     );
   }
 

@@ -6,6 +6,7 @@ import 'dart:convert';
 
 import 'package:devtools_app/src/screens/memory/panes/leaks/diagnostics/model.dart';
 import 'package:devtools_app/src/screens/memory/panes/leaks/instrumentation/model.dart';
+import 'package:devtools_app/src/screens/memory/shared/heap/model.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -25,6 +26,7 @@ void main() {
             references: [2, 3, 4],
             code: 6,
             library: 'library',
+            shallowSize: 1,
           ),
         ],
       ),
@@ -45,6 +47,7 @@ void main() {
         references: [3, 4, 5],
         klass: 'klass',
         library: 'library',
+        shallowSize: 1,
       )
     ]).toJson();
 

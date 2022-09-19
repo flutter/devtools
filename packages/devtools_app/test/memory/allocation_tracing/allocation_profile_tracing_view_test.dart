@@ -7,6 +7,7 @@ import 'dart:io';
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
+import 'package:devtools_app/src/primitives/feature_flags.dart';
 import 'package:devtools_app/src/primitives/trees.dart';
 import 'package:devtools_app/src/screens/memory/memory_controller.dart';
 import 'package:devtools_app/src/screens/memory/memory_heap_tree_view.dart';
@@ -91,21 +92,21 @@ void main() {
 
   test('Allocation tracing disabled by default', () {
     // TODO(bkonyi): remove this check once we enable the tab by default.
-    expect(enableNewAllocationProfileTable, isFalse);
+    expect(FeatureFlags.newAllocationProfileTable, isFalse);
   });
 
   group('Allocation Tracing', () {
     late final CpuSamples allocationTracingProfile;
 
     setUpAll(() {
-      enableNewAllocationProfileTable = true;
+      FeatureFlags.newAllocationProfileTable = true;
       final rawProfile = File(
         'test/test_data/memory/allocation_tracing/allocation_trace.json',
       ).readAsStringSync();
       allocationTracingProfile = CpuSamples.parse(jsonDecode(rawProfile))!;
     });
 
-    tearDownAll(() => enableNewAllocationProfileTable = false);
+    tearDownAll(() => FeatureFlags.newAllocationProfileTable = false);
 
     setUp(() async {
       setGlobal(NotificationService, NotificationService());
@@ -169,7 +170,7 @@ void main() {
         (e) => e.traceAllocations,
       );
 
-      expect(find.byType(AllocationProfileTracingBottomUpTable), findsNothing);
+      expect(find.byType(AllocationProfileTracingTable), findsNothing);
       final traceElement = find.byKey(Key(selectedTrace.cls.id!));
       expect(traceElement, findsOneWidget);
 
@@ -196,12 +197,14 @@ void main() {
       await tester.tap(refresh);
       await tester.pumpAndSettle();
       expect(
-        find.byType(AllocationProfileTracingBottomUpTable),
+        find.byType(AllocationProfileTracingTable),
         findsOneWidget,
       );
 
       // Verify the expected widget components are present.
       expect(find.textContaining('Traced allocations for: '), findsOneWidget);
+      expect(find.text('Bottom Up'), findsOneWidget);
+      expect(find.text('Call Tree'), findsOneWidget);
       expect(find.text('Expand All'), findsOneWidget);
       expect(find.text('Collapse All'), findsOneWidget);
       expect(find.text('Inclusive'), findsOneWidget);
@@ -211,14 +214,19 @@ void main() {
 
       final bottomUpRoots =
           controller.selectedTracedClassAllocationData!.bottomUpRoots;
+      final callTreeRoots =
+          controller.selectedTracedClassAllocationData!.callTreeRoots;
       for (final root in bottomUpRoots) {
+        expect(root.isExpanded, false);
+      }
+      for (final root in callTreeRoots) {
         expect(root.isExpanded, false);
       }
 
       await tester.tap(find.text('Expand All'));
       await tester.pumpAndSettle();
 
-      // Check all nodes have been expanded.
+      // Check all nodes in the bottom up tree have been expanded.
       for (final root in bottomUpRoots) {
         breadthFirstTraversal<CpuStackFrame>(
           root,
@@ -228,11 +236,52 @@ void main() {
         );
       }
 
+      // But also make sure that the call tree nodes haven't been expanded.
+      for (final root in callTreeRoots) {
+        expect(root.isExpanded, false);
+      }
+
       await tester.tap(find.text('Collapse All'));
       await tester.pumpAndSettle();
 
       // Check all nodes have been collapsed.
       for (final root in bottomUpRoots) {
+        breadthFirstTraversal<CpuStackFrame>(
+          root,
+          action: (e) {
+            expect(e.isExpanded, false);
+          },
+        );
+      }
+
+      // Switch from bottom up view to call tree view.
+      await tester.tap(find.text('Call Tree'));
+      await tester.pumpAndSettle();
+
+      // Expand the call tree.
+      await tester.tap(find.text('Expand All'));
+      await tester.pumpAndSettle();
+
+      // Check all nodes in the call tree have been expanded.
+      for (final root in callTreeRoots) {
+        breadthFirstTraversal<CpuStackFrame>(
+          root,
+          action: (e) {
+            expect(e.isExpanded, true);
+          },
+        );
+      }
+
+      // But also make sure that the bottom up tree nodes haven't been expanded.
+      for (final root in bottomUpRoots) {
+        expect(root.isExpanded, false);
+      }
+
+      await tester.tap(find.text('Collapse All'));
+      await tester.pumpAndSettle();
+
+      // Check all nodes have been collapsed.
+      for (final root in callTreeRoots) {
         breadthFirstTraversal<CpuStackFrame>(
           root,
           action: (e) {

@@ -704,33 +704,8 @@ class InspectorController extends DisposableController
     if (node == null) {
       return;
     }
-    final List<InspectorTreeNode> targets = [node];
 
-    // Backtrack to the the first non-property parent so that all properties
-    // for the node are visible if one property is animated to. This is helpful
-    // as typically users want to view the properties of a node as a chunk.
-    while (node!.parent != null && node.diagnostic?.isProperty == true) {
-      node = node.parent;
-    }
-    // Make sure we scroll so that immediate un-expanded children
-    // are also in view. There is no risk in including these children as
-    // the amount of space they take up is bounded. This also ensures that if
-    // a node is selected, its properties will also be selected as by
-    // convention properties are the first children of a node and properties
-    // typically do not have children and are never expanded by default.
-    for (InspectorTreeNode child in node.children) {
-      final RemoteDiagnosticsNode? diagnosticsNode = child.diagnostic;
-      targets.add(child);
-      if (!child.isLeaf && child.isExpanded) {
-        // Stop if we get to expanded children as they might be too large
-        // to try to scroll into view.
-        break;
-      }
-      if (diagnosticsNode != null && !diagnosticsNode.isProperty) {
-        break;
-      }
-    }
-    inspectorTree.animateToTargets(targets);
+    inspectorTree.animateToTargets([node]);
   }
 
   void setSelectedNode(InspectorTreeNode? newSelection) {

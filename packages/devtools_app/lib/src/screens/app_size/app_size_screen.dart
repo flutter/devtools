@@ -200,7 +200,7 @@ class _AppSizeBodyState extends State<AppSizeBody>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   TabBar(
-                    labelColor: Theme.of(context).textTheme.bodyText1!.color,
+                    labelColor: Theme.of(context).textTheme.bodyLarge!.color,
                     isScrollable: true,
                     controller: _tabController,
                     tabs: tabs,
@@ -419,7 +419,7 @@ class _AnalysisViewState extends State<AnalysisView>
               AppSizeScreen.loadingMessage,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Theme.of(context).textTheme.headline1!.color,
+                color: Theme.of(context).textTheme.displayLarge!.color,
               ),
             ),
           );
@@ -592,7 +592,7 @@ class _DiffViewState extends State<DiffView>
         AppSizeScreen.loadingMessage,
         textAlign: TextAlign.center,
         style: TextStyle(
-          color: Theme.of(context).textTheme.headline1!.color,
+          color: Theme.of(context).textTheme.displayLarge!.color,
         ),
       ),
     );

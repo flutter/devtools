@@ -45,9 +45,6 @@
 // ignore_for_file: invalid_use_of_visible_for_testing_member
 // ignore_for_file: invalid_use_of_protected_member
 
-// This annotation should stay here for compatibility with legacy code.
-// @dart=2.9
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer' as developer;
@@ -81,8 +78,8 @@ import 'package:vector_math/vector_math_64.dart';
 // WidgetInspectorService show up as in scope as far as the analysis server is
 // concerned.
 extension WidgetInspectorServicePrivateMethods on WidgetInspectorService {
-  Map<String, Object /*?*/ > /*?*/ _nodeToJson(
-    DiagnosticsNode /*?*/ node,
+  Map<String, Object?>? _nodeToJson(
+    DiagnosticsNode? node,
     InspectorSerializationDelegate delegate,
   ) {
     throw 'Dummy extension method to make the code type check when it calls private members';
@@ -92,7 +89,7 @@ extension WidgetInspectorServicePrivateMethods on WidgetInspectorService {
     throw 'Dummy extension method to make the code type check when it calls private members';
   }
 
-  List<String> /*?*/ get _pubRootDirectories {
+  List<String>? get _pubRootDirectories {
     throw 'Dummy extension method to make the code type check when it calls private members';
   }
 }
@@ -121,7 +118,7 @@ String addServiceExtensions() {
     final groupName = parameters['groupName'];
 
     final result = instance._nodeToJson(
-      WidgetsBinding.instance?.renderViewElement?.toDiagnosticsNode(),
+      WidgetsBinding.instance.renderViewElement?.toDiagnosticsNode(),
       InspectorSerializationDelegate(
         groupName: groupName,
         subtreeDepth: 1000000,

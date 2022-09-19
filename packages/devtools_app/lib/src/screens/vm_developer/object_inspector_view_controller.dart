@@ -8,6 +8,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../primitives/auto_dispose.dart';
 import '../../shared/globals.dart';
+import '../debugger/codeview_controller.dart';
 import '../debugger/program_explorer_controller.dart';
 import 'object_viewport.dart';
 import 'vm_object_model.dart';
@@ -30,6 +31,8 @@ class ObjectInspectorViewController extends DisposableController
 
   final programExplorerController =
       ProgramExplorerController(showCodeNodes: true);
+
+  final codeViewController = CodeViewController();
 
   final objectHistory = ObjectHistory();
 
@@ -56,15 +59,22 @@ class ObjectInspectorViewController extends DisposableController
     final currentObjectValue = objectHistory.current.value;
 
     if (currentObjectValue != null) {
-      final scriptRef = currentObjectValue.scriptRef;
+      final scriptRef = currentObjectValue.scriptRef ??
+          (await programExplorerController
+                  .searchFileExplorer(currentObjectValue.obj))
+              .script;
 
       if (scriptRef != null) {
         await programExplorerController.selectScriptNode(scriptRef);
       }
 
-      if (currentObjectValue.outlineNode != null) {
-        final outlineNode = currentObjectValue.outlineNode!;
+      final outlineNode = currentObjectValue.outlineNode ??
+          programExplorerController.breadthFirstSearchObject(
+            currentObjectValue.obj,
+            programExplorerController.outlineNodes.value,
+          );
 
+      if (outlineNode != null) {
         programExplorerController
           ..selectOutlineNode(outlineNode)
           ..expandToNode(outlineNode);
@@ -156,11 +166,10 @@ class ObjectInspectorViewController extends DisposableController
     objectHistory.clear();
 
     final scriptRefs = scriptManager.sortedScripts.value;
-
     final service = serviceManager.service!;
-
-    final isolate = await service
-        .getIsolate(serviceManager.isolateManager.selectedIsolate.value!.id!);
+    final isolate = await service.getIsolate(
+      serviceManager.isolateManager.selectedIsolate.value!.id!,
+    );
 
     final mainScriptRef = scriptRefs.firstWhereOrNull((ref) {
       return ref.uri == isolate.rootLib?.uri;
@@ -168,11 +177,9 @@ class ObjectInspectorViewController extends DisposableController
 
     if (mainScriptRef != null) {
       _currentScriptRef = mainScriptRef;
-
-      final parts = mainScriptRef.uri!.split('/')..removeLast();
-
       await programExplorerController.selectScriptNode(mainScriptRef);
 
+      final parts = mainScriptRef.uri!.split('/')..removeLast();
       final libraries = isolate.libraries!;
 
       if (parts.isEmpty) {
@@ -182,12 +189,17 @@ class ObjectInspectorViewController extends DisposableController
           }
         }
       }
-
       await pushObject(mainScriptRef);
     }
   }
 
   void setCurrentScript(ScriptRef scriptRef) {
     _currentScriptRef = scriptRef;
+  }
+
+  Future<void> findAndSelectNodeForObject(ObjRef obj) async {
+    final node = await programExplorerController.searchFileExplorer(obj);
+    setCurrentScript(node.location!.scriptRef);
+    await pushObject(obj);
   }
 }

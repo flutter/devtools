@@ -13,6 +13,7 @@ import '../../http/http_request_data.dart';
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../primitives/utils.dart';
 import '../../shared/common_widgets.dart';
+import '../../shared/globals.dart';
 import '../../shared/screen.dart';
 import '../../shared/split.dart';
 import '../../shared/table.dart';
@@ -47,7 +48,7 @@ class NetworkScreen extends Screen {
   @override
   Widget buildStatus(BuildContext context) {
     final networkController = Provider.of<NetworkController>(context);
-    final color = Theme.of(context).textTheme.bodyText2!.color!;
+    final color = Theme.of(context).textTheme.bodyMedium!.color!;
 
     return DualValueListenableBuilder<NetworkRequests, List<NetworkRequest>>(
       firstListenable: networkController.requests,
@@ -125,6 +126,14 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
     super.didChangeDependencies();
     if (!initController()) return;
     controller.startRecording();
+
+    cancelListeners();
+
+    addAutoDisposeListener(serviceManager.isolateManager.mainIsolate, () {
+      if (serviceManager.isolateManager.mainIsolate.value != null) {
+        controller.startRecording();
+      }
+    });
   }
 
   @override

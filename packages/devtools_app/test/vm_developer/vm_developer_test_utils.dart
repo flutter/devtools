@@ -2,12 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/primitives/listenable.dart';
 import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_model.dart';
 import 'package:devtools_app/src/screens/debugger/program_explorer_controller.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector_view_controller.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_viewport.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_object_model.dart';
+import 'package:devtools_app/src/scripts/script_manager.dart';
+import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mockito/mockito.dart';
@@ -169,9 +172,18 @@ class TestInstanceObject extends InstanceObject {
   String? get name => 'FooInstance';
 }
 
+void setUpMockScriptManager() {
+  final mockScriptManager = MockScriptManager();
+  when(mockScriptManager.sortedScripts).thenReturn(
+    FixedValueListenable<List<ScriptRef>>([testScript]),
+  );
+  when(mockScriptManager.getScriptCached(any)).thenReturn(testScript);
+  setGlobal(ScriptManager, mockScriptManager);
+}
+
 void mockVmObject(VmObject object) {
   when(object.outlineNode).thenReturn(null);
-  when(object.scriptRef).thenReturn(null);
+  when(object.scriptRef).thenReturn(testScript);
   when(object.script).thenReturn(testScript);
   when(object.pos).thenReturn(testPos);
   when(object.fetchingReachableSize).thenReturn(ValueNotifier<bool>(false));

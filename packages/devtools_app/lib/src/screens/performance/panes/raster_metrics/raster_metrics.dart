@@ -55,7 +55,7 @@ class RenderingLayerVisualizer extends StatelessWidget {
                 return LayerImage(
                   snapshot: snapshot,
                   originalFrameSize: rasterMetricsController.originalFrameSize,
-                  includeFullscreenButton: true,
+                  includeFullScreenButton: true,
                 );
               },
             ),
@@ -79,11 +79,13 @@ class LayerSnapshotTable extends StatelessWidget {
 
   final ColumnData<LayerSnapshot> _layerColumn = _LayerColumn();
 
+  final ColumnData<LayerSnapshot> _timeColumn = _RenderingTimeColumn();
+
   final ColumnData<LayerSnapshot> _percentageColumn =
       _RenderingTimePercentageColumn();
 
   List<ColumnData<LayerSnapshot>> get _columns =>
-      [_layerColumn, _percentageColumn];
+      [_layerColumn, _timeColumn, _percentageColumn];
 
   @override
   Widget build(BuildContext context) {
@@ -117,6 +119,24 @@ class _LayerColumn extends ColumnData<LayerSnapshot> {
   String getValue(LayerSnapshot dataObject) => dataObject.displayName;
 }
 
+class _RenderingTimeColumn extends ColumnData<LayerSnapshot> {
+  _RenderingTimeColumn()
+      : super(
+          'Rendering time',
+          fixedWidthPx: scaleByFontFactor(120),
+        );
+
+  @override
+  int getValue(LayerSnapshot dataObject) => dataObject.duration.inMicroseconds;
+
+  @override
+  String getDisplayValue(LayerSnapshot dataObject) =>
+      msText(dataObject.duration);
+
+  @override
+  bool get numeric => true;
+}
+
 class _RenderingTimePercentageColumn extends ColumnData<LayerSnapshot> {
   _RenderingTimePercentageColumn()
       : super(
@@ -141,14 +161,14 @@ class LayerImage extends StatelessWidget {
     Key? key,
     required this.snapshot,
     required this.originalFrameSize,
-    this.includeFullscreenButton = false,
+    this.includeFullScreenButton = false,
   }) : super(key: key);
 
   final LayerSnapshot? snapshot;
 
   final Size? originalFrameSize;
 
-  final bool includeFullscreenButton;
+  final bool includeFullScreenButton;
 
   double get _fullscreenButtonWidth => defaultButtonHeight + denseSpacing * 2;
 
@@ -170,7 +190,7 @@ class LayerImage extends StatelessWidget {
       children: [
         SizedBox(
           width:
-              includeFullscreenButton ? _fullscreenButtonWidth : defaultSpacing,
+              includeFullScreenButton ? _fullscreenButtonWidth : defaultSpacing,
         ),
         Flexible(
           child: Container(
@@ -206,25 +226,10 @@ class LayerImage extends StatelessWidget {
             ),
           ),
         ),
-        includeFullscreenButton
-            ? Container(
-                padding: const EdgeInsets.only(bottom: denseSpacing),
-                alignment: Alignment.bottomRight,
-                child: IconButton(
-                  icon: Icon(
-                    Icons.fullscreen,
-                    size: defaultButtonHeight,
-                  ),
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) => LayerImageDialog(
-                        snapshot: snapshot,
-                        originalFrameSize: originalFrameSize,
-                      ),
-                    );
-                  },
-                ),
+        includeFullScreenButton
+            ? _FullScreenButton(
+                snapshot: snapshot,
+                originalFrameSize: originalFrameSize,
               )
             : const SizedBox(width: defaultSpacing),
       ],
@@ -252,6 +257,41 @@ class LayerImage extends StatelessWidget {
     final scaledDx = layerSnapshot.offset.dx * scale;
     final scaledDy = layerSnapshot.offset.dy * scale;
     return Offset(scaledDx, scaledDy);
+  }
+}
+
+class _FullScreenButton extends StatelessWidget {
+  const _FullScreenButton({
+    Key? key,
+    required this.snapshot,
+    required this.originalFrameSize,
+  }) : super(key: key);
+
+  final LayerSnapshot snapshot;
+
+  final Size originalFrameSize;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.only(bottom: denseSpacing),
+      alignment: Alignment.bottomRight,
+      child: IconButton(
+        icon: Icon(
+          Icons.fullscreen,
+          size: defaultButtonHeight,
+        ),
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (context) => LayerImageDialog(
+              snapshot: snapshot,
+              originalFrameSize: originalFrameSize,
+            ),
+          );
+        },
+      ),
+    );
   }
 }
 

@@ -2,12 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: invalid_use_of_protected_member
 import 'dart:async';
 
 import 'package:devtools_app/src/primitives/auto_dispose.dart';
 import 'package:devtools_app/src/primitives/auto_dispose_mixin.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../fixtures/debugging_app_async.dart';
 
 class AutoDisposedWidget extends StatefulWidget {
   const AutoDisposedWidget(this.stream, {Key? key}) : super(key: key);
@@ -83,7 +86,6 @@ void main() {
       disposer.addAutoDisposeListener(notifier, () {
         values.add(notifier.value);
       });
-      // ignore: invalid_use_of_protected_member
       expect(notifier.hasListeners, isTrue);
       notifier.value = 13;
       expect(values.length, equals(1));
@@ -91,10 +93,8 @@ void main() {
       notifier.value = 15;
       expect(values.length, equals(2));
       expect(values.last, equals(15));
-      // ignore: invalid_use_of_protected_member
       expect(notifier.hasListeners, isTrue);
       disposer.cancelListeners();
-      // ignore: invalid_use_of_protected_member
       expect(notifier.hasListeners, isFalse);
       notifier.value = 17;
       // Verify listener not fired.
@@ -105,18 +105,134 @@ void main() {
       disposer.addAutoDisposeListener(notifier, () {
         values.add(notifier.value);
       });
-      // ignore: invalid_use_of_protected_member
       expect(notifier.hasListeners, isTrue);
       notifier.value = 19;
       expect(values.length, equals(3));
       expect(values.last, equals(19));
       disposer.cancelListeners();
 
-      // ignore: invalid_use_of_protected_member
       expect(notifier.hasListeners, isFalse);
       notifier.value = 21;
       expect(values.length, equals(3));
       expect(values.last, equals(19));
+    });
+
+    group('callOnceWhenReady', () {
+      for (bool isReady in [false, true]) {
+        group('isReady=$isReady', () {
+          test('triggers callback and cancels listeners when ready ', () async {
+            final disposer = Disposer();
+            final trigger = ValueNotifier<bool?>(!isReady);
+            int callbackCounter = 0;
+
+            disposer.callOnceWhenReady(
+              trigger: trigger,
+              readyWhen: (triggerValue) => triggerValue == isReady,
+              callback: () {
+                callbackCounter++;
+              },
+            );
+
+            expect(callbackCounter, equals(0));
+            expect(disposer.listenables.length, equals(1));
+            expect(disposer.listeners.length, equals(1));
+
+            // Set a value that won't trigger the callback.
+            trigger.value = null;
+
+            await delay();
+
+            expect(trigger.hasListeners, isTrue);
+            expect(callbackCounter, equals(0));
+            expect(disposer.listenables.length, equals(1));
+            expect(disposer.listeners.length, equals(1));
+
+            // Set a value that will trigger the callback.
+            trigger.value = isReady;
+
+            await delay();
+
+            expect(trigger.hasListeners, isFalse);
+            expect(disposer.listenables.length, equals(0));
+            expect(disposer.listeners.length, equals(0));
+
+            // Check that we ran the callback.
+            expect(callbackCounter, equals(1));
+
+            // Keep changing the isReady value to make sure we don't trigger again.
+            trigger.value = true;
+            trigger.value = null;
+
+            await delay();
+
+            // Verify callback not fired again.
+            expect(callbackCounter, equals(1));
+          });
+
+          test('removes listeners when disposer cancels', () async {
+            final disposer = Disposer();
+            final trigger = ValueNotifier<bool>(!isReady);
+            int callbackCounter = 0;
+
+            disposer.callOnceWhenReady(
+              trigger: trigger,
+              readyWhen: (triggerValue) => triggerValue == isReady,
+              callback: () {
+                callbackCounter++;
+              },
+            );
+
+            expect(trigger.hasListeners, isTrue);
+            expect(disposer.listenables.length, equals(1));
+            expect(disposer.listeners.length, equals(1));
+            expect(callbackCounter, equals(0));
+
+            disposer.cancelListeners();
+
+            expect(trigger.hasListeners, isFalse);
+            expect(disposer.listenables.length, equals(0));
+            expect(disposer.listeners.length, equals(0));
+
+            // Change the isReady value to make sure we don't trigger again.
+            trigger.value = isReady;
+
+            await delay();
+
+            // Verify callback not fired again.
+            expect(callbackCounter, equals(0));
+          });
+
+          test('runs callback immediately if starting in the ready state',
+              () async {
+            final disposer = Disposer();
+            final trigger = ValueNotifier<bool>(isReady);
+            int callbackCounter = 0;
+
+            expect(trigger.hasListeners, isFalse);
+
+            disposer.callOnceWhenReady(
+              trigger: trigger,
+              readyWhen: (triggerValue) => triggerValue == isReady,
+              callback: () {
+                callbackCounter++;
+              },
+            );
+
+            expect(trigger.hasListeners, isFalse);
+            expect(callbackCounter, equals(1));
+            expect(disposer.listenables.length, equals(0));
+            expect(disposer.listeners.length, equals(0));
+
+            // Change the isReady value to make sure we don't trigger again.
+            trigger.value = !trigger.value;
+
+            await delay();
+
+            // Verify callback not fired again.
+            expect(callbackCounter, equals(1));
+          });
+        });
+      }
     });
   });
 
@@ -152,7 +268,6 @@ void main() {
     controller.addAutoDisposeListener(notifier, () {
       values.add(notifier.value);
     });
-    // ignore: invalid_use_of_protected_member
     expect(notifier.hasListeners, isTrue);
     notifier.value = 13;
     expect(values.length, equals(1));
@@ -160,10 +275,8 @@ void main() {
     notifier.value = 15;
     expect(values.length, equals(2));
     expect(values.last, equals(15));
-    // ignore: invalid_use_of_protected_member
     expect(notifier.hasListeners, isTrue);
     controller.cancelListeners();
-    // ignore: invalid_use_of_protected_member
     expect(notifier.hasListeners, isFalse);
     notifier.value = 17;
     // Verify listener not fired.

@@ -628,7 +628,7 @@ class Badge extends StatelessWidget {
       child: Text(
         text,
         // Use a slightly smaller font for the badge.
-        style: (theme.primaryTextTheme.bodyText2 ?? const TextStyle())
+        style: (theme.primaryTextTheme.bodyMedium ?? const TextStyle())
             .apply(fontSizeDelta: -1),
       ),
     );
@@ -781,6 +781,7 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
     this.leftPadding = defaultSpacing,
     this.rightPadding = densePadding,
     this.tall = false,
+    this.backgroundColor,
   }) : super(key: key);
 
   final Widget title;
@@ -792,6 +793,7 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
   final double leftPadding;
   final double rightPadding;
   final bool tall;
+  final Color? backgroundColor;
 
   @override
   Widget build(BuildContext context) {
@@ -806,7 +808,7 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
                 needsBottomBorder ? defaultBorderSide(theme) : BorderSide.none,
             left: needsLeftBorder ? defaultBorderSide(theme) : BorderSide.none,
           ),
-          color: theme.titleSolidBackgroundColor,
+          color: backgroundColor ?? theme.titleSolidBackgroundColor,
         ),
         padding: EdgeInsets.only(left: leftPadding, right: rightPadding),
         alignment: Alignment.centerLeft,
@@ -816,7 +818,7 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
               child: DefaultTextStyle(
                 maxLines: maxLines,
                 overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.subtitle2!,
+                style: theme.textTheme.titleSmall!,
                 child: title,
               ),
             ),
@@ -862,7 +864,7 @@ class DevToolsToggleButtonGroup extends StatelessWidget {
       color: theme.colorScheme.toggleButtonsTitle,
       selectedColor: theme.colorScheme.toggleButtonsTitleSelected,
       fillColor: theme.colorScheme.toggleButtonsFillSelected,
-      textStyle: theme.textTheme.bodyText1,
+      textStyle: theme.textTheme.bodyLarge,
       constraints: BoxConstraints(
         minWidth: defaultButtonHeight,
         minHeight: defaultButtonHeight,
@@ -1154,15 +1156,66 @@ class OutlinedRowGroup extends StatelessWidget {
 }
 
 class OutlineDecoration extends StatelessWidget {
-  const OutlineDecoration({Key? key, this.child}) : super(key: key);
+  const OutlineDecoration({
+    Key? key,
+    this.child,
+    this.showTop = true,
+    this.showBottom = true,
+    this.showLeft = true,
+    this.showRight = true,
+  }) : super(key: key);
+
+  factory OutlineDecoration.onlyBottom({required Widget? child}) =>
+      OutlineDecoration(
+        showTop: false,
+        showLeft: false,
+        showRight: false,
+        child: child,
+      );
+
+  factory OutlineDecoration.onlyTop({required Widget? child}) =>
+      OutlineDecoration(
+        showBottom: false,
+        showLeft: false,
+        showRight: false,
+        child: child,
+      );
+
+  factory OutlineDecoration.onlyLeft({required Widget? child}) =>
+      OutlineDecoration(
+        showBottom: false,
+        showTop: false,
+        showRight: false,
+        child: child,
+      );
+
+  factory OutlineDecoration.onlyRight({required Widget? child}) =>
+      OutlineDecoration(
+        showBottom: false,
+        showTop: false,
+        showLeft: false,
+        child: child,
+      );
+
+  final bool showTop;
+  final bool showBottom;
+  final bool showLeft;
+  final bool showRight;
 
   final Widget? child;
 
   @override
   Widget build(BuildContext context) {
+    final color = Theme.of(context).focusColor;
+    final border = BorderSide(color: color);
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: Theme.of(context).focusColor),
+        border: Border(
+          left: showLeft ? border : BorderSide.none,
+          right: showRight ? border : BorderSide.none,
+          top: showTop ? border : BorderSide.none,
+          bottom: showBottom ? border : BorderSide.none,
+        ),
       ),
       child: child,
     );
@@ -1220,7 +1273,7 @@ class CenteredMessage extends StatelessWidget {
     return Center(
       child: Text(
         message,
-        style: Theme.of(context).textTheme.headline6,
+        style: Theme.of(context).textTheme.titleLarge,
       ),
     );
   }
@@ -1815,6 +1868,7 @@ class NotifierCheckbox extends StatelessWidget {
     required this.notifier,
     this.onChanged,
     this.enabled = true,
+    this.checkboxKey,
   }) : super(key: key);
 
   /// The notifier this [NotifierCheckbox] is responsible for listening to and
@@ -1827,6 +1881,9 @@ class NotifierCheckbox extends StatelessWidget {
 
   /// Whether this checkbox should be enabled for interaction.
   final bool enabled;
+
+  /// Key to assign to the checkbox, for testing purposes.
+  final Key? checkboxKey;
 
   void _updateValue(bool? value) {
     if (notifier.value != value) {
@@ -1846,6 +1903,7 @@ class NotifierCheckbox extends StatelessWidget {
           materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           value: value,
           onChanged: enabled ? _updateValue : null,
+          key: checkboxKey,
         );
       },
     );
@@ -1863,6 +1921,7 @@ class CheckboxSetting extends StatelessWidget {
     this.enabled = true,
     this.gaScreenName,
     this.gaItem,
+    this.checkboxKey,
   }) : super(key: key);
 
   final ValueNotifier<bool?> notifier;
@@ -1881,6 +1940,8 @@ class CheckboxSetting extends StatelessWidget {
   final String? gaScreenName;
 
   final String? gaItem;
+
+  final Key? checkboxKey;
 
   @override
   Widget build(BuildContext context) {
@@ -1928,6 +1989,7 @@ class CheckboxSetting extends StatelessWidget {
             }
           },
           enabled: enabled,
+          checkboxKey: checkboxKey,
         ),
         Flexible(
           child: textContent,
@@ -2228,9 +2290,9 @@ class BulletSpacer extends StatelessWidget {
     late TextStyle? textStyle;
     if (useAccentColor) {
       textStyle = theme.appBarTheme.toolbarTextStyle ??
-          theme.primaryTextTheme.bodyText2;
+          theme.primaryTextTheme.bodyMedium;
     } else {
-      textStyle = theme.textTheme.bodyText2;
+      textStyle = theme.textTheme.bodyMedium;
     }
 
     final mutedColor = textStyle?.color?.withAlpha(0x90);

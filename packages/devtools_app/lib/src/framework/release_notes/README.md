@@ -24,8 +24,8 @@ DISABLE_TESTS=1 make build
 firebase deploy --project devtools-staging --only hosting
 ```
 
-If the firebase command gives an authentication error, try running `firebase logout` and `firebase login`,
-and then retry the `firebase deploy` command.
+If the firebase command gives an authentication error or just says it cannot access a URL, try running
+`firebase logout` and `firebase login`, and then retry the `firebase deploy` command.
 
 Once you see this message, the deployment was successful and now you can move on to the next step.
 ```shell

@@ -1,4 +1,9 @@
-## 2.16.0-dev.0
+## 2.17.0
+* Prepare for 2.17.0 release [#4428](https://github.com/flutter/devtools/pull/4428)
+* Revert perfetto bundle [#4422](https://github.com/flutter/devtools/pull/4422)
+* Handle nested scopes better when parsing code for syntax highlighting [#4363](https://github.com/flutter/devtools/pull/4363)
+* Make fixes for internal checks [#4415](https://github.com/flutter/devtools/pull/4415)
+* Bump version to 2.16.0-dev.0 [#4414](https://github.com/flutter/devtools/pull/4414)
 * Upgrade to latest Flutter beta [#4410](https://github.com/flutter/devtools/pull/4410)
 * Update helper for bumping versions [#4406](https://github.com/flutter/devtools/pull/4406)
 * VM Developer Tools screen IndexedStack & other changes [#4382](https://github.com/flutter/devtools/pull/4382)
