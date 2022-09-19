@@ -31,7 +31,8 @@ class SnapshotListItem extends DiffListItem {
   ) {
     _isProcessing.value = true;
     receiver.whenComplete(() async {
-      heap = AdaptedHeap(await receiver);
+      final data = await receiver;
+      if (data != null) heap = AdaptedHeap(data);
       _isProcessing.value = false;
     });
   }

@@ -23,7 +23,7 @@ class SnapshotView extends StatelessWidget {
       builder: (_, isProcessing, __) {
         if (isProcessing) return const SizedBox.shrink();
 
-        final stats = item.stats;
+        final stats = item.heap?.stats;
         if (stats == null) {
           return const Center(child: Text('Could not take snapshot.'));
         }
@@ -142,7 +142,7 @@ class _StatsTable extends StatefulWidget {
     required this.selectedRecord,
   }) : super(key: key);
 
-  final List<HeapStatsRecord> data;
+  final HeapStatistics data;
   final ValueNotifier<HeapStatsRecord?> selectedRecord;
 
   final ColumnSorting sorting;
@@ -179,7 +179,7 @@ class _StatsTableState extends State<_StatsTable> {
   Widget build(BuildContext context) {
     return FlatTable<HeapStatsRecord>(
       columns: _columns,
-      data: widget.data,
+      data: widget.data.list,
       keyFactory: (e) => Key(e.heapClass.fullName),
       onItemSelected: (r) => widget.selectedRecord.value = r,
       selectionNotifier: widget.selectedRecord,
