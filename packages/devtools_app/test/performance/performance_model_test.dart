@@ -42,6 +42,7 @@ void main() {
       expect(performanceData.selectedEvent, isNull);
       expect(performanceData.displayRefreshRate, 60.0);
       expect(performanceData.cpuProfileData, isNull);
+      expect(performanceData.rasterStats, isNull);
     });
 
     test('to json', () {
@@ -52,27 +53,26 @@ void main() {
           PerformanceData.flutterFramesKey: [],
           PerformanceData.displayRefreshRateKey: 60,
           PerformanceData.traceEventsKey: [],
-          PerformanceData.cpuProfileKey: {},
           PerformanceData.selectedEventKey: {},
+          PerformanceData.cpuProfileKey: {},
+          PerformanceData.rasterStatsKey: {},
         }),
       );
 
       performanceData = PerformanceData(
+        frames: [testFrame0, testFrame1],
+        displayRefreshRate: 60,
         traceEvents: [
           {'name': 'FakeTraceEvent'}
         ],
-        frames: [testFrame0, testFrame1],
         selectedEvent: vsyncEvent,
         cpuProfileData: CpuProfileData.parse(goldenCpuProfileDataJson),
-        displayRefreshRate: 60,
+        rasterStats: RasterStats.parse(rasterStatsFromDevToolsJson),
       );
       expect(
         performanceData.json,
         equals({
           PerformanceData.selectedFrameIdKey: null,
-          PerformanceData.traceEventsKey: [
-            {'name': 'FakeTraceEvent'}
-          ],
           PerformanceData.flutterFramesKey: [
             {
               'number': 0,
@@ -91,9 +91,13 @@ void main() {
               'vsyncOverhead': 1000
             },
           ],
-          PerformanceData.cpuProfileKey: goldenCpuProfileDataJson,
-          PerformanceData.selectedEventKey: vsyncEvent.json,
           PerformanceData.displayRefreshRateKey: 60,
+          PerformanceData.traceEventsKey: [
+            {'name': 'FakeTraceEvent'}
+          ],
+          PerformanceData.selectedEventKey: vsyncEvent.json,
+          PerformanceData.cpuProfileKey: goldenCpuProfileDataJson,
+          PerformanceData.rasterStatsKey: rasterStatsFromDevToolsJson,
         }),
       );
     });
@@ -114,7 +118,7 @@ void main() {
         selectedEvent: vsyncEvent,
         selectedFrame: testFrame0,
         cpuProfileData: CpuProfileData.parse(jsonDecode(jsonEncode({}))),
-        rasterStats: RasterStats.parse(rasterStatsFromService),
+        rasterStats: RasterStats.parse(rasterStatsFromDevToolsJson),
       );
       expect(performanceData.traceEvents, isNotEmpty);
       expect(performanceData.frames, isNotEmpty);
@@ -122,9 +126,9 @@ void main() {
       expect(performanceData.selectedFrameId, 0);
       expect(performanceData.selectedEvent, isNotNull);
       expect(performanceData.displayRefreshRate, equals(120));
-      expect(performanceData.cpuProfileData, isNotNull);
       expect(performanceData.timelineEvents, isNotEmpty);
-      expect(performanceData.rasterStats, isNotEmpty);
+      expect(performanceData.cpuProfileData, isNotNull);
+      expect(performanceData.rasterStats, isNotNull);
 
       performanceData.clear();
       expect(performanceData.traceEvents, isEmpty);
@@ -132,8 +136,8 @@ void main() {
       expect(performanceData.selectedFrame, isNull);
       expect(performanceData.selectedFrameId, isNull);
       expect(performanceData.selectedEvent, isNull);
-      expect(performanceData.cpuProfileData, isNull);
       expect(performanceData.timelineEvents, isEmpty);
+      expect(performanceData.cpuProfileData, isNull);
       expect(performanceData.rasterStats, isNull);
     });
 
@@ -227,7 +231,10 @@ void main() {
         offlineData.cpuProfileData!.toJson,
         equals(goldenCpuProfileDataJson),
       );
-      expect(offlineData.rasterStats!.json, equals(rasterStatsFromDevTools));
+      expect(
+        offlineData.rasterStats!.json,
+        equals(rasterStatsFromDevToolsJson),
+      );
     });
 
     test('shallowClone', () {

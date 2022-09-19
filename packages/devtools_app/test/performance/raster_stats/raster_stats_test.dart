@@ -22,7 +22,7 @@ void main() {
     setUp(() async {
       final mockServiceManager = MockServiceConnectionManager();
       when(mockServiceManager.renderFrameWithRasterStats).thenAnswer(
-        (_) => Future.value(Response.parse(rasterStatsFromService)),
+        (_) => Future.value(Response.parse(rasterStatsFromServiceJson)),
       );
       setGlobal(ServiceConnectionManager, mockServiceManager);
       setGlobal(IdeTheme, IdeTheme());

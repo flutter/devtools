@@ -22,7 +22,7 @@ void main() {
     });
 
     test('parse from service data', () {
-      rasterStats = RasterStats.parse(rasterStatsFromService);
+      rasterStats = RasterStats.parse(rasterStatsFromServiceJson);
       expect(rasterStats.layerSnapshots.length, equals(2));
       expect(rasterStats.selectedSnapshot, isNotNull);
       expect(rasterStats.selectedSnapshot!.id, equals(12731));
@@ -50,7 +50,7 @@ void main() {
     });
 
     test('parse from devtools data', () {
-      rasterStats = RasterStats.parse(rasterStatsFromDevTools);
+      rasterStats = RasterStats.parse(rasterStatsFromDevToolsJson);
       expect(rasterStats.layerSnapshots.length, equals(2));
       expect(rasterStats.selectedSnapshot, isNotNull);
       expect(rasterStats.selectedSnapshot!.id, equals(12734));
@@ -88,9 +88,9 @@ void main() {
       };
       expect(collectionEquals(json, expected), isTrue);
 
-      rasterStats = RasterStats.parse(rasterStatsFromService);
+      rasterStats = RasterStats.parse(rasterStatsFromServiceJson);
       json = rasterStats.json;
-      expected = Map<String, Object?>.from(rasterStatsFromService);
+      expected = Map<String, Object?>.from(rasterStatsFromServiceJson);
       // The expected output should not have the 'type' field that comes from
       // the service protocol and it should have an additional field for the id
       // of the selected snapshot.

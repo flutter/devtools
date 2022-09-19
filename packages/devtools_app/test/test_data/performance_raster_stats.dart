@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-const rasterStatsFromService = {
+const rasterStatsFromServiceJson = {
   'type': 'RenderFrameWithRasterStats',
   ..._rasterStatsCommon,
 };
 
-const rasterStatsFromDevTools = {
+const rasterStatsFromDevToolsJson = {
   ..._rasterStatsCommon,
   'selectedId': 12734,
 };

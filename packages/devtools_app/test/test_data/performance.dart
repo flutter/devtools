@@ -1338,7 +1338,7 @@ final offlinePerformanceDataJson = {
   PerformanceData.selectedFrameIdKey: 1,
   PerformanceData.selectedEventKey: vsyncEvent.json,
   PerformanceData.displayRefreshRateKey: 120.0,
-  PerformanceData.rasterStatsKey: rasterStatsFromDevTools,
+  PerformanceData.rasterStatsKey: rasterStatsFromDevToolsJson,
 };
 
 // Mark: Duration events with duplicate traces
