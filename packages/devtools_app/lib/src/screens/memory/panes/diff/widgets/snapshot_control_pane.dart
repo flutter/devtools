@@ -87,7 +87,7 @@ class _DiffDropdown extends StatelessWidget {
       valueListenable: current.diffWith,
       builder: (_, diffWith, __) => Row(
         children: [
-          const Text('Diff with'),
+          const Text('Diff with:'),
           const SizedBox(width: defaultSpacing),
           RoundedDropDownButton<SnapshotListItem>(
             isDense: true,
