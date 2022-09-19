@@ -115,7 +115,6 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
     with AutoDisposeMixin {
   final _headerHeight = 1.20 * defaultRowHeight;
   late ScrollController _scrollController;
-  late int _currentSnapshotsLength;
 
   @override
   void initState() {
