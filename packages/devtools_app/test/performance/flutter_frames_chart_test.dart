@@ -138,6 +138,8 @@ void main() {
 
   group('FlutterFramesChartItem', () {
     testWidgets('builds for selected frame', (WidgetTester tester) async {
+      setGlobal(IdeTheme, IdeTheme());
+
       await tester.pumpWidget(
         // FlutterFramesChartItem needs to be wrapped in Material,
         // Directionality, and Overlay in order to pump the widget and test.
