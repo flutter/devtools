@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-const renderStats = {
+const rasterStatsFromService = {
   'type': 'RenderFrameWithRasterStats',
   'frame_width': 100,
   'frame_height': 200,

@@ -7,7 +7,7 @@ import 'package:devtools_app/src/screens/performance/panes/raster_stats/raster_s
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../../test_data/performance_raster_metrics.dart';
+import '../../test_data/performance_raster_stats.dart';
 
 void main() {
   late RasterStats rasterStats;
@@ -22,7 +22,7 @@ void main() {
     });
 
     test('parse constructor', () {
-      rasterStats = RasterStats.parse(renderStats);
+      rasterStats = RasterStats.parse(rasterStatsFromService);
       expect(rasterStats.layerSnapshots.length, equals(2));
       expect(rasterStats.selectedSnapshot, isNotNull);
       expect(rasterStats.selectedSnapshot!.id, equals(12731));
@@ -60,9 +60,9 @@ void main() {
       };
       expect(collectionEquals(json, expected), isTrue);
 
-      rasterStats = RasterStats.parse(renderStats);
+      rasterStats = RasterStats.parse(rasterStatsFromService);
       json = rasterStats.json;
-      expected = Map<String, Object?>.from(renderStats);
+      expected = Map<String, Object?>.from(rasterStatsFromService);
       // The expected output should not have the 'type' field that comes from
       // the service protocol and it should have an additional field for the id
       // of the selected snapshot.

@@ -86,7 +86,7 @@ class RasterStats {
 
   /// The selected snapshot for this set of raster stats data.
   ///
-  /// This field is mutable, and is managed by the [RasterMetricsController]. It
+  /// This field is mutable, and is managed by the [RasterStatsController]. It
   /// is included in [RasterStats] so that it can be encoded in and decoded from
   /// json.
   LayerSnapshot? selectedSnapshot;

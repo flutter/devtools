@@ -13,7 +13,7 @@ import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../matchers/matchers.dart';
-import '../../test_data/performance_raster_metrics.dart';
+import '../../test_data/performance_raster_stats.dart';
 
 void main() {
   group('RenderingLayerVisualizer', () {
@@ -22,7 +22,7 @@ void main() {
     setUp(() async {
       final mockServiceManager = MockServiceConnectionManager();
       when(mockServiceManager.renderFrameWithRasterStats).thenAnswer(
-        (_) => Future.value(Response.parse(renderStats)),
+        (_) => Future.value(Response.parse(rasterStatsFromService)),
       );
       setGlobal(ServiceConnectionManager, mockServiceManager);
       setGlobal(IdeTheme, IdeTheme());
@@ -74,7 +74,7 @@ void main() {
 
       await expectLater(
         find.byType(RenderingLayerVisualizer),
-        matchesDevToolsGolden('goldens/raster_metrics_with_data.png'),
+        matchesDevToolsGolden('goldens/raster_stats_with_data.png'),
       );
     });
 
@@ -98,7 +98,7 @@ void main() {
       expect(controller.selectedSnapshot.value, equals(secondLayer));
       await expectLater(
         find.byType(RenderingLayerVisualizer),
-        matchesDevToolsGolden('goldens/raster_metrics_changed_selection.png'),
+        matchesDevToolsGolden('goldens/raster_stats_changed_selection.png'),
       );
     });
   });

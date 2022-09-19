@@ -11,7 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../test_data/performance_raster_metrics.dart';
+import '../../test_data/performance_raster_stats.dart';
 
 void main() {
   group('$RasterStatsController', () {
@@ -20,7 +20,7 @@ void main() {
     setUp(() async {
       final mockServiceManager = MockServiceConnectionManager();
       when(mockServiceManager.renderFrameWithRasterStats).thenAnswer(
-        (_) => Future.value(Response.parse(renderStats)),
+        (_) => Future.value(Response.parse(rasterStatsFromService)),
       );
       setGlobal(ServiceConnectionManager, mockServiceManager);
       setGlobal(IdeTheme, IdeTheme());
