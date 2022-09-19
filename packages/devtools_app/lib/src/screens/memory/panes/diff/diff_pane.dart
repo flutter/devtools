@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/split.dart';
-import '../../shared/heap/model.dart';
 import 'controller/diff_pane_controller.dart';
 import 'controller/model.dart';
 import 'widgets/snapshot_control_pane.dart';

@@ -28,7 +28,6 @@ import 'memory_protocol.dart';
 import 'memory_snapshot_models.dart';
 import 'panes/allocation_profile/allocation_profile_table_view_controller.dart';
 import 'panes/diff/controller/diff_pane_controller.dart';
-import 'panes/diff/controller/diff_pane_controller.dart';
 import 'primitives/filter_config.dart';
 import 'primitives/memory_timeline.dart';
 import 'shared/heap/model.dart';
