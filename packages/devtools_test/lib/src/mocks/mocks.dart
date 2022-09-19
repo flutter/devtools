@@ -164,6 +164,10 @@ class MockLoggingController extends Mock
   final _selectedLog = ValueNotifier<LogData?>(null);
 
   @override
+  final HoverCardTooltipController hoverCardTooltipController =
+      HoverCardTooltipController();
+
+  @override
   void selectLog(LogData data) {
     _selectedLog.value = data;
   }
