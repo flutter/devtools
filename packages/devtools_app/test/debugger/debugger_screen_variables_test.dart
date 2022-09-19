@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/screens/debugger/breakpoint_manager.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_screen.dart';
 import 'package:devtools_app/src/scripts/script_manager.dart';
@@ -30,6 +31,7 @@ void main() {
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(ScriptManager, scriptManager);
     setGlobal(NotificationService, NotificationService());
+    setGlobal(BreakpointManager, BreakpointManager());
     fakeServiceManager.consoleService.ensureServiceInitialized();
     when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
         .thenReturn(ValueNotifier<int>(0));

@@ -3,9 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/screens/debugger/breakpoint_manager.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector_view_controller.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_class_display.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_developer_common_widgets.dart';
+import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +26,9 @@ void main() {
 
   setUp(() {
     setUpMockScriptManager();
+    setGlobal(BreakpointManager, BreakpointManager());
     setGlobal(IdeTheme, IdeTheme());
+    setGlobal(ServiceConnectionManager, FakeServiceManager());
     mockClassObject = MockClassObject();
 
     final json = testClass.toJson();

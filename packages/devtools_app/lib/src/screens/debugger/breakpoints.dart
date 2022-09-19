@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../../primitives/utils.dart';
 import '../../shared/common_widgets.dart';
+import '../../shared/globals.dart';
 import '../../shared/theme.dart';
 import '../../shared/utils.dart';
 import 'common.dart';
@@ -34,7 +35,7 @@ class _BreakpointsState extends State<Breakpoints>
   Widget build(BuildContext context) {
     return DualValueListenableBuilder<List<BreakpointAndSourcePosition>,
         BreakpointAndSourcePosition?>(
-      firstListenable: controller.breakpointsWithLocation,
+      firstListenable: breakpointManager.breakpointsWithLocation,
       secondListenable: controller.selectedBreakpoint,
       builder: (context, breakpoints, selectedBreakpoint, _) {
         return ListView.builder(

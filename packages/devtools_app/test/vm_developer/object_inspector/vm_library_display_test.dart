@@ -3,9 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/screens/debugger/breakpoint_manager.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector_view_controller.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_developer_common_widgets.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_library_display.dart';
+import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/common_widgets.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -19,6 +21,8 @@ import '../vm_developer_test_utils.dart';
 void main() {
   setUp(() {
     setGlobal(IdeTheme, IdeTheme());
+    setGlobal(BreakpointManager, BreakpointManager());
+    setGlobal(ServiceConnectionManager, FakeServiceManager());
   });
   group('test build library display', () {
     late Library testLibCopy;
@@ -39,6 +43,7 @@ void main() {
       mockVmObject(mockLibraryObject);
       when(mockLibraryObject.obj).thenReturn(testLibCopy);
       when(mockLibraryObject.vmName).thenReturn('fooDartLibrary');
+      when(mockLibraryObject.scriptRef).thenReturn(testScript);
     });
 
     testWidgetsWithWindowSize(' - basic layout', windowSize,
