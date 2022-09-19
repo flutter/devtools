@@ -26,14 +26,16 @@ class VmFuncDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return VmObjectDisplayBasicLayout(
-      object: function,
-      generalDataRows: vmObjectGeneralDataRows(
-        controller,
-        function,
+    return ObjectInspectorCodeView(
+      codeViewController: controller.codeViewController,
+      script: function.scriptRef!,
+      object: function.obj,
+      child: VmObjectDisplayBasicLayout(
+        object: function,
+        generalDataRows: vmObjectGeneralDataRows(controller, function),
+        sideCardDataRows: _functionDetailRows(function),
+        sideCardTitle: 'Function Details',
       ),
-      sideCardDataRows: _functionDetailRows(function),
-      sideCardTitle: 'Function Details',
     );
   }
 

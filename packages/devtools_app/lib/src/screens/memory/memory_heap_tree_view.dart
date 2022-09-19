@@ -476,7 +476,7 @@ class HeapTreeViewState extends State<HeapTree>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 TabBar(
-                  labelColor: themeData.textTheme.bodyText1!.color,
+                  labelColor: themeData.textTheme.bodyLarge!.color,
                   isScrollable: true,
                   controller: _tabController,
                   tabs: _tabs,
@@ -643,7 +643,7 @@ class HeapTreeViewState extends State<HeapTree>
     return DropdownButtonHideUnderline(
       child: DropdownButton<String>(
         key: groupByMenuButtonKey,
-        style: textTheme.bodyText2,
+        style: textTheme.bodyMedium,
         value: controller.groupingBy.value,
         onChanged: (String? newValue) {
           setState(

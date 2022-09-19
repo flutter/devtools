@@ -283,7 +283,7 @@ class EventMetaData extends StatelessWidget {
           SelectableText.rich(
             TextSpan(
               text: '$title${inlineValue != null ? ':  ' : ''}',
-              style: theme.textTheme.subtitle2,
+              style: theme.textTheme.titleSmall,
               children: [
                 if (inlineValue != null)
                   TextSpan(
@@ -319,7 +319,7 @@ class ExpandingEventMetaData extends StatelessWidget {
     return ExpansionTile(
       title: Text(
         title,
-        style: Theme.of(context).textTheme.subtitle2,
+        style: Theme.of(context).textTheme.titleSmall,
       ),
       childrenPadding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
       expandedAlignment: Alignment.topLeft,

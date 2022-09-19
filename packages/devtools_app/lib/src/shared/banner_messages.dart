@@ -156,7 +156,7 @@ class BannerMessage extends StatelessWidget {
                   headerText,
                   style: Theme.of(context)
                       .textTheme
-                      .bodyText1!
+                      .bodyLarge!
                       .copyWith(color: foregroundColor),
                 ),
                 const SizedBox(width: defaultSpacing),

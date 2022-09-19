@@ -119,7 +119,7 @@ class _DebuggingControlsState extends State<DebuggingControls>
 
   Widget _librariesButton() {
     return ValueListenableBuilder<bool>(
-      valueListenable: controller.fileExplorerVisible,
+      valueListenable: controller.codeViewController.fileExplorerVisible,
       builder: (context, visible, _) {
         return RoundedOutlinedBorder(
           child: Container(
@@ -127,7 +127,7 @@ class _DebuggingControlsState extends State<DebuggingControls>
             child: DebuggerButton(
               title: 'File Explorer',
               icon: Icons.folder,
-              onPressed: controller.toggleLibrariesVisible,
+              onPressed: controller.codeViewController.toggleLibrariesVisible,
             ),
           ),
         );
