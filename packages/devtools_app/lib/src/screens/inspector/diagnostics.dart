@@ -190,7 +190,10 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       enabled: () =>
           preferences.inspector.hoverEvalModeEnabled.value &&
           diagnosticLocal.inspectorService != null,
-      asyncGenerateHoverCardData: (event, isHoverStale) async {
+      asyncGenerateHoverCardData: ({
+        required event,
+        required isHoverStale,
+      }) async {
         final group = inspectorService.createObjectGroup('hover');
 
         if (isHoverStale()) return Future.value();

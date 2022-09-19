@@ -317,10 +317,14 @@ class HoverCardTooltip extends StatefulWidget {
 
   /// The callback that is used when the [HoverCard]'s data is only available
   /// asynchronously.
-  final Future<HoverCardData?> Function(
-    PointerHoverEvent event,
-    bool Function() isHoverStale,
-  )? asyncGenerateHoverCardData;
+  final Future<HoverCardData?> Function({
+    required PointerHoverEvent event,
+
+    /// Returns true if the HoverCard is no longer visible.
+    ///
+    /// Use this callback to short circuit long running tasks.
+    required bool Function() isHoverStale,
+  })? asyncGenerateHoverCardData;
 
   /// The callback that is used when the [HoverCard]'s data is available
   /// synchronously.
@@ -378,10 +382,10 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
           hoverCard: spinnerHoverCard,
         );
 
-        // The spinner showing, we can now generate the HoverCardData
+        // The spinner is showing, we can now generate the HoverCardData
         hoverCardData = await widget.asyncGenerateHoverCardData!(
-          event,
-          () => !widget.hoverCardTooltipController
+          event: event,
+          isHoverStale: () => !widget.hoverCardTooltipController
               .isHoverCardStillFresh(spinnerHoverCard),
         );
 
