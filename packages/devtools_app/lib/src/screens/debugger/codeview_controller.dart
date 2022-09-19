@@ -25,6 +25,12 @@ class CodeViewController extends DisposableController
     scriptsHistory.current.addListener(_scriptHistoryListener);
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+    scriptsHistory.current.removeListener(_scriptHistoryListener);
+  }
+
   ValueListenable<ScriptLocation?> get scriptLocation => _scriptLocation;
   final _scriptLocation = ValueNotifier<ScriptLocation?>(null);
 

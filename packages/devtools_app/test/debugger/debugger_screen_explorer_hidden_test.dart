@@ -31,7 +31,7 @@ void main() {
   when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
       .thenReturn(ValueNotifier<int>(0));
   final debuggerController = createMockDebuggerControllerWithDefaults();
-  final codeViewController = debuggerController.debuggerCodeViewController;
+  final codeViewController = debuggerController.codeViewController;
 
   final scripts = [
     ScriptRef(uri: 'package:/test/script.dart', id: 'test-script')

@@ -121,7 +121,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
 
   @override
   Widget build(BuildContext context) {
-    final codeViewController = controller.debuggerCodeViewController;
+    final codeViewController = controller.codeViewController;
     return Split(
       axis: Axis.horizontal,
       initialFractions: const [0.25, 0.75],
@@ -192,7 +192,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   void _onNodeSelected(VMServiceObjectNode? node) {
     final location = node?.location;
     if (location != null) {
-      controller.debuggerCodeViewController.showScriptLocation(location);
+      controller.codeViewController.showScriptLocation(location);
     }
   }
 
@@ -277,9 +277,9 @@ class GoToLineNumberAction extends Action<GoToLineNumberIntent> {
   void invoke(GoToLineNumberIntent intent) {
     showGoToLineDialog(
       intent._context,
-      intent._controller.debuggerCodeViewController,
+      intent._controller.codeViewController,
     );
-    intent._controller.debuggerCodeViewController
+    intent._controller.codeViewController
       ..toggleFileOpenerVisibility(false)
       ..toggleSearchInFileVisibility(false);
   }
@@ -294,7 +294,7 @@ class SearchInFileIntent extends Intent {
 class SearchInFileAction extends Action<SearchInFileIntent> {
   @override
   void invoke(SearchInFileIntent intent) {
-    intent._controller.debuggerCodeViewController
+    intent._controller.codeViewController
       ..toggleSearchInFileVisibility(true)
       ..toggleFileOpenerVisibility(false);
   }
@@ -309,7 +309,7 @@ class EscapeIntent extends Intent {
 class EscapeAction extends Action<EscapeIntent> {
   @override
   void invoke(EscapeIntent intent) {
-    intent._controller.debuggerCodeViewController
+    intent._controller.codeViewController
       ..toggleSearchInFileVisibility(false)
       ..toggleFileOpenerVisibility(false);
   }
@@ -324,7 +324,7 @@ class OpenFileIntent extends Intent {
 class OpenFileAction extends Action<OpenFileIntent> {
   @override
   void invoke(OpenFileIntent intent) {
-    intent._controller.debuggerCodeViewController
+    intent._controller.codeViewController
       ..toggleFileOpenerVisibility(true)
       ..toggleSearchInFileVisibility(false);
   }

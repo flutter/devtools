@@ -53,7 +53,7 @@ void main() {
       const SourcePosition(line: 10, column: 1),
     )
   ];
-  final codeViewController = debuggerController.debuggerCodeViewController;
+  final codeViewController = debuggerController.codeViewController;
   when(mockBreakpointManager.breakpoints)
       .thenReturn(ValueNotifier(breakpoints));
   when(mockBreakpointManager.breakpointsWithLocation)

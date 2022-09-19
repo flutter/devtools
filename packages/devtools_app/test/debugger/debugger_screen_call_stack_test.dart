@@ -130,7 +130,7 @@ void main() {
     when(debuggerController.stackFramesWithLocation)
         .thenReturn(ValueNotifier(stackFramesWithLocation));
     when(debuggerController.isPaused).thenReturn(ValueNotifier(true));
-    final codeViewController = debuggerController.debuggerCodeViewController;
+    final codeViewController = debuggerController.codeViewController;
     when(codeViewController.showFileOpener).thenReturn(ValueNotifier(false));
     await pumpDebuggerScreen(tester, debuggerController);
 

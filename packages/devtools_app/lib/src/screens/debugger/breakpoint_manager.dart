@@ -16,11 +16,9 @@ class BreakpointManager extends Disposer {
 
   final bool initialSwitchToIsolate;
 
-  VmServiceWrapper get _service {
-    return serviceManager.service!;
-  }
+  VmServiceWrapper get _service => serviceManager.service!;
 
-  final Map<String, List<SourcePosition>> _breakPositionsMap = {};
+  final _breakPositionsMap = <String, List<SourcePosition>>{};
 
   final _breakpoints = ValueNotifier<List<Breakpoint>>([]);
 

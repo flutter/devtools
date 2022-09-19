@@ -35,7 +35,7 @@ void main() {
   when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
       .thenReturn(ValueNotifier<int>(0));
   final debuggerController = createMockDebuggerControllerWithDefaults();
-  final codeViewController = debuggerController.debuggerCodeViewController;
+  final codeViewController = debuggerController.codeViewController;
   when(codeViewController.showFileOpener).thenReturn(ValueNotifier(false));
 
   when(debuggerController.isPaused).thenReturn(ValueNotifier(true));

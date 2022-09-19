@@ -78,7 +78,7 @@ MockDebuggerController createMockDebuggerControllerWithDefaults({
   when(debuggerController.variables).thenReturn(ValueNotifier([]));
 
   mockCodeViewController ??= createMockCodeViewControllerWithDefaults();
-  when(debuggerController.debuggerCodeViewController).thenReturn(
+  when(debuggerController.codeViewController).thenReturn(
     mockCodeViewController,
   );
 

@@ -5,8 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../shared/common_widgets.dart';
-import '../../shared/split.dart';
 import '../../shared/theme.dart';
 import 'object_inspector_view_controller.dart';
 import 'vm_developer_common_widgets.dart';
@@ -26,26 +24,18 @@ class VmLibraryDisplay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dependencies = library.obj.dependencies;
-    return Split(
-      axis: Axis.vertical,
-      initialFractions: const [0.5, 0.5],
-      children: [
-        OutlineDecoration.onlyBottom(
-          child: VmObjectDisplayBasicLayout(
-            object: library,
-            generalDataRows: _libraryDataRows(library),
-            expandableWidgets: [
-              if (dependencies != null)
-                LibraryDependencies(dependencies: dependencies)
-            ],
-          ),
-        ),
-        ObjectInspectorCodeView(
-          codeViewController: controller.codeViewController,
-          script: library.scriptRef!,
-          object: library.obj,
-        ),
-      ],
+    return ObjectInspectorCodeView(
+      codeViewController: controller.codeViewController,
+      script: library.scriptRef!,
+      object: library.obj,
+      child: VmObjectDisplayBasicLayout(
+        object: library,
+        generalDataRows: _libraryDataRows(library),
+        expandableWidgets: [
+          if (dependencies != null)
+            LibraryDependencies(dependencies: dependencies)
+        ],
+      ),
     );
   }
 

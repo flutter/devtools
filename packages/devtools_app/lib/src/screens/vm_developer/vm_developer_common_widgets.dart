@@ -12,6 +12,7 @@ import 'package:vm_service/vm_service.dart';
 import '../../primitives/utils.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
+import '../../shared/split.dart';
 import '../../shared/table.dart';
 import '../../shared/theme.dart';
 import '../debugger/codeview.dart';
@@ -802,18 +803,22 @@ List<MapEntry<String, WidgetBuilder>> vmObjectGeneralDataRows(
 }
 
 /// Creates a simple [CodeView] which displays the code relevant to [object] in
-/// [script]. If [object] is synthetic and doesn't have actual token positions,
+/// [script].
+///
+/// If [object] is synthetic and doesn't have actual token positions,
 /// [object]'s owner's code will be displayed instead.
 class ObjectInspectorCodeView extends StatefulWidget {
   ObjectInspectorCodeView({
     required this.codeViewController,
     required this.script,
     required this.object,
+    required this.child,
   }) : super(key: ValueKey(object));
 
   final CodeViewController codeViewController;
   final ScriptRef script;
   final ObjRef object;
+  final Widget child;
 
   @override
   State<ObjectInspectorCodeView> createState() =>
@@ -824,6 +829,16 @@ class _ObjectInspectorCodeViewState extends State<ObjectInspectorCodeView> {
   @override
   void didChangeDependencies() async {
     super.didChangeDependencies();
+    if (widget.script != widget.codeViewController.currentScriptRef.value) {
+      widget.codeViewController.resetScriptLocation(
+        ScriptLocation(widget.script),
+      );
+    }
+  }
+
+  @override
+  void didUpdateWidget(ObjectInspectorCodeView oldWidget) {
+    super.didUpdateWidget(oldWidget);
     if (widget.script != widget.codeViewController.currentScriptRef.value) {
       widget.codeViewController.resetScriptLocation(
         ScriptLocation(widget.script),
@@ -876,22 +891,31 @@ class _ObjectInspectorCodeViewState extends State<ObjectInspectorCodeView> {
           }
         }
 
-        return Column(
+        return Split(
+          axis: Axis.vertical,
+          initialFractions: const [0.5, 0.5],
           children: [
-            const AreaPaneHeader(
-              title: Text('Code Preview'),
+            OutlineDecoration.onlyBottom(
+              child: widget.child,
             ),
-            Expanded(
-              child: CodeView(
-                codeViewController: widget.codeViewController,
-                scriptRef: widget.script,
-                parsedScript: currentParsedScript,
-                enableFileExplorer: false,
-                enableHistory: false,
-                enableSearch: false,
-                lineRange: lineRange,
-                onSelected: breakpointManager.toggleBreakpoint,
-              ),
+            Column(
+              children: [
+                const AreaPaneHeader(
+                  title: Text('Code Preview'),
+                ),
+                Expanded(
+                  child: CodeView(
+                    codeViewController: widget.codeViewController,
+                    scriptRef: widget.script,
+                    parsedScript: currentParsedScript,
+                    enableFileExplorer: false,
+                    enableHistory: false,
+                    enableSearch: false,
+                    lineRange: lineRange,
+                    onSelected: breakpointManager.toggleBreakpoint,
+                  ),
+                ),
+              ],
             ),
           ],
         );

@@ -39,7 +39,7 @@ class DebuggerController extends DisposableController
     }
   }
 
-  final debuggerCodeViewController = CodeViewController();
+  final codeViewController = CodeViewController();
 
   bool _firstDebuggerScreenLoaded = false;
 
@@ -51,7 +51,7 @@ class DebuggerController extends DisposableController
   /// connecting to low-end devices.
   Future<void> onFirstDebuggerScreenLoad() async {
     if (!_firstDebuggerScreenLoaded) {
-      await debuggerCodeViewController.maybeSetupProgramExplorer();
+      await codeViewController.maybeSetupProgramExplorer();
     }
   }
 
@@ -220,7 +220,7 @@ class DebuggerController extends DisposableController
 
     _clearCaches();
 
-    debuggerCodeViewController.clearScriptHistory();
+    codeViewController.clearScriptHistory();
 
     if (ref == null) {
       await _getStackOperation?.cancel();
@@ -441,8 +441,8 @@ class DebuggerController extends DisposableController
 
     // Redirect the current editor screen if necessary.
     if (removedScripts
-        .contains(debuggerCodeViewController.currentScriptRef.value)) {
-      final uri = debuggerCodeViewController.currentScriptRef.value!.uri;
+        .contains(codeViewController.currentScriptRef.value)) {
+      final uri = codeViewController.currentScriptRef.value!.uri;
       final newScriptRef =
           addedScripts.firstWhereOrNull((script) => script.uri == uri);
 
@@ -459,7 +459,7 @@ class DebuggerController extends DisposableController
   /// cache, in order to reduce flashing in the editor view.
   void _populateScriptAndShowLocation(ScriptRef scriptRef) {
     scriptManager.getScript(scriptRef).then((script) {
-      debuggerCodeViewController.showScriptLocation(ScriptLocation(scriptRef));
+      codeViewController.showScriptLocation(ScriptLocation(scriptRef));
     });
   }
 
@@ -615,9 +615,9 @@ class DebuggerController extends DisposableController
     if (scriptRef == null) return;
 
     if (bp.sourcePosition == null) {
-      debuggerCodeViewController.showScriptLocation(ScriptLocation(scriptRef));
+      codeViewController.showScriptLocation(ScriptLocation(scriptRef));
     } else {
-      debuggerCodeViewController.showScriptLocation(
+      codeViewController.showScriptLocation(
         ScriptLocation(scriptRef, location: bp.sourcePosition),
       );
     }
@@ -635,7 +635,7 @@ class DebuggerController extends DisposableController
     final scriptRef = frame?.scriptRef;
     final position = frame?.position;
     if (scriptRef != null && position != null) {
-      debuggerCodeViewController.showScriptLocation(
+      codeViewController.showScriptLocation(
         ScriptLocation(scriptRef, location: position),
       );
     }

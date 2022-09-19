@@ -5,8 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../shared/common_widgets.dart';
-import '../../shared/split.dart';
 import 'object_inspector_view_controller.dart';
 import 'vm_developer_common_widgets.dart';
 import 'vm_object_model.dart';
@@ -29,34 +27,26 @@ class VmClassDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Split(
-      axis: Axis.vertical,
-      initialFractions: const [0.5, 0.5],
-      children: [
-        OutlineDecoration.onlyBottom(
-          child: Row(
-            children: [
-              Flexible(
-                child: VmObjectDisplayBasicLayout(
-                  object: clazz,
-                  generalDataRows: _classDataRows(clazz),
-                ),
-              ),
-              if (displayClassInstances)
-                Flexible(
-                  child: ClassInstancesWidget(
-                    instances: clazz.instances,
-                  ),
-                ),
-            ],
+    return ObjectInspectorCodeView(
+      codeViewController: controller.codeViewController,
+      script: clazz.scriptRef!,
+      object: clazz.ref,
+      child: Row(
+        children: [
+          Flexible(
+            child: VmObjectDisplayBasicLayout(
+              object: clazz,
+              generalDataRows: _classDataRows(clazz),
+            ),
           ),
-        ),
-        ObjectInspectorCodeView(
-          codeViewController: controller.codeViewController,
-          script: clazz.scriptRef!,
-          object: clazz.ref,
-        ),
-      ],
+          if (displayClassInstances)
+            Flexible(
+              child: ClassInstancesWidget(
+                instances: clazz.instances,
+              ),
+            ),
+        ],
+      ),
     );
   }
 

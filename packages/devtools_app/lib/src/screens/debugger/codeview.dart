@@ -488,7 +488,7 @@ class _CodeViewState extends State<CodeView>
             widget.codeViewController.toggleFileOpenerVisibility(true),
         child: Text(
           'Open a file ($openFileKeySetDescription)',
-          style: theme.textTheme.titleMedium,
+          style: theme.textTheme.subtitle1,
         ),
       ),
     );

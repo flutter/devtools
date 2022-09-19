@@ -5,8 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../shared/common_widgets.dart';
-import '../../shared/split.dart';
 import 'object_inspector_view_controller.dart';
 import 'vm_developer_common_widgets.dart';
 import 'vm_object_model.dart';
@@ -25,25 +23,14 @@ class VmScriptDisplay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scriptRef = script.scriptRef!;
-    return Split(
-      initialFractions: const [0.5, 0.5],
-      axis: Axis.vertical,
-      children: [
-        OutlineDecoration(
-          showLeft: false,
-          showRight: false,
-          showTop: false,
-          child: VmObjectDisplayBasicLayout(
-            object: script,
-            generalDataRows: _scriptDataRows(script),
-          ),
-        ),
-        ObjectInspectorCodeView(
-          codeViewController: controller.codeViewController,
-          script: scriptRef,
-          object: scriptRef,
-        ),
-      ],
+    return ObjectInspectorCodeView(
+      codeViewController: controller.codeViewController,
+      script: scriptRef,
+      object: scriptRef,
+      child: VmObjectDisplayBasicLayout(
+        object: script,
+        generalDataRows: _scriptDataRows(script),
+      ),
     );
   }
 

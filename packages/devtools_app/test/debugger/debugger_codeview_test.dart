@@ -55,7 +55,7 @@ void main() {
 
     scriptsHistory.pushEntry(mockScript!);
     final mockCodeViewController =
-        debuggerController.debuggerCodeViewController;
+        debuggerController.codeViewController;
     when(mockCodeViewController.currentScriptRef)
         .thenReturn(ValueNotifier(mockScriptRef));
     when(mockCodeViewController.currentParsedScript)
