@@ -21,7 +21,7 @@ import '../../test_data/memory_allocation.dart';
 
 /// To run:
 /// flutter run -t test/scenes/memory/connected.stager_app.dart -d macos
-class MemoryOfflineScene extends Scene {
+class MemoryDefaultScene extends Scene {
   late MemoryController controller;
 
   @override
@@ -73,7 +73,7 @@ class MemoryOfflineScene extends Scene {
   }
 
   @override
-  String get title => '$MemoryOfflineScene';
+  String get title => '$MemoryDefaultScene';
 
   void tearDown() {
     FeatureFlags.newAllocationProfileTable = false;
@@ -91,7 +91,7 @@ class _TestSnapshotTaker implements SnapshotTaker {
     // This delay is needed for UI to start showing the progress indicator.
     await Future.delayed(const Duration(milliseconds: 100));
 
-    // Return null if it is the first time.
+    // Return null if it is the first time to test cover the edge case.
     if (firstTime) {
       firstTime = false;
       return null;
