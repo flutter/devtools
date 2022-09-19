@@ -415,7 +415,7 @@ class _CodeViewState extends State<CodeView>
         return Center(
           child: Text(
             'No source available',
-            style: theme.textTheme.titleMedium,
+            style: theme.textTheme.subtitle1,
           ),
         );
       }
