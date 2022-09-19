@@ -132,11 +132,14 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
     addAutoDisposeListener(widget.controller.snapshots);
 
     addAutoDisposeListener(widget.controller.selectedIndex, () async {
-      final newSnapshotsLength = widget.controller.snapshots.value.length;
-      final bool addedItem = newSnapshotsLength > _currentSnapshotsLength;
-      _currentSnapshotsLength = newSnapshotsLength;
-      if (addedItem) await _scrollController.autoScrollToBottom();
       setState(() {});
+
+      final newSnapshotsLength = widget.controller.snapshots.value.length;
+      if (newSnapshotsLength > _currentSnapshotsLength) {
+        _currentSnapshotsLength = newSnapshotsLength;
+        await _scrollController.autoScrollToBottom();
+        setState(() {});
+      }
     });
   }
 

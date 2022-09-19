@@ -70,26 +70,28 @@ void main() {
       );
       expect(snapshots.value.length, equals(1 + 3));
 
-      // Delete and take a snapshot.
+      // Delete a snapshot.
       await tester.tap(find.byTooltip('Delete snapshot'));
       await tester.pumpAndSettle();
       expect(snapshots.value.length, equals(1 + 3 - 1));
+
+      // Record snapshot
       await tester.tap(find.byIcon(Icons.fiber_manual_record));
-      // await tester.pumpAndSettle();
-      // await expectLater(
-      //   finder,
-      //   matchesDevToolsGolden('../../goldens/memory_diff_three_snapshots.png'),
-      // );
-      // expect(snapshots.value.length, equals(1 + 3 - 1 + 1));
-      //
-      // // Clear all
-      // await tester.tap(find.byTooltip('Clear all snapshots'));
-      // await tester.pumpAndSettle();
-      // await expectLater(
-      //   finder,
-      //   matchesDevToolsGolden('../../goldens/memory_diff_empty.png'),
-      // );
-      // expect(snapshots.value.length, equals(1));
+      await tester.pumpAndSettle();
+      await expectLater(
+        finder,
+        matchesDevToolsGolden('../../goldens/memory_diff_three_snapshots.png'),
+      );
+      expect(snapshots.value.length, equals(1 + 3 - 1 + 1));
+
+      // Clear all
+      await tester.tap(find.byTooltip('Clear all snapshots'));
+      await tester.pumpAndSettle();
+      await expectLater(
+        finder,
+        matchesDevToolsGolden('../../goldens/memory_diff_empty.png'),
+      );
+      expect(snapshots.value.length, equals(1));
     });
   });
 }

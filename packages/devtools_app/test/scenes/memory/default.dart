@@ -20,7 +20,7 @@ import '../../test_data/memory/heap/heap_data.dart';
 import '../../test_data/memory_allocation.dart';
 
 /// To run:
-/// flutter run -t test/scenes/memory/connected.stager_app.dart -d macos
+/// flutter run -t test/scenes/memory/default.stager_app.dart -d macos
 class MemoryDefaultScene extends Scene {
   late MemoryController controller;
 
@@ -108,6 +108,7 @@ class _TestSnapshotTaker implements SnapshotTaker {
 
 final _simpleHeapTests = <AdaptedHeap>[
   _createHeap({'A': 1, 'B': 2}),
+  _createHeap({'B': 1, 'C': 2, 'D': 3}),
   _createHeap({'B': 1, 'C': 2, 'D': 3}),
 ];
 
