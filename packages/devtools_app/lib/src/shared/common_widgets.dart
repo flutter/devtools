@@ -1294,7 +1294,7 @@ extension ScrollControllerAutoScroll on ScrollController {
 
   /// Scroll the content to the bottom using the app's default animation
   /// duration and curve..
-  void autoScrollToBottom() async {
+  Future<void> autoScrollToBottom() async {
     await animateTo(
       position.maxScrollExtent,
       duration: rapidDuration,

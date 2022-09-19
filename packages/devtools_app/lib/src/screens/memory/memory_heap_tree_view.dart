@@ -531,7 +531,7 @@ class HeapTreeViewState extends State<HeapTree>
                 if (FeatureFlags.memoryDiffing)
                   KeepAliveWrapper(
                     child: DiffPane(
-                      snapshotTaker: controller.snapshotTaker,
+                      controller: controller.diffPaneController,
                     ),
                   ),
                 // Leaks tab.

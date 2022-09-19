@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:devtools_app/src/primitives/feature_flags.dart';
 import 'package:devtools_app/src/screens/memory/memory_heap_tree_view.dart';
 import 'package:devtools_app/src/screens/memory/memory_screen.dart';
@@ -47,6 +49,9 @@ void main() {
 
     testWidgetsWithWindowSize('records and deletes snapshots', windowSize,
         (WidgetTester tester) async {
+      final snapshots = scene.controller.diffPaneController.snapshots.value;
+      // Check the list contains only documentation item.
+      expect(snapshots.length, equals(1));
       await pumpDiffTab(tester);
 
       // Check initial golden.
@@ -65,16 +70,19 @@ void main() {
         finder,
         matchesDevToolsGolden('../../goldens/memory_diff_three_snapshots.png'),
       );
+      expect(snapshots.length, equals(1 + 3));
 
       // Delete and take a snapshot.
       await tester.tap(find.byTooltip('Delete snapshot'));
       await tester.pumpAndSettle();
+      expect(snapshots.length, equals(1 + 3 - 1));
       await tester.tap(find.byIcon(Icons.fiber_manual_record));
       await tester.pumpAndSettle();
       await expectLater(
         finder,
         matchesDevToolsGolden('../../goldens/memory_diff_three_snapshots.png'),
       );
+      expect(snapshots.length, equals(1 + 3 - 1 + 1));
 
       // Clear all
       await tester.tap(find.byTooltip('Clear all snapshots'));
@@ -83,6 +91,7 @@ void main() {
         finder,
         matchesDevToolsGolden('../../goldens/memory_diff_empty.png'),
       );
+      expect(snapshots.length, equals(1));
     });
   });
 }

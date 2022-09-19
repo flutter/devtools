@@ -12,7 +12,7 @@ void buildSpanningTree(AdaptedHeap heap) {
   assert(!heap.isSpanningTreeBuilt);
   _setRetainers(heap);
   heap.isSpanningTreeBuilt = true;
-  assert(_verifyHeapIntegrity(heap));
+  _verifyHeapIntegrity(heap);
 }
 
 List<HeapStatsRecord> heapStats(AdaptedHeap? heap) {
@@ -126,20 +126,22 @@ bool isWeakEntry(String klass, String library) {
 ///
 /// 2. Root's 'retainedSize' should be sum of shallow sizes of all reachable
 /// objects.
-bool _verifyHeapIntegrity(AdaptedHeap heap) {
-  var totalReachableSize = 0;
+void _verifyHeapIntegrity(AdaptedHeap heap) {
+  assert(() {
+    var totalReachableSize = 0;
 
-  for (var object in heap.objects) {
+    for (var object in heap.objects) {
+      assert(
+        (object.retainedSize == null) == (object.retainer == null),
+        'retainedSize = ${object.retainedSize}, retainer = ${object.retainer}',
+      );
+      if (object.retainer != null) totalReachableSize += object.shallowSize;
+    }
+
     assert(
-      (object.retainedSize == null) == (object.retainer == null),
-      'retainedSize = ${object.retainedSize}, retainer = ${object.retainer}',
+      heap.root.retainedSize == totalReachableSize,
+      '${heap.root.retainedSize} not equal to $totalReachableSize',
     );
-    if (object.retainer != null) totalReachableSize += object.shallowSize;
-  }
-
-  assert(
-    heap.root.retainedSize == totalReachableSize,
-    '${heap.root.retainedSize} not equal to $totalReachableSize',
-  );
-  return true;
+    return true;
+  }());
 }

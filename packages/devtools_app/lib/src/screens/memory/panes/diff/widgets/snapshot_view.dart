@@ -33,6 +33,7 @@ class SnapshotView extends StatelessWidget {
           key: ObjectKey(item),
           data: stats,
           sorting: item.sorting,
+          selectedRecord: item.selectedRecord,
         );
       },
     );
@@ -138,9 +139,11 @@ class _StatsTable extends StatefulWidget {
     Key? key,
     required this.data,
     required this.sorting,
+    required this.selectedRecord,
   }) : super(key: key);
 
   final List<HeapStatsRecord> data;
+  final ValueNotifier<HeapStatsRecord?> selectedRecord;
 
   final ColumnSorting sorting;
 
@@ -178,7 +181,8 @@ class _StatsTableState extends State<_StatsTable> {
       columns: _columns,
       data: widget.data,
       keyFactory: (e) => Key(e.fullClassName),
-      onItemSelected: (r) {},
+      onItemSelected: (r) => widget.selectedRecord.value = r,
+      selectionNotifier: widget.selectedRecord,
       sortColumn: _columns[widget.sorting.columnIndex],
       sortDirection: widget.sorting.direction,
       onSortChanged: (
