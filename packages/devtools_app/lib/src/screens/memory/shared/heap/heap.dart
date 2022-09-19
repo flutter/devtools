@@ -10,23 +10,23 @@ class AdaptedHeap {
 
   final AdaptedHeapData data;
 
-  late final stats = _heapStats();
+  late final HeapStatistics stats = _heapStatistics(data);
+}
 
-  List<HeapStatsRecord> _heapStats() {
-    final result = <String, HeapStatsRecord>{};
-    if (!data.isSpanningTreeBuilt) buildSpanningTree(data);
-    for (var object in data.objects) {
-      // We do not show objects that will be garbage collected soon.
-      if (object.retainedSize == null || object.heapClass.isSentinel) continue;
+HeapStatistics _heapStatistics(AdaptedHeapData data) {
+  final result = <String, HeapStatsRecord>{};
+  if (!data.isSpanningTreeBuilt) buildSpanningTree(data);
+  for (var object in data.objects) {
+    // We do not show objects that will be garbage collected soon.
+    if (object.retainedSize == null || object.heapClass.isSentinel) continue;
 
-      if (!result.containsKey(object.heapClass.fullName)) {
-        result[object.heapClass.fullName] = HeapStatsRecord(object.heapClass);
-      }
-      final stats = result[object.heapClass.fullName]!;
-      stats.retainedSize += object.retainedSize ?? 0;
-      stats.shallowSize += object.shallowSize;
-      stats.instanceCount++;
+    if (!result.containsKey(object.heapClass.fullName)) {
+      result[object.heapClass.fullName] = HeapStatsRecord(object.heapClass);
     }
-    return result.values.toList();
+    final stats = result[object.heapClass.fullName]!;
+    stats.retainedSize += object.retainedSize ?? 0;
+    stats.shallowSize += object.shallowSize;
+    stats.instanceCount++;
   }
+  return HeapStatistics(result);
 }
