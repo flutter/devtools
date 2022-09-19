@@ -5,7 +5,6 @@
 import 'package:flutter/foundation.dart';
 
 import '../../../../../primitives/utils.dart';
-import '../../../shared/heap/heap_analysis.dart';
 import '../../../shared/heap/model.dart';
 
 abstract class DiffListItem {
@@ -32,14 +31,11 @@ class SnapshotListItem extends DiffListItem {
     _isProcessing.value = true;
     receiver.whenComplete(() async {
       final heap = await receiver;
-      if (heap != null) stats = heapStats(heap);
       _isProcessing.value = false;
     });
   }
 
   final String _isolateName;
-
-  List<HeapStatsRecord>? stats;
 
   final selectedRecord = ValueNotifier<HeapStatsRecord?>(null);
 
