@@ -87,7 +87,7 @@ class _ShallowSizeColumn extends ColumnData<HeapStatsRecord> {
               'Shallow size of an object is size of this object plus\n'
               'the references it holds to other Dart objects in its fields\n'
               '(this does not include the size of the fields\n'
-              ' - just the size of the reference)',
+              ' - just the size of the references)',
           fixedWidthPx: scaleByFontFactor(85.0),
           alignment: ColumnAlignment.right,
         );
@@ -146,6 +146,7 @@ class _StatsTable extends StatefulWidget {
   }) : super(key: key);
 
   final List<HeapStatsRecord> data;
+
   final ValueNotifier<HeapStatsRecord?> selectedRecord;
 
   final ColumnSorting sorting;
