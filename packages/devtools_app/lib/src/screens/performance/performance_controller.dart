@@ -28,7 +28,7 @@ import '../profiler/cpu_profile_service.dart';
 import '../profiler/cpu_profile_transformer.dart';
 import '../profiler/profile_granularity.dart';
 import 'panes/controls/enhance_tracing/enhance_tracing_controller.dart';
-import 'panes/raster_metrics/raster_metrics_controller.dart';
+import 'panes/raster_stats/raster_stats_controller.dart';
 import 'panes/timeline_events/perfetto/perfetto.dart';
 import 'performance_model.dart';
 import 'performance_screen.dart';
@@ -46,8 +46,8 @@ bool embeddedPerfettoEnabled = false;
 /// Flag to hide the frame analysis feature while it is under development.
 bool frameAnalysisSupported = true;
 
-/// Flag to hide the raster metrics feature while it is under development.
-bool rasterMetricsSupported = true;
+/// Flag to hide the raster stats feature while it is under development.
+bool rasterStatsSupported = true;
 
 /// This class contains the business logic for [performance_screen.dart].
 ///
@@ -70,7 +70,7 @@ class PerformanceController extends DisposableController
 
   final enhanceTracingController = EnhanceTracingController();
 
-  final rasterMetricsController = RasterMetricsController();
+  final rasterStatsController = RasterStatsController();
 
   final perfettoController = createPerfettoController();
 
@@ -611,6 +611,10 @@ class PerformanceController extends DisposableController
     List<TraceEvent> threadNameEvents, {
     bool isInitialUpdate = false,
   }) {
+    // This can happen if there is a race between this method being called and
+    // losing connection to the app.
+    if (serviceManager.connectedApp == null) return;
+
     final isFlutterApp = offlineController.offlineMode.value
         ? offlinePerformanceData != null &&
             offlinePerformanceData!.frames.isNotEmpty
@@ -781,6 +785,11 @@ class PerformanceController extends DisposableController
     );
   }
 
+  Future<void> collectRasterStats() async {
+    await rasterStatsController.collectRasterStats();
+    data!.rasterStats = rasterStatsController.rasterStats.value;
+  }
+
   FutureOr<void> processOfflineData(OfflinePerformanceData offlineData) async {
     await clearData();
     final traceEvents = [
@@ -861,17 +870,24 @@ class PerformanceController extends DisposableController
       }
     }
 
-    if (_offlineData.cpuProfileData != null) {
+    final offlineCpuProfileData = _offlineData.cpuProfileData;
+    if (offlineCpuProfileData != null) {
       cpuProfilerController.loadProcessedData(
-        _offlineData.cpuProfileData!,
+        offlineCpuProfileData,
         storeAsUserTagNone: true,
       );
+    }
+
+    final offlineRasterStats = _offlineData.rasterStats;
+    if (offlineRasterStats != null) {
+      _data.rasterStats = offlineRasterStats;
+      rasterStatsController.setNotifiersForRasterStats(offlineRasterStats);
     }
 
     _displayRefreshRate.value = _offlineData.displayRefreshRate;
   }
 
-  /// Exports the current timeline data to a .json file.
+  /// Exports the current performance screen data to a .json file.
   ///
   /// This method returns the name of the file that was downloaded.
   String exportData() {
