@@ -14,7 +14,7 @@ import '../../shared/theme.dart';
 import '../../ui/search.dart';
 import '../../ui/tab.dart';
 import 'panes/frame_analysis/frame_analysis.dart';
-import 'panes/raster_metrics/raster_metrics.dart';
+import 'panes/raster_stats/raster_stats.dart';
 import 'panes/timeline_events/perfetto/perfetto.dart';
 import 'panes/timeline_events/timeline_flame_chart.dart';
 import 'performance_controller.dart';
@@ -75,9 +75,9 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
       );
     }
 
-    final rasterMetrics = Center(
+    final rasterStats = Center(
       child: RenderingLayerVisualizer(
-        rasterMetricsController: controller.rasterMetricsController,
+        rasterStatsController: controller.rasterStatsController,
       ),
     );
 
@@ -100,9 +100,9 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
         KeepAliveWrapper(
           child: frameAnalysisView,
         ),
-      if (rasterMetricsSupported && isFlutterApp)
+      if (rasterStatsSupported && isFlutterApp)
         KeepAliveWrapper(
-          child: rasterMetrics,
+          child: rasterStats,
         ),
     ];
 
@@ -138,9 +138,9 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
         _buildTab(
           tabName: 'Frame Analysis',
         ),
-      if (rasterMetricsSupported && isFlutterApp)
+      if (rasterStatsSupported && isFlutterApp)
         _buildTab(
-          tabName: 'Raster Metrics',
+          tabName: 'Raster Stats',
           trailing: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
@@ -156,13 +156,13 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
                     PerformanceScreen.id,
                     analytics_constants.collectRasterStats,
                   );
-                  controller.rasterMetricsController.collectRasterStats();
+                  controller.collectRasterStats();
                 },
               ),
               const SizedBox(width: denseSpacing),
               ClearButton(
                 outlined: false,
-                onPressed: controller.rasterMetricsController.clear,
+                onPressed: controller.rasterStatsController.clear,
               ),
               const SizedBox(width: densePadding),
             ],

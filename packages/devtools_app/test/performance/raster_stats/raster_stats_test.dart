@@ -2,78 +2,40 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
-import 'dart:ui' as ui;
-
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/screens/performance/panes/raster_metrics/raster_metrics.dart';
-import 'package:devtools_app/src/screens/performance/panes/raster_metrics/raster_metrics_controller.dart';
+import 'package:devtools_app/src/screens/performance/panes/raster_stats/raster_stats.dart';
+import 'package:devtools_app/src/screens/performance/panes/raster_stats/raster_stats_controller.dart';
+import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../../matchers/matchers.dart';
 import '../../test_data/performance_raster_metrics.dart';
 
 void main() {
-  late TestRasterMetricsController controller;
-
-  group('RasterMetricsController', () {
-    setUp(() {
-      controller = TestRasterMetricsController();
-    });
-
-    test('initDataFromJson', () async {
-      await controller.initDataFromJson(renderStats);
-      final layerSnapshots = controller.layerSnapshots.value;
-      expect(layerSnapshots.length, equals(2));
-      expect(controller.originalFrameSize, equals(const Size(100, 200)));
-      final first = layerSnapshots[0];
-      final second = layerSnapshots[1];
-      expect(first.id, equals(12731));
-      expect(first.duration.inMicroseconds, equals(389));
-      expect(first.totalRenderingDuration!.inMicroseconds, equals(494));
-      expect(first.percentRenderingTimeDisplay, equals('78.74%'));
-      expect(first.size, equals(const Size(50, 50)));
-      expect(first.offset, equals(const Offset(25, 25)));
-      expect(second.id, equals(12734));
-      expect(second.duration.inMicroseconds, equals(105));
-      expect(second.totalRenderingDuration!.inMicroseconds, equals(494));
-      expect(second.percentRenderingTimeDisplay, equals('21.26%'));
-      expect(second.size, equals(const Size(20, 40)));
-      expect(second.offset, equals(const Offset(35, 30)));
-
-      expect(controller.selectedSnapshot.value, equals(first));
-    });
-
-    test('clear', () async {
-      await controller.initDataFromJson(renderStats);
-      expect(controller.layerSnapshots.value.length, equals(2));
-      expect(controller.selectedSnapshot.value, isNotNull);
-      expect(controller.originalFrameSize, isNotNull);
-
-      controller.clear();
-
-      expect(controller.layerSnapshots.value, isEmpty);
-      expect(controller.selectedSnapshot.value, isNull);
-      expect(controller.originalFrameSize, isNull);
-    });
-  });
-
   group('RenderingLayerVisualizer', () {
-    setUp(() async {
-      controller = TestRasterMetricsController();
-      await controller.initDataFromJson(renderStats);
+    late RasterStatsController controller;
 
+    setUp(() async {
+      final mockServiceManager = MockServiceConnectionManager();
+      when(mockServiceManager.renderFrameWithRasterStats).thenAnswer(
+        (_) => Future.value(Response.parse(renderStats)),
+      );
+      setGlobal(ServiceConnectionManager, mockServiceManager);
       setGlobal(IdeTheme, IdeTheme());
+
+      controller = RasterStatsController();
+      await controller.collectRasterStats();
     });
 
     Future<void> pumpRenderingLayerVisualizer(WidgetTester tester) async {
       await tester.pumpWidget(
         wrap(
           RenderingLayerVisualizer(
-            rasterMetricsController: controller,
+            rasterStatsController: controller,
           ),
         ),
       );
@@ -88,7 +50,7 @@ void main() {
       expect(find.byType(LayerImage), findsNothing);
       expect(
         find.text(
-          'Take a snapshot to view raster metrics for the current screen.',
+          'Take a snapshot to view raster stats for the current screen.',
         ),
         findsOneWidget,
       );
@@ -119,13 +81,16 @@ void main() {
     testWidgets('can change layer selection', (tester) async {
       await pumpRenderingLayerVisualizer(tester);
 
-      final layers = controller.layerSnapshots.value;
+      final layers = controller.rasterStats.value.layerSnapshots;
       final firstLayer = layers.first;
       final secondLayer = layers.last;
       expect(firstLayer.displayName, equals('Layer 12731'));
       expect(secondLayer.displayName, equals('Layer 12734'));
 
-      expect(controller.selectedSnapshot.value, equals(firstLayer));
+      expect(
+        controller.rasterStats.value.selectedSnapshot,
+        equals(firstLayer),
+      );
 
       await tester.tap(find.richText('Layer 12734'));
       await tester.pumpAndSettle();
@@ -137,11 +102,4 @@ void main() {
       );
     });
   });
-}
-
-class TestRasterMetricsController extends RasterMetricsController {
-  @override
-  Future<ui.Image> imageFromBytes(Uint8List bytes) async {
-    return MockImage();
-  }
 }

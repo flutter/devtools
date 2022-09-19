@@ -16,6 +16,7 @@ import '../../ui/search.dart';
 import '../profiler/cpu_profile_model.dart';
 import 'panes/controls/enhance_tracing/enhance_tracing_model.dart';
 import 'panes/frame_analysis/frame_analysis_model.dart';
+import 'panes/raster_stats/raster_stats_model.dart';
 import 'performance_utils.dart';
 import 'timeline_event_processor.dart';
 
@@ -26,6 +27,7 @@ class PerformanceData {
     this.selectedFrame,
     this.selectedEvent,
     this.cpuProfileData,
+    this.rasterStats,
     double? displayRefreshRate,
     List<TimelineEvent>? timelineEvents,
   })  : traceEvents = traceEvents ?? <Map<String, dynamic>>[],
@@ -36,6 +38,8 @@ class PerformanceData {
   static const traceEventsKey = 'traceEvents';
 
   static const cpuProfileKey = 'cpuProfile';
+
+  static const rasterStatsKey = 'rasterStats';
 
   static const selectedEventKey = 'selectedEvent';
 
@@ -72,6 +76,8 @@ class PerformanceData {
   TimelineEvent? selectedEvent;
 
   CpuProfileData? cpuProfileData;
+
+  RasterStats? rasterStats;
 
   double displayRefreshRate;
 
@@ -118,6 +124,7 @@ class PerformanceData {
     traceEvents.clear();
     selectedEvent = null;
     cpuProfileData = null;
+    rasterStats = null;
     timelineEvents.clear();
     eventGroups.clear();
     time = TimeRange();
@@ -131,8 +138,9 @@ class PerformanceData {
         flutterFramesKey: frames.map((frame) => frame.json).toList(),
         displayRefreshRateKey: displayRefreshRate,
         traceEventsKey: traceEvents,
-        cpuProfileKey: cpuProfileData?.toJson ?? {},
         selectedEventKey: selectedEvent?.json ?? {},
+        cpuProfileKey: cpuProfileData?.toJson ?? {},
+        rasterStatsKey: rasterStats?.json ?? {},
       };
 }
 
@@ -278,6 +286,7 @@ class OfflinePerformanceData extends PerformanceData {
     TimelineEvent? selectedEvent,
     double? displayRefreshRate,
     CpuProfileData? cpuProfileData,
+    RasterStats? rasterStats,
   })  : _selectedFrameId = selectedFrameId,
         super(
           traceEvents: traceEvents,
@@ -286,6 +295,7 @@ class OfflinePerformanceData extends PerformanceData {
           selectedEvent: selectedEvent,
           displayRefreshRate: displayRefreshRate,
           cpuProfileData: cpuProfileData,
+          rasterStats: rasterStats,
         );
 
   static OfflinePerformanceData parse(Map<String, dynamic> json) {
@@ -297,6 +307,11 @@ class OfflinePerformanceData extends PerformanceData {
         json[PerformanceData.cpuProfileKey] ?? <String, dynamic>{};
     final CpuProfileData? cpuProfileData =
         cpuProfileJson.isNotEmpty ? CpuProfileData.parse(cpuProfileJson) : null;
+
+    final Map<String, dynamic> rasterStatsJson =
+        json[PerformanceData.rasterStatsKey] ?? <String, dynamic>{};
+    final RasterStats? rasterStats =
+        rasterStatsJson.isNotEmpty ? RasterStats.parse(rasterStatsJson) : null;
 
     final int? selectedFrameId = json[PerformanceData.selectedFrameIdKey];
 
@@ -328,6 +343,7 @@ class OfflinePerformanceData extends PerformanceData {
       selectedEvent: selectedEvent,
       displayRefreshRate: displayRefreshRate.toDouble(),
       cpuProfileData: cpuProfileData,
+      rasterStats: rasterStats,
     );
   }
 
@@ -351,6 +367,7 @@ class OfflinePerformanceData extends PerformanceData {
       selectedEvent: selectedEvent,
       displayRefreshRate: displayRefreshRate,
       cpuProfileData: cpuProfileData,
+      rasterStats: rasterStats,
     );
   }
 }
