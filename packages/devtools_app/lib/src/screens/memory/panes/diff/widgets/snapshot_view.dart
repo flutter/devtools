@@ -29,9 +29,11 @@ class SnapshotView extends StatelessWidget {
         }
 
         return _StatsTable(
+          // The key is passed to persist state.
+          key: ObjectKey(item),
           data: stats,
           sorting: item.sorting,
-          key: ObjectKey(item),
+          selectedRecord: item.selectedRecord,
         );
       },
     );
@@ -62,7 +64,7 @@ class _InstanceColumn extends ColumnData<HeapStatsRecord> {
       : super(
           'Non GC-able\nInstances',
           titleTooltip: 'Number of instances of the class, '
-              'that have retaining path from the root.',
+              'that have a retaining path from the root.',
           fixedWidthPx: scaleByFontFactor(110.0),
           alignment: ColumnAlignment.right,
         );
@@ -80,8 +82,9 @@ class _InstanceColumn extends ColumnData<HeapStatsRecord> {
 class _ShallowSizeColumn extends ColumnData<HeapStatsRecord> {
   _ShallowSizeColumn()
       : super(
-          'Shallow\nSize',
-          titleTooltip: 'Total shallow Dart (not native) size of objects.',
+          'Shallow\n Dart Size',
+          titleTooltip: 'Total shallow Dart size (sum of all references '
+              "to the Dart object's fields) of objects.",
           fixedWidthPx: scaleByFontFactor(85.0),
           alignment: ColumnAlignment.right,
         );
@@ -106,9 +109,10 @@ class _ShallowSizeColumn extends ColumnData<HeapStatsRecord> {
 class _RetainedSizeColumn extends ColumnData<HeapStatsRecord> {
   _RetainedSizeColumn()
       : super(
-          'Retained\nSize',
-          titleTooltip: 'Total size of objects plus objects they retain, '
-              'taking to account only the shortest retaining path for the referenced objects.',
+          'Retained\nDart Size',
+          titleTooltip:
+              'Total shallow Dart size of objects plus shallow Dart size of objects they retain,\n'
+              'taking into account only the shortest retaining path for the referenced objects.',
           fixedWidthPx: scaleByFontFactor(85.0),
           alignment: ColumnAlignment.right,
         );
@@ -135,8 +139,11 @@ class _StatsTable extends StatefulWidget {
     Key? key,
     required this.data,
     required this.sorting,
+    required this.selectedRecord,
   }) : super(key: key);
+
   final HeapStatistics data;
+  final ValueNotifier<HeapStatsRecord?> selectedRecord;
   final ColumnSorting sorting;
 
   @override
@@ -147,8 +154,8 @@ class _StatsTableState extends State<_StatsTable> {
   late final List<ColumnData<HeapStatsRecord>> _columns;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  void initState() {
+    super.initState();
 
     final _shallowSizeColumn = _ShallowSizeColumn();
 
@@ -173,7 +180,8 @@ class _StatsTableState extends State<_StatsTable> {
       columns: _columns,
       data: widget.data.list,
       keyFactory: (e) => Key(e.fullClassName),
-      onItemSelected: (r) {},
+      onItemSelected: (r) => widget.selectedRecord.value = r,
+      selectionNotifier: widget.selectedRecord,
       sortColumn: _columns[widget.sorting.columnIndex],
       sortDirection: widget.sorting.direction,
       onSortChanged: (

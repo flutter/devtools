@@ -14,23 +14,28 @@ import 'vm_object_model.dart';
 /// related to library objects in the Dart VM.
 class VmLibraryDisplay extends StatelessWidget {
   const VmLibraryDisplay({
-    required this.library,
     required this.controller,
+    required this.library,
   });
 
-  final LibraryObject library;
   final ObjectInspectorViewController controller;
+  final LibraryObject library;
 
   @override
   Widget build(BuildContext context) {
     final dependencies = library.obj.dependencies;
-    return VmObjectDisplayBasicLayout(
-      object: library,
-      generalDataRows: _libraryDataRows(library),
-      expandableWidgets: [
-        if (dependencies != null)
-          LibraryDependencies(dependencies: dependencies)
-      ],
+    return ObjectInspectorCodeView(
+      codeViewController: controller.codeViewController,
+      script: library.scriptRef!,
+      object: library.obj,
+      child: VmObjectDisplayBasicLayout(
+        object: library,
+        generalDataRows: _libraryDataRows(library),
+        expandableWidgets: [
+          if (dependencies != null)
+            LibraryDependencies(dependencies: dependencies)
+        ],
+      ),
     );
   }
 

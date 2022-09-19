@@ -4,6 +4,7 @@
 
 @TestOn('vm')
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/screens/debugger/breakpoint_manager.dart';
 import 'package:devtools_app/src/screens/provider/instance_viewer/instance_details.dart';
 import 'package:devtools_app/src/screens/provider/instance_viewer/instance_providers.dart';
 import 'package:devtools_app/src/screens/provider/provider_nodes.dart';
@@ -28,6 +29,8 @@ void main() async {
 
   setUp(() async {
     setGlobal(IdeTheme, getIdeTheme());
+    setGlobal(BreakpointManager, BreakpointManager());
+
     await env.setupEnvironment(
       config: const FlutterRunConfiguration(withDebugger: true),
     );

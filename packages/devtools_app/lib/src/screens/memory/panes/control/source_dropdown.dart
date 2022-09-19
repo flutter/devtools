@@ -63,7 +63,7 @@ class _MemorySourceDropdownState extends State<MemorySourceDropdown>
     return RoundedDropDownButton<String>(
       key: sourcesDropdownKey,
       isDense: true,
-      style: textTheme.bodyText2,
+      style: textTheme.bodyMedium,
       value: controller.memorySource,
       onChanged: (String? newValue) {
         setState(() {

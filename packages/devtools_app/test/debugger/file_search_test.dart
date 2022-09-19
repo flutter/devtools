@@ -13,7 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
 void main() {
-  final debuggerController = createMockDebuggerControllerWithDefaults();
+  final codeViewController = createMockCodeViewControllerWithDefaults();
   final scriptManager = MockScriptManager();
 
   Widget buildFileSearch() {
@@ -21,7 +21,7 @@ void main() {
       home: Scaffold(
         body: Card(
           child: FileSearchField(
-            debuggerController: debuggerController,
+            codeViewController: codeViewController,
           ),
         ),
       ),

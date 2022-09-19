@@ -19,6 +19,8 @@ export 'src/primitives/trees.dart';
 export 'src/primitives/utils.dart';
 export 'src/screens/app_size/app_size_controller.dart';
 export 'src/screens/app_size/app_size_screen.dart';
+export 'src/screens/debugger/breakpoint_manager.dart';
+export 'src/screens/debugger/codeview_controller.dart';
 export 'src/screens/debugger/debugger_controller.dart';
 export 'src/screens/debugger/debugger_screen.dart';
 export 'src/screens/debugger/program_explorer_controller.dart';

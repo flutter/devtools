@@ -198,6 +198,7 @@ class HeapStatistics {
 String _fullClassName(String library, String className) =>
     library.isNotEmpty ? '$library/$className' : className;
 
+/// This class is needed to make snapshot taking mockable.
 class SnapshotTaker {
   Future<AdaptedHeap?> take() async {
     final snapshot = await snapshotMemory();

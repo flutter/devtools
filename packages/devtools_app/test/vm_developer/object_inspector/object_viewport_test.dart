@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/screens/debugger/breakpoint_manager.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_viewport.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_class_display.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_developer_common_widgets.dart';
@@ -11,12 +12,11 @@ import 'package:devtools_app/src/screens/vm_developer/vm_function_display.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_library_display.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_object_model.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_script_display.dart';
-import 'package:devtools_app/src/scripts/script_manager.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/history_viewport.dart';
 import 'package:devtools_test/devtools_test.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
@@ -27,17 +27,15 @@ void main() {
 
   late FakeServiceManager fakeServiceManager;
 
-  late MockScriptManager scriptManager;
+  const windowSize = Size(2560.0, 1338.0);
 
   setUp(() {
     fakeServiceManager = FakeServiceManager();
 
-    scriptManager = MockScriptManager();
-    when(scriptManager.sortedScripts).thenReturn(ValueNotifier(<ScriptRef>[]));
-
+    setUpMockScriptManager();
     setGlobal(ServiceConnectionManager, fakeServiceManager);
-    setGlobal(ScriptManager, scriptManager);
     setGlobal(IdeTheme, IdeTheme());
+    setGlobal(BreakpointManager, BreakpointManager());
 
     testObjectInspectorViewController = TestObjectInspectorViewController();
   });
@@ -61,7 +59,8 @@ void main() {
       mockVmObject(mockClassObject);
     });
 
-    testWidgets('viewport shows class display', (WidgetTester tester) async {
+    testWidgetsWithWindowSize('viewport shows class display', windowSize,
+        (WidgetTester tester) async {
       testObjectInspectorViewController.fakeObjectHistory
           .setCurrentObject(mockClassObject);
       await tester.pumpWidget(
@@ -82,7 +81,8 @@ void main() {
       mockVmObject(mockFieldObject);
     });
 
-    testWidgets('viewport shows field display', (WidgetTester tester) async {
+    testWidgetsWithWindowSize('viewport shows field display', windowSize,
+        (WidgetTester tester) async {
       testObjectInspectorViewController.fakeObjectHistory
           .setCurrentObject(mockFieldObject);
 
@@ -110,7 +110,8 @@ void main() {
       mockVmObject(mockFuncObject);
       when(mockFuncObject.obj).thenReturn(testFunctionCopy);
     });
-    testWidgets('viewport shows function display', (WidgetTester tester) async {
+    testWidgetsWithWindowSize('viewport shows function display', windowSize,
+        (WidgetTester tester) async {
       testObjectInspectorViewController.fakeObjectHistory
           .setCurrentObject(mockFuncObject);
 
@@ -136,7 +137,8 @@ void main() {
       mockVmObject(mockScriptObject);
     });
 
-    testWidgets('viewport shows script display', (WidgetTester tester) async {
+    testWidgetsWithWindowSize('viewport shows script display', windowSize,
+        (WidgetTester tester) async {
       testObjectInspectorViewController.fakeObjectHistory
           .setCurrentObject(mockScriptObject);
       await tester.pumpWidget(

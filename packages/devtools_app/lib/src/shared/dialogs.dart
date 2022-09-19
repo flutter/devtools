@@ -10,12 +10,12 @@ import 'theme.dart';
 const dialogDefaultContext = 'dialog';
 
 Text dialogTitleText(ThemeData theme, String text) {
-  return Text(text, style: theme.textTheme.headline6);
+  return Text(text, style: theme.textTheme.titleLarge);
 }
 
 List<Widget> dialogSubHeader(ThemeData theme, String titleText) {
   return [
-    Text(titleText, style: theme.textTheme.subtitle1),
+    Text(titleText, style: theme.textTheme.titleMedium),
     const PaddedDivider(padding: EdgeInsets.only(bottom: denseRowSpacing)),
   ];
 }

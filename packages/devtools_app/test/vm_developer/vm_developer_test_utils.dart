@@ -177,12 +177,13 @@ void setUpMockScriptManager() {
   when(mockScriptManager.sortedScripts).thenReturn(
     FixedValueListenable<List<ScriptRef>>([testScript]),
   );
+  when(mockScriptManager.getScriptCached(any)).thenReturn(testScript);
   setGlobal(ScriptManager, mockScriptManager);
 }
 
 void mockVmObject(VmObject object) {
   when(object.outlineNode).thenReturn(null);
-  when(object.scriptRef).thenReturn(null);
+  when(object.scriptRef).thenReturn(testScript);
   when(object.script).thenReturn(testScript);
   when(object.pos).thenReturn(testPos);
   when(object.fetchingReachableSize).thenReturn(ValueNotifier<bool>(false));

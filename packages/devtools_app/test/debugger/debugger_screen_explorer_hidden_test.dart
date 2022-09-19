@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/screens/debugger/breakpoint_manager.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_screen.dart';
 import 'package:devtools_app/src/scripts/script_manager.dart';
@@ -25,20 +26,22 @@ void main() {
   setGlobal(IdeTheme, IdeTheme());
   setGlobal(ScriptManager, scriptManager);
   setGlobal(NotificationService, NotificationService());
+  setGlobal(BreakpointManager, BreakpointManager());
   fakeServiceManager.consoleService.ensureServiceInitialized();
   when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
       .thenReturn(ValueNotifier<int>(0));
   final debuggerController = createMockDebuggerControllerWithDefaults();
+  final codeViewController = debuggerController.codeViewController;
 
   final scripts = [
     ScriptRef(uri: 'package:/test/script.dart', id: 'test-script')
   ];
 
   when(scriptManager.sortedScripts).thenReturn(ValueNotifier(scripts));
-  when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
+  when(codeViewController.showFileOpener).thenReturn(ValueNotifier(false));
 
   // File Explorer view is hidden
-  when(debuggerController.fileExplorerVisible).thenReturn(ValueNotifier(false));
+  when(codeViewController.fileExplorerVisible).thenReturn(ValueNotifier(false));
 
   Future<void> pumpDebuggerScreen(
     WidgetTester tester,

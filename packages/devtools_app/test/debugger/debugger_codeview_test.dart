@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/screens/debugger/breakpoint_manager.dart';
 import 'package:devtools_app/src/screens/debugger/codeview.dart';
+import 'package:devtools_app/src/screens/debugger/codeview_controller.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_model.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_screen.dart';
@@ -23,17 +25,22 @@ void main() {
   const mockScriptRefFileUri = 'the/path/mapped/to/script/ref/uri';
   late FakeServiceManager fakeServiceManager;
   late MockDebuggerController debuggerController;
+  late MockCodeViewController codeViewController;
   late ScriptsHistory scriptsHistory;
 
   const smallWindowSize = Size(1000.0, 1000.0);
 
   setUpAll(() {
+    setGlobal(BreakpointManager, BreakpointManager());
     fakeServiceManager = FakeServiceManager(
       service: FakeServiceManager.createFakeService(
         resolvedUriMap: {mockScriptRefFileUri: mockScriptRef.uri!},
       ),
     );
-    debuggerController = createMockDebuggerControllerWithDefaults();
+    codeViewController = createMockCodeViewControllerWithDefaults();
+    debuggerController = createMockDebuggerControllerWithDefaults(
+      mockCodeViewController: codeViewController,
+    );
     scriptsHistory = ScriptsHistory();
 
     when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
@@ -47,16 +54,12 @@ void main() {
         .thenReturn(ValueNotifier<int>(0));
 
     scriptsHistory.pushEntry(mockScript!);
-    when(debuggerController.currentScriptRef)
+    final mockCodeViewController = debuggerController.codeViewController;
+    when(mockCodeViewController.currentScriptRef)
         .thenReturn(ValueNotifier(mockScriptRef));
-    when(debuggerController.currentParsedScript)
+    when(mockCodeViewController.currentParsedScript)
         .thenReturn(ValueNotifier(mockParsedScript));
-    when(debuggerController.showSearchInFileField)
-        .thenReturn(ValueNotifier(false));
-    when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
-    when(debuggerController.scriptsHistory).thenReturn(scriptsHistory);
-    when(debuggerController.searchMatches).thenReturn(ValueNotifier([]));
-    when(debuggerController.activeSearchMatch).thenReturn(ValueNotifier(null));
+    when(mockCodeViewController.scriptsHistory).thenReturn(scriptsHistory);
   });
 
   Future<void> pumpDebuggerScreen(
@@ -79,7 +82,7 @@ void main() {
     // TODO(elliette): https://github.com/flutter/flutter/pull/88152 fixes
     // this so that forcing a scroll event is no longer necessary. Remove
     // once the change is in the stable release.
-    debuggerController.showScriptLocation(
+    codeViewController.showScriptLocation(
       ScriptLocation(
         mockScriptRef,
         location: const SourcePosition(line: 50, column: 50),
@@ -104,7 +107,7 @@ void main() {
 
   group('fetchScriptLocationFullFilePath', () {
     testWidgets('gets the full path', (WidgetTester tester) async {
-      when(debuggerController.scriptLocation).thenReturn(
+      when(codeViewController.scriptLocation).thenReturn(
         ValueNotifier(
           ScriptLocation(
             mockScriptRef,
@@ -114,14 +117,14 @@ void main() {
       );
 
       final filePath =
-          await fetchScriptLocationFullFilePath(debuggerController);
+          await fetchScriptLocationFullFilePath(codeViewController);
 
       expect(filePath, equals(mockScriptRefFileUri));
     });
 
     testWidgets('gets the path if immediately available',
         (WidgetTester tester) async {
-      when(debuggerController.scriptLocation).thenReturn(
+      when(codeViewController.scriptLocation).thenReturn(
         ValueNotifier(
           ScriptLocation(
             mockScriptRef,
@@ -136,14 +139,14 @@ void main() {
       );
 
       final filePath =
-          await fetchScriptLocationFullFilePath(debuggerController);
+          await fetchScriptLocationFullFilePath(codeViewController);
 
       expect(filePath, equals(mockScriptRefFileUri));
     });
 
     testWidgets('returns null if package not found',
         (WidgetTester tester) async {
-      when(debuggerController.scriptLocation).thenReturn(
+      when(codeViewController.scriptLocation).thenReturn(
         ValueNotifier(
           ScriptLocation(
             ScriptRef(
@@ -156,7 +159,7 @@ void main() {
       );
 
       final filePath =
-          await fetchScriptLocationFullFilePath(debuggerController);
+          await fetchScriptLocationFullFilePath(codeViewController);
 
       expect(filePath, isNull);
     });
