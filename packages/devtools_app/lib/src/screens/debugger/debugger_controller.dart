@@ -440,8 +440,7 @@ class DebuggerController extends DisposableController
     );
 
     // Redirect the current editor screen if necessary.
-    if (removedScripts
-        .contains(codeViewController.currentScriptRef.value)) {
+    if (removedScripts.contains(codeViewController.currentScriptRef.value)) {
       final uri = codeViewController.currentScriptRef.value!.uri;
       final newScriptRef =
           addedScripts.firstWhereOrNull((script) => script.uri == uri);
