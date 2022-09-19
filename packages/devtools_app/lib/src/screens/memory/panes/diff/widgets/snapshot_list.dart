@@ -120,15 +120,9 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    addAutoDisposeListener(
-      widget.controller.snapshots,
-      () => setState(() {/*  snapshots changed */}),
-    );
+    addAutoDisposeListener(widget.controller.snapshots);
 
-    addAutoDisposeListener(
-      widget.controller.selectedIndex,
-      () => setState(() {/* selectedIndex changed */}),
-    );
+    addAutoDisposeListener(widget.controller.selectedIndex);
 
     addAutoDisposeListener(widget.controller.itemAdded, () async {
       await _scrollController.autoScrollToBottom();
