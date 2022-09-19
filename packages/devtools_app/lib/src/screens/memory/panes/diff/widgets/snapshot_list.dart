@@ -127,19 +127,18 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    _currentSnapshotsLength = widget.controller.snapshots.value.length;
+    addAutoDisposeListener(
+      widget.controller.snapshots,
+      () => setState(() {/*  snapshots changed */}),
+    );
 
-    addAutoDisposeListener(widget.controller.snapshots);
+    addAutoDisposeListener(
+      widget.controller.selectedIndex,
+      () => setState(() {/* selectedIndex changed  */}),
+    );
 
-    addAutoDisposeListener(widget.controller.selectedIndex, () async {
-      setState(() {});
-
-      final newSnapshotsLength = widget.controller.snapshots.value.length;
-      if (newSnapshotsLength > _currentSnapshotsLength) {
-        _currentSnapshotsLength = newSnapshotsLength;
-        await _scrollController.autoScrollToBottom();
-        setState(() {});
-      }
+    addAutoDisposeListener(widget.controller.itemAdded, () async {
+      await _scrollController.autoScrollToBottom();
     });
   }
 
@@ -157,7 +156,7 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
               : null,
           child: InkWell(
             canRequestFocus: false,
-            onTap: () => widget.controller.selectedIndex.value = index,
+            onTap: () => widget.controller.select(index),
             child: _SnapshotListTitle(
               item: widget.controller.snapshots.value[index],
               selected: index == widget.controller.selectedIndex.value,
