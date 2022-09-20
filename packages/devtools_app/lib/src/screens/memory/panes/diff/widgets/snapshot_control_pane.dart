@@ -5,7 +5,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../../primitives/utils.dart';
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/theme.dart';
 import '../controller/diff_pane_controller.dart';

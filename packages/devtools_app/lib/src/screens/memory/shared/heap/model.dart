@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../primitives/memory_utils.dart';
@@ -22,11 +21,11 @@ class _JsonFields {
 /// Contains information from [HeapSnapshotGraph],
 /// needed for memory screen.
 class AdaptedHeapData {
-  /// Default value for rootIndex is taken from the doc:
-  /// https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/heap_snapshot.md#object-ids
-  AdaptedHeapData(this.objects,
-      {this.rootIndex = _defaultRootIndex, DateTime? created})
-      : assert(objects.isNotEmpty),
+  AdaptedHeapData(
+    this.objects, {
+    this.rootIndex = _defaultRootIndex,
+    DateTime? created,
+  })  : assert(objects.isNotEmpty),
         assert(objects.length > rootIndex);
 
   factory AdaptedHeapData.fromJson(Map<String, dynamic> json) =>
@@ -46,6 +45,8 @@ class AdaptedHeapData {
         created: DateTime.now(),
       );
 
+  /// Default value for rootIndex is taken from the doc:
+  /// https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/heap_snapshot.md#object-ids
   static const int _defaultRootIndex = 1;
 
   final int rootIndex;
@@ -101,7 +102,7 @@ class AdaptedHeapData {
   }
 }
 
-/// Result of invocation of [inentityHashCode()].
+/// Result of invocation of [identityHashCode].
 typedef IdentityHashCode = int;
 
 /// Sequence of ids of objects in the heap.
