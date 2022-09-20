@@ -20,6 +20,7 @@ void main() {
         )
       ],
       rootIndex: 0,
+      created: DateTime(2000),
     ).toJson();
 
     expect(json, AdaptedHeapData.fromJson(json).toJson());
