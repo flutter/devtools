@@ -114,7 +114,7 @@ class _SnapshotListItems extends StatefulWidget {
 class _SnapshotListItemsState extends State<_SnapshotListItems>
     with AutoDisposeMixin {
   final _headerHeight = 1.20 * defaultRowHeight;
-  late final _scrollController;
+  late final ScrollController _scrollController;
 
   @override
   void initState() {
