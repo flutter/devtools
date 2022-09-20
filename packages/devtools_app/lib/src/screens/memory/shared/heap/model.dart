@@ -26,14 +26,16 @@ class AdaptedHeapData {
     this.rootIndex = _defaultRootIndex,
     DateTime? created,
   })  : assert(objects.isNotEmpty),
-        assert(objects.length > rootIndex);
+        assert(objects.length > rootIndex) {
+    this.created = created ?? DateTime.now();
+  }
 
   factory AdaptedHeapData.fromJson(Map<String, dynamic> json) =>
       AdaptedHeapData(
         (json[_JsonFields.objects] as List<dynamic>)
             .map((e) => AdaptedHeapObject.fromJson(e))
             .toList(),
-        created: json[_JsonFields.created] ?? DateTime.now(),
+        created: json[_JsonFields.created],
         rootIndex: json[_JsonFields.rootIndex] ?? _defaultRootIndex,
       );
 
@@ -42,7 +44,6 @@ class AdaptedHeapData {
         graph.objects
             .map((e) => AdaptedHeapObject.fromHeapSnapshotObject(e))
             .toList(),
-        created: DateTime.now(),
       );
 
   /// Default value for rootIndex is taken from the doc:
