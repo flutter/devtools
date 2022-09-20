@@ -25,7 +25,7 @@ class SnapshotControlPane extends StatelessWidget {
       builder: (_, isProcessing, __) => Row(
         children: [
           const SizedBox(width: defaultSpacing),
-          if (current.stats != null) ...[
+          if (current.heap != null) ...[
             _DiffDropdown(
               isProcessing: controller.isProcessing,
               current: controller.selected as SnapshotListItem,
@@ -69,7 +69,7 @@ class _DiffDropdown extends StatelessWidget {
         (item) =>
             item is SnapshotListItem &&
             !item.isProcessing.value &&
-            !(item.stats == null),
+            item.heap != null,
       )
       .cast<SnapshotListItem>()
       .map(
