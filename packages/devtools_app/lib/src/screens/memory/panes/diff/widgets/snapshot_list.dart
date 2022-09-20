@@ -101,6 +101,13 @@ class _SnapshotListTitle extends StatelessWidget {
   }
 }
 
+/// Stores list change history to detect if it is time to scroll to bottom in
+/// order to show newly created item to user.
+class _LastListChange {
+  bool increased = false;
+  late int length;
+}
+
 class _SnapshotListItems extends StatefulWidget {
   const _SnapshotListItems({Key? key, required this.controller})
       : super(key: key);
@@ -115,50 +122,68 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
     with AutoDisposeMixin {
   final _headerHeight = 1.20 * defaultRowHeight;
   late final ScrollController _scrollController;
+  late _LastListChange _lastListChange;
 
   @override
   void initState() {
-    _scrollController = ScrollController();
     super.initState();
+    _scrollController = ScrollController();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    addAutoDisposeListener(widget.controller.snapshots);
+    _lastListChange = _LastListChange()
+      ..length = widget.controller.snapshots.value.length;
 
-    addAutoDisposeListener(widget.controller.selectedIndex);
+    addAutoDisposeListener(
+        widget.controller.selectedIndex, checkIfItemAddedAndSelected);
+    addAutoDisposeListener(
+        widget.controller.snapshots, checkIfItemAddedAndSelected);
+  }
 
-    addAutoDisposeListener(widget.controller.itemAdded, () async {
-      await _scrollController.autoScrollToBottom();
-    });
+  Future<void> checkIfItemAddedAndSelected() async {
+    final newLength = widget.controller.snapshots.value.length;
+    final newIndex = widget.controller.selectedIndex.value;
+
+    if (newLength != _lastListChange.length) {
+      _lastListChange.increased = newLength > _lastListChange.length;
+      _lastListChange.length = newLength;
+    }
+
+    final itemAddedAndSelected =
+        _lastListChange.increased && (newIndex == newLength - 1);
+
+    if (itemAddedAndSelected) await _scrollController.autoScrollToBottom();
   }
 
   @override
   Widget build(BuildContext context) {
-    final selectedIndex = widget.controller.selectedIndex.value;
-    final snapshots = widget.controller.snapshots.value;
-    return ListView.builder(
-      controller: _scrollController,
-      shrinkWrap: true,
-      itemCount: snapshots.length,
-      itemBuilder: (context, index) {
-        return Container(
-          height: _headerHeight,
-          color: selectedIndex == index
-              ? Theme.of(context).selectedRowColor
-              : null,
-          child: InkWell(
-            canRequestFocus: false,
-            onTap: () => widget.controller.select(index),
-            child: _SnapshotListTitle(
-              item: snapshots[index],
-              selected: index == selectedIndex,
+    return DualValueListenableBuilder<List<DiffListItem>, int>(
+      firstListenable: widget.controller.snapshots,
+      secondListenable: widget.controller.selectedIndex,
+      builder: (_, snapshots, selectedIndex, __) => ListView.builder(
+        controller: _scrollController,
+        shrinkWrap: true,
+        itemCount: snapshots.length,
+        itemBuilder: (context, index) {
+          return Container(
+            height: _headerHeight,
+            color: selectedIndex == index
+                ? Theme.of(context).selectedRowColor
+                : null,
+            child: InkWell(
+              canRequestFocus: false,
+              onTap: () => widget.controller.select(index),
+              child: _SnapshotListTitle(
+                item: snapshots[index],
+                selected: index == selectedIndex,
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 

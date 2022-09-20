@@ -26,15 +26,11 @@ class DiffPaneController {
   final _selectedIndex = ValueNotifier<int>(0);
   ValueListenable<int> get selectedIndex => _selectedIndex;
 
-  final _isProcessing = ValueNotifier<bool>(false);
-
   /// If true, some process is going on.
   ValueListenable<bool> get isProcessing => _isProcessing;
+  final _isProcessing = ValueNotifier<bool>(false);
 
   DiffListItem get selected => snapshots.value[selectedIndex.value];
-
-  final _itemAdded = ValueNotifier<int>(0);
-  ValueListenable<int> get itemAdded => _itemAdded;
 
   /// True, if the list contains snapshots, i.e. items beyond the first
   /// informational item.
@@ -54,7 +50,6 @@ class DiffPaneController {
     final newElementIndex = snapshots.value.length - 1;
     _selectedIndex.value = newElementIndex;
     _isProcessing.value = false;
-    _itemAdded.value++;
   }
 
   Future<void> clearSnapshots() async {
