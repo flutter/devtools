@@ -27,8 +27,10 @@ import 'memory_graph_model.dart';
 import 'memory_protocol.dart';
 import 'memory_snapshot_models.dart';
 import 'panes/allocation_profile/allocation_profile_table_view_controller.dart';
+import 'panes/diff/controller/diff_pane_controller.dart';
 import 'primitives/filter_config.dart';
 import 'primitives/memory_timeline.dart';
+import 'shared/heap/model.dart';
 
 enum ChartType {
   DartHeaps,
@@ -236,9 +238,11 @@ class MemoryController extends DisposableController
         AutoDisposeControllerMixin,
         SearchControllerMixin,
         AutoCompleteSearchControllerMixin {
-  MemoryController() {
+  MemoryController({DiffPaneController? diffPaneController}) {
     memoryTimeline = MemoryTimeline(offline);
     memoryLog = MemoryLog(this);
+    this.diffPaneController =
+        diffPaneController ?? DiffPaneController(SnapshotTaker());
 
     // Update the chart when the memorySource changes.
     addAutoDisposeListener(memorySourceNotifier, () async {
@@ -253,6 +257,9 @@ class MemoryController extends DisposableController
       refreshAllCharts();
     });
   }
+
+  /// The controller is late to enable test injection.
+  late final DiffPaneController diffPaneController;
 
   /// Controller for [AllocationProfileTableView].
   final allocationProfileController = AllocationProfileTableViewController();

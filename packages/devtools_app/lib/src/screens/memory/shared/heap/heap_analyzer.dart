@@ -2,15 +2,45 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart';
+
 import 'model.dart';
 
-/// Sets the field [retainer] for each object in the [heap], that has retaining
-/// path to the root.
-///
-/// The algorithm takes O(number of references in the heap).
+/// Sets the field retainer and retainedSize for each object in the [heap], that
+/// has retaining path to the root.
 void buildSpanningTree(AdaptedHeap heap) {
-  final root = heap.objects[AdaptedHeap.rootIndex];
-  root.retainer = -1;
+  assert(!heap.isSpanningTreeBuilt);
+  _setRetainers(heap);
+  heap.isSpanningTreeBuilt = true;
+  _verifyHeapIntegrity(heap);
+}
+
+List<HeapStatsRecord> heapStats(AdaptedHeap? heap) {
+  final result = <String, HeapStatsRecord>{};
+  if (heap == null) return [];
+  if (!heap.isSpanningTreeBuilt) buildSpanningTree(heap);
+  for (var object in heap.objects) {
+    // We do not show objects that will be garbage collected soon.
+    if (object.retainedSize == null || object.isSentinel) continue;
+
+    if (!result.containsKey(object.fullClassName)) {
+      result[object.fullClassName] = HeapStatsRecord(
+        className: object.className,
+        library: object.library,
+      );
+    }
+    final stats = result[object.fullClassName]!;
+    stats.retainedSize += object.retainedSize ?? 0;
+    stats.shallowSize += object.shallowSize;
+    stats.instanceCount++;
+  }
+  return result.values.toList();
+}
+
+/// The algorithm takes O(number of references in the heap).
+void _setRetainers(AdaptedHeap heap) {
+  heap.root.retainer = -1;
+  heap.root.retainedSize = heap.root.shallowSize;
 
   // Array of all objects where the best distance from root is n.
   // n starts with 0 and increases by 1 on each step of the algorithm.
@@ -18,7 +48,7 @@ void buildSpanningTree(AdaptedHeap heap) {
   // See description of cut:
   // https://en.wikipedia.org/wiki/Cut_(graph_theory)
   // On each step the algorithm moves the cut one step further from the root.
-  var cut = [AdaptedHeap.rootIndex];
+  var cut = [heap.rootIndex];
 
   // On each step of algorithm we know that all nodes at distance n or closer to
   // root, has parent initialized.
@@ -30,22 +60,45 @@ void buildSpanningTree(AdaptedHeap heap) {
         final child = heap.objects[c];
 
         if (child.retainer != null) continue;
-        if (!_canRetain(child.klass, child.library)) continue;
-
         child.retainer = r;
-        nextCut.add(c);
+        child.retainedSize = child.shallowSize;
+
+        _propagateSize(child, heap);
+
+        if (_isRetainer(child)) {
+          nextCut.add(c);
+        }
       }
     }
-    if (nextCut.isEmpty) {
-      heap.isSpanningTreeBuilt = true;
-      return;
-    }
+    if (nextCut.isEmpty) return;
     cut = nextCut;
   }
 }
 
+/// Assuming the [object] is leaf, initializes its retained size
+/// and adds the size to all its retainers.
+void _propagateSize(AdaptedHeapObject object, AdaptedHeap heap) {
+  assert(object.retainer != null);
+  assert(object.retainedSize == object.shallowSize);
+  final addedSize = object.shallowSize;
+
+  while (object.retainer != -1) {
+    final retainer = heap.objects[object.retainer!];
+    assert(retainer.retainer != null);
+    assert(retainer != object);
+    retainer.retainedSize = retainer.retainedSize! + addedSize;
+    object = retainer;
+  }
+}
+
+bool _isRetainer(AdaptedHeapObject object) {
+  if (isWeakEntry(object.className, object.library)) return false;
+  return object.references.isNotEmpty;
+}
+
 /// Detects if a class can retain an object from garbage collection.
-bool _canRetain(String klass, String library) {
+@visibleForTesting
+bool isWeakEntry(String klass, String library) {
   // Classes that hold reference to an object without preventing
   // its collection.
   const weakHolders = {
@@ -54,8 +107,8 @@ bool _canRetain(String klass, String library) {
     'FinalizerEntry': 'dart._internal',
   };
 
-  if (!weakHolders.containsKey(klass)) return true;
-  if (weakHolders[klass] == library) return false;
+  if (!weakHolders.containsKey(klass)) return false;
+  if (weakHolders[klass] == library) return true;
 
   // If a class lives in unexpected library, this can be because of
   // (1) name collision or (2) bug in this code.
@@ -64,5 +117,31 @@ bool _canRetain(String klass, String library) {
   // or detect weak references automatically, without hard coding
   // class names.
   assert(false, 'Unexpected library for $klass: $library.');
-  return true;
+  return false;
+}
+
+/// Verifies heap integrity rules.
+///
+/// 1. Nullness of 'retainedSize' and 'retainer' should be equal.
+///
+/// 2. Root's 'retainedSize' should be sum of shallow sizes of all reachable
+/// objects.
+void _verifyHeapIntegrity(AdaptedHeap heap) {
+  assert(() {
+    var totalReachableSize = 0;
+
+    for (var object in heap.objects) {
+      assert(
+        (object.retainedSize == null) == (object.retainer == null),
+        'retainedSize = ${object.retainedSize}, retainer = ${object.retainer}',
+      );
+      if (object.retainer != null) totalReachableSize += object.shallowSize;
+    }
+
+    assert(
+      heap.root.retainedSize == totalReachableSize,
+      '${heap.root.retainedSize} not equal to $totalReachableSize',
+    );
+    return true;
+  }());
 }
