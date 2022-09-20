@@ -67,7 +67,7 @@ class FrameHints extends StatelessWidget {
             if (frame.hasShaderTime)
               ShaderCompilationHint(shaderTime: frame.shaderDuration),
             const SizedBox(height: denseSpacing),
-            const RasterMetricsHint(),
+            const RasterStatsHint(),
           ]
         : [];
 
@@ -362,8 +362,8 @@ class ShaderCompilationHint extends StatelessWidget {
 }
 
 @visibleForTesting
-class RasterMetricsHint extends StatelessWidget {
-  const RasterMetricsHint({Key? key}) : super(key: key);
+class RasterStatsHint extends StatelessWidget {
+  const RasterStatsHint({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -377,7 +377,7 @@ class RasterMetricsHint extends StatelessWidget {
               style: theme.regularTextStyle,
             ),
             TextSpan(
-              text: ' Raster Metrics ',
+              text: ' Raster Stats ',
               style: theme.subtleFixedFontStyle,
             ),
             TextSpan(

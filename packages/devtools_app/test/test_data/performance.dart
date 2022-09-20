@@ -8,6 +8,7 @@ import 'package:devtools_app/devtools_app.dart';
 
 import '../test_utils/test_utils.dart';
 import 'cpu_profile.dart';
+import 'performance_raster_stats.dart';
 
 const testUiThreadId = 1;
 const testRasterThreadId = 2;
@@ -1337,6 +1338,7 @@ final offlinePerformanceDataJson = {
   PerformanceData.selectedFrameIdKey: 1,
   PerformanceData.selectedEventKey: vsyncEvent.json,
   PerformanceData.displayRefreshRateKey: 120.0,
+  PerformanceData.rasterStatsKey: rasterStatsFromDevToolsJson,
 };
 
 // Mark: Duration events with duplicate traces
