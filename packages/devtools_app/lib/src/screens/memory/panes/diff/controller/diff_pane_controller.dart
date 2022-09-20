@@ -10,12 +10,15 @@ import 'package:flutter/foundation.dart';
 import '../../../../../primitives/utils.dart';
 import '../../../primitives/memory_utils.dart';
 import '../../../shared/heap/model.dart';
+import 'heap_diff.dart';
 import 'model.dart';
 
 class DiffPaneController {
   DiffPaneController(this.snapshotTaker);
 
   final SnapshotTaker snapshotTaker;
+
+  final diffStore = HeapDiffStore();
 
   /// The list contains one item that show information and all others
   /// are snapshots.
