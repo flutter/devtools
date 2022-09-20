@@ -13,7 +13,7 @@ TOOL_DIR=`dirname "${RELATIVE_PATH_TO_SCRIPT}"`
 # The devtools root directory is assumed to be the parent of this directory.
 DEVTOOLS_DIR="${TOOL_DIR}/.."
 
-pushd $DEVTOOLS_DIR/packages/third_party/packages/perfetto_compiled
+pushd $DEVTOOLS_DIR/third_party/packages/perfetto_compiled/lib
 
 echo "UPDATE_PERFETTO: Moving DevTools-Perfetto integration files to a temp directory"
 mkdir _tmp
@@ -42,11 +42,11 @@ fi
 
 echo "UPDATE_PERFETTO: Moving DevTools-Perfetto integration files back from _tmp/"
 mkdir dist/devtools
-mv _tmp/devtools/* dist/devtools/
+mv _tmp/* dist/devtools/
 
 echo "UPDATE_PERFETTO: Updating index.html headers to include DevTools-Perfetto integration files"
-gsed -i "s/<\/head>/  <link id=\"devtools-style\" rel=\"stylesheet\" href=\"devtools/devtools_dark.css\">\n<\/head>/g" dist/index.html
-gsed -i "s/<\/head>/  <script src=\"devtools/devtools_theme_handler.js\"><\/script>\n<\/head>/g" dist/index.html
+gsed -i "s/<\/head>/  <link id=\"devtools-style\" rel=\"stylesheet\" href=\"devtools\/devtools_dark.css\">\n<\/head>/g" dist/index.html
+gsed -i "s/<\/head>/  <script src=\"devtools\/devtools_theme_handler.js\"><\/script>\n<\/head>/g" dist/index.html
 
 echo "UPDATE_PERFETTO: Cleaning up temporary directories"
 rm -rf _tmp

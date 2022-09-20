@@ -28,9 +28,9 @@ function toggleTheme(messageEvent) {
   }
   const sheet = document.getElementById('devtools-style');
   if (theme === 'light') {
-    sheet.setAttribute('href', 'devtools_light.css');
+    sheet.setAttribute('href', 'devtools/devtools_light.css');
   } else {
-    sheet.setAttribute('href', 'devtools_dark.css');
+    sheet.setAttribute('href', 'devtools/devtools_dark.css');
   }
 }
 
