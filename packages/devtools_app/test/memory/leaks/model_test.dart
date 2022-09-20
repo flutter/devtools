@@ -42,23 +42,4 @@ void main() {
       jsonEncode(NotGCedAnalyzerTask.fromJson(json).toJson()),
     );
   });
-
-  test('$AdaptedHeapData serializes.', () {
-    final json = AdaptedHeapData(
-      [
-        AdaptedHeapObject(
-          code: 1,
-          references: [3, 4, 5],
-          heapClass: HeapClass(
-            className: 'class',
-            library: 'library',
-          ),
-          shallowSize: 1,
-        )
-      ],
-      rootIndex: 0,
-    ).toJson();
-
-    expect(json, AdaptedHeapData.fromJson(json).toJson());
-  });
 }
