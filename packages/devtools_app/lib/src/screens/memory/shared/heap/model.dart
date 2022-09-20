@@ -24,7 +24,8 @@ class _JsonFields {
 class AdaptedHeapData {
   /// Default value for rootIndex is taken from the doc:
   /// https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/heap_snapshot.md#object-ids
-  AdaptedHeapData(this.objects, {this.rootIndex = _defaultRootIndex})
+  AdaptedHeapData(this.objects,
+      {this.rootIndex = _defaultRootIndex, DateTime? created})
       : assert(objects.isNotEmpty),
         assert(objects.length > rootIndex);
 
@@ -48,6 +49,7 @@ class AdaptedHeapData {
   static const int _defaultRootIndex = 1;
 
   final int rootIndex;
+
   AdaptedHeapObject get root => objects[rootIndex];
 
   final List<AdaptedHeapObject> objects;
@@ -175,17 +177,8 @@ class HeapStatsRecord {
   int retainedSize = 0;
   int instanceCount = 0;
 
-  String get fullClassName => _fullClassName(library, className);
-  bool get isZero =>
-      shallowSize == 0 && retainedSize == 0 && instanceCount == 0;
-}
-
-class HeapStatistics {
-  HeapStatistics(this.map);
-
-  /// Maps full class name to stats record of this class.
-  final Map<String, HeapStatsRecord> map;
-  late final List<HeapStatsRecord> list = map.values.toList(growable: false);
+  // bool get isZero =>
+  //     shallowSize == 0 && retainedSize == 0 && instanceCount == 0;
 }
 
 /// This class is needed to make snapshot taking mockable.

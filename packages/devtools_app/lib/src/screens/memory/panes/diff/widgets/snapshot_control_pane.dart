@@ -61,7 +61,7 @@ class _DiffDropdown extends StatelessWidget {
     }
   }
 
-  final ListValueNotifier<DiffListItem> list;
+  final ValueListenable<List<DiffListItem>> list;
   final SnapshotListItem current;
   final ValueListenable<bool> isProcessing;
 
