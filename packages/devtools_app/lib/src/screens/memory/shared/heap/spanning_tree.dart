@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/cupertino.dart';
-
 import 'model.dart';
 
 /// Sets the field retainer and retainedSize for each object in the [heap], that

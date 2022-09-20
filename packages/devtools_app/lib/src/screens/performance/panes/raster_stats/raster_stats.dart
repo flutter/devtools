@@ -15,29 +15,31 @@ import '../../../../shared/table_data.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../../../ui/colors.dart';
-import 'raster_metrics_controller.dart';
+import 'raster_stats_controller.dart';
+import 'raster_stats_model.dart';
 
 class RenderingLayerVisualizer extends StatelessWidget {
   const RenderingLayerVisualizer({
     Key? key,
-    required this.rasterMetricsController,
+    required this.rasterStatsController,
   }) : super(key: key);
 
-  final RasterMetricsController rasterMetricsController;
+  final RasterStatsController rasterStatsController;
 
   @override
   Widget build(BuildContext context) {
-    return DualValueListenableBuilder<List<LayerSnapshot>, bool>(
-      firstListenable: rasterMetricsController.layerSnapshots,
-      secondListenable: rasterMetricsController.loadingSnapshot,
-      builder: (context, snapshots, loading, _) {
+    return DualValueListenableBuilder<RasterStats, bool>(
+      firstListenable: rasterStatsController.rasterStats,
+      secondListenable: rasterStatsController.loadingSnapshot,
+      builder: (context, rasterStats, loading, _) {
         if (loading) {
           return const CenteredCircularProgressIndicator();
         }
+        final snapshots = rasterStats.layerSnapshots;
         if (snapshots.isEmpty) {
           return const Center(
             child: Text(
-              'Take a snapshot to view raster metrics for the current screen.',
+              'Take a snapshot to view raster stats for the current screen.',
             ),
           );
         }
@@ -46,15 +48,16 @@ class RenderingLayerVisualizer extends StatelessWidget {
           initialFractions: const [0.5, 0.5],
           children: [
             LayerSnapshotTable(
-              controller: rasterMetricsController,
+              controller: rasterStatsController,
               snapshots: snapshots,
             ),
             ValueListenableBuilder<LayerSnapshot?>(
-              valueListenable: rasterMetricsController.selectedSnapshot,
+              valueListenable: rasterStatsController.selectedSnapshot,
               builder: (context, snapshot, _) {
                 return LayerImage(
                   snapshot: snapshot,
-                  originalFrameSize: rasterMetricsController.originalFrameSize,
+                  originalFrameSize:
+                      rasterStatsController.rasterStats.value.originalFrameSize,
                   includeFullScreenButton: true,
                 );
               },
@@ -73,7 +76,7 @@ class LayerSnapshotTable extends StatelessWidget {
     required this.snapshots,
   }) : super(key: key);
 
-  final RasterMetricsController controller;
+  final RasterStatsController controller;
 
   final List<LayerSnapshot> snapshots;
 
