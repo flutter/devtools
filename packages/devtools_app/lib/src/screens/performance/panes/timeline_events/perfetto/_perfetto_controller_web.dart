@@ -55,7 +55,7 @@ class PerfettoController extends DisposableController
       return _debugPerfettoUrl;
     }
     final baseUrl = isExternalBuild
-        ? '${html.window.location.origin}/packages/perfetto_compiled/dist/index.html'
+        ? '${html.window.location.origin}/assets/packages/perfetto_compiled/dist/index.html'
         : 'https://ui.perfetto.dev';
     return '$baseUrl$_embeddedModeQuery';
   }
