@@ -7,7 +7,6 @@ not-gced:
   victims: 1
   objects:
     MyTrackedClass:
-      type: MyTrackedClass
       identityHashCode: 602745562
       retainingPath:
         - /Root-0
@@ -30,6 +29,5 @@ not-gced:
       total-victims: 1
       victims:
         MyTrackedClass:
-          type: MyTrackedClass
           identityHashCode: 254077742
           retainingPath: /Root-0/Isolate-0/WidgetsFlutterBinding-235266188/BuildOwner-800677189/_InternalLinkedHashMap-0/_List-0/InheritedElement-934004911/_HashMap-3265445665/_List-0/_HashMapEntry-4138455891/MultiChildRenderObjectElement-930100091/SingleChildRenderObjectElement-738570971/MultiChildRenderObjectElement-95169238/StatefulElement-324739411/_LeakingWidgetState-452071513/MyClass-3721699850/MyTrackedClass-602745562/MyTrackedClass-254077742/

@@ -22,13 +22,14 @@ void main() {
       heap: AdaptedHeap(
         [
           AdaptedHeapObject(
-            klass: 'class',
+            className: 'class',
             references: [2, 3, 4],
             code: 6,
             library: 'library',
             shallowSize: 1,
           ),
         ],
+        rootIndex: 0,
       ),
     );
 
@@ -41,15 +42,18 @@ void main() {
   });
 
   test('$AdaptedHeap serializes.', () {
-    final json = AdaptedHeap([
-      AdaptedHeapObject(
-        code: 1,
-        references: [3, 4, 5],
-        klass: 'klass',
-        library: 'library',
-        shallowSize: 1,
-      )
-    ]).toJson();
+    final json = AdaptedHeap(
+      [
+        AdaptedHeapObject(
+          code: 1,
+          references: [3, 4, 5],
+          className: 'klass',
+          library: 'library',
+          shallowSize: 1,
+        )
+      ],
+      rootIndex: 0,
+    ).toJson();
 
     expect(json, AdaptedHeap.fromJson(json).toJson());
   });

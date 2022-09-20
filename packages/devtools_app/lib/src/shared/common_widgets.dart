@@ -1345,7 +1345,7 @@ extension ScrollControllerAutoScroll on ScrollController {
 
   /// Scroll the content to the bottom using the app's default animation
   /// duration and curve..
-  void autoScrollToBottom() async {
+  Future<void> autoScrollToBottom() async {
     await animateTo(
       position.maxScrollExtent,
       duration: rapidDuration,
@@ -2304,6 +2304,24 @@ class BulletSpacer extends StatelessWidget {
       child: Text(
         '•',
         style: textStyle?.copyWith(color: mutedColor),
+      ),
+    );
+  }
+}
+
+class Progress extends StatelessWidget {
+  Progress({Key? key, double? size})
+      : size = size ?? smallProgressSize,
+        super(key: key);
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: size,
+      height: size,
+      child: CircularProgressIndicator(
+        color: Theme.of(context).textTheme.bodyText1?.color,
       ),
     );
   }

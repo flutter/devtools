@@ -3,7 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:vm_service/vm_service.dart';
+
+import '../../../../../primitives/utils.dart';
+import '../../../shared/heap/heap_analyzer.dart';
+import '../../../shared/heap/model.dart';
 
 abstract class DiffListItem {
   /// Number, that, if shown in name, should be unique in the list.
@@ -22,23 +25,34 @@ class InformationListItem extends DiffListItem {
 
 class SnapshotListItem extends DiffListItem {
   SnapshotListItem(
-    Future<HeapSnapshotGraph?> graphReceiver,
+    Future<AdaptedHeap?> receiver,
     this.displayNumber,
     this._isolateName,
   ) {
     _isProcessing.value = true;
-    graphReceiver.whenComplete(() async {
-      graph = await graphReceiver;
+    receiver.whenComplete(() async {
+      final heap = await receiver;
+      if (heap != null) stats = heapStats(heap);
       _isProcessing.value = false;
     });
   }
 
   final String _isolateName;
 
-  HeapSnapshotGraph? graph;
+  List<HeapStatsRecord>? stats;
+
+  final selectedRecord = ValueNotifier<HeapStatsRecord?>(null);
 
   @override
   final int displayNumber;
 
   String get name => '$_isolateName-$displayNumber';
+
+  var sorting = ColumnSorting();
+}
+
+class ColumnSorting {
+  bool initialized = false;
+  SortDirection direction = SortDirection.ascending;
+  int columnIndex = 0;
 }

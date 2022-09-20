@@ -12,15 +12,10 @@ import 'widgets/snapshot_control_pane.dart';
 import 'widgets/snapshot_list.dart';
 import 'widgets/snapshot_view.dart';
 
-class DiffPane extends StatefulWidget {
-  const DiffPane({Key? key}) : super(key: key);
+class DiffPane extends StatelessWidget {
+  const DiffPane({Key? key, required this.controller}) : super(key: key);
 
-  @override
-  State<DiffPane> createState() => _DiffPaneState();
-}
-
-class _DiffPaneState extends State<DiffPane> {
-  final controller = DiffPaneController();
+  final DiffPaneController controller;
 
   @override
   Widget build(BuildContext context) {
@@ -28,6 +23,7 @@ class _DiffPaneState extends State<DiffPane> {
       valueListenable: controller.selectedIndex,
       builder: (_, index, __) {
         final item = controller.selected;
+
         if (item is InformationListItem) {
           return const _SnapshotDoc();
         } else if (item is SnapshotListItem) {
