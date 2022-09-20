@@ -8,6 +8,7 @@ import 'dart:html' as html;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import '../../../../../app.dart';
 import '../../../../../primitives/auto_dispose.dart';
 import '../../../../../primitives/trace_event.dart';
 import '../../../../../shared/globals.dart';
@@ -24,9 +25,6 @@ const _debugUseLocalPerfetto = false;
 class PerfettoController extends DisposableController
     with AutoDisposeControllerMixin {
   static const viewId = 'embedded-perfetto';
-
-  String get _bundledPerfettoUrl =>
-      '${html.window.location.origin}/assets/perfetto/dist/index.html$_embeddedModeQuery';
 
   /// Url when running Perfetto locally following the instructions here:
   /// https://perfetto.dev/docs/contributing/build-instructions#ui-development
@@ -52,8 +50,15 @@ class PerfettoController extends DisposableController
   /// [post_message_handler.ts] in the Perfetto codebase.
   static const _devtoolsThemeChange = 'DART-DEVTOOLS-THEME-CHANGE';
 
-  String get perfettoUrl =>
-      _debugUseLocalPerfetto ? _debugPerfettoUrl : _bundledPerfettoUrl;
+  String get _perfettoUrl {
+    if (_debugUseLocalPerfetto) {
+      return _debugPerfettoUrl;
+    }
+    final baseUrl = isExternalBuild
+        ? '${html.window.location.origin}/assets/perfetto/dist/index.html'
+        : 'ui.perfetto.dev';
+    return '$baseUrl$_embeddedModeQuery';
+  }
 
   late final html.IFrameElement _perfettoIFrame;
 
@@ -68,7 +73,7 @@ class PerfettoController extends DisposableController
       // This url is safe because we built it ourselves and it does not include
       // any user input.
       // ignore: unsafe_html
-      ..src = perfettoUrl
+      ..src = _perfettoUrl
       ..allow = 'usb';
     _perfettoIFrame.style
       ..border = 'none'
@@ -127,7 +132,7 @@ class PerfettoController extends DisposableController
   void _postMessage(dynamic message) {
     _perfettoIFrame.contentWindow!.postMessage(
       message,
-      perfettoUrl,
+      _perfettoUrl,
     );
   }
 
