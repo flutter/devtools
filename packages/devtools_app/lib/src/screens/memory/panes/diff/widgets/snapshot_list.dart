@@ -101,13 +101,6 @@ class _SnapshotListTitle extends StatelessWidget {
   }
 }
 
-/// Stores list change history to detect if it is time to scroll to bottom in
-/// order to show newly created item to user.
-class _LastListChange {
-  bool increased = false;
-  late int length;
-}
-
 class _SnapshotListItems extends StatefulWidget {
   const _SnapshotListItems({Key? key, required this.controller})
       : super(key: key);
@@ -122,7 +115,6 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
     with AutoDisposeMixin {
   final _headerHeight = 1.20 * defaultRowHeight;
   late final ScrollController _scrollController;
-  late _LastListChange _lastListChange;
 
   @override
   void initState() {
@@ -133,29 +125,14 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
-    _lastListChange = _LastListChange()
-      ..length = widget.controller.snapshots.value.length;
-
-    addAutoDisposeListener(
-        widget.controller.selectedIndex, checkIfItemAddedAndSelected);
-    addAutoDisposeListener(
-        widget.controller.snapshots, checkIfItemAddedAndSelected);
+    addAutoDisposeListener(widget.controller.selectedIndex, scrollIfLast);
   }
 
-  Future<void> checkIfItemAddedAndSelected() async {
+  Future<void> scrollIfLast() async {
     final newLength = widget.controller.snapshots.value.length;
     final newIndex = widget.controller.selectedIndex.value;
 
-    if (newLength != _lastListChange.length) {
-      _lastListChange.increased = newLength > _lastListChange.length;
-      _lastListChange.length = newLength;
-    }
-
-    final itemAddedAndSelected =
-        _lastListChange.increased && (newIndex == newLength - 1);
-
-    if (itemAddedAndSelected) await _scrollController.autoScrollToBottom();
+    if (newIndex == newLength - 1) await _scrollController.autoScrollToBottom();
   }
 
   @override

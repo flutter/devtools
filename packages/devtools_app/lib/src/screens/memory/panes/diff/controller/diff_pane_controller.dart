@@ -17,14 +17,13 @@ class DiffPaneController {
 
   final SnapshotTaker snapshotTaker;
 
-  final _snapshots = ListValueNotifier(<DiffListItem>[InformationListItem()]);
-
   /// The list contains one item that show information and all others
   /// are snapshots.
   ValueListenable<List<DiffListItem>> get snapshots => _snapshots;
+  final _snapshots = ListValueNotifier(<DiffListItem>[InformationListItem()]);
 
-  final _selectedIndex = ValueNotifier<int>(0);
   ValueListenable<int> get selectedIndex => _selectedIndex;
+  final _selectedIndex = ValueNotifier<int>(0);
 
   /// If true, some process is going on.
   ValueListenable<bool> get isProcessing => _isProcessing;
