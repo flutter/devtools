@@ -258,7 +258,8 @@ class MemoryController extends DisposableController
     });
   }
 
-  late DiffPaneController diffPaneController;
+  /// The controller is late to enable test injection.
+  late final DiffPaneController diffPaneController;
 
   /// Controller for [AllocationProfileTableView].
   final allocationProfileController = AllocationProfileTableViewController();

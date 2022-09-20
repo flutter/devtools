@@ -39,6 +39,10 @@ mixin AutoDisposeMixin<T extends StatefulWidget> on State<T>
 
   void _refresh() => setState(() {});
 
+  /// Add a listener to a Listenable object that is automatically removed on
+  /// the object disposal or when cancel is called.
+  ///
+  /// If listener is not provided, setState will be invoked.
   @override
   void addAutoDisposeListener(
     Listenable? listenable, [

@@ -12,29 +12,24 @@ import 'widgets/snapshot_control_pane.dart';
 import 'widgets/snapshot_list.dart';
 import 'widgets/snapshot_view.dart';
 
-class DiffPane extends StatefulWidget {
+class DiffPane extends StatelessWidget {
   const DiffPane({Key? key, required this.controller}) : super(key: key);
 
   final DiffPaneController controller;
 
   @override
-  State<DiffPane> createState() => _DiffPaneState();
-}
-
-class _DiffPaneState extends State<DiffPane> {
-  @override
   Widget build(BuildContext context) {
     final Widget itemContent = ValueListenableBuilder<int>(
-      valueListenable: widget.controller.selectedIndex,
+      valueListenable: controller.selectedIndex,
       builder: (_, index, __) {
-        final item = widget.controller.selected;
+        final item = controller.selected;
 
         if (item is InformationListItem) {
           return const _SnapshotDoc();
         } else if (item is SnapshotListItem) {
           return _SnapshotContent(
             item: item,
-            controller: widget.controller,
+            controller: controller,
           );
         } else {
           throw Exception('Unexpected type of item: ${item.runtimeType}.');
@@ -48,7 +43,7 @@ class _DiffPaneState extends State<DiffPane> {
       minSizes: const [80, 80],
       children: [
         OutlineDecoration(
-          child: SnapshotList(controller: widget.controller),
+          child: SnapshotList(controller: controller),
         ),
         OutlineDecoration(
           child: itemContent,

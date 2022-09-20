@@ -83,8 +83,11 @@ class _ShallowSizeColumn extends ColumnData<HeapStatsRecord> {
   _ShallowSizeColumn()
       : super(
           'Shallow\n Dart Size',
-          titleTooltip: 'Total shallow Dart size (sum of all references '
-              "to the Dart object's fields) of objects.",
+          titleTooltip: 'Total shallow size of the instances.\n'
+              'Shallow size of an object is size of this object plus\n'
+              'the references it holds to other Dart objects in its fields\n'
+              '(this does not include the size of the fields\n'
+              ' - just the size of the references)',
           fixedWidthPx: scaleByFontFactor(85.0),
           alignment: ColumnAlignment.right,
         );
@@ -143,6 +146,7 @@ class _StatsTable extends StatefulWidget {
   }) : super(key: key);
 
   final HeapStatistics data;
+
   final ValueNotifier<HeapStatsRecord?> selectedRecord;
 
   final ColumnSorting sorting;

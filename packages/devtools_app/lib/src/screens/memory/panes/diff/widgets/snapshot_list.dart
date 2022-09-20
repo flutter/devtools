@@ -114,8 +114,7 @@ class _SnapshotListItems extends StatefulWidget {
 class _SnapshotListItemsState extends State<_SnapshotListItems>
     with AutoDisposeMixin {
   final _headerHeight = 1.20 * defaultRowHeight;
-  late ScrollController _scrollController;
-  late int _currentSnapshotsLength;
+  late final ScrollController _scrollController;
 
   @override
   void initState() {
@@ -126,45 +125,42 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    addAutoDisposeListener(widget.controller.selectedIndex, scrollIfLast);
+  }
 
-    _currentSnapshotsLength = widget.controller.snapshots.value.length;
+  Future<void> scrollIfLast() async {
+    final newLength = widget.controller.snapshots.value.length;
+    final newIndex = widget.controller.selectedIndex.value;
 
-    addAutoDisposeListener(widget.controller.snapshots);
-
-    addAutoDisposeListener(widget.controller.selectedIndex, () async {
-      setState(() {});
-
-      final newSnapshotsLength = widget.controller.snapshots.value.length;
-      if (newSnapshotsLength > _currentSnapshotsLength) {
-        _currentSnapshotsLength = newSnapshotsLength;
-        await _scrollController.autoScrollToBottom();
-        setState(() {});
-      }
-    });
+    if (newIndex == newLength - 1) await _scrollController.autoScrollToBottom();
   }
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      controller: _scrollController,
-      shrinkWrap: true,
-      itemCount: widget.controller.snapshots.value.length,
-      itemBuilder: (context, index) {
-        return Container(
-          height: _headerHeight,
-          color: widget.controller.selectedIndex.value == index
-              ? Theme.of(context).selectedRowColor
-              : null,
-          child: InkWell(
-            canRequestFocus: false,
-            onTap: () => widget.controller.selectedIndex.value = index,
-            child: _SnapshotListTitle(
-              item: widget.controller.snapshots.value[index],
-              selected: index == widget.controller.selectedIndex.value,
+    return DualValueListenableBuilder<List<DiffListItem>, int>(
+      firstListenable: widget.controller.snapshots,
+      secondListenable: widget.controller.selectedIndex,
+      builder: (_, snapshots, selectedIndex, __) => ListView.builder(
+        controller: _scrollController,
+        shrinkWrap: true,
+        itemCount: snapshots.length,
+        itemBuilder: (context, index) {
+          return Container(
+            height: _headerHeight,
+            color: selectedIndex == index
+                ? Theme.of(context).selectedRowColor
+                : null,
+            child: InkWell(
+              canRequestFocus: false,
+              onTap: () => widget.controller.select(index),
+              child: _SnapshotListTitle(
+                item: snapshots[index],
+                selected: index == selectedIndex,
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
