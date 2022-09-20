@@ -52,4 +52,7 @@ echo "UPDATE_PERFETTO: Cleaning up temporary directories"
 rm -rf _tmp
 rm -rf _perfetto
 
+# TODO(kenz): we should verify that every file name under dist/ is included in devtools_app/pubspec.yaml until
+# https://github.com/flutter/flutter/issues/112019 is resolved.
+
 popd
