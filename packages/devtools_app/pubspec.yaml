@@ -85,7 +85,7 @@ flutter:
     - icons/perf/
     # We have to explicitly list every asset under `packages/perfetto_compiled/`
     # since directory support is not available for assets under `packages/`.
-    # See (issue link)
+    # See (https://github.com/flutter/flutter/issues/112019).
     # TODO(kenz): investigate whether we really need all these assets for the trace viewer.
     - packages/perfetto_compiled/dist/devtools/devtools_dark.css
     - packages/perfetto_compiled/dist/devtools/devtools_light.css
