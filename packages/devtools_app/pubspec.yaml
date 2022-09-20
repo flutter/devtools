@@ -42,6 +42,8 @@ dependencies:
   js: ^0.6.1+1
   mime: ^1.0.0
   path: ^1.8.0
+  perfetto_compiled:
+    path: ../../third_party/packages/perfetto_compiled
   provider: ^6.0.2
   sse: ^4.0.0
   stack_trace: ^1.10.0
@@ -71,7 +73,6 @@ flutter:
     - assets/img/layout_explorer/cross_axis_alignment/
     - assets/img/layout_explorer/main_axis_alignment/
     - assets/img/legend/
-    - assets/perfetto/dist/
     - assets/scripts/inspector_polyfill_script.dart
     - icons/
     - icons/actions/
@@ -82,6 +83,7 @@ flutter:
     - icons/inspector/widget_icons/
     - icons/memory/
     - icons/perf/
+    - packages/perfetto_compiled/dist/
 
   fonts:
     - family: Roboto

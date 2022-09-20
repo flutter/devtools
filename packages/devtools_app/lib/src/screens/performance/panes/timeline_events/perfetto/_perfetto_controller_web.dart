@@ -55,8 +55,8 @@ class PerfettoController extends DisposableController
       return _debugPerfettoUrl;
     }
     final baseUrl = isExternalBuild
-        ? '${html.window.location.origin}/assets/perfetto/dist/index.html'
-        : 'ui.perfetto.dev';
+        ? '${html.window.location.origin}/packages/perfetto_compiled/dist/index.html'
+        : 'https://ui.perfetto.dev';
     return '$baseUrl$_embeddedModeQuery';
   }
 
@@ -88,10 +88,12 @@ class PerfettoController extends DisposableController
 
     html.window.addEventListener('message', _handleMessage);
 
-    _loadInitialStyle();
-    addAutoDisposeListener(preferences.darkModeTheme, () async {
-      _loadStyle(preferences.darkModeTheme.value);
-    });
+    if (isExternalBuild) {
+      _loadInitialStyle();
+      addAutoDisposeListener(preferences.darkModeTheme, () async {
+        _loadStyle(preferences.darkModeTheme.value);
+      });
+    }
   }
 
   Future<void> loadTrace(List<TraceEventWrapper> devToolsTraceEvents) async {
@@ -114,13 +116,15 @@ class PerfettoController extends DisposableController
   }
 
   Future<void> _loadInitialStyle() async {
+    if (!isExternalBuild) return;
     await _pingDevToolsThemeHandlerUntilReady();
     _loadStyle(preferences.darkModeTheme.value);
   }
 
   void _loadStyle(bool darkMode) {
+    if (!isExternalBuild) return;
     // This message will be handled by [devtools_theme_handler.js], which is
-    // included in the Perfetto build inside [assets/perfetto/dist].
+    // included in the Perfetto build inside [packages/perfetto_compiled/dist].
     _postMessageWithId(
       _devtoolsThemeChange,
       args: {
@@ -167,6 +171,7 @@ class PerfettoController extends DisposableController
   }
 
   Future<void> _pingDevToolsThemeHandlerUntilReady() async {
+    if (!isExternalBuild) return;
     while (!_devtoolsThemeHandlerReady.isCompleted) {
       await Future.delayed(const Duration(microseconds: 100), () async {
         // Once [devtools_theme_handler.js] is ready, it will receive this

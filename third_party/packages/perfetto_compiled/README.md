@@ -7,11 +7,14 @@ styling for the Perfetto UI. We embed this web app in an iFrame on the DevTools
 Performance page. This allows us to leverage the first-in-class trace viewer for
 viewing Dart and Flutter timeline traces.
 
-## Why is this included in `assets/`?
+## Why are we loading pre-compiled sources instead of the live Perfetto UI url?
 
-This build output is stored in our `assets/` directory for the following
+This build output is included with the DevTools app bundle so that we can load
+the Perfetto UI web app from source at runtime. We do this for the following
 reasons:
 * this allows us to include our custom theming .css and .js files in the build.
+These theming files enable a more dense interface that better fits our tooling,
+and they also enable a dark theme that we can switch to and from.
 * this allows us to load the Perfetto UI web app directly from assets, meaning
   we have zero latency and can support users with a slow or non-existent internet
   connection.

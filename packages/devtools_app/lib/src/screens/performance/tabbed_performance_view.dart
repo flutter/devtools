@@ -8,6 +8,7 @@ import '../../analytics/analytics.dart' as ga;
 import '../../analytics/constants.dart' as analytics_constants;
 import '../../charts/flame_chart.dart';
 import '../../primitives/auto_dispose_mixin.dart';
+import '../../primitives/feature_flags.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
 import '../../shared/theme.dart';
@@ -83,7 +84,7 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
 
     final isFlutterApp = serviceManager.connectedApp!.isFlutterAppNow!;
     final tabViews = [
-      embeddedPerfettoEnabled
+      FeatureFlags.embeddedPerfetto
           ? KeepAliveWrapper(
               child: EmbeddedPerfetto(
                 perfettoController: controller.perfettoController,
@@ -123,7 +124,7 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
         trailing: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            if (!embeddedPerfettoEnabled) ...[
+            if (!FeatureFlags.embeddedPerfetto) ...[
               _buildSearchField(searchFieldEnabled),
               const FlameChartHelpButton(
                 gaScreen: PerformanceScreen.id,
