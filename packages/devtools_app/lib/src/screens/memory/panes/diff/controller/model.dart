@@ -17,11 +17,17 @@ abstract class DiffListItem extends DisposableController {
 
   ValueListenable<bool> get isProcessing => _isProcessing;
   final _isProcessing = ValueNotifier<bool>(false);
+
+  /// If true, the item can be compared.
+  bool get isComparable;
 }
 
 class InformationListItem extends DiffListItem {
   @override
   int get displayNumber => 0;
+
+  @override
+  bool get isComparable => false;
 }
 
 class SnapshotListItem extends DiffListItem with AutoDisposeControllerMixin {
@@ -36,8 +42,6 @@ class SnapshotListItem extends DiffListItem with AutoDisposeControllerMixin {
       if (data != null) heap = AdaptedHeap(data);
       _isProcessing.value = false;
     });
-
-    addAutoDisposeListener(diffWith, _handleDiff);
   }
 
   final String _isolateName;
@@ -55,7 +59,8 @@ class SnapshotListItem extends DiffListItem with AutoDisposeControllerMixin {
 
   final diffWith = ValueNotifier<SnapshotListItem?>(null);
 
-  void _handleDiff() {}
+  @override
+  bool get isComparable => heap != null;
 }
 
 class ColumnSorting {

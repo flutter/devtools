@@ -18,28 +18,29 @@ class SnapshotControlPane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final current = controller.selected as SnapshotListItem;
-
     return ValueListenableBuilder<bool>(
       valueListenable: controller.isProcessing,
-      builder: (_, isProcessing, __) => Row(
-        children: [
-          const SizedBox(width: defaultSpacing),
-          if (current.heap != null) ...[
-            _DiffDropdown(
-              isProcessing: controller.isProcessing,
-              current: controller.selected as SnapshotListItem,
-              list: controller.snapshots,
-            ),
+      builder: (_, isProcessing, __) {
+        final current = controller.selected as SnapshotListItem;
+
+        return Row(
+          children: [
             const SizedBox(width: defaultSpacing),
+            if (!isProcessing && current.heap != null) ...[
+              _DiffDropdown(
+                current: current,
+                list: controller.snapshots,
+              ),
+              const SizedBox(width: defaultSpacing),
+            ],
+            ToolbarAction(
+              icon: Icons.clear,
+              tooltip: 'Delete snapshot',
+              onPressed: isProcessing ? null : controller.deleteCurrentSnapshot,
+            ),
           ],
-          ToolbarAction(
-            icon: Icons.clear,
-            tooltip: 'Delete snapshot',
-            onPressed: isProcessing ? null : controller.deleteCurrentSnapshot,
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -49,36 +50,28 @@ class _DiffDropdown extends StatelessWidget {
     Key? key,
     required this.list,
     required this.current,
-    required this.isProcessing,
   }) : super(key: key) {
     final diffWith = current.diffWith.value;
     // Check if diffWith was deleted from list.
-    if (diffWith != null &&
-        diffWith != current &&
-        !list.value.contains(diffWith)) {
+    if (diffWith != null && !list.value.contains(diffWith)) {
       current.diffWith.value = null;
     }
   }
 
   final ValueListenable<List<DiffListItem>> list;
   final SnapshotListItem current;
-  final ValueListenable<bool> isProcessing;
 
   List<DropdownMenuItem<SnapshotListItem>> items() => list.value
-      .where(
-        (item) =>
-            item is SnapshotListItem &&
-            !item.isProcessing.value &&
-            item.heap != null,
-      )
-      .cast<SnapshotListItem>()
-      .map(
-        (e) => DropdownMenuItem<SnapshotListItem>(
-          value: e,
-          child: Text(e == current ? '-' : e.name),
-        ),
-      )
-      .toList();
+          .where((item) => item.isComparable)
+          .cast<SnapshotListItem>()
+          .map(
+        (item) {
+          return DropdownMenuItem<SnapshotListItem>(
+            value: item,
+            child: Text(item == current ? '-' : item.name),
+          );
+        },
+      ).toList();
 
   @override
   Widget build(BuildContext context) {
@@ -93,7 +86,7 @@ class _DiffDropdown extends StatelessWidget {
             style: Theme.of(context).textTheme.bodyText2,
             value: current.diffWith.value ?? current,
             onChanged: (SnapshotListItem? value) {
-              if (value == current) {
+              if ((value ?? current) == current) {
                 current.diffWith.value = null;
               } else {
                 current.diffWith.value = value;
