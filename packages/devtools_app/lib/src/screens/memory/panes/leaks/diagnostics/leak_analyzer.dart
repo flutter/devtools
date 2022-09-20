@@ -30,7 +30,7 @@ NotGCedAnalyzed analyseNotGCed(NotGCedAnalyzerTask task) {
 
 /// Sets [retainingPath] to each [notGCedLeaks].
 void analyzeHeapAndSetRetainingPaths(
-  AdaptedHeap heap,
+  AdaptedHeapData heap,
   List<LeakReport> notGCedLeaks,
 ) {
   if (!heap.isSpanningTreeBuilt) buildSpanningTree(heap);
@@ -41,7 +41,7 @@ void analyzeHeapAndSetRetainingPaths(
 }
 
 /// Sets [detailedPath] to each leak.
-void setDetailedPaths(AdaptedHeap heap, List<LeakReport> notGCedLeaks) {
+void setDetailedPaths(AdaptedHeapData heap, List<LeakReport> notGCedLeaks) {
   assert(heap.isSpanningTreeBuilt);
 
   for (var l in notGCedLeaks) {

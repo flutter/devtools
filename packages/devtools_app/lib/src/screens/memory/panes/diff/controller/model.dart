@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../../../../primitives/auto_dispose.dart';
 import '../../../../../primitives/utils.dart';
-import '../../../shared/heap/heap_analysis.dart';
+import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
 
 abstract class DiffListItem extends DisposableController {
@@ -26,14 +26,14 @@ class InformationListItem extends DiffListItem {
 
 class SnapshotListItem extends DiffListItem with AutoDisposeControllerMixin {
   SnapshotListItem(
-    Future<AdaptedHeap?> receiver,
+    Future<AdaptedHeapData?> receiver,
     this.displayNumber,
     this._isolateName,
   ) {
     _isProcessing.value = true;
     receiver.whenComplete(() async {
-      final heap = await receiver;
-      if (heap != null) stats = heapStats(heap);
+      final data = await receiver;
+      if (data != null) heap = AdaptedHeap(data);
       _isProcessing.value = false;
     });
 
@@ -46,6 +46,8 @@ class SnapshotListItem extends DiffListItem with AutoDisposeControllerMixin {
   HeapStatistics? diff;
 
   final selectedRecord = ValueNotifier<HeapStatsRecord?>(null);
+
+  AdaptedHeap? heap;
 
   @override
   final int displayNumber;

@@ -23,7 +23,7 @@ class SnapshotView extends StatelessWidget {
       builder: (_, isProcessing, __) {
         if (isProcessing) return const SizedBox.shrink();
 
-        final stats = item.stats;
+        final stats = item.heap?.stats;
         if (stats == null) {
           return const Center(child: Text('Could not take snapshot.'));
         }
@@ -50,13 +50,13 @@ class _ClassNameColumn extends ColumnData<HeapStatsRecord> {
         );
 
   @override
-  String? getValue(HeapStatsRecord record) => record.className;
+  String? getValue(HeapStatsRecord record) => record.heapClass.className;
 
   @override
   bool get supportsSorting => true;
 
   @override
-  String getTooltip(HeapStatsRecord record) => record.fullClassName;
+  String getTooltip(HeapStatsRecord record) => record.heapClass.fullName;
 }
 
 class _InstanceColumn extends ColumnData<HeapStatsRecord> {
@@ -83,8 +83,11 @@ class _ShallowSizeColumn extends ColumnData<HeapStatsRecord> {
   _ShallowSizeColumn()
       : super(
           'Shallow\n Dart Size',
-          titleTooltip: 'Total shallow Dart size (sum of all references '
-              "to the Dart object's fields) of objects.",
+          titleTooltip: 'Total shallow size of the instances.\n'
+              'Shallow size of an object is size of this object plus\n'
+              'the references it holds to other Dart objects in its fields\n'
+              '(this does not include the size of the fields\n'
+              ' - just the size of the references)',
           fixedWidthPx: scaleByFontFactor(85.0),
           alignment: ColumnAlignment.right,
         );
@@ -143,7 +146,9 @@ class _StatsTable extends StatefulWidget {
   }) : super(key: key);
 
   final HeapStatistics data;
+
   final ValueNotifier<HeapStatsRecord?> selectedRecord;
+
   final ColumnSorting sorting;
 
   @override
@@ -179,7 +184,7 @@ class _StatsTableState extends State<_StatsTable> {
     return FlatTable<HeapStatsRecord>(
       columns: _columns,
       data: widget.data.list,
-      keyFactory: (e) => Key(e.fullClassName),
+      keyFactory: (e) => Key(e.heapClass.fullName),
       onItemSelected: (r) => widget.selectedRecord.value = r,
       selectionNotifier: widget.selectedRecord,
       sortColumn: _columns[widget.sorting.columnIndex],
