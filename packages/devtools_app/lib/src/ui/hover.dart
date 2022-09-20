@@ -112,6 +112,7 @@ class HoverCard {
     required Widget contents,
     required double width,
     required Offset position,
+    required HoverCardTooltipController hoverCardTooltipController,
     String? title,
     double? maxCardHeight,
   }) {
@@ -128,7 +129,7 @@ class HoverCard {
           top: position.dy,
           child: MouseRegion(
             onExit: (_) {
-              remove();
+              hoverCardTooltipController.removeHoverCard(this);
             },
             onEnter: (_) {
               _hasMouseEntered = true;
@@ -180,6 +181,7 @@ class HoverCard {
     required PointerHoverEvent event,
     required Widget contents,
     required double width,
+    required HoverCardTooltipController hoverCardTooltipController,
     String? title,
   }) : this(
           context: context,
@@ -190,6 +192,7 @@ class HoverCard {
             event.position.dy + _hoverYOffset,
           ),
           title: title,
+          hoverCardTooltipController: hoverCardTooltipController,
         );
 
   int? freshnessToken;
@@ -243,24 +246,28 @@ class HoverCardTooltipController {
   }
 
   /// If the mouse is outside of [_hoverCard] then then it will be removed.
-  void maybeRemoveHoverCard() {
-    final wasRemoved = _hoverCard?.maybeRemove();
-    if (wasRemoved == true) {
-      // Only one hovercard is ever shown on screen. So if the
-      // mouse has moved outside, then no other hovercards are meant to pop up
-      // any more. Invalidating the freshness token means all current hover
-      // cards, that are still generating data, will exit quietly once the data
-      // is available.
-      _invalidateFreshnessToken();
-      _hoverCard = null;
+  void maybeRemoveHoverCard(HoverCard hoverCard) {
+    if (hoverCard == _hoverCard) {
+      final wasRemoved = _hoverCard?.maybeRemove();
+      if (wasRemoved == true) {
+        // Only one hovercard is ever shown on screen. So if the
+        // mouse has moved outside, then no other hovercards are meant to pop up
+        // any more. Invalidating the freshness token means all current hover
+        // cards, that are still generating data, will exit quietly once the data
+        // is available.
+        _invalidateFreshnessToken();
+        _hoverCard = null;
+      }
     }
   }
 
   /// Remove the [HoverCard] being displayed, if there is one.
-  void removeHoverCard() {
-    _invalidateFreshnessToken();
-    _hoverCard?.remove();
-    _hoverCard = null;
+  void removeHoverCard(HoverCard card) {
+    if (_hoverCard == card) {
+      _invalidateFreshnessToken();
+      _hoverCard?.remove();
+      _hoverCard = null;
+    }
   }
 
   /// Create increment the freshness token and return the new value.
@@ -350,11 +357,21 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
   /// A timer that removes a [HoverCard] when completed.
   Timer? _removeTimer;
 
+  HoverCard? _currentHoverCard;
+
   void _onHoverExit() {
     _showTimer?.cancel();
     _removeTimer = Timer(HoverCardTooltip._hoverDelay, () {
-      widget.hoverCardTooltipController.maybeRemoveHoverCard();
+      if (_currentHoverCard != null) {
+        widget.hoverCardTooltipController
+            .maybeRemoveHoverCard(_currentHoverCard!);
+      }
     });
+  }
+
+  void _setHoverCard(HoverCard hoverCard) {
+    widget.hoverCardTooltipController.set(hoverCard: hoverCard);
+    _currentHoverCard = hoverCard;
   }
 
   void _onHover(PointerHoverEvent event) {
@@ -376,10 +393,11 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
           contents: const CenteredCircularProgressIndicator(),
           width: HoverCardTooltip.defaultHoverWidth,
           event: event,
+          hoverCardTooltipController: widget.hoverCardTooltipController,
         );
 
-        widget.hoverCardTooltipController.set(
-          hoverCard: spinnerHoverCard,
+        _setHoverCard(
+          spinnerHoverCard,
         );
 
         // The spinner is showing, we can now generate the HoverCardData
@@ -406,23 +424,25 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
         if (!mounted) return;
 
         if (hoverCardData.position == HoverCardPosition.cursor) {
-          widget.hoverCardTooltipController.set(
-            hoverCard: HoverCard.fromHoverEvent(
+          _setHoverCard(
+            HoverCard.fromHoverEvent(
               context: context,
               title: hoverCardData.title,
               contents: hoverCardData.contents,
               width: hoverCardData.width,
               event: event,
+              hoverCardTooltipController: widget.hoverCardTooltipController,
             ),
           );
         } else {
-          widget.hoverCardTooltipController.set(
-            hoverCard: HoverCard(
+          _setHoverCard(
+            HoverCard(
               context: context,
               title: hoverCardData.title,
               contents: hoverCardData.contents,
               width: hoverCardData.width,
               position: _calculateTooltipPosition(hoverCardData.width),
+              hoverCardTooltipController: widget.hoverCardTooltipController,
             ),
           );
         }
@@ -453,7 +473,6 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
   void dispose() {
     _showTimer?.cancel();
     _removeTimer?.cancel();
-    widget.hoverCardTooltipController.removeHoverCard();
     widget.disposable?.dispose();
     super.dispose();
   }

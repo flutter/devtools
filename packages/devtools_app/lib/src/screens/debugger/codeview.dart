@@ -853,6 +853,7 @@ class _LineItemState extends State<LineItem>
             width: LineItem._hoverWidth,
             title: word,
             context: context,
+            hoverCardTooltipController: controller.hoverCardTooltipController,
           );
         } catch (_) {
           // Silently fail and don't display a HoverCard.
