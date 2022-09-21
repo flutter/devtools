@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../../../../../primitives/auto_dispose_mixin.dart';
 import '../../../../../primitives/utils.dart';
 import '../../../../../shared/table.dart';
 import '../../../../../shared/table_data.dart';
@@ -126,7 +127,7 @@ class StatsTable extends StatefulWidget {
   State<StatsTable> createState() => _StatsTableState();
 }
 
-class _StatsTableState extends State<StatsTable> {
+class _StatsTableState extends State<StatsTable> with AutoDisposeMixin {
   late final List<ColumnData<HeapStatsRecord>> _columns;
 
   @override
