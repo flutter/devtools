@@ -20,6 +20,7 @@ import 'primitives/inspector_text_styles.dart' as inspector_text_styles;
 final _colorIconMaker = ColorIconMaker();
 final _customIconMaker = CustomIconMaker();
 final defaultIcon = _customIconMaker.fromInfo('Default');
+
 const _showRenderObjectPropertiesAsLinks = false;
 
 /// Presents the content of a single [RemoteDiagnosticsNode].
@@ -192,6 +193,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         required event,
         required isHoverStale,
       }) async {
+        await Future.delayed(const Duration(seconds: 5));
         final group = inspectorService.createObjectGroup('hover');
 
         if (isHoverStale()) return Future.value();

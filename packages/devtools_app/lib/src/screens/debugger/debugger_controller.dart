@@ -16,7 +16,6 @@ import '../../service/isolate_state.dart';
 import '../../service/vm_service_wrapper.dart';
 import '../../shared/globals.dart';
 import '../../shared/object_tree.dart';
-import '../../ui/hover.dart';
 import 'codeview_controller.dart';
 import 'debugger_model.dart';
 
