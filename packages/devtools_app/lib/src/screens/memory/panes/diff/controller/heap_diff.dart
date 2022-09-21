@@ -68,8 +68,8 @@ class HeapComparison {
   HeapStatistics _stats() {
     final result = <String, HeapStatsRecord>{};
 
-    final older = heapCouple.older.stats.map;
-    final younger = heapCouple.younger.stats.map;
+    final older = heapCouple.older.stats.recordsByClass;
+    final younger = heapCouple.younger.stats.recordsByClass;
 
     final unionOfKeys = older.keys.toSet().union(younger.keys.toSet());
 

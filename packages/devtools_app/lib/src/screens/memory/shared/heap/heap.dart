@@ -16,13 +16,16 @@ class AdaptedHeap {
 HeapStatistics _heapStatistics(AdaptedHeapData data) {
   final result = <String, HeapStatsRecord>{};
   if (!data.isSpanningTreeBuilt) buildSpanningTree(data);
-  for (var object in data.objects) {
-    // We do not show objects that will be garbage collected soon.
-    if (object.retainedSize == null || object.heapClass.isSentinel) continue;
 
-    final fullName = object.heapClass.fullName;
+  for (var object in data.objects) {
+    final heapClass = object.heapClass;
+
+    // We do not show objects that will be garbage collected soon.
+    if (object.retainedSize == null || heapClass.isSentinel) continue;
+
+    final fullName = heapClass.fullName;
     if (!result.containsKey(fullName)) {
-      result[fullName] = HeapStatsRecord(object.heapClass);
+      result[fullName] = HeapStatsRecord(heapClass);
     }
     final stats = result[fullName]!;
     stats.retainedSize += object.retainedSize ?? 0;

@@ -232,9 +232,10 @@ class HeapClass {
 }
 
 class HeapStatistics {
-  HeapStatistics(this.map);
+  HeapStatistics(this.recordsByClass);
 
   /// Maps full class name to stats record of this class.
-  final Map<String, HeapStatsRecord> map;
-  late final List<HeapStatsRecord> records = map.values.toList(growable: false);
+  final Map<String, HeapStatsRecord> recordsByClass;
+  late final List<HeapStatsRecord> records =
+      recordsByClass.values.toList(growable: false);
 }

@@ -18,6 +18,6 @@ class ClassDetails extends StatelessWidget {
         child: Text('Select class to see details here.'),
       );
     }
-    return const Text('Class details will be here');
+    return Center(child: Text('Details for ${theClass.fullName} will be here'));
   }
 }

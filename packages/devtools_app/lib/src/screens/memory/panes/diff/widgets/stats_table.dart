@@ -150,10 +150,13 @@ class _StatsTableState extends State<StatsTable> with AutoDisposeMixin {
     }
   }
 
-  @override void didChangeDependencies() {
+  @override
+  void didChangeDependencies() {
     super.didChangeDependencies();
-    addAutoDisposeListener(widget.controller.selectedClass, (){
-      _item.statsToShow.map
+    addAutoDisposeListener(widget.controller.selectedClass, () {
+      final record = _item
+          .statsToShow.recordsByClass[widget.controller.selectedClass.value];
+      _selectionNotifier.value = record;
     });
   }
 
