@@ -32,7 +32,12 @@ class DiffPaneController {
   ValueListenable<bool> get isProcessing => _isProcessing;
   final _isProcessing = ValueNotifier<bool>(false);
 
-  DiffListItem get selected => snapshots.value[selectedIndex.value];
+  DiffListItem get selectedItem => snapshots.value[selectedIndex.value];
+
+  /// Full name for the selected class.
+  ValueNotifier<String?> get selectedClass => _selectedClass;
+  final _selectedClass = ValueNotifier<String?>(null);
+  void setSelectedClass(String? value) => _selectedClass.value = value;
 
   /// True, if the list contains snapshots, i.e. items beyond the first
   /// informational item.
@@ -67,7 +72,7 @@ class DiffPaneController {
   }
 
   void deleteCurrentSnapshot() {
-    assert(selected is SnapshotListItem);
+    assert(selectedItem is SnapshotListItem);
     _snapshots.removeRange(selectedIndex.value, selectedIndex.value + 1);
     // We must change the selectedIndex, because otherwise the content will
     // not be re-rendered.

@@ -21,7 +21,7 @@ class SnapshotControlPane extends StatelessWidget {
     return ValueListenableBuilder<bool>(
       valueListenable: controller.isProcessing,
       builder: (_, isProcessing, __) {
-        final current = controller.selected as SnapshotListItem;
+        final current = controller.selectedItem as SnapshotListItem;
 
         return Row(
           children: [

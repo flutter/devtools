@@ -7,20 +7,19 @@ import 'package:flutter/material.dart';
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/split.dart';
 import '../../../shared/heap/model.dart';
-import '../controller/heap_diff.dart';
+import '../controller/diff_pane_controller.dart';
 import '../controller/model.dart';
 import 'class_details.dart';
 import 'stats_table.dart';
 
 class SnapshotView extends StatelessWidget {
-  const SnapshotView({Key? key, required this.item, required this.diffStore})
-      : super(key: key);
+  const SnapshotView({Key? key, required this.controller}) : super(key: key);
 
-  final SnapshotListItem item;
-  final HeapDiffStore diffStore;
+  final DiffPaneController controller;
 
   @override
   Widget build(BuildContext context) {
+    final item = controller.selectedItem as SnapshotListItem;
     return ValueListenableBuilder<bool>(
       valueListenable: item.isProcessing,
       builder: (_, isProcessing, __) {
@@ -32,7 +31,7 @@ class SnapshotView extends StatelessWidget {
         } else {
           final heap1 = item.heap!;
           final heap2 = item.diffWith.value!.heap!;
-          stats = diffStore.compare(heap1, heap2).stats;
+          stats = controller.diffStore.compare(heap1, heap2).stats;
         }
 
         if (stats == null) {
@@ -51,9 +50,7 @@ class SnapshotView extends StatelessWidget {
                   child: StatsTable(
                     // The key is passed to persist state.
                     key: ObjectKey(item),
-                    data: item.statsToShow,
-                    sorting: item.sorting,
-                    selectedRecord: item.selectedRecord,
+                    controller: controller,
                   ),
                 ),
                 const OutlineDecoration(

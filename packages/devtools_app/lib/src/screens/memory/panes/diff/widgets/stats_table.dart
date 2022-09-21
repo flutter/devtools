@@ -10,6 +10,7 @@ import '../../../../../shared/table.dart';
 import '../../../../../shared/table_data.dart';
 import '../../../../../shared/utils.dart';
 import '../../../shared/heap/model.dart';
+import '../controller/diff_pane_controller.dart';
 import '../controller/model.dart';
 
 class _ClassNameColumn extends ColumnData<HeapStatsRecord> {
@@ -112,16 +113,10 @@ class _RetainedSizeColumn extends ColumnData<HeapStatsRecord> {
 class StatsTable extends StatefulWidget {
   const StatsTable({
     Key? key,
-    required this.data,
-    required this.sorting,
-    required this.selectedRecord,
+    required this.controller,
   }) : super(key: key);
 
-  final HeapStatistics data;
-
-  final ValueNotifier<HeapStatsRecord?> selectedRecord;
-
-  final ColumnSorting sorting;
+  final DiffPaneController controller;
 
   @override
   State<StatsTable> createState() => _StatsTableState();
@@ -129,10 +124,14 @@ class StatsTable extends StatefulWidget {
 
 class _StatsTableState extends State<StatsTable> with AutoDisposeMixin {
   late final List<ColumnData<HeapStatsRecord>> _columns;
+  late final SnapshotListItem _item;
+  late final ValueNotifier<HeapStatsRecord?> _selectionNotifier;
 
   @override
   void initState() {
     super.initState();
+
+    _item = widget.controller.selectedItem as SnapshotListItem;
 
     final _shallowSizeColumn = _ShallowSizeColumn();
 
@@ -143,32 +142,40 @@ class _StatsTableState extends State<StatsTable> with AutoDisposeMixin {
       _RetainedSizeColumn(),
     ];
 
-    if (!widget.sorting.initialized) {
-      widget.sorting
+    if (!_item.sorting.initialized) {
+      _item.sorting
         ..direction = SortDirection.descending
         ..columnIndex = _columns.indexOf(_shallowSizeColumn)
         ..initialized = true;
     }
   }
 
+  @override void didChangeDependencies() {
+    super.didChangeDependencies();
+    addAutoDisposeListener(widget.controller.selectedClass, (){
+      _item.statsToShow.map
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return FlatTable<HeapStatsRecord>(
       columns: _columns,
-      data: widget.data.records,
+      data: _item.statsToShow.records,
       keyFactory: (e) => Key(e.heapClass.fullName),
-      onItemSelected: (r) => widget.selectedRecord.value = r,
-      selectionNotifier: widget.selectedRecord,
-      sortColumn: _columns[widget.sorting.columnIndex],
-      sortDirection: widget.sorting.direction,
+      onItemSelected: (r) =>
+          widget.controller.setSelectedClass(r.heapClass.fullName),
+      selectionNotifier: _selectionNotifier,
+      sortColumn: _columns[_item.sorting.columnIndex],
+      sortDirection: _item.sorting.direction,
       onSortChanged: (
         sortColumn,
         direction, {
         secondarySortColumn,
       }) =>
           setState(() {
-        widget.sorting.columnIndex = _columns.indexOf(sortColumn);
-        widget.sorting.direction = direction;
+        _item.sorting.columnIndex = _columns.indexOf(sortColumn);
+        _item.sorting.direction = direction;
       }),
     );
   }

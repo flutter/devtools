@@ -48,8 +48,6 @@ class SnapshotListItem extends DiffListItem with AutoDisposeControllerMixin {
 
   final String _isolateName;
 
-  final selectedRecord = ValueNotifier<HeapStatsRecord?>(null);
-
   final HeapDiffStore diffStore;
 
   AdaptedHeap? heap;
