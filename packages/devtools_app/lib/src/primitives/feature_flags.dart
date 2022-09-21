@@ -15,5 +15,5 @@ abstract class FeatureFlags {
   /// Flag to enable the embedded perfetto trace viewer.
   ///
   /// https://github.com/flutter/devtools/issues/4207.
-  static bool embeddedPerfetto = true;
+  static bool embeddedPerfetto = false;
 }
