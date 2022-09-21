@@ -261,7 +261,7 @@ class CpuProfileData {
       time: TimeRange()
         ..start = const Duration()
         ..end = Duration(
-          microseconds: microsPerSample.isInfinite
+          microseconds: microsPerSample.isInfinite || microsPerSample.isNaN
               ? 0
               : (filteredCpuSamples.length * microsPerSample).round(),
         ),
