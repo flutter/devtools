@@ -35,7 +35,7 @@ class _InstanceColumn extends ColumnData<HeapStatsRecord> {
   _InstanceColumn()
       : super(
           'Non GC-able\nInstances',
-          titleTooltip: 'Number of instances of the class, '
+          titleTooltip: 'Number of instances of the class '
               'that have a retaining path from the root.',
           fixedWidthPx: scaleByFontFactor(110.0),
           alignment: ColumnAlignment.right,
