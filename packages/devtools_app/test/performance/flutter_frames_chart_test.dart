@@ -149,6 +149,7 @@ void main() {
                 OverlayEntry(
                   builder: (context) {
                     return FlutterFramesChartItem(
+                      index: 0,
                       controller: createMockPerformanceControllerWithDefaults(),
                       frame: testFrame0,
                       selected: true,
