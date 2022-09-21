@@ -388,9 +388,8 @@ class FlutterFramesChartItem extends StatelessWidget {
             children: [
               content,
               Container(
-                padding: EdgeInsets.only(top: defaultChartHeight),
-                height: defaultChartHeight +
-                    _FlutterFramesChartState._frameNumberSectionHeight,
+                margin: EdgeInsets.only(top: defaultChartHeight),
+                height: _FlutterFramesChartState._frameNumberSectionHeight,
                 alignment: AlignmentDirectional.center,
                 child: Text(
                   '${frame.id}',
