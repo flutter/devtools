@@ -61,10 +61,8 @@ class _DiffDropdown extends StatelessWidget {
   final ValueListenable<List<DiffListItem>> list;
   final SnapshotListItem current;
 
-  List<DropdownMenuItem<SnapshotListItem>> items() => list.value
-          .where((item) => item.isComparable)
-          .cast<SnapshotListItem>()
-          .map(
+  List<DropdownMenuItem<SnapshotListItem>> items() =>
+      list.value.where((item) => item.hasData).cast<SnapshotListItem>().map(
         (item) {
           return DropdownMenuItem<SnapshotListItem>(
             value: item,

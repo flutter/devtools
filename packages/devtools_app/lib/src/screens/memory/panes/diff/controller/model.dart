@@ -19,8 +19,8 @@ abstract class DiffListItem extends DisposableController {
   ValueListenable<bool> get isProcessing => _isProcessing;
   final _isProcessing = ValueNotifier<bool>(false);
 
-  /// If true, the item can be compared.
-  bool get isComparable;
+  /// If true, the item contains data, that can be compared and analyzed.
+  bool get hasData;
 }
 
 class InformationListItem extends DiffListItem {
@@ -28,7 +28,7 @@ class InformationListItem extends DiffListItem {
   int get displayNumber => 0;
 
   @override
-  bool get isComparable => false;
+  bool get hasData => false;
 }
 
 class SnapshotListItem extends DiffListItem with AutoDisposeControllerMixin {
@@ -64,7 +64,7 @@ class SnapshotListItem extends DiffListItem with AutoDisposeControllerMixin {
   final diffWith = ValueNotifier<SnapshotListItem?>(null);
 
   @override
-  bool get isComparable => heap != null;
+  bool get hasData => heap != null;
 
   HeapStatistics get statsToShow {
     final theHeap = heap!;
