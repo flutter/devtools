@@ -763,14 +763,14 @@ final mockSyntaxHighlighter = SyntaxHighlighter.withGrammar(
   source: mockScript!.source,
 );
 
-const coverageHitLines = <int> {
+const coverageHitLines = <int>{
   1,
   3,
   4,
   7,
 };
 
-const coverageMissLines = <int> {
+const coverageMissLines = <int>{
   2,
   5,
 };
