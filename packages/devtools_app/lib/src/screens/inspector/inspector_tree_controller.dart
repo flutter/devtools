@@ -25,7 +25,6 @@ import '../../shared/globals.dart';
 import '../../shared/theme.dart';
 import '../../shared/utils.dart';
 import '../../ui/colors.dart';
-import '../../ui/hover.dart';
 import '../../ui/search.dart';
 import '../../ui/utils.dart';
 import '../debugger/debugger_controller.dart';
@@ -49,7 +48,6 @@ class _InspectorTreeRowWidget extends StatefulWidget {
     required this.scrollControllerX,
     required this.viewportWidth,
     required this.debuggerController,
-    required this.hoverCardTooltipController,
   }) : super(key: key);
 
   final _InspectorTreeState inspectorTreeState;
@@ -59,7 +57,6 @@ class _InspectorTreeRowWidget extends StatefulWidget {
   final DebuggerController debuggerController;
   final ScrollController scrollControllerX;
   final double viewportWidth;
-  final HoverCardTooltipController hoverCardTooltipController;
 
   /// A [DevToolsError] that applies to the widget in this row.
   ///
@@ -87,7 +84,6 @@ class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
           setExpanded(!isExpanded);
         },
         debuggerController: widget.debuggerController,
-        hoverCardTooltipController: widget.hoverCardTooltipController,
       ),
     );
   }
@@ -1052,8 +1048,6 @@ class _InspectorTreeState extends State<InspectorTree>
                                 ? widget.widgetErrors![inspectorRef]
                                 : null,
                             debuggerController: _debuggerController,
-                            hoverCardTooltipController:
-                                controller.hoverCardTooltipController,
                           );
                         },
                         childCount: treeControllerLocal.numRows + 1,
@@ -1177,7 +1171,6 @@ class InspectorRowContent extends StatelessWidget {
     required this.scrollControllerX,
     required this.viewportWidth,
     required this.debuggerController,
-    required this.hoverCardTooltipController,
   });
 
   final InspectorTreeRow row;
@@ -1187,7 +1180,6 @@ class InspectorRowContent extends StatelessWidget {
   final Animation<double> expandArrowAnimation;
   final ScrollController scrollControllerX;
   final double viewportWidth;
-  final HoverCardTooltipController hoverCardTooltipController;
 
   /// A [DevToolsError] that applies to the widget in this row.
   ///
@@ -1267,8 +1259,6 @@ class InspectorRowContent extends StatelessWidget {
                                   : row.isSelected
                                       ? theme.searchMatchHighlightStyleFocused
                                       : theme.searchMatchHighlightStyle,
-                          hoverCardTooltipController:
-                              hoverCardTooltipController,
                         ),
                       ),
                     ),

@@ -40,7 +40,6 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     this.style,
     required this.debuggerController,
     this.nodeDescriptionHighlightStyle,
-    required this.hoverCardTooltipController,
   });
 
   final RemoteDiagnosticsNode? diagnostic;
@@ -51,7 +50,6 @@ class DiagnosticsNodeDescription extends StatelessWidget {
   final TextStyle? style;
   final DebuggerController debuggerController;
   final TextStyle? nodeDescriptionHighlightStyle;
-  final HoverCardTooltipController hoverCardTooltipController;
 
   static Widget _paddedIcon(Widget icon) {
     return Padding(
@@ -225,7 +223,6 @@ class DiagnosticsNodeDescription extends StatelessWidget {
           ),
         );
       },
-      hoverCardTooltipController: hoverCardTooltipController,
       child: multiline
           ? SelectableText.rich(textSpan)
           : RichText(

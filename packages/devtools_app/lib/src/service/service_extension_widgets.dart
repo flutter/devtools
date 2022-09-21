@@ -34,9 +34,7 @@ class ServiceExtensionButtonGroup extends StatefulWidget {
   const ServiceExtensionButtonGroup({
     this.minScreenWidthForTextBeforeScaling,
     required this.extensions,
-    required this.hoverCardTooltipController,
   });
-  final HoverCardTooltipController hoverCardTooltipController;
 
   final double? minScreenWidthForTextBeforeScaling;
   final List<ToggleableServiceExtensionDescription> extensions;
@@ -133,7 +131,6 @@ class _ServiceExtensionButtonGroupState
 
     return ServiceExtensionTooltip(
       description: description,
-      hoverCardTooltipController: widget.hoverCardTooltipController,
       child: Container(
         height: defaultButtonHeight,
         padding: EdgeInsets.symmetric(
@@ -320,19 +317,12 @@ class _RegisteredServiceExtensionButtonState
 
 /// Control that toggles the value of [structuredErrors].
 class StructuredErrorsToggle extends StatelessWidget {
-  const StructuredErrorsToggle({
-    required this.hoverCardTooltipController,
-  });
-
-  final HoverCardTooltipController hoverCardTooltipController;
-
   @override
   Widget build(BuildContext context) {
     return _ServiceExtensionToggle(
       service: structuredErrors,
       describeError: (error) =>
           'Failed to update structuredError settings: $error',
-      hoverCardTooltipController: hoverCardTooltipController,
     );
   }
 }
@@ -345,14 +335,12 @@ class _ServiceExtensionToggle extends _ServiceExtensionWidget {
     Key? key,
     required this.service,
     required String Function(dynamic) describeError,
-    required this.hoverCardTooltipController,
   }) : super(
           key: key,
           // Don't show messages on success or when this toggle is in progress.
           completedText: null,
           describeError: describeError,
         );
-  final HoverCardTooltipController hoverCardTooltipController;
   final ToggleableServiceExtensionDescription service;
 
   @override
@@ -386,7 +374,6 @@ class _ServiceExtensionToggleState extends State<_ServiceExtensionToggle>
   Widget build(BuildContext context) {
     return ServiceExtensionTooltip(
       description: widget.service,
-      hoverCardTooltipController: widget.hoverCardTooltipController,
       child: InkWell(
         onTap: _onClick,
         child: Row(
@@ -883,10 +870,8 @@ class ServiceExtensionTooltip extends StatelessWidget {
     Key? key,
     required this.description,
     required this.child,
-    required this.hoverCardTooltipController,
   }) : super(key: key);
 
-  final HoverCardTooltipController hoverCardTooltipController;
   final ToggleableServiceExtensionDescription description;
   final Widget child;
 
@@ -895,7 +880,6 @@ class ServiceExtensionTooltip extends StatelessWidget {
     if (description.documentationUrl != null) {
       return ServiceExtensionRichTooltip(
         description: description,
-        hoverCardTooltipController: hoverCardTooltipController,
         child: child,
       );
     }
@@ -929,10 +913,7 @@ class ServiceExtensionRichTooltip extends StatelessWidget {
     Key? key,
     required this.description,
     required this.child,
-    required this.hoverCardTooltipController,
   }) : super(key: key);
-
-  final HoverCardTooltipController hoverCardTooltipController;
 
   final ToggleableServiceExtensionDescription description;
   final Widget child;
@@ -944,7 +925,6 @@ class ServiceExtensionRichTooltip extends StatelessWidget {
     return HoverCardTooltip.sync(
       enabled: () => true,
       generateHoverCardData: (_) => _buildCardData(context),
-      hoverCardTooltipController: hoverCardTooltipController,
       child: child,
     );
   }

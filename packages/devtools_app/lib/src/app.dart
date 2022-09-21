@@ -51,6 +51,7 @@ import 'shared/routing.dart';
 import 'shared/screen.dart';
 import 'shared/snapshot_screen.dart';
 import 'shared/theme.dart';
+import 'ui/hover.dart';
 
 // Assign to true to use a sample implementation of a conditional screen.
 // WARNING: Do not check in this file if debugEnableSampleScreen is true.
@@ -94,6 +95,9 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
 
   bool get denseModeEnabled => _denseModeEnabled;
   bool _denseModeEnabled = false;
+
+  final HoverCardTooltipController hoverCardTooltipController =
+      HoverCardTooltipController();
 
   late ReleaseNotesController releaseNotesController;
 
@@ -324,10 +328,13 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       builder: (context, child) {
         return Provider<AnalyticsController>.value(
           value: widget.analyticsController,
-          child: NotificationsView(
-            child: ReleaseNotesViewer(
-              releaseNotesController: releaseNotesController,
-              child: child,
+          child: Provider<HoverCardTooltipController>.value(
+            value: hoverCardTooltipController,
+            child: NotificationsView(
+              child: ReleaseNotesViewer(
+                releaseNotesController: releaseNotesController,
+                child: child,
+              ),
             ),
           ),
         );

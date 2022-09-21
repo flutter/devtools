@@ -8,6 +8,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../../config_specific/logger/logger.dart';
@@ -808,6 +809,8 @@ class _LineItemState extends State<LineItem>
   String _previousHoverWord = '';
   bool _hasMouseExited = false;
 
+  HoverCardTooltipController? _hoverCardTooltipController;
+
   void _onHoverExit() {
     _showTimer?.cancel();
     _hasMouseExited = true;
@@ -853,7 +856,7 @@ class _LineItemState extends State<LineItem>
             width: LineItem._hoverWidth,
             title: word,
             context: context,
-            hoverCardTooltipController: controller.hoverCardTooltipController,
+            hoverCardTooltipController: _hoverCardTooltipController!,
           );
         } catch (_) {
           // Silently fail and don't display a HoverCard.
@@ -880,7 +883,8 @@ class _LineItemState extends State<LineItem>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final darkTheme = theme.brightness == Brightness.dark;
-
+    _hoverCardTooltipController ??=
+        Provider.of<HoverCardTooltipController>(context);
     Widget child;
     final column = widget.pausedFrame?.column;
     if (column != null) {

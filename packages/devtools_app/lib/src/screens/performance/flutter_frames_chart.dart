@@ -369,7 +369,6 @@ class FlutterFramesChartItem extends StatelessWidget {
           FlutterFrameTooltip(
             frame: frame,
             hasShaderJank: hasShaderJank,
-            hoverCardTooltipController: controller.hoverCardTooltipController,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: densePadding),
               color: selected ? colorScheme.selectedFrameBackgroundColor : null,
@@ -432,7 +431,6 @@ class FlutterFrameTooltip extends StatelessWidget {
     required this.child,
     required this.frame,
     required this.hasShaderJank,
-    required this.hoverCardTooltipController,
   }) : super(key: key);
 
   final Widget child;
@@ -444,14 +442,12 @@ class FlutterFrameTooltip extends StatelessWidget {
   static const double _moreInfoLinkWidth = 85.0;
 
   static const _textMeasurementBuffer = 4.0;
-  final HoverCardTooltipController hoverCardTooltipController;
 
   @override
   Widget build(BuildContext context) {
     return HoverCardTooltip.sync(
       enabled: () => true,
       generateHoverCardData: (_) => _buildCardData(context),
-      hoverCardTooltipController: hoverCardTooltipController,
       child: child,
     );
   }

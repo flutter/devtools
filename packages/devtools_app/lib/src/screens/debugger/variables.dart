@@ -114,7 +114,6 @@ Widget displayProvider(
       multiline: true,
       style: theme.fixedFontStyle,
       debuggerController: controller,
-      hoverCardTooltipController: controller.hoverCardTooltipController,
     );
   }
   TextStyle variableDisplayStyle() {

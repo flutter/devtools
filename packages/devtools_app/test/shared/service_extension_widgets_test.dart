@@ -152,9 +152,7 @@ void main() {
               as FakeServiceExtensionManager)
           .fakeAddServiceExtension(structuredErrors.extension);
 
-      final button = StructuredErrorsToggle(
-        hoverCardTooltipController: HoverCardTooltipController(),
-      );
+      final button = StructuredErrorsToggle();
       await tester.pumpWidget(wrap(Scaffold(body: Center(child: button))));
       expect(find.byWidget(button), findsOneWidget);
       await tester.tap(find.byWidget(button));
@@ -173,9 +171,7 @@ void main() {
       await (mockServiceManager.serviceExtensionManager
               as FakeServiceExtensionManager)
           .fakeAddServiceExtension(structuredErrors.extension);
-      final button = StructuredErrorsToggle(
-        hoverCardTooltipController: HoverCardTooltipController(),
-      );
+      final button = StructuredErrorsToggle();
       await tester.pumpWidget(wrap(Scaffold(body: Center(child: button))));
       expect(find.byWidget(button), findsOneWidget);
 

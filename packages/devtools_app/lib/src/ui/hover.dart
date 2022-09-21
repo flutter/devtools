@@ -7,6 +7,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../devtools_app.dart';
 import '../shared/eval_on_dart_library.dart';
@@ -301,7 +302,6 @@ class HoverCardTooltip extends StatefulWidget {
     required this.asyncGenerateHoverCardData,
     required this.child,
     this.disposable,
-    required this.hoverCardTooltipController,
   }) : generateHoverCardData = null;
 
   /// A [HoverCardTooltip] that generates it's [HoverCardData] synchronously.
@@ -313,7 +313,6 @@ class HoverCardTooltip extends StatefulWidget {
     required this.generateHoverCardData,
     required this.child,
     this.disposable,
-    required this.hoverCardTooltipController,
   }) : asyncGenerateHoverCardData = null;
 
   static const _hoverDelay = Duration(milliseconds: 500);
@@ -344,8 +343,6 @@ class HoverCardTooltip extends StatefulWidget {
   /// Disposable object to be disposed when the group is closed.
   final Disposable? disposable;
 
-  final HoverCardTooltipController hoverCardTooltipController;
-
   @override
   _HoverCardTooltipState createState() => _HoverCardTooltipState();
 }
@@ -359,18 +356,18 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
 
   HoverCard? _currentHoverCard;
 
+  HoverCardTooltipController? _hoverCardTooltipController;
   void _onHoverExit() {
     _showTimer?.cancel();
     _removeTimer = Timer(HoverCardTooltip._hoverDelay, () {
       if (_currentHoverCard != null) {
-        widget.hoverCardTooltipController
-            .maybeRemoveHoverCard(_currentHoverCard!);
+        _hoverCardTooltipController!.maybeRemoveHoverCard(_currentHoverCard!);
       }
     });
   }
 
   void _setHoverCard(HoverCard hoverCard) {
-    widget.hoverCardTooltipController.set(hoverCard: hoverCard);
+    _hoverCardTooltipController!.set(hoverCard: hoverCard);
     _currentHoverCard = hoverCard;
   }
 
@@ -393,7 +390,7 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
           contents: const CenteredCircularProgressIndicator(),
           width: HoverCardTooltip.defaultHoverWidth,
           event: event,
-          hoverCardTooltipController: widget.hoverCardTooltipController,
+          hoverCardTooltipController: _hoverCardTooltipController!,
         );
 
         _setHoverCard(
@@ -403,11 +400,11 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
         // The spinner is showing, we can now generate the HoverCardData
         hoverCardData = await widget.asyncGenerateHoverCardData!(
           event: event,
-          isHoverStale: () => !widget.hoverCardTooltipController
+          isHoverStale: () => !_hoverCardTooltipController!
               .isHoverCardStillFresh(spinnerHoverCard),
         );
 
-        if (!widget.hoverCardTooltipController
+        if (!_hoverCardTooltipController!
             .isHoverCardStillFresh(spinnerHoverCard)) {
           // The hovercard became stale while fetching it's data. So it should
           // no longer be shown.
@@ -431,7 +428,7 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
               contents: hoverCardData.contents,
               width: hoverCardData.width,
               event: event,
-              hoverCardTooltipController: widget.hoverCardTooltipController,
+              hoverCardTooltipController: _hoverCardTooltipController!,
             ),
           );
         } else {
@@ -442,7 +439,7 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
               contents: hoverCardData.contents,
               width: hoverCardData.width,
               position: _calculateTooltipPosition(hoverCardData.width),
-              hoverCardTooltipController: widget.hoverCardTooltipController,
+              hoverCardTooltipController: _hoverCardTooltipController!,
             ),
           );
         }
@@ -473,12 +470,19 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
   void dispose() {
     _showTimer?.cancel();
     _removeTimer?.cancel();
+    if (_currentHoverCard != null) {
+      // If the widget that triggered the hovercard is disposed, then the
+      // HoverCard should be removed from the screen
+      _hoverCardTooltipController?.removeHoverCard(_currentHoverCard!);
+    }
     widget.disposable?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    _hoverCardTooltipController ??=
+        Provider.of<HoverCardTooltipController>(context);
     return MouseRegion(
       onExit: (_) => _onHoverExit(),
       onHover: _onHover,

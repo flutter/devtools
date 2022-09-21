@@ -43,8 +43,6 @@ class DebuggerController extends DisposableController
   final codeViewController = CodeViewController();
 
   bool _firstDebuggerScreenLoaded = false;
-  final HoverCardTooltipController hoverCardTooltipController =
-      HoverCardTooltipController();
 
   /// Callback to be called when the debugger screen is first loaded.
   ///

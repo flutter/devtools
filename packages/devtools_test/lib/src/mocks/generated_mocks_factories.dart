@@ -24,8 +24,6 @@ MockPerformanceController createMockPerformanceControllerWithDefaults() {
   when(controller.selectedFrame)
       .thenReturn(const FixedValueListenable<FlutterFrame?>(null));
   when(controller.displayRefreshRate).thenReturn(ValueNotifier<double>(60.0));
-  when(controller.hoverCardTooltipController)
-      .thenReturn(HoverCardTooltipController());
   return controller;
 }
 

@@ -27,7 +27,10 @@ Widget wrap(Widget widget) {
         child: Material(
           child: Directionality(
             textDirection: TextDirection.ltr,
-            child: widget,
+            child: Provider<HoverCardTooltipController>.value(
+              value: HoverCardTooltipController(),
+              child: widget,
+            ),
           ),
         ),
       ),
