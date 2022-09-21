@@ -5,10 +5,22 @@
 import 'package:flutter/foundation.dart';
 
 import '../../../shared/heap/heap.dart';
+import '../../../shared/heap/model.dart';
+
+/// Stores already calculated comparisons for heap couples.
+class HeapDiffStore {
+  final _store = <_HeapCouple, HeapComparison>{};
+
+  HeapComparison compare(AdaptedHeap heap1, AdaptedHeap heap2) {
+    final couple = _HeapCouple(heap1, heap2);
+    if (!_store.containsKey(couple)) _store[couple] = HeapComparison(couple);
+    return _store[couple]!;
+  }
+}
 
 @immutable
-class HeapCouple {
-  HeapCouple(AdaptedHeap heap1, AdaptedHeap heap2) {
+class _HeapCouple {
+  _HeapCouple(AdaptedHeap heap1, AdaptedHeap heap2) {
     older = _older(heap1, heap2);
     younger = older == heap1 ? heap2 : heap1;
   }
@@ -37,7 +49,7 @@ class HeapCouple {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is HeapCouple &&
+    return other is _HeapCouple &&
         other.older == older &&
         other.younger == younger;
   }
@@ -49,16 +61,40 @@ class HeapCouple {
 class HeapComparison {
   HeapComparison(this.heapCouple);
 
-  final HeapCouple heapCouple;
-}
+  late final HeapStatistics stats = _stats();
 
-/// Stores already calculated comparisons for heap couples.
-class HeapDiffStore {
-  final _store = <HeapCouple, HeapComparison>{};
+  final _HeapCouple heapCouple;
 
-  HeapComparison compare(AdaptedHeap heap1, AdaptedHeap heap2) {
-    final couple = HeapCouple(heap1, heap2);
-    if (!_store.containsKey(couple)) _store[couple] = HeapComparison(couple);
-    return _store[couple]!;
+  HeapStatistics _stats() {
+    final result = <String, HeapStatsRecord>{};
+
+    final older = heapCouple.older.stats.map;
+    final younger = heapCouple.younger.stats.map;
+
+    final unionOfKeys = older.keys.toSet().union(younger.keys.toSet());
+
+    for (var key in unionOfKeys) {
+      if (older.containsKey(key) && younger.containsKey(key)) {
+        final diff = _diffStatsRecords(older[key]!, younger[key]!);
+        if (!diff.isZero) result[key] = diff;
+      } else if (younger.containsKey(key)) {
+        result[key] = younger[key]!;
+      } else {
+        result[key] = older[key]!.negative();
+      }
+    }
+
+    return HeapStatistics(result);
+  }
+
+  static HeapStatsRecord _diffStatsRecords(
+    HeapStatsRecord older,
+    HeapStatsRecord younger,
+  ) {
+    assert(older.heapClass.fullName == younger.heapClass.fullName);
+    return HeapStatsRecord(older.heapClass)
+      ..instanceCount = younger.instanceCount - older.instanceCount
+      ..shallowSize = younger.shallowSize - older.shallowSize
+      ..retainedSize = younger.retainedSize - older.retainedSize;
   }
 }

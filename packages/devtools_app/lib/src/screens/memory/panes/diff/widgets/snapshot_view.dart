@@ -9,12 +9,15 @@ import '../../../../../shared/table.dart';
 import '../../../../../shared/table_data.dart';
 import '../../../../../shared/utils.dart';
 import '../../../shared/heap/model.dart';
+import '../controller/heap_diff.dart';
 import '../controller/model.dart';
 
 class SnapshotView extends StatelessWidget {
-  const SnapshotView({Key? key, required this.item}) : super(key: key);
+  const SnapshotView({Key? key, required this.item, required this.diffStore})
+      : super(key: key);
 
   final SnapshotListItem item;
+  final HeapDiffStore diffStore;
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +26,15 @@ class SnapshotView extends StatelessWidget {
       builder: (_, isProcessing, __) {
         if (isProcessing) return const SizedBox.shrink();
 
-        final stats = item.heap?.stats;
+        late HeapStatistics? stats;
+        if (item.diffWith.value == null) {
+          stats = item.heap?.stats;
+        } else {
+          final heap1 = item.heap!;
+          final heap2 = item.diffWith.value!.heap!;
+          stats = diffStore.compare(heap1, heap2).stats;
+        }
+
         if (stats == null) {
           return const Center(child: Text('Could not take snapshot.'));
         }

@@ -83,7 +83,7 @@ class _SnapshotContent extends StatelessWidget {
         SnapshotControlPane(controller: controller),
         const SizedBox(height: denseRowSpacing),
         Expanded(
-          child: SnapshotView(item: item),
+          child: SnapshotView(item: item, diffStore: controller.diffStore),
         ),
       ],
     );

@@ -175,15 +175,20 @@ class HeapStatsRecord {
   HeapStatsRecord(this.heapClass);
 
   final HeapClass heapClass;
+  int instanceCount = 0;
   int shallowSize = 0;
   int retainedSize = 0;
-  int instanceCount = 0;
 
-  // bool get isZero =>
-  //     shallowSize == 0 && retainedSize == 0 && instanceCount == 0;
+  HeapStatsRecord negative() => HeapStatsRecord(heapClass)
+    ..instanceCount = -instanceCount
+    ..shallowSize = -shallowSize
+    ..retainedSize = -retainedSize;
+
+  bool get isZero =>
+      shallowSize == 0 && retainedSize == 0 && instanceCount == 0;
 }
 
-/// This class is needed to make snapshot taking mockable.
+/// This class is needed to make the snapshot taking operation mockable.
 class SnapshotTaker {
   Future<AdaptedHeapData?> take() async {
     final snapshot = await snapshotMemory();
