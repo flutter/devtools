@@ -196,8 +196,6 @@ class HoverCard {
           hoverCardTooltipController: hoverCardTooltipController,
         );
 
-  int? freshnessToken;
-
   late OverlayEntry _overlayEntry;
 
   bool _isRemoved = false;
@@ -228,7 +226,7 @@ class HoverCard {
 /// Ensures that only one [HoverCard] is ever displayed at a time.
 class HoverCardTooltipController {
   /// The card that is currenty being displayed
-  HoverCard? _hoverCard;
+  HoverCard? _currentHoverCard;
 
   /// A new token is given to each [HoverCard].
   ///
@@ -241,50 +239,34 @@ class HoverCardTooltipController {
   /// This methods sets a unique [hoverCard.freshnessToken], as a way to track whether
   /// [hoverCard] is the most recently displayed [HoverCard].
   void set({required HoverCard hoverCard}) {
-    _hoverCard?.remove();
-    hoverCard.freshnessToken = _newFreshnessToken();
-    _hoverCard = hoverCard;
+    _currentHoverCard?.remove();
+    _currentHoverCard = hoverCard;
   }
 
-  /// If the mouse is outside of [_hoverCard] then then it will be removed.
+  /// If the mouse is outside of [_currentHoverCard] then then it will be removed.
   void maybeRemoveHoverCard(HoverCard hoverCard) {
-    if (hoverCard == _hoverCard) {
-      final wasRemoved = _hoverCard?.maybeRemove();
+    if (hoverCard == _currentHoverCard) {
+      final wasRemoved = _currentHoverCard?.maybeRemove();
       if (wasRemoved == true) {
-        // Only one hovercard is ever shown on screen. So if the
-        // mouse has moved outside, then no other hovercards are meant to pop up
-        // any more. Invalidating the freshness token means all current hover
-        // cards, that are still generating data, will exit quietly once the data
-        // is available.
-        _invalidateFreshnessToken();
-        _hoverCard = null;
+        _currentHoverCard = null;
       }
     }
   }
 
   /// Remove the [HoverCard] being displayed, if there is one.
   void removeHoverCard(HoverCard card) {
-    if (_hoverCard == card) {
-      _invalidateFreshnessToken();
-      _hoverCard?.remove();
-      _hoverCard = null;
+    if (_currentHoverCard == card) {
+      _currentHoverCard?.remove();
+      _currentHoverCard = null;
     }
   }
 
-  /// Create increment the freshness token and return the new value.
-  int _newFreshnessToken() {
-    return ++_freshnessToken;
-  }
-
   /// Helper for incrementing the freshness token.
-  void _invalidateFreshnessToken() {
-    _newFreshnessToken();
-  }
 
   /// Check's that a [hoverCard.freshnessToken] is the same as the active
   /// freshness token.
   bool isHoverCardStillFresh(HoverCard hoverCard) {
-    return hoverCard.freshnessToken == _freshnessToken;
+    return _currentHoverCard == hoverCard;
   }
 }
 
