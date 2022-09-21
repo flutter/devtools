@@ -228,12 +228,6 @@ class HoverCardTooltipController {
   /// The card that is currenty being displayed
   HoverCard? _currentHoverCard;
 
-  /// A new token is given to each [HoverCard].
-  ///
-  /// If [_freshnessToken] matches the [HoverCard.freshnessToken] then it is the
-  /// most recently displayed [HoverCard].
-  int _freshnessToken = 0;
-
   /// Sets [hoverCard] as the most recently displayed [HoverCard].
   ///
   /// This methods sets a unique [hoverCard.freshnessToken], as a way to track whether
