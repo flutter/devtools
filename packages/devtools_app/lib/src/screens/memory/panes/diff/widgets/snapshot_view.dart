@@ -4,9 +4,12 @@
 
 import 'package:flutter/material.dart';
 
+import '../../../../../shared/common_widgets.dart';
+import '../../../../../shared/split.dart';
 import '../../../shared/heap/model.dart';
 import '../controller/heap_diff.dart';
 import '../controller/model.dart';
+import 'class_details.dart';
 import 'stats_table.dart';
 
 class SnapshotView extends StatelessWidget {
@@ -39,12 +42,24 @@ class SnapshotView extends StatelessWidget {
         return ValueListenableBuilder<SnapshotListItem?>(
           valueListenable: item.diffWith,
           builder: (_, diffWith, __) {
-            return StatsTable(
-              // The key is passed to persist state.
-              key: ObjectKey(item),
-              data: item.statsToShow,
-              sorting: item.sorting,
-              selectedRecord: item.selectedRecord,
+            return Split(
+              axis: Axis.horizontal,
+              initialFractions: const [0.5, 0.5],
+              minSizes: const [80, 80],
+              children: [
+                OutlineDecoration(
+                  child: StatsTable(
+                    // The key is passed to persist state.
+                    key: ObjectKey(item),
+                    data: item.statsToShow,
+                    sorting: item.sorting,
+                    selectedRecord: item.selectedRecord,
+                  ),
+                ),
+                const OutlineDecoration(
+                  child: ClassDetails(heapClass: null),
+                ),
+              ],
             );
           },
         );
