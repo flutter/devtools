@@ -1199,10 +1199,10 @@ void main() {
       final TableRow snapRow = tester.widget(snapFinder);
       TableRow crackleRow = tester.widget(crackleFinder);
 
-      expect(fooRow.backgroundColor!.value, equals(color2Value));
-      expect(barRow.backgroundColor!.value, equals(color1Value));
-      expect(bazRow.backgroundColor!.value, equals(color2Value));
-      expect(quxRow.backgroundColor!.value, equals(color1Value));
+      expect(fooRow.backgroundColor!.value, equals(color1Value));
+      expect(barRow.backgroundColor!.value, equals(color2Value));
+      expect(bazRow.backgroundColor!.value, equals(color1Value));
+      expect(quxRow.backgroundColor!.value, equals(color2Value));
       expect(snapRow.backgroundColor!.value, equals(color1Value));
       expect(crackleRow.backgroundColor!.value, equals(color2Value));
 
@@ -1218,12 +1218,12 @@ void main() {
       barRow = tester.widget(barFinder);
       crackleRow = tester.widget(crackleFinder);
 
-      expect(fooRow.backgroundColor!.value, equals(color2Value));
+      expect(fooRow.backgroundColor!.value, equals(color1Value));
       // [barRow] has the rowSelected color after being tapped.
       expect(barRow.backgroundColor!.value, equals(rowSelectedColorValue));
       // [crackleRow] has a different background color after collapsing previous
       // row (Bar).
-      expect(crackleRow.backgroundColor!.value, equals(color2Value));
+      expect(crackleRow.backgroundColor!.value, equals(color1Value));
     });
 
     test('fails when TreeColumn is not in column list', () {
