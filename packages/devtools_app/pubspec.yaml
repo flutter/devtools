@@ -43,6 +43,8 @@ dependencies:
   mime: ^1.0.0
   path: ^1.8.0
   provider: ^6.0.2
+  # Only used for debug mode logic.
+  shared_preferences: ^2.0.15
   sse: ^4.0.0
   stack_trace: ^1.10.0
   string_scanner: ^1.1.0
