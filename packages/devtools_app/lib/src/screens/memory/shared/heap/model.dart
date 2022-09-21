@@ -236,5 +236,5 @@ class HeapStatistics {
 
   /// Maps full class name to stats record of this class.
   final Map<String, HeapStatsRecord> map;
-  late final List<HeapStatsRecord> list = map.values.toList(growable: false);
+  late final List<HeapStatsRecord> records = map.values.toList(growable: false);
 }

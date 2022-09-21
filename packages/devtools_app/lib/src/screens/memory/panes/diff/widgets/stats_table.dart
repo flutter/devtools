@@ -155,7 +155,7 @@ class _StatsTableState extends State<StatsTable> with AutoDisposeMixin {
   Widget build(BuildContext context) {
     return FlatTable<HeapStatsRecord>(
       columns: _columns,
-      data: widget.data.list,
+      data: widget.data.records,
       keyFactory: (e) => Key(e.heapClass.fullName),
       onItemSelected: (r) => widget.selectedRecord.value = r,
       selectionNotifier: widget.selectedRecord,

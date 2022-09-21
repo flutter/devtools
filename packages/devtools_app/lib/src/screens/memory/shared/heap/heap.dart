@@ -20,10 +20,11 @@ HeapStatistics _heapStatistics(AdaptedHeapData data) {
     // We do not show objects that will be garbage collected soon.
     if (object.retainedSize == null || object.heapClass.isSentinel) continue;
 
-    if (!result.containsKey(object.heapClass.fullName)) {
-      result[object.heapClass.fullName] = HeapStatsRecord(object.heapClass);
+    final fullName = object.heapClass.fullName;
+    if (!result.containsKey(fullName)) {
+      result[fullName] = HeapStatsRecord(object.heapClass);
     }
-    final stats = result[object.heapClass.fullName]!;
+    final stats = result[fullName]!;
     stats.retainedSize += object.retainedSize ?? 0;
     stats.shallowSize += object.shallowSize;
     stats.instanceCount++;
