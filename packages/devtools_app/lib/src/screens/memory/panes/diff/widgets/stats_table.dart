@@ -125,7 +125,7 @@ class StatsTable extends StatefulWidget {
 class _StatsTableState extends State<StatsTable> with AutoDisposeMixin {
   late final List<ColumnData<HeapStatsRecord>> _columns;
   late final SnapshotListItem _item;
-  late final ValueNotifier<HeapStatsRecord?> _selectionNotifier;
+  final _selectionNotifier = ValueNotifier<HeapStatsRecord?>(null);
 
   @override
   void initState() {
@@ -150,14 +150,18 @@ class _StatsTableState extends State<StatsTable> with AutoDisposeMixin {
     }
   }
 
+  HeapStatsRecord? get _selectedRecord =>
+      _item.statsToShow.recordsByClass[widget.controller.selectedClass.value];
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    addAutoDisposeListener(widget.controller.selectedClass, () {
-      final record = _item
-          .statsToShow.recordsByClass[widget.controller.selectedClass.value];
-      _selectionNotifier.value = record;
-    });
+
+    _selectionNotifier.value = _selectedRecord;
+    addAutoDisposeListener(
+      widget.controller.selectedClass,
+      () => _selectionNotifier.value = _selectedRecord,
+    );
   }
 
   @override
