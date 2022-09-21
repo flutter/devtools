@@ -19,13 +19,15 @@ void main() {
           code: 2,
         )
       ],
-      heap: AdaptedHeap(
+      heap: AdaptedHeapData(
         [
           AdaptedHeapObject(
-            className: 'class',
+            heapClass: HeapClass(
+              className: 'class',
+              library: 'library',
+            ),
             references: [2, 3, 4],
             code: 6,
-            library: 'library',
             shallowSize: 1,
           ),
         ],
@@ -39,22 +41,5 @@ void main() {
       jsonEncode(json),
       jsonEncode(NotGCedAnalyzerTask.fromJson(json).toJson()),
     );
-  });
-
-  test('$AdaptedHeap serializes.', () {
-    final json = AdaptedHeap(
-      [
-        AdaptedHeapObject(
-          code: 1,
-          references: [3, 4, 5],
-          className: 'klass',
-          library: 'library',
-          shallowSize: 1,
-        )
-      ],
-      rootIndex: 0,
-    ).toJson();
-
-    expect(json, AdaptedHeap.fromJson(json).toJson());
   });
 }

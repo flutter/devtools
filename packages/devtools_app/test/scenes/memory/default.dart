@@ -87,7 +87,7 @@ class _TestSnapshotTaker implements SnapshotTaker {
   int index = -1;
 
   @override
-  Future<AdaptedHeap?> take() async {
+  Future<AdaptedHeapData?> take() async {
     // This delay is needed for UI to start showing the progress indicator.
     await Future.delayed(const Duration(milliseconds: 100));
 
@@ -106,13 +106,13 @@ class _TestSnapshotTaker implements SnapshotTaker {
   }
 }
 
-final _simpleHeapTests = <AdaptedHeap>[
+final _simpleHeapTests = <AdaptedHeapData>[
   _createHeap({'A': 1, 'B': 2}),
   _createHeap({'B': 1, 'C': 2, 'D': 3}),
   _createHeap({'B': 1, 'C': 2, 'D': 3}),
 ];
 
-AdaptedHeap _createHeap(Map<String, int> classToInstance) {
+AdaptedHeapData _createHeap(Map<String, int> classToInstance) {
   const rootIndex = 0;
   final objects = <AdaptedHeapObject>[_createObject('root')];
   var leafCount = 0;
@@ -131,13 +131,15 @@ AdaptedHeap _createHeap(Map<String, int> classToInstance) {
     objects[rootIndex].references.add(i + 1);
   }
 
-  return AdaptedHeap(objects, rootIndex: rootIndex);
+  return AdaptedHeapData(objects, rootIndex: rootIndex);
 }
 
 AdaptedHeapObject _createObject(String className) => AdaptedHeapObject(
       code: 0,
       references: [],
-      className: className,
-      library: 'my_lib',
+      heapClass: HeapClass(
+        className: className,
+        library: 'my_lib',
+      ),
       shallowSize: 80, // 10 bytes
     );

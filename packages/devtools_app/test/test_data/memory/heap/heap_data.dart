@@ -11,7 +11,7 @@ import '../leaks/leaks_data.dart';
 
 const _dataDir = 'test/test_data/memory/heap/';
 
-typedef HeapLoader = Future<AdaptedHeap> Function();
+typedef HeapLoader = Future<AdaptedHeapData> Function();
 
 class GoldenHeapTest {
   GoldenHeapTest({
@@ -26,7 +26,7 @@ class GoldenHeapTest {
 
   static HeapLoader _loaderFromFile(String fileName) => () async {
         final json = jsonDecode(await File(fileName).readAsString());
-        return AdaptedHeap.fromJson(json);
+        return AdaptedHeapData.fromJson(json);
       };
 }
 
