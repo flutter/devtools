@@ -8,6 +8,7 @@ import '../../../../../primitives/auto_dispose.dart';
 import '../../../../../primitives/utils.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
+import 'heap_diff.dart';
 
 abstract class DiffListItem extends DisposableController {
   /// Number, that, if shown in name, should be unique in the list.
@@ -35,6 +36,7 @@ class SnapshotListItem extends DiffListItem with AutoDisposeControllerMixin {
     Future<AdaptedHeapData?> receiver,
     this.displayNumber,
     this._isolateName,
+    this.diffStore,
   ) {
     _isProcessing.value = true;
     receiver.whenComplete(() async {
@@ -47,6 +49,8 @@ class SnapshotListItem extends DiffListItem with AutoDisposeControllerMixin {
   final String _isolateName;
 
   final selectedRecord = ValueNotifier<HeapStatsRecord?>(null);
+
+  final HeapDiffStore diffStore;
 
   AdaptedHeap? heap;
 
@@ -61,6 +65,13 @@ class SnapshotListItem extends DiffListItem with AutoDisposeControllerMixin {
 
   @override
   bool get isComparable => heap != null;
+
+  HeapStatistics get statsToShow {
+    final theHeap = heap!;
+    final itemToDiffWith = diffWith.value;
+    if (itemToDiffWith == null) return theHeap.stats;
+    return diffStore.compare(theHeap, itemToDiffWith.heap!).stats;
+  }
 }
 
 class ColumnSorting {

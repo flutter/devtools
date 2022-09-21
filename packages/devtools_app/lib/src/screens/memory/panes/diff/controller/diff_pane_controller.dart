@@ -46,6 +46,7 @@ class DiffPaneController {
         future,
         _nextDisplayNumber(),
         currentIsolateName ?? '<isolate-not-detected>',
+        diffStore,
       ),
     );
     await future;

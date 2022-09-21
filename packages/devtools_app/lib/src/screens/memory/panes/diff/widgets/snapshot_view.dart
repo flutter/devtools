@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../../../../../primitives/auto_dispose_mixin.dart';
 import '../../../../../primitives/utils.dart';
 import '../../../../../shared/table.dart';
 import '../../../../../shared/table_data.dart';
@@ -39,12 +40,17 @@ class SnapshotView extends StatelessWidget {
           return const Center(child: Text('Could not take snapshot.'));
         }
 
-        return _StatsTable(
-          // The key is passed to persist state.
-          key: ObjectKey(item),
-          data: stats,
-          sorting: item.sorting,
-          selectedRecord: item.selectedRecord,
+        return ValueListenableBuilder<SnapshotListItem?>(
+          valueListenable: item.diffWith,
+          builder: (_, diffWith, __) {
+            return _StatsTable(
+              // The key is passed to persist state.
+              key: ObjectKey(item),
+              data: item.statsToShow,
+              sorting: item.sorting,
+              selectedRecord: item.selectedRecord,
+            );
+          },
         );
       },
     );
@@ -166,7 +172,7 @@ class _StatsTable extends StatefulWidget {
   State<_StatsTable> createState() => _StatsTableState();
 }
 
-class _StatsTableState extends State<_StatsTable> {
+class _StatsTableState extends State<_StatsTable> with AutoDisposeMixin {
   late final List<ColumnData<HeapStatsRecord>> _columns;
 
   @override
