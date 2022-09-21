@@ -193,7 +193,6 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         required event,
         required isHoverStale,
       }) async {
-        await Future.delayed(const Duration(seconds: 5));
         final group = inspectorService.createObjectGroup('hover');
 
         if (isHoverStale()) return Future.value();
