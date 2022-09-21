@@ -38,9 +38,9 @@ class BannerMessagesController {
   }
 
   void removeMessage(BannerMessage message, {bool dismiss = false}) {
-      if (dismiss) {
-        _dismissedMessageKeys.add(message.key);
-      }
+    if (dismiss) {
+      _dismissedMessageKeys.add(message.key);
+    }
     // We push the banner message in a post frame callback because otherwise,
     // we'd be trying to call setState while the parent widget `BannerMessages`
     // is in the middle of `build`.
