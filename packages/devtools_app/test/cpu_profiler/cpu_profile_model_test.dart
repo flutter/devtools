@@ -27,6 +27,19 @@ void main() {
         ),
       );
     });
+
+    test('empty frame regression test', () {
+      final cpuProfileEmtpyData =
+          CpuProfileData.parse(cpuProfileResponseEmptyJson);
+      expect(
+        cpuProfileEmtpyData.profileMetaData.time!.end!.inMilliseconds,
+        47377796,
+      );
+      final filtered =
+          CpuProfileData.filterFrom(cpuProfileEmtpyData, (_) => true);
+      expect(filtered.profileMetaData.time!.end!.inMilliseconds, 0);
+    });
+
     test('init from parse', () {
       expect(
         cpuProfileData.stackFramesJson,
