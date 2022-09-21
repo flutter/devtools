@@ -49,6 +49,48 @@ void main() {
       );
     });
 
+    testWidgets('copy request body', (tester) async {
+      final requestsNotifier = controller.requests;
+
+      await controller.startRecording();
+
+      await tester.pumpWidget(
+        wrapWithControllers(
+          NetworkRequestInspector(controller),
+          debugger: createMockDebuggerControllerWithDefaults(),
+        ),
+      );
+
+      // Load the network request.
+      await controller.networkService.refreshNetworkData();
+      expect(requestsNotifier.value.requests.length, equals(1));
+
+      // Select the request in the network request list.
+      final networkRequest = requestsNotifier.value.requests.first;
+      controller.selectRequest(networkRequest);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Request'));
+      await tester.pumpAndSettle();
+
+      // Tap the requestBody copy button.
+      expect(_clipboardContents, isEmpty);
+      await tester.tap(find.byType(CopyToClipboardControl));
+      final expectedResponseBody =
+          jsonDecode(utf8.decode(httpRequest!.requestBody!.toList()));
+
+      // Check that the contents were copied to clipboard.
+      expect(_clipboardContents, isNotEmpty);
+      expect(
+        jsonDecode(_clipboardContents),
+        equals(expectedResponseBody),
+      );
+
+      controller.stopRecording();
+
+      // pumpAndSettle so residual http timers can clear.
+      await tester.pumpAndSettle(const Duration(seconds: 1));
+    });
+
     testWidgets('copy response body', (tester) async {
       final requestsNotifier = controller.requests;
 
@@ -76,7 +118,7 @@ void main() {
       expect(_clipboardContents, isEmpty);
       await tester.tap(find.byType(CopyToClipboardControl));
       final expectedResponseBody =
-          jsonDecode(utf8.decode(httpRequest!.responseBody!.toList()));
+      jsonDecode(utf8.decode(httpRequest!.responseBody!.toList()));
 
       // Check that the contents were copied to clipboard.
       expect(_clipboardContents, isNotEmpty);

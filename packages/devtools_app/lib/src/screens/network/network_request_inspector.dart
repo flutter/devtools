@@ -55,7 +55,17 @@ class NetworkRequestInspector extends StatelessWidget {
           if (data is DartIOHttpRequestData) ...[
             _buildTab(tabName: NetworkRequestInspector._headersTabTitle),
             if (data.requestBody != null)
-              _buildTab(tabName: NetworkRequestInspector._requestTabTitle),
+              _buildTab(
+                tabName: NetworkRequestInspector._requestTabTitle,
+                trailing: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    CopyToClipboardControl(
+                      dataProvider: () => data.requestBody,
+                    )
+                  ],
+                ),
+              ),
             if (data.responseBody != null)
               _buildTab(
                 tabName: NetworkRequestInspector._responseTabTitle,
