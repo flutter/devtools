@@ -46,16 +46,19 @@ class HeapStatistics {
 
 class HeapStatsRecord {
   HeapStatsRecord(this.heapClass)
-      : total = SizeOfSet(),
+      : _isSealed = false,
+        total = SizeOfSet(),
         byRetainingPath = <String, SizeOfSet>{};
 
   HeapStatsRecord.negative(HeapStatsRecord other)
-      : heapClass = other.heapClass,
+      : _isSealed = true,
+        heapClass = other.heapClass,
         total = SizeOfSet.negative(other.total),
         byRetainingPath = <String, SizeOfSet>{}; // ???
 
-  HeapStatsRecord.subtruct(HeapStatsRecord left, HeapStatsRecord right)
+  HeapStatsRecord.subtract(HeapStatsRecord left, HeapStatsRecord right)
       : assert(left.heapClass.fullName == right.heapClass.fullName),
+        _isSealed = true,
         heapClass = left.heapClass,
         total = SizeOfSet.subtract(left.total, right.total),
         byRetainingPath = <String, SizeOfSet>{}; // ???
@@ -65,6 +68,7 @@ class HeapStatsRecord {
   final Map<String, SizeOfSet> byRetainingPath;
 
   void countInstance(AdaptedHeapData data, int onbjectIndex) {
+    assert(!_isSealed);
     // ???
     final object = data.objects[onbjectIndex];
     assert(object.heapClass.fullName == heapClass.fullName);
@@ -73,19 +77,31 @@ class HeapStatsRecord {
   }
 
   bool get isZero => total.isZero;
+
+  /// Mark the object as immutable.
+  ///
+  /// There is no strong protection from mutation, just some asserts.
+  void seal() {
+    _isSealed = true;
+    total.seal();
+  }
+
+  bool _isSealed;
 }
 
 /// Size of set of instances.
 class SizeOfSet {
-  SizeOfSet();
+  SizeOfSet() : _isSealed = false;
 
   SizeOfSet.negative(SizeOfSet other)
-      : instanceCount = -other.instanceCount,
+      : _isSealed = true,
+        instanceCount = -other.instanceCount,
         shallowSize = -other.shallowSize,
         retainedSize = -other.retainedSize;
 
   SizeOfSet.subtract(SizeOfSet left, SizeOfSet right)
-      : instanceCount = left.instanceCount - right.instanceCount,
+      : _isSealed = true,
+        instanceCount = left.instanceCount - right.instanceCount,
         shallowSize = left.shallowSize - right.shallowSize,
         retainedSize = left.retainedSize - right.retainedSize;
 
@@ -97,8 +113,16 @@ class SizeOfSet {
       shallowSize == 0 && retainedSize == 0 && instanceCount == 0;
 
   void countInstance(AdaptedHeapObject object) {
+    assert(!_isSealed);
     retainedSize += object.retainedSize!;
     shallowSize += object.shallowSize;
     instanceCount++;
   }
+
+  /// Mark the object as immutable.
+  ///
+  /// There is no strong protection from mutation, just some asserts.
+  void seal() => _isSealed = true;
+
+  bool _isSealed;
 }

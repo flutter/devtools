@@ -76,7 +76,7 @@ class HeapComparison {
       final youngerRecord = younger[key];
 
       if (olderRecord != null && youngerRecord != null) {
-        final diff = HeapStatsRecord.subtruct(olderRecord, youngerRecord);
+        final diff = HeapStatsRecord.subtract(olderRecord, youngerRecord);
         if (!diff.isZero) result[key] = diff;
       } else if (youngerRecord != null) {
         result[key] = youngerRecord;
