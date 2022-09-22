@@ -4,6 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
+import '../../../shared/heap/model.dart';
 import '../controller/Item_controller.dart';
 
 class ClassDetails extends StatelessWidget {
@@ -13,13 +14,19 @@ class ClassDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (item.selectedRecord.value == null) {
-      return const Center(
-        child: Text('Select class to see details here.'),
-      );
-    }
-    return Center(
-      child: Text('Details for ${item.selectedClass.value} will be here'),
+    return ValueListenableBuilder<HeapStatsRecord?>(
+      valueListenable: item.selectedRecord,
+      builder: (_, record, __) {
+        if (record == null) {
+          return const Center(
+            child: Text('Select class to see details here.'),
+          );
+        }
+
+        return Center(
+          child: Text('Details for ${record.heapClass.fullName} will be here'),
+        );
+      },
     );
   }
 }
