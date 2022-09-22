@@ -11,7 +11,6 @@ import '../../analytics/analytics.dart' as ga;
 import '../../analytics/constants.dart' as analytics_constants;
 import '../../framework/scaffold.dart';
 import '../../primitives/auto_dispose_mixin.dart';
-import '../../primitives/flutter_widgets/linked_scroll_controller.dart';
 import '../../primitives/utils.dart';
 import '../../shared/banner_messages.dart';
 import '../../shared/common_widgets.dart';
@@ -56,16 +55,11 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
 
   double get _yAxisUnitsSpace => scaleByFontFactor(48.0);
 
-  double get _frameNumberSectionHeight => scaleByFontFactor(20.0);
+  static double get _frameNumberSectionHeight => scaleByFontFactor(20.0);
 
-  double get _frameChartScrollbarOffset =>
-      defaultScrollBarOffset + _frameNumberSectionHeight;
-
-  late final LinkedScrollControllerGroup _linkedScrollControllerGroup;
+  double get _frameChartScrollbarOffset => defaultScrollBarOffset;
 
   late final ScrollController _framesScrollController;
-
-  late final ScrollController _frameNumbersScrollController;
 
   FlutterFrame? _selectedFrame;
 
@@ -80,9 +74,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
   @override
   void initState() {
     super.initState();
-    _linkedScrollControllerGroup = LinkedScrollControllerGroup();
-    _framesScrollController = _linkedScrollControllerGroup.addAndGet();
-    _frameNumbersScrollController = _linkedScrollControllerGroup.addAndGet();
+    _framesScrollController = ScrollController();
   }
 
   @override
@@ -104,9 +96,9 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
   @override
   void didUpdateWidget(FlutterFramesChart oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (_linkedScrollControllerGroup.hasAttachedControllers &&
-        _linkedScrollControllerGroup.atScrollBottom) {
-      _linkedScrollControllerGroup.autoScrollToBottom();
+    if (_framesScrollController.hasClients &&
+        _framesScrollController.atScrollBottom) {
+      _framesScrollController.autoScrollToBottom();
     }
 
     if (!collectionEquals(oldWidget.frames, widget.frames)) {
@@ -138,7 +130,6 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
   @override
   void dispose() {
     _framesScrollController.dispose();
-    _frameNumbersScrollController.dispose();
     super.dispose();
   }
 
@@ -150,7 +141,9 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
         right: denseSpacing,
         bottom: denseSpacing,
       ),
-      height: defaultChartHeight + _frameChartScrollbarOffset,
+      height: defaultChartHeight +
+          _frameNumberSectionHeight +
+          _frameChartScrollbarOffset,
       child: Row(
         children: [
           Expanded(child: _buildChart()),
@@ -203,6 +196,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
                 itemExtent: _defaultFrameWidthWithPadding,
                 itemBuilder: (context, index) => FlutterFramesChartItem(
                   controller: controller,
+                  index: index,
                   frame: widget.frames[index],
                   selected: widget.frames[index] == _selectedFrame,
                   msPerPx: _msPerPx,
@@ -214,28 +208,6 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
             ),
           ),
         );
-        final frameNumbers = Container(
-          height: _frameNumberSectionHeight,
-          padding: EdgeInsets.only(left: _yAxisUnitsSpace),
-          child: ListView.builder(
-            controller: _frameNumbersScrollController,
-            scrollDirection: Axis.horizontal,
-            itemCount: widget.frames.length,
-            itemExtent: _defaultFrameWidthWithPadding,
-            shrinkWrap: true,
-            itemBuilder: (context, index) {
-              if (index % 2 == 1) {
-                return const SizedBox(width: _defaultFrameWidthWithPadding);
-              }
-              return Center(
-                child: Text(
-                  '${widget.frames[index].id}',
-                  style: themeData.subtleChartTextStyle,
-                ),
-              );
-            },
-          ),
-        );
         final chartAxisPainter = CustomPaint(
           painter: ChartAxisPainter(
             constraints: constraints,
@@ -243,7 +215,8 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
             displayRefreshRate: widget.displayRefreshRate,
             msPerPx: _msPerPx,
             themeData: themeData,
-            bottomMargin: _frameChartScrollbarOffset,
+            bottomMargin:
+                _frameChartScrollbarOffset + _frameNumberSectionHeight,
           ),
         );
         final fpsLinePainter = CustomPaint(
@@ -253,16 +226,13 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
             displayRefreshRate: widget.displayRefreshRate,
             msPerPx: _msPerPx,
             themeData: themeData,
-            bottomMargin: _frameChartScrollbarOffset,
+            bottomMargin:
+                _frameChartScrollbarOffset + _frameNumberSectionHeight,
           ),
         );
         return Stack(
           children: [
             chartAxisPainter,
-            Positioned(
-              top: defaultChartHeight,
-              child: frameNumbers,
-            ),
             Padding(
               padding: EdgeInsets.only(left: _yAxisUnitsSpace),
               child: chart,
@@ -277,6 +247,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
 
 class FlutterFramesChartItem extends StatelessWidget {
   const FlutterFramesChartItem({
+    required this.index,
     required this.controller,
     required this.frame,
     required this.selected,
@@ -294,6 +265,8 @@ class FlutterFramesChartItem extends StatelessWidget {
 
   final PerformanceController controller;
 
+  final int index;
+
   final FlutterFrame frame;
 
   final bool selected;
@@ -306,7 +279,8 @@ class FlutterFramesChartItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final themeData = Theme.of(context);
+    final colorScheme = themeData.colorScheme;
 
     final bool uiJanky = frame.isUiJanky(displayRefreshRate);
     final bool rasterJanky = frame.isRasterJanky(displayRefreshRate);
@@ -361,48 +335,70 @@ class FlutterFramesChartItem extends StatelessWidget {
       ],
     );
 
-    return InkWell(
-      onTap: _selectFrame,
-      child: Stack(
-        children: [
-          // TODO(kenz): make tooltip to persist if the frame is selected.
-          FlutterFrameTooltip(
-            frame: frame,
-            hasShaderJank: hasShaderJank,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: densePadding),
-              color: selected ? colorScheme.selectedFrameBackgroundColor : null,
-              child: Column(
-                children: [
-                  // Dummy child so that the InkWell does not take up the entire column.
-                  const Expanded(child: SizedBox()),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      ui,
-                      raster,
-                    ],
-                  ),
-                ],
+    final content = Padding(
+      padding: EdgeInsets.only(
+        bottom: _FlutterFramesChartState._frameNumberSectionHeight,
+      ),
+      child: InkWell(
+        onTap: _selectFrame,
+        child: Stack(
+          children: [
+            // TODO(kenz): make tooltip to persist if the frame is selected.
+            FlutterFrameTooltip(
+              frame: frame,
+              hasShaderJank: hasShaderJank,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: densePadding),
+                color:
+                    selected ? colorScheme.selectedFrameBackgroundColor : null,
+                child: Column(
+                  children: [
+                    // Dummy child so that the InkWell does not take up the entire column.
+                    const Expanded(child: SizedBox()),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        ui,
+                        raster,
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          if (selected)
-            Container(
-              key: selectedFrameIndicatorKey,
-              color: defaultSelectionColor,
-              height: selectedIndicatorHeight,
-            ),
-          if (hasShaderJank)
-            const Padding(
-              padding: EdgeInsets.only(
-                top: FlutterFramesChartItem.selectedIndicatorHeight,
+            if (selected)
+              Container(
+                key: selectedFrameIndicatorKey,
+                color: defaultSelectionColor,
+                height: selectedIndicatorHeight,
               ),
-              child: ShaderJankWarningIcon(),
-            ),
-        ],
+            if (hasShaderJank)
+              const Padding(
+                padding: EdgeInsets.only(
+                  top: FlutterFramesChartItem.selectedIndicatorHeight,
+                ),
+                child: ShaderJankWarningIcon(),
+              ),
+          ],
+        ),
       ),
     );
+    return index % 2 == 0
+        ? Stack(
+            children: [
+              content,
+              Container(
+                margin: EdgeInsets.only(top: defaultChartHeight),
+                height: _FlutterFramesChartState._frameNumberSectionHeight,
+                alignment: AlignmentDirectional.center,
+                child: Text(
+                  '${frame.id}',
+                  style: themeData.subtleChartTextStyle,
+                ),
+              )
+            ],
+          )
+        : content;
   }
 
   void _selectFrame() {

@@ -7,7 +7,7 @@ import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/primitives/listenable.dart';
 import 'package:devtools_app/src/screens/performance/panes/frame_analysis/frame_analysis.dart';
-import 'package:devtools_app/src/screens/performance/panes/raster_metrics/raster_metrics.dart';
+import 'package:devtools_app/src/screens/performance/panes/raster_stats/raster_stats.dart';
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/timeline_flame_chart.dart';
 import 'package:devtools_app/src/screens/performance/performance_controller.dart';
 import 'package:devtools_app/src/screens/performance/performance_model.dart';
@@ -64,7 +64,7 @@ void main() {
       setGlobal(NotificationService, NotificationService());
       controller = createMockPerformanceControllerWithDefaults();
       frameAnalysisSupported = true;
-      rasterMetricsSupported = true;
+      rasterStatsSupported = true;
     });
 
     Future<void> pumpView(
@@ -108,7 +108,7 @@ void main() {
 
         expect(find.text('Timeline Events'), findsOneWidget);
         expect(find.text('Frame Analysis'), findsOneWidget);
-        expect(find.text('Raster Metrics'), findsOneWidget);
+        expect(find.text('Raster Stats'), findsOneWidget);
       });
     });
 
@@ -175,8 +175,7 @@ void main() {
       });
     });
 
-    testWidgetsWithWindowSize(
-        'builds content for Raster Metrics tab', windowSize,
+    testWidgetsWithWindowSize('builds content for Raster Stats tab', windowSize,
         (WidgetTester tester) async {
       await tester.runAsync(() async {
         await _setUpServiceManagerWithTimeline({});
@@ -185,7 +184,7 @@ void main() {
         expect(find.byType(AnalyticsTabbedView), findsOneWidget);
         expect(find.byType(DevToolsTab), findsNWidgets(3));
 
-        await tester.tap(find.text('Raster Metrics'));
+        await tester.tap(find.text('Raster Stats'));
         await tester.pumpAndSettle();
 
         expect(find.byType(RenderingLayerVisualizer), findsOneWidget);
@@ -214,7 +213,7 @@ void main() {
         expect(find.byType(DevToolsTab), findsOneWidget);
         expect(find.text('Timeline Events'), findsOneWidget);
         expect(find.text('Frame Analysis'), findsNothing);
-        expect(find.text('Raster Metrics'), findsNothing);
+        expect(find.text('Raster Stats'), findsNothing);
       });
     });
   });

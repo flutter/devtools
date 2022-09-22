@@ -2,25 +2,42 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../../primitives/utils.dart';
 import '../../../primitives/memory_utils.dart';
-import 'model.dart';
+import '../../../shared/heap/model.dart';
+import 'heap_diff.dart';
+import 'item_controller.dart';
 
 class DiffPaneController {
+  DiffPaneController(this.snapshotTaker);
+
+  final SnapshotTaker snapshotTaker;
+
+  final diffStore = HeapDiffStore();
+
   /// The list contains one item that show information and all others
   /// are snapshots.
-  final snapshots = ListValueNotifier(<DiffListItem>[InformationListItem()]);
+  ValueListenable<List<DiffListItem>> get snapshots => _snapshots;
+  final _snapshots = ListValueNotifier(<DiffListItem>[InformationListItem()]);
 
-  final selectedIndex = ValueNotifier<int>(0);
+  ValueListenable<int> get selectedIndex => _selectedIndex;
+  final _selectedIndex = ValueNotifier<int>(0);
 
   /// If true, some process is going on.
   ValueListenable<bool> get isProcessing => _isProcessing;
   final _isProcessing = ValueNotifier<bool>(false);
 
-  DiffListItem get selected => snapshots.value[selectedIndex.value];
+  DiffListItem get selectedItem => snapshots.value[selectedIndex.value];
+
+  /// Full name for the selected class.
+  ValueListenable<String?> get selectedClass => _selectedClass;
+  final _selectedClass = ValueNotifier<String?>(null);
+  void setSelectedClass(String? value) => _selectedClass.value = value;
 
   /// True, if the list contains snapshots, i.e. items beyond the first
   /// informational item.
@@ -28,23 +45,28 @@ class DiffPaneController {
 
   Future<void> takeSnapshot() async {
     _isProcessing.value = true;
-    final future = snapshotMemory();
-    snapshots.add(
+    final future = snapshotTaker.take();
+    _snapshots.add(
       SnapshotListItem(
         future,
         _nextDisplayNumber(),
         currentIsolateName ?? '<isolate-not-detected>',
+        diffStore,
+        selectedClass,
       ),
     );
     await future;
     final newElementIndex = snapshots.value.length - 1;
-    selectedIndex.value = newElementIndex;
+    _selectedIndex.value = newElementIndex;
     _isProcessing.value = false;
   }
 
   Future<void> clearSnapshots() async {
-    snapshots.removeRange(1, snapshots.value.length);
-    selectedIndex.value = 0;
+    for (var i = 1; i < snapshots.value.length; i++) {
+      snapshots.value[i].dispose();
+    }
+    _snapshots.removeRange(1, snapshots.value.length);
+    _selectedIndex.value = 0;
   }
 
   int _nextDisplayNumber() {
@@ -54,8 +76,15 @@ class DiffPaneController {
   }
 
   void deleteCurrentSnapshot() {
-    assert(selected is SnapshotListItem);
-    snapshots.removeRange(selectedIndex.value, selectedIndex.value + 1);
-    selectedIndex.value = selectedIndex.value - 1;
+    assert(selectedItem is SnapshotListItem);
+    selectedItem.dispose();
+    _snapshots.removeRange(selectedIndex.value, selectedIndex.value + 1);
+    // We must change the selectedIndex, because otherwise the content will
+    // not be re-rendered.
+    _selectedIndex.value = max(selectedIndex.value - 1, 0);
+  }
+
+  void select(int index) {
+    _selectedIndex.value = index;
   }
 }

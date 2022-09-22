@@ -6,28 +6,25 @@ import 'package:flutter/material.dart';
 
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/split.dart';
+import '../../../../shared/theme.dart';
 import 'controller/diff_pane_controller.dart';
-import 'controller/model.dart';
+import 'controller/item_controller.dart';
 import 'widgets/snapshot_control_pane.dart';
 import 'widgets/snapshot_list.dart';
 import 'widgets/snapshot_view.dart';
 
-class DiffPane extends StatefulWidget {
-  const DiffPane({Key? key}) : super(key: key);
+class DiffPane extends StatelessWidget {
+  const DiffPane({Key? key, required this.controller}) : super(key: key);
 
-  @override
-  State<DiffPane> createState() => _DiffPaneState();
-}
-
-class _DiffPaneState extends State<DiffPane> {
-  final controller = DiffPaneController();
+  final DiffPaneController controller;
 
   @override
   Widget build(BuildContext context) {
     final Widget itemContent = ValueListenableBuilder<int>(
       valueListenable: controller.selectedIndex,
       builder: (_, index, __) {
-        final item = controller.selected;
+        final item = controller.selectedItem;
+
         if (item is InformationListItem) {
           return const _SnapshotDoc();
         } else if (item is SnapshotListItem) {
@@ -72,7 +69,7 @@ class _SnapshotDoc extends StatelessWidget {
 
 class _SnapshotContent extends StatelessWidget {
   _SnapshotContent({Key? key, required this.item, required this.controller})
-      : assert(controller.selected == item),
+      : assert(controller.selectedItem == item),
         super(key: key);
 
   final SnapshotListItem item;
@@ -82,9 +79,11 @@ class _SnapshotContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        const SizedBox(height: denseRowSpacing),
         SnapshotControlPane(controller: controller),
+        const SizedBox(height: denseRowSpacing),
         Expanded(
-          child: SnapshotView(item: item),
+          child: SnapshotView(controller: controller),
         ),
       ],
     );

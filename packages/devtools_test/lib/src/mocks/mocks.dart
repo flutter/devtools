@@ -18,7 +18,7 @@ class FakeIsolateManager extends Fake implements IsolateManager {
   final _selectedIsolate = ValueNotifier(
     IsolateRef.parse({
       'id': 'fake_isolate_id',
-      'name': 'some-isolate',
+      'name': 'selected-isolate',
     }),
   );
 
