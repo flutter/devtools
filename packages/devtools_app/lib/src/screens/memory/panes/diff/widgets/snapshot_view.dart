@@ -56,7 +56,7 @@ class SnapshotView extends StatelessWidget {
                   ),
                 ),
                 const OutlineDecoration(
-                  child: ClassDetails(heapClass: null),
+                  child: HeapClassDetails(heapClass: null),
                 ),
               ],
             );

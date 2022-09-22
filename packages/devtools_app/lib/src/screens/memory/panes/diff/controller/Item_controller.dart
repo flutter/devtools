@@ -11,7 +11,7 @@ import '../../../shared/heap/model.dart';
 import 'heap_diff.dart';
 
 abstract class DiffListItem extends DisposableController {
-  /// Number, that, if shown in name, should be unique in the list.
+  /// Number, that if shown in name, should be unique in the list.
   ///
   /// If the number is not expected to be shown in UI, it should be 0.
   int get displayNumber;
