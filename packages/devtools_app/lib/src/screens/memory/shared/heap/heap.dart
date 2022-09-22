@@ -72,7 +72,7 @@ class HeapClassStatistics {
         _isSealed = true,
         heapClass = left.heapClass,
         total = SizeOfClassSet.subtract(left.total, right.total),
-        byRetainingPath = <ClassOnlyHeapPath, SizeOfClassSet>{}; // ???????
+        byRetainingPath = throw 'not implemented yet';
 
   final HeapClass heapClass;
   final SizeOfClassSet total;
