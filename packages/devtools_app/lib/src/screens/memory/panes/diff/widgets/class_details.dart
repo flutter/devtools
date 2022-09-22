@@ -4,7 +4,6 @@
 
 import 'package:flutter/widgets.dart';
 
-import '../../../shared/heap/model.dart';
 import '../controller/Item_controller.dart';
 
 class ClassDetails extends StatelessWidget {
@@ -20,6 +19,7 @@ class ClassDetails extends StatelessWidget {
       );
     }
     return Center(
-        child: Text('Details for ${item.selectedClass.value} will be here'));
+      child: Text('Details for ${item.selectedClass.value} will be here'),
+    );
   }
 }

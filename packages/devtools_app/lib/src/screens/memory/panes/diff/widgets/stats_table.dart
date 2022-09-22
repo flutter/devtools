@@ -10,8 +10,8 @@ import '../../../../../shared/table.dart';
 import '../../../../../shared/table_data.dart';
 import '../../../../../shared/utils.dart';
 import '../../../shared/heap/model.dart';
-import '../controller/diff_pane_controller.dart';
 import '../controller/Item_controller.dart';
+import '../controller/diff_pane_controller.dart';
 
 class _ClassNameColumn extends ColumnData<HeapStatsRecord> {
   _ClassNameColumn()
