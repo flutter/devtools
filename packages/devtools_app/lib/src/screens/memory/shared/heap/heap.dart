@@ -67,12 +67,14 @@ class HeapClassStatistics {
             .map((key, value) => MapEntry(key, SizeOfClassSet.negative(value)));
 
   HeapClassStatistics.subtract(
-      HeapClassStatistics left, HeapClassStatistics right)
-      : assert(left.heapClass.fullName == right.heapClass.fullName),
+    HeapClassStatistics left,
+    HeapClassStatistics right,
+  )   : assert(left.heapClass.fullName == right.heapClass.fullName),
         _isSealed = true,
         heapClass = left.heapClass,
         total = SizeOfClassSet.subtract(left.total, right.total),
-        byRetainingPath = throw 'not implemented yet';
+        // ignore: dead_code
+        byRetainingPath = throw UnimplementedError();
 
   final HeapClass heapClass;
   final SizeOfClassSet total;
@@ -87,7 +89,9 @@ class HeapClassStatistics {
     final path = data.retainingPath(objectIndex);
     if (path == null) return;
     final sizeForPath = byRetainingPath.putIfAbsent(
-        ClassOnlyHeapPath(path), () => SizeOfClassSet());
+      ClassOnlyHeapPath(path),
+      () => SizeOfClassSet(),
+    );
     sizeForPath.countInstance(object);
   }
 

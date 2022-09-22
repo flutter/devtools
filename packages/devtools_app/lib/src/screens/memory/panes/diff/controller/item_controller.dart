@@ -5,7 +5,6 @@
 import 'package:flutter/foundation.dart';
 
 import '../../../../../primitives/auto_dispose.dart';
-import '../../../../../primitives/utils.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
 import 'heap_diff.dart';

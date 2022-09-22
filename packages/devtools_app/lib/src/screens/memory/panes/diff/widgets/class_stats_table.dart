@@ -12,7 +12,6 @@ import '../../../../../shared/utils.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
 import '../../../shared/heap/primitives.dart';
-import '../controller/item_controller.dart';
 import '../controller/model.dart';
 
 typedef _RetainingPathRecord = MapEntry<ClassOnlyHeapPath, SizeOfClassSet>;
