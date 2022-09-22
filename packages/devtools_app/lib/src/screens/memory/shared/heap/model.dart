@@ -174,23 +174,6 @@ class AdaptedHeapObject {
   String get name => '${heapClass.library}/$shortName';
 }
 
-class HeapStatsRecord {
-  HeapStatsRecord(this.heapClass);
-
-  final HeapClass heapClass;
-  int instanceCount = 0;
-  int shallowSize = 0;
-  int retainedSize = 0;
-
-  HeapStatsRecord negative() => HeapStatsRecord(heapClass)
-    ..instanceCount = -instanceCount
-    ..shallowSize = -shallowSize
-    ..retainedSize = -retainedSize;
-
-  bool get isZero =>
-      shallowSize == 0 && retainedSize == 0 && instanceCount == 0;
-}
-
 /// This class is needed to make the snapshot taking operation mockable.
 class SnapshotTaker {
   Future<AdaptedHeapData?> take() async {
@@ -232,13 +215,4 @@ class HeapClass {
     assert(false, 'Unexpected library for $className: $library.');
     return false;
   }
-}
-
-class HeapStatistics {
-  HeapStatistics(this.recordsByClass);
-
-  /// Maps full class name to stats record of this class.
-  final Map<String, HeapStatsRecord> recordsByClass;
-  late final List<HeapStatsRecord> records =
-      recordsByClass.values.toList(growable: false);
 }
