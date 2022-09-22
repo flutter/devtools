@@ -9,8 +9,10 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../devtools_app.dart';
+import '../shared/common_widgets.dart';
 import '../shared/eval_on_dart_library.dart';
+import '../shared/theme.dart';
+import '../shared/utils.dart';
 import 'utils.dart';
 
 /// Regex for valid Dart identifiers.
@@ -113,7 +115,7 @@ class HoverCard {
     required Widget contents,
     required double width,
     required Offset position,
-    required HoverCardTooltipController hoverCardTooltipController,
+    required HoverCardController hoverCardTooltipController,
     String? title,
     double? maxCardHeight,
   }) {
@@ -182,7 +184,7 @@ class HoverCard {
     required PointerHoverEvent event,
     required Widget contents,
     required double width,
-    required HoverCardTooltipController hoverCardTooltipController,
+    required HoverCardController hoverCardTooltipController,
     String? title,
   }) : this(
           context: context,
@@ -206,7 +208,7 @@ class HoverCard {
   ///
   /// The HoverCard will not be removed if the mouse is currently inside the
   /// widget.
-  /// Returns whether or not the HoverCard was removed
+  /// Returns whether or not the HoverCard was removed.
   bool maybeRemove() {
     if (!_hasMouseEntered) {
       remove();
@@ -224,13 +226,12 @@ class HoverCard {
 }
 
 /// Ensures that only one [HoverCard] is ever displayed at a time.
-class HoverCardTooltipController {
-  /// The card that is currenty being displayed
+class HoverCardController {
+  /// The card that is currenty being displayed.
   HoverCard? _currentHoverCard;
 
   /// Sets [hoverCard] as the most recently displayed [HoverCard].
   ///
-  /// This methods sets a unique [hoverCard.freshnessToken], as a way to track whether
   /// [hoverCard] is the most recently displayed [HoverCard].
   void set({required HoverCard hoverCard}) {
     _currentHoverCard?.remove();
@@ -270,7 +271,7 @@ class HoverCardTooltip extends StatefulWidget {
   /// a [HoverCard] with a spinner will show. If any [HoverCardData] returned
   /// from [asyncGenerateHoverCardData] the spinner [HoverCard] will be replaced
   /// with one containing the generated [HoverCardData].
-  const HoverCardTooltip({
+  const HoverCardTooltip.async({
     required this.enabled,
     required this.asyncGenerateHoverCardData,
     required this.child,
@@ -329,7 +330,7 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
 
   HoverCard? _currentHoverCard;
 
-  late HoverCardTooltipController _hoverCardTooltipController;
+  late HoverCardController _hoverCardTooltipController;
 
   void _onHoverExit() {
     _showTimer?.cancel();
@@ -386,7 +387,6 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
         }
       } else {
         assert(widget.generateHoverCardData != null);
-        assert(widget.asyncGenerateHoverCardData == null);
 
         hoverCardData = widget.generateHoverCardData!(event);
       }
@@ -454,9 +454,13 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
   }
 
   @override
+  void didChangeDependencies() {
+    _hoverCardTooltipController = Provider.of<HoverCardController>(context);
+    super.didChangeDependencies();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    _hoverCardTooltipController =
-        Provider.of<HoverCardTooltipController>(context);
     return MouseRegion(
       onExit: (_) => _onHoverExit(),
       onHover: _onHover,

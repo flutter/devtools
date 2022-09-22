@@ -809,7 +809,7 @@ class _LineItemState extends State<LineItem>
   String _previousHoverWord = '';
   bool _hasMouseExited = false;
 
-  HoverCardTooltipController? _hoverCardTooltipController;
+  late HoverCardController? _hoverCardTooltipController;
 
   void _onHoverExit() {
     _showTimer?.cancel();
@@ -869,6 +869,7 @@ class _LineItemState extends State<LineItem>
   void didChangeDependencies() {
     super.didChangeDependencies();
     initController();
+    _hoverCardTooltipController ??= Provider.of<HoverCardController>(context);
   }
 
   @override
@@ -883,8 +884,6 @@ class _LineItemState extends State<LineItem>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final darkTheme = theme.brightness == Brightness.dark;
-    _hoverCardTooltipController ??=
-        Provider.of<HoverCardTooltipController>(context);
     Widget child;
     final column = widget.pausedFrame?.column;
     if (column != null) {
