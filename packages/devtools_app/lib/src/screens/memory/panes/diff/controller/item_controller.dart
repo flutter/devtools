@@ -16,8 +16,8 @@ abstract class DiffListItem extends DisposableController {
   /// If the number is not expected to be shown in UI, it should be 0.
   int get displayNumber;
 
-  final _isProcessing = ValueNotifier<bool>(false);
   ValueListenable<bool> get isProcessing => _isProcessing;
+  final _isProcessing = ValueNotifier<bool>(false);
 
   /// If true, the item contains data, that can be compared and analyzed.
   bool get hasData;
@@ -37,7 +37,7 @@ class SnapshotListItem extends DiffListItem with AutoDisposeControllerMixin {
     this.displayNumber,
     this._isolateName,
     this.diffStore,
-    this.selectedClass,
+    this.selectedClassName,
   ) {
     _isProcessing.value = true;
     receiver.whenComplete(() async {
@@ -45,7 +45,7 @@ class SnapshotListItem extends DiffListItem with AutoDisposeControllerMixin {
       if (data != null) {
         heap = AdaptedHeap(data);
         updateSelectedRecord();
-        addAutoDisposeListener(selectedClass, () => updateSelectedRecord());
+        addAutoDisposeListener(selectedClassName, () => updateSelectedRecord());
       }
       _isProcessing.value = false;
     });
@@ -64,17 +64,17 @@ class SnapshotListItem extends DiffListItem with AutoDisposeControllerMixin {
 
   var sorting = ColumnSorting();
 
-  final _diffWith = ValueNotifier<SnapshotListItem?>(null);
   ValueListenable<SnapshotListItem?> get diffWith => _diffWith;
+  final _diffWith = ValueNotifier<SnapshotListItem?>(null);
   void setDiffWith(SnapshotListItem? value) {
     _diffWith.value = value;
     updateSelectedRecord();
   }
 
-  final ValueListenable<String?> selectedClass;
+  final ValueListenable<String?> selectedClassName;
 
-  final _selectedRecord = ValueNotifier<HeapStatsRecord?>(null);
   ValueListenable<HeapStatsRecord?> get selectedRecord => _selectedRecord;
+  final _selectedRecord = ValueNotifier<HeapStatsRecord?>(null);
 
   @override
   bool get hasData => heap != null;
@@ -86,8 +86,8 @@ class SnapshotListItem extends DiffListItem with AutoDisposeControllerMixin {
     return diffStore.compare(theHeap, itemToDiffWith.heap!).stats;
   }
 
-  void updateSelectedRecord() =>
-      _selectedRecord.value = statsToShow.recordsByClass[selectedClass.value];
+  void updateSelectedRecord() => _selectedRecord.value =
+      statsToShow.recordsByClass[selectedClassName.value];
 }
 
 class ColumnSorting {
