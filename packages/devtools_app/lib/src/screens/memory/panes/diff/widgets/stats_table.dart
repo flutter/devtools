@@ -4,12 +4,14 @@
 
 import 'package:flutter/material.dart';
 
+import '../../../../../primitives/auto_dispose_mixin.dart';
 import '../../../../../primitives/utils.dart';
 import '../../../../../shared/table.dart';
 import '../../../../../shared/table_data.dart';
 import '../../../../../shared/utils.dart';
 import '../../../shared/heap/model.dart';
-import '../controller/model.dart';
+import '../controller/diff_pane_controller.dart';
+import '../controller/item_controller.dart';
 
 class _ClassNameColumn extends ColumnData<HeapStatsRecord> {
   _ClassNameColumn()
@@ -34,7 +36,7 @@ class _InstanceColumn extends ColumnData<HeapStatsRecord> {
   _InstanceColumn()
       : super(
           'Non GC-able\nInstances',
-          titleTooltip: 'Number of instances of the class, '
+          titleTooltip: 'Number of instances of the class '
               'that have a retaining path from the root.',
           fixedWidthPx: scaleByFontFactor(110.0),
           alignment: ColumnAlignment.right,
@@ -111,27 +113,24 @@ class _RetainedSizeColumn extends ColumnData<HeapStatsRecord> {
 class StatsTable extends StatefulWidget {
   const StatsTable({
     Key? key,
-    required this.data,
-    required this.sorting,
-    required this.selectedRecord,
+    required this.controller,
   }) : super(key: key);
 
-  final HeapStatistics data;
-
-  final ValueNotifier<HeapStatsRecord?> selectedRecord;
-
-  final ColumnSorting sorting;
+  final DiffPaneController controller;
 
   @override
   State<StatsTable> createState() => _StatsTableState();
 }
 
-class _StatsTableState extends State<StatsTable> {
+class _StatsTableState extends State<StatsTable> with AutoDisposeMixin {
   late final List<ColumnData<HeapStatsRecord>> _columns;
+  late final SnapshotListItem _item;
 
   @override
   void initState() {
     super.initState();
+
+    _item = widget.controller.selectedItem as SnapshotListItem;
 
     final _shallowSizeColumn = _ShallowSizeColumn();
 
@@ -142,8 +141,8 @@ class _StatsTableState extends State<StatsTable> {
       _RetainedSizeColumn(),
     ];
 
-    if (!widget.sorting.initialized) {
-      widget.sorting
+    if (!_item.sorting.initialized) {
+      _item.sorting
         ..direction = SortDirection.descending
         ..columnIndex = _columns.indexOf(_shallowSizeColumn)
         ..initialized = true;
@@ -154,20 +153,21 @@ class _StatsTableState extends State<StatsTable> {
   Widget build(BuildContext context) {
     return FlatTable<HeapStatsRecord>(
       columns: _columns,
-      data: widget.data.records,
+      data: _item.statsToShow.records,
       keyFactory: (e) => Key(e.heapClass.fullName),
-      onItemSelected: (r) => widget.selectedRecord.value = r,
-      selectionNotifier: widget.selectedRecord,
-      sortColumn: _columns[widget.sorting.columnIndex],
-      sortDirection: widget.sorting.direction,
+      onItemSelected: (r) =>
+          widget.controller.setSelectedClass(r.heapClass.fullName),
+      selectionNotifier: _item.selectedRecord,
+      sortColumn: _columns[_item.sorting.columnIndex],
+      sortDirection: _item.sorting.direction,
       onSortChanged: (
         sortColumn,
         direction, {
         secondarySortColumn,
       }) =>
           setState(() {
-        widget.sorting.columnIndex = _columns.indexOf(sortColumn);
-        widget.sorting.direction = direction;
+        _item.sorting.columnIndex = _columns.indexOf(sortColumn);
+        _item.sorting.direction = direction;
       }),
     );
   }

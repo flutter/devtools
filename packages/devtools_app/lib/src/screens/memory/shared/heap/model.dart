@@ -15,24 +15,32 @@ class _JsonFields {
   static const String library = 'library';
   static const String shallowSize = 'shallowSize';
   static const String rootIndex = 'rootIndex';
+  static const String created = 'created';
 }
 
 /// Contains information from [HeapSnapshotGraph],
 /// needed for memory screen.
 class AdaptedHeapData {
-  /// Default value for rootIndex is taken from the doc:
-  /// https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/heap_snapshot.md#object-ids
-  AdaptedHeapData(this.objects, {this.rootIndex = _defaultRootIndex})
-      : assert(objects.isNotEmpty),
-        assert(objects.length > rootIndex);
+  AdaptedHeapData(
+    this.objects, {
+    this.rootIndex = _defaultRootIndex,
+    DateTime? created,
+  })  : assert(objects.isNotEmpty),
+        assert(objects.length > rootIndex) {
+    this.created = created ?? DateTime.now();
+  }
 
-  factory AdaptedHeapData.fromJson(Map<String, dynamic> json) =>
-      AdaptedHeapData(
-        (json[_JsonFields.objects] as List<dynamic>)
-            .map((e) => AdaptedHeapObject.fromJson(e))
-            .toList(),
-        rootIndex: json[_JsonFields.rootIndex] ?? _defaultRootIndex,
-      );
+  factory AdaptedHeapData.fromJson(Map<String, dynamic> json) {
+    final createdJson = json[_JsonFields.created];
+
+    return AdaptedHeapData(
+      (json[_JsonFields.objects] as List<dynamic>)
+          .map((e) => AdaptedHeapObject.fromJson(e))
+          .toList(),
+      created: createdJson == null ? null : DateTime.parse(createdJson),
+      rootIndex: json[_JsonFields.rootIndex] ?? _defaultRootIndex,
+    );
+  }
 
   factory AdaptedHeapData.fromHeapSnapshot(HeapSnapshotGraph graph) =>
       AdaptedHeapData(
@@ -41,15 +49,19 @@ class AdaptedHeapData {
             .toList(),
       );
 
+  /// Default value for rootIndex is taken from the doc:
+  /// https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/heap_snapshot.md#object-ids
   static const int _defaultRootIndex = 1;
 
   final int rootIndex;
+
+  AdaptedHeapObject get root => objects[rootIndex];
 
   final List<AdaptedHeapObject> objects;
 
   bool isSpanningTreeBuilt = false;
 
-  AdaptedHeapObject get root => objects[rootIndex];
+  late DateTime created;
 
   /// Heap objects by identityHashCode.
   late final Map<IdentityHashCode, int> _objectsByCode = Map.fromIterable(
@@ -61,6 +73,7 @@ class AdaptedHeapData {
   Map<String, dynamic> toJson() => {
         _JsonFields.objects: objects.map((e) => e.toJson()).toList(),
         _JsonFields.rootIndex: rootIndex,
+        _JsonFields.created: created.toIso8601String(),
       };
 
   HeapPath? _retainingPath(IdentityHashCode code) {
@@ -93,7 +106,7 @@ class AdaptedHeapData {
   }
 }
 
-/// Result of invocation of [inentityHashCode()].
+/// Result of invocation of [identityHashCode].
 typedef IdentityHashCode = int;
 
 /// Sequence of ids of objects in the heap.
@@ -165,12 +178,20 @@ class HeapStatsRecord {
   HeapStatsRecord(this.heapClass);
 
   final HeapClass heapClass;
+  int instanceCount = 0;
   int shallowSize = 0;
   int retainedSize = 0;
-  int instanceCount = 0;
+
+  HeapStatsRecord negative() => HeapStatsRecord(heapClass)
+    ..instanceCount = -instanceCount
+    ..shallowSize = -shallowSize
+    ..retainedSize = -retainedSize;
+
+  bool get isZero =>
+      shallowSize == 0 && retainedSize == 0 && instanceCount == 0;
 }
 
-/// This class is needed to make snapshot taking mockable.
+/// This class is needed to make the snapshot taking operation mockable.
 class SnapshotTaker {
   Future<AdaptedHeapData?> take() async {
     final snapshot = await snapshotMemory();
@@ -214,9 +235,10 @@ class HeapClass {
 }
 
 class HeapStatistics {
-  HeapStatistics(this.map);
+  HeapStatistics(this.recordsByClass);
 
   /// Maps full class name to stats record of this class.
-  final Map<String, HeapStatsRecord> map;
-  late final List<HeapStatsRecord> records = map.values.toList(growable: false);
+  final Map<String, HeapStatsRecord> recordsByClass;
+  late final List<HeapStatsRecord> records =
+      recordsByClass.values.toList(growable: false);
 }
