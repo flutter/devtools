@@ -96,7 +96,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   bool get denseModeEnabled => _denseModeEnabled;
   bool _denseModeEnabled = false;
 
-  final hoverCardTooltipController = HoverCardController();
+  final hoverCardController = HoverCardController();
 
   late ReleaseNotesController releaseNotesController;
 
@@ -331,7 +331,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
               value: widget.analyticsController,
             ),
             Provider<HoverCardController>.value(
-              value: hoverCardTooltipController,
+              value: hoverCardController,
             ),
           ],
           child: NotificationsView(
