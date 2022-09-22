@@ -22,11 +22,37 @@ class ClassDetails extends StatelessWidget {
             child: Text('Select class to see details here.'),
           );
         }
+        if (item.diffWith.value == null) {
+          return _SnapshotClassDetails(item: item);
+        }
 
-        return Center(
-          child: Text('Details for ${record.heapClass.fullName} will be here'),
-        );
+        return _DiffClassDetails(item: item);
       },
+    );
+  }
+}
+
+class _SnapshotClassDetails extends StatelessWidget {
+  const _SnapshotClassDetails({Key? key, required this.item}) : super(key: key);
+  final SnapshotListItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child:
+          Text('Single details for ${item.selectedClass.value} will be here'),
+    );
+  }
+}
+
+class _DiffClassDetails extends StatelessWidget {
+  const _DiffClassDetails({Key? key, required this.item}) : super(key: key);
+  final SnapshotListItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text('Diff details for ${item.selectedClass.value} will be here'),
     );
   }
 }
