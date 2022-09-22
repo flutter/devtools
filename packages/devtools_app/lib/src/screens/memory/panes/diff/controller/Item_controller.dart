@@ -13,7 +13,7 @@ import 'heap_diff.dart';
 abstract class DiffListItem extends DisposableController {
   /// Number, that, if shown in name, should be unique in the list.
   ///
-  /// If the number is not shown, it should be 0.
+  /// If the number is not expected to be shown in UI, it should be 0.
   int get displayNumber;
 
   final _isProcessing = ValueNotifier<bool>(false);

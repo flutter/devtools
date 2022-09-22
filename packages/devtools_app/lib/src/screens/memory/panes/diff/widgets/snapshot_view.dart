@@ -31,6 +31,8 @@ class SnapshotView extends StatelessWidget {
         } else {
           final heap1 = item.heap!;
           final heap2 = item.diffWith.value!.heap!;
+
+          // TODO(polina-c): make comparison async.
           stats = controller.diffStore.compare(heap1, heap2).stats;
         }
 
