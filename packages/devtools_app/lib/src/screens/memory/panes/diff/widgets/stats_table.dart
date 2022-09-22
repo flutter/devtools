@@ -13,7 +13,7 @@ import '../../../shared/heap/heap.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/item_controller.dart';
 
-class _ClassNameColumn extends ColumnData<HeapStatsRecord> {
+class _ClassNameColumn extends ColumnData<HeapClassStatistics> {
   _ClassNameColumn()
       : super(
           'Class',
@@ -23,16 +23,16 @@ class _ClassNameColumn extends ColumnData<HeapStatsRecord> {
         );
 
   @override
-  String? getValue(HeapStatsRecord record) => record.heapClass.className;
+  String? getValue(HeapClassStatistics record) => record.heapClass.className;
 
   @override
   bool get supportsSorting => true;
 
   @override
-  String getTooltip(HeapStatsRecord record) => record.heapClass.fullName;
+  String getTooltip(HeapClassStatistics record) => record.heapClass.fullName;
 }
 
-class _InstanceColumn extends ColumnData<HeapStatsRecord> {
+class _InstanceColumn extends ColumnData<HeapClassStatistics> {
   _InstanceColumn()
       : super(
           'Non GC-able\nInstances',
@@ -44,7 +44,7 @@ class _InstanceColumn extends ColumnData<HeapStatsRecord> {
         );
 
   @override
-  int getValue(HeapStatsRecord record) => record.total.instanceCount;
+  int getValue(HeapClassStatistics record) => record.total.instanceCount;
 
   @override
   bool get supportsSorting => true;
@@ -53,7 +53,7 @@ class _InstanceColumn extends ColumnData<HeapStatsRecord> {
   bool get numeric => true;
 }
 
-class _ShallowSizeColumn extends ColumnData<HeapStatsRecord> {
+class _ShallowSizeColumn extends ColumnData<HeapClassStatistics> {
   _ShallowSizeColumn()
       : super(
           'Shallow\nDart Size',
@@ -67,7 +67,7 @@ class _ShallowSizeColumn extends ColumnData<HeapStatsRecord> {
         );
 
   @override
-  int getValue(HeapStatsRecord record) => record.total.shallowSize;
+  int getValue(HeapClassStatistics record) => record.total.shallowSize;
 
   @override
   bool get supportsSorting => true;
@@ -76,14 +76,14 @@ class _ShallowSizeColumn extends ColumnData<HeapStatsRecord> {
   bool get numeric => true;
 
   @override
-  String getDisplayValue(HeapStatsRecord record) => prettyPrintBytes(
+  String getDisplayValue(HeapClassStatistics record) => prettyPrintBytes(
         getValue(record),
         includeUnit: true,
         kbFractionDigits: 1,
       )!;
 }
 
-class _RetainedSizeColumn extends ColumnData<HeapStatsRecord> {
+class _RetainedSizeColumn extends ColumnData<HeapClassStatistics> {
   _RetainedSizeColumn()
       : super(
           'Retained\nDart Size',
@@ -95,7 +95,7 @@ class _RetainedSizeColumn extends ColumnData<HeapStatsRecord> {
         );
 
   @override
-  int getValue(HeapStatsRecord record) => record.total.retainedSize;
+  int getValue(HeapClassStatistics record) => record.total.retainedSize;
 
   @override
   bool get supportsSorting => true;
@@ -104,7 +104,7 @@ class _RetainedSizeColumn extends ColumnData<HeapStatsRecord> {
   bool get numeric => true;
 
   @override
-  String getDisplayValue(HeapStatsRecord record) => prettyPrintBytes(
+  String getDisplayValue(HeapClassStatistics record) => prettyPrintBytes(
         getValue(record),
         includeUnit: true,
         kbFractionDigits: 1,
@@ -124,7 +124,7 @@ class StatsTable extends StatefulWidget {
 }
 
 class _StatsTableState extends State<StatsTable> with AutoDisposeMixin {
-  late final List<ColumnData<HeapStatsRecord>> _columns;
+  late final List<ColumnData<HeapClassStatistics>> _columns;
   late final SnapshotListItem _item;
 
   @override
@@ -135,7 +135,7 @@ class _StatsTableState extends State<StatsTable> with AutoDisposeMixin {
 
     final _shallowSizeColumn = _ShallowSizeColumn();
 
-    _columns = <ColumnData<HeapStatsRecord>>[
+    _columns = <ColumnData<HeapClassStatistics>>[
       _ClassNameColumn(),
       _InstanceColumn(),
       _shallowSizeColumn,
@@ -152,7 +152,7 @@ class _StatsTableState extends State<StatsTable> with AutoDisposeMixin {
 
   @override
   Widget build(BuildContext context) {
-    return FlatTable<HeapStatsRecord>(
+    return FlatTable<HeapClassStatistics>(
       columns: _columns,
       data: _item.statsToShow.records,
       keyFactory: (e) => Key(e.heapClass.fullName),

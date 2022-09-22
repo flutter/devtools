@@ -13,7 +13,7 @@ class AdaptedHeap {
   late final HeapStatistics stats = _heapStatistics(data);
 
   static HeapStatistics _heapStatistics(AdaptedHeapData data) {
-    final result = <String, HeapStatsRecord>{};
+    final result = <String, HeapClassStatistics>{};
     if (!data.isSpanningTreeBuilt) buildSpanningTree(data);
 
     for (var i in Iterable.generate(data.objects.length)) {
@@ -27,7 +27,7 @@ class AdaptedHeap {
       final fullName = heapClass.fullName;
 
       final stats =
-          result.putIfAbsent(fullName, () => HeapStatsRecord(heapClass));
+          result.putIfAbsent(fullName, () => HeapClassStatistics(heapClass));
       stats.countInstance(data, i);
     }
 
@@ -39,8 +39,8 @@ class HeapStatistics {
   HeapStatistics(this.recordsByClass);
 
   /// Maps full class name to stats record of this class.
-  final Map<String, HeapStatsRecord> recordsByClass;
-  late final List<HeapStatsRecord> records =
+  final Map<String, HeapClassStatistics> recordsByClass;
+  late final List<HeapClassStatistics> records =
       recordsByClass.values.toList(growable: false);
 
   /// Mark the object as deeply immutable.
@@ -53,36 +53,41 @@ class HeapStatistics {
   }
 }
 
-class HeapStatsRecord {
-  HeapStatsRecord(this.heapClass)
+class HeapClassStatistics {
+  HeapClassStatistics(this.heapClass)
       : _isSealed = false,
-        total = SizeOfSet(),
-        byRetainingPath = <String, SizeOfSet>{};
+        total = SizeOfClassSet(),
+        byRetainingPath = <ClassOnlyHeapPath, SizeOfClassSet>{};
 
-  HeapStatsRecord.negative(HeapStatsRecord other)
+  HeapClassStatistics.negative(HeapClassStatistics other)
       : _isSealed = true,
         heapClass = other.heapClass,
-        total = SizeOfSet.negative(other.total),
-        byRetainingPath = <String, SizeOfSet>{}; // ???
+        total = SizeOfClassSet.negative(other.total),
+        byRetainingPath = <ClassOnlyHeapPath, SizeOfClassSet>{}; // ???
 
-  HeapStatsRecord.subtract(HeapStatsRecord left, HeapStatsRecord right)
+  HeapClassStatistics.subtract(
+      HeapClassStatistics left, HeapClassStatistics right)
       : assert(left.heapClass.fullName == right.heapClass.fullName),
         _isSealed = true,
         heapClass = left.heapClass,
-        total = SizeOfSet.subtract(left.total, right.total),
-        byRetainingPath = <String, SizeOfSet>{}; // ???
+        total = SizeOfClassSet.subtract(left.total, right.total),
+        byRetainingPath = <ClassOnlyHeapPath, SizeOfClassSet>{}; // ???
 
   final HeapClass heapClass;
-  final SizeOfSet total;
-  final Map<String, SizeOfSet> byRetainingPath;
+  final SizeOfClassSet total;
+  final Map<ClassOnlyHeapPath, SizeOfClassSet> byRetainingPath;
 
-  void countInstance(AdaptedHeapData data, int onbjectIndex) {
+  void countInstance(AdaptedHeapData data, int objectIndex) {
     assert(!_isSealed);
-    // ???
-    final object = data.objects[onbjectIndex];
+    final object = data.objects[objectIndex];
     assert(object.heapClass.fullName == heapClass.fullName);
     total.countInstance(object);
-    // final path = object.
+
+    final path = data.retainingPath(objectIndex);
+    if (path == null) return;
+    final sizeForPath = byRetainingPath.putIfAbsent(
+        ClassOnlyHeapPath(path), () => SizeOfClassSet());
+    sizeForPath.countInstance(object);
   }
 
   bool get isZero => total.isZero;
@@ -102,16 +107,16 @@ class HeapStatsRecord {
 }
 
 /// Size of set of instances.
-class SizeOfSet {
-  SizeOfSet() : _isSealed = false;
+class SizeOfClassSet {
+  SizeOfClassSet() : _isSealed = false;
 
-  SizeOfSet.negative(SizeOfSet other)
+  SizeOfClassSet.negative(SizeOfClassSet other)
       : _isSealed = true,
         instanceCount = -other.instanceCount,
         shallowSize = -other.shallowSize,
         retainedSize = -other.retainedSize;
 
-  SizeOfSet.subtract(SizeOfSet left, SizeOfSet right)
+  SizeOfClassSet.subtract(SizeOfClassSet left, SizeOfClassSet right)
       : _isSealed = true,
         instanceCount = left.instanceCount - right.instanceCount,
         shallowSize = left.shallowSize - right.shallowSize,

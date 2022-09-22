@@ -101,6 +101,11 @@ class AdaptedHeapData {
 typedef IdentityHashCode = int;
 
 /// Sequence of ids of objects in the heap.
+///
+/// TODO(polina-c): maybe we do not need to store path by objects.
+/// It can be that only classes are interesting, and we can save some
+/// performance on this object. It will become clear when the leak tracking
+/// feature stabilizes.
 class HeapPath {
   HeapPath(this.objects);
 
@@ -110,7 +115,30 @@ class HeapPath {
   String? shortPath() => '/${objects.map((o) => o.shortName).join('/')}/';
 
   /// Retaining path for the object as an array of the retaining objects.
-  List<String>? detailedPath() => objects.map((o) => o.name).toList();
+  List<String>? detailedPath() =>
+      objects.map((o) => o.name).toList(growable: false);
+}
+
+/// Heap path represented by classes only, without object details.
+class ClassOnlyHeapPath {
+  ClassOnlyHeapPath(HeapPath heapPath)
+      : classes =
+            heapPath.objects.map((o) => o.heapClass).toList(growable: false);
+  final List<HeapClass> classes;
+
+  String asShortString() => classes.map((e) => e.className).join('/');
+  String asLongString() => classes.map((e) => e.fullName).join('\n');
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is ClassOnlyHeapPath && other.asLongString() == asLongString();
+  }
+
+  @override
+  int get hashCode => asLongString().hashCode;
 }
 
 /// Contains information from [HeapSnapshotObject] needed for
