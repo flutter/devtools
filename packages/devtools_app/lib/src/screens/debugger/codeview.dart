@@ -809,7 +809,7 @@ class _LineItemState extends State<LineItem>
   String _previousHoverWord = '';
   bool _hasMouseExited = false;
 
-  late HoverCardController? _hoverCardTooltipController;
+  late HoverCardController _hoverCardTooltipController;
 
   void _onHoverExit() {
     _showTimer?.cancel();
@@ -856,7 +856,7 @@ class _LineItemState extends State<LineItem>
             width: LineItem._hoverWidth,
             title: word,
             context: context,
-            hoverCardTooltipController: _hoverCardTooltipController!,
+            hoverCardTooltipController: _hoverCardTooltipController,
           );
         } catch (_) {
           // Silently fail and don't display a HoverCard.
@@ -869,7 +869,7 @@ class _LineItemState extends State<LineItem>
   void didChangeDependencies() {
     super.didChangeDependencies();
     initController();
-    _hoverCardTooltipController ??= Provider.of<HoverCardController>(context);
+    _hoverCardTooltipController = Provider.of<HoverCardController>(context);
   }
 
   @override
