@@ -150,7 +150,7 @@ class _ClassStatsTableState extends State<ClassStatsTable>
   Widget build(BuildContext context) {
     return FlatTable<_RetainingPathRecord>(
       columns: _columns,
-      data: widget.data.byRetainingPath.entries.toList(growable: false),
+      data: widget.data.sizesByPath.entries.toList(growable: false),
       keyFactory: (e) => Key(e.key.asLongString()),
       onItemSelected: (r) => {},
       sortColumn: _columns[widget.sorting.columnIndex],

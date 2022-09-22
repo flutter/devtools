@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 
+import '../../../../../shared/utils.dart';
 import '../../../shared/heap/heap.dart';
 
 /// Stores already calculated comparisons for heap couples.
@@ -64,27 +65,17 @@ class HeapComparison {
   final _HeapCouple heapCouple;
 
   HeapStatistics _stats() {
-    final result = <String, HeapClassStatistics>{};
+    final statisticByClass = subtractMaps<String, HeapClassStatistics>(
+      minuend: heapCouple.younger.stats.recordsByClass,
+      subtrahend: heapCouple.older.stats.recordsByClass,
+      subtract: (minuend, subtrahend) {
+        final diff = HeapClassStatistics.subtract(minuend, subtrahend);
+        if (diff.isZero) return null;
+        return diff;
+      },
+      negate: (value) => HeapClassStatistics.negative(value),
+    );
 
-    final older = heapCouple.older.stats.recordsByClass;
-    final younger = heapCouple.younger.stats.recordsByClass;
-
-    final unionOfKeys = older.keys.toSet().union(younger.keys.toSet());
-
-    for (var key in unionOfKeys) {
-      final olderRecord = older[key];
-      final youngerRecord = younger[key];
-
-      if (olderRecord != null && youngerRecord != null) {
-        final diff = HeapClassStatistics.subtract(olderRecord, youngerRecord);
-        if (!diff.isZero) result[key] = diff;
-      } else if (youngerRecord != null) {
-        result[key] = youngerRecord;
-      } else {
-        result[key] = HeapClassStatistics.negative(olderRecord!);
-      }
-    }
-
-    return HeapStatistics(result);
+    return HeapStatistics(statisticByClass);
   }
 }

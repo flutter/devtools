@@ -53,32 +53,38 @@ class HeapStatistics {
   }
 }
 
+typedef SizesByPath = Map<ClassOnlyHeapPath, SizeOfClassSet>;
+
 class HeapClassStatistics {
   HeapClassStatistics(this.heapClass)
       : _isSealed = false,
         total = SizeOfClassSet(),
-        byRetainingPath = <ClassOnlyHeapPath, SizeOfClassSet>{};
+        sizesByPath = {};
 
   HeapClassStatistics.negative(HeapClassStatistics other)
       : _isSealed = true,
         heapClass = other.heapClass,
         total = SizeOfClassSet.negative(other.total),
-        byRetainingPath = other.byRetainingPath
+        sizesByPath = other.sizesByPath
             .map((key, value) => MapEntry(key, SizeOfClassSet.negative(value)));
-
   HeapClassStatistics.subtract(
-    HeapClassStatistics left,
-    HeapClassStatistics right,
-  )   : assert(left.heapClass.fullName == right.heapClass.fullName),
+    HeapClassStatistics minuend,
+    HeapClassStatistics subtrahend,
+  )   : assert(minuend.heapClass.fullName == subtrahend.heapClass.fullName),
         _isSealed = true,
-        heapClass = left.heapClass,
-        total = SizeOfClassSet.subtract(left.total, right.total),
+        heapClass = minuend.heapClass,
+        total = SizeOfClassSet.subtract(minuend.total, subtrahend.total),
         // ignore: dead_code
-        byRetainingPath = throw UnimplementedError();
+        sizesByPath =
+            _subtractSizesByPath(minuend.sizesByPath, subtrahend.sizesByPath);
+
+  static SizesByPath _subtractSizesByPath(SizesByPath left, SizesByPath rigth) {
+    throw UnimplementedError('memory diff');
+  }
 
   final HeapClass heapClass;
   final SizeOfClassSet total;
-  final Map<ClassOnlyHeapPath, SizeOfClassSet> byRetainingPath;
+  final SizesByPath sizesByPath;
 
   void countInstance(AdaptedHeapData data, int objectIndex) {
     assert(!_isSealed);
@@ -88,7 +94,7 @@ class HeapClassStatistics {
 
     final path = data.retainingPath(objectIndex);
     if (path == null) return;
-    final sizeForPath = byRetainingPath.putIfAbsent(
+    final sizeForPath = sizesByPath.putIfAbsent(
       ClassOnlyHeapPath(path),
       () => SizeOfClassSet(),
     );
@@ -103,7 +109,7 @@ class HeapClassStatistics {
   void seal() {
     _isSealed = true;
     total.seal();
-    for (var size in byRetainingPath.values) {
+    for (var size in sizesByPath.values) {
       size.seal();
     }
   }
