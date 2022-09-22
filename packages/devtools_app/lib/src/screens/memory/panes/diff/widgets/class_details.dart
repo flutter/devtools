@@ -29,28 +29,12 @@ class HeapClassDetails extends StatelessWidget {
             child: Text('Select class to see details here.'),
           );
         }
-        if (item.diffWith.value == null) {
-          return ClassStatsTable(
-            data: record,
-            sorting: sorting,
-          );
-        }
 
-        return _DiffClassDetails(item: item);
+        return ClassStatsTable(
+          data: record,
+          sorting: sorting,
+        );
       },
-    );
-  }
-}
-
-class _DiffClassDetails extends StatelessWidget {
-  const _DiffClassDetails({Key? key, required this.item}) : super(key: key);
-  final SnapshotListItem item;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child:
-          Text('Diff details for ${item.selectedClassName.value} will be here'),
     );
   }
 }

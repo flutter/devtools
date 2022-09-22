@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../../../../shared/utils.dart';
 import 'model.dart';
 import 'spanning_tree.dart';
 
@@ -74,13 +75,23 @@ class HeapClassStatistics {
         _isSealed = true,
         heapClass = minuend.heapClass,
         total = SizeOfClassSet.subtract(minuend.total, subtrahend.total),
-        // ignore: dead_code
         sizesByPath =
             _subtractSizesByPath(minuend.sizesByPath, subtrahend.sizesByPath);
 
-  static SizesByPath _subtractSizesByPath(SizesByPath left, SizesByPath rigth) {
-    throw UnimplementedError('memory diff');
-  }
+  static SizesByPath _subtractSizesByPath(
+    SizesByPath minuend,
+    SizesByPath subtrahend,
+  ) =>
+      subtractMaps<ClassOnlyHeapPath, SizeOfClassSet>(
+        minuend: minuend,
+        subtrahend: subtrahend,
+        subtract: (minuend, subtrahend) {
+          final diff = SizeOfClassSet.subtract(minuend, subtrahend);
+          if (diff.isZero) return null;
+          return diff;
+        },
+        negate: (value) => SizeOfClassSet.negative(value),
+      );
 
   final HeapClass heapClass;
   final SizeOfClassSet total;
