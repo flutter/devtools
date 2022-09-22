@@ -454,8 +454,8 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
 
   @override
   void didChangeDependencies() {
-    _hoverCardController = Provider.of<HoverCardController>(context);
     super.didChangeDependencies();
+    _hoverCardController = Provider.of<HoverCardController>(context);
   }
 
   @override
