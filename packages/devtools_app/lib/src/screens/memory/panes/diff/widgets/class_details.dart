@@ -14,7 +14,7 @@ class HeapClassDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<HeapStatsRecord?>(
+    return ValueListenableBuilder<HeapClassStatistics?>(
       valueListenable: item.selectedRecord,
       builder: (_, record, __) {
         if (record == null) {

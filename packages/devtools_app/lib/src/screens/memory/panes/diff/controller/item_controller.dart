@@ -73,8 +73,8 @@ class SnapshotListItem extends DiffListItem with AutoDisposeControllerMixin {
 
   final ValueListenable<String?> selectedClassName;
 
-  ValueListenable<HeapStatsRecord?> get selectedRecord => _selectedRecord;
-  final _selectedRecord = ValueNotifier<HeapStatsRecord?>(null);
+  ValueListenable<HeapClassStatistics?> get selectedRecord => _selectedRecord;
+  final _selectedRecord = ValueNotifier<HeapClassStatistics?>(null);
 
   @override
   bool get hasData => heap != null;

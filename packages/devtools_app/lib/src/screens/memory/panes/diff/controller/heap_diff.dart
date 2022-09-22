@@ -64,7 +64,7 @@ class HeapComparison {
   final _HeapCouple heapCouple;
 
   HeapStatistics _stats() {
-    final result = <String, HeapStatsRecord>{};
+    final result = <String, HeapClassStatistics>{};
 
     final older = heapCouple.older.stats.recordsByClass;
     final younger = heapCouple.younger.stats.recordsByClass;
@@ -76,12 +76,12 @@ class HeapComparison {
       final youngerRecord = younger[key];
 
       if (olderRecord != null && youngerRecord != null) {
-        final diff = HeapStatsRecord.subtract(olderRecord, youngerRecord);
+        final diff = HeapClassStatistics.subtract(olderRecord, youngerRecord);
         if (!diff.isZero) result[key] = diff;
       } else if (youngerRecord != null) {
         result[key] = youngerRecord;
       } else {
-        result[key] = HeapStatsRecord.negative(olderRecord!);
+        result[key] = HeapClassStatistics.negative(olderRecord!);
       }
     }
 
