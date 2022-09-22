@@ -10,6 +10,7 @@ import '../../../../../shared/table.dart';
 import '../../../../../shared/table_data.dart';
 import '../../../../../shared/utils.dart';
 import '../../../shared/heap/heap.dart';
+import '../../../shared/heap/primitives.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/item_controller.dart';
 
@@ -57,11 +58,7 @@ class _ShallowSizeColumn extends ColumnData<HeapClassStatistics> {
   _ShallowSizeColumn()
       : super(
           'Shallow\nDart Size',
-          titleTooltip: 'Total shallow size of all of the instances.\n'
-              'Shallow size of an object is the size of this object\n'
-              'plus the references it holds to other Dart objects\n'
-              "in its fields (this doesn't include the size of\n"
-              'the fields - just the size of the references).',
+          titleTooltip: shallowSizeColumnTooltip,
           fixedWidthPx: scaleByFontFactor(85.0),
           alignment: ColumnAlignment.right,
         );
@@ -87,9 +84,7 @@ class _RetainedSizeColumn extends ColumnData<HeapClassStatistics> {
   _RetainedSizeColumn()
       : super(
           'Retained\nDart Size',
-          titleTooltip:
-              'Total shallow Dart size of objects plus shallow Dart size of objects they retain,\n'
-              'taking into account only the shortest retaining path for the referenced objects.',
+          titleTooltip: retainedSizeColumnTooltip,
           fixedWidthPx: scaleByFontFactor(85.0),
           alignment: ColumnAlignment.right,
         );
@@ -111,8 +106,8 @@ class _RetainedSizeColumn extends ColumnData<HeapClassStatistics> {
       )!;
 }
 
-class StatsTable extends StatefulWidget {
-  const StatsTable({
+class SnapshotStatsTable extends StatefulWidget {
+  const SnapshotStatsTable({
     Key? key,
     required this.controller,
   }) : super(key: key);
@@ -120,10 +115,11 @@ class StatsTable extends StatefulWidget {
   final DiffPaneController controller;
 
   @override
-  State<StatsTable> createState() => _StatsTableState();
+  State<SnapshotStatsTable> createState() => _SnapshotStatsTableState();
 }
 
-class _StatsTableState extends State<StatsTable> with AutoDisposeMixin {
+class _SnapshotStatsTableState extends State<SnapshotStatsTable>
+    with AutoDisposeMixin {
   late final List<ColumnData<HeapClassStatistics>> _columns;
   late final SnapshotListItem _item;
 
@@ -142,8 +138,9 @@ class _StatsTableState extends State<StatsTable> with AutoDisposeMixin {
       _RetainedSizeColumn(),
     ];
 
-    if (!_item.sorting.initialized) {
-      _item.sorting
+    final sorting = widget.controller.snapshotStatsSorting;
+    if (!sorting.initialized) {
+      sorting
         ..direction = SortDirection.descending
         ..columnIndex = _columns.indexOf(_shallowSizeColumn)
         ..initialized = true;
@@ -152,6 +149,7 @@ class _StatsTableState extends State<StatsTable> with AutoDisposeMixin {
 
   @override
   Widget build(BuildContext context) {
+    final sorting = widget.controller.snapshotStatsSorting;
     return FlatTable<HeapClassStatistics>(
       columns: _columns,
       data: _item.statsToShow.records,
@@ -159,16 +157,16 @@ class _StatsTableState extends State<StatsTable> with AutoDisposeMixin {
       onItemSelected: (r) =>
           widget.controller.setSelectedClass(r.heapClass.fullName),
       selectionNotifier: _item.selectedRecord,
-      sortColumn: _columns[_item.sorting.columnIndex],
-      sortDirection: _item.sorting.direction,
+      sortColumn: _columns[sorting.columnIndex],
+      sortDirection: sorting.direction,
       onSortChanged: (
         sortColumn,
         direction, {
         secondarySortColumn,
       }) =>
           setState(() {
-        _item.sorting.columnIndex = _columns.indexOf(sortColumn);
-        _item.sorting.direction = direction;
+        sorting.columnIndex = _columns.indexOf(sortColumn);
+        sorting.direction = direction;
       }),
     );
   }

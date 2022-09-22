@@ -62,8 +62,6 @@ class SnapshotListItem extends DiffListItem with AutoDisposeControllerMixin {
 
   String get name => '$_isolateName-$displayNumber';
 
-  var sorting = ColumnSorting();
-
   ValueListenable<SnapshotListItem?> get diffWith => _diffWith;
   final _diffWith = ValueNotifier<SnapshotListItem?>(null);
   void setDiffWith(SnapshotListItem? value) {
@@ -88,10 +86,4 @@ class SnapshotListItem extends DiffListItem with AutoDisposeControllerMixin {
 
   void updateSelectedRecord() => _selectedRecord.value =
       statsToShow.recordsByClass[selectedClassName.value];
-}
-
-class ColumnSorting {
-  bool initialized = false;
-  SortDirection direction = SortDirection.ascending;
-  int columnIndex = 0;
 }

@@ -63,7 +63,8 @@ class HeapClassStatistics {
       : _isSealed = true,
         heapClass = other.heapClass,
         total = SizeOfClassSet.negative(other.total),
-        byRetainingPath = <ClassOnlyHeapPath, SizeOfClassSet>{}; // ???
+        byRetainingPath = other.byRetainingPath
+            .map((key, value) => MapEntry(key, SizeOfClassSet.negative(value)));
 
   HeapClassStatistics.subtract(
       HeapClassStatistics left, HeapClassStatistics right)
@@ -71,7 +72,7 @@ class HeapClassStatistics {
         _isSealed = true,
         heapClass = left.heapClass,
         total = SizeOfClassSet.subtract(left.total, right.total),
-        byRetainingPath = <ClassOnlyHeapPath, SizeOfClassSet>{}; // ???
+        byRetainingPath = <ClassOnlyHeapPath, SizeOfClassSet>{}; // ???????
 
   final HeapClass heapClass;
   final SizeOfClassSet total;
