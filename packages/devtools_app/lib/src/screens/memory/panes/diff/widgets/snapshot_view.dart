@@ -56,7 +56,10 @@ class SnapshotView extends StatelessWidget {
                   ),
                 ),
                 OutlineDecoration(
-                  child: HeapClassDetails(item: item),
+                  child: HeapClassDetails(
+                    item: item,
+                    sorting: controller.classStatsSorting,
+                  ),
                 ),
               ],
             );
