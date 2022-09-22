@@ -11,26 +11,56 @@ class AdaptedHeap {
   final AdaptedHeapData data;
 
   late final HeapStatistics stats = _heapStatistics(data);
+
+  static HeapStatistics _heapStatistics(AdaptedHeapData data) {
+    final result = <String, HeapStatsRecord>{};
+    if (!data.isSpanningTreeBuilt) buildSpanningTree(data);
+
+    for (var i in Iterable.generate(data.objects.length)) {
+      final object = data.objects[i];
+      final heapClass = object.heapClass;
+
+      // We do not show objects that will be garbage collected soon or are
+      // native.
+      if (object.retainedSize == null || heapClass.isSentinel) continue;
+
+      final fullName = heapClass.fullName;
+
+      final stats =
+          result.putIfAbsent(fullName, () => HeapStatsRecord(heapClass));
+      stats.countInstance(data, i);
+    }
+
+    return HeapStatistics(result);
+  }
 }
 
-HeapStatistics _heapStatistics(AdaptedHeapData data) {
-  final result = <String, HeapStatsRecord>{};
-  if (!data.isSpanningTreeBuilt) buildSpanningTree(data);
+class HeapStatistics {
+  HeapStatistics(this.recordsByClass);
 
-  for (var i in Iterable.generate(data.objects.length)) {
-    final object = data.objects[i];
-    final heapClass = object.heapClass;
+  /// Maps full class name to stats record of this class.
+  final Map<String, HeapStatsRecord> recordsByClass;
+  late final List<HeapStatsRecord> records =
+      recordsByClass.values.toList(growable: false);
+}
 
-    // We do not show objects that will be garbage collected soon or are
-    // native.
-    if (object.retainedSize == null || heapClass.isSentinel) continue;
+class HeapStatsRecord {
+  HeapStatsRecord(this.heapClass, {SizeOfSet? total})
+      : total = total ?? SizeOfSet();
 
-    final fullName = heapClass.fullName;
+  final HeapClass heapClass;
+  final SizeOfSet total;
+  final byRetainingPath = <String, SizeOfSet>{};
 
-    final stats =
-        result.putIfAbsent(fullName, () => HeapStatsRecord(heapClass));
-    stats.countInstance(data, i);
+  void countInstance(AdaptedHeapData data, int onbjectIndex) {
+    final object = data.objects[onbjectIndex];
+    assert(object.heapClass.fullName == heapClass.fullName);
+    total.countInstance(object);
+    // final path = object.
   }
 
-  return HeapStatistics(result);
+  HeapStatsRecord negative() =>
+      HeapStatsRecord(heapClass, total: total.negative());
+
+  bool get isZero => total.isZero;
 }

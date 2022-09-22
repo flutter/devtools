@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
-import '../../../shared/heap/model.dart';
+import '../../../shared/heap/heap.dart';
 import '../controller/item_controller.dart';
 
 class HeapClassDetails extends StatelessWidget {

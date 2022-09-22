@@ -201,27 +201,6 @@ class SizeOfSet {
   }
 }
 
-class HeapStatsRecord {
-  HeapStatsRecord(this.heapClass, {SizeOfSet? total})
-      : total = total ?? SizeOfSet();
-
-  final HeapClass heapClass;
-  final SizeOfSet total;
-  final byRetainingPath = <String, SizeOfSet>{};
-
-  void countInstance(AdaptedHeapData data, int onbjectIndex) {
-    final object = data.objects[onbjectIndex];
-    assert(object.heapClass.fullName == heapClass.fullName);
-    total.countInstance(object);
-    // final path = object.
-  }
-
-  HeapStatsRecord negative() =>
-      HeapStatsRecord(heapClass, total: total.negative());
-
-  bool get isZero => total.isZero;
-}
-
 /// This class is needed to make the snapshot taking operation mockable.
 class SnapshotTaker {
   Future<AdaptedHeapData?> take() async {
@@ -263,13 +242,4 @@ class HeapClass {
     assert(false, 'Unexpected library for $className: $library.');
     return false;
   }
-}
-
-class HeapStatistics {
-  HeapStatistics(this.recordsByClass);
-
-  /// Maps full class name to stats record of this class.
-  final Map<String, HeapStatsRecord> recordsByClass;
-  late final List<HeapStatsRecord> records =
-      recordsByClass.values.toList(growable: false);
 }
