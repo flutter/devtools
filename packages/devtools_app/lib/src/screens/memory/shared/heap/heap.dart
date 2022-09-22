@@ -49,41 +49,52 @@ class HeapStatsRecord {
       : total = SizeOfSet(),
         byRetainingPath = <String, SizeOfSet>{};
 
+  HeapStatsRecord.negative(HeapStatsRecord other)
+      : heapClass = other.heapClass,
+        total = SizeOfSet.negative(other.total),
+        byRetainingPath = <String, SizeOfSet>{}; // ???
+
+  HeapStatsRecord.subtruct(HeapStatsRecord left, HeapStatsRecord right)
+      : assert(left.heapClass.fullName == right.heapClass.fullName),
+        heapClass = left.heapClass,
+        total = SizeOfSet.subtract(left.total, right.total),
+        byRetainingPath = <String, SizeOfSet>{}; // ???
+
   final HeapClass heapClass;
   final SizeOfSet total;
   final Map<String, SizeOfSet> byRetainingPath;
 
   void countInstance(AdaptedHeapData data, int onbjectIndex) {
+    // ???
     final object = data.objects[onbjectIndex];
     assert(object.heapClass.fullName == heapClass.fullName);
     total.countInstance(object);
     // final path = object.
   }
 
-  HeapStatsRecord negative() =>
-      HeapStatsRecord(heapClass, total: total.negative());
-
   bool get isZero => total.isZero;
 }
 
 /// Size of set of instances.
 class SizeOfSet {
+  SizeOfSet();
+
+  SizeOfSet.negative(SizeOfSet other)
+      : instanceCount = -other.instanceCount,
+        shallowSize = -other.shallowSize,
+        retainedSize = -other.retainedSize;
+
+  SizeOfSet.subtract(SizeOfSet left, SizeOfSet right)
+      : instanceCount = left.instanceCount - right.instanceCount,
+        shallowSize = left.shallowSize - right.shallowSize,
+        retainedSize = left.retainedSize - right.retainedSize;
+
   int instanceCount = 0;
   int shallowSize = 0;
   int retainedSize = 0;
 
-  SizeOfSet negative() => SizeOfSet()
-    ..instanceCount = -instanceCount
-    ..shallowSize = -shallowSize
-    ..retainedSize = -retainedSize;
-
   bool get isZero =>
       shallowSize == 0 && retainedSize == 0 && instanceCount == 0;
-
-  SizeOfSet subtract(SizeOfSet other) => SizeOfSet()
-    ..instanceCount = instanceCount - other.instanceCount
-    ..shallowSize = shallowSize - other.shallowSize
-    ..retainedSize = retainedSize - other.retainedSize;
 
   void countInstance(AdaptedHeapObject object) {
     retainedSize += object.retainedSize!;

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../primitives/memory_utils.dart';
@@ -184,8 +185,9 @@ class SnapshotTaker {
   }
 }
 
+@immutable
 class HeapClass {
-  HeapClass({required this.className, required this.library});
+  const HeapClass({required this.className, required this.library});
 
   final String className;
   final String library;

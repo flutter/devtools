@@ -76,26 +76,15 @@ class HeapComparison {
       final youngerRecord = younger[key];
 
       if (olderRecord != null && youngerRecord != null) {
-        final diff = _diffStatsRecords(olderRecord, youngerRecord);
+        final diff = HeapStatsRecord.subtruct(olderRecord, youngerRecord);
         if (!diff.isZero) result[key] = diff;
       } else if (youngerRecord != null) {
         result[key] = youngerRecord;
       } else {
-        result[key] = olderRecord!.negative();
+        result[key] = HeapStatsRecord.negative(olderRecord!);
       }
     }
 
     return HeapStatistics(result);
-  }
-
-  static HeapStatsRecord _diffStatsRecords(
-    HeapStatsRecord older,
-    HeapStatsRecord younger,
-  ) {
-    assert(older.heapClass.fullName == younger.heapClass.fullName);
-    return HeapStatsRecord(
-      older.heapClass,
-      total: younger.total.subtract(older.total),
-    );
   }
 }
