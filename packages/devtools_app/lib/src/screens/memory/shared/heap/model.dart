@@ -171,21 +171,45 @@ class AdaptedHeapObject {
   String get name => '${heapClass.library}/$shortName';
 }
 
-class HeapStatsRecord {
-  HeapStatsRecord(this.heapClass);
-
-  final HeapClass heapClass;
+/// Size of set of instances.
+class SetSize {
   int instanceCount = 0;
   int shallowSize = 0;
   int retainedSize = 0;
 
-  HeapStatsRecord negative() => HeapStatsRecord(heapClass)
+  SetSize negative() => SetSize()
     ..instanceCount = -instanceCount
     ..shallowSize = -shallowSize
     ..retainedSize = -retainedSize;
 
   bool get isZero =>
       shallowSize == 0 && retainedSize == 0 && instanceCount == 0;
+
+  SetSize subtract(SetSize other) => SetSize()
+    ..instanceCount = instanceCount - other.instanceCount
+    ..shallowSize = shallowSize - other.shallowSize
+    ..retainedSize = retainedSize - other.retainedSize;
+}
+
+class HeapStatsRecord {
+  HeapStatsRecord(this.heapClass, {SetSize? total})
+      : total = total ?? SetSize();
+
+  final HeapClass heapClass;
+  final SetSize total;
+  final byPath = <String, SetSize>{};
+
+  void countInstance(AdaptedHeapObject object) {
+    assert(object.heapClass.fullName == heapClass.fullName);
+    total.retainedSize += object.retainedSize!;
+    total.shallowSize += object.shallowSize;
+    total.instanceCount++;
+  }
+
+  HeapStatsRecord negative() =>
+      HeapStatsRecord(heapClass, total: total.negative());
+
+  bool get isZero => total.isZero;
 }
 
 /// This class is needed to make the snapshot taking operation mockable.

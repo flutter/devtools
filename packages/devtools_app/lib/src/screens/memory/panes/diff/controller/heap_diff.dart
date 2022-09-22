@@ -94,9 +94,9 @@ class HeapComparison {
     HeapStatsRecord younger,
   ) {
     assert(older.heapClass.fullName == younger.heapClass.fullName);
-    return HeapStatsRecord(older.heapClass)
-      ..instanceCount = younger.instanceCount - older.instanceCount
-      ..shallowSize = younger.shallowSize - older.shallowSize
-      ..retainedSize = younger.retainedSize - older.retainedSize;
+    return HeapStatsRecord(
+      older.heapClass,
+      total: younger.total.subtract(older.total),
+    );
   }
 }

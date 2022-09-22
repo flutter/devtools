@@ -24,13 +24,10 @@ HeapStatistics _heapStatistics(AdaptedHeapData data) {
     if (object.retainedSize == null || heapClass.isSentinel) continue;
 
     final fullName = heapClass.fullName;
-    if (!result.containsKey(fullName)) {
-      result[fullName] = HeapStatsRecord(heapClass);
-    }
-    final stats = result[fullName]!;
-    stats.retainedSize += object.retainedSize ?? 0;
-    stats.shallowSize += object.shallowSize;
-    stats.instanceCount++;
+
+    final stats =
+        result.putIfAbsent(fullName, () => HeapStatsRecord(heapClass));
+    stats.countInstance(object);
   }
   return HeapStatistics(result);
 }

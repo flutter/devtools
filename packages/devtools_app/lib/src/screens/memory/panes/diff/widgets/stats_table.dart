@@ -44,7 +44,7 @@ class _InstanceColumn extends ColumnData<HeapStatsRecord> {
         );
 
   @override
-  int getValue(HeapStatsRecord record) => record.instanceCount;
+  int getValue(HeapStatsRecord record) => record.total.instanceCount;
 
   @override
   bool get supportsSorting => true;
@@ -67,7 +67,7 @@ class _ShallowSizeColumn extends ColumnData<HeapStatsRecord> {
         );
 
   @override
-  int getValue(HeapStatsRecord record) => record.shallowSize;
+  int getValue(HeapStatsRecord record) => record.total.shallowSize;
 
   @override
   bool get supportsSorting => true;
@@ -95,7 +95,7 @@ class _RetainedSizeColumn extends ColumnData<HeapStatsRecord> {
         );
 
   @override
-  int getValue(HeapStatsRecord record) => record.retainedSize;
+  int getValue(HeapStatsRecord record) => record.total.retainedSize;
 
   @override
   bool get supportsSorting => true;
