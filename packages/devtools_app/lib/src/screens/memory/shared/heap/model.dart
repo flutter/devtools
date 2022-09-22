@@ -79,7 +79,7 @@ class AdaptedHeapData {
   int? objectIndexByIdentityHashCode(IdentityHashCode code) =>
       _objectsByCode[code];
 
-  HeapPath? _retainingPath(int objectIndex) {
+  HeapPath? retainingPath(int objectIndex) {
     assert(isSpanningTreeBuilt);
 
     if (objects[objectIndex].retainer == null) return null;
@@ -106,18 +106,10 @@ class HeapPath {
   final List<AdaptedHeapObject> objects;
 
   /// Retaining path for the object in string format.
-  String? shortPath(IdentityHashCode code) {
-    final path = _retainingPath(code);
-    if (path == null) return null;
-    return '/${path.map((i) => objects[i].shortName).join('/')}/';
-  }
+  String? shortPath() => '/${objects.map((o) => o.shortName).join('/')}/';
 
   /// Retaining path for the object as an array of the retaining objects.
-  List<String>? detailedPath(IdentityHashCode code) {
-    final path = _retainingPath(code);
-    if (path == null) return null;
-    return path.map((i) => objects[i].name).toList();
-  }
+  List<String>? detailedPath() => objects.map((o) => o.name).toList();
 }
 
 /// Contains information from [HeapSnapshotObject] needed for
@@ -218,6 +210,7 @@ class HeapStatsRecord {
   final byRetainingPath = <String, SizeOfSet>{};
 
   void countInstance(AdaptedHeapData data, int onbjectIndex) {
+    final object = data.objects[onbjectIndex];
     assert(object.heapClass.fullName == heapClass.fullName);
     total.countInstance(object);
     // final path = object.

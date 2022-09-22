@@ -5,7 +5,7 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../shared/heap/model.dart';
-import '../controller/Item_controller.dart';
+import '../controller/item_controller.dart';
 
 class HeapClassDetails extends StatelessWidget {
   const HeapClassDetails({Key? key, required this.item}) : super(key: key);
@@ -39,8 +39,9 @@ class _SnapshotClassDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child:
-          Text('Single details for ${item.selectedClassName.value} will be here'),
+      child: Text(
+        'Single details for ${item.selectedClassName.value} will be here',
+      ),
     );
   }
 }
@@ -52,7 +53,8 @@ class _DiffClassDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Text('Diff details for ${item.selectedClassName.value} will be here'),
+      child:
+          Text('Diff details for ${item.selectedClassName.value} will be here'),
     );
   }
 }
