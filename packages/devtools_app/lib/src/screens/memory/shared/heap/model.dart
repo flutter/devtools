@@ -73,20 +73,34 @@ class AdaptedHeapData {
         _JsonFields.created: created,
       };
 
-  HeapPath? _retainingPath(IdentityHashCode code) {
+  int? objectIndexByIdentityHashCode(IdentityHashCode code) =>
+      _objectsByCode[code];
+
+  HeapPath? _retainingPath(int objectIndex) {
     assert(isSpanningTreeBuilt);
-    var i = _objectsByCode[code]!;
-    if (objects[i].retainer == null) return null;
 
-    final result = <int>[];
+    if (objects[objectIndex].retainer == null) return null;
 
-    while (i >= 0) {
-      result.add(i);
-      i = objects[i].retainer!;
+    final result = <AdaptedHeapObject>[];
+
+    while (objectIndex >= 0) {
+      final object = objects[objectIndex];
+      result.add(object);
+      objectIndex = object.retainer!;
     }
 
-    return result.reversed.toList(growable: false);
+    return HeapPath(result.reversed.toList(growable: false));
   }
+}
+
+/// Result of invocation of [identityHashCode].
+typedef IdentityHashCode = int;
+
+/// Sequence of ids of objects in the heap.
+class HeapPath {
+  HeapPath(this.objects);
+
+  final List<AdaptedHeapObject> objects;
 
   /// Retaining path for the object in string format.
   String? shortPath(IdentityHashCode code) {
@@ -102,12 +116,6 @@ class AdaptedHeapData {
     return path.map((i) => objects[i].name).toList();
   }
 }
-
-/// Result of invocation of [identityHashCode].
-typedef IdentityHashCode = int;
-
-/// Sequence of ids of objects in the heap.
-typedef HeapPath = List<int>;
 
 /// Contains information from [HeapSnapshotObject] needed for
 /// memory analysis on memory screen.
@@ -168,16 +176,17 @@ class AdaptedHeapObject {
       };
 
   String get shortName => '${heapClass.className}-$code';
+
   String get name => '${heapClass.library}/$shortName';
 }
 
 /// Size of set of instances.
-class SetSize {
+class SizeOfSet {
   int instanceCount = 0;
   int shallowSize = 0;
   int retainedSize = 0;
 
-  SetSize negative() => SetSize()
+  SizeOfSet negative() => SizeOfSet()
     ..instanceCount = -instanceCount
     ..shallowSize = -shallowSize
     ..retainedSize = -retainedSize;
@@ -185,25 +194,30 @@ class SetSize {
   bool get isZero =>
       shallowSize == 0 && retainedSize == 0 && instanceCount == 0;
 
-  SetSize subtract(SetSize other) => SetSize()
+  SizeOfSet subtract(SizeOfSet other) => SizeOfSet()
     ..instanceCount = instanceCount - other.instanceCount
     ..shallowSize = shallowSize - other.shallowSize
     ..retainedSize = retainedSize - other.retainedSize;
+
+  void countInstance(AdaptedHeapObject object) {
+    retainedSize += object.retainedSize!;
+    shallowSize += object.shallowSize;
+    instanceCount++;
+  }
 }
 
 class HeapStatsRecord {
-  HeapStatsRecord(this.heapClass, {SetSize? total})
-      : total = total ?? SetSize();
+  HeapStatsRecord(this.heapClass, {SizeOfSet? total})
+      : total = total ?? SizeOfSet();
 
   final HeapClass heapClass;
-  final SetSize total;
-  final byPath = <String, SetSize>{};
+  final SizeOfSet total;
+  final byRetainingPath = <String, SizeOfSet>{};
 
-  void countInstance(AdaptedHeapObject object) {
+  void countInstance(AdaptedHeapData data, int onbjectIndex) {
     assert(object.heapClass.fullName == heapClass.fullName);
-    total.retainedSize += object.retainedSize!;
-    total.shallowSize += object.shallowSize;
-    total.instanceCount++;
+    total.countInstance(object);
+    // final path = object.
   }
 
   HeapStatsRecord negative() =>

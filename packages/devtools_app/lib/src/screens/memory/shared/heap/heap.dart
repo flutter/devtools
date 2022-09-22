@@ -17,17 +17,20 @@ HeapStatistics _heapStatistics(AdaptedHeapData data) {
   final result = <String, HeapStatsRecord>{};
   if (!data.isSpanningTreeBuilt) buildSpanningTree(data);
 
-  for (var object in data.objects) {
+  for (var i in Iterable.generate(data.objects.length)) {
+    final object = data.objects[i];
     final heapClass = object.heapClass;
 
-    // We do not show objects that will be garbage collected soon.
+    // We do not show objects that will be garbage collected soon or are
+    // native.
     if (object.retainedSize == null || heapClass.isSentinel) continue;
 
     final fullName = heapClass.fullName;
 
     final stats =
         result.putIfAbsent(fullName, () => HeapStatsRecord(heapClass));
-    stats.countInstance(object);
+    stats.countInstance(data, i);
   }
+
   return HeapStatistics(result);
 }
