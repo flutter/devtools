@@ -24,15 +24,20 @@ class SnapshotControlPane extends StatelessWidget {
         final current = controller.selectedItem as SnapshotListItem;
 
         return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const SizedBox(width: defaultSpacing),
-            if (!isProcessing && current.heap != null) ...[
-              _DiffDropdown(
-                current: current,
-                list: controller.snapshots,
-              ),
-              const SizedBox(width: defaultSpacing),
-            ],
+            // This child is aligned to the left.
+            Row(
+              children: [
+                const SizedBox(width: defaultSpacing),
+                if (!isProcessing && current.heap != null)
+                  _DiffDropdown(
+                    current: current,
+                    list: controller.snapshots,
+                  ),
+              ],
+            ),
+            // This child is aligned to the right.
             ToolbarAction(
               icon: Icons.clear,
               tooltip: 'Delete snapshot',
