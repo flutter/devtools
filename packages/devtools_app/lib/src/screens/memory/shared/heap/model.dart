@@ -30,14 +30,17 @@ class AdaptedHeapData {
     this.created = created ?? DateTime.now();
   }
 
-  factory AdaptedHeapData.fromJson(Map<String, dynamic> json) =>
-      AdaptedHeapData(
-        (json[_JsonFields.objects] as List<dynamic>)
-            .map((e) => AdaptedHeapObject.fromJson(e))
-            .toList(),
-        created: json[_JsonFields.created],
-        rootIndex: json[_JsonFields.rootIndex] ?? _defaultRootIndex,
-      );
+  factory AdaptedHeapData.fromJson(Map<String, dynamic> json) {
+    final createdJson = json[_JsonFields.created];
+
+    return AdaptedHeapData(
+      (json[_JsonFields.objects] as List<dynamic>)
+          .map((e) => AdaptedHeapObject.fromJson(e))
+          .toList(),
+      created: createdJson == null ? null : DateTime.parse(createdJson),
+      rootIndex: json[_JsonFields.rootIndex] ?? _defaultRootIndex,
+    );
+  }
 
   factory AdaptedHeapData.fromHeapSnapshot(HeapSnapshotGraph graph) =>
       AdaptedHeapData(
@@ -70,7 +73,7 @@ class AdaptedHeapData {
   Map<String, dynamic> toJson() => {
         _JsonFields.objects: objects.map((e) => e.toJson()).toList(),
         _JsonFields.rootIndex: rootIndex,
-        _JsonFields.created: created,
+        _JsonFields.created: created.toIso8601String(),
       };
 
   int? objectIndexByIdentityHashCode(IdentityHashCode code) =>

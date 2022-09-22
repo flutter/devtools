@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/split.dart';
 import '../../../shared/heap/model.dart';
-import '../controller/Item_controller.dart';
 import '../controller/diff_pane_controller.dart';
+import '../controller/item_controller.dart';
 import 'class_details.dart';
 import 'stats_table.dart';
 
@@ -31,6 +31,8 @@ class SnapshotView extends StatelessWidget {
         } else {
           final heap1 = item.heap!;
           final heap2 = item.diffWith.value!.heap!;
+
+          // TODO(polina-c): make comparison async.
           stats = controller.diffStore.compare(heap1, heap2).stats;
         }
 
@@ -54,7 +56,7 @@ class SnapshotView extends StatelessWidget {
                   ),
                 ),
                 OutlineDecoration(
-                  child: ClassDetails(item: item),
+                  child: HeapClassDetails(item: item),
                 ),
               ],
             );

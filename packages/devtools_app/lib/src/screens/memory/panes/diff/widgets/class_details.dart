@@ -7,8 +7,8 @@ import 'package:flutter/widgets.dart';
 import '../../../shared/heap/model.dart';
 import '../controller/Item_controller.dart';
 
-class ClassDetails extends StatelessWidget {
-  const ClassDetails({Key? key, required this.item}) : super(key: key);
+class HeapClassDetails extends StatelessWidget {
+  const HeapClassDetails({Key? key, required this.item}) : super(key: key);
 
   final SnapshotListItem item;
 
