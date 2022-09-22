@@ -21,6 +21,7 @@ class ObjectStoreController extends DisposableController
     if (isolate == null) {
       return;
     }
+    _selectedIsolateObjectStore.value = null;
     _selectedIsolateObjectStore.value =
         await service.getObjectStore(isolate.id!);
   }

@@ -21,7 +21,7 @@ class ObjectInspectorViewController extends DisposableController
   ObjectInspectorViewController() {
     addAutoDisposeListener(
       scriptManager.sortedScripts,
-      selectAndPushMainScript,
+      _initializeForCurrentIsolate,
     );
 
     addAutoDisposeListener(
@@ -50,8 +50,7 @@ class ObjectInspectorViewController extends DisposableController
       programExplorerController
         ..initialize()
         ..initListeners();
-      objectStoreController.refresh();
-      selectAndPushMainScript();
+      _initializeForCurrentIsolate();
       _initialized = true;
     }
   }
@@ -167,8 +166,11 @@ class ObjectInspectorViewController extends DisposableController
     return object;
   }
 
-  void selectAndPushMainScript() async {
+  /// Re-initializes the object inspector's state when building it for the
+  /// first time or when the selected isolate is updated.
+  void _initializeForCurrentIsolate() async {
     objectHistory.clear();
+    await objectStoreController.refresh();
 
     final scriptRefs = scriptManager.sortedScripts.value;
     final service = serviceManager.service!;
