@@ -5,20 +5,21 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../shared/heap/model.dart';
+import '../controller/Item_controller.dart';
 
 class ClassDetails extends StatelessWidget {
-  const ClassDetails({Key? key, required this.heapClass}) : super(key: key);
+  const ClassDetails({Key? key, required this.item}) : super(key: key);
 
-  final HeapClass? heapClass;
+  final SnapshotListItem item;
 
   @override
   Widget build(BuildContext context) {
-    final theClass = heapClass;
-    if (theClass == null) {
+    if (item.selectedRecord.value == null) {
       return const Center(
         child: Text('Select class to see details here.'),
       );
     }
-    return Center(child: Text('Details for ${theClass.fullName} will be here'));
+    return Center(
+        child: Text('Details for ${item.selectedClass.value} will be here'));
   }
 }
