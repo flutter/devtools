@@ -11,7 +11,7 @@ import '../../../../../shared/table_data.dart';
 import '../../../../../shared/utils.dart';
 import '../../../shared/heap/model.dart';
 import '../controller/diff_pane_controller.dart';
-import '../controller/model.dart';
+import '../controller/Item_controller.dart';
 
 class _ClassNameColumn extends ColumnData<HeapStatsRecord> {
   _ClassNameColumn()
@@ -125,7 +125,6 @@ class StatsTable extends StatefulWidget {
 class _StatsTableState extends State<StatsTable> with AutoDisposeMixin {
   late final List<ColumnData<HeapStatsRecord>> _columns;
   late final SnapshotListItem _item;
-  final _selectionNotifier = ValueNotifier<HeapStatsRecord?>(null);
 
   @override
   void initState() {
@@ -150,20 +149,6 @@ class _StatsTableState extends State<StatsTable> with AutoDisposeMixin {
     }
   }
 
-  HeapStatsRecord? get _selectedRecord =>
-      _item.statsToShow.recordsByClass[widget.controller.selectedClass.value];
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-
-    _selectionNotifier.value = _selectedRecord;
-    addAutoDisposeListener(
-      widget.controller.selectedClass,
-      () => _selectionNotifier.value = _selectedRecord,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return FlatTable<HeapStatsRecord>(
@@ -172,7 +157,7 @@ class _StatsTableState extends State<StatsTable> with AutoDisposeMixin {
       keyFactory: (e) => Key(e.heapClass.fullName),
       onItemSelected: (r) =>
           widget.controller.setSelectedClass(r.heapClass.fullName),
-      selectionNotifier: _selectionNotifier,
+      selectionNotifier: _item.selectedRecord,
       sortColumn: _columns[_item.sorting.columnIndex],
       sortDirection: _item.sorting.direction,
       onSortChanged: (

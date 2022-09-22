@@ -13,8 +13,7 @@ class HeapDiffStore {
 
   HeapComparison compare(AdaptedHeap heap1, AdaptedHeap heap2) {
     final couple = _HeapCouple(heap1, heap2);
-    if (!_store.containsKey(couple)) _store[couple] = HeapComparison(couple);
-    return _store[couple]!;
+    return _store.putIfAbsent(couple, () => HeapComparison(couple));
   }
 }
 
@@ -74,13 +73,16 @@ class HeapComparison {
     final unionOfKeys = older.keys.toSet().union(younger.keys.toSet());
 
     for (var key in unionOfKeys) {
-      if (older.containsKey(key) && younger.containsKey(key)) {
-        final diff = _diffStatsRecords(older[key]!, younger[key]!);
+      final olderRecord = older[key];
+      final youngerRecord = younger[key];
+
+      if (olderRecord != null && youngerRecord != null) {
+        final diff = _diffStatsRecords(olderRecord, youngerRecord);
         if (!diff.isZero) result[key] = diff;
-      } else if (younger.containsKey(key)) {
-        result[key] = younger[key]!;
+      } else if (youngerRecord != null) {
+        result[key] = youngerRecord;
       } else {
-        result[key] = older[key]!.negative();
+        result[key] = olderRecord!.negative();
       }
     }
 

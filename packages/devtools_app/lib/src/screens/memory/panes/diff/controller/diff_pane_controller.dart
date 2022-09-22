@@ -11,7 +11,7 @@ import '../../../../../primitives/utils.dart';
 import '../../../primitives/memory_utils.dart';
 import '../../../shared/heap/model.dart';
 import 'heap_diff.dart';
-import 'model.dart';
+import 'Item_controller.dart';
 
 class DiffPaneController {
   DiffPaneController(this.snapshotTaker);
@@ -35,7 +35,7 @@ class DiffPaneController {
   DiffListItem get selectedItem => snapshots.value[selectedIndex.value];
 
   /// Full name for the selected class.
-  ValueNotifier<String?> get selectedClass => _selectedClass;
+  ValueListenable<String?> get selectedClass => _selectedClass;
   final _selectedClass = ValueNotifier<String?>(null);
   void setSelectedClass(String? value) => _selectedClass.value = value;
 
@@ -52,6 +52,7 @@ class DiffPaneController {
         _nextDisplayNumber(),
         currentIsolateName ?? '<isolate-not-detected>',
         diffStore,
+        selectedClass,
       ),
     );
     await future;
@@ -61,6 +62,9 @@ class DiffPaneController {
   }
 
   Future<void> clearSnapshots() async {
+    for (var i = 0; i < snapshots.value.length; i++) {
+      snapshots.value[i].dispose();
+    }
     _snapshots.removeRange(1, snapshots.value.length);
     _selectedIndex.value = 0;
   }
@@ -73,6 +77,7 @@ class DiffPaneController {
 
   void deleteCurrentSnapshot() {
     assert(selectedItem is SnapshotListItem);
+    selectedItem.dispose();
     _snapshots.removeRange(selectedIndex.value, selectedIndex.value + 1);
     // We must change the selectedIndex, because otherwise the content will
     // not be re-rendered.

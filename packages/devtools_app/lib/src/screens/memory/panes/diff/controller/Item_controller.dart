@@ -16,8 +16,8 @@ abstract class DiffListItem extends DisposableController {
   /// If the number is not shown, it should be 0.
   int get displayNumber;
 
-  ValueListenable<bool> get isProcessing => _isProcessing;
   final _isProcessing = ValueNotifier<bool>(false);
+  ValueListenable<bool> get isProcessing => _isProcessing;
 
   /// If true, the item contains data, that can be compared and analyzed.
   bool get hasData;
@@ -37,11 +37,16 @@ class SnapshotListItem extends DiffListItem with AutoDisposeControllerMixin {
     this.displayNumber,
     this._isolateName,
     this.diffStore,
+    this.selectedClass,
   ) {
     _isProcessing.value = true;
     receiver.whenComplete(() async {
       final data = await receiver;
-      if (data != null) heap = AdaptedHeap(data);
+      if (data != null) {
+        heap = AdaptedHeap(data);
+        updateSelectedRecord();
+        addAutoDisposeListener(selectedClass, () => updateSelectedRecord());
+      }
       _isProcessing.value = false;
     });
   }
@@ -59,7 +64,17 @@ class SnapshotListItem extends DiffListItem with AutoDisposeControllerMixin {
 
   var sorting = ColumnSorting();
 
-  final diffWith = ValueNotifier<SnapshotListItem?>(null);
+  final _diffWith = ValueNotifier<SnapshotListItem?>(null);
+  ValueListenable<SnapshotListItem?> get diffWith => _diffWith;
+  void setDiffWith(SnapshotListItem? value) {
+    _diffWith.value = value;
+    updateSelectedRecord();
+  }
+
+  final ValueListenable<String?> selectedClass;
+
+  final _selectedRecord = ValueNotifier<HeapStatsRecord?>(null);
+  ValueListenable<HeapStatsRecord?> get selectedRecord => _selectedRecord;
 
   @override
   bool get hasData => heap != null;
@@ -70,6 +85,9 @@ class SnapshotListItem extends DiffListItem with AutoDisposeControllerMixin {
     if (itemToDiffWith == null) return theHeap.stats;
     return diffStore.compare(theHeap, itemToDiffWith.heap!).stats;
   }
+
+  void updateSelectedRecord() =>
+      _selectedRecord.value = statsToShow.recordsByClass[selectedClass.value];
 }
 
 class ColumnSorting {

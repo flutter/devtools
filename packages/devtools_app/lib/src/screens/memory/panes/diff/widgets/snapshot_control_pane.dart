@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/theme.dart';
 import '../controller/diff_pane_controller.dart';
-import '../controller/model.dart';
+import '../controller/Item_controller.dart';
 
 class SnapshotControlPane extends StatelessWidget {
   const SnapshotControlPane({Key? key, required this.controller})
@@ -54,7 +54,7 @@ class _DiffDropdown extends StatelessWidget {
     final diffWith = current.diffWith.value;
     // Check if diffWith was deleted from list.
     if (diffWith != null && !list.value.contains(diffWith)) {
-      current.diffWith.value = null;
+      current.setDiffWith(null);
     }
   }
 
@@ -85,9 +85,9 @@ class _DiffDropdown extends StatelessWidget {
             value: current.diffWith.value ?? current,
             onChanged: (SnapshotListItem? value) {
               if ((value ?? current) == current) {
-                current.diffWith.value = null;
+                current.setDiffWith(null);
               } else {
-                current.diffWith.value = value;
+                current.setDiffWith(value);
               }
             },
             items: items(),

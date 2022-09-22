@@ -8,6 +8,7 @@ import '../../../shared/heap/model.dart';
 
 class ClassDetails extends StatelessWidget {
   const ClassDetails({Key? key, required this.heapClass}) : super(key: key);
+
   final HeapClass? heapClass;
 
   @override
