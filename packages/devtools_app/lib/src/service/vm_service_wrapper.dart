@@ -10,6 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../primitives/utils.dart';
+import '../screens/vm_developer/vm_service_private_extensions.dart';
 import 'json_to_service_cache.dart';
 
 class VmServiceWrapper implements VmService {
@@ -1032,5 +1033,11 @@ extension VmServicePrivate on VmServiceWrapper {
           'targetId': targetId,
         },
         parser: InstanceRef.parse,
+      );
+
+  Future<ObjectStore?> getObjectStore(String isolateId) => _privateRpcInvoke(
+        'getObjectStore',
+        isolateId: isolateId,
+        parser: ObjectStore.parse,
       );
 }

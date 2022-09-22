@@ -765,6 +765,16 @@ class ToolbarAction extends StatelessWidget {
   }
 }
 
+class BlankHeader extends StatelessWidget implements PreferredSizeWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container();
+  }
+
+  @override
+  Size get preferredSize => Size.zero;
+}
+
 /// Create a bordered, fixed-height header area with a title and optional child
 /// on the right-hand side.
 ///

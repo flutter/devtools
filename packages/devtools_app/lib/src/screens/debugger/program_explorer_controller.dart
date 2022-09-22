@@ -107,6 +107,10 @@ class ProgramExplorerController extends DisposableController
     if (!initialized.value) {
       return;
     }
+    if (script == null) {
+      clearSelection();
+      return;
+    }
     await _selectScriptNode(script, rootObjectNodesInternal.value);
     rootObjectNodesInternal.notifyListeners();
   }
@@ -161,6 +165,13 @@ class ProgramExplorerController extends DisposableController
     _initialized.value = false;
     _initializing = false;
     return initialize();
+  }
+
+  void clearSelection() {
+    _scriptSelection?.unselect();
+    _scriptSelection = null;
+    _outlineNodes.clear();
+    _outlineSelection.value = null;
   }
 
   /// Marks [node] as the currently selected node, clearing the selection state
@@ -353,8 +364,11 @@ class ProgramExplorerController extends DisposableController
     // Find the script node nested under the library.
     final scriptNode = breadthFirstSearchObject(
       targetScript,
-      [libNode],
-    )!;
+      rootObjectNodes.value,
+    );
+    if (scriptNode == null) {
+      throw StateError('Could not find script node');
+    }
     await scriptNode.populateLocation();
     return scriptNode;
   }

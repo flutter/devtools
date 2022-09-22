@@ -651,6 +651,38 @@ class VmServiceObjectLink<T> extends StatelessWidget {
       } else if (object is ClassRef) {
         final cls = object as ClassRef;
         text = cls.name!;
+      } else if (object is CodeRef) {
+        final code = object as CodeRef;
+        text = code.name!;
+      } else if (object is InstanceRef) {
+        final instance = object as InstanceRef;
+        if (instance.kind == InstanceKind.kTypeParameter) {
+          final buf = StringBuffer();
+          final typeParams = instance.typeParameters!;
+          buf.write('<');
+          for (int i = 0; i < typeParams.length; ++i) {
+            buf.write(typeParams[i].valueAsString);
+            if (i + 1 != typeParams.length) {
+              buf.write(', ');
+            }
+          }
+          buf.write('>');
+          text = buf.toString();
+        } else if (instance.kind == InstanceKind.kList) {
+          text = 'List(length: ${instance.length})';
+        } else if (instance.kind == InstanceKind.kType) {
+          text = instance.name!;
+        } else {
+          if (instance.valueAsString != null) {
+            text = instance.valueAsString!;
+          } else {
+            final cls = instance.classRef!;
+            text = 'Instance of ${cls.name}';
+          }
+        }
+      } else if (object is TypeArgumentsRef) {
+        final typeArgs = object as TypeArgumentsRef;
+        text = typeArgs.name!;
       }
     } else {
       text = textBuilder!(object);
@@ -658,10 +690,15 @@ class VmServiceObjectLink<T> extends StatelessWidget {
 
     final theme = Theme.of(context);
     return SelectableText.rich(
+      style: theme.linkTextStyle.apply(
+        overflow: TextOverflow.ellipsis,
+      ),
+      maxLines: 1,
       TextSpan(
         text: text,
         style: theme.linkTextStyle.apply(
           fontFamily: theme.fixedFontStyle.fontFamily,
+          overflow: TextOverflow.ellipsis,
         ),
         recognizer: TapGestureRecognizer()
           ..onTap = () async {
@@ -881,7 +918,9 @@ class _ObjectInspectorCodeViewState extends State<ObjectInspectorCodeView> {
             }
           }
 
-          if (location != null && location.line != null) {
+          if (location != null &&
+              location.line != null &&
+              location.endTokenPos != null) {
             final script = currentParsedScript.script;
             final startLine = location.line!;
             final endLine = script.getLineNumberFromTokenPos(

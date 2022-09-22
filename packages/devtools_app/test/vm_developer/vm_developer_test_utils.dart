@@ -182,7 +182,6 @@ void setUpMockScriptManager() {
 }
 
 void mockVmObject(VmObject object) {
-  when(object.outlineNode).thenReturn(null);
   when(object.scriptRef).thenReturn(testScript);
   when(object.script).thenReturn(testScript);
   when(object.pos).thenReturn(testPos);

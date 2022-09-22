@@ -10,6 +10,7 @@ import '../../primitives/auto_dispose.dart';
 import '../../shared/globals.dart';
 import '../debugger/codeview_controller.dart';
 import '../debugger/program_explorer_controller.dart';
+import 'object_store_controller.dart';
 import 'object_viewport.dart';
 import 'vm_object_model.dart';
 
@@ -33,12 +34,11 @@ class ObjectInspectorViewController extends DisposableController
       ProgramExplorerController(showCodeNodes: true);
 
   final codeViewController = CodeViewController();
+  final objectStoreController = ObjectStoreController();
 
   final objectHistory = ObjectHistory();
 
   Isolate? isolate;
-
-  ScriptRef? _currentScriptRef;
 
   ValueListenable<bool> get refreshing => _refreshing;
   final _refreshing = ValueNotifier<bool>(false);
@@ -50,6 +50,7 @@ class ObjectInspectorViewController extends DisposableController
       programExplorerController
         ..initialize()
         ..initListeners();
+      objectStoreController.refresh();
       selectAndPushMainScript();
       _initialized = true;
     }
@@ -59,20 +60,26 @@ class ObjectInspectorViewController extends DisposableController
     final currentObjectValue = objectHistory.current.value;
 
     if (currentObjectValue != null) {
-      final scriptRef = currentObjectValue.scriptRef ??
-          (await programExplorerController
-                  .searchFileExplorer(currentObjectValue.obj))
-              .script;
+      try {
+        final scriptRef = currentObjectValue.scriptRef ??
+            (await programExplorerController
+                    .searchFileExplorer(currentObjectValue.obj))
+                .script;
 
-      if (scriptRef != null) {
-        await programExplorerController.selectScriptNode(scriptRef);
+        if (scriptRef != null) {
+          await programExplorerController.selectScriptNode(scriptRef);
+        }
+      } on StateError {
+        // Couldn't find a node for the newly pushed object. It's likely that
+        // this is an object from the object store that isn't otherwise
+        // reachable from the isolate's libraries, or it's an instance object.
+        return;
       }
 
-      final outlineNode = currentObjectValue.outlineNode ??
-          programExplorerController.breadthFirstSearchObject(
-            currentObjectValue.obj,
-            programExplorerController.outlineNodes.value,
-          );
+      final outlineNode = programExplorerController.breadthFirstSearchObject(
+        currentObjectValue.obj,
+        programExplorerController.outlineNodes.value,
+      );
 
       if (outlineNode != null) {
         programExplorerController
@@ -92,7 +99,10 @@ class ObjectInspectorViewController extends DisposableController
     final objRef = objectHistory.current.value?.ref;
 
     if (objRef != null) {
-      final refetchedObject = await createVmObject(objRef);
+      final refetchedObject = await createVmObject(
+        objRef,
+        scriptRef: objectHistory.current.value!.scriptRef,
+      );
       if (refetchedObject != null) {
         objectHistory.replaceCurrent(refetchedObject);
       }
@@ -101,10 +111,10 @@ class ObjectInspectorViewController extends DisposableController
     _refreshing.value = false;
   }
 
-  Future<void> pushObject(ObjRef objRef) async {
+  Future<void> pushObject(ObjRef objRef, {ScriptRef? scriptRef}) async {
     _refreshing.value = true;
 
-    final object = await createVmObject(objRef);
+    final object = await createVmObject(objRef, scriptRef: scriptRef);
     if (object != null) {
       objectHistory.pushEntry(object);
     }
@@ -112,38 +122,35 @@ class ObjectInspectorViewController extends DisposableController
     _refreshing.value = false;
   }
 
-  Future<VmObject?> createVmObject(ObjRef objRef) async {
+  Future<VmObject?> createVmObject(
+    ObjRef objRef, {
+    ScriptRef? scriptRef,
+  }) async {
     VmObject? object;
-
-    final outlineSelection = programExplorerController.outlineSelection.value;
-
     if (objRef is ClassRef) {
       object = ClassObject(
         ref: objRef,
-        scriptRef: _currentScriptRef,
-        outlineNode: outlineSelection,
+        scriptRef: scriptRef,
       );
     } else if (objRef is FuncRef) {
       object = FuncObject(
         ref: objRef,
-        scriptRef: _currentScriptRef,
-        outlineNode: outlineSelection,
+        scriptRef: scriptRef,
       );
     } else if (objRef is FieldRef) {
       object = FieldObject(
         ref: objRef,
-        scriptRef: _currentScriptRef,
-        outlineNode: outlineSelection,
+        scriptRef: scriptRef,
       );
     } else if (objRef is LibraryRef) {
       object = LibraryObject(
         ref: objRef,
-        scriptRef: _currentScriptRef,
+        scriptRef: scriptRef,
       );
     } else if (objRef is ScriptRef) {
       object = ScriptObject(
         ref: objRef,
-        scriptRef: _currentScriptRef,
+        scriptRef: scriptRef,
       );
     } else if (objRef is InstanceRef) {
       object = InstanceObject(
@@ -152,8 +159,6 @@ class ObjectInspectorViewController extends DisposableController
     } else if (objRef is CodeRef) {
       object = CodeObject(
         ref: objRef,
-        scriptRef: _currentScriptRef,
-        outlineNode: outlineSelection,
       );
     }
 
@@ -176,7 +181,6 @@ class ObjectInspectorViewController extends DisposableController
     });
 
     if (mainScriptRef != null) {
-      _currentScriptRef = mainScriptRef;
       await programExplorerController.selectScriptNode(mainScriptRef);
 
       final parts = mainScriptRef.uri!.split('/')..removeLast();
@@ -185,21 +189,25 @@ class ObjectInspectorViewController extends DisposableController
       if (parts.isEmpty) {
         for (final lib in libraries) {
           if (lib.uri == mainScriptRef.uri) {
-            return await pushObject(lib);
+            return await pushObject(lib, scriptRef: mainScriptRef);
           }
         }
       }
-      await pushObject(mainScriptRef);
+      await pushObject(mainScriptRef, scriptRef: mainScriptRef);
     }
   }
 
-  void setCurrentScript(ScriptRef scriptRef) {
-    _currentScriptRef = scriptRef;
-  }
-
   Future<void> findAndSelectNodeForObject(ObjRef obj) async {
-    final node = await programExplorerController.searchFileExplorer(obj);
-    setCurrentScript(node.location!.scriptRef);
-    await pushObject(obj);
+    codeViewController.clearState();
+    ScriptRef? script;
+    try {
+      final node = await programExplorerController.searchFileExplorer(obj);
+      script = node.location!.scriptRef;
+    } on StateError {
+      // The node doesn't exist, so it must be an instance or an object from
+      // the object store.
+      programExplorerController.clearSelection();
+    }
+    await pushObject(obj, scriptRef: script);
   }
 }
