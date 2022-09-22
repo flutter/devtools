@@ -36,8 +36,9 @@ class _InstanceColumn extends ColumnData<HeapStatsRecord> {
   _InstanceColumn()
       : super(
           'Non GC-able\nInstances',
-          titleTooltip: 'Number of instances of the class '
-              'that have a retaining path from the root.',
+          titleTooltip: 'Number of instances of the class\n'
+              'that have a retaining path from the root\n'
+              'and therefore can’t be garbage collected.',
           fixedWidthPx: scaleByFontFactor(110.0),
           alignment: ColumnAlignment.right,
         );
@@ -55,12 +56,12 @@ class _InstanceColumn extends ColumnData<HeapStatsRecord> {
 class _ShallowSizeColumn extends ColumnData<HeapStatsRecord> {
   _ShallowSizeColumn()
       : super(
-          'Shallow\n Dart Size',
-          titleTooltip: 'Total shallow size of the instances.\n'
-              'Shallow size of an object is size of this object plus\n'
-              'the references it holds to other Dart objects in its fields\n'
-              '(this does not include the size of the fields\n'
-              ' - just the size of the references)',
+          'Shallow\nDart Size',
+          titleTooltip: 'Total shallow size of all of the instances.\n'
+              'Shallow size of an object is the size of this object\n'
+              'plus the references it holds to other Dart objects\n'
+              "in its fields (this doesn't include the size of\n"
+              'the fields - just the size of the references).',
           fixedWidthPx: scaleByFontFactor(85.0),
           alignment: ColumnAlignment.right,
         );
