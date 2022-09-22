@@ -40,7 +40,7 @@ class DiffPane extends StatelessWidget {
 
     return Split(
       axis: Axis.horizontal,
-      initialFractions: const [0.2, 0.8],
+      initialFractions: const [0.1, 0.9],
       minSizes: const [80, 80],
       children: [
         OutlineDecoration(

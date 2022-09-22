@@ -45,7 +45,7 @@ class SnapshotView extends StatelessWidget {
           builder: (_, diffWith, __) {
             return Split(
               axis: Axis.horizontal,
-              initialFractions: const [0.5, 0.5],
+              initialFractions: const [0.4, 0.6],
               minSizes: const [80, 80],
               children: [
                 OutlineDecoration(
