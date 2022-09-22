@@ -45,12 +45,13 @@ class HeapStatistics {
 }
 
 class HeapStatsRecord {
-  HeapStatsRecord(this.heapClass, {SizeOfSet? total})
-      : total = total ?? SizeOfSet();
+  HeapStatsRecord(this.heapClass)
+      : total = SizeOfSet(),
+        byRetainingPath = <String, SizeOfSet>{};
 
   final HeapClass heapClass;
   final SizeOfSet total;
-  final byRetainingPath = <String, SizeOfSet>{};
+  final Map<String, SizeOfSet> byRetainingPath;
 
   void countInstance(AdaptedHeapData data, int onbjectIndex) {
     final object = data.objects[onbjectIndex];
@@ -63,4 +64,30 @@ class HeapStatsRecord {
       HeapStatsRecord(heapClass, total: total.negative());
 
   bool get isZero => total.isZero;
+}
+
+/// Size of set of instances.
+class SizeOfSet {
+  int instanceCount = 0;
+  int shallowSize = 0;
+  int retainedSize = 0;
+
+  SizeOfSet negative() => SizeOfSet()
+    ..instanceCount = -instanceCount
+    ..shallowSize = -shallowSize
+    ..retainedSize = -retainedSize;
+
+  bool get isZero =>
+      shallowSize == 0 && retainedSize == 0 && instanceCount == 0;
+
+  SizeOfSet subtract(SizeOfSet other) => SizeOfSet()
+    ..instanceCount = instanceCount - other.instanceCount
+    ..shallowSize = shallowSize - other.shallowSize
+    ..retainedSize = retainedSize - other.retainedSize;
+
+  void countInstance(AdaptedHeapObject object) {
+    retainedSize += object.retainedSize!;
+    shallowSize += object.shallowSize;
+    instanceCount++;
+  }
 }

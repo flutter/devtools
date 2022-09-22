@@ -175,32 +175,6 @@ class AdaptedHeapObject {
   String get name => '${heapClass.library}/$shortName';
 }
 
-/// Size of set of instances.
-class SizeOfSet {
-  int instanceCount = 0;
-  int shallowSize = 0;
-  int retainedSize = 0;
-
-  SizeOfSet negative() => SizeOfSet()
-    ..instanceCount = -instanceCount
-    ..shallowSize = -shallowSize
-    ..retainedSize = -retainedSize;
-
-  bool get isZero =>
-      shallowSize == 0 && retainedSize == 0 && instanceCount == 0;
-
-  SizeOfSet subtract(SizeOfSet other) => SizeOfSet()
-    ..instanceCount = instanceCount - other.instanceCount
-    ..shallowSize = shallowSize - other.shallowSize
-    ..retainedSize = retainedSize - other.retainedSize;
-
-  void countInstance(AdaptedHeapObject object) {
-    retainedSize += object.retainedSize!;
-    shallowSize += object.shallowSize;
-    instanceCount++;
-  }
-}
-
 /// This class is needed to make the snapshot taking operation mockable.
 class SnapshotTaker {
   Future<AdaptedHeapData?> take() async {
