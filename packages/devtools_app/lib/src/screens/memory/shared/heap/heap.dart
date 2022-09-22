@@ -31,7 +31,7 @@ class AdaptedHeap {
       stats.countInstance(data, i);
     }
 
-    return HeapStatistics(result);
+    return HeapStatistics(result)..seal();
   }
 }
 
@@ -42,6 +42,15 @@ class HeapStatistics {
   final Map<String, HeapStatsRecord> recordsByClass;
   late final List<HeapStatsRecord> records =
       recordsByClass.values.toList(growable: false);
+
+  /// Mark the object as deeply immutable.
+  ///
+  /// There is no strong protection from mutation, just some asserts.
+  void seal() {
+    for (var record in records) {
+      record.seal();
+    }
+  }
 }
 
 class HeapStatsRecord {
@@ -78,12 +87,15 @@ class HeapStatsRecord {
 
   bool get isZero => total.isZero;
 
-  /// Mark the object as immutable.
+  /// Mark the object as deeply immutable.
   ///
   /// There is no strong protection from mutation, just some asserts.
   void seal() {
     _isSealed = true;
     total.seal();
+    for (var size in byRetainingPath.values) {
+      size.seal();
+    }
   }
 
   bool _isSealed;
@@ -119,7 +131,7 @@ class SizeOfSet {
     instanceCount++;
   }
 
-  /// Mark the object as immutable.
+  /// Mark the object as deeply immutable.
   ///
   /// There is no strong protection from mutation, just some asserts.
   void seal() => _isSealed = true;
