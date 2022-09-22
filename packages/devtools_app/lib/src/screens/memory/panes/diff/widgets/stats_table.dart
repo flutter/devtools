@@ -10,6 +10,7 @@ import '../../../../../shared/table.dart';
 import '../../../../../shared/table_data.dart';
 import '../../../../../shared/utils.dart';
 import '../../../shared/heap/heap.dart';
+import '../../../shared/heap/model.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/item_controller.dart';
 

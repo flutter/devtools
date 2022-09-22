@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../../../shared/heap/heap.dart';
+import '../../../shared/heap/model.dart';
 
 /// Stores already calculated comparisons for heap couples.
 class HeapDiffStore {
