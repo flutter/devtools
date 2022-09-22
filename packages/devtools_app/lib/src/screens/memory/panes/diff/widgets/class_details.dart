@@ -40,7 +40,7 @@ class _SnapshotClassDetails extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child:
-          Text('Single details for ${item.selectedClass.value} will be here'),
+          Text('Single details for ${item.selectedClassName.value} will be here'),
     );
   }
 }
@@ -52,7 +52,7 @@ class _DiffClassDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Text('Diff details for ${item.selectedClass.value} will be here'),
+      child: Text('Diff details for ${item.selectedClassName.value} will be here'),
     );
   }
 }
