@@ -5,7 +5,6 @@
 import 'package:flutter/foundation.dart';
 
 import '../../primitives/auto_dispose.dart';
-import '../../service/vm_service_wrapper.dart';
 import '../../shared/globals.dart';
 import 'vm_service_private_extensions.dart';
 
