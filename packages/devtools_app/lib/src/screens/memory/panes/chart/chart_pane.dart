@@ -191,34 +191,41 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
   @override
   Widget build(BuildContext context) {
-    return RawKeyboardListener(
-      focusNode: widget.keyFocusNode,
-      onKey: (RawKeyEvent event) {
-        if (event.isKeyPressed(LogicalKeyboardKey.escape)) {
-          _hideHover();
-        }
-      },
-      autofocus: true,
-      child: Column(
-        children: [
-          // TODO(polina-c): explain why we need SizedBox here.
-          // And put 70 into a named const that describes what it is.
-          SizedBox(
-            height: scaleByFontFactor(70),
-            child: MemoryEventsPane(widget.chartControllers.event),
-          ),
-          SizedBox(
-            child: MemoryVMChart(widget.chartControllers.vm),
-          ),
-          if (controller.isAndroidChartVisibleNotifier.value)
-            SizedBox(
-              height: defaultChartHeight,
-              child: MemoryAndroidChart(
-                widget.chartControllers.android,
+    return ValueListenableBuilder<bool>(
+      valueListenable: preferences.memory.showChart,
+      builder: (_, showChart, __) {
+        if (!showChart) return const SizedBox.shrink();
+
+        return RawKeyboardListener(
+          focusNode: widget.keyFocusNode,
+          onKey: (RawKeyEvent event) {
+            if (event.isKeyPressed(LogicalKeyboardKey.escape)) {
+              _hideHover();
+            }
+          },
+          autofocus: true,
+          child: Column(
+            children: [
+              // TODO(polina-c): explain why we need SizedBox here.
+              // And put 70 into a named const that describes what it is.
+              SizedBox(
+                height: scaleByFontFactor(70),
+                child: MemoryEventsPane(widget.chartControllers.event),
               ),
-            ),
-        ],
-      ),
+              SizedBox(
+                child: MemoryVMChart(widget.chartControllers.vm),
+              ),
+              if (controller.isAndroidChartVisibleNotifier.value)
+                SizedBox(
+                  height: defaultChartHeight,
+                  child: MemoryAndroidChart(
+                    widget.chartControllers.android,
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 

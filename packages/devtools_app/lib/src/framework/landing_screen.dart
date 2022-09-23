@@ -100,7 +100,8 @@ class _ConnectDialogState extends State<ConnectDialog>
   @override
   void initState() {
     super.initState();
-    connectDialogController = TextEditingController();
+    connectDialogController =
+        TextEditingController(text: 'http://127.0.0.1:51120/89GC0W3GnJc=/');
     assert(() {
       _debugInitSharedPreferences();
       return true;

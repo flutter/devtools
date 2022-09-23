@@ -101,6 +101,7 @@ const memoryLegend = 'memoryLegend';
 const memorySettings = 'memorySettings';
 const androidChart = 'androidChart';
 const autoSnapshot = 'autoSnapshot';
+const showChart = 'showChart';
 const groupByPrefix = 'groupBy';
 const trackAllocations = 'trackAllocations';
 const resetAllocationAccumulators = 'resetAllocationAccumulators';

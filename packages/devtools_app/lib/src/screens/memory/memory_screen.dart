@@ -9,6 +9,8 @@ import '../../analytics/analytics.dart' as ga;
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../primitives/listenable.dart';
 import '../../shared/banner_messages.dart';
+import '../../shared/common_widgets.dart';
+import '../../shared/globals.dart';
 import '../../shared/screen.dart';
 import '../../shared/theme.dart';
 import '../../shared/utils.dart';
@@ -98,6 +100,12 @@ class MemoryBodyState extends State<MemoryBody>
 
   @override
   Widget build(BuildContext context) {
+    final memoryPane = KeepAliveWrapper(
+        child: MemoryChartPane(
+      chartControllers: _chartController,
+      keyFocusNode: _focusNode,
+    ));
+
     return Column(
       key: MemoryChartPane.hoverKey,
       children: [
@@ -107,7 +115,6 @@ class MemoryBodyState extends State<MemoryBody>
           chartControllers: _chartController,
           keyFocusNode: _focusNode,
         ),
-        const SizedBox(width: defaultSpacing),
         Expanded(
           child: HeapTree(memoryController),
         ),

@@ -310,6 +310,9 @@ class MemoryPreferencesController extends DisposableController
   final autoSnapshotEnabled = ValueNotifier<bool>(false);
   static const _autoSnapshotEnabledStorageId = 'memory.autoSnapshotEnabled';
 
+  final showChart = ValueNotifier<bool>(true);
+  static const _showChartStorageId = 'memory.showChart';
+
   Future<void> init() async {
     addAutoDisposeListener(
       androidCollectionEnabled,
@@ -346,5 +349,23 @@ class MemoryPreferencesController extends DisposableController
     );
     autoSnapshotEnabled.value =
         await storage.getValue(_autoSnapshotEnabledStorageId) == 'true';
+
+    addAutoDisposeListener(
+      showChart,
+      () {
+        storage.setValue(
+          _showChartStorageId,
+          showChart.value.toString(),
+        );
+        if (showChart.value) {
+          ga.select(
+            analytics_constants.memory,
+            analytics_constants.showChart,
+          );
+        }
+      },
+    );
+    autoSnapshotEnabled.value =
+        await storage.getValue(_showChartStorageId) == 'true';
   }
 }
