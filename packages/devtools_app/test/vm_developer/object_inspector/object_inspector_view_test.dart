@@ -10,6 +10,7 @@ import 'package:devtools_app/src/screens/vm_developer/vm_developer_tools_control
 import 'package:devtools_app/src/screens/vm_developer/vm_developer_tools_screen.dart';
 import 'package:devtools_app/src/scripts/script_manager.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/service/vm_service_wrapper.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
 import 'package:devtools_app/src/shared/split.dart';
@@ -40,6 +41,8 @@ void main() {
     setGlobal(ScriptManager, scriptManager);
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(NotificationService, NotificationService());
+
+    VmServiceWrapper.enablePrivateRpcs = true;
   });
 
   tearDown(() {

@@ -374,7 +374,7 @@ typedef ObjectStoreEntry = MapEntry<String, ObjRef>;
 /// collector, meaning that objects in the store will be considered live, even
 /// if they're not referenced anywhere else in the program.
 class ObjectStore {
-  const ObjectStore._({
+  const ObjectStore({
     required this.fields,
   });
 
@@ -383,7 +383,7 @@ class ObjectStore {
       return null;
     }
     final rawFields = json!['fields']! as Map<String, dynamic>;
-    return ObjectStore._(
+    return ObjectStore(
       fields: rawFields.map((key, value) {
         return ObjectStoreEntry(
           key,

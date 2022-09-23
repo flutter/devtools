@@ -57,6 +57,7 @@ export 'src/screens/provider/provider_screen.dart';
 export 'src/screens/vm_developer/vm_developer_tools_controller.dart';
 export 'src/screens/vm_developer/vm_developer_tools_screen.dart';
 export 'src/screens/vm_developer/vm_object_model.dart';
+export 'src/screens/vm_developer/vm_service_private_extensions.dart';
 export 'src/scripts/script_manager.dart';
 export 'src/service/isolate_manager.dart';
 export 'src/service/isolate_state.dart';
