@@ -72,16 +72,16 @@ class HeapComparison {
     final unionOfKeys = older.keys.toSet().union(younger.keys.toSet());
 
     for (var key in unionOfKeys) {
-      final olderRecord = older[key];
-      final youngerRecord = younger[key];
+      final olderStats = older[key];
+      final youngerStats = younger[key];
 
-      if (olderRecord != null && youngerRecord != null) {
-        final diff = HeapClassStatistics.subtract(olderRecord, youngerRecord);
+      if (olderStats != null && youngerStats != null) {
+        final diff = HeapClassStatistics.subtract(olderStats, youngerStats);
         if (!diff.isZero) result[key] = diff;
-      } else if (youngerRecord != null) {
-        result[key] = youngerRecord;
+      } else if (youngerStats != null) {
+        result[key] = youngerStats;
       } else {
-        result[key] = HeapClassStatistics.negative(olderRecord!);
+        result[key] = HeapClassStatistics.negative(olderStats!);
       }
     }
 

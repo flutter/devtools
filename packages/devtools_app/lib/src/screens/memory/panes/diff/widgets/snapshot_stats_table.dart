@@ -156,7 +156,7 @@ class _SnapshotStatsTableState extends State<SnapshotStatsTable>
       keyFactory: (e) => Key(e.heapClass.fullName),
       onItemSelected: (r) =>
           widget.controller.setSelectedClass(r.heapClass.fullName),
-      selectionNotifier: _item.selectedRecord,
+      selectionNotifier: _item.selectedClassStats,
       sortColumn: _columns[sorting.columnIndex],
       sortDirection: sorting.direction,
       onSortChanged: (
