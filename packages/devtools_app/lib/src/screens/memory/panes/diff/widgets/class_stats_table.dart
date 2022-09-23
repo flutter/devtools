@@ -125,13 +125,11 @@ class ClassStatsTable extends StatefulWidget {
 class _ClassStatsTableState extends State<ClassStatsTable>
     with AutoDisposeMixin {
   late final List<ColumnData<_RetainingPathRecord>> _columns;
-  late final List<MapEntry<ClassOnlyHeapPath, SizeOfClassSet>> _dataList;
+  late List<MapEntry<ClassOnlyHeapPath, SizeOfClassSet>> _dataList;
 
   @override
   void initState() {
     super.initState();
-
-    _dataList = widget.data.sizeByRetainingPath.entries.toList(growable: false);
 
     final _shallowSizeColumn = _ShallowSizeColumn();
 
@@ -148,6 +146,12 @@ class _ClassStatsTableState extends State<ClassStatsTable>
         ..columnIndex = _columns.indexOf(_shallowSizeColumn)
         ..initialized = true;
     }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _dataList = widget.data.sizeByRetainingPath.entries.toList(growable: false);
   }
 
   @override
