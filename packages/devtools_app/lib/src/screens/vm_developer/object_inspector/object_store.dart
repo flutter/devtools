@@ -25,7 +25,8 @@ class _EntryColumn extends ColumnData<ObjectStoreEntry> {
   }
 }
 
-class _ObjectColumn extends ColumnData<ObjectStoreEntry> implements ColumnRenderer {
+class _ObjectColumn extends ColumnData<ObjectStoreEntry>
+    implements ColumnRenderer {
   _ObjectColumn({required this.onTap}) : super.wide('Object');
 
   final void Function(ObjRef) onTap;
