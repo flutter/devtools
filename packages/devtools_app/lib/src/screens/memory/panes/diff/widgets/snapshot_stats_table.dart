@@ -24,13 +24,15 @@ class _ClassNameColumn extends ColumnData<HeapClassStatistics> {
         );
 
   @override
-  String? getValue(HeapClassStatistics record) => record.heapClass.className;
+  String? getValue(HeapClassStatistics classStats) =>
+      classStats.heapClass.className;
 
   @override
   bool get supportsSorting => true;
 
   @override
-  String getTooltip(HeapClassStatistics record) => record.heapClass.fullName;
+  String getTooltip(HeapClassStatistics classStats) =>
+      classStats.heapClass.fullName;
 }
 
 class _InstanceColumn extends ColumnData<HeapClassStatistics> {
@@ -45,7 +47,8 @@ class _InstanceColumn extends ColumnData<HeapClassStatistics> {
         );
 
   @override
-  int getValue(HeapClassStatistics record) => record.total.instanceCount;
+  int getValue(HeapClassStatistics classStats) =>
+      classStats.total.instanceCount;
 
   @override
   bool get supportsSorting => true;
@@ -64,7 +67,7 @@ class _ShallowSizeColumn extends ColumnData<HeapClassStatistics> {
         );
 
   @override
-  int getValue(HeapClassStatistics record) => record.total.shallowSize;
+  int getValue(HeapClassStatistics classStats) => classStats.total.shallowSize;
 
   @override
   bool get supportsSorting => true;
@@ -73,8 +76,8 @@ class _ShallowSizeColumn extends ColumnData<HeapClassStatistics> {
   bool get numeric => true;
 
   @override
-  String getDisplayValue(HeapClassStatistics record) => prettyPrintBytes(
-        getValue(record),
+  String getDisplayValue(HeapClassStatistics classStats) => prettyPrintBytes(
+        getValue(classStats),
         includeUnit: true,
         kbFractionDigits: 1,
       )!;
@@ -90,7 +93,7 @@ class _RetainedSizeColumn extends ColumnData<HeapClassStatistics> {
         );
 
   @override
-  int getValue(HeapClassStatistics record) => record.total.retainedSize;
+  int getValue(HeapClassStatistics classStats) => classStats.total.retainedSize;
 
   @override
   bool get supportsSorting => true;
@@ -99,8 +102,8 @@ class _RetainedSizeColumn extends ColumnData<HeapClassStatistics> {
   bool get numeric => true;
 
   @override
-  String getDisplayValue(HeapClassStatistics record) => prettyPrintBytes(
-        getValue(record),
+  String getDisplayValue(HeapClassStatistics classStats) => prettyPrintBytes(
+        getValue(classStats),
         includeUnit: true,
         kbFractionDigits: 1,
       )!;
@@ -152,7 +155,7 @@ class _SnapshotStatsTableState extends State<SnapshotStatsTable>
     final sorting = widget.controller.snapshotStatsSorting;
     return FlatTable<HeapClassStatistics>(
       columns: _columns,
-      data: _item.statsToShow.records,
+      data: _item.statsToShow.classStats,
       keyFactory: (e) => Key(e.heapClass.fullName),
       onItemSelected: (r) =>
           widget.controller.setSelectedClass(r.heapClass.fullName),

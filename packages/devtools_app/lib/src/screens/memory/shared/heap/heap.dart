@@ -36,19 +36,19 @@ class AdaptedHeap {
 }
 
 class HeapStatistics {
-  HeapStatistics(this.recordsByClass);
+  HeapStatistics(this.statsByClassName);
 
-  /// Maps full class name to stats record of this class.
-  final Map<String, HeapClassStatistics> recordsByClass;
-  late final List<HeapClassStatistics> records =
-      recordsByClass.values.toList(growable: false);
+  /// Maps full class name to statistics of this class.
+  final Map<String, HeapClassStatistics> statsByClassName;
+  late final List<HeapClassStatistics> classStats =
+      statsByClassName.values.toList(growable: false);
 
   /// Mark the object as deeply immutable.
   ///
   /// There is no strong protection from mutation, just some asserts.
   void seal() {
-    for (var record in records) {
-      record.seal();
+    for (var stats in classStats) {
+      stats.seal();
     }
   }
 }
@@ -57,13 +57,13 @@ class HeapClassStatistics {
   HeapClassStatistics(this.heapClass)
       : _isSealed = false,
         total = SizeOfClassSet(),
-        byRetainingPath = <ClassOnlyHeapPath, SizeOfClassSet>{};
+        sizeByRetainingPath = <ClassOnlyHeapPath, SizeOfClassSet>{};
 
   HeapClassStatistics.negative(HeapClassStatistics other)
       : _isSealed = true,
         heapClass = other.heapClass,
         total = SizeOfClassSet.negative(other.total),
-        byRetainingPath = other.byRetainingPath
+        sizeByRetainingPath = other.sizeByRetainingPath
             .map((key, value) => MapEntry(key, SizeOfClassSet.negative(value)));
 
   HeapClassStatistics.subtract(
@@ -74,11 +74,11 @@ class HeapClassStatistics {
         heapClass = left.heapClass,
         total = SizeOfClassSet.subtract(left.total, right.total),
         // ignore: dead_code
-        byRetainingPath = throw UnimplementedError();
+        sizeByRetainingPath = throw UnimplementedError();
 
   final HeapClass heapClass;
   final SizeOfClassSet total;
-  final Map<ClassOnlyHeapPath, SizeOfClassSet> byRetainingPath;
+  final Map<ClassOnlyHeapPath, SizeOfClassSet> sizeByRetainingPath;
 
   void countInstance(AdaptedHeapData data, int objectIndex) {
     assert(!_isSealed);
@@ -88,7 +88,7 @@ class HeapClassStatistics {
 
     final path = data.retainingPath(objectIndex);
     if (path == null) return;
-    final sizeForPath = byRetainingPath.putIfAbsent(
+    final sizeForPath = sizeByRetainingPath.putIfAbsent(
       ClassOnlyHeapPath(path),
       () => SizeOfClassSet(),
     );
@@ -103,7 +103,7 @@ class HeapClassStatistics {
   void seal() {
     _isSealed = true;
     total.seal();
-    for (var size in byRetainingPath.values) {
+    for (var size in sizeByRetainingPath.values) {
       size.seal();
     }
   }

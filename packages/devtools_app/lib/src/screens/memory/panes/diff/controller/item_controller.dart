@@ -85,5 +85,5 @@ class SnapshotListItem extends DiffListItem with AutoDisposeControllerMixin {
   }
 
   void updateSelectedRecord() => _selectedClassStats.value =
-      statsToShow.recordsByClass[selectedClassName.value];
+      statsToShow.statsByClassName[selectedClassName.value];
 }
