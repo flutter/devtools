@@ -19,7 +19,7 @@ typedef _RetainingPathRecord = MapEntry<ClassOnlyHeapPath, SizeOfClassSet>;
 class _RetainingPathColumn extends ColumnData<_RetainingPathRecord> {
   _RetainingPathColumn()
       : super.wide(
-          'Retaining Path',
+          'Shortest Retaining Path',
           titleTooltip: 'Class names of objects that retain'
               '\nthe instances from garbage collection.',
           alignment: ColumnAlignment.left,

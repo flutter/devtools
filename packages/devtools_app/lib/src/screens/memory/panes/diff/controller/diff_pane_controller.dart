@@ -40,6 +40,25 @@ class DiffPaneController {
   final _selectedClass = ValueNotifier<String?>(null);
   void setSelectedClass(String? value) => _selectedClass.value = value;
 
+  ValueListenable<String?> get classFilter => _selectedClass;
+  final _classFilter = ValueNotifier<String?>(null);
+  void setClassFilter(String value) {
+    _classFilter.value = value;
+
+    // if (value.isEmpty && _currentFilter.isEmpty) return;
+    // final updatedFilteredClassList = (value.contains(_currentFilter)
+    //     ? _filteredClassList.value
+    //     : _unfilteredClassList)
+    //     .where(
+    //       (e) => e.cls.name!.contains(value),
+    // )
+    //     .map((e) => _tracedClasses[e.cls.id!]!)
+    //     .toList();
+    //
+    // _filteredClassList.replaceAll(updatedFilteredClassList);
+    // _currentFilter = value;
+  }
+
   /// True, if the list contains snapshots, i.e. items beyond the first
   /// informational item.
   bool get hasSnapshots => snapshots.value.length > 1;

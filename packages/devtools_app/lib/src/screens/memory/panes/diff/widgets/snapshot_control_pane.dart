@@ -16,6 +16,7 @@ class SnapshotControlPane extends StatelessWidget {
       : super(key: key);
 
   final DiffPaneController controller;
+  static const _classFilterWidth = 200.0;
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +38,11 @@ class SnapshotControlPane extends StatelessWidget {
                     list: controller.snapshots,
                   ),
                   const SizedBox(width: defaultSpacing),
+                  SizedBox(
+                    width: _classFilterWidth,
+                    child: _ClassFilter(onChanged: controller.setClassFilter),
+                  ),
+                  const SizedBox(width: defaultSpacing),
                   _ToCsv(item: current),
                 ],
               ],
@@ -52,6 +58,19 @@ class SnapshotControlPane extends StatelessWidget {
       },
     );
   }
+}
+
+class _ClassFilter extends StatelessWidget {
+  const _ClassFilter({Key? key, required this.onChanged}) : super(key: key);
+
+  final Function(String value) onChanged;
+
+  @override
+  Widget build(BuildContext context) => DevToolsClearableTextField(
+        labelText: 'Class Filter',
+        hintText: 'Filter by class name',
+        onChanged: onChanged,
+      );
 }
 
 class _ToCsv extends StatelessWidget {
