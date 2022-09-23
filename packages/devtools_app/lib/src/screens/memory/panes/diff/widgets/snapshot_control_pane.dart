@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/theme.dart';
+import '../../../primitives/ui.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/item_controller.dart';
 
@@ -30,11 +31,14 @@ class SnapshotControlPane extends StatelessWidget {
             Row(
               children: [
                 const SizedBox(width: defaultSpacing),
-                if (!isProcessing && current.heap != null)
+                if (!isProcessing && current.heap != null) ...[
                   _DiffDropdown(
                     current: current,
                     list: controller.snapshots,
                   ),
+                  const SizedBox(width: defaultSpacing),
+                  _ToCsv(item: current),
+                ],
               ],
             ),
             // This child is aligned to the right.
@@ -46,6 +50,23 @@ class SnapshotControlPane extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+}
+
+class _ToCsv extends StatelessWidget {
+  const _ToCsv({Key? key, required this.item}) : super(key: key);
+
+  final SnapshotListItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconLabelButton(
+      label: 'CSV',
+      icon: Icons.file_download,
+      tooltip: 'Download allocation profile data in CSV format',
+      onPressed: () => item.downloadToCsv(),
+      minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
     );
   }
 }
