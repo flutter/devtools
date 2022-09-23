@@ -129,6 +129,11 @@ const analytics = 'analytics';
 const vmDeveloperMode = 'vmDeveloperMode';
 const inspectorHoverEvalMode = 'inspectorHoverEvalMode';
 
+// Object explorer:
+const objectInspectorScreen = 'objectInspector';
+const programExplorer = 'programExplorer';
+const objectStore = 'objectStore';
+
 // Common actions shared across screens.
 // These actions will be tracked per screen, so they will still be
 // distinguishable from one screen to the other.

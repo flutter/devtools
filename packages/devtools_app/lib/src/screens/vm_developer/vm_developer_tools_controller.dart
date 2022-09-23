@@ -4,7 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 
-import 'object_inspector_view_controller.dart';
+import 'object_inspector/object_inspector_view_controller.dart';
 import 'vm_developer_tools_screen.dart';
 
 class VMDeveloperToolsController {

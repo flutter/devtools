@@ -18,8 +18,8 @@ import '../../shared/theme.dart';
 import '../debugger/codeview.dart';
 import '../debugger/codeview_controller.dart';
 import '../debugger/debugger_model.dart';
-import 'object_inspector_view_controller.dart';
-import 'vm_object_model.dart';
+import 'object_inspector/object_inspector_view_controller.dart';
+import 'object_inspector/vm_object_model.dart';
 import 'vm_service_private_extensions.dart';
 
 /// A convenience widget used to create non-scrollable information cards.

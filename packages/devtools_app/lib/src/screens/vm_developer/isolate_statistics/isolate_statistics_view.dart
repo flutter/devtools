@@ -6,16 +6,16 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../primitives/utils.dart';
-import '../../shared/common_widgets.dart';
-import '../../shared/split.dart';
-import '../../shared/table.dart';
-import '../../shared/table_data.dart';
-import '../profiler/cpu_profiler.dart';
+import '../../../primitives/utils.dart';
+import '../../../shared/common_widgets.dart';
+import '../../../shared/split.dart';
+import '../../../shared/table.dart';
+import '../../../shared/table_data.dart';
+import '../../profiler/cpu_profiler.dart';
+import '../vm_developer_common_widgets.dart';
+import '../vm_developer_tools_screen.dart';
+import '../vm_service_private_extensions.dart';
 import 'isolate_statistics_view_controller.dart';
-import 'vm_developer_common_widgets.dart';
-import 'vm_developer_tools_screen.dart';
-import 'vm_service_private_extensions.dart';
 
 /// Displays general information about the state of the currently selected
 /// isolate.

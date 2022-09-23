@@ -6,11 +6,11 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../primitives/utils.dart';
-import '../../service/vm_service_wrapper.dart';
-import '../../shared/globals.dart';
-import '../debugger/debugger_model.dart';
-import 'vm_service_private_extensions.dart';
+import '../../../primitives/utils.dart';
+import '../../../service/vm_service_wrapper.dart';
+import '../../../shared/globals.dart';
+import '../../debugger/debugger_model.dart';
+import '../vm_service_private_extensions.dart';
 
 /// Wrapper class for storing Dart VM objects with their relevant VM
 /// information.

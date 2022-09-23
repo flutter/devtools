@@ -494,9 +494,7 @@ class ProgramExplorer extends StatelessWidget {
             },
           );
         }
-        return OutlineDecoration(
-          child: body,
-        );
+        return body;
       },
     );
   }

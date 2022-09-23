@@ -5,13 +5,13 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../primitives/utils.dart';
-import '../../shared/common_widgets.dart';
-import '../../shared/table.dart';
-import '../../shared/table_data.dart';
-import 'vm_developer_common_widgets.dart';
-import 'vm_developer_tools_screen.dart';
-import 'vm_service_private_extensions.dart';
+import '../../../primitives/utils.dart';
+import '../../../shared/common_widgets.dart';
+import '../../../shared/table.dart';
+import '../../../shared/table_data.dart';
+import '../vm_developer_common_widgets.dart';
+import '../vm_developer_tools_screen.dart';
+import '../vm_service_private_extensions.dart';
 import 'vm_statistics_view_controller.dart';
 
 class VMStatisticsView extends VMDeveloperView {

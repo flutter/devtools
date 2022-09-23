@@ -5,17 +5,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../shared/common_widgets.dart';
-import '../../shared/split.dart';
-import '../../shared/table.dart';
-import '../../shared/theme.dart';
-import '../debugger/program_explorer.dart';
-import '../debugger/program_explorer_model.dart';
+import '../../../analytics/constants.dart' as analytics_constants;
+import '../../../shared/split.dart';
+import '../../../ui/tab.dart';
+import '../../debugger/program_explorer.dart';
+import '../../debugger/program_explorer_model.dart';
+import '../vm_developer_tools_controller.dart';
+import '../vm_developer_tools_screen.dart';
 import 'object_inspector_view_controller.dart';
 import 'object_store.dart';
 import 'object_viewport.dart';
-import 'vm_developer_tools_controller.dart';
-import 'vm_developer_tools_screen.dart';
 
 /// Displays a program explorer and a history viewport that displays
 /// information about objects in the Dart VM.
@@ -43,7 +42,6 @@ class _ObjectInspectorView extends StatefulWidget {
 class _ObjectInspectorViewState extends State<_ObjectInspectorView>
     with TickerProviderStateMixin {
   late ObjectInspectorViewController controller;
-  late TabController tabController;
 
   @override
   void didChangeDependencies() {
@@ -52,58 +50,36 @@ class _ObjectInspectorViewState extends State<_ObjectInspectorView>
         Provider.of<VMDeveloperToolsController>(context);
     controller = vmDeveloperToolsController.objectInspectorViewController!
       ..init();
-    tabController = TabController(
-      length: 2,
-      vsync: this,
-      // Disable the animation.
-      animationDuration: const Duration(),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Split(
       axis: Axis.horizontal,
       initialFractions: const [0.20, 0.80],
       children: [
-        Column(
-          children: [
-            Container(
-              color: theme.titleSolidBackgroundColor,
-              child: OutlineDecoration(
-                showBottom: false,
-                child: TabBar(
-                  controller: tabController,
-                  tabs: [
-                    Tab(
-                      height: defaultRowHeight,
-                      text: 'Program Explorer',
-                    ),
-                    Tab(
-                      height: defaultRowHeight,
-                      text: 'Object Store',
-                    ),
-                  ],
-                ),
-              ),
+        AnalyticsTabbedView(
+          gaScreen: analytics_constants.objectInspectorScreen,
+          tabs: [
+            DevToolsTab.create(
+              tabName: 'Program Explorer',
+              gaPrefix: analytics_constants.programExplorer,
             ),
-            Expanded(
-              child: TabBarView(
-                controller: tabController,
-                children: [
-                  ProgramExplorer(
-                    controller: controller.programExplorerController,
-                    onNodeSelected: _onNodeSelected,
-                    displayHeader: false,
-                  ),
-                  ObjectStoreViewer(
-                    controller: controller.objectStoreController,
-                    onLinkTapped: controller.findAndSelectNodeForObject,
-                  ),
-                ],
-              ),
-            )
+            DevToolsTab.create(
+              tabName: 'Object Store',
+              gaPrefix: analytics_constants.objectStore,
+            ),
+          ],
+          tabViews: [
+            ProgramExplorer(
+              controller: controller.programExplorerController,
+              onNodeSelected: _onNodeSelected,
+              displayHeader: false,
+            ),
+            ObjectStoreViewer(
+              controller: controller.objectStoreController,
+              onLinkTapped: controller.findAndSelectNodeForObject,
+            ),
           ],
         ),
         ObjectViewport(

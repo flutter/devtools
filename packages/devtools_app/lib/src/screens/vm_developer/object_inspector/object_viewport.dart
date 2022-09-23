@@ -4,13 +4,13 @@
 
 import 'package:flutter/material.dart';
 
-import '../../primitives/history_manager.dart';
-import '../../shared/common_widgets.dart';
-import '../../shared/history_viewport.dart';
+import '../../../primitives/history_manager.dart';
+import '../../../shared/common_widgets.dart';
+import '../../../shared/history_viewport.dart';
+import '../vm_developer_common_widgets.dart';
 import 'object_inspector_view_controller.dart';
 import 'vm_class_display.dart';
 import 'vm_code_display.dart';
-import 'vm_developer_common_widgets.dart';
 import 'vm_field_display.dart';
 import 'vm_function_display.dart';
 import 'vm_library_display.dart';

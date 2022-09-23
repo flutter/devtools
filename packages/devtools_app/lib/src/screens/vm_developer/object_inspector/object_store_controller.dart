@@ -1,12 +1,12 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
 
-import '../../primitives/auto_dispose.dart';
-import '../../shared/globals.dart';
-import 'vm_service_private_extensions.dart';
+import '../../../primitives/auto_dispose.dart';
+import '../../../shared/globals.dart';
+import '../vm_service_private_extensions.dart';
 
 class ObjectStoreController extends DisposableController
     with AutoDisposeControllerMixin {
