@@ -173,7 +173,9 @@ class ProcessStatisticsWidget extends StatelessWidget {
           ),
           selectableTextBuilderMapEntry('Target CPU', vm?.targetCPU),
           selectableTextBuilderMapEntry(
-              'Operating System', vm?.operatingSystem),
+            'Operating System',
+            vm?.operatingSystem,
+          ),
           selectableTextBuilderMapEntry(
             'Max Memory (RSS)',
             prettyPrintBytes(
