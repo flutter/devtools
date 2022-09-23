@@ -441,14 +441,14 @@ class FlutterFrameTooltip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return HoverCardTooltip(
+    return HoverCardTooltip.sync(
       enabled: () => true,
-      onHover: (_) => _buildCardData(context),
+      generateHoverCardData: (_) => _buildCardData(context),
       child: child,
     );
   }
 
-  Future<HoverCardData> _buildCardData(BuildContext context) {
+  HoverCardData _buildCardData(BuildContext context) {
     final textColor = Theme.of(context).colorScheme.toggleButtonsTitle;
     final textStyle = TextStyle(color: textColor);
     final uiText = 'UI: ${msText(frame.buildTime)}';
@@ -456,46 +456,44 @@ class FlutterFrameTooltip extends StatelessWidget {
     final shaderText = hasShaderJank
         ? 'Shader Compilation: ${msText(frame.shaderDuration)}  -'
         : '';
-    return Future.value(
-      HoverCardData(
-        position: HoverCardPosition.element,
-        width: _calculateTooltipWidth([uiText, rasterText, shaderText]),
-        contents: Material(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                uiText,
-                style: textStyle,
+    return HoverCardData(
+      position: HoverCardPosition.element,
+      width: _calculateTooltipWidth([uiText, rasterText, shaderText]),
+      contents: Material(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              uiText,
+              style: textStyle,
+            ),
+            const SizedBox(height: densePadding),
+            Text(
+              rasterText,
+              style: textStyle,
+            ),
+            if (hasShaderJank)
+              Row(
+                children: [
+                  Icon(
+                    Icons.subdirectory_arrow_right,
+                    color: textColor,
+                    size: defaultIconSizeBeforeScaling,
+                  ),
+                  Text(
+                    shaderText,
+                    style: textStyle,
+                  ),
+                  const MoreInfoLink(
+                    url: preCompileShadersDocsUrl,
+                    gaScreenName: analytics_constants.performance,
+                    gaSelectedItemDescription:
+                        analytics_constants.shaderCompilationDocsTooltipLink,
+                  ),
+                ],
               ),
-              const SizedBox(height: densePadding),
-              Text(
-                rasterText,
-                style: textStyle,
-              ),
-              if (hasShaderJank)
-                Row(
-                  children: [
-                    Icon(
-                      Icons.subdirectory_arrow_right,
-                      color: textColor,
-                      size: defaultIconSizeBeforeScaling,
-                    ),
-                    Text(
-                      shaderText,
-                      style: textStyle,
-                    ),
-                    const MoreInfoLink(
-                      url: preCompileShadersDocsUrl,
-                      gaScreenName: analytics_constants.performance,
-                      gaSelectedItemDescription:
-                          analytics_constants.shaderCompilationDocsTooltipLink,
-                    ),
-                  ],
-                ),
-            ],
-          ),
+          ],
         ),
       ),
     );
