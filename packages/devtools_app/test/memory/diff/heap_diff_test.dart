@@ -32,7 +32,8 @@ AdaptedHeap _createHeap() => AdaptedHeap(
           AdaptedHeapObject(
             code: 0,
             references: [],
-            heapClass: HeapClass(className: 'className', library: 'library'),
+            heapClass:
+                const HeapClass(className: 'className', library: 'library'),
             shallowSize: 1,
           )
         ],

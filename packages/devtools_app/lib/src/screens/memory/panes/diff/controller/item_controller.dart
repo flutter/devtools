@@ -5,7 +5,6 @@
 import 'package:flutter/foundation.dart';
 
 import '../../../../../primitives/auto_dispose.dart';
-import '../../../../../primitives/utils.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
 import 'heap_diff.dart';
@@ -62,8 +61,6 @@ class SnapshotListItem extends DiffListItem with AutoDisposeControllerMixin {
 
   String get name => '$_isolateName-$displayNumber';
 
-  var sorting = ColumnSorting();
-
   ValueListenable<SnapshotListItem?> get diffWith => _diffWith;
   final _diffWith = ValueNotifier<SnapshotListItem?>(null);
   void setDiffWith(SnapshotListItem? value) {
@@ -73,8 +70,9 @@ class SnapshotListItem extends DiffListItem with AutoDisposeControllerMixin {
 
   final ValueListenable<String?> selectedClassName;
 
-  ValueListenable<HeapStatsRecord?> get selectedRecord => _selectedRecord;
-  final _selectedRecord = ValueNotifier<HeapStatsRecord?>(null);
+  ValueListenable<HeapClassStatistics?> get selectedClassStats =>
+      _selectedClassStats;
+  final _selectedClassStats = ValueNotifier<HeapClassStatistics?>(null);
 
   @override
   bool get hasData => heap != null;
@@ -86,12 +84,6 @@ class SnapshotListItem extends DiffListItem with AutoDisposeControllerMixin {
     return diffStore.compare(theHeap, itemToDiffWith.heap!).stats;
   }
 
-  void updateSelectedRecord() => _selectedRecord.value =
-      statsToShow.recordsByClass[selectedClassName.value];
-}
-
-class ColumnSorting {
-  bool initialized = false;
-  SortDirection direction = SortDirection.ascending;
-  int columnIndex = 0;
+  void updateSelectedRecord() => _selectedClassStats.value =
+      statsToShow.statsByClassName[selectedClassName.value];
 }
