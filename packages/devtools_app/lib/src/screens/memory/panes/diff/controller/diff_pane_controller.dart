@@ -44,9 +44,9 @@ class DiffPaneController {
   /// informational item.
   bool get hasSnapshots => snapshots.value.length > 1;
 
-  var snapshotStatsSorting = ColumnSorting();
+  final snapshotStatsSorting = ColumnSorting();
 
-  var classStatsSorting = ColumnSorting();
+  final classStatsSorting = ColumnSorting();
 
   Future<void> takeSnapshot() async {
     _isProcessing.value = true;

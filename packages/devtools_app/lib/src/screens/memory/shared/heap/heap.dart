@@ -108,6 +108,7 @@ class HeapClassStatistics {
     }
   }
 
+  /// See doc for the method [seal].
   bool _isSealed;
 }
 
@@ -146,5 +147,6 @@ class SizeOfClassSet {
   /// There is no strong protection from mutation, just some asserts.
   void seal() => _isSealed = true;
 
+  /// See doc for the method [seal].
   bool _isSealed;
 }
