@@ -60,13 +60,13 @@ class HeapClassStatistics {
   HeapClassStatistics(this.heapClass)
       : _isSealed = false,
         total = SizeOfClassSet(),
-        sizeByRetainingPath = <ClassOnlyHeapPath, SizeOfClassSet>{};
+        sizeByPath = <ClassOnlyHeapPath, SizeOfClassSet>{};
 
   HeapClassStatistics.negative(HeapClassStatistics other)
       : _isSealed = true,
         heapClass = other.heapClass,
         total = SizeOfClassSet.negative(other.total),
-        sizesByPath = other.sizesByPath
+        sizeByPath = other.sizeByPath
             .map((key, value) => MapEntry(key, SizeOfClassSet.negative(value)));
   HeapClassStatistics.subtract(
     HeapClassStatistics minuend,
@@ -75,8 +75,8 @@ class HeapClassStatistics {
         _isSealed = true,
         heapClass = minuend.heapClass,
         total = SizeOfClassSet.subtract(minuend.total, subtrahend.total),
-        sizesByPath =
-            _subtractSizesByPath(minuend.sizesByPath, subtrahend.sizesByPath);
+        sizeByPath =
+            _subtractSizesByPath(minuend.sizeByPath, subtrahend.sizeByPath);
 
   static SizesByPath _subtractSizesByPath(
     SizesByPath minuend,
@@ -95,7 +95,7 @@ class HeapClassStatistics {
 
   final HeapClass heapClass;
   final SizeOfClassSet total;
-  final SizesByPath sizesByPath;
+  final SizesByPath sizeByPath;
 
   void countInstance(AdaptedHeapData data, int objectIndex) {
     assert(!_isSealed);
@@ -105,7 +105,7 @@ class HeapClassStatistics {
 
     final path = data.retainingPath(objectIndex);
     if (path == null) return;
-    final sizeForPath = sizeByRetainingPath.putIfAbsent(
+    final sizeForPath = sizeByPath.putIfAbsent(
       ClassOnlyHeapPath(path),
       () => SizeOfClassSet(),
     );
@@ -120,12 +120,13 @@ class HeapClassStatistics {
   void seal() {
     _isSealed = true;
     total.seal();
-    for (var size in sizeByRetainingPath.values) {
+    for (var size in sizeByPath.values) {
       size.seal();
     }
   }
 
   /// See doc for the method [seal].
+  bool get isSealed => _isSealed;
   bool _isSealed;
 }
 

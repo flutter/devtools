@@ -107,8 +107,8 @@ class SnapshotListItem extends DiffListItem with AutoDisposeControllerMixin {
     );
 
     // Write a row per retaining path.
-    for (var classStats in data.records) {
-      for (var pathStats in classStats.sizesByPath.entries) {
+    for (var classStats in data.classStats) {
+      for (var pathStats in classStats.sizeByPath.entries) {
         csvBuffer.writeln(
           [
             classStats.heapClass.className,
@@ -130,5 +130,4 @@ class SnapshotListItem extends DiffListItem with AutoDisposeControllerMixin {
 
     notificationService.push(successfulExportMessage(file));
   }
-
 }

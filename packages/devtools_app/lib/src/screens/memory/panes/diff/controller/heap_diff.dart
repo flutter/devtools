@@ -66,8 +66,8 @@ class HeapComparison {
 
   HeapStatistics _stats() {
     final statisticByClass = subtractMaps<String, HeapClassStatistics>(
-      minuend: heapCouple.younger.stats.recordsByClass,
-      subtrahend: heapCouple.older.stats.recordsByClass,
+      minuend: heapCouple.younger.stats.statsByClassName,
+      subtrahend: heapCouple.older.stats.statsByClassName,
       subtract: (minuend, subtrahend) {
         final diff = HeapClassStatistics.subtract(minuend, subtrahend);
         if (diff.isZero) return null;

@@ -32,8 +32,7 @@ class _RetainingPathColumn extends ColumnData<_RetainingPathRecord> {
   bool get supportsSorting => true;
 
   @override
-  String getTooltip(_RetainingPathRecord record) =>
-      record.key.asMultiLineString();
+  String getTooltip(_RetainingPathRecord record) => record.key.asLongString();
 }
 
 class _InstanceColumn extends ColumnData<_RetainingPathRecord> {
@@ -130,6 +129,8 @@ class _ClassStatsTableState extends State<ClassStatsTable>
   @override
   void initState() {
     super.initState();
+    assert(widget.data.isSealed);
+    _dataList = widget.data.sizeByPath.entries.toList(growable: false);
 
     final _shallowSizeColumn = _ShallowSizeColumn();
 
@@ -149,17 +150,11 @@ class _ClassStatsTableState extends State<ClassStatsTable>
   }
 
   @override
-  void didUpdateWidget() {
-    super.didUpdateWidget();
-    _dataList = widget.data.sizeByRetainingPath.entries.toList(growable: false);
-  }
-
-  @override
   Widget build(BuildContext context) {
     return FlatTable<_RetainingPathRecord>(
       columns: _columns,
       data: _dataList,
-      keyFactory: (e) => Key(e.key.asMultiLineString()),
+      keyFactory: (e) => Key(e.key.asLongString()),
       onItemSelected: (r) => {},
       sortColumn: _columns[widget.sorting.columnIndex],
       sortDirection: widget.sorting.direction,
