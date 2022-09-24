@@ -36,7 +36,7 @@ class AdaptedHeap {
   }
 }
 
-class HeapStatistics {
+class HeapStatistics with Sealable {
   HeapStatistics(this.statsByClassName);
 
   /// Maps full class name to statistics of this class.
@@ -44,10 +44,9 @@ class HeapStatistics {
   late final List<HeapClassStatistics> classStats =
       statsByClassName.values.toList(growable: false);
 
-  /// Mark the object as deeply immutable.
-  ///
-  /// There is no strong protection from mutation, just some asserts.
+  @override
   void seal() {
+    super.seal();
     for (var stats in classStats) {
       stats.seal();
     }
@@ -56,27 +55,29 @@ class HeapStatistics {
 
 typedef ObjectsByPath = Map<ClassOnlyHeapPath, ObjectSet>;
 
-class HeapClassStatistics {
+class HeapClassStatistics with Sealable {
   HeapClassStatistics(this.heapClass)
-      : _isSealed = false,
-        total = ObjectSet(),
+      : total = ObjectSet(),
         objectsByPath = <ClassOnlyHeapPath, ObjectSet>{};
 
   HeapClassStatistics.negative(HeapClassStatistics other)
-      : _isSealed = true,
-        heapClass = other.heapClass,
+      : heapClass = other.heapClass,
         total = ObjectSet.negative(other.total),
         objectsByPath = other.objectsByPath
-            .map((key, value) => MapEntry(key, ObjectSet.negative(value)));
+            .map((key, value) => MapEntry(key, ObjectSet.negative(value))) {
+    seal();
+  }
+
   HeapClassStatistics.subtract(
     HeapClassStatistics minuend,
     HeapClassStatistics subtrahend,
   )   : assert(minuend.heapClass.fullName == subtrahend.heapClass.fullName),
-        _isSealed = true,
         heapClass = minuend.heapClass,
         total = ObjectSet.subtract(minuend.total, subtrahend.total),
         objectsByPath = _subtractSizesByPath(
-            minuend.objectsByPath, subtrahend.objectsByPath);
+            minuend.objectsByPath, subtrahend.objectsByPath) {
+    seal();
+  }
 
   static ObjectsByPath _subtractSizesByPath(
     ObjectsByPath minuend,
@@ -98,7 +99,7 @@ class HeapClassStatistics {
   final ObjectsByPath objectsByPath;
 
   void countInstance(AdaptedHeapData data, int objectIndex) {
-    assert(!_isSealed);
+    assert(!isSealed);
     final object = data.objects[objectIndex];
     assert(object.heapClass.fullName == heapClass.fullName);
     total.countInstance(object);
@@ -113,38 +114,31 @@ class HeapClassStatistics {
   }
 
   bool get isZero => total.isZero;
+}
 
-  /// Mark the object as deeply immutable.
-  ///
-  /// There is no strong protection from mutation, just some asserts.
-  void seal() {
-    _isSealed = true;
-    total.seal();
-    for (var size in objectsByPath.values) {
-      size.seal();
-    }
-  }
-
-  /// See doc for the method [seal].
-  bool get isSealed => _isSealed;
-  bool _isSealed;
+class ObjectSetDiff with Sealable {
+  final created = ObjectSet();
+  final deleted = ObjectSet();
+  final delta = ObjectSet();
 }
 
 /// Size of set of instances.
-class ObjectSet {
-  ObjectSet() : _isSealed = false;
+class ObjectSet with Sealable {
+  ObjectSet();
 
   ObjectSet.negative(ObjectSet other)
-      : _isSealed = true,
-        instanceCount = -other.instanceCount,
+      : instanceCount = -other.instanceCount,
         shallowSize = -other.shallowSize,
-        retainedSize = -other.retainedSize;
+        retainedSize = -other.retainedSize {
+    seal();
+  }
 
   ObjectSet.subtract(ObjectSet left, ObjectSet right)
-      : _isSealed = true,
-        instanceCount = left.instanceCount - right.instanceCount,
+      : instanceCount = left.instanceCount - right.instanceCount,
         shallowSize = left.shallowSize - right.shallowSize,
-        retainedSize = left.retainedSize - right.retainedSize;
+        retainedSize = left.retainedSize - right.retainedSize {
+    seal();
+  }
 
   final codes = <int>{};
   int instanceCount = 0;
@@ -155,19 +149,11 @@ class ObjectSet {
       shallowSize == 0 && retainedSize == 0 && instanceCount == 0;
 
   void countInstance(AdaptedHeapObject object) {
-    assert(!_isSealed);
+    assert(!isSealed);
     if (codes.contains(object.code)) return;
     codes.add(object.code);
     retainedSize += object.retainedSize!;
     shallowSize += object.shallowSize;
     instanceCount++;
   }
-
-  /// Mark the object as deeply immutable.
-  ///
-  /// There is no strong protection from mutation, just some asserts.
-  void seal() => _isSealed = true;
-
-  /// See doc for the method [seal].
-  bool _isSealed;
 }
