@@ -83,38 +83,38 @@ class _ChartControlPaneState extends State<ChartControlPane>
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<bool>(
-      // Move down!!!!!!
-      valueListenable: controller.paused,
-      builder: (context, paused, _) {
-        return Column(
-          children: [
-            PauseButton(
-              minScreenWidthForTextBeforeScaling:
-                  primaryControlsMinVerboseWidth,
-              onPressed: paused ? null : _onPause,
-            ),
-            const SizedBox(height: denseSpacing),
-            ResumeButton(
-              minScreenWidthForTextBeforeScaling:
-                  primaryControlsMinVerboseWidth,
-              onPressed: paused ? _onResume : null,
-            ),
-            const SizedBox(height: defaultSpacing),
-            IntervalDropdown(chartController: widget.chartController),
-            const SizedBox(width: denseSpacing),
-            IconLabelButton(
-              key: legendKey,
-              onPressed: controller.toggleLegendVisibility,
-              icon: _legendOverlayEntry == null ? Icons.storage : Icons.close,
-              label: 'Legend',
-              tooltip: 'Legend',
-              minScreenWidthForTextBeforeScaling:
-                  primaryControlsMinVerboseWidth,
-            ),
-          ],
-        );
-      },
+    return Column(
+      children: [
+        ValueListenableBuilder<bool>(
+          valueListenable: controller.paused,
+          builder: (context, paused, _) => Column(
+            children: [
+              PauseButton(
+                minScreenWidthForTextBeforeScaling:
+                    primaryControlsMinVerboseWidth,
+                onPressed: paused ? null : _onPause,
+              ),
+              const SizedBox(height: denseSpacing),
+              ResumeButton(
+                minScreenWidthForTextBeforeScaling:
+                    primaryControlsMinVerboseWidth,
+                onPressed: paused ? _onResume : null,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: defaultSpacing),
+        IntervalDropdown(chartController: widget.chartController),
+        const SizedBox(width: denseSpacing),
+        IconLabelButton(
+          key: legendKey,
+          onPressed: controller.toggleLegendVisibility,
+          icon: _legendOverlayEntry == null ? Icons.storage : Icons.close,
+          label: 'Legend',
+          tooltip: 'Legend',
+          minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
+        ),
+      ],
     );
   }
 

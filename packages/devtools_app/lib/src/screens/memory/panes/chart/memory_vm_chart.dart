@@ -15,10 +15,7 @@ import '../../memory_controller.dart';
 import '../../primitives/memory_timeline.dart';
 
 class VMChartController extends ChartController {
-  VMChartController(this._memoryController)
-      : super(
-          name: 'VM Memory',
-        );
+  VMChartController(this._memoryController) : super(name: 'VM Memory');
 
   final MemoryController _memoryController;
 
