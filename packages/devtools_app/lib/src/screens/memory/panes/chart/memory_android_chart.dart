@@ -17,7 +17,6 @@ import '../../primitives/memory_timeline.dart';
 class AndroidChartController extends ChartController {
   AndroidChartController(this._memoryController, {sharedLabels = const <int>[]})
       : super(
-          displayTopLine: false,
           name: 'Android',
           sharedLabelimestamps: sharedLabels,
         );
