@@ -64,38 +64,27 @@ class HeapComparison {
   final _HeapCouple heapCouple;
 
   HeapStatistics _stats() {
-    final result = <String, HeapStatsRecord>{};
+    final result = <String, HeapClassStatistics>{};
 
-    final older = heapCouple.older.stats.recordsByClass;
-    final younger = heapCouple.younger.stats.recordsByClass;
+    final older = heapCouple.older.stats.statsByClassName;
+    final younger = heapCouple.younger.stats.statsByClassName;
 
     final unionOfKeys = older.keys.toSet().union(younger.keys.toSet());
 
     for (var key in unionOfKeys) {
-      final olderRecord = older[key];
-      final youngerRecord = younger[key];
+      final olderStats = older[key];
+      final youngerStats = younger[key];
 
-      if (olderRecord != null && youngerRecord != null) {
-        final diff = _diffStatsRecords(olderRecord, youngerRecord);
+      if (olderStats != null && youngerStats != null) {
+        final diff = HeapClassStatistics.subtract(olderStats, youngerStats);
         if (!diff.isZero) result[key] = diff;
-      } else if (youngerRecord != null) {
-        result[key] = youngerRecord;
+      } else if (youngerStats != null) {
+        result[key] = youngerStats;
       } else {
-        result[key] = olderRecord!.negative();
+        result[key] = HeapClassStatistics.negative(olderStats!);
       }
     }
 
     return HeapStatistics(result);
-  }
-
-  static HeapStatsRecord _diffStatsRecords(
-    HeapStatsRecord older,
-    HeapStatsRecord younger,
-  ) {
-    assert(older.heapClass.fullName == younger.heapClass.fullName);
-    return HeapStatsRecord(older.heapClass)
-      ..instanceCount = younger.instanceCount - older.instanceCount
-      ..shallowSize = younger.shallowSize - older.shallowSize
-      ..retainedSize = younger.retainedSize - older.retainedSize;
   }
 }

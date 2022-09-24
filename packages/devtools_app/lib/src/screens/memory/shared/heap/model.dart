@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../primitives/memory_utils.dart';
@@ -76,33 +77,23 @@ class AdaptedHeapData {
         _JsonFields.created: created.toIso8601String(),
       };
 
-  HeapPath? _retainingPath(IdentityHashCode code) {
+  int? objectIndexByIdentityHashCode(IdentityHashCode code) =>
+      _objectsByCode[code];
+
+  HeapPath? retainingPath(int objectIndex) {
     assert(isSpanningTreeBuilt);
-    var i = _objectsByCode[code]!;
-    if (objects[i].retainer == null) return null;
 
-    final result = <int>[];
+    if (objects[objectIndex].retainer == null) return null;
 
-    while (i >= 0) {
-      result.add(i);
-      i = objects[i].retainer!;
+    final result = <AdaptedHeapObject>[];
+
+    while (objectIndex >= 0) {
+      final object = objects[objectIndex];
+      result.add(object);
+      objectIndex = object.retainer!;
     }
 
-    return result.reversed.toList(growable: false);
-  }
-
-  /// Retaining path for the object in string format.
-  String? shortPath(IdentityHashCode code) {
-    final path = _retainingPath(code);
-    if (path == null) return null;
-    return '/${path.map((i) => objects[i].shortName).join('/')}/';
-  }
-
-  /// Retaining path for the object as an array of the retaining objects.
-  List<String>? detailedPath(IdentityHashCode code) {
-    final path = _retainingPath(code);
-    if (path == null) return null;
-    return path.map((i) => objects[i].name).toList();
+    return HeapPath(result.reversed.toList(growable: false));
   }
 }
 
@@ -110,7 +101,47 @@ class AdaptedHeapData {
 typedef IdentityHashCode = int;
 
 /// Sequence of ids of objects in the heap.
-typedef HeapPath = List<int>;
+///
+/// TODO(polina-c): maybe we do not need to store path by objects.
+/// It can be that only classes are interesting, and we can save some
+/// performance on this object. It will become clear when the leak tracking
+/// feature stabilizes.
+class HeapPath {
+  HeapPath(this.objects);
+
+  final List<AdaptedHeapObject> objects;
+
+  /// Retaining path for the object in string format.
+  String? shortPath() => '/${objects.map((o) => o.shortName).join('/')}/';
+
+  /// Retaining path for the object as an array of the retaining objects.
+  List<String>? detailedPath() =>
+      objects.map((o) => o.name).toList(growable: false);
+}
+
+/// Heap path represented by classes only, without object details.
+class ClassOnlyHeapPath {
+  ClassOnlyHeapPath(HeapPath heapPath)
+      : classes =
+            heapPath.objects.map((o) => o.heapClass).toList(growable: false);
+  final List<HeapClass> classes;
+
+  String asShortString() => classes.map((e) => e.className).join('/');
+
+  String asMultiLineString() => classes.map((e) => e.fullName).join('\n');
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is ClassOnlyHeapPath &&
+        other.asMultiLineString() == asMultiLineString();
+  }
+
+  @override
+  int get hashCode => asMultiLineString().hashCode;
+}
 
 /// Contains information from [HeapSnapshotObject] needed for
 /// memory analysis on memory screen.
@@ -171,6 +202,7 @@ class AdaptedHeapObject {
       };
 
   String get shortName => '${heapClass.className}-$code';
+
   String get name => '${heapClass.library}/$shortName';
 }
 
@@ -183,8 +215,9 @@ class SnapshotTaker {
   }
 }
 
+@immutable
 class HeapClass {
-  HeapClass({required this.className, required this.library});
+  const HeapClass({required this.className, required this.library});
 
   final String className;
   final String library;

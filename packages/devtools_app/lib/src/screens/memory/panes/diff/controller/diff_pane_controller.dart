@@ -12,6 +12,7 @@ import '../../../primitives/memory_utils.dart';
 import '../../../shared/heap/model.dart';
 import 'heap_diff.dart';
 import 'item_controller.dart';
+import 'model.dart';
 
 class DiffPaneController {
   DiffPaneController(this.snapshotTaker);
@@ -42,6 +43,10 @@ class DiffPaneController {
   /// True, if the list contains snapshots, i.e. items beyond the first
   /// informational item.
   bool get hasSnapshots => snapshots.value.length > 1;
+
+  final snapshotStatsSorting = ColumnSorting();
+
+  final classStatsSorting = ColumnSorting();
 
   Future<void> takeSnapshot() async {
     _isProcessing.value = true;

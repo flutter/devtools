@@ -18,7 +18,11 @@ NotGCedAnalyzed analyseNotGCed(NotGCedAnalyzerTask task) {
   final leaksByCulprits = findCulprits(leaksWithPath);
 
   for (var report in leaksByCulprits.keys) {
-    report.detailedPath = task.heap.detailedPath(report.code);
+    final objectIndex = task.heap.objectIndexByIdentityHashCode(report.code);
+    if (objectIndex != null) {
+      final path = task.heap.retainingPath(objectIndex);
+      if (path != null) report.detailedPath = path.detailedPath();
+    }
   }
 
   return NotGCedAnalyzed(
@@ -36,7 +40,7 @@ void analyzeHeapAndSetRetainingPaths(
   if (!heap.isSpanningTreeBuilt) buildSpanningTree(heap);
 
   for (var l in notGCedLeaks) {
-    l.retainingPath = heap.shortPath(l.code);
+    l.retainingPath = _pathByIdentityHashCode(heap, l.code)?.shortPath();
   }
 }
 
@@ -45,8 +49,14 @@ void setDetailedPaths(AdaptedHeapData heap, List<LeakReport> notGCedLeaks) {
   assert(heap.isSpanningTreeBuilt);
 
   for (var l in notGCedLeaks) {
-    l.detailedPath = heap.detailedPath(l.code);
+    l.detailedPath = _pathByIdentityHashCode(heap, l.code)?.detailedPath();
   }
+}
+
+HeapPath? _pathByIdentityHashCode(AdaptedHeapData heap, int code) {
+  final objectIndex = heap.objectIndexByIdentityHashCode(code);
+  if (objectIndex == null) return null;
+  return heap.retainingPath(objectIndex);
 }
 
 /// Out of list of notGCed objects, identifies ones that hold others from

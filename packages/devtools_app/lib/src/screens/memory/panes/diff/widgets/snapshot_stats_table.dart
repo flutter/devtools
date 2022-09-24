@@ -10,10 +10,11 @@ import '../../../../../shared/table.dart';
 import '../../../../../shared/table_data.dart';
 import '../../../../../shared/utils.dart';
 import '../../../shared/heap/heap.dart';
+import '../../../shared/heap/primitives.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/item_controller.dart';
 
-class _ClassNameColumn extends ColumnData<HeapStatsRecord> {
+class _ClassNameColumn extends ColumnData<HeapClassStatistics> {
   _ClassNameColumn()
       : super(
           'Class',
@@ -23,27 +24,31 @@ class _ClassNameColumn extends ColumnData<HeapStatsRecord> {
         );
 
   @override
-  String? getValue(HeapStatsRecord record) => record.heapClass.className;
+  String? getValue(HeapClassStatistics classStats) =>
+      classStats.heapClass.className;
 
   @override
   bool get supportsSorting => true;
 
   @override
-  String getTooltip(HeapStatsRecord record) => record.heapClass.fullName;
+  String getTooltip(HeapClassStatistics classStats) =>
+      classStats.heapClass.fullName;
 }
 
-class _InstanceColumn extends ColumnData<HeapStatsRecord> {
+class _InstanceColumn extends ColumnData<HeapClassStatistics> {
   _InstanceColumn()
       : super(
           'Non GC-able\nInstances',
-          titleTooltip: 'Number of instances of the class '
-              'that have a retaining path from the root.',
+          titleTooltip: 'Number of instances of the class\n'
+              'that have a retaining path from the root\n'
+              'and therefore can’t be garbage collected.',
           fixedWidthPx: scaleByFontFactor(110.0),
           alignment: ColumnAlignment.right,
         );
 
   @override
-  int getValue(HeapStatsRecord record) => record.instanceCount;
+  int getValue(HeapClassStatistics classStats) =>
+      classStats.total.instanceCount;
 
   @override
   bool get supportsSorting => true;
@@ -52,21 +57,17 @@ class _InstanceColumn extends ColumnData<HeapStatsRecord> {
   bool get numeric => true;
 }
 
-class _ShallowSizeColumn extends ColumnData<HeapStatsRecord> {
+class _ShallowSizeColumn extends ColumnData<HeapClassStatistics> {
   _ShallowSizeColumn()
       : super(
-          'Shallow\n Dart Size',
-          titleTooltip: 'Total shallow size of the instances.\n'
-              'Shallow size of an object is size of this object plus\n'
-              'the references it holds to other Dart objects in its fields\n'
-              '(this does not include the size of the fields\n'
-              ' - just the size of the references)',
+          'Shallow\nDart Size',
+          titleTooltip: shallowSizeColumnTooltip,
           fixedWidthPx: scaleByFontFactor(85.0),
           alignment: ColumnAlignment.right,
         );
 
   @override
-  int getValue(HeapStatsRecord record) => record.shallowSize;
+  int getValue(HeapClassStatistics classStats) => classStats.total.shallowSize;
 
   @override
   bool get supportsSorting => true;
@@ -75,26 +76,24 @@ class _ShallowSizeColumn extends ColumnData<HeapStatsRecord> {
   bool get numeric => true;
 
   @override
-  String getDisplayValue(HeapStatsRecord record) => prettyPrintBytes(
-        getValue(record),
+  String getDisplayValue(HeapClassStatistics classStats) => prettyPrintBytes(
+        getValue(classStats),
         includeUnit: true,
         kbFractionDigits: 1,
       )!;
 }
 
-class _RetainedSizeColumn extends ColumnData<HeapStatsRecord> {
+class _RetainedSizeColumn extends ColumnData<HeapClassStatistics> {
   _RetainedSizeColumn()
       : super(
           'Retained\nDart Size',
-          titleTooltip:
-              'Total shallow Dart size of objects plus shallow Dart size of objects they retain,\n'
-              'taking into account only the shortest retaining path for the referenced objects.',
+          titleTooltip: retainedSizeColumnTooltip,
           fixedWidthPx: scaleByFontFactor(85.0),
           alignment: ColumnAlignment.right,
         );
 
   @override
-  int getValue(HeapStatsRecord record) => record.retainedSize;
+  int getValue(HeapClassStatistics classStats) => classStats.total.retainedSize;
 
   @override
   bool get supportsSorting => true;
@@ -103,15 +102,15 @@ class _RetainedSizeColumn extends ColumnData<HeapStatsRecord> {
   bool get numeric => true;
 
   @override
-  String getDisplayValue(HeapStatsRecord record) => prettyPrintBytes(
-        getValue(record),
+  String getDisplayValue(HeapClassStatistics classStats) => prettyPrintBytes(
+        getValue(classStats),
         includeUnit: true,
         kbFractionDigits: 1,
       )!;
 }
 
-class StatsTable extends StatefulWidget {
-  const StatsTable({
+class SnapshotStatsTable extends StatefulWidget {
+  const SnapshotStatsTable({
     Key? key,
     required this.controller,
   }) : super(key: key);
@@ -119,11 +118,12 @@ class StatsTable extends StatefulWidget {
   final DiffPaneController controller;
 
   @override
-  State<StatsTable> createState() => _StatsTableState();
+  State<SnapshotStatsTable> createState() => _SnapshotStatsTableState();
 }
 
-class _StatsTableState extends State<StatsTable> with AutoDisposeMixin {
-  late final List<ColumnData<HeapStatsRecord>> _columns;
+class _SnapshotStatsTableState extends State<SnapshotStatsTable>
+    with AutoDisposeMixin {
+  late final List<ColumnData<HeapClassStatistics>> _columns;
   late final SnapshotListItem _item;
 
   @override
@@ -134,15 +134,16 @@ class _StatsTableState extends State<StatsTable> with AutoDisposeMixin {
 
     final _shallowSizeColumn = _ShallowSizeColumn();
 
-    _columns = <ColumnData<HeapStatsRecord>>[
+    _columns = <ColumnData<HeapClassStatistics>>[
       _ClassNameColumn(),
       _InstanceColumn(),
       _shallowSizeColumn,
       _RetainedSizeColumn(),
     ];
 
-    if (!_item.sorting.initialized) {
-      _item.sorting
+    final sorting = widget.controller.snapshotStatsSorting;
+    if (!sorting.initialized) {
+      sorting
         ..direction = SortDirection.descending
         ..columnIndex = _columns.indexOf(_shallowSizeColumn)
         ..initialized = true;
@@ -151,23 +152,24 @@ class _StatsTableState extends State<StatsTable> with AutoDisposeMixin {
 
   @override
   Widget build(BuildContext context) {
-    return FlatTable<HeapStatsRecord>(
+    final sorting = widget.controller.snapshotStatsSorting;
+    return FlatTable<HeapClassStatistics>(
       columns: _columns,
-      data: _item.statsToShow.records,
+      data: _item.statsToShow.classStats,
       keyFactory: (e) => Key(e.heapClass.fullName),
       onItemSelected: (r) =>
           widget.controller.setSelectedClass(r.heapClass.fullName),
-      selectionNotifier: _item.selectedRecord,
-      sortColumn: _columns[_item.sorting.columnIndex],
-      sortDirection: _item.sorting.direction,
+      selectionNotifier: _item.selectedClassStats,
+      sortColumn: _columns[sorting.columnIndex],
+      sortDirection: sorting.direction,
       onSortChanged: (
         sortColumn,
         direction, {
         secondarySortColumn,
       }) =>
           setState(() {
-        _item.sorting.columnIndex = _columns.indexOf(sortColumn);
-        _item.sorting.direction = direction;
+        sorting.columnIndex = _columns.indexOf(sortColumn);
+        sorting.direction = direction;
       }),
     );
   }

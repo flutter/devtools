@@ -10,7 +10,7 @@ import '../../../shared/heap/heap.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/item_controller.dart';
 import 'class_details.dart';
-import 'stats_table.dart';
+import 'snapshot_stats_table.dart';
 
 class SnapshotView extends StatelessWidget {
   const SnapshotView({Key? key, required this.controller}) : super(key: key);
@@ -49,14 +49,17 @@ class SnapshotView extends StatelessWidget {
               minSizes: const [80, 80],
               children: [
                 OutlineDecoration(
-                  child: StatsTable(
+                  child: SnapshotStatsTable(
                     // The key is passed to persist state.
                     key: ObjectKey(item),
                     controller: controller,
                   ),
                 ),
-                const OutlineDecoration(
-                  child: HeapClassDetails(heapClass: null),
+                OutlineDecoration(
+                  child: HeapClassDetails(
+                    item: item,
+                    sorting: controller.classStatsSorting,
+                  ),
                 ),
               ],
             );
