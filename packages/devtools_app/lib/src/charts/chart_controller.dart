@@ -35,7 +35,6 @@ import 'chart_trace.dart';
 class ChartController extends DisposableController
     with AutoDisposeControllerMixin {
   ChartController({
-    this.displayTopLine = true,
     this.displayXAxis = true,
     this.displayXLabels = true,
     this.displayYLabels = true,
@@ -89,9 +88,6 @@ class ChartController extends DisposableController
       _xAxisLabeledTimestamps.indexOf(timestamp);
 
   int? getLabelTimestampByIndex(int index) => _xAxisLabeledTimestamps[index];
-
-  /// If false displays top horizontal line of chart.
-  final bool displayTopLine;
 
   /// If true the X axis line is rendered, if false then both the X axis line
   /// is not rendered and the labels and ticks are also not rendered.

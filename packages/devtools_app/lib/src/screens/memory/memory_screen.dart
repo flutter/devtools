@@ -102,14 +102,13 @@ class MemoryBodyState extends State<MemoryBody>
       key: MemoryChartPane.hoverKey,
       children: [
         MemoryControlPane(chartController: _chartController),
-        const SizedBox(height: denseRowSpacing),
+        const SizedBox(height: defaultSpacing),
         MemoryChartPane(
-          chartControllers: _chartController,
+          chartController: _chartController,
           keyFocusNode: _focusNode,
         ),
-        const SizedBox(width: defaultSpacing),
         Expanded(
-          child: HeapTree(memoryController),
+          child: HeapTreeView(memoryController),
         ),
       ],
     );
