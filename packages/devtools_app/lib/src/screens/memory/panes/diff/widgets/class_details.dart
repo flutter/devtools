@@ -22,16 +22,16 @@ class HeapClassDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<HeapClassStatistics?>(
-      valueListenable: item.selectedRecord,
-      builder: (_, record, __) {
-        if (record == null) {
+      valueListenable: item.selectedClassStats,
+      builder: (_, classStats, __) {
+        if (classStats == null) {
           return const Center(
             child: Text('Select class to see details here.'),
           );
         }
 
         return ClassStatsTable(
-          data: record,
+          data: classStats,
           sorting: sorting,
         );
       },

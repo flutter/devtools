@@ -32,7 +32,8 @@ class _RetainingPathColumn extends ColumnData<_RetainingPathRecord> {
   bool get supportsSorting => true;
 
   @override
-  String getTooltip(_RetainingPathRecord record) => record.key.asLongString();
+  String getTooltip(_RetainingPathRecord record) =>
+      record.key.asMultiLineString();
 }
 
 class _InstanceColumn extends ColumnData<_RetainingPathRecord> {
@@ -124,6 +125,7 @@ class ClassStatsTable extends StatefulWidget {
 class _ClassStatsTableState extends State<ClassStatsTable>
     with AutoDisposeMixin {
   late final List<ColumnData<_RetainingPathRecord>> _columns;
+  late List<MapEntry<ClassOnlyHeapPath, SizeOfClassSet>> _dataList;
 
   @override
   void initState() {
@@ -147,11 +149,17 @@ class _ClassStatsTableState extends State<ClassStatsTable>
   }
 
   @override
+  void didUpdateWidget() {
+    super.didUpdateWidget();
+    _dataList = widget.data.sizeByRetainingPath.entries.toList(growable: false);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return FlatTable<_RetainingPathRecord>(
       columns: _columns,
-      data: widget.data.sizesByPath.entries.toList(growable: false),
-      keyFactory: (e) => Key(e.key.asLongString()),
+      data: _dataList,
+      keyFactory: (e) => Key(e.key.asMultiLineString()),
       onItemSelected: (r) => {},
       sortColumn: _columns[widget.sorting.columnIndex],
       sortDirection: widget.sorting.direction,

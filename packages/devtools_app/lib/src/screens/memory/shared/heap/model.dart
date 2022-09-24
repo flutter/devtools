@@ -127,18 +127,20 @@ class ClassOnlyHeapPath {
   final List<HeapClass> classes;
 
   String asShortString() => classes.map((e) => e.className).join('/');
-  String asLongString() => classes.map((e) => e.fullName).join('\n');
+
+  String asMultiLineString() => classes.map((e) => e.fullName).join('\n');
 
   @override
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is ClassOnlyHeapPath && other.asLongString() == asLongString();
+    return other is ClassOnlyHeapPath &&
+        other.asMultiLineString() == asMultiLineString();
   }
 
   @override
-  int get hashCode => asLongString().hashCode;
+  int get hashCode => asMultiLineString().hashCode;
 }
 
 /// Contains information from [HeapSnapshotObject] needed for

@@ -922,41 +922,39 @@ class ServiceExtensionRichTooltip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return HoverCardTooltip(
+    return HoverCardTooltip.sync(
       enabled: () => true,
-      onHover: (_) => _buildCardData(context),
+      generateHoverCardData: (_) => _buildCardData(context),
       child: child,
     );
   }
 
-  Future<HoverCardData> _buildCardData(BuildContext context) {
+  HoverCardData _buildCardData(BuildContext context) {
     final textColor = Theme.of(context).colorScheme.toggleButtonsTitle;
 
-    return Future.value(
-      HoverCardData(
-        position: HoverCardPosition.element,
-        width: _tooltipWidth,
-        contents: Material(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                description.tooltip,
-                style: TextStyle(color: textColor),
-              ),
-              if (description.documentationUrl != null &&
-                  description.gaScreenName != null)
-                Align(
-                  alignment: Alignment.bottomRight,
-                  child: MoreInfoLink(
-                    url: description.documentationUrl!,
-                    gaScreenName: description.gaScreenName!,
-                    gaSelectedItemDescription: description.gaItemTooltipLink,
-                  ),
+    return HoverCardData(
+      position: HoverCardPosition.element,
+      width: _tooltipWidth,
+      contents: Material(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              description.tooltip,
+              style: TextStyle(color: textColor),
+            ),
+            if (description.documentationUrl != null &&
+                description.gaScreenName != null)
+              Align(
+                alignment: Alignment.bottomRight,
+                child: MoreInfoLink(
+                  url: description.documentationUrl!,
+                  gaScreenName: description.gaScreenName!,
+                  gaSelectedItemDescription: description.gaItemTooltipLink,
                 ),
-            ],
-          ),
+              ),
+          ],
         ),
       ),
     );

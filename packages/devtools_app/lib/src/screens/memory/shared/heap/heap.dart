@@ -37,19 +37,19 @@ class AdaptedHeap {
 }
 
 class HeapStatistics {
-  HeapStatistics(this.recordsByClass);
+  HeapStatistics(this.statsByClassName);
 
-  /// Maps full class name to stats record of this class.
-  final Map<String, HeapClassStatistics> recordsByClass;
-  late final List<HeapClassStatistics> records =
-      recordsByClass.values.toList(growable: false);
+  /// Maps full class name to statistics of this class.
+  final Map<String, HeapClassStatistics> statsByClassName;
+  late final List<HeapClassStatistics> classStats =
+      statsByClassName.values.toList(growable: false);
 
   /// Mark the object as deeply immutable.
   ///
   /// There is no strong protection from mutation, just some asserts.
   void seal() {
-    for (var record in records) {
-      record.seal();
+    for (var stats in classStats) {
+      stats.seal();
     }
   }
 }
@@ -60,7 +60,7 @@ class HeapClassStatistics {
   HeapClassStatistics(this.heapClass)
       : _isSealed = false,
         total = SizeOfClassSet(),
-        sizesByPath = {};
+        sizeByRetainingPath = <ClassOnlyHeapPath, SizeOfClassSet>{};
 
   HeapClassStatistics.negative(HeapClassStatistics other)
       : _isSealed = true,
@@ -105,7 +105,7 @@ class HeapClassStatistics {
 
     final path = data.retainingPath(objectIndex);
     if (path == null) return;
-    final sizeForPath = sizesByPath.putIfAbsent(
+    final sizeForPath = sizeByRetainingPath.putIfAbsent(
       ClassOnlyHeapPath(path),
       () => SizeOfClassSet(),
     );
@@ -120,11 +120,12 @@ class HeapClassStatistics {
   void seal() {
     _isSealed = true;
     total.seal();
-    for (var size in sizesByPath.values) {
+    for (var size in sizeByRetainingPath.values) {
       size.seal();
     }
   }
 
+  /// See doc for the method [seal].
   bool _isSealed;
 }
 
@@ -163,5 +164,6 @@ class SizeOfClassSet {
   /// There is no strong protection from mutation, just some asserts.
   void seal() => _isSealed = true;
 
+  /// See doc for the method [seal].
   bool _isSealed;
 }

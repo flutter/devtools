@@ -72,8 +72,9 @@ class SnapshotListItem extends DiffListItem with AutoDisposeControllerMixin {
 
   final ValueListenable<String?> selectedClassName;
 
-  ValueListenable<HeapClassStatistics?> get selectedRecord => _selectedRecord;
-  final _selectedRecord = ValueNotifier<HeapClassStatistics?>(null);
+  ValueListenable<HeapClassStatistics?> get selectedClassStats =>
+      _selectedClassStats;
+  final _selectedClassStats = ValueNotifier<HeapClassStatistics?>(null);
 
   @override
   bool get hasData => heap != null;
@@ -85,8 +86,8 @@ class SnapshotListItem extends DiffListItem with AutoDisposeControllerMixin {
     return diffStore.compare(theHeap, itemToDiffWith.heap!).stats;
   }
 
-  void updateSelectedRecord() => _selectedRecord.value =
-      statsToShow.recordsByClass[selectedClassName.value];
+  void updateSelectedRecord() => _selectedClassStats.value =
+      statsToShow.statsByClassName[selectedClassName.value];
 
   void downloadToCsv() {
     final data = statsToShow;
@@ -129,4 +130,5 @@ class SnapshotListItem extends DiffListItem with AutoDisposeControllerMixin {
 
     notificationService.push(successfulExportMessage(file));
   }
+
 }
