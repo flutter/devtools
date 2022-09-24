@@ -35,16 +35,6 @@ class _PrimaryControlsState extends State<PrimaryControls>
     initController();
   }
 
-  void _onPause() {
-    ga.select(analytics_constants.memory, analytics_constants.pause);
-    controller.pauseLiveFeed();
-  }
-
-  void _onResume() {
-    ga.select(analytics_constants.memory, analytics_constants.resume);
-    controller.resumeLiveFeed();
-  }
-
   void _clearTimeline() {
     ga.select(analytics_constants.memory, analytics_constants.clear);
 
@@ -70,39 +60,21 @@ class _PrimaryControlsState extends State<PrimaryControls>
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: controller.paused,
-      builder: (context, paused, _) {
-        return Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            PauseButton(
-              minScreenWidthForTextBeforeScaling:
-                  primaryControlsMinVerboseWidth,
-              onPressed: paused ? null : _onPause,
-            ),
-            const SizedBox(width: denseSpacing),
-            ResumeButton(
-              minScreenWidthForTextBeforeScaling:
-                  primaryControlsMinVerboseWidth,
-              onPressed: paused ? _onResume : null,
-            ),
-            const SizedBox(width: defaultSpacing),
-            ChartButton(),
-            const SizedBox(width: defaultSpacing),
-            ClearButton(
-              // TODO(terry): Button needs to be Delete for offline data.
-              onPressed: controller.memorySource == MemoryController.liveFeed
-                  ? _clearTimeline
-                  : null,
-              minScreenWidthForTextBeforeScaling:
-                  primaryControlsMinVerboseWidth,
-            ),
-            const SizedBox(width: defaultSpacing),
-            IntervalDropdown(chartController: widget.chartController),
-          ],
-        );
-      },
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ChartButton(),
+        const SizedBox(width: defaultSpacing),
+        ClearButton(
+          // TODO(terry): Button needs to be Delete for offline data.
+          onPressed: controller.memorySource == MemoryController.liveFeed
+              ? _clearTimeline
+              : null,
+          minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
+        ),
+        const SizedBox(width: defaultSpacing),
+        IntervalDropdown(chartController: widget.chartController),
+      ],
     );
   }
 }

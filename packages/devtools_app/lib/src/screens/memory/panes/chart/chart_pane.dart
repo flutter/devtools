@@ -14,6 +14,7 @@ import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../memory_controller.dart';
 import '../../primitives/painting.dart';
+import 'chart_control_pane.dart';
 import 'chart_pane_controller.dart';
 import 'memory_android_chart.dart';
 import 'memory_charts.dart';
@@ -23,10 +24,10 @@ import 'memory_vm_chart.dart';
 class MemoryChartPane extends StatefulWidget {
   const MemoryChartPane({
     Key? key,
-    required this.chartControllers,
+    required this.chartController,
     required this.keyFocusNode,
   }) : super(key: key);
-  final MemoryChartPaneController chartControllers;
+  final MemoryChartPaneController chartController;
 
   /// Which widget's key press will be handled by chart.
   final FocusNode keyFocusNode;
@@ -80,20 +81,20 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     if (!initController()) return;
 
     // TODO(polinach): generalize three addAutoDisposeListener below.
-    addAutoDisposeListener(widget.chartControllers.event.tapLocation, () {
-      if (widget.chartControllers.event.tapLocation.value != null) {
+    addAutoDisposeListener(widget.chartController.event.tapLocation, () {
+      if (widget.chartController.event.tapLocation.value != null) {
         if (_hoverOverlayEntry != null) {
           _hideHover();
         }
-        final tapLocation = widget.chartControllers.event.tapLocation.value;
+        final tapLocation = widget.chartController.event.tapLocation.value;
         if (tapLocation?.tapDownDetails != null) {
           final tapData = tapLocation!;
           final index = tapData.index;
           final timestamp = tapData.timestamp!;
 
           final copied = TapLocation.copy(tapLocation);
-          widget.chartControllers.vm.tapLocation.value = copied;
-          widget.chartControllers.android.tapLocation.value = copied;
+          widget.chartController.vm.tapLocation.value = copied;
+          widget.chartController.android.tapLocation.value = copied;
 
           final allValues = ChartsValues(controller, index, timestamp);
           _showHover(
@@ -105,20 +106,20 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
       }
     });
 
-    addAutoDisposeListener(widget.chartControllers.vm.tapLocation, () {
-      if (widget.chartControllers.vm.tapLocation.value != null) {
+    addAutoDisposeListener(widget.chartController.vm.tapLocation, () {
+      if (widget.chartController.vm.tapLocation.value != null) {
         if (_hoverOverlayEntry != null) {
           _hideHover();
         }
-        final tapLocation = widget.chartControllers.vm.tapLocation.value;
+        final tapLocation = widget.chartController.vm.tapLocation.value;
         if (tapLocation?.tapDownDetails != null) {
           final tapData = tapLocation!;
           final index = tapData.index;
           final timestamp = tapData.timestamp!;
 
           final copied = TapLocation.copy(tapLocation);
-          widget.chartControllers.event.tapLocation.value = copied;
-          widget.chartControllers.android.tapLocation.value = copied;
+          widget.chartController.event.tapLocation.value = copied;
+          widget.chartController.android.tapLocation.value = copied;
 
           final allValues = ChartsValues(controller, index, timestamp);
 
@@ -131,20 +132,20 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
       }
     });
 
-    addAutoDisposeListener(widget.chartControllers.android.tapLocation, () {
-      if (widget.chartControllers.android.tapLocation.value != null) {
+    addAutoDisposeListener(widget.chartController.android.tapLocation, () {
+      if (widget.chartController.android.tapLocation.value != null) {
         if (_hoverOverlayEntry != null) {
           _hideHover();
         }
-        final tapLocation = widget.chartControllers.android.tapLocation.value;
+        final tapLocation = widget.chartController.android.tapLocation.value;
         if (tapLocation?.tapDownDetails != null) {
           final tapData = tapLocation!;
           final index = tapData.index;
           final timestamp = tapData.timestamp!;
 
           final copied = TapLocation.copy(tapLocation);
-          widget.chartControllers.event.tapLocation.value = copied;
-          widget.chartControllers.vm.tapLocation.value = copied;
+          widget.chartController.event.tapLocation.value = copied;
+          widget.chartController.vm.tapLocation.value = copied;
 
           final allValues = ChartsValues(controller, index, timestamp);
 
@@ -159,7 +160,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
     addAutoDisposeListener(controller.refreshCharts, () {
       setState(() {
-        widget.chartControllers.recomputeChartData();
+        widget.chartController.recomputeChartData();
       });
     });
 
@@ -204,24 +205,33 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
             }
           },
           autofocus: true,
-          child: Column(
+          child: Row(
             children: [
-              // TODO(polina-c): explain why we need SizedBox here.
-              // And put 70 into a named const that describes what it is.
-              SizedBox(
-                height: scaleByFontFactor(70),
-                child: MemoryEventsPane(widget.chartControllers.event),
-              ),
-              SizedBox(
-                child: MemoryVMChart(widget.chartControllers.vm),
-              ),
-              if (controller.isAndroidChartVisibleNotifier.value)
-                SizedBox(
-                  height: defaultChartHeight,
-                  child: MemoryAndroidChart(
-                    widget.chartControllers.android,
-                  ),
+              Expanded(
+                child: Column(
+                  children: [
+                    // TODO(polina-c): explain why we need SizedBox here.
+                    // And put 70 into a named const that describes what it is.
+                    SizedBox(
+                      height: scaleByFontFactor(70),
+                      child: MemoryEventsPane(widget.chartController.event),
+                    ),
+                    SizedBox(
+                      child: MemoryVMChart(widget.chartController.vm),
+                    ),
+                    if (controller.isAndroidChartVisibleNotifier.value)
+                      SizedBox(
+                        height: defaultChartHeight,
+                        child: MemoryAndroidChart(
+                          widget.chartController.android,
+                        ),
+                      ),
+                  ],
                 ),
+              ),
+              ChartControlPane(
+                chartController: widget.chartController,
+              ),
             ],
           ),
         );
@@ -238,7 +248,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
   List<Widget> _displayVmDataInHover(ChartsValues chartsValues) =>
       _dataToDisplay(
-        chartsValues.displayVmDataToDisplay(widget.chartControllers.vm.traces),
+        chartsValues.displayVmDataToDisplay(widget.chartController.vm.traces),
       );
 
   List<Widget> _displayAndroidDataInHover(ChartsValues chartsValues) {
@@ -249,7 +259,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     if (!controller.isAndroidChartVisibleNotifier.value) return [];
 
     final androidDataDisplayed = chartsValues
-        .androidDataToDisplay(widget.chartControllers.android.traces);
+        .androidDataToDisplay(widget.chartController.android.traces);
 
     // Separator between Android data.
     // TODO(terry): Why Center widget doesn't work (parent width is bigger/centered too far right).
@@ -478,9 +488,9 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
   void _hideHover() {
     if (_hoverOverlayEntry != null) {
-      widget.chartControllers.event.tapLocation.value = null;
-      widget.chartControllers.vm.tapLocation.value = null;
-      widget.chartControllers.android.tapLocation.value = null;
+      widget.chartController.event.tapLocation.value = null;
+      widget.chartController.vm.tapLocation.value = null;
+      widget.chartController.android.tapLocation.value = null;
 
       _hoverOverlayEntry?.remove();
       _hoverOverlayEntry = null;

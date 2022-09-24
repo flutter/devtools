@@ -102,7 +102,7 @@ class MemoryBodyState extends State<MemoryBody>
   Widget build(BuildContext context) {
     final memoryPane = KeepAliveWrapper(
         child: MemoryChartPane(
-      chartControllers: _chartController,
+      chartController: _chartController,
       keyFocusNode: _focusNode,
     ));
 
@@ -112,7 +112,7 @@ class MemoryBodyState extends State<MemoryBody>
         MemoryControlPane(chartController: _chartController),
         const SizedBox(height: denseRowSpacing),
         MemoryChartPane(
-          chartControllers: _chartController,
+          chartController: _chartController,
           keyFocusNode: _focusNode,
         ),
         Expanded(
