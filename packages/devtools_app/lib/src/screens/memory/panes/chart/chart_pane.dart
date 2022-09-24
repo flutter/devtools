@@ -47,6 +47,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
   static const _hoverXOffset = 10;
   static const _hoverYOffset = 0.0;
+
   static double get _hoverWidth => scaleByFontFactor(225.0);
   static const _hover_card_border_width = 2.0;
 
@@ -192,6 +193,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
   @override
   Widget build(BuildContext context) {
+    const memoryEventsPainHeight = 70.0;
     return ValueListenableBuilder<bool>(
       valueListenable: preferences.memory.showChart,
       builder: (_, showChart, __) {
@@ -206,19 +208,16 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
           },
           autofocus: true,
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
                 child: Column(
                   children: [
-                    // TODO(polina-c): explain why we need SizedBox here.
-                    // And put 70 into a named const that describes what it is.
                     SizedBox(
-                      height: scaleByFontFactor(70),
+                      height: memoryEventsPainHeight,
                       child: MemoryEventsPane(widget.chartController.event),
                     ),
-                    SizedBox(
-                      child: MemoryVMChart(widget.chartController.vm),
-                    ),
+                    MemoryVMChart(widget.chartController.vm),
                     if (controller.isAndroidChartVisibleNotifier.value)
                       SizedBox(
                         height: defaultChartHeight,

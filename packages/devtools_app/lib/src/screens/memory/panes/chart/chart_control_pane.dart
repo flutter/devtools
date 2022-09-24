@@ -37,8 +37,6 @@ class _ChartControlPaneState extends State<ChartControlPane>
     super.didChangeDependencies();
     if (!initController()) return;
 
-    // TODO(polinach): do we need these listeners?
-    // https://github.com/flutter/devtools/pull/4136#discussion_r881773861
     addAutoDisposeListener(controller.legendVisibleNotifier, () {
       setState(() {
         if (controller.isLegendVisible) {
@@ -54,14 +52,9 @@ class _ChartControlPaneState extends State<ChartControlPane>
       });
     });
 
+    // Refresh legend if android chary visibility changed.
     addAutoDisposeListener(controller.isAndroidChartVisibleNotifier, () {
       setState(() {
-        if (controller.isAndroidChartVisibleNotifier.value) {
-          ga.select(
-            analytics_constants.memory,
-            analytics_constants.androidChart,
-          );
-        }
         if (controller.isLegendVisible) {
           // Recompute the legend with the new traces now visible.
           _hideLegend();
@@ -84,10 +77,12 @@ class _ChartControlPaneState extends State<ChartControlPane>
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ValueListenableBuilder<bool>(
           valueListenable: controller.paused,
           builder: (context, paused, _) => Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               PauseButton(
                 minScreenWidthForTextBeforeScaling:
@@ -100,12 +95,12 @@ class _ChartControlPaneState extends State<ChartControlPane>
                     primaryControlsMinVerboseWidth,
                 onPressed: paused ? _onResume : null,
               ),
+              const SizedBox(height: denseSpacing),
             ],
           ),
         ),
-        const SizedBox(height: defaultSpacing),
         IntervalDropdown(chartController: widget.chartController),
-        const SizedBox(width: denseSpacing),
+        const SizedBox(height: denseSpacing),
         IconLabelButton(
           key: legendKey,
           onPressed: controller.toggleLegendVisibility,
