@@ -23,7 +23,7 @@ class SnapshotControlPane extends StatelessWidget {
     return ValueListenableBuilder<bool>(
       valueListenable: controller.isProcessing,
       builder: (_, isProcessing, __) {
-        final current = controller.selectedItem as SnapshotListItem;
+        final current = controller.selectedItem as SnapshotInstanceItem;
 
         return Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -76,7 +76,7 @@ class _ClassFilter extends StatelessWidget {
 class _ToCsv extends StatelessWidget {
   const _ToCsv({Key? key, required this.item}) : super(key: key);
 
-  final SnapshotListItem item;
+  final SnapshotInstanceItem item;
 
   @override
   Widget build(BuildContext context) {
@@ -103,13 +103,13 @@ class _DiffDropdown extends StatelessWidget {
     }
   }
 
-  final ValueListenable<List<DiffListItem>> list;
-  final SnapshotListItem current;
+  final ValueListenable<List<SnapshotItem>> list;
+  final SnapshotInstanceItem current;
 
-  List<DropdownMenuItem<SnapshotListItem>> items() =>
-      list.value.where((item) => item.hasData).cast<SnapshotListItem>().map(
+  List<DropdownMenuItem<SnapshotInstanceItem>> items() =>
+      list.value.where((item) => item.hasData).cast<SnapshotInstanceItem>().map(
         (item) {
-          return DropdownMenuItem<SnapshotListItem>(
+          return DropdownMenuItem<SnapshotInstanceItem>(
             value: item,
             child: Text(item == current ? '-' : item.name),
           );
@@ -118,17 +118,17 @@ class _DiffDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<SnapshotListItem?>(
+    return ValueListenableBuilder<SnapshotInstanceItem?>(
       valueListenable: current.diffWith,
       builder: (_, diffWith, __) => Row(
         children: [
           const Text('Diff with:'),
           const SizedBox(width: defaultSpacing),
-          RoundedDropDownButton<SnapshotListItem>(
+          RoundedDropDownButton<SnapshotInstanceItem>(
             isDense: true,
             style: Theme.of(context).textTheme.bodyText2,
             value: current.diffWith.value ?? current,
-            onChanged: (SnapshotListItem? value) {
+            onChanged: (SnapshotInstanceItem? value) {
               if ((value ?? current) == current) {
                 current.setDiffWith(null);
               } else {

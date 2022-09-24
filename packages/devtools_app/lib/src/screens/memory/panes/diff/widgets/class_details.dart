@@ -16,7 +16,7 @@ class HeapClassDetails extends StatelessWidget {
     required this.sorting,
   }) : super(key: key);
 
-  final SnapshotListItem item;
+  final SnapshotInstanceItem item;
   final ColumnSorting sorting;
 
   @override

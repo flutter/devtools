@@ -4,7 +4,6 @@
 
 import 'package:flutter/foundation.dart';
 
-import '../../../../../shared/utils.dart';
 import '../../../shared/heap/heap.dart';
 
 /// Stores already calculated comparisons for heap couples.
@@ -27,9 +26,9 @@ class _HeapCouple {
   late final AdaptedHeap older;
   late final AdaptedHeap younger;
 
-  /// Finds most deterministic way to declare earliest heap.
+  /// Tries to declare earliest heap in a determenistic way.
   ///
-  /// If earliest heap cannot be identified, returns first argument.
+  /// If the earliest heap cannot be identified, returns the first argument.
   static AdaptedHeap _older(AdaptedHeap heap1, AdaptedHeap heap2) {
     assert(heap1.data != heap2.data);
     if (heap1.data.created.isBefore(heap2.data.created)) return heap1;
@@ -57,25 +56,33 @@ class _HeapCouple {
   int get hashCode => Object.hash(older, younger);
 }
 
+class HeapClassDiff {
+  HeapClassDiff(HeapClassStatistics before, HeapClassStatistics after) {
+    throw UnimplementedError();
+  }
+}
+
 class HeapComparison {
   HeapComparison(this.heapCouple);
 
-  late final HeapStatistics stats = _stats();
-
   final _HeapCouple heapCouple;
 
-  HeapStatistics _stats() {
-    final statisticByClass = subtractMaps<String, HeapClassStatistics>(
-      minuend: heapCouple.younger.stats.statsByClassName,
-      subtrahend: heapCouple.older.stats.statsByClassName,
-      subtract: (minuend, subtrahend) {
-        final diff = HeapClassStatistics.subtract(minuend, subtrahend);
-        if (diff.isZero) return null;
-        return diff;
-      },
-      negate: (value) => HeapClassStatistics.negative(value),
-    );
+  late final HeapStatistics stats = _stats();
 
-    return HeapStatistics(statisticByClass);
+  HeapStatistics _stats() {
+    // final statisticByClass = subtractMaps<String, HeapClassStatistics>(
+    //   minuend: heapCouple.younger.stats.statsByClassName,
+    //   subtrahend: heapCouple.older.stats.statsByClassName,
+    //   subtract: (minuend, subtrahend) {
+    //     final diff = HeapClassStatistics.subtract(minuend, subtrahend);
+    //     if (diff.isZero) return null;
+    //     return diff;
+    //   },
+    //   negate: (value) => HeapClassStatistics.negative(value),
+    // );
+
+    // return HeapStatistics(statisticByClass);
+
+    throw UnimplementedError();
   }
 }

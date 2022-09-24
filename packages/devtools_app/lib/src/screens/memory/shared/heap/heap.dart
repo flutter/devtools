@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../../../../shared/utils.dart';
 import 'model.dart';
 import 'spanning_tree.dart';
 
@@ -53,94 +52,100 @@ class HeapStatistics with Sealable {
   }
 }
 
-typedef ObjectsByPath = Map<ClassOnlyHeapPath, ObjectSet>;
+typedef ObjectsByPath = Map<ClassOnlyHeapPath, ObjectSetStats>;
 
 class HeapClassStatistics with Sealable {
   HeapClassStatistics(this.heapClass)
-      : total = ObjectSet(),
-        objectsByPath = <ClassOnlyHeapPath, ObjectSet>{};
+      : objects = ObjectSet(),
+        objectsByPath = <ClassOnlyHeapPath, ObjectSetStats>{};
 
-  HeapClassStatistics.negative(HeapClassStatistics other)
-      : heapClass = other.heapClass,
-        total = ObjectSet.negative(other.total),
-        objectsByPath = other.objectsByPath
-            .map((key, value) => MapEntry(key, ObjectSet.negative(value))) {
-    seal();
-  }
+  // HeapClassStatistics.negative(HeapClassStatistics other)
+  //     : heapClass = other.heapClass,
+  //       total = ObjectSet.negative(other.total),
+  //       objectsByPath = other.objectsByPath
+  //           .map((key, value) => MapEntry(key, ObjectSet.negative(value))) {
+  //   seal();
+  // }
 
-  HeapClassStatistics.subtract(
-    HeapClassStatistics minuend,
-    HeapClassStatistics subtrahend,
-  )   : assert(minuend.heapClass.fullName == subtrahend.heapClass.fullName),
-        heapClass = minuend.heapClass,
-        total = ObjectSet.subtract(minuend.total, subtrahend.total),
-        objectsByPath = _subtractSizesByPath(
-            minuend.objectsByPath, subtrahend.objectsByPath) {
-    seal();
-  }
+  // HeapClassStatistics.subtract(
+  //   HeapClassStatistics minuend,
+  //   HeapClassStatistics subtrahend,
+  // )   : assert(minuend.heapClass.fullName == subtrahend.heapClass.fullName),
+  //       heapClass = minuend.heapClass,
+  //       total = ObjectSet.subtract(minuend.total, subtrahend.total),
+  //       objectsByPath = _subtractSizesByPath(
+  //           minuend.objectsByPath, subtrahend.objectsByPath) {
+  //   seal();
+  // }
 
-  static ObjectsByPath _subtractSizesByPath(
-    ObjectsByPath minuend,
-    ObjectsByPath subtrahend,
-  ) =>
-      subtractMaps<ClassOnlyHeapPath, ObjectSet>(
-        minuend: minuend,
-        subtrahend: subtrahend,
-        subtract: (minuend, subtrahend) {
-          final diff = ObjectSet.subtract(minuend, subtrahend);
-          if (diff.isZero) return null;
-          return diff;
-        },
-        negate: (value) => ObjectSet.negative(value),
-      );
+  // static ObjectsByPath _subtractSizesByPath(
+  //   ObjectsByPath minuend,
+  //   ObjectsByPath subtrahend,
+  // ) =>
+  //     subtractMaps<ClassOnlyHeapPath, ObjectSet>(
+  //       minuend: minuend,
+  //       subtrahend: subtrahend,
+  //       subtract: (minuend, subtrahend) {
+  //         final diff = ObjectSet.subtract(minuend, subtrahend);
+  //         if (diff.isZero) return null;
+  //         return diff;
+  //       },
+  //       negate: (value) => ObjectSet.negative(value),
+  //     );
 
   final HeapClass heapClass;
-  final ObjectSet total;
+  final ObjectSet objects;
   final ObjectsByPath objectsByPath;
 
   void countInstance(AdaptedHeapData data, int objectIndex) {
     assert(!isSealed);
     final object = data.objects[objectIndex];
     assert(object.heapClass.fullName == heapClass.fullName);
-    total.countInstance(object);
+    objects.countInstance(object);
 
     final path = data.retainingPath(objectIndex);
     if (path == null) return;
-    final sizeForPath = objectsByPath.putIfAbsent(
+    final objectsForPath = objectsByPath.putIfAbsent(
       ClassOnlyHeapPath(path),
       () => ObjectSet(),
     );
-    sizeForPath.countInstance(object);
+    objectsForPath.countInstance(object);
   }
 
-  bool get isZero => total.isZero;
+  bool get isZero => objects.isZero;
 }
 
-class ObjectSetDiff with Sealable {
+class ObjectSetDiff {
+  ObjectSetDiff(ObjectSet before, ObjectSet after) {
+    final objects = before.objects.union(after.objects);
+    for (var object in objects) {
+      if (before.objects.contains(object) && (after.objects.contains(object)))
+        continue;
+
+      if (before.objects.contains(object)) {
+        deleted.countInstance(object);
+        delta.uncountInstance(object);
+      }
+      if (after.objects.contains(object)) {
+        created.countInstance(object);
+        delta.countInstance(object);
+      }
+      assert(false);
+    }
+    created.seal();
+    deleted.seal();
+    delta.seal();
+  }
+
   final created = ObjectSet();
   final deleted = ObjectSet();
-  final delta = ObjectSet();
+  final delta = ObjectSetStats();
 }
 
 /// Size of set of instances.
-class ObjectSet with Sealable {
-  ObjectSet();
+class ObjectSetStats with Sealable {
+  ObjectSetStats();
 
-  ObjectSet.negative(ObjectSet other)
-      : instanceCount = -other.instanceCount,
-        shallowSize = -other.shallowSize,
-        retainedSize = -other.retainedSize {
-    seal();
-  }
-
-  ObjectSet.subtract(ObjectSet left, ObjectSet right)
-      : instanceCount = left.instanceCount - right.instanceCount,
-        shallowSize = left.shallowSize - right.shallowSize,
-        retainedSize = left.retainedSize - right.retainedSize {
-    seal();
-  }
-
-  final codes = <int>{};
   int instanceCount = 0;
   int shallowSize = 0;
   int retainedSize = 0;
@@ -150,10 +155,51 @@ class ObjectSet with Sealable {
 
   void countInstance(AdaptedHeapObject object) {
     assert(!isSealed);
-    if (codes.contains(object.code)) return;
-    codes.add(object.code);
     retainedSize += object.retainedSize!;
     shallowSize += object.shallowSize;
     instanceCount++;
+  }
+
+  void uncountInstance(AdaptedHeapObject object) {
+    assert(!isSealed);
+    retainedSize -= object.retainedSize!;
+    shallowSize -= object.shallowSize;
+    instanceCount--;
+  }
+}
+
+/// Size of set of instances.
+class ObjectSet extends ObjectSetStats {
+  ObjectSet();
+
+  // ObjectSet.negative(ObjectSet other)
+  //     : instanceCount = -other.instanceCount,
+  //       shallowSize = -other.shallowSize,
+  //       retainedSize = -other.retainedSize {
+  //   seal();
+  // }
+
+  // ObjectSet.subtract(ObjectSet left, ObjectSet right)
+  //     : instanceCount = left.instanceCount - right.instanceCount,
+  //       shallowSize = left.shallowSize - right.shallowSize,
+  //       retainedSize = left.retainedSize - right.retainedSize {
+  //   seal();
+  // }
+
+  final objects = <AdaptedHeapObject>{};
+
+  @override
+  bool get isZero => objects.isEmpty;
+
+  @override
+  void countInstance(AdaptedHeapObject object) {
+    assert(!objects.contains(object));
+    super.countInstance(object);
+    objects.add(object);
+  }
+
+  @override
+  void uncountInstance(AdaptedHeapObject object) {
+    throw AssertionError('uncountInstance is not valid for $ObjectSet');
   }
 }

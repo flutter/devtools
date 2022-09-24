@@ -19,7 +19,7 @@ class SnapshotView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final item = controller.selectedItem as SnapshotListItem;
+    final item = controller.selectedItem as SnapshotInstanceItem;
     return ValueListenableBuilder<bool>(
       valueListenable: item.isProcessing,
       builder: (_, isProcessing, __) {
@@ -40,7 +40,7 @@ class SnapshotView extends StatelessWidget {
           return const Center(child: Text('Could not take snapshot.'));
         }
 
-        return ValueListenableBuilder<SnapshotListItem?>(
+        return ValueListenableBuilder<SnapshotInstanceItem?>(
           valueListenable: item.diffWith,
           builder: (_, diffWith, __) {
             return Split(

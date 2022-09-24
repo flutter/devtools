@@ -23,17 +23,17 @@ class DiffPaneController {
 
   /// The list contains one item that show information and all others
   /// are snapshots.
-  ValueListenable<List<DiffListItem>> get snapshots => _snapshots;
-  final _snapshots = ListValueNotifier(<DiffListItem>[InformationListItem()]);
+  ValueListenable<List<SnapshotItem>> get snapshots => _snapshots;
+  final _snapshots = ListValueNotifier(<SnapshotItem>[SnapshotDocItem()]);
 
-  ValueListenable<int> get selectedIndex => _selectedIndex;
-  final _selectedIndex = ValueNotifier<int>(0);
+  ValueListenable<int> get selectedSnapshotIndex => _selectedSnapshotIndex;
+  final _selectedSnapshotIndex = ValueNotifier<int>(0);
 
   /// If true, some process is going on.
   ValueListenable<bool> get isProcessing => _isProcessing;
   final _isProcessing = ValueNotifier<bool>(false);
 
-  DiffListItem get selectedItem => snapshots.value[selectedIndex.value];
+  SnapshotItem get selectedItem => snapshots.value[selectedSnapshotIndex.value];
 
   /// Full name for the selected class.
   ValueListenable<String?> get selectedClass => _selectedClass;
@@ -44,7 +44,7 @@ class DiffPaneController {
   final _classFilter = ValueNotifier<String?>(null);
   void setClassFilter(String value) {
     _classFilter.value = value;
-
+    throw UnimplementedError();
     // if (value.isEmpty && _currentFilter.isEmpty) return;
     // final updatedFilteredClassList = (value.contains(_currentFilter)
     //     ? _filteredClassList.value
@@ -71,7 +71,7 @@ class DiffPaneController {
     _isProcessing.value = true;
     final future = snapshotTaker.take();
     _snapshots.add(
-      SnapshotListItem(
+      SnapshotInstanceItem(
         future,
         _nextDisplayNumber(),
         currentIsolateName ?? '<isolate-not-detected>',
@@ -81,7 +81,7 @@ class DiffPaneController {
     );
     await future;
     final newElementIndex = snapshots.value.length - 1;
-    _selectedIndex.value = newElementIndex;
+    _selectedSnapshotIndex.value = newElementIndex;
     _isProcessing.value = false;
   }
 
@@ -90,7 +90,7 @@ class DiffPaneController {
       snapshots.value[i].dispose();
     }
     _snapshots.removeRange(1, snapshots.value.length);
-    _selectedIndex.value = 0;
+    _selectedSnapshotIndex.value = 0;
   }
 
   int _nextDisplayNumber() {
@@ -100,15 +100,16 @@ class DiffPaneController {
   }
 
   void deleteCurrentSnapshot() {
-    assert(selectedItem is SnapshotListItem);
+    assert(selectedItem is SnapshotInstanceItem);
     selectedItem.dispose();
-    _snapshots.removeRange(selectedIndex.value, selectedIndex.value + 1);
+    _snapshots.removeRange(
+        selectedSnapshotIndex.value, selectedSnapshotIndex.value + 1);
     // We must change the selectedIndex, because otherwise the content will
     // not be re-rendered.
-    _selectedIndex.value = max(selectedIndex.value - 1, 0);
+    _selectedSnapshotIndex.value = max(selectedSnapshotIndex.value - 1, 0);
   }
 
   void select(int index) {
-    _selectedIndex.value = index;
+    _selectedSnapshotIndex.value = index;
   }
 }

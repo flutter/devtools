@@ -11,7 +11,7 @@ import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
 import 'heap_diff.dart';
 
-abstract class DiffListItem extends DisposableController {
+abstract class SnapshotItem extends DisposableController {
   /// Number, that if shown in name, should be unique in the list.
   ///
   /// If the number is not expected to be shown in UI, it should be 0.
@@ -24,7 +24,7 @@ abstract class DiffListItem extends DisposableController {
   bool get hasData;
 }
 
-class InformationListItem extends DiffListItem {
+class SnapshotDocItem extends SnapshotItem {
   @override
   int get displayNumber => 0;
 
@@ -32,8 +32,9 @@ class InformationListItem extends DiffListItem {
   bool get hasData => false;
 }
 
-class SnapshotListItem extends DiffListItem with AutoDisposeControllerMixin {
-  SnapshotListItem(
+class SnapshotInstanceItem extends SnapshotItem
+    with AutoDisposeControllerMixin {
+  SnapshotInstanceItem(
     Future<AdaptedHeapData?> receiver,
     this.displayNumber,
     this._isolateName,
@@ -63,9 +64,9 @@ class SnapshotListItem extends DiffListItem with AutoDisposeControllerMixin {
 
   String get name => '$_isolateName-$displayNumber';
 
-  ValueListenable<SnapshotListItem?> get diffWith => _diffWith;
-  final _diffWith = ValueNotifier<SnapshotListItem?>(null);
-  void setDiffWith(SnapshotListItem? value) {
+  ValueListenable<SnapshotInstanceItem?> get diffWith => _diffWith;
+  final _diffWith = ValueNotifier<SnapshotInstanceItem?>(null);
+  void setDiffWith(SnapshotInstanceItem? value) {
     _diffWith.value = value;
     updateSelectedRecord();
   }

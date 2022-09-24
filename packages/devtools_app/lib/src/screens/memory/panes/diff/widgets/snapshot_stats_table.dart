@@ -48,7 +48,7 @@ class _InstanceColumn extends ColumnData<HeapClassStatistics> {
 
   @override
   int getValue(HeapClassStatistics classStats) =>
-      classStats.total.instanceCount;
+      classStats.objects.instanceCount;
 
   @override
   bool get supportsSorting => true;
@@ -67,7 +67,8 @@ class _ShallowSizeColumn extends ColumnData<HeapClassStatistics> {
         );
 
   @override
-  int getValue(HeapClassStatistics classStats) => classStats.total.shallowSize;
+  int getValue(HeapClassStatistics classStats) =>
+      classStats.objects.shallowSize;
 
   @override
   bool get supportsSorting => true;
@@ -93,7 +94,8 @@ class _RetainedSizeColumn extends ColumnData<HeapClassStatistics> {
         );
 
   @override
-  int getValue(HeapClassStatistics classStats) => classStats.total.retainedSize;
+  int getValue(HeapClassStatistics classStats) =>
+      classStats.objects.retainedSize;
 
   @override
   bool get supportsSorting => true;
@@ -124,13 +126,13 @@ class SnapshotStatsTable extends StatefulWidget {
 class _SnapshotStatsTableState extends State<SnapshotStatsTable>
     with AutoDisposeMixin {
   late final List<ColumnData<HeapClassStatistics>> _columns;
-  late final SnapshotListItem _item;
+  late final SnapshotInstanceItem _item;
 
   @override
   void initState() {
     super.initState();
 
-    _item = widget.controller.selectedItem as SnapshotListItem;
+    _item = widget.controller.selectedItem as SnapshotInstanceItem;
 
     final _shallowSizeColumn = _ShallowSizeColumn();
 
