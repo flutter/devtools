@@ -465,82 +465,79 @@ class HeapTreeViewState extends State<HeapTreeView>
       snapshotDisplay = null;
     }
 
-    return Padding(
-      padding: const EdgeInsets.only(top: denseRowSpacing),
-      child: Column(
-        children: [
-          ValueListenableBuilder<int>(
-            valueListenable: _currentTab,
-            builder: (context, index, _) => Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                TabBar(
-                  labelColor: themeData.textTheme.bodyLarge!.color,
-                  isScrollable: true,
-                  controller: _tabController,
-                  tabs: _tabs,
-                ),
-                if (_searchableTabs.contains(_tabs[index].key))
-                  _buildSearchFilterControls(),
-              ],
-            ),
+    return Column(
+      children: [
+        ValueListenableBuilder<int>(
+          valueListenable: _currentTab,
+          builder: (context, index, _) => Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              TabBar(
+                labelColor: themeData.textTheme.bodyLarge!.color,
+                isScrollable: true,
+                controller: _tabController,
+                tabs: _tabs,
+              ),
+              if (_searchableTabs.contains(_tabs[index].key))
+                _buildSearchFilterControls(),
+            ],
           ),
-          const Divider(),
-          Expanded(
-            child: TabBarView(
-              physics: defaultTabBarViewPhysics,
-              controller: _tabController,
-              children: [
-                // Profile Tab
-                if (FeatureFlags.newAllocationProfileTable) ...[
-                  KeepAliveWrapper(
-                    child: AllocationProfileTableView(
-                      controller: controller.allocationProfileController,
-                    ),
-                  ),
-                  const KeepAliveWrapper(
-                    child: AllocationProfileTracingView(),
-                  ),
-                ],
-                // Analysis Tab
+        ),
+        const Divider(),
+        Expanded(
+          child: TabBarView(
+            physics: defaultTabBarViewPhysics,
+            controller: _tabController,
+            children: [
+              // Profile Tab
+              if (FeatureFlags.newAllocationProfileTable) ...[
                 KeepAliveWrapper(
-                  child: Column(
-                    children: [
-                      _buildSnapshotControls(themeData.textTheme),
-                      const SizedBox(height: denseRowSpacing),
-                      Expanded(
-                        child: buildSnapshotTables(snapshotDisplay),
-                      ),
-                    ],
+                  child: AllocationProfileTableView(
+                    controller: controller.allocationProfileController,
                   ),
                 ),
-                // Allocations Tab
-                KeepAliveWrapper(
-                  child: Column(
-                    children: [
-                      _buildAllocationsControls(),
-                      const SizedBox(height: denseRowSpacing),
-                      const Expanded(
-                        child: AllocationTableView(),
-                      ),
-                    ],
-                  ),
+                const KeepAliveWrapper(
+                  child: AllocationProfileTracingView(),
                 ),
-                // Diff tab.
-                if (FeatureFlags.memoryDiffing)
-                  KeepAliveWrapper(
-                    child: DiffPane(
-                      controller: controller.diffPaneController,
-                    ),
-                  ),
-                // Leaks tab.
-                if (controller.shouldShowLeaksTab.value)
-                  const KeepAliveWrapper(child: LeaksPane()),
               ],
-            ),
+              // Analysis Tab
+              KeepAliveWrapper(
+                child: Column(
+                  children: [
+                    _buildSnapshotControls(themeData.textTheme),
+                    const SizedBox(height: denseRowSpacing),
+                    Expanded(
+                      child: buildSnapshotTables(snapshotDisplay),
+                    ),
+                  ],
+                ),
+              ),
+              // Allocations Tab
+              KeepAliveWrapper(
+                child: Column(
+                  children: [
+                    _buildAllocationsControls(),
+                    const SizedBox(height: denseRowSpacing),
+                    const Expanded(
+                      child: AllocationTableView(),
+                    ),
+                  ],
+                ),
+              ),
+              // Diff tab.
+              if (FeatureFlags.memoryDiffing)
+                KeepAliveWrapper(
+                  child: DiffPane(
+                    controller: controller.diffPaneController,
+                  ),
+                ),
+              // Leaks tab.
+              if (controller.shouldShowLeaksTab.value)
+                const KeepAliveWrapper(child: LeaksPane()),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
