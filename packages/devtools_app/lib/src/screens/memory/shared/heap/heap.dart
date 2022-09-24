@@ -54,48 +54,48 @@ class HeapStatistics {
   }
 }
 
-typedef SizesByPath = Map<ClassOnlyHeapPath, SizeOfClassSet>;
+typedef ObjectsByPath = Map<ClassOnlyHeapPath, ObjectSet>;
 
 class HeapClassStatistics {
   HeapClassStatistics(this.heapClass)
       : _isSealed = false,
-        total = SizeOfClassSet(),
-        sizeByPath = <ClassOnlyHeapPath, SizeOfClassSet>{};
+        total = ObjectSet(),
+        objectsByPath = <ClassOnlyHeapPath, ObjectSet>{};
 
   HeapClassStatistics.negative(HeapClassStatistics other)
       : _isSealed = true,
         heapClass = other.heapClass,
-        total = SizeOfClassSet.negative(other.total),
-        sizeByPath = other.sizeByPath
-            .map((key, value) => MapEntry(key, SizeOfClassSet.negative(value)));
+        total = ObjectSet.negative(other.total),
+        objectsByPath = other.objectsByPath
+            .map((key, value) => MapEntry(key, ObjectSet.negative(value)));
   HeapClassStatistics.subtract(
     HeapClassStatistics minuend,
     HeapClassStatistics subtrahend,
   )   : assert(minuend.heapClass.fullName == subtrahend.heapClass.fullName),
         _isSealed = true,
         heapClass = minuend.heapClass,
-        total = SizeOfClassSet.subtract(minuend.total, subtrahend.total),
-        sizeByPath =
-            _subtractSizesByPath(minuend.sizeByPath, subtrahend.sizeByPath);
+        total = ObjectSet.subtract(minuend.total, subtrahend.total),
+        objectsByPath = _subtractSizesByPath(
+            minuend.objectsByPath, subtrahend.objectsByPath);
 
-  static SizesByPath _subtractSizesByPath(
-    SizesByPath minuend,
-    SizesByPath subtrahend,
+  static ObjectsByPath _subtractSizesByPath(
+    ObjectsByPath minuend,
+    ObjectsByPath subtrahend,
   ) =>
-      subtractMaps<ClassOnlyHeapPath, SizeOfClassSet>(
+      subtractMaps<ClassOnlyHeapPath, ObjectSet>(
         minuend: minuend,
         subtrahend: subtrahend,
         subtract: (minuend, subtrahend) {
-          final diff = SizeOfClassSet.subtract(minuend, subtrahend);
+          final diff = ObjectSet.subtract(minuend, subtrahend);
           if (diff.isZero) return null;
           return diff;
         },
-        negate: (value) => SizeOfClassSet.negative(value),
+        negate: (value) => ObjectSet.negative(value),
       );
 
   final HeapClass heapClass;
-  final SizeOfClassSet total;
-  final SizesByPath sizeByPath;
+  final ObjectSet total;
+  final ObjectsByPath objectsByPath;
 
   void countInstance(AdaptedHeapData data, int objectIndex) {
     assert(!_isSealed);
@@ -105,9 +105,9 @@ class HeapClassStatistics {
 
     final path = data.retainingPath(objectIndex);
     if (path == null) return;
-    final sizeForPath = sizeByPath.putIfAbsent(
+    final sizeForPath = objectsByPath.putIfAbsent(
       ClassOnlyHeapPath(path),
-      () => SizeOfClassSet(),
+      () => ObjectSet(),
     );
     sizeForPath.countInstance(object);
   }
@@ -120,7 +120,7 @@ class HeapClassStatistics {
   void seal() {
     _isSealed = true;
     total.seal();
-    for (var size in sizeByPath.values) {
+    for (var size in objectsByPath.values) {
       size.seal();
     }
   }
@@ -131,16 +131,16 @@ class HeapClassStatistics {
 }
 
 /// Size of set of instances.
-class SizeOfClassSet {
-  SizeOfClassSet() : _isSealed = false;
+class ObjectSet {
+  ObjectSet() : _isSealed = false;
 
-  SizeOfClassSet.negative(SizeOfClassSet other)
+  ObjectSet.negative(ObjectSet other)
       : _isSealed = true,
         instanceCount = -other.instanceCount,
         shallowSize = -other.shallowSize,
         retainedSize = -other.retainedSize;
 
-  SizeOfClassSet.subtract(SizeOfClassSet left, SizeOfClassSet right)
+  ObjectSet.subtract(ObjectSet left, ObjectSet right)
       : _isSealed = true,
         instanceCount = left.instanceCount - right.instanceCount,
         shallowSize = left.shallowSize - right.shallowSize,
