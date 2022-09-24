@@ -44,7 +44,7 @@ class SnapshotView extends StatelessWidget {
           valueListenable: item.diffWith,
           builder: (_, diffWith, __) {
             return Split(
-              axis: Axis.horizontal,
+              axis: Axis.vertical,
               initialFractions: const [0.4, 0.6],
               minSizes: const [80, 80],
               children: [
