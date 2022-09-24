@@ -65,11 +65,11 @@ class _PrimaryControlsState extends State<PrimaryControls>
         const ChartButton(),
         const SizedBox(width: defaultSpacing),
         ClearButton(
-          // TODO(terry): Button needs to be Delete for offline data.
           onPressed: controller.memorySource == MemoryController.liveFeed
               ? _clearTimeline
               : null,
           minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
+          tooltip: 'Clear all data on the memory screen.',
         ),
       ],
     );

@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../analytics/analytics.dart' as ga;
 import '../../../../analytics/constants.dart' as analytics_constants;
-import '../../../../config_specific/logger/logger.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/theme.dart';
@@ -55,6 +54,7 @@ class _SecondaryControlsState extends State<SecondaryControls>
           onPressed: controller.isGcing ? null : _gc,
           icon: Icons.delete,
           label: 'GC',
+          tooltip: 'Trigger full garbage collection.',
           minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
         ),
         const SizedBox(width: denseSpacing),
@@ -65,6 +65,7 @@ class _SecondaryControlsState extends State<SecondaryControls>
         const SizedBox(width: denseSpacing),
         SettingsOutlinedButton(
           onPressed: _openSettingsDialog,
+          tooltip: 'Open memory settings',
         ),
       ],
     );
@@ -85,15 +86,8 @@ class _SecondaryControlsState extends State<SecondaryControls>
   }
 
   Future<void> _gc() async {
-    try {
-      ga.select(analytics_constants.memory, analytics_constants.gc);
-
-      controller.memoryTimeline.addGCEvent();
-
-      await controller.gc();
-    } catch (e) {
-      // TODO(terry): Show toast?
-      log('Unable to GC ${e.toString()}', LogLevel.error);
-    }
+    ga.select(analytics_constants.memory, analytics_constants.gc);
+    controller.memoryTimeline.addGCEvent();
+    await controller.gc();
   }
 }

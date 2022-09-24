@@ -91,6 +91,9 @@ class _ChartControlPaneState extends State<ChartControlPane>
                   minScreenWidthForTextBeforeScaling:
                       primaryControlsMinVerboseWidth,
                   onPressed: paused ? null : _onPause,
+                  tooltip: 'Pause the chart and auto-collection of snapshot\n'
+                      'in case of aggressive memory consumption\n'
+                      '(if enabled in settings)',
                 ),
               ),
               const SizedBox(height: denseSpacing),
@@ -100,6 +103,7 @@ class _ChartControlPaneState extends State<ChartControlPane>
                   minScreenWidthForTextBeforeScaling:
                       primaryControlsMinVerboseWidth,
                   onPressed: paused ? _onResume : null,
+                  tooltip: 'Resume the chart',
                 ),
               ),
               const SizedBox(height: denseSpacing),
@@ -113,7 +117,7 @@ class _ChartControlPaneState extends State<ChartControlPane>
             onPressed: controller.toggleLegendVisibility,
             icon: _legendOverlayEntry == null ? Icons.storage : Icons.close,
             label: 'Legend',
-            tooltip: 'Legend',
+            tooltip: 'Show chart legend',
             minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
           ),
         ),

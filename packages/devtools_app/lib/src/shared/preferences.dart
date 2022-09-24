@@ -365,7 +365,6 @@ class MemoryPreferencesController extends DisposableController
         }
       },
     );
-    autoSnapshotEnabled.value =
-        await storage.getValue(_showChartStorageId) == 'true';
+    showChart.value = await storage.getValue(_showChartStorageId) == 'true';
   }
 }
