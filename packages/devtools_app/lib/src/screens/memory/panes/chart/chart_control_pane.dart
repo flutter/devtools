@@ -76,6 +76,7 @@ class _ChartControlPaneState extends State<ChartControlPane>
 
   @override
   Widget build(BuildContext context) {
+    const buttonWidth = 110.0;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -84,31 +85,40 @@ class _ChartControlPaneState extends State<ChartControlPane>
           builder: (context, paused, _) => Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              PauseButton(
-                minScreenWidthForTextBeforeScaling:
-                    primaryControlsMinVerboseWidth,
-                onPressed: paused ? null : _onPause,
+              SizedBox(
+                width: buttonWidth,
+                child: PauseButton(
+                  minScreenWidthForTextBeforeScaling:
+                      primaryControlsMinVerboseWidth,
+                  onPressed: paused ? null : _onPause,
+                ),
               ),
               const SizedBox(height: denseSpacing),
-              ResumeButton(
-                minScreenWidthForTextBeforeScaling:
-                    primaryControlsMinVerboseWidth,
-                onPressed: paused ? _onResume : null,
+              SizedBox(
+                width: buttonWidth,
+                child: ResumeButton(
+                  minScreenWidthForTextBeforeScaling:
+                      primaryControlsMinVerboseWidth,
+                  onPressed: paused ? _onResume : null,
+                ),
               ),
               const SizedBox(height: denseSpacing),
             ],
           ),
         ),
-        IntervalDropdown(chartController: widget.chartController),
-        const SizedBox(height: denseSpacing),
-        IconLabelButton(
-          key: legendKey,
-          onPressed: controller.toggleLegendVisibility,
-          icon: _legendOverlayEntry == null ? Icons.storage : Icons.close,
-          label: 'Legend',
-          tooltip: 'Legend',
-          minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
+        SizedBox(
+          width: buttonWidth,
+          child: IconLabelButton(
+            key: legendKey,
+            onPressed: controller.toggleLegendVisibility,
+            icon: _legendOverlayEntry == null ? Icons.storage : Icons.close,
+            label: 'Legend',
+            tooltip: 'Legend',
+            minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
+          ),
         ),
+        const SizedBox(height: denseSpacing),
+        IntervalDropdown(chartController: widget.chartController),
       ],
     );
   }
