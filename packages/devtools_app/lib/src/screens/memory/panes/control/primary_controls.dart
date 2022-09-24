@@ -13,7 +13,6 @@ import '../../memory_controller.dart';
 import '../../primitives/ui.dart';
 import '../chart/chart_pane_controller.dart';
 import 'chart_button.dart';
-import 'interval_dropdown.dart';
 
 class PrimaryControls extends StatefulWidget {
   const PrimaryControls({
@@ -63,7 +62,7 @@ class _PrimaryControlsState extends State<PrimaryControls>
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        ChartButton(),
+        const ChartButton(),
         const SizedBox(width: defaultSpacing),
         ClearButton(
           // TODO(terry): Button needs to be Delete for offline data.
@@ -72,8 +71,6 @@ class _PrimaryControlsState extends State<PrimaryControls>
               : null,
           minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
         ),
-        const SizedBox(width: defaultSpacing),
-        IntervalDropdown(chartController: widget.chartController),
       ],
     );
   }

@@ -796,7 +796,7 @@ class ChartPainter extends CustomPainter {
 
     final fillArea = Path()
       ..moveTo(x0, y0Bottom)
-      ..lineTo(x0, y0)
+      ..moveTo(x0, y0)
       ..lineTo(x1, y1)
       ..lineTo(x1, y1Bottom)
       ..lineTo(x0, y0Bottom);
