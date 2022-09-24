@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
 import '../../../../../config_specific/import_export/import_export.dart';
@@ -38,8 +40,8 @@ class SnapshotInstanceItem extends SnapshotItem
     Future<AdaptedHeapData?> receiver,
     this.displayNumber,
     this._isolateName,
-    this.diffStore,
-    this.selectedClassName,
+    this._diffStore,
+    this._selectedClassName,
   ) {
     _isProcessing.value = true;
     receiver.whenComplete(() async {
@@ -47,7 +49,8 @@ class SnapshotInstanceItem extends SnapshotItem
       if (data != null) {
         heap = AdaptedHeap(data);
         updateSelectedRecord();
-        addAutoDisposeListener(selectedClassName, () => updateSelectedRecord());
+        addAutoDisposeListener(
+            _selectedClassName, () => updateSelectedRecord());
       }
       _isProcessing.value = false;
     });
@@ -55,7 +58,7 @@ class SnapshotInstanceItem extends SnapshotItem
 
   final String _isolateName;
 
-  final HeapDiffStore diffStore;
+  final HeapDiffStore _diffStore;
 
   AdaptedHeap? heap;
 
@@ -71,27 +74,25 @@ class SnapshotInstanceItem extends SnapshotItem
     updateSelectedRecord();
   }
 
-  final ValueListenable<String?> selectedClassName;
+  final ValueListenable<HeapClassName?> _selectedClassName;
 
-  ValueListenable<HeapClassStatistics?> get selectedClassStats =>
-      _selectedClassStats;
-  final _selectedClassStats = ValueNotifier<HeapClassStatistics?>(null);
+  ValueListenable<HeapClass?> get selectedHeapClass => _selectedHeapClass;
+  final _selectedHeapClass = ValueNotifier<HeapClass?>(null);
 
   @override
   bool get hasData => heap != null;
 
-  HeapStatistics get statsToShow {
+  HeapClasses get heapClassesToShow {
     final theHeap = heap!;
     final itemToDiffWith = diffWith.value;
-    if (itemToDiffWith == null) return theHeap.stats;
-    return diffStore.compare(theHeap, itemToDiffWith.heap!).stats;
+    if (itemToDiffWith == null) return theHeap.classes;
+    return _diffStore.compare(theHeap, itemToDiffWith.heap!);
   }
 
-  void updateSelectedRecord() => _selectedClassStats.value =
-      statsToShow.statsByClassName[selectedClassName.value];
+  void updateSelectedRecord() => _selectedHeapClass.value =
+      heapClassesToShow.classByName(_selectedClassName.value);
 
   void downloadToCsv() {
-    final data = statsToShow;
     final csvBuffer = StringBuffer();
 
     // Write the headers first.
@@ -107,22 +108,23 @@ class SnapshotInstanceItem extends SnapshotItem
       ].map((e) => '"$e"').join(','),
     );
 
-    // Write a row per retaining path.
-    for (var classStats in data.classStats) {
-      for (var pathStats in classStats.objectsByPath.entries) {
-        csvBuffer.writeln(
-          [
-            classStats.heapClass.className,
-            classStats.heapClass.library,
-            pathStats.value.instanceCount,
-            pathStats.value.shallowSize,
-            pathStats.value.retainedSize,
-            pathStats.key.asShortString(),
-            pathStats.key.asLongString().replaceAll('\n', ' | '),
-          ].join(','),
-        );
-      }
-    }
+    // // Write a row per retaining path.
+    // final data = heapClassesToShow;
+    // for (var classStats in data.classAnalysis) {
+    //   for (var pathStats in classStats.objectsByPath.entries) {
+    //     csvBuffer.writeln(
+    //       [
+    //         classStats.heapClass.className,
+    //         classStats.heapClass.library,
+    //         pathStats.value.instanceCount,
+    //         pathStats.value.shallowSize,
+    //         pathStats.value.retainedSize,
+    //         pathStats.key.asShortString(),
+    //         pathStats.key.asLongString().replaceAll('\n', ' | '),
+    //       ].join(','),
+    //     );
+    //   }
+    // }
 
     final file = ExportController().downloadFile(
       csvBuffer.toString(),
@@ -130,5 +132,7 @@ class SnapshotInstanceItem extends SnapshotItem
     );
 
     notificationService.push(successfulExportMessage(file));
+
+    throw UnimplementedError();
   }
 }

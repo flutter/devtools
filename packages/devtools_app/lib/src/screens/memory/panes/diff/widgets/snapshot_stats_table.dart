@@ -14,7 +14,7 @@ import '../../../shared/heap/primitives.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/item_controller.dart';
 
-class _ClassNameColumn extends ColumnData<HeapClassStatistics> {
+class _ClassNameColumn extends ColumnData<SingleHeapClass> {
   _ClassNameColumn()
       : super(
           'Class',
@@ -24,18 +24,18 @@ class _ClassNameColumn extends ColumnData<HeapClassStatistics> {
         );
 
   @override
-  String? getValue(HeapClassStatistics classStats) =>
+  String? getValue(SingleHeapClass classStats) =>
       classStats.heapClass.className;
 
   @override
   bool get supportsSorting => true;
 
   @override
-  String getTooltip(HeapClassStatistics classStats) =>
+  String getTooltip(SingleHeapClass classStats) =>
       classStats.heapClass.fullName;
 }
 
-class _InstanceColumn extends ColumnData<HeapClassStatistics> {
+class _InstanceColumn extends ColumnData<SingleHeapClass> {
   _InstanceColumn()
       : super(
           'Non GC-able\nInstances',
@@ -47,8 +47,7 @@ class _InstanceColumn extends ColumnData<HeapClassStatistics> {
         );
 
   @override
-  int getValue(HeapClassStatistics classStats) =>
-      classStats.objects.instanceCount;
+  int getValue(SingleHeapClass classStats) => classStats.objects.instanceCount;
 
   @override
   bool get supportsSorting => true;
@@ -57,7 +56,7 @@ class _InstanceColumn extends ColumnData<HeapClassStatistics> {
   bool get numeric => true;
 }
 
-class _ShallowSizeColumn extends ColumnData<HeapClassStatistics> {
+class _ShallowSizeColumn extends ColumnData<SingleHeapClass> {
   _ShallowSizeColumn()
       : super(
           'Shallow\nDart Size',
@@ -67,8 +66,7 @@ class _ShallowSizeColumn extends ColumnData<HeapClassStatistics> {
         );
 
   @override
-  int getValue(HeapClassStatistics classStats) =>
-      classStats.objects.shallowSize;
+  int getValue(SingleHeapClass classStats) => classStats.objects.shallowSize;
 
   @override
   bool get supportsSorting => true;
@@ -77,14 +75,14 @@ class _ShallowSizeColumn extends ColumnData<HeapClassStatistics> {
   bool get numeric => true;
 
   @override
-  String getDisplayValue(HeapClassStatistics classStats) => prettyPrintBytes(
+  String getDisplayValue(SingleHeapClass classStats) => prettyPrintBytes(
         getValue(classStats),
         includeUnit: true,
         kbFractionDigits: 1,
       )!;
 }
 
-class _RetainedSizeColumn extends ColumnData<HeapClassStatistics> {
+class _RetainedSizeColumn extends ColumnData<SingleHeapClass> {
   _RetainedSizeColumn()
       : super(
           'Retained\nDart Size',
@@ -94,8 +92,7 @@ class _RetainedSizeColumn extends ColumnData<HeapClassStatistics> {
         );
 
   @override
-  int getValue(HeapClassStatistics classStats) =>
-      classStats.objects.retainedSize;
+  int getValue(SingleHeapClass classStats) => classStats.objects.retainedSize;
 
   @override
   bool get supportsSorting => true;
@@ -104,15 +101,15 @@ class _RetainedSizeColumn extends ColumnData<HeapClassStatistics> {
   bool get numeric => true;
 
   @override
-  String getDisplayValue(HeapClassStatistics classStats) => prettyPrintBytes(
+  String getDisplayValue(SingleHeapClass classStats) => prettyPrintBytes(
         getValue(classStats),
         includeUnit: true,
         kbFractionDigits: 1,
       )!;
 }
 
-class SnapshotStatsTable extends StatefulWidget {
-  const SnapshotStatsTable({
+class SingleSnapshotTable extends StatefulWidget {
+  const SingleSnapshotTable({
     Key? key,
     required this.controller,
   }) : super(key: key);
@@ -120,30 +117,32 @@ class SnapshotStatsTable extends StatefulWidget {
   final DiffPaneController controller;
 
   @override
-  State<SnapshotStatsTable> createState() => _SnapshotStatsTableState();
+  State<SingleSnapshotTable> createState() => _SingleSnapshotTableState();
 }
 
-class _SnapshotStatsTableState extends State<SnapshotStatsTable>
+class _SingleSnapshotTableState extends State<SingleSnapshotTable>
     with AutoDisposeMixin {
-  late final List<ColumnData<HeapClassStatistics>> _columns;
+  late final List<ColumnData<SingleHeapClass>> _columns;
   late final SnapshotInstanceItem _item;
+  late final SingeHeapClasses _classes;
 
   @override
   void initState() {
     super.initState();
 
-    _item = widget.controller.selectedItem as SnapshotInstanceItem;
+    _item = widget.controller.selectedSnapshotItem as SnapshotInstanceItem;
+    _classes = _item.heapClassesToShow as SingeHeapClasses;
 
     final _shallowSizeColumn = _ShallowSizeColumn();
 
-    _columns = <ColumnData<HeapClassStatistics>>[
+    _columns = <ColumnData<SingleHeapClass>>[
       _ClassNameColumn(),
       _InstanceColumn(),
       _shallowSizeColumn,
       _RetainedSizeColumn(),
     ];
 
-    final sorting = widget.controller.snapshotStatsSorting;
+    final sorting = widget.controller.classSorting;
     if (!sorting.initialized) {
       sorting
         ..direction = SortDirection.descending
@@ -154,14 +153,13 @@ class _SnapshotStatsTableState extends State<SnapshotStatsTable>
 
   @override
   Widget build(BuildContext context) {
-    final sorting = widget.controller.snapshotStatsSorting;
-    return FlatTable<HeapClassStatistics>(
+    final sorting = widget.controller.classSorting;
+    return FlatTable<SingleHeapClass>(
       columns: _columns,
-      data: _item.statsToShow.classStats,
+      data: _classes.classes,
       keyFactory: (e) => Key(e.heapClass.fullName),
-      onItemSelected: (r) =>
-          widget.controller.setSelectedClass(r.heapClass.fullName),
-      selectionNotifier: _item.selectedClassStats,
+      onItemSelected: (r) => widget.controller.setSelectedClass(r.heapClass),
+      //selectionNotifier: null, //  _item.selectedHeapClass, ??????????
       sortColumn: _columns[sorting.columnIndex],
       sortDirection: sorting.direction,
       onSortChanged: (

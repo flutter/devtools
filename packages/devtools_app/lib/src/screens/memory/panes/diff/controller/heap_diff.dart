@@ -5,14 +5,15 @@
 import 'package:flutter/foundation.dart';
 
 import '../../../shared/heap/heap.dart';
+import '../../../shared/heap/model.dart';
 
 /// Stores already calculated comparisons for heap couples.
 class HeapDiffStore {
-  final _store = <_HeapCouple, HeapComparison>{};
+  final _store = <_HeapCouple, HeapDiffClasses>{};
 
-  HeapComparison compare(AdaptedHeap heap1, AdaptedHeap heap2) {
+  HeapDiffClasses compare(AdaptedHeap heap1, AdaptedHeap heap2) {
     final couple = _HeapCouple(heap1, heap2);
-    return _store.putIfAbsent(couple, () => HeapComparison(couple));
+    return _store.putIfAbsent(couple, () => HeapDiffClasses(couple));
   }
 }
 
@@ -57,32 +58,40 @@ class _HeapCouple {
 }
 
 class HeapClassDiff {
-  HeapClassDiff(HeapClassStatistics before, HeapClassStatistics after) {
+  HeapClassDiff(SingleHeapClass before, SingleHeapClass after) {
     throw UnimplementedError();
   }
 }
 
-class HeapComparison {
-  HeapComparison(this.heapCouple);
+class HeapDiffClasses extends HeapClasses {
+  HeapDiffClasses(this.heapCouple);
 
   final _HeapCouple heapCouple;
 
-  late final HeapStatistics stats = _stats();
-
-  HeapStatistics _stats() {
-    // final statisticByClass = subtractMaps<String, HeapClassStatistics>(
-    //   minuend: heapCouple.younger.stats.statsByClassName,
-    //   subtrahend: heapCouple.older.stats.statsByClassName,
-    //   subtract: (minuend, subtrahend) {
-    //     final diff = HeapClassStatistics.subtract(minuend, subtrahend);
-    //     if (diff.isZero) return null;
-    //     return diff;
-    //   },
-    //   negate: (value) => HeapClassStatistics.negative(value),
-    // );
-
-    // return HeapStatistics(statisticByClass);
-
+  @override
+  HeapClass? classByName(HeapClassName? name) {
+    // TODO: implement classByName
     throw UnimplementedError();
   }
+
+  // late final SingeHeapAnalysis stats = _stats();
+
+  // SingeHeapAnalysis _stats() {
+  //   // final statisticByClass = subtractMaps<String, HeapClassStatistics>(
+  //   //   minuend: heapCouple.younger.stats.statsByClassName,
+  //   //   subtrahend: heapCouple.older.stats.statsByClassName,
+  //   //   subtract: (minuend, subtrahend) {
+  //   //     final diff = HeapClassStatistics.subtract(minuend, subtrahend);
+  //   //     if (diff.isZero) return null;
+  //   //     return diff;
+  //   //   },
+  //   //   negate: (value) => HeapClassStatistics.negative(value),
+  //   // );
+
+  //   // return HeapStatistics(statisticByClass);
+
+  //   throw UnimplementedError();
+  // }
 }
+
+class HeapDiffClass extends HeapClass {}

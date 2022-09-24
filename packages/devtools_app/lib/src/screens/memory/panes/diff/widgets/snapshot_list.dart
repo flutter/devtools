@@ -153,7 +153,7 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
                 : null,
             child: InkWell(
               canRequestFocus: false,
-              onTap: () => widget.controller.select(index),
+              onTap: () => widget.controller.setSelectedSnapshotIndex(index),
               child: _SnapshotListTitle(
                 item: snapshots[index],
                 selected: index == selectedIndex,

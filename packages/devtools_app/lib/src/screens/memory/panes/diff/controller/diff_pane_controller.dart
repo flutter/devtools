@@ -28,19 +28,27 @@ class DiffPaneController {
 
   ValueListenable<int> get selectedSnapshotIndex => _selectedSnapshotIndex;
   final _selectedSnapshotIndex = ValueNotifier<int>(0);
+  void setSelectedSnapshotIndex(int index) =>
+      _selectedSnapshotIndex.value = index;
 
   /// If true, some process is going on.
   ValueListenable<bool> get isProcessing => _isProcessing;
   final _isProcessing = ValueNotifier<bool>(false);
 
-  SnapshotItem get selectedItem => snapshots.value[selectedSnapshotIndex.value];
+  SnapshotItem get selectedSnapshotItem =>
+      snapshots.value[selectedSnapshotIndex.value];
 
   /// Full name for the selected class.
-  ValueListenable<String?> get selectedClass => _selectedClass;
-  final _selectedClass = ValueNotifier<String?>(null);
-  void setSelectedClass(String? value) => _selectedClass.value = value;
+  ValueListenable<HeapClassName?> get selectedClass => _selectedClass;
+  final _selectedClass = ValueNotifier<HeapClassName?>(null);
+  void setSelectedClass(HeapClassName? value) => _selectedClass.value = value;
 
-  ValueListenable<String?> get classFilter => _selectedClass;
+  /// Selected retaining path.
+  ValueListenable<String?> get selectedPath => _selectedPath;
+  final _selectedPath = ValueNotifier<String?>(null);
+  void setselectedPath(String? value) => _selectedPath.value = value;
+
+  ValueListenable<String?> get classFilter => _classFilter;
   final _classFilter = ValueNotifier<String?>(null);
   void setClassFilter(String value) {
     _classFilter.value = value;
@@ -63,9 +71,11 @@ class DiffPaneController {
   /// informational item.
   bool get hasSnapshots => snapshots.value.length > 1;
 
-  final snapshotStatsSorting = ColumnSorting();
+  final classSorting = ColumnSorting();
 
-  final classStatsSorting = ColumnSorting();
+  final classDiffSorting = ColumnSorting();
+
+  final pathSorting = ColumnSorting();
 
   Future<void> takeSnapshot() async {
     _isProcessing.value = true;
@@ -100,16 +110,12 @@ class DiffPaneController {
   }
 
   void deleteCurrentSnapshot() {
-    assert(selectedItem is SnapshotInstanceItem);
-    selectedItem.dispose();
+    assert(selectedSnapshotItem is SnapshotInstanceItem);
+    selectedSnapshotItem.dispose();
     _snapshots.removeRange(
         selectedSnapshotIndex.value, selectedSnapshotIndex.value + 1);
     // We must change the selectedIndex, because otherwise the content will
     // not be re-rendered.
     _selectedSnapshotIndex.value = max(selectedSnapshotIndex.value - 1, 0);
-  }
-
-  void select(int index) {
-    _selectedSnapshotIndex.value = index;
   }
 }

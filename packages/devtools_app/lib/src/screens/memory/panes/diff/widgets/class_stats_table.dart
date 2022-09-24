@@ -114,7 +114,7 @@ class ClassStatsTable extends StatefulWidget {
     required this.sorting,
   }) : super(key: key);
 
-  final HeapClassStatistics data;
+  final SingleHeapClass data;
   final ColumnSorting sorting;
 
   @override

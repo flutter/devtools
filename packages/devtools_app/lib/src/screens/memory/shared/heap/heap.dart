@@ -10,10 +10,10 @@ class AdaptedHeap {
 
   final AdaptedHeapData data;
 
-  late final HeapStatistics stats = _heapStatistics(data);
+  late final SingeHeapClasses classes = _heapStatistics(data);
 
-  static HeapStatistics _heapStatistics(AdaptedHeapData data) {
-    final result = <String, HeapClassStatistics>{};
+  static SingeHeapClasses _heapStatistics(AdaptedHeapData data) {
+    final result = <String, SingleHeapClass>{};
     if (!data.isSpanningTreeBuilt) buildSpanningTree(data);
 
     for (var i in Iterable.generate(data.objects.length)) {
@@ -27,35 +27,47 @@ class AdaptedHeap {
       final fullName = heapClass.fullName;
 
       final stats =
-          result.putIfAbsent(fullName, () => HeapClassStatistics(heapClass));
+          result.putIfAbsent(fullName, () => SingleHeapClass(heapClass));
       stats.countInstance(data, i);
     }
 
-    return HeapStatistics(result)..seal();
+    return SingeHeapClasses(result)..seal();
   }
 }
 
-class HeapStatistics with Sealable {
-  HeapStatistics(this.statsByClassName);
+abstract class HeapClasses with Sealable {
+  HeapClass? classByName(HeapClassName? name);
+}
+
+class SingeHeapClasses extends HeapClasses {
+  SingeHeapClasses(this.classesByName);
 
   /// Maps full class name to statistics of this class.
-  final Map<String, HeapClassStatistics> statsByClassName;
-  late final List<HeapClassStatistics> classStats =
-      statsByClassName.values.toList(growable: false);
+  final Map<String, SingleHeapClass> classesByName;
+  late final List<SingleHeapClass> classes =
+      classesByName.values.toList(growable: false);
 
   @override
   void seal() {
     super.seal();
-    for (var stats in classStats) {
-      stats.seal();
+    for (var analysis in classes) {
+      analysis.seal();
     }
+  }
+
+  @override
+  HeapClass? classByName(HeapClassName? name) {
+    if (name == null) return null;
+    return classesByName[name];
   }
 }
 
 typedef ObjectsByPath = Map<ClassOnlyHeapPath, ObjectSetStats>;
 
-class HeapClassStatistics with Sealable {
-  HeapClassStatistics(this.heapClass)
+abstract class HeapClass with Sealable {}
+
+class SingleHeapClass extends HeapClass {
+  SingleHeapClass(this.heapClass)
       : objects = ObjectSet(),
         objectsByPath = <ClassOnlyHeapPath, ObjectSetStats>{};
 
@@ -93,7 +105,7 @@ class HeapClassStatistics with Sealable {
   //       negate: (value) => ObjectSet.negative(value),
   //     );
 
-  final HeapClass heapClass;
+  final HeapClassName heapClass;
   final ObjectSet objects;
   final ObjectsByPath objectsByPath;
 

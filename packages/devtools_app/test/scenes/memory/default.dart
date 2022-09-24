@@ -141,7 +141,7 @@ AdaptedHeapData _createHeap(Map<String, int> classToInstance) {
 AdaptedHeapObject _createObject(String className) => AdaptedHeapObject(
       code: 0,
       references: [],
-      heapClass: HeapClass(
+      heapClass: HeapClassName(
         className: className,
         library: 'my_lib',
       ),

@@ -23,7 +23,7 @@ class SnapshotControlPane extends StatelessWidget {
     return ValueListenableBuilder<bool>(
       valueListenable: controller.isProcessing,
       builder: (_, isProcessing, __) {
-        final current = controller.selectedItem as SnapshotInstanceItem;
+        final current = controller.selectedSnapshotItem as SnapshotInstanceItem;
 
         return Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,

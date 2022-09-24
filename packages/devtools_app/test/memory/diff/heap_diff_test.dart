@@ -8,7 +8,8 @@ import 'package:devtools_app/src/screens/memory/shared/heap/model.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('$HeapDiffStore does not create new $HeapComparison for the same couple',
+  test(
+      '$HeapDiffStore does not create new $HeapDiffClasses for the same couple',
       () {
     final heap1 = _createHeap();
     final heap2 = _createHeap();
@@ -33,7 +34,7 @@ AdaptedHeap _createHeap() => AdaptedHeap(
             code: 0,
             references: [],
             heapClass:
-                const HeapClass(className: 'className', library: 'library'),
+                const HeapClassName(className: 'className', library: 'library'),
             shallowSize: 1,
           )
         ],

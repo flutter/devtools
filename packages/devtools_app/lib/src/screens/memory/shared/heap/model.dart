@@ -124,7 +124,7 @@ class ClassOnlyHeapPath {
   ClassOnlyHeapPath(HeapPath heapPath)
       : classes =
             heapPath.objects.map((o) => o.heapClass).toList(growable: false);
-  final List<HeapClass> classes;
+  final List<HeapClassName> classes;
 
   String asShortString() => classes.map((e) => e.className).join('/');
 
@@ -159,7 +159,7 @@ class AdaptedHeapObject {
     return AdaptedHeapObject(
       code: object.identityHashCode,
       references: List.from(object.references),
-      heapClass: HeapClass(className: object.klass.name, library: library),
+      heapClass: HeapClassName(className: object.klass.name, library: library),
       shallowSize: object.shallowSize,
     );
   }
@@ -168,7 +168,7 @@ class AdaptedHeapObject {
       AdaptedHeapObject(
         code: json[_JsonFields.code],
         references: (json[_JsonFields.references] as List<dynamic>).cast<int>(),
-        heapClass: HeapClass(
+        heapClass: HeapClassName(
           className: json[_JsonFields.klass],
           library: json[_JsonFields.library],
         ),
@@ -176,7 +176,7 @@ class AdaptedHeapObject {
       );
 
   final List<int> references;
-  final HeapClass heapClass;
+  final HeapClassName heapClass;
   final IdentityHashCode code;
   final int shallowSize;
 
@@ -216,8 +216,8 @@ class SnapshotTaker {
 }
 
 @immutable
-class HeapClass {
-  const HeapClass({required this.className, required this.library});
+class HeapClassName {
+  const HeapClassName({required this.className, required this.library});
 
   final String className;
   final String library;
