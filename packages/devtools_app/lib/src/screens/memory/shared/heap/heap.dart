@@ -146,6 +146,7 @@ class SizeOfClassSet {
         shallowSize = left.shallowSize - right.shallowSize,
         retainedSize = left.retainedSize - right.retainedSize;
 
+  final codes = <int>{};
   int instanceCount = 0;
   int shallowSize = 0;
   int retainedSize = 0;
@@ -155,6 +156,8 @@ class SizeOfClassSet {
 
   void countInstance(AdaptedHeapObject object) {
     assert(!_isSealed);
+    if (codes.contains(object.code)) return;
+    codes.add(object.code);
     retainedSize += object.retainedSize!;
     shallowSize += object.shallowSize;
     instanceCount++;
