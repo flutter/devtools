@@ -44,8 +44,8 @@ const memorySearchFieldKeyName = 'MemorySearchFieldKey';
 @visibleForTesting
 final memorySearchFieldKey = GlobalKey(debugLabel: memorySearchFieldKeyName);
 
-class HeapTree extends StatefulWidget {
-  const HeapTree(
+class HeapTreeView extends StatefulWidget {
+  const HeapTreeView(
     this.controller,
   );
 
@@ -135,11 +135,11 @@ String buildRegExs(Map<WildcardMatch, List<String>> matchingCriteria) {
 
 final String knownClassesRegExs = buildRegExs(knowClassesToAnalyzeForImages);
 
-class HeapTreeViewState extends State<HeapTree>
+class HeapTreeViewState extends State<HeapTreeView>
     with
         AutoDisposeMixin,
-        ProvidedControllerMixin<MemoryController, HeapTree>,
-        SearchFieldMixin<HeapTree>,
+        ProvidedControllerMixin<MemoryController, HeapTreeView>,
+        SearchFieldMixin<HeapTreeView>,
         TickerProviderStateMixin {
   @visibleForTesting
   static const searchButtonKey = Key('Snapshot Search');
@@ -469,7 +469,6 @@ class HeapTreeViewState extends State<HeapTree>
       padding: const EdgeInsets.only(top: denseRowSpacing),
       child: Column(
         children: [
-          const SizedBox(height: defaultSpacing),
           ValueListenableBuilder<int>(
             valueListenable: _currentTab,
             builder: (context, index, _) => Row(

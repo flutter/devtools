@@ -108,7 +108,7 @@ class MemoryBodyState extends State<MemoryBody>
           keyFocusNode: _focusNode,
         ),
         Expanded(
-          child: HeapTree(memoryController),
+          child: HeapTreeView(memoryController),
         ),
       ],
     );
