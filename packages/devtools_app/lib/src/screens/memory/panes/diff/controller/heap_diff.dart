@@ -126,10 +126,12 @@ class ObjectSetDiff {
       if (before.objects.contains(object)) {
         deleted.countInstance(object);
         delta.uncountInstance(object);
+        continue;
       }
       if (after.objects.contains(object)) {
         created.countInstance(object);
         delta.countInstance(object);
+        continue;
       }
       assert(false);
     }
