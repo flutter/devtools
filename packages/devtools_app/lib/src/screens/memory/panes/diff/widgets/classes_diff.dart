@@ -4,8 +4,12 @@
 
 import 'package:flutter/widgets.dart';
 
+import '../controller/heap_diff.dart';
+
 class DiffClassesTable extends StatefulWidget {
-  const DiffClassesTable({super.key});
+  const DiffClassesTable({super.key, required this.classes});
+
+  final DiffHeapClasses classes;
 
   @override
   State<DiffClassesTable> createState() => _DiffClassesTableState();

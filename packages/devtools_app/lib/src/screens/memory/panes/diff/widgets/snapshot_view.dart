@@ -11,6 +11,7 @@ import '../controller/diff_pane_controller.dart';
 import '../controller/heap_diff.dart';
 import '../controller/item_controller.dart';
 import 'class_details.dart';
+import 'classes_diff.dart';
 import 'classes_single.dart';
 
 class SnapshotView extends StatelessWidget {
@@ -29,49 +30,41 @@ class SnapshotView extends StatelessWidget {
         return ValueListenableBuilder<SnapshotInstanceItem?>(
           valueListenable: item.diffWith,
           builder: (_, diffWith, __) {
-            late HeapClasses? classes;
+            if (item.heap == null) {
+              return const Center(child: Text('Could not take snapshot.'));
+            }
+
+            late Widget table1;
+
             if (diffWith == null) {
-              classes = item.heap?.classes;
+              table1 = SingleClassesTable(
+                // The key is passed to persist state.
+                key: ObjectKey(item),
+                controller: controller,
+              );
             } else {
               final heap1 = item.heap!;
               final heap2 = diffWith.heap!;
 
               // TODO(polina-c): make comparison async.
-              classes = controller.diffStore.compare(heap1, heap2);
+              final classes = controller.diffStore.compare(heap1, heap2);
+              table1 = DiffClassesTable(classes: classes);
             }
 
-            if (classes == null) {
-              return const Center(child: Text('Could not take snapshot.'));
-            }
+            const Widget table2 = HeapClassDetails(
+                // item: item,
+                // sorting: controller.pathSorting,
+                );
 
-            if (classes is SingleHeapClasses) {
-              return Split(
-                axis: Axis.vertical,
-                initialFractions: const [0.4, 0.6],
-                minSizes: const [80, 80],
-                children: [
-                  OutlineDecoration(
-                    child: SingleClassesTable(
-                      // The key is passed to persist state.
-                      key: ObjectKey(item),
-                      controller: controller,
-                    ),
-                  ),
-                  const OutlineDecoration(
-                    child: HeapClassDetails(
-                        // item: item,
-                        // sorting: controller.pathSorting,
-                        ),
-                  ),
-                ],
-              );
-            }
-
-            if (classes is DiffHeapClasses) {
-              return const Text('heap diff classes will be here');
-            }
-
-            throw StateError('Unexpected type: ${classes.runtimeType}.');
+            return Split(
+              axis: Axis.vertical,
+              initialFractions: const [0.4, 0.6],
+              minSizes: const [80, 80],
+              children: [
+                OutlineDecoration(child: table1),
+                const OutlineDecoration(child: table2),
+              ],
+            );
           },
         );
       },
