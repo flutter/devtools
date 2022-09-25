@@ -83,10 +83,11 @@ class DiffHeapClasses extends HeapClasses {
 }
 
 class DiffClassStats extends ClassStats {
-  DiffClassStats._(
-      {required this.heapClass,
-      required this.total,
-      required this.statsByPath});
+  DiffClassStats._({
+    required this.heapClass,
+    required this.total,
+    required this.statsByPath,
+  });
 
   final HeapClassName heapClass;
   final ObjectSetDiff total;

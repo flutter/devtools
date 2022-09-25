@@ -2,11 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/widgets.dart';
-
-import '../controller/heap_diff.dart';
-
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 import '../../../../../primitives/auto_dispose_mixin.dart';
 import '../../../../../primitives/utils.dart';
@@ -15,6 +12,7 @@ import '../../../../../shared/table_data.dart';
 import '../../../../../shared/utils.dart';
 import '../../../shared/heap/primitives.dart';
 import '../controller/diff_pane_controller.dart';
+import '../controller/heap_diff.dart';
 import '../controller/item_controller.dart';
 
 enum _DataPart {
