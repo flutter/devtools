@@ -14,7 +14,7 @@ import '../../../shared/heap/model.dart';
 import '../../../shared/heap/primitives.dart';
 import '../controller/model.dart';
 
-typedef _RetainingPathRecord = MapEntry<ClassOnlyHeapPath, ObjectSet>;
+typedef _RetainingPathRecord = MapEntry<ClassOnlyHeapPath, ObjectSetStats>;
 
 class _RetainingPathColumn extends ColumnData<_RetainingPathRecord> {
   _RetainingPathColumn()
@@ -124,7 +124,7 @@ class ClassStatsTable extends StatefulWidget {
 class _ClassStatsTableState extends State<ClassStatsTable>
     with AutoDisposeMixin {
   late final List<ColumnData<_RetainingPathRecord>> _columns;
-  late List<MapEntry<ClassOnlyHeapPath, ObjectSet>> _dataList;
+  late List<MapEntry<ClassOnlyHeapPath, ObjectSetStats>> _dataList;
 
   @override
   void initState() {
