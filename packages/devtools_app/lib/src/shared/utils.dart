@@ -177,28 +177,3 @@ mixin ProvidedControllerMixin<T, V extends StatefulWidget> on State<V> {
     return true;
   }
 }
-
-Map<K, V> subtractMaps<K, V>({
-  required Map<K, V> minuend,
-  required Map<K, V> subtrahend,
-  required V? Function(V left, V right) subtract,
-  required V Function(V value) negate,
-}) {
-  final result = <K, V>{};
-  final unionOfKeys = minuend.keys.toSet().union(subtrahend.keys.toSet());
-
-  for (var key in unionOfKeys) {
-    final leftValue = minuend[key];
-    final rightValue = subtrahend[key];
-
-    if (leftValue != null && rightValue != null) {
-      final diff = subtract(leftValue, rightValue);
-      if (diff != null) result[key] = diff;
-    } else if (leftValue != null) {
-      result[key] = leftValue;
-    } else {
-      result[key] = negate(rightValue!);
-    }
-  }
-  return result;
-}

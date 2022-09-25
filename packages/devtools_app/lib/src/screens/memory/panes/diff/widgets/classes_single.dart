@@ -14,7 +14,7 @@ import '../../../shared/heap/primitives.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/item_controller.dart';
 
-class _ClassNameColumn extends ColumnData<SingleHeapClass> {
+class _ClassNameColumn extends ColumnData<SingleClassStats> {
   _ClassNameColumn()
       : super(
           'Class',
@@ -24,18 +24,18 @@ class _ClassNameColumn extends ColumnData<SingleHeapClass> {
         );
 
   @override
-  String? getValue(SingleHeapClass classStats) =>
+  String? getValue(SingleClassStats classStats) =>
       classStats.heapClass.className;
 
   @override
   bool get supportsSorting => true;
 
   @override
-  String getTooltip(SingleHeapClass classStats) =>
+  String getTooltip(SingleClassStats classStats) =>
       classStats.heapClass.fullName;
 }
 
-class _InstanceColumn extends ColumnData<SingleHeapClass> {
+class _InstanceColumn extends ColumnData<SingleClassStats> {
   _InstanceColumn()
       : super(
           'Non GC-able\nInstances',
@@ -47,7 +47,7 @@ class _InstanceColumn extends ColumnData<SingleHeapClass> {
         );
 
   @override
-  int getValue(SingleHeapClass classStats) => classStats.objects.instanceCount;
+  int getValue(SingleClassStats classStats) => classStats.objects.instanceCount;
 
   @override
   bool get supportsSorting => true;
@@ -56,7 +56,7 @@ class _InstanceColumn extends ColumnData<SingleHeapClass> {
   bool get numeric => true;
 }
 
-class _ShallowSizeColumn extends ColumnData<SingleHeapClass> {
+class _ShallowSizeColumn extends ColumnData<SingleClassStats> {
   _ShallowSizeColumn()
       : super(
           'Shallow\nDart Size',
@@ -66,7 +66,7 @@ class _ShallowSizeColumn extends ColumnData<SingleHeapClass> {
         );
 
   @override
-  int getValue(SingleHeapClass classStats) => classStats.objects.shallowSize;
+  int getValue(SingleClassStats classStats) => classStats.objects.shallowSize;
 
   @override
   bool get supportsSorting => true;
@@ -75,14 +75,14 @@ class _ShallowSizeColumn extends ColumnData<SingleHeapClass> {
   bool get numeric => true;
 
   @override
-  String getDisplayValue(SingleHeapClass classStats) => prettyPrintBytes(
+  String getDisplayValue(SingleClassStats classStats) => prettyPrintBytes(
         getValue(classStats),
         includeUnit: true,
         kbFractionDigits: 1,
       )!;
 }
 
-class _RetainedSizeColumn extends ColumnData<SingleHeapClass> {
+class _RetainedSizeColumn extends ColumnData<SingleClassStats> {
   _RetainedSizeColumn()
       : super(
           'Retained\nDart Size',
@@ -92,7 +92,7 @@ class _RetainedSizeColumn extends ColumnData<SingleHeapClass> {
         );
 
   @override
-  int getValue(SingleHeapClass classStats) => classStats.objects.retainedSize;
+  int getValue(SingleClassStats classStats) => classStats.objects.retainedSize;
 
   @override
   bool get supportsSorting => true;
@@ -101,7 +101,7 @@ class _RetainedSizeColumn extends ColumnData<SingleHeapClass> {
   bool get numeric => true;
 
   @override
-  String getDisplayValue(SingleHeapClass classStats) => prettyPrintBytes(
+  String getDisplayValue(SingleClassStats classStats) => prettyPrintBytes(
         getValue(classStats),
         includeUnit: true,
         kbFractionDigits: 1,
@@ -122,7 +122,7 @@ class SingleClassesTable extends StatefulWidget {
 
 class _SingleClassesTableState extends State<SingleClassesTable>
     with AutoDisposeMixin {
-  late final List<ColumnData<SingleHeapClass>> _columns;
+  late final List<ColumnData<SingleClassStats>> _columns;
   late final SnapshotInstanceItem _item;
   late final SingleHeapClasses _classes;
 
@@ -135,7 +135,7 @@ class _SingleClassesTableState extends State<SingleClassesTable>
 
     final _shallowSizeColumn = _ShallowSizeColumn();
 
-    _columns = <ColumnData<SingleHeapClass>>[
+    _columns = <ColumnData<SingleClassStats>>[
       _ClassNameColumn(),
       _InstanceColumn(),
       _shallowSizeColumn,
@@ -154,7 +154,7 @@ class _SingleClassesTableState extends State<SingleClassesTable>
   @override
   Widget build(BuildContext context) {
     final sorting = widget.controller.classSorting;
-    return FlatTable<SingleHeapClass>(
+    return FlatTable<SingleClassStats>(
       columns: _columns,
       data: _classes.classes,
       keyFactory: (e) => Key(e.heapClass.fullName),

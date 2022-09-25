@@ -78,13 +78,13 @@ class SnapshotInstanceItem extends SnapshotItem
 
   final ValueListenable<HeapClassName?> _selectedClassName;
 
-  ValueListenable<SingleHeapClass?> get selectedSingleHeapClass =>
+  ValueListenable<SingleClassStats?> get selectedSingleHeapClass =>
       _selectedSingleHeapClass;
-  final _selectedSingleHeapClass = ValueNotifier<SingleHeapClass?>(null);
+  final _selectedSingleHeapClass = ValueNotifier<SingleClassStats?>(null);
 
-  ValueListenable<DiffHeapClass?> get selectedDiffHeapClass =>
+  ValueListenable<DiffClassStats?> get selectedDiffHeapClass =>
       _selectedDiffHeapClass;
-  final _selectedDiffHeapClass = ValueNotifier<DiffHeapClass?>(null);
+  final _selectedDiffHeapClass = ValueNotifier<DiffClassStats?>(null);
 
   @override
   bool get hasData => heap != null;

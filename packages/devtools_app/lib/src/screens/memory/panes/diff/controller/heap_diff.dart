@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 
+import '../../../../../primitives/utils.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
 
@@ -57,37 +58,41 @@ class _HeapCouple {
   int get hashCode => Object.hash(older, younger);
 }
 
-class DiffHeapClass extends HeapClass {
-  DiffHeapClass(SingleHeapClass before, SingleHeapClass after) {
+class DiffClassStats extends ClassStats {
+  DiffClassStats(SingleClassStats before, SingleClassStats after) {
     throw UnimplementedError();
   }
 }
 
 class DiffHeapClasses extends HeapClasses {
-  DiffHeapClasses(this.heapCouple);
+  DiffHeapClasses(_HeapCouple heapCouple) {
+    classesByName =
+        subtractMaps<HeapClassName, SingleClassStats, DiffClassStats>(
+      minuend: heapCouple.younger.classes.classesByName,
+      subtrahend: heapCouple.older.classes.classesByName,
+      subtract: _subtruct,
+    );
+  }
 
-  final _HeapCouple heapCouple;
+  static DiffClassStats? _subtruct(
+      SingleClassStats? left, SingleClassStats? right) {
+    // (minuend, subtrahend) {
+    //   final diff = HeapClassStatistics.subtract(minuend, subtrahend);
+    //   if (diff.isZero) return null;
+    //   return diff;
+    // },
+  }
 
   /// Maps full class name to class.
-  late Map<HeapClassName, DiffHeapClass> classesByName;
-  late final DiffHeapClass stats = _stats();
+  late Map<HeapClassName, DiffClassStats> classesByName;
+  late final List<DiffClassStats> classes =
+      classesByName.values.toList(growable: false);
 
-  // SingeHeapAnalysis _stats() {
-  //   // final statisticByClass = subtractMaps<String, HeapClassStatistics>(
-  //   //   minuend: heapCouple.younger.stats.statsByClassName,
-  //   //   subtrahend: heapCouple.older.stats.statsByClassName,
-  //   //   subtract: (minuend, subtrahend) {
-  //   //     final diff = HeapClassStatistics.subtract(minuend, subtrahend);
-  //   //     if (diff.isZero) return null;
-  //   //     return diff;
-  //   //   },
-  //   //   negate: (value) => HeapClassStatistics.negative(value),
-  //   // );
-
-  //   // return HeapStatistics(statisticByClass);
-
-  //   throw UnimplementedError();
-  // }
+  @override
+  void seal() {
+    super.seal();
+    for (var c in classes) {
+      c.seal();
+    }
+  }
 }
-
-class HeapDiffClass extends HeapClass {}

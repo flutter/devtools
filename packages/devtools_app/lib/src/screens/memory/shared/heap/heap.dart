@@ -13,7 +13,7 @@ class AdaptedHeap {
   late final SingleHeapClasses classes = _heapStatistics(data);
 
   static SingleHeapClasses _heapStatistics(AdaptedHeapData data) {
-    final result = <HeapClassName, SingleHeapClass>{};
+    final result = <HeapClassName, SingleClassStats>{};
     if (!data.isSpanningTreeBuilt) buildSpanningTree(data);
 
     for (var i in Iterable.generate(data.objects.length)) {
@@ -25,7 +25,7 @@ class AdaptedHeap {
       if (object.retainedSize == null || className.isSentinel) continue;
 
       final singleHeapClass =
-          result.putIfAbsent(className, () => SingleHeapClass(className));
+          result.putIfAbsent(className, () => SingleClassStats(className));
       singleHeapClass.countInstance(data, i);
     }
 
@@ -41,8 +41,8 @@ class SingleHeapClasses extends HeapClasses {
   SingleHeapClasses(this.classesByName);
 
   /// Maps full class name to class.
-  final Map<HeapClassName, SingleHeapClass> classesByName;
-  late final List<SingleHeapClass> classes =
+  final Map<HeapClassName, SingleClassStats> classesByName;
+  late final List<SingleClassStats> classes =
       classesByName.values.toList(growable: false);
 
   @override
@@ -56,10 +56,10 @@ class SingleHeapClasses extends HeapClasses {
 
 typedef ObjectsByPath = Map<ClassOnlyHeapPath, ObjectSetStats>;
 
-abstract class HeapClass with Sealable {}
+abstract class ClassStats with Sealable {}
 
-class SingleHeapClass extends HeapClass {
-  SingleHeapClass(this.heapClass)
+class SingleClassStats extends ClassStats {
+  SingleClassStats(this.heapClass)
       : objects = ObjectSet(),
         objectsByPath = <ClassOnlyHeapPath, ObjectSetStats>{};
 

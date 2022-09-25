@@ -1501,3 +1501,29 @@ bool isPrimativeInstanceKind(String? kind) {
 /// Returns the file name from a URI or path string, by splitting the [uri] at
 /// the directory separators '/', and returning the last element.
 String? fileNameFromUri(String? uri) => uri?.split('/').last;
+
+/// Calculates subtraction of two maps.
+///
+/// Result map keys is union of the imput maps' keys.
+///
+/// The function invokes:
+/// - `subtract` for values if keys presented in both input maps
+/// - `transform` for keys presented in just `minuend`
+/// - `negate` for keys presented in just `subtrahend`
+Map<K, V2> subtractMaps<K, V1, V2>({
+  required Map<K, V1> minuend,
+  required Map<K, V1> subtrahend,
+  required V2? Function(V1? left, V1? right) subtract,
+}) {
+  final result = <K, V2>{};
+  final unionOfKeys = minuend.keys.toSet().union(subtrahend.keys.toSet());
+
+  for (var key in unionOfKeys) {
+    final leftValue = minuend[key];
+    final rightValue = subtrahend[key];
+
+    final diff = subtract(leftValue, rightValue);
+    if (diff != null) result[key] = diff;
+  }
+  return result;
+}
