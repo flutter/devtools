@@ -248,6 +248,17 @@ class HeapClassName {
     assert(false, 'Unexpected library for $className: $library.');
     return false;
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is HeapClassName && other.fullName == fullName;
+  }
+
+  @override
+  int get hashCode => fullName.hashCode;
 }
 
 /// Mark the object as deeply immutable.

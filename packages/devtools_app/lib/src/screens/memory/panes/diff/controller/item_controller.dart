@@ -89,12 +89,10 @@ class SnapshotInstanceItem extends SnapshotItem
   @override
   bool get hasData => heap != null;
 
-  HeapClasses heapClassesToShow() {
-    print(1);
+  HeapClasses classesToShow() {
     final theHeap = heap!;
     final itemToDiffWith = diffWith.value;
     if (itemToDiffWith == null) return theHeap.classes;
-    print('!!!! ${itemToDiffWith.name}');
     return _diffStore.compare(theHeap, itemToDiffWith.heap!);
   }
 
@@ -105,14 +103,14 @@ class SnapshotInstanceItem extends SnapshotItem
     final className = _selectedClassName.value;
     if (className == null) return;
 
-    final heapClasses = heapClassesToShow();
+    final heapClasses = classesToShow();
     if (heapClasses is SingeHeapClasses) {
       _selectedSingleHeapClass.value = heapClasses.classesByName[className];
     } else if (heapClasses is DiffHeapClasses) {
       _selectedDiffHeapClass.value = heapClasses.classesByName[className];
+    } else {
+      throw StateError('Unexpected type: ${heapClasses.runtimeType}.');
     }
-
-    throw StateError('Unexpected type: ${heapClasses.runtimeType}.');
   }
 
   void downloadToCsv() {
@@ -132,7 +130,7 @@ class SnapshotInstanceItem extends SnapshotItem
     );
 
     // // Write a row per retaining path.
-    // final data = heapClassesToShow;
+    // final data = heapClassesToShow();
     // for (var classStats in data.classAnalysis) {
     //   for (var pathStats in classStats.objectsByPath.entries) {
     //     csvBuffer.writeln(

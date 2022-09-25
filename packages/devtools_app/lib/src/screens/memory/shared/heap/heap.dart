@@ -13,22 +13,20 @@ class AdaptedHeap {
   late final SingeHeapClasses classes = _heapStatistics(data);
 
   static SingeHeapClasses _heapStatistics(AdaptedHeapData data) {
-    final result = <String, SingleHeapClass>{};
+    final result = <HeapClassName, SingleHeapClass>{};
     if (!data.isSpanningTreeBuilt) buildSpanningTree(data);
 
     for (var i in Iterable.generate(data.objects.length)) {
       final object = data.objects[i];
-      final heapClass = object.heapClass;
+      final className = object.heapClass;
 
       // We do not show objects that will be garbage collected soon or are
       // native.
-      if (object.retainedSize == null || heapClass.isSentinel) continue;
+      if (object.retainedSize == null || className.isSentinel) continue;
 
-      final fullName = heapClass.fullName;
-
-      final stats =
-          result.putIfAbsent(fullName, () => SingleHeapClass(heapClass));
-      stats.countInstance(data, i);
+      final singleHeapClass =
+          result.putIfAbsent(className, () => SingleHeapClass(className));
+      singleHeapClass.countInstance(data, i);
     }
 
     return SingeHeapClasses(result)..seal();
@@ -43,7 +41,7 @@ class SingeHeapClasses extends HeapClasses {
   SingeHeapClasses(this.classesByName);
 
   /// Maps full class name to class.
-  final Map<String, SingleHeapClass> classesByName;
+  final Map<HeapClassName, SingleHeapClass> classesByName;
   late final List<SingleHeapClass> classes =
       classesByName.values.toList(growable: false);
 

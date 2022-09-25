@@ -131,7 +131,7 @@ class _SingleClassesTableState extends State<SingleClassesTable>
     super.initState();
 
     _item = widget.controller.selectedSnapshotItem as SnapshotInstanceItem;
-    _classes = _item.heapClassesToShow as SingeHeapClasses;
+    _classes = _item.classesToShow() as SingeHeapClasses;
 
     final _shallowSizeColumn = _ShallowSizeColumn();
 
