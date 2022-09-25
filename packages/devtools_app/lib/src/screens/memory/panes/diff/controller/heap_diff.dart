@@ -69,9 +69,8 @@ class DiffHeapClasses extends HeapClasses {
   final _HeapCouple heapCouple;
 
   /// Maps full class name to class.
-  late Map<String, DiffHeapClass> classesByName;
-
-  // late final SingeHeapAnalysis stats = _stats();
+  late Map<HeapClassName, DiffHeapClass> classesByName;
+  late final DiffHeapClass stats = _stats();
 
   // SingeHeapAnalysis _stats() {
   //   // final statisticByClass = subtractMaps<String, HeapClassStatistics>(

@@ -10,9 +10,9 @@ class AdaptedHeap {
 
   final AdaptedHeapData data;
 
-  late final SingeHeapClasses classes = _heapStatistics(data);
+  late final SingleHeapClasses classes = _heapStatistics(data);
 
-  static SingeHeapClasses _heapStatistics(AdaptedHeapData data) {
+  static SingleHeapClasses _heapStatistics(AdaptedHeapData data) {
     final result = <HeapClassName, SingleHeapClass>{};
     if (!data.isSpanningTreeBuilt) buildSpanningTree(data);
 
@@ -29,7 +29,7 @@ class AdaptedHeap {
       singleHeapClass.countInstance(data, i);
     }
 
-    return SingeHeapClasses(result)..seal();
+    return SingleHeapClasses(result)..seal();
   }
 }
 
@@ -37,8 +37,8 @@ abstract class HeapClasses with Sealable {
   // HeapClass? classByName(HeapClassName? name);
 }
 
-class SingeHeapClasses extends HeapClasses {
-  SingeHeapClasses(this.classesByName);
+class SingleHeapClasses extends HeapClasses {
+  SingleHeapClasses(this.classesByName);
 
   /// Maps full class name to class.
   final Map<HeapClassName, SingleHeapClass> classesByName;

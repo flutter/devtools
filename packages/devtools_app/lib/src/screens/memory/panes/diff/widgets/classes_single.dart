@@ -124,14 +124,14 @@ class _SingleClassesTableState extends State<SingleClassesTable>
     with AutoDisposeMixin {
   late final List<ColumnData<SingleHeapClass>> _columns;
   late final SnapshotInstanceItem _item;
-  late final SingeHeapClasses _classes;
+  late final SingleHeapClasses _classes;
 
   @override
   void initState() {
     super.initState();
 
     _item = widget.controller.selectedSnapshotItem as SnapshotInstanceItem;
-    _classes = _item.classesToShow() as SingeHeapClasses;
+    _classes = _item.classesToShow() as SingleHeapClasses;
 
     final _shallowSizeColumn = _ShallowSizeColumn();
 

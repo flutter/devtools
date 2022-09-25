@@ -104,7 +104,7 @@ class SnapshotInstanceItem extends SnapshotItem
     if (className == null) return;
 
     final heapClasses = classesToShow();
-    if (heapClasses is SingeHeapClasses) {
+    if (heapClasses is SingleHeapClasses) {
       _selectedSingleHeapClass.value = heapClasses.classesByName[className];
     } else if (heapClasses is DiffHeapClasses) {
       _selectedDiffHeapClass.value = heapClasses.classesByName[className];

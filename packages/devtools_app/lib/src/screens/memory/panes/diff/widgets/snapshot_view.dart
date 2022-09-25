@@ -41,7 +41,7 @@ class SnapshotView extends StatelessWidget {
           return const Center(child: Text('Could not take snapshot.'));
         }
 
-        if (classes is SingeHeapClasses) {
+        if (classes is SingleHeapClasses) {
           return ValueListenableBuilder<SnapshotInstanceItem?>(
             valueListenable: item.diffWith,
             builder: (_, diffWith, __) {
