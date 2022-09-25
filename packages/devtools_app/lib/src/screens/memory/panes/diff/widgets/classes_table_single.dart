@@ -39,9 +39,7 @@ class _InstanceColumn extends ColumnData<SingleClassStats> {
   _InstanceColumn()
       : super(
           'Non GC-able\nInstances',
-          titleTooltip: 'Number of instances of the class\n'
-              'that have a retaining path from the root\n'
-              'and therefore can’t be garbage collected.',
+          titleTooltip: nonGcableInstancesColumnTooltip,
           fixedWidthPx: scaleByFontFactor(110.0),
           alignment: ColumnAlignment.right,
         );

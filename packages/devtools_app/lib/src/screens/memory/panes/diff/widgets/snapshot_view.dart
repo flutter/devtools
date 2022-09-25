@@ -46,7 +46,8 @@ class SnapshotView extends StatelessWidget {
 
               // TODO(polina-c): make comparison async.
               final classes = controller.diffStore.compare(heap1, heap2);
-              table1 = ClassesTableDiff(classes: classes);
+              table1 =
+                  ClassesTableDiff(classes: classes, controller: controller);
             }
 
             const Widget table2 = HeapClassDetails(

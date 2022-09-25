@@ -83,8 +83,12 @@ class DiffHeapClasses extends HeapClasses {
 }
 
 class DiffClassStats extends ClassStats {
-  DiffClassStats._({required this.total, required this.statsByPath});
+  DiffClassStats._(
+      {required this.heapClass,
+      required this.total,
+      required this.statsByPath});
 
+  final HeapClassName heapClass;
   final ObjectSetDiff total;
   final ObjectStatsByPath statsByPath;
 
@@ -93,7 +97,11 @@ class DiffClassStats extends ClassStats {
     SingleClassStats? after,
   ) {
     if (before == null && after == null) return null;
+
+    final heapClass = (before?.heapClass ?? after?.heapClass)!;
+
     final result = DiffClassStats._(
+      heapClass: heapClass,
       total: ObjectSetDiff(before: before?.objects, after: after?.objects),
       statsByPath:
           subtractMaps<ClassOnlyHeapPath, ObjectSetStats, ObjectSetStats>(
