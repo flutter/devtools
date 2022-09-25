@@ -108,9 +108,7 @@ class DiffClassStats extends ClassStats {
     return result..seal();
   }
 
-  bool isZero() {
-    throw UnimplementedError();
-  }
+  bool isZero() => total.isZero;
 }
 
 class ObjectSetDiff {
@@ -143,4 +141,6 @@ class ObjectSetDiff {
   final created = ObjectSet();
   final deleted = ObjectSet();
   final delta = ObjectSetStats();
+
+  bool get isZero => delta.isZero;
 }

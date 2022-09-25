@@ -45,7 +45,10 @@ class MemoryDefaultScene extends Scene {
     setGlobal(OfflineModeController, OfflineModeController());
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(NotificationService, NotificationService());
-    setGlobal(PreferencesController, PreferencesController());
+    setGlobal(
+      PreferencesController,
+      PreferencesController()..memory.showChart.value = false,
+    );
 
     // Load canned data testHeapSampleData.
     final memoryJson =
