@@ -26,25 +26,25 @@ class SnapshotView extends StatelessWidget {
       builder: (_, isProcessing, __) {
         if (isProcessing) return const SizedBox.shrink();
 
-        late HeapClasses? classes;
-        if (item.diffWith.value == null) {
-          classes = item.heap?.classes;
-        } else {
-          final heap1 = item.heap!;
-          final heap2 = item.diffWith.value!.heap!;
+        return ValueListenableBuilder<SnapshotInstanceItem?>(
+          valueListenable: item.diffWith,
+          builder: (_, diffWith, __) {
+            late HeapClasses? classes;
+            if (diffWith == null) {
+              classes = item.heap?.classes;
+            } else {
+              final heap1 = item.heap!;
+              final heap2 = diffWith.heap!;
 
-          // TODO(polina-c): make comparison async.
-          classes = controller.diffStore.compare(heap1, heap2);
-        }
+              // TODO(polina-c): make comparison async.
+              classes = controller.diffStore.compare(heap1, heap2);
+            }
 
-        if (classes == null) {
-          return const Center(child: Text('Could not take snapshot.'));
-        }
+            if (classes == null) {
+              return const Center(child: Text('Could not take snapshot.'));
+            }
 
-        if (classes is SingleHeapClasses) {
-          return ValueListenableBuilder<SnapshotInstanceItem?>(
-            valueListenable: item.diffWith,
-            builder: (_, diffWith, __) {
+            if (classes is SingleHeapClasses) {
               return Split(
                 axis: Axis.vertical,
                 initialFractions: const [0.4, 0.6],
@@ -65,15 +65,15 @@ class SnapshotView extends StatelessWidget {
                   ),
                 ],
               );
-            },
-          );
-        }
+            }
 
-        if (classes is DiffHeapClasses) {
-          return const Text('heap diff classes will be here');
-        }
+            if (classes is DiffHeapClasses) {
+              return const Text('heap diff classes will be here');
+            }
 
-        throw StateError('Unexpected type: ${classes.runtimeType}.');
+            throw StateError('Unexpected type: ${classes.runtimeType}.');
+          },
+        );
       },
     );
   }
