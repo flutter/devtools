@@ -28,7 +28,7 @@ class _ClassNameColumn extends ColumnData<DiffClassStats> {
       : super(
           'Class',
           titleTooltip: 'Class name',
-          fixedWidthPx: scaleByFontFactor(100.0),
+          fixedWidthPx: scaleByFontFactor(180.0),
           alignment: ColumnAlignment.left,
         );
 
@@ -46,7 +46,7 @@ class _InstanceColumn extends ColumnData<DiffClassStats> {
   _InstanceColumn(this.dataPart)
       : super(
           columnTitle(dataPart),
-          fixedWidthPx: scaleByFontFactor(110.0),
+          fixedWidthPx: scaleByFontFactor(80.0),
           alignment: ColumnAlignment.right,
         );
 
@@ -87,7 +87,7 @@ class _ShallowSizeColumn extends ColumnData<DiffClassStats> {
       : super(
           'Shallow\nDart Size',
           titleTooltip: shallowSizeColumnTooltip,
-          fixedWidthPx: scaleByFontFactor(85.0),
+          fixedWidthPx: scaleByFontFactor(80.0),
           alignment: ColumnAlignment.right,
         );
 
@@ -113,7 +113,7 @@ class _RetainedSizeColumn extends ColumnData<DiffClassStats> {
       : super(
           'Retained\nDart Size',
           titleTooltip: retainedSizeColumnTooltip,
-          fixedWidthPx: scaleByFontFactor(85.0),
+          fixedWidthPx: scaleByFontFactor(80.0),
           alignment: ColumnAlignment.right,
         );
 
@@ -150,6 +150,24 @@ class ClassesTableDiff extends StatefulWidget {
 
 class _ClassesTableDiffState extends State<ClassesTableDiff>
     with AutoDisposeMixin {
+  static final _columnGroups = [
+    ColumnGroup(
+      title: '',
+      range: const Range(0, 1),
+    ),
+    ColumnGroup(
+      title: 'Non GC-able Instances',
+      range: const Range(1, 4),
+    ),
+    ColumnGroup(
+      title: 'Shallow Dart Size',
+      range: const Range(4, 7),
+    ),
+    ColumnGroup(
+      title: 'Retained Dart Size',
+      range: const Range(7, 10),
+    ),
+  ];
   late final List<ColumnData<DiffClassStats>> _columns;
   late final SnapshotInstanceItem _item;
 
@@ -188,6 +206,7 @@ class _ClassesTableDiffState extends State<ClassesTableDiff>
     final sorting = widget.controller.classSorting;
     return FlatTable<DiffClassStats>(
       columns: _columns,
+      columnGroups: _columnGroups,
       data: widget.classes.classes,
       keyFactory: (e) => Key(e.heapClass.fullName),
       onItemSelected: (r) => widget.controller.setSelectedClass(r.heapClass),

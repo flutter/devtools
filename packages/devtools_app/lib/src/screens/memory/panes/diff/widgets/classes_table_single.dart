@@ -19,7 +19,7 @@ class _ClassNameColumn extends ColumnData<SingleClassStats> {
       : super(
           'Class',
           titleTooltip: 'Class name',
-          fixedWidthPx: scaleByFontFactor(100.0),
+          fixedWidthPx: scaleByFontFactor(180.0),
           alignment: ColumnAlignment.left,
         );
 
@@ -40,7 +40,7 @@ class _InstanceColumn extends ColumnData<SingleClassStats> {
       : super(
           'Non GC-able\nInstances',
           titleTooltip: nonGcableInstancesColumnTooltip,
-          fixedWidthPx: scaleByFontFactor(110.0),
+          fixedWidthPx: scaleByFontFactor(180.0),
           alignment: ColumnAlignment.right,
         );
 
