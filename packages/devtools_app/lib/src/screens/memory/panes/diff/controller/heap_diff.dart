@@ -9,11 +9,11 @@ import '../../../shared/heap/model.dart';
 
 /// Stores already calculated comparisons for heap couples.
 class HeapDiffStore {
-  final _store = <_HeapCouple, HeapDiffClasses>{};
+  final _store = <_HeapCouple, DiffHeapClasses>{};
 
-  HeapDiffClasses compare(AdaptedHeap heap1, AdaptedHeap heap2) {
+  DiffHeapClasses compare(AdaptedHeap heap1, AdaptedHeap heap2) {
     final couple = _HeapCouple(heap1, heap2);
-    return _store.putIfAbsent(couple, () => HeapDiffClasses(couple));
+    return _store.putIfAbsent(couple, () => DiffHeapClasses(couple));
   }
 }
 
@@ -57,22 +57,19 @@ class _HeapCouple {
   int get hashCode => Object.hash(older, younger);
 }
 
-class HeapClassDiff {
-  HeapClassDiff(SingleHeapClass before, SingleHeapClass after) {
+class DiffHeapClass extends HeapClass {
+  DiffHeapClass(SingleHeapClass before, SingleHeapClass after) {
     throw UnimplementedError();
   }
 }
 
-class HeapDiffClasses extends HeapClasses {
-  HeapDiffClasses(this.heapCouple);
+class DiffHeapClasses extends HeapClasses {
+  DiffHeapClasses(this.heapCouple);
 
   final _HeapCouple heapCouple;
 
-  @override
-  HeapClass? classByName(HeapClassName? name) {
-    // TODO: implement classByName
-    throw UnimplementedError();
-  }
+  /// Maps full class name to class.
+  late Map<String, DiffHeapClass> classesByName;
 
   // late final SingeHeapAnalysis stats = _stats();
 

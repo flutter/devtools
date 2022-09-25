@@ -108,8 +108,8 @@ class _RetainedSizeColumn extends ColumnData<SingleHeapClass> {
       )!;
 }
 
-class SingleSnapshotTable extends StatefulWidget {
-  const SingleSnapshotTable({
+class SingleClassesTable extends StatefulWidget {
+  const SingleClassesTable({
     Key? key,
     required this.controller,
   }) : super(key: key);
@@ -117,10 +117,10 @@ class SingleSnapshotTable extends StatefulWidget {
   final DiffPaneController controller;
 
   @override
-  State<SingleSnapshotTable> createState() => _SingleSnapshotTableState();
+  State<SingleClassesTable> createState() => _SingleClassesTableState();
 }
 
-class _SingleSnapshotTableState extends State<SingleSnapshotTable>
+class _SingleClassesTableState extends State<SingleClassesTable>
     with AutoDisposeMixin {
   late final List<ColumnData<SingleHeapClass>> _columns;
   late final SnapshotInstanceItem _item;
@@ -159,7 +159,7 @@ class _SingleSnapshotTableState extends State<SingleSnapshotTable>
       data: _classes.classes,
       keyFactory: (e) => Key(e.heapClass.fullName),
       onItemSelected: (r) => widget.controller.setSelectedClass(r.heapClass),
-      //selectionNotifier: null, //  _item.selectedHeapClass, ??????????
+      selectionNotifier: _item.selectedSingleHeapClass,
       sortColumn: _columns[sorting.columnIndex],
       sortDirection: sorting.direction,
       onSortChanged: (

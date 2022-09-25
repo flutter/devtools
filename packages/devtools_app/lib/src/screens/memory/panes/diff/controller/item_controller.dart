@@ -48,9 +48,11 @@ class SnapshotInstanceItem extends SnapshotItem
       final data = await receiver;
       if (data != null) {
         heap = AdaptedHeap(data);
-        updateSelectedRecord();
+        _updateSelectedClass();
         addAutoDisposeListener(
-            _selectedClassName, () => updateSelectedRecord());
+          _selectedClassName,
+          () => _updateSelectedClass(),
+        );
       }
       _isProcessing.value = false;
     });
@@ -71,26 +73,47 @@ class SnapshotInstanceItem extends SnapshotItem
   final _diffWith = ValueNotifier<SnapshotInstanceItem?>(null);
   void setDiffWith(SnapshotInstanceItem? value) {
     _diffWith.value = value;
-    updateSelectedRecord();
+    _updateSelectedClass();
   }
 
   final ValueListenable<HeapClassName?> _selectedClassName;
 
-  ValueListenable<HeapClass?> get selectedHeapClass => _selectedHeapClass;
-  final _selectedHeapClass = ValueNotifier<HeapClass?>(null);
+  ValueListenable<SingleHeapClass?> get selectedSingleHeapClass =>
+      _selectedSingleHeapClass;
+  final _selectedSingleHeapClass = ValueNotifier<SingleHeapClass?>(null);
+
+  ValueListenable<DiffHeapClass?> get selectedDiffHeapClass =>
+      _selectedDiffHeapClass;
+  final _selectedDiffHeapClass = ValueNotifier<DiffHeapClass?>(null);
 
   @override
   bool get hasData => heap != null;
 
-  HeapClasses get heapClassesToShow {
+  HeapClasses heapClassesToShow() {
+    print(1);
     final theHeap = heap!;
     final itemToDiffWith = diffWith.value;
     if (itemToDiffWith == null) return theHeap.classes;
+    print('!!!! ${itemToDiffWith.name}');
     return _diffStore.compare(theHeap, itemToDiffWith.heap!);
   }
 
-  void updateSelectedRecord() => _selectedHeapClass.value =
-      heapClassesToShow.classByName(_selectedClassName.value);
+  void _updateSelectedClass() {
+    _selectedSingleHeapClass.value = null;
+    _selectedDiffHeapClass.value = null;
+
+    final className = _selectedClassName.value;
+    if (className == null) return;
+
+    final heapClasses = heapClassesToShow();
+    if (heapClasses is SingeHeapClasses) {
+      _selectedSingleHeapClass.value = heapClasses.classesByName[className];
+    } else if (heapClasses is DiffHeapClasses) {
+      _selectedDiffHeapClass.value = heapClasses.classesByName[className];
+    }
+
+    throw StateError('Unexpected type: ${heapClasses.runtimeType}.');
+  }
 
   void downloadToCsv() {
     final csvBuffer = StringBuffer();

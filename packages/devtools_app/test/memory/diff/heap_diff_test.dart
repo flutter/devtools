@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test(
-      '$HeapDiffStore does not create new $HeapDiffClasses for the same couple',
+      '$HeapDiffStore does not create new $DiffHeapClasses for the same couple',
       () {
     final heap1 = _createHeap();
     final heap2 = _createHeap();

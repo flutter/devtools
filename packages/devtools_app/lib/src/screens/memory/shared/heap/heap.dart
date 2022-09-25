@@ -36,13 +36,13 @@ class AdaptedHeap {
 }
 
 abstract class HeapClasses with Sealable {
-  HeapClass? classByName(HeapClassName? name);
+  // HeapClass? classByName(HeapClassName? name);
 }
 
 class SingeHeapClasses extends HeapClasses {
   SingeHeapClasses(this.classesByName);
 
-  /// Maps full class name to statistics of this class.
+  /// Maps full class name to class.
   final Map<String, SingleHeapClass> classesByName;
   late final List<SingleHeapClass> classes =
       classesByName.values.toList(growable: false);
@@ -53,12 +53,6 @@ class SingeHeapClasses extends HeapClasses {
     for (var analysis in classes) {
       analysis.seal();
     }
-  }
-
-  @override
-  HeapClass? classByName(HeapClassName? name) {
-    if (name == null) return null;
-    return classesByName[name];
   }
 }
 

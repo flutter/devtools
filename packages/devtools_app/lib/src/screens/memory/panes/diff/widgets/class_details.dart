@@ -4,17 +4,12 @@
 
 import 'package:flutter/widgets.dart';
 
-import '../../../shared/heap/heap.dart';
-import '../controller/item_controller.dart';
-import '../controller/model.dart';
-import 'class_stats_table.dart';
-
 class HeapClassDetails extends StatelessWidget {
   const HeapClassDetails({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return const Text('Class details will be here');
   }
 }
 
