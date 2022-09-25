@@ -58,29 +58,14 @@ class _HeapCouple {
   int get hashCode => Object.hash(older, younger);
 }
 
-class DiffClassStats extends ClassStats {
-  DiffClassStats(SingleClassStats before, SingleClassStats after) {
-    throw UnimplementedError();
-  }
-}
-
 class DiffHeapClasses extends HeapClasses {
-  DiffHeapClasses(_HeapCouple heapCouple) {
+  DiffHeapClasses(_HeapCouple couple) {
     classesByName =
         subtractMaps<HeapClassName, SingleClassStats, DiffClassStats>(
-      minuend: heapCouple.younger.classes.classesByName,
-      subtrahend: heapCouple.older.classes.classesByName,
-      subtract: _subtruct,
+      minuend: couple.younger.classes.classesByName,
+      subtrahend: couple.older.classes.classesByName,
+      subtract: (before, after) => DiffClassStats.diff(before, after),
     );
-  }
-
-  static DiffClassStats? _subtruct(
-      SingleClassStats? left, SingleClassStats? right) {
-    // (minuend, subtrahend) {
-    //   final diff = HeapClassStatistics.subtract(minuend, subtrahend);
-    //   if (diff.isZero) return null;
-    //   return diff;
-    // },
   }
 
   /// Maps full class name to class.
@@ -95,4 +80,65 @@ class DiffHeapClasses extends HeapClasses {
       c.seal();
     }
   }
+}
+
+class DiffClassStats extends ClassStats {
+  DiffClassStats._({required this.total, required this.statsByPath});
+
+  final ObjectSetDiff total;
+  final ObjectStatsByPath statsByPath;
+
+  static DiffClassStats? diff(
+    SingleClassStats? before,
+    SingleClassStats? after,
+  ) {
+    if (before == null && after == null) return null;
+    final result = DiffClassStats._(
+      total: ObjectSetDiff(before: before?.objects, after: after?.objects),
+      statsByPath:
+          subtractMaps<ClassOnlyHeapPath, ObjectSetStats, ObjectSetStats>(
+        minuend: after?.objectsByPath,
+        subtrahend: before?.objectsByPath,
+        subtract: (minuend, subtrahend) =>
+            ObjectSetStats.subtruct(minuend: minuend, subtrahend: subtrahend),
+      ),
+    );
+
+    if (result.isZero()) return null;
+    return result..seal();
+  }
+
+  bool isZero() {
+    throw UnimplementedError();
+  }
+}
+
+class ObjectSetDiff {
+  ObjectSetDiff({ObjectSet? before, ObjectSet? after}) {
+    before ??= ObjectSet.empty;
+    after ??= ObjectSet.empty;
+
+    final objects = before.objects.union(after.objects);
+    for (var object in objects) {
+      if (before.objects.contains(object) && (after.objects.contains(object)))
+        continue;
+
+      if (before.objects.contains(object)) {
+        deleted.countInstance(object);
+        delta.uncountInstance(object);
+      }
+      if (after.objects.contains(object)) {
+        created.countInstance(object);
+        delta.countInstance(object);
+      }
+      assert(false);
+    }
+    created.seal();
+    deleted.seal();
+    delta.seal();
+  }
+
+  final created = ObjectSet();
+  final deleted = ObjectSet();
+  final delta = ObjectSetStats();
 }

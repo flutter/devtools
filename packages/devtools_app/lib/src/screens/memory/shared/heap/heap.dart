@@ -54,7 +54,7 @@ class SingleHeapClasses extends HeapClasses {
   }
 }
 
-typedef ObjectsByPath = Map<ClassOnlyHeapPath, ObjectSetStats>;
+typedef ObjectStatsByPath = Map<ClassOnlyHeapPath, ObjectSetStats>;
 
 abstract class ClassStats with Sealable {}
 
@@ -99,7 +99,7 @@ class SingleClassStats extends ClassStats {
 
   final HeapClassName heapClass;
   final ObjectSet objects;
-  final ObjectsByPath objectsByPath;
+  final ObjectStatsByPath objectsByPath;
 
   void countInstance(AdaptedHeapData data, int objectIndex) {
     assert(!isSealed);
@@ -119,36 +119,27 @@ class SingleClassStats extends ClassStats {
   bool get isZero => objects.isZero;
 }
 
-class ObjectSetDiff {
-  ObjectSetDiff(ObjectSet before, ObjectSet after) {
-    final objects = before.objects.union(after.objects);
-    for (var object in objects) {
-      if (before.objects.contains(object) && (after.objects.contains(object)))
-        continue;
-
-      if (before.objects.contains(object)) {
-        deleted.countInstance(object);
-        delta.uncountInstance(object);
-      }
-      if (after.objects.contains(object)) {
-        created.countInstance(object);
-        delta.countInstance(object);
-      }
-      assert(false);
-    }
-    created.seal();
-    deleted.seal();
-    delta.seal();
-  }
-
-  final created = ObjectSet();
-  final deleted = ObjectSet();
-  final delta = ObjectSetStats();
-}
-
 /// Size of set of instances.
 class ObjectSetStats with Sealable {
   ObjectSetStats();
+
+  static ObjectSetStats? subtruct({
+    required ObjectSetStats? minuend,
+    required ObjectSetStats? subtrahend,
+  }) {
+    minuend ??= _empty;
+    subtrahend ??= _empty;
+
+    final result = ObjectSetStats()
+      ..instanceCount = minuend.instanceCount - subtrahend.instanceCount
+      ..shallowSize = minuend.shallowSize - subtrahend.shallowSize
+      ..retainedSize = minuend.retainedSize - subtrahend.retainedSize;
+
+    if (result.isZero) return null;
+    return result;
+  }
+
+  static final ObjectSetStats _empty = ObjectSetStats()..seal();
 
   int instanceCount = 0;
   int shallowSize = 0;
@@ -175,6 +166,8 @@ class ObjectSetStats with Sealable {
 /// Size of set of instances.
 class ObjectSet extends ObjectSetStats {
   ObjectSet();
+
+  static ObjectSet empty = ObjectSet()..seal();
 
   // ObjectSet.negative(ObjectSet other)
   //     : instanceCount = -other.instanceCount,

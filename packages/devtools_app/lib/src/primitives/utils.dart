@@ -1511,18 +1511,18 @@ String? fileNameFromUri(String? uri) => uri?.split('/').last;
 /// - `transform` for keys presented in just `minuend`
 /// - `negate` for keys presented in just `subtrahend`
 Map<K, V2> subtractMaps<K, V1, V2>({
-  required Map<K, V1> minuend,
-  required Map<K, V1> subtrahend,
-  required V2? Function(V1? left, V1? right) subtract,
+  required Map<K, V1>? minuend,
+  required Map<K, V1>? subtrahend,
+  required V2? Function(V1? minuend, V1? subtrahend) subtract,
 }) {
+  minuend ??= <K, V1>{};
+  subtrahend ??= <K, V1>{};
+
   final result = <K, V2>{};
   final unionOfKeys = minuend.keys.toSet().union(subtrahend.keys.toSet());
 
   for (var key in unionOfKeys) {
-    final leftValue = minuend[key];
-    final rightValue = subtrahend[key];
-
-    final diff = subtract(leftValue, rightValue);
+    final diff = subtract(minuend[key], subtrahend[key]);
     if (diff != null) result[key] = diff;
   }
   return result;
