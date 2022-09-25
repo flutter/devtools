@@ -108,8 +108,8 @@ class _RetainedSizeColumn extends ColumnData<SingleClassStats> {
       )!;
 }
 
-class SingleClassesTable extends StatefulWidget {
-  const SingleClassesTable({
+class ClassesTableSingle extends StatefulWidget {
+  const ClassesTableSingle({
     Key? key,
     required this.controller,
   }) : super(key: key);
@@ -117,10 +117,10 @@ class SingleClassesTable extends StatefulWidget {
   final DiffPaneController controller;
 
   @override
-  State<SingleClassesTable> createState() => _SingleClassesTableState();
+  State<ClassesTableSingle> createState() => _ClassesTableSingleState();
 }
 
-class _SingleClassesTableState extends State<SingleClassesTable>
+class _ClassesTableSingleState extends State<ClassesTableSingle>
     with AutoDisposeMixin {
   late final List<ColumnData<SingleClassStats>> _columns;
   late final SnapshotInstanceItem _item;

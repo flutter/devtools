@@ -6,16 +6,16 @@ import 'package:flutter/widgets.dart';
 
 import '../controller/heap_diff.dart';
 
-class DiffClassesTable extends StatefulWidget {
-  const DiffClassesTable({super.key, required this.classes});
+class ClassesTableDiff extends StatefulWidget {
+  const ClassesTableDiff({super.key, required this.classes});
 
   final DiffHeapClasses classes;
 
   @override
-  State<DiffClassesTable> createState() => _DiffClassesTableState();
+  State<ClassesTableDiff> createState() => _ClassesTableDiffState();
 }
 
-class _DiffClassesTableState extends State<DiffClassesTable> {
+class _ClassesTableDiffState extends State<ClassesTableDiff> {
   @override
   Widget build(BuildContext context) {
     return const Text('diff classes table will be here');

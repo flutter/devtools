@@ -126,7 +126,9 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
   void didChangeDependencies() {
     super.didChangeDependencies();
     addAutoDisposeListener(
-        widget.controller.selectedSnapshotIndex, scrollIfLast);
+      widget.controller.selectedSnapshotIndex,
+      scrollIfLast,
+    );
   }
 
   Future<void> scrollIfLast() async {

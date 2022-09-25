@@ -113,7 +113,9 @@ class DiffPaneController {
     assert(selectedSnapshotItem is SnapshotInstanceItem);
     selectedSnapshotItem.dispose();
     _snapshots.removeRange(
-        selectedSnapshotIndex.value, selectedSnapshotIndex.value + 1);
+      selectedSnapshotIndex.value,
+      selectedSnapshotIndex.value + 1,
+    );
     // We must change the selectedIndex, because otherwise the content will
     // not be re-rendered.
     _selectedSnapshotIndex.value = max(selectedSnapshotIndex.value - 1, 0);

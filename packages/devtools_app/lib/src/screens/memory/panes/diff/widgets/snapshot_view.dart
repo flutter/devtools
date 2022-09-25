@@ -6,13 +6,11 @@ import 'package:flutter/material.dart';
 
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/split.dart';
-import '../../../shared/heap/heap.dart';
 import '../controller/diff_pane_controller.dart';
-import '../controller/heap_diff.dart';
 import '../controller/item_controller.dart';
 import 'class_details.dart';
-import 'classes_diff.dart';
-import 'classes_single.dart';
+import 'classes_table_diff.dart';
+import 'classes_table_single.dart';
 
 class SnapshotView extends StatelessWidget {
   const SnapshotView({Key? key, required this.controller}) : super(key: key);
@@ -37,7 +35,7 @@ class SnapshotView extends StatelessWidget {
             late Widget table1;
 
             if (diffWith == null) {
-              table1 = SingleClassesTable(
+              table1 = ClassesTableSingle(
                 // The key is passed to persist state.
                 key: ObjectKey(item),
                 controller: controller,
@@ -48,7 +46,7 @@ class SnapshotView extends StatelessWidget {
 
               // TODO(polina-c): make comparison async.
               final classes = controller.diffStore.compare(heap1, heap2);
-              table1 = DiffClassesTable(classes: classes);
+              table1 = ClassesTableDiff(classes: classes);
             }
 
             const Widget table2 = HeapClassDetails(
