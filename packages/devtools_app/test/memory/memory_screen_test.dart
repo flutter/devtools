@@ -35,6 +35,12 @@ void main() {
   late MemoryController controller;
   late FakeServiceManager fakeServiceManager;
 
+  // Load canned data testHeapSampleData.
+  final memoryJson =
+      SamplesMemoryJson.decode(argJsonString: testHeapSampleData);
+  final allocationJson =
+      AllocationMemoryJson.decode(argJsonString: testAllocationData);
+
   /// Classes to track while testing.
   final classesToTrack = <ClassRef>[];
 
@@ -50,12 +56,6 @@ void main() {
   }
 
   void _setUpServiceManagerForMemory() {
-    // Load canned data testHeapSampleData.
-    final memoryJson =
-        SamplesMemoryJson.decode(argJsonString: testHeapSampleData);
-    final allocationJson =
-        AllocationMemoryJson.decode(argJsonString: testAllocationData);
-
     // Use later in the class tracking test.
     if (classesToTrack.isEmpty) {
       for (var classDetails in allocationJson.data) {
@@ -80,20 +80,22 @@ void main() {
         .thenAnswer((_) => Future.value(false));
     setGlobal(ServiceConnectionManager, fakeServiceManager);
     setGlobal(PreferencesController, PreferencesController());
+  }
 
+  void initControllerState() {
     controller.offline.value = true;
     controller.memoryTimeline.offlineData.clear();
     controller.memoryTimeline.offlineData.addAll(memoryJson.data);
+    controller.memoryTimeline.liveData.clear();
   }
 
   Future<void> pumpMemoryScreen(
-    WidgetTester tester, {
-    MemoryController? memoryController,
-  }) async {
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       wrapWithControllers(
         const MemoryBody(),
-        memory: controller = memoryController ?? MemoryController(),
+        memory: controller,
       ),
     );
 
@@ -129,6 +131,8 @@ void main() {
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(NotificationService, NotificationService());
       screen = const MemoryScreen();
+      controller = MemoryController();
+      _setUpServiceManagerForMemory();
     });
 
     testWidgets('builds its tab', (WidgetTester tester) async {
@@ -176,9 +180,10 @@ void main() {
     testWidgetsWithWindowSize('Chart Select Hover Test', windowSize,
         (WidgetTester tester) async {
       await pumpMemoryScreen(tester);
+      initControllerState();
 
-      // Load canned data.
-      _setUpServiceManagerForMemory();
+      await tester.tap(find.text('Analysis'));
+      await tester.pumpAndSettle();
 
       expect(controller.offline.value, isTrue);
 
@@ -292,13 +297,13 @@ void main() {
     testWidgetsWithWindowSize('heap tree view', windowSize,
         (WidgetTester tester) async {
       await pumpMemoryScreen(tester);
+      initControllerState();
+      await tester.tap(find.text('Analysis'));
+      await tester.pumpAndSettle();
 
       final heapSnapShotFinder = find.text('Take Heap Snapshot');
 
       expect(heapSnapShotFinder, findsOneWidget);
-
-      // Load canned data.
-      _setUpServiceManagerForMemory();
 
       expect(controller.offline.value, isTrue);
 
@@ -449,9 +454,6 @@ void main() {
         }
 
         await pumpMemoryScreen(tester);
-
-        // Load canned data.
-        _setUpServiceManagerForMemory();
 
         controller.refreshAllCharts();
         await pumpAndSettleTwoSeconds();
