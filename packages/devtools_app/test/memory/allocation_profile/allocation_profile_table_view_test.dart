@@ -4,7 +4,6 @@
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
-import 'package:devtools_app/src/primitives/feature_flags.dart';
 import 'package:devtools_app/src/screens/memory/memory_controller.dart';
 import 'package:devtools_app/src/screens/memory/memory_heap_tree_view.dart';
 import 'package:devtools_app/src/screens/memory/memory_screen.dart';
@@ -63,15 +62,7 @@ void main() {
   const windowSize = Size(2225.0, 1000.0);
   setGlobal(NotificationService, NotificationService());
 
-  test('Allocation profile disabled by default', () {
-    // TODO(bkonyi): remove this check once we enable the tab by default.
-    expect(FeatureFlags.newAllocationProfileTable, isFalse);
-  });
-
   group('Allocation Profile Table', () {
-    setUpAll(() => FeatureFlags.newAllocationProfileTable = true);
-    tearDownAll(() => FeatureFlags.newAllocationProfileTable = false);
-
     setUp(() async {
       setGlobal(OfflineModeController, OfflineModeController());
       setGlobal(IdeTheme, IdeTheme());

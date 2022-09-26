@@ -90,23 +90,16 @@ void main() {
   // Set a wide enough screen width that we do not run into overflow.
   const windowSize = Size(2225.0, 1000.0);
 
-  test('Allocation tracing disabled by default', () {
-    // TODO(bkonyi): remove this check once we enable the tab by default.
-    expect(FeatureFlags.newAllocationProfileTable, isFalse);
-  });
-
   group('Allocation Tracing', () {
     late final CpuSamples allocationTracingProfile;
 
     setUpAll(() {
-      FeatureFlags.newAllocationProfileTable = true;
       final rawProfile = File(
         'test/test_data/memory/allocation_tracing/allocation_trace.json',
       ).readAsStringSync();
       allocationTracingProfile = CpuSamples.parse(jsonDecode(rawProfile))!;
     });
 
-    tearDownAll(() => FeatureFlags.newAllocationProfileTable = false);
 
     setUp(() async {
       setGlobal(NotificationService, NotificationService());

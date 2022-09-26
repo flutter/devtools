@@ -38,7 +38,6 @@ class MemoryDefaultScene extends Scene {
 
   @override
   Future<void> setUp() async {
-    FeatureFlags.newAllocationProfileTable = true;
     FeatureFlags.memoryDiffing = true;
 
     await ensureInspectorDependencies();
@@ -80,7 +79,6 @@ class MemoryDefaultScene extends Scene {
   String get title => '$MemoryDefaultScene';
 
   void tearDown() {
-    FeatureFlags.newAllocationProfileTable = false;
     FeatureFlags.memoryDiffing = false;
   }
 }
