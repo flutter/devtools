@@ -15,6 +15,7 @@ flutter pub get
 popd
 
 pushd packages/devtools_test
+flutter pub upgrade
 flutter pub get
 popd
 
