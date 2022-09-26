@@ -100,7 +100,6 @@ void main() {
       allocationTracingProfile = CpuSamples.parse(jsonDecode(rawProfile))!;
     });
 
-
     setUp(() async {
       setGlobal(NotificationService, NotificationService());
       setGlobal(OfflineModeController, OfflineModeController());
