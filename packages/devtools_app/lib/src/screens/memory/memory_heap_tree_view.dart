@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:collection/collection.dart' show IterableExtension;
-import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -25,7 +24,6 @@ import '../../shared/theme.dart';
 import '../../shared/utils.dart';
 import '../../ui/search.dart';
 import '../../ui/tab.dart';
-import 'memory_allocation_table_view.dart';
 import 'memory_analyzer.dart';
 import 'memory_controller.dart';
 import 'memory_filter.dart';
@@ -202,27 +200,20 @@ class HeapTreeViewState extends State<HeapTreeView>
 
   void _initTabs() {
     _tabs = [
-      if (FeatureFlags.newAllocationProfileTable) ...[
-        DevToolsTab.create(
-          key: dartHeapTableProfileKey,
-          tabName: 'Profile',
-          gaPrefix: _gaPrefix,
-        ),
-        DevToolsTab.create(
-          key: dartHeapAllocationTracingKey,
-          tabName: 'Allocation Tracing',
-          gaPrefix: _gaPrefix,
-        ),
-      ],
+      DevToolsTab.create(
+        key: dartHeapTableProfileKey,
+        tabName: 'Profile',
+        gaPrefix: _gaPrefix,
+      ),
+      DevToolsTab.create(
+        key: dartHeapAllocationTracingKey,
+        tabName: 'Allocation Tracing',
+        gaPrefix: _gaPrefix,
+      ),
       DevToolsTab.create(
         key: dartHeapAnalysisTabKey,
         gaPrefix: _gaPrefix,
         tabName: 'Analysis',
-      ),
-      DevToolsTab.create(
-        key: dartHeapAllocationsTabKey,
-        gaPrefix: _gaPrefix,
-        tabName: 'Allocations',
       ),
       if (FeatureFlags.memoryDiffing)
         DevToolsTab.create(
@@ -482,15 +473,13 @@ class HeapTreeViewState extends State<HeapTreeView>
                 _buildSearchFilterControls(),
             ],
           ),
-        ),
-        const Divider(),
-        Expanded(
-          child: TabBarView(
-            physics: defaultTabBarViewPhysics,
-            controller: _tabController,
-            children: [
-              // Profile Tab
-              if (FeatureFlags.newAllocationProfileTable) ...[
+          const Divider(),
+          Expanded(
+            child: TabBarView(
+              physics: defaultTabBarViewPhysics,
+              controller: _tabController,
+              children: [
+                // Profile Tab
                 KeepAliveWrapper(
                   child: AllocationProfileTableView(
                     controller: controller.allocationProfileController,
@@ -499,6 +488,22 @@ class HeapTreeViewState extends State<HeapTreeView>
                 const KeepAliveWrapper(
                   child: AllocationProfileTracingView(),
                 ),
+                // Analysis Tab
+                KeepAliveWrapper(
+                  child: AllocationProfileTableView(
+                    controller: controller.allocationProfileController,
+                  ),
+                ),
+                // Diff tab.
+                if (FeatureFlags.memoryDiffing)
+                  KeepAliveWrapper(
+                    child: DiffPane(
+                      controller: controller.diffPaneController,
+                    ),
+                  ),
+                // Leaks tab.
+                if (controller.shouldShowLeaksTab.value)
+                  const KeepAliveWrapper(child: LeaksPane()),
               ],
               // Analysis Tab
               KeepAliveWrapper(
@@ -807,42 +812,6 @@ class HeapTreeViewState extends State<HeapTreeView>
     return bubble;
   }
 
-  Widget _buildAllocationsControls() {
-    final updateCircle = displayTimestampUpdateBubble();
-
-    return Row(
-      children: [
-        IconLabelButton(
-          tooltip: 'Collect Allocation Statistics',
-          imageIcon: trackImage(context),
-          label: 'Track',
-          onPressed: () async {
-            ga.select(
-              analytics_constants.memory,
-              analytics_constants.trackAllocations,
-            );
-            await _allocationStart();
-          },
-        ),
-        const SizedBox(width: denseSpacing),
-        IconLabelButton(
-          tooltip: 'Reset all accumulators',
-          imageIcon: resetImage(context),
-          label: 'Reset',
-          onPressed: () async {
-            ga.select(
-              analytics_constants.memory,
-              analytics_constants.resetAllocationAccumulators,
-            );
-            await _allocationReset();
-          },
-        ),
-        const Spacer(),
-        updateCircle,
-      ],
-    );
-  }
-
   Widget textWidgetWithUpdateCircle(
     String text, {
     TextStyle? style,
@@ -908,95 +877,6 @@ class HeapTreeViewState extends State<HeapTreeView>
     }
 
     return textWidth;
-  }
-
-  // WARNING: Do not checkin the debug flag set to true.
-  final _debugAllocationMonitoring = false;
-
-  Future<void> _allocationStart() async {
-    // TODO(terry): Look at grouping by library or classes also filtering e.g.,
-    // await controller.computeLibraries();
-    controller.memoryTimeline.addMonitorStartEvent();
-
-    final allocationtimestamp = DateTime.now();
-    final currentAllocations = await controller.getAllocationProfile();
-
-    if (controller.monitorAllocations.isNotEmpty) {
-      final previousSize = controller.monitorAllocations.length;
-      int previousIndex = 0;
-      final currentSize = currentAllocations.length;
-      int currentIndex = 0;
-      while (currentIndex < currentSize && previousIndex < previousSize) {
-        final previousAllocation = controller.monitorAllocations[previousIndex];
-        final currentAllocation = currentAllocations[currentIndex];
-
-        if (previousAllocation.classRef.id == currentAllocation.classRef.id) {
-          final instancesCurrent = currentAllocation.instancesCurrent;
-          final bytesCurrent = currentAllocation.bytesCurrent;
-
-          currentAllocation.instancesDelta = previousAllocation.instancesDelta +
-              (instancesCurrent - previousAllocation.instancesCurrent);
-          currentAllocation.bytesDelta = previousAllocation.bytesDelta +
-              (bytesCurrent - previousAllocation.bytesCurrent);
-
-          final instancesAccumulated = currentAllocation.instancesDelta;
-          final bytesAccumulated = currentAllocation.bytesDelta;
-
-          if (_debugAllocationMonitoring &&
-              (instancesAccumulated != 0 || bytesAccumulated != 0)) {
-            debugLogger(
-              'previous,index=[$previousIndex][$currentIndex] '
-              'class ${currentAllocation.classRef.name}\n'
-              '    instancesCurrent=$instancesCurrent, '
-              '    instancesAccumulated=${currentAllocation.instancesDelta}\n'
-              '    bytesCurrent=$bytesCurrent, '
-              '    bytesAccumulated=${currentAllocation.bytesDelta}}\n',
-            );
-          }
-
-          previousIndex++;
-          currentIndex++;
-        } else {
-          // Either a new class in currentAllocations or old that's no longer
-          // active in previousAllocations.
-          final currentClassId = currentAllocation.classRef.id;
-          final ClassHeapDetailStats? first =
-              controller.monitorAllocations.firstWhereOrNull(
-            (element) => element.classRef.id == currentClassId,
-          );
-          if (first != null) {
-            // A class that no longer exist (live or sentinel).
-            previousIndex++;
-          } else {
-            // New Class encountered in new AllocationProfile, don't increment
-            // previousIndex.
-            currentIndex++;
-          }
-        }
-      }
-
-      // Insure all entries from previous and current monitors were looked at.
-      assert(previousSize == previousIndex, '$previousSize == $previousIndex');
-      assert(currentSize == currentIndex, '$currentSize == $currentIndex');
-    }
-
-    controller.monitorTimestamp = allocationtimestamp;
-    controller.monitorAllocations = currentAllocations;
-
-    controller.treeChanged();
-  }
-
-  Future<void> _allocationReset() async {
-    controller.memoryTimeline.addMonitorResetEvent();
-    final currentAllocations = await controller.resetAllocationProfile();
-
-    // Reset all accumulators to zero.
-    for (final classAllocation in currentAllocations) {
-      classAllocation.bytesDelta = 0;
-      classAllocation.instancesDelta = 0;
-    }
-
-    controller.monitorAllocations = currentAllocations;
   }
 
   /// Match, found,  select it and process via ValueNotifiers.
