@@ -86,19 +86,17 @@ class _ChartControlPaneState extends State<ChartControlPane>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               PauseButton(
-                minScreenWidthForTextBeforeScaling:
-                    minScreeWidthToKeepButtonsSmall,
+                iconOnly: true,
                 onPressed: paused ? null : _onPause,
-                tooltip: 'Pause the chart and auto-collection of snapshot\n'
+                tooltip: 'Pause the chart and auto-collection of snapshots\n'
                     'in case of aggressive memory consumption\n'
                     '(if enabled in settings)',
               ),
               const SizedBox(width: denseSpacing),
               ResumeButton(
-                minScreenWidthForTextBeforeScaling:
-                    minScreeWidthToKeepButtonsSmall,
+                iconOnly: true,
                 onPressed: paused ? _onResume : null,
-                tooltip: 'Resume the chart',
+                tooltip: 'Resume recording memory statistics',
               ),
             ],
           ),

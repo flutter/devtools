@@ -102,6 +102,7 @@ const memorySettings = 'memorySettings';
 const androidChart = 'androidChart';
 const autoSnapshot = 'autoSnapshot';
 const showChart = 'showChart';
+const hideChart = 'hideChart';
 const groupByPrefix = 'groupBy';
 const trackAllocations = 'trackAllocations';
 const resetAllocationAccumulators = 'resetAllocationAccumulators';

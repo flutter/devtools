@@ -357,12 +357,13 @@ class MemoryPreferencesController extends DisposableController
           _showChartStorageId,
           showChart.value.toString(),
         );
-        if (showChart.value) {
-          ga.select(
-            analytics_constants.memory,
-            analytics_constants.showChart,
-          );
-        }
+
+        ga.select(
+          analytics_constants.memory,
+          showChart.value
+              ? analytics_constants.showChart
+              : analytics_constants.hideChart,
+        );
       },
     );
     showChart.value = await storage.getValue(_showChartStorageId) == 'true';

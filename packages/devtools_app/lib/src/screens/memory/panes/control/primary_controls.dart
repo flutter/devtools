@@ -12,7 +12,9 @@ import '../../../../shared/utils.dart';
 import '../../memory_controller.dart';
 import '../../primitives/ui.dart';
 import '../chart/chart_pane_controller.dart';
-import 'chart_button.dart';
+import '../../../../shared/common_widgets.dart';
+import '../../../../shared/globals.dart';
+import '../../primitives/ui.dart';
 
 class PrimaryControls extends StatefulWidget {
   const PrimaryControls({
@@ -62,7 +64,7 @@ class _PrimaryControlsState extends State<PrimaryControls>
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const ChartButton(),
+        const _ChartButton(),
         const SizedBox(width: defaultSpacing),
         ClearButton(
           onPressed: controller.memorySource == MemoryController.liveFeed
@@ -72,6 +74,26 @@ class _PrimaryControlsState extends State<PrimaryControls>
           tooltip: 'Clear all data on the memory screen.',
         ),
       ],
+    );
+  }
+}
+
+class _ChartButton extends StatelessWidget {
+  const _ChartButton({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: preferences.memory.showChart,
+      builder: (_, showChart, __) => IconLabelButton(
+        key: key,
+        tooltip: showChart ? 'Hide chart' : 'Show chart',
+        icon: showChart ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+        label: 'Chart',
+        minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
+        onPressed: () => preferences.memory.showChart.value =
+            !preferences.memory.showChart.value,
+      ),
     );
   }
 }
