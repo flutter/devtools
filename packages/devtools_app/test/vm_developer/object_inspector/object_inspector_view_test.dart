@@ -28,6 +28,8 @@ void main() {
 
   late MockScriptManager scriptManager;
 
+  const windowSize = Size(2560.0, 1338.0);
+
   setUp(() {
     displayObjectInspector = true;
     objectInspector = ObjectInspectorView();
@@ -51,7 +53,8 @@ void main() {
     displayObjectInspector = false;
   });
 
-  testWidgets('builds screen', (WidgetTester tester) async {
+  testWidgetsWithWindowSize('builds screen', windowSize,
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       wrapWithControllers(
         Builder(
