@@ -230,11 +230,11 @@ class _CodeViewState extends State<CodeView>
 
     return DualValueListenableBuilder<bool, bool>(
       firstListenable: widget.enableFileExplorer
-          ? widget.codeViewController.showFileOpener
-          : const FixedValueListenable<bool>(false),
+          ? const FixedValueListenable<bool>(false)
+          : widget.codeViewController.showFileOpener,
       secondListenable: widget.enableSearch
-          ? widget.codeViewController.showSearchInFileField
-          : const FixedValueListenable<bool>(false),
+          ? const FixedValueListenable<bool>(false)
+          : widget.codeViewController.showSearchInFileField,
       builder: (context, showFileOpener, showSearch, _) {
         return Stack(
           children: [
