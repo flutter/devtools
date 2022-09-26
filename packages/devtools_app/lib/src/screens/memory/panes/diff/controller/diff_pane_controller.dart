@@ -10,12 +10,16 @@ import 'package:flutter/foundation.dart';
 import '../../../../../primitives/utils.dart';
 import '../../../primitives/memory_utils.dart';
 import '../../../shared/heap/model.dart';
+import 'heap_diff.dart';
+import 'item_controller.dart';
 import 'model.dart';
 
 class DiffPaneController {
   DiffPaneController(this.snapshotTaker);
 
   final SnapshotTaker snapshotTaker;
+
+  final diffStore = HeapDiffStore();
 
   /// The list contains one item that show information and all others
   /// are snapshots.
@@ -29,11 +33,20 @@ class DiffPaneController {
   ValueListenable<bool> get isProcessing => _isProcessing;
   final _isProcessing = ValueNotifier<bool>(false);
 
-  DiffListItem get selected => snapshots.value[selectedIndex.value];
+  DiffListItem get selectedItem => snapshots.value[selectedIndex.value];
+
+  /// Full name for the selected class.
+  ValueListenable<String?> get selectedClass => _selectedClass;
+  final _selectedClass = ValueNotifier<String?>(null);
+  void setSelectedClass(String? value) => _selectedClass.value = value;
 
   /// True, if the list contains snapshots, i.e. items beyond the first
   /// informational item.
   bool get hasSnapshots => snapshots.value.length > 1;
+
+  final snapshotStatsSorting = ColumnSorting();
+
+  final classStatsSorting = ColumnSorting();
 
   Future<void> takeSnapshot() async {
     _isProcessing.value = true;
@@ -43,6 +56,8 @@ class DiffPaneController {
         future,
         _nextDisplayNumber(),
         currentIsolateName ?? '<isolate-not-detected>',
+        diffStore,
+        selectedClass,
       ),
     );
     await future;
@@ -52,6 +67,9 @@ class DiffPaneController {
   }
 
   Future<void> clearSnapshots() async {
+    for (var i = 1; i < snapshots.value.length; i++) {
+      snapshots.value[i].dispose();
+    }
     _snapshots.removeRange(1, snapshots.value.length);
     _selectedIndex.value = 0;
   }
@@ -63,7 +81,8 @@ class DiffPaneController {
   }
 
   void deleteCurrentSnapshot() {
-    assert(selected is SnapshotListItem);
+    assert(selectedItem is SnapshotListItem);
+    selectedItem.dispose();
     _snapshots.removeRange(selectedIndex.value, selectedIndex.value + 1);
     // We must change the selectedIndex, because otherwise the content will
     // not be re-rendered.

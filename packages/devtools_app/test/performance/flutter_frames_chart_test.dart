@@ -138,28 +138,28 @@ void main() {
 
   group('FlutterFramesChartItem', () {
     testWidgets('builds for selected frame', (WidgetTester tester) async {
+      setGlobal(IdeTheme, IdeTheme());
+
       await tester.pumpWidget(
         // FlutterFramesChartItem needs to be wrapped in Material,
         // Directionality, and Overlay in order to pump the widget and test.
-        Material(
-          child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: Overlay(
-              initialEntries: [
-                OverlayEntry(
-                  builder: (context) {
-                    return FlutterFramesChartItem(
-                      controller: createMockPerformanceControllerWithDefaults(),
-                      frame: testFrame0,
-                      selected: true,
-                      msPerPx: 1,
-                      availableChartHeight: 100.0,
-                      displayRefreshRate: defaultRefreshRate,
-                    );
-                  },
-                ),
-              ],
-            ),
+        wrap(
+          Overlay(
+            initialEntries: [
+              OverlayEntry(
+                builder: (context) {
+                  return FlutterFramesChartItem(
+                    index: 0,
+                    controller: createMockPerformanceControllerWithDefaults(),
+                    frame: testFrame0,
+                    selected: true,
+                    msPerPx: 1,
+                    availableChartHeight: 100.0,
+                    displayRefreshRate: defaultRefreshRate,
+                  );
+                },
+              ),
+            ],
           ),
         ),
       );

@@ -46,12 +46,10 @@ class VMInfoCard extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return SizedBox.fromSize(
       size: preferredSize,
-      child: Card(
-        child: VMInfoList(
-          title: title,
-          rowKeyValues: rowKeyValues,
-          table: table,
-        ),
+      child: VMInfoList(
+        title: title,
+        rowKeyValues: rowKeyValues,
+        table: table,
       ),
     );
   }
@@ -737,16 +735,23 @@ class VmObjectDisplayBasicLayout extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Flexible(
-                child: VMInfoCard(
-                  title: generalInfoTitle,
-                  rowKeyValues: generalDataRows,
+                child: OutlineDecoration(
+                  showLeft: false,
+                  showTop: false,
+                  showRight: sideCardDataRows != null,
+                  child: VMInfoCard(
+                    title: generalInfoTitle,
+                    rowKeyValues: generalDataRows,
+                  ),
                 ),
               ),
               if (sideCardDataRows != null)
                 Flexible(
-                  child: VMInfoCard(
-                    title: sideCardTitle,
-                    rowKeyValues: sideCardDataRows,
+                  child: OutlineDecoration.onlyBottom(
+                    child: VMInfoCard(
+                      title: sideCardTitle,
+                      rowKeyValues: sideCardDataRows,
+                    ),
                   ),
                 ),
             ],

@@ -48,7 +48,7 @@ class _ObjectInspectorViewState extends State<_ObjectInspectorView>
     super.didChangeDependencies();
     final vmDeveloperToolsController =
         Provider.of<VMDeveloperToolsController>(context);
-    controller = vmDeveloperToolsController.objectInspectorViewController!
+    controller = vmDeveloperToolsController.objectInspectorViewController
       ..init();
   }
 

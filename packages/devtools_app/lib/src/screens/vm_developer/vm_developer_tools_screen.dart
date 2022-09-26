@@ -14,8 +14,6 @@ import 'object_inspector/object_inspector_view.dart';
 import 'vm_developer_tools_controller.dart';
 import 'vm_statistics/vm_statistics_view.dart';
 
-bool displayObjectInspector = true;
-
 abstract class VMDeveloperView {
   const VMDeveloperView(
     this.screenId, {
@@ -65,7 +63,7 @@ class VMDeveloperToolsScreenBody extends StatefulWidget {
   static List<VMDeveloperView> views = [
     const VMStatisticsView(),
     const IsolateStatisticsView(),
-    if (displayObjectInspector) ObjectInspectorView(),
+    ObjectInspectorView(),
   ];
 
   @override

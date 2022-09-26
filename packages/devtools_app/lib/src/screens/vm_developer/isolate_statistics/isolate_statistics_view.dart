@@ -11,6 +11,7 @@ import '../../../shared/common_widgets.dart';
 import '../../../shared/split.dart';
 import '../../../shared/table.dart';
 import '../../../shared/table_data.dart';
+import '../../../shared/theme.dart';
 import '../../profiler/cpu_profiler.dart';
 import '../vm_developer_common_widgets.dart';
 import '../vm_developer_tools_screen.dart';
@@ -44,14 +45,12 @@ class IsolateStatisticsViewBody extends StatelessWidget {
       valueListenable: controller.refreshing,
       builder: (context, refreshing, _) {
         return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                RefreshButton(
-                  onPressed: controller.refresh,
-                ),
-              ],
+            RefreshButton(
+              onPressed: controller.refresh,
             ),
+            const SizedBox(height: denseRowSpacing),
             Flexible(
               child: Column(
                 children: [
@@ -145,15 +144,19 @@ class GeneralIsolateStatisticsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isolate = controller.isolate;
-    return VMInfoCard(
-      title: 'General',
-      rowKeyValues: [
-        selectableTextBuilderMapEntry('Name', isolate?.name),
-        selectableTextBuilderMapEntry('Started at', _startTime(isolate)),
-        selectableTextBuilderMapEntry('Uptime', _uptime(isolate)),
-        selectableTextBuilderMapEntry('Root Library', isolate?.rootLib?.uri),
-        selectableTextBuilderMapEntry('ID', isolate?.id),
-      ],
+    return OutlineDecoration(
+      showRight: false,
+      showBottom: false,
+      child: VMInfoCard(
+        title: 'General',
+        rowKeyValues: [
+          selectableTextBuilderMapEntry('Name', isolate?.name),
+          selectableTextBuilderMapEntry('Started at', _startTime(isolate)),
+          selectableTextBuilderMapEntry('Uptime', _uptime(isolate)),
+          selectableTextBuilderMapEntry('Root Library', isolate?.rootLib?.uri),
+          selectableTextBuilderMapEntry('ID', isolate?.id),
+        ],
+      ),
     );
   }
 }
@@ -177,31 +180,35 @@ class IsolateMemoryStatisticsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isolate = controller.isolate;
-    return VMInfoCard(
-      title: 'Memory',
-      rowKeyValues: [
-        selectableTextBuilderMapEntry(
-          'Dart Heap',
-          _buildMemoryString(
-            isolate?.dartHeapSize,
-            isolate?.dartHeapCapacity,
+    return OutlineDecoration(
+      showRight: false,
+      showBottom: false,
+      child: VMInfoCard(
+        title: 'Memory',
+        rowKeyValues: [
+          selectableTextBuilderMapEntry(
+            'Dart Heap',
+            _buildMemoryString(
+              isolate?.dartHeapSize,
+              isolate?.dartHeapCapacity,
+            ),
           ),
-        ),
-        selectableTextBuilderMapEntry(
-          'New Space',
-          _buildMemoryString(
-            isolate?.newSpaceUsage,
-            isolate?.newSpaceUsage,
+          selectableTextBuilderMapEntry(
+            'New Space',
+            _buildMemoryString(
+              isolate?.newSpaceUsage,
+              isolate?.newSpaceUsage,
+            ),
           ),
-        ),
-        selectableTextBuilderMapEntry(
-          'Old Space',
-          _buildMemoryString(
-            isolate?.oldSpaceUsage,
-            isolate?.oldSpaceCapacity,
+          selectableTextBuilderMapEntry(
+            'Old Space',
+            _buildMemoryString(
+              isolate?.oldSpaceUsage,
+              isolate?.oldSpaceCapacity,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -219,21 +226,24 @@ class TagStatisticsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return VMInfoCard(
-      title: 'Execution Time',
-      table: Flexible(
-        child: controller.cpuProfilerController.profilerEnabled
-            ? FlatTable<VMTag>(
-                columns: columns,
-                data: controller.tags,
-                keyFactory: (VMTag tag) => ValueKey<String>(tag.name),
-                sortColumn: percentage,
-                sortDirection: SortDirection.descending,
-                onItemSelected: (_) => null,
-              )
-            : CpuProfilerDisabled(
-                controller.cpuProfilerController,
-              ),
+    return OutlineDecoration(
+      showBottom: false,
+      child: VMInfoCard(
+        title: 'Execution Time',
+        table: Flexible(
+          child: controller.cpuProfilerController.profilerEnabled
+              ? FlatTable<VMTag>(
+                  columns: columns,
+                  data: controller.tags,
+                  keyFactory: (VMTag tag) => ValueKey<String>(tag.name),
+                  sortColumn: percentage,
+                  sortDirection: SortDirection.descending,
+                  onItemSelected: (_) => null,
+                )
+              : CpuProfilerDisabled(
+                  controller.cpuProfilerController,
+                ),
+        ),
       ),
     );
   }
@@ -356,20 +366,25 @@ class _IsolatePortsWidgetState extends State<IsolatePortsWidget> {
   @override
   Widget build(BuildContext context) {
     final ports = widget.controller.ports;
-    return Column(
-      children: [
-        Flexible(
-          child: VMInfoCard(
-            title: 'Open Ports (${ports.length})',
-            table: Flexible(
-              child: Split(
-                axis: Axis.horizontal,
-                initialFractions: const [
-                  0.3,
-                  0.7,
-                ],
-                children: [
-                  FlatTable<InstanceRef?>(
+    return OutlineDecoration(
+      child: Split(
+        axis: Axis.horizontal,
+        initialFractions: const [
+          0.3,
+          0.7,
+        ],
+        children: [
+          OutlineDecoration.onlyRight(
+            child: Column(
+              children: [
+                AreaPaneHeader(
+                  needsTopBorder: false,
+                  title: Text(
+                    'Open Ports (${ports.length})',
+                  ),
+                ),
+                Flexible(
+                  child: FlatTable<InstanceRef?>(
                     columns: columns,
                     data: ports,
                     keyFactory: (InstanceRef? port) =>
@@ -387,15 +402,17 @@ class _IsolatePortsWidgetState extends State<IsolatePortsWidget> {
                       },
                     ),
                   ),
-                  StackTraceViewerWidget(
-                    stackTrace: selectedPort.value,
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
-        ),
-      ],
+          OutlineDecoration.onlyLeft(
+            child: StackTraceViewerWidget(
+              stackTrace: selectedPort.value,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -423,16 +440,20 @@ class ServiceExtensionsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final extensions = controller.isolate?.extensionRPCs ?? [];
-    return VMInfoCard(
-      title: 'Service Extensions (${extensions.length})',
-      table: Flexible(
-        child: FlatTable<String>(
-          columns: columns,
-          data: extensions,
-          keyFactory: (String extension) => ValueKey<String>(extension),
-          sortColumn: name,
-          sortDirection: SortDirection.ascending,
-          onItemSelected: (_) => null,
+    return OutlineDecoration(
+      showBottom: false,
+      showLeft: false,
+      child: VMInfoCard(
+        title: 'Service Extensions (${extensions.length})',
+        table: Flexible(
+          child: FlatTable<String>(
+            columns: columns,
+            data: extensions,
+            keyFactory: (String extension) => ValueKey<String>(extension),
+            sortColumn: name,
+            sortDirection: SortDirection.ascending,
+            onItemSelected: (_) => null,
+          ),
         ),
       ),
     );

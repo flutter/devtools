@@ -1,7 +1,10 @@
+// Copyright 2022 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be found
+// in the LICENSE file.
+
 import 'dart:convert';
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/ui/hover.dart';
 import 'package:devtools_app/src/ui/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
