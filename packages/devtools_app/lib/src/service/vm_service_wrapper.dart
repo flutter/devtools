@@ -934,6 +934,7 @@ class VmServiceWrapper implements VmService {
 
   @visibleForTesting
   Future<T> trackFuture<T>(String name, Future<T> future) {
+    print('TRACK_FUTURE(name:$name)');
     if (!trackFutures) {
       return future;
     }
