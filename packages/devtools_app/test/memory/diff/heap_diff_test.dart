@@ -36,42 +36,40 @@ void main() {
     final created1 = _createObject(className, 3, []);
     final created2 = _createObject(className, 4, []);
 
-    final heapBefore = _createHeap([deleted, persistedBefore]);
-    final statsBefore = SingleClassStats(className)
-      ..countInstance(heapBefore, 1)
-      ..countInstance(heapBefore, 2);
-
-    final heapAfter = _createHeap([persistedAfter, created1, created2]);
-    final statsAfter = SingleClassStats(className)
-      ..countInstance(heapAfter, 1)
-      ..countInstance(heapAfter, 2)
-      ..countInstance(heapAfter, 3);
+    final statsBefore = _createClassStats([deleted, persistedBefore]);
+    final statsAfter = _createClassStats([persistedAfter, created1, created2]);
 
     final stats = DiffClassStats.diff(statsBefore, statsAfter)!;
 
     expect(stats.heapClass, className);
-    expect(stats.total.created.instanceCount, 1);
+    expect(stats.total.created.instanceCount, 2);
     expect(stats.total.deleted.instanceCount, 1);
-    expect(stats.total.delta.instanceCount, 0);
+    expect(stats.total.delta.instanceCount, 1);
   });
 }
 
-AdaptedHeapData _createHeap(List<AdaptedHeapObject> leafs) {
-  final rootRefs =
-      Iterable<int>.generate(leafs.length).map((i) => i + 1).toList();
+SingleClassStats _createClassStats(List<AdaptedHeapObject> instances) {
+  final indexes =
+      Iterable<int>.generate(instances.length).map((i) => i + 1).toList();
 
   final objects = [
     _createObject(
       const HeapClassName(className: 'root', library: 'lib'),
       0,
-      rootRefs,
+      indexes,
     ),
-    ...leafs,
+    ...instances,
   ];
 
   final heap = AdaptedHeapData(objects, rootIndex: 0);
   buildSpanningTree(heap);
-  return heap;
+
+  final result = SingleClassStats(instances.first.heapClass);
+  for (var index in indexes) {
+    result.countInstance(heap, index);
+  }
+
+  return result;
 }
 
 AdaptedHeapObject _createObject(

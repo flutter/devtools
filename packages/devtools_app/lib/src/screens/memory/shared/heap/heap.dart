@@ -169,30 +169,16 @@ class ObjectSet extends ObjectSetStats {
 
   static ObjectSet empty = ObjectSet()..seal();
 
-  // ObjectSet.negative(ObjectSet other)
-  //     : instanceCount = -other.instanceCount,
-  //       shallowSize = -other.shallowSize,
-  //       retainedSize = -other.retainedSize {
-  //   seal();
-  // }
-
-  // ObjectSet.subtract(ObjectSet left, ObjectSet right)
-  //     : instanceCount = left.instanceCount - right.instanceCount,
-  //       shallowSize = left.shallowSize - right.shallowSize,
-  //       retainedSize = left.retainedSize - right.retainedSize {
-  //   seal();
-  // }
-
-  final objects = <AdaptedHeapObject>{};
+  final objectsByCodes = <IdentityHashCode, AdaptedHeapObject>{};
 
   @override
-  bool get isZero => objects.isEmpty;
+  bool get isZero => objectsByCodes.isEmpty;
 
   @override
   void countInstance(AdaptedHeapObject object) {
-    assert(!objects.contains(object));
+    if (objectsByCodes.containsKey(object.code)) return;
     super.countInstance(object);
-    objects.add(object);
+    objectsByCodes[object.code] = object;
   }
 
   @override
