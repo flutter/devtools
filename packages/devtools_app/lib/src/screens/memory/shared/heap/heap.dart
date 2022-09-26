@@ -63,43 +63,10 @@ class SingleClassStats extends ClassStats {
       : objects = ObjectSet(),
         objectsByPath = <ClassOnlyHeapPath, ObjectSetStats>{};
 
-  // HeapClassStatistics.negative(HeapClassStatistics other)
-  //     : heapClass = other.heapClass,
-  //       total = ObjectSet.negative(other.total),
-  //       objectsByPath = other.objectsByPath
-  //           .map((key, value) => MapEntry(key, ObjectSet.negative(value))) {
-  //   seal();
-  // }
-
-  // HeapClassStatistics.subtract(
-  //   HeapClassStatistics minuend,
-  //   HeapClassStatistics subtrahend,
-  // )   : assert(minuend.heapClass.fullName == subtrahend.heapClass.fullName),
-  //       heapClass = minuend.heapClass,
-  //       total = ObjectSet.subtract(minuend.total, subtrahend.total),
-  //       objectsByPath = _subtractSizesByPath(
-  //           minuend.objectsByPath, subtrahend.objectsByPath) {
-  //   seal();
-  // }
-
-  // static ObjectsByPath _subtractSizesByPath(
-  //   ObjectsByPath minuend,
-  //   ObjectsByPath subtrahend,
-  // ) =>
-  //     subtractMaps<ClassOnlyHeapPath, ObjectSet>(
-  //       minuend: minuend,
-  //       subtrahend: subtrahend,
-  //       subtract: (minuend, subtrahend) {
-  //         final diff = ObjectSet.subtract(minuend, subtrahend);
-  //         if (diff.isZero) return null;
-  //         return diff;
-  //       },
-  //       negate: (value) => ObjectSet.negative(value),
-  //     );
-
   final HeapClassName heapClass;
   final ObjectSet objects;
   final ObjectStatsByPath objectsByPath;
+  late final entries = objectsByPath.entries.toList(growable: false);
 
   void countInstance(AdaptedHeapData data, int objectIndex) {
     assert(!isSealed);

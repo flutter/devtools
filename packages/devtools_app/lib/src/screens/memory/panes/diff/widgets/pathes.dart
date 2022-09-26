@@ -124,13 +124,17 @@ class ClassStatsTable extends StatefulWidget {
 class _ClassStatsTableState extends State<ClassStatsTable>
     with AutoDisposeMixin {
   late final List<ColumnData<_RetainingPathRecord>> _columns;
-  late List<MapEntry<ClassOnlyHeapPath, ObjectSetStats>> _dataList;
+
+  @override
+  void didUpdateWidget(covariant ClassStatsTable oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.data == oldWidget.data) return;
+  }
 
   @override
   void initState() {
     super.initState();
     assert(widget.data.isSealed);
-    _dataList = widget.data.objectsByPath.entries.toList(growable: false);
 
     final _shallowSizeColumn = _ShallowSizeColumn();
 
@@ -153,7 +157,7 @@ class _ClassStatsTableState extends State<ClassStatsTable>
   Widget build(BuildContext context) {
     return FlatTable<_RetainingPathRecord>(
       columns: _columns,
-      data: _dataList,
+      data: widget.data.entries,
       keyFactory: (e) => Key(e.key.asLongString()),
       onItemSelected: (r) => {},
       sortColumn: _columns[widget.sorting.columnIndex],
