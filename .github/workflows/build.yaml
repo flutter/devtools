@@ -64,8 +64,10 @@ jobs:
       fail-fast: false
       matrix:
         bot:
+          - test_ddc
           - test_dart2js
         flutter-test-env:
+          - pinned
           - master
     steps:
       - name: git clone
