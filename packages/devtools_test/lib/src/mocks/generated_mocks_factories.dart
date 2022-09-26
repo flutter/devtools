@@ -52,7 +52,8 @@ MockCodeViewController createMockCodeViewControllerWithDefaults({
   when(codeViewController.showFileOpener).thenReturn(ValueNotifier(false));
   when(codeViewController.showSearchInFileField)
       .thenReturn(ValueNotifier(false));
-  createMockProgramExplorerControllerWithDefaults();
+  mockProgramExplorerController ??=
+      createMockProgramExplorerControllerWithDefaults();
   when(codeViewController.programExplorerController).thenReturn(
     mockProgramExplorerController,
   );
