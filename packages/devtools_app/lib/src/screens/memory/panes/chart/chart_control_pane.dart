@@ -82,34 +82,28 @@ class _ChartControlPaneState extends State<ChartControlPane>
       children: [
         ValueListenableBuilder<bool>(
           valueListenable: controller.paused,
-          builder: (context, paused, _) => Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          builder: (context, paused, _) => Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              SizedBox(
-                width: buttonWidth,
-                child: PauseButton(
-                  minScreenWidthForTextBeforeScaling:
-                      primaryControlsMinVerboseWidth,
-                  onPressed: paused ? null : _onPause,
-                  tooltip: 'Pause the chart and auto-collection of snapshot\n'
-                      'in case of aggressive memory consumption\n'
-                      '(if enabled in settings)',
-                ),
+              PauseButton(
+                minScreenWidthForTextBeforeScaling:
+                    minScreeWidthToKeepButtonsSmall,
+                onPressed: paused ? null : _onPause,
+                tooltip: 'Pause the chart and auto-collection of snapshot\n'
+                    'in case of aggressive memory consumption\n'
+                    '(if enabled in settings)',
               ),
-              const SizedBox(height: denseSpacing),
-              SizedBox(
-                width: buttonWidth,
-                child: ResumeButton(
-                  minScreenWidthForTextBeforeScaling:
-                      primaryControlsMinVerboseWidth,
-                  onPressed: paused ? _onResume : null,
-                  tooltip: 'Resume the chart',
-                ),
+              const SizedBox(width: denseSpacing),
+              ResumeButton(
+                minScreenWidthForTextBeforeScaling:
+                    minScreeWidthToKeepButtonsSmall,
+                onPressed: paused ? _onResume : null,
+                tooltip: 'Resume the chart',
               ),
-              const SizedBox(height: denseSpacing),
             ],
           ),
         ),
+        const SizedBox(height: denseSpacing),
         SizedBox(
           width: buttonWidth,
           child: IconLabelButton(

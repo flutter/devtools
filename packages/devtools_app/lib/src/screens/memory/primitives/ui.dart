@@ -4,3 +4,6 @@
 
 /// Width of application window when memory buttons lose their text.
 const primaryControlsMinVerboseWidth = 1100.0;
+
+/// Width of application window when memory buttons lose their text.
+const minScreeWidthToKeepButtonsSmall = 1000000000.0;
