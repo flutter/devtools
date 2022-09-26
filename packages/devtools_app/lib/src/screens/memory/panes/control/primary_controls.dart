@@ -7,34 +7,21 @@ import 'package:flutter/material.dart';
 import '../../../../analytics/analytics.dart' as ga;
 import '../../../../analytics/constants.dart' as analytics_constants;
 import '../../../../shared/common_widgets.dart';
+import '../../../../shared/globals.dart';
 import '../../../../shared/theme.dart';
-import '../../../../shared/utils.dart';
 import '../../memory_controller.dart';
 import '../../primitives/ui.dart';
 import '../chart/chart_pane_controller.dart';
-import '../../../../shared/common_widgets.dart';
-import '../../../../shared/globals.dart';
-import '../../primitives/ui.dart';
 
-class PrimaryControls extends StatefulWidget {
+class PrimaryControls extends StatelessWidget {
   const PrimaryControls({
     Key? key,
     required this.chartController,
+    required this.controller,
   }) : super(key: key);
 
   final MemoryChartPaneController chartController;
-
-  @override
-  State<PrimaryControls> createState() => _PrimaryControlsState();
-}
-
-class _PrimaryControlsState extends State<PrimaryControls>
-    with ProvidedControllerMixin<MemoryController, PrimaryControls> {
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    initController();
-  }
+  final MemoryController controller;
 
   void _clearTimeline() {
     ga.select(analytics_constants.memory, analytics_constants.clear);
@@ -56,7 +43,7 @@ class _PrimaryControlsState extends State<PrimaryControls>
     controller.selectedLeaf = null;
 
     // Remove history of all plotted data in all charts.
-    widget.chartController.resetAll();
+    chartController.resetAll();
   }
 
   @override
