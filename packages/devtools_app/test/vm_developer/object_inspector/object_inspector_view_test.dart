@@ -13,6 +13,7 @@ import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/service/vm_service_wrapper.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
+import 'package:devtools_app/src/shared/preferences.dart';
 import 'package:devtools_app/src/shared/split.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
@@ -37,6 +38,7 @@ void main() {
     when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
     when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
 
+    setGlobal(PreferencesController, PreferencesController());
     setGlobal(ServiceConnectionManager, fakeServiceManager);
     setGlobal(ScriptManager, scriptManager);
     setGlobal(IdeTheme, IdeTheme());
