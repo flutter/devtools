@@ -7,7 +7,6 @@ import 'package:devtools_app/src/screens/debugger/program_explorer.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector_view.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_viewport.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_developer_tools_controller.dart';
-import 'package:devtools_app/src/screens/vm_developer/vm_developer_tools_screen.dart';
 import 'package:devtools_app/src/scripts/script_manager.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
@@ -27,7 +26,6 @@ void main() {
   late MockScriptManager scriptManager;
 
   setUp(() {
-    displayObjectInspector = true;
     objectInspector = ObjectInspectorView();
     fakeServiceManager = FakeServiceManager();
     scriptManager = MockScriptManager();
@@ -40,10 +38,6 @@ void main() {
     setGlobal(ScriptManager, scriptManager);
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(NotificationService, NotificationService());
-  });
-
-  tearDown(() {
-    displayObjectInspector = false;
   });
 
   testWidgets('builds screen', (WidgetTester tester) async {
