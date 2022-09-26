@@ -9,6 +9,7 @@ import '../../primitives/utils.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/table.dart';
 import '../../shared/table_data.dart';
+import '../../shared/theme.dart';
 import 'vm_developer_common_widgets.dart';
 import 'vm_developer_tools_screen.dart';
 import 'vm_service_private_extensions.dart';
@@ -32,27 +33,22 @@ class VMStatisticsViewBody extends StatelessWidget {
   final controller = VMStatisticsViewController();
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: controller.refreshing,
-      builder: (context, refreshing, child) {
-        return Column(
-          children: [
-            Row(
-              children: [
-                child!,
-              ],
-            ),
-            Expanded(
-              child: VMStatisticsWidget(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        RefreshButton(onPressed: controller.refresh),
+        const SizedBox(height: denseRowSpacing),
+        Expanded(
+          child: ValueListenableBuilder(
+            valueListenable: controller.refreshing,
+            builder: (context, _, __) {
+              return VMStatisticsWidget(
                 controller: controller,
-              ),
-            ),
-          ],
-        );
-      },
-      child: RefreshButton(
-        onPressed: controller.refresh,
-      ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }
@@ -121,29 +117,31 @@ class GeneralVMStatisticsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final vm = controller.vm;
-    return VMInfoCard(
-      title: 'VM',
-      rowKeyValues: [
-        selectableTextBuilderMapEntry('Name', vm?.name),
-        selectableTextBuilderMapEntry('Version', vm?.version),
-        selectableTextBuilderMapEntry('Embedder', vm?.embedder),
-        selectableTextBuilderMapEntry(
-          'Started',
-          vm == null
-              ? null
-              : formatDateTime(
-                  DateTime.fromMillisecondsSinceEpoch(vm.startTime!),
-                ),
-        ),
-        selectableTextBuilderMapEntry('Profiler Mode', vm?.profilerMode),
-        selectableTextBuilderMapEntry(
-          'Current Memory',
-          prettyPrintBytes(
-            vm?.currentMemory,
-            includeUnit: true,
+    return OutlineDecoration(
+      child: VMInfoCard(
+        title: 'VM',
+        rowKeyValues: [
+          selectableTextBuilderMapEntry('Name', vm?.name),
+          selectableTextBuilderMapEntry('Version', vm?.version),
+          selectableTextBuilderMapEntry('Embedder', vm?.embedder),
+          selectableTextBuilderMapEntry(
+            'Started',
+            vm == null
+                ? null
+                : formatDateTime(
+                    DateTime.fromMillisecondsSinceEpoch(vm.startTime!),
+                  ),
           ),
-        ),
-      ],
+          selectableTextBuilderMapEntry('Profiler Mode', vm?.profilerMode),
+          selectableTextBuilderMapEntry(
+            'Current Memory',
+            prettyPrintBytes(
+              vm?.currentMemory,
+              includeUnit: true,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -163,38 +161,44 @@ class ProcessStatisticsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final vm = controller.vm;
-    return VMInfoCard(
-      title: 'Process',
-      rowKeyValues: [
-        selectableTextBuilderMapEntry('PID', vm?.pid?.toString()),
-        selectableTextBuilderMapEntry(
-          'Host CPU',
-          vm == null ? null : '${vm.hostCPU} (${vm.architectureBits}-bits)',
-        ),
-        selectableTextBuilderMapEntry('Target CPU', vm?.targetCPU),
-        selectableTextBuilderMapEntry('Operating System', vm?.operatingSystem),
-        selectableTextBuilderMapEntry(
-          'Max Memory (RSS)',
-          prettyPrintBytes(
-            vm?.maxRSS,
-            includeUnit: true,
+    return OutlineDecoration(
+      showTop: false,
+      child: VMInfoCard(
+        title: 'Process',
+        rowKeyValues: [
+          selectableTextBuilderMapEntry('PID', vm?.pid?.toString()),
+          selectableTextBuilderMapEntry(
+            'Host CPU',
+            vm == null ? null : '${vm.hostCPU} (${vm.architectureBits}-bits)',
           ),
-        ),
-        selectableTextBuilderMapEntry(
-          'Current Memory (RSS)',
-          prettyPrintBytes(
-            vm?.currentRSS,
-            includeUnit: true,
+          selectableTextBuilderMapEntry('Target CPU', vm?.targetCPU),
+          selectableTextBuilderMapEntry(
+            'Operating System',
+            vm?.operatingSystem,
           ),
-        ),
-        selectableTextBuilderMapEntry(
-          'Zone Memory',
-          prettyPrintBytes(
-            vm?.nativeZoneMemoryUsage,
-            includeUnit: true,
+          selectableTextBuilderMapEntry(
+            'Max Memory (RSS)',
+            prettyPrintBytes(
+              vm?.maxRSS,
+              includeUnit: true,
+            ),
           ),
-        ),
-      ],
+          selectableTextBuilderMapEntry(
+            'Current Memory (RSS)',
+            prettyPrintBytes(
+              vm?.currentRSS,
+              includeUnit: true,
+            ),
+          ),
+          selectableTextBuilderMapEntry(
+            'Zone Memory',
+            prettyPrintBytes(
+              vm?.nativeZoneMemoryUsage,
+              includeUnit: true,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -289,16 +293,20 @@ class IsolatesPreviewWidget extends StatelessWidget {
     final title = systemIsolates ? 'System Isolates' : 'Isolates';
     final isolates =
         systemIsolates ? controller.systemIsolates : controller.isolates;
-    return VMInfoCard(
-      title: '$title (${isolates.length})',
-      table: Flexible(
-        child: FlatTable<Isolate>(
-          columns: columns,
-          data: isolates,
-          keyFactory: (Isolate i) => ValueKey<String>(i.id!),
-          sortColumn: name,
-          sortDirection: SortDirection.descending,
-          onItemSelected: (_) => null,
+    return OutlineDecoration(
+      showLeft: false,
+      showTop: !systemIsolates,
+      child: VMInfoCard(
+        title: '$title (${isolates.length})',
+        table: Flexible(
+          child: FlatTable<Isolate>(
+            columns: columns,
+            data: isolates,
+            keyFactory: (Isolate i) => ValueKey<String>(i.id!),
+            sortColumn: name,
+            sortDirection: SortDirection.descending,
+            onItemSelected: (_) => null,
+          ),
         ),
       ),
     );
