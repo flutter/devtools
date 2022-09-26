@@ -19,8 +19,7 @@ MockPerformanceController createMockPerformanceControllerWithDefaults() {
   when(controller.matchIndex).thenReturn(ValueNotifier<int>(0));
   when(controller.enhanceTracingController)
       .thenReturn(EnhanceTracingController());
-  when(controller.rasterStatsController)
-      .thenReturn(RasterStatsController());
+  when(controller.rasterStatsController).thenReturn(RasterStatsController());
   when(controller.selectedFrame)
       .thenReturn(const FixedValueListenable<FlutterFrame?>(null));
   when(controller.displayRefreshRate).thenReturn(ValueNotifier<double>(60.0));
@@ -50,8 +49,10 @@ MockCodeViewController createMockCodeViewControllerWithDefaults({
       .thenReturn(ValueNotifier<ParsedScript?>(null));
   when(codeViewController.searchMatches).thenReturn(ValueNotifier([]));
   when(codeViewController.activeSearchMatch).thenReturn(ValueNotifier(null));
-  mockProgramExplorerController ??=
-      createMockProgramExplorerControllerWithDefaults();
+  when(codeViewController.showFileOpener).thenReturn(ValueNotifier(false));
+  when(codeViewController.showSearchInFileField)
+      .thenReturn(ValueNotifier(false));
+  createMockProgramExplorerControllerWithDefaults();
   when(codeViewController.programExplorerController).thenReturn(
     mockProgramExplorerController,
   );
