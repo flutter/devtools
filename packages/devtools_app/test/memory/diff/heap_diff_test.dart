@@ -5,14 +5,15 @@
 import 'package:devtools_app/src/screens/memory/panes/diff/controller/heap_diff.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/heap.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/model.dart';
+import 'package:devtools_app/src/screens/memory/shared/heap/spanning_tree.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test(
       '$HeapDiffStore does not create new $DiffHeapClasses for the same couple',
       () {
-    final heap1 = _createHeap();
-    final heap2 = _createHeap();
+    final heap1 = _createSimplestHeap();
+    final heap2 = _createSimplestHeap();
 
     expect(heap1 == heap2, false);
 
@@ -25,16 +26,70 @@ void main() {
     expect(couple1, couple2);
     expect(couple1, couple3);
   });
+
+  test('$DiffClassStats calculates diff as expected', () {
+    const className = HeapClassName(className: 'myClass', library: 'library');
+
+    final deleted = _createObject(className, 1, []);
+    final persistedBefore = _createObject(className, 2, []);
+    final persistedAfter = _createObject(className, 2, []);
+    final created1 = _createObject(className, 3, []);
+    final created2 = _createObject(className, 4, []);
+
+    final heapBefore = _createHeap([deleted, persistedBefore]);
+    final statsBefore = SingleClassStats(className)
+      ..countInstance(heapBefore, 1)
+      ..countInstance(heapBefore, 2);
+
+    final heapAfter = _createHeap([persistedAfter, created1, created2]);
+    final statsAfter = SingleClassStats(className)
+      ..countInstance(heapAfter, 1)
+      ..countInstance(heapAfter, 2)
+      ..countInstance(heapAfter, 3);
+
+    final stats = DiffClassStats.diff(statsBefore, statsAfter)!;
+
+    expect(stats.heapClass, className);
+    expect(stats.total.created.instanceCount, 1);
+    expect(stats.total.deleted.instanceCount, 1);
+    expect(stats.total.delta.instanceCount, 0);
+  });
 }
 
-AdaptedHeap _createHeap() => AdaptedHeap(
+AdaptedHeapData _createHeap(List<AdaptedHeapObject> leafs) {
+  final rootRefs =
+      Iterable<int>.generate(leafs.length).map((i) => i + 1).toList();
+
+  final objects = [
+    _createObject(
+      const HeapClassName(className: 'root', library: 'lib'),
+      0,
+      rootRefs,
+    ),
+    ...leafs,
+  ];
+
+  final heap = AdaptedHeapData(objects, rootIndex: 0);
+  buildSpanningTree(heap);
+  return heap;
+}
+
+AdaptedHeapObject _createObject(
+        HeapClassName className, int code, List<int> references) =>
+    AdaptedHeapObject(
+      code: code,
+      references: references,
+      heapClass: className,
+      shallowSize: 1,
+    );
+
+AdaptedHeap _createSimplestHeap() => AdaptedHeap(
       AdaptedHeapData(
         [
           AdaptedHeapObject(
             code: 0,
             references: [],
-            heapClass:
-                const HeapClassName(className: 'className', library: 'library'),
+            heapClass: const HeapClassName(className: 'root', library: 'lib'),
             shallowSize: 1,
           )
         ],
