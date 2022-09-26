@@ -9,7 +9,6 @@ import '../../../../analytics/constants.dart' as analytics_constants;
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/theme.dart';
-import '../../../../shared/utils.dart';
 import '../../memory_controller.dart';
 import '../../primitives/ui.dart';
 import '../../shared/constants.dart';
@@ -22,28 +21,24 @@ class SecondaryControls extends StatefulWidget {
   const SecondaryControls({
     Key? key,
     required this.chartController,
+    required this.controller,
   }) : super(key: key);
 
   final MemoryChartPaneController chartController;
+  final MemoryController controller;
 
   @override
   State<SecondaryControls> createState() => _SecondaryControlsState();
 }
 
-class _SecondaryControlsState extends State<SecondaryControls>
-    with ProvidedControllerMixin<MemoryController, SecondaryControls> {
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    initController();
-  }
-
+class _SecondaryControlsState extends State<SecondaryControls> {
   @override
   Widget build(BuildContext context) {
     final mediaWidth = MediaQuery.of(context).size.width;
-    controller.memorySourcePrefix = mediaWidth > verboseDropDownMinimumWidth
-        ? memorySourceMenuItemPrefix
-        : '';
+    widget.controller.memorySourcePrefix =
+        mediaWidth > verboseDropDownMinimumWidth
+            ? memorySourceMenuItemPrefix
+            : '';
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -51,7 +46,7 @@ class _SecondaryControlsState extends State<SecondaryControls>
         const MemorySourceDropdown(),
         const SizedBox(width: denseSpacing),
         IconLabelButton(
-          onPressed: controller.isGcing ? null : _gc,
+          onPressed: widget.controller.isGcing ? null : _gc,
           icon: Icons.delete,
           label: 'GC',
           tooltip: 'Trigger full garbage collection.',
@@ -59,7 +54,7 @@ class _SecondaryControlsState extends State<SecondaryControls>
         ),
         const SizedBox(width: denseSpacing),
         ExportButton(
-          onPressed: controller.offline.value ? null : _exportToFile,
+          onPressed: widget.controller.offline.value ? null : _exportToFile,
           minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
         ),
         const SizedBox(width: denseSpacing),
@@ -74,12 +69,12 @@ class _SecondaryControlsState extends State<SecondaryControls>
   void _openSettingsDialog() {
     showDialog(
       context: context,
-      builder: (context) => MemorySettingsDialog(controller),
+      builder: (context) => MemorySettingsDialog(widget.controller),
     );
   }
 
   void _exportToFile() {
-    final outputPath = controller.memoryLog.exportMemory();
+    final outputPath = widget.controller.memoryLog.exportMemory();
     notificationService.push(
       'Successfully exported file ${outputPath.last} to ${outputPath.first} directory',
     );
@@ -87,7 +82,7 @@ class _SecondaryControlsState extends State<SecondaryControls>
 
   Future<void> _gc() async {
     ga.select(analytics_constants.memory, analytics_constants.gc);
-    controller.memoryTimeline.addGCEvent();
-    await controller.gc();
+    widget.controller.memoryTimeline.addGCEvent();
+    await widget.controller.gc();
   }
 }

@@ -31,6 +31,7 @@ class MemoryControlPane extends StatelessWidget {
         const Spacer(),
         SecondaryControls(
           chartController: chartController,
+          controller: controller,
         )
       ],
     );
