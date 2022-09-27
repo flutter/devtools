@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -66,7 +67,15 @@ class AllocationProfileTableViewController extends DisposableController
   /// Converts the current [AllocationProfile] to CSV format and downloads it.
   ///
   /// The returned string is the name of the downloaded CSV file.
-  String downloadMemoryTableCsv(AllocationProfile profile) {
+  Future<String?> downloadMemoryTableCsv(AllocationProfile profile) async {
+    final path = await getSavePath(
+      suggestedName: _exportController.generateFileName(
+        type: ExportFileType.csv,
+      ),
+    );
+    if (path == null) {
+      return null;
+    }
     final csvBuffer = StringBuffer();
 
     // Write the headers first.
@@ -111,6 +120,7 @@ class AllocationProfileTableViewController extends DisposableController
     }
     return _exportController.downloadFile(
       csvBuffer.toString(),
+      fileName: path,
       type: ExportFileType.csv,
     );
   }

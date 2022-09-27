@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:path/path.dart' as path;
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../analytics/constants.dart' as analytics_constants;
@@ -398,10 +399,19 @@ class _ExportAllocationProfileButton extends StatelessWidget {
           tooltip: 'Download allocation profile data in CSV format',
           onPressed: currentAllocationProfile == null
               ? null
-              : () {
-                  final file = allocationProfileController
+              : () async {
+                  final loc = await allocationProfileController
                       .downloadMemoryTableCsv(currentAllocationProfile);
-                  notificationService.push(successfulExportMessage(file));
+                  if (loc != null) {
+                    final file = path.basename(loc);
+                    final dir = path.dirname(loc);
+                    notificationService.push(
+                      successfulExportMessage(
+                        file,
+                        directory: dir,
+                      ),
+                    );
+                  }
                 },
           minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
         );

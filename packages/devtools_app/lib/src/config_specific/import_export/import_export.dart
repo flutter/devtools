@@ -34,8 +34,11 @@ String attemptingToImportMessage(String devToolsScreen) {
   return 'Attempting to import file for screen with id "$devToolsScreen".';
 }
 
-String successfulExportMessage(String exportedFile) {
-  return 'Successfully exported $exportedFile to ~/Downloads directory';
+String successfulExportMessage(
+  String exportedFile, {
+  String directory = '~/Downloads',
+}) {
+  return 'Successfully exported $exportedFile to $directory';
 }
 
 // TODO(kenz): we should support a file picker import for desktop.
