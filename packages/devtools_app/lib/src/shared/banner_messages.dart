@@ -23,7 +23,7 @@ const _profileGranularityDocsUrl =
     'https://flutter.dev/docs/development/tools/devtools/performance#profile-granularity';
 
 class BannerMessagesController {
-  final _messages = <String, ValueNotifier<List<BannerMessage>>>{};
+  final _messages = <String, ListValueNotifier<BannerMessage>>{};
   final _dismissedMessageKeys = <Key?>{};
 
   void addMessage(BannerMessage message) {
@@ -33,28 +33,20 @@ class BannerMessagesController {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (isMessageDismissed(message) || isMessageVisible(message)) return;
       final messages = _messagesForScreen(message.screenId);
-      messages.value.add(message);
-      // TODO(kenz): we should make a ListValueNotifier class that handles
-      // notifying listeners so we don't have to make an illegal call to a
-      // protected method.
-      // ignore: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member
-      messages.notifyListeners();
+      messages.add(message);
     });
   }
 
   void removeMessage(BannerMessage message, {bool dismiss = false}) {
+    if (dismiss) {
+      _dismissedMessageKeys.add(message.key);
+    }
     // We push the banner message in a post frame callback because otherwise,
     // we'd be trying to call setState while the parent widget `BannerMessages`
     // is in the middle of `build`.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (dismiss) {
-        assert(!_dismissedMessageKeys.contains(message.key));
-        _dismissedMessageKeys.add(message.key);
-      }
       final messages = _messagesForScreen(message.screenId);
-      messages.value.remove(message);
-      // ignore: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member
-      messages.notifyListeners();
+      messages.remove(message);
     });
   }
 
@@ -81,10 +73,10 @@ class BannerMessagesController {
         .isNotEmpty;
   }
 
-  ValueNotifier<List<BannerMessage>> _messagesForScreen(String screenId) {
+  ListValueNotifier<BannerMessage> _messagesForScreen(String screenId) {
     return _messages.putIfAbsent(
       screenId,
-      () => ValueNotifier<List<BannerMessage>>([]),
+      () => ListValueNotifier<BannerMessage>([]),
     );
   }
 

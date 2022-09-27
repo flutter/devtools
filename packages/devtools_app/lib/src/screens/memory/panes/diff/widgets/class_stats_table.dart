@@ -4,67 +4,69 @@
 
 import 'package:flutter/material.dart';
 
+import '../../../../../primitives/auto_dispose_mixin.dart';
 import '../../../../../primitives/utils.dart';
 import '../../../../../shared/table.dart';
 import '../../../../../shared/table_data.dart';
 import '../../../../../shared/utils.dart';
+import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
+import '../../../shared/heap/primitives.dart';
 import '../controller/model.dart';
 
-class _ClassNameColumn extends ColumnData<HeapStatsRecord> {
-  _ClassNameColumn()
-      : super(
-          'Class',
-          titleTooltip: 'Class name',
-          fixedWidthPx: scaleByFontFactor(100.0),
+typedef _RetainingPathRecord = MapEntry<ClassOnlyHeapPath, SizeOfClassSet>;
+
+class _RetainingPathColumn extends ColumnData<_RetainingPathRecord> {
+  _RetainingPathColumn()
+      : super.wide(
+          'Retaining Path',
+          titleTooltip: 'Class names of objects that retain'
+              '\nthe instances from garbage collection.',
           alignment: ColumnAlignment.left,
         );
 
   @override
-  String? getValue(HeapStatsRecord record) => record.heapClass.className;
+  String? getValue(_RetainingPathRecord record) => record.key.asShortString();
 
   @override
   bool get supportsSorting => true;
 
   @override
-  String getTooltip(HeapStatsRecord record) => record.heapClass.fullName;
+  String getTooltip(_RetainingPathRecord record) =>
+      record.key.asMultiLineString();
 }
 
-class _InstanceColumn extends ColumnData<HeapStatsRecord> {
+class _InstanceColumn extends ColumnData<_RetainingPathRecord> {
   _InstanceColumn()
       : super(
-          'Non GC-able\nInstances',
-          titleTooltip: 'Number of instances of the class, '
-              'that have a retaining path from the root.',
-          fixedWidthPx: scaleByFontFactor(110.0),
-          alignment: ColumnAlignment.right,
-        );
-
-  @override
-  int getValue(HeapStatsRecord record) => record.instanceCount;
-
-  @override
-  bool get supportsSorting => true;
-
-  @override
-  bool get numeric => true;
-}
-
-class _ShallowSizeColumn extends ColumnData<HeapStatsRecord> {
-  _ShallowSizeColumn()
-      : super(
-          'Shallow\n Dart Size',
-          titleTooltip: 'Total shallow size of the instances.\n'
-              'Shallow size of an object is size of this object plus\n'
-              'the references it holds to other Dart objects in its fields\n'
-              '(this does not include the size of the fields\n'
-              ' - just the size of the references)',
+          'Instances',
+          titleTooltip: 'Number of instances of the class\n'
+              'retained by the path.',
           fixedWidthPx: scaleByFontFactor(85.0),
           alignment: ColumnAlignment.right,
         );
 
   @override
-  int getValue(HeapStatsRecord record) => record.shallowSize;
+  int getValue(_RetainingPathRecord record) => record.value.instanceCount;
+
+  @override
+  bool get supportsSorting => true;
+
+  @override
+  bool get numeric => true;
+}
+
+class _ShallowSizeColumn extends ColumnData<_RetainingPathRecord> {
+  _ShallowSizeColumn()
+      : super(
+          'Shallow\nDart Size',
+          titleTooltip: shallowSizeColumnTooltip,
+          fixedWidthPx: scaleByFontFactor(85.0),
+          alignment: ColumnAlignment.right,
+        );
+
+  @override
+  int getValue(_RetainingPathRecord record) => record.value.shallowSize;
 
   @override
   bool get supportsSorting => true;
@@ -73,26 +75,24 @@ class _ShallowSizeColumn extends ColumnData<HeapStatsRecord> {
   bool get numeric => true;
 
   @override
-  String getDisplayValue(HeapStatsRecord record) => prettyPrintBytes(
+  String getDisplayValue(_RetainingPathRecord record) => prettyPrintBytes(
         getValue(record),
         includeUnit: true,
         kbFractionDigits: 1,
       )!;
 }
 
-class _RetainedSizeColumn extends ColumnData<HeapStatsRecord> {
+class _RetainedSizeColumn extends ColumnData<_RetainingPathRecord> {
   _RetainedSizeColumn()
       : super(
           'Retained\nDart Size',
-          titleTooltip:
-              'Total shallow Dart size of objects plus shallow Dart size of objects they retain,\n'
-              'taking into account only the shortest retaining path for the referenced objects.',
+          titleTooltip: retainedSizeColumnTooltip,
           fixedWidthPx: scaleByFontFactor(85.0),
           alignment: ColumnAlignment.right,
         );
 
   @override
-  int getValue(HeapStatsRecord record) => record.retainedSize;
+  int getValue(_RetainingPathRecord record) => record.value.retainedSize;
 
   @override
   bool get supportsSorting => true;
@@ -101,33 +101,31 @@ class _RetainedSizeColumn extends ColumnData<HeapStatsRecord> {
   bool get numeric => true;
 
   @override
-  String getDisplayValue(HeapStatsRecord record) => prettyPrintBytes(
+  String getDisplayValue(_RetainingPathRecord record) => prettyPrintBytes(
         getValue(record),
         includeUnit: true,
         kbFractionDigits: 1,
       )!;
 }
 
-class StatsTable extends StatefulWidget {
-  const StatsTable({
+class ClassStatsTable extends StatefulWidget {
+  const ClassStatsTable({
     Key? key,
     required this.data,
     required this.sorting,
-    required this.selectedRecord,
   }) : super(key: key);
 
-  final HeapStatistics data;
-
-  final ValueNotifier<HeapStatsRecord?> selectedRecord;
-
+  final HeapClassStatistics data;
   final ColumnSorting sorting;
 
   @override
-  State<StatsTable> createState() => _StatsTableState();
+  State<ClassStatsTable> createState() => _ClassStatsTableState();
 }
 
-class _StatsTableState extends State<StatsTable> {
-  late final List<ColumnData<HeapStatsRecord>> _columns;
+class _ClassStatsTableState extends State<ClassStatsTable>
+    with AutoDisposeMixin {
+  late final List<ColumnData<_RetainingPathRecord>> _columns;
+  late List<MapEntry<ClassOnlyHeapPath, SizeOfClassSet>> _dataList;
 
   @override
   void initState() {
@@ -135,8 +133,8 @@ class _StatsTableState extends State<StatsTable> {
 
     final _shallowSizeColumn = _ShallowSizeColumn();
 
-    _columns = <ColumnData<HeapStatsRecord>>[
-      _ClassNameColumn(),
+    _columns = <ColumnData<_RetainingPathRecord>>[
+      _RetainingPathColumn(),
       _InstanceColumn(),
       _shallowSizeColumn,
       _RetainedSizeColumn(),
@@ -151,13 +149,18 @@ class _StatsTableState extends State<StatsTable> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _dataList = widget.data.sizeByRetainingPath.entries.toList(growable: false);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return FlatTable<HeapStatsRecord>(
+    return FlatTable<_RetainingPathRecord>(
       columns: _columns,
-      data: widget.data.records,
-      keyFactory: (e) => Key(e.heapClass.fullName),
-      onItemSelected: (r) => widget.selectedRecord.value = r,
-      selectionNotifier: widget.selectedRecord,
+      data: _dataList,
+      keyFactory: (e) => Key(e.key.asMultiLineString()),
+      onItemSelected: (r) => {},
       sortColumn: _columns[widget.sorting.columnIndex],
       sortDirection: widget.sorting.direction,
       onSortChanged: (

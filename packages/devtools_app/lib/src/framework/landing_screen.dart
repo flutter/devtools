@@ -5,6 +5,7 @@
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../analytics/analytics.dart' as ga;
 import '../analytics/constants.dart' as analytics_constants;
@@ -94,10 +95,29 @@ class _ConnectDialogState extends State<ConnectDialog>
     with BlockingActionMixin {
   late final TextEditingController connectDialogController;
 
+  SharedPreferences? _debugSharedPreferences;
+  static const _vmServiceUriKey = 'vmServiceUri';
   @override
   void initState() {
     super.initState();
     connectDialogController = TextEditingController();
+    assert(() {
+      _debugInitSharedPreferences();
+      return true;
+    }());
+  }
+
+  void _debugInitSharedPreferences() async {
+    // We only do this in debug mode as it speeds iteration for DevTools
+    // developers who tend to repeatedly restart DevTools to debug the same
+    // test application.
+    _debugSharedPreferences = await SharedPreferences.getInstance();
+    if (_debugSharedPreferences != null && mounted) {
+      final uri = _debugSharedPreferences!.getString(_vmServiceUriKey);
+      if (uri != null) {
+        connectDialogController.text = uri;
+      }
+    }
   }
 
   @override
@@ -185,6 +205,14 @@ class _ConnectDialogState extends State<ConnectDialog>
       notificationService.push('Please enter a VM Service URL.');
       return;
     }
+
+    assert(() {
+      if (_debugSharedPreferences != null) {
+        _debugSharedPreferences!
+            .setString(_vmServiceUriKey, connectDialogController.text);
+      }
+      return true;
+    }());
 
     final uri = normalizeVmServiceUri(connectDialogController.text);
     // Cache the routerDelegate and notifications providers before the async

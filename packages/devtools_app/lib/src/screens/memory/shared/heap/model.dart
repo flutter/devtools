@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../primitives/memory_utils.dart';
@@ -15,24 +16,32 @@ class _JsonFields {
   static const String library = 'library';
   static const String shallowSize = 'shallowSize';
   static const String rootIndex = 'rootIndex';
+  static const String created = 'created';
 }
 
 /// Contains information from [HeapSnapshotGraph],
 /// needed for memory screen.
 class AdaptedHeapData {
-  /// Default value for rootIndex is taken from the doc:
-  /// https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/heap_snapshot.md#object-ids
-  AdaptedHeapData(this.objects, {this.rootIndex = _defaultRootIndex})
-      : assert(objects.isNotEmpty),
-        assert(objects.length > rootIndex);
+  AdaptedHeapData(
+    this.objects, {
+    this.rootIndex = _defaultRootIndex,
+    DateTime? created,
+  })  : assert(objects.isNotEmpty),
+        assert(objects.length > rootIndex) {
+    this.created = created ?? DateTime.now();
+  }
 
-  factory AdaptedHeapData.fromJson(Map<String, dynamic> json) =>
-      AdaptedHeapData(
-        (json[_JsonFields.objects] as List<dynamic>)
-            .map((e) => AdaptedHeapObject.fromJson(e))
-            .toList(),
-        rootIndex: json[_JsonFields.rootIndex] ?? _defaultRootIndex,
-      );
+  factory AdaptedHeapData.fromJson(Map<String, dynamic> json) {
+    final createdJson = json[_JsonFields.created];
+
+    return AdaptedHeapData(
+      (json[_JsonFields.objects] as List<dynamic>)
+          .map((e) => AdaptedHeapObject.fromJson(e))
+          .toList(),
+      created: createdJson == null ? null : DateTime.parse(createdJson),
+      rootIndex: json[_JsonFields.rootIndex] ?? _defaultRootIndex,
+    );
+  }
 
   factory AdaptedHeapData.fromHeapSnapshot(HeapSnapshotGraph graph) =>
       AdaptedHeapData(
@@ -41,15 +50,19 @@ class AdaptedHeapData {
             .toList(),
       );
 
+  /// Default value for rootIndex is taken from the doc:
+  /// https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/heap_snapshot.md#object-ids
   static const int _defaultRootIndex = 1;
 
   final int rootIndex;
+
+  AdaptedHeapObject get root => objects[rootIndex];
 
   final List<AdaptedHeapObject> objects;
 
   bool isSpanningTreeBuilt = false;
 
-  AdaptedHeapObject get root => objects[rootIndex];
+  late DateTime created;
 
   /// Heap objects by identityHashCode.
   late final Map<IdentityHashCode, int> _objectsByCode = Map.fromIterable(
@@ -61,43 +74,74 @@ class AdaptedHeapData {
   Map<String, dynamic> toJson() => {
         _JsonFields.objects: objects.map((e) => e.toJson()).toList(),
         _JsonFields.rootIndex: rootIndex,
+        _JsonFields.created: created.toIso8601String(),
       };
 
-  HeapPath? _retainingPath(IdentityHashCode code) {
+  int? objectIndexByIdentityHashCode(IdentityHashCode code) =>
+      _objectsByCode[code];
+
+  HeapPath? retainingPath(int objectIndex) {
     assert(isSpanningTreeBuilt);
-    var i = _objectsByCode[code]!;
-    if (objects[i].retainer == null) return null;
 
-    final result = <int>[];
+    if (objects[objectIndex].retainer == null) return null;
 
-    while (i >= 0) {
-      result.add(i);
-      i = objects[i].retainer!;
+    final result = <AdaptedHeapObject>[];
+
+    while (objectIndex >= 0) {
+      final object = objects[objectIndex];
+      result.add(object);
+      objectIndex = object.retainer!;
     }
 
-    return result.reversed.toList(growable: false);
-  }
-
-  /// Retaining path for the object in string format.
-  String? shortPath(IdentityHashCode code) {
-    final path = _retainingPath(code);
-    if (path == null) return null;
-    return '/${path.map((i) => objects[i].shortName).join('/')}/';
-  }
-
-  /// Retaining path for the object as an array of the retaining objects.
-  List<String>? detailedPath(IdentityHashCode code) {
-    final path = _retainingPath(code);
-    if (path == null) return null;
-    return path.map((i) => objects[i].name).toList();
+    return HeapPath(result.reversed.toList(growable: false));
   }
 }
 
-/// Result of invocation of [inentityHashCode()].
+/// Result of invocation of [identityHashCode].
 typedef IdentityHashCode = int;
 
 /// Sequence of ids of objects in the heap.
-typedef HeapPath = List<int>;
+///
+/// TODO(polina-c): maybe we do not need to store path by objects.
+/// It can be that only classes are interesting, and we can save some
+/// performance on this object. It will become clear when the leak tracking
+/// feature stabilizes.
+class HeapPath {
+  HeapPath(this.objects);
+
+  final List<AdaptedHeapObject> objects;
+
+  /// Retaining path for the object in string format.
+  String? shortPath() => '/${objects.map((o) => o.shortName).join('/')}/';
+
+  /// Retaining path for the object as an array of the retaining objects.
+  List<String>? detailedPath() =>
+      objects.map((o) => o.name).toList(growable: false);
+}
+
+/// Heap path represented by classes only, without object details.
+class ClassOnlyHeapPath {
+  ClassOnlyHeapPath(HeapPath heapPath)
+      : classes =
+            heapPath.objects.map((o) => o.heapClass).toList(growable: false);
+  final List<HeapClass> classes;
+
+  String asShortString() => classes.map((e) => e.className).join('/');
+
+  String asMultiLineString() => classes.map((e) => e.fullName).join('\n');
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is ClassOnlyHeapPath &&
+        other.asMultiLineString() == asMultiLineString();
+  }
+
+  @override
+  int get hashCode => asMultiLineString().hashCode;
+}
 
 /// Contains information from [HeapSnapshotObject] needed for
 /// memory analysis on memory screen.
@@ -158,19 +202,11 @@ class AdaptedHeapObject {
       };
 
   String get shortName => '${heapClass.className}-$code';
+
   String get name => '${heapClass.library}/$shortName';
 }
 
-class HeapStatsRecord {
-  HeapStatsRecord(this.heapClass);
-
-  final HeapClass heapClass;
-  int shallowSize = 0;
-  int retainedSize = 0;
-  int instanceCount = 0;
-}
-
-/// This class is needed to make snapshot taking mockable.
+/// This class is needed to make the snapshot taking operation mockable.
 class SnapshotTaker {
   Future<AdaptedHeapData?> take() async {
     final snapshot = await snapshotMemory();
@@ -179,8 +215,9 @@ class SnapshotTaker {
   }
 }
 
+@immutable
 class HeapClass {
-  HeapClass({required this.className, required this.library});
+  const HeapClass({required this.className, required this.library});
 
   final String className;
   final String library;
@@ -211,12 +248,4 @@ class HeapClass {
     assert(false, 'Unexpected library for $className: $library.');
     return false;
   }
-}
-
-class HeapStatistics {
-  HeapStatistics(this.map);
-
-  /// Maps full class name to stats record of this class.
-  final Map<String, HeapStatsRecord> map;
-  late final List<HeapStatsRecord> records = map.values.toList(growable: false);
 }

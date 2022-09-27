@@ -59,6 +59,7 @@ class CodeViewController extends DisposableController
     // It would be nice to not clear the script history but it is currently
     // coupled to ScriptRef objects so that is unsafe.
     scriptsHistory.clear();
+    parsedScript.value = null;
     _currentScriptRef.value = null;
     _scriptLocation.value = null;
     _librariesVisible.value = false;

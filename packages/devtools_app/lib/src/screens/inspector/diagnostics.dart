@@ -185,25 +185,34 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     final diagnosticLocal = diagnostic!;
     final inspectorService = serviceManager.inspectorService!;
 
-    return HoverCardTooltip(
+    return HoverCardTooltip.async(
       enabled: () =>
           preferences.inspector.hoverEvalModeEnabled.value &&
           diagnosticLocal.inspectorService != null,
-      onHover: (event) async {
+      asyncGenerateHoverCardData: ({
+        required event,
+        required isHoverStale,
+      }) async {
         final group = inspectorService.createObjectGroup('hover');
+
+        if (isHoverStale()) return Future.value();
         final value =
             await group.toObservatoryInstanceRef(diagnosticLocal.valueRef);
+
         final variable = DartObjectNode.fromValue(
           value: value,
           isolateRef: inspectorService.isolateRef,
           diagnostic: diagnosticLocal,
         );
+
+        if (isHoverStale()) return Future.value();
         await buildVariablesTree(variable);
         for (var child in variable.children) {
+          if (isHoverStale()) return Future.value();
           await buildVariablesTree(child);
         }
+
         variable.expand();
-        // TODO(jacobr): should we ensure the hover has not yet been cancelled?
 
         return HoverCardData(
           title: diagnosticLocal.toStringShort(),

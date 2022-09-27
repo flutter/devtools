@@ -247,7 +247,7 @@ AdaptedHeapObject _createOneByteObject(
     AdaptedHeapObject(
       code: codeAndIndex,
       references: references,
-      heapClass: HeapClass(
+      heapClass: const HeapClass(
         className: 'MyClass',
         library: 'my_lib',
       ),
@@ -261,7 +261,7 @@ AdaptedHeapObject _createOneByteWeakObject(
   final result = AdaptedHeapObject(
     code: codeAndIndex,
     references: references,
-    heapClass: HeapClass(
+    heapClass: const HeapClass(
       className: '_WeakProperty',
       library: 'dart.core',
     ),

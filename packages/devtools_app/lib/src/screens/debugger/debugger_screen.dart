@@ -142,10 +142,12 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
                       initialFractions: const [0.70, 0.30],
                       children: [
                         child!,
-                        ProgramExplorer(
-                          controller:
-                              codeViewController.programExplorerController,
-                          onNodeSelected: _onNodeSelected,
+                        OutlineDecoration(
+                          child: ProgramExplorer(
+                            controller:
+                                codeViewController.programExplorerController,
+                            onNodeSelected: _onNodeSelected,
+                          ),
                         ),
                       ],
                     );

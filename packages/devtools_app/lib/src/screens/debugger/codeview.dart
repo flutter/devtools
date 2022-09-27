@@ -8,6 +8,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../../config_specific/logger/logger.dart';
@@ -38,6 +39,9 @@ import 'variables.dart';
 
 final debuggerCodeViewSearchKey =
     GlobalKey(debugLabel: 'DebuggerCodeViewSearchKey');
+
+final debuggerCodeViewFileOpenerKey =
+    GlobalKey(debugLabel: 'DebuggerCodeViewFileOpenerKey');
 
 // TODO(kenz): consider moving lines / pausedPositions calculations to the
 // controller.
@@ -229,11 +233,11 @@ class _CodeViewState extends State<CodeView>
 
     return DualValueListenableBuilder<bool, bool>(
       firstListenable: widget.enableFileExplorer
-          ? const FixedValueListenable<bool>(false)
-          : widget.codeViewController.showFileOpener,
+          ? widget.codeViewController.showFileOpener
+          : const FixedValueListenable<bool>(false),
       secondListenable: widget.enableSearch
-          ? const FixedValueListenable<bool>(false)
-          : widget.codeViewController.showSearchInFileField,
+          ? widget.codeViewController.showSearchInFileField
+          : const FixedValueListenable<bool>(false),
       builder: (context, showFileOpener, showSearch, _) {
         return Stack(
           children: [
@@ -453,6 +457,7 @@ class _CodeViewState extends State<CodeView>
 
   Widget buildFileSearchField() {
     return ElevatedCard(
+      key: debuggerCodeViewFileOpenerKey,
       width: extraWideSearchTextWidth,
       height: defaultTextFieldHeight,
       padding: EdgeInsets.zero,
@@ -808,6 +813,8 @@ class _LineItemState extends State<LineItem>
   String _previousHoverWord = '';
   bool _hasMouseExited = false;
 
+  late HoverCardController _hoverCardController;
+
   void _onHoverExit() {
     _showTimer?.cancel();
     _hasMouseExited = true;
@@ -853,6 +860,7 @@ class _LineItemState extends State<LineItem>
             width: LineItem._hoverWidth,
             title: word,
             context: context,
+            hoverCardController: _hoverCardController,
           );
         } catch (_) {
           // Silently fail and don't display a HoverCard.
@@ -865,6 +873,7 @@ class _LineItemState extends State<LineItem>
   void didChangeDependencies() {
     super.didChangeDependencies();
     initController();
+    _hoverCardController = Provider.of<HoverCardController>(context);
   }
 
   @override

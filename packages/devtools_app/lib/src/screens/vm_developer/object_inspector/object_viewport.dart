@@ -4,13 +4,13 @@
 
 import 'package:flutter/material.dart';
 
-import '../../primitives/history_manager.dart';
-import '../../shared/common_widgets.dart';
-import '../../shared/history_viewport.dart';
+import '../../../primitives/history_manager.dart';
+import '../../../shared/common_widgets.dart';
+import '../../../shared/history_viewport.dart';
+import '../vm_developer_common_widgets.dart';
 import 'object_inspector_view_controller.dart';
 import 'vm_class_display.dart';
 import 'vm_code_display.dart';
-import 'vm_developer_common_widgets.dart';
 import 'vm_field_display.dart';
 import 'vm_function_display.dart';
 import 'vm_library_display.dart';
@@ -119,54 +119,6 @@ String viewportTitle(VmObject? object) {
   }
 
   return '${object.obj.type} ${object.name ?? '<name>'}';
-}
-
-/// Calls the object VM statistics card builder according to the VM Object type.
-@visibleForTesting
-Widget buildObjectDisplay(
-  ObjectInspectorViewController controller,
-  VmObject obj,
-) {
-  if (obj is ClassObject) {
-    return VmClassDisplay(
-      controller: controller,
-      clazz: obj,
-    );
-  }
-  if (obj is FuncObject) {
-    return VmFuncDisplay(
-      controller: controller,
-      function: obj,
-    );
-  }
-  if (obj is FieldObject) {
-    return VmFieldDisplay(
-      controller: controller,
-      field: obj,
-    );
-  }
-  if (obj is LibraryObject) {
-    return VmLibraryDisplay(
-      controller: controller,
-      library: obj,
-    );
-  }
-  if (obj is ScriptObject) {
-    return VmScriptDisplay(
-      controller: controller,
-      script: obj,
-    );
-  }
-  if (obj is InstanceObject) {
-    return const VMInfoCard(title: 'TO-DO: Display Instance object data');
-  }
-  if (obj is CodeObject) {
-    return VmCodeDisplay(
-      controller: controller,
-      code: obj,
-    );
-  }
-  return const SizedBox.shrink();
 }
 
 /// Manages the history of selected ObjRefs to make them accessible on a
