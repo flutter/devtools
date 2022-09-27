@@ -73,7 +73,10 @@ SingleClassStats _createClassStats(List<AdaptedHeapObject> instances) {
 }
 
 AdaptedHeapObject _createObject(
-        HeapClassName className, int code, List<int> references) =>
+  HeapClassName className,
+  int code,
+  List<int> references,
+) =>
     AdaptedHeapObject(
       code: code,
       references: references,
