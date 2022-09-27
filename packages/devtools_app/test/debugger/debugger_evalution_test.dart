@@ -20,6 +20,8 @@ import '../test_infra/flutter_test_environment.dart';
 import '../test_infra/flutter_test_storage.dart';
 
 void main() {
+  setGlobal(Storage, FlutterTestStorage());
+
   final FlutterTestEnvironment env = FlutterTestEnvironment(
     const FlutterRunConfiguration(withDebugger: true),
   );
@@ -29,7 +31,6 @@ void main() {
   late EvalOnDartLibrary eval;
   setUp(() async {
     setGlobal(BreakpointManager, BreakpointManager());
-    setGlobal(Storage, FlutterTestStorage());
     isAlive = Disposable();
     await env.setupEnvironment();
     debuggerController = DebuggerController();
