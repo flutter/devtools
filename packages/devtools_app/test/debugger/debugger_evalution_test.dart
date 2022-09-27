@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:devtools_app/src/primitives/storage.dart';
 import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/screens/debugger/breakpoint_manager.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
@@ -16,6 +17,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../test_infra/flutter_test_driver.dart';
 import '../test_infra/flutter_test_environment.dart';
+import '../test_infra/flutter_test_storage.dart';
 
 void main() {
   final FlutterTestEnvironment env = FlutterTestEnvironment(
@@ -27,6 +29,7 @@ void main() {
   late EvalOnDartLibrary eval;
   setUp(() async {
     setGlobal(BreakpointManager, BreakpointManager());
+    setGlobal(Storage, FlutterTestStorage());
     isAlive = Disposable();
     await env.setupEnvironment();
     debuggerController = DebuggerController();
