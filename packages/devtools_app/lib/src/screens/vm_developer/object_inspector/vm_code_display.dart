@@ -6,13 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:string_scanner/string_scanner.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../primitives/utils.dart';
-import '../../shared/table.dart';
-import '../../shared/table_data.dart';
-import '../../shared/theme.dart';
+import '../../../primitives/utils.dart';
+import '../../../shared/table.dart';
+import '../../../shared/table_data.dart';
+import '../../../shared/theme.dart';
+import '../vm_service_private_extensions.dart';
 import 'object_inspector_view_controller.dart';
 import 'vm_object_model.dart';
-import 'vm_service_private_extensions.dart';
 
 // TODO(bkonyi): remove once profile ticks are populated for instructions.
 const profilerTicksEnabled = false;

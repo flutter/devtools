@@ -435,6 +435,13 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   }
 
   @override
+  Future<ObjectStore?> getObjectStore(String isolateId) => Future.value(
+        const ObjectStore(
+          fields: {},
+        ),
+      );
+
+  @override
   final fakeServiceCache = JsonToServiceCache();
 
   @override

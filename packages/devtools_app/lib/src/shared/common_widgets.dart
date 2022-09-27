@@ -765,6 +765,20 @@ class ToolbarAction extends StatelessWidget {
   }
 }
 
+/// A blank, drop-in replacement for [AreaPaneHeader].
+///
+/// Acts as an empty header widget with zero size that is compatible with
+/// interfaces that expect a [PreferredSizeWidget].
+class BlankHeader extends StatelessWidget implements PreferredSizeWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container();
+  }
+
+  @override
+  Size get preferredSize => Size.zero;
+}
+
 /// Create a bordered, fixed-height header area with a title and optional child
 /// on the right-hand side.
 ///
