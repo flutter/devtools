@@ -304,7 +304,7 @@ class AutoUpdateCommand extends Command {
         },
         mandatory: false,
         defaultsTo: 'minor',
-        help: '''Bumps the preparory devtools version by the selected type.
+        help: '''Bumps the preparatory devtools version by the selected type.
         Ignored if we are already on a dev version. Defaults to "minor" if not
         provided.''');
   }
