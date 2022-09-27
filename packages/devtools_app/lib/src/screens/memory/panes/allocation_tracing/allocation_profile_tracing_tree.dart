@@ -65,63 +65,68 @@ class _AllocationTracingTreeState extends State<AllocationTracingTree>
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<TracedClass?>(
-      valueListenable: widget.controller.selectedTracedClass,
-      builder: (context, selection, _) {
-        if (selection == null) {
-          return const _AllocationTracingInstructions();
-        } else if (!selection.traceAllocations) {
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'Allocation tracing is not enabled for class ${selection.cls.name}.\n',
-              ),
-              const _AllocationTracingInstructions(),
-            ],
-          );
-        } else if (selection.traceAllocations &&
-            (widget.controller.selectedTracedClassAllocationData == null ||
-                widget.controller.selectedTracedClassAllocationData!
-                    .bottomUpRoots.isEmpty)) {
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'No allocation samples have been collected for class ${selection.cls.name}.\n',
-              ),
-            ],
-          );
-        }
-        return Column(
-          children: [
-            _AllocationProfileTracingTreeHeader(
-              controller: widget.controller,
-              tabController: _tabController,
-              tabs: AllocationTracingTree.tabs,
-              updateTreeStateCallback: setState,
-            ),
-            Expanded(
-              child: TabBarView(
-                physics: defaultTabBarViewPhysics,
-                controller: _tabController,
+    return ValueListenableBuilder<AllocationProfileTracingIsolateState>(
+      valueListenable: widget.controller.stateForIsolate,
+      builder: (context, state, _) {
+        return ValueListenableBuilder<TracedClass?>(
+          valueListenable: state.selectedTracedClass,
+          builder: (context, selection, _) {
+            if (selection == null) {
+              return const _AllocationTracingInstructions();
+            } else if (!selection.traceAllocations) {
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Bottom-up tree view
-                  AllocationProfileTracingTable(
-                    cls: selection.cls,
-                    dataRoots: widget.controller
-                        .selectedTracedClassAllocationData!.bottomUpRoots,
+                  Text(
+                    'Allocation tracing is not enabled for class ${selection.cls.name}.\n',
                   ),
-                  // Call tree view
-                  AllocationProfileTracingTable(
-                    cls: selection.cls,
-                    dataRoots: widget.controller
-                        .selectedTracedClassAllocationData!.callTreeRoots,
+                  const _AllocationTracingInstructions(),
+                ],
+              );
+            } else if (selection.traceAllocations &&
+                (state.selectedTracedClassAllocationData == null ||
+                    state.selectedTracedClassAllocationData!.bottomUpRoots
+                        .isEmpty)) {
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'No allocation samples have been collected for class ${selection.cls.name}.\n',
                   ),
                 ],
-              ),
-            ),
-          ],
+              );
+            }
+            return Column(
+              children: [
+                _AllocationProfileTracingTreeHeader(
+                  controller: widget.controller,
+                  tabController: _tabController,
+                  tabs: AllocationTracingTree.tabs,
+                  updateTreeStateCallback: setState,
+                ),
+                Expanded(
+                  child: TabBarView(
+                    physics: defaultTabBarViewPhysics,
+                    controller: _tabController,
+                    children: [
+                      // Bottom-up tree view
+                      AllocationProfileTracingTable(
+                        cls: selection.cls,
+                        dataRoots: state
+                            .selectedTracedClassAllocationData!.bottomUpRoots,
+                      ),
+                      // Call tree view
+                      AllocationProfileTracingTable(
+                        cls: selection.cls,
+                        dataRoots: state
+                            .selectedTracedClassAllocationData!.callTreeRoots,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -192,7 +197,8 @@ class _AllocationProfileTracingTreeHeader extends StatelessWidget {
             ),
             TextSpan(
               style: theme.fixedFontStyle,
-              text: controller.selectedTracedClass.value?.cls.name!,
+              text: controller
+                  .stateForIsolate.value.selectedTracedClass.value?.cls.name!,
             ),
           ],
         ),
@@ -235,7 +241,8 @@ class _AllocationProfileTracingTreeHeader extends StatelessWidget {
   List<CpuStackFrame> get _currentDataRoots {
     final isBottomUp =
         tabs[tabController.index] == AllocationTracingTree._bottomUpTab;
-    final data = controller.selectedTracedClassAllocationData!;
+    final data =
+        controller.stateForIsolate.value.selectedTracedClassAllocationData!;
     return isBottomUp ? data.bottomUpRoots : data.callTreeRoots;
   }
 }
