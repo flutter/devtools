@@ -76,7 +76,6 @@ class _ChartControlPaneState extends State<ChartControlPane>
 
   @override
   Widget build(BuildContext context) {
-    const buttonWidth = 110.0;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -102,16 +101,13 @@ class _ChartControlPaneState extends State<ChartControlPane>
           ),
         ),
         const SizedBox(height: denseSpacing),
-        SizedBox(
-          width: buttonWidth,
-          child: IconLabelButton(
-            key: legendKey,
-            onPressed: controller.toggleLegendVisibility,
-            icon: _legendOverlayEntry == null ? Icons.storage : Icons.close,
-            label: 'Legend',
-            tooltip: 'Show chart legend',
-            minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
-          ),
+        IconLabelButton(
+          key: legendKey,
+          onPressed: controller.toggleLegendVisibility,
+          icon: _legendOverlayEntry == null ? Icons.storage : Icons.close,
+          label: 'Legend',
+          tooltip: 'Show chart legend',
+          minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
         ),
         const SizedBox(height: denseSpacing),
         IntervalDropdown(chartController: widget.chartController),
