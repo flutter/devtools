@@ -189,7 +189,7 @@ void writeVersionToIndexHtml(
   indexHtml.writeAsStringSync(revisedLines.joinWithNewLine());
 }
 
-String incrementDevVersion(String currentVersion) {
+String incrementDevVersion(String currentVersion, String devType) {
   final alreadyHasDevVersion = RegExp(r'-dev\.\d+').hasMatch(currentVersion);
   if (alreadyHasDevVersion) {
     final devVerMatch = RegExp(
@@ -208,7 +208,8 @@ String incrementDevVersion(String currentVersion) {
       return newVersion;
     }
   } else {
-    return '$currentVersion-dev.0';
+    final nextVersion = incrementVersionByType(currentVersion, devType);
+    return '$nextVersion-dev.0';
   }
 }
 
@@ -288,11 +289,26 @@ class AutoUpdateCommand extends Command {
         },
         mandatory: true,
         help: 'Bumps the devtools version by the selected type.');
+
+    argParser.addOption('devType',
+        abbr: 'd',
+        allowed: ['patch', 'minor', 'major'],
+        allowedHelp: {
+          'patch': 'bumps the version to the next patch value',
+          'minor': 'bumps the version to the next minor value',
+          'major': 'bumps the version to the next major value',
+        },
+        mandatory: false,
+        defaultsTo: 'minor',
+        help: '''Bumps the preparory devtools version by the selected type.
+        Ignored if we are already on a dev version. Defaults to "minor" if not
+        provided.''');
   }
 
   @override
   void run() {
     final type = argResults!['type'].toString();
+    final devType = argResults!['devType'].toString();
     final currentVersion = versionFromPubspecFile();
     String? newVersion;
     if (currentVersion == null) {
@@ -300,7 +316,7 @@ class AutoUpdateCommand extends Command {
     }
     switch (type) {
       case 'dev':
-        newVersion = incrementDevVersion(currentVersion);
+        newVersion = incrementDevVersion(currentVersion, devType);
         break;
       default:
         newVersion = incrementVersionByType(currentVersion, type);
