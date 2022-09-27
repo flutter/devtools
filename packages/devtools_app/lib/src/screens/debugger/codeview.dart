@@ -40,6 +40,9 @@ import 'variables.dart';
 final debuggerCodeViewSearchKey =
     GlobalKey(debugLabel: 'DebuggerCodeViewSearchKey');
 
+final debuggerCodeViewFileOpenerKey =
+    GlobalKey(debugLabel: 'DebuggerCodeViewFileOpenerKey');
+
 // TODO(kenz): consider moving lines / pausedPositions calculations to the
 // controller.
 class CodeView extends StatefulWidget {
@@ -454,6 +457,7 @@ class _CodeViewState extends State<CodeView>
 
   Widget buildFileSearchField() {
     return ElevatedCard(
+      key: debuggerCodeViewFileOpenerKey,
       width: extraWideSearchTextWidth,
       height: defaultTextFieldHeight,
       padding: EdgeInsets.zero,
