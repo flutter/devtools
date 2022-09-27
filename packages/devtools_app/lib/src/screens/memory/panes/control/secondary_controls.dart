@@ -17,7 +17,7 @@ import 'settings_dialog.dart';
 import 'source_dropdown.dart';
 
 /// Controls related to the entire memory screen.
-class SecondaryControls extends StatefulWidget {
+class SecondaryControls extends StatelessWidget {
   const SecondaryControls({
     Key? key,
     required this.chartController,
@@ -28,17 +28,11 @@ class SecondaryControls extends StatefulWidget {
   final MemoryController controller;
 
   @override
-  State<SecondaryControls> createState() => _SecondaryControlsState();
-}
-
-class _SecondaryControlsState extends State<SecondaryControls> {
-  @override
   Widget build(BuildContext context) {
     final mediaWidth = MediaQuery.of(context).size.width;
-    widget.controller.memorySourcePrefix =
-        mediaWidth > verboseDropDownMinimumWidth
-            ? memorySourceMenuItemPrefix
-            : '';
+    controller.memorySourcePrefix = mediaWidth > verboseDropDownMinimumWidth
+        ? memorySourceMenuItemPrefix
+        : '';
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -46,7 +40,7 @@ class _SecondaryControlsState extends State<SecondaryControls> {
         const MemorySourceDropdown(),
         const SizedBox(width: denseSpacing),
         IconLabelButton(
-          onPressed: widget.controller.isGcing ? null : _gc,
+          onPressed: controller.isGcing ? null : _gc,
           icon: Icons.delete,
           label: 'GC',
           tooltip: 'Trigger full garbage collection.',
@@ -54,27 +48,27 @@ class _SecondaryControlsState extends State<SecondaryControls> {
         ),
         const SizedBox(width: denseSpacing),
         ExportButton(
-          onPressed: widget.controller.offline.value ? null : _exportToFile,
+          onPressed: controller.offline.value ? null : _exportToFile,
           minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
         ),
         const SizedBox(width: denseSpacing),
         SettingsOutlinedButton(
-          onPressed: _openSettingsDialog,
+          onPressed: () => _openSettingsDialog(context),
           tooltip: 'Open memory settings',
         ),
       ],
     );
   }
 
-  void _openSettingsDialog() {
+  void _openSettingsDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => MemorySettingsDialog(widget.controller),
+      builder: (context) => MemorySettingsDialog(controller),
     );
   }
 
   void _exportToFile() {
-    final outputPath = widget.controller.memoryLog.exportMemory();
+    final outputPath = controller.memoryLog.exportMemory();
     notificationService.push(
       'Successfully exported file ${outputPath.last} to ${outputPath.first} directory',
     );
@@ -82,7 +76,7 @@ class _SecondaryControlsState extends State<SecondaryControls> {
 
   Future<void> _gc() async {
     ga.select(analytics_constants.memory, analytics_constants.gc);
-    widget.controller.memoryTimeline.addGCEvent();
-    await widget.controller.gc();
+    controller.memoryTimeline.addGCEvent();
+    await controller.gc();
   }
 }
