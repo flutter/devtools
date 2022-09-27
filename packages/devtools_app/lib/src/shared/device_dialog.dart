@@ -14,8 +14,8 @@ import 'connected_app.dart';
 import 'dialogs.dart';
 import 'globals.dart';
 import 'routing.dart';
-import 'table.dart';
-import 'table_data.dart';
+import 'table/table.dart';
+import 'table/table_data.dart';
 import 'theme.dart';
 import 'utils.dart';
 
@@ -200,12 +200,12 @@ class _FlagTable extends StatelessWidget {
   Widget build(BuildContext context) {
     return OutlineDecoration(
       child: FlatTable<_DialogFlag>(
-        columns: columns,
-        data: flags,
         keyFactory: (_DialogFlag flag) => ValueKey<String?>(flag.name),
-        sortColumn: name,
-        sortDirection: SortDirection.ascending,
-        onItemSelected: (_) => null,
+        data: flags,
+        dataKey: 'vm-flags',
+        columns: columns,
+        defaultSortColumn: name,
+        defaultSortDirection: SortDirection.ascending,
       ),
     );
   }

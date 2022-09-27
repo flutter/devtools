@@ -10,8 +10,8 @@ import '../../../../primitives/utils.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/dialogs.dart';
 import '../../../../shared/split.dart';
-import '../../../../shared/table.dart';
-import '../../../../shared/table_data.dart';
+import '../../../../shared/table/table.dart';
+import '../../../../shared/table/table_data.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../../../ui/colors.dart';
@@ -98,12 +98,13 @@ class LayerSnapshotTable extends StatelessWidget {
         border: Border(right: borderSide),
       ),
       child: FlatTable<LayerSnapshot>(
-        columns: _columns,
-        data: snapshots,
         keyFactory: (LayerSnapshot snapshot) =>
             ValueKey<String?>('${snapshot.id}'),
-        sortColumn: _percentageColumn,
-        sortDirection: SortDirection.descending,
+        data: snapshots,
+        dataKey: 'raster-layer-snapshots',
+        columns: _columns,
+        defaultSortColumn: _percentageColumn,
+        defaultSortDirection: SortDirection.descending,
         onItemSelected: controller.selectSnapshot,
         selectionNotifier: controller.selectedSnapshot,
       ),

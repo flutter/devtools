@@ -67,7 +67,7 @@ void main() {
 
       // Select the request in the network request list.
       final networkRequest = requestsNotifier.value.requests.first;
-      controller.selectRequest(networkRequest);
+      controller.selectedRequest.value = networkRequest;
       await tester.pumpAndSettle();
       await tester.tap(find.text('Response'));
       await tester.pumpAndSettle();

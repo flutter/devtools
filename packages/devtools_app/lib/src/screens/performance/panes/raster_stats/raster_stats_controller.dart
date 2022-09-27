@@ -17,13 +17,11 @@ class RasterStatsController {
 
   final _loadingSnapshot = ValueNotifier<bool>(false);
 
-  ValueListenable<LayerSnapshot?> get selectedSnapshot => _selectedSnapshot;
-
-  final _selectedSnapshot = ValueNotifier<LayerSnapshot?>(null);
+  final selectedSnapshot = ValueNotifier<LayerSnapshot?>(null);
 
   void selectSnapshot(LayerSnapshot? snapshot) {
     _rasterStats.value.selectedSnapshot = snapshot;
-    _selectedSnapshot.value = snapshot;
+    selectedSnapshot.value = snapshot;
   }
 
   Future<void> collectRasterStats() async {
@@ -44,7 +42,7 @@ class RasterStatsController {
 
   void setNotifiersForRasterStats(RasterStats stats) {
     _rasterStats.value = stats;
-    _selectedSnapshot.value = stats.selectedSnapshot;
+    selectedSnapshot.value = stats.selectedSnapshot;
   }
 
   void clear() {

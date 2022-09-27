@@ -12,7 +12,7 @@ import 'package:vm_snapshot_analysis/v8_profile.dart';
 
 import '../../charts/treemap.dart';
 import '../../primitives/utils.dart';
-import '../../shared/table.dart';
+import '../../shared/table/table.dart';
 import '../../ui/colors.dart';
 import 'app_size_screen.dart';
 

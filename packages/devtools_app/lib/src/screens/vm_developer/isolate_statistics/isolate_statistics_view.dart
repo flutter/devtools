@@ -9,8 +9,8 @@ import 'package:vm_service/vm_service.dart';
 import '../../../primitives/utils.dart';
 import '../../../shared/common_widgets.dart';
 import '../../../shared/split.dart';
-import '../../../shared/table.dart';
-import '../../../shared/table_data.dart';
+import '../../../shared/table/table.dart';
+import '../../../shared/table/table_data.dart';
 import '../../../shared/theme.dart';
 import '../../profiler/cpu_profiler.dart';
 import '../vm_developer_common_widgets.dart';
@@ -233,12 +233,12 @@ class TagStatisticsWidget extends StatelessWidget {
         table: Flexible(
           child: controller.cpuProfilerController.profilerEnabled
               ? FlatTable<VMTag>(
-                  columns: columns,
-                  data: controller.tags,
                   keyFactory: (VMTag tag) => ValueKey<String>(tag.name),
-                  sortColumn: percentage,
-                  sortDirection: SortDirection.descending,
-                  onItemSelected: (_) => null,
+                  data: controller.tags,
+                  dataKey: 'tag-statistics',
+                  columns: columns,
+                  defaultSortColumn: percentage,
+                  defaultSortDirection: SortDirection.descending,
                 )
               : CpuProfilerDisabled(
                   controller.cpuProfilerController,
@@ -324,14 +324,14 @@ class StackTraceViewerWidget extends StatelessWidget {
             )
           : Flexible(
               child: FlatTable<String>(
+                keyFactory: (String s) => ValueKey<String>(s),
+                data: lines,
+                dataKey: 'stack-trace-viewer',
                 columns: [
                   frame,
                 ],
-                data: lines,
-                keyFactory: (String s) => ValueKey<String>(s),
-                onItemSelected: (_) => null,
-                sortColumn: frame,
-                sortDirection: SortDirection.ascending,
+                defaultSortColumn: frame,
+                defaultSortDirection: SortDirection.ascending,
               ),
             ),
     );
@@ -385,12 +385,13 @@ class _IsolatePortsWidgetState extends State<IsolatePortsWidget> {
                 ),
                 Flexible(
                   child: FlatTable<InstanceRef?>(
-                    columns: columns,
-                    data: ports,
                     keyFactory: (InstanceRef? port) =>
                         ValueKey<String>(port!.debugName!),
-                    sortColumn: id,
-                    sortDirection: SortDirection.ascending,
+                    data: ports,
+                    dataKey: 'isolate-ports',
+                    columns: columns,
+                    defaultSortColumn: id,
+                    defaultSortDirection: SortDirection.ascending,
                     selectionNotifier: selectedPort,
                     onItemSelected: (InstanceRef? port) => setState(
                       () {
@@ -447,12 +448,12 @@ class ServiceExtensionsWidget extends StatelessWidget {
         title: 'Service Extensions (${extensions.length})',
         table: Flexible(
           child: FlatTable<String>(
-            columns: columns,
-            data: extensions,
             keyFactory: (String extension) => ValueKey<String>(extension),
-            sortColumn: name,
-            sortDirection: SortDirection.ascending,
-            onItemSelected: (_) => null,
+            data: extensions,
+            dataKey: 'registered-service-extensions',
+            columns: columns,
+            defaultSortColumn: name,
+            defaultSortDirection: SortDirection.ascending,
           ),
         ),
       ),

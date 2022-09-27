@@ -7,8 +7,8 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../../primitives/utils.dart';
 import '../../../shared/common_widgets.dart';
-import '../../../shared/table.dart';
-import '../../../shared/table_data.dart';
+import '../../../shared/table/table.dart';
+import '../../../shared/table/table_data.dart';
 import '../../../shared/theme.dart';
 import '../vm_developer_common_widgets.dart';
 import '../vm_developer_tools_screen.dart';
@@ -300,12 +300,12 @@ class IsolatesPreviewWidget extends StatelessWidget {
         title: '$title (${isolates.length})',
         table: Flexible(
           child: FlatTable<Isolate>(
-            columns: columns,
-            data: isolates,
             keyFactory: (Isolate i) => ValueKey<String>(i.id!),
-            sortColumn: name,
-            sortDirection: SortDirection.descending,
-            onItemSelected: (_) => null,
+            data: isolates,
+            dataKey: 'isolate-statistics',
+            columns: columns,
+            defaultSortColumn: name,
+            defaultSortDirection: SortDirection.descending,
           ),
         ),
       ),

@@ -9,7 +9,7 @@ import 'package:vm_service/vm_service.dart';
 import '../../../../primitives/auto_dispose.dart';
 import '../../../../primitives/utils.dart';
 import '../../../../shared/globals.dart';
-import '../../../../shared/table_data.dart';
+import '../../../../shared/table/table_data.dart';
 import '../../../profiler/cpu_profile_model.dart';
 import '../../../profiler/cpu_profile_transformer.dart';
 
@@ -80,8 +80,7 @@ class AllocationProfileTracingIsolateState {
   final unfilteredClassList = <TracedClass>[];
 
   /// The current class selection in the [AllocationTracingTable]
-  ValueListenable<TracedClass?> get selectedTracedClass => _selectedTracedClass;
-  final _selectedTracedClass = ValueNotifier<TracedClass?>(null);
+  final selectedTracedClass = ValueNotifier<TracedClass?>(null);
 
   /// The list of classes for the currently selected isolate.
   ValueListenable<List<TracedClass>> get filteredClassList =>
@@ -183,7 +182,7 @@ class AllocationProfileTracingIsolateState {
     final cls = original.cls;
     // Update the currently selected class, if it's still being traced.
     if (selectedTracedClass.value?.cls.id == cls.id) {
-      _selectedTracedClass.value = updated;
+      selectedTracedClass.value = updated;
     }
     tracedClasses[cls.id!] = updated;
     _filteredClassList.replace(original, updated);
@@ -244,7 +243,7 @@ class AllocationProfileTracingIsolateState {
     if (selectedTracedClass.value == traced) {
       update = null;
     }
-    _selectedTracedClass.value = update;
+    selectedTracedClass.value = update;
   }
 }
 

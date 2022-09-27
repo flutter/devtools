@@ -7,8 +7,8 @@ import 'package:string_scanner/string_scanner.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../primitives/utils.dart';
-import '../../../shared/table.dart';
-import '../../../shared/table_data.dart';
+import '../../../shared/table/table.dart';
+import '../../../shared/table/table_data.dart';
 import '../../../shared/theme.dart';
 import '../vm_service_private_extensions.dart';
 import 'object_inspector_view_controller.dart';
@@ -259,17 +259,18 @@ class CodeTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FlatTable<Instruction>(
+      data: code.obj.disassembly.instructions,
+      dataKey: 'vm-code-display',
+      keyFactory: (instruction) => Key(instruction.address),
       columnGroups: [
         ColumnGroup(title: 'Instructions', range: const Range(0, 3)),
         if (profilerTicksEnabled)
           ColumnGroup(title: 'Profiler Ticks', range: const Range(4, 6)),
       ],
       columns: columns,
-      data: code.obj.disassembly.instructions,
-      keyFactory: (instruction) => Key(instruction.address),
       onItemSelected: (_) => null,
-      sortColumn: columns[0],
-      sortDirection: SortDirection.ascending,
+      defaultSortColumn: columns[0],
+      defaultSortDirection: SortDirection.ascending,
     );
   }
 }

@@ -6,8 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../primitives/utils.dart';
-import '../../shared/table.dart';
-import '../../shared/table_data.dart';
+import '../../shared/table/table.dart';
+import '../../shared/table/table_data.dart';
 import '_kind_column.dart';
 import '_message_column.dart';
 import '_when_column.dart';
@@ -17,15 +17,13 @@ class LogsTable extends StatelessWidget {
   LogsTable({
     Key? key,
     required this.data,
-    required this.onItemSelected,
     required this.selectionNotifier,
     required this.searchMatchesNotifier,
     required this.activeSearchMatchNotifier,
   }) : super(key: key);
 
   final List<LogData> data;
-  final ItemCallback<LogData> onItemSelected;
-  final ValueListenable<LogData?> selectionNotifier;
+  final ValueNotifier<LogData?> selectionNotifier;
   final ValueListenable<List<LogData>> searchMatchesNotifier;
   final ValueListenable<LogData?> activeSearchMatchNotifier;
 
@@ -38,17 +36,17 @@ class LogsTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FlatTable<LogData>(
-      columns: columns,
-      data: data,
-      autoScrollContent: true,
       keyFactory: (LogData data) => ValueKey<LogData>(data),
-      onItemSelected: onItemSelected,
-      selectionNotifier: selectionNotifier,
-      sortColumn: when,
-      secondarySortColumn: message,
-      sortDirection: SortDirection.ascending,
+      data: data,
+      dataKey: 'logs',
+      autoScrollContent: true,
       searchMatchesNotifier: searchMatchesNotifier,
       activeSearchMatchNotifier: activeSearchMatchNotifier,
+      columns: columns,
+      selectionNotifier: selectionNotifier,
+      defaultSortColumn: when,
+      defaultSortDirection: SortDirection.ascending,
+      secondarySortColumn: message,
     );
   }
 }

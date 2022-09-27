@@ -4,10 +4,9 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../../primitives/auto_dispose_mixin.dart';
 import '../../../../../primitives/utils.dart';
-import '../../../../../shared/table.dart';
-import '../../../../../shared/table_data.dart';
+import '../../../../../shared/table/table.dart';
+import '../../../../../shared/table/table_data.dart';
 import '../../../../../shared/utils.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/primitives.dart';
@@ -109,68 +108,42 @@ class _RetainedSizeColumn extends ColumnData<HeapClassStatistics> {
       )!;
 }
 
-class SnapshotStatsTable extends StatefulWidget {
-  const SnapshotStatsTable({
+class SnapshotStatsTable extends StatelessWidget {
+  SnapshotStatsTable({
     Key? key,
+    required this.item,
+    required this.dataId,
     required this.controller,
   }) : super(key: key);
 
+  final SnapshotListItem item;
+
+  final int dataId;
+
   final DiffPaneController controller;
 
-  @override
-  State<SnapshotStatsTable> createState() => _SnapshotStatsTableState();
-}
+  final _shallowSizeColumn = _ShallowSizeColumn();
 
-class _SnapshotStatsTableState extends State<SnapshotStatsTable>
-    with AutoDisposeMixin {
-  late final List<ColumnData<HeapClassStatistics>> _columns;
-  late final SnapshotListItem _item;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _item = widget.controller.selectedItem as SnapshotListItem;
-
-    final _shallowSizeColumn = _ShallowSizeColumn();
-
-    _columns = <ColumnData<HeapClassStatistics>>[
-      _ClassNameColumn(),
-      _InstanceColumn(),
-      _shallowSizeColumn,
-      _RetainedSizeColumn(),
-    ];
-
-    final sorting = widget.controller.snapshotStatsSorting;
-    if (!sorting.initialized) {
-      sorting
-        ..direction = SortDirection.descending
-        ..columnIndex = _columns.indexOf(_shallowSizeColumn)
-        ..initialized = true;
-    }
-  }
+  List<ColumnData<HeapClassStatistics>> get _columns => [
+        _ClassNameColumn(),
+        _InstanceColumn(),
+        _shallowSizeColumn,
+        _RetainedSizeColumn(),
+      ];
 
   @override
   Widget build(BuildContext context) {
-    final sorting = widget.controller.snapshotStatsSorting;
+    final data = item.statsToShow.classStats;
     return FlatTable<HeapClassStatistics>(
-      columns: _columns,
-      data: _item.statsToShow.classStats,
       keyFactory: (e) => Key(e.heapClass.fullName),
-      onItemSelected: (r) =>
-          widget.controller.setSelectedClass(r.heapClass.fullName),
-      selectionNotifier: _item.selectedClassStats,
-      sortColumn: _columns[sorting.columnIndex],
-      sortDirection: sorting.direction,
-      onSortChanged: (
-        sortColumn,
-        direction, {
-        secondarySortColumn,
-      }) =>
-          setState(() {
-        sorting.columnIndex = _columns.indexOf(sortColumn);
-        sorting.direction = direction;
-      }),
+      data: data,
+      dataKey: 'snapshot-stats-$dataId',
+      columns: _columns,
+      selectionNotifier: item.selectedClassStats,
+      onItemSelected: (classStats) =>
+          controller.selectedClassName.value = classStats?.heapClass.fullName,
+      defaultSortColumn: _shallowSizeColumn,
+      defaultSortDirection: SortDirection.descending,
     );
   }
 }

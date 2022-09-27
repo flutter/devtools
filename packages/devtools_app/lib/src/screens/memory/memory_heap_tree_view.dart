@@ -18,8 +18,8 @@ import '../../primitives/utils.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
 import '../../shared/split.dart';
-import '../../shared/table.dart';
-import '../../shared/table_data.dart';
+import '../../shared/table/table.dart';
+import '../../shared/table/table_data.dart';
 import '../../shared/theme.dart';
 import '../../shared/utils.dart';
 import '../../ui/search.dart';
@@ -1323,12 +1323,13 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
     if (root != null && root.children.isNotEmpty) {
       // Snapshots and analyses exists display the trees.
       controller.groupByTreeTable = TreeTable<Reference>(
+        keyFactory: (libRef) => PageStorageKey<String?>(libRef.name),
         dataRoots: root.children,
+        dataKey: 'memory-snapshot-tree',
         columns: _columns,
         treeColumn: _treeColumn,
-        keyFactory: (libRef) => PageStorageKey<String?>(libRef.name),
-        sortColumn: _columns[0],
-        sortDirection: SortDirection.ascending,
+        defaultSortColumn: _columns[0],
+        defaultSortDirection: SortDirection.ascending,
         selectionNotifier: controller.selectionSnapshotNotifier,
       );
 

@@ -9,6 +9,8 @@ import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
 import 'heap_diff.dart';
 
+typedef RetainingPathRecord = MapEntry<ClassOnlyHeapPath, SizeOfClassSet>;
+
 abstract class DiffListItem extends DisposableController {
   /// Number, that if shown in name, should be unique in the list.
   ///
@@ -31,26 +33,32 @@ class InformationListItem extends DiffListItem {
 }
 
 class SnapshotListItem extends DiffListItem with AutoDisposeControllerMixin {
-  SnapshotListItem(
-    Future<AdaptedHeapData?> receiver,
-    this.displayNumber,
-    this._isolateName,
-    this.diffStore,
-    this.selectedClassName,
-  ) {
+  SnapshotListItem({
+    required Future<AdaptedHeapData?> receiver,
+    required this.id,
+    required this.displayNumber,
+    required this.isolateName,
+    required this.diffStore,
+    required this.selectedClassName,
+  }) {
     _isProcessing.value = true;
     receiver.whenComplete(() async {
       final data = await receiver;
       if (data != null) {
         heap = AdaptedHeap(data);
         updateSelectedRecord();
+        // TODO(https://github.com/flutter/devtools/issues/4539): it is unclear
+        // whether preserving the selection between snapshots should be the
+        // default behavior. Revisit after consulting with UXR.
         addAutoDisposeListener(selectedClassName, () => updateSelectedRecord());
       }
       _isProcessing.value = false;
     });
   }
 
-  final String _isolateName;
+  final int id;
+
+  final String isolateName;
 
   final HeapDiffStore diffStore;
 
@@ -59,7 +67,7 @@ class SnapshotListItem extends DiffListItem with AutoDisposeControllerMixin {
   @override
   final int displayNumber;
 
-  String get name => '$_isolateName-$displayNumber';
+  String get name => '$isolateName-$displayNumber';
 
   ValueListenable<SnapshotListItem?> get diffWith => _diffWith;
   final _diffWith = ValueNotifier<SnapshotListItem?>(null);
@@ -68,11 +76,21 @@ class SnapshotListItem extends DiffListItem with AutoDisposeControllerMixin {
     updateSelectedRecord();
   }
 
-  final ValueListenable<String?> selectedClassName;
+  final ValueNotifier<String?> selectedClassName;
 
-  ValueListenable<HeapClassStatistics?> get selectedClassStats =>
-      _selectedClassStats;
-  final _selectedClassStats = ValueNotifier<HeapClassStatistics?>(null);
+  final selectedClassStats = ValueNotifier<HeapClassStatistics?>(null);
+
+  List<RetainingPathRecord> get retainingPathList {
+    final classStats = selectedClassStats.value;
+    if (classStats == null) return [];
+    return _retainingPathForClass.putIfAbsent(
+      classStats,
+      () => classStats.sizeByRetainingPath.entries.toList(growable: false),
+    );
+  }
+
+  final _retainingPathForClass =
+      <HeapClassStatistics, List<RetainingPathRecord>>{};
 
   @override
   bool get hasData => heap != null;
@@ -84,6 +102,16 @@ class SnapshotListItem extends DiffListItem with AutoDisposeControllerMixin {
     return diffStore.compare(theHeap, itemToDiffWith.heap!).stats;
   }
 
-  void updateSelectedRecord() => _selectedClassStats.value =
-      statsToShow.statsByClassName[selectedClassName.value];
+  void updateSelectedRecord() {
+    if (selectedClassName.value == null) {
+      selectedClassStats.value = null;
+      return;
+    }
+    final classStats = statsToShow.statsByClassName[selectedClassName.value];
+    if (classStats != null) {
+      _retainingPathForClass[classStats] =
+          classStats.sizeByRetainingPath.entries.toList(growable: false);
+    }
+    selectedClassStats.value = classStats;
+  }
 }

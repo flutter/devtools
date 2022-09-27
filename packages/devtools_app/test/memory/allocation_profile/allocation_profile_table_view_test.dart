@@ -13,7 +13,7 @@ import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
 import 'package:devtools_app/src/shared/preferences.dart';
-import 'package:devtools_app/src/shared/table.dart';
+import 'package:devtools_app/src/shared/table/table.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
@@ -215,10 +215,11 @@ void main() {
       }
 
       final state = tester.state<FlatTableState<ClassHeapStats?>>(table.first);
+      var data = state.tableController.tableData.value.data;
 
       // Initial state should be sorted by size, largest to smallest.
-      int lastValue = state.data.first!.bytesCurrent!;
-      for (final element in state.data) {
+      int lastValue = data.first!.bytesCurrent!;
+      for (final element in data) {
         expect(element!.bytesCurrent! <= lastValue, isTrue);
         lastValue = element.bytesCurrent!;
       }
@@ -227,8 +228,10 @@ void main() {
       await tester.tap(size);
       await tester.pumpAndSettle();
 
-      lastValue = state.data.first!.bytesCurrent!;
-      for (final element in state.data) {
+      data = state.tableController.tableData.value.data;
+
+      lastValue = data.first!.bytesCurrent!;
+      for (final element in data) {
         expect(element!.bytesCurrent! >= lastValue, isTrue);
         lastValue = element.bytesCurrent!;
       }
@@ -237,8 +240,10 @@ void main() {
       await tester.tap(cls);
       await tester.pumpAndSettle();
 
-      String lastClassName = state.data.first!.classRef!.name!;
-      for (final element in state.data) {
+      data = state.tableController.tableData.value.data;
+
+      String lastClassName = data.first!.classRef!.name!;
+      for (final element in data) {
         final name = element!.classRef!.name!;
         expect(name.compareTo(lastClassName) >= 0, isTrue);
         lastClassName = name;
@@ -248,8 +253,10 @@ void main() {
       await tester.tap(cls);
       await tester.pumpAndSettle();
 
-      lastClassName = state.data.first!.classRef!.name!;
-      for (final element in state.data) {
+      data = state.tableController.tableData.value.data;
+
+      lastClassName = data.first!.classRef!.name!;
+      for (final element in data) {
         final name = element!.classRef!.name!;
         expect(name.compareTo(lastClassName) <= 0, isTrue);
         lastClassName = name;
@@ -259,8 +266,10 @@ void main() {
       await tester.tap(instances);
       await tester.pumpAndSettle();
 
-      lastValue = state.data.first!.instancesCurrent!;
-      for (final element in state.data) {
+      data = state.tableController.tableData.value.data;
+
+      lastValue = data.first!.instancesCurrent!;
+      for (final element in data) {
         expect(element!.instancesCurrent! <= lastValue, isTrue);
         lastValue = element.instancesCurrent!;
       }
@@ -269,8 +278,10 @@ void main() {
       await tester.tap(instances);
       await tester.pumpAndSettle();
 
-      lastValue = state.data.first!.instancesCurrent!;
-      for (final element in state.data) {
+      data = state.tableController.tableData.value.data;
+
+      lastValue = data.first!.instancesCurrent!;
+      for (final element in data) {
         expect(element!.instancesCurrent! >= lastValue, isTrue);
         lastValue = element.instancesCurrent!;
       }
@@ -279,9 +290,10 @@ void main() {
       await tester.tap(internal);
       await tester.pumpAndSettle();
 
-      lastValue =
-          state.data.first!.newSpace.size + state.data.first!.oldSpace.size;
-      for (final element in state.data) {
+      data = state.tableController.tableData.value.data;
+
+      lastValue = data.first!.newSpace.size + data.first!.oldSpace.size;
+      for (final element in data) {
         final internalSize = element!.newSpace.size + element.oldSpace.size;
         expect(internalSize <= lastValue, isTrue);
         lastValue = internalSize;
@@ -291,9 +303,10 @@ void main() {
       await tester.tap(instances);
       await tester.pumpAndSettle();
 
-      lastValue =
-          state.data.first!.newSpace.size + state.data.first!.oldSpace.size;
-      for (final element in state.data) {
+      data = state.tableController.tableData.value.data;
+
+      lastValue = data.first!.newSpace.size + data.first!.oldSpace.size;
+      for (final element in data) {
         final internalSize = element!.newSpace.size + element.oldSpace.size;
         expect(internalSize >= lastValue, isTrue);
         lastValue = internalSize;
@@ -303,9 +316,11 @@ void main() {
       await tester.tap(internal);
       await tester.pumpAndSettle();
 
-      lastValue = state.data.first!.newSpace.externalSize +
-          state.data.first!.oldSpace.externalSize;
-      for (final element in state.data) {
+      data = state.tableController.tableData.value.data;
+
+      lastValue =
+          data.first!.newSpace.externalSize + data.first!.oldSpace.externalSize;
+      for (final element in data) {
         final externalSize =
             element!.newSpace.externalSize + element.oldSpace.externalSize;
         expect(externalSize <= lastValue, isTrue);
@@ -316,9 +331,9 @@ void main() {
       await tester.tap(instances);
       await tester.pumpAndSettle();
 
-      lastValue = state.data.first!.newSpace.externalSize +
-          state.data.first!.oldSpace.externalSize;
-      for (final element in state.data) {
+      lastValue =
+          data.first!.newSpace.externalSize + data.first!.oldSpace.externalSize;
+      for (final element in data) {
         final externalSize =
             element!.newSpace.externalSize + element.oldSpace.externalSize;
         expect(externalSize >= lastValue, isTrue);
