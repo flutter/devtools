@@ -493,12 +493,12 @@ void main() {
         );
 
         expect(
-          find.byKey(HeapTreeViewState.dartHeapAnalysisTabKey),
+          find.byKey(MemoryScreenKeys.dartHeapAnalysisTab),
           findsOneWidget,
         );
 
         final allocationsKey =
-            find.byKey(HeapTreeViewState.dartHeapAllocationsTabKey);
+            find.byKey(MemoryScreenKeys.dartHeapAllocationsTab);
         await tester.tap(allocationsKey);
 
         await pumpAndSettleTwoSeconds();
