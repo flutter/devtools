@@ -151,6 +151,11 @@ class InspectorController extends DisposableController
           .hasServiceExtension(extensions.toggleSelectWidgetMode.extension);
 
   void _onClientChange(bool added) {
+    if (!added && _clientCount == 0) {
+      // Don't try to remove clients if there are none
+      return;
+    }
+
     _clientCount += added ? 1 : -1;
     assert(_clientCount >= 0);
     if (_clientCount == 1) {

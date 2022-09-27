@@ -6,27 +6,22 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../primitives/utils.dart';
-import '../../service/vm_service_wrapper.dart';
-import '../../shared/globals.dart';
-import '../debugger/debugger_model.dart';
-import '../debugger/program_explorer_model.dart';
-import 'vm_service_private_extensions.dart';
+import '../../../primitives/utils.dart';
+import '../../../service/vm_service_wrapper.dart';
+import '../../../shared/globals.dart';
+import '../../debugger/debugger_model.dart';
+import '../vm_service_private_extensions.dart';
 
 /// Wrapper class for storing Dart VM objects with their relevant VM
 /// information.
 abstract class VmObject {
-  VmObject({required this.ref, this.scriptRef, this.outlineNode});
+  VmObject({required this.ref, this.scriptRef});
 
   final ObjRef ref;
 
   /// The script node selected on the FileExplorer of the ProgramExplorer
   /// corresponding to this VM object.
   final ScriptRef? scriptRef;
-
-  /// The outline node selected on the ProgramExplorer
-  /// corresponding to this VM object.
-  final VMServiceObjectNode? outlineNode;
 
   VmServiceWrapper get _service => serviceManager.service!;
 
@@ -113,7 +108,7 @@ abstract class VmObject {
 /// Stores a 'Class' VM object and provides an interface for obtaining the
 /// Dart VM information related to this object.
 class ClassObject extends VmObject {
-  ClassObject({required super.ref, super.scriptRef, super.outlineNode});
+  ClassObject({required super.ref, super.scriptRef});
 
   @override
   Class get obj => _obj as Class;
@@ -137,7 +132,7 @@ class ClassObject extends VmObject {
 /// Stores a function (Func type) VM object and provides an interface for
 /// obtaining the Dart VM information related to this object.
 class FuncObject extends VmObject {
-  FuncObject({required super.ref, super.scriptRef, super.outlineNode});
+  FuncObject({required super.ref, super.scriptRef});
 
   @override
   Func get obj => _obj as Func;
@@ -183,7 +178,7 @@ class FuncObject extends VmObject {
 /// Stores a 'Field' VM object and provides an interface for obtaining the
 /// Dart VM information related to this object.
 class FieldObject extends VmObject {
-  FieldObject({required super.ref, super.scriptRef, super.outlineNode});
+  FieldObject({required super.ref, super.scriptRef});
 
   @override
   Field get obj => _obj as Field;
@@ -217,7 +212,7 @@ class FieldObject extends VmObject {
 /// Stores a 'Library' VM object and provides an interface for obtaining the
 /// Dart VM information related to this object.
 class LibraryObject extends VmObject {
-  LibraryObject({required super.ref, super.scriptRef, super.outlineNode});
+  LibraryObject({required super.ref, super.scriptRef});
 
   @override
   Library get obj => _obj as Library;
@@ -234,7 +229,7 @@ class LibraryObject extends VmObject {
 /// Stores a 'Script' VM object and provides an interface for obtaining the
 /// Dart VM information related to this object.
 class ScriptObject extends VmObject {
-  ScriptObject({required super.ref, super.scriptRef, super.outlineNode});
+  ScriptObject({required super.ref, super.scriptRef});
 
   @override
   Script get obj => _obj as Script;
@@ -250,7 +245,7 @@ class ScriptObject extends VmObject {
 
 //TODO(mtaylee): finish class implementation.
 class InstanceObject extends VmObject {
-  InstanceObject({required super.ref, super.scriptRef, super.outlineNode});
+  InstanceObject({required super.ref, super.scriptRef});
 
   @override
   Instance get obj => _obj as Instance;
@@ -263,7 +258,7 @@ class InstanceObject extends VmObject {
 }
 
 class CodeObject extends VmObject {
-  CodeObject({required super.ref, super.scriptRef, super.outlineNode});
+  CodeObject({required super.ref, super.scriptRef});
 
   @override
   Code get obj => _obj as Code;

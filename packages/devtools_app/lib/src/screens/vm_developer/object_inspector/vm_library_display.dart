@@ -5,9 +5,9 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../shared/theme.dart';
+import '../../../shared/theme.dart';
+import '../vm_developer_common_widgets.dart';
 import 'object_inspector_view_controller.dart';
-import 'vm_developer_common_widgets.dart';
 import 'vm_object_model.dart';
 
 /// A widget for the object inspector historyViewport displaying information

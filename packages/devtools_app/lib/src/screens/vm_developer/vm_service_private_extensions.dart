@@ -354,3 +354,44 @@ extension ScriptPrivateViewExtension on Script {
 extension LibraryPrivateExtension on Library {
   String? get vmName => json![_vmNameKey];
 }
+
+typedef ObjectStoreEntry = MapEntry<String, ObjRef>;
+
+/// A collection of VM objects stored in an isolate's object store.
+///
+/// The object store is used to provide easy and cheap access to important
+/// VM objects within the VM. Examples of objects stored in the object store
+/// include:
+///
+///   - Code stubs (e.g., allocation paths, async/await machinery)
+///   - References to core classes (e.g., `Null`, `Object`, `Never`)
+///   - Common type arguments (e.g., `<String, dynamic>`)
+///   - References to frequently accessed fields / functions (e.g.,
+///     `_objectEquals()`, `_Enum._name`)
+///   - Cached, per-isolate data (e.g., library URI mappings)
+///
+/// The object store is considered one of the GC roots by the VM's garbage
+/// collector, meaning that objects in the store will be considered live, even
+/// if they're not referenced anywhere else in the program.
+class ObjectStore {
+  const ObjectStore({
+    required this.fields,
+  });
+
+  static ObjectStore? parse(Map<String, dynamic>? json) {
+    if (json?['type'] != '_ObjectStore') {
+      return null;
+    }
+    final rawFields = json!['fields']! as Map<String, dynamic>;
+    return ObjectStore(
+      fields: rawFields.map((key, value) {
+        return ObjectStoreEntry(
+          key,
+          createServiceObject(value, ['InstanceRef']) as ObjRef,
+        );
+      }),
+    );
+  }
+
+  final Map<String, ObjRef> fields;
+}

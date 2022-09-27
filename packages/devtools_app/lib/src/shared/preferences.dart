@@ -73,7 +73,7 @@ class PreferencesController extends DisposableController
   /// Change the value for the VM developer mode setting.
   void toggleVmDeveloperMode(bool enableVmDeveloperMode) {
     _vmDeveloperMode.value = enableVmDeveloperMode;
-    VmServicePrivate.enablePrivateRpcs = enableVmDeveloperMode;
+    VmServiceWrapper.enablePrivateRpcs = enableVmDeveloperMode;
   }
 
   /// Change the value for the dense mode setting.

@@ -6,9 +6,9 @@ import 'package:devtools_app/src/primitives/listenable.dart';
 import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_model.dart';
 import 'package:devtools_app/src/screens/debugger/program_explorer_controller.dart';
-import 'package:devtools_app/src/screens/vm_developer/object_inspector_view_controller.dart';
-import 'package:devtools_app/src/screens/vm_developer/object_viewport.dart';
-import 'package:devtools_app/src/screens/vm_developer/vm_object_model.dart';
+import 'package:devtools_app/src/screens/vm_developer/object_inspector/object_inspector_view_controller.dart';
+import 'package:devtools_app/src/screens/vm_developer/object_inspector/object_viewport.dart';
+import 'package:devtools_app/src/screens/vm_developer/object_inspector/vm_object_model.dart';
 import 'package:devtools_app/src/scripts/script_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -182,7 +182,6 @@ void setUpMockScriptManager() {
 }
 
 void mockVmObject(VmObject object) {
-  when(object.outlineNode).thenReturn(null);
   when(object.scriptRef).thenReturn(testScript);
   when(object.script).thenReturn(testScript);
   when(object.pos).thenReturn(testPos);

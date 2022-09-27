@@ -280,7 +280,7 @@ class _AllocationProfileTableState extends State<_AllocationProfileTable> {
   // TODO(bkonyi): pull state into a TableController class.
   // See https://github.com/flutter/devtools/issues/4365
   late SortDirection _sortDirection;
-  late ColumnData<ClassHeapStats> _sortColumn;
+  late ColumnData<ClassHeapStats?> _sortColumn;
 
   @override
   void initState() {
@@ -333,7 +333,7 @@ class _AllocationProfileTableState extends State<_AllocationProfileTable> {
                       secondarySortColumn,
                     }) {
                       setState(() {
-                        sortColumn = sortColumn;
+                        _sortColumn = sortColumn;
                         _sortDirection = direction;
                       });
                     },
