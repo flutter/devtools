@@ -11,12 +11,10 @@ echo "Refreshing local clone..."
 
 pushd packages/devtools_app
 flutter pub upgrade
-flutter pub get
 popd
 
 pushd packages/devtools_test
 flutter pub upgrade
-flutter pub get
 popd
 
 bash tool/generate_code.sh
