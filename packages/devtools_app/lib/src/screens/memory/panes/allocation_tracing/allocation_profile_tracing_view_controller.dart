@@ -217,8 +217,8 @@ class AllocationProfileTracingViewController extends DisposableController
     // Note: we need to provide `timeExtentMicros` to `getAllocationTraces`,
     // otherwise the VM will respond with all samples, not just the samples
     // collected after `_lastClearTimeMicros`. We'll just use the maximum
-    // signed 64-bit value in place of "infinity".
-    const int64Max = 0x7FFFFFFFFFFFFFFF;
+    // Javascript integer value (2^53 - 1) to represent "infinity". 
+    const int64Max = 0x1FFFFFFFFFFFFF;
     // Request the allocation profile for the traced class.
     final trace = await service.getAllocationTraces(
       isolateId,
