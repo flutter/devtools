@@ -158,7 +158,7 @@ void writeVersionToChangelog(File changelog, String version) {
   }
   changelog.writeAsString([
     versionString,
-    'TODO: update changelog\n',
+    isDevVersion(version) ? '* Dev version\n' : 'TODO: update changelog\n',
     ...lines,
   ].joinWithNewLine());
 }
@@ -190,7 +190,7 @@ void writeVersionToIndexHtml(
 }
 
 String incrementDevVersion(String currentVersion, String devType) {
-  final alreadyHasDevVersion = RegExp(r'-dev\.\d+').hasMatch(currentVersion);
+  final alreadyHasDevVersion = isDevVersion(currentVersion);
   if (alreadyHasDevVersion) {
     final devVerMatch = RegExp(
             r'^(?<prefix>\d+\.\d+\.\d+.*-dev\.)(?<devVersion>\d+)(?<suffix>.*)$')
@@ -211,6 +211,10 @@ String incrementDevVersion(String currentVersion, String devType) {
     final nextVersion = incrementVersionByType(currentVersion, devType);
     return '$nextVersion-dev.0';
   }
+}
+
+bool isDevVersion(String version) {
+  return RegExp(r'-dev\.\d+').hasMatch(version);
 }
 
 const pubspecVersionPrefix = 'version:';
