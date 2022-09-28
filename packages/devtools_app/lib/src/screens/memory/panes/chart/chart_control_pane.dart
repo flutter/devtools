@@ -26,6 +26,15 @@ class ChartControlPane extends StatefulWidget {
   State<ChartControlPane> createState() => _ChartControlPaneState();
 }
 
+@visibleForTesting
+class ChartPaneTooltips {
+  static const String pauseTooltip =
+      'Pause the chart and auto-collection of snapshots\n'
+      'in case of aggressive memory consumption\n'
+      '(if enabled in settings)';
+  static const String resumeTooltip = 'Resume recording memory statistics';
+}
+
 class _ChartControlPaneState extends State<ChartControlPane>
     with
         ProvidedControllerMixin<MemoryController, ChartControlPane>,
@@ -87,15 +96,13 @@ class _ChartControlPaneState extends State<ChartControlPane>
               PauseButton(
                 iconOnly: true,
                 onPressed: paused ? null : _onPause,
-                tooltip: 'Pause the chart and auto-collection of snapshots\n'
-                    'in case of aggressive memory consumption\n'
-                    '(if enabled in settings)',
+                tooltip: ChartPaneTooltips.pauseTooltip,
               ),
               const SizedBox(width: denseSpacing),
               ResumeButton(
                 iconOnly: true,
                 onPressed: paused ? _onResume : null,
-                tooltip: 'Resume recording memory statistics',
+                tooltip: ChartPaneTooltips.resumeTooltip,
               ),
             ],
           ),
