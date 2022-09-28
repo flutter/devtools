@@ -5,13 +5,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../shared/split.dart';
-import '../debugger/program_explorer.dart';
-import '../debugger/program_explorer_model.dart';
+import '../../../analytics/constants.dart' as analytics_constants;
+import '../../../shared/split.dart';
+import '../../../ui/tab.dart';
+import '../../debugger/program_explorer.dart';
+import '../../debugger/program_explorer_model.dart';
+import '../vm_developer_tools_controller.dart';
+import '../vm_developer_tools_screen.dart';
 import 'object_inspector_view_controller.dart';
+import 'object_store.dart';
 import 'object_viewport.dart';
-import 'vm_developer_tools_controller.dart';
-import 'vm_developer_tools_screen.dart';
 
 /// Displays a program explorer and a history viewport that displays
 /// information about objects in the Dart VM.
@@ -36,15 +39,16 @@ class _ObjectInspectorView extends StatefulWidget {
   State<StatefulWidget> createState() => _ObjectInspectorViewState();
 }
 
-class _ObjectInspectorViewState extends State<_ObjectInspectorView> {
-  late final ObjectInspectorViewController controller;
+class _ObjectInspectorViewState extends State<_ObjectInspectorView>
+    with TickerProviderStateMixin {
+  late ObjectInspectorViewController controller;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final vmDeveloperToolsController =
         Provider.of<VMDeveloperToolsController>(context);
-    controller = vmDeveloperToolsController.objectInspectorViewController!
+    controller = vmDeveloperToolsController.objectInspectorViewController
       ..init();
   }
 
@@ -54,10 +58,29 @@ class _ObjectInspectorViewState extends State<_ObjectInspectorView> {
       axis: Axis.horizontal,
       initialFractions: const [0.20, 0.80],
       children: [
-        ProgramExplorer(
-          controller: controller.programExplorerController,
-          onNodeSelected: _onNodeSelected,
-          title: 'Program Explorer',
+        AnalyticsTabbedView(
+          gaScreen: analytics_constants.objectInspectorScreen,
+          tabs: [
+            DevToolsTab.create(
+              tabName: 'Program Explorer',
+              gaPrefix: analytics_constants.programExplorer,
+            ),
+            DevToolsTab.create(
+              tabName: 'Object Store',
+              gaPrefix: analytics_constants.objectStore,
+            ),
+          ],
+          tabViews: [
+            ProgramExplorer(
+              controller: controller.programExplorerController,
+              onNodeSelected: _onNodeSelected,
+              displayHeader: false,
+            ),
+            ObjectStoreViewer(
+              controller: controller.objectStoreController,
+              onLinkTapped: controller.findAndSelectNodeForObject,
+            ),
+          ],
         ),
         ObjectViewport(
           controller: controller,
@@ -69,14 +92,9 @@ class _ObjectInspectorViewState extends State<_ObjectInspectorView> {
   void _onNodeSelected(VMServiceObjectNode node) {
     final objRef = node.object;
     final location = node.location;
-
-    if (location != null) {
-      controller.setCurrentScript(location.scriptRef);
-    }
-
     if (objRef != null &&
         objRef != controller.objectHistory.current.value?.ref) {
-      controller.pushObject(objRef);
+      controller.pushObject(objRef, scriptRef: location?.scriptRef);
     }
   }
 }

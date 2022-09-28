@@ -4,14 +4,15 @@
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/screens/debugger/program_explorer.dart';
-import 'package:devtools_app/src/screens/vm_developer/object_inspector_view.dart';
-import 'package:devtools_app/src/screens/vm_developer/object_viewport.dart';
+import 'package:devtools_app/src/screens/vm_developer/object_inspector/object_inspector_view.dart';
+import 'package:devtools_app/src/screens/vm_developer/object_inspector/object_viewport.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_developer_tools_controller.dart';
-import 'package:devtools_app/src/screens/vm_developer/vm_developer_tools_screen.dart';
 import 'package:devtools_app/src/scripts/script_manager.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/service/vm_service_wrapper.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
+import 'package:devtools_app/src/shared/preferences.dart';
 import 'package:devtools_app/src/shared/split.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
@@ -26,8 +27,9 @@ void main() {
 
   late MockScriptManager scriptManager;
 
+  const windowSize = Size(2560.0, 1338.0);
+
   setUp(() {
-    displayObjectInspector = true;
     objectInspector = ObjectInspectorView();
     fakeServiceManager = FakeServiceManager();
     scriptManager = MockScriptManager();
@@ -36,17 +38,17 @@ void main() {
     when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
     when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
 
+    setGlobal(PreferencesController, PreferencesController());
     setGlobal(ServiceConnectionManager, fakeServiceManager);
     setGlobal(ScriptManager, scriptManager);
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(NotificationService, NotificationService());
+
+    VmServiceWrapper.enablePrivateRpcs = true;
   });
 
-  tearDown(() {
-    displayObjectInspector = false;
-  });
-
-  testWidgets('builds screen', (WidgetTester tester) async {
+  testWidgetsWithWindowSize('builds screen', windowSize,
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       wrapWithControllers(
         Builder(

@@ -788,7 +788,6 @@ class ChartPainter extends CustomPainter {
       ..color = characteristics.color.withAlpha(140);
 
     final fillArea = Path()
-      ..moveTo(x0, y0Bottom)
       ..moveTo(x0, y0)
       ..lineTo(x1, y1)
       ..lineTo(x1, y1Bottom)

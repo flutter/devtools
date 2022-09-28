@@ -102,6 +102,7 @@ const memorySettings = 'memorySettings';
 const androidChart = 'androidChart';
 const autoSnapshot = 'autoSnapshot';
 const showChart = 'showChart';
+const hideChart = 'hideChart';
 const groupByPrefix = 'groupBy';
 const trackAllocations = 'trackAllocations';
 const resetAllocationAccumulators = 'resetAllocationAccumulators';
@@ -129,6 +130,11 @@ const denseMode = 'denseMode';
 const analytics = 'analytics';
 const vmDeveloperMode = 'vmDeveloperMode';
 const inspectorHoverEvalMode = 'inspectorHoverEvalMode';
+
+// Object explorer:
+const objectInspectorScreen = 'objectInspector';
+const programExplorer = 'programExplorer';
+const objectStore = 'objectStore';
 
 // Common actions shared across screens.
 // These actions will be tracked per screen, so they will still be

@@ -26,6 +26,15 @@ class ChartControlPane extends StatefulWidget {
   State<ChartControlPane> createState() => _ChartControlPaneState();
 }
 
+@visibleForTesting
+class ChartPaneTooltips {
+  static const String pauseTooltip =
+      'Pause the chart and auto-collection of snapshots\n'
+      'in case of aggressive memory consumption\n'
+      '(if enabled in settings)';
+  static const String resumeTooltip = 'Resume recording memory statistics';
+}
+
 class _ChartControlPaneState extends State<ChartControlPane>
     with
         ProvidedControllerMixin<MemoryController, ChartControlPane>,
@@ -76,50 +85,36 @@ class _ChartControlPaneState extends State<ChartControlPane>
 
   @override
   Widget build(BuildContext context) {
-    const buttonWidth = 110.0;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ValueListenableBuilder<bool>(
           valueListenable: controller.paused,
-          builder: (context, paused, _) => Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          builder: (context, paused, _) => Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              SizedBox(
-                width: buttonWidth,
-                child: PauseButton(
-                  minScreenWidthForTextBeforeScaling:
-                      primaryControlsMinVerboseWidth,
-                  onPressed: paused ? null : _onPause,
-                  tooltip: 'Pause the chart and auto-collection of snapshot\n'
-                      'in case of aggressive memory consumption\n'
-                      '(if enabled in settings)',
-                ),
+              PauseButton(
+                iconOnly: true,
+                onPressed: paused ? null : _onPause,
+                tooltip: ChartPaneTooltips.pauseTooltip,
               ),
-              const SizedBox(height: denseSpacing),
-              SizedBox(
-                width: buttonWidth,
-                child: ResumeButton(
-                  minScreenWidthForTextBeforeScaling:
-                      primaryControlsMinVerboseWidth,
-                  onPressed: paused ? _onResume : null,
-                  tooltip: 'Resume the chart',
-                ),
+              const SizedBox(width: denseSpacing),
+              ResumeButton(
+                iconOnly: true,
+                onPressed: paused ? _onResume : null,
+                tooltip: ChartPaneTooltips.resumeTooltip,
               ),
-              const SizedBox(height: denseSpacing),
             ],
           ),
         ),
-        SizedBox(
-          width: buttonWidth,
-          child: IconLabelButton(
-            key: legendKey,
-            onPressed: controller.toggleLegendVisibility,
-            icon: _legendOverlayEntry == null ? Icons.storage : Icons.close,
-            label: 'Legend',
-            tooltip: 'Show chart legend',
-            minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
-          ),
+        const SizedBox(height: denseSpacing),
+        IconLabelButton(
+          key: legendKey,
+          onPressed: controller.toggleLegendVisibility,
+          icon: _legendOverlayEntry == null ? Icons.storage : Icons.close,
+          label: 'Legend',
+          tooltip: 'Show chart legend',
+          minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
         ),
         const SizedBox(height: denseSpacing),
         IntervalDropdown(chartController: widget.chartController),

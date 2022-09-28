@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:collection/collection.dart' show IterableExtension;
-import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -25,7 +24,6 @@ import '../../shared/theme.dart';
 import '../../shared/utils.dart';
 import '../../ui/search.dart';
 import '../../ui/tab.dart';
-import 'memory_allocation_table_view.dart';
 import 'memory_analyzer.dart';
 import 'memory_controller.dart';
 import 'memory_filter.dart';
@@ -135,30 +133,36 @@ String buildRegExs(Map<WildcardMatch, List<String>> matchingCriteria) {
 
 final String knownClassesRegExs = buildRegExs(knowClassesToAnalyzeForImages);
 
-class HeapTreeViewState extends State<HeapTreeView>
+@visibleForTesting
+class MemoryScreenKeys {
+  static const searchButton = Key('Snapshot Search');
+  static const filterButton = Key('Snapshot Filter');
+  static const dartHeapAnalysisTab = Key('Dart Heap Analysis Tab');
+  static const dartHeapAllocationsTab = Key('Dart Heap Allocations Tab');
+  static const leaksTab = Key('Leaks Tab');
+  static const dartHeapTableProfileTab = Key('Dart Heap Profile Tab');
+  static const dartHeapAllocationTracingTab =
+      Key('Dart Heap Allocation Tracing Tab');
+  static const diffTab = Key('Diff Tab');
+}
+
+class HeapTreeView extends StatefulWidget {
+  const HeapTreeView(
+    this.controller,
+  );
+
+  final MemoryController controller;
+
+  @override
+  _HeapTreeViewState createState() => _HeapTreeViewState();
+}
+
+class _HeapTreeViewState extends State<HeapTreeView>
     with
         AutoDisposeMixin,
         ProvidedControllerMixin<MemoryController, HeapTreeView>,
         SearchFieldMixin<HeapTreeView>,
         TickerProviderStateMixin {
-  @visibleForTesting
-  static const searchButtonKey = Key('Snapshot Search');
-  @visibleForTesting
-  static const filterButtonKey = Key('Snapshot Filter');
-  @visibleForTesting
-  static const dartHeapAnalysisTabKey = Key('Dart Heap Analysis Tab');
-  @visibleForTesting
-  static const dartHeapAllocationsTabKey = Key('Dart Heap Allocations Tab');
-  @visibleForTesting
-  static const leaksTabKey = Key('Leaks Tab');
-  @visibleForTesting
-  static const dartHeapTableProfileKey = Key('Dart Heap Profile Tab');
-  @visibleForTesting
-  static const dartHeapAllocationTracingKey =
-      Key('Dart Heap Allocation Tracing Tab');
-  @visibleForTesting
-  static const diffTabKey = Key('Diff Tab');
-
   /// Below constants should match index for Tab index in DartHeapTabs.
   static const int analysisTabIndex = 0;
   static const int allocationsTabIndex = 1;
@@ -202,43 +206,39 @@ class HeapTreeViewState extends State<HeapTreeView>
 
   void _initTabs() {
     _tabs = [
-      if (FeatureFlags.newAllocationProfileTable) ...[
-        DevToolsTab.create(
-          key: dartHeapTableProfileKey,
-          tabName: 'Profile',
-          gaPrefix: _gaPrefix,
-        ),
-        DevToolsTab.create(
-          key: dartHeapAllocationTracingKey,
-          tabName: 'Allocation Tracing',
-          gaPrefix: _gaPrefix,
-        ),
-      ],
       DevToolsTab.create(
-        key: dartHeapAnalysisTabKey,
+        key: MemoryScreenKeys.dartHeapTableProfileTab,
+        tabName: 'Profile',
+        gaPrefix: _gaPrefix,
+      ),
+      DevToolsTab.create(
+        key: MemoryScreenKeys.dartHeapAllocationTracingTab,
+        tabName: 'Allocation Tracing',
+        gaPrefix: _gaPrefix,
+      ),
+      DevToolsTab.create(
+        key: MemoryScreenKeys.dartHeapAnalysisTab,
         gaPrefix: _gaPrefix,
         tabName: 'Analysis',
       ),
-      DevToolsTab.create(
-        key: dartHeapAllocationsTabKey,
-        gaPrefix: _gaPrefix,
-        tabName: 'Allocations',
-      ),
       if (FeatureFlags.memoryDiffing)
         DevToolsTab.create(
-          key: diffTabKey,
+          key: MemoryScreenKeys.diffTab,
           gaPrefix: _gaPrefix,
           tabName: 'Diff',
         ),
       if (widget.controller.shouldShowLeaksTab.value)
         DevToolsTab.create(
-          key: leaksTabKey,
+          key: MemoryScreenKeys.leaksTab,
           gaPrefix: _gaPrefix,
           tabName: 'Leaks',
         ),
     ];
 
-    _searchableTabs = {dartHeapAnalysisTabKey, dartHeapAllocationsTabKey};
+    _searchableTabs = {
+      MemoryScreenKeys.dartHeapAnalysisTab,
+      MemoryScreenKeys.dartHeapAllocationsTab
+    };
     _tabController = TabController(length: _tabs.length, vsync: this);
     _tabController.addListener(_onTabChanged);
   }
@@ -807,42 +807,6 @@ class HeapTreeViewState extends State<HeapTreeView>
     return bubble;
   }
 
-  Widget _buildAllocationsControls() {
-    final updateCircle = displayTimestampUpdateBubble();
-
-    return Row(
-      children: [
-        IconLabelButton(
-          tooltip: 'Collect Allocation Statistics',
-          imageIcon: trackImage(context),
-          label: 'Track',
-          onPressed: () async {
-            ga.select(
-              analytics_constants.memory,
-              analytics_constants.trackAllocations,
-            );
-            await _allocationStart();
-          },
-        ),
-        const SizedBox(width: denseSpacing),
-        IconLabelButton(
-          tooltip: 'Reset all accumulators',
-          imageIcon: resetImage(context),
-          label: 'Reset',
-          onPressed: () async {
-            ga.select(
-              analytics_constants.memory,
-              analytics_constants.resetAllocationAccumulators,
-            );
-            await _allocationReset();
-          },
-        ),
-        const Spacer(),
-        updateCircle,
-      ],
-    );
-  }
-
   Widget textWidgetWithUpdateCircle(
     String text, {
     TextStyle? style,
@@ -910,95 +874,6 @@ class HeapTreeViewState extends State<HeapTreeView>
     return textWidth;
   }
 
-  // WARNING: Do not checkin the debug flag set to true.
-  final _debugAllocationMonitoring = false;
-
-  Future<void> _allocationStart() async {
-    // TODO(terry): Look at grouping by library or classes also filtering e.g.,
-    // await controller.computeLibraries();
-    controller.memoryTimeline.addMonitorStartEvent();
-
-    final allocationtimestamp = DateTime.now();
-    final currentAllocations = await controller.getAllocationProfile();
-
-    if (controller.monitorAllocations.isNotEmpty) {
-      final previousSize = controller.monitorAllocations.length;
-      int previousIndex = 0;
-      final currentSize = currentAllocations.length;
-      int currentIndex = 0;
-      while (currentIndex < currentSize && previousIndex < previousSize) {
-        final previousAllocation = controller.monitorAllocations[previousIndex];
-        final currentAllocation = currentAllocations[currentIndex];
-
-        if (previousAllocation.classRef.id == currentAllocation.classRef.id) {
-          final instancesCurrent = currentAllocation.instancesCurrent;
-          final bytesCurrent = currentAllocation.bytesCurrent;
-
-          currentAllocation.instancesDelta = previousAllocation.instancesDelta +
-              (instancesCurrent - previousAllocation.instancesCurrent);
-          currentAllocation.bytesDelta = previousAllocation.bytesDelta +
-              (bytesCurrent - previousAllocation.bytesCurrent);
-
-          final instancesAccumulated = currentAllocation.instancesDelta;
-          final bytesAccumulated = currentAllocation.bytesDelta;
-
-          if (_debugAllocationMonitoring &&
-              (instancesAccumulated != 0 || bytesAccumulated != 0)) {
-            debugLogger(
-              'previous,index=[$previousIndex][$currentIndex] '
-              'class ${currentAllocation.classRef.name}\n'
-              '    instancesCurrent=$instancesCurrent, '
-              '    instancesAccumulated=${currentAllocation.instancesDelta}\n'
-              '    bytesCurrent=$bytesCurrent, '
-              '    bytesAccumulated=${currentAllocation.bytesDelta}}\n',
-            );
-          }
-
-          previousIndex++;
-          currentIndex++;
-        } else {
-          // Either a new class in currentAllocations or old that's no longer
-          // active in previousAllocations.
-          final currentClassId = currentAllocation.classRef.id;
-          final ClassHeapDetailStats? first =
-              controller.monitorAllocations.firstWhereOrNull(
-            (element) => element.classRef.id == currentClassId,
-          );
-          if (first != null) {
-            // A class that no longer exist (live or sentinel).
-            previousIndex++;
-          } else {
-            // New Class encountered in new AllocationProfile, don't increment
-            // previousIndex.
-            currentIndex++;
-          }
-        }
-      }
-
-      // Insure all entries from previous and current monitors were looked at.
-      assert(previousSize == previousIndex, '$previousSize == $previousIndex');
-      assert(currentSize == currentIndex, '$currentSize == $currentIndex');
-    }
-
-    controller.monitorTimestamp = allocationtimestamp;
-    controller.monitorAllocations = currentAllocations;
-
-    controller.treeChanged();
-  }
-
-  Future<void> _allocationReset() async {
-    controller.memoryTimeline.addMonitorResetEvent();
-    final currentAllocations = await controller.resetAllocationProfile();
-
-    // Reset all accumulators to zero.
-    for (final classAllocation in currentAllocations) {
-      classAllocation.bytesDelta = 0;
-      classAllocation.instancesDelta = 0;
-    }
-
-    controller.monitorAllocations = currentAllocations;
-  }
-
   /// Match, found,  select it and process via ValueNotifiers.
   void selectTheMatch(String foundName) {
     ga.select(
@@ -1049,7 +924,7 @@ class HeapTreeViewState extends State<HeapTreeView>
           _buildSearchWidget(memorySearchFieldKey),
           const SizedBox(width: denseSpacing),
           FilterButton(
-            key: filterButtonKey,
+            key: MemoryScreenKeys.filterButton,
             onPressed: _filter,
             // TODO(kenz): implement isFilterActive
             isFilterActive: false,

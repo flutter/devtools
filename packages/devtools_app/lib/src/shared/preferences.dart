@@ -73,7 +73,7 @@ class PreferencesController extends DisposableController
   /// Change the value for the VM developer mode setting.
   void toggleVmDeveloperMode(bool enableVmDeveloperMode) {
     _vmDeveloperMode.value = enableVmDeveloperMode;
-    VmServicePrivate.enablePrivateRpcs = enableVmDeveloperMode;
+    VmServiceWrapper.enablePrivateRpcs = enableVmDeveloperMode;
   }
 
   /// Change the value for the dense mode setting.
@@ -357,12 +357,13 @@ class MemoryPreferencesController extends DisposableController
           _showChartStorageId,
           showChart.value.toString(),
         );
-        if (showChart.value) {
-          ga.select(
-            analytics_constants.memory,
-            analytics_constants.showChart,
-          );
-        }
+
+        ga.select(
+          analytics_constants.memory,
+          showChart.value
+              ? analytics_constants.showChart
+              : analytics_constants.hideChart,
+        );
       },
     );
     showChart.value = await storage.getValue(_showChartStorageId) == 'true';

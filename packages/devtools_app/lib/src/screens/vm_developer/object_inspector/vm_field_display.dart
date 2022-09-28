@@ -5,10 +5,10 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../vm_developer_common_widgets.dart';
+import '../vm_service_private_extensions.dart';
 import 'object_inspector_view_controller.dart';
-import 'vm_developer_common_widgets.dart';
 import 'vm_object_model.dart';
-import 'vm_service_private_extensions.dart';
 
 /// A widget for the object inspector historyViewport, displaying information
 /// related to field objects in the Dart VM.

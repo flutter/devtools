@@ -9,7 +9,6 @@ import '../../../../analytics/constants.dart' as analytics_constants;
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/theme.dart';
-import '../../../../shared/utils.dart';
 import '../../memory_controller.dart';
 import '../../primitives/ui.dart';
 import '../../shared/constants.dart';
@@ -18,25 +17,15 @@ import 'settings_dialog.dart';
 import 'source_dropdown.dart';
 
 /// Controls related to the entire memory screen.
-class SecondaryControls extends StatefulWidget {
+class SecondaryControls extends StatelessWidget {
   const SecondaryControls({
     Key? key,
     required this.chartController,
+    required this.controller,
   }) : super(key: key);
 
   final MemoryChartPaneController chartController;
-
-  @override
-  State<SecondaryControls> createState() => _SecondaryControlsState();
-}
-
-class _SecondaryControlsState extends State<SecondaryControls>
-    with ProvidedControllerMixin<MemoryController, SecondaryControls> {
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    initController();
-  }
+  final MemoryController controller;
 
   @override
   Widget build(BuildContext context) {
@@ -64,14 +53,14 @@ class _SecondaryControlsState extends State<SecondaryControls>
         ),
         const SizedBox(width: denseSpacing),
         SettingsOutlinedButton(
-          onPressed: _openSettingsDialog,
+          onPressed: () => _openSettingsDialog(context),
           tooltip: 'Open memory settings',
         ),
       ],
     );
   }
 
-  void _openSettingsDialog() {
+  void _openSettingsDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) => MemorySettingsDialog(controller),
