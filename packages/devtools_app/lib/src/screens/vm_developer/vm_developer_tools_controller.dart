@@ -11,8 +11,7 @@ class VMDeveloperToolsController {
   ValueListenable<int> get selectedIndex => _selectedIndex;
   final _selectedIndex = ValueNotifier<int>(0);
 
-  final objectInspectorViewController =
-      displayObjectInspector ? ObjectInspectorViewController() : null;
+  final objectInspectorViewController = ObjectInspectorViewController();
 
   void selectIndex(int index) {
     _selectedIndex.value = index;
