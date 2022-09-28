@@ -25,6 +25,7 @@ Future<String> initializePlatform() async {
 
 class FlutterDesktopStorage implements Storage {
   late final Map<String, dynamic> _values = _readValues();
+  bool _fileAndDirVerified = false;
 
   @override
   Future<String?> getValue(String key) async {
@@ -36,6 +37,10 @@ class FlutterDesktopStorage implements Storage {
     _values[key] = value;
 
     const encoder = JsonEncoder.withIndent('  ');
+    if (!_fileAndDirVerified) {
+      File(_preferencesFile.path).createSync(recursive: true);
+      _fileAndDirVerified = true;
+    }
     _preferencesFile.writeAsStringSync('${encoder.convert(_values)}\n');
   }
 

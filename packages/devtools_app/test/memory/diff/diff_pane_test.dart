@@ -28,7 +28,7 @@ void main() {
       await tester.pumpAndSettle(const Duration(seconds: 1));
       expect(find.byType(MemoryBody), findsOneWidget);
       await tester.tap(
-        find.byKey(HeapTreeViewState.diffTabKey),
+        find.byKey(MemoryScreenKeys.diffTab),
       );
       await tester.pumpAndSettle();
     }

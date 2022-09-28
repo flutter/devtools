@@ -111,7 +111,7 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.tap(
-        find.byKey(HeapTreeViewState.dartHeapAllocationTracingKey),
+        find.byKey(MemoryScreenKeys.dartHeapAllocationTracingTab),
       );
       await tester.pumpAndSettle();
 

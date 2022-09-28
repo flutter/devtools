@@ -77,7 +77,7 @@ void main() {
       WidgetTester tester,
       AllocationProfileTableViewController allocationProfileController,
     ) async {
-      await tester.tap(find.byKey(HeapTreeViewState.dartHeapTableProfileKey));
+      await tester.tap(find.byKey(MemoryScreenKeys.dartHeapTableProfileTab));
       await tester.pumpAndSettle();
 
       // We should have requested an allocation profile by navigating to the tab.

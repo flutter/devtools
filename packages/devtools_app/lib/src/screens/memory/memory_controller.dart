@@ -1298,18 +1298,17 @@ class MemoryController extends DisposableController
         objectRef,
       );
 
-  bool _gcing = false;
-
   bool get isGcing => _gcing;
+  bool _gcing = false;
 
   Future<void> gc() async {
     _gcing = true;
-
     try {
       await serviceManager.service!.getAllocationProfile(
         _isolateId!,
         gc: true,
       );
+      notificationService.push('Successfully garbage collected.');
     } finally {
       _gcing = false;
     }

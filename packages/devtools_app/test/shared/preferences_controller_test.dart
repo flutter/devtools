@@ -141,7 +141,7 @@ void main() {
     });
 
     test('stores values and reads them on init', () async {
-      expect(storage.values.isEmpty, isTrue);
+      storage.values.clear();
 
       // Remember original values.
       final originalAndroidCollection =
