@@ -5,7 +5,6 @@
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/screens/memory/memory_controller.dart';
-import 'package:devtools_app/src/screens/memory/memory_heap_tree_view.dart';
 import 'package:devtools_app/src/screens/memory/memory_screen.dart';
 import 'package:devtools_app/src/screens/memory/panes/chart/chart_control_pane.dart';
 import 'package:devtools_app/src/screens/memory/panes/chart/memory_events_pane.dart';
@@ -404,67 +403,5 @@ void main() {
       await tester.pumpAndSettle(const Duration(seconds: 2));
       */
     });
-
-    testWidgetsWithWindowSize(
-      'allocation monitor, class tracking and search auto-complete',
-      windowSize,
-      (WidgetTester tester) async {
-        const _oneSecond = Duration(seconds: 1);
-        const _twoSeconds = Duration(seconds: 2);
-
-        Future<void> pumpAndSettleOneSecond() async {
-          await tester.pumpAndSettle(_oneSecond);
-        }
-
-        Future<void> pumpAndSettleTwoSeconds() async {
-          await tester.pumpAndSettle(_twoSeconds);
-        }
-
-        await pumpMemoryScreen(tester);
-
-        controller.refreshAllCharts();
-        await pumpAndSettleTwoSeconds();
-
-        expect(controller.offline.value, isTrue);
-
-        Future<void> checkGolden(String goldenFilename, {Key? key}) async {
-          // Await delay for golden comparison.
-          await pumpAndSettleTwoSeconds();
-
-          final finder =
-              key == null ? find.byType(MemoryBody) : find.byKey(key);
-          expect(finder, findsOneWidget);
-
-          // Screenshot should display left-side tree table fully expanded and the monitor
-          // allocation leaf node 'Monitor <timestamp>' selected. The right-side displaying
-          // all allocations in a flat table, no items checked (tracked), search should
-          // be enabled with focus. No tree table displayed on the bottom only empty message.
-          await expectLater(finder, matchesDevToolsGolden(goldenFilename));
-        }
-
-        await pumpAndSettleTwoSeconds();
-
-        await pumpMemoryScreen(tester);
-
-        // Any exported memory files in the /tmp or $TMPDIR or /var/folders/Downloads will cause
-        // the memory page's drop-down widget width to be wider than normal (longest exported file
-        // name). For goldens don't generate snapshots as they we be slightly different on the bots.
-        expect(
-          controller.memoryLog.offlineFiles().isEmpty,
-          isTrue,
-          reason:
-              '\n\n=========================================================================\n'
-              'WARNING: Exported memory files in /tmp/memory_log_YYYYMMDD_HH_MM exist.\n'
-              'The switch --update-goldens shouldn\'t be used until export files removed.\n'
-              '=========================================================================',
-        );
-
-        expect(
-          find.byKey(MemoryScreenKeys.dartHeapAnalysisTab),
-          findsOneWidget,
-        );
-      },
-      skip: true,
-    );
   });
 }
