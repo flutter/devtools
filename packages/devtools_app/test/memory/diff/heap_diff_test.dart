@@ -27,7 +27,7 @@ void main() {
     expect(couple1, couple3);
   });
 
-  test('$DiffClassStats calculates diff as expected', () {
+  test('$DiffClassStats calculates mix of cases as expected', () {
     const className = HeapClassName(className: 'myClass', library: 'library');
 
     final deleted = _createObject(className, 1, []);
@@ -45,6 +45,21 @@ void main() {
     expect(stats.total.created.instanceCount, 2);
     expect(stats.total.deleted.instanceCount, 1);
     expect(stats.total.delta.instanceCount, 1);
+  });
+
+  test('$DiffClassStats calculates deletion as expected', () {
+    const className = HeapClassName(className: 'myClass', library: 'library');
+
+    final deleted = _createObject(className, 1, []);
+
+    final statsBefore = _createClassStats([deleted]);
+
+    final stats = DiffClassStats.diff(statsBefore, null)!;
+
+    expect(stats.heapClass, className);
+    expect(stats.total.created.instanceCount, 0);
+    expect(stats.total.deleted.instanceCount, 1);
+    expect(stats.total.delta.instanceCount, -1);
   });
 }
 

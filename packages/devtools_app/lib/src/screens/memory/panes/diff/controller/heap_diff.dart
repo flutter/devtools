@@ -149,6 +149,7 @@ class ObjectSetDiff {
     created.seal();
     deleted.seal();
     delta.seal();
+    assert(delta.instanceCount == created.instanceCount - deleted.instanceCount);
   }
 
   final created = ObjectSet();

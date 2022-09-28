@@ -69,7 +69,7 @@ class _InstanceColumn extends ColumnData<DiffClassStats> {
       case _DataPart.deleted:
         return classStats.total.deleted.instanceCount;
       case _DataPart.delta:
-        return classStats.total.deleted.instanceCount;
+        return classStats.total.delta.instanceCount;
     }
   }
 
