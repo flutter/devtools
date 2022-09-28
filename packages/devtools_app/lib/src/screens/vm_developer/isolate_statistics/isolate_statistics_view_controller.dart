@@ -23,10 +23,17 @@ class IsolateStatisticsViewController extends DisposableController
       () => refresh(),
     );
 
-    addAutoDisposeListener(serviceManager.isolateManager.selectedIsolate, () {
-      switchToIsolate(serviceManager.isolateManager.selectedIsolate.value!);
+    final isolateListenable = serviceManager.isolateManager.selectedIsolate;
+    addAutoDisposeListener(isolateListenable, () {
+      final isolate= isolateListenable.value;
+      if (isolate != null) {
+        switchToIsolate(isolate);
+      }
     });
-    switchToIsolate(serviceManager.isolateManager.selectedIsolate.value!);
+    final isolate = isolateListenable.value;
+    if (isolate != null) {
+      switchToIsolate(isolate);
+    }
   }
 
   final cpuProfilerController = CpuProfilerController();
