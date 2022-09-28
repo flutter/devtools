@@ -109,7 +109,7 @@ class _RetainedSizeColumn extends ColumnData<HeapClassStatistics> {
 }
 
 class SnapshotStatsTable extends StatelessWidget {
-  SnapshotStatsTable({
+  const SnapshotStatsTable({
     Key? key,
     required this.item,
     required this.dataId,
@@ -122,14 +122,14 @@ class SnapshotStatsTable extends StatelessWidget {
 
   final DiffPaneController controller;
 
-  final _shallowSizeColumn = _ShallowSizeColumn();
+  static final _shallowSizeColumn = _ShallowSizeColumn();
 
-  List<ColumnData<HeapClassStatistics>> get _columns => [
-        _ClassNameColumn(),
-        _InstanceColumn(),
-        _shallowSizeColumn,
-        _RetainedSizeColumn(),
-      ];
+  static final List<ColumnData<HeapClassStatistics>> _columns = [
+    _ClassNameColumn(),
+    _InstanceColumn(),
+    _shallowSizeColumn,
+    _RetainedSizeColumn(),
+  ];
 
   @override
   Widget build(BuildContext context) {

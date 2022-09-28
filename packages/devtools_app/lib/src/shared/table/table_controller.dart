@@ -57,8 +57,6 @@ class FlatTableController<T> extends TableControllerBase<T> {
       secondarySortColumn: secondarySortColumn,
       dataKey: key,
     );
-
-    // TODO: scroll to the tableUiState.offset use a notifier that _Table listens to
   }
 
   @override

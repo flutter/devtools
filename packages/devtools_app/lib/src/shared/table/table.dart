@@ -82,8 +82,18 @@ class FlatTable<T> extends StatefulWidget {
 
   final List<ColumnGroup>? columnGroups;
 
+  /// Data set to show as rows in this table.
   final List<T> data;
 
+  /// Unique key for the data shown in this table.
+  ///
+  /// This key will be used to restore things like sort column, sort direction,
+  /// and scroll position for this table (when [preserveVerticalScrollPosition]
+  /// is true).
+  ///
+  /// We use [TableUiStateStore] to store [_TableUiState] by this key so that
+  /// we can save and restore this state without having to keep [State] or table
+  /// controller objects alive.
   final String dataKey;
 
   /// Auto-scrolling the table to keep new content visible.
@@ -92,6 +102,7 @@ class FlatTable<T> extends StatefulWidget {
   /// Factory that creates keys for each row in this table.
   final Key Function(T data) keyFactory;
 
+  /// Callback that, when non-null, will be called on each table row selection.
   final ItemSelectedCallback<T?>? onItemSelected;
 
   /// Determines how elements that request to be pinned are displayed.
@@ -99,18 +110,35 @@ class FlatTable<T> extends StatefulWidget {
   /// Defaults to [FlatTablePinBehavior.none], which disables pinnning.
   final FlatTablePinBehavior pinBehavior;
 
-  /// The default sort column for this [FlatTable].
+  /// The default sort column for this table.
+  ///
+  /// This sort column is passed along to [TreeTableState.tableController],
+  /// which uses [defaultSortColumn] for the starting value in
+  /// [TableControllerBase.tableUiState].
   final ColumnData<T> defaultSortColumn;
 
-  /// The default [SortDirection] for tables using this [TableController].
+  /// The default [SortDirection] for this table.
+  ///
+  /// This [SortDirection] is passed along to [TreeTableState.tableController],
+  /// which uses [defaultSortDirection] for the starting value in
+  /// [TableControllerBase.tableUiState].
   final SortDirection defaultSortDirection;
 
+  /// The secondary sort column to be used in the sorting algorithm provided by
+  /// [TableControllerBase.sortDataAndNotify].
   final ColumnData<T>? secondarySortColumn;
 
+  /// Notifies with the list of data items that should be marked as search
+  /// matches.
   final ValueListenable<List<T>>? searchMatchesNotifier;
 
+  /// Notifies with the data item that should be marked as the active search
+  /// match.
   final ValueListenable<T?>? activeSearchMatchNotifier;
 
+  /// Stores the selected data item (the selected row) for this table.
+  ///
+  /// This notifier's value will be updated when a row of the table is selected.
   final ValueNotifier<T?> selectionNotifier;
 
   /// Whether the verical scroll position for this table should be preserved for
@@ -172,7 +200,7 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
     }
 
     if (widget.preserveVerticalScrollPosition) {
-      // Order mattters - this must be called before [tableController.setData]
+      // Order matters - this must be called before [tableController.setData]
       tableController.storeScrollPosition();
     }
 
@@ -273,7 +301,7 @@ class Selection<T> {
   final T? node;
   // TODO (carolynqu): get rid of nodeIndex and only use nodeIndexCalculator, https://github.com/flutter/devtools/issues/4266
   final int? nodeIndex;
-  final int Function(T)? nodeIndexCalculator;
+  final int? Function(T?)? nodeIndexCalculator;
   final bool scrollIntoView;
 }
 
@@ -318,8 +346,21 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
   final Key Function(T) keyFactory;
 
   /// The tree structures of rows to show in this table.
+  ///
+  /// Each root in [dataRoots] will be a top-level entry in the table. Depending
+  /// on the expanded / collapsed state of each root and its children,
+  /// additional table rows will be present in the table.
   final List<T> dataRoots;
 
+  /// Unique key for the data shown in this table.
+  ///
+  /// This key will be used to restore things like sort column, sort direction,
+  /// and scroll position for this table (when [preserveVerticalScrollPosition]
+  /// is true).
+  ///
+  /// We use [TableUiStateStore] to store [_TableUiState] by this key so that
+  /// we can save and restore this state without having to keep [State] or table
+  /// controller objects alive.
   final String dataKey;
 
   /// The columns to show in this table.
@@ -328,14 +369,30 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
   /// The column of the table to treat as expandable.
   final TreeColumnData<T> treeColumn;
 
+  /// The default sort column for this table.
+  ///
+  /// This sort column is passed along to [TreeTableState.tableController],
+  /// which uses [defaultSortColumn] for the starting value in
+  /// [TableControllerBase.tableUiState].
   final ColumnData<T> defaultSortColumn;
 
+  /// The default [SortDirection] for this table.
+  ///
+  /// This [SortDirection] is passed along to [TreeTableState.tableController],
+  /// which uses [defaultSortDirection] for the starting value in
+  /// [TableControllerBase.tableUiState].
   final SortDirection defaultSortDirection;
 
+  /// The secondary sort column to be used in the sorting algorithm provided by
+  /// [TableControllerBase.sortDataAndNotify].
   final ColumnData<T>? secondarySortColumn;
 
+  /// Stores the selected data item (the selected row) for this table.
+  ///
+  /// This notifier's value will be updated when a row of the table is selected.
   final ValueNotifier<Selection<T?>> selectionNotifier;
 
+  /// Whether the data roots in this table should be automatically expanded.
   final bool autoExpandRoots;
 
   /// Whether the verical scroll position for this table should be preserved for
@@ -420,7 +477,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     }
 
     if (widget.preserveVerticalScrollPosition) {
-      // Order mattters - this must be called before [tableController.setData]
+      // Order matters - this must be called before [tableController.setData]
       tableController.storeScrollPosition();
     }
 
@@ -491,7 +548,6 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   void _toggleNode(T node) {
     if (!node.isExpandable) {
       node.leaf();
-      // _updateItems();
       return;
     }
 
@@ -767,13 +823,13 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           final Selection<T?> selection = selectionNotifier.value;
           final T? node = selection.node;
-          final int Function(T)? nodeIndexCalculator =
+          final int? Function(T?)? nodeIndexCalculator =
               selection.nodeIndexCalculator;
           final int? nodeIndex = selection.nodeIndex;
 
           if (selection.scrollIntoView && node != null) {
             final int selectedDisplayRow = nodeIndexCalculator != null
-                ? nodeIndexCalculator(node)
+                ? nodeIndexCalculator(node)!
                 : nodeIndex!;
 
             final newPos = selectedDisplayRow * defaultRowHeight;
@@ -868,7 +924,6 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
     final tableUiState = widget.tableController.tableUiState;
     final sortColumn =
         widget.tableController.columns[tableUiState.sortColumnIndex];
-    // how does this conflict with auto scroll to bototm above?
     if (widget.preserveVerticalScrollPosition && scrollController.hasClients) {
       scrollController.jumpTo(tableUiState.scrollOffset);
     }
@@ -1546,9 +1601,7 @@ class _ColumnHeader<T> extends StatelessWidget {
           ),
           const SizedBox(width: densePadding),
         ],
-        // TODO: This Flexible wrapper was added to get the
-        // network_profiler_test.dart tests to pass.
-        Flexible(
+        Expanded(
           child: column.titleTooltip != null
               ? DevToolsTooltip(
                   message: column.titleTooltip,

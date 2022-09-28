@@ -186,15 +186,14 @@ class _VMFlagsDialogState extends State<VMFlagsDialog> with AutoDisposeMixin {
 }
 
 class _FlagTable extends StatelessWidget {
-  _FlagTable(this.flags);
+  const _FlagTable(this.flags);
 
   final List<_DialogFlag> flags;
 
-  final ColumnData<_DialogFlag> name = _NameColumn();
-  final ColumnData<_DialogFlag> description = _DescriptionColumn();
-  final ColumnData<_DialogFlag> value = _ValueColumn();
-
-  List<ColumnData<_DialogFlag>> get columns => [name, description, value];
+  static final ColumnData<_DialogFlag> name = _NameColumn();
+  static final ColumnData<_DialogFlag> description = _DescriptionColumn();
+  static final ColumnData<_DialogFlag> value = _ValueColumn();
+  static List<ColumnData<_DialogFlag>> columns = [name, description, value];
 
   @override
   Widget build(BuildContext context) {

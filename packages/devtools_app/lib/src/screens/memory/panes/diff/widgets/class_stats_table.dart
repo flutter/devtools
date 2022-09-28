@@ -104,21 +104,21 @@ class _RetainedSizeColumn extends ColumnData<RetainingPathRecord> {
 }
 
 class ClassStatsRetainingPathTable extends StatelessWidget {
-  ClassStatsRetainingPathTable({
+  const ClassStatsRetainingPathTable({
     Key? key,
     required this.data,
   }) : super(key: key);
 
   final List<RetainingPathRecord> data;
 
-  final _shallowSizeColumn = _ShallowSizeColumn();
+  static final _shallowSizeColumn = _ShallowSizeColumn();
 
-  List<ColumnData<RetainingPathRecord>> get _columns => [
-        _RetainingPathColumn(),
-        _InstanceColumn(),
-        _shallowSizeColumn,
-        _RetainedSizeColumn(),
-      ];
+  static final _columns = [
+    _RetainingPathColumn(),
+    _InstanceColumn(),
+    _shallowSizeColumn,
+    _RetainedSizeColumn(),
+  ];
 
   @override
   Widget build(BuildContext context) {

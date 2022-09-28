@@ -105,6 +105,10 @@ extension FlatColumnWidthExtension<T> on FlatTableController<T> {
   }
 }
 
+// TODO(https://github.com/flutter/devtools/issues/2047): build flexible column
+// widths into the tables so that we do not have to do in depth calculations
+// like this.
+
 extension TreeColumnWidthExtension<T extends TreeNode<T>>
     on TreeTableController<T> {
   /// The width to assume for columns that don't specify a width.

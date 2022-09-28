@@ -216,12 +216,12 @@ class IsolateMemoryStatisticsWidget extends StatelessWidget {
 /// A table which displays the amount of time the VM is performing certain
 /// tagged tasks.
 class TagStatisticsWidget extends StatelessWidget {
-  TagStatisticsWidget({required this.controller});
+  const TagStatisticsWidget({required this.controller});
 
-  final name = _TagColumn();
-  final percentage = _PercentageColumn();
+  static final _name = _TagColumn();
+  static final _percentage = _PercentageColumn();
+  static final List<ColumnData<VMTag>> columns = [_name, _percentage];
 
-  List<ColumnData<VMTag>> get columns => [name, percentage];
   final IsolateStatisticsViewController controller;
 
   @override
@@ -237,7 +237,7 @@ class TagStatisticsWidget extends StatelessWidget {
                   data: controller.tags,
                   dataKey: 'tag-statistics',
                   columns: columns,
-                  defaultSortColumn: percentage,
+                  defaultSortColumn: _percentage,
                   defaultSortDirection: SortDirection.descending,
                 )
               : CpuProfilerDisabled(
@@ -353,15 +353,14 @@ class IsolatePortsWidget extends StatefulWidget {
 }
 
 class _IsolatePortsWidgetState extends State<IsolatePortsWidget> {
-  final id = _PortIDColumn();
-  final name = _PortNameColumn();
+  static final _id = _PortIDColumn();
+  static final _name = _PortNameColumn();
+  static final List<ColumnData<InstanceRef>> _columns = [
+    _name,
+    _id,
+  ];
 
   final selectedPort = ValueNotifier<InstanceRef?>(null);
-
-  List<ColumnData<InstanceRef>> get columns => [
-        name,
-        id,
-      ];
 
   @override
   Widget build(BuildContext context) {
@@ -389,8 +388,8 @@ class _IsolatePortsWidgetState extends State<IsolatePortsWidget> {
                         ValueKey<String>(port!.debugName!),
                     data: ports,
                     dataKey: 'isolate-ports',
-                    columns: columns,
-                    defaultSortColumn: id,
+                    columns: _columns,
+                    defaultSortColumn: _id,
                     defaultSortDirection: SortDirection.ascending,
                     selectionNotifier: selectedPort,
                     onItemSelected: (InstanceRef? port) => setState(
@@ -428,13 +427,13 @@ class _ServiceExtensionNameColumn extends ColumnData<String> {
 /// A table displaying the list of service extensions registered with an
 /// isolate.
 class ServiceExtensionsWidget extends StatelessWidget {
-  ServiceExtensionsWidget({required this.controller});
+  const ServiceExtensionsWidget({required this.controller});
 
-  final name = _ServiceExtensionNameColumn();
+  static final _name = _ServiceExtensionNameColumn();
 
-  List<ColumnData<String>> get columns => [
-        name,
-      ];
+  static final List<ColumnData<String>> _columns = [
+    _name,
+  ];
 
   final IsolateStatisticsViewController controller;
 
@@ -451,8 +450,8 @@ class ServiceExtensionsWidget extends StatelessWidget {
             keyFactory: (String extension) => ValueKey<String>(extension),
             data: extensions,
             dataKey: 'registered-service-extensions',
-            columns: columns,
-            defaultSortColumn: name,
+            columns: _columns,
+            defaultSortColumn: _name,
             defaultSortDirection: SortDirection.ascending,
           ),
         ),

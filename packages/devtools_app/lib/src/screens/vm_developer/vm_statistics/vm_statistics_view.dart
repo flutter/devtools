@@ -266,24 +266,24 @@ class _IsolateHeapColumn extends _IsolateMemoryColumn {
 ///   - New / old space usage
 ///   - Dart heap usage
 class IsolatesPreviewWidget extends StatelessWidget {
-  IsolatesPreviewWidget({
+  const IsolatesPreviewWidget({
     required this.controller,
     this.systemIsolates = false,
   });
 
-  final name = _IsolateNameColumn();
-  final number = _IsolateIDColumn();
-  final newSpace = _IsolateNewSpaceColumn();
-  final oldSpace = _IsolateOldSpaceColumn();
-  final heap = _IsolateHeapColumn();
+  static final name = _IsolateNameColumn();
+  static final number = _IsolateIDColumn();
+  static final newSpace = _IsolateNewSpaceColumn();
+  static final oldSpace = _IsolateOldSpaceColumn();
+  static final heap = _IsolateHeapColumn();
 
-  List<ColumnData<Isolate>> get columns => [
-        name,
-        number,
-        newSpace,
-        oldSpace,
-        heap,
-      ];
+  static List<ColumnData<Isolate>> columns = [
+    name,
+    number,
+    newSpace,
+    oldSpace,
+    heap,
+  ];
 
   final VMStatisticsViewController controller;
   final bool systemIsolates;

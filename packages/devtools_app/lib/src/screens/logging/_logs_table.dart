@@ -14,7 +14,7 @@ import '_when_column.dart';
 import 'logging_controller.dart';
 
 class LogsTable extends StatelessWidget {
-  LogsTable({
+  const LogsTable({
     Key? key,
     required this.data,
     required this.selectionNotifier,
@@ -27,11 +27,10 @@ class LogsTable extends StatelessWidget {
   final ValueListenable<List<LogData>> searchMatchesNotifier;
   final ValueListenable<LogData?> activeSearchMatchNotifier;
 
-  final ColumnData<LogData> when = WhenColumn();
-  final ColumnData<LogData> kind = KindColumn();
-  final ColumnData<LogData> message = MessageColumn();
-
-  List<ColumnData<LogData>> get columns => [when, kind, message];
+  static final ColumnData<LogData> when = WhenColumn();
+  static final ColumnData<LogData> kind = KindColumn();
+  static final ColumnData<LogData> message = MessageColumn();
+  static final List<ColumnData<LogData>> columns = [when, kind, message];
 
   @override
   Widget build(BuildContext context) {

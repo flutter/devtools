@@ -76,7 +76,6 @@ void main() {
         data: [TestData('empty', 0)],
         dataKey: 'test-data',
         keyFactory: (d) => Key(d.name),
-        //
         defaultSortColumn: flatNameColumn,
         defaultSortDirection: SortDirection.ascending,
       );
