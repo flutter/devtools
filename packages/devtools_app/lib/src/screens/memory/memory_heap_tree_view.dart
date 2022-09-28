@@ -42,17 +42,6 @@ const memorySearchFieldKeyName = 'MemorySearchFieldKey';
 @visibleForTesting
 final memorySearchFieldKey = GlobalKey(debugLabel: memorySearchFieldKeyName);
 
-class HeapTreeView extends StatefulWidget {
-  const HeapTreeView(
-    this.controller,
-  );
-
-  final MemoryController controller;
-
-  @override
-  HeapTreeViewState createState() => HeapTreeViewState();
-}
-
 enum SnapshotStatus {
   none,
   streaming,
