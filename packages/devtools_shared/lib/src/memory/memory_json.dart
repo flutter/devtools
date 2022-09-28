@@ -227,6 +227,8 @@ class SamplesMemoryJson extends MemoryJson<HeapSample> {
 ///     ]
 ///   }
 /// }
+
+// TODO(bkonyi): update to use `ClassHeapStats` from package:vm_service
 class AllocationMemoryJson extends MemoryJson<ClassHeapDetailStats> {
   AllocationMemoryJson();
 

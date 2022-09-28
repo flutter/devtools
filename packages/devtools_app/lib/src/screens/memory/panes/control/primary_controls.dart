@@ -28,13 +28,6 @@ class PrimaryControls extends StatelessWidget {
 
     controller.memoryTimeline.reset();
 
-    // Clear any current Allocation Profile collected.
-    controller.monitorAllocations = [];
-    controller.monitorTimestamp = null;
-    controller.lastMonitorTimestamp.value = null;
-    controller.trackAllocations.clear();
-    controller.allocationSamples.clear();
-
     // Clear all analysis and snapshots collected too.
     controller.clearAllSnapshots();
     controller.classRoot = null;
