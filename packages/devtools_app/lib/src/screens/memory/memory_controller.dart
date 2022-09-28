@@ -715,7 +715,6 @@ class MemoryController extends DisposableController
   //              to line number of the source file when clicked is needed.
   static const packageName = '/packages/';
 
-
   /// When new snapshot occurs entire libraries should be rebuilt then rebuild should be true.
   LibraryReference? computeAllLibraries({
     bool filtered = true,
