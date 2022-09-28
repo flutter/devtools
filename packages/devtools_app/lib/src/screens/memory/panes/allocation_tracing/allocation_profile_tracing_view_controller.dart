@@ -218,13 +218,12 @@ class AllocationProfileTracingViewController extends DisposableController
     // otherwise the VM will respond with all samples, not just the samples
     // collected after `_lastClearTimeMicros`. We'll just use the maximum
     // Javascript integer value (2^53 - 1) to represent "infinity".
-    const int64Max = 0x1FFFFFFFFFFFFF;
     // Request the allocation profile for the traced class.
     final trace = await service.getAllocationTraces(
       isolateId,
       classId: cls.id!,
       timeOriginMicros: _lastClearTimeMicros,
-      timeExtentMicros: int64Max,
+      timeExtentMicros: maxJsInt,
     );
 
     final profileData = await CpuProfileData.generateFromCpuSamples(
