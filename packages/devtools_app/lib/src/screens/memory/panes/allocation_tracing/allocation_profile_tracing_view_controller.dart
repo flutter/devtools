@@ -101,9 +101,7 @@ class AllocationProfileTracingIsolateState {
     for (final cls in classList.classes!) {
       tracedClasses[cls.id!] = TracedClass(cls: cls);
     }
-    _filteredClassList
-      ..clear()
-      ..addAll(tracedClasses.values);
+    _filteredClassList.replaceAll(tracedClasses.values);
     unfilteredClassList.addAll(tracedClasses.values);
   }
 
@@ -273,8 +271,8 @@ class AllocationProfileTracingViewController extends DisposableController
 
   @override
   void dispose() {
-    super.dispose();
     textEditingController.dispose();
+    super.dispose();
   }
 
   /// Refreshes the allocation profiles for the current isolate's traced classes.
