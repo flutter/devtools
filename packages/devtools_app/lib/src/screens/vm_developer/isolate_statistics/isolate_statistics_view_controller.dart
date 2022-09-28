@@ -25,7 +25,7 @@ class IsolateStatisticsViewController extends DisposableController
 
     final isolateListenable = serviceManager.isolateManager.selectedIsolate;
     addAutoDisposeListener(isolateListenable, () {
-      final isolate= isolateListenable.value;
+      final isolate = isolateListenable.value;
       if (isolate != null) {
         switchToIsolate(isolate);
       }
