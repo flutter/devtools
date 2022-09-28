@@ -14,6 +14,8 @@ import 'object_inspector/object_inspector_view.dart';
 import 'vm_developer_tools_controller.dart';
 import 'vm_statistics/vm_statistics_view.dart';
 
+bool displayObjectInspector = false;
+
 abstract class VMDeveloperView {
   const VMDeveloperView(
     this.screenId, {
