@@ -12,7 +12,6 @@ import '../../../../shared/theme.dart';
 import '../../memory_controller.dart';
 import '../../primitives/ui.dart';
 import '../chart/chart_pane_controller.dart';
-import 'chart_button.dart';
 
 class PrimaryControls extends StatelessWidget {
   const PrimaryControls({

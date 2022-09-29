@@ -456,6 +456,7 @@ class _HeapTreeViewState extends State<HeapTreeView>
 
     return Column(
       children: [
+        const SizedBox(height: defaultSpacing),
         ValueListenableBuilder<int>(
           valueListenable: _currentTab,
           builder: (context, index, _) => Row(
@@ -479,16 +480,14 @@ class _HeapTreeViewState extends State<HeapTreeView>
             controller: _tabController,
             children: [
               // Profile Tab
-              if (FeatureFlags.newAllocationProfileTable) ...[
-                KeepAliveWrapper(
-                  child: AllocationProfileTableView(
-                    controller: controller.allocationProfileController,
-                  ),
+              KeepAliveWrapper(
+                child: AllocationProfileTableView(
+                  controller: controller.allocationProfileController,
                 ),
-                const KeepAliveWrapper(
-                  child: AllocationProfileTracingView(),
-                ),
-              ],
+              ),
+              const KeepAliveWrapper(
+                child: AllocationProfileTracingView(),
+              ),
               // Analysis Tab
               KeepAliveWrapper(
                 child: Column(
@@ -497,18 +496,6 @@ class _HeapTreeViewState extends State<HeapTreeView>
                     const SizedBox(height: denseRowSpacing),
                     Expanded(
                       child: buildSnapshotTables(snapshotDisplay),
-                    ),
-                  ],
-                ),
-              ),
-              // Allocations Tab
-              KeepAliveWrapper(
-                child: Column(
-                  children: [
-                    _buildAllocationsControls(),
-                    const SizedBox(height: denseRowSpacing),
-                    const Expanded(
-                      child: AllocationTableView(),
                     ),
                   ],
                 ),
