@@ -57,15 +57,6 @@ void main() {
   }
 
   void _setUpServiceManagerForMemory() {
-    // Use later in the class tracking test.
-    if (classesToTrack.isEmpty) {
-      for (var classDetails in allocationJson.data) {
-        if (classDetails.isStacktraced) {
-          classesToTrack.add(classDetails.classRef);
-        }
-      }
-    }
-
     fakeServiceManager = FakeServiceManager(
       service: FakeServiceManager.createFakeService(
         memoryData: memoryJson,

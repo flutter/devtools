@@ -240,7 +240,6 @@ void main() {
       String lastClassName = state.data.first!.classRef!.name!;
       for (final element in state.data) {
         final name = element!.classRef!.name!;
-        print('$name $lastClassName');
         expect(name.compareTo(lastClassName) >= 0, isTrue);
         lastClassName = name;
       }

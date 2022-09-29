@@ -166,9 +166,9 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
     for (var data in _allocationData!.data) {
       final stats = ClassHeapStats(
         classRef: data.classRef,
-        accumulatedSize: data.bytesDelta,
+        accumulatedSize: 0, //TODO(bkonyi): data.bytesDelta,
         bytesCurrent: data.bytesCurrent,
-        instancesAccumulated: data.instancesDelta,
+        instancesAccumulated: 0, // TODO(bkonyi): data.instancesDelta,
         instancesCurrent: data.instancesCurrent,
       );
       stats.json = stats.toJson();
