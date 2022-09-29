@@ -16,6 +16,7 @@ import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../../vm_developer/vm_service_private_extensions.dart';
 import '../../primitives/ui.dart';
+import '../../shared/heap/primitives.dart';
 import 'allocation_profile_table_view_controller.dart';
 
 // TODO(bkonyi): ensure data displayed in this view is included in the full
@@ -90,7 +91,8 @@ class _FieldExternalSizeColumn extends _FieldSizeColumn {
   _FieldExternalSizeColumn({required super.heap})
       : super._(
           title: 'External',
-          titleTooltip: 'Portion of memory allocated outside of the Dart heap',
+          titleTooltip:
+              'Non-Dart heap allocated memory associated with a Dart object',
         );
 
   @override
@@ -107,11 +109,11 @@ class _FieldExternalSizeColumn extends _FieldSizeColumn {
   }
 }
 
-class _FieldInternalSizeColumn extends _FieldSizeColumn {
-  _FieldInternalSizeColumn({required super.heap})
+class _FieldDartHeapSizeColumn extends _FieldSizeColumn {
+  _FieldDartHeapSizeColumn({required super.heap})
       : super._(
-          title: 'Internal',
-          titleTooltip: 'Portion of memory allocated within the Dart heap',
+          title: 'Dart Heap',
+          titleTooltip: shallowSizeColumnTooltip,
         );
 
   @override
@@ -129,8 +131,10 @@ class _FieldInternalSizeColumn extends _FieldSizeColumn {
 
 class _FieldSizeColumn extends ColumnData<ClassHeapStats> {
   factory _FieldSizeColumn({required heap}) => _FieldSizeColumn._(
-        title: 'Size',
-        titleTooltip: 'Total memory allocated',
+        title: 'Total Size',
+        titleTooltip: "The sum of the type's total shallow memory "
+            'consumption in the Dart heap and associated external (e.g., '
+            'non-Dart heap) allocations',
         heap: heap,
       );
 
@@ -242,7 +246,7 @@ class _AllocationProfileTable extends StatefulWidget {
     _FieldClassNameColumn(),
     _FieldInstanceCountColumn(heap: _HeapGeneration.total),
     _initialSortColumn,
-    _FieldInternalSizeColumn(heap: _HeapGeneration.total),
+    _FieldDartHeapSizeColumn(heap: _HeapGeneration.total),
     _FieldExternalSizeColumn(heap: _HeapGeneration.total),
   ];
 
@@ -261,11 +265,11 @@ class _AllocationProfileTable extends StatefulWidget {
   static final _vmDeveloperModeColumns = [
     _FieldInstanceCountColumn(heap: _HeapGeneration.newSpace),
     _FieldSizeColumn(heap: _HeapGeneration.newSpace),
-    _FieldInternalSizeColumn(heap: _HeapGeneration.newSpace),
+    _FieldDartHeapSizeColumn(heap: _HeapGeneration.newSpace),
     _FieldExternalSizeColumn(heap: _HeapGeneration.newSpace),
     _FieldInstanceCountColumn(heap: _HeapGeneration.oldSpace),
     _FieldSizeColumn(heap: _HeapGeneration.oldSpace),
-    _FieldInternalSizeColumn(heap: _HeapGeneration.oldSpace),
+    _FieldDartHeapSizeColumn(heap: _HeapGeneration.oldSpace),
     _FieldExternalSizeColumn(heap: _HeapGeneration.oldSpace),
   ];
 
