@@ -126,7 +126,7 @@ class AllocationProfileTracingIsolateState {
   }
 
   void updateClassFilter(String value, {bool force = false}) {
-    if (value.isEmpty && _currentFilter.isEmpty) return;
+    if (value.isEmpty && _currentFilter.isEmpty && !force) return;
     final updatedFilter = (value.contains(_currentFilter) && !force
             ? _filteredClassList.value
             : unfilteredClassList)
@@ -144,7 +144,6 @@ class AllocationProfileTracingIsolateState {
   Future<void> clear() async {
     _lastClearTimeMicros =
         (await serviceManager.service!.getVMTimelineMicros()).timestamp!;
-
     // Reset the counts for traced classes.
     final updatedTracedClasses = tracedClasses.map((key, value) {
       return MapEntry(key, value.copyWith(instances: 0));
