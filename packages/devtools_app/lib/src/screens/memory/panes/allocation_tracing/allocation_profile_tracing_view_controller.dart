@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../primitives/auto_dispose.dart';
@@ -56,86 +57,62 @@ class TracedClass with PinnableListEntry {
 
   @override
   bool get pinToTop => traceAllocations;
+
+  @override
+  String toString() =>
+      '${cls.name} instances: $instances trace: $traceAllocations';
 }
 
-class AllocationProfileTracingViewController extends DisposableController
-    with AutoDisposeControllerMixin {
-  /// Set to `true` if the controller has not yet finished initializing.
-  ValueListenable<bool> get initializing => _initializing;
-  final _initializing = ValueNotifier<bool>(true);
+/// Contains allocation tracing state for a single isolate.
+///
+/// `AllocationProfileTracingController` is effectively only used to provide
+/// consumers the allocation tracing state for the currently selected isolate.
+class AllocationProfileTracingIsolateState {
+  AllocationProfileTracingIsolateState({required this.isolate});
 
-  /// Set to `true` when `refresh()` has been called and allocation profiles
-  /// are being updated, before then being set again to `false`.
-  ValueListenable<bool> get refreshing => _refreshing;
-  final _refreshing = ValueNotifier<bool>(false);
+  AllocationProfileTracingIsolateState._empty() : isolate = IsolateRef();
 
-  /// The list of classes for the currently selected isolate.
-  ValueListenable<List<TracedClass>> get filteredClassList =>
-      _filteredClassList;
-  final _filteredClassList = ListValueNotifier<TracedClass>([]);
-  final _unfilteredClassList = <TracedClass>[];
+  final IsolateRef isolate;
 
-  String _currentFilter = '';
+  // Keeps track of which classes have allocation tracing enabling.
+  final tracedClasses = <String, TracedClass>{};
+  final tracedClassesProfiles = <String, CpuProfileData>{};
+  final unfilteredClassList = <TracedClass>[];
 
   /// The current class selection in the [AllocationTracingTable]
   ValueListenable<TracedClass?> get selectedTracedClass => _selectedTracedClass;
   final _selectedTracedClass = ValueNotifier<TracedClass?>(null);
 
+  /// The list of classes for the currently selected isolate.
+  ValueListenable<List<TracedClass>> get filteredClassList =>
+      _filteredClassList;
+  final _filteredClassList = ListValueNotifier<TracedClass>([]);
+
+  String _currentFilter = '';
+
   /// The allocation profile data for the current class selection in the
   /// [AllocationTracingTable].
-  CpuProfileData? get selectedTracedClassAllocationData =>
-      _tracedClassesProfiles[selectedTracedClass.value?.cls.id!];
-
-  // Keeps track of which classes have allocation tracing enabling.
-  // TODO(bkonyi): handle multiple isolate case.
-  final _tracedClasses = <String, TracedClass>{};
-  final _tracedClassesProfiles = <String, CpuProfileData>{};
+  CpuProfileData? get selectedTracedClassAllocationData {
+    return tracedClassesProfiles[selectedTracedClass.value?.cls.id!];
+  }
 
   /// The last time, in microseconds, the table was cleared. This time is based
   /// on the VM's internal monotonic clock, which is accessible through
   /// `service.getVMTimelineMicros()`.
   int _lastClearTimeMicros = 0;
 
-  void updateClassFilter(String value, {bool force = false}) {
-    if (value.isEmpty && _currentFilter.isEmpty && !force) return;
-    final updatedFilter = (value.contains(_currentFilter) && !force
-            ? _filteredClassList.value
-            : _unfilteredClassList)
-        .where(
-          (e) => e.cls.name!.contains(value),
-        )
-        .map((e) => _tracedClasses[e.cls.id!]!)
-        .toList();
-
-    _filteredClassList.replaceAll(updatedFilter);
-    _currentFilter = value;
-  }
-
   Future<void> initialize() async {
-    _initializing.value = true;
-
-    final isolateId = serviceManager.isolateManager.selectedIsolate.value!.id!;
-
-    // TODO(bkonyi): we don't need to request this unless we've had a hot reload.
-    // We generally need to rebuild this data if we've had a hot reload or
-    // switched the currently selected isolate.
-    final classList = await serviceManager.service!.getClassList(isolateId);
+    final classList = await serviceManager.service!.getClassList(isolate.id!);
     for (final cls in classList.classes!) {
-      _tracedClasses[cls.id!] = TracedClass(cls: cls);
+      tracedClasses[cls.id!] = TracedClass(cls: cls);
     }
-    _filteredClassList.addAll(_tracedClasses.values);
-    _unfilteredClassList.addAll(_tracedClasses.values);
-
-    await refresh();
-    _initializing.value = false;
+    _filteredClassList.replaceAll(tracedClasses.values);
+    unfilteredClassList.addAll(tracedClasses.values);
   }
 
-  /// Refreshes the allocation profiles for the currently traced classes.
   Future<void> refresh() async {
-    _refreshing.value = true;
-
     final profileRequests = <Future<void>>[];
-    for (final tracedClass in _filteredClassList.value) {
+    for (final tracedClass in filteredClassList.value) {
       // If allocation tracing is enabled for this class, request an updated
       // profile.
       if (tracedClass.traceAllocations) {
@@ -146,41 +123,51 @@ class AllocationProfileTracingViewController extends DisposableController
     // All profile requests need to complete before we can consider the refresh
     // completed.
     await Future.wait(profileRequests);
-    _refreshing.value = false;
+  }
+
+  void updateClassFilter(String value, {bool force = false}) {
+    if (value.isEmpty && _currentFilter.isEmpty && !force) return;
+    final updatedFilter = (value.contains(_currentFilter) && !force
+            ? _filteredClassList.value
+            : unfilteredClassList)
+        .where(
+          (e) => e.cls.name!.contains(value),
+        )
+        .map((e) => tracedClasses[e.cls.id!]!)
+        .toList();
+
+    _filteredClassList.replaceAll(updatedFilter);
+    _currentFilter = value;
   }
 
   /// Clears the allocation profiles for the currently traced classes.
   Future<void> clear() async {
-    _refreshing.value = true;
     _lastClearTimeMicros =
         (await serviceManager.service!.getVMTimelineMicros()).timestamp!;
-
     // Reset the counts for traced classes.
-    final updatedTracedClasses = _tracedClasses.map((key, value) {
+    final updatedTracedClasses = tracedClasses.map((key, value) {
       return MapEntry(key, value.copyWith(instances: 0));
     });
 
-    _tracedClasses
+    tracedClasses
       ..clear()
       ..addAll(updatedTracedClasses);
 
     // Reset the unfiltered class list with the new `TracedClass` instances.
-    _unfilteredClassList
+    unfilteredClassList
       ..clear()
-      ..addAll(_tracedClasses.values);
+      ..addAll(tracedClasses.values);
     updateClassFilter(_currentFilter, force: true);
 
     // Since there's no longer any tracing data, clear the existing profiles.
-    _tracedClassesProfiles.clear();
-
-    _refreshing.value = false;
+    tracedClassesProfiles.clear();
   }
 
   /// Enables or disables tracing of allocations of [cls].
   Future<void> setAllocationTracingForClass(ClassRef cls, bool enabled) async {
     final service = serviceManager.service!;
     final isolate = serviceManager.isolateManager.selectedIsolate.value!;
-    final tracedClass = _tracedClasses[cls.id!]!;
+    final tracedClass = tracedClasses[cls.id!]!;
 
     // Only update if the tracing state has changed for `cls`.
     if (tracedClass.traceAllocations != enabled) {
@@ -195,10 +182,10 @@ class AllocationProfileTracingViewController extends DisposableController
   void _updateClassState(TracedClass original, TracedClass updated) {
     final cls = original.cls;
     // Update the currently selected class, if it's still being traced.
-    if (_selectedTracedClass.value?.cls.id == cls.id) {
+    if (selectedTracedClass.value?.cls.id == cls.id) {
       _selectedTracedClass.value = updated;
     }
-    _tracedClasses[cls.id!] = updated;
+    tracedClasses[cls.id!] = updated;
     _filteredClassList.replace(original, updated);
   }
 
@@ -241,8 +228,8 @@ class AllocationProfileTracingViewController extends DisposableController
     final updated = tracedClass.copyWith(
       instances: profileData.cpuSamples.length,
     );
-    _tracedClasses[cls.id!] = updated;
-    _tracedClassesProfiles[cls.id!] = profileData;
+    tracedClasses[cls.id!] = updated;
+    tracedClassesProfiles[cls.id!] = profileData;
 
     _updateClassState(tracedClass, updated);
     return profileData;
@@ -254,9 +241,97 @@ class AllocationProfileTracingViewController extends DisposableController
     TracedClass? update = traced;
     // Clear the selection if the user tries to select the currently selected
     // class.
-    if (_selectedTracedClass.value == traced) {
+    if (selectedTracedClass.value == traced) {
       update = null;
     }
     _selectedTracedClass.value = update;
+  }
+}
+
+class AllocationProfileTracingViewController extends DisposableController
+    with AutoDisposeControllerMixin {
+  /// Set to `true` if the controller has not yet finished initializing.
+  ValueListenable<bool> get initializing => _initializing;
+  final _initializing = ValueNotifier<bool>(true);
+
+  /// Set to `true` when `refresh()` has been called and allocation profiles
+  /// are being updated, before then being set again to `false`.
+  ValueListenable<bool> get refreshing => _refreshing;
+  final _refreshing = ValueNotifier<bool>(false);
+
+  /// The allocation tracing state for the currently selected isolate.
+  ValueListenable<AllocationProfileTracingIsolateState> get stateForIsolate =>
+      _stateForIsolateListenable;
+  final _stateForIsolateListenable =
+      ValueNotifier<AllocationProfileTracingIsolateState>(
+    AllocationProfileTracingIsolateState._empty(),
+  );
+
+  final _stateForIsolate = <String, AllocationProfileTracingIsolateState>{};
+
+  /// The [TextEditingController] for the 'Class Filter' text field.
+  final textEditingController = TextEditingController();
+
+  Future<void> initialize() async {
+    _initializing.value = true;
+
+    final updateState = () async {
+      final isolate = serviceManager.isolateManager.selectedIsolate.value!;
+      final isolateId = isolate.id!;
+      var state = _stateForIsolate[isolateId];
+      if (state == null) {
+        // TODO(bkonyi): we don't need to request this unless we've had a hot reload.
+        // We generally need to rebuild this data if we've had a hot reload or
+        // switched the currently selected isolate.
+        state = AllocationProfileTracingIsolateState(isolate: isolate);
+        await state.initialize();
+        _stateForIsolate[isolateId] = state;
+      }
+      // Restore the previously applied filter for the isolate.
+      textEditingController.text = state._currentFilter;
+      _stateForIsolateListenable.value = state;
+    };
+
+    addAutoDisposeListener(
+      serviceManager.isolateManager.selectedIsolate,
+      updateState,
+    );
+
+    await updateState();
+    await refresh();
+
+    _initializing.value = false;
+  }
+
+  @override
+  void dispose() {
+    textEditingController.dispose();
+    super.dispose();
+  }
+
+  /// Refreshes the allocation profiles for the current isolate's traced classes.
+  Future<void> refresh() async {
+    _refreshing.value = true;
+    await stateForIsolate.value.refresh();
+    _refreshing.value = false;
+  }
+
+  /// Refreshes the allocation profiles for the current isolate's traced classes.
+  Future<void> clear() async {
+    _refreshing.value = true;
+    await stateForIsolate.value.clear();
+    _refreshing.value = false;
+  }
+
+  /// Enables or disables tracing of allocations of [cls] in the current
+  /// isolate.
+  Future<void> setAllocationTracingForClass(ClassRef cls, bool enabled) async {
+    await stateForIsolate.value.setAllocationTracingForClass(cls, enabled);
+  }
+
+  /// Updates the class filter criteria for the current isolate's allocation
+  /// tracing state.
+  void updateClassFilter(String value) {
+    stateForIsolate.value.updateClassFilter(value);
   }
 }
