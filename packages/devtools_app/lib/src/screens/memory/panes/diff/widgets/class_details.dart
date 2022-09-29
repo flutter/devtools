@@ -12,33 +12,3 @@ class HeapClassDetails extends StatelessWidget {
     return const Text('Class details will be here');
   }
 }
-
-// class HeapClassDetails extends StatelessWidget {
-//   const HeapClassDetails({
-//     Key? key,
-//     required this.item,
-//     required this.sorting,
-//   }) : super(key: key);
-
-//   final ValueListenable<HeapClassName?> heapClassName;
-//   final ColumnSorting sorting;
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return ValueListenableBuilder<HeapClass?>(
-//       valueListenable: item.selectedHeapClass,
-//       builder: (_, classStats, __) {
-//         if (classStats == null) {
-//           return const Center(
-//             child: Text('Select class to see details here.'),
-//           );
-//         }
-
-//         return ClassStatsTable(
-//           data: classStats,
-//           sorting: sorting,
-//         );
-//       },
-//     );
-//   }
-// }
