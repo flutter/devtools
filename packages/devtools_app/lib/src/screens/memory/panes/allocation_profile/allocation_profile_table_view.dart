@@ -226,8 +226,8 @@ class _AllocationProfileTable extends StatefulWidget {
     required this.controller,
   }) : super(key: key);
 
-  /// List of columns that are displayed regardless of VM developer mode state.
-  static final _columnGroups = [
+  /// List of columns displayed in VM developer mode state.
+  static final _vmModeColumnGroups = [
     ColumnGroup(
       title: '',
       range: const Range(0, 1),
@@ -235,6 +235,14 @@ class _AllocationProfileTable extends StatefulWidget {
     ColumnGroup(
       title: 'Total',
       range: const Range(1, 5),
+    ),
+    ColumnGroup(
+      title: 'New Space',
+      range: const Range(5, 9),
+    ),
+    ColumnGroup(
+      title: 'Old Space',
+      range: const Range(9, 13),
     ),
   ];
 
@@ -248,18 +256,6 @@ class _AllocationProfileTable extends StatefulWidget {
     _initialSortColumn,
     _FieldDartHeapSizeColumn(heap: _HeapGeneration.total),
     _FieldExternalSizeColumn(heap: _HeapGeneration.total),
-  ];
-
-  /// Columns for data that is only displayed with VM developer mode enabled.
-  static final _vmDeveloperModeColumnGroups = [
-    ColumnGroup(
-      title: 'New Space',
-      range: const Range(5, 9),
-    ),
-    ColumnGroup(
-      title: 'Old Space',
-      range: const Range(9, 13),
-    ),
   ];
 
   static final _vmDeveloperModeColumns = [
@@ -312,11 +308,9 @@ class _AllocationProfileTableState extends State<_AllocationProfileTable> {
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   return FlatTable<ClassHeapStats?>(
-                    columnGroups: [
-                      ..._AllocationProfileTable._columnGroups,
-                      if (vmDeveloperModeEnabled)
-                        ..._AllocationProfileTable._vmDeveloperModeColumnGroups,
-                    ],
+                    columnGroups: vmDeveloperModeEnabled
+                        ? _AllocationProfileTable._vmModeColumnGroups
+                        : null,
                     columns: [
                       ..._AllocationProfileTable._columns,
                       if (vmDeveloperModeEnabled)

@@ -32,7 +32,7 @@ typedef ButtonClickHandler = Function(BuildContext);
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
-  ButtonClickHandler? _buttonClickHandler;
+  VoidCallback? _buttonClickHandler;
 
   void _incrementCounter(BuildContext context) {
     setState(() {
@@ -40,17 +40,18 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  ButtonClickHandler _createButtonClickHandler(BuildContext context) {
-    late ButtonClickHandler result;
+  VoidCallback _createButtonClickHandler(BuildContext context) {
     final theHandler = _buttonClickHandler;
 
-    if (theHandler == null) {
-      result = (_) => _incrementCounter(context);
-    } else {
-      result = (_) => theHandler(context);
+    result() {
+      if (theHandler == null) {
+        _incrementCounter(context);
+      } else {
+        theHandler();
+      }
     }
-    _buttonClickHandler = result;
 
+    _buttonClickHandler = result;
     return result;
   }
 
@@ -75,7 +76,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: ()=>_createButtonClickHandler(context)(context),
+        onPressed: _createButtonClickHandler(context),
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ),

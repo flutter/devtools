@@ -154,12 +154,10 @@ class AdaptedHeapObject {
   });
 
   factory AdaptedHeapObject.fromHeapSnapshotObject(HeapSnapshotObject object) {
-    var library = object.klass.libraryName;
-    if (library.isEmpty) library = object.klass.libraryUri.toString();
     return AdaptedHeapObject(
       code: object.identityHashCode,
       references: List.from(object.references),
-      heapClass: HeapClass(className: object.klass.name, library: library),
+      heapClass: HeapClass.fromHeapSnapshotClass(object.klass),
       shallowSize: object.shallowSize,
     );
   }
@@ -218,6 +216,23 @@ class SnapshotTaker {
 @immutable
 class HeapClass {
   const HeapClass({required this.className, required this.library});
+
+  HeapClass.fromClassRef(ClassRef? classRef)
+      : library = _library(classRef?.library?.name, classRef?.library?.uri),
+        className = classRef?.name ?? '';
+
+  HeapClass.fromHeapSnapshotClass(HeapSnapshotClass? theClass)
+      : library =
+            _library(theClass?.libraryName, theClass?.libraryUri.toString()),
+        className = theClass?.name ?? '';
+
+  static const empty = HeapClass(className: '', library: '');
+
+  static String _library(String? libName, String? libUrl) {
+    libName ??= '';
+    if (libName.isNotEmpty) return libName;
+    return libUrl ?? '';
+  }
 
   final String className;
   final String library;
