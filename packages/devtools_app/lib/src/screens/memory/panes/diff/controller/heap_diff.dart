@@ -94,8 +94,8 @@ class DiffClassStats extends ClassStats {
   final ObjectSetDiff total;
 
   static DiffClassStats? diff({
-    SingleClassStats? before,
-    SingleClassStats? after,
+    required SingleClassStats? before,
+    required SingleClassStats? after,
   }) {
     if (before == null && after == null) return null;
 

@@ -39,7 +39,7 @@ void main() {
     final statsBefore = _createClassStats([deleted, persistedBefore]);
     final statsAfter = _createClassStats([persistedAfter, created1, created2]);
 
-    final stats = DiffClassStats.diff(statsBefore, statsAfter)!;
+    final stats = DiffClassStats.diff(before: statsBefore, after: statsAfter)!;
 
     expect(stats.heapClass, className);
     expect(stats.total.created.instanceCount, 2);
@@ -54,7 +54,7 @@ void main() {
 
     final statsBefore = _createClassStats([deleted]);
 
-    final stats = DiffClassStats.diff(statsBefore, null)!;
+    final stats = DiffClassStats.diff(before: statsBefore, after: null)!;
 
     expect(stats.heapClass, className);
     expect(stats.total.created.instanceCount, 0);
