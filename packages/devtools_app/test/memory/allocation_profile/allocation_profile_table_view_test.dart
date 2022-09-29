@@ -101,8 +101,8 @@ void main() {
       expect(preferences.vmDeveloperModeEnabled.value, isFalse);
       expect(find.text('Class'), findsOneWidget);
       expect(find.text('Instances'), findsOneWidget);
-      expect(find.text('Size'), findsOneWidget);
-      expect(find.text('Internal'), findsOneWidget);
+      expect(find.text('Total Size'), findsOneWidget);
+      expect(find.text('Dart Heap'), findsOneWidget);
       expect(find.text('External'), findsOneWidget);
       expect(find.text('Total'), findsOneWidget);
       expect(find.text('Old Space'), findsNothing);
@@ -115,8 +115,8 @@ void main() {
       expect(preferences.vmDeveloperModeEnabled.value, isTrue);
       expect(find.text('Class'), findsOneWidget);
       expect(find.text('Instances'), findsNWidgets(3));
-      expect(find.text('Size'), findsNWidgets(3));
-      expect(find.text('Internal'), findsNWidgets(3));
+      expect(find.text('Total Size'), findsNWidgets(3));
+      expect(find.text('Dart Heap'), findsNWidgets(3));
       expect(find.text('External'), findsNWidgets(3));
       expect(find.text('Total'), findsOneWidget);
       expect(find.text('Old Space'), findsOneWidget);
@@ -198,8 +198,8 @@ void main() {
 
       final cls = find.text('Class');
       final instances = find.text('Instances');
-      final size = find.text('Size');
-      final internal = find.text('Internal');
+      final size = find.text('Total Size');
+      final internal = find.text('Dart Heap');
       final external = find.text('External');
 
       final columns = <Finder>[

@@ -40,8 +40,18 @@ class AllocationProfileTracingViewState
         Row(
           children: [
             RefreshButton(
+              tooltip: 'Request the set of updated allocation traces',
               onPressed: () async {
                 await controller.refresh();
+              },
+            ),
+            const SizedBox(
+              width: denseSpacing,
+            ),
+            ClearButton(
+              tooltip: 'Clear the set of previously collected traces',
+              onPressed: () async {
+                await controller.clear();
               },
             ),
             const _ProfileHelpLink(),

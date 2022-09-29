@@ -566,7 +566,6 @@ class CheckboxSetting extends StatelessWidget {
 /// Conditional screens can be added to this list, and they will automatically
 /// be shown or hidden based on the [Screen.conditionalLibrary] provided.
 List<DevToolsScreen> get defaultScreens {
-  final vmDeveloperToolsController = VMDeveloperToolsController();
   return <DevToolsScreen>[
     DevToolsScreen<InspectorController>(
       const InspectorScreen(),
@@ -609,7 +608,7 @@ List<DevToolsScreen> get defaultScreens {
     ),
     DevToolsScreen<VMDeveloperToolsController>(
       const VMDeveloperToolsScreen(),
-      controller: vmDeveloperToolsController,
+      createController: () => VMDeveloperToolsController(),
     ),
     // Show the sample DevTools screen.
     if (debugEnableSampleScreen && (kDebugMode || kProfileMode))
