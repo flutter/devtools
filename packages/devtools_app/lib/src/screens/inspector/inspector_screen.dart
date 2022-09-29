@@ -329,13 +329,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       // completed, this could indicate a slow load time or that the inspector
       // failed to load the tree once available.
       if (!controller.firstInspectorTreeLoadCompleted) {
-        if (controller.inspectorTree.root?.children != null &&
-            controller.inspectorTree.root!.children.isEmpty) {
-          ga.select(
-            analytics_constants.inspector,
-            analytics_constants.firstInspectorTreeRefreshIsEmpty,
-          );
-        }
         // We do not want to complete this timing operation because the force
         // refresh will skew the results.
         ga.cancelTimingOperation(
