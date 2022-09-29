@@ -21,13 +21,13 @@ class DiffPane extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Widget itemContent = ValueListenableBuilder<int>(
-      valueListenable: controller.selectedIndex,
+      valueListenable: controller.selectedSnapshotIndex,
       builder: (_, index, __) {
-        final item = controller.selectedItem;
+        final item = controller.selectedSnapshotItem;
 
-        if (item is InformationListItem) {
+        if (item is SnapshotDocItem) {
           return const _SnapshotDoc();
-        } else if (item is SnapshotListItem) {
+        } else if (item is SnapshotInstanceItem) {
           return _SnapshotContent(
             item: item,
             controller: controller,
@@ -40,7 +40,7 @@ class DiffPane extends StatelessWidget {
 
     return Split(
       axis: Axis.horizontal,
-      initialFractions: const [0.2, 0.8],
+      initialFractions: const [0.1, 0.9],
       minSizes: const [80, 80],
       children: [
         OutlineDecoration(
@@ -69,10 +69,10 @@ class _SnapshotDoc extends StatelessWidget {
 
 class _SnapshotContent extends StatelessWidget {
   _SnapshotContent({Key? key, required this.item, required this.controller})
-      : assert(controller.selectedItem == item),
+      : assert(controller.selectedSnapshotItem == item),
         super(key: key);
 
-  final SnapshotListItem item;
+  final SnapshotInstanceItem item;
   final DiffPaneController controller;
 
   @override

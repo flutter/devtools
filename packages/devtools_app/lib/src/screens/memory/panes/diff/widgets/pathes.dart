@@ -14,12 +14,12 @@ import '../../../shared/heap/model.dart';
 import '../../../shared/heap/primitives.dart';
 import '../controller/model.dart';
 
-typedef _RetainingPathRecord = MapEntry<ClassOnlyHeapPath, SizeOfClassSet>;
+typedef _RetainingPathRecord = MapEntry<ClassOnlyHeapPath, ObjectSetStats>;
 
 class _RetainingPathColumn extends ColumnData<_RetainingPathRecord> {
   _RetainingPathColumn()
       : super.wide(
-          'Retaining Path',
+          'Shortest Retaining Path',
           titleTooltip: 'Class names of objects that retain'
               '\nthe instances from garbage collection.',
           alignment: ColumnAlignment.left,
@@ -32,8 +32,7 @@ class _RetainingPathColumn extends ColumnData<_RetainingPathRecord> {
   bool get supportsSorting => true;
 
   @override
-  String getTooltip(_RetainingPathRecord record) =>
-      record.key.asMultiLineString();
+  String getTooltip(_RetainingPathRecord record) => record.key.asLongString();
 }
 
 class _InstanceColumn extends ColumnData<_RetainingPathRecord> {
@@ -115,7 +114,7 @@ class ClassStatsTable extends StatefulWidget {
     required this.sorting,
   }) : super(key: key);
 
-  final HeapClassStatistics data;
+  final SingleClassStats data;
   final ColumnSorting sorting;
 
   @override
@@ -125,11 +124,17 @@ class ClassStatsTable extends StatefulWidget {
 class _ClassStatsTableState extends State<ClassStatsTable>
     with AutoDisposeMixin {
   late final List<ColumnData<_RetainingPathRecord>> _columns;
-  late List<MapEntry<ClassOnlyHeapPath, SizeOfClassSet>> _dataList;
+
+  @override
+  void didUpdateWidget(covariant ClassStatsTable oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.data == oldWidget.data) return;
+  }
 
   @override
   void initState() {
     super.initState();
+    assert(widget.data.isSealed);
 
     final _shallowSizeColumn = _ShallowSizeColumn();
 
@@ -149,17 +154,11 @@ class _ClassStatsTableState extends State<ClassStatsTable>
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _dataList = widget.data.sizeByRetainingPath.entries.toList(growable: false);
-  }
-
-  @override
   Widget build(BuildContext context) {
     return FlatTable<_RetainingPathRecord>(
       columns: _columns,
-      data: _dataList,
-      keyFactory: (e) => Key(e.key.asMultiLineString()),
+      data: widget.data.entries,
+      keyFactory: (e) => Key(e.key.asLongString()),
       onItemSelected: (r) => {},
       sortColumn: _columns[widget.sorting.columnIndex],
       sortDirection: widget.sorting.direction,

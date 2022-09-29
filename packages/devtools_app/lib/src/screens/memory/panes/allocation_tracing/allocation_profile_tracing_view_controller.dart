@@ -98,7 +98,7 @@ class AllocationProfileTracingViewController extends DisposableController
 
   void updateClassFilter(String value, {bool force = false}) {
     if (value.isEmpty && _currentFilter.isEmpty && !force) return;
-    final updatedFilter = (value.contains(_currentFilter) && !force
+    final updatedFilteredClassList = (value.contains(_currentFilter) && !force
             ? _filteredClassList.value
             : _unfilteredClassList)
         .where(
@@ -107,7 +107,7 @@ class AllocationProfileTracingViewController extends DisposableController
         .map((e) => _tracedClasses[e.cls.id!]!)
         .toList();
 
-    _filteredClassList.replaceAll(updatedFilter);
+    _filteredClassList.replaceAll(updatedFilteredClassList);
     _currentFilter = value;
   }
 

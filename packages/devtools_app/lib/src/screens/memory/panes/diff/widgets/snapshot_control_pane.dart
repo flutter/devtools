@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/theme.dart';
+import '../../../primitives/ui.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/item_controller.dart';
 
@@ -15,24 +16,38 @@ class SnapshotControlPane extends StatelessWidget {
       : super(key: key);
 
   final DiffPaneController controller;
+  static const _classFilterWidth = 200.0;
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
       valueListenable: controller.isProcessing,
       builder: (_, isProcessing, __) {
-        final current = controller.selectedItem as SnapshotListItem;
+        final current = controller.selectedSnapshotItem as SnapshotInstanceItem;
 
         return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const SizedBox(width: defaultSpacing),
-            if (!isProcessing && current.heap != null) ...[
-              _DiffDropdown(
-                current: current,
-                list: controller.snapshots,
-              ),
-              const SizedBox(width: defaultSpacing),
-            ],
+            // This child is aligned to the left.
+            Row(
+              children: [
+                const SizedBox(width: defaultSpacing),
+                if (!isProcessing && current.heap != null) ...[
+                  _DiffDropdown(
+                    current: current,
+                    list: controller.snapshots,
+                  ),
+                  const SizedBox(width: defaultSpacing),
+                  SizedBox(
+                    width: _classFilterWidth,
+                    child: _ClassFilter(onChanged: controller.setClassFilter),
+                  ),
+                  const SizedBox(width: defaultSpacing),
+                  _ToCsv(item: current),
+                ],
+              ],
+            ),
+            // This child is aligned to the right.
             ToolbarAction(
               icon: Icons.clear,
               tooltip: 'Delete snapshot',
@@ -41,6 +56,36 @@ class SnapshotControlPane extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+}
+
+class _ClassFilter extends StatelessWidget {
+  const _ClassFilter({Key? key, required this.onChanged}) : super(key: key);
+
+  final Function(String value) onChanged;
+
+  @override
+  Widget build(BuildContext context) => DevToolsClearableTextField(
+        labelText: 'Class Filter',
+        hintText: 'Filter by class name',
+        onChanged: onChanged,
+      );
+}
+
+class _ToCsv extends StatelessWidget {
+  const _ToCsv({Key? key, required this.item}) : super(key: key);
+
+  final SnapshotInstanceItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconLabelButton(
+      label: 'CSV',
+      icon: Icons.file_download,
+      tooltip: 'Download allocation profile data in CSV format',
+      onPressed: () => item.downloadToCsv(),
+      minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
     );
   }
 }
@@ -58,13 +103,13 @@ class _DiffDropdown extends StatelessWidget {
     }
   }
 
-  final ValueListenable<List<DiffListItem>> list;
-  final SnapshotListItem current;
+  final ValueListenable<List<SnapshotItem>> list;
+  final SnapshotInstanceItem current;
 
-  List<DropdownMenuItem<SnapshotListItem>> items() =>
-      list.value.where((item) => item.hasData).cast<SnapshotListItem>().map(
+  List<DropdownMenuItem<SnapshotInstanceItem>> items() =>
+      list.value.where((item) => item.hasData).cast<SnapshotInstanceItem>().map(
         (item) {
-          return DropdownMenuItem<SnapshotListItem>(
+          return DropdownMenuItem<SnapshotInstanceItem>(
             value: item,
             child: Text(item == current ? '-' : item.name),
           );
@@ -73,17 +118,17 @@ class _DiffDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<SnapshotListItem?>(
+    return ValueListenableBuilder<SnapshotInstanceItem?>(
       valueListenable: current.diffWith,
       builder: (_, diffWith, __) => Row(
         children: [
           const Text('Diff with:'),
           const SizedBox(width: defaultSpacing),
-          RoundedDropDownButton<SnapshotListItem>(
+          RoundedDropDownButton<SnapshotInstanceItem>(
             isDense: true,
             style: Theme.of(context).textTheme.bodyText2,
             value: current.diffWith.value ?? current,
-            onChanged: (SnapshotListItem? value) {
+            onChanged: (SnapshotInstanceItem? value) {
               if ((value ?? current) == current) {
                 current.setDiffWith(null);
               } else {

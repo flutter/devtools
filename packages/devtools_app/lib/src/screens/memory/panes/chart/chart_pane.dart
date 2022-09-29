@@ -197,8 +197,6 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     return ValueListenableBuilder<bool>(
       valueListenable: preferences.memory.showChart,
       builder: (_, showChart, __) {
-        // TODO(polina-c): animate the showing / hiding of this chart.
-
         if (!showChart) return const SizedBox.shrink();
 
         return RawKeyboardListener(

@@ -12,3 +12,8 @@ const String shallowSizeColumnTooltip =
 const String retainedSizeColumnTooltip =
     'Total shallow Dart size of objects plus shallow Dart size of objects they retain,\n'
     'taking into account only the shortest retaining path for the referenced objects.';
+
+const String nonGcableInstancesColumnTooltip =
+    'Number of instances of the class\n'
+    'that have a retaining path from the root\n'
+    'and therefore can’t be garbage collected.';

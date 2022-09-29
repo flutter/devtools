@@ -67,7 +67,7 @@ class _SnapshotListTitle extends StatelessWidget {
     required this.selected,
   }) : super(key: key);
 
-  final DiffListItem item;
+  final SnapshotItem item;
 
   final bool selected;
 
@@ -79,11 +79,11 @@ class _SnapshotListTitle extends StatelessWidget {
       builder: (_, isProcessing, __) => Row(
         children: [
           const SizedBox(width: denseRowSpacing),
-          if (theItem is SnapshotListItem)
+          if (theItem is SnapshotInstanceItem)
             Expanded(
               child: Text(theItem.name, overflow: TextOverflow.ellipsis),
             ),
-          if (theItem is InformationListItem) ...[
+          if (theItem is SnapshotDocItem) ...[
             const Expanded(
               child: Text('Snapshots', overflow: TextOverflow.ellipsis),
             ),
@@ -125,21 +125,24 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    addAutoDisposeListener(widget.controller.selectedIndex, scrollIfLast);
+    addAutoDisposeListener(
+      widget.controller.selectedSnapshotIndex,
+      scrollIfLast,
+    );
   }
 
   Future<void> scrollIfLast() async {
     final newLength = widget.controller.snapshots.value.length;
-    final newIndex = widget.controller.selectedIndex.value;
+    final newIndex = widget.controller.selectedSnapshotIndex.value;
 
     if (newIndex == newLength - 1) await _scrollController.autoScrollToBottom();
   }
 
   @override
   Widget build(BuildContext context) {
-    return DualValueListenableBuilder<List<DiffListItem>, int>(
+    return DualValueListenableBuilder<List<SnapshotItem>, int>(
       firstListenable: widget.controller.snapshots,
-      secondListenable: widget.controller.selectedIndex,
+      secondListenable: widget.controller.selectedSnapshotIndex,
       builder: (_, snapshots, selectedIndex, __) => ListView.builder(
         controller: _scrollController,
         shrinkWrap: true,
@@ -152,7 +155,7 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
                 : null,
             child: InkWell(
               canRequestFocus: false,
-              onTap: () => widget.controller.select(index),
+              onTap: () => widget.controller.setSelectedSnapshotIndex(index),
               child: _SnapshotListTitle(
                 item: snapshots[index],
                 selected: index == selectedIndex,
