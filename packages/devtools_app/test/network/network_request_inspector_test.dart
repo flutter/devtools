@@ -118,7 +118,7 @@ void main() {
       expect(_clipboardContents, isEmpty);
       await tester.tap(find.byType(CopyToClipboardControl));
       final expectedResponseBody =
-      jsonDecode(utf8.decode(httpRequest!.responseBody!.toList()));
+          jsonDecode(utf8.decode(httpRequest!.responseBody!.toList()));
 
       // Check that the contents were copied to clipboard.
       expect(_clipboardContents, isNotEmpty);
