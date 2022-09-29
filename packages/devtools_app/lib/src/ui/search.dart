@@ -585,7 +585,7 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
       maxWidth: maxWidth,
     );
 
-    Overlay.of(context)!.insert(autoCompleteOverlay!);
+    Overlay.of(context).insert(autoCompleteOverlay!);
   }
 
   /// Until an expression parser, poor man's way of finding the parts for

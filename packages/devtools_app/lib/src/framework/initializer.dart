@@ -140,7 +140,7 @@ class _InitializerState extends State<Initializer>
           analytics_constants.devToolsMain,
           analytics_constants.appDisconnected,
         );
-        Overlay.of(context)!.insert(_createDisconnectedOverlay());
+        Overlay.of(context).insert(_createDisconnectedOverlay());
 
         addAutoDisposeListener(serviceManager.connectedState, () {
           final connectedState = serviceManager.connectedState.value;
