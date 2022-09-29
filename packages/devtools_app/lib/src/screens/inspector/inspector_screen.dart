@@ -125,10 +125,11 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
         searchPreventClose = false;
       }
     });
-    addAutoDisposeListener(preferences.inspector.customPubRootDirectories, () {
+    addAutoDisposeListener(preferences.inspector.customPubRootDirectories,
+        () async {
       if (serviceManager.hasConnection &&
           controller.firstInspectorTreeLoadCompleted) {
-        _refreshInspector();
+        await controller.onForceRefresh();
       }
     });
   }
@@ -326,7 +327,16 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
         );
         controller.firstInspectorTreeLoadCompleted = true;
       }
+
       await controller.onForceRefresh();
+
+      if (controller.inspectorTree.root?.children != null &&
+          controller.inspectorTree.root!.children.isEmpty) {
+        ga.select(
+          analytics_constants.inspector,
+          analytics_constants.userRefreshResultsInEmptyTree,
+        );
+      }
     });
   }
 }

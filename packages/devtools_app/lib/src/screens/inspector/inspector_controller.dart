@@ -22,6 +22,7 @@ import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../analytics/analytics.dart' as ga;
+import '../../analytics/constants.dart' as analytics_constants;
 import '../../config_specific/logger/logger.dart';
 import '../../config_specific/url/url.dart';
 import '../../primitives/auto_dispose.dart';
@@ -470,7 +471,11 @@ class InspectorController extends DisposableController
       inspectorTree.root = rootNode;
 
       if (visibleToUser && rootNode.children.isEmpty) {
-        ga.reportError('Empty Inspector Widget Tree presented to user');
+        ga.select(
+          analytics_constants.inspector,
+          analytics_constants.recomputeTreeRootResultsInEmptyRoot,
+          nonInteraction: true,
+        );
       }
 
       refreshSelection(newSelection, detailsSelection, setSubtreeRoot);

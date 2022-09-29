@@ -42,6 +42,9 @@ const discordLink = 'discord';
 // Inspector UX actions:
 const refresh = 'refresh';
 const refreshEmptyTree = 'refreshEmptyTree';
+const userRefreshResultsInEmptyTree = 'userRefreshResultsInEmptyTree';
+const recomputeTreeRootResultsInEmptyRoot =
+    'recomputeTreeRootResultsInEmptyRoot';
 const debugPaint = 'debugPaint';
 const debugPaintDocs = 'debugPaintDocs';
 const paintBaseline = 'paintBaseline';
