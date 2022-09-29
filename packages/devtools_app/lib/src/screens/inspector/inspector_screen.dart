@@ -129,7 +129,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
         () async {
       if (serviceManager.hasConnection &&
           controller.firstInspectorTreeLoadCompleted) {
-        await controller.onForceRefresh();
+        await _refreshInspector();
       }
     });
   }
@@ -216,7 +216,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
               InspectorSummaryTreeControls(
                 isSearchVisible: searchVisible,
                 constraints: constraints,
-                onRefreshInspectorPressed: _refreshInspector,
+                onRefreshInspectorPressed: _onRefreshButtonPressed,
                 onSearchVisibleToggle: _onSearchVisibleToggle,
                 searchFieldBuilder: () => buildSearchField(
                   controller: _summaryTreeController,
@@ -308,13 +308,34 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     ];
   }
 
-  void _refreshInspector() {
+  void _onRefreshButtonPressed() async {
+    await _refreshInspector();
+
+    if (controller.inspectorTree.root?.children != null &&
+        controller.inspectorTree.root!.children.isEmpty) {
+      ga.select(
+        analytics_constants.inspector,
+        analytics_constants.userRefreshResultsInEmptyTree,
+      );
+    }
+  }
+
+  Future<void> _refreshInspector() async {
     ga.select(analytics_constants.inspector, analytics_constants.refresh);
-    blockWhileInProgress(() async {
+    await blockWhileInProgress(() async {
+      await controller.onForceRefresh();
+
       // If the user is force refreshing the inspector before the first load has
       // completed, this could indicate a slow load time or that the inspector
       // failed to load the tree once available.
       if (!controller.firstInspectorTreeLoadCompleted) {
+        if (controller.inspectorTree.root?.children != null &&
+            controller.inspectorTree.root!.children.isEmpty) {
+          ga.select(
+            analytics_constants.inspector,
+            analytics_constants.firstInspectorTreeRefreshIsEmpty,
+          );
+        }
         // We do not want to complete this timing operation because the force
         // refresh will skew the results.
         ga.cancelTimingOperation(
@@ -326,16 +347,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
           analytics_constants.refreshEmptyTree,
         );
         controller.firstInspectorTreeLoadCompleted = true;
-      }
-
-      await controller.onForceRefresh();
-
-      if (controller.inspectorTree.root?.children != null &&
-          controller.inspectorTree.root!.children.isEmpty) {
-        ga.select(
-          analytics_constants.inspector,
-          analytics_constants.userRefreshResultsInEmptyTree,
-        );
       }
     });
   }

@@ -43,6 +43,7 @@ const discordLink = 'discord';
 const refresh = 'refresh';
 const refreshEmptyTree = 'refreshEmptyTree';
 const userRefreshResultsInEmptyTree = 'userRefreshResultsInEmptyTree';
+const firstInspectorTreeRefreshIsEmpty = 'firstInspectorTreeRefreshIsEmpty';
 const recomputeTreeRootResultsInEmptyRoot =
     'recomputeTreeRootResultsInEmptyRoot';
 const debugPaint = 'debugPaint';
