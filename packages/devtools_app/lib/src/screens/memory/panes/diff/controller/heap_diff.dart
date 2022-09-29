@@ -86,12 +86,11 @@ class DiffClassStats extends ClassStats {
   DiffClassStats._({
     required this.heapClass,
     required this.total,
-    required this.statsByPath,
-  });
+    required StatsByPath objectsByPath,
+  }) : super(objectsByPath);
 
   final HeapClassName heapClass;
   final ObjectSetDiff total;
-  final ObjectStatsByPath statsByPath;
 
   static DiffClassStats? diff(
     SingleClassStats? before,
@@ -104,10 +103,10 @@ class DiffClassStats extends ClassStats {
     final result = DiffClassStats._(
       heapClass: heapClass,
       total: ObjectSetDiff(before: before?.objects, after: after?.objects),
-      statsByPath:
+      objectsByPath:
           subtractMaps<ClassOnlyHeapPath, ObjectSetStats, ObjectSetStats>(
-        minuend: after?.objectsByPath,
-        subtrahend: before?.objectsByPath,
+        minuend: after?.statsByPath,
+        subtrahend: before?.statsByPath,
         subtract: (minuend, subtrahend) =>
             ObjectSetStats.subtruct(minuend: minuend, subtrahend: subtrahend),
       ),
@@ -149,7 +148,8 @@ class ObjectSetDiff {
     created.seal();
     deleted.seal();
     delta.seal();
-    assert(delta.instanceCount == created.instanceCount - deleted.instanceCount);
+    assert(
+        delta.instanceCount == created.instanceCount - deleted.instanceCount,);
   }
 
   final created = ObjectSet();

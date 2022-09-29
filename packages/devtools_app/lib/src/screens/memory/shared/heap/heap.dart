@@ -54,19 +54,29 @@ class SingleHeapClasses extends HeapClasses {
   }
 }
 
-typedef ObjectStatsByPath = Map<ClassOnlyHeapPath, ObjectSetStats>;
+typedef StatsByPath = Map<ClassOnlyHeapPath, ObjectSetStats>;
+typedef StatsByPathEntry = MapEntry<ClassOnlyHeapPath, ObjectSetStats>;
 
-abstract class ClassStats with Sealable {}
+abstract class ClassStats with Sealable {
+  ClassStats(this.statsByPath);
+
+  final StatsByPath statsByPath;
+  late final List<StatsByPathEntry> statsByPathEntries = _getEntries();
+  List<StatsByPathEntry> _getEntries() {
+    assert(isSealed);
+    return statsByPath.entries.toList(growable: false);
+  }
+}
 
 class SingleClassStats extends ClassStats {
   SingleClassStats(this.heapClass)
       : objects = ObjectSet(),
-        objectsByPath = <ClassOnlyHeapPath, ObjectSetStats>{};
+        super(<ClassOnlyHeapPath, ObjectSetStats>{});
 
   final HeapClassName heapClass;
   final ObjectSet objects;
-  final ObjectStatsByPath objectsByPath;
-  late final entries = objectsByPath.entries.toList(growable: false);
+
+  late final entries = statsByPath.entries.toList(growable: false);
 
   void countInstance(AdaptedHeapData data, int objectIndex) {
     assert(!isSealed);
@@ -76,7 +86,7 @@ class SingleClassStats extends ClassStats {
 
     final path = data.retainingPath(objectIndex);
     if (path == null) return;
-    final objectsForPath = objectsByPath.putIfAbsent(
+    final objectsForPath = statsByPath.putIfAbsent(
       ClassOnlyHeapPath(path),
       () => ObjectSet(),
     );

@@ -50,10 +50,10 @@ class SnapshotView extends StatelessWidget {
                   ClassesTableDiff(classes: classes, controller: controller);
             }
 
-            const Widget table2 = HeapClassDetails(
-                // item: item,
-                // sorting: controller.pathSorting,
-                );
+            final Widget table2 = HeapClassDetails(
+              item: item,
+              controller: controller,
+            );
 
             return Split(
               axis: Axis.vertical,
@@ -61,7 +61,7 @@ class SnapshotView extends StatelessWidget {
               minSizes: const [80, 80],
               children: [
                 OutlineDecoration(child: table1),
-                const OutlineDecoration(child: table2),
+                OutlineDecoration(child: table2),
               ],
             );
           },

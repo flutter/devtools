@@ -221,7 +221,7 @@ class _ClassesTableDiffState extends State<ClassesTableDiff>
       data: widget.classes.classes,
       keyFactory: (e) => Key(e.heapClass.fullName),
       onItemSelected: (r) => widget.controller.setSelectedClass(r.heapClass),
-      selectionNotifier: _item.selectedDiffHeapClass,
+      selectionNotifier: _item.selectedDiffClassStats,
       sortColumn: _columns[sorting.columnIndex],
       sortDirection: sorting.direction,
       onSortChanged: (

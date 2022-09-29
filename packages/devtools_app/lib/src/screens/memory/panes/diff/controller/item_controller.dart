@@ -41,17 +41,17 @@ class SnapshotInstanceItem extends SnapshotItem
     this.displayNumber,
     this._isolateName,
     this._diffStore,
-    this._selectedClassName,
+    this._selectedClass,
   ) {
     _isProcessing.value = true;
     receiver.whenComplete(() async {
       final data = await receiver;
       if (data != null) {
         heap = AdaptedHeap(data);
-        _updateSelectedClass();
+        _handleSelectionChange();
         addAutoDisposeListener(
-          _selectedClassName,
-          () => _updateSelectedClass(),
+          _selectedClass,
+          _handleSelectionChange,
         );
       }
       _isProcessing.value = false;
@@ -73,18 +73,21 @@ class SnapshotInstanceItem extends SnapshotItem
   final _diffWith = ValueNotifier<SnapshotInstanceItem?>(null);
   void setDiffWith(SnapshotInstanceItem? value) {
     _diffWith.value = value;
-    _updateSelectedClass();
+    _handleSelectionChange();
   }
 
-  final ValueListenable<HeapClassName?> _selectedClassName;
+  final ValueListenable<HeapClassName?> _selectedClass;
 
-  ValueListenable<SingleClassStats?> get selectedSingleHeapClass =>
-      _selectedSingleHeapClass;
-  final _selectedSingleHeapClass = ValueNotifier<SingleClassStats?>(null);
+  ValueListenable<SingleClassStats?> get selectedSingleClassStats =>
+      _selectedSingleClassStats;
+  final _selectedSingleClassStats = ValueNotifier<SingleClassStats?>(null);
 
-  ValueListenable<DiffClassStats?> get selectedDiffHeapClass =>
-      _selectedDiffHeapClass;
-  final _selectedDiffHeapClass = ValueNotifier<DiffClassStats?>(null);
+  ValueListenable<DiffClassStats?> get selectedDiffClassStats =>
+      _selectedDiffClassStats;
+  final _selectedDiffClassStats = ValueNotifier<DiffClassStats?>(null);
+
+  ValueListenable<ClassStats?> get selectedClassStats => _selectedClassStats;
+  final _selectedClassStats = ValueNotifier<ClassStats?>(null);
 
   @override
   bool get hasData => heap != null;
@@ -96,18 +99,22 @@ class SnapshotInstanceItem extends SnapshotItem
     return _diffStore.compare(theHeap, itemToDiffWith.heap!);
   }
 
-  void _updateSelectedClass() {
-    _selectedSingleHeapClass.value = null;
-    _selectedDiffHeapClass.value = null;
+  void _handleSelectionChange() {
+    _selectedSingleClassStats.value = null;
+    _selectedDiffClassStats.value = null;
+    _selectedClassStats.value = null;
 
-    final className = _selectedClassName.value;
+    final className = _selectedClass.value;
     if (className == null) return;
 
     final heapClasses = classesToShow();
+
     if (heapClasses is SingleHeapClasses) {
-      _selectedSingleHeapClass.value = heapClasses.classesByName[className];
+      _selectedSingleClassStats.value =
+          _selectedClassStats.value = heapClasses.classesByName[className];
     } else if (heapClasses is DiffHeapClasses) {
-      _selectedDiffHeapClass.value = heapClasses.classesByName[className];
+      _selectedDiffClassStats.value =
+          _selectedClassStats.value = heapClasses.classesByName[className];
     } else {
       throw StateError('Unexpected type: ${heapClasses.runtimeType}.');
     }
