@@ -323,8 +323,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   Future<void> _refreshInspector() async {
     ga.select(analytics_constants.inspector, analytics_constants.refresh);
     await blockWhileInProgress(() async {
-      await controller.onForceRefresh();
-
       // If the user is force refreshing the inspector before the first load has
       // completed, this could indicate a slow load time or that the inspector
       // failed to load the tree once available.
@@ -341,6 +339,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
         );
         controller.firstInspectorTreeLoadCompleted = true;
       }
+      await controller.onForceRefresh();
     });
   }
 }
