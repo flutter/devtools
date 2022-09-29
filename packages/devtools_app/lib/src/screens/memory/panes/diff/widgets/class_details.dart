@@ -4,7 +4,6 @@
 
 import 'package:flutter/widgets.dart';
 
-import '../../../../../primitives/auto_dispose_mixin.dart';
 import '../../../../../primitives/utils.dart';
 import '../../../../../shared/table.dart';
 import '../../../../../shared/table_data.dart';
@@ -36,16 +35,15 @@ class HeapClassDetails extends StatelessWidget {
           );
         }
 
-        return ClassStatsTable(
+        return _RetainingPathTable(
           data: classStats,
           sorting: controller.classSorting,
+          controller: controller,
         );
       },
     );
   }
 }
-
-
 
 class _RetainingPathColumn extends ColumnData<StatsByPathEntry> {
   _RetainingPathColumn()
@@ -138,53 +136,57 @@ class _RetainedSizeColumn extends ColumnData<StatsByPathEntry> {
       )!;
 }
 
-class ClassStatsTable extends StatefulWidget {
-  const ClassStatsTable({
+class _RetainingPathTable extends StatefulWidget {
+  _RetainingPathTable({
     Key? key,
     required this.data,
     required this.sorting,
-  }) : super(key: key);
+    required this.controller,
+  })  : _columns = _tableColumns(sorting),
+        super(key: key);
 
   final ClassStats data;
   final ColumnSorting sorting;
+  final DiffPaneController controller;
 
-  @override
-  State<ClassStatsTable> createState() => _ClassStatsTableState();
-}
+  final List<ColumnData<StatsByPathEntry>> _columns;
 
-class _ClassStatsTableState extends State<ClassStatsTable>
-    with AutoDisposeMixin {
-  late final List<ColumnData<StatsByPathEntry>> _columns;
-
-  @override
-  void initState() {
-    super.initState();
-
+  static List<ColumnData<StatsByPathEntry>> _tableColumns(
+    ColumnSorting sorting,
+  ) {
     final _shallowSizeColumn = _ShallowSizeColumn();
 
-    _columns = <ColumnData<StatsByPathEntry>>[
+    final result = <ColumnData<StatsByPathEntry>>[
       _RetainingPathColumn(),
       _InstanceColumn(),
       _shallowSizeColumn,
       _RetainedSizeColumn(),
     ];
 
-    if (!widget.sorting.initialized) {
-      widget.sorting
+    if (!sorting.initialized) {
+      sorting
         ..direction = SortDirection.descending
-        ..columnIndex = _columns.indexOf(_shallowSizeColumn)
+        ..columnIndex = result.indexOf(_shallowSizeColumn)
         ..initialized = true;
     }
+
+    return result;
   }
 
   @override
+  State<_RetainingPathTable> createState() => _RetainingPathTableState();
+}
+
+class _RetainingPathTableState extends State<_RetainingPathTable> {
+  @override
   Widget build(BuildContext context) {
     return FlatTable<StatsByPathEntry>(
-      columns: _columns,
+      columns: widget._columns,
       data: widget.data.statsByPathEntries,
       keyFactory: (e) => Key(e.key.asLongString()),
-      onItemSelected: (r) => {},
-      sortColumn: _columns[widget.sorting.columnIndex],
+      selectionNotifier: widget.controller.selectedPath,
+      onItemSelected: (r) => widget.controller.setselectedPath(r),
+      sortColumn: widget._columns[widget.sorting.columnIndex],
       sortDirection: widget.sorting.direction,
       onSortChanged: (
         sortColumn,
@@ -192,7 +194,7 @@ class _ClassStatsTableState extends State<ClassStatsTable>
         secondarySortColumn,
       }) =>
           setState(() {
-        widget.sorting.columnIndex = _columns.indexOf(sortColumn);
+        widget.sorting.columnIndex = widget._columns.indexOf(sortColumn);
         widget.sorting.direction = direction;
       }),
     );

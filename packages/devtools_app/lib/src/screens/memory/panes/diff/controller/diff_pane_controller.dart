@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../../../../primitives/utils.dart';
 import '../../../primitives/memory_utils.dart';
+import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
 import 'heap_diff.dart';
 import 'item_controller.dart';
@@ -44,9 +45,9 @@ class DiffPaneController {
   void setSelectedClass(HeapClassName? value) => _selectedClass.value = value;
 
   /// Selected retaining path.
-  ValueListenable<String?> get selectedPath => _selectedPath;
-  final _selectedPath = ValueNotifier<String?>(null);
-  void setselectedPath(String? value) => _selectedPath.value = value;
+  ValueListenable<StatsByPathEntry?> get selectedPath => _selectedPath;
+  final _selectedPath = ValueNotifier<StatsByPathEntry?>(null);
+  void setselectedPath(StatsByPathEntry? value) => _selectedPath.value = value;
 
   ValueListenable<String?> get classFilter => _classFilter;
   final _classFilter = ValueNotifier<String?>(null);
