@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../../config_specific/import_export/import_export.dart';
@@ -42,6 +43,7 @@ class SnapshotInstanceItem extends SnapshotItem
     this._isolateName,
     this._diffStore,
     this._selectedClass,
+    this._selectedPath,
   ) {
     _isProcessing.value = true;
     receiver.whenComplete(() async {
@@ -51,6 +53,10 @@ class SnapshotInstanceItem extends SnapshotItem
         _handleSelectionChange();
         addAutoDisposeListener(
           _selectedClass,
+          _handleSelectionChange,
+        );
+        addAutoDisposeListener(
+          _selectedPath,
           _handleSelectionChange,
         );
       }
@@ -78,6 +84,8 @@ class SnapshotInstanceItem extends SnapshotItem
 
   final ValueListenable<HeapClassName?> _selectedClass;
 
+  final ValueListenable<ClassOnlyHeapPath?> _selectedPath;
+
   ValueListenable<SingleClassStats?> get selectedSingleClassStats =>
       _selectedSingleClassStats;
   final _selectedSingleClassStats = ValueNotifier<SingleClassStats?>(null);
@@ -88,6 +96,11 @@ class SnapshotInstanceItem extends SnapshotItem
 
   ValueListenable<ClassStats?> get selectedClassStats => _selectedClassStats;
   final _selectedClassStats = ValueNotifier<ClassStats?>(null);
+
+  /// Selected retaining path.
+  ValueListenable<StatsByPathEntry?> get selectedPathEntry =>
+      _selectedPathEntry;
+  final _selectedPathEntry = ValueNotifier<StatsByPathEntry?>(null);
 
   @override
   bool get hasData => heap != null;
@@ -100,10 +113,6 @@ class SnapshotInstanceItem extends SnapshotItem
   }
 
   void _handleSelectionChange() {
-    _selectedSingleClassStats.value = null;
-    _selectedDiffClassStats.value = null;
-    _selectedClassStats.value = null;
-
     final className = _selectedClass.value;
     if (className == null) return;
 
@@ -112,12 +121,26 @@ class SnapshotInstanceItem extends SnapshotItem
     if (heapClasses is SingleHeapClasses) {
       _selectedSingleClassStats.value =
           _selectedClassStats.value = heapClasses.classesByName[className];
+      _selectedDiffClassStats.value = null;
     } else if (heapClasses is DiffHeapClasses) {
       _selectedDiffClassStats.value =
           _selectedClassStats.value = heapClasses.classesByName[className];
+      _selectedSingleClassStats.value = null;
     } else {
       throw StateError('Unexpected type: ${heapClasses.runtimeType}.');
     }
+
+    StatsByPathEntry? newByPathEntry;
+    final path = _selectedPath.value;
+    final classStats = _selectedClassStats.value;
+    if (path != null && classStats != null) {
+      final pathStats = classStats.statsByPath[path];
+      if (pathStats != null) {
+        newByPathEntry = classStats.statsByPathEntries
+            .firstWhereOrNull((e) => e.key == path);
+      }
+    }
+    _selectedPathEntry.value = newByPathEntry;
   }
 
   void downloadToCsv() {

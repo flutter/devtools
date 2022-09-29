@@ -39,6 +39,7 @@ class HeapClassDetails extends StatelessWidget {
           data: classStats,
           sorting: controller.classSorting,
           controller: controller,
+          item: item,
         );
       },
     );
@@ -142,11 +143,13 @@ class _RetainingPathTable extends StatefulWidget {
     required this.data,
     required this.sorting,
     required this.controller,
+    required this.item,
   })  : _columns = _tableColumns(sorting),
         super(key: key);
 
   final ClassStats data;
   final ColumnSorting sorting;
+  final SnapshotInstanceItem item;
   final DiffPaneController controller;
 
   final List<ColumnData<StatsByPathEntry>> _columns;
@@ -184,8 +187,8 @@ class _RetainingPathTableState extends State<_RetainingPathTable> {
       columns: widget._columns,
       data: widget.data.statsByPathEntries,
       keyFactory: (e) => Key(e.key.asLongString()),
-      selectionNotifier: widget.controller.selectedPath,
-      onItemSelected: (r) => widget.controller.setselectedPath(r),
+      selectionNotifier: widget.item.selectedPathEntry,
+      onItemSelected: (r) => widget.controller.setselectedPath(r.key),
       sortColumn: widget._columns[widget.sorting.columnIndex],
       sortDirection: widget.sorting.direction,
       onSortChanged: (
