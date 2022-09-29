@@ -10,7 +10,6 @@ import '../../../../../primitives/utils.dart';
 import '../../../../../shared/table.dart';
 import '../../../../../shared/table_data.dart';
 import '../../../../../shared/utils.dart';
-import '../../../shared/heap/primitives.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/heap_diff.dart';
 import '../controller/item_controller.dart';
@@ -19,6 +18,11 @@ enum _DataPart {
   created,
   deleted,
   delta,
+}
+
+enum _SizeType {
+  shallow,
+  retained,
 }
 
 class _ClassNameColumn extends ColumnData<DiffClassStats> {
@@ -80,23 +84,51 @@ class _InstanceColumn extends ColumnData<DiffClassStats> {
   bool get numeric => true;
 }
 
-class _ShallowSizeColumn extends ColumnData<DiffClassStats> {
-  _ShallowSizeColumn()
+class _SizeColumn extends ColumnData<DiffClassStats> {
+  _SizeColumn(this.dataPart, this.sizeType)
       : super(
-          'Shallow\nDart Size',
-          titleTooltip: shallowSizeColumnTooltip,
+          columnTitle(dataPart),
           fixedWidthPx: scaleByFontFactor(80.0),
           alignment: ColumnAlignment.right,
         );
 
-  @override
-  int getValue(DiffClassStats classStats) => 1;
+  final _DataPart dataPart;
+  final _SizeType sizeType;
+
+  static String columnTitle(_DataPart dataPart) {
+    switch (dataPart) {
+      case _DataPart.created:
+        return 'Allocated';
+      case _DataPart.deleted:
+        return 'Freed';
+      case _DataPart.delta:
+        return 'Delta';
+    }
+  }
 
   @override
-  bool get supportsSorting => true;
-
-  @override
-  bool get numeric => true;
+  int getValue(DiffClassStats classStats) {
+    switch (sizeType) {
+      case _SizeType.shallow:
+        switch (dataPart) {
+          case _DataPart.created:
+            return classStats.total.created.shallowSize;
+          case _DataPart.deleted:
+            return classStats.total.deleted.shallowSize;
+          case _DataPart.delta:
+            return classStats.total.delta.shallowSize;
+        }
+      case _SizeType.retained:
+        switch (dataPart) {
+          case _DataPart.created:
+            return classStats.total.created.retainedSize;
+          case _DataPart.deleted:
+            return classStats.total.deleted.retainedSize;
+          case _DataPart.delta:
+            return classStats.total.delta.retainedSize;
+        }
+    }
+  }
 
   @override
   String getDisplayValue(DiffClassStats classStats) => prettyPrintBytes(
@@ -104,32 +136,12 @@ class _ShallowSizeColumn extends ColumnData<DiffClassStats> {
         includeUnit: true,
         kbFractionDigits: 1,
       )!;
-}
-
-class _RetainedSizeColumn extends ColumnData<DiffClassStats> {
-  _RetainedSizeColumn()
-      : super(
-          'Retained\nDart Size',
-          titleTooltip: retainedSizeColumnTooltip,
-          fixedWidthPx: scaleByFontFactor(80.0),
-          alignment: ColumnAlignment.right,
-        );
-
-  @override
-  int getValue(DiffClassStats classStats) => 1;
 
   @override
   bool get supportsSorting => true;
 
   @override
   bool get numeric => true;
-
-  @override
-  String getDisplayValue(DiffClassStats classStats) => prettyPrintBytes(
-        getValue(classStats),
-        includeUnit: true,
-        kbFractionDigits: 1,
-      )!;
 }
 
 class ClassesTableDiff extends StatefulWidget {
@@ -175,22 +187,23 @@ class _ClassesTableDiffState extends State<ClassesTableDiff>
 
     _item = widget.controller.selectedSnapshotItem as SnapshotInstanceItem;
 
-    final _shallowSizeDeltaColumn = _ShallowSizeColumn();
+    final _shallowSizeDeltaColumn =
+        _SizeColumn(_DataPart.delta, _SizeType.shallow);
 
     _columns = <ColumnData<DiffClassStats>>[
       _ClassNameColumn(),
       _InstanceColumn(_DataPart.created),
       _InstanceColumn(_DataPart.deleted),
       _InstanceColumn(_DataPart.delta),
-      _ShallowSizeColumn(),
-      _ShallowSizeColumn(),
+      _SizeColumn(_DataPart.created, _SizeType.shallow),
+      _SizeColumn(_DataPart.deleted, _SizeType.shallow),
       _shallowSizeDeltaColumn,
-      _RetainedSizeColumn(),
-      _RetainedSizeColumn(),
-      _RetainedSizeColumn(),
+      _SizeColumn(_DataPart.created, _SizeType.retained),
+      _SizeColumn(_DataPart.deleted, _SizeType.retained),
+      _SizeColumn(_DataPart.delta, _SizeType.retained),
     ];
 
-    final sorting = widget.controller.classSorting;
+    final sorting = widget.controller.classDiffSorting;
     if (!sorting.initialized) {
       sorting
         ..direction = SortDirection.descending
@@ -201,7 +214,7 @@ class _ClassesTableDiffState extends State<ClassesTableDiff>
 
   @override
   Widget build(BuildContext context) {
-    final sorting = widget.controller.classSorting;
+    final sorting = widget.controller.classDiffSorting;
     return FlatTable<DiffClassStats>(
       columns: _columns,
       columnGroups: _columnGroups,
