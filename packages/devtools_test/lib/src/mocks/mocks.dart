@@ -157,7 +157,13 @@ class MockBannerMessagesController extends Mock
 
 class MockLoggingController extends Mock
     with SearchControllerMixin<LogData>, FilterControllerMixin<LogData>
-    implements LoggingController {}
+    implements LoggingController {
+  @override
+  final selectedLog = ValueNotifier<LogData?>(null);
+
+  @override
+  List<LogData> data = <LogData>[];
+}
 
 class MockMemoryController extends Mock implements MemoryController {}
 
