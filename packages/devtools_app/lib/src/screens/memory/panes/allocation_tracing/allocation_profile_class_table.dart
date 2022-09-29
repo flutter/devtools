@@ -136,16 +136,16 @@ class _AllocationTracingTableState extends State<AllocationTracingTable> {
                   valueListenable: state.filteredClassList,
                   builder: (context, filteredClassList, _) {
                     return FlatTable<TracedClass>(
-                  keyFactory: (e) => Key(e.cls.id!),
-                  data: filteredClassList,
-                  dataKey: 'allocation-tracing',
-                  columns: columns,
-                  onItemSelected: (TracedClass? tracedClass) =>
-                      state.selectTracedClass(tracedClass!),
-                  defaultSortColumn: _classNameColumn,
-                  defaultSortDirection: SortDirection.ascending,
-                  selectionNotifier: state.selectedTracedClass,
-                  pinBehavior: FlatTablePinBehavior.pinOriginalToTop,
+                      keyFactory: (e) => Key(e.cls.id!),
+                      data: filteredClassList,
+                      dataKey: 'allocation-tracing',
+                      columns: columns,
+                      onItemSelected: (TracedClass? tracedClass) =>
+                          state.selectTracedClass(tracedClass!),
+                      defaultSortColumn: _classNameColumn,
+                      defaultSortDirection: SortDirection.ascending,
+                      selectionNotifier: state.selectedTracedClass,
+                      pinBehavior: FlatTablePinBehavior.pinOriginalToTop,
                     );
                   },
                 );
