@@ -8,10 +8,11 @@ import 'package:devtools_app/src/config_specific/import_export/import_export.dar
 import 'package:devtools_app/src/screens/memory/memory_controller.dart';
 import 'package:devtools_app/src/screens/memory/memory_heap_tree_view.dart';
 import 'package:devtools_app/src/screens/memory/memory_screen.dart';
+import 'package:devtools_app/src/screens/memory/panes/chart/chart_control_pane.dart';
 import 'package:devtools_app/src/screens/memory/panes/chart/memory_events_pane.dart';
 import 'package:devtools_app/src/screens/memory/panes/chart/memory_vm_chart.dart';
-import 'package:devtools_app/src/screens/memory/panes/control/constants.dart';
 import 'package:devtools_app/src/screens/memory/panes/control/source_dropdown.dart';
+import 'package:devtools_app/src/screens/memory/shared/constants.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/common_widgets.dart';
 import 'package:devtools_app/src/shared/globals.dart';
@@ -148,8 +149,8 @@ void main() {
       expect(controller.offline.value, isFalse);
 
       // Verify Memory, Memory Source, and Memory Sources content.
-      expect(find.text('Pause'), findsOneWidget);
-      expect(find.text('Resume'), findsOneWidget);
+      expect(find.byTooltip(ChartPaneTooltips.pauseTooltip), findsOneWidget);
+      expect(find.byTooltip(ChartPaneTooltips.resumeTooltip), findsOneWidget);
 
       expect(controller.memorySource, MemoryController.liveFeed);
 
@@ -493,12 +494,12 @@ void main() {
         );
 
         expect(
-          find.byKey(HeapTreeViewState.dartHeapAnalysisTabKey),
+          find.byKey(MemoryScreenKeys.dartHeapAnalysisTab),
           findsOneWidget,
         );
 
         final allocationsKey =
-            find.byKey(HeapTreeViewState.dartHeapAllocationsTabKey);
+            find.byKey(MemoryScreenKeys.dartHeapAllocationsTab);
         await tester.tap(allocationsKey);
 
         await pumpAndSettleTwoSeconds();

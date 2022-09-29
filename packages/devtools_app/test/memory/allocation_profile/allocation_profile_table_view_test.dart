@@ -8,14 +8,17 @@ import 'package:devtools_app/src/screens/memory/memory_controller.dart';
 import 'package:devtools_app/src/screens/memory/memory_heap_tree_view.dart';
 import 'package:devtools_app/src/screens/memory/memory_screen.dart';
 import 'package:devtools_app/src/screens/memory/panes/allocation_profile/allocation_profile_table_view_controller.dart';
+import 'package:devtools_app/src/screens/vm_developer/vm_service_private_extensions.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
 import 'package:devtools_app/src/shared/preferences.dart';
+import 'package:devtools_app/src/shared/table.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../../test_data/memory_allocation.dart';
 
@@ -74,7 +77,7 @@ void main() {
       WidgetTester tester,
       AllocationProfileTableViewController allocationProfileController,
     ) async {
-      await tester.tap(find.byKey(HeapTreeViewState.dartHeapTableProfileKey));
+      await tester.tap(find.byKey(MemoryScreenKeys.dartHeapTableProfileTab));
       await tester.pumpAndSettle();
 
       // We should have requested an allocation profile by navigating to the tab.
@@ -98,8 +101,8 @@ void main() {
       expect(preferences.vmDeveloperModeEnabled.value, isFalse);
       expect(find.text('Class'), findsOneWidget);
       expect(find.text('Instances'), findsOneWidget);
-      expect(find.text('Size'), findsOneWidget);
-      expect(find.text('Internal'), findsOneWidget);
+      expect(find.text('Total Size'), findsOneWidget);
+      expect(find.text('Dart Heap'), findsOneWidget);
       expect(find.text('External'), findsOneWidget);
       expect(find.text('Total'), findsOneWidget);
       expect(find.text('Old Space'), findsNothing);
@@ -112,8 +115,8 @@ void main() {
       expect(preferences.vmDeveloperModeEnabled.value, isTrue);
       expect(find.text('Class'), findsOneWidget);
       expect(find.text('Instances'), findsNWidgets(3));
-      expect(find.text('Size'), findsNWidgets(3));
-      expect(find.text('Internal'), findsNWidgets(3));
+      expect(find.text('Total Size'), findsNWidgets(3));
+      expect(find.text('Dart Heap'), findsNWidgets(3));
       expect(find.text('External'), findsNWidgets(3));
       expect(find.text('Total'), findsOneWidget);
       expect(find.text('Old Space'), findsOneWidget);
@@ -183,6 +186,145 @@ void main() {
         allocationProfileController.currentAllocationProfile.value,
         isNotNull,
       );
+    });
+
+    // Regression test for https://github.com/flutter/devtools/issues/4484.
+    testWidgetsWithWindowSize('sorts correctly', windowSize,
+        (WidgetTester tester) async {
+      await pumpMemoryScreen(tester);
+
+      final table = find.byType(FlatTable<ClassHeapStats?>);
+      expect(table, findsOneWidget);
+
+      final cls = find.text('Class');
+      final instances = find.text('Instances');
+      final size = find.text('Total Size');
+      final internal = find.text('Dart Heap');
+      final external = find.text('External');
+
+      final columns = <Finder>[
+        cls,
+        instances,
+        size,
+        internal,
+        external,
+      ];
+
+      for (final columnFinder in columns) {
+        expect(columnFinder, findsOneWidget);
+      }
+
+      final state = tester.state<FlatTableState<ClassHeapStats?>>(table.first);
+
+      // Initial state should be sorted by size, largest to smallest.
+      int lastValue = state.data.first!.bytesCurrent!;
+      for (final element in state.data) {
+        expect(element!.bytesCurrent! <= lastValue, isTrue);
+        lastValue = element.bytesCurrent!;
+      }
+
+      // Sort by size, smallest to largest.
+      await tester.tap(size);
+      await tester.pumpAndSettle();
+
+      lastValue = state.data.first!.bytesCurrent!;
+      for (final element in state.data) {
+        expect(element!.bytesCurrent! >= lastValue, isTrue);
+        lastValue = element.bytesCurrent!;
+      }
+
+      // Sort by class name, alphabetically
+      await tester.tap(cls);
+      await tester.pumpAndSettle();
+
+      String lastClassName = state.data.first!.classRef!.name!;
+      for (final element in state.data) {
+        final name = element!.classRef!.name!;
+        print('$name $lastClassName');
+        expect(name.compareTo(lastClassName) >= 0, isTrue);
+        lastClassName = name;
+      }
+
+      // Sort by class name, reverse alphabetical order
+      await tester.tap(cls);
+      await tester.pumpAndSettle();
+
+      lastClassName = state.data.first!.classRef!.name!;
+      for (final element in state.data) {
+        final name = element!.classRef!.name!;
+        expect(name.compareTo(lastClassName) <= 0, isTrue);
+        lastClassName = name;
+      }
+
+      // Sort by instance count, largest to smallest.
+      await tester.tap(instances);
+      await tester.pumpAndSettle();
+
+      lastValue = state.data.first!.instancesCurrent!;
+      for (final element in state.data) {
+        expect(element!.instancesCurrent! <= lastValue, isTrue);
+        lastValue = element.instancesCurrent!;
+      }
+
+      // Sort by instance count, smallest to largest.
+      await tester.tap(instances);
+      await tester.pumpAndSettle();
+
+      lastValue = state.data.first!.instancesCurrent!;
+      for (final element in state.data) {
+        expect(element!.instancesCurrent! >= lastValue, isTrue);
+        lastValue = element.instancesCurrent!;
+      }
+
+      // Sort by internal size, largest to smallest.
+      await tester.tap(internal);
+      await tester.pumpAndSettle();
+
+      lastValue =
+          state.data.first!.newSpace.size + state.data.first!.oldSpace.size;
+      for (final element in state.data) {
+        final internalSize = element!.newSpace.size + element.oldSpace.size;
+        expect(internalSize <= lastValue, isTrue);
+        lastValue = internalSize;
+      }
+
+      // Sort by internal size, smallest to largest.
+      await tester.tap(instances);
+      await tester.pumpAndSettle();
+
+      lastValue =
+          state.data.first!.newSpace.size + state.data.first!.oldSpace.size;
+      for (final element in state.data) {
+        final internalSize = element!.newSpace.size + element.oldSpace.size;
+        expect(internalSize >= lastValue, isTrue);
+        lastValue = internalSize;
+      }
+
+      // Sort by external size, largest to smallest.
+      await tester.tap(internal);
+      await tester.pumpAndSettle();
+
+      lastValue = state.data.first!.newSpace.externalSize +
+          state.data.first!.oldSpace.externalSize;
+      for (final element in state.data) {
+        final externalSize =
+            element!.newSpace.externalSize + element.oldSpace.externalSize;
+        expect(externalSize <= lastValue, isTrue);
+        lastValue = externalSize;
+      }
+
+      // Sort by external size, smallest to largest.
+      await tester.tap(instances);
+      await tester.pumpAndSettle();
+
+      lastValue = state.data.first!.newSpace.externalSize +
+          state.data.first!.oldSpace.externalSize;
+      for (final element in state.data) {
+        final externalSize =
+            element!.newSpace.externalSize + element.oldSpace.externalSize;
+        expect(externalSize >= lastValue, isTrue);
+        lastValue = externalSize;
+      }
     });
   });
 }

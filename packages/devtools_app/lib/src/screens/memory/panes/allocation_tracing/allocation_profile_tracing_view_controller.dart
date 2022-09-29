@@ -96,6 +96,11 @@ class AllocationProfileTracingIsolateState {
     return tracedClassesProfiles[selectedTracedClass.value?.cls.id!];
   }
 
+  /// The last time, in microseconds, the table was cleared. This time is based
+  /// on the VM's internal monotonic clock, which is accessible through
+  /// `service.getVMTimelineMicros()`.
+  int _lastClearTimeMicros = 0;
+
   Future<void> initialize() async {
     final classList = await serviceManager.service!.getClassList(isolate.id!);
     for (final cls in classList.classes!) {
@@ -120,9 +125,9 @@ class AllocationProfileTracingIsolateState {
     await Future.wait(profileRequests);
   }
 
-  void updateClassFilter(String value) {
+  void updateClassFilter(String value, {bool force = false}) {
     if (value.isEmpty && _currentFilter.isEmpty) return;
-    final updatedFilter = (value.contains(_currentFilter)
+    final updatedFilter = (value.contains(_currentFilter) && !force
             ? _filteredClassList.value
             : unfilteredClassList)
         .where(
@@ -133,6 +138,30 @@ class AllocationProfileTracingIsolateState {
 
     _filteredClassList.replaceAll(updatedFilter);
     _currentFilter = value;
+  }
+
+  /// Clears the allocation profiles for the currently traced classes.
+  Future<void> clear() async {
+    _lastClearTimeMicros =
+        (await serviceManager.service!.getVMTimelineMicros()).timestamp!;
+
+    // Reset the counts for traced classes.
+    final updatedTracedClasses = tracedClasses.map((key, value) {
+      return MapEntry(key, value.copyWith(instances: 0));
+    });
+
+    tracedClasses
+      ..clear()
+      ..addAll(updatedTracedClasses);
+
+    // Reset the unfiltered class list with the new `TracedClass` instances.
+    unfilteredClassList
+      ..clear()
+      ..addAll(tracedClasses.values);
+    updateClassFilter(_currentFilter, force: true);
+
+    // Since there's no longer any tracing data, clear the existing profiles.
+    tracedClassesProfiles.clear();
   }
 
   /// Enables or disables tracing of allocations of [cls].
@@ -173,10 +202,16 @@ class AllocationProfileTracingIsolateState {
     final isolateId = serviceManager.isolateManager.selectedIsolate.value!.id!;
     final cls = tracedClass.cls;
 
+    // Note: we need to provide `timeExtentMicros` to `getAllocationTraces`,
+    // otherwise the VM will respond with all samples, not just the samples
+    // collected after `_lastClearTimeMicros`. We'll just use the maximum
+    // Javascript integer value (2^53 - 1) to represent "infinity".
     // Request the allocation profile for the traced class.
     final trace = await service.getAllocationTraces(
       isolateId,
       classId: cls.id!,
+      timeOriginMicros: _lastClearTimeMicros,
+      timeExtentMicros: maxJsInt,
     );
 
     final profileData = await CpuProfileData.generateFromCpuSamples(
@@ -279,6 +314,13 @@ class AllocationProfileTracingViewController extends DisposableController
   Future<void> refresh() async {
     _refreshing.value = true;
     await stateForIsolate.value.refresh();
+    _refreshing.value = false;
+  }
+
+  /// Refreshes the allocation profiles for the current isolate's traced classes.
+  Future<void> clear() async {
+    _refreshing.value = true;
+    await stateForIsolate.value.clear();
     _refreshing.value = false;
   }
 

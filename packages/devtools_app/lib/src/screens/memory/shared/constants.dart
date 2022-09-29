@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../shared/utils.dart';
+import '../../../shared/utils.dart';
 
 /// When to have verbose Dropdown based on media width.
 const verboseDropDownMinimumWidth = 950;

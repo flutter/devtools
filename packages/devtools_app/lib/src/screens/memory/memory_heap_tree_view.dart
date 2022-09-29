@@ -42,17 +42,6 @@ const memorySearchFieldKeyName = 'MemorySearchFieldKey';
 @visibleForTesting
 final memorySearchFieldKey = GlobalKey(debugLabel: memorySearchFieldKeyName);
 
-class HeapTree extends StatefulWidget {
-  const HeapTree(
-    this.controller,
-  );
-
-  final MemoryController controller;
-
-  @override
-  HeapTreeViewState createState() => HeapTreeViewState();
-}
-
 enum SnapshotStatus {
   none,
   streaming,
@@ -133,30 +122,36 @@ String buildRegExs(Map<WildcardMatch, List<String>> matchingCriteria) {
 
 final String knownClassesRegExs = buildRegExs(knowClassesToAnalyzeForImages);
 
-class HeapTreeViewState extends State<HeapTree>
+@visibleForTesting
+class MemoryScreenKeys {
+  static const searchButton = Key('Snapshot Search');
+  static const filterButton = Key('Snapshot Filter');
+  static const dartHeapAnalysisTab = Key('Dart Heap Analysis Tab');
+  static const dartHeapAllocationsTab = Key('Dart Heap Allocations Tab');
+  static const leaksTab = Key('Leaks Tab');
+  static const dartHeapTableProfileTab = Key('Dart Heap Profile Tab');
+  static const dartHeapAllocationTracingTab =
+      Key('Dart Heap Allocation Tracing Tab');
+  static const diffTab = Key('Diff Tab');
+}
+
+class HeapTreeView extends StatefulWidget {
+  const HeapTreeView(
+    this.controller,
+  );
+
+  final MemoryController controller;
+
+  @override
+  _HeapTreeViewState createState() => _HeapTreeViewState();
+}
+
+class _HeapTreeViewState extends State<HeapTreeView>
     with
         AutoDisposeMixin,
-        ProvidedControllerMixin<MemoryController, HeapTree>,
-        SearchFieldMixin<HeapTree>,
+        ProvidedControllerMixin<MemoryController, HeapTreeView>,
+        SearchFieldMixin<HeapTreeView>,
         TickerProviderStateMixin {
-  @visibleForTesting
-  static const searchButtonKey = Key('Snapshot Search');
-  @visibleForTesting
-  static const filterButtonKey = Key('Snapshot Filter');
-  @visibleForTesting
-  static const dartHeapAnalysisTabKey = Key('Dart Heap Analysis Tab');
-  @visibleForTesting
-  static const dartHeapAllocationsTabKey = Key('Dart Heap Allocations Tab');
-  @visibleForTesting
-  static const leaksTabKey = Key('Leaks Tab');
-  @visibleForTesting
-  static const dartHeapTableProfileKey = Key('Dart Heap Profile Tab');
-  @visibleForTesting
-  static const dartHeapAllocationTracingKey =
-      Key('Dart Heap Allocation Tracing Tab');
-  @visibleForTesting
-  static const diffTabKey = Key('Diff Tab');
-
   /// Below constants should match index for Tab index in DartHeapTabs.
   static const int analysisTabIndex = 0;
   static const int allocationsTabIndex = 1;
@@ -201,35 +196,38 @@ class HeapTreeViewState extends State<HeapTree>
   void _initTabs() {
     _tabs = [
       DevToolsTab.create(
-        key: dartHeapTableProfileKey,
+        key: MemoryScreenKeys.dartHeapTableProfileTab,
         tabName: 'Profile',
         gaPrefix: _gaPrefix,
       ),
       DevToolsTab.create(
-        key: dartHeapAllocationTracingKey,
+        key: MemoryScreenKeys.dartHeapAllocationTracingTab,
         tabName: 'Allocation Tracing',
         gaPrefix: _gaPrefix,
       ),
       DevToolsTab.create(
-        key: dartHeapAnalysisTabKey,
+        key: MemoryScreenKeys.dartHeapAnalysisTab,
         gaPrefix: _gaPrefix,
         tabName: 'Analysis',
       ),
       if (FeatureFlags.memoryDiffing)
         DevToolsTab.create(
-          key: diffTabKey,
+          key: MemoryScreenKeys.diffTab,
           gaPrefix: _gaPrefix,
           tabName: 'Diff',
         ),
       if (widget.controller.shouldShowLeaksTab.value)
         DevToolsTab.create(
-          key: leaksTabKey,
+          key: MemoryScreenKeys.leaksTab,
           gaPrefix: _gaPrefix,
           tabName: 'Leaks',
         ),
     ];
 
-    _searchableTabs = {dartHeapAnalysisTabKey, dartHeapAllocationsTabKey};
+    _searchableTabs = {
+      MemoryScreenKeys.dartHeapAnalysisTab,
+      MemoryScreenKeys.dartHeapAllocationsTab
+    };
     _tabController = TabController(length: _tabs.length, vsync: this);
     _tabController.addListener(_onTabChanged);
   }
@@ -905,7 +903,7 @@ class HeapTreeViewState extends State<HeapTree>
           _buildSearchWidget(memorySearchFieldKey),
           const SizedBox(width: denseSpacing),
           FilterButton(
-            key: filterButtonKey,
+            key: MemoryScreenKeys.filterButton,
             onPressed: _filter,
             // TODO(kenz): implement isFilterActive
             isFilterActive: false,

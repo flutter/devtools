@@ -7,12 +7,12 @@ import 'package:flutter/material.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/theme.dart';
 import '../../primitives/painting.dart';
-import '../chart/chart_pane_controller.dart';
-import '../chart/memory_android_chart.dart';
-import '../chart/memory_charts.dart';
-import '../chart/memory_events_pane.dart';
-import '../chart/memory_vm_chart.dart';
-import 'constants.dart';
+import '../../shared/constants.dart';
+import 'chart_pane_controller.dart';
+import 'memory_android_chart.dart';
+import 'memory_charts.dart';
+import 'memory_events_pane.dart';
+import 'memory_vm_chart.dart';
 
 class LegendRow extends StatelessWidget {
   const LegendRow({

@@ -203,38 +203,74 @@ class IconLabelButton extends StatelessWidget {
   }
 }
 
-class PauseButton extends IconLabelButton {
+class PauseButton extends StatelessWidget {
   const PauseButton({
-    Key? key,
-    double? minScreenWidthForTextBeforeScaling,
-    String tooltip = 'Pause',
-    required VoidCallback? onPressed,
-  }) : super(
-          key: key,
-          icon: Icons.pause,
-          label: 'Pause',
-          tooltip: tooltip,
-          minScreenWidthForTextBeforeScaling:
-              minScreenWidthForTextBeforeScaling,
-          onPressed: onPressed,
-        );
+    super.key,
+    this.iconOnly = false,
+    required this.tooltip,
+    required this.onPressed,
+    this.minScreenWidthForTextBeforeScaling,
+  });
+
+  final bool iconOnly;
+  final String? tooltip;
+  final VoidCallback? onPressed;
+  final double? minScreenWidthForTextBeforeScaling;
+
+  @override
+  Widget build(BuildContext context) {
+    if (iconOnly) {
+      return OutlinedIconButton(
+        icon: Icons.pause,
+        onPressed: onPressed,
+        tooltip: tooltip,
+      );
+    }
+
+    return IconLabelButton(
+      key: key,
+      icon: Icons.pause,
+      label: 'Pause',
+      tooltip: tooltip,
+      minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
+      onPressed: onPressed,
+    );
+  }
 }
 
-class ResumeButton extends IconLabelButton {
+class ResumeButton extends StatelessWidget {
   const ResumeButton({
-    Key? key,
-    double? minScreenWidthForTextBeforeScaling,
-    String tooltip = 'Resume',
-    required VoidCallback? onPressed,
-  }) : super(
-          key: key,
-          icon: Icons.play_arrow,
-          label: 'Resume',
-          tooltip: tooltip,
-          minScreenWidthForTextBeforeScaling:
-              minScreenWidthForTextBeforeScaling,
-          onPressed: onPressed,
-        );
+    super.key,
+    this.iconOnly = false,
+    required this.tooltip,
+    required this.onPressed,
+    this.minScreenWidthForTextBeforeScaling,
+  });
+
+  final bool iconOnly;
+  final String? tooltip;
+  final VoidCallback? onPressed;
+  final double? minScreenWidthForTextBeforeScaling;
+
+  @override
+  Widget build(BuildContext context) {
+    if (iconOnly) {
+      return OutlinedIconButton(
+        icon: Icons.play_arrow,
+        onPressed: onPressed,
+        tooltip: tooltip,
+      );
+    }
+
+    return IconLabelButton(
+      key: key,
+      icon: Icons.pause,
+      label: 'Resume',
+      tooltip: tooltip,
+      minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
+      onPressed: onPressed,
+    );
+  }
 }
 
 class ClearButton extends IconLabelButton {
