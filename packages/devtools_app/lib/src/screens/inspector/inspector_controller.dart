@@ -473,7 +473,7 @@ class InspectorController extends DisposableController
       if (visibleToUser && rootNode.children.isEmpty) {
         ga.select(
           analytics_constants.inspector,
-          analytics_constants.recomputeTreeRootResultsInEmptyRoot,
+          analytics_constants.emptyRootAfterRecomputeTreeRoot,
           nonInteraction: true,
         );
       }
