@@ -64,7 +64,8 @@ class DiffHeapClasses extends HeapClasses {
         subtractMaps<HeapClassName, SingleClassStats, DiffClassStats>(
       minuend: couple.younger.classes.classesByName,
       subtrahend: couple.older.classes.classesByName,
-      subtract: (before, after) => DiffClassStats.diff(before, after),
+      subtract: (minuend, subtrahend) =>
+          DiffClassStats.diff(before: subtrahend, after: minuend),
     );
   }
 
@@ -92,10 +93,10 @@ class DiffClassStats extends ClassStats {
   final HeapClassName heapClass;
   final ObjectSetDiff total;
 
-  static DiffClassStats? diff(
+  static DiffClassStats? diff({
     SingleClassStats? before,
     SingleClassStats? after,
-  ) {
+  }) {
     if (before == null && after == null) return null;
 
     final heapClass = (before?.heapClass ?? after?.heapClass)!;
@@ -149,7 +150,8 @@ class ObjectSetDiff {
     deleted.seal();
     delta.seal();
     assert(
-        delta.instanceCount == created.instanceCount - deleted.instanceCount,);
+      delta.instanceCount == created.instanceCount - deleted.instanceCount,
+    );
   }
 
   final created = ObjectSet();
