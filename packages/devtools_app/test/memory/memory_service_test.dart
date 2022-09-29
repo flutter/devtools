@@ -58,93 +58,6 @@ void main() async {
 
         await env.tearDownEnvironment();
       });
-
-      test('allocations', () async {
-        await env.setupEnvironment();
-
-        final List<ClassHeapDetailStats> classStats =
-            await memoryController.getAllocationProfile();
-
-        final Iterator<ClassHeapDetailStats> iterator = classStats.iterator;
-        while (iterator.moveNext()) {
-          final ClassHeapDetailStats classStat = iterator.current;
-
-          if (classStat.classRef.name == 'MyApp') {
-            checkHeapStat(
-              classStat,
-              'MyApp',
-              instanceCount: 1,
-              accumulatorCount: 2,
-            );
-          } else if (classStat.classRef.name == 'ThemeData') {
-            checkHeapStat(
-              classStat,
-              'ThemeData',
-              instanceCount: 2,
-              accumulatorCount: 4,
-            );
-          } else if (classStat.classRef.name == 'AppBar') {
-            checkHeapStat(
-              classStat,
-              'AppBar',
-              instanceCount: 1,
-              accumulatorCount: 2,
-            );
-          } else if (classStat.classRef.name == 'Center') {
-            checkHeapStat(
-              classStat,
-              'Center',
-              instanceCount: 1,
-              accumulatorCount: 2,
-            );
-          }
-        }
-
-        await env.tearDownEnvironment();
-      });
-
-      test('reset', () async {
-        await env.setupEnvironment();
-
-        final List<ClassHeapDetailStats> classStats =
-            await memoryController.getAllocationProfile(reset: true);
-        final Iterator<ClassHeapDetailStats> iterator = classStats.iterator;
-        while (iterator.moveNext()) {
-          final ClassHeapDetailStats classStat = iterator.current;
-
-          if (classStat.classRef.name == 'MyApp') {
-            checkHeapStat(
-              classStat,
-              'MyApp',
-              instanceCount: 1,
-              accumulatorCount: 0,
-            );
-          } else if (classStat.classRef.name == 'ThemeData') {
-            checkHeapStat(
-              classStat,
-              'ThemeData',
-              instanceCount: 2,
-              accumulatorCount: 0,
-            );
-          } else if (classStat.classRef.name == 'AppBar') {
-            checkHeapStat(
-              classStat,
-              'AppBar',
-              instanceCount: 1,
-              accumulatorCount: 0,
-            );
-          } else if (classStat.classRef.name == 'Center') {
-            checkHeapStat(
-              classStat,
-              'Center',
-              instanceCount: 1,
-              accumulatorCount: 0,
-            );
-          }
-        }
-
-        await env.tearDownEnvironment();
-      });
     });
   }
 }
@@ -188,16 +101,4 @@ Future<void> collectSamples([int sampleCount = defaultSampleSize]) async {
   for (var trackers = 0; trackers < sampleCount; trackers++) {
     await memoryController.onMemory.first;
   }
-}
-
-void checkHeapStat(
-  ClassHeapDetailStats classStat,
-  String className, {
-  int? instanceCount,
-  int? accumulatorCount,
-}) {
-  expect(classStat.classRef.name, equals(className));
-  expect(classStat.instancesCurrent, equals(instanceCount));
-  // TODO(terry): investigate this failure.
-  //  expect(classStat.instancesAccumulated, equals(accumulatorCount));
 }
