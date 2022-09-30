@@ -109,7 +109,7 @@ class DiffClassStats extends ClassStats {
         from: after?.statsByPath,
         substract: before?.statsByPath,
         subtractor: ({subtract, from}) =>
-            ObjectSetStats.subtruct(subtruct: subtract, from: from),
+            ObjectSetStats.subtract(subtract: subtract, from: from),
       ),
     );
 

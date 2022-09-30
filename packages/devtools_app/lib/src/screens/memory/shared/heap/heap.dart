@@ -33,9 +33,7 @@ class AdaptedHeap {
   }
 }
 
-abstract class HeapClasses with Sealable {
-  // HeapClass? classByName(HeapClassName? name);
-}
+abstract class HeapClasses with Sealable {}
 
 class SingleHeapClasses extends HeapClasses {
   SingleHeapClasses(this.classesByName);
@@ -48,8 +46,8 @@ class SingleHeapClasses extends HeapClasses {
   @override
   void seal() {
     super.seal();
-    for (var analysis in classes) {
-      analysis.seal();
+    for (var stats in classes) {
+      stats.seal();
     }
   }
 }
@@ -100,17 +98,17 @@ class SingleClassStats extends ClassStats {
 class ObjectSetStats with Sealable {
   ObjectSetStats();
 
-  static ObjectSetStats? subtruct({
-    required ObjectSetStats? subtruct,
+  static ObjectSetStats? subtract({
+    required ObjectSetStats? subtract,
     required ObjectSetStats? from,
   }) {
     from ??= _empty;
-    subtruct ??= _empty;
+    subtract ??= _empty;
 
     final result = ObjectSetStats()
-      ..instanceCount = from.instanceCount - subtruct.instanceCount
-      ..shallowSize = from.shallowSize - subtruct.shallowSize
-      ..retainedSize = from.retainedSize - subtruct.retainedSize;
+      ..instanceCount = from.instanceCount - subtract.instanceCount
+      ..shallowSize = from.shallowSize - subtract.shallowSize
+      ..retainedSize = from.retainedSize - subtract.retainedSize;
 
     if (result.isZero) return null;
     return result;

@@ -50,7 +50,7 @@ class SnapshotView extends StatelessWidget {
                   ClassesTableDiff(classes: classes, controller: controller);
             }
 
-            final Widget table2 = HeapClassDetails(
+            final table2 = HeapClassDetails(
               item: item,
               controller: controller,
             );
