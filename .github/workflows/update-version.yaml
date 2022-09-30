@@ -17,7 +17,7 @@ on:
         - dev-minor
         - dev-major
 jobs:
-  log-the-inputs:
+  bump-version:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -28,6 +28,7 @@ jobs:
       # - uses: dart-lang/setup-dart@v1
       - uses: dart-lang/setup-dart@9a04e6d73cca37bd455e0608d7e5092f881fd603
       - run: |
+          RELEASE_TYPE=patch # TODO REMOVE
           echo "releaseType: $RELEASE_TYPE"
           
           dart tool/update_version.dart auto --type $RELEASE_TYPE
