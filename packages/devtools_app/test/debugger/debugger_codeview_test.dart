@@ -19,7 +19,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../matchers/matchers.dart';
+import '../test_infra/matchers/matchers.dart';
 
 void main() {
   const mockScriptRefFileUri = 'the/path/mapped/to/script/ref/uri';

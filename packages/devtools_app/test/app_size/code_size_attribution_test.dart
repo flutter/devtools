@@ -13,7 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_snapshot_analysis/precompiler_trace.dart';
 import 'package:vm_snapshot_analysis/program_info.dart';
 
-import '../test_data/app_size/precompiler_trace.dart';
+import '../test_infra/test_data/app_size/precompiler_trace.dart';
 
 void main() {
   late CallGraph callGraph;

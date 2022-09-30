@@ -20,7 +20,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../test_data/memory_allocation.dart';
+import '../../test_infra/test_data/memory_allocation.dart';
 
 void main() {
   late MemoryController controller;

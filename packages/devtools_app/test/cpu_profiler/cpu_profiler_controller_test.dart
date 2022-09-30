@@ -12,7 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../test_data/cpu_profile.dart';
+import '../test_infra/test_data/cpu_profile.dart';
 
 void main() {
   final ServiceConnectionManager fakeServiceManager = FakeServiceManager(

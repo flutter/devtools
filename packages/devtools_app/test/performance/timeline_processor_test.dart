@@ -10,8 +10,8 @@ import 'package:devtools_app/src/screens/performance/timeline_event_processor.da
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-import '../test_data/performance.dart';
-import '../test_utils/test_utils.dart';
+import '../test_infra/test_data/performance.dart';
+import '../test_infra/test_utils/test_utils.dart';
 
 void main() {
   final originalGoldenUiEvent = goldenUiTimelineEvent.deepCopy();

@@ -18,7 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../matchers/matchers.dart';
+import '../test_infra/matchers/matchers.dart';
 
 void main() {
   // Set a wide enough screen width that we do not run into overflow.
