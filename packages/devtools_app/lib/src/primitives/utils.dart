@@ -1505,24 +1505,19 @@ String? fileNameFromUri(String? uri) => uri?.split('/').last;
 /// Calculates subtraction of two maps.
 ///
 /// Result map keys is union of the imput maps' keys.
-///
-/// The function invokes:
-/// - `subtract` for values if keys presented in both input maps
-/// - `transform` for keys presented in just `minuend`
-/// - `negate` for keys presented in just `subtrahend`
 Map<K, V2> subtractMaps<K, V1, V2>({
-  required Map<K, V1>? minuend,
+  required Map<K, V1>? from,
   required Map<K, V1>? subtrahend,
-  required V2? Function(V1? minuend, V1? subtrahend) subtract,
+  required V2? Function({V1? from, V1? subtrahend}) subtract,
 }) {
-  minuend ??= <K, V1>{};
+  from ??= <K, V1>{};
   subtrahend ??= <K, V1>{};
 
   final result = <K, V2>{};
-  final unionOfKeys = minuend.keys.toSet().union(subtrahend.keys.toSet());
+  final unionOfKeys = from.keys.toSet().union(subtrahend.keys.toSet());
 
   for (var key in unionOfKeys) {
-    final diff = subtract(minuend[key], subtrahend[key]);
+    final diff = subtract(from: from[key], subtrahend: subtrahend[key]);
     if (diff != null) result[key] = diff;
   }
   return result;
