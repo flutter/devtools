@@ -1,3 +1,4 @@
+name: Update Version
 on:
   push:
   pull_request:
