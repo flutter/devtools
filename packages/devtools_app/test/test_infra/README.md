@@ -1,1 +1,1 @@
-All files under `test`, not ending with `_test.dart` should be in this folder.
+All files under `test`, which do not contain actual tests, should be in this folder.
