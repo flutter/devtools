@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../../../../../primitives/auto_dispose_mixin.dart';
 import '../../../../../primitives/utils.dart';
 import '../../../../../shared/table/table.dart';
 import '../../../../../shared/table/table_data.dart';
@@ -106,16 +107,19 @@ class _RetainedSizeColumn extends ColumnData<_RetainingPathRecord> {
       )!;
 }
 
-class ClassStatsRetainingPathTable extends StatelessWidget {
-  const ClassStatsRetainingPathTable({
+class ClassStatsTable extends StatefulWidget {
+  const ClassStatsTable({
     Key? key,
     required this.data,
+    required this.sorting,
   }) : super(key: key);
 
   final SingleClassStats data;
+  final ColumnSorting sorting;
 
-
-  static final _shallowSizeColumn = _ShallowSizeColumn();
+  @override
+  State<ClassStatsTable> createState() => _ClassStatsTableState();
+}
 
 class _ClassStatsTableState extends State<ClassStatsTable>
     with AutoDisposeMixin {
