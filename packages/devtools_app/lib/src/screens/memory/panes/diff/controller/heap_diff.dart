@@ -64,7 +64,7 @@ class DiffHeapClasses extends HeapClasses {
         subtractMaps<HeapClassName, SingleClassStats, DiffClassStats>(
       from: couple.younger.classes.classesByName,
       substract: couple.older.classes.classesByName,
-      subtract: ({subtruct, from}) =>
+      subtractor: ({subtruct, from}) =>
           DiffClassStats.diff(before: subtruct, after: from),
     );
   }
@@ -108,7 +108,7 @@ class DiffClassStats extends ClassStats {
           subtractMaps<ClassOnlyHeapPath, ObjectSetStats, ObjectSetStats>(
         from: after?.statsByPath,
         substract: before?.statsByPath,
-        subtract: ({subtruct, from}) =>
+        subtractor: ({subtruct, from}) =>
             ObjectSetStats.subtruct(subtruct: subtruct, from: from),
       ),
     );

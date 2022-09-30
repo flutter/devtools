@@ -1471,12 +1471,29 @@ void main() {
 
     group('subtractMaps', () {
       test('subtracts non-null maps', () {
-        final from = 
+        final from = {1: 1.1, 2: 2.0, 3: 3.0};
+        final subtract = {1: 'subtract'};
+        SubtractionResult? elementSubtractor({
+          required double? from,
+          required String? subtract,
+        }) =>
+            SubtractionResult(from: from, subtract: subtract);
 
+        final result = subtractMaps<int, double, String, SubtractionResult>(
+          from: from,
+          substract: subtract,
+          subtractor: elementSubtractor,
+        );
       });
-
     });
   });
+}
+
+class SubtractionResult {
+  SubtractionResult({required this.from, required this.subtract});
+
+  final double? from;
+  final String? subtract;
 }
 
 class TestProvidedController {

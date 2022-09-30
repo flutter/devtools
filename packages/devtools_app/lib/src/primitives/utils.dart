@@ -1505,19 +1505,19 @@ String? fileNameFromUri(String? uri) => uri?.split('/').last;
 /// Calculates subtraction of two maps.
 ///
 /// Result map keys is union of the imput maps' keys.
-Map<K, V2> subtractMaps<K, V1, V2>({
-  required Map<K, V1>? substract,
-  required Map<K, V1>? from,
-  required V2? Function({V1? subtruct, V1? from}) subtract,
+Map<K, R> subtractMaps<K, F, S, R>({
+  required Map<K, S>? substract,
+  required Map<K, F>? from,
+  required R? Function({required S? subtruct, required F? from}) subtractor,
 }) {
-  from ??= <K, V1>{};
-  substract ??= <K, V1>{};
+  from ??= <K, F>{};
+  substract ??= <K, S>{};
 
-  final result = <K, V2>{};
+  final result = <K, R>{};
   final unionOfKeys = from.keys.toSet().union(substract.keys.toSet());
 
   for (var key in unionOfKeys) {
-    final diff = subtract(from: from[key], subtruct: substract[key]);
+    final diff = subtractor(from: from[key], subtruct: substract[key]);
     if (diff != null) result[key] = diff;
   }
   return result;
