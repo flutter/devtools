@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 
 import '../../charts/treemap.dart';
 import '../../primitives/utils.dart';
-import '../../shared/table.dart';
-import '../../shared/table_data.dart';
+import '../../shared/table/table.dart';
+import '../../shared/table/table_data.dart';
 import '../../shared/utils.dart';
 import '../../ui/colors.dart';
 
@@ -62,13 +62,14 @@ class AppSizeAnalysisTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TreeTable<TreemapNode>(
+      keyFactory: (node) => PageStorageKey<String>(node.name),
       dataRoots:
           controller.isDeferredApp.value ? rootNode.children : [rootNode],
+      dataKey: 'app-size-analysis',
       columns: columns,
       treeColumn: treeColumn,
-      keyFactory: (node) => PageStorageKey<String>(node.name),
-      sortColumn: sortColumn,
-      sortDirection: SortDirection.descending,
+      defaultSortColumn: sortColumn,
+      defaultSortDirection: SortDirection.descending,
       selectionNotifier: controller.analysisRoot,
       autoExpandRoots: true,
     );
@@ -196,12 +197,13 @@ class AppSizeDiffTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TreeTable<TreemapNode>(
+      keyFactory: (node) => PageStorageKey<String>(node.name),
       dataRoots: [rootNode],
+      dataKey: 'app-size-diff',
       columns: columns,
       treeColumn: treeColumn,
-      keyFactory: (node) => PageStorageKey<String>(node.name),
-      sortColumn: sortColumn,
-      sortDirection: SortDirection.descending,
+      defaultSortColumn: sortColumn,
+      defaultSortDirection: SortDirection.descending,
       autoExpandRoots: true,
     );
   }

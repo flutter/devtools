@@ -117,6 +117,43 @@ void main() {
       expect(values.last, equals(19));
     });
 
+    test('cancels and disposes a single listener', () {
+      final disposer = Disposer();
+      final notifier = ValueNotifier<int>(42);
+      final values = <int>[];
+      final listener = () {
+        values.add(notifier.value);
+      };
+      disposer.addAutoDisposeListener(notifier, listener);
+      expect(notifier.hasListeners, isTrue);
+      notifier.value = 13;
+      expect(values.length, equals(1));
+      expect(values.last, equals(13));
+      notifier.value = 15;
+      expect(values.length, equals(2));
+      expect(values.last, equals(15));
+      expect(notifier.hasListeners, isTrue);
+      disposer.cancelListener(listener);
+      expect(notifier.hasListeners, isFalse);
+      notifier.value = 17;
+      // Verify listener not fired.
+      expect(values.length, equals(2));
+      expect(values.last, equals(15));
+
+      // Add a new listener:
+      disposer.addAutoDisposeListener(notifier, listener);
+      expect(notifier.hasListeners, isTrue);
+      notifier.value = 19;
+      expect(values.length, equals(3));
+      expect(values.last, equals(19));
+      disposer.cancelListener(listener);
+
+      expect(notifier.hasListeners, isFalse);
+      notifier.value = 21;
+      expect(values.length, equals(3));
+      expect(values.last, equals(19));
+    });
+
     group('callOnceWhenReady', () {
       for (bool isReady in [false, true]) {
         group('isReady=$isReady', () {

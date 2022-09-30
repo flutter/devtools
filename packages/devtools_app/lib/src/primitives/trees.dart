@@ -398,3 +398,30 @@ T? _treeTraversal<T extends TreeNode<T>>(
   }
   return null;
 }
+
+List<T> buildFlatList<T extends TreeNode<T>>(
+  List<T> roots, {
+  void onTraverse(T node)?,
+}) {
+  final flatList = <T>[];
+  for (T root in roots) {
+    _traverse(root, (T n) {
+      if (onTraverse != null) onTraverse(n);
+      flatList.add(n);
+      return n.isExpanded;
+    });
+  }
+  return flatList;
+}
+
+void _traverse<T extends TreeNode<T>>(
+  T node,
+  bool Function(T) callback,
+) {
+  final shouldContinue = callback(node);
+  if (shouldContinue) {
+    for (var child in node.children) {
+      _traverse(child, callback);
+    }
+  }
+}

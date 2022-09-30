@@ -19,7 +19,7 @@ import '../../primitives/utils.dart';
 import '../../service/service_extensions.dart';
 import '../../service/service_manager.dart';
 import '../../shared/globals.dart';
-import '../../shared/table.dart';
+import '../../shared/table/table.dart';
 import '../../shared/utils.dart';
 import '../../ui/search.dart';
 import 'memory_graph_model.dart';
@@ -437,16 +437,13 @@ class MemoryController extends DisposableController
   final settings = SettingsModel();
 
   final selectionSnapshotNotifier =
-      ValueNotifier<Selection<Reference>>(Selection.empty());
+      ValueNotifier<Selection<Reference?>>(Selection.empty());
 
   /// Tree to view Libary/Class/Instance (grouped by)
   late TreeTable<Reference> groupByTreeTable;
 
   /// Tree to view fields of an instance.
   TreeTable<FieldReference>? instanceFieldsTreeTable;
-
-  /// Tree to view fields of an analysis.
-  late TreeTable<AnalysisField> analysisFieldsTreeTable;
 
   final _updateClassStackTraces = ValueNotifier(0);
 

@@ -6,9 +6,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../primitives/trees.dart';
-import '../primitives/utils.dart';
-import 'utils.dart';
+import '../../primitives/trees.dart';
+import '../../primitives/utils.dart';
+import '../utils.dart';
 
 // TODO(peterdjlee): Remove get from method names.
 abstract class ColumnData<T> {
@@ -119,4 +119,18 @@ class ColumnGroup {
 
   /// The range of column indices for columns that make up this group.
   final Range range;
+}
+
+extension ColumnDataExtension<T> on ColumnData<T> {
+  MainAxisAlignment get mainAxisAlignment {
+    switch (alignment) {
+      case ColumnAlignment.center:
+        return MainAxisAlignment.center;
+      case ColumnAlignment.right:
+        return MainAxisAlignment.end;
+      case ColumnAlignment.left:
+      default:
+        return MainAxisAlignment.start;
+    }
+  }
 }

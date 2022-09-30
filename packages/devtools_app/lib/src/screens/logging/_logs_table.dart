@@ -6,49 +6,46 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../primitives/utils.dart';
-import '../../shared/table.dart';
-import '../../shared/table_data.dart';
+import '../../shared/table/table.dart';
+import '../../shared/table/table_data.dart';
 import '_kind_column.dart';
 import '_message_column.dart';
 import '_when_column.dart';
 import 'logging_controller.dart';
 
 class LogsTable extends StatelessWidget {
-  LogsTable({
+  const LogsTable({
     Key? key,
     required this.data,
-    required this.onItemSelected,
     required this.selectionNotifier,
     required this.searchMatchesNotifier,
     required this.activeSearchMatchNotifier,
   }) : super(key: key);
 
   final List<LogData> data;
-  final ItemCallback<LogData> onItemSelected;
-  final ValueListenable<LogData?> selectionNotifier;
+  final ValueNotifier<LogData?> selectionNotifier;
   final ValueListenable<List<LogData>> searchMatchesNotifier;
   final ValueListenable<LogData?> activeSearchMatchNotifier;
 
-  final ColumnData<LogData> when = WhenColumn();
-  final ColumnData<LogData> kind = KindColumn();
-  final ColumnData<LogData> message = MessageColumn();
-
-  List<ColumnData<LogData>> get columns => [when, kind, message];
+  static final ColumnData<LogData> when = WhenColumn();
+  static final ColumnData<LogData> kind = KindColumn();
+  static final ColumnData<LogData> message = MessageColumn();
+  static final List<ColumnData<LogData>> columns = [when, kind, message];
 
   @override
   Widget build(BuildContext context) {
     return FlatTable<LogData>(
-      columns: columns,
-      data: data,
-      autoScrollContent: true,
       keyFactory: (LogData data) => ValueKey<LogData>(data),
-      onItemSelected: onItemSelected,
-      selectionNotifier: selectionNotifier,
-      sortColumn: when,
-      secondarySortColumn: message,
-      sortDirection: SortDirection.ascending,
+      data: data,
+      dataKey: 'logs',
+      autoScrollContent: true,
       searchMatchesNotifier: searchMatchesNotifier,
       activeSearchMatchNotifier: activeSearchMatchNotifier,
+      columns: columns,
+      selectionNotifier: selectionNotifier,
+      defaultSortColumn: when,
+      defaultSortDirection: SortDirection.ascending,
+      secondarySortColumn: message,
     );
   }
 }

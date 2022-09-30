@@ -50,15 +50,14 @@ class SnapshotView extends StatelessWidget {
               children: [
                 OutlineDecoration(
                   child: SnapshotStatsTable(
-                    // The key is passed to persist state.
-                    key: ObjectKey(item),
+                    item: item,
+                    dataId: item.id,
                     controller: controller,
                   ),
                 ),
                 OutlineDecoration(
                   child: HeapClassDetails(
                     item: item,
-                    sorting: controller.classStatsSorting,
                   ),
                 ),
               ],
