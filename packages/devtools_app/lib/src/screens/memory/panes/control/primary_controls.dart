@@ -7,54 +7,26 @@ import 'package:flutter/material.dart';
 import '../../../../analytics/analytics.dart' as ga;
 import '../../../../analytics/constants.dart' as analytics_constants;
 import '../../../../shared/common_widgets.dart';
+import '../../../../shared/globals.dart';
 import '../../../../shared/theme.dart';
-import '../../../../shared/utils.dart';
 import '../../memory_controller.dart';
 import '../../primitives/ui.dart';
 import '../chart/chart_pane_controller.dart';
-import 'interval_dropdown.dart';
 
-class PrimaryControls extends StatefulWidget {
+class PrimaryControls extends StatelessWidget {
   const PrimaryControls({
     Key? key,
     required this.chartController,
+    required this.controller,
   }) : super(key: key);
 
   final MemoryChartPaneController chartController;
-
-  @override
-  State<PrimaryControls> createState() => _PrimaryControlsState();
-}
-
-class _PrimaryControlsState extends State<PrimaryControls>
-    with ProvidedControllerMixin<MemoryController, PrimaryControls> {
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    initController();
-  }
-
-  void _onPause() {
-    ga.select(analytics_constants.memory, analytics_constants.pause);
-    controller.pauseLiveFeed();
-  }
-
-  void _onResume() {
-    ga.select(analytics_constants.memory, analytics_constants.resume);
-    controller.resumeLiveFeed();
-  }
+  final MemoryController controller;
 
   void _clearTimeline() {
     ga.select(analytics_constants.memory, analytics_constants.clear);
 
     controller.memoryTimeline.reset();
-
-    // Clear any current Allocation Profile collected.
-    controller.monitorAllocations = [];
-    controller.monitorTimestamp = null;
-    controller.lastMonitorTimestamp.value = null;
-    controller.trackAllocations.clear();
-    controller.allocationSamples.clear();
 
     // Clear all analysis and snapshots collected too.
     controller.clearAllSnapshots();
@@ -64,42 +36,44 @@ class _PrimaryControlsState extends State<PrimaryControls>
     controller.selectedLeaf = null;
 
     // Remove history of all plotted data in all charts.
-    widget.chartController.resetAll();
+    chartController.resetAll();
   }
 
   @override
   Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const _ChartButton(),
+        const SizedBox(width: defaultSpacing),
+        ClearButton(
+          onPressed: controller.memorySource == MemoryController.liveFeed
+              ? _clearTimeline
+              : null,
+          minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
+          tooltip: 'Clear all data on the memory screen.',
+        ),
+      ],
+    );
+  }
+}
+
+class _ChartButton extends StatelessWidget {
+  const _ChartButton({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
-      valueListenable: controller.paused,
-      builder: (context, paused, _) {
-        return Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            PauseButton(
-              minScreenWidthForTextBeforeScaling:
-                  primaryControlsMinVerboseWidth,
-              onPressed: paused ? null : _onPause,
-            ),
-            const SizedBox(width: denseSpacing),
-            ResumeButton(
-              minScreenWidthForTextBeforeScaling:
-                  primaryControlsMinVerboseWidth,
-              onPressed: paused ? _onResume : null,
-            ),
-            const SizedBox(width: defaultSpacing),
-            ClearButton(
-              // TODO(terry): Button needs to be Delete for offline data.
-              onPressed: controller.memorySource == MemoryController.liveFeed
-                  ? _clearTimeline
-                  : null,
-              minScreenWidthForTextBeforeScaling:
-                  primaryControlsMinVerboseWidth,
-            ),
-            const SizedBox(width: defaultSpacing),
-            IntervalDropdown(chartController: widget.chartController),
-          ],
-        );
-      },
+      valueListenable: preferences.memory.showChart,
+      builder: (_, showChart, __) => IconLabelButton(
+        key: key,
+        tooltip: showChart ? 'Hide chart' : 'Show chart',
+        icon: showChart ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+        label: 'Chart',
+        minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
+        onPressed: () => preferences.memory.showChart.value =
+            !preferences.memory.showChart.value,
+      ),
     );
   }
 }

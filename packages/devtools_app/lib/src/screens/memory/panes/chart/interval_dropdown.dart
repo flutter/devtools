@@ -9,8 +9,9 @@ import '../../../../analytics/constants.dart' as analytics_constants;
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/utils.dart';
 import '../../memory_controller.dart';
-import '../chart/chart_pane_controller.dart';
-import 'constants.dart';
+import 'chart_pane_controller.dart';
+
+const verboseDropDownMinimumWidth = 950;
 
 class IntervalDropdown extends StatefulWidget {
   const IntervalDropdown({Key? key, required this.chartController})

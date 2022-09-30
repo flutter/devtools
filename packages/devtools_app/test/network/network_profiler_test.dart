@@ -255,7 +255,7 @@ void main() {
       }
 
       for (final request in controller.requests.value.requests) {
-        controller.selectRequest(request);
+        controller.selectedRequest.value = request;
         await tester.pumpAndSettle();
         expect(
           find.byKey(NetworkRequestInspector.noRequestSelectedKey),

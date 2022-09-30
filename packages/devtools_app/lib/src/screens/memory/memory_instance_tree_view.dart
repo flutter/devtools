@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../primitives/utils.dart';
-import '../../shared/table.dart';
-import '../../shared/table_data.dart';
+import '../../shared/table/table.dart';
+import '../../shared/table/table_data.dart';
 import '../../shared/utils.dart';
 import 'memory_controller.dart';
 import 'memory_snapshot_models.dart';
@@ -59,12 +59,13 @@ class InstanceTreeViewState extends State<InstanceTreeView>
   @override
   Widget build(BuildContext context) {
     controller.instanceFieldsTreeTable = TreeTable<FieldReference>(
+      keyFactory: (typeRef) => PageStorageKey<String>(typeRef.name),
       dataRoots: controller.instanceRoot!,
+      dataKey: 'memory-instance-tree',
       columns: columns,
       treeColumn: treeColumn,
-      keyFactory: (typeRef) => PageStorageKey<String>(typeRef.name),
-      sortColumn: columns[0],
-      sortDirection: SortDirection.ascending,
+      defaultSortColumn: columns[0],
+      defaultSortDirection: SortDirection.ascending,
     );
 
     return controller.instanceFieldsTreeTable!;

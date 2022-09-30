@@ -9,8 +9,8 @@ import 'package:vm_service/vm_service.dart';
 import '../../../primitives/utils.dart';
 import '../../../shared/common_widgets.dart';
 import '../../../shared/split.dart';
-import '../../../shared/table.dart';
-import '../../../shared/table_data.dart';
+import '../../../shared/table/table.dart';
+import '../../../shared/table/table_data.dart';
 import '../../../shared/theme.dart';
 import '../../profiler/cpu_profiler.dart';
 import '../vm_developer_common_widgets.dart';
@@ -216,12 +216,12 @@ class IsolateMemoryStatisticsWidget extends StatelessWidget {
 /// A table which displays the amount of time the VM is performing certain
 /// tagged tasks.
 class TagStatisticsWidget extends StatelessWidget {
-  TagStatisticsWidget({required this.controller});
+  const TagStatisticsWidget({required this.controller});
 
-  final name = _TagColumn();
-  final percentage = _PercentageColumn();
+  static final _name = _TagColumn();
+  static final _percentage = _PercentageColumn();
+  static final List<ColumnData<VMTag>> columns = [_name, _percentage];
 
-  List<ColumnData<VMTag>> get columns => [name, percentage];
   final IsolateStatisticsViewController controller;
 
   @override
@@ -233,12 +233,12 @@ class TagStatisticsWidget extends StatelessWidget {
         table: Flexible(
           child: controller.cpuProfilerController.profilerEnabled
               ? FlatTable<VMTag>(
-                  columns: columns,
-                  data: controller.tags,
                   keyFactory: (VMTag tag) => ValueKey<String>(tag.name),
-                  sortColumn: percentage,
-                  sortDirection: SortDirection.descending,
-                  onItemSelected: (_) => null,
+                  data: controller.tags,
+                  dataKey: 'tag-statistics',
+                  columns: columns,
+                  defaultSortColumn: _percentage,
+                  defaultSortDirection: SortDirection.descending,
                 )
               : CpuProfilerDisabled(
                   controller.cpuProfilerController,
@@ -324,14 +324,14 @@ class StackTraceViewerWidget extends StatelessWidget {
             )
           : Flexible(
               child: FlatTable<String>(
+                keyFactory: (String s) => ValueKey<String>(s),
+                data: lines,
+                dataKey: 'stack-trace-viewer',
                 columns: [
                   frame,
                 ],
-                data: lines,
-                keyFactory: (String s) => ValueKey<String>(s),
-                onItemSelected: (_) => null,
-                sortColumn: frame,
-                sortDirection: SortDirection.ascending,
+                defaultSortColumn: frame,
+                defaultSortDirection: SortDirection.ascending,
               ),
             ),
     );
@@ -353,15 +353,14 @@ class IsolatePortsWidget extends StatefulWidget {
 }
 
 class _IsolatePortsWidgetState extends State<IsolatePortsWidget> {
-  final id = _PortIDColumn();
-  final name = _PortNameColumn();
+  static final _id = _PortIDColumn();
+  static final _name = _PortNameColumn();
+  static final List<ColumnData<InstanceRef>> _columns = [
+    _name,
+    _id,
+  ];
 
   final selectedPort = ValueNotifier<InstanceRef?>(null);
-
-  List<ColumnData<InstanceRef>> get columns => [
-        name,
-        id,
-      ];
 
   @override
   Widget build(BuildContext context) {
@@ -385,22 +384,14 @@ class _IsolatePortsWidgetState extends State<IsolatePortsWidget> {
                 ),
                 Flexible(
                   child: FlatTable<InstanceRef?>(
-                    columns: columns,
-                    data: ports,
                     keyFactory: (InstanceRef? port) =>
                         ValueKey<String>(port!.debugName!),
-                    sortColumn: id,
-                    sortDirection: SortDirection.ascending,
+                    data: ports,
+                    dataKey: 'isolate-ports',
+                    columns: _columns,
+                    defaultSortColumn: _id,
+                    defaultSortDirection: SortDirection.ascending,
                     selectionNotifier: selectedPort,
-                    onItemSelected: (InstanceRef? port) => setState(
-                      () {
-                        if (port == selectedPort.value) {
-                          selectedPort.value = null;
-                        } else {
-                          selectedPort.value = port;
-                        }
-                      },
-                    ),
                   ),
                 ),
               ],
@@ -427,13 +418,13 @@ class _ServiceExtensionNameColumn extends ColumnData<String> {
 /// A table displaying the list of service extensions registered with an
 /// isolate.
 class ServiceExtensionsWidget extends StatelessWidget {
-  ServiceExtensionsWidget({required this.controller});
+  const ServiceExtensionsWidget({required this.controller});
 
-  final name = _ServiceExtensionNameColumn();
+  static final _name = _ServiceExtensionNameColumn();
 
-  List<ColumnData<String>> get columns => [
-        name,
-      ];
+  static final List<ColumnData<String>> _columns = [
+    _name,
+  ];
 
   final IsolateStatisticsViewController controller;
 
@@ -447,12 +438,12 @@ class ServiceExtensionsWidget extends StatelessWidget {
         title: 'Service Extensions (${extensions.length})',
         table: Flexible(
           child: FlatTable<String>(
-            columns: columns,
-            data: extensions,
             keyFactory: (String extension) => ValueKey<String>(extension),
-            sortColumn: name,
-            sortDirection: SortDirection.ascending,
-            onItemSelected: (_) => null,
+            data: extensions,
+            dataKey: 'registered-service-extensions',
+            columns: _columns,
+            defaultSortColumn: _name,
+            defaultSortDirection: SortDirection.ascending,
           ),
         ),
       ),

@@ -12,7 +12,6 @@ import '../../../primitives/memory_utils.dart';
 import '../../../shared/heap/model.dart';
 import 'heap_diff.dart';
 import 'item_controller.dart';
-import 'model.dart';
 
 class DiffPaneController {
   DiffPaneController(this.snapshotTaker);
@@ -36,28 +35,27 @@ class DiffPaneController {
   DiffListItem get selectedItem => snapshots.value[selectedIndex.value];
 
   /// Full name for the selected class.
-  ValueListenable<String?> get selectedClass => _selectedClass;
-  final _selectedClass = ValueNotifier<String?>(null);
-  void setSelectedClass(String? value) => _selectedClass.value = value;
+  final selectedClassName = ValueNotifier<String?>(null);
 
   /// True, if the list contains snapshots, i.e. items beyond the first
   /// informational item.
   bool get hasSnapshots => snapshots.value.length > 1;
 
-  final snapshotStatsSorting = ColumnSorting();
-
-  final classStatsSorting = ColumnSorting();
+  // This value should never be reset. It is incremented for every snapshot that
+  // is taken, and is used to assign a unique id to each [SnapshotListItem].
+  int _snapshotId = 0;
 
   Future<void> takeSnapshot() async {
     _isProcessing.value = true;
     final future = snapshotTaker.take();
     _snapshots.add(
       SnapshotListItem(
-        future,
-        _nextDisplayNumber(),
-        currentIsolateName ?? '<isolate-not-detected>',
-        diffStore,
-        selectedClass,
+        receiver: future,
+        id: _snapshotId++,
+        displayNumber: _nextDisplayNumber(),
+        isolateName: currentIsolateName ?? '<isolate-not-detected>',
+        diffStore: diffStore,
+        selectedClassName: selectedClassName,
       ),
     );
     await future;

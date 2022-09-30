@@ -80,15 +80,15 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
 
   @override
   Widget build(BuildContext context) {
-    if (items.isEmpty) return _emptyTreeViewBuilder();
+    if (dataFlatList.isEmpty) return _emptyTreeViewBuilder();
     final content = ListView.builder(
-      itemCount: items.length,
+      itemCount: dataFlatList.length,
       itemExtent: widget.itemExtent,
       shrinkWrap: widget.shrinkWrap,
       physics: widget.shrinkWrap ? const ClampingScrollPhysics() : null,
       controller: widget.scrollController,
       itemBuilder: (context, index) {
-        final T item = items[index];
+        final T item = dataFlatList[index];
         return _TreeViewItem<T>(
           item,
           buildDisplay: (onPressed) =>
@@ -140,7 +140,7 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
 
   void _updateItems() {
     setState(() {
-      items = buildFlatList(
+      dataFlatList = buildFlatList(
         dataRoots,
         onTraverse: widget.onTraverse,
       );
@@ -225,29 +225,5 @@ class _TreeViewItemState<T extends TreeNode<T>> extends State<_TreeViewItem<T>>
 mixin TreeMixin<T extends TreeNode<T>> {
   late List<T> dataRoots;
 
-  late List<T> items;
-
-  List<T> buildFlatList(
-    List<T> roots, {
-    void onTraverse(T node)?,
-  }) {
-    final flatList = <T>[];
-    for (T root in roots) {
-      traverse(root, (n) {
-        if (onTraverse != null) onTraverse(n);
-        flatList.add(n);
-        return n.isExpanded;
-      });
-    }
-    return flatList;
-  }
-
-  void traverse(T node, bool Function(T) callback) {
-    final shouldContinue = callback(node);
-    if (shouldContinue) {
-      for (var child in node.children) {
-        traverse(child, callback);
-      }
-    }
-  }
+  late List<T> dataFlatList;
 }

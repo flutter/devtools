@@ -43,9 +43,7 @@ class NetworkController
 
   final _requests = ValueNotifier<NetworkRequests>(NetworkRequests());
 
-  ValueListenable<NetworkRequest?> get selectedRequest => _selectedRequest;
-
-  final _selectedRequest = ValueNotifier<NetworkRequest?>(null);
+  final selectedRequest = ValueNotifier<NetworkRequest?>(null);
 
   /// Notifies that the timeline is currently being recorded.
   ValueListenable<bool> get recordingNotifier => _recordingNotifier;
@@ -70,10 +68,6 @@ class NetworkController
 
   @visibleForTesting
   bool get isPolling => _pollingTimer != null;
-
-  void selectRequest(NetworkRequest? selection) {
-    _selectedRequest.value = selection;
-  }
 
   void _processHttpProfileRequests({
     required int timelineMicrosOffset,
@@ -124,9 +118,9 @@ class NetworkController
     for (final socket in sockets) {
       final webSocket = WebSocket(socket, timelineMicrosOffset);
       // If we have updated data for the selected web socket, update the value.
-      if (_selectedRequest.value is WebSocket &&
-          (_selectedRequest.value as WebSocket).id == webSocket.id) {
-        _selectedRequest.value = webSocket;
+      if (selectedRequest.value is WebSocket &&
+          (selectedRequest.value as WebSocket).id == webSocket.id) {
+        selectedRequest.value = webSocket;
       }
       currentValues.add(webSocket);
     }
@@ -259,11 +253,11 @@ class NetworkController
   }
 
   void _updateSelection() {
-    final selected = _selectedRequest.value;
+    final selected = selectedRequest.value;
     if (selected != null) {
       final requests = filteredData.value;
       if (!requests.contains(selected)) {
-        _selectedRequest.value = null;
+        selectedRequest.value = null;
       }
     }
   }
