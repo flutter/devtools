@@ -187,13 +187,7 @@ class LoggingController extends DisposableController
 
   List<LogData> data = <LogData>[];
 
-  final _selectedLog = ValueNotifier<LogData?>(null);
-
-  ValueListenable<LogData?> get selectedLog => _selectedLog;
-
-  void selectLog(LogData data) {
-    _selectedLog.value = data;
-  }
+  final selectedLog = ValueNotifier<LogData?>(null);
 
   void _updateData(List<LogData> logs) {
     data = logs;
@@ -204,11 +198,11 @@ class LoggingController extends DisposableController
   }
 
   void _updateSelection() {
-    final selected = _selectedLog.value;
+    final selected = selectedLog.value;
     if (selected != null) {
       final List<LogData> logs = filteredData.value;
       if (!logs.contains(selected)) {
-        _selectedLog.value = null;
+        selectedLog.value = null;
       }
     }
   }

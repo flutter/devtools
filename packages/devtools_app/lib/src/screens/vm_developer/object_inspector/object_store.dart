@@ -7,8 +7,8 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../../primitives/utils.dart';
 import '../../../shared/common_widgets.dart';
-import '../../../shared/table.dart';
-import '../../../shared/table_data.dart';
+import '../../../shared/table/table.dart';
+import '../../../shared/table/table_data.dart';
 import '../vm_developer_common_widgets.dart';
 import '../vm_service_private_extensions.dart';
 import 'object_store_controller.dart';
@@ -81,9 +81,9 @@ class ObjectStoreViewer extends StatelessWidget {
           keyFactory: (item) => Key(item.key),
           columns: _columns,
           data: objectStore.fields.entries.toList(),
-          sortColumn: _entryColumn,
-          sortDirection: SortDirection.ascending,
-          onItemSelected: (_) => null,
+          dataKey: 'object-store',
+          defaultSortColumn: _entryColumn,
+          defaultSortDirection: SortDirection.ascending,
         );
       },
     );

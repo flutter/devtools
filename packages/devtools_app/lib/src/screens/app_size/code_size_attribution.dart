@@ -9,8 +9,8 @@ import 'package:vm_snapshot_analysis/program_info.dart';
 import '../../primitives/trees.dart';
 import '../../primitives/utils.dart';
 import '../../shared/common_widgets.dart';
-import '../../shared/table.dart';
-import '../../shared/table_data.dart';
+import '../../shared/table/table.dart';
+import '../../shared/table/table_data.dart';
 import '../../shared/theme.dart';
 
 class CallGraphWithDominators extends StatefulWidget {
@@ -150,24 +150,26 @@ class _CallGraphViewState extends State<CallGraphView> {
   Widget _buildFromTable() {
     return FlatTable<CallGraphNode>(
       key: CallGraphView.fromTableKey,
-      columns: [_fromColumn],
-      data: selectedNode.pred,
       keyFactory: (CallGraphNode node) => ValueKey<CallGraphNode>(node),
-      onItemSelected: _selectMainNode,
-      sortColumn: _fromColumn,
-      sortDirection: SortDirection.descending,
+      data: selectedNode.pred,
+      dataKey: 'call-graph-from',
+      columns: [_fromColumn],
+      onItemSelected: (CallGraphNode? node) => _selectMainNode(node!),
+      defaultSortColumn: _fromColumn,
+      defaultSortDirection: SortDirection.descending,
     );
   }
 
   Widget _buildToTable() {
     return FlatTable<CallGraphNode>(
       key: CallGraphView.toTableKey,
-      columns: [_toColumn],
-      data: selectedNode.succ,
       keyFactory: (CallGraphNode node) => ValueKey<CallGraphNode>(node),
-      onItemSelected: _selectMainNode,
-      sortColumn: _toColumn,
-      sortDirection: SortDirection.descending,
+      data: selectedNode.succ,
+      dataKey: 'call-graph-to',
+      columns: [_toColumn],
+      onItemSelected: (CallGraphNode? node) => _selectMainNode(node!),
+      defaultSortColumn: _toColumn,
+      defaultSortDirection: SortDirection.descending,
     );
   }
 
@@ -242,11 +244,12 @@ class DominatorTree extends StatelessWidget {
     return TreeTable<DominatorTreeNode>(
       key: dominatorTreeTableKey,
       dataRoots: [dominatorTreeRoot!],
+      dataKey: 'dominator-tree',
+      keyFactory: (node) => PageStorageKey<String>('${node.callGraphNode.id}'),
       columns: [_packageColumn],
       treeColumn: _packageColumn,
-      keyFactory: (node) => PageStorageKey<String>('${node.callGraphNode.id}'),
-      sortColumn: _packageColumn,
-      sortDirection: SortDirection.descending,
+      defaultSortColumn: _packageColumn,
+      defaultSortDirection: SortDirection.descending,
       autoExpandRoots: true,
     );
   }

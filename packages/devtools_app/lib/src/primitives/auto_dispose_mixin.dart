@@ -85,6 +85,11 @@ mixin AutoDisposeMixin<T extends StatefulWidget> on State<T>
   }
 
   @override
+  void cancelListener(VoidCallback? listener) {
+    _delegate.cancelListener(listener);
+  }
+
+  @override
   void cancelFocusNodes() {
     _delegate.cancelFocusNodes();
   }

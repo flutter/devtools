@@ -16,8 +16,8 @@ import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
 import '../../shared/screen.dart';
 import '../../shared/split.dart';
-import '../../shared/table.dart';
-import '../../shared/table_data.dart';
+import '../../shared/table/table.dart';
+import '../../shared/table/table_data.dart';
 import '../../shared/theme.dart';
 import '../../shared/utils.dart';
 import '../../ui/filter.dart';
@@ -347,6 +347,12 @@ class NetworkRequestsTable extends StatelessWidget {
   Widget build(BuildContext context) {
     return OutlineDecoration(
       child: FlatTable<NetworkRequest?>(
+        keyFactory: (NetworkRequest? data) => ValueKey<NetworkRequest?>(data),
+        data: requests,
+        dataKey: 'network-requests',
+        searchMatchesNotifier: searchMatchesNotifier,
+        activeSearchMatchNotifier: activeSearchMatchNotifier,
+        autoScrollContent: true,
         columns: [
           methodColumn,
           addressColumn,
@@ -356,17 +362,9 @@ class NetworkRequestsTable extends StatelessWidget {
           timestampColumn,
           actionsColumn
         ],
-        data: requests,
-        keyFactory: (NetworkRequest? data) => ValueKey<NetworkRequest?>(data),
-        onItemSelected: (item) {
-          networkController.selectRequest(item);
-        },
         selectionNotifier: networkController.selectedRequest,
-        autoScrollContent: true,
-        sortColumn: timestampColumn,
-        sortDirection: SortDirection.ascending,
-        searchMatchesNotifier: searchMatchesNotifier,
-        activeSearchMatchNotifier: activeSearchMatchNotifier,
+        defaultSortColumn: timestampColumn,
+        defaultSortDirection: SortDirection.ascending,
       ),
     );
   }

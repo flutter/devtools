@@ -6,8 +6,9 @@ import 'package:flutter/material.dart';
 
 import '../../../../primitives/utils.dart';
 import '../../../../shared/common_widgets.dart';
-import '../../../../shared/table.dart';
-import '../../../../shared/table_data.dart';
+import '../../../../shared/table/table.dart';
+import '../../../../shared/table/table_controller.dart';
+import '../../../../shared/table/table_data.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import 'allocation_profile_tracing_view_controller.dart';
@@ -94,9 +95,6 @@ class AllocationTracingTable extends StatefulWidget {
 }
 
 class _AllocationTracingTableState extends State<AllocationTracingTable> {
-  late SortDirection sortDirection;
-  late ColumnData<TracedClass> sortColumn;
-
   late final _TraceCheckBoxColumn _checkboxColumn;
   static final _classNameColumn = _ClassNameColumn();
   static final _instancesColumn = _InstancesColumn();
@@ -112,8 +110,6 @@ class _AllocationTracingTableState extends State<AllocationTracingTable> {
       _classNameColumn,
       _instancesColumn,
     ];
-    sortColumn = _classNameColumn;
-    sortDirection = SortDirection.ascending;
   }
 
   @override
@@ -140,25 +136,13 @@ class _AllocationTracingTableState extends State<AllocationTracingTable> {
                   valueListenable: state.filteredClassList,
                   builder: (context, filteredClassList, _) {
                     return FlatTable<TracedClass>(
-                      columns: columns,
-                      data: filteredClassList,
                       keyFactory: (e) => Key(e.cls.id!),
-                      onItemSelected: state.selectTracedClass,
-                      sortColumn: _classNameColumn,
-                      sortDirection: sortDirection,
+                      data: filteredClassList,
+                      dataKey: 'allocation-tracing',
+                      columns: columns,
+                      defaultSortColumn: _classNameColumn,
+                      defaultSortDirection: SortDirection.ascending,
                       selectionNotifier: state.selectedTracedClass,
-                      onSortChanged: (
-                        column,
-                        direction, {
-                        secondarySortColumn,
-                      }) {
-                        // Keep track of sorting state so it doesn't get reset when
-                        // `controller.refreshing` changes.
-                        setState(() {
-                          sortDirection = direction;
-                          sortColumn = column;
-                        });
-                      },
                       pinBehavior: FlatTablePinBehavior.pinOriginalToTop,
                     );
                   },

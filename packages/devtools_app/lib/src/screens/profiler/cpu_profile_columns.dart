@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import '../../primitives/utils.dart';
-import '../../shared/table_data.dart';
+import '../../shared/table/table_data.dart';
 import '../../shared/utils.dart';
 import 'cpu_profile_model.dart';
 
