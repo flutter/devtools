@@ -233,18 +233,6 @@ class AllocationProfileTracingIsolateState {
     _updateClassState(tracedClass, updated);
     return profileData;
   }
-
-  /// Updates `selectedTracedClass` with the current selection from the
-  /// `AllocationTracingTable`.
-  void selectTracedClass(TracedClass traced) {
-    TracedClass? update = traced;
-    // Clear the selection if the user tries to select the currently selected
-    // class.
-    if (selectedTracedClass.value == traced) {
-      update = null;
-    }
-    selectedTracedClass.value = update;
-  }
 }
 
 class AllocationProfileTracingViewController extends DisposableController

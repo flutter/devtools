@@ -392,15 +392,6 @@ class _IsolatePortsWidgetState extends State<IsolatePortsWidget> {
                     defaultSortColumn: _id,
                     defaultSortDirection: SortDirection.ascending,
                     selectionNotifier: selectedPort,
-                    onItemSelected: (InstanceRef? port) => setState(
-                      () {
-                        if (port == selectedPort.value) {
-                          selectedPort.value = null;
-                        } else {
-                          selectedPort.value = port;
-                        }
-                      },
-                    ),
                   ),
                 ),
               ],

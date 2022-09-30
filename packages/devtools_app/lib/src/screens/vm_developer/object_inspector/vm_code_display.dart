@@ -268,7 +268,6 @@ class CodeTable extends StatelessWidget {
           ColumnGroup(title: 'Profiler Ticks', range: const Range(4, 6)),
       ],
       columns: columns,
-      onItemSelected: (_) => null,
       defaultSortColumn: columns[0],
       defaultSortDirection: SortDirection.ascending,
     );

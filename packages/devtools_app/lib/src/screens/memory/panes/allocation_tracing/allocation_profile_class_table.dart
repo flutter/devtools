@@ -140,8 +140,6 @@ class _AllocationTracingTableState extends State<AllocationTracingTable> {
                       data: filteredClassList,
                       dataKey: 'allocation-tracing',
                       columns: columns,
-                      onItemSelected: (TracedClass? tracedClass) =>
-                          state.selectTracedClass(tracedClass!),
                       defaultSortColumn: _classNameColumn,
                       defaultSortDirection: SortDirection.ascending,
                       selectionNotifier: state.selectedTracedClass,

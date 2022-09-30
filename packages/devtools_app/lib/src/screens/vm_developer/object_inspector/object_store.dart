@@ -84,7 +84,6 @@ class ObjectStoreViewer extends StatelessWidget {
           dataKey: 'object-store',
           defaultSortColumn: _entryColumn,
           defaultSortDirection: SortDirection.ascending,
-          onItemSelected: (_) => null,
         );
       },
     );
