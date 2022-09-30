@@ -11,6 +11,7 @@ import '../../analytics/analytics_common.dart';
 import '../../analytics/constants.dart' as analytics_constants;
 import '../../config_specific/import_export/import_export.dart';
 import '../../primitives/auto_dispose_mixin.dart';
+import '../../primitives/feature_flags.dart';
 import '../../service/service_extension_widgets.dart';
 import '../../service/service_extensions.dart' as extensions;
 import '../../shared/banner_messages.dart';
@@ -163,7 +164,7 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
             },
           ),
         Expanded(
-          child: embeddedPerfettoEnabled
+          child: FeatureFlags.embeddedPerfetto
               ? tabbedPerformanceView
               : Split(
                   axis: Axis.vertical,
