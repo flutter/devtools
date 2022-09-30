@@ -1,4 +1,5 @@
 on:
+  push:
   workflow_dispatch:
     inputs:
       releaseType:
@@ -18,7 +19,23 @@ jobs:
   log-the-inputs:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
+
+      # Note: This workflow uses the latest stable version of the Dart SDK.
+      # You can specify other versions if desired, see documentation here:
+      # https://github.com/dart-lang/setup-dart/blob/main/README.md
+      # - uses: dart-lang/setup-dart@v1
+      - uses: dart-lang/setup-dart@9a04e6d73cca37bd455e0608d7e5092f881fd603
       - run: |
           echo "releaseType: $RELEASE_TYPE"
+          
+          dart tool/update_version.dart auto --type $RELEASE_TYPE
+          dart tool/bin/repo_tool.dart generate-changelog
+          # TODO GET VERSION
+          VERSION=123.23.23.
+          git add .
+          git commit -m “Prepare for $VERSION release.”
+          git push
+
         env:
           RELEASE_TYPE: ${{ inputs.releaseType }}
