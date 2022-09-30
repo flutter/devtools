@@ -1117,6 +1117,10 @@ extension ListExtension<T> on List<T> {
   }
 }
 
+extension UiListExtension<T> on List<T> {
+  int get numSpacers => max(0, length - 1);
+}
+
 Map<String, String> devToolsQueryParams(String url) {
   // DevTools urls can have the form:
   // http://localhost:123/?key=value

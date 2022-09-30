@@ -12,7 +12,6 @@ import '../../../primitives/memory_utils.dart';
 import '../../../shared/heap/model.dart';
 import 'heap_diff.dart';
 import 'item_controller.dart';
-import 'model.dart';
 
 class DiffPaneController {
   DiffPaneController(this.snapshotTaker);
@@ -71,22 +70,22 @@ class DiffPaneController {
   /// informational item.
   bool get hasSnapshots => snapshots.value.length > 1;
 
-  final classSorting = ColumnSorting();
-
-  final classDiffSorting = ColumnSorting();
-
-  final pathSorting = ColumnSorting();
+  // This value should never be reset. It is incremented for every snapshot that
+  // is taken, and is used to assign a unique id to each [SnapshotListItem].
+  int _snapshotId = 0;
 
   Future<void> takeSnapshot() async {
     _isProcessing.value = true;
     final future = snapshotTaker.take();
-    final newItem = SnapshotInstanceItem(
-      future,
-      _nextDisplayNumber(),
-      currentIsolateName ?? '<isolate-not-detected>',
-      diffStore,
-      selectedClass,
-      selectedPath,
+    _snapshots.add(
+      SnapshotListItem(
+        receiver: future,
+        id: _snapshotId++,
+        displayNumber: _nextDisplayNumber(),
+        isolateName: currentIsolateName ?? '<isolate-not-detected>',
+        diffStore: diffStore,
+        selectedClassName: selectedClassName,
+      ),
     );
     _snapshots.add(newItem);
     await future;

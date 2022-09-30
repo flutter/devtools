@@ -4,15 +4,12 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../../primitives/auto_dispose_mixin.dart';
 import '../../../../../primitives/utils.dart';
-import '../../../../../shared/table.dart';
-import '../../../../../shared/table_data.dart';
+import '../../../../../shared/table/table.dart';
+import '../../../../../shared/table/table_data.dart';
 import '../../../../../shared/utils.dart';
-import '../../../shared/heap/heap.dart';
-import '../../../shared/heap/model.dart';
 import '../../../shared/heap/primitives.dart';
-import '../controller/model.dart';
+import '../controller/item_controller.dart';
 
 typedef _RetainingPathRecord = MapEntry<ClassOnlyHeapPath, ObjectSetStats>;
 
@@ -26,7 +23,7 @@ class _RetainingPathColumn extends ColumnData<_RetainingPathRecord> {
         );
 
   @override
-  String? getValue(_RetainingPathRecord record) => record.key.asShortString();
+  String? getValue(RetainingPathRecord record) => record.key.asShortString();
 
   @override
   bool get supportsSorting => true;
@@ -35,7 +32,7 @@ class _RetainingPathColumn extends ColumnData<_RetainingPathRecord> {
   String getTooltip(_RetainingPathRecord record) => record.key.asLongString();
 }
 
-class _InstanceColumn extends ColumnData<_RetainingPathRecord> {
+class _InstanceColumn extends ColumnData<RetainingPathRecord> {
   _InstanceColumn()
       : super(
           'Instances',
@@ -46,7 +43,7 @@ class _InstanceColumn extends ColumnData<_RetainingPathRecord> {
         );
 
   @override
-  int getValue(_RetainingPathRecord record) => record.value.instanceCount;
+  int getValue(RetainingPathRecord record) => record.value.instanceCount;
 
   @override
   bool get supportsSorting => true;
@@ -55,7 +52,7 @@ class _InstanceColumn extends ColumnData<_RetainingPathRecord> {
   bool get numeric => true;
 }
 
-class _ShallowSizeColumn extends ColumnData<_RetainingPathRecord> {
+class _ShallowSizeColumn extends ColumnData<RetainingPathRecord> {
   _ShallowSizeColumn()
       : super(
           'Shallow\nDart Size',
@@ -65,7 +62,7 @@ class _ShallowSizeColumn extends ColumnData<_RetainingPathRecord> {
         );
 
   @override
-  int getValue(_RetainingPathRecord record) => record.value.shallowSize;
+  int getValue(RetainingPathRecord record) => record.value.shallowSize;
 
   @override
   bool get supportsSorting => true;
@@ -74,14 +71,14 @@ class _ShallowSizeColumn extends ColumnData<_RetainingPathRecord> {
   bool get numeric => true;
 
   @override
-  String getDisplayValue(_RetainingPathRecord record) => prettyPrintBytes(
+  String getDisplayValue(RetainingPathRecord record) => prettyPrintBytes(
         getValue(record),
         includeUnit: true,
         kbFractionDigits: 1,
       )!;
 }
 
-class _RetainedSizeColumn extends ColumnData<_RetainingPathRecord> {
+class _RetainedSizeColumn extends ColumnData<RetainingPathRecord> {
   _RetainedSizeColumn()
       : super(
           'Retained\nDart Size',
@@ -91,7 +88,7 @@ class _RetainedSizeColumn extends ColumnData<_RetainingPathRecord> {
         );
 
   @override
-  int getValue(_RetainingPathRecord record) => record.value.retainedSize;
+  int getValue(RetainingPathRecord record) => record.value.retainedSize;
 
   @override
   bool get supportsSorting => true;
@@ -100,26 +97,23 @@ class _RetainedSizeColumn extends ColumnData<_RetainingPathRecord> {
   bool get numeric => true;
 
   @override
-  String getDisplayValue(_RetainingPathRecord record) => prettyPrintBytes(
+  String getDisplayValue(RetainingPathRecord record) => prettyPrintBytes(
         getValue(record),
         includeUnit: true,
         kbFractionDigits: 1,
       )!;
 }
 
-class ClassStatsTable extends StatefulWidget {
-  const ClassStatsTable({
+class ClassStatsRetainingPathTable extends StatelessWidget {
+  const ClassStatsRetainingPathTable({
     Key? key,
     required this.data,
-    required this.sorting,
   }) : super(key: key);
 
   final SingleClassStats data;
   final ColumnSorting sorting;
 
-  @override
-  State<ClassStatsTable> createState() => _ClassStatsTableState();
-}
+  static final _shallowSizeColumn = _ShallowSizeColumn();
 
 class _ClassStatsTableState extends State<ClassStatsTable>
     with AutoDisposeMixin {

@@ -4,10 +4,9 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../../primitives/auto_dispose_mixin.dart';
 import '../../../../../primitives/utils.dart';
-import '../../../../../shared/table.dart';
-import '../../../../../shared/table_data.dart';
+import '../../../../../shared/table/table.dart';
+import '../../../../../shared/table/table_data.dart';
 import '../../../../../shared/utils.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/primitives.dart';
@@ -109,8 +108,14 @@ class _RetainedSizeColumn extends ColumnData<SingleClassStats> {
 class ClassesTableSingle extends StatefulWidget {
   const ClassesTableSingle({
     Key? key,
+    required this.item,
+    required this.dataId,
     required this.controller,
   }) : super(key: key);
+
+  final SnapshotListItem item;
+
+  final int dataId;
 
   final DiffPaneController controller;
 

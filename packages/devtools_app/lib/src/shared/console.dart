@@ -67,7 +67,8 @@ class ConsoleFrame extends StatelessWidget {
           child: Material(
             child: Stack(
               children: [
-                child,
+                // Fill the width of the console to expand the scrollable area.
+                Positioned.fill(child: child),
                 if (controls.isNotEmpty)
                   _ConsoleControls(
                     controls: controls,

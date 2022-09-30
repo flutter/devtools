@@ -13,7 +13,7 @@ import '../../primitives/utils.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
 import '../../shared/split.dart';
-import '../../shared/table.dart';
+import '../../shared/table/table.dart';
 import '../../shared/theme.dart';
 import '../debugger/codeview.dart';
 import '../debugger/codeview_controller.dart';

@@ -50,6 +50,9 @@ class SnapshotInstanceItem extends SnapshotItem
       final data = await receiver;
       if (data != null) {
         heap = AdaptedHeap(data);
+        // TODO(https://github.com/flutter/devtools/issues/4539): it is unclear
+        // whether preserving the selection between snapshots should be the
+        // default behavior. Revisit after consulting with UXR.
         _handleSelectionChange();
         addAutoDisposeListener(
           _selectedClass,
@@ -64,7 +67,9 @@ class SnapshotInstanceItem extends SnapshotItem
     });
   }
 
-  final String _isolateName;
+  final int id;
+
+  final String isolateName;
 
   final HeapDiffStore _diffStore;
 
@@ -73,7 +78,7 @@ class SnapshotInstanceItem extends SnapshotItem
   @override
   final int displayNumber;
 
-  String get name => '$_isolateName-$displayNumber';
+  String get name => '$isolateName-$displayNumber';
 
   ValueListenable<SnapshotInstanceItem?> get diffWith => _diffWith;
   final _diffWith = ValueNotifier<SnapshotInstanceItem?>(null);

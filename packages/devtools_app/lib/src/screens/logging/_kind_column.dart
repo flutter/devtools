@@ -4,8 +4,8 @@
 
 import 'package:flutter/material.dart';
 
-import '../../shared/table.dart';
-import '../../shared/table_data.dart';
+import '../../shared/table/table.dart';
+import '../../shared/table/table_data.dart';
 import '../../shared/theme.dart';
 import '../../shared/utils.dart';
 import 'logging_controller.dart';

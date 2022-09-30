@@ -13,6 +13,7 @@ import '../../../shared/heap/primitives.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/item_controller.dart';
 import '../controller/model.dart';
+import 'class_stats_table.dart';
 
 class HeapClassDetails extends StatelessWidget {
   const HeapClassDetails({

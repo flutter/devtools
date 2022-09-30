@@ -9,8 +9,8 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../primitives/utils.dart';
-import '../../shared/table.dart';
-import '../../shared/table_data.dart';
+import '../../shared/table/table.dart';
+import '../../shared/table/table_data.dart';
 import '../../shared/utils.dart';
 import 'memory_controller.dart';
 import 'memory_graph_model.dart';
@@ -566,16 +566,15 @@ class AnalysisInstanceViewState extends State<AnalysisInstanceViewTable>
 
   @override
   Widget build(BuildContext context) {
-    controller.analysisFieldsTreeTable = TreeTable<AnalysisField>(
+    return TreeTable<AnalysisField>(
+      keyFactory: (typeRef) => PageStorageKey<String>(typeRef.name ?? ''),
       dataRoots: controller.analysisInstanceRoot!,
+      dataKey: 'instance-fields',
       columns: _columns,
       treeColumn: _treeColumn,
-      keyFactory: (typeRef) => PageStorageKey<String>(typeRef.name ?? ''),
-      sortColumn: _columns[0],
-      sortDirection: SortDirection.ascending,
+      defaultSortColumn: _columns[0],
+      defaultSortDirection: SortDirection.ascending,
     );
-
-    return controller.analysisFieldsTreeTable;
   }
 }
 
