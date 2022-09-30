@@ -9,6 +9,7 @@ import '../../../../../shared/table/table.dart';
 import '../../../../../shared/table/table_data.dart';
 import '../../../../../shared/utils.dart';
 import '../../../shared/heap/heap.dart';
+import '../../../shared/heap/model.dart';
 import '../../../shared/heap/primitives.dart';
 import '../controller/item_controller.dart';
 
@@ -24,7 +25,7 @@ class _RetainingPathColumn extends ColumnData<_RetainingPathRecord> {
         );
 
   @override
-  String? getValue(RetainingPathRecord record) => record.key.asShortString();
+  String? getValue(_RetainingPathRecord record) => record.key.asShortString();
 
   @override
   bool get supportsSorting => true;
@@ -33,7 +34,7 @@ class _RetainingPathColumn extends ColumnData<_RetainingPathRecord> {
   String getTooltip(_RetainingPathRecord record) => record.key.asLongString();
 }
 
-class _InstanceColumn extends ColumnData<RetainingPathRecord> {
+class _InstanceColumn extends ColumnData<_RetainingPathRecord> {
   _InstanceColumn()
       : super(
           'Instances',
@@ -44,7 +45,7 @@ class _InstanceColumn extends ColumnData<RetainingPathRecord> {
         );
 
   @override
-  int getValue(RetainingPathRecord record) => record.value.instanceCount;
+  int getValue(_RetainingPathRecord record) => record.value.instanceCount;
 
   @override
   bool get supportsSorting => true;
@@ -53,7 +54,7 @@ class _InstanceColumn extends ColumnData<RetainingPathRecord> {
   bool get numeric => true;
 }
 
-class _ShallowSizeColumn extends ColumnData<RetainingPathRecord> {
+class _ShallowSizeColumn extends ColumnData<_RetainingPathRecord> {
   _ShallowSizeColumn()
       : super(
           'Shallow\nDart Size',
@@ -63,7 +64,7 @@ class _ShallowSizeColumn extends ColumnData<RetainingPathRecord> {
         );
 
   @override
-  int getValue(RetainingPathRecord record) => record.value.shallowSize;
+  int getValue(_RetainingPathRecord record) => record.value.shallowSize;
 
   @override
   bool get supportsSorting => true;
@@ -72,14 +73,14 @@ class _ShallowSizeColumn extends ColumnData<RetainingPathRecord> {
   bool get numeric => true;
 
   @override
-  String getDisplayValue(RetainingPathRecord record) => prettyPrintBytes(
+  String getDisplayValue(_RetainingPathRecord record) => prettyPrintBytes(
         getValue(record),
         includeUnit: true,
         kbFractionDigits: 1,
       )!;
 }
 
-class _RetainedSizeColumn extends ColumnData<RetainingPathRecord> {
+class _RetainedSizeColumn extends ColumnData<_RetainingPathRecord> {
   _RetainedSizeColumn()
       : super(
           'Retained\nDart Size',
@@ -89,7 +90,7 @@ class _RetainedSizeColumn extends ColumnData<RetainingPathRecord> {
         );
 
   @override
-  int getValue(RetainingPathRecord record) => record.value.retainedSize;
+  int getValue(_RetainingPathRecord record) => record.value.retainedSize;
 
   @override
   bool get supportsSorting => true;
@@ -98,7 +99,7 @@ class _RetainedSizeColumn extends ColumnData<RetainingPathRecord> {
   bool get numeric => true;
 
   @override
-  String getDisplayValue(RetainingPathRecord record) => prettyPrintBytes(
+  String getDisplayValue(_RetainingPathRecord record) => prettyPrintBytes(
         getValue(record),
         includeUnit: true,
         kbFractionDigits: 1,
@@ -112,7 +113,7 @@ class ClassStatsRetainingPathTable extends StatelessWidget {
   }) : super(key: key);
 
   final SingleClassStats data;
-  final ColumnSorting sorting;
+
 
   static final _shallowSizeColumn = _ShallowSizeColumn();
 
