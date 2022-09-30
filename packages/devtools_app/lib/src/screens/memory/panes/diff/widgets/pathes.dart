@@ -12,7 +12,6 @@ import '../../../../../shared/utils.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
 import '../../../shared/heap/primitives.dart';
-import '../controller/item_controller.dart';
 
 typedef _RetainingPathRecord = MapEntry<ClassOnlyHeapPath, ObjectSetStats>;
 
@@ -111,11 +110,9 @@ class ClassStatsTable extends StatefulWidget {
   const ClassStatsTable({
     Key? key,
     required this.data,
-    required this.sorting,
   }) : super(key: key);
 
   final SingleClassStats data;
-  final ColumnSorting sorting;
 
   @override
   State<ClassStatsTable> createState() => _ClassStatsTableState();
@@ -123,6 +120,7 @@ class ClassStatsTable extends StatefulWidget {
 
 class _ClassStatsTableState extends State<ClassStatsTable>
     with AutoDisposeMixin {
+  final _shallowSizeColumn = _ShallowSizeColumn();
   late final List<ColumnData<_RetainingPathRecord>> _columns;
 
   @override
@@ -136,21 +134,12 @@ class _ClassStatsTableState extends State<ClassStatsTable>
     super.initState();
     assert(widget.data.isSealed);
 
-    final _shallowSizeColumn = _ShallowSizeColumn();
-
     _columns = <ColumnData<_RetainingPathRecord>>[
       _RetainingPathColumn(),
       _InstanceColumn(),
       _shallowSizeColumn,
       _RetainedSizeColumn(),
     ];
-
-    if (!widget.sorting.initialized) {
-      widget.sorting
-        ..direction = SortDirection.descending
-        ..columnIndex = _columns.indexOf(_shallowSizeColumn)
-        ..initialized = true;
-    }
   }
 
   @override
@@ -159,18 +148,11 @@ class _ClassStatsTableState extends State<ClassStatsTable>
       columns: _columns,
       data: widget.data.entries,
       keyFactory: (e) => Key(e.key.asLongString()),
+      // We want sorting to be the same for all snapshots and classes.
+      dataKey: '',
       onItemSelected: (r) => {},
-      sortColumn: _columns[widget.sorting.columnIndex],
-      sortDirection: widget.sorting.direction,
-      onSortChanged: (
-        sortColumn,
-        direction, {
-        secondarySortColumn,
-      }) =>
-          setState(() {
-        widget.sorting.columnIndex = _columns.indexOf(sortColumn);
-        widget.sorting.direction = direction;
-      }),
+      defaultSortColumn: _shallowSizeColumn,
+      defaultSortDirection: SortDirection.descending,
     );
   }
 }
