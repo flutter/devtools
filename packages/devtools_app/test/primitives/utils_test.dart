@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/shared/globals.dart';
@@ -1471,18 +1472,73 @@ void main() {
 
     group('subtractMaps', () {
       test('subtracts non-null maps', () {
-        final from = {1: 1.1, 2: 2.0, 3: 3.0};
         final subtract = {1: 'subtract'};
+        final from = {1: 1.0, 2: 2.0};
         SubtractionResult? elementSubtractor({
-          required double? from,
           required String? subtract,
+          required double? from,
         }) =>
-            SubtractionResult(from: from, subtract: subtract);
+            // ignore: unnecessary_cast
+            SubtractionResult(subtract: subtract, from: from)
+                as SubtractionResult?;
 
         final result = subtractMaps<int, double, String, SubtractionResult>(
-          from: from,
           substract: subtract,
+          from: from,
           subtractor: elementSubtractor,
+        );
+
+        expect(const SetEquality().equals(result.keys.toSet(), {1, 2}), true);
+        expect(
+          result[1],
+          equals(SubtractionResult(subtract: 'subtract', from: 1.0)),
+        );
+        expect(result[2], equals(SubtractionResult(subtract: null, from: 2.0)));
+      });
+
+      test('subtracts null', () {
+        final from = {1: 1.0};
+        SubtractionResult? elementSubtractor({
+          required String? subtract,
+          required double? from,
+        }) =>
+            // ignore: unnecessary_cast
+            SubtractionResult(subtract: subtract, from: from)
+                as SubtractionResult?;
+
+        final result = subtractMaps<int, double, String, SubtractionResult>(
+          substract: null,
+          from: from,
+          subtractor: elementSubtractor,
+        );
+
+        expect(const SetEquality().equals(result.keys.toSet(), {1}), true);
+        expect(
+          result[1],
+          equals(SubtractionResult(subtract: null, from: 1.0)),
+        );
+      });
+
+      test('subtracts from null', () {
+        final subtract = {1: 'subtract'};
+        SubtractionResult? elementSubtractor({
+          required String? subtract,
+          required double? from,
+        }) =>
+            // ignore: unnecessary_cast
+            SubtractionResult(subtract: subtract, from: from)
+                as SubtractionResult?;
+
+        final result = subtractMaps<int, double, String, SubtractionResult>(
+          substract: subtract,
+          from: null,
+          subtractor: elementSubtractor,
+        );
+
+        expect(const SetEquality().equals(result.keys.toSet(), {1}), true);
+        expect(
+          result[1],
+          equals(SubtractionResult(subtract: 'subtract', from: null)),
         );
       });
     });
@@ -1490,10 +1546,29 @@ void main() {
 }
 
 class SubtractionResult {
-  SubtractionResult({required this.from, required this.subtract});
-
-  final double? from;
+  SubtractionResult({
+    required this.subtract,
+    required this.from,
+  });
   final String? subtract;
+  final double? from;
+
+  @override
+  bool operator ==(Object? other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+
+    return other is SubtractionResult &&
+        other.subtract == subtract &&
+        other.from == from;
+  }
+
+  @override
+  int get hashCode => Object.hash(subtract, from);
+
+  @override
+  String toString() => '$from - $subtract';
 }
 
 class TestProvidedController {

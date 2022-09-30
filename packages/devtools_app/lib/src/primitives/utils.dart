@@ -1508,7 +1508,7 @@ String? fileNameFromUri(String? uri) => uri?.split('/').last;
 Map<K, R> subtractMaps<K, F, S, R>({
   required Map<K, S>? substract,
   required Map<K, F>? from,
-  required R? Function({required S? subtruct, required F? from}) subtractor,
+  required R? Function({required S? subtract, required F? from}) subtractor,
 }) {
   from ??= <K, F>{};
   substract ??= <K, S>{};
@@ -1517,7 +1517,7 @@ Map<K, R> subtractMaps<K, F, S, R>({
   final unionOfKeys = from.keys.toSet().union(substract.keys.toSet());
 
   for (var key in unionOfKeys) {
-    final diff = subtractor(from: from[key], subtruct: substract[key]);
+    final diff = subtractor(from: from[key], subtract: substract[key]);
     if (diff != null) result[key] = diff;
   }
   return result;
