@@ -125,8 +125,9 @@ class _ChartControlPaneState extends State<ChartControlPane>
   void _showLegend(BuildContext context) {
     final box = legendKey.currentContext!.findRenderObject() as RenderBox;
 
-    final colorScheme = Theme.of(context).colorScheme;
-    final legendHeading = colorScheme.hoverTextStyle;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final legendHeading = theme.hoverTextStyle;
 
     // Global position.
     final position = box.localToGlobal(Offset.zero);
