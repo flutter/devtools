@@ -35,7 +35,6 @@ jobs:
           VERSION=123.23.23.
           git add .
           git commit -m “Prepare for $VERSION release.”
-          git push
 
         env:
           RELEASE_TYPE: ${{ inputs.releaseType }}
