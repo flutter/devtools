@@ -1,8 +1,0 @@
-▼[R][root]
-  ▼[M]MyApp
-    ▼[M]MaterialApp
-      ▼[S]Scaffold
-      ├───▼[C]Center
-      │     [/icons/inspector/textArea.png]Text <-- selected
-      └─▼[A]AppBar
-          [/icons/inspector/textArea.png]Text

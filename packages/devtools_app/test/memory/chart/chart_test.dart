@@ -273,7 +273,8 @@ void main() {
 
           await expectLater(
             find.byKey(chartKey),
-            matchesDevToolsGolden('../../goldens/memory_chart_scaled_live.png'),
+            matchesDevToolsGolden(
+                '../../test_infra/goldens/memory_chart_scaled_live.png'),
           );
           // Await delay for golden comparison.
           await tester.pumpAndSettle(const Duration(seconds: 2));
@@ -356,7 +357,8 @@ void main() {
 
         await expectLater(
           find.byKey(chartKey),
-          matchesDevToolsGolden('../../goldens/memory_chart_scaled_all.png'),
+          matchesDevToolsGolden(
+              '../../test_infra/goldens/memory_chart_scaled_all.png'),
         );
         // Await delay for golden comparison.
         await tester.pumpAndSettle(const Duration(seconds: 2));
@@ -396,7 +398,7 @@ void main() {
         await expectLater(
           find.byKey(chartKey),
           matchesDevToolsGolden(
-            '../../goldens/memory_chart_scaled_five_minute.png',
+            '../../test_infra/goldens/memory_chart_scaled_five_minute.png',
           ),
         );
         // Await delay for golden comparison.
@@ -630,7 +632,8 @@ void main() {
 
           await expectLater(
             find.byKey(chartKey),
-            matchesDevToolsGolden('../../goldens/memory_chart_fixed_live.png'),
+            matchesDevToolsGolden(
+                '../../test_infra/goldens/memory_chart_fixed_live.png'),
           );
           // Await delay for golden comparison.
           await tester.pumpAndSettle(const Duration(seconds: 2));
@@ -739,7 +742,8 @@ void main() {
 
         await expectLater(
           find.byKey(chartKey),
-          matchesDevToolsGolden('../../goldens/memory_chart_fixed_all.png'),
+          matchesDevToolsGolden(
+              '../../test_infra/goldens/memory_chart_fixed_all.png'),
         );
         // Await delay for golden comparison.
         await tester.pumpAndSettle(const Duration(seconds: 2));
@@ -792,7 +796,7 @@ void main() {
         await expectLater(
           find.byKey(chartKey),
           matchesDevToolsGolden(
-            '../../goldens/memory_chart_fixed_five_minutes.png',
+            '../../test_infra/goldens/memory_chart_fixed_five_minutes.png',
           ),
         );
         // Await delay for golden comparison.

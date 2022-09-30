@@ -195,7 +195,7 @@ void main() {
 
       await expectLater(
         find.byType(MemoryVMChart),
-        matchesDevToolsGolden('../goldens/memory_hover_card.png'),
+        matchesDevToolsGolden('../test_infra/goldens/memory_hover_card.png'),
       );
     });
 
@@ -364,7 +364,7 @@ void main() {
 
       await expectLater(
         find.byType(MemoryVMChart),
-        matchesDevToolsGolden('../goldens/memory_heap_android.png'),
+        matchesDevToolsGolden('../test_infra/goldens/memory_heap_android.png'),
       );
 
       // Await delay for golden comparison.
@@ -382,7 +382,7 @@ void main() {
 
       await expectLater(
         find.byKey(MemoryScreen.vmChartKey),
-        matchesDevToolsGolden('../goldens/memory_heap_android_legend.png'),
+        matchesDevToolsGolden('../test_infra/goldens/memory_heap_android_legend.png'),
       );
 
       // Await delay for golden comparison.
@@ -396,7 +396,7 @@ void main() {
 
       await expectLater(
         find.byKey(MemoryScreen.vmChartKey),
-        matchesDevToolsGolden('../goldens/memory_heap_legend.png'),
+        matchesDevToolsGolden('../test_infra/goldens/memory_heap_legend.png'),
       );
 
       // Await delay for golden comparison.

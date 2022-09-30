@@ -80,7 +80,7 @@ void main() async {
       await expectLater(
         find.byType(InspectorScreenBody),
         matchesDevToolsGolden(
-          '../goldens/integration_inspector_initial_load.png',
+          '../test_infra/goldens/integration_inspector_initial_load.png',
         ),
       );
 
@@ -90,7 +90,7 @@ void main() async {
       await expectLater(
         find.byType(InspectorScreenBody),
         matchesDevToolsGolden(
-          '../goldens/integration_inspector_select_center.png',
+          '../test_infra/goldens/integration_inspector_select_center.png',
         ),
       );
 
@@ -100,7 +100,7 @@ void main() async {
       await expectLater(
         find.byType(InspectorScreenBody),
         matchesDevToolsGolden(
-          '../goldens/integration_inspector_select_center_details_tree.png',
+          '../test_infra/goldens/integration_inspector_select_center_details_tree.png',
         ),
       );
 
@@ -110,7 +110,7 @@ void main() async {
       await expectLater(
         find.byType(InspectorScreenBody),
         matchesDevToolsGolden(
-          '../goldens/integration_inspector_richtext_selected.png',
+          '../test_infra/goldens/integration_inspector_richtext_selected.png',
         ),
       );
 
@@ -132,7 +132,7 @@ void main() async {
       await expectLater(
         find.byType(InspectorScreenBody),
         matchesDevToolsGolden(
-          '../goldens/integration_inspector_scaffold_selected.png',
+          '../test_infra/goldens/integration_inspector_scaffold_selected.png',
         ),
       );
 
@@ -144,7 +144,7 @@ void main() async {
       await expectLater(
         find.byType(InspectorScreenBody),
         matchesDevToolsGolden(
-          '../goldens/integration_animated_physical_model_selected.png',
+          '../test_infra/goldens/integration_animated_physical_model_selected.png',
         ),
       );
 
@@ -437,7 +437,7 @@ void main() async {
       await expectLater(
         find.byType(InspectorScreenBody),
         matchesDevToolsGolden(
-          '../goldens/integration_inspector_errors_1_initial_load.png',
+          '../test_infra/goldens/integration_inspector_errors_1_initial_load.png',
         ),
       );
 
@@ -449,7 +449,7 @@ void main() async {
       await expectLater(
         find.byType(InspectorScreenBody),
         matchesDevToolsGolden(
-          '../goldens/integration_inspector_errors_2_error_selected.png',
+          '../test_infra/goldens/integration_inspector_errors_2_error_selected.png',
         ),
       );
 

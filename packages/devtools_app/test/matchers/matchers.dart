@@ -41,7 +41,7 @@ String treeToDebugStringTruncated(RemoteDiagnosticsNode node, int maxLines) {
 /// Asserts that a [path] matches a golden file after normalizing likely hash
 /// codes.
 ///
-/// Paths are assumed to reference files within the `test/goldens` directory.
+/// Paths are assumed to reference files within the `test/test_infra/goldens` directory.
 ///
 /// To rebaseline all golden files run:
 /// ```
@@ -74,7 +74,7 @@ Matcher equalsGoldenValueIgnoringHashCodes(String value) {
 
 class _EqualsGoldenIgnoringHashCodes extends Matcher {
   _EqualsGoldenIgnoringHashCodes(String pathWithinGoldenDirectory) {
-    path = 'test/goldens$_goldensSuffix/$pathWithinGoldenDirectory';
+    path = 'test/test_infra/goldens$_goldensSuffix/$pathWithinGoldenDirectory';
     try {
       _value = _normalize(io.File(path).readAsStringSync());
     } catch (e) {

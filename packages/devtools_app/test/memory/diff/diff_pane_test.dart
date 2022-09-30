@@ -55,7 +55,8 @@ void main() {
       // Check initial golden.
       await expectLater(
         finder,
-        matchesDevToolsGolden('../../goldens/memory_diff_empty1.png'),
+        matchesDevToolsGolden(
+            '../../test_infra/goldens/memory_diff_empty1.png'),
       );
 
       // Record three snapshots.
@@ -66,7 +67,8 @@ void main() {
       }
       await expectLater(
         finder,
-        matchesDevToolsGolden('../../goldens/memory_diff_three_snapshots.png'),
+        matchesDevToolsGolden(
+            '../../test_infra/goldens/memory_diff_three_snapshots.png'),
       );
       expect(snapshots.value.length, equals(1 + 3));
 
@@ -80,7 +82,8 @@ void main() {
       await tester.pumpAndSettle();
       await expectLater(
         finder,
-        matchesDevToolsGolden('../../goldens/memory_diff_three_snapshots.png'),
+        matchesDevToolsGolden(
+            '../../test_infra/goldens/memory_diff_three_snapshots.png'),
       );
       expect(snapshots.value.length, equals(1 + 3 - 1 + 1));
 
@@ -89,7 +92,8 @@ void main() {
       await tester.pumpAndSettle();
       await expectLater(
         finder,
-        matchesDevToolsGolden('../../goldens/memory_diff_empty2.png'),
+        matchesDevToolsGolden(
+            '../../test_infra/goldens/memory_diff_empty2.png'),
       );
       expect(snapshots.value.length, equals(1));
     });
