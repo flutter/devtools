@@ -1,0 +1,24 @@
+on:
+  workflow_dispatch:
+    inputs:
+      releaseType:
+        description: 'Release Type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+        - dev
+        - patch
+        - minor
+        - major
+        - dev-patch
+        - dev-minor
+        - dev-major
+jobs:
+  log-the-inputs:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "releaseType: $RELEASE_TYPE"
+        env:
+          RELEASE_TYPE: ${{ inputs.releaseType }}
