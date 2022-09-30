@@ -101,16 +101,16 @@ class ObjectSetStats with Sealable {
   ObjectSetStats();
 
   static ObjectSetStats? subtruct({
+    required ObjectSetStats? subtruct,
     required ObjectSetStats? from,
-    required ObjectSetStats? subtrahend,
   }) {
     from ??= _empty;
-    subtrahend ??= _empty;
+    subtruct ??= _empty;
 
     final result = ObjectSetStats()
-      ..instanceCount = from.instanceCount - subtrahend.instanceCount
-      ..shallowSize = from.shallowSize - subtrahend.shallowSize
-      ..retainedSize = from.retainedSize - subtrahend.retainedSize;
+      ..instanceCount = from.instanceCount - subtruct.instanceCount
+      ..shallowSize = from.shallowSize - subtruct.shallowSize
+      ..retainedSize = from.retainedSize - subtruct.retainedSize;
 
     if (result.isZero) return null;
     return result;

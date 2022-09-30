@@ -1506,18 +1506,18 @@ String? fileNameFromUri(String? uri) => uri?.split('/').last;
 ///
 /// Result map keys is union of the imput maps' keys.
 Map<K, V2> subtractMaps<K, V1, V2>({
+  required Map<K, V1>? substract,
   required Map<K, V1>? from,
-  required Map<K, V1>? subtrahend,
-  required V2? Function({V1? from, V1? subtrahend}) subtract,
+  required V2? Function({V1? subtruct, V1? from}) subtract,
 }) {
   from ??= <K, V1>{};
-  subtrahend ??= <K, V1>{};
+  substract ??= <K, V1>{};
 
   final result = <K, V2>{};
-  final unionOfKeys = from.keys.toSet().union(subtrahend.keys.toSet());
+  final unionOfKeys = from.keys.toSet().union(substract.keys.toSet());
 
   for (var key in unionOfKeys) {
-    final diff = subtract(from: from[key], subtrahend: subtrahend[key]);
+    final diff = subtract(from: from[key], subtruct: substract[key]);
     if (diff != null) result[key] = diff;
   }
   return result;
