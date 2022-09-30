@@ -75,9 +75,6 @@
 * Update README.md [#4426](https://github.com/flutter/devtools/pull/4426)
 * Add minor changes to README.md [#4431](https://github.com/flutter/devtools/pull/4431)
 
-## 2.18.0-dev.0
-* Pre-release version bump.
-
 ## 2.17.0
 * Prepare for 2.17.0 release [#4428](https://github.com/flutter/devtools/pull/4428)
 * Revert perfetto bundle [#4422](https://github.com/flutter/devtools/pull/4422)
