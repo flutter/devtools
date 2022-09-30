@@ -37,14 +37,15 @@ class SnapshotDocItem extends SnapshotItem {
 
 class SnapshotInstanceItem extends SnapshotItem
     with AutoDisposeControllerMixin {
-  SnapshotInstanceItem(
-    Future<AdaptedHeapData?> receiver,
-    this.displayNumber,
-    this._isolateName,
-    this._diffStore,
-    this._selectedClass,
-    this._selectedPath,
-  ) {
+  SnapshotInstanceItem({
+    required Future<AdaptedHeapData?> receiver,
+    required this.displayNumber,
+    required this.isolateName,
+    required this.diffStore,
+    required this.id,
+    required this.selectedClass,
+    required this.selectedPath,
+  }) {
     _isProcessing.value = true;
     receiver.whenComplete(() async {
       final data = await receiver;
@@ -55,11 +56,11 @@ class SnapshotInstanceItem extends SnapshotItem
         // default behavior. Revisit after consulting with UXR.
         _handleSelectionChange();
         addAutoDisposeListener(
-          _selectedClass,
+          selectedClass,
           _handleSelectionChange,
         );
         addAutoDisposeListener(
-          _selectedPath,
+          selectedPath,
           _handleSelectionChange,
         );
       }
@@ -71,7 +72,7 @@ class SnapshotInstanceItem extends SnapshotItem
 
   final String isolateName;
 
-  final HeapDiffStore _diffStore;
+  final HeapDiffStore diffStore;
 
   AdaptedHeap? heap;
 
@@ -87,9 +88,9 @@ class SnapshotInstanceItem extends SnapshotItem
     _handleSelectionChange();
   }
 
-  final ValueListenable<HeapClassName?> _selectedClass;
+  final ValueListenable<HeapClassName?> selectedClass;
 
-  final ValueListenable<ClassOnlyHeapPath?> _selectedPath;
+  final ValueListenable<ClassOnlyHeapPath?> selectedPath;
 
   ValueListenable<SingleClassStats?> get selectedSingleClassStats =>
       _selectedSingleClassStats;
@@ -114,11 +115,11 @@ class SnapshotInstanceItem extends SnapshotItem
     final theHeap = heap!;
     final itemToDiffWith = diffWith.value;
     if (itemToDiffWith == null) return theHeap.classes;
-    return _diffStore.compare(theHeap, itemToDiffWith.heap!);
+    return diffStore.compare(theHeap, itemToDiffWith.heap!);
   }
 
   void _handleSelectionChange() {
-    final className = _selectedClass.value;
+    final className = selectedClass.value;
     if (className == null) return;
 
     final heapClasses = classesToShow();
@@ -136,7 +137,7 @@ class SnapshotInstanceItem extends SnapshotItem
     }
 
     StatsByPathEntry? newByPathEntry;
-    final path = _selectedPath.value;
+    final path = selectedPath.value;
     final classStats = _selectedClassStats.value;
     if (path != null && classStats != null) {
       final pathStats = classStats.statsByPath[path];

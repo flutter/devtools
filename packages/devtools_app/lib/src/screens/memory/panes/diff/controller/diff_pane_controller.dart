@@ -78,16 +78,16 @@ class DiffPaneController {
     _isProcessing.value = true;
     final future = snapshotTaker.take();
     _snapshots.add(
-      SnapshotListItem(
+      SnapshotInstanceItem(
         receiver: future,
         id: _snapshotId++,
         displayNumber: _nextDisplayNumber(),
         isolateName: currentIsolateName ?? '<isolate-not-detected>',
         diffStore: diffStore,
-        selectedClassName: selectedClassName,
+        selectedClass: selectedClass,
+        selectedPath: selectedPath,
       ),
     );
-    _snapshots.add(newItem);
     await future;
     final newElementIndex = snapshots.value.length - 1;
     _selectedSnapshotIndex.value = newElementIndex;
