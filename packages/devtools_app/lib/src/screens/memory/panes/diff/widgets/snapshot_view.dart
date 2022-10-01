@@ -36,9 +36,8 @@ class SnapshotView extends StatelessWidget {
 
             if (diffWith == null) {
               table1 = ClassesTableSingle(
-                // The key is passed to persist state.
-                key: ObjectKey(item),
                 controller: controller,
+                item: item,
               );
             } else {
               final heap1 = item.heap!;

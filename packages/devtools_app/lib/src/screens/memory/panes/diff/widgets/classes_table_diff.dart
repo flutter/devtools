@@ -7,8 +7,8 @@ import 'package:flutter/widgets.dart';
 
 import '../../../../../primitives/auto_dispose_mixin.dart';
 import '../../../../../primitives/utils.dart';
-import '../../../../../shared/table.dart';
-import '../../../../../shared/table_data.dart';
+import '../../../../../shared/table/table.dart';
+import '../../../../../shared/table/table_data.dart';
 import '../../../../../shared/utils.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/heap_diff.dart';
@@ -180,15 +180,14 @@ class _ClassesTableDiffState extends State<ClassesTableDiff>
   ];
   late final List<ColumnData<DiffClassStats>> _columns;
   late final SnapshotInstanceItem _item;
+  final _shallowSizeDeltaColumn =
+      _SizeColumn(_DataPart.delta, _SizeType.shallow);
 
   @override
   void initState() {
     super.initState();
 
     _item = widget.controller.selectedSnapshotItem as SnapshotInstanceItem;
-
-    final _shallowSizeDeltaColumn =
-        _SizeColumn(_DataPart.delta, _SizeType.shallow);
 
     _columns = <ColumnData<DiffClassStats>>[
       _ClassNameColumn(),
@@ -202,37 +201,23 @@ class _ClassesTableDiffState extends State<ClassesTableDiff>
       _SizeColumn(_DataPart.deleted, _SizeType.retained),
       _SizeColumn(_DataPart.delta, _SizeType.retained),
     ];
-
-    final sorting = widget.controller.classDiffSorting;
-    if (!sorting.initialized) {
-      sorting
-        ..direction = SortDirection.descending
-        ..columnIndex = _columns.indexOf(_shallowSizeDeltaColumn)
-        ..initialized = true;
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final sorting = widget.controller.classDiffSorting;
     return FlatTable<DiffClassStats>(
       columns: _columns,
       columnGroups: _columnGroups,
       data: widget.classes.classes,
+      dataKey: _item.id.toString(),
       keyFactory: (e) => Key(e.heapClass.fullName),
-      onItemSelected: (r) => widget.controller.setSelectedClass(r.heapClass),
-      selectionNotifier: _item.selectedDiffClassStats,
-      sortColumn: _columns[sorting.columnIndex],
-      sortDirection: sorting.direction,
-      onSortChanged: (
-        sortColumn,
-        direction, {
-        secondarySortColumn,
-      }) =>
-          setState(() {
-        sorting.columnIndex = _columns.indexOf(sortColumn);
-        sorting.direction = direction;
-      }),
+
+      onItemSelected: (r) => widget.controller.setSelectedClass(r?.heapClass),
+      // TODO: figure out why we need it to be Notifier, not listener.
+      selectionNotifier:
+          _item.selectedDiffClassStats as ValueNotifier<DiffClassStats?>,
+      defaultSortColumn: _shallowSizeDeltaColumn,
+      defaultSortDirection: SortDirection.descending,
     );
   }
 }

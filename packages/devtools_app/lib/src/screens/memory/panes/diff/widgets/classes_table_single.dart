@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../../../../../primitives/auto_dispose_mixin.dart';
 import '../../../../../primitives/utils.dart';
 import '../../../../../shared/table/table.dart';
 import '../../../../../shared/table/table_data.dart';
@@ -109,13 +110,10 @@ class ClassesTableSingle extends StatefulWidget {
   const ClassesTableSingle({
     Key? key,
     required this.item,
-    required this.dataId,
     required this.controller,
   }) : super(key: key);
 
-  final SnapshotListItem item;
-
-  final int dataId;
+  final SnapshotInstanceItem item;
 
   final DiffPaneController controller;
 
@@ -125,55 +123,37 @@ class ClassesTableSingle extends StatefulWidget {
 
 class _ClassesTableSingleState extends State<ClassesTableSingle>
     with AutoDisposeMixin {
-  late final List<ColumnData<SingleClassStats>> _columns;
-  late final SnapshotInstanceItem _item;
-  late final SingleHeapClasses _classes;
+  late SingleHeapClasses _classes;
+  final ColumnData<SingleClassStats> _shallowSizeColumn = _ShallowSizeColumn();
+  late final List<ColumnData<SingleClassStats>> _columns =
+      <ColumnData<SingleClassStats>>[
+    _ClassNameColumn(),
+    _InstanceColumn(),
+    _shallowSizeColumn,
+    _RetainedSizeColumn(),
+  ];
 
   @override
-  void initState() {
-    super.initState();
-
-    _item = widget.controller.selectedSnapshotItem as SnapshotInstanceItem;
-    _classes = _item.classesToShow() as SingleHeapClasses;
-
-    final _shallowSizeColumn = _ShallowSizeColumn();
-
-    _columns = <ColumnData<SingleClassStats>>[
-      _ClassNameColumn(),
-      _InstanceColumn(),
-      _shallowSizeColumn,
-      _RetainedSizeColumn(),
-    ];
-
-    final sorting = widget.controller.classSorting;
-    if (!sorting.initialized) {
-      sorting
-        ..direction = SortDirection.descending
-        ..columnIndex = _columns.indexOf(_shallowSizeColumn)
-        ..initialized = true;
+  void didUpdateWidget(covariant ClassesTableSingle oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.item != oldWidget.item) {
+      _classes = widget.item.classesToShow() as SingleHeapClasses;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final sorting = widget.controller.classSorting;
     return FlatTable<SingleClassStats>(
       columns: _columns,
       data: _classes.classes,
+      dataKey: widget.item.id.toString(),
       keyFactory: (e) => Key(e.heapClass.fullName),
-      onItemSelected: (r) => widget.controller.setSelectedClass(r.heapClass),
-      selectionNotifier: _item.selectedSingleClassStats,
-      sortColumn: _columns[sorting.columnIndex],
-      sortDirection: sorting.direction,
-      onSortChanged: (
-        sortColumn,
-        direction, {
-        secondarySortColumn,
-      }) =>
-          setState(() {
-        sorting.columnIndex = _columns.indexOf(sortColumn);
-        sorting.direction = direction;
-      }),
+      onItemSelected: (r) => widget.controller.setSelectedClass(r?.heapClass),
+      // TODO: figure out casting.
+      selectionNotifier: widget.item.selectedSingleClassStats
+          as ValueNotifier<SingleClassStats?>,
+      defaultSortColumn: _shallowSizeColumn,
+      defaultSortDirection: SortDirection.descending,
     );
   }
 }

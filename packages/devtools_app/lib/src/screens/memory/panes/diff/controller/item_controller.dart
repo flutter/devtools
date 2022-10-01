@@ -104,9 +104,7 @@ class SnapshotInstanceItem extends SnapshotItem
   final _selectedClassStats = ValueNotifier<ClassStats?>(null);
 
   /// Selected retaining path.
-  ValueListenable<StatsByPathEntry?> get selectedPathEntry =>
-      _selectedPathEntry;
-  final _selectedPathEntry = ValueNotifier<StatsByPathEntry?>(null);
+  final selectedPathEntry = ValueNotifier<StatsByPathEntry?>(null);
 
   @override
   bool get hasData => heap != null;
@@ -146,7 +144,7 @@ class SnapshotInstanceItem extends SnapshotItem
             .firstWhereOrNull((e) => e.key == path);
       }
     }
-    _selectedPathEntry.value = newByPathEntry;
+    selectedPathEntry.value = newByPathEntry;
   }
 
   void downloadToCsv() {
