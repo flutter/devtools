@@ -7,8 +7,8 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../../../primitives/utils.dart';
 import '../../../../shared/common_widgets.dart';
-import '../../../../shared/table.dart';
-import '../../../../shared/table_data.dart';
+import '../../../../shared/table/table.dart';
+import '../../../../shared/table/table_data.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../../../ui/tab.dart';
@@ -314,24 +314,13 @@ class _ExclusiveCountColumn extends ColumnData<CpuStackFrame> {
 }
 
 /// A table of an allocation profile tree.
-class AllocationProfileTracingTable extends StatefulWidget {
+class AllocationProfileTracingTable extends StatelessWidget {
   const AllocationProfileTracingTable({
     Key? key,
     required this.cls,
     required this.dataRoots,
   }) : super(key: key);
 
-  final ClassRef cls;
-  final List<CpuStackFrame> dataRoots;
-
-  @override
-  State<AllocationProfileTracingTable> createState() {
-    return _AllocationProfileTracingTableState();
-  }
-}
-
-class _AllocationProfileTracingTableState
-    extends State<AllocationProfileTracingTable> {
   static final treeColumn = MethodNameColumn();
   static final startingSortColumn = _InclusiveCountColumn();
   static final columns = List<ColumnData<CpuStackFrame>>.unmodifiable([
@@ -341,34 +330,20 @@ class _AllocationProfileTracingTableState
     SourceColumn(),
   ]);
 
-  // TODO(bkonyi): this is a common pattern when creating tables that can be
-  // refreshed. Consider pulling this state into a "TableController".
-  // See: https://github.com/flutter/devtools/issues/4365
-  late ColumnData<CpuStackFrame> sortColumn;
-  late SortDirection sortDirection;
+  final ClassRef cls;
 
-  @override
-  void initState() {
-    super.initState();
-    sortColumn = startingSortColumn;
-    sortDirection = SortDirection.descending;
-  }
+  final List<CpuStackFrame> dataRoots;
 
   @override
   Widget build(BuildContext context) {
     return TreeTable<CpuStackFrame>(
-      dataRoots: widget.dataRoots,
+      keyFactory: (frame) => PageStorageKey<String>(frame.id),
+      dataRoots: dataRoots,
+      dataKey: 'allocation-profile-tree',
       columns: columns,
       treeColumn: treeColumn,
-      keyFactory: (frame) => PageStorageKey<String>(frame.id),
-      sortColumn: sortColumn,
-      sortDirection: sortDirection,
-      onSortChanged: (column, direction, {secondarySortColumn}) {
-        setState(() {
-          sortColumn = column;
-          sortDirection = direction;
-        });
-      },
+      defaultSortColumn: startingSortColumn,
+      defaultSortDirection: SortDirection.descending,
     );
   }
 }

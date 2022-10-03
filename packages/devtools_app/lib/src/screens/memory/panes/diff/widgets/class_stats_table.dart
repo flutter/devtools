@@ -4,19 +4,14 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../../primitives/auto_dispose_mixin.dart';
 import '../../../../../primitives/utils.dart';
-import '../../../../../shared/table.dart';
-import '../../../../../shared/table_data.dart';
+import '../../../../../shared/table/table.dart';
+import '../../../../../shared/table/table_data.dart';
 import '../../../../../shared/utils.dart';
-import '../../../shared/heap/heap.dart';
-import '../../../shared/heap/model.dart';
 import '../../../shared/heap/primitives.dart';
-import '../controller/model.dart';
+import '../controller/item_controller.dart';
 
-typedef _RetainingPathRecord = MapEntry<ClassOnlyHeapPath, SizeOfClassSet>;
-
-class _RetainingPathColumn extends ColumnData<_RetainingPathRecord> {
+class _RetainingPathColumn extends ColumnData<RetainingPathRecord> {
   _RetainingPathColumn()
       : super.wide(
           'Retaining Path',
@@ -26,17 +21,17 @@ class _RetainingPathColumn extends ColumnData<_RetainingPathRecord> {
         );
 
   @override
-  String? getValue(_RetainingPathRecord record) => record.key.asShortString();
+  String? getValue(RetainingPathRecord record) => record.key.asShortString();
 
   @override
   bool get supportsSorting => true;
 
   @override
-  String getTooltip(_RetainingPathRecord record) =>
+  String getTooltip(RetainingPathRecord record) =>
       record.key.asMultiLineString();
 }
 
-class _InstanceColumn extends ColumnData<_RetainingPathRecord> {
+class _InstanceColumn extends ColumnData<RetainingPathRecord> {
   _InstanceColumn()
       : super(
           'Instances',
@@ -47,7 +42,7 @@ class _InstanceColumn extends ColumnData<_RetainingPathRecord> {
         );
 
   @override
-  int getValue(_RetainingPathRecord record) => record.value.instanceCount;
+  int getValue(RetainingPathRecord record) => record.value.instanceCount;
 
   @override
   bool get supportsSorting => true;
@@ -56,7 +51,7 @@ class _InstanceColumn extends ColumnData<_RetainingPathRecord> {
   bool get numeric => true;
 }
 
-class _ShallowSizeColumn extends ColumnData<_RetainingPathRecord> {
+class _ShallowSizeColumn extends ColumnData<RetainingPathRecord> {
   _ShallowSizeColumn()
       : super(
           'Shallow\nDart Size',
@@ -66,7 +61,7 @@ class _ShallowSizeColumn extends ColumnData<_RetainingPathRecord> {
         );
 
   @override
-  int getValue(_RetainingPathRecord record) => record.value.shallowSize;
+  int getValue(RetainingPathRecord record) => record.value.shallowSize;
 
   @override
   bool get supportsSorting => true;
@@ -75,14 +70,14 @@ class _ShallowSizeColumn extends ColumnData<_RetainingPathRecord> {
   bool get numeric => true;
 
   @override
-  String getDisplayValue(_RetainingPathRecord record) => prettyPrintBytes(
+  String getDisplayValue(RetainingPathRecord record) => prettyPrintBytes(
         getValue(record),
         includeUnit: true,
         kbFractionDigits: 1,
       )!;
 }
 
-class _RetainedSizeColumn extends ColumnData<_RetainingPathRecord> {
+class _RetainedSizeColumn extends ColumnData<RetainingPathRecord> {
   _RetainedSizeColumn()
       : super(
           'Retained\nDart Size',
@@ -92,7 +87,7 @@ class _RetainedSizeColumn extends ColumnData<_RetainingPathRecord> {
         );
 
   @override
-  int getValue(_RetainingPathRecord record) => record.value.retainedSize;
+  int getValue(RetainingPathRecord record) => record.value.retainedSize;
 
   @override
   bool get supportsSorting => true;
@@ -101,77 +96,39 @@ class _RetainedSizeColumn extends ColumnData<_RetainingPathRecord> {
   bool get numeric => true;
 
   @override
-  String getDisplayValue(_RetainingPathRecord record) => prettyPrintBytes(
+  String getDisplayValue(RetainingPathRecord record) => prettyPrintBytes(
         getValue(record),
         includeUnit: true,
         kbFractionDigits: 1,
       )!;
 }
 
-class ClassStatsTable extends StatefulWidget {
-  const ClassStatsTable({
+class ClassStatsRetainingPathTable extends StatelessWidget {
+  const ClassStatsRetainingPathTable({
     Key? key,
     required this.data,
-    required this.sorting,
   }) : super(key: key);
 
-  final HeapClassStatistics data;
-  final ColumnSorting sorting;
+  final List<RetainingPathRecord> data;
 
-  @override
-  State<ClassStatsTable> createState() => _ClassStatsTableState();
-}
+  static final _shallowSizeColumn = _ShallowSizeColumn();
 
-class _ClassStatsTableState extends State<ClassStatsTable>
-    with AutoDisposeMixin {
-  late final List<ColumnData<_RetainingPathRecord>> _columns;
-  late List<MapEntry<ClassOnlyHeapPath, SizeOfClassSet>> _dataList;
-
-  @override
-  void initState() {
-    super.initState();
-
-    final _shallowSizeColumn = _ShallowSizeColumn();
-
-    _columns = <ColumnData<_RetainingPathRecord>>[
-      _RetainingPathColumn(),
-      _InstanceColumn(),
-      _shallowSizeColumn,
-      _RetainedSizeColumn(),
-    ];
-
-    if (!widget.sorting.initialized) {
-      widget.sorting
-        ..direction = SortDirection.descending
-        ..columnIndex = _columns.indexOf(_shallowSizeColumn)
-        ..initialized = true;
-    }
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _dataList = widget.data.sizeByRetainingPath.entries.toList(growable: false);
-  }
+  static final _columns = [
+    _RetainingPathColumn(),
+    _InstanceColumn(),
+    _shallowSizeColumn,
+    _RetainedSizeColumn(),
+  ];
 
   @override
   Widget build(BuildContext context) {
-    return FlatTable<_RetainingPathRecord>(
-      columns: _columns,
-      data: _dataList,
+    return FlatTable<RetainingPathRecord>(
       keyFactory: (e) => Key(e.key.asMultiLineString()),
-      onItemSelected: (r) => {},
-      sortColumn: _columns[widget.sorting.columnIndex],
-      sortDirection: widget.sorting.direction,
-      onSortChanged: (
-        sortColumn,
-        direction, {
-        secondarySortColumn,
-      }) =>
-          setState(() {
-        widget.sorting.columnIndex = _columns.indexOf(sortColumn);
-        widget.sorting.direction = direction;
-      }),
+      columns: _columns,
+      data: data,
+      dataKey: 'class-stats-retaining-path',
+      defaultSortColumn: _shallowSizeColumn,
+      defaultSortDirection: SortDirection.descending,
     );
   }
 }

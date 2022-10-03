@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../primitives/auto_dispose_mixin.dart';
 import '../../../../../shared/common_widgets.dart';
-import '../../../../../shared/table.dart';
+import '../../../../../shared/table/table.dart';
 import '../../../../../shared/theme.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/item_controller.dart';

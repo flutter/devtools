@@ -74,6 +74,19 @@ class Disposer {
     _listeners.clear();
   }
 
+  /// Cancels a single listener, if present.
+  void cancelListener(VoidCallback? listener) {
+    if (listener == null) return;
+
+    assert(_listenables.length == _listeners.length);
+    final foundIndex =
+        _listeners.indexWhere((currentListener) => currentListener == listener);
+    if (foundIndex == -1) return;
+    _listenables[foundIndex].removeListener(_listeners[foundIndex]);
+    _listenables.removeAt(foundIndex);
+    _listeners.removeAt(foundIndex);
+  }
+
   /// Cancel all focus nodes added.
   ///
   /// It is fine to call this method and then add additional focus nodes.
@@ -176,6 +189,11 @@ mixin AutoDisposeControllerMixin on DisposableController implements Disposer {
   @override
   void cancelListeners() {
     _delegate.cancelListeners();
+  }
+
+  @override
+  void cancelListener(VoidCallback? listener) {
+    _delegate.cancelListener(listener);
   }
 
   @override

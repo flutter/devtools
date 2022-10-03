@@ -7,8 +7,10 @@ import 'package:devtools_app/src/primitives/trees.dart';
 import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/table.dart';
-import 'package:devtools_app/src/shared/table_data.dart';
+import 'package:devtools_app/src/shared/table/column_widths.dart';
+import 'package:devtools_app/src/shared/table/table.dart';
+import 'package:devtools_app/src/shared/table/table_controller.dart';
+import 'package:devtools_app/src/shared/table/table_data.dart';
 import 'package:devtools_app/src/shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart' hide TableRow;
@@ -46,6 +48,7 @@ void main() {
   setUp(() {
     setGlobal(ServiceConnectionManager, FakeServiceManager());
     setGlobal(IdeTheme, IdeTheme());
+    TableUiStateStore.clear();
   });
 
   group('FlatTable view', () {
@@ -71,10 +74,10 @@ void main() {
       final table = FlatTable<TestData>(
         columns: [flatNameColumn],
         data: [TestData('empty', 0)],
+        dataKey: 'test-data',
         keyFactory: (d) => Key(d.name),
-        onItemSelected: noop,
-        sortColumn: flatNameColumn,
-        sortDirection: SortDirection.ascending,
+        defaultSortColumn: flatNameColumn,
+        defaultSortDirection: SortDirection.ascending,
       );
       await tester.pumpWidget(wrap(table));
       expect(find.byWidget(table), findsOneWidget);
@@ -82,7 +85,7 @@ void main() {
       expect(find.text('FlatName'), findsOneWidget);
 
       final FlatTableState state = tester.state(find.byWidget(table));
-      final columnWidths = state.computeColumnWidths(1000);
+      final columnWidths = state.tableController.computeColumnWidths(1000);
       expect(columnWidths.length, 1);
       expect(columnWidths.first, 300);
       expect(find.byKey(const Key('empty')), findsOneWidget);
@@ -97,10 +100,10 @@ void main() {
           _NumberColumn(),
         ],
         data: flatData,
-        onItemSelected: noop,
+        dataKey: 'test-data',
         keyFactory: (d) => Key(d.name),
-        sortColumn: flatNameColumn,
-        sortDirection: SortDirection.ascending,
+        defaultSortColumn: flatNameColumn,
+        defaultSortDirection: SortDirection.ascending,
       );
       await tester.pumpWidget(wrap(table));
       expect(find.byWidget(table), findsOneWidget);
@@ -140,10 +143,10 @@ void main() {
           ),
         ],
         data: flatData,
-        onItemSelected: noop,
+        dataKey: 'test-data',
         keyFactory: (d) => Key(d.name),
-        sortColumn: flatNameColumn,
-        sortDirection: SortDirection.ascending,
+        defaultSortColumn: flatNameColumn,
+        defaultSortDirection: SortDirection.ascending,
       );
       await tester.pumpWidget(wrap(table));
       expect(find.byWidget(table), findsOneWidget);
@@ -183,14 +186,14 @@ void main() {
           _NumberColumn(),
         ],
         data: flatData,
-        onItemSelected: noop,
+        dataKey: 'test-data',
         keyFactory: (d) => Key(d.name),
-        sortColumn: flatNameColumn,
-        sortDirection: SortDirection.ascending,
+        defaultSortColumn: flatNameColumn,
+        defaultSortDirection: SortDirection.ascending,
       );
       await tester.pumpWidget(wrap(table));
       final FlatTableState state = tester.state(find.byWidget(table));
-      final data = state.data;
+      final data = state.tableController.tableData.value.data;
       expect(data[0].name, equals('Bar'));
       expect(data[1].name, equals('Baz'));
       expect(data[2].name, equals('Baz'));
@@ -209,15 +212,15 @@ void main() {
           _NumberColumn(),
         ],
         data: flatData,
-        onItemSelected: noop,
+        dataKey: 'test-data',
         keyFactory: (d) => Key(d.name),
-        sortColumn: flatNameColumn,
-        sortDirection: SortDirection.ascending,
+        defaultSortColumn: flatNameColumn,
+        defaultSortDirection: SortDirection.ascending,
       );
       await tester.pumpWidget(wrap(table));
       final FlatTableState state = tester.state(find.byWidget(table));
       {
-        final data = state.data;
+        final data = state.tableController.tableData.value.data;
         expect(data[0].name, equals('Bar'));
         expect(data[1].name, equals('Baz'));
         expect(data[2].name, equals('Baz'));
@@ -233,7 +236,7 @@ void main() {
       await tester.pumpAndSettle();
 
       {
-        final data = state.data;
+        final data = state.tableController.tableData.value.data;
         expect(data[8].name, equals('Bar'));
         expect(data[7].name, equals('Baz'));
         expect(data[6].name, equals('Baz'));
@@ -250,7 +253,7 @@ void main() {
       await tester.pumpAndSettle();
 
       {
-        final data = state.data;
+        final data = state.tableController.tableData.value.data;
         expect(data[0].name, equals('Foo'));
         expect(data[1].name, equals('Bar'));
         expect(data[2].name, equals('Baz'));
@@ -274,15 +277,15 @@ void main() {
           nonSortableFlatNumColumn,
         ],
         data: flatData,
-        onItemSelected: noop,
+        dataKey: 'test-data',
         keyFactory: (d) => Key(d.name),
-        sortColumn: flatNameColumn,
-        sortDirection: SortDirection.ascending,
+        defaultSortColumn: nonSortableFlatNameColumn,
+        defaultSortDirection: SortDirection.ascending,
       );
       await tester.pumpWidget(wrap(table));
       final FlatTableState state = tester.state(find.byWidget(table));
       {
-        final data = state.data;
+        final data = state.tableController.tableData.value.data;
         expect(data[0].name, equals('Bar'));
         expect(data[1].name, equals('Baz'));
         expect(data[2].name, equals('Baz'));
@@ -299,7 +302,7 @@ void main() {
       await tester.pumpAndSettle();
 
       {
-        final data = state.data;
+        final data = state.tableController.tableData.value.data;
         expect(data[0].name, equals('Bar'));
         expect(data[1].name, equals('Baz'));
         expect(data[2].name, equals('Baz'));
@@ -315,7 +318,7 @@ void main() {
       await tester.tap(find.text('Number'));
       await tester.pumpAndSettle();
       {
-        final data = state.data;
+        final data = state.tableController.tableData.value.data;
         expect(data[0].name, equals('Bar'));
         expect(data[1].name, equals('Baz'));
         expect(data[2].name, equals('Baz'));
@@ -347,16 +350,16 @@ void main() {
           TestData('Bang', 4),
           TestData('Qux', 5),
         ],
-        onItemSelected: noop,
+        dataKey: 'test-data',
         keyFactory: (d) => Key(d.name),
-        sortColumn: numberColumn,
-        sortDirection: SortDirection.ascending,
+        defaultSortColumn: numberColumn,
+        defaultSortDirection: SortDirection.ascending,
         secondarySortColumn: flatNameColumn,
       );
       await tester.pumpWidget(wrap(table));
       final FlatTableState state = tester.state(find.byWidget(table));
       {
-        final data = state.data;
+        final data = state.tableController.tableData.value.data;
         expect(data[0].name, equals('Foo'));
         expect(data[1].name, equals('1 Bar'));
         expect(data[2].name, equals('# Baz'));
@@ -373,7 +376,7 @@ void main() {
       await tester.pumpAndSettle();
 
       {
-        final data = state.data;
+        final data = state.tableController.tableData.value.data;
         expect(data[8].name, equals('Foo'));
         expect(data[7].name, equals('1 Bar'));
         expect(data[6].name, equals('# Baz'));
@@ -389,7 +392,7 @@ void main() {
       await tester.pumpAndSettle();
 
       {
-        final data = state.data;
+        final data = state.tableController.tableData.value.data;
         expect(data[0].name, equals('# Baz'));
         expect(data[1].name, equals('1 Bar'));
         expect(data[2].name, equals('Bang'));
@@ -411,10 +414,10 @@ void main() {
           _CombinedColumn(),
         ],
         data: flatData,
-        onItemSelected: noop,
+        dataKey: 'test-data',
         keyFactory: (data) => Key(data.name),
-        sortColumn: flatNameColumn,
-        sortDirection: SortDirection.ascending,
+        defaultSortColumn: flatNameColumn,
+        defaultSortDirection: SortDirection.ascending,
       );
       await tester.pumpWidget(
         wrap(
@@ -437,10 +440,10 @@ void main() {
           _WideColumn(),
         ],
         data: flatData,
-        onItemSelected: noop,
+        dataKey: 'test-data',
         keyFactory: (data) => Key(data.name),
-        sortColumn: flatNameColumn,
-        sortDirection: SortDirection.ascending,
+        defaultSortColumn: flatNameColumn,
+        defaultSortDirection: SortDirection.ascending,
       );
       await tester.pumpWidget(
         wrap(
@@ -455,7 +458,7 @@ void main() {
       {
         final FlatTableState<TestData> state =
             tester.state(find.byWidget(table));
-        final columnWidths = state.computeColumnWidths(800.0);
+        final columnWidths = state.tableController.computeColumnWidths(800.0);
         expect(columnWidths.length, equals(3));
         expect(columnWidths[0], equals(300.0));
         expect(columnWidths[1], equals(400.0));
@@ -477,7 +480,7 @@ void main() {
       {
         final FlatTableState<TestData> state =
             tester.state(find.byWidget(table));
-        final columnWidths = state.computeColumnWidths(200.0);
+        final columnWidths = state.tableController.computeColumnWidths(200.0);
         expect(columnWidths.length, equals(3));
         expect(columnWidths[0], equals(300.0)); // Fixed width column.
         expect(columnWidths[1], equals(400.0)); // Fixed width column.
@@ -497,10 +500,10 @@ void main() {
           _WideColumn(),
         ],
         data: flatData,
-        onItemSelected: noop,
+        dataKey: 'test-data',
         keyFactory: (data) => Key(data.name),
-        sortColumn: flatNameColumn,
-        sortDirection: SortDirection.ascending,
+        defaultSortColumn: flatNameColumn,
+        defaultSortDirection: SortDirection.ascending,
       );
       await tester.pumpWidget(
         wrap(
@@ -515,7 +518,7 @@ void main() {
       {
         final FlatTableState<TestData> state =
             tester.state(find.byWidget(table));
-        final columnWidths = state.computeColumnWidths(1000.0);
+        final columnWidths = state.tableController.computeColumnWidths(1000.0);
         expect(columnWidths.length, equals(4));
         expect(columnWidths[0], equals(300.0)); // Fixed width column.
         expect(columnWidths[1], equals(110.0)); // Min width wide column
@@ -535,7 +538,7 @@ void main() {
       {
         final FlatTableState<TestData> state =
             tester.state(find.byWidget(table));
-        final columnWidths = state.computeColumnWidths(200.0);
+        final columnWidths = state.tableController.computeColumnWidths(200.0);
         expect(columnWidths.length, equals(4));
         expect(columnWidths[0], equals(300.0)); // Fixed width column.
         expect(columnWidths[1], equals(100.0)); // Min width wide column
@@ -555,10 +558,10 @@ void main() {
           _WideColumn(),
         ],
         data: flatData,
-        onItemSelected: noop,
+        dataKey: 'test-data',
         keyFactory: (data) => Key(data.name),
-        sortColumn: flatNameColumn,
-        sortDirection: SortDirection.ascending,
+        defaultSortColumn: flatNameColumn,
+        defaultSortDirection: SortDirection.ascending,
       );
       await tester.pumpWidget(
         wrap(
@@ -573,7 +576,7 @@ void main() {
       {
         final FlatTableState<TestData> state =
             tester.state(find.byWidget(table));
-        final columnWidths = state.computeColumnWidths(1501.0);
+        final columnWidths = state.tableController.computeColumnWidths(1501.0);
         expect(columnWidths.length, equals(5));
         expect(columnWidths[0], equals(300.0)); // Fixed width column.
         expect(columnWidths[1], equals(235.0)); // Min width wide column
@@ -598,7 +601,7 @@ void main() {
       {
         final FlatTableState<TestData> state =
             tester.state(find.byWidget(table));
-        final columnWidths = state.computeColumnWidths(1200.0);
+        final columnWidths = state.tableController.computeColumnWidths(1200.0);
         expect(columnWidths.length, equals(5));
         expect(columnWidths[0], equals(300.0)); // Fixed width column.
         expect(columnWidths[1], equals(122.0)); // Min width wide column
@@ -623,7 +626,7 @@ void main() {
       {
         final FlatTableState<TestData> state =
             tester.state(find.byWidget(table));
-        final columnWidths = state.computeColumnWidths(1000.0);
+        final columnWidths = state.tableController.computeColumnWidths(1000.0);
         expect(columnWidths.length, equals(5));
         expect(columnWidths[0], equals(300.0)); // Fixed width column.
         expect(columnWidths[1], equals(100.0)); // Min width wide column
@@ -643,10 +646,11 @@ void main() {
       final table = FlatTable<TestData>(
         columns: [flatNameColumn],
         data: [testData],
+        dataKey: 'test-data',
         keyFactory: (d) => Key(d.name),
         onItemSelected: (item) => selected = item,
-        sortColumn: flatNameColumn,
-        sortDirection: SortDirection.ascending,
+        defaultSortColumn: flatNameColumn,
+        defaultSortDirection: SortDirection.ascending,
       );
       await tester.pumpWidget(wrap(table));
       expect(find.byWidget(table), findsOneWidget);
@@ -666,10 +670,10 @@ void main() {
       final table = FlatTable<PinnableTestData>(
         columns: [column],
         data: testData,
+        dataKey: 'test-data',
         keyFactory: (d) => Key(d.name),
-        onItemSelected: (_) => null,
-        sortColumn: column,
-        sortDirection: SortDirection.ascending,
+        defaultSortColumn: column,
+        defaultSortDirection: SortDirection.ascending,
         pinBehavior: FlatTablePinBehavior.pinOriginalToTop,
       );
       await tester.pumpWidget(wrap(table));
@@ -680,38 +684,40 @@ void main() {
         find.byWidget(table),
       );
 
-      expect(state.pinnedData.length, testData.length / 2);
-      for (int i = 0; i < state.pinnedData.length; ++i) {
-        expect(state.pinnedData[i].name, (i * 2).toString());
-        expect(state.pinnedData[i].enabled, true);
+      var pinnedData = state.tableController.pinnedData;
+      expect(pinnedData.length, testData.length / 2);
+      for (int i = 0; i < pinnedData.length; ++i) {
+        expect(pinnedData[i].name, (i * 2).toString());
+        expect(pinnedData[i].enabled, true);
       }
-      expect(state.data.length, testData.length / 2);
-      for (int i = 0; i < state.data.length; ++i) {
-        expect(state.data[i].name, ((i * 2) + 1).toString());
-        expect(state.data[i].enabled, false);
+
+      var data = state.tableController.tableData.value.data;
+      expect(data.length, testData.length / 2);
+      for (int i = 0; i < data.length; ++i) {
+        expect(data[i].name, ((i * 2) + 1).toString());
+        expect(data[i].enabled, false);
       }
 
       // Sorting should apply to both pinned and unpinned items.
       await tester.tap(find.text(column.title));
       await tester.pumpAndSettle();
 
-      expect(state.pinnedData.length, testData.length / 2);
-      for (int i = 0; i < state.pinnedData.length; ++i) {
-        final index = state.data.length - i - 1;
-        expect(
-          state.pinnedData[i].name,
-          (index * 2).toString(),
-        );
-        expect(state.pinnedData[i].enabled, true);
+      data = state.tableController.tableData.value.data;
+      pinnedData = state.tableController.pinnedData;
+      expect(pinnedData.length, testData.length / 2);
+      for (int i = 0; i < pinnedData.length; ++i) {
+        final index = data.length - i - 1;
+        expect(pinnedData[i].name, (index * 2).toString());
+        expect(pinnedData[i].enabled, true);
       }
-      expect(state.data.length, testData.length / 2);
-      for (int i = 0; i < state.data.length; ++i) {
-        final index = state.data.length - i - 1;
+      expect(data.length, testData.length / 2);
+      for (int i = 0; i < data.length; ++i) {
+        final index = data.length - i - 1;
         expect(
-          state.data[i].name,
+          data[i].name,
           ((index * 2) + 1).toString(),
         );
-        expect(state.data[i].enabled, false);
+        expect(data[i].enabled, false);
       }
     });
 
@@ -725,10 +731,10 @@ void main() {
       final table = FlatTable<PinnableTestData>(
         columns: [column],
         data: testData,
+        dataKey: 'test-data',
         keyFactory: (d) => Key(d.name),
-        onItemSelected: (_) => null,
-        sortColumn: column,
-        sortDirection: SortDirection.ascending,
+        defaultSortColumn: column,
+        defaultSortDirection: SortDirection.ascending,
         pinBehavior: FlatTablePinBehavior.pinCopyToTop,
       );
       await tester.pumpWidget(wrap(table));
@@ -739,38 +745,39 @@ void main() {
         find.byWidget(table),
       );
 
-      expect(state.pinnedData.length, testData.length / 2);
-      for (int i = 0; i < state.pinnedData.length; ++i) {
-        expect(state.pinnedData[i].name, (i * 2).toString());
-        expect(state.pinnedData[i].enabled, true);
+      var data = state.tableController.tableData.value.data;
+      var pinnedData = state.tableController.pinnedData;
+      expect(pinnedData.length, testData.length / 2);
+      for (int i = 0; i < pinnedData.length; ++i) {
+        expect(pinnedData[i].name, (i * 2).toString());
+        expect(pinnedData[i].enabled, true);
       }
-      expect(state.data.length, testData.length);
-      for (int i = 0; i < state.data.length; ++i) {
-        expect(state.data[i].name, i.toString());
-        expect(state.data[i].enabled, i % 2 == 0);
+      expect(data.length, testData.length);
+      for (int i = 0; i < data.length; ++i) {
+        expect(data[i].name, i.toString());
+        expect(data[i].enabled, i % 2 == 0);
       }
 
       // Sorting should apply to both pinned and unpinned items.
       await tester.tap(find.text(column.title));
       await tester.pumpAndSettle();
 
-      expect(state.pinnedData.length, testData.length / 2);
-      for (int i = 0; i < state.pinnedData.length; ++i) {
-        final index = state.pinnedData.length - i - 1;
-        expect(
-          state.pinnedData[i].name,
-          (index * 2).toString(),
-        );
-        expect(state.pinnedData[i].enabled, true);
+      data = state.tableController.tableData.value.data;
+      pinnedData = state.tableController.pinnedData;
+      expect(pinnedData.length, testData.length / 2);
+      for (int i = 0; i < pinnedData.length; ++i) {
+        final index = pinnedData.length - i - 1;
+        expect(pinnedData[i].name, (index * 2).toString());
+        expect(pinnedData[i].enabled, true);
       }
-      expect(state.data.length, testData.length);
-      for (int i = 0; i < state.data.length; ++i) {
-        final index = state.data.length - i - 1;
+      expect(data.length, testData.length);
+      for (int i = 0; i < data.length; ++i) {
+        final index = data.length - i - 1;
         expect(
-          state.data[i].name,
+          data[i].name,
           index.toString(),
         );
-        expect(state.data[i].enabled, index % 2 == 0);
+        expect(data[i].enabled, index % 2 == 0);
       }
     });
   });
@@ -811,10 +818,11 @@ void main() {
       final table = TreeTable<TestData>(
         columns: [treeColumn],
         dataRoots: [TestData('empty', 0)],
+        dataKey: 'test-data',
         treeColumn: treeColumn,
         keyFactory: (d) => Key(d.name),
-        sortColumn: treeColumn,
-        sortDirection: SortDirection.ascending,
+        defaultSortColumn: treeColumn,
+        defaultSortDirection: SortDirection.ascending,
       );
       await tester.pumpWidget(wrap(table));
       expect(find.byWidget(table), findsOneWidget);
@@ -826,10 +834,11 @@ void main() {
       final table = TreeTable<TestData>(
         columns: [treeColumn],
         dataRoots: [tree1, tree2],
+        dataKey: 'test-data',
         treeColumn: treeColumn,
         keyFactory: (d) => Key(d.name),
-        sortColumn: treeColumn,
-        sortDirection: SortDirection.ascending,
+        defaultSortColumn: treeColumn,
+        defaultSortDirection: SortDirection.ascending,
       );
       await tester.pumpWidget(wrap(table));
       expect(find.byWidget(table), findsOneWidget);
@@ -861,10 +870,11 @@ void main() {
       final table = TreeTable<TestData>(
         columns: [treeColumn],
         dataRoots: [tree1, tree2],
+        dataKey: 'test-data',
         treeColumn: treeColumn,
         keyFactory: (d) => Key(d.name),
-        sortColumn: treeColumn,
-        sortDirection: SortDirection.ascending,
+        defaultSortColumn: treeColumn,
+        defaultSortDirection: SortDirection.ascending,
       );
       await tester.pumpWidget(wrap(table));
       expect(find.byWidget(table), findsOneWidget);
@@ -880,10 +890,11 @@ void main() {
       final newTable = TreeTable<TestData>(
         columns: [treeColumn],
         dataRoots: [TestData('root1', 0), TestData('root2', 1)],
+        dataKey: 'test-data',
         treeColumn: treeColumn,
         keyFactory: (d) => Key(d.name),
-        sortColumn: treeColumn,
-        sortDirection: SortDirection.descending,
+        defaultSortColumn: treeColumn,
+        defaultSortDirection: SortDirection.descending,
       );
       await tester.pumpWidget(wrap(newTable));
       expect(find.byKey(const Key('Foo')), findsNothing);
@@ -905,10 +916,11 @@ void main() {
           _NumberColumn(),
         ],
         dataRoots: [tree1],
+        dataKey: 'test-data',
         treeColumn: treeColumn,
         keyFactory: (d) => Key(d.name),
-        sortColumn: treeColumn,
-        sortDirection: SortDirection.descending,
+        defaultSortColumn: treeColumn,
+        defaultSortDirection: SortDirection.descending,
       );
       await tester.pumpWidget(wrap(table));
       expect(find.byWidget(table), findsOneWidget);
@@ -932,10 +944,11 @@ void main() {
           _CombinedColumn(),
         ],
         dataRoots: [tree1],
+        dataKey: 'test-data',
         treeColumn: treeColumn,
         keyFactory: (d) => Key(d.name),
-        sortColumn: treeColumn,
-        sortDirection: SortDirection.ascending,
+        defaultSortColumn: treeColumn,
+        defaultSortDirection: SortDirection.ascending,
       );
       await tester.pumpWidget(
         wrap(
@@ -957,10 +970,11 @@ void main() {
           treeColumn,
         ],
         dataRoots: [tree1],
+        dataKey: 'test-data',
         treeColumn: treeColumn,
         keyFactory: (d) => Key(d.name),
-        sortColumn: treeColumn,
-        sortDirection: SortDirection.ascending,
+        defaultSortColumn: treeColumn,
+        defaultSortDirection: SortDirection.ascending,
       );
       await tester.pumpWidget(wrap(table));
       await tester.pumpAndSettle();
@@ -992,14 +1006,15 @@ void main() {
           treeColumn,
         ],
         dataRoots: [tree1],
+        dataKey: 'test-data',
         treeColumn: treeColumn,
         keyFactory: (d) => Key(d.name),
-        sortColumn: treeColumn,
-        sortDirection: SortDirection.ascending,
+        defaultSortColumn: treeColumn,
+        defaultSortDirection: SortDirection.ascending,
       );
       await tester.pumpWidget(wrap(table));
       final TreeTableState state = tester.state(find.byWidget(table));
-      final tree = state.dataRoots[0];
+      final tree = state.tableController.dataRoots[0];
       expect(tree.children[0].name, equals('Bar'));
       expect(tree.children[0].children[0].name, equals('Baz'));
       expect(tree.children[0].children[1].name, equals('Crackle'));
@@ -1017,16 +1032,17 @@ void main() {
           treeColumn,
         ],
         dataRoots: [tree1],
+        dataKey: 'test-data',
         treeColumn: treeColumn,
         keyFactory: (d) => Key(d.name),
-        sortColumn: treeColumn,
-        sortDirection: SortDirection.ascending,
+        defaultSortColumn: treeColumn,
+        defaultSortDirection: SortDirection.ascending,
       );
       await tester.pumpWidget(wrap(table));
       final TreeTableState state = tester.state(find.byWidget(table));
-      expect(state.columnWidths[0], equals(400));
-      expect(state.columnWidths[1], equals(500));
-      final tree = state.dataRoots[0];
+      expect(state.tableController.columnWidths[0], equals(400));
+      expect(state.tableController.columnWidths[1], equals(500));
+      final tree = state.tableController.dataRoots[0];
       expect(tree.children[0].name, equals('Bar'));
       expect(tree.children[0].children[0].name, equals('Baz'));
       expect(tree.children[0].children[1].name, equals('Crackle'));
@@ -1077,10 +1093,11 @@ void main() {
             treeColumn,
           ],
           dataRoots: [data],
+          dataKey: 'test-data',
           treeColumn: treeColumn,
           keyFactory: (d) => Key(d.name),
-          sortColumn: treeColumn,
-          sortDirection: SortDirection.ascending,
+          defaultSortColumn: treeColumn,
+          defaultSortDirection: SortDirection.ascending,
         );
       });
 
@@ -1094,18 +1111,21 @@ void main() {
         state.focusNode!.requestFocus();
         await tester.pumpAndSettle();
 
-        expect(state.selectionNotifier.value.node, equals(null));
+        expect(state.widget.selectionNotifier.value.node, equals(null));
 
         // the root is selected by default when there is no selection. Pressing
         // arrowDown should take us to the first child, Bar
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
         await tester.pumpAndSettle();
-        expect(state.selectionNotifier.value.node, equals(data.children[0]));
+        expect(
+          state.widget.selectionNotifier.value.node,
+          equals(data.children[0]),
+        );
 
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
         await tester.pumpAndSettle();
 
-        expect(state.selectionNotifier.value.node, equals(data.root));
+        expect(state.widget.selectionNotifier.value.node, equals(data.root));
       });
 
       testWidgets('selection changes with left/right arrow keys',
@@ -1122,8 +1142,8 @@ void main() {
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
         await tester.pumpAndSettle();
 
-        expect(state.selectionNotifier.value.node, equals(data.root));
-        expect(state.selectionNotifier.value.node!.isExpanded, isFalse);
+        expect(state.widget.selectionNotifier.value.node, equals(data.root));
+        expect(state.widget.selectionNotifier.value.node!.isExpanded, isFalse);
 
         // Expand root and navigate down twice
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
@@ -1132,7 +1152,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(
-          state.selectionNotifier.value.node,
+          state.widget.selectionNotifier.value.node,
           equals(data.root.children[1]),
         );
 
@@ -1140,8 +1160,8 @@ void main() {
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
         await tester.pumpAndSettle();
 
-        expect(state.selectionNotifier.value.node, equals(data.root));
-        expect(state.selectionNotifier.value.node!.isExpanded, isTrue);
+        expect(state.widget.selectionNotifier.value.node, equals(data.root));
+        expect(state.widget.selectionNotifier.value.node!.isExpanded, isTrue);
       });
     });
 
@@ -1164,10 +1184,11 @@ void main() {
           treeColumn,
         ],
         dataRoots: [data],
+        dataKey: 'test-data',
         treeColumn: treeColumn,
         keyFactory: (d) => Key(d.name),
-        sortColumn: treeColumn,
-        sortDirection: SortDirection.ascending,
+        defaultSortColumn: treeColumn,
+        defaultSortDirection: SortDirection.ascending,
       );
 
       final fooFinder = find.byKey(const Key('Foo'));
@@ -1232,10 +1253,11 @@ void main() {
           TreeTable<TestData>(
             columns: const [],
             dataRoots: [tree1],
+            dataKey: 'test-data',
             treeColumn: treeColumn,
             keyFactory: (d) => Key(d.name),
-            sortColumn: treeColumn,
-            sortDirection: SortDirection.ascending,
+            defaultSortColumn: treeColumn,
+            defaultSortDirection: SortDirection.ascending,
           );
         },
         throwsAssertionError,
@@ -1373,5 +1395,3 @@ class _VeryWideMinWidthColumn extends ColumnData<TestData> {
   String getValue(TestData dataObject) =>
       '${dataObject.name} ${dataObject.number} with min width';
 }
-
-void noop(TestData data) {}

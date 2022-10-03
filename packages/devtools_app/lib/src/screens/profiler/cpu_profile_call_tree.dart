@@ -5,8 +5,8 @@
 import 'package:flutter/material.dart';
 
 import '../../primitives/utils.dart';
-import '../../shared/table.dart';
-import '../../shared/table_data.dart';
+import '../../shared/table/table.dart';
+import '../../shared/table/table_data.dart';
 import 'cpu_profile_columns.dart';
 import 'cpu_profile_model.dart';
 
@@ -53,12 +53,13 @@ class CpuCallTreeTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TreeTable<CpuStackFrame>(
+      keyFactory: (frame) => PageStorageKey<String>(frame.id),
       dataRoots: dataRoots,
+      dataKey: 'cpu-call-tree',
       columns: columns,
       treeColumn: treeColumn,
-      keyFactory: (frame) => PageStorageKey<String>(frame.id),
-      sortColumn: sortColumn,
-      sortDirection: SortDirection.descending,
+      defaultSortColumn: sortColumn,
+      defaultSortDirection: SortDirection.descending,
     );
   }
 }
