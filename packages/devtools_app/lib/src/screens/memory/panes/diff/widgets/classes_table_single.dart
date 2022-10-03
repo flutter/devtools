@@ -48,9 +48,6 @@ class _InstanceColumn extends ColumnData<SingleClassStats> {
   int getValue(SingleClassStats classStats) => classStats.objects.instanceCount;
 
   @override
-  bool get supportsSorting => true;
-
-  @override
   bool get numeric => true;
 }
 
@@ -66,8 +63,7 @@ class _ShallowSizeColumn extends ColumnData<SingleClassStats> {
   @override
   int getValue(SingleClassStats classStats) => classStats.objects.shallowSize;
 
-  @override
-  bool get supportsSorting => true;
+
 
   @override
   bool get numeric => true;
@@ -91,9 +87,6 @@ class _RetainedSizeColumn extends ColumnData<SingleClassStats> {
 
   @override
   int getValue(SingleClassStats classStats) => classStats.objects.retainedSize;
-
-  @override
-  bool get supportsSorting => true;
 
   @override
   bool get numeric => true;

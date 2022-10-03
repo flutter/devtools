@@ -48,9 +48,6 @@ class _InstanceColumn extends ColumnData<_RetainingPathRecord> {
   int getValue(_RetainingPathRecord record) => record.value.instanceCount;
 
   @override
-  bool get supportsSorting => true;
-
-  @override
   bool get numeric => true;
 }
 
@@ -66,8 +63,6 @@ class _ShallowSizeColumn extends ColumnData<_RetainingPathRecord> {
   @override
   int getValue(_RetainingPathRecord record) => record.value.shallowSize;
 
-  @override
-  bool get supportsSorting => true;
 
   @override
   bool get numeric => true;
@@ -92,8 +87,6 @@ class _RetainedSizeColumn extends ColumnData<_RetainingPathRecord> {
   @override
   int getValue(_RetainingPathRecord record) => record.value.retainedSize;
 
-  @override
-  bool get supportsSorting => true;
 
   @override
   bool get numeric => true;

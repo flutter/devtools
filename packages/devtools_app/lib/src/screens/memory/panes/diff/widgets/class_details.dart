@@ -78,9 +78,6 @@ class _InstanceColumn extends ColumnData<StatsByPathEntry> {
   int getValue(StatsByPathEntry record) => record.value.instanceCount;
 
   @override
-  bool get supportsSorting => true;
-
-  @override
   bool get numeric => true;
 }
 
@@ -95,9 +92,6 @@ class _ShallowSizeColumn extends ColumnData<StatsByPathEntry> {
 
   @override
   int getValue(StatsByPathEntry record) => record.value.shallowSize;
-
-  @override
-  bool get supportsSorting => true;
 
   @override
   bool get numeric => true;
@@ -121,9 +115,6 @@ class _RetainedSizeColumn extends ColumnData<StatsByPathEntry> {
 
   @override
   int getValue(StatsByPathEntry record) => record.value.retainedSize;
-
-  @override
-  bool get supportsSorting => true;
 
   @override
   bool get numeric => true;

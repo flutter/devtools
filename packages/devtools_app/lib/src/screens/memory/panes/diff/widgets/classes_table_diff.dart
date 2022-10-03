@@ -78,9 +78,6 @@ class _InstanceColumn extends ColumnData<DiffClassStats> {
   }
 
   @override
-  bool get supportsSorting => true;
-
-  @override
   bool get numeric => true;
 }
 
@@ -136,9 +133,6 @@ class _SizeColumn extends ColumnData<DiffClassStats> {
         includeUnit: true,
         kbFractionDigits: 1,
       )!;
-
-  @override
-  bool get supportsSorting => true;
 
   @override
   bool get numeric => true;

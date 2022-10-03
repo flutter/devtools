@@ -2376,3 +2376,27 @@ class Progress extends StatelessWidget {
     );
   }
 }
+
+class ToCsvButton extends StatelessWidget {
+  const ToCsvButton({
+    Key? key,
+    this.onPressed,
+    this.tooltip = 'Download data in CSV format',
+    required this.minScreenWidthForTextBeforeScaling,
+  }) : super(key: key);
+
+  final VoidCallback? onPressed;
+  final String? tooltip;
+  final double minScreenWidthForTextBeforeScaling;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconLabelButton(
+      label: 'CSV',
+      icon: Icons.file_download,
+      tooltip: tooltip,
+      onPressed: onPressed,
+      minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
+    );
+  }
+}

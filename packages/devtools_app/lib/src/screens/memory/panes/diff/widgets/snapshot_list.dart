@@ -120,11 +120,16 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
   void initState() {
     super.initState();
     _scrollController = ScrollController();
+    _initWidget();
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  void didUpdateWidget(covariant _SnapshotListItems oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) _initWidget();
+  }
+
+  void _initWidget() {
     addAutoDisposeListener(
       widget.controller.selectedSnapshotIndex,
       scrollIfLast,

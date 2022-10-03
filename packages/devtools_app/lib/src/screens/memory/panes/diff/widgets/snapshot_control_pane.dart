@@ -43,7 +43,11 @@ class SnapshotControlPane extends StatelessWidget {
                     child: _ClassFilter(onChanged: controller.setClassFilter),
                   ),
                   const SizedBox(width: defaultSpacing),
-                  _ToCsv(item: current),
+                  ToCsvButton(
+                    minScreenWidthForTextBeforeScaling:
+                        primaryControlsMinVerboseWidth,
+                    onPressed: current.downloadToCsv,
+                  ),
                 ],
               ],
             ),
@@ -71,23 +75,6 @@ class _ClassFilter extends StatelessWidget {
         hintText: 'Filter by class name',
         onChanged: onChanged,
       );
-}
-
-class _ToCsv extends StatelessWidget {
-  const _ToCsv({Key? key, required this.item}) : super(key: key);
-
-  final SnapshotInstanceItem item;
-
-  @override
-  Widget build(BuildContext context) {
-    return IconLabelButton(
-      label: 'CSV',
-      icon: Icons.file_download,
-      tooltip: 'Download allocation profile data in CSV format',
-      onPressed: () => item.downloadToCsv(),
-      minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
-    );
-  }
 }
 
 class _DiffDropdown extends StatelessWidget {
