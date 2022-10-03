@@ -124,12 +124,6 @@ class _ClassStatsTableState extends State<ClassStatsTable>
   late final List<ColumnData<_RetainingPathRecord>> _columns;
 
   @override
-  void didUpdateWidget(covariant ClassStatsTable oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.data == oldWidget.data) return;
-  }
-
-  @override
   void initState() {
     super.initState();
     assert(widget.data.isSealed);

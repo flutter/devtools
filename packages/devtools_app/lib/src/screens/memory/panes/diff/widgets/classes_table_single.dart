@@ -133,12 +133,20 @@ class _ClassesTableSingleState extends State<ClassesTableSingle>
     _RetainedSizeColumn(),
   ];
 
+  void _initWidget() {
+    _classes = widget.item.classesToShow() as SingleHeapClasses;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _initWidget();
+  }
+
   @override
   void didUpdateWidget(covariant ClassesTableSingle oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.item != oldWidget.item) {
-      _classes = widget.item.classesToShow() as SingleHeapClasses;
-    }
+    if (widget.item != oldWidget.item) _initWidget();
   }
 
   @override
