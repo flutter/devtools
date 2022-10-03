@@ -7,6 +7,7 @@
 - Test these changes locally before creating the PR.
     - See [README.md](https://github.com/flutter/website/blob/main/README.md)
 for getting setup to run the Flutter website locally.
+    - Release notes can be found at [http://localhost:4002/development/tools/devtools/release-notes/](http://localhost:4002/development/tools/devtools/release-notes/)
 
 - Once you are satisfied with the release notes
     - stage the Flutter website on Firebase
