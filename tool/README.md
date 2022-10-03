@@ -17,15 +17,19 @@ Make sure:
 
 ```shell
 cd ~/path/to/devtools
-git checkout master
-git pull upstream master
-git checkout -b release_2.7.0
+```
+
+```shell
+git checkout master && \
+git pull upstream master && \
+git checkout -b release_2.7.0;
 ```
 
 #### Update the DevTools version number
 
 Run the `tool/update_version.dart` script to update the DevTools version.
-For monthly releases use `auto --type minor`.
+
+> For monthly releases use `auto --type minor`.
 
 ```shell
 # To manually set the version:
@@ -38,31 +42,39 @@ dart tool/update_version.dart auto --type patch
 dart tool/update_version.dart auto --type minor
 ```
 
-Verify that this script updated the pubspecs under packages/
-and updated all references to those packages. These packages always have their
-version numbers updated in lock, so we don't have to worry about
-versioning. Also make sure that the version constant in
-`packages/devtools_app/lib/devtools.dart` was updated.
+
+Verify:
+* that this script updated the pubspecs under packages/
+* updated all references to those packages.
+*  make sure that the version constant in `packages/devtools_app/lib/devtools.dart` was updated
+
+These packages always have their version numbers updated in lock, so we don't have to worry about versioning.
 
 #### Update the CHANGELOG.md (for non-dev releases)
 
-Use the tool `generate-changelog` to automatically update the `packages/devtools/CHANGELOG.md` file.
+* Use the tool `generate-changelog` to automatically update the `packages/devtools/CHANGELOG.md` file.
 
 ```shell
 cd ~/path/to/devtools
 dart tool/bin/repo_tool.dart generate-changelog
 ```
 
-Be sure to manually check that the version for the CHANGELOG entry was correctly generated
-and that the entries don't have any syntax errors. The `generate-changelog` script is
+* The `generate-changelog` script is
 intended to do the bulk of the work, but still needs manual review.
+* Verify
+   * that the version for the CHANGELOG entry was correctly generated
+   * that the entries don't have any syntax errors. 
 
 #### Push the local branch
 
 ```shell
-git add .
-git commit -m “Prepare for 2.7.0 release.”
-git push origin release_2.7.0
+NEW_DEVTOOLS_VERSION=2.7.0 # Change this to the new version
+```
+
+```shell
+git add . && \
+git commit -m “Prepare for $NEW_DEVTOOLS_VERSION release.” && \
+git push origin release_$NEW_DEVTOOLS_VERSION;
 ```
 
 From the git GUI tool or from github.com directly:
@@ -71,12 +83,13 @@ From the git GUI tool or from github.com directly:
 3. Receive an LGTM, squash and commit.
 
 ### Test the release
-Checkout the commit you just created, or remain on the branch you just landed the prep PR from.
+
+* Checkout the commit you just created, or remain on the branch you just landed the prep PR from.
 ```shell
 git checkout 8881a7caa9067471008a8e00750b161f53cdb843
 ```
 
-Build the DevTools binary and run it from your local Dart SDK. From the main devtools/ directory.
+* Build the DevTools binary and run it from your local Dart SDK. From the main devtools/ directory.
 ```shell
 dart ./tool/build_e2e.dart
 ```
@@ -84,12 +97,16 @@ dart ./tool/build_e2e.dart
 Launch DevTools and verify that everything generally works.
 - open the page in a browser (http://localhost:53432)
 - `flutter run` an application
-- connect to the running app from DevTools, verify that the pages
-  generally work and that there are no exceptions in the chrome devtools log
-
-If you find any release blocking issues, fix them before releasing. Then 
-grab the latest commit hash that includes both the release prep commit and the bug fixes,
-and use this commit hash for the following steps.
+- connect to the running app from DevTools
+- verify:
+   - pages generally work
+   - there are no exceptions in the chrome devtools log
+- If you find any release blocking issues:
+   - fix them before releasing.
+   - Then grab the latest commit hash that includes
+      - the release prep commit
+      - the bug fixes,
+   - use this commit hash for the following steps.
 
 Once the build is in good shape, you can revert any local changes and proceed to the next step.
 ```shell
@@ -98,32 +115,37 @@ git clean -f -d
 ```
 
 ### Tag the release
-Checkout the commit from which you want to release DevTools (likely the
-commit for the PR you just landed). You can run `git log -v` to see the commits.
-Run the `tag_version.sh` script to create a tag on the `flutter/devtools` repo for this
-release. This script will automatically determine the version from `packages/devtools/pubspec.yaml`
-so there is no need to manually enter the version.
+- Checkout the commit from which you want to release DevTools
+   - This is likely the commit for the PR you just landed
+   - You can run `git log -v` to see the commits.
+- Run the `tag_version.sh` script
+   - this creates a tag on the `flutter/devtools` repo for this release.
+   - This script will automatically determine the version from `packages/devtools/pubspec.yaml` so there is no need to manually enter the version.
+
 ```shell
-tool/tag_version.sh
+tool/tag_version.sh;
 ```
 
 ### Upload the DevTools binary to CIPD
 Using the commit hash you want to release DevTools from (this should match the
 commit hash for the tag you just created) and the [update.sh](https://github.com/dart-lang/sdk/blob/master/third_party/devtools/update.sh)
 script, build and upload the DevTools binary to CIPD.
+```shell
+TARGET_COMMIT_HASH=<Commit hash for the version bump commit>
+```
 
 ```shell
-cd $LOCAL_DART_SDK
-git rebase-update
-third_party/devtools/update.sh <your commit hash like 8881a7caa9067471008a8e00750b161f53cdb843>
+cd $LOCAL_DART_SDK && \
+git rebase-update && \
+third_party/devtools/update.sh $TARGET_COMMIT_HASH;
 ```
 
 ### Update the DevTools hash in the Dart SDK
 
 Create new branch for your changes:
 ```shell
-cd $LOCAL_DART_SDK
-git new-branch dt-release
+cd $LOCAL_DART_SDK && \
+git new-branch dt-release;
 ```
 
 Update the `devtools_rev` entry in the Dart SDK 
@@ -132,20 +154,27 @@ with the git commit hash you just built DevTools from (this is
 the id for the CIPD upload in the previous step). See this 
 [example CL](https://dart-review.googlesource.com/c/sdk/+/215520).
 
-Verify that running `dart devtools` launches the version of DevTools you just released. You'll
-need to build the dart sdk locally to do this.
+
+Build the dart sdk locally to do this.
+
 ```shell
-cd $LOCAL_DART_SDK
-gclient sync -D
-./tools/build.py -mrelease -ax64 create_sdk
-out/ReleaseX64/dart-sdk/bin/dart devtools  # On OSX replace 'out' with 'xcodebuild'
+cd $LOCAL_DART_SDK && \
+gclient sync -D && \
+./tools/build.py -mrelease -ax64 create_sdk;
 ```
+
+* Verify that running `dart devtools` launches the version of DevTools you just released. 
+   * For non-OSX
+      * `out/ReleaseX64/dart-sdk/bin/dart devtools`
+   * for OSX
+      * `xcodebuild/ReleaseX64/dart-sdk/bin/dart devtools`
+
 
 If the version of DevTools you just published to CIPD loads properly, push up the SDK CL for review.
 ```shell
-git add .
-git commit -m "Bump DevTools DEP to 2.16.0"
-git cl upload -s
+git add . && \
+git commit -m "Bump DevTools DEP to 2.16.0" && \
+git cl upload -s;
 ```
 
 ### Publish package:devtools_shared on pub

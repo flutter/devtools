@@ -1,13 +1,16 @@
 ## Writing DevTools release notes
-Release notes for DevTools are hosted on the flutter website (see [archive](https://docs.flutter.dev/development/tools/devtools/release-notes)).
-To add release notes for the latest release, create a PR with the appropriate changes for your release (see example
-[PR](https://github.com/flutter/website/pull/6791)).
+- Release notes for DevTools are hosted on the flutter website (see [archive](https://docs.flutter.dev/development/tools/devtools/release-notes)).
+- To add release notes for the latest release, create a PR with the appropriate changes for your release
+    - The [release notes template](release-notes-template.md) can be used as a starting point
+    - see example [PR](https://github.com/flutter/website/pull/6791).
 
-Test these changes locally before creating the PR. See [README.md](https://github.com/flutter/website/blob/main/README.md)
+- Test these changes locally before creating the PR.
+    - See [README.md](https://github.com/flutter/website/blob/main/README.md)
 for getting setup to run the Flutter website locally.
 
-One you are satisfied with the release notes, stage the Flutter website on Firebase and point the DevTools release notes
-logic to this staged url.
+- Once you are satisfied with the release notes
+    - stage the Flutter website on Firebase
+    - point the DevTools release notes logic to this staged url.
 
 ### Staging your changes on Firebase
 In the flutter/website directory, open [_config.yml](https://github.com/flutter/website/blob/main/_config.yml#L2)
