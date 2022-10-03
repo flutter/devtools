@@ -121,9 +121,10 @@ class HoverCard {
   }) {
     maxCardHeight ??= maxHoverCardHeight;
     final overlayState = Overlay.of(context)!;
-    final colorScheme = Theme.of(context).colorScheme;
-    final focusColor = Theme.of(context).focusColor;
-    final hoverHeading = colorScheme.hoverTitleTextStyle;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final focusColor = theme.focusColor;
+    final hoverHeading = theme.hoverTitleTextStyle;
 
     _overlayEntry = OverlayEntry(
       builder: (context) {
@@ -161,7 +162,7 @@ class HoverCard {
                         textAlign: TextAlign.center,
                       ),
                     ),
-                    Divider(color: colorScheme.hoverTextStyle.color),
+                    Divider(color: theme.hoverTextStyle.color),
                   ],
                   SingleChildScrollView(
                     child: Container(
