@@ -10,3 +10,16 @@ To run:
 ```
 flutter run -t test/scenes/hello.stager_app.dart -d macos
 ```
+
+Configuration for VSCode:
+```
+{
+    "name": "my-scene",
+    "cwd": "devtools_app",
+    "request": "launch",
+    "type": "dart",
+    "program": "test/scenes/memory/default.stager_app.dart",
+    "deviceId": "macos"
+},
+```
+
