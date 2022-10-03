@@ -33,7 +33,8 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_markdown: ^0.6.8
-  flutter_riverpod: 1.0.4
+  # TODO: https://github.com/flutter/devtools/issues/4569 - unpin this version
+  flutter_riverpod: 2.0.0-dev.9
   flutter_web_plugins:
     sdk: flutter
   http: ^0.13.4
