@@ -38,20 +38,17 @@ class DiffPaneController {
       snapshots.value[selectedSnapshotIndex.value];
 
   /// Full name for the selected class.
-  ValueListenable<HeapClassName?> get selectedClass => _selectedClass;
-  final _selectedClass = ValueNotifier<HeapClassName?>(null);
-  void setSelectedClass(HeapClassName? value) => _selectedClass.value = value;
+  final selectedClassName = ValueNotifier<HeapClassName?>(null);
 
   /// Selected retaining path.
-  ValueListenable<ClassOnlyHeapPath?> get selectedPath => _selectedPath;
-  final _selectedPath = ValueNotifier<ClassOnlyHeapPath?>(null);
-  void setselectedPath(ClassOnlyHeapPath? value) => _selectedPath.value = value;
+  final selectedPath = ValueNotifier<ClassOnlyHeapPath?>(null);
 
   ValueListenable<String?> get classFilter => _classFilter;
   final _classFilter = ValueNotifier<String?>(null);
   void setClassFilter(String value) {
     _classFilter.value = value;
-    throw UnimplementedError();
+
+    // TODO(polina-c): filter the data before opening the feature:
     // if (value.isEmpty && _currentFilter.isEmpty) return;
     // final updatedFilteredClassList = (value.contains(_currentFilter)
     //     ? _filteredClassList.value
@@ -84,7 +81,7 @@ class DiffPaneController {
         displayNumber: _nextDisplayNumber(),
         isolateName: currentIsolateName ?? '<isolate-not-detected>',
         diffStore: diffStore,
-        selectedClass: selectedClass,
+        selectedClassName: selectedClassName,
         selectedPath: selectedPath,
       ),
     );

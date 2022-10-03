@@ -166,7 +166,7 @@ class _RetainingPathTable extends StatelessWidget {
       data: data.statsByPathEntries,
       keyFactory: (e) => Key(e.key.asLongString()),
       selectionNotifier: item.selectedPathEntry,
-      onItemSelected: (r) => controller.setselectedPath(r?.key),
+      onItemSelected: (r) => controller.selectedPath.value = r?.key,
       defaultSortColumn: _shallowSizeColumn,
       defaultSortDirection: SortDirection.descending,
     );

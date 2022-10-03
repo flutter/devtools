@@ -70,7 +70,7 @@ class DiffHeapClasses extends HeapClasses {
   }
 
   /// Maps full class name to class.
-  late Map<HeapClassName, DiffClassStats> classesByName;
+  late final Map<HeapClassName, DiffClassStats> classesByName;
   late final List<DiffClassStats> classes =
       classesByName.values.toList(growable: false);
 

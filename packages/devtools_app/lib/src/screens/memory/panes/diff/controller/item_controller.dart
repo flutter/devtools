@@ -43,7 +43,7 @@ class SnapshotInstanceItem extends SnapshotItem
     required this.isolateName,
     required this.diffStore,
     required this.id,
-    required this.selectedClass,
+    required this.selectedClassName,
     required this.selectedPath,
   }) {
     _isProcessing.value = true;
@@ -56,13 +56,21 @@ class SnapshotInstanceItem extends SnapshotItem
         // default behavior. Revisit after consulting with UXR.
         _handleSelectionChange();
         addAutoDisposeListener(
-          selectedClass,
+          selectedClassName,
           _handleSelectionChange,
         );
         addAutoDisposeListener(
           selectedPath,
           _handleSelectionChange,
         );
+        addAutoDisposeListener(selectedDiffClassStats, () {
+          selectedClassName.value = selectedDiffClassStats.value?.heapClass;
+          _handleSelectionChange();
+        });
+        addAutoDisposeListener(selectedSingleClassStats, () {
+          selectedClassName.value = selectedSingleClassStats.value?.heapClass;
+          _handleSelectionChange();
+        });
       }
       _isProcessing.value = false;
     });
@@ -88,17 +96,13 @@ class SnapshotInstanceItem extends SnapshotItem
     _handleSelectionChange();
   }
 
-  final ValueListenable<HeapClassName?> selectedClass;
+  final ValueNotifier<HeapClassName?> selectedClassName;
 
-  final ValueListenable<ClassOnlyHeapPath?> selectedPath;
+  final ValueNotifier<ClassOnlyHeapPath?> selectedPath;
 
-  ValueListenable<SingleClassStats?> get selectedSingleClassStats =>
-      _selectedSingleClassStats;
-  final _selectedSingleClassStats = ValueNotifier<SingleClassStats?>(null);
+  final selectedSingleClassStats = ValueNotifier<SingleClassStats?>(null);
 
-  ValueListenable<DiffClassStats?> get selectedDiffClassStats =>
-      _selectedDiffClassStats;
-  final _selectedDiffClassStats = ValueNotifier<DiffClassStats?>(null);
+  final selectedDiffClassStats = ValueNotifier<DiffClassStats?>(null);
 
   ValueListenable<ClassStats?> get selectedClassStats => _selectedClassStats;
   final _selectedClassStats = ValueNotifier<ClassStats?>(null);
@@ -117,19 +121,19 @@ class SnapshotInstanceItem extends SnapshotItem
   }
 
   void _handleSelectionChange() {
-    final className = selectedClass.value;
+    final className = selectedClassName.value;
     if (className == null) return;
 
     final heapClasses = classesToShow();
 
     if (heapClasses is SingleHeapClasses) {
-      _selectedSingleClassStats.value =
+      selectedSingleClassStats.value =
           _selectedClassStats.value = heapClasses.classesByName[className];
-      _selectedDiffClassStats.value = null;
+      selectedDiffClassStats.value = null;
     } else if (heapClasses is DiffHeapClasses) {
-      _selectedDiffClassStats.value =
+      selectedDiffClassStats.value =
           _selectedClassStats.value = heapClasses.classesByName[className];
-      _selectedSingleClassStats.value = null;
+      selectedSingleClassStats.value = null;
     } else {
       throw StateError('Unexpected type: ${heapClasses.runtimeType}.');
     }
@@ -163,6 +167,7 @@ class SnapshotInstanceItem extends SnapshotItem
       ].map((e) => '"$e"').join(','),
     );
 
+    // TODO(polina-c): write data to file before opening the feature.
     // // Write a row per retaining path.
     // final data = heapClassesToShow();
     // for (var classStats in data.classAnalysis) {
@@ -186,6 +191,7 @@ class SnapshotInstanceItem extends SnapshotItem
       type: ExportFileType.csv,
     );
 
+    // TODO(polina-c): add the notification to ExportController.downloadFile.
     notificationService.push(successfulExportMessage(file));
 
     throw UnimplementedError();

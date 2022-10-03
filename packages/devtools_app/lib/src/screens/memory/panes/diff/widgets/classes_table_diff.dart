@@ -211,11 +211,7 @@ class _ClassesTableDiffState extends State<ClassesTableDiff>
       data: widget.classes.classes,
       dataKey: _item.id.toString(),
       keyFactory: (e) => Key(e.heapClass.fullName),
-
-      onItemSelected: (r) => widget.controller.setSelectedClass(r?.heapClass),
-      // TODO: figure out why we need it to be Notifier, not listener.
-      selectionNotifier:
-          _item.selectedDiffClassStats as ValueNotifier<DiffClassStats?>,
+      selectionNotifier: _item.selectedDiffClassStats,
       defaultSortColumn: _shallowSizeDeltaColumn,
       defaultSortDirection: SortDirection.descending,
     );

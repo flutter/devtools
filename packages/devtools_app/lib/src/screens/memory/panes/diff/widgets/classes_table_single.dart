@@ -156,10 +156,7 @@ class _ClassesTableSingleState extends State<ClassesTableSingle>
       data: _classes.classes,
       dataKey: widget.item.id.toString(),
       keyFactory: (e) => Key(e.heapClass.fullName),
-      onItemSelected: (r) => widget.controller.setSelectedClass(r?.heapClass),
-      // TODO: figure out casting.
-      selectionNotifier: widget.item.selectedSingleClassStats
-          as ValueNotifier<SingleClassStats?>,
+      selectionNotifier: widget.item.selectedSingleClassStats,
       defaultSortColumn: _shallowSizeColumn,
       defaultSortDirection: SortDirection.descending,
     );
