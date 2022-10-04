@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 
 import '../../../../../config_specific/import_export/import_export.dart';
@@ -35,17 +33,11 @@ class SnapshotDocItem extends SnapshotItem {
 
 class SnapshotInstanceItem extends SnapshotItem {
   SnapshotInstanceItem({
-    required Future<AdaptedHeapData?> receiver,
     required this.displayNumber,
     required this.isolateName,
     required this.id,
   }) {
     _isProcessing.value = true;
-    receiver.whenComplete(() async {
-      final data = await receiver;
-      if (data != null) heap = AdaptedHeap(data);
-      _isProcessing.value = false;
-    });
   }
 
   final int id;
@@ -53,6 +45,11 @@ class SnapshotInstanceItem extends SnapshotItem {
   final String isolateName;
 
   AdaptedHeap? heap;
+
+  void setHeapData(AdaptedHeapData? data) {
+    if (data != null) heap = AdaptedHeap(data);
+    _isProcessing.value = false;
+  }
 
   @override
   final int displayNumber;

@@ -39,19 +39,20 @@ class DiffPaneController extends DisposableController {
     _isProcessing.value = true;
     final future = snapshotTaker.take();
     final snapshots = core._snapshots;
-    snapshots.add(
-      SnapshotInstanceItem(
-        receiver: future,
-        id: _snapshotId++,
-        displayNumber: _nextDisplayNumber(),
-        isolateName: currentIsolateName ?? '<isolate-not-detected>',
-      ),
+
+    final item = SnapshotInstanceItem(
+      id: _snapshotId++,
+      displayNumber: _nextDisplayNumber(),
+      isolateName: currentIsolateName ?? '<isolate-not-detected>',
     );
-    await future;
+
+    snapshots.add(item);
+    item.setHeapData(await future);
+
     final newElementIndex = snapshots.value.length - 1;
     core._snapshotIndex.value = newElementIndex;
     _isProcessing.value = false;
-    derived._recalculateValues(core);
+    derived._updateValues(core);
   }
 
   Future<void> clearSnapshots() async {
@@ -61,7 +62,7 @@ class DiffPaneController extends DisposableController {
     }
     snapshots.removeRange(1, snapshots.value.length);
     core._snapshotIndex.value = 0;
-    derived._recalculateValues(core);
+    derived._updateValues(core);
   }
 
   int _nextDisplayNumber() {
@@ -82,12 +83,13 @@ class DiffPaneController extends DisposableController {
     // We must change the selectedIndex, because otherwise the content will
     // not be re-rendered.
     core._snapshotIndex.value = max(index - 1, 0);
-    derived._recalculateValues(core);
+    derived._updateValues(core);
   }
 
   void setSnapshotIndex(int index) {
+    print('!!!! setting index');
     core._snapshotIndex.value = index;
-    derived._recalculateValues(core);
+    derived._updateValues(core);
   }
 
   void setClassFilter(String value) {
@@ -129,7 +131,7 @@ class CoreData {
 /// from widgets.
 class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   DerivedData(CoreData core) {
-    this.selectedItem = ValueNotifier<SnapshotItem>(core.selectedItem);
+    selectedItem = ValueNotifier<SnapshotItem>(core.selectedItem);
 
     addAutoDisposeListener(
       singleClassStats,
@@ -145,6 +147,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     );
   }
 
+  // TODO: turn to listener.
   /// Currently selected item, to take signal from the list widget.
   late final ValueNotifier<SnapshotItem> selectedItem;
 
@@ -169,14 +172,14 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   void _setClassIfNotNull(HeapClassName? theClass, CoreData core) {
     if (theClass == null || theClass == core.className) return;
     core.className = theClass;
-    _recalculateValues(core);
+    _updateValues(core);
   }
 
   /// Updates cross-snapshot path if the argument is not null.
   void _setPathIfNotNull(ClassOnlyHeapPath? path, CoreData core) {
     if (path == null || path == core.path) return;
     core.path = path;
-    _recalculateValues(core);
+    _updateValues(core);
   }
 
   void _assertIntegrity() {
@@ -219,16 +222,8 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     }
   }
 
-  /// Set [derived] values based on [core] values.
-  ///
-  /// It should be invoked after updating values in core, but not automatically
-  /// on a single value change, but after an operation change.
-  ///
-  /// Operation here is an operation triggered by UI: selection change or change of data.
-  void _recalculateValues(CoreData core) {
-    // Set current snapshot.
-    // derived._selectedItem.value = core.selectedItem;
-
+  /// Updates fields in this instance based on the values in [core].
+  void _updateValues(CoreData core) {
     // Set classes to show.
     final classes = _snapshotClasses(core);
     heapClasses.value = classes;
@@ -243,15 +238,18 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     final theClass = singleClassStats.value ?? diffClassStats.value;
     final thePathEntries = pathEntries.value = theClass?.statsByPathEntries;
     final pathes = theClass?.statsByPath;
-    StatsByPathEntry? byPathEntry;
+    StatsByPathEntry? thePathEntry;
     if (core.path != null && pathes != null && thePathEntries != null) {
       final pathStats = pathes[core.path];
       if (pathStats != null) {
-        byPathEntry =
+        thePathEntry =
             thePathEntries.firstWhereOrNull((e) => e.key == core.path);
       }
     }
-    pathEntry.value = byPathEntry;
+    pathEntry.value = thePathEntry;
+
+    // Set current snapshot.
+    selectedItem.value = core.selectedItem;
 
     _assertIntegrity();
   }

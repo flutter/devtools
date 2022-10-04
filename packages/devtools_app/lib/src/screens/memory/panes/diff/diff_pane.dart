@@ -29,7 +29,7 @@ class DiffPane extends StatelessWidget {
           child: SnapshotList(controller: diffController),
         ),
         OutlineDecoration(
-          child: _SnapshotContent(
+          child: _SnapshotItemContent(
             controller: diffController,
           ),
         ),
@@ -38,8 +38,8 @@ class DiffPane extends StatelessWidget {
   }
 }
 
-class _SnapshotContent extends StatelessWidget {
-  const _SnapshotContent({Key? key, required this.controller})
+class _SnapshotItemContent extends StatelessWidget {
+  const _SnapshotItemContent({Key? key, required this.controller})
       : super(key: key);
 
   final DiffPaneController controller;

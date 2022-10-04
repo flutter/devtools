@@ -9,7 +9,6 @@ import '../../../../../shared/split.dart';
 import '../../../shared/heap/heap.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/heap_diff.dart';
-import '../controller/item_controller.dart';
 import 'class_details.dart';
 import 'classes_table_diff.dart';
 import 'classes_table_single.dart';
@@ -21,59 +20,49 @@ class SnapshotView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<SnapshotItem>(
-      valueListenable: controller.derived.selectedItem,
-      builder: (_, item, __) {
-        return ValueListenableBuilder<bool>(
-          valueListenable: item.isProcessing,
-          builder: (_, isProcessing, __) {
-            if (isProcessing) return const SizedBox.shrink();
+    return ValueListenableBuilder<HeapClasses?>(
+      valueListenable: controller.derived.heapClasses,
+      builder: (_, classes, __) {
+        if (classes == null) {
+          if (controller.isProcessing.value) {
+            return const SizedBox.shrink();
+          } else {
+            return const Center(child: Text('Could not take snapshot.'));
+          }
+        }
 
-            if (item is! SnapshotInstanceItem) {
-              throw StateError('Unexpected type: ${item.runtimeType}.');
-            }
+        late Widget table1;
 
-            if (item.heap == null) {
-              return const Center(child: Text('Could not take snapshot.'));
-            }
+        if (classes is SingleHeapClasses) {
+          table1 = ClassesTableSingle(
+            classes: classes,
+            selection: controller.derived.singleClassStats,
+          );
+        } else if (classes is DiffHeapClasses) {
+          table1 = ClassesTableDiff(
+            classes: classes,
+            selection: controller.derived.diffClassStats,
+          );
+        } else {
+          throw StateError('Unexpected type: ${classes.runtimeType}.');
+        }
 
-            final table1 = ValueListenableBuilder<HeapClasses?>(
-              valueListenable: controller.derived.heapClasses,
-              builder: (_, classes, __) {
-                if (classes is SingleHeapClasses) {
-                  return ClassesTableSingle(
-                    classes: classes,
-                    selection: controller.derived.singleClassStats,
-                  );
-                } else if (classes is DiffHeapClasses) {
-                  return ClassesTableDiff(
-                    classes: classes,
-                    selection: controller.derived.diffClassStats,
-                  );
-                } else {
-                  throw StateError('Unexpected type: ${classes.runtimeType}.');
-                }
-              },
-            );
+        final table2 = ValueListenableBuilder<List<StatsByPathEntry>?>(
+          valueListenable: controller.derived.pathEntries,
+          builder: (_, entries, __) => HeapClassDetails(
+            entries: entries,
+            selection: controller.derived.pathEntry,
+          ),
+        );
 
-            final table2 = ValueListenableBuilder<List<StatsByPathEntry>?>(
-              valueListenable: controller.derived.pathEntries,
-              builder: (_, entries, __) => HeapClassDetails(
-                entries: entries,
-                selection: controller.derived.pathEntry,
-              ),
-            );
-
-            return Split(
-              axis: Axis.vertical,
-              initialFractions: const [0.4, 0.6],
-              minSizes: const [80, 80],
-              children: [
-                OutlineDecoration(child: table1),
-                OutlineDecoration(child: table2),
-              ],
-            );
-          },
+        return Split(
+          axis: Axis.vertical,
+          initialFractions: const [0.4, 0.6],
+          minSizes: const [80, 80],
+          children: [
+            OutlineDecoration(child: table1),
+            OutlineDecoration(child: table2),
+          ],
         );
       },
     );
