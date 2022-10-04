@@ -13,9 +13,9 @@ class ReleaseVersion {
     }
   }
 
+  final SemanticVersion version;
   List<ReleaseSection> sections = [];
   final Map<String, ReleaseSection> _sectionMap = {};
-  final SemanticVersion version;
 
   void addNote(String sectionName, ReleaseNote note) {
     _sectionMap[sectionName]!.notes.add(note);

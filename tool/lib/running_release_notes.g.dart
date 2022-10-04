@@ -17,8 +17,8 @@ ReleaseVersion _$ReleaseVersionFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$ReleaseVersionToJson(ReleaseVersion instance) =>
     <String, dynamic>{
-      'sections': instance.sections,
       'version': instance.version,
+      'sections': instance.sections,
     };
 
 SemanticVersion _$SemanticVersionFromJson(Map<String, dynamic> json) =>
