@@ -24,10 +24,8 @@ jobs:
 
           FILES_RESPONSE=$(gh api /repos/flutter/devtools/pulls/$PULL_NUMBER/files)
           echo "FILES_RESPONSE: $FILES_REPONSE"
-          CHANGED_FILES=$(echo $FILES_RESPONSE | jq '.[].filename')
-          echo "CHANGED_FILES: $CHANGED_FILES"
           
-          HAS_CHANGED_RELEASE_NOTES=$(echo $CHANGED_FILES | jq '. | any(. == env.JSON_RELEASE_FILE)')
+          HAS_CHANGED_RELEASE_NOTES=$(echo $FILES_REPONSE | jq '.[].filename | any(. == env.JSON_RELEASE_FILE)')
           echo "HAS_CHANGED_RELEASE_NOTES: $HAS_CHANGED_RELEASE_NOTES"
           echo "::set-output name=HAS_CHANGED_RELEASE_NOTES::$HAS_CHANGED_RELEASE_NOTES"
       - name: Get PR Labels
