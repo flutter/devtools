@@ -21,7 +21,7 @@ class SnapshotView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final item = controller.selectedSnapshot as SnapshotInstanceItem;
+    final item = controller.selectedSnapshotItem as SnapshotInstanceItem;
     return ValueListenableBuilder<bool>(
       valueListenable: item.isProcessing,
       builder: (_, isProcessing, __) {
@@ -35,7 +35,9 @@ class SnapshotView extends StatelessWidget {
           valueListenable: controller.data.derived.heapClasses,
           builder: (_, classes, __) {
             if (classes is SingleHeapClasses) {
-              return ClassesTableSingle(classes: classes, selection: controller.data.derived.singleClassStats);
+              return ClassesTableSingle(
+                  classes: classes,
+                  selection: controller.data.derived.singleClassStats);
             } else if (classes is DiffHeapClasses) {
               return ClassesTableDiff(classes: classes, controller: controller);
             } else {

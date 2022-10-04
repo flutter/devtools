@@ -35,7 +35,7 @@ class SnapshotControlPane extends StatelessWidget {
                 if (!isProcessing && current.heap != null) ...[
                   _DiffDropdown(
                     current: current,
-                    list: controller.snapshots,
+                    list: controller.data.core.snapshots,
                   ),
                   const SizedBox(width: defaultSpacing),
                   SizedBox(
@@ -86,7 +86,7 @@ class _DiffDropdown extends StatelessWidget {
     final diffWith = current.diffWith.value;
     // Check if diffWith was deleted from list.
     if (diffWith != null && !list.value.contains(diffWith)) {
-      current.setDiffWith(null);
+      current.diffWith.value = null;
     }
   }
 
@@ -117,9 +117,9 @@ class _DiffDropdown extends StatelessWidget {
             value: current.diffWith.value ?? current,
             onChanged: (SnapshotInstanceItem? value) {
               if ((value ?? current) == current) {
-                current.setDiffWith(null);
+                current.diffWith.value = null;
               } else {
-                current.setDiffWith(value);
+                current.diffWith.value = value;
               }
             },
             items: items(),

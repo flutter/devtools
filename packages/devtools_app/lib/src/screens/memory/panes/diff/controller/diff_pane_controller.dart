@@ -48,7 +48,7 @@ class DiffPaneController extends DisposableController {
   /// informational item.
   bool get hasSnapshots => data.core.snapshots.value.length > 1;
 
-  SnapshotItem get selectedSnapshot =>
+  SnapshotItem get selectedSnapshotItem =>
       data.core._snapshots.value[data.core.snapshotIndex.value];
 
   // This value should never be reset. It is incremented for every snapshot that
@@ -89,8 +89,8 @@ class DiffPaneController extends DisposableController {
   }
 
   void deleteCurrentSnapshot() {
-    assert(selectedSnapshot is SnapshotInstanceItem);
-    selectedSnapshot.dispose();
+    assert(selectedSnapshotItem is SnapshotInstanceItem);
+    selectedSnapshotItem.dispose();
     final index = data.core.snapshotIndex.value;
     data.core._snapshots.removeRange(
       index,

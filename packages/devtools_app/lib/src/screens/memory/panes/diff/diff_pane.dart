@@ -24,7 +24,7 @@ class DiffPane extends StatelessWidget {
     final Widget itemContent = ValueListenableBuilder<int>(
       valueListenable: diffCore.snapshotIndex,
       builder: (_, index, __) {
-        final item = diffController.selectedSnapshot;
+        final item = diffController.selectedSnapshotItem;
 
         if (item is SnapshotDocItem) {
           return const _SnapshotDoc();
@@ -70,7 +70,7 @@ class _SnapshotDoc extends StatelessWidget {
 
 class _SnapshotContent extends StatelessWidget {
   _SnapshotContent({Key? key, required this.item, required this.controller})
-      : assert(controller.selectedSnapshot == item),
+      : assert(controller.selectedSnapshotItem == item),
         super(key: key);
 
   final SnapshotInstanceItem item;
