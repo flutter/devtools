@@ -23,6 +23,9 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "THE CHANGED FILES ARE ${{ steps.get-modified-files.outputs.CHANGED_FILES }}"
+    
+      - name: Add PR Url to Release Notes
+      - name: Verify release_notes.json integrity
 
           
 
