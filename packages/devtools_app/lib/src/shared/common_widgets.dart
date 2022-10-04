@@ -504,7 +504,7 @@ class CollapseAllButton extends StatelessWidget {
 }
 
 /// Button that should be used to control showing or hiding a chart.
-/// 
+///
 /// The button automatically toggles the icon and the tooltip to indicate the
 /// shown or hidden state.
 class ChartVisibilityButton extends StatelessWidget {
