@@ -44,7 +44,11 @@ class PrimaryControls extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const _ChartButton(),
+        ChartVisibilityButton(
+          showChart: preferences.memory.showChart,
+          onPressed: (show) => preferences.memory.showChart.value = show,
+          minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
+        ),
         const SizedBox(width: defaultSpacing),
         ClearButton(
           onPressed: controller.memorySource == MemoryController.liveFeed
@@ -54,26 +58,6 @@ class PrimaryControls extends StatelessWidget {
           tooltip: 'Clear all data on the memory screen.',
         ),
       ],
-    );
-  }
-}
-
-class _ChartButton extends StatelessWidget {
-  const _ChartButton({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: preferences.memory.showChart,
-      builder: (_, showChart, __) => IconLabelButton(
-        key: key,
-        tooltip: showChart ? 'Hide chart' : 'Show chart',
-        icon: showChart ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
-        label: 'Chart',
-        minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
-        onPressed: () => preferences.memory.showChart.value =
-            !preferences.memory.showChart.value,
-      ),
     );
   }
 }

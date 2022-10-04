@@ -197,8 +197,8 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     return ValueListenableBuilder<bool>(
       valueListenable: preferences.memory.showChart,
       builder: (_, showChart, __) {
-        // TODO(polina-c): animate the showing / hiding of this chart.
-
+        // TODO(https://github.com/flutter/devtools/issues/4576): animate
+        // showing and hiding the chart.
         if (!showChart) return const SizedBox.shrink();
 
         return RawKeyboardListener(
