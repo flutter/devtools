@@ -24,10 +24,10 @@ jobs:
         run: |
           echo "THE CHANGED FILES ARE ${{ steps.get-modified-files.outputs.CHANGED_FILES }}"
     
-      - name: Add PR Url to Release Notes
-        run: 
-      - name: Verify release_notes.json integrity
-        run: 
+      # - name: Add PR Url to Release Notes
+      #   run: 
+      # - name: Verify release_notes.json integrity
+      #   run: 
 
           
 
