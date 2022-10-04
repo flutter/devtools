@@ -11,4 +11,4 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           PULL_NUMBER=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
-          gh api /repos/flutter/devtools/pulls/$PULL_NUMBER/files | jq .
+          gh api /repos/flutter/devtools/pulls/$PULL_NUMBER/files | jq '.[].filename'
