@@ -7,30 +7,24 @@ class ReleaseVersion {
   ReleaseVersion({
     required this.version,
     required this.sections,
-  });
-
-  ReleaseVersion.sectionsList({
-    required this.version,
-    required List<ReleaseSection> sectionsList,
   }) {
-    for (var section in sectionsList) {
-      sections[section.name] = section;
+    for (var element in sections) {
+      _sectionMap[element.name] = element;
     }
   }
 
-  Map<String, ReleaseSection> sections = {};
+  List<ReleaseSection> sections = [];
+  final Map<String, ReleaseSection> _sectionMap = {};
   final SemanticVersion version;
-  void addNote(
-    String sectionName,
-    ReleaseNote note,
-  ) {
-    sections[sectionName]!.notes.add(note);
+
+  void addNote(String sectionName, ReleaseNote note) {
+    _sectionMap[sectionName]!.notes.add(note);
   }
 
   String toMarkdown() {
     String markdown = '';
     markdown += '# DevTools $version release notes\n\n';
-    sections.forEach((_, section) {
+    sections.forEach((section) {
       markdown += '# ${section.name}\n\n';
       for (var note in section.notes) {
         markdown += '- ${note.message}';
@@ -81,8 +75,8 @@ class SemanticVersion {
 class ReleaseSection {
   ReleaseSection({
     required this.name,
-    required this.notes,
-  });
+    List<ReleaseNote>? notes,
+  }) : notes = notes ?? [];
 
   ReleaseSection.emptyNotes({
     required this.name,
@@ -101,11 +95,8 @@ class ReleaseSection {
 class ReleaseNote {
   ReleaseNote({
     required this.message,
-    required this.githubPullRequestUrl,
+    this.githubPullRequestUrl,
   });
-  ReleaseNote.noGithubUrl({
-    required this.message,
-  }) : githubPullRequestUrl = null;
 
   final String? githubPullRequestUrl;
   final String message;

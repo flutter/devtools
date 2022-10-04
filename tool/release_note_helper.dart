@@ -10,13 +10,13 @@ void main() {
   final cpuSection = 'CPU profiler updates';
   final memorySection = 'Memory updates';
 
-  final releaseVersion = ReleaseVersion.sectionsList(
+  final releaseVersion = ReleaseVersion(
     version: SemanticVersion(
       major: 2,
       minor: 3,
       patch: 4,
     ),
-    sectionsList: [
+    sections: [
       ReleaseSection.emptyNotes(name: inspectorSection),
       ReleaseSection.emptyNotes(name: performanceSection),
       ReleaseSection.emptyNotes(name: cpuSection),
@@ -32,19 +32,19 @@ void main() {
   );
   releaseVersion.addNote(
     inspectorSection,
-    ReleaseNote.noGithubUrl(message: 'This is a 2nd inspector note'),
+    ReleaseNote(message: 'This is a 2nd inspector note'),
   );
   releaseVersion.addNote(
     performanceSection,
-    ReleaseNote.noGithubUrl(message: 'This is a performance note'),
+    ReleaseNote(message: 'This is a performance note'),
   );
   releaseVersion.addNote(
     cpuSection,
-    ReleaseNote.noGithubUrl(message: 'This is a cpu note'),
+    ReleaseNote(message: 'This is a cpu note'),
   );
   releaseVersion.addNote(
     memorySection,
-    ReleaseNote.noGithubUrl(message: 'This is a memory note'),
+    ReleaseNote(message: 'This is a memory note'),
   );
 
   print(releaseVersion.toMarkdown());

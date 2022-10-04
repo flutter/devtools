@@ -10,10 +10,9 @@ ReleaseVersion _$ReleaseVersionFromJson(Map<String, dynamic> json) =>
     ReleaseVersion(
       version:
           SemanticVersion.fromJson(json['version'] as Map<String, dynamic>),
-      sections: (json['sections'] as Map<String, dynamic>).map(
-        (k, e) =>
-            MapEntry(k, ReleaseSection.fromJson(e as Map<String, dynamic>)),
-      ),
+      sections: (json['sections'] as List<dynamic>)
+          .map((e) => ReleaseSection.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
 
 Map<String, dynamic> _$ReleaseVersionToJson(ReleaseVersion instance) =>
@@ -41,8 +40,8 @@ Map<String, dynamic> _$SemanticVersionToJson(SemanticVersion instance) =>
 ReleaseSection _$ReleaseSectionFromJson(Map<String, dynamic> json) =>
     ReleaseSection(
       name: json['name'] as String,
-      notes: (json['notes'] as List<dynamic>)
-          .map((e) => ReleaseNote.fromJson(e as Map<String, dynamic>))
+      notes: (json['notes'] as List<dynamic>?)
+          ?.map((e) => ReleaseNote.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
 
