@@ -7,8 +7,23 @@ jobs:
   check-release-condition:
     runs-on: ubuntu-latest
     steps:
-      - env:
+      - name: Get PR Modified Files 
+        env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          JSON_RELEASE_FILE='packages/devtools_app/lib/src/framework/release_notes/release_notes.json'
           PULL_NUMBER=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
-          gh api /repos/flutter/devtools/pulls/$PULL_NUMBER/files | jq '.[].filename'
+          FILES_RESPONSE=$(gh api /repos/flutter/devtools/pulls/$PULL_NUMBER/files)
+          export CHANGED_FILES=$(echo $FILES_RESPONSE | jq '.[].filename)
+          echo "::set-env name=CHANGED_FILES::$CHANGED_FILES"
+
+          # HAS_JSON_RELEASE_FILE=$(echo $FILE_NAMES | jq '. | any(. == env.JSON_RELEASE_FILE)')
+      - name: Get PR Labels
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CHANGED_FILES:  ${{ $CHANGED_FILES }}
+        run: |
+          echo "THE CHANGED FILES ARE $CHANGED_FILES"
+
+          
+
