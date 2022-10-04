@@ -22,7 +22,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "THE CHANGED FILES ARE ${{ steps.get-modified-files.CHANGED_FILES }}"
+          echo "THE CHANGED FILES ARE ${{ steps.get-modified-files.outputs.CHANGED_FILES }}"
 
           
 
