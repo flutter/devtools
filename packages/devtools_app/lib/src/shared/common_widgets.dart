@@ -273,6 +273,8 @@ class ResumeButton extends StatelessWidget {
   }
 }
 
+/// A button that groups pause and resume controls and automatically manages
+/// the button enabled states depending on the value of [paused].
 class PauseResumeButtonGroup extends StatelessWidget {
   const PauseResumeButtonGroup({
     super.key,
@@ -296,7 +298,6 @@ class PauseResumeButtonGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         PauseButton(
           iconOnly: true,
@@ -502,6 +503,10 @@ class CollapseAllButton extends StatelessWidget {
   }
 }
 
+/// Button that should be used to control showing or hiding a chart.
+/// 
+/// The button automatically toggles the icon and the tooltip to indicate the
+/// shown or hidden state.
 class ChartVisibilityButton extends StatelessWidget {
   const ChartVisibilityButton({
     required this.showChart,
@@ -2246,9 +2251,9 @@ class _BlinkingIconState extends State<BlinkingIcon> {
   }
 }
 
-// TODO(): investigate if we can modify this widget to be a
-// 'MultiValueListenableBuilder' that can take an arbitrary number of
-// listenables.
+// TODO(https://github.com/flutter/devtools/issues/2989): investigate if we can
+// modify this widget to be a 'MultiValueListenableBuilder' that can take an
+// arbitrary number of listenables.
 /// A widget that listens for changes to two different [ValueListenable]s and
 /// rebuilds for change notifications to either.
 ///
