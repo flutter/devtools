@@ -2,97 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../../primitives/auto_dispose.dart';
 import '../../../../../primitives/utils.dart';
-import '../../../primitives/memory_utils.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
 import 'heap_diff.dart';
 import 'item_controller.dart';
-
-class DiffPaneController extends DisposableController {
-  DiffPaneController(this.snapshotTaker);
-
-  final SnapshotTaker snapshotTaker;
-
-  /// If true, some process is going on.
-  ValueListenable<bool> get isProcessing => _isProcessing;
-  final _isProcessing = ValueNotifier<bool>(false);
-
-  late final data = DiffData();
-
-  /// True, if the list contains snapshots, i.e. items beyond the first
-  /// informational item.
-  bool get hasSnapshots => data.core.snapshots.value.length > 1;
-
-  // This value should never be reset. It is incremented for every snapshot that
-  // is taken, and is used to assign a unique id to each [SnapshotListItem].
-  int _snapshotId = 0;
-
-  Future<void> takeSnapshot() async {
-    _isProcessing.value = true;
-    final future = snapshotTaker.take();
-    final snapshots = data.core._snapshots;
-    snapshots.add(
-      SnapshotInstanceItem(
-        receiver: future,
-        id: _snapshotId++,
-        displayNumber: _nextDisplayNumber(),
-        isolateName: currentIsolateName ?? '<isolate-not-detected>',
-      ),
-    );
-    await future;
-    final newElementIndex = snapshots.value.length - 1;
-    data.core._snapshotIndex.value = newElementIndex;
-    _isProcessing.value = false;
-    data._recalculateValues();
-  }
-
-  Future<void> clearSnapshots() async {
-    final snapshots = data.core._snapshots;
-    for (var i = 1; i < snapshots.value.length; i++) {
-      snapshots.value[i].dispose();
-    }
-    snapshots.removeRange(1, snapshots.value.length);
-    data.core._snapshotIndex.value = 0;
-    data._recalculateValues();
-  }
-
-  int _nextDisplayNumber() {
-    final numbers = data.core._snapshots.value.map((e) => e.displayNumber);
-    assert(numbers.isNotEmpty);
-    return numbers.max + 1;
-  }
-
-  void deleteCurrentSnapshot() {
-    final item = data.core.selectedItem;
-    assert(item is SnapshotInstanceItem);
-    item.dispose();
-    final index = data.core.snapshotIndex.value;
-    data.core._snapshots.removeRange(
-      index,
-      index + 1,
-    );
-    // We must change the selectedIndex, because otherwise the content will
-    // not be re-rendered.
-    data.core._snapshotIndex.value = max(index - 1, 0);
-    data._recalculateValues();
-  }
-
-  void setSnapshotIndex(int index) {
-    data.core._snapshotIndex.value = index;
-    data._recalculateValues();
-  }
-
-  void setClassFilter(String value) {
-    // TODO(polina-c): add implementation
-  }
-}
 
 class DiffData extends DisposableController with AutoDisposeControllerMixin {
   DiffData() {

@@ -20,25 +20,6 @@ class DiffPane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final diffCore = diffController.data.core;
-    final Widget itemContent = ValueListenableBuilder<int>(
-      valueListenable: diffCore.snapshotIndex,
-      builder: (_, index, __) {
-        final item = diffController.data.core.selectedItem;
-
-        if (item is SnapshotDocItem) {
-          return const _SnapshotDoc();
-        } else if (item is SnapshotInstanceItem) {
-          return _SnapshotContent(
-            item: item,
-            controller: diffController,
-          );
-        } else {
-          throw Exception('Unexpected type of item: ${item.runtimeType}.');
-        }
-      },
-    );
-
     return Split(
       axis: Axis.horizontal,
       initialFractions: const [0.1, 0.9],
@@ -48,48 +29,45 @@ class DiffPane extends StatelessWidget {
           child: SnapshotList(controller: diffController),
         ),
         OutlineDecoration(
-          child: itemContent,
+          child: _SnapshotContent(
+            controller: diffController,
+          ),
         ),
       ],
-    );
-  }
-}
-
-class _SnapshotDoc extends StatelessWidget {
-  const _SnapshotDoc({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Text('''
-        Introduction to snapshot diffing is under construction.
-        '''),
     );
   }
 }
 
 class _SnapshotContent extends StatelessWidget {
-  _SnapshotContent({Key? key, required this.item, required this.controller})
-      : assert(controller.data.core.selectedItem == item),
-        super(key: key);
+  const _SnapshotContent({Key? key, required this.controller})
+      : super(key: key);
 
-  final SnapshotInstanceItem item;
   final DiffPaneController controller;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const SizedBox(height: denseRowSpacing),
-        SnapshotControlPane(controller: controller),
-        const SizedBox(height: denseRowSpacing),
-        Expanded(
-          child: SnapshotView(
-            controller: controller,
-            item: item,
-          ),
-        ),
-      ],
+    return ValueListenableBuilder<SnapshotItem>(
+      valueListenable: controller.data.derived.selectedItem,
+      builder: (_, item, __) {
+        if (item is SnapshotDocItem) {
+          return const Center(
+            child: Text('Snapshot documentation will be here.'),
+          );
+        }
+
+        return Column(
+          children: [
+            const SizedBox(height: denseRowSpacing),
+            SnapshotControlPane(controller: controller),
+            const SizedBox(height: denseRowSpacing),
+            Expanded(
+              child: SnapshotView(
+                controller: controller,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

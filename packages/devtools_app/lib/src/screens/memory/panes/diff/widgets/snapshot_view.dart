@@ -15,58 +15,65 @@ import 'classes_table_diff.dart';
 import 'classes_table_single.dart';
 
 class SnapshotView extends StatelessWidget {
-  const SnapshotView({Key? key, required this.controller, required this.item})
-      : super(key: key);
+  const SnapshotView({Key? key, required this.controller}) : super(key: key);
 
   final DiffPaneController controller;
-  final SnapshotInstanceItem item;
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: item.isProcessing,
-      builder: (_, isProcessing, __) {
-        if (isProcessing) return const SizedBox.shrink();
+    return ValueListenableBuilder<SnapshotItem>(
+      valueListenable: controller.data.derived.selectedItem,
+      builder: (_, item, __) {
+        return ValueListenableBuilder<bool>(
+          valueListenable: item.isProcessing,
+          builder: (_, isProcessing, __) {
+            if (isProcessing) return const SizedBox.shrink();
 
-        if (item.heap == null) {
-          return const Center(child: Text('Could not take snapshot.'));
-        }
-
-        final table1 = ValueListenableBuilder<HeapClasses?>(
-          valueListenable: controller.data.derived.heapClasses,
-          builder: (_, classes, __) {
-            if (classes is SingleHeapClasses) {
-              return ClassesTableSingle(
-                classes: classes,
-                selection: controller.data.derived.singleClassStats,
-              );
-            } else if (classes is DiffHeapClasses) {
-              return ClassesTableDiff(
-                classes: classes,
-                selection: controller.data.derived.diffClassStats,
-              );
-            } else {
-              throw StateError('Unexpected type: ${classes.runtimeType}.');
+            if (item is! SnapshotInstanceItem) {
+              throw StateError('Unexpected type: ${item.runtimeType}.');
             }
+
+            if (item.heap == null) {
+              return const Center(child: Text('Could not take snapshot.'));
+            }
+
+            final table1 = ValueListenableBuilder<HeapClasses?>(
+              valueListenable: controller.data.derived.heapClasses,
+              builder: (_, classes, __) {
+                if (classes is SingleHeapClasses) {
+                  return ClassesTableSingle(
+                    classes: classes,
+                    selection: controller.data.derived.singleClassStats,
+                  );
+                } else if (classes is DiffHeapClasses) {
+                  return ClassesTableDiff(
+                    classes: classes,
+                    selection: controller.data.derived.diffClassStats,
+                  );
+                } else {
+                  throw StateError('Unexpected type: ${classes.runtimeType}.');
+                }
+              },
+            );
+
+            final table2 = ValueListenableBuilder<List<StatsByPathEntry>?>(
+              valueListenable: controller.data.derived.pathEntries,
+              builder: (_, entries, __) => HeapClassDetails(
+                entries: entries,
+                selection: controller.data.derived.pathEntry,
+              ),
+            );
+
+            return Split(
+              axis: Axis.vertical,
+              initialFractions: const [0.4, 0.6],
+              minSizes: const [80, 80],
+              children: [
+                OutlineDecoration(child: table1),
+                OutlineDecoration(child: table2),
+              ],
+            );
           },
-        );
-
-        final table2 = ValueListenableBuilder<List<StatsByPathEntry>?>(
-          valueListenable: controller.data.derived.pathEntries,
-          builder: (_, entries, __) => HeapClassDetails(
-            entries: entries,
-            selection: controller.data.derived.pathEntry,
-          ),
-        );
-
-        return Split(
-          axis: Axis.vertical,
-          initialFractions: const [0.4, 0.6],
-          minSizes: const [80, 80],
-          children: [
-            OutlineDecoration(child: table1),
-            OutlineDecoration(child: table2),
-          ],
         );
       },
     );

@@ -158,7 +158,7 @@ class _SnapshotListItemsState extends DiffWidgetState<_SnapshotListItems>
                 : null,
             child: InkWell(
               canRequestFocus: false,
-              onTap: () => diffCore.setSnapshotIndex(index),
+              onTap: () => diffController.setSnapshotIndex(index),
               child: _SnapshotListTitle(
                 item: snapshots[index],
                 selected: index == selectedIndex,
