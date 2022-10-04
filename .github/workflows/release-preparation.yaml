@@ -7,6 +7,7 @@ jobs:
   check-release-condition:
     runs-on: ubuntu-latest
     steps:
+
       - name: Get Pull Request Number
         id: get-pull-request-number
         run: |
@@ -38,7 +39,7 @@ jobs:
           HAS_CHANGED_RELEASE_NOTES: ${{steps.get-modified-files.outputs.HAS_CHANGED_RELEASE_NOTES}}
         run: |
           echo "HAS_CHANGED_RELEASE_NOTES: ${{steps.get-modified-files.outputs.HAS_CHANGED_RELEASE_NOTES}}"
-          
+
       # - name: Add PR Url to Release Notes
       #   run: 
       # - name: Verify release_notes.json integrity
