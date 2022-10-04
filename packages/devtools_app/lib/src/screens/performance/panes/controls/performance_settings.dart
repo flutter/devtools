@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../../../../primitives/feature_flags.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/dialogs.dart';
 import '../../../../shared/globals.dart';
@@ -137,11 +138,12 @@ class FlutterSettings extends StatelessWidget {
           notifier: controller.badgeTabForJankyFrames as ValueNotifier<bool?>,
           title: 'Badge Performance tab when Flutter UI jank is detected',
         ),
-        CheckboxSetting(
-          notifier: controller.useLegacyTraceViewer,
-          title: 'Use legacy trace viewer',
-          onChanged: controller.toggleUseLegacyTraceViewer,
-        ),
+        if (FeatureFlags.embeddedPerfetto)
+          CheckboxSetting(
+            notifier: controller.useLegacyTraceViewer,
+            title: 'Use legacy trace viewer',
+            onChanged: controller.toggleUseLegacyTraceViewer,
+          ),
       ],
     );
   }
