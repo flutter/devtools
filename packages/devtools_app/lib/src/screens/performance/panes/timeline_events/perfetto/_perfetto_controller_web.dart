@@ -134,27 +134,11 @@ class PerfettoController extends DisposableController
   }
 
   void _postMessage(dynamic message) async {
-    final callback = () {
-      _perfettoIFrame.contentWindow!.postMessage(
-        message,
-        _perfettoUrl,
-      );
-    };
-    if (_perfettoIFrame.contentWindow != null) {
-      callback.call();
-    } else {
-      late StreamSubscription? onLoad;
-      onLoad = _perfettoIFrame.onLoad.listen((event) {
-        assert(
-          _perfettoIFrame.contentWindow != null,
-          'Something went wrong. The iFrame\'s contentWindow is null after the'
-          ' onLoad event.',
-        );
-        callback.call();
-        onLoad?.cancel();
-        onLoad = null;
-      });
-    }
+    await _perfettoIFrameReady();
+    _perfettoIFrame.contentWindow!.postMessage(
+      message,
+      _perfettoUrl,
+    );
   }
 
   void _postMessageWithId(String id, {Map<String, dynamic> args = const {}}) {
@@ -174,6 +158,17 @@ class PerfettoController extends DisposableController
           !_devtoolsThemeHandlerReady.isCompleted) {
         _devtoolsThemeHandlerReady.complete();
       }
+    }
+  }
+
+  Future<void> _perfettoIFrameReady() async {
+    if (_perfettoIFrame.contentWindow == null) {
+      await _perfettoIFrame.onLoad.first;
+      assert(
+        _perfettoIFrame.contentWindow != null,
+        'Something went wrong. The iFrame\'s contentWindow is null after the'
+        ' onLoad event.',
+      );
     }
   }
 
