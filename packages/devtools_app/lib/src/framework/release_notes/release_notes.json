@@ -1,4 +1,10 @@
 {
+    "version": {
+      "major": 2,
+      "minor": 18,
+      "patch": 0,
+      "pre": null
+    },
     "sections": [
       {
         "name": "Inspector updates",
@@ -34,12 +40,5 @@
           }
         ]
       }
-    ],
-    "version": {
-      "major": 2,
-      "minor": 18,
-      "patch": 0,
-      "pre": null
-    }
+    ]
   }
-  
