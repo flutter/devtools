@@ -137,7 +137,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
   @override
   Widget build(BuildContext context) {
     // TODO(https://github.com/flutter/devtools/issues/4576): animate showing
-    // and hiding the chart. 
+    // and hiding the chart.
     if (!widget.isVisible) return const SizedBox.shrink();
 
     return Container(
