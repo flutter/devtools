@@ -8,6 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Get PR Modified Files 
+        id: get-modified-files
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -15,15 +16,13 @@ jobs:
           PULL_NUMBER=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
           FILES_RESPONSE=$(gh api /repos/flutter/devtools/pulls/$PULL_NUMBER/files)
           export CHANGED_FILES=$(echo $FILES_RESPONSE | jq '.[].filename')
-          echo "::set-env name=CHANGED_FILES::$CHANGED_FILES"
-
+          echo "::set-output name=CHANGED_FILES::$CHANGED_FILES"
           # HAS_JSON_RELEASE_FILE=$(echo $FILE_NAMES | jq '. | any(. == env.JSON_RELEASE_FILE)')
       - name: Get PR Labels
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CHANGED_FILES:  ${{ env.CHANGED_FILES }}
         run: |
-          echo "THE CHANGED FILES ARE $CHANGED_FILES"
+          echo "THE CHANGED FILES ARE ${{ steps.get-modified-files.CHANGED_FILES }}"
 
           
 
