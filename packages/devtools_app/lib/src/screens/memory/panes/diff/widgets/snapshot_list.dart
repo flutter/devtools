@@ -10,6 +10,7 @@ import '../../../../../shared/table/table.dart';
 import '../../../../../shared/theme.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/item_controller.dart';
+import 'shared.dart';
 
 class SnapshotList extends StatelessWidget {
   const SnapshotList({Key? key, required this.controller}) : super(key: key);
@@ -21,7 +22,7 @@ class SnapshotList extends StatelessWidget {
       children: [
         _ListControlPane(controller: controller),
         Expanded(
-          child: _SnapshotListItems(controller: controller),
+          child: _SnapshotListItems(diffController: controller),
         ),
       ],
     );
@@ -101,17 +102,14 @@ class _SnapshotListTitle extends StatelessWidget {
   }
 }
 
-class _SnapshotListItems extends StatefulWidget {
-  const _SnapshotListItems({Key? key, required this.controller})
-      : super(key: key);
-
-  final DiffPaneController controller;
+class _SnapshotListItems extends DiffWidget {
+  const _SnapshotListItems({required super.diffController});
 
   @override
   State<_SnapshotListItems> createState() => _SnapshotListItemsState();
 }
 
-class _SnapshotListItemsState extends State<_SnapshotListItems>
+class _SnapshotListItemsState extends DiffWidgetState<_SnapshotListItems>
     with AutoDisposeMixin {
   final _headerHeight = 1.20 * defaultRowHeight;
   late final ScrollController _scrollController;
@@ -126,19 +124,19 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
   @override
   void didUpdateWidget(covariant _SnapshotListItems oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.controller != widget.controller) _initWidget();
+    if (oldWidget.diffController != widget.diffController) _initWidget();
   }
 
   void _initWidget() {
     addAutoDisposeListener(
-      widget.controller.selectedSnapshotIndex,
+      diffCore.snapshotIndex,
       scrollIfLast,
     );
   }
 
   Future<void> scrollIfLast() async {
-    final newLength = widget.controller.snapshots.value.length;
-    final newIndex = widget.controller.selectedSnapshotIndex.value;
+    final newLength = diffCore.snapshots.value.length;
+    final newIndex = diffCore.snapshotIndex.value;
 
     if (newIndex == newLength - 1) await _scrollController.autoScrollToBottom();
   }
@@ -146,8 +144,8 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
   @override
   Widget build(BuildContext context) {
     return DualValueListenableBuilder<List<SnapshotItem>, int>(
-      firstListenable: widget.controller.snapshots,
-      secondListenable: widget.controller.selectedSnapshotIndex,
+      firstListenable: diffCore.snapshots,
+      secondListenable: diffCore.snapshotIndex,
       builder: (_, snapshots, selectedIndex, __) => ListView.builder(
         controller: _scrollController,
         shrinkWrap: true,
@@ -160,7 +158,7 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
                 : null,
             child: InkWell(
               canRequestFocus: false,
-              onTap: () => widget.controller.setSelectedSnapshotIndex(index),
+              onTap: () => diffCore.setSnapshotIndex(index),
               child: _SnapshotListTitle(
                 item: snapshots[index],
                 selected: index == selectedIndex,

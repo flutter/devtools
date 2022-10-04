@@ -48,6 +48,9 @@ class DiffPaneController extends DisposableController {
   /// informational item.
   bool get hasSnapshots => data.core.snapshots.value.length > 1;
 
+  SnapshotItem get selectedSnapshot =>
+      data.core._snapshots.value[data.core.snapshotIndex.value];
+
   // This value should never be reset. It is incremented for every snapshot that
   // is taken, and is used to assign a unique id to each [SnapshotListItem].
   int _snapshotId = 0;
@@ -86,8 +89,8 @@ class DiffPaneController extends DisposableController {
   }
 
   void deleteCurrentSnapshot() {
-    assert(data.snapshotItem is SnapshotInstanceItem);
-    data.snapshotItem.dispose();
+    assert(selectedSnapshot is SnapshotInstanceItem);
+    selectedSnapshot.dispose();
     final index = data.core.snapshotIndex.value;
     data.core._snapshots.removeRange(
       index,
@@ -107,7 +110,7 @@ class DiffPaneController extends DisposableController {
 }
 
 /// Values that define what data to show on diff screen.
-class _CoreData {
+class CoreData {
   /// The list contains one item that show information and all others
   /// are snapshots.
   ValueListenable<List<SnapshotItem>> get snapshots => _snapshots;
@@ -116,6 +119,7 @@ class _CoreData {
   /// Selected snapshot.
   ValueListenable<int> get snapshotIndex => _snapshotIndex;
   final _snapshotIndex = ValueNotifier<int>(0);
+  void setSnapshotIndex(int value) => _snapshotIndex.value = value;
 
   // TODO(https://github.com/flutter/devtools/issues/4539): it is unclear
   // whether preserving the selection between snapshots should be the
@@ -131,8 +135,8 @@ class _CoreData {
   final _classFilter = ValueNotifier<String?>(null);
 }
 
-/// Values calculated from [_CoreData].
-class _DerivedData {
+/// Values that can be calculated from [CoreData].
+class DerivedData {
   /// Classes to show.
   final heapClasses = ValueNotifier<HeapClasses?>(null);
 
@@ -175,9 +179,9 @@ class DiffData extends DisposableController with AutoDisposeControllerMixin {
     );
   }
 
-  final core = _CoreData();
+  final core = CoreData();
 
-  final derived = _DerivedData();
+  final derived = DerivedData();
 
   /// Updates cross-snapshot class if the argument is not null.
   void _setClassIfNotNull(HeapClassName? theClass) {
@@ -192,9 +196,6 @@ class DiffData extends DisposableController with AutoDisposeControllerMixin {
     core.path = path;
     _recalculateValues();
   }
-
-  SnapshotItem get snapshotItem =>
-      core._snapshots.value[core.snapshotIndex.value];
 
   void _assertIntegrity() {
     assert(() {
@@ -211,11 +212,11 @@ class DiffData extends DisposableController with AutoDisposeControllerMixin {
 
   /// List of classes to show for the selected snapshot.
   HeapClasses? _snapshotClasses() {
-    final item = snapshotItem;
-    if (item is! SnapshotInstanceItem) return null;
-    final heap = item.heap;
+    final theItem = core._snapshots.value[core.snapshotIndex.value];
+    if (theItem is! SnapshotInstanceItem) return null;
+    final heap = theItem.heap;
     if (heap == null) return null;
-    final itemToDiffWith = item.diffWith;
+    final itemToDiffWith = theItem.diffWith;
     if (itemToDiffWith == null) return heap.classes;
     return derived.diffStore.compare(heap, itemToDiffWith.heap!);
   }

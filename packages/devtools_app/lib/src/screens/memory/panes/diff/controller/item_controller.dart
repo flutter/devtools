@@ -61,7 +61,7 @@ class SnapshotInstanceItem extends SnapshotItem {
 
   String get name => '$isolateName-$displayNumber';
 
-  SnapshotInstanceItem? diffWith;
+  final diffWith = ValueNotifier<SnapshotInstanceItem?>(null);
 
   @override
   bool get hasData => heap != null;

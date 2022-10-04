@@ -6,7 +6,9 @@ import 'package:flutter/material.dart';
 
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/split.dart';
+import '../../../shared/heap/heap.dart';
 import '../controller/diff_pane_controller.dart';
+import '../controller/heap_diff.dart';
 import '../controller/item_controller.dart';
 import 'class_details.dart';
 import 'classes_table_diff.dart';
@@ -19,51 +21,42 @@ class SnapshotView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final item = controller.selectedSnapshotItem as SnapshotInstanceItem;
+    final item = controller.selectedSnapshot as SnapshotInstanceItem;
     return ValueListenableBuilder<bool>(
       valueListenable: item.isProcessing,
       builder: (_, isProcessing, __) {
         if (isProcessing) return const SizedBox.shrink();
 
-        return ValueListenableBuilder<SnapshotInstanceItem?>(
-          valueListenable: item.diffWith,
-          builder: (_, diffWith, __) {
-            if (item.heap == null) {
-              return const Center(child: Text('Could not take snapshot.'));
-            }
+        if (item.heap == null) {
+          return const Center(child: Text('Could not take snapshot.'));
+        }
 
-            late Widget table1;
-
-            if (diffWith == null) {
-              table1 = ClassesTableSingle(
-                controller: controller,
-                item: item,
-              );
+        final table1 = ValueListenableBuilder<HeapClasses?>(
+          valueListenable: controller.data.derived.heapClasses,
+          builder: (_, classes, __) {
+            if (classes is SingleHeapClasses) {
+              return ClassesTableSingle(classes: classes, selection: controller.data.derived.singleClassStats);
+            } else if (classes is DiffHeapClasses) {
+              return ClassesTableDiff(classes: classes, controller: controller);
             } else {
-              final heap1 = item.heap!;
-              final heap2 = diffWith.heap!;
-
-              // TODO(polina-c): make comparison async.
-              final classes = controller.diffStore.compare(heap1, heap2);
-              table1 =
-                  ClassesTableDiff(classes: classes, controller: controller);
+              throw StateError('Unexpected type: ${classes.runtimeType}.');
             }
-
-            final table2 = HeapClassDetails(
-              item: item,
-              controller: controller,
-            );
-
-            return Split(
-              axis: Axis.vertical,
-              initialFractions: const [0.4, 0.6],
-              minSizes: const [80, 80],
-              children: [
-                OutlineDecoration(child: table1),
-                OutlineDecoration(child: table2),
-              ],
-            );
           },
+        );
+
+        final table2 = HeapClassDetails(
+          item: item,
+          controller: controller,
+        );
+
+        return Split(
+          axis: Axis.vertical,
+          initialFractions: const [0.4, 0.6],
+          minSizes: const [80, 80],
+          children: [
+            OutlineDecoration(child: table1),
+            OutlineDecoration(child: table2),
+          ],
         );
       },
     );

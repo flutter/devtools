@@ -14,23 +14,24 @@ import 'widgets/snapshot_list.dart';
 import 'widgets/snapshot_view.dart';
 
 class DiffPane extends StatelessWidget {
-  const DiffPane({Key? key, required this.controller}) : super(key: key);
+  const DiffPane({Key? key, required this.diffController}) : super(key: key);
 
-  final DiffPaneController controller;
+  final DiffPaneController diffController;
 
   @override
   Widget build(BuildContext context) {
+    final diffCore = diffController.data.core;
     final Widget itemContent = ValueListenableBuilder<int>(
-      valueListenable: controller.selectedSnapshotIndex,
+      valueListenable: diffCore.snapshotIndex,
       builder: (_, index, __) {
-        final item = controller.selectedSnapshotItem;
+        final item = diffController.selectedSnapshot;
 
         if (item is SnapshotDocItem) {
           return const _SnapshotDoc();
         } else if (item is SnapshotInstanceItem) {
           return _SnapshotContent(
             item: item,
-            controller: controller,
+            controller: diffController,
           );
         } else {
           throw Exception('Unexpected type of item: ${item.runtimeType}.');
@@ -44,7 +45,7 @@ class DiffPane extends StatelessWidget {
       minSizes: const [80, 80],
       children: [
         OutlineDecoration(
-          child: SnapshotList(controller: controller),
+          child: SnapshotList(controller: diffController),
         ),
         OutlineDecoration(
           child: itemContent,
@@ -69,7 +70,7 @@ class _SnapshotDoc extends StatelessWidget {
 
 class _SnapshotContent extends StatelessWidget {
   _SnapshotContent({Key? key, required this.item, required this.controller})
-      : assert(controller.selectedSnapshotItem == item),
+      : assert(controller.selectedSnapshot == item),
         super(key: key);
 
   final SnapshotInstanceItem item;

@@ -11,8 +11,6 @@ import '../../../../../shared/table/table_data.dart';
 import '../../../../../shared/utils.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/primitives.dart';
-import '../controller/diff_pane_controller.dart';
-import '../controller/item_controller.dart';
 
 class _ClassNameColumn extends ColumnData<SingleClassStats> {
   _ClassNameColumn()
@@ -63,8 +61,6 @@ class _ShallowSizeColumn extends ColumnData<SingleClassStats> {
   @override
   int getValue(SingleClassStats classStats) => classStats.objects.shallowSize;
 
-
-
   @override
   bool get numeric => true;
 
@@ -102,13 +98,12 @@ class _RetainedSizeColumn extends ColumnData<SingleClassStats> {
 class ClassesTableSingle extends StatefulWidget {
   const ClassesTableSingle({
     Key? key,
-    required this.item,
-    required this.controller,
+    required this.classes,
+    required this.selection,
   }) : super(key: key);
 
-  final SnapshotInstanceItem item;
-
-  final DiffPaneController controller;
+  final SingleHeapClasses classes;
+  final ValueNotifier<SingleClassStats?> selection;
 
   @override
   State<ClassesTableSingle> createState() => _ClassesTableSingleState();
@@ -116,9 +111,9 @@ class ClassesTableSingle extends StatefulWidget {
 
 class _ClassesTableSingleState extends State<ClassesTableSingle>
     with AutoDisposeMixin {
-  late SingleHeapClasses _classes;
-  final ColumnData<SingleClassStats> _shallowSizeColumn = _ShallowSizeColumn();
-  late final List<ColumnData<SingleClassStats>> _columns =
+  static final ColumnData<SingleClassStats> _shallowSizeColumn =
+      _ShallowSizeColumn();
+  static late final List<ColumnData<SingleClassStats>> _columns =
       <ColumnData<SingleClassStats>>[
     _ClassNameColumn(),
     _InstanceColumn(),
@@ -126,30 +121,14 @@ class _ClassesTableSingleState extends State<ClassesTableSingle>
     _RetainedSizeColumn(),
   ];
 
-  void _initWidget() {
-    _classes = widget.item.classesToShow() as SingleHeapClasses;
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _initWidget();
-  }
-
-  @override
-  void didUpdateWidget(covariant ClassesTableSingle oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.item != oldWidget.item) _initWidget();
-  }
-
   @override
   Widget build(BuildContext context) {
     return FlatTable<SingleClassStats>(
       columns: _columns,
-      data: _classes.classes,
-      dataKey: widget.item.id.toString(),
+      data: widget.classes.classes,
+      dataKey: 'ClassesTableSingle',
       keyFactory: (e) => Key(e.heapClass.fullName),
-      selectionNotifier: widget.item.selectedSingleClassStats,
+      selectionNotifier: widget.selection,
       defaultSortColumn: _shallowSizeColumn,
       defaultSortDirection: SortDirection.descending,
     );
