@@ -84,19 +84,25 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
 
     final isFlutterApp = serviceManager.connectedApp!.isFlutterAppNow!;
     final tabViews = [
-      FeatureFlags.embeddedPerfetto
-          ? KeepAliveWrapper(
-              child: EmbeddedPerfetto(
-                perfettoController: controller.perfettoController,
-              ),
-            )
-          : KeepAliveWrapper(
+      ValueListenableBuilder<bool>(
+        valueListenable: controller.useLegacyTraceViewer,
+        builder: (context, useLegacy, _) {
+          if (useLegacy || !FeatureFlags.embeddedPerfetto) {
+            return KeepAliveWrapper(
               child: TimelineEventsView(
                 controller: controller,
                 processing: widget.processing,
                 processingProgress: widget.processingProgress,
               ),
+            );
+          }
+          return KeepAliveWrapper(
+            child: EmbeddedPerfetto(
+              perfettoController: controller.perfettoController,
             ),
+          );
+        },
+      ),
       if (frameAnalysisSupported && isFlutterApp)
         KeepAliveWrapper(
           child: frameAnalysisView,
@@ -121,18 +127,23 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
     return [
       _buildTab(
         tabName: 'Timeline Events',
-        trailing: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            if (!FeatureFlags.embeddedPerfetto) ...[
-              _buildSearchField(searchFieldEnabled),
-              const FlameChartHelpButton(
-                gaScreen: PerformanceScreen.id,
-                gaSelection: analytics_constants.timelineFlameChartHelp,
-              ),
-            ],
-            RefreshTimelineEventsButton(controller: controller),
-          ],
+        trailing: ValueListenableBuilder<bool>(
+          valueListenable: controller.useLegacyTraceViewer,
+          builder: (context, useLegacy, _) {
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                if (useLegacy || !FeatureFlags.embeddedPerfetto) ...[
+                  _buildSearchField(searchFieldEnabled),
+                  const FlameChartHelpButton(
+                    gaScreen: PerformanceScreen.id,
+                    gaSelection: analytics_constants.timelineFlameChartHelp,
+                  ),
+                ],
+                RefreshTimelineEventsButton(controller: controller),
+              ],
+            );
+          },
         ),
       ),
       if (frameAnalysisSupported && isFlutterApp)
