@@ -141,19 +141,11 @@ class PerfettoController extends DisposableController
       );
     };
     if (_perfettoIFrame.contentWindow != null) {
-      callback.call();
+      callback();
     } else {
-      late StreamSubscription? onLoad;
-      onLoad = _perfettoIFrame.onLoad.listen((event) {
-        assert(
-          _perfettoIFrame.contentWindow != null,
-          'Something went wrong. The iFrame\'s contentWindow is null after the'
-          ' onLoad event.',
-        );
-        callback.call();
-        onLoad?.cancel();
-        onLoad = null;
-      });
+      await _perfettoIFrame.onLoad.first;
+      assert(_perfettoIFrame.contentWindow != null);
+      callback();
     }
   }
 
