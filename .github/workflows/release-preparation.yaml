@@ -23,8 +23,9 @@ jobs:
           export JSON_RELEASE_FILE='packages/devtools_app/lib/src/framework/release_notes/release_notes.json'
 
           FILES_RESPONSE=$(gh api /repos/flutter/devtools/pulls/$PULL_NUMBER/files)
-
+          echo "FILES_RESPONSE: $FILES_REPONSE"
           CHANGED_FILES=$(echo $FILES_RESPONSE | jq '.[].filename')
+          echo "CHANGED_FILES: $CHANGED_FILES"
           
           HAS_CHANGED_RELEASE_NOTES=$(echo $FILE_NAMES | jq '. | any(. == env.JSON_RELEASE_FILE)')
           echo "::set-output name=HAS_CHANGED_RELEASE_NOTES::$HAS_CHANGED_RELEASE_NOTES"
