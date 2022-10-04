@@ -5,11 +5,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-import '../common_widgets.dart';
-import '../globals.dart';
-import '../screen.dart';
+import '../shared/common_widgets.dart';
+import '../shared/globals.dart';
+import '../shared/screen.dart';
+import '../shared/utils.dart';
 
 /// This is an example implementation of a conditional screen that supports
 /// offline mode and uses a provided controller [ExampleController].
@@ -43,16 +43,14 @@ class _ExampleConditionalScreenBody extends StatefulWidget {
 
 class _ExampleConditionalScreenBodyState
     extends State<_ExampleConditionalScreenBody>
-    with OfflineScreenMixin<_ExampleConditionalScreenBody, String> {
-  ExampleController controller;
-
+    with
+        OfflineScreenMixin<_ExampleConditionalScreenBody, String>,
+        ProvidedControllerMixin<ExampleController,
+            _ExampleConditionalScreenBody> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final newController = Provider.of<ExampleController>(context);
-    if (newController == controller) return;
-    controller = newController;
-
+    if (!initController()) return;
     if (shouldLoadOfflineData()) {
       final json =
           offlineController.offlineDataJson[ExampleConditionalScreen.id];
@@ -64,9 +62,9 @@ class _ExampleConditionalScreenBodyState
 
   @override
   Widget build(BuildContext context) {
-    final exampleScreen = ValueListenableBuilder(
+    final exampleScreen = ValueListenableBuilder<String>(
       valueListenable: controller.title,
-      builder: (context, value, _) {
+      builder: (context, String value, _) {
         return Center(child: Text(value));
       },
     );

@@ -5,7 +5,6 @@
 @TestOn('vm')
 import 'dart:io';
 
-import 'package:devtools_test/file_utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'app.dart';
@@ -19,18 +18,19 @@ void main() {
     // ignore: dead_code
     if (false) {
       setUpAll(() async {
-        compensateForFlutterTestDirectoryBug();
         final bool testInReleaseMode =
             Platform.environment['WEBDEV_RELEASE'] == 'true';
 
         webBuildFixture = await WebBuildFixture.serve(
-            release: testInReleaseMode, verbose: true);
+          release: testInReleaseMode,
+          verbose: true,
+        );
         browserManager = await BrowserManager.create();
       });
 
       tearDownAll(() async {
-        await browserManager?.teardown();
-        await webBuildFixture?.teardown();
+        await browserManager.teardown();
+        await webBuildFixture.teardown();
       });
 
       group('app', appTests, skip: true);

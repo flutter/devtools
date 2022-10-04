@@ -4,17 +4,17 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-import '../common_widgets.dart';
 import '../config_specific/launch_url/launch_url.dart';
-import '../theme.dart';
+import '../shared/common_widgets.dart';
+import '../shared/theme.dart';
+import '../shared/utils.dart';
 import 'analytics_controller.dart';
 
 /// Conditionally displays a prompt to request permission for collection of
 /// usage analytics.
 class AnalyticsPrompt extends StatefulWidget {
-  const AnalyticsPrompt({@required this.child});
+  const AnalyticsPrompt({required this.child});
 
   final Widget child;
 
@@ -22,29 +22,25 @@ class AnalyticsPrompt extends StatefulWidget {
   State<AnalyticsPrompt> createState() => _AnalyticsPromptState();
 }
 
-class _AnalyticsPromptState extends State<AnalyticsPrompt> {
-  AnalyticsController _controller;
-
+class _AnalyticsPromptState extends State<AnalyticsPrompt>
+    with ProvidedControllerMixin<AnalyticsController, AnalyticsPrompt> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
-    final newAnalyticsController = Provider.of<AnalyticsController>(context);
-    if (newAnalyticsController == _controller) return;
-    _controller = newAnalyticsController;
+    initController();
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
-    return ValueListenableBuilder(
-      valueListenable: _controller.shouldPrompt,
+    return ValueListenableBuilder<bool>(
+      valueListenable: controller.shouldPrompt,
       builder: (context, showPrompt, child) {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (showPrompt) child,
+            if (showPrompt) child!,
             Expanded(child: widget.child),
           ],
         );
@@ -70,11 +66,11 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt> {
                 children: [
                   Text(
                     'Send usage statistics for DevTools?',
-                    style: textTheme.headline5,
+                    style: textTheme.headlineSmall,
                   ),
                   CircularIconButton(
                     icon: Icons.close,
-                    onPressed: _controller.hidePrompt,
+                    onPressed: controller.hidePrompt,
                     backgroundColor: theme.canvasColor,
                     foregroundColor: theme.colorScheme.contrastForeground,
                   ),
@@ -101,11 +97,12 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt> {
             text: 'DevTools reports feature usage statistics and basic '
                 'crash reports to Google in order to help Google improve '
                 'the tool over time. See Google\'s ',
-            style: textTheme.subtitle1,
+            style: textTheme.titleMedium,
           ),
           TextSpan(
             text: 'privacy policy',
-            style: textTheme.subtitle1.copyWith(color: const Color(0xFF54C1EF)),
+            style:
+                textTheme.titleMedium?.copyWith(color: const Color(0xFF54C1EF)),
             recognizer: TapGestureRecognizer()
               ..onTap = () {
                 launchUrl(
@@ -116,7 +113,7 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt> {
           ),
           TextSpan(
             text: '.',
-            style: textTheme.subtitle1,
+            style: textTheme.titleMedium,
           ),
         ],
       ),
@@ -130,9 +127,9 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt> {
         ElevatedButton(
           onPressed: () {
             // This will also hide the prompt.
-            _controller.toggleAnalyticsEnabled(false);
+            controller.toggleAnalyticsEnabled(false);
           },
-          style: ElevatedButton.styleFrom(primary: Colors.grey),
+          style: ElevatedButton.styleFrom(backgroundColor: Colors.grey),
           child: const Text('No thanks.'),
         ),
         const Padding(
@@ -140,7 +137,7 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt> {
         ),
         ElevatedButton(
           onPressed: () {
-            _controller
+            controller
               ..toggleAnalyticsEnabled(true)
               ..hidePrompt();
           },

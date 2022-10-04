@@ -1,0 +1,104 @@
+>// Copyright 2022 The Chromium Authors. All rights reserved.
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ comment.line.double-slash.dart
+>// Use of this source code is governed by a BSD-style license that can be
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ comment.line.double-slash.dart
+>// found in the LICENSE file.
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ comment.line.double-slash.dart
+>
+>/// Multiline dartdoc comment.
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ comment.block.documentation.dart
+>///
+#^^^ comment.block.documentation.dart
+>/// ```
+#^^^^^^^ comment.block.documentation.dart
+>/// doc
+#^^^ comment.block.documentation.dart
+#   ^^^^ comment.block.documentation.dart variable.other.source.dart
+>/// ```
+#^^^ comment.block.documentation.dart
+#   ^ comment.block.documentation.dart variable.other.source.dart
+#    ^^^ comment.block.documentation.dart
+>///
+#^^^ comment.block.documentation.dart
+>/// ...
+#^^^^^^^ comment.block.documentation.dart
+>var a;
+#^^^ storage.type.primitive.dart
+#     ^ punctuation.terminator.dart
+>
+>/*
+#^^ comment.block.dart
+> * Old-style dartdoc
+#^^^^^^^^^^^^^^^^^^^^ comment.block.dart
+> *
+#^^ comment.block.dart
+> * ...
+#^^^^^^ comment.block.dart
+> */
+#^^^ comment.block.dart
+>var b;
+#^^^ storage.type.primitive.dart
+#     ^ punctuation.terminator.dart
+>
+>/* Inline block comment */
+#^^^^^^^^^^^^^^^^^^^^^^^^^^ comment.block.dart
+>var c;
+#^^^ storage.type.primitive.dart
+#     ^ punctuation.terminator.dart
+>
+>/**
+#^^^ comment.block.documentation.dart
+> * Nested block
+#^^^^^^^^^^^^^^^ comment.block.documentation.dart
+> *
+#^^ comment.block.documentation.dart
+> * /**
+#^^^^^^ comment.block.documentation.dart
+> *  * Nested block
+#^^^^^^^^^^^^^^^^^^ comment.block.documentation.dart
+> *  */
+#^^^^^^ comment.block.documentation.dart
+> */
+#^^^ comment.block.documentation.dart
+>var d;
+#^^^ storage.type.primitive.dart
+#     ^ punctuation.terminator.dart
+>
+>/**
+#^^^ comment.block.documentation.dart
+> * Nested
+#^^^^^^^^^ comment.block.documentation.dart
+> *
+#^^ comment.block.documentation.dart
+> * /* Inline */
+#^^^ comment.block.documentation.dart
+#   ^^^^^^^^^^^^ comment.block.documentation.dart comment.block.dart
+> */
+#^^^ comment.block.documentation.dart
+>var e;
+#^^^ storage.type.primitive.dart
+#     ^ punctuation.terminator.dart
+>
+>/* Nested /* Inline */ */
+#^^^^^^^^^^^^^^^^^^^^^^^^^ comment.block.dart
+>var f;
+#^^^ storage.type.primitive.dart
+#     ^ punctuation.terminator.dart
+>
+>// Simple comment
+#^^^^^^^^^^^^^^^^^ comment.line.double-slash.dart
+>var g;
+#^^^ storage.type.primitive.dart
+#     ^ punctuation.terminator.dart
+>
+>/// Dartdoc with reference to [a].
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ comment.block.documentation.dart
+#                              ^^^ comment.block.documentation.dart variable.name.source.dart
+#                                 ^ comment.block.documentation.dart
+>/// And a link to [example.org](http://example.org/).
+#^^^^^^^^^^^^^^^^^^ comment.block.documentation.dart
+#                  ^^^^^^^^^^^^^ comment.block.documentation.dart variable.name.source.dart
+#                               ^^^^^^^^^^^^^^^^^^^^^^ comment.block.documentation.dart
+>var h;
+#^^^ storage.type.primitive.dart
+#     ^ punctuation.terminator.dart

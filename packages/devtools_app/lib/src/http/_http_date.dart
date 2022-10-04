@@ -165,7 +165,7 @@ class HttpDate {
 
     int index = 0;
     String tmp;
-    int format;
+    int? format;
 
     void expect(String s) {
       if (date.length - index < s.length) {
@@ -352,10 +352,10 @@ class HttpDate {
       }
     }
 
-    String timeStr;
-    String dayOfMonthStr;
-    String monthStr;
-    String yearStr;
+    String? timeStr;
+    String? dayOfMonthStr;
+    String? monthStr;
+    String? yearStr;
 
     for (var token in tokens) {
       if (token.length < 1) continue;
@@ -383,18 +383,18 @@ class HttpDate {
       error();
     }
 
-    int year = toInt(yearStr);
+    int year = toInt(yearStr!);
     if (year >= 70 && year <= 99) {
       year += 1900;
     } else if (year >= 0 && year <= 69) year += 2000;
     if (year < 1601) error();
 
-    int dayOfMonth = toInt(dayOfMonthStr);
+    int dayOfMonth = toInt(dayOfMonthStr!);
     if (dayOfMonth < 1 || dayOfMonth > 31) error();
 
-    int month = getMonth(monthStr) + 1;
+    int month = getMonth(monthStr!) + 1;
 
-    var timeList = timeStr.split(":");
+    var timeList = timeStr!.split(":");
     if (timeList.length != 3) error();
     int hour = toInt(timeList[0]);
     int minute = toInt(timeList[1]);

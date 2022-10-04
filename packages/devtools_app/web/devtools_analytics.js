@@ -28,13 +28,15 @@ function initializeGA() {
       'dimension8': 'flutter_client_id',
       'dimension9': 'is_external_build',
       'dimension10': 'is_embedded',
+      'dimension11': 'g3_username',
        // Custom metrics:
       'metric1': 'ui_duration_micros',
       'metric2': 'raster_duration_micros',
       'metric3': 'shader_compilation_duration_micros',
       'metric4': 'cpu_sample_count',
       'metric5': 'cpu_stack_depth',
-    }
+    },
+    cookie_flags: 'SameSite=None;Secure',
   });
 }
 

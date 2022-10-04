@@ -16,8 +16,8 @@ typedef AsyncAnalyticsCallback = FutureOr<void> Function();
 
 class AnalyticsController {
   AnalyticsController({
-    @required bool enabled,
-    @required bool firstRun,
+    required bool enabled,
+    required bool firstRun,
     this.onEnableAnalytics,
     this.onDisableAnalytics,
     this.onSetupAnalytics,
@@ -40,26 +40,26 @@ class AnalyticsController {
   bool get analyticsInitialized => _analyticsInitialized;
   bool _analyticsInitialized = false;
 
-  final AsyncAnalyticsCallback onEnableAnalytics;
+  final AsyncAnalyticsCallback? onEnableAnalytics;
 
-  final AsyncAnalyticsCallback onDisableAnalytics;
+  final AsyncAnalyticsCallback? onDisableAnalytics;
 
-  final VoidCallback onSetupAnalytics;
+  final VoidCallback? onSetupAnalytics;
 
-  Future<void> toggleAnalyticsEnabled(bool enable) async {
-    if (enable) {
+  Future<void> toggleAnalyticsEnabled(bool? enable) async {
+    if (enable == true) {
       _analyticsEnabled.value = true;
       if (!_analyticsInitialized) {
         setUpAnalytics();
       }
       if (onEnableAnalytics != null) {
-        await onEnableAnalytics();
+        await onEnableAnalytics!();
       }
     } else {
       _analyticsEnabled.value = false;
       hidePrompt();
       if (onDisableAnalytics != null) {
-        await onDisableAnalytics();
+        await onDisableAnalytics!();
       }
     }
   }
@@ -68,7 +68,7 @@ class AnalyticsController {
     if (_analyticsInitialized) return;
     assert(_analyticsEnabled.value = true);
     if (onSetupAnalytics != null) {
-      onSetupAnalytics();
+      onSetupAnalytics!();
     }
     _analyticsInitialized = true;
   }

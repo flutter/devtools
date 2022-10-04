@@ -66,7 +66,9 @@ class ServerApi {
       case apiGetDevToolsEnabled:
         // Is DevTools Analytics collection enabled?
         return api.getCompleted(
-            request, json.encode(_devToolsUsage.analyticsEnabled));
+          request,
+          json.encode(_devToolsUsage.analyticsEnabled),
+        );
       case apiSetDevToolsEnabled:
         // Enable or disable DevTools analytics collection.
         final queryParams = request.requestedUri.queryParameters;
@@ -75,7 +77,9 @@ class ServerApi {
               json.decode(queryParams[devToolsEnabledPropertyName]!);
         }
         return api.setCompleted(
-            request, json.encode(_devToolsUsage.analyticsEnabled));
+          request,
+          json.encode(_devToolsUsage.analyticsEnabled),
+        );
 
       // ----- DevTools survey store. -----
 
@@ -100,8 +104,10 @@ class ServerApi {
       case apiGetSurveyActionTaken:
         // Request setActiveSurvey has not been requested.
         if (_devToolsUsage.activeSurvey == null) {
-          return api.badRequest('$errorNoActiveSurvey '
-              '- $apiGetSurveyActionTaken');
+          return api.badRequest(
+            '$errorNoActiveSurvey '
+            '- $apiGetSurveyActionTaken',
+          );
         }
         // SurveyActionTaken has the survey been acted upon (taken or dismissed)
         return api.getCompleted(
@@ -114,8 +120,10 @@ class ServerApi {
       case apiSetSurveyActionTaken:
         // Request setActiveSurvey has not been requested.
         if (_devToolsUsage.activeSurvey == null) {
-          return api.badRequest('$errorNoActiveSurvey '
-              '- $apiSetSurveyActionTaken');
+          return api.badRequest(
+            '$errorNoActiveSurvey '
+            '- $apiSetSurveyActionTaken',
+          );
         }
         // Set the SurveyActionTaken.
         // Has the survey been taken or dismissed..
@@ -131,8 +139,10 @@ class ServerApi {
       case apiGetSurveyShownCount:
         // Request setActiveSurvey has not been requested.
         if (_devToolsUsage.activeSurvey == null) {
-          return api.badRequest('$errorNoActiveSurvey '
-              '- $apiGetSurveyShownCount');
+          return api.badRequest(
+            '$errorNoActiveSurvey '
+            '- $apiGetSurveyShownCount',
+          );
         }
         // SurveyShownCount how many times have we asked to take survey.
         return api.getCompleted(
@@ -142,14 +152,31 @@ class ServerApi {
       case apiIncrementSurveyShownCount:
         // Request setActiveSurvey has not been requested.
         if (_devToolsUsage.activeSurvey == null) {
-          return api.badRequest('$errorNoActiveSurvey '
-              '- $apiIncrementSurveyShownCount');
+          return api.badRequest(
+            '$errorNoActiveSurvey '
+            '- $apiIncrementSurveyShownCount',
+          );
         }
         // Increment the SurveyShownCount, we've asked about the survey.
         _devToolsUsage.incrementSurveyShownCount();
         return api.getCompleted(
           request,
           json.encode(_devToolsUsage.surveyShownCount),
+        );
+      case apiGetLastReleaseNotesVersion:
+        return api.getCompleted(
+          request,
+          json.encode(_devToolsUsage.lastReleaseNotesVersion),
+        );
+      case apiSetLastReleaseNotesVersion:
+        final queryParams = request.requestedUri.queryParameters;
+        if (queryParams.containsKey(lastReleaseNotesVersionPropertyName)) {
+          _devToolsUsage.lastReleaseNotesVersion =
+              queryParams[lastReleaseNotesVersionPropertyName]!;
+        }
+        return api.getCompleted(
+          request,
+          json.encode(_devToolsUsage.lastReleaseNotesVersion),
         );
       case apiGetBaseAppSizeFile:
         final queryParams = request.requestedUri.queryParameters;
@@ -161,9 +188,11 @@ class ServerApi {
           }
           return api.getCompleted(request, fileJson);
         }
-        return api.badRequest('Request for base app size file does not '
-            'contain a query parameter with the expected key: '
-            '$baseAppSizeFilePropertyName');
+        return api.badRequest(
+          'Request for base app size file does not '
+          'contain a query parameter with the expected key: '
+          '$baseAppSizeFilePropertyName',
+        );
       case apiGetTestAppSizeFile:
         final queryParams = request.requestedUri.queryParameters;
         if (queryParams.containsKey(testAppSizeFilePropertyName)) {
@@ -174,9 +203,11 @@ class ServerApi {
           }
           return api.getCompleted(request, fileJson);
         }
-        return api.badRequest('Request for test app size file does not '
-            'contain a query parameter with the expected key: '
-            '$testAppSizeFilePropertyName');
+        return api.badRequest(
+          'Request for test app size file does not '
+          'contain a query parameter with the expected key: '
+          '$testAppSizeFilePropertyName',
+        );
       default:
         return api.notImplemented(request);
     }

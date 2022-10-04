@@ -2,23 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: implementation_imports
-
 library matchers;
 
 import 'dart:io' as io;
 
-import 'package:devtools_app/src/inspector/diagnostics_node.dart';
+import 'package:devtools_app/src/screens/inspector/diagnostics_node.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-RemoteDiagnosticsNode findNodeMatching(
-    RemoteDiagnosticsNode node, String text) {
+RemoteDiagnosticsNode? findNodeMatching(
+  RemoteDiagnosticsNode node,
+  String text,
+) {
   if (node.name?.startsWith(text) == true ||
       node.description?.startsWith(text) == true) {
     return node;
-  }
-  if (node.childrenNow == null) {
-    return null;
   }
   for (var child in node.childrenNow) {
     final match = findNodeMatching(child, text);
@@ -62,6 +59,19 @@ Matcher equalsGoldenIgnoringHashCodes(String path) {
   return _EqualsGoldenIgnoringHashCodes(path);
 }
 
+Matcher equalsGoldenValueIgnoringHashCodes(String value) {
+  const shouldCheckForMatchingGoldens = bool.fromEnvironment(
+    'SHOULD_TEST_GOLDENS',
+    defaultValue: true,
+  );
+
+  if (shouldCheckForMatchingGoldens) {
+    return equalsIgnoringHashCodes(value);
+  }
+
+  return const _AlwaysTrueMatcher();
+}
+
 class _EqualsGoldenIgnoringHashCodes extends Matcher {
   _EqualsGoldenIgnoringHashCodes(String pathWithinGoldenDirectory) {
     path = 'test/goldens$_goldensSuffix/$pathWithinGoldenDirectory';
@@ -71,8 +81,8 @@ class _EqualsGoldenIgnoringHashCodes extends Matcher {
       _value = 'Error reading $path: $e';
     }
   }
-  String path;
-  String _value;
+  late String path;
+  late String _value;
 
   static final Object _mismatchedValueKey = Object();
 
@@ -87,18 +97,24 @@ class _EqualsGoldenIgnoringHashCodes extends Matcher {
 
   @override
   bool matches(dynamic object, Map<dynamic, dynamic> matchState) {
-    final String description = _normalize(object);
-    if (_value != description) {
-      if (updateGoldens) {
-        io.File(path).writeAsStringSync(description);
-        print('Updated golden file $path\nto\n$description');
-        // Act like the match succeeded so all goldens are updated instead of
-        // just the first failure.
-        return true;
-      }
+    const shouldCheckForMatchingGoldens = bool.fromEnvironment(
+      'SHOULD_TEST_GOLDENS',
+      defaultValue: true,
+    );
+    if (shouldCheckForMatchingGoldens) {
+      final String description = _normalize(object);
+      if (_value != description) {
+        if (updateGoldens) {
+          io.File(path).writeAsStringSync(description);
+          print('Updated golden file $path\nto\n$description');
+          // Act like the match succeeded so all goldens are updated instead of
+          // just the first failure.
+          return true;
+        }
 
-      matchState[_mismatchedValueKey] = description;
-      return false;
+        matchState[_mismatchedValueKey] = description;
+        return false;
+      }
     }
     return true;
   }
@@ -109,21 +125,64 @@ class _EqualsGoldenIgnoringHashCodes extends Matcher {
   }
 
   @override
-  Description describeMismatch(dynamic item, Description mismatchDescription,
-      Map<dynamic, dynamic> matchState, bool verbose) {
-    if (matchState.containsKey(_mismatchedValueKey)) {
-      final String actualValue = matchState[_mismatchedValueKey];
-      // Leading whitespace is added so that lines in the multi-line
-      // description returned by addDescriptionOf are all indented equally
-      // which makes the output easier to read for this case.
-      return mismatchDescription
-          .add('expected golden file \'$path\' with normalized value\n  ')
-          .addDescriptionOf(_value)
-          .add('\nbut got\n  ')
-          .addDescriptionOf(actualValue)
-          .add('\nTo update golden files run:\n')
-          .add('  tool/update_goldens.sh"\n');
+  Description describeMismatch(
+    dynamic item,
+    Description mismatchDescription,
+    Map<dynamic, dynamic> matchState,
+    bool verbose,
+  ) {
+    if (!matchState.containsKey(_mismatchedValueKey)) {
+      return mismatchDescription;
     }
-    return null;
+
+    final String? actualValue = matchState[_mismatchedValueKey];
+    // Leading whitespace is added so that lines in the multi-line
+    // description returned by addDescriptionOf are all indented equally
+    // which makes the output easier to read for this case.
+    return mismatchDescription
+        .add('expected golden file \'$path\' with normalized value\n  ')
+        .addDescriptionOf(_value)
+        .add('\nbut got\n  ')
+        .addDescriptionOf(actualValue)
+        .add('\nTo update golden files run:\n')
+        .add('  tool/update_goldens.sh"\n');
   }
+}
+
+class _AlwaysTrueMatcher extends Matcher {
+  const _AlwaysTrueMatcher();
+
+  @override
+  bool matches(dynamic object, Map<dynamic, dynamic> matchState) {
+    return true;
+  }
+
+  @override
+  Description describe(Description description) {
+    return description;
+  }
+}
+
+// TODO(https://github.com/flutter/devtools/issues/4060): add a check to the
+// bots script that verifies we never use [matchesGoldenFile] directly.
+/// A matcher for testing DevTools goldens which will always return true when
+/// the 'SHOULD_TEST_GOLDENS' environment variable is set to false.
+///
+/// This should always be used instead of [matchesGoldenFile] for testing
+/// DevTools golden images.
+///
+/// We configure this environment variable on the bots, where we have bots that
+/// test against a pinned flutter version and bots that test against Flutter
+/// master. To avoid noise on the bots, we only want to test goldens against the
+/// pinned version of Flutter that we build DevTools from (see
+/// flutter-version.txt).
+Matcher matchesDevToolsGolden(Object key) {
+  const shouldCheckForMatchingGoldens = bool.fromEnvironment(
+    'SHOULD_TEST_GOLDENS',
+    defaultValue: true,
+  );
+  if (shouldCheckForMatchingGoldens && io.Platform.isMacOS) {
+    return matchesGoldenFile(key);
+  }
+  return const _AlwaysTrueMatcher();
 }

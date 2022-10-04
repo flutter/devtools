@@ -4,7 +4,8 @@
 
 import 'dart:convert';
 
-import 'class_heap_detail_stats.dart';
+import 'package:vm_service/vm_service.dart';
+
 import 'heap_sample.dart';
 
 abstract class DecodeEncode<T> {
@@ -30,19 +31,14 @@ abstract class MemoryJson<T> implements DecodeEncode<T> {
   }) {
     final Map<String, dynamic> decodedMap =
         argDecodedMap == null ? jsonDecode(argJsonString) : argDecodedMap;
-    final Map<String, dynamic> samplesPayload = decodedMap['$payloadName'];
+    Map<String, dynamic> payload = decodedMap[payloadName];
 
-    final payloadVersion = samplesPayload['$jsonVersionField'];
-    final payloadDevToolsScreen = samplesPayload['$jsonDevToolsScreenField'];
+    int payloadVersion = payload[jsonVersionField];
+    final payloadDevToolsScreen = payload[jsonDevToolsScreenField];
 
     if (payloadVersion != version) {
-      // TODO(terry): Convert Payload TBD - only one version today.
-      // TODO(terry): Notify user the file is being converted.
-      // TODO(terry): Consider moving config_specific/logger/ into shared to
-      //              use logger instead of print.
-      print(
-          'WARNING: Unable to convert JSON memory file payload version=$payloadVersion.');
-      // TODO(terry): After conversion update payloadVersion to version;
+      payload = upgradeToVersion(payload, payloadVersion);
+      payloadVersion = version;
     }
 
     _memoryPayload = payloadDevToolsScreen == devToolsScreenValueMemory;
@@ -51,12 +47,17 @@ abstract class MemoryJson<T> implements DecodeEncode<T> {
     // Any problem return (data is empty).
     if (!isMatchedVersion || !isMemoryPayload) return;
 
-    final List dynamicList = samplesPayload['$jsonDataField'];
+    final List dynamicList = payload[jsonDataField];
     for (var index = 0; index < dynamicList.length; index++) {
-      final sample = fromJson(dynamicList[index]);
+      final sample = fromJson(dynamicList[index] as Map<String, dynamic>);
       data.add(sample);
     }
   }
+
+  Map<String, dynamic> upgradeToVersion(
+    Map<String, dynamic> payload,
+    int oldVersion,
+  );
 
   late final int _payloadVersion;
 
@@ -165,6 +166,15 @@ class SamplesMemoryJson extends MemoryJson<HeapSample> {
   @override
   HeapSample fromJson(Map<String, dynamic> json) => HeapSample.fromJson(json);
 
+  @override
+  Map<String, dynamic> upgradeToVersion(
+    Map<String, dynamic> payload,
+    int oldVersion,
+  ) =>
+      throw UnimplementedError(
+        '${HeapSample.version} is the only valid HeapSample version',
+      );
+
   /// Given a list of HeapSample, encode as a Json string.
   static String encodeList(List<HeapSample> data) {
     final samplesJson = SamplesMemoryJson();
@@ -191,10 +201,10 @@ class SamplesMemoryJson extends MemoryJson<HeapSample> {
 ///
 /// {
 ///   "allocations": {
-///     "version": 1,
+///     "version": 2,
 ///     "dartDevToolsScreen": "memory"
 ///     "data": [
-///       Encoded ClassHeapDetailStats see section below.
+///       Encoded ClassHeapStats see section below.
 ///     ]
 ///   }
 /// }
@@ -203,7 +213,7 @@ class SamplesMemoryJson extends MemoryJson<HeapSample> {
 /// =======================================
 /// {
 ///   "allocations": {
-///     "version": 1,
+///     "version": 2,
 ///     "dartDevToolsScreen": "memory"
 ///     "data": [
 ///
@@ -215,10 +225,19 @@ class SamplesMemoryJson extends MemoryJson<HeapSample> {
 ///          name: "AClassName"
 ///        },
 ///       "instancesCurrent": 100,
-///       "instancesDelta": 0,
+///       "instancesAccumulated": 0,
 ///       "bytesCurrent": 55,
-///       "bytesDelta": 5,
-///       "isStacktraced": false,
+///       "accumulatedSize": 5,
+///       "_new": [
+///         100,
+///         50,
+///         5
+///       ],
+///       "_old": [
+///         0,
+///         0,
+///         0
+///       ]
 ///     },
 ///
 /// Trailer portion (memoryJsonTrailer) e.g.,
@@ -226,7 +245,7 @@ class SamplesMemoryJson extends MemoryJson<HeapSample> {
 ///     ]
 ///   }
 /// }
-class AllocationMemoryJson extends MemoryJson<ClassHeapDetailStats> {
+class AllocationMemoryJson extends MemoryJson<ClassHeapStats> {
   AllocationMemoryJson();
 
   /// Given a JSON string representing an array of HeapSample, decode to a
@@ -245,22 +264,62 @@ class AllocationMemoryJson extends MemoryJson<ClassHeapDetailStats> {
 
   /// Encoded ClassHeapDetailStats
   @override
-  String encode(ClassHeapDetailStats sample) => jsonEncode(sample);
+  String encode(ClassHeapStats sample) => jsonEncode(sample.json);
 
   /// More than one Encoded ClassHeapDetailStats, add a comma and the Encoded ClassHeapDetailStats entry.
   @override
-  String encodeAnother(ClassHeapDetailStats sample) =>
-      ',\n${jsonEncode(sample)}';
+  String encodeAnother(ClassHeapStats sample) =>
+      ',\n${jsonEncode(sample.json)}';
 
   @override
-  ClassHeapDetailStats fromJson(Map<String, dynamic> json) =>
-      ClassHeapDetailStats.fromJson(json);
+  ClassHeapStats fromJson(Map<String, dynamic> json) =>
+      ClassHeapStats.parse(json)!;
 
   @override
-  int get version => ClassHeapDetailStats.version;
+  Map<String, dynamic> upgradeToVersion(
+    Map<String, dynamic> payload,
+    int oldVersion,
+  ) {
+    assert(oldVersion < version);
+    assert(oldVersion == 1);
+    final updatedPayload = Map<String, dynamic>.of(payload);
+    updatedPayload['version'] = version;
+    final oldData = payload['data'];
+    updatedPayload['data'] = [
+      for (final data in oldData)
+        {
+          'type': 'ClassHeapStats',
+          'class': <String, dynamic>{
+            'type': '@Class',
+            ...data['class'],
+          },
+          'bytesCurrent': data['bytesCurrent'],
+          'accumulatedSize': data['bytesDelta'],
+          'instancesCurrent': data['instancesCurrent'],
+          'instancesAccumulated': data['instancesDelta'],
+          // new and old space data is just reported as a list of ints
+          '_new': <int>[
+            // # of instances in new space.
+            data['instancesCurrent'],
+            // shallow memory consumption in new space.
+            data['bytesCurrent'],
+            // external memory consumption.
+            0,
+          ],
+          // We'll just fudge the old space numbers.
+          '_old': const <int>[0, 0, 0],
+        }
+    ];
+    return updatedPayload;
+  }
+
+  @override
+  int get version => allocationFormatVersion;
+
+  static const int allocationFormatVersion = 2;
 
   /// Given a list of HeapSample, encode as a Json string.
-  static String encodeList(List<ClassHeapDetailStats> data) {
+  static String encodeList(List<ClassHeapStats> data) {
     final allocationJson = AllocationMemoryJson();
 
     final result = StringBuffer();
@@ -278,7 +337,7 @@ class AllocationMemoryJson extends MemoryJson<ClassHeapDetailStats> {
 
   /// Allocations Header portion:
   static String get header => '{"$_jsonAllocationPayloadField": {'
-      '"${MemoryJson.jsonVersionField}": ${ClassHeapDetailStats.version}, '
+      '"${MemoryJson.jsonVersionField}": $allocationFormatVersion, '
       '"${MemoryJson.jsonDevToolsScreenField}": "${MemoryJson.devToolsScreenValueMemory}", '
       '"${MemoryJson.jsonDataField}": [\n';
 }

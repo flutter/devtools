@@ -27,16 +27,19 @@ function flutter {
 }
 
 # Get Flutter.
-echo "Cloning the Flutter $CHANNEL branch"
-git clone https://github.com/flutter/flutter.git --branch $CHANNEL ./flutter-sdk
+echo "Cloning the Flutter $PINNED_FLUTTER_CHANNEL branch"
+git clone https://github.com/flutter/flutter.git --branch $PINNED_FLUTTER_CHANNEL ./flutter-sdk
 
-if [ "$CHANNEL" = "stable" ]; then
-    # Set the suffix so we use stable goldens.
-    export DEVTOOLS_GOLDENS_SUFFIX="_stable"
+if [ "$FLUTTER_TEST_ENV" = "pinned" ]; then
+  export DART_DEFINE_ARGS="--dart-define=SHOULD_TEST_GOLDENS=true"
 else
-    # Set the suffix so we use the non-stable goldens
-    export DEVTOOLS_GOLDENS_SUFFIX=""
+  echo "Cloning the Flutter $FLUTTER_TEST_ENV branch to use for test apps"
+  git clone https://github.com/flutter/flutter.git --branch $FLUTTER_TEST_ENV ./flutter-sdk-$FLUTTER_TEST_ENV
+  export DART_DEFINE_ARGS="--dart-define=SHOULD_TEST_GOLDENS=false --dart-define=FLUTTER_CMD=`pwd`/flutter-sdk-$FLUTTER_TEST_ENV/bin/flutter"
 fi
+
+echo "Testing with Flutter test environment: $FLUTTER_TEST_ENV"
+echo "Flutter tests will be ran with args: $DART_DEFINE_ARGS"
 
 # Look in the dart bin dir first, then the flutter one, then the one for the
 # devtools repo. We don't use the dart script from flutter/bin as that script
@@ -68,12 +71,14 @@ dart --version
 export FLUTTER_VERSION=$(flutter --version | awk -F '•' 'NR==1{print $1}' | awk '{print $2}')
 echo "Flutter version is '$FLUTTER_VERSION'"
 
-# Some integration tests assume the devtools package is up to date and located
-# adjacent to the devtools_app package.
-pushd packages/devtools
-    # We want to make sure that devtools is retrievable with regular pub.
-    flutter pub get
+# Generate code.
+pushd packages/devtools_app
+flutter pub get
 popd
+pushd packages/devtools_test
+flutter pub get
+popd
+bash tool/generate_code.sh
 
 # Change the CI to the packages/devtools_app directory.
 pushd packages/devtools_app
@@ -84,12 +89,10 @@ if [ "$BOT" = "main" ]; then
     # Provision our packages.
     flutter pub get
 
-    if [ "$CHANNEL" = "master" ]; then
-        # Verify that dart format has been run.
-        echo "Checking formatting..."
-        # Here, we use the dart instance from the flutter sdk.
-        $(dirname $(which flutter))/dart format --output=none --set-exit-if-changed .
-    fi
+    # Verify that dart format has been run.
+    echo "Checking formatting..."
+    # Here, we use the dart instance from the flutter sdk.
+    $(dirname $(which flutter))/dart format --output=none --set-exit-if-changed .
 
     # Make sure the app versions are in sync.
     repo_tool repo-check
@@ -98,23 +101,36 @@ if [ "$BOT" = "main" ]; then
     dart analyze --fatal-infos
 
     # Ensure we can build the app.
-    flutter pub run build_runner build -o web:build --release
+    flutter build web --release
+
+    # Test the devtools_shared package tests on the main bot.
+    popd
+    pushd packages/devtools_shared
+    echo `pwd`
+
+    flutter test test/
+    popd
+
+    # Change the directory back to devtools_app.
+    pushd packages/devtools_app
+    echo `pwd`
 
 elif [ "$BOT" = "test_ddc" ]; then
 
+    # Provision our packages.
     flutter pub get
 
     # TODO(https://github.com/flutter/flutter/issues/43538): Remove workaround.
     flutter config --enable-web
     flutter build web --pwa-strategy=none --no-tree-shake-icons
 
-    # Run every test except for integration_tests.
-    # The flutter tool doesn't support excluding a specific set of targets,
-    # so we explicitly provide them.
+    # TODO(https://github.com/flutter/devtools/issues/1987): once this issue is fixed,
+    # we may need to explicitly exclude running integration_tests here (this is what we
+    # used to do when integration tests were enabled).
     if [ "$PLATFORM" = "vm" ]; then
-        flutter test test/*.dart test/{core,fixtures}/
+        flutter test $DART_DEFINE_ARGS test/
     elif [ "$PLATFORM" = "chrome" ]; then
-        flutter test --platform chrome test/*.dart test/{core,fixtures}/
+        flutter test --platform chrome $DART_DEFINE_ARGS test/
     else
         echo "unknown test platform"
         exit 1
@@ -126,13 +142,13 @@ elif [ "$BOT" = "test_dart2js" ]; then
     flutter config --enable-web
     flutter build web --pwa-strategy=none --no-tree-shake-icons
 
-    # Run every test except for integration_tests.
-    # The flutter tool doesn't support excluding a specific set of targets,
-    # so we explicitly provide them.
+    # TODO(https://github.com/flutter/devtools/issues/1987): once this issue is fixed,
+    # we may need to explicitly exclude running integration_tests here (this is what we
+    # used to do when integration tests were enabled).
     if [ "$PLATFORM" = "vm" ]; then
-        WEBDEV_RELEASE=true flutter test test/*.dart test/{core,fixtures}/
+        WEBDEV_RELEASE=true flutter test $DART_DEFINE_ARGS test/
     elif [ "$PLATFORM" = "chrome" ]; then
-        WEBDEV_RELEASE=true flutter test --platform chrome test/*.dart test/{core,fixtures}/
+        WEBDEV_RELEASE=true flutter test --platform chrome $DART_DEFINE_ARGS test/
     else
         echo "unknown test platform"
         exit 1
@@ -145,18 +161,18 @@ elif [ "$BOT" = "integration_ddc" ]; then
     flutter pub get
     flutter config --enable-web
 
+    # TODO(https://github.com/flutter/devtools/issues/1987): rewrite integration tests.
     # We need to run integration tests with -j1 to run with no concurrency.
-    flutter test -j1 test/integration_tests/
-
-    flutter test -j1 test/integration/
+    # flutter test -j1 $DART_DEFINE_ARGS test/integration_tests/
 
 elif [ "$BOT" = "integration_dart2js" ]; then
 
     flutter pub get
     flutter config --enable-web
 
+    # TODO(https://github.com/flutter/devtools/issues/1987): rewrite integration tests.
     # We need to run integration tests with -j1 to run with no concurrency.
-    WEBDEV_RELEASE=true flutter test -j1 test/integration_tests/
+    # WEBDEV_RELEASE=true flutter test -j1 $DART_DEFINE_ARGS test/integration_tests/
 
 elif [ "$BOT" = "packages" ]; then
 

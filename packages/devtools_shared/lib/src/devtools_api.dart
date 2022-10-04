@@ -44,6 +44,14 @@ const String apiGetSurveyShownCount = '${apiPrefix}getSurveyShownCount';
 const String apiIncrementSurveyShownCount =
     '${apiPrefix}incrementSurveyShownCount';
 
+const String lastReleaseNotesVersionPropertyName = 'lastReleaseNotesVersion';
+
+/// Returns the last DevTools version for which we have shown release notes.
+const String apiGetLastReleaseNotesVersion = '${apiPrefix}getLastReleaseNotesVersion';
+
+/// Sets the last DevTools version for which we have shown release notes.
+const String apiSetLastReleaseNotesVersion = '${apiPrefix}setLastReleaseNotesVersion';
+
 /// Returns the base app size file, if present.
 const String apiGetBaseAppSizeFile = '${apiPrefix}getBaseAppSizeFile';
 

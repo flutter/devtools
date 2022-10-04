@@ -23,12 +23,12 @@
 part of http;
 
 class Cookie {
-  String _name;
-  String _value;
-  DateTime expires;
-  int maxAge;
-  String domain;
-  String path;
+  String? _name;
+  String? _value;
+  DateTime? expires;
+  int? maxAge;
+  String? domain;
+  String? path;
   bool httpOnly = false;
   bool secure = false;
 
@@ -37,15 +37,15 @@ class Cookie {
         _value = _validateValue(value),
         httpOnly = true;
 
-  String get name => _name;
-  String get value => _value;
+  String? get name => _name;
+  String? get value => _value;
 
-  set name(String newName) {
+  set name(String? newName) {
     _validateName(newName);
     _name = newName;
   }
 
-  set value(String newValue) {
+  set value(String? newValue) {
     _validateValue(newValue);
     _value = newValue;
   }
@@ -131,7 +131,7 @@ class Cookie {
     }
 
     _name = _validateName(parseName());
-    if (done() || _name.length == 0) {
+    if (done() || _name!.length == 0) {
       throw new HttpException("Failed to parse header value [$s]");
     }
     index++; // Skip the = character.
@@ -150,7 +150,7 @@ class Cookie {
     if (expires != null) {
       sb
         ..write("; Expires=")
-        ..write(HttpDate.format(expires));
+        ..write(HttpDate.format(expires!));
     }
     if (maxAge != null) {
       sb
@@ -172,7 +172,7 @@ class Cookie {
     return sb.toString();
   }
 
-  static String _validateName(String newName) {
+  static String _validateName(String? newName) {
     const separators = const [
       "(",
       ")",
@@ -199,15 +199,16 @@ class Cookie {
           codeUnit >= 127 ||
           separators.indexOf(newName[i]) >= 0) {
         throw new FormatException(
-            "Invalid character in cookie name, code unit: '$codeUnit'",
-            newName,
-            i);
+          "Invalid character in cookie name, code unit: '$codeUnit'",
+          newName,
+          i,
+        );
       }
     }
     return newName;
   }
 
-  static String _validateValue(String newValue) {
+  static String _validateValue(String? newValue) {
     if (newValue == null) throw new ArgumentError.notNull("value");
     // Per RFC 6265, consider surrounding "" as part of the value, but otherwise
     // double quotes are not allowed.
@@ -228,9 +229,10 @@ class Cookie {
           (codeUnit >= 0x3C && codeUnit <= 0x5B) ||
           (codeUnit >= 0x5D && codeUnit <= 0x7E))) {
         throw new FormatException(
-            "Invalid character in cookie value, code unit: '$codeUnit'",
-            newValue,
-            i);
+          "Invalid character in cookie value, code unit: '$codeUnit'",
+          newValue,
+          i,
+        );
       }
     }
     return newValue;

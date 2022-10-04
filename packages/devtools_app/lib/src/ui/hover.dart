@@ -7,10 +7,12 @@ import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import '../eval_on_dart_library.dart';
-import '../theme.dart';
-import '../utils.dart';
+import '../shared/common_widgets.dart';
+import '../shared/eval_on_dart_library.dart';
+import '../shared/theme.dart';
+import '../shared/utils.dart';
 import 'utils.dart';
 
 /// Regex for valid Dart identifiers.
@@ -90,12 +92,12 @@ enum HoverCardPosition {
 class HoverCardData {
   HoverCardData({
     this.title,
-    @required this.contents,
-    double width,
+    required this.contents,
+    double? width,
     this.position = HoverCardPosition.cursor,
   }) : width = width ?? HoverCardTooltip.defaultHoverWidth;
 
-  final String title;
+  final String? title;
   final Widget contents;
   final double width;
   final HoverCardPosition position;
@@ -109,70 +111,82 @@ class HoverCardData {
 /// Note that if a mouse has never entered, it will not remove itself.
 class HoverCard {
   HoverCard({
-    @required BuildContext context,
-    @required Widget contents,
-    @required double width,
-    @required Offset position,
-    String title,
+    required BuildContext context,
+    required Widget contents,
+    required double width,
+    required Offset position,
+    required HoverCardController hoverCardController,
+    String? title,
+    double? maxCardHeight,
   }) {
-    final overlayState = Overlay.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
-    final focusColor = Theme.of(context).focusColor;
-    final hoverHeading = colorScheme.hoverTitleTextStyle;
+    maxCardHeight ??= maxHoverCardHeight;
+    final overlayState = Overlay.of(context)!;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final focusColor = theme.focusColor;
+    final hoverHeading = theme.hoverTitleTextStyle;
 
-    _overlayEntry = OverlayEntry(builder: (context) {
-      return Positioned(
-        left: position.dx,
-        top: position.dy,
-        child: MouseRegion(
-          onExit: (_) {
-            remove();
-          },
-          onEnter: (_) {
-            _hasMouseEntered = true;
-          },
-          child: Container(
-            padding: const EdgeInsets.all(denseSpacing),
-            decoration: BoxDecoration(
-              color: colorScheme.defaultBackgroundColor,
-              border: Border.all(
-                color: focusColor,
-                width: hoverCardBorderWidth,
+    _overlayEntry = OverlayEntry(
+      builder: (context) {
+        return Positioned(
+          left: position.dx,
+          top: position.dy,
+          child: MouseRegion(
+            onExit: (_) {
+              hoverCardController.removeHoverCard(this);
+            },
+            onEnter: (_) {
+              _hasMouseEntered = true;
+            },
+            child: Container(
+              padding: const EdgeInsets.all(denseSpacing),
+              decoration: BoxDecoration(
+                color: colorScheme.defaultBackgroundColor,
+                border: Border.all(
+                  color: focusColor,
+                  width: hoverCardBorderWidth,
+                ),
+                borderRadius: BorderRadius.circular(defaultBorderRadius),
               ),
-              borderRadius: BorderRadius.circular(defaultBorderRadius),
-            ),
-            width: width,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (title != null) ...[
-                  Container(
-                    width: width,
-                    child: Text(
-                      title,
-                      overflow: TextOverflow.ellipsis,
-                      style: hoverHeading,
-                      textAlign: TextAlign.center,
+              width: width,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (title != null) ...[
+                    Container(
+                      width: width,
+                      child: Text(
+                        title,
+                        overflow: TextOverflow.ellipsis,
+                        style: hoverHeading,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    Divider(color: theme.hoverTextStyle.color),
+                  ],
+                  SingleChildScrollView(
+                    child: Container(
+                      constraints: BoxConstraints(maxHeight: maxCardHeight!),
+                      child: contents,
                     ),
                   ),
-                  Divider(color: colorScheme.hoverTextStyle.color),
                 ],
-                contents,
-              ],
+              ),
             ),
           ),
-        ),
-      );
-    });
+        );
+      },
+    );
     overlayState.insert(_overlayEntry);
   }
 
   HoverCard.fromHoverEvent({
-    @required BuildContext context,
-    @required PointerHoverEvent event,
-    @required Widget contents,
-    @required double width,
-    String title,
+    required BuildContext context,
+    required PointerHoverEvent event,
+    required Widget contents,
+    required double width,
+    required HoverCardController hoverCardController,
+    String? title,
   }) : this(
           context: context,
           contents: contents,
@@ -182,9 +196,10 @@ class HoverCard {
             event.position.dy + _hoverYOffset,
           ),
           title: title,
+          hoverCardController: hoverCardController,
         );
 
-  OverlayEntry _overlayEntry;
+  late OverlayEntry _overlayEntry;
 
   bool _isRemoved = false;
 
@@ -194,8 +209,13 @@ class HoverCard {
   ///
   /// The HoverCard will not be removed if the mouse is currently inside the
   /// widget.
-  void maybeRemove() {
-    if (!_hasMouseEntered) remove();
+  /// Returns whether or not the HoverCard was removed.
+  bool maybeRemove() {
+    if (!_hasMouseEntered) {
+      remove();
+      return true;
+    }
+    return false;
   }
 
   /// Removes the HoverCard even if the mouse is in the corresponding mouse
@@ -206,14 +226,69 @@ class HoverCard {
   }
 }
 
+/// Ensures that only one [HoverCard] is ever displayed at a time.
+class HoverCardController {
+  /// The card that is currenty being displayed.
+  HoverCard? _currentHoverCard;
+
+  /// Sets [hoverCard] as the most recently displayed [HoverCard].
+  ///
+  /// [hoverCard] is the most recently displayed [HoverCard].
+  void set({required HoverCard hoverCard}) {
+    _currentHoverCard?.remove();
+    _currentHoverCard = hoverCard;
+  }
+
+  /// If the mouse is outside of [_currentHoverCard] then then it will be removed.
+  void maybeRemoveHoverCard(HoverCard hoverCard) {
+    if (isHoverCardStillActive(hoverCard)) {
+      final wasRemoved = _currentHoverCard?.maybeRemove();
+      if (wasRemoved == true) {
+        _currentHoverCard = null;
+      }
+    }
+  }
+
+  /// Remove [hoverCard] if it is currently active.
+  void removeHoverCard(HoverCard hoverCard) {
+    if (isHoverCardStillActive(hoverCard)) {
+      _currentHoverCard?.remove();
+      _currentHoverCard = null;
+    }
+  }
+
+  /// Checks if the [hoverCard] is still the active [HoverCard].
+  bool isHoverCardStillActive(HoverCard hoverCard) {
+    return _currentHoverCard == hoverCard;
+  }
+}
+
 /// A hover card based tooltip.
 class HoverCardTooltip extends StatefulWidget {
-  const HoverCardTooltip({
-    @required this.enabled,
-    @required this.onHover,
-    @required this.child,
+  /// A [HoverCardTooltip] that generates it's [HoverCardData] asynchronously.
+  ///
+  /// [asyncGenerateHoverCardData] is used to generate the data that will
+  /// display in the final [HoverCard]. While that data is being generated,
+  /// a [HoverCard] with a spinner will show. If any [HoverCardData] returned
+  /// from [asyncGenerateHoverCardData] the spinner [HoverCard] will be replaced
+  /// with one containing the generated [HoverCardData].
+  const HoverCardTooltip.async({
+    required this.enabled,
+    required this.asyncGenerateHoverCardData,
+    required this.child,
     this.disposable,
-  });
+  }) : generateHoverCardData = null;
+
+  /// A [HoverCardTooltip] that generates it's [HoverCardData] synchronously.
+  ///
+  /// The [HoverCardData] generated from [generateHoverCardData] will be
+  /// displayed in a [HoverCard].
+  const HoverCardTooltip.sync({
+    required this.enabled,
+    required this.generateHoverCardData,
+    required this.child,
+    this.disposable,
+  }) : asyncGenerateHoverCardData = null;
 
   static const _hoverDelay = Duration(milliseconds: 500);
   static double get defaultHoverWidth => scaleByFontFactor(450.0);
@@ -221,13 +296,27 @@ class HoverCardTooltip extends StatefulWidget {
   /// Whether the tooltip is currently enabled.
   final bool Function() enabled;
 
-  /// Data to display when hovering over a particular point.
-  final Future<HoverCardData> Function(PointerHoverEvent event) onHover;
+  /// The callback that is used when the [HoverCard]'s data is only available
+  /// asynchronously.
+  final Future<HoverCardData?> Function({
+    required PointerHoverEvent event,
+
+    /// Returns true if the HoverCard is no longer visible.
+    ///
+    /// Use this callback to short circuit long running tasks.
+    required bool Function() isHoverStale,
+  })? asyncGenerateHoverCardData;
+
+  /// The callback that is used when the [HoverCard]'s data is available
+  /// synchronously.
+  final HoverCardData Function(
+    PointerHoverEvent event,
+  )? generateHoverCardData;
 
   final Widget child;
 
   /// Disposable object to be disposed when the group is closed.
-  final Disposable disposable;
+  final Disposable? disposable;
 
   @override
   _HoverCardTooltipState createState() => _HoverCardTooltipState();
@@ -235,19 +324,27 @@ class HoverCardTooltip extends StatefulWidget {
 
 class _HoverCardTooltipState extends State<HoverCardTooltip> {
   /// A timer that shows a [HoverCard] with an evaluation result when completed.
-  Timer _showTimer;
+  Timer? _showTimer;
 
   /// A timer that removes a [HoverCard] when completed.
-  Timer _removeTimer;
+  Timer? _removeTimer;
 
-  /// Displays the evaluation result of a source code item.
-  HoverCard _hoverCard;
+  HoverCard? _currentHoverCard;
+
+  late HoverCardController _hoverCardController;
 
   void _onHoverExit() {
     _showTimer?.cancel();
     _removeTimer = Timer(HoverCardTooltip._hoverDelay, () {
-      _hoverCard?.maybeRemove();
+      if (_currentHoverCard != null) {
+        _hoverCardController.maybeRemoveHoverCard(_currentHoverCard!);
+      }
     });
+  }
+
+  void _setHoverCard(HoverCard hoverCard) {
+    _hoverCardController.set(hoverCard: hoverCard);
+    _currentHoverCard = hoverCard;
   }
 
   void _onHover(PointerHoverEvent event) {
@@ -258,26 +355,66 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
 
     if (!widget.enabled()) return;
     _showTimer = Timer(HoverCardTooltip._hoverDelay, () async {
-      _hoverCard?.remove();
-      _hoverCard = null;
-      final hoverCardData = await widget.onHover(event);
-      if (!mounted) return;
+      HoverCardData? hoverCardData;
+
+      if (widget.asyncGenerateHoverCardData != null) {
+        assert(widget.generateHoverCardData == null);
+        // The data on the card is fetched asynchronously, so show a spinner
+        // while we wait for it.
+        final spinnerHoverCard = HoverCard.fromHoverEvent(
+          context: context,
+          contents: const CenteredCircularProgressIndicator(),
+          width: HoverCardTooltip.defaultHoverWidth,
+          event: event,
+          hoverCardController: _hoverCardController,
+        );
+
+        _setHoverCard(
+          spinnerHoverCard,
+        );
+
+        // The spinner is showing, we can now generate the HoverCardData
+        hoverCardData = await widget.asyncGenerateHoverCardData!(
+          event: event,
+          isHoverStale: () =>
+              !_hoverCardController.isHoverCardStillActive(spinnerHoverCard),
+        );
+
+        if (!_hoverCardController.isHoverCardStillActive(spinnerHoverCard)) {
+          // The hovercard became stale while fetching it's data. So it should
+          // no longer be shown.
+          return;
+        }
+      } else {
+        assert(widget.generateHoverCardData != null);
+
+        hoverCardData = widget.generateHoverCardData!(event);
+      }
+
       if (hoverCardData != null) {
+        if (!mounted) return;
+
         if (hoverCardData.position == HoverCardPosition.cursor) {
-          _hoverCard = HoverCard.fromHoverEvent(
-            context: context,
-            title: hoverCardData.title,
-            contents: hoverCardData.contents,
-            width: hoverCardData.width,
-            event: event,
+          _setHoverCard(
+            HoverCard.fromHoverEvent(
+              context: context,
+              title: hoverCardData.title,
+              contents: hoverCardData.contents,
+              width: hoverCardData.width,
+              event: event,
+              hoverCardController: _hoverCardController,
+            ),
           );
         } else {
-          _hoverCard = HoverCard(
-            context: context,
-            title: hoverCardData.title,
-            contents: hoverCardData.contents,
-            width: hoverCardData.width,
-            position: _calculateTooltipPosition(hoverCardData.width),
+          _setHoverCard(
+            HoverCard(
+              context: context,
+              title: hoverCardData.title,
+              contents: hoverCardData.contents,
+              width: hoverCardData.width,
+              position: _calculateTooltipPosition(hoverCardData.width),
+              hoverCardController: _hoverCardController,
+            ),
           );
         }
       }
@@ -286,7 +423,7 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
 
   Offset _calculateTooltipPosition(double width) {
     final overlayBox =
-        Overlay.of(context).context.findRenderObject() as RenderBox;
+        Overlay.of(context)!.context.findRenderObject() as RenderBox;
     final box = context.findRenderObject() as RenderBox;
 
     final maxX = overlayBox.size.width - _hoverMargin - width;
@@ -307,9 +444,19 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
   void dispose() {
     _showTimer?.cancel();
     _removeTimer?.cancel();
-    _hoverCard?.remove();
+    if (_currentHoverCard != null) {
+      // If the widget that triggered the hovercard is disposed, then the
+      // HoverCard should be removed from the screen
+      _hoverCardController.removeHoverCard(_currentHoverCard!);
+    }
     widget.disposable?.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _hoverCardController = Provider.of<HoverCardController>(context);
   }
 
   @override

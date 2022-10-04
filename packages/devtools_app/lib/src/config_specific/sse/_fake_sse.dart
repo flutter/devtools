@@ -12,7 +12,7 @@ import 'dart:async';
 class SseClient {
   SseClient(String endpoint);
 
-  Stream get stream => null;
+  Stream? get stream => null;
 
-  StreamSink get sink => null;
+  StreamSink? get sink => null;
 }

@@ -7,20 +7,31 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'src/analytics/analytics_controller.dart';
 import 'src/app.dart';
-import 'src/app_error_handling.dart';
 import 'src/config_specific/framework_initialize/framework_initialize.dart';
 import 'src/config_specific/ide_theme/ide_theme.dart';
-import 'src/debugger/syntax_highlighter.dart';
+import 'src/config_specific/url/url.dart';
+import 'src/config_specific/url_strategy/url_strategy.dart';
 import 'src/extension_points/extensions_base.dart';
 import 'src/extension_points/extensions_external.dart';
-import 'src/globals.dart';
-import 'src/preferences.dart';
-import 'src/provider/riverpod_error_logger_observer.dart';
+import 'src/framework/app_error_handling.dart';
+import 'src/primitives/url_utils.dart';
+import 'src/screens/debugger/syntax_highlighter.dart';
+import 'src/screens/provider/riverpod_error_logger_observer.dart';
+import 'src/shared/globals.dart';
+import 'src/shared/preferences.dart';
 
 void main() async {
+  // Before switching to URL path strategy, check if this URL is in the legacy
+  // fragment format and redirect if necessary.
+  if (_handleLegacyUrl()) return;
+
+  usePathUrlStrategy();
+
   // Initialize the framework before we do anything else, otherwise the
   // StorageController won't be initialized and preferences won't be loaded.
   await initializeFramework();
+
+  setGlobal(IdeTheme, getIdeTheme());
 
   final preferences = PreferencesController();
   // Wait for preferences to load before rendering the app to avoid a flash of
@@ -32,7 +43,6 @@ void main() async {
 
   // Set the extension points global.
   setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
-  setGlobal(IdeTheme, getIdeTheme());
 
   setupErrorHandling(() async {
     // Run the app.
@@ -43,4 +53,22 @@ void main() async {
       ),
     );
   });
+}
+
+/// Checks if the request is for a legacy URL and if so, redirects to the new
+/// equivalent.
+///
+/// Returns `true` if a redirect was performed, in which case normal app
+/// initialization should be skipped.
+bool _handleLegacyUrl() {
+  final url = getWebUrl();
+  if (url == null) return false;
+
+  final newUrl = mapLegacyUrl(url);
+  if (newUrl != null) {
+    webRedirect(newUrl);
+    return true;
+  }
+
+  return false;
 }

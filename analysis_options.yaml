@@ -72,7 +72,6 @@ linter:
     - empty_statements
     - hash_and_equals
     - implementation_imports
-    # - invariant_booleans # https://github.com/flutter/flutter/issues/5790
     - iterable_contains_unrelated_type
     # - join_return_with_assignment # not yet tested
     - library_names
@@ -114,8 +113,10 @@ linter:
     - prefer_relative_imports
     - prefer_single_quotes
     - prefer_typing_uninitialized_variables
+    - require_trailing_commas
     - recursive_getters
     - slash_for_doc_comments
+    - sort_child_properties_last
     - sort_constructors_first
     - sort_unnamed_constructors_first
     - test_types_in_equals
@@ -135,6 +136,7 @@ linter:
     - unnecessary_statements
     - unnecessary_this
     - unrelated_type_equality_checks
+    - unsafe_html
     - use_rethrow_when_possible
     # - use_setters_to_change_properties # not yet tested
     # - use_string_buffers # https://github.com/dart-lang/linter/pull/664

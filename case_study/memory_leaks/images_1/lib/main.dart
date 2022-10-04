@@ -6,10 +6,11 @@ import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
   // This widget is the root of your application.
 
   @override
@@ -28,7 +29,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key key, this.title}) : super(key: key);
+  const MyHomePage({Key? key, this.title = ""}) : super(key: key);
 
   final String title;
 
@@ -52,7 +53,7 @@ class ObjectWithUniqueId {
 
 class MyHomePageState extends State<MyHomePage>
     with SingleTickerProviderStateMixin {
-  TabController _tabController;
+  late TabController _tabController;
 
   List tabs = ['1', '2', '3'];
 
@@ -76,7 +77,7 @@ class MyHomePageState extends State<MyHomePage>
       'param': imageUrl,
     });
 
-    if (imageChunkEvent == null) return null;
+    // if (imageChunkEvent == null) return null;
 
     final recordLoading = loadedImages.putIfAbsent(imageUrl, () {
       developer.log(
@@ -155,7 +156,7 @@ class MyHomePageState extends State<MyHomePage>
             loadingBuilder: (
               BuildContext context,
               Widget child,
-              ImageChunkEvent loadingProgress,
+              ImageChunkEvent? loadingProgress,
             ) {
               if (loadingProgress == null) return child;
               return recordLoadedImage(loadingProgress, imgUrl);
@@ -169,12 +170,14 @@ class MyHomePageState extends State<MyHomePage>
   void _jumpNewPage() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => SecondScreen()),
+      MaterialPageRoute(builder: (context) => const SecondScreen()),
     );
   }
 }
 
-class SecondScreen extends MyHomePage {}
+class SecondScreen extends MyHomePage {
+  const SecondScreen({Key? key}) : super(key: key);
+}
 
 // Loaded images. key is ImageUrl and value is the ImageChunkEvent (total and cumulative bytes loaded).
 final loadedImages = <String, ImageChunkEvent>{};

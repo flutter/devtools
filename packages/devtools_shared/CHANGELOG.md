@@ -1,3 +1,10 @@
+## 2.11.3
+Check for CHROME_PATH env variable in devtools_shared [#3805](https://github.com/flutter/devtools/pull/3805)
+
+## 2.11.1
+- Update CLI test driver with the correct Dart VM Service prefix
+## 2.11.0
+- Create `devtools_test_utils.dart`, which exposes shared test infrastructure.  
 ## 2.3.0
 - Migrate to null safety.
 ## 0.2.3

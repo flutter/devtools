@@ -47,9 +47,9 @@ const sinceArg = 'since-tag';
 /// version number will be used for the CHANGELOG entry.
 ///
 /// If `--since-tag` is specified from the command
-/// (e.g. dart tool/bin/repo_tool.dart generate-changelog --version=2.5.2), this
-/// tag version will be used as the lower bound for commit history instead of
-/// using the most recent tagged version as the lower bound.
+/// (e.g. dart tool/bin/repo_tool.dart generate-changelog --since-tag=v2.5.2),
+/// this tag version will be used as the lower bound for commit history instead
+/// of using the most recent tagged version as the lower bound.
 class GenerateChangelogCommand extends Command {
   GenerateChangelogCommand() {
     argParser
@@ -62,6 +62,13 @@ class GenerateChangelogCommand extends Command {
         help: 'Specify the name of the tag to mark the lower bound',
       );
   }
+
+  static const _authorKey = 'author';
+  static const _commitKey = 'commit';
+  static const _dateKey = 'date';
+  static const _messageKey = 'message';
+  static const _nameKey = 'name';
+  static const _shaKey = 'sha';
 
   // You can authorize your access if you run into a github rate limit.
   // Don't check in your passwords or auth tokens.
@@ -97,7 +104,7 @@ class GenerateChangelogCommand extends Command {
 
     bool isDevBuild(String tagName) => tagName.contains('dev');
     bool isCherryPickRelease(String tagName) => tagName.contains('+');
-    String nameOf(tag) => tag['name'];
+    String nameOf(tag) => tag[_nameKey];
 
     Map<String, dynamic>? closestTag;
     if (sinceTag != null) {
@@ -113,42 +120,62 @@ class GenerateChangelogCommand extends Command {
       }).first;
     }
 
-    final commitInfo = closestTag['commit'] as Map<String, dynamic>;
-    print('Getting the date of the tagged commit for ${closestTag['name']}...');
+    final commitInfo = closestTag[_commitKey] as Map<String, dynamic>;
+    print(
+      'Getting the date of the tagged commit for ${closestTag[_nameKey]}...',
+    );
     final taggedCommit = jsonDecode((await http.get(Uri.https(
       '${auth}api.github.com',
-      '/repos/flutter/devtools/commits/${commitInfo['sha']}',
+      '/repos/flutter/devtools/commits/${commitInfo[_shaKey]}',
     )))
         .body);
 
-    final commitDate = taggedCommit['commit']['author']['date'];
+    final commitDate = taggedCommit[_commitKey][_authorKey][_dateKey];
     print(
-        'Adding entries to the changelog for all commits since $commitDate...');
-
-    // TODO(kenz): handle cases where there are more than 100 commits.
-    final uri = Uri.https(
-      '${auth}api.github.com',
-      '/repos/flutter/devtools/commits',
-      {
-        'since': commitDate,
-        'per_page': '100',
-      },
+      'Adding entries to the changelog for all commits since $commitDate...',
     );
-    final commits = jsonDecode((await http.get(uri)).body);
+
     final changes = <String>[];
-    for (var commit in commits) {
-      if (commit['sha'] == taggedCommit['sha']) {
-        print(
-            'Skipping commit ${commit['sha']} because this is the commit of the previous tag');
-        continue;
+
+    // TODO(kenz): consider traversing pages properly instead of using a while
+    // loop.
+    // See https://docs.github.com/en/rest/guides/traversing-with-pagination
+    const maxPerPage = 100;
+    var requestPage = 0;
+    bool lastPageReceived = false;
+    while (!lastPageReceived) {
+      final uri = Uri.https(
+        '${auth}api.github.com',
+        '/repos/flutter/devtools/commits',
+        {
+          'since': commitDate,
+          'per_page': '$maxPerPage',
+          'page': '$requestPage',
+        },
+      );
+      final githubResponse = await http.get(uri);
+      final commits = jsonDecode(githubResponse.body);
+      for (final commit in commits) {
+        if (commit[_shaKey] == taggedCommit[_shaKey]) {
+          print(
+            'Skipping commit ${commit[_shaKey]} because this is the commit of '
+            'the previous tag',
+          );
+          continue;
+        }
+        final message = commit[_commitKey][_messageKey];
+        if (_shouldSkip(commit[_commitKey][_messageKey])) {
+          print('Skipping commit marked to be ignored: $message');
+          continue;
+        }
+        final entry = '* ${_sanitize(commit[_commitKey][_messageKey])}';
+        changes.add(entry);
       }
-      final message = commit['commit']['message'];
-      if (_shouldSkip(commit['commit']['message'])) {
-        print('Skipping commit marked to be ignored: $message');
-        continue;
+
+      requestPage++;
+      if (commits.length < maxPerPage) {
+        lastPageReceived = true;
       }
-      final entry = '* ' + _sanitize(commit['commit']['message']);
-      changes.add(entry);
     }
 
     if (nextVersion != null) {
@@ -167,9 +194,8 @@ class GenerateChangelogCommand extends Command {
           'inserted to any files other than changelog.');
     }
 
-    final changelogFile =
-        File('${repo.repoPath}/packages/devtools/CHANGELOG.md');
-    final output = '## $nextVersion\n' + changes.join('\n') + '\n\n';
+    final changelogFile = File('${repo.repoPath}/CHANGELOG.md');
+    final output = '## $nextVersion\n${changes.join('\n')}\n\n';
     await changelogFile.writeAsString(
       output + changelogFile.readAsStringSync(),
     );
@@ -181,23 +207,31 @@ class GenerateChangelogCommand extends Command {
   }
 
   String _sanitize(String message) {
-    message = message.split('\n').first;
-    message = message.substring(0, 1).toUpperCase() +
-        message.substring(1, message.length);
-    const prPrefix = '(#';
-    final periodNumberIndex = message.lastIndexOf('. $prPrefix');
-    if (periodNumberIndex != -1) {
-      message =
-          message.replaceFirst('. $prPrefix', prPrefix, periodNumberIndex);
+    try {
+      var modifiedMessage = message.split('\n').first;
+      modifiedMessage = modifiedMessage.substring(0, 1).toUpperCase() +
+          modifiedMessage.substring(1, modifiedMessage.length);
+      const prPrefix = '(#';
+      final periodNumberIndex = modifiedMessage.lastIndexOf('. $prPrefix');
+      if (periodNumberIndex != -1) {
+        modifiedMessage = modifiedMessage.replaceFirst(
+          '. $prPrefix',
+          prPrefix,
+          periodNumberIndex,
+        );
+      }
+      final prIndex = modifiedMessage.indexOf(prPrefix);
+      final endPrIndexExclusive = modifiedMessage.lastIndexOf(')');
+      final pr = modifiedMessage.substring(
+        prIndex + prPrefix.length,
+        endPrIndexExclusive,
+      );
+      return '${modifiedMessage.substring(0, prIndex).trim()}'
+          ' [#$pr](https://github.com/flutter/devtools/pull/$pr)';
+    } catch (_) {
+      return '# Something went wrong. Please input this CHANGELOG entry '
+          'manually: "$message"';
     }
-    final prIndex = message.indexOf(prPrefix);
-    final endPrIndexExclusive = message.lastIndexOf(')');
-    final pr = message.substring(
-      prIndex + prPrefix.length,
-      endPrIndexExclusive,
-    );
-    return message.substring(0, prIndex).trim() +
-        ' [#$pr](https://github.com/flutter/devtools/pull/$pr)';
   }
 
   bool _shouldSkip(String message) {

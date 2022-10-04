@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
-import '../../theme.dart';
+import '../../shared/theme.dart';
 
 export 'ide_theme_stub.dart'
     if (dart.library.html) 'ide_theme_web.dart'
@@ -15,15 +15,14 @@ class IdeTheme {
   IdeTheme({
     this.backgroundColor,
     this.foregroundColor,
-    this.fontSize,
-    this.embed,
+    this.fontSize = unscaledDefaultFontSize,
+    this.embed = false,
   });
 
-  final Color backgroundColor;
-  final Color foregroundColor;
+  final Color? backgroundColor;
+  final Color? foregroundColor;
   final double fontSize;
   final bool embed;
 
-  double get fontSizeFactor =>
-      fontSize != null ? fontSize / unscaledDefaultFontSize : 1.0;
+  double get fontSizeFactor => fontSize / unscaledDefaultFontSize;
 }

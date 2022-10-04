@@ -5,8 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-import '../../notifications.dart';
-import '../../utils.dart';
+import '../../primitives/utils.dart';
 import '_drag_and_drop_stub.dart'
     if (dart.library.html) '_drag_and_drop_web.dart'
     if (dart.library.io) '_drag_and_drop_desktop.dart';
@@ -18,18 +17,19 @@ abstract class DragAndDropManager {
     init();
   }
 
-  static DragAndDropManager get instance => _instance ?? DragAndDropManager();
+  static DragAndDropManager get instance => _instance;
 
-  static DragAndDropManager _instance;
+  static late final DragAndDropManager _instance = DragAndDropManager();
 
   final _dragAndDropStates = <DragAndDropState>{};
 
-  DragAndDropState activeState;
+  DragAndDropState? activeState;
 
-  @mustCallSuper
-  void init() {
-    _instance = this;
-  }
+  /// The method is abstract, because we want to force descendants to define it.
+  ///
+  /// The method is called in [impl], so any initialization the subclasses need,
+  /// like initializing listeners, should happen ahead of time in this method.
+  void init();
 
   @mustCallSuper
   void dispose() {
@@ -77,13 +77,12 @@ abstract class DragAndDropManager {
         if (metaData is DragAndDropMetaData) {
           final newActiveState = metaData.state;
           // Activate the new state and deactivate the previously active state.
-          if (newActiveState != null) {
-            final previousActiveState = activeState;
-            previousActiveState?.setIsActive(false);
-            activeState = newActiveState;
-            activeState.setIsActive(true);
-            return;
-          }
+
+          final previousActiveState = activeState;
+          previousActiveState?.setIsActive(false);
+          activeState = newActiveState;
+          activeState!.setIsActive(true);
+          return;
         }
       }
     }
@@ -92,14 +91,14 @@ abstract class DragAndDropManager {
 
 class DragAndDrop extends StatefulWidget {
   const DragAndDrop({
-    @required this.child,
+    required this.child,
     this.handleDrop,
   });
 
   /// Callback to handle parsed data from drag and drop.
   ///
   /// The current implementation expects data in json format.
-  final DevToolsJsonFileHandler handleDrop;
+  final DevToolsJsonFileHandler? handleDrop;
 
   final Widget child;
 
@@ -110,20 +109,12 @@ class DragAndDrop extends StatefulWidget {
 class DragAndDropState extends State<DragAndDrop> {
   final _dragging = ValueNotifier<bool>(false);
 
-  NotificationsState notifications;
-
-  bool _isActive;
+  bool _isActive = false;
 
   @override
   void initState() {
     super.initState();
     DragAndDropManager.instance.registerDragAndDrop(this);
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    notifications = Notifications.of(context);
   }
 
   @override
@@ -137,7 +128,7 @@ class DragAndDropState extends State<DragAndDrop> {
     return MetaData(
       metaData: DragAndDropMetaData(state: this),
       child: widget.handleDrop != null
-          ? ValueListenableBuilder(
+          ? ValueListenableBuilder<bool>(
               valueListenable: _dragging,
               builder: (context, dragging, _) {
                 // TODO(kenz): use AnimatedOpacity instead.
@@ -152,7 +143,7 @@ class DragAndDropState extends State<DragAndDrop> {
   }
 
   void dragOver() {
-    _dragging.value = _isActive ?? false;
+    _dragging.value = _isActive;
   }
 
   void dragLeave() {
@@ -182,7 +173,7 @@ class DragAndDropState extends State<DragAndDrop> {
 /// field set to an instance of this class. [value] must be a unique identifier
 /// for [DragAndDrop] widgets.
 class DragAndDropMetaData {
-  const DragAndDropMetaData({@required this.state});
+  const DragAndDropMetaData({required this.state});
 
   final DragAndDropState state;
 }

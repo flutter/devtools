@@ -2,9 +2,11 @@ include: ../../analysis_options.yaml
 
 analyzer:
   exclude:
+    - build/**
     - lib/generated_plugin_registrant.dart
     - macos/
-# Enable this option if you need to test whether the inspector_polyfill_script is compatible with
-# versions of flutter that require null safety.
-#  enable-experiment:
-#    - non-nullable
+    # Syntax highlighting test files may include or lint-violating code
+    # for testing so should be ignored. Uncomment this while modifying
+    # these files if you want to ensure code is not invalid except where
+    # expected.
+    - test/test_data/syntax_highlighting/**

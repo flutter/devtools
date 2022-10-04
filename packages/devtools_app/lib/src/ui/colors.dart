@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../theme.dart';
+import '../shared/theme.dart';
 import 'utils.dart';
 
 /// This file holds color constants that are used throughout DevTools.
@@ -76,6 +76,8 @@ const treemapDecreaseColor = Color(0xFF77102F);
 
 const tableIncreaseColor = Color(0xFF73BF43);
 const tableDecreaseColor = Color(0xFFEE284F);
+
+const treemapDeferredColor = Color(0xFFBDBDBD);
 
 const appCodeColor = ThemedColorPair(
   background: ThemedColor(

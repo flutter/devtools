@@ -10,7 +10,6 @@ library gtags;
 import 'dart:async';
 import 'dart:html';
 
-import 'package:flutter/foundation.dart';
 import 'package:js/js.dart';
 
 import '../../devtools.dart' as devtools show version;
@@ -18,11 +17,11 @@ import '../app.dart';
 import '../config_specific/logger/logger.dart';
 import '../config_specific/server/server.dart' as server;
 import '../config_specific/url/url.dart';
-import '../globals.dart';
-import '../performance/performance_screen.dart';
-import '../profiler/profiler_screen.dart';
+import '../primitives/url_utils.dart';
+import '../screens/performance/performance_screen.dart';
+import '../screens/profiler/profiler_screen.dart';
+import '../shared/globals.dart';
 import '../ui/gtags.dart';
-import '../version.dart';
 import 'analytics_common.dart';
 import 'constants.dart' as analytics_constants;
 
@@ -68,42 +67,49 @@ class GtagEventDevTools extends GtagEvent {
   // than a fixed list of fields. See
   // https://github.com/flutter/devtools/pull/3281#discussion_r692376353.
   external factory GtagEventDevTools({
-    String event_category,
-    String event_label, // Event e.g., gaScreenViewEvent, gaSelectEvent, etc.
-    String send_to, // UA ID of target GA property to receive event data.
+    String? event_category,
+    String? event_label, // Event e.g., gaScreenViewEvent, gaSelectEvent, etc.
+    String? send_to, // UA ID of target GA property to receive event data.
 
     int value,
     bool non_interaction,
     dynamic custom_map,
-    String user_app, // dimension1 (flutter or web)
-    String user_build, // dimension2 (debug or profile)
-    String user_platform, // dimension3 (android/ios/fuchsia/linux/mac/windows)
-    String devtools_platform, // dimension4 linux/android/mac/windows
-    String devtools_chrome, // dimension5 Chrome version #
-    String devtools_version, // dimension6 DevTools version #
-    String ide_launched, // dimension7 Devtools launched (CLI, VSCode, Android)
-    String flutter_client_id, // dimension8 Flutter tool client_id (~/.flutter).
-    bool is_external_build, // dimension9 External build or google3
-    bool is_embedded, // dimension10 Whether devtools is embedded
+
+    // NOTE: Do not reorder any of these. Order here must match the order in the
+    // Google Analytics console.
+
+    String? user_app, // dimension1 (flutter or web)
+    String? user_build, // dimension2 (debug or profile)
+    String? user_platform, // dimension3 (android/ios/fuchsia/linux/mac/windows)
+    String? devtools_platform, // dimension4 linux/android/mac/windows
+    String? devtools_chrome, // dimension5 Chrome version #
+    String? devtools_version, // dimension6 DevTools version #
+    String? ide_launched, // dimension7 Devtools launched (CLI, VSCode, Android)
+    String?
+        flutter_client_id, // dimension8 Flutter tool client_id (~/.flutter).
+    String? is_external_build, // dimension9 External build or google3
+    String? is_embedded, // dimension10 Whether devtools is embedded
+    String? g3_username, // dimension11 g3 username (null for external users)
 
     // Performance screen metrics. See [PerformanceScreenMetrics].
-    int ui_duration_micros,
-    int raster_duration_micros,
-    int shader_compilation_duration_micros,
-    int trace_event_count,
+    int? ui_duration_micros, // metric1
+    int? raster_duration_micros, // metric2
+    int? shader_compilation_duration_micros, // metric3
     // Profiler screen metrics. See [ProfilerScreenMetrics].
-    int cpu_sample_count,
-    int cpu_stack_depth,
+    int? cpu_sample_count, // metric4
+    int? cpu_stack_depth, // metric5
+    // Performance screen metric. See [PerformanceScreenMetrics].
+    int? trace_event_count, // metric6
   });
 
   @override
-  external String get event_category;
+  external String? get event_category;
 
   @override
-  external String get event_label;
+  external String? get event_label;
 
   @override
-  external String get send_to;
+  external String? get send_to;
 
   @override
   external int get value; // Positive number.
@@ -115,57 +121,51 @@ class GtagEventDevTools extends GtagEvent {
   external dynamic get custom_map;
 
   // Custom dimensions:
-  external String get user_app;
+  external String? get user_app;
 
-  external String get user_build;
+  external String? get user_build;
 
-  external String get user_platform;
+  external String? get user_platform;
 
-  external String get devtools_platform;
+  external String? get devtools_platform;
 
-  external String get devtools_chrome;
+  external String? get devtools_chrome;
 
-  external String get devtools_version;
+  external String? get devtools_version;
 
-  external String get ide_launched;
+  external String? get ide_launched;
 
-  external String get flutter_client_id;
+  external String? get flutter_client_id;
 
-  external bool get is_external_build;
+  external String? get is_external_build;
+
+  external String? get is_embedded;
+
+  external String? get g3_username;
 
   // Custom metrics:
-  external int get ui_duration_micros;
+  external int? get ui_duration_micros;
 
-  external int get raster_duration_micros;
+  external int? get raster_duration_micros;
 
-  external int get shader_compilation_duration_micros;
+  external int? get shader_compilation_duration_micros;
 
-  external int get trace_event_count;
+  external int? get cpu_sample_count;
 
-  external int get cpu_sample_count;
+  external int? get cpu_stack_depth;
 
-  external int get cpu_stack_depth;
+  external int? get trace_event_count;
 }
 
 // This cannot be a factory constructor in the [GtagEventDevTools] class due to
 // https://github.com/dart-lang/sdk/issues/46967.
-GtagEventDevTools gtagEventWithScreenMetrics({
-  String event_category,
-  String event_label,
-  String send_to,
-  int value,
-  bool non_interaction,
-  dynamic custom_map,
-  String user_app,
-  String user_build,
-  String user_platform,
-  String devtools_platform,
-  String devtools_chrome,
-  String devtools_version,
-  String ide_launched,
-  String flutter_client_id,
-  bool is_external_build,
-  ScreenAnalyticsMetrics screenMetrics,
+GtagEventDevTools _gtagEvent({
+  String? event_category,
+  String? event_label,
+  String? send_to,
+  bool non_interaction = false,
+  int value = 0,
+  ScreenAnalyticsMetrics? screenMetrics,
 }) {
   return GtagEventDevTools(
     event_category: event_category,
@@ -181,8 +181,9 @@ GtagEventDevTools gtagEventWithScreenMetrics({
     devtools_version: devtoolsVersion,
     ide_launched: ideLaunched,
     flutter_client_id: flutterClientId,
-    is_external_build: isExternalBuild,
-    is_embedded: ideTheme.embed,
+    is_external_build: isExternalBuild.toString(),
+    is_embedded: ideTheme.embed.toString(),
+    g3_username: devToolsExtensionPoints.username(),
     ui_duration_micros: screenMetrics is PerformanceScreenMetrics
         ? screenMetrics.uiDuration?.inMicroseconds
         : null,
@@ -193,14 +194,57 @@ GtagEventDevTools gtagEventWithScreenMetrics({
         screenMetrics is PerformanceScreenMetrics
             ? screenMetrics.shaderCompilationDuration?.inMicroseconds
             : null,
-    trace_event_count: screenMetrics is PerformanceScreenMetrics
-        ? screenMetrics.traceEventCount
-        : null,
     cpu_sample_count: screenMetrics is ProfilerScreenMetrics
         ? screenMetrics.cpuSampleCount
         : null,
     cpu_stack_depth: screenMetrics is ProfilerScreenMetrics
         ? screenMetrics.cpuStackDepth
+        : null,
+    trace_event_count: screenMetrics is PerformanceScreenMetrics
+        ? screenMetrics.traceEventCount
+        : null,
+  );
+}
+
+// This cannot be a factory constructor in the [GtagExceptionDevTools] class due to
+// https://github.com/dart-lang/sdk/issues/46967.
+GtagExceptionDevTools _gtagException(
+  String errorMessage, {
+  bool fatal = false,
+  ScreenAnalyticsMetrics? screenMetrics,
+}) {
+  return GtagExceptionDevTools(
+    description: errorMessage,
+    fatal: fatal,
+    user_app: userAppType,
+    user_build: userBuildType,
+    user_platform: userPlatformType,
+    devtools_platform: devtoolsPlatformType,
+    devtools_chrome: devtoolsChrome,
+    devtools_version: devtoolsVersion,
+    ide_launched: ideLaunched,
+    flutter_client_id: flutterClientId,
+    is_external_build: isExternalBuild.toString(),
+    is_embedded: ideTheme.embed.toString(),
+    g3_username: devToolsExtensionPoints.username(),
+    ui_duration_micros: screenMetrics is PerformanceScreenMetrics
+        ? screenMetrics.uiDuration?.inMicroseconds
+        : null,
+    raster_duration_micros: screenMetrics is PerformanceScreenMetrics
+        ? screenMetrics.rasterDuration?.inMicroseconds
+        : null,
+    shader_compilation_duration_micros:
+        screenMetrics is PerformanceScreenMetrics
+            ? screenMetrics.shaderCompilationDuration?.inMicroseconds
+            : null,
+    cpu_sample_count: screenMetrics is ProfilerScreenMetrics
+        ? screenMetrics.cpuSampleCount
+        : null,
+    cpu_stack_depth: screenMetrics is ProfilerScreenMetrics
+        ? screenMetrics.cpuStackDepth
+        : null,
+    trace_event_count: screenMetrics is PerformanceScreenMetrics
+        ? screenMetrics.traceEventCount
         : null,
   );
 }
@@ -209,39 +253,75 @@ GtagEventDevTools gtagEventWithScreenMetrics({
 @anonymous
 class GtagExceptionDevTools extends GtagException {
   external factory GtagExceptionDevTools({
-    String description,
+    String? description,
     bool fatal,
-    String user_app, // dimension1 (flutter or web)
-    String user_build, // dimension2 (debug or profile)
-    String user_platform, // dimension3 (android or ios)
-    String devtools_platform, // dimension4 linux/android/mac/windows
-    String devtools_chrome, // dimension5 Chrome version #
-    String devtools_version, // dimension6 DevTools version #
-    String ide_launched, // dimension7 IDE launched DevTools
-    String flutter_client_id, // dimension8 Flutter tool clientId
+
+    // NOTE: Do not reorder any of these. Order here must match the order in the
+    // Google Analytics console.
+
+    String? user_app, // dimension1 (flutter or web)
+    String? user_build, // dimension2 (debug or profile)
+    String? user_platform, // dimension3 (android or ios)
+    String? devtools_platform, // dimension4 linux/android/mac/windows
+    String? devtools_chrome, // dimension5 Chrome version #
+    String? devtools_version, // dimension6 DevTools version #
+    String? ide_launched, // dimension7 IDE launched DevTools
+    String? flutter_client_id, // dimension8 Flutter tool clientId
+    String? is_external_build, // dimension9 External build or google3
+    String? is_embedded, // dimension10 Whether devtools is embedded
+    String? g3_username, // dimension11 g3 username (null for external users)
+
+    // Performance screen metrics. See [PerformanceScreenMetrics].
+    int? ui_duration_micros, // metric1
+    int? raster_duration_micros, // metric2
+    int? shader_compilation_duration_micros, // metric3
+    // Profiler screen metrics. See [ProfilerScreenMetrics].
+    int? cpu_sample_count, // metric4
+    int? cpu_stack_depth, // metric5
+    // Performance screen metric. See [PerformanceScreenMetrics].
+    int? trace_event_count, // metric6
   });
 
   @override
-  external String get description; // Description of the error.
+  external String? get description; // Description of the error.
   @override
   external bool get fatal; // Fatal error.
 
   // Custom dimensions:
-  external String get user_app;
+  external String? get user_app;
 
-  external String get user_build;
+  external String? get user_build;
 
-  external String get user_platform;
+  external String? get user_platform;
 
-  external String get devtools_platform;
+  external String? get devtools_platform;
 
-  external String get devtools_chrome;
+  external String? get devtools_chrome;
 
-  external String get devtools_version;
+  external String? get devtools_version;
 
-  external String get ide_launched;
+  external String? get ide_launched;
 
-  external String get flutter_client_id;
+  external String? get flutter_client_id;
+
+  external String? get is_external_build;
+
+  external String? get is_embedded;
+
+  external String? get g3_username;
+
+  // Custom metrics:
+  external int? get ui_duration_micros;
+
+  external int? get raster_duration_micros;
+
+  external int? get shader_compilation_duration_micros;
+
+  external int? get cpu_sample_count;
+
+  external int? get cpu_stack_depth;
+
+  external int? get trace_event_count;
 }
 
 /// Request DevTools property value 'enabled' (GA enabled) stored in the file
@@ -262,20 +342,10 @@ void screen(
 ]) {
   GTag.event(
     screenName,
-    GtagEventDevTools(
+    _gtagEvent(
       event_category: analytics_constants.screenViewEvent,
       value: value,
       send_to: gaDevToolsPropertyId(),
-      user_app: userAppType,
-      user_build: userBuildType,
-      user_platform: userPlatformType,
-      devtools_platform: devtoolsPlatformType,
-      devtools_chrome: devtoolsChrome,
-      devtools_version: devtoolsVersion,
-      ide_launched: ideLaunched,
-      flutter_client_id: flutterClientId,
-      is_external_build: isExternalBuild,
-      is_embedded: ideTheme.embed,
     ),
   );
 }
@@ -304,7 +374,7 @@ void timeStart(String screenName, String timedOperation) {
 void timeEnd(
   String screenName,
   String timedOperation, {
-  ScreenAnalyticsMetrics Function() screenMetricsProvider,
+  ScreenAnalyticsMetrics Function()? screenMetricsProvider,
 }) {
   final endTime = DateTime.now();
   final operationKey = _operationKey(
@@ -333,12 +403,24 @@ void timeEnd(
   );
 }
 
+void cancelTimingOperation(String screenName, String timedOperation) {
+  final operationKey = _operationKey(
+    screenName,
+    timedOperation,
+  );
+  final operation = _timedOperationsInProgress.remove(operationKey);
+  assert(
+    operation != null,
+    'The operation cannot be cancelled because it does not exist.',
+  );
+}
+
 // Use this when a synchronous operation can be timed in a callback.
 void timeSync(
   String screenName,
   String timedOperation, {
-  @required void Function() syncOperation,
-  ScreenAnalyticsMetrics Function() screenMetricsProvider,
+  required void Function() syncOperation,
+  ScreenAnalyticsMetrics Function()? screenMetricsProvider,
 }) {
   final startTime = DateTime.now();
   try {
@@ -368,8 +450,8 @@ void timeSync(
 Future<void> timeAsync(
   String screenName,
   String timedOperation, {
-  @required Future<void> Function() asyncOperation,
-  ScreenAnalyticsMetrics Function() screenMetricsProvider,
+  required Future<void> Function() asyncOperation,
+  ScreenAnalyticsMetrics Function()? screenMetricsProvider,
 }) async {
   final startTime = DateTime.now();
   try {
@@ -398,24 +480,16 @@ Future<void> timeAsync(
 void _timing(
   String screenName,
   String timedOperation, {
-  @required int durationMicros,
-  ScreenAnalyticsMetrics screenMetrics,
+  required int durationMicros,
+  ScreenAnalyticsMetrics? screenMetrics,
 }) {
   GTag.event(
     screenName,
-    gtagEventWithScreenMetrics(
+    _gtagEvent(
       event_category: analytics_constants.timingEvent,
       event_label: timedOperation,
       value: durationMicros,
       send_to: gaDevToolsPropertyId(),
-      user_app: userAppType,
-      user_build: userBuildType,
-      user_platform: userPlatformType,
-      devtools_platform: devtoolsPlatformType,
-      devtools_chrome: devtoolsChrome,
-      devtools_version: devtoolsVersion,
-      ide_launched: ideLaunched,
-      flutter_client_id: flutterClientId,
       screenMetrics: screenMetrics,
     ),
   );
@@ -425,51 +499,40 @@ void select(
   String screenName,
   String selectedItem, {
   int value = 0,
-  ScreenAnalyticsMetrics Function() screenMetricsProvider,
+  bool nonInteraction = false,
+  ScreenAnalyticsMetrics Function()? screenMetricsProvider,
 }) {
   GTag.event(
     screenName,
-    gtagEventWithScreenMetrics(
+    _gtagEvent(
       event_category: analytics_constants.selectEvent,
       event_label: selectedItem,
       value: value,
+      non_interaction: nonInteraction,
       send_to: gaDevToolsPropertyId(),
-      user_app: userAppType,
-      user_build: userBuildType,
-      user_platform: userPlatformType,
-      devtools_platform: devtoolsPlatformType,
-      devtools_chrome: devtoolsChrome,
-      devtools_version: devtoolsVersion,
-      ide_launched: ideLaunched,
-      flutter_client_id: flutterClientId,
       screenMetrics:
           screenMetricsProvider != null ? screenMetricsProvider() : null,
     ),
   );
 }
 
-String _lastGaError;
+String? _lastGaError;
 
 void reportError(
   String errorMessage, {
   bool fatal = false,
+  ScreenAnalyticsMetrics Function()? screenMetricsProvider,
 }) {
   // Don't keep recording same last error.
   if (_lastGaError == errorMessage) return;
   _lastGaError = errorMessage;
 
   GTag.exception(
-    GtagExceptionDevTools(
-      description: errorMessage,
+    _gtagException(
+      errorMessage,
       fatal: fatal,
-      user_app: userAppType,
-      user_build: userBuildType,
-      user_platform: userPlatformType,
-      devtools_platform: devtoolsPlatformType,
-      devtools_chrome: devtoolsChrome,
-      devtools_version: devtoolsVersion,
-      ide_launched: ideLaunched,
-      flutter_client_id: flutterClientId,
+      screenMetrics:
+          screenMetricsProvider != null ? screenMetricsProvider() : null,
     ),
   );
 }
@@ -542,30 +605,28 @@ bool _computingUserApplicationDimensions = false;
 bool _userApplicationDimensionsComputed = false;
 
 // Computes the running application.
-Future<void> computeUserApplicationCustomGTagData() async {
+void _computeUserApplicationCustomGTagData() {
   if (_userApplicationDimensionsComputed) return;
 
-  assert(serviceManager.connectedApp.isFlutterAppNow != null);
-  assert(serviceManager.connectedApp.isDartWebAppNow != null);
-  assert(serviceManager.connectedApp.isProfileBuildNow != null);
+  assert(serviceManager.connectedApp!.isFlutterAppNow != null);
+  assert(serviceManager.connectedApp!.isDartWebAppNow != null);
+  assert(serviceManager.connectedApp!.isProfileBuildNow != null);
 
-  if (serviceManager.connectedApp.isFlutterAppNow) {
-    userPlatformType = (await serviceManager.service.isProtocolVersionSupported(
-            supportedVersion: SemanticVersion(major: 3, minor: 24)))
-        ? serviceManager.vm.operatingSystem
-        : 'unknown';
+  const unknownOS = 'unknown';
+  if (serviceManager.connectedApp!.isFlutterAppNow!) {
+    userPlatformType = serviceManager.vm?.operatingSystem ?? unknownOS;
   }
-  if (serviceManager.connectedApp.isFlutterWebAppNow) {
+  if (serviceManager.connectedApp!.isFlutterWebAppNow) {
     userAppType = appTypeFlutterWeb;
-  } else if (serviceManager.connectedApp.isFlutterAppNow) {
+  } else if (serviceManager.connectedApp!.isFlutterAppNow!) {
     userAppType = appTypeFlutter;
-  } else if (serviceManager.connectedApp.isDartWebAppNow) {
+  } else if (serviceManager.connectedApp!.isDartWebAppNow!) {
     userAppType = appTypeWeb;
   } else {
     userAppType = appTypeDartCLI;
   }
 
-  userBuildType = serviceManager.connectedApp.isProfileBuildNow
+  userBuildType = serviceManager.connectedApp!.isProfileBuildNow!
       ? buildTypeProfile
       : buildTypeDebug;
 
@@ -590,7 +651,7 @@ Future<bool> disableAnalytics() async {
 /// devtoolsChrome.
 void computeDevToolsCustomGTagsData() {
   // Platform
-  final String platform = window.navigator.platform;
+  final String platform = window.navigator.platform!;
   platform.replaceAll(' ', '_');
   devtoolsPlatformType = platform;
 
@@ -665,41 +726,25 @@ Future<void> setupDimensions() async {
   }
 }
 
-Future<void> setupUserApplicationDimensions() async {
+void setupUserApplicationDimensions() {
   if (serviceManager.connectedApp != null &&
       !_userApplicationDimensionsComputed &&
       !_computingUserApplicationDimensions) {
     _computingUserApplicationDimensions = true;
-    await computeUserApplicationCustomGTagData();
+    _computeUserApplicationCustomGTagData();
     _userApplicationDimensionsComputed = true;
   }
 }
 
 Map<String, dynamic> generateSurveyQueryParameters() {
-  const clientIdKey = 'ClientId';
   const ideKey = 'IDE';
   const fromKey = 'From';
   const internalKey = 'Internal';
 
-  // TODO(https://github.com/flutter/devtools/issues/2475): fix url structure
-  // Parsing the url via Uri.parse returns an incorrect value for fragment.
-  // Grab the fragment value manually. The url will be of the form
-  // http://127.0.0.1:9100/#/timeline?ide=IntelliJ-IDEA&uri=..., and we want the
-  // part equal to '/timeline'.
-  final url = window.location.toString();
-  const fromValuePrefix = '#/';
-  final startIndex = url.indexOf(fromValuePrefix);
-  final endIndex = url.indexOf('?');
-  final fromPage = url.substring(
-    startIndex + fromValuePrefix.length,
-    endIndex,
-  );
-
-  final clientId = flutterClientId;
   final internalValue = (!isExternalBuild).toString();
+  final fromPage = extractCurrentPageFromUrl(window.location.toString());
 
   return {
-    clientIdKey: clientId,
     ideKey: ideLaunched,
     fromKey: fromPage,
     internalKey: internalValue,

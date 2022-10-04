@@ -7,18 +7,15 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:devtools_test/chrome.dart';
-import 'package:devtools_test/cli_test_driver.dart';
-import 'package:devtools_test/utils.dart';
+import 'package:devtools_shared/devtools_test_utils.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pedantic/pedantic.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
     show ConsoleAPIEvent, RemoteObject;
 
 const bool verboseTesting = false;
 
-WebBuildFixture webBuildFixture;
-BrowserManager browserManager;
+late WebBuildFixture webBuildFixture;
+late BrowserManager browserManager;
 
 class DevtoolsManager {
   DevtoolsManager(this.tabInstance, this.baseUri);
@@ -28,11 +25,12 @@ class DevtoolsManager {
 
   Future<void> start(
     AppFixture appFixture, {
-    Uri overrideUri,
+    Uri? overrideUri,
     bool waitForConnection = true,
   }) async {
     final Uri baseAppUri = baseUri.resolve(
-        'index.html?uri=${Uri.encodeQueryComponent(appFixture.serviceUri.toString())}');
+      'index.html?uri=${Uri.encodeQueryComponent(appFixture.serviceUri.toString())}',
+    );
     await tabInstance.tab.navigate('${overrideUri ?? baseAppUri}');
 
     // wait for app initialization
@@ -49,9 +47,9 @@ class DevtoolsManager {
     await tabInstance.send('switchPage', page);
   }
 
-  Future<String> currentPageId() async {
+  Future<String?> currentPageId() async {
     final AppResponse response = await tabInstance.send('currentPageId');
-    return response.result;
+    return response.result as String?;
   }
 }
 
@@ -59,13 +57,13 @@ class BrowserManager {
   BrowserManager._(this.chromeProcess, this.tab);
 
   static Future<BrowserManager> create() async {
-    final Chrome chrome = Chrome.locate();
+    final Chrome? chrome = Chrome.locate();
     if (chrome == null) {
       throw 'unable to locate Chrome';
     }
 
     final ChromeProcess chromeProcess = await chrome.start();
-    final ChromeTab tab = await chromeProcess.getFirstTab();
+    final ChromeTab tab = (await chromeProcess.getFirstTab())!;
 
     await tab.connect();
 
@@ -81,12 +79,12 @@ class BrowserManager {
     await delay();
 
     final ChromeTab tab =
-        await chromeProcess.connectToTabId('localhost', targetId);
+        (await chromeProcess.connectToTabId('localhost', targetId))!;
     await tab.connect(verbose: true);
 
     await delay();
 
-    await tab.wipConnection.target.activateTarget(targetId);
+    await tab.wipConnection!.target.activateTarget(targetId);
 
     await delay();
 
@@ -123,7 +121,7 @@ class BrowserTabInstance {
 
   final ChromeTab tab;
 
-  RemoteObject _remote;
+  RemoteObject? _remote;
 
   Future<RemoteObject> getBrowserChannel() async {
     final DateTime start = DateTime.now();
@@ -145,7 +143,7 @@ class BrowserTabInstance {
   }
 
   Future<RemoteObject> _getAppChannelObject() {
-    return tab.wipConnection.runtime.evaluate('devtools');
+    return tab.wipConnection!.runtime.evaluate('devtools');
   }
 
   int _nextId = 1;
@@ -167,9 +165,9 @@ class BrowserTabInstance {
     _completers[id] = completer;
 
     try {
-      await tab.wipConnection.runtime.callFunctionOn(
+      await tab.wipConnection!.runtime.callFunctionOn(
         "function (method, id, params) { return window['devtools'].send(method, id, params); }",
-        objectId: _remote.objectId,
+        objectId: _remote!.objectId,
         arguments: <dynamic>[method, id, params],
       );
 
@@ -185,9 +183,9 @@ class BrowserTabInstance {
     // In Headless Chrome, we get Inspector.detached when we close the last
     // target rather than a response.
     await Future.any(<Future<Object>>[
-      tab.wipConnection.onNotification
+      tab.wipConnection!.onNotification
           .firstWhere((n) => n.method == 'Inspector.detached'),
-      tab.wipConnection.target.closeTarget(tab.wipTab.id),
+      tab.wipConnection!.target.closeTarget(tab.wipTab.id),
     ]);
   }
 
@@ -199,7 +197,7 @@ class BrowserTabInstance {
     if (message.containsKey('id')) {
       // handle a response: {id: 1}
       final AppResponse response = AppResponse(message);
-      final Completer<AppResponse> completer = _completers.remove(response.id);
+      final Completer<AppResponse> completer = _completers.remove(response.id)!;
       if (response.hasError) {
         completer.completeError(response.error);
       } else {
@@ -217,7 +215,7 @@ class AppEvent {
 
   final Map<dynamic, dynamic> json;
 
-  String get event => json['event'];
+  String? get event => json['event'];
 
   dynamic get params => json['params'];
 
@@ -230,7 +228,7 @@ class AppResponse {
 
   final Map<dynamic, dynamic> json;
 
-  int get id => json['id'];
+  int? get id => json['id'];
 
   dynamic get result => json['result'];
 
@@ -249,9 +247,9 @@ class AppError {
 
   final Map<dynamic, dynamic> json;
 
-  String get message => json['message'];
+  String? get message => json['message'];
 
-  String get stackTrace => json['stackTrace'];
+  String? get stackTrace => json['stackTrace'];
 
   @override
   String toString() => '$message\n$stackTrace';
@@ -282,8 +280,10 @@ class WebBuildFixture {
 
     _toLines(process.stderr).listen((String line) {
       if (verbose || hasUrl.isCompleted) {
-        print('pub run build_runner serve • ${process.pid}'
-            ' • STDERR • ${line.trim()}');
+        print(
+          'pub run build_runner serve • ${process.pid}'
+          ' • STDERR • ${line.trim()}',
+        );
       }
 
       final err = 'error starting webdev: $line';
@@ -372,15 +372,17 @@ class WebBuildFixture {
       }
     });
 
-    unawaited(process.exitCode.then((code) {
-      if (!buildFinished.isCompleted) {
-        if (code == 0) {
-          buildFinished.complete();
-        } else {
-          buildFinished.completeError('Exited with code $code');
+    unawaited(
+      process.exitCode.then((code) {
+        if (!buildFinished.isCompleted) {
+          if (code == 0) {
+            buildFinished.complete();
+          } else {
+            buildFinished.completeError('Exited with code $code');
+          }
         }
-      }
-    }));
+      }),
+    );
 
     await buildFinished.future.catchError((e) {
       fail('Build failed: $e');
@@ -426,7 +428,8 @@ class WebBuildFixture {
 
     if (verbose) {
       print(
-          'Running "$executable" with args: ${buildArgs.join(' ')} from ${Directory.current.path}');
+        'Running "$executable" with args: ${buildArgs.join(' ')} from ${Directory.current.path}',
+      );
     }
     return Process.start(
       executable,

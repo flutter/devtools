@@ -19,8 +19,8 @@ class _Tester extends WidgetController {
   }
 
   @override
-  Future<void> pump([Duration duration]) {
-    binding.renderViewElement.markNeedsBuild();
+  Future<void> pump([Duration? duration]) {
+    binding.renderViewElement!.markNeedsBuild();
 
     final completer = Completer<void>();
     binding.addPostFrameCallback((timeStamp) => completer.complete());

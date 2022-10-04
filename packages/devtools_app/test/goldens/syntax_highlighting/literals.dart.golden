@@ -1,0 +1,111 @@
+>// Copyright 2022 The Chromium Authors. All rights reserved.
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ comment.line.double-slash.dart
+>// Use of this source code is governed by a BSD-style license that can be
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ comment.line.double-slash.dart
+>// found in the LICENSE file.
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ comment.line.double-slash.dart
+>
+>const a = 'aaaaa';
+#^^^^^ storage.modifier.dart
+#        ^ keyword.operator.assignment.dart
+#          ^^^^^^^ string.interpolated.single.dart
+#                 ^ punctuation.terminator.dart
+>
+>const list1 = [];
+#^^^^^ storage.modifier.dart
+#            ^ keyword.operator.assignment.dart
+#                ^ punctuation.terminator.dart
+>const list2 = <String>[];
+#^^^^^ storage.modifier.dart
+#            ^ keyword.operator.assignment.dart
+#              ^ keyword.operator.comparison.dart
+#               ^^^^^^ support.class.dart
+#                     ^ keyword.operator.comparison.dart
+#                        ^ punctuation.terminator.dart
+>const list3 = ['', '$a'];
+#^^^^^ storage.modifier.dart
+#            ^ keyword.operator.assignment.dart
+#               ^^ string.interpolated.single.dart
+#                 ^ punctuation.comma.dart
+#                   ^^ string.interpolated.single.dart
+#                     ^ string.interpolated.single.dart variable.parameter.dart
+#                      ^ string.interpolated.single.dart
+#                        ^ punctuation.terminator.dart
+>const list4 = <String>['', '$a'];
+#^^^^^ storage.modifier.dart
+#            ^ keyword.operator.assignment.dart
+#              ^ keyword.operator.comparison.dart
+#               ^^^^^^ support.class.dart
+#                     ^ keyword.operator.comparison.dart
+#                       ^^ string.interpolated.single.dart
+#                         ^ punctuation.comma.dart
+#                           ^^ string.interpolated.single.dart
+#                             ^ string.interpolated.single.dart variable.parameter.dart
+#                              ^ string.interpolated.single.dart
+#                                ^ punctuation.terminator.dart
+>
+>const set1 = {};
+#^^^^^ storage.modifier.dart
+#           ^ keyword.operator.assignment.dart
+#               ^ punctuation.terminator.dart
+>const set2 = <String>{};
+#^^^^^ storage.modifier.dart
+#           ^ keyword.operator.assignment.dart
+#             ^ keyword.operator.comparison.dart
+#              ^^^^^^ support.class.dart
+#                    ^ keyword.operator.comparison.dart
+#                       ^ punctuation.terminator.dart
+>const set3 = {'', '$a'};
+#^^^^^ storage.modifier.dart
+#           ^ keyword.operator.assignment.dart
+#              ^^ string.interpolated.single.dart
+#                ^ punctuation.comma.dart
+#                  ^^ string.interpolated.single.dart
+#                    ^ string.interpolated.single.dart variable.parameter.dart
+#                     ^ string.interpolated.single.dart
+#                       ^ punctuation.terminator.dart
+>const set4 = <String>{'', '$a'};
+#^^^^^ storage.modifier.dart
+#           ^ keyword.operator.assignment.dart
+#             ^ keyword.operator.comparison.dart
+#              ^^^^^^ support.class.dart
+#                    ^ keyword.operator.comparison.dart
+#                      ^^ string.interpolated.single.dart
+#                        ^ punctuation.comma.dart
+#                          ^^ string.interpolated.single.dart
+#                            ^ string.interpolated.single.dart variable.parameter.dart
+#                             ^ string.interpolated.single.dart
+#                               ^ punctuation.terminator.dart
+>
+>const map1 = <String, String>{};
+#^^^^^ storage.modifier.dart
+#           ^ keyword.operator.assignment.dart
+#             ^ keyword.operator.comparison.dart
+#              ^^^^^^ support.class.dart
+#                    ^ punctuation.comma.dart
+#                      ^^^^^^ support.class.dart
+#                            ^ keyword.operator.comparison.dart
+#                               ^ punctuation.terminator.dart
+>const map2 = {'': '$a'};
+#^^^^^ storage.modifier.dart
+#           ^ keyword.operator.assignment.dart
+#              ^^ string.interpolated.single.dart
+#                ^ keyword.operator.ternary.dart
+#                  ^^ string.interpolated.single.dart
+#                    ^ string.interpolated.single.dart variable.parameter.dart
+#                     ^ string.interpolated.single.dart
+#                       ^ punctuation.terminator.dart
+>const map3 = <String, String>{'': '$a'};
+#^^^^^ storage.modifier.dart
+#           ^ keyword.operator.assignment.dart
+#             ^ keyword.operator.comparison.dart
+#              ^^^^^^ support.class.dart
+#                    ^ punctuation.comma.dart
+#                      ^^^^^^ support.class.dart
+#                            ^ keyword.operator.comparison.dart
+#                              ^^ string.interpolated.single.dart
+#                                ^ keyword.operator.ternary.dart
+#                                  ^^ string.interpolated.single.dart
+#                                    ^ string.interpolated.single.dart variable.parameter.dart
+#                                     ^ string.interpolated.single.dart
+#                                       ^ punctuation.terminator.dart

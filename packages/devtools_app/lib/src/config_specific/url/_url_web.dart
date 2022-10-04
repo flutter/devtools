@@ -4,8 +4,14 @@
 
 import 'dart:html';
 
-import '../../utils.dart';
+import '../../primitives/utils.dart';
 
 Map<String, String> loadQueryParams() {
   return devToolsQueryParams(window.location.toString());
+}
+
+String? getWebUrl() => window.location.toString();
+
+void webRedirect(String url) {
+  window.location.replace(url);
 }

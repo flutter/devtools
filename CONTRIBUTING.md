@@ -10,42 +10,52 @@ You can do this online, and it only takes a minute. If you've never submitted co
 you must add your (or your organization's) name and contact info to the [AUTHORS](AUTHORS)
 file.
 
+## Workflow for making changes
+
+- Create a branch from your cloned repo: `git checkout -b myBranch`
+- Refresh local code: `sh tool/refresh.sh`
+- Implement your changes
+- Commit work to your branch: `git commit -m “description”`
+- Push to your branch: `git push origin myBranch`
+- Navigate to the Pull Requests tab in the main [DevTools repo](https://github.com/flutter/devtools). You should see a popup to create a pull request from the branch in your cloned repo to DevTools master. Create a pull request.
+
+### Keeping your fork in-sync
+
+- Pull the code from the upstream DevTools and refresh local code: `sh tool/pull_and_refresh.sh`
+
+### Announcing your changes
+
+If your improvement is user-facing, document it in
+[release-notes-next.md](packages/devtools_app/lib/src/framework/release_notes/release-notes-next.md).
+
 ## Development prep
 
 1. If you haven't already, follow the [instructions](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh) to generate a new SSH key and connect to Github with SSH
 2. Follow the [instructions](https://docs.github.com/en/get-started/quickstart/fork-a-repo) to fork the DevTools repo to your own Github account, and clone using SSH
 3. Make sure to [configure Git to keep your fork in sync](https://docs.github.com/en/get-started/quickstart/fork-a-repo#configuring-git-to-sync-your-fork-with-the-original-repository) with the main DevTools repo
-4. Finally, update to the newest version of the package with `cd packages/devtools_app` and `flutter pub upgrade`
+4. Finally, run `sh tool/refresh.sh` to pull the latest version from repo, generate missing code and upgrade dependencies.
 
 From a separate terminal, start running a flutter app to connect to DevTools:
 - `git clone https://github.com/flutter/gallery.git` (this is an existing application with many examples of Flutter widgets)
 - `cd gallery`
+- ensure your flutter channel is the one required by the [gallery documentation](https://github.com/flutter/gallery#running-flutter-gallery-on-flutters-master-channel)
 - ensure the iOS Simulator is open (or a physical device is connected)
 - `flutter run`
-
-## Workflow for making changes
-
-- Create a branch from your cloned repo: `git checkout -b myBranch`
-- Commit work to your branch: `git commit -m “description”`
-- Push to your branch: `git push origin myBranch`
-- Navigate to the Pull Requests tab in the main [DevTools repo](https://github.com/flutter/devtools). You should see a popup to create a pull request from your local branch to DevTools master. Create a pull request.
-
-### Keeping your fork in-sync
-
-- Fetch branches/commits from the upstream DevTools: `git fetch upstream`
-- From your local branch, merge in the upstream master branch: `git merge upstream/master`
+- copy the "Observatory debugger and profiler" uri printed in the command output, to connect to the app from DevTools later
 
 ## Development
 
-To run DevTools as a Flutter web app, follow these steps.
+*NOTE:* Though DevTools is shipped as a Flutter Web app, we recommend developing as a Flutter Desktop app where possible for a more efficient development workflow. Please see the [Desktop Embedder] section below for instructions on running DevTools as a Flutter Desktop app.
 
-First, perform one-time setup:
+To pull fresh version, regenerate code and upgrade dependencies:
 
-- `flutter config --enable-web`
+- `sh tool/pull_and_refresh.sh`
 
-Now you can run the app at any time with the flutter command.
+To regenerate mocks and upgrade dependencies (after switching branches, for example):
 
-From the packages/devtools_app directory:
+- `sh tool/refresh.sh`
+
+To run DevTools as a Flutter web app, from the packages/devtools_app directory:
 
 - `flutter run -d chrome`
 
@@ -55,6 +65,8 @@ To test release performance:
 
 You can also use `-d headless-server`, which will start a headless server that serves the HTML
 files for the DevTools Flutter app.
+
+To connect to your running application, paste the earlier copied observatory URL into the section "Connect to a Running App" in DevTools.
 
 ## Development (DevTools server + DevTools Flutter web app)
 
@@ -77,9 +89,29 @@ When you make changes on disk, you can hit `r` in your command-line to rebuild t
 refresh in your browser to see the changes. Hit `q` in the command line to terminate both the
 `flutter run` instance and the devtools server instance.
 
+## Development (VS Code Integration)
+
+To test integration with VS Code, you can instruct the Dart extension to run DevTools and the server from local code. You will need to have the Dart SDK source set up (see [dart-lang/sdk/CONTRIBUTING.md](https://github.com/dart-lang/sdk/blob/main/CONTRIBUTING.md#getting-the-code)) and you will need version v3.47 or newer of the Dart extension for VS Code.
+
+Open your VS Code settings (Run the **Preferences: Open User Settings (JSON)** command from the command palette (`F1`)) and add the following to your settings:
+
+```js
+"dart.customDevTools": {
+	"script": "/path/to/devtools/tool/build_e2e.dart",
+	"cwd": "/path/to/devtools",
+	"env": {
+		"LOCAL_DART_SDK": "/path/to/dart-sdk/sdk"
+	}
+},
+```
+
+This instructs VS Code to run the `tool/build_e2e.dart` script instead of running `dart devtools`. You must set the `cwd` and `LOCAL_DART_SDK` env variable correctly for the script to work.
+
+Next, restart VS Code (or run the **Developer: Reload Window** command from the command palette (`F1`)) and DevTools will be run from your local code. After making any code changes to DevTools or the server, you will need to re-run the **Developer: Reload Window** command to rebuild and restart the server.
+
 ### Desktop Embedder
 
-You can also try running the app in the Flutter desktop embedder on linux or macos.
+You can also run the app in the Flutter desktop embedder on linux or macos.
 
 *NOTE:* The Linux desktop version only works with the master branch of Flutter (and sometimes this is true for MacOS as well). Syncing
 to a the master branch of Flutter may fail with a runner version error. If this occurs run
@@ -94,18 +126,6 @@ Now you can run with either of the following:
 
 - `flutter run -d macos`
 - `flutter run -d linux`
-
-### Where to put Flutter code
-
-We also roll DevTools' code into a bazel build system, where we need to run only the non-flutter
-code from the app. To facilitate this, please keep code that imports package:flutter under a
-directory named 'flutter'.
-
-For example, `lib/src/flutter`, `lib/src/inspector/flutter`, or `test/flutter` are all acceptable
-locations to put new Flutter code.
-
-When we are ready to turn down the `dart:html` web version of the app, we will delete all code that
-isn't inside of or imported by the flutter code.
 
 ## Developing with VS Code
 
@@ -140,12 +160,12 @@ critical that the devtools_server is released first and the version numbers in
 
 ### Running tests
 
-Make sure your Flutter SDK matches the tip of trunk before
-running these tests.
+Make sure your Flutter SDK matches the version specified in `devtools/flutter-version.txt`
+before running these tests.
 
 ```
 cd packages/devtools_app
-flutter test -j1
+flutter test -j1 --no-sound-null-safety
 ```
 
 The flag `-j1` tells Flutter to run tests with 1 concurrent test runner. If your test run does
@@ -153,8 +173,11 @@ not include the directory `devtools_app/test/integration_tests`, then you do not
 this flag.  For example, it is OK to do the following:
 
 ```
-flutter test test/ui/
+flutter test test/ui/ --no-sound-null-safety
 ```
+
+If you run the tests on other than Linux environment, first time add the flag `--update-goldens`, 
+because goldens on your machine will be little different.
 
 ### Updating golden files
 

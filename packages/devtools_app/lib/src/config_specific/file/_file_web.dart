@@ -21,17 +21,20 @@ class FileSystemWeb implements FileIO {
   String exportDirectoryName({bool isMemory = false}) => 'LocalStorage';
 
   @override
-  void writeStringToFile(String filename, String contents,
-      {bool isMemory = false}) {
+  void writeStringToFile(
+    String filename,
+    String contents, {
+    bool isMemory = false,
+  }) {
     _files.putIfAbsent(filename, () => contents);
   }
 
   @override
-  String readStringFromFile(String filename, {bool isMemory = false}) =>
-      _files.containsKey(filename) ? _files[filename] : null;
+  String? readStringFromFile(String filename, {bool isMemory = false}) =>
+      _files.containsKey(filename) ? _files[filename]! : null;
 
   @override
-  List<String> list({String prefix, bool isMemory = false}) =>
+  List<String> list({required String prefix, bool isMemory = false}) =>
       _files.keys.toList();
 
   @override
