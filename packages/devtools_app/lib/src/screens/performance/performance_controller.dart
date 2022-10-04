@@ -140,6 +140,12 @@ class PerformanceController extends DisposableController
   /// be processed and added to the timeline events flame chart.
   int _nextTimelineEventIndexToProcess = 0;
 
+  /// Whether we should show the Flutter frames chart.
+  ValueListenable<bool> get showFlutterFramesChart => _showFlutterFramesChart;
+  final _showFlutterFramesChart = ValueNotifier<bool>(true);
+  void toggleShowFlutterFrames(bool value) =>
+      _showFlutterFramesChart.value = value;
+
   /// Whether flutter frames are currently being recorded.
   ValueListenable<bool> get recordingFrames => _recordingFrames;
   final _recordingFrames = ValueNotifier<bool>(true);

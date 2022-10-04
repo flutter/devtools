@@ -29,16 +29,17 @@ import 'performance_utils.dart';
 bool debugFrames = false;
 
 class FlutterFramesChart extends StatefulWidget {
-  const FlutterFramesChart(
-    this.frames,
-    this.displayRefreshRate,
-  );
-
-  static const chartLegendKey = Key('Flutter frames chart legend');
+  const FlutterFramesChart({
+    required this.frames,
+    required this.displayRefreshRate,
+    required this.isVisible,
+  });
 
   final List<FlutterFrame> frames;
 
   final double displayRefreshRate;
+
+  final bool isVisible;
 
   @override
   _FlutterFramesChartState createState() => _FlutterFramesChartState();
@@ -135,6 +136,9 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
 
   @override
   Widget build(BuildContext context) {
+    // TODO(kenz): animate showing and hiding the chart.
+    if (!widget.isVisible) return const SizedBox.shrink();
+
     return Container(
       margin: const EdgeInsets.only(
         left: denseSpacing,
@@ -150,28 +154,10 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
           const SizedBox(width: defaultSpacing),
           Padding(
             padding: EdgeInsets.only(bottom: _frameChartScrollbarOffset),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Legend(
-                  key: FlutterFramesChart.chartLegendKey,
-                  entries: [
-                    const LegendEntry('Frame Time (UI)', mainUiColor),
-                    const LegendEntry('Frame Time (Raster)', mainRasterColor),
-                    const LegendEntry('Jank (slow frame)', uiJankColor),
-                    LegendEntry(
-                      'Shader Compilation',
-                      shaderCompilationColor.background,
-                    ),
-                  ],
-                ),
-                if (widget.frames.isNotEmpty)
-                  AverageFPS(
-                    frames: widget.frames,
-                    displayRefreshRate: widget.displayRefreshRate,
-                  ),
-              ],
+            child: FramesChartControls(
+              controller: controller,
+              frames: widget.frames,
+              displayRefreshRate: widget.displayRefreshRate,
             ),
           ),
         ],
@@ -242,6 +228,73 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
         );
       },
     );
+  }
+}
+
+@visibleForTesting
+class FramesChartControls extends StatelessWidget {
+  const FramesChartControls({
+    required this.controller,
+    required this.frames,
+    required this.displayRefreshRate,
+  });
+
+  static const _pauseTooltip = 'Pause Flutter frame recording';
+
+  static const _resumeTooltip = 'Resume Flutter frame recording';
+
+  final PerformanceController controller;
+
+  final List<FlutterFrame> frames;
+
+  final double displayRefreshRate;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ValueListenableBuilder<bool>(
+          valueListenable: controller.recordingFrames,
+          builder: (context, recording, child) {
+            return PauseResumeButtonGroup(
+              paused: !recording,
+              onPause: _pauseFrameRecording,
+              onResume: _resumeFrameRecording,
+              pauseTooltip: _pauseTooltip,
+              resumeTooltip: _resumeTooltip,
+            );
+          },
+        ),
+        Legend(
+          dense: true,
+          entries: [
+            const LegendEntry('Frame Time (UI)', mainUiColor),
+            const LegendEntry('Frame Time (Raster)', mainRasterColor),
+            const LegendEntry('Jank (slow frame)', uiJankColor),
+            LegendEntry(
+              'Shader Compilation',
+              shaderCompilationColor.background,
+            ),
+          ],
+        ),
+        AverageFPS(
+          frames: frames,
+          displayRefreshRate: displayRefreshRate,
+        ),
+      ],
+    );
+  }
+
+  void _pauseFrameRecording() {
+    ga.select(analytics_constants.performance, analytics_constants.pause);
+    controller.toggleRecordingFrames(false);
+  }
+
+  void _resumeFrameRecording() {
+    ga.select(analytics_constants.performance, analytics_constants.resume);
+    controller.toggleRecordingFrames(true);
   }
 }
 
@@ -525,23 +578,30 @@ class AverageFPS extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double sumFrameTimesMs = frames.fold(
-      0.0,
-      (sum, frame) =>
-          sum +
-          math.max(
-            1000 / displayRefreshRate,
+    late String fpsText;
+    if (frames.isEmpty) {
+      fpsText = '--';
+    } else {
+      final double sumFrameTimesMs = frames.fold(
+        0.0,
+        (sum, frame) =>
+            sum +
             math.max(
-              frame.buildTime.inMilliseconds,
-              frame.rasterTime.inMilliseconds,
+              1000 / displayRefreshRate,
+              math.max(
+                frame.buildTime.inMilliseconds,
+                frame.rasterTime.inMilliseconds,
+              ),
             ),
-          ),
-    );
-    final avgFrameTime = sumFrameTimesMs / frames.length;
-    final avgFps = (1 / avgFrameTime * 1000).round();
+      );
+      final avgFrameTime = sumFrameTimesMs / frames.length;
+      final avgFps = (1 / avgFrameTime * 1000).round();
+      fpsText = '$avgFps';
+    }
     return Text(
-      '$avgFps FPS (average)',
+      '$fpsText FPS (average)',
       maxLines: 2,
+      style: Theme.of(context).legendTextStyle,
     );
   }
 }

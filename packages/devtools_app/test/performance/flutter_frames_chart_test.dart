@@ -9,6 +9,7 @@ import 'package:devtools_app/src/screens/performance/flutter_frames_chart.dart';
 import 'package:devtools_app/src/screens/performance/performance_controller.dart';
 import 'package:devtools_app/src/screens/performance/performance_model.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/common_widgets.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
 import 'package:devtools_app/src/ui/colors.dart';
@@ -22,10 +23,15 @@ void main() {
   Future<void> pumpChart(
     WidgetTester tester, {
     required List<FlutterFrame> frames,
+    bool isVisible = true,
   }) async {
     await tester.pumpWidget(
       wrapWithControllers(
-        FlutterFramesChart(frames, defaultRefreshRate),
+        FlutterFramesChart(
+          frames: frames,
+          displayRefreshRate: defaultRefreshRate,
+          isVisible: isVisible,
+        ),
         performance: PerformanceController(),
       ),
     );
@@ -54,19 +60,35 @@ void main() {
 
     testWidgets('builds with no frames', (WidgetTester tester) async {
       await pumpChart(tester, frames: []);
-      expect(find.byKey(FlutterFramesChart.chartLegendKey), findsOneWidget);
+      expect(find.byType(FramesChartControls), findsOneWidget);
+      expect(find.byType(Legend), findsOneWidget);
+      expect(find.byType(AverageFPS), findsOneWidget);
+      expect(find.byType(FlutterFramesChartItem), findsNothing);
+    });
+
+    testWidgets('builds nothing when isVisible is false',
+        (WidgetTester tester) async {
+      await pumpChart(
+        tester,
+        frames: [testFrame0, testFrame1],
+        isVisible: false,
+      );
+      expect(find.byType(FramesChartControls), findsNothing);
+      expect(find.byType(Legend), findsNothing);
+      expect(find.byType(AverageFPS), findsNothing);
       expect(find.byType(FlutterFramesChartItem), findsNothing);
     });
 
     testWidgets('builds with frames', (WidgetTester tester) async {
       await pumpChart(tester, frames: [testFrame0, testFrame1]);
-      expect(find.byKey(FlutterFramesChart.chartLegendKey), findsOneWidget);
+      expect(find.byType(FramesChartControls), findsOneWidget);
+      expect(find.byType(Legend), findsOneWidget);
+      expect(find.byType(AverageFPS), findsOneWidget);
       expect(find.byType(FlutterFramesChartItem), findsNWidgets(2));
     });
 
     testWidgets('builds with janky frame', (WidgetTester tester) async {
       await pumpChart(tester, frames: [jankyFrame]);
-      expect(find.byKey(FlutterFramesChart.chartLegendKey), findsOneWidget);
       expect(find.byType(FlutterFramesChartItem), findsOneWidget);
       final ui =
           tester.widget(find.byKey(const Key('frame 2 - ui'))) as Container;
@@ -78,7 +100,6 @@ void main() {
 
     testWidgets('builds with janky frame ui only', (WidgetTester tester) async {
       await pumpChart(tester, frames: [jankyFrameUiOnly]);
-      expect(find.byKey(FlutterFramesChart.chartLegendKey), findsOneWidget);
       expect(find.byType(FlutterFramesChartItem), findsOneWidget);
       final ui =
           tester.widget(find.byKey(const Key('frame 3 - ui'))) as Container;
@@ -91,7 +112,6 @@ void main() {
     testWidgets('builds with janky frame raster only',
         (WidgetTester tester) async {
       await pumpChart(tester, frames: [jankyFrameRasterOnly]);
-      expect(find.byKey(FlutterFramesChart.chartLegendKey), findsOneWidget);
       expect(find.byType(FlutterFramesChartItem), findsOneWidget);
       final ui =
           tester.widget(find.byKey(const Key('frame 4 - ui'))) as Container;
@@ -104,7 +124,6 @@ void main() {
     testWidgets('builds with janky frame with shader jank',
         (WidgetTester tester) async {
       await pumpChart(tester, frames: [testFrameWithShaderJank]);
-      expect(find.byKey(FlutterFramesChart.chartLegendKey), findsOneWidget);
       expect(find.byType(FlutterFramesChartItem), findsOneWidget);
       final ui =
           tester.widget(find.byKey(const Key('frame 5 - ui'))) as Container;
@@ -121,7 +140,6 @@ void main() {
     testWidgets('builds with janky frame with subtle shader jank',
         (WidgetTester tester) async {
       await pumpChart(tester, frames: [testFrameWithSubtleShaderJank]);
-      expect(find.byKey(FlutterFramesChart.chartLegendKey), findsOneWidget);
       expect(find.byType(FlutterFramesChartItem), findsOneWidget);
       final ui =
           tester.widget(find.byKey(const Key('frame 6 - ui'))) as Container;
