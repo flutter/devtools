@@ -10,7 +10,6 @@ import '../../../../../primitives/utils.dart';
 import '../../../../../shared/table/table.dart';
 import '../../../../../shared/table/table_data.dart';
 import '../../../../../shared/utils.dart';
-import '../controller/diff_pane_controller.dart';
 import '../controller/heap_diff.dart';
 import '../controller/item_controller.dart';
 

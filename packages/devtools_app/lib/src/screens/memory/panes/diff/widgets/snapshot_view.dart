@@ -36,19 +36,26 @@ class SnapshotView extends StatelessWidget {
           builder: (_, classes, __) {
             if (classes is SingleHeapClasses) {
               return ClassesTableSingle(
-                  classes: classes,
-                  selection: controller.data.derived.singleClassStats);
+                classes: classes,
+                selection: controller.data.derived.singleClassStats,
+              );
             } else if (classes is DiffHeapClasses) {
-              return ClassesTableDiff(classes: classes, controller: controller);
+              return ClassesTableDiff(
+                classes: classes,
+                selection: controller.data.derived.diffClassStats,
+              );
             } else {
               throw StateError('Unexpected type: ${classes.runtimeType}.');
             }
           },
         );
 
-        final table2 = HeapClassDetails(
-          item: item,
-          controller: controller,
+        final table2 = ValueListenableBuilder<List<StatsByPathEntry>?>(
+          valueListenable: controller.data.derived.pathEntries,
+          builder: (_, entries, __) => HeapClassDetails(
+            entries: entries,
+            selection: controller.data.derived.pathEntry,
+          ),
         );
 
         return Split(

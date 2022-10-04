@@ -10,37 +10,29 @@ import '../../../../../shared/table/table_data.dart';
 import '../../../../../shared/utils.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/primitives.dart';
-import '../controller/diff_pane_controller.dart';
-import '../controller/item_controller.dart';
 
 class HeapClassDetails extends StatelessWidget {
   const HeapClassDetails({
     Key? key,
-    required this.controller,
-    required this.item,
+    required this.entries,
+    required this.selection,
   }) : super(key: key);
 
-  final DiffPaneController controller;
-  final SnapshotInstanceItem item;
+  final List<StatsByPathEntry>? entries;
+  final ValueNotifier<StatsByPathEntry?> selection;
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<ClassStats?>(
-      valueListenable: item.selectedClassStats,
-      builder: (_, classStats, __) {
-        print('!!!! building details for ${item.name}');
-        if (classStats == null) {
-          return const Center(
-            child: Text('Select class to see details here.'),
-          );
-        }
+    final theEntries = entries;
+    if (theEntries == null) {
+      return const Center(
+        child: Text('Select class to see details here.'),
+      );
+    }
 
-        return _RetainingPathTable(
-          data: classStats,
-          controller: controller,
-          item: item,
-        );
-      },
+    return _RetainingPathTable(
+      entries: theEntries,
+      selection: selection,
     );
   }
 }
@@ -128,36 +120,32 @@ class _RetainedSizeColumn extends ColumnData<StatsByPathEntry> {
 }
 
 class _RetainingPathTable extends StatelessWidget {
-  _RetainingPathTable({
+  const _RetainingPathTable({
     Key? key,
-    required this.data,
-    required this.controller,
-    required this.item,
-  }) : super(key: key) {
-    _columns = <ColumnData<StatsByPathEntry>>[
-      _RetainingPathColumn(),
-      _InstanceColumn(),
-      _shallowSizeColumn,
-      _RetainedSizeColumn(),
-    ];
-  }
+    required this.entries,
+    required this.selection,
+  }) : super(key: key);
 
-  final ClassStats data;
-  final SnapshotInstanceItem item;
-  final DiffPaneController controller;
+  final List<StatsByPathEntry> entries;
+  final ValueNotifier<StatsByPathEntry?> selection;
 
-  late final List<ColumnData<StatsByPathEntry>> _columns;
   static final _shallowSizeColumn = _ShallowSizeColumn();
+  static late final List<ColumnData<StatsByPathEntry>> _columns =
+      <ColumnData<StatsByPathEntry>>[
+    _RetainingPathColumn(),
+    _InstanceColumn(),
+    _shallowSizeColumn,
+    _RetainedSizeColumn(),
+  ];
 
   @override
   Widget build(BuildContext context) {
     return FlatTable<StatsByPathEntry>(
-      dataKey: identityHashCode(data).toString(),
+      dataKey: 'RetainingPathTable',
       columns: _columns,
-      data: data.statsByPathEntries,
+      data: entries,
       keyFactory: (e) => Key(e.key.asLongString()),
-      selectionNotifier: item.selectedPathEntry,
-      onItemSelected: (r) => controller.selectedPath.value = r?.key,
+      selectionNotifier: selection,
       defaultSortColumn: _shallowSizeColumn,
       defaultSortDirection: SortDirection.descending,
     );

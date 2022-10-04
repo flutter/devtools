@@ -100,13 +100,6 @@ class DiffPaneController extends DisposableController {
     // not be re-rendered.
     data.core._snapshotIndex.value = max(index - 1, 0);
   }
-
-  void setDiffing(
-    SnapshotInstanceItem diffItem,
-    SnapshotInstanceItem? withItem,
-  ) {
-    diffItem.diffWith = withItem;
-  }
 }
 
 /// Values that define what data to show on diff screen.
@@ -216,7 +209,7 @@ class DiffData extends DisposableController with AutoDisposeControllerMixin {
     if (theItem is! SnapshotInstanceItem) return null;
     final heap = theItem.heap;
     if (heap == null) return null;
-    final itemToDiffWith = theItem.diffWith;
+    final itemToDiffWith = theItem.diffWith.value;
     if (itemToDiffWith == null) return heap.classes;
     return derived.diffStore.compare(heap, itemToDiffWith.heap!);
   }
