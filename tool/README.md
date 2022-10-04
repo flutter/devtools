@@ -161,7 +161,7 @@ script,
    ```
 
 - Update the `devtools_rev` entry in the Dart SDK [DEPS file](https://github.com/dart-lang/sdk/blob/master/DEPS)
-   - set the `devtools_rev` entry to the `TARGET_COMMIT_HASH.
+   - set the `devtools_rev` entry to the `TARGET_COMMIT_HASH`.
    - See this [example CL](https://dart-review.googlesource.com/c/sdk/+/215520) for reference.
 
 
