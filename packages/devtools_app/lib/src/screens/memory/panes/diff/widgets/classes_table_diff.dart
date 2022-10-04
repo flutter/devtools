@@ -142,11 +142,11 @@ class ClassesTableDiff extends StatefulWidget {
   const ClassesTableDiff({
     Key? key,
     required this.classes,
-    required this.controller,
+    required this.selection,
   }) : super(key: key);
 
   final DiffHeapClasses classes;
-  final DiffPaneController controller;
+  final ValueNotifier<DiffClassStats?> selection;
 
   @override
   State<ClassesTableDiff> createState() => _ClassesTableDiffState();
@@ -172,40 +172,24 @@ class _ClassesTableDiffState extends State<ClassesTableDiff>
       range: const Range(7, 10),
     ),
   ];
-  late final List<ColumnData<DiffClassStats>> _columns;
-  late final SnapshotInstanceItem _item;
-  final _shallowSizeDeltaColumn =
+
+  static late final SnapshotInstanceItem _item;
+
+  static final _shallowSizeDeltaColumn =
       _SizeColumn(_DataPart.delta, _SizeType.shallow);
-
-  @override
-  void initState() {
-    super.initState();
-
-    _columns = <ColumnData<DiffClassStats>>[
-      _ClassNameColumn(),
-      _InstanceColumn(_DataPart.created),
-      _InstanceColumn(_DataPart.deleted),
-      _InstanceColumn(_DataPart.delta),
-      _SizeColumn(_DataPart.created, _SizeType.shallow),
-      _SizeColumn(_DataPart.deleted, _SizeType.shallow),
-      _shallowSizeDeltaColumn,
-      _SizeColumn(_DataPart.created, _SizeType.retained),
-      _SizeColumn(_DataPart.deleted, _SizeType.retained),
-      _SizeColumn(_DataPart.delta, _SizeType.retained),
-    ];
-
-    _initWidget();
-  }
-
-  void _initWidget() {
-    _item = widget.controller.selectedSnapshotItem as SnapshotInstanceItem;
-  }
-
-  @override
-  void didUpdateWidget(covariant ClassesTableDiff oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.controller != oldWidget.controller) _initWidget();
-  }
+  static late final List<ColumnData<DiffClassStats>> _columns =
+      <ColumnData<DiffClassStats>>[
+    _ClassNameColumn(),
+    _InstanceColumn(_DataPart.created),
+    _InstanceColumn(_DataPart.deleted),
+    _InstanceColumn(_DataPart.delta),
+    _SizeColumn(_DataPart.created, _SizeType.shallow),
+    _SizeColumn(_DataPart.deleted, _SizeType.shallow),
+    _shallowSizeDeltaColumn,
+    _SizeColumn(_DataPart.created, _SizeType.retained),
+    _SizeColumn(_DataPart.deleted, _SizeType.retained),
+    _SizeColumn(_DataPart.delta, _SizeType.retained),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -215,7 +199,7 @@ class _ClassesTableDiffState extends State<ClassesTableDiff>
       data: widget.classes.classes,
       dataKey: _item.id.toString(),
       keyFactory: (e) => Key(e.heapClass.fullName),
-      selectionNotifier: _item.selectedDiffClassStats,
+      selectionNotifier: widget.selection,
       defaultSortColumn: _shallowSizeDeltaColumn,
       defaultSortDirection: SortDirection.descending,
     );
