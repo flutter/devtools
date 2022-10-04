@@ -23,12 +23,12 @@ class SnapshotControlPane extends StatelessWidget {
     return ValueListenableBuilder<bool>(
       valueListenable: controller.isProcessing,
       builder: (_, isProcessing, __) {
-        final current = controller.selectedSnapshotItem as SnapshotInstanceItem;
+        final current =
+            controller.data.core.selectedItem as SnapshotInstanceItem;
 
         return Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // This child is aligned to the left.
             Row(
               children: [
                 const SizedBox(width: defaultSpacing),

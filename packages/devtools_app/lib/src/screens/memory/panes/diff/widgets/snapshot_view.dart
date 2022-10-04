@@ -15,13 +15,14 @@ import 'classes_table_diff.dart';
 import 'classes_table_single.dart';
 
 class SnapshotView extends StatelessWidget {
-  const SnapshotView({Key? key, required this.controller}) : super(key: key);
+  const SnapshotView({Key? key, required this.controller, required this.item})
+      : super(key: key);
 
   final DiffPaneController controller;
+  final SnapshotInstanceItem item;
 
   @override
   Widget build(BuildContext context) {
-    final item = controller.selectedSnapshotItem as SnapshotInstanceItem;
     return ValueListenableBuilder<bool>(
       valueListenable: item.isProcessing,
       builder: (_, isProcessing, __) {

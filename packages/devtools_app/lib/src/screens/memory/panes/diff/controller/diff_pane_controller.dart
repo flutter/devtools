@@ -48,9 +48,6 @@ class DiffPaneController extends DisposableController {
   /// informational item.
   bool get hasSnapshots => data.core.snapshots.value.length > 1;
 
-  SnapshotItem get selectedSnapshotItem =>
-      data.core._snapshots.value[data.core.snapshotIndex.value];
-
   // This value should never be reset. It is incremented for every snapshot that
   // is taken, and is used to assign a unique id to each [SnapshotListItem].
   int _snapshotId = 0;
@@ -89,8 +86,9 @@ class DiffPaneController extends DisposableController {
   }
 
   void deleteCurrentSnapshot() {
-    assert(selectedSnapshotItem is SnapshotInstanceItem);
-    selectedSnapshotItem.dispose();
+    final item = data.core.selectedItem;
+    assert(item is SnapshotInstanceItem);
+    item.dispose();
     final index = data.core.snapshotIndex.value;
     data.core._snapshots.removeRange(
       index,
@@ -114,6 +112,8 @@ class CoreData {
   final _snapshotIndex = ValueNotifier<int>(0);
   void setSnapshotIndex(int value) => _snapshotIndex.value = value;
 
+  SnapshotItem get selectedItem => _snapshots.value[_snapshotIndex.value];
+
   // TODO(https://github.com/flutter/devtools/issues/4539): it is unclear
   // whether preserving the selection between snapshots should be the
   // default behavior. Revisit after consulting with UXR.
@@ -130,6 +130,13 @@ class CoreData {
 
 /// Values that can be calculated from [CoreData].
 class DerivedData {
+  DerivedData(CoreData core) {
+    // _selectedItem = ValueNotifier<SnapshotItem>(core.selectedItem);
+  }
+
+  // ValueListenable<SnapshotItem> get selectedSnapshotItem => _selectedItem;
+  // late final ValueNotifier<SnapshotItem> _selectedItem;
+
   /// Classes to show.
   final heapClasses = ValueNotifier<HeapClasses?>(null);
 
@@ -174,7 +181,7 @@ class DiffData extends DisposableController with AutoDisposeControllerMixin {
 
   final core = CoreData();
 
-  final derived = DerivedData();
+  late final derived = DerivedData(core);
 
   /// Updates cross-snapshot class if the argument is not null.
   void _setClassIfNotNull(HeapClassName? theClass) {
@@ -205,7 +212,7 @@ class DiffData extends DisposableController with AutoDisposeControllerMixin {
 
   /// List of classes to show for the selected snapshot.
   HeapClasses? _snapshotClasses() {
-    final theItem = core._snapshots.value[core.snapshotIndex.value];
+    final theItem = core.selectedItem;
     if (theItem is! SnapshotInstanceItem) return null;
     final heap = theItem.heap;
     if (heap == null) return null;
@@ -214,29 +221,44 @@ class DiffData extends DisposableController with AutoDisposeControllerMixin {
     return derived.diffStore.compare(heap, itemToDiffWith.heap!);
   }
 
-  /// Set [derived] values based on [core] values.
-  void _recalculateValues() {
-    final classes = _snapshotClasses();
-    derived.heapClasses.value = classes;
-
-    // Set classes to show.
-    final singleClass = derived.singleClassStats;
-    final diffClass = derived.diffClassStats;
+  static _updateClassStats({
+    required HeapClasses? classes,
+    required HeapClassName? className,
+    required ValueNotifier<SingleClassStats?> singleToUpdate,
+    required ValueNotifier<DiffClassStats?> diffToUpdate,
+  }) {
     if (classes is SingleHeapClasses) {
-      singleClass.value = classes.classesByName[core.className];
-      diffClass.value = null;
+      singleToUpdate.value = classes.classesByName[className];
+      diffToUpdate.value = null;
     } else if (classes is DiffHeapClasses) {
-      singleClass.value = null;
-      diffClass.value = classes.classesByName[core.className];
+      singleToUpdate.value = null;
+      diffToUpdate.value = classes.classesByName[className];
     } else if (classes == null) {
-      singleClass.value = null;
-      diffClass.value = null;
+      singleToUpdate.value = null;
+      diffToUpdate.value = null;
     } else {
       throw StateError('Unexpected type: ${classes.runtimeType}.');
     }
+  }
+
+  /// Set [derived] values based on [core] values.
+  void _recalculateValues() {
+    // Set current snapshot.
+    // derived._selectedItem.value = core.selectedItem;
+
+    // Set classes to show.
+    final classes = _snapshotClasses();
+    derived.heapClasses.value = classes;
+    _updateClassStats(
+      classes: classes,
+      className: core.className,
+      singleToUpdate: derived.singleClassStats,
+      diffToUpdate: derived.diffClassStats,
+    );
 
     // Set pathes to show.
-    final theClass = singleClass.value ?? diffClass.value;
+    final theClass =
+        derived.singleClassStats.value ?? derived.diffClassStats.value;
     final pathEntries =
         derived.pathEntries.value = theClass?.statsByPathEntries;
     final pathes = theClass?.statsByPath;
