@@ -288,8 +288,9 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     ChartsValues chartsValues,
     Offset position,
   ) {
-    final focusColor = Theme.of(context).focusColor;
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final focusColor = theme.focusColor;
+    final colorScheme = theme.colorScheme;
 
     final box = MemoryChartPane.hoverKey.currentContext!.findRenderObject()
         as RenderBox;
@@ -319,7 +320,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
     final displayTimestamp = prettyTimestamp(chartsValues.timestamp);
 
-    final hoverHeading = colorScheme.hoverTitleTextStyle;
+    final hoverHeading = theme.hoverTitleTextStyle;
 
     final OverlayState overlayState = Overlay.of(context)!;
     _hoverOverlayEntry ??= OverlayEntry(
@@ -407,10 +408,10 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     bool scaleImage = false,
     double leftPadding = 5.0,
   }) {
-    final hoverTitleEntry = Theme.of(context).colorScheme.hoverTextStyle;
-    final hoverValueEntry = Theme.of(context).colorScheme.hoverValueTextStyle;
-    final hoverSmallEntry =
-        Theme.of(context).colorScheme.hoverSmallValueTextStyle;
+    final theme = Theme.of(context);
+    final hoverTitleEntry = theme.hoverTextStyle;
+    final hoverValueEntry = theme.hoverValueTextStyle;
+    final hoverSmallEntry = theme.hoverSmallValueTextStyle;
 
     List<Widget> hoverPartImageLine(
       String name, {
@@ -558,8 +559,9 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
       index++;
     }
 
-    final colorScheme = Theme.of(context).colorScheme;
-    final hoverTextStyle = colorScheme.hoverTextStyle;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final hoverTextStyle = theme.hoverTextStyle;
     final contrastForeground = colorScheme.contrastForeground;
     final collapsedColor = colorScheme.defaultBackgroundColor;
 
@@ -588,8 +590,9 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
   }
 
   Widget _cardWidget(String value) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final hoverValueEntry = colorScheme.hoverSmallValueTextStyle;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final hoverValueEntry = theme.hoverSmallValueTextStyle;
     final expandedGradient = colorScheme.verticalGradient;
 
     return Padding(
