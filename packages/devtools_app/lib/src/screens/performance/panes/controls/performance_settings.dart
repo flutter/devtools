@@ -137,6 +137,11 @@ class FlutterSettings extends StatelessWidget {
           notifier: controller.badgeTabForJankyFrames as ValueNotifier<bool?>,
           title: 'Badge Performance tab when Flutter UI jank is detected',
         ),
+        CheckboxSetting(
+          notifier: controller.useLegacyTraceViewer as ValueNotifier<bool?>,
+          title: 'Use legacy trace viewer',
+          onChanged: controller.toggleUseLegacyTraceViewer,
+        ),
       ],
     );
   }

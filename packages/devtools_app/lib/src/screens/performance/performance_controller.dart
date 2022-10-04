@@ -72,6 +72,9 @@ class PerformanceController extends DisposableController
 
   final perfettoController = createPerfettoController();
 
+  final useLegacyTraceViewer =
+      ValueNotifier<bool>(!FeatureFlags.embeddedPerfetto || !kIsWeb);
+
   final _exportController = ExportController();
 
   /// The currently selected timeline event.
@@ -699,7 +702,7 @@ class PerformanceController extends DisposableController
   }
 
   FutureOr<void> processTraceEvents(List<TraceEventWrapper> traceEvents) async {
-    if (FeatureFlags.embeddedPerfetto) {
+    if (FeatureFlags.embeddedPerfetto && !useLegacyTraceViewer.value) {
       await perfettoController.loadTrace(traceEvents);
     } else {
       await _processTraceEvents(traceEvents);
@@ -927,6 +930,11 @@ class PerformanceController extends DisposableController
   Future<void> toggleHttpRequestLogging(bool state) async {
     await HttpService.toggleHttpRequestLogging(state);
     _httpTimelineLoggingEnabled.value = state;
+  }
+
+  void toggleUseLegacyTraceViewer(bool? value) {
+    useLegacyTraceViewer.value = value ?? false;
+    processAvailableEvents();
   }
 
   /// Clears the timeline data currently stored by the controller as well the

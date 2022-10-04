@@ -164,7 +164,7 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
             },
           ),
         Expanded(
-          child: FeatureFlags.embeddedPerfetto
+          child: FeatureFlags.embeddedPerfetto && !controller.useLegacyTraceViewer.value
               ? tabbedPerformanceView
               : Split(
                   axis: Axis.vertical,
