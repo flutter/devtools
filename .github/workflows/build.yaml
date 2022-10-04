@@ -4,11 +4,11 @@
 
 name: devtools
 
-on:
-  pull_request:
-  push:
-    branches:
-      - master
+# on:
+#   # pull_request:
+#   # push:
+#   #   branches:
+#   #     - master
 
 # Declare default permissions as read only.
 permissions: read-all
