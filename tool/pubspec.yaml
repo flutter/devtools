@@ -8,10 +8,5 @@ dependencies:
   args: ^2.1.0
   cli_util: ^0.3.3
   http: ^0.13.3
-  json_annotation: ^4.4.0
   lints: any
   path: ^1.8.0
-
-dev_dependencies:
-  build_runner: ^2.0.0
-  json_serializable: ^6.0.0
