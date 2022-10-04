@@ -22,7 +22,7 @@ class SnapshotView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<SnapshotItem>(
-      valueListenable: controller.data.derived.selectedItem,
+      valueListenable: controller.derived.selectedItem,
       builder: (_, item, __) {
         return ValueListenableBuilder<bool>(
           valueListenable: item.isProcessing,
@@ -38,17 +38,17 @@ class SnapshotView extends StatelessWidget {
             }
 
             final table1 = ValueListenableBuilder<HeapClasses?>(
-              valueListenable: controller.data.derived.heapClasses,
+              valueListenable: controller.derived.heapClasses,
               builder: (_, classes, __) {
                 if (classes is SingleHeapClasses) {
                   return ClassesTableSingle(
                     classes: classes,
-                    selection: controller.data.derived.singleClassStats,
+                    selection: controller.derived.singleClassStats,
                   );
                 } else if (classes is DiffHeapClasses) {
                   return ClassesTableDiff(
                     classes: classes,
-                    selection: controller.data.derived.diffClassStats,
+                    selection: controller.derived.diffClassStats,
                   );
                 } else {
                   throw StateError('Unexpected type: ${classes.runtimeType}.');
@@ -57,10 +57,10 @@ class SnapshotView extends StatelessWidget {
             );
 
             final table2 = ValueListenableBuilder<List<StatsByPathEntry>?>(
-              valueListenable: controller.data.derived.pathEntries,
+              valueListenable: controller.derived.pathEntries,
               builder: (_, entries, __) => HeapClassDetails(
                 entries: entries,
-                selection: controller.data.derived.pathEntry,
+                selection: controller.derived.pathEntry,
               ),
             );
 

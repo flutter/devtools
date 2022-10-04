@@ -24,7 +24,7 @@ class SnapshotControlPane extends StatelessWidget {
       valueListenable: controller.isProcessing,
       builder: (_, isProcessing, __) {
         final current =
-            controller.data.core.selectedItem as SnapshotInstanceItem;
+            controller.core.selectedItem as SnapshotInstanceItem;
 
         return Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -35,7 +35,7 @@ class SnapshotControlPane extends StatelessWidget {
                 if (!isProcessing && current.heap != null) ...[
                   _DiffDropdown(
                     current: current,
-                    list: controller.data.core.snapshots,
+                    list: controller.core.snapshots,
                   ),
                   const SizedBox(width: defaultSpacing),
                   SizedBox(

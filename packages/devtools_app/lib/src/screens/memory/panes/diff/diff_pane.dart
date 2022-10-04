@@ -47,7 +47,7 @@ class _SnapshotContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<SnapshotItem>(
-      valueListenable: controller.data.derived.selectedItem,
+      valueListenable: controller.derived.selectedItem,
       builder: (_, item, __) {
         if (item is SnapshotDocItem) {
           return const Center(

@@ -28,7 +28,7 @@ abstract class DiffWidgetState<T extends DiffWidget> extends State<T> {
 
   void _initWidget() {
     diffController = widget.diffController;
-    diffCore = widget.diffController.data.core;
-    diffDerived = widget.diffController.data.derived;
+    diffCore = widget.diffController.core;
+    diffDerived = widget.diffController.derived;
   }
 }
