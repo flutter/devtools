@@ -164,22 +164,26 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
             },
           ),
         Expanded(
-          child: FeatureFlags.embeddedPerfetto &&
-                  !controller.useLegacyTraceViewer.value
-              ? tabbedPerformanceView
-              : Split(
-                  axis: Axis.vertical,
-                  initialFractions: const [0.7, 0.3],
-                  children: [
-                    tabbedPerformanceView,
-                    ValueListenableBuilder<TimelineEvent?>(
-                      valueListenable: controller.selectedTimelineEvent,
-                      builder: (context, selectedEvent, _) {
-                        return EventDetails(selectedEvent);
-                      },
-                    ),
-                  ],
-                ),
+          child: ValueListenableBuilder<bool>(
+            valueListenable: controller.useLegacyTraceViewer,
+            builder: (context, useLegacy, _) {
+              return FeatureFlags.embeddedPerfetto && !useLegacy
+                  ? tabbedPerformanceView
+                  : Split(
+                      axis: Axis.vertical,
+                      initialFractions: const [0.7, 0.3],
+                      children: [
+                        tabbedPerformanceView,
+                        ValueListenableBuilder<TimelineEvent?>(
+                          valueListenable: controller.selectedTimelineEvent,
+                          builder: (context, selectedEvent, _) {
+                            return EventDetails(selectedEvent);
+                          },
+                        ),
+                      ],
+                    );
+            },
+          ),
         ),
       ],
     );
