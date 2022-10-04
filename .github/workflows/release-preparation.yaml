@@ -21,7 +21,7 @@ jobs:
       - name: Get PR Labels
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CHANGED_FILES:  ${{ $CHANGED_FILES }}
+          CHANGED_FILES:  ${{ env.CHANGED_FILES }}
         run: |
           echo "THE CHANGED FILES ARE $CHANGED_FILES"
 
