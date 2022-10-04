@@ -15,7 +15,8 @@ jobs:
           JSON_RELEASE_FILE='packages/devtools_app/lib/src/framework/release_notes/release_notes.json'
           PULL_NUMBER=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
           FILES_RESPONSE=$(gh api /repos/flutter/devtools/pulls/$PULL_NUMBER/files)
-          export CHANGED_FILES=$(echo $FILES_RESPONSE | jq '.[].filename')
+          CHANGED_FILES=$(echo $FILES_RESPONSE | jq '.[].filename')
+          echo "THE CHANGED FILES ARE $CHANGED_FILES"
           echo "::set-output name=CHANGED_FILES::'$CHANGED_FILES'"
           # HAS_JSON_RELEASE_FILE=$(echo $FILE_NAMES | jq '. | any(. == env.JSON_RELEASE_FILE)')
       - name: Get PR Labels
