@@ -9,7 +9,7 @@ Make sure:
     
    ```shell 
    DART_SDK_REPO_DIR=<Path to cloned dart sdk>
-   LOCAL_DART_SDK=$DART_SDK_REPO_DIR/sdk
+   export LOCAL_DART_SDK=$DART_SDK_REPO_DIR/sdk
    ```
 3. The local checkout is at `main` branch:
    - `git rebase-update`.
