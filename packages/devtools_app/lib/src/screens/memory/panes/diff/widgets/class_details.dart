@@ -29,6 +29,7 @@ class HeapClassDetails extends StatelessWidget {
     return ValueListenableBuilder<ClassStats?>(
       valueListenable: item.selectedClassStats,
       builder: (_, classStats, __) {
+        print('!!!! building details for ${item.name}');
         if (classStats == null) {
           return const Center(
             child: Text('Select class to see details here.'),
@@ -151,6 +152,7 @@ class _RetainingPathTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('!!!! building details table');
     return FlatTable<StatsByPathEntry>(
       dataKey: identityHashCode(data).toString(),
       columns: _columns,

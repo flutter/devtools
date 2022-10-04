@@ -120,12 +120,22 @@ class SnapshotInstanceItem extends SnapshotItem
     return diffStore.compare(theHeap, itemToDiffWith.heap!);
   }
 
+  bool _handlingSelectionChange = false;
   void _handleSelectionChange() {
     final className = selectedClassName.value;
+    // The class name is null only in the beginning when nothing is selected.
     if (className == null) return;
+
+    if (_handlingSelectionChange) return;
+    _handlingSelectionChange = true;
+
+    if (name.contains('-3')) {
+      print('handling #3');
+    }
 
     final heapClasses = classesToShow();
 
+    // Update what class to show.
     if (heapClasses is SingleHeapClasses) {
       selectedSingleClassStats.value =
           _selectedClassStats.value = heapClasses.classesByName[className];
@@ -138,6 +148,7 @@ class SnapshotInstanceItem extends SnapshotItem
       throw StateError('Unexpected type: ${heapClasses.runtimeType}.');
     }
 
+    // Update what path to show.
     StatsByPathEntry? newByPathEntry;
     final path = selectedPath.value;
     final classStats = _selectedClassStats.value;
@@ -149,6 +160,8 @@ class SnapshotInstanceItem extends SnapshotItem
       }
     }
     selectedPathEntry.value = newByPathEntry;
+
+    _handlingSelectionChange = false;
   }
 
   void downloadToCsv() {

@@ -181,8 +181,6 @@ class _ClassesTableDiffState extends State<ClassesTableDiff>
   void initState() {
     super.initState();
 
-    _item = widget.controller.selectedSnapshotItem as SnapshotInstanceItem;
-
     _columns = <ColumnData<DiffClassStats>>[
       _ClassNameColumn(),
       _InstanceColumn(_DataPart.created),
@@ -195,6 +193,18 @@ class _ClassesTableDiffState extends State<ClassesTableDiff>
       _SizeColumn(_DataPart.deleted, _SizeType.retained),
       _SizeColumn(_DataPart.delta, _SizeType.retained),
     ];
+
+    _initWidget();
+  }
+
+  void _initWidget() {
+    _item = widget.controller.selectedSnapshotItem as SnapshotInstanceItem;
+  }
+
+  @override
+  void didUpdateWidget(covariant ClassesTableDiff oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.controller != oldWidget.controller) _initWidget();
   }
 
   @override
