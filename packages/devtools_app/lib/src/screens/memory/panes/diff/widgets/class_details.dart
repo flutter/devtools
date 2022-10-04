@@ -5,7 +5,6 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../../../primitives/utils.dart';
-
 import '../../../../../shared/table/table.dart';
 import '../../../../../shared/table/table_data.dart';
 import '../../../../../shared/utils.dart';
@@ -148,11 +147,10 @@ class _RetainingPathTable extends StatelessWidget {
   final DiffPaneController controller;
 
   late final List<ColumnData<StatsByPathEntry>> _columns;
-  final _shallowSizeColumn = _ShallowSizeColumn();
+  static final _shallowSizeColumn = _ShallowSizeColumn();
 
   @override
   Widget build(BuildContext context) {
-    print('!!!! building details table');
     return FlatTable<StatsByPathEntry>(
       dataKey: identityHashCode(data).toString(),
       columns: _columns,

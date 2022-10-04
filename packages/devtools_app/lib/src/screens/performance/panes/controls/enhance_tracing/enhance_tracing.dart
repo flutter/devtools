@@ -132,11 +132,11 @@ class _TrackWidgetBuildsSettingState extends State<TrackWidgetBuildsSetting>
   /// [TrackWidgetBuildsScope] or null if widget builds are not being tracked.
   final _selectedScope = ValueNotifier<TrackWidgetBuildsScope?>(null);
 
-  /// Whether either of the extensions in [_trackWidgetBuildsExtensions.values]
+  /// Whether either of the extensions in [_trackWidgetBuildsExtensions.data]
   /// are enabled.
   final _tracked = ValueNotifier<bool>(false);
 
-  /// Whether either of the extensions in [_trackWidgetBuildsExtensions.values]
+  /// Whether either of the extensions in [_trackWidgetBuildsExtensions.data]
   /// are available.
   final _trackingAvailable = ValueNotifier<bool>(false);
 

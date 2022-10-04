@@ -7,46 +7,27 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../../../../primitives/auto_dispose.dart';
 import '../../../../../primitives/utils.dart';
 import '../../../primitives/memory_utils.dart';
+import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
 import 'heap_diff.dart';
 import 'item_controller.dart';
 
-class DiffPaneController {
+class DiffPaneController extends DisposableController {
   DiffPaneController(this.snapshotTaker);
 
   final SnapshotTaker snapshotTaker;
-
-  final diffStore = HeapDiffStore();
-
-  /// The list contains one item that show information and all others
-  /// are snapshots.
-  ValueListenable<List<SnapshotItem>> get snapshots => _snapshots;
-  final _snapshots = ListValueNotifier(<SnapshotItem>[SnapshotDocItem()]);
-
-  ValueListenable<int> get selectedSnapshotIndex => _selectedSnapshotIndex;
-  final _selectedSnapshotIndex = ValueNotifier<int>(0);
-  void setSelectedSnapshotIndex(int index) =>
-      _selectedSnapshotIndex.value = index;
 
   /// If true, some process is going on.
   ValueListenable<bool> get isProcessing => _isProcessing;
   final _isProcessing = ValueNotifier<bool>(false);
 
-  SnapshotItem get selectedSnapshotItem =>
-      snapshots.value[selectedSnapshotIndex.value];
+  late final data = DiffData();
 
-  /// Full name for the selected class.
-  final selectedClassName = ValueNotifier<HeapClassName?>(null);
-
-  /// Selected retaining path.
-  final selectedPath = ValueNotifier<ClassOnlyHeapPath?>(null);
-
-  ValueListenable<String?> get classFilter => _classFilter;
-  final _classFilter = ValueNotifier<String?>(null);
   void setClassFilter(String value) {
-    _classFilter.value = value;
+    data.core._classFilter.value = value;
 
     // TODO(polina-c): filter the data before opening the feature:
     // if (value.isEmpty && _currentFilter.isEmpty) return;
@@ -65,7 +46,7 @@ class DiffPaneController {
 
   /// True, if the list contains snapshots, i.e. items beyond the first
   /// informational item.
-  bool get hasSnapshots => snapshots.value.length > 1;
+  bool get hasSnapshots => data.core.snapshots.value.length > 1;
 
   // This value should never be reset. It is incremented for every snapshot that
   // is taken, and is used to assign a unique id to each [SnapshotListItem].
@@ -74,46 +55,206 @@ class DiffPaneController {
   Future<void> takeSnapshot() async {
     _isProcessing.value = true;
     final future = snapshotTaker.take();
-    _snapshots.add(
+    final snapshots = data.core._snapshots;
+    snapshots.add(
       SnapshotInstanceItem(
         receiver: future,
         id: _snapshotId++,
         displayNumber: _nextDisplayNumber(),
         isolateName: currentIsolateName ?? '<isolate-not-detected>',
-        diffStore: diffStore,
-        selectedClassName: selectedClassName,
-        selectedPath: selectedPath,
       ),
     );
     await future;
     final newElementIndex = snapshots.value.length - 1;
-    _selectedSnapshotIndex.value = newElementIndex;
+    data.core._snapshotIndex.value = newElementIndex;
     _isProcessing.value = false;
   }
 
   Future<void> clearSnapshots() async {
+    final snapshots = data.core._snapshots;
     for (var i = 1; i < snapshots.value.length; i++) {
       snapshots.value[i].dispose();
     }
-    _snapshots.removeRange(1, snapshots.value.length);
-    _selectedSnapshotIndex.value = 0;
+    snapshots.removeRange(1, snapshots.value.length);
+    data.core._snapshotIndex.value = 0;
   }
 
   int _nextDisplayNumber() {
-    final numbers = snapshots.value.map((e) => e.displayNumber);
+    final numbers = data.core._snapshots.value.map((e) => e.displayNumber);
     assert(numbers.isNotEmpty);
     return numbers.max + 1;
   }
 
   void deleteCurrentSnapshot() {
-    assert(selectedSnapshotItem is SnapshotInstanceItem);
-    selectedSnapshotItem.dispose();
-    _snapshots.removeRange(
-      selectedSnapshotIndex.value,
-      selectedSnapshotIndex.value + 1,
+    assert(data.snapshotItem is SnapshotInstanceItem);
+    data.snapshotItem.dispose();
+    final index = data.core.snapshotIndex.value;
+    data.core._snapshots.removeRange(
+      index,
+      index + 1,
     );
     // We must change the selectedIndex, because otherwise the content will
     // not be re-rendered.
-    _selectedSnapshotIndex.value = max(selectedSnapshotIndex.value - 1, 0);
+    data.core._snapshotIndex.value = max(index - 1, 0);
+  }
+
+  void setDiffing(
+    SnapshotInstanceItem diffItem,
+    SnapshotInstanceItem? withItem,
+  ) {
+    diffItem.diffWith = withItem;
+  }
+}
+
+/// Values that define what data to show on diff screen.
+class _CoreData {
+  /// The list contains one item that show information and all others
+  /// are snapshots.
+  ValueListenable<List<SnapshotItem>> get snapshots => _snapshots;
+  final _snapshots = ListValueNotifier(<SnapshotItem>[SnapshotDocItem()]);
+
+  /// Selected snapshot.
+  ValueListenable<int> get snapshotIndex => _snapshotIndex;
+  final _snapshotIndex = ValueNotifier<int>(0);
+
+  // TODO(https://github.com/flutter/devtools/issues/4539): it is unclear
+  // whether preserving the selection between snapshots should be the
+  // default behavior. Revisit after consulting with UXR.
+
+  /// Full name for the selected class (cross-snapshot).
+  HeapClassName? className;
+
+  /// Selected retaining path (cross-snapshot).
+  ClassOnlyHeapPath? path;
+
+  ValueListenable<String?> get classFilter => _classFilter;
+  final _classFilter = ValueNotifier<String?>(null);
+}
+
+/// Values calculated from [_CoreData].
+class _DerivedData {
+  /// Classes to show.
+  final heapClasses = ValueNotifier<HeapClasses?>(null);
+
+  /// Selected single class item in snapshot, to provide to table widget.
+  final singleClassStats = ValueNotifier<SingleClassStats?>(null);
+
+  /// Selected diff class item in snapshot, to provide to table widget.
+  final diffClassStats = ValueNotifier<DiffClassStats?>(null);
+
+  /// List of retaining paths to show for the selected class.
+  final pathEntries = ValueNotifier<List<StatsByPathEntry>?>(null);
+
+  /// Selected retaining path record in a concrete snapshot, to provide to table widget.
+  final pathEntry = ValueNotifier<StatsByPathEntry?>(null);
+
+  final diffStore = HeapDiffStore();
+}
+
+class DiffData extends DisposableController with AutoDisposeControllerMixin {
+  DiffData() {
+    addAutoDisposeListener(
+      derived.singleClassStats,
+      () => _setClassIfNotNull(derived.singleClassStats.value?.heapClass),
+    );
+    addAutoDisposeListener(
+      derived.diffClassStats,
+      () => _setClassIfNotNull(derived.diffClassStats.value?.heapClass),
+    );
+    addAutoDisposeListener(
+      derived.pathEntry,
+      () => _setPathIfNotNull(derived.pathEntry.value?.key),
+    );
+    addAutoDisposeListener(
+      core.snapshotIndex,
+      _recalculateValues,
+    );
+    addAutoDisposeListener(
+      core._snapshots,
+      _recalculateValues,
+    );
+  }
+
+  final core = _CoreData();
+
+  final derived = _DerivedData();
+
+  /// Updates cross-snapshot class if the argument is not null.
+  void _setClassIfNotNull(HeapClassName? theClass) {
+    if (theClass == null || theClass == core.className) return;
+    core.className = theClass;
+    _recalculateValues();
+  }
+
+  /// Updates cross-snapshot path if the argument is not null.
+  void _setPathIfNotNull(ClassOnlyHeapPath? path) {
+    if (path == null || path == core.path) return;
+    core.path = path;
+    _recalculateValues();
+  }
+
+  SnapshotItem get snapshotItem =>
+      core._snapshots.value[core.snapshotIndex.value];
+
+  void _assertIntegrity() {
+    assert(() {
+      final singleClass = derived.singleClassStats.value;
+      final diffClass = derived.diffClassStats.value;
+      final theClass = singleClass?.heapClass ?? diffClass?.heapClass;
+
+      assert(singleClass == null || diffClass == null);
+      assert(theClass == null || theClass == core.className);
+
+      return true;
+    }());
+  }
+
+  /// List of classes to show for the selected snapshot.
+  HeapClasses? _snapshotClasses() {
+    final item = snapshotItem;
+    if (item is! SnapshotInstanceItem) return null;
+    final heap = item.heap;
+    if (heap == null) return null;
+    final itemToDiffWith = item.diffWith;
+    if (itemToDiffWith == null) return heap.classes;
+    return derived.diffStore.compare(heap, itemToDiffWith.heap!);
+  }
+
+  /// Set [derived] values based on [core] values.
+  void _recalculateValues() {
+    final classes = _snapshotClasses();
+    derived.heapClasses.value = classes;
+
+    // Set classes to show.
+    final singleClass = derived.singleClassStats;
+    final diffClass = derived.diffClassStats;
+    if (classes is SingleHeapClasses) {
+      singleClass.value = classes.classesByName[core.className];
+      diffClass.value = null;
+    } else if (classes is DiffHeapClasses) {
+      singleClass.value = null;
+      diffClass.value = classes.classesByName[core.className];
+    } else if (classes == null) {
+      singleClass.value = null;
+      diffClass.value = null;
+    } else {
+      throw StateError('Unexpected type: ${classes.runtimeType}.');
+    }
+
+    // Set pathes to show.
+    final theClass = singleClass.value ?? diffClass.value;
+    final pathEntries =
+        derived.pathEntries.value = theClass?.statsByPathEntries;
+    final pathes = theClass?.statsByPath;
+    StatsByPathEntry? byPathEntry;
+    if (core.path != null && pathes != null && pathEntries != null) {
+      final pathStats = pathes[core.path];
+      if (pathStats != null) {
+        byPathEntry = pathEntries.firstWhereOrNull((e) => e.key == core.path);
+      }
+    }
+    derived.pathEntry.value = byPathEntry;
+
+    _assertIntegrity();
   }
 }

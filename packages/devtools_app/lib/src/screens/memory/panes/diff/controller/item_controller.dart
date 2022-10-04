@@ -35,43 +35,17 @@ class SnapshotDocItem extends SnapshotItem {
   bool get hasData => false;
 }
 
-class SnapshotInstanceItem extends SnapshotItem
-    with AutoDisposeControllerMixin {
+class SnapshotInstanceItem extends SnapshotItem {
   SnapshotInstanceItem({
     required Future<AdaptedHeapData?> receiver,
     required this.displayNumber,
     required this.isolateName,
-    required this.diffStore,
     required this.id,
-    required this.selectedClassName,
-    required this.selectedPath,
   }) {
     _isProcessing.value = true;
     receiver.whenComplete(() async {
       final data = await receiver;
-      if (data != null) {
-        heap = AdaptedHeap(data);
-        // TODO(https://github.com/flutter/devtools/issues/4539): it is unclear
-        // whether preserving the selection between snapshots should be the
-        // default behavior. Revisit after consulting with UXR.
-        _handleSelectionChange();
-        addAutoDisposeListener(
-          selectedClassName,
-          _handleSelectionChange,
-        );
-        addAutoDisposeListener(
-          selectedPath,
-          _handleSelectionChange,
-        );
-        addAutoDisposeListener(selectedDiffClassStats, () {
-          selectedClassName.value = selectedDiffClassStats.value?.heapClass;
-          _handleSelectionChange();
-        });
-        addAutoDisposeListener(selectedSingleClassStats, () {
-          selectedClassName.value = selectedSingleClassStats.value?.heapClass;
-          _handleSelectionChange();
-        });
-      }
+      if (data != null) heap = AdaptedHeap(data);
       _isProcessing.value = false;
     });
   }
@@ -80,8 +54,6 @@ class SnapshotInstanceItem extends SnapshotItem
 
   final String isolateName;
 
-  final HeapDiffStore diffStore;
-
   AdaptedHeap? heap;
 
   @override
@@ -89,80 +61,10 @@ class SnapshotInstanceItem extends SnapshotItem
 
   String get name => '$isolateName-$displayNumber';
 
-  ValueListenable<SnapshotInstanceItem?> get diffWith => _diffWith;
-  final _diffWith = ValueNotifier<SnapshotInstanceItem?>(null);
-  void setDiffWith(SnapshotInstanceItem? value) {
-    _diffWith.value = value;
-    _handleSelectionChange();
-  }
-
-  final ValueNotifier<HeapClassName?> selectedClassName;
-
-  final ValueNotifier<ClassOnlyHeapPath?> selectedPath;
-
-  final selectedSingleClassStats = ValueNotifier<SingleClassStats?>(null);
-
-  final selectedDiffClassStats = ValueNotifier<DiffClassStats?>(null);
-
-  ValueListenable<ClassStats?> get selectedClassStats => _selectedClassStats;
-  final _selectedClassStats = ValueNotifier<ClassStats?>(null);
-
-  /// Selected retaining path.
-  final selectedPathEntry = ValueNotifier<StatsByPathEntry?>(null);
+  SnapshotInstanceItem? diffWith;
 
   @override
   bool get hasData => heap != null;
-
-  HeapClasses classesToShow() {
-    final theHeap = heap!;
-    final itemToDiffWith = diffWith.value;
-    if (itemToDiffWith == null) return theHeap.classes;
-    return diffStore.compare(theHeap, itemToDiffWith.heap!);
-  }
-
-  bool _handlingSelectionChange = false;
-  void _handleSelectionChange() {
-    final className = selectedClassName.value;
-    // The class name is null only in the beginning when nothing is selected.
-    if (className == null) return;
-
-    if (_handlingSelectionChange) return;
-    _handlingSelectionChange = true;
-
-    if (name.contains('-3')) {
-      print('handling #3');
-    }
-
-    final heapClasses = classesToShow();
-
-    // Update what class to show.
-    if (heapClasses is SingleHeapClasses) {
-      selectedSingleClassStats.value =
-          _selectedClassStats.value = heapClasses.classesByName[className];
-      selectedDiffClassStats.value = null;
-    } else if (heapClasses is DiffHeapClasses) {
-      selectedDiffClassStats.value =
-          _selectedClassStats.value = heapClasses.classesByName[className];
-      selectedSingleClassStats.value = null;
-    } else {
-      throw StateError('Unexpected type: ${heapClasses.runtimeType}.');
-    }
-
-    // Update what path to show.
-    StatsByPathEntry? newByPathEntry;
-    final path = selectedPath.value;
-    final classStats = _selectedClassStats.value;
-    if (path != null && classStats != null) {
-      final pathStats = classStats.statsByPath[path];
-      if (pathStats != null) {
-        newByPathEntry = classStats.statsByPathEntries
-            .firstWhereOrNull((e) => e.key == path);
-      }
-    }
-    selectedPathEntry.value = newByPathEntry;
-
-    _handlingSelectionChange = false;
-  }
 
   void downloadToCsv() {
     final csvBuffer = StringBuffer();
