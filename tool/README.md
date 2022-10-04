@@ -165,7 +165,7 @@ script,
    - See this [example CL](https://dart-review.googlesource.com/c/sdk/+/215520) for reference.
 
 
-- Build the dart sdk locally to do this.
+- Build the dart sdk locally
 
    ```shell
    cd $LOCAL_DART_SDK && \
