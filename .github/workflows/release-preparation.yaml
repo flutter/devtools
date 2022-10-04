@@ -1,0 +1,15 @@
+name: Release Preparation
+
+on:
+  pull_request:
+
+jobs:
+  check-release-condition:
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PULL_NUMBER=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+          gh api /repos/flutter/devtools/pulls/$PULL_NUMBER
+          
