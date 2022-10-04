@@ -87,8 +87,15 @@ class DiffPaneController extends DisposableController {
   }
 
   void setSnapshotIndex(int index) {
-    print('!!!! setting index');
     core._snapshotIndex.value = index;
+    derived._updateValues(core);
+  }
+
+  void setDiffing(
+    SnapshotInstanceItem diffItem,
+    SnapshotInstanceItem? withItem,
+  ) {
+    diffItem.diffWith.value = withItem;
     derived._updateValues(core);
   }
 
@@ -130,22 +137,24 @@ class CoreData {
 /// Values that can be calculated from [CoreData] and notifiers that take signal
 /// from widgets.
 class DerivedData extends DisposableController with AutoDisposeControllerMixin {
-  DerivedData(CoreData core) {
-    selectedItem = ValueNotifier<SnapshotItem>(core.selectedItem);
+  DerivedData(this._core) {
+    selectedItem = ValueNotifier<SnapshotItem>(_core.selectedItem);
 
     addAutoDisposeListener(
       singleClassStats,
-      () => _setClassIfNotNull(singleClassStats.value?.heapClass, core),
+      () => _setClassIfNotNull(singleClassStats.value?.heapClass),
     );
     addAutoDisposeListener(
       diffClassStats,
-      () => _setClassIfNotNull(diffClassStats.value?.heapClass, core),
+      () => _setClassIfNotNull(diffClassStats.value?.heapClass),
     );
     addAutoDisposeListener(
       pathEntry,
-      () => _setPathIfNotNull(pathEntry.value?.key, core),
+      () => _setPathIfNotNull(pathEntry.value?.key),
     );
   }
+
+  final CoreData _core;
 
   // TODO: turn to listener.
   /// Currently selected item, to take signal from the list widget.
@@ -166,20 +175,20 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   /// Selected retaining path record in a concrete snapshot, to take signal from the table widget.
   final pathEntry = ValueNotifier<StatsByPathEntry?>(null);
 
-  final diffStore = HeapDiffStore();
+  final _diffStore = HeapDiffStore();
 
   /// Updates cross-snapshot class if the argument is not null.
-  void _setClassIfNotNull(HeapClassName? theClass, CoreData core) {
-    if (theClass == null || theClass == core.className) return;
-    core.className = theClass;
-    _updateValues(core);
+  void _setClassIfNotNull(HeapClassName? theClass) {
+    if (theClass == null || theClass == _core.className) return;
+    _core.className = theClass;
+    _updateValues(_core);
   }
 
   /// Updates cross-snapshot path if the argument is not null.
-  void _setPathIfNotNull(ClassOnlyHeapPath? path, CoreData core) {
-    if (path == null || path == core.path) return;
-    core.path = path;
-    _updateValues(core);
+  void _setPathIfNotNull(ClassOnlyHeapPath? path) {
+    if (path == null || path == _core.path) return;
+    _core.path = path;
+    _updateValues(_core);
   }
 
   void _assertIntegrity() {
@@ -192,14 +201,14 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   }
 
   /// List of classes to show for the selected snapshot.
-  HeapClasses? _snapshotClasses(CoreData core) {
-    final theItem = core.selectedItem;
+  HeapClasses? _snapshotClasses() {
+    final theItem = _core.selectedItem;
     if (theItem is! SnapshotInstanceItem) return null;
     final heap = theItem.heap;
     if (heap == null) return null;
     final itemToDiffWith = theItem.diffWith.value;
     if (itemToDiffWith == null) return heap.classes;
-    return diffStore.compare(heap, itemToDiffWith.heap!);
+    return _diffStore.compare(heap, itemToDiffWith.heap!);
   }
 
   static void _updateClassStats({
@@ -225,7 +234,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   /// Updates fields in this instance based on the values in [core].
   void _updateValues(CoreData core) {
     // Set classes to show.
-    final classes = _snapshotClasses(core);
+    final classes = _snapshotClasses();
     heapClasses.value = classes;
     _updateClassStats(
       classes: classes,

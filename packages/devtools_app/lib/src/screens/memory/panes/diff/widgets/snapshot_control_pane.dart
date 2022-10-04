@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../shared/common_widgets.dart';
@@ -23,8 +22,7 @@ class SnapshotControlPane extends StatelessWidget {
     return ValueListenableBuilder<bool>(
       valueListenable: controller.isProcessing,
       builder: (_, isProcessing, __) {
-        final current =
-            controller.core.selectedItem as SnapshotInstanceItem;
+        final current = controller.core.selectedItem as SnapshotInstanceItem;
 
         return Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -35,7 +33,7 @@ class SnapshotControlPane extends StatelessWidget {
                 if (!isProcessing && current.heap != null) ...[
                   _DiffDropdown(
                     current: current,
-                    list: controller.core.snapshots,
+                    controller: controller,
                   ),
                   const SizedBox(width: defaultSpacing),
                   SizedBox(
@@ -80,21 +78,25 @@ class _ClassFilter extends StatelessWidget {
 class _DiffDropdown extends StatelessWidget {
   _DiffDropdown({
     Key? key,
-    required this.list,
     required this.current,
+    required this.controller,
   }) : super(key: key) {
+    final list = controller.core.snapshots.value;
     final diffWith = current.diffWith.value;
     // Check if diffWith was deleted from list.
-    if (diffWith != null && !list.value.contains(diffWith)) {
+    if (diffWith != null && !list.contains(diffWith)) {
       current.diffWith.value = null;
     }
   }
 
-  final ValueListenable<List<SnapshotItem>> list;
   final SnapshotInstanceItem current;
+  final DiffPaneController controller;
 
   List<DropdownMenuItem<SnapshotInstanceItem>> items() =>
-      list.value.where((item) => item.hasData).cast<SnapshotInstanceItem>().map(
+      controller.core.snapshots.value
+          .where((item) => item.hasData)
+          .cast<SnapshotInstanceItem>()
+          .map(
         (item) {
           return DropdownMenuItem<SnapshotInstanceItem>(
             value: item,
@@ -116,11 +118,13 @@ class _DiffDropdown extends StatelessWidget {
             style: Theme.of(context).textTheme.bodyText2,
             value: current.diffWith.value ?? current,
             onChanged: (SnapshotInstanceItem? value) {
+              late SnapshotInstanceItem? newDiffWith;
               if ((value ?? current) == current) {
-                current.diffWith.value = null;
+                newDiffWith = null;
               } else {
-                current.diffWith.value = value;
+                newDiffWith = value;
               }
+              controller.setDiffing(current, newDiffWith);
             },
             items: items(),
           ),

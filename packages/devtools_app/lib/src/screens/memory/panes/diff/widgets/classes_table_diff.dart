@@ -11,7 +11,6 @@ import '../../../../../shared/table/table.dart';
 import '../../../../../shared/table/table_data.dart';
 import '../../../../../shared/utils.dart';
 import '../controller/heap_diff.dart';
-import '../controller/item_controller.dart';
 
 enum _DataPart {
   created,
@@ -172,8 +171,6 @@ class _ClassesTableDiffState extends State<ClassesTableDiff>
     ),
   ];
 
-  static late final SnapshotInstanceItem _item;
-
   static final _shallowSizeDeltaColumn =
       _SizeColumn(_DataPart.delta, _SizeType.shallow);
   static late final List<ColumnData<DiffClassStats>> _columns =
@@ -196,7 +193,7 @@ class _ClassesTableDiffState extends State<ClassesTableDiff>
       columns: _columns,
       columnGroups: _columnGroups,
       data: widget.classes.classes,
-      dataKey: _item.id.toString(),
+      dataKey: 'ClassesTableDiff',
       keyFactory: (e) => Key(e.heapClass.fullName),
       selectionNotifier: widget.selection,
       defaultSortColumn: _shallowSizeDeltaColumn,
