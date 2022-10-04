@@ -144,7 +144,11 @@ class PerfettoController extends DisposableController
       callback();
     } else {
       await _perfettoIFrame.onLoad.first;
-      assert(_perfettoIFrame.contentWindow != null);
+      assert(
+        _perfettoIFrame.contentWindow != null,
+        'Something went wrong. The iFrame\'s contentWindow is null after the'
+        ' onLoad event.',
+      );
       callback();
     }
   }
