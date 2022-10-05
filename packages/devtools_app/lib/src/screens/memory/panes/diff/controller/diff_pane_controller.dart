@@ -138,7 +138,7 @@ class CoreData {
 /// from widgets.
 class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   DerivedData(this._core) {
-    selectedItem = ValueNotifier<SnapshotItem>(_core.selectedItem);
+    _selectedItem = ValueNotifier<SnapshotItem>(_core.selectedItem);
 
     addAutoDisposeListener(
       singleClassStats,
@@ -156,9 +156,9 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
 
   final CoreData _core;
 
-  // TODO: turn to listener.
   /// Currently selected item, to take signal from the list widget.
-  late final ValueNotifier<SnapshotItem> selectedItem;
+  ValueListenable<SnapshotItem> get selectedItem => _selectedItem;
+  late final ValueNotifier<SnapshotItem> _selectedItem;
 
   /// Classes to show.
   final heapClasses = ValueNotifier<HeapClasses?>(null);
@@ -258,7 +258,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     pathEntry.value = thePathEntry;
 
     // Set current snapshot.
-    selectedItem.value = _core.selectedItem;
+    _selectedItem.value = _core.selectedItem;
 
     _assertIntegrity();
   }
