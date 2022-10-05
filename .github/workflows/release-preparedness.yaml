@@ -52,7 +52,6 @@ jobs:
           if [ "$HAS_CHANGED_RELEASE_NOTES" != "true" ] || [ "$HAS_EXCEPTION_LABEL" != "true" ] ; then
             echo "Release Preparedness check failed"
             echo "::error file=packages/devtools_app/lib/src/framework/release_notes/release_notes.json,line=0,col=0,endColumn=0,title='Release Preparedness check failed'::If your change is user facing, add a release note. Otherwise add the 'Not User Facing' label to your PR"
-            exit 1
           fi
 
       - name: Check Release Preparedness requirements
