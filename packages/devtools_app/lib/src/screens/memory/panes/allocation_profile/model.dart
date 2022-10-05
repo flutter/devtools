@@ -7,8 +7,26 @@ import 'package:vm_service/vm_service.dart';
 import '../../../vm_developer/vm_service_private_extensions.dart';
 import '../../shared/heap/model.dart';
 
-class ProfileDisplayRecord {
-  ProfileDisplayRecord.fromClassHeapStats(ClassHeapStats stats)
+class AdaptedAllocationProfile {
+  AdaptedAllocationProfile.fromAllocationProfile(AllocationProfile profile) {
+    final elements = (profile.members ?? []).where((element) {
+      return element.bytesCurrent != 0 ||
+          element.newSpace.externalSize != 0 ||
+          element.oldSpace.externalSize != 0;
+    }).map((e) => AllocationProfileRecord.fromClassHeapStats(e));
+
+    records = [
+      AllocationProfileRecord.fromAllocationProfile(profile),
+      ...elements,
+    ];
+  }
+
+  /// A record per class plus one total record.
+  late final List<AllocationProfileRecord> records;
+}
+
+class AllocationProfileRecord {
+  AllocationProfileRecord.fromClassHeapStats(ClassHeapStats stats)
       : heapClass = HeapClass.fromClassRef(stats.classRef),
         instances = stats.instancesCurrent ?? 0,
         totalExternalSize =
@@ -19,7 +37,7 @@ class ProfileDisplayRecord {
         newDartSize = stats.newSpace.size,
         oldDartSize = stats.oldSpace.size;
 
-  ProfileDisplayRecord.fromAllocationProfile(AllocationProfile profile)
+  AllocationProfileRecord.fromAllocationProfile(AllocationProfile profile)
       : heapClass = null,
         instances = null,
         totalExternalSize = profile.memoryUsage?.externalUsage ?? 0,

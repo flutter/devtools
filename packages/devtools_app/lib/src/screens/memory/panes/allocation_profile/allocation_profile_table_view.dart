@@ -291,12 +291,9 @@ class _AllocationProfileTable extends StatelessWidget {
                 builder: (context, constraints) {
                   return FlatTable<ClassHeapStats?>(
                     keyFactory: (element) => Key(element!.classRef!.name!),
-                    data: profile.members!.where(
-                      (element) {
-                        return element.bytesCurrent != 0 ||
-                            element.newSpace.externalSize != 0 ||
-                            element.oldSpace.externalSize != 0;
-                      },
+
+                    /// ?????
+                    data: profile,
                     ).toList(),
                     dataKey: 'allocation-profile',
                     columnGroups: vmDeveloperModeEnabled

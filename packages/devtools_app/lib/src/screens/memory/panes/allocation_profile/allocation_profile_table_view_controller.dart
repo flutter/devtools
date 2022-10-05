@@ -9,15 +9,17 @@ import '../../../../config_specific/import_export/import_export.dart';
 import '../../../../primitives/auto_dispose.dart';
 import '../../../../shared/globals.dart';
 import '../../../vm_developer/vm_service_private_extensions.dart';
+import 'model.dart';
 
 class AllocationProfileTableViewController extends DisposableController
     with AutoDisposeControllerMixin {
   final _exportController = ExportController();
 
-  /// The current [AllocationProfile] being displayed.
-  ValueListenable<AllocationProfile?> get currentAllocationProfile =>
+  /// The current profile being displayed.
+  ValueListenable<AdaptedAllocationProfile?> get currentAllocationProfile =>
       _currentAllocationProfile;
-  final _currentAllocationProfile = ValueNotifier<AllocationProfile?>(null);
+  final _currentAllocationProfile =
+      ValueNotifier<AdaptedAllocationProfile?>(null);
 
   /// Specifies if the allocation profile should be refreshed when a GC event
   /// is received.
@@ -60,7 +62,8 @@ class AllocationProfileTableViewController extends DisposableController
     final service = serviceManager.service!;
     final isolate = serviceManager.isolateManager.selectedIsolate.value;
     final allocationProfile = await service.getAllocationProfile(isolate!.id!);
-    _currentAllocationProfile.value = allocationProfile;
+    _currentAllocationProfile.value =
+        AdaptedAllocationProfile.fromAllocationProfile(allocationProfile);
   }
 
   /// Converts the current [AllocationProfile] to CSV format and downloads it.
