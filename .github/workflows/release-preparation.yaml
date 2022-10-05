@@ -43,16 +43,22 @@ jobs:
           echo "HAS_EXCEPTION_LABEL: $HAS_EXCEPTION_LABEL"
 
           echo "::set-output name=HAS_EXCEPTION_LABEL::$HAS_EXCEPTION_LABEL"
-      - name: Test Values 
+      - name: Check Release Preparedness requirements
         env:
           HAS_CHANGED_RELEASE_NOTES: ${{steps.get-modified-files.outputs.HAS_CHANGED_RELEASE_NOTES}}
           HAS_EXCEPTION_LABEL: ${{steps.get-label-exception.outputs.HAS_EXCEPTION_LABEL}}
         run: |
-          echo "HAS_CHANGED_RELEASE_NOTES: ${{steps.get-modified-files.outputs.HAS_CHANGED_RELEASE_NOTES}}"
+          if [[ "$HAS_CHANGED_RELEASE_NOTES" == "true" ]] || [[ "$HAS_EXCEPTION_LABEL" != "true"]]; then
+            echo "Release Preparedness check failed"
+            echo "::error file=packages/devtools_app/lib/src/framework/release_notes/release_notes.json,line=0,col=0,endColumn=0,title='Release Preparedness check failed'::If your change is user facing, add a release note. Otherwise add the 'Not User Facing' label to your PR"
+            exit 1
+          fi
 
       # - name: Add PR Url to Release Notes
       #   run: 
       # - name: Verify release_notes.json integrity
+      #   run: 
+      # - name: Build new serializable changes if they are required
       #   run: 
 
           
