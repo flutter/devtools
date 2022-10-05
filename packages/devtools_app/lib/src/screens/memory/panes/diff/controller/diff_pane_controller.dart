@@ -52,7 +52,7 @@ class DiffPaneController extends DisposableController {
     final newElementIndex = snapshots.value.length - 1;
     core._snapshotIndex.value = newElementIndex;
     _isProcessing.value = false;
-    derived._updateValues(core);
+    derived._updateValues();
   }
 
   Future<void> clearSnapshots() async {
@@ -62,7 +62,7 @@ class DiffPaneController extends DisposableController {
     }
     snapshots.removeRange(1, snapshots.value.length);
     core._snapshotIndex.value = 0;
-    derived._updateValues(core);
+    derived._updateValues();
   }
 
   int _nextDisplayNumber() {
@@ -83,12 +83,12 @@ class DiffPaneController extends DisposableController {
     // We must change the selectedIndex, because otherwise the content will
     // not be re-rendered.
     core._snapshotIndex.value = max(index - 1, 0);
-    derived._updateValues(core);
+    derived._updateValues();
   }
 
   void setSnapshotIndex(int index) {
     core._snapshotIndex.value = index;
-    derived._updateValues(core);
+    derived._updateValues();
   }
 
   void setDiffing(
@@ -96,7 +96,7 @@ class DiffPaneController extends DisposableController {
     SnapshotInstanceItem? withItem,
   ) {
     diffItem.diffWith.value = withItem;
-    derived._updateValues(core);
+    derived._updateValues();
   }
 
   void setClassFilter(String value) {
@@ -181,14 +181,14 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   void _setClassIfNotNull(HeapClassName? theClass) {
     if (theClass == null || theClass == _core.className) return;
     _core.className = theClass;
-    _updateValues(_core);
+    _updateValues();
   }
 
   /// Updates cross-snapshot path if the argument is not null.
   void _setPathIfNotNull(ClassOnlyHeapPath? path) {
     if (path == null || path == _core.path) return;
     _core.path = path;
-    _updateValues(_core);
+    _updateValues();
   }
 
   void _assertIntegrity() {
@@ -232,13 +232,13 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   }
 
   /// Updates fields in this instance based on the values in [core].
-  void _updateValues(CoreData core) {
+  void _updateValues() {
     // Set classes to show.
     final classes = _snapshotClasses();
     heapClasses.value = classes;
     _updateClassStats(
       classes: classes,
-      className: core.className,
+      className: _core.className,
       singleToUpdate: singleClassStats,
       diffToUpdate: diffClassStats,
     );
@@ -248,17 +248,17 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     final thePathEntries = pathEntries.value = theClass?.statsByPathEntries;
     final pathes = theClass?.statsByPath;
     StatsByPathEntry? thePathEntry;
-    if (core.path != null && pathes != null && thePathEntries != null) {
-      final pathStats = pathes[core.path];
+    if (_core.path != null && pathes != null && thePathEntries != null) {
+      final pathStats = pathes[_core.path];
       if (pathStats != null) {
         thePathEntry =
-            thePathEntries.firstWhereOrNull((e) => e.key == core.path);
+            thePathEntries.firstWhereOrNull((e) => e.key == _core.path);
       }
     }
     pathEntry.value = thePathEntry;
 
     // Set current snapshot.
-    selectedItem.value = core.selectedItem;
+    selectedItem.value = _core.selectedItem;
 
     _assertIntegrity();
   }
