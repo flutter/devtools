@@ -35,9 +35,7 @@ class ErrorLoggerObserver extends ProviderObserver {
       log('Provider $provider failed with "${value.error}"', LogLevel.error);
 
       final stackTrace = value.stackTrace;
-      if (stackTrace != null) {
-        log(stackTrace);
-      }
+      log(stackTrace);
     }
   }
 }
