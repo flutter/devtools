@@ -8,29 +8,37 @@ import '../../../vm_developer/vm_service_private_extensions.dart';
 import '../../shared/heap/model.dart';
 
 class ProfileRecord {
-  ProfileRecord({
-    required this.heapClass,
-    required this.instances,
-    required this.newDartSize,
-    required this.oldDartSize,
-    required this.newExternalSize,
-    required this.oldExternalSize,
-  });
-
   ProfileRecord.fromClassHeapStats(ClassHeapStats stats)
       : heapClass = HeapClass.fromClassRef(stats.classRef),
         instances = stats.instancesCurrent ?? 0,
+        totalExternalSize =
+            stats.newSpace.externalSize + stats.oldSpace.externalSize,
         newExternalSize = stats.newSpace.externalSize,
         oldExternalSize = stats.oldSpace.externalSize,
+        totalDartSize = stats.newSpace.size + stats.oldSpace.size,
         newDartSize = stats.newSpace.size,
         oldDartSize = stats.oldSpace.size;
 
-  /// If null, the record is for all classes.
+  ProfileRecord.fromAllocationProfile(AllocationProfile profile)
+      : heapClass = null,
+        instances = null,
+        totalExternalSize = profile.memoryUsage?.externalUsage ?? 0,
+        newExternalSize = null,
+        oldExternalSize = null,
+        totalDartSize = profile.memoryUsage?.heapUsage ?? 0,
+        newDartSize = null,
+        oldDartSize = null;
+
+  /// If null, the record represents total for all classes.
   final HeapClass? heapClass;
 
-  final int instances;
-  final int newDartSize;
-  final int oldDartSize;
-  final int newExternalSize;
-  final int oldExternalSize;
+  final int? instances;
+
+  final int? newDartSize;
+  final int? oldDartSize;
+  final int totalDartSize;
+
+  final int? newExternalSize;
+  final int? oldExternalSize;
+  final int totalExternalSize;
 }
