@@ -29,8 +29,10 @@ class DiffData extends DisposableController with AutoDisposeControllerMixin {
     );
   }
 
+  /// Data that are necessary to calculate all other data.
   final core = CoreData();
 
+  /// Data that can be calculated from [core].
   late final derived = DerivedData(core.selectedItem);
 
   /// Updates cross-snapshot class if the argument is not null.
