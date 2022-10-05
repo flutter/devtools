@@ -52,6 +52,10 @@ class AllocationProfileRecord {
 
   final int? instances;
 
+  final int totalSize;
+  final int totalDartSize;
+  final int totalExternalSize;
+
   final int? newDartSize;
   final int? oldDartSize;
   final int totalDartSize;
@@ -60,3 +64,42 @@ class AllocationProfileRecord {
   final int? oldExternalSize;
   final int totalExternalSize;
 }
+
+
+  'Class',
+        'Total Instances',
+
+        'Total Size',
+        'Total Internal Size',
+        'Total External Size',
+
+        'New Space Instances',
+        'New Space Size',
+        'New Space Internal Size',
+        'New Space External Size',
+
+        'Old Space Instances',
+        'Old Space Size',
+        'Old Space Internal Size',
+        'Old Space External Size',
+      ].map((e) => '"$e"').join(','),
+    );
+    // Write a row for each entry in the profile.
+    for (final member in profile.members!) {
+      csvBuffer.writeln(
+        [
+          member.classRef!.name,
+          member.instancesCurrent,
+          member.bytesCurrent! +
+              member.oldSpace.externalSize +
+              member.newSpace.externalSize,
+          member.bytesCurrent!,
+          member.oldSpace.externalSize + member.newSpace.externalSize,
+          member.newSpace.count,
+          member.newSpace.size + member.newSpace.externalSize,
+          member.newSpace.size,
+          member.newSpace.externalSize,
+          member.oldSpace.count,
+          member.oldSpace.size + member.oldSpace.externalSize,
+          member.oldSpace.size,
+          member.oldSpace.externalSize,
