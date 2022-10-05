@@ -4,7 +4,6 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../../primitives/auto_dispose_mixin.dart';
 import '../../../../../primitives/utils.dart';
 import '../../../../../shared/table/table.dart';
 import '../../../../../shared/table/table_data.dart';
@@ -95,7 +94,7 @@ class _RetainedSizeColumn extends ColumnData<SingleClassStats> {
       )!;
 }
 
-class ClassesTableSingle extends StatefulWidget {
+class ClassesTableSingle extends StatelessWidget {
   const ClassesTableSingle({
     Key? key,
     required this.classes,
@@ -105,12 +104,6 @@ class ClassesTableSingle extends StatefulWidget {
   final SingleHeapClasses classes;
   final ValueNotifier<SingleClassStats?> selection;
 
-  @override
-  State<ClassesTableSingle> createState() => _ClassesTableSingleState();
-}
-
-class _ClassesTableSingleState extends State<ClassesTableSingle>
-    with AutoDisposeMixin {
   static final ColumnData<SingleClassStats> _shallowSizeColumn =
       _ShallowSizeColumn();
   static late final List<ColumnData<SingleClassStats>> _columns =
@@ -125,10 +118,10 @@ class _ClassesTableSingleState extends State<ClassesTableSingle>
   Widget build(BuildContext context) {
     return FlatTable<SingleClassStats>(
       columns: _columns,
-      data: widget.classes.classes,
+      data: classes.classes,
       dataKey: 'ClassesTableSingle',
       keyFactory: (e) => Key(e.heapClass.fullName),
-      selectionNotifier: widget.selection,
+      selectionNotifier: selection,
       defaultSortColumn: _shallowSizeColumn,
       defaultSortDirection: SortDirection.descending,
     );

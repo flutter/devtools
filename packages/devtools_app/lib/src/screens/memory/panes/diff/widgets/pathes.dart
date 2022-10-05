@@ -4,7 +4,6 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../../primitives/auto_dispose_mixin.dart';
 import '../../../../../primitives/utils.dart';
 import '../../../../../shared/table/table.dart';
 import '../../../../../shared/table/table_data.dart';
@@ -63,7 +62,6 @@ class _ShallowSizeColumn extends ColumnData<_RetainingPathRecord> {
   @override
   int getValue(_RetainingPathRecord record) => record.value.shallowSize;
 
-
   @override
   bool get numeric => true;
 
@@ -87,7 +85,6 @@ class _RetainedSizeColumn extends ColumnData<_RetainingPathRecord> {
   @override
   int getValue(_RetainingPathRecord record) => record.value.retainedSize;
 
-
   @override
   bool get numeric => true;
 
@@ -99,7 +96,7 @@ class _RetainedSizeColumn extends ColumnData<_RetainingPathRecord> {
       )!;
 }
 
-class ClassStatsTable extends StatefulWidget {
+class ClassStatsTable extends StatelessWidget {
   const ClassStatsTable({
     Key? key,
     required this.data,
@@ -107,37 +104,22 @@ class ClassStatsTable extends StatefulWidget {
 
   final SingleClassStats data;
 
-  @override
-  State<ClassStatsTable> createState() => _ClassStatsTableState();
-}
-
-class _ClassStatsTableState extends State<ClassStatsTable>
-    with AutoDisposeMixin {
-  final _shallowSizeColumn = _ShallowSizeColumn();
-  late final List<ColumnData<_RetainingPathRecord>> _columns;
-
-  @override
-  void initState() {
-    super.initState();
-    assert(widget.data.isSealed);
-
-    _columns = <ColumnData<_RetainingPathRecord>>[
-      _RetainingPathColumn(),
-      _InstanceColumn(),
-      _shallowSizeColumn,
-      _RetainedSizeColumn(),
-    ];
-  }
+  static final _shallowSizeColumn = _ShallowSizeColumn();
+  static late final List<ColumnData<_RetainingPathRecord>> _columns =
+      <ColumnData<_RetainingPathRecord>>[
+    _RetainingPathColumn(),
+    _InstanceColumn(),
+    _shallowSizeColumn,
+    _RetainedSizeColumn(),
+  ];
 
   @override
   Widget build(BuildContext context) {
     return FlatTable<_RetainingPathRecord>(
       columns: _columns,
-      data: widget.data.entries,
+      data: data.entries,
       keyFactory: (e) => Key(e.key.asLongString()),
-      // We want sorting to be the same for all snapshots and classes.
-      dataKey: '',
-      onItemSelected: (r) => {},
+      dataKey: 'ClassStatsTable',
       defaultSortColumn: _shallowSizeColumn,
       defaultSortDirection: SortDirection.descending,
     );

@@ -5,7 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../../../../primitives/auto_dispose_mixin.dart';
 import '../../../../../primitives/utils.dart';
 import '../../../../../shared/table/table.dart';
 import '../../../../../shared/table/table_data.dart';
@@ -136,7 +135,7 @@ class _SizeColumn extends ColumnData<DiffClassStats> {
   bool get numeric => true;
 }
 
-class ClassesTableDiff extends StatefulWidget {
+class ClassesTableDiff extends StatelessWidget {
   const ClassesTableDiff({
     Key? key,
     required this.classes,
@@ -146,12 +145,6 @@ class ClassesTableDiff extends StatefulWidget {
   final DiffHeapClasses classes;
   final ValueNotifier<DiffClassStats?> selection;
 
-  @override
-  State<ClassesTableDiff> createState() => _ClassesTableDiffState();
-}
-
-class _ClassesTableDiffState extends State<ClassesTableDiff>
-    with AutoDisposeMixin {
   static final _columnGroups = [
     ColumnGroup(
       title: '',
@@ -192,10 +185,10 @@ class _ClassesTableDiffState extends State<ClassesTableDiff>
     return FlatTable<DiffClassStats>(
       columns: _columns,
       columnGroups: _columnGroups,
-      data: widget.classes.classes,
+      data: classes.classes,
       dataKey: 'ClassesTableDiff',
       keyFactory: (e) => Key(e.heapClass.fullName),
-      selectionNotifier: widget.selection,
+      selectionNotifier: selection,
       defaultSortColumn: _shallowSizeDeltaColumn,
       defaultSortDirection: SortDirection.descending,
     );
