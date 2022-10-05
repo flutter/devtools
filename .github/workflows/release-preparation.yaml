@@ -58,8 +58,6 @@ jobs:
       #   run: 
       # - name: Verify release_notes.json integrity
       #   run: 
-      # - name: Build new serializable changes if they are required
-      #   run: 
 
           
 
