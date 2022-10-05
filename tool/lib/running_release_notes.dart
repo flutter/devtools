@@ -3,8 +3,21 @@ import 'package:json_annotation/json_annotation.dart';
 part 'running_release_notes.g.dart';
 
 @JsonSerializable()
-class ReleaseVersion {
-  ReleaseVersion({
+class ReleaseNotes {
+  ReleaseNotes({
+    required this.releases,
+  });
+
+  List<Release> releases;
+  factory ReleaseNotes.fromJson(Map<String, dynamic> json) =>
+      _$ReleaseNotesFromJson(json);
+
+  Map<String, dynamic> toJson() => _$ReleaseNotesToJson(this);
+}
+
+@JsonSerializable()
+class Release {
+  Release({
     required this.version,
     required this.sections,
   }) {
@@ -38,10 +51,10 @@ class ReleaseVersion {
     return markdown;
   }
 
-  factory ReleaseVersion.fromJson(Map<String, dynamic> json) =>
-      _$ReleaseVersionFromJson(json);
+  factory Release.fromJson(Map<String, dynamic> json) =>
+      _$ReleaseFromJson(json);
 
-  Map<String, dynamic> toJson() => _$ReleaseVersionToJson(this);
+  Map<String, dynamic> toJson() => _$ReleaseToJson(this);
 }
 
 @JsonSerializable()
