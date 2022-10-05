@@ -97,8 +97,6 @@ class SingleClassStats extends ClassStats {
 
 /// Size of set of instances.
 class ObjectSetStats with Sealable {
-  ObjectSetStats();
-
   static ObjectSetStats? subtract({
     required ObjectSetStats? subtract,
     required ObjectSetStats? from,
