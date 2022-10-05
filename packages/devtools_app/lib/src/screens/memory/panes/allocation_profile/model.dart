@@ -4,6 +4,7 @@
 
 import 'package:vm_service/vm_service.dart';
 
+import '../../../vm_developer/vm_service_private_extensions.dart';
 import '../../shared/heap/model.dart';
 
 class ProfileRecord {
@@ -17,9 +18,16 @@ class ProfileRecord {
   });
 
   ProfileRecord.fromClassHeapStats(ClassHeapStats stats)
-      : heapClass = HeapClass.fromClassRef(stats.classRef);
+      : heapClass = HeapClass.fromClassRef(stats.classRef),
+        instances = stats.instancesCurrent ?? 0,
+        newExternalSize = stats.newSpace.externalSize,
+        oldExternalSize = stats.oldSpace.externalSize,
+        newDartSize = stats.newSpace.size,
+        oldDartSize = stats.oldSpace.size;
 
-  final HeapClass heapClass;
+  /// If null, the record is for all classes.
+  final HeapClass? heapClass;
+
   final int instances;
   final int newDartSize;
   final int oldDartSize;
