@@ -49,7 +49,6 @@ class SnapshotControlPane extends StatelessWidget {
                 ],
               ],
             ),
-            // This child is aligned to the right.
             ToolbarAction(
               icon: Icons.clear,
               tooltip: 'Delete snapshot',
