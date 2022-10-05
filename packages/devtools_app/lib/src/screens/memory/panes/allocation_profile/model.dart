@@ -16,7 +16,7 @@ class AdaptedAllocationProfile {
     }).map((e) => AllocationProfileRecord.fromClassHeapStats(e));
 
     records = [
-      AllocationProfileRecord.fromAllocationProfile(profile),
+      AllocationProfileRecord.total(profile),
       ...elements,
     ];
   }
@@ -27,79 +27,57 @@ class AdaptedAllocationProfile {
 
 class AllocationProfileRecord {
   AllocationProfileRecord.fromClassHeapStats(ClassHeapStats stats)
-      : heapClass = HeapClass.fromClassRef(stats.classRef),
-        instances = stats.instancesCurrent ?? 0,
+      : isTotal = false,
+        heapClass = HeapClass.fromClassRef(stats.classRef),
+        totalInstances = stats.instancesCurrent ?? 0,
+        totalSize = stats.bytesCurrent! +
+            stats.oldSpace.externalSize +
+            stats.newSpace.externalSize,
+        totalDartHeapSize = stats.bytesCurrent!,
         totalExternalSize =
-            stats.newSpace.externalSize + stats.oldSpace.externalSize,
-        newExternalSize = stats.newSpace.externalSize,
-        oldExternalSize = stats.oldSpace.externalSize,
-        totalDartSize = stats.newSpace.size + stats.oldSpace.size,
-        newDartSize = stats.newSpace.size,
-        oldDartSize = stats.oldSpace.size;
+            stats.oldSpace.externalSize + stats.newSpace.externalSize,
+        newSpaceInstances = stats.newSpace.count,
+        newSpaceSize = stats.newSpace.size + stats.newSpace.externalSize,
+        newSpaceDartHeapSize = stats.newSpace.size,
+        newSpaceExternalSize = stats.newSpace.externalSize,
+        oldSpaceInstances = stats.oldSpace.count,
+        oldSpaceSize = stats.oldSpace.size + stats.oldSpace.externalSize,
+        oldSpaceDartHeapSize = stats.oldSpace.size,
+        oldSpaceExternalSize = stats.oldSpace.externalSize;
 
-  AllocationProfileRecord.fromAllocationProfile(AllocationProfile profile)
-      : heapClass = null,
-        instances = null,
+  AllocationProfileRecord.total(AllocationProfile profile)
+      : isTotal = true,
+        heapClass = const HeapClass(className: 'All Classes', library: ''),
+        totalInstances = null,
+        totalSize = profile.memoryUsage?.externalUsage ??
+            0 + (profile.memoryUsage?.heapUsage ?? 0),
+        totalDartHeapSize = profile.memoryUsage?.heapUsage ?? 0,
         totalExternalSize = profile.memoryUsage?.externalUsage ?? 0,
-        newExternalSize = null,
-        oldExternalSize = null,
-        totalDartSize = profile.memoryUsage?.heapUsage ?? 0,
-        newDartSize = null,
-        oldDartSize = null;
+        newSpaceInstances = null,
+        newSpaceSize = null,
+        newSpaceDartHeapSize = null,
+        newSpaceExternalSize = null,
+        oldSpaceInstances = null,
+        oldSpaceSize = null,
+        oldSpaceDartHeapSize = null,
+        oldSpaceExternalSize = null;
 
-  /// If null, the record represents total numbers for all classes.
-  final HeapClass? heapClass;
+  final bool isTotal;
 
-  final int? instances;
+  final HeapClass heapClass;
 
+  final int? totalInstances;
   final int totalSize;
-  final int totalDartSize;
+  final int totalDartHeapSize;
   final int totalExternalSize;
 
-  final int? newDartSize;
-  final int? oldDartSize;
-  final int totalDartSize;
+  final int? newSpaceInstances;
+  final int? newSpaceSize;
+  final int? newSpaceDartHeapSize;
+  final int? newSpaceExternalSize;
 
-  final int? newExternalSize;
-  final int? oldExternalSize;
-  final int totalExternalSize;
+  final int? oldSpaceInstances;
+  final int? oldSpaceSize;
+  final int? oldSpaceDartHeapSize;
+  final int? oldSpaceExternalSize;
 }
-
-
-  'Class',
-        'Total Instances',
-
-        'Total Size',
-        'Total Internal Size',
-        'Total External Size',
-
-        'New Space Instances',
-        'New Space Size',
-        'New Space Internal Size',
-        'New Space External Size',
-
-        'Old Space Instances',
-        'Old Space Size',
-        'Old Space Internal Size',
-        'Old Space External Size',
-      ].map((e) => '"$e"').join(','),
-    );
-    // Write a row for each entry in the profile.
-    for (final member in profile.members!) {
-      csvBuffer.writeln(
-        [
-          member.classRef!.name,
-          member.instancesCurrent,
-          member.bytesCurrent! +
-              member.oldSpace.externalSize +
-              member.newSpace.externalSize,
-          member.bytesCurrent!,
-          member.oldSpace.externalSize + member.newSpace.externalSize,
-          member.newSpace.count,
-          member.newSpace.size + member.newSpace.externalSize,
-          member.newSpace.size,
-          member.newSpace.externalSize,
-          member.oldSpace.count,
-          member.oldSpace.size + member.oldSpace.externalSize,
-          member.oldSpace.size,
-          member.oldSpace.externalSize,

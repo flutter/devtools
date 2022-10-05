@@ -18,6 +18,7 @@ import '../../../vm_developer/vm_service_private_extensions.dart';
 import '../../primitives/ui.dart';
 import '../../shared/heap/primitives.dart';
 import 'allocation_profile_table_view_controller.dart';
+import 'model.dart';
 
 // TODO(bkonyi): ensure data displayed in this view is included in the full
 // memory page export and is serializable/deserializable.
@@ -273,7 +274,7 @@ class _AllocationProfileTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<AllocationProfile?>(
+    return ValueListenableBuilder<AdaptedAllocationProfile?>(
       valueListenable: controller.currentAllocationProfile,
       builder: (context, profile, _) {
         // TODO(bkonyi): make this an overlay so the table doesn't
@@ -289,12 +290,9 @@ class _AllocationProfileTable extends StatelessWidget {
               padding: EdgeInsets.zero,
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  return FlatTable<ClassHeapStats?>(
-                    keyFactory: (element) => Key(element!.classRef!.name!),
-
-                    /// ?????
-                    data: profile,
-                    ).toList(),
+                  return FlatTable<AllocationProfileRecord>(
+                    keyFactory: (element) => Key(element.heapClass.fullName),
+                    data: profile.records,
                     dataKey: 'allocation-profile',
                     columnGroups: vmDeveloperModeEnabled
                         ? _AllocationProfileTable._vmModeColumnGroups
