@@ -36,12 +36,12 @@ class SnapshotView extends StatelessWidget {
         if (classes is SingleHeapClasses) {
           table1 = ClassesTableSingle(
             classes: classes,
-            selection: controller.derived.singleClassStats,
+            selection: controller.derived.selectedSingleClassStats,
           );
         } else if (classes is DiffHeapClasses) {
           table1 = ClassesTableDiff(
             classes: classes,
-            selection: controller.derived.diffClassStats,
+            selection: controller.derived.selectedDiffClassStats,
           );
         } else {
           throw StateError('Unexpected type: ${classes.runtimeType}.');
@@ -51,7 +51,7 @@ class SnapshotView extends StatelessWidget {
           valueListenable: controller.derived.pathEntries,
           builder: (_, entries, __) => HeapClassDetails(
             entries: entries,
-            selection: controller.derived.pathEntry,
+            selection: controller.derived.selectedPathEntry,
           ),
         );
 

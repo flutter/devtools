@@ -1214,6 +1214,13 @@ void main() {
         expect(notifier.value, equals([1, 4]));
       });
 
+      test('notifies on removeAt', () {
+        setUpWithInitialValue([1, 2, 3, 4]);
+        notifier.removeAt(1);
+        expect(didNotify, isTrue);
+        expect(notifier.value, equals([1, 3, 4]));
+      });
+
       test('does not notify on remove of missing element', () {
         setUpWithInitialValue([1, 2, 3]);
         notifier.remove(0);
@@ -1478,9 +1485,7 @@ void main() {
           required String? subtract,
           required double? from,
         }) =>
-            // ignore: unnecessary_cast
-            SubtractionResult(subtract: subtract, from: from)
-                as SubtractionResult?;
+            SubtractionResult(subtract: subtract, from: from);
 
         final result = subtractMaps<int, double, String, SubtractionResult>(
           substract: subtract,

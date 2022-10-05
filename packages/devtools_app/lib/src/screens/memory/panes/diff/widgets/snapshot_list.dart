@@ -130,7 +130,7 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
 
   void _init() {
     addAutoDisposeListener(
-      widget.controller.core.snapshotIndex,
+      widget.controller.core.selectedSnapshotIndex,
       scrollIfLast,
     );
   }
@@ -139,7 +139,7 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
     final core = widget.controller.core;
 
     final newLength = core.snapshots.value.length;
-    final newIndex = core.snapshotIndex.value;
+    final newIndex = core.selectedSnapshotIndex.value;
 
     if (newIndex == newLength - 1) await _scrollController.autoScrollToBottom();
   }
@@ -150,7 +150,7 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
 
     return DualValueListenableBuilder<List<SnapshotItem>, int>(
       firstListenable: core.snapshots,
-      secondListenable: core.snapshotIndex,
+      secondListenable: core.selectedSnapshotIndex,
       builder: (_, snapshots, selectedIndex, __) => ListView.builder(
         controller: _scrollController,
         shrinkWrap: true,

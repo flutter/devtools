@@ -50,7 +50,7 @@ class DiffPaneController extends DisposableController {
     item.setHeapData(await future);
 
     final newElementIndex = snapshots.value.length - 1;
-    core._snapshotIndex.value = newElementIndex;
+    core._selectedSnapshotIndex.value = newElementIndex;
     _isProcessing.value = false;
     derived._updateValues();
   }
@@ -61,7 +61,7 @@ class DiffPaneController extends DisposableController {
       snapshots.value[i].dispose();
     }
     snapshots.removeRange(1, snapshots.value.length);
-    core._snapshotIndex.value = 0;
+    core._selectedSnapshotIndex.value = 0;
     derived._updateValues();
   }
 
@@ -75,19 +75,17 @@ class DiffPaneController extends DisposableController {
     final item = core.selectedItem;
     assert(item is SnapshotInstanceItem);
     item.dispose();
-    final index = core.snapshotIndex.value;
-    core._snapshots.removeRange(
-      index,
-      index + 1,
-    );
-    // We must change the selectedIndex, because otherwise the content will
-    // not be re-rendered.
-    core._snapshotIndex.value = max(index - 1, 0);
+    final index = core.selectedSnapshotIndex.value;
+    core._snapshots.removeAt(index);
+    // We change the selectedIndex, because:
+    // 1. It is convenient UX
+    // 2. Otherwise the content will not be re-rendered.
+    core._selectedSnapshotIndex.value = max(index - 1, 0);
     derived._updateValues();
   }
 
   void setSnapshotIndex(int index) {
-    core._snapshotIndex.value = index;
+    core._selectedSnapshotIndex.value = index;
     derived._updateValues();
   }
 
@@ -115,10 +113,11 @@ class CoreData {
   final _snapshots = ListValueNotifier(<SnapshotItem>[SnapshotDocItem()]);
 
   /// Selected snapshot.
-  ValueListenable<int> get snapshotIndex => _snapshotIndex;
-  final _snapshotIndex = ValueNotifier<int>(0);
+  ValueListenable<int> get selectedSnapshotIndex => _selectedSnapshotIndex;
+  final _selectedSnapshotIndex = ValueNotifier<int>(0);
 
-  SnapshotItem get selectedItem => _snapshots.value[_snapshotIndex.value];
+  SnapshotItem get selectedItem =>
+      _snapshots.value[_selectedSnapshotIndex.value];
 
   // TODO(https://github.com/flutter/devtools/issues/4539): it is unclear
   // whether preserving the selection between snapshots should be the
@@ -141,16 +140,16 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     _selectedItem = ValueNotifier<SnapshotItem>(_core.selectedItem);
 
     addAutoDisposeListener(
-      singleClassStats,
-      () => _setClassIfNotNull(singleClassStats.value?.heapClass),
+      selectedSingleClassStats,
+      () => _setClassIfNotNull(selectedSingleClassStats.value?.heapClass),
     );
     addAutoDisposeListener(
-      diffClassStats,
-      () => _setClassIfNotNull(diffClassStats.value?.heapClass),
+      selectedDiffClassStats,
+      () => _setClassIfNotNull(selectedDiffClassStats.value?.heapClass),
     );
     addAutoDisposeListener(
-      pathEntry,
-      () => _setPathIfNotNull(pathEntry.value?.key),
+      selectedPathEntry,
+      () => _setPathIfNotNull(selectedPathEntry.value?.key),
     );
   }
 
@@ -164,17 +163,18 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   final heapClasses = ValueNotifier<HeapClasses?>(null);
 
   /// Selected single class item in snapshot, to take signal from the table widget.
-  final singleClassStats = ValueNotifier<SingleClassStats?>(null);
+  final selectedSingleClassStats = ValueNotifier<SingleClassStats?>(null);
 
   /// Selected diff class item in snapshot, to take signal from the table widget.
-  final diffClassStats = ValueNotifier<DiffClassStats?>(null);
+  final selectedDiffClassStats = ValueNotifier<DiffClassStats?>(null);
 
   /// List of retaining paths to show for the selected class.
   final pathEntries = ValueNotifier<List<StatsByPathEntry>?>(null);
 
   /// Selected retaining path record in a concrete snapshot, to take signal from the table widget.
-  final pathEntry = ValueNotifier<StatsByPathEntry?>(null);
+  final selectedPathEntry = ValueNotifier<StatsByPathEntry?>(null);
 
+  /// Storage for already calculated diffs between snapshots.
   final _diffStore = HeapDiffStore();
 
   /// Updates cross-snapshot class if the argument is not null.
@@ -193,8 +193,8 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
 
   void _assertIntegrity() {
     assert(() {
-      final singleClass = singleClassStats.value;
-      final diffClass = diffClassStats.value;
+      final singleClass = selectedSingleClassStats.value;
+      final diffClass = selectedDiffClassStats.value;
       assert(singleClass == null || diffClass == null);
       return true;
     }());
@@ -239,23 +239,24 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     _updateClassStats(
       classes: classes,
       className: _core.className,
-      singleToUpdate: singleClassStats,
-      diffToUpdate: diffClassStats,
+      singleToUpdate: selectedSingleClassStats,
+      diffToUpdate: selectedDiffClassStats,
     );
 
-    // Set pathes to show.
-    final theClass = singleClassStats.value ?? diffClassStats.value;
+    // Set paths to show.
+    final theClass =
+        selectedSingleClassStats.value ?? selectedDiffClassStats.value;
     final thePathEntries = pathEntries.value = theClass?.statsByPathEntries;
-    final pathes = theClass?.statsByPath;
+    final paths = theClass?.statsByPath;
     StatsByPathEntry? thePathEntry;
-    if (_core.path != null && pathes != null && thePathEntries != null) {
-      final pathStats = pathes[_core.path];
+    if (_core.path != null && paths != null && thePathEntries != null) {
+      final pathStats = paths[_core.path];
       if (pathStats != null) {
         thePathEntry =
             thePathEntries.firstWhereOrNull((e) => e.key == _core.path);
       }
     }
-    pathEntry.value = thePathEntry;
+    selectedPathEntry.value = thePathEntry;
 
     // Set current snapshot.
     _selectedItem.value = _core.selectedItem;

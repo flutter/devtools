@@ -1319,6 +1319,15 @@ class ListValueNotifier<T> extends ChangeNotifier
     _rawList.removeRange(start, end);
     _listChanged();
   }
+
+  /// Removes the object at position `index` from this list.
+  ///
+  /// https://api.flutter.dev/flutter/dart-core/List/removeAt.html
+  void removeAt(int index) {
+    _rawList = _rawList.toList();
+    _rawList.removeAt(index);
+    _listChanged();
+  }
 }
 
 /// Wrapper for a list that prevents any modification of the list's content.
