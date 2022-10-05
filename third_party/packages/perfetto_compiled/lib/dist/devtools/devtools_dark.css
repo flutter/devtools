@@ -1,0 +1,163 @@
+/**
+Copyright 2022 The Chromium Authors. All rights reserved.
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file.
+**/
+
+@import "devtools_shared.css";
+
+:root {
+    --devtools-dark-background-color: #303030;
+    --devtools-dark-primary-color: #C0C0C0;
+    --overview-timeline-non-visible-color: #6e6e6e80 !important;
+    /* Perfetto CSS variable overrides. */
+    /* DevTools-specific CSS variables. Prefix with 'devtools' so that
+    we are less likely to be broken by a CSS var name upstream. */
+}
+
+body {
+  background-color: var(--devtools-dark-background-color) !important;
+  color: #fbfbfb !important;
+  overscroll-behavior-x: none !important;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--devtools-dark-background-color) !important;
+  border-radius: 2px !important;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #6e6e6e !important;
+  border-radius: 5px !important;
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #b7b7b7 !important;
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+}
+
+.home-page {
+  color: #fbfbfb !important;
+}
+
+.topbar {
+  background-color: var(--devtools-dark-background-color) !important;
+}
+
+.topbar .omnibox {
+  background-color: var(--devtools-dark-background-color) !important;
+  border-color: var(--devtools-dark-primary-color) !important;
+  border-width: thin !important;
+  border: solid !important;
+}
+
+.topbar .omnibox input {
+  color: var(--devtools-dark-primary-color) !important;
+}
+
+.material-icons {
+  color: var(--devtools-dark-primary-color) !important;
+}
+
+.track-shell {
+  background-color: var(--devtools-dark-background-color) !important;
+  border-right: 1px solid var(--devtools-dark-primary-color) !important;
+}
+
+.track .track-shell h1 {
+  color: var(--devtools-dark-primary-color) !important;
+}
+
+.track .track-shell .track-button {
+  color: var(--devtools-dark-primary-color) !important;
+}
+
+.track::after {
+  border-top: 1px solid #585858 !important;
+}
+
+.track-group-panel[collapsed=true], .track-group-panel[collapsed=true] .shell {
+  background-color: #6e6e6e !important;
+}
+
+.track-group-panel[collapsed=false], .track-group-panel[collapsed=false] .shell {
+  background-color: #6e6e6e !important;
+}
+
+.track-group-panel .shell {
+  border-right: 1px solid var(--devtools-dark-primary-color) !important;
+}
+
+.details-panel {
+  background-color: var(--devtools-dark-background-color) !important;
+  color: var(--devtools-dark-primary-color) !important;
+}
+
+.details-panel .details-panel-heading {
+  background-color: var(--devtools-dark-background-color) !important;
+  color: var(--devtools-dark-primary-color) !important;
+}
+
+.details-panel table tr:hover td, .details-panel table tr:hover th {
+  background-color: var(--devtools-dark-primary-color) !important;
+  color: #262626 !important;
+}
+
+.details-content .handle {
+  background-color: #262626 !important;
+  border-top: 1px solid #585858 !important;
+}
+
+.details-content .handle .tabs .tab[active] {
+  background-color: #262626 !important;
+  border-left: solid 1px var(--devtools-dark-primary-color) !important;
+  border-right: solid 1px var(--devtools-dark-primary-color) !important;
+  border-top: solid 1px var(--devtools-dark-primary-color) !important;
+  color: var(--devtools-dark-primary-color) !important;
+}
+
+.details-content .handle .tabs .tab[active]:hover {
+  color: #13b9fd !important;
+}
+
+.notes-editor-panel {
+  color: var(--devtools-dark-primary-color) !important;
+}
+
+.notes-editor-panel button {
+  background: transparent !important;
+  border-color: var(--devtools-dark-primary-color) !important;
+  border-width: thin !important;
+  border: solid !important;
+}
+.notes-editor-panel input {
+  background-color: var(--devtools-dark-background-color) !important;
+  border-color: var(--devtools-dark-primary-color) !important;
+  color: var(--devtools-dark-primary-color) !important;
+}
+
+.sum .sum-data {
+  border-bottom: 1px solid var(--devtools-dark-primary-color) !important;
+}
+
+.cookie-consent {
+  background-color: var(--devtools-dark-primary-color) !important;
+  color: #262626 !important;
+}
+
+.cookie-consent .buttons button {
+  color: #262626 !important;
+}
+
+.cookie-consent button a {
+  color: #262626 !important;
+}
+
+.cookie-consent button:hover {
+  background-color: #ffffff !important;
+}

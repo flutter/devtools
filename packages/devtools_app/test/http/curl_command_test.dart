@@ -202,7 +202,7 @@ void main() {
 
       expect(
         command.toString(),
-        "curl --location --request POST \'https://jsonplaceholder.typicode.com/posts\' \\\n--data-raw '    {\n      title: '\\''foo'\\'',\n      body: '\\''bar'\\'',\n      userId: 1,\n    }\n    '",
+        "curl --location --request POST \'https://jsonplaceholder.typicode.com/posts\' \\\n--data-raw '{\n \"title\": \"foo\", \"body\": \"bar\", \"userId\": 1\n}\n '",
       );
     });
   });

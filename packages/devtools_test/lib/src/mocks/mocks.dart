@@ -159,14 +159,7 @@ class MockLoggingController extends Mock
     with SearchControllerMixin<LogData>, FilterControllerMixin<LogData>
     implements LoggingController {
   @override
-  ValueListenable<LogData?> get selectedLog => _selectedLog;
-
-  final _selectedLog = ValueNotifier<LogData?>(null);
-
-  @override
-  void selectLog(LogData data) {
-    _selectedLog.value = data;
-  }
+  final selectedLog = ValueNotifier<LogData?>(null);
 
   @override
   List<LogData> data = <LogData>[];

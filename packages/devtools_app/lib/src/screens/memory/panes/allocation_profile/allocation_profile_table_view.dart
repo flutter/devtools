@@ -10,8 +10,8 @@ import '../../../../config_specific/import_export/import_export.dart';
 import '../../../../primitives/utils.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
-import '../../../../shared/table.dart';
-import '../../../../shared/table_data.dart';
+import '../../../../shared/table/table.dart';
+import '../../../../shared/table/table_data.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../../vm_developer/vm_service_private_extensions.dart';
@@ -220,7 +220,7 @@ class AllocationProfileTableViewState
   }
 }
 
-class _AllocationProfileTable extends StatefulWidget {
+class _AllocationProfileTable extends StatelessWidget {
   const _AllocationProfileTable({
     Key? key,
     required this.controller,
@@ -272,27 +272,9 @@ class _AllocationProfileTable extends StatefulWidget {
   final AllocationProfileTableViewController controller;
 
   @override
-  State<_AllocationProfileTable> createState() =>
-      _AllocationProfileTableState();
-}
-
-class _AllocationProfileTableState extends State<_AllocationProfileTable> {
-  // TODO(bkonyi): pull state into a TableController class.
-  // See https://github.com/flutter/devtools/issues/4365
-  late SortDirection _sortDirection;
-  late ColumnData<ClassHeapStats?> _sortColumn;
-
-  @override
-  void initState() {
-    super.initState();
-    _sortColumn = _AllocationProfileTable._initialSortColumn;
-    _sortDirection = SortDirection.descending;
-  }
-
-  @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<AllocationProfile?>(
-      valueListenable: widget.controller.currentAllocationProfile,
+      valueListenable: controller.currentAllocationProfile,
       builder: (context, profile, _) {
         // TODO(bkonyi): make this an overlay so the table doesn't
         // disappear when we're retrieving new data, especially since the
@@ -308,6 +290,15 @@ class _AllocationProfileTableState extends State<_AllocationProfileTable> {
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   return FlatTable<ClassHeapStats?>(
+                    keyFactory: (element) => Key(element!.classRef!.name!),
+                    data: profile.members!.where(
+                      (element) {
+                        return element.bytesCurrent != 0 ||
+                            element.newSpace.externalSize != 0 ||
+                            element.oldSpace.externalSize != 0;
+                      },
+                    ).toList(),
+                    dataKey: 'allocation-profile',
                     columnGroups: vmDeveloperModeEnabled
                         ? _AllocationProfileTable._vmModeColumnGroups
                         : null,
@@ -316,27 +307,9 @@ class _AllocationProfileTableState extends State<_AllocationProfileTable> {
                       if (vmDeveloperModeEnabled)
                         ..._AllocationProfileTable._vmDeveloperModeColumns,
                     ],
-                    data: profile.members!.where(
-                      (element) {
-                        return element.bytesCurrent != 0 ||
-                            element.newSpace.externalSize != 0 ||
-                            element.oldSpace.externalSize != 0;
-                      },
-                    ).toList(),
-                    sortColumn: _sortColumn,
-                    sortDirection: _sortDirection,
-                    onSortChanged: (
-                      sortColumn,
-                      direction, {
-                      secondarySortColumn,
-                    }) {
-                      setState(() {
-                        _sortColumn = sortColumn;
-                        _sortDirection = direction;
-                      });
-                    },
-                    onItemSelected: (item) => null,
-                    keyFactory: (element) => Key(element!.classRef!.name!),
+                    defaultSortColumn:
+                        _AllocationProfileTable._initialSortColumn,
+                    defaultSortDirection: SortDirection.descending,
                   );
                 },
               ),

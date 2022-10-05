@@ -90,22 +90,15 @@ class _ChartControlPaneState extends State<ChartControlPane>
       children: [
         ValueListenableBuilder<bool>(
           valueListenable: controller.paused,
-          builder: (context, paused, _) => Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              PauseButton(
-                iconOnly: true,
-                onPressed: paused ? null : _onPause,
-                tooltip: ChartPaneTooltips.pauseTooltip,
-              ),
-              const SizedBox(width: denseSpacing),
-              ResumeButton(
-                iconOnly: true,
-                onPressed: paused ? _onResume : null,
-                tooltip: ChartPaneTooltips.resumeTooltip,
-              ),
-            ],
-          ),
+          builder: (context, paused, _) {
+            return PauseResumeButtonGroup(
+              paused: paused,
+              onPause: _onPause,
+              onResume: _onResume,
+              pauseTooltip: ChartPaneTooltips.pauseTooltip,
+              resumeTooltip: ChartPaneTooltips.resumeTooltip,
+            );
+          },
         ),
         const SizedBox(height: denseSpacing),
         IconLabelButton(
@@ -125,8 +118,9 @@ class _ChartControlPaneState extends State<ChartControlPane>
   void _showLegend(BuildContext context) {
     final box = legendKey.currentContext!.findRenderObject() as RenderBox;
 
-    final colorScheme = Theme.of(context).colorScheme;
-    final legendHeading = colorScheme.hoverTextStyle;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final legendHeading = theme.hoverTextStyle;
 
     // Global position.
     final position = box.localToGlobal(Offset.zero);

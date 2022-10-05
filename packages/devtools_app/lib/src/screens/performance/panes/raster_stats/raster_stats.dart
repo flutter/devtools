@@ -10,8 +10,8 @@ import '../../../../primitives/utils.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/dialogs.dart';
 import '../../../../shared/split.dart';
-import '../../../../shared/table.dart';
-import '../../../../shared/table_data.dart';
+import '../../../../shared/table/table.dart';
+import '../../../../shared/table/table_data.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../../../ui/colors.dart';
@@ -70,7 +70,7 @@ class RenderingLayerVisualizer extends StatelessWidget {
 }
 
 class LayerSnapshotTable extends StatelessWidget {
-  LayerSnapshotTable({
+  const LayerSnapshotTable({
     Key? key,
     required this.controller,
     required this.snapshots,
@@ -80,15 +80,18 @@ class LayerSnapshotTable extends StatelessWidget {
 
   final List<LayerSnapshot> snapshots;
 
-  final ColumnData<LayerSnapshot> _layerColumn = _LayerColumn();
+  static final ColumnData<LayerSnapshot> _layerColumn = _LayerColumn();
 
-  final ColumnData<LayerSnapshot> _timeColumn = _RenderingTimeColumn();
+  static final ColumnData<LayerSnapshot> _timeColumn = _RenderingTimeColumn();
 
-  final ColumnData<LayerSnapshot> _percentageColumn =
+  static final ColumnData<LayerSnapshot> _percentageColumn =
       _RenderingTimePercentageColumn();
 
-  List<ColumnData<LayerSnapshot>> get _columns =>
-      [_layerColumn, _timeColumn, _percentageColumn];
+  static final List<ColumnData<LayerSnapshot>> _columns = [
+    _layerColumn,
+    _timeColumn,
+    _percentageColumn
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -98,12 +101,13 @@ class LayerSnapshotTable extends StatelessWidget {
         border: Border(right: borderSide),
       ),
       child: FlatTable<LayerSnapshot>(
-        columns: _columns,
-        data: snapshots,
         keyFactory: (LayerSnapshot snapshot) =>
             ValueKey<String?>('${snapshot.id}'),
-        sortColumn: _percentageColumn,
-        sortDirection: SortDirection.descending,
+        data: snapshots,
+        dataKey: 'raster-layer-snapshots',
+        columns: _columns,
+        defaultSortColumn: _percentageColumn,
+        defaultSortDirection: SortDirection.descending,
         onItemSelected: controller.selectSnapshot,
         selectionNotifier: controller.selectedSnapshot,
       ),

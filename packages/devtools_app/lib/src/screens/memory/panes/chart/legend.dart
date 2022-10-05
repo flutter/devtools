@@ -28,7 +28,8 @@ class LegendRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final legendEntry = Theme.of(context).colorScheme.legendTextStyle;
+    final theme = Theme.of(context);
+    final legendEntry = theme.legendTextStyle;
 
     List<Widget> legendPart(
       String name,
