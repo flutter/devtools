@@ -1498,7 +1498,8 @@ void main() {
           result[1],
           equals(_SubtractionResult(subtract: 'subtract', from: 1.0)),
         );
-        expect(result[2], equals(_SubtractionResult(subtract: null, from: 2.0)));
+        expect(
+            result[2], equals(_SubtractionResult(subtract: null, from: 2.0)));
       });
 
       test('subtracts null', () {
