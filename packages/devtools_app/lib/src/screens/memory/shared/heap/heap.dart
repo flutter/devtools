@@ -35,6 +35,7 @@ class AdaptedHeap {
 
 abstract class HeapClasses with Sealable {}
 
+/// Set of heap class statistical information for single heap (not comparision between two heaps).
 class SingleHeapClasses extends HeapClasses {
   SingleHeapClasses(this.classesByName);
 
@@ -114,7 +115,7 @@ class ObjectSetStats with Sealable {
     return result;
   }
 
-  static final ObjectSetStats _empty = ObjectSetStats()..seal();
+  static final _empty = ObjectSetStats()..seal();
 
   int instanceCount = 0;
   int shallowSize = 0;

@@ -397,7 +397,7 @@ class CpuProfileData {
     Map<String, dynamic> traceObject,
   ) async {
     final stackFrames = traceObject[CpuProfileData.stackFramesKey]
-        .data
+        .values
         .cast<Map<String, dynamic>>();
     final stackFramesWaitingOnPackageUri = <Map<String, dynamic>>[];
     final urisWithoutPackageUri = <String>{};

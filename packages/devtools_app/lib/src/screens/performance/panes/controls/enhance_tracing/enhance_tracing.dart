@@ -136,7 +136,7 @@ class _TrackWidgetBuildsSettingState extends State<TrackWidgetBuildsSetting>
   /// are enabled.
   final _tracked = ValueNotifier<bool>(false);
 
-  /// Whether either of the extensions in [_trackWidgetBuildsExtensions.data]
+  /// Whether either of the extensions in [_trackWidgetBuildsExtensions.values]
   /// are available.
   final _trackingAvailable = ValueNotifier<bool>(false);
 
