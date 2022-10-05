@@ -45,6 +45,7 @@ dependencies:
   path: ^1.8.0
   perfetto_compiled:
     path: ../../third_party/packages/perfetto_compiled
+  pointer_interceptor: ^0.9.3+3
   provider: ^6.0.2
   # Only used for debug mode logic.
   shared_preferences: ^2.0.15
