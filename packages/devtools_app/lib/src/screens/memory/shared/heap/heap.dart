@@ -140,8 +140,6 @@ class ObjectSetStats with Sealable {
 
 /// Statistical and detailed size-information about objects.
 class ObjectSet extends ObjectSetStats {
-
-
   static ObjectSet empty = ObjectSet()..seal();
 
   final objectsByCodes = <IdentityHashCode, AdaptedHeapObject>{};
