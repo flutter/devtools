@@ -27,27 +27,29 @@ class SnapshotControlPane extends StatelessWidget {
         return Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Row(
-              children: [
-                const SizedBox(width: defaultSpacing),
-                if (!isProcessing && current.heap != null) ...[
-                  _DiffDropdown(
-                    current: current,
-                    controller: controller,
-                  ),
-                  const SizedBox(width: defaultSpacing),
-                  SizedBox(
-                    width: _classFilterWidth,
-                    child: _ClassFilter(onChanged: controller.setClassFilter),
-                  ),
-                  const SizedBox(width: defaultSpacing),
-                  ToCsvButton(
-                    minScreenWidthForTextBeforeScaling:
-                        primaryControlsMinVerboseWidth,
-                    onPressed: current.downloadToCsv,
-                  ),
+            Padding(
+              padding: const EdgeInsets.only(left: defaultSpacing),
+              child: Row(
+                children: [
+                  if (!isProcessing && current.heap != null) ...[
+                    _DiffDropdown(
+                      current: current,
+                      controller: controller,
+                    ),
+                    const SizedBox(width: defaultSpacing),
+                    SizedBox(
+                      width: _classFilterWidth,
+                      child: _ClassFilter(onChanged: controller.setClassFilter),
+                    ),
+                    const SizedBox(width: defaultSpacing),
+                    ToCsvButton(
+                      minScreenWidthForTextBeforeScaling:
+                          primaryControlsMinVerboseWidth,
+                      onPressed: current.downloadToCsv,
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
             ToolbarAction(
               icon: Icons.clear,
