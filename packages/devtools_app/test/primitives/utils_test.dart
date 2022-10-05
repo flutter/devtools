@@ -1481,13 +1481,13 @@ void main() {
       test('subtracts non-null maps', () {
         final subtract = {1: 'subtract'};
         final from = {1: 1.0, 2: 2.0};
-        SubtractionResult? elementSubtractor({
+        _SubtractionResult? elementSubtractor({
           required String? subtract,
           required double? from,
         }) =>
-            SubtractionResult(subtract: subtract, from: from);
+            _SubtractionResult(subtract: subtract, from: from);
 
-        final result = subtractMaps<int, double, String, SubtractionResult>(
+        final result = subtractMaps<int, double, String, _SubtractionResult>(
           substract: subtract,
           from: from,
           subtractor: elementSubtractor,
@@ -1496,22 +1496,22 @@ void main() {
         expect(const SetEquality().equals(result.keys.toSet(), {1, 2}), true);
         expect(
           result[1],
-          equals(SubtractionResult(subtract: 'subtract', from: 1.0)),
+          equals(_SubtractionResult(subtract: 'subtract', from: 1.0)),
         );
-        expect(result[2], equals(SubtractionResult(subtract: null, from: 2.0)));
+        expect(result[2], equals(_SubtractionResult(subtract: null, from: 2.0)));
       });
 
       test('subtracts null', () {
         final from = {1: 1.0};
-        SubtractionResult? elementSubtractor({
+        _SubtractionResult? elementSubtractor({
           required String? subtract,
           required double? from,
         }) =>
             // ignore: unnecessary_cast
-            SubtractionResult(subtract: subtract, from: from)
-                as SubtractionResult?;
+            _SubtractionResult(subtract: subtract, from: from)
+                as _SubtractionResult?;
 
-        final result = subtractMaps<int, double, String, SubtractionResult>(
+        final result = subtractMaps<int, double, String, _SubtractionResult>(
           substract: null,
           from: from,
           subtractor: elementSubtractor,
@@ -1520,21 +1520,21 @@ void main() {
         expect(const SetEquality().equals(result.keys.toSet(), {1}), true);
         expect(
           result[1],
-          equals(SubtractionResult(subtract: null, from: 1.0)),
+          equals(_SubtractionResult(subtract: null, from: 1.0)),
         );
       });
 
       test('subtracts from null', () {
         final subtract = {1: 'subtract'};
-        SubtractionResult? elementSubtractor({
+        _SubtractionResult? elementSubtractor({
           required String? subtract,
           required double? from,
         }) =>
             // ignore: unnecessary_cast
-            SubtractionResult(subtract: subtract, from: from)
-                as SubtractionResult?;
+            _SubtractionResult(subtract: subtract, from: from)
+                as _SubtractionResult?;
 
-        final result = subtractMaps<int, double, String, SubtractionResult>(
+        final result = subtractMaps<int, double, String, _SubtractionResult>(
           substract: subtract,
           from: null,
           subtractor: elementSubtractor,
@@ -1543,15 +1543,15 @@ void main() {
         expect(const SetEquality().equals(result.keys.toSet(), {1}), true);
         expect(
           result[1],
-          equals(SubtractionResult(subtract: 'subtract', from: null)),
+          equals(_SubtractionResult(subtract: 'subtract', from: null)),
         );
       });
     });
   });
 }
 
-class SubtractionResult {
-  SubtractionResult({
+class _SubtractionResult {
+  _SubtractionResult({
     required this.subtract,
     required this.from,
   });
@@ -1564,7 +1564,7 @@ class SubtractionResult {
       return false;
     }
 
-    return other is SubtractionResult &&
+    return other is _SubtractionResult &&
         other.subtract == subtract &&
         other.from == from;
   }

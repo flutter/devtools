@@ -58,6 +58,7 @@ class _HeapCouple {
   int get hashCode => Object.hash(older, younger);
 }
 
+/// List of classes with per-class comparision between two heaps.
 class DiffHeapClasses extends HeapClasses {
   DiffHeapClasses(_HeapCouple couple) {
     classesByName = subtractMaps<HeapClassName, SingleClassStats,
@@ -83,6 +84,7 @@ class DiffHeapClasses extends HeapClasses {
   }
 }
 
+/// Comparision between two heaps for a class.
 class DiffClassStats extends ClassStats {
   DiffClassStats._({
     required this.heapClass,
@@ -120,6 +122,7 @@ class DiffClassStats extends ClassStats {
   bool isZero() => total.isZero;
 }
 
+/// Comparision between two sets of objects.
 class ObjectSetDiff {
   ObjectSetDiff({ObjectSet? before, ObjectSet? after}) {
     before ??= ObjectSet.empty;

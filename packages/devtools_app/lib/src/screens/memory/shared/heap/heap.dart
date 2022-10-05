@@ -67,6 +67,7 @@ abstract class ClassStats with Sealable {
   }
 }
 
+/// Statistics for a class about a single heap.
 class SingleClassStats extends ClassStats {
   SingleClassStats(this.heapClass)
       : objects = ObjectSet(),
@@ -95,7 +96,7 @@ class SingleClassStats extends ClassStats {
   bool get isZero => objects.isZero;
 }
 
-/// Size of set of instances.
+/// Statistical size-information about objects.
 class ObjectSetStats with Sealable {
   static ObjectSetStats? subtract({
     required ObjectSetStats? subtract,
@@ -137,9 +138,9 @@ class ObjectSetStats with Sealable {
   }
 }
 
-/// Size of set of instances.
+/// Statistical and detailed size-information about objects.
 class ObjectSet extends ObjectSetStats {
-  ObjectSet();
+
 
   static ObjectSet empty = ObjectSet()..seal();
 

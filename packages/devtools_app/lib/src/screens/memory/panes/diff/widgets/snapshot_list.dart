@@ -129,6 +129,7 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
   }
 
   void _init() {
+    cancelListeners();
     addAutoDisposeListener(
       widget.controller.core.selectedSnapshotIndex,
       scrollIfLast,
