@@ -4,15 +4,17 @@
 
 import 'package:flutter/foundation.dart';
 
+import '../../../../../primitives/utils.dart';
 import '../../../shared/heap/heap.dart';
+import '../../../shared/heap/model.dart';
 
 /// Stores already calculated comparisons for heap couples.
 class HeapDiffStore {
-  final _store = <_HeapCouple, HeapComparison>{};
+  final _store = <_HeapCouple, DiffHeapClasses>{};
 
-  HeapComparison compare(AdaptedHeap heap1, AdaptedHeap heap2) {
+  DiffHeapClasses compare(AdaptedHeap heap1, AdaptedHeap heap2) {
     final couple = _HeapCouple(heap1, heap2);
-    return _store.putIfAbsent(couple, () => HeapComparison(couple));
+    return _store.putIfAbsent(couple, () => DiffHeapClasses(couple));
   }
 }
 
@@ -26,9 +28,9 @@ class _HeapCouple {
   late final AdaptedHeap older;
   late final AdaptedHeap younger;
 
-  /// Finds most deterministic way to declare earliest heap.
+  /// Tries to declare earliest heap in a determenistic way.
   ///
-  /// If earliest heap cannot be identified, returns first argument.
+  /// If the earliest heap cannot be identified, returns the first argument.
   static AdaptedHeap _older(AdaptedHeap heap1, AdaptedHeap heap2) {
     assert(heap1.data != heap2.data);
     if (heap1.data.created.isBefore(heap2.data.created)) return heap1;
@@ -56,35 +58,110 @@ class _HeapCouple {
   int get hashCode => Object.hash(older, younger);
 }
 
-class HeapComparison {
-  HeapComparison(this.heapCouple);
-
-  late final HeapStatistics stats = _stats();
-
-  final _HeapCouple heapCouple;
-
-  HeapStatistics _stats() {
-    final result = <String, HeapClassStatistics>{};
-
-    final older = heapCouple.older.stats.statsByClassName;
-    final younger = heapCouple.younger.stats.statsByClassName;
-
-    final unionOfKeys = older.keys.toSet().union(younger.keys.toSet());
-
-    for (var key in unionOfKeys) {
-      final olderStats = older[key];
-      final youngerStats = younger[key];
-
-      if (olderStats != null && youngerStats != null) {
-        final diff = HeapClassStatistics.subtract(olderStats, youngerStats);
-        if (!diff.isZero) result[key] = diff;
-      } else if (youngerStats != null) {
-        result[key] = youngerStats;
-      } else {
-        result[key] = HeapClassStatistics.negative(olderStats!);
-      }
-    }
-
-    return HeapStatistics(result);
+/// List of classes with per-class comparision between two heaps.
+class DiffHeapClasses extends HeapClasses {
+  DiffHeapClasses(_HeapCouple couple) {
+    classesByName = subtractMaps<HeapClassName, SingleClassStats,
+        SingleClassStats, DiffClassStats>(
+      from: couple.younger.classes.classesByName,
+      substract: couple.older.classes.classesByName,
+      subtractor: ({subtract, from}) =>
+          DiffClassStats.diff(before: subtract, after: from),
+    );
   }
+
+  /// Maps full class name to class.
+  late final Map<HeapClassName, DiffClassStats> classesByName;
+  late final List<DiffClassStats> classes =
+      classesByName.values.toList(growable: false);
+
+  @override
+  void seal() {
+    super.seal();
+    for (var c in classes) {
+      c.seal();
+    }
+  }
+}
+
+/// Comparision between two heaps for a class.
+class DiffClassStats extends ClassStats {
+  DiffClassStats._({
+    required this.heapClass,
+    required this.total,
+    required StatsByPath objectsByPath,
+  }) : super(objectsByPath);
+
+  final HeapClassName heapClass;
+  final ObjectSetDiff total;
+
+  static DiffClassStats? diff({
+    required SingleClassStats? before,
+    required SingleClassStats? after,
+  }) {
+    if (before == null && after == null) return null;
+
+    final heapClass = (before?.heapClass ?? after?.heapClass)!;
+
+    final result = DiffClassStats._(
+      heapClass: heapClass,
+      total: ObjectSetDiff(before: before?.objects, after: after?.objects),
+      objectsByPath: subtractMaps<ClassOnlyHeapPath, ObjectSetStats,
+          ObjectSetStats, ObjectSetStats>(
+        from: after?.statsByPath,
+        substract: before?.statsByPath,
+        subtractor: ({subtract, from}) =>
+            ObjectSetStats.subtract(subtract: subtract, from: from),
+      ),
+    );
+
+    if (result.isZero()) return null;
+    return result..seal();
+  }
+
+  bool isZero() => total.isZero;
+}
+
+/// Comparision between two sets of objects.
+class ObjectSetDiff {
+  ObjectSetDiff({ObjectSet? before, ObjectSet? after}) {
+    before ??= ObjectSet.empty;
+    after ??= ObjectSet.empty;
+
+    final codesBefore = before.objectsByCodes.keys.toSet();
+    final codesAfter = after.objectsByCodes.keys.toSet();
+
+    final allCodes = codesBefore.union(codesAfter);
+    for (var code in allCodes) {
+      final inBefore = codesBefore.contains(code);
+      final inAfter = codesAfter.contains(code);
+      if (inBefore && inAfter) continue;
+
+      final object = before.objectsByCodes[code] ?? after.objectsByCodes[code]!;
+
+      if (inBefore) {
+        deleted.countInstance(object);
+        delta.uncountInstance(object);
+        continue;
+      }
+      if (inAfter) {
+        created.countInstance(object);
+        delta.countInstance(object);
+        continue;
+      }
+      assert(false);
+    }
+    created.seal();
+    deleted.seal();
+    delta.seal();
+    assert(
+      delta.instanceCount == created.instanceCount - deleted.instanceCount,
+    );
+  }
+
+  final created = ObjectSet();
+  final deleted = ObjectSet();
+  final delta = ObjectSetStats();
+
+  bool get isZero => delta.isZero;
 }

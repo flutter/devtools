@@ -12,7 +12,7 @@ void main() {
         AdaptedHeapObject(
           code: 1,
           references: [3, 4, 5],
-          heapClass: const HeapClass(
+          heapClass: const HeapClassName(
             className: 'class',
             library: 'library',
           ),

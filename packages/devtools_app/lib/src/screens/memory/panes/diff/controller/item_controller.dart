@@ -4,14 +4,13 @@
 
 import 'package:flutter/foundation.dart';
 
+import '../../../../../config_specific/import_export/import_export.dart';
 import '../../../../../primitives/auto_dispose.dart';
+import '../../../../../shared/globals.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
-import 'heap_diff.dart';
 
-typedef RetainingPathRecord = MapEntry<ClassOnlyHeapPath, SizeOfClassSet>;
-
-abstract class DiffListItem extends DisposableController {
+abstract class SnapshotItem extends DisposableController {
   /// Number, that if shown in name, should be unique in the list.
   ///
   /// If the number is not expected to be shown in UI, it should be 0.
@@ -24,7 +23,7 @@ abstract class DiffListItem extends DisposableController {
   bool get hasData;
 }
 
-class InformationListItem extends DiffListItem {
+class SnapshotDocItem extends SnapshotItem {
   @override
   int get displayNumber => 0;
 
@@ -32,86 +31,79 @@ class InformationListItem extends DiffListItem {
   bool get hasData => false;
 }
 
-class SnapshotListItem extends DiffListItem with AutoDisposeControllerMixin {
-  SnapshotListItem({
-    required Future<AdaptedHeapData?> receiver,
-    required this.id,
+class SnapshotInstanceItem extends SnapshotItem {
+  SnapshotInstanceItem({
     required this.displayNumber,
     required this.isolateName,
-    required this.diffStore,
-    required this.selectedClassName,
+    required this.id,
   }) {
     _isProcessing.value = true;
-    receiver.whenComplete(() async {
-      final data = await receiver;
-      if (data != null) {
-        heap = AdaptedHeap(data);
-        updateSelectedRecord();
-        // TODO(https://github.com/flutter/devtools/issues/4539): it is unclear
-        // whether preserving the selection between snapshots should be the
-        // default behavior. Revisit after consulting with UXR.
-        addAutoDisposeListener(selectedClassName, () => updateSelectedRecord());
-      }
-      _isProcessing.value = false;
-    });
   }
 
   final int id;
 
   final String isolateName;
 
-  final HeapDiffStore diffStore;
-
   AdaptedHeap? heap;
+
+  void setHeapData(AdaptedHeapData? data) {
+    if (data != null) heap = AdaptedHeap(data);
+    _isProcessing.value = false;
+  }
 
   @override
   final int displayNumber;
 
   String get name => '$isolateName-$displayNumber';
 
-  ValueListenable<SnapshotListItem?> get diffWith => _diffWith;
-  final _diffWith = ValueNotifier<SnapshotListItem?>(null);
-  void setDiffWith(SnapshotListItem? value) {
-    _diffWith.value = value;
-    updateSelectedRecord();
-  }
-
-  final ValueNotifier<String?> selectedClassName;
-
-  final selectedClassStats = ValueNotifier<HeapClassStatistics?>(null);
-
-  List<RetainingPathRecord> get retainingPathList {
-    final classStats = selectedClassStats.value;
-    if (classStats == null) return [];
-    return _retainingPathForClass.putIfAbsent(
-      classStats,
-      () => classStats.sizeByRetainingPath.entries.toList(growable: false),
-    );
-  }
-
-  final _retainingPathForClass =
-      <HeapClassStatistics, List<RetainingPathRecord>>{};
+  final diffWith = ValueNotifier<SnapshotInstanceItem?>(null);
 
   @override
   bool get hasData => heap != null;
 
-  HeapStatistics get statsToShow {
-    final theHeap = heap!;
-    final itemToDiffWith = diffWith.value;
-    if (itemToDiffWith == null) return theHeap.stats;
-    return diffStore.compare(theHeap, itemToDiffWith.heap!).stats;
-  }
+  void downloadToCsv() {
+    final csvBuffer = StringBuffer();
 
-  void updateSelectedRecord() {
-    if (selectedClassName.value == null) {
-      selectedClassStats.value = null;
-      return;
-    }
-    final classStats = statsToShow.statsByClassName[selectedClassName.value];
-    if (classStats != null) {
-      _retainingPathForClass[classStats] =
-          classStats.sizeByRetainingPath.entries.toList(growable: false);
-    }
-    selectedClassStats.value = classStats;
+    // Write the headers first.
+    csvBuffer.writeln(
+      [
+        'Class',
+        'Library',
+        'Instances',
+        'Shallow Dart Size',
+        'Retained Dart Size',
+        'Short Retaining Path',
+        'Full Retaining Path',
+      ].map((e) => '"$e"').join(','),
+    );
+
+    // TODO(polina-c): write data to file before opening the feature.
+    // // Write a row per retaining path.
+    // final data = heapClassesToShow();
+    // for (var classStats in data.classAnalysis) {
+    //   for (var pathStats in classStats.objectsByPath.entries) {
+    //     csvBuffer.writeln(
+    //       [
+    //         classStats.heapClass.className,
+    //         classStats.heapClass.library,
+    //         pathStats.value.instanceCount,
+    //         pathStats.value.shallowSize,
+    //         pathStats.value.retainedSize,
+    //         pathStats.key.asShortString(),
+    //         pathStats.key.asLongString().replaceAll('\n', ' | '),
+    //       ].join(','),
+    //     );
+    //   }
+    // }
+
+    final file = ExportController().downloadFile(
+      csvBuffer.toString(),
+      type: ExportFileType.csv,
+    );
+
+    // TODO(polina-c): add the notification to ExportController.downloadFile.
+    notificationService.push(successfulExportMessage(file));
+
+    throw UnimplementedError();
   }
 }

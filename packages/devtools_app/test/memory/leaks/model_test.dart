@@ -22,7 +22,7 @@ void main() {
       heap: AdaptedHeapData(
         [
           AdaptedHeapObject(
-            heapClass: const HeapClass(
+            heapClass: const HeapClassName(
               className: 'class',
               library: 'library',
             ),
