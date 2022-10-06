@@ -115,7 +115,7 @@ abstract class ExportController {
 
   const ExportController.impl();
 
-  String generateFileName({
+  static String generateFileName({
     String prefix = 'dart_devtools',
     String postfix = '',
     required ExportFileType type,

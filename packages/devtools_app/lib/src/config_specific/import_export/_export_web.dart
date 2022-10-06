@@ -20,7 +20,7 @@ class ExportControllerWeb extends ExportController {
     ExportFileType type = ExportFileType.json,
   }) {
     final element = document.createElement('a');
-    fileName ??= generateFileName(type: type);
+    fileName ??= ExportController.generateFileName(type: type);
     element.setAttribute('href', Url.createObjectUrl(Blob([contents])));
     element.setAttribute('download', fileName);
     element.style.display = 'none';

@@ -20,7 +20,7 @@ class ExportControllerDesktop extends ExportController {
     String? fileName,
     ExportFileType type = ExportFileType.json,
   }) {
-    fileName ??= generateFileName(type: type);
+    fileName ??= ExportController.generateFileName(type: type);
     _fs.writeStringToFile(fileName, contents);
     return fileName;
   }

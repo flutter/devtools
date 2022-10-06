@@ -105,10 +105,23 @@ class DiffPaneController extends DisposableController {
 
   void downloadCurrentItemToCsv() {
     final classes = derived.heapClasses.value!;
+    final item = core.selectedItem as SnapshotInstanceItem;
+    final diffWith = item.diffWith.value;
+
+    late String filePrefix;
+    if (diffWith == null) {
+      filePrefix = item.name;
+    } else {
+      filePrefix = '${item.name}--${diffWith.name}';
+    }
 
     ExportController().downloadAndNotify(
       classesToCsv(classes),
       type: ExportFileType.csv,
+      fileName: ExportController.generateFileName(
+        type: ExportFileType.csv,
+        prefix: filePrefix,
+      ),
     );
   }
 }

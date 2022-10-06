@@ -143,7 +143,7 @@ class _LeaksPaneController {
 
   void _saveResultAndSetStatus(String yaml, NotGCedAnalyzerTask? task) async {
     final now = DateTime.now();
-    final yamlFile = _exportController.generateFileName(
+    final yamlFile = ExportController.generateFileName(
       time: now,
       prefix: _filePrefix,
       type: ExportFileType.yaml,
@@ -163,7 +163,7 @@ class _LeaksPaneController {
     if (task == null) return null;
 
     final json = jsonEncode(task.toJson());
-    final jsonFile = _exportController.generateFileName(
+    final jsonFile = ExportController.generateFileName(
       time: now,
       prefix: _filePrefix,
       postfix: '.raw',
