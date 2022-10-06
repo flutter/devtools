@@ -217,16 +217,16 @@ class SnapshotTaker {
 class HeapClassName {
   const HeapClassName({required this.className, required this.library});
 
-  HeapClass.fromClassRef(ClassRef? classRef)
+  HeapClassName.fromClassRef(ClassRef? classRef)
       : library = _library(classRef?.library?.name, classRef?.library?.uri),
         className = classRef?.name ?? '';
 
-  HeapClass.fromHeapSnapshotClass(HeapSnapshotClass? theClass)
+  HeapClassName.fromHeapSnapshotClass(HeapSnapshotClass? theClass)
       : library =
             _library(theClass?.libraryName, theClass?.libraryUri.toString()),
         className = theClass?.name ?? '';
 
-  static const empty = HeapClass(className: '', library: '');
+  static const empty = HeapClassName(className: '', library: '');
 
   static String _library(String? libName, String? libUrl) {
     libName ??= '';

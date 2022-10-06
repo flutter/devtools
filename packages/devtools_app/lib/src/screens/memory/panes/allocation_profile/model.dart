@@ -29,7 +29,7 @@ class AdaptedAllocationProfile {
 class AllocationProfileRecord with PinnableListEntry {
   AllocationProfileRecord.fromClassHeapStats(ClassHeapStats stats)
       : isTotal = false,
-        heapClass = HeapClass.fromClassRef(stats.classRef),
+        heapClass = HeapClassName.fromClassRef(stats.classRef),
         totalInstances = stats.instancesCurrent ?? 0,
         totalSize = stats.bytesCurrent! +
             stats.oldSpace.externalSize +
@@ -50,7 +50,7 @@ class AllocationProfileRecord with PinnableListEntry {
 
   AllocationProfileRecord.total(AllocationProfile profile)
       : isTotal = true,
-        heapClass = const HeapClass(className: 'All Classes', library: ''),
+        heapClass = const HeapClassName(className: 'All Classes', library: ''),
         totalInstances = null,
         totalSize = (profile.memoryUsage?.externalUsage ?? 0) +
             (profile.memoryUsage?.heapUsage ?? 0),
@@ -69,7 +69,7 @@ class AllocationProfileRecord with PinnableListEntry {
 
   final bool isTotal;
 
-  final HeapClass heapClass;
+  final HeapClassName heapClass;
 
   final int? totalInstances;
   final int totalSize;
