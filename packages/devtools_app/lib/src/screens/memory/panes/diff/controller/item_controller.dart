@@ -4,9 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 
-import '../../../../../config_specific/import_export/import_export.dart';
 import '../../../../../primitives/auto_dispose.dart';
-import '../../../../../shared/globals.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
 

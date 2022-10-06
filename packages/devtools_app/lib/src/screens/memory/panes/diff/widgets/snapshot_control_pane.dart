@@ -45,7 +45,7 @@ class SnapshotControlPane extends StatelessWidget {
                     ToCsvButton(
                       minScreenWidthForTextBeforeScaling:
                           primaryControlsMinVerboseWidth,
-                      onPressed: current.downloadToCsv,
+                      onPressed: controller.downloadCurrentItemToCsv,
                     ),
                   ],
                 ],
