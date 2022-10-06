@@ -126,6 +126,20 @@ abstract class ExportController {
     return '${prefix}_$timestamp$postfix.$type';
   }
 
+  /// Downloads a file with [contents] and pushes notification about success.
+  void downloadAndNotify(
+    String content, {
+    String? fileName,
+    ExportFileType type = ExportFileType.json,
+  }) {
+    final file = ExportController().downloadFile(
+      content,
+      type: ExportFileType.csv,
+      fileName: fileName,
+    );
+    notificationService.push(successfulExportMessage(file));
+  }
+
   /// Downloads a file with [contents] and returns the name of the
   /// downloaded file.
   String downloadFile(

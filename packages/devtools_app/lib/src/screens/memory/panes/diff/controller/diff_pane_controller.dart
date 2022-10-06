@@ -7,11 +7,13 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../../../../config_specific/import_export/import_export.dart';
 import '../../../../../primitives/auto_dispose.dart';
 import '../../../../../primitives/utils.dart';
 import '../../../primitives/memory_utils.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
+import 'csv.dart';
 import 'heap_diff.dart';
 import 'item_controller.dart';
 
@@ -99,6 +101,15 @@ class DiffPaneController extends DisposableController {
 
   void setClassFilter(String value) {
     // TODO(polina-c): add implementation
+  }
+
+  void downloadCurrentItemToCsv() {
+    final classes = derived.heapClasses.value!;
+
+    ExportController().downloadAndNotify(
+      classesToCsv(classes),
+      type: ExportFileType.csv,
+    );
   }
 }
 

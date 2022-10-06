@@ -2,17 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import '../../../shared/heap/heap.dart';
-import 'heap_diff.dart';
 
 String classesToCsv(HeapClasses classes) {
-  if (classes is SingleHeapClasses) return _singleClassesToCsv(classes);
-  if (classes is DiffHeapClasses) return _diffClassesToCsv(classes);
-  throw StateError('Unexpected type: ${classes.runtimeType}');
-}
-
-String _singleClassesToCsv(SingleHeapClasses classes) {
   final csvBuffer = StringBuffer();
 
   // Write the headers first.
@@ -21,15 +13,15 @@ String _singleClassesToCsv(SingleHeapClasses classes) {
       'Class',
       'Library',
       'Instances',
-      'Shallow Dart Size',
-      'Retained Dart Size',
+      'Shallow',
+      'Retained',
       'Short Retaining Path',
       'Full Retaining Path',
     ].map((e) => '"$e"').join(','),
   );
 
-  for (var classStats in classes.classes) {
-    for (var pathStats in classStats.entries) {
+  for (var classStats in classes.classStatsList) {
+    for (var pathStats in classStats.statsByPathEntries) {
       csvBuffer.writeln(
         [
           classStats.heapClass.className,
@@ -45,8 +37,4 @@ String _singleClassesToCsv(SingleHeapClasses classes) {
   }
 
   return csvBuffer.toString();
-}
-
-String _diffClassesToCsv(DiffHeapClasses classes) {
-  return '';
 }
