@@ -49,9 +49,11 @@ abstract class ColumnData<T> {
   bool get supportsSorting => numeric;
 
   int compare(T a, T b) {
-    final valueA = (getValue(a) ?? '') as Comparable;
-    final valueB = (getValue(b) ?? '') as Comparable;
-    return valueA.compareTo(valueB);
+    final valueA = getValue(a);
+    final valueB = getValue(b);
+    if (valueA == null && valueB == null) return 0;
+    if (valueA == null) return -1;
+    return (valueA as Comparable).compareTo(valueB);
   }
 
   /// Get the cell's value from the given [dataObject].
