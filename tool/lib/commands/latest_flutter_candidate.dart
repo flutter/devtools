@@ -74,7 +74,8 @@ class LatestFlutterCandidateCommand extends Command {
     }
 
     if (latestBranchName == null) {
-      print('Something went wrong. Could not find the latest candidate branch:'
+      throw Exception(
+          'Something went wrong. Could not find the latest candidate branch:'
           '${allBranchNames.join('\n')}');
     } else {
       print(latestBranchName);

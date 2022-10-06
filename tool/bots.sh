@@ -43,7 +43,6 @@ export PATH=`pwd`/flutter-sdk/bin/cache/dart-sdk/bin:`pwd`/flutter-sdk/bin:`pwd`
 echo "Looking up the latest Flutter candidate branch"
 pushd packages/devtools_app
 LATEST_FLUTTER_CANDIDATE=`repo_tool latest-flutter-candidate | tail -n 1`
-echo "Latest Flutter candidate branch: $LATEST_FLUTTER_CANDIDATE"
 popd
 
 pushd flutter-sdk
