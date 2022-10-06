@@ -9,6 +9,16 @@ class ReleaseNotes {
   });
 
   List<Release> releases;
+
+  String toMarkdown() {
+    String markdown = '';
+    for (var release in releases) {
+      markdown += release.toMarkdown();
+      markdown += '\n';
+    }
+    return markdown;
+  }
+
   factory ReleaseNotes.fromJson(Map<String, dynamic> json) =>
       _$ReleaseNotesFromJson(json);
 
@@ -69,6 +79,7 @@ class SemanticVersion {
   final int minor;
   final int patch;
   final String? pre;
+
   @override
   String toString() {
     String versionString = '$major.$minor.$patch';
@@ -110,6 +121,7 @@ class ReleaseNote {
     required this.message,
     this.githubPullRequestUrl,
   });
+  // TODO add ability to add image
 
   final String? githubPullRequestUrl;
   final String message;
