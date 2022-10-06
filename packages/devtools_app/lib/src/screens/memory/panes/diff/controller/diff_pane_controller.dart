@@ -112,7 +112,7 @@ class DiffPaneController extends DisposableController {
     if (diffWith == null) {
       filePrefix = item.name;
     } else {
-      filePrefix = '${item.name}--${diffWith.name}';
+      filePrefix = '${item.name}-${diffWith.name}';
     }
 
     ExportController().downloadAndNotify(
