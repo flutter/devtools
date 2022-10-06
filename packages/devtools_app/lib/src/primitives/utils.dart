@@ -1319,6 +1319,15 @@ class ListValueNotifier<T> extends ChangeNotifier
     _rawList.removeRange(start, end);
     _listChanged();
   }
+
+  /// Removes the object at position `index` from this list.
+  ///
+  /// https://api.flutter.dev/flutter/dart-core/List/removeAt.html
+  void removeAt(int index) {
+    _rawList = _rawList.toList();
+    _rawList.removeAt(index);
+    _listChanged();
+  }
 }
 
 /// Wrapper for a list that prevents any modification of the list's content.
@@ -1505,3 +1514,24 @@ bool isPrimativeInstanceKind(String? kind) {
 /// Returns the file name from a URI or path string, by splitting the [uri] at
 /// the directory separators '/', and returning the last element.
 String? fileNameFromUri(String? uri) => uri?.split('/').last;
+
+/// Calculates subtraction of two maps.
+///
+/// Result map keys is union of the imput maps' keys.
+Map<K, R> subtractMaps<K, F, S, R>({
+  required Map<K, S>? substract,
+  required Map<K, F>? from,
+  required R? Function({required S? subtract, required F? from}) subtractor,
+}) {
+  from ??= <K, F>{};
+  substract ??= <K, S>{};
+
+  final result = <K, R>{};
+  final unionOfKeys = from.keys.toSet().union(substract.keys.toSet());
+
+  for (var key in unionOfKeys) {
+    final diff = subtractor(from: from[key], subtract: substract[key]);
+    if (diff != null) result[key] = diff;
+  }
+  return result;
+}

@@ -10,53 +10,45 @@ import '../../../../../shared/table/table_data.dart';
 import '../../../../../shared/utils.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/primitives.dart';
-import '../controller/diff_pane_controller.dart';
-import '../controller/item_controller.dart';
 
-class _ClassNameColumn extends ColumnData<HeapClassStatistics> {
+class _ClassNameColumn extends ColumnData<SingleClassStats> {
   _ClassNameColumn()
       : super(
           'Class',
           titleTooltip: 'Class name',
-          fixedWidthPx: scaleByFontFactor(100.0),
+          fixedWidthPx: scaleByFontFactor(180.0),
           alignment: ColumnAlignment.left,
         );
 
   @override
-  String? getValue(HeapClassStatistics classStats) =>
+  String? getValue(SingleClassStats classStats) =>
       classStats.heapClass.className;
 
   @override
   bool get supportsSorting => true;
 
   @override
-  String getTooltip(HeapClassStatistics classStats) =>
+  String getTooltip(SingleClassStats classStats) =>
       classStats.heapClass.fullName;
 }
 
-class _InstanceColumn extends ColumnData<HeapClassStatistics> {
+class _InstanceColumn extends ColumnData<SingleClassStats> {
   _InstanceColumn()
       : super(
           'Non GC-able\nInstances',
-          titleTooltip: 'Number of instances of the class\n'
-              'that have a retaining path from the root\n'
-              'and therefore can’t be garbage collected.',
-          fixedWidthPx: scaleByFontFactor(110.0),
+          titleTooltip: nonGcableInstancesColumnTooltip,
+          fixedWidthPx: scaleByFontFactor(180.0),
           alignment: ColumnAlignment.right,
         );
 
   @override
-  int getValue(HeapClassStatistics classStats) =>
-      classStats.total.instanceCount;
-
-  @override
-  bool get supportsSorting => true;
+  int getValue(SingleClassStats classStats) => classStats.objects.instanceCount;
 
   @override
   bool get numeric => true;
 }
 
-class _ShallowSizeColumn extends ColumnData<HeapClassStatistics> {
+class _ShallowSizeColumn extends ColumnData<SingleClassStats> {
   _ShallowSizeColumn()
       : super(
           'Shallow\nDart Size',
@@ -66,23 +58,20 @@ class _ShallowSizeColumn extends ColumnData<HeapClassStatistics> {
         );
 
   @override
-  int getValue(HeapClassStatistics classStats) => classStats.total.shallowSize;
-
-  @override
-  bool get supportsSorting => true;
+  int getValue(SingleClassStats classStats) => classStats.objects.shallowSize;
 
   @override
   bool get numeric => true;
 
   @override
-  String getDisplayValue(HeapClassStatistics classStats) => prettyPrintBytes(
+  String getDisplayValue(SingleClassStats classStats) => prettyPrintBytes(
         getValue(classStats),
         includeUnit: true,
         kbFractionDigits: 1,
       )!;
 }
 
-class _RetainedSizeColumn extends ColumnData<HeapClassStatistics> {
+class _RetainedSizeColumn extends ColumnData<SingleClassStats> {
   _RetainedSizeColumn()
       : super(
           'Retained\nDart Size',
@@ -92,39 +81,33 @@ class _RetainedSizeColumn extends ColumnData<HeapClassStatistics> {
         );
 
   @override
-  int getValue(HeapClassStatistics classStats) => classStats.total.retainedSize;
-
-  @override
-  bool get supportsSorting => true;
+  int getValue(SingleClassStats classStats) => classStats.objects.retainedSize;
 
   @override
   bool get numeric => true;
 
   @override
-  String getDisplayValue(HeapClassStatistics classStats) => prettyPrintBytes(
+  String getDisplayValue(SingleClassStats classStats) => prettyPrintBytes(
         getValue(classStats),
         includeUnit: true,
         kbFractionDigits: 1,
       )!;
 }
 
-class SnapshotStatsTable extends StatelessWidget {
-  const SnapshotStatsTable({
+class ClassesTableSingle extends StatelessWidget {
+  const ClassesTableSingle({
     Key? key,
-    required this.item,
-    required this.dataId,
-    required this.controller,
+    required this.classes,
+    required this.selection,
   }) : super(key: key);
 
-  final SnapshotListItem item;
+  final SingleHeapClasses classes;
+  final ValueNotifier<SingleClassStats?> selection;
 
-  final int dataId;
-
-  final DiffPaneController controller;
-
-  static final _shallowSizeColumn = _ShallowSizeColumn();
-
-  static final List<ColumnData<HeapClassStatistics>> _columns = [
+  static final ColumnData<SingleClassStats> _shallowSizeColumn =
+      _ShallowSizeColumn();
+  static late final List<ColumnData<SingleClassStats>> _columns =
+      <ColumnData<SingleClassStats>>[
     _ClassNameColumn(),
     _InstanceColumn(),
     _shallowSizeColumn,
@@ -133,15 +116,12 @@ class SnapshotStatsTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final data = item.statsToShow.classStats;
-    return FlatTable<HeapClassStatistics>(
-      keyFactory: (e) => Key(e.heapClass.fullName),
-      data: data,
-      dataKey: 'snapshot-stats-$dataId',
+    return FlatTable<SingleClassStats>(
       columns: _columns,
-      selectionNotifier: item.selectedClassStats,
-      onItemSelected: (classStats) =>
-          controller.selectedClassName.value = classStats?.heapClass.fullName,
+      data: classes.classes,
+      dataKey: 'ClassesTableSingle',
+      keyFactory: (e) => Key(e.heapClass.fullName),
+      selectionNotifier: selection,
       defaultSortColumn: _shallowSizeColumn,
       defaultSortDirection: SortDirection.descending,
     );

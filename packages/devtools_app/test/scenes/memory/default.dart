@@ -45,7 +45,10 @@ class MemoryDefaultScene extends Scene {
     setGlobal(OfflineModeController, OfflineModeController());
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(NotificationService, NotificationService());
-    setGlobal(PreferencesController, PreferencesController());
+    setGlobal(
+      PreferencesController,
+      PreferencesController()..memory.showChart.value = false,
+    );
 
     // Load canned data testHeapSampleData.
     final memoryJson =
@@ -115,32 +118,30 @@ final _simpleHeapTests = <AdaptedHeapData>[
   _createHeap({'B': 1, 'C': 2, 'D': 3}),
 ];
 
-AdaptedHeapData _createHeap(Map<String, int> classToInstance) {
+AdaptedHeapData _createHeap(Map<String, int> classToInstanceCount) {
   const rootIndex = 0;
   final objects = <AdaptedHeapObject>[_createObject('root')];
   var leafCount = 0;
 
   // Create objects.
-  for (var entry in classToInstance.entries) {
+  for (var entry in classToInstanceCount.entries) {
     for (var _ in Iterable.generate(entry.value)) {
       objects.add(_createObject(entry.key));
       leafCount++;
+      final objectIndex = leafCount;
+      objects[rootIndex].references.add(objectIndex);
     }
-  }
-
-  // Reference each object from root, so that it is visible in the
-  // snapshot view.
-  for (var i in Iterable.generate(leafCount)) {
-    objects[rootIndex].references.add(i + 1);
   }
 
   return AdaptedHeapData(objects, rootIndex: rootIndex);
 }
 
+var _nextCode = 1;
+
 AdaptedHeapObject _createObject(String className) => AdaptedHeapObject(
-      code: 0,
+      code: _nextCode++,
       references: [],
-      heapClass: HeapClass(
+      heapClass: HeapClassName(
         className: className,
         library: 'my_lib',
       ),

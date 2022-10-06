@@ -364,9 +364,8 @@ class _ExportAllocationProfileButton extends StatelessWidget {
     return ValueListenableBuilder<AdaptedAllocationProfile?>(
       valueListenable: allocationProfileController.currentAllocationProfile,
       builder: (context, currentAllocationProfile, _) {
-        return IconLabelButton(
-          label: 'CSV',
-          icon: Icons.file_download,
+        return ToCsvButton(
+          minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
           tooltip: 'Download allocation profile data in CSV format',
           onPressed: currentAllocationProfile == null
               ? null
@@ -375,7 +374,6 @@ class _ExportAllocationProfileButton extends StatelessWidget {
                       .downloadMemoryTableCsv(currentAllocationProfile);
                   notificationService.push(successfulExportMessage(file));
                 },
-          minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
         );
       },
     );

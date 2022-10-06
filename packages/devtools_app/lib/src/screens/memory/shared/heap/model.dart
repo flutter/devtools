@@ -124,23 +124,23 @@ class ClassOnlyHeapPath {
   ClassOnlyHeapPath(HeapPath heapPath)
       : classes =
             heapPath.objects.map((o) => o.heapClass).toList(growable: false);
-  final List<HeapClass> classes;
+  final List<HeapClassName> classes;
 
   String asShortString() => classes.map((e) => e.className).join('/');
 
-  String asMultiLineString() => classes.map((e) => e.fullName).join('\n');
+  String asLongString({String delimiter = '\n'}) =>
+      classes.map((e) => e.fullName).join(delimiter);
 
   @override
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is ClassOnlyHeapPath &&
-        other.asMultiLineString() == asMultiLineString();
+    return other is ClassOnlyHeapPath && other.asLongString() == asLongString();
   }
 
   @override
-  int get hashCode => asMultiLineString().hashCode;
+  int get hashCode => asLongString().hashCode;
 }
 
 /// Contains information from [HeapSnapshotObject] needed for
@@ -157,7 +157,7 @@ class AdaptedHeapObject {
     return AdaptedHeapObject(
       code: object.identityHashCode,
       references: List.from(object.references),
-      heapClass: HeapClass.fromHeapSnapshotClass(object.klass),
+      heapClass: HeapClassName.fromHeapSnapshotClass(object.klass),
       shallowSize: object.shallowSize,
     );
   }
@@ -166,7 +166,7 @@ class AdaptedHeapObject {
       AdaptedHeapObject(
         code: json[_JsonFields.code],
         references: (json[_JsonFields.references] as List<dynamic>).cast<int>(),
-        heapClass: HeapClass(
+        heapClass: HeapClassName(
           className: json[_JsonFields.klass],
           library: json[_JsonFields.library],
         ),
@@ -174,7 +174,7 @@ class AdaptedHeapObject {
       );
 
   final List<int> references;
-  final HeapClass heapClass;
+  final HeapClassName heapClass;
   final IdentityHashCode code;
   final int shallowSize;
 
@@ -214,8 +214,8 @@ class SnapshotTaker {
 }
 
 @immutable
-class HeapClass {
-  const HeapClass({required this.className, required this.library});
+class HeapClassName {
+  const HeapClassName({required this.className, required this.library});
 
   HeapClass.fromClassRef(ClassRef? classRef)
       : library = _library(classRef?.library?.name, classRef?.library?.uri),
@@ -263,4 +263,29 @@ class HeapClass {
     assert(false, 'Unexpected library for $className: $library.');
     return false;
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is HeapClassName && other.fullName == fullName;
+  }
+
+  @override
+  int get hashCode => fullName.hashCode;
+}
+
+/// Mark the object as deeply immutable.
+///
+/// There is no strong protection from mutation, just some asserts.
+mixin Sealable {
+  /// See doc for the mixin [Sealable].
+  void seal() {
+    _isSealed = true;
+  }
+
+  /// See doc for the mixin [Sealable].
+  bool get isSealed => _isSealed;
+  bool _isSealed = false;
 }
