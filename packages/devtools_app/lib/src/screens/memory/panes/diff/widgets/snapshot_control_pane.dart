@@ -24,12 +24,12 @@ class SnapshotControlPane extends StatelessWidget {
       builder: (_, isProcessing, __) {
         final current = controller.core.selectedItem as SnapshotInstanceItem;
 
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: defaultSpacing),
-              child: Row(
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
                 children: [
                   if (!isProcessing && current.heap != null) ...[
                     _DiffDropdown(
@@ -45,18 +45,19 @@ class SnapshotControlPane extends StatelessWidget {
                     ToCsvButton(
                       minScreenWidthForTextBeforeScaling:
                           primaryControlsMinVerboseWidth,
-                      onPressed: controller.downloadCurrentItemToCsv,
+                      onPressed: current.downloadToCsv,
                     ),
                   ],
                 ],
               ),
-            ),
-            ToolbarAction(
-              icon: Icons.clear,
-              tooltip: 'Delete snapshot',
-              onPressed: isProcessing ? null : controller.deleteCurrentSnapshot,
-            ),
-          ],
+              ToolbarAction(
+                icon: Icons.clear,
+                tooltip: 'Delete snapshot',
+                onPressed:
+                    isProcessing ? null : controller.deleteCurrentSnapshot,
+              ),
+            ],
+          ),
         );
       },
     );
