@@ -49,13 +49,19 @@ class LatestFlutterCandidateCommand extends Command {
         },
       );
 
+      print('HERE - 1');
+
       final List<Map<String, dynamic>> branches =
           (jsonDecode((await http.get(uri)).body) as List)
               .cast<Map<String, dynamic>>();
 
+      print('HERE - 2');
+
       final branchNames =
           branches.map((branch) => branch['name']).cast<String>();
       allBranchNames.addAll(branchNames);
+
+      print('HERE - 3');
 
       final candidateBranchesNames =
           branchNames.where((name) => name.contains('candidate'));
