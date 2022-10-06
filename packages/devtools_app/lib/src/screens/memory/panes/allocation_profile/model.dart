@@ -28,7 +28,11 @@ class AdaptedAllocationProfile {
 
 class AllocationProfileRecord with PinnableListEntry {
   AllocationProfileRecord.fromClassHeapStats(ClassHeapStats stats)
-      : isTotal = false,
+      : assert(
+          stats.bytesCurrent! == stats.newSpace.size + stats.oldSpace.size,
+          '${stats.bytesCurrent}, ${stats.newSpace.size}, ${stats.oldSpace.size}',
+        ),
+        isTotal = false,
         heapClass = HeapClass.fromClassRef(stats.classRef),
         totalInstances = stats.instancesCurrent ?? 0,
         totalSize = stats.bytesCurrent! +
