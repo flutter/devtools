@@ -4,6 +4,7 @@
 
 import 'package:vm_service/vm_service.dart';
 
+import '../../../../shared/table/table_data.dart';
 import '../../../vm_developer/vm_service_private_extensions.dart';
 import '../../shared/heap/model.dart';
 
@@ -25,7 +26,7 @@ class AdaptedAllocationProfile {
   late final List<AllocationProfileRecord> records;
 }
 
-class AllocationProfileRecord {
+class AllocationProfileRecord with PinnableListEntry {
   AllocationProfileRecord.fromClassHeapStats(ClassHeapStats stats)
       : isTotal = false,
         heapClass = HeapClass.fromClassRef(stats.classRef),
@@ -84,6 +85,9 @@ class AllocationProfileRecord {
   final int? oldSpaceSize;
   final int? oldSpaceDartHeapSize;
   final int? oldSpaceExternalSize;
+
+  @override
+  bool get pinToTop => isTotal;
 
   void _verifyIntegrity() {
     assert(() {

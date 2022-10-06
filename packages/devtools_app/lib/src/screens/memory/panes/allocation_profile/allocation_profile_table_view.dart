@@ -11,6 +11,7 @@ import '../../../../primitives/utils.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/table/table.dart';
+import '../../../../shared/table/table_controller.dart';
 import '../../../../shared/table/table_data.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
@@ -308,6 +309,7 @@ class _AllocationProfileTable extends StatelessWidget {
                     defaultSortColumn:
                         _AllocationProfileTable._initialSortColumn,
                     defaultSortDirection: SortDirection.descending,
+                    pinBehavior: FlatTablePinBehavior.pinOriginalToTop,
                   );
                 },
               ),
