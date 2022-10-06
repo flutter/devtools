@@ -133,8 +133,8 @@ class ObjectSetDiff {
 
     final allCodes = codesBefore.union(codesAfter);
     for (var code in allCodes) {
-      final bool inBefore = codesBefore.contains(code);
-      final bool inAfter = codesAfter.contains(code);
+      final inBefore = codesBefore.contains(code);
+      final inAfter = codesAfter.contains(code);
       if (inBefore && inAfter) continue;
 
       final object = before.objectsByCodes[code] ?? after.objectsByCodes[code]!;

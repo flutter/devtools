@@ -27,4 +27,4 @@ Podfile.lock
 **/build/
 packages/devtools_test/lib/src/mocks/generated.mocks.dart
 **/*.stager_app.dart
-**/failures/
+test/**/failures/
