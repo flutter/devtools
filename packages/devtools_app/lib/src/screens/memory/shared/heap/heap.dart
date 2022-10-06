@@ -10,123 +10,111 @@ class AdaptedHeap {
 
   final AdaptedHeapData data;
 
-  late final HeapStatistics stats = _heapStatistics(data);
+  late final SingleHeapClasses classes = _heapStatistics(data);
 
-  static HeapStatistics _heapStatistics(AdaptedHeapData data) {
-    final result = <String, HeapClassStatistics>{};
+  static SingleHeapClasses _heapStatistics(AdaptedHeapData data) {
+    final result = <HeapClassName, SingleClassStats>{};
     if (!data.isSpanningTreeBuilt) buildSpanningTree(data);
 
     for (var i in Iterable.generate(data.objects.length)) {
       final object = data.objects[i];
-      final heapClass = object.heapClass;
+      final className = object.heapClass;
 
       // We do not show objects that will be garbage collected soon or are
       // native.
-      if (object.retainedSize == null || heapClass.isSentinel) continue;
+      if (object.retainedSize == null || className.isSentinel) continue;
 
-      final fullName = heapClass.fullName;
-
-      final stats =
-          result.putIfAbsent(fullName, () => HeapClassStatistics(heapClass));
-      stats.countInstance(data, i);
+      final singleHeapClass =
+          result.putIfAbsent(className, () => SingleClassStats(className));
+      singleHeapClass.countInstance(data, i);
     }
 
-    return HeapStatistics(result)..seal();
+    return SingleHeapClasses(result)..seal();
   }
 }
 
-class HeapStatistics {
-  HeapStatistics(this.statsByClassName);
+abstract class HeapClasses with Sealable {}
 
-  /// Maps full class name to statistics of this class.
-  final Map<String, HeapClassStatistics> statsByClassName;
-  late final List<HeapClassStatistics> classStats =
-      statsByClassName.values.toList(growable: false);
+/// Set of heap class statistical information for single heap (not comparision between two heaps).
+class SingleHeapClasses extends HeapClasses {
+  SingleHeapClasses(this.classesByName);
 
-  /// Mark the object as deeply immutable.
-  ///
-  /// There is no strong protection from mutation, just some asserts.
+  /// Maps full class name to class.
+  final Map<HeapClassName, SingleClassStats> classesByName;
+  late final List<SingleClassStats> classes =
+      classesByName.values.toList(growable: false);
+
+  @override
   void seal() {
-    for (var stats in classStats) {
+    super.seal();
+    for (var stats in classes) {
       stats.seal();
     }
   }
 }
 
-class HeapClassStatistics {
-  HeapClassStatistics(this.heapClass)
-      : _isSealed = false,
-        total = SizeOfClassSet(),
-        sizeByRetainingPath = <ClassOnlyHeapPath, SizeOfClassSet>{};
+typedef StatsByPath = Map<ClassOnlyHeapPath, ObjectSetStats>;
+typedef StatsByPathEntry = MapEntry<ClassOnlyHeapPath, ObjectSetStats>;
 
-  HeapClassStatistics.negative(HeapClassStatistics other)
-      : _isSealed = true,
-        heapClass = other.heapClass,
-        total = SizeOfClassSet.negative(other.total),
-        sizeByRetainingPath = other.sizeByRetainingPath
-            .map((key, value) => MapEntry(key, SizeOfClassSet.negative(value)));
+abstract class ClassStats with Sealable {
+  ClassStats(this.statsByPath);
 
-  HeapClassStatistics.subtract(
-    HeapClassStatistics left,
-    HeapClassStatistics right,
-  )   : assert(left.heapClass.fullName == right.heapClass.fullName),
-        _isSealed = true,
-        heapClass = left.heapClass,
-        total = SizeOfClassSet.subtract(left.total, right.total),
-        // ignore: dead_code
-        sizeByRetainingPath = throw UnimplementedError();
+  final StatsByPath statsByPath;
+  late final List<StatsByPathEntry> statsByPathEntries = _getEntries();
+  List<StatsByPathEntry> _getEntries() {
+    assert(isSealed);
+    return statsByPath.entries.toList(growable: false);
+  }
+}
 
-  final HeapClass heapClass;
-  final SizeOfClassSet total;
-  final Map<ClassOnlyHeapPath, SizeOfClassSet> sizeByRetainingPath;
+/// Statistics for a class about a single heap.
+class SingleClassStats extends ClassStats {
+  SingleClassStats(this.heapClass)
+      : objects = ObjectSet(),
+        super(<ClassOnlyHeapPath, ObjectSetStats>{});
+
+  final HeapClassName heapClass;
+  final ObjectSet objects;
+
+  late final entries = statsByPath.entries.toList(growable: false);
 
   void countInstance(AdaptedHeapData data, int objectIndex) {
-    assert(!_isSealed);
+    assert(!isSealed);
     final object = data.objects[objectIndex];
     assert(object.heapClass.fullName == heapClass.fullName);
-    total.countInstance(object);
+    objects.countInstance(object);
 
     final path = data.retainingPath(objectIndex);
     if (path == null) return;
-    final sizeForPath = sizeByRetainingPath.putIfAbsent(
+    final objectsForPath = statsByPath.putIfAbsent(
       ClassOnlyHeapPath(path),
-      () => SizeOfClassSet(),
+      () => ObjectSet(),
     );
-    sizeForPath.countInstance(object);
+    objectsForPath.countInstance(object);
   }
 
-  bool get isZero => total.isZero;
-
-  /// Mark the object as deeply immutable.
-  ///
-  /// There is no strong protection from mutation, just some asserts.
-  void seal() {
-    _isSealed = true;
-    total.seal();
-    for (var size in sizeByRetainingPath.values) {
-      size.seal();
-    }
-  }
-
-  /// See doc for the method [seal].
-  bool _isSealed;
+  bool get isZero => objects.isZero;
 }
 
-/// Size of set of instances.
-class SizeOfClassSet {
-  SizeOfClassSet() : _isSealed = false;
+/// Statistical size-information about objects.
+class ObjectSetStats with Sealable {
+  static ObjectSetStats? subtract({
+    required ObjectSetStats? subtract,
+    required ObjectSetStats? from,
+  }) {
+    from ??= _empty;
+    subtract ??= _empty;
 
-  SizeOfClassSet.negative(SizeOfClassSet other)
-      : _isSealed = true,
-        instanceCount = -other.instanceCount,
-        shallowSize = -other.shallowSize,
-        retainedSize = -other.retainedSize;
+    final result = ObjectSetStats()
+      ..instanceCount = from.instanceCount - subtract.instanceCount
+      ..shallowSize = from.shallowSize - subtract.shallowSize
+      ..retainedSize = from.retainedSize - subtract.retainedSize;
 
-  SizeOfClassSet.subtract(SizeOfClassSet left, SizeOfClassSet right)
-      : _isSealed = true,
-        instanceCount = left.instanceCount - right.instanceCount,
-        shallowSize = left.shallowSize - right.shallowSize,
-        retainedSize = left.retainedSize - right.retainedSize;
+    if (result.isZero) return null;
+    return result;
+  }
+
+  static final _empty = ObjectSetStats()..seal();
 
   int instanceCount = 0;
   int shallowSize = 0;
@@ -136,17 +124,38 @@ class SizeOfClassSet {
       shallowSize == 0 && retainedSize == 0 && instanceCount == 0;
 
   void countInstance(AdaptedHeapObject object) {
-    assert(!_isSealed);
+    assert(!isSealed);
     retainedSize += object.retainedSize!;
     shallowSize += object.shallowSize;
     instanceCount++;
   }
 
-  /// Mark the object as deeply immutable.
-  ///
-  /// There is no strong protection from mutation, just some asserts.
-  void seal() => _isSealed = true;
+  void uncountInstance(AdaptedHeapObject object) {
+    assert(!isSealed);
+    retainedSize -= object.retainedSize!;
+    shallowSize -= object.shallowSize;
+    instanceCount--;
+  }
+}
 
-  /// See doc for the method [seal].
-  bool _isSealed;
+/// Statistical and detailed size-information about objects.
+class ObjectSet extends ObjectSetStats {
+  static ObjectSet empty = ObjectSet()..seal();
+
+  final objectsByCodes = <IdentityHashCode, AdaptedHeapObject>{};
+
+  @override
+  bool get isZero => objectsByCodes.isEmpty;
+
+  @override
+  void countInstance(AdaptedHeapObject object) {
+    if (objectsByCodes.containsKey(object.code)) return;
+    super.countInstance(object);
+    objectsByCodes[object.code] = object;
+  }
+
+  @override
+  void uncountInstance(AdaptedHeapObject object) {
+    throw AssertionError('uncountInstance is not valid for $ObjectSet');
+  }
 }
