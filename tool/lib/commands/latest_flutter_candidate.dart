@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:args/command_runner.dart';
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:http/http.dart' as http;
 
 /// Outputs the latest flutter candidate branch name.
