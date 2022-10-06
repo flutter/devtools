@@ -50,7 +50,7 @@ for getting setup to run the Flutter website locally.
 - In `release_notes.dart` flip the `debugTestReleaseNotes` flag to true. 
 
 - from the main `devtools/` directory, run the following:
-    ```dart
+    ```shell
     dart ./tool/build_e2e.dart
     ```
 

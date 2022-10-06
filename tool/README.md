@@ -29,7 +29,7 @@ cd ~/path/to/devtools
 ```shell
 git checkout master && \
 git pull upstream master && \
-git checkout -b release_2.7.0;
+git checkout -b release_$(date +%s);
 ```
 
 #### Update the DevTools version number
@@ -135,16 +135,10 @@ From the git GUI tool or from github.com directly:
    ```
 
 ### Upload the DevTools binary to CIPD
-- `TARGET_COMMIT_HASH` should be the commit hash you want to release DevTools from
-   - this should match the
-commit hash for the tag you just created
-   - and the [update.sh](https://github.com/dart-lang/sdk/blob/master/third_party/devtools/update.sh)
-script,
+- Use the update.sh script to build and upload the DevTools binary to CIPD:
    ```shell
-   TARGET_COMMIT_HASH=<Commit hash for the version bump commit>
+   TARGET_COMMIT_HASH=<Commit hash for the version bump commit in DevTools>
    ```
-
-- build and upload the DevTools binary to CIPD.
 
    ```shell
    cd $LOCAL_DART_SDK && \
@@ -174,20 +168,23 @@ script,
    ```
 
 - Verify that running `dart devtools` launches the version of DevTools you just released. 
-   - For non-OSX
-      ```shell
-      out/ReleaseX64/dart-sdk/bin/dart devtools
-      ```
    - for OSX
       ```shell
       xcodebuild/ReleaseX64/dart-sdk/bin/dart devtools
       ```
+   - For non-OSX
+      ```shell
+      out/ReleaseX64/dart-sdk/bin/dart devtools
+      ```
 
 - If the version of DevTools you just published to CIPD loads properly
+  
+   > You may need to hard reload and clear your browser cache in order to see the changes.
+
    - push up the SDK CL for review.
       ```shell
       git add . && \
-      git commit -m "Bump DevTools DEP to 2.16.0" && \
+      git commit -m "Bump DevTools DEP to $NEW_DEVTOOLS_VERSION" && \
       git cl upload -s;
       ```
 
