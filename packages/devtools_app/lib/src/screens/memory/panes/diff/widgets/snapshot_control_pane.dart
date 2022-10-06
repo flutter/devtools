@@ -25,7 +25,7 @@ class SnapshotControlPane extends StatelessWidget {
         final current = controller.core.selectedItem as SnapshotInstanceItem;
 
         return Padding(
-          padding: const EdgeInsets.only(left: defaultSpacing),
+          padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
