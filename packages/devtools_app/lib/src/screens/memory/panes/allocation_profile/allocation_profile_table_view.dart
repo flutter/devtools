@@ -174,7 +174,8 @@ class _FieldSizeColumn extends ColumnData<AllocationProfileRecord> {
         getValue(dataObject),
         includeUnit: true,
         kbFractionDigits: 1,
-      )!;
+      ) ??
+      '';
 
   @override
   String getTooltip(AllocationProfileRecord dataObject) =>

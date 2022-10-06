@@ -27,6 +27,7 @@ import '../../test_data/memory_allocation.dart';
 /// flutter run -t test/scenes/memory/default.stager_app.dart -d macos
 class MemoryDefaultScene extends Scene {
   late MemoryController controller;
+  late FakeServiceManager fakeServiceManager;
 
   @override
   Widget build() {
@@ -52,7 +53,7 @@ class MemoryDefaultScene extends Scene {
     final allocationJson =
         AllocationMemoryJson.decode(argJsonString: testAllocationData);
 
-    final fakeServiceManager = FakeServiceManager(
+    fakeServiceManager = FakeServiceManager(
       service: FakeServiceManager.createFakeService(
         memoryData: memoryJson,
         allocationData: allocationJson,

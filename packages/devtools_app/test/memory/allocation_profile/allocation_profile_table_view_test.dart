@@ -2,60 +2,32 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/screens/memory/memory_controller.dart';
 import 'package:devtools_app/src/screens/memory/memory_heap_tree_view.dart';
 import 'package:devtools_app/src/screens/memory/memory_screen.dart';
 import 'package:devtools_app/src/screens/memory/panes/allocation_profile/allocation_profile_table_view_controller.dart';
-import 'package:devtools_app/src/screens/vm_developer/vm_service_private_extensions.dart';
-import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/screens/memory/panes/allocation_profile/model.dart';
 import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/notifications.dart';
-import 'package:devtools_app/src/shared/preferences.dart';
 import 'package:devtools_app/src/shared/table/table.dart';
-import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:vm_service/vm_service.dart';
 
-import '../../test_data/memory_allocation.dart';
+import '../../scenes/memory/default.dart';
 
 void main() {
-  late MemoryController controller;
-  late FakeServiceManager fakeServiceManager;
+  late MemoryDefaultScene scene;
 
-  void _setUpServiceManagerForMemory() {
-    // Load canned data testHeapSampleData.
-    final allocationJson =
-        AllocationMemoryJson.decode(argJsonString: testAllocationData);
-
-    fakeServiceManager = FakeServiceManager(
-      service: FakeServiceManager.createFakeService(
-        allocationData: allocationJson,
-      ),
-    );
-    mockConnectedApp(
-      fakeServiceManager.connectedApp!,
-      isFlutterApp: true,
-      isProfileBuild: false,
-      isWebApp: false,
-    );
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
-  }
+  setUp(() async {
+    scene = MemoryDefaultScene();
+    await scene.setUp();
+  });
 
   Future<void> pumpMemoryScreen(
     WidgetTester tester, {
     MemoryController? memoryController,
   }) async {
-    await tester.pumpWidget(
-      wrapWithControllers(
-        const MemoryBody(),
-        memory: controller = memoryController ?? MemoryController(),
-      ),
-    );
-
+    await tester.pumpWidget(scene.build());
     // Delay to ensure the memory profiler has collected data.
     await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(find.byType(MemoryBody), findsOneWidget);
@@ -63,15 +35,15 @@ void main() {
 
   // Set a wide enough screen width that we do not run into overflow.
   const windowSize = Size(2225.0, 1000.0);
-  setGlobal(NotificationService, NotificationService());
+  //setGlobal(NotificationService, NotificationService());
 
   group('Allocation Profile Table', () {
-    setUp(() async {
-      setGlobal(OfflineModeController, OfflineModeController());
-      setGlobal(IdeTheme, IdeTheme());
-      setGlobal(PreferencesController, PreferencesController());
-      _setUpServiceManagerForMemory();
-    });
+    // setUp(() async {
+    //   setGlobal(OfflineModeController, OfflineModeController());
+    //   setGlobal(IdeTheme, IdeTheme());
+    //   setGlobal(PreferencesController, PreferencesController());
+    //   _setUpServiceManagerForMemory();
+    // });
 
     Future<void> navigateToAllocationProfile(
       WidgetTester tester,
@@ -92,7 +64,7 @@ void main() {
       await pumpMemoryScreen(tester);
 
       final allocationProfileController =
-          controller.allocationProfileController;
+          scene.controller.allocationProfileController;
 
       preferences.toggleVmDeveloperMode(false);
       await navigateToAllocationProfile(tester, allocationProfileController);
@@ -104,7 +76,6 @@ void main() {
       expect(find.text('Total Size'), findsOneWidget);
       expect(find.text('Dart Heap'), findsOneWidget);
       expect(find.text('External'), findsOneWidget);
-      expect(find.text('Total'), findsOneWidget);
       expect(find.text('Old Space'), findsNothing);
       expect(find.text('New Space'), findsNothing);
 
@@ -128,7 +99,7 @@ void main() {
       await pumpMemoryScreen(tester);
 
       final allocationProfileController =
-          controller.allocationProfileController;
+          scene.controller.allocationProfileController;
       await navigateToAllocationProfile(tester, allocationProfileController);
 
       // We'll clear it for now so we can tell when it's refreshed.
@@ -155,7 +126,7 @@ void main() {
       await pumpMemoryScreen(tester);
 
       final allocationProfileController =
-          controller.allocationProfileController;
+          scene.controller.allocationProfileController;
 
       await navigateToAllocationProfile(tester, allocationProfileController);
 
@@ -164,7 +135,8 @@ void main() {
       await tester.pump();
 
       // Emit a GC event and confirm we don't perform a refresh.
-      final fakeService = fakeServiceManager.service as FakeVmServiceWrapper;
+      final fakeService =
+          scene.fakeServiceManager.service as FakeVmServiceWrapper;
       fakeService.emitGCEvent();
       expect(
         allocationProfileController.currentAllocationProfile.value,
@@ -193,35 +165,36 @@ void main() {
         (WidgetTester tester) async {
       await pumpMemoryScreen(tester);
 
-      final table = find.byType(FlatTable<ClassHeapStats?>);
+      final table = find.byType(FlatTable<AllocationProfileRecord>);
       expect(table, findsOneWidget);
 
       final cls = find.text('Class');
       final instances = find.text('Instances');
       final size = find.text('Total Size');
-      final internal = find.text('Dart Heap');
-      final external = find.text('External');
+      final dartHeap = find.text('Dart Heap');
+      final external_ = find.text('External');
 
       final columns = <Finder>[
         cls,
         instances,
         size,
-        internal,
-        external,
+        dartHeap,
+        external_,
       ];
 
       for (final columnFinder in columns) {
         expect(columnFinder, findsOneWidget);
       }
 
-      final state = tester.state<FlatTableState<ClassHeapStats?>>(table.first);
+      final state =
+          tester.state<FlatTableState<AllocationProfileRecord>>(table.first);
       var data = state.tableController.tableData.value.data;
 
       // Initial state should be sorted by size, largest to smallest.
-      int lastValue = data.first!.bytesCurrent!;
+      int lastValue = data.first.totalDartHeapSize;
       for (final element in data) {
-        expect(element!.bytesCurrent! <= lastValue, isTrue);
-        lastValue = element.bytesCurrent!;
+        expect(element.totalDartHeapSize <= lastValue, isTrue);
+        lastValue = element.totalDartHeapSize;
       }
 
       // Sort by size, smallest to largest.
@@ -230,10 +203,10 @@ void main() {
 
       data = state.tableController.tableData.value.data;
 
-      lastValue = data.first!.bytesCurrent!;
+      lastValue = data.first.totalDartHeapSize;
       for (final element in data) {
-        expect(element!.bytesCurrent! >= lastValue, isTrue);
-        lastValue = element.bytesCurrent!;
+        expect(element.totalDartHeapSize >= lastValue, isTrue);
+        lastValue = element.totalDartHeapSize;
       }
 
       // Sort by class name, alphabetically
@@ -242,9 +215,9 @@ void main() {
 
       data = state.tableController.tableData.value.data;
 
-      String lastClassName = data.first!.classRef!.name!;
+      String lastClassName = data.first.heapClass.className;
       for (final element in data) {
-        final name = element!.classRef!.name!;
+        final name = element.heapClass.className;
         expect(name.compareTo(lastClassName) >= 0, isTrue);
         lastClassName = name;
       }
@@ -255,9 +228,9 @@ void main() {
 
       data = state.tableController.tableData.value.data;
 
-      lastClassName = data.first!.classRef!.name!;
+      lastClassName = data.first.heapClass.className;
       for (final element in data) {
-        final name = element!.classRef!.name!;
+        final name = element.heapClass.className;
         expect(name.compareTo(lastClassName) <= 0, isTrue);
         lastClassName = name;
       }
@@ -268,10 +241,11 @@ void main() {
 
       data = state.tableController.tableData.value.data;
 
-      lastValue = data.first!.instancesCurrent!;
+      lastValue = data.first.totalInstances!;
       for (final element in data) {
-        expect(element!.instancesCurrent! <= lastValue, isTrue);
-        lastValue = element.instancesCurrent!;
+        if (element.isTotal) continue;
+        expect(element.totalInstances! <= lastValue, isTrue);
+        lastValue = element.totalInstances!;
       }
 
       // Sort by instance count, smallest to largest.
@@ -280,49 +254,47 @@ void main() {
 
       data = state.tableController.tableData.value.data;
 
-      lastValue = data.first!.instancesCurrent!;
+      lastValue = data.first.totalInstances!;
       for (final element in data) {
-        expect(element!.instancesCurrent! >= lastValue, isTrue);
-        lastValue = element.instancesCurrent!;
+        expect(element.totalInstances! >= lastValue, isTrue);
+        lastValue = element.totalInstances!;
       }
 
-      // Sort by internal size, largest to smallest.
-      await tester.tap(internal);
+      // Sort by dart heap size, largest to smallest.
+      await tester.tap(dartHeap);
       await tester.pumpAndSettle();
 
       data = state.tableController.tableData.value.data;
 
-      lastValue = data.first!.newSpace.size + data.first!.oldSpace.size;
+      lastValue = data.first.totalDartHeapSize;
       for (final element in data) {
-        final internalSize = element!.newSpace.size + element.oldSpace.size;
+        final internalSize = element.totalDartHeapSize;
         expect(internalSize <= lastValue, isTrue);
         lastValue = internalSize;
       }
 
-      // Sort by internal size, smallest to largest.
-      await tester.tap(instances);
+      // Sort by dart heap size, smallest to largest.
+      await tester.tap(dartHeap);
       await tester.pumpAndSettle();
 
       data = state.tableController.tableData.value.data;
 
-      lastValue = data.first!.newSpace.size + data.first!.oldSpace.size;
+      lastValue = data.first.totalDartHeapSize;
       for (final element in data) {
-        final internalSize = element!.newSpace.size + element.oldSpace.size;
+        final internalSize = element.totalDartHeapSize;
         expect(internalSize >= lastValue, isTrue);
         lastValue = internalSize;
       }
 
       // Sort by external size, largest to smallest.
-      await tester.tap(internal);
+      await tester.tap(external_);
       await tester.pumpAndSettle();
 
       data = state.tableController.tableData.value.data;
 
-      lastValue =
-          data.first!.newSpace.externalSize + data.first!.oldSpace.externalSize;
+      lastValue = data.first.totalExternalSize;
       for (final element in data) {
-        final externalSize =
-            element!.newSpace.externalSize + element.oldSpace.externalSize;
+        final externalSize = element.totalExternalSize;
         expect(externalSize <= lastValue, isTrue);
         lastValue = externalSize;
       }
@@ -332,10 +304,10 @@ void main() {
       await tester.pumpAndSettle();
 
       lastValue =
-          data.first!.newSpace.externalSize + data.first!.oldSpace.externalSize;
+          data.first.newSpaceExternalSize! + data.first.oldSpaceExternalSize!;
       for (final element in data) {
         final externalSize =
-            element!.newSpace.externalSize + element.oldSpace.externalSize;
+            element.newSpaceExternalSize! + element.oldSpaceExternalSize!;
         expect(externalSize >= lastValue, isTrue);
         lastValue = externalSize;
       }

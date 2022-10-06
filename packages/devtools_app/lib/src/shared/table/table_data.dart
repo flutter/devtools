@@ -49,8 +49,8 @@ abstract class ColumnData<T> {
   bool get supportsSorting => numeric;
 
   int compare(T a, T b) {
-    final valueA = getValue(a) as Comparable;
-    final valueB = getValue(b) as Comparable;
+    final valueA = (getValue(a) ?? 0) as Comparable;
+    final valueB = (getValue(b) ?? 0) as Comparable;
     return valueA.compareTo(valueB);
   }
 
