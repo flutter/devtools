@@ -14,7 +14,6 @@ import '../../../../shared/table/table.dart';
 import '../../../../shared/table/table_data.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
-import '../../../vm_developer/vm_service_private_extensions.dart';
 import '../../primitives/ui.dart';
 import '../../shared/heap/primitives.dart';
 import 'allocation_profile_table_view_controller.dart';
@@ -27,7 +26,7 @@ import 'model.dart';
 /// instances, memory).
 const _defaultNumberFieldWidth = 90.0;
 
-class _FieldClassNameColumn extends ColumnData<ClassHeapStats> {
+class _FieldClassNameColumn extends ColumnData<AllocationProfileRecord> {
   _FieldClassNameColumn()
       : super(
           'Class',
@@ -35,7 +34,12 @@ class _FieldClassNameColumn extends ColumnData<ClassHeapStats> {
         );
 
   @override
-  String? getValue(ClassHeapStats dataObject) => dataObject.classRef!.name;
+  String? getValue(AllocationProfileRecord dataObject) =>
+      dataObject.heapClass.className;
+
+  @override
+  String getTooltip(AllocationProfileRecord dataObject) =>
+      dataObject.heapClass.library;
 
   @override
   bool get supportsSorting => true;
@@ -61,7 +65,7 @@ enum _HeapGeneration {
   }
 }
 
-class _FieldInstanceCountColumn extends ColumnData<ClassHeapStats> {
+class _FieldInstanceCountColumn extends ColumnData<AllocationProfileRecord> {
   _FieldInstanceCountColumn({required this.heap})
       : super(
           'Instances',
@@ -73,14 +77,14 @@ class _FieldInstanceCountColumn extends ColumnData<ClassHeapStats> {
   final _HeapGeneration heap;
 
   @override
-  dynamic getValue(ClassHeapStats dataObject) {
+  dynamic getValue(AllocationProfileRecord dataObject) {
     switch (heap) {
       case _HeapGeneration.newSpace:
-        return dataObject.newSpace.count;
+        return dataObject.newSpaceInstances;
       case _HeapGeneration.oldSpace:
-        return dataObject.oldSpace.count;
+        return dataObject.oldSpaceInstances;
       case _HeapGeneration.total:
-        return dataObject.instancesCurrent;
+        return dataObject.totalInstances;
     }
   }
 
@@ -97,15 +101,14 @@ class _FieldExternalSizeColumn extends _FieldSizeColumn {
         );
 
   @override
-  dynamic getValue(ClassHeapStats dataObject) {
+  dynamic getValue(AllocationProfileRecord dataObject) {
     switch (heap) {
       case _HeapGeneration.newSpace:
-        return dataObject.newSpace.externalSize;
+        return dataObject.newSpaceExternalSize;
       case _HeapGeneration.oldSpace:
-        return dataObject.oldSpace.externalSize;
+        return dataObject.oldSpaceExternalSize;
       case _HeapGeneration.total:
-        return dataObject.newSpace.externalSize +
-            dataObject.oldSpace.externalSize;
+        return dataObject.totalExternalSize;
     }
   }
 }
@@ -118,19 +121,19 @@ class _FieldDartHeapSizeColumn extends _FieldSizeColumn {
         );
 
   @override
-  dynamic getValue(ClassHeapStats dataObject) {
+  dynamic getValue(AllocationProfileRecord dataObject) {
     switch (heap) {
       case _HeapGeneration.newSpace:
-        return dataObject.newSpace.size;
+        return dataObject.newSpaceDartHeapSize;
       case _HeapGeneration.oldSpace:
-        return dataObject.oldSpace.size;
+        return dataObject.oldSpaceDartHeapSize;
       case _HeapGeneration.total:
-        return dataObject.bytesCurrent!;
+        return dataObject.totalDartHeapSize;
     }
   }
 }
 
-class _FieldSizeColumn extends ColumnData<ClassHeapStats> {
+class _FieldSizeColumn extends ColumnData<AllocationProfileRecord> {
   factory _FieldSizeColumn({required heap}) => _FieldSizeColumn._(
         title: 'Total Size',
         titleTooltip: "The sum of the type's total shallow memory "
@@ -153,28 +156,28 @@ class _FieldSizeColumn extends ColumnData<ClassHeapStats> {
   final _HeapGeneration heap;
 
   @override
-  dynamic getValue(ClassHeapStats dataObject) {
+  dynamic getValue(AllocationProfileRecord dataObject) {
     switch (heap) {
       case _HeapGeneration.newSpace:
-        return dataObject.newSpace.size + dataObject.newSpace.externalSize;
+        return dataObject.newSpaceSize;
       case _HeapGeneration.oldSpace:
-        return dataObject.oldSpace.size + dataObject.oldSpace.externalSize;
+        return dataObject.oldSpaceSize;
       case _HeapGeneration.total:
-        return dataObject.bytesCurrent! +
-            dataObject.newSpace.externalSize +
-            dataObject.oldSpace.externalSize;
+        return dataObject.totalSize;
     }
   }
 
   @override
-  String getDisplayValue(ClassHeapStats dataObject) => prettyPrintBytes(
+  String getDisplayValue(AllocationProfileRecord dataObject) =>
+      prettyPrintBytes(
         getValue(dataObject),
         includeUnit: true,
         kbFractionDigits: 1,
       )!;
 
   @override
-  String getTooltip(ClassHeapStats dataObject) => '${getValue(dataObject)} B';
+  String getTooltip(AllocationProfileRecord dataObject) =>
+      '${getValue(dataObject)} B';
 
   @override
   bool get numeric => true;
@@ -355,7 +358,7 @@ class _ExportAllocationProfileButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<AllocationProfile?>(
+    return ValueListenableBuilder<AdaptedAllocationProfile?>(
       valueListenable: allocationProfileController.currentAllocationProfile,
       builder: (context, currentAllocationProfile, _) {
         return IconLabelButton(

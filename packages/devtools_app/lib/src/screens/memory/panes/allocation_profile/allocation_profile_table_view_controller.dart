@@ -8,7 +8,6 @@ import 'package:vm_service/vm_service.dart';
 import '../../../../config_specific/import_export/import_export.dart';
 import '../../../../primitives/auto_dispose.dart';
 import '../../../../shared/globals.dart';
-import '../../../vm_developer/vm_service_private_extensions.dart';
 import 'model.dart';
 
 class AllocationProfileTableViewController extends DisposableController
@@ -69,46 +68,48 @@ class AllocationProfileTableViewController extends DisposableController
   /// Converts the current [AllocationProfile] to CSV format and downloads it.
   ///
   /// The returned string is the name of the downloaded CSV file.
-  String downloadMemoryTableCsv(AllocationProfile profile) {
+  String downloadMemoryTableCsv(AdaptedAllocationProfile profile) {
     final csvBuffer = StringBuffer();
 
     // Write the headers first.
     csvBuffer.writeln(
       [
         'Class',
+        'Library',
         'Total Instances',
         'Total Size',
-        'Total Internal Size',
+        'Total Dart Heap Size',
         'Total External Size',
         'New Space Instances',
         'New Space Size',
-        'New Space Internal Size',
+        'New Space Dart Heap Size',
         'New Space External Size',
         'Old Space Instances',
         'Old Space Size',
-        'Old Space Internal Size',
+        'Old Space Dart Heap Size',
         'Old Space External Size',
       ].map((e) => '"$e"').join(','),
     );
     // Write a row for each entry in the profile.
-    for (final member in profile.members!) {
+    for (final member in profile.records) {
+      if (member.isTotal) continue;
+
       csvBuffer.writeln(
         [
-          member.classRef!.name,
-          member.instancesCurrent,
-          member.bytesCurrent! +
-              member.oldSpace.externalSize +
-              member.newSpace.externalSize,
-          member.bytesCurrent!,
-          member.oldSpace.externalSize + member.newSpace.externalSize,
-          member.newSpace.count,
-          member.newSpace.size + member.newSpace.externalSize,
-          member.newSpace.size,
-          member.newSpace.externalSize,
-          member.oldSpace.count,
-          member.oldSpace.size + member.oldSpace.externalSize,
-          member.oldSpace.size,
-          member.oldSpace.externalSize,
+          member.heapClass.className,
+          member.heapClass.library,
+          member.totalInstances,
+          member.totalSize,
+          member.totalDartHeapSize,
+          member.totalExternalSize,
+          member.newSpaceInstances,
+          member.newSpaceSize,
+          member.newSpaceDartHeapSize,
+          member.newSpaceExternalSize,
+          member.oldSpaceInstances,
+          member.oldSpaceSize,
+          member.oldSpaceDartHeapSize,
+          member.oldSpaceExternalSize,
         ].join(','),
       );
     }

@@ -43,7 +43,9 @@ class AllocationProfileRecord {
         oldSpaceInstances = stats.oldSpace.count,
         oldSpaceSize = stats.oldSpace.size + stats.oldSpace.externalSize,
         oldSpaceDartHeapSize = stats.oldSpace.size,
-        oldSpaceExternalSize = stats.oldSpace.externalSize;
+        oldSpaceExternalSize = stats.oldSpace.externalSize {
+    _verifyIntegrity();
+  }
 
   AllocationProfileRecord.total(AllocationProfile profile)
       : isTotal = true,
@@ -60,7 +62,9 @@ class AllocationProfileRecord {
         oldSpaceInstances = null,
         oldSpaceSize = null,
         oldSpaceDartHeapSize = null,
-        oldSpaceExternalSize = null;
+        oldSpaceExternalSize = null {
+    _verifyIntegrity();
+  }
 
   final bool isTotal;
 
@@ -80,4 +84,17 @@ class AllocationProfileRecord {
   final int? oldSpaceSize;
   final int? oldSpaceDartHeapSize;
   final int? oldSpaceExternalSize;
+
+  void _verifyIntegrity() {
+    assert(() {
+      assert(totalSize == totalDartHeapSize + totalExternalSize);
+      if (!isTotal) {
+        assert(totalSize == newSpaceSize! + oldSpaceSize!);
+        assert(totalInstances == newSpaceInstances! + oldSpaceInstances!);
+        assert(newSpaceSize == newSpaceDartHeapSize! + newSpaceExternalSize!);
+        assert(oldSpaceSize == oldSpaceDartHeapSize! + oldSpaceExternalSize!);
+      }
+      return true;
+    }());
+  }
 }
