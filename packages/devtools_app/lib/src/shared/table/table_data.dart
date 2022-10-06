@@ -53,7 +53,8 @@ abstract class ColumnData<T> {
     final valueB = getValue(b);
     if (valueA == null && valueB == null) return 0;
     if (valueA == null) return -1;
-    return (valueA as Comparable).compareTo(valueB);
+    if (valueB == null) return 1;
+    return (valueA as Comparable).compareTo(valueB as Comparable);
   }
 
   /// Get the cell's value from the given [dataObject].
