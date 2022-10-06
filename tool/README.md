@@ -5,7 +5,7 @@
 Make sure:
 1. You have a local checkout of the Dart SDK
    - (for getting started instructions, see [sdk/CONTRIBUTING.md](https://github.com/dart-lang/sdk/blob/main/CONTRIBUTING.md)).
-2. Ensure your .bashrc sets `$LOCAL_DART_SDK`
+2. Ensure your `.bashrc` sets `$LOCAL_DART_SDK`
     
    ```shell 
    DART_SDK_REPO_DIR=<Path to cloned dart sdk>
