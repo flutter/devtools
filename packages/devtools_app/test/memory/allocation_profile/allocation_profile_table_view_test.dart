@@ -300,14 +300,12 @@ void main() {
       }
 
       // Sort by external size, smallest to largest.
-      await tester.tap(instances);
+      await tester.tap(external_);
       await tester.pumpAndSettle();
 
-      lastValue =
-          data.first.newSpaceExternalSize! + data.first.oldSpaceExternalSize!;
+      lastValue = data.first.totalExternalSize;
       for (final element in data) {
-        final externalSize =
-            element.newSpaceExternalSize! + element.oldSpaceExternalSize!;
+        final externalSize = element.totalExternalSize;
         expect(externalSize >= lastValue, isTrue);
         lastValue = externalSize;
       }
