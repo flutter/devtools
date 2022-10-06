@@ -39,6 +39,13 @@ void main(List<String> args) async {
 
   print('Completed building DevTools: $devToolsBuildLocation');
 
+  print('Run pub get for DDS in local dart sdk');
+  await Process.start(
+    'dart',
+    ['pub', 'get'],
+    workingDirectory: '$localDartSdkLocation/pkg/dds',
+  );
+
   print('Serving DevTools with a local devtools server...');
   final serveProcess = await Process.start(
     'dart',

@@ -56,3 +56,11 @@ rm -rf _perfetto
 # https://github.com/flutter/flutter/issues/112019 is resolved.
 
 popd
+
+pushd $DEVTOOLS_DIR
+
+// Verify that all the perfetto assets are included in the devtools_app pubspec.yaml, and that the assets
+// paths are updated to the new version number.
+dart ./tool/update_perfetto_assets.dart
+
+popd
