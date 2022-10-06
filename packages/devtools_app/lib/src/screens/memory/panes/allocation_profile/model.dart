@@ -52,8 +52,8 @@ class AllocationProfileRecord with PinnableListEntry {
       : isTotal = true,
         heapClass = const HeapClass(className: 'All Classes', library: ''),
         totalInstances = null,
-        totalSize = profile.memoryUsage?.externalUsage ??
-            0 + (profile.memoryUsage?.heapUsage ?? 0),
+        totalSize = (profile.memoryUsage?.externalUsage ?? 0) +
+            (profile.memoryUsage?.heapUsage ?? 0),
         totalDartHeapSize = profile.memoryUsage?.heapUsage ?? 0,
         totalExternalSize = profile.memoryUsage?.externalUsage ?? 0,
         newSpaceInstances = null,

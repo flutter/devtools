@@ -40,7 +40,7 @@ class _FieldClassNameColumn extends ColumnData<AllocationProfileRecord> {
 
   @override
   String getTooltip(AllocationProfileRecord dataObject) =>
-      dataObject.heapClass.library;
+      dataObject.heapClass.fullName;
 
   @override
   bool get supportsSorting => true;
