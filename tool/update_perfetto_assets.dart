@@ -21,7 +21,7 @@ void main(List<String> args) {
 
   // Find the new perfetto version number.
   String newVersionNumber = '';
-  final versionRegExp = RegExp(r'v[0-9]+[.][0-9]+-[0-9a-f]+');
+  final versionRegExp = RegExp(r'v\d+[.]\d+-[0-9a-fA-F]+');
   final entities = perfettoDistDir.listSync();
   for (FileSystemEntity entity in entities) {
     final path = entity.path;
@@ -49,18 +49,15 @@ void main(List<String> args) {
   // [perfettoDistDir].
 
   final perfettoAssetRegExp = RegExp(
-      r'.*packages\/perfetto_compiled\/dist\/v[0-9]+[.][0-9]+-[0-9a-f]+\/');
-  bool isPerfettoAssetLine(String line) => perfettoAssetRegExp.hasMatch(line);
-
+      r'(?<prefix>^.*packages\/perfetto_compiled\/dist\/)(?<version>v\d+[.]\d+-[0-9a-fA-F]+)(?<suffix>\/.*$)');
   final lines = pubspec.readAsLinesSync();
   for (int i = 0; i < lines.length; i++) {
     final line = lines[i];
-    if (isPerfettoAssetLine(line)) {
-      final parts = line.split('/').map(
-            (part) => versionRegExp.hasMatch(part) ? newVersionNumber : part,
-          );
-      final newLine = parts.join('/');
-      lines[i] = newLine;
+    final match = perfettoAssetRegExp.firstMatch(line);
+    if (match != null) {
+      final prefix = match.namedGroup('prefix')!;
+      final suffix = match.namedGroup('suffix')!;
+      lines[i] = '$prefix$newVersionNumber$suffix';
     }
   }
 
