@@ -16,10 +16,12 @@ class HeapClassDetails extends StatelessWidget {
     Key? key,
     required this.entries,
     required this.selection,
+    required this.isDiff,
   }) : super(key: key);
 
   final List<StatsByPathEntry>? entries;
   final ValueNotifier<StatsByPathEntry?> selection;
+  final bool isDiff;
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +35,7 @@ class HeapClassDetails extends StatelessWidget {
     return _RetainingPathTable(
       entries: theEntries,
       selection: selection,
+      isDiff: isDiff,
     );
   }
 }
@@ -57,9 +60,9 @@ class _RetainingPathColumn extends ColumnData<StatsByPathEntry> {
 }
 
 class _InstanceColumn extends ColumnData<StatsByPathEntry> {
-  _InstanceColumn()
+  _InstanceColumn(bool isDiff)
       : super(
-          'Instances',
+          isDiff ? 'Instances\nDelta' : 'Instances',
           titleTooltip: 'Number of instances of the class\n'
               'retained by the path.',
           fixedWidthPx: scaleByFontFactor(85.0),
@@ -74,9 +77,9 @@ class _InstanceColumn extends ColumnData<StatsByPathEntry> {
 }
 
 class _ShallowSizeColumn extends ColumnData<StatsByPathEntry> {
-  _ShallowSizeColumn()
+  _ShallowSizeColumn(bool isDiff)
       : super(
-          'Shallow\nDart Size',
+          isDiff ? 'Shallow\nSize Delta' : 'Shallow\nDart Size',
           titleTooltip: shallowSizeColumnTooltip,
           fixedWidthPx: scaleByFontFactor(85.0),
           alignment: ColumnAlignment.right,
@@ -97,9 +100,9 @@ class _ShallowSizeColumn extends ColumnData<StatsByPathEntry> {
 }
 
 class _RetainedSizeColumn extends ColumnData<StatsByPathEntry> {
-  _RetainedSizeColumn()
+  _RetainedSizeColumn(bool isDiff)
       : super(
-          'Retained\nDart Size',
+          isDiff ? 'Retained\nSize Delta' : 'Retained\nDart Size',
           titleTooltip: retainedSizeColumnTooltip,
           fixedWidthPx: scaleByFontFactor(85.0),
           alignment: ColumnAlignment.right,
@@ -120,22 +123,24 @@ class _RetainedSizeColumn extends ColumnData<StatsByPathEntry> {
 }
 
 class _RetainingPathTable extends StatelessWidget {
-  const _RetainingPathTable({
+  _RetainingPathTable({
     Key? key,
     required this.entries,
     required this.selection,
+    required this.isDiff,
   }) : super(key: key);
 
   final List<StatsByPathEntry> entries;
   final ValueNotifier<StatsByPathEntry?> selection;
+  final bool isDiff;
 
-  static final _shallowSizeColumn = _ShallowSizeColumn();
-  static late final List<ColumnData<StatsByPathEntry>> _columns =
+  late final _shallowSizeColumn = _ShallowSizeColumn(isDiff);
+  late final List<ColumnData<StatsByPathEntry>> _columns =
       <ColumnData<StatsByPathEntry>>[
     _RetainingPathColumn(),
-    _InstanceColumn(),
+    _InstanceColumn(isDiff),
     _shallowSizeColumn,
-    _RetainedSizeColumn(),
+    _RetainedSizeColumn(isDiff),
   ];
 
   @override

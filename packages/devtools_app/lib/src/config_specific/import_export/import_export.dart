@@ -132,7 +132,7 @@ abstract class ExportController {
     String? fileName,
     ExportFileType type = ExportFileType.json,
   }) {
-    final file = ExportController().downloadFile(
+    final file = downloadFile(
       content,
       type: ExportFileType.csv,
       fileName: fileName,
