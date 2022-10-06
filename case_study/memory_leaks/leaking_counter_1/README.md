@@ -2,6 +2,4 @@
 
 This is memory leaking application to test memory debugging tools.
 
-To observe the leak:
-1. Start the app
-2.
+TODO(polina-c): add instruction to debug the leak.
