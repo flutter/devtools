@@ -189,10 +189,7 @@ flutter:
         - asset: packages/codicon/font/codicon.ttf
 
 dependency_overrides:
-# The '#OVERRIDE_FOR_DEVELOPMENT' lines are stripped out when we publish.
-# All overriden dependencies are published together so there is no harm
-# in treating them like they are part of a mono-repo while developing.
-  devtools_shared: #OVERRIDE_FOR_DEVELOPMENT
-    path: ../devtools_shared #OVERRIDE_FOR_DEVELOPMENT
-  devtools_test: #OVERRIDE_FOR_DEVELOPMENT
-    path: ../devtools_test #OVERRIDE_FOR_DEVELOPMENT
+  devtools_shared:
+    path: ../devtools_shared
+  devtools_test:
+    path: ../devtools_test

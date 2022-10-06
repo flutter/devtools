@@ -174,8 +174,9 @@ class _TreeViewItemState<T extends TreeNode<T>> extends State<_TreeViewItem<T>>
     return Padding(
       padding: EdgeInsets.only(left: nodeIndent(widget.data)),
       child: Container(
-        color:
-            widget.data.isSelected ? Theme.of(context).selectedRowColor : null,
+        color: widget.data.isSelected
+            ? Theme.of(context).colorScheme.selectedRowColor
+            : null,
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [

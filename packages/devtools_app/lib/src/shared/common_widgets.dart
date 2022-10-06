@@ -2472,7 +2472,7 @@ class Progress extends StatelessWidget {
       width: size,
       height: size,
       child: CircularProgressIndicator(
-        color: Theme.of(context).textTheme.bodyText1?.color,
+        color: Theme.of(context).textTheme.bodyLarge?.color,
       ),
     );
   }

@@ -1,110 +1,105 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
+import 'dart:convert';
 import 'dart:math' as math;
 
-import 'utils.dart';
+import 'package:args/command_runner.dart';
+import 'package:http/http.dart' as http;
 
-class FlutterVersion extends SemanticVersion {
-  FlutterVersion._({
-    required this.version,
-    required this.channel,
-    required this.repositoryUrl,
-    required this.frameworkRevision,
-    required this.frameworkCommitDate,
-    required this.engineRevision,
-    required this.dartSdkVersion,
-  }) {
-    final semVer = SemanticVersion.parse(version);
-    major = semVer.major;
-    minor = semVer.minor;
-    patch = semVer.patch;
-    preReleaseMajor = semVer.preReleaseMajor;
-    preReleaseMinor = semVer.preReleaseMinor;
-  }
-
-  factory FlutterVersion.parse(Map<String, dynamic> json) {
-    return FlutterVersion._(
-      version: json['frameworkVersion'],
-      channel: json['channel'],
-      repositoryUrl: json['repositoryUrl'],
-      frameworkRevision: json['frameworkRevisionShort'],
-      frameworkCommitDate: json['frameworkCommitDate'],
-      engineRevision: json['engineRevisionShort'],
-      dartSdkVersion: _parseDartVersion(json['dartSdkVersion']),
-    );
-  }
-
-  final String? version;
-
-  final String? channel;
-
-  final String? repositoryUrl;
-
-  final String? frameworkRevision;
-
-  final String? frameworkCommitDate;
-
-  final String? engineRevision;
-
-  final SemanticVersion? dartSdkVersion;
-
-  String get flutterVersionSummary => [
-        if (version != 'unknown') version,
-        'channel $channel',
-        repositoryUrl ?? 'unknown source',
-      ].join(' • ');
-
-  String get frameworkVersionSummary =>
-      'revision $frameworkRevision • $frameworkCommitDate';
-
-  String get engineVersionSummary => 'revision $engineRevision';
+/// Outputs the latest flutter candidate branch name.
+///
+/// The latest candidate branch will be the branch that matches the Flutter SDK
+/// inside g3.
+///
+/// Sample usage:
+/// ```shell
+///   $dart tool/bin/repo_tool.dart latest-flutter-candidate
+/// ```
+class LatestFlutterCandidateCommand extends Command {
+  // You can authorize your access if you run into a github rate limit.
+  // Don't check in your passwords or auth tokens.
+  static const auth = '';
 
   @override
-  bool operator ==(other) {
-    if (other is! FlutterVersion) return false;
-    return version == other.version &&
-        channel == other.channel &&
-        repositoryUrl == other.repositoryUrl &&
-        frameworkRevision == other.frameworkRevision &&
-        frameworkCommitDate == other.frameworkCommitDate &&
-        engineRevision == other.engineRevision &&
-        dartSdkVersion == other.dartSdkVersion;
-  }
+  String get name => 'latest-flutter-candidate';
 
   @override
-  int get hashCode => Object.hash(
-        version,
-        channel,
-        repositoryUrl,
-        frameworkRevision,
-        frameworkCommitDate,
-        engineRevision,
-        dartSdkVersion,
+  String get description =>
+      'Outputs the most recent flutter release candidate banch';
+
+  @override
+  Future run() async {
+    SemanticVersion latest = SemanticVersion();
+    String? latestBranchName;
+
+    final allBranchNames = <String>[];
+
+    // TODO(kenz): consider traversing pages properly instead of using a while
+    // loop.
+    // See https://docs.github.com/en/rest/guides/traversing-with-pagination
+    const maxPerPage = 100;
+    var requestPage = 0;
+    bool lastPageReceived = false;
+    while (!lastPageReceived) {
+      final uri = Uri.https(
+        '${auth}api.github.com',
+        '/repos/flutter/flutter/branches',
+        {
+          'per_page': '$maxPerPage',
+          'page': '$requestPage',
+        },
       );
 
-  static SemanticVersion? _parseDartVersion(String? versionString) {
-    if (versionString == null) return null;
+      final List<Map<String, dynamic>> branches =
+          (jsonDecode((await http.get(uri)).body) as List)
+              .cast<Map<String, dynamic>>();
 
-    // Example Dart version string: "2.15.0 (build 2.15.0-178.1.beta)"
-    const prefix = '(build ';
-    final indexOfPrefix = versionString.indexOf(prefix);
+      final branchNames =
+          branches.map((branch) => branch['name']).cast<String>();
+      allBranchNames.addAll(branchNames);
 
-    String rawVersion;
-    if (indexOfPrefix != -1) {
-      final startIndex = indexOfPrefix + prefix.length;
-      rawVersion = versionString.substring(
-        startIndex,
-        versionString.length - 1,
-      );
-    } else {
-      rawVersion = versionString;
+      final candidateBranchesNames =
+          branchNames.where((name) => name.contains('candidate'));
+
+      for (final branchName in candidateBranchesNames) {
+        final semVer = semVerFromCandidateBranch(branchName);
+        if (semVer != null && semVer > latest) {
+          latest = semVer;
+          latestBranchName = branchName;
+        }
+      }
+
+      requestPage++;
+      if (branches.length < maxPerPage) {
+        lastPageReceived = true;
+      }
     }
-    return SemanticVersion.parse(rawVersion);
+
+    if (latestBranchName == null) {
+      print('Something went wrong. Could not find the latest candidate branch:'
+          '${allBranchNames.join('\n')}');
+    } else {
+      print(latestBranchName);
+    }
   }
 }
 
+SemanticVersion? semVerFromCandidateBranch(String branch) {
+  final candidateBranchPattern =
+      RegExp(r'^flutter-([0-9]+).([0-9]+)-candidate.([0-9]+)$');
+
+  final match = candidateBranchPattern.firstMatch(branch);
+  if (match == null) {
+    return null;
+  }
+
+  final x = int.parse(match.group(1)!);
+  final y = int.parse(match.group(2)!);
+  final z = int.parse(match.group(3)!);
+
+  return SemanticVersion(major: x, minor: y, patch: z);
+}
+
+// TODO(kenz): consider placing this class in devtools_shared, as this is
+// currently copied from `devtools_app/lib/src/shared/version.dart`
 class SemanticVersion with CompareMixin {
   SemanticVersion({
     this.major = 0,
@@ -260,5 +255,23 @@ class SemanticVersion with CompareMixin {
           if (preReleaseMinor != null) preReleaseMinor,
         ].join('.'),
     ].join('-');
+  }
+}
+
+mixin CompareMixin implements Comparable {
+  bool operator <(other) {
+    return compareTo(other) < 0;
+  }
+
+  bool operator >(other) {
+    return compareTo(other) > 0;
+  }
+
+  bool operator <=(other) {
+    return compareTo(other) <= 0;
+  }
+
+  bool operator >=(other) {
+    return compareTo(other) >= 0;
   }
 }
