@@ -41,7 +41,6 @@ export PATH=`pwd`/flutter-sdk/bin/cache/dart-sdk/bin:`pwd`/flutter-sdk/bin:`pwd`
 # shell script so we won't have to incurr the cost of building flutter tool twice.
 echo "Looking up the latest Flutter candidate branch"
 pushd packages/devtools_app
-repo_tool latest-flutter-candidate --githubToken=$AUTH_TOKEN
 LATEST_FLUTTER_CANDIDATE=`repo_tool latest-flutter-candidate --githubToken=$AUTH_TOKEN | tail -n 1`
 popd
 
