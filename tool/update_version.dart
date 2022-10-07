@@ -284,35 +284,23 @@ class AutoUpdateCommand extends Command {
   AutoUpdateCommand() {
     argParser.addOption('type',
         abbr: 't',
-        allowed: ['dev', 'patch', 'minor', 'major'],
+        allowed: ['dev', 'dev,patch', 'dev,major', 'patch', 'minor', 'major'],
         allowedHelp: {
-          'dev': 'bumps the version to the next dev pre-release value',
+          'dev':
+              'bumps the version to the next dev pre-release value (minor by default)',
+          'dev,patch': 'bumps the version to the next dev pre-patch value',
+          'dev,major': 'bumps the version to the next dev pre-major value',
           'patch': 'bumps the version to the next patch value',
           'minor': 'bumps the version to the next minor value',
           'major': 'bumps the version to the next major value',
         },
         mandatory: true,
         help: 'Bumps the devtools version by the selected type.');
-
-    argParser.addOption('devType',
-        abbr: 'd',
-        allowed: ['patch', 'minor', 'major'],
-        allowedHelp: {
-          'patch': 'bumps the version to the next patch value',
-          'minor': 'bumps the version to the next minor value',
-          'major': 'bumps the version to the next major value',
-        },
-        mandatory: false,
-        defaultsTo: 'minor',
-        help: '''Bumps the preparatory devtools version by the selected type.
-        Ignored if we are already on a dev version. Defaults to "minor" if not
-        provided.''');
   }
 
   @override
   void run() {
     final type = argResults!['type'].toString();
-    final devType = argResults!['devType'].toString();
     final currentVersion = versionFromPubspecFile();
     String? newVersion;
     if (currentVersion == null) {
@@ -320,7 +308,13 @@ class AutoUpdateCommand extends Command {
     }
     switch (type) {
       case 'dev':
-        newVersion = incrementDevVersion(currentVersion, devType);
+        newVersion = incrementDevVersion(currentVersion, 'minor');
+        break;
+      case 'dev,patch':
+        newVersion = incrementDevVersion(currentVersion, 'patch');
+        break;
+      case 'dev,major':
+        newVersion = incrementDevVersion(currentVersion, 'major');
         break;
       default:
         newVersion = incrementVersionByType(currentVersion, type);
