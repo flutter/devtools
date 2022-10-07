@@ -671,7 +671,7 @@ class _ServiceExtensionCheckboxGroupButtonState
   void _insertOverlay(BuildContext context) {
     final offset = _calculateOverlayPosition(widget.overlayWidth, context);
     _overlay?.remove();
-    Overlay.of(context).insert(
+    Overlay.of(context)!.insert(
       _overlay = OverlayEntry(
         maintainState: true,
         builder: (context) {
@@ -704,7 +704,7 @@ class _ServiceExtensionCheckboxGroupButtonState
 
   Offset _calculateOverlayPosition(double width, BuildContext context) {
     final overlayBox =
-        Overlay.of(context).context.findRenderObject() as RenderBox;
+        Overlay.of(context)!.context.findRenderObject() as RenderBox;
     final box = context.findRenderObject() as RenderBox;
 
     final maxX = overlayBox.size.width - width;

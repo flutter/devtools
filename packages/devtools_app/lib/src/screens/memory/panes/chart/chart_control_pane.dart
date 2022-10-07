@@ -188,7 +188,7 @@ class _ChartControlPaneState extends State<ChartControlPane>
       }
     }
 
-    final OverlayState overlayState = Overlay.of(context);
+    final OverlayState overlayState = Overlay.of(context)!;
     _legendOverlayEntry ??= OverlayEntry(
       builder: (context) => Positioned(
         top: position.dy + box.size.height + legendYOffset,

@@ -177,7 +177,7 @@ class HoverCard {
         );
       },
     );
-    overlayState.insert(_overlayEntry);
+    overlayState!.insert(_overlayEntry);
   }
 
   HoverCard.fromHoverEvent({
@@ -423,7 +423,7 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
 
   Offset _calculateTooltipPosition(double width) {
     final overlayBox =
-        Overlay.of(context).context.findRenderObject() as RenderBox;
+        Overlay.of(context)!.context.findRenderObject() as RenderBox;
     final box = context.findRenderObject() as RenderBox;
 
     final maxX = overlayBox.size.width - _hoverMargin - width;

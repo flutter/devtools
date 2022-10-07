@@ -146,7 +146,7 @@ class _RetainingPathTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FlatTable<StatsByPathEntry>(
-      dataKey: 'RetainingPathTable',
+      dataKey: 'RetainingPathTable-$isDiff',
       columns: _columns,
       data: entries,
       keyFactory: (e) => Key(e.key.asLongString()),

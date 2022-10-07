@@ -324,7 +324,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
     final hoverHeading = theme.hoverTitleTextStyle;
 
-    final OverlayState overlayState = Overlay.of(context);
+    final OverlayState overlayState = Overlay.of(context)!;
     _hoverOverlayEntry ??= OverlayEntry(
       builder: (context) => Positioned(
         top: position.dy + _hoverYOffset,
