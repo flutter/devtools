@@ -17,7 +17,7 @@ DEVTOOLS_DIR="${TOOL_DIR}/.."
 FLUTTER_DIR="`pwd`/flutter-sdk"
 PATH="$FLUTTER_DIR/bin":$PATH
 
-REQUIRED_FLUTTER_VERSION=$(<"${DEVTOOLS_DIR}/flutter-version.txt")
+REQUIRED_FLUTTER_VERSION=`dart $TOOL_DIR/bin/repo_tool.dart latest-flutter-candidate | tail -n 1`
 
 flutter --version
 ACTUAL_FLUTTER_VERSION=$(<"$FLUTTER_DIR/version")
@@ -25,8 +25,8 @@ ACTUAL_FLUTTER_VERSION=$(<"$FLUTTER_DIR/version")
 # Check that the 'actual' and 'required' SDK versions agree.
 if [[ "$REQUIRED_FLUTTER_VERSION" != "$ACTUAL_FLUTTER_VERSION" ]]; then
   echo ""
-  echo "flutter-version.txt != flutter-sdk/version"
-  echo "  $REQUIRED_FLUTTER_VERSION != $ACTUAL_FLUTTER_VERSION"
+  echo "Failed Flutter version check:"
+  echo "  $REQUIRED_FLUTTER_VERSION (required) != $ACTUAL_FLUTTER_VERSION (actual)"
   echo ""
   echo "To switch versions, run './tool/update_flutter_sdk.sh'."
   exit 1

@@ -166,6 +166,7 @@ void main() {
         // Await delay for golden comparison.
         await tester.pumpAndSettle(const Duration(seconds: 2));
       },
+      // ignore: avoid_redundant_argument_values
       skip: kIsWeb,
     );
   });

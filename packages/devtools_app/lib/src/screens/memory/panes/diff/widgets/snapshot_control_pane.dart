@@ -117,7 +117,7 @@ class _DiffDropdown extends StatelessWidget {
           const SizedBox(width: defaultSpacing),
           RoundedDropDownButton<SnapshotInstanceItem>(
             isDense: true,
-            style: Theme.of(context).textTheme.bodyText2,
+            style: Theme.of(context).textTheme.bodyMedium,
             value: current.diffWith.value ?? current,
             onChanged: (SnapshotInstanceItem? value) {
               late SnapshotInstanceItem? newDiffWith;
