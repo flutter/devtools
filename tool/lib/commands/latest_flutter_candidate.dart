@@ -50,10 +50,10 @@ class LatestFlutterCandidateCommand extends Command {
       );
 
       print('HERE - 1');
-
+      final response = (await http.get(uri)).body;
+      print("THE RESPONSE: $response");
       final List<Map<String, dynamic>> branches =
-          (jsonDecode((await http.get(uri)).body) as List)
-              .cast<Map<String, dynamic>>();
+          (jsonDecode(response) as List).cast<Map<String, dynamic>>();
 
       print('HERE - 2');
 
