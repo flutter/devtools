@@ -38,7 +38,7 @@ dart tool/update_version.dart auto --type patch
 dart tool/update_version.dart auto --type minor
 ```
 
-> Note: Updating to a new `dev` version will automatically prepare the version for a new `minor` release (eg, `2.17.0` will become `2.18.0-dev.0`). To specify a `major` or `patch` release instead, use the `devType` argument (eg, `dart tool/update_version.dart auto --type dev --devType patch`).
+> Note: Updating to a new `dev` version will automatically prepare the version for a new `minor` release (eg, `2.17.0` will become `2.18.0-dev.0`). To update to a `major` or `patch` release instead, specify either `dev,patch` or `dev,major` (eg, `dart tool/update_version.dart auto --type dev,patch`).
 
 Verify that this script updated the pubspecs under packages/
 and updated all references to those packages. These packages always have their
