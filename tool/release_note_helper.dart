@@ -6,9 +6,6 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 import 'lib/running_release_notes.dart';
 
-final releaseNoteJsonPath =
-    '../packages/devtools_app/lib/src/framework/release_notes/release_notes.json';
-
 void main(List<String> args) {
   final runner = CommandRunner(
     'release_note_helper',
@@ -51,14 +48,9 @@ class MarkDownCommand extends Command {
     final version = argResults?['version']?.toString();
 
     final fileContents = await File(filePath).readAsString();
-    ReleaseNotes releaseNotes = ReleaseNotes.fromJson(jsonDecode(fileContents));
+    Release release = Release.fromJson(jsonDecode(fileContents));
 
-    if (version != null) {
-      releaseNotes.releases = releaseNotes.releases
-          .where((release) => release.version.toString() == version)
-          .toList();
-    }
-    print(releaseNotes.toMarkdown());
+    print(release.toMarkdown());
   }
 }
 
@@ -85,7 +77,7 @@ class VerifyCommand extends Command {
     print("The filepath $filePath");
     final fileContents = await File(filePath).readAsString();
     // This step will fail if the json is not valid, or can't be unserialized
-    ReleaseNotes.fromJson(jsonDecode(fileContents));
+    Release.fromJson(jsonDecode(fileContents));
 
     print('Release notes were successfully decoded and serialized');
   }
