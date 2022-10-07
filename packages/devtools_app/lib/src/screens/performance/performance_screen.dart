@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 
 import '../../analytics/analytics.dart' as ga;
@@ -11,6 +12,7 @@ import '../../analytics/analytics_common.dart';
 import '../../analytics/constants.dart' as analytics_constants;
 import '../../config_specific/import_export/import_export.dart';
 import '../../primitives/auto_dispose_mixin.dart';
+import '../../primitives/feature_flags.dart';
 import '../../service/service_extension_widgets.dart';
 import '../../service/service_extensions.dart' as extensions;
 import '../../shared/banner_messages.dart';
@@ -20,7 +22,6 @@ import '../../shared/screen.dart';
 import '../../shared/split.dart';
 import '../../shared/theme.dart';
 import '../../shared/utils.dart';
-import '../../shared/version.dart';
 import '../../ui/icons.dart';
 import '../../ui/vm_flag_widgets.dart';
 import 'event_details.dart';
@@ -156,28 +157,39 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
             firstListenable: controller.flutterFrames,
             secondListenable: controller.displayRefreshRate,
             builder: (context, frames, displayRefreshRate, child) {
-              return FlutterFramesChart(
-                frames,
-                displayRefreshRate,
+              return ValueListenableBuilder<bool>(
+                valueListenable: controller.showFlutterFramesChart,
+                builder: (context, show, _) {
+                  return FlutterFramesChart(
+                    frames: frames,
+                    displayRefreshRate: displayRefreshRate,
+                    isVisible: show,
+                  );
+                },
               );
             },
           ),
         Expanded(
-          child: embeddedPerfettoEnabled
-              ? tabbedPerformanceView
-              : Split(
-                  axis: Axis.vertical,
-                  initialFractions: const [0.7, 0.3],
-                  children: [
-                    tabbedPerformanceView,
-                    ValueListenableBuilder<TimelineEvent?>(
-                      valueListenable: controller.selectedTimelineEvent,
-                      builder: (context, selectedEvent, _) {
-                        return EventDetails(selectedEvent);
-                      },
-                    ),
-                  ],
-                ),
+          child: ValueListenableBuilder<bool>(
+            valueListenable: controller.useLegacyTraceViewer,
+            builder: (context, useLegacy, _) {
+              return FeatureFlags.embeddedPerfetto && !useLegacy
+                  ? tabbedPerformanceView
+                  : Split(
+                      axis: Axis.vertical,
+                      initialFractions: const [0.7, 0.3],
+                      children: [
+                        tabbedPerformanceView,
+                        ValueListenableBuilder<TimelineEvent?>(
+                          valueListenable: controller.selectedTimelineEvent,
+                          builder: (context, selectedEvent, _) {
+                            return EventDetails(selectedEvent);
+                          },
+                        ),
+                      ],
+                    );
+            },
+          ),
         ),
       ],
     );
@@ -231,62 +243,40 @@ class _PrimaryControls extends StatelessWidget {
     Key? key,
     required this.controller,
     required this.processing,
-    this.onClear,
+    required this.onClear,
   }) : super(key: key);
 
   final PerformanceController controller;
 
   final bool processing;
 
-  final VoidCallback? onClear;
+  final VoidCallback onClear;
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: controller.recordingFrames,
-      builder: (context, recording, child) {
-        return Row(
-          children: [
-            OutlinedIconButton(
-              icon: Icons.pause,
-              tooltip: 'Pause frame recording',
-              onPressed: recording ? _pauseFrameRecording : null,
-            ),
-            const SizedBox(width: denseSpacing),
-            OutlinedIconButton(
-              icon: Icons.play_arrow,
-              tooltip: 'Resume frame recording',
-              onPressed: recording ? null : _resumeFrameRecording,
-            ),
-            const SizedBox(width: denseSpacing),
-            child!,
-          ],
-        );
-      },
-      child: OutlinedIconButton(
-        icon: Icons.block,
-        tooltip: 'Clear',
-        onPressed: processing ? null : _clearPerformanceData,
-      ),
+    return Row(
+      children: [
+        if (serviceManager.connectedApp!.isFlutterAppNow!) ...[
+          ChartVisibilityButton(
+            showChart: controller.showFlutterFramesChart,
+            onPressed: controller.toggleShowFlutterFrames,
+            label: 'Flutter frames',
+          ),
+          const SizedBox(width: denseSpacing),
+        ],
+        OutlinedIconButton(
+          icon: Icons.block,
+          tooltip: 'Clear all data on the Performance screen',
+          onPressed: processing ? null : _clearPerformanceData,
+        ),
+      ],
     );
-  }
-
-  void _pauseFrameRecording() {
-    ga.select(analytics_constants.performance, analytics_constants.pause);
-    controller.toggleRecordingFrames(false);
-  }
-
-  void _resumeFrameRecording() {
-    ga.select(analytics_constants.performance, analytics_constants.resume);
-    controller.toggleRecordingFrames(true);
   }
 
   Future<void> _clearPerformanceData() async {
     ga.select(analytics_constants.performance, analytics_constants.clear);
     await controller.clearData();
-    if (onClear != null) {
-      onClear!();
-    }
+    onClear();
   }
 }
 
@@ -296,7 +286,7 @@ class SecondaryPerformanceControls extends StatelessWidget {
     required this.controller,
   }) : super(key: key);
 
-  static const minScreenWidthForTextBeforeScaling = 1075.0;
+  static const minScreenWidthForTextBeforeScaling = 1140.0;
 
   final PerformanceController controller;
 

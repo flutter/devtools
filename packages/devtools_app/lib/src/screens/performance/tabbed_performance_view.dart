@@ -8,13 +8,14 @@ import '../../analytics/analytics.dart' as ga;
 import '../../analytics/constants.dart' as analytics_constants;
 import '../../charts/flame_chart.dart';
 import '../../primitives/auto_dispose_mixin.dart';
+import '../../primitives/feature_flags.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
 import '../../shared/theme.dart';
 import '../../ui/search.dart';
 import '../../ui/tab.dart';
 import 'panes/frame_analysis/frame_analysis.dart';
-import 'panes/raster_metrics/raster_metrics.dart';
+import 'panes/raster_stats/raster_stats.dart';
 import 'panes/timeline_events/perfetto/perfetto.dart';
 import 'panes/timeline_events/timeline_flame_chart.dart';
 import 'performance_controller.dart';
@@ -75,34 +76,40 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
       );
     }
 
-    final rasterMetrics = Center(
+    final rasterStats = Center(
       child: RenderingLayerVisualizer(
-        rasterMetricsController: controller.rasterMetricsController,
+        rasterStatsController: controller.rasterStatsController,
       ),
     );
 
     final isFlutterApp = serviceManager.connectedApp!.isFlutterAppNow!;
     final tabViews = [
-      embeddedPerfettoEnabled
-          ? KeepAliveWrapper(
-              child: EmbeddedPerfetto(
-                perfettoController: controller.perfettoController,
-              ),
-            )
-          : KeepAliveWrapper(
+      ValueListenableBuilder<bool>(
+        valueListenable: controller.useLegacyTraceViewer,
+        builder: (context, useLegacy, _) {
+          if (useLegacy || !FeatureFlags.embeddedPerfetto) {
+            return KeepAliveWrapper(
               child: TimelineEventsView(
                 controller: controller,
                 processing: widget.processing,
                 processingProgress: widget.processingProgress,
               ),
+            );
+          }
+          return KeepAliveWrapper(
+            child: EmbeddedPerfetto(
+              perfettoController: controller.perfettoController,
             ),
+          );
+        },
+      ),
       if (frameAnalysisSupported && isFlutterApp)
         KeepAliveWrapper(
           child: frameAnalysisView,
         ),
-      if (rasterMetricsSupported && isFlutterApp)
+      if (rasterStatsSupported && isFlutterApp)
         KeepAliveWrapper(
-          child: rasterMetrics,
+          child: rasterStats,
         ),
     ];
 
@@ -120,27 +127,32 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
     return [
       _buildTab(
         tabName: 'Timeline Events',
-        trailing: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            if (!embeddedPerfettoEnabled) ...[
-              _buildSearchField(searchFieldEnabled),
-              const FlameChartHelpButton(
-                gaScreen: PerformanceScreen.id,
-                gaSelection: analytics_constants.timelineFlameChartHelp,
-              ),
-            ],
-            RefreshTimelineEventsButton(controller: controller),
-          ],
+        trailing: ValueListenableBuilder<bool>(
+          valueListenable: controller.useLegacyTraceViewer,
+          builder: (context, useLegacy, _) {
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                if (useLegacy || !FeatureFlags.embeddedPerfetto) ...[
+                  _buildSearchField(searchFieldEnabled),
+                  const FlameChartHelpButton(
+                    gaScreen: PerformanceScreen.id,
+                    gaSelection: analytics_constants.timelineFlameChartHelp,
+                  ),
+                ],
+                RefreshTimelineEventsButton(controller: controller),
+              ],
+            );
+          },
         ),
       ),
       if (frameAnalysisSupported && isFlutterApp)
         _buildTab(
           tabName: 'Frame Analysis',
         ),
-      if (rasterMetricsSupported && isFlutterApp)
+      if (rasterStatsSupported && isFlutterApp)
         _buildTab(
-          tabName: 'Raster Metrics',
+          tabName: 'Raster Stats',
           trailing: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
@@ -156,13 +168,13 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
                     PerformanceScreen.id,
                     analytics_constants.collectRasterStats,
                   );
-                  controller.rasterMetricsController.collectRasterStats();
+                  controller.collectRasterStats();
                 },
               ),
               const SizedBox(width: denseSpacing),
               ClearButton(
                 outlined: false,
-                onPressed: controller.rasterMetricsController.clear,
+                onPressed: controller.rasterStatsController.clear,
               ),
               const SizedBox(width: densePadding),
             ],

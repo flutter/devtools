@@ -148,28 +148,6 @@ class CpuProfileData {
         .toList();
     assert(samplesWithTag.isNotEmpty);
 
-    // Use a SplayTreeMap so that map iteration will be in sorted key order.
-    // This keeps the visualization of the profile as consistent as possible
-    // when applying filters.
-    final SplayTreeMap<String, CpuStackFrame> stackFramesWithTag =
-        SplayTreeMap(stackFrameIdCompare);
-
-    for (final sample in samplesWithTag) {
-      String? currentId = sample.leafId;
-      var currentStackFrame = originalData.stackFrames[currentId];
-
-      while (currentStackFrame != null) {
-        stackFramesWithTag[currentId!] = currentStackFrame.shallowCopy(
-          copySampleCountsAndTags: false,
-        );
-        final parentId = currentStackFrame.parentId;
-        final parentStackFrameJson =
-            parentId != null ? originalData.stackFrames[parentId] : null;
-        currentId = parentId;
-        currentStackFrame = parentStackFrameJson;
-      }
-    }
-
     final originalTime = originalData.profileMetaData.time!.duration;
     final microsPerSample =
         originalTime.inMicroseconds / originalData.profileMetaData.sampleCount;
@@ -182,9 +160,35 @@ class CpuProfileData {
       // times wouldn't be helpful.
       time: TimeRange()
         ..start = const Duration()
-        ..end =
-            Duration(microseconds: (newSampleCount * microsPerSample).round()),
+        ..end = Duration(
+          microseconds: microsPerSample.isInfinite
+              ? 0
+              : (newSampleCount * microsPerSample).round(),
+        ),
     );
+
+    // Use a SplayTreeMap so that map iteration will be in sorted key order.
+    // This keeps the visualization of the profile as consistent as possible
+    // when applying filters.
+    final SplayTreeMap<String, CpuStackFrame> stackFramesWithTag =
+        SplayTreeMap(stackFrameIdCompare);
+
+    for (final sample in samplesWithTag) {
+      String? currentId = sample.leafId;
+      var currentStackFrame = originalData.stackFrames[currentId];
+
+      while (currentStackFrame != null) {
+        stackFramesWithTag[currentId!] = currentStackFrame.shallowCopy(
+          copySampleCounts: false,
+          profileMetaData: metaData,
+        );
+        final parentId = currentStackFrame.parentId;
+        final parentStackFrameJson =
+            parentId != null ? originalData.stackFrames[parentId] : null;
+        currentId = parentId;
+        currentStackFrame = parentStackFrameJson;
+      }
+    }
 
     return CpuProfileData._(
       stackFrames: stackFramesWithTag,
@@ -245,13 +249,32 @@ class CpuProfileData {
       return null;
     }
 
+    final originalTime = originalData.profileMetaData.time!.duration;
+    final microsPerSample =
+        originalTime.inMicroseconds / originalData.profileMetaData.sampleCount;
+    final updatedMetaData = originalData.profileMetaData.copyWith(
+      sampleCount: filteredCpuSamples.length,
+      // The start time is zero because only `TimeRange.duration` will matter
+      // for this profile data, and the samples included in this data could be
+      // sparse over the original profile's time range, so true start and end
+      // times wouldn't be helpful.
+      time: TimeRange()
+        ..start = const Duration()
+        ..end = Duration(
+          microseconds: microsPerSample.isInfinite || microsPerSample.isNaN
+              ? 0
+              : (filteredCpuSamples.length * microsPerSample).round(),
+        ),
+    );
+
     void walkAndFilter(CpuStackFrame stackFrame) {
       if (includeFilter(stackFrame)) {
         final parent = originalData.stackFrames[stackFrame.parentId];
         final filteredParentId = filteredParentStackFrameId(parent);
         filteredStackFrames[stackFrame.id] = stackFrame.shallowCopy(
-          copySampleCountsAndTags: false,
           parentId: filteredParentId,
+          copySampleCounts: false,
+          profileMetaData: updatedMetaData,
         );
         if (filteredParentId != null) {
           walkAndFilter(originalData.stackFrames[filteredParentId]!);
@@ -270,12 +293,7 @@ class CpuProfileData {
     return CpuProfileData._(
       stackFrames: filteredStackFrames,
       cpuSamples: filteredCpuSamples,
-      profileMetaData: CpuProfileMetaData(
-        sampleCount: filteredCpuSamples.length,
-        samplePeriod: originalData.profileMetaData.samplePeriod,
-        stackDepth: originalData.profileMetaData.stackDepth,
-        time: originalData.profileMetaData.time,
-      ),
+      profileMetaData: updatedMetaData,
     );
   }
 
@@ -666,23 +684,6 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
 
   bool? _isFlutterCore;
 
-  Iterable<String> get userTags => _userTagSampleCount.keys;
-
-  /// Maps a user tag to the number of CPU samples associated with it.
-  ///
-  /// A single [CpuStackFrame] can have multiple tags because a single object
-  /// can be part of multiple samples.
-  final _userTagSampleCount = <String, int>{};
-
-  void incrementTagSampleCount(String userTag, {int increment = 1}) {
-    final currentCount = _userTagSampleCount.putIfAbsent(userTag, () => 0);
-    _userTagSampleCount[userTag] = currentCount + increment;
-
-    if (parent != null) {
-      parent!.incrementTagSampleCount(userTag);
-    }
-  }
-
   @override
   String get tooltip {
     var prefix = '';
@@ -701,6 +702,17 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     ].join(' - ');
   }
 
+  /// [copySampleCounts] control whether or not the resulting [CpuStackFrame]
+  /// will have [exclusiveSampleCount] and [inclusiveSampleCount] initialized.
+  ///
+  /// Sample counts should only be reset when building a filtered view of the
+  /// full set of samples, as some stacks may no longer be included in the
+  /// profile, changing the exclusive counts.
+  ///
+  /// When [copySampleCounts] is true, inclusive sample counts are also reset
+  /// by default, unless [resetInclusiveSampleCount] is also set to false.
+  /// Inclusive sample counts should only be copied as part of a deep copy of
+  /// a tree.
   @override
   CpuStackFrame shallowCopy({
     String? id,
@@ -712,7 +724,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     String? parentId,
     int? sourceLine,
     CpuProfileMetaData? profileMetaData,
-    bool copySampleCountsAndTags = true,
+    bool copySampleCounts = true,
     bool resetInclusiveSampleCount = true,
   }) {
     final copy = CpuStackFrame._(
@@ -726,14 +738,11 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
       parentId: parentId ?? this.parentId,
       profileMetaData: profileMetaData ?? this.profileMetaData,
     );
-    if (copySampleCountsAndTags) {
+    if (copySampleCounts) {
       copy
         ..exclusiveSampleCount = exclusiveSampleCount
         ..inclusiveSampleCount =
             resetInclusiveSampleCount ? null : inclusiveSampleCount;
-      for (final entry in _userTagSampleCount.entries) {
-        copy.incrementTagSampleCount(entry.key, increment: entry.value);
-      }
     }
     return copy;
   }

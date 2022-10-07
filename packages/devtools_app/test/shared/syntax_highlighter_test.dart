@@ -424,38 +424,96 @@ void main() {
                   final highlighted = highlighter.highlight(context);
                   final children = highlighted.children!;
 
+                  var i = 0;
+
                   spanTester(
                     context,
-                    children[0] as TextSpan,
+                    children[i++] as TextSpan,
                     "'\$",
                     stringSyntaxColor,
                   );
 
                   spanTester(
                     context,
-                    children[1] as TextSpan,
+                    children[i++] as TextSpan,
                     'i',
                     variableSyntaxColor,
                   );
 
                   spanTester(
                     context,
-                    children[2] as TextSpan,
-                    ': \${',
+                    children[i++] as TextSpan,
+                    ': ',
                     stringSyntaxColor,
                   );
 
                   spanTester(
                     context,
-                    children[3] as TextSpan,
-                    'foo[i] == bar[i]',
+                    children[i++] as TextSpan,
+                    '\${',
+                    stringSyntaxColor,
+                  );
+
+                  spanTester(
+                    context,
+                    children[i++] as TextSpan,
+                    'foo',
                     variableSyntaxColor,
                   );
 
                   spanTester(
                     context,
-                    children[4] as TextSpan,
-                    '}\'',
+                    children[i++] as TextSpan,
+                    '[',
+                    stringSyntaxColor,
+                  );
+
+                  spanTester(
+                    context,
+                    children[i++] as TextSpan,
+                    'i',
+                    variableSyntaxColor,
+                  );
+
+                  spanTester(
+                    context,
+                    children[i++] as TextSpan,
+                    '] == ',
+                    stringSyntaxColor,
+                  );
+
+                  spanTester(
+                    context,
+                    children[i++] as TextSpan,
+                    'bar',
+                    variableSyntaxColor,
+                  );
+
+                  spanTester(
+                    context,
+                    children[i++] as TextSpan,
+                    '[',
+                    stringSyntaxColor,
+                  );
+
+                  spanTester(
+                    context,
+                    children[i++] as TextSpan,
+                    'i',
+                    variableSyntaxColor,
+                  );
+
+                  spanTester(
+                    context,
+                    children[i++] as TextSpan,
+                    ']}',
+                    stringSyntaxColor,
+                  );
+
+                  spanTester(
+                    context,
+                    children[i++] as TextSpan,
+                    '\'',
                     stringSyntaxColor,
                   );
                 },

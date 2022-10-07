@@ -14,6 +14,7 @@ import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../memory_controller.dart';
 import '../../primitives/painting.dart';
+import 'chart_control_pane.dart';
 import 'chart_pane_controller.dart';
 import 'memory_android_chart.dart';
 import 'memory_charts.dart';
@@ -23,10 +24,10 @@ import 'memory_vm_chart.dart';
 class MemoryChartPane extends StatefulWidget {
   const MemoryChartPane({
     Key? key,
-    required this.chartControllers,
+    required this.chartController,
     required this.keyFocusNode,
   }) : super(key: key);
-  final MemoryChartPaneController chartControllers;
+  final MemoryChartPaneController chartController;
 
   /// Which widget's key press will be handled by chart.
   final FocusNode keyFocusNode;
@@ -46,6 +47,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
   static const _hoverXOffset = 10;
   static const _hoverYOffset = 0.0;
+
   static double get _hoverWidth => scaleByFontFactor(225.0);
   static const _hover_card_border_width = 2.0;
 
@@ -80,20 +82,20 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     if (!initController()) return;
 
     // TODO(polinach): generalize three addAutoDisposeListener below.
-    addAutoDisposeListener(widget.chartControllers.event.tapLocation, () {
-      if (widget.chartControllers.event.tapLocation.value != null) {
+    addAutoDisposeListener(widget.chartController.event.tapLocation, () {
+      if (widget.chartController.event.tapLocation.value != null) {
         if (_hoverOverlayEntry != null) {
           _hideHover();
         }
-        final tapLocation = widget.chartControllers.event.tapLocation.value;
+        final tapLocation = widget.chartController.event.tapLocation.value;
         if (tapLocation?.tapDownDetails != null) {
           final tapData = tapLocation!;
           final index = tapData.index;
           final timestamp = tapData.timestamp!;
 
           final copied = TapLocation.copy(tapLocation);
-          widget.chartControllers.vm.tapLocation.value = copied;
-          widget.chartControllers.android.tapLocation.value = copied;
+          widget.chartController.vm.tapLocation.value = copied;
+          widget.chartController.android.tapLocation.value = copied;
 
           final allValues = ChartsValues(controller, index, timestamp);
           _showHover(
@@ -105,20 +107,20 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
       }
     });
 
-    addAutoDisposeListener(widget.chartControllers.vm.tapLocation, () {
-      if (widget.chartControllers.vm.tapLocation.value != null) {
+    addAutoDisposeListener(widget.chartController.vm.tapLocation, () {
+      if (widget.chartController.vm.tapLocation.value != null) {
         if (_hoverOverlayEntry != null) {
           _hideHover();
         }
-        final tapLocation = widget.chartControllers.vm.tapLocation.value;
+        final tapLocation = widget.chartController.vm.tapLocation.value;
         if (tapLocation?.tapDownDetails != null) {
           final tapData = tapLocation!;
           final index = tapData.index;
           final timestamp = tapData.timestamp!;
 
           final copied = TapLocation.copy(tapLocation);
-          widget.chartControllers.event.tapLocation.value = copied;
-          widget.chartControllers.android.tapLocation.value = copied;
+          widget.chartController.event.tapLocation.value = copied;
+          widget.chartController.android.tapLocation.value = copied;
 
           final allValues = ChartsValues(controller, index, timestamp);
 
@@ -131,20 +133,20 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
       }
     });
 
-    addAutoDisposeListener(widget.chartControllers.android.tapLocation, () {
-      if (widget.chartControllers.android.tapLocation.value != null) {
+    addAutoDisposeListener(widget.chartController.android.tapLocation, () {
+      if (widget.chartController.android.tapLocation.value != null) {
         if (_hoverOverlayEntry != null) {
           _hideHover();
         }
-        final tapLocation = widget.chartControllers.android.tapLocation.value;
+        final tapLocation = widget.chartController.android.tapLocation.value;
         if (tapLocation?.tapDownDetails != null) {
           final tapData = tapLocation!;
           final index = tapData.index;
           final timestamp = tapData.timestamp!;
 
           final copied = TapLocation.copy(tapLocation);
-          widget.chartControllers.event.tapLocation.value = copied;
-          widget.chartControllers.vm.tapLocation.value = copied;
+          widget.chartController.event.tapLocation.value = copied;
+          widget.chartController.vm.tapLocation.value = copied;
 
           final allValues = ChartsValues(controller, index, timestamp);
 
@@ -159,12 +161,12 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
     addAutoDisposeListener(controller.refreshCharts, () {
       setState(() {
-        widget.chartControllers.recomputeChartData();
+        widget.chartController.recomputeChartData();
       });
     });
 
     // There is no listener passed, so SetState will be invoked.
-    addAutoDisposeListener(controller.androidChartVisibleNotifier);
+    addAutoDisposeListener(controller.isAndroidChartVisibleNotifier);
 
     _updateListeningState();
   }
@@ -191,48 +193,63 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
   @override
   Widget build(BuildContext context) {
-    // TODO(polinach): Can Flutter's focus system be used instead of listening to keyboard?
-    // See debugger page on how to keys can be handled better.
-    return RawKeyboardListener(
-      focusNode: widget.keyFocusNode,
-      onKey: (RawKeyEvent event) {
-        if (event.isKeyPressed(LogicalKeyboardKey.escape)) {
-          _hideHover();
-        }
-      },
-      autofocus: true,
-      child: Column(
-        children: [
-          // TODO(polinach): explain why we need SizedBox here.
-          // And put 70 into a named const that describes what it is.
-          SizedBox(
-            height: scaleByFontFactor(70),
-            child: MemoryEventsPane(widget.chartControllers.event),
-          ),
-          SizedBox(
-            child: MemoryVMChart(widget.chartControllers.vm),
-          ),
-          if (controller.isAndroidChartVisible)
-            SizedBox(
-              height: defaultChartHeight,
-              child: MemoryAndroidChart(
-                widget.chartControllers.android,
+    const memoryEventsPainHeight = 70.0;
+    return ValueListenableBuilder<bool>(
+      valueListenable: preferences.memory.showChart,
+      builder: (_, showChart, __) {
+        // TODO(https://github.com/flutter/devtools/issues/4576): animate
+        // showing and hiding the chart.
+        if (!showChart) return const SizedBox.shrink();
+
+        return RawKeyboardListener(
+          focusNode: widget.keyFocusNode,
+          onKey: (RawKeyEvent event) {
+            if (event.isKeyPressed(LogicalKeyboardKey.escape)) {
+              _hideHover();
+            }
+          },
+          autofocus: true,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  children: [
+                    SizedBox(
+                      height: memoryEventsPainHeight,
+                      child: MemoryEventsPane(widget.chartController.event),
+                    ),
+                    MemoryVMChart(widget.chartController.vm),
+                    if (controller.isAndroidChartVisibleNotifier.value)
+                      SizedBox(
+                        height: defaultChartHeight,
+                        child: MemoryAndroidChart(
+                          widget.chartController.android,
+                        ),
+                      ),
+                  ],
+                ),
               ),
-            ),
-        ],
-      ),
+              ChartControlPane(
+                chartController: widget.chartController,
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
   @override
   void dispose() {
     _hideHover(); // hover will leak if not hide
+    controller.stopTimeLine();
     super.dispose();
   }
 
   List<Widget> _displayVmDataInHover(ChartsValues chartsValues) =>
       _dataToDisplay(
-        chartsValues.displayVmDataToDisplay(widget.chartControllers.vm.traces),
+        chartsValues.displayVmDataToDisplay(widget.chartController.vm.traces),
       );
 
   List<Widget> _displayAndroidDataInHover(ChartsValues chartsValues) {
@@ -240,10 +257,10 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     const dividerLineHorizontalSpace = 20.0;
     const totalDividerLineHorizontalSpace = dividerLineHorizontalSpace * 2;
 
-    if (!controller.isAndroidChartVisible) return [];
+    if (!controller.isAndroidChartVisibleNotifier.value) return [];
 
     final androidDataDisplayed = chartsValues
-        .androidDataToDisplay(widget.chartControllers.android.traces);
+        .androidDataToDisplay(widget.chartController.android.traces);
 
     // Separator between Android data.
     // TODO(terry): Why Center widget doesn't work (parent width is bigger/centered too far right).
@@ -273,8 +290,9 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     ChartsValues chartsValues,
     Offset position,
   ) {
-    final focusColor = Theme.of(context).focusColor;
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final focusColor = theme.focusColor;
+    final colorScheme = theme.colorScheme;
 
     final box = MemoryChartPane.hoverKey.currentContext!.findRenderObject()
         as RenderBox;
@@ -288,7 +306,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
     double totalHoverHeight;
     int totalTraces;
-    if (controller.isAndroidChartVisible) {
+    if (controller.isAndroidChartVisibleNotifier.value) {
       totalTraces = chartsValues.vmData.entries.length -
           1 +
           chartsValues.androidData.entries.length;
@@ -304,9 +322,9 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
     final displayTimestamp = prettyTimestamp(chartsValues.timestamp);
 
-    final hoverHeading = colorScheme.hoverTitleTextStyle;
+    final hoverHeading = theme.hoverTitleTextStyle;
 
-    final OverlayState overlayState = Overlay.of(context)!;
+    final OverlayState overlayState = Overlay.of(context);
     _hoverOverlayEntry ??= OverlayEntry(
       builder: (context) => Positioned(
         top: position.dy + _hoverYOffset,
@@ -374,7 +392,6 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
           dashed: dashedLine == true,
           image: image,
           hasNumeric: true,
-          hasUnit: controller.unitDisplayed.value,
           scaleImage: true,
         ),
       );
@@ -390,14 +407,13 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     bool dashed = false,
     bool bold = true,
     bool hasNumeric = false,
-    bool hasUnit = false,
     bool scaleImage = false,
     double leftPadding = 5.0,
   }) {
-    final hoverTitleEntry = Theme.of(context).colorScheme.hoverTextStyle;
-    final hoverValueEntry = Theme.of(context).colorScheme.hoverValueTextStyle;
-    final hoverSmallEntry =
-        Theme.of(context).colorScheme.hoverSmallValueTextStyle;
+    final theme = Theme.of(context);
+    final hoverTitleEntry = theme.hoverTextStyle;
+    final hoverValueEntry = theme.hoverValueTextStyle;
+    final hoverSmallEntry = theme.hoverSmallValueTextStyle;
 
     List<Widget> hoverPartImageLine(
       String name, {
@@ -411,13 +427,13 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
       String displayValue = ' ';
       if (hasNumeric) {
         int startOfNumber = name.lastIndexOf(' ');
-        if (hasUnit) {
-          final unitOrValue = name.substring(startOfNumber + 1);
-          if (int.tryParse(unitOrValue) == null) {
-            // Got a unit.
-            startOfNumber = name.lastIndexOf(' ', startOfNumber - 1);
-          }
+
+        final unitOrValue = name.substring(startOfNumber + 1);
+        if (int.tryParse(unitOrValue) == null) {
+          // Got a unit.
+          startOfNumber = name.lastIndexOf(' ', startOfNumber - 1);
         }
+
         displayName = '${name.substring(0, startOfNumber)} ';
         displayValue = name.substring(startOfNumber + 1);
       }
@@ -474,9 +490,9 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
   void _hideHover() {
     if (_hoverOverlayEntry != null) {
-      widget.chartControllers.event.tapLocation.value = null;
-      widget.chartControllers.vm.tapLocation.value = null;
-      widget.chartControllers.android.tapLocation.value = null;
+      widget.chartController.event.tapLocation.value = null;
+      widget.chartController.vm.tapLocation.value = null;
+      widget.chartController.android.tapLocation.value = null;
 
       _hoverOverlayEntry?.remove();
       _hoverOverlayEntry = null;
@@ -545,8 +561,9 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
       index++;
     }
 
-    final colorScheme = Theme.of(context).colorScheme;
-    final hoverTextStyle = colorScheme.hoverTextStyle;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final hoverTextStyle = theme.hoverTextStyle;
     final contrastForeground = colorScheme.contrastForeground;
     final collapsedColor = colorScheme.defaultBackgroundColor;
 
@@ -575,8 +592,9 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
   }
 
   Widget _cardWidget(String value) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final hoverValueEntry = colorScheme.hoverSmallValueTextStyle;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final hoverValueEntry = theme.hoverSmallValueTextStyle;
     final expandedGradient = colorScheme.verticalGradient;
 
     return Padding(

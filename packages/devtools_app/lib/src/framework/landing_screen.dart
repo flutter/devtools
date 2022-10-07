@@ -5,6 +5,7 @@
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../analytics/analytics.dart' as ga;
 import '../analytics/constants.dart' as analytics_constants;
@@ -73,7 +74,7 @@ class LandingScreenSection extends StatelessWidget {
       children: [
         Text(
           title,
-          style: textTheme.headline5,
+          style: textTheme.headlineSmall,
         ),
         const PaddedDivider(),
         child,
@@ -94,10 +95,29 @@ class _ConnectDialogState extends State<ConnectDialog>
     with BlockingActionMixin {
   late final TextEditingController connectDialogController;
 
+  SharedPreferences? _debugSharedPreferences;
+  static const _vmServiceUriKey = 'vmServiceUri';
   @override
   void initState() {
     super.initState();
     connectDialogController = TextEditingController();
+    assert(() {
+      _debugInitSharedPreferences();
+      return true;
+    }());
+  }
+
+  void _debugInitSharedPreferences() async {
+    // We only do this in debug mode as it speeds iteration for DevTools
+    // developers who tend to repeatedly restart DevTools to debug the same
+    // test application.
+    _debugSharedPreferences = await SharedPreferences.getInstance();
+    if (_debugSharedPreferences != null && mounted) {
+      final uri = _debugSharedPreferences!.getString(_vmServiceUriKey);
+      if (uri != null) {
+        connectDialogController.text = uri;
+      }
+    }
   }
 
   @override
@@ -115,12 +135,12 @@ class _ConnectDialogState extends State<ConnectDialog>
         children: [
           Text(
             'Connect to a Running App',
-            style: Theme.of(context).textTheme.subtitle1,
+            style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: denseRowSpacing),
           Text(
             'Enter a URL to a running Dart or Flutter application',
-            style: Theme.of(context).textTheme.caption,
+            style: Theme.of(context).textTheme.bodySmall,
           ),
           const Padding(padding: EdgeInsets.only(top: 20.0)),
           _buildConnectInput(),
@@ -164,7 +184,7 @@ class _ConnectDialogState extends State<ConnectDialog>
           child: Text(
             '(e.g., http://127.0.0.1:12345/auth_code=...)',
             textAlign: TextAlign.start,
-            style: Theme.of(context).textTheme.caption,
+            style: Theme.of(context).textTheme.bodySmall,
           ),
         ),
       ],
@@ -185,6 +205,14 @@ class _ConnectDialogState extends State<ConnectDialog>
       notificationService.push('Please enter a VM Service URL.');
       return;
     }
+
+    assert(() {
+      if (_debugSharedPreferences != null) {
+        _debugSharedPreferences!
+            .setString(_vmServiceUriKey, connectDialogController.text);
+      }
+      return true;
+    }());
 
     final uri = normalizeVmServiceUri(connectDialogController.text);
     // Cache the routerDelegate and notifications providers before the async
@@ -227,13 +255,13 @@ class ImportFileInstructions extends StatelessWidget {
         children: [
           Text(
             'Import a data file to use DevTools without an app connection.',
-            style: Theme.of(context).textTheme.subtitle1,
+            style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: denseRowSpacing),
           Text(
             'At this time, DevTools only supports importing files that were originally'
             ' exported from DevTools.',
-            style: Theme.of(context).textTheme.caption,
+            style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: defaultSpacing),
           ElevatedButton(
@@ -276,13 +304,13 @@ class AppSizeToolingInstructions extends StatelessWidget {
         children: [
           Text(
             'Analyze and view diffs for your app\'s size',
-            style: Theme.of(context).textTheme.subtitle1,
+            style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: denseRowSpacing),
           Text(
             'Load Dart AOT snapshots or app size analysis files to '
             'track down size issues in your app.',
-            style: Theme.of(context).textTheme.caption,
+            style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: defaultSpacing),
           ElevatedButton(

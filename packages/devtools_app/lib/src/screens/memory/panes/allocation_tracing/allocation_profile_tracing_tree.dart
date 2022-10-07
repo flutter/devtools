@@ -7,10 +7,11 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../../../primitives/utils.dart';
 import '../../../../shared/common_widgets.dart';
-import '../../../../shared/table.dart';
-import '../../../../shared/table_data.dart';
+import '../../../../shared/table/table.dart';
+import '../../../../shared/table/table_data.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
+import '../../../../ui/tab.dart';
 import '../../../profiler/cpu_profile_columns.dart';
 import '../../../profiler/cpu_profile_model.dart';
 import 'allocation_profile_tracing_view_controller.dart';
@@ -19,55 +20,108 @@ const double _countColumnWidth = 130;
 
 /// Displays an allocation profile as a tree of stack frames, displaying
 /// inclusive and exclusive allocation counts.
-class AllocationTracingTree extends StatelessWidget {
+class AllocationTracingTree extends StatefulWidget {
   const AllocationTracingTree({required this.controller});
 
   final AllocationProfileTracingViewController controller;
 
+  static final _bottomUpTab = _buildTab(tabName: 'Bottom Up');
+  static final _callTreeTab = _buildTab(tabName: 'Call Tree');
+  static final tabs = [
+    _bottomUpTab,
+    _callTreeTab,
+  ];
+
+  static DevToolsTab _buildTab({Key? key, required String tabName}) {
+    return DevToolsTab.create(
+      key: key,
+      tabName: tabName,
+      gaPrefix: 'memoryAllocationTracingTab',
+    );
+  }
+
+  @override
+  State<AllocationTracingTree> createState() => _AllocationTracingTreeState();
+}
+
+class _AllocationTracingTreeState extends State<AllocationTracingTree>
+    with TickerProviderStateMixin {
+  late final TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(
+      length: AllocationTracingTree.tabs.length,
+      vsync: this,
+    );
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<TracedClass?>(
-      valueListenable: controller.selectedTracedClass,
-      builder: (context, selection, _) {
-        if (selection == null) {
-          return const _AllocationTracingInstructions();
-        } else if (!selection.traceAllocations) {
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'Allocation tracing is not enabled for class ${selection.cls.name}.\n',
-              ),
-              const _AllocationTracingInstructions(),
-            ],
-          );
-        } else if (selection.traceAllocations &&
-            (controller.selectedTracedClassAllocationData == null ||
-                controller.selectedTracedClassAllocationData!.bottomUpRoots
-                    .isEmpty)) {
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'No allocation samples have been collected for class ${selection.cls.name}.\n',
-              ),
-            ],
-          );
-        }
-        return StatefulBuilder(
-          builder: (context, setState) {
+    return ValueListenableBuilder<AllocationProfileTracingIsolateState>(
+      valueListenable: widget.controller.stateForIsolate,
+      builder: (context, state, _) {
+        return ValueListenableBuilder<TracedClass?>(
+          valueListenable: state.selectedTracedClass,
+          builder: (context, selection, _) {
+            if (selection == null) {
+              return const _AllocationTracingInstructions();
+            } else if (!selection.traceAllocations) {
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Allocation tracing is not enabled for class ${selection.cls.name}.\n',
+                  ),
+                  const _AllocationTracingInstructions(),
+                ],
+              );
+            } else if (selection.traceAllocations &&
+                (state.selectedTracedClassAllocationData == null ||
+                    state.selectedTracedClassAllocationData!.bottomUpRoots
+                        .isEmpty)) {
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'No allocation samples have been collected for class ${selection.cls.name}.\n',
+                  ),
+                ],
+              );
+            }
             return Column(
               children: [
                 _AllocationProfileTracingTreeHeader(
-                  controller: controller,
+                  controller: widget.controller,
+                  tabController: _tabController,
+                  tabs: AllocationTracingTree.tabs,
                   updateTreeStateCallback: setState,
                 ),
                 Expanded(
-                  child: AllocationProfileTracingBottomUpTable(
-                    cls: selection.cls,
-                    // TODO(bkonyi): support call stack and bottom up views.
-                    dataRoots: controller
-                        .selectedTracedClassAllocationData!.bottomUpRoots,
+                  child: TabBarView(
+                    physics: defaultTabBarViewPhysics,
+                    controller: _tabController,
+                    children: [
+                      // Bottom-up tree view
+                      AllocationProfileTracingTable(
+                        cls: selection.cls,
+                        dataRoots: state
+                            .selectedTracedClassAllocationData!.bottomUpRoots,
+                      ),
+                      // Call tree view
+                      AllocationProfileTracingTable(
+                        cls: selection.cls,
+                        dataRoots: state
+                            .selectedTracedClassAllocationData!.callTreeRoots,
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -119,15 +173,21 @@ class _AllocationProfileTracingTreeHeader extends StatelessWidget {
   const _AllocationProfileTracingTreeHeader({
     Key? key,
     required this.controller,
+    required this.tabController,
+    required this.tabs,
     required this.updateTreeStateCallback,
   }) : super(key: key);
 
   final AllocationProfileTracingViewController controller;
   final Function(VoidCallback) updateTreeStateCallback;
+  final TabController tabController;
+  final List<DevToolsTab> tabs;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
     return AreaPaneHeader(
       title: Text.rich(
         TextSpan(
@@ -137,7 +197,8 @@ class _AllocationProfileTracingTreeHeader extends StatelessWidget {
             ),
             TextSpan(
               style: theme.fixedFontStyle,
-              text: controller.selectedTracedClass.value?.cls.name!,
+              text: controller
+                  .stateForIsolate.value.selectedTracedClass.value?.cls.name!,
             ),
           ],
         ),
@@ -145,11 +206,19 @@ class _AllocationProfileTracingTreeHeader extends StatelessWidget {
       tall: true,
       needsTopBorder: false,
       actions: [
+        const Spacer(),
+        TabBar(
+          labelColor:
+              textTheme.bodyLarge?.color ?? colorScheme.defaultForeground,
+          tabs: tabs,
+          isScrollable: true,
+          controller: tabController,
+        ),
+        const SizedBox(width: denseSpacing),
         ExpandAllButton(
           onPressed: () => updateTreeStateCallback(
             () {
-              final data = controller.selectedTracedClassAllocationData!;
-              for (final root in data.bottomUpRoots) {
+              for (final root in _currentDataRoots) {
                 root.expandCascading();
               }
             },
@@ -159,8 +228,7 @@ class _AllocationProfileTracingTreeHeader extends StatelessWidget {
         CollapseAllButton(
           onPressed: () => updateTreeStateCallback(
             () {
-              final data = controller.selectedTracedClassAllocationData!;
-              for (final root in data.bottomUpRoots) {
+              for (final root in _currentDataRoots) {
                 root.collapseCascading();
               }
             },
@@ -168,6 +236,14 @@ class _AllocationProfileTracingTreeHeader extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  List<CpuStackFrame> get _currentDataRoots {
+    final isBottomUp =
+        tabs[tabController.index] == AllocationTracingTree._bottomUpTab;
+    final data =
+        controller.stateForIsolate.value.selectedTracedClassAllocationData!;
+    return isBottomUp ? data.bottomUpRoots : data.callTreeRoots;
   }
 }
 
@@ -237,25 +313,14 @@ class _ExclusiveCountColumn extends ColumnData<CpuStackFrame> {
   }
 }
 
-/// A table of the bottom-up allocation profile tree.
-class AllocationProfileTracingBottomUpTable extends StatefulWidget {
-  const AllocationProfileTracingBottomUpTable({
+/// A table of an allocation profile tree.
+class AllocationProfileTracingTable extends StatelessWidget {
+  const AllocationProfileTracingTable({
     Key? key,
     required this.cls,
     required this.dataRoots,
   }) : super(key: key);
 
-  final ClassRef cls;
-  final List<CpuStackFrame> dataRoots;
-
-  @override
-  State<AllocationProfileTracingBottomUpTable> createState() {
-    return _AllocationProfileTracingBottomUpTableState();
-  }
-}
-
-class _AllocationProfileTracingBottomUpTableState
-    extends State<AllocationProfileTracingBottomUpTable> {
   static final treeColumn = MethodNameColumn();
   static final startingSortColumn = _InclusiveCountColumn();
   static final columns = List<ColumnData<CpuStackFrame>>.unmodifiable([
@@ -265,34 +330,20 @@ class _AllocationProfileTracingBottomUpTableState
     SourceColumn(),
   ]);
 
-  // TODO(bkonyi): this is a common pattern when creating tables that can be
-  // refreshed. Consider pulling this state into a "TableController".
-  // See: https://github.com/flutter/devtools/issues/4365
-  late ColumnData<CpuStackFrame> sortColumn;
-  late SortDirection sortDirection;
+  final ClassRef cls;
 
-  @override
-  void initState() {
-    super.initState();
-    sortColumn = startingSortColumn;
-    sortDirection = SortDirection.descending;
-  }
+  final List<CpuStackFrame> dataRoots;
 
   @override
   Widget build(BuildContext context) {
     return TreeTable<CpuStackFrame>(
-      dataRoots: widget.dataRoots,
+      keyFactory: (frame) => PageStorageKey<String>(frame.id),
+      dataRoots: dataRoots,
+      dataKey: 'allocation-profile-tree',
       columns: columns,
       treeColumn: treeColumn,
-      keyFactory: (frame) => PageStorageKey<String>(frame.id),
-      sortColumn: sortColumn,
-      sortDirection: sortDirection,
-      onSortChanged: (column, direction, {secondarySortColumn}) {
-        setState(() {
-          sortColumn = column;
-          sortDirection = direction;
-        });
-      },
+      defaultSortColumn: startingSortColumn,
+      defaultSortDirection: SortDirection.descending,
     );
   }
 }

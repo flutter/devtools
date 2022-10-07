@@ -6,6 +6,7 @@
 import 'dart:async';
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/primitives/storage.dart';
 import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/service/service_extension_manager.dart';
 import 'package:devtools_app/src/service/service_extensions.dart' as extensions;
@@ -18,6 +19,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../test_infra/flutter_test_driver.dart' show FlutterRunConfiguration;
 import '../test_infra/flutter_test_environment.dart';
+import '../test_infra/flutter_test_storage.dart';
 
 // Error codes defined by
 // https://www.jsonrpc.org/specification#error_object
@@ -25,6 +27,7 @@ const jsonRpcInvalidParamsCode = -32602;
 
 void main() async {
   setGlobal(IdeTheme, IdeTheme());
+  setGlobal(Storage, FlutterTestStorage());
   final FlutterTestEnvironment env = FlutterTestEnvironment(
     const FlutterRunConfiguration(withDebugger: true),
   );

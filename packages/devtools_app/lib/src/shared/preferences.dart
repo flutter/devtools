@@ -5,6 +5,9 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import '../analytics/analytics.dart' as ga;
+
+import '../analytics/constants.dart' as analytics_constants;
 
 import '../primitives/auto_dispose.dart';
 import '../primitives/utils.dart';
@@ -24,8 +27,10 @@ class PreferencesController extends DisposableController
   ValueListenable<bool> get denseModeEnabled => _denseMode;
 
   InspectorPreferencesController get inspector => _inspector;
-
   final _inspector = InspectorPreferencesController();
+
+  MemoryPreferencesController get memory => _memory;
+  final _memory = MemoryPreferencesController();
 
   Future<void> init() async {
     // Get the current values and listen for and write back changes.
@@ -48,6 +53,7 @@ class PreferencesController extends DisposableController
     });
 
     await inspector.init();
+    await memory.init();
 
     setGlobal(PreferencesController, this);
   }
@@ -55,6 +61,7 @@ class PreferencesController extends DisposableController
   @override
   void dispose() {
     inspector.dispose();
+    memory.dispose();
     super.dispose();
   }
 
@@ -66,7 +73,7 @@ class PreferencesController extends DisposableController
   /// Change the value for the VM developer mode setting.
   void toggleVmDeveloperMode(bool enableVmDeveloperMode) {
     _vmDeveloperMode.value = enableVmDeveloperMode;
-    VmServicePrivate.enablePrivateRpcs = enableVmDeveloperMode;
+    VmServiceWrapper.enablePrivateRpcs = enableVmDeveloperMode;
   }
 
   /// Change the value for the dense mode setting.
@@ -291,5 +298,74 @@ class InspectorPreferencesController extends DisposableController
   /// Change the value for the hover eval mode setting.
   void setHoverEvalMode(bool enableHoverEvalMode) {
     _hoverEvalMode.value = enableHoverEvalMode;
+  }
+}
+
+class MemoryPreferencesController extends DisposableController
+    with AutoDisposeControllerMixin {
+  final androidCollectionEnabled = ValueNotifier<bool>(false);
+  static const _androidCollectionEnabledStorageId =
+      'memory.androidCollectionEnabled';
+
+  final autoSnapshotEnabled = ValueNotifier<bool>(false);
+  static const _autoSnapshotEnabledStorageId = 'memory.autoSnapshotEnabled';
+
+  final showChart = ValueNotifier<bool>(true);
+  static const _showChartStorageId = 'memory.showChart';
+
+  Future<void> init() async {
+    addAutoDisposeListener(
+      androidCollectionEnabled,
+      () {
+        storage.setValue(
+          _androidCollectionEnabledStorageId,
+          androidCollectionEnabled.value.toString(),
+        );
+        if (androidCollectionEnabled.value) {
+          ga.select(
+            analytics_constants.memory,
+            analytics_constants.androidChart,
+          );
+        }
+      },
+    );
+    androidCollectionEnabled.value =
+        await storage.getValue(_androidCollectionEnabledStorageId) == 'true';
+
+    addAutoDisposeListener(
+      autoSnapshotEnabled,
+      () {
+        storage.setValue(
+          _autoSnapshotEnabledStorageId,
+          autoSnapshotEnabled.value.toString(),
+        );
+        if (autoSnapshotEnabled.value) {
+          ga.select(
+            analytics_constants.memory,
+            analytics_constants.autoSnapshot,
+          );
+        }
+      },
+    );
+    autoSnapshotEnabled.value =
+        await storage.getValue(_autoSnapshotEnabledStorageId) == 'true';
+
+    addAutoDisposeListener(
+      showChart,
+      () {
+        storage.setValue(
+          _showChartStorageId,
+          showChart.value.toString(),
+        );
+
+        ga.select(
+          analytics_constants.memory,
+          showChart.value
+              ? analytics_constants.showChart
+              : analytics_constants.hideChart,
+        );
+      },
+    );
+    showChart.value = await storage.getValue(_showChartStorageId) == 'true';
   }
 }

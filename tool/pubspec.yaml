@@ -5,8 +5,13 @@ environment:
   sdk: '>=2.12.0 <3.0.0'
 
 dependencies:
-  args: ^2.0.0
+  args: ^2.1.0
   cli_util: ^0.3.3
+  devtools_shared: ^2.18.0
   http: ^0.13.3
   lints: any
   path: ^1.8.0
+
+dependency_overrides:
+  devtools_shared:
+    path: ../packages/devtools_shared

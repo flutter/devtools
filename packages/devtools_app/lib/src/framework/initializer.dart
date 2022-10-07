@@ -140,7 +140,7 @@ class _InitializerState extends State<Initializer>
           analytics_constants.devToolsMain,
           analytics_constants.appDisconnected,
         );
-        Overlay.of(context)!.insert(_createDisconnectedOverlay());
+        Overlay.of(context).insert(_createDisconnectedOverlay());
 
         addAutoDisposeListener(serviceManager.connectedState, () {
           final connectedState = serviceManager.connectedState.value;
@@ -167,7 +167,7 @@ class _InitializerState extends State<Initializer>
           child: Column(
             children: [
               const Spacer(),
-              Text('Disconnected', style: theme.textTheme.headline3),
+              Text('Disconnected', style: theme.textTheme.displaySmall),
               const SizedBox(height: defaultSpacing),
               if (widget.allowConnectionScreenOnDisconnect)
                 ElevatedButton(
@@ -183,7 +183,7 @@ class _InitializerState extends State<Initializer>
               else
                 Text(
                   'Run a new debug session to reconnect',
-                  style: theme.textTheme.bodyText2,
+                  style: theme.textTheme.bodyMedium,
                 ),
               const Spacer(),
               ElevatedButton(

@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:collection/collection.dart' show IterableExtension;
-import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -14,17 +13,17 @@ import '../../analytics/analytics.dart' as ga;
 import '../../analytics/constants.dart' as analytics_constants;
 import '../../config_specific/logger/logger.dart' as logger;
 import '../../primitives/auto_dispose_mixin.dart';
+import '../../primitives/feature_flags.dart';
 import '../../primitives/utils.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
 import '../../shared/split.dart';
-import '../../shared/table.dart';
-import '../../shared/table_data.dart';
+import '../../shared/table/table.dart';
+import '../../shared/table/table_data.dart';
 import '../../shared/theme.dart';
 import '../../shared/utils.dart';
 import '../../ui/search.dart';
 import '../../ui/tab.dart';
-import 'memory_allocation_table_view.dart';
 import 'memory_analyzer.dart';
 import 'memory_controller.dart';
 import 'memory_filter.dart';
@@ -38,26 +37,10 @@ import 'panes/diff/diff_pane.dart';
 import 'panes/leaks/leaks_pane.dart';
 import 'primitives/memory_utils.dart';
 
-// TODO(bkonyi): enable new allocation profile table when we're ready to remove
-// the existing allocations table.
-@visibleForTesting
-bool enableNewAllocationProfileTable = false;
-
 const memorySearchFieldKeyName = 'MemorySearchFieldKey';
 
 @visibleForTesting
 final memorySearchFieldKey = GlobalKey(debugLabel: memorySearchFieldKeyName);
-
-class HeapTree extends StatefulWidget {
-  const HeapTree(
-    this.controller,
-  );
-
-  final MemoryController controller;
-
-  @override
-  HeapTreeViewState createState() => HeapTreeViewState();
-}
 
 enum SnapshotStatus {
   none,
@@ -139,34 +122,35 @@ String buildRegExs(Map<WildcardMatch, List<String>> matchingCriteria) {
 
 final String knownClassesRegExs = buildRegExs(knowClassesToAnalyzeForImages);
 
-class HeapTreeViewState extends State<HeapTree>
+@visibleForTesting
+class MemoryScreenKeys {
+  static const searchButton = Key('Snapshot Search');
+  static const filterButton = Key('Snapshot Filter');
+  static const dartHeapAnalysisTab = Key('Dart Heap Analysis Tab');
+  static const leaksTab = Key('Leaks Tab');
+  static const dartHeapTableProfileTab = Key('Dart Heap Profile Tab');
+  static const dartHeapAllocationTracingTab =
+      Key('Dart Heap Allocation Tracing Tab');
+  static const diffTab = Key('Diff Tab');
+}
+
+class HeapTreeView extends StatefulWidget {
+  const HeapTreeView(
+    this.controller,
+  );
+
+  final MemoryController controller;
+
+  @override
+  _HeapTreeViewState createState() => _HeapTreeViewState();
+}
+
+class _HeapTreeViewState extends State<HeapTreeView>
     with
         AutoDisposeMixin,
-        ProvidedControllerMixin<MemoryController, HeapTree>,
-        SearchFieldMixin<HeapTree>,
+        ProvidedControllerMixin<MemoryController, HeapTreeView>,
+        SearchFieldMixin<HeapTreeView>,
         TickerProviderStateMixin {
-  @visibleForTesting
-  static const searchButtonKey = Key('Snapshot Search');
-  @visibleForTesting
-  static const filterButtonKey = Key('Snapshot Filter');
-  @visibleForTesting
-  static const dartHeapAnalysisTabKey = Key('Dart Heap Analysis Tab');
-  @visibleForTesting
-  static const dartHeapAllocationsTabKey = Key('Dart Heap Allocations Tab');
-  @visibleForTesting
-  static const leaksTabKey = Key('Leaks Tab');
-  @visibleForTesting
-  static const dartHeapTableProfileKey = Key('Dart Heap Profile Tab');
-  @visibleForTesting
-  static const dartHeapAllocationTracingKey =
-      Key('Dart Heap Allocation Tracing Tab');
-  @visibleForTesting
-  static const diffTabKey = Key('Diff Tab');
-
-  /// Below constants should match index for Tab index in DartHeapTabs.
-  static const int analysisTabIndex = 0;
-  static const int allocationsTabIndex = 1;
-
   static const _gaPrefix = 'memoryTab';
 
   late List<Tab> _tabs;
@@ -206,43 +190,38 @@ class HeapTreeViewState extends State<HeapTree>
 
   void _initTabs() {
     _tabs = [
-      if (enableNewAllocationProfileTable) ...[
-        DevToolsTab.create(
-          key: dartHeapTableProfileKey,
-          tabName: 'Profile',
-          gaPrefix: _gaPrefix,
-        ),
-        DevToolsTab.create(
-          key: dartHeapAllocationTracingKey,
-          tabName: 'Allocation Tracing',
-          gaPrefix: _gaPrefix,
-        ),
-      ],
       DevToolsTab.create(
-        key: dartHeapAnalysisTabKey,
+        key: MemoryScreenKeys.dartHeapTableProfileTab,
+        tabName: 'Profile',
+        gaPrefix: _gaPrefix,
+      ),
+      DevToolsTab.create(
+        key: MemoryScreenKeys.dartHeapAllocationTracingTab,
+        tabName: 'Allocation Tracing',
+        gaPrefix: _gaPrefix,
+      ),
+      DevToolsTab.create(
+        key: MemoryScreenKeys.dartHeapAnalysisTab,
         gaPrefix: _gaPrefix,
         tabName: 'Analysis',
       ),
-      DevToolsTab.create(
-        key: dartHeapAllocationsTabKey,
-        gaPrefix: _gaPrefix,
-        tabName: 'Allocations',
-      ),
-      if (shouldShowDiffPane)
+      if (FeatureFlags.memoryDiffing)
         DevToolsTab.create(
-          key: diffTabKey,
+          key: MemoryScreenKeys.diffTab,
           gaPrefix: _gaPrefix,
           tabName: 'Diff',
         ),
       if (widget.controller.shouldShowLeaksTab.value)
         DevToolsTab.create(
-          key: leaksTabKey,
+          key: MemoryScreenKeys.leaksTab,
           gaPrefix: _gaPrefix,
           tabName: 'Leaks',
         ),
     ];
 
-    _searchableTabs = {dartHeapAnalysisTabKey, dartHeapAllocationsTabKey};
+    _searchableTabs = {
+      MemoryScreenKeys.dartHeapAnalysisTab,
+    };
     _tabController = TabController(length: _tabs.length, vsync: this);
     _tabController.addListener(_onTabChanged);
   }
@@ -311,12 +290,6 @@ class HeapTreeViewState extends State<HeapTree>
       );
     });
 
-    addAutoDisposeListener(controller.monitorAllocationsNotifier, () {
-      setState(() {
-        controller.computeAllLibraries(rebuild: true);
-      });
-    });
-
     addAutoDisposeListener(controller.memoryTimeline.sampleAddedNotifier, () {
       autoSnapshot();
     });
@@ -327,8 +300,6 @@ class HeapTreeViewState extends State<HeapTree>
         treeMapVisible = controller.treeMapVisible.value;
       });
     });
-
-    addAutoDisposeListener(controller.lastMonitorTimestamp);
   }
 
   @override
@@ -347,7 +318,7 @@ class HeapTreeViewState extends State<HeapTree>
 
   /// Detect spike in memory usage if so do an automatic snapshot.
   void autoSnapshot() {
-    if (!controller.autoSnapshotEnabled.value) return;
+    if (!preferences.memory.autoSnapshotEnabled.value) return;
     final heapSample = controller.memoryTimeline.sampleAddedNotifier.value!;
     final heapSum = heapSample.external + heapSample.used;
     heapMovingAverage.add(heapSum);
@@ -469,79 +440,66 @@ class HeapTreeViewState extends State<HeapTree>
       snapshotDisplay = null;
     }
 
-    return Padding(
-      padding: const EdgeInsets.only(top: denseRowSpacing),
-      child: Column(
-        children: [
-          const SizedBox(height: defaultSpacing),
-          ValueListenableBuilder<int>(
-            valueListenable: _currentTab,
-            builder: (context, index, _) => Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                TabBar(
-                  labelColor: themeData.textTheme.bodyText1!.color,
-                  isScrollable: true,
-                  controller: _tabController,
-                  tabs: _tabs,
-                ),
-                if (_searchableTabs.contains(_tabs[index].key))
-                  _buildSearchFilterControls(),
-              ],
-            ),
+    return Column(
+      children: [
+        const SizedBox(height: defaultSpacing),
+        ValueListenableBuilder<int>(
+          valueListenable: _currentTab,
+          builder: (context, index, _) => Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              TabBar(
+                labelColor: themeData.textTheme.bodyLarge!.color,
+                isScrollable: true,
+                controller: _tabController,
+                tabs: _tabs,
+              ),
+              if (_searchableTabs.contains(_tabs[index].key))
+                _buildSearchFilterControls(),
+            ],
           ),
-          const Divider(),
-          Expanded(
-            child: TabBarView(
-              physics: defaultTabBarViewPhysics,
-              controller: _tabController,
-              children: [
-                // Profile Tab
-                if (enableNewAllocationProfileTable) ...[
-                  KeepAliveWrapper(
-                    child: AllocationProfileTableView(
-                      controller: controller.allocationProfileController,
+        ),
+        const Divider(),
+        Expanded(
+          child: TabBarView(
+            physics: defaultTabBarViewPhysics,
+            controller: _tabController,
+            children: [
+              // Profile Tab
+              KeepAliveWrapper(
+                child: AllocationProfileTableView(
+                  controller: controller.allocationProfileController,
+                ),
+              ),
+              const KeepAliveWrapper(
+                child: AllocationProfileTracingView(),
+              ),
+              // Analysis Tab
+              KeepAliveWrapper(
+                child: Column(
+                  children: [
+                    _buildSnapshotControls(themeData.textTheme),
+                    const SizedBox(height: denseRowSpacing),
+                    Expanded(
+                      child: buildSnapshotTables(snapshotDisplay),
                     ),
-                  ),
-                  const KeepAliveWrapper(
-                    child: AllocationProfileTracingView(),
-                  ),
-                ],
-                // Analysis Tab
+                  ],
+                ),
+              ),
+              // Diff tab.
+              if (FeatureFlags.memoryDiffing)
                 KeepAliveWrapper(
-                  child: Column(
-                    children: [
-                      _buildSnapshotControls(themeData.textTheme),
-                      const SizedBox(height: denseRowSpacing),
-                      Expanded(
-                        child: buildSnapshotTables(snapshotDisplay),
-                      ),
-                    ],
+                  child: DiffPane(
+                    diffController: controller.diffPaneController,
                   ),
                 ),
-                // Allocations Tab
-                KeepAliveWrapper(
-                  child: Column(
-                    children: [
-                      _buildAllocationsControls(),
-                      const SizedBox(height: denseRowSpacing),
-                      const Expanded(
-                        child: AllocationTableView(),
-                      ),
-                    ],
-                  ),
-                ),
-                // Diff tab.
-                if (shouldShowDiffPane)
-                  const KeepAliveWrapper(child: DiffPane()),
-                // Leaks tab.
-                if (controller.shouldShowLeaksTab.value)
-                  const KeepAliveWrapper(child: LeaksPane()),
-              ],
-            ),
+              // Leaks tab.
+              if (controller.shouldShowLeaksTab.value)
+                const KeepAliveWrapper(child: LeaksPane()),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -643,7 +601,7 @@ class HeapTreeViewState extends State<HeapTree>
     return DropdownButtonHideUnderline(
       child: DropdownButton<String>(
         key: groupByMenuButtonKey,
-        style: textTheme.bodyText2,
+        style: textTheme.bodyMedium,
         value: controller.groupingBy.value,
         onChanged: (String? newValue) {
           setState(
@@ -767,85 +725,7 @@ class HeapTreeViewState extends State<HeapTree>
     }
   }
 
-  static const _updateCircleRadius = 8.0;
-
   Timer? removeUpdateBubble;
-
-  Widget displayTimestampUpdateBubble() {
-    // Build the bubble to show data has changed (new allocation data).
-    final bubble = AnimatedBuilder(
-      animation: _animation,
-      builder: (context, widget) {
-        double circleSize = _animation.value;
-        if (_animation.status == AnimationStatus.reverse &&
-            _animation.value < _updateCircleRadius) {
-          circleSize = _updateCircleRadius;
-          _animation.stop();
-
-          // Keep the bubble displayed for a few seconds.
-          removeUpdateBubble?.cancel();
-
-          removeUpdateBubble = Timer(const Duration(seconds: 5), () {
-            controller.lastMonitorTimestamp.value = controller.monitorTimestamp;
-            removeUpdateBubble = null;
-          });
-        }
-        final circleWidget = textWidgetWithUpdateCircle(
-          controller.monitorTimestamp == null
-              ? 'No allocations tracked'
-              : 'Allocations Tracked at ${MemoryController.formattedTimestamp(controller.monitorTimestamp)}',
-          style: Theme.of(context).colorScheme.italicTextStyle,
-          size: controller.lastMonitorTimestamp.value ==
-                  controller.monitorTimestamp
-              ? 0
-              : circleSize,
-        );
-
-        return circleWidget;
-      },
-    );
-
-    // Start the animation running again, wobbly bubble.
-    _animation.forward();
-
-    return bubble;
-  }
-
-  Widget _buildAllocationsControls() {
-    final updateCircle = displayTimestampUpdateBubble();
-
-    return Row(
-      children: [
-        IconLabelButton(
-          tooltip: 'Collect Allocation Statistics',
-          imageIcon: trackImage(context),
-          label: 'Track',
-          onPressed: () async {
-            ga.select(
-              analytics_constants.memory,
-              analytics_constants.trackAllocations,
-            );
-            await _allocationStart();
-          },
-        ),
-        const SizedBox(width: denseSpacing),
-        IconLabelButton(
-          tooltip: 'Reset all accumulators',
-          imageIcon: resetImage(context),
-          label: 'Reset',
-          onPressed: () async {
-            ga.select(
-              analytics_constants.memory,
-              analytics_constants.resetAllocationAccumulators,
-            );
-            await _allocationReset();
-          },
-        ),
-        const Spacer(),
-        updateCircle,
-      ],
-    );
-  }
 
   Widget textWidgetWithUpdateCircle(
     String text, {
@@ -914,95 +794,6 @@ class HeapTreeViewState extends State<HeapTree>
     return textWidth;
   }
 
-  // WARNING: Do not checkin the debug flag set to true.
-  final _debugAllocationMonitoring = false;
-
-  Future<void> _allocationStart() async {
-    // TODO(terry): Look at grouping by library or classes also filtering e.g.,
-    // await controller.computeLibraries();
-    controller.memoryTimeline.addMonitorStartEvent();
-
-    final allocationtimestamp = DateTime.now();
-    final currentAllocations = await controller.getAllocationProfile();
-
-    if (controller.monitorAllocations.isNotEmpty) {
-      final previousSize = controller.monitorAllocations.length;
-      int previousIndex = 0;
-      final currentSize = currentAllocations.length;
-      int currentIndex = 0;
-      while (currentIndex < currentSize && previousIndex < previousSize) {
-        final previousAllocation = controller.monitorAllocations[previousIndex];
-        final currentAllocation = currentAllocations[currentIndex];
-
-        if (previousAllocation.classRef.id == currentAllocation.classRef.id) {
-          final instancesCurrent = currentAllocation.instancesCurrent;
-          final bytesCurrent = currentAllocation.bytesCurrent;
-
-          currentAllocation.instancesDelta = previousAllocation.instancesDelta +
-              (instancesCurrent - previousAllocation.instancesCurrent);
-          currentAllocation.bytesDelta = previousAllocation.bytesDelta +
-              (bytesCurrent - previousAllocation.bytesCurrent);
-
-          final instancesAccumulated = currentAllocation.instancesDelta;
-          final bytesAccumulated = currentAllocation.bytesDelta;
-
-          if (_debugAllocationMonitoring &&
-              (instancesAccumulated != 0 || bytesAccumulated != 0)) {
-            debugLogger(
-              'previous,index=[$previousIndex][$currentIndex] '
-              'class ${currentAllocation.classRef.name}\n'
-              '    instancesCurrent=$instancesCurrent, '
-              '    instancesAccumulated=${currentAllocation.instancesDelta}\n'
-              '    bytesCurrent=$bytesCurrent, '
-              '    bytesAccumulated=${currentAllocation.bytesDelta}}\n',
-            );
-          }
-
-          previousIndex++;
-          currentIndex++;
-        } else {
-          // Either a new class in currentAllocations or old that's no longer
-          // active in previousAllocations.
-          final currentClassId = currentAllocation.classRef.id;
-          final ClassHeapDetailStats? first =
-              controller.monitorAllocations.firstWhereOrNull(
-            (element) => element.classRef.id == currentClassId,
-          );
-          if (first != null) {
-            // A class that no longer exist (live or sentinel).
-            previousIndex++;
-          } else {
-            // New Class encountered in new AllocationProfile, don't increment
-            // previousIndex.
-            currentIndex++;
-          }
-        }
-      }
-
-      // Insure all entries from previous and current monitors were looked at.
-      assert(previousSize == previousIndex, '$previousSize == $previousIndex');
-      assert(currentSize == currentIndex, '$currentSize == $currentIndex');
-    }
-
-    controller.monitorTimestamp = allocationtimestamp;
-    controller.monitorAllocations = currentAllocations;
-
-    controller.treeChanged();
-  }
-
-  Future<void> _allocationReset() async {
-    controller.memoryTimeline.addMonitorResetEvent();
-    final currentAllocations = await controller.resetAllocationProfile();
-
-    // Reset all accumulators to zero.
-    for (final classAllocation in currentAllocations) {
-      classAllocation.bytesDelta = 0;
-      classAllocation.instancesDelta = 0;
-    }
-
-    controller.monitorAllocations = currentAllocations;
-  }
-
   /// Match, found,  select it and process via ValueNotifiers.
   void selectTheMatch(String foundName) {
     ga.select(
@@ -1011,10 +802,7 @@ class HeapTreeViewState extends State<HeapTree>
     );
 
     setState(() {
-      if (_tabController.index == allocationsTabIndex) {
-        controller.selectItemInAllocationTable(foundName);
-      } else if (_tabController.index == analysisTabIndex &&
-          snapshotDisplay is MemoryHeapTable) {
+      if (snapshotDisplay is MemoryHeapTable) {
         controller.groupByTreeTable.dataRoots.every((element) {
           element.collapseCascading();
           return true;
@@ -1026,21 +814,14 @@ class HeapTreeViewState extends State<HeapTree>
     clearSearchField(controller);
   }
 
-  bool get _isSearchable {
-    // Analysis tab and Snapshot exist or 'Allocations' tab allocations are monitored.
-    return (_tabController.index == analysisTabIndex && !treeMapVisible) ||
-        (_tabController.index == allocationsTabIndex &&
-            controller.monitorAllocations.isNotEmpty);
-  }
-
   Widget _buildSearchWidget(GlobalKey<State<StatefulWidget>> key) => Container(
         width: wideSearchTextWidth,
         height: defaultTextFieldHeight,
         child: buildAutoCompleteSearchField(
           controller: controller,
           searchFieldKey: key,
-          searchFieldEnabled: _isSearchable,
-          shouldRequestFocus: _isSearchable,
+          searchFieldEnabled: !treeMapVisible,
+          shouldRequestFocus: !treeMapVisible,
           onSelection: selectTheMatch,
           supportClearField: true,
         ),
@@ -1053,7 +834,7 @@ class HeapTreeViewState extends State<HeapTree>
           _buildSearchWidget(memorySearchFieldKey),
           const SizedBox(width: denseSpacing),
           FilterButton(
-            key: filterButtonKey,
+            key: MemoryScreenKeys.filterButton,
             onPressed: _filter,
             // TODO(kenz): implement isFilterActive
             isFilterActive: false,
@@ -1243,11 +1024,6 @@ class HeapTreeViewState extends State<HeapTree>
       nodeIndex: analyzeSnapshot.index,
       scrollIntoView: true,
     );
-  }
-
-  // ignore: unused_element
-  void _settings() {
-    // TODO(terry): TBD
   }
 }
 
@@ -1544,12 +1320,13 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
     if (root != null && root.children.isNotEmpty) {
       // Snapshots and analyses exists display the trees.
       controller.groupByTreeTable = TreeTable<Reference>(
+        keyFactory: (libRef) => PageStorageKey<String?>(libRef.name),
         dataRoots: root.children,
+        dataKey: 'memory-snapshot-tree',
         columns: _columns,
         treeColumn: _treeColumn,
-        keyFactory: (libRef) => PageStorageKey<String?>(libRef.name),
-        sortColumn: _columns[0],
-        sortDirection: SortDirection.ascending,
+        defaultSortColumn: _columns[0],
+        defaultSortDirection: SortDirection.ascending,
         selectionNotifier: controller.selectionSnapshotNotifier,
       );
 

@@ -93,7 +93,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
         widget.instructions,
         textAlign: TextAlign.center,
         style: TextStyle(
-          color: Theme.of(context).textTheme.headline1!.color,
+          color: Theme.of(context).textTheme.displayLarge!.color,
         ),
       ),
     );
@@ -147,7 +147,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
             importedFile?.path ?? 'No File Selected',
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              color: Theme.of(context).textTheme.headline1!.color,
+              color: Theme.of(context).textTheme.displayLarge!.color,
             ),
             textAlign: TextAlign.left,
           ),

@@ -13,14 +13,11 @@ TOOL_DIR=`dirname "${RELATIVE_PATH_TO_SCRIPT}"`
 # The devtools root directory is assumed to be the parent of this directory.
 DEVTOOLS_DIR="${TOOL_DIR}/.."
 
-pushd $DEVTOOLS_DIR/packages/devtools_app/assets/perfetto
+pushd $DEVTOOLS_DIR/third_party/packages/perfetto_compiled/lib
 
 echo "UPDATE_PERFETTO: Moving DevTools-Perfetto integration files to a temp directory"
 mkdir _tmp
-mv dist/devtools_dark.css _tmp/
-mv dist/devtools_light.css _tmp/
-mv dist/devtools_shared.css _tmp/
-mv dist/devtools_theme_handler.js _tmp/
+mv dist/devtools/* _tmp/
 
 echo "UPDATE_PERFETTO: Deleting existing Perfetto build"
 rm -rf dist/
@@ -44,17 +41,26 @@ else
 fi
 
 echo "UPDATE_PERFETTO: Moving DevTools-Perfetto integration files back from _tmp/"
-mv _tmp/devtools_dark.css dist/
-mv _tmp/devtools_light.css dist/
-mv _tmp/devtools_shared.css dist/
-mv _tmp/devtools_theme_handler.js dist/
+mkdir dist/devtools
+mv _tmp/* dist/devtools/
 
 echo "UPDATE_PERFETTO: Updating index.html headers to include DevTools-Perfetto integration files"
-gsed -i "s/<\/head>/  <link id=\"devtools-style\" rel=\"stylesheet\" href=\"devtools_dark.css\">\n<\/head>/g" dist/index.html
-gsed -i "s/<\/head>/  <script src=\"devtools_theme_handler.js\"><\/script>\n<\/head>/g" dist/index.html
+gsed -i "s/<\/head>/  <link id=\"devtools-style\" rel=\"stylesheet\" href=\"devtools\/devtools_dark.css\">\n<\/head>/g" dist/index.html
+gsed -i "s/<\/head>/  <script src=\"devtools\/devtools_theme_handler.js\"><\/script>\n<\/head>/g" dist/index.html
 
 echo "UPDATE_PERFETTO: Cleaning up temporary directories"
 rm -rf _tmp
 rm -rf _perfetto
+
+# TODO(kenz): we should verify that every file name under dist/ is included in devtools_app/pubspec.yaml until
+# https://github.com/flutter/flutter/issues/112019 is resolved.
+
+popd
+
+pushd $DEVTOOLS_DIR
+
+// Verify that all the perfetto assets are included in the devtools_app pubspec.yaml, and that the assets
+// paths are updated to the new version number.
+dart ./tool/update_perfetto_assets.dart
 
 popd

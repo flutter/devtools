@@ -3,23 +3,24 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/screens/vm_developer/object_viewport.dart';
-import 'package:devtools_app/src/screens/vm_developer/vm_class_display.dart';
+import 'package:devtools_app/src/screens/debugger/breakpoint_manager.dart';
+import 'package:devtools_app/src/screens/vm_developer/object_inspector/object_viewport.dart';
+import 'package:devtools_app/src/screens/vm_developer/object_inspector/vm_class_display.dart';
+import 'package:devtools_app/src/screens/vm_developer/object_inspector/vm_field_display.dart';
+import 'package:devtools_app/src/screens/vm_developer/object_inspector/vm_function_display.dart';
+import 'package:devtools_app/src/screens/vm_developer/object_inspector/vm_library_display.dart';
+import 'package:devtools_app/src/screens/vm_developer/object_inspector/vm_object_model.dart';
+import 'package:devtools_app/src/screens/vm_developer/object_inspector/vm_script_display.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_developer_common_widgets.dart';
-import 'package:devtools_app/src/screens/vm_developer/vm_field_display.dart';
-import 'package:devtools_app/src/screens/vm_developer/vm_function_display.dart';
-import 'package:devtools_app/src/screens/vm_developer/vm_library_display.dart';
-import 'package:devtools_app/src/screens/vm_developer/vm_object_model.dart';
-import 'package:devtools_app/src/screens/vm_developer/vm_script_display.dart';
-import 'package:devtools_app/src/scripts/script_manager.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/history_viewport.dart';
 import 'package:devtools_test/devtools_test.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
+
 import '../vm_developer_test_utils.dart';
 
 void main() {
@@ -27,17 +28,15 @@ void main() {
 
   late FakeServiceManager fakeServiceManager;
 
-  late MockScriptManager scriptManager;
+  const windowSize = Size(2560.0, 1338.0);
 
   setUp(() {
     fakeServiceManager = FakeServiceManager();
 
-    scriptManager = MockScriptManager();
-    when(scriptManager.sortedScripts).thenReturn(ValueNotifier(<ScriptRef>[]));
-
+    setUpMockScriptManager();
     setGlobal(ServiceConnectionManager, fakeServiceManager);
-    setGlobal(ScriptManager, scriptManager);
     setGlobal(IdeTheme, IdeTheme());
+    setGlobal(BreakpointManager, BreakpointManager());
 
     testObjectInspectorViewController = TestObjectInspectorViewController();
   });
@@ -46,7 +45,7 @@ void main() {
     await tester.pumpWidget(
       wrap(ObjectViewport(controller: testObjectInspectorViewController)),
     );
-    expect(viewportTitle(null), 'No object selected.');
+    expect(ObjectViewport.viewportTitle(null), 'No object selected.');
     expect(find.text('No object selected.'), findsOneWidget);
     expect(find.byTooltip('Refresh'), findsOneWidget);
     expect(find.byType(HistoryViewport<VmObject>), findsOneWidget);
@@ -61,13 +60,14 @@ void main() {
       mockVmObject(mockClassObject);
     });
 
-    testWidgets('viewport shows class display', (WidgetTester tester) async {
+    testWidgetsWithWindowSize('viewport shows class display', windowSize,
+        (WidgetTester tester) async {
       testObjectInspectorViewController.fakeObjectHistory
           .setCurrentObject(mockClassObject);
       await tester.pumpWidget(
         wrap(ObjectViewport(controller: testObjectInspectorViewController)),
       );
-      expect(viewportTitle(mockClassObject), 'Class FooClass');
+      expect(ObjectViewport.viewportTitle(mockClassObject), 'Class FooClass');
       expect(find.text('Class FooClass'), findsOneWidget);
       expect(find.byType(VmClassDisplay), findsOneWidget);
     });
@@ -82,7 +82,8 @@ void main() {
       mockVmObject(mockFieldObject);
     });
 
-    testWidgets('viewport shows field display', (WidgetTester tester) async {
+    testWidgetsWithWindowSize('viewport shows field display', windowSize,
+        (WidgetTester tester) async {
       testObjectInspectorViewController.fakeObjectHistory
           .setCurrentObject(mockFieldObject);
 
@@ -90,7 +91,7 @@ void main() {
         wrap(ObjectViewport(controller: testObjectInspectorViewController)),
       );
 
-      expect(viewportTitle(mockFieldObject), 'Field fooField');
+      expect(ObjectViewport.viewportTitle(mockFieldObject), 'Field fooField');
       expect(find.text('Field fooField'), findsOneWidget);
       expect(find.byType(VmFieldDisplay), findsOneWidget);
     });
@@ -110,7 +111,8 @@ void main() {
       mockVmObject(mockFuncObject);
       when(mockFuncObject.obj).thenReturn(testFunctionCopy);
     });
-    testWidgets('viewport shows function display', (WidgetTester tester) async {
+    testWidgetsWithWindowSize('viewport shows function display', windowSize,
+        (WidgetTester tester) async {
       testObjectInspectorViewController.fakeObjectHistory
           .setCurrentObject(mockFuncObject);
 
@@ -118,7 +120,10 @@ void main() {
         wrap(ObjectViewport(controller: testObjectInspectorViewController)),
       );
 
-      expect(viewportTitle(mockFuncObject), 'Function fooFunction');
+      expect(
+        ObjectViewport.viewportTitle(mockFuncObject),
+        'Function fooFunction',
+      );
       expect(find.text('Function fooFunction'), findsOneWidget);
       expect(find.byType(VmFuncDisplay), findsOneWidget);
     });
@@ -133,13 +138,17 @@ void main() {
       mockVmObject(mockScriptObject);
     });
 
-    testWidgets('viewport shows script display', (WidgetTester tester) async {
+    testWidgetsWithWindowSize('viewport shows script display', windowSize,
+        (WidgetTester tester) async {
       testObjectInspectorViewController.fakeObjectHistory
           .setCurrentObject(mockScriptObject);
       await tester.pumpWidget(
         wrap(ObjectViewport(controller: testObjectInspectorViewController)),
       );
-      expect(viewportTitle(mockScriptObject), 'Script fooScript.dart');
+      expect(
+        ObjectViewport.viewportTitle(mockScriptObject),
+        'Script fooScript.dart',
+      );
       expect(find.text('Script fooScript.dart'), findsOneWidget);
       expect(find.byType(VmScriptDisplay), findsOneWidget);
     });
@@ -160,7 +169,7 @@ void main() {
       await tester.pumpWidget(
         wrap(ObjectViewport(controller: testObjectInspectorViewController)),
       );
-      expect(viewportTitle(mockLibraryObject), 'Library fooLib');
+      expect(ObjectViewport.viewportTitle(mockLibraryObject), 'Library fooLib');
       expect(find.text('Library fooLib'), findsOneWidget);
       expect(find.byType(VmLibraryDisplay), findsOneWidget);
     });
@@ -176,7 +185,10 @@ void main() {
       await tester.pumpWidget(
         wrap(ObjectViewport(controller: testObjectInspectorViewController)),
       );
-      expect(viewportTitle(testInstanceObject), 'Instance FooInstance');
+      expect(
+        ObjectViewport.viewportTitle(testInstanceObject),
+        'Instance FooInstance',
+      );
       expect(find.text('Instance FooInstance'), findsOneWidget);
       expect(find.byType(VMInfoCard), findsOneWidget);
     });

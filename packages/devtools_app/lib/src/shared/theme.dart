@@ -53,7 +53,6 @@ ThemeData _darkTheme(IdeTheme ideTheme) {
     primaryColor: devtoolsGrey[900]!,
     backgroundColor: background,
     indicatorColor: devtoolsBlue[400]!,
-    selectedRowColor: devtoolsGrey[600]!,
     textSelectionColor: Colors.black,
   );
 }
@@ -69,7 +68,6 @@ ThemeData _lightTheme(IdeTheme ideTheme) {
     primaryColor: devtoolsBlue[600]!,
     backgroundColor: background,
     indicatorColor: Colors.yellowAccent[400]!,
-    selectedRowColor: devtoolsBlue[600]!,
     textSelectionColor: Colors.white,
   );
 }
@@ -80,22 +78,18 @@ ThemeData _baseTheme({
   required Color primaryColor,
   required Color backgroundColor,
   required Color indicatorColor,
-  required Color selectedRowColor,
   required Color textSelectionColor,
 }) {
   return theme.copyWith(
     primaryColor: primaryColor,
     indicatorColor: indicatorColor,
-    selectedRowColor: selectedRowColor,
     // Same values for both light and dark themes.
     primaryColorDark: devtoolsBlue[700],
     primaryColorLight: devtoolsBlue[400],
     // ignore: deprecated_member_use
     accentColor: devtoolsBlue[400],
-    backgroundColor: devtoolsGrey[600],
     canvasColor: backgroundColor,
     scaffoldBackgroundColor: backgroundColor,
-    colorScheme: theme.colorScheme.copyWith(background: backgroundColor),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         foregroundColor: theme.colorScheme.contrastForeground,
@@ -153,6 +147,7 @@ ThemeData _baseTheme({
     textSelectionTheme: TextSelectionThemeData(
       selectionColor: textSelectionColor,
     ),
+    colorScheme: theme.colorScheme.copyWith(background: backgroundColor),
   );
 }
 
@@ -375,55 +370,6 @@ extension DevToolsColorScheme on ColorScheme {
 
   Color get autoCompleteTextColor => isLight ? Colors.black : Colors.white;
 
-  // Title of the hover card.
-  TextStyle get hoverTitleTextStyle => TextStyle(
-        color: defaultForeground,
-        fontWeight: FontWeight.normal,
-        fontSize: scaleByFontFactor(15.0),
-        decoration: TextDecoration.none,
-      );
-
-  // Items in the hover card.
-  TextStyle get hoverTextStyle => TextStyle(
-        color: defaultForeground,
-        fontWeight: FontWeight.normal,
-        fontSize: scaleByFontFactor(11.5),
-        decoration: TextDecoration.none,
-      );
-
-  // Value of items in hover e.g., capacity, etc.
-  TextStyle get hoverValueTextStyle => TextStyle(
-        color: contrastForeground,
-        fontWeight: FontWeight.normal,
-        fontSize: scaleByFontFactor(11.5),
-        decoration: TextDecoration.none,
-      );
-
-  // Used for custom extension event values.
-  TextStyle get hoverSmallValueTextStyle => TextStyle(
-        color: defaultForeground,
-        fontWeight: FontWeight.normal,
-        fontSize: scaleByFontFactor(10.0),
-        decoration: TextDecoration.none,
-      );
-
-  // Last allocation timestamp displayed.
-  TextStyle get italicTextStyle => TextStyle(
-        color: defaultForeground,
-        fontWeight: FontWeight.normal,
-        fontSize: scaleByFontFactor(14.0),
-        fontStyle: FontStyle.italic,
-        decoration: TextDecoration.none,
-      );
-
-  // Items in a chart's legend.
-  TextStyle get legendTextStyle => TextStyle(
-        color: defaultForeground,
-        fontWeight: FontWeight.normal,
-        fontSize: scaleByFontFactor(10.0),
-        decoration: TextDecoration.none,
-      );
-
   Color get expandedColor => isLight ? Colors.grey[200]! : Colors.grey[800]!;
 
   Color get expandedTopContentColor =>
@@ -439,19 +385,8 @@ extension DevToolsColorScheme on ColorScheme {
         tileMode: TileMode.repeated,
       );
 
-  /// TextStyle for callstack.
-  TextStyle get stackTraceCall => TextStyle(
-        color: defaultForeground,
-        fontWeight: FontWeight.normal,
-        fontSize: scaleByFontFactor(12.0),
-      );
-
-  /// TextStyle for source file displayed in callstack.
-  TextStyle get stackTraceSource => TextStyle(
-        color: defaultForeground,
-        fontWeight: FontWeight.w100,
-        fontSize: scaleByFontFactor(12.0),
-      );
+  Color get selectedRowColor =>
+      isLight ? devtoolsBlue[600]! : devtoolsGrey[600]!;
 }
 
 /// Utility extension methods to the [ThemeData] class.
@@ -460,7 +395,7 @@ extension ThemeDataExtension on ThemeData {
   bool get isDarkTheme => brightness == Brightness.dark;
 
   TextStyle get regularTextStyle => TextStyle(
-        color: textTheme.bodyText2!.color,
+        color: textTheme.bodyMedium!.color,
         fontSize: defaultFontSize,
       );
 
@@ -478,7 +413,7 @@ extension ThemeDataExtension on ThemeData {
       );
 
   TextStyle get fixedFontStyle =>
-      textTheme.bodyText2!.copyWith(fontFamily: 'RobotoMono');
+      textTheme.bodyMedium!.copyWith(fontFamily: 'RobotoMono');
 
   TextStyle get subtleFixedFontStyle =>
       fixedFontStyle.copyWith(color: unselectedWidgetColor);
@@ -488,7 +423,7 @@ extension ThemeDataExtension on ThemeData {
       );
 
   TextStyle get devToolsTitleStyle =>
-      textTheme.headline6!.copyWith(color: Colors.white);
+      textTheme.titleLarge!.copyWith(color: Colors.white);
 
   Color get titleSolidBackgroundColor => colorScheme.isLight
       ? colorScheme.alternatingBackgroundColor
@@ -513,6 +448,69 @@ extension ThemeDataExtension on ThemeData {
   TextStyle get searchMatchHighlightStyleFocused => const TextStyle(
         color: Colors.black,
         backgroundColor: searchMatchColor,
+      );
+
+  // Title of the hover card.
+  TextStyle get hoverTitleTextStyle => TextStyle(
+        color: colorScheme.defaultForeground,
+        fontWeight: FontWeight.normal,
+        fontSize: scaleByFontFactor(15.0),
+        decoration: TextDecoration.none,
+      );
+
+  // Items in the hover card.
+  TextStyle get hoverTextStyle => TextStyle(
+        color: colorScheme.defaultForeground,
+        fontWeight: FontWeight.normal,
+        fontSize: scaleByFontFactor(11.5),
+        decoration: TextDecoration.none,
+      );
+
+  // Value of items in hover e.g., capacity, etc.
+  TextStyle get hoverValueTextStyle => TextStyle(
+        color: colorScheme.contrastForeground,
+        fontWeight: FontWeight.normal,
+        fontSize: scaleByFontFactor(11.5),
+        decoration: TextDecoration.none,
+      );
+
+  // Used for custom extension event values.
+  TextStyle get hoverSmallValueTextStyle => TextStyle(
+        color: colorScheme.defaultForeground,
+        fontWeight: FontWeight.normal,
+        fontSize: scaleByFontFactor(10.0),
+        decoration: TextDecoration.none,
+      );
+
+  // Last allocation timestamp displayed.
+  TextStyle get italicTextStyle => TextStyle(
+        color: colorScheme.defaultForeground,
+        fontWeight: FontWeight.normal,
+        fontSize: scaleByFontFactor(14.0),
+        fontStyle: FontStyle.italic,
+        decoration: TextDecoration.none,
+      );
+
+  // Items in a chart's legend.
+  TextStyle get legendTextStyle => TextStyle(
+        color: colorScheme.defaultForeground,
+        fontWeight: FontWeight.normal,
+        fontSize: chartFontSizeSmall,
+        decoration: TextDecoration.none,
+      );
+
+  /// TextStyle for callstack.
+  TextStyle get stackTraceCall => TextStyle(
+        color: colorScheme.defaultForeground,
+        fontWeight: FontWeight.normal,
+        fontSize: scaleByFontFactor(12.0),
+      );
+
+  /// TextStyle for source file displayed in callstack.
+  TextStyle get stackTraceSource => TextStyle(
+        color: colorScheme.defaultForeground,
+        fontWeight: FontWeight.w100,
+        fontSize: scaleByFontFactor(12.0),
       );
 }
 

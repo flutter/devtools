@@ -8,6 +8,7 @@ import 'dart:html' as html;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import '../../../../../app.dart';
 import '../../../../../primitives/auto_dispose.dart';
 import '../../../../../primitives/trace_event.dart';
 import '../../../../../shared/globals.dart';
@@ -24,9 +25,6 @@ const _debugUseLocalPerfetto = false;
 class PerfettoController extends DisposableController
     with AutoDisposeControllerMixin {
   static const viewId = 'embedded-perfetto';
-
-  String get _bundledPerfettoUrl =>
-      '${html.window.location.origin}/assets/perfetto/dist/index.html$_embeddedModeQuery';
 
   /// Url when running Perfetto locally following the instructions here:
   /// https://perfetto.dev/docs/contributing/build-instructions#ui-development
@@ -52,8 +50,15 @@ class PerfettoController extends DisposableController
   /// [post_message_handler.ts] in the Perfetto codebase.
   static const _devtoolsThemeChange = 'DART-DEVTOOLS-THEME-CHANGE';
 
-  String get perfettoUrl =>
-      _debugUseLocalPerfetto ? _debugPerfettoUrl : _bundledPerfettoUrl;
+  String get _perfettoUrl {
+    if (_debugUseLocalPerfetto) {
+      return _debugPerfettoUrl;
+    }
+    final baseUrl = isExternalBuild
+        ? '${html.window.location.origin}/assets/packages/perfetto_compiled/dist/index.html'
+        : 'https://ui.perfetto.dev';
+    return '$baseUrl$_embeddedModeQuery';
+  }
 
   late final html.IFrameElement _perfettoIFrame;
 
@@ -68,7 +73,7 @@ class PerfettoController extends DisposableController
       // This url is safe because we built it ourselves and it does not include
       // any user input.
       // ignore: unsafe_html
-      ..src = perfettoUrl
+      ..src = _perfettoUrl
       ..allow = 'usb';
     _perfettoIFrame.style
       ..border = 'none'
@@ -83,10 +88,12 @@ class PerfettoController extends DisposableController
 
     html.window.addEventListener('message', _handleMessage);
 
-    _loadInitialStyle();
-    addAutoDisposeListener(preferences.darkModeTheme, () async {
-      _loadStyle(preferences.darkModeTheme.value);
-    });
+    if (isExternalBuild) {
+      _loadInitialStyle();
+      addAutoDisposeListener(preferences.darkModeTheme, () async {
+        _loadStyle(preferences.darkModeTheme.value);
+      });
+    }
   }
 
   Future<void> loadTrace(List<TraceEventWrapper> devToolsTraceEvents) async {
@@ -109,13 +116,15 @@ class PerfettoController extends DisposableController
   }
 
   Future<void> _loadInitialStyle() async {
+    if (!isExternalBuild) return;
     await _pingDevToolsThemeHandlerUntilReady();
     _loadStyle(preferences.darkModeTheme.value);
   }
 
   void _loadStyle(bool darkMode) {
+    if (!isExternalBuild) return;
     // This message will be handled by [devtools_theme_handler.js], which is
-    // included in the Perfetto build inside [assets/perfetto/dist].
+    // included in the Perfetto build inside [packages/perfetto_compiled/dist].
     _postMessageWithId(
       _devtoolsThemeChange,
       args: {
@@ -124,10 +133,11 @@ class PerfettoController extends DisposableController
     );
   }
 
-  void _postMessage(dynamic message) {
+  void _postMessage(dynamic message) async {
+    await _perfettoIFrameReady();
     _perfettoIFrame.contentWindow!.postMessage(
       message,
-      perfettoUrl,
+      _perfettoUrl,
     );
   }
 
@@ -151,6 +161,17 @@ class PerfettoController extends DisposableController
     }
   }
 
+  Future<void> _perfettoIFrameReady() async {
+    if (_perfettoIFrame.contentWindow == null) {
+      await _perfettoIFrame.onLoad.first;
+      assert(
+        _perfettoIFrame.contentWindow != null,
+        'Something went wrong. The iFrame\'s contentWindow is null after the'
+        ' onLoad event.',
+      );
+    }
+  }
+
   Future<void> _pingPerfettoUntilReady() async {
     while (!_perfettoReady.isCompleted) {
       await Future.delayed(const Duration(microseconds: 100), () async {
@@ -162,6 +183,7 @@ class PerfettoController extends DisposableController
   }
 
   Future<void> _pingDevToolsThemeHandlerUntilReady() async {
+    if (!isExternalBuild) return;
     while (!_devtoolsThemeHandlerReady.isCompleted) {
       await Future.delayed(const Duration(microseconds: 100), () async {
         // Once [devtools_theme_handler.js] is ready, it will receive this

@@ -51,6 +51,7 @@ import 'shared/routing.dart';
 import 'shared/screen.dart';
 import 'shared/snapshot_screen.dart';
 import 'shared/theme.dart';
+import 'ui/hover.dart';
 
 // Assign to true to use a sample implementation of a conditional screen.
 // WARNING: Do not check in this file if debugEnableSampleScreen is true.
@@ -94,6 +95,8 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
 
   bool get denseModeEnabled => _denseModeEnabled;
   bool _denseModeEnabled = false;
+
+  final hoverCardController = HoverCardController();
 
   late ReleaseNotesController releaseNotesController;
 
@@ -322,8 +325,15 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         theme: Theme.of(context),
       ),
       builder: (context, child) {
-        return Provider<AnalyticsController>.value(
-          value: widget.analyticsController,
+        return MultiProvider(
+          providers: [
+            Provider<AnalyticsController>.value(
+              value: widget.analyticsController,
+            ),
+            Provider<HoverCardController>.value(
+              value: hoverCardController,
+            ),
+          ],
           child: NotificationsView(
             child: ReleaseNotesViewer(
               releaseNotesController: releaseNotesController,
@@ -556,7 +566,6 @@ class CheckboxSetting extends StatelessWidget {
 /// Conditional screens can be added to this list, and they will automatically
 /// be shown or hidden based on the [Screen.conditionalLibrary] provided.
 List<DevToolsScreen> get defaultScreens {
-  final vmDeveloperToolsController = VMDeveloperToolsController();
   return <DevToolsScreen>[
     DevToolsScreen<InspectorController>(
       const InspectorScreen(),
@@ -599,7 +608,7 @@ List<DevToolsScreen> get defaultScreens {
     ),
     DevToolsScreen<VMDeveloperToolsController>(
       const VMDeveloperToolsScreen(),
-      controller: vmDeveloperToolsController,
+      createController: () => VMDeveloperToolsController(),
     ),
     // Show the sample DevTools screen.
     if (debugEnableSampleScreen && (kDebugMode || kProfileMode))

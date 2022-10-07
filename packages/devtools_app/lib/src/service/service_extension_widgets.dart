@@ -671,7 +671,7 @@ class _ServiceExtensionCheckboxGroupButtonState
   void _insertOverlay(BuildContext context) {
     final offset = _calculateOverlayPosition(widget.overlayWidth, context);
     _overlay?.remove();
-    Overlay.of(context)!.insert(
+    Overlay.of(context).insert(
       _overlay = OverlayEntry(
         maintainState: true,
         builder: (context) {
@@ -704,7 +704,7 @@ class _ServiceExtensionCheckboxGroupButtonState
 
   Offset _calculateOverlayPosition(double width, BuildContext context) {
     final overlayBox =
-        Overlay.of(context)!.context.findRenderObject() as RenderBox;
+        Overlay.of(context).context.findRenderObject() as RenderBox;
     final box = context.findRenderObject() as RenderBox;
 
     final maxX = overlayBox.size.width - width;
@@ -922,41 +922,39 @@ class ServiceExtensionRichTooltip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return HoverCardTooltip(
+    return HoverCardTooltip.sync(
       enabled: () => true,
-      onHover: (_) => _buildCardData(context),
+      generateHoverCardData: (_) => _buildCardData(context),
       child: child,
     );
   }
 
-  Future<HoverCardData> _buildCardData(BuildContext context) {
+  HoverCardData _buildCardData(BuildContext context) {
     final textColor = Theme.of(context).colorScheme.toggleButtonsTitle;
 
-    return Future.value(
-      HoverCardData(
-        position: HoverCardPosition.element,
-        width: _tooltipWidth,
-        contents: Material(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                description.tooltip,
-                style: TextStyle(color: textColor),
-              ),
-              if (description.documentationUrl != null &&
-                  description.gaScreenName != null)
-                Align(
-                  alignment: Alignment.bottomRight,
-                  child: MoreInfoLink(
-                    url: description.documentationUrl!,
-                    gaScreenName: description.gaScreenName!,
-                    gaSelectedItemDescription: description.gaItemTooltipLink,
-                  ),
+    return HoverCardData(
+      position: HoverCardPosition.element,
+      width: _tooltipWidth,
+      contents: Material(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              description.tooltip,
+              style: TextStyle(color: textColor),
+            ),
+            if (description.documentationUrl != null &&
+                description.gaScreenName != null)
+              Align(
+                alignment: Alignment.bottomRight,
+                child: MoreInfoLink(
+                  url: description.documentationUrl!,
+                  gaScreenName: description.gaScreenName!,
+                  gaSelectedItemDescription: description.gaItemTooltipLink,
                 ),
-            ],
-          ),
+              ),
+          ],
         ),
       ),
     );

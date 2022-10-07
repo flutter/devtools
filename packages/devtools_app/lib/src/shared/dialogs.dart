@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:pointer_interceptor/pointer_interceptor.dart';
 
 import 'common_widgets.dart';
 import 'theme.dart';
@@ -10,12 +11,12 @@ import 'theme.dart';
 const dialogDefaultContext = 'dialog';
 
 Text dialogTitleText(ThemeData theme, String text) {
-  return Text(text, style: theme.textTheme.headline6);
+  return Text(text, style: theme.textTheme.titleLarge);
 }
 
 List<Widget> dialogSubHeader(ThemeData theme, String titleText) {
   return [
-    Text(titleText, style: theme.textTheme.subtitle1),
+    Text(titleText, style: theme.textTheme.titleMedium),
     const PaddedDivider(padding: EdgeInsets.only(bottom: denseRowSpacing)),
   ];
 }
@@ -42,27 +43,29 @@ class DevToolsDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      scrollable: scrollable,
-      title: Column(
-        children: [
-          titleContent,
-          includeDivider
-              ? const PaddedDivider(
-                  padding: EdgeInsets.only(bottom: denseRowSpacing),
-                )
-              : const SizedBox(height: defaultSpacing),
-        ],
+    return PointerInterceptor(
+      child: AlertDialog(
+        scrollable: scrollable,
+        title: Column(
+          children: [
+            titleContent,
+            includeDivider
+                ? const PaddedDivider(
+                    padding: EdgeInsets.only(bottom: denseRowSpacing),
+                  )
+                : const SizedBox(height: defaultSpacing),
+          ],
+        ),
+        contentPadding: const EdgeInsets.fromLTRB(
+          contentPadding,
+          0,
+          contentPadding,
+          contentPadding,
+        ),
+        content: content,
+        actions: actions,
+        buttonPadding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
       ),
-      contentPadding: const EdgeInsets.fromLTRB(
-        contentPadding,
-        0,
-        contentPadding,
-        contentPadding,
-      ),
-      content: content,
-      actions: actions,
-      buttonPadding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
     );
   }
 }

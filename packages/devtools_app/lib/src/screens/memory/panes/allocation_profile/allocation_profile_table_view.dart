@@ -10,12 +10,13 @@ import '../../../../config_specific/import_export/import_export.dart';
 import '../../../../primitives/utils.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
-import '../../../../shared/table.dart';
-import '../../../../shared/table_data.dart';
+import '../../../../shared/table/table.dart';
+import '../../../../shared/table/table_data.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../../vm_developer/vm_service_private_extensions.dart';
 import '../../primitives/ui.dart';
+import '../../shared/heap/primitives.dart';
 import 'allocation_profile_table_view_controller.dart';
 
 // TODO(bkonyi): ensure data displayed in this view is included in the full
@@ -23,10 +24,10 @@ import 'allocation_profile_table_view_controller.dart';
 
 /// The default width for columns containing *mostly* numeric data (e.g.,
 /// instances, memory).
-const _defaultNumberFieldWidth = 80.0;
+const _defaultNumberFieldWidth = 90.0;
 
-class _FieldClassName extends ColumnData<ClassHeapStats> {
-  _FieldClassName()
+class _FieldClassNameColumn extends ColumnData<ClassHeapStats> {
+  _FieldClassNameColumn()
       : super(
           'Class',
           fixedWidthPx: scaleByFontFactor(200),
@@ -90,7 +91,8 @@ class _FieldExternalSizeColumn extends _FieldSizeColumn {
   _FieldExternalSizeColumn({required super.heap})
       : super._(
           title: 'External',
-          titleTooltip: 'Portion of memory allocated outside of the Dart heap',
+          titleTooltip:
+              'Non-Dart heap allocated memory associated with a Dart object',
         );
 
   @override
@@ -107,11 +109,11 @@ class _FieldExternalSizeColumn extends _FieldSizeColumn {
   }
 }
 
-class _FieldInternalSizeColumn extends _FieldSizeColumn {
-  _FieldInternalSizeColumn({required super.heap})
+class _FieldDartHeapSizeColumn extends _FieldSizeColumn {
+  _FieldDartHeapSizeColumn({required super.heap})
       : super._(
-          title: 'Internal',
-          titleTooltip: 'Portion of memory allocated within the Dart heap',
+          title: 'Dart Heap',
+          titleTooltip: shallowSizeColumnTooltip,
         );
 
   @override
@@ -129,8 +131,10 @@ class _FieldInternalSizeColumn extends _FieldSizeColumn {
 
 class _FieldSizeColumn extends ColumnData<ClassHeapStats> {
   factory _FieldSizeColumn({required heap}) => _FieldSizeColumn._(
-        title: 'Size',
-        titleTooltip: 'Total memory allocated',
+        title: 'Total Size',
+        titleTooltip: "The sum of the type's total shallow memory "
+            'consumption in the Dart heap and associated external (e.g., '
+            'non-Dart heap) allocations',
         heap: heap,
       );
 
@@ -208,7 +212,7 @@ class AllocationProfileTableViewState
         ),
         Expanded(
           child: _AllocationProfileTable(
-            allocationProfileController: widget.controller,
+            controller: widget.controller,
           ),
         ),
       ],
@@ -219,7 +223,7 @@ class AllocationProfileTableViewState
 class _AllocationProfileTable extends StatelessWidget {
   const _AllocationProfileTable({
     Key? key,
-    required this.allocationProfileController,
+    required this.controller,
   }) : super(key: key);
 
   /// List of columns that are displayed regardless of VM developer mode state.
@@ -234,11 +238,15 @@ class _AllocationProfileTable extends StatelessWidget {
     ),
   ];
 
+  static final _initialSortColumn = _FieldSizeColumn(
+    heap: _HeapGeneration.total,
+  );
+
   static final _columns = [
-    _FieldClassName(),
+    _FieldClassNameColumn(),
     _FieldInstanceCountColumn(heap: _HeapGeneration.total),
-    _FieldSizeColumn(heap: _HeapGeneration.total),
-    _FieldInternalSizeColumn(heap: _HeapGeneration.total),
+    _initialSortColumn,
+    _FieldDartHeapSizeColumn(heap: _HeapGeneration.total),
     _FieldExternalSizeColumn(heap: _HeapGeneration.total),
   ];
 
@@ -257,20 +265,20 @@ class _AllocationProfileTable extends StatelessWidget {
   static final _vmDeveloperModeColumns = [
     _FieldInstanceCountColumn(heap: _HeapGeneration.newSpace),
     _FieldSizeColumn(heap: _HeapGeneration.newSpace),
-    _FieldInternalSizeColumn(heap: _HeapGeneration.newSpace),
+    _FieldDartHeapSizeColumn(heap: _HeapGeneration.newSpace),
     _FieldExternalSizeColumn(heap: _HeapGeneration.newSpace),
     _FieldInstanceCountColumn(heap: _HeapGeneration.oldSpace),
     _FieldSizeColumn(heap: _HeapGeneration.oldSpace),
-    _FieldInternalSizeColumn(heap: _HeapGeneration.oldSpace),
+    _FieldDartHeapSizeColumn(heap: _HeapGeneration.oldSpace),
     _FieldExternalSizeColumn(heap: _HeapGeneration.oldSpace),
   ];
 
-  final AllocationProfileTableViewController allocationProfileController;
+  final AllocationProfileTableViewController controller;
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<AllocationProfile?>(
-      valueListenable: allocationProfileController.currentAllocationProfile,
+      valueListenable: controller.currentAllocationProfile,
       builder: (context, profile, _) {
         // TODO(bkonyi): make this an overlay so the table doesn't
         // disappear when we're retrieving new data, especially since the
@@ -286,15 +294,7 @@ class _AllocationProfileTable extends StatelessWidget {
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   return FlatTable<ClassHeapStats?>(
-                    columnGroups: [
-                      ..._columnGroups,
-                      if (vmDeveloperModeEnabled)
-                        ..._vmDeveloperModeColumnGroups,
-                    ],
-                    columns: [
-                      ..._columns,
-                      if (vmDeveloperModeEnabled) ..._vmDeveloperModeColumns,
-                    ],
+                    keyFactory: (element) => Key(element!.classRef!.name!),
                     data: profile.members!.where(
                       (element) {
                         return element.bytesCurrent != 0 ||
@@ -302,10 +302,20 @@ class _AllocationProfileTable extends StatelessWidget {
                             element.oldSpace.externalSize != 0;
                       },
                     ).toList(),
-                    sortColumn: _columns.first,
-                    sortDirection: SortDirection.ascending,
-                    onItemSelected: (item) => null,
-                    keyFactory: (element) => Key(element!.classRef!.name!),
+                    dataKey: 'allocation-profile',
+                    columnGroups: [
+                      ..._AllocationProfileTable._columnGroups,
+                      if (vmDeveloperModeEnabled)
+                        ..._AllocationProfileTable._vmDeveloperModeColumnGroups,
+                    ],
+                    columns: [
+                      ..._AllocationProfileTable._columns,
+                      if (vmDeveloperModeEnabled)
+                        ..._AllocationProfileTable._vmDeveloperModeColumns,
+                    ],
+                    defaultSortColumn:
+                        _AllocationProfileTable._initialSortColumn,
+                    defaultSortDirection: SortDirection.descending,
                   );
                 },
               ),
@@ -359,9 +369,8 @@ class _ExportAllocationProfileButton extends StatelessWidget {
     return ValueListenableBuilder<AllocationProfile?>(
       valueListenable: allocationProfileController.currentAllocationProfile,
       builder: (context, currentAllocationProfile, _) {
-        return IconLabelButton(
-          label: 'CSV',
-          icon: Icons.file_download,
+        return ToCsvButton(
+          minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
           tooltip: 'Download allocation profile data in CSV format',
           onPressed: currentAllocationProfile == null
               ? null
@@ -370,7 +379,6 @@ class _ExportAllocationProfileButton extends StatelessWidget {
                       .downloadMemoryTableCsv(currentAllocationProfile);
                   notificationService.push(successfulExportMessage(file));
                 },
-          minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
         );
       },
     );

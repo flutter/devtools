@@ -19,16 +19,17 @@ import '../../primitives/utils.dart';
 import '../../service/service_extensions.dart';
 import '../../service/service_manager.dart';
 import '../../shared/globals.dart';
-import '../../shared/table.dart';
-import '../../shared/table_data.dart';
+import '../../shared/table/table.dart';
 import '../../shared/utils.dart';
 import '../../ui/search.dart';
 import 'memory_graph_model.dart';
 import 'memory_protocol.dart';
 import 'memory_snapshot_models.dart';
 import 'panes/allocation_profile/allocation_profile_table_view_controller.dart';
+import 'panes/diff/controller/diff_pane_controller.dart';
 import 'primitives/filter_config.dart';
 import 'primitives/memory_timeline.dart';
+import 'shared/heap/model.dart';
 
 enum ChartType {
   DartHeaps,
@@ -109,124 +110,6 @@ class OfflineFileException implements Exception {
   String toString() => message;
 }
 
-class AllocationStackTrace {
-  AllocationStackTrace(CpuSample sample, {List<ProfileFunction>? functions}) {
-    computeStacktrace(sample, functions: functions);
-  }
-
-  int? timestamp;
-
-  var showFullStacktrace = false;
-
-  final stacktrace = <String>[];
-
-  final sources = <String?>[];
-
-  int get stackDepth => stacktrace.length;
-
-  static const NoClasses = 0;
-  static const DartClasses = 1;
-  static const FlutterClasses = 2;
-
-  static const DartFlutterClasses = DartClasses | FlutterClasses;
-
-  bool hideDartClasses(int hideClasses) =>
-      hideClasses & DartClasses == DartClasses;
-  bool hideFlutterClasses(int hideClasses) =>
-      hideClasses & FlutterClasses == FlutterClasses;
-
-  /// Display stacktrace format is:
-  ///    [className.functionName]
-  /// [maxLines] default is 4, if -1 then display all lines
-  String stacktraceDisplay({
-    int maxLines = 4,
-    int hideClasses = DartFlutterClasses,
-  }) {
-    final buffer = StringBuffer();
-    var lines = 0;
-    for (var stackEntry in stacktrace) {
-      if (maxLines == -1 || lines++ < maxLines) {
-        buffer.writeln('- $stackEntry');
-      }
-    }
-
-    return buffer.toString();
-  }
-
-  String get sourcesDisplay => sources.join('\r');
-
-  void computeStacktrace(
-    CpuSample cpuSample, {
-    List<ProfileFunction>? functions,
-  }) {
-    if (cpuSample.stack?.isNotEmpty == true) {
-      final stackLength = cpuSample.stack!.length;
-      for (var stackIndex = 0; stackIndex < stackLength; stackIndex++) {
-        final functionId = cpuSample.stack![stackIndex];
-        final ProfileFunction profileFunc = functions![functionId];
-        late final String ownerName;
-        late final String functionName;
-        if (profileFunc.function is FuncRef) {
-          final FuncRef funcRef = profileFunc.function;
-          if (funcRef.owner is ClassRef) {
-            ownerName = funcRef.owner.name ?? '';
-          } else if (funcRef.owner is LibraryRef) {
-            ownerName = funcRef.owner.name ?? '';
-          } else {
-            assert(funcRef.owner is FuncRef);
-            ownerName = '${funcRef.owner.name}.';
-          }
-          functionName = funcRef.name ?? '';
-        } else {
-          final NativeFunction nativeFunction = profileFunc.function;
-          ownerName = '';
-          functionName = nativeFunction.name ?? '';
-        }
-
-        // Skip any internal binding names e.g.,
-        // _WidgetsFlutterBinding&BindingBase&GestureBinding&SchedulerBinding...
-        if (!ownerName.contains('&')) {
-          timestamp = cpuSample.timestamp;
-          if (ownerName == '<anonymous closure>.' &&
-              functionName == '<anonymous closure>') {
-            stacktrace.add(functionName);
-          } else {
-            stacktrace.add('$ownerName.$functionName');
-          }
-          sources.add(profileFunc.resolvedUrl);
-        }
-      }
-    }
-  }
-}
-
-class AllocationSamples {
-  AllocationSamples(this.classRef, CpuSamples cpuSamples) {
-    _computeCpuSamples(cpuSamples);
-  }
-
-  final ClassRef? classRef;
-
-  final stacktraces = <AllocationStackTrace>[];
-
-  int get totalStacktraces => stacktraces.length;
-
-  void _computeCpuSamples(CpuSamples cpuSamples) {
-    final samplesLength = cpuSamples.samples!.length;
-    for (var index = 0; index < samplesLength; index++) {
-      final cpuSample = cpuSamples.samples![index];
-      if (cpuSample.stack!.isNotEmpty) {
-        stacktraces.add(
-          AllocationStackTrace(
-            cpuSample,
-            functions: cpuSamples.functions,
-          ),
-        );
-      }
-    }
-  }
-}
-
 /// This class contains the business logic for [memory.dart].
 ///
 /// This class must not have direct dependencies on dart:html. This allows tests
@@ -236,9 +119,11 @@ class MemoryController extends DisposableController
         AutoDisposeControllerMixin,
         SearchControllerMixin,
         AutoCompleteSearchControllerMixin {
-  MemoryController() {
+  MemoryController({DiffPaneController? diffPaneController}) {
     memoryTimeline = MemoryTimeline(offline);
     memoryLog = MemoryLog(this);
+    this.diffPaneController =
+        diffPaneController ?? DiffPaneController(SnapshotTaker());
 
     // Update the chart when the memorySource changes.
     addAutoDisposeListener(memorySourceNotifier, () async {
@@ -254,36 +139,13 @@ class MemoryController extends DisposableController
     });
   }
 
+  /// The controller is late to enable test injection.
+  late final DiffPaneController diffPaneController;
+
   /// Controller for [AllocationProfileTableView].
   final allocationProfileController = AllocationProfileTableViewController();
 
   static const logFilenamePrefix = 'memory_log_';
-
-  // Default state of Android ADB collection.
-  static const androidADBDefault = true;
-
-  ValueListenable<bool> get androidCollectionEnabled =>
-      _androidCollectionEnabled;
-
-  final _androidCollectionEnabled = ValueNotifier<bool>(androidADBDefault);
-
-  // Default state of advanced settings enabled.
-  static const advancedSettingsEnabledDefault = false;
-
-  ValueListenable<bool> get advancedSettingsEnabled => _advancedSettingsEnabled;
-
-  final _advancedSettingsEnabled =
-      ValueNotifier<bool>(advancedSettingsEnabledDefault);
-
-  ValueListenable<bool> get autoSnapshotEnabled => _autoSnapshotEnabled;
-  final _autoSnapshotEnabled = ValueNotifier<bool>(false);
-
-  // Memory statistics displayed as raw numbers or units (KB, MB, GB).
-  static const unitDisplayedDefault = true;
-
-  ValueListenable<bool> get unitDisplayed => _unitDisplayed;
-
-  final _unitDisplayed = ValueNotifier<bool>(unitDisplayedDefault);
 
   final List<Snapshot> snapshots = [];
 
@@ -481,6 +343,7 @@ class MemoryController extends DisposableController
 
   void refreshAllCharts() {
     _refreshCharts.value++;
+    _updateAndroidChartVisibility();
   }
 
   /// Starting chunk for slider based on the intervalDurationInMs.
@@ -551,6 +414,8 @@ class MemoryController extends DisposableController
         throw OfflineFileException(e.toString());
       });
     }
+
+    _updateAndroidChartVisibility();
   }
 
   final _paused = ValueNotifier<bool>(false);
@@ -567,34 +432,18 @@ class MemoryController extends DisposableController
 
   bool get isPaused => _paused.value;
 
-  final _androidChartVisibleNotifier = ValueNotifier<bool>(false);
+  final isAndroidChartVisibleNotifier = ValueNotifier<bool>(false);
 
-  ValueListenable get androidChartVisibleNotifier =>
-      _androidChartVisibleNotifier;
-
-  bool get isAndroidChartVisible => _androidChartVisibleNotifier.value;
-
-  bool toggleAndroidChartVisibility() =>
-      _androidChartVisibleNotifier.value = !_androidChartVisibleNotifier.value;
-
-  bool get isAdvancedSettingsVisible => _advancedSettingsEnabled.value;
-
-  bool toggleAdvancedSettingsVisibility() =>
-      _advancedSettingsEnabled.value = !_advancedSettingsEnabled.value;
-
-  final SettingsModel settings = SettingsModel();
+  final settings = SettingsModel();
 
   final selectionSnapshotNotifier =
-      ValueNotifier<Selection<Reference>>(Selection.empty());
+      ValueNotifier<Selection<Reference?>>(Selection.empty());
 
   /// Tree to view Libary/Class/Instance (grouped by)
   late TreeTable<Reference> groupByTreeTable;
 
   /// Tree to view fields of an instance.
   TreeTable<FieldReference>? instanceFieldsTreeTable;
-
-  /// Tree to view fields of an analysis.
-  late TreeTable<AnalysisField> analysisFieldsTreeTable;
 
   final _updateClassStackTraces = ValueNotifier(0);
 
@@ -603,99 +452,6 @@ class MemoryController extends DisposableController
   void changeStackTraces() {
     _updateClassStackTraces.value += 1;
   }
-
-  /// Tracking memory allocation of classes.
-  /// Format key is Class name and value is ClassRef.
-  final trackAllocations = <String, ClassRef>{};
-
-  /// Set up the class to be tracked.
-  void setTracking(ClassRef classRef, bool enable) {
-    final foundClass = monitorAllocations.firstWhereOrNull(
-      (element) => element.classRef == classRef,
-    );
-
-    if (foundClass != null) {
-      foundClass.isStacktraced = enable;
-
-      final classRef = foundClass.classRef;
-      _setTracking(classRef, enable).catchError((e) {
-        debugLogger('ERROR: ${e.tooltip}');
-      }).whenComplete(
-        () {
-          changeStackTraces();
-          treeChanged();
-          // TODO(terry): Add a toast popup.
-        },
-      );
-    }
-  }
-
-  /// Track where/when a class is allocated (constructor new'd).
-  Future<void> _setTracking(ClassRef ref, bool enable) async {
-    if (_isolateId == null || !await isIsolateLive(_isolateId!)) return;
-
-    final Success returnObject =
-        await serviceManager.service!.setTraceClassAllocation(
-      _isolateId!,
-      ref.id!,
-      enable,
-    );
-
-    if (returnObject.type != 'Success') {
-      debugLogger('Failed setTraceClassAllocation ${ref.name}');
-      return;
-    }
-
-    if (enable) {
-      if (trackAllocations.containsKey(ref.name)) {
-        // Somehow, already enabled don't enable again.
-        assert(trackAllocations[ref.name] == ref);
-        return;
-      }
-      if (ref.name != null) {
-        // Add to tracking list.
-        trackAllocations[ref.name!] = ref;
-      }
-    } else {
-      // Remove from tracking list.
-      assert(trackAllocations.containsKey(ref.name));
-      trackAllocations.remove(ref.name);
-    }
-  }
-
-  /// Track where/when a particular class is allocated (constructor new'd).
-  Future<CpuSamples?> getAllocationTraces(ClassRef ref) async {
-    if (!await isIsolateLive(_isolateId!)) return null;
-    final returnObject = await serviceManager.service!.getAllocationTraces(
-      _isolateId!,
-      classId: ref.id,
-    );
-
-    return returnObject;
-  }
-
-  final _allAllocationSamples = <ClassRef, CpuSamples>{};
-
-  List<AllocationSamples> allocationSamples = [];
-
-  /// Any new allocations being tracked.
-  Future<Map<ClassRef, CpuSamples>> computeAllAllocationSamples() async {
-    _allAllocationSamples.clear();
-
-    final keys = trackAllocations.keys;
-    for (var key in keys) {
-      // TODO(terry): Need to process output.
-      final samples = await getAllocationTraces(trackAllocations[key]!);
-      if (samples != null) {
-        _allAllocationSamples[trackAllocations[key]!] = samples;
-      }
-    }
-
-    return _allAllocationSamples;
-  }
-
-  /// Table to view fields of an Allocation Profile.
-  FlatTable<ClassHeapDetailStats?>? allocationsFieldsTable;
 
   final FilterConfig filterConfig = FilterConfig(
     filterZeroInstances: ValueNotifier(true),
@@ -826,9 +582,10 @@ class MemoryController extends DisposableController
 
   void _handleConnectionStart(ServiceConnectionManager serviceManager) async {
     _refreshShouldShowLeaksTab();
-
-    _memoryTracker = MemoryTracker(this);
-    _memoryTracker!.start();
+    if (_memoryTracker == null) {
+      _memoryTracker = MemoryTracker(this);
+      _memoryTracker!.start();
+    }
 
     // Log Flutter extension events.
     // Note: We do not need to listen to event history here because we do not
@@ -883,10 +640,28 @@ class MemoryController extends DisposableController
       (_) {},
       onDone: () {
         // Stop polling and reset memoryTracker.
-        _memoryTracker!.stop();
+        _memoryTracker?.stop();
         _memoryTracker = null;
       },
     );
+
+    _updateAndroidChartVisibility();
+    addAutoDisposeListener(
+      preferences.memory.androidCollectionEnabled,
+      _updateAndroidChartVisibility,
+    );
+  }
+
+  void _updateAndroidChartVisibility() {
+    final bool isOfflineAndAndroidData =
+        offline.value && memoryTimeline.data.first.adbMemoryInfo.realtime > 0;
+
+    final bool isConnectedToAndroidAndAndroidEnabled =
+        isConnectedDeviceAndroid &&
+            preferences.memory.androidCollectionEnabled.value;
+
+    isAndroidChartVisibleNotifier.value =
+        isOfflineAndAndroidData || isConnectedToAndroidAndAndroidEnabled;
   }
 
   void _handleConnectionStop(dynamic event) {
@@ -915,138 +690,8 @@ class MemoryController extends DisposableController
     );
   }
 
-  final _monitorAllocationsNotifier = ValueNotifier<int>(0);
-
-  /// Last column sorted and sort direction in allocation monitoring. As table
-  /// is reconstructed e.g., reset, etc. remembers user's sorting preference.
-  late ColumnData<ClassHeapDetailStats?> sortedMonitorColumn;
-  late SortDirection sortedMonitorDirection;
-
-  ValueListenable<int> get monitorAllocationsNotifier =>
-      _monitorAllocationsNotifier;
-
-  DateTime? monitorTimestamp;
-
-  ValueListenable<DateTime?> get lastMonitorTimestampNotifier =>
-      lastMonitorTimestamp;
-
-  final lastMonitorTimestamp = ValueNotifier<DateTime?>(null);
-
-  /// Used for Allocations table search auto-complete.
-
-  /// This finds and selects an exact match in the tree.
-  /// Returns `true` if [searchingValue] is found in the tree.
-  bool selectItemInAllocationTable(String searchingValue) {
-    // Search the allocation table.
-    for (final reference in monitorAllocations) {
-      final foundIt = _selectItemInTable(reference, searchingValue);
-      if (foundIt) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  bool _selectAllocationInTable(ClassHeapDetailStats reference, search) {
-    if (reference.classRef.name == search) {
-      searchMatchMonitorAllocationsNotifier.value = reference;
-      clearSearchAutoComplete();
-      return true;
-    }
-    return false;
-  }
-
-  bool _selectItemInTable(ClassHeapDetailStats reference, String search) =>
-      _selectAllocationInTable(reference, search);
-
-  /// Used for searching in monitor allocation table.
-  final searchMatchMonitorAllocationsNotifier =
-      ValueNotifier<ClassHeapDetailStats?>(null);
-
-  var _monitorAllocations = <ClassHeapDetailStats>[];
-
-  List<ClassHeapDetailStats> get monitorAllocations => _monitorAllocations;
-
-  set monitorAllocations(List<ClassHeapDetailStats> allocations) {
-    _monitorAllocations = allocations;
-    // Clearing allocations reset ValueNotifier to zero.
-    if (allocations.isEmpty) {
-      _monitorAllocationsNotifier.value = 0;
-    } else {
-      _monitorAllocationsNotifier.value++;
-    }
-
-    // Update the tracking (stacktrace) state of the newly fetched monitored allocations.
-    for (var monitorAllocation in _monitorAllocations) {
-      final trackedClass = trackAllocations.entries.firstWhereOrNull(
-        (trackRef) => monitorAllocation.classRef.id == trackRef.value.id,
-      );
-
-      if (trackedClass != null) {
-        monitorAllocation.isStacktraced = true;
-        setTracking(trackedClass.value, true);
-      }
-    }
-  }
-
-  void toggleAllocationTracking(ClassHeapDetailStats item, bool isStacktraced) {
-    item.isStacktraced = isStacktraced;
-    setTracking(item.classRef, isStacktraced);
-    changeStackTraces();
-  }
-
-  Future<List<ClassHeapDetailStats>> resetAllocationProfile() =>
-      getAllocationProfile(reset: true);
-
-  /// 'reset': true to reset the monitor allocation accumulators
-  Future<List<ClassHeapDetailStats>> getAllocationProfile({
-    bool reset = false,
-  }) async {
-    if (_isolateId == null || !await isIsolateLive(_isolateId!)) return [];
-
-    AllocationProfile allocationProfile;
-    allocationProfile = await serviceManager.service!.getAllocationProfile(
-      _isolateId!,
-      reset: reset,
-    );
-
-    final lastReset = allocationProfile.dateLastAccumulatorReset;
-    if (lastReset != null) {
-      final resetTimestamp = DateTime.fromMillisecondsSinceEpoch(lastReset);
-      debugLogger(
-        'Last Allocation Reset @ '
-        '${MemoryController.formattedTimestamp(resetTimestamp)}',
-      );
-    }
-
-    final allocations = allocationProfile.members!
-        .map((ClassHeapStats stats) => parseJsonClassHeapStats(stats.json!))
-        .where((ClassHeapDetailStats stats) {
-      return stats.instancesCurrent > 0 || stats.instancesDelta > 0;
-    }).toList();
-
-    if (!reset) {
-      // AllocationStart again, any classes being tracked?
-      final allSamples = await computeAllAllocationSamples();
-      final allClassRefTracked = allSamples.keys;
-      allocationSamples.clear();
-      for (var classRef in allClassRefTracked) {
-        final cpuSamples = allSamples[classRef]!;
-        allocationSamples.add(AllocationSamples(classRef, cpuSamples));
-      }
-    }
-
-    return allocations;
-  }
-
-  /// If viewing offline data (Android collected) the connection may not be
-  /// Android.
-  ///
-  /// If offline and if any Android collected data then we can view the Android
-  /// data.
-  bool get isOfflineAndAndroidData {
-    return offline.value &&
-        memoryTimeline.data.first.adbMemoryInfo.realtime > 0;
+  void stopTimeLine() {
+    _memoryTracker?.stop();
   }
 
   bool get isConnectedDeviceAndroid {
@@ -1066,29 +711,6 @@ class MemoryController extends DisposableController
   //              When line # and package mapping exist ability to navigate
   //              to line number of the source file when clicked is needed.
   static const packageName = '/packages/';
-
-  Future<List<InstanceSummary>> getInstances(
-    String classRef,
-    String className,
-    int maxInstances,
-  ) async {
-    // TODO(terry): Expose as a stream to reduce stall when querying for 1000s
-    // TODO(terry): of instances.
-    InstanceSet instanceSet;
-    try {
-      instanceSet = await serviceManager.service!.getInstances(
-        _isolateId!,
-        classRef,
-        maxInstances,
-        classId: classRef,
-      );
-    } on SentinelException catch (_) {
-      return [];
-    }
-    return instanceSet.instances!
-        .map((ObjRef ref) => InstanceSummary(classRef, className, ref.id))
-        .toList();
-  }
 
   /// When new snapshot occurs entire libraries should be rebuilt then rebuild should be true.
   LibraryReference? computeAllLibraries({
@@ -1314,18 +936,17 @@ class MemoryController extends DisposableController
         objectRef,
       );
 
-  bool _gcing = false;
-
   bool get isGcing => _gcing;
+  bool _gcing = false;
 
   Future<void> gc() async {
     _gcing = true;
-
     try {
       await serviceManager.service!.getAllocationProfile(
         _isolateId!,
         gc: true,
       );
+      notificationService.push('Successfully garbage collected.');
     } finally {
       _gcing = false;
     }
@@ -1384,6 +1005,7 @@ class MemoryController extends DisposableController
     _memorySourceNotifier.dispose();
     _disconnectController.close();
     _memoryTrackerController.close();
+    _memoryTracker?.dispose();
   }
 }
 

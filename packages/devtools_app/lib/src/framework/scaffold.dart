@@ -452,7 +452,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     final painter = TextPainter(
       text: TextSpan(
         text: title,
-        style: textTheme.headline6,
+        style: textTheme.titleLarge,
       ),
       textDirection: TextDirection.ltr,
     )..layout();

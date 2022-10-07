@@ -3,9 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/screens/debugger/breakpoint_manager.dart';
+import 'package:devtools_app/src/screens/vm_developer/object_inspector/object_inspector_view_controller.dart';
+import 'package:devtools_app/src/screens/vm_developer/object_inspector/vm_field_display.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_developer_common_widgets.dart';
-import 'package:devtools_app/src/screens/vm_developer/vm_field_display.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_service_private_extensions.dart';
+import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
@@ -25,6 +28,9 @@ void main() {
   late InstanceRef fieldStaticValue;
 
   setUp(() {
+    setUpMockScriptManager();
+    setGlobal(ServiceConnectionManager, FakeServiceManager());
+    setGlobal(BreakpointManager, BreakpointManager());
     setGlobal(IdeTheme, IdeTheme());
 
     mockFieldObject = MockFieldObject();
@@ -43,12 +49,20 @@ void main() {
 
     mockVmObject(mockFieldObject);
     when(mockFieldObject.obj).thenReturn(testFieldCopy);
+    when(mockFieldObject.scriptRef).thenReturn(testScript);
   });
 
   group('field data display tests', () {
     testWidgetsWithWindowSize('basic layout', windowSize,
         (WidgetTester tester) async {
-      await tester.pumpWidget(wrap(VmFieldDisplay(field: mockFieldObject)));
+      await tester.pumpWidget(
+        wrap(
+          VmFieldDisplay(
+            field: mockFieldObject,
+            controller: ObjectInspectorViewController(),
+          ),
+        ),
+      );
 
       expect(find.byType(VmObjectDisplayBasicLayout), findsOneWidget);
       expect(find.byType(VMInfoCard), findsOneWidget);
@@ -75,7 +89,14 @@ void main() {
       when(mockFieldObject.guardNullable).thenReturn(true);
       when(mockFieldObject.guardClassKind).thenReturn(GuardClassKind.single);
 
-      await tester.pumpWidget(wrap(VmFieldDisplay(field: mockFieldObject)));
+      await tester.pumpWidget(
+        wrap(
+          VmFieldDisplay(
+            field: mockFieldObject,
+            controller: ObjectInspectorViewController(),
+          ),
+        ),
+      );
       expect(find.text('FooClass - null observed'), findsOneWidget);
     });
 
@@ -86,7 +107,14 @@ void main() {
       when(mockFieldObject.guardNullable).thenReturn(false);
       when(mockFieldObject.guardClassKind).thenReturn(GuardClassKind.dynamic);
 
-      await tester.pumpWidget(wrap(VmFieldDisplay(field: mockFieldObject)));
+      await tester.pumpWidget(
+        wrap(
+          VmFieldDisplay(
+            field: mockFieldObject,
+            controller: ObjectInspectorViewController(),
+          ),
+        ),
+      );
       expect(find.text('various - null not observed'), findsOneWidget);
     });
 
@@ -97,7 +125,14 @@ void main() {
       when(mockFieldObject.guardNullable).thenReturn(null);
       when(mockFieldObject.guardClassKind).thenReturn(GuardClassKind.unknown);
 
-      await tester.pumpWidget(wrap(VmFieldDisplay(field: mockFieldObject)));
+      await tester.pumpWidget(
+        wrap(
+          VmFieldDisplay(
+            field: mockFieldObject,
+            controller: ObjectInspectorViewController(),
+          ),
+        ),
+      );
       expect(
         find.text('none'),
         findsOneWidget,
@@ -108,7 +143,14 @@ void main() {
         (WidgetTester tester) async {
       testFieldCopy.staticValue = testClass;
 
-      await tester.pumpWidget(wrap(VmFieldDisplay(field: mockFieldObject)));
+      await tester.pumpWidget(
+        wrap(
+          VmFieldDisplay(
+            field: mockFieldObject,
+            controller: ObjectInspectorViewController(),
+          ),
+        ),
+      );
 
       expect(find.text('Static Value:'), findsNothing);
     });

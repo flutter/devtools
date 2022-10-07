@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/screens/debugger/breakpoint_manager.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_model.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_screen.dart';
@@ -18,7 +19,7 @@ import 'package:vm_service/vm_service.dart';
 
 void main() {
   const windowSize = Size(4000.0, 4000.0);
-
+  final mockBreakpointManager = MockBreakpointManager();
   final fakeServiceManager = FakeServiceManager();
   final scriptManager = MockScriptManager();
   when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
@@ -27,6 +28,7 @@ void main() {
   setGlobal(IdeTheme, IdeTheme());
   setGlobal(ScriptManager, scriptManager);
   setGlobal(NotificationService, NotificationService());
+  setGlobal(BreakpointManager, mockBreakpointManager);
   fakeServiceManager.consoleService.ensureServiceInitialized();
   when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
       .thenReturn(ValueNotifier<int>(0));
@@ -51,14 +53,15 @@ void main() {
       const SourcePosition(line: 10, column: 1),
     )
   ];
-
-  when(debuggerController.breakpoints).thenReturn(ValueNotifier(breakpoints));
-  when(debuggerController.breakpointsWithLocation)
+  final codeViewController = debuggerController.codeViewController;
+  when(mockBreakpointManager.breakpoints)
+      .thenReturn(ValueNotifier(breakpoints));
+  when(mockBreakpointManager.breakpointsWithLocation)
       .thenReturn(ValueNotifier(breakpointsWithLocation));
 
   when(scriptManager.sortedScripts).thenReturn(ValueNotifier([]));
-  when(debuggerController.scriptLocation).thenReturn(ValueNotifier(null));
-  when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
+  when(codeViewController.scriptLocation).thenReturn(ValueNotifier(null));
+  when(codeViewController.showFileOpener).thenReturn(ValueNotifier(false));
 
   Future<void> pumpDebuggerScreen(
     WidgetTester tester,

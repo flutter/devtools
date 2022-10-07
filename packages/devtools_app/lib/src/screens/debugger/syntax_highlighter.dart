@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
+import '../../primitives/utils.dart';
 import '../../shared/theme.dart';
 import 'span_parser.dart';
 
@@ -22,6 +23,7 @@ class SyntaxHighlighter {
   }
 
   final String source;
+  late String _processedSource;
 
   final _spanStack = ListQueue<ScopeSpan>();
 
@@ -43,15 +45,26 @@ class SyntaxHighlighter {
     }
   }
 
-  TextSpan highlight(BuildContext context) {
+  /// Returns the highlighted [source] in [TextSpan] form.
+  ///
+  /// If [lineRange] is provided, only the lines between
+  /// `[lineRange.begin, lineRange.end]` will be returned.
+  TextSpan highlight(BuildContext context, {LineRange? lineRange}) {
     // Generate the styling for the various scopes based on the current theme.
     _scopeStyles = _buildSyntaxColorTable(Theme.of(context));
     _currentPosition = 0;
+    _processedSource = source;
+    if (lineRange != null) {
+      _processedSource = _processedSource
+          .split('\n')
+          .sublist(lineRange.begin - 1, lineRange.end)
+          .join('\n');
+    }
     return TextSpan(
       children: _highlightLoopHelper(
         currentScope: null,
-        loopCondition: () => _currentPosition < source.length,
-        scopes: SpanParser.parse(_grammar!, source),
+        loopCondition: () => _currentPosition < _processedSource.length,
+        scopes: SpanParser.parse(_grammar!, _processedSource),
       ),
     );
   }
@@ -67,14 +80,14 @@ class SyntaxHighlighter {
     }
     final scopes = _spanStack.last.scopes;
 
-    if (scopes == null || scopes.isEmpty) {
+    if (scopes.isEmpty) {
       return const TextStyle();
     } else if (scopes.length == 1) {
-      return _scopeStyles[scopes.first!] ?? const TextStyle();
+      return _scopeStyles[scopes.first] ?? const TextStyle();
     } else {
       var style = const TextStyle();
       for (final scope in scopes) {
-        style = style.merge(_scopeStyles[scope!] ?? const TextStyle());
+        style = style.merge(_scopeStyles[scope] ?? const TextStyle());
       }
       return style;
     }
@@ -107,7 +120,7 @@ class SyntaxHighlighter {
       if (scopes.isNotEmpty && scopes.first.contains(_currentPosition)) {
         // Encountered the next scoped span. Close the current span and enter
         // the next.
-        final text = source.substring(
+        final text = _processedSource.substring(
           currentScopeBegin!,
           _currentPosition,
         );
@@ -139,7 +152,7 @@ class SyntaxHighlighter {
     }
     // Reached the end of the text covered by the current span. Close the span
     // and exit the scope.
-    final text = source.substring(
+    final text = _processedSource.substring(
       currentScopeBegin!,
       _currentPosition,
     );
@@ -158,10 +171,11 @@ class SyntaxHighlighter {
   }
 
   bool _atNewline() =>
-      String.fromCharCode(source.codeUnitAt(_currentPosition)) == '\n';
+      String.fromCharCode(_processedSource.codeUnitAt(_currentPosition)) ==
+      '\n';
 
   int? _processNewlines(List<TextSpan> sourceSpans, int currentScopeBegin) {
-    final text = source.substring(
+    final text = _processedSource.substring(
       currentScopeBegin,
       _currentPosition,
     );
@@ -169,7 +183,7 @@ class SyntaxHighlighter {
       sourceSpans.add(
         TextSpan(
           style: _getStyleForSpan(),
-          text: source.substring(
+          text: _processedSource.substring(
             currentScopeBegin,
             _currentPosition,
           ),
@@ -181,8 +195,9 @@ class SyntaxHighlighter {
     do {
       sourceSpans.add(const TextSpan(text: '\n'));
       ++_currentPosition;
-    } while ((_currentPosition < source.length) &&
-        (String.fromCharCode(source.codeUnitAt(_currentPosition)) == '\n'));
+    } while ((_currentPosition < _processedSource.length) &&
+        (String.fromCharCode(_processedSource.codeUnitAt(_currentPosition)) ==
+            '\n'));
     return _currentPosition;
   }
 

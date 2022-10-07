@@ -27,25 +27,26 @@ function flutter {
 }
 
 # Get Flutter.
-echo "Cloning the Flutter $PINNED_FLUTTER_CHANNEL branch"
-git clone https://github.com/flutter/flutter.git --branch $PINNED_FLUTTER_CHANNEL ./flutter-sdk
-
-if [ "$FLUTTER_TEST_ENV" = "pinned" ]; then
-  export DART_DEFINE_ARGS="--dart-define=SHOULD_TEST_GOLDENS=true"
-else
-  echo "Cloning the Flutter $FLUTTER_TEST_ENV branch to use for test apps"
-  git clone https://github.com/flutter/flutter.git --branch $FLUTTER_TEST_ENV ./flutter-sdk-$FLUTTER_TEST_ENV
-  export DART_DEFINE_ARGS="--dart-define=SHOULD_TEST_GOLDENS=false --dart-define=FLUTTER_CMD=`pwd`/flutter-sdk-$FLUTTER_TEST_ENV/bin/flutter"
-fi
-
-echo "Testing with Flutter test environment: $FLUTTER_TEST_ENV"
-echo "Flutter tests will be ran with args: $DART_DEFINE_ARGS"
+echo "Cloning the Flutter master branch"
+git clone https://github.com/flutter/flutter.git ./flutter-sdk
 
 # Look in the dart bin dir first, then the flutter one, then the one for the
 # devtools repo. We don't use the dart script from flutter/bin as that script
 # can and does print 'Waiting for another flutter command...' at inopportune
 # times.
 export PATH=`pwd`/flutter-sdk/bin/cache/dart-sdk/bin:`pwd`/flutter-sdk/bin:`pwd`/bin:$PATH
+
+# Look up the latest flutter candidate (this is the latest flutter version in g3)
+# TODO(https://github.com/flutter/devtools/issues/4591): re-write this script as a
+# shell script so we won't have to incurr the cost of building flutter tool twice.
+echo "Looking up the latest Flutter candidate branch"
+pushd packages/devtools_app
+LATEST_FLUTTER_CANDIDATE=`repo_tool latest-flutter-candidate --githubToken=$AUTH_TOKEN | tail -n 1`
+popd
+
+pushd flutter-sdk
+git checkout $LATEST_FLUTTER_CANDIDATE
+popd
 
 flutter config --no-analytics
 flutter doctor
@@ -62,16 +63,10 @@ dart --disable-analytics
 flutter --version
 dart --version
 
-# Put the Flutter version into a variable.
-# First awk extracts "Flutter x.y.z-pre.a":
-#   -F '•'         uses the bullet as field separator
-#   NR==1          says only take the first record (line)
-#   { print $1}    prints just the first field
-# Second awk splits on space (default) and takes the second field (the version)
-export FLUTTER_VERSION=$(flutter --version | awk -F '•' 'NR==1{print $1}' | awk '{print $2}')
-echo "Flutter version is '$FLUTTER_VERSION'"
-
 # Generate code.
+pushd packages/devtools_app
+flutter pub get
+popd
 pushd packages/devtools_test
 flutter pub get
 popd
@@ -94,8 +89,11 @@ if [ "$BOT" = "main" ]; then
     # Make sure the app versions are in sync.
     repo_tool repo-check
 
-    # Analyze the source.
-    dart analyze --fatal-infos
+    # Get packages
+    repo_tool packages-get
+
+    # Analyze the code
+    repo_tool analyze
 
     # Ensure we can build the app.
     flutter build web --release
@@ -118,16 +116,15 @@ elif [ "$BOT" = "test_ddc" ]; then
     flutter pub get
 
     # TODO(https://github.com/flutter/flutter/issues/43538): Remove workaround.
-    flutter config --enable-web
     flutter build web --pwa-strategy=none --no-tree-shake-icons
 
     # TODO(https://github.com/flutter/devtools/issues/1987): once this issue is fixed,
     # we may need to explicitly exclude running integration_tests here (this is what we
     # used to do when integration tests were enabled).
     if [ "$PLATFORM" = "vm" ]; then
-        flutter test $DART_DEFINE_ARGS test/
+        flutter test test/
     elif [ "$PLATFORM" = "chrome" ]; then
-        flutter test --platform chrome $DART_DEFINE_ARGS test/
+        flutter test --platform chrome test/
     else
         echo "unknown test platform"
         exit 1
@@ -136,16 +133,15 @@ elif [ "$BOT" = "test_dart2js" ]; then
     flutter pub get
 
     # TODO(https://github.com/flutter/flutter/issues/43538): Remove workaround.
-    flutter config --enable-web
     flutter build web --pwa-strategy=none --no-tree-shake-icons
 
     # TODO(https://github.com/flutter/devtools/issues/1987): once this issue is fixed,
     # we may need to explicitly exclude running integration_tests here (this is what we
     # used to do when integration tests were enabled).
     if [ "$PLATFORM" = "vm" ]; then
-        WEBDEV_RELEASE=true flutter test $DART_DEFINE_ARGS test/
+        WEBDEV_RELEASE=true flutter test test/
     elif [ "$PLATFORM" = "chrome" ]; then
-        WEBDEV_RELEASE=true flutter test --platform chrome $DART_DEFINE_ARGS test/
+        WEBDEV_RELEASE=true flutter test --platform chrome test/
     else
         echo "unknown test platform"
         exit 1
@@ -160,7 +156,7 @@ elif [ "$BOT" = "integration_ddc" ]; then
 
     # TODO(https://github.com/flutter/devtools/issues/1987): rewrite integration tests.
     # We need to run integration tests with -j1 to run with no concurrency.
-    # flutter test -j1 $DART_DEFINE_ARGS test/integration_tests/
+    # flutter test -j1 test/integration_tests/
 
 elif [ "$BOT" = "integration_dart2js" ]; then
 
@@ -169,19 +165,7 @@ elif [ "$BOT" = "integration_dart2js" ]; then
 
     # TODO(https://github.com/flutter/devtools/issues/1987): rewrite integration tests.
     # We need to run integration tests with -j1 to run with no concurrency.
-    # WEBDEV_RELEASE=true flutter test -j1 $DART_DEFINE_ARGS test/integration_tests/
-
-elif [ "$BOT" = "packages" ]; then
-
-    popd
-
-    # Get packages
-    repo_tool packages-get
-
-    # Analyze the code
-    repo_tool analyze
-
-    pushd packages/devtools_app
+    # WEBDEV_RELEASE=true flutter test -j1 test/integration_tests/
 
 else
 

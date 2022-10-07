@@ -15,11 +15,16 @@ import '../test_infra/flutter_test_storage.dart';
 void main() {
   setGlobal(ServiceConnectionManager, FakeServiceManager());
 
-  group('PreferencesController', () {
+  group('$PreferencesController', () {
     late PreferencesController controller;
 
     setUp(() {
       controller = PreferencesController();
+    });
+
+    test('has subcontrollers initialized', () {
+      expect(controller.memory, isNotNull);
+      expect(controller.inspector, isNotNull);
     });
 
     test('has value', () {
@@ -68,7 +73,7 @@ void main() {
     });
   });
 
-  group('InspectorPreferencesController', () {
+  group('$InspectorPreferencesController', () {
     group('hoverEvalMode', () {
       late InspectorPreferencesController controller;
 
@@ -117,6 +122,69 @@ void main() {
       });
       // TODO(https://github.com/flutter/devtools/issues/4342): make inspector
       // preferences testable, then test it
+    });
+  });
+
+  group('$MemoryPreferencesController', () {
+    late MemoryPreferencesController controller;
+    late FlutterTestStorage storage;
+
+    setUp(() async {
+      setGlobal(Storage, storage = FlutterTestStorage());
+      controller = MemoryPreferencesController();
+      await controller.init();
+    });
+
+    test('has expected default values', () async {
+      expect(controller.androidCollectionEnabled.value, isFalse);
+      expect(controller.autoSnapshotEnabled.value, isFalse);
+    });
+
+    test('stores values and reads them on init', () async {
+      storage.values.clear();
+
+      // Remember original values.
+      final originalAndroidCollection =
+          controller.androidCollectionEnabled.value;
+      final originalAutoSnapshot = controller.androidCollectionEnabled.value;
+
+      // Flip the values in controller.
+      controller.androidCollectionEnabled.value = !originalAndroidCollection;
+      controller.autoSnapshotEnabled.value = !originalAutoSnapshot;
+
+      // Check the values are stored.
+      expect(storage.values, hasLength(2));
+
+      // Reload the values from storage.
+      await controller.init();
+
+      // Check they did not change back to default.
+      expect(
+        controller.androidCollectionEnabled.value,
+        !originalAndroidCollection,
+      );
+      expect(
+        controller.autoSnapshotEnabled.value,
+        !originalAutoSnapshot,
+      );
+
+      // Flip the values in storage.
+      for (var key in storage.values.keys) {
+        storage.values[key] = (!(storage.values[key] == 'true')).toString();
+      }
+
+      // Reload the values from storage.
+      await controller.init();
+
+      // Check they flipped values are loaded.
+      expect(
+        controller.androidCollectionEnabled.value,
+        originalAndroidCollection,
+      );
+      expect(
+        controller.autoSnapshotEnabled.value,
+        originalAutoSnapshot,
+      );
     });
   });
 }

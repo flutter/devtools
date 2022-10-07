@@ -17,10 +17,17 @@ DEVTOOLS_DIR="${TOOL_DIR}/.."
 # Fast fail the script on failures.
 set -ex
 
-echo "Generating code..."
+echo "Generating code for devtools_app..."
 
 echo $(pwd)
 
+pushd $DEVTOOLS_DIR/packages/devtools_app
+
+flutter pub run build_runner build --delete-conflicting-outputs
+
+popd
+
+echo "Generating code for devtools_test..."
 
 pushd $DEVTOOLS_DIR/packages/devtools_test
 

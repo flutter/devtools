@@ -14,7 +14,7 @@ flutter pub upgrade
 popd
 
 pushd packages/devtools_test
-flutter pub get
+flutter pub upgrade
 popd
 
 bash tool/generate_code.sh

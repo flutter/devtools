@@ -17,6 +17,7 @@ import '../../config_specific/logger/allowed_error.dart';
 import '../../config_specific/logger/logger.dart';
 import '../../http/http_service.dart';
 import '../../primitives/auto_dispose.dart';
+import '../../primitives/feature_flags.dart';
 import '../../primitives/trace_event.dart';
 import '../../primitives/trees.dart';
 import '../../primitives/utils.dart';
@@ -28,7 +29,7 @@ import '../profiler/cpu_profile_service.dart';
 import '../profiler/cpu_profile_transformer.dart';
 import '../profiler/profile_granularity.dart';
 import 'panes/controls/enhance_tracing/enhance_tracing_controller.dart';
-import 'panes/raster_metrics/raster_metrics_controller.dart';
+import 'panes/raster_stats/raster_stats_controller.dart';
 import 'panes/timeline_events/perfetto/perfetto.dart';
 import 'performance_model.dart';
 import 'performance_screen.dart';
@@ -40,14 +41,11 @@ import 'timeline_event_processor.dart';
 /// Debugging flag to load sample trace events from [simple_trace_example.dart].
 bool debugSimpleTrace = false;
 
-/// Flag to enable the embedded perfetto trace viewer.
-bool embeddedPerfettoEnabled = false;
-
 /// Flag to hide the frame analysis feature while it is under development.
 bool frameAnalysisSupported = true;
 
-/// Flag to hide the raster metrics feature while it is under development.
-bool rasterMetricsSupported = true;
+/// Flag to hide the raster stats feature while it is under development.
+bool rasterStatsSupported = true;
 
 /// This class contains the business logic for [performance_screen.dart].
 ///
@@ -70,9 +68,12 @@ class PerformanceController extends DisposableController
 
   final enhanceTracingController = EnhanceTracingController();
 
-  final rasterMetricsController = RasterMetricsController();
+  final rasterStatsController = RasterStatsController();
 
   final perfettoController = createPerfettoController();
+
+  final useLegacyTraceViewer =
+      ValueNotifier<bool>(!FeatureFlags.embeddedPerfetto || !kIsWeb);
 
   final _exportController = ExportController();
 
@@ -142,6 +143,12 @@ class PerformanceController extends DisposableController
   /// be processed and added to the timeline events flame chart.
   int _nextTimelineEventIndexToProcess = 0;
 
+  /// Whether we should show the Flutter frames chart.
+  ValueListenable<bool> get showFlutterFramesChart => _showFlutterFramesChart;
+  final _showFlutterFramesChart = ValueNotifier<bool>(true);
+  void toggleShowFlutterFrames(bool value) =>
+      _showFlutterFramesChart.value = value;
+
   /// Whether flutter frames are currently being recorded.
   ValueListenable<bool> get recordingFrames => _recordingFrames;
   final _recordingFrames = ValueNotifier<bool>(true);
@@ -186,7 +193,7 @@ class PerformanceController extends DisposableController
   }
 
   Future<void> _initHelper() async {
-    if (embeddedPerfettoEnabled) {
+    if (FeatureFlags.embeddedPerfetto) {
       perfettoController.init();
     }
 
@@ -611,6 +618,10 @@ class PerformanceController extends DisposableController
     List<TraceEvent> threadNameEvents, {
     bool isInitialUpdate = false,
   }) {
+    // This can happen if there is a race between this method being called and
+    // losing connection to the app.
+    if (serviceManager.connectedApp == null) return;
+
     final isFlutterApp = offlineController.offlineMode.value
         ? offlinePerformanceData != null &&
             offlinePerformanceData!.frames.isNotEmpty
@@ -697,7 +708,7 @@ class PerformanceController extends DisposableController
   }
 
   FutureOr<void> processTraceEvents(List<TraceEventWrapper> traceEvents) async {
-    if (embeddedPerfettoEnabled) {
+    if (FeatureFlags.embeddedPerfetto && !useLegacyTraceViewer.value) {
       await perfettoController.loadTrace(traceEvents);
     } else {
       await _processTraceEvents(traceEvents);
@@ -781,6 +792,11 @@ class PerformanceController extends DisposableController
     );
   }
 
+  Future<void> collectRasterStats() async {
+    await rasterStatsController.collectRasterStats();
+    data!.rasterStats = rasterStatsController.rasterStats.value;
+  }
+
   FutureOr<void> processOfflineData(OfflinePerformanceData offlineData) async {
     await clearData();
     final traceEvents = [
@@ -861,17 +877,24 @@ class PerformanceController extends DisposableController
       }
     }
 
-    if (_offlineData.cpuProfileData != null) {
+    final offlineCpuProfileData = _offlineData.cpuProfileData;
+    if (offlineCpuProfileData != null) {
       cpuProfilerController.loadProcessedData(
-        _offlineData.cpuProfileData!,
+        offlineCpuProfileData,
         storeAsUserTagNone: true,
       );
+    }
+
+    final offlineRasterStats = _offlineData.rasterStats;
+    if (offlineRasterStats != null) {
+      _data.rasterStats = offlineRasterStats;
+      rasterStatsController.setNotifiersForRasterStats(offlineRasterStats);
     }
 
     _displayRefreshRate.value = _offlineData.displayRefreshRate;
   }
 
-  /// Exports the current timeline data to a .json file.
+  /// Exports the current performance screen data to a .json file.
   ///
   /// This method returns the name of the file that was downloaded.
   String exportData() {
@@ -915,6 +938,11 @@ class PerformanceController extends DisposableController
     _httpTimelineLoggingEnabled.value = state;
   }
 
+  void toggleUseLegacyTraceViewer(bool? value) {
+    useLegacyTraceViewer.value = value ?? false;
+    processAvailableEvents();
+  }
+
   /// Clears the timeline data currently stored by the controller as well the
   /// VM timeline if a connected app is present.
   Future<void> clearData() async {
@@ -937,7 +965,7 @@ class PerformanceController extends DisposableController
     _selectedFrameNotifier.value = null;
     _processing.value = false;
     serviceManager.errorBadgeManager.clearErrors(PerformanceScreen.id);
-    if (embeddedPerfettoEnabled) {
+    if (FeatureFlags.embeddedPerfetto) {
       await perfettoController.clear();
     }
   }
@@ -951,7 +979,7 @@ class PerformanceController extends DisposableController
     _pollingTimer?.cancel();
     _timelinePollingRateLimiter?.dispose();
     cpuProfilerController.dispose();
-    if (embeddedPerfettoEnabled) {
+    if (FeatureFlags.embeddedPerfetto) {
       perfettoController.dispose();
     }
     enhanceTracingController.dispose();

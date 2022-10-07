@@ -11,7 +11,6 @@ import '../../analytics/analytics.dart' as ga;
 import '../../analytics/constants.dart' as analytics_constants;
 import '../../framework/scaffold.dart';
 import '../../primitives/auto_dispose_mixin.dart';
-import '../../primitives/flutter_widgets/linked_scroll_controller.dart';
 import '../../primitives/utils.dart';
 import '../../shared/banner_messages.dart';
 import '../../shared/common_widgets.dart';
@@ -30,16 +29,17 @@ import 'performance_utils.dart';
 bool debugFrames = false;
 
 class FlutterFramesChart extends StatefulWidget {
-  const FlutterFramesChart(
-    this.frames,
-    this.displayRefreshRate,
-  );
-
-  static const chartLegendKey = Key('Flutter frames chart legend');
+  const FlutterFramesChart({
+    required this.frames,
+    required this.displayRefreshRate,
+    required this.isVisible,
+  });
 
   final List<FlutterFrame> frames;
 
   final double displayRefreshRate;
+
+  final bool isVisible;
 
   @override
   _FlutterFramesChartState createState() => _FlutterFramesChartState();
@@ -56,16 +56,11 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
 
   double get _yAxisUnitsSpace => scaleByFontFactor(48.0);
 
-  double get _frameNumberSectionHeight => scaleByFontFactor(20.0);
+  static double get _frameNumberSectionHeight => scaleByFontFactor(20.0);
 
-  double get _frameChartScrollbarOffset =>
-      defaultScrollBarOffset + _frameNumberSectionHeight;
-
-  late final LinkedScrollControllerGroup _linkedScrollControllerGroup;
+  double get _frameChartScrollbarOffset => defaultScrollBarOffset;
 
   late final ScrollController _framesScrollController;
-
-  late final ScrollController _frameNumbersScrollController;
 
   FlutterFrame? _selectedFrame;
 
@@ -80,9 +75,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
   @override
   void initState() {
     super.initState();
-    _linkedScrollControllerGroup = LinkedScrollControllerGroup();
-    _framesScrollController = _linkedScrollControllerGroup.addAndGet();
-    _frameNumbersScrollController = _linkedScrollControllerGroup.addAndGet();
+    _framesScrollController = ScrollController();
   }
 
   @override
@@ -104,9 +97,9 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
   @override
   void didUpdateWidget(FlutterFramesChart oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (_linkedScrollControllerGroup.hasAttachedControllers &&
-        _linkedScrollControllerGroup.atScrollBottom) {
-      _linkedScrollControllerGroup.autoScrollToBottom();
+    if (_framesScrollController.hasClients &&
+        _framesScrollController.atScrollBottom) {
+      _framesScrollController.autoScrollToBottom();
     }
 
     if (!collectionEquals(oldWidget.frames, widget.frames)) {
@@ -138,47 +131,34 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
   @override
   void dispose() {
     _framesScrollController.dispose();
-    _frameNumbersScrollController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    // TODO(https://github.com/flutter/devtools/issues/4576): animate showing
+    // and hiding the chart.
+    if (!widget.isVisible) return const SizedBox.shrink();
+
     return Container(
       margin: const EdgeInsets.only(
         left: denseSpacing,
         right: denseSpacing,
         bottom: denseSpacing,
       ),
-      height: defaultChartHeight + _frameChartScrollbarOffset,
+      height: defaultChartHeight +
+          _frameNumberSectionHeight +
+          _frameChartScrollbarOffset,
       child: Row(
         children: [
           Expanded(child: _buildChart()),
           const SizedBox(width: defaultSpacing),
           Padding(
             padding: EdgeInsets.only(bottom: _frameChartScrollbarOffset),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Legend(
-                  key: FlutterFramesChart.chartLegendKey,
-                  entries: [
-                    const LegendEntry('Frame Time (UI)', mainUiColor),
-                    const LegendEntry('Frame Time (Raster)', mainRasterColor),
-                    const LegendEntry('Jank (slow frame)', uiJankColor),
-                    LegendEntry(
-                      'Shader Compilation',
-                      shaderCompilationColor.background,
-                    ),
-                  ],
-                ),
-                if (widget.frames.isNotEmpty)
-                  AverageFPS(
-                    frames: widget.frames,
-                    displayRefreshRate: widget.displayRefreshRate,
-                  ),
-              ],
+            child: FramesChartControls(
+              controller: controller,
+              frames: widget.frames,
+              displayRefreshRate: widget.displayRefreshRate,
             ),
           ),
         ],
@@ -203,6 +183,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
                 itemExtent: _defaultFrameWidthWithPadding,
                 itemBuilder: (context, index) => FlutterFramesChartItem(
                   controller: controller,
+                  index: index,
                   frame: widget.frames[index],
                   selected: widget.frames[index] == _selectedFrame,
                   msPerPx: _msPerPx,
@@ -214,28 +195,6 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
             ),
           ),
         );
-        final frameNumbers = Container(
-          height: _frameNumberSectionHeight,
-          padding: EdgeInsets.only(left: _yAxisUnitsSpace),
-          child: ListView.builder(
-            controller: _frameNumbersScrollController,
-            scrollDirection: Axis.horizontal,
-            itemCount: widget.frames.length,
-            itemExtent: _defaultFrameWidthWithPadding,
-            shrinkWrap: true,
-            itemBuilder: (context, index) {
-              if (index % 2 == 1) {
-                return const SizedBox(width: _defaultFrameWidthWithPadding);
-              }
-              return Center(
-                child: Text(
-                  '${widget.frames[index].id}',
-                  style: themeData.subtleChartTextStyle,
-                ),
-              );
-            },
-          ),
-        );
         final chartAxisPainter = CustomPaint(
           painter: ChartAxisPainter(
             constraints: constraints,
@@ -243,7 +202,8 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
             displayRefreshRate: widget.displayRefreshRate,
             msPerPx: _msPerPx,
             themeData: themeData,
-            bottomMargin: _frameChartScrollbarOffset,
+            bottomMargin:
+                _frameChartScrollbarOffset + _frameNumberSectionHeight,
           ),
         );
         final fpsLinePainter = CustomPaint(
@@ -253,16 +213,13 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
             displayRefreshRate: widget.displayRefreshRate,
             msPerPx: _msPerPx,
             themeData: themeData,
-            bottomMargin: _frameChartScrollbarOffset,
+            bottomMargin:
+                _frameChartScrollbarOffset + _frameNumberSectionHeight,
           ),
         );
         return Stack(
           children: [
             chartAxisPainter,
-            Positioned(
-              top: defaultChartHeight,
-              child: frameNumbers,
-            ),
             Padding(
               padding: EdgeInsets.only(left: _yAxisUnitsSpace),
               child: chart,
@@ -275,8 +232,76 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
   }
 }
 
+@visibleForTesting
+class FramesChartControls extends StatelessWidget {
+  const FramesChartControls({
+    required this.controller,
+    required this.frames,
+    required this.displayRefreshRate,
+  });
+
+  static const _pauseTooltip = 'Pause Flutter frame recording';
+
+  static const _resumeTooltip = 'Resume Flutter frame recording';
+
+  final PerformanceController controller;
+
+  final List<FlutterFrame> frames;
+
+  final double displayRefreshRate;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ValueListenableBuilder<bool>(
+          valueListenable: controller.recordingFrames,
+          builder: (context, recording, child) {
+            return PauseResumeButtonGroup(
+              paused: !recording,
+              onPause: _pauseFrameRecording,
+              onResume: _resumeFrameRecording,
+              pauseTooltip: _pauseTooltip,
+              resumeTooltip: _resumeTooltip,
+            );
+          },
+        ),
+        Legend(
+          dense: true,
+          entries: [
+            const LegendEntry('Frame Time (UI)', mainUiColor),
+            const LegendEntry('Frame Time (Raster)', mainRasterColor),
+            const LegendEntry('Jank (slow frame)', uiJankColor),
+            LegendEntry(
+              'Shader Compilation',
+              shaderCompilationColor.background,
+            ),
+          ],
+        ),
+        AverageFPS(
+          frames: frames,
+          displayRefreshRate: displayRefreshRate,
+        ),
+      ],
+    );
+  }
+
+  void _pauseFrameRecording() {
+    ga.select(analytics_constants.performance, analytics_constants.pause);
+    controller.toggleRecordingFrames(false);
+  }
+
+  void _resumeFrameRecording() {
+    ga.select(analytics_constants.performance, analytics_constants.resume);
+    controller.toggleRecordingFrames(true);
+  }
+}
+
 class FlutterFramesChartItem extends StatelessWidget {
   const FlutterFramesChartItem({
+    required this.index,
     required this.controller,
     required this.frame,
     required this.selected,
@@ -285,7 +310,7 @@ class FlutterFramesChartItem extends StatelessWidget {
     required this.displayRefreshRate,
   });
 
-  static const defaultFrameWidth = 24.0;
+  static const defaultFrameWidth = 28.0;
 
   static const selectedIndicatorHeight = 8.0;
 
@@ -293,6 +318,8 @@ class FlutterFramesChartItem extends StatelessWidget {
       Key('flutter frames chart - selected frame indicator');
 
   final PerformanceController controller;
+
+  final int index;
 
   final FlutterFrame frame;
 
@@ -306,7 +333,8 @@ class FlutterFramesChartItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final themeData = Theme.of(context);
+    final colorScheme = themeData.colorScheme;
 
     final bool uiJanky = frame.isUiJanky(displayRefreshRate);
     final bool rasterJanky = frame.isRasterJanky(displayRefreshRate);
@@ -361,48 +389,70 @@ class FlutterFramesChartItem extends StatelessWidget {
       ],
     );
 
-    return InkWell(
-      onTap: _selectFrame,
-      child: Stack(
-        children: [
-          // TODO(kenz): make tooltip to persist if the frame is selected.
-          FlutterFrameTooltip(
-            frame: frame,
-            hasShaderJank: hasShaderJank,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: densePadding),
-              color: selected ? colorScheme.selectedFrameBackgroundColor : null,
-              child: Column(
-                children: [
-                  // Dummy child so that the InkWell does not take up the entire column.
-                  const Expanded(child: SizedBox()),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      ui,
-                      raster,
-                    ],
-                  ),
-                ],
+    final content = Padding(
+      padding: EdgeInsets.only(
+        bottom: _FlutterFramesChartState._frameNumberSectionHeight,
+      ),
+      child: InkWell(
+        onTap: _selectFrame,
+        child: Stack(
+          children: [
+            // TODO(kenz): make tooltip to persist if the frame is selected.
+            FlutterFrameTooltip(
+              frame: frame,
+              hasShaderJank: hasShaderJank,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: densePadding),
+                color:
+                    selected ? colorScheme.selectedFrameBackgroundColor : null,
+                child: Column(
+                  children: [
+                    // Dummy child so that the InkWell does not take up the entire column.
+                    const Expanded(child: SizedBox()),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        ui,
+                        raster,
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          if (selected)
-            Container(
-              key: selectedFrameIndicatorKey,
-              color: defaultSelectionColor,
-              height: selectedIndicatorHeight,
-            ),
-          if (hasShaderJank)
-            const Padding(
-              padding: EdgeInsets.only(
-                top: FlutterFramesChartItem.selectedIndicatorHeight,
+            if (selected)
+              Container(
+                key: selectedFrameIndicatorKey,
+                color: defaultSelectionColor,
+                height: selectedIndicatorHeight,
               ),
-              child: ShaderJankWarningIcon(),
-            ),
-        ],
+            if (hasShaderJank)
+              const Padding(
+                padding: EdgeInsets.only(
+                  top: FlutterFramesChartItem.selectedIndicatorHeight,
+                ),
+                child: ShaderJankWarningIcon(),
+              ),
+          ],
+        ),
       ),
     );
+    return index % 2 == 0
+        ? Stack(
+            children: [
+              content,
+              Container(
+                margin: EdgeInsets.only(top: defaultChartHeight),
+                height: _FlutterFramesChartState._frameNumberSectionHeight,
+                alignment: AlignmentDirectional.center,
+                child: Text(
+                  '${frame.id}',
+                  style: themeData.subtleChartTextStyle,
+                ),
+              )
+            ],
+          )
+        : content;
   }
 
   void _selectFrame() {
@@ -445,14 +495,14 @@ class FlutterFrameTooltip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return HoverCardTooltip(
+    return HoverCardTooltip.sync(
       enabled: () => true,
-      onHover: (_) => _buildCardData(context),
+      generateHoverCardData: (_) => _buildCardData(context),
       child: child,
     );
   }
 
-  Future<HoverCardData> _buildCardData(BuildContext context) {
+  HoverCardData _buildCardData(BuildContext context) {
     final textColor = Theme.of(context).colorScheme.toggleButtonsTitle;
     final textStyle = TextStyle(color: textColor);
     final uiText = 'UI: ${msText(frame.buildTime)}';
@@ -460,46 +510,44 @@ class FlutterFrameTooltip extends StatelessWidget {
     final shaderText = hasShaderJank
         ? 'Shader Compilation: ${msText(frame.shaderDuration)}  -'
         : '';
-    return Future.value(
-      HoverCardData(
-        position: HoverCardPosition.element,
-        width: _calculateTooltipWidth([uiText, rasterText, shaderText]),
-        contents: Material(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                uiText,
-                style: textStyle,
+    return HoverCardData(
+      position: HoverCardPosition.element,
+      width: _calculateTooltipWidth([uiText, rasterText, shaderText]),
+      contents: Material(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              uiText,
+              style: textStyle,
+            ),
+            const SizedBox(height: densePadding),
+            Text(
+              rasterText,
+              style: textStyle,
+            ),
+            if (hasShaderJank)
+              Row(
+                children: [
+                  Icon(
+                    Icons.subdirectory_arrow_right,
+                    color: textColor,
+                    size: defaultIconSizeBeforeScaling,
+                  ),
+                  Text(
+                    shaderText,
+                    style: textStyle,
+                  ),
+                  const MoreInfoLink(
+                    url: preCompileShadersDocsUrl,
+                    gaScreenName: analytics_constants.performance,
+                    gaSelectedItemDescription:
+                        analytics_constants.shaderCompilationDocsTooltipLink,
+                  ),
+                ],
               ),
-              const SizedBox(height: densePadding),
-              Text(
-                rasterText,
-                style: textStyle,
-              ),
-              if (hasShaderJank)
-                Row(
-                  children: [
-                    Icon(
-                      Icons.subdirectory_arrow_right,
-                      color: textColor,
-                      size: defaultIconSizeBeforeScaling,
-                    ),
-                    Text(
-                      shaderText,
-                      style: textStyle,
-                    ),
-                    const MoreInfoLink(
-                      url: preCompileShadersDocsUrl,
-                      gaScreenName: analytics_constants.performance,
-                      gaSelectedItemDescription:
-                          analytics_constants.shaderCompilationDocsTooltipLink,
-                    ),
-                  ],
-                ),
-            ],
-          ),
+          ],
         ),
       ),
     );
@@ -531,23 +579,30 @@ class AverageFPS extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double sumFrameTimesMs = frames.fold(
-      0.0,
-      (sum, frame) =>
-          sum +
-          math.max(
-            1000 / displayRefreshRate,
+    late String fpsText;
+    if (frames.isEmpty) {
+      fpsText = '--';
+    } else {
+      final double sumFrameTimesMs = frames.fold(
+        0.0,
+        (sum, frame) =>
+            sum +
             math.max(
-              frame.buildTime.inMilliseconds,
-              frame.rasterTime.inMilliseconds,
+              1000 / displayRefreshRate,
+              math.max(
+                frame.buildTime.inMilliseconds,
+                frame.rasterTime.inMilliseconds,
+              ),
             ),
-          ),
-    );
-    final avgFrameTime = sumFrameTimesMs / frames.length;
-    final avgFps = (1 / avgFrameTime * 1000).round();
+      );
+      final avgFrameTime = sumFrameTimesMs / frames.length;
+      final avgFps = (1 / avgFrameTime * 1000).round();
+      fpsText = '$avgFps';
+    }
     return Text(
-      '$avgFps FPS (average)',
+      '$fpsText FPS (average)',
       maxLines: 2,
+      style: Theme.of(context).legendTextStyle,
     );
   }
 }

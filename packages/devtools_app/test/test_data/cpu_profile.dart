@@ -174,6 +174,19 @@ final Map<String, dynamic> cpuProfileResponseJson = {
   'stackFrames': goldenCpuProfileStackFrames,
   'traceEvents': goldenCpuProfileTraceEvents,
 };
+
+final Map<String, dynamic> cpuProfileResponseEmptyJson = {
+  'type': '_CpuProfileTimeline',
+  'samplePeriod': 0,
+  'stackDepth': 128,
+  'sampleCount': 0,
+  'timeSpan': 0.0,
+  'timeOriginMicros': 47377796685,
+  'timeExtentMicros': 0,
+  'stackFrames': {},
+  'traceEvents': [],
+};
+
 const String goldenSamplesIsolate = '140357727781376';
 final Map<String, dynamic> goldenCpuSamplesJson = {
   'type': 'CpuSamples',

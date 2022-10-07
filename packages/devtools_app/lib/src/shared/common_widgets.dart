@@ -203,38 +203,116 @@ class IconLabelButton extends StatelessWidget {
   }
 }
 
-class PauseButton extends IconLabelButton {
+class PauseButton extends StatelessWidget {
   const PauseButton({
-    Key? key,
-    double? minScreenWidthForTextBeforeScaling,
-    String tooltip = 'Pause',
-    required VoidCallback? onPressed,
-  }) : super(
-          key: key,
-          icon: Icons.pause,
-          label: 'Pause',
-          tooltip: tooltip,
-          minScreenWidthForTextBeforeScaling:
-              minScreenWidthForTextBeforeScaling,
-          onPressed: onPressed,
-        );
+    super.key,
+    this.iconOnly = false,
+    required this.tooltip,
+    required this.onPressed,
+    this.minScreenWidthForTextBeforeScaling,
+  });
+
+  final bool iconOnly;
+  final String? tooltip;
+  final VoidCallback? onPressed;
+  final double? minScreenWidthForTextBeforeScaling;
+
+  @override
+  Widget build(BuildContext context) {
+    if (iconOnly) {
+      return OutlinedIconButton(
+        icon: Icons.pause,
+        onPressed: onPressed,
+        tooltip: tooltip,
+      );
+    }
+
+    return IconLabelButton(
+      key: key,
+      icon: Icons.pause,
+      label: 'Pause',
+      tooltip: tooltip,
+      minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
+      onPressed: onPressed,
+    );
+  }
 }
 
-class ResumeButton extends IconLabelButton {
+class ResumeButton extends StatelessWidget {
   const ResumeButton({
-    Key? key,
-    double? minScreenWidthForTextBeforeScaling,
-    String tooltip = 'Resume',
-    required VoidCallback? onPressed,
-  }) : super(
-          key: key,
-          icon: Icons.play_arrow,
-          label: 'Resume',
-          tooltip: tooltip,
-          minScreenWidthForTextBeforeScaling:
-              minScreenWidthForTextBeforeScaling,
-          onPressed: onPressed,
-        );
+    super.key,
+    this.iconOnly = false,
+    required this.tooltip,
+    required this.onPressed,
+    this.minScreenWidthForTextBeforeScaling,
+  });
+
+  final bool iconOnly;
+  final String? tooltip;
+  final VoidCallback? onPressed;
+  final double? minScreenWidthForTextBeforeScaling;
+
+  @override
+  Widget build(BuildContext context) {
+    if (iconOnly) {
+      return OutlinedIconButton(
+        icon: Icons.play_arrow,
+        onPressed: onPressed,
+        tooltip: tooltip,
+      );
+    }
+
+    return IconLabelButton(
+      key: key,
+      icon: Icons.pause,
+      label: 'Resume',
+      tooltip: tooltip,
+      minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
+      onPressed: onPressed,
+    );
+  }
+}
+
+/// A button that groups pause and resume controls and automatically manages
+/// the button enabled states depending on the value of [paused].
+class PauseResumeButtonGroup extends StatelessWidget {
+  const PauseResumeButtonGroup({
+    super.key,
+    required this.paused,
+    required this.onPause,
+    required this.onResume,
+    this.pauseTooltip = 'Pause',
+    this.resumeTooltip = 'Resume',
+  });
+
+  final bool paused;
+
+  final VoidCallback onPause;
+
+  final VoidCallback onResume;
+
+  final String pauseTooltip;
+
+  final String resumeTooltip;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        PauseButton(
+          iconOnly: true,
+          onPressed: paused ? null : onPause,
+          tooltip: pauseTooltip,
+        ),
+        const SizedBox(width: denseSpacing),
+        ResumeButton(
+          iconOnly: true,
+          onPressed: paused ? onResume : null,
+          tooltip: resumeTooltip,
+        ),
+      ],
+    );
+  }
 }
 
 class ClearButton extends IconLabelButton {
@@ -421,6 +499,45 @@ class CollapseAllButton extends StatelessWidget {
     return OutlinedButton(
       onPressed: onPressed,
       child: const Text('Collapse All'),
+    );
+  }
+}
+
+/// Button that should be used to control showing or hiding a chart.
+///
+/// The button automatically toggles the icon and the tooltip to indicate the
+/// shown or hidden state.
+class ChartVisibilityButton extends StatelessWidget {
+  const ChartVisibilityButton({
+    required this.showChart,
+    required this.onPressed,
+    this.minScreenWidthForTextBeforeScaling,
+    this.label = 'Chart',
+  });
+
+  final ValueListenable<bool> showChart;
+
+  final void Function(bool) onPressed;
+
+  final double? minScreenWidthForTextBeforeScaling;
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: showChart,
+      builder: (_, show, __) {
+        return IconLabelButton(
+          key: key,
+          tooltip: show ? 'Hide chart' : 'Show chart',
+          icon: show ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+          label: label,
+          minScreenWidthForTextBeforeScaling:
+              minScreenWidthForTextBeforeScaling,
+          onPressed: () => onPressed(!show),
+        );
+      },
     );
   }
 }
@@ -628,7 +745,7 @@ class Badge extends StatelessWidget {
       child: Text(
         text,
         // Use a slightly smaller font for the badge.
-        style: (theme.primaryTextTheme.bodyText2 ?? const TextStyle())
+        style: (theme.primaryTextTheme.bodyMedium ?? const TextStyle())
             .apply(fontSizeDelta: -1),
       ),
     );
@@ -765,6 +882,20 @@ class ToolbarAction extends StatelessWidget {
   }
 }
 
+/// A blank, drop-in replacement for [AreaPaneHeader].
+///
+/// Acts as an empty header widget with zero size that is compatible with
+/// interfaces that expect a [PreferredSizeWidget].
+class BlankHeader extends StatelessWidget implements PreferredSizeWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container();
+  }
+
+  @override
+  Size get preferredSize => Size.zero;
+}
+
 /// Create a bordered, fixed-height header area with a title and optional child
 /// on the right-hand side.
 ///
@@ -781,6 +912,7 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
     this.leftPadding = defaultSpacing,
     this.rightPadding = densePadding,
     this.tall = false,
+    this.backgroundColor,
   }) : super(key: key);
 
   final Widget title;
@@ -792,6 +924,7 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
   final double leftPadding;
   final double rightPadding;
   final bool tall;
+  final Color? backgroundColor;
 
   @override
   Widget build(BuildContext context) {
@@ -806,7 +939,7 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
                 needsBottomBorder ? defaultBorderSide(theme) : BorderSide.none,
             left: needsLeftBorder ? defaultBorderSide(theme) : BorderSide.none,
           ),
-          color: theme.titleSolidBackgroundColor,
+          color: backgroundColor ?? theme.titleSolidBackgroundColor,
         ),
         padding: EdgeInsets.only(left: leftPadding, right: rightPadding),
         alignment: Alignment.centerLeft,
@@ -816,7 +949,7 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
               child: DefaultTextStyle(
                 maxLines: maxLines,
                 overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.subtitle2!,
+                style: theme.textTheme.titleSmall!,
                 child: title,
               ),
             ),
@@ -862,7 +995,7 @@ class DevToolsToggleButtonGroup extends StatelessWidget {
       color: theme.colorScheme.toggleButtonsTitle,
       selectedColor: theme.colorScheme.toggleButtonsTitleSelected,
       fillColor: theme.colorScheme.toggleButtonsFillSelected,
-      textStyle: theme.textTheme.bodyText1,
+      textStyle: theme.textTheme.bodyLarge,
       constraints: BoxConstraints(
         minWidth: defaultButtonHeight,
         minHeight: defaultButtonHeight,
@@ -1154,15 +1287,66 @@ class OutlinedRowGroup extends StatelessWidget {
 }
 
 class OutlineDecoration extends StatelessWidget {
-  const OutlineDecoration({Key? key, this.child}) : super(key: key);
+  const OutlineDecoration({
+    Key? key,
+    this.child,
+    this.showTop = true,
+    this.showBottom = true,
+    this.showLeft = true,
+    this.showRight = true,
+  }) : super(key: key);
+
+  factory OutlineDecoration.onlyBottom({required Widget? child}) =>
+      OutlineDecoration(
+        showTop: false,
+        showLeft: false,
+        showRight: false,
+        child: child,
+      );
+
+  factory OutlineDecoration.onlyTop({required Widget? child}) =>
+      OutlineDecoration(
+        showBottom: false,
+        showLeft: false,
+        showRight: false,
+        child: child,
+      );
+
+  factory OutlineDecoration.onlyLeft({required Widget? child}) =>
+      OutlineDecoration(
+        showBottom: false,
+        showTop: false,
+        showRight: false,
+        child: child,
+      );
+
+  factory OutlineDecoration.onlyRight({required Widget? child}) =>
+      OutlineDecoration(
+        showBottom: false,
+        showTop: false,
+        showLeft: false,
+        child: child,
+      );
+
+  final bool showTop;
+  final bool showBottom;
+  final bool showLeft;
+  final bool showRight;
 
   final Widget? child;
 
   @override
   Widget build(BuildContext context) {
+    final color = Theme.of(context).focusColor;
+    final border = BorderSide(color: color);
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: Theme.of(context).focusColor),
+        border: Border(
+          left: showLeft ? border : BorderSide.none,
+          right: showRight ? border : BorderSide.none,
+          top: showTop ? border : BorderSide.none,
+          bottom: showBottom ? border : BorderSide.none,
+        ),
       ),
       child: child,
     );
@@ -1220,7 +1404,7 @@ class CenteredMessage extends StatelessWidget {
     return Center(
       child: Text(
         message,
-        style: Theme.of(context).textTheme.headline6,
+        style: Theme.of(context).textTheme.titleLarge,
       ),
     );
   }
@@ -1292,7 +1476,7 @@ extension ScrollControllerAutoScroll on ScrollController {
 
   /// Scroll the content to the bottom using the app's default animation
   /// duration and curve..
-  void autoScrollToBottom() async {
+  Future<void> autoScrollToBottom() async {
     await animateTo(
       position.maxScrollExtent,
       duration: rapidDuration,
@@ -1724,16 +1908,30 @@ Widget maybeWrapWithTooltip({
 }
 
 class Legend extends StatelessWidget {
-  const Legend({Key? key, required this.entries}) : super(key: key);
+  const Legend({
+    Key? key,
+    required this.entries,
+    this.dense = false,
+  }) : super(key: key);
 
-  double get legendSquareSize => scaleByFontFactor(16.0);
+  double get legendSquareSize =>
+      dense ? scaleByFontFactor(12.0) : scaleByFontFactor(16.0);
 
   final List<LegendEntry> entries;
 
+  final bool dense;
+
   @override
   Widget build(BuildContext context) {
+    final textStyle = dense ? Theme.of(context).legendTextStyle : null;
     final List<Widget> legendItems = entries
-        .map((entry) => _legendItem(entry.description, entry.color))
+        .map(
+          (entry) => _legendItem(
+            entry.description,
+            entry.color,
+            textStyle,
+          ),
+        )
         .toList()
         .joinWith(const SizedBox(height: denseRowSpacing));
     return Column(
@@ -1742,7 +1940,7 @@ class Legend extends StatelessWidget {
     );
   }
 
-  Widget _legendItem(String description, Color? color) {
+  Widget _legendItem(String description, Color? color, TextStyle? style) {
     return Row(
       children: [
         Container(
@@ -1751,7 +1949,10 @@ class Legend extends StatelessWidget {
           color: color,
         ),
         const SizedBox(width: denseSpacing),
-        Text(description),
+        Text(
+          description,
+          style: style,
+        ),
       ],
     );
   }
@@ -1815,6 +2016,7 @@ class NotifierCheckbox extends StatelessWidget {
     required this.notifier,
     this.onChanged,
     this.enabled = true,
+    this.checkboxKey,
   }) : super(key: key);
 
   /// The notifier this [NotifierCheckbox] is responsible for listening to and
@@ -1827,6 +2029,9 @@ class NotifierCheckbox extends StatelessWidget {
 
   /// Whether this checkbox should be enabled for interaction.
   final bool enabled;
+
+  /// Key to assign to the checkbox, for testing purposes.
+  final Key? checkboxKey;
 
   void _updateValue(bool? value) {
     if (notifier.value != value) {
@@ -1846,6 +2051,7 @@ class NotifierCheckbox extends StatelessWidget {
           materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           value: value,
           onChanged: enabled ? _updateValue : null,
+          key: checkboxKey,
         );
       },
     );
@@ -1863,6 +2069,7 @@ class CheckboxSetting extends StatelessWidget {
     this.enabled = true,
     this.gaScreenName,
     this.gaItem,
+    this.checkboxKey,
   }) : super(key: key);
 
   final ValueNotifier<bool?> notifier;
@@ -1881,6 +2088,8 @@ class CheckboxSetting extends StatelessWidget {
   final String? gaScreenName;
 
   final String? gaItem;
+
+  final Key? checkboxKey;
 
   @override
   Widget build(BuildContext context) {
@@ -1928,6 +2137,7 @@ class CheckboxSetting extends StatelessWidget {
             }
           },
           enabled: enabled,
+          checkboxKey: checkboxKey,
         ),
         Flexible(
           child: textContent,
@@ -2041,6 +2251,9 @@ class _BlinkingIconState extends State<BlinkingIcon> {
   }
 }
 
+// TODO(https://github.com/flutter/devtools/issues/2989): investigate if we can
+// modify this widget to be a 'MultiValueListenableBuilder' that can take an
+// arbitrary number of listenables.
 /// A widget that listens for changes to two different [ValueListenable]s and
 /// rebuilds for change notifications to either.
 ///
@@ -2228,9 +2441,9 @@ class BulletSpacer extends StatelessWidget {
     late TextStyle? textStyle;
     if (useAccentColor) {
       textStyle = theme.appBarTheme.toolbarTextStyle ??
-          theme.primaryTextTheme.bodyText2;
+          theme.primaryTextTheme.bodyMedium;
     } else {
-      textStyle = theme.textTheme.bodyText2;
+      textStyle = theme.textTheme.bodyMedium;
     }
 
     final mutedColor = textStyle?.color?.withAlpha(0x90);
@@ -2243,6 +2456,48 @@ class BulletSpacer extends StatelessWidget {
         '•',
         style: textStyle?.copyWith(color: mutedColor),
       ),
+    );
+  }
+}
+
+class Progress extends StatelessWidget {
+  Progress({Key? key, double? size})
+      : size = size ?? smallProgressSize,
+        super(key: key);
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: size,
+      height: size,
+      child: CircularProgressIndicator(
+        color: Theme.of(context).textTheme.bodyLarge?.color,
+      ),
+    );
+  }
+}
+
+class ToCsvButton extends StatelessWidget {
+  const ToCsvButton({
+    Key? key,
+    this.onPressed,
+    this.tooltip = 'Download data in CSV format',
+    required this.minScreenWidthForTextBeforeScaling,
+  }) : super(key: key);
+
+  final VoidCallback? onPressed;
+  final String? tooltip;
+  final double minScreenWidthForTextBeforeScaling;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconLabelButton(
+      label: 'CSV',
+      icon: Icons.file_download,
+      tooltip: tooltip,
+      onPressed: onPressed,
+      minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
     );
   }
 }

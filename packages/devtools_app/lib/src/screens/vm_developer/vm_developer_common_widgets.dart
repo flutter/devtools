@@ -2,15 +2,24 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../primitives/utils.dart';
 import '../../shared/common_widgets.dart';
-import '../../shared/table.dart';
+import '../../shared/globals.dart';
+import '../../shared/split.dart';
+import '../../shared/table/table.dart';
 import '../../shared/theme.dart';
-import 'vm_object_model.dart';
+import '../debugger/codeview.dart';
+import '../debugger/codeview_controller.dart';
+import '../debugger/debugger_model.dart';
+import 'object_inspector/object_inspector_view_controller.dart';
+import 'object_inspector/vm_object_model.dart';
 import 'vm_service_private_extensions.dart';
 
 /// A convenience widget used to create non-scrollable information cards.
@@ -37,12 +46,10 @@ class VMInfoCard extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return SizedBox.fromSize(
       size: preferredSize,
-      child: Card(
-        child: VMInfoList(
-          title: title,
-          rowKeyValues: rowKeyValues,
-          table: table,
-        ),
+      child: VMInfoList(
+        title: title,
+        rowKeyValues: rowKeyValues,
+        table: table,
       ),
     );
   }
@@ -69,6 +76,27 @@ MapEntry<String, WidgetBuilder> selectableTextBuilderMapEntry(
     (context) => SelectableText(
       value ?? '--',
       style: Theme.of(context).fixedFontStyle,
+    ),
+  );
+}
+
+MapEntry<String, WidgetBuilder>
+    serviceObjectLinkBuilderMapEntry<T extends ObjRef>({
+  required ObjectInspectorViewController controller,
+  required String key,
+  required T object,
+  bool preferUri = false,
+  String Function(T)? textBuilder,
+}) {
+  return MapEntry(
+    key,
+    (context) => VmServiceObjectLink<T>(
+      object: object,
+      textBuilder: textBuilder,
+      preferUri: preferUri,
+      onTap: (object) async {
+        await controller.findAndSelectNodeForObject(object);
+      },
     ),
   );
 }
@@ -245,31 +273,6 @@ String? _objectName(ObjRef? objectRef) {
   return objectRefName;
 }
 
-/// Returns the owner name of a Field or Func object, if [object] is a
-/// FuncObject, it returns the complete (qualified) name of the owner.
-String? _ownerName(VmObject object) {
-  assert(object is FieldObject || object is FuncObject);
-  final owner = (object as dynamic).obj.owner as ObjRef?;
-
-  if (owner == null) {
-    return object.script?.uri;
-  }
-
-  if (object is FieldObject) {
-    if (owner is ClassRef || owner is LibraryRef) {
-      return _objectName(owner);
-    }
-  } else if (object is FuncObject) {
-    if (owner is LibraryRef) {
-      return _objectName(owner);
-    } else {
-      return qualifiedName(owner);
-    }
-  }
-
-  throw Exception('Unexpected owner type: ${owner.type}');
-}
-
 /// Returns the name of a function, qualified with the name of
 /// its owner added as a prefix, separated by a period.
 ///
@@ -326,18 +329,31 @@ class VmExpansionTile extends StatelessWidget {
     final titleRow = AreaPaneHeader(
       title: Text(title),
       needsTopBorder: false,
+      needsBottomBorder: false,
+      // We'll set the color in the Card so the InkWell shows a consistent
+      // color when the user hovers over the ExpansionTile.
+      backgroundColor: Colors.transparent,
     );
+    final theme = Theme.of(context);
     return Card(
+      color: theme.titleSolidBackgroundColor,
       child: ListTileTheme(
-        data: ListTileTheme.of(context).copyWith(dense: true),
-        child: ExpansionTile(
-          title: titleRow,
-          onExpansionChanged: onExpanded,
-          tilePadding: const EdgeInsets.only(
-            left: densePadding,
-            right: defaultSpacing,
+        data: ListTileTheme.of(context).copyWith(
+          dense: true,
+        ),
+        child: Theme(
+          // Prevents divider lines appearing at the top and bottom of the
+          // expanded ExpansionTile.
+          data: theme.copyWith(dividerColor: Colors.transparent),
+          child: ExpansionTile(
+            title: titleRow,
+            onExpansionChanged: onExpanded,
+            tilePadding: const EdgeInsets.only(
+              left: densePadding,
+              right: defaultSpacing,
+            ),
+            children: children,
           ),
-          children: children,
         ),
       ),
     );
@@ -596,6 +612,101 @@ class InboundReferencesWidget extends StatelessWidget {
   }
 }
 
+class VmServiceObjectLink<T> extends StatelessWidget {
+  const VmServiceObjectLink({
+    required this.object,
+    required this.onTap,
+    this.preferUri = false,
+    this.textBuilder,
+  });
+
+  final T object;
+  final bool preferUri;
+  final String Function(T)? textBuilder;
+  final FutureOr<void> Function(T) onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    String text = '';
+    if (textBuilder == null) {
+      if (object is LibraryRef) {
+        final lib = object as LibraryRef;
+        if (lib.uri!.startsWith('dart') || preferUri) {
+          text = lib.uri!;
+        } else {
+          final name = lib.name;
+          text = name!.isEmpty ? lib.uri! : name;
+        }
+      } else if (object is FieldRef) {
+        final field = object as FieldRef;
+        text = field.name!;
+      } else if (object is FuncRef) {
+        final func = object as FuncRef;
+        text = func.name!;
+      } else if (object is ScriptRef) {
+        final script = object as ScriptRef;
+        text = script.uri!;
+      } else if (object is ClassRef) {
+        final cls = object as ClassRef;
+        text = cls.name!;
+      } else if (object is CodeRef) {
+        final code = object as CodeRef;
+        text = code.name!;
+      } else if (object is InstanceRef) {
+        final instance = object as InstanceRef;
+        if (instance.kind == InstanceKind.kTypeParameter) {
+          final buf = StringBuffer();
+          final typeParams = instance.typeParameters!;
+          buf.write('<');
+          for (int i = 0; i < typeParams.length; ++i) {
+            buf.write(typeParams[i].valueAsString);
+            if (i + 1 != typeParams.length) {
+              buf.write(', ');
+            }
+          }
+          buf.write('>');
+          text = buf.toString();
+        } else if (instance.kind == InstanceKind.kList) {
+          text = 'List(length: ${instance.length})';
+        } else if (instance.kind == InstanceKind.kType) {
+          text = instance.name!;
+        } else {
+          if (instance.valueAsString != null) {
+            text = instance.valueAsString!;
+          } else {
+            final cls = instance.classRef!;
+            text = 'Instance of ${cls.name}';
+          }
+        }
+      } else if (object is TypeArgumentsRef) {
+        final typeArgs = object as TypeArgumentsRef;
+        text = typeArgs.name!;
+      }
+    } else {
+      text = textBuilder!(object);
+    }
+
+    final theme = Theme.of(context);
+    return SelectableText.rich(
+      style: theme.linkTextStyle.apply(
+        overflow: TextOverflow.ellipsis,
+      ),
+      maxLines: 1,
+      TextSpan(
+        text: text,
+        style: theme.linkTextStyle.apply(
+          fontFamily: theme.fixedFontStyle.fontFamily,
+          overflow: TextOverflow.ellipsis,
+        ),
+        recognizer: TapGestureRecognizer()
+          ..onTap = () async {
+            await onTap(object);
+          },
+      ),
+    );
+  }
+}
+
 /// A widget for the object inspector historyViewport containing the main
 /// layout of information widgets related to VM object types.
 class VmObjectDisplayBasicLayout extends StatelessWidget {
@@ -624,16 +735,23 @@ class VmObjectDisplayBasicLayout extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Flexible(
-                child: VMInfoCard(
-                  title: generalInfoTitle,
-                  rowKeyValues: generalDataRows,
+                child: OutlineDecoration(
+                  showLeft: false,
+                  showTop: false,
+                  showRight: sideCardDataRows != null,
+                  child: VMInfoCard(
+                    title: generalInfoTitle,
+                    rowKeyValues: generalDataRows,
+                  ),
                 ),
               ),
               if (sideCardDataRows != null)
                 Flexible(
-                  child: VMInfoCard(
-                    title: sideCardTitle,
-                    rowKeyValues: sideCardDataRows,
+                  child: OutlineDecoration.onlyBottom(
+                    child: VMInfoCard(
+                      title: sideCardTitle,
+                      rowKeyValues: sideCardDataRows,
+                    ),
                   ),
                 ),
             ],
@@ -672,6 +790,7 @@ class VmObjectDisplayBasicLayout extends StatelessWidget {
 }
 
 List<MapEntry<String, WidgetBuilder>> vmObjectGeneralDataRows(
+  ObjectInspectorViewController controller,
   VmObject object,
 ) {
   return [
@@ -702,19 +821,149 @@ List<MapEntry<String, WidgetBuilder>> vmObjectGeneralDataRows(
       ),
     ),
     if (object is ClassObject || object is ScriptObject)
-      selectableTextBuilderMapEntry(
-        'Library',
-        _objectName((object.obj as dynamic).library),
+      serviceObjectLinkBuilderMapEntry<LibraryRef>(
+        controller: controller,
+        key: 'Library',
+        object: (object.obj as dynamic).library,
       ),
     if (object is FieldObject || object is FuncObject)
-      selectableTextBuilderMapEntry(
-        'Owner',
-        _ownerName(object),
+      serviceObjectLinkBuilderMapEntry<ObjRef>(
+        controller: controller,
+        key: 'Owner',
+        object: (object.obj as dynamic).owner,
       ),
     if (object is! ScriptObject && object is! LibraryObject)
-      selectableTextBuilderMapEntry(
-        'Script',
-        '${fileNameFromUri(object.script?.uri) ?? ''}:${object.pos?.toString() ?? ''}',
+      serviceObjectLinkBuilderMapEntry<ScriptRef>(
+        controller: controller,
+        key: 'Script',
+        object: object.script!,
+        textBuilder: (script) {
+          return '${fileNameFromUri(script.uri) ?? ''}:${object.pos?.toString() ?? ''}';
+        },
       ),
   ];
+}
+
+/// Creates a simple [CodeView] which displays the code relevant to [object] in
+/// [script].
+///
+/// If [object] is synthetic and doesn't have actual token positions,
+/// [object]'s owner's code will be displayed instead.
+class ObjectInspectorCodeView extends StatefulWidget {
+  ObjectInspectorCodeView({
+    required this.codeViewController,
+    required this.script,
+    required this.object,
+    required this.child,
+  }) : super(key: ValueKey(object));
+
+  final CodeViewController codeViewController;
+  final ScriptRef script;
+  final ObjRef object;
+  final Widget child;
+
+  @override
+  State<ObjectInspectorCodeView> createState() =>
+      _ObjectInspectorCodeViewState();
+}
+
+class _ObjectInspectorCodeViewState extends State<ObjectInspectorCodeView> {
+  @override
+  void didChangeDependencies() async {
+    super.didChangeDependencies();
+    if (widget.script != widget.codeViewController.currentScriptRef.value) {
+      widget.codeViewController.resetScriptLocation(
+        ScriptLocation(widget.script),
+      );
+    }
+  }
+
+  @override
+  void didUpdateWidget(ObjectInspectorCodeView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.script != widget.codeViewController.currentScriptRef.value) {
+      widget.codeViewController.resetScriptLocation(
+        ScriptLocation(widget.script),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<ParsedScript?>(
+      valueListenable: widget.codeViewController.currentParsedScript,
+      builder: (context, currentParsedScript, _) {
+        LineRange? lineRange;
+        if (currentParsedScript != null) {
+          final obj = widget.object;
+          SourceLocation? location;
+          if (obj is ClassRef) {
+            location = obj.location!;
+          } else if (obj is FuncRef) {
+            location = obj.location!;
+            // If there's no line associated with the location, we're likely
+            // dealing with an artificial field / method like a constructor.
+            // We'll display the owner's code instead of showing nothing,
+            // although showing a "No Source Available" message is another
+            // option.
+            final owner = obj.owner;
+            if (location.line == null && obj.owner is ClassRef) {
+              location = owner!.location;
+            }
+          } else if (obj is FieldRef) {
+            location = obj.location!;
+            // If there's no line associated with the location, we're likely
+            // dealing with an artificial field / method like a constructor.
+            // We'll display the owner's code instead of showing nothing,
+            // although showing a "No Source Available" message is another
+            // option.
+            final owner = obj.owner;
+            if (location.line == null && owner is ClassRef) {
+              location = owner.location;
+            }
+          }
+
+          if (location != null &&
+              location.line != null &&
+              location.endTokenPos != null) {
+            final script = currentParsedScript.script;
+            final startLine = location.line!;
+            final endLine = script.getLineNumberFromTokenPos(
+              location.endTokenPos!,
+            )!;
+            lineRange = LineRange(startLine, endLine);
+          }
+        }
+
+        return Split(
+          axis: Axis.vertical,
+          initialFractions: const [0.5, 0.5],
+          children: [
+            OutlineDecoration.onlyBottom(
+              child: widget.child,
+            ),
+            Column(
+              children: [
+                const AreaPaneHeader(
+                  title: Text('Code Preview'),
+                ),
+                Expanded(
+                  child: CodeView(
+                    codeViewController: widget.codeViewController,
+                    scriptRef: widget.script,
+                    parsedScript: currentParsedScript,
+                    enableFileExplorer: false,
+                    enableHistory: false,
+                    enableSearch: false,
+                    lineRange: lineRange,
+                    onSelected: breakpointManager.toggleBreakpoint,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
 }

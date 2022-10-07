@@ -123,7 +123,7 @@ void main() {
       expect(find.byType(EnhanceTracingHint), findsOneWidget);
       expect(find.byType(IntrinsicOperationsHint), findsNothing);
       expect(find.text('Raster Jank Detected'), findsOneWidget);
-      expect(find.byType(RasterMetricsHint), findsOneWidget);
+      expect(find.byType(RasterStatsHint), findsOneWidget);
       expect(find.byType(CanvasSaveLayerHint), findsNothing);
       expect(find.byType(ShaderCompilationHint), findsNothing);
     });

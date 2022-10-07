@@ -127,7 +127,7 @@ abstract class Screen {
     final painter = TextPainter(
       text: TextSpan(
         text: title,
-        style: textTheme.bodyText1,
+        style: textTheme.bodyLarge,
       ),
       textDirection: TextDirection.ltr,
     )..layout();

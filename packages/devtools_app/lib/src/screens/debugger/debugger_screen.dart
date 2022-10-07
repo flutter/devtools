@@ -23,6 +23,7 @@ import '../../ui/icons.dart';
 import 'breakpoints.dart';
 import 'call_stack.dart';
 import 'codeview.dart';
+import 'codeview_controller.dart';
 import 'controls.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
@@ -118,58 +119,9 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     controller.onFirstDebuggerScreenLoad();
   }
 
-  void _onNodeSelected(VMServiceObjectNode? node) {
-    final location = node?.location;
-    if (location != null) {
-      controller.showScriptLocation(location);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final codeArea = ValueListenableBuilder<bool>(
-      valueListenable: controller.fileExplorerVisible,
-      builder: (context, visible, child) {
-        if (visible) {
-          // TODO(devoncarew): Animate this opening and closing.
-          return Split(
-            axis: Axis.horizontal,
-            initialFractions: const [0.70, 0.30],
-            children: [
-              child!,
-              ProgramExplorer(
-                controller: controller.programExplorerController,
-                onNodeSelected: _onNodeSelected,
-              ),
-            ],
-          );
-        } else {
-          return child!;
-        }
-      },
-      child: DualValueListenableBuilder<ScriptRef?, ParsedScript?>(
-        firstListenable: controller.currentScriptRef,
-        secondListenable: controller.currentParsedScript,
-        builder: (context, scriptRef, parsedScript, _) {
-          if (scriptRef != null && parsedScript != null && !_shownFirstScript) {
-            ga.timeEnd(DebuggerScreen.id, analytics_constants.pageReady);
-            serviceManager.sendDwdsEvent(
-              screen: DebuggerScreen.id,
-              action: analytics_constants.pageReady,
-            );
-            _shownFirstScript = true;
-          }
-          return CodeView(
-            key: DebuggerScreenBody.codeViewKey,
-            controller: controller,
-            scriptRef: scriptRef,
-            parsedScript: parsedScript,
-            onSelected: controller.toggleBreakpoint,
-          );
-        },
-      ),
-    );
-
+    final codeViewController = controller.codeViewController;
     return Split(
       axis: Axis.horizontal,
       initialFractions: const [0.25, 0.75],
@@ -180,12 +132,70 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
             const DebuggingControls(),
             const SizedBox(height: denseRowSpacing),
             Expanded(
-              child: codeArea,
+              child: ValueListenableBuilder<bool>(
+                valueListenable: codeViewController.fileExplorerVisible,
+                builder: (context, visible, child) {
+                  if (visible) {
+                    // TODO(devoncarew): Animate this opening and closing.
+                    return Split(
+                      axis: Axis.horizontal,
+                      initialFractions: const [0.70, 0.30],
+                      children: [
+                        child!,
+                        OutlineDecoration(
+                          child: ProgramExplorer(
+                            controller:
+                                codeViewController.programExplorerController,
+                            onNodeSelected: _onNodeSelected,
+                          ),
+                        ),
+                      ],
+                    );
+                  } else {
+                    return child!;
+                  }
+                },
+                child: DualValueListenableBuilder<ScriptRef?, ParsedScript?>(
+                  firstListenable: codeViewController.currentScriptRef,
+                  secondListenable: codeViewController.currentParsedScript,
+                  builder: (context, scriptRef, parsedScript, _) {
+                    if (scriptRef != null &&
+                        parsedScript != null &&
+                        !_shownFirstScript) {
+                      ga.timeEnd(
+                        DebuggerScreen.id,
+                        analytics_constants.pageReady,
+                      );
+                      serviceManager.sendDwdsEvent(
+                        screen: DebuggerScreen.id,
+                        action: analytics_constants.pageReady,
+                      );
+                      _shownFirstScript = true;
+                    }
+
+                    return CodeView(
+                      key: DebuggerScreenBody.codeViewKey,
+                      codeViewController: codeViewController,
+                      debuggerController: controller,
+                      scriptRef: scriptRef,
+                      parsedScript: parsedScript,
+                      onSelected: breakpointManager.toggleBreakpoint,
+                    );
+                  },
+                ),
+              ),
             ),
           ],
         ),
       ],
     );
+  }
+
+  void _onNodeSelected(VMServiceObjectNode? node) {
+    final location = node?.location;
+    if (location != null) {
+      controller.codeViewController.showScriptLocation(location);
+    }
   }
 
   Widget debuggerPanes() {
@@ -236,7 +246,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
 
   Widget _breakpointsRightChild() {
     return ValueListenableBuilder<List<BreakpointAndSourcePosition>>(
-      valueListenable: controller.breakpointsWithLocation,
+      valueListenable: breakpointManager.breakpointsWithLocation,
       builder: (context, breakpoints, _) {
         return Row(
           children: [
@@ -245,8 +255,9 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
               message: 'Remove all breakpoints',
               child: ToolbarAction(
                 icon: Icons.delete,
-                onPressed:
-                    breakpoints.isNotEmpty ? controller.clearBreakpoints : null,
+                onPressed: breakpoints.isNotEmpty
+                    ? breakpointManager.clearBreakpoints
+                    : null,
               ),
             ),
           ],
@@ -266,9 +277,13 @@ class GoToLineNumberIntent extends Intent {
 class GoToLineNumberAction extends Action<GoToLineNumberIntent> {
   @override
   void invoke(GoToLineNumberIntent intent) {
-    showGoToLineDialog(intent._context, intent._controller);
-    intent._controller.toggleFileOpenerVisibility(false);
-    intent._controller.toggleSearchInFileVisibility(false);
+    showGoToLineDialog(
+      intent._context,
+      intent._controller.codeViewController,
+    );
+    intent._controller.codeViewController
+      ..toggleFileOpenerVisibility(false)
+      ..toggleSearchInFileVisibility(false);
   }
 }
 
@@ -281,8 +296,9 @@ class SearchInFileIntent extends Intent {
 class SearchInFileAction extends Action<SearchInFileIntent> {
   @override
   void invoke(SearchInFileIntent intent) {
-    intent._controller.toggleSearchInFileVisibility(true);
-    intent._controller.toggleFileOpenerVisibility(false);
+    intent._controller.codeViewController
+      ..toggleSearchInFileVisibility(true)
+      ..toggleFileOpenerVisibility(false);
   }
 }
 
@@ -295,8 +311,9 @@ class EscapeIntent extends Intent {
 class EscapeAction extends Action<EscapeIntent> {
   @override
   void invoke(EscapeIntent intent) {
-    intent._controller.toggleSearchInFileVisibility(false);
-    intent._controller.toggleFileOpenerVisibility(false);
+    intent._controller.codeViewController
+      ..toggleSearchInFileVisibility(false)
+      ..toggleFileOpenerVisibility(false);
   }
 }
 
@@ -309,8 +326,9 @@ class OpenFileIntent extends Intent {
 class OpenFileAction extends Action<OpenFileIntent> {
   @override
   void invoke(OpenFileIntent intent) {
-    intent._controller.toggleFileOpenerVisibility(true);
-    intent._controller.toggleSearchInFileVisibility(false);
+    intent._controller.codeViewController
+      ..toggleFileOpenerVisibility(true)
+      ..toggleSearchInFileVisibility(false);
   }
 }
 

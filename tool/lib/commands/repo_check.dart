@@ -22,7 +22,6 @@ class RepoCheckCommand extends Command {
 
     final checks = <Check>[
       DevToolsVersionCheck(),
-      FlutterVersionCheck(),
     ];
 
     print('\nPerforming checks...');
@@ -87,28 +86,5 @@ class DevToolsVersionCheck extends Check {
     print('  version $pubspecVersion');
 
     return Future.value();
-  }
-}
-
-/// Validate that 'flutter-version.txt' and .github/workflows/build.yaml agree
-/// - point to the same version of Flutter.
-class FlutterVersionCheck extends Check {
-  @override
-  String get name => 'flutter version';
-
-  @override
-  Future<void> performCheck(DevToolsRepo repo) async {
-    final versionFile = 'flutter-version.txt';
-    final actionFile = '.github/workflows/build.yaml';
-
-    String fileVersion = repo.readFile(versionFile).trim();
-    print('  $versionFile: $fileVersion');
-
-    String actionsContent = repo.readFile(actionFile);
-    if (!actionsContent.contains(fileVersion)) {
-      throw '$actionFile does not contain the Flutter SDK '
-          'version \'$fileVersion\'. Please make sure that the version in '
-          '$versionFile and $actionFile are in sync.';
-    }
   }
 }

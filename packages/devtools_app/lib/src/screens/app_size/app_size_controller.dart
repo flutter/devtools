@@ -12,7 +12,7 @@ import 'package:vm_snapshot_analysis/v8_profile.dart';
 
 import '../../charts/treemap.dart';
 import '../../primitives/utils.dart';
-import '../../shared/table.dart';
+import '../../shared/table/table.dart';
 import '../../ui/colors.dart';
 import 'app_size_screen.dart';
 
@@ -132,8 +132,9 @@ class AppSizeController {
     }
   }
 
-  int nodeIndexCalculator(TreemapNode newAnalysisRoot) {
-    final searchCondition = (TreemapNode n) => n == newAnalysisRoot;
+  int? nodeIndexCalculator(TreemapNode? newAnalysisRoot) {
+    if (newAnalysisRoot == null) return null;
+    final searchCondition = (TreemapNode? n) => n == newAnalysisRoot;
     if (!newAnalysisRoot.root.isExpanded) newAnalysisRoot.root.expand();
     final nodeIndex = newAnalysisRoot.root.childCountToMatchingNode(
       matchingNodeCondition: searchCondition,

@@ -4,7 +4,9 @@
 
 import 'dart:async';
 
+import 'package:devtools_app/src/primitives/storage.dart';
 import 'package:devtools_app/src/primitives/utils.dart';
+import 'package:devtools_app/src/screens/debugger/breakpoint_manager.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/screens/debugger/evaluate.dart';
 import 'package:devtools_app/src/shared/eval_on_dart_library.dart';
@@ -15,8 +17,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../test_infra/flutter_test_driver.dart';
 import '../test_infra/flutter_test_environment.dart';
+import '../test_infra/flutter_test_storage.dart';
 
 void main() {
+  setGlobal(Storage, FlutterTestStorage());
+
   final FlutterTestEnvironment env = FlutterTestEnvironment(
     const FlutterRunConfiguration(withDebugger: true),
   );
@@ -25,9 +30,10 @@ void main() {
   late DebuggerController debuggerController;
   late EvalOnDartLibrary eval;
   setUp(() async {
+    setGlobal(BreakpointManager, BreakpointManager());
     isAlive = Disposable();
     await env.setupEnvironment();
-    debuggerController = TestDebuggerController();
+    debuggerController = DebuggerController();
     eval = EvalOnDartLibrary(
       'package:flutter_app/src/autocomplete.dart',
       serviceManager.service!,

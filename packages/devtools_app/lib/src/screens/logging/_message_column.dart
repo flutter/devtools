@@ -7,8 +7,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import '../../primitives/utils.dart';
-import '../../shared/table.dart';
-import '../../shared/table_data.dart';
+import '../../shared/table/table.dart';
+import '../../shared/table/table_data.dart';
 import '../../shared/theme.dart';
 import '../../ui/colors.dart';
 import 'logging_controller.dart';
@@ -85,7 +85,7 @@ class MessageColumn extends ColumnData<LogData>
           ),
         ],
       );
-    } else if (data.kind == 'stdout') {
+    } else
       return RichText(
         text: TextSpan(
           children: processAnsiTerminalCodes(
@@ -98,8 +98,5 @@ class MessageColumn extends ColumnData<LogData>
         overflow: TextOverflow.ellipsis,
         maxLines: 1,
       );
-    } else {
-      return const SizedBox.shrink();
-    }
   }
 }

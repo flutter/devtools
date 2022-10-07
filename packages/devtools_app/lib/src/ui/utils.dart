@@ -1,8 +1,6 @@
-/*
- * Copyright 2020 The Chromium Authors. All rights reserved.
- * Use of this source code is governed by a BSD-style license that can be
- * found in the LICENSE file.
- */
+// Copyright 2020 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be found
+// in the LICENSE file.
 
 import 'dart:math';
 
@@ -11,7 +9,7 @@ import 'package:flutter/scheduler.dart';
 
 import '../primitives/enum_utils.dart';
 import '../primitives/utils.dart';
-import '../shared/table.dart';
+import '../shared/table/table.dart';
 import '../shared/theme.dart';
 
 /// Returns a [TextSpan] that only includes the first [length] characters of
