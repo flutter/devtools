@@ -13,6 +13,9 @@ on:
 # Declare default permissions as read only.
 permissions: read-all
 
+env:
+  AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 jobs:
   main:
     name: main

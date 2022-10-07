@@ -42,7 +42,8 @@ export PATH=`pwd`/flutter-sdk/bin/cache/dart-sdk/bin:`pwd`/flutter-sdk/bin:`pwd`
 # to checkout flutter before we can call this script in its current form.
 echo "Looking up the latest Flutter candidate branch"
 pushd packages/devtools_app
-LATEST_FLUTTER_CANDIDATE=`repo_tool latest-flutter-candidate | tail -n 1`
+repo_tool latest-flutter-candidate --githubToken=$AUTH_TOKEN
+LATEST_FLUTTER_CANDIDATE=`repo_tool latest-flutter-candidate --githubToken=$AUTH_TOKEN | tail -n 1`
 popd
 
 pushd flutter-sdk
