@@ -6,10 +6,6 @@
 
 # Fast fail the script on failures.
 set -ex
-echo "DAKE testing LFC"
-pushd packages/devtools_app
-repo_tool latest-flutter-candidate
-exit 0
 # TODO: Also support windows on github actions.
 if [[ $RUNNER_OS == "Windows" ]]; then
     echo Installing Google Chrome Stable...
@@ -45,6 +41,10 @@ export PATH=`pwd`/flutter-sdk/bin/cache/dart-sdk/bin:`pwd`/flutter-sdk/bin:`pwd`
 # to checkout flutter before we can call this script in its current form.
 echo "Looking up the latest Flutter candidate branch"
 pushd packages/devtools_app
+echo "DAKE testing LFC"
+pushd packages/devtools_app
+repo_tool latest-flutter-candidate
+exit 0
 LATEST_FLUTTER_CANDIDATE=`repo_tool latest-flutter-candidate | tail -n 1`
 popd
 
