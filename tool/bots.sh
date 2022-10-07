@@ -42,8 +42,8 @@ export PATH=`pwd`/flutter-sdk/bin/cache/dart-sdk/bin:`pwd`/flutter-sdk/bin:`pwd`
 echo "Looking up the latest Flutter candidate branch"
 pushd packages/devtools_app
 echo "DAKE testing LFC"
-pushd packages/devtools_app
 repo_tool latest-flutter-candidate
+echo "Done Testing"
 exit 0
 LATEST_FLUTTER_CANDIDATE=`repo_tool latest-flutter-candidate | tail -n 1`
 popd
