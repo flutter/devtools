@@ -37,9 +37,8 @@ git clone https://github.com/flutter/flutter.git ./flutter-sdk
 export PATH=`pwd`/flutter-sdk/bin/cache/dart-sdk/bin:`pwd`/flutter-sdk/bin:`pwd`/bin:$PATH
 
 # Look up the latest flutter candidate (this is the latest flutter version in g3)
-# TODO(kenz): if we re-write this logic as a shell script, we won't have to incurr the cost
-# of building flutter tool twice. We need flutter and dart to use this repo_tool, so we have
-# to checkout flutter before we can call this script in its current form.
+# TODO(https://github.com/flutter/devtools/issues/4591): re-write this script as a
+# shell script so we won't have to incurr the cost of building flutter tool twice.
 echo "Looking up the latest Flutter candidate branch"
 pushd packages/devtools_app
 repo_tool latest-flutter-candidate --githubToken=$AUTH_TOKEN
