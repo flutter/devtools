@@ -51,8 +51,8 @@ class Release {
       markdown += '# ${section.name}\n\n';
       for (var note in section.notes) {
         markdown += '- ${note.message}';
-        if (note.githubPullRequestUrl != null) {
-          markdown += ' - ${note.githubPullRequestUrl}';
+        if (note.githubPullRequestUrls != null) {
+          markdown += ' - ${note.githubPullRequestUrls!.join(", ")}';
         }
         markdown += '\n';
       }
@@ -119,11 +119,11 @@ class ReleaseSection {
 class ReleaseNote {
   ReleaseNote({
     required this.message,
-    this.githubPullRequestUrl,
+    this.githubPullRequestUrls,
   });
   // TODO add ability to add image
 
-  final String? githubPullRequestUrl;
+  List<String>? githubPullRequestUrls;
   final String message;
 
   factory ReleaseNote.fromJson(Map<String, dynamic> json) =>
