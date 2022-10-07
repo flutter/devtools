@@ -9,7 +9,7 @@ import 'package:flutter/scheduler.dart';
 
 import '../primitives/enum_utils.dart';
 import '../primitives/utils.dart';
-import '../shared/table.dart';
+import '../shared/table/table.dart';
 import '../shared/theme.dart';
 
 /// Returns a [TextSpan] that only includes the first [length] characters of

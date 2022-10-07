@@ -9,10 +9,10 @@ import '../../primitives/auto_dispose_mixin.dart';
 import '../../shared/screen.dart';
 import '../../shared/theme.dart';
 import '../../shared/utils.dart';
-import 'isolate_statistics_view.dart';
-import 'object_inspector_view.dart';
+import 'isolate_statistics/isolate_statistics_view.dart';
+import 'object_inspector/object_inspector_view.dart';
 import 'vm_developer_tools_controller.dart';
-import 'vm_statistics_view.dart';
+import 'vm_statistics/vm_statistics_view.dart';
 
 abstract class VMDeveloperView {
   const VMDeveloperView(

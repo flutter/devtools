@@ -166,9 +166,9 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
     for (var data in _allocationData!.data) {
       final stats = ClassHeapStats(
         classRef: data.classRef,
-        accumulatedSize: data.bytesDelta,
+        accumulatedSize: 0,
         bytesCurrent: data.bytesCurrent,
-        instancesAccumulated: data.instancesDelta,
+        instancesAccumulated: 0,
         instancesCurrent: data.instancesCurrent,
       );
       stats.json = stats.toJson();
@@ -433,6 +433,13 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   }) async {
     return SourceReport(ranges: [], scripts: []);
   }
+
+  @override
+  Future<ObjectStore?> getObjectStore(String isolateId) => Future.value(
+        const ObjectStore(
+          fields: {},
+        ),
+      );
 
   @override
   final fakeServiceCache = JsonToServiceCache();

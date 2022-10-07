@@ -105,6 +105,28 @@ void main() {
     );
   });
 
+  testWidgetsWithWindowSize('search in file field is visible', smallWindowSize,
+      (WidgetTester tester) async {
+    when(codeViewController.showSearchInFileField)
+        .thenReturn(ValueNotifier(true));
+    await pumpDebuggerScreen(tester, debuggerController);
+    expect(
+      find.byKey(debuggerCodeViewSearchKey),
+      findsOneWidget,
+    );
+  });
+
+  testWidgetsWithWindowSize('file opener is visible', smallWindowSize,
+      (WidgetTester tester) async {
+    when(codeViewController.showFileOpener).thenReturn(ValueNotifier(true));
+    when(scriptManager.sortedScripts).thenReturn(ValueNotifier([]));
+    await pumpDebuggerScreen(tester, debuggerController);
+    expect(
+      find.byKey(debuggerCodeViewFileOpenerKey),
+      findsOneWidget,
+    );
+  });
+
   group('fetchScriptLocationFullFilePath', () {
     testWidgets('gets the full path', (WidgetTester tester) async {
       when(codeViewController.scriptLocation).thenReturn(

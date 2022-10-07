@@ -28,7 +28,7 @@ void main() {
       await tester.pumpAndSettle(const Duration(seconds: 1));
       expect(find.byType(MemoryBody), findsOneWidget);
       await tester.tap(
-        find.byKey(HeapTreeViewState.diffTabKey),
+        find.byKey(MemoryScreenKeys.diffTab),
       );
       await tester.pumpAndSettle();
     }
@@ -47,7 +47,7 @@ void main() {
 
     testWidgetsWithWindowSize('records and deletes snapshots', windowSize,
         (WidgetTester tester) async {
-      final snapshots = scene.controller.diffPaneController.snapshots;
+      final snapshots = scene.controller.diffPaneController.core.snapshots;
       // Check the list contains only documentation item.
       expect(snapshots.value.length, equals(1));
       await pumpDiffTab(tester);

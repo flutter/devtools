@@ -79,8 +79,6 @@ class _LoggingScreenState extends State<LoggingScreenBody>
         AutoDisposeMixin,
         ProvidedControllerMixin<LoggingController, LoggingScreenBody>,
         SearchFieldMixin<LoggingScreenBody> {
-  LogData? selected;
-
   late List<LogData> filteredLogs;
 
   @override
@@ -100,13 +98,6 @@ class _LoggingScreenState extends State<LoggingScreenBody>
     addAutoDisposeListener(controller.filteredData, () {
       setState(() {
         filteredLogs = controller.filteredData.value;
-      });
-    });
-
-    selected = controller.selectedLog.value;
-    addAutoDisposeListener(controller.selectedLog, () {
-      setState(() {
-        selected = controller.selectedLog.value;
       });
     });
   }
@@ -161,13 +152,17 @@ class _LoggingScreenState extends State<LoggingScreenBody>
         OutlineDecoration(
           child: LogsTable(
             data: filteredLogs,
-            onItemSelected: controller.selectLog,
             selectionNotifier: controller.selectedLog,
             searchMatchesNotifier: controller.searchMatches,
             activeSearchMatchNotifier: controller.activeSearchMatch,
           ),
         ),
-        LogDetails(log: selected),
+        ValueListenableBuilder<LogData?>(
+          valueListenable: controller.selectedLog,
+          builder: (context, selected, _) {
+            return LogDetails(log: selected);
+          },
+        ),
       ],
     );
   }

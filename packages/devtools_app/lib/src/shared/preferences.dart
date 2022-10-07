@@ -73,7 +73,7 @@ class PreferencesController extends DisposableController
   /// Change the value for the VM developer mode setting.
   void toggleVmDeveloperMode(bool enableVmDeveloperMode) {
     _vmDeveloperMode.value = enableVmDeveloperMode;
-    VmServicePrivate.enablePrivateRpcs = enableVmDeveloperMode;
+    VmServiceWrapper.enablePrivateRpcs = enableVmDeveloperMode;
   }
 
   /// Change the value for the dense mode setting.
@@ -310,6 +310,9 @@ class MemoryPreferencesController extends DisposableController
   final autoSnapshotEnabled = ValueNotifier<bool>(false);
   static const _autoSnapshotEnabledStorageId = 'memory.autoSnapshotEnabled';
 
+  final showChart = ValueNotifier<bool>(true);
+  static const _showChartStorageId = 'memory.showChart';
+
   Future<void> init() async {
     addAutoDisposeListener(
       androidCollectionEnabled,
@@ -346,5 +349,23 @@ class MemoryPreferencesController extends DisposableController
     );
     autoSnapshotEnabled.value =
         await storage.getValue(_autoSnapshotEnabledStorageId) == 'true';
+
+    addAutoDisposeListener(
+      showChart,
+      () {
+        storage.setValue(
+          _showChartStorageId,
+          showChart.value.toString(),
+        );
+
+        ga.select(
+          analytics_constants.memory,
+          showChart.value
+              ? analytics_constants.showChart
+              : analytics_constants.hideChart,
+        );
+      },
+    );
+    showChart.value = await storage.getValue(_showChartStorageId) == 'true';
   }
 }

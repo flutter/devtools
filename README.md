@@ -1,6 +1,7 @@
 # Dart & Flutter DevTools
 
 [![Build Status](https://github.com/flutter/devtools/workflows/devtools/badge.svg)](https://github.com/flutter/devtools/actions)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/flutter/devtools/badge)](https://api.securityscorecards.dev/projects/github.com/flutter/devtools)
 
 ## What is this?
 

@@ -23,6 +23,7 @@ MockPerformanceController createMockPerformanceControllerWithDefaults() {
   when(controller.selectedFrame)
       .thenReturn(const FixedValueListenable<FlutterFrame?>(null));
   when(controller.displayRefreshRate).thenReturn(ValueNotifier<double>(60.0));
+  when(controller.useLegacyTraceViewer).thenReturn(ValueNotifier<bool>(true));
   return controller;
 }
 
@@ -52,6 +53,9 @@ MockCodeViewController createMockCodeViewControllerWithDefaults({
   when(codeViewController.showFileOpener).thenReturn(ValueNotifier(false));
   when(codeViewController.showSearchInFileField)
       .thenReturn(ValueNotifier(false));
+  when(codeViewController.searchInProgressNotifier)
+      .thenReturn(const FixedValueListenable<bool>(false));
+  when(codeViewController.matchIndex).thenReturn(ValueNotifier<int>(0));
   mockProgramExplorerController ??=
       createMockProgramExplorerControllerWithDefaults();
   when(codeViewController.programExplorerController).thenReturn(

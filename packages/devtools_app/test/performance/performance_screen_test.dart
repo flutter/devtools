@@ -116,8 +116,7 @@ void main() {
           findsNothing,
         );
         expect(find.byType(EventDetails), findsOneWidget);
-        expect(find.byIcon(Icons.pause), findsOneWidget);
-        expect(find.byIcon(Icons.play_arrow), findsOneWidget);
+        expect(find.byType(ChartVisibilityButton), findsOneWidget);
         expect(find.byIcon(Icons.block), findsOneWidget);
         expect(find.text('Performance Overlay'), findsOneWidget);
         expect(find.text('Enhance Tracing'), findsOneWidget);
@@ -147,8 +146,7 @@ void main() {
           findsOneWidget,
         );
         expect(find.byType(EventDetails), findsOneWidget);
-        expect(find.byIcon(Icons.pause), findsOneWidget);
-        expect(find.byIcon(Icons.play_arrow), findsOneWidget);
+        expect(find.byType(ChartVisibilityButton), findsOneWidget);
         expect(find.byIcon(Icons.block), findsOneWidget);
         expect(find.text('Performance Overlay'), findsOneWidget);
         expect(find.text('Enhance Tracing'), findsOneWidget);
@@ -179,8 +177,7 @@ void main() {
           findsNothing,
         );
         expect(find.byType(EventDetails), findsOneWidget);
-        expect(find.byIcon(Icons.pause), findsOneWidget);
-        expect(find.byIcon(Icons.play_arrow), findsOneWidget);
+        expect(find.byType(ChartVisibilityButton), findsNothing);
         expect(find.byIcon(Icons.block), findsOneWidget);
         expect(find.text('Performance Overlay'), findsNothing);
         expect(find.text('Enhance Tracing'), findsNothing);
@@ -193,6 +190,36 @@ void main() {
         expect(splitFinder, findsOneWidget);
         final Split splitter = tester.widget(splitFinder);
         expect(splitter.initialFractions[0], equals(0.7));
+      });
+    });
+
+    testWidgetsWithWindowSize(
+        'can expand and collapse flutter frames chart', windowSize,
+        (WidgetTester tester) async {
+      await tester.runAsync(() async {
+        await pumpPerformanceScreen(tester, runAsync: true);
+        await tester.pumpAndSettle();
+
+        final chartButtonFinder = find.byType(ChartVisibilityButton);
+        expect(chartButtonFinder, findsOneWidget);
+
+        // The flutter frames chart is visible.
+        expect(find.byType(FramesChartControls), findsOneWidget);
+        expect(controller.showFlutterFramesChart.value, isTrue);
+
+        await tester.tap(chartButtonFinder);
+        await tester.pumpAndSettle();
+
+        // The flutter frames chart should no longer be visible.
+        expect(find.byType(FramesChartControls), findsNothing);
+        expect(controller.showFlutterFramesChart.value, isFalse);
+
+        await tester.tap(chartButtonFinder);
+        await tester.pumpAndSettle();
+
+        // The flutter frames chart should be visible again.
+        expect(find.byType(FramesChartControls), findsOneWidget);
+        expect(controller.showFlutterFramesChart.value, isTrue);
       });
     });
 

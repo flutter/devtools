@@ -8,8 +8,8 @@ The allocation profile tab displays information about currently allocated object
 
 - **Class**, which contains the name of each Dart class included in the program.
 - **Instances**, which contains the number of live instances of each class.
-- **Total**, which displays the total memory consumption of all instances of each class.
-- **Internal**, which displays the portion of allocated memory which resides directly in the Dart heap.
+- **Total Size**, which displays the total shallow memory consumption of all instances of each class. The value in this column is the sum of the `Dart Heap` and `External` columns.
+- **Dart Heap**, which displays the portion of allocated memory which resides directly in the Dart heap. The value in this column is the shallow size of all instances of a given class, which is the size of an object not including the size of its children.
 - **External**, which displays the portion of allocated memory that is held on to by instances of the class but does not reside in the Dart heap (e.g., Flutter images, instances of `ExternalTypedData`, etc).
 
 ### Refresh on GC

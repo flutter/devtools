@@ -176,7 +176,6 @@ class ChartPainter extends CustomPainter {
           size,
           axis,
           displayX: chartController.displayXAxis,
-          displayTopLine: chartController.displayTopLine,
         );
       },
     );
@@ -451,16 +450,10 @@ class ChartPainter extends CustomPainter {
     Paint axis, {
     bool displayX = true,
     bool displayY = true,
-    bool displayTopLine = true,
   }) {
     final chartWidthPosition =
         chartController.canvasChartWidth - chartController.xPaddingRight;
     final chartHeight = chartController.canvasChartHeight;
-
-    // Top line of chart.
-    if (displayTopLine) {
-      canvas.drawLine(const Offset(0, 0), Offset(chartWidthPosition, 0), axis);
-    }
 
     // Left-side of chart
     if (displayY) {
@@ -795,8 +788,7 @@ class ChartPainter extends CustomPainter {
       ..color = characteristics.color.withAlpha(140);
 
     final fillArea = Path()
-      ..moveTo(x0, y0Bottom)
-      ..lineTo(x0, y0)
+      ..moveTo(x0, y0)
       ..lineTo(x1, y1)
       ..lineTo(x1, y1Bottom)
       ..lineTo(x0, y0Bottom);

@@ -7,8 +7,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import '../../primitives/utils.dart';
-import '../../shared/table.dart';
-import '../../shared/table_data.dart';
+import '../../shared/table/table.dart';
+import '../../shared/table/table_data.dart';
 import '../../shared/theme.dart';
 import '../../ui/colors.dart';
 import 'logging_controller.dart';

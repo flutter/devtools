@@ -9,7 +9,7 @@ import '../../http/http.dart';
 import '../../http/http_request_data.dart';
 import '../../primitives/utils.dart';
 import '../../shared/common_widgets.dart';
-import '../../shared/table.dart';
+import '../../shared/table/table.dart';
 import '../../shared/theme.dart';
 import '../../ui/colors.dart';
 import 'network_model.dart';

@@ -1,0 +1,36 @@
+/**
+Copyright 2022 The Chromium Authors. All rights reserved.
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file.
+**/
+
+:root {
+    --details-content-height: 180px!important;
+    --selection-fill-color: #13b9fd4d !important;
+    --selection-stroke-color: #13b9fd !important;
+    --sidebar-width: 0px!important;
+    --topbar-height: 36px!important;
+    /* Perfetto CSS variable overrides. */
+    /* There must not be a space betweein the value and '!important'. This value is parsed by Perfetto. */
+}
+
+.topbar .omnibox {
+    height: 28px !important;
+}
+
+.topbar .omnibox::before {
+    font-size: 18px !important;
+}
+
+.topbar .omnibox input {
+    font-size: 16px !important;
+}
+
+.topbar .omnibox .stepthrough {
+    align-items: center !important;
+    height: 28px !important;
+}
+
+.overview-timeline {
+    height: 60px !important;
+}

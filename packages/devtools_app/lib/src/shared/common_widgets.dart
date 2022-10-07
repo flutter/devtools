@@ -203,38 +203,116 @@ class IconLabelButton extends StatelessWidget {
   }
 }
 
-class PauseButton extends IconLabelButton {
+class PauseButton extends StatelessWidget {
   const PauseButton({
-    Key? key,
-    double? minScreenWidthForTextBeforeScaling,
-    String tooltip = 'Pause',
-    required VoidCallback? onPressed,
-  }) : super(
-          key: key,
-          icon: Icons.pause,
-          label: 'Pause',
-          tooltip: tooltip,
-          minScreenWidthForTextBeforeScaling:
-              minScreenWidthForTextBeforeScaling,
-          onPressed: onPressed,
-        );
+    super.key,
+    this.iconOnly = false,
+    required this.tooltip,
+    required this.onPressed,
+    this.minScreenWidthForTextBeforeScaling,
+  });
+
+  final bool iconOnly;
+  final String? tooltip;
+  final VoidCallback? onPressed;
+  final double? minScreenWidthForTextBeforeScaling;
+
+  @override
+  Widget build(BuildContext context) {
+    if (iconOnly) {
+      return OutlinedIconButton(
+        icon: Icons.pause,
+        onPressed: onPressed,
+        tooltip: tooltip,
+      );
+    }
+
+    return IconLabelButton(
+      key: key,
+      icon: Icons.pause,
+      label: 'Pause',
+      tooltip: tooltip,
+      minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
+      onPressed: onPressed,
+    );
+  }
 }
 
-class ResumeButton extends IconLabelButton {
+class ResumeButton extends StatelessWidget {
   const ResumeButton({
-    Key? key,
-    double? minScreenWidthForTextBeforeScaling,
-    String tooltip = 'Resume',
-    required VoidCallback? onPressed,
-  }) : super(
-          key: key,
-          icon: Icons.play_arrow,
-          label: 'Resume',
-          tooltip: tooltip,
-          minScreenWidthForTextBeforeScaling:
-              minScreenWidthForTextBeforeScaling,
-          onPressed: onPressed,
-        );
+    super.key,
+    this.iconOnly = false,
+    required this.tooltip,
+    required this.onPressed,
+    this.minScreenWidthForTextBeforeScaling,
+  });
+
+  final bool iconOnly;
+  final String? tooltip;
+  final VoidCallback? onPressed;
+  final double? minScreenWidthForTextBeforeScaling;
+
+  @override
+  Widget build(BuildContext context) {
+    if (iconOnly) {
+      return OutlinedIconButton(
+        icon: Icons.play_arrow,
+        onPressed: onPressed,
+        tooltip: tooltip,
+      );
+    }
+
+    return IconLabelButton(
+      key: key,
+      icon: Icons.pause,
+      label: 'Resume',
+      tooltip: tooltip,
+      minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
+      onPressed: onPressed,
+    );
+  }
+}
+
+/// A button that groups pause and resume controls and automatically manages
+/// the button enabled states depending on the value of [paused].
+class PauseResumeButtonGroup extends StatelessWidget {
+  const PauseResumeButtonGroup({
+    super.key,
+    required this.paused,
+    required this.onPause,
+    required this.onResume,
+    this.pauseTooltip = 'Pause',
+    this.resumeTooltip = 'Resume',
+  });
+
+  final bool paused;
+
+  final VoidCallback onPause;
+
+  final VoidCallback onResume;
+
+  final String pauseTooltip;
+
+  final String resumeTooltip;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        PauseButton(
+          iconOnly: true,
+          onPressed: paused ? null : onPause,
+          tooltip: pauseTooltip,
+        ),
+        const SizedBox(width: denseSpacing),
+        ResumeButton(
+          iconOnly: true,
+          onPressed: paused ? onResume : null,
+          tooltip: resumeTooltip,
+        ),
+      ],
+    );
+  }
 }
 
 class ClearButton extends IconLabelButton {
@@ -421,6 +499,45 @@ class CollapseAllButton extends StatelessWidget {
     return OutlinedButton(
       onPressed: onPressed,
       child: const Text('Collapse All'),
+    );
+  }
+}
+
+/// Button that should be used to control showing or hiding a chart.
+///
+/// The button automatically toggles the icon and the tooltip to indicate the
+/// shown or hidden state.
+class ChartVisibilityButton extends StatelessWidget {
+  const ChartVisibilityButton({
+    required this.showChart,
+    required this.onPressed,
+    this.minScreenWidthForTextBeforeScaling,
+    this.label = 'Chart',
+  });
+
+  final ValueListenable<bool> showChart;
+
+  final void Function(bool) onPressed;
+
+  final double? minScreenWidthForTextBeforeScaling;
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: showChart,
+      builder: (_, show, __) {
+        return IconLabelButton(
+          key: key,
+          tooltip: show ? 'Hide chart' : 'Show chart',
+          icon: show ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+          label: label,
+          minScreenWidthForTextBeforeScaling:
+              minScreenWidthForTextBeforeScaling,
+          onPressed: () => onPressed(!show),
+        );
+      },
     );
   }
 }
@@ -763,6 +880,20 @@ class ToolbarAction extends StatelessWidget {
             child: button,
           );
   }
+}
+
+/// A blank, drop-in replacement for [AreaPaneHeader].
+///
+/// Acts as an empty header widget with zero size that is compatible with
+/// interfaces that expect a [PreferredSizeWidget].
+class BlankHeader extends StatelessWidget implements PreferredSizeWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container();
+  }
+
+  @override
+  Size get preferredSize => Size.zero;
 }
 
 /// Create a bordered, fixed-height header area with a title and optional child
@@ -1777,16 +1908,30 @@ Widget maybeWrapWithTooltip({
 }
 
 class Legend extends StatelessWidget {
-  const Legend({Key? key, required this.entries}) : super(key: key);
+  const Legend({
+    Key? key,
+    required this.entries,
+    this.dense = false,
+  }) : super(key: key);
 
-  double get legendSquareSize => scaleByFontFactor(16.0);
+  double get legendSquareSize =>
+      dense ? scaleByFontFactor(12.0) : scaleByFontFactor(16.0);
 
   final List<LegendEntry> entries;
 
+  final bool dense;
+
   @override
   Widget build(BuildContext context) {
+    final textStyle = dense ? Theme.of(context).legendTextStyle : null;
     final List<Widget> legendItems = entries
-        .map((entry) => _legendItem(entry.description, entry.color))
+        .map(
+          (entry) => _legendItem(
+            entry.description,
+            entry.color,
+            textStyle,
+          ),
+        )
         .toList()
         .joinWith(const SizedBox(height: denseRowSpacing));
     return Column(
@@ -1795,7 +1940,7 @@ class Legend extends StatelessWidget {
     );
   }
 
-  Widget _legendItem(String description, Color? color) {
+  Widget _legendItem(String description, Color? color, TextStyle? style) {
     return Row(
       children: [
         Container(
@@ -1804,7 +1949,10 @@ class Legend extends StatelessWidget {
           color: color,
         ),
         const SizedBox(width: denseSpacing),
-        Text(description),
+        Text(
+          description,
+          style: style,
+        ),
       ],
     );
   }
@@ -2103,6 +2251,9 @@ class _BlinkingIconState extends State<BlinkingIcon> {
   }
 }
 
+// TODO(https://github.com/flutter/devtools/issues/2989): investigate if we can
+// modify this widget to be a 'MultiValueListenableBuilder' that can take an
+// arbitrary number of listenables.
 /// A widget that listens for changes to two different [ValueListenable]s and
 /// rebuilds for change notifications to either.
 ///
@@ -2323,6 +2474,30 @@ class Progress extends StatelessWidget {
       child: CircularProgressIndicator(
         color: Theme.of(context).textTheme.bodyText1?.color,
       ),
+    );
+  }
+}
+
+class ToCsvButton extends StatelessWidget {
+  const ToCsvButton({
+    Key? key,
+    this.onPressed,
+    this.tooltip = 'Download data in CSV format',
+    required this.minScreenWidthForTextBeforeScaling,
+  }) : super(key: key);
+
+  final VoidCallback? onPressed;
+  final String? tooltip;
+  final double minScreenWidthForTextBeforeScaling;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconLabelButton(
+      label: 'CSV',
+      icon: Icons.file_download,
+      tooltip: tooltip,
+      onPressed: onPressed,
+      minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
     );
   }
 }
