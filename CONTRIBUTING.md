@@ -30,11 +30,14 @@ If your improvement is user-facing, document it in
 
 ## Development prep
 
+### Configure DevTools
+
 1. If you haven't already, follow the [instructions](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh) to generate a new SSH key and connect to Github with SSH
 2. Follow the [instructions](https://docs.github.com/en/get-started/quickstart/fork-a-repo) to fork the DevTools repo to your own Github account, and clone using SSH
 3. Make sure to [configure Git to keep your fork in sync](https://docs.github.com/en/get-started/quickstart/fork-a-repo#configuring-git-to-sync-your-fork-with-the-original-repository) with the main DevTools repo
 4. Finally, run `sh tool/refresh.sh` to pull the latest version from repo, generate missing code and upgrade dependencies.
 
+### Connect to application
 From a separate terminal, start running a flutter app to connect to DevTools:
 - `git clone https://github.com/flutter/gallery.git` (this is an existing application with many examples of Flutter widgets)
 - `cd gallery`
@@ -156,7 +159,7 @@ critical that the devtools_server is released first and the version numbers in
 `packages/devtools/pubspec.yaml` and `packages/devtools_app/pubspec.yaml` are updated.
  Please make sure this is clear on any PRs you open.
 
-## Testing
+## Automated Testing
 
 ### Running tests
 
@@ -165,6 +168,7 @@ the bots. To update your local flutter version, run:
 
 ```
 ./tool/update_flutter_sdk.sh --local
+
 ```
 
 Now you can proceed with running DevTools tests:
@@ -208,6 +212,19 @@ To update goldens for all tests, run:
 ```
 flutter test test/ --update-goldens
 ```
+
+## Manual Testing
+
+To run master version of DevTools with all experimental features enabled:
+
+1. Start DevTools
+```
+git clone git@github.com:flutter/devtools.git
+cd devtools/packages/devtools_app
+flutter run -d chrome --dart-define=enable_experiments=true
+```
+
+2. Paste URL of your application (for example [Gallery](#connect-to-application)) to the connection textbox.
 
 ## third_party dependencies
 
