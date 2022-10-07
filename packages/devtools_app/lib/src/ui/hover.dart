@@ -120,7 +120,7 @@ class HoverCard {
     double? maxCardHeight,
   }) {
     maxCardHeight ??= maxHoverCardHeight;
-    final overlayState = Overlay.of(context)!;
+    final overlayState = Overlay.of(context);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final focusColor = theme.focusColor;
@@ -423,7 +423,7 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
 
   Offset _calculateTooltipPosition(double width) {
     final overlayBox =
-        Overlay.of(context)!.context.findRenderObject() as RenderBox;
+        Overlay.of(context).context.findRenderObject() as RenderBox;
     final box = context.findRenderObject() as RenderBox;
 
     final maxX = overlayBox.size.width - _hoverMargin - width;

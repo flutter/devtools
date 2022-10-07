@@ -163,8 +163,15 @@ critical that the devtools_server is released first and the version numbers in
 
 ### Running tests
 
-Make sure your Flutter SDK matches the version specified in `devtools/flutter-version.txt`
-before running these tests.
+Before running tests, make sure your Flutter SDK matches the version that will be used on
+the bots. To update your local flutter version, run:
+
+```
+./tool/update_flutter_sdk.sh --local
+
+```
+
+Now you can proceed with running DevTools tests:
 
 ```
 cd packages/devtools_app
@@ -173,35 +180,37 @@ flutter test -j1
 
 The flag `-j1` tells Flutter to run tests with 1 concurrent test runner. If your test run does
 not include the directory `devtools_app/test/integration_tests`, then you do not need to include
-this flag.  For example, it is OK to do the following:
-
-```
-flutter test test/ui/
-```
-
-If you run the tests on other than Linux environment, first time add the flag `--update-goldens`, 
-because goldens on your machine will be little different.
+this flag.
 
 ### Updating golden files
 
-Some of the golden file tests will fail if Flutter changes the implementation or diagnostic
-properties of widgets used by the inspector tests. If this happens, make sure the golden
-file output still looks reasonable and execute the following command to update the golden files.
+**Note: golden images should only be generated on MacOS.**
+
+Golden image tests will fail for one of three reasons:
+
+1) The UI has been _intentionally_ modified.
+2) Something changed in the Flutter framework that would cause downstream changes for our tests.
+3) The UI has been _unintentionally_ modified, in which case we should not accept the changes.
+
+For valid golden image updates (1 and 2 above), the failing golden tests will need to be ran
+with the `--update-goldens` flag.
+
+Before updating the goldens, ensure your version of Flutter matches the version of Flutter that
+will be used on the bots. To update your local flutter version, run:
 
 ```
-./tool/update_goldens.sh
+./tool/update_flutter_sdk.sh --local
 ```
 
-This will update the master or stable goldens depending on whether you're on the stable
-Flutter branch.
-
-To update goldens for both channels do:
+Now you can proceed with updating the goldens:
 
 ```
-flutter channel master
-./tool/update_goldens.sh
-flutter channel stable
-./tool/update_goldens.sh
+flutter test <path/to/my/test> --update-goldens
+```
+
+To update goldens for all tests, run:
+```
+flutter test test/ --update-goldens
 ```
 
 ## Manual Testing

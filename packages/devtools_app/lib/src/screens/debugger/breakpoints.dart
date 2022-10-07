@@ -60,7 +60,7 @@ class _BreakpointsState extends State<Breakpoints>
     final isSelected = bp.id == selectedBreakpoint?.id;
 
     return Material(
-      color: isSelected ? theme.selectedRowColor : null,
+      color: isSelected ? theme.colorScheme.selectedRowColor : null,
       child: InkWell(
         onTap: () => _onBreakpointSelected(bp),
         child: Padding(

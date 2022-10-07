@@ -56,24 +56,6 @@ bool isDense() {
 
 bool isEmbedded() => ideTheme.embed;
 
-mixin CompareMixin implements Comparable {
-  bool operator <(other) {
-    return compareTo(other) < 0;
-  }
-
-  bool operator >(other) {
-    return compareTo(other) > 0;
-  }
-
-  bool operator <=(other) {
-    return compareTo(other) <= 0;
-  }
-
-  bool operator >=(other) {
-    return compareTo(other) >= 0;
-  }
-}
-
 extension VmExtension on VM {
   List<IsolateRef> isolatesForDevToolsMode() {
     final vmDeveloperModeEnabled = preferences.vmDeveloperModeEnabled.value;

@@ -53,7 +53,6 @@ ThemeData _darkTheme(IdeTheme ideTheme) {
     primaryColor: devtoolsGrey[900]!,
     backgroundColor: background,
     indicatorColor: devtoolsBlue[400]!,
-    selectedRowColor: devtoolsGrey[600]!,
     textSelectionColor: Colors.black,
   );
 }
@@ -69,7 +68,6 @@ ThemeData _lightTheme(IdeTheme ideTheme) {
     primaryColor: devtoolsBlue[600]!,
     backgroundColor: background,
     indicatorColor: Colors.yellowAccent[400]!,
-    selectedRowColor: devtoolsBlue[600]!,
     textSelectionColor: Colors.white,
   );
 }
@@ -80,22 +78,18 @@ ThemeData _baseTheme({
   required Color primaryColor,
   required Color backgroundColor,
   required Color indicatorColor,
-  required Color selectedRowColor,
   required Color textSelectionColor,
 }) {
   return theme.copyWith(
     primaryColor: primaryColor,
     indicatorColor: indicatorColor,
-    selectedRowColor: selectedRowColor,
     // Same values for both light and dark themes.
     primaryColorDark: devtoolsBlue[700],
     primaryColorLight: devtoolsBlue[400],
     // ignore: deprecated_member_use
     accentColor: devtoolsBlue[400],
-    backgroundColor: devtoolsGrey[600],
     canvasColor: backgroundColor,
     scaffoldBackgroundColor: backgroundColor,
-    colorScheme: theme.colorScheme.copyWith(background: backgroundColor),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         foregroundColor: theme.colorScheme.contrastForeground,
@@ -153,6 +147,7 @@ ThemeData _baseTheme({
     textSelectionTheme: TextSelectionThemeData(
       selectionColor: textSelectionColor,
     ),
+    colorScheme: theme.colorScheme.copyWith(background: backgroundColor),
   );
 }
 
@@ -389,6 +384,9 @@ extension DevToolsColorScheme on ColorScheme {
         colors: [expandedTopContentColor, expandedBottomContentColor],
         tileMode: TileMode.repeated,
       );
+
+  Color get selectedRowColor =>
+      isLight ? devtoolsBlue[600]! : devtoolsGrey[600]!;
 }
 
 /// Utility extension methods to the [ThemeData] class.
