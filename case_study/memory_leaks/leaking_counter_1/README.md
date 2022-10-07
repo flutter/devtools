@@ -31,7 +31,7 @@ Setup the lab:
 
     ```
     cd packages/devtools_app
-    flutter run -d chrome --dart-define=enable_experiments=true`
+    flutter run -d chrome --dart-define=enable_experiments=true
     ```
 
     b. Paste the copyed URL to the connection box
