@@ -27,34 +27,6 @@ jobs:
           BOT: main
         run: ./tool/bots.sh
 
-  test:
-    name: test ${{ matrix.bot }}
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        bot:
-          - test_ddc
-          - test_dart2js
-    steps:
-      - name: git clone
-        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
-
-      - name: tool/bots.sh
-        env:
-          BOT: ${{ matrix.bot }}
-          PLATFORM: vm
-        run: ./tool/bots.sh
-
-      - name: image failures
-        uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
-        if: failure() # Only if failure then failures directory exists.
-        with:
-          # TODO(terry): matrix.os currently empty. If we run tests on other
-          #              platforms this will be used.
-          name: test-image-failures-${{ matrix.os }} # Name for the artifact
-          path: packages/devtools_app/test/failures # Path to upload
-                
   macos-test:
     name: macos ${{ matrix.bot }}
     runs-on: macos-latest

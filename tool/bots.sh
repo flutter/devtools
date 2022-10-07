@@ -6,7 +6,8 @@
 
 # Fast fail the script on failures.
 set -ex
-
+echo "DAKE testing LFC"
+repo_tool latest-flutter-candidate
 # TODO: Also support windows on github actions.
 if [[ $RUNNER_OS == "Windows" ]]; then
     echo Installing Google Chrome Stable...
