@@ -4,11 +4,20 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+# Contains a path to this script, relative to the directory it was called from.
+RELATIVE_PATH_TO_SCRIPT="${BASH_SOURCE[0]}"
+
+# The directory that this script is located in.
+TOOL_DIR=`dirname "${RELATIVE_PATH_TO_SCRIPT}"`
+
+# The devtools root directory is assumed to be the parent of this directory.
+DEVTOOLS_DIR="${TOOL_DIR}/.."
+
 # Use the Flutter SDK from flutter-sdk/.
 FLUTTER_DIR="`pwd`/flutter-sdk"
 PATH="$FLUTTER_DIR/bin":$PATH
 
-REQUIRED_FLUTTER_VERSION=$(<"flutter-version.txt")
+REQUIRED_FLUTTER_VERSION=$(<"${DEVTOOLS_DIR}/flutter-version.txt")
 
 flutter --version
 ACTUAL_FLUTTER_VERSION=$(<"$FLUTTER_DIR/version")
@@ -26,7 +35,11 @@ fi
 # echo on
 set -ex
 
-pushd packages/devtools_app
+if [[ $1 = "--update-perfetto" ]]; then
+  $TOOL_DIR/update_perfetto.sh
+fi
+
+pushd $DEVTOOLS_DIR/packages/devtools_app
 
 flutter clean
 rm -rf build/web

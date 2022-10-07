@@ -497,7 +497,7 @@ extension ThemeDataExtension on ThemeData {
   TextStyle get legendTextStyle => TextStyle(
         color: colorScheme.defaultForeground,
         fontWeight: FontWeight.normal,
-        fontSize: scaleByFontFactor(10.0),
+        fontSize: chartFontSizeSmall,
         decoration: TextDecoration.none,
       );
 

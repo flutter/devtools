@@ -72,6 +72,9 @@ class PerformanceController extends DisposableController
 
   final perfettoController = createPerfettoController();
 
+  final useLegacyTraceViewer =
+      ValueNotifier<bool>(!FeatureFlags.embeddedPerfetto || !kIsWeb);
+
   final _exportController = ExportController();
 
   /// The currently selected timeline event.
@@ -139,6 +142,12 @@ class PerformanceController extends DisposableController
   /// The tracking index for the first unprocessed [TimelineEvent] that needs to
   /// be processed and added to the timeline events flame chart.
   int _nextTimelineEventIndexToProcess = 0;
+
+  /// Whether we should show the Flutter frames chart.
+  ValueListenable<bool> get showFlutterFramesChart => _showFlutterFramesChart;
+  final _showFlutterFramesChart = ValueNotifier<bool>(true);
+  void toggleShowFlutterFrames(bool value) =>
+      _showFlutterFramesChart.value = value;
 
   /// Whether flutter frames are currently being recorded.
   ValueListenable<bool> get recordingFrames => _recordingFrames;
@@ -699,7 +708,7 @@ class PerformanceController extends DisposableController
   }
 
   FutureOr<void> processTraceEvents(List<TraceEventWrapper> traceEvents) async {
-    if (FeatureFlags.embeddedPerfetto) {
+    if (FeatureFlags.embeddedPerfetto && !useLegacyTraceViewer.value) {
       await perfettoController.loadTrace(traceEvents);
     } else {
       await _processTraceEvents(traceEvents);
@@ -927,6 +936,11 @@ class PerformanceController extends DisposableController
   Future<void> toggleHttpRequestLogging(bool state) async {
     await HttpService.toggleHttpRequestLogging(state);
     _httpTimelineLoggingEnabled.value = state;
+  }
+
+  void toggleUseLegacyTraceViewer(bool? value) {
+    useLegacyTraceViewer.value = value ?? false;
+    processAvailableEvents();
   }
 
   /// Clears the timeline data currently stored by the controller as well the

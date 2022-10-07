@@ -23,6 +23,7 @@ MockPerformanceController createMockPerformanceControllerWithDefaults() {
   when(controller.selectedFrame)
       .thenReturn(const FixedValueListenable<FlutterFrame?>(null));
   when(controller.displayRefreshRate).thenReturn(ValueNotifier<double>(60.0));
+  when(controller.useLegacyTraceViewer).thenReturn(ValueNotifier<bool>(true));
   return controller;
 }
 

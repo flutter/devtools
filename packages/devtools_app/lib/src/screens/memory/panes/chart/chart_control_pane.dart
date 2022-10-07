@@ -90,22 +90,15 @@ class _ChartControlPaneState extends State<ChartControlPane>
       children: [
         ValueListenableBuilder<bool>(
           valueListenable: controller.paused,
-          builder: (context, paused, _) => Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              PauseButton(
-                iconOnly: true,
-                onPressed: paused ? null : _onPause,
-                tooltip: ChartPaneTooltips.pauseTooltip,
-              ),
-              const SizedBox(width: denseSpacing),
-              ResumeButton(
-                iconOnly: true,
-                onPressed: paused ? _onResume : null,
-                tooltip: ChartPaneTooltips.resumeTooltip,
-              ),
-            ],
-          ),
+          builder: (context, paused, _) {
+            return PauseResumeButtonGroup(
+              paused: paused,
+              onPause: _onPause,
+              onResume: _onResume,
+              pauseTooltip: ChartPaneTooltips.pauseTooltip,
+              resumeTooltip: ChartPaneTooltips.resumeTooltip,
+            );
+          },
         ),
         const SizedBox(height: denseSpacing),
         IconLabelButton(

@@ -45,6 +45,7 @@ dependencies:
   path: ^1.8.0
   perfetto_compiled:
     path: ../../third_party/packages/perfetto_compiled
+  pointer_interceptor: ^0.9.3+3
   provider: ^6.0.2
   # Only used for debug mode logic.
   shared_preferences: ^2.0.15
@@ -90,68 +91,65 @@ flutter:
     # since directory support is not available for assets under `packages/`.
     # See (https://github.com/flutter/flutter/issues/112019).
     # TODO(kenz): investigate whether we really need all these assets for the trace viewer.
+    - packages/perfetto_compiled/dist/index.html
+    - packages/perfetto_compiled/dist/service_worker.js
+    - packages/perfetto_compiled/dist/service_worker.js.map
     - packages/perfetto_compiled/dist/devtools/devtools_dark.css
     - packages/perfetto_compiled/dist/devtools/devtools_light.css
     - packages/perfetto_compiled/dist/devtools/devtools_shared.css
     - packages/perfetto_compiled/dist/devtools/devtools_theme_handler.js
-    - packages/perfetto_compiled/dist/index.html
-    - packages/perfetto_compiled/dist/service_worker.js
-    - packages/perfetto_compiled/dist/service_worker.js.map
-    - packages/perfetto_compiled/dist/controller_bundle.js
-    - packages/perfetto_compiled/dist/controller_bundle.js.map
-    - packages/perfetto_compiled/dist/engine_bundle.js
-    - packages/perfetto_compiled/dist/engine_bundle.js.map
-    - packages/perfetto_compiled/dist/frontend_bundle.js
-    - packages/perfetto_compiled/dist/frontend_bundle.js.map
-    - packages/perfetto_compiled/dist/manifest.json
-    - packages/perfetto_compiled/dist/perfetto.css
-    - packages/perfetto_compiled/dist/trace_processor.wasm
-    - packages/perfetto_compiled/dist/traceconv.wasm
-    - packages/perfetto_compiled/dist/traceconv_bundle.js
-    - packages/perfetto_compiled/dist/traceconv_bundle.js.map
-    # The below entries are actually under
-    # `perfetto_compiled/dist/<perfetto-version-number>/assets/`, but the
-    # version number is omitted here so that we don't have to update these
-    # paths for each version update. We can do this because of the
-    # asset variant support (https://docs.flutter.dev/development/ui/assets-and-images#asset-variants).
-    - packages/perfetto_compiled/dist/brand.png
-    - packages/perfetto_compiled/dist/catapult_trace_viewer.html
-    - packages/perfetto_compiled/dist/catapult_trace_viewer.js
-    - packages/perfetto_compiled/dist/favicon.png
-    - packages/perfetto_compiled/dist/logo-3d.png
-    - packages/perfetto_compiled/dist/logo-128.png
-    - packages/perfetto_compiled/dist/MaterialIcons.woff2
-    - packages/perfetto_compiled/dist/Raleway-Regular.woff2
-    - packages/perfetto_compiled/dist/Raleway-Thin.woff2
-    - packages/perfetto_compiled/dist/rec_atrace.png
-    - packages/perfetto_compiled/dist/rec_battery_counters.png
-    - packages/perfetto_compiled/dist/rec_board_voltage.png
-    - packages/perfetto_compiled/dist/rec_cpu_coarse.png
-    - packages/perfetto_compiled/dist/rec_cpu_fine.png
-    - packages/perfetto_compiled/dist/rec_cpu_freq.png
-    - packages/perfetto_compiled/dist/rec_cpu_voltage.png
-    - packages/perfetto_compiled/dist/rec_frame_timeline.png
-    - packages/perfetto_compiled/dist/rec_ftrace.png
-    - packages/perfetto_compiled/dist/rec_gpu_mem_total.png
-    - packages/perfetto_compiled/dist/rec_java_heap_dump.png
-    - packages/perfetto_compiled/dist/rec_lmk.png
-    - packages/perfetto_compiled/dist/rec_logcat.png
-    - packages/perfetto_compiled/dist/rec_long_trace.png
-    - packages/perfetto_compiled/dist/rec_mem_hifreq.png
-    - packages/perfetto_compiled/dist/rec_meminfo.png
-    - packages/perfetto_compiled/dist/rec_native_heap_profiler.png
-    - packages/perfetto_compiled/dist/rec_one_shot.png
-    - packages/perfetto_compiled/dist/rec_ps_stats.png
-    - packages/perfetto_compiled/dist/rec_ring_buf.png
-    - packages/perfetto_compiled/dist/rec_syscalls.png
-    - packages/perfetto_compiled/dist/rec_vmstat.png
-    - packages/perfetto_compiled/dist/Roboto-100.woff2
-    - packages/perfetto_compiled/dist/Roboto-300.woff2
-    - packages/perfetto_compiled/dist/Roboto-400.woff2
-    - packages/perfetto_compiled/dist/Roboto-500.woff2
-    - packages/perfetto_compiled/dist/RobotoCondensed-Light.woff2
-    - packages/perfetto_compiled/dist/RobotoCondensed-Regular.woff2
-    - packages/perfetto_compiled/dist/RobotoMono-Regular.woff2
+    # The version number for all the Perfetto asset paths below is updated by running the
+    # ./tool/update_perfetto.sh script.
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/controller_bundle.js
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/controller_bundle.js.map
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/engine_bundle.js
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/engine_bundle.js.map
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/frontend_bundle.js
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/frontend_bundle.js.map
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/manifest.json
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/perfetto.css
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/trace_processor.wasm
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/traceconv.wasm
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/traceconv_bundle.js
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/traceconv_bundle.js.map
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/brand.png
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/catapult_trace_viewer.html
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/catapult_trace_viewer.js
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/favicon.png
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/logo-3d.png
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/logo-128.png
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/MaterialIcons.woff2
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/Raleway-Regular.woff2
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/Raleway-Thin.woff2
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/rec_atrace.png
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/rec_battery_counters.png
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/rec_board_voltage.png
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/rec_cpu_coarse.png
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/rec_cpu_fine.png
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/rec_cpu_freq.png
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/rec_cpu_voltage.png
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/rec_frame_timeline.png
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/rec_ftrace.png
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/rec_gpu_mem_total.png
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/rec_java_heap_dump.png
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/rec_lmk.png
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/rec_logcat.png
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/rec_long_trace.png
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/rec_mem_hifreq.png
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/rec_meminfo.png
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/rec_native_heap_profiler.png
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/rec_one_shot.png
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/rec_ps_stats.png
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/rec_ring_buf.png
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/rec_syscalls.png
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/rec_vmstat.png
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/Roboto-100.woff2
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/Roboto-300.woff2
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/Roboto-400.woff2
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/Roboto-500.woff2
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/RobotoCondensed-Light.woff2
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/RobotoCondensed-Regular.woff2
+    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/RobotoMono-Regular.woff2
 
   fonts:
     - family: Roboto

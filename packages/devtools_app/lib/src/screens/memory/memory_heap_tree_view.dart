@@ -440,69 +440,66 @@ class _HeapTreeViewState extends State<HeapTreeView>
       snapshotDisplay = null;
     }
 
-    return Padding(
-      padding: const EdgeInsets.only(top: denseRowSpacing),
-      child: Column(
-        children: [
-          const SizedBox(height: defaultSpacing),
-          ValueListenableBuilder<int>(
-            valueListenable: _currentTab,
-            builder: (context, index, _) => Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                TabBar(
-                  labelColor: themeData.textTheme.bodyLarge!.color,
-                  isScrollable: true,
-                  controller: _tabController,
-                  tabs: _tabs,
-                ),
-                if (_searchableTabs.contains(_tabs[index].key))
-                  _buildSearchFilterControls(),
-              ],
-            ),
+    return Column(
+      children: [
+        const SizedBox(height: defaultSpacing),
+        ValueListenableBuilder<int>(
+          valueListenable: _currentTab,
+          builder: (context, index, _) => Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              TabBar(
+                labelColor: themeData.textTheme.bodyLarge!.color,
+                isScrollable: true,
+                controller: _tabController,
+                tabs: _tabs,
+              ),
+              if (_searchableTabs.contains(_tabs[index].key))
+                _buildSearchFilterControls(),
+            ],
           ),
-          const Divider(),
-          Expanded(
-            child: TabBarView(
-              physics: defaultTabBarViewPhysics,
-              controller: _tabController,
-              children: [
-                // Profile Tab
-                KeepAliveWrapper(
-                  child: AllocationProfileTableView(
-                    controller: controller.allocationProfileController,
-                  ),
+        ),
+        const Divider(),
+        Expanded(
+          child: TabBarView(
+            physics: defaultTabBarViewPhysics,
+            controller: _tabController,
+            children: [
+              // Profile Tab
+              KeepAliveWrapper(
+                child: AllocationProfileTableView(
+                  controller: controller.allocationProfileController,
                 ),
-                const KeepAliveWrapper(
-                  child: AllocationProfileTracingView(),
-                ),
-                // Analysis Tab
-                KeepAliveWrapper(
-                  child: Column(
-                    children: [
-                      _buildSnapshotControls(themeData.textTheme),
-                      const SizedBox(height: denseRowSpacing),
-                      Expanded(
-                        child: buildSnapshotTables(snapshotDisplay),
-                      ),
-                    ],
-                  ),
-                ),
-                // Diff tab.
-                if (FeatureFlags.memoryDiffing)
-                  KeepAliveWrapper(
-                    child: DiffPane(
-                      controller: controller.diffPaneController,
+              ),
+              const KeepAliveWrapper(
+                child: AllocationProfileTracingView(),
+              ),
+              // Analysis Tab
+              KeepAliveWrapper(
+                child: Column(
+                  children: [
+                    _buildSnapshotControls(themeData.textTheme),
+                    const SizedBox(height: denseRowSpacing),
+                    Expanded(
+                      child: buildSnapshotTables(snapshotDisplay),
                     ),
+                  ],
+                ),
+              ),
+              // Diff tab.
+              if (FeatureFlags.memoryDiffing)
+                KeepAliveWrapper(
+                  child: DiffPane(
+                    diffController: controller.diffPaneController,
                   ),
-                // Leaks tab.
-                if (controller.shouldShowLeaksTab.value)
-                  const KeepAliveWrapper(child: LeaksPane()),
-              ],
-            ),
+                ),
+              // Leaks tab.
+              if (controller.shouldShowLeaksTab.value)
+                const KeepAliveWrapper(child: LeaksPane()),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
