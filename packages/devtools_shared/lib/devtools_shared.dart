@@ -10,3 +10,5 @@ export 'src/memory/heap_sample.dart';
 export 'src/memory/heap_space.dart';
 export 'src/memory/memory_json.dart';
 export 'src/service_utils.dart';
+export 'src/utils/compare.dart';
+export 'src/utils/semantic_version.dart';

@@ -99,7 +99,7 @@ class _CallStackState extends State<CallStack>
     final isAsyncBreak = frame.frame.kind == FrameKind.kAsyncSuspensionMarker;
 
     final result = Material(
-      color: selected ? theme.selectedRowColor : null,
+      color: selected ? theme.colorScheme.selectedRowColor : null,
       child: InkWell(
         onTap: () => _onStackFrameSelected(frame),
         child: Container(

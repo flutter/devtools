@@ -67,7 +67,7 @@ class _NotificationsState extends State<_Notifications> with AutoDisposeMixin {
         builder: _buildOverlay,
       );
       SchedulerBinding.instance.scheduleFrameCallback((_) {
-        Overlay.of(context)!.insert(_overlayEntry!);
+        Overlay.of(context).insert(_overlayEntry!);
       });
 
       addAutoDisposeListener(

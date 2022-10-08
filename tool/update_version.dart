@@ -158,7 +158,7 @@ void writeVersionToChangelog(File changelog, String version) {
   }
   changelog.writeAsString([
     versionString,
-    'TODO: update changelog\n',
+    isDevVersion(version) ? '* Dev version\n' : 'TODO: update changelog\n',
     ...lines,
   ].joinWithNewLine());
 }
@@ -189,8 +189,8 @@ void writeVersionToIndexHtml(
   indexHtml.writeAsStringSync(revisedLines.joinWithNewLine());
 }
 
-String incrementDevVersion(String currentVersion) {
-  final alreadyHasDevVersion = RegExp(r'-dev\.\d+').hasMatch(currentVersion);
+String incrementDevVersion(String currentVersion, String devType) {
+  final alreadyHasDevVersion = isDevVersion(currentVersion);
   if (alreadyHasDevVersion) {
     final devVerMatch = RegExp(
             r'^(?<prefix>\d+\.\d+\.\d+.*-dev\.)(?<devVersion>\d+)(?<suffix>.*)$')
@@ -208,8 +208,13 @@ String incrementDevVersion(String currentVersion) {
       return newVersion;
     }
   } else {
-    return '$currentVersion-dev.0';
+    final nextVersion = incrementVersionByType(currentVersion, devType);
+    return '$nextVersion-dev.0';
   }
+}
+
+bool isDevVersion(String version) {
+  return RegExp(r'-dev\.\d+').hasMatch(version);
 }
 
 const pubspecVersionPrefix = 'version:';
@@ -279,9 +284,12 @@ class AutoUpdateCommand extends Command {
   AutoUpdateCommand() {
     argParser.addOption('type',
         abbr: 't',
-        allowed: ['dev', 'patch', 'minor', 'major'],
+        allowed: ['dev', 'dev,patch', 'dev,major', 'patch', 'minor', 'major'],
         allowedHelp: {
-          'dev': 'bumps the version to the next dev pre-release value',
+          'dev':
+              'bumps the version to the next dev pre-release value (minor by default)',
+          'dev,patch': 'bumps the version to the next dev pre-patch value',
+          'dev,major': 'bumps the version to the next dev pre-major value',
           'patch': 'bumps the version to the next patch value',
           'minor': 'bumps the version to the next minor value',
           'major': 'bumps the version to the next major value',
@@ -300,7 +308,13 @@ class AutoUpdateCommand extends Command {
     }
     switch (type) {
       case 'dev':
-        newVersion = incrementDevVersion(currentVersion);
+        newVersion = incrementDevVersion(currentVersion, 'minor');
+        break;
+      case 'dev,patch':
+        newVersion = incrementDevVersion(currentVersion, 'patch');
+        break;
+      case 'dev,major':
+        newVersion = incrementDevVersion(currentVersion, 'major');
         break;
       default:
         newVersion = incrementVersionByType(currentVersion, type);
