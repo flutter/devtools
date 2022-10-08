@@ -351,18 +351,17 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
         showWhenUnlinked: false,
         targetAnchor: Alignment.bottomLeft,
         offset: Offset(xCoord, yCoord),
-        // Temporary off before we fix compilation error. Should not merge to master:
-        // child: Material(
-        //   elevation: defaultElevation,
-        //   child: TextFieldTapRegion(
-        //     child: ListView(
-        //       padding: EdgeInsets.zero,
-        //       shrinkWrap: true,
-        //       itemExtent: tileEntryHeight,
-        //       children: autoCompleteTiles,
-        //     ),
-        //   ),
-        // ),
+        child: Material(
+          elevation: defaultElevation,
+          child: TextFieldTapRegion(
+            child: ListView(
+              padding: EdgeInsets.zero,
+              shrinkWrap: true,
+              itemExtent: tileEntryHeight,
+              children: autoCompleteTiles,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -588,7 +587,7 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
       maxWidth: maxWidth,
     );
 
-    Overlay.of(context)!.insert(autoCompleteOverlay!);
+    Overlay.of(context).insert(autoCompleteOverlay!);
   }
 
   /// Until an expression parser, poor man's way of finding the parts for
