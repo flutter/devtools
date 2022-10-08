@@ -134,16 +134,23 @@ class _RetainingPathTable extends StatelessWidget {
   final ValueNotifier<StatsByPathEntry?> selection;
   final bool isDiff;
 
-  static final _shallowSizeColumn = {true: _ShallowSizeColumn(true), false: _ShallowSizeColumn(false)};
-  late final _columns = {true: _createColumns(true), false: _createColumns(false)};
-      ;
+  static final _shallowSizeColumn = {
+    true: _ShallowSizeColumn(true),
+    false: _ShallowSizeColumn(false)
+  };
 
-  static List<ColumnData<StatsByPathEntry>> _createColumns(bool isDiff) => <ColumnData<StatsByPathEntry>>[
-    _RetainingPathColumn(),
-    _InstanceColumn(isDiff),
-    _shallowSizeColumn[isDiff]!,
-    _RetainedSizeColumn(isDiff),
-  ];
+  late final _columns = {
+    true: _createColumns(true),
+    false: _createColumns(false)
+  };
+
+  static List<ColumnData<StatsByPathEntry>> _createColumns(bool isDiff) =>
+      <ColumnData<StatsByPathEntry>>[
+        _RetainingPathColumn(),
+        _InstanceColumn(isDiff),
+        _shallowSizeColumn[isDiff]!,
+        _RetainedSizeColumn(isDiff),
+      ];
 
   @override
   Widget build(BuildContext context) {

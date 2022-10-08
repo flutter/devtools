@@ -32,7 +32,7 @@ import 'table_data.dart';
 /// height of 0 and a height of [defaultRowHeight].
 double get defaultRowHeight => scaleByFontFactor(32.0);
 
-typedef IndexedScrollableWidgetBuilder = Widget Function({
+typedef IndexedScrollableWidgetBuilder = Widget? Function({
   required BuildContext context,
   required LinkedScrollControllerGroup linkedScrollControllerGroup,
   required int index,
@@ -245,7 +245,7 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
     );
   }
 
-  Widget _buildRow({
+  Widget? _buildRow({
     required BuildContext context,
     required LinkedScrollControllerGroup linkedScrollControllerGroup,
     required int index,
@@ -253,8 +253,9 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
     required bool isPinned,
   }) {
     final pinnedData = tableController.pinnedData;
-    final data = tableController.tableData.value.data;
-    final node = (isPinned ? pinnedData : data)[index];
+    final data = isPinned ? pinnedData : tableController.tableData.value.data;
+    if (data.length <= index) return null;
+    final node = data[index];
     return ValueListenableBuilder<T?>(
       valueListenable: widget.selectionNotifier,
       builder: (context, selected, _) {
@@ -901,7 +902,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
     return tableWidth;
   }
 
-  Widget _buildItem(BuildContext context, int index, {bool isPinned = false}) {
+  Widget? _buildItem(BuildContext context, int index, {bool isPinned = false}) {
     return widget.rowBuilder(
       context: context,
       linkedScrollControllerGroup: _linkedHorizontalScrollControllerGroup,
@@ -925,7 +926,11 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
     final sortColumn =
         widget.tableController.columns[tableUiState.sortColumnIndex];
     if (widget.preserveVerticalScrollPosition && scrollController.hasClients) {
-      scrollController.jumpTo(tableUiState.scrollOffset);
+      try {
+        scrollController.jumpTo(tableUiState.scrollOffset);
+      } catch (ex) {
+        print('!!!!!! $ex');
+      }
     }
 
     // TODO(kenz): add horizontal scrollbar.
