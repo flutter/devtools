@@ -164,8 +164,9 @@ class ClassesTableDiff extends StatelessWidget {
     ),
   ];
 
-  static final _shallowSizeDeltaColumn =
-      _SizeColumn(_DataPart.delta, _SizeType.shallow);
+  static final _retainedSizeDeltaColumn =
+      _SizeColumn(_DataPart.delta, _SizeType.retained);
+
   static late final List<ColumnData<DiffClassStats>> _columns =
       <ColumnData<DiffClassStats>>[
     _ClassNameColumn(),
@@ -174,10 +175,10 @@ class ClassesTableDiff extends StatelessWidget {
     _InstanceColumn(_DataPart.delta),
     _SizeColumn(_DataPart.created, _SizeType.shallow),
     _SizeColumn(_DataPart.deleted, _SizeType.shallow),
-    _shallowSizeDeltaColumn,
+    _SizeColumn(_DataPart.delta, _SizeType.shallow),
     _SizeColumn(_DataPart.created, _SizeType.retained),
     _SizeColumn(_DataPart.deleted, _SizeType.retained),
-    _SizeColumn(_DataPart.delta, _SizeType.retained),
+    _retainedSizeDeltaColumn,
   ];
 
   @override
@@ -189,7 +190,7 @@ class ClassesTableDiff extends StatelessWidget {
       dataKey: 'ClassesTableDiff',
       keyFactory: (e) => Key(e.heapClass.fullName),
       selectionNotifier: selection,
-      defaultSortColumn: _shallowSizeDeltaColumn,
+      defaultSortColumn: _retainedSizeDeltaColumn,
       defaultSortDirection: SortDirection.descending,
     );
   }
