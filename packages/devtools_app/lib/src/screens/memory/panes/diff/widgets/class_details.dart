@@ -122,8 +122,21 @@ class _RetainedSizeColumn extends ColumnData<StatsByPathEntry> {
       )!;
 }
 
+class _RetainingPathTableColumns {
+  _RetainingPathTableColumns(this.isDiff);
+
+  final bool isDiff;
+  late final shallowSizeColumn = _ShallowSizeColumn(isDiff);
+  late final columnList = <ColumnData<StatsByPathEntry>>[
+    _RetainingPathColumn(),
+    _InstanceColumn(isDiff),
+    shallowSizeColumn,
+    _RetainedSizeColumn(isDiff),
+  ];
+}
+
 class _RetainingPathTable extends StatelessWidget {
-  _RetainingPathTable({
+  const _RetainingPathTable({
     Key? key,
     required this.entries,
     required this.selection,
@@ -134,33 +147,22 @@ class _RetainingPathTable extends StatelessWidget {
   final ValueNotifier<StatsByPathEntry?> selection;
   final bool isDiff;
 
-  static final _shallowSizeColumn = {
-    true: _ShallowSizeColumn(true),
-    false: _ShallowSizeColumn(false)
-  };
-
-  late final _columns = {
-    true: _createColumns(true),
-    false: _createColumns(false)
-  };
-
-  static List<ColumnData<StatsByPathEntry>> _createColumns(bool isDiff) =>
-      <ColumnData<StatsByPathEntry>>[
-        _RetainingPathColumn(),
-        _InstanceColumn(isDiff),
-        _shallowSizeColumn[isDiff]!,
-        _RetainedSizeColumn(isDiff),
-      ];
+  static final _columns = <String, _RetainingPathTableColumns>{};
+  static _RetainingPathTableColumns _obtainColumns(
+          String dataKey, bool isDiff) =>
+      _columns.putIfAbsent(dataKey, () => _RetainingPathTableColumns(isDiff));
 
   @override
   Widget build(BuildContext context) {
+    final dataKey = 'RetainingPathTable-${identityHashCode(entries)}';
+    final columns = _obtainColumns(dataKey, isDiff);
     return FlatTable<StatsByPathEntry>(
-      dataKey: 'RetainingPathTable-$isDiff',
-      columns: _columns[isDiff]!,
+      dataKey: dataKey,
+      columns: columns.columnList,
       data: entries,
       keyFactory: (e) => Key(e.key.asLongString()),
       selectionNotifier: selection,
-      defaultSortColumn: _shallowSizeColumn[isDiff]!,
+      defaultSortColumn: columns.shallowSizeColumn,
       defaultSortDirection: SortDirection.descending,
     );
   }
