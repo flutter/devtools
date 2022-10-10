@@ -65,6 +65,8 @@ abstract class ClassStats with Sealable {
     assert(isSealed);
     return statsByPath.entries.toList(growable: false);
   }
+
+  HeapClassName get heapClass;
 }
 
 /// Statistics for a class about a single heap.
@@ -73,7 +75,9 @@ class SingleClassStats extends ClassStats {
       : objects = ObjectSet(),
         super(<ClassOnlyHeapPath, ObjectSetStats>{});
 
+  @override
   final HeapClassName heapClass;
+
   final ObjectSet objects;
 
   late final entries = statsByPath.entries.toList(growable: false);

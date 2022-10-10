@@ -168,6 +168,10 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   /// Selected diff class item in snapshot, to take signal from the table widget.
   final selectedDiffClassStats = ValueNotifier<DiffClassStats?>(null);
 
+  /// Selected class item in snapshot, to give signal to control pane.
+  ValueListenable<ClassStats?> get selectedClassStats => _selectedClassStats;
+  late final ValueNotifier<ClassStats?> _selectedClassStats;
+
   /// List of retaining paths to show for the selected class.
   final pathEntries = ValueNotifier<List<StatsByPathEntry>?>(null);
 
@@ -216,16 +220,20 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     required HeapClassName? className,
     required ValueNotifier<SingleClassStats?> singleToUpdate,
     required ValueNotifier<DiffClassStats?> diffToUpdate,
+    required ValueNotifier<ClassStats?> genericToUpdate,
   }) {
     if (classes is SingleHeapClasses) {
-      singleToUpdate.value = classes.classesByName[className];
+      genericToUpdate.value =
+          singleToUpdate.value = classes.classesByName[className];
       diffToUpdate.value = null;
     } else if (classes is DiffHeapClasses) {
       singleToUpdate.value = null;
-      diffToUpdate.value = classes.classesByName[className];
+      genericToUpdate.value =
+          diffToUpdate.value = classes.classesByName[className];
     } else if (classes == null) {
       singleToUpdate.value = null;
       diffToUpdate.value = null;
+      genericToUpdate.value = null;
     } else {
       throw StateError('Unexpected type: ${classes.runtimeType}.');
     }
@@ -241,6 +249,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
       className: _core.className,
       singleToUpdate: selectedSingleClassStats,
       diffToUpdate: selectedDiffClassStats,
+      genericToUpdate: _selectedClassStats,
     );
 
     // Set paths to show.

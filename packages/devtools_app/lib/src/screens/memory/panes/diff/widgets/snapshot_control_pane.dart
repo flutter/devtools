@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/theme.dart';
 import '../../../primitives/ui.dart';
+import '../../../shared/heap/heap.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/item_controller.dart';
 
@@ -48,15 +49,20 @@ class SnapshotControlPane extends StatelessWidget {
                       onPressed: current.downloadToCsv,
                     ),
                     const SizedBox(width: defaultSpacing),
-                    CopyButton(
-                      tooltip: 'Copy full name of the selected class.',
-                      onPressed: () {},
-                      label: 'Class',
+                    ValueListenableBuilder<ClassStats?>(
+                      valueListenable: controller.derived.selectedClassStats,
+                      builder: (_, theClass, ___) => CopyButton(
+                        tooltip: 'Copy full name of the selected class.',
+                        contentBuilder: theClass == null
+                            ? null
+                            : () => theClass.heapClass.fullName,
+                        label: 'Class',
+                      ),
                     ),
                     const SizedBox(width: defaultSpacing),
                     CopyButton(
                       tooltip: 'Copy the selected retaining path.',
-                      onPressed: () {},
+                      contentBuilder: () => 'to be implemented',
                       label: 'Path',
                     ),
                   ],

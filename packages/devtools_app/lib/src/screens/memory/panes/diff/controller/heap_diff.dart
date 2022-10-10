@@ -92,7 +92,9 @@ class DiffClassStats extends ClassStats {
     required StatsByPath objectsByPath,
   }) : super(objectsByPath);
 
+  @override
   final HeapClassName heapClass;
+
   final ObjectSetDiff total;
 
   static DiffClassStats? diff({

@@ -2506,26 +2506,29 @@ class CopyButton extends StatelessWidget {
   const CopyButton({
     super.key,
     required this.tooltip,
-    required this.onPressed,
+    required this.contentBuilder,
     this.label,
   });
 
   final String? tooltip;
   final String? label;
-  final VoidCallback? onPressed;
+  final String Function()? contentBuilder;
 
   @override
   Widget build(BuildContext context) {
     final theLabel = label;
+    final handler = contentBuilder == null ? null : () {
+      
+    };
     if (theLabel == null) {
       return OutlinedIconButton(
         icon: Icons.copy,
-        onPressed: onPressed,
+        onPressed: handler,
         tooltip: tooltip,
       );
     }
     return OutlinedButton(
-      onPressed: onPressed,
+      onPressed: handler,
       child: Row(
         children: [
           const Icon(Icons.copy),
