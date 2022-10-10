@@ -67,16 +67,18 @@ jobs:
       - name: git clone
         uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
       - name: Verify the release note integrity
+        uses: dart-lang/setup-dart@9a04e6d73cca37bd455e0608d7e5092f881fd603
         run: |
-          export PATH=`pwd`/flutter-sdk/bin/cache/dart-sdk/bin:`pwd`/flutter-sdk/bin:`pwd`/bin:$PATH
           cd tool/
+          flutter pub get
           dart ./release_note_helper.dart verify -f ../packages/devtools_app/lib/src/framework/release_notes/release_notes-2.18.0.json
       - name: Backfill PR Urls
+        uses: dart-lang/setup-dart@9a04e6d73cca37bd455e0608d7e5092f881fd603
         env:
           PULL_NUMBER: ${{steps.get-pull-request-number.outputs.PULL_REQUEST_NUMBER}}
         run: |
-          export PATH=`pwd`/flutter-sdk/bin/cache/dart-sdk/bin:`pwd`/flutter-sdk/bin:`pwd`/bin:$PATH
           cd tool/
+          flutter pub get
           dart ./release_note_helper.dart verify \
             -f ../packages/devtools_app/lib/src/framework/release_notes/release_notes-2.18.0.json \
             -u https://github.com/flutter/devtools/pull/$PULL_NUMBER
