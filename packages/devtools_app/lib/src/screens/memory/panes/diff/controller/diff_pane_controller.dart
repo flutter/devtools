@@ -170,7 +170,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
 
   /// Selected class item in snapshot, to give signal to control pane.
   ValueListenable<ClassStats?> get selectedClassStats => _selectedClassStats;
-  late final ValueNotifier<ClassStats?> _selectedClassStats;
+  final _selectedClassStats = ValueNotifier<ClassStats?>(null);
 
   /// List of retaining paths to show for the selected class.
   final pathEntries = ValueNotifier<List<StatsByPathEntry>?>(null);

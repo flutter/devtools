@@ -9,6 +9,7 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../analytics/analytics.dart' as ga;
@@ -2517,9 +2518,11 @@ class CopyButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theLabel = label;
-    final handler = contentBuilder == null ? null : () {
-      
-    };
+    final theContentBuilder = contentBuilder;
+    final handler = theContentBuilder == null
+        ? null
+        : () => Clipboard.setData(ClipboardData(text: theContentBuilder()));
+
     if (theLabel == null) {
       return OutlinedIconButton(
         icon: Icons.copy,
@@ -2527,14 +2530,11 @@ class CopyButton extends StatelessWidget {
         tooltip: tooltip,
       );
     }
-    return OutlinedButton(
+    return IconLabelButton(
       onPressed: handler,
-      child: Row(
-        children: [
-          const Icon(Icons.copy),
-          Text(theLabel),
-        ],
-      ),
+      icon: Icons.copy,
+      label: theLabel,
+      tooltip: tooltip,
     );
   }
 }
