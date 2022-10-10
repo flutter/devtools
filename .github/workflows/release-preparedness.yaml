@@ -69,12 +69,14 @@ jobs:
       - name: Verify the release note integrity
         run: |
           cd tool/
+          export PATH=`pwd`/flutter-sdk/bin/cache/dart-sdk/bin:`pwd`/flutter-sdk/bin:`pwd`/bin:$PATH
           dart ./release_note_helper.dart verify -f ../packages/devtools_app/lib/src/framework/release_notes/release_notes-2.18.0.json
       - name: Backfill PR Urls
         env:
           PULL_NUMBER: ${{steps.get-pull-request-number.outputs.PULL_REQUEST_NUMBER}}
         run: |
           cd tool/
+          export PATH=`pwd`/flutter-sdk/bin/cache/dart-sdk/bin:`pwd`/flutter-sdk/bin:`pwd`/bin:$PATH
           dart ./release_note_helper.dart verify \
             -f ../packages/devtools_app/lib/src/framework/release_notes/release_notes-2.18.0.json \
             -u https://github.com/flutter/devtools/pull/$PULL_NUMBER
