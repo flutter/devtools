@@ -1521,7 +1521,9 @@ class _TableRowState<T> extends State<TableRow<T>>
           switch (displayTypeForIndex) {
             case _TableRowPartDisplayType.column:
               final current = columnIndexTracker;
-              columnIndexTracker++;
+              if (columnIndexTracker + 1 < widget.columns.length) {
+                columnIndexTracker++;
+              }
               return columnFor(
                 widget.columns[current],
                 widget.columnWidths[current],
