@@ -2501,3 +2501,37 @@ class ToCsvButton extends StatelessWidget {
     );
   }
 }
+
+class CopyButton extends StatelessWidget {
+  const CopyButton({
+    super.key,
+    required this.tooltip,
+    required this.onPressed,
+    this.label,
+  });
+
+  final String? tooltip;
+  final String? label;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final theLabel = label;
+    if (theLabel == null) {
+      return OutlinedIconButton(
+        icon: Icons.copy,
+        onPressed: onPressed,
+        tooltip: tooltip,
+      );
+    }
+    return OutlinedButton(
+      onPressed: onPressed,
+      child: Row(
+        children: [
+          const Icon(Icons.copy),
+          Text(theLabel),
+        ],
+      ),
+    );
+  }
+}

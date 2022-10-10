@@ -47,6 +47,18 @@ class SnapshotControlPane extends StatelessWidget {
                           primaryControlsMinVerboseWidth,
                       onPressed: current.downloadToCsv,
                     ),
+                    const SizedBox(width: defaultSpacing),
+                    CopyButton(
+                      tooltip: 'Copy full name of the selected class.',
+                      onPressed: () {},
+                      label: 'Class',
+                    ),
+                    const SizedBox(width: defaultSpacing),
+                    CopyButton(
+                      tooltip: 'Copy the selected retaining path.',
+                      onPressed: () {},
+                      label: 'Path',
+                    ),
                   ],
                 ],
               ),
