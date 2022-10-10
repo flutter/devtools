@@ -79,6 +79,7 @@ jobs:
       - name: Backfill PR Urls
         env:
           PULL_NUMBER: ${{steps.get-pull-request-number.outputs.PULL_REQUEST_NUMBER}}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd tool/
           dart pub get
