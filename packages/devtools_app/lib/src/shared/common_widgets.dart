@@ -2519,6 +2519,7 @@ class CopyButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theLabel = label;
     final theContentBuilder = contentBuilder;
+
     final handler = theContentBuilder == null
         ? null
         : () => Clipboard.setData(ClipboardData(text: theContentBuilder()));

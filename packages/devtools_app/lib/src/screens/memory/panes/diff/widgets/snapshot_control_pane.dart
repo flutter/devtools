@@ -37,18 +37,18 @@ class SnapshotControlPane extends StatelessWidget {
                       current: current,
                       controller: controller,
                     ),
-                    const SizedBox(width: defaultSpacing),
+                    const SizedBox(width: denseSpacing),
                     SizedBox(
                       width: _classFilterWidth,
                       child: _ClassFilter(onChanged: controller.setClassFilter),
                     ),
-                    const SizedBox(width: defaultSpacing),
+                    const SizedBox(width: denseSpacing),
                     ToCsvButton(
                       minScreenWidthForTextBeforeScaling:
                           primaryControlsMinVerboseWidth,
                       onPressed: current.downloadToCsv,
                     ),
-                    const SizedBox(width: defaultSpacing),
+                    const SizedBox(width: denseSpacing),
                     ValueListenableBuilder<ClassStats?>(
                       valueListenable: controller.derived.selectedClassStats,
                       builder: (_, theClass, ___) => CopyButton(
@@ -59,11 +59,16 @@ class SnapshotControlPane extends StatelessWidget {
                         label: 'Class',
                       ),
                     ),
-                    const SizedBox(width: defaultSpacing),
-                    CopyButton(
-                      tooltip: 'Copy the selected retaining path.',
-                      contentBuilder: () => 'to be implemented',
-                      label: 'Path',
+                    const SizedBox(width: denseSpacing),
+                    ValueListenableBuilder<StatsByPathEntry?>(
+                      valueListenable: controller.derived.selectedPathEntry,
+                      builder: (_, pathEntry, ___) => CopyButton(
+                        tooltip: 'Copy the selected retaining path.',
+                        contentBuilder: pathEntry == null
+                            ? null
+                            : () => pathEntry.key.asLongString(),
+                        label: 'Path',
+                      ),
                     ),
                   ],
                 ],
