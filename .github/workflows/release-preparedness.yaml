@@ -82,7 +82,7 @@ jobs:
         run: |
           cd tool/
           dart pub get
-          dart ./release_note_helper.dart verify \
+          dart ./release_note_helper.dart pr-url \
             -f ../packages/devtools_app/lib/src/framework/release_notes/release_notes-2.18.0.json \
             -u https://github.com/flutter/devtools/pull/$PULL_NUMBER
           
