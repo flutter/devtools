@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 
 import '../../analytics/analytics.dart' as ga;
@@ -21,7 +22,6 @@ import '../../shared/screen.dart';
 import '../../shared/split.dart';
 import '../../shared/theme.dart';
 import '../../shared/utils.dart';
-import '../../shared/version.dart';
 import '../../ui/icons.dart';
 import '../../ui/vm_flag_widgets.dart';
 import 'event_details.dart';

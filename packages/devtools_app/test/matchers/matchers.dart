@@ -59,19 +59,6 @@ Matcher equalsGoldenIgnoringHashCodes(String path) {
   return _EqualsGoldenIgnoringHashCodes(path);
 }
 
-Matcher equalsGoldenValueIgnoringHashCodes(String value) {
-  const shouldCheckForMatchingGoldens = bool.fromEnvironment(
-    'SHOULD_TEST_GOLDENS',
-    defaultValue: true,
-  );
-
-  if (shouldCheckForMatchingGoldens) {
-    return equalsIgnoringHashCodes(value);
-  }
-
-  return const _AlwaysTrueMatcher();
-}
-
 class _EqualsGoldenIgnoringHashCodes extends Matcher {
   _EqualsGoldenIgnoringHashCodes(String pathWithinGoldenDirectory) {
     path = 'test/goldens$_goldensSuffix/$pathWithinGoldenDirectory';
@@ -97,24 +84,18 @@ class _EqualsGoldenIgnoringHashCodes extends Matcher {
 
   @override
   bool matches(dynamic object, Map<dynamic, dynamic> matchState) {
-    const shouldCheckForMatchingGoldens = bool.fromEnvironment(
-      'SHOULD_TEST_GOLDENS',
-      defaultValue: true,
-    );
-    if (shouldCheckForMatchingGoldens) {
-      final String description = _normalize(object);
-      if (_value != description) {
-        if (updateGoldens) {
-          io.File(path).writeAsStringSync(description);
-          print('Updated golden file $path\nto\n$description');
-          // Act like the match succeeded so all goldens are updated instead of
-          // just the first failure.
-          return true;
-        }
-
-        matchState[_mismatchedValueKey] = description;
-        return false;
+    final String description = _normalize(object);
+    if (_value != description) {
+      if (updateGoldens) {
+        io.File(path).writeAsStringSync(description);
+        print('Updated golden file $path\nto\n$description');
+        // Act like the match succeeded so all goldens are updated instead of
+        // just the first failure.
+        return true;
       }
+
+      matchState[_mismatchedValueKey] = description;
+      return false;
     }
     return true;
   }
@@ -166,22 +147,12 @@ class _AlwaysTrueMatcher extends Matcher {
 // TODO(https://github.com/flutter/devtools/issues/4060): add a check to the
 // bots script that verifies we never use [matchesGoldenFile] directly.
 /// A matcher for testing DevTools goldens which will always return true when
-/// the 'SHOULD_TEST_GOLDENS' environment variable is set to false.
+/// the platform is not MacOS.
 ///
 /// This should always be used instead of [matchesGoldenFile] for testing
 /// DevTools golden images.
-///
-/// We configure this environment variable on the bots, where we have bots that
-/// test against a pinned flutter version and bots that test against Flutter
-/// master. To avoid noise on the bots, we only want to test goldens against the
-/// pinned version of Flutter that we build DevTools from (see
-/// flutter-version.txt).
 Matcher matchesDevToolsGolden(Object key) {
-  const shouldCheckForMatchingGoldens = bool.fromEnvironment(
-    'SHOULD_TEST_GOLDENS',
-    defaultValue: true,
-  );
-  if (shouldCheckForMatchingGoldens && io.Platform.isMacOS) {
+  if (io.Platform.isMacOS) {
     return matchesGoldenFile(key);
   }
   return const _AlwaysTrueMatcher();
