@@ -89,8 +89,10 @@ jobs:
         run: |
           git config --global user.name 'Release preparedness Github action'
           git config --global user.email 'danchevalier@google.com' #todo: make a bot email?
-          git commit -am "Backfilling release notes with the current PR url"
-          git push
+          if git diff --exit-code; then
+            git commit -am "Backfilling release notes with the current PR url"
+            git push
+          fi
           
 
       # - name: Add PR Url to Release Notes
