@@ -22,9 +22,6 @@
                          "message": "Fix issue where widget inspector wouldn't load when connecting to a paused  app"
                     },
                     {
-                         "githubPullRequestUrls": [
-                              "https://www.dan.com"
-                         ],
                          "message": "Improve widget inspector hover cards to show progress while waiting for data"
                     }
                ]
