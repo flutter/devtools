@@ -21,6 +21,8 @@ if [[ $1 = "--local" ]]; then
   FLUTTER_DIR="$FLUTTER_BIN/.."
 
   pushd $FLUTTER_DIR
+  git pull upstream master
+  git fetch upstream
   git checkout $REQUIRED_FLUTTER_VERSION
   flutter --version
   popd
@@ -33,7 +35,7 @@ PATH="$FLUTTER_DIR/bin":$PATH
 
 echo "STATUS: Updating 'tool/flutter-sdk' to version '$REQUIRED_FLUTTER_VERSION'."
 
-if [ -d "$FLUTTER_DIR" ]; then 
+if [ -d "$FLUTTER_DIR" ]; then
   echo "STATUS: 'tool/flutter-sdk' directory already exists"
 
   # switch to the specified version
