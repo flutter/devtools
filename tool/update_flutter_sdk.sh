@@ -4,14 +4,19 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+set -e
+# Any subsequent commands failure will cause this script to exit immediately
+
 # Contains a path to this script, relative to the directory it was called from.
 RELATIVE_PATH_TO_SCRIPT="${BASH_SOURCE[0]}"
 
 # The directory that this script is located in.
 TOOL_DIR=`dirname "${RELATIVE_PATH_TO_SCRIPT}"`
 
+cd `$TOOL_DIR`
+dart pub get
 REQUIRED_FLUTTER_VERSION=`dart $TOOL_DIR/bin/repo_tool.dart latest-flutter-candidate | tail -n 1`
-
+cd -
 
 if [[ $1 = "--local" ]]; then
   echo "STATUS: Updating local Flutter checkout to version '$REQUIRED_FLUTTER_VERSION'."

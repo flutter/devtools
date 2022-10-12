@@ -215,16 +215,20 @@ flutter test test/ --update-goldens
 
 ## Manual Testing
 
-To run master version of DevTools with all experimental features enabled:
+If you do not have environment configured, but want to try newest DevTools with all experimental features enabled.
 
-1. Start DevTools
+1. Configure Dart or Flutter.
+
+2. Start DevTools:
 ```
 git clone git@github.com:flutter/devtools.git
-cd devtools/packages/devtools_app
-flutter run -d chrome --dart-define=enable_experiments=true
+cd devtools
+sudo ./tool/update_flutter_sdk.sh
+cd packages/devtools_app
+../../flutter-sdk/bin/flutter run -d chrome --dart-define=enable_experiments=true
 ```
 
-2. Paste URL of your application (for example [Gallery](#connect-to-application)) to the connection textbox.
+3. Paste URL of your application (for example [Gallery](#connect-to-application)) to the connection textbox.
 
 ## third_party dependencies
 
