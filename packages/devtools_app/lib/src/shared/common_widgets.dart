@@ -9,7 +9,6 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../analytics/analytics.dart' as ga;
@@ -857,14 +856,27 @@ class ToolbarAction extends StatelessWidget {
     required this.onPressed,
     this.tooltip,
     Key? key,
+    this.label,
   }) : super(key: key);
 
   final IconData icon;
   final String? tooltip;
   final VoidCallback? onPressed;
+  final String? label;
 
   @override
   Widget build(BuildContext context) {
+    final theLabel = label;
+
+    if (theLabel != null) {
+      return IconLabelButton(
+        onPressed: onPressed,
+        icon: Icons.copy,
+        label: theLabel,
+        tooltip: tooltip,
+      );
+    }
+
     final button = TextButton(
       style: TextButton.styleFrom(
         padding: EdgeInsets.zero,
@@ -1979,12 +1991,14 @@ class CopyToClipboardControl extends StatelessWidget {
     this.successMessage = 'Copied to clipboard.',
     this.tooltip = 'Copy to clipboard',
     this.buttonKey,
+    this.label,
   });
 
   final ClipboardDataProvider? dataProvider;
   final String successMessage;
   final String tooltip;
   final Key? buttonKey;
+  final String? label;
 
   @override
   Widget build(BuildContext context) {
@@ -1996,6 +2010,7 @@ class CopyToClipboardControl extends StatelessWidget {
           : () =>
               copyToClipboard(dataProvider!() ?? '', successMessage, context),
       key: buttonKey,
+      label: label,
     );
   }
 }
@@ -2499,43 +2514,6 @@ class ToCsvButton extends StatelessWidget {
       tooltip: tooltip,
       onPressed: onPressed,
       minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
-    );
-  }
-}
-
-class CopyButton extends StatelessWidget {
-  const CopyButton({
-    super.key,
-    required this.tooltip,
-    required this.contentBuilder,
-    this.label,
-  });
-
-  final String? tooltip;
-  final String? label;
-  final String Function()? contentBuilder;
-
-  @override
-  Widget build(BuildContext context) {
-    final theLabel = label;
-    final theContentBuilder = contentBuilder;
-
-    final handler = theContentBuilder == null
-        ? null
-        : () => Clipboard.setData(ClipboardData(text: theContentBuilder()));
-
-    if (theLabel == null) {
-      return OutlinedIconButton(
-        icon: Icons.copy,
-        onPressed: handler,
-        tooltip: tooltip,
-      );
-    }
-    return IconLabelButton(
-      onPressed: handler,
-      icon: Icons.copy,
-      label: theLabel,
-      tooltip: tooltip,
     );
   }
 }

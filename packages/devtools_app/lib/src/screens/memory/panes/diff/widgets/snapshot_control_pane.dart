@@ -51,9 +51,9 @@ class SnapshotControlPane extends StatelessWidget {
                     const SizedBox(width: denseSpacing),
                     ValueListenableBuilder<ClassStats?>(
                       valueListenable: controller.derived.selectedClassStats,
-                      builder: (_, theClass, ___) => CopyButton(
+                      builder: (_, theClass, ___) => CopyToClipboardControl(
                         tooltip: 'Copy full name of the selected class.',
-                        contentBuilder: theClass == null
+                        dataProvider: theClass == null
                             ? null
                             : () => theClass.heapClass.fullName,
                         label: 'Class',
@@ -62,9 +62,9 @@ class SnapshotControlPane extends StatelessWidget {
                     const SizedBox(width: denseSpacing),
                     ValueListenableBuilder<StatsByPathEntry?>(
                       valueListenable: controller.derived.selectedPathEntry,
-                      builder: (_, pathEntry, ___) => CopyButton(
+                      builder: (_, pathEntry, ___) => CopyToClipboardControl(
                         tooltip: 'Copy the selected retaining path.',
-                        contentBuilder: pathEntry == null
+                        dataProvider: pathEntry == null
                             ? null
                             : () => pathEntry.key.asLongString(),
                         label: 'Path',
