@@ -215,16 +215,15 @@ flutter test test/ --update-goldens
 
 ## Manual Testing
 
-If you do not have environment configured, but want to try newest DevTools with all experimental features enabled.
+If you do not have environment configured, but want to try newest DevTools with all experimental features enabled:
 
 1. Configure Dart or Flutter.
 
 2. Start DevTools:
 ```
 git clone git@github.com:flutter/devtools.git
-cd devtools
-sudo ./tool/update_flutter_sdk.sh
-cd packages/devtools_app
+sudo ./devtools/tool/update_flutter_sdk.sh
+cd devtools/packages/devtools_app
 ../../flutter-sdk/bin/flutter run -d chrome --dart-define=enable_experiments=true
 ```
 
