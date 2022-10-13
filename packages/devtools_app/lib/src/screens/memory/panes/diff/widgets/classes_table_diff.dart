@@ -151,7 +151,7 @@ class ClassesTableDiff extends StatelessWidget {
       range: const Range(0, 1),
     ),
     ColumnGroup(
-      title: 'Non GC-able Instances',
+      title: 'Instances',
       range: const Range(1, 4),
     ),
     ColumnGroup(
