@@ -149,7 +149,9 @@ class _RetainingPathTable extends StatelessWidget {
 
   static final _columns = <String, _RetainingPathTableColumns>{};
   static _RetainingPathTableColumns _obtainColumns(
-          String dataKey, bool isDiff) =>
+    String dataKey,
+    bool isDiff,
+  ) =>
       _columns.putIfAbsent(dataKey, () => _RetainingPathTableColumns(isDiff));
 
   @override
