@@ -73,7 +73,7 @@ void main() {
       await tester.tap(find.byTooltip('my_lib/root'));
       await tester.pumpAndSettle();
       await expectLater(
-        finder,
+        find.byType(DiffPane),
         matchesDevToolsGolden('../../goldens/memory_diff_selected_class.png'),
       );
 
