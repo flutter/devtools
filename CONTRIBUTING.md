@@ -58,9 +58,9 @@ To regenerate mocks and upgrade dependencies (after switching branches, for exam
 
 - `sh tool/refresh.sh`
 
-To run DevTools as a Flutter web app, from the packages/devtools_app directory:
+To run DevTools as a Flutter web app, with all experiments enabled, from the packages/devtools_app directory:
 
-- `flutter run -d chrome`
+- `flutter run -d chrome  --dart-define=enable_experiments=true`
 
 To test release performance:
 
@@ -70,6 +70,14 @@ You can also use `-d headless-server`, which will start a headless server that s
 files for the DevTools Flutter app.
 
 To connect to your running application, paste the earlier copied observatory URL into the section "Connect to a Running App" in DevTools.
+
+To make VSCode's F5 having all DevTools` experiments enabled, add to the debugging configuration:
+
+```
+"args": [
+  "--dart-define=enable_experiments=true"
+]
+```
 
 ## Development (DevTools server + DevTools Flutter web app)
 
