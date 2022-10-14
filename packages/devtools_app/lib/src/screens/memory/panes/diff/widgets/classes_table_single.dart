@@ -10,8 +10,10 @@ import '../../../../../shared/table/table_data.dart';
 import '../../../../../shared/utils.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/primitives.dart';
+import '../../../shared/widgets/heap_class_view.dart';
 
-class _ClassNameColumn extends ColumnData<SingleClassStats> {
+class _ClassNameColumn extends ColumnData<SingleClassStats>
+    implements ColumnRenderer<SingleClassStats> {
   _ClassNameColumn()
       : super(
           'Class',
@@ -30,6 +32,15 @@ class _ClassNameColumn extends ColumnData<SingleClassStats> {
   @override
   String getTooltip(SingleClassStats classStats) =>
       classStats.heapClass.fullName;
+
+  @override
+  Widget build(
+    BuildContext context,
+    SingleClassStats data, {
+    bool isRowSelected = false,
+    VoidCallback? onPressed,
+  }) =>
+      HeapClassView(theClass: data.heapClass);
 }
 
 class _InstanceColumn extends ColumnData<SingleClassStats> {
