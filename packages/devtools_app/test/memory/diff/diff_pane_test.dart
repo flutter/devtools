@@ -66,9 +66,17 @@ void main() {
       }
       await expectLater(
         finder,
-        matchesDevToolsGolden('../../goldens/memory_diff_three_snapshots.png'),
+        matchesDevToolsGolden('../../goldens/memory_diff_three_snapshots1.png'),
       );
       expect(snapshots.value.length, equals(1 + 3));
+
+      // Select a class.
+      await tester.tap(find.byTooltip('my_lib/root'));
+      await tester.pumpAndSettle();
+      await expectLater(
+        finder,
+        matchesDevToolsGolden('../../goldens/memory_diff_selected_class.png'),
+      );
 
       // Delete a snapshot.
       await tester.tap(find.byTooltip('Delete snapshot'));
@@ -80,7 +88,7 @@ void main() {
       await tester.pumpAndSettle();
       await expectLater(
         finder,
-        matchesDevToolsGolden('../../goldens/memory_diff_three_snapshots.png'),
+        matchesDevToolsGolden('../../goldens/memory_diff_three_snapshots2.png'),
       );
       expect(snapshots.value.length, equals(1 + 3 - 1 + 1));
 
