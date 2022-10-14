@@ -926,11 +926,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
     final sortColumn =
         widget.tableController.columns[tableUiState.sortColumnIndex];
     if (widget.preserveVerticalScrollPosition && scrollController.hasClients) {
-      try {
-        scrollController.jumpTo(tableUiState.scrollOffset);
-      } catch (ex) {
-        print('!!!!!! $ex');
-      }
+      scrollController.jumpTo(tableUiState.scrollOffset);
     }
 
     // TODO(kenz): add horizontal scrollbar.
