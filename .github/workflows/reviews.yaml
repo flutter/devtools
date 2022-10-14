@@ -1,0 +1,24 @@
+name: reviews 
+
+on:
+  pull_request:
+    #types: [opened] TODO UNCOMMENT BEFORE MERGE
+
+
+
+jobs:
+  add-devtools-reviewers:
+    name: Add Devtools Reviewers
+    runs-on: ubuntu-latest
+    steps:
+    - name: Get Pull Request Number
+      id: get-pull-request-number
+      run: |
+        PULL_REQUEST_NUMBER=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+        echo "::set-output name=PULL_REQUEST_NUMBER::$PULL_REQUEST_NUMBER"
+    - name: Add reviewers
+      run: |
+        gh api /repos/flutter/devtools/pulls/$PULL_NUMBER/requested_reviewers -f reviewers=CoderDake
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        PULL_NUMBER: ${{steps.get-pull-request-number.outputs.PULL_REQUEST_NUMBER}}
