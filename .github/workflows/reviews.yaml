@@ -23,5 +23,5 @@ jobs:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         PULL_NUMBER: ${{steps.get-pull-request-number.outputs.PULL_REQUEST_NUMBER}}
       run: |
-        RESPONSE=$(jq -n '{"team_reviewers": ["@flutter/devtools-reviewers"]}' | gh api -X POST /repos/flutter/devtools/pulls/$PULL_NUMBER/requested_reviewers --input -)
+        RESPONSE=$(jq -n '{"team_reviewers": ["@flutter/devtools-reviewers"]}' | gh api  /repos/flutter/devtools/pulls/$PULL_NUMBER/requested_reviewers -X POST --input -)
         echo $RESPONSE | jq .
