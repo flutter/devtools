@@ -71,7 +71,7 @@ files for the DevTools Flutter app.
 
 To connect to your running application, paste the earlier copied observatory URL into the section "Connect to a Running App" in DevTools.
 
-To make VSCode's F5 having all DevTools` experiments enabled, add to the debugging configuration:
+To enable all experiments by default when you are running with VS Code, add the following to your debugging configuration:
 
 ```
 "args": [
@@ -223,7 +223,7 @@ flutter test test/ --update-goldens
 
 ## Manual Testing
 
-If want to explore DevTools with all experimental features enabled:
+To explore DevTools with all experimental features enabled:
 
 1. [Configure](https://docs.flutter.dev/get-started/install) Dart or Flutter.
 
