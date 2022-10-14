@@ -623,7 +623,6 @@ class LoggingController extends DisposableController
     );
   }
 
-  // TODO(kenz): search through previous matches when possible.
   @override
   List<LogData> matchesForSearch(
     String search, {
@@ -631,17 +630,22 @@ class LoggingController extends DisposableController
   }) {
     if (search.isEmpty) return [];
     final matches = <LogData>[];
-    final caseInsensitiveSearch = search.toLowerCase();
-
-    final List<LogData> currentLogs = filteredData.value;
-    for (final log in currentLogs) {
-      if ((log.summary != null &&
-              log.summary!.toLowerCase().contains(caseInsensitiveSearch)) ||
-          (log.details != null &&
-              log.details!.toLowerCase().contains(caseInsensitiveSearch))) {
-        matches.add(log);
-        // TODO(kenz): use the value of log.isSearchMatch in the logs table to
-        // improve performance. This will require some refactoring of FlatTable.
+    if (searchPreviousMatches) {
+      final previousMatches = searchMatches.value;
+      for (final previousMatch in previousMatches) {
+        if (previousMatch.summary!.caseInsensitiveContains(search)) {
+          matches.add(previousMatch);
+        }
+      }
+    } else {
+      final List<LogData> currentLogs = filteredData.value;
+      for (final log in currentLogs) {
+        if ((log.summary != null &&
+                log.summary!.caseInsensitiveContains(search)) ||
+            (log.details != null &&
+                log.details!.caseInsensitiveContains(search))) {
+          matches.add(log);
+        }
       }
     }
     return matches;

@@ -20,7 +20,6 @@ void main() {
 
   group('Diff pane', () {
     late MemoryDefaultScene scene;
-    final finder = find.byType(DiffPane);
 
     Future<void> pumpDiffTab(WidgetTester tester) async {
       await tester.pumpWidget(scene.build());
@@ -54,7 +53,7 @@ void main() {
 
       // Check initial golden.
       await expectLater(
-        finder,
+        find.byType(DiffPane),
         matchesDevToolsGolden('../../goldens/memory_diff_empty1.png'),
       );
 
@@ -65,7 +64,7 @@ void main() {
         expect(find.text('selected-isolate-${i + 1}'), findsOneWidget);
       }
       await expectLater(
-        finder,
+        find.byType(DiffPane),
         matchesDevToolsGolden('../../goldens/memory_diff_three_snapshots1.png'),
       );
       expect(snapshots.value.length, equals(1 + 3));
@@ -87,7 +86,7 @@ void main() {
       await tester.tap(find.byIcon(Icons.fiber_manual_record));
       await tester.pumpAndSettle();
       await expectLater(
-        finder,
+        find.byType(DiffPane),
         matchesDevToolsGolden('../../goldens/memory_diff_three_snapshots2.png'),
       );
       expect(snapshots.value.length, equals(1 + 3 - 1 + 1));
@@ -96,7 +95,7 @@ void main() {
       await tester.tap(find.byTooltip('Clear all snapshots'));
       await tester.pumpAndSettle();
       await expectLater(
-        finder,
+        find.byType(DiffPane),
         matchesDevToolsGolden('../../goldens/memory_diff_empty2.png'),
       );
       expect(snapshots.value.length, equals(1));
