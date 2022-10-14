@@ -13,7 +13,7 @@ import '../../../../../primitives/utils.dart';
 import '../../../primitives/memory_utils.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
-import 'csv.dart';
+import 'utils.dart';
 import 'heap_diff.dart';
 import 'item_controller.dart';
 
