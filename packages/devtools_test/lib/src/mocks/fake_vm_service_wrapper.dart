@@ -171,7 +171,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
         instancesAccumulated: 0,
         instancesCurrent: data.instancesCurrent,
       );
-      stats.json = stats.toJson();
+      stats.json = data.json;
       memberStats.add(stats);
     }
     final allocationProfile = AllocationProfile(
