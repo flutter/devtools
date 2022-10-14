@@ -146,10 +146,22 @@ class HttpRequestView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final requestHeaders = data.requestHeaders;
+    final requestContentType = requestHeaders?['content-type'] ?? '';
+    Widget child;
+    if (requestContentType.contains('json')) {
+      child = JsonViewer(encodedJson: data.requestBody!);
+    } else {
+      child = Text(
+        data.requestBody!,
+        style: theme.fixedFontStyle,
+      );
+    }
     return Padding(
       padding: const EdgeInsets.all(denseSpacing),
       child: SingleChildScrollView(
-        child: JsonViewer(encodedJson: data.requestBody!),
+        child: child,
       ),
     );
   }
