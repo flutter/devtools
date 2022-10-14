@@ -33,7 +33,7 @@ class _RetainingPathColumn extends ColumnData<StatsByPathEntry> {
 class _InstanceColumn extends ColumnData<StatsByPathEntry> {
   _InstanceColumn(bool isDiff)
       : super(
-          isDiff ? 'Instances\nDelta' : 'Instances',
+          isDiff ? 'Instance\nDelta' : 'Instances',
           titleTooltip: 'Number of instances of the class\n'
               'retained by the path.',
           fixedWidthPx: scaleByFontFactor(85.0),

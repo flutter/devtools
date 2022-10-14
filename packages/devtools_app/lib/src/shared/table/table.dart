@@ -245,7 +245,7 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
     );
   }
 
-  Widget? _buildRow({
+  Widget _buildRow({
     required BuildContext context,
     required LinkedScrollControllerGroup linkedScrollControllerGroup,
     required int index,
@@ -254,7 +254,6 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
   }) {
     final pinnedData = tableController.pinnedData;
     final data = isPinned ? pinnedData : tableController.tableData.value.data;
-    if (data.length <= index) return null;
     final node = data[index];
     return ValueListenableBuilder<T?>(
       valueListenable: widget.selectionNotifier,
