@@ -1979,7 +1979,8 @@ class CopyToClipboardControl extends StatelessWidget {
     this.dataProvider,
     this.successMessage = 'Copied to clipboard.',
     this.tooltip = 'Copy to clipboard',
-    this.buttonKey, this.size,
+    this.buttonKey,
+    this.size,
   });
 
   final ClipboardDataProvider? dataProvider;
