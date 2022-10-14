@@ -11,18 +11,18 @@ jobs:
     name: Add Devtools Reviewers
     runs-on: ubuntu-latest
     permissions:
-      actions: read
-      checks: read
-      contents: read
-      deployments: read
-      issues: read
-      discussions: read
-      packages: read
-      pages: read
+      actions: write
+      checks: write
+      contents: write
+      deployments: write
+      issues: write
+      discussions: write
+      packages: write
+      pages: write
       pull-requests: write
-      repository-projects: read
-      security-events: read
-      statuses: read
+      repository-projects: write
+      security-events: write
+      statuses: write
     steps:
     - name: Get Pull Request Number
       id: get-pull-request-number
