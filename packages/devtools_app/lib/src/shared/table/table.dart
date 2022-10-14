@@ -1504,12 +1504,27 @@ class _TableRowState<T> extends State<TableRow<T>>
     } else {
       final parts = List.generate(
         widget.columns.length,
-        (index) => _TableRowPartDisplayType.column,
+        (_) => _TableRowPartDisplayType.column,
       ).joinWith(_TableRowPartDisplayType.columnSpacer);
       rowDisplayParts.addAll(parts);
     }
 
-    var columnIndexTracker = 0;
+    // Maps the indices from [rowDisplayParts] to the corresponding index of
+    // each column in [widget.columns].
+    final columnIndexMap = <int, int>{};
+    // Add scope to guarantee [columnIndexTracker] is not used outside of this
+    // block.
+    {
+      var columnIndexTracker = 0;
+      for (int i = 0; i < rowDisplayParts.length; i++) {
+        final type = rowDisplayParts[i];
+        if (type == _TableRowPartDisplayType.column) {
+          columnIndexMap[i] = columnIndexTracker;
+          columnIndexTracker++;
+        }
+      }
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
       child: ListView.builder(
@@ -1520,13 +1535,10 @@ class _TableRowState<T> extends State<TableRow<T>>
           final displayTypeForIndex = rowDisplayParts[i];
           switch (displayTypeForIndex) {
             case _TableRowPartDisplayType.column:
-              final current = columnIndexTracker;
-              if (columnIndexTracker + 1 < widget.columns.length) {
-                columnIndexTracker++;
-              }
+              final index = columnIndexMap[i]!;
               return columnFor(
-                widget.columns[current],
-                widget.columnWidths[current],
+                widget.columns[index],
+                widget.columnWidths[index],
               );
             case _TableRowPartDisplayType.columnSpacer:
               return const SizedBox(
@@ -1695,10 +1707,7 @@ class _ColumnGroupHeaderRow extends StatelessWidget {
           return Container(
             alignment: Alignment.center,
             width: groupWidth,
-            child: maybeWrapWithTooltip(
-              tooltip: group.tooltip,
-              child: Text(group.title),
-            ),
+            child: Text(group.title),
           );
         },
       ),
