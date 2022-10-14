@@ -10,7 +10,7 @@ import '../../../../../shared/table/table_data.dart';
 import '../../../../../shared/utils.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/primitives.dart';
-import '../../../shared/widgets/heap_class_view.dart';
+import '../../../shared/shared_memory_widgets.dart';
 
 class _ClassNameColumn extends ColumnData<SingleClassStats>
     implements ColumnRenderer<SingleClassStats> {
@@ -29,7 +29,9 @@ class _ClassNameColumn extends ColumnData<SingleClassStats>
   @override
   bool get supportsSorting => true;
 
+
   @override
+  // We are removing the tooltip, because it is provided by [HeapClassView].
   String getTooltip(SingleClassStats classStats) => '';
 
   @override

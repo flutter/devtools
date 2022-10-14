@@ -4,8 +4,8 @@
 
 import 'package:flutter/widgets.dart';
 
-import '../../../../../devtools_app.dart';
-import '../heap/model.dart';
+import '../../../../devtools_app.dart';
+import 'heap/model.dart';
 
 class HeapClassView extends StatelessWidget {
   const HeapClassView({super.key, required this.theClass});

@@ -10,7 +10,7 @@ import '../../../../../shared/table/table.dart';
 import '../../../../../shared/table/table_data.dart';
 import '../../../../../shared/utils.dart';
 import '../../../shared/heap/primitives.dart';
-import '../../../shared/widgets/heap_class_view.dart';
+import '../../../shared/shared_memory_widgets.dart';
 import '../controller/heap_diff.dart';
 
 enum _DataPart {
@@ -41,6 +41,7 @@ class _ClassNameColumn extends ColumnData<DiffClassStats>
   bool get supportsSorting => true;
 
   @override
+  // We are removing the tooltip, because it is provided by [HeapClassView].
   String getTooltip(DiffClassStats classStats) => '';
 
   @override
