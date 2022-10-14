@@ -217,7 +217,7 @@ flutter test test/ --update-goldens
 
 If want to explore DevTools with all experimental features enabled:
 
-1. Configure Dart or Flutter.
+1. [Configure](https://docs.flutter.dev/get-started/install) Dart or Flutter.
 
 2. Start DevTools:
 ```
