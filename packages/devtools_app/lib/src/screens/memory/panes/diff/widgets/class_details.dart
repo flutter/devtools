@@ -147,17 +147,20 @@ class _RetainingPathTable extends StatelessWidget {
   final ValueNotifier<StatsByPathEntry?> selection;
   final bool isDiff;
 
-  static final _columns = <String, _RetainingPathTableColumns>{};
-  static _RetainingPathTableColumns _obtainColumns(
+  static final _columnStore = <String, _RetainingPathTableColumns>{};
+  static _RetainingPathTableColumns _columns(
     String dataKey,
     bool isDiff,
   ) =>
-      _columns.putIfAbsent(dataKey, () => _RetainingPathTableColumns(isDiff));
+      _columnStore.putIfAbsent(
+        dataKey,
+        () => _RetainingPathTableColumns(isDiff),
+      );
 
   @override
   Widget build(BuildContext context) {
     final dataKey = 'RetainingPathTable-${identityHashCode(entries)}';
-    final columns = _obtainColumns(dataKey, isDiff);
+    final columns = _columns(dataKey, isDiff);
     return FlatTable<StatsByPathEntry>(
       dataKey: dataKey,
       columns: columns.columnList,
