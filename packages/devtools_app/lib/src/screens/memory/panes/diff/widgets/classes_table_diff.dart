@@ -9,8 +9,8 @@ import '../../../../../primitives/utils.dart';
 import '../../../../../shared/table/table.dart';
 import '../../../../../shared/table/table_data.dart';
 import '../../../../../shared/utils.dart';
-import '../../../shared/widgets/heap_class_view.dart';
 import '../../../shared/heap/primitives.dart';
+import '../../../shared/widgets/heap_class_view.dart';
 import '../controller/heap_diff.dart';
 
 enum _DataPart {
