@@ -32,7 +32,7 @@ import 'table_data.dart';
 /// height of 0 and a height of [defaultRowHeight].
 double get defaultRowHeight => scaleByFontFactor(32.0);
 
-typedef IndexedScrollableWidgetBuilder = Widget? Function({
+typedef IndexedScrollableWidgetBuilder = Widget Function({
   required BuildContext context,
   required LinkedScrollControllerGroup linkedScrollControllerGroup,
   required int index,
@@ -901,7 +901,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
     return tableWidth;
   }
 
-  Widget? _buildItem(BuildContext context, int index, {bool isPinned = false}) {
+  Widget _buildItem(BuildContext context, int index, {bool isPinned = false}) {
     return widget.rowBuilder(
       context: context,
       linkedScrollControllerGroup: _linkedHorizontalScrollControllerGroup,
