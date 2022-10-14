@@ -4,6 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
+import '../../../../../../shared/common_widgets.dart';
 import '../../../../shared/heap/model.dart';
 import '../../controller/simple_controllers.dart';
 
@@ -29,8 +30,9 @@ class RetainingPath extends StatelessWidget {
 }
 
 class _PathControlPane extends StatefulWidget {
-  const _PathControlPane({required this.controller});
+  const _PathControlPane({required this.controller, required this.path});
 
+final ClassOnlyHeapPath path;
   final RetainingPathController controller;
 
   @override
@@ -40,7 +42,9 @@ class _PathControlPane extends StatefulWidget {
 class _PathControlPaneState extends State<_PathControlPane> {
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return Row(children: [
+      CopyToClipboardControl(dataProvider: () => ,),
+    ],);
   }
 }
 
