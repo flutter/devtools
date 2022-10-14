@@ -23,4 +23,4 @@ jobs:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         PULL_NUMBER: ${{steps.get-pull-request-number.outputs.PULL_REQUEST_NUMBER}}
       run: |
-        gh api -X POST "/repos/flutter/devtools/pulls/$PULL_NUMBER/requested_reviewers" -f reviewers='[CoderDake]'
+        gh api -X POST "/repos/flutter/devtools/pulls/$PULL_NUMBER/requested_reviewers" -f reviewers='["CoderDake"]'
