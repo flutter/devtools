@@ -11,7 +11,7 @@ class HeapClassView extends StatelessWidget {
   const HeapClassView({
     super.key,
     required this.theClass,
-    this.showCopyButton = true,
+    this.showCopyButton = false,
   });
 
   final HeapClassName theClass;
