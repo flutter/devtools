@@ -215,7 +215,7 @@ flutter test test/ --update-goldens
 
 ## Manual Testing
 
-If you do not have environment configured, but want to try newest DevTools with all experimental features enabled:
+If want to explore DevTools with all experimental features enabled:
 
 1. Configure Dart or Flutter.
 
