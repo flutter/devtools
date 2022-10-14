@@ -10,19 +10,6 @@ jobs:
   add-devtools-reviewers:
     name: Add Devtools Reviewers
     runs-on: ubuntu-latest
-    permissions:
-      actions: write
-      checks: write
-      contents: write
-      deployments: write
-      issues: write
-      discussions: write
-      packages: write
-      pages: write
-      pull-requests: write
-      repository-projects: write
-      security-events: write
-      statuses: write
     steps:
     - name: Get Pull Request Number
       id: get-pull-request-number
@@ -36,3 +23,8 @@ jobs:
       run: |
         export HUB_VERBOSE=1
         jq -n '{"team_reviewers": ["devtools-reviewers"], "reviewers": []}' | gh api  /repos/flutter/devtools/pulls/$PULL_NUMBER/requested_reviewers -X POST --input -
+ 
+    - uses: delivery-much/actions-assigner@v1
+      with:
+        token: ${{ secrets.GH_TOKEN }}
+        team-reviewers: devtools-reviewers
