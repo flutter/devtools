@@ -17,13 +17,16 @@ class HeapClassView extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        maybeWrapWithTooltip(
-          tooltip: theClass.fullName,
-          child: Text(theClass.className),
+        Expanded(
+          child: maybeWrapWithTooltip(
+            tooltip: theClass.fullName,
+            child: Text(theClass.className, overflow: TextOverflow.ellipsis),
+          ),
         ),
         CopyToClipboardControl(
           dataProvider: () => theClass.fullName,
           tooltip: 'Copy full class name to clipboard.',
+          size: tableIconSize,
         ),
       ],
     );
