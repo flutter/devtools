@@ -15,6 +15,7 @@ import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
 import 'heap_diff.dart';
 import 'item_controller.dart';
+import 'simple_controllers.dart';
 import 'utils.dart';
 
 class DiffPaneController extends DisposableController {
@@ -25,6 +26,8 @@ class DiffPaneController extends DisposableController {
   /// If true, some process is going on.
   ValueListenable<bool> get isProcessing => _isProcessing;
   final _isProcessing = ValueNotifier<bool>(false);
+
+  final retainingPathController = RetainingPathController();
 
   final core = CoreData();
   late final derived = DerivedData(core);
