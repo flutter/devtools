@@ -24,5 +24,4 @@ jobs:
         PULL_NUMBER: ${{steps.get-pull-request-number.outputs.PULL_REQUEST_NUMBER}}
       run: |
         export HUB_VERBOSE=1
-        RESPONSE=$(jq -n '{"team_reviewers": ["devtools-reviewers"], "reviewers": []}' | gh api  /repos/flutter/devtools/pulls/$PULL_NUMBER/requested_reviewers -X POST --input -)
-        echo $RESPONSE | jq .
+        jq -n '{"team_reviewers": ["devtools-reviewers"], "reviewers": []}' | gh api  /repos/flutter/devtools/pulls/$PULL_NUMBER/requested_reviewers -X POST --input -
