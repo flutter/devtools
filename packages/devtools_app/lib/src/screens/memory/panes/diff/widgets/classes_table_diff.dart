@@ -40,7 +40,7 @@ class _ClassNameColumn extends ColumnData<DiffClassStats>
   bool get supportsSorting => true;
 
   @override
-  String getTooltip(DiffClassStats classStats) => classStats.heapClass.fullName;
+  String getTooltip(DiffClassStats classStats) => '';
 
   @override
   Widget build(

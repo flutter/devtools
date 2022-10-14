@@ -30,8 +30,7 @@ class _ClassNameColumn extends ColumnData<SingleClassStats>
   bool get supportsSorting => true;
 
   @override
-  String getTooltip(SingleClassStats classStats) =>
-      classStats.heapClass.fullName;
+  String getTooltip(SingleClassStats classStats) => '';
 
   @override
   Widget build(
