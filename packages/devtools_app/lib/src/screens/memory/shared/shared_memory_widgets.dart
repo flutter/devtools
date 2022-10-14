@@ -8,9 +8,14 @@ import '../../../../devtools_app.dart';
 import 'heap/model.dart';
 
 class HeapClassView extends StatelessWidget {
-  const HeapClassView({super.key, required this.theClass});
+  const HeapClassView({
+    super.key,
+    required this.theClass,
+    this.showCopyButton = true,
+  });
 
   final HeapClassName theClass;
+  final bool showCopyButton;
 
   @override
   Widget build(BuildContext context) {
@@ -23,11 +28,12 @@ class HeapClassView extends StatelessWidget {
             child: Text(theClass.className, overflow: TextOverflow.ellipsis),
           ),
         ),
-        CopyToClipboardControl(
-          dataProvider: () => theClass.fullName,
-          tooltip: 'Copy full class name to clipboard.',
-          size: tableIconSize,
-        ),
+        if (showCopyButton)
+          CopyToClipboardControl(
+            dataProvider: () => theClass.fullName,
+            tooltip: 'Copy full class name to clipboard.',
+            size: tableIconSize,
+          ),
       ],
     );
   }

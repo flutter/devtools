@@ -51,7 +51,7 @@ class _ClassNameColumn extends ColumnData<DiffClassStats>
     bool isRowSelected = false,
     VoidCallback? onPressed,
   }) =>
-      HeapClassView(theClass: data.heapClass);
+      HeapClassView(theClass: data.heapClass, showCopyButton: isRowSelected);
 }
 
 class _InstanceColumn extends ColumnData<DiffClassStats> {

@@ -41,7 +41,7 @@ class _ClassNameColumn extends ColumnData<SingleClassStats>
     bool isRowSelected = false,
     VoidCallback? onPressed,
   }) =>
-      HeapClassView(theClass: data.heapClass);
+      HeapClassView(theClass: data.heapClass, showCopyButton: isRowSelected);
 }
 
 class _InstanceColumn extends ColumnData<SingleClassStats> {
