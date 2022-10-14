@@ -9,6 +9,7 @@ import '../../../../../primitives/utils.dart';
 import '../../../../../shared/table/table.dart';
 import '../../../../../shared/table/table_data.dart';
 import '../../../../../shared/utils.dart';
+import '../../../shared/heap/primitives.dart';
 import '../controller/heap_diff.dart';
 
 enum _DataPart {
@@ -153,14 +154,17 @@ class ClassesTableDiff extends StatelessWidget {
     ColumnGroup(
       title: 'Instances',
       range: const Range(1, 4),
+      tooltip: nonGcableInstancesColumnTooltip,
     ),
     ColumnGroup(
       title: 'Shallow Dart Size',
       range: const Range(4, 7),
+      tooltip: shallowSizeColumnTooltip,
     ),
     ColumnGroup(
       title: 'Retained Dart Size',
       range: const Range(7, 10),
+      tooltip: retainedSizeColumnTooltip,
     ),
   ];
 
