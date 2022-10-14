@@ -24,7 +24,3 @@ jobs:
         export HUB_VERBOSE=1
         jq -n '{"team_reviewers": ["devtools-reviewers"], "reviewers": []}' | gh api  /repos/flutter/devtools/pulls/$PULL_NUMBER/requested_reviewers -X POST --input -
  
-    - uses: delivery-much/actions-assigner@v1
-      with:
-        token: ${{ secrets.GH_TOKEN }}
-        team-reviewers: devtools-reviewers
