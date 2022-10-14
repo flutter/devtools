@@ -29,7 +29,6 @@ class _ClassNameColumn extends ColumnData<SingleClassStats>
   @override
   bool get supportsSorting => true;
 
-
   @override
   // We are removing the tooltip, because it is provided by [HeapClassView].
   String getTooltip(SingleClassStats classStats) => '';
