@@ -241,7 +241,6 @@ class CpuProfilerController
     }
   }
 
-  // TODO(kenz): search through previous matches when possible.
   @override
   List<CpuStackFrame> matchesForSearch(
     String search, {
@@ -250,11 +249,21 @@ class CpuProfilerController
     if (search.isEmpty) return <CpuStackFrame>[];
     final regexSearch = RegExp(search, caseSensitive: false);
     final matches = <CpuStackFrame>[];
-    final currentStackFrames = _dataNotifier.value!.stackFrames.values;
-    for (final frame in currentStackFrames) {
-      if (frame.name.caseInsensitiveContains(regexSearch) ||
-          frame.packageUri.caseInsensitiveContains(regexSearch)) {
-        matches.add(frame);
+    if (searchPreviousMatches) {
+      final previousMatches = searchMatches.value;
+      for (final previousMatch in previousMatches) {
+        if (previousMatch.name.caseInsensitiveContains(regexSearch) ||
+            previousMatch.packageUri.caseInsensitiveContains(regexSearch)) {
+          matches.add(previousMatch);
+        }
+      }
+    } else {
+      final currentStackFrames = _dataNotifier.value!.stackFrames.values;
+      for (final frame in currentStackFrames) {
+        if (frame.name.caseInsensitiveContains(regexSearch) ||
+            frame.packageUri.caseInsensitiveContains(regexSearch)) {
+          matches.add(frame);
+        }
       }
     }
     return matches;

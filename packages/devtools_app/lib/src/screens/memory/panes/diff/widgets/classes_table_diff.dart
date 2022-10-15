@@ -10,6 +10,7 @@ import '../../../../../shared/table/table.dart';
 import '../../../../../shared/table/table_data.dart';
 import '../../../../../shared/utils.dart';
 import '../../../shared/heap/primitives.dart';
+import '../../../shared/shared_memory_widgets.dart';
 import '../controller/heap_diff.dart';
 
 enum _DataPart {
@@ -23,7 +24,8 @@ enum _SizeType {
   retained,
 }
 
-class _ClassNameColumn extends ColumnData<DiffClassStats> {
+class _ClassNameColumn extends ColumnData<DiffClassStats>
+    implements ColumnRenderer<DiffClassStats> {
   _ClassNameColumn()
       : super(
           'Class',
@@ -39,7 +41,17 @@ class _ClassNameColumn extends ColumnData<DiffClassStats> {
   bool get supportsSorting => true;
 
   @override
-  String getTooltip(DiffClassStats classStats) => classStats.heapClass.fullName;
+  // We are removing the tooltip, because it is provided by [HeapClassView].
+  String getTooltip(DiffClassStats classStats) => '';
+
+  @override
+  Widget build(
+    BuildContext context,
+    DiffClassStats data, {
+    bool isRowSelected = false,
+    VoidCallback? onPressed,
+  }) =>
+      HeapClassView(theClass: data.heapClass, showCopyButton: isRowSelected);
 }
 
 class _InstanceColumn extends ColumnData<DiffClassStats> {

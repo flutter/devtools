@@ -10,8 +10,10 @@ import '../../../../../shared/table/table_data.dart';
 import '../../../../../shared/utils.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/primitives.dart';
+import '../../../shared/shared_memory_widgets.dart';
 
-class _ClassNameColumn extends ColumnData<SingleClassStats> {
+class _ClassNameColumn extends ColumnData<SingleClassStats>
+    implements ColumnRenderer<SingleClassStats> {
   _ClassNameColumn()
       : super(
           'Class',
@@ -28,8 +30,17 @@ class _ClassNameColumn extends ColumnData<SingleClassStats> {
   bool get supportsSorting => true;
 
   @override
-  String getTooltip(SingleClassStats classStats) =>
-      classStats.heapClass.fullName;
+  // We are removing the tooltip, because it is provided by [HeapClassView].
+  String getTooltip(SingleClassStats classStats) => '';
+
+  @override
+  Widget build(
+    BuildContext context,
+    SingleClassStats data, {
+    bool isRowSelected = false,
+    VoidCallback? onPressed,
+  }) =>
+      HeapClassView(theClass: data.heapClass, showCopyButton: isRowSelected);
 }
 
 class _InstanceColumn extends ColumnData<SingleClassStats> {

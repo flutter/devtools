@@ -184,6 +184,7 @@ double get defaultIconSize => scaleByFontFactor(defaultIconSizeBeforeScaling);
 double get actionsIconSize =>
     scaleByFontFactor(defaultActionsIconSizeBeforeScaling);
 double get tooltipIconSize => scaleByFontFactor(12.0);
+double get tableIconSize => scaleByFontFactor(12.0);
 
 const defaultIconSizeBeforeScaling = 16.0;
 const defaultActionsIconSizeBeforeScaling = 20.0;
