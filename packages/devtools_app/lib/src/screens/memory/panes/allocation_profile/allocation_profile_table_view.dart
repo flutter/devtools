@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../analytics/constants.dart' as analytics_constants;
-import '../../../../config_specific/import_export/import_export.dart';
 import '../../../../primitives/utils.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
@@ -369,11 +368,8 @@ class _ExportAllocationProfileButton extends StatelessWidget {
           tooltip: 'Download allocation profile data in CSV format',
           onPressed: currentAllocationProfile == null
               ? null
-              : () {
-                  final file = allocationProfileController
-                      .downloadMemoryTableCsv(currentAllocationProfile);
-                  notificationService.push(successfulExportMessage(file));
-                },
+              : () => allocationProfileController
+                  .downloadMemoryTableCsv(currentAllocationProfile),
         );
       },
     );
