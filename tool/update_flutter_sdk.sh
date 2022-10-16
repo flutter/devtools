@@ -22,12 +22,11 @@ RELATIVE_PATH_TO_SCRIPT="${BASH_SOURCE[0]}"
 TOOL_DIR=`dirname "${RELATIVE_PATH_TO_SCRIPT}"`
 
 cd "$TOOL_DIR"
-echo $PATH
 dart pub get
 REQUIRED_FLUTTER_VERSION=`dart bin/repo_tool.dart latest-flutter-candidate | tail -n 1`
 cd -
 
-echo "REQUIRED_FLUTTER_VERSION = $REQUIRED_FLUTTER_VERSION"
+echo "REQUIRED_FLUTTER_VERSION: $REQUIRED_FLUTTER_VERSION"
 
 if [[ $UPDATE_LOCALLY = "--local" ]]; then
   echo "STATUS: Updating local Flutter checkout to version '$REQUIRED_FLUTTER_VERSION'."
@@ -46,13 +45,16 @@ if [[ $UPDATE_LOCALLY = "--local" ]]; then
   echo "STATUS: Finished updating local Flutter checkout."
 fi
 
-FLUTTER_DIR="$TOOL_DIR/flutter-sdk"
+FLUTTER_DIR="$TOOL_DIR/../flutter-sdk"
 PATH="$FLUTTER_DIR/bin":$PATH
 
-echo "STATUS: Updating 'tool/flutter-sdk' to version '$REQUIRED_FLUTTER_VERSION'."
+echo "STATUS: Updating 'flutter-sdk' to version '$REQUIRED_FLUTTER_VERSION'."
+
+echo "!!!!"
+echo "$FLUTTER_DIR"
 
 if [ -d "$FLUTTER_DIR" ]; then
-  echo "STATUS: 'tool/flutter-sdk' directory already exists"
+  echo "STATUS: 'flutter-sdk' directory already exists"
 
   # switch to the specified version
   pushd $FLUTTER_DIR

@@ -231,8 +231,8 @@ To explore DevTools with all experimental features enabled:
 ```
 git clone git@github.com:flutter/devtools.git
 cd devtools
-./tool/update_flutter_sdk.sh $PATH
-cd devtools/packages/devtools_app
+./devtools/tool/update_flutter_sdk.sh $PATH
+cd packages/devtools_app
 ../../flutter-sdk/bin/flutter run -d chrome --dart-define=enable_experiments=true
 ```
 
