@@ -262,7 +262,6 @@ class NetworkController
     }
   }
 
-  // TODO(kenz): search through previous matches when possible.
   @override
   List<NetworkRequest> matchesForSearch(
     String search, {
@@ -270,15 +269,19 @@ class NetworkController
   }) {
     if (search.isEmpty) return [];
     final matches = <NetworkRequest>[];
-    final caseInsensitiveSearch = search.toLowerCase();
-
-    final currentRequests = filteredData.value;
-    for (final request in currentRequests) {
-      if (request.uri.toLowerCase().contains(caseInsensitiveSearch)) {
-        matches.add(request);
-        // TODO(kenz): use the value request.isSearchMatch in the network
-        // requests table to improve performance. This will require some
-        // refactoring of FlatTable.
+    if (searchPreviousMatches) {
+      final previousMatches = searchMatches.value;
+      for (final previousMatch in previousMatches) {
+        if (previousMatch.uri.caseInsensitiveContains(search)) {
+          matches.add(previousMatch);
+        }
+      }
+    } else {
+      final currentRequests = filteredData.value;
+      for (final request in currentRequests) {
+        if (request.uri.caseInsensitiveContains(search)) {
+          matches.add(request);
+        }
       }
     }
     return matches;

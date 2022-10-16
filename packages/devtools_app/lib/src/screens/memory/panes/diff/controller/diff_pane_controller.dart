@@ -118,7 +118,7 @@ class DiffPaneController extends DisposableController {
       filePrefix = '${item.name}-${diffWith.name}';
     }
 
-    ExportController().downloadAndNotify(
+    ExportController().downloadFile(
       classesToCsv(classes),
       type: ExportFileType.csv,
       fileName: ExportController.generateFileName(
