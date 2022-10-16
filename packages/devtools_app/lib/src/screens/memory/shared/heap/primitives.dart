@@ -14,6 +14,6 @@ const String retainedSizeColumnTooltip =
     'taking into account only the shortest retaining path for the referenced objects.';
 
 const String nonGcableInstancesColumnTooltip =
-    'Number of instances of the class\n'
-    'that have a retaining path from the root\n'
+    'Number of instances of the class,\n'
+    'that are reachable, i.e. have a retaining path from the root\n'
     'and therefore can’t be garbage collected.';

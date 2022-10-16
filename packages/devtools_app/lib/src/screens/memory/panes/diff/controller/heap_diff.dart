@@ -82,6 +82,9 @@ class DiffHeapClasses extends HeapClasses {
       c.seal();
     }
   }
+
+  @override
+  Iterable<ClassStats> get classStatsList => classes;
 }
 
 /// Comparision between two heaps for a class.
@@ -92,7 +95,9 @@ class DiffClassStats extends ClassStats {
     required StatsByPath objectsByPath,
   }) : super(objectsByPath);
 
+  @override
   final HeapClassName heapClass;
+
   final ObjectSetDiff total;
 
   static DiffClassStats? diff({

@@ -68,7 +68,7 @@ class AllocationProfileTableViewController extends DisposableController
   /// Converts the current [AllocationProfile] to CSV format and downloads it.
   ///
   /// The returned string is the name of the downloaded CSV file.
-  String downloadMemoryTableCsv(AdaptedAllocationProfile profile) {
+  void downloadMemoryTableCsv(AdaptedAllocationProfile profile) {
     final csvBuffer = StringBuffer();
 
     // Write the headers first.
@@ -113,7 +113,7 @@ class AllocationProfileTableViewController extends DisposableController
         ].join(','),
       );
     }
-    return _exportController.downloadFile(
+    _exportController.downloadFile(
       csvBuffer.toString(),
       type: ExportFileType.csv,
     );

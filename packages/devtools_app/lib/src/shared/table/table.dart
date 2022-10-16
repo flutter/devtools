@@ -253,8 +253,8 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
     required bool isPinned,
   }) {
     final pinnedData = tableController.pinnedData;
-    final data = tableController.tableData.value.data;
-    final node = (isPinned ? pinnedData : data)[index];
+    final data = isPinned ? pinnedData : tableController.tableData.value.data;
+    final node = data[index];
     return ValueListenableBuilder<T?>(
       valueListenable: widget.selectionNotifier,
       builder: (context, selected, _) {

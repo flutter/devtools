@@ -46,7 +46,7 @@ class _ClassNameColumn extends ColumnData<SingleClassStats>
 class _InstanceColumn extends ColumnData<SingleClassStats> {
   _InstanceColumn()
       : super(
-          'Non GC-able\nInstances',
+          'Instances',
           titleTooltip: nonGcableInstancesColumnTooltip,
           fixedWidthPx: scaleByFontFactor(180.0),
           alignment: ColumnAlignment.right,

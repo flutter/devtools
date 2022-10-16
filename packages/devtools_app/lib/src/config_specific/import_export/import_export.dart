@@ -115,7 +115,7 @@ abstract class ExportController {
 
   const ExportController.impl();
 
-  String generateFileName({
+  static String generateFileName({
     String prefix = 'dart_devtools',
     String postfix = '',
     required ExportFileType type,
@@ -126,12 +126,27 @@ abstract class ExportController {
     return '${prefix}_$timestamp$postfix.$type';
   }
 
-  /// Downloads a file with [contents] and returns the name of the
-  /// downloaded file.
+  /// Downloads a file with [contents]
+  /// and pushes notification about success if [notify] is true.
   String downloadFile(
-    String contents, {
+    String content, {
     String? fileName,
     ExportFileType type = ExportFileType.json,
+    bool notify = true,
+  }) {
+    fileName ??= ExportController.generateFileName(type: type);
+    saveFile(
+      content: content,
+      fileName: fileName,
+    );
+    notificationService.push(successfulExportMessage(fileName));
+    return fileName;
+  }
+
+  /// Saves [content] to the [fileName].
+  void saveFile({
+    required String content,
+    required String fileName,
   });
 
   String encode(String activeScreenId, Map<String, dynamic> contents) {
