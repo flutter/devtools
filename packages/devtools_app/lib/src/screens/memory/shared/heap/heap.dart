@@ -33,7 +33,9 @@ class AdaptedHeap {
   }
 }
 
-abstract class HeapClasses with Sealable {}
+abstract class HeapClasses with Sealable {
+  Iterable<ClassStats> get classStatsList;
+}
 
 /// Set of heap class statistical information for single heap (not comparision between two heaps).
 class SingleHeapClasses extends HeapClasses {
@@ -51,6 +53,9 @@ class SingleHeapClasses extends HeapClasses {
       stats.seal();
     }
   }
+
+  @override
+  Iterable<ClassStats> get classStatsList => classes;
 }
 
 typedef StatsByPath = Map<ClassOnlyHeapPath, ObjectSetStats>;
@@ -65,6 +70,8 @@ abstract class ClassStats with Sealable {
     assert(isSealed);
     return statsByPath.entries.toList(growable: false);
   }
+
+  HeapClassName get heapClass;
 }
 
 /// Statistics for a class about a single heap.
@@ -73,7 +80,9 @@ class SingleClassStats extends ClassStats {
       : objects = ObjectSet(),
         super(<ClassOnlyHeapPath, ObjectSetStats>{});
 
+  @override
   final HeapClassName heapClass;
+
   final ObjectSet objects;
 
   late final entries = statsByPath.entries.toList(growable: false);

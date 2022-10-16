@@ -83,14 +83,10 @@ class _SnapshotListTitle extends StatelessWidget {
             Expanded(
               child: Text(theItem.name, overflow: TextOverflow.ellipsis),
             ),
-          if (theItem is SnapshotDocItem) ...[
+          if (theItem is SnapshotDocItem)
             const Expanded(
               child: Text('Snapshots', overflow: TextOverflow.ellipsis),
             ),
-            const SizedBox(width: denseRowSpacing),
-            const Text('ⓘ'),
-            const SizedBox(width: denseRowSpacing),
-          ],
           if (isProcessing) ...[
             Progress(),
             const SizedBox(width: denseRowSpacing)
