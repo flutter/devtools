@@ -45,6 +45,7 @@ if [[ $UPDATE_LOCALLY = "--local" ]]; then
 fi
 
 FLUTTER_DIR="flutter-sdk"
+PATH="$FLUTTER_DIR/bin":$PATH
 
 echo "STATUS: Updating 'tool/flutter-sdk' to version '$REQUIRED_FLUTTER_VERSION'."
 
