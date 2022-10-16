@@ -45,16 +45,12 @@ if [[ $UPDATE_LOCALLY = "--local" ]]; then
   echo "STATUS: Finished updating local Flutter checkout."
 fi
 
-FLUTTER_DIR="$TOOL_DIR/../flutter-sdk"
-PATH="$FLUTTER_DIR/bin":$PATH
+FLUTTER_DIR="$TOOL_DIR/flutter-sdk"
 
-echo "STATUS: Updating 'flutter-sdk' to version '$REQUIRED_FLUTTER_VERSION'."
-
-echo "!!!!"
-echo "$FLUTTER_DIR"
+echo "STATUS: Updating 'tool/flutter-sdk' to version '$REQUIRED_FLUTTER_VERSION'."
 
 if [ -d "$FLUTTER_DIR" ]; then
-  echo "STATUS: 'flutter-sdk' directory already exists"
+  echo "STATUS: 'tool/flutter-sdk' directory already exists"
 
   # switch to the specified version
   pushd $FLUTTER_DIR
