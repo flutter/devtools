@@ -21,10 +21,9 @@ RELATIVE_PATH_TO_SCRIPT="${BASH_SOURCE[0]}"
 # The directory that this script is located in.
 TOOL_DIR=`dirname "${RELATIVE_PATH_TO_SCRIPT}"`
 
-cd "$TOOL_DIR"
+pushd "$TOOL_DIR"
 dart pub get
 REQUIRED_FLUTTER_VERSION=`dart bin/repo_tool.dart latest-flutter-candidate | tail -n 1`
-cd -
 
 echo "REQUIRED_FLUTTER_VERSION: $REQUIRED_FLUTTER_VERSION"
 
@@ -45,7 +44,7 @@ if [[ $UPDATE_LOCALLY = "--local" ]]; then
   echo "STATUS: Finished updating local Flutter checkout."
 fi
 
-FLUTTER_DIR="$TOOL_DIR/flutter-sdk"
+FLUTTER_DIR="flutter-sdk"
 
 echo "STATUS: Updating 'tool/flutter-sdk' to version '$REQUIRED_FLUTTER_VERSION'."
 
@@ -69,4 +68,5 @@ else
   popd
 fi
 
+popd
 echo "STATUS: Finished updating 'tool/flutter-sdk'."
