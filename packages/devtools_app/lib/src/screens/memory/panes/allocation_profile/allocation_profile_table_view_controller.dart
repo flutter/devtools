@@ -113,7 +113,7 @@ class AllocationProfileTableViewController extends DisposableController
         ].join(','),
       );
     }
-    _exportController.downloadAndNotify(
+    _exportController.downloadFile(
       csvBuffer.toString(),
       type: ExportFileType.csv,
     );
