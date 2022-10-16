@@ -126,26 +126,27 @@ abstract class ExportController {
     return '${prefix}_$timestamp$postfix.$type';
   }
 
-  /// Downloads a file with [contents] and pushes notification about success.
-  void downloadAndNotify(
+  /// Downloads a file with [contents]
+  /// and pushes notification about success if [notify] is true.
+  String downloadFile(
     String content, {
     String? fileName,
     ExportFileType type = ExportFileType.json,
+    bool notify = true,
   }) {
-    final file = downloadFile(
-      content,
-      type: ExportFileType.csv,
+    fileName ??= ExportController.generateFileName(type: type);
+    saveFile(
+      content: content,
       fileName: fileName,
     );
-    notificationService.push(successfulExportMessage(file));
+    notificationService.push(successfulExportMessage(fileName));
+    return fileName;
   }
 
-  /// Downloads a file with [contents] and returns the name of the
-  /// downloaded file.
-  String downloadFile(
-    String contents, {
-    String? fileName,
-    ExportFileType type = ExportFileType.json,
+  /// Saves [content] to the [fileName].
+  void saveFile({
+    required String content,
+    required String fileName,
   });
 
   String encode(String activeScreenId, Map<String, dynamic> contents) {

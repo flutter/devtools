@@ -856,11 +856,13 @@ class ToolbarAction extends StatelessWidget {
     required this.onPressed,
     this.tooltip,
     Key? key,
+    this.size,
   }) : super(key: key);
 
   final IconData icon;
   final String? tooltip;
   final VoidCallback? onPressed;
+  final double? size;
 
   @override
   Widget build(BuildContext context) {
@@ -870,7 +872,7 @@ class ToolbarAction extends StatelessWidget {
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),
       onPressed: onPressed,
-      child: Icon(icon, size: actionsIconSize),
+      child: Icon(icon, size: size ?? actionsIconSize),
     );
 
     return tooltip == null
@@ -1978,23 +1980,27 @@ class CopyToClipboardControl extends StatelessWidget {
     this.successMessage = 'Copied to clipboard.',
     this.tooltip = 'Copy to clipboard',
     this.buttonKey,
+    this.size,
   });
 
   final ClipboardDataProvider? dataProvider;
   final String successMessage;
   final String tooltip;
   final Key? buttonKey;
+  final double? size;
 
   @override
   Widget build(BuildContext context) {
+    final onPressed = dataProvider == null
+        ? null
+        : () => copyToClipboard(dataProvider!() ?? '', successMessage, context);
+
     return ToolbarAction(
       icon: Icons.content_copy,
       tooltip: tooltip,
-      onPressed: dataProvider == null
-          ? null
-          : () =>
-              copyToClipboard(dataProvider!() ?? '', successMessage, context),
+      onPressed: onPressed,
       key: buttonKey,
+      size: size,
     );
   }
 }
