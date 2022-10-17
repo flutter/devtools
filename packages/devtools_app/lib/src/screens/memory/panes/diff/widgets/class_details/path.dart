@@ -62,6 +62,7 @@ class _PathControlPane extends StatelessWidget {
             onPressed: () =>
                 controller.hideStandard.value = !controller.hideStandard.value,
             isFilterActive: hideStandard,
+            message: 'Hide standard libraries',
           ),
         ),
         const SizedBox(width: denseSpacing),
