@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 import '../../../../../../shared/common_widgets.dart';
+import '../../../../../../shared/theme.dart';
 import '../../../../shared/heap/model.dart';
 import '../../controller/simple_controllers.dart';
 
@@ -23,6 +24,7 @@ class RetainingPathView extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        const SizedBox(height: denseRowSpacing),
         _PathControlPane(
           controller: controller,
           path: path,
@@ -33,24 +35,38 @@ class RetainingPathView extends StatelessWidget {
   }
 }
 
-class _PathControlPane extends StatefulWidget {
+class _PathControlPane extends StatelessWidget {
   const _PathControlPane({required this.controller, required this.path});
 
   final ClassOnlyHeapPath path;
   final RetainingPathController controller;
 
   @override
-  State<_PathControlPane> createState() => _PathControlPaneState();
-}
-
-class _PathControlPaneState extends State<_PathControlPane> {
-  @override
   Widget build(BuildContext context) {
     return Row(
       children: [
         CopyToClipboardControl(
-          dataProvider: () => widget.path.asLongString(),
+          dataProvider: () => path.asLongString(),
           successMessage: null,
+        ),
+        const SizedBox(width: denseSpacing),
+        ValueListenableBuilder<bool>(
+          valueListenable: controller.hideStandard,
+          builder: (_, hideStandard, __) => FilterButton(
+            onPressed: () =>
+                controller.hideStandard.value = !controller.hideStandard.value,
+            isFilterActive: hideStandard,
+          ),
+        ),
+        const SizedBox(width: denseSpacing),
+        ValueListenableBuilder<bool>(
+          valueListenable: controller.invert,
+          builder: (_, invert, __) => ToggleButton(
+            onPressed: () => controller.invert.value = !controller.invert.value,
+            isSelected: invert,
+            message: 'Invert the path',
+            icon: Icons.swap_vert,
+          ),
         ),
       ],
     );

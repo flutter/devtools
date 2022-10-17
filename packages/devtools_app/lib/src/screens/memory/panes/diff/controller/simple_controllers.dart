@@ -5,7 +5,6 @@
 import 'package:flutter/material.dart';
 
 class RetainingPathController {
-  final showAll = ValueNotifier<bool>(true);
-  final invert  = ValueNotifier<bool>(true);
+  final hideStandard = ValueNotifier<bool>(true);
+  final invert = ValueNotifier<bool>(true);
 }
-
