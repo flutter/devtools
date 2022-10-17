@@ -8,6 +8,7 @@ import '../../../../../../shared/split.dart';
 import '../../../../shared/heap/heap.dart';
 import '../../controller/simple_controllers.dart';
 import 'path.dart';
+import '../../../../shared/heap/heap.dart';
 import 'paths.dart';
 
 class HeapClassDetails extends StatelessWidget {
