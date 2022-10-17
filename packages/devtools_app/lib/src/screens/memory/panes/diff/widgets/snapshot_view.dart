@@ -9,7 +9,7 @@ import '../../../../../shared/split.dart';
 import '../../../shared/heap/heap.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/heap_diff.dart';
-import 'class_details.dart';
+import 'class_details/class_details.dart';
 import 'classes_table_diff.dart';
 import 'classes_table_single.dart';
 

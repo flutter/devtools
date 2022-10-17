@@ -4,12 +4,12 @@
 
 import 'package:flutter/widgets.dart';
 
-import '../../../../../primitives/utils.dart';
-import '../../../../../shared/table/table.dart';
-import '../../../../../shared/table/table_data.dart';
-import '../../../../../shared/utils.dart';
-import '../../../shared/heap/heap.dart';
-import '../../../shared/heap/primitives.dart';
+import '../../../../../../primitives/utils.dart';
+import '../../../../../../shared/table/table.dart';
+import '../../../../../../shared/table/table_data.dart';
+import '../../../../../../shared/utils.dart';
+import '../../../../shared/heap/heap.dart';
+import '../../../../shared/heap/primitives.dart';
 
 class HeapClassDetails extends StatelessWidget {
   const HeapClassDetails({
@@ -32,7 +32,7 @@ class HeapClassDetails extends StatelessWidget {
       );
     }
 
-    return _RetainingPathTable(
+    return RetainingPathTable(
       entries: theEntries,
       selection: selection,
       isDiff: isDiff,
@@ -135,8 +135,8 @@ class _RetainingPathTableColumns {
   ];
 }
 
-class _RetainingPathTable extends StatelessWidget {
-  const _RetainingPathTable({
+class RetainingPathTable extends StatelessWidget {
+  const RetainingPathTable({
     Key? key,
     required this.entries,
     required this.selection,
