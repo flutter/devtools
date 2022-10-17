@@ -24,12 +24,18 @@ class RetainingPathView extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SizedBox(height: denseRowSpacing),
+        const SizedBox(height: densePadding),
         _PathControlPane(
           controller: controller,
           path: path,
         ),
-        Expanded(child: _PathView(path: path, controller: controller)),
+        Expanded(
+          child: Padding(
+            padding:
+                const EdgeInsets.only(top: densePadding, left: densePadding),
+            child: _PathView(path: path, controller: controller),
+          ),
+        ),
       ],
     );
   }
