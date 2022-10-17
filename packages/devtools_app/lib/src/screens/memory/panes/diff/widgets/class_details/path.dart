@@ -21,6 +21,7 @@ class RetainingPathView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _PathControlPane(
           controller: controller,
@@ -49,6 +50,7 @@ class _PathControlPaneState extends State<_PathControlPane> {
       children: [
         CopyToClipboardControl(
           dataProvider: () => widget.path.asLongString(),
+          successMessage: null,
         ),
       ],
     );
@@ -63,6 +65,14 @@ class _PathView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(path.asLongString());
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: SingleChildScrollView(
+        child: Text(
+          path.asLongString(delimiter: '\n→'),
+          overflow: TextOverflow.visible,
+        ),
+      ),
+    );
   }
 }

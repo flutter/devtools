@@ -24,9 +24,11 @@ import 'globals.dart';
 /// Shows a `successMessage` [Notification] on the passed in `context`.
 Future<void> copyToClipboard(
   String data,
-  String successMessage,
+  String? successMessage,
   BuildContext context,
 ) async {
+  if (successMessage == null) return;
+
   await Clipboard.setData(
     ClipboardData(
       text: data,

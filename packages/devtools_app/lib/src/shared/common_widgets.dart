@@ -1984,7 +1984,7 @@ class CopyToClipboardControl extends StatelessWidget {
   });
 
   final ClipboardDataProvider? dataProvider;
-  final String successMessage;
+  final String? successMessage;
   final String tooltip;
   final Key? buttonKey;
   final double? size;

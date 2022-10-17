@@ -44,7 +44,7 @@ class HeapClassDetails extends StatelessWidget {
       builder: (_, selection, __) {
         if (selection == null) {
           return const Center(
-            child:  Text('Select retaining path to see details here.'),
+            child:  Text('Select group of instances to see the retaining path here.'),
           );
         }
 
