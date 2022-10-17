@@ -71,7 +71,7 @@ class _PathControlPane extends StatelessWidget {
             onPressed: () => controller.invert.value = !controller.invert.value,
             isSelected: invert,
             message: 'Invert the path',
-            icon: Icons.swap_vert,
+            icon: Icons.arrow_upward,
           ),
         ),
       ],
@@ -91,7 +91,7 @@ class _PathView extends StatelessWidget {
       scrollDirection: Axis.horizontal,
       child: SingleChildScrollView(
         child: Text(
-          path.asLongString(delimiter: '\n→'),
+          path.asLongString(delimiter: '\n→ '),
           overflow: TextOverflow.visible,
         ),
       ),
