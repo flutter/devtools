@@ -27,15 +27,13 @@ Future<void> copyToClipboard(
   String? successMessage,
   BuildContext context,
 ) async {
-  if (successMessage == null) return;
-
   await Clipboard.setData(
     ClipboardData(
       text: data,
     ),
   );
 
-  notificationService.push(successMessage);
+  if (successMessage != null) notificationService.push(successMessage);
 }
 
 /// Logging to debug console only in debug runs.

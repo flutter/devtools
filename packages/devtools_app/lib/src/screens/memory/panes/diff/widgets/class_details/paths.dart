@@ -50,7 +50,8 @@ class _RetainingPathColumn extends ColumnData<StatsByPathEntry> {
         );
 
   @override
-  String? getValue(StatsByPathEntry record) => record.key.asShortString();
+  String? getValue(StatsByPathEntry record) =>
+      record.key.asShortString(inverted: true);
 
   @override
   bool get supportsSorting => true;

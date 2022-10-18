@@ -53,6 +53,9 @@ class _PathControlPane extends StatelessWidget {
       children: [
         CopyToClipboardControl(
           dataProvider: () => path.asLongString(),
+          // We do not give success message because it pops up directly on
+          // top of the path control, that makes the control anavailable
+          // while message is here.
           successMessage: null,
         ),
         const SizedBox(width: denseSpacing),
@@ -72,7 +75,7 @@ class _PathControlPane extends StatelessWidget {
             onPressed: () => controller.invert.value = !controller.invert.value,
             isSelected: invert,
             message: 'Invert the path',
-            icon: Icons.arrow_upward,
+            icon: Icons.turn_left,
           ),
         ),
       ],
@@ -88,12 +91,16 @@ class _PathView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: SingleChildScrollView(
-        child: Text(
-          path.asLongString(delimiter: '\n→ '),
-          overflow: TextOverflow.visible,
+    return DualValueListenableBuilder<bool, bool>(
+      firstListenable: controller.hideStandard,
+      secondListenable: controller.invert,
+      builder: (_, hideStandard, invert, __) => SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: SingleChildScrollView(
+          child: Text(
+            path.asLongString(inverted: invert, hideStandard: hideStandard),
+            overflow: TextOverflow.visible,
+          ),
         ),
       ),
     );
