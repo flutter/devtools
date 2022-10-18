@@ -227,7 +227,7 @@ To explore DevTools with all experimental features enabled:
 
 1. [Configure](https://docs.flutter.dev/get-started/install) Dart or Flutter.
 
-2. Create an empty folder with any name somwhere and `cd` to it in terminal. 
+2. Create an empty folder and `cd` to it in terminal. 
 
 3. Start DevTools:
 ```
