@@ -54,6 +54,7 @@ class SnapshotView extends StatelessWidget {
             selection: controller.derived.selectedPathEntry,
             isDiff: classes is DiffHeapClasses,
             pathController: controller.retainingPathController,
+            className: controller.core.className?.className,
           ),
         );
 

@@ -36,14 +36,15 @@ class HeapClassDetails extends StatelessWidget {
       entries: theEntries,
       selection: selection,
       isDiff: isDiff,
+      className: throw UnimplementedError(),
     );
   }
 }
 
 class _RetainingPathColumn extends ColumnData<StatsByPathEntry> {
-  _RetainingPathColumn()
+  _RetainingPathColumn(String className)
       : super.wide(
-          'Retaining Path',
+          'Shortest Retaining Path for Instances of $className',
           titleTooltip: 'Class names of objects that retain'
               '\nthe instances from garbage collection.',
           alignment: ColumnAlignment.left,
@@ -124,12 +125,16 @@ class _RetainedSizeColumn extends ColumnData<StatsByPathEntry> {
 }
 
 class _RetainingPathTableColumns {
-  _RetainingPathTableColumns(this.isDiff);
+  _RetainingPathTableColumns(this.isDiff, this.className);
 
   final bool isDiff;
+
+  final String className;
+
   late final shallowSizeColumn = _ShallowSizeColumn(isDiff);
+
   late final columnList = <ColumnData<StatsByPathEntry>>[
-    _RetainingPathColumn(),
+    _RetainingPathColumn(className),
     _InstanceColumn(isDiff),
     shallowSizeColumn,
     _RetainedSizeColumn(isDiff),
@@ -142,26 +147,26 @@ class RetainingPathTable extends StatelessWidget {
     required this.entries,
     required this.selection,
     required this.isDiff,
+    required this.className,
   }) : super(key: key);
 
   final List<StatsByPathEntry> entries;
   final ValueNotifier<StatsByPathEntry?> selection;
   final bool isDiff;
+  final String className;
 
   static final _columnStore = <String, _RetainingPathTableColumns>{};
   static _RetainingPathTableColumns _columns(
-    String dataKey,
-    bool isDiff,
-  ) =>
+          String dataKey, bool isDiff, String className) =>
       _columnStore.putIfAbsent(
         dataKey,
-        () => _RetainingPathTableColumns(isDiff),
+        () => _RetainingPathTableColumns(isDiff, className),
       );
 
   @override
   Widget build(BuildContext context) {
     final dataKey = 'RetainingPathTable-${identityHashCode(entries)}';
-    final columns = _columns(dataKey, isDiff);
+    final columns = _columns(dataKey, isDiff, className);
     return FlatTable<StatsByPathEntry>(
       dataKey: dataKey,
       columns: columns.columnList,

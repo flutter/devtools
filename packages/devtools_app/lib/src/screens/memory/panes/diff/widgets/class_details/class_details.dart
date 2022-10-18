@@ -17,12 +17,14 @@ class HeapClassDetails extends StatelessWidget {
     required this.selection,
     required this.isDiff,
     required this.pathController,
+    required this.className,
   }) : super(key: key);
 
   final List<StatsByPathEntry>? entries;
   final ValueNotifier<StatsByPathEntry?> selection;
   final RetainingPathController pathController;
   final bool isDiff;
+  final String? className;
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +39,7 @@ class HeapClassDetails extends StatelessWidget {
       entries: theEntries,
       selection: selection,
       isDiff: isDiff,
+      className: className!,
     );
 
     final area2 = ValueListenableBuilder<StatsByPathEntry?>(
