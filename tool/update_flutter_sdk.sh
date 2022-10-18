@@ -7,13 +7,7 @@
 # Any subsequent commands failure will cause this script to exit immediately
 set -e
 
-GLOBAL_PATH=$1
-UPDATE_LOCALLY=$2
-
-# We need path to `dart` to be included.
-# Global path is not available here, so we are passing it as parameter.
-# https://unix.stackexchange.com/questions/704630/path-in-script-different-than-actual-path
-export PATH="$GLOBAL_PATH:$PATH"
+UPDATE_LOCALLY=$1
 
 # Contains a path to this script, relative to the directory it was called from.
 RELATIVE_PATH_TO_SCRIPT="${BASH_SOURCE[0]}"

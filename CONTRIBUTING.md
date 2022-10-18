@@ -175,7 +175,7 @@ Before running tests, make sure your Flutter SDK matches the version that will b
 the bots. To update your local flutter version, run:
 
 ```
-./tool/update_flutter_sdk.sh $PATH --local
+./tool/update_flutter_sdk.sh --local
 
 ```
 
@@ -207,7 +207,7 @@ Before updating the goldens, ensure your version of Flutter matches the version 
 will be used on the bots. To update your local flutter version, run:
 
 ```
-./tool/update_flutter_sdk.sh $PATH --local
+./tool/update_flutter_sdk.sh --local
 ```
 
 Now you can proceed with updating the goldens:
@@ -230,7 +230,7 @@ To explore DevTools with all experimental features enabled:
 2. Start DevTools:
 ```
 git clone git@github.com:flutter/devtools.git
-./devtools/tool/update_flutter_sdk.sh $PATH
+./devtools/tool/update_flutter_sdk.sh
 cd devtools/packages/devtools_app
 ../../tool/flutter-sdk/bin/flutter run -d chrome --dart-define=enable_experiments=true
 ```
