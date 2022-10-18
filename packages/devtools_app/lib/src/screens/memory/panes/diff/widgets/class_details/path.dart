@@ -52,7 +52,7 @@ class _PathControlPane extends StatelessWidget {
     return Row(
       children: [
         CopyToClipboardControl(
-          dataProvider: () => path.asLongString(),
+          dataProvider: () => path.asLongString(delimiter: '\n'),
           // We do not give success message because it pops up directly on
           // top of the path control, that makes the control anavailable
           // while message is here.
