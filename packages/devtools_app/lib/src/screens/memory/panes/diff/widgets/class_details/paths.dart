@@ -11,36 +11,6 @@ import '../../../../../../shared/utils.dart';
 import '../../../../shared/heap/heap.dart';
 import '../../../../shared/heap/primitives.dart';
 
-class HeapClassDetails extends StatelessWidget {
-  const HeapClassDetails({
-    Key? key,
-    required this.entries,
-    required this.selection,
-    required this.isDiff,
-  }) : super(key: key);
-
-  final List<StatsByPathEntry>? entries;
-  final ValueNotifier<StatsByPathEntry?> selection;
-  final bool isDiff;
-
-  @override
-  Widget build(BuildContext context) {
-    final theEntries = entries;
-    if (theEntries == null) {
-      return const Center(
-        child: Text('Select class to see details here.'),
-      );
-    }
-
-    return RetainingPathTable(
-      entries: theEntries,
-      selection: selection,
-      isDiff: isDiff,
-      className: throw UnimplementedError(),
-    );
-  }
-}
-
 class _RetainingPathColumn extends ColumnData<StatsByPathEntry> {
   _RetainingPathColumn(String className)
       : super.wide(
@@ -157,7 +127,7 @@ class RetainingPathTable extends StatelessWidget {
 
   static final _columnStore = <String, _RetainingPathTableColumns>{};
   static _RetainingPathTableColumns _columns(
-          String dataKey, bool isDiff, String className) =>
+          String dataKey, bool isDiff, String className,) =>
       _columnStore.putIfAbsent(
         dataKey,
         () => _RetainingPathTableColumns(isDiff, className),
