@@ -230,9 +230,9 @@ To explore DevTools with all experimental features enabled:
 2. Start DevTools:
 ```
 git clone git@github.com:flutter/devtools.git
-sudo ./devtools/tool/update_flutter_sdk.sh
+./devtools/tool/update_flutter_sdk.sh
 cd devtools/packages/devtools_app
-../../flutter-sdk/bin/flutter run -d chrome --dart-define=enable_experiments=true
+../../tool/flutter-sdk/bin/flutter run -d chrome --dart-define=enable_experiments=true
 ```
 
 3. Paste URL of your application (for example [Gallery](#connect-to-application)) to the connection textbox.
