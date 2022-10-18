@@ -227,15 +227,17 @@ To explore DevTools with all experimental features enabled:
 
 1. [Configure](https://docs.flutter.dev/get-started/install) Dart or Flutter.
 
-2. Start DevTools:
+2. Create an empty folder with any name somwhere and `cd` to it in terminal. 
+
+3. Start DevTools:
 ```
-git clone git@github.com:flutter/devtools.git
+git clone https://github.com/flutter/devtools.git
 ./devtools/tool/update_flutter_sdk.sh
 cd devtools/packages/devtools_app
 ../../tool/flutter-sdk/bin/flutter run -d chrome --dart-define=enable_experiments=true
 ```
 
-3. Paste URL of your application (for example [Gallery](#connect-to-application)) to the connection textbox.
+4. Paste URL of your application (for example [Gallery](#connect-to-application)) to the connection textbox.
 
 ## third_party dependencies
 
