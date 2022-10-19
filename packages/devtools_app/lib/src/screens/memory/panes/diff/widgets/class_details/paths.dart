@@ -15,8 +15,8 @@ class _RetainingPathColumn extends ColumnData<StatsByPathEntry> {
   _RetainingPathColumn(String className)
       : super.wide(
           'Shortest Retaining Path for Instances of $className',
-          titleTooltip: 'Class names of objects that retain'
-              '\nthe instances from garbage collection.',
+          titleTooltip: 'The shortest of sequences of objects that retain'
+              '\nthe instances of $className from garbage collection.',
           alignment: ColumnAlignment.left,
         );
 
