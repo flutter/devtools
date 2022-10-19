@@ -1,22 +1,22 @@
 *   @flutter/devtools-reviewers
 
 # Inspector Files
-**/inspector/** CoderDake
+**/inspector/** @CoderDake
 
 # Network Files
-**/network/**       kenzieschmoll bkonyi
+**/network/**       @kenzieschmoll @bkonyi
 
 # Performance Files
-**/performance/**   kenzieschmoll
+**/performance/**   @kenzieschmoll
 
 # CPU Profiler files
-**/profiler/**      kenzieschmoll
+**/profiler/**      @kenzieschmoll
 
 # Memory files
-**/memory/**        bkonyi polina-c
+**/memory/**        @bkonyi @polina-c
 
 # Debugger files
-**/debugger/**      elliette
+**/debugger/**      @elliette
 
 # VM Developer files
-**/vm_developer/** bkonyi
+**/vm_developer/** @bkonyi
