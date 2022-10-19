@@ -8,4 +8,3 @@ class RetainingPathController {
   final hideStandard = ValueNotifier<bool>(true);
   final invert = ValueNotifier<bool>(true);
 }
-

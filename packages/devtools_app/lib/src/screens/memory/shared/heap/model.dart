@@ -126,7 +126,7 @@ class ClassOnlyHeapPath {
             heapPath.objects.map((o) => o.heapClass).toList(growable: false);
   final List<HeapClassName> classes;
 
-  String asShortString({String? delimiter, bool inverted = false}) => _asString(
+  String toShortString({String? delimiter, bool inverted = false}) => _asString(
         data: classes.map((e) => e.className).toList(),
         delimiter: _delimeter(
           delimiter: delimiter,
@@ -136,12 +136,12 @@ class ClassOnlyHeapPath {
         inverted: inverted,
       );
 
-  String asLongString({
+  String toLongString({
     String? delimiter,
     bool inverted = false,
     bool hideStandard = false,
   }) {
-    late List<String> data;
+    final List<String> data;
     bool justAddedEllipsis = false;
     if (hideStandard) {
       data = [];
@@ -195,11 +195,11 @@ class ClassOnlyHeapPath {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is ClassOnlyHeapPath && other.asLongString() == asLongString();
+    return other is ClassOnlyHeapPath && other.toLongString() == toLongString();
   }
 
   @override
-  int get hashCode => asLongString().hashCode;
+  int get hashCode => toLongString().hashCode;
 }
 
 /// Contains information from [HeapSnapshotObject] needed for
