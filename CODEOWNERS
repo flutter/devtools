@@ -1,7 +1,7 @@
-*   @flutter/devtools-reviewers
+*                   @flutter/devtools-reviewers
 
 # Inspector Files
-**/inspector/** @CoderDake
+**/inspector/**     @CoderDake
 
 # Network Files
 **/network/**       @kenzieschmoll @bkonyi
@@ -19,4 +19,4 @@
 **/debugger/**      @elliette
 
 # VM Developer files
-**/vm_developer/** @bkonyi
+**/vm_developer/**  @bkonyi
