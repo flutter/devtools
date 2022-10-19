@@ -221,13 +221,15 @@ To update goldens for all tests, run:
 flutter test test/ --update-goldens
 ```
 
-## Manual Testing
+## Manual testing
 
 To explore DevTools with all experimental features enabled:
 
+### Setup and start
+
 1. [Configure](https://docs.flutter.dev/get-started/install) Dart or Flutter.
 
-2. In your terminal `cd` to a folder where you want to clone devtools, and that does not have subfolder `devtools` yet. It is ok if you already have devtools cloned somewhere else.
+2. In your terminal `cd` to a folder where you want to clone devtools, and that does not have subfolder `devtools` yet. 
 
 3. Start DevTools:
 ```
@@ -238,6 +240,20 @@ cd devtools/packages/devtools_app
 ```
 
 4. Paste URL of your application (for example [Gallery](#connect-to-application)) to the connection textbox.
+
+### Refresh and start
+
+1. Run in the `devtools` created in previous section:
+
+```
+git pull origin master
+./tool/update_flutter_sdk.sh
+cd packages/devtools_app
+flutter pub upgrade
+../../tool/flutter-sdk/bin/flutter run -d chrome --dart-define=enable_experiments=true
+```
+
+2. Paste URL of your application (for example [Gallery](#connect-to-application)) to the connection textbox.
 
 ## third_party dependencies
 
