@@ -811,20 +811,26 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
   @override
   void didUpdateWidget(covariant _Table<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (_data == oldWidget.tableController.tableData.value.data) return;
-    _initData();
+
+    final dataChanged = widget.tableController.tableData !=
+            oldWidget.tableController.tableData ||
+        widget.selectionNotifier != oldWidget.selectionNotifier ||
+        widget.activeSearchMatchNotifier != oldWidget.activeSearchMatchNotifier;
+
+    if (dataChanged) {
+      cancelListeners();
+      _initData();
+    }
   }
 
   void _initData() {
-    cancelListeners();
-
     _data = widget.tableController.tableData.value.data;
+
     addAutoDisposeListener(widget.tableController.tableData, () {
       setState(() {
         _data = widget.tableController.tableData.value.data;
       });
     });
-
     _initScrollOnSelectionListener(widget.selectionNotifier);
     _initSearchListener();
   }
