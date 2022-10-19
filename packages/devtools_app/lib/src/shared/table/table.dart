@@ -795,12 +795,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
   void initState() {
     super.initState();
 
-    _data = widget.tableController.tableData.value.data;
-    addAutoDisposeListener(widget.tableController.tableData, () {
-      setState(() {
-        _data = widget.tableController.tableData.value.data;
-      });
-    });
+    _initDataAndAddListeners();
 
     _linkedHorizontalScrollControllerGroup = LinkedScrollControllerGroup();
 
@@ -811,6 +806,31 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
     scrollController = widget.tableController.verticalScrollController!;
 
     pinnedScrollController = ScrollController();
+  }
+
+  @override
+  void didUpdateWidget(covariant _Table<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    final notifiersChanged = widget.tableController.tableData !=
+            oldWidget.tableController.tableData ||
+        widget.selectionNotifier != oldWidget.selectionNotifier ||
+        widget.activeSearchMatchNotifier != oldWidget.activeSearchMatchNotifier;
+
+    if (notifiersChanged) {
+      cancelListeners();
+      _initDataAndAddListeners();
+    }
+  }
+
+  void _initDataAndAddListeners() {
+    _data = widget.tableController.tableData.value.data;
+
+    addAutoDisposeListener(widget.tableController.tableData, () {
+      setState(() {
+        _data = widget.tableController.tableData.value.data;
+      });
+    });
     _initScrollOnSelectionListener(widget.selectionNotifier);
     _initSearchListener();
   }
