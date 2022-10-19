@@ -15,6 +15,7 @@ import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
 import 'heap_diff.dart';
 import 'item_controller.dart';
+import 'model.dart';
 import 'simple_controllers.dart';
 import 'utils.dart';
 
@@ -35,6 +36,8 @@ class DiffPaneController extends DisposableController {
   /// True, if the list contains snapshots, i.e. items beyond the first
   /// informational item.
   bool get hasSnapshots => core.snapshots.value.length > 1;
+
+  final  classFilter = ValueNotifier<ClassFilter>(ClassFilter.empty());
 
   // This value should never be reset. It is incremented for every snapshot that
   // is taken, and is used to assign a unique id to each [SnapshotListItem].

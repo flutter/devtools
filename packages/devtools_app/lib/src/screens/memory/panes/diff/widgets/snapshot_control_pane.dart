@@ -9,6 +9,7 @@ import '../../../../../shared/theme.dart';
 import '../../../primitives/ui.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/item_controller.dart';
+import '../controller/model.dart';
 
 class SnapshotControlPane extends StatelessWidget {
   const SnapshotControlPane({Key? key, required this.controller})
@@ -40,6 +41,15 @@ class SnapshotControlPane extends StatelessWidget {
                     SizedBox(
                       width: _classFilterWidth,
                       child: _ClassFilter(onChanged: controller.setClassFilter),
+                    ),
+                    const SizedBox(width: defaultSpacing),
+                    ValueListenableBuilder<ClassFilter>(
+                      valueListenable: controller.classFilter,
+                      builder: (_, classFilter, __) => FilterButton(
+                        onPressed: () => {},
+                        isFilterActive: !controller.classFilter.value.isEmpty,
+                        message: controller.classFilter.value.buttonTooltip,
+                      ),
                     ),
                     const SizedBox(width: defaultSpacing),
                     ToCsvButton(
