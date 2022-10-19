@@ -795,7 +795,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
   void initState() {
     super.initState();
 
-    _initData();
+    _initDataAndAddListeners();
 
     _linkedHorizontalScrollControllerGroup = LinkedScrollControllerGroup();
 
@@ -812,18 +812,18 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
   void didUpdateWidget(covariant _Table<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    final dataChanged = widget.tableController.tableData !=
+    final notifiersChanged = widget.tableController.tableData !=
             oldWidget.tableController.tableData ||
         widget.selectionNotifier != oldWidget.selectionNotifier ||
         widget.activeSearchMatchNotifier != oldWidget.activeSearchMatchNotifier;
 
-    if (dataChanged) {
+    if (notifiersChanged) {
       cancelListeners();
-      _initData();
+      _initDataAndAddListeners();
     }
   }
 
-  void _initData() {
+  void _initDataAndAddListeners() {
     _data = widget.tableController.tableData.value.data;
 
     addAutoDisposeListener(widget.tableController.tableData, () {
