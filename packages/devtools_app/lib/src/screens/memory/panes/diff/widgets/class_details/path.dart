@@ -31,8 +31,10 @@ class RetainingPathView extends StatelessWidget {
         ),
         Expanded(
           child: Padding(
-            padding:
-                const EdgeInsets.only(top: densePadding, left: densePadding),
+            padding: const EdgeInsets.only(
+              top: densePadding,
+              left: densePadding,
+            ),
             child: _PathView(path: path, controller: controller),
           ),
         ),
@@ -52,7 +54,7 @@ class _PathControlPane extends StatelessWidget {
     return Row(
       children: [
         CopyToClipboardControl(
-          dataProvider: () => path.asLongString(delimiter: '\n'),
+          dataProvider: () => path.toLongString(delimiter: '\n'),
           // We do not give success message because it pops up directly on
           // top of the path control, that makes the control anavailable
           // while message is here.
@@ -98,7 +100,7 @@ class _PathView extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         child: SingleChildScrollView(
           child: Text(
-            path.asLongString(inverted: invert, hideStandard: hideStandard),
+            path.toLongString(inverted: invert, hideStandard: hideStandard),
             overflow: TextOverflow.visible,
           ),
         ),

@@ -22,13 +22,13 @@ class _RetainingPathColumn extends ColumnData<StatsByPathEntry> {
 
   @override
   String? getValue(StatsByPathEntry record) =>
-      record.key.asShortString(inverted: true);
+      record.key.toShortString(inverted: true);
 
   @override
   bool get supportsSorting => true;
 
   @override
-  String getTooltip(StatsByPathEntry record) => record.key.asLongString();
+  String getTooltip(StatsByPathEntry record) => record.key.toLongString();
 }
 
 class _InstanceColumn extends ColumnData<StatsByPathEntry> {
@@ -144,7 +144,7 @@ class RetainingPathTable extends StatelessWidget {
       dataKey: dataKey,
       columns: columns.columnList,
       data: entries,
-      keyFactory: (e) => Key(e.key.asLongString()),
+      keyFactory: (e) => Key(e.key.toLongString()),
       selectionNotifier: selection,
       defaultSortColumn: columns.shallowSizeColumn,
       defaultSortDirection: SortDirection.descending,

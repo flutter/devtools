@@ -35,14 +35,14 @@ class HeapClassDetails extends StatelessWidget {
       );
     }
 
-    final area1 = RetainingPathTable(
+    final retainingPathsTable = RetainingPathTable(
       entries: theEntries,
       selection: selection,
       isDiff: isDiff,
       className: className!,
     );
 
-    final area2 = ValueListenableBuilder<StatsByPathEntry?>(
+    final selectedPathView = ValueListenableBuilder<StatsByPathEntry?>(
       valueListenable: selection,
       builder: (_, selection, __) {
         if (selection == null) {
@@ -63,7 +63,7 @@ class HeapClassDetails extends StatelessWidget {
     return Split(
       axis: Axis.horizontal,
       initialFractions: const [0.7, 0.3],
-      children: [area1, area2],
+      children: [retainingPathsTable, selectedPathView],
     );
   }
 }
