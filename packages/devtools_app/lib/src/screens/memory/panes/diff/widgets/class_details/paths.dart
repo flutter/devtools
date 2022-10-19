@@ -11,52 +11,24 @@ import '../../../../../../shared/utils.dart';
 import '../../../../shared/heap/heap.dart';
 import '../../../../shared/heap/primitives.dart';
 
-class HeapClassDetails extends StatelessWidget {
-  const HeapClassDetails({
-    Key? key,
-    required this.entries,
-    required this.selection,
-    required this.isDiff,
-  }) : super(key: key);
-
-  final List<StatsByPathEntry>? entries;
-  final ValueNotifier<StatsByPathEntry?> selection;
-  final bool isDiff;
-
-  @override
-  Widget build(BuildContext context) {
-    final theEntries = entries;
-    if (theEntries == null) {
-      return const Center(
-        child: Text('Select class to see details here.'),
-      );
-    }
-
-    return RetainingPathTable(
-      entries: theEntries,
-      selection: selection,
-      isDiff: isDiff,
-    );
-  }
-}
-
 class _RetainingPathColumn extends ColumnData<StatsByPathEntry> {
-  _RetainingPathColumn()
+  _RetainingPathColumn(String className)
       : super.wide(
-          'Retaining Path',
+          'Shortest Retaining Path for Instances of $className',
           titleTooltip: 'Class names of objects that retain'
               '\nthe instances from garbage collection.',
           alignment: ColumnAlignment.left,
         );
 
   @override
-  String? getValue(StatsByPathEntry record) => record.key.asShortString();
+  String? getValue(StatsByPathEntry record) =>
+      record.key.toShortString(inverted: true);
 
   @override
   bool get supportsSorting => true;
 
   @override
-  String getTooltip(StatsByPathEntry record) => record.key.asLongString();
+  String getTooltip(StatsByPathEntry record) => record.key.toLongString();
 }
 
 class _InstanceColumn extends ColumnData<StatsByPathEntry> {
@@ -123,12 +95,16 @@ class _RetainedSizeColumn extends ColumnData<StatsByPathEntry> {
 }
 
 class _RetainingPathTableColumns {
-  _RetainingPathTableColumns(this.isDiff);
+  _RetainingPathTableColumns(this.isDiff, this.className);
 
   final bool isDiff;
+
+  final String className;
+
   late final shallowSizeColumn = _ShallowSizeColumn(isDiff);
+
   late final columnList = <ColumnData<StatsByPathEntry>>[
-    _RetainingPathColumn(),
+    _RetainingPathColumn(className),
     _InstanceColumn(isDiff),
     shallowSizeColumn,
     _RetainedSizeColumn(isDiff),
@@ -141,31 +117,34 @@ class RetainingPathTable extends StatelessWidget {
     required this.entries,
     required this.selection,
     required this.isDiff,
+    required this.className,
   }) : super(key: key);
 
   final List<StatsByPathEntry> entries;
   final ValueNotifier<StatsByPathEntry?> selection;
   final bool isDiff;
+  final String className;
 
   static final _columnStore = <String, _RetainingPathTableColumns>{};
   static _RetainingPathTableColumns _columns(
     String dataKey,
     bool isDiff,
+    String className,
   ) =>
       _columnStore.putIfAbsent(
         dataKey,
-        () => _RetainingPathTableColumns(isDiff),
+        () => _RetainingPathTableColumns(isDiff, className),
       );
 
   @override
   Widget build(BuildContext context) {
     final dataKey = 'RetainingPathTable-${identityHashCode(entries)}';
-    final columns = _columns(dataKey, isDiff);
+    final columns = _columns(dataKey, isDiff, className);
     return FlatTable<StatsByPathEntry>(
       dataKey: dataKey,
       columns: columns.columnList,
       data: entries,
-      keyFactory: (e) => Key(e.key.asLongString()),
+      keyFactory: (e) => Key(e.key.toLongString()),
       selectionNotifier: selection,
       defaultSortColumn: columns.shallowSizeColumn,
       defaultSortDirection: SortDirection.descending,

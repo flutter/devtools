@@ -4,7 +4,10 @@
 
 import 'package:flutter/widgets.dart';
 
+import '../../../../../../shared/split.dart';
 import '../../../../shared/heap/heap.dart';
+import '../../controller/simple_controllers.dart';
+import 'path.dart';
 import 'paths.dart';
 
 class HeapClassDetails extends StatelessWidget {
@@ -13,11 +16,15 @@ class HeapClassDetails extends StatelessWidget {
     required this.entries,
     required this.selection,
     required this.isDiff,
+    required this.pathController,
+    required this.className,
   }) : super(key: key);
 
   final List<StatsByPathEntry>? entries;
   final ValueNotifier<StatsByPathEntry?> selection;
+  final RetainingPathController pathController;
   final bool isDiff;
+  final String? className;
 
   @override
   Widget build(BuildContext context) {
@@ -28,10 +35,35 @@ class HeapClassDetails extends StatelessWidget {
       );
     }
 
-    return RetainingPathTable(
+    final retainingPathsTable = RetainingPathTable(
       entries: theEntries,
       selection: selection,
       isDiff: isDiff,
+      className: className!,
+    );
+
+    final selectedPathView = ValueListenableBuilder<StatsByPathEntry?>(
+      valueListenable: selection,
+      builder: (_, selection, __) {
+        if (selection == null) {
+          return const Center(
+            child: Text(
+              'Select a group of instances to see the retaining path here.',
+            ),
+          );
+        }
+
+        return RetainingPathView(
+          path: selection.key,
+          controller: pathController,
+        );
+      },
+    );
+
+    return Split(
+      axis: Axis.horizontal,
+      initialFractions: const [0.7, 0.3],
+      children: [retainingPathsTable, selectedPathView],
     );
   }
 }

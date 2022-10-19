@@ -1121,18 +1121,19 @@ class FilterButton extends StatelessWidget {
     Key? key,
     required this.onPressed,
     required this.isFilterActive,
+    this.message = 'Filter',
   }) : super(key: key);
 
   final VoidCallback onPressed;
-
   final bool isFilterActive;
+  final String message;
 
   @override
   Widget build(BuildContext context) {
     return ToggleButton(
       onPressed: onPressed,
       isSelected: isFilterActive,
-      message: 'Filter',
+      message: message,
       icon: Icons.filter_list,
     );
   }
@@ -1984,7 +1985,7 @@ class CopyToClipboardControl extends StatelessWidget {
   });
 
   final ClipboardDataProvider? dataProvider;
-  final String successMessage;
+  final String? successMessage;
   final String tooltip;
   final Key? buttonKey;
   final double? size;

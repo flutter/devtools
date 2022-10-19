@@ -29,8 +29,8 @@ String classesToCsv(HeapClasses classes) {
           pathStats.value.instanceCount,
           pathStats.value.shallowSize,
           pathStats.value.retainedSize,
-          pathStats.key.asShortString(),
-          pathStats.key.asLongString(delimiter: ' | '),
+          pathStats.key.toShortString(),
+          pathStats.key.toLongString(delimiter: ' | '),
         ].join(','),
       );
     }
