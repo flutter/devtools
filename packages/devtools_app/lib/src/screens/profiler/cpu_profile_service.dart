@@ -5,11 +5,12 @@
 import '../../service/vm_flags.dart' as vm_flags;
 import '../../service/vm_service_wrapper.dart';
 import '../../shared/globals.dart';
+import '../vm_developer/vm_service_private_extensions.dart';
 import 'cpu_profile_model.dart';
 
 /// Manages interactions between the Cpu Profiler and the VmService.
 extension CpuProfilerExtension on VmServiceWrapper {
-  Future<CpuProfileData> getCpuProfile({
+  Future<CpuProfilePair> getCpuProfile({
     required int startMicros,
     required int extentMicros,
   }) async {
@@ -19,9 +20,41 @@ extension CpuProfilerExtension on VmServiceWrapper {
       startMicros,
       extentMicros,
     );
-    return CpuProfileData.generateFromCpuSamples(
+
+    const kSamples = 'samples';
+    const kCodeStack = '_codeStack';
+
+    final rawSamples =
+        (cpuSamples.json![kSamples] as List).cast<Map<String, dynamic>>();
+
+    bool buildCodeProfile = false;
+    // If the samples contain a code stack, we should attach them to the
+    // `CpuSample` objects.
+    if (rawSamples.first.containsKey(kCodeStack)) {
+      buildCodeProfile = true;
+      final samples = cpuSamples.samples!;
+      for (int i = 0; i < samples.length; ++i) {
+        final cpuSample = samples[i];
+        final rawSample = rawSamples[i];
+        cpuSample.setCodeStack(rawSample[kCodeStack].cast<int>());
+      }
+    }
+
+    final functionProfile = await CpuProfileData.generateFromCpuSamples(
       isolateId: isolateId,
       cpuSamples: cpuSamples,
+    );
+    CpuProfileData? codeProfile;
+    if (buildCodeProfile) {
+      codeProfile = await CpuProfileData.generateFromCpuSamples(
+        isolateId: isolateId,
+        cpuSamples: cpuSamples,
+        buildCodeTree: true,
+      );
+    }
+    return CpuProfilePair(
+      functionProfile: functionProfile,
+      codeProfile: codeProfile,
     );
   }
 

@@ -87,12 +87,15 @@ void main() {
         label: CpuProfilerController.userTagNone,
       )!;
       final filteredData = controller.dataNotifier.value!;
-      expect(originalData.stackFrames.values.length, equals(17));
+      expect(
+          originalData.functionProfile.stackFrames.values.length, equals(17));
       expect(filteredData.stackFrames.values.length, equals(12));
 
       // The native frame filter is applied by default.
-      final originalNativeFrames =
-          originalData.stackFrames.values.where((sf) => sf.isNative).toList();
+      final originalNativeFrames = originalData
+          .functionProfile.stackFrames.values
+          .where((sf) => sf.isNative)
+          .toList();
       final filteredNativeFrames =
           filteredData.stackFrames.values.where((sf) => sf.isNative).toList();
       expect(originalNativeFrames.length, equals(5));
@@ -236,7 +239,10 @@ void main() {
         processId: 'test',
       );
       controller.loadProcessedData(
-        cpuProfileDataWithTags,
+        CpuProfilePair(
+          functionProfile: cpuProfileDataWithTags,
+          codeProfile: null,
+        ),
         storeAsUserTagNone: true,
       );
 
@@ -312,7 +318,10 @@ void main() {
         processId: 'test',
       );
       controller.loadProcessedData(
-        cpuProfileDataWithTags,
+        CpuProfilePair(
+          functionProfile: cpuProfileDataWithTags,
+          codeProfile: null,
+        ),
         storeAsUserTagNone: true,
       );
 

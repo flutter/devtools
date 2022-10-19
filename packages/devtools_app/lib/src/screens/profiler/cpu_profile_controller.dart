@@ -19,6 +19,16 @@ import 'cpu_profile_service.dart';
 import 'cpu_profile_transformer.dart';
 import 'profiler_screen.dart';
 
+enum CpuProfilerViewType {
+  function,
+  code;
+
+  @override
+  String toString() {
+    return this == function ? 'Function' : 'Code';
+  }
+}
+
 class CpuProfilerController
     with
         SearchControllerMixin<CpuStackFrame>,
@@ -84,8 +94,17 @@ class CpuProfilerController
   final _userTagFilter = ValueNotifier<String>(userTagNone);
 
   Iterable<String> get userTags =>
-      cpuProfileStore.lookupProfile(label: userTagNone)?.userTags ??
+      cpuProfileStore
+          .lookupProfile(
+            label: userTagNone,
+          )
+          ?.functionProfile
+          .userTags ??
       const <String>[];
+
+  ValueListenable<CpuProfilerViewType> get viewType => _viewType;
+  final _viewType =
+      ValueNotifier<CpuProfilerViewType>(CpuProfilerViewType.function);
 
   bool get isToggleFilterActive =>
       toggleFilters.any((filter) => filter.enabled.value);
@@ -153,19 +172,22 @@ class CpuProfilerController
 
     _processingNotifier.value = true;
 
-    var cpuProfileData = baseStateCpuProfileData;
+    var cpuProfiles = CpuProfilePair(
+      functionProfile: baseStateCpuProfileData,
+      codeProfile: null,
+    );
 
     _dataNotifier.value = null;
 
     Future<void> pullAndProcessHelper() async {
       // TODO(kenz): add a cancel button to the processing UI in case pulling a
       // large payload from the vm service takes a long time.
-      cpuProfileData = await serviceManager.service!.getCpuProfile(
+      cpuProfiles = await serviceManager.service!.getCpuProfile(
         startMicros: startMicros,
         extentMicros: extentMicros,
       );
       await processAndSetData(
-        cpuProfileData,
+        cpuProfiles,
         processId: processId,
         storeAsUserTagNone: true,
         shouldApplyFilters: true,
@@ -181,8 +203,8 @@ class CpuProfilerController
         analytics_constants.cpuProfileProcessingTime,
         asyncOperation: pullAndProcessHelper,
         screenMetricsProvider: () => ProfilerScreenMetrics(
-          cpuSampleCount: cpuProfileData.profileMetaData.sampleCount,
-          cpuStackDepth: cpuProfileData.profileMetaData.stackDepth,
+          cpuSampleCount: cpuProfiles.profileMetaData.sampleCount,
+          cpuStackDepth: cpuProfiles.profileMetaData.stackDepth,
         ),
       );
     } else {
@@ -195,38 +217,69 @@ class CpuProfilerController
     }
   }
 
-  /// Processes [cpuProfileData] and sets the data for the controller.
+  Future<CpuProfilePair> _processDataHelper(
+    CpuProfilePair cpuProfiles, {
+    required String processId,
+    required bool storeAsUserTagNone,
+    required bool shouldApplyFilters,
+    required bool shouldRefreshSearchMatches,
+    required bool isCodeProfile,
+  }) async {
+    await cpuProfiles.processData(
+      transformer: transformer,
+      processId: processId,
+    );
+    if (storeAsUserTagNone) {
+      cpuProfileStore.storeProfile(
+        cpuProfiles,
+        label: userTagNone,
+      );
+      cpuProfileStore.storeProfile(
+        cpuProfiles,
+        time: cpuProfiles.profileMetaData.time,
+      );
+    }
+    if (shouldApplyFilters) {
+      cpuProfiles = applyToggleFilters(cpuProfiles);
+      await cpuProfiles.processData(
+        transformer: transformer,
+        processId: processId,
+      );
+      if (storeAsUserTagNone) {
+        cpuProfileStore.storeProfile(
+          cpuProfiles,
+          label: _wrapWithFilterSuffix(userTagNone),
+        );
+      }
+    }
+    return cpuProfiles;
+  }
+
+  /// Processes [cpuProfiles] and sets the data for the controller.
   ///
   /// If `storeAsUserTagNone` is true, the processed data will be stored as the
   /// original data, where no user tag filter has been applied.
   Future<void> processAndSetData(
-    CpuProfileData cpuProfileData, {
+    CpuProfilePair cpuProfiles, {
     required String processId,
     required bool storeAsUserTagNone,
     required bool shouldApplyFilters,
     required bool shouldRefreshSearchMatches,
   }) async {
-    _processingNotifier.value = true;
     _dataNotifier.value = null;
+    final type = viewType.value;
+    CpuProfileData cpuProfileData = cpuProfiles.getActive(type);
     try {
-      await transformer.processData(cpuProfileData, processId: processId);
-      if (storeAsUserTagNone) {
-        cpuProfileStore.storeProfile(cpuProfileData, label: userTagNone);
-        cpuProfileStore.storeProfile(
-          cpuProfileData,
-          time: cpuProfileData.profileMetaData.time,
-        );
-      }
-      if (shouldApplyFilters) {
-        cpuProfileData = applyToggleFilters(cpuProfileData);
-        await transformer.processData(cpuProfileData, processId: processId);
-        if (storeAsUserTagNone) {
-          cpuProfileStore.storeProfile(
-            cpuProfileData,
-            label: _wrapWithFilterSuffix(userTagNone),
-          );
-        }
-      }
+      _processingNotifier.value = true;
+      cpuProfileData = await _processDataHelper(
+        cpuProfiles,
+        processId: processId,
+        storeAsUserTagNone: storeAsUserTagNone,
+        shouldApplyFilters: shouldApplyFilters,
+        shouldRefreshSearchMatches: shouldRefreshSearchMatches,
+        isCodeProfile: type == CpuProfilerViewType.code,
+      ).then((p) => p.getActive(type));
+
       _dataNotifier.value = cpuProfileData;
       if (shouldRefreshSearchMatches) {
         refreshSearchMatches();
@@ -305,7 +358,7 @@ class CpuProfilerController
       label: _wrapWithFilterSuffix(appStartUpUserTag),
     );
     if (storedProfileWithFilters != null) {
-      _dataNotifier.value = storedProfileWithFilters;
+      _dataNotifier.value = storedProfileWithFilters.getActive(viewType.value);
       refreshSearchMatches();
       _processingNotifier.value = false;
       return;
@@ -321,12 +374,18 @@ class CpuProfilerController
         // give us all cpu samples we have available.
         extentMicros: maxJsInt,
       );
-      appStartUpProfile = CpuProfileData.fromUserTag(
+      appStartUpProfile = CpuProfilePair.fromUserTag(
         cpuProfile,
         appStartUpUserTag,
       );
-      cpuProfileStore.storeProfile(appStartUpProfile, label: userTagNone);
-      cpuProfileStore.storeProfile(appStartUpProfile, label: appStartUpUserTag);
+      cpuProfileStore.storeProfile(
+        appStartUpProfile,
+        label: userTagNone,
+      );
+      cpuProfileStore.storeProfile(
+        appStartUpProfile,
+        label: appStartUpUserTag,
+      );
     }
 
     if (appStartUpProfile.isEmpty) {
@@ -354,26 +413,29 @@ class CpuProfilerController
     }
 
     if (!appStartUpProfile.processed) {
-      await transformer.processData(
-        appStartUpProfile,
+      await appStartUpProfile.processData(
+        transformer: transformer,
         processId: 'appStartUpProfile',
       );
     }
 
     _processingNotifier.value = false;
-    _dataNotifier.value = appStartUpProfile;
+    _dataNotifier.value = appStartUpProfile.getActive(viewType.value);
   }
 
   // TODO(kenz): filter the data before calling this method, or pass in
   // unprocessed data to avoid processing the data twice.
   void loadProcessedData(
-    CpuProfileData data, {
+    CpuProfilePair data, {
     required bool storeAsUserTagNone,
   }) {
     assert(data.processed);
-    _dataNotifier.value = data;
+    _dataNotifier.value = data.getActive(viewType.value);
     if (storeAsUserTagNone) {
-      cpuProfileStore.storeProfile(data, label: userTagNone);
+      cpuProfileStore.storeProfile(
+        data,
+        label: userTagNone,
+      );
     }
   }
 
@@ -384,51 +446,72 @@ class CpuProfilerController
     _processingNotifier.value = true;
 
     try {
-      _dataNotifier.value = await processDataForTag(tag);
+      _dataNotifier.value = await processDataForTag(tag).then(
+        (e) => e.getActive(viewType.value),
+      );
     } catch (e) {
       // In the event of an error, reset the data to the original CPU profile.
       final filteredOriginalData = cpuProfileStore.lookupProfile(
         label: _wrapWithFilterSuffix(userTagNone),
       )!;
-      _dataNotifier.value = filteredOriginalData;
+      _dataNotifier.value = filteredOriginalData.getActive(viewType.value);
       throw Exception('Error loading data with tag "$tag": ${e.toString()}');
     } finally {
       _processingNotifier.value = false;
     }
   }
 
-  Future<CpuProfileData> processDataForTag(String tag) async {
+  Future<CpuProfilePair> processDataForTag(String tag) async {
     final profileLabel = _wrapWithFilterSuffix(tag);
     final filteredDataForTag = cpuProfileStore.lookupProfile(
       label: profileLabel,
     );
     if (filteredDataForTag != null) {
       if (!filteredDataForTag.processed) {
-        await transformer.processData(
-          filteredDataForTag,
+        await filteredDataForTag.processData(
+          transformer: transformer,
           processId: profileLabel,
         );
       }
       return filteredDataForTag;
     }
 
-    var data = cpuProfileStore.lookupProfile(label: tag);
+    var data = cpuProfileStore.lookupProfile(
+      label: tag,
+    );
     if (data == null) {
-      final fullData = cpuProfileStore.lookupProfile(label: userTagNone)!;
-      data = CpuProfileData.fromUserTag(fullData, tag);
-      cpuProfileStore.storeProfile(data, label: tag);
+      final fullData = cpuProfileStore.lookupProfile(
+        label: userTagNone,
+      )!;
+      data = CpuProfilePair.fromUserTag(fullData, tag);
+      cpuProfileStore.storeProfile(
+        data,
+        label: tag,
+      );
     }
 
     data = applyToggleFilters(data);
     if (!data.processed) {
-      await transformer.processData(
-        data,
+      await data.processData(
+        transformer: transformer,
         processId: 'data with toggle filters applied',
       );
     }
-    cpuProfileStore.storeProfile(data, label: _wrapWithFilterSuffix(tag));
+    cpuProfileStore.storeProfile(
+      data,
+      label: _wrapWithFilterSuffix(tag),
+    );
 
     return data;
+  }
+
+  void updateView(CpuProfilerViewType view) {
+    _viewType.value = view;
+    _dataNotifier.value = cpuProfileStore
+        .lookupProfile(
+          label: _wrapWithFilterSuffix(userTagNone),
+        )
+        ?.getActive(view);
   }
 
   void selectCpuStackFrame(CpuStackFrame? stackFrame) {
@@ -468,12 +551,18 @@ class CpuProfilerController
   @override
   void filterData(Filter<CpuStackFrame> filter) {
     final dataLabel = _wrapWithFilterSuffix(_userTagFilter.value);
-    var filteredData = cpuProfileStore.lookupProfile(label: dataLabel);
+    var filteredData = cpuProfileStore.lookupProfile(
+      label: dataLabel,
+    );
     if (filteredData == null) {
-      final originalData =
-          cpuProfileStore.lookupProfile(label: _userTagFilter.value)!;
+      final originalData = cpuProfileStore.lookupProfile(
+        label: _userTagFilter.value,
+      )!;
       filteredData = _filterData(originalData, filter);
-      cpuProfileStore.storeProfile(filteredData, label: dataLabel);
+      cpuProfileStore.storeProfile(
+        filteredData,
+        label: dataLabel,
+      );
     }
     processAndSetData(
       filteredData,
@@ -485,8 +574,8 @@ class CpuProfilerController
     _filterIdentifier++;
   }
 
-  CpuProfileData _filterData(
-    CpuProfileData originalData,
+  CpuProfilePair _filterData(
+    CpuProfilePair originalData,
     Filter<CpuStackFrame> filter,
   ) {
     final filterCallback = (CpuStackFrame stackFrame) {
@@ -500,10 +589,10 @@ class CpuProfilerController
       }
       return shouldInclude;
     };
-    return CpuProfileData.filterFrom(originalData, filterCallback);
+    return CpuProfilePair.filterFrom(originalData, filterCallback);
   }
 
-  CpuProfileData applyToggleFilters(CpuProfileData data) {
+  CpuProfilePair applyToggleFilters(CpuProfilePair data) {
     return _filterData(data, Filter(toggleFilters: toggleFilters));
   }
 }

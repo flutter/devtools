@@ -264,7 +264,10 @@ void main() {
         );
         // Call this to force the value of `_dataByTag[userTagNone]` to be set.
         controller.cpuProfilerController.loadProcessedData(
-          cpuProfileData,
+          CpuProfilePair(
+            functionProfile: cpuProfileData,
+            codeProfile: null,
+          ),
           storeAsUserTagNone: true,
         );
       });

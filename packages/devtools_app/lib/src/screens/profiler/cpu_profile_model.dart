@@ -15,7 +15,69 @@ import '../../primitives/utils.dart';
 import '../../shared/globals.dart';
 import '../../shared/profiler_utils.dart';
 import '../../ui/search.dart';
+import '../vm_developer/vm_service_private_extensions.dart';
+import 'cpu_profile_controller.dart';
 import 'cpu_profile_transformer.dart';
+
+class CpuProfilePair {
+  const CpuProfilePair({
+    required this.functionProfile,
+    required this.codeProfile,
+  });
+
+  factory CpuProfilePair.fromUserTag(CpuProfilePair original, String tag) {
+    final function = CpuProfileData.fromUserTag(original.functionProfile, tag);
+    CpuProfileData? code;
+    if (original.codeProfile != null) {
+      code = CpuProfileData.fromUserTag(original.codeProfile!, tag);
+    }
+    return CpuProfilePair(functionProfile: function, codeProfile: code);
+  }
+
+  factory CpuProfilePair.filterFrom(
+    CpuProfilePair original,
+    bool Function(CpuStackFrame) callback,
+  ) {
+    final function =
+        CpuProfileData.filterFrom(original.functionProfile, callback);
+    CpuProfileData? code;
+    if (original.codeProfile != null) {
+      code = CpuProfileData.filterFrom(original.codeProfile!, callback);
+    }
+    return CpuProfilePair(functionProfile: function, codeProfile: code);
+  }
+
+  final CpuProfileData functionProfile;
+  final CpuProfileData? codeProfile;
+
+  bool get isEmpty => functionProfile.isEmpty;
+  bool get processed => functionProfile.processed;
+  CpuProfileMetaData get profileMetaData => functionProfile.profileMetaData;
+
+  CpuProfileData getActive(CpuProfilerViewType activeType) {
+    if (activeType == CpuProfilerViewType.function) {
+      return functionProfile;
+    }
+    return codeProfile!;
+  }
+
+  CpuProfileData? getInactive(CpuProfilerViewType activeType) {
+    if (activeType == CpuProfilerViewType.function) {
+      return codeProfile;
+    }
+    return functionProfile;
+  }
+
+  Future<void> processData({
+    required CpuProfileTransformer transformer,
+    required String processId,
+  }) async {
+    await transformer.processData(functionProfile, processId: processId);
+    if (codeProfile != null) {
+      await transformer.processData(codeProfile!, processId: processId);
+    }
+  }
+}
 
 /// Data model for DevTools CPU profile.
 class CpuProfileData {
@@ -80,9 +142,9 @@ class CpuProfileData {
     final stackTraceEvents =
         (json[traceEventsKey] ?? []).cast<Map<String, dynamic>>();
     final samples = stackTraceEvents
-        .map((trace) => CpuSample.parse(trace))
+        .map((trace) => CpuSampleEvent.parse(trace))
         .toList()
-        .cast<CpuSample>();
+        .cast<CpuSampleEvent>();
 
     return CpuProfileData._(
       stackFrames: stackFrames,
@@ -205,15 +267,15 @@ class CpuProfileData {
     CpuProfileData originalData,
     bool Function(CpuStackFrame) includeFilter,
   ) {
-    final filteredCpuSamples = <CpuSample>[];
+    final filteredCpuSamples = <CpuSampleEvent>[];
     void includeSampleOrWalkUp(
-      CpuSample sample,
+      CpuSampleEvent sample,
       Map<String, Object> sampleJson,
       CpuStackFrame stackFrame,
     ) {
       if (includeFilter(stackFrame)) {
         filteredCpuSamples.add(
-          CpuSample(
+          CpuSampleEvent(
             leafId: stackFrame.id,
             userTag: sample.userTag,
             traceJson: sampleJson,
@@ -307,6 +369,7 @@ class CpuProfileData {
   static Future<CpuProfileData> generateFromCpuSamples({
     required String isolateId,
     required vm_service.CpuSamples cpuSamples,
+    bool buildCodeTree = false,
   }) async {
     // The root ID is associated with an artificial frame / node that is the root
     // of all stacks, regardless of entrypoint. This should never be seen in the
@@ -355,9 +418,11 @@ class CpuProfileData {
       }
     }
 
-    final root = _CpuProfileTimelineTree.fromCpuSamples(cpuSamples);
+    final root = _CpuProfileTimelineTree.fromCpuSamples(
+      cpuSamples,
+      buildCodeTree: buildCodeTree,
+    );
     processStackFrame(current: root, parent: null);
-
     // Build the trace events.
     for (final sample in cpuSamples.samples ?? <vm_service.CpuSample>[]) {
       final tree = _CpuProfileTimelineTree.getTreeFromSample(sample)!;
@@ -454,7 +519,7 @@ class CpuProfileData {
 
   final Map<String, CpuStackFrame> stackFrames;
 
-  final List<CpuSample> cpuSamples;
+  final List<CpuSampleEvent> cpuSamples;
 
   final CpuProfileMetaData profileMetaData;
 
@@ -554,19 +619,19 @@ class CpuProfileMetaData extends ProfileMetaData {
   }
 }
 
-class CpuSample extends TraceEvent {
-  CpuSample({
+class CpuSampleEvent extends TraceEvent {
+  CpuSampleEvent({
     required this.leafId,
     this.userTag,
     required Map<String, dynamic> traceJson,
   }) : super(traceJson);
 
-  factory CpuSample.parse(Map<String, dynamic> traceJson) {
+  factory CpuSampleEvent.parse(Map<String, dynamic> traceJson) {
     final leafId = traceJson[CpuProfileData.stackFrameIdKey];
     final userTag = traceJson[TraceEvent.argsKey] != null
         ? traceJson[TraceEvent.argsKey][CpuProfileData.userTagKey]
         : null;
-    return CpuSample(
+    return CpuSampleEvent(
       leafId: leafId,
       userTag: userTag,
       traceJson: traceJson,
@@ -839,12 +904,12 @@ class CpuProfileStore {
   ///
   /// This label will contain information regarding any toggle filters or user
   /// tag filters applied to the profile.
-  final _profilesByLabel = <String, CpuProfileData>{};
+  final _profilesByLabel = <String, CpuProfilePair>{};
 
   /// Store of CPU profiles keyed by a time range.
   ///
   /// These time ranges are allowed to overlap.
-  final _profilesByTime = <TimeRange, CpuProfileData>{};
+  final _profilesByTime = <TimeRange, CpuProfilePair>{};
 
   /// Lookup a profile from either cache: [_profilesByLabel] or
   /// [_profilesByTime].
@@ -859,7 +924,10 @@ class CpuProfileStore {
   /// generated, cached in [_profilesByTime] and then returned. This method will
   /// return null if no profiles are cached for [time] or if a sub profile
   /// cannot be generated for [time].
-  CpuProfileData? lookupProfile({String? label, TimeRange? time}) {
+  CpuProfilePair? lookupProfile({
+    String? label,
+    TimeRange? time,
+  }) {
     assert((label == null) != (time == null));
 
     if (label != null) {
@@ -875,7 +943,11 @@ class CpuProfileStore {
     return _profilesByTime[time];
   }
 
-  void storeProfile(CpuProfileData profile, {String? label, TimeRange? time}) {
+  void storeProfile(
+    CpuProfilePair profile, {
+    String? label,
+    TimeRange? time,
+  }) {
     assert((label == null) != (time == null));
     if (label != null) {
       _profilesByLabel[label] = profile;
@@ -889,7 +961,18 @@ class CpuProfileStore {
     final encompassingTimeRange = _encompassingTimeRange(time);
     if (encompassingTimeRange != null) {
       final encompassingProfile = _profilesByTime[encompassingTimeRange]!;
-      final subProfile = CpuProfileData.subProfile(encompassingProfile, time);
+      final subProfile = CpuProfilePair(
+        functionProfile: CpuProfileData.subProfile(
+          encompassingProfile.functionProfile,
+          time,
+        ),
+        codeProfile: encompassingProfile.codeProfile == null
+            ? null
+            : CpuProfileData.subProfile(
+                encompassingProfile.codeProfile!,
+                time,
+              ),
+      );
       _profilesByTime[time] = subProfile;
     }
   }
@@ -916,15 +999,21 @@ class CpuProfileStore {
 
 class _CpuProfileTimelineTree {
   factory _CpuProfileTimelineTree.fromCpuSamples(
-    vm_service.CpuSamples cpuSamples,
-  ) {
-    final root = _CpuProfileTimelineTree._fromIndex(cpuSamples, kRootIndex);
+    vm_service.CpuSamples cpuSamples, {
+    bool buildCodeTree = false,
+  }) {
+    final root = _CpuProfileTimelineTree._fromIndex(
+      cpuSamples,
+      kRootIndex,
+      buildCodeTree,
+    );
     _CpuProfileTimelineTree current;
     // TODO(bkonyi): handle truncated?
-    for (final sample in cpuSamples.samples ?? []) {
+    for (final sample in cpuSamples.samples ?? <vm_service.CpuSample>[]) {
       current = root;
+      final stack = buildCodeTree ? sample.codeStack : sample.stack!;
       // Build an inclusive trie.
-      for (final index in sample.stack!.reversed) {
+      for (final index in stack.reversed) {
         current = current._getChild(index);
       }
       _timelineTreeExpando[sample] = current;
@@ -932,19 +1021,33 @@ class _CpuProfileTimelineTree {
     return root;
   }
 
-  _CpuProfileTimelineTree._fromIndex(this.samples, this.index);
+  _CpuProfileTimelineTree._fromIndex(this.samples, this.index, this.isCodeTree);
 
   static final _timelineTreeExpando = Expando<_CpuProfileTimelineTree>();
   static const kRootIndex = -1;
   static const kNoFrameId = -1;
   final vm_service.CpuSamples samples;
   final int index;
+  final bool isCodeTree;
   int frameId = kNoFrameId;
 
-  String? get name => samples.functions![index].function.name;
+  dynamic get _function {
+    if (isCodeTree) {
+      return samples.codes[index].code!.function!;
+    }
+    return samples.functions![index].function;
+  }
+
+  String? get name {
+    if (isCodeTree) {
+      return samples.codes[index].code!.name;
+    }
+    return _function.name;
+  }
 
   String? get className {
-    final function = samples.functions![index].function;
+    if (isCodeTree) return null;
+    final function = _function;
     if (function is vm_service.FuncRef) {
       final owner = function.owner;
       if (owner is vm_service.ClassRef) {
@@ -954,10 +1057,18 @@ class _CpuProfileTimelineTree {
     return null;
   }
 
-  String? get resolvedUrl => samples.functions![index].resolvedUrl;
+  String? get resolvedUrl {
+    if (isCodeTree) {
+      // TODO(bkonyi): not sure if this is a resolved URL or not, but it's not
+      // critical since this is only displayed when VM developer mode is
+      // enabled.
+      return samples.codes[index].code!.function!.location?.script!.uri;
+    }
+    return samples.functions![index].resolvedUrl;
+  }
 
   int? get sourceLine {
-    final function = samples.functions![index].function;
+    final function = _function;
     try {
       return function.location?.line;
     } catch (_) {
@@ -988,7 +1099,8 @@ class _CpuProfileTimelineTree {
         break;
       }
     }
-    final child = _CpuProfileTimelineTree._fromIndex(samples, index);
+    final child =
+        _CpuProfileTimelineTree._fromIndex(samples, index, isCodeTree);
     if (i < length) {
       children.insert(i, child);
     } else {

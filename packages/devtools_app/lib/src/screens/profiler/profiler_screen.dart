@@ -239,7 +239,10 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
       processId: 'offline data processing',
     );
     controller.cpuProfilerController.loadProcessedData(
-      offlineData,
+      CpuProfilePair(
+        functionProfile: offlineData,
+        codeProfile: null,
+      ),
       storeAsUserTagNone: true,
     );
   }

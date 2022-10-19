@@ -262,9 +262,18 @@ enum FunctionKind {
   }
 }
 
+extension CodeRefPrivateViewExtension on CodeRef {
+  static const _functionKey = 'function';
+
+  /// Returns the function from which this code object was generated.
+  FuncRef? get function {
+    final functionJson = json![_functionKey] as Map<String, dynamic>;
+    return FuncRef.parse(functionJson);
+  }
+}
+
 /// An extension on [Code] which allows for access to VM internal fields.
 extension CodePrivateViewExtension on Code {
-  static const _functionKey = 'function';
   static const _disassemblyKey = '_disassembly';
 
   /// Returns the disassembly of the [Code], which is the generated assembly
@@ -272,12 +281,6 @@ extension CodePrivateViewExtension on Code {
   Disassembly get disassembly => Disassembly.parse(json![_disassemblyKey]);
   set disassembly(Disassembly disassembly) =>
       json![_disassemblyKey] = disassembly.toJson();
-
-  /// Returns the function from which this code object was generated.
-  FuncRef? get function {
-    final functionJson = json![_functionKey] as Map<String, dynamic>;
-    return FuncRef.parse(functionJson);
-  }
 }
 
 /// An extension on [Field] which allows for access to VM internal fields.
@@ -394,4 +397,85 @@ class ObjectStore {
   }
 
   final Map<String, ObjRef> fields;
+}
+
+/// A `ProfileCode` contains profiling information about a Dart or native
+/// code object.
+///
+/// See [CpuSamples].
+class ProfileCode {
+  ProfileCode({
+    this.kind,
+    this.inclusiveTicks,
+    this.exclusiveTicks,
+    this.code,
+  });
+
+  ProfileCode._fromJson(Map<String, dynamic> json) {
+    kind = json['kind'] ?? '';
+    inclusiveTicks = json['inclusiveTicks'] ?? -1;
+    exclusiveTicks = json['exclusiveTicks'] ?? -1;
+    code = createServiceObject(json['code'], const ['@Code']) as CodeRef?;
+  }
+  static ProfileCode? parse(Map<String, dynamic>? json) =>
+      json == null ? null : ProfileCode._fromJson(json);
+
+  /// The kind of function this object represents.
+  String? kind;
+
+  /// The number of times function appeared on the stack during sampling events.
+  int? inclusiveTicks;
+
+  /// The number of times function appeared on the top of the stack during
+  /// sampling events.
+  int? exclusiveTicks;
+
+  /// The function captured during profiling.
+  CodeRef? code;
+
+  Map<String, dynamic> toJson() {
+    final json = <String, dynamic>{};
+    json.addAll({
+      'kind': kind ?? '',
+      'inclusiveTicks': inclusiveTicks ?? -1,
+      'exclusiveTicks': exclusiveTicks ?? -1,
+      'code': code?.toJson(),
+    });
+    return json;
+  }
+
+  @override
+  String toString() => '[ProfileCode ' //
+      'kind: $kind, inclusiveTicks: $inclusiveTicks, exclusiveTicks: $exclusiveTicks, ' //
+      'code: $code]';
+}
+
+extension CpuSamplePrivateView on CpuSample {
+  static final _expando = Expando<List<int>>();
+
+  List<int> get codeStack => _expando[this] ?? [];
+  void setCodeStack(List<int> stack) => _expando[this] = stack;
+}
+
+extension CpuSamplesPrivateView on CpuSamples {
+  // Used to attach the codes list to a CpuSamples instance.
+  static final _expando = Expando<List<ProfileCode>>();
+
+  static const _kCodesKey = '_codes';
+
+  bool get hasCodes {
+    return _expando[this] != null || json!.containsKey(_kCodesKey);
+  }
+
+  List<ProfileCode> get codes {
+    var _codes = _expando[this];
+    if (_codes == null) {
+      _codes = json![_kCodesKey]
+          .cast<Map<String, dynamic>>()
+          .map<ProfileCode>((e) => ProfileCode.parse(e)!)
+          .toList();
+      _expando[this] = _codes;
+    }
+    return _codes!;
+  }
 }

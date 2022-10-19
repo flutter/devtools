@@ -179,6 +179,21 @@ class _CpuProfilerState extends State<CpuProfiler>
               const SizedBox(width: denseSpacing),
               UserTagDropdown(widget.controller),
               const SizedBox(width: denseSpacing),
+              ValueListenableBuilder<bool>(
+                valueListenable: preferences.vmDeveloperModeEnabled,
+                builder: (context, vmDeveloperModeEnabled, _) {
+                  if (!vmDeveloperModeEnabled) {
+                    return Container();
+                  }
+                  return Row(
+                    children: [
+                      ModeDropdown(widget.controller),
+                      const SizedBox(width: denseSpacing),
+                    ],
+                  );
+                },
+              ),
+              const SizedBox(width: denseSpacing),
             ],
             // TODO(kenz): support search for call tree and bottom up tabs as
             // well. This will require implementing search for tree tables.
@@ -239,12 +254,17 @@ class _CpuProfilerState extends State<CpuProfiler>
             ],
           ],
         ),
-        Expanded(
-          child: TabBarView(
-            physics: defaultTabBarViewPhysics,
-            controller: _tabController,
-            children: _buildProfilerViews(),
-          ),
+        ValueListenableBuilder<CpuProfilerViewType>(
+          valueListenable: widget.controller.viewType,
+          builder: (context, viewType, _) {
+            return Expanded(
+              child: TabBarView(
+                physics: defaultTabBarViewPhysics,
+                controller: _tabController,
+                children: _buildProfilerViews(),
+              ),
+            );
+          },
         ),
       ],
     );
@@ -449,5 +469,61 @@ class UserTagDropdown extends StatelessWidget {
     } catch (e) {
       notificationService.push(e.toString());
     }
+  }
+}
+
+/// DropdownButton that controls the value of
+/// [ProfilerScreenController.viewType].
+class ModeDropdown extends StatelessWidget {
+  const ModeDropdown(this.controller);
+
+  final CpuProfilerController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    const mode = 'View:';
+    return ValueListenableBuilder<CpuProfilerViewType>(
+      valueListenable: controller.viewType,
+      builder: (context, viewType, _) {
+        final tooltip = viewType == CpuProfilerViewType.function
+            ? 'Display the profile in terms of the Dart call stack '
+                '(i.e., inlined frames are expanded)'
+            : 'Display the profile in terms of native stack frames '
+                '(i.e., inlined frames are not expanded, display code objects '
+                'rather than individual functions)';
+        return SizedBox(
+          height: defaultButtonHeight,
+          child: DevToolsTooltip(
+            message: tooltip,
+            child: RoundedDropDownButton<CpuProfilerViewType>(
+              isDense: true,
+              style: Theme.of(context).textTheme.bodyMedium,
+              value: viewType,
+              items: [
+                _buildMenuItem(
+                  display: '$mode ${CpuProfilerViewType.function}',
+                  value: CpuProfilerViewType.function,
+                ),
+                _buildMenuItem(
+                  display: '$mode ${CpuProfilerViewType.code}',
+                  value: CpuProfilerViewType.code,
+                ),
+              ],
+              onChanged: (type) => controller.updateView(type!),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  DropdownMenuItem<CpuProfilerViewType> _buildMenuItem({
+    required String display,
+    required CpuProfilerViewType value,
+  }) {
+    return DropdownMenuItem<CpuProfilerViewType>(
+      value: value,
+      child: Text(display),
+    );
   }
 }
