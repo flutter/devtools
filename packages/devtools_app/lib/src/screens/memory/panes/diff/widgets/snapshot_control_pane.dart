@@ -10,6 +10,7 @@ import '../../../primitives/ui.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/item_controller.dart';
 import '../controller/model.dart';
+import 'class_filter_dialog.dart';
 
 class SnapshotControlPane extends StatelessWidget {
   const SnapshotControlPane({Key? key, required this.controller})
@@ -46,7 +47,11 @@ class SnapshotControlPane extends StatelessWidget {
                     ValueListenableBuilder<ClassFilter>(
                       valueListenable: controller.classFilter,
                       builder: (_, classFilter, __) => FilterButton(
-                        onPressed: () => {},
+                        onPressed: () => showDialog(
+                          context: context,
+                          builder: (context) =>
+                              ClassFilterDialog(controller.classFilter),
+                        ),
                         isFilterActive: !controller.classFilter.value.isEmpty,
                         message: controller.classFilter.value.buttonTooltip,
                       ),

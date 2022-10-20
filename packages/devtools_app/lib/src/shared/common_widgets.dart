@@ -2508,3 +2508,34 @@ class ToCsvButton extends StatelessWidget {
     );
   }
 }
+
+
+class RadioButton<T> extends StatelessWidget {
+  const RadioButton({
+    super.key,
+    required this.label,
+    required this.itemValue,
+    required this.groupValue,
+    this.onChanged,
+  });
+
+  final String label;
+  final T itemValue;
+  final T groupValue;
+  final void Function(T?)? onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Radio<T>(
+          value: itemValue,
+          groupValue: groupValue,
+          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          onChanged: onChanged,
+        ),
+        Text(label),
+      ],
+    );
+  }
+}

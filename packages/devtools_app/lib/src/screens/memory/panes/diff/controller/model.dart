@@ -9,18 +9,18 @@ enum ClassFilterType {
 }
 
 class ClassFilter {
-  ClassFilter(this.filterType, this.exceptText, this.onlyText);
+  ClassFilter(this.filterType, this.except, this.only);
 
   ClassFilter.empty() : this(ClassFilterType.all, '', '');
 
   final ClassFilterType filterType;
-  final String exceptText;
-  final String onlyText;
+  final String except;
+  final String only;
 
   bool get isEmpty =>
       filterType == ClassFilterType.all ||
-      (filterType == ClassFilterType.except && exceptText.trim().isEmpty) ||
-      (filterType == ClassFilterType.only && onlyText.trim().isEmpty);
+      (filterType == ClassFilterType.except && except.trim().isEmpty) ||
+      (filterType == ClassFilterType.only && only.trim().isEmpty);
 
   String get buttonTooltip {
     if (isEmpty) return 'Filter classes and packages.';
