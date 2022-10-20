@@ -2420,7 +2420,7 @@ class HelpButtonWithDialog extends StatelessWidget {
             title: dialogTitleText(theme, dialogTitle),
             includeDivider: false,
             content: child,
-            actions: [
+            actions: const [
               DialogCloseButton(),
             ],
           ),

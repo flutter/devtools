@@ -36,7 +36,7 @@ class PerformanceSettingsDialog extends StatelessWidget {
           ],
         ),
       ),
-      actions: [
+      actions: const [
         DialogCloseButton(),
       ],
     );

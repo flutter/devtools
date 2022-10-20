@@ -9,9 +9,20 @@ enum ClassFilterType {
 }
 
 class ClassFilter {
-  ClassFilter(this.filterType, this.except, this.only);
+  ClassFilter({
+    required this.filterType,
+    required this.except,
+    required this.only,
+  });
 
-  ClassFilter.empty() : this(ClassFilterType.all, '', '');
+  ClassFilter.empty()
+      : this(
+          filterType: ClassFilterType.all,
+          except: standardLibrariesAlias,
+          only: '',
+        );
+
+  static const String standardLibrariesAlias = 'standard-libraries';
 
   final ClassFilterType filterType;
   final String except;

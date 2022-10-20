@@ -331,7 +331,7 @@ class LayerImageDialog extends StatelessWidget {
           originalFrameSize: originalFrameSize,
         ),
       ),
-      actions: [
+      actions: const [
         DialogCloseButton(),
       ],
     );
