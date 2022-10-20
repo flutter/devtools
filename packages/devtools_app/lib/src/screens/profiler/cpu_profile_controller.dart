@@ -434,7 +434,7 @@ class CpuProfilerController
     if (storeAsUserTagNone) {
       cpuProfileStore.storeProfile(
         data,
-        label: userTagNone,
+        label: _wrapWithFilterSuffix(userTagNone),
       );
     }
   }
@@ -507,8 +507,9 @@ class CpuProfilerController
 
   void updateView(CpuProfilerViewType view) {
     _viewType.value = view;
-    _dataNotifier.value =
-        cpuProfileStore.lookupProfile(label: userTagNone)?.getActive(view);
+    _dataNotifier.value = cpuProfileStore
+        .lookupProfile(label: _wrapWithFilterSuffix(userTagNone))
+        ?.getActive(view);
   }
 
   void selectCpuStackFrame(CpuStackFrame? stackFrame) {
