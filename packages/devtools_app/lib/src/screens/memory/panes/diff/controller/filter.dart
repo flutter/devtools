@@ -17,9 +17,10 @@ enum FilteringTask {
 class ClassFilter {
   ClassFilter({
     required this.filterType,
-    required this.except,
-    required this.only,
-  });
+    required String except,
+    required String only,
+  })  : except = _trimByLine(except),
+        only = _trimByLine(only);
 
   ClassFilter.empty()
       : this(
@@ -27,6 +28,9 @@ class ClassFilter {
           except: standardLibrariesAlias,
           only: '',
         );
+
+  static String _trimByLine(String value) =>
+      value.split('\n').map((e) => e.trim()).join('\n');
 
   static const String standardLibrariesAlias = 'standard-libraries';
 

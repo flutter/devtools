@@ -7,7 +7,7 @@ import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/dialogs.dart';
 import '../../../../../shared/theme.dart';
 import '../../../../../shared/utils.dart';
-import '../controller/model.dart';
+import '../controller/filter.dart';
 
 class ClassFilterDialog extends StatefulWidget {
   const ClassFilterDialog(this.classFilter, {super.key});

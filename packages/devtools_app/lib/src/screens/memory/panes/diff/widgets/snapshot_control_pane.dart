@@ -9,7 +9,7 @@ import '../../../../../shared/theme.dart';
 import '../../../primitives/ui.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/item_controller.dart';
-import '../controller/model.dart';
+import '../controller/filter.dart';
 import 'class_filter_dialog.dart';
 
 class SnapshotControlPane extends StatelessWidget {
