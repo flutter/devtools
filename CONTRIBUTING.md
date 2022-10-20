@@ -243,7 +243,7 @@ cd devtools/packages/devtools_app
 
 ### Refresh and start
 
-1. Run in the `devtools` created in previous section:
+1. Change directories to the `devtools` directory created in the [Setup and start](#setup-and-start) section:
 
 ```
 4. Update flutter version and pubs
