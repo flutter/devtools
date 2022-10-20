@@ -233,9 +233,9 @@ To explore DevTools with all experimental features enabled:
 
 3. Start DevTools:
 ```
-git clone https://github.com/flutter/devtools.git
-./devtools/tool/update_flutter_sdk.sh
-cd devtools/packages/devtools_app
+git clone https://github.com/flutter/devtools.git;
+./devtools/tool/update_flutter_sdk.sh;
+cd devtools/packages/devtools_app;
 ../../tool/flutter-sdk/bin/flutter run -d chrome --dart-define=enable_experiments=true
 ```
 
@@ -243,22 +243,21 @@ cd devtools/packages/devtools_app
 
 ### Refresh and start
 
-1. Change directories to the `devtools` directory created in the [Setup and start](#setup-and-start) section:
+1. `cd` to the `devtools` directory created in the [Setup and start](#setup-and-start) section.
+
+2. Refresh and run DevTools:
 
 ```
-4. Update flutter version and pubs
-``
+git checkout master;
+git reset --hard origin/master;
 ./tool/update_flutter_sdk.sh;
 cd packages/devtools_app;
 flutter pub upgrade;
-``
-5.  Run DevTools
-``
 ../../tool/flutter-sdk/bin/flutter run -d chrome --dart-define=enable_experiments=true
-``
+```
 
-6. Paste the `VM Service URL` of a running application 
-    - For example an example of running an application and grabbing the VM Service URL see the  [Connect To Application](#connect-to-application)) section.
+3. Paste the `VM Service URL` of a running application 
+    - For an example of running an application and grabbing the VM Service URL see the  [Connect To Application](#connect-to-application)) section.
 
 ## third_party dependencies
 
