@@ -232,7 +232,8 @@ To explore DevTools with all experimental features enabled:
 2. In your terminal `cd` to a folder where you want to clone devtools, and that does not have subfolder `devtools` yet. 
 
 3. Start DevTools:
-```
+
+```bash
 git clone https://github.com/flutter/devtools.git;
 ./devtools/tool/update_flutter_sdk.sh;
 cd devtools/packages/devtools_app;
@@ -245,11 +246,13 @@ cd devtools/packages/devtools_app;
 
 1. `cd` to the `devtools` directory created in the [Setup and start](#setup-and-start) section.
 
-2. Refresh and run DevTools:
+2. Refresh and run DevTools (it will delete all your local changes!):
 
-```
+```bash
+# Checkout the master branch and ensure it is at the most recent change:
 git checkout master;
 git reset --hard origin/master;
+# Ensure Flutter version is corrct:
 ./tool/update_flutter_sdk.sh;
 cd packages/devtools_app;
 flutter pub upgrade;
