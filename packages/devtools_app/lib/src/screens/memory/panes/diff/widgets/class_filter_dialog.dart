@@ -71,12 +71,12 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
             if (_showHelp) ...[
               const SizedBox(height: denseSpacing),
               // TODO (polina-c): apply editor's changes from go/help-for-class-filters.
-              const Text('Choose the type of filtering and edit the filters.\n'
-                  'The filters are full or partial class names separated by new line. For example:\n\n'
+              const Text('Choose and customize the filter.\n'
+                  'List full or partial class names separated by new lines. For example:\n\n'
                   '  package:myPackage/src/myFolder/myLibrary.dart/MyClass\n'
                   '  MyClass\n'
                   '  package:myPackage/src/\n\n'
-                  'Use the alias "${ClassFilter.standardLibrariesAlias}" for standard Dart and Flutter classes.'),
+                  'Specify "standard-libraries” for standard Dart and Flutter classes.'),
             ],
             SizedBox(height: itemSpacing),
             RadioButton<ClassFilterType>(
