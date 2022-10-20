@@ -260,7 +260,7 @@ flutter pub upgrade;
 ```
 
 3. Paste the `VM Service URL` of a running application 
-    - For an example of running an application and grabbing the VM Service URL see the  [Connect To Application](#connect-to-application)) section.
+    - For an example of running an application and grabbing the VM Service URL see the [Connect To Application](#connect-to-application)) section.
 
 ## third_party dependencies
 
