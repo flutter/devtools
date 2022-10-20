@@ -246,12 +246,16 @@ cd devtools/packages/devtools_app
 1. Run in the `devtools` created in previous section:
 
 ```
-git pull origin master
-./tool/update_flutter_sdk.sh
-cd packages/devtools_app
-flutter pub upgrade
+4. Update flutter version and pubs
+``
+./tool/update_flutter_sdk.sh;
+cd packages/devtools_app;
+flutter pub upgrade;
+``
+5.  Run DevTools
+``
 ../../tool/flutter-sdk/bin/flutter run -d chrome --dart-define=enable_experiments=true
-```
+``
 
 6. Paste the `VM Service URL` of a running application 
     - For example an example of running an application and grabbing the VM Service URL see the  [Connect To Application](#connect-to-application)) section.
