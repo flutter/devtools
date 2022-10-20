@@ -77,7 +77,7 @@ class _PathControlPane extends StatelessWidget {
             onPressed: () => controller.invert.value = !controller.invert.value,
             isSelected: invert,
             message: 'Invert the path',
-            icon: Icons.turn_left,
+            icon: Icons.swap_horiz,
           ),
         ),
       ],
