@@ -125,11 +125,15 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
           child: const Text('Reset Defaults'),
         ),
         DialogCloseButton(
-          onClose: () => widget.classFilter.value = ClassFilter(
-            filterType: _type,
-            except: _except.text,
-            only: _only.text,
-          ),
+          onClose: () {
+            final newFilter = ClassFilter(
+              filterType: _type,
+              except: _except.text,
+              only: _only.text,
+            );
+            if (newFilter.equals(widget.classFilter.value)) return;
+            widget.classFilter.value = newFilter;
+          },
         ),
       ],
     );

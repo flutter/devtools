@@ -17,7 +17,6 @@ class SnapshotControlPane extends StatelessWidget {
       : super(key: key);
 
   final DiffPaneController controller;
-  static const _classFilterWidth = 200.0;
 
   @override
   Widget build(BuildContext context) {
@@ -37,11 +36,6 @@ class SnapshotControlPane extends StatelessWidget {
                     _DiffDropdown(
                       current: current,
                       controller: controller,
-                    ),
-                    const SizedBox(width: defaultSpacing),
-                    SizedBox(
-                      width: _classFilterWidth,
-                      child: _ClassFilter(onChanged: controller.setClassFilter),
                     ),
                     const SizedBox(width: defaultSpacing),
                     ValueListenableBuilder<ClassFilter>(
@@ -77,19 +71,6 @@ class SnapshotControlPane extends StatelessWidget {
       },
     );
   }
-}
-
-class _ClassFilter extends StatelessWidget {
-  const _ClassFilter({Key? key, required this.onChanged}) : super(key: key);
-
-  final Function(String value) onChanged;
-
-  @override
-  Widget build(BuildContext context) => DevToolsClearableTextField(
-        labelText: 'Class Filter',
-        hintText: 'Filter by class name',
-        onChanged: onChanged,
-      );
 }
 
 class _DiffDropdown extends StatelessWidget {
