@@ -21,7 +21,7 @@ git clone https://github.com/flutter/devtools.git;
 
 # Start the application:
 cd devtools/packages/devtools_app;
-../../tool/flutter-sdk/bin/flutter run -d chrome --dart-define=enable_experiments=true
+../../tool/flutter-sdk/bin/flutter run -d chrome --dart-define=enable_experiments=true;
 ```
 
 4. Paste the URL of your application (for example [Gallery](https://github.com/flutter/devtools/blob/master/CONTRIBUTING.md#connect-to-application)) to the connection textbox.
@@ -40,10 +40,10 @@ git reset --hard origin/master; # this line will remove all local changes or com
 # Make sure all dependencies have correct version:
 ./tool/update_flutter_sdk.sh;
 cd packages/devtools_app;
-flutter pub upgrade;
+../../tool/flutter-sdk/bin/flutter pub upgrade;
 
 # Start the application:
-../../tool/flutter-sdk/bin/flutter run -d chrome --dart-define=enable_experiments=true
+../../tool/flutter-sdk/bin/flutter run -d chrome --dart-define=enable_experiments=true;
 ```
 
 3. Paste the URL of your application (for example [Gallery](https://github.com/flutter/devtools/blob/master/CONTRIBUTING.md#connect-to-application)) to the connection textbox.
