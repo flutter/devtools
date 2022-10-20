@@ -19,12 +19,21 @@ import '../vm_developer/vm_service_private_extensions.dart';
 import 'cpu_profile_controller.dart';
 import 'cpu_profile_transformer.dart';
 
+/// A convenience wrapper for managing CPU profiles with both function and code
+/// profile views.
+///
+/// `codeProfile` is null for CPU profiles collected when VM developer mode is
+/// disabled.
 class CpuProfilePair {
   const CpuProfilePair({
     required this.functionProfile,
     required this.codeProfile,
   });
 
+  /// Builds a new [CpuProfilePair] from `original`, only consisting of samples
+  /// associated with the user tag `tag`.
+  ///
+  /// `original` does not need to be `processed` when calling this constructor.
   factory CpuProfilePair.fromUserTag(CpuProfilePair original, String tag) {
     final function = CpuProfileData.fromUserTag(original.functionProfile, tag);
     CpuProfileData? code;
@@ -34,6 +43,10 @@ class CpuProfilePair {
     return CpuProfilePair(functionProfile: function, codeProfile: code);
   }
 
+  /// Builds a new [CpuProfilePair] from `original`, only containing frames
+  /// that meet the conditions set out by `callback`.
+  ///
+  /// `original` does not need to be `processed` when calling this constructor.
   factory CpuProfilePair.filterFrom(
     CpuProfilePair original,
     bool Function(CpuStackFrame) callback,
@@ -47,19 +60,70 @@ class CpuProfilePair {
     return CpuProfilePair(functionProfile: function, codeProfile: code);
   }
 
+  /// Builds a new [CpuProfilePair] from `original`, only consisting of samples
+  /// collected within [subTimeRange].
+  ///
+  /// `original` does not need to be `processed` when calling this constructor.
+  factory CpuProfilePair.subProfile(
+    CpuProfilePair original,
+    TimeRange subTimeRange,
+  ) {
+    final function =
+        CpuProfileData.subProfile(original.functionProfile, subTimeRange);
+    CpuProfileData? code;
+    if (original.codeProfile != null) {
+      code = CpuProfileData.subProfile(original.codeProfile!, subTimeRange);
+    }
+    return CpuProfilePair(functionProfile: function, codeProfile: code);
+  }
+
+  /// Represents the function view of the CPU profile. This view displays
+  /// function objects rather than code objects, which can potentially contain
+  /// multiple inlined functions.
   final CpuProfileData functionProfile;
+
+  /// Represents the code view of the CPU profile, which displays code objects
+  /// rather than functions. Individual code objects can contain code for
+  /// multiple functions if they are inlined by the compiler.
+  ///
+  /// `codeProfile` is null when VM developer mode is not enabled.
   final CpuProfileData? codeProfile;
 
+  // Both function and code profiles will have the same metadata, processing
+  // state, and number of samples, so we can just use the values from
+  // `functionProfile` since it is always available.
+
+  /// Returns `true` if there are any samples in this CPU profile.
   bool get isEmpty => functionProfile.isEmpty;
+
+  /// Returns `true` if [process] has been invoked.
   bool get processed => functionProfile.processed;
+
+  /// Returns the metadata associated with this CPU profile.
   CpuProfileMetaData get profileMetaData => functionProfile.profileMetaData;
 
+  /// Returns the [CpuProfileData] that should be displayed for the currently
+  /// selected profile view.
+  ///
+  /// This method will throw a [StateError] when given
+  /// `CpuProfilerViewType.code` as its parameter when VM developer mode is
+  /// disabled.
   CpuProfileData getActive(CpuProfilerViewType activeType) {
+    if (activeType == CpuProfilerViewType.code &&
+        !preferences.vmDeveloperModeEnabled.value) {
+      throw StateError(
+        'Attempting to display a code profile with VM developer mode disabled.',
+      );
+    }
     return activeType == CpuProfilerViewType.function
         ? functionProfile
         : codeProfile!;
   }
 
+  /// Builds up the function profile and code profile (if non-null).
+  ///
+  /// This method must be called before either `functionProfile` or
+  /// `codeProfile` can be used.
   Future<void> process({
     required CpuProfileTransformer transformer,
     required String processId,
@@ -953,18 +1017,7 @@ class CpuProfileStore {
     final encompassingTimeRange = _encompassingTimeRange(time);
     if (encompassingTimeRange != null) {
       final encompassingProfile = _profilesByTime[encompassingTimeRange]!;
-      final subProfile = CpuProfilePair(
-        functionProfile: CpuProfileData.subProfile(
-          encompassingProfile.functionProfile,
-          time,
-        ),
-        codeProfile: encompassingProfile.codeProfile == null
-            ? null
-            : CpuProfileData.subProfile(
-                encompassingProfile.codeProfile!,
-                time,
-              ),
-      );
+      final subProfile = CpuProfilePair.subProfile(encompassingProfile, time);
       _profilesByTime[time] = subProfile;
     }
   }
