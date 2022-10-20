@@ -7,6 +7,7 @@ import 'package:devtools_app/src/screens/profiler/cpu_profile_controller.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/preferences.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -30,6 +31,7 @@ void main() {
     setUp(() {
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(OfflineModeController, OfflineModeController());
+      setGlobal(PreferencesController, PreferencesController());
       controller = CpuProfilerController();
     });
 
