@@ -30,7 +30,7 @@ extension CpuProfilerExtension on VmServiceWrapper {
     bool buildCodeProfile = false;
     // If the samples contain a code stack, we should attach them to the
     // `CpuSample` objects.
-    if (rawSamples.first.containsKey(kCodeStack)) {
+    if (rawSamples.isNotEmpty && rawSamples.first.containsKey(kCodeStack)) {
       buildCodeProfile = true;
       final samples = cpuSamples.samples!;
       for (int i = 0; i < samples.length; ++i) {

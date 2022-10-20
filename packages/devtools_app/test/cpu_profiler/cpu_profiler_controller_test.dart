@@ -88,7 +88,9 @@ void main() {
       )!;
       final filteredData = controller.dataNotifier.value!;
       expect(
-          originalData.functionProfile.stackFrames.values.length, equals(17));
+        originalData.functionProfile.stackFrames.values.length,
+        equals(17),
+      );
       expect(filteredData.stackFrames.values.length, equals(12));
 
       // The native frame filter is applied by default.
