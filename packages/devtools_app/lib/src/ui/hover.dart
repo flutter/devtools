@@ -347,6 +347,10 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
     _currentHoverCard = hoverCard;
   }
 
+  void _removeHoverCard(HoverCard hoverCard) {
+    _hoverCardController.removeHoverCard(hoverCard);
+  }
+
   void _onHover(PointerHoverEvent event) {
     _showTimer?.cancel();
     _showTimer = null;
@@ -385,38 +389,41 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
           // no longer be shown.
           return;
         }
+        if (hoverCardData == null) {
+          // No data was provided so remove the spinner
+          _removeHoverCard(spinnerHoverCard);
+          return;
+        }
       } else {
         assert(widget.generateHoverCardData != null);
 
         hoverCardData = widget.generateHoverCardData!(event);
       }
 
-      if (hoverCardData != null) {
-        if (!mounted) return;
+      if (!mounted) return;
 
-        if (hoverCardData.position == HoverCardPosition.cursor) {
-          _setHoverCard(
-            HoverCard.fromHoverEvent(
-              context: context,
-              title: hoverCardData.title,
-              contents: hoverCardData.contents,
-              width: hoverCardData.width,
-              event: event,
-              hoverCardController: _hoverCardController,
-            ),
-          );
-        } else {
-          _setHoverCard(
-            HoverCard(
-              context: context,
-              title: hoverCardData.title,
-              contents: hoverCardData.contents,
-              width: hoverCardData.width,
-              position: _calculateTooltipPosition(hoverCardData.width),
-              hoverCardController: _hoverCardController,
-            ),
-          );
-        }
+      if (hoverCardData.position == HoverCardPosition.cursor) {
+        _setHoverCard(
+          HoverCard.fromHoverEvent(
+            context: context,
+            title: hoverCardData.title,
+            contents: hoverCardData.contents,
+            width: hoverCardData.width,
+            event: event,
+            hoverCardController: _hoverCardController,
+          ),
+        );
+      } else {
+        _setHoverCard(
+          HoverCard(
+            context: context,
+            title: hoverCardData.title,
+            contents: hoverCardData.contents,
+            width: hoverCardData.width,
+            position: _calculateTooltipPosition(hoverCardData.width),
+            hoverCardController: _hoverCardController,
+          ),
+        );
       }
     });
   }
