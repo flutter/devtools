@@ -253,7 +253,8 @@ flutter pub upgrade
 ../../tool/flutter-sdk/bin/flutter run -d chrome --dart-define=enable_experiments=true
 ```
 
-2. Paste URL of your application (for example [Gallery](#connect-to-application)) to the connection textbox.
+6. Paste the `VM Service URL` of a running application 
+    - For example an example of running an application and grabbing the VM Service URL see the  [Connect To Application](#connect-to-application)) section.
 
 ## third_party dependencies
 
