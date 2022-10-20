@@ -485,7 +485,7 @@ class PerformanceController extends DisposableController
       _data.cpuProfileData = cpuProfilerController.dataNotifier.value;
     } else {
       if (!storedProfileForFrame.processed) {
-        await storedProfileForFrame.processData(
+        await storedProfileForFrame.process(
           transformer: cpuProfilerController.transformer,
           processId: 'Flutter frame ${frame.id} - stored profile ',
         );

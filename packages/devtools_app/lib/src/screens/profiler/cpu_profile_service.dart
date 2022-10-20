@@ -14,6 +14,9 @@ extension CpuProfilerExtension on VmServiceWrapper {
     required int startMicros,
     required int extentMicros,
   }) async {
+    // Grab the value of this flag before doing asynchronous work.
+    final vmDeveloperModeEnabled = preferences.vmDeveloperModeEnabled.value;
+
     final isolateId = serviceManager.isolateManager.selectedIsolate.value!.id!;
     final cpuSamples = await serviceManager.service!.getCpuSamples(
       isolateId,
@@ -21,6 +24,12 @@ extension CpuProfilerExtension on VmServiceWrapper {
       extentMicros,
     );
 
+    // If VM developer mode is enabled, getCpuSamples will also include code
+    // profile details automatically (e.g., code stacks and a list of code
+    // objects).
+    //
+    // If the samples contain a code stack, we should attach them to the
+    // `CpuSample` objects.
     const kSamples = 'samples';
     const kCodeStack = '_codeStack';
 
@@ -28,9 +37,10 @@ extension CpuProfilerExtension on VmServiceWrapper {
         (cpuSamples.json![kSamples] as List).cast<Map<String, dynamic>>();
 
     bool buildCodeProfile = false;
-    // If the samples contain a code stack, we should attach them to the
-    // `CpuSample` objects.
     if (rawSamples.isNotEmpty && rawSamples.first.containsKey(kCodeStack)) {
+      // kCodeStack should not be present in the response if VM developer mode
+      // is not enabled.
+      assert(vmDeveloperModeEnabled);
       buildCodeProfile = true;
       final samples = cpuSamples.samples!;
       for (int i = 0; i < samples.length; ++i) {

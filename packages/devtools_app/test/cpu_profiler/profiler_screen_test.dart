@@ -70,6 +70,7 @@ void main() {
       expect(find.byKey(ProfilerScreen.recordingStatusKey), findsNothing);
       expect(find.byType(CircularProgressIndicator), findsNothing);
       expect(find.byType(CpuProfiler), findsNothing);
+      expect(find.byType(ModeDropdown), findsNothing);
     }
 
     Future<void> pumpProfilerScreenBody(

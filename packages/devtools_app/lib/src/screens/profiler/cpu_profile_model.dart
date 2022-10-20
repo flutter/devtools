@@ -55,20 +55,12 @@ class CpuProfilePair {
   CpuProfileMetaData get profileMetaData => functionProfile.profileMetaData;
 
   CpuProfileData getActive(CpuProfilerViewType activeType) {
-    if (activeType == CpuProfilerViewType.function) {
-      return functionProfile;
-    }
-    return codeProfile!;
+    return activeType == CpuProfilerViewType.function
+        ? functionProfile
+        : codeProfile!;
   }
 
-  CpuProfileData? getInactive(CpuProfilerViewType activeType) {
-    if (activeType == CpuProfilerViewType.function) {
-      return codeProfile;
-    }
-    return functionProfile;
-  }
-
-  Future<void> processData({
+  Future<void> process({
     required CpuProfileTransformer transformer,
     required String processId,
   }) async {
@@ -420,7 +412,7 @@ class CpuProfileData {
 
     final root = _CpuProfileTimelineTree.fromCpuSamples(
       cpuSamples,
-      buildCodeTree: buildCodeTree,
+      asCodeProfileTimelineTree: buildCodeTree,
     );
     processStackFrame(current: root, parent: null);
     // Build the trace events.
@@ -1000,18 +992,19 @@ class CpuProfileStore {
 class _CpuProfileTimelineTree {
   factory _CpuProfileTimelineTree.fromCpuSamples(
     vm_service.CpuSamples cpuSamples, {
-    bool buildCodeTree = false,
+    bool asCodeProfileTimelineTree = false,
   }) {
     final root = _CpuProfileTimelineTree._fromIndex(
       cpuSamples,
       kRootIndex,
-      buildCodeTree,
+      asCodeProfileTimelineTree,
     );
     _CpuProfileTimelineTree current;
     // TODO(bkonyi): handle truncated?
     for (final sample in cpuSamples.samples ?? <vm_service.CpuSample>[]) {
       current = root;
-      final stack = buildCodeTree ? sample.codeStack : sample.stack!;
+      final stack =
+          asCodeProfileTimelineTree ? sample.codeStack : sample.stack!;
       // Build an inclusive trie.
       for (final index in stack.reversed) {
         current = current._getChild(index);
@@ -1033,17 +1026,14 @@ class _CpuProfileTimelineTree {
 
   dynamic get _function {
     if (isCodeTree) {
-      return samples.codes[index].code!.function!;
+      return _code.function!;
     }
     return samples.functions![index].function;
   }
 
-  String? get name {
-    if (isCodeTree) {
-      return samples.codes[index].code!.name;
-    }
-    return _function.name;
-  }
+  vm_service.CodeRef get _code => samples.codes[index].code!;
+
+  String? get name => isCodeTree ? _code.name : _function.name;
 
   String? get className {
     if (isCodeTree) return null;
@@ -1057,15 +1047,13 @@ class _CpuProfileTimelineTree {
     return null;
   }
 
-  String? get resolvedUrl {
-    if (isCodeTree) {
+  String? get resolvedUrl => isCodeTree
+      ?
       // TODO(bkonyi): not sure if this is a resolved URL or not, but it's not
       // critical since this is only displayed when VM developer mode is
       // enabled.
-      return samples.codes[index].code!.function!.location?.script!.uri;
-    }
-    return samples.functions![index].resolvedUrl;
-  }
+      _function.location?.script!.uri
+      : samples.functions![index].resolvedUrl;
 
   int? get sourceLine {
     final function = _function;

@@ -29,14 +29,14 @@ void main() {
     });
 
     test('empty frame regression test', () {
-      final cpuProfileEmtpyData =
+      final cpuProfileEmptyData =
           CpuProfileData.parse(cpuProfileResponseEmptyJson);
       expect(
-        cpuProfileEmtpyData.profileMetaData.time!.end!.inMilliseconds,
+        cpuProfileEmptyData.profileMetaData.time!.end!.inMilliseconds,
         47377796,
       );
       final filtered =
-          CpuProfileData.filterFrom(cpuProfileEmtpyData, (_) => true);
+          CpuProfileData.filterFrom(cpuProfileEmptyData, (_) => true);
       expect(filtered.profileMetaData.time!.end!.inMilliseconds, 0);
     });
 

@@ -225,7 +225,7 @@ class CpuProfilerController
     required bool shouldRefreshSearchMatches,
     required bool isCodeProfile,
   }) async {
-    await cpuProfiles.processData(
+    await cpuProfiles.process(
       transformer: transformer,
       processId: processId,
     );
@@ -241,7 +241,7 @@ class CpuProfilerController
     }
     if (shouldApplyFilters) {
       cpuProfiles = applyToggleFilters(cpuProfiles);
-      await cpuProfiles.processData(
+      await cpuProfiles.process(
         transformer: transformer,
         processId: processId,
       );
@@ -413,7 +413,7 @@ class CpuProfilerController
     }
 
     if (!appStartUpProfile.processed) {
-      await appStartUpProfile.processData(
+      await appStartUpProfile.process(
         transformer: transformer,
         processId: 'appStartUpProfile',
       );
@@ -468,7 +468,7 @@ class CpuProfilerController
     );
     if (filteredDataForTag != null) {
       if (!filteredDataForTag.processed) {
-        await filteredDataForTag.processData(
+        await filteredDataForTag.process(
           transformer: transformer,
           processId: profileLabel,
         );
@@ -492,7 +492,7 @@ class CpuProfilerController
 
     data = applyToggleFilters(data);
     if (!data.processed) {
-      await data.processData(
+      await data.process(
         transformer: transformer,
         processId: 'data with toggle filters applied',
       );
@@ -507,11 +507,8 @@ class CpuProfilerController
 
   void updateView(CpuProfilerViewType view) {
     _viewType.value = view;
-    _dataNotifier.value = cpuProfileStore
-        .lookupProfile(
-          label: _wrapWithFilterSuffix(userTagNone),
-        )
-        ?.getActive(view);
+    _dataNotifier.value =
+        cpuProfileStore.lookupProfile(label: userTagNone)?.getActive(view);
   }
 
   void selectCpuStackFrame(CpuStackFrame? stackFrame) {

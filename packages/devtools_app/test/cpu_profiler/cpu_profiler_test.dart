@@ -158,6 +158,127 @@ void main() {
       expect(find.byKey(CpuProfiler.summaryTab), findsOneWidget);
     });
 
+    group('profile views', () {
+      late ProfilerScreenController controller;
+
+      void loadData() {
+        // Call this to force the value of `_dataByTag[userTagNone]` to be set.
+        controller.cpuProfilerController.loadProcessedData(
+          CpuProfilePair(
+            functionProfile: cpuProfileData,
+            // Function and code profiles have the same structure, so just use
+            // the function profile in place of a dedicated code profile for
+            // testing since we don't care about the contents as much as we
+            // care about testing the ability to switch between function and
+            // code profile views.
+            codeProfile: cpuProfileData,
+          ),
+          storeAsUserTagNone: true,
+        );
+      }
+
+      setUp(() async {
+        controller = ProfilerScreenController();
+        cpuProfileData = CpuProfileData.parse(cpuProfileDataWithUserTagsJson);
+        await controller.cpuProfilerController.transformer.processData(
+          cpuProfileData,
+          processId: 'test',
+        );
+        loadData();
+      });
+
+      testWidgetsWithWindowSize(
+          'shows function / code view selector when in VM developer mode',
+          windowSize, (WidgetTester tester) async {
+        // We need to pump the entire `ProfilerScreenBody` widget because the
+        // CpuProfiler widget has `cpuProfileData` passed in from there, and
+        // CpuProfiler needs to be rebuilt on data updates.
+        await tester.pumpWidget(
+          wrapWithControllers(
+            const ProfilerScreenBody(),
+            profiler: controller,
+          ),
+        );
+        // Verify the profile view dropdown is not visible.
+        expect(find.byType(ModeDropdown), findsNothing);
+
+        // Enabling VM developer mode will clear the current profile as it's
+        // possible there's no code profile associated with it.
+        preferences.toggleVmDeveloperMode(true);
+        await tester.pumpAndSettle();
+        expect(find.byType(CpuProfiler), findsNothing);
+
+        // Verify the profile view dropdown appears when toggling VM developer
+        // mode and data is present.
+        loadData();
+        await tester.pumpAndSettle();
+        expect(find.byType(ModeDropdown), findsOneWidget);
+
+        // Verify the profile view dropdown is no longer visible.
+        preferences.toggleVmDeveloperMode(false);
+        await tester.pumpAndSettle();
+        expect(find.byType(ModeDropdown), findsNothing);
+      });
+
+      testWidgetsWithWindowSize(
+          'resets view to function when leaving VM developer mode', windowSize,
+          (WidgetTester tester) async {
+        // We need to pump the entire `ProfilerScreenBody` widget because the
+        // CpuProfiler widget has `cpuProfileData` passed in from there, and
+        // CpuProfiler needs to be rebuilt on data updates.
+        await tester.pumpWidget(
+          wrapWithControllers(
+            const ProfilerScreenBody(),
+            profiler: controller,
+          ),
+        );
+
+        // Verify the profile view dropdown is not visible.
+        expect(find.byType(ModeDropdown), findsNothing);
+
+        // The default view is the function profile, even when the profile view
+        // selector isn't visible.
+        expect(
+          controller.cpuProfilerController.viewType.value,
+          CpuProfilerViewType.function,
+        );
+
+        // Enable VM developer mode and reset the profile data.
+        preferences.toggleVmDeveloperMode(true);
+        await tester.pumpAndSettle();
+        expect(find.byType(CpuProfiler), findsNothing);
+        loadData();
+        await tester.pumpAndSettle();
+
+        // Verify the function profile view is still selected.
+        expect(
+          controller.cpuProfilerController.viewType.value,
+          CpuProfilerViewType.function,
+        );
+        expect(find.text('View: Function'), findsOneWidget);
+
+        // Switch to the code profile view.
+        await tester.tap(find.byType(ModeDropdown));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('View: Code').last);
+        await tester.pumpAndSettle();
+        expect(find.text('View: Code'), findsOneWidget);
+        expect(
+          controller.cpuProfilerController.viewType.value,
+          CpuProfilerViewType.code,
+        );
+
+        // Disabling VM developer mode will reset the view to the function
+        // profile as the dropdown will no longer be visible.
+        preferences.toggleVmDeveloperMode(false);
+        await tester.pumpAndSettle();
+        expect(
+          controller.cpuProfilerController.viewType.value,
+          CpuProfilerViewType.function,
+        );
+      });
+    });
+
     testWidgetsWithWindowSize('switches tabs', windowSize,
         (WidgetTester tester) async {
       cpuProfiler = CpuProfiler(
@@ -174,6 +295,7 @@ void main() {
       expect(find.byType(ExpandAllButton), findsOneWidget);
       expect(find.byType(CollapseAllButton), findsOneWidget);
       expect(find.byType(FlameChartHelpButton), findsNothing);
+      expect(find.byType(ModeDropdown), findsNothing);
       expect(find.byKey(searchFieldKey), findsNothing);
 
       await tester.tap(find.text('Call Tree'));
@@ -185,6 +307,7 @@ void main() {
       expect(find.byType(ExpandAllButton), findsOneWidget);
       expect(find.byType(CollapseAllButton), findsOneWidget);
       expect(find.byType(FlameChartHelpButton), findsNothing);
+      expect(find.byType(ModeDropdown), findsNothing);
       expect(find.byKey(searchFieldKey), findsNothing);
 
       await tester.tap(find.text('CPU Flame Chart'));
@@ -196,6 +319,7 @@ void main() {
       expect(find.byType(ExpandAllButton), findsNothing);
       expect(find.byType(CollapseAllButton), findsNothing);
       expect(find.byType(FlameChartHelpButton), findsOneWidget);
+      expect(find.byType(ModeDropdown), findsNothing);
       expect(find.byKey(searchFieldKey), findsOneWidget);
     });
 
@@ -268,7 +392,12 @@ void main() {
         controller.cpuProfilerController.loadProcessedData(
           CpuProfilePair(
             functionProfile: cpuProfileData,
-            codeProfile: null,
+            // Function and code profiles have the same structure, so just use
+            // the function profile in place of a dedicated code profile for
+            // testing since we don't care about the contents as much as we
+            // care about testing the ability to switch between function and
+            // code profile views.
+            codeProfile: cpuProfileData,
           ),
           storeAsUserTagNone: true,
         );

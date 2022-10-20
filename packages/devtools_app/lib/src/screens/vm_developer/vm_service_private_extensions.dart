@@ -409,6 +409,7 @@ class ProfileCode {
     this.inclusiveTicks,
     this.exclusiveTicks,
     this.code,
+    this.ticks,
   });
 
   ProfileCode._fromJson(Map<String, dynamic> json) {
@@ -416,6 +417,7 @@ class ProfileCode {
     inclusiveTicks = json['inclusiveTicks'] ?? -1;
     exclusiveTicks = json['exclusiveTicks'] ?? -1;
     code = createServiceObject(json['code'], const ['@Code']) as CodeRef?;
+    ticks = json['ticks'];
   }
   static ProfileCode? parse(Map<String, dynamic>? json) =>
       json == null ? null : ProfileCode._fromJson(json);
@@ -433,6 +435,8 @@ class ProfileCode {
   /// The function captured during profiling.
   CodeRef? code;
 
+  List? ticks;
+
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
     json.addAll({
@@ -440,6 +444,7 @@ class ProfileCode {
       'inclusiveTicks': inclusiveTicks ?? -1,
       'exclusiveTicks': exclusiveTicks ?? -1,
       'code': code?.toJson(),
+      'ticks': ticks,
     });
     return json;
   }

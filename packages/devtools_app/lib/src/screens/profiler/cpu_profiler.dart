@@ -183,17 +183,14 @@ class _CpuProfilerState extends State<CpuProfiler>
                 valueListenable: preferences.vmDeveloperModeEnabled,
                 builder: (context, vmDeveloperModeEnabled, _) {
                   if (!vmDeveloperModeEnabled) {
-                    return Container();
+                    return const SizedBox();
                   }
-                  return Row(
-                    children: [
-                      ModeDropdown(widget.controller),
-                      const SizedBox(width: denseSpacing),
-                    ],
+                  return Padding(
+                    padding: const EdgeInsets.only(right: denseSpacing),
+                    child: ModeDropdown(widget.controller),
                   );
                 },
               ),
-              const SizedBox(width: denseSpacing),
             ],
             // TODO(kenz): support search for call tree and bottom up tabs as
             // well. This will require implementing search for tree tables.
