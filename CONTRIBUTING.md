@@ -3,6 +3,7 @@
 ![GitHub contributors](https://img.shields.io/github/contributors/flutter/devtools.svg)
 
 We gladly accept contributions via GitHub pull requests!
+This page instructs how to contribute code changes to DevTools.
 
 > If you just want to test newest functionality, follow
 [beta testing guidance](https://github.com/flutter/devtools/blob/master/BETA_TESTING.md).
