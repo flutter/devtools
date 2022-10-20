@@ -251,7 +251,7 @@ cd devtools/packages/devtools_app;
 ```bash
 # Checkout the master branch and ensure it is at the most recent change:
 git checkout master;
-git reset --hard origin/master;
+git reset --hard origin/master; # this line will remove all local changes or commits on your branch
 # Ensure Flutter version is corrct:
 ./tool/update_flutter_sdk.sh;
 cd packages/devtools_app;
