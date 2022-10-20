@@ -9,6 +9,7 @@ import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/screens/performance/event_details.dart';
 import 'package:devtools_app/src/screens/performance/flutter_frames_chart.dart';
+import 'package:devtools_app/src/screens/performance/panes/frame_analysis/frame_analysis.dart';
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/timeline_flame_chart.dart';
 import 'package:devtools_app/src/screens/performance/performance_controller.dart';
 import 'package:devtools_app/src/screens/performance/performance_screen.dart';
@@ -110,42 +111,10 @@ void main() {
         await pumpPerformanceScreen(tester, runAsync: true);
         await tester.pumpAndSettle();
         expect(find.byType(FlutterFramesChart), findsOneWidget);
-        expect(find.byType(TimelineFlameChart), findsOneWidget);
         expect(
-          find.byKey(TimelineEventsView.emptyTimelineKey),
-          findsNothing,
-        );
-        expect(find.byType(EventDetails), findsOneWidget);
-        expect(find.byType(ChartVisibilityButton), findsOneWidget);
-        expect(find.byIcon(Icons.block), findsOneWidget);
-        expect(find.text('Performance Overlay'), findsOneWidget);
-        expect(find.text('Enhance Tracing'), findsOneWidget);
-        expect(find.text('More debugging options'), findsOneWidget);
-        expect(find.byIcon(Icons.file_download), findsOneWidget);
-        expect(find.byIcon(Icons.settings), findsOneWidget);
-
-        // Verify the state of the splitter.
-        final splitFinder = find.byType(Split);
-        expect(splitFinder, findsOneWidget);
-        final Split splitter = tester.widget(splitFinder);
-        expect(splitter.initialFractions[0], equals(0.7));
-      });
-    });
-
-    testWidgetsWithWindowSize(
-        'builds initial content for empty timeline', windowSize,
-        (WidgetTester tester) async {
-      await tester.runAsync(() async {
-        await _setUpServiceManagerWithTimeline({});
-        await pumpPerformanceScreen(tester, runAsync: true);
-        await tester.pumpAndSettle();
-        expect(find.byType(FlutterFramesChart), findsOneWidget);
-        expect(find.byType(TimelineFlameChart), findsNothing);
-        expect(
-          find.byKey(TimelineEventsView.emptyTimelineKey),
+          find.text('Select a frame above to view analysis data.'),
           findsOneWidget,
         );
-        expect(find.byType(EventDetails), findsOneWidget);
         expect(find.byType(ChartVisibilityButton), findsOneWidget);
         expect(find.byIcon(Icons.block), findsOneWidget);
         expect(find.text('Performance Overlay'), findsOneWidget);
@@ -153,12 +122,6 @@ void main() {
         expect(find.text('More debugging options'), findsOneWidget);
         expect(find.byIcon(Icons.file_download), findsOneWidget);
         expect(find.byIcon(Icons.settings), findsOneWidget);
-
-        // Verify the state of the splitter.
-        final splitFinder = find.byType(Split);
-        expect(splitFinder, findsOneWidget);
-        final Split splitter = tester.widget(splitFinder);
-        expect(splitter.initialFractions[0], equals(0.7));
       });
     });
 
@@ -247,6 +210,13 @@ void main() {
       await tester.runAsync(() async {
         await pumpPerformanceScreen(tester, runAsync: true);
         await tester.pumpAndSettle();
+
+        // Ensure the Timeline Events tab is selected.
+        final timelineEventsTabFinder = find.text('Timeline Events');
+        expect(timelineEventsTabFinder, findsOneWidget);
+        await tester.tap(timelineEventsTabFinder);
+        await tester.pumpAndSettle();
+
         expect(controller.allTraceEvents, isNotEmpty);
         expect(find.byType(FlutterFramesChart), findsOneWidget);
         expect(find.byType(TimelineFlameChart), findsOneWidget);
@@ -265,7 +235,7 @@ void main() {
           find.byKey(TimelineEventsView.emptyTimelineKey),
           findsOneWidget,
         );
-        expect(find.byType(EventDetails), findsOneWidget);
+        expect(find.byType(EventDetails), findsNothing);
       });
     });
 

@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:devtools_app/src/charts/flame_chart.dart';
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
+import 'package:devtools_app/src/screens/performance/event_details.dart';
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/timeline_flame_chart.dart';
 import 'package:devtools_app/src/screens/performance/performance_controller.dart';
 import 'package:devtools_app/src/screens/performance/performance_screen.dart';
@@ -15,6 +16,7 @@ import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
 import 'package:devtools_app/src/shared/preferences.dart';
+import 'package:devtools_app/src/shared/split.dart';
 import 'package:devtools_app/src/shared/version.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/foundation.dart';
@@ -83,6 +85,12 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+
+      // Ensure the Timeline Events tab is selected.
+      final timelineEventsTabFinder = find.text('Timeline Events');
+      expect(timelineEventsTabFinder, findsOneWidget);
+      await tester.tap(timelineEventsTabFinder);
+      await tester.pumpAndSettle();
     }
 
     const windowSize = Size(2225.0, 1000.0);
@@ -93,7 +101,6 @@ void main() {
         await _setUpServiceManagerWithTimeline({});
         await pumpPerformanceScreenBody(tester);
         await tester.pumpAndSettle();
-        expect(find.text('Timeline Events'), findsOneWidget);
         expect(find.byType(RefreshTimelineEventsButton), findsOneWidget);
         expect(find.byKey(timelineSearchFieldKey), findsOneWidget);
         expect(find.byType(FlameChartHelpButton), findsOneWidget);
@@ -119,11 +126,19 @@ void main() {
         (WidgetTester tester) async {
       await tester.runAsync(() async {
         await pumpPerformanceScreenBody(tester, runAsync: true);
-        expect(find.byType(TimelineFlameChart), findsOneWidget);
         expect(
           find.byKey(TimelineEventsView.emptyTimelineKey),
           findsNothing,
         );
+
+        expect(find.byType(TimelineFlameChart), findsOneWidget);
+        expect(find.byType(EventDetails), findsOneWidget);
+
+        // Verify the state of the splitter.
+        final splitFinder = find.byType(Split);
+        expect(splitFinder, findsOneWidget);
+        final Split splitter = tester.widget(splitFinder);
+        expect(splitter.initialFractions[0], equals(0.7));
       });
     });
 
@@ -133,11 +148,14 @@ void main() {
         await _setUpServiceManagerWithTimeline({});
         await pumpPerformanceScreenBody(tester, runAsync: true);
         await tester.pumpAndSettle();
-        expect(find.byType(TimelineFlameChart), findsNothing);
         expect(
           find.byKey(TimelineEventsView.emptyTimelineKey),
           findsOneWidget,
         );
+
+        expect(find.byType(TimelineFlameChart), findsNothing);
+        expect(find.byType(EventDetails), findsNothing);
+        expect(find.byType(Split), findsNothing);
       });
     });
 
