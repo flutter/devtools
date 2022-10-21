@@ -16,7 +16,7 @@ const bool _kEnableExperiments = bool.fromEnvironment('enable_experiments');
 
 /// If true, features, ready for beta testing, will be on.
 ///
-/// Always true whwn [_kEnableExperiments] is true.
+/// Always true when [_kEnableExperiments] is true.
 /// See [_kEnableExperiments] documentation  for usage.
 const bool _kEnableBeta =
     bool.fromEnvironment('enable_beta') || _kEnableExperiments;
