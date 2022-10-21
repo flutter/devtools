@@ -8,10 +8,16 @@ enum ClassFilterType {
   only,
 }
 
+/// What should be done to apply new filter.
 enum FilteringTask {
+  /// New filter is equivalent to previous, so nothing should be done.
   doNothing,
-  reFilter,
-  reUse,
+
+  /// Previous filtering results cannot be reused.
+  refilter,
+
+  /// Previous filtering results can be reused.
+  reuse,
 }
 
 class ClassFilter {
@@ -65,25 +71,24 @@ class ClassFilter {
     }
   }
 
-  FilteringTask task(ClassFilter previousFilter) {
-    if (filterType == previousFilter.filterType &&
-        filters == previousFilter.filters) {
+  FilteringTask task({required ClassFilter previous}) {
+    if (filterType == previous.filterType && filters == previous.filters) {
       return FilteringTask.doNothing;
     }
 
     if (filterType == ClassFilterType.only &&
-        previousFilter.filterType == ClassFilterType.only &&
-        filters.startsWith(previousFilter.filters)) {
-      return FilteringTask.reUse;
+        previous.filterType == ClassFilterType.only &&
+        previous.filters.startsWith(filters)) {
+      return FilteringTask.reuse;
     }
 
     if (filterType == ClassFilterType.except &&
-        previousFilter.filterType == ClassFilterType.except &&
-        filters.startsWith(previousFilter.filters)) {
-      return FilteringTask.reUse;
+        previous.filterType == ClassFilterType.except &&
+        filters.startsWith(previous.filters)) {
+      return FilteringTask.reuse;
     }
 
-    return FilteringTask.reFilter;
+    return FilteringTask.refilter;
   }
 
   String get displayString {
