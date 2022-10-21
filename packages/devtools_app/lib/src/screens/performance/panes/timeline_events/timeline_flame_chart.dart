@@ -16,10 +16,12 @@ import '../../../../primitives/trace_event.dart';
 import '../../../../primitives/utils.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
+import '../../../../shared/split.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../../../ui/colors.dart';
 import '../../../../ui/utils.dart';
+import '../../event_details.dart';
 import '../../performance_controller.dart';
 import '../../performance_model.dart';
 import '../../performance_utils.dart';
@@ -72,18 +74,30 @@ class TimelineEventsView extends StatelessWidget {
         ),
       );
     } else {
-      return LayoutBuilder(
-        builder: (context, constraints) {
-          return TimelineFlameChart(
-            controller.data!,
-            width: constraints.maxWidth,
-            height: constraints.maxHeight,
-            selectionNotifier: controller.selectedTimelineEvent,
-            searchMatchesNotifier: controller.searchMatches,
-            activeSearchMatchNotifier: controller.activeSearchMatch,
-            onDataSelected: controller.selectTimelineEvent,
-          );
-        },
+      return Split(
+        axis: Axis.vertical,
+        initialFractions: const [0.7, 0.3],
+        children: [
+          LayoutBuilder(
+            builder: (context, constraints) {
+              return TimelineFlameChart(
+                controller.data!,
+                width: constraints.maxWidth,
+                height: constraints.maxHeight,
+                selectionNotifier: controller.selectedTimelineEvent,
+                searchMatchesNotifier: controller.searchMatches,
+                activeSearchMatchNotifier: controller.activeSearchMatch,
+                onDataSelected: controller.selectTimelineEvent,
+              );
+            },
+          ),
+          ValueListenableBuilder<TimelineEvent?>(
+            valueListenable: controller.selectedTimelineEvent,
+            builder: (context, selectedEvent, _) {
+              return EventDetails(selectedEvent);
+            },
+          ),
+        ],
       );
     }
   }

@@ -84,25 +84,6 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
 
     final isFlutterApp = serviceManager.connectedApp!.isFlutterAppNow!;
     final tabViews = [
-      ValueListenableBuilder<bool>(
-        valueListenable: controller.useLegacyTraceViewer,
-        builder: (context, useLegacy, _) {
-          if (useLegacy || !FeatureFlags.embeddedPerfetto) {
-            return KeepAliveWrapper(
-              child: TimelineEventsView(
-                controller: controller,
-                processing: widget.processing,
-                processingProgress: widget.processingProgress,
-              ),
-            );
-          }
-          return KeepAliveWrapper(
-            child: EmbeddedPerfetto(
-              perfettoController: controller.perfettoController,
-            ),
-          );
-        },
-      ),
       if (frameAnalysisSupported && isFlutterApp)
         KeepAliveWrapper(
           child: frameAnalysisView,
@@ -111,6 +92,24 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
         KeepAliveWrapper(
           child: rasterStats,
         ),
+      ValueListenableBuilder<bool>(
+        valueListenable: controller.useLegacyTraceViewer,
+        builder: (context, useLegacy, _) {
+          return (useLegacy || !FeatureFlags.embeddedPerfetto)
+              ? KeepAliveWrapper(
+                  child: TimelineEventsView(
+                    controller: controller,
+                    processing: widget.processing,
+                    processingProgress: widget.processingProgress,
+                  ),
+                )
+              : KeepAliveWrapper(
+                  child: EmbeddedPerfetto(
+                    perfettoController: controller.perfettoController,
+                  ),
+                );
+        },
+      ),
     ];
 
     return AnalyticsTabbedView(
@@ -125,27 +124,6 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
     final hasData = data != null && !data.isEmpty;
     final searchFieldEnabled = hasData && !widget.processing;
     return [
-      _buildTab(
-        tabName: 'Timeline Events',
-        trailing: ValueListenableBuilder<bool>(
-          valueListenable: controller.useLegacyTraceViewer,
-          builder: (context, useLegacy, _) {
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                if (useLegacy || !FeatureFlags.embeddedPerfetto) ...[
-                  _buildSearchField(searchFieldEnabled),
-                  const FlameChartHelpButton(
-                    gaScreen: PerformanceScreen.id,
-                    gaSelection: analytics_constants.timelineFlameChartHelp,
-                  ),
-                ],
-                RefreshTimelineEventsButton(controller: controller),
-              ],
-            );
-          },
-        ),
-      ),
       if (frameAnalysisSupported && isFlutterApp)
         _buildTab(
           tabName: 'Frame Analysis',
@@ -180,6 +158,27 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
             ],
           ),
         ),
+      _buildTab(
+        tabName: 'Timeline Events',
+        trailing: ValueListenableBuilder<bool>(
+          valueListenable: controller.useLegacyTraceViewer,
+          builder: (context, useLegacy, _) {
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                if (useLegacy || !FeatureFlags.embeddedPerfetto) ...[
+                  _buildSearchField(searchFieldEnabled),
+                  const FlameChartHelpButton(
+                    gaScreen: PerformanceScreen.id,
+                    gaSelection: analytics_constants.timelineFlameChartHelp,
+                  ),
+                ],
+                RefreshTimelineEventsButton(controller: controller),
+              ],
+            );
+          },
+        ),
+      ),
     ];
   }
 

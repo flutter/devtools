@@ -12,19 +12,16 @@ import '../../analytics/analytics_common.dart';
 import '../../analytics/constants.dart' as analytics_constants;
 import '../../config_specific/import_export/import_export.dart';
 import '../../primitives/auto_dispose_mixin.dart';
-import '../../primitives/feature_flags.dart';
 import '../../service/service_extension_widgets.dart';
 import '../../service/service_extensions.dart' as extensions;
 import '../../shared/banner_messages.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
 import '../../shared/screen.dart';
-import '../../shared/split.dart';
 import '../../shared/theme.dart';
 import '../../shared/utils.dart';
 import '../../ui/icons.dart';
 import '../../ui/vm_flag_widgets.dart';
-import 'event_details.dart';
 import 'flutter_frames_chart.dart';
 import 'panes/controls/enhance_tracing/enhance_tracing.dart';
 import 'panes/controls/layer_debugging_options.dart';
@@ -169,28 +166,7 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
               );
             },
           ),
-        Expanded(
-          child: ValueListenableBuilder<bool>(
-            valueListenable: controller.useLegacyTraceViewer,
-            builder: (context, useLegacy, _) {
-              return FeatureFlags.embeddedPerfetto && !useLegacy
-                  ? tabbedPerformanceView
-                  : Split(
-                      axis: Axis.vertical,
-                      initialFractions: const [0.7, 0.3],
-                      children: [
-                        tabbedPerformanceView,
-                        ValueListenableBuilder<TimelineEvent?>(
-                          valueListenable: controller.selectedTimelineEvent,
-                          builder: (context, selectedEvent, _) {
-                            return EventDetails(selectedEvent);
-                          },
-                        ),
-                      ],
-                    );
-            },
-          ),
-        ),
+        Expanded(child: tabbedPerformanceView),
       ],
     );
 
