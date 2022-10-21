@@ -113,24 +113,6 @@ void main() {
     });
 
     testWidgetsWithWindowSize(
-        'builds content for Timeline Events tab', windowSize,
-        (WidgetTester tester) async {
-      await tester.runAsync(() async {
-        await _setUpServiceManagerWithTimeline({});
-        await pumpView(tester);
-
-        expect(find.byType(AnalyticsTabbedView), findsOneWidget);
-        expect(find.byType(DevToolsTab), findsNWidgets(3));
-
-        // Timeline Events tab should be selected by default
-        expect(find.byType(RefreshTimelineEventsButton), findsOneWidget);
-        expect(find.byType(FlameChartHelpButton), findsOneWidget);
-        expect(find.byKey(timelineSearchFieldKey), findsOneWidget);
-        expect(find.byType(TimelineEventsView), findsOneWidget);
-      });
-    });
-
-    testWidgetsWithWindowSize(
         'builds content for Frame Analysis tab with selected frame', windowSize,
         (WidgetTester tester) async {
       await tester.runAsync(() async {
@@ -148,9 +130,7 @@ void main() {
         expect(find.byType(AnalyticsTabbedView), findsOneWidget);
         expect(find.byType(DevToolsTab), findsNWidgets(3));
 
-        await tester.tap(find.text('Frame Analysis'));
-        await tester.pumpAndSettle();
-
+        // The frame analysis tab should be selected by default.
         expect(find.byType(FlutterFrameAnalysisView), findsOneWidget);
       });
     });
@@ -165,9 +145,7 @@ void main() {
         expect(find.byType(AnalyticsTabbedView), findsOneWidget);
         expect(find.byType(DevToolsTab), findsNWidgets(3));
 
-        await tester.tap(find.text('Frame Analysis'));
-        await tester.pumpAndSettle();
-
+        // The frame analysis tab should be selected by default.
         expect(
           find.text('Select a frame above to view analysis data.'),
           findsOneWidget,
@@ -190,6 +168,26 @@ void main() {
         expect(find.byType(RenderingLayerVisualizer), findsOneWidget);
         expect(find.text('Take Snapshot'), findsOneWidget);
         expect(find.byType(ClearButton), findsOneWidget);
+      });
+    });
+
+    testWidgetsWithWindowSize(
+        'builds content for Timeline Events tab', windowSize,
+        (WidgetTester tester) async {
+      await tester.runAsync(() async {
+        await _setUpServiceManagerWithTimeline({});
+        await pumpView(tester);
+
+        expect(find.byType(AnalyticsTabbedView), findsOneWidget);
+        expect(find.byType(DevToolsTab), findsNWidgets(3));
+
+        await tester.tap(find.text('Timeline Events'));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(RefreshTimelineEventsButton), findsOneWidget);
+        expect(find.byType(FlameChartHelpButton), findsOneWidget);
+        expect(find.byKey(timelineSearchFieldKey), findsOneWidget);
+        expect(find.byType(TimelineEventsView), findsOneWidget);
       });
     });
 

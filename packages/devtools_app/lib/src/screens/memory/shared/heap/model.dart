@@ -126,21 +126,80 @@ class ClassOnlyHeapPath {
             heapPath.objects.map((o) => o.heapClass).toList(growable: false);
   final List<HeapClassName> classes;
 
-  String asShortString() => classes.map((e) => e.className).join('/');
+  String toShortString({String? delimiter, bool inverted = false}) => _asString(
+        data: classes.map((e) => e.className).toList(),
+        delimiter: _delimeter(
+          delimiter: delimiter,
+          inverted: inverted,
+          isLong: false,
+        ),
+        inverted: inverted,
+      );
 
-  String asLongString({String delimiter = '\n'}) =>
-      classes.map((e) => e.fullName).join(delimiter);
+  String toLongString({
+    String? delimiter,
+    bool inverted = false,
+    bool hideStandard = false,
+  }) {
+    final List<String> data;
+    bool justAddedEllipsis = false;
+    if (hideStandard) {
+      data = [];
+      for (var item in classes.asMap().entries) {
+        if (item.key == 0 ||
+            item.key == classes.length - 1 ||
+            !item.value.isStandard) {
+          data.add(item.value.fullName);
+          justAddedEllipsis = false;
+        } else {
+          if (!justAddedEllipsis) data.add('...');
+          justAddedEllipsis = true;
+        }
+      }
+    } else {
+      data = classes.map((e) => e.fullName).toList();
+    }
+
+    return _asString(
+      data: data,
+      delimiter: _delimeter(
+        delimiter: delimiter,
+        inverted: inverted,
+        isLong: true,
+      ),
+      inverted: inverted,
+    );
+  }
+
+  static String _delimeter({
+    required String? delimiter,
+    required bool inverted,
+    required bool isLong,
+  }) {
+    if (delimiter != null) return delimiter;
+    if (isLong) {
+      return inverted ? '\n← ' : '\n→ ';
+    }
+    return inverted ? ' ← ' : ' → ';
+  }
+
+  static String _asString({
+    required List<String> data,
+    required String delimiter,
+    required bool inverted,
+  }) =>
+      (inverted ? data.reversed : data).join(delimiter);
 
   @override
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is ClassOnlyHeapPath && other.asLongString() == asLongString();
+    return other is ClassOnlyHeapPath && other.toLongString() == toLongString();
   }
 
   @override
-  int get hashCode => asLongString().hashCode;
+  int get hashCode => toLongString().hashCode;
 }
 
 /// Contains information from [HeapSnapshotObject] needed for
@@ -262,6 +321,15 @@ class HeapClassName {
     // class names.
     assert(false, 'Unexpected library for $className: $library.');
     return false;
+  }
+
+  bool get isStandard {
+    return library.isEmpty ||
+        library.startsWith('dart:') ||
+        library.startsWith('dart.') ||
+        library.startsWith('package:flutter/') ||
+        library.startsWith('package:vm_service/') ||
+        library.startsWith('package:collection/');
   }
 
   @override
