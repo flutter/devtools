@@ -45,7 +45,7 @@ class SnapshotInstanceItem extends SnapshotItem {
   AdaptedHeap? heap;
 
   void setHeapData(AdaptedHeapData? data) {
-    assert(heap != null);
+    assert(heap == null);
     if (data != null) heap = AdaptedHeap(data);
     _isProcessing.value = false;
   }

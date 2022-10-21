@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/theme.dart';
 import '../../../primitives/ui.dart';
-import '../controller/diff_pane_controller.dart';
 import '../../../shared/heap/class_filter.dart';
+import '../controller/diff_pane_controller.dart';
 import '../controller/item_controller.dart';
 import 'class_filter_dialog.dart';
 

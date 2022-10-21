@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'model.dart';
+
 enum ClassFilterType {
   all,
   except,
@@ -38,7 +40,7 @@ class ClassFilter {
   static String _trimByLine(String value) =>
       value.split('\n').map((e) => e.trim()).join('\n');
 
-  static const String standardLibrariesAlias = 'standard-libraries';
+  static const String standardLibrariesAlias = '\$standard-libraries';
 
   final ClassFilterType filterType;
   final String except;
@@ -76,7 +78,10 @@ class ClassFilter {
 
   late final Set<String> filters = _filtersAsSet();
 
-  FilteringTask task({required ClassFilter previous}) {
+  /// Task to be applied when filter changed.
+  FilteringTask task({required ClassFilter? previous}) {
+    if (previous == null) return FilteringTask.refilter;
+
     if (filterType == previous.filterType && filters == previous.filters) {
       return FilteringTask.doNothing;
     }
@@ -105,5 +110,25 @@ class ClassFilter {
       case ClassFilterType.only:
         return 'Show only:\n$only';
     }
+  }
+
+  bool apply(HeapClassName className) {
+    if (filterType == ClassFilterType.all) {
+      throw StateError('This method should not be invoked');
+    }
+
+    for (var filter in filters) {
+      if (_isMatch(className, filter)) {
+        return filterType == ClassFilterType.only;
+      }
+    }
+
+    return filterType == ClassFilterType.except;
+  }
+
+  bool _isMatch(HeapClassName className, String filter) {
+    if (className.fullName.contains(filter)) return true;
+    if (filter == standardLibrariesAlias && className.isStandard) return true;
+    return false;
   }
 }

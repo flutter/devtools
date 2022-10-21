@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'class_filter.dart';
 import 'model.dart';
 import 'spanning_tree.dart';
 
@@ -37,8 +38,34 @@ abstract class HeapClasses with Sealable {
   Iterable<ClassStats> get classStatsList;
 }
 
+mixin Filterable on HeapClasses {
+  ClassFilter? _filter;
+  Iterable<ClassStats>? _filtered;
+
+  Iterable<ClassStats> filtered(ClassFilter filter) {
+    assert((_filter == null) == (_filtered == null));
+
+    final task = filter.task(previous: _filter);
+    _filter = filter;
+
+    if (task == FilteringTask.doNothing) return _filtered!;
+
+    final Iterable<ClassStats> dataToFilter;
+    if (task == FilteringTask.refilter) {
+      dataToFilter = classStatsList;
+    } else if (task == FilteringTask.reuse) {
+      dataToFilter = _filtered!;
+    } else {
+      throw StateError('Unexpected value: $task.');
+    }
+
+    final result = dataToFilter.where((e) => filter.apply(e.heapClass));
+    return _filtered = result;
+  }
+}
+
 /// Set of heap class statistical information for single heap (not comparision between two heaps).
-class SingleHeapClasses extends HeapClasses {
+class SingleHeapClasses extends HeapClasses with Filterable{
   SingleHeapClasses(this.classesByName);
 
   /// Maps full class name to class.
