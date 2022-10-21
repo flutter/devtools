@@ -8,7 +8,7 @@ enum ClassFilterType {
   only,
 }
 
-/// What should be done to apply new filter.
+/// What should be done to apply new filter to a set of data.
 enum FilteringTask {
   /// New filter is equivalent to previous, so nothing should be done.
   doNothing,
