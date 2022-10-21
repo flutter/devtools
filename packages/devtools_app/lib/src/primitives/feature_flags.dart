@@ -12,13 +12,13 @@
 ///   "args": [
 ///     "--dart-define=enable_experiments=true"
 ///   ]
-const bool _kEnableExperiments = bool.fromEnvironment('enable_experiments');
+const bool _kEnableExperiments = bool.fromEnvironment('enable_experiments') || _kEnableBeta;
 
 /// If true, features, ready for beta testing, will be on.
 ///
 /// See [_kEnableExperiments] documentation  for usage.
 const bool _kEnableBeta =
-    bool.fromEnvironment('enable_beta') || _kEnableExperiments;
+    bool.fromEnvironment('enable_beta');
 
 // It is ok to have enum-like static only classes.
 // ignore: avoid_classes_with_only_static_members
