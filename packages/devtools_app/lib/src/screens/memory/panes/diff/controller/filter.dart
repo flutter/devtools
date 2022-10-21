@@ -60,16 +60,21 @@ class ClassFilter {
         value.only == only;
   }
 
-  String get filters {
+  Set<String> _filtersAsSet() {
+    Set<String> stringToSet(String s) =>
+        s.split('\n').where((e) => e.isNotEmpty).toSet();
+
     switch (filterType) {
       case ClassFilterType.all:
-        return '';
+        return {};
       case ClassFilterType.except:
-        return except;
+        return stringToSet(except);
       case ClassFilterType.only:
-        return only;
+        return stringToSet(only);
     }
   }
+
+  late final Set<String> filters = _filtersAsSet();
 
   FilteringTask task({required ClassFilter previous}) {
     if (filterType == previous.filterType && filters == previous.filters) {
@@ -78,13 +83,13 @@ class ClassFilter {
 
     if (filterType == ClassFilterType.only &&
         previous.filterType == ClassFilterType.only &&
-        previous.filters.startsWith(filters)) {
+        previous.filters.containsAll(filters)) {
       return FilteringTask.reuse;
     }
 
     if (filterType == ClassFilterType.except &&
         previous.filterType == ClassFilterType.except &&
-        filters.startsWith(previous.filters)) {
+        filters.containsAll(previous.filters)) {
       return FilteringTask.reuse;
     }
 
