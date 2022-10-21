@@ -14,12 +14,17 @@
 ///   ]
 const bool _kEnableExperiments = bool.fromEnvironment('enable_experiments');
 
+/// If true, features, ready for beta testing, will be on.
+///
+/// See [_kEnableExperiments] documentation  for usage.
+const bool _kEnableBeta = bool.fromEnvironment('enable_beta');
+
 // It is ok to have enum-like static only classes.
 // ignore: avoid_classes_with_only_static_members
 /// Flags to hide features under construction.
 abstract class FeatureFlags {
   /// https://github.com/flutter/devtools/issues/3949
-  static bool memoryDiffing = _kEnableExperiments;
+  static bool memoryDiffing = _kEnableExperiments || _kEnableBeta;
 
   /// Flag to enable the embedded perfetto trace viewer.
   ///
