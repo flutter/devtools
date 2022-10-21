@@ -8,7 +8,6 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../../config_specific/logger/logger.dart';
@@ -785,8 +784,6 @@ class LineItem extends StatefulWidget {
     this.activeSearchMatch,
   }) : super(key: key);
 
-  static const _hoverDelay = Duration(milliseconds: 150);
-  static const _removeDelay = Duration(milliseconds: 50);
   static double get _hoverWidth => scaleByFontFactor(400.0);
 
   final TextSpan lineContents;
@@ -801,86 +798,53 @@ class LineItem extends StatefulWidget {
 
 class _LineItemState extends State<LineItem>
     with ProvidedControllerMixin<DebuggerController, LineItem> {
-  /// A timer that shows a [HoverCard] with an evaluation result when completed.
-  Timer? _showTimer;
+  Future<HoverCardData?> _generateHoverCardData({
+    required PointerEvent event,
+    required bool Function() isHoverStale,
+  }) async {
+    if (!controller.isPaused.value) return null;
 
-  /// A timer that removes a [HoverCard] when completed.
-  Timer? _removeTimer;
+    final word = wordForHover(
+      event.localPosition.dx,
+      widget.lineContents,
+    );
 
-  /// Displays the evaluation result of a source code item.
-  HoverCard? _hoverCard;
-
-  String _previousHoverWord = '';
-  bool _hasMouseExited = false;
-
-  late HoverCardController _hoverCardController;
-
-  void _onHoverExit() {
-    _showTimer?.cancel();
-    _hasMouseExited = true;
-    _removeTimer = Timer(LineItem._removeDelay, () {
-      _hoverCard?.maybeRemove();
-      _previousHoverWord = '';
-    });
-  }
-
-  void _onHover(PointerHoverEvent event, BuildContext context) {
-    _showTimer?.cancel();
-    _removeTimer?.cancel();
-    _hasMouseExited = false;
-    if (!controller.isPaused.value) return;
-    _showTimer = Timer(LineItem._hoverDelay, () async {
-      final word = wordForHover(
-        event.localPosition.dx,
-        widget.lineContents,
-      );
-      if (word == _previousHoverWord) return;
-      _previousHoverWord = word;
-      _hoverCard?.remove();
-      if (word != '') {
-        try {
-          final response = await controller.evalAtCurrentFrame(word);
-          final isolateRef = controller.isolateRef;
-          if (response is! InstanceRef) return;
-          final variable = DartObjectNode.fromValue(
-            value: response,
-            isolateRef: isolateRef,
-          );
-          await buildVariablesTree(variable);
-          if (_hasMouseExited) return;
-          _hoverCard?.remove();
-          _hoverCard = HoverCard.fromHoverEvent(
-            contents: Material(
-              child: ExpandableVariable(
-                debuggerController: controller,
-                variable: variable,
-              ),
+    if (word != '') {
+      try {
+        final response = await controller.evalAtCurrentFrame(word);
+        final isolateRef = controller.isolateRef;
+        if (response is! InstanceRef) return null;
+        final variable = DartObjectNode.fromValue(
+          value: response,
+          isolateRef: isolateRef,
+        );
+        await buildVariablesTree(variable);
+        return HoverCardData(
+          title: word,
+          contents: Material(
+            child: ExpandableVariable(
+              debuggerController: controller,
+              variable: variable,
             ),
-            event: event,
-            width: LineItem._hoverWidth,
-            title: word,
-            context: context,
-            hoverCardController: _hoverCardController,
-          );
-        } catch (_) {
-          // Silently fail and don't display a HoverCard.
-        }
+          ),
+          width: LineItem._hoverWidth,
+        );
+      } catch (_) {
+        // Silently fail and don't display a HoverCard.
+        return null;
       }
-    });
+    }
+    return null;
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     initController();
-    _hoverCardController = Provider.of<HoverCardController>(context);
   }
 
   @override
   void dispose() {
-    _showTimer?.cancel();
-    _removeTimer?.cancel();
-    _hoverCard?.remove();
     super.dispose();
   }
 
@@ -904,41 +868,52 @@ class _LineItemState extends State<LineItem>
       // TODO: support selecting text across multiples lines.
       child = Stack(
         children: [
-          Row(
-            children: [
-              // Create a hidden copy of the first column-1 characters of the
-              // line as a hack to correctly compute where to place
-              // the cursor. Approximating by using column-1 spaces instead
-              // of the correct characters and style s would be risky as it leads
-              // to small errors if the font is not fixed size or the font
-              // styles vary depending on the syntax highlighting.
-              // TODO(jacobr): there might be some api exposed on SelectedText
-              // to allow us to render this as a proper overlay as similar
-              // functionality exists to render the selection handles properly.
-              Opacity(
-                opacity: 0,
-                child: RichText(
-                  text: truncateTextSpan(widget.lineContents, column - 1),
-                ),
-              ),
-              Transform.translate(
-                offset: const Offset(colLeftOffset, colBottomOffset),
-                child: Transform.rotate(
-                  angle: colIconRotate,
-                  child: Icon(
-                    Icons.label_important,
-                    size: colIconSize,
-                    color: breakpointColor,
+          HoverCardTooltip.async(
+            asyncGenerateHoverCardData: _generateHoverCardData,
+            enabled: () => true,
+            child: Row(
+              children: [
+                // Create a hidden copy of the first column-1 characters of the
+                // line as a hack to correctly compute where to place
+                // the cursor. Approximating by using column-1 spaces instead
+                // of the correct characters and style s would be risky as it leads
+                // to small errors if the font is not fixed size or the font
+                // styles vary depending on the syntax highlighting.
+                // TODO(jacobr): there might be some api exposed on SelectedText
+                // to allow us to render this as a proper overlay as similar
+                // functionality exists to render the selection handles properly.
+                Opacity(
+                  opacity: 0,
+                  child: RichText(
+                    text: truncateTextSpan(widget.lineContents, column - 1),
                   ),
                 ),
-              )
-            ],
+                Transform.translate(
+                  offset: const Offset(colLeftOffset, colBottomOffset),
+                  child: Transform.rotate(
+                    angle: colIconRotate,
+                    child: Icon(
+                      Icons.label_important,
+                      size: colIconSize,
+                      color: breakpointColor,
+                    ),
+                  ),
+                )
+              ],
+            ),
           ),
-          _hoverableLine(),
         ],
       );
     } else {
-      child = _hoverableLine();
+      child = HoverCardTooltip.async(
+        enabled: () => true,
+        asyncGenerateHoverCardData: _generateHoverCardData,
+        child: SelectableText.rich(
+          searchAwareLineContents(),
+          scrollPhysics: const NeverScrollableScrollPhysics(),
+          maxLines: 1,
+        ),
+      );
     }
 
     final backgroundColor = widget.focused
@@ -1074,16 +1049,6 @@ class _LineItemState extends State<LineItem>
     }
     return contentsWithMatch;
   }
-
-  Widget _hoverableLine() => MouseRegion(
-        onExit: (_) => _onHoverExit(),
-        onHover: (e) => _onHover(e, context),
-        child: SelectableText.rich(
-          searchAwareLineContents(),
-          scrollPhysics: const NeverScrollableScrollPhysics(),
-          maxLines: 1,
-        ),
-      );
 }
 
 class ScriptPopupMenu extends StatelessWidget {
