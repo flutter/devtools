@@ -869,6 +869,7 @@ class _LineItemState extends State<LineItem>
       child = Stack(
         children: [
           HoverCardTooltip.async(
+            asyncTimeout: 100,
             asyncGenerateHoverCardData: _generateHoverCardData,
             enabled: () => true,
             child: Row(
@@ -907,6 +908,7 @@ class _LineItemState extends State<LineItem>
     } else {
       child = HoverCardTooltip.async(
         enabled: () => true,
+        asyncTimeout: 100,
         asyncGenerateHoverCardData: _generateHoverCardData,
         child: SelectableText.rich(
           searchAwareLineContents(),
