@@ -37,8 +37,6 @@ class DiffPaneController extends DisposableController {
   /// informational item.
   bool get hasSnapshots => core.snapshots.value.length > 1;
 
-  final classFilter = ValueNotifier<ClassFilter>(ClassFilter.empty());
-
   // This value should never be reset. It is incremented for every snapshot that
   // is taken, and is used to assign a unique id to each [SnapshotListItem].
   int _snapshotId = 0;
@@ -159,8 +157,8 @@ class CoreData {
   /// Selected retaining path (cross-snapshot).
   ClassOnlyHeapPath? path;
 
-  ValueListenable<String?> get classFilter => _classFilter;
-  final _classFilter = ValueNotifier<String?>(null);
+  /// Current class filter, to take signal from the filter dialog.
+  final classFilter = ValueNotifier<ClassFilter>(ClassFilter.empty());
 }
 
 /// Values that can be calculated from [CoreData] and notifiers that take signal

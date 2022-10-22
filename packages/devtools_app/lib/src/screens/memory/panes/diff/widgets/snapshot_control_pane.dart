@@ -20,6 +20,7 @@ class SnapshotControlPane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theFilter = controller.core.classFilter;
     return ValueListenableBuilder<bool>(
       valueListenable: controller.isProcessing,
       builder: (_, isProcessing, __) {
@@ -39,15 +40,14 @@ class SnapshotControlPane extends StatelessWidget {
                     ),
                     const SizedBox(width: defaultSpacing),
                     ValueListenableBuilder<ClassFilter>(
-                      valueListenable: controller.classFilter,
-                      builder: (_, classFilter, __) => FilterButton(
+                      valueListenable: theFilter,
+                      builder: (_, __, ___) => FilterButton(
                         onPressed: () => showDialog(
                           context: context,
-                          builder: (context) =>
-                              ClassFilterDialog(controller.classFilter),
+                          builder: (context) => ClassFilterDialog(theFilter),
                         ),
-                        isFilterActive: !controller.classFilter.value.isEmpty,
-                        message: controller.classFilter.value.buttonTooltip,
+                        isFilterActive: !theFilter.value.isEmpty,
+                        message: theFilter.value.buttonTooltip,
                       ),
                     ),
                     const SizedBox(width: defaultSpacing),
