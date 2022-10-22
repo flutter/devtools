@@ -4,7 +4,7 @@
 
 import '../../../shared/heap/heap.dart';
 
-String classesToCsv(HeapClasses classes) {
+String classesToCsv(Iterable<ClassStats> classes) {
   final csvBuffer = StringBuffer();
 
   // Write the headers first.
@@ -20,7 +20,7 @@ String classesToCsv(HeapClasses classes) {
     ].map((e) => '"$e"').join(','),
   );
 
-  for (var classStats in classes.classStatsList) {
+  for (var classStats in classes) {
     for (var pathStats in classStats.statsByPathEntries) {
       csvBuffer.writeln(
         [

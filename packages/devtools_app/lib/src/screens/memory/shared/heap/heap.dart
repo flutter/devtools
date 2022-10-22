@@ -40,9 +40,9 @@ abstract class HeapClasses with Sealable {
 
 mixin Filterable on HeapClasses {
   ClassFilter? _filter;
-  Iterable<ClassStats>? _filtered;
+  List<ClassStats>? _filtered;
 
-  Iterable<ClassStats> filtered(ClassFilter filter) {
+  List<ClassStats> filtered(ClassFilter filter) {
     assert((_filter == null) == (_filtered == null));
 
     final task = filter.task(previous: _filter);
@@ -59,13 +59,14 @@ mixin Filterable on HeapClasses {
       throw StateError('Unexpected value: $task.');
     }
 
-    final result = dataToFilter.where((e) => filter.apply(e.heapClass));
+    final result =
+        dataToFilter.where((e) => filter.apply(e.heapClass)).toList();
     return _filtered = result;
   }
 }
 
 /// Set of heap class statistical information for single heap (not comparision between two heaps).
-class SingleHeapClasses extends HeapClasses with Filterable{
+class SingleHeapClasses extends HeapClasses with Filterable {
   SingleHeapClasses(this.classesByName);
 
   /// Maps full class name to class.

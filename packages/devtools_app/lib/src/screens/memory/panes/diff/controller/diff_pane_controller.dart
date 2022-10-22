@@ -120,7 +120,7 @@ class DiffPaneController extends DisposableController {
     }
 
     ExportController().downloadFile(
-      classesToCsv(classes),
+      classesToCsv(classes.classStatsList),
       type: ExportFileType.csv,
       fileName: ExportController.generateFileName(
         type: ExportFileType.csv,
