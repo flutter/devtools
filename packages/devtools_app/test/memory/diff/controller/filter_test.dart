@@ -2,27 +2,27 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/screens/memory/panes/diff/controller/filter.dart';
+import 'package:devtools_app/src/screens/memory/shared/heap/class_filter.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('$ClassFilter', () {
-    test('task returns correct task for ${ClassFilterType.except}', () {
-      final shortFilter = _exceptFilter('a');
-      final longFilter = _exceptFilter('a\nb');
+    test('task for ${ClassFilterType.except}', () {
+      final weaker = _exceptFilter('a');
+      final stronger = _exceptFilter('a\nb');
 
-      expect(longFilter.task(previous: shortFilter), FilteringTask.reuse);
-      expect(shortFilter.task(previous: longFilter), FilteringTask.refilter);
-      expect(longFilter.task(previous: longFilter), FilteringTask.doNothing);
+      expect(stronger.task(previous: weaker), FilteringTask.reuse);
+      expect(weaker.task(previous: stronger), FilteringTask.refilter);
+      expect(weaker.task(previous: weaker), FilteringTask.doNothing);
     });
 
-    test('task returns correct task for ${ClassFilterType.only}', () {
-      final shortFilter = _onlyFilter('a');
-      final longFilter = _onlyFilter('a\nb');
+    test('task for ${ClassFilterType.only}', () {
+      final weaker = _onlyFilter('a\nb');
+      final stronger = _onlyFilter('a');
 
-      expect(longFilter.task(previous: shortFilter), FilteringTask.refilter);
-      expect(shortFilter.task(previous: longFilter), FilteringTask.reuse);
-      expect(longFilter.task(previous: longFilter), FilteringTask.doNothing);
+      expect(stronger.task(previous: weaker), FilteringTask.reuse);
+      expect(weaker.task(previous: stronger), FilteringTask.refilter);
+      expect(weaker.task(previous: weaker), FilteringTask.doNothing);
     });
   });
 }
