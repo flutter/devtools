@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../../../../../primitives/auto_dispose.dart';
+import '../../../shared/heap/class_filter.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
 
@@ -44,9 +45,9 @@ class SnapshotInstanceItem extends SnapshotItem {
 
   AdaptedHeap? heap;
 
-  void setHeapData(AdaptedHeapData? data) {
+  void setHeapData(AdaptedHeapData? data, ValueListenable<ClassFilter> filter) {
     assert(heap == null);
-    if (data != null) heap = AdaptedHeap(data);
+    if (data != null) heap = AdaptedHeap(data, filter);
     _isProcessing.value = false;
   }
 

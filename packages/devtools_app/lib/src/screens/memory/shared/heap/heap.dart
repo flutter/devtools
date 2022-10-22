@@ -2,18 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
+
 import 'class_filter.dart';
 import 'model.dart';
 import 'spanning_tree.dart';
 
 class AdaptedHeap {
-  AdaptedHeap(this.data);
+  AdaptedHeap(this.data, this.filter);
 
   final AdaptedHeapData data;
 
-  late final SingleHeapClasses classes = _heapStatistics(data);
+  final ValueListenable<ClassFilter> filter;
 
-  static SingleHeapClasses _heapStatistics(AdaptedHeapData data) {
+  late final SingleHeapClasses classes = _heapStatistics();
+
+  SingleHeapClasses _heapStatistics() {
     final result = <HeapClassName, SingleClassStats>{};
     if (!data.isSpanningTreeBuilt) buildSpanningTree(data);
 
@@ -30,23 +34,26 @@ class AdaptedHeap {
       singleHeapClass.countInstance(data, i);
     }
 
-    return SingleHeapClasses(result)..seal();
+    return SingleHeapClasses(result, filter)..seal();
   }
 }
 
 abstract class HeapClasses with Sealable {
   Iterable<ClassStats> get classStatsList;
+  ValueListenable<ClassFilter> get filter;
 }
 
 mixin Filterable on HeapClasses {
-  ClassFilter? _filter;
+  ClassFilter? _appliedFilter;
   List<ClassStats>? _filtered;
 
-  List<ClassStats> filtered(ClassFilter filter) {
-    assert((_filter == null) == (_filtered == null));
+  List<ClassStats> filtered() {
+    assert((_appliedFilter == null) == (_filtered == null));
+    if (_appliedFilter == filter.value) return _filtered!;
+    final theFilter = filter.value;
 
-    final task = filter.task(previous: _filter);
-    _filter = filter;
+    final task = theFilter.task(previous: _appliedFilter);
+    _appliedFilter = theFilter;
 
     if (task == FilteringTask.doNothing) return _filtered!;
 
@@ -60,14 +67,17 @@ mixin Filterable on HeapClasses {
     }
 
     final result =
-        dataToFilter.where((e) => filter.apply(e.heapClass)).toList();
+        dataToFilter.where((e) => theFilter.apply(e.heapClass)).toList();
     return _filtered = result;
   }
 }
 
 /// Set of heap class statistical information for single heap (not comparision between two heaps).
 class SingleHeapClasses extends HeapClasses with Filterable {
-  SingleHeapClasses(this.classesByName);
+  SingleHeapClasses(this.classesByName, this.filter);
+
+  @override
+  final ValueListenable<ClassFilter> filter;
 
   /// Maps full class name to class.
   final Map<HeapClassName, SingleClassStats> classesByName;

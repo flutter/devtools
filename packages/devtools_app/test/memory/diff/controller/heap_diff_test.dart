@@ -3,10 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/screens/memory/panes/diff/controller/heap_diff.dart';
+import 'package:devtools_app/src/screens/memory/shared/heap/class_filter.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/heap.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/model.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/spanning_tree.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+final _filter = ValueNotifier(ClassFilter.empty());
 
 void main() {
   test(
@@ -17,7 +21,7 @@ void main() {
 
     expect(heap1 == heap2, false);
 
-    final store = HeapDiffStore();
+    final store = HeapDiffStore(_filter);
 
     final couple1 = identityHashCode(store.compare(heap1, heap2));
     final couple2 = identityHashCode(store.compare(heap1, heap2));
@@ -111,4 +115,5 @@ AdaptedHeap _createSimplestHeap() => AdaptedHeap(
         ],
         rootIndex: 0,
       ),
+      _filter,
     );

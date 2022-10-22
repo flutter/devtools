@@ -5,16 +5,20 @@
 import 'package:flutter/foundation.dart';
 
 import '../../../../../primitives/utils.dart';
+import '../../../shared/heap/class_filter.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
 
 /// Stores already calculated comparisons for heap couples.
 class HeapDiffStore {
+  HeapDiffStore(this.filter);
+
+  final ValueListenable<ClassFilter> filter;
   final _store = <_HeapCouple, DiffHeapClasses>{};
 
   DiffHeapClasses compare(AdaptedHeap heap1, AdaptedHeap heap2) {
     final couple = _HeapCouple(heap1, heap2);
-    return _store.putIfAbsent(couple, () => DiffHeapClasses(couple));
+    return _store.putIfAbsent(couple, () => DiffHeapClasses(couple, filter));
   }
 }
 
@@ -60,7 +64,7 @@ class _HeapCouple {
 
 /// List of classes with per-class comparision between two heaps.
 class DiffHeapClasses extends HeapClasses with Filterable {
-  DiffHeapClasses(_HeapCouple couple) {
+  DiffHeapClasses(_HeapCouple couple, this.filter) {
     classesByName = subtractMaps<HeapClassName, SingleClassStats,
         SingleClassStats, DiffClassStats>(
       from: couple.younger.classes.classesByName,
@@ -69,6 +73,9 @@ class DiffHeapClasses extends HeapClasses with Filterable {
           DiffClassStats.diff(before: subtract, after: from),
     );
   }
+
+  @override
+  final ValueListenable<ClassFilter> filter;
 
   /// Maps full class name to class.
   late final Map<HeapClassName, DiffClassStats> classesByName;
