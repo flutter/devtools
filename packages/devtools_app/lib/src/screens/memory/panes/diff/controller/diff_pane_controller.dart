@@ -179,6 +179,10 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
       selectedPathEntry,
       () => _setPathIfNotNull(selectedPathEntry.value?.key),
     );
+    addAutoDisposeListener(
+      _core.classFilter,
+      () => _updateValues(),
+    );
   }
 
   final CoreData _core;
