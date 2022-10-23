@@ -89,7 +89,7 @@ class DiffHeapClasses extends HeapClasses<DiffClassStats>
   }
 
   @override
-  Iterable<DiffClassStats> get classStatsList => classes;
+  List<DiffClassStats> get classStatsList => classes;
 }
 
 /// Comparision between two heaps for a class.

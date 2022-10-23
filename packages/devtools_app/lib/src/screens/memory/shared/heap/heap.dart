@@ -41,7 +41,7 @@ class AdaptedHeap {
 abstract class HeapClasses<T extends ClassStats> with Sealable {
   HeapClasses(this.filter);
 
-  Iterable<T> get classStatsList;
+  List<T> get classStatsList;
 
   final ValueListenable<ClassFilter> filter;
 }
@@ -53,16 +53,23 @@ mixin Filterable<T extends ClassStats> on HeapClasses<T> {
   List<T> filtered() {
     final newFilter = filter.value;
     final oldFilter = _appliedFilter;
-    _appliedFilter = newFilter;
     final oldFiltered = _filtered;
-    if ((oldFilter == null) != (oldFiltered == null)){
+    _appliedFilter = newFilter;
+    if ((oldFilter == null) != (oldFiltered == null)) {
       throw StateError('nullness should match');
     }
 
+    // Return previous data if filter did not change.
     if (oldFilter == newFilter) return oldFiltered!;
-    final task = newFilter.task(previous: oldFilter);
 
+    // Return previous data if filter is identical.
+    final task = newFilter.task(previous: oldFilter);
     if (task == FilteringTask.doNothing) return oldFiltered!;
+
+    // Return all data if filter is trivial.
+    if (newFilter.filterType == ClassFilterType.all) {
+      return _filtered = classStatsList;
+    }
 
     final Iterable<T> dataToFilter;
     if (task == FilteringTask.refilter) {
@@ -98,7 +105,7 @@ class SingleHeapClasses extends HeapClasses<SingleClassStats>
   }
 
   @override
-  Iterable<SingleClassStats> get classStatsList => classes;
+  List<SingleClassStats> get classStatsList => classes;
 }
 
 typedef StatsByPath = Map<ClassOnlyHeapPath, ObjectSetStats>;

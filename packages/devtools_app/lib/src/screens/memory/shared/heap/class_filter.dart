@@ -114,7 +114,7 @@ class ClassFilter {
 
   bool apply(HeapClassName className) {
     if (filterType == ClassFilterType.all) {
-      throw StateError('This method should not be invoked');
+      throw StateError('By row method should not be invoked for $filterType.');
     }
 
     for (var filter in filters) {
