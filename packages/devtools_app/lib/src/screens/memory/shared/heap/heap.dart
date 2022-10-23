@@ -38,16 +38,19 @@ class AdaptedHeap {
   }
 }
 
-abstract class HeapClasses with Sealable {
-  Iterable<ClassStats> get classStatsList;
-  ValueListenable<ClassFilter> get filter;
+abstract class HeapClasses<T extends ClassStats> with Sealable {
+  HeapClasses(this.filter);
+
+  Iterable<T> get classStatsList;
+
+  final ValueListenable<ClassFilter> filter;
 }
 
-mixin Filterable on HeapClasses {
+mixin Filterable<T extends ClassStats> on HeapClasses<T> {
   ClassFilter? _appliedFilter;
-  List<ClassStats>? _filtered;
+  List<T>? _filtered;
 
-  List<ClassStats> filtered() {
+  List<T> filtered() {
     assert((_appliedFilter == null) == (_filtered == null));
     if (_appliedFilter == filter.value) return _filtered!;
     final theFilter = filter.value;
@@ -57,7 +60,7 @@ mixin Filterable on HeapClasses {
 
     if (task == FilteringTask.doNothing) return _filtered!;
 
-    final Iterable<ClassStats> dataToFilter;
+    final Iterable<T> dataToFilter;
     if (task == FilteringTask.refilter) {
       dataToFilter = classStatsList;
     } else if (task == FilteringTask.reuse) {
@@ -73,11 +76,9 @@ mixin Filterable on HeapClasses {
 }
 
 /// Set of heap class statistical information for single heap (not comparision between two heaps).
-class SingleHeapClasses extends HeapClasses with Filterable {
-  SingleHeapClasses(this.classesByName, this.filter);
-
-  @override
-  final ValueListenable<ClassFilter> filter;
+class SingleHeapClasses extends HeapClasses<SingleClassStats>
+    with Filterable<SingleClassStats> {
+  SingleHeapClasses(this.classesByName, super.filter);
 
   /// Maps full class name to class.
   final Map<HeapClassName, SingleClassStats> classesByName;
@@ -93,7 +94,7 @@ class SingleHeapClasses extends HeapClasses with Filterable {
   }
 
   @override
-  Iterable<ClassStats> get classStatsList => classes;
+  Iterable<SingleClassStats> get classStatsList => classes;
 }
 
 typedef StatsByPath = Map<ClassOnlyHeapPath, ObjectSetStats>;

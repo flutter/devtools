@@ -243,24 +243,31 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     return _diffStore.compare(heap, itemToDiffWith.heap!);
   }
 
-  static void _updateClassStats({
+  void _updateClassStats({
     required HeapClasses? classes,
     required HeapClassName? className,
     required ValueNotifier<SingleClassStats?> singleToUpdate,
     required ValueNotifier<DiffClassStats?> diffToUpdate,
   }) {
     if (classes is SingleHeapClasses) {
-      singleToUpdate.value = classes.classesByName[className];
+      singleToUpdate.value = _filter(classes.classesByName[className]);
       diffToUpdate.value = null;
     } else if (classes is DiffHeapClasses) {
       singleToUpdate.value = null;
-      diffToUpdate.value = classes.classesByName[className];
+      diffToUpdate.value = _filter(classes.classesByName[className]);
     } else if (classes == null) {
       singleToUpdate.value = null;
       diffToUpdate.value = null;
     } else {
       throw StateError('Unexpected type: ${classes.runtimeType}.');
     }
+  }
+
+  /// Returns [classStats] if it matches the current filter.
+  T? _filter<T extends ClassStats>(T? classStats) {
+    if (classStats == null) return null;
+    if (_core.classFilter.value.apply(classStats.heapClass)) return classStats;
+    return null;
   }
 
   /// Updates fields in this instance based on the values in [core].

@@ -199,15 +199,20 @@ class ClassesTableDiff extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FlatTable<DiffClassStats>(
-      columns: _columns,
-      columnGroups: _columnGroups,
-      data: classes.classes,
-      dataKey: 'ClassesTableDiff',
-      keyFactory: (e) => Key(e.heapClass.fullName),
-      selectionNotifier: selection,
-      defaultSortColumn: _retainedSizeDeltaColumn,
-      defaultSortDirection: SortDirection.descending,
+    return ValueListenableBuilder(
+      valueListenable: classes.filter,
+      builder: (_, __, ___) {
+        return FlatTable<DiffClassStats>(
+          columns: _columns,
+          columnGroups: _columnGroups,
+          data: classes.filtered(),
+          dataKey: 'ClassesTableDiff',
+          keyFactory: (e) => Key(e.heapClass.fullName),
+          selectionNotifier: selection,
+          defaultSortColumn: _retainedSizeDeltaColumn,
+          defaultSortDirection: SortDirection.descending,
+        );
+      },
     );
   }
 }

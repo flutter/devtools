@@ -63,8 +63,9 @@ class _HeapCouple {
 }
 
 /// List of classes with per-class comparision between two heaps.
-class DiffHeapClasses extends HeapClasses with Filterable {
-  DiffHeapClasses(_HeapCouple couple, this.filter) {
+class DiffHeapClasses extends HeapClasses<DiffClassStats>
+    with Filterable<DiffClassStats> {
+  DiffHeapClasses(_HeapCouple couple, super.filter) {
     classesByName = subtractMaps<HeapClassName, SingleClassStats,
         SingleClassStats, DiffClassStats>(
       from: couple.younger.classes.classesByName,
@@ -73,9 +74,6 @@ class DiffHeapClasses extends HeapClasses with Filterable {
           DiffClassStats.diff(before: subtract, after: from),
     );
   }
-
-  @override
-  final ValueListenable<ClassFilter> filter;
 
   /// Maps full class name to class.
   late final Map<HeapClassName, DiffClassStats> classesByName;
@@ -91,7 +89,7 @@ class DiffHeapClasses extends HeapClasses with Filterable {
   }
 
   @override
-  Iterable<ClassStats> get classStatsList => classes;
+  Iterable<DiffClassStats> get classStatsList => classes;
 }
 
 /// Comparision between two heaps for a class.
