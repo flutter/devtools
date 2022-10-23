@@ -51,26 +51,30 @@ mixin Filterable<T extends ClassStats> on HeapClasses<T> {
   List<T>? _filtered;
 
   List<T> filtered() {
-    assert((_appliedFilter == null) == (_filtered == null));
-    if (_appliedFilter == filter.value) return _filtered!;
-    final theFilter = filter.value;
+    final newFilter = filter.value;
+    final oldFilter = _appliedFilter;
+    _appliedFilter = newFilter;
+    final oldFiltered = _filtered;
+    if ((oldFilter == null) != (oldFiltered == null)){
+      throw StateError('nullness should match');
+    }
 
-    final task = theFilter.task(previous: _appliedFilter);
-    _appliedFilter = theFilter;
+    if (oldFilter == newFilter) return oldFiltered!;
+    final task = newFilter.task(previous: oldFilter);
 
-    if (task == FilteringTask.doNothing) return _filtered!;
+    if (task == FilteringTask.doNothing) return oldFiltered!;
 
     final Iterable<T> dataToFilter;
     if (task == FilteringTask.refilter) {
       dataToFilter = classStatsList;
     } else if (task == FilteringTask.reuse) {
-      dataToFilter = _filtered!;
+      dataToFilter = oldFiltered!;
     } else {
       throw StateError('Unexpected value: $task.');
     }
 
     final result =
-        dataToFilter.where((e) => theFilter.apply(e.heapClass)).toList();
+        dataToFilter.where((e) => newFilter.apply(e.heapClass)).toList();
     return _filtered = result;
   }
 }

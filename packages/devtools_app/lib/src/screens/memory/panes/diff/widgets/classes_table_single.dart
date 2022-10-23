@@ -127,14 +127,19 @@ class ClassesTableSingle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FlatTable<SingleClassStats>(
-      columns: _columns,
-      data: classes.classes,
-      dataKey: 'ClassesTableSingle',
-      keyFactory: (e) => Key(e.heapClass.fullName),
-      selectionNotifier: selection,
-      defaultSortColumn: _shallowSizeColumn,
-      defaultSortDirection: SortDirection.descending,
+    return ValueListenableBuilder(
+      valueListenable: classes.filter,
+      builder: (_, __, ___) {
+        return FlatTable<SingleClassStats>(
+          columns: _columns,
+          data: classes.filtered(),
+          dataKey: 'ClassesTableSingle',
+          keyFactory: (e) => Key(e.heapClass.fullName),
+          selectionNotifier: selection,
+          defaultSortColumn: _shallowSizeColumn,
+          defaultSortDirection: SortDirection.descending,
+        );
+      },
     );
   }
 }
