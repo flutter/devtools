@@ -11,6 +11,7 @@ import 'dart:ui' as ui;
 import '../../../../../app.dart';
 import '../../../../../primitives/auto_dispose.dart';
 import '../../../../../primitives/trace_event.dart';
+import '../../../../../shared/feature_flags.dart';
 import '../../../../../shared/globals.dart';
 
 /// Flag to enable embedding an instance of the Perfetto UI running on

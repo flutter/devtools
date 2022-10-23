@@ -46,6 +46,7 @@ import 'screens/vm_developer/vm_developer_tools_screen.dart';
 import 'service/service_extension_widgets.dart';
 import 'shared/common_widgets.dart';
 import 'shared/dialogs.dart';
+import 'shared/feature_flags.dart';
 import 'shared/globals.dart';
 import 'shared/routing.dart';
 import 'shared/screen.dart';
@@ -59,9 +60,6 @@ const debugEnableSampleScreen = false;
 
 // Disabled until VM developer mode functionality is added.
 const showVmDeveloperMode = false;
-
-/// Whether this DevTools build is external.
-bool isExternalBuild = true;
 
 /// Top-level configuration for the app.
 @immutable

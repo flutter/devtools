@@ -17,7 +17,7 @@ import '../../config_specific/logger/allowed_error.dart';
 import '../../config_specific/logger/logger.dart';
 import '../../http/http_service.dart';
 import '../../primitives/auto_dispose.dart';
-import '../../primitives/feature_flags.dart';
+import '../../shared/feature_flags.dart';
 import '../../primitives/trace_event.dart';
 import '../../primitives/trees.dart';
 import '../../primitives/utils.dart';

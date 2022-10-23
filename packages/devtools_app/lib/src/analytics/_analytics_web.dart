@@ -13,13 +13,13 @@ import 'dart:html';
 import 'package:js/js.dart';
 
 import '../../devtools.dart' as devtools show version;
-import '../app.dart';
 import '../config_specific/logger/logger.dart';
 import '../config_specific/server/server.dart' as server;
 import '../config_specific/url/url.dart';
 import '../primitives/url_utils.dart';
 import '../screens/performance/performance_screen.dart';
 import '../screens/profiler/profiler_screen.dart';
+import '../shared/feature_flags.dart';
 import '../shared/globals.dart';
 import '../ui/gtags.dart';
 import 'analytics_common.dart';
