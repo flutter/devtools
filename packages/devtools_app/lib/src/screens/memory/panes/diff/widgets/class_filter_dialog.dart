@@ -8,6 +8,7 @@ import '../../../../../shared/dialogs.dart';
 import '../../../../../shared/theme.dart';
 import '../../../../../shared/utils.dart';
 import '../../../shared/heap/class_filter.dart';
+import '../controller/utils.dart';
 
 class ClassFilterDialog extends StatefulWidget {
   const ClassFilterDialog(this.classFilter, {super.key});
@@ -27,6 +28,7 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
   @override
   void initState() {
     super.initState();
+    print('!!!! dialog init state');
     _loadStateFromFilter(widget.classFilter.value);
   }
 
@@ -38,10 +40,10 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
     }
   }
 
-  void _loadStateFromFilter(ClassFilter filter) {
+  void _loadStateFromFilter(ClassFilter filter) async {
     _type = filter.filterType;
     _except.text = filter.except;
-    _only.text = filter.only;
+    _only.text = filter.only ?? (await rootLib()) ?? '';
   }
 
   @override

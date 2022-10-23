@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../../../../../shared/globals.dart';
 import '../../../shared/heap/heap.dart';
 
 String classesToCsv(Iterable<ClassStats> classes) {
@@ -37,4 +38,10 @@ String classesToCsv(Iterable<ClassStats> classes) {
   }
 
   return csvBuffer.toString();
+}
+
+Future<String?> rootLib() async {
+  final isolateId = serviceManager.isolateManager.mainIsolate.value?.id;
+  if (isolateId == null) return null;
+  return (await serviceManager.service?.getIsolate(isolateId))?.rootLib?.uri;
 }

@@ -26,15 +26,15 @@ class ClassFilter {
   ClassFilter({
     required this.filterType,
     required String except,
-    required String only,
+    required String? only,
   })  : except = _trimByLine(except),
-        only = _trimByLine(only);
+        only = only == null ? null : _trimByLine(only);
 
   ClassFilter.empty()
       : this(
           filterType: ClassFilterType.all,
           except: standardLibrariesAlias,
-          only: '',
+          only: null,
         );
 
   static String _trimByLine(String value) =>
@@ -44,12 +44,14 @@ class ClassFilter {
 
   final ClassFilterType filterType;
   final String except;
-  final String only;
+
+  /// If the value is null, it should be initialized before displaying.
+  final String? only;
 
   bool get isEmpty =>
       filterType == ClassFilterType.all ||
       (filterType == ClassFilterType.except && except.trim().isEmpty) ||
-      (filterType == ClassFilterType.only && only.trim().isEmpty);
+      (filterType == ClassFilterType.only && (only ?? '').trim().isEmpty);
 
   String get buttonTooltip {
     if (isEmpty) return 'Filter classes and packages.';
@@ -63,8 +65,8 @@ class ClassFilter {
   }
 
   Set<String> _filtersAsSet() {
-    Set<String> stringToSet(String s) =>
-        s.split('\n').where((e) => e.isNotEmpty).toSet();
+    Set<String> stringToSet(String? s) =>
+        s == null ? {} : s.split('\n').where((e) => e.isNotEmpty).toSet();
 
     switch (filterType) {
       case ClassFilterType.all:
