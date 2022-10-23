@@ -324,12 +324,14 @@ class HeapClassName {
   }
 
   bool get isStandard {
+    //if (library.contains(other))
     return library.isEmpty ||
         library.startsWith('dart:') ||
         library.startsWith('dart.') ||
         library.startsWith('package:flutter/') ||
         library.startsWith('package:vm_service/') ||
-        library.startsWith('package:collection/');
+        library.startsWith('package:collection/') ||
+        library == 'vector_math_64';
   }
 
   @override
