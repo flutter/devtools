@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/dialogs.dart';
@@ -20,15 +22,25 @@ class ClassFilterDialog extends StatefulWidget {
 }
 
 class _ClassFilterDialogState extends State<ClassFilterDialog> {
+  bool _initialized = false;
+  bool _showHelp = false;
+  late String _rootLib;
+
   late ClassFilterType _type;
   final _except = TextEditingController();
   final _only = TextEditingController();
-  bool _showHelp = false;
 
   @override
   void initState() {
     super.initState();
+    unawaited(_initialize());
+  }
+
+  Future<void> _initialize() async {
+    assert(!_initialized);
+    _rootLib = await tryToDetectRootLib();
     _loadStateFromFilter(widget.classFilter.value);
+    setState(() => _initialized = true);
   }
 
   @override
@@ -39,14 +51,16 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
     }
   }
 
-  void _loadStateFromFilter(ClassFilter filter) async {
+  void _loadStateFromFilter(ClassFilter filter) {
     _type = filter.filterType;
     _except.text = filter.except;
-    _only.text = filter.only ?? (await rootLib()) ?? '';
+    _only.text = filter.only ?? _rootLib;
   }
 
   @override
   Widget build(BuildContext context) {
+    if (!_initialized) return Progress();
+
     final theme = Theme.of(context);
     final textFieldLeftPadding = scaleByFontFactor(40.0);
     final itemSpacing = scaleByFontFactor(28.0);
@@ -71,13 +85,14 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
             ),
             if (_showHelp) ...[
               const SizedBox(height: denseSpacing),
-              // TODO (polina-c): apply editor's changes from go/help-for-class-filters.
               const Text('Choose and customize the filter.\n'
                   'List full or partial class names separated by new lines. For example:\n\n'
                   '  package:myPackage/src/myFolder/myLibrary.dart/MyClass\n'
                   '  MyClass\n'
                   '  package:myPackage/src/\n\n'
-                  'Specify "standard-libraries” for standard Dart and Flutter classes.'),
+                  'Specify:\n'
+                  '  - ${ClassFilter.coreLibrariesAlias} for core classes without package prefix\n'
+                  '  - ${ClassFilter.dartAndFlutterLibrariesAlias} for "dart." and "package:" libraries published by Dart and Flutter orgs.'),
             ],
             SizedBox(height: itemSpacing),
             RadioButton<ClassFilterType>(

@@ -40,8 +40,10 @@ String classesToCsv(Iterable<ClassStats> classes) {
   return csvBuffer.toString();
 }
 
-Future<String?> rootLib() async {
+/// Returns root library or empty string.
+Future<String> tryToDetectRootLib() async {
   final isolateId = serviceManager.isolateManager.mainIsolate.value?.id;
-  if (isolateId == null) return null;
-  return (await serviceManager.service?.getIsolate(isolateId))?.rootLib?.uri;
+  if (isolateId == null) return '';
+  final isolate = await serviceManager.service?.getIsolate(isolateId);
+  return isolate?.rootLib?.uri ?? '';
 }
