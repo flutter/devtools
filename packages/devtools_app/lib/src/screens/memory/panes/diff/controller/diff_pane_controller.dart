@@ -181,7 +181,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     );
     addAutoDisposeListener(
       _core.classFilter,
-      () => _updateValues(),
+      _updateValues,
     );
   }
 
