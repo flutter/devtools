@@ -59,8 +59,6 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
 
   @override
   Widget build(BuildContext context) {
-    if (!_initialized) return Progress();
-
     final theme = Theme.of(context);
     final textFieldLeftPadding = scaleByFontFactor(40.0);
     final itemSpacing = scaleByFontFactor(28.0);
@@ -69,71 +67,73 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
 
     return DevToolsDialog(
       title: dialogTitleText(theme, 'Filter Classes and Packages'),
-      content: Container(
-        width: defaultDialogWidth,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            IconLabelButton(
-              tooltip: _showHelp ? 'Hide help' : 'Show help',
-              icon: _showHelp
-                  ? Icons.keyboard_arrow_up
-                  : Icons.keyboard_arrow_down,
-              label: 'Help',
-              onPressed: () => setState(() => _showHelp = !_showHelp),
-            ),
-            if (_showHelp) ...[
-              const SizedBox(height: denseSpacing),
-              const Text('Choose and customize the filter.\n'
-                  'List full or partial class names separated by new lines. For example:\n\n'
-                  '  package:myPackage/src/myFolder/myLibrary.dart/MyClass\n'
-                  '  MyClass\n'
-                  '  package:myPackage/src/\n\n'
-                  'Specify:\n'
-                  '  - ${ClassFilter.coreLibrariesAlias} for core classes without package prefix\n'
-                  '  - ${ClassFilter.dartAndFlutterLibrariesAlias} for "dart." and "package:" libraries published by Dart and Flutter orgs.'),
-            ],
-            SizedBox(height: itemSpacing),
-            RadioButton<ClassFilterType>(
-              label: 'Show all classes',
-              itemValue: ClassFilterType.all,
-              groupValue: _type,
-              onChanged: onTypeChanged,
-            ),
-            SizedBox(height: itemSpacing),
-            RadioButton<ClassFilterType>(
-              label: 'Show all classes except:',
-              itemValue: ClassFilterType.except,
-              groupValue: _type,
-              onChanged: onTypeChanged,
-            ),
-            Padding(
-              padding: EdgeInsets.only(left: textFieldLeftPadding),
-              child: TextField(
-                keyboardType: TextInputType.multiline,
-                maxLines: null,
-                controller: _except,
+      content: !_initialized
+          ? Progress(size: 30.0)
+          : Container(
+              width: defaultDialogWidth,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  IconLabelButton(
+                    tooltip: _showHelp ? 'Hide help' : 'Show help',
+                    icon: _showHelp
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
+                    label: 'Help',
+                    onPressed: () => setState(() => _showHelp = !_showHelp),
+                  ),
+                  if (_showHelp) ...[
+                    const SizedBox(height: denseSpacing),
+                    const Text('Choose and customize the filter.\n'
+                        'List full or partial class names separated by new lines. For example:\n\n'
+                        '  package:myPackage/src/myFolder/myLibrary.dart/MyClass\n'
+                        '  MyClass\n'
+                        '  package:myPackage/src/\n\n'
+                        'Specify:\n'
+                        '  - ${ClassFilter.coreLibrariesAlias} for core classes without package prefix\n'
+                        '  - ${ClassFilter.dartAndFlutterLibrariesAlias} for "dart." and "package:" libraries published by Dart and Flutter orgs.'),
+                  ],
+                  SizedBox(height: itemSpacing),
+                  RadioButton<ClassFilterType>(
+                    label: 'Show all classes',
+                    itemValue: ClassFilterType.all,
+                    groupValue: _type,
+                    onChanged: onTypeChanged,
+                  ),
+                  SizedBox(height: itemSpacing),
+                  RadioButton<ClassFilterType>(
+                    label: 'Show all classes except:',
+                    itemValue: ClassFilterType.except,
+                    groupValue: _type,
+                    onChanged: onTypeChanged,
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(left: textFieldLeftPadding),
+                    child: TextField(
+                      keyboardType: TextInputType.multiline,
+                      maxLines: null,
+                      controller: _except,
+                    ),
+                  ),
+                  SizedBox(height: itemSpacing),
+                  RadioButton<ClassFilterType>(
+                    label: 'Show only:',
+                    itemValue: ClassFilterType.only,
+                    groupValue: _type,
+                    onChanged: onTypeChanged,
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(left: textFieldLeftPadding),
+                    child: TextField(
+                      keyboardType: TextInputType.multiline,
+                      maxLines: null,
+                      controller: _only,
+                    ),
+                  ),
+                ],
               ),
             ),
-            SizedBox(height: itemSpacing),
-            RadioButton<ClassFilterType>(
-              label: 'Show only:',
-              itemValue: ClassFilterType.only,
-              groupValue: _type,
-              onChanged: onTypeChanged,
-            ),
-            Padding(
-              padding: EdgeInsets.only(left: textFieldLeftPadding),
-              child: TextField(
-                keyboardType: TextInputType.multiline,
-                maxLines: null,
-                controller: _only,
-              ),
-            ),
-          ],
-        ),
-      ),
       actions: [
         DialogTextButton(
           onPressed: () =>

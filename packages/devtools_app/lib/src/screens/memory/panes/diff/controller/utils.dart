@@ -40,10 +40,17 @@ String classesToCsv(Iterable<ClassStats> classes) {
   return csvBuffer.toString();
 }
 
+String? _cashedIsolateId;
+String? _cashedRootPackage;
+
 /// Returns root library or empty string.
 Future<String?> tryToDetectRootPackage() async {
   final isolateId = serviceManager.isolateManager.mainIsolate.value?.id;
   if (isolateId == null) return null;
+
+  if (_cashedIsolateId == isolateId) return _cashedRootPackage;
+  _cashedIsolateId = isolateId;
+
   final isolate = await serviceManager.service?.getIsolate(isolateId);
   final rootLib = isolate?.rootLib?.uri;
   if (rootLib == null) return null;

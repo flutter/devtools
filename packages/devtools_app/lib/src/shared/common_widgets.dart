@@ -2475,11 +2475,16 @@ class Progress extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // SizedBox is not always enough to constrain the indicator. Sometimes it should be
+    // accompanied with `Center`.
+    // https://stackoverflow.com/questions/51901379/how-to-set-size-to-circularprogressindicator
     return SizedBox(
       width: size,
       height: size,
-      child: CircularProgressIndicator(
-        color: Theme.of(context).textTheme.bodyLarge?.color,
+      child: Center(
+        child: CircularProgressIndicator(
+          color: Theme.of(context).textTheme.bodyLarge?.color,
+        ),
       ),
     );
   }
