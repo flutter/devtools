@@ -14,7 +14,12 @@ import 'package:vm_service/vm_service.dart';
 /// packages.
 @immutable
 class HeapClassName {
-  const HeapClassName({required this.className, required this.library});
+  HeapClassName({required this.className, required this.library}) {
+    assert(
+      !isCore || !isDartOrFlutter,
+      'isCore and isDartOrFlutter must be exclusive',
+    );
+  }
 
   HeapClassName.fromClassRef(ClassRef? classRef)
       : library = _library(classRef?.library?.name, classRef?.library?.uri),
@@ -24,8 +29,6 @@ class HeapClassName {
       : library =
             _library(theClass?.libraryName, theClass?.libraryUri.toString()),
         className = theClass?.name ?? '';
-
-  static const empty = HeapClassName(className: '', library: '');
 
   static String _library(String? libName, String? libUrl) {
     libName ??= '';
@@ -63,15 +66,26 @@ class HeapClassName {
     return false;
   }
 
-  bool get isStandard {
-    ;
+  /// True, if the library is a core library.
+  ///
+  /// I.e. if the library name is empty or does not have prefix
+  /// `dart.` or `package:`.
+  bool get isCore =>
+      library.isEmpty ||
+      (!library.startsWith('dart.') && !library.startsWith('package:'));
 
-    return library.isEmpty ||
-        !library.startsWith('package:') ||
-        library.startsWith('package:collection/') ||
-        library.startsWith('package:flutter/') ||
-        library.startsWith('package:intl/') ||
-        library.startsWith('package:vm_service/');
+  /// True, if the package has prefix `dart.` or has perfix `package:` and is
+  /// published by Dart or Flutter org.
+  bool get isDartOrFlutter {
+    if (library.startsWith('dart.')) return true;
+
+    const packagePrefix = 'package:';
+    if (!library.startsWith(packagePrefix)) return false;
+    final slashIndex = library.indexOf('/');
+    if (slashIndex == -1) return false;
+    final packageName = library.substring(packagePrefix.length, slashIndex);
+
+    return _dartAndFlutterPackages.contains(packageName);
   }
 
   @override
@@ -86,7 +100,8 @@ class HeapClassName {
   int get hashCode => fullName.hashCode;
 }
 
-const _standardLibs = {
+/// Packages that are published by dart.dev or flutter.dev.
+const _dartAndFlutterPackages = {
   'flutter',
 
   // https://pub.dev/publishers/dart.dev/packages

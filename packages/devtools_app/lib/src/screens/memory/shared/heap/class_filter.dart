@@ -33,14 +33,15 @@ class ClassFilter {
   ClassFilter.empty()
       : this(
           filterType: ClassFilterType.all,
-          except: standardLibrariesAlias,
+          except: '$coreLibrariesAlias\n$dartAndFlutterLibrariesAlias',
           only: null,
         );
 
   static String _trimByLine(String value) =>
       value.split('\n').map((e) => e.trim()).join('\n');
 
-  static const String standardLibrariesAlias = '\$standard-libraries';
+  static const String dartAndFlutterLibrariesAlias = '\$dart-flutter-libraries';
+  static const String coreLibrariesAlias = '\$core-libraries';
 
   final ClassFilterType filterType;
   final String except;
@@ -128,7 +129,9 @@ class ClassFilter {
 
   bool _isMatch(HeapClassName className, String filter) {
     if (className.fullName.contains(filter)) return true;
-    if (filter == standardLibrariesAlias && className.isStandard) return true;
+    if (filter == dartAndFlutterLibrariesAlias && className.isDartOrFlutter)
+      return true;
+    if (filter == coreLibrariesAlias && className.isCore) return true;
     return false;
   }
 }
