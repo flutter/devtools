@@ -202,12 +202,15 @@ class ClassesTableDiff extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: classes.filter,
       builder: (_, __, ___) {
+        final data = classes.filtered();
+        final dataKey = 'ClassesTableSingle-$data';
+
         return FlatTable<DiffClassStats>(
           columns: _columns,
           columnGroups: _columnGroups,
-          data: classes.filtered(),
-          dataKey: 'ClassesTableDiff',
-          keyFactory: (e) => Key(e.heapClass.fullName),
+          data: data,
+          dataKey: dataKey,
+          keyFactory: (e) => Key(dataKey),
           selectionNotifier: selection,
           defaultSortColumn: _retainedSizeDeltaColumn,
           defaultSortDirection: SortDirection.descending,

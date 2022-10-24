@@ -28,7 +28,6 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
   @override
   void initState() {
     super.initState();
-    print('!!!! dialog init state');
     _loadStateFromFilter(widget.classFilter.value);
   }
 

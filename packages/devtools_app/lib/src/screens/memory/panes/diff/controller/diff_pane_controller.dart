@@ -270,8 +270,12 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     return null;
   }
 
+  bool _updatingValues = false;
+
   /// Updates fields in this instance based on the values in [core].
   void _updateValues() {
+    assert(!_updatingValues);
+    _updatingValues = true;
     // Set classes to show.
     final classes = _snapshotClasses();
     heapClasses.value = classes;
@@ -301,5 +305,6 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     _selectedItem.value = _core.selectedItem;
 
     _assertIntegrity();
+    _updatingValues = false;
   }
 }

@@ -130,11 +130,13 @@ class ClassesTableSingle extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: classes.filter,
       builder: (_, __, ___) {
+        final data = classes.filtered();
+        final dataKey = 'ClassesTableSingle-$data';
         return FlatTable<SingleClassStats>(
           columns: _columns,
-          data: classes.filtered(),
-          dataKey: 'ClassesTableSingle',
-          keyFactory: (e) => Key(e.heapClass.fullName),
+          data: data,
+          dataKey: dataKey,
+          keyFactory: (e) => Key(dataKey),
           selectionNotifier: selection,
           defaultSortColumn: _shallowSizeColumn,
           defaultSortDirection: SortDirection.descending,
