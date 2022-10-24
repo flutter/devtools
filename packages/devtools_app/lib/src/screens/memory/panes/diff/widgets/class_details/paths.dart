@@ -8,8 +8,8 @@ import '../../../../../../primitives/utils.dart';
 import '../../../../../../shared/table/table.dart';
 import '../../../../../../shared/table/table_data.dart';
 import '../../../../../../shared/utils.dart';
-import '../../../../shared/heap/heap.dart';
 import '../../../../primitives/simple_elements.dart';
+import '../../../../shared/heap/heap.dart';
 
 class _RetainingPathColumn extends ColumnData<StatsByPathEntry> {
   _RetainingPathColumn(String className)

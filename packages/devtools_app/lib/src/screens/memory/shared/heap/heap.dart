@@ -4,10 +4,10 @@
 
 import 'package:flutter/foundation.dart';
 
+import '../../primitives/class_name.dart';
 import 'class_filter.dart';
 import 'model.dart';
 import 'spanning_tree.dart';
-import '../../primitives/class_name.dart';
 
 class AdaptedHeap {
   AdaptedHeap(this.data, this.filter);
