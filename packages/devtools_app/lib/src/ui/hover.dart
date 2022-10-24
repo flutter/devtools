@@ -402,13 +402,12 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
           spinnerHoverCard != null &&
           !_hoverCardController.isHoverCardStillActive(spinnerHoverCard),
     );
+    final hoverCardDataCompleter = _hoverCardDataCompleter(hoverCardDataFuture);
     // If we have set the async hover card to show up only after a timeout,
     // then race the timeout against generating the hover card data. If
     // generating the data completes first, immediately show the hover card
     // (or return early if there is no data).
     if (asyncTimeout != null) {
-      final hoverCardDataCompleter =
-          _hoverCardDataCompleter(hoverCardDataFuture);
       await Future.any([
         _timeoutCompleter(asyncTimeout).future,
         hoverCardDataCompleter.future,
@@ -441,7 +440,7 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
     );
 
     // The spinner is showing, we can now generate the HoverCardData
-    final hoverCardData = await hoverCardDataFuture;
+    final hoverCardData = await hoverCardDataCompleter.future;
 
     if (!_hoverCardController.isHoverCardStillActive(spinnerHoverCard)) {
       // The hovercard became stale while fetching it's data. So it should
@@ -453,6 +452,12 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
       _removeHoverCard(spinnerHoverCard);
       return;
     }
+
+    return _setHoverCardFromData(
+      hoverCardData,
+      context: context,
+      event: event,
+    );
   }
 
   void _setHoverCardFromData(
