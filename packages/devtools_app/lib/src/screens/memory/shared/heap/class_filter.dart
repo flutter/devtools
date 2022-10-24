@@ -115,6 +115,8 @@ class ClassFilter {
   }
 
   bool apply(HeapClassName className) {
+    if (filterType == ClassFilterType.all) return true;
+
     for (var filter in filters) {
       if (_isMatch(className, filter)) {
         return filterType == ClassFilterType.only;
