@@ -24,7 +24,7 @@ class ClassFilterDialog extends StatefulWidget {
 class _ClassFilterDialogState extends State<ClassFilterDialog> {
   bool _initialized = false;
   bool _showHelp = false;
-  late String _rootLib;
+  late String _rootPackage;
 
   late ClassFilterType _type;
   final _except = TextEditingController();
@@ -38,7 +38,7 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
 
   Future<void> _initialize() async {
     assert(!_initialized);
-    _rootLib = await tryToDetectRootLib();
+    _rootPackage = await tryToDetectRootPackage() ?? '';
     _loadStateFromFilter(widget.classFilter.value);
     setState(() => _initialized = true);
   }
@@ -54,7 +54,7 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
   void _loadStateFromFilter(ClassFilter filter) {
     _type = filter.filterType;
     _except.text = filter.except;
-    _only.text = filter.only ?? _rootLib;
+    _only.text = filter.only ?? _rootPackage;
   }
 
   @override

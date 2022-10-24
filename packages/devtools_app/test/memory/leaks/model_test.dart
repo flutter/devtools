@@ -23,7 +23,7 @@ void main() {
       heap: AdaptedHeapData(
         [
           AdaptedHeapObject(
-            heapClass:  HeapClassName(
+            heapClass: HeapClassName(
               className: 'class',
               library: 'library',
             ),

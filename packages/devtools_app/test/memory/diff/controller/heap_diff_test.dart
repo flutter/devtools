@@ -74,7 +74,7 @@ SingleClassStats _createClassStats(List<AdaptedHeapObject> instances) {
 
   final objects = [
     _createObject(
-       HeapClassName(className: 'root', library: 'lib'),
+      HeapClassName(className: 'root', library: 'lib'),
       0,
       indexes,
     ),
@@ -110,7 +110,7 @@ AdaptedHeap _createSimplestHeap() => AdaptedHeap(
           AdaptedHeapObject(
             code: 0,
             references: [],
-            heapClass:  HeapClassName(className: 'root', library: 'lib'),
+            heapClass: HeapClassName(className: 'root', library: 'lib'),
             shallowSize: 1,
           )
         ],

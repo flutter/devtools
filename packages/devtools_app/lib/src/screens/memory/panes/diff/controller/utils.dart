@@ -41,9 +41,13 @@ String classesToCsv(Iterable<ClassStats> classes) {
 }
 
 /// Returns root library or empty string.
-Future<String> tryToDetectRootLib() async {
+Future<String?> tryToDetectRootPackage() async {
   final isolateId = serviceManager.isolateManager.mainIsolate.value?.id;
-  if (isolateId == null) return '';
+  if (isolateId == null) return null;
   final isolate = await serviceManager.service?.getIsolate(isolateId);
-  return isolate?.rootLib?.uri ?? '';
+  final rootLib = isolate?.rootLib?.uri;
+  if (rootLib == null) return null;
+  final slashIndex = rootLib.indexOf('/');
+  if (slashIndex == -1) return null;
+  return rootLib.substring(0, slashIndex);
 }

@@ -54,7 +54,7 @@ class AllocationProfileRecord with PinnableListEntry {
 
   AllocationProfileRecord.total(AllocationProfile profile)
       : isTotal = true,
-        heapClass =  HeapClassName(className: 'All Classes', library: ''),
+        heapClass = HeapClassName(className: 'All Classes', library: ''),
         totalInstances = null,
         totalSize = (profile.memoryUsage?.externalUsage ?? 0) +
             (profile.memoryUsage?.heapUsage ?? 0),
