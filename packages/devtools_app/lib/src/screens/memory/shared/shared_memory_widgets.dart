@@ -5,7 +5,7 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../../devtools_app.dart';
-import 'heap/model.dart';
+import '../primitives/class_name.dart';
 
 class HeapClassView extends StatelessWidget {
   const HeapClassView({

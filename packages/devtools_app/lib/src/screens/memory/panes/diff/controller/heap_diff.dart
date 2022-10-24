@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../../../../../primitives/utils.dart';
+import '../../../primitives/class_name.dart';
 import '../../../shared/heap/class_filter.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';

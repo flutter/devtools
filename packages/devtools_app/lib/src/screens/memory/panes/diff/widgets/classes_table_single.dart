@@ -9,7 +9,7 @@ import '../../../../../shared/table/table.dart';
 import '../../../../../shared/table/table_data.dart';
 import '../../../../../shared/utils.dart';
 import '../../../shared/heap/heap.dart';
-import '../../../shared/heap/primitives.dart';
+import '../../../primitives/simple_elements.dart';
 import '../../../shared/shared_memory_widgets.dart';
 
 class _ClassNameColumn extends ColumnData<SingleClassStats>

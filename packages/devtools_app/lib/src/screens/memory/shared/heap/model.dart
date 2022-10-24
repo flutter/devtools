@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../primitives/class_name.dart';
 import '../../primitives/memory_utils.dart';
 
 /// Names for json fields.
@@ -270,80 +270,6 @@ class SnapshotTaker {
     if (snapshot == null) return null;
     return AdaptedHeapData.fromHeapSnapshot(snapshot);
   }
-}
-
-@immutable
-class HeapClassName {
-  const HeapClassName({required this.className, required this.library});
-
-  HeapClassName.fromClassRef(ClassRef? classRef)
-      : library = _library(classRef?.library?.name, classRef?.library?.uri),
-        className = classRef?.name ?? '';
-
-  HeapClassName.fromHeapSnapshotClass(HeapSnapshotClass? theClass)
-      : library =
-            _library(theClass?.libraryName, theClass?.libraryUri.toString()),
-        className = theClass?.name ?? '';
-
-  static const empty = HeapClassName(className: '', library: '');
-
-  static String _library(String? libName, String? libUrl) {
-    libName ??= '';
-    if (libName.isNotEmpty) return libName;
-    return libUrl ?? '';
-  }
-
-  final String className;
-  final String library;
-
-  String get fullName => library.isNotEmpty ? '$library/$className' : className;
-
-  bool get isSentinel => className == 'Sentinel' && library.isEmpty;
-
-  /// Detects if a class can retain an object from garbage collection.
-  bool get isWeakEntry {
-    // Classes that hold reference to an object without preventing
-    // its collection.
-    const weakHolders = {
-      '_WeakProperty': 'dart.core',
-      '_WeakReferenceImpl': 'dart.core',
-      'FinalizerEntry': 'dart._internal',
-    };
-
-    if (!weakHolders.containsKey(className)) return false;
-    if (weakHolders[className] == library) return true;
-
-    // If a class lives in unexpected library, this can be because of
-    // (1) name collision or (2) bug in this code.
-    // Throwing exception in debug mode to verify option #2.
-    // TODO(polina-c): create a way for users to add their weak classes
-    // or detect weak references automatically, without hard coding
-    // class names.
-    assert(false, 'Unexpected library for $className: $library.');
-    return false;
-  }
-
-  bool get isStandard {
-    //if (library.contains(other))
-    return library.isEmpty ||
-        library.startsWith('dart:') ||
-        library.startsWith('dart.') ||
-        library.startsWith('package:flutter/') ||
-        library.startsWith('package:vm_service/') ||
-        library.startsWith('package:collection/') ||
-        library == 'vector_math_64';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) {
-      return false;
-    }
-    return other is HeapClassName && other.fullName == fullName;
-  }
-
-  @override
-  int get hashCode => fullName.hashCode;
 }
 
 /// Mark the object as deeply immutable.

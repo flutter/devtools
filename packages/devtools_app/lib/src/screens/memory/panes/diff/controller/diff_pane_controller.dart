@@ -10,6 +10,7 @@ import 'package:flutter/foundation.dart';
 import '../../../../../config_specific/import_export/import_export.dart';
 import '../../../../../primitives/auto_dispose.dart';
 import '../../../../../primitives/utils.dart';
+import '../../../primitives/class_name.dart';
 import '../../../primitives/memory_utils.dart';
 import '../../../shared/heap/class_filter.dart';
 import '../../../shared/heap/heap.dart';
