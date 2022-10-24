@@ -46,7 +46,6 @@ import 'screens/vm_developer/vm_developer_tools_screen.dart';
 import 'service/service_extension_widgets.dart';
 import 'shared/common_widgets.dart';
 import 'shared/dialogs.dart';
-import 'shared/feature_flags.dart';
 import 'shared/globals.dart';
 import 'shared/routing.dart';
 import 'shared/screen.dart';
@@ -64,10 +63,13 @@ const showVmDeveloperMode = false;
 /// Top-level configuration for the app.
 @immutable
 class DevToolsApp extends StatefulWidget {
-  const DevToolsApp(
+  DevToolsApp(
     this.screens,
-    this.analyticsController,
-  );
+    this.analyticsController, {
+    required bool isExternalBuildValue,
+  }) {
+    isExternalBuild = isExternalBuildValue;
+  }
 
   final List<DevToolsScreen> screens;
   final AnalyticsController analyticsController;

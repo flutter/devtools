@@ -49,7 +49,11 @@ void main() async {
     runApp(
       ProviderScope(
         observers: const [ErrorLoggerObserver()],
-        child: DevToolsApp(defaultScreens, await analyticsController),
+        child: DevToolsApp(
+          defaultScreens,
+          await analyticsController,
+          isExternalBuildValue: true,
+        ),
       ),
     );
   });

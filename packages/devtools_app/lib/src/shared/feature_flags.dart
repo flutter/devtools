@@ -4,6 +4,8 @@
 
 import 'package:flutter/foundation.dart';
 
+import 'globals.dart';
+
 /// If true, features under construction will be enabled.
 ///
 /// By default, the constant is false.
@@ -18,14 +20,11 @@ import 'package:flutter/foundation.dart';
 bool _kEnableExperiments =
     const bool.fromEnvironment('enable_experiments') || !kReleaseMode;
 
-/// Whether this DevTools build is external.
-const bool isExternalBuild = true;
-
 /// If true, features, ready for beta testing, will be on.
 ///
 /// Always true when [_kEnableExperiments] is true.
 /// See [_kEnableExperiments] documentation  for usage.
-const bool _kEnableBeta = !isExternalBuild;
+late final bool _kEnableBeta = !isExternalBuild;
 
 // It is ok to have enum-like static only classes.
 // ignore: avoid_classes_with_only_static_members
