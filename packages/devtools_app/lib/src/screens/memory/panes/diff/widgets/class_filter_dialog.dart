@@ -23,7 +23,6 @@ class ClassFilterDialog extends StatefulWidget {
 
 class _ClassFilterDialogState extends State<ClassFilterDialog> {
   bool _initialized = false;
-  bool _showHelp = false;
   late String _rootPackage;
 
   late ClassFilterType _type;
@@ -62,47 +61,36 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textFieldLeftPadding = scaleByFontFactor(40.0);
-    final itemSpacing = scaleByFontFactor(28.0);
 
     void onTypeChanged(ClassFilterType? type) => setState(() => _type = type!);
 
     return DevToolsDialog(
       title: dialogTitleText(theme, 'Filter Classes and Packages'),
       content: !_initialized
-          ? Progress(size: 30.0)
+          ? const CenteredCircularProgressIndicator()
           : Container(
               width: defaultDialogWidth,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  IconLabelButton(
-                    tooltip: _showHelp ? 'Hide help' : 'Show help',
-                    icon: _showHelp
-                        ? Icons.keyboard_arrow_up
-                        : Icons.keyboard_arrow_down,
-                    label: 'Help',
-                    onPressed: () => setState(() => _showHelp = !_showHelp),
-                  ),
-                  if (_showHelp) ...[
-                    const SizedBox(height: denseSpacing),
-                    const Text('Choose and customize the filter.\n'
-                        'List full or partial class names separated by new lines. For example:\n\n'
-                        '  package:myPackage/src/myFolder/myLibrary.dart/MyClass\n'
-                        '  MyClass\n'
-                        '  package:myPackage/src/\n\n'
-                        'Specify:\n'
-                        '  - ${ClassFilter.coreLibrariesAlias} for core classes without package prefix\n'
-                        '  - ${ClassFilter.dartAndFlutterLibrariesAlias} for "dart." and "package:" libraries published by Dart and Flutter orgs.'),
-                  ],
-                  SizedBox(height: itemSpacing),
+                  const SizedBox(height: denseSpacing),
+                  const Text('Choose and customize the filter.\n'
+                      'List full or partial class names separated by new lines. For example:\n\n'
+                      '  package:myPackage/src/myFolder/myLibrary.dart/MyClass\n'
+                      '  MyClass\n'
+                      '  package:myPackage/src/\n\n'
+                      'Specify:\n'
+                      '  - ${ClassFilter.coreLibrariesAlias} for core classes without package prefix\n'
+                      '  - ${ClassFilter.dartAndFlutterLibrariesAlias} for "dart." and "package:" libraries published by Dart and Flutter orgs.'),
+                  const SizedBox(height: defaultSpacing),
                   RadioButton<ClassFilterType>(
                     label: 'Show all classes',
                     itemValue: ClassFilterType.all,
                     groupValue: _type,
                     onChanged: onTypeChanged,
                   ),
-                  SizedBox(height: itemSpacing),
+                  const SizedBox(height: defaultSpacing),
                   RadioButton<ClassFilterType>(
                     label: 'Show all classes except:',
                     itemValue: ClassFilterType.except,
@@ -117,7 +105,7 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
                       controller: _except,
                     ),
                   ),
-                  SizedBox(height: itemSpacing),
+                  const SizedBox(height: defaultSpacing),
                   RadioButton<ClassFilterType>(
                     label: 'Show only:',
                     itemValue: ClassFilterType.only,

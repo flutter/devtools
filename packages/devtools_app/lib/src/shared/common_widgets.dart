@@ -1414,12 +1414,22 @@ class CenteredMessage extends StatelessWidget {
 }
 
 class CenteredCircularProgressIndicator extends StatelessWidget {
-  const CenteredCircularProgressIndicator();
+  const CenteredCircularProgressIndicator({this.size});
+
+  final double? size;
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    const indicator = Center(
       child: CircularProgressIndicator(),
+    );
+
+    if (size == null) return indicator;
+
+    return SizedBox(
+      width: size,
+      height: size,
+      child: indicator,
     );
   }
 }
@@ -2462,29 +2472,6 @@ class BulletSpacer extends StatelessWidget {
       child: Text(
         '•',
         style: textStyle?.copyWith(color: mutedColor),
-      ),
-    );
-  }
-}
-
-class Progress extends StatelessWidget {
-  Progress({Key? key, double? size})
-      : size = size ?? smallProgressSize,
-        super(key: key);
-  final double size;
-
-  @override
-  Widget build(BuildContext context) {
-    // SizedBox is not always enough to constrain the indicator. Sometimes it should be
-    // accompanied with `Center`.
-    // https://stackoverflow.com/questions/51901379/how-to-set-size-to-circularprogressindicator
-    return SizedBox(
-      width: size,
-      height: size,
-      child: Center(
-        child: CircularProgressIndicator(
-          color: Theme.of(context).textTheme.bodyLarge?.color,
-        ),
       ),
     );
   }

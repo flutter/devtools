@@ -88,7 +88,7 @@ class _SnapshotListTitle extends StatelessWidget {
               child: Text('Snapshots', overflow: TextOverflow.ellipsis),
             ),
           if (isProcessing) ...[
-            Progress(),
+            CenteredCircularProgressIndicator(size: smallProgressSize),
             const SizedBox(width: denseRowSpacing)
           ],
         ],
