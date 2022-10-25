@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../../../../../shared/globals.dart';
+import '../../../../../shared/utils.dart';
 import '../../../shared/heap/heap.dart';
 
 String classesToCsv(Iterable<ClassStats> classes) {
@@ -40,19 +40,9 @@ String classesToCsv(Iterable<ClassStats> classes) {
   return csvBuffer.toString();
 }
 
-String? _cashedIsolateId;
-String? _cashedRootPackage;
-
-/// Returns root library or empty string.
+/// Returns root package or empty string.
 Future<String?> tryToDetectRootPackage() async {
-  final isolateId = serviceManager.isolateManager.mainIsolate.value?.id;
-  if (isolateId == null) return null;
-
-  if (_cashedIsolateId == isolateId) return _cashedRootPackage;
-  _cashedIsolateId = isolateId;
-
-  final isolate = await serviceManager.service?.getIsolate(isolateId);
-  final rootLib = isolate?.rootLib?.uri;
+  final rootLib = await tryToDetectRootLib();
   if (rootLib == null) return null;
   final slashIndex = rootLib.indexOf('/');
   if (slashIndex == -1) return null;

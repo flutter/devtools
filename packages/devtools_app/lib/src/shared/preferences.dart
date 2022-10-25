@@ -5,15 +5,15 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+
 import '../analytics/analytics.dart' as ga;
-
 import '../analytics/constants.dart' as analytics_constants;
-
 import '../primitives/auto_dispose.dart';
 import '../primitives/utils.dart';
 import '../screens/inspector/inspector_service.dart';
 import '../service/vm_service_wrapper.dart';
 import 'globals.dart';
+import 'utils.dart';
 
 /// A controller for global application preferences.
 class PreferencesController extends DisposableController
@@ -102,17 +102,14 @@ class InspectorPreferencesController extends DisposableController
   String? _mainScriptDir;
 
   Future<void> _updateMainScriptRef() async {
-    final isolateRef = serviceManager.isolateManager.mainIsolate.value!;
-    if (isolateRef.id != null) {
-      final isolate = await serviceManager.service?.getIsolate(isolateRef.id!);
-      final rootLibUri = Uri.parse(isolate?.rootLib?.uri ?? '');
-      final directorySegments = rootLibUri.pathSegments
-          .sublist(0, rootLibUri.pathSegments.length - 1);
-      final rootLibDirectory = rootLibUri.replace(
-        pathSegments: directorySegments,
-      );
-      _mainScriptDir = rootLibDirectory.path;
-    }
+    final rootLibUriString = await tryToDetectRootLib();
+    final rootLibUri = Uri.parse(rootLibUriString ?? '');
+    final directorySegments =
+        rootLibUri.pathSegments.sublist(0, rootLibUri.pathSegments.length - 1);
+    final rootLibDirectory = rootLibUri.replace(
+      pathSegments: directorySegments,
+    );
+    _mainScriptDir = rootLibDirectory.path;
   }
 
   Future<void> init() async {

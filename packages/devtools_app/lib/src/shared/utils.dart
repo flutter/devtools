@@ -159,3 +159,19 @@ mixin ProvidedControllerMixin<T, V extends StatefulWidget> on State<V> {
     return true;
   }
 }
+
+String? _cashedIsolateId;
+String? _cashedRootPackage;
+
+/// Returns root library or empty string.
+Future<String?> tryToDetectRootLib() async {
+  final isolateId = serviceManager.isolateManager.mainIsolate.value?.id;
+  if (isolateId == null) return null;
+
+  if (_cashedIsolateId == isolateId) return _cashedRootPackage;
+  _cashedIsolateId = isolateId;
+
+  final isolate = await serviceManager.service?.getIsolate(isolateId);
+  final rootLib = isolate?.rootLib?.uri;
+  return rootLib;
+}

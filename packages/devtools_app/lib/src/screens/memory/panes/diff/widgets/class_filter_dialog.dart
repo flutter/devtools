@@ -39,6 +39,7 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
   Future<void> _initialize() async {
     assert(!_initialized);
     _rootPackage = await tryToDetectRootPackage() ?? '';
+    if (_rootPackage.isNotEmpty) _rootPackage = '$_rootPackage/';
     _loadStateFromFilter(widget.classFilter.value);
     setState(() => _initialized = true);
   }
