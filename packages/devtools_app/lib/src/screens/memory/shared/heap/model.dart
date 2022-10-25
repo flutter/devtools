@@ -146,9 +146,8 @@ class ClassOnlyHeapPath {
     if (hideStandard) {
       data = [];
       for (var item in classes.asMap().entries) {
-        if (item.key == 0 ||
-            item.key == classes.length - 1 ||
-            !item.value.isDartOrFlutter) {
+        final isStandard = item.value.isDartOrFlutter || item.value.isCore;
+        if (item.key == 0 || item.key == classes.length - 1 || !isStandard) {
           data.add(item.value.fullName);
           justAddedEllipsis = false;
         } else {
