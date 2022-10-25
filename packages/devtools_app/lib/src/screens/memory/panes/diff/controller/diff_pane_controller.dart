@@ -230,21 +230,23 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
 
   void _assertIntegrity() {
     assert(() {
-      var singleIsHidden = true;
-      var diffIsHidden = true;
+      var singleHidden = true;
+      var diffHidden = true;
+      var context = 'no data';
       final item = selectedItem.value;
       if (item is SnapshotInstanceItem) {
-        diffIsHidden = item.diffWith.value == null;
-        singleIsHidden = !diffIsHidden;
+        diffHidden = item.diffWith.value == null;
+        singleHidden = !diffHidden;
+        context = diffHidden ? 'single' : 'diff';
       }
 
-      assert(singleIsHidden || diffIsHidden);
+      assert(singleHidden || diffHidden);
 
-      assert((selectedSingleClassStats.value == null) == singleIsHidden);
-      assert((selectedDiffClassStats.value == null) == diffIsHidden);
+      if (singleHidden) assert(selectedSingleClassStats.value == null, context);
+      if (diffHidden) assert(selectedDiffClassStats.value == null, context);
 
-      assert((singleClassesToShow.value == null) == singleIsHidden);
-      assert((diffClassesToShow.value == null) == diffIsHidden);
+      assert((singleClassesToShow.value == null) == singleHidden, context);
+      assert((diffClassesToShow.value == null) == diffHidden, context);
 
       return true;
     }());
