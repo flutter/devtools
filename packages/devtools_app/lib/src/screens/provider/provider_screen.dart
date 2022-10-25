@@ -165,7 +165,7 @@ class _StateInspectorSettingsDialog extends ConsumerWidget {
     final theme = Theme.of(context);
 
     return DevToolsDialog(
-      title: dialogTitleText(theme, title),
+      title: DialogTitleText(theme: theme, text: title),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -38,7 +38,7 @@ class DeviceDialog extends StatelessWidget {
     // TODO(kenz): set actions alignment to `spaceBetween` if
     // https://github.com/flutter/flutter/issues/69708 is fixed.
     return DevToolsDialog(
-      title: dialogTitleText(theme, 'Device Info'),
+      title: DialogTitleText(theme: theme, text: 'Device Info'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -151,7 +151,7 @@ class _VMFlagsDialogState extends State<VMFlagsDialog> with AutoDisposeMixin {
     return DevToolsDialog(
       title: Row(
         children: [
-          dialogTitleText(theme, 'VM Flags'),
+          DialogTitleText(theme: theme, text: 'VM Flags'),
           const Expanded(child: SizedBox(width: denseSpacing)),
           Container(
             width: defaultSearchTextWidth,

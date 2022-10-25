@@ -18,7 +18,7 @@ class DevToolsAboutDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return DevToolsDialog(
-      title: dialogTitleText(theme, 'About DevTools'),
+      title: DialogTitleText(theme: theme, text: 'About DevTools'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,

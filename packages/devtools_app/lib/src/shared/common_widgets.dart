@@ -2417,7 +2417,7 @@ class HelpButtonWithDialog extends StatelessWidget {
         showDialog(
           context: context,
           builder: (context) => DevToolsDialog(
-            title: dialogTitleText(theme, dialogTitle),
+            title: DialogTitleText(theme: theme, text: dialogTitle),
             includeDivider: false,
             content: child,
             actions: [

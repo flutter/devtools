@@ -5,13 +5,21 @@
 import 'package:flutter/material.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 
+import '../ui/label.dart';
 import 'common_widgets.dart';
 import 'theme.dart';
 
 const dialogDefaultContext = 'dialog';
 
-Text dialogTitleText(ThemeData theme, String text) {
-  return Text(text, style: theme.textTheme.titleLarge);
+class DialogTitleText extends StatelessWidget {
+  const DialogTitleText({super.key, required this.text, required this.theme});
+
+  final ThemeData theme;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) =>
+      Text(text, style: theme.textTheme.titleLarge);
 }
 
 List<Widget> dialogSubHeader(ThemeData theme, String titleText) {
@@ -19,6 +27,94 @@ List<Widget> dialogSubHeader(ThemeData theme, String titleText) {
     Text(titleText, style: theme.textTheme.titleMedium),
     const PaddedDivider(padding: EdgeInsets.only(bottom: denseRowSpacing)),
   ];
+}
+
+/// A standardized dialog with help text and buttons `Reset to default`,
+/// `APPLY` and `CANCEL`.
+class DialogWithDefaults extends StatelessWidget {
+  const DialogWithDefaults({
+    super.key,
+    required this.title,
+    required this.child,
+    this.helpText,
+    this.onResetDefaults,
+    this.onApply,
+    this.onCancel,
+    this.dialogWidth,
+  });
+
+  final String title;
+  final String? helpText;
+  final VoidCallback? onResetDefaults;
+  final VoidCallback? onApply;
+  final VoidCallback? onCancel;
+  final Widget child;
+  final double? dialogWidth;
+
+  @override
+  Widget build(BuildContext context) {
+    return DevToolsDialog(
+      title: _DialogWithDefaultsTitle(onResetDefaults: onResetDefaults),
+      content: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: defaultSpacing,
+        ),
+        width: dialogWidth ?? defaultDialogWidth,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            child,
+            if (helpText != null) ...[
+              const SizedBox(height: defaultSpacing),
+              DialogHelpText(helpText: helpText!),
+              const SizedBox(height: defaultSpacing),
+            ],
+          ],
+        ),
+      ),
+      actions: [
+        DialogApplyButton(onPressed: onApply ?? () {}),
+        DialogCancelButton(cancelAction: onCancel),
+      ],
+    );
+  }
+}
+
+class _DialogWithDefaultsTitle extends StatelessWidget {
+  const _DialogWithDefaultsTitle({this.onResetDefaults});
+  final VoidCallback? onResetDefaults;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        DialogTitleText(theme: Theme.of(context), text: 'Filters'),
+        TextButton(
+          onPressed: onResetDefaults,
+          child: const MaterialIconLabel(
+            label: 'Reset to default',
+            iconData: Icons.replay,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class DialogHelpText extends StatelessWidget {
+  const DialogHelpText({super.key, required this.helpText});
+
+  final String helpText;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      helpText,
+      style: Theme.of(context).subtleTextStyle,
+    );
+  }
 }
 
 /// A standardized dialog for use in DevTools.

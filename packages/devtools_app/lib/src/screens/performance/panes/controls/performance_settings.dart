@@ -20,7 +20,7 @@ class PerformanceSettingsDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return DevToolsDialog(
-      title: dialogTitleText(theme, 'Performance Settings'),
+      title: DialogTitleText(theme: theme, text: 'Performance Settings'),
       includeDivider: false,
       content: Container(
         width: defaultDialogWidth,
