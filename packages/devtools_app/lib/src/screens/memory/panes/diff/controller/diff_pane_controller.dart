@@ -105,6 +105,8 @@ class DiffPaneController extends DisposableController {
   }
 
   void applyFilter(ClassFilter filter) {
+    print('!!!! applyFilter');
+    if (filter.equals(core._classFilter.value)) return;
     core._classFilter.value = filter;
     derived._updateValues();
   }

@@ -23,6 +23,8 @@ class SnapshotView extends StatelessWidget {
     return ValueListenableBuilder<HeapClasses?>(
       valueListenable: controller.derived.heapClasses,
       builder: (_, classes, __) {
+        print('!!!! rebuild snapshot view');
+
         if (classes == null) {
           if (controller.isProcessing.value) {
             return const SizedBox.shrink();
@@ -31,15 +33,15 @@ class SnapshotView extends StatelessWidget {
           }
         }
 
-        late Widget table1;
+        late Widget classTable;
 
         if (classes is SingleHeapClasses) {
-          table1 = ClassesTableSingle(
+          classTable = ClassesTableSingle(
             classes: controller.derived.singleClassesToShow.value!,
             selection: controller.derived.selectedSingleClassStats,
           );
         } else if (classes is DiffHeapClasses) {
-          table1 = ClassesTableDiff(
+          classTable = ClassesTableDiff(
             classes: controller.derived.diffClassesToShow.value!,
             selection: controller.derived.selectedDiffClassStats,
           );
@@ -47,7 +49,7 @@ class SnapshotView extends StatelessWidget {
           throw StateError('Unexpected type: ${classes.runtimeType}.');
         }
 
-        final table2 = ValueListenableBuilder<List<StatsByPathEntry>?>(
+        final pathTable = ValueListenableBuilder<List<StatsByPathEntry>?>(
           valueListenable: controller.derived.pathEntries,
           builder: (_, entries, __) => HeapClassDetails(
             entries: entries,
@@ -63,8 +65,8 @@ class SnapshotView extends StatelessWidget {
           initialFractions: const [0.4, 0.6],
           minSizes: const [80, 80],
           children: [
-            OutlineDecoration(child: table1),
-            OutlineDecoration(child: table2),
+            OutlineDecoration(child: classTable),
+            OutlineDecoration(child: pathTable),
           ],
         );
       },

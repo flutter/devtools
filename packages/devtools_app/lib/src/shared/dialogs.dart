@@ -35,10 +35,10 @@ class StateUpdateDialog extends StatelessWidget {
     super.key,
     required this.title,
     required this.child,
-    this.helpText,
-    this.onResetDefaults,
-    this.onApply,
-    this.onCancel,
+    required this.helpText,
+    required this.onResetDefaults,
+    required this.onApply,
+    required this.onCancel,
     this.dialogWidth,
   });
 

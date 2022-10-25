@@ -64,90 +64,75 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final textFieldLeftPadding = scaleByFontFactor(40.0);
-
     void onTypeChanged(ClassFilterType? type) => setState(() => _type = type!);
 
-    return DevToolsDialog(
-      title: dialogTitleText(theme, 'Filter Classes and Packages'),
-      content: !_initialized
-          ? const CenteredCircularProgressIndicator()
-          : Container(
-              width: defaultDialogWidth,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: denseSpacing),
-                  const Text('Choose and customize the filter.\n'
-                      'List full or partial class names separated by new lines. For example:\n\n'
-                      '  package:myPackage/src/myFolder/myLibrary.dart/MyClass\n'
-                      '  MyClass\n'
-                      '  package:myPackage/src/\n\n'
-                      'Specify:\n'
-                      '  - ${ClassFilter.coreLibrariesAlias} for core classes without package prefix\n'
-                      '  - ${ClassFilter.dartAndFlutterLibrariesAlias} for "dart." and "package:" libraries published by Dart and Flutter orgs.'),
-                  const SizedBox(height: defaultSpacing),
-                  RadioButton<ClassFilterType>(
-                    label: 'Show all classes',
-                    itemValue: ClassFilterType.all,
-                    groupValue: _type,
-                    onChanged: onTypeChanged,
-                  ),
-                  const SizedBox(height: defaultSpacing),
-                  RadioButton<ClassFilterType>(
-                    label: 'Show all classes except:',
-                    itemValue: ClassFilterType.except,
-                    groupValue: _type,
-                    onChanged: onTypeChanged,
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(left: textFieldLeftPadding),
-                    child: TextField(
-                      keyboardType: TextInputType.multiline,
-                      maxLines: null,
-                      controller: _except,
-                    ),
-                  ),
-                  const SizedBox(height: defaultSpacing),
-                  RadioButton<ClassFilterType>(
-                    label: 'Show only:',
-                    itemValue: ClassFilterType.only,
-                    groupValue: _type,
-                    onChanged: onTypeChanged,
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(left: textFieldLeftPadding),
-                    child: TextField(
-                      keyboardType: TextInputType.multiline,
-                      maxLines: null,
-                      controller: _only,
-                    ),
-                  ),
-                ],
-              ),
+    return StateUpdateDialog(
+      title: 'Filter Classes and Packages',
+      helpText: 'Choose and customize the filter.\n'
+          'List full or partial class names separated by new lines. For example:\n\n'
+          '  package:myPackage/src/myFolder/myLibrary.dart/MyClass\n'
+          '  MyClass\n'
+          '  package:myPackage/src/\n\n'
+          'Specify:\n'
+          '  - ${ClassFilter.coreLibrariesAlias} for core classes without package prefix\n'
+          '  - ${ClassFilter.dartAndFlutterLibrariesAlias} for "dart." and "package:" libraries published by Dart and Flutter orgs.',
+      onResetDefaults: () =>
+          setState(() => _loadStateFromFilter(ClassFilter.empty())),
+      onApply: () {
+        print('!!!!! applying filter...');
+        final newFilter = ClassFilter(
+          filterType: _type,
+          except: _except.text,
+          only: _only.text,
+        );
+
+        widget.onChanged(newFilter);
+        print('!!!!! called onChanged...');
+      },
+      onCancel: null,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          RadioButton<ClassFilterType>(
+            label: 'Show all classes',
+            itemValue: ClassFilterType.all,
+            groupValue: _type,
+            onChanged: onTypeChanged,
+          ),
+          const SizedBox(height: defaultSpacing),
+          RadioButton<ClassFilterType>(
+            label: 'Show all classes except:',
+            itemValue: ClassFilterType.except,
+            groupValue: _type,
+            onChanged: onTypeChanged,
+          ),
+          Padding(
+            padding: EdgeInsets.only(left: textFieldLeftPadding),
+            child: TextField(
+              keyboardType: TextInputType.multiline,
+              maxLines: null,
+              controller: _except,
             ),
-      actions: [
-        DialogTextButton(
-          onPressed: () =>
-              setState(() => _loadStateFromFilter(ClassFilter.empty())),
-          child: const Text('Reset Defaults'),
-        ),
-        DialogCloseButton(
-          label: 'OK',
-          onClose: () {
-            final newFilter = ClassFilter(
-              filterType: _type,
-              except: _except.text,
-              only: _only.text,
-            );
-            if (newFilter.equals(widget.classFilter)) return;
-            widget.onChanged(newFilter);
-          },
-        ),
-        const DialogCancelButton(),
-      ],
+          ),
+          const SizedBox(height: defaultSpacing),
+          RadioButton<ClassFilterType>(
+            label: 'Show only:',
+            itemValue: ClassFilterType.only,
+            groupValue: _type,
+            onChanged: onTypeChanged,
+          ),
+          Padding(
+            padding: EdgeInsets.only(left: textFieldLeftPadding),
+            child: TextField(
+              keyboardType: TextInputType.multiline,
+              maxLines: null,
+              controller: _only,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
