@@ -55,23 +55,22 @@ class StateUpdateDialog extends StatelessWidget {
     return DevToolsDialog(
       title: _StateUpdateDialogTitle(onResetDefaults: onResetDefaults),
       content: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: defaultSpacing,
+        padding: const EdgeInsets.only(
+          left: defaultSpacing,
+          right: defaultSpacing,
+          bottom: defaultSpacing,
         ),
         width: dialogWidth ?? defaultDialogWidth,
-        child: Padding(
-          padding: const EdgeInsets.only(bottom: defaultSpacing),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              child,
-              if (helpText != null) ...[
-                const SizedBox(height: defaultSpacing),
-                DialogHelpText(helpText: helpText!),
-              ],
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            child,
+            if (helpText != null) ...[
+              const SizedBox(height: defaultSpacing),
+              DialogHelpText(helpText: helpText!),
             ],
-          ),
+          ],
         ),
       ),
       actions: [
