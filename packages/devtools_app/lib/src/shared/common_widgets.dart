@@ -2410,14 +2410,13 @@ class HelpButtonWithDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return HelpButton(
       onPressed: () {
         ga.select(gaScreen, gaSelection);
         showDialog(
           context: context,
           builder: (context) => DevToolsDialog(
-            title: dialogTitleText(theme, dialogTitle),
+            title: DialogTitleText(dialogTitle),
             includeDivider: false,
             content: child,
             actions: [
