@@ -22,7 +22,7 @@ class SnapshotControlPane extends StatelessWidget {
   Widget build(BuildContext context) {
     final theFilter = controller.core.classFilter;
     return ValueListenableBuilder<bool>(
-      valueListenable: controller.isProcessing,
+      valueListenable: controller.isTakingSnapshot,
       builder: (_, isProcessing, __) {
         final current = controller.core.selectedItem as SnapshotInstanceItem;
 
@@ -44,7 +44,10 @@ class SnapshotControlPane extends StatelessWidget {
                       builder: (_, filterValue, ___) => FilterButton(
                         onPressed: () => showDialog(
                           context: context,
-                          builder: (context) => ClassFilterDialog(filterValue, onChanged: controller.applyFilter,),
+                          builder: (context) => ClassFilterDialog(
+                            filterValue,
+                            onChanged: controller.applyFilter,
+                          ),
                         ),
                         isFilterActive: !theFilter.value.isEmpty,
                         message: theFilter.value.buttonTooltip,

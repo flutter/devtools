@@ -64,6 +64,8 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
 
   @override
   Widget build(BuildContext context) {
+    if (!_initialized) return const CenteredCircularProgressIndicator();
+
     final textFieldLeftPadding = scaleByFontFactor(40.0);
     void onTypeChanged(ClassFilterType? type) => setState(() => _type = type!);
 
@@ -80,15 +82,12 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
       onResetDefaults: () =>
           setState(() => _loadStateFromFilter(ClassFilter.empty())),
       onApply: () {
-        print('!!!!! applying filter...');
         final newFilter = ClassFilter(
           filterType: _type,
           except: _except.text,
           only: _only.text,
         );
-
         widget.onChanged(newFilter);
-        print('!!!!! called onChanged...');
       },
       onCancel: null,
       child: Column(

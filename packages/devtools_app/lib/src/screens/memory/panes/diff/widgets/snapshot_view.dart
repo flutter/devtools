@@ -20,33 +20,40 @@ class SnapshotView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<HeapClasses?>(
-      valueListenable: controller.derived.heapClasses,
-      builder: (_, classes, __) {
-        print('!!!! rebuild snapshot view');
+    return DualValueListenableBuilder<List<SingleClassStats>?,
+        List<DiffClassStats>?>(
+      firstListenable: controller.derived.singleClassesToShow,
+      secondListenable: controller.derived.diffClassesToShow,
+      builder: (_, singleClasses, diffClasses, __) {
+        if (controller.derived.updatingValues) {
+          return const Center(child: Text('Calculating...'));
+        }
 
+        final classes = controller.derived.heapClasses.value;
         if (classes == null) {
-          if (controller.isProcessing.value) {
+          if (controller.isTakingSnapshot.value) {
             return const SizedBox.shrink();
           } else {
             return const Center(child: Text('Could not take snapshot.'));
           }
         }
 
+        assert((singleClasses == null) != (diffClasses == null));
+
         late Widget classTable;
 
-        if (classes is SingleHeapClasses) {
+        if (singleClasses != null) {
           classTable = ClassesTableSingle(
-            classes: controller.derived.singleClassesToShow.value!,
+            classes: singleClasses,
             selection: controller.derived.selectedSingleClassStats,
           );
-        } else if (classes is DiffHeapClasses) {
+        } else if (diffClasses != null) {
           classTable = ClassesTableDiff(
             classes: controller.derived.diffClassesToShow.value!,
             selection: controller.derived.selectedDiffClassStats,
           );
         } else {
-          throw StateError('Unexpected type: ${classes.runtimeType}.');
+          throw StateError('singleClasses or diffClasses should not be null.');
         }
 
         final pathTable = ValueListenableBuilder<List<StatsByPathEntry>?>(

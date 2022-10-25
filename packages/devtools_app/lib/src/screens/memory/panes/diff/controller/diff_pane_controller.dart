@@ -25,9 +25,9 @@ class DiffPaneController extends DisposableController {
 
   final SnapshotTaker snapshotTaker;
 
-  /// If true, some process is going on.
-  ValueListenable<bool> get isProcessing => _isProcessing;
-  final _isProcessing = ValueNotifier<bool>(false);
+  /// If true, a snapshot is being taken.
+  ValueListenable<bool> get isTakingSnapshot => _isTakingSnapshot;
+  final _isTakingSnapshot = ValueNotifier<bool>(false);
 
   final retainingPathController = RetainingPathController();
 
@@ -43,7 +43,7 @@ class DiffPaneController extends DisposableController {
   int _snapshotId = 0;
 
   Future<void> takeSnapshot() async {
-    _isProcessing.value = true;
+    _isTakingSnapshot.value = true;
     final future = snapshotTaker.take();
     final snapshots = core._snapshots;
 
@@ -58,7 +58,7 @@ class DiffPaneController extends DisposableController {
 
     final newElementIndex = snapshots.value.length - 1;
     core._selectedSnapshotIndex.value = newElementIndex;
-    _isProcessing.value = false;
+    _isTakingSnapshot.value = false;
     derived._updateValues();
   }
 
@@ -105,7 +105,6 @@ class DiffPaneController extends DisposableController {
   }
 
   void applyFilter(ClassFilter filter) {
-    print('!!!! applyFilter');
     if (filter.equals(core._classFilter.value)) return;
     core._classFilter.value = filter;
     derived._updateValues();
@@ -298,17 +297,17 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     return null;
   }
 
+  bool get updatingValues => _updatingValues;
   bool _updatingValues = false;
 
   /// Updates fields in this instance based on the values in [core].
   void _updateValues() {
+    // Make sure the method does not trigger itself recursively.
     assert(!_updatingValues);
     _updatingValues = true;
 
     // Set class to show.
     final classes = _snapshotClassesAfterDiffing();
-
-    // do we need heapClasses field?
     heapClasses.value = classes;
     _updateClasses(
       classes: classes,

@@ -37,7 +37,7 @@ class _ListControlPane extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
-      valueListenable: controller.isProcessing,
+      valueListenable: controller.isTakingSnapshot,
       builder: (_, isProcessing, __) {
         final takeSnapshotEnabled = !isProcessing;
         final clearAllEnabled = !isProcessing && controller.hasSnapshots;
