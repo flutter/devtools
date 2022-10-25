@@ -25,15 +25,6 @@ const String rasterEventNameWithFrameNumber = 'Rasterizer::DoDraw';
 
 const String uiEventName = 'Animator::BeginFrame';
 
-const String messageLoopFlushTasks = 'MessageLoop::FlushTasks';
-
-const String vsyncSchedulingOverhead = 'VsyncSchedulingOverhead';
-
-const String sceneDisplayLag = 'SceneDisplayLag';
-
-// For Flutter apps, PipelineItem flow events signal frame start and end events.
-const String pipelineItem = 'PipelineItem';
-
 /// Processor for composing a recorded list of trace events into a timeline of
 /// [AsyncTimelineEvent]s, [SyncTimelineEvent]s, and [FlutterFrame]s.
 class TimelineEventProcessor {
