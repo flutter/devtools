@@ -22,9 +22,11 @@ class Disposer {
   @protected
   @visibleForTesting
   List<Listenable> get listenables => _listenables;
+
+  
   @protected
   @visibleForTesting
-  List<VoidCallback> get listeners => _listeners;
+  List<void Function()> get listeners => _listeners;
 
   final List<Listenable> _listenables = [];
   final List<VoidCallback> _listeners = [];
@@ -153,7 +155,7 @@ mixin AutoDisposeControllerMixin on DisposableController implements Disposer {
 
   @override
   @visibleForTesting
-  List<VoidCallback> get listeners => _delegate.listeners;
+  List<void Function()> get listeners => _delegate.listeners;
 
   @override
   void dispose() {
