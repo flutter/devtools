@@ -13,7 +13,6 @@ import '../primitives/utils.dart';
 import '../screens/inspector/inspector_service.dart';
 import '../service/vm_service_wrapper.dart';
 import 'globals.dart';
-import 'utils.dart';
 
 /// A controller for global application preferences.
 class PreferencesController extends DisposableController
@@ -102,7 +101,7 @@ class InspectorPreferencesController extends DisposableController
   String? _mainScriptDir;
 
   Future<void> _updateMainScriptRef() async {
-    final rootLibUriString = await tryToDetectRootLib();
+    final rootLibUriString = await serviceManager.tryToDetectRootLib();
     final rootLibUri = Uri.parse(rootLibUriString ?? '');
     final directorySegments =
         rootLibUri.pathSegments.sublist(0, rootLibUri.pathSegments.length - 1);

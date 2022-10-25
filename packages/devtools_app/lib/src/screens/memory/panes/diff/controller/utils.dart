@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../../../../../shared/utils.dart';
+import '../../../../../../devtools_app.dart';
 import '../../../shared/heap/heap.dart';
 
 String classesToCsv(Iterable<ClassStats> classes) {
@@ -42,7 +42,7 @@ String classesToCsv(Iterable<ClassStats> classes) {
 
 /// Returns root package or empty string.
 Future<String?> tryToDetectRootPackage() async {
-  final rootLib = await tryToDetectRootLib();
+  final rootLib = await serviceManager.tryToDetectRootLib();
   if (rootLib == null) return null;
   final slashIndex = rootLib.indexOf('/');
   if (slashIndex == -1) return null;
