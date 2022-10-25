@@ -162,7 +162,8 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
     final theme = Theme.of(context);
 
     return DevToolsDialog(
-      title: DialogTitleText(theme: theme, text: 'Memory Filter Libraries and Classes'),
+      title: DialogTitleText(
+          theme: theme, text: 'Memory Filter Libraries and Classes'),
       includeDivider: false,
       content: Container(
         width: defaultDialogWidth,
