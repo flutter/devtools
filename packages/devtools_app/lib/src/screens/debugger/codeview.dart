@@ -1220,7 +1220,7 @@ class GoToLineDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DevToolsDialog(
-      title: dialogTitleText(Theme.of(context), 'Go To'),
+      title: const DialogTitleText('Go To'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
