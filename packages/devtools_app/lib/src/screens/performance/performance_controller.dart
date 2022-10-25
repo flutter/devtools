@@ -31,6 +31,7 @@ import '../profiler/profile_granularity.dart';
 import 'panes/controls/enhance_tracing/enhance_tracing_controller.dart';
 import 'panes/raster_stats/raster_stats_controller.dart';
 import 'panes/timeline_events/perfetto/perfetto.dart';
+import 'panes/timeline_events/perfetto/trace_event_processor.dart';
 import 'performance_model.dart';
 import 'performance_screen.dart';
 import 'performance_utils.dart';
@@ -59,7 +60,8 @@ bool rasterStatsSupported = true;
 class PerformanceController extends DisposableController
     with SearchControllerMixin<TimelineEvent>, AutoDisposeControllerMixin {
   PerformanceController() {
-    processor = TimelineEventProcessor(this);
+    legacyProcessor = TimelineEventProcessor(this);
+    perfettoProcessor = PerfettoEventProcessor(this);
     _init();
   }
 
@@ -129,7 +131,9 @@ class PerformanceController extends DisposableController
   /// in selected timeline event, selected frame, etc.).
   PerformanceData? offlinePerformanceData;
 
-  late final TimelineEventProcessor processor;
+  late final TimelineEventProcessor legacyProcessor;
+
+  late final PerfettoEventProcessor perfettoProcessor;
 
   /// Trace events in the current timeline.
   ///
@@ -406,9 +410,7 @@ class PerformanceController extends DisposableController
   FlutterFrame? _currentFrameBeingSelected;
 
   Future<void> toggleSelectedFrame(FlutterFrame frame) async {
-    if (data == null) {
-      return;
-    }
+    if (data == null) return;
     final _data = data!;
 
     _currentFrameBeingSelected = frame;
@@ -424,74 +426,101 @@ class PerformanceController extends DisposableController
     _selectedFrameNotifier.value = frame;
 
     if (!offlineController.offlineMode.value) {
-      final bool frameBeforeFirstWellFormedFrame =
-          firstWellFormedFrameMicros != null &&
-              frame.timeFromFrameTiming.start!.inMicroseconds <
-                  firstWellFormedFrameMicros!;
-      if (!frame.isWellFormed && !frameBeforeFirstWellFormedFrame) {
-        // Only try to pull timeline events for frames that are after the first
-        // well formed frame. Timeline events that occurred before this frame will
-        // have already fallen out of the buffer.
-        await processAvailableEvents();
-      }
+      if (useLegacyTraceViewer.value) {
+        final bool frameBeforeFirstWellFormedFrame =
+            firstWellFormedFrameMicros != null &&
+                frame.timeFromFrameTiming.start!.inMicroseconds <
+                    firstWellFormedFrameMicros!;
+        if (!frame.isWellFormed && !frameBeforeFirstWellFormedFrame) {
+          // Only try to pull timeline events for frames that are after the first
+          // well formed frame. Timeline events that occurred before this frame will
+          // have already fallen out of the buffer.
+          await processAvailableEvents();
+        }
 
-      if (_currentFrameBeingSelected != frame) return;
+        if (_currentFrameBeingSelected != frame) return;
 
-      // If the frame is still not well formed after processing all available
-      // events, wait a short delay and try to process events again after the
-      // VM has been polled one more time.
-      if (!frame.isWellFormed && !frameBeforeFirstWellFormedFrame) {
-        assert(!_processing.value);
-        _processing.value = true;
-        await Future.delayed(timelinePollingInterval, () async {
+        // If the frame is still not well formed after processing all available
+        // events, wait a short delay and try to process events again after the
+        // VM has been polled one more time.
+        if (!frame.isWellFormed && !frameBeforeFirstWellFormedFrame) {
+          assert(!_processing.value);
+          _processing.value = true;
+          await Future.delayed(timelinePollingInterval, () async {
+            if (_currentFrameBeingSelected != frame) return;
+            await processTraceEvents(allTraceEvents);
+            _processing.value = false;
+          });
+        }
+
+        if (_currentFrameBeingSelected != frame) return;
+
+        // We do not need to pull the CPU profile because we will pull the profile
+        // for the entire frame. The order of selecting the timeline event and
+        // pulling the CPU profile for the frame (directly below) matters here.
+        // If the selected timeline event is null, the event details section will
+        // not show the progress bar while we are processing the CPU profile.
+        await selectTimelineEvent(
+          frame.timelineEventData.uiEvent,
+          updateProfiler: false,
+        );
+
+        if (_currentFrameBeingSelected != frame) return;
+
+        final storedProfileForFrame = cpuProfilerController.cpuProfileStore
+            .lookupProfile(time: frame.timeFromEventFlows);
+        if (storedProfileForFrame == null) {
+          cpuProfilerController.reset();
+          if (!offlineController.offlineMode.value &&
+              frame.timeFromEventFlows.isWellFormed) {
+            await cpuProfilerController.pullAndProcessProfile(
+              startMicros: frame.timeFromEventFlows.start!.inMicroseconds,
+              extentMicros: frame.timeFromEventFlows.duration.inMicroseconds,
+              processId: 'Flutter frame ${frame.id}',
+            );
+          }
           if (_currentFrameBeingSelected != frame) return;
-          await processTraceEvents(allTraceEvents);
-          _processing.value = false;
-        });
-      }
+          _data.cpuProfileData = cpuProfilerController.dataNotifier.value;
+        } else {
+          if (!storedProfileForFrame.processed) {
+            await cpuProfilerController.transformer.processData(
+              storedProfileForFrame,
+              processId: 'Flutter frame ${frame.id} - stored profile ',
+            );
+          }
+          if (_currentFrameBeingSelected != frame) return;
+          _data.cpuProfileData = storedProfileForFrame;
+          cpuProfilerController.loadProcessedData(
+            storedProfileForFrame,
+            storeAsUserTagNone: true,
+          );
+        }
+      } else if (FeatureFlags.embeddedPerfetto) {
+        bool hasProcessedTimelineEventsForFrame =
+            perfettoProcessor.hasProcessedEventsForFrame(frame.id);
+        if (!hasProcessedTimelineEventsForFrame) {
+          await processAvailableEvents();
+        }
 
-      if (_currentFrameBeingSelected != frame) return;
-    }
+        // If we still have not processed the timeline events for this frame,
+        // ewait a short delay and try to process events again after the
+        // VM has been polled one more time.
+        hasProcessedTimelineEventsForFrame =
+            perfettoProcessor.hasProcessedEventsForFrame(frame.id);
+        if (!hasProcessedTimelineEventsForFrame) {
+          await Future.delayed(timelinePollingInterval, () async {
+            if (_currentFrameBeingSelected != frame) return;
+            await processAvailableEvents();
+          });
+        }
 
-    // We do not need to pull the CPU profile because we will pull the profile
-    // for the entire frame. The order of selecting the timeline event and
-    // pulling the CPU profile for the frame (directly below) matters here.
-    // If the selected timeline event is null, the event details section will
-    // not show the progress bar while we are processing the CPU profile.
-    await selectTimelineEvent(
-      frame.timelineEventData.uiEvent,
-      updateProfiler: false,
-    );
-
-    if (_currentFrameBeingSelected != frame) return;
-
-    final storedProfileForFrame = cpuProfilerController.cpuProfileStore
-        .lookupProfile(time: frame.timeFromEventFlows);
-    if (storedProfileForFrame == null) {
-      cpuProfilerController.reset();
-      if (!offlineController.offlineMode.value &&
-          frame.timeFromEventFlows.isWellFormed) {
-        await cpuProfilerController.pullAndProcessProfile(
-          startMicros: frame.timeFromEventFlows.start!.inMicroseconds,
-          extentMicros: frame.timeFromEventFlows.duration.inMicroseconds,
-          processId: 'Flutter frame ${frame.id}',
+        assert(perfettoProcessor.clockOffsetMicros != null);
+        final timeRange = TimeRange.offset(
+          original: frame.timeFromFrameTiming,
+          offset: perfettoProcessor.clockOffsetMicros!,
         );
+        await perfettoController.scrollToTimeRange(timeRange);
       }
-      if (_currentFrameBeingSelected != frame) return;
-      _data.cpuProfileData = cpuProfilerController.dataNotifier.value;
-    } else {
-      if (!storedProfileForFrame.processed) {
-        await cpuProfilerController.transformer.processData(
-          storedProfileForFrame,
-          processId: 'Flutter frame ${frame.id} - stored profile ',
-        );
-      }
-      if (_currentFrameBeingSelected != frame) return;
-      _data.cpuProfileData = storedProfileForFrame;
-      cpuProfilerController.loadProcessedData(
-        storedProfileForFrame,
-        storeAsUserTagNone: true,
-      );
     }
 
     debugTraceEventCallback(() {
@@ -674,7 +703,7 @@ class PerformanceController extends DisposableController
         );
       }
 
-      processor.primeThreadIds(
+      legacyProcessor.primeThreadIds(
         uiThreadId: uiThreadId,
         rasterThreadId: rasterThreadId,
       );
@@ -683,7 +712,13 @@ class PerformanceController extends DisposableController
 
   void addTimelineEvent(TimelineEvent event) {
     data!.addTimelineEvent(event);
+    _linkEventToFlutterFrame(event);
+  }
+
+  void _linkEventToFlutterFrame(TimelineEvent event) {
     if (event is SyncTimelineEvent) {
+      // TODO(kenz): audit this to make sure we are actually linking events to
+      // flutter frames for offline mode.
       if (!offlineController.offlineMode.value &&
           serviceManager.hasConnection &&
           !serviceManager.connectedApp!.isFlutterAppNow!) {
@@ -709,13 +744,20 @@ class PerformanceController extends DisposableController
 
   FutureOr<void> processTraceEvents(List<TraceEventWrapper> traceEvents) async {
     if (FeatureFlags.embeddedPerfetto && !useLegacyTraceViewer.value) {
-      await perfettoController.loadTrace(traceEvents);
+      await _processTraceEventsPerfetto(traceEvents);
     } else {
-      await _processTraceEvents(traceEvents);
+      await _processTraceEventsLegacy(traceEvents);
     }
   }
 
-  FutureOr<void> _processTraceEvents(
+  Future<void> _processTraceEventsPerfetto(
+    List<TraceEventWrapper> traceEvents,
+  ) async {
+    perfettoProcessor.processTraceEvents(traceEvents);
+    await perfettoController.loadTrace(traceEvents);
+  }
+
+  FutureOr<void> _processTraceEventsLegacy(
     List<TraceEventWrapper> traceEvents,
   ) async {
     if (debugSimpleTrace) {
@@ -747,8 +789,8 @@ class PerformanceController extends DisposableController
 
     final processingTraceCount = traceEventCount - _nextTraceIndexToProcess;
 
-    Future<void> processTraceEventsHelper() async {
-      await processor.processTraceEvents(
+    Future<void> processHelper() async {
+      await legacyProcessor.processTraceEvents(
         traceEvents,
         startIndex: _nextTraceIndexToProcess,
       );
@@ -785,7 +827,7 @@ class PerformanceController extends DisposableController
     await ga.timeAsync(
       analytics_constants.performance,
       analytics_constants.traceEventProcessingTime,
-      asyncOperation: processTraceEventsHelper,
+      asyncOperation: processHelper,
       screenMetricsProvider: () => PerformanceScreenMetrics(
         traceEventCount: processingTraceCount,
       ),
@@ -816,10 +858,12 @@ class PerformanceController extends DisposableController
     data = offlineData.shallowClone();
 
     // Process offline data.
-    processor.primeThreadIds(
-      uiThreadId: uiThreadId,
-      rasterThreadId: rasterThreadId,
-    );
+    if (useLegacyTraceViewer.value) {
+      legacyProcessor.primeThreadIds(
+        uiThreadId: uiThreadId,
+        rasterThreadId: rasterThreadId,
+      );
+    }
     await processTraceEvents(traceEvents);
     if (data!.cpuProfileData != null) {
       await cpuProfilerController.transformer.processData(
@@ -954,7 +998,8 @@ class PerformanceController extends DisposableController
     cpuProfilerController.reset();
     threadNamesById.clear();
     data?.clear();
-    processor.reset();
+    legacyProcessor.reset();
+    perfettoProcessor.reset();
     _flutterFrames.clear();
     _nextTraceIndexToProcess = 0;
     _nextTimelineEventIndexToProcess = 0;

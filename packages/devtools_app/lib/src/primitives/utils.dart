@@ -541,6 +541,15 @@ enum TimeUnit {
 class TimeRange {
   TimeRange({this.singleAssignment = true});
 
+  factory TimeRange.offset({
+    required TimeRange original,
+    required Duration offset,
+  }) {
+    return TimeRange()
+      ..start = original.start! + offset
+      ..end = original.end! + offset;
+  }
+
   final bool singleAssignment;
 
   Duration? get start => _start;

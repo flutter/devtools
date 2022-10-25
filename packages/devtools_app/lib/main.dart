@@ -27,6 +27,9 @@ void main() async {
 
   usePathUrlStrategy();
 
+  // Set the extension points global.
+  setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+
   // Initialize the framework before we do anything else, otherwise the
   // StorageController won't be initialized and preferences won't be loaded.
   await initializeFramework();
@@ -40,9 +43,6 @@ void main() async {
 
   // Load the Dart syntax highlighting grammar.
   await SyntaxHighlighter.initialize();
-
-  // Set the extension points global.
-  setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
 
   setupErrorHandling(() async {
     // Run the app.

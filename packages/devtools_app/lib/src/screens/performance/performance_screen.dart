@@ -104,10 +104,10 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
       });
     });
 
-    processingProgress = controller.processor.progressNotifier.value;
-    addAutoDisposeListener(controller.processor.progressNotifier, () {
+    processingProgress = controller.legacyProcessor.progressNotifier.value;
+    addAutoDisposeListener(controller.legacyProcessor.progressNotifier, () {
       setState(() {
-        processingProgress = controller.processor.progressNotifier.value;
+        processingProgress = controller.legacyProcessor.progressNotifier.value;
       });
     });
 

@@ -72,11 +72,11 @@ void main() async {
           isTrue,
         );
         expect(
-          performanceController.processor.uiThreadId,
+          performanceController.legacyProcessor.uiThreadId,
           equals(testUiThreadId),
         );
         expect(
-          performanceController.processor.rasterThreadId,
+          performanceController.legacyProcessor.rasterThreadId,
           equals(testRasterThreadId),
         );
         expect(
