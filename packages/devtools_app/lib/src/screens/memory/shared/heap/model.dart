@@ -150,8 +150,8 @@ class ClassOnlyHeapPath {
         if (item.key == 0 || item.key == classes.length - 1 || !isStandard) {
           data.add(item.value.fullName);
           justAddedEllipsis = false;
-        } else {
-          if (!justAddedEllipsis) data.add('...');
+        } else if (!justAddedEllipsis) {
+          data.add('...');
           justAddedEllipsis = true;
         }
       }
