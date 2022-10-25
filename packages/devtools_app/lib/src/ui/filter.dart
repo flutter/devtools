@@ -9,7 +9,6 @@ import '../primitives/utils.dart';
 import '../shared/common_widgets.dart';
 import '../shared/dialogs.dart';
 import '../shared/theme.dart';
-import 'label.dart';
 
 // TODO(kenz): consider breaking this up flat data filtering and tree data
 // filtering.
@@ -84,73 +83,40 @@ class _FilterDialogState<T>
 
   @override
   Widget build(BuildContext context) {
-    return DevToolsDialog(
-      title: _buildDialogTitle(),
-      content: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: defaultSpacing,
-        ),
-        width: widget.dialogWidth,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (widget.includeQueryFilter) ...[
-              DevToolsClearableTextField(
-                autofocus: true,
-                labelText: 'Filter Query',
-                controller: queryTextFieldController,
-              ),
-              const SizedBox(height: defaultSpacing),
-              _buildQueryInstructions(),
-              const SizedBox(height: defaultSpacing),
-            ],
-            if (widget.toggleFilters != null)
-              for (final toggleFilter in widget.toggleFilters!) ...[
-                ToggleFilterElement(filter: toggleFilter),
-              ],
-          ],
+    return StateUpdateDialog(
+      title: 'Filters',
+      helpText: widget.queryInstructions,
+      onApply: () => widget.controller.filterData(
+        Filter<T>(
+          queryFilter: widget.includeQueryFilter
+              ? QueryFilter.parse(
+                  queryTextFieldController.value.text,
+                  widget.queryFilterArguments!,
+                )
+              : null,
+          toggleFilters: widget.toggleFilters,
         ),
       ),
-      actions: [
-        DialogApplyButton(
-          onPressed: () => widget.controller.filterData(
-            Filter<T>(
-              queryFilter: widget.includeQueryFilter
-                  ? QueryFilter.parse(
-                      queryTextFieldController.value.text,
-                      widget.queryFilterArguments!,
-                    )
-                  : null,
-              toggleFilters: widget.toggleFilters,
+      onCancel: widget.onCancel,
+      onResetDefaults: _resetFilters,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (widget.includeQueryFilter) ...[
+            DevToolsClearableTextField(
+              autofocus: true,
+              labelText: 'Filter Query',
+              controller: queryTextFieldController,
             ),
-          ),
-        ),
-        DialogCancelButton(cancelAction: widget.onCancel),
-      ],
-    );
-  }
-
-  Widget _buildDialogTitle() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        dialogTitleText(Theme.of(context), 'Filters'),
-        TextButton(
-          onPressed: _resetFilters,
-          child: const MaterialIconLabel(
-            label: 'Reset to default',
-            iconData: Icons.replay,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildQueryInstructions() {
-    return Text(
-      widget.queryInstructions!,
-      style: Theme.of(context).subtleTextStyle,
+            const SizedBox(height: defaultSpacing),
+          ],
+          if (widget.toggleFilters != null)
+            for (final toggleFilter in widget.toggleFilters!) ...[
+              ToggleFilterElement(filter: toggleFilter),
+            ],
+        ],
+      ),
     );
   }
 
