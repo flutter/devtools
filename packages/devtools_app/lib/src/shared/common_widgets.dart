@@ -2525,7 +2525,7 @@ class RadioButton<T> extends StatelessWidget {
           materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           onChanged: onChanged,
         ),
-        Text(label),
+        Expanded(child: Text(label, overflow: TextOverflow.ellipsis)),
       ],
     );
   }
