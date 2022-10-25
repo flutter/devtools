@@ -41,10 +41,10 @@ class SnapshotControlPane extends StatelessWidget {
                     const SizedBox(width: defaultSpacing),
                     ValueListenableBuilder<ClassFilter>(
                       valueListenable: theFilter,
-                      builder: (_, __, ___) => FilterButton(
+                      builder: (_, filterValue, ___) => FilterButton(
                         onPressed: () => showDialog(
                           context: context,
-                          builder: (context) => ClassFilterDialog(theFilter),
+                          builder: (context) => ClassFilterDialog(filterValue, onChanged: controller.applyFilter,),
                         ),
                         isFilterActive: !theFilter.value.isEmpty,
                         message: theFilter.value.buttonTooltip,

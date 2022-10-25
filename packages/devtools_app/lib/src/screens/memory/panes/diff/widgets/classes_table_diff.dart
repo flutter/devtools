@@ -155,7 +155,7 @@ class ClassesTableDiff extends StatelessWidget {
     required this.selection,
   }) : super(key: key);
 
-  final DiffHeapClasses classes;
+  final List<DiffClassStats> classes;
   final ValueNotifier<DiffClassStats?> selection;
 
   static final _columnGroups = [
@@ -199,23 +199,17 @@ class ClassesTableDiff extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: classes.filter,
-      builder: (_, __, ___) {
-        final data = classes.filtered();
-        final dataKey = 'ClassesTableSingle-$data';
+    final dataKey = 'ClassesTableSingle-${identityHashCode(classes)}';
 
-        return FlatTable<DiffClassStats>(
-          columns: _columns,
-          columnGroups: _columnGroups,
-          data: data,
-          dataKey: dataKey,
-          keyFactory: (e) => Key(dataKey),
-          selectionNotifier: selection,
-          defaultSortColumn: _retainedSizeDeltaColumn,
-          defaultSortDirection: SortDirection.descending,
-        );
-      },
+    return FlatTable<DiffClassStats>(
+      columns: _columns,
+      columnGroups: _columnGroups,
+      data: classes,
+      dataKey: dataKey,
+      keyFactory: (e) => Key(dataKey),
+      selectionNotifier: selection,
+      defaultSortColumn: _retainedSizeDeltaColumn,
+      defaultSortDirection: SortDirection.descending,
     );
   }
 }

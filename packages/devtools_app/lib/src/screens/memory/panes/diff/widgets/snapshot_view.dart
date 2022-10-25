@@ -35,12 +35,12 @@ class SnapshotView extends StatelessWidget {
 
         if (classes is SingleHeapClasses) {
           table1 = ClassesTableSingle(
-            classes: classes,
+            classes: controller.derived.singleClassesToShow.value!,
             selection: controller.derived.selectedSingleClassStats,
           );
         } else if (classes is DiffHeapClasses) {
           table1 = ClassesTableDiff(
-            classes: classes,
+            classes: controller.derived.diffClassesToShow.value!,
             selection: controller.derived.selectedDiffClassStats,
           );
         } else {

@@ -13,9 +13,14 @@ import '../../../shared/heap/class_filter.dart';
 import '../controller/utils.dart';
 
 class ClassFilterDialog extends StatefulWidget {
-  const ClassFilterDialog(this.classFilter, {super.key});
+  const ClassFilterDialog(
+    this.classFilter, {
+    super.key,
+    required this.onChanged,
+  });
 
-  final ValueNotifier<ClassFilter> classFilter;
+  final ClassFilter classFilter;
+  final Function(ClassFilter filter) onChanged;
 
   @override
   State<ClassFilterDialog> createState() => _ClassFilterDialogState();
@@ -39,15 +44,15 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
     assert(!_initialized);
     _rootPackage = await tryToDetectRootPackage() ?? '';
     if (_rootPackage.isNotEmpty) _rootPackage = '$_rootPackage/';
-    _loadStateFromFilter(widget.classFilter.value);
+    _loadStateFromFilter(widget.classFilter);
     setState(() => _initialized = true);
   }
 
   @override
   void didUpdateWidget(covariant ClassFilterDialog oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.classFilter.value != widget.classFilter.value) {
-      _loadStateFromFilter(widget.classFilter.value);
+    if (oldWidget.classFilter != widget.classFilter) {
+      _loadStateFromFilter(widget.classFilter);
     }
   }
 
@@ -137,8 +142,8 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
               except: _except.text,
               only: _only.text,
             );
-            if (newFilter.equals(widget.classFilter.value)) return;
-            widget.classFilter.value = newFilter;
+            if (newFilter.equals(widget.classFilter)) return;
+            widget.onChanged(newFilter);
           },
         ),
         const DialogCancelButton(),

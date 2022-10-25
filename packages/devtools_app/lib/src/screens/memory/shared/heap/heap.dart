@@ -2,19 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-
 import '../../primitives/class_name.dart';
 import 'class_filter.dart';
 import 'model.dart';
 import 'spanning_tree.dart';
 
 class AdaptedHeap {
-  AdaptedHeap(this.data, this.filter);
+  AdaptedHeap(this.data);
 
   final AdaptedHeapData data;
-
-  final ValueListenable<ClassFilter> filter;
 
   late final SingleHeapClasses classes = _heapStatistics();
 
@@ -35,29 +31,26 @@ class AdaptedHeap {
       singleHeapClass.countInstance(data, i);
     }
 
-    return SingleHeapClasses(result, filter)..seal();
+    return SingleHeapClasses(result)..seal();
   }
 }
 
 abstract class HeapClasses<T extends ClassStats> with Sealable {
-  HeapClasses(this.filter);
+
 
   List<T> get classStatsList;
-
-  final ValueListenable<ClassFilter> filter;
 }
 
 mixin Filterable<T extends ClassStats> on HeapClasses<T> {
   ClassFilter? _appliedFilter;
   List<T>? _filtered;
 
-  List<T> filtered() {
-    final newFilter = filter.value;
+  List<T> filtered(ClassFilter newFilter) {
     final oldFilter = _appliedFilter;
     final oldFiltered = _filtered;
     _appliedFilter = newFilter;
     if ((oldFilter == null) != (oldFiltered == null)) {
-      throw StateError('nullness should match');
+      throw StateError('Nullness should match.');
     }
 
     // Return previous data if filter did not change.
@@ -78,7 +71,7 @@ mixin Filterable<T extends ClassStats> on HeapClasses<T> {
     } else if (task == FilteringTask.reuse) {
       dataToFilter = oldFiltered!;
     } else {
-      throw StateError('Unexpected value: $task.');
+      throw StateError('Unexpected task: $task.');
     }
 
     final result =
@@ -90,7 +83,7 @@ mixin Filterable<T extends ClassStats> on HeapClasses<T> {
 /// Set of heap class statistical information for single heap (not comparision between two heaps).
 class SingleHeapClasses extends HeapClasses<SingleClassStats>
     with Filterable<SingleClassStats> {
-  SingleHeapClasses(this.classesByName, super.filter);
+  SingleHeapClasses(this.classesByName);
 
   /// Maps full class name to class.
   final Map<HeapClassName, SingleClassStats> classesByName;
