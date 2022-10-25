@@ -337,10 +337,7 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
     final theme = Theme.of(context);
     final dialogHeight = scaleByFontFactor(400.0);
     return DevToolsDialog(
-      title: DialogTitleText(
-        theme: Theme.of(context),
-        text: 'Flutter Inspector Settings',
-      ),
+      title: const DialogTitleText('Flutter Inspector Settings'),
       content: Container(
         width: defaultDialogWidth,
         height: dialogHeight,

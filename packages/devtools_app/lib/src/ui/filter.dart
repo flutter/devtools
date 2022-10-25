@@ -83,7 +83,7 @@ class _FilterDialogState<T>
 
   @override
   Widget build(BuildContext context) {
-    return DialogWithDefaults(
+    return StateUpdateDialog(
       title: 'Filters',
       helpText: widget.queryInstructions,
       onApply: () => widget.controller.filterData(

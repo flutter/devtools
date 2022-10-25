@@ -24,10 +24,8 @@ class MemorySettingsDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return DevToolsDialog(
-      title: DialogTitleText(theme: theme, text: 'Memory Settings'),
+      title: const DialogTitleText('Memory Settings'),
       includeDivider: false,
       content: Container(
         width: defaultDialogWidth,

@@ -12,14 +12,13 @@ import 'theme.dart';
 const dialogDefaultContext = 'dialog';
 
 class DialogTitleText extends StatelessWidget {
-  const DialogTitleText({super.key, required this.text, required this.theme});
+  const DialogTitleText(this.text, {super.key});
 
-  final ThemeData theme;
   final String text;
 
   @override
   Widget build(BuildContext context) =>
-      Text(text, style: theme.textTheme.titleLarge);
+      Text(text, style: Theme.of(context).textTheme.titleLarge);
 }
 
 List<Widget> dialogSubHeader(ThemeData theme, String titleText) {
@@ -31,8 +30,8 @@ List<Widget> dialogSubHeader(ThemeData theme, String titleText) {
 
 /// A standardized dialog with help text and buttons `Reset to default`,
 /// `APPLY` and `CANCEL`.
-class DialogWithDefaults extends StatelessWidget {
-  const DialogWithDefaults({
+class StateUpdateDialog extends StatelessWidget {
+  const StateUpdateDialog({
     super.key,
     required this.title,
     required this.child,
@@ -54,23 +53,25 @@ class DialogWithDefaults extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DevToolsDialog(
-      title: _DialogWithDefaultsTitle(onResetDefaults: onResetDefaults),
+      title: _StateUpdateDialogTitle(onResetDefaults: onResetDefaults),
       content: Container(
         padding: const EdgeInsets.symmetric(
           horizontal: defaultSpacing,
         ),
         width: dialogWidth ?? defaultDialogWidth,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            child,
-            if (helpText != null) ...[
-              const SizedBox(height: defaultSpacing),
-              DialogHelpText(helpText: helpText!),
-              const SizedBox(height: defaultSpacing),
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: defaultSpacing),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              child,
+              if (helpText != null) ...[
+                const SizedBox(height: defaultSpacing),
+                DialogHelpText(helpText: helpText!),
+              ],
             ],
-          ],
+          ),
         ),
       ),
       actions: [
@@ -81,8 +82,8 @@ class DialogWithDefaults extends StatelessWidget {
   }
 }
 
-class _DialogWithDefaultsTitle extends StatelessWidget {
-  const _DialogWithDefaultsTitle({this.onResetDefaults});
+class _StateUpdateDialogTitle extends StatelessWidget {
+  const _StateUpdateDialogTitle({this.onResetDefaults});
   final VoidCallback? onResetDefaults;
 
   @override
@@ -90,7 +91,7 @@ class _DialogWithDefaultsTitle extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        DialogTitleText(theme: Theme.of(context), text: 'Filters'),
+        const DialogTitleText('Filters'),
         TextButton(
           onPressed: onResetDefaults,
           child: const MaterialIconLabel(
