@@ -23,7 +23,6 @@ class Disposer {
   @visibleForTesting
   List<Listenable> get listenables => _listenables;
 
-  
   @protected
   @visibleForTesting
   List<void Function()> get listeners => _listeners;
