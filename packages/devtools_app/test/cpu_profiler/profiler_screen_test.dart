@@ -12,6 +12,7 @@ import 'package:devtools_app/src/service/vm_flags.dart' as vm_flags;
 import 'package:devtools_app/src/shared/common_widgets.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
+import 'package:devtools_app/src/shared/preferences.dart';
 import 'package:devtools_app/src/ui/vm_flag_widgets.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
@@ -46,6 +47,7 @@ void main() {
       setGlobal(OfflineModeController, OfflineModeController());
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(NotificationService, NotificationService());
+      setGlobal(PreferencesController, PreferencesController());
       screen = const ProfilerScreen();
     });
 
@@ -68,6 +70,7 @@ void main() {
       expect(find.byKey(ProfilerScreen.recordingStatusKey), findsNothing);
       expect(find.byType(CircularProgressIndicator), findsNothing);
       expect(find.byType(CpuProfiler), findsNothing);
+      expect(find.byType(ModeDropdown), findsNothing);
     }
 
     Future<void> pumpProfilerScreenBody(
