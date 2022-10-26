@@ -69,7 +69,7 @@ class _InstanceColumn extends ColumnData<DiffClassStats> {
       case _DataPart.created:
         return 'New';
       case _DataPart.deleted:
-        return 'Deleted';
+        return 'Released';
       case _DataPart.delta:
         return 'Delta';
     }
