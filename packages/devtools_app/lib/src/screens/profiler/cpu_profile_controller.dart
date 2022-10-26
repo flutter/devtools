@@ -434,7 +434,7 @@ class CpuProfilerController
     if (storeAsUserTagNone) {
       cpuProfileStore.storeProfile(
         data,
-        label: _wrapWithFilterSuffix(userTagNone),
+        label: userTagNone,
       );
     }
   }

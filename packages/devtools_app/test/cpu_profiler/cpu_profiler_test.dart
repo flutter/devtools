@@ -161,18 +161,26 @@ void main() {
     group('profile views', () {
       late ProfilerScreenController controller;
 
-      void loadData() {
+      Future<void> loadData() async {
+        for (final filter in controller.cpuProfilerController.toggleFilters) {
+          filter.enabled.value = false;
+        }
+        final data = CpuProfilePair(
+          functionProfile: cpuProfileData,
+          // Function and code profiles have the same structure, so just use
+          // the function profile in place of a dedicated code profile for
+          // testing since we don't care about the contents as much as we
+          // care about testing the ability to switch between function and
+          // code profile views.
+          codeProfile: cpuProfileData,
+        );
+        await data.process(
+          transformer: controller.cpuProfilerController.transformer,
+          processId: 'test',
+        );
         // Call this to force the value of `_dataByTag[userTagNone]` to be set.
         controller.cpuProfilerController.loadProcessedData(
-          CpuProfilePair(
-            functionProfile: cpuProfileData,
-            // Function and code profiles have the same structure, so just use
-            // the function profile in place of a dedicated code profile for
-            // testing since we don't care about the contents as much as we
-            // care about testing the ability to switch between function and
-            // code profile views.
-            codeProfile: cpuProfileData,
-          ),
+          data,
           storeAsUserTagNone: true,
         );
       }
@@ -180,11 +188,6 @@ void main() {
       setUp(() async {
         controller = ProfilerScreenController();
         cpuProfileData = CpuProfileData.parse(cpuProfileDataWithUserTagsJson);
-        await controller.cpuProfilerController.transformer.processData(
-          cpuProfileData,
-          processId: 'test',
-        );
-        loadData();
       });
 
       testWidgetsWithWindowSize(
@@ -210,7 +213,7 @@ void main() {
 
         // Verify the profile view dropdown appears when toggling VM developer
         // mode and data is present.
-        loadData();
+        await tester.runAsync(() async => await loadData());
         await tester.pumpAndSettle();
         expect(find.byType(ModeDropdown), findsOneWidget);
 
@@ -247,7 +250,7 @@ void main() {
         preferences.toggleVmDeveloperMode(true);
         await tester.pumpAndSettle();
         expect(find.byType(CpuProfiler), findsNothing);
-        loadData();
+        await tester.runAsync(() async => await loadData());
         await tester.pumpAndSettle();
 
         // Verify the function profile view is still selected.
@@ -260,13 +263,16 @@ void main() {
         // Switch to the code profile view.
         await tester.tap(find.byType(ModeDropdown));
         await tester.pumpAndSettle();
+        expect(find.text('View: Function'), findsWidgets);
+        expect(find.text('View: Code'), findsWidgets);
         await tester.tap(find.text('View: Code').last);
         await tester.pumpAndSettle();
-        expect(find.text('View: Code'), findsOneWidget);
         expect(
           controller.cpuProfilerController.viewType.value,
           CpuProfilerViewType.code,
         );
+        expect(find.byType(ModeDropdown), findsOneWidget);
+        expect(find.text('View: Code'), findsOneWidget);
 
         // Disabling VM developer mode will reset the view to the function
         // profile as the dropdown will no longer be visible.
