@@ -4,11 +4,11 @@
 
 /// Package name prefixes.
 class PackagePrefixes {
-  /// Packages from the core Dart libraries as they listed
+  /// Packages from the core Dart libraries as they are listed
   /// in heap snapshot.
   static const dartInSnapshot = 'dart.';
 
-  /// Packages from the core Dart libraries as they listed
+  /// Packages from the core Dart libraries as they are listed
   /// in import statements.
   static const dart = 'dart:';
 

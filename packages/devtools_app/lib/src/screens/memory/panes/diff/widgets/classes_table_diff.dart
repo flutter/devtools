@@ -199,7 +199,11 @@ class ClassesTableDiff extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dataKey = 'ClassesTableSingle-${identityHashCode(classes)}';
+    // We want to preserve the sorting and sort directions for ClassesTableDiff
+    // no matter what the data passed to it is.
+    // However, there may be collisions with scroll position as the datasets are of different length.
+    // TODO (polina-c): test if removing of identityHashCode will work.
+    final dataKey = 'ClassesTableDiff-${identityHashCode(classes)}';
 
     return FlatTable<DiffClassStats>(
       columns: _columns,

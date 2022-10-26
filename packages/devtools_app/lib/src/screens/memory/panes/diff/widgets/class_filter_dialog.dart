@@ -69,6 +69,23 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
     final textFieldLeftPadding = scaleByFontFactor(40.0);
     void onTypeChanged(ClassFilterType? type) => setState(() => _type = type!);
 
+    RadioButton<ClassFilterType> radio(ClassFilterType type, String label) =>
+        RadioButton<ClassFilterType>(
+          label: label,
+          itemValue: type,
+          groupValue: _type,
+          onChanged: onTypeChanged,
+        );
+
+    Widget textField(TextEditingController controller) => Padding(
+          padding: EdgeInsets.only(left: textFieldLeftPadding),
+          child: TextField(
+            keyboardType: TextInputType.multiline,
+            maxLines: null,
+            controller: controller,
+          ),
+        );
+
     return StateUpdateDialog(
       title: 'Filter Classes and Packages',
       helpText: _helpText,
@@ -82,47 +99,17 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
         );
         widget.onChanged(newFilter);
       },
-      onCancel: null,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          RadioButton<ClassFilterType>(
-            label: 'Show all classes',
-            itemValue: ClassFilterType.all,
-            groupValue: _type,
-            onChanged: onTypeChanged,
-          ),
+          radio(ClassFilterType.showAll, 'Show all classes'),
           const SizedBox(height: defaultSpacing),
-          RadioButton<ClassFilterType>(
-            label: 'Show all classes except:',
-            itemValue: ClassFilterType.except,
-            groupValue: _type,
-            onChanged: onTypeChanged,
-          ),
-          Padding(
-            padding: EdgeInsets.only(left: textFieldLeftPadding),
-            child: TextField(
-              keyboardType: TextInputType.multiline,
-              maxLines: null,
-              controller: _except,
-            ),
-          ),
+          radio(ClassFilterType.except, 'Show all classes except:'),
+          textField(_except),
           const SizedBox(height: defaultSpacing),
-          RadioButton<ClassFilterType>(
-            label: 'Show only:',
-            itemValue: ClassFilterType.only,
-            groupValue: _type,
-            onChanged: onTypeChanged,
-          ),
-          Padding(
-            padding: EdgeInsets.only(left: textFieldLeftPadding),
-            child: TextField(
-              keyboardType: TextInputType.multiline,
-              maxLines: null,
-              controller: _only,
-            ),
-          ),
+          radio(ClassFilterType.only, 'Show only:'),
+          textField(_only),
         ],
       ),
     );
@@ -135,5 +122,5 @@ const _helpText = 'Choose and customize the filter.\n'
     '  MyClass\n'
     '  package:myPackage/src/\n\n'
     'Specify:\n'
-    '  - ${ClassFilter.coreLibrariesAlias} for core classes without package prefix\n'
-    '  - ${ClassFilter.dartAndFlutterLibrariesAlias} for most "dart." and "package:" libraries published by Dart and Flutter orgs.';
+    '  - ${ClassFilter.noPackageLibrariesAlias} for classes without package prefix\n'
+    '  - ${ClassFilter.dartAndFlutterLibrariesAlias} for most "dart:" and "package:" libraries published by Dart and Flutter orgs.';

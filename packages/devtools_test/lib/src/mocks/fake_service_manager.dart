@@ -217,5 +217,6 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   }
 
   @override
-  Future<String?> tryToDetectRootLib() async => 'package:myPackage/myLib.dart';
+  Future<String?> tryToDetectMainRootLib() async =>
+      'package:myPackage/myLib.dart';
 }

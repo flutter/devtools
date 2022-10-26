@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import '../../primitives/class_name.dart';
 
 enum ClassFilterType {
-  all,
+  showAll,
   except,
   only,
 }
@@ -35,8 +35,8 @@ class ClassFilter {
 
   ClassFilter.empty()
       : this(
-          filterType: ClassFilterType.all,
-          except: '$coreLibrariesAlias\n$dartAndFlutterLibrariesAlias',
+          filterType: ClassFilterType.showAll,
+          except: '$noPackageLibrariesAlias\n$dartAndFlutterLibrariesAlias',
           only: null,
         );
 
@@ -44,7 +44,7 @@ class ClassFilter {
       value.split('\n').map((e) => e.trim()).join('\n');
 
   static const String dartAndFlutterLibrariesAlias = '\$dart-flutter-libraries';
-  static const String coreLibrariesAlias = '\$core-libraries';
+  static const String noPackageLibrariesAlias = '\$no-package-libraries';
 
   final ClassFilterType filterType;
   final String except;
@@ -53,7 +53,7 @@ class ClassFilter {
   final String? only;
 
   bool get isEmpty =>
-      filterType == ClassFilterType.all ||
+      filterType == ClassFilterType.showAll ||
       (filterType == ClassFilterType.except && except.trim().isEmpty) ||
       (filterType == ClassFilterType.only && (only ?? '').trim().isEmpty);
 
@@ -73,7 +73,7 @@ class ClassFilter {
         s == null ? {} : s.split('\n').where((e) => e.isNotEmpty).toSet();
 
     switch (filterType) {
-      case ClassFilterType.all:
+      case ClassFilterType.showAll:
         return {};
       case ClassFilterType.except:
         return stringToSet(except);
@@ -109,7 +109,7 @@ class ClassFilter {
 
   String get displayString {
     switch (filterType) {
-      case ClassFilterType.all:
+      case ClassFilterType.showAll:
         return 'Show all classes.';
       case ClassFilterType.except:
         return 'Show all classes, except:\n$except';
@@ -119,7 +119,7 @@ class ClassFilter {
   }
 
   bool apply(HeapClassName className) {
-    if (filterType == ClassFilterType.all) return true;
+    if (filterType == ClassFilterType.showAll) return true;
 
     for (var filter in filters) {
       if (_isMatch(className, filter)) {
@@ -134,7 +134,8 @@ class ClassFilter {
     if (className.fullName.contains(filter)) return true;
     if (filter == dartAndFlutterLibrariesAlias && className.isDartOrFlutter)
       return true;
-    if (filter == coreLibrariesAlias && className.isCore) return true;
+    if (filter == noPackageLibrariesAlias && className.isPackageless)
+      return true;
     return false;
   }
 }

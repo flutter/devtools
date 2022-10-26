@@ -38,7 +38,7 @@ class StateUpdateDialog extends StatelessWidget {
     required this.helpText,
     required this.onResetDefaults,
     required this.onApply,
-    required this.onCancel,
+    this.onCancel,
     this.dialogWidth,
   });
 

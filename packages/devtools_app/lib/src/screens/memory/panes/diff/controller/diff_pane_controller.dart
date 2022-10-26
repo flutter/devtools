@@ -196,12 +196,12 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   /// Selected diff class item in snapshot, to take signal from the table widget.
   final selectedDiffClassStats = ValueNotifier<DiffClassStats?>(null);
 
-  /// Cllasses to show for currently selected item, if the item is diffed.
+  /// Classes to show for currently selected item, if the item is diffed.
   ValueListenable<List<DiffClassStats>?> get diffClassesToShow =>
       _diffClassesToShow;
   final _diffClassesToShow = ValueNotifier<List<DiffClassStats>?>(null);
 
-  /// Cllasses to show for currently selected item, if the item is not diffed.
+  /// Classes to show for currently selected item, if the item is not diffed.
   ValueListenable<List<SingleClassStats>?> get singleClassesToShow =>
       _singleClassesToShow;
   final _singleClassesToShow = ValueNotifier<List<SingleClassStats>?>(null);
@@ -235,21 +235,21 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
 
       var singleHidden = true;
       var diffHidden = true;
-      var context = 'no data';
+      var details = 'no data';
       final item = selectedItem.value;
       if (item is SnapshotInstanceItem && item.hasData) {
         diffHidden = item.diffWith.value == null;
         singleHidden = !diffHidden;
-        context = diffHidden ? 'single' : 'diff';
+        details = diffHidden ? 'single' : 'diff';
       }
 
       assert(singleHidden || diffHidden);
 
-      if (singleHidden) assert(selectedSingleClassStats.value == null, context);
-      if (diffHidden) assert(selectedDiffClassStats.value == null, context);
+      if (singleHidden) assert(selectedSingleClassStats.value == null, details);
+      if (diffHidden) assert(selectedDiffClassStats.value == null, details);
 
-      assert((singleClassesToShow.value == null) == singleHidden, context);
-      assert((diffClassesToShow.value == null) == diffHidden, context);
+      assert((singleClassesToShow.value == null) == singleHidden, details);
+      assert((diffClassesToShow.value == null) == diffHidden, details);
 
       return true;
     }());

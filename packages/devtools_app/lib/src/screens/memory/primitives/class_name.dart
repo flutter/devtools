@@ -12,7 +12,7 @@ class HeapClassName {
   HeapClassName({required this.className, required library})
       : library = _normalizeLibrary(library) {
     assert(
-      !isCore || !isDartOrFlutter,
+      !isPackageless || !isDartOrFlutter,
       'isCore and isDartOrFlutter must be exclusive',
     );
   }
@@ -36,8 +36,7 @@ class HeapClassName {
         );
 
   static String _library(String? libName, String? libUrl) {
-    libName ??= '';
-    if (libName.isNotEmpty) return libName;
+    if (libName != null && libName.isNotEmpty) return libName;
     return libUrl ?? '';
   }
 
@@ -48,7 +47,8 @@ class HeapClassName {
 
   bool get isSentinel => className == 'Sentinel' && library.isEmpty;
 
-  /// Detects if a class can retain an object from garbage collection.
+  /// Whether a class can hold a reference to an object
+  /// without preventing garbage collection.
   bool get isWeakEntry {
     // Classes that hold reference to an object without preventing
     // its collection.
@@ -71,11 +71,13 @@ class HeapClassName {
     return false;
   }
 
-  /// True, if the library is a core library.
+  /// True, if the library does not belong to a package.
   ///
-  /// I.e. if the library name is empty or does not have prefix
+  /// I.e. if the library does not have prefix
   /// `dart:` or `package:`.
-  bool get isCore =>
+  /// Examples of such classes: Code, Function, Class, Field,
+  /// number_symbols/NumberSymbols, vector_math_64/Matrix4.
+  bool get isPackageless =>
       library.isEmpty ||
       (!library.startsWith(PackagePrefixes.dart) &&
           !library.startsWith(PackagePrefixes.genericDartPackage));
@@ -84,8 +86,10 @@ class HeapClassName {
   /// published by Dart or Flutter org.
   bool get isDartOrFlutter {
     if (library.startsWith(PackagePrefixes.dart)) return true;
+    if (library.startsWith(PackagePrefixes.flutterPackage)) return true;
 
     if (!library.startsWith(PackagePrefixes.genericDartPackage)) return false;
+
     final slashIndex = library.indexOf('/');
     if (slashIndex == -1) return false;
     final packageName = library.substring(

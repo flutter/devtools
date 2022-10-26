@@ -59,7 +59,7 @@ mixin Filterable<T extends ClassStats> on HeapClasses<T> {
     if (task == FilteringTask.doNothing) return oldFiltered!;
 
     // Return all data if filter is trivial.
-    if (newFilter.filterType == ClassFilterType.all) {
+    if (newFilter.filterType == ClassFilterType.showAll) {
       return _filtered = classStatsList;
     }
 
