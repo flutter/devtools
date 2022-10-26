@@ -5,16 +5,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-/// List of packages, published by Dart and Flutter.
-///
-/// There is no active monitoring for new packages.
-/// So, if you see something is missing here,
-/// please, create PR to add it.
-/// TODO(polina-c): add a test that verifies there is missing
-/// packages.
+import '../../../primitives/simple_items.dart';
+
 @immutable
 class HeapClassName {
-  HeapClassName({required this.className, required this.library}) {
+  HeapClassName({required this.className, required library})
+      : library = _normalizeLibrary(library) {
     assert(
       !isCore || !isDartOrFlutter,
       'isCore and isDartOrFlutter must be exclusive',
@@ -22,13 +18,22 @@ class HeapClassName {
   }
 
   HeapClassName.fromClassRef(ClassRef? classRef)
-      : library = _library(classRef?.library?.name, classRef?.library?.uri),
-        className = classRef?.name ?? '';
+      : this(
+          library: _library(
+            classRef?.library?.name,
+            classRef?.library?.uri,
+          ),
+          className: classRef?.name ?? '',
+        );
 
   HeapClassName.fromHeapSnapshotClass(HeapSnapshotClass? theClass)
-      : library =
-            _library(theClass?.libraryName, theClass?.libraryUri.toString()),
-        className = theClass?.name ?? '';
+      : this(
+          library: _library(
+            theClass?.libraryName,
+            theClass?.libraryUri.toString(),
+          ),
+          className: theClass?.name ?? '',
+        );
 
   static String _library(String? libName, String? libUrl) {
     libName ??= '';
@@ -48,9 +53,9 @@ class HeapClassName {
     // Classes that hold reference to an object without preventing
     // its collection.
     const weakHolders = {
-      '_WeakProperty': 'dart.core',
-      '_WeakReferenceImpl': 'dart.core',
-      'FinalizerEntry': 'dart._internal',
+      '_WeakProperty': '${PackagePrefixes.dart}core',
+      '_WeakReferenceImpl': '${PackagePrefixes.dart}core',
+      'FinalizerEntry': '${PackagePrefixes.dart}_internal',
     };
 
     if (!weakHolders.containsKey(className)) return false;
@@ -69,21 +74,24 @@ class HeapClassName {
   /// True, if the library is a core library.
   ///
   /// I.e. if the library name is empty or does not have prefix
-  /// `dart.` or `package:`.
+  /// `dart:` or `package:`.
   bool get isCore =>
       library.isEmpty ||
-      (!library.startsWith('dart.') && !library.startsWith('package:'));
+      (!library.startsWith(PackagePrefixes.dart) &&
+          !library.startsWith(PackagePrefixes.genericDartPackage));
 
-  /// True, if the package has prefix `dart.` or has perfix `package:` and is
+  /// True, if the package has prefix `dart:` or has perfix `package:` and is
   /// published by Dart or Flutter org.
   bool get isDartOrFlutter {
-    if (library.startsWith('dart.')) return true;
+    if (library.startsWith(PackagePrefixes.dart)) return true;
 
-    const packagePrefix = 'package:';
-    if (!library.startsWith(packagePrefix)) return false;
+    if (!library.startsWith(PackagePrefixes.genericDartPackage)) return false;
     final slashIndex = library.indexOf('/');
     if (slashIndex == -1) return false;
-    final packageName = library.substring(packagePrefix.length, slashIndex);
+    final packageName = library.substring(
+      PackagePrefixes.genericDartPackage.length,
+      slashIndex,
+    );
 
     return _dartAndFlutterPackages.contains(packageName);
   }
@@ -98,9 +106,21 @@ class HeapClassName {
 
   @override
   int get hashCode => fullName.hashCode;
+
+  static String _normalizeLibrary(String library) =>
+      library.trim().replaceFirst(
+            RegExp('^${PackagePrefixes.dartInSnapshot}'),
+            PackagePrefixes.dart,
+          );
 }
 
 /// Packages that are published by dart.dev or flutter.dev.
+///
+/// There is no active monitoring for new packages.
+/// If you see something is missing here,
+/// please, create a PR to add it.
+/// TODO(polina-c): add a test that verifies if there are missing
+/// packages.
 const _dartAndFlutterPackages = {
   'flutter',
 

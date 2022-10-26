@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../../charts/flame_chart.dart';
+import '../../primitives/simple_items.dart';
 import '../../primitives/trace_event.dart';
 import '../../primitives/trees.dart';
 import '../../primitives/utils.dart';
@@ -626,18 +627,6 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     required CpuProfileMetaData profileMetaData,
   }) : _profileMetaData = profileMetaData;
 
-  /// Prefix for packages from the core Dart libraries.
-  static const dartPackagePrefix = 'dart:';
-
-  /// Prefix for packages from the core Flutter libraries.
-  static const flutterPackagePrefix = 'package:flutter/';
-
-  /// The Flutter namespace in C++ that is part of the Flutter Engine code.
-  static const flutterEnginePrefix = 'flutter::';
-
-  /// dart:ui is the library for the Dart part of the Flutter Engine code.
-  static const dartUiPrefix = 'dart:ui';
-
   final String id;
 
   final String name;
@@ -667,20 +656,20 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
 
   bool get isNative => _isNative ??= id != CpuProfileData.rootId &&
       packageUri.isEmpty &&
-      !name.startsWith(flutterEnginePrefix);
+      !name.startsWith(PackagePrefixes.flutterEngine);
 
   bool? _isNative;
 
   bool get isDartCore =>
-      _isDartCore ??= packageUri.startsWith(dartPackagePrefix) &&
-          !packageUri.startsWith(dartUiPrefix);
+      _isDartCore ??= packageUri.startsWith(PackagePrefixes.dart) &&
+          !packageUri.startsWith(PackagePrefixes.dartUi);
 
   bool? _isDartCore;
 
-  bool get isFlutterCore =>
-      _isFlutterCore ??= packageUri.startsWith(flutterPackagePrefix) ||
-          name.startsWith(flutterEnginePrefix) ||
-          packageUri.startsWith(dartUiPrefix);
+  bool get isFlutterCore => _isFlutterCore ??=
+      packageUri.startsWith(PackagePrefixes.flutterPackage) ||
+          name.startsWith(PackagePrefixes.flutterEngine) ||
+          packageUri.startsWith(PackagePrefixes.dartUi);
 
   bool? _isFlutterCore;
 

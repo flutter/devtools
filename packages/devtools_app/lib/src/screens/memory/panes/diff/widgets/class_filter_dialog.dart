@@ -71,14 +71,7 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
 
     return StateUpdateDialog(
       title: 'Filter Classes and Packages',
-      helpText: 'Choose and customize the filter.\n'
-          'List full or partial class names separated by new lines. For example:\n\n'
-          '  package:myPackage/src/myFolder/myLibrary.dart/MyClass\n'
-          '  MyClass\n'
-          '  package:myPackage/src/\n\n'
-          'Specify:\n'
-          '  - ${ClassFilter.coreLibrariesAlias} for core classes without package prefix\n'
-          '  - ${ClassFilter.dartAndFlutterLibrariesAlias} for "dart." and "package:" libraries published by Dart and Flutter orgs.',
+      helpText: _helpText,
       onResetDefaults: () =>
           setState(() => _loadStateFromFilter(ClassFilter.empty())),
       onApply: () {
@@ -135,3 +128,12 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
     );
   }
 }
+
+const _helpText = 'Choose and customize the filter.\n'
+    'List full or partial class names separated by new lines. For example:\n\n'
+    '  package:myPackage/src/myFolder/myLibrary.dart/MyClass\n'
+    '  MyClass\n'
+    '  package:myPackage/src/\n\n'
+    'Specify:\n'
+    '  - ${ClassFilter.coreLibrariesAlias} for core classes without package prefix\n'
+    '  - ${ClassFilter.dartAndFlutterLibrariesAlias} for "dart." and "package:" libraries published by Dart and Flutter orgs.';
