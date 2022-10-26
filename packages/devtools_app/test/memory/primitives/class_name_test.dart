@@ -33,8 +33,14 @@ final _classTests = [
     isDartOrFlutter: false,
   ),
   _ClassTest(
-    'dart',
+    'dart-from-snapshot',
     'dart.something',
+    isCore: false,
+    isDartOrFlutter: true,
+  ),
+  _ClassTest(
+    'dart-normalized',
+    'dart:something',
     isCore: false,
     isDartOrFlutter: true,
   ),
