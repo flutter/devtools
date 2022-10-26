@@ -51,36 +51,48 @@ class _PathControlPane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        CopyToClipboardControl(
-          dataProvider: () => path.toLongString(delimiter: '\n'),
-          // We do not give success message because it pops up directly on
-          // top of the path control, that makes the control anavailable
-          // while message is here.
-          successMessage: null,
-        ),
-        const SizedBox(width: denseSpacing),
-        ValueListenableBuilder<bool>(
-          valueListenable: controller.hideStandard,
-          builder: (_, hideStandard, __) => FilterButton(
-            onPressed: () =>
-                controller.hideStandard.value = !controller.hideStandard.value,
-            isFilterActive: hideStandard,
-            message: 'Hide standard libraries',
+    return Padding(
+      padding: const EdgeInsets.only(right: denseSpacing),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              'Retaining path for ${path.classes.last.className}',
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
-        ),
-        const SizedBox(width: denseSpacing),
-        ValueListenableBuilder<bool>(
-          valueListenable: controller.invert,
-          builder: (_, invert, __) => ToggleButton(
-            onPressed: () => controller.invert.value = !controller.invert.value,
-            isSelected: invert,
-            message: 'Invert the path',
-            icon: Icons.swap_horiz,
+          const SizedBox(width: denseSpacing),
+          CopyToClipboardControl(
+            dataProvider: () => path.toLongString(delimiter: '\n'),
+            // We do not give success message because it pops up directly on
+            // top of the path control, that makes the control anavailable
+            // while message is here.
+            successMessage: null,
           ),
-        ),
-      ],
+          const SizedBox(width: denseSpacing),
+          ValueListenableBuilder<bool>(
+            valueListenable: controller.hideStandard,
+            builder: (_, hideStandard, __) => FilterButton(
+              onPressed: () => controller.hideStandard.value =
+                  !controller.hideStandard.value,
+              isFilterActive: hideStandard,
+              message: 'Hide standard libraries',
+            ),
+          ),
+          const SizedBox(width: denseSpacing),
+          ValueListenableBuilder<bool>(
+            valueListenable: controller.invert,
+            builder: (_, invert, __) => ToggleButton(
+              onPressed: () =>
+                  controller.invert.value = !controller.invert.value,
+              isSelected: invert,
+              message: 'Invert the path',
+              icon: Icons.swap_horiz,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
