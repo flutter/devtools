@@ -36,8 +36,6 @@ class AdaptedHeap {
 }
 
 abstract class HeapClasses<T extends ClassStats> with Sealable {
-
-
   List<T> get classStatsList;
 }
 
