@@ -136,4 +136,4 @@ const _helpText = 'Choose and customize the filter.\n'
     '  package:myPackage/src/\n\n'
     'Specify:\n'
     '  - ${ClassFilter.coreLibrariesAlias} for core classes without package prefix\n'
-    '  - ${ClassFilter.dartAndFlutterLibrariesAlias} for "dart." and "package:" libraries published by Dart and Flutter orgs.';
+    '  - ${ClassFilter.dartAndFlutterLibrariesAlias} for most "dart." and "package:" libraries published by Dart and Flutter orgs.';
