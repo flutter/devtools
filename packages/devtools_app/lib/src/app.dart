@@ -474,7 +474,7 @@ class SettingsDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final analyticsController = Provider.of<AnalyticsController>(context);
     return DevToolsDialog(
-      title: dialogTitleText(Theme.of(context), 'Settings'),
+      title: const DialogTitleText('Settings'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,

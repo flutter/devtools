@@ -22,9 +22,12 @@ class Disposer {
   @protected
   @visibleForTesting
   List<Listenable> get listenables => _listenables;
+
+  /// Not using VoidCallback because of
+  /// https://github.com/dart-lang/mockito/issues/579
   @protected
   @visibleForTesting
-  List<VoidCallback> get listeners => _listeners;
+  List<void Function()> get listeners => _listeners;
 
   final List<Listenable> _listenables = [];
   final List<VoidCallback> _listeners = [];
@@ -151,9 +154,11 @@ mixin AutoDisposeControllerMixin on DisposableController implements Disposer {
   @visibleForTesting
   List<Listenable> get listenables => _delegate.listenables;
 
+  /// Not using VoidCallback because of
+  /// https://github.com/dart-lang/mockito/issues/579
   @override
   @visibleForTesting
-  List<VoidCallback> get listeners => _delegate.listeners;
+  List<void Function()> get listeners => _delegate.listeners;
 
   @override
   void dispose() {
