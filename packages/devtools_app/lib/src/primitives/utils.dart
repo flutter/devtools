@@ -19,6 +19,8 @@ import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../screens/memory/panes/diff/controller/utils.dart';
+
 bool isPrivate(String member) => member.startsWith('_');
 
 /// Public properties first, then sort alphabetically
@@ -1523,15 +1525,18 @@ Map<K, R> subtractMaps<K, F, S, R>({
   required Map<K, F>? from,
   required R? Function({required S? subtract, required F? from}) subtractor,
 }) {
+  final t = TimeWatcher();
   from ??= <K, F>{};
   substract ??= <K, S>{};
 
   final result = <K, R>{};
+  t.tap('subtractMaps 1');
   final unionOfKeys = from.keys.toSet().union(substract.keys.toSet());
-
+  t.tap('subtractMaps 2');
   for (var key in unionOfKeys) {
     final diff = subtractor(from: from[key], subtract: substract[key]);
     if (diff != null) result[key] = diff;
   }
+  t.tap('subtractMaps 3');
   return result;
 }

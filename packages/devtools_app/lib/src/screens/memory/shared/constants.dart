@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../../../primitives/utils.dart';
 import '../../../shared/utils.dart';
 
 /// When to have verbose Dropdown based on media width.
@@ -23,3 +24,11 @@ const sourcesKey = Key('Sources');
 
 /// Padding for each title in the legend.
 const legendTitlePadding = EdgeInsets.fromLTRB(5, 0, 0, 4);
+
+/// Memory specifiv actions for analytics.
+class MemoryActions {
+  static const diffUpdateValues = 'diffUpdateValues';
+}
+
+Future<void> memoryDelayForBatchProcessing() =>
+    delayForBatchProcessing(micros: 5000);

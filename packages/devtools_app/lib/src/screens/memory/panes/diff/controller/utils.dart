@@ -5,6 +5,15 @@
 import '../../../../../shared/globals.dart';
 import '../../../shared/heap/heap.dart';
 
+class TimeWatcher {
+  DateTime start = DateTime.now();
+  void tap(Object o) {
+    final t = DateTime.now();
+    print('$o: ${t.difference(start)}');
+    start = t;
+  }
+}
+
 String classesToCsv(Iterable<ClassStats> classes) {
   final csvBuffer = StringBuffer();
 

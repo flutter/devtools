@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../../../../primitives/utils.dart';
+import '../../panes/diff/controller/utils.dart';
 import '../../primitives/class_name.dart';
+import '../constants.dart';
 import 'class_filter.dart';
 import 'model.dart';
 import 'spanning_tree.dart';
@@ -12,13 +15,19 @@ class AdaptedHeap {
 
   final AdaptedHeapData data;
 
-  late final SingleHeapClasses classes = _heapStatistics();
+  late final Future<SingleHeapClasses> _classes = _heapStatistics();
+  Future<SingleHeapClasses> classes() async => await _classes;
 
-  SingleHeapClasses _heapStatistics() {
+  Future<SingleHeapClasses> _heapStatistics() async {
+    final t = TimeWatcher();
+    t.tap(11);
     final result = <HeapClassName, SingleClassStats>{};
+
     if (!data.isSpanningTreeBuilt) buildSpanningTree(data);
 
+    t.tap(12);
     for (var i in Iterable.generate(data.objects.length)) {
+      await memoryDelayForBatchProcessing();
       final object = data.objects[i];
       final className = object.heapClass;
 
@@ -30,7 +39,7 @@ class AdaptedHeap {
           result.putIfAbsent(className, () => SingleClassStats(className));
       singleHeapClass.countInstance(data, i);
     }
-
+    t.tap(13);
     return SingleHeapClasses(result)..seal();
   }
 }

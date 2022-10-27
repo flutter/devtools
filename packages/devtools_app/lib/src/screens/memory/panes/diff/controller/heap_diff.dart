@@ -67,15 +67,26 @@ class DiffHeapClasses extends HeapClasses<DiffClassStats>
   DiffHeapClasses(_HeapCouple couple) {
     classesByName = subtractMaps<HeapClassName, SingleClassStats,
         SingleClassStats, DiffClassStats>(
-      from: couple.younger.classes.classesByName,
-      substract: couple.older.classes.classesByName,
+      from: couple.younger.classes().classesByName,
+      substract: couple.older.classes().classesByName,
+      subtractor: ({subtract, from}) =>
+          DiffClassStats.diff(before: subtract, after: from),
+    );
+  }
+
+  static Future<Map<HeapClassName, DiffClassStats>> _diffClassesByName(
+      _HeapCouple couple) async {
+    return subtractMaps<HeapClassName, SingleClassStats, SingleClassStats,
+        DiffClassStats>(
+      from: await (couple.younger.classes()).classesByName,
+      substract: await couple.older.classes().classesByName,
       subtractor: ({subtract, from}) =>
           DiffClassStats.diff(before: subtract, after: from),
     );
   }
 
   /// Maps full class name to class.
-  late final Map<HeapClassName, DiffClassStats> classesByName;
+  late final Future<Map<HeapClassName, DiffClassStats>> _classesByName;
   late final List<DiffClassStats> classes =
       classesByName.values.toList(growable: false);
 
