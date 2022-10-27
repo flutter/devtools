@@ -42,5 +42,5 @@ ClassFilter _exceptFilter(String filter) =>
 ClassFilter _onlyFilter(String filter) =>
     ClassFilter(filterType: ClassFilterType.only, except: '', only: filter);
 
-ClassFilter _allFilter(String only, String except) =>
-    ClassFilter(filterType: ClassFilterType.only, except: except, only: only);
+ClassFilter _allFilter(String only, String except) => ClassFilter(
+    filterType: ClassFilterType.showAll, except: except, only: only);

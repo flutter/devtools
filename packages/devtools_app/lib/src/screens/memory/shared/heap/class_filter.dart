@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../primitives/class_name.dart';
@@ -93,7 +94,8 @@ class ClassFilter {
   FilteringTask task({required ClassFilter? previous}) {
     if (previous == null) return FilteringTask.refilter;
 
-    if (filterType == previous.filterType && filters == previous.filters) {
+    if (filterType == previous.filterType &&
+        setEquals(filters, previous.filters)) {
       return FilteringTask.doNothing;
     }
 
