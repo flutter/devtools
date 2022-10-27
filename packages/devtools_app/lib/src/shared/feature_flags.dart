@@ -8,23 +8,16 @@ import 'globals.dart';
 
 /// If true, features under construction will be enabled.
 ///
-/// By default, the constant is false.
+/// By default, the constant is false in release mode.
 /// To enable it, pass the compilation flag
 /// `--dart-define=enable_experiments=true`.
-///
-/// To enable the flag in debug configuration of VSCode, add value:
-///   "args": [
-///     "--dart-define=enable_experiments=true"
-///   ]
-
 bool _kEnableExperiments =
     const bool.fromEnvironment('enable_experiments') || !kReleaseMode;
 
 /// If true, features, ready for beta testing, will be on.
 ///
 /// Always true when [_kEnableExperiments] is true.
-/// See [_kEnableExperiments] documentation  for usage.
-late final bool _kEnableBeta = !isExternalBuild;
+late final bool _kEnableBeta = !isExternalBuild || _kEnableExperiments;
 
 // It is ok to have enum-like static only classes.
 // ignore: avoid_classes_with_only_static_members
