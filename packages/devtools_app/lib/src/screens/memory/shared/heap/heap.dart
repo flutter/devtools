@@ -39,7 +39,7 @@ abstract class HeapClasses<T extends ClassStats> with Sealable {
   List<T> get classStatsList;
 }
 
-mixin Filterable<T extends ClassStats> on HeapClasses<T> {
+mixin FilterableHeapClasses<T extends ClassStats> on HeapClasses<T> {
   ClassFilter? _appliedFilter;
   List<T>? _filtered;
 
@@ -80,7 +80,7 @@ mixin Filterable<T extends ClassStats> on HeapClasses<T> {
 
 /// Set of heap class statistical information for single heap (not comparision between two heaps).
 class SingleHeapClasses extends HeapClasses<SingleClassStats>
-    with Filterable<SingleClassStats> {
+    with FilterableHeapClasses<SingleClassStats> {
   SingleHeapClasses(this.classesByName);
 
   /// Maps full class name to class.

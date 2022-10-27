@@ -63,7 +63,7 @@ class _HeapCouple {
 
 /// List of classes with per-class comparision between two heaps.
 class DiffHeapClasses extends HeapClasses<DiffClassStats>
-    with Filterable<DiffClassStats> {
+    with FilterableHeapClasses<DiffClassStats> {
   DiffHeapClasses(_HeapCouple couple) {
     classesByName = subtractMaps<HeapClassName, SingleClassStats,
         SingleClassStats, DiffClassStats>(

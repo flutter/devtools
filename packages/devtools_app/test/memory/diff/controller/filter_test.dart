@@ -24,6 +24,15 @@ void main() {
       expect(weaker.task(previous: stronger), FilteringTask.refilter);
       expect(weaker.task(previous: weaker), FilteringTask.doNothing);
     });
+
+    test('task for ${ClassFilterType.showAll}', () {
+      final f1 = _allFilter('a', '');
+      final f2 = _allFilter('', 'b');
+
+      expect(f1.task(previous: f2), FilteringTask.doNothing);
+      expect(f2.task(previous: f1), FilteringTask.doNothing);
+      expect(f1.task(previous: f1), FilteringTask.doNothing);
+    });
   });
 }
 
@@ -32,3 +41,6 @@ ClassFilter _exceptFilter(String filter) =>
 
 ClassFilter _onlyFilter(String filter) =>
     ClassFilter(filterType: ClassFilterType.only, except: '', only: filter);
+
+ClassFilter _allFilter(String only, String except) =>
+    ClassFilter(filterType: ClassFilterType.only, except: except, only: only);

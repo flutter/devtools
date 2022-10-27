@@ -69,8 +69,13 @@ class ClassFilter {
   }
 
   Set<String> _filtersAsSet() {
-    Set<String> stringToSet(String? s) =>
-        s == null ? {} : s.split('\n').where((e) => e.isNotEmpty).toSet();
+    Set<String> stringToSet(String? s) => s == null
+        ? {}
+        : s
+            .split(RegExp(',|\n'))
+            .where((e) => e.isNotEmpty)
+            .map((e) => e.trim())
+            .toSet();
 
     switch (filterType) {
       case ClassFilterType.showAll:
@@ -110,7 +115,7 @@ class ClassFilter {
   String get displayString {
     switch (filterType) {
       case ClassFilterType.showAll:
-        return 'Show all classes.';
+        return 'Show all classes';
       case ClassFilterType.except:
         return 'Show all classes, except:\n$except';
       case ClassFilterType.only:
