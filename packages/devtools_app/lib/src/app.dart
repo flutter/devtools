@@ -68,7 +68,7 @@ class DevToolsApp extends StatefulWidget {
     this.analyticsController, {
     required bool isExternalBuildValue,
   }) {
-    isExternalBuild = isExternalBuildValue;
+    if (isExternalBuildValue) setExternalBuild();
   }
 
   final List<DevToolsScreen> screens;

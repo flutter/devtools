@@ -16,7 +16,11 @@ import 'preferences.dart';
 import 'survey.dart';
 
 /// Whether this DevTools build is external.
-late final bool isExternalBuild;
+bool get isExternalBuild => _isExternalBuild;
+bool _isExternalBuild = false;
+
+/// Flag the build as external.
+void setExternalBuild() => _isExternalBuild = true;
 
 final Map<Type, dynamic> globals = <Type, dynamic>{};
 
