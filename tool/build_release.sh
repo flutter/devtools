@@ -14,8 +14,10 @@ TOOL_DIR=`dirname "${RELATIVE_PATH_TO_SCRIPT}"`
 DEVTOOLS_DIR="${TOOL_DIR}/.."
 
 # Use the Flutter SDK from flutter-sdk/.
-FLUTTER_DIR="$TOOL_DIR/flutter-sdk"
+pushd $TOOL_DIR
+FLUTTER_DIR="`pwd`/flutter-sdk"
 PATH="$FLUTTER_DIR/bin":$PATH
+popd
 
 REQUIRED_FLUTTER_VERSION=`dart $TOOL_DIR/bin/repo_tool.dart latest-flutter-candidate | tail -n 1`
 
