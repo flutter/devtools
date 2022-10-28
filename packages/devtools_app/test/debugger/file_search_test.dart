@@ -429,8 +429,10 @@ void main() {
 
     autoCompleteController.search = 'food cartwheel';
     expect(
-      getAutoCompleteMatch(autoCompleteController.searchAutoComplete.value,
-          preserveCases: true),
+      getAutoCompleteMatch(
+        autoCompleteController.searchAutoComplete.value,
+        preserveCases: true,
+      ),
       equals(
         [
           'No files found.',
@@ -440,8 +442,10 @@ void main() {
   });
 }
 
-List<String> getAutoCompleteMatch(List<AutoCompleteMatch> matches,
-    {bool preserveCases = false}) {
+List<String> getAutoCompleteMatch(
+  List<AutoCompleteMatch> matches, {
+  bool preserveCases = false,
+}) {
   return matches
       .map(
         (match) => match.transformAutoCompleteMatch<String>(
