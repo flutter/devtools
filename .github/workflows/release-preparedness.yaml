@@ -68,7 +68,7 @@ jobs:
         run: |
           if [ "$HAS_CHANGED_RELEASE_NOTES" != "true" ] && [ "$HAS_RELEASE_NOTE_EXCEPTION_STRING" != "true" ] ; then
             echo "Release Preparedness check failed"
-            echo "::error file=$JSON_RELEASE_FILE_PATH,line=0,col=0,endColumn=0,title='Release Notes Weren\'t Modified'::%0APlease add a release note entry or a reason to your description using: \`> NO RELEASE NOTE CHANGES: [reason goes here]\`"
+            echo "::error file=$JSON_RELEASE_FILE_PATH,line=0,col=0,endColumn=0,title='Release Notes Weren\'t Modified'::Please add a release note entry or a reason to your description using: %0A\`> NO RELEASE NOTE CHANGES: [reason goes here]\`"
             exit 1
           fi
 
