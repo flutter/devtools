@@ -22,6 +22,9 @@
                          "message": "Fix issue where widget inspector wouldn't load when connecting to a paused  app"
                     },
                     {
+                         "githubPullRequestUrls": [
+                              "https://github.com/flutter/devtools/pull/4572"
+                         ],
                          "message": "Improve widget inspector hover cards to show progress while waiting for data"
                     }
                ]
