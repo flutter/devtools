@@ -868,54 +868,41 @@ class _LineItemState extends State<LineItem>
       // TODO: support selecting text across multiples lines.
       child = Stack(
         children: [
-          HoverCardTooltip.async(
-            asyncTimeout: 100,
-            asyncGenerateHoverCardData: _generateHoverCardData,
-            enabled: () => true,
-            child: Row(
-              children: [
-                // Create a hidden copy of the first column-1 characters of the
-                // line as a hack to correctly compute where to place
-                // the cursor. Approximating by using column-1 spaces instead
-                // of the correct characters and style s would be risky as it leads
-                // to small errors if the font is not fixed size or the font
-                // styles vary depending on the syntax highlighting.
-                // TODO(jacobr): there might be some api exposed on SelectedText
-                // to allow us to render this as a proper overlay as similar
-                // functionality exists to render the selection handles properly.
-                Opacity(
-                  opacity: 0,
-                  child: RichText(
-                    text: truncateTextSpan(widget.lineContents, column - 1),
+          Row(
+            children: [
+              // Create a hidden copy of the first column-1 characters of the
+              // line as a hack to correctly compute where to place
+              // the cursor. Approximating by using column-1 spaces instead
+              // of the correct characters and style s would be risky as it leads
+              // to small errors if the font is not fixed size or the font
+              // styles vary depending on the syntax highlighting.
+              // TODO(jacobr): there might be some api exposed on SelectedText
+              // to allow us to render this as a proper overlay as similar
+              // functionality exists to render the selection handles properly.
+              Opacity(
+                opacity: .5,
+                child: RichText(
+                  text: truncateTextSpan(widget.lineContents, column - 1),
+                ),
+              ),
+              Transform.translate(
+                offset: const Offset(colLeftOffset, colBottomOffset),
+                child: Transform.rotate(
+                  angle: colIconRotate,
+                  child: Icon(
+                    Icons.label_important,
+                    size: colIconSize,
+                    color: breakpointColor,
                   ),
                 ),
-                Transform.translate(
-                  offset: const Offset(colLeftOffset, colBottomOffset),
-                  child: Transform.rotate(
-                    angle: colIconRotate,
-                    child: Icon(
-                      Icons.label_important,
-                      size: colIconSize,
-                      color: breakpointColor,
-                    ),
-                  ),
-                )
-              ],
-            ),
+              ),
+            ],
           ),
+          _hoverableLine(),
         ],
       );
     } else {
-      child = HoverCardTooltip.async(
-        enabled: () => true,
-        asyncTimeout: 100,
-        asyncGenerateHoverCardData: _generateHoverCardData,
-        child: SelectableText.rich(
-          searchAwareLineContents(),
-          scrollPhysics: const NeverScrollableScrollPhysics(),
-          maxLines: 1,
-        ),
-      );
+      child = _hoverableLine();
     }
 
     final backgroundColor = widget.focused
@@ -931,6 +918,17 @@ class _LineItemState extends State<LineItem>
       child: child,
     );
   }
+
+  Widget _hoverableLine() => HoverCardTooltip.async(
+        enabled: () => true,
+        asyncTimeout: 100,
+        asyncGenerateHoverCardData: _generateHoverCardData,
+        child: SelectableText.rich(
+          searchAwareLineContents(),
+          scrollPhysics: const NeverScrollableScrollPhysics(),
+          maxLines: 1,
+        ),
+      );
 
   TextSpan searchAwareLineContents() {
     final children = widget.lineContents.children;
