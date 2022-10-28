@@ -65,21 +65,15 @@ class _HeapCouple {
 class DiffHeapClasses extends HeapClasses<DiffClassStats>
     with FilterableHeapClasses<DiffClassStats> {
   DiffHeapClasses(_HeapCouple couple) {
-    classesByName = subtractMaps<HeapClassName, SingleClassStats,
-        SingleClassStats, DiffClassStats>(
-      from: couple.younger.classes().classesByName,
-      substract: couple.older.classes().classesByName,
-      subtractor: ({subtract, from}) =>
-          DiffClassStats.diff(before: subtract, after: from),
-    );
+    _classesByName = _diffClassesByName(couple);
   }
 
   static Future<Map<HeapClassName, DiffClassStats>> _diffClassesByName(
       _HeapCouple couple) async {
     return subtractMaps<HeapClassName, SingleClassStats, SingleClassStats,
         DiffClassStats>(
-      from: await (couple.younger.classes()).classesByName,
-      substract: await couple.older.classes().classesByName,
+      from: (await couple.younger.classes()).classesByName,
+      substract: (await couple.older.classes()).classesByName,
       subtractor: ({subtract, from}) =>
           DiffClassStats.diff(before: subtract, after: from),
     );

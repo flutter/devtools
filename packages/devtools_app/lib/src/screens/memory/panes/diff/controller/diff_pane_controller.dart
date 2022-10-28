@@ -276,7 +276,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     final heap = theItem.heap;
     if (heap == null) return null;
     final itemToDiffWith = theItem.diffWith.value;
-    if (itemToDiffWith == null) return await heap.classes;
+    if (itemToDiffWith == null) return await heap.classes();
     return _diffStore.compare(heap, itemToDiffWith.heap!);
   }
 
