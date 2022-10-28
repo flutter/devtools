@@ -46,6 +46,7 @@ import 'screens/vm_developer/vm_developer_tools_screen.dart';
 import 'service/service_extension_widgets.dart';
 import 'shared/common_widgets.dart';
 import 'shared/dialogs.dart';
+import 'shared/feature_flags.dart';
 import 'shared/globals.dart';
 import 'shared/routing.dart';
 import 'shared/screen.dart';
@@ -60,6 +61,13 @@ const debugEnableSampleScreen = false;
 // Disabled until VM developer mode functionality is added.
 const showVmDeveloperMode = false;
 
+/// If true, features under construction will be enabled.
+///
+/// By default, the features are off in release mode.
+/// To enable them pass the compilation flag
+/// `--dart-define=enable_experiments=true`.
+bool _kEnableExperiments = const bool.fromEnvironment('enable_experiments');
+
 /// Top-level configuration for the app.
 @immutable
 class DevToolsApp extends StatefulWidget {
@@ -68,8 +76,22 @@ class DevToolsApp extends StatefulWidget {
     this.analyticsController, {
     required bool isExternalBuildValue,
   }) {
-    isExternalBuild = isExternalBuildValue;
-    isTestEnvironment = false;
+    if (isExternalBuildValue) setExternalBuild();
+    _setFeatureLevel();
+  }
+
+  void _setFeatureLevel() {
+    final FeatureLevel level;
+    if (isExternalBuild) {
+      level = FeatureLevel.prodOnly;
+    } else {
+      if (kReleaseMode && !_kEnableExperiments) {
+        level = FeatureLevel.beta;
+      } else {
+        level = FeatureLevel.experiments;
+      }
+    }
+    FeatureFlags.setFeatureLevel(level);
   }
 
   final List<DevToolsScreen> screens;

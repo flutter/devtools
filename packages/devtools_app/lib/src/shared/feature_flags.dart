@@ -2,34 +2,36 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
+enum FeatureLevel {
+  prodOnly(0),
+  beta(1),
+  experiments(2);
 
-import 'globals.dart';
-
-/// If true, features under construction will be enabled.
-///
-/// By default, the constant is false in release mode and for tests.
-/// To enable it for release mode, pass the compilation flag
-/// `--dart-define=enable_experiments=true`.
-bool _kEnableExperiments =
-    (const bool.fromEnvironment('enable_experiments') || !kReleaseMode) &&
-        !isTestEnvironment;
-
-/// If true, features, ready for beta testing, will be on.
-///
-/// Always true when [_kEnableExperiments] is true.
-late final bool _kEnableBeta =
-    (!isExternalBuild || _kEnableExperiments) && !isTestEnvironment;
+  const FeatureLevel(this.value);
+  final num value;
+}
 
 // It is ok to have enum-like static only classes.
 // ignore: avoid_classes_with_only_static_members
 /// Flags to hide features under construction.
 abstract class FeatureFlags {
+  static void setFeatureLevel(FeatureLevel level) {
+    if (level == FeatureLevel.prodOnly) return;
+
+    if (level.value >= FeatureLevel.beta.value) {
+      memoryDiffing = true;
+    }
+
+    if (level.value >= FeatureLevel.experiments.value) {
+      embeddedPerfetto = true;
+    }
+  }
+
   /// https://github.com/flutter/devtools/issues/3949
-  static bool memoryDiffing = _kEnableBeta;
+  static bool memoryDiffing = false;
 
   /// Flag to enable the embedded perfetto trace viewer.
   ///
   /// https://github.com/flutter/devtools/issues/4207.
-  static bool embeddedPerfetto = _kEnableExperiments;
+  static bool embeddedPerfetto = false;
 }

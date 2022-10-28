@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-
 import '../config_specific/ide_theme/ide_theme.dart';
 import '../config_specific/import_export/import_export.dart';
 import '../extension_points/extensions_base.dart';
@@ -22,16 +20,7 @@ bool get isExternalBuild => _isExternalBuild;
 bool _isExternalBuild = false;
 
 /// Flag the build as external.
-set isExternalBuild(bool value) {
-  if (kReleaseMode && _isExternalBuild && !value) {
-    throw StateError(
-      'isExternalBuild should not switch from true to false in release mode.',
-    );
-  }
-  _isExternalBuild = value;
-}
-
-bool isTestEnvironment = true;
+void setExternalBuild() => _isExternalBuild = true;
 
 final Map<Type, dynamic> globals = <Type, dynamic>{};
 
