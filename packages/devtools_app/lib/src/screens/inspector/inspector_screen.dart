@@ -374,7 +374,7 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
           ],
         ),
       ),
-      actions: [
+      actions: const [
         DialogCloseButton(),
       ],
     );

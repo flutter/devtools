@@ -510,7 +510,7 @@ class SettingsDialog extends StatelessWidget {
           ),
         ],
       ),
-      actions: [
+      actions: const [
         DialogCloseButton(),
       ],
     );

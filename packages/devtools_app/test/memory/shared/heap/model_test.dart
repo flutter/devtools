@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/screens/memory/primitives/class_name.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/model.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -12,7 +13,7 @@ void main() {
         AdaptedHeapObject(
           code: 1,
           references: [3, 4, 5],
-          heapClass: const HeapClassName(
+          heapClass: HeapClassName(
             className: 'class',
             library: 'library',
           ),

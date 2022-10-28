@@ -44,7 +44,9 @@ class SnapshotInstanceItem extends SnapshotItem {
 
   AdaptedHeap? heap;
 
-  void setHeapData(AdaptedHeapData? data) {
+  /// This method is expected to be called once when heap is actually recieved.
+  void initializeHeapData(AdaptedHeapData? data) {
+    assert(heap == null);
     if (data != null) heap = AdaptedHeap(data);
     _isProcessing.value = false;
   }

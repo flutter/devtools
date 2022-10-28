@@ -1414,12 +1414,22 @@ class CenteredMessage extends StatelessWidget {
 }
 
 class CenteredCircularProgressIndicator extends StatelessWidget {
-  const CenteredCircularProgressIndicator();
+  const CenteredCircularProgressIndicator({this.size});
+
+  final double? size;
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    const indicator = Center(
       child: CircularProgressIndicator(),
+    );
+
+    if (size == null) return indicator;
+
+    return SizedBox(
+      width: size,
+      height: size,
+      child: indicator,
     );
   }
 }
@@ -2419,7 +2429,7 @@ class HelpButtonWithDialog extends StatelessWidget {
             title: DialogTitleText(dialogTitle),
             includeDivider: false,
             content: child,
-            actions: [
+            actions: const [
               DialogCloseButton(),
             ],
           ),
@@ -2466,24 +2476,6 @@ class BulletSpacer extends StatelessWidget {
   }
 }
 
-class Progress extends StatelessWidget {
-  Progress({Key? key, double? size})
-      : size = size ?? smallProgressSize,
-        super(key: key);
-  final double size;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: size,
-      height: size,
-      child: CircularProgressIndicator(
-        color: Theme.of(context).textTheme.bodyLarge?.color,
-      ),
-    );
-  }
-}
-
 class ToCsvButton extends StatelessWidget {
   const ToCsvButton({
     Key? key,
@@ -2504,6 +2496,36 @@ class ToCsvButton extends StatelessWidget {
       tooltip: tooltip,
       onPressed: onPressed,
       minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
+    );
+  }
+}
+
+class RadioButton<T> extends StatelessWidget {
+  const RadioButton({
+    super.key,
+    required this.label,
+    required this.itemValue,
+    required this.groupValue,
+    this.onChanged,
+  });
+
+  final String label;
+  final T itemValue;
+  final T groupValue;
+  final void Function(T?)? onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Radio<T>(
+          value: itemValue,
+          groupValue: groupValue,
+          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          onChanged: onChanged,
+        ),
+        Expanded(child: Text(label, overflow: TextOverflow.ellipsis)),
+      ],
     );
   }
 }
