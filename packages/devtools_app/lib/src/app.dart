@@ -77,21 +77,15 @@ class DevToolsApp extends StatefulWidget {
     required bool isExternalBuildValue,
   }) {
     if (isExternalBuildValue) setExternalBuild();
-    _setFeatureLevel();
+    if (!isExternalBuild) _enableNonProdFeatures();
   }
 
-  void _setFeatureLevel() {
-    final FeatureLevel level;
-    if (isExternalBuild) {
-      level = FeatureLevel.prodOnly;
+  void _enableNonProdFeatures() {
+    if (kReleaseMode && !_kEnableExperiments) {
+      FeatureFlags.enableNonProdFeatures(NonProdFeatureLevel.beta);
     } else {
-      if (kReleaseMode && !_kEnableExperiments) {
-        level = FeatureLevel.beta;
-      } else {
-        level = FeatureLevel.experiments;
-      }
+      FeatureFlags.enableNonProdFeatures(NonProdFeatureLevel.experiment);
     }
-    FeatureFlags.setFeatureLevel(level);
   }
 
   final List<DevToolsScreen> screens;

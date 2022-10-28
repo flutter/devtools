@@ -2,29 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-enum FeatureLevel {
-  prodOnly(0),
-  beta(1),
-  experiments(2);
-
-  const FeatureLevel(this.value);
-  final num value;
+enum NonProdFeatureLevel {
+  beta,
+  experiment,
 }
 
 // It is ok to have enum-like static only classes.
 // ignore: avoid_classes_with_only_static_members
 /// Flags to hide features under construction.
 abstract class FeatureFlags {
-  static void setFeatureLevel(FeatureLevel level) {
-    if (level == FeatureLevel.prodOnly) return;
-
-    if (level.value >= FeatureLevel.beta.value) {
-      memoryDiffing = true;
-    }
-
-    if (level.value >= FeatureLevel.experiments.value) {
+  static void enableNonProdFeatures(NonProdFeatureLevel level) {
+    if (level == NonProdFeatureLevel.experiment) {
       embeddedPerfetto = true;
+      return;
     }
+
+    memoryDiffing = true;
   }
 
   /// https://github.com/flutter/devtools/issues/3949
