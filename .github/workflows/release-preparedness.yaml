@@ -79,7 +79,7 @@ jobs:
       - name: Check if the User still needs to add Urls
         run: |
           if ! git diff --exit-code; then
-            echo "::error file=$JSON_RELEASE_FILE_PATH,line=0,col=0,endColumn=0,title='Release Preparedness check failed'::Please make sure to add the PR Url to the release notes. You can automatically do this by running: \n\`dart tool/release_note_helper.dart pr-url -f $JSON_RELEASE_FILE_PATH -u https://github.com/flutter/devtools/pull/$PULL_NUMBER\`"
+            echo "::error file=$JSON_RELEASE_FILE_PATH,line=0,col=0,endColumn=0,title='Release Preparedness check failed'::Please make sure to add the PR Url to the release notes. You can automatically do this by running: \`dart tool/release_note_helper.dart pr-url -f $JSON_RELEASE_FILE_PATH -u https://github.com/flutter/devtools/pull/$PULL_NUMBER\`"
             exit 1
           fi
 
