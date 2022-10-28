@@ -29,21 +29,35 @@ jobs:
           HAS_CHANGED_RELEASE_NOTES=$(echo $FILES_RESPONSE | jq '.[].filename' | jq -s '. | any(. == env.JSON_RELEASE_FILE_PATH)')
           echo "HAS_CHANGED_RELEASE_NOTES: $HAS_CHANGED_RELEASE_NOTES"
           echo "::set-output name=HAS_CHANGED_RELEASE_NOTES::$HAS_CHANGED_RELEASE_NOTES"
-      - name: Get PR Labels
-        id: get-label-exception
+      - name: Get PR Description
+        id: get-pr-descripion
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PULL_NUMBER: ${{steps.get-pull-request-number.outputs.PULL_REQUEST_NUMBER}}
         run: |
           PULLS_RESPONSE=$(gh api /repos/flutter/devtools/pulls/$PULL_NUMBER)
           echo $PULLS_RESPONSE
+          DESCRIPTION_BODY=$(echo $PULLS_RESPONSE | jq '.body')
+          echo $DESCRIPTION_BODY
+          HAS_EXCEPTION_STRING=$(echo $DESCRIPTION_BODY | grep -q "<Not User Facing>")
 
-          export NOT_USER_FACING_LABEL_ID=4614108310
+          echo "::set-output name=HAS_EXCEPTION_STRING::$HAS_EXCEPTION_STRING"
 
-          HAS_EXCEPTION_LABEL=$(jq '.labels[].id ' | jq -s '. | any(. == env.NOT_USER_FACING_LABEL_ID|tostring)')
-          echo "HAS_EXCEPTION_LABEL: $HAS_EXCEPTION_LABEL"
+      # - name: Get PR Labels
+      #   id: get-label-exception
+      #   env:
+      #     GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     PULL_NUMBER: ${{steps.get-pull-request-number.outputs.PULL_REQUEST_NUMBER}}
+      #   run: |
+      #     PULLS_RESPONSE=$(gh api /repos/flutter/devtools/pulls/$PULL_NUMBER)
+      #     echo $PULLS_RESPONSE
 
-          echo "::set-output name=HAS_EXCEPTION_LABEL::$HAS_EXCEPTION_LABEL"
+      #     export NOT_USER_FACING_LABEL_ID=4614108310
+
+      #     HAS_EXCEPTION_LABEL=$(jq '.labels[].id ' | jq -s '. | any(. == env.NOT_USER_FACING_LABEL_ID|tostring)')
+      #     echo "HAS_EXCEPTION_LABEL: $HAS_EXCEPTION_LABEL"
+
+      #     echo "::set-output name=HAS_EXCEPTION_LABEL::$HAS_EXCEPTION_LABEL"
       - name: Check Release Preparedness requirements
         env:
           HAS_CHANGED_RELEASE_NOTES: ${{steps.get-modified-files.outputs.HAS_CHANGED_RELEASE_NOTES}}
