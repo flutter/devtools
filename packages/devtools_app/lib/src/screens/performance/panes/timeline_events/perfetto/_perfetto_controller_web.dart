@@ -129,8 +129,8 @@ class PerfettoController extends DisposableController
     _postMessage({
       'perfetto': {
         // Pass the values to Perfetto in seconds.
-        'timeStartMicros': timeRange.start!.inMicroseconds / 1000000,
-        'timeEndMicros': timeRange.end!.inMicroseconds / 1000000,
+        'timeStart': timeRange.start!.inMicroseconds / 1000000,
+        'timeEnd': timeRange.end!.inMicroseconds / 1000000,
         // The time range should take up 80% of the visible window.
         'viewPercentage': 0.8,
       }
