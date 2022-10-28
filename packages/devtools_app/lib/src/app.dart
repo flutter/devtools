@@ -61,13 +61,6 @@ const debugEnableSampleScreen = false;
 // Disabled until VM developer mode functionality is added.
 const showVmDeveloperMode = false;
 
-/// If true, features under construction will be enabled.
-///
-/// By default, the features are off in release mode.
-/// To enable them pass the compilation flag
-/// `--dart-define=enable_experiments=true`.
-bool _kEnableExperiments = const bool.fromEnvironment('enable_experiments');
-
 /// Top-level configuration for the app.
 @immutable
 class DevToolsApp extends StatefulWidget {
@@ -78,15 +71,7 @@ class DevToolsApp extends StatefulWidget {
   }) {
     if (!isExternalBuildValue) {
       setInternalBuild();
-      _enableNonProdFeatures();
-    }
-  }
-
-  void _enableNonProdFeatures() {
-    if (kReleaseMode && !_kEnableExperiments) {
-      FeatureFlags.enableNonProdFeatures(NonProdFeatureLevel.beta);
-    } else {
-      FeatureFlags.enableNonProdFeatures(NonProdFeatureLevel.experiment);
+      FeatureFlags.enableNonProdFeatures();
     }
   }
 
