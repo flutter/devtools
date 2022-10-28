@@ -187,7 +187,7 @@ class _StateInspectorSettingsDialog extends ConsumerWidget {
           )
         ],
       ),
-      actions: [
+      actions: const [
         DialogCloseButton(),
       ],
     );

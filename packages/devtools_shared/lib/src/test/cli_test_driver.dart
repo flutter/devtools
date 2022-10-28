@@ -167,7 +167,8 @@ class CliAppFixture extends AppFixture {
       final vm = await serviceConnection.getVM();
       final List<Isolate?> isolates = await Future.wait(
         vm.isolates!.map(
-          (ref) => serviceConnection.getIsolate(ref.id!)
+          (ref) => serviceConnection
+              .getIsolate(ref.id!)
               // Calling getIsolate() can sometimes return a collected sentinel
               // for an isolate that hasn't started yet. We can just ignore these
               // as on the next trip around the Isolate will be returned.

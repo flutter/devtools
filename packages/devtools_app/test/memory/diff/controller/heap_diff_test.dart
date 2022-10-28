@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/screens/memory/panes/diff/controller/heap_diff.dart';
+import 'package:devtools_app/src/screens/memory/primitives/class_name.dart';
+
 import 'package:devtools_app/src/screens/memory/shared/heap/heap.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/model.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/spanning_tree.dart';
@@ -28,7 +30,7 @@ void main() {
   });
 
   test('$DiffClassStats calculates mix of cases as expected', () {
-    const className = HeapClassName(className: 'myClass', library: 'library');
+    final className = HeapClassName(className: 'myClass', library: 'library');
 
     final deleted = _createObject(className, 1, []);
     final persistedBefore = _createObject(className, 2, []);
@@ -48,7 +50,7 @@ void main() {
   });
 
   test('$DiffClassStats calculates deletion as expected', () {
-    const className = HeapClassName(className: 'myClass', library: 'library');
+    final className = HeapClassName(className: 'myClass', library: 'library');
 
     final deleted = _createObject(className, 1, []);
 
@@ -69,7 +71,7 @@ SingleClassStats _createClassStats(List<AdaptedHeapObject> instances) {
 
   final objects = [
     _createObject(
-      const HeapClassName(className: 'root', library: 'lib'),
+      HeapClassName(className: 'root', library: 'lib'),
       0,
       indexes,
     ),
@@ -105,7 +107,7 @@ AdaptedHeap _createSimplestHeap() => AdaptedHeap(
           AdaptedHeapObject(
             code: 0,
             references: [],
-            heapClass: const HeapClassName(className: 'root', library: 'lib'),
+            heapClass: HeapClassName(className: 'root', library: 'lib'),
             shallowSize: 1,
           )
         ],

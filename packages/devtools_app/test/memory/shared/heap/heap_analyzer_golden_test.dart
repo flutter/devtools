@@ -6,7 +6,7 @@ import 'package:devtools_app/src/screens/memory/shared/heap/model.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/spanning_tree.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../../test_data/memory/heap/heap_data.dart';
+import '../../../test_data/memory/heap/heap_data.dart';
 
 void main() async {
   for (var t in goldenHeapTests) {
