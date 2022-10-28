@@ -64,10 +64,9 @@ jobs:
       - uses: actions/checkout@v3
       - name: Verify the release note integrity
         run: |
-          pushd tool/
+          cd tool/
           dart pub get
-          popd
-          dart tool/release_note_helper.dart verify -f $JSON_RELEASE_FILE_PATH
+          dart release_note_helper.dart verify -f ../$JSON_RELEASE_FILE_PATH
       - name: Backfill PR Urls
         env:
           PULL_NUMBER: ${{steps.get-pull-request-number.outputs.PULL_REQUEST_NUMBER}}
