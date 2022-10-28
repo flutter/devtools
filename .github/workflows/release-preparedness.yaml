@@ -23,12 +23,10 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PULL_NUMBER: ${{steps.get-pull-request-number.outputs.PULL_REQUEST_NUMBER}}
         run: |
-          export JSON_RELEASE_FILE=$JSON_RELEASE_FILE_PATH
-
           FILES_RESPONSE=$(gh api /repos/flutter/devtools/pulls/$PULL_NUMBER/files)
           echo "FILES_RESPONSE: $FILES_RESPONSE"
           
-          HAS_CHANGED_RELEASE_NOTES=$(echo $FILES_RESPONSE | jq '.[].filename' | jq -s '. | any(. == env.JSON_RELEASE_FILE)')
+          HAS_CHANGED_RELEASE_NOTES=$(echo $FILES_RESPONSE | jq '.[].filename' | jq -s '. | any(. == env.JSON_RELEASE_FILE_PATH)')
           echo "HAS_CHANGED_RELEASE_NOTES: $HAS_CHANGED_RELEASE_NOTES"
           echo "::set-output name=HAS_CHANGED_RELEASE_NOTES::$HAS_CHANGED_RELEASE_NOTES"
       - name: Get PR Labels
@@ -75,7 +73,7 @@ jobs:
           cd tool/
           dart pub get
           dart ./release_note_helper.dart pr-url \
-            -f $JSON_RELEASE_FILE_PATH \
+            -f "../$JSON_RELEASE_FILE_PATH" \
             -u https://github.com/flutter/devtools/pull/$PULL_NUMBER
       - name: Commit any backfilled urls 
         run: |
