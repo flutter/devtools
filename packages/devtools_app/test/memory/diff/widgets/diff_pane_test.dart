@@ -10,8 +10,8 @@ import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../../matchers/matchers.dart';
-import '../../scenes/memory/default.dart';
+import '../../../matchers/matchers.dart';
+import '../../../scenes/memory/default.dart';
 
 void main() {
   test('Diff tab is off yet.', () {
@@ -54,7 +54,7 @@ void main() {
       // Check initial golden.
       await expectLater(
         find.byType(DiffPane),
-        matchesDevToolsGolden('../../goldens/memory_diff_empty1.png'),
+        matchesDevToolsGolden('../../../goldens/memory_diff_empty1.png'),
       );
 
       // Record three snapshots.
@@ -65,7 +65,9 @@ void main() {
       }
       await expectLater(
         find.byType(DiffPane),
-        matchesDevToolsGolden('../../goldens/memory_diff_three_snapshots1.png'),
+        matchesDevToolsGolden(
+          '../../../goldens/memory_diff_three_snapshots1.png',
+        ),
       );
       expect(snapshots.value.length, equals(1 + 3));
 
@@ -74,7 +76,9 @@ void main() {
       await tester.pumpAndSettle();
       await expectLater(
         find.byType(DiffPane),
-        matchesDevToolsGolden('../../goldens/memory_diff_selected_class.png'),
+        matchesDevToolsGolden(
+          '../../../goldens/memory_diff_selected_class.png',
+        ),
       );
 
       // Delete a snapshot.
@@ -87,7 +91,9 @@ void main() {
       await tester.pumpAndSettle();
       await expectLater(
         find.byType(DiffPane),
-        matchesDevToolsGolden('../../goldens/memory_diff_three_snapshots2.png'),
+        matchesDevToolsGolden(
+          '../../../goldens/memory_diff_three_snapshots2.png',
+        ),
       );
       expect(snapshots.value.length, equals(1 + 3 - 1 + 1));
 
@@ -96,7 +102,7 @@ void main() {
       await tester.pumpAndSettle();
       await expectLater(
         find.byType(DiffPane),
-        matchesDevToolsGolden('../../goldens/memory_diff_empty2.png'),
+        matchesDevToolsGolden('../../../goldens/memory_diff_empty2.png'),
       );
       expect(snapshots.value.length, equals(1));
     });

@@ -8,8 +8,8 @@ import '../../../../../primitives/utils.dart';
 import '../../../../../shared/table/table.dart';
 import '../../../../../shared/table/table_data.dart';
 import '../../../../../shared/utils.dart';
+import '../../../primitives/simple_elements.dart';
 import '../../../shared/heap/heap.dart';
-import '../../../shared/heap/primitives.dart';
 import '../../../shared/shared_memory_widgets.dart';
 
 class _ClassNameColumn extends ColumnData<SingleClassStats>
@@ -112,7 +112,7 @@ class ClassesTableSingle extends StatelessWidget {
     required this.selection,
   }) : super(key: key);
 
-  final SingleHeapClasses classes;
+  final List<SingleClassStats> classes;
   final ValueNotifier<SingleClassStats?> selection;
 
   static final ColumnData<SingleClassStats> _shallowSizeColumn =
@@ -127,11 +127,16 @@ class ClassesTableSingle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // We want to preserve the sorting and sort directions for ClassesTableDiff
+    // no matter what the data passed to it is.
+    // However, there may be collisions with scroll position as the datasets are of different length.
+    // TODO (polina-c): test if removing of identityHashCode will work.
+    final dataKey = 'ClassesTableSingle-${identityHashCode(classes)}';
     return FlatTable<SingleClassStats>(
       columns: _columns,
-      data: classes.classes,
-      dataKey: 'ClassesTableSingle',
-      keyFactory: (e) => Key(e.heapClass.fullName),
+      data: classes,
+      dataKey: dataKey,
+      keyFactory: (e) => Key(dataKey),
       selectionNotifier: selection,
       defaultSortColumn: _shallowSizeColumn,
       defaultSortDirection: SortDirection.descending,

@@ -8,15 +8,15 @@ import '../../../../../../primitives/utils.dart';
 import '../../../../../../shared/table/table.dart';
 import '../../../../../../shared/table/table_data.dart';
 import '../../../../../../shared/utils.dart';
+import '../../../../primitives/simple_elements.dart';
 import '../../../../shared/heap/heap.dart';
-import '../../../../shared/heap/primitives.dart';
 
 class _RetainingPathColumn extends ColumnData<StatsByPathEntry> {
   _RetainingPathColumn(String className)
       : super.wide(
           'Shortest Retaining Path for Instances of $className',
-          titleTooltip: 'Class names of objects that retain'
-              '\nthe instances from garbage collection.',
+          titleTooltip: 'The shortest sequence of objects\n'
+              'retaining $className instances from garbage collection.',
           alignment: ColumnAlignment.left,
         );
 
