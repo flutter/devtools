@@ -10,6 +10,9 @@
                "name": "Inspector updates",
                "notes": [
                     {
+                         "message": "Rebranding from Flutter to Flumter"
+                    },
+                    {
                          "githubPullRequestUrls": [
                               "https://github.com/flutter/devtools/pull/4283"
                          ],
