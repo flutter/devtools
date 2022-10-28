@@ -2,6 +2,7 @@ name: Release Preparedness
 
 on:
   pull_request:
+    types: [ assigned, opened, synchronize, reopened, edited ]
 # TODO: have a most recent version that is being checked (not hardcoded to 2.18)
 env:
   JSON_RELEASE_FILE_PATH: packages/devtools_app/lib/src/framework/release_notes/release_notes-latest.json
@@ -29,29 +30,45 @@ jobs:
           HAS_CHANGED_RELEASE_NOTES=$(echo $FILES_RESPONSE | jq '.[].filename' | jq -s '. | any(. == env.JSON_RELEASE_FILE_PATH)')
           echo "HAS_CHANGED_RELEASE_NOTES: $HAS_CHANGED_RELEASE_NOTES"
           echo "::set-output name=HAS_CHANGED_RELEASE_NOTES::$HAS_CHANGED_RELEASE_NOTES"
-      - name: Get PR Labels
-        id: get-label-exception
+      - name: Get PR Description
+        id: check-release-note-exceptions
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PULL_NUMBER: ${{steps.get-pull-request-number.outputs.PULL_REQUEST_NUMBER}}
         run: |
           PULLS_RESPONSE=$(gh api /repos/flutter/devtools/pulls/$PULL_NUMBER)
-          echo $PULLS_RESPONSE
+          DESCRIPTION_BODY=$(echo $PULLS_RESPONSE | jq '.body')
+          echo $DESCRIPTION_BODY
+          if $(echo $DESCRIPTION_BODY | grep -q "> NO RELEASE NOTE CHANGES:"); then
+            HAS_RELEASE_NOTE_EXCEPTION_STRING=true
+          else
+            HAS_RELEASE_NOTE_EXCEPTION_STRING=false
+          fi
+          echo "::set-output name=HAS_RELEASE_NOTE_EXCEPTION_STRING::$HAS_RELEASE_NOTE_EXCEPTION_STRING"
 
-          export NOT_USER_FACING_LABEL_ID=4614108310
+      # - name: Get PR Labels
+      #   id: get-label-exception
+      #   env:
+      #     GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     PULL_NUMBER: ${{steps.get-pull-request-number.outputs.PULL_REQUEST_NUMBER}}
+      #   run: |
+      #     PULLS_RESPONSE=$(gh api /repos/flutter/devtools/pulls/$PULL_NUMBER)
+      #     echo $PULLS_RESPONSE
 
-          HAS_EXCEPTION_LABEL=$(jq '.labels[].id ' | jq -s '. | any(. == env.NOT_USER_FACING_LABEL_ID|tostring)')
-          echo "HAS_EXCEPTION_LABEL: $HAS_EXCEPTION_LABEL"
+      #     export NOT_USER_FACING_LABEL_ID=4614108310
 
-          echo "::set-output name=HAS_EXCEPTION_LABEL::$HAS_EXCEPTION_LABEL"
+      #     HAS_EXCEPTION_LABEL=$(jq '.labels[].id ' | jq -s '. | any(. == env.NOT_USER_FACING_LABEL_ID|tostring)')
+      #     echo "HAS_EXCEPTION_LABEL: $HAS_EXCEPTION_LABEL"
+
+      #     echo "::set-output name=HAS_EXCEPTION_LABEL::$HAS_EXCEPTION_LABEL"
       - name: Check Release Preparedness requirements
         env:
           HAS_CHANGED_RELEASE_NOTES: ${{steps.get-modified-files.outputs.HAS_CHANGED_RELEASE_NOTES}}
-          HAS_EXCEPTION_LABEL: ${{steps.get-label-exception.outputs.HAS_EXCEPTION_LABEL}}
+          HAS_RELEASE_NOTE_EXCEPTION_STRING: ${{steps.check-release-note-exceptions.outputs.HAS_RELEASE_NOTE_EXCEPTION_STRING}}
         run: |
-          if [ "$HAS_CHANGED_RELEASE_NOTES" != "true" ] && [ "$HAS_EXCEPTION_LABEL" != "true" ] ; then
+          if [ "$HAS_CHANGED_RELEASE_NOTES" != "true" ] && [ "$HAS_RELEASE_NOTE_EXCEPTION_STRING" != "true" ] ; then
             echo "Release Preparedness check failed"
-            echo "::error file=$JSON_RELEASE_FILE_PATH,line=0,col=0,endColumn=0,title='Release Preparedness check failed'::If your change is user facing, add a release note. Otherwise add the 'Not User Facing' label to your PR"
+            echo "::error file=$JSON_RELEASE_FILE_PATH,line=0,col=0,endColumn=0,title='Release Notes Weren\'t Modified'::Please add a release note entry or a reason to your description using: \`> NO RELEASE NOTE CHANGES: [reason goes here]\`"
             exit 1
           fi
 
