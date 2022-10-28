@@ -38,7 +38,7 @@ jobs:
           PULLS_RESPONSE=$(gh api /repos/flutter/devtools/pulls/$PULL_NUMBER)
           DESCRIPTION_BODY=$(echo $PULLS_RESPONSE | jq '.body')
           echo $DESCRIPTION_BODY
-          if $(echo $DESCRIPTION_BODY | grep -q "[NO RELEASE NOTE CHANGES]: "); then
+          if $(echo $DESCRIPTION_BODY | grep -q "^\s*> NO RELEASE NOTE CHANGES:"); then
             HAS_RELEASE_NOTE_EXCEPTION_STRING=true
           else
             HAS_RELEASE_NOTE_EXCEPTION_STRING=false
