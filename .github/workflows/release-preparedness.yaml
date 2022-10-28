@@ -30,18 +30,20 @@ jobs:
           echo "HAS_CHANGED_RELEASE_NOTES: $HAS_CHANGED_RELEASE_NOTES"
           echo "::set-output name=HAS_CHANGED_RELEASE_NOTES::$HAS_CHANGED_RELEASE_NOTES"
       - name: Get PR Description
-        id: get-pr-descripion
+        id: check-release-note-exceptions
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PULL_NUMBER: ${{steps.get-pull-request-number.outputs.PULL_REQUEST_NUMBER}}
         run: |
           PULLS_RESPONSE=$(gh api /repos/flutter/devtools/pulls/$PULL_NUMBER)
-          echo $PULLS_RESPONSE
           DESCRIPTION_BODY=$(echo $PULLS_RESPONSE | jq '.body')
           echo $DESCRIPTION_BODY
-          HAS_EXCEPTION_STRING=$(echo $DESCRIPTION_BODY | grep -q "<Not User Facing>")
-
-          echo "::set-output name=HAS_EXCEPTION_STRING::$HAS_EXCEPTION_STRING"
+          if $(echo $DESCRIPTION_BODY | grep -q "[NO RELEASE NOTE CHANGES]: "); then
+            HAS_RELEASE_NOTE_EXCEPTION_STRING=true
+          else
+            HAS_RELEASE_NOTE_EXCEPTION_STRING=false
+          fi
+          echo "::set-output name=HAS_RELEASE_NOTE_EXCEPTION_STRING::$HAS_RELEASE_NOTE_EXCEPTION_STRING"
 
       # - name: Get PR Labels
       #   id: get-label-exception
@@ -61,9 +63,9 @@ jobs:
       - name: Check Release Preparedness requirements
         env:
           HAS_CHANGED_RELEASE_NOTES: ${{steps.get-modified-files.outputs.HAS_CHANGED_RELEASE_NOTES}}
-          HAS_EXCEPTION_LABEL: ${{steps.get-label-exception.outputs.HAS_EXCEPTION_LABEL}}
+          HAS_RELEASE_NOTE_EXCEPTION_STRING: ${{steps.check-release-note-exceptions.outputs.HAS_RELEASE_NOTE_EXCEPTION_STRING}}
         run: |
-          if [ "$HAS_CHANGED_RELEASE_NOTES" != "true" ] && [ "$HAS_EXCEPTION_LABEL" != "true" ] ; then
+          if [ "$HAS_CHANGED_RELEASE_NOTES" != "true" ] && [ "$HAS_RELEASE_NOTE_EXCEPTION_STRING" != "true" ] ; then
             echo "Release Preparedness check failed"
             echo "::error file=$JSON_RELEASE_FILE_PATH,line=0,col=0,endColumn=0,title='Release Preparedness check failed'::If your change is user facing, add a release note. Otherwise add the 'Not User Facing' label to your PR"
             exit 1
