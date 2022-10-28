@@ -59,6 +59,11 @@ jobs:
     runs-on: ubuntu-latest
     name: Validation Stuff
     steps:
+      - name: Get Pull Request Number
+        id: get-pull-request-number
+        run: |
+          PULL_REQUEST_NUMBER=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+          echo "::set-output name=PULL_REQUEST_NUMBER::$PULL_REQUEST_NUMBER"
       - uses: dart-lang/setup-dart@9a04e6d73cca37bd455e0608d7e5092f881fd603
       - uses: actions/checkout@v3
       - name: Verify the release note integrity
