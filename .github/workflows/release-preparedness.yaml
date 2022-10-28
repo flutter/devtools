@@ -2,6 +2,7 @@ name: Release Preparedness
 
 on:
   pull_request:
+    types: [ assigned, opened, synchronize, reopened, edited ]
 # TODO: have a most recent version that is being checked (not hardcoded to 2.18)
 env:
   JSON_RELEASE_FILE_PATH: packages/devtools_app/lib/src/framework/release_notes/release_notes-latest.json
