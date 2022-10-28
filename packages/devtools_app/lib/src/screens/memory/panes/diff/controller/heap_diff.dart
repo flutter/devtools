@@ -69,7 +69,8 @@ class DiffHeapClasses extends HeapClasses<DiffClassStats>
   }
 
   static Future<Map<HeapClassName, DiffClassStats>> _diffClassesByName(
-      _HeapCouple couple) async {
+    _HeapCouple couple,
+  ) async {
     return subtractMaps<HeapClassName, SingleClassStats, SingleClassStats,
         DiffClassStats>(
       from: (await couple.younger.classes()).classesByName,
@@ -80,20 +81,25 @@ class DiffHeapClasses extends HeapClasses<DiffClassStats>
   }
 
   /// Maps full class name to class.
+  Future<Map<HeapClassName, DiffClassStats>> classesByName() => _classesByName;
   late final Future<Map<HeapClassName, DiffClassStats>> _classesByName;
-  late final List<DiffClassStats> classes =
-      classesByName.values.toList(growable: false);
+
+  List<DiffClassStats>? _classes;
+  Future<List<DiffClassStats>> classes() async {
+    if (_classes != null) return _classes!;
+    return _classes = (await _classesByName).values.toList(growable: false);
+  }
 
   @override
   void seal() {
     super.seal();
-    for (var c in classes) {
+    for (var c in _classes!) {
       c.seal();
     }
   }
 
   @override
-  List<DiffClassStats> get classStatsList => classes;
+  List<DiffClassStats> get classStatsList => _classes!;
 }
 
 /// Comparision between two heaps for a class.

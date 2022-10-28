@@ -8,9 +8,8 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../../../devtools_app.dart';
+import '../../../../../analytics/analytics.dart' as ga;
 import '../../../../../config_specific/import_export/import_export.dart';
-import '../../../../../primitives/auto_dispose.dart';
-import '../../../../../primitives/utils.dart';
 import '../../../primitives/class_name.dart';
 import '../../../primitives/memory_utils.dart';
 import '../../../shared/constants.dart';
@@ -21,9 +20,6 @@ import 'heap_diff.dart';
 import 'item_controller.dart';
 import 'simple_controllers.dart';
 import 'utils.dart';
-
-import '../../../../../analytics/analytics.dart' as ga;
-import '../../../../../analytics/constants.dart' as analytics_constants;
 
 class DiffPaneController extends DisposableController {
   DiffPaneController(this.snapshotTaker);
@@ -72,7 +68,7 @@ class DiffPaneController extends DisposableController {
     _isTakingSnapshot.value = false;
     t.tap(7);
     //
-    derived._updateValues();
+    await derived._updateValues();
     t.tap(8);
   }
 
@@ -83,7 +79,7 @@ class DiffPaneController extends DisposableController {
     }
     snapshots.removeRange(1, snapshots.value.length);
     core._selectedSnapshotIndex.value = 0;
-    derived._updateValues();
+    await derived._updateValues();
   }
 
   int _nextDisplayNumber() {
@@ -92,7 +88,7 @@ class DiffPaneController extends DisposableController {
     return numbers.max + 1;
   }
 
-  void deleteCurrentSnapshot() {
+  void deleteCurrentSnapshot() async {
     final item = core.selectedItem;
     assert(item is SnapshotInstanceItem);
     item.dispose();
@@ -102,7 +98,7 @@ class DiffPaneController extends DisposableController {
     // 1. It is convenient UX
     // 2. Otherwise the content will not be re-rendered.
     core._selectedSnapshotIndex.value = max(index - 1, 0);
-    derived._updateValues();
+    await derived._updateValues();
   }
 
   void setSnapshotIndex(int index) {
@@ -280,10 +276,10 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     return _diffStore.compare(heap, itemToDiffWith.heap!);
   }
 
-  void _updateClasses({
+  Future<void> _updateClasses({
     required HeapClasses? classes,
     required HeapClassName? className,
-  }) {
+  }) async {
     final filter = _core.classFilter.value;
     if (classes is SingleHeapClasses) {
       _singleClassesToShow.value = classes.filtered(filter);
@@ -295,7 +291,8 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
       _singleClassesToShow.value = null;
       _diffClassesToShow.value = classes.filtered(filter);
       selectedSingleClassStats.value = null;
-      selectedDiffClassStats.value = _filter(classes.classesByName[className]);
+      selectedDiffClassStats.value =
+          _filter((await classes.classesByName())[className]);
     } else if (classes == null) {
       _singleClassesToShow.value = null;
       _diffClassesToShow.value = null;
@@ -326,7 +323,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     // Set class to show.
     final classes = await _snapshotClassesAfterDiffing();
     heapClasses.value = classes;
-    _updateClasses(
+    await _updateClasses(
       classes: classes,
       className: _core.className,
     );
