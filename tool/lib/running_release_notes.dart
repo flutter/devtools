@@ -1,3 +1,4 @@
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'running_release_notes.g.dart';
@@ -36,7 +37,7 @@ class Release {
     }
   }
 
-  final SemanticVersion version;
+  final SerializableSemanticVersion version;
   List<ReleaseSection> sections = [];
   final Map<String, ReleaseSection> _sectionMap = {};
 
@@ -68,28 +69,8 @@ class Release {
 }
 
 @JsonSerializable()
-class SemanticVersion {
-  SemanticVersion({
-    required this.major,
-    required this.minor,
-    required this.patch,
-    this.pre,
-  });
-  final int major;
-  final int minor;
-  final int patch;
-  final String? pre;
-
-  @override
-  String toString() {
-    String versionString = '$major.$minor.$patch';
-    if (pre != null) {
-      versionString += '-$pre';
-    }
-    return versionString;
-  }
-
-  factory SemanticVersion.fromJson(Map<String, dynamic> json) =>
+class SerializableSemanticVersion extends SemanticVersion {
+  factory SerializableSemanticVersion.fromJson(Map<String, dynamic> json) =>
       _$SemanticVersionFromJson(json);
 
   Map<String, dynamic> toJson() => _$SemanticVersionToJson(this);

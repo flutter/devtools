@@ -3,9 +3,10 @@ name: Release Preparedness
 on:
   pull_request:
     types: [ assigned, opened, synchronize, reopened, edited ]
-# TODO: have a most recent version that is being checked (not hardcoded to 2.18)
 env:
   JSON_RELEASE_FILE_PATH: packages/devtools_app/lib/src/framework/release_notes/release_notes-latest.json
+  ## TODO: tool/release-notes/running/notes.json will be where we put our running release notes
+  ## TODO: tool/release-notes/latest-release/notes.json will be where we put the most recent releases notes
 jobs:
   release-preparedness:
     runs-on: ubuntu-latest
@@ -46,21 +47,6 @@ jobs:
           fi
           echo "::set-output name=HAS_RELEASE_NOTE_EXCEPTION_STRING::$HAS_RELEASE_NOTE_EXCEPTION_STRING"
 
-      # - name: Get PR Labels
-      #   id: get-label-exception
-      #   env:
-      #     GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #     PULL_NUMBER: ${{steps.get-pull-request-number.outputs.PULL_REQUEST_NUMBER}}
-      #   run: |
-      #     PULLS_RESPONSE=$(gh api /repos/flutter/devtools/pulls/$PULL_NUMBER)
-      #     echo $PULLS_RESPONSE
-
-      #     export NOT_USER_FACING_LABEL_ID=4614108310
-
-      #     HAS_EXCEPTION_LABEL=$(jq '.labels[].id ' | jq -s '. | any(. == env.NOT_USER_FACING_LABEL_ID|tostring)')
-      #     echo "HAS_EXCEPTION_LABEL: $HAS_EXCEPTION_LABEL"
-
-      #     echo "::set-output name=HAS_EXCEPTION_LABEL::$HAS_EXCEPTION_LABEL"
       - name: Check Release Preparedness requirements
         env:
           HAS_CHANGED_RELEASE_NOTES: ${{steps.get-modified-files.outputs.HAS_CHANGED_RELEASE_NOTES}}

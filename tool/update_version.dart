@@ -6,6 +6,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
+import 'package:devtools_repo/running_release_notes.dart' as rn;
+import 'package:devtools_shared/devtools_shared.dart';
 
 // This script must be executed from the top level devtools/ directory.
 // TODO(kenz): If changes are made to this script, first consider refactoring to
@@ -57,6 +59,31 @@ Future<void> performTheVersionUpdate(
   process.stdout.asBroadcastStream().listen((event) {
     print(utf8.decode(event));
   });
+}
+
+void resetReleaseNotesFile(rn.SerializableSemanticVersion version) async {
+  final release = rn.Release(version: version, sections: [
+    rn.ReleaseSection(name: 'General updates'),
+    rn.ReleaseSection(name: 'Inspector update'),
+    rn.ReleaseSection(name: 'Performance updates'),
+    rn.ReleaseSection(name: 'CPU profiler updates'),
+    rn.ReleaseSection(name: 'Memory updates'),
+    rn.ReleaseSection(name: 'Network profiler updates'),
+    rn.ReleaseSection(name: 'Logging updates'),
+    rn.ReleaseSection(name: 'App size tool updates'),
+  ]);
+  //TODO
+
+  await File('release-notes/running/notes.md')
+      .writeAsString(release.toMarkdown());
+  await File('release-notes/running/notes.json').writeAsString(
+    jsonEncode(release),
+  );
+
+  // delete contents of tool/release-notes/latest-release/
+  // copy contents of tool/release-notes/running/ to /tool/release-notes/latest-release/
+
+  //generate fresh new json file for release notes in tool/release-notes/latest-release
 }
 
 String? incrementVersionByType(String version, String type) {
@@ -289,6 +316,7 @@ class AutoUpdateCommand extends Command {
           'dev':
               'bumps the version to the next dev pre-release value (minor by default)',
           'dev,patch': 'bumps the version to the next dev pre-patch value',
+          'dev,minor': 'bumps the version to the next dev pre-minor value',
           'dev,major': 'bumps the version to the next dev pre-major value',
           'patch': 'bumps the version to the next patch value',
           'minor': 'bumps the version to the next minor value',
@@ -302,12 +330,14 @@ class AutoUpdateCommand extends Command {
   void run() {
     final type = argResults!['type'].toString();
     final currentVersion = versionFromPubspecFile();
+    final currentSemanticVersion = SemanticVersion.parse(currentVersion);
     String? newVersion;
     if (currentVersion == null) {
       throw 'Could not automatically determine current version.';
     }
     switch (type) {
       case 'dev':
+      case 'dev,minor':
         newVersion = incrementDevVersion(currentVersion, 'minor');
         break;
       case 'dev,patch':
