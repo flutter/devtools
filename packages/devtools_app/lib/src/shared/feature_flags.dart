@@ -12,12 +12,11 @@ enum NonProdFeatureLevel {
 /// Flags to hide features under construction.
 abstract class FeatureFlags {
   static void enableNonProdFeatures(NonProdFeatureLevel level) {
+    memoryDiffing = true;
+
     if (level == NonProdFeatureLevel.experiment) {
       embeddedPerfetto = true;
-      return;
     }
-
-    memoryDiffing = true;
   }
 
   /// https://github.com/flutter/devtools/issues/3949
