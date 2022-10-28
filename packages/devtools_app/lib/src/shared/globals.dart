@@ -20,7 +20,7 @@ bool get isExternalBuild => _isExternalBuild;
 bool _isExternalBuild = true;
 
 /// Flag the build as external.
-void setExternalBuild() => _isExternalBuild = true;
+void setInternalBuild() => _isExternalBuild = true;
 
 final Map<Type, dynamic> globals = <Type, dynamic>{};
 

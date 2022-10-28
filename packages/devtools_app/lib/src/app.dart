@@ -76,8 +76,10 @@ class DevToolsApp extends StatefulWidget {
     this.analyticsController, {
     required bool isExternalBuildValue,
   }) {
-    if (isExternalBuildValue) setExternalBuild();
-    if (!isExternalBuild) _enableNonProdFeatures();
+    if (!isExternalBuildValue) {
+      setInternalBuild();
+      _enableNonProdFeatures();
+    }
   }
 
   void _enableNonProdFeatures() {
