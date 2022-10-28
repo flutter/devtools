@@ -19,8 +19,8 @@ import 'survey.dart';
 bool get isExternalBuild => _isExternalBuild;
 bool _isExternalBuild = true;
 
-/// Flag the build as external.
-void setInternalBuild() => _isExternalBuild = true;
+/// Flag the build as internal.
+void setInternalBuild() => _isExternalBuild = false;
 
 final Map<Type, dynamic> globals = <Type, dynamic>{};
 
