@@ -149,6 +149,7 @@ class PerfettoController extends DisposableController
     // included in the Perfetto build inside [packages/perfetto_compiled/dist].
     _postMessageWithId(
       _devtoolsThemeChange,
+      perfettoIgnore: true,
       args: {
         'theme': '${darkMode ? 'dark' : 'light'}',
       },
@@ -216,7 +217,7 @@ class PerfettoController extends DisposableController
         // Once [devtools_theme_handler.js] is ready, it will receive this
         // 'PING-DEVTOOLS-THEME' message and return a 'PONG-DEVTOOLS-THEME'
         // message, handled in [_handleMessage].
-        _postMessageWithId(_devtoolsThemePing);
+        _postMessageWithId(_devtoolsThemePing, perfettoIgnore: true);
       });
     }
   }
