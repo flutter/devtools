@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../analytics/analytics.dart' as ga;
@@ -111,16 +113,23 @@ class _InspectorExpandCollapseButtonsState
   }
 
   void _onExpandClick() {
-    blockWhileInProgress(() async {
-      ga.select(analytics_constants.inspector, analytics_constants.expandAll);
-      await widget.controller.expandAllNodesInDetailsTree();
-    });
+    unawaited(
+      blockWhileInProgress(() async {
+        ga.select(analytics_constants.inspector, analytics_constants.expandAll);
+        await widget.controller.expandAllNodesInDetailsTree();
+      }),
+    );
   }
 
   void _onCollapseClick() {
-    blockWhileInProgress(() async {
-      ga.select(analytics_constants.inspector, analytics_constants.collapseAll);
-      await widget.controller.collapseDetailsToSelected();
-    });
+    unawaited(
+      blockWhileInProgress(() async {
+        ga.select(
+          analytics_constants.inspector,
+          analytics_constants.collapseAll,
+        );
+        await widget.controller.collapseDetailsToSelected();
+      }),
+    );
   }
 }

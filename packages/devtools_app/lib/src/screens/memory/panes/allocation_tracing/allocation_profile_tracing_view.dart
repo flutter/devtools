@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../../analytics/constants.dart' as analytics_constants;
@@ -29,7 +31,8 @@ class AllocationProfileTracingViewState
   @override
   void initState() {
     super.initState();
-    controller = AllocationProfileTracingViewController()..initialize();
+    controller = AllocationProfileTracingViewController();
+    unawaited(controller.initialize());
   }
 
   @override

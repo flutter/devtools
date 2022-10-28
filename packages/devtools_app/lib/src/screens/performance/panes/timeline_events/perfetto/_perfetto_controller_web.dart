@@ -89,7 +89,7 @@ class PerfettoController extends DisposableController
     html.window.addEventListener('message', _handleMessage);
 
     if (isExternalBuild) {
-      _loadInitialStyle();
+      unawaited(_loadInitialStyle());
       addAutoDisposeListener(preferences.darkModeTheme, () async {
         _loadStyle(preferences.darkModeTheme.value);
       });

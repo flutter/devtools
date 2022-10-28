@@ -61,7 +61,7 @@ class PerformanceController extends DisposableController
     with SearchControllerMixin<TimelineEvent>, AutoDisposeControllerMixin {
   PerformanceController() {
     processor = TimelineEventProcessor(this);
-    _init();
+    unawaited(_init());
   }
 
   final cpuProfilerController =

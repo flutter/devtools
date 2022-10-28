@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -289,11 +290,13 @@ class _FullScreenButton extends StatelessWidget {
           size: defaultButtonHeight,
         ),
         onPressed: () {
-          showDialog(
-            context: context,
-            builder: (context) => LayerImageDialog(
-              snapshot: snapshot,
-              originalFrameSize: originalFrameSize,
+          unawaited(
+            showDialog(
+              context: context,
+              builder: (context) => LayerImageDialog(
+                snapshot: snapshot,
+                originalFrameSize: originalFrameSize,
+              ),
             ),
           );
         },

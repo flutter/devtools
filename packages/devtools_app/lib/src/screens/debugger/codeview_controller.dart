@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -133,7 +135,7 @@ class CodeViewController extends DisposableController
       log('Trying to show a location with a null script ref', LogLevel.error);
     }
 
-    _parseCurrentScript();
+    unawaited(_parseCurrentScript());
 
     // We want to notify regardless of the previous scriptLocation, temporarily
     // set to null to ensure that happens.
