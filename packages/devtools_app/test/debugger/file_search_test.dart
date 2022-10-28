@@ -233,7 +233,15 @@ void main() {
     );
 
     autoCompleteController.search = 'caterpie';
-    expect(autoCompleteController.searchAutoComplete.value, equals([]));
+    expect(
+      getAutoCompleteMatch(
+        autoCompleteController.searchAutoComplete.value,
+        preserveCases: true,
+      ),
+      equals([
+        'No files found.',
+      ]),
+    );
   });
 
   testWidgetsWithWindowSize(
@@ -418,15 +426,29 @@ void main() {
         ],
       ),
     );
+
+    autoCompleteController.search = 'food cartwheel';
+    expect(
+      getAutoCompleteMatch(autoCompleteController.searchAutoComplete.value,
+          preserveCases: true),
+      equals(
+        [
+          'No files found.',
+        ],
+      ),
+    );
   });
 }
 
-List<String> getAutoCompleteMatch(List<AutoCompleteMatch> matches) {
+List<String> getAutoCompleteMatch(List<AutoCompleteMatch> matches,
+    {bool preserveCases = false}) {
   return matches
       .map(
         (match) => match.transformAutoCompleteMatch<String>(
-          transformMatchedSegment: (segment) => segment.toUpperCase(),
-          transformUnmatchedSegment: (segment) => segment.toLowerCase(),
+          transformMatchedSegment: (segment) =>
+              preserveCases ? segment : segment.toUpperCase(),
+          transformUnmatchedSegment: (segment) =>
+              preserveCases ? segment : segment.toLowerCase(),
           combineSegments: (segments) => segments.join(),
         ),
       )
