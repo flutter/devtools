@@ -429,101 +429,9 @@ class PerformanceController extends DisposableController
 
     if (!offlineController.offlineMode.value) {
       if (useLegacyTraceViewer.value) {
-        final bool frameBeforeFirstWellFormedFrame =
-            firstWellFormedFrameMicros != null &&
-                frame.timeFromFrameTiming.start!.inMicroseconds <
-                    firstWellFormedFrameMicros!;
-        if (!frame.isWellFormed && !frameBeforeFirstWellFormedFrame) {
-          // Only try to pull timeline events for frames that are after the first
-          // well formed frame. Timeline events that occurred before this frame will
-          // have already fallen out of the buffer.
-          await processAvailableEvents();
-        }
-
-        if (_currentFrameBeingSelected != frame) return;
-
-        // If the frame is still not well formed after processing all available
-        // events, wait a short delay and try to process events again after the
-        // VM has been polled one more time.
-        if (!frame.isWellFormed && !frameBeforeFirstWellFormedFrame) {
-          assert(!_processing.value);
-          _processing.value = true;
-          await Future.delayed(timelinePollingInterval, () async {
-            if (_currentFrameBeingSelected != frame) return;
-            await processTraceEvents(allTraceEvents);
-            _processing.value = false;
-          });
-        }
-
-        if (_currentFrameBeingSelected != frame) return;
-
-        // We do not need to pull the CPU profile because we will pull the profile
-        // for the entire frame. The order of selecting the timeline event and
-        // pulling the CPU profile for the frame (directly below) matters here.
-        // If the selected timeline event is null, the event details section will
-        // not show the progress bar while we are processing the CPU profile.
-        await selectTimelineEvent(
-          frame.timelineEventData.uiEvent,
-          updateProfiler: false,
-        );
-
-        if (_currentFrameBeingSelected != frame) return;
-
-        final storedProfileForFrame = cpuProfilerController.cpuProfileStore
-            .lookupProfile(time: frame.timeFromEventFlows);
-        if (storedProfileForFrame == null) {
-          cpuProfilerController.reset();
-          if (!offlineController.offlineMode.value &&
-              frame.timeFromEventFlows.isWellFormed) {
-            await cpuProfilerController.pullAndProcessProfile(
-              startMicros: frame.timeFromEventFlows.start!.inMicroseconds,
-              extentMicros: frame.timeFromEventFlows.duration.inMicroseconds,
-              processId: 'Flutter frame ${frame.id}',
-            );
-          }
-          if (_currentFrameBeingSelected != frame) return;
-          _data.cpuProfileData = cpuProfilerController.dataNotifier.value;
-        } else {
-          if (!storedProfileForFrame.processed) {
-            await storedProfileForFrame.process(
-              transformer: cpuProfilerController.transformer,
-              processId: 'Flutter frame ${frame.id} - stored profile ',
-            );
-          }
-          if (_currentFrameBeingSelected != frame) return;
-          _data.cpuProfileData = storedProfileForFrame.getActive(
-            cpuProfilerController.viewType.value,
-          );
-          cpuProfilerController.loadProcessedData(
-            storedProfileForFrame,
-            storeAsUserTagNone: true,
-          );
-        }
+        await _legacyToggleFrame(frame, _data);
       } else if (FeatureFlags.embeddedPerfetto) {
-        bool hasProcessedTimelineEventsForFrame =
-            perfettoProcessor.hasProcessedEventsForFrame(frame.id);
-        if (!hasProcessedTimelineEventsForFrame) {
-          await processAvailableEvents();
-        }
-
-        // If we still have not processed the timeline events for this frame,
-        // ewait a short delay and try to process events again after the
-        // VM has been polled one more time.
-        hasProcessedTimelineEventsForFrame =
-            perfettoProcessor.hasProcessedEventsForFrame(frame.id);
-        if (!hasProcessedTimelineEventsForFrame) {
-          await Future.delayed(timelinePollingInterval, () async {
-            if (_currentFrameBeingSelected != frame) return;
-            await processAvailableEvents();
-          });
-        }
-
-        assert(perfettoProcessor.clockOffsetMicros != null);
-        final timeRange = TimeRange.offset(
-          original: frame.timeFromFrameTiming,
-          offset: perfettoProcessor.clockOffsetMicros!,
-        );
-        await perfettoController.scrollToTimeRange(timeRange);
+        await _toggleFrame(frame);
       }
     }
 
@@ -539,6 +447,106 @@ class PerformanceController extends DisposableController
       frame.timelineEventData.rasterEvent?.writeTraceToBuffer(buf);
       log(buf.toString());
     });
+  }
+
+  Future<void> _legacyToggleFrame(FlutterFrame frame, PerformanceData data) async {
+    final bool frameBeforeFirstWellFormedFrame =
+        firstWellFormedFrameMicros != null &&
+            frame.timeFromFrameTiming.start!.inMicroseconds <
+                firstWellFormedFrameMicros!;
+    if (!frame.isWellFormed && !frameBeforeFirstWellFormedFrame) {
+      // Only try to pull timeline events for frames that are after the first
+      // well formed frame. Timeline events that occurred before this frame will
+      // have already fallen out of the buffer.
+      await processAvailableEvents();
+    }
+
+    if (_currentFrameBeingSelected != frame) return;
+
+    // If the frame is still not well formed after processing all available
+    // events, wait a short delay and try to process events again after the
+    // VM has been polled one more time.
+    if (!frame.isWellFormed && !frameBeforeFirstWellFormedFrame) {
+      assert(!_processing.value);
+      _processing.value = true;
+      await Future.delayed(timelinePollingInterval, () async {
+        if (_currentFrameBeingSelected != frame) return;
+        await processTraceEvents(allTraceEvents);
+        _processing.value = false;
+      });
+    }
+
+    if (_currentFrameBeingSelected != frame) return;
+
+    // We do not need to pull the CPU profile because we will pull the profile
+    // for the entire frame. The order of selecting the timeline event and
+    // pulling the CPU profile for the frame (directly below) matters here.
+    // If the selected timeline event is null, the event details section will
+    // not show the progress bar while we are processing the CPU profile.
+    await selectTimelineEvent(
+      frame.timelineEventData.uiEvent,
+      updateProfiler: false,
+    );
+
+    if (_currentFrameBeingSelected != frame) return;
+
+    final storedProfileForFrame = cpuProfilerController.cpuProfileStore
+        .lookupProfile(time: frame.timeFromEventFlows);
+    if (storedProfileForFrame == null) {
+      cpuProfilerController.reset();
+      if (!offlineController.offlineMode.value &&
+          frame.timeFromEventFlows.isWellFormed) {
+        await cpuProfilerController.pullAndProcessProfile(
+          startMicros: frame.timeFromEventFlows.start!.inMicroseconds,
+          extentMicros: frame.timeFromEventFlows.duration.inMicroseconds,
+          processId: 'Flutter frame ${frame.id}',
+        );
+      }
+      if (_currentFrameBeingSelected != frame) return;
+      data.cpuProfileData = cpuProfilerController.dataNotifier.value;
+    } else {
+      if (!storedProfileForFrame.processed) {
+        await storedProfileForFrame.process(
+          transformer: cpuProfilerController.transformer,
+          processId: 'Flutter frame ${frame.id} - stored profile ',
+        );
+      }
+      if (_currentFrameBeingSelected != frame) return;
+      data.cpuProfileData = storedProfileForFrame.getActive(
+        cpuProfilerController.viewType.value,
+      );
+      cpuProfilerController.loadProcessedData(
+        storedProfileForFrame,
+        storeAsUserTagNone: true,
+      );
+    }
+  }
+
+  Future<void> _toggleFrame(FlutterFrame frame) async {
+    bool hasProcessedTimelineEventsForFrame =
+        perfettoProcessor.hasProcessedEventsForFrame(frame.id);
+    if (!hasProcessedTimelineEventsForFrame) {
+      await processAvailableEvents();
+    }
+
+    // If we still have not processed the timeline events for this frame,
+    // wait a short delay and try to process events again after the
+    // VM has been polled one more time.
+    hasProcessedTimelineEventsForFrame =
+        perfettoProcessor.hasProcessedEventsForFrame(frame.id);
+    if (!hasProcessedTimelineEventsForFrame) {
+      await Future.delayed(timelinePollingInterval, () async {
+        if (_currentFrameBeingSelected != frame) return;
+        await processAvailableEvents();
+      });
+    }
+
+    assert(perfettoProcessor.clockOffsetMicros != null);
+    final timeRange = TimeRange.offset(
+      original: frame.timeFromFrameTiming,
+      offset: perfettoProcessor.clockOffsetMicros!,
+    );
+    await perfettoController.scrollToTimeRange(timeRange);
   }
 
   void addFrame(FlutterFrame frame) {
