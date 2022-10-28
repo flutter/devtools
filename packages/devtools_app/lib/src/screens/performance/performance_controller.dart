@@ -25,6 +25,7 @@ import '../../service/service_manager.dart';
 import '../../shared/globals.dart';
 import '../../ui/search.dart';
 import '../profiler/cpu_profile_controller.dart';
+import '../profiler/cpu_profile_model.dart';
 import '../profiler/cpu_profile_service.dart';
 import '../profiler/cpu_profile_transformer.dart';
 import '../profiler/profile_granularity.dart';
@@ -375,8 +376,9 @@ class PerformanceController extends DisposableController
     _selectedTimelineEventNotifier.value = event;
 
     if (event.isUiEvent && updateProfiler) {
-      final storedProfile =
-          cpuProfilerController.cpuProfileStore.lookupProfile(time: event.time);
+      final storedProfile = cpuProfilerController.cpuProfileStore.lookupProfile(
+        time: event.time,
+      );
       if (storedProfile != null) {
         await cpuProfilerController.processAndSetData(
           storedProfile,
@@ -483,13 +485,15 @@ class PerformanceController extends DisposableController
           _data.cpuProfileData = cpuProfilerController.dataNotifier.value;
         } else {
           if (!storedProfileForFrame.processed) {
-            await cpuProfilerController.transformer.processData(
-              storedProfileForFrame,
+            await storedProfileForFrame.process(
+              transformer: cpuProfilerController.transformer,
               processId: 'Flutter frame ${frame.id} - stored profile ',
             );
           }
           if (_currentFrameBeingSelected != frame) return;
-          _data.cpuProfileData = storedProfileForFrame;
+          _data.cpuProfileData = storedProfileForFrame.getActive(
+            cpuProfilerController.viewType.value,
+          );
           cpuProfilerController.loadProcessedData(
             storedProfileForFrame,
             storeAsUserTagNone: true,
@@ -924,7 +928,11 @@ class PerformanceController extends DisposableController
     final offlineCpuProfileData = _offlineData.cpuProfileData;
     if (offlineCpuProfileData != null) {
       cpuProfilerController.loadProcessedData(
-        offlineCpuProfileData,
+        CpuProfilePair(
+          functionProfile: offlineCpuProfileData,
+          // TODO(bkonyi): do we care about offline code profiles?
+          codeProfile: null,
+        ),
         storeAsUserTagNone: true,
       );
     }

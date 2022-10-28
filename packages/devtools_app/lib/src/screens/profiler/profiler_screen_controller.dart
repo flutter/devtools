@@ -30,6 +30,20 @@ class ProfilerScreenController extends DisposableController
       addAutoDisposeListener(serviceManager.isolateManager.selectedIsolate, () {
         switchToIsolate(serviceManager.isolateManager.selectedIsolate.value);
       });
+
+      addAutoDisposeListener(preferences.vmDeveloperModeEnabled, () {
+        if (preferences.vmDeveloperModeEnabled.value) {
+          // If VM developer mode was just enabled, clear the profile store
+          // since the existing entries won't have code profiles and cannot be
+          // constructed from function profiles.
+          cpuProfilerController.cpuProfileStore.clear();
+          cpuProfilerController.reset();
+        }
+        // Always reset to the function view when the VM developer mode state
+        // changes. The selector is hidden when VM developer mode is disabled
+        // and data for code profiles won't be requested.
+        cpuProfilerController.updateView(CpuProfilerViewType.function);
+      });
     }
   }
 

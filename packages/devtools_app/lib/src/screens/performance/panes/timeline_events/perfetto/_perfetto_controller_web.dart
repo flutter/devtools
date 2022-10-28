@@ -163,9 +163,14 @@ class PerfettoController extends DisposableController
     );
   }
 
-  void _postMessageWithId(String id, {Map<String, dynamic> args = const {}}) {
+  void _postMessageWithId(
+    String id, {
+    Map<String, dynamic> args = const {},
+    bool perfettoIgnore = false,
+  }) {
     final message = <String, dynamic>{
       'msgId': id,
+      if (perfettoIgnore) 'perfettoIgnore': true,
     }..addAll(args);
     _postMessage(message);
   }

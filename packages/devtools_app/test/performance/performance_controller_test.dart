@@ -13,6 +13,7 @@ import 'package:devtools_app/src/screens/performance/performance_controller.dart
 import 'package:devtools_app/src/screens/performance/performance_model.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/preferences.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -40,6 +41,7 @@ void main() async {
           .thenReturn(initializedCompleter);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(IdeTheme, IdeTheme());
+      setGlobal(PreferencesController, PreferencesController());
     });
 
     setUp(() async {
