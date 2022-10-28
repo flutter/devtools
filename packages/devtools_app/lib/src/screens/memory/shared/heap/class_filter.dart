@@ -73,8 +73,8 @@ class ClassFilter {
         ? {}
         : s
             .split(RegExp(',|\n'))
-            .where((e) => e.isNotEmpty)
             .map((e) => e.trim())
+            .where((e) => e.isNotEmpty)
             .toSet();
 
     switch (filterType) {
