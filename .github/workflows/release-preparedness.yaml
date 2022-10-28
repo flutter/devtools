@@ -3,6 +3,8 @@ name: Release Preparedness
 on:
   pull_request:
 # TODO: have a most recent version that is being checked (not hardcoded to 2.18)
+env:
+  JSON_RELEASE_FILE_PATH: packages/devtools_app/lib/src/framework/release_notes/release_notes-latest.json
 jobs:
   release-preparedness:
     runs-on: ubuntu-latest
@@ -21,7 +23,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PULL_NUMBER: ${{steps.get-pull-request-number.outputs.PULL_REQUEST_NUMBER}}
         run: |
-          export JSON_RELEASE_FILE='packages/devtools_app/lib/src/framework/release_notes/release_notes-2.18.0.json'
+          export JSON_RELEASE_FILE=$JSON_RELEASE_FILE_PATH
 
           FILES_RESPONSE=$(gh api /repos/flutter/devtools/pulls/$PULL_NUMBER/files)
           echo "FILES_RESPONSE: $FILES_RESPONSE"
@@ -51,7 +53,7 @@ jobs:
         run: |
           if [ "$HAS_CHANGED_RELEASE_NOTES" != "true" ] && [ "$HAS_EXCEPTION_LABEL" != "true" ] ; then
             echo "Release Preparedness check failed"
-            echo "::error file=packages/devtools_app/lib/src/framework/release_notes/release_notes-2.18.0.json,line=0,col=0,endColumn=0,title='Release Preparedness check failed'::If your change is user facing, add a release note. Otherwise add the 'Not User Facing' label to your PR"
+            echo "::error file=$JSON_RELEASE_FILE_PATH,line=0,col=0,endColumn=0,title='Release Preparedness check failed'::If your change is user facing, add a release note. Otherwise add the 'Not User Facing' label to your PR"
           fi
 
   validation-stuff:
@@ -62,9 +64,10 @@ jobs:
       - uses: actions/checkout@v3
       - name: Verify the release note integrity
         run: |
-          cd tool/
+          pushd tool/
           dart pub get
-          dart ./release_note_helper.dart verify -f ../packages/devtools_app/lib/src/framework/release_notes/release_notes-2.18.0.json
+          popd
+          dart tool/release_note_helper.dart verify -f $JSON_RELEASE_FILE_PATH
       - name: Backfill PR Urls
         env:
           PULL_NUMBER: ${{steps.get-pull-request-number.outputs.PULL_REQUEST_NUMBER}}
@@ -73,7 +76,7 @@ jobs:
           cd tool/
           dart pub get
           dart ./release_note_helper.dart pr-url \
-            -f ../packages/devtools_app/lib/src/framework/release_notes/release_notes-2.18.0.json \
+            -f $JSON_RELEASE_FILE_PATH \
             -u https://github.com/flutter/devtools/pull/$PULL_NUMBER
       - name: Commit any backfilled urls 
         run: |
