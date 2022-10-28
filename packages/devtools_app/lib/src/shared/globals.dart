@@ -17,7 +17,7 @@ import 'survey.dart';
 
 /// Whether this DevTools build is external.
 bool get isExternalBuild => _isExternalBuild;
-bool _isExternalBuild = false;
+bool _isExternalBuild = true;
 
 /// Flag the build as external.
 void setExternalBuild() => _isExternalBuild = true;
