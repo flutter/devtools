@@ -68,4 +68,4 @@ mv build/web/devtools_service_worker.js build/web/service_worker.js
 chmod 0755 build/web/canvaskit/canvaskit.*
 chmod 0755 build/web/canvaskit/profiling/canvaskit.*
 
-flutter pub get
+popd
