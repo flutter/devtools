@@ -32,10 +32,12 @@ class _HomePage extends StatelessWidget {
         child: TextButton(
           style: TextButton.styleFrom(backgroundColor: Colors.green),
           onPressed: () {
-            unawaited(Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => ChannelDemo()),
-            ));
+            unawaited(
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ChannelDemo()),
+              ),
+            );
           },
           child: const Text(
             platformChannelTitle,

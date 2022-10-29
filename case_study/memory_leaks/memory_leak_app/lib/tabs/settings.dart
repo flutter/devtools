@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../logging.dart';
@@ -61,9 +63,11 @@ class SettingsState extends State<Settings> {
                 restfulApi = key;
               });
               // Display the data received.
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => MyGetHttpData()),
+              unawaited(
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => MyGetHttpData()),
+                ),
               );
             },
           );
