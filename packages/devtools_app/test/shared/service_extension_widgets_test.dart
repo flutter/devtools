@@ -30,6 +30,9 @@ void main() {
 
     setUp(() {
       reloads = 0;
+
+      // Intebtionally unwaited.
+      // ignore: discarded_futures
       when(mockServiceManager.performHotReload()).thenAnswer((invocation) {
         reloads++;
         return Future<void>.value();
@@ -81,6 +84,9 @@ void main() {
 
     setUp(() {
       restarts = 0;
+
+      // Intebtionally unwaited.
+      // ignore: discarded_futures
       when(mockServiceManager.performHotRestart()).thenAnswer((invocation) {
         restarts++;
         return Future<void>.value();

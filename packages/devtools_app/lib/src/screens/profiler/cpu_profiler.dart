@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
@@ -268,10 +269,12 @@ class _CpuProfilerState extends State<CpuProfiler>
   }
 
   void _showFilterDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => CpuProfileFilterDialog(
-        controller: widget.controller,
+    unawaited(
+      showDialog(
+        context: context,
+        builder: (context) => CpuProfileFilterDialog(
+          controller: widget.controller,
+        ),
       ),
     );
   }

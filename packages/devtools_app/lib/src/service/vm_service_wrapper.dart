@@ -20,7 +20,7 @@ class VmServiceWrapper implements VmService {
     this._connectedUri, {
     this.trackFutures = false,
   }) {
-    _initSupportedProtocols();
+    unawaited(_initSupportedProtocols());
   }
 
   VmServiceWrapper.fromNewVmService(
@@ -37,7 +37,7 @@ class VmServiceWrapper implements VmService {
       log: log,
       disposeHandler: disposeHandler,
     );
-    _initSupportedProtocols();
+    unawaited(_initSupportedProtocols());
   }
 
   // TODO(https://github.com/dart-lang/sdk/issues/49072): in the long term, do

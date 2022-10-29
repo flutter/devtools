@@ -126,6 +126,6 @@ Stream<T> convertBroadcastToSingleSubscriber<T>(Stream<T> stream) {
   late StreamSubscription<T> subscription;
   controller.onListen =
       () => subscription = stream.listen((T e) => controller.add(e));
-  controller.onCancel = () => subscription.cancel();
+  controller.onCancel = () => unawaited(subscription.cancel());
   return controller.stream;
 }

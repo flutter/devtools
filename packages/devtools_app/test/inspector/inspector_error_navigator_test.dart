@@ -68,6 +68,8 @@ void main() {
 
     testWidgets(
       'can navigate forwards',
+      // Intebtionally unwaited.
+      // ignore: discarded_futures
       (WidgetTester tester) => testNavigate(
         tester,
         tapIcon: Icons.keyboard_arrow_down,
@@ -79,6 +81,8 @@ void main() {
 
     testWidgets(
       'can navigate backwards',
+      // Intebtionally unwaited.
+      // ignore: discarded_futures
       (WidgetTester tester) => testNavigate(
         tester,
         tapIcon: Icons.keyboard_arrow_up,
@@ -90,6 +94,8 @@ void main() {
 
     testWidgets(
       'wraps forwards',
+      // Intebtionally unwaited.
+      // ignore: discarded_futures
       (WidgetTester tester) => testNavigate(
         tester,
         tapIcon: Icons.keyboard_arrow_down,
@@ -101,6 +107,8 @@ void main() {
 
     testWidgets(
       'wraps backwards',
+      // Intebtionally unwaited.
+      // ignore: discarded_futures
       (WidgetTester tester) => testNavigate(
         tester,
         tapIcon: Icons.keyboard_arrow_up,

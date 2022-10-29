@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:devtools_app/devtools_app.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mockito/mockito.dart';
@@ -93,7 +95,8 @@ MockDebuggerController createMockDebuggerControllerWithDefaults({
 
 MockVmServiceWrapper createMockVmServiceWrapperWithDefaults() {
   final service = MockVmServiceWrapper();
-  when(service.getFlagList()).thenAnswer((_) async => FlagList(flags: []));
+  when(unawaited(service.getFlagList()))
+      .thenAnswer((_) async => FlagList(flags: []));
   when(service.onDebugEvent).thenAnswer((_) {
     return const Stream.empty();
   });
