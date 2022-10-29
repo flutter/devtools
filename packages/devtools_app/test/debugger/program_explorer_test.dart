@@ -80,7 +80,9 @@ void main() {
       when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
 
       final mockScriptManager = MockScriptManager();
-      when(unawaited(mockScriptManager.getScript(any))).thenAnswer(
+      //`then` is used
+      // ignore: discarded_futures
+      when(mockScriptManager.getScript(any)).thenAnswer(
         (_) => Future<Script>.value(testScript),
       );
 

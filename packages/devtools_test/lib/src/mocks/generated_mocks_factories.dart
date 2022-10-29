@@ -95,8 +95,9 @@ MockDebuggerController createMockDebuggerControllerWithDefaults({
 
 MockVmServiceWrapper createMockVmServiceWrapperWithDefaults() {
   final service = MockVmServiceWrapper();
-  when(unawaited(service.getFlagList()))
-      .thenAnswer((_) async => FlagList(flags: []));
+  // `then` is used.
+  // ignore: discarded_futures
+  when(service.getFlagList()).thenAnswer((_) async => FlagList(flags: []));
   when(service.onDebugEvent).thenAnswer((_) {
     return const Stream.empty();
   });
