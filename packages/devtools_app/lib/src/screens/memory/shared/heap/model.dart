@@ -27,16 +27,15 @@ class _JsonFields {
 /// needed for memory screen.
 class AdaptedHeapData {
   @visibleForTesting
-  factory AdaptedHeapData(
-    List<AdaptedHeapObject> objects, {
-    int rootIndex = _defaultRootIndex,
+  AdaptedHeapData(
+    this.objects, {
+    this.rootIndex = _defaultRootIndex,
     DateTime? created,
-  }) =>
-      AdaptedHeapData.fromInitializer(
-        Future.value(objects),
-        rootIndex: rootIndex,
-        created: created,
-      );
+  })  : assert(objects.isNotEmpty),
+        assert(objects.length > rootIndex),
+        _objectsInitializer = Future.value(objects) {
+    this.created = created ?? DateTime.now();
+  }
 
   @visibleForTesting
   AdaptedHeapData.fromInitializer(
