@@ -129,14 +129,12 @@ class ClassesTableSingle extends StatelessWidget {
   Widget build(BuildContext context) {
     // We want to preserve the sorting and sort directions for ClassesTableDiff
     // no matter what the data passed to it is.
-    // However, there may be collisions with scroll position as the datasets are of different length.
-    // TODO (polina-c): test if removing of identityHashCode will work.
-    final dataKey = 'ClassesTableSingle-${identityHashCode(classes)}';
+    const dataKey = 'ClassesTableSingle';
     return FlatTable<SingleClassStats>(
       columns: _columns,
       data: classes,
       dataKey: dataKey,
-      keyFactory: (e) => Key(dataKey),
+      keyFactory: (e) => const Key(dataKey),
       selectionNotifier: selection,
       defaultSortColumn: _shallowSizeColumn,
       defaultSortDirection: SortDirection.descending,
