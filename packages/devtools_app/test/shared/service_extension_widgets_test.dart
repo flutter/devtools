@@ -31,7 +31,7 @@ void main() {
     setUp(() {
       reloads = 0;
 
-      // Intebtionally unwaited.
+      // Intentionally unawaited.
       // ignore: discarded_futures
       when(mockServiceManager.performHotReload()).thenAnswer((invocation) {
         reloads++;
@@ -85,7 +85,7 @@ void main() {
     setUp(() {
       restarts = 0;
 
-      // Intebtionally unwaited.
+      // Intentionally unawaited.
       // ignore: discarded_futures
       when(mockServiceManager.performHotRestart()).thenAnswer((invocation) {
         restarts++;
