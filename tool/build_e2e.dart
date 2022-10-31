@@ -32,7 +32,12 @@ void main(List<String> args) async {
     workingDirectory: mainDevToolsDirectory.path,
   );
   _forwardOutputStreams(buildProcess);
-  await buildProcess.exitCode;
+  final buildProcessExitCode = await buildProcess.exitCode;
+  if (buildProcessExitCode == 1) {
+    throw Exception(
+      'Something went wrong while running `tool/build_release.sh.',
+    );
+  }
 
   final devToolsBuildLocation =
       '${mainDevToolsDirectory.path}/packages/devtools_app/build/web';
