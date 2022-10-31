@@ -4,14 +4,9 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../analytics/analytics.dart' as ga;
-import '../../../../analytics/constants.dart' as analytics_constants;
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
-import '../../../../shared/theme.dart';
-import '../../memory_controller.dart';
 import '../../primitives/ui.dart';
-import '../chart/chart_pane_controller.dart';
 
 class PrimaryControls extends StatelessWidget {
   const PrimaryControls({
