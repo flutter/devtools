@@ -4,7 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 
-import '../app.dart';
+import '../shared/globals.dart';
 
 /// If true, features under construction will be enabled for release build.
 ///
