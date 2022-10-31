@@ -17,21 +17,22 @@ import '../app.dart';
 ///     "--dart-define=enable_experiments=true"
 ///   ]
 @visibleForTesting
-const bool kEnableExperiments =
-    !kReleaseMode || bool.fromEnvironment('enable_experiments');
+const bool kEnableExperiments = bool.fromEnvironment('enable_experiments');
+
+bool enableExperiments = kEnableExperiments;
 
 @visibleForTesting
-bool kEnableBeta = kEnableExperiments || !isExternalBuild;
+bool enableBeta = kEnableExperiments || !isExternalBuild;
 
 // It is ok to have enum-like static only classes.
 // ignore: avoid_classes_with_only_static_members
 /// Flags to hide features under construction.
 abstract class FeatureFlags {
   /// https://github.com/flutter/devtools/issues/3949
-  static bool memoryDiffing = kEnableBeta;
+  static bool memoryDiffing = enableBeta;
 
   /// Flag to enable the embedded perfetto trace viewer.
   ///
   /// https://github.com/flutter/devtools/issues/4207.
-  static bool embeddedPerfetto = kEnableExperiments;
+  static bool embeddedPerfetto = enableExperiments;
 }
