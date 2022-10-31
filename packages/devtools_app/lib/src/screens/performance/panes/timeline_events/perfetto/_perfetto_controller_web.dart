@@ -37,18 +37,34 @@ class PerfettoController extends DisposableController
 
   static const _perfettoPong = 'PONG';
 
+  /// Id for a [postMessage] request that is sent before trying to change the
+  /// DevTools theme (see [_devtoolsThemeChange]).
+  /// 
+  /// Once the DevTools theme handler in the bundled Perfetto web app has been
+  /// registered, a "pong" event [_devtoolsThemePong] will be returned, at which
+  /// point we can safely change the theme [_devtoolsThemeChange].
+  /// 
+  /// This message must be sent with the argument 'perfettoIgnore' set to true
+  /// so that the message handler in the Perfetto codebase
+  /// [post_message_handler.ts] will not try to handle this message and warn
+  /// "Unknown postMessage() event received".
   static const _devtoolsThemePing = 'DART-DEVTOOLS-THEME-PING';
 
+  /// Id for a [postMessage] response that should be received when the DevTools
+  /// theme handler has been registered.
+  /// 
+  /// We will send a "ping" event [_devtoolsThemePing] to the DevTools theme 
+  /// handler in the bundled Perfetto web app, and the handler will return this
+  /// "pong" event when it is ready. We must wait for this event to be returned
+  /// before we can send a theme change request [_devtoolsThemeChange]. 
   static const _devtoolsThemePong = 'DART-DEVTOOLS-THEME-PONG';
 
   /// Id for a [postMessage] request that is sent on DevTools theme changes.
   ///
-  /// This id is marked in the Perfetto UI codebase [post_message_handler.ts] as
-  /// trusted. This ensures that the embedded Perfetto web app does not try to
-  /// handle this message and warn "Unknown postMessage() event received".
-  ///
-  /// Any changes to this string must also be applied in
-  /// [post_message_handler.ts] in the Perfetto codebase.
+  /// This message must be sent with the argument 'perfettoIgnore' set to true
+  /// so that the message handler in the Perfetto codebase
+  /// [post_message_handler.ts] will not try to handle this message and warn
+  /// "Unknown postMessage() event received".
   static const _devtoolsThemeChange = 'DART-DEVTOOLS-THEME-CHANGE';
 
   String get _perfettoUrl {
