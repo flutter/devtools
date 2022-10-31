@@ -104,7 +104,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   void initState() {
     super.initState();
 
-    ga.setupDimensions();
+    unawaited(ga.setupDimensions());
 
     addAutoDisposeListener(serviceManager.isolateManager.mainIsolate, () {
       setState(() {

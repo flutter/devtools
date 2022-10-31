@@ -562,12 +562,14 @@ class CpuProfilerController
         label: dataLabel,
       );
     }
-    processAndSetData(
-      filteredData,
-      processId: 'filter $_filterIdentifier',
-      storeAsUserTagNone: false,
-      shouldApplyFilters: false,
-      shouldRefreshSearchMatches: true,
+    unawaited(
+      processAndSetData(
+        filteredData,
+        processId: 'filter $_filterIdentifier',
+        storeAsUserTagNone: false,
+        shouldApplyFilters: false,
+        shouldRefreshSearchMatches: true,
+      ),
     );
     _filterIdentifier++;
   }

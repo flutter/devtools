@@ -67,8 +67,8 @@ class _LeaksPaneController {
   }
 
   void dispose() {
-    summarySubscription.cancel();
-    detailsSubscription.cancel();
+    unawaited(summarySubscription.cancel());
+    unawaited(detailsSubscription.cancel());
     status.dispose();
   }
 

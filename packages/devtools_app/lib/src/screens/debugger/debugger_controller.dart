@@ -60,7 +60,7 @@ class DebuggerController extends DisposableController
     _clearCaches();
 
     _hasTruncatedFrames.value = false;
-    _getStackOperation?.cancel();
+    unawaited(_getStackOperation?.cancel());
     _getStackOperation = null;
 
     isolateRef = null;
@@ -377,7 +377,7 @@ class DebuggerController extends DisposableController
     if (_resuming.value &&
         event.isolate!.id != _isolateRefId &&
         event.kind == EventKind.kPauseStart) {
-      _resumeIsolatePauseStart(event);
+      unawaited(_resumeIsolatePauseStart(event));
     }
 
     if (event.isolate!.id != _isolateRefId) return;
@@ -386,7 +386,7 @@ class DebuggerController extends DisposableController
 
     switch (event.kind) {
       case EventKind.kResume:
-        _pause(false);
+        unawaited(_pause(false));
         break;
       case EventKind.kPauseStart:
       case EventKind.kPauseExit:
@@ -397,7 +397,7 @@ class DebuggerController extends DisposableController
         // Any event we receive here indicates that any resume/step request has been
         // processed.
         _resuming.value = false;
-        _pause(true, pauseEvent: event);
+        unawaited(_pause(true, pauseEvent: event));
         break;
     }
   }
@@ -457,9 +457,11 @@ class DebuggerController extends DisposableController
   /// This method ensures that the source for the script is populated in our
   /// cache, in order to reduce flashing in the editor view.
   void _populateScriptAndShowLocation(ScriptRef scriptRef) {
-    scriptManager.getScript(scriptRef).then((script) {
-      codeViewController.showScriptLocation(ScriptLocation(scriptRef));
-    });
+    unawaited(
+      scriptManager.getScript(scriptRef).then((script) {
+        codeViewController.showScriptLocation(ScriptLocation(scriptRef));
+      }),
+    );
   }
 
   final _hasTruncatedFrames = ValueNotifier<bool>(false);

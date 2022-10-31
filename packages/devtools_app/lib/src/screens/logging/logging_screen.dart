@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -168,12 +170,14 @@ class _LoggingScreenState extends State<LoggingScreenBody>
   }
 
   void _showFilterDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => FilterDialog<LoggingController, LogData>(
-        controller: controller,
-        queryInstructions: LoggingScreenBody.filterQueryInstructions,
-        queryFilterArguments: controller.filterArgs,
+    unawaited(
+      showDialog(
+        context: context,
+        builder: (context) => FilterDialog<LoggingController, LogData>(
+          controller: controller,
+          queryInstructions: LoggingScreenBody.filterQueryInstructions,
+          queryFilterArguments: controller.filterArgs,
+        ),
       ),
     );
   }

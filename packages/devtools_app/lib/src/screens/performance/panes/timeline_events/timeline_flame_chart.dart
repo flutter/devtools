@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
@@ -645,8 +646,8 @@ class TimelineFlameChartState
         backgroundColor: backgroundWithOpacity,
         threadButtonContainerWidth: threadButtonContainerWidth,
         onPressed: () => isNext
-            ? _viewNextEventInGroup(group)
-            : _viewPreviousEventInGroup(group),
+            ? unawaited(_viewNextEventInGroup(group))
+            : unawaited(_viewPreviousEventInGroup(group)),
         shouldEnableButton: (g) => isNext
             ? _shouldEnableNextInThreadButton(g)
             : _shouldEnablePrevInThreadButton(g),

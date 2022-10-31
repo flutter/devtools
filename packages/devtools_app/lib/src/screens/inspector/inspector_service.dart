@@ -1548,14 +1548,14 @@ class InspectorObjectGroupManager {
 
   void clearCurrent() {
     if (_current != null) {
-      _current!.dispose();
+      unawaited(_current!.dispose());
       _current = null;
     }
   }
 
   void cancelNext() {
     if (_next != null) {
-      _next!.dispose();
+      unawaited(_next!.dispose());
       _setNextNull();
     }
   }

@@ -180,10 +180,12 @@ class _CodeViewState extends State<CodeView>
       if (_lastScriptRef?.uri != scriptRef?.uri) {
         // Default to scrolling to the top of the script.
         if (animate) {
-          verticalController.animateTo(
-            0,
-            duration: longDuration,
-            curve: defaultCurve,
+          unawaited(
+            verticalController.animateTo(
+              0,
+              duration: longDuration,
+              curve: defaultCurve,
+            ),
           );
         } else {
           verticalController.jumpTo(0);
@@ -204,10 +206,12 @@ class _CodeViewState extends State<CodeView>
       final scrollPosition =
           lineIndex * CodeView.rowHeight - ((extent - CodeView.rowHeight) / 2);
       if (animate) {
-        verticalController.animateTo(
-          scrollPosition,
-          duration: longDuration,
-          curve: defaultCurve,
+        unawaited(
+          verticalController.animateTo(
+            scrollPosition,
+            duration: longDuration,
+            curve: defaultCurve,
+          ),
         );
       } else {
         verticalController.jumpTo(scrollPosition);
@@ -727,10 +731,12 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
             activeSearchLine * CodeView.rowHeight - widget.height / 2,
             0.0,
           );
-          widget.scrollController.animateTo(
-            targetOffset,
-            duration: defaultDuration,
-            curve: defaultCurve,
+          unawaited(
+            widget.scrollController.animateTo(
+              targetOffset,
+              duration: defaultDuration,
+              curve: defaultCurve,
+            ),
           );
         }
       }
@@ -1190,9 +1196,11 @@ Future<String?> fetchScriptLocationFullFilePath(
 }
 
 void showGoToLineDialog(BuildContext context, CodeViewController controller) {
-  showDialog(
-    context: context,
-    builder: (context) => GoToLineDialog(controller),
+  unawaited(
+    showDialog(
+      context: context,
+      builder: (context) => GoToLineDialog(controller),
+    ),
   );
 }
 

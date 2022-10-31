@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../../../shared/common_widgets.dart';
@@ -42,11 +44,13 @@ class SnapshotControlPane extends StatelessWidget {
                     ValueListenableBuilder<ClassFilter>(
                       valueListenable: filter,
                       builder: (context, filterValue, ___) => FilterButton(
-                        onPressed: () => showDialog(
-                          context: context,
-                          builder: (context) => ClassFilterDialog(
-                            filterValue,
-                            onChanged: controller.applyFilter,
+                        onPressed: () => unawaited(
+                          showDialog(
+                            context: context,
+                            builder: (context) => ClassFilterDialog(
+                              filterValue,
+                              onChanged: controller.applyFilter,
+                            ),
                           ),
                         ),
                         isFilterActive: !filter.value.isEmpty,

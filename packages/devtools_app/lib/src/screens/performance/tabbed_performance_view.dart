@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../analytics/analytics.dart' as ga;
@@ -146,7 +148,7 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
                     PerformanceScreen.id,
                     analytics_constants.collectRasterStats,
                   );
-                  controller.collectRasterStats();
+                  unawaited(controller.collectRasterStats());
                 },
               ),
               const SizedBox(width: denseSpacing),

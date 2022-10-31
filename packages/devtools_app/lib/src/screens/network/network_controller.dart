@@ -87,14 +87,15 @@ class NetworkController
         if (!request.inProgress) {
           final data =
               outstandingRequestsMap.remove(id) as DartIOHttpRequestData;
-          data.getFullRequestData().then((value) => _updateData());
+
+          unawaited(data.getFullRequestData().then((value) => _updateData()));
         }
         continue;
       } else if (wrapped.inProgress) {
         outstandingRequestsMap.putIfAbsent(id, () => wrapped);
       } else {
         // If the response has completed, send a request for body data.
-        wrapped.getFullRequestData().then((value) => _updateData());
+        unawaited(wrapped.getFullRequestData().then((value) => _updateData()));
       }
       currentValues.add(wrapped);
     }
@@ -162,7 +163,7 @@ class NetworkController
         // TODO(kenz): look into improving performance by caching more data.
         // Polling less frequently helps performance.
         const Duration(milliseconds: 2000),
-        (_) => _networkService.refreshNetworkData(),
+        (_) => unawaited(_networkService.refreshNetworkData()),
       );
     } else {
       _pollingTimer?.cancel();

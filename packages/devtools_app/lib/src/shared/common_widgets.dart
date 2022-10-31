@@ -1774,6 +1774,8 @@ class _JsonViewerState extends State<JsonViewer>
         isSystemIsolate: true,
       ),
     );
+    // Intended to be unawaited.
+    // ignore: discarded_futures
     _initializeTree = buildVariablesTree(variable);
   }
 
@@ -1864,7 +1866,7 @@ class MoreInfoLink extends StatelessWidget {
   }
 
   void _onLinkTap(BuildContext context) {
-    launchUrl(url, context);
+    unawaited(launchUrl(url, context));
     ga.select(gaScreenName, gaSelectedItemDescription);
   }
 }
@@ -2004,7 +2006,9 @@ class CopyToClipboardControl extends StatelessWidget {
   Widget build(BuildContext context) {
     final onPressed = dataProvider == null
         ? null
-        : () => copyToClipboard(dataProvider!() ?? '', successMessage, context);
+        : () => unawaited(
+              copyToClipboard(dataProvider!() ?? '', successMessage, context),
+            );
 
     return ToolbarAction(
       icon: Icons.content_copy,
@@ -2423,15 +2427,17 @@ class HelpButtonWithDialog extends StatelessWidget {
     return HelpButton(
       onPressed: () {
         ga.select(gaScreen, gaSelection);
-        showDialog(
-          context: context,
-          builder: (context) => DevToolsDialog(
-            title: DialogTitleText(dialogTitle),
-            includeDivider: false,
-            content: child,
-            actions: const [
-              DialogCloseButton(),
-            ],
+        unawaited(
+          showDialog(
+            context: context,
+            builder: (context) => DevToolsDialog(
+              title: DialogTitleText(dialogTitle),
+              includeDivider: false,
+              content: child,
+              actions: const [
+                DialogCloseButton(),
+              ],
+            ),
           ),
         );
       },

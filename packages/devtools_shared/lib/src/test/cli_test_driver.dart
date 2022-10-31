@@ -24,7 +24,7 @@ class AppFixture {
     // "starting app"
     _onAppStarted = lines.first;
 
-    serviceConnection.streamListen(EventStreams.kIsolate);
+    unawaited(serviceConnection.streamListen(EventStreams.kIsolate));
     _isolateEventStreamSubscription =
         serviceConnection.onIsolateEvent.listen((Event event) {
       if (event.kind == EventKind.kIsolateExit) {

@@ -32,9 +32,9 @@ class DragAndDropManagerWeb extends DragAndDropManager {
 
   @override
   void dispose() {
-    onDragOverSubscription.cancel();
-    onDragLeaveSubscription.cancel();
-    onDropSubscription.cancel();
+    unawaited(onDragOverSubscription.cancel());
+    unawaited(onDragLeaveSubscription.cancel());
+    unawaited(onDropSubscription.cancel());
     super.dispose();
   }
 
