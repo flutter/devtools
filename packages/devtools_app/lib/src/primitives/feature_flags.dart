@@ -17,7 +17,8 @@ import '../app.dart';
 ///     "--dart-define=enable_experiments=true"
 ///   ]
 @visibleForTesting
-const bool kEnableExperiments = bool.fromEnvironment('enable_experiments');
+const bool kEnableExperiments =
+    !kReleaseMode || bool.fromEnvironment('enable_experiments');
 
 @visibleForTesting
 bool kEnableBeta = kEnableExperiments || !isExternalBuild;
