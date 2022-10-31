@@ -208,7 +208,7 @@ class ClassesTableDiff extends StatelessWidget {
       columnGroups: _columnGroups,
       data: classes,
       dataKey: dataKey,
-      keyFactory: (e) => const Key(dataKey),
+      keyFactory: (e) => Key(e.heapClass.fullName),
       selectionNotifier: selection,
       defaultSortColumn: _retainedSizeDeltaColumn,
       defaultSortDirection: SortDirection.descending,

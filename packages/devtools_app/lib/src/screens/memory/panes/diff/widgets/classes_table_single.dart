@@ -134,7 +134,7 @@ class ClassesTableSingle extends StatelessWidget {
       columns: _columns,
       data: classes,
       dataKey: dataKey,
-      keyFactory: (e) => const Key(dataKey),
+      keyFactory: (e) => Key(e.heapClass.fullName),
       selectionNotifier: selection,
       defaultSortColumn: _shallowSizeColumn,
       defaultSortDirection: SortDirection.descending,
