@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
+import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../primitives/class_name.dart';
@@ -22,12 +25,24 @@ class _JsonFields {
 /// Contains information from [HeapSnapshotGraph],
 /// needed for memory screen.
 class AdaptedHeapData {
-  AdaptedHeapData(
-    this.objects, {
+  @visibleForTesting
+  factory AdaptedHeapData(
+    List<AdaptedHeapObject> objects, {
+    int rootIndex = _defaultRootIndex,
+    DateTime? created,
+  }) =>
+      AdaptedHeapData.fromInitializer(
+        Future.value(objects),
+        rootIndex: rootIndex,
+        created: created,
+      );
+
+  @visibleForTesting
+  AdaptedHeapData.fromInitializer(
+    this._objectsInitializer, {
     this.rootIndex = _defaultRootIndex,
     DateTime? created,
-  })  : assert(objects.isNotEmpty),
-        assert(objects.length > rootIndex) {
+  }) {
     this.created = created ?? DateTime.now();
   }
 
@@ -43,12 +58,25 @@ class AdaptedHeapData {
     );
   }
 
-  factory AdaptedHeapData.fromHeapSnapshot(HeapSnapshotGraph graph) =>
-      AdaptedHeapData(
-        graph.objects
-            .map((e) => AdaptedHeapObject.fromHeapSnapshotObject(e))
-            .toList(),
-      );
+  factory AdaptedHeapData.fromHeapSnapshot(HeapSnapshotGraph graph) {
+    Future<List<AdaptedHeapObject>> objectsInitializer() async {
+      final listOfFutures = graph.objects.map((e) async {
+        return AdaptedHeapObject.fromHeapSnapshotObject(e);
+      }).toList();
+
+      return await Future.wait(listOfFutures);
+    }
+
+    // The future is passed as an argument intentionally.
+    // ignore: discarded_futures
+    return AdaptedHeapData.fromInitializer(objectsInitializer());
+  }
+
+  Future<void> init() async {
+    objects = await _objectsInitializer;
+    assert(objects.isNotEmpty);
+    assert(objects.length > rootIndex);
+  }
 
   /// Default value for rootIndex is taken from the doc:
   /// https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/heap_snapshot.md#object-ids
@@ -58,7 +86,9 @@ class AdaptedHeapData {
 
   AdaptedHeapObject get root => objects[rootIndex];
 
-  final List<AdaptedHeapObject> objects;
+  final Future<List<AdaptedHeapObject>> _objectsInitializer;
+
+  late final List<AdaptedHeapObject> objects;
 
   bool isSpanningTreeBuilt = false;
 
@@ -268,7 +298,9 @@ class SnapshotTaker {
   Future<AdaptedHeapData?> take() async {
     final snapshot = await snapshotMemory();
     if (snapshot == null) return null;
-    return AdaptedHeapData.fromHeapSnapshot(snapshot);
+    final result = AdaptedHeapData.fromHeapSnapshot(snapshot);
+    await result.init();
+    return result;
   }
 }
 
