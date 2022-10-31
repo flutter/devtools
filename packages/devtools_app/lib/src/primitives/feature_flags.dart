@@ -16,13 +16,13 @@ import '../app.dart';
 ///   "args": [
 ///     "--dart-define=enable_experiments=true"
 ///   ]
-@visibleForTesting
-const bool kEnableExperiments = bool.fromEnvironment('enable_experiments');
 
-bool enableExperiments = kEnableExperiments;
+const bool _kEnableExperiments = bool.fromEnvironment('enable_experiments');
+
+bool enableExperiments = _kEnableExperiments;
 
 @visibleForTesting
-bool enableBeta = kEnableExperiments || !isExternalBuild;
+bool enableBeta = _kEnableExperiments || !isExternalBuild;
 
 // It is ok to have enum-like static only classes.
 // ignore: avoid_classes_with_only_static_members

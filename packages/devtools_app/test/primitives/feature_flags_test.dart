@@ -8,8 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('constants have expected values', () {
-    expect(kEnableExperiments, false);
-    expect(kEnableBeta, false);
+    expect(enableExperiments, false);
+    expect(enableBeta, false);
     expect(isExternalBuild, true);
   });
 }
