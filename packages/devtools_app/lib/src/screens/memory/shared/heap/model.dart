@@ -54,8 +54,6 @@ class AdaptedHeapData {
 
     final objects = await Future.wait(listOfFutures);
 
-    // The future is passed as an argument intentionally.
-    // ignore: discarded_futures
     return AdaptedHeapData(objects);
   }
 
