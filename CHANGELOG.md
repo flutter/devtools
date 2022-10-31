@@ -1,4 +1,5 @@
 ## 2.19.0
+* Prep for 2.19.0 release [#4673](https://github.com/flutter/devtools/pull/4673)
 * Add lint 'discarded_futures' [#4659](https://github.com/flutter/devtools/pull/4659)
 * Update path.dart [#4663](https://github.com/flutter/devtools/pull/4663)
 * Prepare dev release for g3 roll [#4655](https://github.com/flutter/devtools/pull/4655)
