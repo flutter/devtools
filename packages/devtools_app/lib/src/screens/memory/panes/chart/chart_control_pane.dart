@@ -83,6 +83,22 @@ class _ChartControlPaneState extends State<ChartControlPane>
     controller.resumeLiveFeed();
   }
 
+  void _clearTimeline() {
+    ga.select(analytics_constants.memory, analytics_constants.clear);
+
+    controller.memoryTimeline.reset();
+
+    // Clear all analysis and snapshots collected too.
+    controller.clearAllSnapshots();
+    controller.classRoot = null;
+    controller.topNode = null;
+    controller.selectedSnapshotTimestamp = null;
+    controller.selectedLeaf = null;
+
+    // Remove history of all plotted data in all charts.
+    widget.chartController.resetAll();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -111,6 +127,14 @@ class _ChartControlPaneState extends State<ChartControlPane>
         ),
         const SizedBox(height: denseSpacing),
         IntervalDropdown(chartController: widget.chartController),
+        const SizedBox(height: denseSpacing),
+        ClearButton(
+          onPressed: controller.memorySource == MemoryController.liveFeed
+              ? _clearTimeline
+              : null,
+          minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
+          tooltip: 'Clear all data on the memory screen.',
+        ),
       ],
     );
   }
