@@ -68,7 +68,7 @@ void main() {
 
     testWidgets(
       'can navigate forwards',
-      // Intebtionally unwaited.
+      // Intentionally unawaited.
       // ignore: discarded_futures
       (WidgetTester tester) => testNavigate(
         tester,
@@ -81,7 +81,7 @@ void main() {
 
     testWidgets(
       'can navigate backwards',
-      // Intebtionally unwaited.
+      // Intentionally unawaited.
       // ignore: discarded_futures
       (WidgetTester tester) => testNavigate(
         tester,
@@ -94,7 +94,7 @@ void main() {
 
     testWidgets(
       'wraps forwards',
-      // Intebtionally unwaited.
+      // Intentionally unawaited.
       // ignore: discarded_futures
       (WidgetTester tester) => testNavigate(
         tester,
@@ -107,7 +107,7 @@ void main() {
 
     testWidgets(
       'wraps backwards',
-      // Intebtionally unwaited.
+      // Intentionally unawaited.
       // ignore: discarded_futures
       (WidgetTester tester) => testNavigate(
         tester,
