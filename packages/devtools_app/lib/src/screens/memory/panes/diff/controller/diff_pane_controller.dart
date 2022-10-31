@@ -44,7 +44,6 @@ class DiffPaneController extends DisposableController {
 
   Future<void> takeSnapshot() async {
     _isTakingSnapshot.value = true;
-    final future = snapshotTaker.take();
     final snapshots = core._snapshots;
 
     final item = SnapshotInstanceItem(
@@ -54,7 +53,9 @@ class DiffPaneController extends DisposableController {
     );
 
     snapshots.add(item);
-    item.initializeHeapData(await future);
+
+    final heapData = await snapshotTaker.take();
+    item.initializeHeapData(heapData);
 
     final newElementIndex = snapshots.value.length - 1;
     core._selectedSnapshotIndex.value = newElementIndex;

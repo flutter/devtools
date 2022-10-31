@@ -4,6 +4,7 @@
 
 import 'package:vm_service/vm_service.dart';
 
+import '../../../../primitives/utils.dart';
 import '../../primitives/class_name.dart';
 import '../../primitives/memory_utils.dart';
 
@@ -43,12 +44,18 @@ class AdaptedHeapData {
     );
   }
 
-  factory AdaptedHeapData.fromHeapSnapshot(HeapSnapshotGraph graph) =>
-      AdaptedHeapData(
-        graph.objects
-            .map((e) => AdaptedHeapObject.fromHeapSnapshotObject(e))
-            .toList(),
-      );
+  static Future<AdaptedHeapData> fromHeapSnapshot(
+    HeapSnapshotGraph graph,
+  ) async {
+    final listOfFutures = graph.objects.map((e) async {
+      await delayForBatchProcessing();
+      return AdaptedHeapObject.fromHeapSnapshotObject(e);
+    }).toList();
+
+    final objects = await Future.wait(listOfFutures);
+
+    return AdaptedHeapData(objects);
+  }
 
   /// Default value for rootIndex is taken from the doc:
   /// https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/heap_snapshot.md#object-ids
