@@ -13,7 +13,6 @@ import 'dart:html';
 import 'package:js/js.dart';
 
 import '../../devtools.dart' as devtools show version;
-import '../app.dart';
 import '../config_specific/logger/logger.dart';
 import '../config_specific/server/server.dart' as server;
 import '../config_specific/url/url.dart';

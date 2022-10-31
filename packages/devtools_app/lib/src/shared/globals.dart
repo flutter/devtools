@@ -15,6 +15,9 @@ import 'framework_controller.dart';
 import 'preferences.dart';
 import 'survey.dart';
 
+/// Whether this DevTools build is external.
+bool isExternalBuild = true;
+
 final Map<Type, dynamic> globals = <Type, dynamic>{};
 
 ServiceConnectionManager get serviceManager =>

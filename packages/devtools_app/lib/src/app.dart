@@ -60,9 +60,6 @@ const debugEnableSampleScreen = false;
 // Disabled until VM developer mode functionality is added.
 const showVmDeveloperMode = false;
 
-/// Whether this DevTools build is external.
-bool isExternalBuild = true;
-
 /// Top-level configuration for the app.
 @immutable
 class DevToolsApp extends StatefulWidget {
