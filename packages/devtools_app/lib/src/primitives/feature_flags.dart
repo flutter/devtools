@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
+
+import '../app.dart';
+
 /// If true, features under construction will be enabled.
 ///
 /// By default, the constant is false.
@@ -12,17 +16,22 @@
 ///   "args": [
 ///     "--dart-define=enable_experiments=true"
 ///   ]
-const bool _kEnableExperiments = bool.fromEnvironment('enable_experiments');
+@visibleForTesting
+const bool kEnableExperiments =
+    !kReleaseMode || bool.fromEnvironment('enable_experiments');
+
+@visibleForTesting
+bool kEnableBeta = kEnableExperiments || !isExternalBuild;
 
 // It is ok to have enum-like static only classes.
 // ignore: avoid_classes_with_only_static_members
 /// Flags to hide features under construction.
 abstract class FeatureFlags {
   /// https://github.com/flutter/devtools/issues/3949
-  static bool memoryDiffing = _kEnableExperiments;
+  static bool memoryDiffing = kEnableBeta;
 
   /// Flag to enable the embedded perfetto trace viewer.
   ///
   /// https://github.com/flutter/devtools/issues/4207.
-  static bool embeddedPerfetto = _kEnableExperiments;
+  static bool embeddedPerfetto = kEnableExperiments;
 }
