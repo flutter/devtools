@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 
 import '../app.dart';
 
-/// If true, features under construction will be enabled.
+/// If true, features under construction will be enabled for release build.
 ///
 /// By default, the constant is false.
 /// To enable it, pass the compilation flag
@@ -16,7 +16,6 @@ import '../app.dart';
 ///   "args": [
 ///     "--dart-define=enable_experiments=true"
 ///   ]
-
 const bool _kEnableExperiments = bool.fromEnvironment('enable_experiments');
 
 bool enableExperiments = _kEnableExperiments;
