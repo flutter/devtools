@@ -55,14 +55,12 @@ class DiffPaneController extends DisposableController {
 
     snapshots.add(item);
     final heapData = await snapshotTaker.take();
-
     item.initializeHeapData(heapData);
 
     final newElementIndex = snapshots.value.length - 1;
     core._selectedSnapshotIndex.value = newElementIndex;
     _isTakingSnapshot.value = false;
 
-    print('updating values');
     derived._updateValues();
   }
 

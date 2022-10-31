@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../../../../devtools_app.dart';
 import '../../primitives/class_name.dart';
 import '../../primitives/memory_utils.dart';
 
@@ -61,6 +62,7 @@ class AdaptedHeapData {
   factory AdaptedHeapData.fromHeapSnapshot(HeapSnapshotGraph graph) {
     Future<List<AdaptedHeapObject>> objectsInitializer() async {
       final listOfFutures = graph.objects.map((e) async {
+        await delayForBatchProcessing();
         return AdaptedHeapObject.fromHeapSnapshotObject(e);
       }).toList();
 
