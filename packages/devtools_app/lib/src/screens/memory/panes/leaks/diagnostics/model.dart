@@ -46,8 +46,13 @@ class NotGCedAnalyzerTask {
         heap: AdaptedHeapData.fromJson(json[_JsonFields.heap]),
       );
 
-  NotGCedAnalyzerTask.fromSnapshot(HeapSnapshotGraph graph, this.reports)
-      : heap = AdaptedHeapData.fromHeapSnapshot(graph);
+  static Future<NotGCedAnalyzerTask> fromSnapshot(
+      HeapSnapshotGraph graph, List<LeakReport> reports,) async {
+    return NotGCedAnalyzerTask(
+      heap: await AdaptedHeapData.fromHeapSnapshot(graph),
+      reports: reports,
+    );
+  }
 
   final AdaptedHeapData heap;
   final List<LeakReport> reports;
