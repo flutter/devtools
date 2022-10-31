@@ -1,5 +1,5 @@
-## 2.19.0-dev.2
-* Dev version
+## 2.19.0
+TODO: update changelog
 
 ## 2.18.0
 * Add token permissions to allow signing scorecard results [#4555](https://github.com/flutter/devtools/pull/4555)
