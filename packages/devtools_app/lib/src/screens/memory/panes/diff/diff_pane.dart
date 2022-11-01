@@ -50,21 +50,19 @@ class _SnapshotItemContent extends StatelessWidget {
       valueListenable: controller.derived.selectedItem,
       builder: (_, item, __) {
         if (item is SnapshotDocItem) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(densePadding),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(_snapshotDocumentation),
-                  const SizedBox(height: denseSpacing),
-                  IconLabelButton(
-                    onPressed: () async => await controller.takeSnapshot(),
-                    icon: Icons.fiber_manual_record,
-                    label: 'Take Snapshot',
-                  )
-                ],
-              ),
+          return Padding(
+            padding: const EdgeInsets.all(defaultSpacing),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(_snapshotDocumentation),
+                const SizedBox(height: denseSpacing),
+                IconLabelButton(
+                  onPressed: () async => await controller.takeSnapshot(),
+                  icon: Icons.fiber_manual_record,
+                  label: 'Take Snapshot',
+                )
+              ],
             ),
           );
         }
