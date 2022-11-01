@@ -53,7 +53,7 @@ bool rasterStatsSupported = true;
 ///
 /// The controller manages the timeline data model and communicates with the
 /// view to give and receive data updates. It also manages data processing via
-/// [TimelineEventProcessor] and [CpuProfileTransformer].
+/// [LegacyTimelineEventProcessor] and [CpuProfileTransformer].
 ///
 /// This class must not have direct dependencies on dart:html. This allows tests
 /// of the complicated logic in this class to run on the VM and will help
@@ -61,7 +61,7 @@ bool rasterStatsSupported = true;
 class PerformanceController extends DisposableController
     with SearchControllerMixin<TimelineEvent>, AutoDisposeControllerMixin {
   PerformanceController() {
-    legacyProcessor = TimelineEventProcessor(this);
+    legacyProcessor = LegacyTimelineEventProcessor(this);
     perfettoProcessor = PerfettoEventProcessor(this);
     // See https://github.com/dart-lang/linter/issues/3801
     // ignore: discarded_futures
@@ -134,7 +134,7 @@ class PerformanceController extends DisposableController
   /// in selected timeline event, selected frame, etc.).
   PerformanceData? offlinePerformanceData;
 
-  late final TimelineEventProcessor legacyProcessor;
+  late final LegacyTimelineEventProcessor legacyProcessor;
 
   late final PerfettoEventProcessor perfettoProcessor;
 

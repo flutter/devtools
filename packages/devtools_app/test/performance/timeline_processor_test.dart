@@ -36,10 +36,10 @@ void main() {
   });
 
   group('TimelineProcessor', () {
-    late TimelineEventProcessor processor;
+    late LegacyTimelineEventProcessor processor;
 
     setUp(() {
-      processor = TimelineEventProcessor(MockTimelineController())
+      processor = LegacyTimelineEventProcessor(MockTimelineController())
         ..primeThreadIds(
           uiThreadId: testUiThreadId,
           rasterThreadId: testRasterThreadId,

@@ -27,8 +27,8 @@ const String uiEventName = 'Animator::BeginFrame';
 
 /// Processor for composing a recorded list of trace events into a timeline of
 /// [AsyncTimelineEvent]s, [SyncTimelineEvent]s, and [FlutterFrame]s.
-class TimelineEventProcessor {
-  TimelineEventProcessor(this.performanceController);
+class LegacyTimelineEventProcessor {
+  LegacyTimelineEventProcessor(this.performanceController);
 
   /// Number of traceEvents we will process in each batch.
   static const _defaultBatchSize = 2000;
