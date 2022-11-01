@@ -4,7 +4,6 @@
 
 import 'package:vm_service/vm_service.dart';
 
-import '../../../../primitives/utils.dart';
 import '../../primitives/class_name.dart';
 import '../../primitives/memory_utils.dart';
 
@@ -44,15 +43,12 @@ class AdaptedHeapData {
     );
   }
 
-  static Future<AdaptedHeapData> fromHeapSnapshot(
+  static AdaptedHeapData fromHeapSnapshot(
     HeapSnapshotGraph graph,
-  ) async {
-    final listOfFutures = graph.objects.map((e) async {
-      await delayForBatchProcessing();
+  ) {
+    final objects = graph.objects.map((e) {
       return AdaptedHeapObject.fromHeapSnapshotObject(e);
     }).toList();
-
-    final objects = await Future.wait(listOfFutures);
 
     return AdaptedHeapData(objects);
   }
