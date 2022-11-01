@@ -381,6 +381,30 @@ class PerformanceController extends DisposableController
     _data.selectedFrame = frame;
     _selectedFrameNotifier.value = frame;
 
+    if (useLegacyTraceViewer.value) {
+      await _legacyToggleFrame(frame, _data);
+    } else if (FeatureFlags.embeddedPerfetto) {
+      // TODO(kenz): hook up scroll to frame for Perfetto viewer.
+    }
+
+    debugTraceEventCallback(() {
+      final buf = StringBuffer();
+      buf.writeln('UI timeline event for frame ${frame.id}:');
+      frame.timelineEventData.uiEvent?.format(buf, '  ');
+      buf.writeln('\nUI trace for frame ${frame.id}');
+      frame.timelineEventData.uiEvent?.writeTraceToBuffer(buf);
+      buf.writeln('\Raster timeline event frame ${frame.id}:');
+      frame.timelineEventData.rasterEvent?.format(buf, '  ');
+      buf.writeln('\nRaster trace for frame ${frame.id}');
+      frame.timelineEventData.rasterEvent?.writeTraceToBuffer(buf);
+      log(buf.toString());
+    });
+  }
+
+  Future<void> _legacyToggleFrame(
+    FlutterFrame frame,
+    PerformanceData data,
+  ) async {
     if (!offlineController.offlineMode.value) {
       final bool frameBeforeFirstWellFormedFrame =
           firstWellFormedFrameMicros != null &&
@@ -438,7 +462,7 @@ class PerformanceController extends DisposableController
         );
       }
       if (_currentFrameBeingSelected != frame) return;
-      _data.cpuProfileData = cpuProfilerController.dataNotifier.value;
+      data.cpuProfileData = cpuProfilerController.dataNotifier.value;
     } else {
       if (!storedProfileForFrame.processed) {
         await storedProfileForFrame.process(
@@ -447,7 +471,7 @@ class PerformanceController extends DisposableController
         );
       }
       if (_currentFrameBeingSelected != frame) return;
-      _data.cpuProfileData = storedProfileForFrame.getActive(
+      data.cpuProfileData = storedProfileForFrame.getActive(
         cpuProfilerController.viewType.value,
       );
       cpuProfilerController.loadProcessedData(
@@ -455,19 +479,6 @@ class PerformanceController extends DisposableController
         storeAsUserTagNone: true,
       );
     }
-
-    debugTraceEventCallback(() {
-      final buf = StringBuffer();
-      buf.writeln('UI timeline event for frame ${frame.id}:');
-      frame.timelineEventData.uiEvent?.format(buf, '  ');
-      buf.writeln('\nUI trace for frame ${frame.id}');
-      frame.timelineEventData.uiEvent?.writeTraceToBuffer(buf);
-      buf.writeln('\Raster timeline event frame ${frame.id}:');
-      frame.timelineEventData.rasterEvent?.format(buf, '  ');
-      buf.writeln('\nRaster trace for frame ${frame.id}');
-      frame.timelineEventData.rasterEvent?.writeTraceToBuffer(buf);
-      log(buf.toString());
-    });
   }
 
   void addFrame(FlutterFrame frame) {
