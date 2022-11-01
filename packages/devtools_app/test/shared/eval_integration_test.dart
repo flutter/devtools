@@ -103,7 +103,7 @@ void main() {
                 isAlive: isAlive,
               )
               .then<FutureFailedException>(
-                (_) => throw FallThroughError(),
+                (_) => throw Exception(),
                 onError: (err) => err,
               );
 

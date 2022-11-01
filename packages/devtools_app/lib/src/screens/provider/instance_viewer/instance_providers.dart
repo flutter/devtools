@@ -94,7 +94,7 @@ Future<InstanceRef> _resolveInstanceRefForPath(
       // objects to have multiple properties with the same name
       return eval.safeGetInstance(ref, isAlive);
     },
-    orElse: () => throw FallThroughError(),
+    orElse: () => throw Exception(),
   );
 }
 
@@ -257,7 +257,7 @@ Setter? _parseSetter({
       if (field.isFinal) return null;
       return mutate;
     },
-    orElse: () => throw FallThroughError(),
+    orElse: () => throw Exception(),
   );
 }
 

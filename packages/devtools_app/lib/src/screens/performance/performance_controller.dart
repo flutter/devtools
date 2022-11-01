@@ -431,12 +431,10 @@ class PerformanceController extends DisposableController
     _data.selectedFrame = frame;
     _selectedFrameNotifier.value = frame;
 
-    if (!offlineController.offlineMode.value) {
-      if (useLegacyTraceViewer.value) {
-        await _legacyToggleFrame(frame, _data);
-      } else if (FeatureFlags.embeddedPerfetto) {
-        await _toggleFrame(frame);
-      }
+    if (useLegacyTraceViewer.value) {
+      await _legacyToggleFrame(frame, _data);
+    } else if (FeatureFlags.embeddedPerfetto) {
+      // TODO(kenz): hook up scroll to frame for Perfetto viewer.
     }
 
     debugTraceEventCallback(() {
@@ -457,33 +455,24 @@ class PerformanceController extends DisposableController
     FlutterFrame frame,
     PerformanceData data,
   ) async {
-    final bool frameBeforeFirstWellFormedFrame =
-        firstWellFormedFrameMicros != null &&
-            frame.timeFromFrameTiming.start!.inMicroseconds <
-                firstWellFormedFrameMicros!;
-    if (!frame.isWellFormed && !frameBeforeFirstWellFormedFrame) {
-      // Only try to pull timeline events for frames that are after the first
-      // well formed frame. Timeline events that occurred before this frame will
-      // have already fallen out of the buffer.
-      await processAvailableEvents();
+    if (!offlineController.offlineMode.value) {
+      if (_currentFrameBeingSelected != frame) return;
+
+      // If the frame is still not well formed after processing all available
+      // events, wait a short delay and try to process events again after the
+      // VM has been polled one more time.
+      if (!frame.isWellFormed && !frameBeforeFirstWellFormedFrame) {
+        assert(!_processing.value);
+        _processing.value = true;
+        await Future.delayed(timelinePollingInterval, () async {
+          if (_currentFrameBeingSelected != frame) return;
+          await processTraceEvents(allTraceEvents);
+          _processing.value = false;
+        });
+      }
+
+      if (_currentFrameBeingSelected != frame) return;
     }
-
-    if (_currentFrameBeingSelected != frame) return;
-
-    // If the frame is still not well formed after processing all available
-    // events, wait a short delay and try to process events again after the
-    // VM has been polled one more time.
-    if (!frame.isWellFormed && !frameBeforeFirstWellFormedFrame) {
-      assert(!_processing.value);
-      _processing.value = true;
-      await Future.delayed(timelinePollingInterval, () async {
-        if (_currentFrameBeingSelected != frame) return;
-        await processTraceEvents(allTraceEvents);
-        _processing.value = false;
-      });
-    }
-
-    if (_currentFrameBeingSelected != frame) return;
 
     // We do not need to pull the CPU profile because we will pull the profile
     // for the entire frame. The order of selecting the timeline event and
@@ -497,8 +486,10 @@ class PerformanceController extends DisposableController
 
     if (_currentFrameBeingSelected != frame) return;
 
-    final storedProfileForFrame = cpuProfilerController.cpuProfileStore
-        .lookupProfile(time: frame.timeFromEventFlows);
+    final storedProfileForFrame =
+        cpuProfilerController.cpuProfileStore.lookupProfile(
+      time: frame.timeFromEventFlows,
+    );
     if (storedProfileForFrame == null) {
       cpuProfilerController.reset();
       if (!offlineController.offlineMode.value &&
