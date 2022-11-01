@@ -72,16 +72,20 @@ Future<void> buildVariablesTree(
     }
 
     if (diagnostic.inlineProperties.isNotEmpty) {
-      /*await*/ _addPropertiesHelper(diagnostic.inlineProperties).then((v) {
-        completer.complete(true);
-      });
+      unawaited(
+        _addPropertiesHelper(diagnostic.inlineProperties).then((v) {
+          completer.complete(true);
+        }),
+      );
     } else {
       assert(!service!.disposed);
       if (!service!.disposed) {
-        /*await*/ _addPropertiesHelper(await diagnostic.getProperties(service))
-            .then((v) {
-          completer.complete(true);
-        });
+        unawaited(
+          _addPropertiesHelper(await diagnostic.getProperties(service))
+              .then((v) {
+            completer.complete(true);
+          }),
+        );
       }
     }
   } else {
@@ -150,7 +154,7 @@ Future<void> buildVariablesTree(
             );
           }
         }
-      } on SentinelException catch (e) {
+      } on SentinelException {
         // Fail gracefully if calling `getObject` throws a SentinelException.
       }
     }
@@ -207,7 +211,6 @@ Future<void> buildVariablesTree(
                 value: valueInstanceRef,
               );
             } catch (e) {
-              print('DEVTOOLS: buildVariablesTree: error updating refs: $e');
               if (e is! SentinelException) {
                 log(
                   'Caught $e accessing the value of an object',
