@@ -35,6 +35,9 @@ void main() async {
 
   setGlobal(IdeTheme, getIdeTheme());
 
+  // Set the extension points global.
+  setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+
   final preferences = PreferencesController();
   // Wait for preferences to load before rendering the app to avoid a flash of
   // content with the incorrect theme.
@@ -42,9 +45,6 @@ void main() async {
 
   // Load the Dart syntax highlighting grammar.
   await SyntaxHighlighter.initialize();
-
-  // Set the extension points global.
-  setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
 
   setupErrorHandling(() async {
     if (!kReleaseMode) enableExperiments = true;
