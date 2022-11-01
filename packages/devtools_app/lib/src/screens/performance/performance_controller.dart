@@ -434,7 +434,7 @@ class PerformanceController extends DisposableController
     if (useLegacyTraceViewer.value) {
       await _legacyToggleFrame(frame, _data);
     } else if (FeatureFlags.embeddedPerfetto) {
-      // TODO(kenz): hook up scroll to frame for Perfetto viewer.
+      await _toggleFrame(frame);
     }
 
     debugTraceEventCallback(() {
