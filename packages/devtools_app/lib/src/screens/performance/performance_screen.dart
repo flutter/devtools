@@ -22,7 +22,7 @@ import '../../shared/theme.dart';
 import '../../shared/utils.dart';
 import '../../ui/icons.dart';
 import '../../ui/vm_flag_widgets.dart';
-import 'flutter_frames_chart.dart';
+import 'panes/flutter_frames/flutter_frames_chart.dart';
 import 'panes/controls/enhance_tracing/enhance_tracing.dart';
 import 'panes/controls/layer_debugging_options.dart';
 import 'panes/controls/performance_settings.dart';
