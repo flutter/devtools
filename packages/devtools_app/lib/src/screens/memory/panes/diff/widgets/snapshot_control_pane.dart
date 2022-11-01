@@ -2,25 +2,29 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/theme.dart';
 import '../../../primitives/ui.dart';
+import '../../../shared/heap/class_filter.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/item_controller.dart';
+import 'class_filter_dialog.dart';
 
 class SnapshotControlPane extends StatelessWidget {
   const SnapshotControlPane({Key? key, required this.controller})
       : super(key: key);
 
   final DiffPaneController controller;
-  static const _classFilterWidth = 200.0;
 
   @override
   Widget build(BuildContext context) {
+    final filter = controller.core.classFilter;
     return ValueListenableBuilder<bool>(
-      valueListenable: controller.isProcessing,
+      valueListenable: controller.isTakingSnapshot,
       builder: (_, isProcessing, __) {
         final current = controller.core.selectedItem as SnapshotInstanceItem;
 
@@ -37,9 +41,21 @@ class SnapshotControlPane extends StatelessWidget {
                       controller: controller,
                     ),
                     const SizedBox(width: defaultSpacing),
-                    SizedBox(
-                      width: _classFilterWidth,
-                      child: _ClassFilter(onChanged: controller.setClassFilter),
+                    ValueListenableBuilder<ClassFilter>(
+                      valueListenable: filter,
+                      builder: (context, filterValue, ___) => FilterButton(
+                        onPressed: () => unawaited(
+                          showDialog(
+                            context: context,
+                            builder: (context) => ClassFilterDialog(
+                              filterValue,
+                              onChanged: controller.applyFilter,
+                            ),
+                          ),
+                        ),
+                        isFilterActive: !filter.value.isEmpty,
+                        message: filter.value.buttonTooltip,
+                      ),
                     ),
                     const SizedBox(width: defaultSpacing),
                     ToCsvButton(
@@ -62,19 +78,6 @@ class SnapshotControlPane extends StatelessWidget {
       },
     );
   }
-}
-
-class _ClassFilter extends StatelessWidget {
-  const _ClassFilter({Key? key, required this.onChanged}) : super(key: key);
-
-  final Function(String value) onChanged;
-
-  @override
-  Widget build(BuildContext context) => DevToolsClearableTextField(
-        labelText: 'Class Filter',
-        hintText: 'Filter by class name',
-        onChanged: onChanged,
-      );
 }
 
 class _DiffDropdown extends StatelessWidget {

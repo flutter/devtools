@@ -10,7 +10,9 @@ import 'package:flutter/foundation.dart';
 import '../../../../../config_specific/import_export/import_export.dart';
 import '../../../../../primitives/auto_dispose.dart';
 import '../../../../../primitives/utils.dart';
+import '../../../primitives/class_name.dart';
 import '../../../primitives/memory_utils.dart';
+import '../../../shared/heap/class_filter.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
 import 'heap_diff.dart';
@@ -23,9 +25,9 @@ class DiffPaneController extends DisposableController {
 
   final SnapshotTaker snapshotTaker;
 
-  /// If true, some process is going on.
-  ValueListenable<bool> get isProcessing => _isProcessing;
-  final _isProcessing = ValueNotifier<bool>(false);
+  /// If true, a snapshot is being taken.
+  ValueListenable<bool> get isTakingSnapshot => _isTakingSnapshot;
+  final _isTakingSnapshot = ValueNotifier<bool>(false);
 
   final retainingPathController = RetainingPathController();
 
@@ -41,8 +43,7 @@ class DiffPaneController extends DisposableController {
   int _snapshotId = 0;
 
   Future<void> takeSnapshot() async {
-    _isProcessing.value = true;
-    final future = snapshotTaker.take();
+    _isTakingSnapshot.value = true;
     final snapshots = core._snapshots;
 
     final item = SnapshotInstanceItem(
@@ -52,11 +53,13 @@ class DiffPaneController extends DisposableController {
     );
 
     snapshots.add(item);
-    item.setHeapData(await future);
+
+    final heapData = await snapshotTaker.take();
+    item.initializeHeapData(heapData);
 
     final newElementIndex = snapshots.value.length - 1;
     core._selectedSnapshotIndex.value = newElementIndex;
-    _isProcessing.value = false;
+    _isTakingSnapshot.value = false;
     derived._updateValues();
   }
 
@@ -102,8 +105,10 @@ class DiffPaneController extends DisposableController {
     derived._updateValues();
   }
 
-  void setClassFilter(String value) {
-    // TODO(polina-c): add implementation
+  void applyFilter(ClassFilter filter) {
+    if (filter.equals(core._classFilter.value)) return;
+    core._classFilter.value = filter;
+    derived._updateValues();
   }
 
   void downloadCurrentItemToCsv() {
@@ -119,7 +124,7 @@ class DiffPaneController extends DisposableController {
     }
 
     ExportController().downloadFile(
-      classesToCsv(classes),
+      classesToCsv(classes.classStatsList),
       type: ExportFileType.csv,
       fileName: ExportController.generateFileName(
         type: ExportFileType.csv,
@@ -146,18 +151,15 @@ class CoreData {
   SnapshotItem get selectedItem =>
       _snapshots.value[_selectedSnapshotIndex.value];
 
-  // TODO(https://github.com/flutter/devtools/issues/4539): it is unclear
-  // whether preserving the selection between snapshots should be the
-  // default behavior. Revisit after consulting with UXR.
-
   /// Full name for the selected class (cross-snapshot).
   HeapClassName? className;
 
   /// Selected retaining path (cross-snapshot).
   ClassOnlyHeapPath? path;
 
-  ValueListenable<String?> get classFilter => _classFilter;
-  final _classFilter = ValueNotifier<String?>(null);
+  /// Current class filter.
+  ValueListenable<ClassFilter> get classFilter => _classFilter;
+  final _classFilter = ValueNotifier(ClassFilter.empty());
 }
 
 /// Values that can be calculated from [CoreData] and notifiers that take signal
@@ -195,6 +197,16 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   /// Selected diff class item in snapshot, to take signal from the table widget.
   final selectedDiffClassStats = ValueNotifier<DiffClassStats?>(null);
 
+  /// Classes to show for currently selected item, if the item is diffed.
+  ValueListenable<List<DiffClassStats>?> get diffClassesToShow =>
+      _diffClassesToShow;
+  final _diffClassesToShow = ValueNotifier<List<DiffClassStats>?>(null);
+
+  /// Classes to show for currently selected item, if the item is not diffed.
+  ValueListenable<List<SingleClassStats>?> get singleClassesToShow =>
+      _singleClassesToShow;
+  final _singleClassesToShow = ValueNotifier<List<SingleClassStats>?>(null);
+
   /// List of retaining paths to show for the selected class.
   final pathEntries = ValueNotifier<List<StatsByPathEntry>?>(null);
 
@@ -202,7 +214,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   final selectedPathEntry = ValueNotifier<StatsByPathEntry?>(null);
 
   /// Storage for already calculated diffs between snapshots.
-  final _diffStore = HeapDiffStore();
+  late final _diffStore = HeapDiffStore();
 
   /// Updates cross-snapshot class if the argument is not null.
   void _setClassIfNotNull(HeapClassName? theClass) {
@@ -220,15 +232,32 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
 
   void _assertIntegrity() {
     assert(() {
-      final singleClass = selectedSingleClassStats.value;
-      final diffClass = selectedDiffClassStats.value;
-      assert(singleClass == null || diffClass == null);
+      assert(!_updatingValues);
+
+      var singleHidden = true;
+      var diffHidden = true;
+      var details = 'no data';
+      final item = selectedItem.value;
+      if (item is SnapshotInstanceItem && item.hasData) {
+        diffHidden = item.diffWith.value == null;
+        singleHidden = !diffHidden;
+        details = diffHidden ? 'single' : 'diff';
+      }
+
+      assert(singleHidden || diffHidden);
+
+      if (singleHidden) assert(selectedSingleClassStats.value == null, details);
+      if (diffHidden) assert(selectedDiffClassStats.value == null, details);
+
+      assert((singleClassesToShow.value == null) == singleHidden, details);
+      assert((diffClassesToShow.value == null) == diffHidden, details);
+
       return true;
     }());
   }
 
-  /// List of classes to show for the selected snapshot.
-  HeapClasses? _snapshotClasses() {
+  /// Classes for the selected snapshot with diffing applied.
+  HeapClasses? _snapshotClassesAfterDiffing() {
     final theItem = _core.selectedItem;
     if (theItem is! SnapshotInstanceItem) return null;
     final heap = theItem.heap;
@@ -238,36 +267,54 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     return _diffStore.compare(heap, itemToDiffWith.heap!);
   }
 
-  static void _updateClassStats({
+  void _updateClasses({
     required HeapClasses? classes,
     required HeapClassName? className,
-    required ValueNotifier<SingleClassStats?> singleToUpdate,
-    required ValueNotifier<DiffClassStats?> diffToUpdate,
   }) {
+    final filter = _core.classFilter.value;
     if (classes is SingleHeapClasses) {
-      singleToUpdate.value = classes.classesByName[className];
-      diffToUpdate.value = null;
+      _singleClassesToShow.value = classes.filtered(filter);
+      _diffClassesToShow.value = null;
+      selectedSingleClassStats.value =
+          _filter(classes.classesByName[className]);
+      selectedDiffClassStats.value = null;
     } else if (classes is DiffHeapClasses) {
-      singleToUpdate.value = null;
-      diffToUpdate.value = classes.classesByName[className];
+      _singleClassesToShow.value = null;
+      _diffClassesToShow.value = classes.filtered(filter);
+      selectedSingleClassStats.value = null;
+      selectedDiffClassStats.value = _filter(classes.classesByName[className]);
     } else if (classes == null) {
-      singleToUpdate.value = null;
-      diffToUpdate.value = null;
+      _singleClassesToShow.value = null;
+      _diffClassesToShow.value = null;
+      selectedSingleClassStats.value = null;
+      selectedDiffClassStats.value = null;
     } else {
       throw StateError('Unexpected type: ${classes.runtimeType}.');
     }
   }
 
+  /// Returns [classStats] if it matches the current filter.
+  T? _filter<T extends ClassStats>(T? classStats) {
+    if (classStats == null) return null;
+    if (_core.classFilter.value.apply(classStats.heapClass)) return classStats;
+    return null;
+  }
+
+  bool get updatingValues => _updatingValues;
+  bool _updatingValues = false;
+
   /// Updates fields in this instance based on the values in [core].
   void _updateValues() {
-    // Set classes to show.
-    final classes = _snapshotClasses();
+    // Make sure the method does not trigger itself recursively.
+    assert(!_updatingValues);
+    _updatingValues = true;
+
+    // Set class to show.
+    final classes = _snapshotClassesAfterDiffing();
     heapClasses.value = classes;
-    _updateClassStats(
+    _updateClasses(
       classes: classes,
       className: _core.className,
-      singleToUpdate: selectedSingleClassStats,
-      diffToUpdate: selectedDiffClassStats,
     );
 
     // Set paths to show.
@@ -288,6 +335,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     // Set current snapshot.
     _selectedItem.value = _core.selectedItem;
 
+    _updatingValues = false;
     _assertIntegrity();
   }
 }

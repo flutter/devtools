@@ -93,7 +93,7 @@ class LoggingDetailsController {
       tree = createLoggingTree(
         onSelectionChange: () {
           final InspectorTreeNode node = tree!.selection!;
-          tree!.maybePopulateChildren(node);
+          unawaited(tree!.maybePopulateChildren(node));
 
           // TODO(jacobr): node.diagnostic.isDiagnosticableValue isn't quite
           // right.
@@ -102,7 +102,7 @@ class LoggingDetailsController {
             // TODO(jacobr): warn if the selection can't be set as the node is
             // stale which is likely if this is an old log entry.
             onShowInspector();
-            diagnosticLocal.setSelectionInspector(false);
+            unawaited(diagnosticLocal.setSelectionInspector(false));
           }
         },
       );
@@ -125,13 +125,15 @@ class LoggingDetailsController {
     if (data.needsComputing) {
       onShowDetails(text: '');
 
-      data.compute().then((_) {
-        // If we're still displaying the same log entry, then update the UI with
-        // the calculated value.
-        if (this.data == data) {
-          _updateUIFromData();
-        }
-      });
+      unawaited(
+        data.compute().then((_) {
+          // If we're still displaying the same log entry, then update the UI with
+          // the calculated value.
+          if (this.data == data) {
+            _updateUIFromData();
+          }
+        }),
+      );
     } else {
       _updateUIFromData();
     }

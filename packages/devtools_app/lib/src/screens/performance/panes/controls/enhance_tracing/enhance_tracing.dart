@@ -148,21 +148,24 @@ class _TrackWidgetBuildsSettingState extends State<TrackWidgetBuildsSetting>
     // respond to their state changes.
     for (final type in TrackWidgetBuildsScope.values) {
       final extension = _trackWidgetBuildsExtensions[type]!;
-      serviceManager.serviceExtensionManager
-          .waitForServiceExtensionAvailable(extension.extension)
-          .then((isServiceAvailable) {
-        if (isServiceAvailable) {
-          _trackingAvailable.value = true;
 
-          final state = serviceManager.serviceExtensionManager
-              .getServiceExtensionState(extension.extension);
+      unawaited(
+        serviceManager.serviceExtensionManager
+            .waitForServiceExtensionAvailable(extension.extension)
+            .then((isServiceAvailable) {
+          if (isServiceAvailable) {
+            _trackingAvailable.value = true;
 
-          _updateForServiceExtensionState(state.value, type);
-          addAutoDisposeListener(state, () {
+            final state = serviceManager.serviceExtensionManager
+                .getServiceExtensionState(extension.extension);
+
             _updateForServiceExtensionState(state.value, type);
-          });
-        }
-      });
+            addAutoDisposeListener(state, () {
+              _updateForServiceExtensionState(state.value, type);
+            });
+          }
+        }),
+      );
     }
   }
 

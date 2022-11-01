@@ -613,7 +613,7 @@ class _HeapTreeViewState extends State<HeapTreeView>
               controller.selectedLeaf = null;
               controller.groupingBy.value = newValue!;
               if (controller.snapshots.isNotEmpty) {
-                doGroupBy();
+                unawaited(doGroupBy());
               }
             },
           );
@@ -955,10 +955,12 @@ class _HeapTreeViewState extends State<HeapTreeView>
     //              dialog same as cancel.
     // Dialog isn't dismissed by clicking outside the dialog (modal).
     // Pressing either the Apply or Cancel button will dismiss.
-    showDialog(
-      context: context,
-      builder: (BuildContext context) => SnapshotFilterDialog(controller),
-      barrierDismissible: false,
+    unawaited(
+      showDialog(
+        context: context,
+        builder: (BuildContext context) => SnapshotFilterDialog(controller),
+        barrierDismissible: false,
+      ),
     );
   }
 

@@ -77,7 +77,7 @@ class _InitializerState extends State<Initializer>
           !connectionState.userInitiatedConnectionState) {
         // Try to reconnect (otherwise, will fall back to showing the
         // disconnected overlay).
-        _attemptUrlConnection();
+        unawaited(_attemptUrlConnection());
       }
     });
 
@@ -88,7 +88,7 @@ class _InitializerState extends State<Initializer>
       serviceManager.onConnectionAvailable.listen((_) => setState(() {})),
     );
 
-    _attemptUrlConnection();
+    unawaited(_attemptUrlConnection());
   }
 
   @override
@@ -97,7 +97,7 @@ class _InitializerState extends State<Initializer>
 
     // Handle widget rebuild when the URL has changed.
     if (widget.url != null && widget.url != oldWidget.url) {
-      _attemptUrlConnection();
+      unawaited(_attemptUrlConnection());
     }
   }
 

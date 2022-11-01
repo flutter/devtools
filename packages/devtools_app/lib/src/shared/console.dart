@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -208,7 +210,7 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
       _scrollToBottom = false;
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
         if (_scroll.hasClients) {
-          _scroll.autoScrollToBottom();
+          unawaited(_scroll.autoScrollToBottom());
         } else {
           // Set back to true to retry scrolling when we are back in view.
           // We expected to be in view after the frame but it turns out we were

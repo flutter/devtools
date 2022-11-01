@@ -6,7 +6,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../../../shared/table/table_data.dart';
 import '../../../vm_developer/vm_service_private_extensions.dart';
-import '../../shared/heap/model.dart';
+import '../../primitives/class_name.dart';
 
 class AdaptedAllocationProfile {
   AdaptedAllocationProfile.fromAllocationProfile(AllocationProfile profile) {
@@ -54,7 +54,7 @@ class AllocationProfileRecord with PinnableListEntry {
 
   AllocationProfileRecord.total(AllocationProfile profile)
       : isTotal = true,
-        heapClass = const HeapClassName(className: 'All Classes', library: ''),
+        heapClass = HeapClassName(className: 'All Classes', library: ''),
         totalInstances = null,
         totalSize = (profile.memoryUsage?.externalUsage ?? 0) +
             (profile.memoryUsage?.heapUsage ?? 0),

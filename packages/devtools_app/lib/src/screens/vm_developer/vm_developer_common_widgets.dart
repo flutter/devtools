@@ -778,13 +778,13 @@ class VmObjectDisplayBasicLayout extends StatelessWidget {
 
   void _onExpandRetainingPath(bool expanded) {
     if (object.retainingPath.value == null) {
-      object.requestRetainingPath();
+      unawaited(object.requestRetainingPath());
     }
   }
 
   void _onExpandInboundRefs(bool expanded) {
     if (object.inboundReferences.value == null) {
-      object.requestInboundsRefs();
+      unawaited(object.requestInboundsRefs());
     }
   }
 }

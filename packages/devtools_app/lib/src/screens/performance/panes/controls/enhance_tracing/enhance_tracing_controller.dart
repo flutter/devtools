@@ -64,7 +64,7 @@ class EnhanceTracingController extends DisposableController
 
   @override
   void dispose() {
-    showMenuStreamController.close();
+    unawaited(showMenuStreamController.close());
     super.dispose();
   }
 }

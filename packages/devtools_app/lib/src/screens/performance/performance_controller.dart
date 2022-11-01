@@ -63,7 +63,9 @@ class PerformanceController extends DisposableController
   PerformanceController() {
     legacyProcessor = TimelineEventProcessor(this);
     perfettoProcessor = PerfettoEventProcessor(this);
-    _init();
+    // See https://github.com/dart-lang/linter/issues/3801
+    // ignore: discarded_futures
+    unawaited(_init());
   }
 
   final cpuProfilerController =
@@ -317,7 +319,9 @@ class PerformanceController extends DisposableController
         if (event.extensionKind == 'Flutter.Frame' &&
             _firstLiveFrameId == null) {
           _firstLiveFrameId = FlutterFrame.parse(event.extensionData!.data).id;
-          _firstFrameEventSubscription!.cancel();
+          // See https://github.com/dart-lang/linter/issues/3801
+          // ignore: discarded_futures
+          unawaited(_firstFrameEventSubscription!.cancel());
           _firstFrameEventSubscription = null;
         }
       },
@@ -1003,6 +1007,8 @@ class PerformanceController extends DisposableController
 
   void toggleUseLegacyTraceViewer(bool? value) {
     useLegacyTraceViewer.value = value ?? false;
+    // `unawaited` does not work for FutureOr
+    // ignore: discarded_futures
     processAvailableEvents();
   }
 
@@ -1047,7 +1053,9 @@ class PerformanceController extends DisposableController
       perfettoController.dispose();
     }
     enhanceTracingController.dispose();
-    _firstFrameEventSubscription?.cancel();
+    // See https://github.com/dart-lang/linter/issues/3801
+    // ignore: discarded_futures
+    unawaited(_firstFrameEventSubscription?.cancel());
     super.dispose();
   }
 }

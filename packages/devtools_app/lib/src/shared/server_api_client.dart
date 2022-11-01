@@ -163,10 +163,10 @@ class DevToolsServerConnection {
         frameworkController.notifyShowPageId(pageId);
         return;
       case 'enableNotifications':
-        Notification.requestPermission();
+        unawaited(Notification.requestPermission());
         return;
       case 'notify':
-        notify();
+        unawaited(notify());
         return;
       case 'ping':
         ping();
@@ -182,21 +182,23 @@ class DevToolsServerConnection {
   }
 
   void _notifyConnected(Uri vmServiceUri) {
-    _callMethod('connected', {'uri': vmServiceUri.toString()});
+    unawaited(_callMethod('connected', {'uri': vmServiceUri.toString()}));
   }
 
   void _notifyCurrentPage(PageChangeEvent page) {
-    _callMethod(
-      'currentPage',
-      {
-        'id': page.id,
-        'embedded': page.embedded,
-      },
+    unawaited(
+      _callMethod(
+        'currentPage',
+        {
+          'id': page.id,
+          'embedded': page.embedded,
+        },
+      ),
     );
   }
 
   void _notifyDisconnected() {
-    _callMethod('disconnected');
+    unawaited(_callMethod('disconnected'));
   }
 
   /// Retrieves a preference value from the DevTools configuration file at
@@ -219,6 +221,6 @@ class DevToolsServerConnection {
   /// Allows the server to ping the client to see that it is definitely still
   /// active and doesn't just appear to be connected because of SSE timeouts.
   void ping() {
-    _callMethod('pingResponse');
+    unawaited(_callMethod('pingResponse'));
   }
 }

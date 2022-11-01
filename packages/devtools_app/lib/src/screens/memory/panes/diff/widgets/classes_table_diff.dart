@@ -9,7 +9,7 @@ import '../../../../../primitives/utils.dart';
 import '../../../../../shared/table/table.dart';
 import '../../../../../shared/table/table_data.dart';
 import '../../../../../shared/utils.dart';
-import '../../../shared/heap/primitives.dart';
+import '../../../primitives/simple_elements.dart';
 import '../../../shared/shared_memory_widgets.dart';
 import '../controller/heap_diff.dart';
 
@@ -69,7 +69,7 @@ class _InstanceColumn extends ColumnData<DiffClassStats> {
       case _DataPart.created:
         return 'New';
       case _DataPart.deleted:
-        return 'Deleted';
+        return 'Released';
       case _DataPart.delta:
         return 'Delta';
     }
@@ -155,7 +155,7 @@ class ClassesTableDiff extends StatelessWidget {
     required this.selection,
   }) : super(key: key);
 
-  final DiffHeapClasses classes;
+  final List<DiffClassStats> classes;
   final ValueNotifier<DiffClassStats?> selection;
 
   static final _columnGroups = [
@@ -199,11 +199,15 @@ class ClassesTableDiff extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // We want to preserve the sorting and sort directions for ClassesTableDiff
+    // no matter what the data passed to it is.
+    const dataKey = 'ClassesTableDiff';
+
     return FlatTable<DiffClassStats>(
       columns: _columns,
       columnGroups: _columnGroups,
-      data: classes.classes,
-      dataKey: 'ClassesTableDiff',
+      data: classes,
+      dataKey: dataKey,
       keyFactory: (e) => Key(e.heapClass.fullName),
       selectionNotifier: selection,
       defaultSortColumn: _retainedSizeDeltaColumn,

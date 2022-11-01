@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -14,6 +15,7 @@ import 'src/config_specific/url_strategy/url_strategy.dart';
 import 'src/extension_points/extensions_base.dart';
 import 'src/extension_points/extensions_external.dart';
 import 'src/framework/app_error_handling.dart';
+import 'src/primitives/feature_flags.dart';
 import 'src/primitives/url_utils.dart';
 import 'src/screens/debugger/syntax_highlighter.dart';
 import 'src/screens/provider/riverpod_error_logger_observer.dart';
@@ -36,6 +38,9 @@ void main() async {
 
   setGlobal(IdeTheme, getIdeTheme());
 
+  // Set the extension points global.
+  setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+
   final preferences = PreferencesController();
   // Wait for preferences to load before rendering the app to avoid a flash of
   // content with the incorrect theme.
@@ -45,6 +50,8 @@ void main() async {
   await SyntaxHighlighter.initialize();
 
   setupErrorHandling(() async {
+    if (!kReleaseMode) enableExperiments = true;
+
     // Run the app.
     runApp(
       ProviderScope(

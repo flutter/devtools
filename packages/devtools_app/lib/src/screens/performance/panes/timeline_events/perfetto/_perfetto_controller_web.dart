@@ -8,7 +8,6 @@ import 'dart:html' as html;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import '../../../../../app.dart';
 import '../../../../../primitives/auto_dispose.dart';
 import '../../../../../primitives/trace_event.dart';
 import '../../../../../primitives/utils.dart';
@@ -106,7 +105,7 @@ class PerfettoController extends DisposableController
     html.window.addEventListener('message', _handleMessage);
 
     if (isExternalBuild) {
-      _loadInitialStyle();
+      unawaited(_loadInitialStyle());
       addAutoDisposeListener(preferences.darkModeTheme, () async {
         _loadStyle(preferences.darkModeTheme.value);
       });

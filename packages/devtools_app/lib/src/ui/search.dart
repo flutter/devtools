@@ -197,7 +197,7 @@ mixin SearchControllerMixin<T extends DataSearchStateMixin> {
   }
 
   void disposeSearch() {
-    _searchOperation?.cancel();
+    unawaited(_searchOperation?.cancel());
     if (_searchDebounce?.isActive ?? false) {
       _searchDebounce!.cancel();
     }

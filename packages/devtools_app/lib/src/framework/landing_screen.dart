@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -158,7 +160,8 @@ class _ConnectDialogState extends State<ConnectDialog>
             SizedBox(
               width: scaleByFontFactor(350.0),
               child: TextField(
-                onSubmitted: actionInProgress ? null : (str) => _connect(),
+                onSubmitted:
+                    actionInProgress ? null : (str) => unawaited(_connect()),
                 autofocus: true,
                 decoration: const InputDecoration(
                   isDense: true,
@@ -265,7 +268,7 @@ class ImportFileInstructions extends StatelessWidget {
           ),
           const SizedBox(height: defaultSpacing),
           ElevatedButton(
-            onPressed: () => _importFile(context),
+            onPressed: () => unawaited(_importFile(context)),
             child: const MaterialIconLabel(
               label: 'Import File',
               iconData: Icons.file_upload,

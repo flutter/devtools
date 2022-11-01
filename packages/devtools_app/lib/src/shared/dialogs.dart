@@ -35,9 +35,9 @@ class StateUpdateDialog extends StatelessWidget {
     super.key,
     required this.title,
     required this.child,
-    this.helpText,
-    this.onResetDefaults,
-    this.onApply,
+    required this.helpText,
+    required this.onResetDefaults,
+    required this.onApply,
     this.onCancel,
     this.dialogWidth,
   });
@@ -168,13 +168,19 @@ class DevToolsDialog extends StatelessWidget {
 
 /// A TextButton used to close a containing dialog (Close).
 class DialogCloseButton extends StatelessWidget {
+  const DialogCloseButton({super.key, this.onClose, this.label = 'CLOSE'});
+
+  final VoidCallback? onClose;
+  final String label;
+
   @override
   Widget build(BuildContext context) {
     return DialogTextButton(
       onPressed: () {
+        onClose?.call();
         Navigator.of(context, rootNavigator: true).pop('dialog');
       },
-      child: const Text('CLOSE'),
+      child: Text(label),
     );
   }
 }

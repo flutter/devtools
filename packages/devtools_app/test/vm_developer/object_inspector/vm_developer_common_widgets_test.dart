@@ -38,6 +38,8 @@ void main() {
     when(mockClassObject.reachableSize).thenReturn(null);
     when(mockClassObject.retainedSize).thenReturn(null);
 
+    // Intentionally unawaited.
+    // ignore: discarded_futures
     when(mockClassObject.requestReachableSize()).thenAnswer((_) async {
       fetchingSizeNotifier.value = true;
 
@@ -54,12 +56,16 @@ void main() {
 
     when(mockClassObject.retainingPath).thenReturn(retainingPathNotifier);
 
+    // Intentionally unawaited.
+    // ignore: discarded_futures
     when(mockClassObject.requestRetainingPath()).thenAnswer((_) async {
       retainingPathNotifier.value = testRetainingPath;
     });
 
     when(mockClassObject.inboundReferences).thenReturn(inboundRefsNotifier);
 
+    // Intentionally unawaited.
+    // ignore: discarded_futures
     when(mockClassObject.requestInboundsRefs()).thenAnswer((_) async {
       inboundRefsNotifier.value = testInboundRefs;
     });

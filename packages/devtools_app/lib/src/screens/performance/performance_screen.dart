@@ -127,7 +127,7 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
         });
       final offlinePerformanceData = OfflinePerformanceData.parse(timelineJson);
       if (!offlinePerformanceData.isEmpty) {
-        loadOfflineData(offlinePerformanceData);
+        unawaited(loadOfflineData(offlinePerformanceData));
       }
     }
   }
@@ -318,9 +318,11 @@ class SecondaryPerformanceControls extends StatelessWidget {
   }
 
   void _openSettingsDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => PerformanceSettingsDialog(controller),
+    unawaited(
+      showDialog(
+        context: context,
+        builder: (context) => PerformanceSettingsDialog(controller),
+      ),
     );
   }
 }
