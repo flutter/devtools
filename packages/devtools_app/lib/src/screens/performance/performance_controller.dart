@@ -449,7 +449,10 @@ class PerformanceController extends DisposableController
     });
   }
 
-  Future<void> _legacyToggleFrame(FlutterFrame frame, PerformanceData data) async {
+  Future<void> _legacyToggleFrame(
+    FlutterFrame frame,
+    PerformanceData data,
+  ) async {
     if (!offlineController.offlineMode.value) {
       final bool frameBeforeFirstWellFormedFrame =
           firstWellFormedFrameMicros != null &&
