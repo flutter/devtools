@@ -103,7 +103,9 @@ void main() {
                 isAlive: isAlive,
               )
               .then<FutureFailedException>(
-                (_) => throw FallThroughError(),
+                (_) => throw Exception(
+                  'The FutureFailedException was not thrown as expected.',
+                ),
                 onError: (err) => err,
               );
 

@@ -8,9 +8,9 @@ import 'dart:html' as html;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import '../../../../../app.dart';
 import '../../../../../primitives/auto_dispose.dart';
 import '../../../../../primitives/trace_event.dart';
+import '../../../../../primitives/utils.dart';
 import '../../../../../shared/globals.dart';
 
 /// Flag to enable embedding an instance of the Perfetto UI running on
@@ -36,18 +36,34 @@ class PerfettoController extends DisposableController
 
   static const _perfettoPong = 'PONG';
 
+  /// Id for a [postMessage] request that is sent before trying to change the
+  /// DevTools theme (see [_devtoolsThemeChange]).
+  ///
+  /// Once the DevTools theme handler in the bundled Perfetto web app has been
+  /// registered, a "pong" event [_devtoolsThemePong] will be returned, at which
+  /// point we can safely change the theme [_devtoolsThemeChange].
+  ///
+  /// This message must be sent with the argument 'perfettoIgnore' set to true
+  /// so that the message handler in the Perfetto codebase
+  /// [post_message_handler.ts] will not try to handle this message and warn
+  /// "Unknown postMessage() event received".
   static const _devtoolsThemePing = 'DART-DEVTOOLS-THEME-PING';
 
+  /// Id for a [postMessage] response that should be received when the DevTools
+  /// theme handler has been registered.
+  ///
+  /// We will send a "ping" event [_devtoolsThemePing] to the DevTools theme
+  /// handler in the bundled Perfetto web app, and the handler will return this
+  /// "pong" event when it is ready. We must wait for this event to be returned
+  /// before we can send a theme change request [_devtoolsThemeChange].
   static const _devtoolsThemePong = 'DART-DEVTOOLS-THEME-PONG';
 
   /// Id for a [postMessage] request that is sent on DevTools theme changes.
   ///
-  /// This id is marked in the Perfetto UI codebase [post_message_handler.ts] as
-  /// trusted. This ensures that the embedded Perfetto web app does not try to
-  /// handle this message and warn "Unknown postMessage() event received".
-  ///
-  /// Any changes to this string must also be applied in
-  /// [post_message_handler.ts] in the Perfetto codebase.
+  /// This message must be sent with the argument 'perfettoIgnore' set to true
+  /// so that the message handler in the Perfetto codebase
+  /// [post_message_handler.ts] will not try to handle this message and warn
+  /// "Unknown postMessage() event received".
   static const _devtoolsThemeChange = 'DART-DEVTOOLS-THEME-CHANGE';
 
   String get _perfettoUrl {
@@ -115,6 +131,27 @@ class PerfettoController extends DisposableController
     });
   }
 
+  Future<void> scrollToTimeRange(TimeRange timeRange) async {
+    if (!timeRange.isWellFormed) {
+      notificationService.push(
+        'No timeline events available for the selected frame. Timeline '
+        'events occurred too long ago before DevTools could access them. '
+        'To avoid this, open the DevTools Performance page sooner.',
+      );
+      return;
+    }
+    await _pingPerfettoUntilReady();
+    _postMessage({
+      'perfetto': {
+        // Pass the values to Perfetto in seconds.
+        'timeStart': timeRange.start!.inMicroseconds / 1000000,
+        'timeEnd': timeRange.end!.inMicroseconds / 1000000,
+        // The time range should take up 80% of the visible window.
+        'viewPercentage': 0.8,
+      }
+    });
+  }
+
   Future<void> _loadInitialStyle() async {
     if (!isExternalBuild) return;
     await _pingDevToolsThemeHandlerUntilReady();
@@ -127,6 +164,7 @@ class PerfettoController extends DisposableController
     // included in the Perfetto build inside [packages/perfetto_compiled/dist].
     _postMessageWithId(
       _devtoolsThemeChange,
+      perfettoIgnore: true,
       args: {
         'theme': '${darkMode ? 'dark' : 'light'}',
       },
@@ -141,9 +179,14 @@ class PerfettoController extends DisposableController
     );
   }
 
-  void _postMessageWithId(String id, {Map<String, dynamic> args = const {}}) {
+  void _postMessageWithId(
+    String id, {
+    Map<String, dynamic> args = const {},
+    bool perfettoIgnore = false,
+  }) {
     final message = <String, dynamic>{
       'msgId': id,
+      if (perfettoIgnore) 'perfettoIgnore': true,
     }..addAll(args);
     _postMessage(message);
   }
@@ -189,7 +232,7 @@ class PerfettoController extends DisposableController
         // Once [devtools_theme_handler.js] is ready, it will receive this
         // 'PING-DEVTOOLS-THEME' message and return a 'PONG-DEVTOOLS-THEME'
         // message, handled in [_handleMessage].
-        _postMessageWithId(_devtoolsThemePing);
+        _postMessageWithId(_devtoolsThemePing, perfettoIgnore: true);
       });
     }
   }

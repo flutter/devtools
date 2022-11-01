@@ -43,12 +43,15 @@ class AdaptedHeapData {
     );
   }
 
-  factory AdaptedHeapData.fromHeapSnapshot(HeapSnapshotGraph graph) =>
-      AdaptedHeapData(
-        graph.objects
-            .map((e) => AdaptedHeapObject.fromHeapSnapshotObject(e))
-            .toList(),
-      );
+  static AdaptedHeapData fromHeapSnapshot(
+    HeapSnapshotGraph graph,
+  ) {
+    final objects = graph.objects.map((e) {
+      return AdaptedHeapObject.fromHeapSnapshotObject(e);
+    }).toList();
+
+    return AdaptedHeapData(objects);
+  }
 
   /// Default value for rootIndex is taken from the doc:
   /// https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/heap_snapshot.md#object-ids
