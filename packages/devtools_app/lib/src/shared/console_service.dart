@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -106,7 +108,7 @@ class ConsoleService extends Disposer {
     if (_objectGroup?.inspectorService == inspectorService) {
       return _objectGroup!;
     }
-    _objectGroup?.dispose();
+    unawaited(_objectGroup?.dispose());
     _objectGroup = inspectorService.createObjectGroup('console');
     return _objectGroup!;
   }
@@ -268,6 +270,9 @@ class ConsoleService extends Disposer {
       final inspector = objectGroup;
       if (event.isolate == inspector.inspectorService.isolateRef) {
         try {
+          /// TODO: This seems to be the first evaluation call from the inspector.
+          /// is it possible to not wait for it to show the inspector?
+          print('DEVTOOLS: isInspectable: ${event.inspectee}');
           if (await inspector.isInspectable(
             GenericInstanceRef(
               isolateRef: event.isolate,

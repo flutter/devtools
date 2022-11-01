@@ -207,11 +207,13 @@ class DiagnosticsNodeDescription extends StatelessWidget {
 
         if (isHoverStale()) return Future.value();
         await buildVariablesTree(variable);
+        var tasks = <Future<void>>[];
         for (var child in variable.children) {
-          if (isHoverStale()) return Future.value();
-          await buildVariablesTree(child);
+          tasks.add(() async {
+            if (!isHoverStale()) await buildVariablesTree(child);
+          }());
         }
-
+        await Future.wait(tasks);
         variable.expand();
 
         return HoverCardData(
