@@ -29,6 +29,7 @@ import '../profiler/cpu_profile_service.dart';
 import '../profiler/cpu_profile_transformer.dart';
 import '../profiler/profile_granularity.dart';
 import 'panes/controls/enhance_tracing/enhance_tracing_controller.dart';
+import 'panes/flutter_frames/flutter_frame_model.dart';
 import 'panes/raster_stats/raster_stats_controller.dart';
 import 'panes/timeline_events/perfetto/perfetto.dart';
 import 'performance_model.dart';
