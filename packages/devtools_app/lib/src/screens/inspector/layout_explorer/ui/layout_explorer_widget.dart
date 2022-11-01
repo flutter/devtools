@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -265,7 +267,7 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
         'flex-layout',
       );
     }
-    onSelectionChanged();
+    unawaited(onSelectionChanged());
   }
 
   bool _dirty = false;

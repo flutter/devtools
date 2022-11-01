@@ -20,34 +20,43 @@ class SnapshotView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<HeapClasses?>(
-      valueListenable: controller.derived.heapClasses,
-      builder: (_, classes, __) {
+    return DualValueListenableBuilder<List<SingleClassStats>?,
+        List<DiffClassStats>?>(
+      firstListenable: controller.derived.singleClassesToShow,
+      secondListenable: controller.derived.diffClassesToShow,
+      builder: (_, singleClasses, diffClasses, __) {
+        if (controller.derived.updatingValues) {
+          return const Center(child: Text('Calculating...'));
+        }
+
+        final classes = controller.derived.heapClasses.value;
         if (classes == null) {
-          if (controller.isProcessing.value) {
+          if (controller.isTakingSnapshot.value) {
             return const SizedBox.shrink();
           } else {
             return const Center(child: Text('Could not take snapshot.'));
           }
         }
 
-        late Widget table1;
+        assert((singleClasses == null) != (diffClasses == null));
 
-        if (classes is SingleHeapClasses) {
-          table1 = ClassesTableSingle(
-            classes: classes,
+        late Widget classTable;
+
+        if (singleClasses != null) {
+          classTable = ClassesTableSingle(
+            classes: singleClasses,
             selection: controller.derived.selectedSingleClassStats,
           );
-        } else if (classes is DiffHeapClasses) {
-          table1 = ClassesTableDiff(
-            classes: classes,
+        } else if (diffClasses != null) {
+          classTable = ClassesTableDiff(
+            classes: controller.derived.diffClassesToShow.value!,
             selection: controller.derived.selectedDiffClassStats,
           );
         } else {
-          throw StateError('Unexpected type: ${classes.runtimeType}.');
+          throw StateError('singleClasses or diffClasses should not be null.');
         }
 
-        final table2 = ValueListenableBuilder<List<StatsByPathEntry>?>(
+        final pathTable = ValueListenableBuilder<List<StatsByPathEntry>?>(
           valueListenable: controller.derived.pathEntries,
           builder: (_, entries, __) => HeapClassDetails(
             entries: entries,
@@ -63,8 +72,8 @@ class SnapshotView extends StatelessWidget {
           initialFractions: const [0.4, 0.6],
           minSizes: const [80, 80],
           children: [
-            OutlineDecoration(child: table1),
-            OutlineDecoration(child: table2),
+            OutlineDecoration(child: classTable),
+            OutlineDecoration(child: pathTable),
           ],
         );
       },

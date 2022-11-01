@@ -17,12 +17,12 @@ TOOL_DIR=`dirname "${RELATIVE_PATH_TO_SCRIPT}"`
 
 pushd "$TOOL_DIR"
 dart pub get
-REQUIRED_FLUTTER_VERSION=`dart bin/repo_tool.dart latest-flutter-candidate | tail -n 1`
+REQUIRED_FLUTTER_BRANCH=`dart bin/repo_tool.dart latest-flutter-candidate | tail -n 1`
 
-echo "REQUIRED_FLUTTER_VERSION: $REQUIRED_FLUTTER_VERSION"
+echo "REQUIRED_FLUTTER_BRANCH: $REQUIRED_FLUTTER_BRANCH"
 
 if [[ $UPDATE_LOCALLY = "--local" ]]; then
-  echo "STATUS: Updating local Flutter checkout to version '$REQUIRED_FLUTTER_VERSION'."
+  echo "STATUS: Updating local Flutter checkout to branch '$REQUIRED_FLUTTER_BRANCH'."
 
   FLUTTER_EXE=`which flutter`
   FLUTTER_BIN=`dirname "${FLUTTER_EXE}"`
@@ -31,7 +31,7 @@ if [[ $UPDATE_LOCALLY = "--local" ]]; then
   pushd $FLUTTER_DIR
   git pull upstream master
   git fetch upstream
-  git checkout $REQUIRED_FLUTTER_VERSION
+  git checkout $REQUIRED_FLUTTER_BRANCH
   flutter --version
   popd
 
@@ -41,7 +41,7 @@ fi
 FLUTTER_DIR="flutter-sdk"
 PATH="$FLUTTER_DIR/bin":$PATH
 
-echo "STATUS: Updating 'tool/flutter-sdk' to version '$REQUIRED_FLUTTER_VERSION'."
+echo "STATUS: Updating 'tool/flutter-sdk' to branch '$REQUIRED_FLUTTER_BRANCH'."
 
 if [ -d "$FLUTTER_DIR" ]; then
   echo "STATUS: 'tool/flutter-sdk' directory already exists"
@@ -49,7 +49,7 @@ if [ -d "$FLUTTER_DIR" ]; then
   # switch to the specified version
   pushd $FLUTTER_DIR
   git fetch
-  git checkout $REQUIRED_FLUTTER_VERSION
+  git checkout $REQUIRED_FLUTTER_BRANCH
   ./bin/flutter --version
   popd
 else
@@ -58,7 +58,7 @@ else
   # clone the flutter repo and switch to the specified version
   git clone https://github.com/flutter/flutter flutter-sdk
   pushd flutter-sdk
-  git checkout $REQUIRED_FLUTTER_VERSION
+  git checkout $REQUIRED_FLUTTER_BRANCH
   ./bin/flutter --version
   popd
 fi

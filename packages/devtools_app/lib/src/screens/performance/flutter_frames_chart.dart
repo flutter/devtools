@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -99,7 +100,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
     super.didUpdateWidget(oldWidget);
     if (_framesScrollController.hasClients &&
         _framesScrollController.atScrollBottom) {
-      _framesScrollController.autoScrollToBottom();
+      unawaited(_framesScrollController.autoScrollToBottom());
     }
 
     if (!collectionEquals(oldWidget.frames, widget.frames)) {
@@ -471,7 +472,7 @@ class FlutterFramesChartItem extends StatelessWidget {
         ),
       );
     }
-    controller.toggleSelectedFrame(frame);
+    unawaited(controller.toggleSelectedFrame(frame));
   }
 }
 

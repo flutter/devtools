@@ -42,7 +42,7 @@ class DevToolsAboutDialog extends StatelessWidget {
           )
         ],
       ),
-      actions: [
+      actions: const [
         DialogCloseButton(),
       ],
     );

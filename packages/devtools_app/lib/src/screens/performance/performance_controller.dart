@@ -8,7 +8,6 @@ import 'dart:math' as math;
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/foundation.dart';
 import 'package:pedantic/pedantic.dart';
-import 'package:vm_service/vm_service.dart' show Event;
 
 import '../../analytics/analytics.dart' as ga;
 import '../../analytics/constants.dart' as analytics_constants;
@@ -25,6 +24,7 @@ import '../../service/service_manager.dart';
 import '../../shared/globals.dart';
 import '../../ui/search.dart';
 import '../profiler/cpu_profile_controller.dart';
+import '../profiler/cpu_profile_model.dart';
 import '../profiler/cpu_profile_service.dart';
 import '../profiler/cpu_profile_transformer.dart';
 import '../profiler/profile_granularity.dart';
@@ -60,7 +60,9 @@ class PerformanceController extends DisposableController
     with SearchControllerMixin<TimelineEvent>, AutoDisposeControllerMixin {
   PerformanceController() {
     processor = TimelineEventProcessor(this);
-    _init();
+    // See https://github.com/dart-lang/linter/issues/3801
+    // ignore: discarded_futures
+    unawaited(_init());
   }
 
   final cpuProfilerController =
@@ -221,22 +223,13 @@ class PerformanceController extends DisposableController
 
       enhanceTracingController.init();
 
-      // Listen for the first 'Flutter.Frame' event we receive from this point
-      // on so that we know the start id for frames that we can assign the
-      // current [FlutterFrame.enhanceTracingState].
-      _listenForFirstLiveFrame();
-
       // Listen for Flutter.Frame events with frame timing data.
       // Listen for Flutter.RebuiltWidgets events.
       autoDisposeStreamSubscription(
         serviceManager.service!.onExtensionEventWithHistory.listen((event) {
           if (event.extensionKind == 'Flutter.Frame') {
             final frame = FlutterFrame.parse(event.extensionData!.data);
-            // We can only assign [FlutterFrame.enhanceTracingState] for frames
-            // with ids after [_firstLiveFrameId].
-            if (_firstLiveFrameId != null && frame.id >= _firstLiveFrameId!) {
-              frame.enhanceTracingState = enhanceTracingController.tracingState;
-            }
+            enhanceTracingController.assignStateForFrame(frame);
             addFrame(frame);
           } else if (event.extensionKind == 'Flutter.RebuiltWidgets') {
             rebuildCountModel.processRebuildEvent(event.extensionData!.data);
@@ -281,42 +274,6 @@ class PerformanceController extends DisposableController
             displayRefreshRate: await serviceManager.queryDisplayRefreshRate,
           )
         : PerformanceData();
-  }
-
-  /// The id of the first 'Flutter.Frame' event that occurs after the DevTools
-  /// performance page is opened.
-  ///
-  /// For frames with this id and greater, we can assign
-  /// [FlutterFrame.enhanceTracingState]. For frames with an earlier id, we
-  /// do not know the value of [FlutterFrame.enhanceTracingState], and we will
-  /// use other heuristics.
-  int? _firstLiveFrameId;
-
-  /// Stream subscription on the 'Extension' stream that listens for the first
-  /// 'Flutter.Frame' event.
-  ///
-  /// This stream should be initialized and cancelled in
-  /// [_listenForFirstLiveFrame], unless we never receive any 'Flutter.Frame'
-  /// events, in which case the subscription will be canceled in [dispose].
-  StreamSubscription<Event>? _firstFrameEventSubscription;
-
-  /// Listens on the 'Extension' stream (without history) for 'Flutter.Frame'
-  /// events.
-  ///
-  /// This method assigns [_firstLiveFrameId] when the first 'Flutter.Frame'
-  /// event is received, and then cancels the stream subscription.
-  void _listenForFirstLiveFrame() {
-    _firstFrameEventSubscription =
-        serviceManager.service!.onExtensionEvent.listen(
-      (event) {
-        if (event.extensionKind == 'Flutter.Frame' &&
-            _firstLiveFrameId == null) {
-          _firstLiveFrameId = FlutterFrame.parse(event.extensionData!.data).id;
-          _firstFrameEventSubscription!.cancel();
-          _firstFrameEventSubscription = null;
-        }
-      },
-    );
   }
 
   Future<void> _pullTraceEventsFromVmTimeline({
@@ -371,8 +328,9 @@ class PerformanceController extends DisposableController
     _selectedTimelineEventNotifier.value = event;
 
     if (event.isUiEvent && updateProfiler) {
-      final storedProfile =
-          cpuProfilerController.cpuProfileStore.lookupProfile(time: event.time);
+      final storedProfile = cpuProfilerController.cpuProfileStore.lookupProfile(
+        time: event.time,
+      );
       if (storedProfile != null) {
         await cpuProfilerController.processAndSetData(
           storedProfile,
@@ -423,6 +381,30 @@ class PerformanceController extends DisposableController
     _data.selectedFrame = frame;
     _selectedFrameNotifier.value = frame;
 
+    if (useLegacyTraceViewer.value) {
+      await _legacyToggleFrame(frame, _data);
+    } else if (FeatureFlags.embeddedPerfetto) {
+      // TODO(kenz): hook up scroll to frame for Perfetto viewer.
+    }
+
+    debugTraceEventCallback(() {
+      final buf = StringBuffer();
+      buf.writeln('UI timeline event for frame ${frame.id}:');
+      frame.timelineEventData.uiEvent?.format(buf, '  ');
+      buf.writeln('\nUI trace for frame ${frame.id}');
+      frame.timelineEventData.uiEvent?.writeTraceToBuffer(buf);
+      buf.writeln('\Raster timeline event frame ${frame.id}:');
+      frame.timelineEventData.rasterEvent?.format(buf, '  ');
+      buf.writeln('\nRaster trace for frame ${frame.id}');
+      frame.timelineEventData.rasterEvent?.writeTraceToBuffer(buf);
+      log(buf.toString());
+    });
+  }
+
+  Future<void> _legacyToggleFrame(
+    FlutterFrame frame,
+    PerformanceData data,
+  ) async {
     if (!offlineController.offlineMode.value) {
       final bool frameBeforeFirstWellFormedFrame =
           firstWellFormedFrameMicros != null &&
@@ -465,8 +447,10 @@ class PerformanceController extends DisposableController
 
     if (_currentFrameBeingSelected != frame) return;
 
-    final storedProfileForFrame = cpuProfilerController.cpuProfileStore
-        .lookupProfile(time: frame.timeFromEventFlows);
+    final storedProfileForFrame =
+        cpuProfilerController.cpuProfileStore.lookupProfile(
+      time: frame.timeFromEventFlows,
+    );
     if (storedProfileForFrame == null) {
       cpuProfilerController.reset();
       if (!offlineController.offlineMode.value &&
@@ -478,34 +462,23 @@ class PerformanceController extends DisposableController
         );
       }
       if (_currentFrameBeingSelected != frame) return;
-      _data.cpuProfileData = cpuProfilerController.dataNotifier.value;
+      data.cpuProfileData = cpuProfilerController.dataNotifier.value;
     } else {
       if (!storedProfileForFrame.processed) {
-        await cpuProfilerController.transformer.processData(
-          storedProfileForFrame,
+        await storedProfileForFrame.process(
+          transformer: cpuProfilerController.transformer,
           processId: 'Flutter frame ${frame.id} - stored profile ',
         );
       }
       if (_currentFrameBeingSelected != frame) return;
-      _data.cpuProfileData = storedProfileForFrame;
+      data.cpuProfileData = storedProfileForFrame.getActive(
+        cpuProfilerController.viewType.value,
+      );
       cpuProfilerController.loadProcessedData(
         storedProfileForFrame,
         storeAsUserTagNone: true,
       );
     }
-
-    debugTraceEventCallback(() {
-      final buf = StringBuffer();
-      buf.writeln('UI timeline event for frame ${frame.id}:');
-      frame.timelineEventData.uiEvent?.format(buf, '  ');
-      buf.writeln('\nUI trace for frame ${frame.id}');
-      frame.timelineEventData.uiEvent?.writeTraceToBuffer(buf);
-      buf.writeln('\Raster timeline event frame ${frame.id}:');
-      frame.timelineEventData.rasterEvent?.format(buf, '  ');
-      buf.writeln('\nRaster trace for frame ${frame.id}');
-      frame.timelineEventData.rasterEvent?.writeTraceToBuffer(buf);
-      log(buf.toString());
-    });
   }
 
   void addFrame(FlutterFrame frame) {
@@ -880,7 +853,11 @@ class PerformanceController extends DisposableController
     final offlineCpuProfileData = _offlineData.cpuProfileData;
     if (offlineCpuProfileData != null) {
       cpuProfilerController.loadProcessedData(
-        offlineCpuProfileData,
+        CpuProfilePair(
+          functionProfile: offlineCpuProfileData,
+          // TODO(bkonyi): do we care about offline code profiles?
+          codeProfile: null,
+        ),
         storeAsUserTagNone: true,
       );
     }
@@ -940,6 +917,8 @@ class PerformanceController extends DisposableController
 
   void toggleUseLegacyTraceViewer(bool? value) {
     useLegacyTraceViewer.value = value ?? false;
+    // `unawaited` does not work for FutureOr
+    // ignore: discarded_futures
     processAvailableEvents();
   }
 
@@ -983,7 +962,6 @@ class PerformanceController extends DisposableController
       perfettoController.dispose();
     }
     enhanceTracingController.dispose();
-    _firstFrameEventSubscription?.cancel();
     super.dispose();
   }
 }

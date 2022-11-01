@@ -44,6 +44,6 @@ class MessageBus {
   /// testing context. All stream listeners will be closed and the bus will not
   /// fire any more events.
   void close() {
-    _controller.close();
+    unawaited(_controller.close());
   }
 }

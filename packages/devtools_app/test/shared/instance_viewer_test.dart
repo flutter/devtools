@@ -121,7 +121,7 @@ final enumValueInstance = AsyncValue.data(
 );
 
 void main() {
-  setUpAll(() => loadFonts());
+  setUpAll(() async => await loadFonts());
 
   setUp(() {
     setGlobal(IdeTheme, getIdeTheme());
