@@ -456,6 +456,17 @@ class PerformanceController extends DisposableController
     PerformanceData data,
   ) async {
     if (!offlineController.offlineMode.value) {
+      final bool frameBeforeFirstWellFormedFrame =
+          firstWellFormedFrameMicros != null &&
+              frame.timeFromFrameTiming.start!.inMicroseconds <
+                  firstWellFormedFrameMicros!;
+      if (!frame.isWellFormed && !frameBeforeFirstWellFormedFrame) {
+        // Only try to pull timeline events for frames that are after the first
+        // well formed frame. Timeline events that occurred before this frame will
+        // have already fallen out of the buffer.
+        await processAvailableEvents();
+      }
+
       if (_currentFrameBeingSelected != frame) return;
 
       // If the frame is still not well formed after processing all available
