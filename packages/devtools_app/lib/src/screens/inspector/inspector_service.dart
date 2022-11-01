@@ -21,9 +21,29 @@ import '../../shared/eval_on_dart_library.dart';
 import '../../shared/globals.dart';
 import '../debugger/debugger_model.dart';
 import 'diagnostics_node.dart';
+import 'inspector_service_polyfill.dart';
 import 'primitives/inspector_common.dart';
 
 const inspectorLibraryUri = 'package:flutter/src/widgets/widget_inspector.dart';
+
+class RegistrableServiceExtension {
+  const RegistrableServiceExtension(this.name);
+
+  final String name;
+
+  // Layout explorer service extensions.
+  static const getLayoutExplorerNode =
+      RegistrableServiceExtension('getLayoutExplorerNode');
+  static const setFlexFit = RegistrableServiceExtension('setFlexFit');
+  static const setFlexFactor = RegistrableServiceExtension('setFlexFactor');
+  static const setFlexProperties =
+      RegistrableServiceExtension('setFlexProperties');
+  static const getRootWidgetSummaryTreeWithPreviews =
+      RegistrableServiceExtension('getRootWidgetSummaryTreeWithPreviews');
+
+  static const getPubRootDirectories =
+      RegistrableServiceExtension('getPubRootDirectories');
+}
 
 abstract class InspectorServiceBase extends DisposableController
     with AutoDisposeControllerMixin {
@@ -44,7 +64,7 @@ abstract class InspectorServiceBase extends DisposableController
           // consequences that out-weigh the benefits of being able to cancel
           // requests from object groups that have been disposed before the requests
           // were issued.
-          oneRequestAtATime: false,
+          oneRequestAtATime: true,
           isolate: serviceManager.isolateManager.mainIsolate,
         ) {
     _lastMainIsolate = serviceManager.isolateManager.mainIsolate.value;
@@ -1138,6 +1158,35 @@ class ObjectGroup extends ObjectGroupBase {
   @override
   final InspectorService inspectorService;
 
+  Future<Object?> invokeServiceExtensionMethod(
+    RegistrableServiceExtension extension,
+    Map<String, String?> parameters,
+  ) async {
+    final name = extension.name;
+    final fullName = '${inspectorService.serviceExtensionPrefix}.$name';
+    if (!serviceManager.serviceExtensionManager
+        .isServiceExtensionAvailable(fullName)) {
+      // Wait until a service extension we know will be eventually available for
+      // a Flutter app is loaded to avoid attempting to apply the polyfill
+      // while the list of Flutter service extensions is really just being
+      // registered on the device. This prevents pew in the app console about
+      // trying to register service extensions multiple times.
+      final regularExtensionsRegistered = await serviceManager
+          .serviceExtensionManager
+          .waitForServiceExtensionAvailable(
+        '${inspectorService.serviceExtensionPrefix}.isWidgetCreationTracked',
+      );
+      if (disposed) return null;
+      assert(regularExtensionsRegistered);
+      if (!serviceManager.serviceExtensionManager
+          .isServiceExtensionAvailable(fullName)) {
+        await invokeInspectorPolyfill(this);
+      }
+      if (disposed) return null;
+    }
+    return invokeServiceMethodDaemonParams(name, parameters);
+  }
+
   Future<RemoteDiagnosticsNode?> getRoot(FlutterTreeType type) {
     // There is no excuse to call this method on a disposed group.
     assert(!disposed);
@@ -1151,9 +1200,8 @@ class ObjectGroup extends ObjectGroupBase {
 
   Future<RemoteDiagnosticsNode?> getRootWidget() {
     return parseDiagnosticsNodeDaemon(
-      invokeServiceMethodDaemonParams(
-        WidgetInspectorServiceExtensions
-            .getRootWidgetSummaryTreeWithPreviews.name,
+      invokeServiceExtensionMethod(
+        RegistrableServiceExtension.getRootWidgetSummaryTreeWithPreviews,
         {'groupName': groupName},
       ),
     );
@@ -1342,8 +1390,8 @@ class ObjectGroup extends ObjectGroupBase {
     MainAxisAlignment? mainAxisAlignment,
     CrossAxisAlignment? crossAxisAlignment,
   ) async {
-    await invokeServiceMethodDaemonParams(
-      WidgetInspectorServiceExtensions.setFlexProperties.name,
+    await invokeServiceExtensionMethod(
+      RegistrableServiceExtension.setFlexProperties,
       {
         'id': ref.id,
         'mainAxisAlignment': '$mainAxisAlignment',
@@ -1356,8 +1404,8 @@ class ObjectGroup extends ObjectGroupBase {
     InspectorInstanceRef ref,
     int? flexFactor,
   ) async {
-    await invokeServiceMethodDaemonParams(
-      WidgetInspectorServiceExtensions.setFlexFactor.name,
+    await invokeServiceExtensionMethod(
+      RegistrableServiceExtension.setFlexFactor,
       {'id': ref.id, 'flexFactor': '$flexFactor'},
     );
   }
@@ -1366,8 +1414,8 @@ class ObjectGroup extends ObjectGroupBase {
     InspectorInstanceRef ref,
     FlexFit flexFit,
   ) async {
-    await invokeServiceMethodDaemonParams(
-      WidgetInspectorServiceExtensions.setFlexFit.name,
+    await invokeServiceExtensionMethod(
+      RegistrableServiceExtension.setFlexFit,
       {'id': ref.id, 'flexFit': '$flexFit'},
     );
   }
@@ -1378,8 +1426,8 @@ class ObjectGroup extends ObjectGroupBase {
   }) async {
     if (node == null) return null;
     return parseDiagnosticsNodeDaemon(
-      invokeServiceMethodDaemonParams(
-        WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
+      invokeServiceExtensionMethod(
+        RegistrableServiceExtension.getLayoutExplorerNode,
         {
           'groupName': groupName,
           'id': node.dartDiagnosticRef.id,
@@ -1390,8 +1438,8 @@ class ObjectGroup extends ObjectGroupBase {
   }
 
   Future<List<String>> getPubRootDirectories() async {
-    final invocationResult = await invokeServiceMethodDaemonParams(
-      WidgetInspectorServiceExtensions.getPubRootDirectories.name,
+    final invocationResult = await invokeServiceExtensionMethod(
+      RegistrableServiceExtension.getPubRootDirectories,
       {},
     );
     final directories = (invocationResult as List?)?.cast<Object>();
@@ -1500,14 +1548,14 @@ class InspectorObjectGroupManager {
 
   void clearCurrent() {
     if (_current != null) {
-      unawaited(_current!.dispose());
+      _current!.dispose();
       _current = null;
     }
   }
 
   void cancelNext() {
     if (_next != null) {
-      unawaited(_next!.dispose());
+      _next!.dispose();
       _setNextNull();
     }
   }
