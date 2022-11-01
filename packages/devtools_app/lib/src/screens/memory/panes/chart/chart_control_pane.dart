@@ -104,17 +104,30 @@ class _ChartControlPaneState extends State<ChartControlPane>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        ValueListenableBuilder<bool>(
-          valueListenable: controller.paused,
-          builder: (context, paused, _) {
-            return PauseResumeButtonGroup(
-              paused: paused,
-              onPause: _onPause,
-              onResume: _onResume,
-              pauseTooltip: ChartPaneTooltips.pauseTooltip,
-              resumeTooltip: ChartPaneTooltips.resumeTooltip,
-            );
-          },
+        Row(
+          children: [
+            ValueListenableBuilder<bool>(
+              valueListenable: controller.paused,
+              builder: (context, paused, _) {
+                return PauseResumeButtonGroup(
+                  paused: paused,
+                  onPause: _onPause,
+                  onResume: _onResume,
+                  pauseTooltip: ChartPaneTooltips.pauseTooltip,
+                  resumeTooltip: ChartPaneTooltips.resumeTooltip,
+                );
+              },
+            ),
+            const SizedBox(width: defaultSpacing),
+            ClearButton(
+              onPressed: controller.memorySource == MemoryController.liveFeed
+                  ? _clearTimeline
+                  : null,
+              minScreenWidthForTextBeforeScaling:
+                  primaryControlsMinVerboseWidth,
+              tooltip: 'Clear memory chart.',
+            ),
+          ],
         ),
         const SizedBox(height: denseSpacing),
         IconLabelButton(
@@ -127,14 +140,6 @@ class _ChartControlPaneState extends State<ChartControlPane>
         ),
         const SizedBox(height: denseSpacing),
         IntervalDropdown(chartController: widget.chartController),
-        const SizedBox(height: denseSpacing),
-        ClearButton(
-          onPressed: controller.memorySource == MemoryController.liveFeed
-              ? _clearTimeline
-              : null,
-          minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
-          tooltip: 'Clear all data on the memory screen.',
-        ),
       ],
     );
   }

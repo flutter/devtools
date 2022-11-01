@@ -15,15 +15,10 @@ class PrimaryControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        ChartVisibilityButton(
-          showChart: preferences.memory.showChart,
-          onPressed: (show) => preferences.memory.showChart.value = show,
-          minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
-        ),
-      ],
+    return ChartVisibilityButton(
+      showChart: preferences.memory.showChart,
+      onPressed: (show) => preferences.memory.showChart.value = show,
+      minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
     );
   }
 }
