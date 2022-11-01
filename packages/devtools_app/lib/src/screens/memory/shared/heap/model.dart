@@ -44,7 +44,7 @@ class AdaptedHeapData {
     );
   }
 
-  static Future<AdaptedHeapData> fromHeapSnapshot(
+  static Future<AdaptedHeapData> fromHeapSnapshotAsync(
     HeapSnapshotGraph graph,
   ) async {
     final listOfFutures = graph.objects.map((e) async {
@@ -53,6 +53,16 @@ class AdaptedHeapData {
     }).toList();
 
     final objects = await Future.wait(listOfFutures);
+
+    return AdaptedHeapData(objects);
+  }
+
+  static AdaptedHeapData fromHeapSnapshot(
+    HeapSnapshotGraph graph,
+  ) {
+    final objects = graph.objects.map((e) {
+      return AdaptedHeapObject.fromHeapSnapshotObject(e);
+    }).toList();
 
     return AdaptedHeapData(objects);
   }
@@ -273,9 +283,15 @@ class AdaptedHeapObject {
 /// This class is needed to make the snapshot taking operation mockable.
 class SnapshotTaker {
   Future<AdaptedHeapData?> take() async {
+    final sw = Stopwatch()..start();
+    print('snapshot1: ${sw.elapsedMilliseconds}');
     final snapshot = await snapshotMemory();
+    print('snapshot2: ${sw.elapsedMilliseconds}');
     if (snapshot == null) return null;
-    return AdaptedHeapData.fromHeapSnapshot(snapshot);
+    // final result = AdaptedHeapData.fromHeapSnapshot(snapshot);
+    final result = await AdaptedHeapData.fromHeapSnapshotAsync(snapshot);
+    print('snapshot3: ${sw.elapsedMilliseconds}');
+    return result;
   }
 }
 
