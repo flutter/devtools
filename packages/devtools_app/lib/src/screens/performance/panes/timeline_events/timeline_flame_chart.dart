@@ -26,6 +26,7 @@ import '../../event_details.dart';
 import '../../performance_controller.dart';
 import '../../performance_model.dart';
 import '../../performance_utils.dart';
+import '../flutter_frames/flutter_frame_model.dart';
 
 class TimelineEventsView extends StatelessWidget {
   const TimelineEventsView({

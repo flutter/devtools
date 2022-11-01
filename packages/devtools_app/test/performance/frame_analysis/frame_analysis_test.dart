@@ -4,12 +4,12 @@
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
+import 'package:devtools_app/src/screens/performance/panes/flutter_frames/flutter_frame_model.dart';
 import 'package:devtools_app/src/screens/performance/panes/frame_analysis/frame_analysis.dart';
 import 'package:devtools_app/src/screens/performance/panes/frame_analysis/frame_analysis_model.dart';
 import 'package:devtools_app/src/screens/performance/panes/frame_analysis/frame_hints.dart';
 import 'package:devtools_app/src/screens/performance/panes/frame_analysis/frame_time_visualizer.dart';
 import 'package:devtools_app/src/screens/performance/performance_controller.dart';
-import 'package:devtools_app/src/screens/performance/performance_model.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/screens/performance/panes/flutter_frames/flutter_frame_model.dart';
 import 'package:devtools_app/src/screens/performance/panes/frame_analysis/frame_analysis_model.dart';
-import 'package:devtools_app/src/screens/performance/performance_model.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../test_data/performance.dart';

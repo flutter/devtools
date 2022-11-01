@@ -9,7 +9,7 @@ import 'package:vm_service/vm_service.dart';
 import '../../../../../primitives/auto_dispose.dart';
 import '../../../../../service/service_extensions.dart' as extensions;
 import '../../../../../shared/globals.dart';
-import '../../../performance_model.dart';
+import '../../flutter_frames/flutter_frame_model.dart';
 import 'enhance_tracing_model.dart';
 
 final enhanceTracingExtensions = [

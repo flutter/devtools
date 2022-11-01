@@ -12,7 +12,6 @@ import '../../../../service/service_extensions.dart' as extensions;
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/theme.dart';
 import '../../performance_controller.dart';
-import '../../performance_model.dart';
 import '../../performance_utils.dart';
 import '../controls/enhance_tracing/enhance_tracing.dart';
 import '../controls/enhance_tracing/enhance_tracing_controller.dart';
