@@ -20,5 +20,5 @@ const String nonGcableInstancesColumnTooltip =
 
 /// Analytic constants specific for memory screen.
 class MemoryAnalytics {
-  static const diffTakeSnapshot = 'diffTakeSnapshot';
+  static const diffAdaptSnapshot = 'diffAdaptSnapshot';
 }

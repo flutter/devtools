@@ -275,14 +275,11 @@ class SnapshotTaker {
   Future<AdaptedHeapData?> take() async {
     final snapshot = await snapshotMemory();
     if (snapshot == null) return null;
-
     late final AdaptedHeapData result;
     ga.timeSync(
       memory,
-      MemoryAnalytics.diffTakeSnapshot,
-      syncOperation: () {
-        result = AdaptedHeapData.fromHeapSnapshot(snapshot);
-      },
+      MemoryAnalytics.diffAdaptSnapshot,
+      syncOperation: () => result = AdaptedHeapData.fromHeapSnapshot(snapshot),
       screenMetricsProvider: () => _SnapshotAnalyticsMetrics(
         numberOfObjects: snapshot.objects.length,
       ),
