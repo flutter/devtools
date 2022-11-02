@@ -85,19 +85,21 @@ class _SnapshotItemContent extends StatelessWidget {
 }
 
 const _snapshotDocumentation = '''
-Take a heap snapshot to view the current memory allocation details.
+Take a heap snapshot to view current memory allocation:
 
-1. Click on the ● button in the 'Snapshots' panel to the left (or click [ ● Take Snapshot ] below these instructions)
-2. Use the filter button above the snapshot table to refine the results
-3. Select a class from the snapshot table to view its retaining paths in another table
-4. Select a path from the 'Shortest retaining paths…' table to view the path details
+1. In the Snapshots panel, click the ● button
+(or click Take Snapshot below these instructions)
+2. Use the Filter button to refine the results
+3. Select a class from the snapshot table to view its retaining paths
+4. View the path detail by selecting from the Shortest retaining paths… table
 
-View the diff between snapshots to detect or debug allocation issues for a feature.
+Check the diff between snapshots to detect allocation issues:
 
-1. Take a snapshot (1) at the starting point of the feature in your application
+1. Take a snapshot
 2. Execute the feature in your application
-3. Take another snapshot (2) at the end of the feature execution
-4. While viewing (2), click the 'Diff with:' dropdown menu and select (1); the results area will display the delta of (1) and (2)
-6. Use the filter button as needed to refine the diff results
-7. Select a class from the diff with unexpected instances to view its retaining paths, and see which objects hold the references to those instances
+3. Take a second snapshot
+4. While viewing the second snapshot, click Diff with: and select the first snapshot from the drop-down menu;
+the results area will display the diff
+5. Use the Filter button to refine the diff results, if needed
+6. Select a class from the diff to view its retaining paths, and see which objects hold the references to those instances
 ''';
