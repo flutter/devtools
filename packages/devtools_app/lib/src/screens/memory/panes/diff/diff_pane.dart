@@ -88,7 +88,7 @@ const _snapshotDocumentation = '''
 Take a heap snapshot to view current memory allocation:
 
 1. In the Snapshots panel, click the ● button
-(or click Take Snapshot below these instructions)
+(or click *Take Snapshot* below these instructions)
 2. Use the Filter button to refine the results
 3. Select a class from the snapshot table to view its retaining paths
 4. View the path detail by selecting from the Shortest retaining paths… table
