@@ -278,7 +278,7 @@ class SnapshotTaker {
     late final AdaptedHeapData result;
     ga.timeSync(
       memory,
-      MemoryAnalytics.adaptSnapshot,
+      MemoryTimeAnalytics.adaptSnapshot,
       syncOperation: () => result = AdaptedHeapData.fromHeapSnapshot(snapshot),
       screenMetricsProvider: () => _SnapshotAnalyticsMetrics(
         numberOfObjects: snapshot.objects.length,
