@@ -64,7 +64,7 @@ class MemoryTracker {
     memoryController.paused.removeListener(_updateLiveDataPolling);
 
     _pollingTimer?.cancel();
-    _gcStreamListener?.cancel();
+    unawaited(_gcStreamListener?.cancel());
     _pollingTimer = null;
     _gcStreamListener = null;
   }

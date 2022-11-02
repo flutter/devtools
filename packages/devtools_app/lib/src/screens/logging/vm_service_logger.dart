@@ -78,7 +78,7 @@ class VmServiceTrafficLogger {
   }
 
   void dispose() {
-    _sendSub.cancel();
-    _receiveSub.cancel();
+    unawaited(_sendSub.cancel());
+    unawaited(_receiveSub.cancel());
   }
 }

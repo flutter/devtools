@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:collection';
 
 import 'package:collection/collection.dart' show IterableExtension;
@@ -36,10 +37,12 @@ class ErrorBadgeManager extends DisposableController
 
   void vmServiceOpened(VmServiceWrapper service) {
     // Ensure structured errors are enabled.
-    serviceManager.serviceExtensionManager.setServiceExtensionState(
-      extensions.structuredErrors.extension,
-      enabled: true,
-      value: true,
+    unawaited(
+      serviceManager.serviceExtensionManager.setServiceExtensionState(
+        extensions.structuredErrors.extension,
+        enabled: true,
+        value: true,
+      ),
     );
 
     // Log Flutter extension events.

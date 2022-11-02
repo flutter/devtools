@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -125,13 +127,13 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!initController()) return;
-    controller.startRecording();
+    unawaited(controller.startRecording());
 
     cancelListeners();
 
     addAutoDisposeListener(serviceManager.isolateManager.mainIsolate, () {
       if (serviceManager.isolateManager.mainIsolate.value != null) {
-        controller.startRecording();
+        unawaited(controller.startRecording());
       }
     });
   }
@@ -250,7 +252,7 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
               analytics_constants.network,
               analytics_constants.clear,
             );
-            widget.controller.clear();
+            unawaited(widget.controller.clear());
           },
         ),
         const SizedBox(width: defaultSpacing),
@@ -277,12 +279,14 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
   }
 
   void _showFilterDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => FilterDialog<NetworkController, NetworkRequest>(
-        controller: widget.controller,
-        queryInstructions: NetworkScreenBody.filterQueryInstructions,
-        queryFilterArguments: widget.controller.filterArgs,
+    unawaited(
+      showDialog(
+        context: context,
+        builder: (context) => FilterDialog<NetworkController, NetworkRequest>(
+          controller: widget.controller,
+          queryInstructions: NetworkScreenBody.filterQueryInstructions,
+          queryFilterArguments: widget.controller.filterArgs,
+        ),
       ),
     );
   }
@@ -441,20 +445,24 @@ class ActionsColumn extends ColumnData<NetworkRequest>
         PopupMenuItem(
           child: const Text('Copy as URL'),
           onTap: () {
-            copyToClipboard(
-              data.uri,
-              'Copied the URL to the clipboard',
-              context,
+            unawaited(
+              copyToClipboard(
+                data.uri,
+                'Copied the URL to the clipboard',
+                context,
+              ),
             );
           },
         ),
         PopupMenuItem(
           child: const Text('Copy as cURL'),
           onTap: () {
-            copyToClipboard(
-              CurlCommand.from(data).toString(),
-              'Copied the cURL command to the clipboard',
-              context,
+            unawaited(
+              copyToClipboard(
+                CurlCommand.from(data).toString(),
+                'Copied the cURL command to the clipboard',
+                context,
+              ),
             );
           },
         )

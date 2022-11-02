@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
@@ -25,6 +26,7 @@ import '../../event_details.dart';
 import '../../performance_controller.dart';
 import '../../performance_model.dart';
 import '../../performance_utils.dart';
+import '../flutter_frames/flutter_frame_model.dart';
 
 class TimelineEventsView extends StatelessWidget {
   const TimelineEventsView({
@@ -645,8 +647,8 @@ class TimelineFlameChartState
         backgroundColor: backgroundWithOpacity,
         threadButtonContainerWidth: threadButtonContainerWidth,
         onPressed: () => isNext
-            ? _viewNextEventInGroup(group)
-            : _viewPreviousEventInGroup(group),
+            ? unawaited(_viewNextEventInGroup(group))
+            : unawaited(_viewPreviousEventInGroup(group)),
         shouldEnableButton: (g) => isNext
             ? _shouldEnableNextInThreadButton(g)
             : _shouldEnablePrevInThreadButton(g),

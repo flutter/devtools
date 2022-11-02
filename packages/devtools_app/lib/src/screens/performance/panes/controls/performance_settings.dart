@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../../primitives/feature_flags.dart';
@@ -35,7 +37,7 @@ class PerformanceSettingsDialog extends StatelessWidget {
           ],
         ),
       ),
-      actions: [
+      actions: const [
         DialogCloseButton(),
       ],
     );
@@ -80,7 +82,7 @@ class TimelineStreamSettings extends StatelessWidget {
         description: 'Http traffic',
         notifier: controller.httpTimelineLoggingEnabled as ValueNotifier<bool?>,
         onChanged: (value) =>
-            controller.toggleHttpRequestLogging(value ?? false),
+            unawaited(controller.toggleHttpRequestLogging(value ?? false)),
       ),
     ];
   }
@@ -110,10 +112,11 @@ class TimelineStreamSettings extends StatelessWidget {
             title: stream.name,
             description: stream.description,
             notifier: stream.recorded as ValueNotifier<bool?>,
-            onChanged: (newValue) =>
-                serviceManager.timelineStreamManager.updateTimelineStream(
-              stream,
-              newValue ?? false,
+            onChanged: (newValue) => unawaited(
+              serviceManager.timelineStreamManager.updateTimelineStream(
+                stream,
+                newValue ?? false,
+              ),
             ),
           ),
         )

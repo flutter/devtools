@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
@@ -727,16 +728,21 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       // Scroll so selected row is the last full item displayed in the viewport.
       // To do this we need to be showing the (minCompleteItemsInView + 1)
       // previous item  at the top.
-      scrollController.animateTo(
-        (newSelectedNodeIndex - minCompleteItemsInView + 1) * defaultRowHeight,
-        duration: defaultDuration,
-        curve: defaultCurve,
+      unawaited(
+        scrollController.animateTo(
+          (newSelectedNodeIndex - minCompleteItemsInView + 1) *
+              defaultRowHeight,
+          duration: defaultDuration,
+          curve: defaultCurve,
+        ),
       );
     } else if (isAboveViewport) {
-      scrollController.animateTo(
-        newSelectedNodeIndex * defaultRowHeight,
-        duration: defaultDuration,
-        curve: defaultCurve,
+      unawaited(
+        scrollController.animateTo(
+          newSelectedNodeIndex * defaultRowHeight,
+          duration: defaultDuration,
+          curve: defaultCurve,
+        ),
       );
     }
 
@@ -936,7 +942,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
     // If we're at the end already, scroll to expose the new content.
     if (widget.autoScrollContent) {
       if (scrollController.hasClients && scrollController.atScrollBottom) {
-        scrollController.autoScrollToBottom();
+        unawaited(scrollController.autoScrollToBottom());
       }
     }
 

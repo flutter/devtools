@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:provider/provider.dart';
@@ -220,7 +222,8 @@ class VariableSelectionControls extends MaterialTextSelectionControls {
       clipboardStatus: clipboardStatus!,
       handleCut: canCut(delegate) ? () => handleCut(delegate) : null,
       handleCopy: canCopy(delegate) ? () => handleCopy(delegate) : null,
-      handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
+      handlePaste:
+          canPaste(delegate) ? () => unawaited(handlePaste(delegate)) : null,
       handleSelectAll:
           canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
       handleInspect:

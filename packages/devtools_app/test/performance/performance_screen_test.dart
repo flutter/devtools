@@ -8,7 +8,7 @@ import 'dart:async';
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/screens/performance/event_details.dart';
-import 'package:devtools_app/src/screens/performance/flutter_frames_chart.dart';
+import 'package:devtools_app/src/screens/performance/panes/flutter_frames/flutter_frames_chart.dart';
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/timeline_flame_chart.dart';
 import 'package:devtools_app/src/screens/performance/performance_controller.dart';
 import 'package:devtools_app/src/screens/performance/performance_screen.dart';
