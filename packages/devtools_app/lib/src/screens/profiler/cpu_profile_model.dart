@@ -77,6 +77,24 @@ class CpuProfilePair {
     return CpuProfilePair(functionProfile: function, codeProfile: code);
   }
 
+  factory CpuProfilePair.withTagRoots(
+    CpuProfilePair original,
+    CpuProfilerTagType tag,
+  ) {
+    final function = CpuProfileData.withTagRoots(
+      original.functionProfile,
+      tag,
+    );
+    CpuProfileData? code;
+    if (original.codeProfile != null) {
+      code = CpuProfileData.withTagRoots(
+        original.codeProfile!,
+        tag,
+      );
+    }
+    return CpuProfilePair(functionProfile: function, codeProfile: code);
+  }
+
   /// Represents the function view of the CPU profile. This view displays
   /// function objects rather than code objects, which can potentially contain
   /// multiple inlined functions.
@@ -141,18 +159,9 @@ class CpuProfileData {
     required this.stackFrames,
     required this.cpuSamples,
     required this.profileMetaData,
+    required this.rootedAtTags,
   }) {
-    _cpuProfileRoot = CpuStackFrame._(
-      id: rootId,
-      name: rootName,
-      verboseName: rootName,
-      category: 'Dart',
-      rawUrl: '',
-      packageUri: '',
-      sourceLine: null,
-      profileMetaData: profileMetaData,
-      parentId: null,
-    );
+    _cpuProfileRoot = CpuStackFrame.root(profileMetaData);
   }
 
   factory CpuProfileData.parse(Map<String, dynamic> json) {
@@ -190,6 +199,7 @@ class CpuProfileData {
         sourceLine: stackFrameJson[sourceLineKey],
         parentId: stackFrameJson[parentIdKey] ?? rootId,
         profileMetaData: profileMetaData,
+        isTag: false,
       );
       stackFrames[stackFrame.id] = stackFrame;
     }
@@ -206,6 +216,7 @@ class CpuProfileData {
       stackFrames: stackFrames,
       cpuSamples: samples,
       profileMetaData: profileMetaData,
+      rootedAtTags: false,
     );
   }
 
@@ -249,7 +260,115 @@ class CpuProfileData {
         stackDepth: superProfile.profileMetaData.stackDepth,
         time: subTimeRange,
       ),
+      rootedAtTags: superProfile.rootedAtTags,
     );
+  }
+
+  /// Generate a cpu profile from [originalData] where the profile is broken
+  /// down for each tag of the given [type].
+  ///
+  /// [originalData] does not need to be [processed] to run this operation.
+  factory CpuProfileData.withTagRoots(
+    CpuProfileData originalData,
+    CpuProfilerTagType type,
+  ) {
+    final useUserTags = type == CpuProfilerTagType.user;
+    final tags = <String>{
+      for (final sample in originalData.cpuSamples)
+        useUserTags ? sample.userTag! : sample.vmTag!,
+    };
+
+    final tagProfiles = <String, CpuProfileData>{
+      for (final tag in tags)
+        tag: CpuProfileData._fromTag(originalData, tag, type),
+    };
+
+    final metaData = originalData.profileMetaData.copyWith();
+
+    // Use a SplayTreeMap so that map iteration will be in sorted key order.
+    // This keeps the visualization of the profile as consistent as possible
+    // when applying filters.
+    final SplayTreeMap<String, CpuStackFrame> stackFrames =
+        SplayTreeMap(stackFrameIdCompare);
+
+    final samples = <CpuSampleEvent>[];
+
+    int nextId = 1;
+
+    for (final tagProfileEntry in tagProfiles.entries) {
+      final tag = tagProfileEntry.key;
+      final tagProfile = tagProfileEntry.value;
+      if (tagProfile.cpuSamples.isEmpty) {
+        continue;
+      }
+      final isolateId = tagProfile.cpuSamples.first.leafId.split('-').first;
+      final tagId = '$isolateId-${nextId++}';
+      stackFrames[tagId] = CpuStackFrame._(
+        id: tagId,
+        name: tag,
+        verboseName: tag,
+        category: 'Dart',
+        rawUrl: '',
+        packageUri: '',
+        sourceLine: null,
+        parentId: null,
+        profileMetaData: metaData,
+        isTag: true,
+      );
+      final idMapping = <String, String>{
+        rootId: tagId,
+      };
+
+      String? getId(String? id) {
+        if (id == null) {
+          return null;
+        }
+        return idMapping.putIfAbsent(id, () => '$isolateId-${nextId++}');
+      }
+
+      tagProfile.stackFrames.forEach((k, v) => getId(k));
+
+      for (final sample in tagProfile.cpuSamples) {
+        String? updatedId = getId(sample.leafId);
+        samples.add(
+          CpuSampleEvent(
+            leafId: updatedId!,
+            userTag: sample.userTag,
+            vmTag: sample.vmTag,
+            traceJson: sample.toJson,
+          ),
+        );
+        var currentStackFrame = tagProfile.stackFrames[sample.leafId];
+        while (currentStackFrame != null) {
+          final parentId = getId(currentStackFrame.parentId);
+          stackFrames[updatedId!] = currentStackFrame.shallowCopy(
+            id: updatedId,
+            copySampleCounts: false,
+            profileMetaData: metaData,
+            parentId: parentId,
+          );
+          final parentStackFrameJson = parentId != null
+              ? originalData.stackFrames[currentStackFrame.parentId]
+              : null;
+          updatedId = parentId;
+          currentStackFrame = parentStackFrameJson;
+        }
+      }
+    }
+    return CpuProfileData._(
+      stackFrames: stackFrames,
+      cpuSamples: samples,
+      profileMetaData: metaData,
+      rootedAtTags: true,
+    );
+  }
+
+  /// Generate a cpu profile from [originalData] where each sample contains the
+  /// vmTag [tag].
+  ///
+  /// [originalData] does not need to be [processed] to run this operation.
+  factory CpuProfileData.fromVMTag(CpuProfileData originalData, String tag) {
+    return CpuProfileData._fromTag(originalData, tag, CpuProfilerTagType.vm);
   }
 
   /// Generate a cpu profile from [originalData] where each sample contains the
@@ -257,12 +376,22 @@ class CpuProfileData {
   ///
   /// [originalData] does not need to be [processed] to run this operation.
   factory CpuProfileData.fromUserTag(CpuProfileData originalData, String tag) {
-    if (!originalData.userTags.contains(tag)) {
+    return CpuProfileData._fromTag(originalData, tag, CpuProfilerTagType.user);
+  }
+
+  factory CpuProfileData._fromTag(
+    CpuProfileData originalData,
+    String tag,
+    CpuProfilerTagType type,
+  ) {
+    final useUserTag = type == CpuProfilerTagType.user;
+    final tags = useUserTag ? originalData.userTags : originalData.vmTags;
+    if (!tags.contains(tag)) {
       return CpuProfileData.empty();
     }
 
     final samplesWithTag = originalData.cpuSamples
-        .where((sample) => sample.userTag == tag)
+        .where((sample) => (useUserTag ? sample.userTag : sample.vmTag) == tag)
         .toList();
     assert(samplesWithTag.isNotEmpty);
 
@@ -312,6 +441,7 @@ class CpuProfileData {
       stackFrames: stackFramesWithTag,
       cpuSamples: samplesWithTag,
       profileMetaData: metaData,
+      rootedAtTags: false,
     );
   }
 
@@ -334,6 +464,7 @@ class CpuProfileData {
           CpuSampleEvent(
             leafId: stackFrame.id,
             userTag: sample.userTag,
+            vmTag: sample.vmTag,
             traceJson: sampleJson,
           ),
         );
@@ -412,6 +543,7 @@ class CpuProfileData {
       stackFrames: filteredStackFrames,
       cpuSamples: filteredCpuSamples,
       profileMetaData: updatedMetaData,
+      rootedAtTags: originalData.rootedAtTags,
     );
   }
 
@@ -495,8 +627,8 @@ class CpuProfileData {
         'cat': 'Dart',
         CpuProfileData.stackFrameIdKey: '$isolateId-${tree.frameId}',
         'args': {
-          if (sample.userTag != null) 'userTag': sample.userTag,
-          if (sample.vmTag != null) 'vmTag': sample.vmTag,
+          if (sample.userTag != null) userTagKey: sample.userTag,
+          if (sample.vmTag != null) vmTagKey: sample.vmTag,
         },
       });
     }
@@ -572,6 +704,7 @@ class CpuProfileData {
   static const timeOriginKey = 'timeOriginMicros';
   static const timeExtentKey = 'timeExtentMicros';
   static const userTagKey = 'userTag';
+  static const vmTagKey = 'vmTag';
 
   final Map<String, CpuStackFrame> stackFrames;
 
@@ -579,12 +712,20 @@ class CpuProfileData {
 
   final CpuProfileMetaData profileMetaData;
 
+  /// `true` if the CpuProfileData has tag-based roots. This value is used
+  /// during the bottom-up transformation to ensure that the tag-based roots
+  /// are kept at the root of the resulting bottom-up tree.
+  final bool rootedAtTags;
+
   /// Marks whether this data has already been processed.
   bool processed = false;
 
   List<CpuStackFrame> get callTreeRoots {
     if (!processed) return <CpuStackFrame>[];
-    return _callTreeRoots ??= [_cpuProfileRoot.deepCopy()];
+    return _callTreeRoots ??= [
+      // Don't display the root node.
+      ..._cpuProfileRoot.children.map((e) => e.deepCopy())
+    ];
   }
 
   List<CpuStackFrame>? _callTreeRoots;
@@ -595,6 +736,7 @@ class CpuProfileData {
         BottomUpTransformer<CpuStackFrame>().bottomUpRootsFor(
       topDownRoot: _cpuProfileRoot,
       mergeSamples: mergeCpuProfileRoots,
+      rootedAtTags: rootedAtTags,
     );
   }
 
@@ -617,7 +759,23 @@ class CpuProfileData {
     return _userTags!;
   }
 
+  Iterable<String> get vmTags {
+    if (_vmTags != null) {
+      return _vmTags!;
+    }
+    final tags = <String>{};
+    for (final cpuSample in cpuSamples) {
+      final tag = cpuSample.vmTag;
+      if (tag != null) {
+        tags.add(tag);
+      }
+    }
+    _vmTags = tags;
+    return _vmTags!;
+  }
+
   Iterable<String>? _userTags;
+  Iterable<String>? _vmTags;
 
   late final CpuStackFrame _cpuProfileRoot;
 
@@ -678,7 +836,8 @@ class CpuProfileMetaData extends ProfileMetaData {
 class CpuSampleEvent extends TraceEvent {
   CpuSampleEvent({
     required this.leafId,
-    this.userTag,
+    required this.userTag,
+    required this.vmTag,
     required Map<String, dynamic> traceJson,
   }) : super(traceJson);
 
@@ -687,9 +846,13 @@ class CpuSampleEvent extends TraceEvent {
     final userTag = traceJson[TraceEvent.argsKey] != null
         ? traceJson[TraceEvent.argsKey][CpuProfileData.userTagKey]
         : null;
+    final vmTag = traceJson[TraceEvent.argsKey] != null
+        ? traceJson[TraceEvent.argsKey][CpuProfileData.vmTagKey]
+        : null;
     return CpuSampleEvent(
       leafId: leafId,
       userTag: userTag,
+      vmTag: vmTag,
       traceJson: traceJson,
     );
   }
@@ -697,6 +860,7 @@ class CpuSampleEvent extends TraceEvent {
   final String leafId;
 
   final String? userTag;
+  final String? vmTag;
 
   Map<String, dynamic> get toJson {
     // [leafId] is the source of truth for the leaf id of this sample.
@@ -721,6 +885,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     required int? sourceLine,
     required String parentId,
     required CpuProfileMetaData profileMetaData,
+    required bool isTag,
   }) {
     return CpuStackFrame._(
       id: id,
@@ -732,8 +897,23 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
       sourceLine: sourceLine,
       parentId: parentId,
       profileMetaData: profileMetaData,
+      isTag: isTag,
     );
   }
+
+  factory CpuStackFrame.root(CpuProfileMetaData profileMetaData) =>
+      CpuStackFrame._(
+        id: CpuProfileData.rootId,
+        name: CpuProfileData.rootName,
+        verboseName: CpuProfileData.rootName,
+        category: 'Dart',
+        rawUrl: '',
+        packageUri: '',
+        sourceLine: null,
+        profileMetaData: profileMetaData,
+        parentId: null,
+        isTag: false,
+      );
 
   CpuStackFrame._({
     required this.id,
@@ -745,6 +925,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     required this.sourceLine,
     required this.parentId,
     required CpuProfileMetaData profileMetaData,
+    required this.isTag,
   }) : _profileMetaData = profileMetaData;
 
   /// Prefix for packages from the core Dart libraries.
@@ -786,9 +967,12 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
   @override
   String get displayName => name;
 
+  final bool isTag;
+
   bool get isNative => _isNative ??= id != CpuProfileData.rootId &&
       packageUri.isEmpty &&
-      !name.startsWith(flutterEnginePrefix);
+      !name.startsWith(flutterEnginePrefix) &&
+      !isTag;
 
   bool? _isNative;
 
@@ -814,6 +998,8 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
       prefix = '[Dart]';
     } else if (isFlutterCore) {
       prefix = '[Flutter]';
+    } else if (isTag) {
+      prefix = '[Tag]';
     }
     final nameWithPrefix = [prefix, name].join(' ');
     return [
@@ -858,6 +1044,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
       sourceLine: sourceLine ?? this.sourceLine,
       parentId: parentId ?? this.parentId,
       profileMetaData: profileMetaData ?? this.profileMetaData,
+      isTag: isTag,
     );
     if (copySampleCounts) {
       copy
