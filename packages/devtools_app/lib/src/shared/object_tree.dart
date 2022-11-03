@@ -50,7 +50,6 @@ Future<void> buildVariablesTree(
     return;
   variable.treeInitializeStarted = true;
 
-  final completer = Completer<bool>();
   final isolateRef = ref.isolateRef;
   final instanceRef = ref.instanceRef;
   final diagnostic = ref.diagnostic;
@@ -72,166 +71,152 @@ Future<void> buildVariablesTree(
     }
 
     if (diagnostic.inlineProperties.isNotEmpty) {
-      unawaited(
-        _addPropertiesHelper(diagnostic.inlineProperties).then((v) {
-          completer.complete(true);
-        }),
-      );
+      await _addPropertiesHelper(diagnostic.inlineProperties);
     } else {
       assert(!service!.disposed);
       if (!service!.disposed) {
-        unawaited(
-          _addPropertiesHelper(await diagnostic.getProperties(service))
-              .then((v) {
-            completer.complete(true);
-          }),
-        );
+        await _addPropertiesHelper(await diagnostic.getProperties(service));
       }
     }
-  } else {
-    completer.complete(true);
   }
-  return await completer.future.then((value) async {
-    final existingNames = <String>{};
-    for (var child in variable.children) {
-      final name = child.name;
-      if (name != null && name.isNotEmpty) {
-        existingNames.add(name);
-        if (!isPrivate(name)) {
-          // Assume private and public names with the same name reference the same
-          // data so showing both is not useful.
-          existingNames.add('_$name');
-        }
+  final existingNames = <String>{};
+  for (var child in variable.children) {
+    final name = child.name;
+    if (name != null && name.isNotEmpty) {
+      existingNames.add(name);
+      if (!isPrivate(name)) {
+        // Assume private and public names with the same name reference the same
+        // data so showing both is not useful.
+        existingNames.add('_$name');
       }
     }
+  }
 
-    if (variable.childCount > DartObjectNode.MAX_CHILDREN_IN_GROUPING) {
-      final numChildrenInGrouping =
-          variable.childCount >= pow(DartObjectNode.MAX_CHILDREN_IN_GROUPING, 2)
-              ? (roundToNearestPow10(variable.childCount) /
-                      DartObjectNode.MAX_CHILDREN_IN_GROUPING)
-                  .floor()
-              : DartObjectNode.MAX_CHILDREN_IN_GROUPING;
+  if (variable.childCount > DartObjectNode.MAX_CHILDREN_IN_GROUPING) {
+    final numChildrenInGrouping =
+        variable.childCount >= pow(DartObjectNode.MAX_CHILDREN_IN_GROUPING, 2)
+            ? (roundToNearestPow10(variable.childCount) /
+                    DartObjectNode.MAX_CHILDREN_IN_GROUPING)
+                .floor()
+            : DartObjectNode.MAX_CHILDREN_IN_GROUPING;
 
-      var start = variable.offset;
-      final end = start + variable.childCount;
-      while (start < end) {
-        final count = min(end - start, numChildrenInGrouping);
-        variable.addChild(
-          DartObjectNode.grouping(variable.ref, offset: start, count: count),
-        );
-        start += count;
-      }
-    } else if (instanceRef != null && serviceManager.service != null) {
-      final variableId = variable.ref!.isolateRef!.id!;
-      try {
-        final dynamic result = await serviceManager.service!.getObject(
-          variableId,
-          instanceRef.id!,
-          offset: variable.offset,
-          count: variable.childCount,
-        );
-        if (result is Instance) {
-          if (result.associations != null) {
-            variable.addAllChildren(
-              _createVariablesForAssociations(result, isolateRef),
-            );
-          } else if (result.elements != null) {
-            variable.addAllChildren(
-                _createVariablesForElements(result, isolateRef));
-          } else if (result.bytes != null) {
-            variable
-                .addAllChildren(_createVariablesForBytes(result, isolateRef));
-            // Check fields last, as all instanceRefs may have a non-null fields
-            // with no entries.
-          } else if (result.fields != null) {
-            variable.addAllChildren(
-              _createVariablesForFields(
-                result,
-                isolateRef,
-                existingNames: existingNames,
-              ),
-            );
-          }
-        }
-      } on SentinelException {
-        // Fail gracefully if calling `getObject` throws a SentinelException.
-      }
+    var start = variable.offset;
+    final end = start + variable.childCount;
+    while (start < end) {
+      final count = min(end - start, numChildrenInGrouping);
+      variable.addChild(
+        DartObjectNode.grouping(variable.ref, offset: start, count: count),
+      );
+      start += count;
     }
-    if (diagnostic != null && includeDiagnosticChildren) {
-      // Always add children last after properties to avoid confusion.
-      final ObjectGroupBase? service = diagnostic.inspectorService;
-      final diagnosticChildren = await diagnostic.children;
-      if (diagnosticChildren != null && diagnosticChildren.isNotEmpty) {
-        final childrenNode = DartObjectNode.text(
-          pluralize('child', diagnosticChildren.length, plural: 'children'),
-        );
-        variable.addChild(childrenNode);
-        if (service != null && isolateRef != null) {
-          await addExpandableChildren(
-            childrenNode,
-            await _createVariablesForDiagnostics(
-              service,
-              diagnosticChildren,
+  } else if (instanceRef != null && serviceManager.service != null) {
+    final variableId = variable.ref!.isolateRef!.id!;
+    try {
+      final dynamic result = await serviceManager.service!.getObject(
+        variableId,
+        instanceRef.id!,
+        offset: variable.offset,
+        count: variable.childCount,
+      );
+      if (result is Instance) {
+        if (result.associations != null) {
+          variable.addAllChildren(
+            _createVariablesForAssociations(result, isolateRef),
+          );
+        } else if (result.elements != null) {
+          variable
+              .addAllChildren(_createVariablesForElements(result, isolateRef));
+        } else if (result.bytes != null) {
+          variable.addAllChildren(_createVariablesForBytes(result, isolateRef));
+          // Check fields last, as all instanceRefs may have a non-null fields
+          // with no entries.
+        } else if (result.fields != null) {
+          variable.addAllChildren(
+            _createVariablesForFields(
+              result,
               isolateRef,
+              existingNames: existingNames,
             ),
-            expandAll: expandAll,
           );
         }
       }
+    } on SentinelException {
+      // Fail gracefully if calling `getObject` throws a SentinelException.
     }
-    final inspectorService = serviceManager.inspectorService;
-    if (inspectorService != null) {
-      final tasks = <Future>[];
-      ObjectGroupBase? group;
-      Future<void> _maybeUpdateRef(DartObjectNode child) async {
-        final childRef = child.ref;
-        if (childRef == null) return;
-        if (childRef.diagnostic == null) {
-          // TODO(jacobr): also check whether the InstanceRef is an instance of
-          // Diagnosticable and show the Diagnosticable properties in that case.
-          final instanceRef = childRef.instanceRef;
-          // This is an approximation of eval('instanceRef is DiagnosticsNode')
-          // TODO(jacobr): cache the full class hierarchy so we can cheaply check
-          // instanceRef is DiagnosticsNode without having to do an eval.
-          if (instanceRef != null &&
-              (instanceRef.classRef?.name == 'DiagnosticableTreeNode' ||
-                  instanceRef.classRef?.name == 'DiagnosticsProperty')) {
-            // The user is expecting to see the object the DiagnosticsNode is
-            // describing not the DiagnosticsNode itself.
-            try {
-              group ??= inspectorService.createObjectGroup('temp');
-              final valueInstanceRef = await group!.evalOnRef(
-                'object.value',
-                childRef,
+  }
+  if (diagnostic != null && includeDiagnosticChildren) {
+    // Always add children last after properties to avoid confusion.
+    final ObjectGroupBase? service = diagnostic.inspectorService;
+    final diagnosticChildren = await diagnostic.children;
+    if (diagnosticChildren != null && diagnosticChildren.isNotEmpty) {
+      final childrenNode = DartObjectNode.text(
+        pluralize('child', diagnosticChildren.length, plural: 'children'),
+      );
+      variable.addChild(childrenNode);
+      if (service != null && isolateRef != null) {
+        await addExpandableChildren(
+          childrenNode,
+          await _createVariablesForDiagnostics(
+            service,
+            diagnosticChildren,
+            isolateRef,
+          ),
+          expandAll: expandAll,
+        );
+      }
+    }
+  }
+  final inspectorService = serviceManager.inspectorService;
+  if (inspectorService != null) {
+    final tasks = <Future>[];
+    ObjectGroupBase? group;
+    Future<void> _maybeUpdateRef(DartObjectNode child) async {
+      final childRef = child.ref;
+      if (childRef == null) return;
+      if (childRef.diagnostic == null) {
+        // TODO(jacobr): also check whether the InstanceRef is an instance of
+        // Diagnosticable and show the Diagnosticable properties in that case.
+        final instanceRef = childRef.instanceRef;
+        // This is an approximation of eval('instanceRef is DiagnosticsNode')
+        // TODO(jacobr): cache the full class hierarchy so we can cheaply check
+        // instanceRef is DiagnosticsNode without having to do an eval.
+        if (instanceRef != null &&
+            (instanceRef.classRef?.name == 'DiagnosticableTreeNode' ||
+                instanceRef.classRef?.name == 'DiagnosticsProperty')) {
+          // The user is expecting to see the object the DiagnosticsNode is
+          // describing not the DiagnosticsNode itself.
+          try {
+            group ??= inspectorService.createObjectGroup('temp');
+            final valueInstanceRef = await group!.evalOnRef(
+              'object.value',
+              childRef,
+            );
+            // TODO(jacobr): add the Diagnostics properties as well?
+            child._ref = GenericInstanceRef(
+              isolateRef: isolateRef,
+              value: valueInstanceRef,
+            );
+          } catch (e) {
+            if (e is! SentinelException) {
+              log(
+                'Caught $e accessing the value of an object',
+                LogLevel.warning,
               );
-              // TODO(jacobr): add the Diagnostics properties as well?
-              child._ref = GenericInstanceRef(
-                isolateRef: isolateRef,
-                value: valueInstanceRef,
-              );
-            } catch (e) {
-              if (e is! SentinelException) {
-                log(
-                  'Caught $e accessing the value of an object',
-                  LogLevel.warning,
-                );
-              }
             }
           }
         }
       }
-
-      for (var child in variable.children) {
-        tasks.add(_maybeUpdateRef(child));
-      }
-      if (tasks.isNotEmpty) {
-        await Future.wait(tasks);
-        unawaited(group?.dispose());
-      }
     }
-    variable.treeInitializeComplete = true;
-  });
+
+    for (var child in variable.children) {
+      tasks.add(_maybeUpdateRef(child));
+    }
+    if (tasks.isNotEmpty) {
+      await Future.wait(tasks);
+      unawaited(group?.dispose());
+    }
+  }
+  variable.treeInitializeComplete = true;
 }
 
 Future<DartObjectNode> _buildVariable(
