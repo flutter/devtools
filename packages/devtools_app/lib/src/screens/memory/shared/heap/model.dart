@@ -4,6 +4,9 @@
 
 import 'package:vm_service/vm_service.dart';
 
+import '../../../../analytics/analytics.dart' as ga;
+import '../../../../analytics/analytics_common.dart';
+import '../../../../analytics/constants.dart' as analytics_constants;
 import '../../primitives/class_name.dart';
 import '../../primitives/memory_utils.dart';
 
@@ -271,7 +274,16 @@ class SnapshotTaker {
   Future<AdaptedHeapData?> take() async {
     final snapshot = await snapshotMemory();
     if (snapshot == null) return null;
-    return AdaptedHeapData.fromHeapSnapshot(snapshot);
+    late final AdaptedHeapData result;
+    ga.timeSync(
+      analytics_constants.memory,
+      analytics_constants.MemoryTimeAnalytics.adaptSnapshot,
+      syncOperation: () => result = AdaptedHeapData.fromHeapSnapshot(snapshot),
+      screenMetricsProvider: () => _SnapshotAnalyticsMetrics(
+        numberOfObjects: snapshot.objects.length,
+      ),
+    );
+    return result;
   }
 }
 
@@ -287,4 +299,12 @@ mixin Sealable {
   /// See doc for the mixin [Sealable].
   bool get isSealed => _isSealed;
   bool _isSealed = false;
+}
+
+class _SnapshotAnalyticsMetrics extends ScreenAnalyticsMetrics {
+  _SnapshotAnalyticsMetrics({
+    required this.numberOfObjects,
+  });
+
+  final int numberOfObjects;
 }
