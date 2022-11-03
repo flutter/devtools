@@ -89,12 +89,16 @@ void main() {
 
         await eventsController.clearData();
         expect(eventsController.data!.timelineEvents, isEmpty);
-        expect(eventsController.legacyController.matchesForSearch('test'),
-            isEmpty,);
+        expect(
+          eventsController.legacyController.matchesForSearch('test'),
+          isEmpty,
+        );
 
         eventsController.addTimelineEvent(goldenUiTimelineEvent..deepCopy());
-        expect(eventsController.legacyController.matchesForSearch('test'),
-            isEmpty,);
+        expect(
+          eventsController.legacyController.matchesForSearch('test'),
+          isEmpty,
+        );
 
         final matches =
             eventsController.legacyController.matchesForSearch('frame');

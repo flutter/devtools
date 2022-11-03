@@ -5,6 +5,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() async {
   test('performance controller', () {
-    // TODO(kenz): add better test coverage for [PerformanceController].    
+    // TODO(kenz): add better test coverage for [PerformanceController].
   });
 }
