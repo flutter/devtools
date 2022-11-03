@@ -10,10 +10,9 @@ This is memory leaking application to test memory debugging tools.
 
     b. in another console tabs navigate to the DevTools directory (`cd devtools`) and start the app:
 
-        ```
         cd case_study/memory_leaks/leaking_counter_1
         flutter run -d macos --profile
-        ```
+        
 
     c. Copy the Observatory URL displayed in the console to the connection box in DevTools
 
