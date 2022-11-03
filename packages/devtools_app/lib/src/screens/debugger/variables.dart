@@ -37,10 +37,10 @@ class Variables extends StatelessWidget {
     );
   }
 
-  void onItemPressed(DartObjectNode v, DebuggerController controller) {
+  void onItemPressed(DartObjectNode v, DebuggerController controller) async {
     // On expansion, lazily build the variables tree for performance reasons.
     if (v.isExpanded) {
-      v.children.forEach(buildVariablesTree);
+      await Future.wait(v.children.map(buildVariablesTree));
     }
   }
 }
@@ -76,10 +76,10 @@ class ExpandableVariable extends StatelessWidget {
     );
   }
 
-  void onItemPressed(DartObjectNode v, DebuggerController controller) {
+  void onItemPressed(DartObjectNode v, DebuggerController controller) async {
     // On expansion, lazily build the variables tree for performance reasons.
     if (v.isExpanded) {
-      v.children.forEach(buildVariablesTree);
+      await Future.wait(v.children.map(buildVariablesTree));
     }
   }
 }
