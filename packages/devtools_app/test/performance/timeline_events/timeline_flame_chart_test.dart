@@ -4,20 +4,12 @@
 
 import 'dart:async';
 
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/charts/flame_chart.dart';
-import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/legacy/event_details.dart';
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/legacy/timeline_flame_chart.dart';
-import 'package:devtools_app/src/screens/performance/performance_controller.dart';
-import 'package:devtools_app/src/screens/performance/performance_screen.dart';
 import 'package:devtools_app/src/screens/performance/tabbed_performance_view.dart';
-import 'package:devtools_app/src/service/service_manager.dart';
-import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/notifications.dart';
-import 'package:devtools_app/src/shared/preferences.dart';
-import 'package:devtools_app/src/shared/split.dart';
-import 'package:devtools_app/src/shared/version.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -25,8 +17,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
-import '../matchers/matchers.dart';
-import '../test_data/performance.dart';
+import '../../matchers/matchers.dart';
+import '../../test_data/performance.dart';
 
 void main() {
   FakeServiceManager fakeServiceManager;
@@ -166,12 +158,14 @@ void main() {
         await tester.runAsync(() async {
           await pumpPerformanceScreenBody(tester, runAsync: true);
           controller
-            ..addFrame(testFrame1.shallowCopy())
-            ..addTimelineEvent(goldenUiTimelineEvent)
-            ..addTimelineEvent(goldenRasterTimelineEvent);
+            ..flutterFramesController.addFrame(testFrame1.shallowCopy())
+            ..timelineEventsController.addTimelineEvent(goldenUiTimelineEvent)
+            ..timelineEventsController
+                .addTimelineEvent(goldenRasterTimelineEvent);
           final data = controller.data!;
           expect(data.frames.length, equals(1));
-          await controller.toggleSelectedFrame(data.frames.first);
+          await controller.flutterFramesController
+              .toggleSelectedFrame(data.frames.first);
           await tester.pumpAndSettle();
         });
         expect(find.byType(TimelineFlameChart), findsOneWidget);

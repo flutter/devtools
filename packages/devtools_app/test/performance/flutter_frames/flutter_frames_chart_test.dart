@@ -3,15 +3,9 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
-import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
-import 'package:devtools_app/src/screens/performance/panes/flutter_frames/flutter_frame_model.dart';
 import 'package:devtools_app/src/screens/performance/panes/flutter_frames/flutter_frames_chart.dart';
-import 'package:devtools_app/src/screens/performance/performance_controller.dart';
-import 'package:devtools_app/src/service/service_manager.dart';
-import 'package:devtools_app/src/shared/common_widgets.dart';
-import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/notifications.dart';
 import 'package:devtools_app/src/ui/colors.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
@@ -20,19 +14,13 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../test_data/performance.dart';
 
 void main() {
-  Future<void> pumpChart(
-    WidgetTester tester, {
-    required List<FlutterFrame> frames,
-    bool isVisible = true,
-  }) async {
+  late FlutterFramesController framesController;
+
+  Future<void> pumpChart(WidgetTester tester) async {
     await tester.pumpWidget(
       wrapWithControllers(
-        FlutterFramesChart(
-          frames: frames,
-          displayRefreshRate: defaultRefreshRate,
-          isVisible: isVisible,
-        ),
-        performance: PerformanceController(),
+        FlutterFramesChart(framesController),
+        bannerMessages: BannerMessagesController(),
       ),
     );
     await tester.pumpAndSettle();
@@ -52,27 +40,32 @@ void main() {
       setGlobal(OfflineModeController, OfflineModeController());
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(NotificationService, NotificationService());
-      frameAnalysisSupported = true;
+
+      framesController = FlutterFramesController(
+        createMockPerformanceControllerWithDefaults(),
+      );
 
       // This flag should never be turned on in production.
       expect(debugFrames, isFalse);
     });
 
     testWidgets('builds with no frames', (WidgetTester tester) async {
-      await pumpChart(tester, frames: []);
+      framesController.clearData();
+      await pumpChart(tester);
       expect(find.byType(FramesChartControls), findsOneWidget);
       expect(find.byType(Legend), findsOneWidget);
       expect(find.byType(AverageFPS), findsOneWidget);
       expect(find.byType(FlutterFramesChartItem), findsNothing);
     });
 
-    testWidgets('builds nothing when isVisible is false',
+    testWidgets('builds nothing when visibility is false',
         (WidgetTester tester) async {
-      await pumpChart(
-        tester,
-        frames: [testFrame0, testFrame1],
-        isVisible: false,
-      );
+      framesController
+        ..addFrame(testFrame0)
+        ..addFrame(testFrame1)
+        ..toggleShowFlutterFrames(false);
+
+      await pumpChart(tester);
       expect(find.byType(FramesChartControls), findsNothing);
       expect(find.byType(Legend), findsNothing);
       expect(find.byType(AverageFPS), findsNothing);
@@ -80,7 +73,11 @@ void main() {
     });
 
     testWidgets('builds with frames', (WidgetTester tester) async {
-      await pumpChart(tester, frames: [testFrame0, testFrame1]);
+      framesController
+        ..addFrame(testFrame0)
+        ..addFrame(testFrame1);
+
+      await pumpChart(tester);
       expect(find.byType(FramesChartControls), findsOneWidget);
       expect(find.byType(Legend), findsOneWidget);
       expect(find.byType(AverageFPS), findsOneWidget);
@@ -88,7 +85,9 @@ void main() {
     });
 
     testWidgets('builds with janky frame', (WidgetTester tester) async {
-      await pumpChart(tester, frames: [jankyFrame]);
+      framesController.addFrame(jankyFrame);
+
+      await pumpChart(tester);
       expect(find.byType(FlutterFramesChartItem), findsOneWidget);
       final ui =
           tester.widget(find.byKey(const Key('frame 2 - ui'))) as Container;
@@ -99,7 +98,9 @@ void main() {
     });
 
     testWidgets('builds with janky frame ui only', (WidgetTester tester) async {
-      await pumpChart(tester, frames: [jankyFrameUiOnly]);
+      framesController.addFrame(jankyFrameUiOnly);
+
+      await pumpChart(tester);
       expect(find.byType(FlutterFramesChartItem), findsOneWidget);
       final ui =
           tester.widget(find.byKey(const Key('frame 3 - ui'))) as Container;
@@ -111,7 +112,9 @@ void main() {
 
     testWidgets('builds with janky frame raster only',
         (WidgetTester tester) async {
-      await pumpChart(tester, frames: [jankyFrameRasterOnly]);
+      framesController.addFrame(jankyFrameRasterOnly);
+
+      await pumpChart(tester);
       expect(find.byType(FlutterFramesChartItem), findsOneWidget);
       final ui =
           tester.widget(find.byKey(const Key('frame 4 - ui'))) as Container;
@@ -123,7 +126,9 @@ void main() {
 
     testWidgets('builds with janky frame with shader jank',
         (WidgetTester tester) async {
-      await pumpChart(tester, frames: [testFrameWithShaderJank]);
+      framesController.addFrame(testFrameWithShaderJank);
+
+      await pumpChart(tester);
       expect(find.byType(FlutterFramesChartItem), findsOneWidget);
       final ui =
           tester.widget(find.byKey(const Key('frame 5 - ui'))) as Container;
@@ -139,7 +144,9 @@ void main() {
 
     testWidgets('builds with janky frame with subtle shader jank',
         (WidgetTester tester) async {
-      await pumpChart(tester, frames: [testFrameWithSubtleShaderJank]);
+      framesController.addFrame(testFrameWithSubtleShaderJank);
+
+      await pumpChart(tester);
       expect(find.byType(FlutterFramesChartItem), findsOneWidget);
       final ui =
           tester.widget(find.byKey(const Key('frame 6 - ui'))) as Container;
@@ -151,6 +158,21 @@ void main() {
           as Container;
       expect(shaders.color, equals(shaderCompilationColor.background));
       expect(find.byType(ShaderJankWarningIcon), findsNothing);
+    });
+
+    testWidgets('can pause and resume frame recording from controls',
+        (WidgetTester tester) async {
+      await pumpChart(tester);
+      expect(find.byIcon(Icons.pause), findsOneWidget);
+      expect(find.byIcon(Icons.play_arrow), findsOneWidget);
+
+      expect(framesController.recordingFrames.value, isTrue);
+      await tester.tap(find.byIcon(Icons.pause));
+      await tester.pumpAndSettle();
+      expect(framesController.recordingFrames.value, isFalse);
+      await tester.tap(find.byIcon(Icons.play_arrow));
+      await tester.pumpAndSettle();
+      expect(framesController.recordingFrames.value, isTrue);
     });
   });
 
@@ -168,7 +190,9 @@ void main() {
                 builder: (context) {
                   return FlutterFramesChartItem(
                     index: 0,
-                    controller: createMockPerformanceControllerWithDefaults(),
+                    framesController:
+                        createMockPerformanceControllerWithDefaults()
+                            .flutterFramesController,
                     frame: testFrame0,
                     selected: true,
                     msPerPx: 1,

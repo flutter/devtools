@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../test_data/performance.dart';
 
 void main() {
-  group('FlutterFrame', () {
+  group('$FlutterFrame', () {
     test('shaderDuration', () {
       expect(testFrame0.shaderDuration.inMicroseconds, equals(0));
       expect(testFrame1.shaderDuration.inMicroseconds, equals(0));
@@ -45,6 +45,41 @@ void main() {
       expect(
         testFrameWithSubtleShaderJank.hasShaderJank(defaultRefreshRate),
         isFalse,
+      );
+    });
+
+    test(
+        'UI event flow sets frame.timeFromEventFlows end time if it completes after raster event flow',
+        () {
+      final uiEvent = goldenUiTimelineEvent.deepCopy()
+        ..time = (TimeRange()
+          ..start = const Duration(microseconds: 5000)
+          ..end = const Duration(microseconds: 8000));
+      final rasterEvent = goldenRasterTimelineEvent.deepCopy()
+        ..time = (TimeRange()
+          ..start = const Duration(microseconds: 6000)
+          ..end = const Duration(microseconds: 7000));
+
+      final frame = FlutterFrame.parse({
+        'number': 1,
+        'startTime': 100,
+        'elapsed': 200,
+        'build': 40,
+        'raster': 50,
+        'vsyncOverhead': 10,
+      });
+      frame.setEventFlow(rasterEvent, type: TimelineEventType.raster);
+      expect(frame.timeFromEventFlows.start, isNull);
+      expect(frame.timeFromEventFlows.end, isNull);
+
+      frame.setEventFlow(uiEvent, type: TimelineEventType.ui);
+      expect(
+        frame.timeFromEventFlows.start,
+        equals(const Duration(microseconds: 5000)),
+      );
+      expect(
+        frame.timeFromEventFlows.end,
+        equals(const Duration(microseconds: 8000)),
       );
     });
   });

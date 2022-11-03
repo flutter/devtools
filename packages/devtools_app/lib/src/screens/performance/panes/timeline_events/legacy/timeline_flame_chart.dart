@@ -22,11 +22,12 @@ import '../../../../../shared/theme.dart';
 import '../../../../../shared/utils.dart';
 import '../../../../../ui/colors.dart';
 import '../../../../../ui/utils.dart';
-import 'event_details.dart';
 import '../../../performance_controller.dart';
 import '../../../performance_model.dart';
 import '../../../performance_utils.dart';
 import '../../flutter_frames/flutter_frame_model.dart';
+import '../timeline_events_controller.dart';
+import 'event_details.dart';
 
 class TimelineEventsView extends StatelessWidget {
   const TimelineEventsView({
@@ -39,7 +40,7 @@ class TimelineEventsView extends StatelessWidget {
   @visibleForTesting
   static const emptyTimelineKey = Key('Empty Timeline');
 
-  final PerformanceController controller;
+  final TimelineEventsController controller;
 
   final bool processing;
 
@@ -86,17 +87,20 @@ class TimelineEventsView extends StatelessWidget {
                 controller.data!,
                 width: constraints.maxWidth,
                 height: constraints.maxHeight,
-                selectionNotifier: controller.selectedTimelineEvent,
-                searchMatchesNotifier: controller.searchMatches,
-                activeSearchMatchNotifier: controller.activeSearchMatch,
+                selectionNotifier:
+                    controller.legacyController.selectedTimelineEvent,
+                searchMatchesNotifier:
+                    controller.legacyController.searchMatches,
+                activeSearchMatchNotifier:
+                    controller.legacyController.activeSearchMatch,
                 onDataSelected: controller.selectTimelineEvent,
               );
             },
           ),
           ValueListenableBuilder<TimelineEvent?>(
-            valueListenable: controller.selectedTimelineEvent,
+            valueListenable: controller.legacyController.selectedTimelineEvent,
             builder: (context, selectedEvent, _) {
-              return EventDetails(selectedEvent);
+              return EventDetails(selectedEvent, controller.legacyController);
             },
           ),
         ],
@@ -204,13 +208,13 @@ class TimelineFlameChartState
 
     // If there is already a selected frame, handle setting that data and
     // positioning/zooming the flame chart accordingly.
-    _selectedFrame = controller.selectedFrame.value;
+    _selectedFrame = controller.flutterFramesController.selectedFrame.value;
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _centerSelectedFrame();
     });
 
     addAutoDisposeListener(
-      controller.selectedFrame,
+      controller.flutterFramesController.selectedFrame,
       _handleSelectedFrame,
     );
   }
@@ -236,7 +240,7 @@ class TimelineFlameChartState
   double topYForData(TimelineEvent data) {
     final eventGroupKey = PerformanceUtils.computeEventGroupKey(
       data,
-      controller.threadNamesById,
+      controller.timelineEventsController.threadNamesById,
     );
     final eventGroup = widget.data.eventGroups[eventGroupKey]!;
     final rowOffsetInGroup = eventGroup.rowIndexForEvent[data]!;
@@ -350,7 +354,8 @@ class TimelineFlameChartState
   }
 
   void _handleSelectedFrame() async {
-    final selectedFrame = controller.selectedFrame.value;
+    final selectedFrame =
+        controller.flutterFramesController.selectedFrame.value;
     if (selectedFrame == _selectedFrame) return;
 
     setState(() {
@@ -368,9 +373,11 @@ class TimelineFlameChartState
       final time = _selected.timeToCenterFrame();
       final event = _selected.eventToCenterFrame();
       if (time == null || event == null) {
-        if (controller.firstWellFormedFrameMicros != null &&
+        final firstWellFormedFrameMicros =
+            controller.flutterFramesController.firstWellFormedFrameMicros;
+        if (firstWellFormedFrameMicros != null &&
             _selected.timeFromFrameTiming.start!.inMicroseconds <
-                controller.firstWellFormedFrameMicros!) {
+                firstWellFormedFrameMicros) {
           notificationService.push(
             'No timeline events available for the selected frame. Timeline '
             'events occurred too long ago before DevTools could access them. '

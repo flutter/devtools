@@ -21,20 +21,50 @@ import '../../../../shared/utils.dart';
 import '../../../../ui/colors.dart';
 import '../../../../ui/hover.dart';
 import '../../../../ui/utils.dart';
-import '../../performance_controller.dart';
 import '../../performance_screen.dart';
 import '../../performance_utils.dart';
 import 'flutter_frame_model.dart';
+import 'flutter_frames_controller.dart';
 
 // Turn this flag on to see when flutter frames are linked with timeline events.
 bool debugFrames = false;
 
-class FlutterFramesChart extends StatefulWidget {
-  const FlutterFramesChart({
+class FlutterFramesChart extends StatelessWidget {
+  const FlutterFramesChart(this.framesController, {super.key});
+
+  final FlutterFramesController framesController;
+
+  @override
+  Widget build(BuildContext context) {
+    return DualValueListenableBuilder<List<FlutterFrame>, double>(
+      firstListenable: framesController.flutterFrames,
+      secondListenable: framesController.displayRefreshRate,
+      builder: (context, frames, displayRefreshRate, child) {
+        return ValueListenableBuilder<bool>(
+          valueListenable: framesController.showFlutterFramesChart,
+          builder: (context, show, _) {
+            return _FlutterFramesChart(
+              framesController: framesController,
+              frames: frames,
+              displayRefreshRate: displayRefreshRate,
+              isVisible: show,
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+class _FlutterFramesChart extends StatefulWidget {
+  const _FlutterFramesChart({
+    required this.framesController,
     required this.frames,
     required this.displayRefreshRate,
     required this.isVisible,
   });
+
+  final FlutterFramesController framesController;
 
   final List<FlutterFrame> frames;
 
@@ -46,10 +76,8 @@ class FlutterFramesChart extends StatefulWidget {
   _FlutterFramesChartState createState() => _FlutterFramesChartState();
 }
 
-class _FlutterFramesChartState extends State<FlutterFramesChart>
-    with
-        AutoDisposeMixin,
-        ProvidedControllerMixin<PerformanceController, FlutterFramesChart> {
+class _FlutterFramesChartState extends State<_FlutterFramesChart>
+    with AutoDisposeMixin {
   static const _defaultFrameWidthWithPadding =
       FlutterFramesChartItem.defaultFrameWidth + densePadding * 2;
 
@@ -77,26 +105,24 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
   void initState() {
     super.initState();
     _framesScrollController = ScrollController();
+
+    cancelListeners();
+    _selectedFrame = widget.framesController.selectedFrame.value;
+    addAutoDisposeListener(widget.framesController.selectedFrame, () {
+      setState(() {
+        _selectedFrame = widget.framesController.selectedFrame.value;
+      });
+    });
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!initController()) return;
-
-    cancelListeners();
-    _selectedFrame = controller.selectedFrame.value;
-    addAutoDisposeListener(controller.selectedFrame, () {
-      setState(() {
-        _selectedFrame = controller.selectedFrame.value;
-      });
-    });
-
     _maybeShowShaderJankMessage();
   }
 
   @override
-  void didUpdateWidget(FlutterFramesChart oldWidget) {
+  void didUpdateWidget(_FlutterFramesChart oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (_framesScrollController.hasClients &&
         _framesScrollController.atScrollBottom) {
@@ -157,7 +183,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
           Padding(
             padding: EdgeInsets.only(bottom: _frameChartScrollbarOffset),
             child: FramesChartControls(
-              controller: controller,
+              framesController: widget.framesController,
               frames: widget.frames,
               displayRefreshRate: widget.displayRefreshRate,
             ),
@@ -183,7 +209,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
                 itemCount: widget.frames.length,
                 itemExtent: _defaultFrameWidthWithPadding,
                 itemBuilder: (context, index) => FlutterFramesChartItem(
-                  controller: controller,
+                  framesController: widget.framesController,
                   index: index,
                   frame: widget.frames[index],
                   selected: widget.frames[index] == _selectedFrame,
@@ -236,7 +262,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
 @visibleForTesting
 class FramesChartControls extends StatelessWidget {
   const FramesChartControls({
-    required this.controller,
+    required this.framesController,
     required this.frames,
     required this.displayRefreshRate,
   });
@@ -245,7 +271,7 @@ class FramesChartControls extends StatelessWidget {
 
   static const _resumeTooltip = 'Resume Flutter frame recording';
 
-  final PerformanceController controller;
+  final FlutterFramesController framesController;
 
   final List<FlutterFrame> frames;
 
@@ -258,7 +284,7 @@ class FramesChartControls extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ValueListenableBuilder<bool>(
-          valueListenable: controller.recordingFrames,
+          valueListenable: framesController.recordingFrames,
           builder: (context, recording, child) {
             return PauseResumeButtonGroup(
               paused: !recording,
@@ -291,19 +317,19 @@ class FramesChartControls extends StatelessWidget {
 
   void _pauseFrameRecording() {
     ga.select(analytics_constants.performance, analytics_constants.pause);
-    controller.toggleRecordingFrames(false);
+    framesController.toggleRecordingFrames(false);
   }
 
   void _resumeFrameRecording() {
     ga.select(analytics_constants.performance, analytics_constants.resume);
-    controller.toggleRecordingFrames(true);
+    framesController.toggleRecordingFrames(true);
   }
 }
 
 class FlutterFramesChartItem extends StatelessWidget {
   const FlutterFramesChartItem({
     required this.index,
-    required this.controller,
+    required this.framesController,
     required this.frame,
     required this.selected,
     required this.msPerPx,
@@ -318,7 +344,7 @@ class FlutterFramesChartItem extends StatelessWidget {
   static const selectedFrameIndicatorKey =
       Key('flutter frames chart - selected frame indicator');
 
-  final PerformanceController controller;
+  final FlutterFramesController framesController;
 
   final int index;
 
@@ -457,7 +483,7 @@ class FlutterFramesChartItem extends StatelessWidget {
   }
 
   void _selectFrame() {
-    if (frame != controller.selectedFrame.value) {
+    if (frame != framesController.selectedFrame.value) {
       // TODO(kenz): the shader time could be missing here if a frame is
       // selected before timeline events are associated with the
       // FlutterFrame. If this is the case, process the analytics call once
@@ -472,7 +498,7 @@ class FlutterFramesChartItem extends StatelessWidget {
         ),
       );
     }
-    unawaited(controller.toggleSelectedFrame(frame));
+    unawaited(framesController.toggleSelectedFrame(frame));
   }
 }
 

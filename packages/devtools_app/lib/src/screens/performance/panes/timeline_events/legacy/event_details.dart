@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart' hide TimelineEvent;
 
 import '../../../../../primitives/trace_event.dart';
@@ -14,11 +13,11 @@ import '../../../../../shared/theme.dart';
 import '../../../../profiler/cpu_profile_controller.dart';
 import '../../../../profiler/cpu_profile_model.dart';
 import '../../../../profiler/cpu_profiler.dart';
-import '../../../performance_controller.dart';
 import '../../../performance_model.dart';
+import '../timeline_events_controller.dart';
 
 class EventDetails extends StatelessWidget {
-  const EventDetails(this.selectedEvent);
+  const EventDetails(this.selectedEvent, this.legacyController);
 
   static const instructions =
       'Select an event from the Timeline to view details';
@@ -26,13 +25,14 @@ class EventDetails extends StatelessWidget {
 
   final TimelineEvent? selectedEvent;
 
+  final LegacyTimelineEventsController legacyController;
+
   @override
   Widget build(BuildContext context) {
     // TODO(kenz): when in offlineMode and selectedEvent doesn't match the event
     // from the offline data, show message notifying that CPU profile data is
     // unavailable for snapshots and provide link to return to offline profile
     // (see html_event_details.dart).
-    final controller = Provider.of<PerformanceController>(context);
     final theme = Theme.of(context);
     return OutlineDecoration(
       child: Column(
@@ -46,10 +46,7 @@ class EventDetails extends StatelessWidget {
             child: selectedEvent != null
                 ? ValueListenableBuilder<bool>(
                     valueListenable: offlineController.offlineMode,
-                    builder: (context, offline, _) => _buildDetails(
-                      controller,
-                      offline,
-                    ),
+                    builder: (context, offline, _) => _buildDetails(offline),
                   )
                 : _buildInstructions(theme),
           ),
@@ -67,20 +64,21 @@ class EventDetails extends StatelessWidget {
         '${selected.name} (${msText(selected.time.duration)})';
   }
 
-  Widget _buildDetails(PerformanceController controller, bool offlineMode) {
+  Widget _buildDetails(bool offlineMode) {
     final selected = selectedEvent!;
     if (selected.isUiEvent) {
       // In [offlineController.offlineMode], we do not need to worry about
       // whether the profiler is enabled.
       if (offlineMode) {
-        return _buildCpuProfiler(controller.cpuProfilerController);
+        return _buildCpuProfiler(legacyController.cpuProfilerController);
       }
       return ValueListenableBuilder<Flag>(
-        valueListenable: controller.cpuProfilerController.profilerFlagNotifier!,
+        valueListenable:
+            legacyController.cpuProfilerController.profilerFlagNotifier!,
         builder: (context, profilerFlag, _) {
           return profilerFlag.valueAsString == 'true'
-              ? _buildCpuProfiler(controller.cpuProfilerController)
-              : CpuProfilerDisabled(controller.cpuProfilerController);
+              ? _buildCpuProfiler(legacyController.cpuProfilerController)
+              : CpuProfilerDisabled(legacyController.cpuProfilerController);
         },
       );
     }

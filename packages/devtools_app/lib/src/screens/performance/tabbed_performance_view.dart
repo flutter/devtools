@@ -14,13 +14,16 @@ import '../../primitives/feature_flags.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
 import '../../shared/theme.dart';
+import '../../shared/utils.dart';
 import '../../ui/search.dart';
 import '../../ui/tab.dart';
 import 'panes/flutter_frames/flutter_frame_model.dart';
+import 'panes/flutter_frames/flutter_frames_controller.dart';
 import 'panes/frame_analysis/frame_analysis.dart';
 import 'panes/raster_stats/raster_stats.dart';
-import 'panes/timeline_events/perfetto/perfetto.dart';
 import 'panes/timeline_events/legacy/timeline_flame_chart.dart';
+import 'panes/timeline_events/perfetto/perfetto.dart';
+import 'panes/timeline_events/timeline_events_controller.dart';
 import 'performance_controller.dart';
 import 'performance_screen.dart';
 
@@ -28,12 +31,9 @@ final timelineSearchFieldKey = GlobalKey(debugLabel: 'TimelineSearchFieldKey');
 
 class TabbedPerformanceView extends StatefulWidget {
   const TabbedPerformanceView({
-    required this.controller,
     required this.processing,
     required this.processingProgress,
   });
-
-  final PerformanceController controller;
 
   final bool processing;
 
@@ -44,21 +44,37 @@ class TabbedPerformanceView extends StatefulWidget {
 }
 
 class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
-    with AutoDisposeMixin, SearchFieldMixin<TabbedPerformanceView> {
+    with
+        AutoDisposeMixin,
+        SearchFieldMixin<TabbedPerformanceView>,
+        ProvidedControllerMixin<PerformanceController, TabbedPerformanceView> {
   static const _gaPrefix = 'performanceTab';
 
-  PerformanceController get controller => widget.controller;
+  late FlutterFramesController _flutterFramesController;
+
+  late TimelineEventsController _timelineEventsController;
 
   FlutterFrame? _selectedFlutterFrame;
 
   @override
   void initState() {
     super.initState();
+  }
 
-    _selectedFlutterFrame = controller.selectedFrame.value;
-    addAutoDisposeListener(controller.selectedFrame, () {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!initController()) return;
+
+    _timelineEventsController = controller.timelineEventsController;
+    _flutterFramesController = controller.flutterFramesController;
+
+    cancelListeners();
+
+    _selectedFlutterFrame = _flutterFramesController.selectedFrame.value;
+    addAutoDisposeListener(_flutterFramesController.selectedFrame, () {
       setState(() {
-        _selectedFlutterFrame = controller.selectedFrame.value;
+        _selectedFlutterFrame = _flutterFramesController.selectedFrame.value;
       });
     });
   }
@@ -86,28 +102,29 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
 
     final isFlutterApp = serviceManager.connectedApp!.isFlutterAppNow!;
     final tabViews = [
-      if (frameAnalysisSupported && isFlutterApp)
+      if (isFlutterApp)
         KeepAliveWrapper(
           child: frameAnalysisView,
         ),
-      if (rasterStatsSupported && isFlutterApp)
+      if (isFlutterApp)
         KeepAliveWrapper(
           child: rasterStats,
         ),
       ValueListenableBuilder<bool>(
-        valueListenable: controller.useLegacyTraceViewer,
+        valueListenable: _timelineEventsController.useLegacyTraceViewer,
         builder: (context, useLegacy, _) {
           return (useLegacy || !FeatureFlags.embeddedPerfetto)
               ? KeepAliveWrapper(
                   child: TimelineEventsView(
-                    controller: controller,
+                    controller: _timelineEventsController,
                     processing: widget.processing,
                     processingProgress: widget.processingProgress,
                   ),
                 )
               : KeepAliveWrapper(
                   child: EmbeddedPerfetto(
-                    perfettoController: controller.perfettoController,
+                    perfettoController:
+                        _timelineEventsController.perfettoController,
                   ),
                 );
         },
@@ -126,11 +143,10 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
     final hasData = data != null && !data.isEmpty;
     final searchFieldEnabled = hasData && !widget.processing;
     return [
-      if (frameAnalysisSupported && isFlutterApp)
+      if (isFlutterApp) ...[
         _buildTab(
           tabName: 'Frame Analysis',
         ),
-      if (rasterStatsSupported && isFlutterApp)
         _buildTab(
           tabName: 'Raster Stats',
           trailing: Row(
@@ -148,22 +164,25 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
                     PerformanceScreen.id,
                     analytics_constants.collectRasterStats,
                   );
-                  unawaited(controller.collectRasterStats());
+                  unawaited(
+                    controller.rasterStatsController.collectRasterStats(),
+                  );
                 },
               ),
               const SizedBox(width: denseSpacing),
               ClearButton(
                 outlined: false,
-                onPressed: controller.rasterStatsController.clear,
+                onPressed: controller.rasterStatsController.clearData,
               ),
               const SizedBox(width: densePadding),
             ],
           ),
         ),
+      ],
       _buildTab(
         tabName: 'Timeline Events',
         trailing: ValueListenableBuilder<bool>(
-          valueListenable: controller.useLegacyTraceViewer,
+          valueListenable: _timelineEventsController.useLegacyTraceViewer,
           builder: (context, useLegacy, _) {
             return Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -175,7 +194,9 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
                     gaSelection: analytics_constants.timelineFlameChartHelp,
                   ),
                 ],
-                RefreshTimelineEventsButton(controller: controller),
+                RefreshTimelineEventsButton(
+                  controller: _timelineEventsController,
+                ),
               ],
             );
           },
@@ -189,7 +210,7 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
       width: defaultSearchTextWidth,
       height: defaultTextFieldHeight,
       child: buildSearchField(
-        controller: controller,
+        controller: _timelineEventsController.legacyController,
         searchFieldKey: timelineSearchFieldKey,
         searchFieldEnabled: searchFieldEnabled,
         shouldRequestFocus: false,
@@ -214,7 +235,7 @@ class RefreshTimelineEventsButton extends StatelessWidget {
     required this.controller,
   }) : super(key: key);
 
-  final PerformanceController controller;
+  final TimelineEventsController controller;
 
   @override
   Widget build(BuildContext context) {
