@@ -306,5 +306,5 @@ class _SnapshotAnalyticsMetrics extends ScreenAnalyticsMetrics {
     required this.numberOfObjects,
   });
 
-  final int? numberOfObjects;
+  final int numberOfObjects;
 }
