@@ -9,7 +9,7 @@ import 'package:devtools_app/src/primitives/listenable.dart';
 import 'package:devtools_app/src/screens/performance/panes/flutter_frames/flutter_frame_model.dart';
 import 'package:devtools_app/src/screens/performance/panes/frame_analysis/frame_analysis.dart';
 import 'package:devtools_app/src/screens/performance/panes/raster_stats/raster_stats.dart';
-import 'package:devtools_app/src/screens/performance/panes/timeline_events/timeline_flame_chart.dart';
+import 'package:devtools_app/src/screens/performance/panes/timeline_events/legacy/timeline_flame_chart.dart';
 import 'package:devtools_app/src/screens/performance/performance_controller.dart';
 import 'package:devtools_app/src/screens/performance/tabbed_performance_view.dart';
 import 'package:devtools_app/src/service/service_manager.dart';

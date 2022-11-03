@@ -20,7 +20,7 @@ import 'panes/flutter_frames/flutter_frame_model.dart';
 import 'panes/frame_analysis/frame_analysis.dart';
 import 'panes/raster_stats/raster_stats.dart';
 import 'panes/timeline_events/perfetto/perfetto.dart';
-import 'panes/timeline_events/timeline_flame_chart.dart';
+import 'panes/timeline_events/legacy/timeline_flame_chart.dart';
 import 'performance_controller.dart';
 import 'performance_screen.dart';
 
