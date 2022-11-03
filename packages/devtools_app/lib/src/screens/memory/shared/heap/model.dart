@@ -6,10 +6,9 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../../../analytics/analytics.dart' as ga;
 import '../../../../analytics/analytics_common.dart';
-import '../../../../analytics/constants.dart';
+import '../../../../analytics/constants.dart' as analytics_constants;
 import '../../primitives/class_name.dart';
 import '../../primitives/memory_utils.dart';
-import '../../primitives/simple_elements.dart';
 
 /// Names for json fields.
 class _JsonFields {
@@ -277,8 +276,8 @@ class SnapshotTaker {
     if (snapshot == null) return null;
     late final AdaptedHeapData result;
     ga.timeSync(
-      memory,
-      MemoryTimeAnalytics.adaptSnapshot,
+      analytics_constants.memory,
+      analytics_constants.MemoryTimeAnalytics.adaptSnapshot,
       syncOperation: () => result = AdaptedHeapData.fromHeapSnapshot(snapshot),
       screenMetricsProvider: () => _SnapshotAnalyticsMetrics(
         numberOfObjects: snapshot.objects.length,
