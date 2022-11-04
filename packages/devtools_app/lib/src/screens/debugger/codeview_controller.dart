@@ -57,6 +57,13 @@ class CodeViewController extends DisposableController
   final ScriptsHistory scriptsHistory = ScriptsHistory();
   late VoidCallback _scriptHistoryListener;
 
+  ValueListenable<bool> get showCodeCoverage => _showCodeCoverage;
+  final _showCodeCoverage = ValueNotifier<bool>(false);
+
+  void toggleShowCodeCoverage() {
+    _showCodeCoverage.value = !_showCodeCoverage.value;
+  }
+
   void clearState() {
     // It would be nice to not clear the script history but it is currently
     // coupled to ScriptRef objects so that is unsafe.
@@ -119,6 +126,38 @@ class CodeViewController extends DisposableController
     scriptsHistory.current.addListener(_scriptHistoryListener);
   }
 
+  Future<void> refreshCodeCoverage() async {
+    final hitLines = <int>{};
+    final missedLines = <int>{};
+    final current = parsedScript.value;
+    if (current == null) {
+      return;
+    }
+    final isolateRef = serviceManager.isolateManager.selectedIsolate.value!;
+    final report = await _getCoverageReport(isolateRef, current.script);
+    if (report != null) {
+      for (final range in report.ranges!) {
+        final coverage = range.coverage!;
+        hitLines.addAll(coverage.hits!);
+        missedLines.addAll(coverage.misses!);
+      }
+    }
+    if (report != null) {
+      for (final range in report.ranges!) {
+        final coverage = range.coverage!;
+        hitLines.addAll(coverage.hits!);
+        missedLines.addAll(coverage.misses!);
+      }
+    }
+    parsedScript.value = ParsedScript(
+      script: current.script,
+      highlighter: current.highlighter,
+      executableLines: current.executableLines,
+      hitLines: hitLines,
+      missedLines: missedLines,
+    );
+  }
+
   /// Resets the current script information before invoking [showScriptLocation].
   void resetScriptLocation(ScriptLocation scriptLocation) {
     _scriptLocation.value = null;
@@ -143,6 +182,23 @@ class CodeViewController extends DisposableController
     _scriptLocation.value = scriptLocation;
   }
 
+  Future<SourceReport?> _getCoverageReport(
+      IsolateRef isolateRef, ScriptRef script) async {
+    try {
+      final report = await serviceManager.service!.getSourceReport(
+        isolateRef.id!,
+        const [SourceReportKind.kCoverage],
+        scriptId: script.id!,
+        reportLines: true,
+      );
+      return report;
+    } catch (e) {
+      // Ignore - not supported for all vm service implementations.
+      log('$e');
+      return null;
+    }
+  }
+
   /// Parses the current script into executable lines and prepares the script
   /// for syntax highlighting.
   Future<void> _parseCurrentScript() async {
@@ -160,9 +216,12 @@ class CodeViewController extends DisposableController
     // Gather the data to display breakable lines.
     var executableLines = <int>{};
 
+    final hitLines = <int>{};
+    final missedLines = <int>{};
+
     if (script != null) {
+      final isolateRef = serviceManager.isolateManager.selectedIsolate.value!;
       try {
-        final isolateRef = serviceManager.isolateManager.selectedIsolate.value;
         final positions = await breakpointManager.getBreakablePositions(
           isolateRef,
           script,
@@ -172,10 +231,20 @@ class CodeViewController extends DisposableController
         // Ignore - not supported for all vm service implementations.
         log('$e');
       }
+      final report = await _getCoverageReport(isolateRef, script);
+      if (report != null) {
+        for (final range in report.ranges!) {
+          final coverage = range.coverage!;
+          hitLines.addAll(coverage.hits!);
+          missedLines.addAll(coverage.misses!);
+        }
+      }
       parsedScript.value = ParsedScript(
         script: script,
         highlighter: highlighter,
         executableLines: executableLines,
+        hitLines: hitLines,
+        missedLines: missedLines,
       );
     }
   }
@@ -261,6 +330,8 @@ class ParsedScript {
     required this.script,
     required this.highlighter,
     required this.executableLines,
+    required this.hitLines,
+    required this.missedLines,
   }) : lines = (script.source?.split('\n') ?? const []).toList();
 
   final Script script;
@@ -268,6 +339,9 @@ class ParsedScript {
   final SyntaxHighlighter highlighter;
 
   final Set<int> executableLines;
+
+  final Set<int> hitLines;
+  final Set<int> missedLines;
 
   final List<String> lines;
 

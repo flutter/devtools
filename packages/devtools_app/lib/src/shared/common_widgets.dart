@@ -356,6 +356,7 @@ class RefreshButton extends IconLabelButton {
     Key? key,
     String? tooltip,
     required VoidCallback? onPressed,
+    bool outlined = true,
   })  : isIconButton = true,
         super(
           key: key,
@@ -363,13 +364,15 @@ class RefreshButton extends IconLabelButton {
           label: '',
           tooltip: tooltip,
           onPressed: onPressed,
+          outlined: outlined,
+          minScreenWidthForTextBeforeScaling: 20000,
         );
 
   final bool isIconButton;
 
   @override
   Widget build(BuildContext context) {
-    if (!isIconButton) {
+    if (!isIconButton || !outlined) {
       return super.build(context);
     }
     return OutlinedIconButton(
@@ -1065,6 +1068,7 @@ class ToggleButton extends StatelessWidget {
     required this.isSelected,
     required this.message,
     required this.icon,
+    this.hideBorder = false,
     this.label,
   }) : super(key: key);
 
@@ -1077,6 +1081,8 @@ class ToggleButton extends StatelessWidget {
   final IconData icon;
 
   final Text? label;
+
+  final bool hideBorder;
 
   @override
   Widget build(BuildContext context) {
@@ -1091,6 +1097,7 @@ class ToggleButton extends StatelessWidget {
           key: key,
           onPressed: onPressed,
           style: TextButton.styleFrom(
+            side: hideBorder ? BorderSide.none : null,
             backgroundColor: isSelected
                 ? theme.colorScheme.toggleButtonBackgroundColor
                 : Colors.transparent,

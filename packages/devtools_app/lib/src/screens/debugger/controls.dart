@@ -53,6 +53,8 @@ class _DebuggingControlsState extends State<DebuggingControls>
           _stepButtons(canStep: canStep),
           const SizedBox(width: denseSpacing),
           BreakOnExceptionsControl(controller: controller),
+          const SizedBox(width: denseSpacing),
+          CodeCoverageToggle(controller: controller),
           const Expanded(child: SizedBox(width: denseSpacing)),
           _librariesButton(),
         ],
@@ -134,6 +136,50 @@ class _DebuggingControlsState extends State<DebuggingControls>
           ),
         );
       },
+    );
+  }
+}
+
+class CodeCoverageToggle extends StatelessWidget {
+  const CodeCoverageToggle({
+    super.key,
+    required this.controller,
+  });
+
+  final DebuggerController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return RoundedOutlinedBorder(
+      child: ValueListenableBuilder<bool>(
+        valueListenable: controller.codeViewController.showCodeCoverage,
+        builder: (context, selected, _) {
+          return Row(
+            children: [
+              ToggleButton(
+                label: const Text('Show Coverage'),
+                message: 'Show code coverage',
+                icon: Codicons.checklist,
+                isSelected: selected,
+                hideBorder: true,
+                onPressed: controller.codeViewController.toggleShowCodeCoverage,
+              ),
+              LeftBorder(
+                child: IconLabelButton(
+                  label: '',
+                  tooltip: 'Refresh code coverage statistics',
+                  outlined: false,
+                  onPressed: selected
+                      ? controller.codeViewController.refreshCodeCoverage
+                      : null,
+                  minScreenWidthForTextBeforeScaling: 20000,
+                  icon: Icons.refresh,
+                ),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 }

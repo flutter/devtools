@@ -349,10 +349,13 @@ class _CodeViewState extends State<CodeView>
 
                 return Row(
                   children: [
-                    ValueListenableBuilder<List<BreakpointAndSourcePosition>>(
-                      valueListenable:
+                    DualValueListenableBuilder<
+                        List<BreakpointAndSourcePosition>, bool>(
+                      firstListenable:
                           breakpointManager.breakpointsWithLocation,
-                      builder: (context, breakpoints, _) {
+                      secondListenable:
+                          widget.codeViewController.showCodeCoverage,
+                      builder: (context, breakpoints, showCodeCoverage, _) {
                         return Gutter(
                           gutterWidth: gutterWidth,
                           scrollController: gutterController,
@@ -365,11 +368,15 @@ class _CodeViewState extends State<CodeView>
                           executableLines: parsedScript != null
                               ? parsedScript!.executableLines
                               : <int>{},
+                          hitLines: parsedScript != null
+                              ? parsedScript!.hitLines
+                              : <int>{},
                           onPressed: _onPressed,
                           // Disable dots for possible breakpoint locations.
                           allowInteraction:
                               !(widget.debuggerController?.isSystemIsolate ??
                                   false),
+                          showCodeCoverage: showCodeCoverage,
                         );
                       },
                     ),
@@ -547,6 +554,8 @@ class Gutter extends StatelessWidget {
     required this.executableLines,
     required this.onPressed,
     required this.allowInteraction,
+    required this.hitLines,
+    this.showCodeCoverage = true,
   });
 
   final double gutterWidth;
@@ -556,8 +565,10 @@ class Gutter extends StatelessWidget {
   final StackFrameAndSourcePosition? pausedFrame;
   final List<BreakpointAndSourcePosition> breakpoints;
   final Set<int> executableLines;
+  final Set<int> hitLines;
   final IntCallback onPressed;
   final bool allowInteraction;
+  final bool showCodeCoverage;
 
   @override
   Widget build(BuildContext context) {
@@ -575,6 +586,10 @@ class Gutter extends StatelessWidget {
         itemCount: lineCount,
         itemBuilder: (context, index) {
           final lineNum = lineOffset + index + 1;
+          bool? coverageHit;
+          if (showCodeCoverage) {
+            coverageHit = hitLines.contains(lineNum);
+          }
           return GutterItem(
             lineNumber: lineNum,
             onPressed: () => onPressed(lineNum),
@@ -582,6 +597,7 @@ class Gutter extends StatelessWidget {
             isExecutable: executableLines.contains(lineNum),
             isPausedHere: pausedFrame?.line == lineNum,
             allowInteraction: allowInteraction,
+            coverageHit: coverageHit,
           );
         },
       ),
@@ -598,6 +614,7 @@ class GutterItem extends StatelessWidget {
     required this.isPausedHere,
     required this.onPressed,
     required this.allowInteraction,
+    required this.coverageHit,
   }) : super(key: key);
 
   final int lineNumber;
@@ -607,6 +624,8 @@ class GutterItem extends StatelessWidget {
   final bool isExecutable;
 
   final bool allowInteraction;
+
+  final bool? coverageHit;
 
   /// Whether the execution point is currently paused here.
   final bool isPausedHere;
@@ -622,13 +641,19 @@ class GutterItem extends StatelessWidget {
 
     final bpBoxSize = breakpointRadius * 2;
     final executionPointIndent = scaleByFontFactor(10.0);
-
+    Color? color;
+    if (coverageHit != null && isExecutable) {
+      color = coverageHit!
+          ? theme.colorScheme.coverageHitColor
+          : theme.colorScheme.coverageMissColor;
+    }
     return InkWell(
       onTap: onPressed,
       // Force usage of default mouse pointer when gutter interaction is
       // disabled.
       mouseCursor: allowInteraction ? null : SystemMouseCursors.basic,
       child: Container(
+        color: color,
         height: CodeView.rowHeight,
         padding: const EdgeInsets.only(right: 4.0),
         child: Stack(
