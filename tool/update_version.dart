@@ -367,7 +367,12 @@ class AutoUpdateCommand extends Command {
       default:
         newVersion = incrementVersionByType(currentVersion, type);
         // TODO: updating doesn't make sense right now so the placement of the cycle will need to change.
-        await cycleReleaseNotes(newVersion: SemanticVersion.parse(newVersion));
+        /**
+   * NOTE we are going to be doing a fresh commit with the clean version, then bumping the number.
+   * make sure the version passed here reflects that
+   */
+        await cycleReleaseNotes(
+            newVersion: SemanticVersion.parse(currentVersion));
     }
     if (newVersion == null) {
       throw 'Failed to determine the newVersion.';
