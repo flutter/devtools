@@ -80,9 +80,12 @@ class TimelineStreamSettings extends StatelessWidget {
       CheckboxSetting(
         title: 'Network',
         description: 'Http traffic',
-        notifier: controller.httpTimelineLoggingEnabled as ValueNotifier<bool?>,
-        onChanged: (value) =>
-            unawaited(controller.toggleHttpRequestLogging(value ?? false)),
+        notifier: controller.timelineEventsController.httpTimelineLoggingEnabled
+            as ValueNotifier<bool?>,
+        onChanged: (value) => unawaited(
+          controller.timelineEventsController
+              .toggleHttpRequestLogging(value ?? false),
+        ),
       ),
     ];
   }
@@ -137,14 +140,16 @@ class FlutterSettings extends StatelessWidget {
       children: [
         ...dialogSubHeader(Theme.of(context), 'Additional Settings'),
         CheckboxSetting(
-          notifier: controller.badgeTabForJankyFrames as ValueNotifier<bool?>,
+          notifier: controller.flutterFramesController.badgeTabForJankyFrames
+              as ValueNotifier<bool?>,
           title: 'Badge Performance tab when Flutter UI jank is detected',
         ),
         if (FeatureFlags.embeddedPerfetto)
           CheckboxSetting(
-            notifier: controller.useLegacyTraceViewer,
+            notifier: controller.timelineEventsController.useLegacyTraceViewer,
             title: 'Use legacy trace viewer',
-            onChanged: controller.toggleUseLegacyTraceViewer,
+            onChanged:
+                controller.timelineEventsController.toggleUseLegacyTraceViewer,
           ),
       ],
     );

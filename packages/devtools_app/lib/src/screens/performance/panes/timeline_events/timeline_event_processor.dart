@@ -6,12 +6,13 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 
-import '../../config_specific/logger/logger.dart';
-import '../../primitives/trace_event.dart';
-import '../../primitives/utils.dart';
-import 'performance_controller.dart';
-import 'performance_model.dart';
-import 'performance_utils.dart';
+import '../../../../config_specific/logger/logger.dart';
+import '../../../../primitives/trace_event.dart';
+import '../../../../primitives/utils.dart';
+import '../../performance_controller.dart';
+import '../../performance_model.dart';
+import '../../performance_utils.dart';
+import 'timeline_events_controller.dart';
 
 // For documentation, see the Chrome "Trace Event Format" document:
 // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU.
@@ -27,13 +28,16 @@ const String uiEventName = 'Animator::BeginFrame';
 
 /// Processor for composing a recorded list of trace events into a timeline of
 /// [AsyncTimelineEvent]s, [SyncTimelineEvent]s, and [FlutterFrame]s.
-class TimelineEventProcessor {
-  TimelineEventProcessor(this.performanceController);
+class LegacyTimelineEventProcessor {
+  LegacyTimelineEventProcessor(this.performanceController);
 
   /// Number of traceEvents we will process in each batch.
   static const _defaultBatchSize = 2000;
 
   final PerformanceController performanceController;
+
+  TimelineEventsController get eventsController =>
+      performanceController.timelineEventsController;
 
   /// Notifies with the current progress value of processing Timeline data.
   ///
@@ -101,7 +105,7 @@ class TimelineEventProcessor {
         .toList();
 
     for (final trace in _traceEvents) {
-      performanceController.recordTrace(trace.event.json);
+      eventsController.recordTrace(trace.event.json);
     }
 
     // At minimum, process the data in 4 batches to smooth the appearance of
@@ -126,7 +130,7 @@ class TimelineEventProcessor {
       // async event tree. Add these "repaired" events to the timeline.
       if (!rootEvent.isWellFormedDeep) continue;
 
-      performanceController.addTimelineEvent(rootEvent);
+      eventsController.addTimelineEvent(rootEvent);
       idsToRemove.add(rootEvent.asyncUID);
     }
     idsToRemove.forEach(_asyncEventsById.remove);
@@ -212,7 +216,7 @@ class TimelineEventProcessor {
         (force ||
             currentProcessingTime! >
                 _pendingRootCompleteEvent!.time.end!.inMicroseconds)) {
-      performanceController.addTimelineEvent(_pendingRootCompleteEvent!);
+      eventsController.addTimelineEvent(_pendingRootCompleteEvent!);
       _pendingRootCompleteEvent = null;
     }
   }
@@ -243,7 +247,7 @@ class TimelineEventProcessor {
         // [timelineEvent] is a new root with the same id as
         // [currentEventWithId]. Since [currentEventWithId] is well formed, add
         // it to the timeline.
-        performanceController.addTimelineEvent(currentEventWithId);
+        eventsController.addTimelineEvent(currentEventWithId);
         _asyncEventsById[eventWrapper.event.asyncUID] = timelineEvent;
       } else {
         if (eventWrapper.event.phase != TraceEvent.asyncInstantPhase &&
@@ -464,7 +468,7 @@ class TimelineEventProcessor {
     // If we have reached a null parent, this event is fully formed - add it to
     // the timeline and try to assign it to a Flutter frame.
     if (current.parent == null) {
-      performanceController.addTimelineEvent(current);
+      eventsController.addTimelineEvent(current);
     }
   }
 
