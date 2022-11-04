@@ -145,12 +145,10 @@ class MemoryTime {
   static const updateValues = 'updateValues';
 }
 
-const treemapToggle = 'treemap';
-
 /// Analytic event constants specific for memory screen.
 class MemoryEvent {
   static const gc = 'gc';
-  static const settings = 'settings';
+  //static const settings = 'settings';
   static const autoSnapshot = 'autoSnapshot';
 
   static const chartLegend = 'chartLegend';
@@ -159,34 +157,34 @@ class MemoryEvent {
   static const chartCollapse = 'chartCollapse';
   static const chartInterval = 'chartInterval';
 
-  static const profileDownloadCsv = 'profileDownloadCsv';
-  static const profileRefreshManual = 'profileRefreshManual';
-  static const profileRefreshOnGc = 'profileRefreshOnGc';
+  //static const profileDownloadCsv = 'profileDownloadCsv';
+  //static const profileRefreshManual = 'profileRefreshManual';
+  //static const profileRefreshOnGc = 'profileRefreshOnGc';
 
-  static const allocationClear = 'allocationClear';
-  static const allocationRefresh = 'allocationRefresh';
-  static const allocationFilter = 'allocationFilter';
-  static const allocationTrace = 'allocationTrace';
-  static const allocationHelp = 'allocationHelp';
+  //static const allocationClear = 'allocationClear';
+  //static const allocationRefresh = 'allocationRefresh';
+  //static const allocationFilter = 'allocationFilter';
+  //static const allocationTrace = 'allocationTrace';
+  //static const allocationHelp = 'allocationHelp';
 
-  static const diffTakeSnapshot = 'diffTakeSnapshot';
-  static const diffClearSnapshots = 'diffClearSnapshots';
+  //static const diffTakeSnapshot = 'diffTakeSnapshot';
+  //static const diffClearSnapshots = 'diffClearSnapshots';
 
-  static const diffSnapshotDiff = 'diffSnapshotDiff';
-  static const diffSnapshotFilter = 'diffSnapshotFilter';
-  static const diffSnapshotDownloadCsv = 'diffSnapshotDownloadCsv';
-  static const diffSnapshotDelete = 'diffSnapshotDelete';
+  //static const diffSnapshotDiff = 'diffSnapshotDiff';
+  //static const diffSnapshotFilter = 'diffSnapshotFilter';
+  //static const diffSnapshotDownloadCsv = 'diffSnapshotDownloadCsv';
+  //static const diffSnapshotDelete = 'diffSnapshotDelete';
 
-  static const diffClassSelect = 'diffClassSelect';
-  static const diffPathSelect = 'diffPathSelect';
-  static const diffPathCopy = 'diffPathCopy';
-  static const diffPathFilter = 'diffPathFilter';
-  static const diffPathUnfilter = 'diffPathUnfilter';
-  static const diffPathRevert = 'diffPathRevert';
-  static const diffPathUnrevert = 'diffPathUnrevert';
+  //static const diffClassSelect = 'diffClassSelect';
+  //static const diffPathSelect = 'diffPathSelect';
+  //static const diffPathCopy = 'diffPathCopy';
+  //static const diffPathFilter = 'diffPathFilter';
+  //static const diffPathUnfilter = 'diffPathUnfilter';
+  //static const diffPathRevert = 'diffPathRevert';
+  //static const diffPathUnrevert = 'diffPathUnrevert';
 
-  static const diffSnapshotFilterAll = 'diffSnapshotFilterAll';
-  static const diffSnapshotFilterExcept = 'diffSnapshotFilterExcept';
-  static const diffSnapshotFilterOnly = 'diffSnapshotFilterOnly';
-  static const diffSnapshotFilterReset = 'diffSnapshotFilterReset';
+  //static const diffSnapshotFilterAll = 'diffSnapshotFilterAll';
+  //static const diffSnapshotFilterExcept = 'diffSnapshotFilterExcept';
+  //static const diffSnapshotFilterOnly = 'diffSnapshotFilterOnly';
+  //static const diffSnapshotFilterReset = 'diffSnapshotFilterReset';
 }

@@ -635,11 +635,6 @@ class _HeapTreeViewState extends State<HeapTreeView>
                 value: treeMapVisible,
                 onChanged: controller.snapshotByLibraryData != null
                     ? (value) {
-                        ga.select(
-                          analytics_constants.memory,
-                          '${analytics_constants.treemapToggle}-'
-                          '${value ? 'show' : 'hide'}',
-                        );
                         controller.toggleTreeMapVisible(value);
                       }
                     : null,
