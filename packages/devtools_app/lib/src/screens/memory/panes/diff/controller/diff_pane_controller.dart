@@ -44,6 +44,17 @@ class DiffPaneController extends DisposableController {
   // is taken, and is used to assign a unique id to each [SnapshotListItem].
   int _snapshotId = 0;
 
+  VoidCallback? takeSnapshotHandler(String gaEvent) {
+    if (_isTakingSnapshot.value) return null;
+    return () async {
+      ga.select(
+        analytics_constants.memory,
+        gaEvent,
+      );
+      await takeSnapshot();
+    };
+  }
+
   Future<void> takeSnapshot() async {
     _isTakingSnapshot.value = true;
     final snapshots = core._snapshots;

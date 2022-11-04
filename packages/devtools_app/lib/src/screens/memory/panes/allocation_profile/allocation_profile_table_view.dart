@@ -417,7 +417,8 @@ class _RefreshOnGCToggleButton extends StatelessWidget {
 class _ProfileHelpLink extends StatelessWidget {
   const _ProfileHelpLink({Key? key}) : super(key: key);
 
-  static const _documentationTopic = 'allocationProfile';
+  static const _documentationTopic =
+      analytics_constants.MemoryEvent.profileHelp;
 
   @override
   Widget build(BuildContext context) {

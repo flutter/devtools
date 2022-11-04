@@ -94,7 +94,8 @@ class AllocationProfileTracingViewState
 class _ProfileHelpLink extends StatelessWidget {
   const _ProfileHelpLink({Key? key}) : super(key: key);
 
-  static const _documentationTopic = 'allocationTracing';
+  static const _documentationTopic =
+      analytics_constants.MemoryEvent.tracingHelp;
 
   @override
   Widget build(BuildContext context) {

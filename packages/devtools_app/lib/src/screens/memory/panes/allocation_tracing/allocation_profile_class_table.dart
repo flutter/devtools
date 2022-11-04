@@ -12,6 +12,8 @@ import '../../../../shared/table/table_data.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import 'allocation_profile_tracing_view_controller.dart';
+import '../../../../analytics/analytics.dart' as ga;
+import '../../../../analytics/constants.dart' as analytics_constants;
 
 /// The default width for columns containing *mostly* numeric data (e.g.,
 /// instances, memory).
@@ -43,6 +45,10 @@ class _TraceCheckBoxColumn extends ColumnData<TracedClass>
     return Checkbox(
       value: item.traceAllocations,
       onChanged: (value) async {
+        ga.select(
+          analytics_constants.memory,
+          '${analytics_constants.MemoryEvent.tracingTraceCheck}-$value',
+        );
         await controller.setAllocationTracingForClass(item.cls, value!);
       },
     );
@@ -121,7 +127,13 @@ class _AllocationTracingTableState extends State<AllocationTracingTable> {
           child: DevToolsClearableTextField(
             labelText: 'Class Filter',
             hintText: 'Filter by class name',
-            onChanged: widget.controller.updateClassFilter,
+            onChanged: (value) {
+              ga.select(
+                analytics_constants.memory,
+                analytics_constants.MemoryEvent.tracingClassFilter,
+              );
+              widget.controller.updateClassFilter(value);
+            },
             controller: widget.controller.textEditingController,
           ),
         ),

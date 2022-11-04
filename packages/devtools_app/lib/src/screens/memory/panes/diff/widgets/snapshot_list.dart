@@ -10,6 +10,8 @@ import '../../../../../shared/table/table.dart';
 import '../../../../../shared/theme.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/item_controller.dart';
+import '../../../../../analytics/analytics.dart' as ga;
+import '../../../../../analytics/constants.dart' as analytics_constants;
 
 class SnapshotList extends StatelessWidget {
   const SnapshotList({Key? key, required this.controller}) : super(key: key);
@@ -46,7 +48,9 @@ class _ListControlPane extends StatelessWidget {
             ToolbarAction(
               icon: Icons.fiber_manual_record,
               tooltip: 'Take heap snapshot for the selected isolate',
-              onPressed: takeSnapshotEnabled ? controller.takeSnapshot : null,
+              onPressed: controller.takeSnapshotHandler(
+                analytics_constants.MemoryEvent.diffTakeSnapshotControlPane,
+              ),
             ),
             ToolbarAction(
               icon: Icons.block,

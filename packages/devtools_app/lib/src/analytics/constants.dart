@@ -160,14 +160,17 @@ class MemoryEvent {
   static const profileDownloadCsv = 'profileDownloadCsv';
   static const profileRefreshManual = 'profileRefreshManual';
   static const profileRefreshOnGc = 'profileRefreshOnGc';
+  static const profileHelp = 'memoryProfileHelp';
 
   static const tracingClear = 'tracingClear';
   static const tracingRefresh = 'tracingRefresh';
-  //static const tracingFilter = 'tracingFilter';
-  //static const tracingTrace = 'tracingTrace';
-  //static const tracingHelp = 'tracingHelp';
+  static const tracingClassFilter = 'tracingClassFilter';
+  static const tracingTraceCheck = 'tracingTraceCheck';
+  static const tracingHelp = 'memoryTracingHelp';
 
-  //static const diffTakeSnapshot = 'diffTakeSnapshot';
+  static const diffTakeSnapshotControlPane = 'diffTakeSnapshotControlPane';
+  static const diffTakeSnapshotButtonAfterHelp =
+      'diffTakeSnapshotButtonAfterHelp';
   //static const diffClearSnapshots = 'diffClearSnapshots';
 
   //static const diffSnapshotDiff = 'diffSnapshotDiff';

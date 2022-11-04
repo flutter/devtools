@@ -13,6 +13,8 @@ import 'controller/item_controller.dart';
 import 'widgets/snapshot_control_pane.dart';
 import 'widgets/snapshot_list.dart';
 import 'widgets/snapshot_view.dart';
+import '../../../../analytics/analytics.dart' as ga;
+import '../../../../analytics/constants.dart' as analytics_constants;
 
 class DiffPane extends StatelessWidget {
   const DiffPane({Key? key, required this.diffController}) : super(key: key);
@@ -59,7 +61,10 @@ class _SnapshotItemContent extends StatelessWidget {
                 const Expanded(child: Markdown(data: _snapshotDocumentation)),
                 const SizedBox(height: denseSpacing),
                 IconLabelButton(
-                  onPressed: () async => await controller.takeSnapshot(),
+                  onPressed: controller.takeSnapshotHandler(
+                    analytics_constants
+                        .MemoryEvent.diffTakeSnapshotButtonAfterHelp,
+                  ),
                   icon: Icons.fiber_manual_record,
                   label: 'Take Snapshot',
                 )
