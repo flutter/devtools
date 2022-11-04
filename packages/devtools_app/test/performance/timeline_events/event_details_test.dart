@@ -2,22 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
-import 'package:devtools_app/src/screens/performance/event_details.dart';
-import 'package:devtools_app/src/screens/performance/performance_controller.dart';
-import 'package:devtools_app/src/screens/performance/performance_model.dart';
+import 'package:devtools_app/src/screens/performance/panes/timeline_events/legacy/event_details.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profiler.dart';
-import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/service/vm_flags.dart' as vm_flags;
-import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/notifications.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-import '../test_data/performance.dart';
+import '../../test_data/performance.dart';
 
 void main() {
   const windowSize = Size(2000.0, 1000.0);
@@ -29,11 +24,18 @@ void main() {
       TimelineEvent? selectedEvent,
       WidgetTester tester,
     ) async {
-      eventDetails = EventDetails(selectedEvent);
+      final performanceController =
+          createMockPerformanceControllerWithDefaults();
+      final timelineEventsController =
+          TimelineEventsController(performanceController);
+      eventDetails = EventDetails(
+        selectedEvent,
+        timelineEventsController.legacyController,
+      );
       await tester.pumpWidget(
         wrapWithControllers(
           eventDetails,
-          performance: PerformanceController(),
+          performance: performanceController,
         ),
       );
       expect(find.byType(EventDetails), findsOneWidget);

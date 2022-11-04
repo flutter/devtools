@@ -33,7 +33,8 @@ class FrameHints extends StatelessWidget {
   Widget build(BuildContext context) {
     final performanceController = Provider.of<PerformanceController>(context);
     final frame = frameAnalysis.frame;
-    final displayRefreshRate = performanceController.displayRefreshRate.value;
+    final displayRefreshRate =
+        performanceController.flutterFramesController.displayRefreshRate.value;
     final showUiJankHints = frame.isUiJanky(displayRefreshRate);
     final showRasterJankHints = frame.isRasterJanky(displayRefreshRate);
     if (!(showUiJankHints || showRasterJankHints)) {
