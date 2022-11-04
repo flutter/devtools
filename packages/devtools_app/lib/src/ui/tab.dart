@@ -81,7 +81,6 @@ class AnalyticsTabbedView<T> extends StatefulWidget {
     required this.gaScreen,
     this.outlined = true,
     this.sendAnalytics = true,
-    this.onTabChanged,
   })  : trailingWidgets = List.generate(
           tabs.length,
           (index) => tabs[index].trailing ?? const SizedBox(),
@@ -103,8 +102,6 @@ class AnalyticsTabbedView<T> extends StatefulWidget {
   /// Only set this to false if [AnalyticsTabbedView] is being used for
   /// experimental code we do not want to send GA events for yet.
   final bool sendAnalytics;
-
-  final void Function(int)? onTabChanged;
 
   @override
   _AnalyticsTabbedViewState createState() => _AnalyticsTabbedViewState();
@@ -146,7 +143,6 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
     if (_currentTabControllerIndex != newIndex) {
       setState(() {
         _currentTabControllerIndex = newIndex;
-        widget.onTabChanged?.call(newIndex);
       });
       if (widget.sendAnalytics) {
         ga.select(
