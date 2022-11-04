@@ -187,8 +187,6 @@ class MemoryEvent {
   static const diffPathFilter = 'diffPathFilter';
   static const diffPathInvert = 'diffPathRevert';
 
-  //static const diffSnapshotFilterAll = 'diffSnapshotFilterAll';
-  //static const diffSnapshotFilterExcept = 'diffSnapshotFilterExcept';
-  //static const diffSnapshotFilterOnly = 'diffSnapshotFilterOnly';
-  //static const diffSnapshotFilterReset = 'diffSnapshotFilterReset';
+  static const diffSnapshotFilterType = 'diffSnapshotFilterType';
+  static const diffSnapshotFilterReset = 'diffSnapshotFilterReset';
 }

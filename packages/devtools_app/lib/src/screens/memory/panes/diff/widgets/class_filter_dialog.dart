@@ -11,6 +11,8 @@ import '../../../../../shared/theme.dart';
 import '../../../../../shared/utils.dart';
 import '../../../shared/heap/class_filter.dart';
 import '../controller/utils.dart';
+import '../../../../../analytics/analytics.dart' as ga;
+import '../../../../../analytics/constants.dart' as analytics_constants;
 
 class ClassFilterDialog extends StatefulWidget {
   const ClassFilterDialog(
@@ -89,9 +91,18 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
     return StateUpdateDialog(
       title: 'Filter Classes and Packages',
       helpText: _helpText,
-      onResetDefaults: () =>
-          setState(() => _loadStateFromFilter(ClassFilter.empty())),
+      onResetDefaults: () {
+        ga.select(
+          analytics_constants.memory,
+          analytics_constants.MemoryEvent.diffSnapshotFilterReset,
+        );
+        setState(() => _loadStateFromFilter(ClassFilter.empty()));
+      },
       onApply: () {
+        ga.select(
+          analytics_constants.memory,
+          '${analytics_constants.MemoryEvent.diffSnapshotFilterType}-$_type',
+        );
         final newFilter = ClassFilter(
           filterType: _type,
           except: _except.text,
