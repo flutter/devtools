@@ -37,6 +37,7 @@ class TraceEvent {
   static const durationCompletePhase = 'X';
   static const flowStartPhase = 's';
   static const flowEndPhase = 'f';
+  static const metadataEventPhase = 'M';
 
   static const gcCategory = 'GC';
 

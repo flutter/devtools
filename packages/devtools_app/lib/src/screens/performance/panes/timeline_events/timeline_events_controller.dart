@@ -41,6 +41,9 @@ class TimelineEventsController extends PerformanceFeatureController
     legacyController = LegacyTimelineEventsController(performanceController);
   }
 
+  /// Controller that contains business logic for the legacy trace viewer.
+  ///
+  /// This controller will be used when [useLegacyTraceViewer.value] is true.
   late final LegacyTimelineEventsController legacyController;
 
   final perfettoController = createPerfettoController();
@@ -50,8 +53,15 @@ class TimelineEventsController extends PerformanceFeatureController
   /// This list is cleared and repopulated each time "Refresh" is clicked.
   final allTraceEvents = <TraceEventWrapper>[];
 
+  /// Trace event name for the events used to populate [threadNamesById].
+  static const _threadNameEvent = 'thread_name';
+
+  /// Maps thread names, which are gathererd from the "thread_name" trace
+  /// events, to their thread ids.
   final threadNamesById = <int, String>{};
 
+  /// Whether we should be using the legacy trace viewer or the new Perfetto
+  /// trace viewer.
   final useLegacyTraceViewer =
       ValueNotifier<bool>(!FeatureFlags.embeddedPerfetto || !kIsWeb);
 
@@ -73,9 +83,9 @@ class TimelineEventsController extends PerformanceFeatureController
 
   int _nextPollStartMicros = 0;
 
-  static const timelinePollingRateLimit = 5.0;
+  static const _timelinePollingRateLimit = 5.0;
 
-  static const timelinePollingInterval = Duration(seconds: 1);
+  static const _timelinePollingInterval = Duration(seconds: 1);
 
   RateLimiter? _timelinePollingRateLimiter;
 
@@ -118,7 +128,7 @@ class TimelineEventsController extends PerformanceFeatureController
     _processing.value = false;
 
     _timelinePollingRateLimiter = RateLimiter(
-      timelinePollingRateLimit,
+      _timelinePollingRateLimit,
       _pullTraceEventsFromVmTimeline,
     );
 
@@ -126,7 +136,7 @@ class TimelineEventsController extends PerformanceFeatureController
     // We are polling here instead of listening to the timeline event stream
     // because the event stream is sending out of order and duplicate events.
     // See https://github.com/dart-lang/sdk/issues/46605.
-    _pollingTimer = Timer.periodic(timelinePollingInterval, (_) {
+    _pollingTimer = Timer.periodic(_timelinePollingInterval, (_) {
       _timelinePollingRateLimiter!.scheduleRequest();
     });
   }
@@ -155,7 +165,8 @@ class TimelineEventsController extends PerformanceFeatureController
         traceEvent,
         DateTime.now().millisecondsSinceEpoch,
       );
-      if (traceEvent.phase == 'M' && traceEvent.name == 'thread_name') {
+      if (traceEvent.phase == TraceEvent.metadataEventPhase &&
+          traceEvent.name == _threadNameEvent) {
         threadNameEvents.add(traceEvent);
       }
       allTraceEvents.add(eventWrapper);
@@ -311,7 +322,7 @@ class TimelineEventsController extends PerformanceFeatureController
       if (!frame.isWellFormed && !frameBeforeFirstWellFormedFrame) {
         assert(!_processing.value);
         _processing.value = true;
-        await Future.delayed(timelinePollingInterval, () async {
+        await Future.delayed(_timelinePollingInterval, () async {
           if (framesController.currentFrameBeingSelected != frame) return;
           await processTraceEvents(allTraceEvents);
           _processing.value = false;
