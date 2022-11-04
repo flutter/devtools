@@ -282,7 +282,7 @@ AdaptedHeapData _adaptSnapshotGaWrapper(HeapSnapshotGraph graph) {
   late final AdaptedHeapData result;
   ga.timeSync(
     analytics_constants.memory,
-    analytics_constants.MemoryTimeAnalytics.adaptSnapshot,
+    analytics_constants.MemoryTime.adaptSnapshot,
     syncOperation: () => result = AdaptedHeapData.fromHeapSnapshot(graph),
     screenMetricsProvider: () => _SnapshotAnalyticsMetrics(
       numberOfObjects: graph.objects.length,

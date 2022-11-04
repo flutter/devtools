@@ -323,7 +323,7 @@ class MemoryPreferencesController extends DisposableController
         if (androidCollectionEnabled.value) {
           ga.select(
             analytics_constants.memory,
-            analytics_constants.androidChart,
+            analytics_constants.MemoryEvent.chartAndroid,
           );
         }
       },
@@ -341,7 +341,7 @@ class MemoryPreferencesController extends DisposableController
         if (autoSnapshotEnabled.value) {
           ga.select(
             analytics_constants.memory,
-            analytics_constants.autoSnapshot,
+            analytics_constants.MemoryEvent.autoSnapshot,
           );
         }
       },
@@ -360,8 +360,8 @@ class MemoryPreferencesController extends DisposableController
         ga.select(
           analytics_constants.memory,
           showChart.value
-              ? analytics_constants.showChart
-              : analytics_constants.hideChart,
+              ? analytics_constants.MemoryEvent.chartExpand
+              : analytics_constants.MemoryEvent.chartCollapse,
         );
       },
     );

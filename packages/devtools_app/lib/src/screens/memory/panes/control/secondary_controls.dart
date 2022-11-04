@@ -79,7 +79,10 @@ class SecondaryControls extends StatelessWidget {
   }
 
   Future<void> _gc() async {
-    ga.select(analytics_constants.memory, analytics_constants.gc);
+    ga.select(
+      analytics_constants.memory,
+      analytics_constants.MemoryEvent.gc,
+    );
     controller.memoryTimeline.addGCEvent();
     await controller.gc();
   }

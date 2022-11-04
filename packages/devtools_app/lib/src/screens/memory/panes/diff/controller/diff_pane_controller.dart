@@ -344,7 +344,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
 
     ga.timeStart(
       analytics_constants.memory,
-      analytics_constants.MemoryTimeAnalytics.updateValues,
+      analytics_constants.MemoryTime.updateValues,
     );
 
     _updatingValues = true;
@@ -355,7 +355,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
 
     ga.timeEnd(
       analytics_constants.memory,
-      analytics_constants.MemoryTimeAnalytics.updateValues,
+      analytics_constants.MemoryTime.updateValues,
     );
 
     _assertIntegrity();

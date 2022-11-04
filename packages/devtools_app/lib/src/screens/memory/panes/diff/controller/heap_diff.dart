@@ -28,7 +28,7 @@ DiffHeapClasses _calculateDiffGaWrapper(_HeapCouple couple) {
   late final DiffHeapClasses result;
   ga.timeSync(
     analytics_constants.memory,
-    analytics_constants.MemoryTimeAnalytics.calculateDiff,
+    analytics_constants.MemoryTime.calculateDiff,
     syncOperation: () => result = DiffHeapClasses(couple),
     screenMetricsProvider: () => _DiffAnalyticsMetrics(
       objectsBefore: couple.older.data.objects.length,

@@ -94,24 +94,6 @@ const profileAppStartUp = 'profileAppStartUp';
 const cpuProfileFlameChartHelp = 'cpuProfileFlameChartHelp';
 const cpuProfileProcessingTime = 'cpuProfileProcessingTime';
 
-// Memory UX actions:
-const gc = 'gc';
-const memoryLegend = 'memoryLegend';
-const memorySettings = 'memorySettings';
-const androidChart = 'androidChart';
-const autoSnapshot = 'autoSnapshot';
-const showChart = 'showChart';
-const hideChart = 'hideChart';
-const groupByPrefix = 'groupBy';
-const trackAllocations = 'trackAllocations';
-const resetAllocationAccumulators = 'resetAllocationAccumulators';
-const autoCompleteSearchSelect = 'autoCompleteSearchSelect';
-const takeSnapshot = 'takeSnapshot';
-const snapshotFilterDialog = 'snapshotFilterDialog';
-const sourcesDropDown = 'sourcesDropDown';
-const memoryDisplayInterval = 'chartInterval';
-const treemapToggle = 'treemap';
-
 // Logging UX actions:
 const structuredErrors = 'structuredErrors';
 const trackRebuildWidgets = 'trackRebuildWidgets';
@@ -157,19 +139,25 @@ String topicDocumentationButton(String topic) => '${topic}DocumentationButton';
 String topicDocumentationLink(String topic) => '${topic}DocumentationLink';
 
 /// Analytic time constants specific for memory screen.
-class MemoryTimeAnalytics {
+class MemoryTime {
   static const adaptSnapshot = 'adaptSnapshot';
   static const calculateDiff = 'calculateDiff';
   static const updateValues = 'updateValues';
 }
 
+const treemapToggle = 'treemap';
+
 /// Analytic event constants specific for memory screen.
-class MemoryEventAnalytics {
+class MemoryEvent {
   static const gc = 'gc';
   static const settings = 'settings';
+  static const autoSnapshot = 'autoSnapshot';
 
+  static const chartLegend = 'chartLegend';
+  static const chartAndroid = 'chartAndroid';
   static const chartExpand = 'chartExpand';
   static const chartCollapse = 'chartCollapse';
+  static const chartInterval = 'chartInterval';
 
   static const profileDownloadCsv = 'profileDownloadCsv';
   static const profileRefreshManual = 'profileRefreshManual';

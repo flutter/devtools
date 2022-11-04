@@ -67,10 +67,6 @@ class _MemorySourceDropdownState extends State<MemorySourceDropdown>
       value: controller.memorySource,
       onChanged: (String? newValue) {
         setState(() {
-          ga.select(
-            analytics_constants.memory,
-            analytics_constants.sourcesDropDown,
-          );
           controller.memorySource = newValue!;
         });
       },

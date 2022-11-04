@@ -279,10 +279,6 @@ class _HeapTreeViewState extends State<HeapTreeView>
     });
 
     addAutoDisposeListener(controller.searchAutoCompleteNotifier, () {
-      ga.select(
-        analytics_constants.memory,
-        analytics_constants.snapshotFilterDialog,
-      );
       controller.handleAutoCompleteOverlay(
         context: context,
         searchFieldKey: memorySearchFieldKey,
@@ -606,10 +602,6 @@ class _HeapTreeViewState extends State<HeapTreeView>
         onChanged: (String? newValue) {
           setState(
             () {
-              ga.select(
-                analytics_constants.memory,
-                '${analytics_constants.groupByPrefix}$newValue',
-              );
               controller.selectedLeaf = null;
               controller.groupingBy.value = newValue!;
               if (controller.snapshots.isNotEmpty) {
@@ -796,11 +788,6 @@ class _HeapTreeViewState extends State<HeapTreeView>
 
   /// Match, found,  select it and process via ValueNotifiers.
   void selectTheMatch(String foundName) {
-    ga.select(
-      analytics_constants.memory,
-      analytics_constants.autoCompleteSearchSelect,
-    );
-
     setState(() {
       if (snapshotDisplay is MemoryHeapTable) {
         controller.groupByTreeTable.dataRoots.every((element) {
@@ -845,11 +832,6 @@ class _HeapTreeViewState extends State<HeapTreeView>
   // TODO: Much of the logic for _takeHeapSnapshot() might want to move into the
   // controller.
   void _takeHeapSnapshot({bool userGenerated = true}) async {
-    ga.select(
-      analytics_constants.memory,
-      analytics_constants.takeSnapshot,
-    );
-
     // VmService not available (disconnected/crashed).
     if (serviceManager.service == null) return;
 
@@ -947,10 +929,6 @@ class _HeapTreeViewState extends State<HeapTreeView>
   }
 
   void _filter() {
-    ga.select(
-      analytics_constants.memory,
-      analytics_constants.snapshotFilterDialog,
-    );
     // TODO(terry): Remove barrierDismissble and make clicking outside
     //              dialog same as cancel.
     // Dialog isn't dismissed by clicking outside the dialog (modal).
