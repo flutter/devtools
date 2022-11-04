@@ -27,8 +27,20 @@ function flutter {
 }
 
 # Get Flutter.
-# echo "Cloning the Flutter master branch"
-# git clone https://github.com/flutter/flutter.git ./flutter-sdk
+echo "Cloning the Flutter master branch"
+# if ./flutter-sdk exists then fetch master
+# otherwise clone it and run it fresh
+#NOTES
+# - make sure whole test runs on candidate
+# - cache entire flutter candidate branch
+# - cache build artifacts from devtools
+if [ -d "/path/to/dir" ]; then
+    pushd ./flutter-sdk
+    git fetch --All
+    popd
+else
+    git clone https://github.com/flutter/flutter.git ./flutter-sdk
+fi
 
 # Look in the dart bin dir first, then the flutter one, then the one for the
 # devtools repo. We don't use the dart script from flutter/bin as that script

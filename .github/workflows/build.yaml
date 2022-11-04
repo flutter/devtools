@@ -26,15 +26,15 @@ jobs:
     steps:
       - name: git clone
         uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
-      - name: flutter clone
-        run: git clone https://github.com/flutter/flutter.git ./flutter-sdk
       - name: Cache Generated Files
         uses: actions/cache@v3
         with:
           path: |
             **/build/
             **/.dart_tool/
-          key: ${{ runner.os }}-build-${{ env.cache-name }}
+            ./flutter-sdk
+          key: ${{ runner.os }}-build 
+          #TODO: flutter candidate in env,
 
       - name: tool/bots.sh
         env:
