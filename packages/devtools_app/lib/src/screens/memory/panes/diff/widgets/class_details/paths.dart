@@ -10,6 +10,8 @@ import '../../../../../../shared/table/table_data.dart';
 import '../../../../../../shared/utils.dart';
 import '../../../../primitives/simple_elements.dart';
 import '../../../../shared/heap/heap.dart';
+import '../../../../../../analytics/analytics.dart' as ga;
+import '../../../../../../analytics/constants.dart' as analytics_constants;
 
 class _RetainingPathColumn extends ColumnData<StatsByPathEntry> {
   _RetainingPathColumn(String className)
@@ -146,6 +148,10 @@ class RetainingPathTable extends StatelessWidget {
       data: entries,
       keyFactory: (e) => Key(e.key.toLongString()),
       selectionNotifier: selection,
+      onItemSelected: (_) => ga.select(
+        analytics_constants.memory,
+        '${analytics_constants.MemoryEvent.diffPathSelect}-${isDiff ? "diff" : "single"}',
+      ),
       defaultSortColumn: columns.shallowSizeColumn,
       defaultSortDirection: SortDirection.descending,
     );

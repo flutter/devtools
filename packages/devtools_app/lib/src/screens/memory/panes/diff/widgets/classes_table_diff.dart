@@ -12,6 +12,8 @@ import '../../../../../shared/utils.dart';
 import '../../../primitives/simple_elements.dart';
 import '../../../shared/shared_memory_widgets.dart';
 import '../controller/heap_diff.dart';
+import '../../../../../analytics/analytics.dart' as ga;
+import '../../../../../analytics/constants.dart' as analytics_constants;
 
 enum _DataPart {
   created,
@@ -51,7 +53,11 @@ class _ClassNameColumn extends ColumnData<DiffClassStats>
     bool isRowSelected = false,
     VoidCallback? onPressed,
   }) =>
-      HeapClassView(theClass: data.heapClass, showCopyButton: isRowSelected);
+      HeapClassView(
+        theClass: data.heapClass,
+        showCopyButton: isRowSelected,
+        copyGaItem: analytics_constants.MemoryEvent.diffClassDiffCopy,
+      );
 }
 
 class _InstanceColumn extends ColumnData<DiffClassStats> {
@@ -210,6 +216,10 @@ class ClassesTableDiff extends StatelessWidget {
       dataKey: dataKey,
       keyFactory: (e) => Key(e.heapClass.fullName),
       selectionNotifier: selection,
+      onItemSelected: (_) => ga.select(
+        analytics_constants.memory,
+        analytics_constants.MemoryEvent.diffClassDiffSelect,
+      ),
       defaultSortColumn: _retainedSizeDeltaColumn,
       defaultSortDirection: SortDirection.descending,
     );

@@ -172,18 +172,20 @@ class MemoryEvent {
   static const diffTakeSnapshotAfterHelp = 'diffTakeSnapshotAfterHelp';
   static const diffClearSnapshots = 'diffClearSnapshots';
 
-  //static const diffSnapshotDiff = 'diffSnapshotDiff';
-  //static const diffSnapshotFilter = 'diffSnapshotFilter';
-  //static const diffSnapshotDownloadCsv = 'diffSnapshotDownloadCsv';
-  //static const diffSnapshotDelete = 'diffSnapshotDelete';
+  static const diffSnapshotDiffSelect = 'diffSnapshotDiffSelect';
+  static const diffSnapshotDiffOff = 'diffSnapshotDiffSelectOff';
+  static const diffSnapshotFilter = 'diffSnapshotFilter';
+  static const diffSnapshotDownloadCsv = 'diffSnapshotDownloadCsv';
+  static const diffSnapshotDelete = 'diffSnapshotDelete';
 
-  //static const diffClassSelect = 'diffClassSelect';
-  //static const diffPathSelect = 'diffPathSelect';
-  //static const diffPathCopy = 'diffPathCopy';
-  //static const diffPathFilter = 'diffPathFilter';
-  //static const diffPathUnfilter = 'diffPathUnfilter';
-  //static const diffPathRevert = 'diffPathRevert';
-  //static const diffPathUnrevert = 'diffPathUnrevert';
+  static const diffClassDiffSelect = 'diffClassDiffSelect';
+  static const diffClassSingleSelect = 'diffClassSingleSelect';
+  static const diffPathSelect = 'diffPathSelect';
+  static const diffClassDiffCopy = 'diffClassDiffCopy';
+  static const diffClassSingleCopy = 'diffClassSingleCopy';
+  static const diffPathCopy = 'diffPathCopy';
+  static const diffPathFilter = 'diffPathFilter';
+  static const diffPathInvert = 'diffPathRevert';
 
   //static const diffSnapshotFilterAll = 'diffSnapshotFilterAll';
   //static const diffSnapshotFilterExcept = 'diffSnapshotFilterExcept';

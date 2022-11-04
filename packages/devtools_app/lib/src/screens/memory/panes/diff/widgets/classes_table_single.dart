@@ -11,6 +11,8 @@ import '../../../../../shared/utils.dart';
 import '../../../primitives/simple_elements.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/shared_memory_widgets.dart';
+import '../../../../../analytics/analytics.dart' as ga;
+import '../../../../../analytics/constants.dart' as analytics_constants;
 
 class _ClassNameColumn extends ColumnData<SingleClassStats>
     implements ColumnRenderer<SingleClassStats> {
@@ -40,7 +42,11 @@ class _ClassNameColumn extends ColumnData<SingleClassStats>
     bool isRowSelected = false,
     VoidCallback? onPressed,
   }) =>
-      HeapClassView(theClass: data.heapClass, showCopyButton: isRowSelected);
+      HeapClassView(
+        theClass: data.heapClass,
+        showCopyButton: isRowSelected,
+        copyGaItem: analytics_constants.MemoryEvent.diffClassSingleCopy,
+      );
 }
 
 class _InstanceColumn extends ColumnData<SingleClassStats> {
@@ -136,6 +142,10 @@ class ClassesTableSingle extends StatelessWidget {
       dataKey: dataKey,
       keyFactory: (e) => Key(e.heapClass.fullName),
       selectionNotifier: selection,
+      onItemSelected: (_) => ga.select(
+        analytics_constants.memory,
+        analytics_constants.MemoryEvent.diffClassSingleSelect,
+      ),
       defaultSortColumn: _shallowSizeColumn,
       defaultSortDirection: SortDirection.descending,
     );

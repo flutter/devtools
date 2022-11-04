@@ -1994,6 +1994,8 @@ class CopyToClipboardControl extends StatelessWidget {
     this.tooltip = 'Copy to clipboard',
     this.buttonKey,
     this.size,
+    this.gaScreen,
+    this.gaItem,
   });
 
   final ClipboardDataProvider? dataProvider;
@@ -2001,14 +2003,21 @@ class CopyToClipboardControl extends StatelessWidget {
   final String tooltip;
   final Key? buttonKey;
   final double? size;
+  final String? gaScreen;
+  final String? gaItem;
 
   @override
   Widget build(BuildContext context) {
     final onPressed = dataProvider == null
         ? null
-        : () => unawaited(
+        : () {
+            if (gaScreen != null && gaItem != null) {
+              ga.select(gaScreen!, gaItem!);
+            }
+            unawaited(
               copyToClipboard(dataProvider!() ?? '', successMessage, context),
             );
+          };
 
     return ToolbarAction(
       icon: Icons.content_copy,

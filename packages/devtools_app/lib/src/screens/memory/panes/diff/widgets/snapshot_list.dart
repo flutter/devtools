@@ -4,14 +4,14 @@
 
 import 'package:flutter/material.dart';
 
+import '../../../../../analytics/analytics.dart' as ga;
+import '../../../../../analytics/constants.dart' as analytics_constants;
 import '../../../../../primitives/auto_dispose_mixin.dart';
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/table/table.dart';
 import '../../../../../shared/theme.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/item_controller.dart';
-import '../../../../../analytics/analytics.dart' as ga;
-import '../../../../../analytics/constants.dart' as analytics_constants;
 
 class SnapshotList extends StatelessWidget {
   const SnapshotList({Key? key, required this.controller}) : super(key: key);
@@ -41,7 +41,6 @@ class _ListControlPane extends StatelessWidget {
     return ValueListenableBuilder<bool>(
       valueListenable: controller.isTakingSnapshot,
       builder: (_, isProcessing, __) {
-        final takeSnapshotEnabled = !isProcessing;
         final clearAllEnabled = !isProcessing && controller.hasSnapshots;
         return Row(
           children: [

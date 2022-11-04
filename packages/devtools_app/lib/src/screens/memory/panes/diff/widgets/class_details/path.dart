@@ -8,6 +8,8 @@ import '../../../../../../shared/common_widgets.dart';
 import '../../../../../../shared/theme.dart';
 import '../../../../shared/heap/model.dart';
 import '../../controller/simple_controllers.dart';
+import '../../../../../../analytics/analytics.dart' as ga;
+import '../../../../../../analytics/constants.dart' as analytics_constants;
 
 class RetainingPathView extends StatelessWidget {
   const RetainingPathView({
@@ -69,13 +71,20 @@ class _PathControlPane extends StatelessWidget {
             // top of the path widget, that makes the widget anavailable
             // while message is here.
             successMessage: null,
+            gaScreen: analytics_constants.memory,
+            gaItem: analytics_constants.MemoryEvent.diffPathCopy,
           ),
           const SizedBox(width: denseSpacing),
           ValueListenableBuilder<bool>(
             valueListenable: controller.hideStandard,
             builder: (_, hideStandard, __) => FilterButton(
-              onPressed: () => controller.hideStandard.value =
-                  !controller.hideStandard.value,
+              onPressed: () {
+                ga.select(
+                  analytics_constants.memory,
+                  '${analytics_constants.MemoryEvent.diffPathFilter}-$hideStandard',
+                );
+                controller.hideStandard.value = !controller.hideStandard.value;
+              },
               isFilterActive: hideStandard,
               message: 'Hide standard libraries',
             ),
@@ -84,8 +93,13 @@ class _PathControlPane extends StatelessWidget {
           ValueListenableBuilder<bool>(
             valueListenable: controller.invert,
             builder: (_, invert, __) => ToggleButton(
-              onPressed: () =>
-                  controller.invert.value = !controller.invert.value,
+              onPressed: () {
+                ga.select(
+                  analytics_constants.memory,
+                  '${analytics_constants.MemoryEvent.diffPathInvert}-$invert',
+                );
+                controller.invert.value = !controller.invert.value;
+              },
               isSelected: invert,
               message: 'Invert the path',
               icon: Icons.swap_horiz,
