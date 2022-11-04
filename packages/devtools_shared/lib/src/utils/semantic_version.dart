@@ -14,6 +14,15 @@ class SemanticVersion with CompareMixin {
     this.preReleaseMajor,
     this.preReleaseMinor,
   });
+  factory SemanticVersion.fromJson(Map<String, dynamic> json) {
+    return SemanticVersion(
+      major: json['major'],
+      minor: json['minor'],
+      patch: json['patch'],
+      preReleaseMajor: json['preReleaseMajor'],
+      preReleaseMinor: json['preReleaseMinor'],
+    );
+  }
 
   factory SemanticVersion.parse(String? versionString) {
     if (versionString == null) return SemanticVersion();
@@ -147,6 +156,14 @@ class SemanticVersion with CompareMixin {
 
     return -1;
   }
+
+  Map<String, dynamic> toJson() => {
+        'major': major,
+        'minor': minor,
+        'patch': patch,
+        'preReleaseMajor': preReleaseMajor,
+        'preReleaseMinor': preReleaseMinor,
+      };
 
   @override
   String toString() {

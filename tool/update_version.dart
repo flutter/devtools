@@ -61,8 +61,10 @@ Future<void> performTheVersionUpdate(
   });
 }
 
-void resetReleaseNotesFile(rn.SerializableSemanticVersion version) async {
-  final release = rn.Release(version: version, sections: [
+Future<void> cycleReleaseNotes({
+  required SemanticVersion newVersion,
+}) async {
+  final release = rn.Release(version: newVersion, sections: [
     rn.ReleaseSection(name: 'General updates'),
     rn.ReleaseSection(name: 'Inspector update'),
     rn.ReleaseSection(name: 'Performance updates'),
@@ -72,18 +74,42 @@ void resetReleaseNotesFile(rn.SerializableSemanticVersion version) async {
     rn.ReleaseSection(name: 'Logging updates'),
     rn.ReleaseSection(name: 'App size tool updates'),
   ]);
-  //TODO
 
-  await File('release-notes/running/notes.md')
-      .writeAsString(release.toMarkdown());
-  await File('release-notes/running/notes.json').writeAsString(
-    jsonEncode(release),
+  //TODO remove latest dir
+  await Directory('./tool/release-notes/latest/').delete(recursive: true);
+  await Directory('./tool/release-notes/latest/files').create(recursive: true);
+
+  // Copy Current release notes
+  final releaseNotesFile = File('./tool/release-notes/running/notes.json');
+  await releaseNotesFile.rename('./tool/release-notes/latest/notes.json');
+
+  // Copy Current Files
+  final contents =
+      await Directory('./tool/release-notes/running/files/').list().toList();
+  contents.forEach((element) async {
+    if (element is File) {
+      element.renameSync(
+          './tool/release-notes/latest/files/${element.uri.pathSegments.last}');
+    }
+  });
+
+  // Clear out the running directory
+  await Directory('./tool/release-notes/running/').delete(recursive: true);
+  await Directory('./tool/release-notes/running/files/')
+      .create(recursive: true);
+
+  // populate a blank release notes file
+  JsonEncoder encoder = new JsonEncoder.withIndent('  ');
+  await File('./tool/release-notes/running/notes.json').writeAsString(
+    encoder.convert(release),
   );
 
-  // delete contents of tool/release-notes/latest-release/
-  // copy contents of tool/release-notes/running/ to /tool/release-notes/latest-release/
-
-  //generate fresh new json file for release notes in tool/release-notes/latest-release
+  // Create a markdown version of the release notes
+  final fileContents =
+      File('./tool/release-notes/latest/notes.json').readAsStringSync();
+  final latestRelease = rn.Release.fromJson(jsonDecode(fileContents));
+  await File('./tool/release-notes/latest/notes.md')
+      .writeAsString(latestRelease.toMarkdown());
 }
 
 String? incrementVersionByType(String version, String type) {
@@ -216,7 +242,7 @@ void writeVersionToIndexHtml(
   indexHtml.writeAsStringSync(revisedLines.joinWithNewLine());
 }
 
-String incrementDevVersion(String currentVersion, String devType) {
+String incrementDevVersion(String currentVersion) {
   final alreadyHasDevVersion = isDevVersion(currentVersion);
   if (alreadyHasDevVersion) {
     final devVerMatch = RegExp(
@@ -235,8 +261,7 @@ String incrementDevVersion(String currentVersion, String devType) {
       return newVersion;
     }
   } else {
-    final nextVersion = incrementVersionByType(currentVersion, devType);
-    return '$nextVersion-dev.0';
+    return '$currentVersion-dev.0';
   }
 }
 
@@ -327,7 +352,7 @@ class AutoUpdateCommand extends Command {
   }
 
   @override
-  void run() {
+  void run() async {
     final type = argResults!['type'].toString();
     final currentVersion = versionFromPubspecFile();
     final currentSemanticVersion = SemanticVersion.parse(currentVersion);
@@ -337,17 +362,12 @@ class AutoUpdateCommand extends Command {
     }
     switch (type) {
       case 'dev':
-      case 'dev,minor':
-        newVersion = incrementDevVersion(currentVersion, 'minor');
-        break;
-      case 'dev,patch':
-        newVersion = incrementDevVersion(currentVersion, 'patch');
-        break;
-      case 'dev,major':
-        newVersion = incrementDevVersion(currentVersion, 'major');
+        newVersion = incrementDevVersion(currentVersion);
         break;
       default:
         newVersion = incrementVersionByType(currentVersion, type);
+        // TODO: updating doesn't make sense right now so the placement of the cycle will need to change.
+        await cycleReleaseNotes(newVersion: SemanticVersion.parse(newVersion));
     }
     if (newVersion == null) {
       throw 'Failed to determine the newVersion.';

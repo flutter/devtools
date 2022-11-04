@@ -37,7 +37,7 @@ class Release {
     }
   }
 
-  final SerializableSemanticVersion version;
+  final SemanticVersion version;
   List<ReleaseSection> sections = [];
   final Map<String, ReleaseSection> _sectionMap = {};
 
@@ -66,14 +66,6 @@ class Release {
       _$ReleaseFromJson(json);
 
   Map<String, dynamic> toJson() => _$ReleaseToJson(this);
-}
-
-@JsonSerializable()
-class SerializableSemanticVersion extends SemanticVersion {
-  factory SerializableSemanticVersion.fromJson(Map<String, dynamic> json) =>
-      _$SemanticVersionFromJson(json);
-
-  Map<String, dynamic> toJson() => _$SemanticVersionToJson(this);
 }
 
 @JsonSerializable()

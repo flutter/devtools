@@ -30,22 +30,6 @@ Map<String, dynamic> _$ReleaseToJson(Release instance) => <String, dynamic>{
       'sections': instance.sections,
     };
 
-SemanticVersion _$SemanticVersionFromJson(Map<String, dynamic> json) =>
-    SemanticVersion(
-      major: json['major'] as int,
-      minor: json['minor'] as int,
-      patch: json['patch'] as int,
-      pre: json['pre'] as String?,
-    );
-
-Map<String, dynamic> _$SemanticVersionToJson(SemanticVersion instance) =>
-    <String, dynamic>{
-      'major': instance.major,
-      'minor': instance.minor,
-      'patch': instance.patch,
-      'pre': instance.pre,
-    };
-
 ReleaseSection _$ReleaseSectionFromJson(Map<String, dynamic> json) =>
     ReleaseSection(
       name: json['name'] as String,

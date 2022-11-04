@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:test/test.dart';
 
@@ -205,6 +207,15 @@ void main() {
         ).toString(),
         equals('1.1.1-0.1'),
       );
+    });
+
+    test('json', () {
+      final version = SemanticVersion(
+          major: 1, minor: 2, patch: 3, preReleaseMajor: 4, preReleaseMinor: 5);
+      final encodedVersion = jsonEncode(version);
+      final decodedVersion =
+          SemanticVersion.fromJson(jsonDecode(encodedVersion));
+      expect(version.compareTo(decodedVersion), equals(0));
     });
   });
 }
