@@ -13,19 +13,40 @@ import 'generated.mocks.dart';
 
 MockPerformanceController createMockPerformanceControllerWithDefaults() {
   final controller = MockPerformanceController();
+  final timelineEventsController = MockTimelineEventsController();
+  final legacyTimelineEventsController = MockLegacyTimelineEventsController();
+  final flutterFramesController = MockFlutterFramesController();
   when(controller.data).thenReturn(PerformanceData());
-  when(controller.searchMatches)
-      .thenReturn(const FixedValueListenable<List<TimelineEvent>>([]));
-  when(controller.searchInProgressNotifier)
-      .thenReturn(const FixedValueListenable<bool>(false));
-  when(controller.matchIndex).thenReturn(ValueNotifier<int>(0));
   when(controller.enhanceTracingController)
       .thenReturn(EnhanceTracingController());
-  when(controller.rasterStatsController).thenReturn(RasterStatsController());
-  when(controller.selectedFrame)
+
+  // Stubs for Flutter Frames feature.
+  when(controller.flutterFramesController).thenReturn(flutterFramesController);
+  when(flutterFramesController.selectedFrame)
       .thenReturn(const FixedValueListenable<FlutterFrame?>(null));
-  when(controller.displayRefreshRate).thenReturn(ValueNotifier<double>(60.0));
-  when(controller.useLegacyTraceViewer).thenReturn(ValueNotifier<bool>(true));
+  when(flutterFramesController.recordingFrames)
+      .thenReturn(const FixedValueListenable<bool>(true));
+  when(flutterFramesController.displayRefreshRate)
+      .thenReturn(ValueNotifier<double>(60.0));
+
+  // Stubs for Raster Stats feature.
+  when(controller.rasterStatsController)
+      .thenReturn(RasterStatsController(controller));
+
+  // Stubs for Timeline Events feature.
+  when(controller.timelineEventsController)
+      .thenReturn(timelineEventsController);
+  when(timelineEventsController.useLegacyTraceViewer)
+      .thenReturn(ValueNotifier<bool>(true));
+  when(timelineEventsController.legacyController)
+      .thenReturn(legacyTimelineEventsController);
+  when(legacyTimelineEventsController.searchMatches)
+      .thenReturn(const FixedValueListenable<List<TimelineEvent>>([]));
+  when(legacyTimelineEventsController.searchInProgressNotifier)
+      .thenReturn(const FixedValueListenable<bool>(false));
+  when(legacyTimelineEventsController.matchIndex)
+      .thenReturn(ValueNotifier<int>(0));
+
   return controller;
 }
 
