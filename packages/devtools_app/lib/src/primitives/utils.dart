@@ -564,7 +564,7 @@ class TimeRange {
     if (singleAssignment) {
       assert(_start == null);
     }
-    if (value != null &&_end != null) {
+    if (value != null && _end != null) {
       assert(
         value <= _end!,
         '$value is not less than or equal to end time $_end',
