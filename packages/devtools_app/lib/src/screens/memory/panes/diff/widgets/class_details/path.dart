@@ -4,12 +4,12 @@
 
 import 'package:flutter/material.dart';
 
+import '../../../../../../analytics/analytics.dart' as ga;
+import '../../../../../../analytics/constants.dart' as analytics_constants;
 import '../../../../../../shared/common_widgets.dart';
 import '../../../../../../shared/theme.dart';
 import '../../../../shared/heap/model.dart';
 import '../../controller/simple_controllers.dart';
-import '../../../../../../analytics/analytics.dart' as ga;
-import '../../../../../../analytics/constants.dart' as analytics_constants;
 
 class RetainingPathView extends StatelessWidget {
   const RetainingPathView({

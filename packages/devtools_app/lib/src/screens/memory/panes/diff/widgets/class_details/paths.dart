@@ -4,14 +4,14 @@
 
 import 'package:flutter/widgets.dart';
 
+import '../../../../../../analytics/analytics.dart' as ga;
+import '../../../../../../analytics/constants.dart' as analytics_constants;
 import '../../../../../../primitives/utils.dart';
 import '../../../../../../shared/table/table.dart';
 import '../../../../../../shared/table/table_data.dart';
 import '../../../../../../shared/utils.dart';
 import '../../../../primitives/simple_elements.dart';
 import '../../../../shared/heap/heap.dart';
-import '../../../../../../analytics/analytics.dart' as ga;
-import '../../../../../../analytics/constants.dart' as analytics_constants;
 
 class _RetainingPathColumn extends ColumnData<StatsByPathEntry> {
   _RetainingPathColumn(String className)

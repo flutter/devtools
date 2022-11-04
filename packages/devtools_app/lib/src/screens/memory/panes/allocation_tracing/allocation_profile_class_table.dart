@@ -4,6 +4,8 @@
 
 import 'package:flutter/material.dart';
 
+import '../../../../analytics/analytics.dart' as ga;
+import '../../../../analytics/constants.dart' as analytics_constants;
 import '../../../../primitives/utils.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/table/table.dart';
@@ -12,8 +14,6 @@ import '../../../../shared/table/table_data.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import 'allocation_profile_tracing_view_controller.dart';
-import '../../../../analytics/analytics.dart' as ga;
-import '../../../../analytics/constants.dart' as analytics_constants;
 
 /// The default width for columns containing *mostly* numeric data (e.g.,
 /// instances, memory).

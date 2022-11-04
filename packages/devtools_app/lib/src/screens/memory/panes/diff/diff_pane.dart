@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
+import '../../../../analytics/constants.dart' as analytics_constants;
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/split.dart';
 import '../../../../shared/theme.dart';
@@ -13,8 +14,6 @@ import 'controller/item_controller.dart';
 import 'widgets/snapshot_control_pane.dart';
 import 'widgets/snapshot_list.dart';
 import 'widgets/snapshot_view.dart';
-import '../../../../analytics/analytics.dart' as ga;
-import '../../../../analytics/constants.dart' as analytics_constants;
 
 class DiffPane extends StatelessWidget {
   const DiffPane({Key? key, required this.diffController}) : super(key: key);

@@ -5,14 +5,15 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+
+import '../../../../../analytics/analytics.dart' as ga;
+import '../../../../../analytics/constants.dart' as analytics_constants;
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/dialogs.dart';
 import '../../../../../shared/theme.dart';
 import '../../../../../shared/utils.dart';
 import '../../../shared/heap/class_filter.dart';
 import '../controller/utils.dart';
-import '../../../../../analytics/analytics.dart' as ga;
-import '../../../../../analytics/constants.dart' as analytics_constants;
 
 class ClassFilterDialog extends StatefulWidget {
   const ClassFilterDialog(

@@ -4,6 +4,8 @@
 
 import 'package:flutter/material.dart';
 
+import '../../../../../analytics/analytics.dart' as ga;
+import '../../../../../analytics/constants.dart' as analytics_constants;
 import '../../../../../primitives/utils.dart';
 import '../../../../../shared/table/table.dart';
 import '../../../../../shared/table/table_data.dart';
@@ -11,8 +13,6 @@ import '../../../../../shared/utils.dart';
 import '../../../primitives/simple_elements.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/shared_memory_widgets.dart';
-import '../../../../../analytics/analytics.dart' as ga;
-import '../../../../../analytics/constants.dart' as analytics_constants;
 
 class _ClassNameColumn extends ColumnData<SingleClassStats>
     implements ColumnRenderer<SingleClassStats> {
