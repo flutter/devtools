@@ -72,14 +72,16 @@ class CpuProfileTransformer {
     if (cpuProfileData.rootedAtTags) {
       // Check to see if there are any empty tag roots as a result of filtering
       // and remove them.
-      final nodesToRemove = <int>[];
-      for (int i = 0; i < cpuProfileData.cpuProfileRoot.children.length; ++i) {
+      final nodeIndiciesToRemove = <int>[];
+      for (int i = cpuProfileData.cpuProfileRoot.children.length - 1;
+          i >= 0;
+          --i) {
         final root = cpuProfileData.cpuProfileRoot.children[i];
         if (root.isTag && root.children.isEmpty) {
-          nodesToRemove.add(i);
+          nodeIndiciesToRemove.add(i);
         }
       }
-      nodesToRemove.reversed.forEach(
+      nodeIndiciesToRemove.forEach(
         cpuProfileData.cpuProfileRoot.removeChildAtIndex,
       );
     }
@@ -127,7 +129,7 @@ class CpuProfileTransformer {
     CpuProfileData cpuProfileData,
   ) {
     // [stackFrame] is the root of a new cpu sample. Add it as a child of
-    // [cpuProfile].
+    // [cpuProfileRoot].
     if (parent == null) {
       cpuProfileData.cpuProfileRoot.addChild(stackFrame);
     } else {

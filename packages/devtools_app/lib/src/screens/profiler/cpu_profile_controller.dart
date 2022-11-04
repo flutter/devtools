@@ -31,7 +31,7 @@ enum CpuProfilerViewType {
 
 enum CpuProfilerTagType {
   user,
-  vm;
+  vm,
 }
 
 class CpuProfilerController

@@ -80,17 +80,18 @@ class CpuProfilePair {
 
   factory CpuProfilePair.withTagRoots(
     CpuProfilePair original,
-    CpuProfilerTagType tag,
+    CpuProfilerTagType tagType,
   ) {
     final function = CpuProfileData.withTagRoots(
       original.functionProfile,
-      tag,
+      tagType,
     );
+    final codeProfile = original.codeProfile;
     CpuProfileData? code;
-    if (original.codeProfile != null) {
+    if (codeProfile != null) {
       code = CpuProfileData.withTagRoots(
-        original.codeProfile!,
-        tag,
+        codeProfile,
+        tagType,
       );
     }
     return CpuProfilePair(functionProfile: function, codeProfile: code);
@@ -266,14 +267,14 @@ class CpuProfileData {
   }
 
   /// Generate a cpu profile from [originalData] where the profile is broken
-  /// down for each tag of the given [type].
+  /// down for each tag of the given [tagType].
   ///
   /// [originalData] does not need to be [processed] to run this operation.
   factory CpuProfileData.withTagRoots(
     CpuProfileData originalData,
-    CpuProfilerTagType type,
+    CpuProfilerTagType tagType,
   ) {
-    final useUserTags = type == CpuProfilerTagType.user;
+    final useUserTags = tagType == CpuProfilerTagType.user;
     final tags = <String>{
       for (final sample in originalData.cpuSamples)
         useUserTags ? sample.userTag! : sample.vmTag!,
@@ -281,7 +282,7 @@ class CpuProfileData {
 
     final tagProfiles = <String, CpuProfileData>{
       for (final tag in tags)
-        tag: CpuProfileData._fromTag(originalData, tag, type),
+        tag: CpuProfileData._fromTag(originalData, tag, tagType),
     };
 
     final metaData = originalData.profileMetaData.copyWith();
@@ -320,17 +321,12 @@ class CpuProfileData {
         rootId: tagId,
       };
 
-      String? getId(String? id) {
-        if (id == null) {
-          return null;
-        }
-        return idMapping.putIfAbsent(id, () => '$isolateId-${nextId++}');
-      }
-
-      tagProfile.stackFrames.forEach((k, v) => getId(k));
+      tagProfile.stackFrames.forEach((k, v) {
+        idMapping.putIfAbsent(k, () => '$isolateId-${nextId++}');
+      });
 
       for (final sample in tagProfile.cpuSamples) {
-        String? updatedId = getId(sample.leafId);
+        String? updatedId = idMapping[sample.leafId];
         samples.add(
           CpuSampleEvent(
             leafId: updatedId!,
@@ -341,7 +337,7 @@ class CpuProfileData {
         );
         var currentStackFrame = tagProfile.stackFrames[sample.leafId];
         while (currentStackFrame != null) {
-          final parentId = getId(currentStackFrame.parentId);
+          final parentId = idMapping[currentStackFrame.parentId];
           stackFrames[updatedId!] = currentStackFrame.shallowCopy(
             id: updatedId,
             copySampleCounts: false,
@@ -713,9 +709,10 @@ class CpuProfileData {
 
   final CpuProfileMetaData profileMetaData;
 
-  /// `true` if the CpuProfileData has tag-based roots. This value is used
-  /// during the bottom-up transformation to ensure that the tag-based roots
-  /// are kept at the root of the resulting bottom-up tree.
+  /// `true` if the CpuProfileData has tag-based roots.
+  ///
+  /// This value is used during the bottom-up transformation to ensure that the
+  /// tag-based roots are kept at the root of the resulting bottom-up tree.
   final bool rootedAtTags;
 
   /// Marks whether this data has already been processed.
@@ -771,8 +768,7 @@ class CpuProfileData {
         tags.add(tag);
       }
     }
-    _vmTags = tags;
-    return _vmTags!;
+    return _vmTags = tags;
   }
 
   Iterable<String>? _userTags;
@@ -956,6 +952,11 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
   @override
   String get displayName => name;
 
+  /// Set to `true` if this stack frame is a synthetic frame representing a
+  /// user or VM tag.
+  ///
+  /// These synthetic frames are inserted at the root of the profile when
+  /// samples are being grouped by tag.
   final bool isTag;
 
   bool get isNative => _isNative ??= id != CpuProfileData.rootId &&
