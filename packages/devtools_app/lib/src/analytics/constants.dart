@@ -148,7 +148,7 @@ class MemoryTime {
 /// Analytic event constants specific for memory screen.
 class MemoryEvent {
   static const gc = 'gc';
-  //static const settings = 'settings';
+  static const settings = 'settings';
   static const autoSnapshot = 'autoSnapshot';
 
   static const chartLegend = 'chartLegend';
@@ -157,15 +157,15 @@ class MemoryEvent {
   static const chartCollapse = 'chartCollapse';
   static const chartInterval = 'chartInterval';
 
-  //static const profileDownloadCsv = 'profileDownloadCsv';
-  //static const profileRefreshManual = 'profileRefreshManual';
-  //static const profileRefreshOnGc = 'profileRefreshOnGc';
+  static const profileDownloadCsv = 'profileDownloadCsv';
+  static const profileRefreshManual = 'profileRefreshManual';
+  static const profileRefreshOnGc = 'profileRefreshOnGc';
 
-  //static const allocationClear = 'allocationClear';
-  //static const allocationRefresh = 'allocationRefresh';
-  //static const allocationFilter = 'allocationFilter';
-  //static const allocationTrace = 'allocationTrace';
-  //static const allocationHelp = 'allocationHelp';
+  static const tracingClear = 'tracingClear';
+  static const tracingRefresh = 'tracingRefresh';
+  //static const tracingFilter = 'tracingFilter';
+  //static const tracingTrace = 'tracingTrace';
+  //static const tracingHelp = 'tracingHelp';
 
   //static const diffTakeSnapshot = 'diffTakeSnapshot';
   //static const diffClearSnapshots = 'diffClearSnapshots';

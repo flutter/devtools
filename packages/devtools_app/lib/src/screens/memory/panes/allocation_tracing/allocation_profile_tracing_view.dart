@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../../../analytics/analytics.dart' as ga;
 import '../../../../analytics/constants.dart' as analytics_constants;
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/split.dart';
@@ -45,6 +46,10 @@ class AllocationProfileTracingViewState
             RefreshButton(
               tooltip: 'Request the set of updated allocation traces',
               onPressed: () async {
+                ga.select(
+                  analytics_constants.memory,
+                  analytics_constants.MemoryEvent.tracingRefresh,
+                );
                 await controller.refresh();
               },
             ),
@@ -54,6 +59,10 @@ class AllocationProfileTracingViewState
             ClearButton(
               tooltip: 'Clear the set of previously collected traces',
               onPressed: () async {
+                ga.select(
+                  analytics_constants.memory,
+                  analytics_constants.MemoryEvent.tracingClear,
+                );
                 await controller.clear();
               },
             ),

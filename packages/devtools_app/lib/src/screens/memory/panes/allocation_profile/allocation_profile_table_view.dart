@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../../../analytics/analytics.dart' as ga;
 import '../../../../analytics/constants.dart' as analytics_constants;
 import '../../../../primitives/utils.dart';
 import '../../../../shared/common_widgets.dart';
@@ -338,7 +339,13 @@ class _AllocationProfileTableControls extends StatelessWidget {
         ),
         const SizedBox(width: denseSpacing),
         RefreshButton.icon(
-          onPressed: allocationProfileController.refresh,
+          onPressed: () async {
+            ga.select(
+              analytics_constants.memory,
+              analytics_constants.MemoryEvent.gc,
+            );
+            await allocationProfileController.refresh();
+          },
         ),
         const SizedBox(width: denseSpacing),
         _RefreshOnGCToggleButton(
@@ -394,7 +401,13 @@ class _RefreshOnGCToggleButton extends StatelessWidget {
           label: const Text('Refresh on GC'),
           icon: Icons.autorenew_outlined,
           isSelected: refreshOnGc,
-          onPressed: allocationProfileController.toggleRefreshOnGc,
+          onPressed: () {
+            allocationProfileController.toggleRefreshOnGc();
+            ga.select(
+              analytics_constants.memory,
+              '${analytics_constants.MemoryEvent.profileRefreshOnGc}-$refreshOnGc',
+            );
+          },
         );
       },
     );
