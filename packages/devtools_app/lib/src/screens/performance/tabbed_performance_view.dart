@@ -81,6 +81,32 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
 
   @override
   Widget build(BuildContext context) {
+    final tabRecords = <_PerformanceTabRecord>[
+      if (serviceManager.connectedApp!.isFlutterAppNow!) ...[
+        _frameAnalysisRecord(),
+        _rasterStatsRecord(),
+      ],
+      _timelineEventsRecord(),
+    ];
+
+    final tabs = <DevToolsTab>[];
+    final tabViews = <Widget>[];
+    final featureControllers = <PerformanceFeatureController?>[];
+    for (final record in tabRecords) {
+      tabs.add(record.tab);
+      tabViews.add(record.tabView);
+      featureControllers.add(record.featureController);
+    }
+
+    return AnalyticsTabbedView(
+      tabs: tabs,
+      tabViews: tabViews,
+      gaScreen: analytics_constants.performance,
+    );
+  }
+
+  _PerformanceTabRecord _frameAnalysisRecord() {
+    assert(serviceManager.connectedApp!.isFlutterAppNow!);
     late Widget frameAnalysisView;
     final selectedFrame = _selectedFlutterFrame;
     if (selectedFrame != null) {
@@ -93,93 +119,65 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
         child: Text('Select a frame above to view analysis data.'),
       );
     }
-
-    final rasterStats = Center(
-      child: RenderingLayerVisualizer(
-        rasterStatsController: controller.rasterStatsController,
+    return _PerformanceTabRecord(
+      tab: _buildTab(tabName: 'Frame Analysis'),
+      tabView: KeepAliveWrapper(
+        child: frameAnalysisView,
       ),
-    );
-
-    final isFlutterApp = serviceManager.connectedApp!.isFlutterAppNow!;
-    final tabViews = [
-      if (isFlutterApp)
-        KeepAliveWrapper(
-          child: frameAnalysisView,
-        ),
-      if (isFlutterApp)
-        KeepAliveWrapper(
-          child: rasterStats,
-        ),
-      ValueListenableBuilder<bool>(
-        valueListenable: _timelineEventsController.useLegacyTraceViewer,
-        builder: (context, useLegacy, _) {
-          return (useLegacy || !FeatureFlags.embeddedPerfetto)
-              ? KeepAliveWrapper(
-                  child: TimelineEventsView(
-                    controller: _timelineEventsController,
-                    processing: widget.processing,
-                    processingProgress: widget.processingProgress,
-                  ),
-                )
-              : KeepAliveWrapper(
-                  child: EmbeddedPerfetto(
-                    perfettoController:
-                        _timelineEventsController.perfettoController,
-                  ),
-                );
-        },
-      ),
-    ];
-
-    return AnalyticsTabbedView(
-      tabs: _generateTabs(isFlutterApp: isFlutterApp),
-      tabViews: tabViews,
-      gaScreen: analytics_constants.performance,
+      featureController: null,
     );
   }
 
-  List<DevToolsTab> _generateTabs({required bool isFlutterApp}) {
+  _PerformanceTabRecord _rasterStatsRecord() {
+    assert(serviceManager.connectedApp!.isFlutterAppNow!);
+    return _PerformanceTabRecord(
+      tab: _buildTab(
+        tabName: 'Raster Stats',
+        trailing: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            IconLabelButton(
+              tooltip: 'Take a snapshot of the rendering layers on the current'
+                  ' screen',
+              icon: Icons.camera,
+              label: 'Take Snapshot',
+              outlined: false,
+              onPressed: () {
+                ga.select(
+                  PerformanceScreen.id,
+                  analytics_constants.collectRasterStats,
+                );
+                unawaited(
+                  controller.rasterStatsController.collectRasterStats(),
+                );
+              },
+            ),
+            const SizedBox(width: denseSpacing),
+            ClearButton(
+              outlined: false,
+              onPressed: controller.rasterStatsController.clearData,
+            ),
+            const SizedBox(width: densePadding),
+          ],
+        ),
+      ),
+      tabView: KeepAliveWrapper(
+        child: Center(
+          child: RenderingLayerVisualizer(
+            rasterStatsController: controller.rasterStatsController,
+          ),
+        ),
+      ),
+      featureController: controller.rasterStatsController,
+    );
+  }
+
+  _PerformanceTabRecord _timelineEventsRecord() {
     final data = controller.data;
     final hasData = data != null && !data.isEmpty;
     final searchFieldEnabled = hasData && !widget.processing;
-    return [
-      if (isFlutterApp) ...[
-        _buildTab(
-          tabName: 'Frame Analysis',
-        ),
-        _buildTab(
-          tabName: 'Raster Stats',
-          trailing: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              IconLabelButton(
-                tooltip:
-                    'Take a snapshot of the rendering layers on the current'
-                    ' screen',
-                icon: Icons.camera,
-                label: 'Take Snapshot',
-                outlined: false,
-                onPressed: () {
-                  ga.select(
-                    PerformanceScreen.id,
-                    analytics_constants.collectRasterStats,
-                  );
-                  unawaited(
-                    controller.rasterStatsController.collectRasterStats(),
-                  );
-                },
-              ),
-              const SizedBox(width: denseSpacing),
-              ClearButton(
-                outlined: false,
-                onPressed: controller.rasterStatsController.clearData,
-              ),
-              const SizedBox(width: densePadding),
-            ],
-          ),
-        ),
-      ],
-      _buildTab(
+    return _PerformanceTabRecord(
+      tab: _buildTab(
         tabName: 'Timeline Events',
         trailing: ValueListenableBuilder<bool>(
           valueListenable: _timelineEventsController.useLegacyTraceViewer,
@@ -202,7 +200,27 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
           },
         ),
       ),
-    ];
+      tabView: ValueListenableBuilder<bool>(
+        valueListenable: _timelineEventsController.useLegacyTraceViewer,
+        builder: (context, useLegacy, _) {
+          return (useLegacy || !FeatureFlags.embeddedPerfetto)
+              ? KeepAliveWrapper(
+                  child: TimelineEventsView(
+                    controller: _timelineEventsController,
+                    processing: widget.processing,
+                    processingProgress: widget.processingProgress,
+                  ),
+                )
+              : KeepAliveWrapper(
+                  child: EmbeddedPerfetto(
+                    perfettoController:
+                        _timelineEventsController.perfettoController,
+                  ),
+                );
+        },
+      ),
+      featureController: controller.timelineEventsController,
+    );
   }
 
   Widget _buildSearchField(bool searchFieldEnabled) {
@@ -247,4 +265,16 @@ class RefreshTimelineEventsButton extends StatelessWidget {
       gaSelection: analytics_constants.refreshTimelineEvents,
     );
   }
+}
+
+class _PerformanceTabRecord {
+  _PerformanceTabRecord({
+    required this.tab,
+    required this.tabView,
+    required this.featureController,
+  });
+
+  final DevToolsTab tab;
+  final Widget tabView;
+  final PerformanceFeatureController? featureController;
 }
