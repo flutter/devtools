@@ -274,17 +274,21 @@ class SnapshotTaker {
   Future<AdaptedHeapData?> take() async {
     final snapshot = await snapshotMemory();
     if (snapshot == null) return null;
-    late final AdaptedHeapData result;
-    ga.timeSync(
-      analytics_constants.memory,
-      analytics_constants.MemoryTimeAnalytics.adaptSnapshot,
-      syncOperation: () => result = AdaptedHeapData.fromHeapSnapshot(snapshot),
-      screenMetricsProvider: () => _SnapshotAnalyticsMetrics(
-        numberOfObjects: snapshot.objects.length,
-      ),
-    );
-    return result;
+    return _adaptSnapshotGaWrapper(snapshot);
   }
+}
+
+AdaptedHeapData _adaptSnapshotGaWrapper(HeapSnapshotGraph graph) {
+  late final AdaptedHeapData result;
+  ga.timeSync(
+    analytics_constants.memory,
+    analytics_constants.MemoryTimeAnalytics.adaptSnapshot,
+    syncOperation: () => result = AdaptedHeapData.fromHeapSnapshot(graph),
+    screenMetricsProvider: () => _SnapshotAnalyticsMetrics(
+      numberOfObjects: graph.objects.length,
+    ),
+  );
+  return result;
 }
 
 /// Mark the object as deeply immutable.

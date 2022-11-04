@@ -160,6 +160,7 @@ String topicDocumentationLink(String topic) => '${topic}DocumentationLink';
 /// Analytic time constants specific for memory screen.
 class MemoryTimeAnalytics {
   static const adaptSnapshot = 'adaptSnapshot';
+  static const calculateDiff = 'calculateDiff';
   static const updateValues = 'updateValues';
 }
 
