@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Type of events (event_category):
-
 import '../screens/inspector/inspector_screen.dart';
 import '../screens/logging/logging_screen.dart';
 import '../screens/memory/memory_screen.dart';
@@ -11,6 +9,7 @@ import '../screens/network/network_screen.dart';
 import '../screens/performance/performance_screen.dart';
 import '../screens/profiler/profiler_screen.dart';
 
+// Type of events (event_category):
 const screenViewEvent = 'screen'; // Active screen (tab selected).
 const selectEvent = 'select'; // User selected something.
 const timingEvent = 'timing'; // Timed operation.
