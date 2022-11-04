@@ -1,4 +1,4 @@
-name: Release Preparedness
+name: Release Note Workflow
 
 on:
   pull_request:
@@ -10,7 +10,7 @@ env:
 jobs:
   release-preparedness:
     runs-on: ubuntu-latest
-    name: Release Preparedness
+    name: Verify PR Release Note Requirements
     steps:
 
       - name: Get Pull Request Number
@@ -60,7 +60,7 @@ jobs:
 
   validation-stuff:
     runs-on: ubuntu-latest
-    name: Validation Stuff
+    name: Validate Release Note File
     steps:
       - name: Get Pull Request Number
         id: get-pull-request-number
@@ -89,7 +89,7 @@ jobs:
           PULL_NUMBER: ${{steps.get-pull-request-number.outputs.PULL_REQUEST_NUMBER}}
         run: |
           if ! git diff --exit-code; then
-            echo "::error file=$JSON_RELEASE_FILE_PATH,line=0,col=0,endColumn=0,title='Release Preparedness check failed'::Please make sure to add the PR Url to the release notes. You can automatically do this by running: \`dart tool/release_note_helper.dart pr-url -f $JSON_RELEASE_FILE_PATH -u https://github.com/flutter/devtools/pull/$PULL_NUMBER\`"
+            echo "::error file=$JSON_RELEASE_FILE_PATH,line=0,col=0,endColumn=0,title='Release Note Validation failed'::Please make sure to add the PR Url to the release notes. You can automatically do this by running: \`dart tool/release_note_helper.dart pr-url -f $JSON_RELEASE_FILE_PATH -u https://github.com/flutter/devtools/pull/$PULL_NUMBER\`"
             exit 1
           fi
 
