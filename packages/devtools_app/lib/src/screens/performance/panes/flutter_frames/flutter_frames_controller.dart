@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
@@ -128,7 +129,11 @@ class FlutterFramesController extends PerformanceFeatureController {
 
   Future<void> toggleSelectedFrame(FlutterFrame frame) async {
     handleSelectedFrame(frame);
-    performanceController.timelineEventsController.handleSelectedFrame(frame);
+    // We do not need to block the UI on the TimelineEvents feature loading the
+    // selected frame.
+    unawaited(
+      performanceController.timelineEventsController.handleSelectedFrame(frame),
+    );
   }
 
   void _addPendingFlutterFrames() {

@@ -29,7 +29,8 @@ import '../../performance_screen.dart';
 import '../../performance_utils.dart';
 import '../../simple_trace_example.dart';
 import '../flutter_frames/flutter_frame_model.dart';
-import 'perfetto/perfetto.dart';
+import 'perfetto/_perfetto_controller_desktop.dart'
+    if (dart.library.html) 'perfetto/_perfetto_controller_web.dart';
 import 'timeline_event_processor.dart';
 
 /// Debugging flag to load sample trace events from [simple_trace_example.dart].
@@ -39,6 +40,7 @@ class TimelineEventsController extends PerformanceFeatureController
     with AutoDisposeControllerMixin {
   TimelineEventsController(super.performanceController) {
     legacyController = LegacyTimelineEventsController(performanceController);
+    perfettoController = PerfettoController(performanceController);
   }
 
   /// Controller that contains business logic for the legacy trace viewer.
@@ -46,7 +48,10 @@ class TimelineEventsController extends PerformanceFeatureController
   /// This controller will be used when [useLegacyTraceViewer.value] is true.
   late final LegacyTimelineEventsController legacyController;
 
-  final perfettoController = createPerfettoController();
+  /// Controller that contains business logic for the Perfetto trace viewer.
+  ///
+  /// This controller will be used when [useLegacyTraceViewer.value] is false.
+  late final PerfettoController perfettoController;
 
   /// Trace events in the current timeline.
   ///
@@ -64,6 +69,9 @@ class TimelineEventsController extends PerformanceFeatureController
   /// trace viewer.
   final useLegacyTraceViewer =
       ValueNotifier<bool>(!FeatureFlags.embeddedPerfetto || !kIsWeb);
+
+  bool get _perfettoMode =>
+      FeatureFlags.embeddedPerfetto && !useLegacyTraceViewer.value;
 
   /// Whether the recorded timeline data is currently being processed.
   ValueListenable<bool> get processing => _processing;
@@ -108,6 +116,14 @@ class TimelineEventsController extends PerformanceFeatureController
     }
   }
 
+  @override
+  Future<void> onBecomingActive() async {
+    if (_perfettoMode) {
+      await perfettoController.onBecomingActive();
+    }
+    await super.onBecomingActive();
+  }
+
   Future<void> _initForServiceConnection() async {
     legacyController.init();
     await serviceManager.timelineStreamManager.setDefaultTimelineStreams();
@@ -123,9 +139,7 @@ class TimelineEventsController extends PerformanceFeatureController
     // Load available timeline events.
     await _pullTraceEventsFromVmTimeline(isInitialPull: true);
 
-    _processing.value = true;
-    await processTraceEvents(allTraceEvents);
-    _processing.value = false;
+    await processAllTraceEvents();
 
     _timelinePollingRateLimiter = RateLimiter(
       _timelinePollingRateLimit,
@@ -243,11 +257,24 @@ class TimelineEventsController extends PerformanceFeatureController
     }
   }
 
-  FutureOr<void> processAvailableEvents() async {
+  FutureOr<void> processAllTraceEvents() async {
     assert(!_processing.value);
     _processing.value = true;
-    await processTraceEvents(allTraceEvents);
+    await _processAllTraceEvents();
     _processing.value = false;
+  }
+
+  FutureOr<void> _processAllTraceEvents() async {
+    if (_perfettoMode) {
+      // TODO(kenz): hook up Perfetto event processor to process events before
+      // loading.
+      await perfettoController.loadTrace(allTraceEvents);
+    } else {
+      await legacyController.processTraceEvents(
+        allTraceEvents,
+        threadNamesById: threadNamesById,
+      );
+    }
   }
 
   Future<void> selectTimelineEvent(
@@ -265,19 +292,8 @@ class TimelineEventsController extends PerformanceFeatureController
     }
   }
 
-  FutureOr<void> processTraceEvents(List<TraceEventWrapper> traceEvents) async {
-    if (FeatureFlags.embeddedPerfetto && !useLegacyTraceViewer.value) {
-      await perfettoController.loadTrace(traceEvents);
-    } else {
-      await legacyController.processTraceEvents(
-        traceEvents,
-        threadNamesById: threadNamesById,
-      );
-    }
-  }
-
   @override
-  void handleSelectedFrame(FlutterFrame frame) async {
+  Future<void> handleSelectedFrame(FlutterFrame frame) async {
     if (useLegacyTraceViewer.value) {
       await _legacySelectFrame(frame);
     } else if (FeatureFlags.embeddedPerfetto) {
@@ -311,7 +327,7 @@ class TimelineEventsController extends PerformanceFeatureController
         // Only try to pull timeline events for frames that are after the first
         // well formed frame. Timeline events that occurred before this frame will
         // have already fallen out of the buffer.
-        await processAvailableEvents();
+        await processAllTraceEvents();
       }
 
       if (framesController.currentFrameBeingSelected != frame) return;
@@ -324,9 +340,9 @@ class TimelineEventsController extends PerformanceFeatureController
         _processing.value = true;
         await Future.delayed(_timelinePollingInterval, () async {
           if (framesController.currentFrameBeingSelected != frame) return;
-          await processTraceEvents(allTraceEvents);
-          _processing.value = false;
+          await _processAllTraceEvents();
         });
+        _processing.value = false;
       }
 
       if (framesController.currentFrameBeingSelected != frame) return;
@@ -421,11 +437,9 @@ class TimelineEventsController extends PerformanceFeatureController
     _httpTimelineLoggingEnabled.value = state;
   }
 
-  void toggleUseLegacyTraceViewer(bool? value) {
+  Future<void> toggleUseLegacyTraceViewer(bool? value) async {
     useLegacyTraceViewer.value = value ?? false;
-    // `unawaited` does not work for FutureOr
-    // ignore: discarded_futures
-    processAvailableEvents();
+    await processAllTraceEvents();
   }
 
   void recordTrace(Map<String, dynamic> trace) {
@@ -469,7 +483,7 @@ class TimelineEventsController extends PerformanceFeatureController
       ..clear()
       ..addAll(traceEvents);
     _primeThreadIds(traceEvents);
-    await processAvailableEvents();
+    await processAllTraceEvents();
 
     await legacyController.setOfflineData(offlineData);
   }

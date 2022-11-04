@@ -141,11 +141,13 @@ class PerformanceController extends DisposableController
     await Future.wait(futures);
   }
 
-  // TODO(kenz): use this on tab switches to delay each feature handling a frame
-  // selection until they need to.
-  void setActiveFeature(PerformanceFeatureController featureController) {
-    _applyToFeatureControllers(
-      (c) => c.isActiveFeature = c == featureController,
+  Future<void> setActiveFeature(
+    PerformanceFeatureController? featureController,
+  ) async {
+    await _applyToFeatureControllersAsync(
+      (c) async => await c.setIsActiveFeature(
+        featureController != null && c == featureController,
+      ),
     );
   }
 
@@ -195,7 +197,17 @@ abstract class PerformanceFeatureController extends DisposableController {
 
   PerformanceData? get data => performanceController.data;
 
-  bool isActiveFeature = false;
+  bool get isActiveFeature => _isActiveFeature;
+  bool _isActiveFeature = false;
+
+  Future<void> setIsActiveFeature(bool value) async {
+    _isActiveFeature = value;
+    if (value) {
+      await onBecomingActive();
+    }
+  }
+  
+  Future<void> onBecomingActive() async {}
 
   Future<void> init() async {}
 
