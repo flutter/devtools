@@ -134,27 +134,19 @@ class CodeViewController extends DisposableController
       return;
     }
     final isolateRef = serviceManager.isolateManager.selectedIsolate.value!;
-    final report = await _getCoverageReport(isolateRef, current.script);
-    if (report != null) {
-      for (final range in report.ranges!) {
-        final coverage = range.coverage!;
-        hitLines.addAll(coverage.hits!);
-        missedLines.addAll(coverage.misses!);
-      }
-    }
-    if (report != null) {
-      for (final range in report.ranges!) {
-        final coverage = range.coverage!;
-        hitLines.addAll(coverage.hits!);
-        missedLines.addAll(coverage.misses!);
-      }
-    }
+    await _getCoverageReport(
+      isolateRef,
+      current.script,
+      hitLines,
+      missedLines,
+    );
+
     parsedScript.value = ParsedScript(
       script: current.script,
       highlighter: current.highlighter,
       executableLines: current.executableLines,
-      hitLines: hitLines,
-      missedLines: missedLines,
+      coverageHitLines: hitLines,
+      coverageMissedLines: missedLines,
     );
   }
 
@@ -182,8 +174,12 @@ class CodeViewController extends DisposableController
     _scriptLocation.value = scriptLocation;
   }
 
-  Future<SourceReport?> _getCoverageReport(
-      IsolateRef isolateRef, ScriptRef script) async {
+  Future<void> _getCoverageReport(
+    IsolateRef isolateRef,
+    ScriptRef script,
+    Set<int> hitLines,
+    Set<int> missedLines,
+  ) async {
     try {
       final report = await serviceManager.service!.getSourceReport(
         isolateRef.id!,
@@ -191,11 +187,14 @@ class CodeViewController extends DisposableController
         scriptId: script.id!,
         reportLines: true,
       );
-      return report;
+      for (final range in report.ranges!) {
+        final coverage = range.coverage!;
+        hitLines.addAll(coverage.hits!);
+        missedLines.addAll(coverage.misses!);
+      }
     } catch (e) {
       // Ignore - not supported for all vm service implementations.
       log('$e');
-      return null;
     }
   }
 
@@ -231,20 +230,20 @@ class CodeViewController extends DisposableController
         // Ignore - not supported for all vm service implementations.
         log('$e');
       }
-      final report = await _getCoverageReport(isolateRef, script);
-      if (report != null) {
-        for (final range in report.ranges!) {
-          final coverage = range.coverage!;
-          hitLines.addAll(coverage.hits!);
-          missedLines.addAll(coverage.misses!);
-        }
-      }
+
+      await _getCoverageReport(
+        isolateRef,
+        script,
+        hitLines,
+        missedLines,
+      );
+
       parsedScript.value = ParsedScript(
         script: script,
         highlighter: highlighter,
         executableLines: executableLines,
-        hitLines: hitLines,
-        missedLines: missedLines,
+        coverageHitLines: hitLines,
+        coverageMissedLines: missedLines,
       );
     }
   }
@@ -330,8 +329,8 @@ class ParsedScript {
     required this.script,
     required this.highlighter,
     required this.executableLines,
-    required this.hitLines,
-    required this.missedLines,
+    required this.coverageHitLines,
+    required this.coverageMissedLines,
   }) : lines = (script.source?.split('\n') ?? const []).toList();
 
   final Script script;
@@ -340,8 +339,8 @@ class ParsedScript {
 
   final Set<int> executableLines;
 
-  final Set<int> hitLines;
-  final Set<int> missedLines;
+  final Set<int> coverageHitLines;
+  final Set<int> coverageMissedLines;
 
   final List<String> lines;
 

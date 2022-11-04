@@ -218,8 +218,8 @@ void main() {
         script: testScript,
         highlighter: mockSyntaxHighlighter,
         executableLines: const {},
-        hitLines: const {},
-        missedLines: const {},
+        coverageHitLines: const {},
+        coverageMissedLines: const {},
       );
     });
 

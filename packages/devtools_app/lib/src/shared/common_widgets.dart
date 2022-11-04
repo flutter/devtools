@@ -1068,8 +1068,9 @@ class ToggleButton extends StatelessWidget {
     required this.isSelected,
     required this.message,
     required this.icon,
-    this.hideBorder = false,
+    this.outlined = true,
     this.label,
+    this.shape,
   }) : super(key: key);
 
   final String message;
@@ -1080,9 +1081,11 @@ class ToggleButton extends StatelessWidget {
 
   final IconData icon;
 
-  final Text? label;
+  final String? label;
 
-  final bool hideBorder;
+  final OutlinedBorder? shape;
+
+  final bool outlined;
 
   @override
   Widget build(BuildContext context) {
@@ -1097,10 +1100,11 @@ class ToggleButton extends StatelessWidget {
           key: key,
           onPressed: onPressed,
           style: TextButton.styleFrom(
-            side: hideBorder ? BorderSide.none : null,
+            side: outlined ? null : BorderSide.none,
             backgroundColor: isSelected
-                ? theme.colorScheme.toggleButtonBackgroundColor
+                ? theme.colorScheme.toggleButtonsFillSelected
                 : Colors.transparent,
+            shape: shape,
           ),
           child: Row(
             children: [
@@ -1108,12 +1112,19 @@ class ToggleButton extends StatelessWidget {
                 icon,
                 size: defaultIconSize,
                 color: isSelected
-                    ? theme.colorScheme.toggleButtonForegroundColor
-                    : theme.colorScheme.contrastForeground,
+                    ? theme.colorScheme.toggleButtonsTitleSelected
+                    : theme.colorScheme.toggleButtonsTitle,
               ),
               if (label != null) ...[
                 const SizedBox(width: denseSpacing),
-                label!,
+                Text(
+                  style: theme.textTheme.bodyLarge!.apply(
+                    color: isSelected
+                        ? theme.colorScheme.toggleButtonsTitleSelected
+                        : theme.colorScheme.toggleButtonsTitle,
+                  ),
+                  label!,
+                ),
               ]
             ],
           ),

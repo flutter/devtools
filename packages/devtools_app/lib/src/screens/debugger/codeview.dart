@@ -346,7 +346,7 @@ class _CodeViewState extends State<CodeView>
                 final pausedFrame = frame == null
                     ? null
                     : (frame.scriptRef == scriptRef ? frame : null);
-
+                final currentParsedScript = parsedScript;
                 return Row(
                   children: [
                     DualValueListenableBuilder<
@@ -365,12 +365,15 @@ class _CodeViewState extends State<CodeView>
                           breakpoints: breakpoints
                               .where((bp) => bp.scriptRef == scriptRef)
                               .toList(),
-                          executableLines: parsedScript != null
-                              ? parsedScript!.executableLines
-                              : <int>{},
-                          hitLines: parsedScript != null
-                              ? parsedScript!.hitLines
-                              : <int>{},
+                          executableLines:
+                              currentParsedScript?.executableLines ??
+                                  const <int>{},
+                          coverageHitLines:
+                              currentParsedScript?.coverageHitLines ??
+                                  const <int>{},
+                          coverageMissedLines:
+                              currentParsedScript?.coverageMissedLines ??
+                                  const <int>{},
                           onPressed: _onPressed,
                           // Disable dots for possible breakpoint locations.
                           allowInteraction:
@@ -554,8 +557,9 @@ class Gutter extends StatelessWidget {
     required this.executableLines,
     required this.onPressed,
     required this.allowInteraction,
-    required this.hitLines,
-    this.showCodeCoverage = true,
+    required this.coverageHitLines,
+    required this.coverageMissedLines,
+    required this.showCodeCoverage,
   });
 
   final double gutterWidth;
@@ -565,7 +569,8 @@ class Gutter extends StatelessWidget {
   final StackFrameAndSourcePosition? pausedFrame;
   final List<BreakpointAndSourcePosition> breakpoints;
   final Set<int> executableLines;
-  final Set<int> hitLines;
+  final Set<int> coverageHitLines;
+  final Set<int> coverageMissedLines;
   final IntCallback onPressed;
   final bool allowInteraction;
   final bool showCodeCoverage;
@@ -574,6 +579,7 @@ class Gutter extends StatelessWidget {
   Widget build(BuildContext context) {
     final bpLineSet = Set.from(breakpoints.map((bp) => bp.line));
     final theme = Theme.of(context);
+    final coverageLines = coverageHitLines.union(coverageMissedLines);
     return Container(
       width: gutterWidth,
       decoration: BoxDecoration(
@@ -587,8 +593,8 @@ class Gutter extends StatelessWidget {
         itemBuilder: (context, index) {
           final lineNum = lineOffset + index + 1;
           bool? coverageHit;
-          if (showCodeCoverage) {
-            coverageHit = hitLines.contains(lineNum);
+          if (showCodeCoverage && coverageLines.contains(lineNum)) {
+            coverageHit = coverageHitLines.contains(lineNum);
           }
           return GutterItem(
             lineNumber: lineNum,
@@ -642,8 +648,9 @@ class GutterItem extends StatelessWidget {
     final bpBoxSize = breakpointRadius * 2;
     final executionPointIndent = scaleByFontFactor(10.0);
     Color? color;
-    if (coverageHit != null && isExecutable) {
-      color = coverageHit!
+    final hasCoverage = coverageHit;
+    if (hasCoverage != null && isExecutable) {
+      color = hasCoverage
           ? theme.colorScheme.coverageHitColor
           : theme.colorScheme.coverageMissColor;
     }

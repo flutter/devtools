@@ -784,8 +784,8 @@ final mockParsedScript = ParsedScript(
   script: mockScript!,
   highlighter: mockSyntaxHighlighter,
   executableLines: executableLines,
-  hitLines: coverageHitLines,
-  missedLines: coverageMissLines,
+  coverageHitLines: coverageHitLines,
+  coverageMissedLines: coverageMissLines,
 );
 
 final mockScriptRefs = [

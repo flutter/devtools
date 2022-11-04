@@ -63,6 +63,7 @@ MockCodeViewController createMockCodeViewControllerWithDefaults({
   when(codeViewController.programExplorerController).thenReturn(
     mockProgramExplorerController,
   );
+  when(codeViewController.showCodeCoverage).thenReturn(ValueNotifier(false));
 
   return codeViewController;
 }

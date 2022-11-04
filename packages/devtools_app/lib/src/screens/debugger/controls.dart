@@ -18,7 +18,7 @@ import 'debugger_controller.dart';
 class DebuggingControls extends StatefulWidget {
   const DebuggingControls({Key? key}) : super(key: key);
 
-  static const minWidthBeforeScaling = 1300.0;
+  static const minWidthBeforeScaling = 1600.0;
 
   @override
   _DebuggingControlsState createState() => _DebuggingControlsState();
@@ -154,14 +154,22 @@ class CodeCoverageToggle extends StatelessWidget {
       child: ValueListenableBuilder<bool>(
         valueListenable: controller.codeViewController.showCodeCoverage,
         builder: (context, selected, _) {
+          final isInSmallMode = MediaQuery.of(context).size.width <
+              DebuggingControls.minWidthBeforeScaling;
           return Row(
             children: [
               ToggleButton(
-                label: const Text('Show Coverage'),
+                label: isInSmallMode ? null : 'Show Coverage',
                 message: 'Show code coverage',
                 icon: Codicons.checklist,
                 isSelected: selected,
-                hideBorder: true,
+                outlined: false,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(4),
+                    bottomLeft: Radius.circular(4),
+                  ),
+                ),
                 onPressed: controller.codeViewController.toggleShowCodeCoverage,
               ),
               LeftBorder(
