@@ -856,11 +856,13 @@ class ToolbarAction extends StatelessWidget {
     required this.onPressed,
     this.tooltip,
     Key? key,
+    this.size,
   }) : super(key: key);
 
   final IconData icon;
   final String? tooltip;
   final VoidCallback? onPressed;
+  final double? size;
 
   @override
   Widget build(BuildContext context) {
@@ -870,7 +872,7 @@ class ToolbarAction extends StatelessWidget {
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),
       onPressed: onPressed,
-      child: Icon(icon, size: actionsIconSize),
+      child: Icon(icon, size: size ?? actionsIconSize),
     );
 
     return tooltip == null
@@ -1119,18 +1121,19 @@ class FilterButton extends StatelessWidget {
     Key? key,
     required this.onPressed,
     required this.isFilterActive,
+    this.message = 'Filter',
   }) : super(key: key);
 
   final VoidCallback onPressed;
-
   final bool isFilterActive;
+  final String message;
 
   @override
   Widget build(BuildContext context) {
     return ToggleButton(
       onPressed: onPressed,
       isSelected: isFilterActive,
-      message: 'Filter',
+      message: message,
       icon: Icons.filter_list,
     );
   }
@@ -1411,12 +1414,22 @@ class CenteredMessage extends StatelessWidget {
 }
 
 class CenteredCircularProgressIndicator extends StatelessWidget {
-  const CenteredCircularProgressIndicator();
+  const CenteredCircularProgressIndicator({this.size});
+
+  final double? size;
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    const indicator = Center(
       child: CircularProgressIndicator(),
+    );
+
+    if (size == null) return indicator;
+
+    return SizedBox(
+      width: size,
+      height: size,
+      child: indicator,
     );
   }
 }
@@ -1761,6 +1774,8 @@ class _JsonViewerState extends State<JsonViewer>
         isSystemIsolate: true,
       ),
     );
+    // Intended to be unawaited.
+    // ignore: discarded_futures
     _initializeTree = buildVariablesTree(variable);
   }
 
@@ -1851,7 +1866,7 @@ class MoreInfoLink extends StatelessWidget {
   }
 
   void _onLinkTap(BuildContext context) {
-    launchUrl(url, context);
+    unawaited(launchUrl(url, context));
     ga.select(gaScreenName, gaSelectedItemDescription);
   }
 }
@@ -1978,23 +1993,29 @@ class CopyToClipboardControl extends StatelessWidget {
     this.successMessage = 'Copied to clipboard.',
     this.tooltip = 'Copy to clipboard',
     this.buttonKey,
+    this.size,
   });
 
   final ClipboardDataProvider? dataProvider;
-  final String successMessage;
+  final String? successMessage;
   final String tooltip;
   final Key? buttonKey;
+  final double? size;
 
   @override
   Widget build(BuildContext context) {
+    final onPressed = dataProvider == null
+        ? null
+        : () => unawaited(
+              copyToClipboard(dataProvider!() ?? '', successMessage, context),
+            );
+
     return ToolbarAction(
       icon: Icons.content_copy,
       tooltip: tooltip,
-      onPressed: dataProvider == null
-          ? null
-          : () =>
-              copyToClipboard(dataProvider!() ?? '', successMessage, context),
+      onPressed: onPressed,
       key: buttonKey,
+      size: size,
     );
   }
 }
@@ -2403,19 +2424,20 @@ class HelpButtonWithDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return HelpButton(
       onPressed: () {
         ga.select(gaScreen, gaSelection);
-        showDialog(
-          context: context,
-          builder: (context) => DevToolsDialog(
-            title: dialogTitleText(theme, dialogTitle),
-            includeDivider: false,
-            content: child,
-            actions: [
-              DialogCloseButton(),
-            ],
+        unawaited(
+          showDialog(
+            context: context,
+            builder: (context) => DevToolsDialog(
+              title: DialogTitleText(dialogTitle),
+              includeDivider: false,
+              content: child,
+              actions: const [
+                DialogCloseButton(),
+              ],
+            ),
           ),
         );
       },
@@ -2460,24 +2482,6 @@ class BulletSpacer extends StatelessWidget {
   }
 }
 
-class Progress extends StatelessWidget {
-  Progress({Key? key, double? size})
-      : size = size ?? smallProgressSize,
-        super(key: key);
-  final double size;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: size,
-      height: size,
-      child: CircularProgressIndicator(
-        color: Theme.of(context).textTheme.bodyLarge?.color,
-      ),
-    );
-  }
-}
-
 class ToCsvButton extends StatelessWidget {
   const ToCsvButton({
     Key? key,
@@ -2498,6 +2502,36 @@ class ToCsvButton extends StatelessWidget {
       tooltip: tooltip,
       onPressed: onPressed,
       minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
+    );
+  }
+}
+
+class RadioButton<T> extends StatelessWidget {
+  const RadioButton({
+    super.key,
+    required this.label,
+    required this.itemValue,
+    required this.groupValue,
+    this.onChanged,
+  });
+
+  final String label;
+  final T itemValue;
+  final T groupValue;
+  final void Function(T?)? onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Radio<T>(
+          value: itemValue,
+          groupValue: groupValue,
+          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          onChanged: onChanged,
+        ),
+        Expanded(child: Text(label, overflow: TextOverflow.ellipsis)),
+      ],
     );
   }
 }

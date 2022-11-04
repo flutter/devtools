@@ -13,7 +13,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() async {
   test('Filename is sortable by time', () async {
-    final controller = ExportController();
     final dates = [
       DateTime(1901, 2, 3, 4, 5, 6, 7),
       DateTime(1902, 1, 3, 4, 5, 6, 7),
@@ -25,7 +24,7 @@ void main() async {
     ];
 
     final sortedByTime = dates.sorted().map(
-          (t) => controller.generateFileName(
+          (t) => ExportController.generateFileName(
             time: t,
             type: ExportFileType.json,
           ),
@@ -33,7 +32,7 @@ void main() async {
 
     final sortedByFileName = dates
         .map(
-          (t) => controller.generateFileName(
+          (t) => ExportController.generateFileName(
             time: t,
             type: ExportFileType.json,
           ),
@@ -44,9 +43,7 @@ void main() async {
   });
 
   test('Filename hours are 0 to 23', () async {
-    final controller = ExportController();
-
-    final filename = controller.generateFileName(
+    final filename = ExportController.generateFileName(
       time: DateTime(1901, 2, 3, 14, 5, 6, 7),
       type: ExportFileType.json,
     );

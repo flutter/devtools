@@ -11,6 +11,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../primitives/utils.dart';
 import '../screens/vm_developer/vm_service_private_extensions.dart';
+import '../shared/globals.dart';
 import 'json_to_service_cache.dart';
 
 class VmServiceWrapper implements VmService {
@@ -19,7 +20,7 @@ class VmServiceWrapper implements VmService {
     this._connectedUri, {
     this.trackFutures = false,
   }) {
-    _initSupportedProtocols();
+    unawaited(_initSupportedProtocols());
   }
 
   VmServiceWrapper.fromNewVmService(
@@ -36,7 +37,7 @@ class VmServiceWrapper implements VmService {
       log: log,
       disposeHandler: disposeHandler,
     );
-    _initSupportedProtocols();
+    unawaited(_initSupportedProtocols());
   }
 
   // TODO(https://github.com/dart-lang/sdk/issues/49072): in the long term, do
@@ -245,11 +246,19 @@ class VmServiceWrapper implements VmService {
   ) async {
     return trackFuture(
       'getCpuSamples',
-      _vmService.getCpuSamples(
-        isolateId,
-        timeOriginMicros,
-        timeExtentMicros,
-      ),
+      _vmService.callMethod(
+        'getCpuSamples',
+        isolateId: isolateId,
+        args: {
+          'timeOriginMicros': timeOriginMicros,
+          'timeExtentMicros': timeExtentMicros,
+          // Requests the code profile in addition to the function profile when
+          // running with VM developer mode enabled. This data isn't accessible
+          // in non-VM developer mode, so not requesting the code profile will
+          // save on space and network usage.
+          '_code': preferences.vmDeveloperModeEnabled.value,
+        },
+      ).then((e) => e as CpuSamples),
     );
   }
 

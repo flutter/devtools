@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
@@ -253,8 +254,8 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
     required bool isPinned,
   }) {
     final pinnedData = tableController.pinnedData;
-    final data = tableController.tableData.value.data;
-    final node = (isPinned ? pinnedData : data)[index];
+    final data = isPinned ? pinnedData : tableController.tableData.value.data;
+    final node = data[index];
     return ValueListenableBuilder<T?>(
       valueListenable: widget.selectionNotifier,
       builder: (context, selected, _) {
@@ -727,16 +728,21 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       // Scroll so selected row is the last full item displayed in the viewport.
       // To do this we need to be showing the (minCompleteItemsInView + 1)
       // previous item  at the top.
-      scrollController.animateTo(
-        (newSelectedNodeIndex - minCompleteItemsInView + 1) * defaultRowHeight,
-        duration: defaultDuration,
-        curve: defaultCurve,
+      unawaited(
+        scrollController.animateTo(
+          (newSelectedNodeIndex - minCompleteItemsInView + 1) *
+              defaultRowHeight,
+          duration: defaultDuration,
+          curve: defaultCurve,
+        ),
       );
     } else if (isAboveViewport) {
-      scrollController.animateTo(
-        newSelectedNodeIndex * defaultRowHeight,
-        duration: defaultDuration,
-        curve: defaultCurve,
+      unawaited(
+        scrollController.animateTo(
+          newSelectedNodeIndex * defaultRowHeight,
+          duration: defaultDuration,
+          curve: defaultCurve,
+        ),
       );
     }
 
@@ -795,12 +801,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
   void initState() {
     super.initState();
 
-    _data = widget.tableController.tableData.value.data;
-    addAutoDisposeListener(widget.tableController.tableData, () {
-      setState(() {
-        _data = widget.tableController.tableData.value.data;
-      });
-    });
+    _initDataAndAddListeners();
 
     _linkedHorizontalScrollControllerGroup = LinkedScrollControllerGroup();
 
@@ -811,6 +812,31 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
     scrollController = widget.tableController.verticalScrollController!;
 
     pinnedScrollController = ScrollController();
+  }
+
+  @override
+  void didUpdateWidget(covariant _Table<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    final notifiersChanged = widget.tableController.tableData !=
+            oldWidget.tableController.tableData ||
+        widget.selectionNotifier != oldWidget.selectionNotifier ||
+        widget.activeSearchMatchNotifier != oldWidget.activeSearchMatchNotifier;
+
+    if (notifiersChanged) {
+      cancelListeners();
+      _initDataAndAddListeners();
+    }
+  }
+
+  void _initDataAndAddListeners() {
+    _data = widget.tableController.tableData.value.data;
+
+    addAutoDisposeListener(widget.tableController.tableData, () {
+      setState(() {
+        _data = widget.tableController.tableData.value.data;
+      });
+    });
     _initScrollOnSelectionListener(widget.selectionNotifier);
     _initSearchListener();
   }
@@ -916,7 +942,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
     // If we're at the end already, scroll to expose the new content.
     if (widget.autoScrollContent) {
       if (scrollController.hasClients && scrollController.atScrollBottom) {
-        scrollController.autoScrollToBottom();
+        unawaited(scrollController.autoScrollToBottom());
       }
     }
 
@@ -1504,12 +1530,27 @@ class _TableRowState<T> extends State<TableRow<T>>
     } else {
       final parts = List.generate(
         widget.columns.length,
-        (index) => _TableRowPartDisplayType.column,
+        (_) => _TableRowPartDisplayType.column,
       ).joinWith(_TableRowPartDisplayType.columnSpacer);
       rowDisplayParts.addAll(parts);
     }
 
-    var columnIndexTracker = 0;
+    // Maps the indices from [rowDisplayParts] to the corresponding index of
+    // each column in [widget.columns].
+    final columnIndexMap = <int, int>{};
+    // Add scope to guarantee [columnIndexTracker] is not used outside of this
+    // block.
+    {
+      var columnIndexTracker = 0;
+      for (int i = 0; i < rowDisplayParts.length; i++) {
+        final type = rowDisplayParts[i];
+        if (type == _TableRowPartDisplayType.column) {
+          columnIndexMap[i] = columnIndexTracker;
+          columnIndexTracker++;
+        }
+      }
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
       child: ListView.builder(
@@ -1520,11 +1561,10 @@ class _TableRowState<T> extends State<TableRow<T>>
           final displayTypeForIndex = rowDisplayParts[i];
           switch (displayTypeForIndex) {
             case _TableRowPartDisplayType.column:
-              final current = columnIndexTracker;
-              columnIndexTracker++;
+              final index = columnIndexMap[i]!;
               return columnFor(
-                widget.columns[current],
-                widget.columnWidths[current],
+                widget.columns[index],
+                widget.columnWidths[index],
               );
             case _TableRowPartDisplayType.columnSpacer:
               return const SizedBox(

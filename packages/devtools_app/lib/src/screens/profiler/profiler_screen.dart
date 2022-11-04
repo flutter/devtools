@@ -122,7 +122,7 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
       );
       final offlineProfilerData = CpuProfileData.parse(profilerJson);
       if (!offlineProfilerData.isEmpty) {
-        loadOfflineData(offlineProfilerData);
+        unawaited(loadOfflineData(offlineProfilerData));
       }
     }
   }
@@ -239,7 +239,10 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
       processId: 'offline data processing',
     );
     controller.cpuProfilerController.loadProcessedData(
-      offlineData,
+      CpuProfilePair(
+        functionProfile: offlineData,
+        codeProfile: null,
+      ),
       storeAsUserTagNone: true,
     );
   }
@@ -307,7 +310,7 @@ class _PrimaryControls extends StatelessWidget {
               analytics_constants.cpuProfiler,
               analytics_constants.record,
             );
-            controller.startRecording();
+            unawaited(controller.startRecording());
           },
         ),
         const SizedBox(width: denseSpacing),
@@ -320,7 +323,7 @@ class _PrimaryControls extends StatelessWidget {
               analytics_constants.cpuProfiler,
               analytics_constants.stop,
             );
-            controller.stopRecording();
+            unawaited(controller.stopRecording());
           },
         ),
         const SizedBox(width: denseSpacing),
@@ -334,7 +337,7 @@ class _PrimaryControls extends StatelessWidget {
                     analytics_constants.cpuProfiler,
                     analytics_constants.clear,
                   );
-                  controller.clear();
+                  unawaited(controller.clear());
                 },
         ),
       ],
@@ -376,7 +379,9 @@ class _SecondaryControls extends StatelessWidget {
                       analytics_constants.cpuProfiler,
                       analytics_constants.profileAppStartUp,
                     );
-                    controller.cpuProfilerController.loadAppStartUpProfile();
+                    unawaited(
+                      controller.cpuProfilerController.loadAppStartUpProfile(),
+                    );
                   }
                 : null,
           ),
@@ -392,7 +397,7 @@ class _SecondaryControls extends StatelessWidget {
                     analytics_constants.cpuProfiler,
                     analytics_constants.loadAllCpuSamples,
                   );
-                  controller.cpuProfilerController.loadAllSamples();
+                  unawaited(controller.cpuProfilerController.loadAllSamples());
                 }
               : null,
         ),

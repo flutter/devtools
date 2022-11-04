@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:codicon/codicon.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:vm_service/vm_service.dart';
@@ -157,7 +159,7 @@ class BreakOnExceptionsControl extends StatelessWidget {
           onChanged: controller.isSystemIsolate
               ? null
               : (ExceptionMode? mode) {
-                  controller.setIsolatePauseMode(mode!.id);
+                  unawaited(controller.setIsolatePauseMode(mode!.id));
                 },
           isDense: true,
           items: [

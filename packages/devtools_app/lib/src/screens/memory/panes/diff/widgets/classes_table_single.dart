@@ -8,10 +8,12 @@ import '../../../../../primitives/utils.dart';
 import '../../../../../shared/table/table.dart';
 import '../../../../../shared/table/table_data.dart';
 import '../../../../../shared/utils.dart';
+import '../../../primitives/simple_elements.dart';
 import '../../../shared/heap/heap.dart';
-import '../../../shared/heap/primitives.dart';
+import '../../../shared/shared_memory_widgets.dart';
 
-class _ClassNameColumn extends ColumnData<SingleClassStats> {
+class _ClassNameColumn extends ColumnData<SingleClassStats>
+    implements ColumnRenderer<SingleClassStats> {
   _ClassNameColumn()
       : super(
           'Class',
@@ -28,14 +30,23 @@ class _ClassNameColumn extends ColumnData<SingleClassStats> {
   bool get supportsSorting => true;
 
   @override
-  String getTooltip(SingleClassStats classStats) =>
-      classStats.heapClass.fullName;
+  // We are removing the tooltip, because it is provided by [HeapClassView].
+  String getTooltip(SingleClassStats classStats) => '';
+
+  @override
+  Widget build(
+    BuildContext context,
+    SingleClassStats data, {
+    bool isRowSelected = false,
+    VoidCallback? onPressed,
+  }) =>
+      HeapClassView(theClass: data.heapClass, showCopyButton: isRowSelected);
 }
 
 class _InstanceColumn extends ColumnData<SingleClassStats> {
   _InstanceColumn()
       : super(
-          'Non GC-able\nInstances',
+          'Instances',
           titleTooltip: nonGcableInstancesColumnTooltip,
           fixedWidthPx: scaleByFontFactor(180.0),
           alignment: ColumnAlignment.right,
@@ -101,7 +112,7 @@ class ClassesTableSingle extends StatelessWidget {
     required this.selection,
   }) : super(key: key);
 
-  final SingleHeapClasses classes;
+  final List<SingleClassStats> classes;
   final ValueNotifier<SingleClassStats?> selection;
 
   static final ColumnData<SingleClassStats> _shallowSizeColumn =
@@ -116,10 +127,13 @@ class ClassesTableSingle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // We want to preserve the sorting and sort directions for ClassesTableDiff
+    // no matter what the data passed to it is.
+    const dataKey = 'ClassesTableSingle';
     return FlatTable<SingleClassStats>(
       columns: _columns,
-      data: classes.classes,
-      dataKey: 'ClassesTableSingle',
+      data: classes,
+      dataKey: dataKey,
       keyFactory: (e) => Key(e.heapClass.fullName),
       selectionNotifier: selection,
       defaultSortColumn: _shallowSizeColumn,

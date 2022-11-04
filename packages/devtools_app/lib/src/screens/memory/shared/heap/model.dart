@@ -2,9 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../../../analytics/analytics.dart' as ga;
+import '../../../../analytics/analytics_common.dart';
+import '../../../../analytics/constants.dart' as analytics_constants;
+import '../../primitives/class_name.dart';
 import '../../primitives/memory_utils.dart';
 
 /// Names for json fields.
@@ -43,12 +46,15 @@ class AdaptedHeapData {
     );
   }
 
-  factory AdaptedHeapData.fromHeapSnapshot(HeapSnapshotGraph graph) =>
-      AdaptedHeapData(
-        graph.objects
-            .map((e) => AdaptedHeapObject.fromHeapSnapshotObject(e))
-            .toList(),
-      );
+  static AdaptedHeapData fromHeapSnapshot(
+    HeapSnapshotGraph graph,
+  ) {
+    final objects = graph.objects.map((e) {
+      return AdaptedHeapObject.fromHeapSnapshotObject(e);
+    }).toList();
+
+    return AdaptedHeapData(objects);
+  }
 
   /// Default value for rootIndex is taken from the doc:
   /// https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/heap_snapshot.md#object-ids
@@ -126,21 +132,80 @@ class ClassOnlyHeapPath {
             heapPath.objects.map((o) => o.heapClass).toList(growable: false);
   final List<HeapClassName> classes;
 
-  String asShortString() => classes.map((e) => e.className).join('/');
+  String toShortString({String? delimiter, bool inverted = false}) => _asString(
+        data: classes.map((e) => e.className).toList(),
+        delimiter: _delimeter(
+          delimiter: delimiter,
+          inverted: inverted,
+          isLong: false,
+        ),
+        inverted: inverted,
+      );
 
-  String asLongString({String delimiter = '\n'}) =>
-      classes.map((e) => e.fullName).join(delimiter);
+  String toLongString({
+    String? delimiter,
+    bool inverted = false,
+    bool hideStandard = false,
+  }) {
+    final List<String> data;
+    bool justAddedEllipsis = false;
+    if (hideStandard) {
+      data = [];
+      for (var item in classes.asMap().entries) {
+        final isStandard =
+            item.value.isDartOrFlutter || item.value.isPackageless;
+        if (item.key == 0 || item.key == classes.length - 1 || !isStandard) {
+          data.add(item.value.fullName);
+          justAddedEllipsis = false;
+        } else if (!justAddedEllipsis) {
+          data.add('...');
+          justAddedEllipsis = true;
+        }
+      }
+    } else {
+      data = classes.map((e) => e.fullName).toList();
+    }
+
+    return _asString(
+      data: data,
+      delimiter: _delimeter(
+        delimiter: delimiter,
+        inverted: inverted,
+        isLong: true,
+      ),
+      inverted: inverted,
+    );
+  }
+
+  static String _delimeter({
+    required String? delimiter,
+    required bool inverted,
+    required bool isLong,
+  }) {
+    if (delimiter != null) return delimiter;
+    if (isLong) {
+      return inverted ? '\n← ' : '\n→ ';
+    }
+    return inverted ? ' ← ' : ' → ';
+  }
+
+  static String _asString({
+    required List<String> data,
+    required String delimiter,
+    required bool inverted,
+  }) =>
+      (inverted ? data.reversed : data).join(delimiter);
 
   @override
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is ClassOnlyHeapPath && other.asLongString() == asLongString();
+    return other is ClassOnlyHeapPath && other.toLongString() == toLongString();
   }
 
   @override
-  int get hashCode => asLongString().hashCode;
+  int get hashCode => toLongString().hashCode;
 }
 
 /// Contains information from [HeapSnapshotObject] needed for
@@ -154,12 +219,10 @@ class AdaptedHeapObject {
   });
 
   factory AdaptedHeapObject.fromHeapSnapshotObject(HeapSnapshotObject object) {
-    var library = object.klass.libraryName;
-    if (library.isEmpty) library = object.klass.libraryUri.toString();
     return AdaptedHeapObject(
       code: object.identityHashCode,
       references: List.from(object.references),
-      heapClass: HeapClassName(className: object.klass.name, library: library),
+      heapClass: HeapClassName.fromHeapSnapshotClass(object.klass),
       shallowSize: object.shallowSize,
     );
   }
@@ -211,54 +274,17 @@ class SnapshotTaker {
   Future<AdaptedHeapData?> take() async {
     final snapshot = await snapshotMemory();
     if (snapshot == null) return null;
-    return AdaptedHeapData.fromHeapSnapshot(snapshot);
+    late final AdaptedHeapData result;
+    ga.timeSync(
+      analytics_constants.memory,
+      analytics_constants.MemoryTimeAnalytics.adaptSnapshot,
+      syncOperation: () => result = AdaptedHeapData.fromHeapSnapshot(snapshot),
+      screenMetricsProvider: () => _SnapshotAnalyticsMetrics(
+        numberOfObjects: snapshot.objects.length,
+      ),
+    );
+    return result;
   }
-}
-
-@immutable
-class HeapClassName {
-  const HeapClassName({required this.className, required this.library});
-
-  final String className;
-  final String library;
-
-  String get fullName => library.isNotEmpty ? '$library/$className' : className;
-
-  bool get isSentinel => className == 'Sentinel' && library.isEmpty;
-
-  /// Detects if a class can retain an object from garbage collection.
-  bool get isWeakEntry {
-    // Classes that hold reference to an object without preventing
-    // its collection.
-    const weakHolders = {
-      '_WeakProperty': 'dart.core',
-      '_WeakReferenceImpl': 'dart.core',
-      'FinalizerEntry': 'dart._internal',
-    };
-
-    if (!weakHolders.containsKey(className)) return false;
-    if (weakHolders[className] == library) return true;
-
-    // If a class lives in unexpected library, this can be because of
-    // (1) name collision or (2) bug in this code.
-    // Throwing exception in debug mode to verify option #2.
-    // TODO(polina-c): create a way for users to add their weak classes
-    // or detect weak references automatically, without hard coding
-    // class names.
-    assert(false, 'Unexpected library for $className: $library.');
-    return false;
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) {
-      return false;
-    }
-    return other is HeapClassName && other.fullName == fullName;
-  }
-
-  @override
-  int get hashCode => fullName.hashCode;
 }
 
 /// Mark the object as deeply immutable.
@@ -273,4 +299,12 @@ mixin Sealable {
   /// See doc for the mixin [Sealable].
   bool get isSealed => _isSealed;
   bool _isSealed = false;
+}
+
+class _SnapshotAnalyticsMetrics extends ScreenAnalyticsMetrics {
+  _SnapshotAnalyticsMetrics({
+    required this.numberOfObjects,
+  });
+
+  final int numberOfObjects;
 }

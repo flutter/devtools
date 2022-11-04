@@ -263,6 +263,19 @@ class HoverCardController {
   }
 }
 
+typedef AsyncGenerateHoverCardDataFunc = Future<HoverCardData?> Function({
+  required PointerHoverEvent event,
+
+  /// Returns true if the HoverCard is no longer visible.
+  ///
+  /// Use this callback to short circuit long running tasks.
+  required bool Function() isHoverStale,
+});
+
+typedef SyncGenerateHoverCardDataFunc = HoverCardData Function(
+  PointerHoverEvent event,
+);
+
 /// A hover card based tooltip.
 class HoverCardTooltip extends StatefulWidget {
   /// A [HoverCardTooltip] that generates it's [HoverCardData] asynchronously.
@@ -277,6 +290,7 @@ class HoverCardTooltip extends StatefulWidget {
     required this.asyncGenerateHoverCardData,
     required this.child,
     this.disposable,
+    this.asyncTimeout,
   }) : generateHoverCardData = null;
 
   /// A [HoverCardTooltip] that generates it's [HoverCardData] synchronously.
@@ -288,7 +302,8 @@ class HoverCardTooltip extends StatefulWidget {
     required this.generateHoverCardData,
     required this.child,
     this.disposable,
-  }) : asyncGenerateHoverCardData = null;
+  })  : asyncGenerateHoverCardData = null,
+        asyncTimeout = null;
 
   static const _hoverDelay = Duration(milliseconds: 500);
   static double get defaultHoverWidth => scaleByFontFactor(450.0);
@@ -298,25 +313,19 @@ class HoverCardTooltip extends StatefulWidget {
 
   /// The callback that is used when the [HoverCard]'s data is only available
   /// asynchronously.
-  final Future<HoverCardData?> Function({
-    required PointerHoverEvent event,
-
-    /// Returns true if the HoverCard is no longer visible.
-    ///
-    /// Use this callback to short circuit long running tasks.
-    required bool Function() isHoverStale,
-  })? asyncGenerateHoverCardData;
+  final AsyncGenerateHoverCardDataFunc? asyncGenerateHoverCardData;
 
   /// The callback that is used when the [HoverCard]'s data is available
   /// synchronously.
-  final HoverCardData Function(
-    PointerHoverEvent event,
-  )? generateHoverCardData;
+  final SyncGenerateHoverCardDataFunc? generateHoverCardData;
 
   final Widget child;
 
   /// Disposable object to be disposed when the group is closed.
   final Disposable? disposable;
+
+  /// If set, will only show the async hovercard after the timeout has elapsed.
+  final int? asyncTimeout;
 
   @override
   _HoverCardTooltipState createState() => _HoverCardTooltipState();
@@ -343,8 +352,13 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
   }
 
   void _setHoverCard(HoverCard hoverCard) {
+    if (!mounted) return;
     _hoverCardController.set(hoverCard: hoverCard);
     _currentHoverCard = hoverCard;
+  }
+
+  void _removeHoverCard(HoverCard hoverCard) {
+    _hoverCardController.removeHoverCard(hoverCard);
   }
 
   void _onHover(PointerHoverEvent event) {
@@ -354,71 +368,146 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
     _removeTimer = null;
 
     if (!widget.enabled()) return;
+    final asyncGenerateHoverCardData = widget.asyncGenerateHoverCardData;
+    final generateHoverCardData = widget.generateHoverCardData;
+    final asyncTimeout = widget.asyncTimeout;
+
     _showTimer = Timer(HoverCardTooltip._hoverDelay, () async {
-      HoverCardData? hoverCardData;
-
-      if (widget.asyncGenerateHoverCardData != null) {
-        assert(widget.generateHoverCardData == null);
-        // The data on the card is fetched asynchronously, so show a spinner
-        // while we wait for it.
-        final spinnerHoverCard = HoverCard.fromHoverEvent(
-          context: context,
-          contents: const CenteredCircularProgressIndicator(),
-          width: HoverCardTooltip.defaultHoverWidth,
+      if (asyncGenerateHoverCardData != null) {
+        assert(generateHoverCardData == null);
+        _showAsyncHoverCard(
+          asyncGenerateHoverCardData: asyncGenerateHoverCardData,
           event: event,
-          hoverCardController: _hoverCardController,
+          asyncTimeout: asyncTimeout,
         );
-
-        _setHoverCard(
-          spinnerHoverCard,
-        );
-
-        // The spinner is showing, we can now generate the HoverCardData
-        hoverCardData = await widget.asyncGenerateHoverCardData!(
-          event: event,
-          isHoverStale: () =>
-              !_hoverCardController.isHoverCardStillActive(spinnerHoverCard),
-        );
-
-        if (!_hoverCardController.isHoverCardStillActive(spinnerHoverCard)) {
-          // The hovercard became stale while fetching it's data. So it should
-          // no longer be shown.
-          return;
-        }
       } else {
-        assert(widget.generateHoverCardData != null);
-
-        hoverCardData = widget.generateHoverCardData!(event);
-      }
-
-      if (hoverCardData != null) {
-        if (!mounted) return;
-
-        if (hoverCardData.position == HoverCardPosition.cursor) {
-          _setHoverCard(
-            HoverCard.fromHoverEvent(
-              context: context,
-              title: hoverCardData.title,
-              contents: hoverCardData.contents,
-              width: hoverCardData.width,
-              event: event,
-              hoverCardController: _hoverCardController,
-            ),
-          );
-        } else {
-          _setHoverCard(
-            HoverCard(
-              context: context,
-              title: hoverCardData.title,
-              contents: hoverCardData.contents,
-              width: hoverCardData.width,
-              position: _calculateTooltipPosition(hoverCardData.width),
-              hoverCardController: _hoverCardController,
-            ),
-          );
-        }
+        _setHoverCardFromData(
+          generateHoverCardData!(event),
+          context: context,
+          event: event,
+        );
       }
     });
+  }
+
+  void _showAsyncHoverCard({
+    required AsyncGenerateHoverCardDataFunc asyncGenerateHoverCardData,
+    required PointerHoverEvent event,
+    int? asyncTimeout,
+  }) async {
+    HoverCard? spinnerHoverCard;
+    final hoverCardDataFuture = asyncGenerateHoverCardData(
+      event: event,
+      isHoverStale: () =>
+          spinnerHoverCard != null &&
+          !_hoverCardController.isHoverCardStillActive(spinnerHoverCard),
+    );
+    final hoverCardDataCompleter = _hoverCardDataCompleter(hoverCardDataFuture);
+    // If we have set the async hover card to show up only after a timeout,
+    // then race the timeout against generating the hover card data. If
+    // generating the data completes first, immediately show the hover card
+    // (or return early if there is no data).
+    if (asyncTimeout != null) {
+      await Future.any([
+        _timeoutCompleter(asyncTimeout).future,
+        hoverCardDataCompleter.future,
+      ]);
+
+      if (hoverCardDataCompleter.isCompleted) {
+        final data = await hoverCardDataCompleter.future;
+        // If we get no data back, then don't show a hover card.
+        if (data == null) return;
+        // Otherwise, show a hover card immediately.
+        return _setHoverCardFromData(
+          data,
+          context: context,
+          event: event,
+        );
+      }
+    }
+    // The data on the card is fetched asynchronously, so show a spinner
+    // while we wait for it.
+    spinnerHoverCard = HoverCard.fromHoverEvent(
+      context: context,
+      contents: const CenteredCircularProgressIndicator(),
+      width: HoverCardTooltip.defaultHoverWidth,
+      event: event,
+      hoverCardController: _hoverCardController,
+    );
+
+    _setHoverCard(
+      spinnerHoverCard,
+    );
+
+    // The spinner is showing, we can now generate the HoverCardData
+    final hoverCardData = await hoverCardDataCompleter.future;
+
+    if (!_hoverCardController.isHoverCardStillActive(spinnerHoverCard)) {
+      // The hovercard became stale while fetching it's data. So it should
+      // no longer be shown.
+      return;
+    }
+    if (hoverCardData == null) {
+      // No data was provided so remove the spinner
+      _removeHoverCard(spinnerHoverCard);
+      return;
+    }
+
+    return _setHoverCardFromData(
+      hoverCardData,
+      context: context,
+      event: event,
+    );
+  }
+
+  void _setHoverCardFromData(
+    HoverCardData hoverCardData, {
+    required BuildContext context,
+    required PointerHoverEvent event,
+  }) {
+    if (hoverCardData.position == HoverCardPosition.cursor) {
+      return _setHoverCard(
+        HoverCard.fromHoverEvent(
+          context: context,
+          title: hoverCardData.title,
+          contents: hoverCardData.contents,
+          width: hoverCardData.width,
+          event: event,
+          hoverCardController: _hoverCardController,
+        ),
+      );
+    }
+    return _setHoverCard(
+      HoverCard(
+        context: context,
+        title: hoverCardData.title,
+        contents: hoverCardData.contents,
+        width: hoverCardData.width,
+        position: _calculateTooltipPosition(hoverCardData.width),
+        hoverCardController: _hoverCardController,
+      ),
+    );
+  }
+
+  Completer _timeoutCompleter(int timeout) {
+    final completer = Completer();
+    Timer(Duration(milliseconds: timeout), () {
+      completer.complete();
+    });
+    return completer;
+  }
+
+  Completer<HoverCardData?> _hoverCardDataCompleter(
+    Future<HoverCardData?> hoverCardDataFuture,
+  ) {
+    final completer = Completer<HoverCardData?>();
+    unawaited(
+      hoverCardDataFuture.then(
+        (data) => completer.complete(data),
+        onError: (_) => completer.complete(null),
+      ),
+    );
+    return completer;
   }
 
   Offset _calculateTooltipPosition(double width) {

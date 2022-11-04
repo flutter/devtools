@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -94,7 +96,7 @@ class _ObjectInspectorViewState extends State<_ObjectInspectorView>
     final location = node.location;
     if (objRef != null &&
         objRef != controller.objectHistory.current.value?.ref) {
-      controller.pushObject(objRef, scriptRef: location?.scriptRef);
+      unawaited(controller.pushObject(objRef, scriptRef: location?.scriptRef));
     }
   }
 }

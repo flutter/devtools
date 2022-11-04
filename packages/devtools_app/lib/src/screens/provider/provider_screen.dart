@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -124,9 +126,11 @@ class ProviderScreenBody extends ConsumerWidget {
                 actions: [
                   SettingsOutlinedButton(
                     onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (_) => _StateInspectorSettingsDialog(),
+                      unawaited(
+                        showDialog(
+                          context: context,
+                          builder: (_) => _StateInspectorSettingsDialog(),
+                        ),
                       );
                     },
                   ),
@@ -162,10 +166,8 @@ class _StateInspectorSettingsDialog extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-
     return DevToolsDialog(
-      title: dialogTitleText(theme, title),
+      title: const DialogTitleText(title),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -189,7 +191,7 @@ class _StateInspectorSettingsDialog extends ConsumerWidget {
           )
         ],
       ),
-      actions: [
+      actions: const [
         DialogCloseButton(),
       ],
     );

@@ -8,7 +8,6 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../../config_specific/logger/logger.dart';
@@ -181,10 +180,12 @@ class _CodeViewState extends State<CodeView>
       if (_lastScriptRef?.uri != scriptRef?.uri) {
         // Default to scrolling to the top of the script.
         if (animate) {
-          verticalController.animateTo(
-            0,
-            duration: longDuration,
-            curve: defaultCurve,
+          unawaited(
+            verticalController.animateTo(
+              0,
+              duration: longDuration,
+              curve: defaultCurve,
+            ),
           );
         } else {
           verticalController.jumpTo(0);
@@ -205,10 +206,12 @@ class _CodeViewState extends State<CodeView>
       final scrollPosition =
           lineIndex * CodeView.rowHeight - ((extent - CodeView.rowHeight) / 2);
       if (animate) {
-        verticalController.animateTo(
-          scrollPosition,
-          duration: longDuration,
-          curve: defaultCurve,
+        unawaited(
+          verticalController.animateTo(
+            scrollPosition,
+            duration: longDuration,
+            curve: defaultCurve,
+          ),
         );
       } else {
         verticalController.jumpTo(scrollPosition);
@@ -728,10 +731,12 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
             activeSearchLine * CodeView.rowHeight - widget.height / 2,
             0.0,
           );
-          widget.scrollController.animateTo(
-            targetOffset,
-            duration: defaultDuration,
-            curve: defaultCurve,
+          unawaited(
+            widget.scrollController.animateTo(
+              targetOffset,
+              duration: defaultDuration,
+              curve: defaultCurve,
+            ),
           );
         }
       }
@@ -785,8 +790,6 @@ class LineItem extends StatefulWidget {
     this.activeSearchMatch,
   }) : super(key: key);
 
-  static const _hoverDelay = Duration(milliseconds: 150);
-  static const _removeDelay = Duration(milliseconds: 50);
   static double get _hoverWidth => scaleByFontFactor(400.0);
 
   final TextSpan lineContents;
@@ -801,86 +804,53 @@ class LineItem extends StatefulWidget {
 
 class _LineItemState extends State<LineItem>
     with ProvidedControllerMixin<DebuggerController, LineItem> {
-  /// A timer that shows a [HoverCard] with an evaluation result when completed.
-  Timer? _showTimer;
+  Future<HoverCardData?> _generateHoverCardData({
+    required PointerEvent event,
+    required bool Function() isHoverStale,
+  }) async {
+    if (!controller.isPaused.value) return null;
 
-  /// A timer that removes a [HoverCard] when completed.
-  Timer? _removeTimer;
+    final word = wordForHover(
+      event.localPosition.dx,
+      widget.lineContents,
+    );
 
-  /// Displays the evaluation result of a source code item.
-  HoverCard? _hoverCard;
-
-  String _previousHoverWord = '';
-  bool _hasMouseExited = false;
-
-  late HoverCardController _hoverCardController;
-
-  void _onHoverExit() {
-    _showTimer?.cancel();
-    _hasMouseExited = true;
-    _removeTimer = Timer(LineItem._removeDelay, () {
-      _hoverCard?.maybeRemove();
-      _previousHoverWord = '';
-    });
-  }
-
-  void _onHover(PointerHoverEvent event, BuildContext context) {
-    _showTimer?.cancel();
-    _removeTimer?.cancel();
-    _hasMouseExited = false;
-    if (!controller.isPaused.value) return;
-    _showTimer = Timer(LineItem._hoverDelay, () async {
-      final word = wordForHover(
-        event.localPosition.dx,
-        widget.lineContents,
-      );
-      if (word == _previousHoverWord) return;
-      _previousHoverWord = word;
-      _hoverCard?.remove();
-      if (word != '') {
-        try {
-          final response = await controller.evalAtCurrentFrame(word);
-          final isolateRef = controller.isolateRef;
-          if (response is! InstanceRef) return;
-          final variable = DartObjectNode.fromValue(
-            value: response,
-            isolateRef: isolateRef,
-          );
-          await buildVariablesTree(variable);
-          if (_hasMouseExited) return;
-          _hoverCard?.remove();
-          _hoverCard = HoverCard.fromHoverEvent(
-            contents: Material(
-              child: ExpandableVariable(
-                debuggerController: controller,
-                variable: variable,
-              ),
+    if (word != '') {
+      try {
+        final response = await controller.evalAtCurrentFrame(word);
+        final isolateRef = controller.isolateRef;
+        if (response is! InstanceRef) return null;
+        final variable = DartObjectNode.fromValue(
+          value: response,
+          isolateRef: isolateRef,
+        );
+        await buildVariablesTree(variable);
+        return HoverCardData(
+          title: word,
+          contents: Material(
+            child: ExpandableVariable(
+              debuggerController: controller,
+              variable: variable,
             ),
-            event: event,
-            width: LineItem._hoverWidth,
-            title: word,
-            context: context,
-            hoverCardController: _hoverCardController,
-          );
-        } catch (_) {
-          // Silently fail and don't display a HoverCard.
-        }
+          ),
+          width: LineItem._hoverWidth,
+        );
+      } catch (_) {
+        // Silently fail and don't display a HoverCard.
+        return null;
       }
-    });
+    }
+    return null;
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     initController();
-    _hoverCardController = Provider.of<HoverCardController>(context);
   }
 
   @override
   void dispose() {
-    _showTimer?.cancel();
-    _removeTimer?.cancel();
-    _hoverCard?.remove();
     super.dispose();
   }
 
@@ -916,7 +886,7 @@ class _LineItemState extends State<LineItem>
               // to allow us to render this as a proper overlay as similar
               // functionality exists to render the selection handles properly.
               Opacity(
-                opacity: 0,
+                opacity: .5,
                 child: RichText(
                   text: truncateTextSpan(widget.lineContents, column - 1),
                 ),
@@ -931,7 +901,7 @@ class _LineItemState extends State<LineItem>
                     color: breakpointColor,
                   ),
                 ),
-              )
+              ),
             ],
           ),
           _hoverableLine(),
@@ -954,6 +924,17 @@ class _LineItemState extends State<LineItem>
       child: child,
     );
   }
+
+  Widget _hoverableLine() => HoverCardTooltip.async(
+        enabled: () => true,
+        asyncTimeout: 100,
+        asyncGenerateHoverCardData: _generateHoverCardData,
+        child: SelectableText.rich(
+          searchAwareLineContents(),
+          scrollPhysics: const NeverScrollableScrollPhysics(),
+          maxLines: 1,
+        ),
+      );
 
   TextSpan searchAwareLineContents() {
     final children = widget.lineContents.children;
@@ -1074,16 +1055,6 @@ class _LineItemState extends State<LineItem>
     }
     return contentsWithMatch;
   }
-
-  Widget _hoverableLine() => MouseRegion(
-        onExit: (_) => _onHoverExit(),
-        onHover: (e) => _onHover(e, context),
-        child: SelectableText.rich(
-          searchAwareLineContents(),
-          scrollPhysics: const NeverScrollableScrollPhysics(),
-          maxLines: 1,
-        ),
-      );
 }
 
 class ScriptPopupMenu extends StatelessWidget {
@@ -1225,9 +1196,11 @@ Future<String?> fetchScriptLocationFullFilePath(
 }
 
 void showGoToLineDialog(BuildContext context, CodeViewController controller) {
-  showDialog(
-    context: context,
-    builder: (context) => GoToLineDialog(controller),
+  unawaited(
+    showDialog(
+      context: context,
+      builder: (context) => GoToLineDialog(controller),
+    ),
   );
 }
 
@@ -1255,7 +1228,7 @@ class GoToLineDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DevToolsDialog(
-      title: dialogTitleText(Theme.of(context), 'Go To'),
+      title: const DialogTitleText('Go To'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,

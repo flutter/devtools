@@ -48,7 +48,7 @@ class InspectorController extends DisposableController
     this.parent,
     this.isSummaryTree = true,
   }) : assert((detailsTree != null) == isSummaryTree) {
-    _init(detailsTree: detailsTree);
+    unawaited(_init(detailsTree: detailsTree));
   }
 
   Future<void> _init({
@@ -263,7 +263,7 @@ class InspectorController extends DisposableController
 
     if (visibleToUser) {
       if (parent == null) {
-        maybeLoadUI();
+        unawaited(maybeLoadUI());
       }
     } else {
       shutdownTree(false);
@@ -396,7 +396,7 @@ class InspectorController extends DisposableController
 
     isActive = true;
     inspectorService.addClient(this);
-    maybeLoadUI();
+    unawaited(maybeLoadUI());
   }
 
   InspectorService get inspectorService =>
@@ -514,7 +514,7 @@ class InspectorController extends DisposableController
 
     // Clear now to eliminate frame of highlighted nodes flicker.
     _clearValueToInspectorTreeNodeMapping();
-    _recomputeTreeRoot(selection, null, false);
+    unawaited(_recomputeTreeRoot(selection, null, false));
   }
 
   InspectorTreeNode? getSubtreeRootNode() {
@@ -594,7 +594,7 @@ class InspectorController extends DisposableController
     if (!treeLoadStarted) {
       treeLoadStarted = true;
       // This was the first frame.
-      maybeLoadUI();
+      unawaited(maybeLoadUI());
     }
     _refreshRateLimiter.scheduleRequest();
   }
@@ -619,7 +619,7 @@ class InspectorController extends DisposableController
       // Wait for the master to update.
       return;
     }
-    updateSelectionFromService(firstFrame: false);
+    unawaited(updateSelectionFromService(firstFrame: false));
   }
 
   Future<void> updateSelectionFromService({
@@ -699,7 +699,9 @@ class InspectorController extends DisposableController
     if (nodeInTree == null) {
       // The tree has probably changed since we last updated. Do a full refresh
       // so that the tree includes the new node we care about.
-      _recomputeTreeRoot(newSelection, detailsSelection, setSubtreeRoot);
+      unawaited(
+        _recomputeTreeRoot(newSelection, detailsSelection, setSubtreeRoot),
+      );
     }
 
     refreshSelection(newSelection, detailsSelection, setSubtreeRoot);
@@ -775,14 +777,16 @@ class InspectorController extends DisposableController
         .erroredItemsForPage(InspectorScreen.id)
         .value;
 
-    updateSelectionFromService(
-      firstFrame: false,
-      inspectorRef: errors.keys.elementAt(index),
+    unawaited(
+      updateSelectionFromService(
+        firstFrame: false,
+        inspectorRef: errors.keys.elementAt(index),
+      ),
     );
   }
 
   void _onExpand(InspectorTreeNode node) {
-    inspectorTree.maybePopulateChildren(node);
+    unawaited(inspectorTree.maybePopulateChildren(node));
   }
 
   Future<void> _addNodeToConsole(InspectorTreeNode node) async {
@@ -809,7 +813,7 @@ class InspectorController extends DisposableController
 
     final InspectorTreeNode? node = inspectorTree.selection;
     if (node != null) {
-      inspectorTree.maybePopulateChildren(node);
+      unawaited(inspectorTree.maybePopulateChildren(node));
     }
     if (programaticSelectionChangeInProgress) {
       return;
@@ -880,7 +884,7 @@ class InspectorController extends DisposableController
 
         if (toSelect != null) {
           final diagnosticToSelect = toSelect.diagnostic!;
-          diagnosticToSelect.setSelectionInspector(true);
+          unawaited(diagnosticToSelect.setSelectionInspector(true));
         }
       }
     }
@@ -889,7 +893,7 @@ class InspectorController extends DisposableController
       _showDetailSubtrees(selection, detailsSelection);
     } else if (selection != null) {
       // We can't rely on the details tree to update the selection on the server in this case.
-      selection.setSelectionInspector(true);
+      unawaited(selection.setSelectionInspector(true));
     }
   }
 

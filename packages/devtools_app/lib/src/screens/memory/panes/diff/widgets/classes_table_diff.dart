@@ -9,6 +9,8 @@ import '../../../../../primitives/utils.dart';
 import '../../../../../shared/table/table.dart';
 import '../../../../../shared/table/table_data.dart';
 import '../../../../../shared/utils.dart';
+import '../../../primitives/simple_elements.dart';
+import '../../../shared/shared_memory_widgets.dart';
 import '../controller/heap_diff.dart';
 
 enum _DataPart {
@@ -22,7 +24,8 @@ enum _SizeType {
   retained,
 }
 
-class _ClassNameColumn extends ColumnData<DiffClassStats> {
+class _ClassNameColumn extends ColumnData<DiffClassStats>
+    implements ColumnRenderer<DiffClassStats> {
   _ClassNameColumn()
       : super(
           'Class',
@@ -38,7 +41,17 @@ class _ClassNameColumn extends ColumnData<DiffClassStats> {
   bool get supportsSorting => true;
 
   @override
-  String getTooltip(DiffClassStats classStats) => classStats.heapClass.fullName;
+  // We are removing the tooltip, because it is provided by [HeapClassView].
+  String getTooltip(DiffClassStats classStats) => '';
+
+  @override
+  Widget build(
+    BuildContext context,
+    DiffClassStats data, {
+    bool isRowSelected = false,
+    VoidCallback? onPressed,
+  }) =>
+      HeapClassView(theClass: data.heapClass, showCopyButton: isRowSelected);
 }
 
 class _InstanceColumn extends ColumnData<DiffClassStats> {
@@ -56,7 +69,7 @@ class _InstanceColumn extends ColumnData<DiffClassStats> {
       case _DataPart.created:
         return 'New';
       case _DataPart.deleted:
-        return 'Deleted';
+        return 'Released';
       case _DataPart.delta:
         return 'Delta';
     }
@@ -142,7 +155,7 @@ class ClassesTableDiff extends StatelessWidget {
     required this.selection,
   }) : super(key: key);
 
-  final DiffHeapClasses classes;
+  final List<DiffClassStats> classes;
   final ValueNotifier<DiffClassStats?> selection;
 
   static final _columnGroups = [
@@ -151,21 +164,25 @@ class ClassesTableDiff extends StatelessWidget {
       range: const Range(0, 1),
     ),
     ColumnGroup(
-      title: 'Non GC-able Instances',
+      title: 'Instances',
       range: const Range(1, 4),
+      tooltip: nonGcableInstancesColumnTooltip,
     ),
     ColumnGroup(
       title: 'Shallow Dart Size',
       range: const Range(4, 7),
+      tooltip: shallowSizeColumnTooltip,
     ),
     ColumnGroup(
       title: 'Retained Dart Size',
       range: const Range(7, 10),
+      tooltip: retainedSizeColumnTooltip,
     ),
   ];
 
-  static final _shallowSizeDeltaColumn =
-      _SizeColumn(_DataPart.delta, _SizeType.shallow);
+  static final _retainedSizeDeltaColumn =
+      _SizeColumn(_DataPart.delta, _SizeType.retained);
+
   static late final List<ColumnData<DiffClassStats>> _columns =
       <ColumnData<DiffClassStats>>[
     _ClassNameColumn(),
@@ -174,22 +191,26 @@ class ClassesTableDiff extends StatelessWidget {
     _InstanceColumn(_DataPart.delta),
     _SizeColumn(_DataPart.created, _SizeType.shallow),
     _SizeColumn(_DataPart.deleted, _SizeType.shallow),
-    _shallowSizeDeltaColumn,
+    _SizeColumn(_DataPart.delta, _SizeType.shallow),
     _SizeColumn(_DataPart.created, _SizeType.retained),
     _SizeColumn(_DataPart.deleted, _SizeType.retained),
-    _SizeColumn(_DataPart.delta, _SizeType.retained),
+    _retainedSizeDeltaColumn,
   ];
 
   @override
   Widget build(BuildContext context) {
+    // We want to preserve the sorting and sort directions for ClassesTableDiff
+    // no matter what the data passed to it is.
+    const dataKey = 'ClassesTableDiff';
+
     return FlatTable<DiffClassStats>(
       columns: _columns,
       columnGroups: _columnGroups,
-      data: classes.classes,
-      dataKey: 'ClassesTableDiff',
+      data: classes,
+      dataKey: dataKey,
       keyFactory: (e) => Key(e.heapClass.fullName),
       selectionNotifier: selection,
-      defaultSortColumn: _shallowSizeDeltaColumn,
+      defaultSortColumn: _retainedSizeDeltaColumn,
       defaultSortDirection: SortDirection.descending,
     );
   }

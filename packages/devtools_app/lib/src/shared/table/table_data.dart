@@ -49,9 +49,12 @@ abstract class ColumnData<T> {
   bool get supportsSorting => numeric;
 
   int compare(T a, T b) {
-    final valueA = getValue(a) as Comparable;
-    final valueB = getValue(b) as Comparable;
-    return valueA.compareTo(valueB);
+    final valueA = getValue(a);
+    final valueB = getValue(b);
+    if (valueA == null && valueB == null) return 0;
+    if (valueA == null) return -1;
+    if (valueB == null) return 1;
+    return (valueA as Comparable).compareTo(valueB as Comparable);
   }
 
   /// Get the cell's value from the given [dataObject].
@@ -113,12 +116,14 @@ mixin PinnableListEntry {
 /// will be drawn between groups and an additional header row will be added to
 /// the table to display the column group titles.
 class ColumnGroup {
-  ColumnGroup({required this.title, required this.range});
+  ColumnGroup({required this.title, required this.range, this.tooltip});
 
   final String title;
 
   /// The range of column indices for columns that make up this group.
   final Range range;
+
+  final String? tooltip;
 }
 
 extension ColumnDataExtension<T> on ColumnData<T> {

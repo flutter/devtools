@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -408,7 +409,7 @@ class BoxChildVisualizer extends StatelessWidget {
       top: renderOffset.dy,
       left: renderOffset.dx,
       child: InkWell(
-        onTap: () => state.onTap(propertiesLocal),
+        onTap: () => unawaited(state.onTap(propertiesLocal)),
         onDoubleTap: () => state.onDoubleTap(propertiesLocal),
         onLongPress: () => state.onDoubleTap(propertiesLocal),
         child: SizedBox(

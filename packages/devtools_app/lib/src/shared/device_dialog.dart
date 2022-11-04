@@ -38,7 +38,7 @@ class DeviceDialog extends StatelessWidget {
     // TODO(kenz): set actions alignment to `spaceBetween` if
     // https://github.com/flutter/flutter/issues/69708 is fixed.
     return DevToolsDialog(
-      title: dialogTitleText(theme, 'Device Info'),
+      title: const DialogTitleText('Device Info'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -58,7 +58,7 @@ class DeviceDialog extends StatelessWidget {
       actions: [
         _connectToNewAppButton(context),
         if (connectedApp.isRunningOnDartVM!) _ViewVMFlagsButton(),
-        DialogCloseButton(),
+        const DialogCloseButton(),
       ],
     );
   }
@@ -146,12 +146,10 @@ class _VMFlagsDialogState extends State<VMFlagsDialog> with AutoDisposeMixin {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return DevToolsDialog(
       title: Row(
         children: [
-          dialogTitleText(theme, 'VM Flags'),
+          const DialogTitleText('VM Flags'),
           const Expanded(child: SizedBox(width: denseSpacing)),
           Container(
             width: defaultSearchTextWidth,
@@ -178,7 +176,7 @@ class _VMFlagsDialogState extends State<VMFlagsDialog> with AutoDisposeMixin {
           ),
         ],
       ),
-      actions: [
+      actions: const [
         DialogCloseButton(),
       ],
     );

@@ -1,10 +1,14 @@
-## Contributing code
+# Contributing code
 
 ![GitHub contributors](https://img.shields.io/github/contributors/flutter/devtools.svg)
 
 We gladly accept contributions via GitHub pull requests!
+This page instructs how to contribute code changes to DevTools.
 
-You must complete the
+> If you just want to test newest functionality, follow
+[beta testing guidance](https://github.com/flutter/devtools/blob/master/BETA_TESTING.md).
+
+To contribute code you must complete the
 [Contributor License Agreement](https://cla.developers.google.com/clas).
 You can do this online, and it only takes a minute. If you've never submitted code before,
 you must add your (or your organization's) name and contact info to the [AUTHORS](AUTHORS)
@@ -58,9 +62,9 @@ To regenerate mocks and upgrade dependencies (after switching branches, for exam
 
 - `sh tool/refresh.sh`
 
-To run DevTools as a Flutter web app, from the packages/devtools_app directory:
+To run DevTools as a Flutter web app, with all experiments enabled, from the packages/devtools_app directory:
 
-- `flutter run -d chrome`
+- `flutter run -d chrome  --dart-define=enable_experiments=true`
 
 To test release performance:
 
@@ -70,6 +74,14 @@ You can also use `-d headless-server`, which will start a headless server that s
 files for the DevTools Flutter app.
 
 To connect to your running application, paste the earlier copied observatory URL into the section "Connect to a Running App" in DevTools.
+
+To enable all experiments by default when you are running with VS Code, add the following to your debugging configuration:
+
+```
+"args": [
+  "--dart-define=enable_experiments=true"
+]
+```
 
 ## Development (DevTools server + DevTools Flutter web app)
 
@@ -215,16 +227,19 @@ flutter test test/ --update-goldens
 
 ## Manual Testing
 
-To run master version of DevTools with all experimental features enabled:
+To explore DevTools with all experimental features enabled:
 
-1. Start DevTools
+1. [Configure](https://docs.flutter.dev/get-started/install) Dart or Flutter.
+
+2. Start DevTools:
 ```
 git clone git@github.com:flutter/devtools.git
+./devtools/tool/update_flutter_sdk.sh
 cd devtools/packages/devtools_app
-flutter run -d chrome --dart-define=enable_experiments=true
+../../tool/flutter-sdk/bin/flutter run -d chrome --dart-define=enable_experiments=true
 ```
 
-2. Paste URL of your application (for example [Gallery](#connect-to-application)) to the connection textbox.
+3. Paste URL of your application (for example [Gallery](#connect-to-application)) to the connection textbox.
 
 ## third_party dependencies
 

@@ -4,9 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 
-import '../../../../../config_specific/import_export/import_export.dart';
 import '../../../../../primitives/auto_dispose.dart';
-import '../../../../../shared/globals.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
 
@@ -46,7 +44,9 @@ class SnapshotInstanceItem extends SnapshotItem {
 
   AdaptedHeap? heap;
 
-  void setHeapData(AdaptedHeapData? data) {
+  /// This method is expected to be called once when heap is actually recieved.
+  void initializeHeapData(AdaptedHeapData? data) {
+    assert(heap == null);
     if (data != null) heap = AdaptedHeap(data);
     _isProcessing.value = false;
   }
@@ -60,50 +60,4 @@ class SnapshotInstanceItem extends SnapshotItem {
 
   @override
   bool get hasData => heap != null;
-
-  void downloadToCsv() {
-    final csvBuffer = StringBuffer();
-
-    // Write the headers first.
-    csvBuffer.writeln(
-      [
-        'Class',
-        'Library',
-        'Instances',
-        'Shallow Dart Size',
-        'Retained Dart Size',
-        'Short Retaining Path',
-        'Full Retaining Path',
-      ].map((e) => '"$e"').join(','),
-    );
-
-    // TODO(polina-c): write data to file before opening the feature.
-    // // Write a row per retaining path.
-    // final data = heapClassesToShow();
-    // for (var classStats in data.classAnalysis) {
-    //   for (var pathStats in classStats.objectsByPath.entries) {
-    //     csvBuffer.writeln(
-    //       [
-    //         classStats.heapClass.className,
-    //         classStats.heapClass.library,
-    //         pathStats.value.instanceCount,
-    //         pathStats.value.shallowSize,
-    //         pathStats.value.retainedSize,
-    //         pathStats.key.asShortString(),
-    //         pathStats.key.asLongString().replaceAll('\n', ' | '),
-    //       ].join(','),
-    //     );
-    //   }
-    // }
-
-    final file = ExportController().downloadFile(
-      csvBuffer.toString(),
-      type: ExportFileType.csv,
-    );
-
-    // TODO(polina-c): add the notification to ExportController.downloadFile.
-    notificationService.push(successfulExportMessage(file));
-
-    throw UnimplementedError();
-  }
 }

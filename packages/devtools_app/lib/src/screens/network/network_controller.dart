@@ -87,14 +87,15 @@ class NetworkController
         if (!request.inProgress) {
           final data =
               outstandingRequestsMap.remove(id) as DartIOHttpRequestData;
-          data.getFullRequestData().then((value) => _updateData());
+
+          unawaited(data.getFullRequestData().then((value) => _updateData()));
         }
         continue;
       } else if (wrapped.inProgress) {
         outstandingRequestsMap.putIfAbsent(id, () => wrapped);
       } else {
         // If the response has completed, send a request for body data.
-        wrapped.getFullRequestData().then((value) => _updateData());
+        unawaited(wrapped.getFullRequestData().then((value) => _updateData()));
       }
       currentValues.add(wrapped);
     }
@@ -162,7 +163,7 @@ class NetworkController
         // TODO(kenz): look into improving performance by caching more data.
         // Polling less frequently helps performance.
         const Duration(milliseconds: 2000),
-        (_) => _networkService.refreshNetworkData(),
+        (_) => unawaited(_networkService.refreshNetworkData()),
       );
     } else {
       _pollingTimer?.cancel();
@@ -262,7 +263,6 @@ class NetworkController
     }
   }
 
-  // TODO(kenz): search through previous matches when possible.
   @override
   List<NetworkRequest> matchesForSearch(
     String search, {
@@ -270,15 +270,19 @@ class NetworkController
   }) {
     if (search.isEmpty) return [];
     final matches = <NetworkRequest>[];
-    final caseInsensitiveSearch = search.toLowerCase();
-
-    final currentRequests = filteredData.value;
-    for (final request in currentRequests) {
-      if (request.uri.toLowerCase().contains(caseInsensitiveSearch)) {
-        matches.add(request);
-        // TODO(kenz): use the value request.isSearchMatch in the network
-        // requests table to improve performance. This will require some
-        // refactoring of FlatTable.
+    if (searchPreviousMatches) {
+      final previousMatches = searchMatches.value;
+      for (final previousMatch in previousMatches) {
+        if (previousMatch.uri.caseInsensitiveContains(search)) {
+          matches.add(previousMatch);
+        }
+      }
+    } else {
+      final currentRequests = filteredData.value;
+      for (final request in currentRequests) {
+        if (request.uri.caseInsensitiveContains(search)) {
+          matches.add(request);
+        }
       }
     }
     return matches;

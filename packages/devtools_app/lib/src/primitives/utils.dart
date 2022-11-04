@@ -315,9 +315,9 @@ Stream combineStreams(Stream a, Stream b, Stream c) {
       csub = c.listen(controller.add);
     },
     onCancel: () {
-      asub?.cancel();
-      bsub?.cancel();
-      csub?.cancel();
+      unawaited(asub?.cancel());
+      unawaited(bsub?.cancel());
+      unawaited(csub?.cancel());
     },
   );
 
@@ -484,11 +484,13 @@ class RateLimiter {
       // request. The existing request has already started so may return state
       // that is now out of date.
       requestScheduledButNotStarted = true;
-      _pendingRequest!.future.whenComplete(() {
-        _pendingRequest = null;
-        requestScheduledButNotStarted = false;
-        scheduleRequest();
-      });
+      unawaited(
+        _pendingRequest!.future.whenComplete(() {
+          _pendingRequest = null;
+          requestScheduledButNotStarted = false;
+          scheduleRequest();
+        }),
+      );
       return;
     }
 

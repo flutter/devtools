@@ -163,6 +163,24 @@ class ServiceConnectionManager {
     return listenable;
   }
 
+  String? _cachedMainRootLibKey;
+  String? _cachedMainRootLibValue;
+
+  /// Returns root library of the main isolate or null, if the library is not detectable.
+  Future<String?> tryToDetectMainRootLib() async {
+    final isolateId = isolateManager.mainIsolate.value?.id;
+    if (isolateId == null) return null;
+
+    final rootLibKey = '${serviceManager.service?.connectedUri}-$isolateId';
+
+    if (_cachedMainRootLibKey == rootLibKey) return _cachedMainRootLibValue;
+    _cachedMainRootLibKey = rootLibKey;
+
+    final isolate = await serviceManager.service?.getIsolate(isolateId);
+    _cachedMainRootLibValue = isolate?.rootLib?.uri;
+    return _cachedMainRootLibValue;
+  }
+
   Future<void> vmServiceOpened(
     VmServiceWrapper service, {
     required Future<void> onClosed,
@@ -175,6 +193,9 @@ class ServiceConnectionManager {
     if (_serviceAvailable.isCompleted) {
       _serviceAvailable = Completer();
     }
+
+    assert(_cachedMainRootLibKey == null);
+    assert(_cachedMainRootLibValue == null);
 
     connectedApp = ConnectedApp();
     // It is critical we call vmServiceOpened on each manager class before
@@ -326,6 +347,8 @@ class ServiceConnectionManager {
     vm = null;
     sdkVersion = null;
     connectedApp = null;
+    _cachedMainRootLibKey = null;
+    _cachedMainRootLibValue = null;
     generateDevToolsTitle();
 
     vmFlagManager.vmServiceClosed();

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:codicon/codicon.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
@@ -116,7 +118,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!initController()) return;
-    controller.onFirstDebuggerScreenLoad();
+    unawaited(controller.onFirstDebuggerScreenLoad());
   }
 
   @override
@@ -166,9 +168,11 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
                         DebuggerScreen.id,
                         analytics_constants.pageReady,
                       );
-                      serviceManager.sendDwdsEvent(
-                        screen: DebuggerScreen.id,
-                        action: analytics_constants.pageReady,
+                      unawaited(
+                        serviceManager.sendDwdsEvent(
+                          screen: DebuggerScreen.id,
+                          action: analytics_constants.pageReady,
+                        ),
                       );
                       _shownFirstScript = true;
                     }

@@ -4,9 +4,12 @@
 
 import 'dart:async';
 
+import 'package:vm_service/vm_service.dart';
+
 import '../../../../../primitives/auto_dispose.dart';
 import '../../../../../service/service_extensions.dart' as extensions;
 import '../../../../../shared/globals.dart';
+import '../../flutter_frames/flutter_frame_model.dart';
 import 'enhance_tracing_model.dart';
 
 final enhanceTracingExtensions = [
@@ -29,6 +32,44 @@ class EnhanceTracingController extends DisposableController
     value: (_) => false,
   );
 
+  /// The id of the first 'Flutter.Frame' event that occurs after the DevTools
+  /// performance page is opened.
+  ///
+  /// For frames with this id and greater, we can assign
+  /// [FlutterFrame.enhanceTracingState]. For frames with an earlier id, we
+  /// do not know the value of [FlutterFrame.enhanceTracingState], and we will
+  /// use other heuristics.
+  int? _firstLiveFrameId;
+
+  /// Stream subscription on the 'Extension' stream that listens for the first
+  /// 'Flutter.Frame' event.
+  ///
+  /// This stream should be initialized and cancelled in
+  /// [_listenForFirstLiveFrame], unless we never receive any 'Flutter.Frame'
+  /// events, in which case the subscription will be canceled in [dispose].
+  StreamSubscription<Event>? _firstFrameEventSubscription;
+
+  /// Listens on the 'Extension' stream (without history) for 'Flutter.Frame'
+  /// events.
+  ///
+  /// This method assigns [_firstLiveFrameId] when the first 'Flutter.Frame'
+  /// event is received, and then cancels the stream subscription.
+  void _listenForFirstLiveFrame() {
+    _firstFrameEventSubscription =
+        serviceManager.service!.onExtensionEvent.listen(
+      (event) {
+        if (event.extensionKind == 'Flutter.Frame' &&
+            _firstLiveFrameId == null) {
+          _firstLiveFrameId = FlutterFrame.parse(event.extensionData!.data).id;
+          // See https://github.com/dart-lang/linter/issues/3801
+          // ignore: discarded_futures
+          unawaited(_firstFrameEventSubscription!.cancel());
+          _firstFrameEventSubscription = null;
+        }
+      },
+    );
+  }
+
   void init() {
     for (int i = 0; i < enhanceTracingExtensions.length; i++) {
       final extension = enhanceTracingExtensions[i];
@@ -44,6 +85,11 @@ class EnhanceTracingController extends DisposableController
       });
     }
     _updateTracingState();
+
+    // Listen for the first 'Flutter.Frame' event we receive from this point
+    // on so that we know the start id for frames that we can assign the
+    // current [FlutterFrame.enhanceTracingState].
+    _listenForFirstLiveFrame();
   }
 
   void _updateTracingState() {
@@ -58,13 +104,24 @@ class EnhanceTracingController extends DisposableController
     );
   }
 
+  void assignStateForFrame(FlutterFrame frame) {
+    // We can only assign [FlutterFrame.enhanceTracingState] for frames
+    // with ids after [_firstLiveFrameId].
+    if (_firstLiveFrameId != null && frame.id >= _firstLiveFrameId!) {
+      frame.enhanceTracingState = tracingState;
+    }
+  }
+
   void showEnhancedTracingMenu() {
     showMenuStreamController.add(null);
   }
 
   @override
   void dispose() {
-    showMenuStreamController.close();
+    unawaited(showMenuStreamController.close());
+    // See https://github.com/dart-lang/linter/issues/3801
+    // ignore: discarded_futures
+    unawaited(_firstFrameEventSubscription?.cancel());
     super.dispose();
   }
 }

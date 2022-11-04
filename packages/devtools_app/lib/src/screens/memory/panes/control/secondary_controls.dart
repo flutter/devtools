@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../../analytics/analytics.dart' as ga;
@@ -61,9 +63,11 @@ class SecondaryControls extends StatelessWidget {
   }
 
   void _openSettingsDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => MemorySettingsDialog(controller),
+    unawaited(
+      showDialog(
+        context: context,
+        builder: (context) => MemorySettingsDialog(controller),
+      ),
     );
   }
 

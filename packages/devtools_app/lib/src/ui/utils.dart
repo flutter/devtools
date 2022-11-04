@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be found
 // in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -193,11 +194,13 @@ void maybeScrollToPosition(
   if (!extentVisible.contains(position)) {
     final positionToScrollTo = max(0.0, position - defaultRowHeight);
 
-    scrollController.animateTo(
-      //TODO (carolynqu): should be positionToScrollTo.clamp(0.0, scrollController.position.maxScrollExtent) but maxScrollExtent is not being updated, https://github.com/flutter/devtools/issues/4264
-      positionToScrollTo,
-      duration: defaultDuration,
-      curve: defaultCurve,
+    unawaited(
+      scrollController.animateTo(
+        //TODO (carolynqu): should be positionToScrollTo.clamp(0.0, scrollController.position.maxScrollExtent) but maxScrollExtent is not being updated, https://github.com/flutter/devtools/issues/4264
+        positionToScrollTo,
+        duration: defaultDuration,
+        curve: defaultCurve,
+      ),
     );
   }
 }

@@ -36,7 +36,7 @@ class LatestFlutterCandidateCommand extends Command {
 
   @override
   Future run() async {
-    final authToken = argResults?[githubToken] ?? '';
+    final authToken = (argResults?[githubToken] ?? '') as String;
 
     SemanticVersion latest = SemanticVersion();
     String? latestBranchName;
@@ -61,7 +61,8 @@ class LatestFlutterCandidateCommand extends Command {
 
       final response = await http.get(
         uri,
-        headers: {'authorization': 'Bearer $authToken'},
+        headers:
+            authToken.isEmpty ? null : {'authorization': 'Bearer $authToken'},
       );
 
       if (response.statusCode != HttpStatus.ok) {

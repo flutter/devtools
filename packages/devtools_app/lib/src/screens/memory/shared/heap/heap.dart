@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../../primitives/class_name.dart';
+import 'class_filter.dart';
 import 'model.dart';
 import 'spanning_tree.dart';
 
@@ -10,9 +12,9 @@ class AdaptedHeap {
 
   final AdaptedHeapData data;
 
-  late final SingleHeapClasses classes = _heapStatistics(data);
+  late final SingleHeapClasses classes = _heapStatistics();
 
-  static SingleHeapClasses _heapStatistics(AdaptedHeapData data) {
+  SingleHeapClasses _heapStatistics() {
     final result = <HeapClassName, SingleClassStats>{};
     if (!data.isSpanningTreeBuilt) buildSpanningTree(data);
 
@@ -33,10 +35,52 @@ class AdaptedHeap {
   }
 }
 
-abstract class HeapClasses with Sealable {}
+abstract class HeapClasses<T extends ClassStats> with Sealable {
+  List<T> get classStatsList;
+}
+
+mixin FilterableHeapClasses<T extends ClassStats> on HeapClasses<T> {
+  ClassFilter? _appliedFilter;
+  List<T>? _filtered;
+
+  List<T> filtered(ClassFilter newFilter) {
+    final oldFilter = _appliedFilter;
+    final oldFiltered = _filtered;
+    _appliedFilter = newFilter;
+    if ((oldFilter == null) != (oldFiltered == null)) {
+      throw StateError('Nullness should match.');
+    }
+
+    // Return previous data if filter did not change.
+    if (oldFilter == newFilter) return oldFiltered!;
+
+    // Return previous data if filter is identical.
+    final task = newFilter.task(previous: oldFilter);
+    if (task == FilteringTask.doNothing) return oldFiltered!;
+
+    // Return all data if filter is trivial.
+    if (newFilter.filterType == ClassFilterType.showAll) {
+      return _filtered = classStatsList;
+    }
+
+    final Iterable<T> dataToFilter;
+    if (task == FilteringTask.refilter) {
+      dataToFilter = classStatsList;
+    } else if (task == FilteringTask.reuse) {
+      dataToFilter = oldFiltered!;
+    } else {
+      throw StateError('Unexpected task: $task.');
+    }
+
+    final result =
+        dataToFilter.where((e) => newFilter.apply(e.heapClass)).toList();
+    return _filtered = result;
+  }
+}
 
 /// Set of heap class statistical information for single heap (not comparision between two heaps).
-class SingleHeapClasses extends HeapClasses {
+class SingleHeapClasses extends HeapClasses<SingleClassStats>
+    with FilterableHeapClasses<SingleClassStats> {
   SingleHeapClasses(this.classesByName);
 
   /// Maps full class name to class.
@@ -51,6 +95,9 @@ class SingleHeapClasses extends HeapClasses {
       stats.seal();
     }
   }
+
+  @override
+  List<SingleClassStats> get classStatsList => classes;
 }
 
 typedef StatsByPath = Map<ClassOnlyHeapPath, ObjectSetStats>;
@@ -65,6 +112,8 @@ abstract class ClassStats with Sealable {
     assert(isSealed);
     return statsByPath.entries.toList(growable: false);
   }
+
+  HeapClassName get heapClass;
 }
 
 /// Statistics for a class about a single heap.
@@ -73,7 +122,9 @@ class SingleClassStats extends ClassStats {
       : objects = ObjectSet(),
         super(<ClassOnlyHeapPath, ObjectSetStats>{});
 
+  @override
   final HeapClassName heapClass;
+
   final ObjectSet objects;
 
   late final entries = statsByPath.entries.toList(growable: false);

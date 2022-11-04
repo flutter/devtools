@@ -60,9 +60,6 @@ const debugEnableSampleScreen = false;
 // Disabled until VM developer mode functionality is added.
 const showVmDeveloperMode = false;
 
-/// Whether this DevTools build is external.
-bool isExternalBuild = true;
-
 /// Top-level configuration for the app.
 @immutable
 class DevToolsApp extends StatefulWidget {
@@ -104,7 +101,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   void initState() {
     super.initState();
 
-    ga.setupDimensions();
+    unawaited(ga.setupDimensions());
 
     addAutoDisposeListener(serviceManager.isolateManager.mainIsolate, () {
       setState(() {
@@ -474,7 +471,7 @@ class SettingsDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final analyticsController = Provider.of<AnalyticsController>(context);
     return DevToolsDialog(
-      title: dialogTitleText(Theme.of(context), 'Settings'),
+      title: const DialogTitleText('Settings'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -506,7 +503,7 @@ class SettingsDialog extends StatelessWidget {
           ),
         ],
       ),
-      actions: [
+      actions: const [
         DialogCloseButton(),
       ],
     );
