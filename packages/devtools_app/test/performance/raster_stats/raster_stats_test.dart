@@ -2,11 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/performance/panes/raster_stats/raster_stats.dart';
-import 'package:devtools_app/src/screens/performance/panes/raster_stats/raster_stats_controller.dart';
-import 'package:devtools_app/src/service/service_manager.dart';
-import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -27,7 +24,8 @@ void main() {
       setGlobal(ServiceConnectionManager, mockServiceManager);
       setGlobal(IdeTheme, IdeTheme());
 
-      controller = RasterStatsController();
+      controller =
+          RasterStatsController(createMockPerformanceControllerWithDefaults());
       await controller.collectRasterStats();
     });
 
@@ -43,7 +41,7 @@ void main() {
     }
 
     testWidgets('renders in empty state', (WidgetTester tester) async {
-      controller.clear();
+      controller.clearData();
       await pumpRenderingLayerVisualizer(tester);
 
       expect(find.byType(LayerSnapshotTable), findsNothing);
