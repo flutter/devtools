@@ -24,15 +24,17 @@ jobs:
     strategy:
       fail-fast: false
     steps:
-      - name: Cache Gradle packages
+      - name: git clone
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
+
+      - name: Cache Generated Files
         uses: actions/cache@v3
         with:
           path: |
             **/build/
             **/.dart_tool/
           key: ${{ runner.os }}-build-${{ env.cache-name }}
-      - name: git clone
-        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
+
       - name: tool/bots.sh
         env:
           BOT: main
@@ -50,6 +52,14 @@ jobs:
     steps:
       - name: git clone
         uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
+
+      - name: Cache Generated Files
+        uses: actions/cache@v3
+        with:
+          path: |
+            **/build/
+            **/.dart_tool/
+          key: ${{ runner.os }}-build-${{ env.cache-name }}
 
       - name: tool/bots.sh
         env:
@@ -77,6 +87,14 @@ jobs:
     steps:
       - name: git clone
         uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
+      
+      - name: Cache Generated Files
+        uses: actions/cache@v3
+        with:
+          path: |
+            **/build/
+            **/.dart_tool/
+          key: ${{ runner.os }}-build-${{ env.cache-name }}
 
       - name: tool/bots.sh
         env:
