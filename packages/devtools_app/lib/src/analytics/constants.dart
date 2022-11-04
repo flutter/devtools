@@ -169,9 +169,8 @@ class MemoryEvent {
   static const tracingHelp = 'memoryTracingHelp';
 
   static const diffTakeSnapshotControlPane = 'diffTakeSnapshotControlPane';
-  static const diffTakeSnapshotButtonAfterHelp =
-      'diffTakeSnapshotButtonAfterHelp';
-  //static const diffClearSnapshots = 'diffClearSnapshots';
+  static const diffTakeSnapshotAfterHelp = 'diffTakeSnapshotAfterHelp';
+  static const diffClearSnapshots = 'diffClearSnapshots';
 
   //static const diffSnapshotDiff = 'diffSnapshotDiff';
   //static const diffSnapshotFilter = 'diffSnapshotFilter';

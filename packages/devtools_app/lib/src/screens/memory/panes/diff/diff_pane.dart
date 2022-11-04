@@ -62,8 +62,7 @@ class _SnapshotItemContent extends StatelessWidget {
                 const SizedBox(height: denseSpacing),
                 IconLabelButton(
                   onPressed: controller.takeSnapshotHandler(
-                    analytics_constants
-                        .MemoryEvent.diffTakeSnapshotButtonAfterHelp,
+                    analytics_constants.MemoryEvent.diffTakeSnapshotAfterHelp,
                   ),
                   icon: Icons.fiber_manual_record,
                   label: 'Take Snapshot',

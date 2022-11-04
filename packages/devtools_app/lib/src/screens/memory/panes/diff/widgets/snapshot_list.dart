@@ -55,7 +55,15 @@ class _ListControlPane extends StatelessWidget {
             ToolbarAction(
               icon: Icons.block,
               tooltip: 'Clear all snapshots',
-              onPressed: clearAllEnabled ? controller.clearSnapshots : null,
+              onPressed: clearAllEnabled
+                  ? () async {
+                      ga.select(
+                        analytics_constants.memory,
+                        analytics_constants.MemoryEvent.diffClearSnapshots,
+                      );
+                      await controller.clearSnapshots();
+                    }
+                  : null,
             )
           ],
         );
