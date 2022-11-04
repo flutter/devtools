@@ -99,6 +99,7 @@ class TimelineEventsController extends PerformanceFeatureController
   }
 
   Future<void> _initForServiceConnection() async {
+    legacyController.init();
     await serviceManager.timelineStreamManager.setDefaultTimelineStreams();
     await toggleHttpRequestLogging(true);
 

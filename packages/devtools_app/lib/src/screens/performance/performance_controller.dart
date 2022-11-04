@@ -183,6 +183,7 @@ class PerformanceController extends DisposableController
   @override
   void dispose() {
     _applyToFeatureControllers((c) => c.dispose());
+    enhanceTracingController.dispose();
     super.dispose();
   }
 }
