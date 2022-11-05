@@ -391,7 +391,7 @@ class _RefreshOnGCToggleButton extends StatelessWidget {
       builder: (context, refreshOnGc, _) {
         return ToggleButton(
           message: 'Auto-refresh on garbage collection',
-          label: const Text('Refresh on GC'),
+          label: 'Refresh on GC',
           icon: Icons.autorenew_outlined,
           isSelected: refreshOnGc,
           onPressed: allocationProfileController.toggleRefreshOnGc,

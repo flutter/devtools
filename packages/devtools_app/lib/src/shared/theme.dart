@@ -388,6 +388,9 @@ extension DevToolsColorScheme on ColorScheme {
 
   Color get selectedRowColor =>
       isLight ? devtoolsBlue[600]! : devtoolsGrey[600]!;
+
+  Color get coverageHitColor => treemapIncreaseColor;
+  Color get coverageMissColor => treemapDecreaseColor;
 }
 
 /// Utility extension methods to the [ThemeData] class.
