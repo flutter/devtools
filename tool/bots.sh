@@ -36,7 +36,7 @@ echo "Cloning the Flutter master branch"
 # - cache build artifacts from devtools
 if [ -d "./flutter-sdk" ]; then
     pushd ./flutter-sdk
-    git fetch --All
+    git fetch --all
     popd
 else
     git clone https://github.com/flutter/flutter.git ./flutter-sdk
