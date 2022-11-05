@@ -34,7 +34,7 @@ echo "Cloning the Flutter master branch"
 # - make sure whole test runs on candidate
 # - cache entire flutter candidate branch
 # - cache build artifacts from devtools
-if [ -d "/path/to/dir" ]; then
+if [ -d "./flutter-sdk" ]; then
     pushd ./flutter-sdk
     git fetch --All
     popd
