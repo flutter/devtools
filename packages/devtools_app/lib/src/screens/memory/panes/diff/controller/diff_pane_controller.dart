@@ -312,6 +312,9 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     // Set class to show.
     final classes = _snapshotClassesAfterDiffing();
     heapClasses.value = classes;
+
+    _setSelections();
+
     _updateClasses(
       classes: classes,
       className: _core.className,
@@ -337,5 +340,42 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
 
     _updatingValues = false;
     _assertIntegrity();
+  }
+
+  /// Set initial selection of class and path, for discoverability of detailed view.
+  void _setSelections() {
+    if (_core.className != null) return;
+    final classes = heapClasses.value?.classStatsList;
+    if (classes == null) return;
+
+    SingleClassStats classWithMaxRetainedSizeSingle(
+        SingleClassStats v, SingleClassStats e) {
+      if (v.objects.retainedSize > e.objects.retainedSize) return v;
+      return e;
+    }
+
+    DiffClassStats classWithMaxRetainedSizeDiff(
+        DiffClassStats v, DiffClassStats e) {
+      if (v.total.delta.retainedSize > e.total.delta.retainedSize) return v;
+      return e;
+    }
+
+    // Get class with max retained size.
+    final ClassStats theClass;
+    if (classes is List<SingleClassStats>) {
+      theClass = classes.reduce(classWithMaxRetainedSizeSingle);
+    } else if (classes is List<DiffClassStats>) {
+      theClass = classes.reduce(classWithMaxRetainedSizeDiff);
+    } else {
+      throw StateError('Unexpected type ${classes.runtimeType}');
+    }
+    _core.className = theClass.heapClass;
+
+    // Get path with max retained size.
+    final path = theClass.statsByPathEntries.reduce((v, e) {
+      if (v.value.retainedSize > e.value.retainedSize) return v;
+      return e;
+    });
+    _core.path = path.key;
   }
 }
