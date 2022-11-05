@@ -31,7 +31,7 @@ class HeapClassDetails extends StatelessWidget {
     final theEntries = entries;
     if (theEntries == null) {
       return const Center(
-        child: Text('Select a table row to see class details here.'),
+        child: Text('Click a table row to see class details here.'),
       );
     }
 
@@ -48,7 +48,7 @@ class HeapClassDetails extends StatelessWidget {
         if (selection == null) {
           return const Center(
             child: Text(
-              'Select a table row to see the retaining path here.',
+              'Click a table row to see the retaining path here.',
             ),
           );
         }
