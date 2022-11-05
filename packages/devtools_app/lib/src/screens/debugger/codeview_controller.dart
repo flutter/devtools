@@ -57,6 +57,13 @@ class CodeViewController extends DisposableController
   final ScriptsHistory scriptsHistory = ScriptsHistory();
   late VoidCallback _scriptHistoryListener;
 
+  ValueListenable<bool> get showCodeCoverage => _showCodeCoverage;
+  final _showCodeCoverage = ValueNotifier<bool>(false);
+
+  void toggleShowCodeCoverage() {
+    _showCodeCoverage.value = !_showCodeCoverage.value;
+  }
+
   void clearState() {
     // It would be nice to not clear the script history but it is currently
     // coupled to ScriptRef objects so that is unsafe.
@@ -119,6 +126,30 @@ class CodeViewController extends DisposableController
     scriptsHistory.current.addListener(_scriptHistoryListener);
   }
 
+  Future<void> refreshCodeCoverage() async {
+    final hitLines = <int>{};
+    final missedLines = <int>{};
+    final current = parsedScript.value;
+    if (current == null) {
+      return;
+    }
+    final isolateRef = serviceManager.isolateManager.selectedIsolate.value!;
+    await _getCoverageReport(
+      isolateRef,
+      current.script,
+      hitLines,
+      missedLines,
+    );
+
+    parsedScript.value = ParsedScript(
+      script: current.script,
+      highlighter: current.highlighter,
+      executableLines: current.executableLines,
+      coverageHitLines: hitLines,
+      coverageMissedLines: missedLines,
+    );
+  }
+
   /// Resets the current script information before invoking [showScriptLocation].
   void resetScriptLocation(ScriptLocation scriptLocation) {
     _scriptLocation.value = null;
@@ -143,6 +174,30 @@ class CodeViewController extends DisposableController
     _scriptLocation.value = scriptLocation;
   }
 
+  Future<void> _getCoverageReport(
+    IsolateRef isolateRef,
+    ScriptRef script,
+    Set<int> hitLines,
+    Set<int> missedLines,
+  ) async {
+    try {
+      final report = await serviceManager.service!.getSourceReport(
+        isolateRef.id!,
+        const [SourceReportKind.kCoverage],
+        scriptId: script.id!,
+        reportLines: true,
+      );
+      for (final range in report.ranges!) {
+        final coverage = range.coverage!;
+        hitLines.addAll(coverage.hits!);
+        missedLines.addAll(coverage.misses!);
+      }
+    } catch (e) {
+      // Ignore - not supported for all vm service implementations.
+      log('$e');
+    }
+  }
+
   /// Parses the current script into executable lines and prepares the script
   /// for syntax highlighting.
   Future<void> _parseCurrentScript() async {
@@ -160,9 +215,12 @@ class CodeViewController extends DisposableController
     // Gather the data to display breakable lines.
     var executableLines = <int>{};
 
+    final hitLines = <int>{};
+    final missedLines = <int>{};
+
     if (script != null) {
+      final isolateRef = serviceManager.isolateManager.selectedIsolate.value!;
       try {
-        final isolateRef = serviceManager.isolateManager.selectedIsolate.value;
         final positions = await breakpointManager.getBreakablePositions(
           isolateRef,
           script,
@@ -172,10 +230,20 @@ class CodeViewController extends DisposableController
         // Ignore - not supported for all vm service implementations.
         log('$e');
       }
+
+      await _getCoverageReport(
+        isolateRef,
+        script,
+        hitLines,
+        missedLines,
+      );
+
       parsedScript.value = ParsedScript(
         script: script,
         highlighter: highlighter,
         executableLines: executableLines,
+        coverageHitLines: hitLines,
+        coverageMissedLines: missedLines,
       );
     }
   }
@@ -261,6 +329,8 @@ class ParsedScript {
     required this.script,
     required this.highlighter,
     required this.executableLines,
+    required this.coverageHitLines,
+    required this.coverageMissedLines,
   }) : lines = (script.source?.split('\n') ?? const []).toList();
 
   final Script script;
@@ -268,6 +338,9 @@ class ParsedScript {
   final SyntaxHighlighter highlighter;
 
   final Set<int> executableLines;
+
+  final Set<int> coverageHitLines;
+  final Set<int> coverageMissedLines;
 
   final List<String> lines;
 

@@ -763,10 +763,29 @@ final mockSyntaxHighlighter = SyntaxHighlighter.withGrammar(
   source: mockScript!.source,
 );
 
+const coverageHitLines = <int> {
+  1,
+  3,
+  4,
+  7,
+};
+
+const coverageMissLines = <int> {
+  2,
+  5,
+};
+
+const executableLines = <int>{
+  ...coverageHitLines,
+  ...coverageMissLines,
+};
+
 final mockParsedScript = ParsedScript(
   script: mockScript!,
   highlighter: mockSyntaxHighlighter,
-  executableLines: <int>{},
+  executableLines: executableLines,
+  coverageHitLines: coverageHitLines,
+  coverageMissedLines: coverageMissLines,
 );
 
 final mockScriptRefs = [
