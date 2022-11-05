@@ -36,6 +36,13 @@ void main() {
     );
     scriptsHistory = ScriptsHistory();
 
+    final app = fakeServiceManager.connectedApp!;
+    mockConnectedApp(
+      app,
+      isFlutterApp: false,
+      isProfileBuild: false,
+      isWebApp: false,
+    );
     when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
     when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
     setGlobal(ServiceConnectionManager, fakeServiceManager);
