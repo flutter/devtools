@@ -348,24 +348,24 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     final classes = heapClasses.value?.classStatsList;
     if (classes == null) return;
 
-    SingleClassStats classWithMaxRetainedSizeSingle(
-        SingleClassStats v, SingleClassStats e) {
-      if (v.objects.retainedSize > e.objects.retainedSize) return v;
-      return e;
-    }
+    SingleClassStats singleWithMaxRetainedSize(
+      SingleClassStats a,
+      SingleClassStats b,
+    ) =>
+        a.objects.retainedSize > b.objects.retainedSize ? a : b;
 
-    DiffClassStats classWithMaxRetainedSizeDiff(
-        DiffClassStats v, DiffClassStats e) {
-      if (v.total.delta.retainedSize > e.total.delta.retainedSize) return v;
-      return e;
-    }
+    DiffClassStats diffWithMaxRetainedSize(
+      DiffClassStats a,
+      DiffClassStats b,
+    ) =>
+        a.total.delta.retainedSize > b.total.delta.retainedSize ? a : b;
 
     // Get class with max retained size.
     final ClassStats theClass;
     if (classes is List<SingleClassStats>) {
-      theClass = classes.reduce(classWithMaxRetainedSizeSingle);
+      theClass = classes.reduce(singleWithMaxRetainedSize);
     } else if (classes is List<DiffClassStats>) {
-      theClass = classes.reduce(classWithMaxRetainedSizeDiff);
+      theClass = classes.reduce(diffWithMaxRetainedSize);
     } else {
       throw StateError('Unexpected type ${classes.runtimeType}');
     }
