@@ -68,7 +68,7 @@ class DiffSnapshotScene extends Scene {
   }
 }
 
-/// Provides test snapshots. First time returns null.
+/// Provides test snapshots.
 class _TestSnapshotTaker implements SnapshotTaker {
   bool firstTime = true;
   int _nextIndex = 0;
