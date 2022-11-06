@@ -68,19 +68,31 @@ class _SnapshotItemContent extends StatelessWidget {
           );
         }
 
-        return Column(
-          children: [
-            const SizedBox(height: denseRowSpacing),
-            SnapshotControlPane(controller: controller),
-            const SizedBox(height: denseRowSpacing),
-            Expanded(
-              child: SnapshotView(
-                controller: controller,
-              ),
-            ),
-          ],
-        );
+        return SnapshotInstanceItemPane(controller: controller);
       },
+    );
+  }
+}
+
+@visibleForTesting
+class SnapshotInstanceItemPane extends StatelessWidget {
+  const SnapshotInstanceItemPane({super.key, required this.controller});
+
+  final DiffPaneController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        const SizedBox(height: denseRowSpacing),
+        SnapshotControlPane(controller: controller),
+        const SizedBox(height: denseRowSpacing),
+        Expanded(
+          child: SnapshotView(
+            controller: controller,
+          ),
+        ),
+      ],
     );
   }
 }
