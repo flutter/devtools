@@ -101,13 +101,13 @@ class _RetainingPathTableColumns {
 
   final String className;
 
-  late final retainedSizeColumn = _RetainedSizeColumn(isDiff);
+  late final shallowSizeColumn = _ShallowSizeColumn(isDiff);
 
   late final columnList = <ColumnData<StatsByPathEntry>>[
     _RetainingPathColumn(className),
     _InstanceColumn(isDiff),
-    _ShallowSizeColumn(isDiff),
-    retainedSizeColumn,
+    shallowSizeColumn,
+    _RetainedSizeColumn(isDiff),
   ];
 }
 
@@ -146,7 +146,7 @@ class RetainingPathTable extends StatelessWidget {
       data: entries,
       keyFactory: (e) => Key(e.key.toLongString()),
       selectionNotifier: selection,
-      defaultSortColumn: columns.retainedSizeColumn,
+      defaultSortColumn: columns.shallowSizeColumn,
       defaultSortDirection: SortDirection.descending,
     );
   }
