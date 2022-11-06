@@ -12,16 +12,12 @@ import 'package:devtools_app/src/screens/memory/shared/heap/model.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
-import 'package:devtools_app/src/shared/preferences.dart';
-import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stager/stager.dart';
 
-import '../../test_data/memory.dart';
 import '../../test_data/memory/heap/heap_data.dart';
-import '../../test_data/memory_allocation.dart';
 
 /// To run:
 /// flutter run -t test/scenes/memory/diff_snapshot.stager_app.dart -d macos
@@ -35,41 +31,20 @@ class DiffSnapshotScene extends Scene {
     return Scaffold(
       body: SnapshotInstanceItemPane(controller: diffController),
     );
-
-    // return wrapWithControllers(
-    //   const MemoryBody(),
-    //   memory: controller,
-    // );
   }
 
   @override
   Future<void> setUp() async {
     FeatureFlags.memoryDiffing = true;
 
-    await ensureInspectorDependencies();
     setGlobal(OfflineModeController, OfflineModeController());
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(NotificationService, NotificationService());
-    setGlobal(
-      PreferencesController,
-      PreferencesController()..memory.showChart.value = false,
-    );
 
-    // Load canned data testHeapSampleData.
-    final memoryJson =
-        SamplesMemoryJson.decode(argJsonString: testHeapSampleData);
-    final allocationJson =
-        AllocationMemoryJson.decode(argJsonString: testAllocationData);
-
-    fakeServiceManager = FakeServiceManager(
-      service: FakeServiceManager.createFakeService(
-        memoryData: memoryJson,
-        allocationData: allocationJson,
-      ),
-    );
-    final app = fakeServiceManager.connectedApp!;
+    fakeServiceManager =
+        FakeServiceManager(service: FakeServiceManager.createFakeService());
     mockConnectedApp(
-      app,
+      fakeServiceManager.connectedApp!,
       isFlutterApp: true,
       isProfileBuild: true,
       isWebApp: false,
@@ -79,12 +54,8 @@ class DiffSnapshotScene extends Scene {
     controller = MemoryController(
       diffPaneController: diffController =
           DiffPaneController(_TestSnapshotTaker()),
-    )
-      ..offline.value = true
-      ..memoryTimeline.offlineData.clear()
-      ..memoryTimeline.offlineData.addAll(memoryJson.data);
+    );
 
-    await diffController.takeSnapshot();
     await diffController.takeSnapshot();
     await diffController.takeSnapshot();
   }
