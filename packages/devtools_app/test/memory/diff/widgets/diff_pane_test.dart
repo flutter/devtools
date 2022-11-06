@@ -63,7 +63,6 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.text('selected-isolate-${i + 1}'), findsOneWidget);
       }
-
       await expectLater(
         find.byType(DiffPane),
         matchesDevToolsGolden(
@@ -72,6 +71,9 @@ void main() {
       );
       expect(snapshots.value.length, equals(1 + 3));
 
+      // Select a class.
+      await tester.tap(find.byTooltip('my_lib/root'));
+      await tester.pumpAndSettle();
       await expectLater(
         find.byType(DiffPane),
         matchesDevToolsGolden(
