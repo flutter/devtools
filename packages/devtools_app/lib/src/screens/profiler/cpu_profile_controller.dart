@@ -204,10 +204,11 @@ class CpuProfilerController
       );
     }
 
-    if (analyticsScreenId != null) {
-      // Pull and process cpu profile data [pullAndProcessHelper] and time the
-      // operation for analytics.
-      try {
+    try {
+      if (analyticsScreenId != null) {
+        // Pull and process cpu profile data [pullAndProcessHelper] and time the
+        // operation for analytics.
+
         await ga.timeAsync(
           analyticsScreenId!,
           analytics_constants.cpuProfileProcessingTime,
@@ -217,16 +218,11 @@ class CpuProfilerController
             cpuStackDepth: cpuProfiles.profileMetaData.stackDepth,
           ),
         );
-      } on ProcessCancelledException catch (_) {
-        // Do nothing for instances of [ProcessCancelledException].
-      }
-    } else {
-      try {
+      } else {
         await pullAndProcessHelper();
-      } on ProcessCancelledException catch (_) {
-        // Do nothing because the attempt to process data has been cancelled in
-        // favor of a new one.
       }
+    } on ProcessCancelledException catch (_) {
+      // Do nothing for instances of [ProcessCancelledException].
     }
   }
 
