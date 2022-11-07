@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math';
 
 import 'package:collection/collection.dart';
@@ -46,12 +47,12 @@ class DiffPaneController extends DisposableController {
 
   VoidCallback? takeSnapshotHandler(String gaEvent) {
     if (_isTakingSnapshot.value) return null;
-    return () async {
+    return () {
       ga.select(
         analytics_constants.memory,
         gaEvent,
       );
-      await takeSnapshot();
+      unawaited(takeSnapshot());
     };
   }
 
