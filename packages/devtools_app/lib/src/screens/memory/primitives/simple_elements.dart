@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../../../analytics/analytics_common.dart';
+
 const String shallowSizeColumnTooltip =
     'The total shallow size of all of the instances.\n'
     'The shallow size of an object is the size of the object\n'
@@ -16,4 +18,16 @@ const String retainedSizeColumnTooltip =
 const String nonGcableInstancesColumnTooltip =
     'Number of instances of the class,\n'
     'that are reachable, i.e. have a retaining path from the root\n'
-    'and therefore can’t be garbage collected.';
+    "and therefore can't be garbage collected.";
+
+class MemoryAnalyticsMetrics extends ScreenAnalyticsMetrics {
+  MemoryAnalyticsMetrics({
+    this.heapObjectsTotal,
+    this.heapDiffObjectsBefore,
+    this.heapDiffObjectsAfter,
+  });
+
+  final int? heapDiffObjectsBefore;
+  final int? heapDiffObjectsAfter;
+  final int? heapObjectsTotal;
+}

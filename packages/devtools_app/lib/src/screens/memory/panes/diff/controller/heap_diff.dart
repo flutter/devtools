@@ -5,10 +5,10 @@
 import 'package:flutter/foundation.dart';
 
 import '../../../../../analytics/analytics.dart' as ga;
-import '../../../../../analytics/analytics_common.dart';
 import '../../../../../analytics/constants.dart' as analytics_constants;
 import '../../../../../primitives/utils.dart';
 import '../../../primitives/class_name.dart';
+import '../../../primitives/simple_elements.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
 
@@ -30,22 +30,12 @@ DiffHeapClasses _calculateDiffGaWrapper(_HeapCouple couple) {
     analytics_constants.memory,
     analytics_constants.MemoryTime.calculateDiff,
     syncOperation: () => result = DiffHeapClasses(couple),
-    screenMetricsProvider: () => _DiffAnalyticsMetrics(
-      objectsBefore: couple.older.data.objects.length,
-      objectsAfter: couple.younger.data.objects.length,
+    screenMetricsProvider: () => MemoryAnalyticsMetrics(
+      heapDiffObjectsBefore: couple.older.data.objects.length,
+      heapDiffObjectsAfter: couple.younger.data.objects.length,
     ),
   );
   return result;
-}
-
-class _DiffAnalyticsMetrics extends ScreenAnalyticsMetrics {
-  _DiffAnalyticsMetrics({
-    required this.objectsBefore,
-    required this.objectsAfter,
-  });
-
-  final int objectsBefore;
-  final int objectsAfter;
 }
 
 @immutable

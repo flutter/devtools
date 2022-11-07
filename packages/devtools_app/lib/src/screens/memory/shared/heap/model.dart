@@ -5,10 +5,10 @@
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../analytics/analytics.dart' as ga;
-import '../../../../analytics/analytics_common.dart';
 import '../../../../analytics/constants.dart' as analytics_constants;
 import '../../primitives/class_name.dart';
 import '../../primitives/memory_utils.dart';
+import '../../primitives/simple_elements.dart';
 
 /// Names for json fields.
 class _JsonFields {
@@ -284,8 +284,8 @@ AdaptedHeapData _adaptSnapshotGaWrapper(HeapSnapshotGraph graph) {
     analytics_constants.memory,
     analytics_constants.MemoryTime.adaptSnapshot,
     syncOperation: () => result = AdaptedHeapData.fromHeapSnapshot(graph),
-    screenMetricsProvider: () => _SnapshotAnalyticsMetrics(
-      numberOfObjects: graph.objects.length,
+    screenMetricsProvider: () => MemoryAnalyticsMetrics(
+      heapObjectsTotal: graph.objects.length,
     ),
   );
   return result;
@@ -303,12 +303,4 @@ mixin Sealable {
   /// See doc for the mixin [Sealable].
   bool get isSealed => _isSealed;
   bool _isSealed = false;
-}
-
-class _SnapshotAnalyticsMetrics extends ScreenAnalyticsMetrics {
-  _SnapshotAnalyticsMetrics({
-    required this.numberOfObjects,
-  });
-
-  final int numberOfObjects;
 }

@@ -359,9 +359,7 @@ class MemoryPreferencesController extends DisposableController
 
         ga.select(
           analytics_constants.memory,
-          showChart.value
-              ? analytics_constants.MemoryEvent.chartExpand
-              : analytics_constants.MemoryEvent.chartCollapse,
+          '${analytics_constants.MemoryEvent.chartExpand}-${showChart.value}',
         );
       },
     );

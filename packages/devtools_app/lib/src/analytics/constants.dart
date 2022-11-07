@@ -151,10 +151,9 @@ class MemoryEvent {
   static const settings = 'settings';
   static const autoSnapshot = 'autoSnapshot';
 
-  static const chartLegend = 'chartLegend';
-  static const chartAndroid = 'chartAndroid';
+  static const chartLegend = 'memoryLegend';
+  static const chartAndroid = 'androidChart';
   static const chartExpand = 'chartExpand';
-  static const chartCollapse = 'chartCollapse';
   static const chartInterval = 'chartInterval';
 
   static const profileDownloadCsv = 'profileDownloadCsv';
