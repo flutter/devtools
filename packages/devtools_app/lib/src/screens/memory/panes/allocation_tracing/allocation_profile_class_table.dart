@@ -118,6 +118,19 @@ class _AllocationTracingTableState extends State<AllocationTracingTable> {
     ];
   }
 
+  // How often the ga event should be sent if the user keeps editing the filter.
+  static const _editFilterGaThrottling = Duration(seconds: 5);
+  DateTime _editFilterGaSent = DateTime.fromMillisecondsSinceEpoch(0);
+  void _sendFilterEditGaEvent() {
+    final now = DateTime.now();
+    if (now.difference(_editFilterGaSent) < _editFilterGaThrottling) return;
+    ga.select(
+      analytics_constants.memory,
+      analytics_constants.MemoryEvent.tracingClassFilter,
+    );
+    _editFilterGaSent = now;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -128,10 +141,7 @@ class _AllocationTracingTableState extends State<AllocationTracingTable> {
             labelText: 'Class Filter',
             hintText: 'Filter by class name',
             onChanged: (value) {
-              ga.select(
-                analytics_constants.memory,
-                analytics_constants.MemoryEvent.tracingClassFilter,
-              );
+              _sendFilterEditGaEvent();
               widget.controller.updateClassFilter(value);
             },
             controller: widget.controller.textEditingController,

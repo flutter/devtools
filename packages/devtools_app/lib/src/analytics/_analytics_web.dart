@@ -476,7 +476,7 @@ void timeSync(
       'because an exception was thrown:\n$e\n$st',
       LogLevel.warning,
     );
-    return;
+    rethrow;
   }
   final endTime = DateTime.now();
   final durationMicros =

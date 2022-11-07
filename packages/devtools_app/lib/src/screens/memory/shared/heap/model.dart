@@ -9,7 +9,6 @@ import '../../../../analytics/constants.dart' as analytics_constants;
 import '../../../../analytics/metrics.dart';
 import '../../primitives/class_name.dart';
 import '../../primitives/memory_utils.dart';
-import '../../primitives/simple_elements.dart';
 
 /// Names for json fields.
 class _JsonFields {

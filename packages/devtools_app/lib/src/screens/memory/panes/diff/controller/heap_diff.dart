@@ -9,7 +9,6 @@ import '../../../../../analytics/constants.dart' as analytics_constants;
 import '../../../../../analytics/metrics.dart';
 import '../../../../../primitives/utils.dart';
 import '../../../primitives/class_name.dart';
-import '../../../primitives/simple_elements.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
 

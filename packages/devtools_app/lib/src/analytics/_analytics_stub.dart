@@ -42,11 +42,7 @@ void timeSync(
 }) {
   // Execute the operation here so that the desktop app still functions without
   // the real analytics call.
-  try {
-    syncOperation();
-  } on ProcessCancelledException catch (_) {
-    // Do nothing for instances of [ProcessCancelledException].
-  }
+  syncOperation();
 }
 
 Future<void> timeAsync(

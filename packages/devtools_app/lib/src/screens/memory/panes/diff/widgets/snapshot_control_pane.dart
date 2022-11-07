@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../../../analytics/analytics.dart' as ga;
@@ -99,11 +101,13 @@ class _FilterButton extends StatelessWidget {
           analytics_constants.memory,
           analytics_constants.MemoryEvent.diffSnapshotFilter,
         );
-        await showDialog(
-          context: context,
-          builder: (context) => ClassFilterDialog(
-            filter,
-            onChanged: onChanged,
+        unawaited(
+          showDialog(
+            context: context,
+            builder: (context) => ClassFilterDialog(
+              filter,
+              onChanged: onChanged,
+            ),
           ),
         );
       },

@@ -342,7 +342,7 @@ class _AllocationProfileTableControls extends StatelessWidget {
           onPressed: () async {
             ga.select(
               analytics_constants.memory,
-              analytics_constants.MemoryEvent.gc,
+              analytics_constants.MemoryEvent.profileRefreshManual,
             );
             await allocationProfileController.refresh();
           },

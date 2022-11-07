@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../../../analytics/analytics_common.dart';
-
 const String shallowSizeColumnTooltip =
     'The total shallow size of all of the instances.\n'
     'The shallow size of an object is the size of the object\n'

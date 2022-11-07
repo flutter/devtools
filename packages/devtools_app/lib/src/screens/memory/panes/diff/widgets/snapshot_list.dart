@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../../../analytics/analytics.dart' as ga;
@@ -60,7 +62,7 @@ class _ListControlPane extends StatelessWidget {
                         analytics_constants.memory,
                         analytics_constants.MemoryEvent.diffClearSnapshots,
                       );
-                      await controller.clearSnapshots();
+                      unawaited(controller.clearSnapshots());
                     }
                   : null,
             )
