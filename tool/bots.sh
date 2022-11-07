@@ -34,7 +34,7 @@ if [ -d "./flutter-sdk" ]; then
     git fetch --all
     popd
 else
-    # the flutter-sdk dir DOES NOT exists so clone it
+    # the flutter-sdk dir DOES NOT exist so clone it
     git clone https://github.com/flutter/flutter.git ./flutter-sdk
 fi
 
