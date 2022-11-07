@@ -207,15 +207,19 @@ class CpuProfilerController
     if (analyticsScreenId != null) {
       // Pull and process cpu profile data [pullAndProcessHelper] and time the
       // operation for analytics.
-      await ga.timeAsync(
-        analyticsScreenId!,
-        analytics_constants.cpuProfileProcessingTime,
-        asyncOperation: pullAndProcessHelper,
-        screenMetricsProvider: () => ProfilerScreenMetrics(
-          cpuSampleCount: cpuProfiles.profileMetaData.sampleCount,
-          cpuStackDepth: cpuProfiles.profileMetaData.stackDepth,
-        ),
-      );
+      try {
+        await ga.timeAsync(
+          analyticsScreenId!,
+          analytics_constants.cpuProfileProcessingTime,
+          asyncOperation: pullAndProcessHelper,
+          screenMetricsProvider: () => ProfilerScreenMetrics(
+            cpuSampleCount: cpuProfiles.profileMetaData.sampleCount,
+            cpuStackDepth: cpuProfiles.profileMetaData.stackDepth,
+          ),
+        );
+      } on ProcessCancelledException catch (_) {
+        // Do nothing for instances of [ProcessCancelledException].
+      }
     } else {
       try {
         await pullAndProcessHelper();

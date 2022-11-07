@@ -17,7 +17,6 @@ import '../config_specific/logger/logger.dart';
 import '../config_specific/server/server.dart' as server;
 import '../config_specific/url/url.dart';
 import '../primitives/url_utils.dart';
-import '../primitives/utils.dart';
 import '../screens/performance/performance_screen.dart';
 import '../screens/profiler/profiler_screen.dart';
 import '../shared/globals.dart';
@@ -470,8 +469,6 @@ void timeSync(
   final startTime = DateTime.now();
   try {
     syncOperation();
-  } on ProcessCancelledException catch (_) {
-    // Do nothing for instances of [ProcessCancelledException].
   } catch (e, st) {
     // Do not send the timing analytic to GA if the operation failed.
     log(
@@ -510,7 +507,7 @@ Future<void> timeAsync(
       'because an exception was thrown:\n$e\n$st',
       LogLevel.warning,
     );
-    return;
+    rethrow;
   }
   final endTime = DateTime.now();
   final durationMicros =
