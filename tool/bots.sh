@@ -28,17 +28,13 @@ function flutter {
 
 # Get Flutter.
 echo "Cloning the Flutter master branch"
-# if ./flutter-sdk exists then fetch master
-# otherwise clone it and run it fresh
-# NOTES
-# - make sure whole test runs on candidate
-# - cache entire flutter candidate branch
-# - cache build artifacts from devtools
 if [ -d "./flutter-sdk" ]; then
+    # the flutter-sdk dir exists so just make sure it is up to date
     pushd ./flutter-sdk
     git fetch --all
     popd
 else
+    # the flutter-sdk dir DOES NOT exists so clone it
     git clone https://github.com/flutter/flutter.git ./flutter-sdk
 fi
 
