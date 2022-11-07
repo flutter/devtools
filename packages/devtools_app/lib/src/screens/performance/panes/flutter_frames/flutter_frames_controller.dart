@@ -37,9 +37,15 @@ class FlutterFramesController extends PerformanceFeatureController {
   ValueListenable<bool> get recordingFrames => _recordingFrames;
   final _recordingFrames = ValueNotifier<bool>(true);
 
+  /// Whether the main 'Performance' tab should be badged with a count of the
+  /// janky Flutter frames present in the Flutter frames chart.
   ValueListenable<bool> get badgeTabForJankyFrames => _badgeTabForJankyFrames;
   final _badgeTabForJankyFrames = ValueNotifier<bool>(false);
 
+  /// The display refresh rate for the connected device.
+  ///
+  /// This value is determined by device hardware, and we query it from the
+  /// Flutter engine.
   ValueListenable<double> get displayRefreshRate => _displayRefreshRate;
   final _displayRefreshRate = ValueNotifier<double>(defaultRefreshRate);
 
