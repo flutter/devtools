@@ -6,6 +6,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../../../analytics/analytics.dart' as ga;
 import '../../../../analytics/constants.dart' as analytics_constants;
+import '../../../../analytics/metrics.dart';
 import '../../primitives/class_name.dart';
 import '../../primitives/memory_utils.dart';
 import '../../primitives/simple_elements.dart';
@@ -284,7 +285,7 @@ AdaptedHeapData _adaptSnapshotGaWrapper(HeapSnapshotGraph graph) {
     analytics_constants.memory,
     analytics_constants.MemoryTime.adaptSnapshot,
     syncOperation: () => result = AdaptedHeapData.fromHeapSnapshot(graph),
-    screenMetricsProvider: () => MemoryAnalyticsMetrics(
+    screenMetricsProvider: () => MemoryScreenMetrics(
       heapObjectsTotal: graph.objects.length,
     ),
   );

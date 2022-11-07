@@ -184,7 +184,7 @@ class MemoryEvent {
   static const diffClassSingleCopy = 'diffClassSingleCopy';
   static const diffPathCopy = 'diffPathCopy';
   static const diffPathFilter = 'diffPathFilter';
-  static const diffPathInvert = 'diffPathRevert';
+  static const diffPathInvert = 'diffPathInvert';
 
   static const diffSnapshotFilterType = 'diffSnapshotFilterType';
   static const diffSnapshotFilterReset = 'diffSnapshotFilterReset';
