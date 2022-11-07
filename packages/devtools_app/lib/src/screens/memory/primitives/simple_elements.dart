@@ -19,15 +19,3 @@ const String nonGcableInstancesColumnTooltip =
     'Number of instances of the class,\n'
     'that are reachable, i.e. have a retaining path from the root\n'
     "and therefore can't be garbage collected.";
-
-class MemoryAnalyticsMetrics extends ScreenAnalyticsMetrics {
-  MemoryAnalyticsMetrics({
-    this.heapObjectsTotal,
-    this.heapDiffObjectsBefore,
-    this.heapDiffObjectsAfter,
-  });
-
-  final int? heapDiffObjectsBefore;
-  final int? heapDiffObjectsAfter;
-  final int? heapObjectsTotal;
-}

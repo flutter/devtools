@@ -23,6 +23,7 @@ import '../shared/globals.dart';
 import '../ui/gtags.dart';
 import 'analytics_common.dart';
 import 'constants.dart' as analytics_constants;
+import 'metrics.dart';
 
 // Dimensions1 AppType values:
 const String appTypeFlutter = 'flutter';
@@ -99,6 +100,10 @@ class GtagEventDevTools extends GtagEvent {
     int? cpu_stack_depth, // metric5
     // Performance screen metric. See [PerformanceScreenMetrics].
     int? trace_event_count, // metric6
+    // Memory screen metric. See [MemoryScreenMetrics].
+    int? heap_diff_objects_before, // metric7
+    int? heap_diff_objects_after, // metric8
+    int? heap_objects_total, // metric9
   });
 
   @override
@@ -154,6 +159,12 @@ class GtagEventDevTools extends GtagEvent {
   external int? get cpu_stack_depth;
 
   external int? get trace_event_count;
+
+  external int? get heap_diff_objects_before;
+
+  external int? get heap_diff_objects_after;
+
+  external int? get heap_objects_total;
 }
 
 // This cannot be a factory constructor in the [GtagEventDevTools] class due to
@@ -183,6 +194,7 @@ GtagEventDevTools _gtagEvent({
     is_external_build: isExternalBuild.toString(),
     is_embedded: ideTheme.embed.toString(),
     g3_username: devToolsExtensionPoints.username(),
+    // [PerformanceScreenMetrics]
     ui_duration_micros: screenMetrics is PerformanceScreenMetrics
         ? screenMetrics.uiDuration?.inMicroseconds
         : null,
@@ -193,14 +205,25 @@ GtagEventDevTools _gtagEvent({
         screenMetrics is PerformanceScreenMetrics
             ? screenMetrics.shaderCompilationDuration?.inMicroseconds
             : null,
+    trace_event_count: screenMetrics is PerformanceScreenMetrics
+        ? screenMetrics.traceEventCount
+        : null,
+    // [ProfilerScreenMetrics]
     cpu_sample_count: screenMetrics is ProfilerScreenMetrics
         ? screenMetrics.cpuSampleCount
         : null,
     cpu_stack_depth: screenMetrics is ProfilerScreenMetrics
         ? screenMetrics.cpuStackDepth
         : null,
-    trace_event_count: screenMetrics is PerformanceScreenMetrics
-        ? screenMetrics.traceEventCount
+    // [MemoryScreenMetrics]
+    heap_diff_objects_before: screenMetrics is MemoryScreenMetrics
+        ? screenMetrics.heapDiffObjectsBefore
+        : null,
+    heap_diff_objects_after: screenMetrics is MemoryScreenMetrics
+        ? screenMetrics.heapDiffObjectsAfter
+        : null,
+    heap_objects_total: screenMetrics is MemoryScreenMetrics
+        ? screenMetrics.heapObjectsTotal
         : null,
   );
 }
@@ -226,24 +249,36 @@ GtagExceptionDevTools _gtagException(
     is_external_build: isExternalBuild.toString(),
     is_embedded: ideTheme.embed.toString(),
     g3_username: devToolsExtensionPoints.username(),
+    // [PerformanceScreenMetrics]
     ui_duration_micros: screenMetrics is PerformanceScreenMetrics
         ? screenMetrics.uiDuration?.inMicroseconds
         : null,
     raster_duration_micros: screenMetrics is PerformanceScreenMetrics
         ? screenMetrics.rasterDuration?.inMicroseconds
         : null,
+    trace_event_count: screenMetrics is PerformanceScreenMetrics
+        ? screenMetrics.traceEventCount
+        : null,
     shader_compilation_duration_micros:
         screenMetrics is PerformanceScreenMetrics
             ? screenMetrics.shaderCompilationDuration?.inMicroseconds
             : null,
+    // [ProfilerScreenMetrics]
     cpu_sample_count: screenMetrics is ProfilerScreenMetrics
         ? screenMetrics.cpuSampleCount
         : null,
     cpu_stack_depth: screenMetrics is ProfilerScreenMetrics
         ? screenMetrics.cpuStackDepth
         : null,
-    trace_event_count: screenMetrics is PerformanceScreenMetrics
-        ? screenMetrics.traceEventCount
+    // [MemoryScreenMetrics]
+    heap_diff_objects_before: screenMetrics is MemoryScreenMetrics
+        ? screenMetrics.heapDiffObjectsBefore
+        : null,
+    heap_diff_objects_after: screenMetrics is MemoryScreenMetrics
+        ? screenMetrics.heapDiffObjectsAfter
+        : null,
+    heap_objects_total: screenMetrics is MemoryScreenMetrics
+        ? screenMetrics.heapObjectsTotal
         : null,
   );
 }
@@ -279,6 +314,10 @@ class GtagExceptionDevTools extends GtagException {
     int? cpu_stack_depth, // metric5
     // Performance screen metric. See [PerformanceScreenMetrics].
     int? trace_event_count, // metric6
+    // Memory screen metric. See [MemoryScreenMetrics].
+    int? heap_diff_objects_before, // metric7
+    int? heap_diff_objects_after, // metric8
+    int? heap_objects_total, // metric9
   });
 
   @override
@@ -321,6 +360,12 @@ class GtagExceptionDevTools extends GtagException {
   external int? get cpu_stack_depth;
 
   external int? get trace_event_count;
+
+  external int? get heap_diff_objects_before;
+
+  external int? get heap_diff_objects_after;
+
+  external int? get heap_objects_total;
 }
 
 /// Request DevTools property value 'enabled' (GA enabled) stored in the file
