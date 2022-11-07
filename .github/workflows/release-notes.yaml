@@ -1,12 +1,10 @@
-name: Release Note Workflow
+name: Release Notes
 
 on:
   pull_request:
     types: [ assigned, opened, synchronize, reopened, edited ]
 env:
   JSON_RELEASE_FILE_PATH: packages/devtools_app/lib/src/framework/release_notes/release_notes-latest.json
-  ## TODO: tool/release-notes/running/notes.json will be where we put our running release notes
-  ## TODO: tool/release-notes/latest-release/notes.json will be where we put the most recent releases notes
 jobs:
   release-preparedness:
     runs-on: ubuntu-latest

@@ -1,7 +1,7 @@
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-part 'running_release_notes.g.dart';
+part 'release_note_classes.g.dart';
 
 @JsonSerializable()
 class ReleaseNotes {

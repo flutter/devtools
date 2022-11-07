@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'running_release_notes.dart';
+part of 'release_note_classes.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
