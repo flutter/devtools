@@ -121,14 +121,14 @@ class ClassesTableSingle extends StatelessWidget {
   final List<SingleClassStats> classes;
   final ValueNotifier<SingleClassStats?> selection;
 
-  static final ColumnData<SingleClassStats> _shallowSizeColumn =
-      _ShallowSizeColumn();
+  static final ColumnData<SingleClassStats> _retainedSizeColumn =
+      _RetainedSizeColumn();
   static late final List<ColumnData<SingleClassStats>> _columns =
       <ColumnData<SingleClassStats>>[
     _ClassNameColumn(),
     _InstanceColumn(),
-    _shallowSizeColumn,
-    _RetainedSizeColumn(),
+    _ShallowSizeColumn(),
+    _retainedSizeColumn,
   ];
 
   @override
@@ -146,7 +146,7 @@ class ClassesTableSingle extends StatelessWidget {
         analytics_constants.memory,
         analytics_constants.MemoryEvent.diffClassSingleSelect,
       ),
-      defaultSortColumn: _shallowSizeColumn,
+      defaultSortColumn: _retainedSizeColumn,
       defaultSortDirection: SortDirection.descending,
     );
   }
