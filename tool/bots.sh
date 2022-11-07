@@ -30,7 +30,7 @@ function flutter {
 echo "Cloning the Flutter master branch"
 # if ./flutter-sdk exists then fetch master
 # otherwise clone it and run it fresh
-#NOTES
+# NOTES
 # - make sure whole test runs on candidate
 # - cache entire flutter candidate branch
 # - cache build artifacts from devtools
