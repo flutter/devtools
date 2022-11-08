@@ -55,7 +55,7 @@ void main() {
   });
 
   testWidgetsWithWindowSize(
-      '$ClassFilterDialog customizes resets to default', windowSize,
+      '$ClassFilterDialog customizes and resets to default', windowSize,
       (WidgetTester tester) async {
     await pumpScene(tester);
 
