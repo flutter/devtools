@@ -45,7 +45,7 @@ class SnapshotControlPane extends StatelessWidget {
                     const SizedBox(width: defaultSpacing),
                     ValueListenableBuilder<ClassFilter>(
                       valueListenable: filter,
-                      builder: (context, filterValue, ___) => _FilterButton(
+                      builder: (context, filterValue, ___) => ClassFilterButton(
                         filter: filterValue,
                         onChanged: controller.applyFilter,
                       ),
@@ -88,10 +88,8 @@ class SnapshotControlPane extends StatelessWidget {
 }
 
 @visibleForTesting
-const classFilterButtonKey = Key('classFilterButton');
-
-class _FilterButton extends StatelessWidget {
-  const _FilterButton({required this.filter, required this.onChanged});
+class ClassFilterButton extends StatelessWidget {
+  const ClassFilterButton({required this.filter, required this.onChanged});
 
   final ClassFilter filter;
   final Function(ClassFilter) onChanged;
@@ -99,7 +97,6 @@ class _FilterButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FilterButton(
-      key: classFilterButtonKey,
       onPressed: () {
         ga.select(
           analytics_constants.memory,

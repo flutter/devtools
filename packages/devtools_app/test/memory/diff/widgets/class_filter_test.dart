@@ -72,7 +72,7 @@ void main() {
     );
 
     // Open dialog.
-    await tester.tap(find.byKey(classFilterButtonKey));
+    await tester.tap(find.byType(ClassFilterButton));
     await tester.pumpAndSettle();
 
     await expectLater(
@@ -127,7 +127,7 @@ Future<void> _switchFilter(
   await _checkDataGolden(from, tester);
 
   // Open dialog.
-  await tester.tap(find.byKey(classFilterButtonKey));
+  await tester.tap(find.byType(ClassFilterButton));
   await _checkFilterGolden(from, tester);
 
   // Select new filter.
