@@ -17,19 +17,26 @@ import '../../../scenes/memory/diff_snapshot.dart';
 final _customFilter =
     ClassFilter(filterType: ClassFilterType.only, except: '', only: '');
 
+class _FilterTest {
+  _FilterTest(this.isDiff);
+
+  final bool isDiff;
+  String get name => isDiff ? 'diff' : 'single';
+}
+
+final _tests = [_FilterTest(false), _FilterTest(true)];
+
 void main() {
   late DiffSnapshotScene scene;
 
-  Future<void> pumpScene(WidgetTester tester, {bool isDiff = false}) async {
-    final diffing = isDiff ? 'diff' : 'single';
-
+  Future<void> pumpScene(WidgetTester tester, _FilterTest test) async {
     expect(
       scene.diffController.core.snapshots.value
           .where((element) => element.hasData),
       hasLength(2),
     );
 
-    if (isDiff) {
+    if (test.isDiff) {
       scene.diffController.setDiffing(
         scene.diffController.derived.selectedItem.value as SnapshotInstanceItem,
         scene.diffController.core.snapshots.value[1] as SnapshotInstanceItem,
@@ -40,7 +47,7 @@ void main() {
     await expectLater(
       find.byType(SnapshotInstanceItemPane),
       matchesDevToolsGolden(
-        '../../../goldens/memory_diff_snapshot_scene_$diffing.png',
+        '../../../goldens/memory_diff_snapshot_scene_${test.name}.png',
       ),
     );
   }
@@ -57,45 +64,65 @@ void main() {
     scene.tearDown();
   });
 
-  testWidgetsWithWindowSize('$ClassFilterDialog filters classes', windowSize,
-      (WidgetTester tester) async {
-    await pumpScene(tester);
+  for (var t in _tests) {
+    testWidgetsWithWindowSize(
+        '$ClassFilterDialog filters classes, ${t.name}', windowSize,
+        (WidgetTester tester) async {
+      await pumpScene(tester, t);
 
-    await _switchFilter(
-      ClassFilterType.showAll,
-      ClassFilterType.except,
-      tester,
-    );
-    await _switchFilter(ClassFilterType.except, ClassFilterType.only, tester);
-    await _switchFilter(ClassFilterType.only, ClassFilterType.showAll, tester);
-  });
+      await _switchFilter(
+        ClassFilterType.showAll,
+        ClassFilterType.except,
+        tester,
+        t,
+      );
 
-  testWidgetsWithWindowSize(
-      '$ClassFilterDialog customizes and resets to default', windowSize,
-      (WidgetTester tester) async {
-    await pumpScene(tester);
+      await _switchFilter(
+        ClassFilterType.except,
+        ClassFilterType.only,
+        tester,
+        t,
+      );
 
-    // Customize filter.
-    scene.diffController.applyFilter(_customFilter);
-    await _checkDataGolden(null, tester);
+      await _switchFilter(
+        ClassFilterType.only,
+        ClassFilterType.showAll,
+        tester,
+        t,
+      );
+    });
+  }
 
-    // Open dialog.
-    await tester.tap(find.byType(ClassFilterButton));
-    await _checkFilterGolden(null, tester);
+  for (var t in _tests) {
+    testWidgetsWithWindowSize(
+        '$ClassFilterDialog customizes and resets to default, ${t.name}',
+        windowSize, (WidgetTester tester) async {
+      await pumpScene(tester, t);
 
-    // Reset to default.
-    await tester.tap(find.text('Reset to default'));
-    await _checkFilterGolden(ClassFilterType.showAll, tester);
+      // Customize filter.
+      scene.diffController.applyFilter(_customFilter);
+      await _checkDataGolden(null, tester, t);
 
-    // Close dialog.
-    await tester.tap(find.text('APPLY'));
-    await _checkDataGolden(ClassFilterType.showAll, tester);
-  });
+      // Open dialog.
+      await tester.tap(find.byType(ClassFilterButton));
+      await _checkFilterGolden(null, tester);
+
+      // Reset to default.
+      await tester.tap(find.text('Reset to default'));
+      await _checkFilterGolden(ClassFilterType.showAll, tester);
+
+      // Close dialog.
+      await tester.tap(find.text('APPLY'));
+      await _checkDataGolden(ClassFilterType.showAll, tester, t);
+    });
+  }
 }
 
 /// If type is null, fileter is [_customFilter].
-Future<void> _checkFilterGolden(ClassFilterType? type, WidgetTester tester,
-    {bool isDiff = false}) async {
+Future<void> _checkFilterGolden(
+  ClassFilterType? type,
+  WidgetTester tester,
+) async {
   await tester.pumpAndSettle();
   await expectLater(
     find.byType(ClassFilterDialog),
@@ -106,13 +133,16 @@ Future<void> _checkFilterGolden(ClassFilterType? type, WidgetTester tester,
 }
 
 /// If type is null, fileter is [_customFilter].
-Future<void> _checkDataGolden(ClassFilterType? type, WidgetTester tester,
-    {bool isDiff = false}) async {
+Future<void> _checkDataGolden(
+  ClassFilterType? type,
+  WidgetTester tester,
+  _FilterTest test,
+) async {
   await tester.pumpAndSettle();
   await expectLater(
     find.byType(SnapshotInstanceItemPane),
     matchesDevToolsGolden(
-      '../../../goldens/memory_diff_snapshot_${type?.name ?? "custom"}.png',
+      '../../../goldens/memory_diff_snapshot_${type?.name ?? "custom"}_${test.name}.png',
     ),
   );
 }
@@ -121,10 +151,10 @@ Future<void> _checkDataGolden(ClassFilterType? type, WidgetTester tester,
 Future<void> _switchFilter(
   ClassFilterType from,
   ClassFilterType to,
-  WidgetTester tester, {
-  bool isDiff: false,
-}) async {
-  await _checkDataGolden(from, tester);
+  WidgetTester tester,
+  _FilterTest test,
+) async {
+  await _checkDataGolden(from, tester, test);
 
   // Open dialog.
   await tester.tap(find.byType(ClassFilterButton));
@@ -137,5 +167,5 @@ Future<void> _switchFilter(
   // Close dialog.
   await tester.tap(find.text('APPLY'));
 
-  await _checkDataGolden(to, tester);
+  await _checkDataGolden(to, tester, test);
 }
