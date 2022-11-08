@@ -13,7 +13,6 @@ import '../../analytics/analytics.dart' as ga;
 import '../../analytics/constants.dart' as analytics_constants;
 import '../../config_specific/logger/logger.dart' as logger;
 import '../../primitives/auto_dispose_mixin.dart';
-import '../../primitives/feature_flags.dart';
 import '../../primitives/utils.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
@@ -126,7 +125,6 @@ final String knownClassesRegExs = buildRegExs(knowClassesToAnalyzeForImages);
 class MemoryScreenKeys {
   static const searchButton = Key('Snapshot Search');
   static const filterButton = Key('Snapshot Filter');
-  static const dartHeapAnalysisTab = Key('Dart Heap Analysis Tab');
   static const leaksTab = Key('Leaks Tab');
   static const dartHeapTableProfileTab = Key('Dart Heap Profile Tab');
   static const dartHeapAllocationTracingTab =
@@ -201,16 +199,10 @@ class _HeapTreeViewState extends State<HeapTreeView>
         gaPrefix: _gaPrefix,
       ),
       DevToolsTab.create(
-        key: MemoryScreenKeys.dartHeapAnalysisTab,
+        key: MemoryScreenKeys.diffTab,
         gaPrefix: _gaPrefix,
-        tabName: 'Analysis',
+        tabName: 'Diff',
       ),
-      if (FeatureFlags.memoryDiffing)
-        DevToolsTab.create(
-          key: MemoryScreenKeys.diffTab,
-          gaPrefix: _gaPrefix,
-          tabName: 'Diff',
-        ),
       if (widget.controller.shouldShowLeaksTab.value)
         DevToolsTab.create(
           key: MemoryScreenKeys.leaksTab,
@@ -219,9 +211,8 @@ class _HeapTreeViewState extends State<HeapTreeView>
         ),
     ];
 
-    _searchableTabs = {
-      MemoryScreenKeys.dartHeapAnalysisTab,
-    };
+    // TODO(polina-c): clean up analysis tab and search.
+    _searchableTabs = {};
     _tabController = TabController(length: _tabs.length, vsync: this);
     _tabController.addListener(_onTabChanged);
   }
@@ -470,25 +461,12 @@ class _HeapTreeViewState extends State<HeapTreeView>
               const KeepAliveWrapper(
                 child: AllocationProfileTracingView(),
               ),
-              // Analysis Tab
+              // Diff tab.
               KeepAliveWrapper(
-                child: Column(
-                  children: [
-                    _buildSnapshotControls(themeData.textTheme),
-                    const SizedBox(height: denseRowSpacing),
-                    Expanded(
-                      child: buildSnapshotTables(snapshotDisplay),
-                    ),
-                  ],
+                child: DiffPane(
+                  diffController: controller.diffPaneController,
                 ),
               ),
-              // Diff tab.
-              if (FeatureFlags.memoryDiffing)
-                KeepAliveWrapper(
-                  child: DiffPane(
-                    diffController: controller.diffPaneController,
-                  ),
-                ),
               // Leaks tab.
               if (controller.shouldShowLeaksTab.value)
                 const KeepAliveWrapper(child: LeaksPane()),
@@ -615,6 +593,8 @@ class _HeapTreeViewState extends State<HeapTreeView>
     );
   }
 
+  // TODO(polina-c): cleanup unused code.
+  // ignore: unused_element
   Widget _buildSnapshotControls(TextTheme textTheme) {
     return SizedBox(
       height: defaultButtonHeight,
