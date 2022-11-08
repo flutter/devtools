@@ -7,6 +7,7 @@ import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../../matchers/matchers.dart';
 import '../../../scenes/memory/diff_snapshot.dart';
 
 void main() {
@@ -16,13 +17,15 @@ void main() {
     await tester.pumpWidget(scene.build());
     // Delay to ensure the memory profiler has collected data.
     await tester.pumpAndSettle(const Duration(seconds: 1));
-    expect(find.byType(SnapshotInstanceItemPane), findsOneWidget);
+    await expectLater(
+      find.byType(SnapshotInstanceItemPane),
+      matchesDevToolsGolden('../../../goldens/memory_diff_snapshot_scene.png'),
+    );
     expect(
       scene.diffController.core.snapshots.value
           .where((element) => element.hasData),
       hasLength(2),
     );
-    await tester.pumpAndSettle();
   }
 
   // Set a wide enough screen width that we do not run into overflow.
@@ -40,5 +43,7 @@ void main() {
   testWidgetsWithWindowSize('filters classes', windowSize,
       (WidgetTester tester) async {
     await pumpSnapshot(tester);
+
+    // Check initial golden.
   });
 }
