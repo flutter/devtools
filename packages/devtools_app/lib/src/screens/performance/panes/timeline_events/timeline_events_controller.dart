@@ -602,14 +602,18 @@ class LegacyTimelineEventsController with SearchControllerMixin<TimelineEvent> {
 
     // Process trace events [processTraceEventsHelper] and time the operation
     // for analytics.
-    await ga.timeAsync(
-      analytics_constants.performance,
-      analytics_constants.traceEventProcessingTime,
-      asyncOperation: processTraceEventsHelper,
-      screenMetricsProvider: () => PerformanceScreenMetrics(
-        traceEventCount: processingTraceCount,
-      ),
-    );
+    try {
+      await ga.timeAsync(
+        analytics_constants.performance,
+        analytics_constants.traceEventProcessingTime,
+        asyncOperation: processTraceEventsHelper,
+        screenMetricsProvider: () => PerformanceScreenMetrics(
+          traceEventCount: processingTraceCount,
+        ),
+      );
+    } on ProcessCancelledException catch (_) {
+      // Do nothing for instances of [ProcessCancelledException].
+    }
   }
 
   Future<void> selectTimelineEvent(

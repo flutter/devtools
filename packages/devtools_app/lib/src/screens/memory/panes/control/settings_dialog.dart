@@ -35,7 +35,8 @@ class MemorySettingsDialog extends StatelessWidget {
           children: [
             CheckboxSetting(
               notifier: preferences.memory.androidCollectionEnabled,
-              title: 'Show Android memory chart',
+              title:
+                  'Show Android memory chart in addition to Dart memory chart',
               checkboxKey: MemorySettingDialogKeys.showAndroidChartCheckBox,
             ),
             const SizedBox(

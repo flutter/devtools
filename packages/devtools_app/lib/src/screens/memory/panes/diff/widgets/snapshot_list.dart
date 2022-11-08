@@ -2,8 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
+import '../../../../../analytics/analytics.dart' as ga;
+import '../../../../../analytics/constants.dart' as analytics_constants;
 import '../../../../../primitives/auto_dispose_mixin.dart';
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/table/table.dart';
@@ -39,19 +43,28 @@ class _ListControlPane extends StatelessWidget {
     return ValueListenableBuilder<bool>(
       valueListenable: controller.isTakingSnapshot,
       builder: (_, isProcessing, __) {
-        final takeSnapshotEnabled = !isProcessing;
         final clearAllEnabled = !isProcessing && controller.hasSnapshots;
         return Row(
           children: [
             ToolbarAction(
               icon: Icons.fiber_manual_record,
               tooltip: 'Take heap snapshot for the selected isolate',
-              onPressed: takeSnapshotEnabled ? controller.takeSnapshot : null,
+              onPressed: controller.takeSnapshotHandler(
+                analytics_constants.MemoryEvent.diffTakeSnapshotControlPane,
+              ),
             ),
             ToolbarAction(
               icon: Icons.block,
               tooltip: 'Clear all snapshots',
-              onPressed: clearAllEnabled ? controller.clearSnapshots : null,
+              onPressed: clearAllEnabled
+                  ? () async {
+                      ga.select(
+                        analytics_constants.memory,
+                        analytics_constants.MemoryEvent.diffClearSnapshots,
+                      );
+                      unawaited(controller.clearSnapshots());
+                    }
+                  : null,
             )
           ],
         );

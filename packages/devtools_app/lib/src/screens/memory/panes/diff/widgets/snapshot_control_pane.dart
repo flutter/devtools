@@ -6,6 +6,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../../../../analytics/analytics.dart' as ga;
+import '../../../../../analytics/constants.dart' as analytics_constants;
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/theme.dart';
 import '../../../primitives/ui.dart';
@@ -43,25 +45,23 @@ class SnapshotControlPane extends StatelessWidget {
                     const SizedBox(width: defaultSpacing),
                     ValueListenableBuilder<ClassFilter>(
                       valueListenable: filter,
-                      builder: (context, filterValue, ___) => FilterButton(
-                        onPressed: () => unawaited(
-                          showDialog(
-                            context: context,
-                            builder: (context) => ClassFilterDialog(
-                              filterValue,
-                              onChanged: controller.applyFilter,
-                            ),
-                          ),
-                        ),
-                        isFilterActive: !filter.value.isEmpty,
-                        message: filter.value.buttonTooltip,
+                      builder: (context, filterValue, ___) => _FilterButton(
+                        filter: filterValue,
+                        onChanged: controller.applyFilter,
                       ),
                     ),
                     const SizedBox(width: defaultSpacing),
                     ToCsvButton(
                       minScreenWidthForTextBeforeScaling:
                           primaryControlsMinVerboseWidth,
-                      onPressed: controller.downloadCurrentItemToCsv,
+                      onPressed: () {
+                        ga.select(
+                          analytics_constants.memory,
+                          analytics_constants
+                              .MemoryEvent.diffSnapshotDownloadCsv,
+                        );
+                        controller.downloadCurrentItemToCsv();
+                      },
                     ),
                   ],
                 ],
@@ -69,13 +69,50 @@ class SnapshotControlPane extends StatelessWidget {
               ToolbarAction(
                 icon: Icons.clear,
                 tooltip: 'Delete snapshot',
-                onPressed:
-                    isProcessing ? null : controller.deleteCurrentSnapshot,
+                onPressed: isProcessing
+                    ? null
+                    : () {
+                        controller.deleteCurrentSnapshot();
+                        ga.select(
+                          analytics_constants.memory,
+                          analytics_constants.MemoryEvent.diffSnapshotDelete,
+                        );
+                      },
               ),
             ],
           ),
         );
       },
+    );
+  }
+}
+
+class _FilterButton extends StatelessWidget {
+  const _FilterButton({required this.filter, required this.onChanged});
+
+  final ClassFilter filter;
+  final Function(ClassFilter) onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return FilterButton(
+      onPressed: () async {
+        ga.select(
+          analytics_constants.memory,
+          analytics_constants.MemoryEvent.diffSnapshotFilter,
+        );
+        unawaited(
+          showDialog(
+            context: context,
+            builder: (context) => ClassFilterDialog(
+              filter,
+              onChanged: onChanged,
+            ),
+          ),
+        );
+      },
+      isFilterActive: !filter.isEmpty,
+      message: filter.buttonTooltip,
     );
   }
 }
@@ -125,8 +162,16 @@ class _DiffDropdown extends StatelessWidget {
             onChanged: (SnapshotInstanceItem? value) {
               late SnapshotInstanceItem? newDiffWith;
               if ((value ?? current) == current) {
+                ga.select(
+                  analytics_constants.memory,
+                  analytics_constants.MemoryEvent.diffSnapshotDiffOff,
+                );
                 newDiffWith = null;
               } else {
+                ga.select(
+                  analytics_constants.memory,
+                  analytics_constants.MemoryEvent.diffSnapshotDiffSelect,
+                );
                 newDiffWith = value;
               }
               controller.setDiffing(current, newDiffWith);

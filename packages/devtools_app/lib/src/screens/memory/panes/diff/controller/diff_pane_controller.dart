@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../../../../analytics/analytics.dart' as ga;
+import '../../../../../analytics/constants.dart' as analytics_constants;
 import '../../../../../config_specific/import_export/import_export.dart';
 import '../../../../../primitives/auto_dispose.dart';
 import '../../../../../primitives/utils.dart';
@@ -41,6 +44,17 @@ class DiffPaneController extends DisposableController {
   // This value should never be reset. It is incremented for every snapshot that
   // is taken, and is used to assign a unique id to each [SnapshotListItem].
   int _snapshotId = 0;
+
+  VoidCallback? takeSnapshotHandler(String gaEvent) {
+    if (_isTakingSnapshot.value) return null;
+    return () {
+      ga.select(
+        analytics_constants.memory,
+        gaEvent,
+      );
+      unawaited(takeSnapshot());
+    };
+  }
 
   Future<void> takeSnapshot() async {
     _isTakingSnapshot.value = true;
@@ -305,9 +319,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
 
   /// Updates fields in this instance based on the values in [core].
   void _updateValues() {
-    // Make sure the method does not trigger itself recursively.
-    assert(!_updatingValues);
-    _updatingValues = true;
+    _startUpdatingValues();
 
     // Set class to show.
     final classes = _snapshotClassesAfterDiffing();
@@ -338,7 +350,29 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     // Set current snapshot.
     _selectedItem.value = _core.selectedItem;
 
+    _endUpdateValues();
+  }
+
+  void _startUpdatingValues() {
+    // Make sure the method does not trigger itself recursively.
+    assert(!_updatingValues);
+
+    ga.timeStart(
+      analytics_constants.memory,
+      analytics_constants.MemoryTime.updateValues,
+    );
+
+    _updatingValues = true;
+  }
+
+  void _endUpdateValues() {
     _updatingValues = false;
+
+    ga.timeEnd(
+      analytics_constants.memory,
+      analytics_constants.MemoryTime.updateValues,
+    );
+
     _assertIntegrity();
   }
 

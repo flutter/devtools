@@ -204,25 +204,25 @@ class CpuProfilerController
       );
     }
 
-    if (analyticsScreenId != null) {
-      // Pull and process cpu profile data [pullAndProcessHelper] and time the
-      // operation for analytics.
-      await ga.timeAsync(
-        analyticsScreenId!,
-        analytics_constants.cpuProfileProcessingTime,
-        asyncOperation: pullAndProcessHelper,
-        screenMetricsProvider: () => ProfilerScreenMetrics(
-          cpuSampleCount: cpuProfiles.profileMetaData.sampleCount,
-          cpuStackDepth: cpuProfiles.profileMetaData.stackDepth,
-        ),
-      );
-    } else {
-      try {
+    try {
+      if (analyticsScreenId != null) {
+        // Pull and process cpu profile data [pullAndProcessHelper] and time the
+        // operation for analytics.
+
+        await ga.timeAsync(
+          analyticsScreenId!,
+          analytics_constants.cpuProfileProcessingTime,
+          asyncOperation: pullAndProcessHelper,
+          screenMetricsProvider: () => ProfilerScreenMetrics(
+            cpuSampleCount: cpuProfiles.profileMetaData.sampleCount,
+            cpuStackDepth: cpuProfiles.profileMetaData.stackDepth,
+          ),
+        );
+      } else {
         await pullAndProcessHelper();
-      } on ProcessCancelledException catch (_) {
-        // Do nothing because the attempt to process data has been cancelled in
-        // favor of a new one.
       }
+    } on ProcessCancelledException catch (_) {
+      // Do nothing for instances of [ProcessCancelledException].
     }
   }
 

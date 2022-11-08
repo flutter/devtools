@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Type of events (event_category):
-
 import '../screens/inspector/inspector_screen.dart';
 import '../screens/logging/logging_screen.dart';
 import '../screens/memory/memory_screen.dart';
@@ -11,6 +9,7 @@ import '../screens/network/network_screen.dart';
 import '../screens/performance/performance_screen.dart';
 import '../screens/profiler/profiler_screen.dart';
 
+// Type of events (event_category):
 const screenViewEvent = 'screen'; // Active screen (tab selected).
 const selectEvent = 'select'; // User selected something.
 const timingEvent = 'timing'; // Timed operation.
@@ -95,24 +94,6 @@ const profileAppStartUp = 'profileAppStartUp';
 const cpuProfileFlameChartHelp = 'cpuProfileFlameChartHelp';
 const cpuProfileProcessingTime = 'cpuProfileProcessingTime';
 
-// Memory UX actions:
-const gc = 'gc';
-const memoryLegend = 'memoryLegend';
-const memorySettings = 'memorySettings';
-const androidChart = 'androidChart';
-const autoSnapshot = 'autoSnapshot';
-const showChart = 'showChart';
-const hideChart = 'hideChart';
-const groupByPrefix = 'groupBy';
-const trackAllocations = 'trackAllocations';
-const resetAllocationAccumulators = 'resetAllocationAccumulators';
-const autoCompleteSearchSelect = 'autoCompleteSearchSelect';
-const takeSnapshot = 'takeSnapshot';
-const snapshotFilterDialog = 'snapshotFilterDialog';
-const sourcesDropDown = 'sourcesDropDown';
-const memoryDisplayInterval = 'chartInterval';
-const treemapToggle = 'treemap';
-
 // Logging UX actions:
 const structuredErrors = 'structuredErrors';
 const trackRebuildWidgets = 'trackRebuildWidgets';
@@ -158,47 +139,55 @@ String topicDocumentationButton(String topic) => '${topic}DocumentationButton';
 String topicDocumentationLink(String topic) => '${topic}DocumentationLink';
 
 /// Analytic time constants specific for memory screen.
-class MemoryTimeAnalytics {
+class MemoryTime {
   static const adaptSnapshot = 'adaptSnapshot';
+  static const calculateDiff = 'calculateDiff';
   static const updateValues = 'updateValues';
 }
 
 /// Analytic event constants specific for memory screen.
-class MemoryEventAnalytics {
+class MemoryEvent {
   static const gc = 'gc';
   static const settings = 'settings';
+  static const autoSnapshot = 'autoSnapshot';
 
-  static const chartExpand = 'chartExpand';
-  static const chartCollapse = 'chartCollapse';
+  static const chartLegend = 'memoryLegend';
+  static const chartAndroid = 'androidChart';
+
+  static const showChart = 'showChart';
+  static const hideChart = 'hideChart';
+  static const chartInterval = 'chartInterval';
 
   static const profileDownloadCsv = 'profileDownloadCsv';
   static const profileRefreshManual = 'profileRefreshManual';
   static const profileRefreshOnGc = 'profileRefreshOnGc';
+  static const profileHelp = 'memoryProfileHelp';
 
-  static const allocationClear = 'allocationClear';
-  static const allocationRefresh = 'allocationRefresh';
-  static const allocationFilter = 'allocationFilter';
-  static const allocationTrace = 'allocationTrace';
-  static const allocationHelp = 'allocationHelp';
+  static const tracingClear = 'tracingClear';
+  static const tracingRefresh = 'tracingRefresh';
+  static const tracingClassFilter = 'tracingClassFilter';
+  static const tracingTraceCheck = 'tracingTraceCheck';
+  static const tracingHelp = 'memoryTracingHelp';
 
-  static const diffTakeSnapshot = 'diffTakeSnapshot';
+  static const diffTakeSnapshotControlPane = 'diffTakeSnapshotControlPane';
+  static const diffTakeSnapshotAfterHelp = 'diffTakeSnapshotAfterHelp';
   static const diffClearSnapshots = 'diffClearSnapshots';
 
-  static const diffSnapshotDiff = 'diffSnapshotDiff';
+  static const diffSnapshotDiffSelect = 'diffSnapshotDiffSelect';
+  static const diffSnapshotDiffOff = 'diffSnapshotDiffSelectOff';
   static const diffSnapshotFilter = 'diffSnapshotFilter';
   static const diffSnapshotDownloadCsv = 'diffSnapshotDownloadCsv';
   static const diffSnapshotDelete = 'diffSnapshotDelete';
 
-  static const diffClassSelect = 'diffClassSelect';
+  static const diffClassDiffSelect = 'diffClassDiffSelect';
+  static const diffClassSingleSelect = 'diffClassSingleSelect';
   static const diffPathSelect = 'diffPathSelect';
+  static const diffClassDiffCopy = 'diffClassDiffCopy';
+  static const diffClassSingleCopy = 'diffClassSingleCopy';
   static const diffPathCopy = 'diffPathCopy';
   static const diffPathFilter = 'diffPathFilter';
-  static const diffPathUnfilter = 'diffPathUnfilter';
-  static const diffPathRevert = 'diffPathRevert';
-  static const diffPathUnrevert = 'diffPathUnrevert';
+  static const diffPathInvert = 'diffPathInvert';
 
-  static const diffSnapshotFilterAll = 'diffSnapshotFilterAll';
-  static const diffSnapshotFilterExcept = 'diffSnapshotFilterExcept';
-  static const diffSnapshotFilterOnly = 'diffSnapshotFilterOnly';
+  static const diffSnapshotFilterType = 'diffSnapshotFilterType';
   static const diffSnapshotFilterReset = 'diffSnapshotFilterReset';
 }

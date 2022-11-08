@@ -4,6 +4,8 @@
 
 import 'package:flutter/material.dart';
 
+import '../../../../../analytics/analytics.dart' as ga;
+import '../../../../../analytics/constants.dart' as analytics_constants;
 import '../../../../../primitives/utils.dart';
 import '../../../../../shared/table/table.dart';
 import '../../../../../shared/table/table_data.dart';
@@ -40,7 +42,11 @@ class _ClassNameColumn extends ColumnData<SingleClassStats>
     bool isRowSelected = false,
     VoidCallback? onPressed,
   }) =>
-      HeapClassView(theClass: data.heapClass, showCopyButton: isRowSelected);
+      HeapClassView(
+        theClass: data.heapClass,
+        showCopyButton: isRowSelected,
+        copyGaItem: analytics_constants.MemoryEvent.diffClassSingleCopy,
+      );
 }
 
 class _InstanceColumn extends ColumnData<SingleClassStats> {
@@ -136,6 +142,10 @@ class ClassesTableSingle extends StatelessWidget {
       dataKey: dataKey,
       keyFactory: (e) => Key(e.heapClass.fullName),
       selectionNotifier: selection,
+      onItemSelected: (_) => ga.select(
+        analytics_constants.memory,
+        analytics_constants.MemoryEvent.diffClassSingleSelect,
+      ),
       defaultSortColumn: _retainedSizeColumn,
       defaultSortDirection: SortDirection.descending,
     );

@@ -51,9 +51,8 @@ class _ChartControlPaneState extends State<ChartControlPane>
         if (controller.isLegendVisible) {
           ga.select(
             analytics_constants.memory,
-            analytics_constants.memoryLegend,
+            analytics_constants.MemoryEvent.chartLegend,
           );
-
           _showLegend(context);
         } else {
           _hideLegend();
