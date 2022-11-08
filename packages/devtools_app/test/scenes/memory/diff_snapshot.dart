@@ -5,7 +5,6 @@
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/primitives/feature_flags.dart';
-import 'package:devtools_app/src/screens/memory/memory_controller.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/controller/diff_pane_controller.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/diff_pane.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/model.dart';
@@ -23,7 +22,6 @@ import '../../test_data/memory/heap/heap_data.dart';
 /// flutter run -t test/scenes/memory/diff_snapshot.stager_app.dart -d macos
 class DiffSnapshotScene extends Scene {
   late DiffPaneController diffController;
-  late MemoryController controller;
   late FakeServiceManager fakeServiceManager;
 
   @override
@@ -51,10 +49,7 @@ class DiffSnapshotScene extends Scene {
     );
     setGlobal(ServiceConnectionManager, fakeServiceManager);
 
-    controller = MemoryController(
-      diffPaneController: diffController =
-          DiffPaneController(_TestSnapshotTaker()),
-    );
+    diffController = DiffPaneController(_TestSnapshotTaker());
 
     await diffController.takeSnapshot();
     await diffController.takeSnapshot();

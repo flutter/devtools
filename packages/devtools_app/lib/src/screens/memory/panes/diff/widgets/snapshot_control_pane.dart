@@ -87,6 +87,9 @@ class SnapshotControlPane extends StatelessWidget {
   }
 }
 
+@visibleForTesting
+const classFilterButtonKey = Key('classFilterButton');
+
 class _FilterButton extends StatelessWidget {
   const _FilterButton({required this.filter, required this.onChanged});
 
@@ -96,11 +99,13 @@ class _FilterButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FilterButton(
-      onPressed: () async {
+      key: classFilterButtonKey,
+      onPressed: () {
         ga.select(
           analytics_constants.memory,
           analytics_constants.MemoryEvent.diffSnapshotFilter,
         );
+
         unawaited(
           showDialog(
             context: context,

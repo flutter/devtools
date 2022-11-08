@@ -78,6 +78,7 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
           itemValue: type,
           groupValue: _type,
           onChanged: onTypeChanged,
+          radioKey: Key(type.toString()),
         );
 
     Widget textField(TextEditingController controller) => Padding(
