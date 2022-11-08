@@ -28,8 +28,8 @@ class DiffSnapshotScene extends Scene {
 
   @override
   Widget build() {
-    return Scaffold(
-      body: SnapshotInstanceItemPane(controller: diffController),
+    return wrap(
+      SnapshotInstanceItemPane(controller: diffController),
     );
   }
 
