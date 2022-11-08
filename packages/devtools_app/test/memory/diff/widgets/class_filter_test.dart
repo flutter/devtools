@@ -15,8 +15,6 @@ void main() {
 
   Future<void> pumpSnapshot(WidgetTester tester) async {
     await tester.pumpWidget(scene.build());
-    // Delay to ensure the memory profiler has collected data.
-    await tester.pumpAndSettle(const Duration(seconds: 1));
     await expectLater(
       find.byType(SnapshotInstanceItemPane),
       matchesDevToolsGolden('../../../goldens/memory_diff_snapshot_scene.png'),
