@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/screens/memory/panes/diff/controller/item_controller.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/diff_pane.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/widgets/class_filter_dialog.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/widgets/snapshot_control_pane.dart';
@@ -13,19 +14,34 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../../matchers/matchers.dart';
 import '../../../scenes/memory/diff_snapshot.dart';
 
+final _customFilter =
+    ClassFilter(filterType: ClassFilterType.only, except: '', only: '');
+
 void main() {
   late DiffSnapshotScene scene;
 
-  Future<void> pumpScene(WidgetTester tester) async {
-    await tester.pumpWidget(scene.build());
-    await expectLater(
-      find.byType(SnapshotInstanceItemPane),
-      matchesDevToolsGolden('../../../goldens/memory_diff_snapshot_scene.png'),
-    );
+  Future<void> pumpScene(WidgetTester tester, {bool isDiff = false}) async {
+    final diffing = isDiff ? 'diff' : 'single';
+
     expect(
       scene.diffController.core.snapshots.value
           .where((element) => element.hasData),
       hasLength(2),
+    );
+
+    if (isDiff) {
+      scene.diffController.setDiffing(
+        scene.diffController.derived.selectedItem.value as SnapshotInstanceItem,
+        scene.diffController.core.snapshots.value[1] as SnapshotInstanceItem,
+      );
+    }
+
+    await tester.pumpWidget(scene.build());
+    await expectLater(
+      find.byType(SnapshotInstanceItemPane),
+      matchesDevToolsGolden(
+        '../../../goldens/memory_diff_snapshot_scene_$diffing.png',
+      ),
     );
   }
 
@@ -60,27 +76,12 @@ void main() {
     await pumpScene(tester);
 
     // Customize filter.
-    scene.diffController.applyFilter(
-      ClassFilter(filterType: ClassFilterType.only, except: '', only: ''),
-    );
-    await tester.pumpAndSettle();
-    await expectLater(
-      find.byType(SnapshotInstanceItemPane),
-      matchesDevToolsGolden(
-        '../../../goldens/memory_diff_filter_snapshot_custom.png',
-      ),
-    );
+    scene.diffController.applyFilter(_customFilter);
+    await _checkDataGolden(null, tester);
 
     // Open dialog.
     await tester.tap(find.byType(ClassFilterButton));
-    await tester.pumpAndSettle();
-
-    await expectLater(
-      find.byType(ClassFilterDialog),
-      matchesDevToolsGolden(
-        '../../../goldens/memory_diff_filter_dialog_custom.png',
-      ),
-    );
+    await _checkFilterGolden(null, tester);
 
     // Reset to default.
     await tester.tap(find.text('Reset to default'));
@@ -92,28 +93,26 @@ void main() {
   });
 }
 
-Future<void> _checkFilterGolden(
-  ClassFilterType type,
-  WidgetTester tester,
-) async {
+/// If type is null, fileter is [_customFilter].
+Future<void> _checkFilterGolden(ClassFilterType? type, WidgetTester tester,
+    {bool isDiff = false}) async {
   await tester.pumpAndSettle();
   await expectLater(
     find.byType(ClassFilterDialog),
     matchesDevToolsGolden(
-      '../../../goldens/memory_diff_filter_dialog_${type.name}.png',
+      '../../../goldens/memory_diff_filter_dialog_${type?.name ?? "custom"}.png',
     ),
   );
 }
 
-Future<void> _checkDataGolden(
-  ClassFilterType type,
-  WidgetTester tester,
-) async {
+/// If type is null, fileter is [_customFilter].
+Future<void> _checkDataGolden(ClassFilterType? type, WidgetTester tester,
+    {bool isDiff = false}) async {
   await tester.pumpAndSettle();
   await expectLater(
     find.byType(SnapshotInstanceItemPane),
     matchesDevToolsGolden(
-      '../../../goldens/memory_diff_snapshot_${type.name}.png',
+      '../../../goldens/memory_diff_snapshot_${type?.name ?? "custom"}.png',
     ),
   );
 }
@@ -122,8 +121,9 @@ Future<void> _checkDataGolden(
 Future<void> _switchFilter(
   ClassFilterType from,
   ClassFilterType to,
-  WidgetTester tester,
-) async {
+  WidgetTester tester, {
+  bool isDiff: false,
+}) async {
   await _checkDataGolden(from, tester);
 
   // Open dialog.
