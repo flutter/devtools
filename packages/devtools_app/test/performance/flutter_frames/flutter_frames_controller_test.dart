@@ -77,6 +77,7 @@ void main() async {
         mockTimelineEventsController.handleSelectedFrame(any),
       ).thenAnswer((_) {
         timelineControllerHandlerCalled = true;
+        return Future.value();
       });
 
       expect(timelineControllerHandlerCalled, isFalse);

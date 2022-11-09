@@ -4,11 +4,18 @@
 
 import '../../../../../primitives/trace_event.dart';
 import '../../../../../primitives/utils.dart';
+import '../../../performance_controller.dart';
 
 class PerfettoController {
+  PerfettoController(this.performanceController);
+
+  final PerformanceController performanceController;
+
   void init() {}
 
   void dispose() {}
+
+  Future<void> onBecomingActive() async {}
 
   Future<void> loadTrace(List<TraceEventWrapper> devToolsTraceEvents) async {}
 
