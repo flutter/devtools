@@ -50,15 +50,6 @@ jobs:
           BOT: ${{ matrix.bot }}
           PLATFORM: vm
         run: ./tool/bots.sh
-
-      - name: image failures
-        uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
-        if: failure() # Only if failure then failures directory exists.
-        with:
-          # TODO(terry): matrix.os currently empty. If we run tests on other
-          #              platforms this will be used.
-          name: test-image-failures-${{ matrix.os }} # Name for the artifact
-          path: packages/devtools_app/test/failures # Path to upload
                 
   macos-test:
     name: macos ${{ matrix.bot }}
