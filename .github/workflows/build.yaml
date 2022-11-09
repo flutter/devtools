@@ -23,117 +23,122 @@ jobs:
     runs-on: ubuntu-latest 
     steps:
       - name: Get Flutter HEAD sha
+        id: get-flutter-head
         run: |
           RESPONSE=$(gh api /repos/flutter/flutter/branches/master)
-          echo $RESPONSE
           HEAD_SHA=$(echo $RESPONSE | jq '.commit.sha')
-          echo "HEAD_SHA:$HEAD_SHA"
+          echo "SHA=$HEAD_SHA" >> $GITHUB_OUTPUT
           
-      # - name: Load Cached Flutter SDK
-      #   uses: actions/cache@v3
-      #   with:
-      #     path: |
-      #     ./flutter-sdk
-      #   # TODO: cache keybased on HEAD ref of flutter
-      #   key: flutter-sdk-${{ runner.os }}
-      # - name: Clone Flutter SDK if none cached
-      #   run: |
-      #     if [ ! -d "./flutter-sdk" ]; then
-      #       git clone https://github.com/flutter/flutter.git ./flutter-sdk
-      #     fi
-      # - name: Setup Flutter SDK
-      #   run: |
-      #     ./flutter-sdk/bin/flutter --version # TODO: is there a proper way to do this?
-      #     ./flutter-sdk/bin/cache/dart-sdk/bin/dart --version #TODO: do i need to do the same for dart?
+      - name: Load Cached Flutter SDK
+        uses: actions/cache@v3
+        with:
+          path: |
+          ./flutter-sdk
+        # TODO: cache keybased on HEAD ref of flutter
+        key: flutter-sdk-${{ runner.os }}-${{ steps.get-flutter-head.outputs.SHA }}
+
+      - name: Clone Flutter SDK if none cached
+        run: |
+          if [ ! -d "./flutter-sdk" ]; then
+            git clone https://github.com/flutter/flutter.git ./flutter-sdk
+            git checkout $FLUTTER_HEAD_SHA
+          fi
+        env: |
+          FLUTTER_HEAD_SHA: ${{ steps.get-flutter-head.outputs.SHA }}
+
+      - name: Setup Flutter SDK
+        run: |
+          ./flutter-sdk/bin/flutter --version # TODO: is there a proper way to do this?
+          ./flutter-sdk/bin/cache/dart-sdk/bin/dart --version #TODO: do i need to do the same for dart?
         
 
-  main:
-    name: main
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-    steps:
-      - name: git clone
-        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
-      - name: Cache Generated Files
-        uses: actions/cache@v3
-        with:
-          path: |
-            **/build/
-            **/.dart_tool/
-            ./flutter-sdk
-          key: ${{ runner.os }}-cache
-      - name: tool/bots.sh
-        env:
-          BOT: main
-        run: ./tool/bots.sh
+  # main:
+  #   name: main
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     fail-fast: false
+  #   steps:
+  #     - name: git clone
+  #       uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
+  #     - name: Cache Generated Files
+  #       uses: actions/cache@v3
+  #       with:
+  #         path: |
+  #           **/build/
+  #           **/.dart_tool/
+  #           ./flutter-sdk
+  #         key: ${{ runner.os }}-cache
+  #     - name: tool/bots.sh
+  #       env:
+  #         BOT: main
+  #       run: ./tool/bots.sh
 
-  test:
-    name: test ${{ matrix.bot }}
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        bot:
-          - test_ddc
-          - test_dart2js
-    steps:
-      - name: git clone
-        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
-      - name: Cache Generated Files
-        uses: actions/cache@v3
-        with:
-          path: |
-            **/build/
-            **/.dart_tool/
-            ./flutter-sdk
-          key: ${{ runner.os }}-cache
-      - name: tool/bots.sh
-        env:
-          BOT: ${{ matrix.bot }}
-          PLATFORM: vm
-        run: ./tool/bots.sh
+  # test:
+  #   name: test ${{ matrix.bot }}
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       bot:
+  #         - test_ddc
+  #         - test_dart2js
+  #   steps:
+  #     - name: git clone
+  #       uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
+  #     - name: Cache Generated Files
+  #       uses: actions/cache@v3
+  #       with:
+  #         path: |
+  #           **/build/
+  #           **/.dart_tool/
+  #           ./flutter-sdk
+  #         key: ${{ runner.os }}-cache
+  #     - name: tool/bots.sh
+  #       env:
+  #         BOT: ${{ matrix.bot }}
+  #         PLATFORM: vm
+  #       run: ./tool/bots.sh
 
-      - name: image failures
-        uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
-        if: failure() # Only if failure then failures directory exists.
-        with:
-          # TODO(terry): matrix.os currently empty. If we run tests on other
-          #              platforms this will be used.
-          name: test-image-failures-${{ matrix.os }} # Name for the artifact
-          path: packages/devtools_app/test/failures # Path to upload
+  #     - name: image failures
+  #       uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
+  #       if: failure() # Only if failure then failures directory exists.
+  #       with:
+  #         # TODO(terry): matrix.os currently empty. If we run tests on other
+  #         #              platforms this will be used.
+  #         name: test-image-failures-${{ matrix.os }} # Name for the artifact
+  #         path: packages/devtools_app/test/failures # Path to upload
                 
-  macos-test:
-    name: macos ${{ matrix.bot }}
-    runs-on: macos-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        bot:
-          - test_dart2js
-    steps:
-      - name: git clone
-        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
-      - name: Cache Generated Files
-        uses: actions/cache@v3
-        with:
-          path: |
-            **/build/
-            **/.dart_tool/
-            ./flutter-sdk
-          key: ${{ runner.os }}-cache
-      - name: tool/bots.sh
-        env:
-          BOT: ${{ matrix.bot }}
-          PLATFORM: vm
-        run: ./tool/bots.sh
+  # macos-test:
+  #   name: macos ${{ matrix.bot }}
+  #   runs-on: macos-latest
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       bot:
+  #         - test_dart2js
+  #   steps:
+  #     - name: git clone
+  #       uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
+  #     - name: Cache Generated Files
+  #       uses: actions/cache@v3
+  #       with:
+  #         path: |
+  #           **/build/
+  #           **/.dart_tool/
+  #           ./flutter-sdk
+  #         key: ${{ runner.os }}-cache
+  #     - name: tool/bots.sh
+  #       env:
+  #         BOT: ${{ matrix.bot }}
+  #         PLATFORM: vm
+  #       run: ./tool/bots.sh
   
-      - name: Upload Golden Failure Artifacts
-        uses: actions/upload-artifact@v3
-        if: failure()
-        with: 
-          name: golden_image_failures.${{ matrix.bot }}
-          path: packages/devtools_app/test/**/failures/*.png
+  #     - name: Upload Golden Failure Artifacts
+  #       uses: actions/upload-artifact@v3
+  #       if: failure()
+  #       with: 
+  #         name: golden_image_failures.${{ matrix.bot }}
+  #         path: packages/devtools_app/test/**/failures/*.png
 
 
 # TODO(https://github.com/flutter/devtools/issues/1715): add a windows compatible version of tool/bots.sh
