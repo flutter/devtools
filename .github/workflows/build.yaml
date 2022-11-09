@@ -35,7 +35,7 @@ jobs:
           path: |
             ./flutter-sdk
         # TODO: cache keybased on HEAD ref of flutter
-        key: flutter-sdk-${{ runner.os }}-${{ steps.get-flutter-head.outputs.SHA }}
+          key: flutter-sdk-${{ runner.os }}-${{ steps.get-flutter-head.outputs.SHA }}
 
       - name: Clone Flutter SDK if none cached
         run: |
