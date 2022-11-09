@@ -2,16 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/primitives/trace_event.dart';
-import 'package:devtools_app/src/primitives/utils.dart';
-import 'package:devtools_app/src/screens/performance/performance_controller.dart';
-import 'package:devtools_app/src/screens/performance/performance_model.dart';
-import 'package:devtools_app/src/screens/performance/timeline_event_processor.dart';
+import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
+import 'package:devtools_app/src/screens/performance/panes/timeline_events/timeline_event_processor.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-import '../test_data/performance.dart';
-import '../test_utils/test_utils.dart';
+import '../../test_data/performance.dart';
+import '../../test_utils/test_utils.dart';
 
 void main() {
   final originalGoldenUiEvent = goldenUiTimelineEvent.deepCopy();
@@ -33,13 +32,31 @@ void main() {
       collectionEquals(goldenRasterTraceEvents, originalGoldenGpuTraceEvents),
       isTrue,
     );
+
+    setGlobal(IdeTheme, IdeTheme());
+    setGlobal(OfflineModeController, OfflineModeController());
+    setGlobal(ServiceConnectionManager, FakeServiceManager());
   });
 
   group('TimelineProcessor', () {
-    late TimelineEventProcessor processor;
+    late PerformanceData data;
+    late MockPerformanceController mockPerformanceController;
+    late TimelineEventsController timelineEventsController;
+    late LegacyTimelineEventProcessor processor;
 
-    setUp(() {
-      processor = TimelineEventProcessor(MockTimelineController())
+    setUp(() async {
+      data = PerformanceData();
+      mockPerformanceController = createMockPerformanceControllerWithDefaults();
+      timelineEventsController =
+          TimelineEventsController(mockPerformanceController);
+      when(mockPerformanceController.timelineEventsController)
+          .thenReturn(timelineEventsController);
+      when(mockPerformanceController.data).thenReturn(data);
+      when(mockPerformanceController.clearData()).thenAnswer((_) async {
+        data.clear();
+        await timelineEventsController.clearData();
+      });
+      processor = timelineEventsController.legacyController.processor
         ..primeThreadIds(
           uiThreadId: testUiThreadId,
           rasterThreadId: testRasterThreadId,
@@ -256,24 +273,4 @@ void main() {
       );
     });
   });
-}
-
-class MockTimelineController extends Mock implements PerformanceController {
-  @override
-  final data = PerformanceData();
-
-  @override
-  void addTimelineEvent(TimelineEvent event) {
-    data!.addTimelineEvent(event);
-  }
-
-  @override
-  void addFrame(FlutterFrame frame) {
-    data!.frames.add(frame);
-  }
-
-  @override
-  Future<void> clearData({bool clearVmTimeline = true}) async {
-    data!.clear();
-  }
 }

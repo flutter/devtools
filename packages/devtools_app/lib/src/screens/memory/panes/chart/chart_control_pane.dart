@@ -51,9 +51,8 @@ class _ChartControlPaneState extends State<ChartControlPane>
         if (controller.isLegendVisible) {
           ga.select(
             analytics_constants.memory,
-            analytics_constants.memoryLegend,
+            analytics_constants.MemoryEvent.chartLegend,
           );
-
           _showLegend(context);
         } else {
           _hideLegend();
@@ -83,22 +82,51 @@ class _ChartControlPaneState extends State<ChartControlPane>
     controller.resumeLiveFeed();
   }
 
+  void _clearTimeline() {
+    ga.select(analytics_constants.memory, analytics_constants.clear);
+
+    controller.memoryTimeline.reset();
+
+    // Clear all analysis and snapshots collected too.
+    controller.clearAllSnapshots();
+    controller.classRoot = null;
+    controller.topNode = null;
+    controller.selectedSnapshotTimestamp = null;
+    controller.selectedLeaf = null;
+
+    // Remove history of all plotted data in all charts.
+    widget.chartController.resetAll();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        ValueListenableBuilder<bool>(
-          valueListenable: controller.paused,
-          builder: (context, paused, _) {
-            return PauseResumeButtonGroup(
-              paused: paused,
-              onPause: _onPause,
-              onResume: _onResume,
-              pauseTooltip: ChartPaneTooltips.pauseTooltip,
-              resumeTooltip: ChartPaneTooltips.resumeTooltip,
-            );
-          },
+        Row(
+          children: [
+            ValueListenableBuilder<bool>(
+              valueListenable: controller.paused,
+              builder: (context, paused, _) {
+                return PauseResumeButtonGroup(
+                  paused: paused,
+                  onPause: _onPause,
+                  onResume: _onResume,
+                  pauseTooltip: ChartPaneTooltips.pauseTooltip,
+                  resumeTooltip: ChartPaneTooltips.resumeTooltip,
+                );
+              },
+            ),
+            const SizedBox(width: defaultSpacing),
+            ClearButton(
+              onPressed: controller.memorySource == MemoryController.liveFeed
+                  ? _clearTimeline
+                  : null,
+              minScreenWidthForTextBeforeScaling:
+                  primaryControlsMinVerboseWidth,
+              tooltip: 'Clear memory chart.',
+            ),
+          ],
         ),
         const SizedBox(height: denseSpacing),
         IconLabelButton(

@@ -139,9 +139,10 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
   }
 
   void _onTabChanged() {
-    if (_currentTabControllerIndex != _tabController!.index) {
+    final newIndex = _tabController!.index;
+    if (_currentTabControllerIndex != newIndex) {
       setState(() {
-        _currentTabControllerIndex = _tabController!.index;
+        _currentTabControllerIndex = newIndex;
       });
       if (widget.sendAnalytics) {
         ga.select(

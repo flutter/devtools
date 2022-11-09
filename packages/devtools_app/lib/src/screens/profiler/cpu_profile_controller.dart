@@ -29,6 +29,11 @@ enum CpuProfilerViewType {
   }
 }
 
+enum CpuProfilerTagType {
+  user,
+  vm,
+}
+
 class CpuProfilerController
     with
         SearchControllerMixin<CpuStackFrame>,
@@ -40,6 +45,10 @@ class CpuProfilerController
   /// The word 'none' is not a magic word - just a user-friendly name to convey
   /// the message that no filters are applied.
   static const userTagNone = 'none';
+
+  /// Special tags that represent profiles broken down by user or VM tags.
+  static const groupByUserTag = '#group-by-user-tag';
+  static const groupByVmTag = '#group-by-vm-tag';
 
   /// User tag that marks app start up for Flutter apps.
   ///
@@ -195,25 +204,25 @@ class CpuProfilerController
       );
     }
 
-    if (analyticsScreenId != null) {
-      // Pull and process cpu profile data [pullAndProcessHelper] and time the
-      // operation for analytics.
-      await ga.timeAsync(
-        analyticsScreenId!,
-        analytics_constants.cpuProfileProcessingTime,
-        asyncOperation: pullAndProcessHelper,
-        screenMetricsProvider: () => ProfilerScreenMetrics(
-          cpuSampleCount: cpuProfiles.profileMetaData.sampleCount,
-          cpuStackDepth: cpuProfiles.profileMetaData.stackDepth,
-        ),
-      );
-    } else {
-      try {
+    try {
+      if (analyticsScreenId != null) {
+        // Pull and process cpu profile data [pullAndProcessHelper] and time the
+        // operation for analytics.
+
+        await ga.timeAsync(
+          analyticsScreenId!,
+          analytics_constants.cpuProfileProcessingTime,
+          asyncOperation: pullAndProcessHelper,
+          screenMetricsProvider: () => ProfilerScreenMetrics(
+            cpuSampleCount: cpuProfiles.profileMetaData.sampleCount,
+            cpuStackDepth: cpuProfiles.profileMetaData.stackDepth,
+          ),
+        );
+      } else {
         await pullAndProcessHelper();
-      } on ProcessCancelledException catch (_) {
-        // Do nothing because the attempt to process data has been cancelled in
-        // favor of a new one.
       }
+    } on ProcessCancelledException catch (_) {
+      // Do nothing for instances of [ProcessCancelledException].
     }
   }
 
@@ -475,7 +484,6 @@ class CpuProfilerController
       }
       return filteredDataForTag;
     }
-
     var data = cpuProfileStore.lookupProfile(
       label: tag,
     );
@@ -483,7 +491,17 @@ class CpuProfilerController
       final fullData = cpuProfileStore.lookupProfile(
         label: userTagNone,
       )!;
-      data = CpuProfilePair.fromUserTag(fullData, tag);
+
+      if (tag == groupByUserTag || tag == groupByVmTag) {
+        data = CpuProfilePair.withTagRoots(
+          fullData,
+          tag == groupByUserTag
+              ? CpuProfilerTagType.user
+              : CpuProfilerTagType.vm,
+        );
+      } else {
+        data = CpuProfilePair.fromUserTag(fullData, tag);
+      }
       cpuProfileStore.storeProfile(
         data,
         label: tag,
@@ -508,7 +526,9 @@ class CpuProfilerController
   void updateView(CpuProfilerViewType view) {
     _viewType.value = view;
     _dataNotifier.value = cpuProfileStore
-        .lookupProfile(label: _wrapWithFilterSuffix(userTagNone))
+        .lookupProfile(
+          label: _wrapWithFilterSuffix(_userTagFilter.value),
+        )
         ?.getActive(view);
   }
 
@@ -520,7 +540,6 @@ class CpuProfilerController
 
   Future<void> clear() async {
     reset();
-    cpuProfileStore.clear();
     await serviceManager.service!.clearSamples();
   }
 
@@ -530,6 +549,7 @@ class CpuProfilerController
     _processingNotifier.value = false;
     _userTagFilter.value = userTagNone;
     transformer.reset();
+    cpuProfileStore.clear();
     resetSearch();
   }
 

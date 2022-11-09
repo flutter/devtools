@@ -21,7 +21,7 @@ const bool _kEnableExperiments = bool.fromEnvironment('enable_experiments');
 bool enableExperiments = _kEnableExperiments;
 
 @visibleForTesting
-bool enableBeta = _kEnableExperiments || !isExternalBuild;
+bool get enableBeta => enableExperiments || !isExternalBuild;
 
 // It is ok to have enum-like static only classes.
 // ignore: avoid_classes_with_only_static_members

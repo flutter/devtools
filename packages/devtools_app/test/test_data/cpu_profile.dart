@@ -88,6 +88,7 @@ final Map<String, dynamic> cpuProfileDataWithUserTagsJson = {
       'cat': 'Dart',
       'args': {
         'userTag': 'userTagA',
+        'vmTag': 'vmTagA',
       },
       'sf': '140357727781376-3'
     },
@@ -100,6 +101,7 @@ final Map<String, dynamic> cpuProfileDataWithUserTagsJson = {
       'cat': 'Dart',
       'args': {
         'userTag': 'userTagB',
+        'vmTag': 'vmTagB',
       },
       'sf': '140357727781376-4'
     },
@@ -112,6 +114,7 @@ final Map<String, dynamic> cpuProfileDataWithUserTagsJson = {
       'cat': 'Dart',
       'args': {
         'userTag': 'userTagA',
+        'vmTag': 'vmTagA',
       },
       'sf': '140357727781376-5'
     },
@@ -124,6 +127,7 @@ final Map<String, dynamic> cpuProfileDataWithUserTagsJson = {
       'cat': 'Dart',
       'args': {
         'userTag': 'userTagC',
+        'vmTag': 'vmTagC',
       },
       'sf': '140357727781376-5'
     },
@@ -136,6 +140,7 @@ final Map<String, dynamic> cpuProfileDataWithUserTagsJson = {
       'cat': 'Dart',
       'args': {
         'userTag': 'userTagC',
+        'vmTag': 'vmTagC',
       },
       'sf': '140357727781376-6'
     },
@@ -488,56 +493,104 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'implicit': false,
         'abstract': false
       }
-    }
+    },
+    {
+      'kind': 'Tag',
+      'inclusiveTicks': 0,
+      'exclusiveTicks': 0,
+      'resolvedUrl': '',
+      'function': {
+        'type': '@Function',
+        'id': '',
+        'name': 'Foo',
+        'owner': null,
+        'static': false,
+        'const': false,
+        'implicit': false,
+        'abstract': false
+      }
+    },
+    {
+      'kind': 'Tag',
+      'inclusiveTicks': 0,
+      'exclusiveTicks': 0,
+      'resolvedUrl': '',
+      'function': {
+        'type': '@Function',
+        'id': '',
+        'name': 'Default',
+        'owner': null,
+        'static': false,
+        'const': false,
+        'implicit': false,
+        'abstract': false
+      }
+    },
   ],
   'samples': [
     {
       'tid': 42247,
       'timestamp': 47377796685,
       'stack': [4, 3, 2, 1, 0],
-      'truncated': true
+      'truncated': true,
+      'userTag': 'Foo',
+      'vmTag': 'Dart',
     },
     {
       'tid': 42247,
       'timestamp': 47377797975,
       'stack': [7, 6, 5, 2, 1, 0],
-      'truncated': true
+      'truncated': true,
+      'userTag': 'Foo',
+      'vmTag': 'Dart',
     },
     {
       'tid': 42247,
       'timestamp': 47377799063,
       'stack': [10, 9, 8],
-      'truncated': true
+      'truncated': true,
+      'userTag': 'Foo',
+      'vmTag': 'Dart',
     },
     {
       'tid': 42247,
       'timestamp': 47377800363,
       'stack': [13, 12, 11, 8],
-      'truncated': true
+      'truncated': true,
+      'userTag': 'Default',
+      'vmTag': 'VM',
     },
     {
       'tid': 42247,
       'timestamp': 47377800463,
       'stack': [13, 12, 11, 8],
-      'truncated': true
+      'truncated': true,
+      'userTag': 'Default',
+      'vmTag': 'VM',
     },
     {
       'tid': 42247,
       'timestamp': 47377800563,
       'stack': [13, 12, 11, 8],
-      'truncated': true
+      'truncated': true,
+      'userTag': 'Default',
+      'vmTag': 'VM',
     },
     {
       'tid': 42247,
       'timestamp': 47377800663,
       'stack': [14, 13, 12, 11, 8],
-      'truncated': true
+      'truncated': true,
+      'userTag': 'Default',
+      'vmTag': 'VM',
     },
     {
       'tid': 42247,
       'timestamp': 47377800763,
       'stack': [16, 15, 13, 12, 11, 8],
-      'truncated': true
+      'truncated': true,
+      'userTag': 'Default',
+      'vmTag': 'VM',
     }
   ]
 };
@@ -859,7 +912,10 @@ final filteredCpuSampleTraceEvents = [
     'tid': 42247,
     'ts': 47377796685,
     'cat': 'Dart',
-    'args': <String, dynamic>{},
+    'args': <String, dynamic>{
+      'userTag': 'Foo',
+      'vmTag': 'Dart',
+    },
     'sf': '140357727781376-5'
   },
   {
@@ -869,7 +925,10 @@ final filteredCpuSampleTraceEvents = [
     'tid': 42247,
     'ts': 47377797975,
     'cat': 'Dart',
-    'args': <String, dynamic>{},
+    'args': <String, dynamic>{
+      'userTag': 'Foo',
+      'vmTag': 'Dart',
+    },
     'sf': '140357727781376-8'
   },
   {
@@ -879,7 +938,10 @@ final filteredCpuSampleTraceEvents = [
     'tid': 42247,
     'ts': 47377799063,
     'cat': 'Dart',
-    'args': <String, dynamic>{},
+    'args': <String, dynamic>{
+      'userTag': 'Foo',
+      'vmTag': 'Dart',
+    },
     'sf': '140357727781376-11'
   },
   {
@@ -889,7 +951,10 @@ final filteredCpuSampleTraceEvents = [
     'tid': 42247,
     'ts': 47377800363,
     'cat': 'Dart',
-    'args': <String, dynamic>{},
+    'args': <String, dynamic>{
+      'userTag': 'Default',
+      'vmTag': 'VM',
+    },
     'sf': '140357727781376-13'
   },
   {
@@ -899,7 +964,10 @@ final filteredCpuSampleTraceEvents = [
     'tid': 42247,
     'ts': 47377800463,
     'cat': 'Dart',
-    'args': <String, dynamic>{},
+    'args': <String, dynamic>{
+      'userTag': 'Default',
+      'vmTag': 'VM',
+    },
     'sf': '140357727781376-13'
   },
   {
@@ -909,7 +977,10 @@ final filteredCpuSampleTraceEvents = [
     'tid': 42247,
     'ts': 47377800563,
     'cat': 'Dart',
-    'args': <String, dynamic>{},
+    'args': <String, dynamic>{
+      'userTag': 'Default',
+      'vmTag': 'VM',
+    },
     'sf': '140357727781376-13'
   },
   {
@@ -919,7 +990,10 @@ final filteredCpuSampleTraceEvents = [
     'tid': 42247,
     'ts': 47377800663,
     'cat': 'Dart',
-    'args': <String, dynamic>{},
+    'args': <String, dynamic>{
+      'userTag': 'Default',
+      'vmTag': 'VM',
+    },
     'sf': '140357727781376-15'
   },
   {
@@ -929,7 +1003,10 @@ final filteredCpuSampleTraceEvents = [
     'tid': 42247,
     'ts': 47377800763,
     'cat': 'Dart',
-    'args': <String, dynamic>{},
+    'args': <String, dynamic>{
+      'userTag': 'Default',
+      'vmTag': 'VM',
+    },
     'sf': '140357727781376-17'
   }
 ];
@@ -944,7 +1021,10 @@ final List<Map<String, dynamic>> goldenCpuProfileTraceEvents =
           'tid': 42247,
           'ts': 47377800363,
           'cat': 'Dart',
-          'args': <String, dynamic>{},
+          'args': <String, dynamic>{
+            'userTag': 'Default',
+            'vmTag': 'VM',
+          },
           'sf': '140357727781376-14'
         },
         {
@@ -954,7 +1034,10 @@ final List<Map<String, dynamic>> goldenCpuProfileTraceEvents =
           'tid': 42247,
           'ts': 47377800463,
           'cat': 'Dart',
-          'args': <String, dynamic>{},
+          'args': <String, dynamic>{
+            'userTag': 'Default',
+            'vmTag': 'VM',
+          },
           'sf': '140357727781376-14'
         },
         {
@@ -964,7 +1047,10 @@ final List<Map<String, dynamic>> goldenCpuProfileTraceEvents =
           'tid': 42247,
           'ts': 47377800563,
           'cat': 'Dart',
-          'args': <String, dynamic>{},
+          'args': <String, dynamic>{
+            'userTag': 'Default',
+            'vmTag': 'VM',
+          },
           'sf': '140357727781376-14'
         },
         {
@@ -974,7 +1060,10 @@ final List<Map<String, dynamic>> goldenCpuProfileTraceEvents =
           'tid': 42247,
           'ts': 47377800663,
           'cat': 'Dart',
-          'args': <String, dynamic>{},
+          'args': <String, dynamic>{
+            'userTag': 'Default',
+            'vmTag': 'VM',
+          },
           'sf': '140357727781376-15'
         },
         {
@@ -984,7 +1073,10 @@ final List<Map<String, dynamic>> goldenCpuProfileTraceEvents =
           'tid': 42247,
           'ts': 47377800763,
           'cat': 'Dart',
-          'args': <String, dynamic>{},
+          'args': <String, dynamic>{
+            'userTag': 'Default',
+            'vmTag': 'VM',
+          },
           'sf': '140357727781376-17'
         }
       ]);
@@ -997,7 +1089,10 @@ final subProfileTraceEvents = [
     'tid': 42247,
     'ts': 47377796685,
     'cat': 'Dart',
-    'args': <String, dynamic>{},
+    'args': <String, dynamic>{
+      'userTag': 'Foo',
+      'vmTag': 'Dart',
+    },
     'sf': '140357727781376-5'
   },
   {
@@ -1007,7 +1102,10 @@ final subProfileTraceEvents = [
     'tid': 42247,
     'ts': 47377797975,
     'cat': 'Dart',
-    'args': <String, dynamic>{},
+    'args': <String, dynamic>{
+      'userTag': 'Foo',
+      'vmTag': 'Dart',
+    },
     'sf': '140357727781376-8'
   },
   {
@@ -1017,7 +1115,10 @@ final subProfileTraceEvents = [
     'tid': 42247,
     'ts': 47377799063,
     'cat': 'Dart',
-    'args': <String, dynamic>{},
+    'args': <String, dynamic>{
+      'userTag': 'Foo',
+      'vmTag': 'Dart',
+    },
     'sf': '140357727781376-11'
   },
 ];
@@ -1104,6 +1205,19 @@ final CpuProfileMetaData profileMetaData = CpuProfileMetaData(
     ..end = const Duration(microseconds: 100),
 );
 
+final CpuStackFrame tagFrameA = CpuStackFrame(
+  id: 'id_tag_0',
+  name: 'TagA',
+  verboseName: 'TagA',
+  category: 'Dart',
+  rawUrl: '',
+  packageUri: '',
+  sourceLine: null,
+  parentId: CpuProfileData.rootId,
+  profileMetaData: profileMetaData,
+  isTag: true,
+)..exclusiveSampleCount = 0;
+
 final CpuStackFrame stackFrameA = CpuStackFrame(
   id: 'id_0',
   name: 'A',
@@ -1114,6 +1228,7 @@ final CpuStackFrame stackFrameA = CpuStackFrame(
   sourceLine: null,
   parentId: CpuProfileData.rootId,
   profileMetaData: profileMetaData,
+  isTag: false,
 )..exclusiveSampleCount = 0;
 
 final CpuStackFrame stackFrameB = CpuStackFrame(
@@ -1126,6 +1241,7 @@ final CpuStackFrame stackFrameB = CpuStackFrame(
   sourceLine: 2222,
   parentId: 'id_0',
   profileMetaData: profileMetaData,
+  isTag: false,
 )..exclusiveSampleCount = 0;
 
 final CpuStackFrame stackFrameC = CpuStackFrame(
@@ -1139,7 +1255,9 @@ final CpuStackFrame stackFrameC = CpuStackFrame(
   sourceLine: 3333,
   parentId: 'id_1',
   profileMetaData: profileMetaData,
+  isTag: false,
 )..exclusiveSampleCount = 2;
+
 final CpuStackFrame stackFrameD = CpuStackFrame(
   id: 'id_3',
   name: 'D',
@@ -1150,6 +1268,7 @@ final CpuStackFrame stackFrameD = CpuStackFrame(
   sourceLine: null,
   parentId: 'id_1',
   profileMetaData: profileMetaData,
+  isTag: false,
 )..exclusiveSampleCount = 2;
 
 final CpuStackFrame stackFrameE = CpuStackFrame(
@@ -1162,7 +1281,9 @@ final CpuStackFrame stackFrameE = CpuStackFrame(
   sourceLine: null,
   parentId: 'id_3',
   profileMetaData: profileMetaData,
+  isTag: false,
 )..exclusiveSampleCount = 1;
+
 final CpuStackFrame stackFrameF = CpuStackFrame(
   id: 'id_5',
   name: 'F',
@@ -1173,6 +1294,7 @@ final CpuStackFrame stackFrameF = CpuStackFrame(
   sourceLine: null,
   parentId: 'id_4',
   profileMetaData: profileMetaData,
+  isTag: false,
 )..exclusiveSampleCount = 0;
 
 final CpuStackFrame stackFrameF2 = CpuStackFrame(
@@ -1185,6 +1307,7 @@ final CpuStackFrame stackFrameF2 = CpuStackFrame(
   sourceLine: null,
   parentId: 'id_3',
   profileMetaData: profileMetaData,
+  isTag: false,
 )..exclusiveSampleCount = 3;
 
 final CpuStackFrame stackFrameC2 = CpuStackFrame(
@@ -1198,6 +1321,7 @@ final CpuStackFrame stackFrameC2 = CpuStackFrame(
   sourceLine: 3333,
   parentId: 'id_5',
   profileMetaData: profileMetaData,
+  isTag: false,
 )..exclusiveSampleCount = 1;
 
 final CpuStackFrame stackFrameC3 = CpuStackFrame(
@@ -1211,6 +1335,7 @@ final CpuStackFrame stackFrameC3 = CpuStackFrame(
   sourceLine: 3333,
   parentId: 'id_6',
   profileMetaData: profileMetaData,
+  isTag: false,
 )..exclusiveSampleCount = 1;
 
 final CpuStackFrame stackFrameC4 = CpuStackFrame(
@@ -1225,6 +1350,7 @@ final CpuStackFrame stackFrameC4 = CpuStackFrame(
   sourceLine: 47,
   parentId: 'id_6',
   profileMetaData: profileMetaData,
+  isTag: false,
 )..exclusiveSampleCount = 1;
 
 final CpuStackFrame stackFrameG = CpuStackFrame(
@@ -1239,6 +1365,7 @@ final CpuStackFrame stackFrameG = CpuStackFrame(
   sourceLine: null,
   parentId: 'id_0',
   profileMetaData: profileMetaData,
+  isTag: false,
 )..exclusiveSampleCount = 1;
 
 final CpuStackFrame testStackFrame = stackFrameA
@@ -1250,6 +1377,11 @@ final CpuStackFrame testStackFrame = stackFrameA
           ..addChild(stackFrameE..addChild(stackFrameF..addChild(stackFrameC2)))
           ..addChild(stackFrameF2..addChild(stackFrameC3)),
       ),
+  );
+
+final CpuStackFrame testTagRootedStackFrame = tagFrameA
+  ..addChild(
+    testStackFrame,
   );
 
 const String testStackFrameStringGolden = '''
@@ -1327,6 +1459,46 @@ const String bottomUpGolden = '''
 
 ''';
 
+const String testTagRootedStackFrameStringGolden = '''
+  TagA - children: 1 - excl: 0 - incl: 10
+    A - children: 1 - excl: 0 - incl: 10
+      B - children: 2 - excl: 0 - incl: 10
+        C - children: 0 - excl: 2 - incl: 2
+        D - children: 2 - excl: 2 - incl: 8
+          E - children: 1 - excl: 1 - incl: 2
+            F - children: 1 - excl: 0 - incl: 1
+              C - children: 0 - excl: 1 - incl: 1
+          F - children: 1 - excl: 3 - incl: 4
+            C - children: 0 - excl: 1 - incl: 1
+''';
+
+const String tagRootedBottomUpGolden = '''
+  TagA - children: 4 - excl: 0 - incl: 10
+    C - children: 2 - excl: 4 - incl: 4
+      B - children: 1 - excl: 2 - incl: 2
+        A - children: 0 - excl: 2 - incl: 2
+      F - children: 2 - excl: 2 - incl: 2
+        E - children: 1 - excl: 1 - incl: 1
+          D - children: 1 - excl: 1 - incl: 1
+            B - children: 1 - excl: 1 - incl: 1
+              A - children: 0 - excl: 1 - incl: 1
+        D - children: 1 - excl: 1 - incl: 1
+          B - children: 1 - excl: 1 - incl: 1
+            A - children: 0 - excl: 1 - incl: 1
+    D - children: 1 - excl: 2 - incl: 2
+      B - children: 1 - excl: 2 - incl: 2
+        A - children: 0 - excl: 2 - incl: 2
+    E - children: 1 - excl: 1 - incl: 1
+      D - children: 1 - excl: 1 - incl: 1
+        B - children: 1 - excl: 1 - incl: 1
+          A - children: 0 - excl: 1 - incl: 1
+    F - children: 1 - excl: 3 - incl: 3
+      D - children: 1 - excl: 3 - incl: 3
+        B - children: 1 - excl: 3 - incl: 3
+          A - children: 0 - excl: 3 - incl: 3
+
+''';
+
 final CpuProfileMetaData zeroProfileMetaData = CpuProfileMetaData(
   sampleCount: 0,
   samplePeriod: 50,
@@ -1346,6 +1518,7 @@ final CpuStackFrame zeroStackFrame = CpuStackFrame(
   sourceLine: null,
   parentId: CpuProfileData.rootId,
   profileMetaData: zeroProfileMetaData,
+  isTag: false,
 )..exclusiveSampleCount = 0;
 
 final flutterEngineStackFrame = CpuStackFrame(
@@ -1358,4 +1531,5 @@ final flutterEngineStackFrame = CpuStackFrame(
   sourceLine: null,
   parentId: CpuProfileData.rootId,
   profileMetaData: profileMetaData,
+  isTag: false,
 )..exclusiveSampleCount = 1;

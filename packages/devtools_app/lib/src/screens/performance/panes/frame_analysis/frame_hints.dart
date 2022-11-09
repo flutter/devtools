@@ -12,7 +12,6 @@ import '../../../../service/service_extensions.dart' as extensions;
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/theme.dart';
 import '../../performance_controller.dart';
-import '../../performance_model.dart';
 import '../../performance_utils.dart';
 import '../controls/enhance_tracing/enhance_tracing.dart';
 import '../controls/enhance_tracing/enhance_tracing_controller.dart';
@@ -34,7 +33,8 @@ class FrameHints extends StatelessWidget {
   Widget build(BuildContext context) {
     final performanceController = Provider.of<PerformanceController>(context);
     final frame = frameAnalysis.frame;
-    final displayRefreshRate = performanceController.displayRefreshRate.value;
+    final displayRefreshRate =
+        performanceController.flutterFramesController.displayRefreshRate.value;
     final showUiJankHints = frame.isUiJanky(displayRefreshRate);
     final showRasterJankHints = frame.isRasterJanky(displayRefreshRate);
     if (!(showUiJankHints || showRasterJankHints)) {

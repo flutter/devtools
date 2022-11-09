@@ -28,7 +28,7 @@ void main() {
   late MockCodeViewController codeViewController;
   late ScriptsHistory scriptsHistory;
 
-  const smallWindowSize = Size(1000.0, 1000.0);
+  const smallWindowSize = Size(1200.0, 1000.0);
 
   setUpAll(() {
     setGlobal(BreakpointManager, BreakpointManager());

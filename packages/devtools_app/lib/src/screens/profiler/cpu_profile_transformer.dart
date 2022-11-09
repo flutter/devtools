@@ -69,6 +69,23 @@ class CpuProfileTransformer {
       }
     }
 
+    if (cpuProfileData.rootedAtTags) {
+      // Check to see if there are any empty tag roots as a result of filtering
+      // and remove them.
+      final nodeIndiciesToRemove = <int>[];
+      for (int i = cpuProfileData.cpuProfileRoot.children.length - 1;
+          i >= 0;
+          --i) {
+        final root = cpuProfileData.cpuProfileRoot.children[i];
+        if (root.isTag && root.children.isEmpty) {
+          nodeIndiciesToRemove.add(i);
+        }
+      }
+      nodeIndiciesToRemove.forEach(
+        cpuProfileData.cpuProfileRoot.removeChildAtIndex,
+      );
+    }
+
     _setExclusiveSampleCountsAndTags(cpuProfileData);
     cpuProfileData.processed = true;
 
@@ -111,9 +128,9 @@ class CpuProfileTransformer {
     CpuStackFrame? parent,
     CpuProfileData cpuProfileData,
   ) {
+    // [stackFrame] is the root of a new cpu sample. Add it as a child of
+    // [cpuProfileRoot].
     if (parent == null) {
-      // [stackFrame] is the root of a new cpu sample. Add it as a child of
-      // [cpuProfile].
       cpuProfileData.cpuProfileRoot.addChild(stackFrame);
     } else {
       parent.addChild(stackFrame);
@@ -131,7 +148,7 @@ class CpuProfileTransformer {
         'you must export the timeline immediately after the AssertionError is '
         'thrown.',
       );
-      if (stackFrame != null) {
+      if (stackFrame != null && !stackFrame.isTag) {
         stackFrame.exclusiveSampleCount++;
       }
     }

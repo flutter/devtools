@@ -21,7 +21,7 @@ void main() {
   group('Diff pane', () {
     late MemoryDefaultScene scene;
 
-    Future<void> pumpDiffTab(WidgetTester tester) async {
+    Future<void> pumpScene(WidgetTester tester) async {
       await tester.pumpWidget(scene.build());
       // Delay to ensure the memory profiler has collected data.
       await tester.pumpAndSettle(const Duration(seconds: 1));
@@ -49,7 +49,7 @@ void main() {
       final snapshots = scene.controller.diffPaneController.core.snapshots;
       // Check the list contains only documentation item.
       expect(snapshots.value.length, equals(1));
-      await pumpDiffTab(tester);
+      await pumpScene(tester);
 
       // Check initial golden.
       await expectLater(
@@ -63,6 +63,7 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.text('selected-isolate-${i + 1}'), findsOneWidget);
       }
+
       await expectLater(
         find.byType(DiffPane),
         matchesDevToolsGolden(
@@ -71,9 +72,6 @@ void main() {
       );
       expect(snapshots.value.length, equals(1 + 3));
 
-      // Select a class.
-      await tester.tap(find.byTooltip('my_lib/root'));
-      await tester.pumpAndSettle();
       await expectLater(
         find.byType(DiffPane),
         matchesDevToolsGolden(
