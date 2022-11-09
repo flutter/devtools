@@ -123,7 +123,7 @@ elif [ "$BOT" = "build_dart2js" ]; then
     flutter build web --release
 
 elif [[ "$BOT" == "test_ddc" || "$BOT" == "test_dart2js" ]]; then
-    if [ "$BOT" == "test_dart2js" ]
+    if [ "$BOT" == "test_dart2js" ]; then
         USE_WEBDEV_RELEASE=true
     else
         USE_WEBDEV_RELEASE=false
