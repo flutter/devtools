@@ -41,6 +41,7 @@ jobs:
         run: |
           if [ ! -d "./flutter-sdk" ]; then
             git clone https://github.com/flutter/flutter.git ./flutter-sdk
+            cd flutter-sdk
             git checkout $FLUTTER_HEAD_SHA
           fi
         env:
