@@ -33,7 +33,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-          ./flutter-sdk
+            ./flutter-sdk
         # TODO: cache keybased on HEAD ref of flutter
         key: flutter-sdk-${{ runner.os }}-${{ steps.get-flutter-head.outputs.SHA }}
 
