@@ -17,6 +17,35 @@ env:
   AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
+  ubuntu-flutter-prep:
+    name: main
+    runs-on: ubuntu-latest 
+    steps:
+      - name: Get Flutter HEAD sha
+        run: |
+          RESPONSE=$(gh api /repos/flutter/flutter/branches/master)
+          echo $RESPONSE
+          HEAD_SHA=$(echo $RESPONSE | jq '.commit.sha')
+          echo "HEAD_SHA:$HEAD_SHA"
+          
+      # - name: Load Cached Flutter SDK
+      #   uses: actions/cache@v3
+      #   with:
+      #     path: |
+      #     ./flutter-sdk
+      #   # TODO: cache keybased on HEAD ref of flutter
+      #   key: flutter-sdk-${{ runner.os }}
+      # - name: Clone Flutter SDK if none cached
+      #   run: |
+      #     if [ ! -d "./flutter-sdk" ]; then
+      #       git clone https://github.com/flutter/flutter.git ./flutter-sdk
+      #     fi
+      # - name: Setup Flutter SDK
+      #   run: |
+      #     ./flutter-sdk/bin/flutter --version # TODO: is there a proper way to do this?
+      #     ./flutter-sdk/bin/cache/dart-sdk/bin/dart --version #TODO: do i need to do the same for dart?
+        
+
   main:
     name: main
     runs-on: ubuntu-latest
