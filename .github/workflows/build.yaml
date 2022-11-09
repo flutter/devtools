@@ -20,7 +20,6 @@ env:
 jobs:
   ubuntu-flutter-prep:
     name: Ubuntu Flutter Prep
-    id: ubuntu-flutter-prep
     runs-on: ubuntu-latest 
     #TODO can this be matrixed on OS.
     outputs:
