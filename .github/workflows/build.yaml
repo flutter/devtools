@@ -30,7 +30,9 @@ jobs:
       - name: Get Latest Flutter Candidate
         id: flutter-candidate
         run: |
+         ./tool/latest_flutter_candidate.sh
           LATEST_FLUTTER_CANDIDATE=$(./tool/latest_flutter_candidate.sh)
+          echo $LATEST_FLUTTER_CANDIDATE
           if [ -z ${LATEST_FLUTTER_CANDIDATE+x} ]; then
             echo "::error ::Unable to get Latest flutter candidate"
             exit 1
