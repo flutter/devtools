@@ -26,7 +26,7 @@ jobs:
         id: get-flutter-head
         run: |
           RESPONSE=$(gh api /repos/flutter/flutter/branches/master)
-          HEAD_SHA=$(echo $RESPONSE | jq '.commit.sha')
+          HEAD_SHA=$(echo $RESPONSE | jq -r '.commit.sha')
           echo "SHA=$HEAD_SHA" >> $GITHUB_OUTPUT
           
       - name: Load Cached Flutter SDK
