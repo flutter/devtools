@@ -43,7 +43,7 @@ jobs:
             git clone https://github.com/flutter/flutter.git ./flutter-sdk
             git checkout $FLUTTER_HEAD_SHA
           fi
-        env: |
+        env:
           FLUTTER_HEAD_SHA: ${{ steps.get-flutter-head.outputs.SHA }}
 
       - name: Setup Flutter SDK
