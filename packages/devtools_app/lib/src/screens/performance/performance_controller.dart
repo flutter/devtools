@@ -207,7 +207,7 @@ abstract class PerformanceFeatureController extends DisposableController {
       await onBecomingActive();
     }
   }
-  
+
   Future<void> onBecomingActive() async {}
 
   Future<void> init() async {}
