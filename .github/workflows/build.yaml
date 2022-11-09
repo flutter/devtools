@@ -37,7 +37,9 @@ jobs:
       fail-fast: false
       matrix:
         bot:
+          - build_ddc
           - test_ddc
+          - build_dart2js
           - test_dart2js
     steps:
       - name: git clone

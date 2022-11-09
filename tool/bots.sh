@@ -110,13 +110,15 @@ if [ "$BOT" = "main" ]; then
     pushd packages/devtools_app
     echo `pwd`
 
-elif [ "$BOT" = "test_ddc" ]; then
+elif [ "$BOT" = "build_ddc" ]; then
 
     # Provision our packages.
     flutter pub get
 
     # TODO(https://github.com/flutter/flutter/issues/43538): Remove workaround.
     flutter build web --pwa-strategy=none --no-tree-shake-icons
+
+elif [ "$BOT" = "test_ddc" ]; then
 
     # TODO(https://github.com/flutter/devtools/issues/1987): once this issue is fixed,
     # we may need to explicitly exclude running integration_tests here (this is what we
@@ -129,11 +131,16 @@ elif [ "$BOT" = "test_ddc" ]; then
         echo "unknown test platform"
         exit 1
     fi
-elif [ "$BOT" = "test_dart2js" ]; then
+
+# TODO(kenz): do we actually need this bot? Or does this test the same thing as `flutter build web --release`
+# `flutter build web --release` above in the "main" bot.
+elif [ "$BOT" = "build_dart2js" ]; then
     flutter pub get
 
     # TODO(https://github.com/flutter/flutter/issues/43538): Remove workaround.
     flutter build web --pwa-strategy=none --no-tree-shake-icons
+
+elif [ "$BOT" = "test_dart2js" ]; then
 
     # TODO(https://github.com/flutter/devtools/issues/1987): once this issue is fixed,
     # we may need to explicitly exclude running integration_tests here (this is what we
