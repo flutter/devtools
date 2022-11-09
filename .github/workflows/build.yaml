@@ -31,15 +31,15 @@ jobs:
         run: ./tool/bots.sh
 
   test:
-    name: test ${{ matrix.bot }}
+    name: ${{ matrix.bot }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         bot:
           - build_ddc
-          - test_ddc
           - build_dart2js
+          - test_ddc
           - test_dart2js
     steps:
       - name: git clone
