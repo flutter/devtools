@@ -31,8 +31,10 @@ class FlutterFramesController extends PerformanceFeatureController {
   /// Whether we should show the Flutter frames chart.
   ValueListenable<bool> get showFlutterFramesChart => _showFlutterFramesChart;
   final _showFlutterFramesChart = ValueNotifier<bool>(true);
-  void toggleShowFlutterFrames(bool value) =>
-      _showFlutterFramesChart.value = value;
+  void toggleShowFlutterFrames(bool value) {
+    _showFlutterFramesChart.value = value;
+    unawaited(setIsActiveFeature(_showFlutterFramesChart.value));
+  }
 
   /// Whether flutter frames are currently being recorded.
   ValueListenable<bool> get recordingFrames => _recordingFrames;
@@ -83,6 +85,16 @@ class FlutterFramesController extends PerformanceFeatureController {
         data?.displayRefreshRate = _displayRefreshRate.value;
       }
     }
+  }
+
+  // We override this for [FlutterFramesController] because this feature's
+  // "active" state will be determined by different parameters from other
+  // feature controllers, which respond to tab switches.
+  @override
+  Future<void> setIsActiveFeature(bool value) async {
+    final isFlutterApp = serviceManager.connectedApp?.isFlutterAppNow ?? false;
+    value = isFlutterApp && _showFlutterFramesChart.value;
+    await super.setIsActiveFeature(value);
   }
 
   void addFrame(FlutterFrame frame) {

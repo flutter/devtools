@@ -197,6 +197,7 @@ abstract class PerformanceFeatureController extends DisposableController {
 
   PerformanceData? get data => performanceController.data;
 
+  /// Whether this feature is active and visible to the user.
   bool get isActiveFeature => _isActiveFeature;
   bool _isActiveFeature = false;
 
