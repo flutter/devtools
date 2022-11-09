@@ -122,7 +122,7 @@ elif [ "$BOT" = "build_dart2js" ]; then
 
     flutter build web --release
 
-elif [ "$BOT" = "test_ddc" || "$BOT" = "test_dart2js" ]; then
+elif [[ "$BOT" == "test_ddc" || "$BOT" == "test_dart2js" ]]; then
     USE_WEBDEV_RELEASE=("$BOT" = "test_dart2js")
     echo "USE_WEBDEV_RELEASE = $USE_WEBDEV_RELEASE"
 
