@@ -15,6 +15,7 @@ permissions: read-all
 
 env:
   AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   ubuntu-flutter-prep:
