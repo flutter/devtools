@@ -85,6 +85,7 @@ class FlutterFramesController extends PerformanceFeatureController {
         data?.displayRefreshRate = _displayRefreshRate.value;
       }
     }
+    await setIsActiveFeature(true);
   }
 
   // We override this for [FlutterFramesController] because this feature's
