@@ -19,30 +19,38 @@ env:
 
 jobs:
   ubuntu-flutter-prep:
-    name: main
+    name: Ubuntu Flutter Prep
+    id: ubuntu-flutter-prep
     runs-on: ubuntu-latest 
+    #TODO can this be matrixed on OS.
+    outputs:
+      latest_flutter_candidate: ${{ steps.flutter-candidate.outputs.FLUTTER_CANDIDATE }}
     steps:
-      - name: Get Flutter HEAD sha
-        id: get-flutter-head
+      - name: git clone devtools
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
+      - name: Get Latest Flutter Candidate
+        id: flutter-candidate
         run: |
-          RESPONSE=$(gh api /repos/flutter/flutter/branches/master)
-          HEAD_SHA=$(echo $RESPONSE | jq -r '.commit.sha')
-          echo "SHA=$HEAD_SHA" >> $GITHUB_OUTPUT
+          LATEST_FLUTTER_CANDIDATE=$(./tool/latest_flutter_candidate.sh)
+          if [ -z ${LATEST_FLUTTER_CANDIDATE+x} ]; then
+            echo "::error ::Unable to get Latest flutter candidate"
+            exit 1
+          fi
+          echo "FLUTTER_CANDIDATE=$LATEST_FLUTTER_CANDIDATE" >> $GITHUB_OUTPUT
           
       - name: Load Cached Flutter SDK
         uses: actions/cache@v3
         with:
           path: |
             ./flutter-sdk
-        # TODO: cache keybased on HEAD ref of flutter
-          key: flutter-sdk-${{ runner.os }}-${{ steps.get-flutter-head.outputs.SHA }}
+          key: flutter-sdk-${{ runner.os }}-${{ steps.flutter-candidate.outputs.FLUTTER_CANDIDATE }}
 
       - name: Clone Flutter SDK if none cached
         run: |
           if [ ! -d "./flutter-sdk" ]; then
             git clone https://github.com/flutter/flutter.git ./flutter-sdk
             cd flutter-sdk
-            git checkout $FLUTTER_HEAD_SHA
+            git checkout $LATEST_FLUTTER_CANDIDATE
           fi
         env:
           FLUTTER_HEAD_SHA: ${{ steps.get-flutter-head.outputs.SHA }}
@@ -51,28 +59,35 @@ jobs:
         run: |
           ./flutter-sdk/bin/flutter --version # TODO: is there a proper way to do this?
           ./flutter-sdk/bin/cache/dart-sdk/bin/dart --version #TODO: do i need to do the same for dart?
-        
 
-  # main:
-  #   name: main
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     fail-fast: false
-  #   steps:
-  #     - name: git clone
-  #       uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
-  #     - name: Cache Generated Files
-  #       uses: actions/cache@v3
-  #       with:
-  #         path: |
-  #           **/build/
-  #           **/.dart_tool/
-  #           ./flutter-sdk
-  #         key: ${{ runner.os }}-cache
-  #     - name: tool/bots.sh
-  #       env:
-  #         BOT: main
-  #       run: ./tool/bots.sh
+  main:
+    name: main
+    needs: ubuntu-flutter-prep
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    steps:
+      - name: Load Cached Flutter SDK
+        uses: actions/cache@v3
+        with:
+          path: |
+            ./flutter-sdk
+          key: flutter-sdk-${{ runner.os }}-${{ needs.ubuntu-flutter-prep.outputs.latest_flutter_candidate }} 
+
+      - name: git clone
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
+      - name: Cache Generated Files
+        uses: actions/cache@v3
+        with:
+          path: |
+            **/build/
+            **/.dart_tool/
+            ./flutter-sdk
+          key: ${{ runner.os }}-cache
+      - name: tool/bots.sh
+        env:
+          BOT: main
+        run: ./tool/bots.sh
 
   # test:
   #   name: test ${{ matrix.bot }}
