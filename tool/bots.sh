@@ -95,9 +95,6 @@ if [ "$BOT" = "main" ]; then
     # Analyze the code
     repo_tool analyze
 
-    # Ensure we can build the app.
-    flutter build web --release
-
     # Test the devtools_shared package tests on the main bot.
     popd
     pushd packages/devtools_shared
@@ -118,6 +115,13 @@ elif [ "$BOT" = "build_ddc" ]; then
     # TODO(https://github.com/flutter/flutter/issues/43538): Remove workaround.
     flutter build web --pwa-strategy=none --no-tree-shake-icons
 
+elif [ "$BOT" = "build_dart2js" ]; then
+
+    # Provision our packages.
+    flutter pub get
+
+    flutter build web --release
+
 elif [ "$BOT" = "test_ddc" ]; then
 
     # TODO(https://github.com/flutter/devtools/issues/1987): once this issue is fixed,
@@ -131,14 +135,6 @@ elif [ "$BOT" = "test_ddc" ]; then
         echo "unknown test platform"
         exit 1
     fi
-
-# TODO(kenz): do we actually need this bot? Or does this test the same thing as `flutter build web --release`
-# `flutter build web --release` above in the "main" bot.
-elif [ "$BOT" = "build_dart2js" ]; then
-    flutter pub get
-
-    # TODO(https://github.com/flutter/flutter/issues/43538): Remove workaround.
-    flutter build web --pwa-strategy=none --no-tree-shake-icons
 
 elif [ "$BOT" = "test_dart2js" ]; then
 
