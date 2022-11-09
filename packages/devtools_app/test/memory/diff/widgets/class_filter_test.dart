@@ -32,7 +32,7 @@ class _FilterTest {
   String snapshotGolden(ClassFilterType? type) =>
       '../../../goldens/memory_diff_snapshot_${type?.name ?? 'custom'}_$name.png';
   static String dialogGolden(ClassFilterType? type) =>
-      '../../../goldens/memory_diff_dialog_${type?.name ?? 'custom'}.png';
+      '../../../goldens/memory_diff_filter_dialog_${type?.name ?? 'custom'}.png';
 }
 
 final _tests = [_FilterTest(false), _FilterTest(true)];
