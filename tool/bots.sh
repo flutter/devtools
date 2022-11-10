@@ -37,9 +37,9 @@ fi
 # can and does print 'Waiting for another flutter command...' at inopportune
 # times.
 export PATH=`pwd`/flutter-sdk/bin/cache/dart-sdk/bin:`pwd`/flutter-sdk/bin:`pwd`/bin:$PATH
-ll -l `pwd`/flutter-sdk/bin/cache/dart-sdk/bin
-ll -l `pwd`/flutter-sdk/bin
-ll -l `pwd`/bin
+ls -l `pwd`/flutter-sdk/bin/cache/dart-sdk/bin
+ls -l `pwd`/flutter-sdk/bin
+ls -l `pwd`/bin
 
 
 # Look up the latest flutter candidate (this is the latest flutter version in g3)
