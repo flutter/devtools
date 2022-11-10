@@ -19,7 +19,7 @@ env:
 
 jobs:
   flutter-prep:
-    name: Ubuntu Flutter Prep
+    name: ${{ matrix.os }} Flutter Prep
     #TODO can this be matrixed on OS.
     outputs:
       latest_flutter_candidate: ${{ steps.flutter-candidate.outputs.FLUTTER_CANDIDATE }}
