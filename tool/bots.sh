@@ -26,16 +26,10 @@ function flutter {
     fi
 }
 
-# Get Flutter.
-echo "Cloning the Flutter master branch"
-if [ -d "./flutter-sdk" ]; then
-    # the flutter-sdk dir exists so just make sure it is up to date
-    pushd ./flutter-sdk
-    git fetch --all
-    popd
-else
-    # the flutter-sdk dir DOES NOT exist so clone it
-    git clone https://github.com/flutter/flutter.git ./flutter-sdk
+# Make sure Flutter sdk has been provided
+if [ ! -d "./flutter-sdk" ]; then
+    echo "Expected ./flutter-sdk to exist and be checked out to the right commit"
+    exit 1;
 fi
 
 # Look in the dart bin dir first, then the flutter one, then the one for the
@@ -47,14 +41,6 @@ export PATH=`pwd`/flutter-sdk/bin/cache/dart-sdk/bin:`pwd`/flutter-sdk/bin:`pwd`
 # Look up the latest flutter candidate (this is the latest flutter version in g3)
 # TODO(https://github.com/flutter/devtools/issues/4591): re-write this script as a
 # shell script so we won't have to incurr the cost of building flutter tool twice.
-echo "Looking up the latest Flutter candidate branch"
-pushd packages/devtools_app
-LATEST_FLUTTER_CANDIDATE=`repo_tool latest-flutter-candidate --githubToken=$AUTH_TOKEN | tail -n 1`
-popd
-
-pushd flutter-sdk
-git checkout $LATEST_FLUTTER_CANDIDATE
-popd
 
 flutter config --no-analytics
 flutter doctor

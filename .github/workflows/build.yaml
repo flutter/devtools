@@ -58,8 +58,8 @@ jobs:
 
       - name: Setup Flutter SDK
         run: |
-          ./flutter-sdk/bin/flutter --version # TODO: is there a proper way to do this?
-          ./flutter-sdk/bin/cache/dart-sdk/bin/dart --version #TODO: do i need to do the same for dart?
+          ./flutter-sdk/bin/flutter config --no-analytics
+          ./flutter-sdk/bin/cache/dart-sdk/bin/dart --disable-analytics
 
   main:
     name: main
