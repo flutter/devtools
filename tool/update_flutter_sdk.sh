@@ -17,7 +17,7 @@ TOOL_DIR=`dirname "${RELATIVE_PATH_TO_SCRIPT}"`
 
 pushd "$TOOL_DIR"
 dart pub get
-REQUIRED_FLUTTER_BRANCH=`dart bin/repo_tool.dart latest-flutter-candidate | tail -n 1`
+REQUIRED_FLUTTER_BRANCH=`./latest_flutter_candidate.sh`
 
 echo "REQUIRED_FLUTTER_BRANCH: $REQUIRED_FLUTTER_BRANCH"
 
