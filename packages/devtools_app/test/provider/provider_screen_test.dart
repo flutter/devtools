@@ -27,7 +27,7 @@ void main() {
   late Widget providerScreen;
   late BannerMessagesController bannerMessagesController;
 
-  setUpAll(() => loadFonts());
+  setUpAll(() async => await loadFonts());
 
   setUp(() {
     setGlobal(IdeTheme, getIdeTheme());

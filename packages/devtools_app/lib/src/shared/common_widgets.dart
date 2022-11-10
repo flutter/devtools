@@ -356,6 +356,7 @@ class RefreshButton extends IconLabelButton {
     Key? key,
     String? tooltip,
     required VoidCallback? onPressed,
+    bool outlined = true,
   })  : isIconButton = true,
         super(
           key: key,
@@ -363,13 +364,15 @@ class RefreshButton extends IconLabelButton {
           label: '',
           tooltip: tooltip,
           onPressed: onPressed,
+          outlined: outlined,
+          minScreenWidthForTextBeforeScaling: 20000,
         );
 
   final bool isIconButton;
 
   @override
   Widget build(BuildContext context) {
-    if (!isIconButton) {
+    if (!isIconButton || !outlined) {
       return super.build(context);
     }
     return OutlinedIconButton(
@@ -1065,7 +1068,9 @@ class ToggleButton extends StatelessWidget {
     required this.isSelected,
     required this.message,
     required this.icon,
+    this.outlined = true,
     this.label,
+    this.shape,
   }) : super(key: key);
 
   final String message;
@@ -1076,7 +1081,11 @@ class ToggleButton extends StatelessWidget {
 
   final IconData icon;
 
-  final Text? label;
+  final String? label;
+
+  final OutlinedBorder? shape;
+
+  final bool outlined;
 
   @override
   Widget build(BuildContext context) {
@@ -1091,9 +1100,11 @@ class ToggleButton extends StatelessWidget {
           key: key,
           onPressed: onPressed,
           style: TextButton.styleFrom(
+            side: outlined ? null : BorderSide.none,
             backgroundColor: isSelected
-                ? theme.colorScheme.toggleButtonBackgroundColor
+                ? theme.colorScheme.toggleButtonsFillSelected
                 : Colors.transparent,
+            shape: shape,
           ),
           child: Row(
             children: [
@@ -1101,12 +1112,19 @@ class ToggleButton extends StatelessWidget {
                 icon,
                 size: defaultIconSize,
                 color: isSelected
-                    ? theme.colorScheme.toggleButtonForegroundColor
-                    : theme.colorScheme.contrastForeground,
+                    ? theme.colorScheme.toggleButtonsTitleSelected
+                    : theme.colorScheme.toggleButtonsTitle,
               ),
               if (label != null) ...[
                 const SizedBox(width: denseSpacing),
-                label!,
+                Text(
+                  style: theme.textTheme.bodyLarge!.apply(
+                    color: isSelected
+                        ? theme.colorScheme.toggleButtonsTitleSelected
+                        : theme.colorScheme.toggleButtonsTitle,
+                  ),
+                  label!,
+                ),
               ]
             ],
           ),
@@ -1774,6 +1792,8 @@ class _JsonViewerState extends State<JsonViewer>
         isSystemIsolate: true,
       ),
     );
+    // Intended to be unawaited.
+    // ignore: discarded_futures
     _initializeTree = buildVariablesTree(variable);
   }
 
@@ -1864,7 +1884,7 @@ class MoreInfoLink extends StatelessWidget {
   }
 
   void _onLinkTap(BuildContext context) {
-    launchUrl(url, context);
+    unawaited(launchUrl(url, context));
     ga.select(gaScreenName, gaSelectedItemDescription);
   }
 }
@@ -1992,6 +2012,8 @@ class CopyToClipboardControl extends StatelessWidget {
     this.tooltip = 'Copy to clipboard',
     this.buttonKey,
     this.size,
+    this.gaScreen,
+    this.gaItem,
   });
 
   final ClipboardDataProvider? dataProvider;
@@ -1999,12 +2021,21 @@ class CopyToClipboardControl extends StatelessWidget {
   final String tooltip;
   final Key? buttonKey;
   final double? size;
+  final String? gaScreen;
+  final String? gaItem;
 
   @override
   Widget build(BuildContext context) {
     final onPressed = dataProvider == null
         ? null
-        : () => copyToClipboard(dataProvider!() ?? '', successMessage, context);
+        : () {
+            if (gaScreen != null && gaItem != null) {
+              ga.select(gaScreen!, gaItem!);
+            }
+            unawaited(
+              copyToClipboard(dataProvider!() ?? '', successMessage, context),
+            );
+          };
 
     return ToolbarAction(
       icon: Icons.content_copy,
@@ -2423,15 +2454,17 @@ class HelpButtonWithDialog extends StatelessWidget {
     return HelpButton(
       onPressed: () {
         ga.select(gaScreen, gaSelection);
-        showDialog(
-          context: context,
-          builder: (context) => DevToolsDialog(
-            title: DialogTitleText(dialogTitle),
-            includeDivider: false,
-            content: child,
-            actions: const [
-              DialogCloseButton(),
-            ],
+        unawaited(
+          showDialog(
+            context: context,
+            builder: (context) => DevToolsDialog(
+              title: DialogTitleText(dialogTitle),
+              includeDivider: false,
+              content: child,
+              actions: const [
+                DialogCloseButton(),
+              ],
+            ),
           ),
         );
       },
@@ -2507,12 +2540,14 @@ class RadioButton<T> extends StatelessWidget {
     required this.itemValue,
     required this.groupValue,
     this.onChanged,
+    this.radioKey,
   });
 
   final String label;
   final T itemValue;
   final T groupValue;
   final void Function(T?)? onChanged;
+  final Key? radioKey;
 
   @override
   Widget build(BuildContext context) {
@@ -2523,6 +2558,7 @@ class RadioButton<T> extends StatelessWidget {
           groupValue: groupValue,
           materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           onChanged: onChanged,
+          key: radioKey,
         ),
         Expanded(child: Text(label, overflow: TextOverflow.ellipsis)),
       ],

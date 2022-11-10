@@ -2,9 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../../../analytics/analytics.dart' as ga;
+import '../../../../analytics/constants.dart' as analytics_constants;
 import '../../../../config_specific/import_export/import_export.dart';
 import '../../../../primitives/auto_dispose.dart';
 import '../../../../shared/globals.dart';
@@ -34,14 +38,14 @@ class AllocationProfileTableViewController extends DisposableController
     autoDisposeStreamSubscription(
       serviceManager.service!.onGCEvent.listen((event) {
         if (refreshOnGc.value) {
-          refresh();
+          unawaited(refresh());
         }
       }),
     );
     addAutoDisposeListener(serviceManager.isolateManager.selectedIsolate, () {
-      refresh();
+      unawaited(refresh());
     });
-    refresh();
+    unawaited(refresh());
     _initialized = true;
   }
 
@@ -69,6 +73,10 @@ class AllocationProfileTableViewController extends DisposableController
   ///
   /// The returned string is the name of the downloaded CSV file.
   void downloadMemoryTableCsv(AdaptedAllocationProfile profile) {
+    ga.select(
+      analytics_constants.memory,
+      analytics_constants.MemoryEvent.profileDownloadCsv,
+    );
     final csvBuffer = StringBuffer();
 
     // Write the headers first.

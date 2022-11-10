@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../../../../analytics/analytics.dart' as ga;
+import '../../../../../analytics/constants.dart' as analytics_constants;
 import '../../../../../config_specific/import_export/import_export.dart';
 import '../../../../../primitives/auto_dispose.dart';
 import '../../../../../primitives/utils.dart';
@@ -42,9 +45,19 @@ class DiffPaneController extends DisposableController {
   // is taken, and is used to assign a unique id to each [SnapshotListItem].
   int _snapshotId = 0;
 
+  VoidCallback? takeSnapshotHandler(String gaEvent) {
+    if (_isTakingSnapshot.value) return null;
+    return () {
+      ga.select(
+        analytics_constants.memory,
+        gaEvent,
+      );
+      unawaited(takeSnapshot());
+    };
+  }
+
   Future<void> takeSnapshot() async {
     _isTakingSnapshot.value = true;
-    final future = snapshotTaker.take();
     final snapshots = core._snapshots;
 
     final item = SnapshotInstanceItem(
@@ -54,7 +67,9 @@ class DiffPaneController extends DisposableController {
     );
 
     snapshots.add(item);
-    item.initializeHeapData(await future);
+
+    final heapData = await snapshotTaker.take();
+    item.initializeHeapData(heapData);
 
     final newElementIndex = snapshots.value.length - 1;
     core._selectedSnapshotIndex.value = newElementIndex;
@@ -304,13 +319,14 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
 
   /// Updates fields in this instance based on the values in [core].
   void _updateValues() {
-    // Make sure the method does not trigger itself recursively.
-    assert(!_updatingValues);
-    _updatingValues = true;
+    _startUpdatingValues();
 
     // Set class to show.
     final classes = _snapshotClassesAfterDiffing();
     heapClasses.value = classes;
+
+    _setSelections();
+
     _updateClasses(
       classes: classes,
       className: _core.className,
@@ -334,7 +350,66 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     // Set current snapshot.
     _selectedItem.value = _core.selectedItem;
 
+    _endUpdateValues();
+  }
+
+  void _startUpdatingValues() {
+    // Make sure the method does not trigger itself recursively.
+    assert(!_updatingValues);
+
+    ga.timeStart(
+      analytics_constants.memory,
+      analytics_constants.MemoryTime.updateValues,
+    );
+
+    _updatingValues = true;
+  }
+
+  void _endUpdateValues() {
     _updatingValues = false;
+
+    ga.timeEnd(
+      analytics_constants.memory,
+      analytics_constants.MemoryTime.updateValues,
+    );
+
     _assertIntegrity();
+  }
+
+  /// Set initial selection of class and path, for discoverability of detailed view.
+  void _setSelections() {
+    if (_core.className != null) return;
+    final classes = heapClasses.value?.classStatsList;
+    if (classes == null) return;
+
+    SingleClassStats singleWithMaxRetainedSize(
+      SingleClassStats a,
+      SingleClassStats b,
+    ) =>
+        a.objects.retainedSize > b.objects.retainedSize ? a : b;
+
+    DiffClassStats diffWithMaxRetainedSize(
+      DiffClassStats a,
+      DiffClassStats b,
+    ) =>
+        a.total.delta.retainedSize > b.total.delta.retainedSize ? a : b;
+
+    // Get class with max retained size.
+    final ClassStats theClass;
+    if (classes is List<SingleClassStats>) {
+      theClass = classes.reduce(singleWithMaxRetainedSize);
+    } else if (classes is List<DiffClassStats>) {
+      theClass = classes.reduce(diffWithMaxRetainedSize);
+    } else {
+      throw StateError('Unexpected type ${classes.runtimeType}');
+    }
+    _core.className = theClass.heapClass;
+
+    // Get path with max retained size.
+    final path = theClass.statsByPathEntries.reduce((v, e) {
+      if (v.value.retainedSize > e.value.retainedSize) return v;
+      return e;
+    });
+    _core.path = path.key;
   }
 }

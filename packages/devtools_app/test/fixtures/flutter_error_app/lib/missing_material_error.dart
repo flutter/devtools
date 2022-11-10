@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 class MissingMaterialError extends StatelessWidget {
@@ -42,11 +44,13 @@ class _ExampleWidgetState extends State<ExampleWidget> {
         ),
         ElevatedButton(
           onPressed: () {
-            showDialog(
-              context: context,
-              builder: (context) => AlertDialog(
-                title: const Text('What you typed'),
-                content: Text(_controller.text),
+            unawaited(
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('What you typed'),
+                  content: Text(_controller.text),
+                ),
               ),
             );
           },

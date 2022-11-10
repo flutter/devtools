@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:codicon/codicon.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:vm_service/vm_service.dart';
@@ -16,7 +18,7 @@ import 'debugger_controller.dart';
 class DebuggingControls extends StatefulWidget {
   const DebuggingControls({Key? key}) : super(key: key);
 
-  static const minWidthBeforeScaling = 1300.0;
+  static const minWidthBeforeScaling = 1600.0;
 
   @override
   _DebuggingControlsState createState() => _DebuggingControlsState();
@@ -51,6 +53,8 @@ class _DebuggingControlsState extends State<DebuggingControls>
           _stepButtons(canStep: canStep),
           const SizedBox(width: denseSpacing),
           BreakOnExceptionsControl(controller: controller),
+          const SizedBox(width: denseSpacing),
+          CodeCoverageToggle(controller: controller),
           const Expanded(child: SizedBox(width: denseSpacing)),
           _librariesButton(),
         ],
@@ -136,6 +140,58 @@ class _DebuggingControlsState extends State<DebuggingControls>
   }
 }
 
+class CodeCoverageToggle extends StatelessWidget {
+  const CodeCoverageToggle({
+    super.key,
+    required this.controller,
+  });
+
+  final DebuggerController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return RoundedOutlinedBorder(
+      child: ValueListenableBuilder<bool>(
+        valueListenable: controller.codeViewController.showCodeCoverage,
+        builder: (context, selected, _) {
+          final isInSmallMode = MediaQuery.of(context).size.width <
+              DebuggingControls.minWidthBeforeScaling;
+          return Row(
+            children: [
+              ToggleButton(
+                label: isInSmallMode ? null : 'Show Coverage',
+                message: 'Show code coverage',
+                icon: Codicons.checklist,
+                isSelected: selected,
+                outlined: false,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(4),
+                    bottomLeft: Radius.circular(4),
+                  ),
+                ),
+                onPressed: controller.codeViewController.toggleShowCodeCoverage,
+              ),
+              LeftBorder(
+                child: IconLabelButton(
+                  label: '',
+                  tooltip: 'Refresh code coverage statistics',
+                  outlined: false,
+                  onPressed: selected
+                      ? controller.codeViewController.refreshCodeCoverage
+                      : null,
+                  minScreenWidthForTextBeforeScaling: 20000,
+                  icon: Icons.refresh,
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
 class BreakOnExceptionsControl extends StatelessWidget {
   const BreakOnExceptionsControl({
     Key? key,
@@ -157,7 +213,7 @@ class BreakOnExceptionsControl extends StatelessWidget {
           onChanged: controller.isSystemIsolate
               ? null
               : (ExceptionMode? mode) {
-                  controller.setIsolatePauseMode(mode!.id);
+                  unawaited(controller.setIsolatePauseMode(mode!.id));
                 },
           isDense: true,
           items: [

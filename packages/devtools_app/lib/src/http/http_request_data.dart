@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -44,7 +45,7 @@ class DartIOHttpRequestData extends NetworkRequest {
   })  : wrapperId = _dartIoHttpRequestWrapperId++,
         super(timelineMicrosBase) {
     if (requestFullDataFromVmService && _request.isResponseComplete) {
-      getFullRequestData();
+      unawaited(getFullRequestData());
     }
   }
 

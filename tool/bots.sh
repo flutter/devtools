@@ -92,9 +92,6 @@ if [ "$BOT" = "main" ]; then
     # Analyze the code
     repo_tool analyze
 
-    # Ensure we can build the app.
-    flutter build web --release
-
     # Test the devtools_shared package tests on the main bot.
     popd
     pushd packages/devtools_shared
@@ -107,7 +104,7 @@ if [ "$BOT" = "main" ]; then
     pushd packages/devtools_app
     echo `pwd`
 
-elif [ "$BOT" = "test_ddc" ]; then
+elif [ "$BOT" = "build_ddc" ]; then
 
     # Provision our packages.
     flutter pub get
@@ -115,35 +112,32 @@ elif [ "$BOT" = "test_ddc" ]; then
     # TODO(https://github.com/flutter/flutter/issues/43538): Remove workaround.
     flutter build web --pwa-strategy=none --no-tree-shake-icons
 
-    # TODO(https://github.com/flutter/devtools/issues/1987): once this issue is fixed,
-    # we may need to explicitly exclude running integration_tests here (this is what we
-    # used to do when integration tests were enabled).
-    if [ "$PLATFORM" = "vm" ]; then
-        flutter test test/
-    elif [ "$PLATFORM" = "chrome" ]; then
-        flutter test --platform chrome test/
-    else
-        echo "unknown test platform"
-        exit 1
-    fi
-elif [ "$BOT" = "test_dart2js" ]; then
+elif [ "$BOT" = "build_dart2js" ]; then
+
+    # Provision our packages.
     flutter pub get
 
-    # TODO(https://github.com/flutter/flutter/issues/43538): Remove workaround.
-    flutter build web --pwa-strategy=none --no-tree-shake-icons
+    flutter build web --release
+
+elif [[ "$BOT" == "test_ddc" || "$BOT" == "test_dart2js" ]]; then
+    if [ "$BOT" == "test_dart2js" ]; then
+        USE_WEBDEV_RELEASE=true
+    else
+        USE_WEBDEV_RELEASE=false
+    fi
+    echo "USE_WEBDEV_RELEASE = $USE_WEBDEV_RELEASE"
 
     # TODO(https://github.com/flutter/devtools/issues/1987): once this issue is fixed,
     # we may need to explicitly exclude running integration_tests here (this is what we
     # used to do when integration tests were enabled).
     if [ "$PLATFORM" = "vm" ]; then
-        WEBDEV_RELEASE=true flutter test test/
+        WEBDEV_RELEASE=$USE_WEBDEV_RELEASE flutter test test/
     elif [ "$PLATFORM" = "chrome" ]; then
-        WEBDEV_RELEASE=true flutter test --platform chrome test/
+        WEBDEV_RELEASE=$USE_WEBDEV_RELEASE flutter test --platform chrome test/
     else
         echo "unknown test platform"
         exit 1
     fi
-    echo $WEBDEV_RELEASE
 
 elif [ "$BOT" = "integration_ddc" ]; then
 

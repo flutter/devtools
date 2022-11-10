@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
@@ -296,9 +297,11 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       SettingsOutlinedButton(
         tooltip: 'Flutter Inspector Settings',
         onPressed: () {
-          showDialog(
-            context: context,
-            builder: (context) => FlutterInspectorSettingsDialog(),
+          unawaited(
+            showDialog(
+              context: context,
+              builder: (context) => FlutterInspectorSettingsDialog(),
+            ),
           );
         },
       ),
@@ -309,25 +312,27 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
 
   void _refreshInspector() {
     ga.select(analytics_constants.inspector, analytics_constants.refresh);
-    blockWhileInProgress(() async {
-      // If the user is force refreshing the inspector before the first load has
-      // completed, this could indicate a slow load time or that the inspector
-      // failed to load the tree once available.
-      if (!controller.firstInspectorTreeLoadCompleted) {
-        // We do not want to complete this timing operation because the force
-        // refresh will skew the results.
-        ga.cancelTimingOperation(
-          InspectorScreen.id,
-          analytics_constants.pageReady,
-        );
-        ga.select(
-          analytics_constants.inspector,
-          analytics_constants.refreshEmptyTree,
-        );
-        controller.firstInspectorTreeLoadCompleted = true;
-      }
-      await controller.onForceRefresh();
-    });
+    unawaited(
+      blockWhileInProgress(() async {
+        // If the user is force refreshing the inspector before the first load has
+        // completed, this could indicate a slow load time or that the inspector
+        // failed to load the tree once available.
+        if (!controller.firstInspectorTreeLoadCompleted) {
+          // We do not want to complete this timing operation because the force
+          // refresh will skew the results.
+          ga.cancelTimingOperation(
+            InspectorScreen.id,
+            analytics_constants.pageReady,
+          );
+          ga.select(
+            analytics_constants.inspector,
+            analytics_constants.refreshEmptyTree,
+          );
+          controller.firstInspectorTreeLoadCompleted = true;
+        }
+        await controller.onForceRefresh();
+      }),
+    );
   }
 }
 
@@ -547,11 +552,11 @@ class PubRootDirectorySection extends StatelessWidget {
             isRefreshing:
                 preferences.inspector.isRefreshingCustomPubRootDirectories,
             onEntryAdded: (p0) =>
-                preferences.inspector.addPubRootDirectories([p0]),
+                unawaited(preferences.inspector.addPubRootDirectories([p0])),
             onEntryRemoved: (p0) =>
-                preferences.inspector.removePubRootDirectories([p0]),
+                unawaited(preferences.inspector.removePubRootDirectories([p0])),
             onRefreshTriggered: () =>
-                preferences.inspector.loadCustomPubRootDirectories(),
+                unawaited(preferences.inspector.loadCustomPubRootDirectories()),
           ),
         );
       },

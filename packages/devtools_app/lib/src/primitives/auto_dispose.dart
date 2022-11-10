@@ -60,7 +60,7 @@ class Disposer {
   /// It is fine to call this method and then add additional subscriptions.
   void cancelStreamSubscriptions() {
     for (StreamSubscription subscription in _subscriptions) {
-      subscription.cancel();
+      unawaited(subscription.cancel());
     }
     _subscriptions.clear();
   }

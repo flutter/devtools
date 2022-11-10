@@ -134,6 +134,7 @@ void main() {
       final List<CpuStackFrame> bottomUpRoots = transformer.bottomUpRootsFor(
         topDownRoot: testStackFrame,
         mergeSamples: mergeCpuProfileRoots,
+        rootedAtTags: false,
       );
 
       // Verify the original stack frame was not modified.
@@ -149,6 +150,36 @@ void main() {
         buf.writeln(stackFrame.profileAsString());
       }
       expect(buf.toString(), equals(bottomUpGolden));
+    });
+
+    test('bottomUpRootsFor rootedAtTags', () {
+      expect(
+        testTagRootedStackFrame.profileAsString(),
+        equals(testTagRootedStackFrameStringGolden),
+      );
+
+      // Note: this needs to be rooted at a root frame before transforming as
+      // a tree rooted at a root frame is what is provided in cpu_profile_model.dart.
+      final List<CpuStackFrame> bottomUpRoots = transformer.bottomUpRootsFor(
+        topDownRoot: CpuStackFrame.root(zeroProfileMetaData)
+          ..addChild(testTagRootedStackFrame),
+        mergeSamples: mergeCpuProfileRoots,
+        rootedAtTags: true,
+      );
+
+      // Verify the original stack frame was not modified.
+      expect(
+        testTagRootedStackFrame.profileAsString(),
+        equals(testTagRootedStackFrameStringGolden),
+      );
+
+      expect(bottomUpRoots.length, equals(1));
+
+      final buf = StringBuffer();
+      for (CpuStackFrame stackFrame in bottomUpRoots) {
+        buf.writeln(stackFrame.profileAsString());
+      }
+      expect(buf.toString(), equals(tagRootedBottomUpGolden));
     });
   });
 }

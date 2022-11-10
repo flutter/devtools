@@ -13,9 +13,8 @@ Make sure:
    ```
 3. The local checkout is at `main` branch:
    - `git rebase-update`.
-4. Your Flutter version is equal to the one in flutter_version.txt. If not, fix it using one of:
-    - Run `./tool/update_flutter_sdk.sh` from the main devtools directory
-    - Switch Flutter version by running 'git checkout <version in flutter_version.txt>' in Flutter directory.
+4. Your Flutter version is equal to latest candidate release branch:
+    - Run `./tool/update_flutter_sdk.sh --local` from the main devtools directory.
 5. You have goma [configured](http://go/ma-mac-setup). 
 
 ### Prepare the release

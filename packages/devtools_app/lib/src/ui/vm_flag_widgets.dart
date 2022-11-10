@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
@@ -46,7 +48,7 @@ class ProfileGranularityDropdown extends StatelessWidget {
                 .value;
         // Set the vm flag value to the [safeValue] if we get to this state.
         if (safeValue != flag.valueAsString) {
-          _onProfileGranularityChanged(safeValue);
+          unawaited(_onProfileGranularityChanged(safeValue));
         }
 
         final bannerMessageController =

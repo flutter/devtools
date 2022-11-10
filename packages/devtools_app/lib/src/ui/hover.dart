@@ -501,9 +501,11 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
     Future<HoverCardData?> hoverCardDataFuture,
   ) {
     final completer = Completer<HoverCardData?>();
-    hoverCardDataFuture.then(
-      (data) => completer.complete(data),
-      onError: (_) => completer.complete(null),
+    unawaited(
+      hoverCardDataFuture.then(
+        (data) => completer.complete(data),
+        onError: (_) => completer.complete(null),
+      ),
     );
     return completer;
   }

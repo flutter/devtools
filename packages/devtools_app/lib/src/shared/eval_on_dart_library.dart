@@ -52,7 +52,7 @@ class EvalOnDartLibrary extends DisposableController
     }
 
     if (isolateRef != null) {
-      _initialize(isolateRef, _currentRequestId);
+      unawaited(_initialize(isolateRef, _currentRequestId));
     }
   }
 

@@ -102,23 +102,70 @@ class ProfileMetaData {
 
 /// Process for converting a [ProfilableDataMixin] into a bottom-up
 /// representation of the profile.
+///
+/// [rootedAtTags] specifies whether or not the top-down tree is rooted
+/// at synthetic nodes representing user / VM tags.
 class BottomUpTransformer<T extends ProfilableDataMixin<T>> {
   List<T> bottomUpRootsFor({
     required T topDownRoot,
     required void Function(List<T>) mergeSamples,
+    // TODO(bkonyi): can this take a list instead of a single root?
+    required bool rootedAtTags,
   }) {
-    final bottomUpRoots = generateBottomUpRoots(
-      node: topDownRoot,
-      currentBottomUpRoot: null,
-      bottomUpRoots: <T>[],
-    );
+    List<T> bottomUpRoots;
+    // If the top-down tree has synthetic tag nodes as its roots, we need to
+    // skip the synthetic nodes when inverting the tree and re-insert them at
+    // the root.
+    if (rootedAtTags) {
+      bottomUpRoots = <T>[];
+      for (final tagRoot in topDownRoot.children) {
+        final root = tagRoot.shallowCopy() as T;
 
-    // Set the bottom up sample counts for each sample.
-    bottomUpRoots.forEach(cascadeSampleCounts);
+        // Generate bottom up roots for each child of the synthetic tag node
+        // and insert them into the new synthetic tag node, [root].
+        for (final child in tagRoot.children) {
+          root.addAllChildren(
+            generateBottomUpRoots(
+              node: child,
+              currentBottomUpRoot: null,
+              bottomUpRoots: <T>[],
+            ),
+          );
+        }
 
-    // Merge samples when possible starting at the root (the leaf node of the
-    // original sample).
-    mergeSamples(bottomUpRoots);
+        // Cascade sample counts only for the non-tag nodes as the tag nodes
+        // are synthetic and we'll calculate the counts for the tag nodes
+        // later.
+        root.children.forEach(cascadeSampleCounts);
+        mergeSamples(root.children);
+        bottomUpRoots.add(root);
+      }
+    } else {
+      bottomUpRoots = generateBottomUpRoots(
+        node: topDownRoot,
+        currentBottomUpRoot: null,
+        bottomUpRoots: <T>[],
+      );
+
+      // Set the bottom up sample counts for each sample.
+      bottomUpRoots.forEach(cascadeSampleCounts);
+
+      // Merge samples when possible starting at the root (the leaf node of the
+      // original sample).
+      mergeSamples(bottomUpRoots);
+    }
+
+    if (rootedAtTags) {
+      // Calculate the total time for each tag root. The sum of the inclusive
+      // times for each child for the tag node is the total time spent with the
+      // given tag active.
+      for (final tagRoot in bottomUpRoots) {
+        tagRoot._inclusiveSampleCount = tagRoot.children.fold<int>(
+          0,
+          (prev, e) => prev + e._inclusiveSampleCount!,
+        );
+      }
+    }
 
     return bottomUpRoots;
   }

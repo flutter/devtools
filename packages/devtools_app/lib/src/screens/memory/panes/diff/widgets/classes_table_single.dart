@@ -4,6 +4,8 @@
 
 import 'package:flutter/material.dart';
 
+import '../../../../../analytics/analytics.dart' as ga;
+import '../../../../../analytics/constants.dart' as analytics_constants;
 import '../../../../../primitives/utils.dart';
 import '../../../../../shared/table/table.dart';
 import '../../../../../shared/table/table_data.dart';
@@ -40,7 +42,11 @@ class _ClassNameColumn extends ColumnData<SingleClassStats>
     bool isRowSelected = false,
     VoidCallback? onPressed,
   }) =>
-      HeapClassView(theClass: data.heapClass, showCopyButton: isRowSelected);
+      HeapClassView(
+        theClass: data.heapClass,
+        showCopyButton: isRowSelected,
+        copyGaItem: analytics_constants.MemoryEvent.diffClassSingleCopy,
+      );
 }
 
 class _InstanceColumn extends ColumnData<SingleClassStats> {
@@ -115,30 +121,32 @@ class ClassesTableSingle extends StatelessWidget {
   final List<SingleClassStats> classes;
   final ValueNotifier<SingleClassStats?> selection;
 
-  static final ColumnData<SingleClassStats> _shallowSizeColumn =
-      _ShallowSizeColumn();
+  static final ColumnData<SingleClassStats> _retainedSizeColumn =
+      _RetainedSizeColumn();
   static late final List<ColumnData<SingleClassStats>> _columns =
       <ColumnData<SingleClassStats>>[
     _ClassNameColumn(),
     _InstanceColumn(),
-    _shallowSizeColumn,
-    _RetainedSizeColumn(),
+    _ShallowSizeColumn(),
+    _retainedSizeColumn,
   ];
 
   @override
   Widget build(BuildContext context) {
     // We want to preserve the sorting and sort directions for ClassesTableDiff
     // no matter what the data passed to it is.
-    // However, there may be collisions with scroll position as the datasets are of different length.
-    // TODO (polina-c): test if removing of identityHashCode will work.
-    final dataKey = 'ClassesTableSingle-${identityHashCode(classes)}';
+    const dataKey = 'ClassesTableSingle';
     return FlatTable<SingleClassStats>(
       columns: _columns,
       data: classes,
       dataKey: dataKey,
-      keyFactory: (e) => Key(dataKey),
+      keyFactory: (e) => Key(e.heapClass.fullName),
       selectionNotifier: selection,
-      defaultSortColumn: _shallowSizeColumn,
+      onItemSelected: (_) => ga.select(
+        analytics_constants.memory,
+        analytics_constants.MemoryEvent.diffClassSingleSelect,
+      ),
+      defaultSortColumn: _retainedSizeColumn,
       defaultSortDirection: SortDirection.descending,
     );
   }

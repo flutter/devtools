@@ -4,6 +4,9 @@
 
 import 'package:vm_service/vm_service.dart';
 
+import '../../../../analytics/analytics.dart' as ga;
+import '../../../../analytics/constants.dart' as analytics_constants;
+import '../../../../analytics/metrics.dart';
 import '../../primitives/class_name.dart';
 import '../../primitives/memory_utils.dart';
 
@@ -43,12 +46,15 @@ class AdaptedHeapData {
     );
   }
 
-  factory AdaptedHeapData.fromHeapSnapshot(HeapSnapshotGraph graph) =>
-      AdaptedHeapData(
-        graph.objects
-            .map((e) => AdaptedHeapObject.fromHeapSnapshotObject(e))
-            .toList(),
-      );
+  static AdaptedHeapData fromHeapSnapshot(
+    HeapSnapshotGraph graph,
+  ) {
+    final objects = graph.objects.map((e) {
+      return AdaptedHeapObject.fromHeapSnapshotObject(e);
+    }).toList();
+
+    return AdaptedHeapData(objects);
+  }
 
   /// Default value for rootIndex is taken from the doc:
   /// https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/heap_snapshot.md#object-ids
@@ -268,8 +274,21 @@ class SnapshotTaker {
   Future<AdaptedHeapData?> take() async {
     final snapshot = await snapshotMemory();
     if (snapshot == null) return null;
-    return AdaptedHeapData.fromHeapSnapshot(snapshot);
+    return _adaptSnapshotGaWrapper(snapshot);
   }
+}
+
+AdaptedHeapData _adaptSnapshotGaWrapper(HeapSnapshotGraph graph) {
+  late final AdaptedHeapData result;
+  ga.timeSync(
+    analytics_constants.memory,
+    analytics_constants.MemoryTime.adaptSnapshot,
+    syncOperation: () => result = AdaptedHeapData.fromHeapSnapshot(graph),
+    screenMetricsProvider: () => MemoryScreenMetrics(
+      heapObjectsTotal: graph.objects.length,
+    ),
+  );
+  return result;
 }
 
 /// Mark the object as deeply immutable.

@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
+import '../../../../../analytics/analytics.dart' as ga;
+import '../../../../../analytics/constants.dart' as analytics_constants;
 import '../../../../../primitives/utils.dart';
 import '../../../../../shared/table/table.dart';
 import '../../../../../shared/table/table_data.dart';
@@ -51,7 +53,11 @@ class _ClassNameColumn extends ColumnData<DiffClassStats>
     bool isRowSelected = false,
     VoidCallback? onPressed,
   }) =>
-      HeapClassView(theClass: data.heapClass, showCopyButton: isRowSelected);
+      HeapClassView(
+        theClass: data.heapClass,
+        showCopyButton: isRowSelected,
+        copyGaItem: analytics_constants.MemoryEvent.diffClassDiffCopy,
+      );
 }
 
 class _InstanceColumn extends ColumnData<DiffClassStats> {
@@ -201,17 +207,19 @@ class ClassesTableDiff extends StatelessWidget {
   Widget build(BuildContext context) {
     // We want to preserve the sorting and sort directions for ClassesTableDiff
     // no matter what the data passed to it is.
-    // However, there may be collisions with scroll position as the datasets are of different length.
-    // TODO (polina-c): test if removing of identityHashCode will work.
-    final dataKey = 'ClassesTableDiff-${identityHashCode(classes)}';
+    const dataKey = 'ClassesTableDiff';
 
     return FlatTable<DiffClassStats>(
       columns: _columns,
       columnGroups: _columnGroups,
       data: classes,
       dataKey: dataKey,
-      keyFactory: (e) => Key(dataKey),
+      keyFactory: (e) => Key(e.heapClass.fullName),
       selectionNotifier: selection,
+      onItemSelected: (_) => ga.select(
+        analytics_constants.memory,
+        analytics_constants.MemoryEvent.diffClassDiffSelect,
+      ),
       defaultSortColumn: _retainedSizeDeltaColumn,
       defaultSortDirection: SortDirection.descending,
     );

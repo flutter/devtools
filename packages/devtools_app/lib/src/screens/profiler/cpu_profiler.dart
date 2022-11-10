@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
@@ -268,10 +269,12 @@ class _CpuProfilerState extends State<CpuProfiler>
   }
 
   void _showFilterDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => CpuProfileFilterDialog(
-        controller: widget.controller,
+    unawaited(
+      showDialog(
+        context: context,
+        builder: (context) => CpuProfileFilterDialog(
+          controller: widget.controller,
+        ),
       ),
     );
   }
@@ -418,31 +421,47 @@ class UserTagDropdown extends StatelessWidget {
           height: defaultButtonHeight,
           child: DevToolsTooltip(
             message: tooltip,
-            child: RoundedDropDownButton<String>(
-              isDense: true,
-              style: Theme.of(context).textTheme.bodyMedium,
-              value: userTag,
-              items: [
-                _buildMenuItem(
-                  display: '$filterByTag ${CpuProfilerController.userTagNone}',
-                  value: CpuProfilerController.userTagNone,
-                ),
-                // We don't want to show the 'Default' tag if it is the only
-                // tag available. The 'none' tag above is equivalent in this
-                // case.
-                if (!(userTags.length == 1 &&
-                    userTags.first == UserTag.defaultTag.label))
-                  for (final tag in userTags)
+            child: ValueListenableBuilder<bool>(
+              valueListenable: preferences.vmDeveloperModeEnabled,
+              builder: (context, vmDeveloperModeEnabled, _) {
+                return RoundedDropDownButton<String>(
+                  isDense: true,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                  value: userTag,
+                  items: [
                     _buildMenuItem(
-                      display: '$filterByTag $tag',
-                      value: tag,
+                      display:
+                          '$filterByTag ${CpuProfilerController.userTagNone}',
+                      value: CpuProfilerController.userTagNone,
                     ),
-              ],
-              onChanged: userTags.isEmpty ||
-                      (userTags.length == 1 &&
-                          userTags.first == UserTag.defaultTag.label)
-                  ? null
-                  : (String? tag) => _onUserTagChanged(tag!, context),
+                    // We don't want to show the 'Default' tag if it is the only
+                    // tag available. The 'none' tag above is equivalent in this
+                    // case.
+                    if (!(userTags.length == 1 &&
+                        userTags.first == UserTag.defaultTag.label)) ...[
+                      for (final tag in userTags)
+                        _buildMenuItem(
+                          display: '$filterByTag $tag',
+                          value: tag,
+                        ),
+                      _buildMenuItem(
+                        display: 'Group by: User Tag',
+                        value: CpuProfilerController.groupByUserTag,
+                      ),
+                    ],
+                    if (vmDeveloperModeEnabled)
+                      _buildMenuItem(
+                        display: 'Group by: VM Tag',
+                        value: CpuProfilerController.groupByVmTag,
+                      )
+                  ],
+                  onChanged: userTags.isEmpty ||
+                          (userTags.length == 1 &&
+                              userTags.first == UserTag.defaultTag.label)
+                      ? null
+                      : (String? tag) => _onUserTagChanged(tag!, context),
+                );
+              },
             ),
           ),
         );
