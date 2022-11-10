@@ -20,7 +20,6 @@ env:
 jobs:
   flutter-prep:
     name: ${{ matrix.os }} Flutter Prep
-    #TODO can this be matrixed on OS.
     outputs:
       latest_flutter_candidate: ${{ steps.flutter-candidate.outputs.FLUTTER_CANDIDATE }}
     strategy:
