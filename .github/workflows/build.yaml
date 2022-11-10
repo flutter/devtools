@@ -53,7 +53,7 @@ jobs:
         run: |
             cd flutter-sdk
             HEAD_SHA=$(git rev-parse HEAD)
-            LATEST_FLUTTER_CANDIDATE_SHA=$(git rev-parse "upstream/$LATEST_FLUTTER_CANDIDATE")
+            LATEST_FLUTTER_CANDIDATE_SHA=$(git rev-parse "origin/$LATEST_FLUTTER_CANDIDATE")
             if [ "$HEAD_SHA" != "$LATEST_FLUTTER_CANDIDATE_SHA" ]; then
               echo "::error ,title=Error checking out Latest Flutter Candidate::{expected HEAD to be at $LATEST_FLUTTER_CANDIDATE_SHA but got $HEAD_SHA}"
               exit 1
