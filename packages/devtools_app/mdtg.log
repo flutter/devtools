@@ -1,0 +1,17 @@
+test/memory/memory_screen_test.dart
+test/memory/chart/chart_test.dart
+test/memory/diff/widgets/class_filter_test.dart
+test/memory/diff/widgets/diff_pane_test.dart
+test/memory/control/settings_dialog_test.dart
+test/inspector/inspector_integration_test.dart
+test/inspector/layout_explorer/flex/flex_test.dart
+test/inspector/layout_explorer/flex/arrow_test.dart
+test/provider/provider_screen_test.dart
+test/shared/instance_viewer_test.dart
+test/shared/ui_utils_test.dart
+test/shared/treemap_test.dart
+test/debugger/debugger_codeview_test.dart
+test/matchers/matchers.dart
+test/performance/frame_analysis/frame_analysis_test.dart
+test/performance/timeline_events/timeline_flame_chart_test.dart
+test/performance/raster_stats/raster_stats_test.dart

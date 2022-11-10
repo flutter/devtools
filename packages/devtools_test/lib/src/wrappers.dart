@@ -146,6 +146,7 @@ void testWidgetsWithWindowSize(
   Size windowSize,
   WidgetTesterCallback test, {
   bool skip = false,
+  List<String> tags = const [],
 }) {
   testWidgets(
     name,
@@ -155,6 +156,7 @@ void testWidgetsWithWindowSize(
       await _resetWindowSize();
     },
     skip: skip,
+    tags: tags,
   );
 }
 

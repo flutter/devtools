@@ -40,6 +40,7 @@ void main() {
           );
         },
         skip: kIsWeb,
+        tags: ['golden'],
       );
       testWidgets(
         'up',
@@ -52,6 +53,7 @@ void main() {
           );
         },
         skip: kIsWeb,
+        tags: ['golden'],
       );
       testWidgets(
         'right',
@@ -64,6 +66,7 @@ void main() {
           );
         },
         skip: kIsWeb,
+        tags: ['golden'],
       );
       testWidgets(
         'down',
@@ -76,6 +79,7 @@ void main() {
           );
         },
         skip: kIsWeb,
+        tags: ['golden'],
       );
     });
 
@@ -108,6 +112,7 @@ void main() {
           );
         },
         skip: kIsWeb,
+        tags: ['golden'],
       );
       testWidgets(
         'vertical',
@@ -120,6 +125,7 @@ void main() {
           );
         },
         skip: kIsWeb,
+        tags: ['golden'],
       );
     });
   });

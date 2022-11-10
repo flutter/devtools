@@ -75,55 +75,61 @@ void main() {
 
   for (final test in _tests) {
     testWidgetsWithWindowSize(
-        '$ClassFilterDialog filters classes, ${test.name}', windowSize,
-        (WidgetTester tester) async {
-      await pumpScene(tester, test);
+      '$ClassFilterDialog filters classes, ${test.name}',
+      windowSize,
+      (WidgetTester tester) async {
+        await pumpScene(tester, test);
 
-      await _switchFilter(
-        ClassFilterType.showAll,
-        ClassFilterType.except,
-        tester,
-        test,
-      );
+        await _switchFilter(
+          ClassFilterType.showAll,
+          ClassFilterType.except,
+          tester,
+          test,
+        );
 
-      await _switchFilter(
-        ClassFilterType.except,
-        ClassFilterType.only,
-        tester,
-        test,
-      );
+        await _switchFilter(
+          ClassFilterType.except,
+          ClassFilterType.only,
+          tester,
+          test,
+        );
 
-      await _switchFilter(
-        ClassFilterType.only,
-        ClassFilterType.showAll,
-        tester,
-        test,
-      );
-    });
+        await _switchFilter(
+          ClassFilterType.only,
+          ClassFilterType.showAll,
+          tester,
+          test,
+        );
+      },
+      tags: ['golden'],
+    );
   }
 
   for (final test in _tests) {
     testWidgetsWithWindowSize(
-        '$ClassFilterDialog customizes and resets to default, ${test.name}',
-        windowSize, (WidgetTester tester) async {
-      await pumpScene(tester, test);
+      '$ClassFilterDialog customizes and resets to default, ${test.name}',
+      windowSize,
+      (WidgetTester tester) async {
+        await pumpScene(tester, test);
 
-      // Customize filter.
-      scene.diffController.applyFilter(_customFilter);
-      await _checkDataGolden(null, tester, test);
+        // Customize filter.
+        scene.diffController.applyFilter(_customFilter);
+        await _checkDataGolden(null, tester, test);
 
-      // Open dialog.
-      await tester.tap(find.byType(ClassFilterButton));
-      await _checkFilterGolden(null, tester);
+        // Open dialog.
+        await tester.tap(find.byType(ClassFilterButton));
+        await _checkFilterGolden(null, tester);
 
-      // Reset to default.
-      await tester.tap(find.text('Reset to default'));
-      await _checkFilterGolden(ClassFilterType.showAll, tester);
+        // Reset to default.
+        await tester.tap(find.text('Reset to default'));
+        await _checkFilterGolden(ClassFilterType.showAll, tester);
 
-      // Close dialog.
-      await tester.tap(find.text('APPLY'));
-      await _checkDataGolden(ClassFilterType.showAll, tester, test);
-    });
+        // Close dialog.
+        await tester.tap(find.text('APPLY'));
+        await _checkDataGolden(ClassFilterType.showAll, tester, test);
+      },
+      tags: ['golden'],
+    );
   }
 }
 

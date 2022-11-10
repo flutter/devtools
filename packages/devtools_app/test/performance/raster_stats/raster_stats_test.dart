@@ -54,50 +54,58 @@ void main() {
       );
     });
 
-    testWidgets('renders with data', (tester) async {
-      await pumpRenderingLayerVisualizer(tester);
+    testWidgets(
+      'renders with data',
+      (tester) async {
+        await pumpRenderingLayerVisualizer(tester);
 
-      expect(find.byType(LayerSnapshotTable), findsOneWidget);
-      expect(find.richText('Layer'), findsOneWidget);
-      expect(find.richText('Rendering time'), findsOneWidget);
-      expect(find.richText('Percent rendering time'), findsOneWidget);
-      expect(find.richText('Layer 12731'), findsOneWidget);
-      expect(find.richText('0.4 ms'), findsOneWidget);
-      expect(find.richText('78.74%'), findsOneWidget);
-      expect(find.richText('Layer 12734'), findsOneWidget);
-      expect(find.richText('0.1 ms'), findsOneWidget);
-      expect(find.richText('21.26%'), findsOneWidget);
+        expect(find.byType(LayerSnapshotTable), findsOneWidget);
+        expect(find.richText('Layer'), findsOneWidget);
+        expect(find.richText('Rendering time'), findsOneWidget);
+        expect(find.richText('Percent rendering time'), findsOneWidget);
+        expect(find.richText('Layer 12731'), findsOneWidget);
+        expect(find.richText('0.4 ms'), findsOneWidget);
+        expect(find.richText('78.74%'), findsOneWidget);
+        expect(find.richText('Layer 12734'), findsOneWidget);
+        expect(find.richText('0.1 ms'), findsOneWidget);
+        expect(find.richText('21.26%'), findsOneWidget);
 
-      expect(find.byType(LayerImage), findsOneWidget);
+        expect(find.byType(LayerImage), findsOneWidget);
 
-      await expectLater(
-        find.byType(RenderingLayerVisualizer),
-        matchesDevToolsGolden('goldens/raster_stats_with_data.png'),
-      );
-    });
+        await expectLater(
+          find.byType(RenderingLayerVisualizer),
+          matchesDevToolsGolden('goldens/raster_stats_with_data.png'),
+        );
+      },
+      tags: ['golden'],
+    );
 
-    testWidgets('can change layer selection', (tester) async {
-      await pumpRenderingLayerVisualizer(tester);
+    testWidgets(
+      'can change layer selection',
+      (tester) async {
+        await pumpRenderingLayerVisualizer(tester);
 
-      final layers = controller.rasterStats.value.layerSnapshots;
-      final firstLayer = layers.first;
-      final secondLayer = layers.last;
-      expect(firstLayer.displayName, equals('Layer 12731'));
-      expect(secondLayer.displayName, equals('Layer 12734'));
+        final layers = controller.rasterStats.value.layerSnapshots;
+        final firstLayer = layers.first;
+        final secondLayer = layers.last;
+        expect(firstLayer.displayName, equals('Layer 12731'));
+        expect(secondLayer.displayName, equals('Layer 12734'));
 
-      expect(
-        controller.rasterStats.value.selectedSnapshot,
-        equals(firstLayer),
-      );
+        expect(
+          controller.rasterStats.value.selectedSnapshot,
+          equals(firstLayer),
+        );
 
-      await tester.tap(find.richText('Layer 12734'));
-      await tester.pumpAndSettle();
+        await tester.tap(find.richText('Layer 12734'));
+        await tester.pumpAndSettle();
 
-      expect(controller.selectedSnapshot.value, equals(secondLayer));
-      await expectLater(
-        find.byType(RenderingLayerVisualizer),
-        matchesDevToolsGolden('goldens/raster_stats_changed_selection.png'),
-      );
-    });
+        expect(controller.selectedSnapshot.value, equals(secondLayer));
+        await expectLater(
+          find.byType(RenderingLayerVisualizer),
+          matchesDevToolsGolden('goldens/raster_stats_changed_selection.png'),
+        );
+      },
+      tags: ['golden'],
+    );
   });
 }

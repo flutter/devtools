@@ -1,4 +1,4 @@
-targets:
+targets::
   $default:
     builders:
       build_web_compilers|entrypoint:

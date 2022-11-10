@@ -329,6 +329,7 @@ void main() {
             equals('16:45:30'),
           );
         },
+        tags: ['golden'],
       );
 
       void checkScaledXAxis2Labels(ChartController controller) {
@@ -343,85 +344,93 @@ void main() {
         );
       }
 
-      testWidgetsWithWindowSize('Scaled Y-axis all', windowSize,
-          (WidgetTester tester) async {
-        const chartKey = Key('Chart');
-        final controller = ChartController();
+      testWidgetsWithWindowSize(
+        'Scaled Y-axis all',
+        windowSize,
+        (WidgetTester tester) async {
+          const chartKey = Key('Chart');
+          final controller = ChartController();
 
-        await setupScaledChart(tester, controller, chartKey);
+          await setupScaledChart(tester, controller, chartKey);
 
-        // Check A=all data view zoom.
-        controller.zoomDuration = null;
-        await tester.pumpAndSettle(const Duration(seconds: 2));
+          // Check A=all data view zoom.
+          controller.zoomDuration = null;
+          await tester.pumpAndSettle(const Duration(seconds: 2));
 
-        await expectLater(
-          find.byKey(chartKey),
-          matchesDevToolsGolden('../../goldens/memory_chart_scaled_all.png'),
-        );
-        // Await delay for golden comparison.
-        await tester.pumpAndSettle(const Duration(seconds: 2));
+          await expectLater(
+            find.byKey(chartKey),
+            matchesDevToolsGolden('../../goldens/memory_chart_scaled_all.png'),
+          );
+          // Await delay for golden comparison.
+          await tester.pumpAndSettle(const Duration(seconds: 2));
 
-        // Validate the X axis after data added to all traces.
-        expect(controller.visibleXAxisTicks, equals(104));
-        expect(controller.xCanvasChart, equals(50.0));
-        expect(controller.xPaddingRight, equals(0.0));
-        expect(controller.displayXLabels, true);
-        expect(controller.canvasChartWidth, equals(2150.0));
+          // Validate the X axis after data added to all traces.
+          expect(controller.visibleXAxisTicks, equals(104));
+          expect(controller.xCanvasChart, equals(50.0));
+          expect(controller.xPaddingRight, equals(0.0));
+          expect(controller.displayXLabels, true);
+          expect(controller.canvasChartWidth, equals(2150.0));
 
-        // Validate the Y axis after data added to all traces.
-        expect(controller.yScale.computedMin, equals(0.0));
-        expect(controller.yScale.computedMax, equals(719576719.5767195));
-        expect(controller.yScale.labelTicks, equals(10.0));
-        expect(controller.yScale.labelUnitExponent, 8.0);
-        expect(controller.yScale.tickSpacing, equals(5291005.291005291));
-        expect(controller.yScale.maxPoint, equals(717799424.0));
-        expect(controller.yScale.maxTicks, equals(190.0));
+          // Validate the Y axis after data added to all traces.
+          expect(controller.yScale.computedMin, equals(0.0));
+          expect(controller.yScale.computedMax, equals(719576719.5767195));
+          expect(controller.yScale.labelTicks, equals(10.0));
+          expect(controller.yScale.labelUnitExponent, 8.0);
+          expect(controller.yScale.tickSpacing, equals(5291005.291005291));
+          expect(controller.yScale.maxPoint, equals(717799424.0));
+          expect(controller.yScale.maxTicks, equals(190.0));
 
-        validateScaledYLabels(controller);
+          validateScaledYLabels(controller);
 
-        checkScaledXAxis2Labels(controller);
-      });
+          checkScaledXAxis2Labels(controller);
+        },
+        tags: ['golden'],
+      );
 
-      testWidgetsWithWindowSize('Scaled Y-axis Five Minutes', windowSize,
-          (WidgetTester tester) async {
-        const chartKey = Key('Chart');
-        final controller = ChartController();
+      testWidgetsWithWindowSize(
+        'Scaled Y-axis Five Minutes',
+        windowSize,
+        (WidgetTester tester) async {
+          const chartKey = Key('Chart');
+          final controller = ChartController();
 
-        await setupScaledChart(tester, controller, chartKey);
+          await setupScaledChart(tester, controller, chartKey);
 
-        // Check 5 minute data view zoom.
-        controller.zoomDuration = const Duration(minutes: 5);
-        await tester.pumpAndSettle(const Duration(seconds: 2));
+          // Check 5 minute data view zoom.
+          controller.zoomDuration = const Duration(minutes: 5);
+          await tester.pumpAndSettle(const Duration(seconds: 2));
 
-        await expectLater(
-          find.byKey(chartKey),
-          matchesDevToolsGolden(
-            '../../goldens/memory_chart_scaled_five_minute.png',
-          ),
-        );
-        // Await delay for golden comparison.
-        await tester.pumpAndSettle(const Duration(seconds: 2));
+          await expectLater(
+            find.byKey(chartKey),
+            matchesDevToolsGolden(
+              '../../goldens/memory_chart_scaled_five_minute.png',
+            ),
+          );
+          // Await delay for golden comparison.
+          await tester.pumpAndSettle(const Duration(seconds: 2));
 
-        // Validate the X axis after data added to all traces.
-        expect(controller.visibleXAxisTicks, equals(1704));
-        expect(controller.xCanvasChart, equals(50.0));
-        expect(controller.xPaddingRight, equals(0.6880000000001019));
-        expect(controller.displayXLabels, true);
-        expect(controller.canvasChartWidth, equals(2149.312));
+          // Validate the X axis after data added to all traces.
+          expect(controller.visibleXAxisTicks, equals(1704));
+          expect(controller.xCanvasChart, equals(50.0));
+          expect(controller.xPaddingRight, equals(0.6880000000001019));
+          expect(controller.displayXLabels, true);
+          expect(controller.canvasChartWidth, equals(2149.312));
 
-        // Validate the Y axis after data added to all traces.
-        expect(controller.yScale.computedMin, equals(0.0));
-        expect(controller.yScale.computedMax, equals(719576719.5767195));
-        expect(controller.yScale.labelTicks, equals(10.0));
-        expect(controller.yScale.labelUnitExponent, 8.0);
-        expect(controller.yScale.tickSpacing, equals(5291005.291005291));
-        expect(controller.yScale.maxPoint, equals(717799424.0));
-        expect(controller.yScale.maxTicks, equals(190.0));
+          // Validate the Y axis after data added to all traces.
+          expect(controller.yScale.computedMin, equals(0.0));
+          expect(controller.yScale.computedMax, equals(719576719.5767195));
+          expect(controller.yScale.labelTicks, equals(10.0));
+          expect(controller.yScale.labelUnitExponent, 8.0);
+          expect(controller.yScale.tickSpacing, equals(5291005.291005291));
+          expect(controller.yScale.maxPoint, equals(717799424.0));
+          expect(controller.yScale.maxTicks, equals(190.0));
 
-        validateScaledYLabels(controller);
+          validateScaledYLabels(controller);
 
-        checkScaledXAxis2Labels(controller);
-      });
+          checkScaledXAxis2Labels(controller);
+        },
+        tags: ['golden'],
+      );
 
       ///////////////////////////////////////////////////////////////////////////
       // Fixed Y-axis chart.                                                                     //
@@ -712,6 +721,7 @@ void main() {
             equals('16:45:30'),
           );
         },
+        tags: ['golden'],
       );
 
       void checkFixedXAxis2Labels(ChartController controller) {
@@ -726,111 +736,119 @@ void main() {
         );
       }
 
-      testWidgetsWithWindowSize('Fixed Y-axis all', windowSize,
-          (WidgetTester tester) async {
-        const chartKey = Key('Chart');
-        final controller = ChartController();
+      testWidgetsWithWindowSize(
+        'Fixed Y-axis all',
+        windowSize,
+        (WidgetTester tester) async {
+          const chartKey = Key('Chart');
+          final controller = ChartController();
 
-        await setupFixedChart(tester, controller, chartKey);
+          await setupFixedChart(tester, controller, chartKey);
 
-        // Check all data view zoom.
-        controller.zoomDuration = null;
-        await tester.pumpAndSettle(const Duration(seconds: 15));
+          // Check all data view zoom.
+          controller.zoomDuration = null;
+          await tester.pumpAndSettle(const Duration(seconds: 15));
 
-        await expectLater(
-          find.byKey(chartKey),
-          matchesDevToolsGolden('../../goldens/memory_chart_fixed_all.png'),
-        );
-        // Await delay for golden comparison.
-        await tester.pumpAndSettle(const Duration(seconds: 2));
-
-        // Validate the X axis after data added to all traces.
-        expect(controller.visibleXAxisTicks, equals(104));
-        expect(controller.xCanvasChart, equals(50.0));
-        expect(controller.xPaddingRight, equals(0.0));
-        expect(controller.displayXLabels, true);
-        expect(controller.canvasChartWidth, equals(2150.0));
-
-        // Validate the Y axis after data added to all traces.
-        expect(controller.yScale.computedMin, equals(0.0));
-        expect(controller.yScale.computedMax, equals(2.426966292134831));
-        expect(controller.yScale.labelTicks, equals(3.0));
-        expect(controller.yScale.labelUnitExponent, 0.0);
-        expect(controller.yScale.tickSpacing, equals(0.033707865168539325));
-        expect(controller.yScale.maxPoint, equals(2.4));
-        expect(controller.yScale.maxTicks, equals(90.0));
-
-        // Validate the labels displayed on the y-axis.
-        final yScale = controller.yScale;
-        expect(yScale.labelTicks, equals(3));
-        for (var labelIndex = yScale.labelTicks;
-            labelIndex >= 0;
-            labelIndex--) {
-          final labelName = ChartPainter.constructLabel(
-            labelIndex.toInt(),
-            yScale.labelUnitExponent.toInt(),
+          await expectLater(
+            find.byKey(chartKey),
+            matchesDevToolsGolden('../../goldens/memory_chart_fixed_all.png'),
           );
+          // Await delay for golden comparison.
+          await tester.pumpAndSettle(const Duration(seconds: 2));
 
-          final expectedLabels = ['0', '1', '2', '3'];
-          expect(labelName, expectedLabels[labelIndex.toInt()]);
-        }
+          // Validate the X axis after data added to all traces.
+          expect(controller.visibleXAxisTicks, equals(104));
+          expect(controller.xCanvasChart, equals(50.0));
+          expect(controller.xPaddingRight, equals(0.0));
+          expect(controller.displayXLabels, true);
+          expect(controller.canvasChartWidth, equals(2150.0));
 
-        checkFixedXAxis2Labels(controller);
-      });
+          // Validate the Y axis after data added to all traces.
+          expect(controller.yScale.computedMin, equals(0.0));
+          expect(controller.yScale.computedMax, equals(2.426966292134831));
+          expect(controller.yScale.labelTicks, equals(3.0));
+          expect(controller.yScale.labelUnitExponent, 0.0);
+          expect(controller.yScale.tickSpacing, equals(0.033707865168539325));
+          expect(controller.yScale.maxPoint, equals(2.4));
+          expect(controller.yScale.maxTicks, equals(90.0));
 
-      testWidgetsWithWindowSize('Fixed Y-axis 5 Minutes', windowSize,
-          (WidgetTester tester) async {
-        const chartKey = Key('Chart');
-        final controller = ChartController();
+          // Validate the labels displayed on the y-axis.
+          final yScale = controller.yScale;
+          expect(yScale.labelTicks, equals(3));
+          for (var labelIndex = yScale.labelTicks;
+              labelIndex >= 0;
+              labelIndex--) {
+            final labelName = ChartPainter.constructLabel(
+              labelIndex.toInt(),
+              yScale.labelUnitExponent.toInt(),
+            );
 
-        await setupFixedChart(tester, controller, chartKey);
+            final expectedLabels = ['0', '1', '2', '3'];
+            expect(labelName, expectedLabels[labelIndex.toInt()]);
+          }
 
-        // Check all data view zoom.
-        controller.zoomDuration = const Duration(minutes: 5);
-        await tester.pumpAndSettle(const Duration(seconds: 15));
+          checkFixedXAxis2Labels(controller);
+        },
+        tags: ['golden'],
+      );
 
-        await expectLater(
-          find.byKey(chartKey),
-          matchesDevToolsGolden(
-            '../../goldens/memory_chart_fixed_five_minutes.png',
-          ),
-        );
-        // Await delay for golden comparison.
-        await tester.pumpAndSettle(const Duration(seconds: 2));
+      testWidgetsWithWindowSize(
+        'Fixed Y-axis 5 Minutes',
+        windowSize,
+        (WidgetTester tester) async {
+          const chartKey = Key('Chart');
+          final controller = ChartController();
 
-        // Validate the X axis after data added to all traces.
-        expect(controller.visibleXAxisTicks, equals(1704));
-        expect(controller.xCanvasChart, equals(50.0));
-        expect(controller.xPaddingRight, equals(0.6880000000001019));
-        expect(controller.displayXLabels, true);
-        expect(controller.canvasChartWidth, equals(2149.312));
+          await setupFixedChart(tester, controller, chartKey);
 
-        // Validate the Y axis after data added to all traces.
-        expect(controller.yScale.computedMin, equals(0.0));
-        expect(controller.yScale.computedMax, equals(2.426966292134831));
-        expect(controller.yScale.labelTicks, equals(3.0));
-        expect(controller.yScale.labelUnitExponent, 0.0);
-        expect(controller.yScale.tickSpacing, equals(0.033707865168539325));
-        expect(controller.yScale.maxPoint, equals(2.4));
-        expect(controller.yScale.maxTicks, equals(90.0));
+          // Check all data view zoom.
+          controller.zoomDuration = const Duration(minutes: 5);
+          await tester.pumpAndSettle(const Duration(seconds: 15));
 
-        // Validate the labels displayed on the y-axis.
-        final yScale = controller.yScale;
-        expect(yScale.labelTicks, equals(3));
-        for (var labelIndex = yScale.labelTicks;
-            labelIndex >= 0;
-            labelIndex--) {
-          final labelName = ChartPainter.constructLabel(
-            labelIndex.toInt(),
-            yScale.labelUnitExponent.toInt(),
+          await expectLater(
+            find.byKey(chartKey),
+            matchesDevToolsGolden(
+              '../../goldens/memory_chart_fixed_five_minutes.png',
+            ),
           );
+          // Await delay for golden comparison.
+          await tester.pumpAndSettle(const Duration(seconds: 2));
 
-          final expectedLabels = ['0', '1', '2', '3'];
-          expect(labelName, expectedLabels[labelIndex.toInt()]);
-        }
+          // Validate the X axis after data added to all traces.
+          expect(controller.visibleXAxisTicks, equals(1704));
+          expect(controller.xCanvasChart, equals(50.0));
+          expect(controller.xPaddingRight, equals(0.6880000000001019));
+          expect(controller.displayXLabels, true);
+          expect(controller.canvasChartWidth, equals(2149.312));
 
-        checkFixedXAxis2Labels(controller);
-      });
+          // Validate the Y axis after data added to all traces.
+          expect(controller.yScale.computedMin, equals(0.0));
+          expect(controller.yScale.computedMax, equals(2.426966292134831));
+          expect(controller.yScale.labelTicks, equals(3.0));
+          expect(controller.yScale.labelUnitExponent, 0.0);
+          expect(controller.yScale.tickSpacing, equals(0.033707865168539325));
+          expect(controller.yScale.maxPoint, equals(2.4));
+          expect(controller.yScale.maxTicks, equals(90.0));
+
+          // Validate the labels displayed on the y-axis.
+          final yScale = controller.yScale;
+          expect(yScale.labelTicks, equals(3));
+          for (var labelIndex = yScale.labelTicks;
+              labelIndex >= 0;
+              labelIndex--) {
+            final labelName = ChartPainter.constructLabel(
+              labelIndex.toInt(),
+              yScale.labelUnitExponent.toInt(),
+            );
+
+            final expectedLabels = ['0', '1', '2', '3'];
+            expect(labelName, expectedLabels[labelIndex.toInt()]);
+          }
+
+          checkFixedXAxis2Labels(controller);
+        },
+        tags: ['golden'],
+      );
     },
   );
 }

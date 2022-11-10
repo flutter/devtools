@@ -269,6 +269,7 @@ void main() {
       );
     },
     skip: true,
+    tags: ['golden'],
   );
 
   testWidgetsWithWindowSize(
@@ -288,5 +289,6 @@ void main() {
       );
     },
     skip: true,
+    tags: ['golden'],
   );
 }

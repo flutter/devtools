@@ -36,52 +36,57 @@ void main() {
     scene.tearDown();
   });
 
-  testWidgetsWithWindowSize('settings update preferences', windowSize,
-      (WidgetTester tester) async {
-    await pumpMemoryScreen(tester);
+  testWidgetsWithWindowSize(
+    'settings update preferences',
+    windowSize,
+    (WidgetTester tester) async {
+      await pumpMemoryScreen(tester);
 
-    // Open the dialog.
-    await tester.tap(find.byType(SettingsOutlinedButton));
-    await tester.pumpAndSettle();
-    await expectLater(
-      find.byType(MemorySettingsDialog),
-      matchesDevToolsGolden('../../goldens/settings_dialog_default.png'),
-    );
+      // Open the dialog.
+      await tester.tap(find.byType(SettingsOutlinedButton));
+      await tester.pumpAndSettle();
+      await expectLater(
+        find.byType(MemorySettingsDialog),
+        matchesDevToolsGolden('../../goldens/settings_dialog_default.png'),
+      );
 
-    // Modify settings and check the changes are reflected in the controller.
-    expect(
-      preferences.memory.androidCollectionEnabled.value,
-      isFalse,
-    );
-    expect(
-      preferences.memory.autoSnapshotEnabled.value,
-      isFalse,
-    );
-    await tester
-        .tap(find.byKey(MemorySettingDialogKeys.showAndroidChartCheckBox));
-    await tester.tap(find.byKey(MemorySettingDialogKeys.autoSnapshotCheckbox));
-    await tester.pumpAndSettle();
-    await expectLater(
-      find.byType(MemorySettingsDialog),
-      matchesDevToolsGolden('../../goldens/settings_dialog_modified.png'),
-    );
-    expect(
-      preferences.memory.androidCollectionEnabled.value,
-      isTrue,
-    );
-    expect(
-      preferences.memory.autoSnapshotEnabled.value,
-      isTrue,
-    );
+      // Modify settings and check the changes are reflected in the controller.
+      expect(
+        preferences.memory.androidCollectionEnabled.value,
+        isFalse,
+      );
+      expect(
+        preferences.memory.autoSnapshotEnabled.value,
+        isFalse,
+      );
+      await tester
+          .tap(find.byKey(MemorySettingDialogKeys.showAndroidChartCheckBox));
+      await tester
+          .tap(find.byKey(MemorySettingDialogKeys.autoSnapshotCheckbox));
+      await tester.pumpAndSettle();
+      await expectLater(
+        find.byType(MemorySettingsDialog),
+        matchesDevToolsGolden('../../goldens/settings_dialog_modified.png'),
+      );
+      expect(
+        preferences.memory.androidCollectionEnabled.value,
+        isTrue,
+      );
+      expect(
+        preferences.memory.autoSnapshotEnabled.value,
+        isTrue,
+      );
 
-    // Reopen the dialog and check the settings are not changed.
-    await tester.tap(find.byType(DialogCloseButton));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byType(SettingsOutlinedButton));
-    await tester.pumpAndSettle();
-    await expectLater(
-      find.byType(MemorySettingsDialog),
-      matchesDevToolsGolden('../../goldens/settings_dialog_modified.png'),
-    );
-  });
+      // Reopen the dialog and check the settings are not changed.
+      await tester.tap(find.byType(DialogCloseButton));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(SettingsOutlinedButton));
+      await tester.pumpAndSettle();
+      await expectLater(
+        find.byType(MemorySettingsDialog),
+        matchesDevToolsGolden('../../goldens/settings_dialog_modified.png'),
+      );
+    },
+    tags: ['golden'],
+  );
 }

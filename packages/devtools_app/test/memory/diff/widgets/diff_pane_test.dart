@@ -44,65 +44,69 @@ void main() {
       scene.tearDown();
     });
 
-    testWidgetsWithWindowSize('records and deletes snapshots', windowSize,
-        (WidgetTester tester) async {
-      final snapshots = scene.controller.diffPaneController.core.snapshots;
-      // Check the list contains only documentation item.
-      expect(snapshots.value.length, equals(1));
-      await pumpScene(tester);
+    testWidgetsWithWindowSize(
+      'records and deletes snapshots',
+      windowSize,
+      (WidgetTester tester) async {
+        final snapshots = scene.controller.diffPaneController.core.snapshots;
+        // Check the list contains only documentation item.
+        expect(snapshots.value.length, equals(1));
+        await pumpScene(tester);
 
-      // Check initial golden.
-      await expectLater(
-        find.byType(DiffPane),
-        matchesDevToolsGolden('../../../goldens/memory_diff_empty1.png'),
-      );
+        // Check initial golden.
+        await expectLater(
+          find.byType(DiffPane),
+          matchesDevToolsGolden('../../../goldens/memory_diff_empty1.png'),
+        );
 
-      // Record three snapshots.
-      for (var i in Iterable.generate(3)) {
-        await tester.tap(find.byIcon(Icons.fiber_manual_record).first);
+        // Record three snapshots.
+        for (var i in Iterable.generate(3)) {
+          await tester.tap(find.byIcon(Icons.fiber_manual_record).first);
+          await tester.pumpAndSettle();
+          expect(find.text('selected-isolate-${i + 1}'), findsOneWidget);
+        }
+
+        await expectLater(
+          find.byType(DiffPane),
+          matchesDevToolsGolden(
+            '../../../goldens/memory_diff_three_snapshots1.png',
+          ),
+        );
+        expect(snapshots.value.length, equals(1 + 3));
+
+        await expectLater(
+          find.byType(DiffPane),
+          matchesDevToolsGolden(
+            '../../../goldens/memory_diff_selected_class.png',
+          ),
+        );
+
+        // Delete a snapshot.
+        await tester.tap(find.byTooltip('Delete snapshot'));
         await tester.pumpAndSettle();
-        expect(find.text('selected-isolate-${i + 1}'), findsOneWidget);
-      }
+        expect(snapshots.value.length, equals(1 + 3 - 1));
 
-      await expectLater(
-        find.byType(DiffPane),
-        matchesDevToolsGolden(
-          '../../../goldens/memory_diff_three_snapshots1.png',
-        ),
-      );
-      expect(snapshots.value.length, equals(1 + 3));
+        // Record snapshot
+        await tester.tap(find.byIcon(Icons.fiber_manual_record));
+        await tester.pumpAndSettle();
+        await expectLater(
+          find.byType(DiffPane),
+          matchesDevToolsGolden(
+            '../../../goldens/memory_diff_three_snapshots2.png',
+          ),
+        );
+        expect(snapshots.value.length, equals(1 + 3 - 1 + 1));
 
-      await expectLater(
-        find.byType(DiffPane),
-        matchesDevToolsGolden(
-          '../../../goldens/memory_diff_selected_class.png',
-        ),
-      );
-
-      // Delete a snapshot.
-      await tester.tap(find.byTooltip('Delete snapshot'));
-      await tester.pumpAndSettle();
-      expect(snapshots.value.length, equals(1 + 3 - 1));
-
-      // Record snapshot
-      await tester.tap(find.byIcon(Icons.fiber_manual_record));
-      await tester.pumpAndSettle();
-      await expectLater(
-        find.byType(DiffPane),
-        matchesDevToolsGolden(
-          '../../../goldens/memory_diff_three_snapshots2.png',
-        ),
-      );
-      expect(snapshots.value.length, equals(1 + 3 - 1 + 1));
-
-      // Clear all
-      await tester.tap(find.byTooltip('Clear all snapshots'));
-      await tester.pumpAndSettle();
-      await expectLater(
-        find.byType(DiffPane),
-        matchesDevToolsGolden('../../../goldens/memory_diff_empty2.png'),
-      );
-      expect(snapshots.value.length, equals(1));
-    });
+        // Clear all
+        await tester.tap(find.byTooltip('Clear all snapshots'));
+        await tester.pumpAndSettle();
+        await expectLater(
+          find.byType(DiffPane),
+          matchesDevToolsGolden('../../../goldens/memory_diff_empty2.png'),
+        );
+        expect(snapshots.value.length, equals(1));
+      },
+      tags: ['golden'],
+    );
   });
 }

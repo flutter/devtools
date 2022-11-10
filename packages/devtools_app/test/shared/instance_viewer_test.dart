@@ -130,348 +130,366 @@ void main() {
 
   group('InstanceViewer', () {
     testWidgets(
-        'showInternalProperties: false hides private properties from dependencies',
-        (tester) async {
-      const objPath = InstancePath.fromInstanceId('obj');
+      'showInternalProperties: false hides private properties from dependencies',
+      (tester) async {
+        const objPath = InstancePath.fromInstanceId('obj');
 
-      InstancePath pathForProperty(String name) {
-        return objPath.pathForChild(
-          PathToProperty.objectProperty(
-            name: name,
+        InstancePath pathForProperty(String name) {
+          return objPath.pathForChild(
+            PathToProperty.objectProperty(
+              name: name,
+              ownerUri: '',
+              ownerName: '',
+            ),
+          );
+        }
+
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              instanceProvider(objPath).overrideWithValue(
+                AsyncValue.data(
+                  ObjectInstance(
+                    [
+                      ObjectField(
+                        name: 'first',
+                        isFinal: false,
+                        ownerName: '',
+                        ownerUri: '',
+                        eval: FakeEvalOnDartLibrary(),
+                        ref: Result.error(Error(), StackTrace.empty),
+                        isDefinedByDependency: true,
+                      ),
+                      ObjectField(
+                        name: '_second',
+                        isFinal: false,
+                        ownerName: '',
+                        ownerUri: '',
+                        eval: FakeEvalOnDartLibrary(),
+                        ref: Result.error(Error(), StackTrace.empty),
+                        isDefinedByDependency: true,
+                      ),
+                      ObjectField(
+                        name: 'third',
+                        isFinal: false,
+                        ownerName: '',
+                        ownerUri: '',
+                        eval: FakeEvalOnDartLibrary(),
+                        ref: Result.error(Error(), StackTrace.empty),
+                        isDefinedByDependency: false,
+                      ),
+                      ObjectField(
+                        name: '_forth',
+                        isFinal: false,
+                        ownerName: '',
+                        ownerUri: '',
+                        eval: FakeEvalOnDartLibrary(),
+                        ref: Result.error(Error(), StackTrace.empty),
+                        isDefinedByDependency: false,
+                      ),
+                    ],
+                    hash: 0,
+                    instanceRefId: 'object',
+                    setter: null,
+                    evalForInstance: FakeEvalOnDartLibrary(),
+                    type: 'MyClass',
+                  ),
+                ),
+              ),
+              instanceProvider(pathForProperty('first'))
+                  .overrideWithValue(int42Instance),
+              instanceProvider(pathForProperty('_second'))
+                  .overrideWithValue(int42Instance),
+              instanceProvider(pathForProperty('third'))
+                  .overrideWithValue(int42Instance),
+              instanceProvider(pathForProperty('_forth'))
+                  .overrideWithValue(int42Instance),
+            ],
+            child: const MaterialApp(
+              home: Scaffold(
+                body: InstanceViewer(
+                  showInternalProperties: false,
+                  rootPath: objPath,
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await expectLater(
+          find.byType(MaterialApp),
+          matchesDevToolsGolden(
+            '../goldens/instance_viewer/show_internal_properties.png',
+          ),
+        );
+      },
+      tags: ['golden'],
+    );
+
+    testWidgets(
+      'field editing flow',
+      (tester) async {
+        const objPath = InstancePath.fromInstanceId('obj');
+        final propertyPath = objPath.pathForChild(
+          const PathToProperty.objectProperty(
+            name: 'first',
             ownerUri: '',
             ownerName: '',
           ),
         );
-      }
 
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            instanceProvider(objPath).overrideWithValue(
-              AsyncValue.data(
-                ObjectInstance(
-                  [
-                    ObjectField(
-                      name: 'first',
-                      isFinal: false,
-                      ownerName: '',
-                      ownerUri: '',
-                      eval: FakeEvalOnDartLibrary(),
-                      ref: Result.error(Error(), StackTrace.empty),
-                      isDefinedByDependency: true,
-                    ),
-                    ObjectField(
-                      name: '_second',
-                      isFinal: false,
-                      ownerName: '',
-                      ownerUri: '',
-                      eval: FakeEvalOnDartLibrary(),
-                      ref: Result.error(Error(), StackTrace.empty),
-                      isDefinedByDependency: true,
-                    ),
-                    ObjectField(
-                      name: 'third',
-                      isFinal: false,
-                      ownerName: '',
-                      ownerUri: '',
-                      eval: FakeEvalOnDartLibrary(),
-                      ref: Result.error(Error(), StackTrace.empty),
-                      isDefinedByDependency: false,
-                    ),
-                    ObjectField(
-                      name: '_forth',
-                      isFinal: false,
-                      ownerName: '',
-                      ownerUri: '',
-                      eval: FakeEvalOnDartLibrary(),
-                      ref: Result.error(Error(), StackTrace.empty),
-                      isDefinedByDependency: false,
-                    ),
-                  ],
-                  hash: 0,
-                  instanceRefId: 'object',
-                  setter: null,
-                  evalForInstance: FakeEvalOnDartLibrary(),
-                  type: 'MyClass',
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              instanceProvider(objPath).overrideWithValue(
+                AsyncValue.data(
+                  ObjectInstance(
+                    [
+                      ObjectField(
+                        name: 'first',
+                        isFinal: false,
+                        ownerName: '',
+                        ownerUri: '',
+                        eval: FakeEvalOnDartLibrary(),
+                        ref: Result.error(Error(), StackTrace.empty),
+                        isDefinedByDependency: false,
+                      ),
+                    ],
+                    hash: 0,
+                    instanceRefId: 'object',
+                    setter: null,
+                    evalForInstance: FakeEvalOnDartLibrary(),
+                    type: 'MyClass',
+                  ),
+                ),
+              ),
+              instanceProvider(propertyPath).overrideWithValue(
+                AsyncValue.data(
+                  InstanceDetails.number(
+                    '0',
+                    instanceRefId: '0',
+                    setter: (value) async {},
+                  ),
+                ),
+              ),
+            ],
+            child: const MaterialApp(
+              home: Scaffold(
+                body: InstanceViewer(
+                  showInternalProperties: true,
+                  rootPath: objPath,
                 ),
               ),
             ),
-            instanceProvider(pathForProperty('first'))
-                .overrideWithValue(int42Instance),
-            instanceProvider(pathForProperty('_second'))
-                .overrideWithValue(int42Instance),
-            instanceProvider(pathForProperty('third'))
-                .overrideWithValue(int42Instance),
-            instanceProvider(pathForProperty('_forth'))
-                .overrideWithValue(int42Instance),
-          ],
-          child: const MaterialApp(
-            home: Scaffold(
-              body: InstanceViewer(
-                showInternalProperties: false,
-                rootPath: objPath,
-              ),
-            ),
           ),
-        ),
-      );
+        );
 
-      await expectLater(
-        find.byType(MaterialApp),
-        matchesDevToolsGolden(
-          '../goldens/instance_viewer/show_internal_properties.png',
-        ),
-      );
-    });
+        await tester.pumpAndSettle();
 
-    testWidgets('field editing flow', (tester) async {
-      const objPath = InstancePath.fromInstanceId('obj');
-      final propertyPath = objPath.pathForChild(
-        const PathToProperty.objectProperty(
-          name: 'first',
-          ownerUri: '',
-          ownerName: '',
-        ),
-      );
+        await tester.tap(find.byKey(ValueKey(propertyPath)));
 
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            instanceProvider(objPath).overrideWithValue(
-              AsyncValue.data(
-                ObjectInstance(
-                  [
-                    ObjectField(
-                      name: 'first',
-                      isFinal: false,
-                      ownerName: '',
-                      ownerUri: '',
-                      eval: FakeEvalOnDartLibrary(),
-                      ref: Result.error(Error(), StackTrace.empty),
-                      isDefinedByDependency: false,
-                    ),
-                  ],
-                  hash: 0,
-                  instanceRefId: 'object',
-                  setter: null,
-                  evalForInstance: FakeEvalOnDartLibrary(),
-                  type: 'MyClass',
+        await tester.pump();
+
+        await expectLater(
+          find.byType(MaterialApp),
+          matchesDevToolsGolden('../goldens/instance_viewer/edit.png'),
+        );
+
+        // can press esc to unfocus active node
+        await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+
+        await tester.pump();
+
+        await expectLater(
+          find.byType(MaterialApp),
+          matchesDevToolsGolden('../goldens/instance_viewer/edit_esc.png'),
+        );
+      },
+      tags: ['golden'],
+    );
+
+    testWidgets(
+      'renders <loading> while an instance is fetched',
+      (tester) async {
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              instanceProvider(const InstancePath.fromInstanceId('0'))
+                  .overrideWithValue(const AsyncValue.loading())
+            ],
+            child: const MaterialApp(
+              home: Scaffold(
+                body: InstanceViewer(
+                  showInternalProperties: true,
+                  rootPath: InstancePath.fromInstanceId('0'),
                 ),
               ),
             ),
-            instanceProvider(propertyPath).overrideWithValue(
-              AsyncValue.data(
-                InstanceDetails.number(
-                  '0',
-                  instanceRefId: '0',
-                  setter: (value) async {},
-                ),
-              ),
-            ),
-          ],
-          child: const MaterialApp(
-            home: Scaffold(
-              body: InstanceViewer(
-                showInternalProperties: true,
-                rootPath: objPath,
-              ),
-            ),
           ),
-        ),
-      );
+        );
 
-      await tester.pumpAndSettle();
+        await tester.pumpAndSettle();
 
-      await tester.tap(find.byKey(ValueKey(propertyPath)));
-
-      await tester.pump();
-
-      await expectLater(
-        find.byType(MaterialApp),
-        matchesDevToolsGolden('../goldens/instance_viewer/edit.png'),
-      );
-
-      // can press esc to unfocus active node
-      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
-
-      await tester.pump();
-
-      await expectLater(
-        find.byType(MaterialApp),
-        matchesDevToolsGolden('../goldens/instance_viewer/edit_esc.png'),
-      );
-    });
-
-    testWidgets('renders <loading> while an instance is fetched',
-        (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            instanceProvider(const InstancePath.fromInstanceId('0'))
-                .overrideWithValue(const AsyncValue.loading())
-          ],
-          child: const MaterialApp(
-            home: Scaffold(
-              body: InstanceViewer(
-                showInternalProperties: true,
-                rootPath: InstancePath.fromInstanceId('0'),
-              ),
-            ),
-          ),
-        ),
-      );
-
-      await tester.pumpAndSettle();
-
-      await expectLater(
-        find.byType(MaterialApp),
-        matchesDevToolsGolden('../goldens/instance_viewer/loading.png'),
-      );
-    });
+        await expectLater(
+          find.byType(MaterialApp),
+          matchesDevToolsGolden('../goldens/instance_viewer/loading.png'),
+        );
+      },
+      tags: ['golden'],
+    );
 
     // TODO(rrousselGit) find a way to test "data then loading then wait then loading then wait shows "loading" after a total of one second"
     // This is tricky because tester.pump(duration) completes the Timer even if the duration is < 1 second
 
     testWidgets(
-        'once valid data was fetched, going back to loading and emiting an error immediately updates the UI',
-        (tester) async {
-      const app = MaterialApp(
-        home: Scaffold(
-          body: InstanceViewer(
-            showInternalProperties: true,
-            rootPath: InstancePath.fromInstanceId('0'),
+      'once valid data was fetched, going back to loading and emiting an error immediately updates the UI',
+      (tester) async {
+        const app = MaterialApp(
+          home: Scaffold(
+            body: InstanceViewer(
+              showInternalProperties: true,
+              rootPath: InstancePath.fromInstanceId('0'),
+            ),
           ),
-        ),
-      );
+        );
 
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            instanceProvider(const InstancePath.fromInstanceId('0'))
-                .overrideWithValue(nullInstance),
-          ],
-          child: app,
-        ),
-      );
-      await tester.pumpAndSettle();
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            instanceProvider(const InstancePath.fromInstanceId('0'))
-                .overrideWithValue(const AsyncValue.loading()),
-          ],
-          child: app,
-        ),
-      );
-      await tester.pump();
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              instanceProvider(const InstancePath.fromInstanceId('0'))
+                  .overrideWithValue(nullInstance),
+            ],
+            child: app,
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              instanceProvider(const InstancePath.fromInstanceId('0'))
+                  .overrideWithValue(const AsyncValue.loading()),
+            ],
+            child: app,
+          ),
+        );
+        await tester.pump();
 
-      await expectLater(
-        find.byType(MaterialApp),
-        matchesDevToolsGolden('../goldens/instance_viewer/null.png'),
-      );
+        await expectLater(
+          find.byType(MaterialApp),
+          matchesDevToolsGolden('../goldens/instance_viewer/null.png'),
+        );
 
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            instanceProvider(const InstancePath.fromInstanceId('0'))
-                .overrideWithValue(AsyncValue.error(StateError('test error'))),
-          ],
-          child: app,
-        ),
-      );
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              instanceProvider(const InstancePath.fromInstanceId('0'))
+                  .overrideWithValue(
+                      AsyncValue.error(StateError('test error'))),
+            ],
+            child: app,
+          ),
+        );
+        await tester.pumpAndSettle();
 
-      await expectLater(
-        find.byType(MaterialApp),
-        matchesDevToolsGolden('../goldens/instance_viewer/error.png'),
-      );
-    });
+        await expectLater(
+          find.byType(MaterialApp),
+          matchesDevToolsGolden('../goldens/instance_viewer/error.png'),
+        );
+      },
+      tags: ['golden'],
+    );
 
     testWidgets(
-        'once valid data was fetched, going back to loading and emiting a new value immediately updates the UI',
-        (tester) async {
-      const app = MaterialApp(
-        home: Scaffold(
-          body: InstanceViewer(
-            showInternalProperties: true,
-            rootPath: InstancePath.fromInstanceId('0'),
+      'once valid data was fetched, going back to loading and emiting a new value immediately updates the UI',
+      (tester) async {
+        const app = MaterialApp(
+          home: Scaffold(
+            body: InstanceViewer(
+              showInternalProperties: true,
+              rootPath: InstancePath.fromInstanceId('0'),
+            ),
           ),
-        ),
-      );
+        );
 
-      await tester.pumpWidget(
-        ProviderScope(
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              instanceProvider(const InstancePath.fromInstanceId('0'))
+                  .overrideWithValue(nullInstance),
+            ],
+            child: app,
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              instanceProvider(const InstancePath.fromInstanceId('0'))
+                  .overrideWithValue(const AsyncValue.loading()),
+            ],
+            child: app,
+          ),
+        );
+        await tester.pump();
+
+        await expectLater(
+          find.byType(MaterialApp),
+          matchesDevToolsGolden('../goldens/instance_viewer/null.png'),
+        );
+
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              instanceProvider(const InstancePath.fromInstanceId('0'))
+                  .overrideWithValue(int42Instance),
+            ],
+            child: app,
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        await expectLater(
+          find.byType(MaterialApp),
+          matchesDevToolsGolden('../goldens/instance_viewer/num.png'),
+        );
+      },
+      tags: ['golden'],
+    );
+
+    testWidgets(
+      'renders enums',
+      (tester) async {
+        final container = ProviderContainer(
           overrides: [
-            instanceProvider(const InstancePath.fromInstanceId('0'))
-                .overrideWithValue(nullInstance),
+            instanceProvider(const InstancePath.fromInstanceId('enum'))
+                .overrideWithValue(enumValueInstance),
           ],
-          child: app,
-        ),
-      );
-      await tester.pumpAndSettle();
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            instanceProvider(const InstancePath.fromInstanceId('0'))
-                .overrideWithValue(const AsyncValue.loading()),
-          ],
-          child: app,
-        ),
-      );
-      await tester.pump();
+        );
+        addTearDown(container.dispose);
 
-      await expectLater(
-        find.byType(MaterialApp),
-        matchesDevToolsGolden('../goldens/instance_viewer/null.png'),
-      );
-
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            instanceProvider(const InstancePath.fromInstanceId('0'))
-                .overrideWithValue(int42Instance),
-          ],
-          child: app,
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      await expectLater(
-        find.byType(MaterialApp),
-        matchesDevToolsGolden('../goldens/instance_viewer/num.png'),
-      );
-    });
-
-    testWidgets('renders enums', (tester) async {
-      final container = ProviderContainer(
-        overrides: [
-          instanceProvider(const InstancePath.fromInstanceId('enum'))
-              .overrideWithValue(enumValueInstance),
-        ],
-      );
-      addTearDown(container.dispose);
-
-      await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: container,
-          child: const MaterialApp(
-            home: Scaffold(
-              body: InstanceViewer(
-                showInternalProperties: true,
-                rootPath: InstancePath.fromInstanceId('enum'),
+        await tester.pumpWidget(
+          UncontrolledProviderScope(
+            container: container,
+            child: const MaterialApp(
+              home: Scaffold(
+                body: InstanceViewer(
+                  showInternalProperties: true,
+                  rootPath: InstancePath.fromInstanceId('enum'),
+                ),
               ),
             ),
           ),
-        ),
-      );
+        );
 
-      await tester.pumpAndSettle();
+        await tester.pumpAndSettle();
 
-      await expectLater(
-        find.byType(MaterialApp),
-        matchesDevToolsGolden('../goldens/instance_viewer/enum.png'),
-      );
-    });
+        await expectLater(
+          find.byType(MaterialApp),
+          matchesDevToolsGolden('../goldens/instance_viewer/enum.png'),
+        );
+      },
+      tags: ['golden'],
+    );
 
     testWidgets('renders null', (tester) async {
       final container = ProviderContainer(

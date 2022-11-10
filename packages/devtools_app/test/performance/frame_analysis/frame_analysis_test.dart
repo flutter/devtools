@@ -92,98 +92,108 @@ void main() {
         expect(find.byType(FrameTimeVisualizer), findsOneWidget);
       }
 
-      testWidgetsWithWindowSize('builds successfully', windowSize,
-          (WidgetTester tester) async {
-        await pumpVisualizer(tester, frameAnalysis);
+      testWidgetsWithWindowSize(
+        'builds successfully',
+        windowSize,
+        (WidgetTester tester) async {
+          await pumpVisualizer(tester, frameAnalysis);
 
-        expect(find.text('UI phases:'), findsOneWidget);
-        expect(find.textContaining('Build - '), findsOneWidget);
-        expect(find.textContaining('Layout - '), findsOneWidget);
-        expect(find.textContaining('Paint - '), findsOneWidget);
-        expect(find.byIcon(Icons.build), findsOneWidget);
-        expect(find.byIcon(Icons.auto_awesome_mosaic), findsOneWidget);
-        expect(find.byIcon(Icons.format_paint), findsOneWidget);
+          expect(find.text('UI phases:'), findsOneWidget);
+          expect(find.textContaining('Build - '), findsOneWidget);
+          expect(find.textContaining('Layout - '), findsOneWidget);
+          expect(find.textContaining('Paint - '), findsOneWidget);
+          expect(find.byIcon(Icons.build), findsOneWidget);
+          expect(find.byIcon(Icons.auto_awesome_mosaic), findsOneWidget);
+          expect(find.byIcon(Icons.format_paint), findsOneWidget);
 
-        expect(find.text('Raster phase:'), findsOneWidget);
-        expect(find.textContaining('Raster - '), findsOneWidget);
-        expect(find.byIcon(Icons.grid_on), findsOneWidget);
+          expect(find.text('Raster phase:'), findsOneWidget);
+          expect(find.textContaining('Raster - '), findsOneWidget);
+          expect(find.byIcon(Icons.grid_on), findsOneWidget);
 
-        expect(find.text('Raster phases:'), findsNothing);
-        expect(find.textContaining('Shader compilation'), findsNothing);
-        expect(find.textContaining('Other raster'), findsNothing);
-        expect(find.byIcon(Icons.image_outlined), findsNothing);
+          expect(find.text('Raster phases:'), findsNothing);
+          expect(find.textContaining('Shader compilation'), findsNothing);
+          expect(find.textContaining('Other raster'), findsNothing);
+          expect(find.byIcon(Icons.image_outlined), findsNothing);
 
-        await expectLater(
-          find.byType(FrameTimeVisualizer),
-          matchesDevToolsGolden(
-            'goldens/performance/frame_time_visualizer.png',
-          ),
-        );
-      });
+          await expectLater(
+            find.byType(FrameTimeVisualizer),
+            matchesDevToolsGolden(
+              'goldens/performance/frame_time_visualizer.png',
+            ),
+          );
+        },
+        tags: ['golden'],
+      );
 
       testWidgetsWithWindowSize(
-          'builds with icons only for narrow screen', const Size(200.0, 1000.0),
-          (WidgetTester tester) async {
-        await pumpVisualizer(tester, frameAnalysis);
+        'builds with icons only for narrow screen',
+        const Size(200.0, 1000.0),
+        (WidgetTester tester) async {
+          await pumpVisualizer(tester, frameAnalysis);
 
-        expect(find.text('UI phases:'), findsOneWidget);
-        expect(find.textContaining('Build - '), findsNothing);
-        expect(find.textContaining('Layout - '), findsNothing);
-        expect(find.textContaining('Paint - '), findsNothing);
-        expect(find.byIcon(Icons.build), findsOneWidget);
-        expect(find.byIcon(Icons.auto_awesome_mosaic), findsOneWidget);
-        expect(find.byIcon(Icons.format_paint), findsOneWidget);
+          expect(find.text('UI phases:'), findsOneWidget);
+          expect(find.textContaining('Build - '), findsNothing);
+          expect(find.textContaining('Layout - '), findsNothing);
+          expect(find.textContaining('Paint - '), findsNothing);
+          expect(find.byIcon(Icons.build), findsOneWidget);
+          expect(find.byIcon(Icons.auto_awesome_mosaic), findsOneWidget);
+          expect(find.byIcon(Icons.format_paint), findsOneWidget);
 
-        expect(find.text('Raster phase:'), findsOneWidget);
-        expect(find.textContaining('Raster - '), findsNothing);
-        expect(find.byIcon(Icons.grid_on), findsOneWidget);
+          expect(find.text('Raster phase:'), findsOneWidget);
+          expect(find.textContaining('Raster - '), findsNothing);
+          expect(find.byIcon(Icons.grid_on), findsOneWidget);
 
-        expect(find.text('Raster phases:'), findsNothing);
-        expect(find.textContaining('Shader compilation'), findsNothing);
-        expect(find.textContaining('Other raster'), findsNothing);
-        expect(find.byIcon(Icons.image_outlined), findsNothing);
+          expect(find.text('Raster phases:'), findsNothing);
+          expect(find.textContaining('Shader compilation'), findsNothing);
+          expect(find.textContaining('Other raster'), findsNothing);
+          expect(find.byIcon(Icons.image_outlined), findsNothing);
 
-        await expectLater(
-          find.byType(FrameTimeVisualizer),
-          matchesDevToolsGolden(
-            'goldens/performance/frame_time_visualizer_icons_only.png',
-          ),
-        );
-      });
+          await expectLater(
+            find.byType(FrameTimeVisualizer),
+            matchesDevToolsGolden(
+              'goldens/performance/frame_time_visualizer_icons_only.png',
+            ),
+          );
+        },
+        tags: ['golden'],
+      );
 
       testWidgetsWithWindowSize(
-          'builds for frame with shader compilation', windowSize,
-          (WidgetTester tester) async {
-        frame = testFrame0.shallowCopy()
-          ..setEventFlow(goldenUiTimelineEvent)
-          ..setEventFlow(rasterTimelineEventWithSubtleShaderJank);
-        frameAnalysis = FrameAnalysis(frame);
-        await pumpVisualizer(tester, frameAnalysis);
+        'builds for frame with shader compilation',
+        windowSize,
+        (WidgetTester tester) async {
+          frame = testFrame0.shallowCopy()
+            ..setEventFlow(goldenUiTimelineEvent)
+            ..setEventFlow(rasterTimelineEventWithSubtleShaderJank);
+          frameAnalysis = FrameAnalysis(frame);
+          await pumpVisualizer(tester, frameAnalysis);
 
-        expect(find.text('UI phases:'), findsOneWidget);
-        expect(find.textContaining('Build - '), findsOneWidget);
-        expect(find.textContaining('Layout - '), findsOneWidget);
-        expect(find.textContaining('Paint - '), findsOneWidget);
-        expect(find.byIcon(Icons.build), findsOneWidget);
-        expect(find.byIcon(Icons.auto_awesome_mosaic), findsOneWidget);
-        expect(find.byIcon(Icons.format_paint), findsOneWidget);
+          expect(find.text('UI phases:'), findsOneWidget);
+          expect(find.textContaining('Build - '), findsOneWidget);
+          expect(find.textContaining('Layout - '), findsOneWidget);
+          expect(find.textContaining('Paint - '), findsOneWidget);
+          expect(find.byIcon(Icons.build), findsOneWidget);
+          expect(find.byIcon(Icons.auto_awesome_mosaic), findsOneWidget);
+          expect(find.byIcon(Icons.format_paint), findsOneWidget);
 
-        expect(find.text('Raster phase:'), findsNothing);
-        expect(find.textContaining('Raster - '), findsNothing);
-        expect(find.byIcon(Icons.grid_on), findsOneWidget);
+          expect(find.text('Raster phase:'), findsNothing);
+          expect(find.textContaining('Raster - '), findsNothing);
+          expect(find.byIcon(Icons.grid_on), findsOneWidget);
 
-        expect(find.text('Raster phases:'), findsOneWidget);
-        expect(find.textContaining('Shader compilation - '), findsOneWidget);
-        expect(find.textContaining('Other raster - '), findsOneWidget);
-        expect(find.byIcon(Icons.image_outlined), findsOneWidget);
+          expect(find.text('Raster phases:'), findsOneWidget);
+          expect(find.textContaining('Shader compilation - '), findsOneWidget);
+          expect(find.textContaining('Other raster - '), findsOneWidget);
+          expect(find.byIcon(Icons.image_outlined), findsOneWidget);
 
-        await expectLater(
-          find.byType(FrameTimeVisualizer),
-          matchesDevToolsGolden(
-            'goldens/performance/frame_time_visualizer_with_shader_compilation.png',
-          ),
-        );
-      });
+          await expectLater(
+            find.byType(FrameTimeVisualizer),
+            matchesDevToolsGolden(
+              'goldens/performance/frame_time_visualizer_with_shader_compilation.png',
+            ),
+          );
+        },
+        tags: ['golden'],
+      );
     });
   });
 }
