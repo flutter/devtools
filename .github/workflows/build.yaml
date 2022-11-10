@@ -30,8 +30,7 @@ jobs:
       - name: Get Latest Flutter Candidate
         id: flutter-candidate
         run: |
-          export GH_TOKEN
-          ./tool/latest_flutter_candidate.sh
+          GH_TOKEN=$GH_TOKEN ./tool/latest_flutter_candidate.sh
           LATEST_FLUTTER_CANDIDATE=$(./tool/latest_flutter_candidate.sh)
           echo $LATEST_FLUTTER_CANDIDATE
           if [ -z ${LATEST_FLUTTER_CANDIDATE+x} ]; then

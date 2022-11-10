@@ -1,9 +1,8 @@
-#!/bin/bash
+#!/bin/bash -x
 
 # Copyright 2022 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
 RESPONSE=$(gh api --paginate /repos/flutter/flutter/branches)
 CANDIDATES=$(echo "$RESPONSE" | jq '.[].name' | grep candidate)
 
