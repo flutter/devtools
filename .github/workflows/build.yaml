@@ -47,12 +47,15 @@ jobs:
             cd flutter-sdk
             git checkout $LATEST_FLUTTER_CANDIDATE
           fi
-          HEAD_SHA=$(git rev-parse HEAD)
-          LATEST_FLUTTER_CANDIDATE_SHA=$(git rev-parse $LATEST_FLUTTER_CANDIDATE)
-          if [ "$HEAD_SHA" != "$LATEST_FLUTTER_CANDIDATE_SHA" ]; then
-            echo "::error ,title=Error checking out Latest Flutter Candidate::{expected HEAD to be at $LATEST_FLUTTER_CANDIDATE_SHA but got $HEAD_SHA}"
-            exit 1
-          fi
+      - name: Ensure that the Latest Flutter Candidate is checked out
+        run: |
+            cd flutter-sdk
+            HEAD_SHA=$(git rev-parse HEAD)
+            LATEST_FLUTTER_CANDIDATE_SHA=$(git rev-parse $LATEST_FLUTTER_CANDIDATE)
+            if [ "$HEAD_SHA" != "$LATEST_FLUTTER_CANDIDATE_SHA" ]; then
+              echo "::error ,title=Error checking out Latest Flutter Candidate::{expected HEAD to be at $LATEST_FLUTTER_CANDIDATE_SHA but got $HEAD_SHA}"
+              exit 1
+            fi
         env:
           LATEST_FLUTTER_CANDIDATE: ${{ steps.flutter-candidate.outputs.FLUTTER_CANDIDATE }}
 
