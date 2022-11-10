@@ -27,7 +27,7 @@ function flutter {
 }
 
 # Make sure Flutter sdk has been provided
-if [ ! -d "./flutter-sdk" ]; then
+if [ -d "./flutter-sdk" ]; then
     echo "Expected ./flutter-sdk to exist and be checked out to the right commit"
     exit 1;
 fi
