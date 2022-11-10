@@ -72,11 +72,16 @@ jobs:
           ./flutter-sdk/bin/cache/dart-sdk/bin/dart --disable-analytics
 
   main:
-    name: main
+    name: main - ${{ matrix.shard_index }}
     needs: flutter-prep
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
+      matrix:
+        shard_index:
+          - 0
+          - 1
+          - 2
     steps:
       - name: git clone
         uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
@@ -90,10 +95,11 @@ jobs:
       - name: tool/bots.sh
         env:
           BOT: main
+          SHARD_INDEX: ${{ matrix.shard_index }}
         run: ./tool/bots.sh
 
   test:
-    name: ${{ matrix.bot }}
+    name: ${{ matrix.bot }} - ${{ matrix.shard_index }}
     needs: flutter-prep
     runs-on: ubuntu-latest
     strategy:
@@ -104,6 +110,10 @@ jobs:
           - build_dart2js
           - test_ddc
           - test_dart2js
+        shard_index:
+          - 0
+          - 1
+          - 2
     steps:
       - name: git clone
         uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
@@ -117,17 +127,22 @@ jobs:
         env:
           BOT: ${{ matrix.bot }}
           PLATFORM: vm
+          SHARD_INDEX: ${{ matrix.shard_index }}
         run: ./tool/bots.sh
                 
   macos-test:
     needs: flutter-prep
-    name: macos ${{ matrix.bot }}
+    name: macos ${{ matrix.bot }} - ${{ matrix.shard_index }}
     runs-on: macos-latest
     strategy:
       fail-fast: false
       matrix:
         bot:
           - test_dart2js
+        shard_index:
+          - 0
+          - 1
+          - 2
     steps:
       - name: git clone
         uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
@@ -141,6 +156,7 @@ jobs:
         env:
           BOT: ${{ matrix.bot }}
           PLATFORM: vm
+          SHARD_INDEX: ${{ matrix.shard_index }}
         run: ./tool/bots.sh
   
       - name: Upload Golden Failure Artifacts
