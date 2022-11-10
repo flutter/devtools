@@ -143,41 +143,39 @@ void main() {
       );
     });
 
-    testWidgetsWithWindowSize(
-      'Chart Select Hover Test',
-      windowSize,
-      (WidgetTester tester) async {
-        await pumpMemoryScreen(tester);
-        initControllerState();
+    testWidgetsWithWindowSize('Chart Select Hover Test', windowSize,
+        (WidgetTester tester) async {
+      await pumpMemoryScreen(tester);
+      initControllerState();
 
-        await tester.tap(find.text('Analysis'));
+      await tester.tap(find.text('Analysis'));
+      await tester.pumpAndSettle();
+
+      expect(controller.offline.value, isTrue);
+
+      // Verify default event pane and vm chart exists.
+      expect(find.byType(MemoryEventsPane), findsOneWidget);
+      expect(find.byType(MemoryVMChart), findsOneWidget);
+
+      expect(controller.memoryTimeline.liveData.isEmpty, isTrue);
+      expect(controller.memoryTimeline.offlineData.isEmpty, isFalse);
+
+      controller.refreshAllCharts();
+      await tester.pumpAndSettle();
+
+      expect(controller.memoryTimeline.data.isEmpty, isFalse);
+
+      final data = controller.memoryTimeline.data;
+
+      // Total number of collected HeapSamples.
+      expect(data.length, 104);
+
+      for (var _ in Iterable.generate(6)) {
         await tester.pumpAndSettle();
+      }
 
-        expect(controller.offline.value, isTrue);
-
-        // Verify default event pane and vm chart exists.
-        expect(find.byType(MemoryEventsPane), findsOneWidget);
-        expect(find.byType(MemoryVMChart), findsOneWidget);
-
-        expect(controller.memoryTimeline.liveData.isEmpty, isTrue);
-        expect(controller.memoryTimeline.offlineData.isEmpty, isFalse);
-
-        controller.refreshAllCharts();
-        await tester.pumpAndSettle();
-
-        expect(controller.memoryTimeline.data.isEmpty, isFalse);
-
-        final data = controller.memoryTimeline.data;
-
-        // Total number of collected HeapSamples.
-        expect(data.length, 104);
-
-        for (var _ in Iterable.generate(6)) {
-          await tester.pumpAndSettle();
-        }
-
-        // TODO(terry): Need to fix hover not appearing.
-        /*
+      // TODO(terry): Need to fix hover not appearing.
+      /*
       final vmChartFinder = find.byKey(MemoryScreen.vmChartKey);
       final vmChart = tester.firstWidget(vmChartFinder) as MemoryVMChart;
       final rect = tester.getRect(vmChartFinder);
@@ -195,196 +193,185 @@ void main() {
       await pumpAndSettleTwoSeconds();
       */
 
-        await expectLater(
-          find.byType(MemoryVMChart),
-          matchesDevToolsGolden('../goldens/memory_hover_card.png'),
-        );
-      },
-      tags: ['golden'],
-    );
+      await expectLater(
+        find.byType(MemoryVMChart),
+        matchesDevToolsGolden('../goldens/memory_hover_card.png'),
+      );
+    });
+
+    testWidgetsWithWindowSize('export current memory profile', windowSize,
+        (WidgetTester tester) async {
+      await pumpMemoryScreen(tester);
+
+      // Verify initial state - collecting live feed.
+      expect(controller.offline.value, isFalse);
+
+      final previousMemoryLogs = controller.memoryLog.offlineFiles();
+
+      // Export memory to a memory log file.
+      await tester.tap(find.byType(ExportButton));
+      await tester.pump();
+
+      expect(controller.offline.value, isFalse);
+
+      expect(controller.memoryTimeline.liveData, isEmpty);
+      expect(controller.memoryTimeline.offlineData, isEmpty);
+
+      final currentMemoryLogs = controller.memoryLog.offlineFiles();
+      expect(currentMemoryLogs.length, previousMemoryLogs.length + 1);
+
+      // Verify that memory source is still live feed.
+      expect(controller.offline.value, isFalse);
+    });
 
     testWidgetsWithWindowSize(
-      'export current memory profile',
-      windowSize,
-      (WidgetTester tester) async {
-        await pumpMemoryScreen(tester);
+        'switch from live feed and load exported file', windowSize,
+        (WidgetTester tester) async {
+      await pumpMemoryScreen(tester);
 
-        // Verify initial state - collecting live feed.
-        expect(controller.offline.value, isFalse);
+      // Live feed should be default selected.
+      expect(controller.memorySource, MemoryController.liveFeed);
 
-        final previousMemoryLogs = controller.memoryLog.offlineFiles();
+      // Expand the memory sources.
+      await tester.tap(find.byKey(sourcesDropdownKey));
+      await tester.pumpAndSettle();
 
-        // Export memory to a memory log file.
-        await tester.tap(find.byType(ExportButton));
-        await tester.pump();
+      // Last item in dropdown list of memory source should be memory log file.
+      await tester
+          .tap(find.byType(typeOf<SourceDropdownMenuItem<String>>()).last);
+      await tester.pump();
 
-        expect(controller.offline.value, isFalse);
+      expect(
+        controller.memorySource,
+        startsWith(MemoryController.logFilenamePrefix),
+      );
 
-        expect(controller.memoryTimeline.liveData, isEmpty);
-        expect(controller.memoryTimeline.offlineData, isEmpty);
+      final filenames = controller.memoryLog.offlineFiles();
+      final filename = filenames.first;
 
-        final currentMemoryLogs = controller.memoryLog.offlineFiles();
-        expect(currentMemoryLogs.length, previousMemoryLogs.length + 1);
+      expect(filename, startsWith(MemoryController.logFilenamePrefix));
 
-        // Verify that memory source is still live feed.
-        expect(controller.offline.value, isFalse);
-      },
-      tags: ['golden'],
-    );
+      await controller.memoryLog.loadOffline(filename);
 
-    testWidgetsWithWindowSize(
-      'switch from live feed and load exported file',
-      windowSize,
-      (WidgetTester tester) async {
-        await pumpMemoryScreen(tester);
+      expect(controller.offline.value, isTrue);
 
-        // Live feed should be default selected.
-        expect(controller.memorySource, MemoryController.liveFeed);
+      // Remove the memory log, in desktop only version.  Don't want to polute
+      // our temp directory when this test runs locally.
+      expect(controller.memoryLog.removeOfflineFile(filename), isTrue);
+    });
 
-        // Expand the memory sources.
-        await tester.tap(find.byKey(sourcesDropdownKey));
-        await tester.pumpAndSettle();
+    testWidgetsWithWindowSize('heap tree view', windowSize,
+        (WidgetTester tester) async {
+      await pumpMemoryScreen(tester);
+      initControllerState();
+      await tester.tap(find.text('Analysis'));
+      await tester.pumpAndSettle();
 
-        // Last item in dropdown list of memory source should be memory log file.
-        await tester
-            .tap(find.byType(typeOf<SourceDropdownMenuItem<String>>()).last);
-        await tester.pump();
+      final heapSnapShotFinder = find.text('Take Heap Snapshot');
 
-        expect(
-          controller.memorySource,
-          startsWith(MemoryController.logFilenamePrefix),
-        );
+      expect(heapSnapShotFinder, findsOneWidget);
 
-        final filenames = controller.memoryLog.offlineFiles();
-        final filename = filenames.first;
+      expect(controller.offline.value, isTrue);
 
-        expect(filename, startsWith(MemoryController.logFilenamePrefix));
+      // Verify default event pane and vm chart exists.
+      expect(find.byType(MemoryEventsPane), findsOneWidget);
+      expect(find.byType(MemoryVMChart), findsOneWidget);
 
-        await controller.memoryLog.loadOffline(filename);
+      expect(controller.memoryTimeline.liveData.isEmpty, isTrue);
+      expect(controller.memoryTimeline.offlineData.isNotEmpty, isTrue);
 
-        expect(controller.offline.value, isTrue);
+      controller.refreshAllCharts();
+      expect(controller.isAndroidChartVisibleNotifier.value, true);
 
-        // Remove the memory log, in desktop only version.  Don't want to polute
-        // our temp directory when this test runs locally.
-        expect(controller.memoryLog.removeOfflineFile(filename), isTrue);
-      },
-      tags: ['golden'],
-    );
+      // Await charts to update.
+      await tester.pumpAndSettle(const Duration(seconds: 2));
 
-    testWidgetsWithWindowSize(
-      'heap tree view',
-      windowSize,
-      (WidgetTester tester) async {
-        await pumpMemoryScreen(tester);
-        initControllerState();
-        await tester.tap(find.text('Analysis'));
-        await tester.pumpAndSettle();
+      expect(controller.memoryTimeline.data.isEmpty, isFalse);
 
-        final heapSnapShotFinder = find.text('Take Heap Snapshot');
+      final data = controller.memoryTimeline.data;
 
-        expect(heapSnapShotFinder, findsOneWidget);
+      // Total number of collected HeapSamples.
+      expect(data.length, 104);
 
-        expect(controller.offline.value, isTrue);
+      // Number of VM GCs
+      final totalGCEvents = data.where((element) => element.isGC);
+      expect(totalGCEvents.length, 46);
 
-        // Verify default event pane and vm chart exists.
-        expect(find.byType(MemoryEventsPane), findsOneWidget);
-        expect(find.byType(MemoryVMChart), findsOneWidget);
+      // User initiated GCs
+      final totalUserGCEvents =
+          data.where((element) => element.memoryEventInfo.isEventGC);
+      expect(totalUserGCEvents.length, 3);
 
-        expect(controller.memoryTimeline.liveData.isEmpty, isTrue);
-        expect(controller.memoryTimeline.offlineData.isNotEmpty, isTrue);
+      // User initiated Snapshots
+      final totalSnapshotEvents =
+          data.where((element) => element.memoryEventInfo.isEventSnapshot);
+      expect(totalSnapshotEvents.length, 1);
 
-        controller.refreshAllCharts();
-        expect(controller.isAndroidChartVisibleNotifier.value, true);
+      // Number of auto-Snapshots
+      final totalSnapshotAutoEvents =
+          data.where((element) => element.memoryEventInfo.isEventSnapshotAuto);
+      expect(totalSnapshotAutoEvents.length, 2);
 
-        // Await charts to update.
-        await tester.pumpAndSettle(const Duration(seconds: 2));
+      // Total Allocation Monitor events (many are empty).
+      final totalAllocationMonitorEvents = data.where(
+        (element) => element.memoryEventInfo.isEventAllocationAccumulator,
+      );
+      expect(totalAllocationMonitorEvents.length, 81);
 
-        expect(controller.memoryTimeline.data.isEmpty, isFalse);
+      // Number of user initiated allocation monitors
+      final startMonitors = totalAllocationMonitorEvents.where(
+        (element) => element.memoryEventInfo.allocationAccumulator!.isStart,
+      );
+      expect(startMonitors.length, 2);
 
-        final data = controller.memoryTimeline.data;
+      // Number of accumulator resets
+      final resetMonitors = totalAllocationMonitorEvents.where(
+        (element) => element.memoryEventInfo.allocationAccumulator!.isReset,
+      );
+      expect(resetMonitors.length, 1);
 
-        // Total number of collected HeapSamples.
-        expect(data.length, 104);
+      final interval1Min =
+          MemoryController.displayIntervalToIntervalDurationInMs(
+        ChartInterval.OneMinute,
+      );
+      expect(interval1Min, 60000);
+      final interval5Min =
+          MemoryController.displayIntervalToIntervalDurationInMs(
+        ChartInterval.FiveMinutes,
+      );
+      expect(interval5Min, 300000);
 
-        // Number of VM GCs
-        final totalGCEvents = data.where((element) => element.isGC);
-        expect(totalGCEvents.length, 46);
+      // TODO(terry): Check intervals and autosnapshot does it snapshot same points?
+      // TODO(terry): Simulate sample run of liveData filling up?
 
-        // User initiated GCs
-        final totalUserGCEvents =
-            data.where((element) => element.memoryEventInfo.isEventGC);
-        expect(totalUserGCEvents.length, 3);
+      // Take a snapshot
+      await tester.tap(heapSnapShotFinder);
+      await tester.pump();
 
-        // User initiated Snapshots
-        final totalSnapshotEvents =
-            data.where((element) => element.memoryEventInfo.isEventSnapshot);
-        expect(totalSnapshotEvents.length, 1);
+      final snapshotIconLabel = tester.element(heapSnapShotFinder);
+      final snapshotButton =
+          snapshotIconLabel.findAncestorWidgetOfExactType<OutlinedButton>()!;
 
-        // Number of auto-Snapshots
-        final totalSnapshotAutoEvents = data
-            .where((element) => element.memoryEventInfo.isEventSnapshotAuto);
-        expect(totalSnapshotAutoEvents.length, 2);
+      expect(snapshotButton.enabled, isFalse);
+      await tester.pumpAndSettle(const Duration(seconds: 3));
 
-        // Total Allocation Monitor events (many are empty).
-        final totalAllocationMonitorEvents = data.where(
-          (element) => element.memoryEventInfo.isEventAllocationAccumulator,
-        );
-        expect(totalAllocationMonitorEvents.length, 81);
+      expect(
+        controller.selectedSnapshotTimestamp!.millisecondsSinceEpoch,
+        lessThan(DateTime.now().millisecondsSinceEpoch),
+      );
 
-        // Number of user initiated allocation monitors
-        final startMonitors = totalAllocationMonitorEvents.where(
-          (element) => element.memoryEventInfo.allocationAccumulator!.isStart,
-        );
-        expect(startMonitors.length, 2);
+      await tester.pumpAndSettle(const Duration(seconds: 2));
 
-        // Number of accumulator resets
-        final resetMonitors = totalAllocationMonitorEvents.where(
-          (element) => element.memoryEventInfo.allocationAccumulator!.isReset,
-        );
-        expect(resetMonitors.length, 1);
+      await expectLater(
+        find.byType(MemoryVMChart),
+        matchesDevToolsGolden('../goldens/memory_heap_android.png'),
+      );
 
-        final interval1Min =
-            MemoryController.displayIntervalToIntervalDurationInMs(
-          ChartInterval.OneMinute,
-        );
-        expect(interval1Min, 60000);
-        final interval5Min =
-            MemoryController.displayIntervalToIntervalDurationInMs(
-          ChartInterval.FiveMinutes,
-        );
-        expect(interval5Min, 300000);
+      // Await delay for golden comparison.
+      await tester.pumpAndSettle(const Duration(seconds: 2));
 
-        // TODO(terry): Check intervals and autosnapshot does it snapshot same points?
-        // TODO(terry): Simulate sample run of liveData filling up?
-
-        // Take a snapshot
-        await tester.tap(heapSnapShotFinder);
-        await tester.pump();
-
-        final snapshotIconLabel = tester.element(heapSnapShotFinder);
-        final snapshotButton =
-            snapshotIconLabel.findAncestorWidgetOfExactType<OutlinedButton>()!;
-
-        expect(snapshotButton.enabled, isFalse);
-        await tester.pumpAndSettle(const Duration(seconds: 3));
-
-        expect(
-          controller.selectedSnapshotTimestamp!.millisecondsSinceEpoch,
-          lessThan(DateTime.now().millisecondsSinceEpoch),
-        );
-
-        await tester.pumpAndSettle(const Duration(seconds: 2));
-
-        await expectLater(
-          find.byType(MemoryVMChart),
-          matchesDevToolsGolden('../goldens/memory_heap_android.png'),
-        );
-
-        // Await delay for golden comparison.
-        await tester.pumpAndSettle(const Duration(seconds: 2));
-
-        // TODO(terry): Need to test legend.
-        /*
+      // TODO(terry): Need to test legend.
+      /*
       // Bring up the full legend with Android chart visible.
       expect(find.byKey(legendKey), findsOneWidget);
       // Bring up the legend.
@@ -415,8 +402,6 @@ void main() {
       // Await delay for golden comparison.
       await tester.pumpAndSettle(const Duration(seconds: 2));
       */
-      },
-      tags: ['golden'],
-    );
+    });
   });
 }

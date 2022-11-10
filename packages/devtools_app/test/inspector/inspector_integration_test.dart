@@ -57,103 +57,99 @@ void main() async {
       await env.tearDownEnvironment(force: true);
     });
 
-    testWidgetsWithWindowSize(
-      'navigation',
-      windowSize,
-      (WidgetTester tester) async {
-        await env.setupEnvironment();
-        expect(serviceManager.service, equals(env.service));
-        expect(serviceManager.isolateManager, isNotNull);
+    testWidgetsWithWindowSize('navigation', windowSize,
+        (WidgetTester tester) async {
+      await env.setupEnvironment();
+      expect(serviceManager.service, equals(env.service));
+      expect(serviceManager.isolateManager, isNotNull);
 
-        const screen = InspectorScreen();
-        await tester.pumpWidget(
-          wrapWithInspectorControllers(Builder(builder: screen.build)),
-        );
-        await tester.pump(const Duration(seconds: 1));
-        final InspectorScreenBodyState state =
-            tester.state(find.byType(InspectorScreenBody));
-        final controller = state.controller;
-        while (!controller.flutterAppFrameReady) {
-          await controller.maybeLoadUI();
-          await tester.pumpAndSettle();
-        }
-        // Give time for the initial animation to complete.
-        await tester.pumpAndSettle(inspectorChangeSettleTime);
-        await expectLater(
-          find.byType(InspectorScreenBody),
-          matchesDevToolsGolden(
-            '../goldens/integration_inspector_initial_load.png',
-          ),
-        );
+      const screen = InspectorScreen();
+      await tester.pumpWidget(
+        wrapWithInspectorControllers(Builder(builder: screen.build)),
+      );
+      await tester.pump(const Duration(seconds: 1));
+      final InspectorScreenBodyState state =
+          tester.state(find.byType(InspectorScreenBody));
+      final controller = state.controller;
+      while (!controller.flutterAppFrameReady) {
+        await controller.maybeLoadUI();
+        await tester.pumpAndSettle();
+      }
+      // Give time for the initial animation to complete.
+      await tester.pumpAndSettle(inspectorChangeSettleTime);
+      await expectLater(
+        find.byType(InspectorScreenBody),
+        matchesDevToolsGolden(
+          '../goldens/integration_inspector_initial_load.png',
+        ),
+      );
 
-        // Click on the Center widget (row index #5)
-        await tester.tap(find.richText('Center'));
-        await tester.pumpAndSettle(inspectorChangeSettleTime);
-        await expectLater(
-          find.byType(InspectorScreenBody),
-          matchesDevToolsGolden(
-            '../goldens/integration_inspector_select_center.png',
-          ),
-        );
+      // Click on the Center widget (row index #5)
+      await tester.tap(find.richText('Center'));
+      await tester.pumpAndSettle(inspectorChangeSettleTime);
+      await expectLater(
+        find.byType(InspectorScreenBody),
+        matchesDevToolsGolden(
+          '../goldens/integration_inspector_select_center.png',
+        ),
+      );
 
-        // Select the details tree.
-        await tester.tap(find.text('Widget Details Tree'));
-        await tester.pumpAndSettle(inspectorChangeSettleTime);
-        await expectLater(
-          find.byType(InspectorScreenBody),
-          matchesDevToolsGolden(
-            '../goldens/integration_inspector_select_center_details_tree.png',
-          ),
-        );
+      // Select the details tree.
+      await tester.tap(find.text('Widget Details Tree'));
+      await tester.pumpAndSettle(inspectorChangeSettleTime);
+      await expectLater(
+        find.byType(InspectorScreenBody),
+        matchesDevToolsGolden(
+          '../goldens/integration_inspector_select_center_details_tree.png',
+        ),
+      );
 
-        // Select the RichText row.
-        await tester.tap(find.richText('RichText'));
-        await tester.pumpAndSettle(inspectorChangeSettleTime);
-        await expectLater(
-          find.byType(InspectorScreenBody),
-          matchesDevToolsGolden(
-            '../goldens/integration_inspector_richtext_selected.png',
-          ),
-        );
+      // Select the RichText row.
+      await tester.tap(find.richText('RichText'));
+      await tester.pumpAndSettle(inspectorChangeSettleTime);
+      await expectLater(
+        find.byType(InspectorScreenBody),
+        matchesDevToolsGolden(
+          '../goldens/integration_inspector_richtext_selected.png',
+        ),
+      );
 
-        // Test hovering over the icon shown when a property has its default
-        // value.
-        // TODO(jacobr): support tooltips in the Flutter version of the inspector.
-        // https://github.com/flutter/devtools/issues/2570.
-        // For example, verify that the tooltip hovering over the default value
-        // icons is "Default value".
-        // Test selecting a widget.
+      // Test hovering over the icon shown when a property has its default
+      // value.
+      // TODO(jacobr): support tooltips in the Flutter version of the inspector.
+      // https://github.com/flutter/devtools/issues/2570.
+      // For example, verify that the tooltip hovering over the default value
+      // icons is "Default value".
+      // Test selecting a widget.
 
-        // Two 'Scaffold's: a breadcrumb and an actual tree item
-        expect(find.richText('Scaffold'), findsNWidgets(2));
-        // select Scaffold widget in summary tree.
-        await tester.tap(find.richText('Scaffold').last);
-        await tester.pumpAndSettle(inspectorChangeSettleTime);
-        // This tree is huge. If there is a change to package:flutter it may
-        // change. If this happens don't panic and rebaseline the golden.
-        await expectLater(
-          find.byType(InspectorScreenBody),
-          matchesDevToolsGolden(
-            '../goldens/integration_inspector_scaffold_selected.png',
-          ),
-        );
+      // Two 'Scaffold's: a breadcrumb and an actual tree item
+      expect(find.richText('Scaffold'), findsNWidgets(2));
+      // select Scaffold widget in summary tree.
+      await tester.tap(find.richText('Scaffold').last);
+      await tester.pumpAndSettle(inspectorChangeSettleTime);
+      // This tree is huge. If there is a change to package:flutter it may
+      // change. If this happens don't panic and rebaseline the golden.
+      await expectLater(
+        find.byType(InspectorScreenBody),
+        matchesDevToolsGolden(
+          '../goldens/integration_inspector_scaffold_selected.png',
+        ),
+      );
 
-        // The important thing about this is that the details tree should scroll
-        // instead of re-rooting as the selected row is already visible in the
-        // details tree.
-        await tester.tap(find.richText('AnimatedPhysicalModel'));
-        await tester.pumpAndSettle(inspectorChangeSettleTime);
-        await expectLater(
-          find.byType(InspectorScreenBody),
-          matchesDevToolsGolden(
-            '../goldens/integration_animated_physical_model_selected.png',
-          ),
-        );
+      // The important thing about this is that the details tree should scroll
+      // instead of re-rooting as the selected row is already visible in the
+      // details tree.
+      await tester.tap(find.richText('AnimatedPhysicalModel'));
+      await tester.pumpAndSettle(inspectorChangeSettleTime);
+      await expectLater(
+        find.byType(InspectorScreenBody),
+        matchesDevToolsGolden(
+          '../goldens/integration_animated_physical_model_selected.png',
+        ),
+      );
 
-        await env.tearDownEnvironment();
-      },
-      tags: ['golden'],
-    );
+      await env.tearDownEnvironment();
+    });
 
     // TODO(jacobr): convert these tests to screenshot tests like the initial
     // state test.
@@ -412,56 +408,52 @@ void main() async {
       await env.tearDownEnvironment(force: true);
     });
 
-    testWidgetsWithWindowSize(
-      'show navigator and error labels',
-      windowSize,
-      (WidgetTester tester) async {
-        await env.setupEnvironment(
-          config: const FlutterRunConfiguration(
-            withDebugger: true,
-            entryScript: 'lib/overflow_errors.dart',
-          ),
-        );
-        expect(serviceManager.service, equals(env.service));
-        expect(serviceManager.isolateManager, isNotNull);
+    testWidgetsWithWindowSize('show navigator and error labels', windowSize,
+        (WidgetTester tester) async {
+      await env.setupEnvironment(
+        config: const FlutterRunConfiguration(
+          withDebugger: true,
+          entryScript: 'lib/overflow_errors.dart',
+        ),
+      );
+      expect(serviceManager.service, equals(env.service));
+      expect(serviceManager.isolateManager, isNotNull);
 
-        const screen = InspectorScreen();
-        await tester.pumpWidget(
-          wrapWithInspectorControllers(Builder(builder: screen.build)),
-        );
-        await tester.pumpAndSettle(const Duration(seconds: 1));
-        final InspectorScreenBodyState state =
-            tester.state(find.byType(InspectorScreenBody));
-        final controller = state.controller;
-        while (!controller.flutterAppFrameReady) {
-          await controller.maybeLoadUI();
-          await tester.pumpAndSettle();
-        }
-        await env.flutter!.hotReload();
-        // Give time for the initial animation to complete.
+      const screen = InspectorScreen();
+      await tester.pumpWidget(
+        wrapWithInspectorControllers(Builder(builder: screen.build)),
+      );
+      await tester.pumpAndSettle(const Duration(seconds: 1));
+      final InspectorScreenBodyState state =
+          tester.state(find.byType(InspectorScreenBody));
+      final controller = state.controller;
+      while (!controller.flutterAppFrameReady) {
+        await controller.maybeLoadUI();
+        await tester.pumpAndSettle();
+      }
+      await env.flutter!.hotReload();
+      // Give time for the initial animation to complete.
+      await tester.pumpAndSettle(inspectorChangeSettleTime);
+      await expectLater(
+        find.byType(InspectorScreenBody),
+        matchesDevToolsGolden(
+          '../goldens/integration_inspector_errors_1_initial_load.png',
+        ),
+      );
+
+      // Navigate so one of the errors is selected.
+      for (var i = 0; i < 2; i++) {
+        await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
         await tester.pumpAndSettle(inspectorChangeSettleTime);
-        await expectLater(
-          find.byType(InspectorScreenBody),
-          matchesDevToolsGolden(
-            '../goldens/integration_inspector_errors_1_initial_load.png',
-          ),
-        );
+      }
+      await expectLater(
+        find.byType(InspectorScreenBody),
+        matchesDevToolsGolden(
+          '../goldens/integration_inspector_errors_2_error_selected.png',
+        ),
+      );
 
-        // Navigate so one of the errors is selected.
-        for (var i = 0; i < 2; i++) {
-          await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
-          await tester.pumpAndSettle(inspectorChangeSettleTime);
-        }
-        await expectLater(
-          find.byType(InspectorScreenBody),
-          matchesDevToolsGolden(
-            '../goldens/integration_inspector_errors_2_error_selected.png',
-          ),
-        );
-
-        await env.tearDownEnvironment();
-      },
-      tags: ['golden'],
-    );
+      await env.tearDownEnvironment();
+    });
   });
 }

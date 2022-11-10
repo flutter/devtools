@@ -180,7 +180,6 @@ void main() {
       },
       // ignore: avoid_redundant_argument_values
       skip: kIsWeb,
-      tags: ['golden'],
     );
   });
 }
