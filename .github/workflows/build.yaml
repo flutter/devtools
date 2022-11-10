@@ -30,13 +30,7 @@ jobs:
       - name: Get Latest Flutter Candidate
         id: flutter-candidate
         run: |
-          ./tool/latest_flutter_candidate.sh
           LATEST_FLUTTER_CANDIDATE=$(./tool/latest_flutter_candidate.sh)
-          echo $LATEST_FLUTTER_CANDIDATE
-          if [ -z ${LATEST_FLUTTER_CANDIDATE+x} ]; then
-            echo "::error ::Unable to get Latest flutter candidate"
-            exit 1
-          fi
           echo "FLUTTER_CANDIDATE=$LATEST_FLUTTER_CANDIDATE" >> $GITHUB_OUTPUT
           
       - name: Load Cached Flutter SDK
@@ -53,8 +47,14 @@ jobs:
             cd flutter-sdk
             git checkout $LATEST_FLUTTER_CANDIDATE
           fi
+          HEAD_SHA=$(git rev-parse HEAD)
+          LATEST_FLUTTER_CANDIDATE_SHA=$(git rev-parse $LATEST_FLUTTER_CANDIDATE)
+          if [ "$HEAD_SHA" != "$LATEST_FLUTTER_CANDIDATE_SHA" ]; then
+            echo "::error ,title=Error checking out Latest Flutter Candidate::{expected HEAD to be at $LATEST_FLUTTER_CANDIDATE_SHA but got $HEAD_SHA}"
+            exit 1
+          fi
         env:
-          FLUTTER_HEAD_SHA: ${{ steps.get-flutter-head.outputs.SHA }}
+          LATEST_FLUTTER_CANDIDATE: ${{ steps.flutter-candidate.outputs.FLUTTER_CANDIDATE }}
 
       - name: Setup Flutter SDK
         run: |

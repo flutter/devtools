@@ -27,10 +27,8 @@ function flutter {
 }
 
 # Make sure Flutter sdk has been provided
-ls -l .
-ls -l ..
 if [ ! -d "./flutter-sdk" ]; then
-    echo "Expected ./flutter-sdk to exist and be checked out to the right commit"
+    echo "Expected ./flutter-sdk to exist"
     exit 1;
 fi
 
@@ -39,7 +37,6 @@ fi
 # can and does print 'Waiting for another flutter command...' at inopportune
 # times.
 export PATH=`pwd`/flutter-sdk/bin/cache/dart-sdk/bin:`pwd`/flutter-sdk/bin:`pwd`/bin:$PATH
-
 
 # Look up the latest flutter candidate (this is the latest flutter version in g3)
 # TODO(https://github.com/flutter/devtools/issues/4591): re-write this script as a
