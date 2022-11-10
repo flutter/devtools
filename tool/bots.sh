@@ -94,7 +94,7 @@ if [ "$BOT" = "main" ]; then
     pushd packages/devtools_shared
     echo `pwd`
 
-    flutter test --total-shards 3 --shard-index $SHARD_INDEX test/
+    flutter test test/
     popd
 
     # Change the directory back to devtools_app.
@@ -128,9 +128,9 @@ elif [[ "$BOT" == "test_ddc" || "$BOT" == "test_dart2js" ]]; then
     # we may need to explicitly exclude running integration_tests here (this is what we
     # used to do when integration tests were enabled).
     if [ "$PLATFORM" = "vm" ]; then
-        WEBDEV_RELEASE=$USE_WEBDEV_RELEASE flutter test --total-shards 3 --shard-index $SHARD_INDEX test/
+        WEBDEV_RELEASE=$USE_WEBDEV_RELEASE flutter test test/
     elif [ "$PLATFORM" = "chrome" ]; then
-        WEBDEV_RELEASE=$USE_WEBDEV_RELEASE flutter test --total-shards 3 --shard-index $SHARD_INDEX --platform chrome test/
+        WEBDEV_RELEASE=$USE_WEBDEV_RELEASE flutter test --platform chrome test/
     else
         echo "unknown test platform"
         exit 1
