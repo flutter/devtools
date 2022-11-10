@@ -18,12 +18,15 @@ env:
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
-  ubuntu-flutter-prep:
+  flutter-prep:
     name: Ubuntu Flutter Prep
-    runs-on: ubuntu-latest 
     #TODO can this be matrixed on OS.
     outputs:
       latest_flutter_candidate: ${{ steps.flutter-candidate.outputs.FLUTTER_CANDIDATE }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - name: git clone devtools
         uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
@@ -71,7 +74,7 @@ jobs:
 
   main:
     name: main
-    needs: ubuntu-flutter-prep
+    needs: flutter-prep
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -83,7 +86,7 @@ jobs:
         with:
           path: |
             ./flutter-sdk
-          key: flutter-sdk-${{ runner.os }}-${{ needs.ubuntu-flutter-prep.outputs.latest_flutter_candidate }} 
+          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }} 
 
       - name: tool/bots.sh
         env:
