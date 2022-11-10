@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 # Copyright 2022 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
@@ -6,9 +6,7 @@
 RESPONSE=$(gh api --paginate /repos/flutter/flutter/branches)
 CANDIDATES=$(echo "$RESPONSE" | jq '.[].name' | grep candidate)
 
-VERSIONS=$(echo "$CANDIDATES" |  egrep -o "\d+\.\d+\-candidate\.\d+" )
-
-
+VERSIONS=$(echo "$CANDIDATES" | sed -E 's/.*([0-9]+\.[0-9]+-candidate\.[0-9]+).*/\1/' )
 
 LATEST_VERSION=$(echo "$VERSIONS" |  sort --version-sort | tail  -n 1 )
 
