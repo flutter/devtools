@@ -27,29 +27,31 @@ jobs:
     steps:
       - name: git clone devtools
         uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
+
       - name: Get Latest Flutter Candidate
         id: flutter-candidate
         run: |
           LATEST_FLUTTER_CANDIDATE=$(./tool/latest_flutter_candidate.sh)
           echo "FLUTTER_CANDIDATE=$LATEST_FLUTTER_CANDIDATE" >> $GITHUB_OUTPUT
-          
+      
       - name: Load Cached Flutter SDK
+        id: cache-flutter
         uses: actions/cache@v3
         with:
           path: |
             ./flutter-sdk
           key: flutter-sdk-${{ runner.os }}-${{ steps.flutter-candidate.outputs.FLUTTER_CANDIDATE }}
 
-      - name: Clone Flutter SDK if none cached
+      - if: ${{ steps.cache-flutter.outputs.cache-hit != 'true' }}
+        name: Clone Flutter SDK if none cached
         run: |
-          if [ ! -d "./flutter-sdk" ]; then
-            git clone https://github.com/flutter/flutter.git ./flutter-sdk
-            cd flutter-sdk
-            git checkout $LATEST_FLUTTER_CANDIDATE
-          fi
+          git clone https://github.com/flutter/flutter.git ./flutter-sdk
+          cd flutter-sdk
+          git checkout $LATEST_FLUTTER_CANDIDATE
         env:
           LATEST_FLUTTER_CANDIDATE: ${{ steps.flutter-candidate.outputs.FLUTTER_CANDIDATE }}
-      - name: Ensure that the Latest Flutter Candidate is checked out
+
+      - name: Assert that the Latest Flutter Candidate is checked out
         run: |
             cd flutter-sdk
             HEAD_SHA=$(git rev-parse HEAD)
