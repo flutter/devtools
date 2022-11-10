@@ -16,7 +16,7 @@ permissions: read-all
 env:
   AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+  ACTIONS_RUNNER_DEBUG: true
 jobs:
   flutter-prep:
     name: ${{ matrix.os }} Flutter Prep
