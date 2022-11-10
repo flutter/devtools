@@ -77,14 +77,6 @@ jobs:
             ./flutter-sdk
           key: flutter-sdk-${{ runner.os }}-${{ needs.ubuntu-flutter-prep.outputs.latest_flutter_candidate }} 
 
-      - name: Cache Generated Files
-        uses: actions/cache@v3
-        with:
-          path: |
-            **/build/
-            **/.dart_tool/
-            ./flutter-sdk
-          key: ${{ runner.os }}-cache
       - name: tool/bots.sh
         env:
           BOT: main
