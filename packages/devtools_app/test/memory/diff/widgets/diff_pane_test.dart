@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../../test_infra/matchers.dart';
-import '../../../scenes/memory/default.dart';
+import '../../../test_infra/scenes/memory/default.dart';
 
 void main() {
   group('Diff pane', () {
