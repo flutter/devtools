@@ -12,7 +12,7 @@ import '../test_data/cpu_profile.dart';
 import '../test_data/performance.dart';
 import '../test_data/performance_raster_stats.dart';
 
-import '../test_utils/test_utils.dart';
+import '../test_infra/utils/test_utils.dart';
 
 void main() {
   group('PerformanceData', () {
