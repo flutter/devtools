@@ -391,6 +391,11 @@ extension DevToolsColorScheme on ColorScheme {
 
   Color get coverageHitColor => treemapIncreaseColor;
   Color get coverageMissColor => treemapDecreaseColor;
+
+  List<Color> get treeGuidelineColors => [
+        devtoolsBlue[400]!,
+        devtoolsYellow[700]!,
+      ];
 }
 
 /// Utility extension methods to the [ThemeData] class.
