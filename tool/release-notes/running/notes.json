@@ -1,43 +1,56 @@
 {
   "version": {
-    "major": 2,
-    "minor": 19,
-    "patch": 8,
-    "preReleaseMajor": null,
-    "preReleaseMinor": null
+       "major": 2,
+       "minor": 19,
+       "patch": 0,
+       "pre": null
   },
   "sections": [
-    {
-      "name": "General updates",
-      "notes": []
-    },
-    {
-      "name": "Inspector update",
-      "notes": []
-    },
-    {
-      "name": "Performance updates",
-      "notes": []
-    },
-    {
-      "name": "CPU profiler updates",
-      "notes": []
-    },
-    {
-      "name": "Memory updates",
-      "notes": []
-    },
-    {
-      "name": "Network profiler updates",
-      "notes": []
-    },
-    {
-      "name": "Logging updates",
-      "notes": []
-    },
-    {
-      "name": "App size tool updates",
-      "notes": []
-    }
+       {
+            "name": "Inspector updates",
+            "notes": [
+                 {
+                      "githubPullRequestUrls": [
+                           "https://github.com/flutter/devtools/pull/4283"
+                      ],
+                      "message": "Auto scrolling behavior improved when snapping to a widget into focus"
+                 },
+                 {
+                      "githubPullRequestUrls": [
+                           "https://github.com/flutter/devtools/pull/4527"
+                      ],
+                      "message": "Fix issue where widget inspector wouldn't load when connecting to a paused  app"
+                 },
+                 {
+                      "githubPullRequestUrls": [
+                           "https://github.com/flutter/devtools/pull/4572"
+                      ],
+                      "message": "Improve widget inspector hover cards to show progress while waiting for data"
+                 }
+            ]
+       },
+       {
+            "name": "Performance updates",
+            "notes": [
+                 {
+                      "githubPullRequestUrls": [
+                           "https://www.dan.com"
+                      ],
+                      "message": "Fix issue where scrollbar would go out of sync with the frame content"
+                 },
+                 {
+                      "githubPullRequestUrls": [
+                           "https://github.com/flutter/devtools/pull/4491"
+                      ],
+                      "message": "Add offline support for raster stats"
+                 },
+                 {
+                      "githubPullRequestUrls": [
+                           "https://github.com/flutter/devtools/pull/4474"
+                      ],
+                      "message": "Add 'Rendering time' column to Raster Metrics tab"
+                 }
+            ]
+       }
   ]
 }

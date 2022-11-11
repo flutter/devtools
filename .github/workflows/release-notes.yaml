@@ -4,7 +4,7 @@ on:
   pull_request:
     types: [ assigned, opened, synchronize, reopened, edited ]
 env:
-  JSON_RELEASE_FILE_PATH: packages/devtools_app/lib/src/framework/release_notes/release_notes-latest.json
+  CURRENT_RELEASE_JSON_FILE_PATH: tool/release-notes/running/notes.json
 jobs:
   release-preparedness:
     runs-on: ubuntu-latest
@@ -26,7 +26,7 @@ jobs:
           FILES_RESPONSE=$(gh api /repos/flutter/devtools/pulls/$PULL_NUMBER/files)
           echo "FILES_RESPONSE: $FILES_RESPONSE"
           
-          HAS_CHANGED_RELEASE_NOTES=$(echo $FILES_RESPONSE | jq '.[].filename' | jq -s '. | any(. == env.JSON_RELEASE_FILE_PATH)')
+          HAS_CHANGED_RELEASE_NOTES=$(echo $FILES_RESPONSE | jq '.[].filename' | jq -s '. | any(. == env.CURRENT_RELEASE_JSON_FILE_PATH)')
           echo "HAS_CHANGED_RELEASE_NOTES: $HAS_CHANGED_RELEASE_NOTES"
           echo "::set-output name=HAS_CHANGED_RELEASE_NOTES::$HAS_CHANGED_RELEASE_NOTES"
       - name: Get PR Description
@@ -52,7 +52,7 @@ jobs:
         run: |
           if [ "$HAS_CHANGED_RELEASE_NOTES" != "true" ] && [ "$HAS_RELEASE_NOTE_EXCEPTION_STRING" != "true" ] ; then
             echo "Release Preparedness check failed"
-            echo "::error file=$JSON_RELEASE_FILE_PATH,line=0,col=0,endColumn=0,title='Release Notes Weren\'t Modified'::Please add a release note entry or a reason to your description using: \`> NO RELEASE NOTE CHANGES: [reason goes here]\`"
+            echo "::error file=$CURRENT_RELEASE_JSON_FILE_PATH,line=0,col=0,endColumn=0,title='Release Notes Weren\'t Modified'::Please add a release note entry or a reason to your description using: \`> NO RELEASE NOTE CHANGES: [reason goes here]\`"
             exit 1
           fi
 
@@ -71,7 +71,7 @@ jobs:
         run: |
           cd tool/
           dart pub get
-          dart release_note_helper.dart verify -f "../$JSON_RELEASE_FILE_PATH"
+          dart release_note_helper.dart verify -f "../$CURRENT_RELEASE_JSON_FILE_PATH"
       - name: Backfill PR Urls
         env:
           PULL_NUMBER: ${{steps.get-pull-request-number.outputs.PULL_REQUEST_NUMBER}}
@@ -80,14 +80,14 @@ jobs:
           cd tool/
           dart pub get
           dart ./release_note_helper.dart pr-url \
-            -f "../$JSON_RELEASE_FILE_PATH" \
+            -f "../$CURRENT_RELEASE_JSON_FILE_PATH" \
             -u https://github.com/flutter/devtools/pull/$PULL_NUMBER
       - name: Check if the User still needs to add Urls
         env:
           PULL_NUMBER: ${{steps.get-pull-request-number.outputs.PULL_REQUEST_NUMBER}}
         run: |
           if ! git diff --exit-code; then
-            echo "::error file=$JSON_RELEASE_FILE_PATH,line=0,col=0,endColumn=0,title='Release Note Validation failed'::Please make sure to add the PR Url to the release notes. You can automatically do this by running: \`dart tool/release_note_helper.dart pr-url -f $JSON_RELEASE_FILE_PATH -u https://github.com/flutter/devtools/pull/$PULL_NUMBER\`"
+            echo "::error file=$CURRENT_RELEASE_JSON_FILE_PATH,line=0,col=0,endColumn=0,title='Release Note Validation failed'::Please make sure to add the PR Url to the release notes. You can automatically do this by running: \`dart tool/release_note_helper.dart pr-url -f $CURRENT_RELEASE_JSON_FILE_PATH -u https://github.com/flutter/devtools/pull/$PULL_NUMBER\`"
             exit 1
           fi
 
