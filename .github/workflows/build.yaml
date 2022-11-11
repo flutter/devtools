@@ -51,6 +51,29 @@ jobs:
         env:
           LATEST_FLUTTER_CANDIDATE: ${{ steps.flutter-candidate.outputs.FLUTTER_CANDIDATE }}
 
+      - name: Load build cache
+        id: build-cache
+        # if: github.ref == 'refs/heads/master'
+        uses: actions/cache@v3
+        with:
+          path: |
+            ./packages/devtools_app/build
+            ./packages/devtools_test/build
+          key: build-cache-${{ runner.os }}-master
+
+      - if: ${{ steps.build-cache.outputs.cache-hit != 'true' }}
+        # if: github.ref == 'refs/heads/master'
+        name: generate_code if none cached
+        run: |
+          export PATH=`pwd`/flutter-sdk/bin/cache/dart-sdk/bin:`pwd`/flutter-sdk/bin:`pwd`/bin:$PATH
+          pushd packages/devtools_app
+          flutter pub get
+          popd
+          pushd packages/devtools_test
+          flutter pub get
+          popd
+          ./tool/generate_code.sh
+
       - name: Assert that the Latest Flutter Candidate is checked out
         run: |
             cd flutter-sdk
@@ -92,7 +115,7 @@ jobs:
           path: |
             ./packages/devtools_app/build
             ./packages/devtools_test/build
-          key: build-cache-${{ runner.os }}-${{ env.GITHUB_SHA }}
+          key: build-cache-${{ runner.os }}-master
 
       - name: tool/bots.sh
         env:
@@ -128,7 +151,7 @@ jobs:
           path: |
             ./packages/devtools_app/build
             ./packages/devtools_test/build
-          key: build-cache-${{ runner.os }}-${{ env.GITHUB_SHA }}
+          key: build-cache-${{ runner.os }}-master
 
       - name: tool/bots.sh
         env:
@@ -165,7 +188,7 @@ jobs:
           path: |
             ./packages/devtools_app/build
             ./packages/devtools_test/build
-          key: build-cache-${{ runner.os }}-${{ env.GITHUB_SHA }}
+          key: build-cache-${{ runner.os }}-master
 
       - name: tool/bots.sh
         env:
