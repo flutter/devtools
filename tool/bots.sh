@@ -110,6 +110,7 @@ elif [ "$BOT" = "build_ddc" ]; then
     flutter build web --pwa-strategy=none --no-tree-shake-icons
 
 elif [ "$BOT" = "build_dart2js" ]; then
+
     # Provision our packages.
     flutter pub get
 
@@ -122,6 +123,7 @@ elif [[ "$BOT" == "test_ddc" || "$BOT" == "test_dart2js" ]]; then
         USE_WEBDEV_RELEASE=false
     fi
     echo "USE_WEBDEV_RELEASE = $USE_WEBDEV_RELEASE"
+
     FILES="test/"
     if [ "$ONLY_GOLDEN" = "true" ]; then
         # Set the test files to only those containing golden test
