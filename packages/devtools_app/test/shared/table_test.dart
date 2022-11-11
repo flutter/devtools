@@ -962,6 +962,52 @@ void main() {
       expect(find.byWidget(table), findsOneWidget);
     });
 
+    testWidgets('displays wide data with many columns',
+        (WidgetTester tester) async {
+      const strings = <String>[
+        'All work',
+        'and no play',
+        'makes Ben',
+        'a dull boy',
+        // ignore: no_adjacent_strings_in_list
+        'The quick brown fox jumped over the lazy dog, although the fox '
+        "couldn't jump very high and the dog was very, very small, so it really"
+        " wasn't much of an achievement on the fox's part, so I'm not sure why "
+        "we're even talking about it."
+      ];
+      final root = TestData('Root', 0);
+      var current = root;
+      for (int i = 0; i < 1000; ++i) {
+        final next = TestData(strings[i % strings.length], i);
+        current.addChild(next);
+        current = next;
+      }
+      final table = TreeTable<TestData>(
+        columns: [
+          _NumberColumn(),
+          _CombinedColumn(),
+          treeColumn,
+          _CombinedColumn(),
+        ],
+        dataRoots: [root],
+        dataKey: 'test-data',
+        treeColumn: treeColumn,
+        keyFactory: (d) => Key(d.name),
+        defaultSortColumn: treeColumn,
+        defaultSortDirection: SortDirection.ascending,
+      );
+      await tester.pumpWidget(
+        wrap(
+          SizedBox(
+            width: 200.0,
+            height: 200.0,
+            child: table,
+          ),
+        ),
+      );
+      expect(find.byWidget(table), findsOneWidget);
+    });
+
     testWidgets('properly collapses and expands the tree',
         (WidgetTester tester) async {
       final table = TreeTable<TestData>(

@@ -7,6 +7,7 @@ import 'dart:math';
 import '../../primitives/trees.dart';
 import '../../primitives/utils.dart';
 import '../theme.dart';
+import '../utils.dart';
 import 'table_controller.dart';
 import 'table_data.dart';
 
@@ -105,42 +106,32 @@ extension FlatColumnWidthExtension<T> on FlatTableController<T> {
   }
 }
 
-// TODO(https://github.com/flutter/devtools/issues/2047): build flexible column
-// widths into the tables so that we do not have to do in depth calculations
-// like this.
-
 extension TreeColumnWidthExtension<T extends TreeNode<T>>
     on TreeTableController<T> {
-  /// The width to assume for columns that don't specify a width.
-  static const _defaultColumnWidth = 500.0;
-
   List<double> computeColumnWidths(List<T> flattenedList) {
-    final firstRoot = dataRoots.first;
-    var deepest = firstRoot;
-    // This will use the width of all rows in the table, even the rows
-    // that are hidden by nesting.
-    // We may want to change this to using a flattened list of only
-    // the list items that should show right now.
-    for (var node in flattenedList) {
-      if (node.level > deepest.level) {
-        deepest = node;
-      }
-    }
     final widths = <double>[];
     for (var column in columns) {
-      var width = column.getNodeIndentPx(deepest);
-      assert(width >= 0.0);
+      double width;
       if (column.fixedWidthPx != null) {
-        width += column.fixedWidthPx!;
+        width = column.fixedWidthPx!;
       } else {
-        // TODO(djshuckerow): measure the text of the longest content
-        // to get an idea for how wide this column should be.
-        // Text measurement is a somewhat expensive algorithm, so we don't
-        // want to do it for every row in the table, only the row
-        // we are confident is the widest.  A reasonable heuristic is the row
-        // with the longest text, but because of variable-width fonts, this is
-        // not always true.
-        width += _defaultColumnWidth;
+        // Note: this is assuming that we're always using a monospace font in
+        // our tree tables. This will almost certainly cause overflows if we
+        // try to use non-monospace fonts.
+        //
+        // `fontFactor` was determined through trial and error to roughly
+        // approximate the width of a single character.
+        const fontFactor = 9.0;
+        double longestWidth = 0;
+        for (var node in flattenedList) {
+          final width = column.getNodeIndentPx(node) +
+              (column.getDisplayValue(node).length *
+                  scaleByFontFactor(fontFactor));
+          if (width > longestWidth) {
+            longestWidth = width;
+          }
+        }
+        width = longestWidth;
       }
       widths.add(width);
     }
