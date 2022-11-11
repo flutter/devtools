@@ -207,8 +207,7 @@ void main() {
       storage.values.clear();
 
       // Remember original values.
-      final displayTreeGuidelines =
-          controller.displayTreeGuidelines.value;
+      final displayTreeGuidelines = controller.displayTreeGuidelines.value;
 
       // Flip the values in controller.
       controller.displayTreeGuidelines.value = !displayTreeGuidelines;
