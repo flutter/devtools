@@ -63,13 +63,7 @@ jobs:
       - if: ${{ steps.build-cache.outputs.cache-hit != 'true' }}
         name: generate_code if none cached
         run: |
-          echo "$(pwd)/flutter-sdk/bin/cache/dart-sdk/bin" >> $GITHUB_PATH
-          echo "$(pwd)/flutter-sdk/bin" >> $GITHUB_PATH
-          echo "$(pwd)/bin" >> $GITHUB_PATH
-          echo "$(pwd)/flutter-sdk/bin/cache/dart-sdk/bin"
-          echo "$(pwd)/flutter-sdk/bin"
-          echo "$(pwd)/bin"
-          echo $PATH
+          export PATH=`pwd`/flutter-sdk/bin/cache/dart-sdk/bin:`pwd`/flutter-sdk/bin:`pwd`/bin:$PATH
           ./tool/generate_code.sh
 
       - name: Assert that the Latest Flutter Candidate is checked out
