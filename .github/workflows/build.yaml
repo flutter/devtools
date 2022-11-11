@@ -36,7 +36,7 @@ jobs:
       
       - name: Load Cached Flutter SDK
         id: cache-flutter
-        uses: actions/cache@v3
+        uses: actions/cache@9b0c1fce7a93df8e3bb8926b0d6e9d89e92f20a7
         with:
           path: |
             ./flutter-sdk
@@ -79,7 +79,7 @@ jobs:
       - name: git clone
         uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
       - name: Load Cached Flutter SDK
-        uses: actions/cache@v3
+        uses: actions/cache@9b0c1fce7a93df8e3bb8926b0d6e9d89e92f20a7
         with:
           path: |
             ./flutter-sdk
@@ -106,7 +106,7 @@ jobs:
       - name: git clone
         uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
       - name: Load Cached Flutter SDK
-        uses: actions/cache@v3
+        uses: actions/cache@9b0c1fce7a93df8e3bb8926b0d6e9d89e92f20a7
         with:
           path: |
             ./flutter-sdk
@@ -130,7 +130,7 @@ jobs:
       - name: git clone
         uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
       - name: Load Cached Flutter SDK
-        uses: actions/cache@v3
+        uses: actions/cache@9b0c1fce7a93df8e3bb8926b0d6e9d89e92f20a7
         with:
           path: |
             ./flutter-sdk
@@ -142,7 +142,7 @@ jobs:
         run: ./tool/bots.sh
   
       - name: Upload Golden Failure Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@83fd05a356d7e2593de66fc9913b3002723633cb
         if: failure()
         with: 
           name: golden_image_failures.${{ matrix.bot }}
