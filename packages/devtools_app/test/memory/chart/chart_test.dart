@@ -15,7 +15,7 @@ import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../../matchers/matchers.dart';
+import '../../test_infra/matchers.dart';
 import '../../test_data/memory.dart';
 
 void main() {
