@@ -17,8 +17,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
-import '../../test_infra/matchers.dart';
 import '../../test_data/performance.dart';
+import '../../test_infra/matchers.dart';
 
 void main() {
   FakeServiceManager fakeServiceManager;

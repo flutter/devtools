@@ -9,8 +9,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../test_infra/matchers.dart';
 import '../../test_data/performance_raster_stats.dart';
+import '../../test_infra/matchers.dart';
 
 void main() {
   group('RenderingLayerVisualizer', () {
