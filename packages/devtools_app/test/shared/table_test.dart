@@ -970,10 +970,10 @@ void main() {
         'makes Ben',
         'a dull boy',
         // ignore: no_adjacent_strings_in_list
-        'The quick brown fox jumped over the lazy dog, although the fox '
-        "couldn't jump very high and the dog was very, very small, so it really"
-        " wasn't much of an achievement on the fox's part, so I'm not sure why "
-        "we're even talking about it."
+        'The quick brown fox jumps over the lazy dog, although the fox '
+            "can't jump very high and the dog is very, very small, so it really"
+            " isn't much of an achievement on the fox's part, so I'm not sure why "
+            "we're even talking about it."
       ];
       final root = TestData('Root', 0);
       var current = root;
@@ -996,6 +996,7 @@ void main() {
         defaultSortColumn: treeColumn,
         defaultSortDirection: SortDirection.ascending,
       );
+      // This test will throw an exception if the table overflows.
       await tester.pumpWidget(
         wrap(
           SizedBox(

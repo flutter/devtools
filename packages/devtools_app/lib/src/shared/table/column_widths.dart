@@ -119,14 +119,14 @@ extension TreeColumnWidthExtension<T extends TreeNode<T>>
         // our tree tables. This will almost certainly cause overflows if we
         // try to use non-monospace fonts.
         //
-        // `fontFactor` was determined through trial and error to roughly
+        // `characterWidth` was determined through trial and error to roughly
         // approximate the width of a single character.
-        const fontFactor = 9.0;
+        const characterWidth = 9.0;
         double longestWidth = 0;
         for (var node in flattenedList) {
           final width = column.getNodeIndentPx(node) +
               (column.getDisplayValue(node).length *
-                  scaleByFontFactor(fontFactor));
+                  scaleByFontFactor(characterWidth));
           if (width > longestWidth) {
             longestWidth = width;
           }
