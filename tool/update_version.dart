@@ -6,8 +6,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
-import 'package:devtools_repo/running_release_notes.dart' as rn;
 import 'package:devtools_shared/devtools_shared.dart';
+
+import 'release-notes/release_note_classes.dart' as rn;
 
 // This script must be executed from the top level devtools/ directory.
 // TODO(kenz): If changes are made to this script, first consider refactoring to
@@ -346,9 +347,9 @@ class AutoUpdateCommand extends Command {
   AutoUpdateCommand() {
     argParser.addOption('type',
         abbr: 't',
-        allowed: ['dev', 'dev,patch', 'dev,major', 'patch', 'minor', 'major'],
+        allowed: ['release', 'dev', 'patch', 'minor', 'major'],
         allowedHelp: {
-          'release': 'strips any `-dev` versions from the version.',
+          'release': 'strips any pre-release versions from the version.',
           'dev':
               'bumps the version to the next dev pre-release value (minor by default).',
           'patch': 'bumps the version to the next patch value',
