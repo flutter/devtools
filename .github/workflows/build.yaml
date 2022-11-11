@@ -57,7 +57,6 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-            ./packages/devtools_app/build
             ./packages/devtools_test/build
           key: build-cache-${{ runner.os }}-master
           restore-keys: |
@@ -75,10 +74,6 @@ jobs:
           flutter pub get
           popd
           ./tool/generate_code.sh
-          ls -a packages/devtools_app
-          ls -a packages/devtools_app/build
-          ls -a packages/devtools_test
-          ls -a packages/devtools_test/build
 
       - name: Assert that the Latest Flutter Candidate is checked out
         run: |
@@ -119,7 +114,6 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-            ./packages/devtools_app/build
             ./packages/devtools_test/build
           key: build-cache-${{ runner.os }}-master
 
@@ -155,7 +149,6 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-            ./packages/devtools_app/build
             ./packages/devtools_test/build
           key: build-cache-${{ runner.os }}-master
 
@@ -192,7 +185,6 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-            ./packages/devtools_app/build
             ./packages/devtools_test/build
           key: build-cache-${{ runner.os }}-master
 
