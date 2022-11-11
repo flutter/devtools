@@ -127,7 +127,7 @@ elif [[ "$BOT" == "test_ddc" || "$BOT" == "test_dart2js" ]]; then
     FILES="test/"
     if [ "$ONLY_GOLDEN" = "true" ]; then
         # Set the test files to only those containing golden test
-        FILES=$(grep -rl "matchesDevToolsGolden" test | grep "_test.dart$" | tr '\n' ' ')
+        FILES=$(grep -rl "matchesDevToolsGolden\|matchesGolden" test | grep "_test.dart$" | tr '\n' ' ')
     fi
 
     # TODO(https://github.com/flutter/devtools/issues/1987): once this issue is fixed,
