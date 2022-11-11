@@ -43,7 +43,7 @@ jobs:
           path: |
             ./flutter-sdk
           key: flutter-sdk-${{ runner.os }}-${{ steps.flutter-candidate.outputs.FLUTTER_CANDIDATE }}
-
+      
       - if: ${{ steps.cache-flutter.outputs.cache-hit != 'true' }}
         name: Clone Flutter SDK if none cached
         run: |
@@ -52,6 +52,23 @@ jobs:
           git checkout $LATEST_FLUTTER_CANDIDATE
         env:
           LATEST_FLUTTER_CANDIDATE: ${{ steps.flutter-candidate.outputs.FLUTTER_CANDIDATE }}
+
+      - name: Load build cache
+        id: build-cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ./packages/devtools_app/build
+            ./packages/devtools_test/build
+        key: build-cache-${{ runner.os }}-${{ env.GITHUB_SHA }}
+
+      - if: ${{ steps.build-cache.outputs.cache-hit != 'true' }}
+        name: generate_code if none cached
+        run: |
+          echo "$(pwd)/flutter-sdk/bin/cache/dart-sdk/bin" >> $GITHUB_PATH
+          echo "$(pwd)/flutter-sdk/bin" >> $GITHUB_PATH
+          echo "$(pwd)/bin" >> $GITHUB_PATH
+          ./tool/generate_code.sh
 
       - name: Assert that the Latest Flutter Candidate is checked out
         run: |
@@ -87,6 +104,15 @@ jobs:
             ./flutter-sdk
           key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }} 
 
+      - name: Load build cache
+        id: build-cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ./packages/devtools_app/build
+            ./packages/devtools_test/build
+        key: build-cache-${{ runner.os }}-${{ env.GITHUB_SHA }}
+
       - name: tool/bots.sh
         env:
           BOT: main
@@ -113,6 +139,16 @@ jobs:
           path: |
             ./flutter-sdk
           key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }} 
+
+      - name: Load build cache
+        id: build-cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ./packages/devtools_app/build
+            ./packages/devtools_test/build
+        key: build-cache-${{ runner.os }}-${{ env.GITHUB_SHA }}
+
       - name: tool/bots.sh
         env:
           BOT: ${{ matrix.bot }}
@@ -140,6 +176,16 @@ jobs:
           path: |
             ./flutter-sdk
           key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }} 
+
+      - name: Load build cache
+        id: build-cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ./packages/devtools_app/build
+            ./packages/devtools_test/build
+        key: build-cache-${{ runner.os }}-${{ env.GITHUB_SHA }}
+
       - name: tool/bots.sh
         env:
           BOT: ${{ matrix.bot }}
