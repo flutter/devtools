@@ -121,7 +121,7 @@ jobs:
                 
   macos-test:
     needs: flutter-prep
-    name: macos ${{ matrix.bot }}
+    name: macos goldens ${{ matrix.bot }}
     runs-on: macos-latest
     strategy:
       fail-fast: false
@@ -130,7 +130,6 @@ jobs:
           - test_dart2js
         only_golden:
           - true
-          - false
         
     steps:
       - name: git clone

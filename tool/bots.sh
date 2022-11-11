@@ -123,10 +123,11 @@ elif [[ "$BOT" == "test_ddc" || "$BOT" == "test_dart2js" ]]; then
     fi
     echo "USE_WEBDEV_RELEASE = $USE_WEBDEV_RELEASE"
     FILES="test/"
-    if [ "$ONLY_GOLDEN" = "true"]; then
+    if [ "$ONLY_GOLDEN" = "true" ]; then
         # Set the test files to only those containing golden test
         FILES=$(grep -rl "matchesDevToolsGolden" test | tr '\n' ' ')
     fi
+
     # TODO(https://github.com/flutter/devtools/issues/1987): once this issue is fixed,
     # we may need to explicitly exclude running integration_tests here (this is what we
     # used to do when integration tests were enabled).
