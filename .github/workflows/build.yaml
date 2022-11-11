@@ -14,17 +14,77 @@ on:
 permissions: read-all
 
 env:
-  AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 jobs:
+  flutter-prep:
+    name: ${{ matrix.os }} Flutter Prep
+    outputs:
+      latest_flutter_candidate: ${{ steps.flutter-candidate.outputs.FLUTTER_CANDIDATE }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: git clone devtools
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
+
+      - name: Get Latest Flutter Candidate
+        id: flutter-candidate
+        run: |
+          LATEST_FLUTTER_CANDIDATE=$(./tool/latest_flutter_candidate.sh)
+          echo "FLUTTER_CANDIDATE=$LATEST_FLUTTER_CANDIDATE" >> $GITHUB_OUTPUT
+      
+      - name: Load Cached Flutter SDK
+        id: cache-flutter
+        uses: actions/cache@v3
+        with:
+          path: |
+            ./flutter-sdk
+          key: flutter-sdk-${{ runner.os }}-${{ steps.flutter-candidate.outputs.FLUTTER_CANDIDATE }}
+
+      - if: ${{ steps.cache-flutter.outputs.cache-hit != 'true' }}
+        name: Clone Flutter SDK if none cached
+        run: |
+          git clone https://github.com/flutter/flutter.git ./flutter-sdk
+          cd flutter-sdk
+          git checkout $LATEST_FLUTTER_CANDIDATE
+        env:
+          LATEST_FLUTTER_CANDIDATE: ${{ steps.flutter-candidate.outputs.FLUTTER_CANDIDATE }}
+
+      - name: Assert that the Latest Flutter Candidate is checked out
+        run: |
+            cd flutter-sdk
+            HEAD_SHA=$(git rev-parse HEAD)
+            LATEST_FLUTTER_CANDIDATE_SHA=$(git rev-parse "origin/$LATEST_FLUTTER_CANDIDATE")
+            if [ "$HEAD_SHA" != "$LATEST_FLUTTER_CANDIDATE_SHA" ]; then
+              echo "::error ,title=Error checking out Latest Flutter Candidate::{expected HEAD to be at $LATEST_FLUTTER_CANDIDATE_SHA but got $HEAD_SHA}"
+              exit 1
+            fi
+        env:
+          LATEST_FLUTTER_CANDIDATE: ${{ steps.flutter-candidate.outputs.FLUTTER_CANDIDATE }}
+
+      - name: Setup Flutter SDK
+        run: |
+          ./flutter-sdk/bin/flutter config --no-analytics
+          ./flutter-sdk/bin/flutter doctor
+          ./flutter-sdk/bin/cache/dart-sdk/bin/dart --disable-analytics
+
   main:
     name: main
+    needs: flutter-prep
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
     steps:
       - name: git clone
         uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
+      - name: Load Cached Flutter SDK
+        uses: actions/cache@v3
+        with:
+          path: |
+            ./flutter-sdk
+          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }} 
+
       - name: tool/bots.sh
         env:
           BOT: main
@@ -32,6 +92,7 @@ jobs:
 
   test:
     name: ${{ matrix.bot }}
+    needs: flutter-prep
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -44,7 +105,12 @@ jobs:
     steps:
       - name: git clone
         uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
-
+      - name: Load Cached Flutter SDK
+        uses: actions/cache@v3
+        with:
+          path: |
+            ./flutter-sdk
+          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }} 
       - name: tool/bots.sh
         env:
           BOT: ${{ matrix.bot }}
@@ -52,6 +118,7 @@ jobs:
         run: ./tool/bots.sh
                 
   macos-test:
+    needs: flutter-prep
     name: macos ${{ matrix.bot }}
     runs-on: macos-latest
     strategy:
@@ -62,7 +129,12 @@ jobs:
     steps:
       - name: git clone
         uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
-
+      - name: Load Cached Flutter SDK
+        uses: actions/cache@v3
+        with:
+          path: |
+            ./flutter-sdk
+          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }} 
       - name: tool/bots.sh
         env:
           BOT: ${{ matrix.bot }}
