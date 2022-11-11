@@ -265,6 +265,16 @@ String incrementDevVersion(String currentVersion) {
   }
 }
 
+String stripPreReleases(String currentVersion) {
+  final devVerMatch =
+      RegExp(r'^(?<semver>\d+\.\d+\.\d+).*$').firstMatch(currentVersion);
+  if (devVerMatch == null) {
+    throw 'Invalid version, could not increment dev version';
+  } else {
+    return devVerMatch.namedGroup('semver')!;
+  }
+}
+
 bool isDevVersion(String version) {
   return RegExp(r'-dev\.\d+').hasMatch(version);
 }
@@ -338,11 +348,9 @@ class AutoUpdateCommand extends Command {
         abbr: 't',
         allowed: ['dev', 'dev,patch', 'dev,major', 'patch', 'minor', 'major'],
         allowedHelp: {
+          'release': 'strips any `-dev` versions from the version.',
           'dev':
-              'bumps the version to the next dev pre-release value (minor by default)',
-          'dev,patch': 'bumps the version to the next dev pre-patch value',
-          'dev,minor': 'bumps the version to the next dev pre-minor value',
-          'dev,major': 'bumps the version to the next dev pre-major value',
+              'bumps the version to the next dev pre-release value (minor by default).',
           'patch': 'bumps the version to the next patch value',
           'minor': 'bumps the version to the next minor value',
           'major': 'bumps the version to the next major value',
@@ -355,22 +363,21 @@ class AutoUpdateCommand extends Command {
   void run() async {
     final type = argResults!['type'].toString();
     final currentVersion = versionFromPubspecFile();
-    final currentSemanticVersion = SemanticVersion.parse(currentVersion);
     String? newVersion;
     if (currentVersion == null) {
       throw 'Could not automatically determine current version.';
     }
     switch (type) {
+      case 'release':
+        newVersion = stripPreReleases(currentVersion);
+        break;
       case 'dev':
         newVersion = incrementDevVersion(currentVersion);
         break;
       default:
         newVersion = incrementVersionByType(currentVersion, type);
-        // TODO: updating doesn't make sense right now so the placement of the cycle will need to change.
-        /**
-   * NOTE we are going to be doing a fresh commit with the clean version, then bumping the number.
-   * make sure the version passed here reflects that
-   */
+
+        // Doing a proper version update so cycle the release notes
         await cycleReleaseNotes(
             newVersion: SemanticVersion.parse(currentVersion));
     }
