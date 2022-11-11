@@ -164,6 +164,7 @@ class CliAppFixture extends AppFixture {
   ) async {
     Isolate? foundIsolate;
     await waitFor(() async {
+      const skipId = 'skip';
       final vm = await serviceConnection.getVM();
       final List<Isolate?> isolates = await Future.wait(
         vm.isolates!.map(
@@ -175,11 +176,14 @@ class CliAppFixture extends AppFixture {
               // https://github.com/dart-lang/sdk/issues/33747
               .catchError((error) {
             print('getIsolate(${ref.id}) failed, skipping\n$error');
+            return Future<Isolate>.value(Isolate(id: skipId));
           }),
         ),
       );
       foundIsolate = isolates.firstWhere(
-        (isolate) => isolate!.pauseEvent?.kind == pauseEventKind,
+        (isolate) =>
+            isolate!.id != skipId &&
+            isolate.pauseEvent?.kind == pauseEventKind,
         orElse: () => null,
       );
       return foundIsolate != null;

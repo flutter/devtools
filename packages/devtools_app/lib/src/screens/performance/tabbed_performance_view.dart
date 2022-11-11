@@ -102,6 +102,10 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
       tabs: tabs,
       tabViews: tabViews,
       gaScreen: analytics_constants.performance,
+      onTabChanged: (int index) {
+        final featureController = featureControllers[index];
+        unawaited(controller.setActiveFeature(featureController));
+      },
     );
   }
 
@@ -259,7 +263,7 @@ class RefreshTimelineEventsButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return DevToolsIconButton(
       iconData: Icons.refresh,
-      onPressed: controller.processAvailableEvents,
+      onPressed: controller.processAllTraceEvents,
       tooltip: 'Refresh timeline events',
       gaScreen: analytics_constants.performance,
       gaSelection: analytics_constants.refreshTimelineEvents,

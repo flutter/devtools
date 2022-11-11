@@ -26,9 +26,11 @@ function flutter {
     fi
 }
 
-# Get Flutter.
-echo "Cloning the Flutter master branch"
-git clone https://github.com/flutter/flutter.git ./flutter-sdk
+# Make sure Flutter sdk has been provided
+if [ ! -d "./flutter-sdk" ]; then
+    echo "Expected ./flutter-sdk to exist"
+    exit 1;
+fi
 
 # Look in the dart bin dir first, then the flutter one, then the one for the
 # devtools repo. We don't use the dart script from flutter/bin as that script
@@ -39,14 +41,6 @@ export PATH=`pwd`/flutter-sdk/bin/cache/dart-sdk/bin:`pwd`/flutter-sdk/bin:`pwd`
 # Look up the latest flutter candidate (this is the latest flutter version in g3)
 # TODO(https://github.com/flutter/devtools/issues/4591): re-write this script as a
 # shell script so we won't have to incurr the cost of building flutter tool twice.
-echo "Looking up the latest Flutter candidate branch"
-pushd packages/devtools_app
-LATEST_FLUTTER_CANDIDATE=`repo_tool latest-flutter-candidate --githubToken=$AUTH_TOKEN | tail -n 1`
-popd
-
-pushd flutter-sdk
-git checkout $LATEST_FLUTTER_CANDIDATE
-popd
 
 flutter config --no-analytics
 flutter doctor
@@ -95,9 +89,6 @@ if [ "$BOT" = "main" ]; then
     # Analyze the code
     repo_tool analyze
 
-    # Ensure we can build the app.
-    flutter build web --release
-
     # Test the devtools_shared package tests on the main bot.
     popd
     pushd packages/devtools_shared
@@ -110,7 +101,7 @@ if [ "$BOT" = "main" ]; then
     pushd packages/devtools_app
     echo `pwd`
 
-elif [ "$BOT" = "test_ddc" ]; then
+elif [ "$BOT" = "build_ddc" ]; then
 
     # Provision our packages.
     flutter pub get
@@ -118,35 +109,32 @@ elif [ "$BOT" = "test_ddc" ]; then
     # TODO(https://github.com/flutter/flutter/issues/43538): Remove workaround.
     flutter build web --pwa-strategy=none --no-tree-shake-icons
 
-    # TODO(https://github.com/flutter/devtools/issues/1987): once this issue is fixed,
-    # we may need to explicitly exclude running integration_tests here (this is what we
-    # used to do when integration tests were enabled).
-    if [ "$PLATFORM" = "vm" ]; then
-        flutter test test/
-    elif [ "$PLATFORM" = "chrome" ]; then
-        flutter test --platform chrome test/
-    else
-        echo "unknown test platform"
-        exit 1
-    fi
-elif [ "$BOT" = "test_dart2js" ]; then
+elif [ "$BOT" = "build_dart2js" ]; then
+
+    # Provision our packages.
     flutter pub get
 
-    # TODO(https://github.com/flutter/flutter/issues/43538): Remove workaround.
-    flutter build web --pwa-strategy=none --no-tree-shake-icons
+    flutter build web --release
+
+elif [[ "$BOT" == "test_ddc" || "$BOT" == "test_dart2js" ]]; then
+    if [ "$BOT" == "test_dart2js" ]; then
+        USE_WEBDEV_RELEASE=true
+    else
+        USE_WEBDEV_RELEASE=false
+    fi
+    echo "USE_WEBDEV_RELEASE = $USE_WEBDEV_RELEASE"
 
     # TODO(https://github.com/flutter/devtools/issues/1987): once this issue is fixed,
     # we may need to explicitly exclude running integration_tests here (this is what we
     # used to do when integration tests were enabled).
     if [ "$PLATFORM" = "vm" ]; then
-        WEBDEV_RELEASE=true flutter test test/
+        WEBDEV_RELEASE=$USE_WEBDEV_RELEASE flutter test test/
     elif [ "$PLATFORM" = "chrome" ]; then
-        WEBDEV_RELEASE=true flutter test --platform chrome test/
+        WEBDEV_RELEASE=$USE_WEBDEV_RELEASE flutter test --platform chrome test/
     else
         echo "unknown test platform"
         exit 1
     fi
-    echo $WEBDEV_RELEASE
 
 elif [ "$BOT" = "integration_ddc" ]; then
 
