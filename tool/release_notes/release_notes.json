@@ -10,6 +10,9 @@
             "name": "Inspector updates",
             "notes": [
                  {
+                      "message": "Adding just a comment but I'm testing"
+                 },
+                 {
                       "githubPullRequestUrls": [
                            "https://github.com/flutter/devtools/pull/4283"
                       ],
