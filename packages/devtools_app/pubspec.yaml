@@ -39,6 +39,8 @@ dependencies:
     sdk: flutter
   http: ^0.13.4
   image: ^3.0.2
+  # TODO: https://github.com/flutter/devtools/issues/4728 - remove constraint when archive is fixed
+  archive: <3.3.3
   intl: '>=0.16.1 <0.18.0'
   js: ^0.6.1+1
   mime: ^1.0.0
