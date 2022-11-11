@@ -58,7 +58,7 @@ jobs:
           path: |
             ./packages/devtools_app/build
             ./packages/devtools_test/build
-        key: build-cache-${{ runner.os }}-${{ env.GITHUB_SHA }}
+          key: build-cache-${{ runner.os }}-${{ env.GITHUB_SHA }}
 
       - if: ${{ steps.build-cache.outputs.cache-hit != 'true' }}
         name: generate_code if none cached
@@ -109,7 +109,7 @@ jobs:
           path: |
             ./packages/devtools_app/build
             ./packages/devtools_test/build
-        key: build-cache-${{ runner.os }}-${{ env.GITHUB_SHA }}
+          key: build-cache-${{ runner.os }}-${{ env.GITHUB_SHA }}
 
       - name: tool/bots.sh
         env:
@@ -145,7 +145,7 @@ jobs:
           path: |
             ./packages/devtools_app/build
             ./packages/devtools_test/build
-        key: build-cache-${{ runner.os }}-${{ env.GITHUB_SHA }}
+          key: build-cache-${{ runner.os }}-${{ env.GITHUB_SHA }}
 
       - name: tool/bots.sh
         env:
@@ -182,7 +182,7 @@ jobs:
           path: |
             ./packages/devtools_app/build
             ./packages/devtools_test/build
-        key: build-cache-${{ runner.os }}-${{ env.GITHUB_SHA }}
+          key: build-cache-${{ runner.os }}-${{ env.GITHUB_SHA }}
 
       - name: tool/bots.sh
         env:
