@@ -22,7 +22,8 @@ void debuggingTests() {
 
   test('lists scripts', () async {
     appFixture = await CliAppFixture.create(
-        'test/test_infra/fixtures/debugging_app.dart');
+      'test/test_infra/fixtures/debugging_app.dart',
+    );
 
     final DevtoolsManager tools =
         DevtoolsManager(tabInstance, webBuildFixture.baseUri);
@@ -47,7 +48,8 @@ void debuggingTests() {
 
   test('breakpoints, variables, resume', () async {
     appFixture = await CliAppFixture.create(
-        'test/test_infra/fixtures/debugging_app.dart');
+      'test/test_infra/fixtures/debugging_app.dart',
+    );
 
     final String source = appFixture.scriptSource;
     final List<int> breakpointLines =
@@ -114,7 +116,8 @@ void debuggingTests() {
 
   test('stepping, async step, async frames', () async {
     appFixture = await CliAppFixture.create(
-        'test/test_infra/fixtures/debugging_app_async.dart');
+      'test/test_infra/fixtures/debugging_app_async.dart',
+    );
 
     final String source = appFixture.scriptSource;
     final int breakpointLine =
@@ -294,7 +297,8 @@ void debuggingTests() {
 
   test('pause', () async {
     appFixture = await CliAppFixture.create(
-        'test/test_infra/fixtures/debugging_app.dart');
+      'test/test_infra/fixtures/debugging_app.dart',
+    );
 
     final DevtoolsManager tools =
         DevtoolsManager(tabInstance, webBuildFixture.baseUri);
