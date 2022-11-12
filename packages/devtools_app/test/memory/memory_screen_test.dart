@@ -192,7 +192,7 @@ void main() {
 
       await expectLater(
         find.byType(MemoryVMChart),
-        matchesDevToolsGolden('../../goldens/memory_hover_card.png'),
+        matchesDevToolsGolden('../test_infra/goldens/memory_hover_card.png'),
       );
     });
 

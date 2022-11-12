@@ -101,7 +101,7 @@ void main() {
     );
     await expectLater(
       find.byKey(DebuggerScreenBody.codeViewKey),
-      matchesDevToolsGolden('../../goldens/codeview_scrollbars.png'),
+      matchesDevToolsGolden('../test_infra/goldens/codeview_scrollbars.png'),
     );
   });
 
