@@ -21,7 +21,8 @@ void debuggingTests() {
   });
 
   test('lists scripts', () async {
-    appFixture = await CliAppFixture.create('test/fixtures/debugging_app.dart');
+    appFixture = await CliAppFixture.create(
+        'test/test_infra/fixtures/debugging_app.dart');
 
     final DevtoolsManager tools =
         DevtoolsManager(tabInstance, webBuildFixture.baseUri);
@@ -45,7 +46,8 @@ void debuggingTests() {
   });
 
   test('breakpoints, variables, resume', () async {
-    appFixture = await CliAppFixture.create('test/fixtures/debugging_app.dart');
+    appFixture = await CliAppFixture.create(
+        'test/test_infra/fixtures/debugging_app.dart');
 
     final String source = appFixture.scriptSource;
     final List<int> breakpointLines =
@@ -111,8 +113,8 @@ void debuggingTests() {
   });
 
   test('stepping, async step, async frames', () async {
-    appFixture =
-        await CliAppFixture.create('test/fixtures/debugging_app_async.dart');
+    appFixture = await CliAppFixture.create(
+        'test/test_infra/fixtures/debugging_app_async.dart');
 
     final String source = appFixture.scriptSource;
     final int breakpointLine =
@@ -194,7 +196,7 @@ void debuggingTests() {
 
   test('break on exceptions', () async {
     appFixture = await CliAppFixture.create(
-      'test/fixtures/debugging_app_exception.dart',
+      'test/test_infra/fixtures/debugging_app_exception.dart',
     );
 
     final String source = appFixture.scriptSource;
@@ -245,7 +247,7 @@ void debuggingTests() {
 
   test('console output', () async {
     appFixture = await CliAppFixture.create(
-      'test/fixtures/color_console_output_app.dart',
+      'test/test_infra/fixtures/color_console_output_app.dart',
     );
 
     final tools = DevtoolsManager(tabInstance, webBuildFixture.baseUri);
@@ -291,7 +293,8 @@ void debuggingTests() {
   });
 
   test('pause', () async {
-    appFixture = await CliAppFixture.create('test/fixtures/debugging_app.dart');
+    appFixture = await CliAppFixture.create(
+        'test/test_infra/fixtures/debugging_app.dart');
 
     final DevtoolsManager tools =
         DevtoolsManager(tabInstance, webBuildFixture.baseUri);
