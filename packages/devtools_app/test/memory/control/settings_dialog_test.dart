@@ -45,7 +45,7 @@ void main() {
     await tester.pumpAndSettle();
     await expectLater(
       find.byType(MemorySettingsDialog),
-      matchesDevToolsGolden('../../goldens/settings_dialog_default.png'),
+      matchesDevToolsGolden('../../../goldens/settings_dialog_default.png'),
     );
 
     // Modify settings and check the changes are reflected in the controller.
@@ -63,7 +63,7 @@ void main() {
     await tester.pumpAndSettle();
     await expectLater(
       find.byType(MemorySettingsDialog),
-      matchesDevToolsGolden('../../goldens/settings_dialog_modified.png'),
+      matchesDevToolsGolden('../../../goldens/settings_dialog_modified.png'),
     );
     expect(
       preferences.memory.androidCollectionEnabled.value,
@@ -81,7 +81,7 @@ void main() {
     await tester.pumpAndSettle();
     await expectLater(
       find.byType(MemorySettingsDialog),
-      matchesDevToolsGolden('../../goldens/settings_dialog_modified.png'),
+      matchesDevToolsGolden('../../../goldens/settings_dialog_modified.png'),
     );
   });
 }

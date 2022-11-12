@@ -49,7 +49,7 @@ void main() {
       // Check initial golden.
       await expectLater(
         find.byType(DiffPane),
-        matchesDevToolsGolden('../../../goldens/memory_diff_empty1.png'),
+        matchesDevToolsGolden('../../../../goldens/memory_diff_empty1.png'),
       );
 
       // Record three snapshots.
@@ -62,7 +62,7 @@ void main() {
       await expectLater(
         find.byType(DiffPane),
         matchesDevToolsGolden(
-          '../../../goldens/memory_diff_three_snapshots1.png',
+          '../../../../goldens/memory_diff_three_snapshots1.png',
         ),
       );
       expect(snapshots.value.length, equals(1 + 3));
@@ -70,7 +70,7 @@ void main() {
       await expectLater(
         find.byType(DiffPane),
         matchesDevToolsGolden(
-          '../../../goldens/memory_diff_selected_class.png',
+          '../../../../goldens/memory_diff_selected_class.png',
         ),
       );
 
@@ -85,7 +85,7 @@ void main() {
       await expectLater(
         find.byType(DiffPane),
         matchesDevToolsGolden(
-          '../../../goldens/memory_diff_three_snapshots2.png',
+          '../../../../goldens/memory_diff_three_snapshots2.png',
         ),
       );
       expect(snapshots.value.length, equals(1 + 3 - 1 + 1));
@@ -95,7 +95,7 @@ void main() {
       await tester.pumpAndSettle();
       await expectLater(
         find.byType(DiffPane),
-        matchesDevToolsGolden('../../../goldens/memory_diff_empty2.png'),
+        matchesDevToolsGolden('../../../../goldens/memory_diff_empty2.png'),
       );
       expect(snapshots.value.length, equals(1));
     });

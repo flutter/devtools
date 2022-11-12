@@ -28,11 +28,11 @@ class _FilterTest {
   String get name => isDiff ? 'diff' : 'single';
 
   String get sceneGolden =>
-      '../../../goldens/memory_diff_snapshot_scene_$name.png';
+      '../../../../goldens/memory_diff_snapshot_scene_$name.png';
   String snapshotGolden(ClassFilterType? type) =>
-      '../../../goldens/memory_diff_snapshot_${type?.name ?? 'custom'}_$name.png';
+      '../../../../goldens/memory_diff_snapshot_${type?.name ?? 'custom'}_$name.png';
   static String dialogGolden(ClassFilterType? type) =>
-      '../../../goldens/memory_diff_filter_dialog_${type?.name ?? 'custom'}.png';
+      '../../../../goldens/memory_diff_filter_dialog_${type?.name ?? 'custom'}.png';
 }
 
 final _tests = [_FilterTest(false), _FilterTest(true)];

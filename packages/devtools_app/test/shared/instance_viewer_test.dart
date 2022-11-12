@@ -219,7 +219,7 @@ void main() {
       await expectLater(
         find.byType(MaterialApp),
         matchesDevToolsGolden(
-          '../goldens/instance_viewer/show_internal_properties.png',
+          '../../goldens/instance_viewer/show_internal_properties.png',
         ),
       );
     });
@@ -288,7 +288,7 @@ void main() {
 
       await expectLater(
         find.byType(MaterialApp),
-        matchesDevToolsGolden('../goldens/instance_viewer/edit.png'),
+        matchesDevToolsGolden('../../goldens/instance_viewer/edit.png'),
       );
 
       // can press esc to unfocus active node
@@ -298,7 +298,7 @@ void main() {
 
       await expectLater(
         find.byType(MaterialApp),
-        matchesDevToolsGolden('../goldens/instance_viewer/edit_esc.png'),
+        matchesDevToolsGolden('../../goldens/instance_viewer/edit_esc.png'),
       );
     });
 
@@ -325,7 +325,7 @@ void main() {
 
       await expectLater(
         find.byType(MaterialApp),
-        matchesDevToolsGolden('../goldens/instance_viewer/loading.png'),
+        matchesDevToolsGolden('../../goldens/instance_viewer/loading.png'),
       );
     });
 
@@ -367,7 +367,7 @@ void main() {
 
       await expectLater(
         find.byType(MaterialApp),
-        matchesDevToolsGolden('../goldens/instance_viewer/null.png'),
+        matchesDevToolsGolden('../../goldens/instance_viewer/null.png'),
       );
 
       await tester.pumpWidget(
@@ -383,7 +383,7 @@ void main() {
 
       await expectLater(
         find.byType(MaterialApp),
-        matchesDevToolsGolden('../goldens/instance_viewer/error.png'),
+        matchesDevToolsGolden('../../goldens/instance_viewer/error.png'),
       );
     });
 
@@ -422,7 +422,7 @@ void main() {
 
       await expectLater(
         find.byType(MaterialApp),
-        matchesDevToolsGolden('../goldens/instance_viewer/null.png'),
+        matchesDevToolsGolden('../../goldens/instance_viewer/null.png'),
       );
 
       await tester.pumpWidget(
@@ -438,7 +438,7 @@ void main() {
 
       await expectLater(
         find.byType(MaterialApp),
-        matchesDevToolsGolden('../goldens/instance_viewer/num.png'),
+        matchesDevToolsGolden('../../goldens/instance_viewer/num.png'),
       );
     });
 
@@ -469,7 +469,7 @@ void main() {
 
       await expectLater(
         find.byType(MaterialApp),
-        matchesDevToolsGolden('../goldens/instance_viewer/enum.png'),
+        matchesDevToolsGolden('../../goldens/instance_viewer/enum.png'),
       );
     });
 
@@ -500,7 +500,7 @@ void main() {
 
       await expectLater(
         find.byType(MaterialApp),
-        matchesDevToolsGolden('../goldens/instance_viewer/null.png'),
+        matchesDevToolsGolden('../../goldens/instance_viewer/null.png'),
       );
     });
 
@@ -531,7 +531,7 @@ void main() {
 
       await expectLater(
         find.byType(MaterialApp),
-        matchesDevToolsGolden('../goldens/instance_viewer/bool.png'),
+        matchesDevToolsGolden('../../goldens/instance_viewer/bool.png'),
       );
     });
 
@@ -562,7 +562,7 @@ void main() {
 
       await expectLater(
         find.byType(MaterialApp),
-        matchesDevToolsGolden('../goldens/instance_viewer/string.png'),
+        matchesDevToolsGolden('../../goldens/instance_viewer/string.png'),
       );
     });
 
@@ -593,7 +593,7 @@ void main() {
 
       await expectLater(
         find.byType(MaterialApp),
-        matchesDevToolsGolden('../goldens/instance_viewer/num.png'),
+        matchesDevToolsGolden('../../goldens/instance_viewer/num.png'),
       );
     });
 
@@ -655,7 +655,8 @@ void main() {
 
       await expectLater(
         find.byType(MaterialApp),
-        matchesDevToolsGolden('../goldens/instance_viewer/collasped_map.png'),
+        matchesDevToolsGolden(
+            '../../goldens/instance_viewer/collasped_map.png'),
       );
 
       container
@@ -673,7 +674,7 @@ void main() {
 
       await expectLater(
         find.byType(MaterialApp),
-        matchesDevToolsGolden('../goldens/instance_viewer/expanded_map.png'),
+        matchesDevToolsGolden('../../goldens/instance_viewer/expanded_map.png'),
       );
     });
 
@@ -756,7 +757,7 @@ void main() {
       await expectLater(
         find.byType(MaterialApp),
         matchesDevToolsGolden(
-          '../goldens/instance_viewer/collasped_object.png',
+          '../../goldens/instance_viewer/collasped_object.png',
         ),
       );
 
@@ -781,7 +782,8 @@ void main() {
 
       await expectLater(
         find.byType(MaterialApp),
-        matchesDevToolsGolden('../goldens/instance_viewer/expanded_object.png'),
+        matchesDevToolsGolden(
+            '../../goldens/instance_viewer/expanded_object.png'),
       );
     });
 
@@ -847,7 +849,8 @@ void main() {
 
       await expectLater(
         find.byType(MaterialApp),
-        matchesDevToolsGolden('../goldens/instance_viewer/collasped_list.png'),
+        matchesDevToolsGolden(
+            '../../goldens/instance_viewer/collasped_list.png'),
       );
 
       container
@@ -865,7 +868,8 @@ void main() {
 
       await expectLater(
         find.byType(MaterialApp),
-        matchesDevToolsGolden('../goldens/instance_viewer/expanded_list.png'),
+        matchesDevToolsGolden(
+            '../../goldens/instance_viewer/expanded_list.png'),
       );
     });
 

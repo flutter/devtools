@@ -182,7 +182,7 @@ void main() {
 
         await expectLater(
           find.byKey(treemapKey),
-          matchesDevToolsGolden('../goldens/treemap_sizes.png'),
+          matchesDevToolsGolden('../../goldens/treemap_sizes.png'),
         );
       },
       // ignore: avoid_redundant_argument_values
@@ -206,7 +206,7 @@ void main() {
 
         await expectLater(
           find.byKey(treemapKey),
-          matchesDevToolsGolden('../goldens/treemap_v8.png'),
+          matchesDevToolsGolden('../../goldens/treemap_v8.png'),
         );
         // Await delay for golden comparison.
         await tester.pumpAndSettle(const Duration(seconds: 2));
@@ -232,7 +232,7 @@ void main() {
 
         await expectLater(
           find.byKey(treemapKey),
-          matchesDevToolsGolden('../goldens/treemap_apk.png'),
+          matchesDevToolsGolden('../../goldens/treemap_apk.png'),
         );
         // Await delay for golden comparison.
         await tester.pumpAndSettle(const Duration(seconds: 2));

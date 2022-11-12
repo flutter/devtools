@@ -82,7 +82,7 @@ void main() {
       await expectLater(
         find.byType(ProviderScreenBody),
         matchesDevToolsGolden(
-          '../goldens/provider_screen/list_error_banner.png',
+          '../../goldens/provider_screen/list_error_banner.png',
         ),
       );
     });
@@ -311,7 +311,7 @@ void main() {
       await expectLater(
         find.byType(ProviderScreenBody),
         matchesDevToolsGolden(
-          '../goldens/provider_screen/no_selected_provider.png',
+          '../../goldens/provider_screen/no_selected_provider.png',
         ),
       );
 
@@ -347,7 +347,7 @@ void main() {
       await expectLater(
         find.byType(ProviderScreenBody),
         matchesDevToolsGolden(
-          '../goldens/provider_screen/selected_provider.png',
+          '../../goldens/provider_screen/selected_provider.png',
         ),
       );
     });
@@ -400,7 +400,7 @@ void main() {
       await expectLater(
         find.byType(ProviderScreenBody),
         matchesDevToolsGolden(
-          '../goldens/provider_screen/selected_provider_error_banner.png',
+          '../../goldens/provider_screen/selected_provider_error_banner.png',
         ),
       );
     });
