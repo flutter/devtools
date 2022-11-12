@@ -32,8 +32,9 @@ void main() {
 
   final Directory testDataDirectory =
       Directory(path.join('test', 'test_data', 'syntax_highlighting')).absolute;
-  final Directory goldenDirectory =
-      Directory(path.join('test', 'goldens', 'syntax_highlighting')).absolute;
+  final Directory goldenDirectory = Directory(
+    path.join('test', 'test_infra', 'goldens', 'syntax_highlighting'),
+  ).absolute;
 
   setUpAll(() async {
     expect(grammarFile.existsSync(), true);
