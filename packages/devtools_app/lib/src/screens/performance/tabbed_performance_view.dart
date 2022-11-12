@@ -57,11 +57,6 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
   FlutterFrame? _selectedFlutterFrame;
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!initController()) return;

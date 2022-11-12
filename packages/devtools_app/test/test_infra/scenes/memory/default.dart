@@ -19,9 +19,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stager/stager.dart';
 
-import '../../test_data/memory.dart';
-import '../../test_data/memory/heap/heap_data.dart';
-import '../../test_data/memory_allocation.dart';
+import '../../../test_data/memory.dart';
+import '../../../test_data/memory/heap/heap_data.dart';
+import '../../../test_data/memory_allocation.dart';
 
 /// To run:
 /// flutter run -t test/scenes/memory/default.stager_app.dart -d macos
