@@ -146,7 +146,7 @@ void main() {
       controller.androidCollectionEnabled.value = !originalAndroidCollection;
 
       // Check the values are stored.
-      expect(storage.values, hasLength(2));
+      expect(storage.values, hasLength(1));
 
       // Reload the values from storage.
       await controller.init();
