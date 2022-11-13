@@ -112,7 +112,7 @@ class MemoryController extends DisposableController
     with AutoDisposeControllerMixin {
   MemoryController({DiffPaneController? diffPaneController}) {
     memoryTimeline = MemoryTimeline(offline);
-    memoryLog = MemoryLog(this);
+    memoryLog = _MemoryLog(this);
     this.diffPaneController =
         diffPaneController ?? DiffPaneController(SnapshotTaker());
 
@@ -157,7 +157,7 @@ class MemoryController extends DisposableController
 
   late MemoryTimeline memoryTimeline;
 
-  late MemoryLog memoryLog;
+  late _MemoryLog memoryLog;
 
   /// Source of memory heap samples. False live data, True loaded from a
   /// memory_log file.
@@ -524,29 +524,9 @@ enum ChartDataSets {
   rasterPictureSet,
 }
 
-/// Index in datasets to each dataset's list of Entry's.
-enum EventDataSets {
-  // Datapoint entries for ghost trace to stop auto-scaling of Y-axis.
-  ghostsSet,
-  // Datapoint entries for each user initiated GC.
-  gcUserSet,
-  // Datapoint entries for a VM's GC.
-  gcVmSet,
-  // Datapoint entries for each user initiated snapshot event.
-  snapshotSet,
-  // Datapoint entries for an automatically initiated snapshot event.
-  snapshotAutoSet,
-  // Allocation Accumulator monitoring.
-  monitorStartSet,
-  // TODO(terry): Allocation Accumulator continues UX connector.
-  monitorContinuesSet,
-  // Reset all Allocation Accumulators.
-  monitorResetSet,
-}
-
 /// Supports saving and loading memory samples.
-class MemoryLog {
-  MemoryLog(this.controller);
+class _MemoryLog {
+  _MemoryLog(this.controller);
 
   /// Use in memory or local file system based on Flutter Web/Desktop.
   static final _fs = FileIO();
@@ -612,6 +592,7 @@ class MemoryLog {
   }
 
   /// Load the memory profile data from a saved memory log file.
+  @visibleForTesting
   Future<void> loadOffline(String filename) async {
     final jsonPayload = _fs.readStringFromFile(filename, isMemory: true)!;
 
