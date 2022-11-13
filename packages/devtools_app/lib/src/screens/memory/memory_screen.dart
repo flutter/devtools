@@ -84,16 +84,6 @@ class MemoryBodyState extends State<MemoryBody>
         sharedLabels: vmChartController.labelTimestamps,
       ),
     );
-
-    // Update the chart when the memorySource changes.
-    addAutoDisposeListener(memoryController.selectedSnapshotNotifier, () {
-      setState(() {
-        // TODO(terry): Create the snapshot data to display by Library,
-        //              by Class or by Objects.
-        // Create the snapshot data by Library.
-        memoryController.createSnapshotByLibrary();
-      });
-    });
   }
 
   @override
