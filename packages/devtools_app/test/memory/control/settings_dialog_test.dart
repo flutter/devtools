@@ -55,7 +55,6 @@ void main() {
     );
     await tester
         .tap(find.byKey(MemorySettingDialogKeys.showAndroidChartCheckBox));
-    await tester.tap(find.byKey(MemorySettingDialogKeys.autoSnapshotCheckbox));
     await tester.pumpAndSettle();
     await expectLater(
       find.byType(MemorySettingsDialog),

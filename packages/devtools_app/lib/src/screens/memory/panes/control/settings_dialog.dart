@@ -14,7 +14,6 @@ import '../../memory_controller.dart';
 @visibleForTesting
 class MemorySettingDialogKeys {
   static const Key showAndroidChartCheckBox = ValueKey('showAndroidChart');
-  static const Key autoSnapshotCheckbox = ValueKey('autoSnapshotCheckbox');
 }
 
 class MemorySettingsDialog extends StatelessWidget {
