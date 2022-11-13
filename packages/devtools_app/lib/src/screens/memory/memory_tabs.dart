@@ -9,8 +9,6 @@ import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../../analytics/analytics.dart' as ga;
-import '../../analytics/constants.dart' as analytics_constants;
 import '../../config_specific/logger/logger.dart' as logger;
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../primitives/utils.dart';
@@ -49,82 +47,8 @@ enum SnapshotStatus {
   done,
 }
 
-enum WildcardMatch {
-  exact,
-  startsWith,
-  endsWith,
-  contains,
-}
-
-/// If no wildcard then exact match.
-/// *NNN - ends with NNN
-/// NNN* - starts with NNN
-/// NNN*ZZZ - starts with NNN and ends with ZZZ
-const knowClassesToAnalyzeForImages = <WildcardMatch, List<String>>{
-  // Anything that contains the phrase:
-  WildcardMatch.contains: [
-    'Image',
-  ],
-
-  // Anything that starts with:
-  WildcardMatch.startsWith: [],
-
-  // Anything that exactly matches:
-  WildcardMatch.exact: [
-    '_Int32List',
-    // 32-bit devices e.g., emulators, Pixel 2, raw images as Int32List.
-    '_Int64List',
-    // 64-bit devices e.g., Pixel 3 XL, raw images as Int64List.
-    'FrameInfos',
-  ],
-
-  // Anything that ends with:
-  WildcardMatch.endsWith: [],
-};
-
-/// RegEx expressions to handle the WildcardMatches:
-///     Ends with Image:      \[_A-Za-z0-9_]*Image\$
-///     Starts with Image:    ^Image
-///     Contains Image:       Image
-///     Extact Image:         ^Image$
-String buildRegExs(Map<WildcardMatch, List<String>> matchingCriteria) {
-  final resultRegEx = StringBuffer();
-  matchingCriteria.forEach((key, value) {
-    if (value.isNotEmpty) {
-      final name = value;
-      late String regEx;
-      // TODO(terry): Need to handle $ for identifier names e.g.,
-      //              $FOO is a valid identifier.
-      switch (key) {
-        case WildcardMatch.exact:
-          regEx = '^${name.join("\$|^")}\$';
-          break;
-        case WildcardMatch.startsWith:
-          regEx = '^${name.join("|^")}';
-          break;
-        case WildcardMatch.endsWith:
-          regEx = '^\[_A-Za-z0-9]*${name.join("\|[_A-Za-z0-9]*")}\$';
-          break;
-        case WildcardMatch.contains:
-          regEx = '${name.join("|")}';
-          break;
-        default:
-          assert(false, 'buildRegExs: Unhandled WildcardMatch');
-      }
-      resultRegEx.write(resultRegEx.isEmpty ? '($regEx' : '|$regEx');
-    }
-  });
-
-  resultRegEx.write(')');
-  return resultRegEx.toString();
-}
-
-final String knownClassesRegExs = buildRegExs(knowClassesToAnalyzeForImages);
-
 @visibleForTesting
 class MemoryScreenKeys {
-  static const searchButton = Key('Snapshot Search');
-  static const filterButton = Key('Snapshot Filter');
   static const leaksTab = Key('Leaks Tab');
   static const dartHeapTableProfileTab = Key('Dart Heap Profile Tab');
   static const dartHeapAllocationTracingTab =
@@ -132,28 +56,27 @@ class MemoryScreenKeys {
   static const diffTab = Key('Diff Tab');
 }
 
-class HeapTreeView extends StatefulWidget {
-  const HeapTreeView(
+class MemoryTabs extends StatefulWidget {
+  const MemoryTabs(
     this.controller,
   );
 
   final MemoryController controller;
 
   @override
-  _HeapTreeViewState createState() => _HeapTreeViewState();
+  _MemoryTabsState createState() => _MemoryTabsState();
 }
 
-class _HeapTreeViewState extends State<HeapTreeView>
+class _MemoryTabsState extends State<MemoryTabs>
     with
         AutoDisposeMixin,
-        ProvidedControllerMixin<MemoryController, HeapTreeView>,
-        SearchFieldMixin<HeapTreeView>,
+        ProvidedControllerMixin<MemoryController, MemoryTabs>,
+        SearchFieldMixin<MemoryTabs>,
         TickerProviderStateMixin {
   static const _gaPrefix = 'memoryTab';
 
   late List<Tab> _tabs;
   late TabController _tabController;
-  late Set<Key> _searchableTabs;
   final ValueNotifier<int> _currentTab = ValueNotifier(0);
 
   Widget? snapshotDisplay;
@@ -211,8 +134,6 @@ class _HeapTreeViewState extends State<HeapTreeView>
         ),
     ];
 
-    // TODO(polina-c): clean up analysis tab and search.
-    _searchableTabs = {};
     _tabController = TabController(length: _tabs.length, vsync: this);
     _tabController.addListener(_onTabChanged);
   }
@@ -441,8 +362,6 @@ class _HeapTreeViewState extends State<HeapTreeView>
                 controller: _tabController,
                 tabs: _tabs,
               ),
-              if (_searchableTabs.contains(_tabs[index].key))
-                _buildSearchFilterControls(),
             ],
           ),
         ),
@@ -593,83 +512,6 @@ class _HeapTreeViewState extends State<HeapTreeView>
     );
   }
 
-  // TODO(polina-c): cleanup unused code.
-  // ignore: unused_element
-  Widget _buildSnapshotControls(TextTheme textTheme) {
-    return SizedBox(
-      height: defaultButtonHeight,
-      child: Row(
-        children: [
-          IconLabelButton(
-            tooltip: 'Take a memory profile snapshot',
-            icon: Icons.camera,
-            label: 'Take Heap Snapshot',
-            onPressed: _isSnapshotRunning ? null : _takeHeapSnapshot,
-          ),
-          const SizedBox(width: defaultSpacing),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('Treemap'),
-              Switch(
-                value: treeMapVisible,
-                onChanged: controller.snapshotByLibraryData != null
-                    ? (value) {
-                        controller.toggleTreeMapVisible(value);
-                      }
-                    : null,
-              ),
-            ],
-          ),
-          if (!treeMapVisible) ...[
-            const SizedBox(width: defaultSpacing),
-            _groupByDropdown(textTheme),
-            const SizedBox(width: defaultSpacing),
-            // TODO(terry): Mechanism to handle expand/collapse on both tables
-            // objects/fields. Maybe notion in table?
-            ExpandAllButton(
-              onPressed: () {
-                ga.select(
-                  analytics_constants.memory,
-                  analytics_constants.expandAll,
-                );
-                if (snapshotDisplay is MemoryHeapTable) {
-                  controller.groupByTreeTable.dataRoots.every((element) {
-                    element.expandCascading();
-                    return true;
-                  });
-                }
-                // All nodes expanded - signal tree state  changed.
-                controller.treeChanged();
-              },
-            ),
-            const SizedBox(width: denseSpacing),
-            CollapseAllButton(
-              onPressed: () {
-                ga.select(
-                  analytics_constants.memory,
-                  analytics_constants.collapseAll,
-                );
-                if (snapshotDisplay is MemoryHeapTable) {
-                  controller.groupByTreeTable.dataRoots.every((element) {
-                    element.collapseCascading();
-                    return true;
-                  });
-                  if (controller.instanceFieldsTreeTable != null) {
-                    // We're collapsing close the fields table.
-                    controller.selectedLeaf = null;
-                  }
-                  // All nodes collapsed - signal tree state changed.
-                  controller.treeChanged();
-                }
-              },
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
   AnimationController _setupBubbleAnimationController() {
     // Setup animation controller to handle the update bubble.
     const animationDuration = Duration(milliseconds: 500);
@@ -787,21 +629,6 @@ class _HeapTreeViewState extends State<HeapTreeView>
           onSelection: selectTheMatch,
           supportClearField: true,
         ),
-      );
-
-  Widget _buildSearchFilterControls() => Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          _buildSearchWidget(memorySearchFieldKey),
-          const SizedBox(width: denseSpacing),
-          FilterButton(
-            key: MemoryScreenKeys.filterButton,
-            onPressed: _filter,
-            // TODO(kenz): implement isFilterActive
-            isFilterActive: false,
-          ),
-        ],
       );
 
   // TODO: Much of the logic for _takeHeapSnapshot() might want to move into the
