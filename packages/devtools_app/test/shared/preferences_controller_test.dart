@@ -135,22 +135,15 @@ void main() {
       await controller.init();
     });
 
-    test('has expected default values', () async {
-      expect(controller.androidCollectionEnabled.value, isFalse);
-      expect(controller.autoSnapshotEnabled.value, isFalse);
-    });
-
     test('stores values and reads them on init', () async {
       storage.values.clear();
 
       // Remember original values.
       final originalAndroidCollection =
           controller.androidCollectionEnabled.value;
-      final originalAutoSnapshot = controller.androidCollectionEnabled.value;
 
       // Flip the values in controller.
       controller.androidCollectionEnabled.value = !originalAndroidCollection;
-      controller.autoSnapshotEnabled.value = !originalAutoSnapshot;
 
       // Check the values are stored.
       expect(storage.values, hasLength(2));
@@ -162,10 +155,6 @@ void main() {
       expect(
         controller.androidCollectionEnabled.value,
         !originalAndroidCollection,
-      );
-      expect(
-        controller.autoSnapshotEnabled.value,
-        !originalAutoSnapshot,
       );
 
       // Flip the values in storage.
@@ -180,10 +169,6 @@ void main() {
       expect(
         controller.androidCollectionEnabled.value,
         originalAndroidCollection,
-      );
-      expect(
-        controller.autoSnapshotEnabled.value,
-        originalAutoSnapshot,
       );
     });
   });

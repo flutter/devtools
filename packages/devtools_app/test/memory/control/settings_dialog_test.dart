@@ -53,10 +53,6 @@ void main() {
       preferences.memory.androidCollectionEnabled.value,
       isFalse,
     );
-    expect(
-      preferences.memory.autoSnapshotEnabled.value,
-      isFalse,
-    );
     await tester
         .tap(find.byKey(MemorySettingDialogKeys.showAndroidChartCheckBox));
     await tester.tap(find.byKey(MemorySettingDialogKeys.autoSnapshotCheckbox));
@@ -67,10 +63,6 @@ void main() {
     );
     expect(
       preferences.memory.androidCollectionEnabled.value,
-      isTrue,
-    );
-    expect(
-      preferences.memory.autoSnapshotEnabled.value,
       isTrue,
     );
 

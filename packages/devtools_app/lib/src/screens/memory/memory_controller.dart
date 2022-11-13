@@ -21,7 +21,6 @@ import '../../service/service_manager.dart';
 import '../../shared/globals.dart';
 import '../../shared/table/table.dart';
 import '../../shared/utils.dart';
-import '../../ui/search.dart';
 import 'memory_graph_model.dart';
 import 'memory_protocol.dart';
 import 'memory_snapshot_models.dart';
@@ -115,10 +114,7 @@ class OfflineFileException implements Exception {
 /// This class must not have direct dependencies on dart:html. This allows tests
 /// of the complicated logic in this class to run on the VM.
 class MemoryController extends DisposableController
-    with
-        AutoDisposeControllerMixin,
-        SearchControllerMixin,
-        AutoCompleteSearchControllerMixin {
+    with AutoDisposeControllerMixin {
   MemoryController({DiffPaneController? diffPaneController}) {
     memoryTimeline = MemoryTimeline(offline);
     memoryLog = MemoryLog(this);
@@ -278,16 +274,6 @@ class MemoryController extends DisposableController
 
     return null;
   }
-
-  ValueListenable get treeMapVisible => _treeMapVisible;
-
-  final _treeMapVisible = ValueNotifier<bool>(false);
-
-  void toggleTreeMapVisible(bool value) {
-    _treeMapVisible.value = value;
-  }
-
-  bool isAnalyzeButtonEnabled() => computeSnapshotToAnalyze != null;
 
   ValueListenable get legendVisibleNotifier => _legendVisibleNotifier;
 
