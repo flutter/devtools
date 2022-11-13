@@ -2,11 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
-import '../../config_specific/logger/logger.dart' as logger;
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/theme.dart';
@@ -170,91 +167,5 @@ class _MemoryTabsState extends State<MemoryTabs>
         Text(entry, style: themeData.fixedFontStyle),
       ],
     );
-  }
-
-  Widget helpScreen() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Text(
-          'Click a leaf node instance of a class to\n'
-          'inspect the fields of that instance e.g.,',
-        ),
-        const SizedBox(height: defaultSpacing),
-        tableExample(Icons.expand_more, 'dart:collection'),
-        tableExample(Icons.expand_more, 'SplayTreeMap'),
-        const SizedBox(height: denseRowSpacing),
-        tableExample(null, 'Instance 0'),
-      ],
-    );
-  }
-
-  Timer? removeUpdateBubble;
-
-  Widget textWidgetWithUpdateCircle(
-    String text, {
-    TextStyle? style,
-    double? size,
-  }) {
-    final textWidth = textWidgetWidth(text, style: style);
-
-    return Stack(
-      children: [
-        Positioned(
-          child: Container(
-            width: textWidth + 10,
-            child: Text(text, style: style),
-          ),
-        ),
-        Positioned(
-          right: 0,
-          child: Container(
-            alignment: Alignment.topRight,
-            width: size,
-            height: size,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.blue[400],
-            ),
-            child: const Icon(Icons.fiber_manual_record, size: 0),
-          ),
-        ),
-      ],
-    );
-  }
-
-  static const maxWidth = 800.0;
-
-  double textWidgetWidth(String message, {TextStyle? style}) {
-    // Longest message must fit in this width.
-    const constraints = BoxConstraints(
-      maxWidth: maxWidth,
-    );
-
-    // TODO(terry): Is there a better (less heavyweight) way of computing text
-    //              width than using the widget pipeline?
-    final richTextWidget = Text.rich(TextSpan(text: message), style: style)
-        .build(context) as RichText;
-    final renderObject = richTextWidget.createRenderObject(context);
-    renderObject.layout(constraints);
-    final boxes = renderObject.getBoxesForSelection(
-      TextSelection(
-        baseOffset: 0,
-        extentOffset: TextSpan(text: message).toPlainText().length,
-      ),
-    );
-
-    final textWidth = boxes.last.right;
-
-    if (textWidth > maxWidth) {
-      // TODO(terry): If message > 800 pixels in width (not possible
-      //              today) but could be more robust.
-      logger.log(
-        'Computed text width > $maxWidth ($textWidth)\nmessage=$message.',
-        logger.LogLevel.warning,
-      );
-    }
-
-    return textWidth;
   }
 }
