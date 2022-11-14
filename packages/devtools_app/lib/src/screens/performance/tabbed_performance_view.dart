@@ -219,6 +219,9 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
   }
 
   _PerformanceTabRecord _timelineEventsRecord() {
+    final data = controller.data;
+    final hasData = data != null && !data.isEmpty;
+    final searchFieldEnabled = hasData && !widget.processing;
     return _PerformanceTabRecord(
       tab: _buildTab(
         tabName: 'Timeline Events',
@@ -229,15 +232,7 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 if (useLegacy || !FeatureFlags.embeddedPerfetto) ...[
-                  ValueListenableBuilder<bool>(
-                    valueListenable: _timelineEventsController.processing,
-                    builder: (context, processing, _) {
-                      final data = controller.data;
-                      final hasData = data != null && !data.isEmpty;
-                      final searchFieldEnabled = hasData && !processing;
-                      return _buildSearchField(searchFieldEnabled);
-                    },
-                  ),
+                  _buildSearchField(searchFieldEnabled),
                   const FlameChartHelpButton(
                     gaScreen: PerformanceScreen.id,
                     gaSelection: analytics_constants.timelineFlameChartHelp,
