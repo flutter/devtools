@@ -116,7 +116,15 @@ class ReleaseNote {
     if (githubPullRequestUrls != null) {
       markdown += ' - ${githubPullRequestUrls!.join(", ")}';
     }
+
     markdown += '\n';
+
+    if (imageNames != null) {
+      for (var imageName in imageNames!) {
+        markdown += '![](files/$imageName)\n';
+      }
+    }
+
     return markdown;
   }
 
