@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:devtools_repo/repo_tool.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -53,11 +54,7 @@ class Release {
     sections.forEach((section) {
       markdown += '# ${section.name}\n\n';
       for (var note in section.notes) {
-        markdown += '- ${note.message}';
-        if (note.githubPullRequestUrls != null) {
-          markdown += ' - ${note.githubPullRequestUrls!.join(", ")}';
-        }
-        markdown += '\n';
+        markdown += note.toMarkdown();
       }
       markdown += '\n';
     });
@@ -102,7 +99,8 @@ class ReleaseNote {
         final path = "release_notes/files/$name";
         //TODO: get the proper path?
         if (!File(path).existsSync()) {
-          throw Exception("Could not find image file $path");
+          throw Exception(
+              "Could not find image file $path for note: \n${toMarkdown()}");
         }
       }
     }
@@ -111,6 +109,16 @@ class ReleaseNote {
   List<String>? githubPullRequestUrls;
   final String message;
   final List<String>? imageNames;
+
+  String toMarkdown() {
+    String markdown = '';
+    markdown += '- $message';
+    if (githubPullRequestUrls != null) {
+      markdown += ' - ${githubPullRequestUrls!.join(", ")}';
+    }
+    markdown += '\n';
+    return markdown;
+  }
 
   factory ReleaseNote.fromJson(Map<String, dynamic> json) =>
       _$ReleaseNoteFromJson(json);
