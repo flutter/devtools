@@ -4,7 +4,6 @@
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
-import 'package:devtools_app/src/primitives/feature_flags.dart';
 import 'package:devtools_app/src/screens/memory/memory_controller.dart';
 import 'package:devtools_app/src/screens/memory/memory_screen.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/controller/diff_pane_controller.dart';
@@ -20,9 +19,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stager/stager.dart';
 
-import '../../test_data/memory.dart';
-import '../../test_data/memory/heap/heap_data.dart';
-import '../../test_data/memory_allocation.dart';
+import '../../../test_data/memory.dart';
+import '../../../test_data/memory/heap/heap_data.dart';
+import '../../../test_data/memory_allocation.dart';
 
 /// To run:
 /// flutter run -t test/scenes/memory/default.stager_app.dart -d macos
@@ -40,8 +39,6 @@ class MemoryDefaultScene extends Scene {
 
   @override
   Future<void> setUp() async {
-    FeatureFlags.memoryDiffing = true;
-
     await ensureInspectorDependencies();
     setGlobal(OfflineModeController, OfflineModeController());
     setGlobal(IdeTheme, IdeTheme());
@@ -83,9 +80,7 @@ class MemoryDefaultScene extends Scene {
   @override
   String get title => '$MemoryDefaultScene';
 
-  void tearDown() {
-    FeatureFlags.memoryDiffing = false;
-  }
+  void tearDown() {}
 }
 
 /// Provides test snapshots. First time returns null.

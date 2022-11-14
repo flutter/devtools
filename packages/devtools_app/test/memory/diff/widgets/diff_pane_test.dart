@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/primitives/feature_flags.dart';
 import 'package:devtools_app/src/screens/memory/memory_heap_tree_view.dart';
 import 'package:devtools_app/src/screens/memory/memory_screen.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/diff_pane.dart';
@@ -10,14 +9,10 @@ import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../../../matchers/matchers.dart';
-import '../../../scenes/memory/default.dart';
+import '../../../test_infra/matchers.dart';
+import '../../../test_infra/scenes/memory/default.dart';
 
 void main() {
-  test('Diff tab is off yet.', () {
-    expect(FeatureFlags.memoryDiffing, false);
-  });
-
   group('Diff pane', () {
     late MemoryDefaultScene scene;
 

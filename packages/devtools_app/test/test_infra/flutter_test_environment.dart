@@ -26,7 +26,7 @@ final defaultFlutterExecutable = Platform.isWindows ? 'flutter.bat' : 'flutter';
 class FlutterTestEnvironment {
   FlutterTestEnvironment(
     this._runConfig, {
-    this.testAppDirectory = 'test/fixtures/flutter_app',
+    this.testAppDirectory = 'test/test_infra/fixtures/flutter_app',
     FlutterDriverFactory? flutterDriverFactory,
   })  : _flutterDriverFactory = flutterDriverFactory ?? defaultFlutterRunDriver,
         _flutterExe = _parseFlutterExeFromEnv();

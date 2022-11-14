@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
-import 'package:devtools_repo/commands/latest_flutter_candidate.dart';
 
 import 'commands/analyze.dart';
 import 'commands/generate_changelog.dart';
@@ -21,6 +20,5 @@ class DevToolsCommandRunner extends CommandRunner {
     addCommand(PackagesGetCommand());
     addCommand(GenerateChangelogCommand());
     addCommand(RollbackCommand());
-    addCommand(LatestFlutterCandidateCommand());
   }
 }

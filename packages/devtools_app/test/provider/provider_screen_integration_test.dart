@@ -23,7 +23,7 @@ import '../test_infra/flutter_test_storage.dart';
 void main() async {
   final FlutterTestEnvironment env = FlutterTestEnvironment(
     const FlutterRunConfiguration(withDebugger: true),
-    testAppDirectory: 'test/fixtures/provider_app',
+    testAppDirectory: 'test/test_infra/fixtures/provider_app',
   );
 
   late EvalOnDartLibrary evalOnDartLibrary;
