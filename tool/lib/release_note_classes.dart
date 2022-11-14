@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -92,12 +94,23 @@ class ReleaseSection {
 class ReleaseNote {
   ReleaseNote({
     required this.message,
+    this.imageNames,
     this.githubPullRequestUrls,
-  });
-  // TODO add ability to add image
+  }) {
+    if (imageNames != null) {
+      for (var name in imageNames!) {
+        final path = "release_notes/files/$name";
+        //TODO: get the proper path?
+        if (!File(path).existsSync()) {
+          throw Exception("Could not find image file $path");
+        }
+      }
+    }
+  }
 
   List<String>? githubPullRequestUrls;
   final String message;
+  final List<String>? imageNames;
 
   factory ReleaseNote.fromJson(Map<String, dynamic> json) =>
       _$ReleaseNoteFromJson(json);

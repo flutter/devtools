@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
-import 'lib/running_release_notes.dart';
+import 'lib/release_note_classes.dart';
 
 void main(List<String> args) {
   final runner = CommandRunner(

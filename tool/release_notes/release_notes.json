@@ -13,6 +13,9 @@
                       "githubPullRequestUrls": [
                            "https://github.com/flutter/devtools/pull/4283"
                       ],
+                      "imageNames": [
+                        "image1.png"
+                      ],
                       "message": "Auto scrolling behavior improved when snapping to a widget into focus"
                  },
                  {

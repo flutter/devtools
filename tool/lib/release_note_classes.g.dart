@@ -46,6 +46,9 @@ Map<String, dynamic> _$ReleaseSectionToJson(ReleaseSection instance) =>
 
 ReleaseNote _$ReleaseNoteFromJson(Map<String, dynamic> json) => ReleaseNote(
       message: json['message'] as String,
+      imageNames: (json['imageNames'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
       githubPullRequestUrls: (json['githubPullRequestUrls'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList(),
@@ -55,4 +58,5 @@ Map<String, dynamic> _$ReleaseNoteToJson(ReleaseNote instance) =>
     <String, dynamic>{
       'githubPullRequestUrls': instance.githubPullRequestUrls,
       'message': instance.message,
+      'imageNames': instance.imageNames,
     };
