@@ -114,7 +114,15 @@ class ReleaseNote {
     String markdown = '';
     markdown += '- $message';
     if (githubPullRequestUrls != null) {
-      markdown += ' - ${githubPullRequestUrls!.join(", ")}';
+      List<String> prUrls = [];
+      for (var url in githubPullRequestUrls!) {
+        final match = RegExp(
+                r'^https://github.com/flutter/devtools/pull/(?<pr_number>\d+)$')
+            .firstMatch(url);
+        final prNumber = match!.namedGroup('pr_number');
+        prUrls.add('[#$prNumber]($url)');
+      }
+      markdown += ' - [](${prUrls.join(", ")})';
     }
 
     markdown += '\n';
