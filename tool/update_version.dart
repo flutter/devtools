@@ -8,7 +8,7 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 
-import 'release-notes/release_note_classes.dart' as rn;
+import 'lib/release_note_classes.dart' as rn;
 
 // This script must be executed from the top level devtools/ directory.
 // TODO(kenz): If changes are made to this script, first consider refactoring to
@@ -62,7 +62,7 @@ Future<void> performTheVersionUpdate(
   });
 }
 
-Future<void> cycleReleaseNotes({
+Future<void> resetReleaseNotes({
   required SemanticVersion newVersion,
 }) async {
   final release = rn.Release(version: newVersion, sections: [
@@ -76,41 +76,21 @@ Future<void> cycleReleaseNotes({
     rn.ReleaseSection(name: 'App size tool updates'),
   ]);
 
-  //TODO remove latest dir
-  await Directory('./tool/release-notes/latest/').delete(recursive: true);
-  await Directory('./tool/release-notes/latest/files').create(recursive: true);
+  // Clear out the current notes
+  final releaseNotesDir = Directory('./tool/release_notes/');
+  if (releaseNotesDir.existsSync()) {
+    releaseNotesDir.delete(recursive: true);
+  }
+  final filesDir = Directory('./tool/release_notes/files');
 
-  // Copy Current release notes
-  final releaseNotesFile = File('./tool/release-notes/running/notes.json');
-  await releaseNotesFile.rename('./tool/release-notes/latest/notes.json');
-
-  // Copy Current Files
-  final contents =
-      await Directory('./tool/release-notes/running/files/').list().toList();
-  contents.forEach((element) async {
-    if (element is File) {
-      element.renameSync(
-          './tool/release-notes/latest/files/${element.uri.pathSegments.last}');
-    }
-  });
-
-  // Clear out the running directory
-  await Directory('./tool/release-notes/running/').delete(recursive: true);
-  await Directory('./tool/release-notes/running/files/')
-      .create(recursive: true);
+  await releaseNotesDir.create();
+  await filesDir.create();
 
   // populate a blank release notes file
-  JsonEncoder encoder = new JsonEncoder.withIndent('  ');
-  await File('./tool/release-notes/running/notes.json').writeAsString(
+  JsonEncoder encoder = JsonEncoder.withIndent('  ');
+  await File('./tool/release_notes/release_notes.json').writeAsString(
     encoder.convert(release),
   );
-
-  // Create a markdown version of the release notes
-  final fileContents =
-      File('./tool/release-notes/latest/notes.json').readAsStringSync();
-  final latestRelease = rn.Release.fromJson(jsonDecode(fileContents));
-  await File('./tool/release-notes/latest/notes.md')
-      .writeAsString(latestRelease.toMarkdown());
 }
 
 String? incrementVersionByType(String version, String type) {
@@ -379,7 +359,7 @@ class AutoUpdateCommand extends Command {
         newVersion = incrementVersionByType(currentVersion, type);
 
         // Doing a proper version update so cycle the release notes
-        await cycleReleaseNotes(
+        await resetReleaseNotes(
             newVersion: SemanticVersion.parse(currentVersion));
     }
     if (newVersion == null) {
