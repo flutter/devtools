@@ -11,6 +11,9 @@
       "name": "Inspector updates",
       "notes": [
         {
+          "message" : "making an important change"
+        },
+        {
           "githubPullRequestUrls": [
             "https://githubcom/prurl"
           ],
