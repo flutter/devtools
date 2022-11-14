@@ -81,7 +81,7 @@ jobs:
           dart pub get
           dart ./release_note_helper.dart pr-url \
             -f "../$CURRENT_RELEASE_JSON_FILE_PATH" \
-            -u https://github.com/flutter/devtools/pull/$PULL_NUMBER || true
+            -u https://github.com/flutter/devtools/pull/$PULL_NUMBER 
 
       # - name: Add PR Url to Release Notes
       #   run: 
