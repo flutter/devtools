@@ -47,6 +47,7 @@ void main() {
       setGlobal(OfflineModeController, OfflineModeController());
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(NotificationService, NotificationService());
+      setGlobal(PreferencesController, PreferencesController());
       when(serviceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
     });
 

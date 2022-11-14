@@ -336,6 +336,7 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
     this.secondarySortColumn,
     this.autoExpandRoots = false,
     this.preserveVerticalScrollPosition = false,
+    this.displayTreeGuidelines = false,
     ValueNotifier<Selection<T?>>? selectionNotifier,
   })  : selectionNotifier = selectionNotifier ??
             ValueNotifier<Selection<T?>>(Selection.empty()),
@@ -402,6 +403,9 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
   /// This should be set to true if the table is not disposed and completely
   /// rebuilt when changing from one data set to another.
   final bool preserveVerticalScrollPosition;
+
+  /// Determines whether or not guidelines should be rendered in tree columns.
+  final bool displayTreeGuidelines;
 
   @override
   TreeTableState<T> createState() => TreeTableState<T>();
@@ -616,6 +620,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
         isExpanded: node.isExpanded,
         isExpandable: node.isExpandable,
         isShown: node.shouldShow(),
+        displayTreeGuidelines: widget.displayTreeGuidelines,
         expansionChildren:
             node != animatingNode || animatingChildrenSet.contains(node)
                 ? null
@@ -1090,6 +1095,7 @@ class TableRow<T> extends StatefulWidget {
     this.isExpandable = false,
     this.isSelected = false,
     this.isShown = true,
+    this.displayTreeGuidelines = false,
     this.searchMatchesNotifier,
     this.activeSearchMatchNotifier,
   })  : sortColumn = null,
@@ -1123,6 +1129,7 @@ class TableRow<T> extends StatefulWidget {
         onExpansionCompleted = null,
         searchMatchesNotifier = null,
         activeSearchMatchNotifier = null,
+        displayTreeGuidelines = false,
         rowType = _TableRowType.columnHeader,
         super(key: key);
 
@@ -1150,6 +1157,7 @@ class TableRow<T> extends StatefulWidget {
         onExpansionCompleted = null,
         searchMatchesNotifier = null,
         activeSearchMatchNotifier = null,
+        displayTreeGuidelines = false,
         rowType = _TableRowType.columnGroupHeader,
         super(key: key);
 
@@ -1216,6 +1224,8 @@ class TableRow<T> extends StatefulWidget {
   final ValueListenable<List<T>>? searchMatchesNotifier;
 
   final ValueListenable<T?>? activeSearchMatchNotifier;
+
+  final bool displayTreeGuidelines;
 
   @override
   _TableRowState<T> createState() => _TableRowState<T>();
@@ -1410,6 +1420,7 @@ class _TableRowState<T> extends State<TableRow<T>>
   Widget tableRowFor(BuildContext context, {VoidCallback? onPressed}) {
     Widget columnFor(ColumnData<T> column, double columnWidth) {
       late Widget content;
+      final theme = Theme.of(context);
       final node = widget.node;
       if (widget.rowType == _TableRowType.columnHeader) {
         content = _ColumnHeader(
@@ -1502,6 +1513,18 @@ class _TableRowState<T> extends State<TableRow<T>>
           child: content,
         ),
       );
+      if (widget.displayTreeGuidelines &&
+          node != null &&
+          node is TreeNode &&
+          column is TreeColumnData) {
+        content = CustomPaint(
+          painter: _RowGuidelinePainter(
+            node.level,
+            theme.colorScheme,
+          ),
+          child: content,
+        );
+      }
       return content;
     }
 
@@ -1595,6 +1618,38 @@ class _TableRowState<T> extends State<TableRow<T>>
 
   @override
   bool shouldShow() => widget.isShown;
+}
+
+class _RowGuidelinePainter extends CustomPainter {
+  _RowGuidelinePainter(this.level, this.colorScheme);
+
+  final int level;
+  final ColorScheme colorScheme;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final colors = colorScheme.treeGuidelineColors;
+    for (int i = 0; i < level; ++i) {
+      final currentX = i * TreeColumnData.treeToggleWidth + defaultIconSize / 2;
+      // Draw a vertical line for each tick identifying a connection between
+      // an ancestor of this node and some other node in the tree.
+      canvas.drawLine(
+        Offset(currentX, 0.0),
+        Offset(currentX, defaultRowHeight),
+        Paint()
+          ..color = colors[i % colors.length]
+          ..strokeWidth = 1.0,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    if (oldDelegate is _RowGuidelinePainter) {
+      return oldDelegate.colorScheme.isLight != colorScheme.isLight;
+    }
+    return true;
+  }
 }
 
 class _ColumnHeader<T> extends StatelessWidget {

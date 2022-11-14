@@ -93,6 +93,7 @@ const loadAllCpuSamples = 'loadAllCpuSamples';
 const profileAppStartUp = 'profileAppStartUp';
 const cpuProfileFlameChartHelp = 'cpuProfileFlameChartHelp';
 const cpuProfileProcessingTime = 'cpuProfileProcessingTime';
+const cpuProfileDisplayTreeGuidelines = 'cpuProfileDisplayTreeGuidelines';
 
 // Logging UX actions:
 const structuredErrors = 'structuredErrors';
