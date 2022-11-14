@@ -443,6 +443,22 @@ class InspectorService extends InspectorServiceBase {
     return response.map<String>((e) => e.toString()).toList();
   }
 
+  /// Requests the full mapping of widget ids to source locations.
+  ///
+  /// See [LocationMap] which provides support to parse this JSON.
+  Future<Map<String, dynamic>> widgetLocationIdMap() async {
+    assert(useDaemonApi);
+    final response = await invokeServiceMethodDaemonNoGroupArgs(
+      'widgetLocationIdMap',
+    );
+
+    if (response is! Map) {
+      return {};
+    }
+
+    return response as Map<String, dynamic>;
+  }
+
   /// As we aren't running from an IDE, we don't know exactly what the pub root
   /// directories are for the current project so we make a best guess if needed
   /// based on the the root directory of the first non artifical widget in the

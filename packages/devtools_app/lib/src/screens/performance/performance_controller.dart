@@ -5,18 +5,21 @@
 import 'dart:async';
 
 import 'package:pedantic/pedantic.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../../config_specific/import_export/import_export.dart';
 import '../../primitives/auto_dispose.dart';
+import '../../primitives/feature_flags.dart';
 import '../../shared/globals.dart';
+import '../inspector/inspector_service.dart';
 import 'panes/controls/enhance_tracing/enhance_tracing_controller.dart';
 import 'panes/flutter_frames/flutter_frame_model.dart';
 import 'panes/flutter_frames/flutter_frames_controller.dart';
 import 'panes/raster_stats/raster_stats_controller.dart';
+import 'panes/rebuild_stats/rebuild_counts.dart';
 import 'panes/timeline_events/timeline_events_controller.dart';
 import 'performance_model.dart';
 import 'performance_screen.dart';
-import 'rebuild_counts.dart';
 
 /// This class contains the business logic for [performance_screen.dart].
 ///
@@ -51,6 +54,9 @@ class PerformanceController extends DisposableController
   // PR for rebuild indicators lands
   //(https://github.com/flutter/devtools/pull/4566).
   final rebuildCountModel = RebuildCountModel();
+
+  bool _fetchMissingLocationsStarted = false;
+  IsolateRef? _currentRebuildWidgetsIsolate;
 
   final enhanceTracingController = EnhanceTracingController();
 
@@ -100,10 +106,53 @@ class PerformanceController extends DisposableController
             final frame = FlutterFrame.parse(event.extensionData!.data);
             enhanceTracingController.assignStateForFrame(frame);
             flutterFramesController.addFrame(frame);
-          } else if (event.extensionKind == 'Flutter.RebuiltWidgets') {
-            rebuildCountModel.processRebuildEvent(event.extensionData!.data);
+          } else if (event.extensionKind == 'Flutter.RebuiltWidgets' &&
+              FeatureFlags.widgetRebuildstats) {
+            final data = this.data!;
+            if (_currentRebuildWidgetsIsolate != event.isolate) {
+              data.rebuildCountModel.clearFromRestart();
+            }
+            _currentRebuildWidgetsIsolate = event.isolate;
+            // TODO(jacobr): need to make sure we don't get events from before
+            // the last hot restart. Their data would be bogus.
+            data.rebuildCountModel
+                .processRebuildEvent(event.extensionData!.data);
+            if (data.rebuildCountModel.locationMap.locationsResolved.value ==
+                    false &&
+                !_fetchMissingLocationsStarted) {
+              _fetchMissingRebuildLocations();
+            }
           }
         }),
+      );
+    }
+  }
+
+  void _fetchMissingRebuildLocations() async {
+    final data = this.data!;
+    if (_fetchMissingLocationsStarted) return;
+    // Some locations are missing. This occurs if rebuilds were
+    // enabled before DevTools connected because rebuild events only
+    // include locations that have not yet been sent with an event.
+    _fetchMissingLocationsStarted = true;
+    final inspectorService =
+        serviceManager.inspectorService! as InspectorService;
+    final expectedIsolate = _currentRebuildWidgetsIsolate;
+    final json = await inspectorService.widgetLocationIdMap();
+    // Don't apply the json if the isolate has been restarted
+    // while we were waiting for a response.
+    if (_currentRebuildWidgetsIsolate == expectedIsolate) {
+      // It is strange if unresolved Locations have resolved on their
+      // own. This wouldn't be a big deal but suggests a logic bug
+      // somewhere.
+      assert(
+        data.rebuildCountModel.locationMap.locationsResolved.value == false,
+      );
+      data.rebuildCountModel.locationMap.processLocationMap(json);
+      // Only one call to fetch missing locations should ever be
+      // needed as rebuild events include all associated locations.
+      assert(
+        data.rebuildCountModel.locationMap.locationsResolved.value == true,
       );
     }
   }
@@ -166,7 +215,7 @@ class PerformanceController extends DisposableController
   /// This method returns the name of the file that was downloaded.
   String exportData() {
     final encodedData =
-        _exportController.encode(PerformanceScreen.id, data!.json);
+        _exportController.encode(PerformanceScreen.id, data!.toJson());
     return _exportController.downloadFile(encodedData);
   }
 

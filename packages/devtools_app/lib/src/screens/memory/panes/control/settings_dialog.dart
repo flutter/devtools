@@ -14,7 +14,6 @@ import '../../memory_controller.dart';
 @visibleForTesting
 class MemorySettingDialogKeys {
   static const Key showAndroidChartCheckBox = ValueKey('showAndroidChart');
-  static const Key autoSnapshotCheckbox = ValueKey('autoSnapshotCheckbox');
 }
 
 class MemorySettingsDialog extends StatelessWidget {
@@ -38,14 +37,6 @@ class MemorySettingsDialog extends StatelessWidget {
               title:
                   'Show Android memory chart in addition to Dart memory chart',
               checkboxKey: MemorySettingDialogKeys.showAndroidChartCheckBox,
-            ),
-            const SizedBox(
-              height: defaultSpacing,
-            ),
-            CheckboxSetting(
-              notifier: preferences.memory.autoSnapshotEnabled,
-              title: 'Automatically take snapshot when memory usage spikes',
-              checkboxKey: MemorySettingDialogKeys.autoSnapshotCheckbox,
             ),
           ],
         ),
