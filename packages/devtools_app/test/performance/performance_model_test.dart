@@ -9,9 +9,9 @@ import 'package:devtools_app/src/screens/performance/panes/raster_stats/raster_s
 import 'package:devtools_app/src/screens/performance/panes/rebuild_stats/rebuild_counts.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../test_data/cpu_profile.dart';
-import '../test_data/performance.dart';
-import '../test_data/performance_raster_stats.dart';
+import '../test_infra/test_data/cpu_profile.dart';
+import '../test_infra/test_data/performance.dart';
+import '../test_infra/test_data/performance_raster_stats.dart';
 
 import '../test_infra/utils/test_utils.dart';
 

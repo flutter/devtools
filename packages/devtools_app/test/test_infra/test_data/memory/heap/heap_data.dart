@@ -9,7 +9,7 @@ import 'package:devtools_app/src/screens/memory/shared/heap/model.dart';
 
 import '../leaks/leaks_data.dart';
 
-const _dataDir = 'test/test_data/memory/heap/';
+const _dataDir = 'test/test_infra/test_data/memory/heap/';
 
 typedef HeapLoader = Future<AdaptedHeapData> Function();
 

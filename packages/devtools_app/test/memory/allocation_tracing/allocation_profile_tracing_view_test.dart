@@ -26,7 +26,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../test_data/memory_allocation.dart';
+import '../../test_infra/test_data/memory_allocation.dart';
 
 // TODO(bkonyi): add tests for multi-isolate support.
 // See https://github.com/flutter/devtools/issues/4537.
@@ -100,7 +100,7 @@ void main() {
 
     setUpAll(() {
       final rawProfile = File(
-        'test/test_data/memory/allocation_tracing/allocation_trace.json',
+        'test/test_infra/test_data/memory/allocation_tracing/allocation_trace.json',
       ).readAsStringSync();
       allocationTracingProfile = CpuSamples.parse(jsonDecode(rawProfile))!;
     });

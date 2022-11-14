@@ -7,7 +7,7 @@ import 'dart:io';
 
 import 'package:devtools_app/src/screens/memory/panes/leaks/diagnostics/model.dart';
 
-const _dataDir = 'test/test_data/memory/leaks/';
+const _dataDir = 'test/test_infra/test_data/memory/leaks/';
 
 class GoldenLeakTest {
   GoldenLeakTest({

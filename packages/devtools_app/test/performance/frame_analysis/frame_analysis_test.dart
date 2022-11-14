@@ -12,8 +12,8 @@ import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../../test_data/performance.dart';
 import '../../test_infra/matchers.dart';
+import '../../test_infra/test_data/performance.dart';
 
 void main() {
   const windowSize = Size(4000.0, 1000.0);

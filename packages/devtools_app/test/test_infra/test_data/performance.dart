@@ -6,7 +6,7 @@ import 'dart:convert';
 
 import 'package:devtools_app/devtools_app.dart';
 
-import '../test_infra/utils/test_utils.dart';
+import '../../test_infra/utils/test_utils.dart';
 import 'cpu_profile.dart';
 import 'performance_raster_stats.dart';
 
@@ -253,7 +253,7 @@ const goldenUiString = '  VSYNC [193938741076 μs - 193938742696 μs]\n'
     '            Semantics [193938741736 μs - 193938742484 μs]\n'
     '            Finalize tree [193938742493 μs - 193938742582 μs]\n';
 
-final goldenUiTraceEvents = [
+final goldenUiTraceEvents = <TraceEventWrapper>[
   vsyncTrace,
   animatorBeginFrameTrace,
   frameworkWorkloadTrace,
@@ -1382,7 +1382,7 @@ final transformLayerEnd1 = testTraceEventWrapper({
   'ph': 'E',
   'args': {}
 });
-final durationEventsWithDuplicateTraces = [
+final durationEventsWithDuplicateTraces = <TraceEventWrapper>[
   gpuRasterizerDrawTrace,
   transformLayerStart1,
   transformLayerStart2,

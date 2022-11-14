@@ -24,8 +24,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-import '../test_data/cpu_profile.dart';
 import '../test_infra/matchers.dart';
+import '../test_infra/test_data/cpu_profile.dart';
 
 void main() {
   late CpuProfiler cpuProfiler;
@@ -409,7 +409,7 @@ void main() {
       await expectLater(
         find.byType(CpuProfiler),
         matchesDevToolsGolden(
-          '../goldens/cpu_profiler_call_tree_no_guidelines.png',
+          '../test_infra/goldens/cpu_profiler_call_tree_no_guidelines.png',
         ),
       );
       await tester.tap(find.byType(DisplayTreeGuidelinesToggle));
@@ -419,7 +419,7 @@ void main() {
       await expectLater(
         find.byType(CpuProfiler),
         matchesDevToolsGolden(
-          '../goldens/cpu_profiler_call_tree_guidelines.png',
+          '../test_infra/goldens/cpu_profiler_call_tree_guidelines.png',
         ),
       );
       await tester.tap(find.byType(DisplayTreeGuidelinesToggle));
@@ -429,7 +429,7 @@ void main() {
       await expectLater(
         find.byType(CpuProfiler),
         matchesDevToolsGolden(
-          '../goldens/cpu_profiler_call_tree_no_guidelines.png',
+          '../test_infra/goldens/cpu_profiler_call_tree_no_guidelines.png',
         ),
       );
 
@@ -445,7 +445,7 @@ void main() {
       await expectLater(
         find.byType(CpuProfiler),
         matchesDevToolsGolden(
-          '../goldens/cpu_profiler_bottom_up_no_guidelines.png',
+          '../test_infra/goldens/cpu_profiler_bottom_up_no_guidelines.png',
         ),
       );
       await tester.tap(find.byType(DisplayTreeGuidelinesToggle));
@@ -455,7 +455,7 @@ void main() {
       await expectLater(
         find.byType(CpuProfiler),
         matchesDevToolsGolden(
-          '../goldens/cpu_profiler_bottom_up_guidelines.png',
+          '../test_infra/goldens/cpu_profiler_bottom_up_guidelines.png',
         ),
       );
       await tester.tap(find.byType(DisplayTreeGuidelinesToggle));
@@ -465,7 +465,7 @@ void main() {
       await expectLater(
         find.byType(CpuProfiler),
         matchesDevToolsGolden(
-          '../goldens/cpu_profiler_bottom_up_no_guidelines.png',
+          '../test_infra/goldens/cpu_profiler_bottom_up_no_guidelines.png',
         ),
       );
     });

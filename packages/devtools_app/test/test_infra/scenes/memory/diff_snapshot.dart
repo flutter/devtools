@@ -15,7 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stager/stager.dart';
 
-import '../../../test_data/memory/heap/heap_data.dart';
+import '../../../test_infra/test_data/memory/heap/heap_data.dart';
 
 /// To run:
 /// flutter run -t test/scenes/memory/diff_snapshot.stager_app.dart -d macos

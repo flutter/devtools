@@ -10,7 +10,7 @@ import 'package:devtools_app/src/screens/memory/panes/leaks/formatter.dart';
 import 'package:devtools_app/src/screens/memory/panes/leaks/instrumentation/model.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../../../test_data/memory/leaks/leaks_data.dart';
+import '../../../test_infra/test_data/memory/leaks/leaks_data.dart';
 
 void main() {
   for (var t in goldenLeakTests) {
