@@ -19,7 +19,7 @@
         },
         {
           "githubPullRequestUrls": [
-            "https://githubcom/prurl"
+            "https://github.com/flutter/devtools/pull/12312"
           ],
           "message": "Auto scrolling behavior improved when snapping to a widget into focus",
           "imageNames": [
@@ -47,7 +47,7 @@
       "notes": [
         {
           "githubPullRequestUrls": [
-            "https://www.dan.com"
+            "https://github.com/flutter/devtools/pull/4491"
           ],
           "message": "Fix issue where scrollbar would go out of sync with the frame content",
           "imageNames": null
