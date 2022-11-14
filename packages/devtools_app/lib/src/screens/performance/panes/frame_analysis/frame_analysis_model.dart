@@ -5,6 +5,7 @@
 import '../../../../primitives/trees.dart';
 import '../../../../primitives/utils.dart';
 import '../../performance_model.dart';
+import '../flutter_frames/flutter_frame_model.dart';
 
 class FrameAnalysis {
   FrameAnalysis(this.frame);

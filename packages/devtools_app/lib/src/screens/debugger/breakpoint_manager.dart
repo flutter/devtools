@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
@@ -238,15 +240,16 @@ class BreakpointManager extends Disposer {
         final breakpoint = event.breakpoint!;
         _breakpoints.value = [..._breakpoints.value, breakpoint];
 
-        // ignore: unawaited_futures
-        breakpointManager.createBreakpointWithLocation(breakpoint).then((bp) {
-          final list = [
-            ..._breakpointsWithLocation.value,
-            bp,
-          ]..sort();
+        unawaited(
+          breakpointManager.createBreakpointWithLocation(breakpoint).then((bp) {
+            final list = [
+              ..._breakpointsWithLocation.value,
+              bp,
+            ]..sort();
 
-          _breakpointsWithLocation.value = list;
-        });
+            _breakpointsWithLocation.value = list;
+          }),
+        );
 
         break;
       case EventKind.kBreakpointResolved:
@@ -257,16 +260,17 @@ class BreakpointManager extends Disposer {
           breakpoint
         ];
 
-        // ignore: unawaited_futures
-        breakpointManager.createBreakpointWithLocation(breakpoint).then((bp) {
-          final list = _breakpointsWithLocation.value.toList();
-          // Remote the bp with the older, unresolved information from the list.
-          list.removeWhere((breakpoint) => bp.breakpoint.id == bp.id);
-          // Add the bp with the newer, resolved information.
-          list.add(bp);
-          list.sort();
-          _breakpointsWithLocation.value = list;
-        });
+        unawaited(
+          breakpointManager.createBreakpointWithLocation(breakpoint).then((bp) {
+            final list = _breakpointsWithLocation.value.toList();
+            // Remote the bp with the older, unresolved information from the list.
+            list.removeWhere((breakpoint) => bp.breakpoint.id == bp.id);
+            // Add the bp with the newer, resolved information.
+            list.add(bp);
+            list.sort();
+            _breakpointsWithLocation.value = list;
+          }),
+        );
 
         break;
 

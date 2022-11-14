@@ -24,7 +24,7 @@ class AnalyticsController {
   })  : _analyticsEnabled = ValueNotifier<bool>(enabled),
         _shouldPrompt = ValueNotifier<bool>(firstRun && !enabled) {
     if (_shouldPrompt.value) {
-      toggleAnalyticsEnabled(true);
+      unawaited(toggleAnalyticsEnabled(true));
     }
     if (_analyticsEnabled.value) {
       setUpAnalytics();

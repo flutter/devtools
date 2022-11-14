@@ -58,7 +58,7 @@ class DeviceDialog extends StatelessWidget {
       actions: [
         _connectToNewAppButton(context),
         if (connectedApp.isRunningOnDartVM!) _ViewVMFlagsButton(),
-        DialogCloseButton(),
+        const DialogCloseButton(),
       ],
     );
   }
@@ -176,7 +176,7 @@ class _VMFlagsDialogState extends State<VMFlagsDialog> with AutoDisposeMixin {
           ),
         ],
       ),
-      actions: [
+      actions: const [
         DialogCloseButton(),
       ],
     );

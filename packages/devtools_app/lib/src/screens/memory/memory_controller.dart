@@ -1003,8 +1003,8 @@ class MemoryController extends DisposableController
     super.dispose();
     _displayIntervalNotifier.dispose();
     _memorySourceNotifier.dispose();
-    _disconnectController.close();
-    _memoryTrackerController.close();
+    unawaited(_disconnectController.close());
+    unawaited(_memoryTrackerController.close());
     _memoryTracker?.dispose();
   }
 }

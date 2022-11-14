@@ -4,6 +4,8 @@
 
 import 'package:flutter/material.dart';
 
+import '../../../../../../analytics/analytics.dart' as ga;
+import '../../../../../../analytics/constants.dart' as analytics_constants;
 import '../../../../../../shared/common_widgets.dart';
 import '../../../../../../shared/theme.dart';
 import '../../../../shared/heap/model.dart';
@@ -51,36 +53,60 @@ class _PathControlPane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        CopyToClipboardControl(
-          dataProvider: () => path.toLongString(delimiter: '\n'),
-          // We do not give success message because it pops up directly on
-          // top of the path control, that makes the control anavailable
-          // while message is here.
-          successMessage: null,
-        ),
-        const SizedBox(width: denseSpacing),
-        ValueListenableBuilder<bool>(
-          valueListenable: controller.hideStandard,
-          builder: (_, hideStandard, __) => FilterButton(
-            onPressed: () =>
-                controller.hideStandard.value = !controller.hideStandard.value,
-            isFilterActive: hideStandard,
-            message: 'Hide standard libraries',
+    return Padding(
+      padding: const EdgeInsets.only(right: denseSpacing),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              'Retaining path for ${path.classes.last.className}',
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
-        ),
-        const SizedBox(width: denseSpacing),
-        ValueListenableBuilder<bool>(
-          valueListenable: controller.invert,
-          builder: (_, invert, __) => ToggleButton(
-            onPressed: () => controller.invert.value = !controller.invert.value,
-            isSelected: invert,
-            message: 'Invert the path',
-            icon: Icons.swap_horiz,
+          const SizedBox(width: denseSpacing),
+          CopyToClipboardControl(
+            dataProvider: () => path.toLongString(delimiter: '\n'),
+            // We do not give success message because it pops up directly on
+            // top of the path widget, that makes the widget anavailable
+            // while message is here.
+            successMessage: null,
+            gaScreen: analytics_constants.memory,
+            gaItem: analytics_constants.MemoryEvent.diffPathCopy,
           ),
-        ),
-      ],
+          const SizedBox(width: denseSpacing),
+          ValueListenableBuilder<bool>(
+            valueListenable: controller.hideStandard,
+            builder: (_, hideStandard, __) => FilterButton(
+              onPressed: () {
+                ga.select(
+                  analytics_constants.memory,
+                  '${analytics_constants.MemoryEvent.diffPathFilter}-$hideStandard',
+                );
+                controller.hideStandard.value = !controller.hideStandard.value;
+              },
+              isFilterActive: hideStandard,
+              message: 'Hide standard libraries',
+            ),
+          ),
+          const SizedBox(width: denseSpacing),
+          ValueListenableBuilder<bool>(
+            valueListenable: controller.invert,
+            builder: (_, invert, __) => ToggleButton(
+              onPressed: () {
+                ga.select(
+                  analytics_constants.memory,
+                  '${analytics_constants.MemoryEvent.diffPathInvert}-$invert',
+                );
+                controller.invert.value = !controller.invert.value;
+              },
+              isSelected: invert,
+              message: 'Invert the path',
+              icon: Icons.swap_horiz,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

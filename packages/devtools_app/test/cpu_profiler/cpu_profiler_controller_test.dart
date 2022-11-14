@@ -7,6 +7,7 @@ import 'package:devtools_app/src/screens/profiler/cpu_profile_controller.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/preferences.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -30,6 +31,7 @@ void main() {
     setUp(() {
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(OfflineModeController, OfflineModeController());
+      setGlobal(PreferencesController, PreferencesController());
       controller = CpuProfilerController();
     });
 
@@ -87,12 +89,17 @@ void main() {
         label: CpuProfilerController.userTagNone,
       )!;
       final filteredData = controller.dataNotifier.value!;
-      expect(originalData.stackFrames.values.length, equals(17));
+      expect(
+        originalData.functionProfile.stackFrames.values.length,
+        equals(17),
+      );
       expect(filteredData.stackFrames.values.length, equals(12));
 
       // The native frame filter is applied by default.
-      final originalNativeFrames =
-          originalData.stackFrames.values.where((sf) => sf.isNative).toList();
+      final originalNativeFrames = originalData
+          .functionProfile.stackFrames.values
+          .where((sf) => sf.isNative)
+          .toList();
       final filteredNativeFrames =
           filteredData.stackFrames.values.where((sf) => sf.isNative).toList();
       expect(originalNativeFrames.length, equals(5));
@@ -236,7 +243,10 @@ void main() {
         processId: 'test',
       );
       controller.loadProcessedData(
-        cpuProfileDataWithTags,
+        CpuProfilePair(
+          functionProfile: cpuProfileDataWithTags,
+          codeProfile: null,
+        ),
         storeAsUserTagNone: true,
       );
 
@@ -301,6 +311,52 @@ void main() {
 ''',
         ),
       );
+
+      await controller.loadDataWithTag(CpuProfilerController.groupByUserTag);
+      expect(
+        controller.dataNotifier.value!.cpuProfileRoot.profileAsString(),
+        equals(
+          '''
+  all - children: 3 - excl: 0 - incl: 5
+    userTagA - children: 1 - excl: 0 - incl: 2
+      Frame1 - children: 2 - excl: 0 - incl: 2
+        Frame2 - children: 1 - excl: 0 - incl: 1
+          Frame3 - children: 0 - excl: 1 - incl: 1
+        Frame5 - children: 0 - excl: 1 - incl: 1
+    userTagB - children: 1 - excl: 0 - incl: 1
+      Frame1 - children: 1 - excl: 0 - incl: 1
+        Frame2 - children: 1 - excl: 0 - incl: 1
+          Frame4 - children: 0 - excl: 1 - incl: 1
+    userTagC - children: 1 - excl: 0 - incl: 2
+      Frame1 - children: 1 - excl: 0 - incl: 2
+        Frame5 - children: 1 - excl: 1 - incl: 2
+          Frame6 - children: 0 - excl: 1 - incl: 1
+''',
+        ),
+      );
+
+      await controller.loadDataWithTag(CpuProfilerController.groupByVmTag);
+      expect(
+        controller.dataNotifier.value!.cpuProfileRoot.profileAsString(),
+        equals(
+          '''
+  all - children: 3 - excl: 0 - incl: 5
+    vmTagA - children: 1 - excl: 0 - incl: 2
+      Frame1 - children: 2 - excl: 0 - incl: 2
+        Frame2 - children: 1 - excl: 0 - incl: 1
+          Frame3 - children: 0 - excl: 1 - incl: 1
+        Frame5 - children: 0 - excl: 1 - incl: 1
+    vmTagB - children: 1 - excl: 0 - incl: 1
+      Frame1 - children: 1 - excl: 0 - incl: 1
+        Frame2 - children: 1 - excl: 0 - incl: 1
+          Frame4 - children: 0 - excl: 1 - incl: 1
+    vmTagC - children: 1 - excl: 0 - incl: 2
+      Frame1 - children: 1 - excl: 0 - incl: 2
+        Frame5 - children: 1 - excl: 1 - incl: 2
+          Frame6 - children: 0 - excl: 1 - incl: 1
+''',
+        ),
+      );
     });
 
     test('processDataForTag applies toggle filters by default', () async {
@@ -312,7 +368,10 @@ void main() {
         processId: 'test',
       );
       controller.loadProcessedData(
-        cpuProfileDataWithTags,
+        CpuProfilePair(
+          functionProfile: cpuProfileDataWithTags,
+          codeProfile: null,
+        ),
         storeAsUserTagNone: true,
       );
 
@@ -367,6 +426,42 @@ void main() {
   all - children: 1 - excl: 0 - incl: 2
     Frame5 - children: 1 - excl: 1 - incl: 2
       Frame6 - children: 0 - excl: 1 - incl: 1
+''',
+        ),
+      );
+
+      await controller.loadDataWithTag(CpuProfilerController.groupByUserTag);
+      expect(
+        controller.dataNotifier.value!.cpuProfileRoot.profileAsString(),
+        equals(
+          '''
+  all - children: 3 - excl: 0 - incl: 5
+    userTagA - children: 2 - excl: 0 - incl: 2
+      Frame2 - children: 0 - excl: 1 - incl: 1
+      Frame5 - children: 0 - excl: 1 - incl: 1
+    userTagB - children: 1 - excl: 0 - incl: 1
+      Frame2 - children: 0 - excl: 1 - incl: 1
+    userTagC - children: 1 - excl: 0 - incl: 2
+      Frame5 - children: 1 - excl: 1 - incl: 2
+        Frame6 - children: 0 - excl: 1 - incl: 1
+''',
+        ),
+      );
+
+      await controller.loadDataWithTag(CpuProfilerController.groupByVmTag);
+      expect(
+        controller.dataNotifier.value!.cpuProfileRoot.profileAsString(),
+        equals(
+          '''
+  all - children: 3 - excl: 0 - incl: 5
+    vmTagA - children: 2 - excl: 0 - incl: 2
+      Frame2 - children: 0 - excl: 1 - incl: 1
+      Frame5 - children: 0 - excl: 1 - incl: 1
+    vmTagB - children: 1 - excl: 0 - incl: 1
+      Frame2 - children: 0 - excl: 1 - incl: 1
+    vmTagC - children: 1 - excl: 0 - incl: 2
+      Frame5 - children: 1 - excl: 1 - incl: 2
+        Frame6 - children: 0 - excl: 1 - incl: 1
 ''',
         ),
       );

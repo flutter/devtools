@@ -24,7 +24,7 @@ class AppFixture {
     // "starting app"
     _onAppStarted = lines.first;
 
-    serviceConnection.streamListen(EventStreams.kIsolate);
+    unawaited(serviceConnection.streamListen(EventStreams.kIsolate));
     _isolateEventStreamSubscription =
         serviceConnection.onIsolateEvent.listen((Event event) {
       if (event.kind == EventKind.kIsolateExit) {
@@ -164,21 +164,26 @@ class CliAppFixture extends AppFixture {
   ) async {
     Isolate? foundIsolate;
     await waitFor(() async {
+      const skipId = 'skip';
       final vm = await serviceConnection.getVM();
       final List<Isolate?> isolates = await Future.wait(
         vm.isolates!.map(
-          (ref) => serviceConnection.getIsolate(ref.id!)
+          (ref) => serviceConnection
+              .getIsolate(ref.id!)
               // Calling getIsolate() can sometimes return a collected sentinel
               // for an isolate that hasn't started yet. We can just ignore these
               // as on the next trip around the Isolate will be returned.
               // https://github.com/dart-lang/sdk/issues/33747
               .catchError((error) {
             print('getIsolate(${ref.id}) failed, skipping\n$error');
+            return Future<Isolate>.value(Isolate(id: skipId));
           }),
         ),
       );
       foundIsolate = isolates.firstWhere(
-        (isolate) => isolate!.pauseEvent?.kind == pauseEventKind,
+        (isolate) =>
+            isolate!.id != skipId &&
+            isolate.pauseEvent?.kind == pauseEventKind,
         orElse: () => null,
       );
       return foundIsolate != null;

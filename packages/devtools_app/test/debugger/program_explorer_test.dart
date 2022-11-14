@@ -20,7 +20,7 @@ import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../test_data/debugger/vm_service_object_tree.dart';
-import '../test_utils/tree_utils.dart';
+import '../test_infra/utils/tree_utils.dart';
 
 void main() {
   group('Mock ProgramExplorer', () {
@@ -78,6 +78,8 @@ void main() {
       when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
 
       final mockScriptManager = MockScriptManager();
+      //`then` is used
+      // ignore: discarded_futures
       when(mockScriptManager.getScript(any)).thenAnswer(
         (_) => Future<Script>.value(testScript),
       );

@@ -29,14 +29,14 @@ void main() {
     });
 
     test('empty frame regression test', () {
-      final cpuProfileEmtpyData =
+      final cpuProfileEmptyData =
           CpuProfileData.parse(cpuProfileResponseEmptyJson);
       expect(
-        cpuProfileEmtpyData.profileMetaData.time!.end!.inMilliseconds,
+        cpuProfileEmptyData.profileMetaData.time!.end!.inMilliseconds,
         47377796,
       );
       final filtered =
-          CpuProfileData.filterFrom(cpuProfileEmtpyData, (_) => true);
+          CpuProfileData.filterFrom(cpuProfileEmptyData, (_) => true);
       expect(filtered.profileMetaData.time!.end!.inMilliseconds, 0);
     });
 
@@ -205,6 +205,7 @@ void main() {
           sourceLine: null,
           parentId: '',
           profileMetaData: profileMetaData,
+          isTag: false,
         ).isNative,
         isFalse,
       );
@@ -221,6 +222,28 @@ void main() {
       expect(stackFrameB.isFlutterCore, isFalse);
       expect(stackFrameC.isFlutterCore, isTrue);
       expect(flutterEngineStackFrame.isFlutterCore, isTrue);
+    });
+
+    test('isTag', () {
+      expect(stackFrameA.isTag, isFalse);
+      expect(stackFrameB.isTag, isFalse);
+      expect(stackFrameC.isTag, isFalse);
+      expect(flutterEngineStackFrame.isTag, isFalse);
+      expect(
+        CpuStackFrame(
+          id: CpuProfileData.rootId,
+          name: 'MyTag',
+          verboseName: 'MyTag',
+          category: 'Dart',
+          rawUrl: '',
+          packageUri: '',
+          sourceLine: null,
+          parentId: '',
+          profileMetaData: profileMetaData,
+          isTag: true,
+        ).isTag,
+        isTrue,
+      );
     });
 
     test('sampleCount', () {
@@ -344,6 +367,10 @@ void main() {
     });
 
     test('tooltip', () {
+      expect(
+        tagFrameA.tooltip,
+        equals('[Tag] TagA - 0.0 ms'),
+      );
       expect(
         stackFrameA.tooltip,
         equals('[Native] A - 0.1 ms'),

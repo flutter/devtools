@@ -180,10 +180,12 @@ class _CodeViewState extends State<CodeView>
       if (_lastScriptRef?.uri != scriptRef?.uri) {
         // Default to scrolling to the top of the script.
         if (animate) {
-          verticalController.animateTo(
-            0,
-            duration: longDuration,
-            curve: defaultCurve,
+          unawaited(
+            verticalController.animateTo(
+              0,
+              duration: longDuration,
+              curve: defaultCurve,
+            ),
           );
         } else {
           verticalController.jumpTo(0);
@@ -204,10 +206,12 @@ class _CodeViewState extends State<CodeView>
       final scrollPosition =
           lineIndex * CodeView.rowHeight - ((extent - CodeView.rowHeight) / 2);
       if (animate) {
-        verticalController.animateTo(
-          scrollPosition,
-          duration: longDuration,
-          curve: defaultCurve,
+        unawaited(
+          verticalController.animateTo(
+            scrollPosition,
+            duration: longDuration,
+            curve: defaultCurve,
+          ),
         );
       } else {
         verticalController.jumpTo(scrollPosition);
@@ -342,13 +346,16 @@ class _CodeViewState extends State<CodeView>
                 final pausedFrame = frame == null
                     ? null
                     : (frame.scriptRef == scriptRef ? frame : null);
-
+                final currentParsedScript = parsedScript;
                 return Row(
                   children: [
-                    ValueListenableBuilder<List<BreakpointAndSourcePosition>>(
-                      valueListenable:
+                    DualValueListenableBuilder<
+                        List<BreakpointAndSourcePosition>, bool>(
+                      firstListenable:
                           breakpointManager.breakpointsWithLocation,
-                      builder: (context, breakpoints, _) {
+                      secondListenable:
+                          widget.codeViewController.showCodeCoverage,
+                      builder: (context, breakpoints, showCodeCoverage, _) {
                         return Gutter(
                           gutterWidth: gutterWidth,
                           scrollController: gutterController,
@@ -358,14 +365,21 @@ class _CodeViewState extends State<CodeView>
                           breakpoints: breakpoints
                               .where((bp) => bp.scriptRef == scriptRef)
                               .toList(),
-                          executableLines: parsedScript != null
-                              ? parsedScript!.executableLines
-                              : <int>{},
+                          executableLines:
+                              currentParsedScript?.executableLines ??
+                                  const <int>{},
+                          coverageHitLines:
+                              currentParsedScript?.coverageHitLines ??
+                                  const <int>{},
+                          coverageMissedLines:
+                              currentParsedScript?.coverageMissedLines ??
+                                  const <int>{},
                           onPressed: _onPressed,
                           // Disable dots for possible breakpoint locations.
                           allowInteraction:
                               !(widget.debuggerController?.isSystemIsolate ??
                                   false),
+                          showCodeCoverage: showCodeCoverage,
                         );
                       },
                     ),
@@ -543,6 +557,9 @@ class Gutter extends StatelessWidget {
     required this.executableLines,
     required this.onPressed,
     required this.allowInteraction,
+    required this.coverageHitLines,
+    required this.coverageMissedLines,
+    required this.showCodeCoverage,
   });
 
   final double gutterWidth;
@@ -552,13 +569,17 @@ class Gutter extends StatelessWidget {
   final StackFrameAndSourcePosition? pausedFrame;
   final List<BreakpointAndSourcePosition> breakpoints;
   final Set<int> executableLines;
+  final Set<int> coverageHitLines;
+  final Set<int> coverageMissedLines;
   final IntCallback onPressed;
   final bool allowInteraction;
+  final bool showCodeCoverage;
 
   @override
   Widget build(BuildContext context) {
     final bpLineSet = Set.from(breakpoints.map((bp) => bp.line));
     final theme = Theme.of(context);
+    final coverageLines = coverageHitLines.union(coverageMissedLines);
     return Container(
       width: gutterWidth,
       decoration: BoxDecoration(
@@ -571,6 +592,10 @@ class Gutter extends StatelessWidget {
         itemCount: lineCount,
         itemBuilder: (context, index) {
           final lineNum = lineOffset + index + 1;
+          bool? coverageHit;
+          if (showCodeCoverage && coverageLines.contains(lineNum)) {
+            coverageHit = coverageHitLines.contains(lineNum);
+          }
           return GutterItem(
             lineNumber: lineNum,
             onPressed: () => onPressed(lineNum),
@@ -578,6 +603,7 @@ class Gutter extends StatelessWidget {
             isExecutable: executableLines.contains(lineNum),
             isPausedHere: pausedFrame?.line == lineNum,
             allowInteraction: allowInteraction,
+            coverageHit: coverageHit,
           );
         },
       ),
@@ -594,6 +620,7 @@ class GutterItem extends StatelessWidget {
     required this.isPausedHere,
     required this.onPressed,
     required this.allowInteraction,
+    required this.coverageHit,
   }) : super(key: key);
 
   final int lineNumber;
@@ -603,6 +630,8 @@ class GutterItem extends StatelessWidget {
   final bool isExecutable;
 
   final bool allowInteraction;
+
+  final bool? coverageHit;
 
   /// Whether the execution point is currently paused here.
   final bool isPausedHere;
@@ -618,13 +647,20 @@ class GutterItem extends StatelessWidget {
 
     final bpBoxSize = breakpointRadius * 2;
     final executionPointIndent = scaleByFontFactor(10.0);
-
+    Color? color;
+    final hasCoverage = coverageHit;
+    if (hasCoverage != null && isExecutable) {
+      color = hasCoverage
+          ? theme.colorScheme.coverageHitColor
+          : theme.colorScheme.coverageMissColor;
+    }
     return InkWell(
       onTap: onPressed,
       // Force usage of default mouse pointer when gutter interaction is
       // disabled.
       mouseCursor: allowInteraction ? null : SystemMouseCursors.basic,
       child: Container(
+        color: color,
         height: CodeView.rowHeight,
         padding: const EdgeInsets.only(right: 4.0),
         child: Stack(
@@ -727,10 +763,12 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
             activeSearchLine * CodeView.rowHeight - widget.height / 2,
             0.0,
           );
-          widget.scrollController.animateTo(
-            targetOffset,
-            duration: defaultDuration,
-            curve: defaultCurve,
+          unawaited(
+            widget.scrollController.animateTo(
+              targetOffset,
+              duration: defaultDuration,
+              curve: defaultCurve,
+            ),
           );
         }
       }
@@ -868,52 +906,41 @@ class _LineItemState extends State<LineItem>
       // TODO: support selecting text across multiples lines.
       child = Stack(
         children: [
-          HoverCardTooltip.async(
-            asyncGenerateHoverCardData: _generateHoverCardData,
-            enabled: () => true,
-            child: Row(
-              children: [
-                // Create a hidden copy of the first column-1 characters of the
-                // line as a hack to correctly compute where to place
-                // the cursor. Approximating by using column-1 spaces instead
-                // of the correct characters and style s would be risky as it leads
-                // to small errors if the font is not fixed size or the font
-                // styles vary depending on the syntax highlighting.
-                // TODO(jacobr): there might be some api exposed on SelectedText
-                // to allow us to render this as a proper overlay as similar
-                // functionality exists to render the selection handles properly.
-                Opacity(
-                  opacity: 0,
-                  child: RichText(
-                    text: truncateTextSpan(widget.lineContents, column - 1),
+          Row(
+            children: [
+              // Create a hidden copy of the first column-1 characters of the
+              // line as a hack to correctly compute where to place
+              // the cursor. Approximating by using column-1 spaces instead
+              // of the correct characters and style s would be risky as it leads
+              // to small errors if the font is not fixed size or the font
+              // styles vary depending on the syntax highlighting.
+              // TODO(jacobr): there might be some api exposed on SelectedText
+              // to allow us to render this as a proper overlay as similar
+              // functionality exists to render the selection handles properly.
+              Opacity(
+                opacity: .5,
+                child: RichText(
+                  text: truncateTextSpan(widget.lineContents, column - 1),
+                ),
+              ),
+              Transform.translate(
+                offset: const Offset(colLeftOffset, colBottomOffset),
+                child: Transform.rotate(
+                  angle: colIconRotate,
+                  child: Icon(
+                    Icons.label_important,
+                    size: colIconSize,
+                    color: breakpointColor,
                   ),
                 ),
-                Transform.translate(
-                  offset: const Offset(colLeftOffset, colBottomOffset),
-                  child: Transform.rotate(
-                    angle: colIconRotate,
-                    child: Icon(
-                      Icons.label_important,
-                      size: colIconSize,
-                      color: breakpointColor,
-                    ),
-                  ),
-                )
-              ],
-            ),
+              ),
+            ],
           ),
+          _hoverableLine(),
         ],
       );
     } else {
-      child = HoverCardTooltip.async(
-        enabled: () => true,
-        asyncGenerateHoverCardData: _generateHoverCardData,
-        child: SelectableText.rich(
-          searchAwareLineContents(),
-          scrollPhysics: const NeverScrollableScrollPhysics(),
-          maxLines: 1,
-        ),
-      );
+      child = _hoverableLine();
     }
 
     final backgroundColor = widget.focused
@@ -929,6 +956,17 @@ class _LineItemState extends State<LineItem>
       child: child,
     );
   }
+
+  Widget _hoverableLine() => HoverCardTooltip.async(
+        enabled: () => true,
+        asyncTimeout: 100,
+        asyncGenerateHoverCardData: _generateHoverCardData,
+        child: SelectableText.rich(
+          searchAwareLineContents(),
+          scrollPhysics: const NeverScrollableScrollPhysics(),
+          maxLines: 1,
+        ),
+      );
 
   TextSpan searchAwareLineContents() {
     final children = widget.lineContents.children;
@@ -1190,9 +1228,11 @@ Future<String?> fetchScriptLocationFullFilePath(
 }
 
 void showGoToLineDialog(BuildContext context, CodeViewController controller) {
-  showDialog(
-    context: context,
-    builder: (context) => GoToLineDialog(controller),
+  unawaited(
+    showDialog(
+      context: context,
+      builder: (context) => GoToLineDialog(controller),
+    ),
   );
 }
 

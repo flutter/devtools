@@ -4,7 +4,7 @@ publish_to: none
 
 # Note: this version should only be updated by running tools/update_version.dart
 # that updates all versions of devtools packages (devtools_app, devtools_test).
-version: 2.19.0-dev.1
+version: 2.19.0
 
 repository: https://github.com/flutter/devtools/tree/master/packages/devtools_app
 
@@ -23,7 +23,7 @@ dependencies:
   collection: ^1.15.0
   dds: ^2.2.2
   dds_service_extensions: ^1.3.1
-  devtools_shared: 2.19.0-dev.1
+  devtools_shared: 2.19.0
   file: ^6.0.0
   file_selector: ^0.8.0
   file_selector_linux: ^0.0.2
@@ -39,6 +39,8 @@ dependencies:
     sdk: flutter
   http: ^0.13.4
   image: ^3.0.2
+  # TODO: https://github.com/flutter/devtools/issues/4728 - remove constraint when archive is fixed
+  archive: <3.3.3
   intl: '>=0.16.1 <0.18.0'
   js: ^0.6.1+1
   mime: ^1.0.0
@@ -61,7 +63,7 @@ dependencies:
 
 dev_dependencies:
   build_runner: ^2.0.4
-  devtools_test: 2.19.0-dev.1
+  devtools_test: 2.19.0
   flutter_test:
     sdk: flutter
   mockito: ^5.1.0
@@ -99,56 +101,56 @@ flutter:
     - packages/perfetto_compiled/dist/devtools/devtools_theme_handler.js
     # The version number for all the Perfetto asset paths below is updated by running the
     # ./tool/update_perfetto.sh script.
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/controller_bundle.js
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/controller_bundle.js.map
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/engine_bundle.js
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/engine_bundle.js.map
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/frontend_bundle.js
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/frontend_bundle.js.map
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/manifest.json
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/perfetto.css
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/trace_processor.wasm
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/traceconv.wasm
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/traceconv_bundle.js
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/traceconv_bundle.js.map
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/brand.png
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/catapult_trace_viewer.html
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/catapult_trace_viewer.js
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/favicon.png
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/logo-3d.png
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/logo-128.png
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/MaterialIcons.woff2
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/Raleway-Regular.woff2
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/Raleway-Thin.woff2
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/rec_atrace.png
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/rec_battery_counters.png
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/rec_board_voltage.png
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/rec_cpu_coarse.png
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/rec_cpu_fine.png
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/rec_cpu_freq.png
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/rec_cpu_voltage.png
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/rec_frame_timeline.png
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/rec_ftrace.png
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/rec_gpu_mem_total.png
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/rec_java_heap_dump.png
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/rec_lmk.png
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/rec_logcat.png
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/rec_long_trace.png
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/rec_mem_hifreq.png
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/rec_meminfo.png
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/rec_native_heap_profiler.png
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/rec_one_shot.png
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/rec_ps_stats.png
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/rec_ring_buf.png
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/rec_syscalls.png
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/rec_vmstat.png
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/Roboto-100.woff2
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/Roboto-300.woff2
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/Roboto-400.woff2
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/Roboto-500.woff2
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/RobotoCondensed-Light.woff2
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/RobotoCondensed-Regular.woff2
-    - packages/perfetto_compiled/dist/v29.0-3a9f96aec/assets/RobotoMono-Regular.woff2
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/controller_bundle.js
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/controller_bundle.js.map
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/engine_bundle.js
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/engine_bundle.js.map
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/frontend_bundle.js
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/frontend_bundle.js.map
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/manifest.json
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/perfetto.css
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/trace_processor.wasm
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/traceconv.wasm
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/traceconv_bundle.js
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/traceconv_bundle.js.map
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/assets/brand.png
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/assets/catapult_trace_viewer.html
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/assets/catapult_trace_viewer.js
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/assets/favicon.png
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/assets/logo-3d.png
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/assets/logo-128.png
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/assets/MaterialIcons.woff2
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/assets/Raleway-Regular.woff2
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/assets/Raleway-Thin.woff2
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/assets/rec_atrace.png
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/assets/rec_battery_counters.png
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/assets/rec_board_voltage.png
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/assets/rec_cpu_coarse.png
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/assets/rec_cpu_fine.png
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/assets/rec_cpu_freq.png
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/assets/rec_cpu_voltage.png
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/assets/rec_frame_timeline.png
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/assets/rec_ftrace.png
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/assets/rec_gpu_mem_total.png
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/assets/rec_java_heap_dump.png
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/assets/rec_lmk.png
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/assets/rec_logcat.png
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/assets/rec_long_trace.png
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/assets/rec_mem_hifreq.png
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/assets/rec_meminfo.png
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/assets/rec_native_heap_profiler.png
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/assets/rec_one_shot.png
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/assets/rec_ps_stats.png
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/assets/rec_ring_buf.png
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/assets/rec_syscalls.png
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/assets/rec_vmstat.png
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/assets/Roboto-100.woff2
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/assets/Roboto-300.woff2
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/assets/Roboto-400.woff2
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/assets/Roboto-500.woff2
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/assets/RobotoCondensed-Light.woff2
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/assets/RobotoCondensed-Regular.woff2
+    - packages/perfetto_compiled/dist/v30.0-8d760d3b2/assets/RobotoMono-Regular.woff2
 
   fonts:
     - family: Roboto

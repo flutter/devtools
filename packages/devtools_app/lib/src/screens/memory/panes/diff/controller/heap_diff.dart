@@ -4,18 +4,38 @@
 
 import 'package:flutter/foundation.dart';
 
+import '../../../../../analytics/analytics.dart' as ga;
+import '../../../../../analytics/constants.dart' as analytics_constants;
+import '../../../../../analytics/metrics.dart';
 import '../../../../../primitives/utils.dart';
+import '../../../primitives/class_name.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
 
 /// Stores already calculated comparisons for heap couples.
 class HeapDiffStore {
+  HeapDiffStore();
+
   final _store = <_HeapCouple, DiffHeapClasses>{};
 
   DiffHeapClasses compare(AdaptedHeap heap1, AdaptedHeap heap2) {
     final couple = _HeapCouple(heap1, heap2);
-    return _store.putIfAbsent(couple, () => DiffHeapClasses(couple));
+    return _store.putIfAbsent(couple, () => _calculateDiffGaWrapper(couple));
   }
+}
+
+DiffHeapClasses _calculateDiffGaWrapper(_HeapCouple couple) {
+  late final DiffHeapClasses result;
+  ga.timeSync(
+    analytics_constants.memory,
+    analytics_constants.MemoryTime.calculateDiff,
+    syncOperation: () => result = DiffHeapClasses(couple),
+    screenMetricsProvider: () => MemoryScreenMetrics(
+      heapDiffObjectsBefore: couple.older.data.objects.length,
+      heapDiffObjectsAfter: couple.younger.data.objects.length,
+    ),
+  );
+  return result;
 }
 
 @immutable
@@ -59,7 +79,8 @@ class _HeapCouple {
 }
 
 /// List of classes with per-class comparision between two heaps.
-class DiffHeapClasses extends HeapClasses {
+class DiffHeapClasses extends HeapClasses<DiffClassStats>
+    with FilterableHeapClasses<DiffClassStats> {
   DiffHeapClasses(_HeapCouple couple) {
     classesByName = subtractMaps<HeapClassName, SingleClassStats,
         SingleClassStats, DiffClassStats>(
@@ -84,7 +105,7 @@ class DiffHeapClasses extends HeapClasses {
   }
 
   @override
-  Iterable<ClassStats> get classStatsList => classes;
+  List<DiffClassStats> get classStatsList => classes;
 }
 
 /// Comparision between two heaps for a class.

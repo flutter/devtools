@@ -55,7 +55,7 @@ holding the object in memory for some period, but then disappeared.
 **Disposed, but not GCed, without path (not-GCed-without-path)**: an object
 was disposed and not GCed when expected, but retaining path is not detected,
 that means that the object will be most likely GCed in the next GC cycle,
-and the leak will convert to **GCed-late** leak. 
+and the leak will convert to **GCed-late** leak.
 
 ### Culprits and victims
 
@@ -77,7 +77,7 @@ and GCed, the victims it referenced will be also GCed:
 
 
 ```mermaid
-   
+
    flowchart TD;
       l1[leak1\nculprit]
       l2[leak2\nvictim]
@@ -120,13 +120,13 @@ the total.
 Leak tracking impacts CPU in two areas:
 
 1. Per object tracking.
-   Added ~0.05 of millisecond (~2.7%) to the total load time of 
+   Added ~0.05 of millisecond (~2.7%) to the total load time of
    [Gallery](https://github.com/flutter/gallery) home page in profile mode on `macos`.
 
 2. Regular asynchronous analysis of the tracked objects.
    Took ~2.5 millisectonds for [Gallery](https://github.com/flutter/gallery) home page in
-   profile mode on `macos`. 
-   
+   profile mode on `macos`.
+
 
 ## Use the Leak Tracker
 
@@ -146,17 +146,17 @@ and then never run `flutter upgrade` or `flutter channel`.
 
 ### Detect leaks in demo Flutter app <a id='demo_flutter'></a>
 
-TODO: move the example to test/fixtures when it compiles with stable flutter.
+TODO: move the example to test/test_infra/fixtures when it compiles with stable flutter.
 
 1. Run https://github.com/polina-c/spikes/tree/master/leaking_app
    in profile or debug mode.
 2. [Connect](https://docs.flutter.dev/development/tools/devtools/cli#open-devtools-and-connect-to-the-target-app)
-   DevTools to the app 
+   DevTools to the app
 3. Open Memory > Leaks <a id='memory-leaks-page'></a>
 4. Notice messages that report not-disposed and not-GCed objects.
    If there aren't any not-GCed leaks, resize the app window
    to trigger a GC event, and the following messages should show up:
-   
+
 ```
 flutter: 1 memory leaks: not disposed: 1, not GCed: 0, GCed late: 0
 flutter: 3 memory leaks: not disposed: 1, not GCed: 2, GCed late: 0
@@ -201,7 +201,7 @@ TODO(polina-c): explain how to choose which classes to instrument.
 
 ### Detect leaks in your Dart app
 
-For Dart appliocations: 
+For Dart appliocations:
 
 1. Reference [memory_leak_tracker](https://github.com/polina-c/spikes/blob/master/memory_leak_tracker/README.md) in your pubspec.yaml:
 
@@ -224,9 +224,9 @@ dependencies:
    `http://127.0.0.1:8181/etNluJDHZwE=/`.
 
 4. Launch [DevTools](https://github.com/flutter/devtools) at master:
-   `flutter run -d macos` and connect to the app with the copied URL. 
- 
-TODO(polina-c): update this step to use released version. 
+   `flutter run -d macos` and connect to the app with the copied URL.
+
+TODO(polina-c): update this step to use released version.
 
 5. Follow [the guidance for the demo Flutter app](demo_flutter),
    starting at [the step to open the memory screen](memory-leaks-page).

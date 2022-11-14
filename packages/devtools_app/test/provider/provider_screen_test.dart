@@ -18,7 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../matchers/matchers.dart';
+import '../test_infra/matchers.dart';
 
 void main() {
   // Set a wide enough screen width that we do not run into overflow.
@@ -27,7 +27,7 @@ void main() {
   late Widget providerScreen;
   late BannerMessagesController bannerMessagesController;
 
-  setUpAll(() => loadFonts());
+  setUpAll(() async => await loadFonts());
 
   setUp(() {
     setGlobal(IdeTheme, getIdeTheme());

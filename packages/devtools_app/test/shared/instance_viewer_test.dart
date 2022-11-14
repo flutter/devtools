@@ -14,7 +14,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../matchers/matchers.dart';
+import '../test_infra/matchers.dart';
 
 final alwaysExpandedOverride = isExpandedProvider
     .overrideWithProvider((param) => StateProvider((ref) => true));
@@ -121,7 +121,7 @@ final enumValueInstance = AsyncValue.data(
 );
 
 void main() {
-  setUpAll(() => loadFonts());
+  setUpAll(() async => await loadFonts());
 
   setUp(() {
     setGlobal(IdeTheme, getIdeTheme());

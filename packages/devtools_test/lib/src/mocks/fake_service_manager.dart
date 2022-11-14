@@ -36,7 +36,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
     when(connectedApp!.isFlutterAppNow).thenReturn(false);
     when(connectedApp!.isDebugFlutterAppNow).thenReturn(false);
 
-    vmServiceOpened(this.service!, onClosed: Future.value());
+    unawaited(vmServiceOpened(this.service!, onClosed: Future.value()));
   }
 
   Completer<void> flagsInitialized = Completer();
@@ -215,4 +215,8 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
     initFlagManager();
     return Future.value();
   }
+
+  @override
+  Future<String?> tryToDetectMainRootLib() async =>
+      'package:myPackage/myLib.dart';
 }

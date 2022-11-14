@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+
 import '../analytics/analytics.dart' as ga;
-
 import '../analytics/constants.dart' as analytics_constants;
-
 import '../primitives/auto_dispose.dart';
 import '../primitives/utils.dart';
 import '../screens/inspector/inspector_service.dart';
@@ -102,17 +102,14 @@ class InspectorPreferencesController extends DisposableController
   String? _mainScriptDir;
 
   Future<void> _updateMainScriptRef() async {
-    final isolateRef = serviceManager.isolateManager.mainIsolate.value!;
-    if (isolateRef.id != null) {
-      final isolate = await serviceManager.service?.getIsolate(isolateRef.id!);
-      final rootLibUri = Uri.parse(isolate?.rootLib?.uri ?? '');
-      final directorySegments = rootLibUri.pathSegments
-          .sublist(0, rootLibUri.pathSegments.length - 1);
-      final rootLibDirectory = rootLibUri.replace(
-        pathSegments: directorySegments,
-      );
-      _mainScriptDir = rootLibDirectory.path;
-    }
+    final rootLibUriString = await serviceManager.tryToDetectMainRootLib();
+    final rootLibUri = Uri.parse(rootLibUriString ?? '');
+    final directorySegments =
+        rootLibUri.pathSegments.sublist(0, rootLibUri.pathSegments.length - 1);
+    final rootLibDirectory = rootLibUri.replace(
+      pathSegments: directorySegments,
+    );
+    _mainScriptDir = rootLibDirectory.path;
   }
 
   Future<void> init() async {
@@ -200,9 +197,11 @@ class InspectorPreferencesController extends DisposableController
   }
 
   void _persistCustomPubRootDirectoriesToStorage() {
-    storage.setValue(
-      _customPubRootStorageId(),
-      jsonEncode(_customPubRootDirectories.value),
+    unawaited(
+      storage.setValue(
+        _customPubRootStorageId(),
+        jsonEncode(_customPubRootDirectories.value),
+      ),
     );
   }
 
@@ -324,7 +323,7 @@ class MemoryPreferencesController extends DisposableController
         if (androidCollectionEnabled.value) {
           ga.select(
             analytics_constants.memory,
-            analytics_constants.androidChart,
+            analytics_constants.MemoryEvent.chartAndroid,
           );
         }
       },
@@ -342,7 +341,7 @@ class MemoryPreferencesController extends DisposableController
         if (autoSnapshotEnabled.value) {
           ga.select(
             analytics_constants.memory,
-            analytics_constants.autoSnapshot,
+            analytics_constants.MemoryEvent.autoSnapshot,
           );
         }
       },
@@ -361,8 +360,8 @@ class MemoryPreferencesController extends DisposableController
         ga.select(
           analytics_constants.memory,
           showChart.value
-              ? analytics_constants.showChart
-              : analytics_constants.hideChart,
+              ? analytics_constants.MemoryEvent.showChart
+              : analytics_constants.MemoryEvent.hideChart,
         );
       },
     );

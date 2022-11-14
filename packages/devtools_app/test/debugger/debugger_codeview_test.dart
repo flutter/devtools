@@ -19,7 +19,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../matchers/matchers.dart';
+import '../test_infra/matchers.dart';
 
 void main() {
   const mockScriptRefFileUri = 'the/path/mapped/to/script/ref/uri';
@@ -28,7 +28,7 @@ void main() {
   late MockCodeViewController codeViewController;
   late ScriptsHistory scriptsHistory;
 
-  const smallWindowSize = Size(1000.0, 1000.0);
+  const smallWindowSize = Size(1200.0, 1000.0);
 
   setUpAll(() {
     setGlobal(BreakpointManager, BreakpointManager());

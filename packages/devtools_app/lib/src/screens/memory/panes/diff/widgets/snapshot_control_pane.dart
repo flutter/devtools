@@ -2,25 +2,31 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
+import '../../../../../analytics/analytics.dart' as ga;
+import '../../../../../analytics/constants.dart' as analytics_constants;
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/theme.dart';
 import '../../../primitives/ui.dart';
+import '../../../shared/heap/class_filter.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/item_controller.dart';
+import 'class_filter_dialog.dart';
 
 class SnapshotControlPane extends StatelessWidget {
   const SnapshotControlPane({Key? key, required this.controller})
       : super(key: key);
 
   final DiffPaneController controller;
-  static const _classFilterWidth = 200.0;
 
   @override
   Widget build(BuildContext context) {
+    final filter = controller.core.classFilter;
     return ValueListenableBuilder<bool>(
-      valueListenable: controller.isProcessing,
+      valueListenable: controller.isTakingSnapshot,
       builder: (_, isProcessing, __) {
         final current = controller.core.selectedItem as SnapshotInstanceItem;
 
@@ -37,15 +43,25 @@ class SnapshotControlPane extends StatelessWidget {
                       controller: controller,
                     ),
                     const SizedBox(width: defaultSpacing),
-                    SizedBox(
-                      width: _classFilterWidth,
-                      child: _ClassFilter(onChanged: controller.setClassFilter),
+                    ValueListenableBuilder<ClassFilter>(
+                      valueListenable: filter,
+                      builder: (context, filterValue, ___) => ClassFilterButton(
+                        filter: filterValue,
+                        onChanged: controller.applyFilter,
+                      ),
                     ),
                     const SizedBox(width: defaultSpacing),
                     ToCsvButton(
                       minScreenWidthForTextBeforeScaling:
                           primaryControlsMinVerboseWidth,
-                      onPressed: controller.downloadCurrentItemToCsv,
+                      onPressed: () {
+                        ga.select(
+                          analytics_constants.memory,
+                          analytics_constants
+                              .MemoryEvent.diffSnapshotDownloadCsv,
+                        );
+                        controller.downloadCurrentItemToCsv();
+                      },
                     ),
                   ],
                 ],
@@ -53,8 +69,15 @@ class SnapshotControlPane extends StatelessWidget {
               ToolbarAction(
                 icon: Icons.clear,
                 tooltip: 'Delete snapshot',
-                onPressed:
-                    isProcessing ? null : controller.deleteCurrentSnapshot,
+                onPressed: isProcessing
+                    ? null
+                    : () {
+                        controller.deleteCurrentSnapshot();
+                        ga.select(
+                          analytics_constants.memory,
+                          analytics_constants.MemoryEvent.diffSnapshotDelete,
+                        );
+                      },
               ),
             ],
           ),
@@ -64,17 +87,36 @@ class SnapshotControlPane extends StatelessWidget {
   }
 }
 
-class _ClassFilter extends StatelessWidget {
-  const _ClassFilter({Key? key, required this.onChanged}) : super(key: key);
+@visibleForTesting
+class ClassFilterButton extends StatelessWidget {
+  const ClassFilterButton({required this.filter, required this.onChanged});
 
-  final Function(String value) onChanged;
+  final ClassFilter filter;
+  final Function(ClassFilter) onChanged;
 
   @override
-  Widget build(BuildContext context) => DevToolsClearableTextField(
-        labelText: 'Class Filter',
-        hintText: 'Filter by class name',
-        onChanged: onChanged,
-      );
+  Widget build(BuildContext context) {
+    return FilterButton(
+      onPressed: () {
+        ga.select(
+          analytics_constants.memory,
+          analytics_constants.MemoryEvent.diffSnapshotFilter,
+        );
+
+        unawaited(
+          showDialog(
+            context: context,
+            builder: (context) => ClassFilterDialog(
+              filter,
+              onChanged: onChanged,
+            ),
+          ),
+        );
+      },
+      isFilterActive: !filter.isEmpty,
+      message: filter.buttonTooltip,
+    );
+  }
 }
 
 class _DiffDropdown extends StatelessWidget {
@@ -122,8 +164,16 @@ class _DiffDropdown extends StatelessWidget {
             onChanged: (SnapshotInstanceItem? value) {
               late SnapshotInstanceItem? newDiffWith;
               if ((value ?? current) == current) {
+                ga.select(
+                  analytics_constants.memory,
+                  analytics_constants.MemoryEvent.diffSnapshotDiffOff,
+                );
                 newDiffWith = null;
               } else {
+                ga.select(
+                  analytics_constants.memory,
+                  analytics_constants.MemoryEvent.diffSnapshotDiffSelect,
+                );
                 newDiffWith = value;
               }
               controller.setDiffing(current, newDiffWith);

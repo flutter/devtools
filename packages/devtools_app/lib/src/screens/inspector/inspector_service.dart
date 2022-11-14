@@ -37,14 +37,6 @@ abstract class InspectorServiceBase extends DisposableController
         inspectorLibrary = EvalOnDartLibrary(
           inspectorLibraryUri,
           serviceManager.service!,
-          // TODO(jacobr): evaluate whether oneRequestAtATime is really required.
-          // The out of order request issues seen may have been isolated to Java
-          // where requests could truly be out of order due to multiple threads.
-          // It appears that enforcing in-order requests has significant negative
-          // consequences that out-weigh the benefits of being able to cancel
-          // requests from object groups that have been disposed before the requests
-          // were issued.
-          oneRequestAtATime: true,
           isolate: serviceManager.isolateManager.mainIsolate,
         ) {
     _lastMainIsolate = serviceManager.isolateManager.mainIsolate.value;
@@ -1500,14 +1492,14 @@ class InspectorObjectGroupManager {
 
   void clearCurrent() {
     if (_current != null) {
-      _current!.dispose();
+      unawaited(_current!.dispose());
       _current = null;
     }
   }
 
   void cancelNext() {
     if (_next != null) {
-      _next!.dispose();
+      unawaited(_next!.dispose());
       _setNextNull();
     }
   }
