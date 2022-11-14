@@ -37,4 +37,9 @@ abstract class FeatureFlags {
   ///
   /// https://github.com/flutter/devtools/issues/4207.
   static bool embeddedPerfetto = enableExperiments;
+
+  /// Flag to enable widget rebuild stats ui.
+  ///
+  /// https://github.com/flutter/devtools/issues/4564.
+  static bool widgetRebuildstats = enableExperiments;
 }

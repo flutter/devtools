@@ -7,6 +7,7 @@ import 'package:devtools_app/src/config_specific/import_export/import_export.dar
 import 'package:devtools_app/src/screens/performance/panes/frame_analysis/frame_analysis.dart';
 import 'package:devtools_app/src/screens/performance/panes/frame_analysis/frame_hints.dart';
 import 'package:devtools_app/src/screens/performance/panes/frame_analysis/frame_time_visualizer.dart';
+import 'package:devtools_app/src/screens/performance/panes/rebuild_stats/rebuild_counts.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -21,6 +22,7 @@ void main() {
     late FlutterFrame frame;
     late FrameAnalysis frameAnalysis;
     late MockEnhanceTracingController mockEnhanceTracingController;
+    late RebuildCountModel rebuildCountModel;
 
     setUp(() {
       frame = testFrame0.shallowCopy()
@@ -28,6 +30,7 @@ void main() {
         ..setEventFlow(goldenRasterTimelineEvent);
       frameAnalysis = FrameAnalysis(frame);
       mockEnhanceTracingController = MockEnhanceTracingController();
+      rebuildCountModel = RebuildCountModel();
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(OfflineModeController, OfflineModeController());
       final fakeServiceManager = FakeServiceManager();
@@ -50,6 +53,7 @@ void main() {
           FlutterFrameAnalysisView(
             frameAnalysis: analysis,
             enhanceTracingController: mockEnhanceTracingController,
+            rebuildCountModel: rebuildCountModel,
           ),
           performance: PerformanceController(),
         ),

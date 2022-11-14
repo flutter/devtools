@@ -17,6 +17,7 @@ import '../../../../primitives/feature_flags.dart';
 import '../../../../primitives/trace_event.dart';
 import '../../../../primitives/trees.dart';
 import '../../../../primitives/utils.dart';
+import '../../../../shared/future_work_tracker.dart';
 import '../../../../shared/globals.dart';
 import '../../../../ui/search.dart';
 import '../../../profiler/cpu_profile_controller.dart';
@@ -74,8 +75,8 @@ class TimelineEventsController extends PerformanceFeatureController
       FeatureFlags.embeddedPerfetto && !useLegacyTraceViewer.value;
 
   /// Whether the recorded timeline data is currently being processed.
-  ValueListenable<bool> get processing => _processing;
-  final _processing = ValueNotifier<bool>(false);
+  ValueListenable<bool> get processing => _workTracker.active;
+  final _workTracker = FutureWorkTracker();
 
   // TODO(jacobr): this isn't accurate. Another page of DevTools
   // or a different instance of DevTools could change this value. We need to
@@ -257,14 +258,11 @@ class TimelineEventsController extends PerformanceFeatureController
     }
   }
 
-  FutureOr<void> processAllTraceEvents() async {
-    assert(!_processing.value);
-    _processing.value = true;
-    await _processAllTraceEvents();
-    _processing.value = false;
+  Future<void> processAllTraceEvents() async {
+    await _workTracker.track(_processAllTraceEvents());
   }
 
-  FutureOr<void> _processAllTraceEvents() async {
+  Future<void> _processAllTraceEvents() async {
     if (_perfettoMode) {
       // TODO(kenz): hook up Perfetto event processor to process events before
       // loading.
@@ -336,13 +334,12 @@ class TimelineEventsController extends PerformanceFeatureController
       // events, wait a short delay and try to process events again after the
       // VM has been polled one more time.
       if (!frame.isWellFormed && !frameBeforeFirstWellFormedFrame) {
-        assert(!_processing.value);
-        _processing.value = true;
-        await Future.delayed(_timelinePollingInterval, () async {
-          if (framesController.currentFrameBeingSelected != frame) return;
-          await _processAllTraceEvents();
-        });
-        _processing.value = false;
+        await _workTracker.track(
+          Future.delayed(_timelinePollingInterval, () async {
+            if (framesController.currentFrameBeingSelected != frame) return;
+            await _processAllTraceEvents();
+          }),
+        );
       }
 
       if (framesController.currentFrameBeingSelected != frame) return;
@@ -494,7 +491,7 @@ class TimelineEventsController extends PerformanceFeatureController
     _unassignedFlutterFrameEvents.clear();
 
     threadNamesById.clear();
-    _processing.value = false;
+    _workTracker.clear();
     legacyController.clearData();
     if (FeatureFlags.embeddedPerfetto) {
       await perfettoController.clear();
@@ -548,7 +545,7 @@ class LegacyTimelineEventsController with SearchControllerMixin<TimelineEvent> {
     );
   }
 
-  FutureOr<void> processTraceEvents(
+  Future<void> processTraceEvents(
     List<TraceEventWrapper> traceEvents, {
     required Map<int, String> threadNamesById,
   }) async {
