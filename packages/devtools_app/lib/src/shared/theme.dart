@@ -256,6 +256,8 @@ const devtoolsBlue = ColorSwatch<int>(600, {
   400: Color(0xFF13B9FD),
 });
 
+const devtoolsGreen = Color(0xFF5BC43B);
+
 const devtoolsError = Color(0xFFAF4054);
 
 const devtoolsWarning = Color(0xFFFDFAD5);
@@ -394,7 +396,7 @@ extension DevToolsColorScheme on ColorScheme {
 
   List<Color> get treeGuidelineColors => [
         devtoolsBlue[400]!,
-        devtoolsYellow[700]!,
+        devtoolsGreen,
       ];
 }
 

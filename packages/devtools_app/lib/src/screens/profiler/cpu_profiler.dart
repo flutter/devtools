@@ -178,7 +178,7 @@ class _CpuProfilerState extends State<CpuProfiler>
                 isFilterActive: widget.controller.isToggleFilterActive,
               ),
               const SizedBox(width: denseSpacing),
-              const _DisplayTreeGuidelinesToggle(),
+              const DisplayTreeGuidelinesToggle(),
               const SizedBox(width: denseSpacing),
               UserTagDropdown(widget.controller),
               const SizedBox(width: denseSpacing),
@@ -358,8 +358,8 @@ class _CpuProfilerState extends State<CpuProfiler>
   }
 }
 
-class _DisplayTreeGuidelinesToggle extends StatelessWidget {
-  const _DisplayTreeGuidelinesToggle();
+class DisplayTreeGuidelinesToggle extends StatelessWidget {
+  const DisplayTreeGuidelinesToggle();
 
   @override
   Widget build(BuildContext context) {
