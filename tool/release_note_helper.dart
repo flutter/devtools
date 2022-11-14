@@ -91,13 +91,15 @@ class BackfillPullRequestUrlCommand extends Command {
 
   @override
   final description =
-      'Verifies that the release_notes.json file is still readable with the serializable dart classes.';
+      'Checks if all entries in the release notes have pr urls. If a -u <url> '
+      'parameter is passed along, any entries missing a pr url, will be given '
+      'that pr url.';
 
   BackfillPullRequestUrlCommand() {
     argParser.addOption(
       'url',
       abbr: 'u',
-      mandatory: true,
+      mandatory: false,
       help:
           'Add the url to any note, that does NOT already have an URL assigned to it.',
     );
@@ -112,22 +114,32 @@ class BackfillPullRequestUrlCommand extends Command {
   @override
   void run() async {
     final filePath = argResults!['file'].toString();
-    final url = argResults!['url'].toString();
-    print("The filepath $filePath");
+    final url = argResults!['url']?.toString();
+
     final file = File(filePath);
     final fileContents = await file.readAsString();
     // This step will fail if the json is not valid, or can't be unserialized
     final release = Release.fromJson(jsonDecode(fileContents));
 
-    for (var section in release.sections) {
-      for (var note in section.notes) {
-        note.githubPullRequestUrls ??= [url];
+    var foundMissingPrUrl = false;
+    if (url != null) {
+      for (var section in release.sections) {
+        for (var note in section.notes) {
+          if (note.githubPullRequestUrls?.isEmpty == true) {
+            foundMissingPrUrl = true;
+            note.githubPullRequestUrls = [url];
+          }
+        }
       }
     }
-    final encoder = new JsonEncoder.withIndent("     ");
-    file.writeAsString(encoder.convert(
-      release.toJson(),
-    ));
-    print("$filePath successfully updated");
+    if (foundMissingPrUrl) {
+      final encoder = JsonEncoder.withIndent("  ");
+      await file.writeAsString(encoder.convert(
+        release.toJson(),
+      ));
+      print('Missing PR urls found, $filePath has been updated.');
+      exit(1);
+    }
+    print('No Missing PR Urls Found.');
   }
 }
