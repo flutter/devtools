@@ -122,21 +122,24 @@ class BackfillPullRequestUrlCommand extends Command {
     final release = Release.fromJson(jsonDecode(fileContents));
 
     var foundMissingPrUrl = false;
-    if (url != null) {
-      for (var section in release.sections) {
-        for (var note in section.notes) {
-          if (note.githubPullRequestUrls?.isEmpty == true) {
-            foundMissingPrUrl = true;
+    for (var section in release.sections) {
+      for (var note in section.notes) {
+        if (note.githubPullRequestUrls == null ||
+            note.githubPullRequestUrls!.isEmpty) {
+          foundMissingPrUrl = true;
+          if (url != null) {
             note.githubPullRequestUrls = [url];
           }
         }
       }
     }
     if (foundMissingPrUrl) {
-      final encoder = JsonEncoder.withIndent("  ");
-      await file.writeAsString(encoder.convert(
-        release.toJson(),
-      ));
+      if (url != null) {
+        final encoder = JsonEncoder.withIndent("  ");
+        await file.writeAsString(encoder.convert(
+          release.toJson(),
+        ));
+      }
       print('Missing PR urls found in $filePath');
       exit(1);
     }
