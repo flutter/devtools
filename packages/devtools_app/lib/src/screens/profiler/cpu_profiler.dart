@@ -178,6 +178,8 @@ class _CpuProfilerState extends State<CpuProfiler>
                 isFilterActive: widget.controller.isToggleFilterActive,
               ),
               const SizedBox(width: denseSpacing),
+              const DisplayTreeGuidelinesToggle(),
+              const SizedBox(width: denseSpacing),
               UserTagDropdown(widget.controller),
               const SizedBox(width: denseSpacing),
               ValueListenableBuilder<bool>(
@@ -295,10 +297,26 @@ class _CpuProfilerState extends State<CpuProfiler>
 
   List<Widget> _buildProfilerViews() {
     final bottomUp = KeepAliveWrapper(
-      child: CpuBottomUpTable(widget.bottomUpRoots),
+      child: ValueListenableBuilder<bool>(
+        valueListenable: preferences.cpuProfiler.displayTreeGuidelines,
+        builder: (context, displayTreeGuidelines, _) {
+          return CpuBottomUpTable(
+            widget.bottomUpRoots,
+            displayTreeGuidelines: displayTreeGuidelines,
+          );
+        },
+      ),
     );
     final callTree = KeepAliveWrapper(
-      child: CpuCallTreeTable(widget.callTreeRoots),
+      child: ValueListenableBuilder<bool>(
+        valueListenable: preferences.cpuProfiler.displayTreeGuidelines,
+        builder: (context, displayTreeGuidelines, _) {
+          return CpuCallTreeTable(
+            widget.callTreeRoots,
+            displayTreeGuidelines: displayTreeGuidelines,
+          );
+        },
+      ),
     );
     final cpuFlameChart = KeepAliveWrapper(
       child: LayoutBuilder(
@@ -337,6 +355,28 @@ class _CpuProfilerState extends State<CpuProfiler>
     setState(() {
       roots.forEach(callback);
     });
+  }
+}
+
+class DisplayTreeGuidelinesToggle extends StatelessWidget {
+  const DisplayTreeGuidelinesToggle();
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: preferences.cpuProfiler.displayTreeGuidelines,
+      builder: (context, displayTreeGuidelines, _) {
+        return ToggleButton(
+          onPressed: () {
+            preferences.cpuProfiler.displayTreeGuidelines.value =
+                !displayTreeGuidelines;
+          },
+          isSelected: displayTreeGuidelines,
+          message: 'Display guidelines',
+          icon: Icons.stacked_bar_chart,
+        );
+      },
+    );
   }
 }
 

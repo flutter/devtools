@@ -32,6 +32,9 @@ class PreferencesController extends DisposableController
   MemoryPreferencesController get memory => _memory;
   final _memory = MemoryPreferencesController();
 
+  CpuProfilerPreferencesController get cpuProfiler => _cpuProfiler;
+  final _cpuProfiler = CpuProfilerPreferencesController();
+
   Future<void> init() async {
     // Get the current values and listen for and write back changes.
     String? value = await storage.getValue('ui.darkMode');
@@ -54,6 +57,7 @@ class PreferencesController extends DisposableController
 
     await inspector.init();
     await memory.init();
+    await cpuProfiler.init();
 
     setGlobal(PreferencesController, this);
   }
@@ -366,5 +370,31 @@ class MemoryPreferencesController extends DisposableController
       },
     );
     showChart.value = await storage.getValue(_showChartStorageId) == 'true';
+  }
+}
+
+class CpuProfilerPreferencesController extends DisposableController
+    with AutoDisposeControllerMixin {
+  final displayTreeGuidelines = ValueNotifier<bool>(false);
+  static const _displayTreeGuidelinesId =
+      '${analytics_constants.cpuProfiler}.${analytics_constants.cpuProfileDisplayTreeGuidelines}';
+
+  Future<void> init() async {
+    addAutoDisposeListener(
+      displayTreeGuidelines,
+      () {
+        storage.setValue(
+          _displayTreeGuidelinesId,
+          displayTreeGuidelines.value.toString(),
+        );
+        ga.select(
+          analytics_constants.cpuProfiler,
+          analytics_constants.cpuProfileDisplayTreeGuidelines,
+          value: displayTreeGuidelines.value ? 1 : 0,
+        );
+      },
+    );
+    displayTreeGuidelines.value =
+        await storage.getValue(_displayTreeGuidelinesId) == 'true';
   }
 }

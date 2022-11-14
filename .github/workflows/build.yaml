@@ -119,13 +119,16 @@ jobs:
                 
   macos-test:
     needs: flutter-prep
-    name: macos ${{ matrix.bot }}
+    name: macos goldens ${{ matrix.bot }}
     runs-on: macos-latest
     strategy:
       fail-fast: false
       matrix:
         bot:
           - test_dart2js
+        only_golden:
+          - true
+        
     steps:
       - name: git clone
         uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
@@ -139,6 +142,7 @@ jobs:
         env:
           BOT: ${{ matrix.bot }}
           PLATFORM: vm
+          ONLY_GOLDEN: ${{ matrix.only_golden }}
         run: ./tool/bots.sh
   
       - name: Upload Golden Failure Artifacts
