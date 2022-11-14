@@ -49,7 +49,11 @@ Verify:
 These packages always have their version numbers updated in lock, so we don't have to worry about versioning.
 
 ##### Updating to the next version
-After merging  a cleaned version of the current release, you can then perform a `patch`, `minor`, or `major update:
+After merging a cleaned version of the current release, you can then perform a `patch`, `minor`, or `major` update.
+This version can be pushed up in a separate PR to denote the start of this next version.
+
+> NOTE: In the future these two released commits will automatically be handled by GitHub.
+
 - For regular monthly releases, use `minor`:
    ```shell
    dart tool/update_version.dart auto --type minor
