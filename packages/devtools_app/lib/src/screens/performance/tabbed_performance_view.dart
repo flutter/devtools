@@ -31,14 +31,7 @@ import 'performance_screen.dart';
 final timelineSearchFieldKey = GlobalKey(debugLabel: 'TimelineSearchFieldKey');
 
 class TabbedPerformanceView extends StatefulWidget {
-  const TabbedPerformanceView({
-    required this.processing,
-    required this.processingProgress,
-  });
-
-  final bool processing;
-
-  final double processingProgress;
+  const TabbedPerformanceView();
 
   @override
   _TabbedPerformanceViewState createState() => _TabbedPerformanceViewState();
@@ -77,12 +70,27 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
 
   @override
   Widget build(BuildContext context) {
+    final isOffline = offlineController.offlineMode.value;
+    final isFlutterApp = serviceManager.connectedApp!.isFlutterAppNow!;
+
+    var showFrameAnalysis = isFlutterApp;
+    var showRasterStats = isFlutterApp;
+    var showRebuildStats = FeatureFlags.widgetRebuildstats && isFlutterApp;
+    final offlineData = controller.offlinePerformanceData;
+    if (isOffline && offlineData != null) {
+      showFrameAnalysis = showFrameAnalysis &&
+          offlineData.frames.isNotEmpty;
+      showRasterStats = showRasterStats &&
+          offlineData.rasterStats != null;
+      showRebuildStats = showRebuildStats &&
+          offlineData.rebuildCountModel.locationStats
+              .value.isNotEmpty;
+    }
+
     final tabRecords = <_PerformanceTabRecord>[
-      if (serviceManager.connectedApp!.isFlutterAppNow!) ...[
-        _frameAnalysisRecord(),
-        _rasterStatsRecord(),
-        if (FeatureFlags.widgetRebuildstats) _rebuildStatsRecord(),
-      ],
+      if (showFrameAnalysis) _frameAnalysisRecord(),
+      if (showRasterStats) _rasterStatsRecord(),
+      if (showRebuildStats) _rebuildStatsRecord(),
       _timelineEventsRecord(),
     ];
 
@@ -164,33 +172,36 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
     return _PerformanceTabRecord(
       tab: _buildTab(
         tabName: 'Raster Stats',
-        trailing: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            IconLabelButton(
-              tooltip: 'Take a snapshot of the rendering layers on the current'
-                  ' screen',
-              icon: Icons.camera,
-              label: 'Take Snapshot',
-              outlined: false,
-              onPressed: () {
-                ga.select(
-                  PerformanceScreen.id,
-                  analytics_constants.collectRasterStats,
-                );
-                unawaited(
-                  controller.rasterStatsController.collectRasterStats(),
-                );
-              },
-            ),
-            const SizedBox(width: denseSpacing),
-            ClearButton(
-              outlined: false,
-              onPressed: controller.rasterStatsController.clearData,
-            ),
-            const SizedBox(width: densePadding),
-          ],
-        ),
+        trailing: !offlineController.offlineMode.value
+            ? Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  IconLabelButton(
+                    tooltip:
+                        'Take a snapshot of the rendering layers on the current'
+                        ' screen',
+                    icon: Icons.camera,
+                    label: 'Take Snapshot',
+                    outlined: false,
+                    onPressed: () {
+                      ga.select(
+                        PerformanceScreen.id,
+                        analytics_constants.collectRasterStats,
+                      );
+                      unawaited(
+                        controller.rasterStatsController.collectRasterStats(),
+                      );
+                    },
+                  ),
+                  const SizedBox(width: denseSpacing),
+                  ClearButton(
+                    outlined: false,
+                    onPressed: controller.rasterStatsController.clearData,
+                  ),
+                  const SizedBox(width: densePadding),
+                ],
+              )
+            : null,
       ),
       tabView: KeepAliveWrapper(
         child: Center(
@@ -204,9 +215,6 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
   }
 
   _PerformanceTabRecord _timelineEventsRecord() {
-    final data = controller.data;
-    final hasData = data != null && !data.isEmpty;
-    final searchFieldEnabled = hasData && !widget.processing;
     return _PerformanceTabRecord(
       tab: _buildTab(
         tabName: 'Timeline Events',
@@ -217,15 +225,24 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 if (useLegacy || !FeatureFlags.embeddedPerfetto) ...[
-                  _buildSearchField(searchFieldEnabled),
+                  ValueListenableBuilder<bool>(
+                    valueListenable: _timelineEventsController.processing,
+                    builder: (context, processing, _) {
+                      final data = controller.data;
+                      final hasData = data != null && !data.isEmpty;
+                      final searchFieldEnabled = hasData && !processing;
+                      return _buildSearchField(searchFieldEnabled);
+                    },
+                  ),
                   const FlameChartHelpButton(
                     gaScreen: PerformanceScreen.id,
                     gaSelection: analytics_constants.timelineFlameChartHelp,
                   ),
                 ],
-                RefreshTimelineEventsButton(
-                  controller: _timelineEventsController,
-                ),
+                if (!offlineController.offlineMode.value)
+                  RefreshTimelineEventsButton(
+                    controller: _timelineEventsController,
+                  ),
               ],
             );
           },
@@ -236,10 +253,17 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
         builder: (context, useLegacy, _) {
           return (useLegacy || !FeatureFlags.embeddedPerfetto)
               ? KeepAliveWrapper(
-                  child: TimelineEventsView(
-                    controller: _timelineEventsController,
-                    processing: widget.processing,
-                    processingProgress: widget.processingProgress,
+                  child: DualValueListenableBuilder<bool, double>(
+                    firstListenable: _timelineEventsController.processing,
+                    secondListenable: _timelineEventsController
+                        .legacyController.processor.progressNotifier,
+                    builder: (context, processing, processingProgress, _) {
+                      return TimelineEventsView(
+                        controller: _timelineEventsController,
+                        processing: processing,
+                        processingProgress: processingProgress,
+                      );
+                    },
                   ),
                 )
               : KeepAliveWrapper(

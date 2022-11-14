@@ -13,14 +13,6 @@ void main() {
   late RasterStats rasterStats;
 
   group('$RasterStats model', () {
-    test('empty constructor', () {
-      rasterStats = RasterStats.empty();
-      expect(rasterStats.layerSnapshots, isEmpty);
-      expect(rasterStats.selectedSnapshot, isNull);
-      expect(rasterStats.originalFrameSize, isNull);
-      expect(rasterStats.totalRasterTime, equals(Duration.zero));
-    });
-
     test('parse from service data', () {
       rasterStats = RasterStats.parse(rasterStatsFromServiceJson);
       expect(rasterStats.layerSnapshots.length, equals(2));
@@ -78,19 +70,9 @@ void main() {
     });
 
     test('to json', () {
-      rasterStats = RasterStats.empty();
-      var json = rasterStats.json;
-      var expected = <String, Object?>{
-        'frame_width': null,
-        'frame_height': null,
-        'snapshots': [],
-        'selectedId': null
-      };
-      expect(collectionEquals(json, expected), isTrue);
-
       rasterStats = RasterStats.parse(rasterStatsFromServiceJson);
-      json = rasterStats.json;
-      expected = Map<String, Object?>.from(rasterStatsFromServiceJson);
+      final json = rasterStats.json;
+      final expected = Map<String, Object?>.from(rasterStatsFromServiceJson);
       // The expected output should not have the 'type' field that comes from
       // the service protocol and it should have an additional field for the id
       // of the selected snapshot.

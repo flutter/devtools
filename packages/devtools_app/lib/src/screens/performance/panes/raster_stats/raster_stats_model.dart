@@ -15,21 +15,16 @@ class RasterStats {
     required this.selectedSnapshot,
   });
 
-  factory RasterStats.empty() {
-    return RasterStats._(
-      layerSnapshots: [],
-      originalFrameSize: null,
-      selectedSnapshot: null,
-      totalRasterTime: Duration.zero,
-    );
-  }
-
   factory RasterStats.parse(Map<String, Object?> json) {
-    final originalFrameSize = Size(
-      (json[_frameWidthKey] as num).toDouble(),
-      (json[_frameHeightKey] as num).toDouble(),
-    );
-
+    Size? originalFrameSize;
+    final originalWidth = json[_frameWidthKey] as num?;
+    final originalHeight = json[_frameHeightKey] as num?;
+    if (originalHeight != null && originalWidth != null) {
+      originalFrameSize = Size(
+        (json[_frameWidthKey] as num).toDouble(),
+        (json[_frameHeightKey] as num).toDouble(),
+      );
+    }
     int? selectedId;
     LayerSnapshot? selected;
     if (json[_selectedIdKey] != null) {
