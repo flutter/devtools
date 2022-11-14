@@ -82,11 +82,7 @@ jobs:
           dart ./release_note_helper.dart pr-url \
             -f "../$CURRENT_RELEASE_JSON_FILE_PATH" \
             -u https://github.com/flutter/devtools/pull/$PULL_NUMBER
-      - name: Check if the User still needs to add Urls
-        env:
-          PULL_NUMBER: ${{steps.get-pull-request-number.outputs.PULL_REQUEST_NUMBER}}
-        run: |
-          if ! git diff --exit-code; then
+          if [ $? -ne 0 ]; then
             echo "::error file=$CURRENT_RELEASE_JSON_FILE_PATH,line=0,col=0,endColumn=0,title='Release Note Validation failed'::Please make sure to add the PR Url to the release notes. You can automatically do this by running: \`dart tool/release_note_helper.dart pr-url -f $CURRENT_RELEASE_JSON_FILE_PATH -u https://github.com/flutter/devtools/pull/$PULL_NUMBER\`"
             exit 1
           fi
