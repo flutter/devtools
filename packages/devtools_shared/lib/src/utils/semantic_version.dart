@@ -14,6 +14,7 @@ class SemanticVersion with CompareMixin {
     this.preReleaseMajor,
     this.preReleaseMinor,
   });
+  
   factory SemanticVersion.fromJson(Map<String, dynamic> json) {
     return SemanticVersion(
       major: json['major'],
