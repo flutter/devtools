@@ -27,7 +27,7 @@ void main() async {
   // fragment format and redirect if necessary.
   if (_handleLegacyUrl()) return;
 
-  usePathUrlStrategy();
+  usePathUrlStrategy(); //only adding a comment
 
   // Initialize the framework before we do anything else, otherwise the
   // StorageController won't be initialized and preferences won't be loaded.
