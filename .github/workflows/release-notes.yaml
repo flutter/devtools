@@ -4,7 +4,7 @@ on:
   pull_request:
     types: [ assigned, opened, synchronize, reopened, edited ]
 env:
-  CURRENT_RELEASE_JSON_FILE_PATH: tool/release-notes/running/notes.json
+  CURRENT_RELEASE_JSON_FILE_PATH: tool/release_notes/release_notes.json
 jobs:
   release-preparedness:
     runs-on: ubuntu-latest
