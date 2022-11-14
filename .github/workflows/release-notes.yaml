@@ -73,7 +73,6 @@ jobs:
           dart pub get
           dart release_note_helper.dart verify -f "../$CURRENT_RELEASE_JSON_FILE_PATH"
       - name: Check PR Urls
-        continue-on-error: true
         env:
           PULL_NUMBER: ${{steps.get-pull-request-number.outputs.PULL_REQUEST_NUMBER}}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
