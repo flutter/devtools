@@ -31,7 +31,14 @@ import 'performance_screen.dart';
 final timelineSearchFieldKey = GlobalKey(debugLabel: 'TimelineSearchFieldKey');
 
 class TabbedPerformanceView extends StatefulWidget {
-  const TabbedPerformanceView();
+  const TabbedPerformanceView({
+    required this.processing,
+    required this.processingProgress,
+  });
+
+  final bool processing;
+
+  final double processingProgress;
 
   @override
   _TabbedPerformanceViewState createState() => _TabbedPerformanceViewState();
@@ -250,17 +257,10 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
         builder: (context, useLegacy, _) {
           return (useLegacy || !FeatureFlags.embeddedPerfetto)
               ? KeepAliveWrapper(
-                  child: DualValueListenableBuilder<bool, double>(
-                    firstListenable: _timelineEventsController.processing,
-                    secondListenable: _timelineEventsController
-                        .legacyController.processor.progressNotifier,
-                    builder: (context, processing, processingProgress, _) {
-                      return TimelineEventsView(
-                        controller: _timelineEventsController,
-                        processing: processing,
-                        processingProgress: processingProgress,
-                      );
-                    },
+                  child: TimelineEventsView(
+                    controller: _timelineEventsController,
+                    processing: widget.processing,
+                    processingProgress: widget.processingProgress,
                   ),
                 )
               : KeepAliveWrapper(
