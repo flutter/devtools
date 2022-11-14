@@ -137,7 +137,7 @@ class BackfillPullRequestUrlCommand extends Command {
       await file.writeAsString(encoder.convert(
         release.toJson(),
       ));
-      print('Missing PR urls found, $filePath has been updated.');
+      print('Missing PR urls found in $filePath');
       exit(1);
     }
     print('No Missing PR Urls Found.');
