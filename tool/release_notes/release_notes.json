@@ -11,7 +11,11 @@
       "name": "Inspector updates",
       "notes": [
         {
-          "message" : "making an important change"
+          "githubPullRequestUrls": [
+            "https://github.com/flutter/devtools/pull/4737"
+          ],
+          "message": "making an important change",
+          "imageNames": null
         },
         {
           "githubPullRequestUrls": [
