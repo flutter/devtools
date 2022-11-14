@@ -19,14 +19,13 @@ import 'package:devtools_app/src/shared/common_widgets.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
 import 'package:devtools_app/src/shared/preferences.dart';
-import 'package:devtools_app/src/shared/table/table.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-import '../matchers/matchers.dart';
 import '../test_data/cpu_profile.dart';
+import '../test_infra/matchers.dart';
 
 void main() {
   late CpuProfiler cpuProfiler;
