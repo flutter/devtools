@@ -304,11 +304,11 @@ class PerfettoController extends DisposableController
         _postMessage(_perfettoPing);
       });
 
-      // Timeout after [_pollUntilReadyTimeout] has passed.
-      await Future.any([
-        _perfettoHandlerReady.future,
-        Future.delayed(_pollUntilReadyTimeout),
-      ]).then((_) => _pollForPerfettoHandlerReady?.cancel());
+      await _perfettoHandlerReady.future.timeout(
+        _pollUntilReadyTimeout,
+        onTimeout: () => _pollForPerfettoHandlerReady?.cancel(),
+      );
+      _pollForPerfettoHandlerReady?.cancel();
     }
   }
 
@@ -323,11 +323,11 @@ class PerfettoController extends DisposableController
         _postMessageWithId(_devtoolsThemePing, perfettoIgnore: true);
       });
 
-      // Timeout after [_pollUntilReadyTimeout] has passed.
-      await Future.any([
-        _devtoolsThemeHandlerReady.future,
-        Future.delayed(_pollUntilReadyTimeout),
-      ]).then((_) => _pollForThemeHandlerReady?.cancel());
+      await _devtoolsThemeHandlerReady.future.timeout(
+        _pollUntilReadyTimeout,
+        onTimeout: () => _pollForThemeHandlerReady?.cancel(),
+      );
+      _pollForThemeHandlerReady?.cancel();
     }
   }
 
