@@ -63,6 +63,10 @@ class SecondaryControls extends StatelessWidget {
   }
 
   void _openSettingsDialog(BuildContext context) {
+    ga.select(
+      analytics_constants.memory,
+      analytics_constants.MemoryEvent.settings,
+    );
     unawaited(
       showDialog(
         context: context,
@@ -79,7 +83,10 @@ class SecondaryControls extends StatelessWidget {
   }
 
   Future<void> _gc() async {
-    ga.select(analytics_constants.memory, analytics_constants.gc);
+    ga.select(
+      analytics_constants.memory,
+      analytics_constants.MemoryEvent.gc,
+    );
     controller.memoryTimeline.addGCEvent();
     await controller.gc();
   }

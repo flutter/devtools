@@ -9,8 +9,8 @@ import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-import '../../test_data/performance.dart';
-import '../../test_utils/test_utils.dart';
+import '../../test_infra/test_data/performance.dart';
+import '../../test_infra/utils/test_utils.dart';
 
 void main() {
   final originalGoldenUiEvent = goldenUiTimelineEvent.deepCopy();
@@ -161,7 +161,7 @@ void main() {
     });
 
     test('processes all events', () async {
-      final traceEvents = [
+      final traceEvents = <TraceEventWrapper>[
         ...asyncTraceEvents,
         ...goldenUiTraceEvents,
         ...goldenRasterTraceEvents,
@@ -197,7 +197,7 @@ void main() {
     });
 
     test('tracks flutter frame identifier events', () async {
-      final traceEvents = [
+      final traceEvents = <TraceEventWrapper>[
         ...goldenUiTraceEvents,
         ...goldenRasterTraceEvents,
       ]..sort();

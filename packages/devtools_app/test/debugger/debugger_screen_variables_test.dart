@@ -22,6 +22,8 @@ void main() {
   late MockDebuggerController debuggerController;
   late MockScriptManager scriptManager;
 
+  const windowSize = Size(2500, 4000);
+
   setUp(() {
     fakeServiceManager = FakeServiceManager();
     scriptManager = MockScriptManager();
@@ -53,7 +55,7 @@ void main() {
     );
   }
 
-  testWidgetsWithWindowSize('Variables shows items', const Size(1000.0, 4000.0),
+  testWidgetsWithWindowSize('Variables shows items', windowSize,
       (WidgetTester tester) async {
     when(debuggerController.variables).thenReturn(
       ValueNotifier(
@@ -114,8 +116,9 @@ void main() {
     expect(mapElement2Finder, findsOneWidget);
   });
 
-  testWidgetsWithWindowSize('Children in large list variables are grouped',
-      const Size(1000.0, 4000.0), (WidgetTester tester) async {
+  testWidgetsWithWindowSize(
+      'Children in large list variables are grouped', windowSize,
+      (WidgetTester tester) async {
     final list = _buildParentListVariable(length: 380250);
     await buildVariablesTree(list);
     when(debuggerController.variables).thenReturn(
@@ -173,7 +176,7 @@ void main() {
   });
 
   testWidgetsWithWindowSize(
-      'Children in large map variables are grouped', const Size(1000.0, 4000.0),
+      'Children in large map variables are grouped', windowSize,
       (WidgetTester tester) async {
     final map = _buildParentMapVariable(length: 243621);
     await buildVariablesTree(map);

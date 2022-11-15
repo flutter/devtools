@@ -4,6 +4,8 @@
 
 import 'package:flutter/widgets.dart';
 
+import '../../../../../../analytics/analytics.dart' as ga;
+import '../../../../../../analytics/constants.dart' as analytics_constants;
 import '../../../../../../primitives/utils.dart';
 import '../../../../../../shared/table/table.dart';
 import '../../../../../../shared/table/table_data.dart';
@@ -101,13 +103,13 @@ class _RetainingPathTableColumns {
 
   final String className;
 
-  late final shallowSizeColumn = _ShallowSizeColumn(isDiff);
+  late final retainedSizeColumn = _RetainedSizeColumn(isDiff);
 
   late final columnList = <ColumnData<StatsByPathEntry>>[
     _RetainingPathColumn(className),
     _InstanceColumn(isDiff),
-    shallowSizeColumn,
-    _RetainedSizeColumn(isDiff),
+    _ShallowSizeColumn(isDiff),
+    retainedSizeColumn,
   ];
 }
 
@@ -146,7 +148,11 @@ class RetainingPathTable extends StatelessWidget {
       data: entries,
       keyFactory: (e) => Key(e.key.toLongString()),
       selectionNotifier: selection,
-      defaultSortColumn: columns.shallowSizeColumn,
+      onItemSelected: (_) => ga.select(
+        analytics_constants.memory,
+        '${analytics_constants.MemoryEvent.diffPathSelect}-${isDiff ? "diff" : "single"}',
+      ),
+      defaultSortColumn: columns.retainedSizeColumn,
       defaultSortDirection: SortDirection.descending,
     );
   }

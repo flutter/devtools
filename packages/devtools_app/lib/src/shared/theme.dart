@@ -256,6 +256,8 @@ const devtoolsBlue = ColorSwatch<int>(600, {
   400: Color(0xFF13B9FD),
 });
 
+const devtoolsGreen = Color(0xFF5BC43B);
+
 const devtoolsError = Color(0xFFAF4054);
 
 const devtoolsWarning = Color(0xFFFDFAD5);
@@ -388,6 +390,14 @@ extension DevToolsColorScheme on ColorScheme {
 
   Color get selectedRowColor =>
       isLight ? devtoolsBlue[600]! : devtoolsGrey[600]!;
+
+  Color get coverageHitColor => treemapIncreaseColor;
+  Color get coverageMissColor => treemapDecreaseColor;
+
+  List<Color> get treeGuidelineColors => [
+        devtoolsBlue[400]!,
+        devtoolsGreen,
+      ];
 }
 
 /// Utility extension methods to the [ThemeData] class.

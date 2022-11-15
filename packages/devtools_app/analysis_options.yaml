@@ -9,4 +9,4 @@ analyzer:
     # for testing so should be ignored. Uncomment this while modifying
     # these files if you want to ensure code is not invalid except where
     # expected.
-    - test/test_data/syntax_highlighting/**
+    - test/test_infra/test_data/syntax_highlighting/**

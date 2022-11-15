@@ -65,7 +65,7 @@ class _IntervalDropdownState extends State<IntervalDropdown>
         setState(() {
           ga.select(
             analytics_constants.memory,
-            '${analytics_constants.memoryDisplayInterval}-$newValue',
+            '${analytics_constants.MemoryEvent.chartInterval}-$newValue',
           );
           controller.displayInterval = chartInterval(newValue!);
           final duration = chartDuration(controller.displayInterval);

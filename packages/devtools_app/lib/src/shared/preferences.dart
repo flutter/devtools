@@ -32,6 +32,9 @@ class PreferencesController extends DisposableController
   MemoryPreferencesController get memory => _memory;
   final _memory = MemoryPreferencesController();
 
+  CpuProfilerPreferencesController get cpuProfiler => _cpuProfiler;
+  final _cpuProfiler = CpuProfilerPreferencesController();
+
   Future<void> init() async {
     // Get the current values and listen for and write back changes.
     String? value = await storage.getValue('ui.darkMode');
@@ -54,6 +57,7 @@ class PreferencesController extends DisposableController
 
     await inspector.init();
     await memory.init();
+    await cpuProfiler.init();
 
     setGlobal(PreferencesController, this);
   }
@@ -306,9 +310,6 @@ class MemoryPreferencesController extends DisposableController
   static const _androidCollectionEnabledStorageId =
       'memory.androidCollectionEnabled';
 
-  final autoSnapshotEnabled = ValueNotifier<bool>(false);
-  static const _autoSnapshotEnabledStorageId = 'memory.autoSnapshotEnabled';
-
   final showChart = ValueNotifier<bool>(true);
   static const _showChartStorageId = 'memory.showChart';
 
@@ -323,31 +324,13 @@ class MemoryPreferencesController extends DisposableController
         if (androidCollectionEnabled.value) {
           ga.select(
             analytics_constants.memory,
-            analytics_constants.androidChart,
+            analytics_constants.MemoryEvent.chartAndroid,
           );
         }
       },
     );
     androidCollectionEnabled.value =
         await storage.getValue(_androidCollectionEnabledStorageId) == 'true';
-
-    addAutoDisposeListener(
-      autoSnapshotEnabled,
-      () {
-        storage.setValue(
-          _autoSnapshotEnabledStorageId,
-          autoSnapshotEnabled.value.toString(),
-        );
-        if (autoSnapshotEnabled.value) {
-          ga.select(
-            analytics_constants.memory,
-            analytics_constants.autoSnapshot,
-          );
-        }
-      },
-    );
-    autoSnapshotEnabled.value =
-        await storage.getValue(_autoSnapshotEnabledStorageId) == 'true';
 
     addAutoDisposeListener(
       showChart,
@@ -360,11 +343,37 @@ class MemoryPreferencesController extends DisposableController
         ga.select(
           analytics_constants.memory,
           showChart.value
-              ? analytics_constants.showChart
-              : analytics_constants.hideChart,
+              ? analytics_constants.MemoryEvent.showChart
+              : analytics_constants.MemoryEvent.hideChart,
         );
       },
     );
     showChart.value = await storage.getValue(_showChartStorageId) == 'true';
+  }
+}
+
+class CpuProfilerPreferencesController extends DisposableController
+    with AutoDisposeControllerMixin {
+  final displayTreeGuidelines = ValueNotifier<bool>(false);
+  static const _displayTreeGuidelinesId =
+      '${analytics_constants.cpuProfiler}.${analytics_constants.cpuProfileDisplayTreeGuidelines}';
+
+  Future<void> init() async {
+    addAutoDisposeListener(
+      displayTreeGuidelines,
+      () {
+        storage.setValue(
+          _displayTreeGuidelinesId,
+          displayTreeGuidelines.value.toString(),
+        );
+        ga.select(
+          analytics_constants.cpuProfiler,
+          analytics_constants.cpuProfileDisplayTreeGuidelines,
+          value: displayTreeGuidelines.value ? 1 : 0,
+        );
+      },
+    );
+    displayTreeGuidelines.value =
+        await storage.getValue(_displayTreeGuidelinesId) == 'true';
   }
 }

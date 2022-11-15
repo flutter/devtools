@@ -11,8 +11,8 @@ import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../../matchers/matchers.dart';
-import '../../scenes/memory/default.dart';
+import '../../test_infra/matchers.dart';
+import '../../test_infra/scenes/memory/default.dart';
 
 void main() {
   late MemoryDefaultScene scene;
@@ -45,7 +45,9 @@ void main() {
     await tester.pumpAndSettle();
     await expectLater(
       find.byType(MemorySettingsDialog),
-      matchesDevToolsGolden('../../goldens/settings_dialog_default.png'),
+      matchesDevToolsGolden(
+        '../../test_infra/goldens/settings_dialog_default.png',
+      ),
     );
 
     // Modify settings and check the changes are reflected in the controller.
@@ -53,24 +55,17 @@ void main() {
       preferences.memory.androidCollectionEnabled.value,
       isFalse,
     );
-    expect(
-      preferences.memory.autoSnapshotEnabled.value,
-      isFalse,
-    );
     await tester
         .tap(find.byKey(MemorySettingDialogKeys.showAndroidChartCheckBox));
-    await tester.tap(find.byKey(MemorySettingDialogKeys.autoSnapshotCheckbox));
     await tester.pumpAndSettle();
     await expectLater(
       find.byType(MemorySettingsDialog),
-      matchesDevToolsGolden('../../goldens/settings_dialog_modified.png'),
+      matchesDevToolsGolden(
+        '../../test_infra/goldens/settings_dialog_modified.png',
+      ),
     );
     expect(
       preferences.memory.androidCollectionEnabled.value,
-      isTrue,
-    );
-    expect(
-      preferences.memory.autoSnapshotEnabled.value,
       isTrue,
     );
 
@@ -81,7 +76,9 @@ void main() {
     await tester.pumpAndSettle();
     await expectLater(
       find.byType(MemorySettingsDialog),
-      matchesDevToolsGolden('../../goldens/settings_dialog_modified.png'),
+      matchesDevToolsGolden(
+        '../../test_infra/goldens/settings_dialog_modified.png',
+      ),
     );
   });
 }

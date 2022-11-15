@@ -5,7 +5,7 @@
 import 'package:devtools_app/devtools_app.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../../test_data/performance.dart';
+import '../../test_infra/test_data/performance.dart';
 
 void main() {
   group('$FlutterFrame', () {

@@ -12,7 +12,11 @@ import 'cpu_profile_model.dart';
 
 /// A table of the CPU's bottom-up call tree.
 class CpuBottomUpTable extends StatelessWidget {
-  factory CpuBottomUpTable(List<CpuStackFrame> bottomUpRoots, {Key? key}) {
+  factory CpuBottomUpTable(
+    List<CpuStackFrame> bottomUpRoots, {
+    Key? key,
+    required bool displayTreeGuidelines,
+  }) {
     final treeColumn = MethodNameColumn();
     final startingSortColumn = SelfTimeColumn(titleTooltip: selfTimeTooltip);
     final columns = List<ColumnData<CpuStackFrame>>.unmodifiable([
@@ -27,6 +31,7 @@ class CpuBottomUpTable extends StatelessWidget {
       treeColumn,
       startingSortColumn,
       columns,
+      displayTreeGuidelines,
     );
   }
 
@@ -36,12 +41,14 @@ class CpuBottomUpTable extends StatelessWidget {
     this.treeColumn,
     this.sortColumn,
     this.columns,
+    this.displayTreeGuidelines,
   ) : super(key: key);
 
   final TreeColumnData<CpuStackFrame> treeColumn;
   final ColumnData<CpuStackFrame> sortColumn;
   final List<ColumnData<CpuStackFrame>> columns;
   final List<CpuStackFrame> bottomUpRoots;
+  final bool displayTreeGuidelines;
 
   static const totalTimeTooltip =
       'Time that a method spent executing its own code as well as the code for '
@@ -58,6 +65,7 @@ class CpuBottomUpTable extends StatelessWidget {
   Widget build(BuildContext context) {
     return TreeTable<CpuStackFrame>(
       keyFactory: (frame) => PageStorageKey<String>(frame.id),
+      displayTreeGuidelines: displayTreeGuidelines,
       dataRoots: bottomUpRoots,
       dataKey: 'cpu-bottom-up',
       columns: columns,

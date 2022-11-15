@@ -962,6 +962,53 @@ void main() {
       expect(find.byWidget(table), findsOneWidget);
     });
 
+    testWidgets('displays wide data with many columns',
+        (WidgetTester tester) async {
+      const strings = <String>[
+        'All work',
+        'and no play',
+        'makes Ben',
+        'a dull boy',
+        // ignore: no_adjacent_strings_in_list
+        'The quick brown fox jumps over the lazy dog, although the fox '
+            "can't jump very high and the dog is very, very small, so it really"
+            " isn't much of an achievement on the fox's part, so I'm not sure why "
+            "we're even talking about it."
+      ];
+      final root = TestData('Root', 0);
+      var current = root;
+      for (int i = 0; i < 1000; ++i) {
+        final next = TestData(strings[i % strings.length], i);
+        current.addChild(next);
+        current = next;
+      }
+      final table = TreeTable<TestData>(
+        columns: [
+          _NumberColumn(),
+          _CombinedColumn(),
+          treeColumn,
+          _CombinedColumn(),
+        ],
+        dataRoots: [root],
+        dataKey: 'test-data',
+        treeColumn: treeColumn,
+        keyFactory: (d) => Key(d.name),
+        defaultSortColumn: treeColumn,
+        defaultSortDirection: SortDirection.ascending,
+      );
+      // This test will throw an exception if the table overflows.
+      await tester.pumpWidget(
+        wrap(
+          SizedBox(
+            width: 200.0,
+            height: 200.0,
+            child: table,
+          ),
+        ),
+      );
+      expect(find.byWidget(table), findsOneWidget);
+    });
+
     testWidgets('properly collapses and expands the tree',
         (WidgetTester tester) async {
       final table = TreeTable<TestData>(
@@ -1041,7 +1088,7 @@ void main() {
       await tester.pumpWidget(wrap(table));
       final TreeTableState state = tester.state(find.byWidget(table));
       expect(state.tableController.columnWidths[0], equals(400));
-      expect(state.tableController.columnWidths[1], equals(500));
+      expect(state.tableController.columnWidths[1], equals(63));
       final tree = state.tableController.dataRoots[0];
       expect(tree.children[0].name, equals('Bar'));
       expect(tree.children[0].children[0].name, equals('Baz'));

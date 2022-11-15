@@ -178,6 +178,8 @@ class _CpuProfilerState extends State<CpuProfiler>
                 isFilterActive: widget.controller.isToggleFilterActive,
               ),
               const SizedBox(width: denseSpacing),
+              const DisplayTreeGuidelinesToggle(),
+              const SizedBox(width: denseSpacing),
               UserTagDropdown(widget.controller),
               const SizedBox(width: denseSpacing),
               ValueListenableBuilder<bool>(
@@ -295,10 +297,26 @@ class _CpuProfilerState extends State<CpuProfiler>
 
   List<Widget> _buildProfilerViews() {
     final bottomUp = KeepAliveWrapper(
-      child: CpuBottomUpTable(widget.bottomUpRoots),
+      child: ValueListenableBuilder<bool>(
+        valueListenable: preferences.cpuProfiler.displayTreeGuidelines,
+        builder: (context, displayTreeGuidelines, _) {
+          return CpuBottomUpTable(
+            widget.bottomUpRoots,
+            displayTreeGuidelines: displayTreeGuidelines,
+          );
+        },
+      ),
     );
     final callTree = KeepAliveWrapper(
-      child: CpuCallTreeTable(widget.callTreeRoots),
+      child: ValueListenableBuilder<bool>(
+        valueListenable: preferences.cpuProfiler.displayTreeGuidelines,
+        builder: (context, displayTreeGuidelines, _) {
+          return CpuCallTreeTable(
+            widget.callTreeRoots,
+            displayTreeGuidelines: displayTreeGuidelines,
+          );
+        },
+      ),
     );
     final cpuFlameChart = KeepAliveWrapper(
       child: LayoutBuilder(
@@ -337,6 +355,28 @@ class _CpuProfilerState extends State<CpuProfiler>
     setState(() {
       roots.forEach(callback);
     });
+  }
+}
+
+class DisplayTreeGuidelinesToggle extends StatelessWidget {
+  const DisplayTreeGuidelinesToggle();
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: preferences.cpuProfiler.displayTreeGuidelines,
+      builder: (context, displayTreeGuidelines, _) {
+        return ToggleButton(
+          onPressed: () {
+            preferences.cpuProfiler.displayTreeGuidelines.value =
+                !displayTreeGuidelines;
+          },
+          isSelected: displayTreeGuidelines,
+          message: 'Display guidelines',
+          icon: Icons.stacked_bar_chart,
+        );
+      },
+    );
   }
 }
 
@@ -421,31 +461,47 @@ class UserTagDropdown extends StatelessWidget {
           height: defaultButtonHeight,
           child: DevToolsTooltip(
             message: tooltip,
-            child: RoundedDropDownButton<String>(
-              isDense: true,
-              style: Theme.of(context).textTheme.bodyMedium,
-              value: userTag,
-              items: [
-                _buildMenuItem(
-                  display: '$filterByTag ${CpuProfilerController.userTagNone}',
-                  value: CpuProfilerController.userTagNone,
-                ),
-                // We don't want to show the 'Default' tag if it is the only
-                // tag available. The 'none' tag above is equivalent in this
-                // case.
-                if (!(userTags.length == 1 &&
-                    userTags.first == UserTag.defaultTag.label))
-                  for (final tag in userTags)
+            child: ValueListenableBuilder<bool>(
+              valueListenable: preferences.vmDeveloperModeEnabled,
+              builder: (context, vmDeveloperModeEnabled, _) {
+                return RoundedDropDownButton<String>(
+                  isDense: true,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                  value: userTag,
+                  items: [
                     _buildMenuItem(
-                      display: '$filterByTag $tag',
-                      value: tag,
+                      display:
+                          '$filterByTag ${CpuProfilerController.userTagNone}',
+                      value: CpuProfilerController.userTagNone,
                     ),
-              ],
-              onChanged: userTags.isEmpty ||
-                      (userTags.length == 1 &&
-                          userTags.first == UserTag.defaultTag.label)
-                  ? null
-                  : (String? tag) => _onUserTagChanged(tag!, context),
+                    // We don't want to show the 'Default' tag if it is the only
+                    // tag available. The 'none' tag above is equivalent in this
+                    // case.
+                    if (!(userTags.length == 1 &&
+                        userTags.first == UserTag.defaultTag.label)) ...[
+                      for (final tag in userTags)
+                        _buildMenuItem(
+                          display: '$filterByTag $tag',
+                          value: tag,
+                        ),
+                      _buildMenuItem(
+                        display: 'Group by: User Tag',
+                        value: CpuProfilerController.groupByUserTag,
+                      ),
+                    ],
+                    if (vmDeveloperModeEnabled)
+                      _buildMenuItem(
+                        display: 'Group by: VM Tag',
+                        value: CpuProfilerController.groupByVmTag,
+                      )
+                  ],
+                  onChanged: userTags.isEmpty ||
+                          (userTags.length == 1 &&
+                              userTags.first == UserTag.defaultTag.label)
+                      ? null
+                      : (String? tag) => _onUserTagChanged(tag!, context),
+                );
+              },
             ),
           ),
         );
