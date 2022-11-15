@@ -4,6 +4,15 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+# Any subsequent commands failure will cause this script to exit immediately
+set -e
+
+if ! command -v jq &> /dev/null
+then
+    echo "jq could not be found. If you are on mac you can install this with `brew install jq`"
+    exit 1
+fi
+
 RESPONSE=$(gh api --paginate /repos/flutter/flutter/branches)
 
 CANDIDATES=$(echo "$RESPONSE" | jq '.[].name' | grep candidate)
