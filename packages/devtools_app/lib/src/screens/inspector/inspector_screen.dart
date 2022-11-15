@@ -37,7 +37,7 @@ class InspectorScreen extends Screen {
           id: id,
           requiresLibrary: flutterLibraryUri,
           requiresDebugBuild: true,
-          title: 'Flutter Inspector',
+          title: 'Flutter Inspector Screen',
           icon: Octicons.deviceMobile,
         );
 
