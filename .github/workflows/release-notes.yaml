@@ -15,7 +15,7 @@ jobs:
         id: get-pull-request-number
         run: |
           PULL_REQUEST_NUMBER=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
-          echo "::set-output name=PULL_REQUEST_NUMBER::$PULL_REQUEST_NUMBER"
+          echo "PULL_REQUEST_NUMBER=$PULL_REQUEST_NUMBER" >> $GITHUB_OUTPUT
 
       - name: Check if we have modified release_notes.json 
         id: get-modified-files
@@ -27,8 +27,8 @@ jobs:
           echo "FILES_RESPONSE: $FILES_RESPONSE"
           
           HAS_CHANGED_RELEASE_NOTES=$(echo $FILES_RESPONSE | jq '.[].filename' | jq -s '. | any(. == env.CURRENT_RELEASE_JSON_FILE_PATH)')
-          echo "HAS_CHANGED_RELEASE_NOTES: $HAS_CHANGED_RELEASE_NOTES"
-          echo "::set-output name=HAS_CHANGED_RELEASE_NOTES::$HAS_CHANGED_RELEASE_NOTES"
+          echo "HAS_CHANGED_RELEASE_NOTES=$HAS_CHANGED_RELEASE_NOTES" >> $GITHUB_OUTPUT
+
       - name: Get PR Description
         id: check-release-note-exceptions
         env:
@@ -43,7 +43,7 @@ jobs:
           else
             HAS_RELEASE_NOTE_EXCEPTION_STRING=false
           fi
-          echo "::set-output name=HAS_RELEASE_NOTE_EXCEPTION_STRING::$HAS_RELEASE_NOTE_EXCEPTION_STRING"
+          echo "HAS_RELEASE_NOTE_EXCEPTION_STRING=$HAS_RELEASE_NOTE_EXCEPTION_STRING" >> $GITHUB_OUTPUT
 
       - name: Check Release Preparedness requirements
         env:
