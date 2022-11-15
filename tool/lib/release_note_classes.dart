@@ -119,7 +119,11 @@ class ReleaseNote {
         final match = RegExp(
                 r'^https://github.com/flutter/devtools/pull/(?<pr_number>\d+)$')
             .firstMatch(url);
-        final prNumber = match!.namedGroup('pr_number');
+        if (match == null) {
+          throw Exception(
+              "Invalid github PR Url($url) found in message: $message}");
+        }
+        final prNumber = match.namedGroup('pr_number');
         prUrls.add('[#$prNumber]($url)');
       }
       markdown += ' - [](${prUrls.join(", ")})';
