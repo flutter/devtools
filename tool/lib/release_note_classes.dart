@@ -145,5 +145,3 @@ class ReleaseNote {
 
   Map<String, dynamic> toJson() => _$ReleaseNoteToJson(this);
 }
-// # Sementic line breaks of 80 chars or fewer
-// # each line requires an PR command
