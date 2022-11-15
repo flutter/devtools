@@ -1,0 +1,85 @@
+name: Release Notes
+
+on:
+  pull_request:
+    types: [ assigned, opened, synchronize, reopened, edited ]
+env:
+  CURRENT_RELEASE_JSON_FILE_PATH: tool/release_notes/release_notes.json
+jobs:
+  release-preparedness:
+    runs-on: ubuntu-latest
+    name: Verify PR Release Note Requirements
+    steps:
+
+      - name: Get Pull Request Number
+        id: get-pull-request-number
+        run: |
+          PULL_REQUEST_NUMBER=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+          echo "PULL_REQUEST_NUMBER=$PULL_REQUEST_NUMBER" >> $GITHUB_OUTPUT
+
+      - name: Check if we have modified release_notes.json 
+        id: get-modified-files
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PULL_NUMBER: ${{steps.get-pull-request-number.outputs.PULL_REQUEST_NUMBER}}
+        run: |
+          FILES_RESPONSE=$(gh api /repos/flutter/devtools/pulls/$PULL_NUMBER/files)
+          echo "FILES_RESPONSE: $FILES_RESPONSE"
+          
+          HAS_CHANGED_RELEASE_NOTES=$(echo $FILES_RESPONSE | jq '.[].filename' | jq -s '. | any(. == env.CURRENT_RELEASE_JSON_FILE_PATH)')
+          echo "HAS_CHANGED_RELEASE_NOTES=$HAS_CHANGED_RELEASE_NOTES" >> $GITHUB_OUTPUT
+
+      - name: Get PR Description
+        id: check-release-note-exceptions
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PULL_NUMBER: ${{steps.get-pull-request-number.outputs.PULL_REQUEST_NUMBER}}
+        run: |
+          PULLS_RESPONSE=$(gh api /repos/flutter/devtools/pulls/$PULL_NUMBER)
+          DESCRIPTION_BODY=$(echo $PULLS_RESPONSE | jq '.body')
+          echo $DESCRIPTION_BODY
+          if $(echo $DESCRIPTION_BODY | grep -q "> NO RELEASE NOTE CHANGES:"); then
+            HAS_RELEASE_NOTE_EXCEPTION_STRING=true
+          else
+            HAS_RELEASE_NOTE_EXCEPTION_STRING=false
+          fi
+          echo "HAS_RELEASE_NOTE_EXCEPTION_STRING=$HAS_RELEASE_NOTE_EXCEPTION_STRING" >> $GITHUB_OUTPUT
+
+      - name: Check Release Preparedness requirements
+        env:
+          HAS_CHANGED_RELEASE_NOTES: ${{steps.get-modified-files.outputs.HAS_CHANGED_RELEASE_NOTES}}
+          HAS_RELEASE_NOTE_EXCEPTION_STRING: ${{steps.check-release-note-exceptions.outputs.HAS_RELEASE_NOTE_EXCEPTION_STRING}}
+        run: |
+          if [ "$HAS_CHANGED_RELEASE_NOTES" != "true" ] && [ "$HAS_RELEASE_NOTE_EXCEPTION_STRING" != "true" ] ; then
+            echo "Release Preparedness check failed"
+            echo "::error file=$CURRENT_RELEASE_JSON_FILE_PATH,line=0,col=0,endColumn=0,title='Release Notes Weren\'t Modified'::Please add a release note entry or a reason to your description using: \`> NO RELEASE NOTE CHANGES: [reason goes here]\`"
+            exit 1
+          fi
+
+  release-note-validation:
+    runs-on: ubuntu-latest
+    name: Release Note Validation
+    steps:
+      - name: Get Pull Request Number
+        id: get-pull-request-number
+        run: |
+          PULL_REQUEST_NUMBER=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+          echo "PULL_REQUEST_NUMBER=$PULL_REQUEST_NUMBER" >> $GITHUB_OUTPUT
+      - uses: dart-lang/setup-dart@9a04e6d73cca37bd455e0608d7e5092f881fd603
+      - uses: actions/checkout@v3
+      - name: Verify the release note integrity
+        run: |
+          cd tool/
+          dart pub get
+          dart release_note_helper.dart verify -f "../$CURRENT_RELEASE_JSON_FILE_PATH"
+
+      - name: Check PR Urls
+        env:
+          PULL_NUMBER: ${{steps.get-pull-request-number.outputs.PULL_REQUEST_NUMBER}}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd tool/
+          dart pub get
+          dart ./release_note_helper.dart pr-url \
+            -f "../$CURRENT_RELEASE_JSON_FILE_PATH" \
+            -u https://github.com/flutter/devtools/pull/$PULL_NUMBER 

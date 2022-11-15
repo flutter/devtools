@@ -6,6 +6,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
+import 'package:devtools_shared/devtools_shared.dart';
+
+import 'lib/release_note_classes.dart' as rn;
 
 // This script must be executed from the top level devtools/ directory.
 // TODO(kenz): If changes are made to this script, first consider refactoring to
@@ -57,6 +60,37 @@ Future<void> performTheVersionUpdate(
   process.stdout.asBroadcastStream().listen((event) {
     print(utf8.decode(event));
   });
+}
+
+Future<void> resetReleaseNotes({
+  required SemanticVersion newVersion,
+}) async {
+  final release = rn.Release(version: newVersion, sections: [
+    rn.ReleaseSection(name: 'General updates'),
+    rn.ReleaseSection(name: 'Inspector update'),
+    rn.ReleaseSection(name: 'Performance updates'),
+    rn.ReleaseSection(name: 'CPU profiler updates'),
+    rn.ReleaseSection(name: 'Memory updates'),
+    rn.ReleaseSection(name: 'Network profiler updates'),
+    rn.ReleaseSection(name: 'Logging updates'),
+    rn.ReleaseSection(name: 'App size tool updates'),
+  ]);
+
+  // Clear out the current notes
+  final releaseNotesDir = Directory('./tool/release_notes/');
+  if (releaseNotesDir.existsSync()) {
+    releaseNotesDir.delete(recursive: true);
+  }
+  final filesDir = Directory('./tool/release_notes/files');
+
+  await releaseNotesDir.create();
+  await filesDir.create();
+
+  // populate a blank release notes file
+  JsonEncoder encoder = JsonEncoder.withIndent('  ');
+  await File('./tool/release_notes/release_notes.json').writeAsString(
+    encoder.convert(release),
+  );
 }
 
 String? incrementVersionByType(String version, String type) {
@@ -189,7 +223,7 @@ void writeVersionToIndexHtml(
   indexHtml.writeAsStringSync(revisedLines.joinWithNewLine());
 }
 
-String incrementDevVersion(String currentVersion, String devType) {
+String incrementDevVersion(String currentVersion) {
   final alreadyHasDevVersion = isDevVersion(currentVersion);
   if (alreadyHasDevVersion) {
     final devVerMatch = RegExp(
@@ -208,8 +242,17 @@ String incrementDevVersion(String currentVersion, String devType) {
       return newVersion;
     }
   } else {
-    final nextVersion = incrementVersionByType(currentVersion, devType);
-    return '$nextVersion-dev.0';
+    return '$currentVersion-dev.0';
+  }
+}
+
+String stripPreReleases(String currentVersion) {
+  final devVerMatch =
+      RegExp(r'^(?<semver>\d+\.\d+\.\d+).*$').firstMatch(currentVersion);
+  if (devVerMatch == null) {
+    throw 'Invalid version, could not increment dev version';
+  } else {
+    return devVerMatch.namedGroup('semver')!;
   }
 }
 
@@ -284,12 +327,11 @@ class AutoUpdateCommand extends Command {
   AutoUpdateCommand() {
     argParser.addOption('type',
         abbr: 't',
-        allowed: ['dev', 'dev,patch', 'dev,major', 'patch', 'minor', 'major'],
+        allowed: ['release', 'dev', 'patch', 'minor', 'major'],
         allowedHelp: {
+          'release': 'strips any pre-release versions from the version.',
           'dev':
-              'bumps the version to the next dev pre-release value (minor by default)',
-          'dev,patch': 'bumps the version to the next dev pre-patch value',
-          'dev,major': 'bumps the version to the next dev pre-major value',
+              'bumps the version to the next dev pre-release value (minor by default).',
           'patch': 'bumps the version to the next patch value',
           'minor': 'bumps the version to the next minor value',
           'major': 'bumps the version to the next major value',
@@ -299,7 +341,7 @@ class AutoUpdateCommand extends Command {
   }
 
   @override
-  void run() {
+  void run() async {
     final type = argResults!['type'].toString();
     final currentVersion = versionFromPubspecFile();
     String? newVersion;
@@ -307,17 +349,18 @@ class AutoUpdateCommand extends Command {
       throw 'Could not automatically determine current version.';
     }
     switch (type) {
+      case 'release':
+        newVersion = stripPreReleases(currentVersion);
+        break;
       case 'dev':
-        newVersion = incrementDevVersion(currentVersion, 'minor');
-        break;
-      case 'dev,patch':
-        newVersion = incrementDevVersion(currentVersion, 'patch');
-        break;
-      case 'dev,major':
-        newVersion = incrementDevVersion(currentVersion, 'major');
+        newVersion = incrementDevVersion(currentVersion);
         break;
       default:
         newVersion = incrementVersionByType(currentVersion, type);
+
+        // Doing a proper version update so cycle the release notes
+        await resetReleaseNotes(
+            newVersion: SemanticVersion.parse(currentVersion));
     }
     if (newVersion == null) {
       throw 'Failed to determine the newVersion.';
