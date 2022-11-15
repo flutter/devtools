@@ -10,7 +10,13 @@
     {
       "name": "Inspector updates",
       "notes": [
-        { "message" : "Changing the title" },
+        {
+          "githubPullRequestUrls": [
+            "https://github.com/flutter/devtools/pull/4740"
+          ],
+          "message": "Changing the title",
+          "imageNames": null
+        },
         {
           "githubPullRequestUrls": [
             "https://github.com/flutter/devtools/pull/4527"
