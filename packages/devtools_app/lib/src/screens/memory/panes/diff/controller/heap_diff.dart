@@ -4,6 +4,9 @@
 
 import 'package:flutter/foundation.dart';
 
+import '../../../../../analytics/analytics.dart' as ga;
+import '../../../../../analytics/constants.dart' as analytics_constants;
+import '../../../../../analytics/metrics.dart';
 import '../../../../../primitives/utils.dart';
 import '../../../primitives/class_name.dart';
 import '../../../shared/heap/heap.dart';
@@ -17,8 +20,22 @@ class HeapDiffStore {
 
   DiffHeapClasses compare(AdaptedHeap heap1, AdaptedHeap heap2) {
     final couple = _HeapCouple(heap1, heap2);
-    return _store.putIfAbsent(couple, () => DiffHeapClasses(couple));
+    return _store.putIfAbsent(couple, () => _calculateDiffGaWrapper(couple));
   }
+}
+
+DiffHeapClasses _calculateDiffGaWrapper(_HeapCouple couple) {
+  late final DiffHeapClasses result;
+  ga.timeSync(
+    analytics_constants.memory,
+    analytics_constants.MemoryTime.calculateDiff,
+    syncOperation: () => result = DiffHeapClasses(couple),
+    screenMetricsProvider: () => MemoryScreenMetrics(
+      heapDiffObjectsBefore: couple.older.data.objects.length,
+      heapDiffObjectsAfter: couple.younger.data.objects.length,
+    ),
+  );
+  return result;
 }
 
 @immutable

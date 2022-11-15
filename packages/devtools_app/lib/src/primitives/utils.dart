@@ -543,6 +543,17 @@ enum TimeUnit {
 class TimeRange {
   TimeRange({this.singleAssignment = true});
 
+  factory TimeRange.offset({
+    required TimeRange original,
+    required Duration offset,
+  }) {
+    final originalStart = original.start;
+    final originalEnd = original.end;
+    return TimeRange()
+      ..start = originalStart != null ? originalStart + offset : null
+      ..end = originalEnd != null ? originalEnd + offset : null;
+  }
+
   final bool singleAssignment;
 
   Duration? get start => _start;
@@ -553,9 +564,9 @@ class TimeRange {
     if (singleAssignment) {
       assert(_start == null);
     }
-    if (_end != null) {
+    if (value != null && _end != null) {
       assert(
-        value! <= _end!,
+        value <= _end!,
         '$value is not less than or equal to end time $_end',
       );
     }
@@ -570,9 +581,9 @@ class TimeRange {
     if (singleAssignment) {
       assert(_end == null);
     }
-    if (_start != null) {
+    if (value != null && _start != null) {
       assert(
-        value! >= _start!,
+        value >= _start!,
         '$value is not greater than or equal to start time $_start',
       );
     }

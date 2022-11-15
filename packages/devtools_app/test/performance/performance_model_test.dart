@@ -6,13 +6,14 @@ import 'dart:convert';
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/performance/panes/raster_stats/raster_stats_model.dart';
+import 'package:devtools_app/src/screens/performance/panes/rebuild_stats/rebuild_counts.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../test_data/cpu_profile.dart';
-import '../test_data/performance.dart';
-import '../test_data/performance_raster_stats.dart';
+import '../test_infra/test_data/cpu_profile.dart';
+import '../test_infra/test_data/performance.dart';
+import '../test_infra/test_data/performance_raster_stats.dart';
 
-import '../test_utils/test_utils.dart';
+import '../test_infra/utils/test_utils.dart';
 
 void main() {
   group('PerformanceData', () {
@@ -43,7 +44,7 @@ void main() {
 
     test('to json', () {
       expect(
-        performanceData.json,
+        performanceData.toJson(),
         equals({
           PerformanceData.selectedFrameIdKey: null,
           PerformanceData.flutterFramesKey: [],
@@ -52,6 +53,7 @@ void main() {
           PerformanceData.selectedEventKey: {},
           PerformanceData.cpuProfileKey: {},
           PerformanceData.rasterStatsKey: {},
+          PerformanceData.rebuildCountModelKey: null,
         }),
       );
 
@@ -64,9 +66,10 @@ void main() {
         selectedEvent: vsyncEvent,
         cpuProfileData: CpuProfileData.parse(goldenCpuProfileDataJson),
         rasterStats: RasterStats.parse(rasterStatsFromDevToolsJson),
+        rebuildCountModel: RebuildCountModel.parse(rebuildCountModelJson),
       );
       expect(
-        performanceData.json,
+        performanceData.toJson(),
         equals({
           PerformanceData.selectedFrameIdKey: null,
           PerformanceData.flutterFramesKey: [
@@ -94,6 +97,7 @@ void main() {
           PerformanceData.selectedEventKey: vsyncEvent.json,
           PerformanceData.cpuProfileKey: goldenCpuProfileDataJson,
           PerformanceData.rasterStatsKey: rasterStatsFromDevToolsJson,
+          PerformanceData.rebuildCountModelKey: rebuildCountModelJson,
         }),
       );
     });

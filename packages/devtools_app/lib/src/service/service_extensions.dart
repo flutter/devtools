@@ -517,10 +517,11 @@ final structuredErrors = ToggleableServiceExtensionDescription<bool>._(
 
 final trackRebuildWidgets = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.inspector.trackRebuildDirtyWidgets',
-  title: 'Show Rebuild Counts',
-  enabledIcon: const AssetImageIcon(asset: 'icons/widget_tree@2x.png'),
+  title: 'Track widget build counts',
+  enabledIcon: const AssetImageIcon(asset: 'icons/inspector/diagram@2x.png'),
   enabledValue: true,
   disabledValue: false,
+  description: 'Tells you what has been rebuilt in your app\'s current screen.',
   tooltip: 'Show widget rebuild counts since the last reload',
   gaScreenName: analytics_constants.inspector,
   gaItem: analytics_constants.trackRebuildWidgets,

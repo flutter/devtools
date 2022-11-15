@@ -15,5 +15,6 @@ Future<T> allowedError<T>(Future<T> future, {bool logError = true}) {
       log(errorLines.skip(1).join('\n'), LogLevel.error);
       log('');
     }
+    return Future<T>.value();
   });
 }

@@ -274,9 +274,6 @@ class SecondaryPerformanceControls extends StatelessWidget {
                 minScreenWidthForTextBeforeScaling,
             extensions: [
               extensions.performanceOverlay,
-              // TODO(devoncarew): Enable this once we have a UI displaying the
-              // values.
-              //trackRebuildWidgets,
             ],
           ),
           const SizedBox(width: denseSpacing),

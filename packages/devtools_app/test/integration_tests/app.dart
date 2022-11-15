@@ -12,7 +12,8 @@ void appTests() {
   late BrowserTabInstance tabInstance;
 
   setUp(() async {
-    appFixture = await CliAppFixture.create('test/fixtures/logging_app.dart');
+    appFixture =
+        await CliAppFixture.create('test/test_infra/fixtures/logging_app.dart');
     tabInstance = await browserManager.createNewTab();
   });
 

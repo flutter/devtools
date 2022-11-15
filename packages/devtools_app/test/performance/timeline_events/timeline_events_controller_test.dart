@@ -11,7 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart' hide TimelineEvent;
 
-import '../../test_data/performance.dart';
+import '../../test_infra/test_data/performance.dart';
 
 // TODO(kenz): add better test coverage for [TimelineEventsController].
 
@@ -61,7 +61,8 @@ void main() {
       offlineController.enterOfflineMode();
       final traceEvents = [...goldenUiTraceEvents, ...goldenRasterTraceEvents]
           .map((e) => e.json)
-          .toList();
+          .toList()
+          .cast<Map<String, dynamic>>();
       // TODO(kenz): add some frames for these timeline events to the offline
       // data and verify we correctly assign the events to their frames.
       final offlineData = PerformanceData(traceEvents: traceEvents);

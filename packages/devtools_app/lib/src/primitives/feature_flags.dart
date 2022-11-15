@@ -27,11 +27,19 @@ bool get enableBeta => enableExperiments || !isExternalBuild;
 // ignore: avoid_classes_with_only_static_members
 /// Flags to hide features under construction.
 abstract class FeatureFlags {
-  /// https://github.com/flutter/devtools/issues/3949
-  static bool memoryDiffing = enableBeta;
+  /// Example usage of a flag for a beta feature.
+  static bool myBetaFeature = enableBeta;
+
+  /// Example usage of a flag for an experimental feature.
+  static bool myExperimentalFeature = enableExperiments;
 
   /// Flag to enable the embedded perfetto trace viewer.
   ///
   /// https://github.com/flutter/devtools/issues/4207.
   static bool embeddedPerfetto = enableExperiments;
+
+  /// Flag to enable widget rebuild stats ui.
+  ///
+  /// https://github.com/flutter/devtools/issues/4564.
+  static bool widgetRebuildstats = enableExperiments;
 }

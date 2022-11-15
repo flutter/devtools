@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
+import '../../../../analytics/constants.dart' as analytics_constants;
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/split.dart';
 import '../../../../shared/theme.dart';
@@ -59,7 +60,9 @@ class _SnapshotItemContent extends StatelessWidget {
                 const Expanded(child: Markdown(data: _snapshotDocumentation)),
                 const SizedBox(height: denseSpacing),
                 IconLabelButton(
-                  onPressed: () async => await controller.takeSnapshot(),
+                  onPressed: controller.takeSnapshotHandler(
+                    analytics_constants.MemoryEvent.diffTakeSnapshotAfterHelp,
+                  ),
                   icon: Icons.fiber_manual_record,
                   label: 'Take Snapshot',
                 )
@@ -68,19 +71,31 @@ class _SnapshotItemContent extends StatelessWidget {
           );
         }
 
-        return Column(
-          children: [
-            const SizedBox(height: denseRowSpacing),
-            SnapshotControlPane(controller: controller),
-            const SizedBox(height: denseRowSpacing),
-            Expanded(
-              child: SnapshotView(
-                controller: controller,
-              ),
-            ),
-          ],
-        );
+        return SnapshotInstanceItemPane(controller: controller);
       },
+    );
+  }
+}
+
+@visibleForTesting
+class SnapshotInstanceItemPane extends StatelessWidget {
+  const SnapshotInstanceItemPane({super.key, required this.controller});
+
+  final DiffPaneController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        const SizedBox(height: denseRowSpacing),
+        SnapshotControlPane(controller: controller),
+        const SizedBox(height: denseRowSpacing),
+        Expanded(
+          child: SnapshotView(
+            controller: controller,
+          ),
+        ),
+      ],
     );
   }
 }

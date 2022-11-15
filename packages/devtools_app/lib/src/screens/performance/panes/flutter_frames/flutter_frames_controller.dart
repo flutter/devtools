@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
@@ -30,16 +31,24 @@ class FlutterFramesController extends PerformanceFeatureController {
   /// Whether we should show the Flutter frames chart.
   ValueListenable<bool> get showFlutterFramesChart => _showFlutterFramesChart;
   final _showFlutterFramesChart = ValueNotifier<bool>(true);
-  void toggleShowFlutterFrames(bool value) =>
-      _showFlutterFramesChart.value = value;
+  void toggleShowFlutterFrames(bool value) {
+    _showFlutterFramesChart.value = value;
+    unawaited(setIsActiveFeature(_showFlutterFramesChart.value));
+  }
 
   /// Whether flutter frames are currently being recorded.
   ValueListenable<bool> get recordingFrames => _recordingFrames;
   final _recordingFrames = ValueNotifier<bool>(true);
 
+  /// Whether the main 'Performance' tab should be badged with a count of the
+  /// janky Flutter frames present in the Flutter frames chart.
   ValueListenable<bool> get badgeTabForJankyFrames => _badgeTabForJankyFrames;
   final _badgeTabForJankyFrames = ValueNotifier<bool>(false);
 
+  /// The display refresh rate for the connected device.
+  ///
+  /// This value is determined by device hardware, and we query it from the
+  /// Flutter engine.
   ValueListenable<double> get displayRefreshRate => _displayRefreshRate;
   final _displayRefreshRate = ValueNotifier<double>(defaultRefreshRate);
 
@@ -76,6 +85,17 @@ class FlutterFramesController extends PerformanceFeatureController {
         data?.displayRefreshRate = _displayRefreshRate.value;
       }
     }
+    await setIsActiveFeature(true);
+  }
+
+  // We override this for [FlutterFramesController] because this feature's
+  // "active" state will be determined by different parameters from other
+  // feature controllers, which respond to tab switches.
+  @override
+  Future<void> setIsActiveFeature(bool value) async {
+    final isFlutterApp = serviceManager.connectedApp?.isFlutterAppNow ?? false;
+    value = isFlutterApp && _showFlutterFramesChart.value;
+    await super.setIsActiveFeature(value);
   }
 
   void addFrame(FlutterFrame frame) {
@@ -122,7 +142,11 @@ class FlutterFramesController extends PerformanceFeatureController {
 
   Future<void> toggleSelectedFrame(FlutterFrame frame) async {
     handleSelectedFrame(frame);
-    performanceController.timelineEventsController.handleSelectedFrame(frame);
+    // We do not need to block the UI on the TimelineEvents feature loading the
+    // selected frame.
+    unawaited(
+      performanceController.timelineEventsController.handleSelectedFrame(frame),
+    );
   }
 
   void _addPendingFlutterFrames() {

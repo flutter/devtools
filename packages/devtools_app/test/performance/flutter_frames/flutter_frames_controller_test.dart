@@ -8,7 +8,7 @@ import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-import '../../test_data/performance.dart';
+import '../../test_infra/test_data/performance.dart';
 
 // TODO(kenz): add better test coverage for [FlutterFramesController].
 void main() async {
@@ -77,6 +77,7 @@ void main() async {
         mockTimelineEventsController.handleSelectedFrame(any),
       ).thenAnswer((_) {
         timelineControllerHandlerCalled = true;
+        return Future.value();
       });
 
       expect(timelineControllerHandlerCalled, isFalse);

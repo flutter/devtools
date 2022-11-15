@@ -51,9 +51,8 @@ class _ChartControlPaneState extends State<ChartControlPane>
         if (controller.isLegendVisible) {
           ga.select(
             analytics_constants.memory,
-            analytics_constants.memoryLegend,
+            analytics_constants.MemoryEvent.chartLegend,
           );
-
           _showLegend(context);
         } else {
           _hideLegend();
@@ -87,13 +86,6 @@ class _ChartControlPaneState extends State<ChartControlPane>
     ga.select(analytics_constants.memory, analytics_constants.clear);
 
     controller.memoryTimeline.reset();
-
-    // Clear all analysis and snapshots collected too.
-    controller.clearAllSnapshots();
-    controller.classRoot = null;
-    controller.topNode = null;
-    controller.selectedSnapshotTimestamp = null;
-    controller.selectedLeaf = null;
 
     // Remove history of all plotted data in all charts.
     widget.chartController.resetAll();

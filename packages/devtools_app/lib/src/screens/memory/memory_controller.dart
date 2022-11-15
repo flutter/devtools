@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:collection/collection.dart' show IterableExtension;
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
@@ -19,15 +18,10 @@ import '../../primitives/utils.dart';
 import '../../service/service_extensions.dart';
 import '../../service/service_manager.dart';
 import '../../shared/globals.dart';
-import '../../shared/table/table.dart';
 import '../../shared/utils.dart';
-import '../../ui/search.dart';
-import 'memory_graph_model.dart';
 import 'memory_protocol.dart';
-import 'memory_snapshot_models.dart';
 import 'panes/allocation_profile/allocation_profile_table_view_controller.dart';
 import 'panes/diff/controller/diff_pane_controller.dart';
-import 'primitives/filter_config.dart';
 import 'primitives/memory_timeline.dart';
 import 'shared/heap/model.dart';
 
@@ -115,13 +109,10 @@ class OfflineFileException implements Exception {
 /// This class must not have direct dependencies on dart:html. This allows tests
 /// of the complicated logic in this class to run on the VM.
 class MemoryController extends DisposableController
-    with
-        AutoDisposeControllerMixin,
-        SearchControllerMixin,
-        AutoCompleteSearchControllerMixin {
+    with AutoDisposeControllerMixin {
   MemoryController({DiffPaneController? diffPaneController}) {
     memoryTimeline = MemoryTimeline(offline);
-    memoryLog = MemoryLog(this);
+    memoryLog = _MemoryLog(this);
     this.diffPaneController =
         diffPaneController ?? DiffPaneController(SnapshotTaker());
 
@@ -147,147 +138,13 @@ class MemoryController extends DisposableController
 
   static const logFilenamePrefix = 'memory_log_';
 
-  final List<Snapshot> snapshots = [];
-
-  Snapshot? get lastSnapshot => snapshots.safeLast;
-
   /// Root nodes names that contains nodes of either libraries or classes depending on
   /// group by library or group by class.
   static const libraryRootNode = '___LIBRARY___';
   static const classRootNode = '___CLASSES___';
 
-  /// Notifies that the source of the memory feed has changed.
-  ValueListenable<DateTime?> get selectedSnapshotNotifier =>
-      _selectedSnapshotNotifier;
-
   final _shouldShowLeaksTab = ValueNotifier<bool>(false);
   ValueListenable<bool> get shouldShowLeaksTab => _shouldShowLeaksTab;
-
-  static String formattedTimestamp(DateTime? timestamp) =>
-      timestamp != null ? DateFormat('MMM dd HH:mm:ss').format(timestamp) : '';
-
-  /// Stored value is pretty timestamp when the snapshot was done.
-  final _selectedSnapshotNotifier = ValueNotifier<DateTime?>(null);
-
-  set selectedSnapshotTimestamp(DateTime? snapshotTimestamp) {
-    _selectedSnapshotNotifier.value = snapshotTimestamp;
-  }
-
-  DateTime? get selectedSnapshotTimestamp => _selectedSnapshotNotifier.value;
-
-  HeapGraph? heapGraph;
-
-  /// Leaf node of tabletree snapshot selected?  If selected then the instance
-  /// view is displayed to view the fields of an instance.
-  final _leafSelectedNotifier = ValueNotifier<HeapGraphElementLive?>(null);
-
-  ValueListenable<HeapGraphElementLive?> get leafSelectedNotifier =>
-      _leafSelectedNotifier;
-
-  HeapGraphElementLive? get selectedLeaf => _leafSelectedNotifier.value;
-
-  set selectedLeaf(HeapGraphElementLive? selected) {
-    _leafSelectedNotifier.value = selected;
-  }
-
-  bool get isLeafSelected => selectedLeaf != null;
-
-  void computeRoot() {
-    if (selectedLeaf != null) {
-      final root = instanceToFieldNodes(this, selectedLeaf!);
-      _instanceRoot = root.isNotEmpty ? root : [FieldReference.empty];
-    } else {
-      _instanceRoot = [FieldReference.empty];
-    }
-  }
-
-  List<FieldReference>? _instanceRoot;
-
-  List<FieldReference>? get instanceRoot => _instanceRoot;
-
-  /// Leaf node of analysis selected?  If selected then the field
-  /// view is displayed to view an abbreviated fields of an instance.
-  final _leafAnalysisSelectedNotifier = ValueNotifier<AnalysisInstance?>(null);
-
-  ValueListenable<AnalysisInstance?> get leafAnalysisSelectedNotifier =>
-      _leafAnalysisSelectedNotifier;
-
-  AnalysisInstance? get selectedAnalysisLeaf =>
-      _leafAnalysisSelectedNotifier.value;
-
-  set selectedAnalysisLeaf(AnalysisInstance? selected) {
-    _leafAnalysisSelectedNotifier.value = selected;
-  }
-
-  bool get isAnalysisLeafSelected => selectedAnalysisLeaf != null;
-
-  void computeAnalysisInstanceRoot() {
-    if (selectedAnalysisLeaf != null) {
-      final List<AnalysisField> analysisFields =
-          selectedAnalysisLeaf!.fieldsRoot.children;
-      _analysisInstanceRoot =
-          analysisFields.isNotEmpty ? analysisFields : [AnalysisField.empty];
-    } else {
-      _analysisInstanceRoot = [AnalysisField.empty];
-    }
-  }
-
-  List<AnalysisField>? _analysisInstanceRoot;
-
-  List<AnalysisField>? get analysisInstanceRoot => _analysisInstanceRoot;
-
-  // List of completed Analysis of Snapshots.
-  final List<AnalysisSnapshotReference> completedAnalyses = [];
-
-  /// Determine the snapshot to analyze - current active snapshot (selected or node
-  /// under snapshot selected), last snapshot or null (unknown).
-  Snapshot? get computeSnapshotToAnalyze {
-    // Any snapshots to analyze?
-    if (snapshots.isEmpty) return null;
-
-    // Is a selected table row under a snapshot.
-    final nodeSelected = selectionSnapshotNotifier.value.node;
-    final snapshot = getSnapshot(nodeSelected);
-    if (snapshot != null) {
-      // Has the snapshot (with a selected row) been analyzed?
-      return _findSnapshotAnalyzed(snapshot);
-    }
-
-    final snapshotsCount = snapshots.length;
-    final analysesCount = completedAnalyses.length;
-
-    // Exactly one analysis is left? Ff the 'Analysis' button is pressed the
-    // snapshot that is left will be processed (usually the last one). More
-    // than one snapshots to analyze, the user must select the snapshot to
-    // analyze.
-    if (snapshotsCount > analysesCount &&
-        snapshotsCount == (analysesCount + 1)) {
-      // Has the last snapshot been analyzed?
-      return _findSnapshotAnalyzed(lastSnapshot!);
-    }
-
-    return null;
-  }
-
-  /// Has the snapshot been analyzed, if not return the snapshot otherwise null.
-  Snapshot? _findSnapshotAnalyzed(Snapshot snapshot) {
-    final snapshotDateTime = snapshot.collectedTimestamp;
-    final foundMatch = completedAnalyses
-        .where((analysis) => analysis.dateTime == snapshotDateTime);
-    if (foundMatch.isEmpty) return snapshot;
-
-    return null;
-  }
-
-  ValueListenable get treeMapVisible => _treeMapVisible;
-
-  final _treeMapVisible = ValueNotifier<bool>(false);
-
-  void toggleTreeMapVisible(bool value) {
-    _treeMapVisible.value = value;
-  }
-
-  bool isAnalyzeButtonEnabled() => computeSnapshotToAnalyze != null;
 
   ValueListenable get legendVisibleNotifier => _legendVisibleNotifier;
 
@@ -300,7 +157,7 @@ class MemoryController extends DisposableController
 
   late MemoryTimeline memoryTimeline;
 
-  late MemoryLog memoryLog;
+  late _MemoryLog memoryLog;
 
   /// Source of memory heap samples. False live data, True loaded from a
   /// memory_log file.
@@ -434,17 +291,6 @@ class MemoryController extends DisposableController
 
   final isAndroidChartVisibleNotifier = ValueNotifier<bool>(false);
 
-  final settings = SettingsModel();
-
-  final selectionSnapshotNotifier =
-      ValueNotifier<Selection<Reference?>>(Selection.empty());
-
-  /// Tree to view Libary/Class/Instance (grouped by)
-  late TreeTable<Reference> groupByTreeTable;
-
-  /// Tree to view fields of an instance.
-  TreeTable<FieldReference>? instanceFieldsTreeTable;
-
   final _updateClassStackTraces = ValueNotifier(0);
 
   ValueListenable<int> get updateClassStackTraces => _updateClassStackTraces;
@@ -452,104 +298,6 @@ class MemoryController extends DisposableController
   void changeStackTraces() {
     _updateClassStackTraces.value += 1;
   }
-
-  final FilterConfig filterConfig = FilterConfig(
-    filterZeroInstances: ValueNotifier(true),
-    filterLibraryNoInstances: ValueNotifier(true),
-    filterPrivateClasses: ValueNotifier(true),
-    libraryFilters: FilteredLibraries(),
-  );
-
-  /// All known libraries of the selected snapshot.
-  LibraryReference? get libraryRoot {
-    // Find the selected snapshot's libraryRoot.
-    final snapshot = getSnapshot(selectionSnapshotNotifier.value.node);
-    if (snapshot != null) return snapshot.libraryRoot;
-
-    return null;
-  }
-
-  /// Re-compute the libraries (possible filter change).
-  set libraryRoot(LibraryReference? newRoot) {
-    Snapshot? snapshot;
-
-    // Use last snapshot.
-    if (snapshots.isNotEmpty) {
-      snapshot = snapshots.safeLast;
-    }
-
-    // Find the selected snapshot's libraryRoot.
-    snapshot ??= getSnapshot(selectionSnapshotNotifier.value.node);
-    snapshot?.libraryRoot = newRoot;
-  }
-
-  /// Using the tree table find the active snapshot (selected or last snapshot).
-  SnapshotReference get activeSnapshot {
-    for (final topLevel in groupByTreeTable.dataRoots) {
-      if (topLevel is SnapshotReference) {
-        final nodeSelected = selectionSnapshotNotifier.value.node;
-        final snapshot = getSnapshot(nodeSelected);
-        final SnapshotReference snapshotRef = topLevel;
-        if (snapshot != null &&
-            snapshotRef.snapshot.collectedTimestamp ==
-                snapshot.collectedTimestamp) {
-          return topLevel;
-        }
-      }
-    }
-
-    // No selected snapshot so return the last snapshot.
-    final lastSnapshot = groupByTreeTable.dataRoots.safeLast!;
-    assert(lastSnapshot is SnapshotReference);
-
-    return lastSnapshot as SnapshotReference;
-  }
-
-  /// Given a node return its snapshot.
-  Snapshot? getSnapshot(Reference? reference) {
-    while (reference != null) {
-      if (reference is SnapshotReference) {
-        final SnapshotReference snapshotRef = reference;
-        return snapshotRef.snapshot;
-      }
-      reference = reference.parent;
-    }
-
-    return null;
-  }
-
-  /// Root node of all known analysis and snapshots.
-  LibraryReference? topNode;
-
-  /// Root of known classes (used for group by class).
-  LibraryReference? classRoot;
-
-  /// Notify that the filtering has changed.
-  ValueListenable<int> get filterNotifier => _filterNotifier;
-
-  final _filterNotifier = ValueNotifier<int>(0);
-
-  void updateFilter() {
-    _filterNotifier.value++;
-  }
-
-  ValueListenable<bool> get filterZeroInstancesListenable =>
-      filterConfig.filterZeroInstances;
-
-  ValueListenable<bool> get filterPrivateClassesListenable =>
-      filterConfig.filterPrivateClasses;
-
-  ValueListenable<bool> get filterLibraryNoInstancesListenable =>
-      filterConfig.filterLibraryNoInstances;
-
-  /// Table ordered by library, class or instance
-  static const groupByLibrary = 'Library';
-  static const groupByClass = 'Class';
-  static const groupByInstance = 'Instance';
-
-  final groupingBy = ValueNotifier<String>(groupByLibrary);
-
-  ValueListenable<String> get groupingByNotifier => groupingBy;
 
   String? get _isolateId =>
       serviceManager.isolateManager.selectedIsolate.value?.id;
@@ -712,224 +460,6 @@ class MemoryController extends DisposableController
   //              to line number of the source file when clicked is needed.
   static const packageName = '/packages/';
 
-  /// When new snapshot occurs entire libraries should be rebuilt then rebuild should be true.
-  LibraryReference? computeAllLibraries({
-    bool filtered = true,
-    bool rebuild = false,
-    HeapSnapshotGraph? graph,
-  }) {
-    final HeapSnapshotGraph? snapshotGraph =
-        graph != null ? graph : snapshots.safeLast?.snapshotGraph;
-
-    if (snapshotGraph == null) return null;
-
-    if (filtered && libraryRoot != null && !rebuild) return libraryRoot;
-
-    // Group by library
-    final newLibraryRoot = LibraryReference(this, libraryRootNode, null);
-
-    // Group by class (under root library __CLASSES__).
-    classRoot = LibraryReference(this, classRootNode, null);
-
-    final externalReferences =
-        ExternalReferences(this, snapshotGraph.externalSize);
-    for (final liveExternal
-        in heapGraph?.externals ?? <HeapGraphExternalLive>[]) {
-      if (liveExternal == null) continue;
-
-      final HeapGraphClassLive? classLive =
-          liveExternal.live.theClass as HeapGraphClassLive?;
-
-      ExternalReference? externalReference;
-
-      if (externalReferences.children.isNotEmpty) {
-        externalReference = externalReferences.children.singleWhereOrNull(
-          (knownClass) => knownClass.name == classLive?.name,
-        ) as ExternalReference?;
-      }
-
-      if (externalReference == null) {
-        externalReference =
-            ExternalReference(this, classLive?.name ?? '', liveExternal);
-        externalReferences.addChild(externalReference);
-      }
-
-      final classInstance = ExternalObjectReference(
-        this,
-        externalReference.children.length,
-        liveExternal.live,
-        liveExternal.externalProperty.externalSize,
-      );
-
-      // Sum up the externalSize of the children, under the externalReference group.
-      externalReference.sumExternalSizes +=
-          liveExternal.externalProperty.externalSize;
-
-      externalReference.addChild(classInstance);
-    }
-
-    newLibraryRoot.addChild(externalReferences);
-
-    // Add our filtered items under the 'Filtered' node.
-    if (filtered) {
-      final filteredReference = FilteredReference(this);
-      final filtered = heapGraph!.filteredLibraries;
-      addAllToNode(filteredReference, filtered);
-
-      newLibraryRoot.addChild(filteredReference);
-    }
-
-    // Compute all libraries.
-    final groupBy =
-        filtered ? heapGraph!.groupByLibrary : heapGraph!.rawGroupByLibrary;
-
-    groupBy.forEach((libraryName, classes) {
-      LibraryReference? libReference =
-          newLibraryRoot.children.singleWhereOrNull((library) {
-        return libraryName == library.name;
-      }) as LibraryReference?;
-
-      // Library not found add to list of children.
-      if (libReference == null) {
-        libReference = LibraryReference(this, libraryName, classes);
-        newLibraryRoot.addChild(libReference);
-      }
-
-      for (var actualClass in libReference.actualClasses ?? {}) {
-        monitorClass(
-          className: actualClass!.name,
-          message: 'computeAllLibraries',
-        );
-        final classRef = ClassReference(this, actualClass);
-        classRef.addChild(Reference.empty);
-
-        libReference.addChild(classRef);
-
-        // TODO(terry): Consider adding the ability to clear the table tree cache
-        // (root) to reset the level/depth values.
-        final classRefClassGroupBy = ClassReference(this, actualClass);
-        classRefClassGroupBy.addChild(Reference.empty);
-        classRoot!.addChild(classRefClassGroupBy);
-      }
-    });
-
-    // TODO(terry): Eliminate chicken and egg issue.
-    // This may not be set if snapshot is being computed, first-time.  Returning
-    // newLibraryRoot allows new snapshot to store the libraryRoot.
-    libraryRoot = newLibraryRoot;
-
-    return newLibraryRoot;
-  }
-
-  // TODO(terry): Change to Set of known libraries so it's O(n) instead of O(n^2).
-  void addAllToNode(
-    Reference root,
-    Map<String, Set<HeapGraphClassLive>> allItems,
-  ) {
-    allItems.forEach((libraryName, classes) {
-      LibraryReference? libReference =
-          root.children.singleWhereOrNull((library) {
-        return libraryName == library.name;
-      }) as LibraryReference?;
-
-      // Library not found add to list of children.
-      libReference ??= LibraryReference(this, libraryName, classes);
-      root.addChild(libReference);
-
-      for (var actualClass in libReference.actualClasses ?? {}) {
-        monitorClass(
-          className: actualClass!.name,
-          message: 'computeAllLibraries',
-        );
-        final classRef = ClassReference(this, actualClass);
-        classRef.addChild(Reference.empty);
-
-        libReference.addChild(classRef);
-
-        // TODO(terry): Consider adding the ability to clear the table tree cache
-        // (root) to reset the level/depth values.
-        final classRefClassGroupBy = ClassReference(this, actualClass);
-        classRefClassGroupBy.addChild(Reference.empty);
-        classRoot!.addChild(classRefClassGroupBy);
-      }
-    });
-  }
-
-  AnalysesReference? findAnalysesNode() {
-    if (topNode == null) return null;
-
-    for (final child in topNode!.children) {
-      if (child is AnalysesReference) {
-        return child;
-      }
-    }
-    return null;
-  }
-
-  void createSnapshotEntries(Reference? parent) {
-    for (final snapshot in snapshots) {
-      final Reference? snaphotMatch =
-          parent!.children.firstWhereOrNull((element) {
-        var result = false;
-        if (element is SnapshotReference) {
-          final SnapshotReference node = element;
-          result = node.snapshot == snapshot;
-        }
-
-        return result;
-      });
-      if (snaphotMatch == null) {
-        // New snapshot add it.
-        final snapshotNode = SnapshotReference(snapshot);
-        parent.addChild(snapshotNode);
-
-        final allLibraries =
-            computeAllLibraries(graph: snapshot.snapshotGraph)!;
-        snapshotNode.addAllChildren(allLibraries.children);
-
-        return;
-      }
-    }
-  }
-
-  final _treeChangedNotifier = ValueNotifier<bool>(false);
-
-  ValueListenable<bool> get treeChangedNotifier => _treeChangedNotifier;
-
-  bool get isTreeChanged => _treeChangedNotifier.value;
-
-  void treeChanged({bool state = true}) {
-    if (_treeChangedNotifier.value) {
-      _treeChangedNotifier.value = false;
-    }
-    _treeChangedNotifier.value = state;
-  }
-
-  Reference? buildTreeFromAllData() {
-    final List<Reference>? oldChildren = topNode?.children;
-    if (isTreeChanged) topNode = null;
-    topNode ??= LibraryReference(this, libraryRootNode, null);
-
-    if (isTreeChanged && oldChildren != null) {
-      topNode!.addAllChildren(oldChildren);
-    }
-
-    final anyAnalyses = topNode!.children
-            .firstWhereOrNull((reference) => reference is AnalysesReference) !=
-        null;
-
-    if (snapshots.isNotEmpty && !anyAnalyses) {
-      // Create Analysis entry.
-      final analysesRoot = AnalysesReference();
-      analysesRoot.addChild(AnalysisReference(''));
-      topNode!.addChild(analysesRoot);
-    }
-
-    createSnapshotEntries(topNode);
-
-    return topNode;
-  }
-
   Future getObject(String objectRef) async =>
       await serviceManager.service!.getObject(
         _isolateId!,
@@ -950,35 +480,6 @@ class MemoryController extends DisposableController
     } finally {
       _gcing = false;
     }
-  }
-
-  List<Reference>? snapshotByLibraryData;
-
-  void createSnapshotByLibrary() {
-    snapshotByLibraryData ??= lastSnapshot?.librariesToList();
-  }
-
-  Snapshot storeSnapshot(
-    DateTime timestamp,
-    HeapSnapshotGraph graph,
-    LibraryReference libraryRoot, {
-    bool autoSnapshot = false,
-  }) {
-    final snapshot = Snapshot(
-      timestamp,
-      this,
-      graph,
-      libraryRoot,
-      autoSnapshot,
-    );
-    snapshots.add(snapshot);
-
-    return snapshot;
-  }
-
-  void clearAllSnapshots() {
-    snapshots.clear();
-    snapshotByLibraryData = null;
   }
 
   /// Detect stale isolates (sentinaled), may happen after a hot restart.
@@ -1009,23 +510,6 @@ class MemoryController extends DisposableController
   }
 }
 
-/// Settings dialog model.
-class SettingsModel {
-  /// Pattern is of the form:
-  ///    - empty string implies no matching.
-  ///    - NNN* implies match anything starting with NNN.
-  ///    - *NNN implies match anything ending with NNN.
-  String pattern = '';
-
-  /// If true hide Class names that begin with an underscore.
-  bool hidePrivateClasses = true;
-
-  /// If true enable the memory experiment that following a object instance via
-  /// inbound references instances.  Compares hashCodes (using eval causing
-  /// memory shaking).  Only works in debug mode.
-  bool experiment = false;
-}
-
 /// Index in datasets to each dataset's list of Entry's.
 enum ChartDataSets {
   // Datapoint entries for each used heap value.
@@ -1040,29 +524,9 @@ enum ChartDataSets {
   rasterPictureSet,
 }
 
-/// Index in datasets to each dataset's list of Entry's.
-enum EventDataSets {
-  // Datapoint entries for ghost trace to stop auto-scaling of Y-axis.
-  ghostsSet,
-  // Datapoint entries for each user initiated GC.
-  gcUserSet,
-  // Datapoint entries for a VM's GC.
-  gcVmSet,
-  // Datapoint entries for each user initiated snapshot event.
-  snapshotSet,
-  // Datapoint entries for an automatically initiated snapshot event.
-  snapshotAutoSet,
-  // Allocation Accumulator monitoring.
-  monitorStartSet,
-  // TODO(terry): Allocation Accumulator continues UX connector.
-  monitorContinuesSet,
-  // Reset all Allocation Accumulators.
-  monitorResetSet,
-}
-
 /// Supports saving and loading memory samples.
-class MemoryLog {
-  MemoryLog(this.controller);
+class _MemoryLog {
+  _MemoryLog(this.controller);
 
   /// Use in memory or local file system based on Flutter Web/Desktop.
   static final _fs = FileIO();
@@ -1128,6 +592,7 @@ class MemoryLog {
   }
 
   /// Load the memory profile data from a saved memory log file.
+  @visibleForTesting
   Future<void> loadOffline(String filename) async {
     final jsonPayload = _fs.readStringFromFile(filename, isMemory: true)!;
 

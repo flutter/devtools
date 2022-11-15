@@ -16,6 +16,7 @@ import '../../ui/search.dart';
 import '../profiler/cpu_profile_model.dart';
 import 'panes/flutter_frames/flutter_frame_model.dart';
 import 'panes/raster_stats/raster_stats_model.dart';
+import 'panes/rebuild_stats/rebuild_counts.dart';
 import 'panes/timeline_events/timeline_event_processor.dart';
 import 'performance_utils.dart';
 
@@ -27,10 +28,12 @@ class PerformanceData {
     this.selectedEvent,
     this.cpuProfileData,
     this.rasterStats,
+    RebuildCountModel? rebuildCountModel,
     double? displayRefreshRate,
     List<TimelineEvent>? timelineEvents,
   })  : traceEvents = traceEvents ?? <Map<String, dynamic>>[],
         frames = frames ?? <FlutterFrame>[],
+        rebuildCountModel = rebuildCountModel ?? RebuildCountModel(),
         displayRefreshRate = displayRefreshRate ?? defaultRefreshRate,
         timelineEvents = timelineEvents ?? <TimelineEvent>[];
 
@@ -39,6 +42,8 @@ class PerformanceData {
   static const cpuProfileKey = 'cpuProfile';
 
   static const rasterStatsKey = 'rasterStats';
+
+  static const rebuildCountModelKey = 'rebuildCountModel';
 
   static const selectedEventKey = 'selectedEvent';
 
@@ -77,6 +82,8 @@ class PerformanceData {
   CpuProfileData? cpuProfileData;
 
   RasterStats? rasterStats;
+
+  RebuildCountModel rebuildCountModel;
 
   double displayRefreshRate;
 
@@ -130,9 +137,10 @@ class PerformanceData {
     _endTimestampMicros = -1;
     frames.clear();
     selectedFrame = null;
+    rebuildCountModel.clearAllCounts();
   }
 
-  Map<String, dynamic> get json => {
+  Map<String, dynamic> toJson() => {
         selectedFrameIdKey: selectedFrame?.id,
         flutterFramesKey: frames.map((frame) => frame.json).toList(),
         displayRefreshRateKey: displayRefreshRate,
@@ -140,6 +148,7 @@ class PerformanceData {
         selectedEventKey: selectedEvent?.json ?? {},
         cpuProfileKey: cpuProfileData?.toJson ?? {},
         rasterStatsKey: rasterStats?.json ?? {},
+        rebuildCountModelKey: rebuildCountModel.toJson(),
       };
 }
 
@@ -278,14 +287,15 @@ class TimelineRowData {
 
 class OfflinePerformanceData extends PerformanceData {
   OfflinePerformanceData._({
-    List<Map<String, dynamic>>? traceEvents,
-    List<FlutterFrame>? frames,
+    required List<Map<String, dynamic>>? traceEvents,
+    required List<FlutterFrame>? frames,
     FlutterFrame? selectedFrame,
-    int? selectedFrameId,
-    TimelineEvent? selectedEvent,
-    double? displayRefreshRate,
-    CpuProfileData? cpuProfileData,
-    RasterStats? rasterStats,
+    required int? selectedFrameId,
+    required TimelineEvent? selectedEvent,
+    required double? displayRefreshRate,
+    required CpuProfileData? cpuProfileData,
+    required RasterStats? rasterStats,
+    required RebuildCountModel? rebuildCountModel,
   })  : _selectedFrameId = selectedFrameId,
         super(
           traceEvents: traceEvents,
@@ -295,6 +305,7 @@ class OfflinePerformanceData extends PerformanceData {
           displayRefreshRate: displayRefreshRate,
           cpuProfileData: cpuProfileData,
           rasterStats: rasterStats,
+          rebuildCountModel: rebuildCountModel,
         );
 
   static OfflinePerformanceData parse(Map<String, dynamic> json) {
@@ -335,6 +346,12 @@ class OfflinePerformanceData extends PerformanceData {
     final displayRefreshRate =
         json[PerformanceData.displayRefreshRateKey] ?? defaultRefreshRate;
 
+    final Map<String, dynamic> rebuildCountModelJson =
+        json[PerformanceData.rebuildCountModelKey] ?? {};
+    final rebuildCountModel = rebuildCountModelJson.isNotEmpty
+        ? RebuildCountModel.parse(rebuildCountModelJson)
+        : null;
+
     return OfflinePerformanceData._(
       traceEvents: traceEvents,
       selectedFrameId: selectedFrameId,
@@ -343,6 +360,7 @@ class OfflinePerformanceData extends PerformanceData {
       displayRefreshRate: displayRefreshRate.toDouble(),
       cpuProfileData: cpuProfileData,
       rasterStats: rasterStats,
+      rebuildCountModel: rebuildCountModel,
     );
   }
 
@@ -367,6 +385,7 @@ class OfflinePerformanceData extends PerformanceData {
       displayRefreshRate: displayRefreshRate,
       cpuProfileData: cpuProfileData,
       rasterStats: rasterStats,
+      rebuildCountModel: rebuildCountModel,
     );
   }
 }

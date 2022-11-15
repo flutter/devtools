@@ -17,6 +17,7 @@ import '../../../../primitives/feature_flags.dart';
 import '../../../../primitives/trace_event.dart';
 import '../../../../primitives/trees.dart';
 import '../../../../primitives/utils.dart';
+import '../../../../shared/future_work_tracker.dart';
 import '../../../../shared/globals.dart';
 import '../../../../ui/search.dart';
 import '../../../profiler/cpu_profile_controller.dart';
@@ -29,7 +30,8 @@ import '../../performance_screen.dart';
 import '../../performance_utils.dart';
 import '../../simple_trace_example.dart';
 import '../flutter_frames/flutter_frame_model.dart';
-import 'perfetto/perfetto.dart';
+import 'perfetto/_perfetto_controller_desktop.dart'
+    if (dart.library.html) 'perfetto/_perfetto_controller_web.dart';
 import 'timeline_event_processor.dart';
 
 /// Debugging flag to load sample trace events from [simple_trace_example.dart].
@@ -39,25 +41,42 @@ class TimelineEventsController extends PerformanceFeatureController
     with AutoDisposeControllerMixin {
   TimelineEventsController(super.performanceController) {
     legacyController = LegacyTimelineEventsController(performanceController);
+    perfettoController = PerfettoController(performanceController);
   }
 
+  /// Controller that contains business logic for the legacy trace viewer.
+  ///
+  /// This controller will be used when [useLegacyTraceViewer.value] is true.
   late final LegacyTimelineEventsController legacyController;
 
-  final perfettoController = createPerfettoController();
+  /// Controller that contains business logic for the Perfetto trace viewer.
+  ///
+  /// This controller will be used when [useLegacyTraceViewer.value] is false.
+  late final PerfettoController perfettoController;
 
   /// Trace events in the current timeline.
   ///
   /// This list is cleared and repopulated each time "Refresh" is clicked.
   final allTraceEvents = <TraceEventWrapper>[];
 
+  /// Trace event name for the events used to populate [threadNamesById].
+  static const _threadNameEvent = 'thread_name';
+
+  /// Maps thread names, which are gathererd from the "thread_name" trace
+  /// events, to their thread ids.
   final threadNamesById = <int, String>{};
 
+  /// Whether we should be using the legacy trace viewer or the new Perfetto
+  /// trace viewer.
   final useLegacyTraceViewer =
       ValueNotifier<bool>(!FeatureFlags.embeddedPerfetto || !kIsWeb);
 
+  bool get _perfettoMode =>
+      FeatureFlags.embeddedPerfetto && !useLegacyTraceViewer.value;
+
   /// Whether the recorded timeline data is currently being processed.
-  ValueListenable<bool> get processing => _processing;
-  final _processing = ValueNotifier<bool>(false);
+  ValueListenable<bool> get processing => _workTracker.active;
+  final _workTracker = FutureWorkTracker();
 
   // TODO(jacobr): this isn't accurate. Another page of DevTools
   // or a different instance of DevTools could change this value. We need to
@@ -73,9 +92,9 @@ class TimelineEventsController extends PerformanceFeatureController
 
   int _nextPollStartMicros = 0;
 
-  static const timelinePollingRateLimit = 5.0;
+  static const _timelinePollingRateLimit = 5.0;
 
-  static const timelinePollingInterval = Duration(seconds: 1);
+  static const _timelinePollingInterval = Duration(seconds: 1);
 
   RateLimiter? _timelinePollingRateLimiter;
 
@@ -98,6 +117,14 @@ class TimelineEventsController extends PerformanceFeatureController
     }
   }
 
+  @override
+  Future<void> onBecomingActive() async {
+    if (_perfettoMode) {
+      await perfettoController.onBecomingActive();
+    }
+    await super.onBecomingActive();
+  }
+
   Future<void> _initForServiceConnection() async {
     legacyController.init();
     await serviceManager.timelineStreamManager.setDefaultTimelineStreams();
@@ -113,12 +140,10 @@ class TimelineEventsController extends PerformanceFeatureController
     // Load available timeline events.
     await _pullTraceEventsFromVmTimeline(isInitialPull: true);
 
-    _processing.value = true;
-    await processTraceEvents(allTraceEvents);
-    _processing.value = false;
+    await processAllTraceEvents();
 
     _timelinePollingRateLimiter = RateLimiter(
-      timelinePollingRateLimit,
+      _timelinePollingRateLimit,
       _pullTraceEventsFromVmTimeline,
     );
 
@@ -126,7 +151,7 @@ class TimelineEventsController extends PerformanceFeatureController
     // We are polling here instead of listening to the timeline event stream
     // because the event stream is sending out of order and duplicate events.
     // See https://github.com/dart-lang/sdk/issues/46605.
-    _pollingTimer = Timer.periodic(timelinePollingInterval, (_) {
+    _pollingTimer = Timer.periodic(_timelinePollingInterval, (_) {
       _timelinePollingRateLimiter!.scheduleRequest();
     });
   }
@@ -155,7 +180,8 @@ class TimelineEventsController extends PerformanceFeatureController
         traceEvent,
         DateTime.now().millisecondsSinceEpoch,
       );
-      if (traceEvent.phase == 'M' && traceEvent.name == 'thread_name') {
+      if (traceEvent.phase == TraceEvent.metadataEventPhase &&
+          traceEvent.name == _threadNameEvent) {
         threadNameEvents.add(traceEvent);
       }
       allTraceEvents.add(eventWrapper);
@@ -232,11 +258,21 @@ class TimelineEventsController extends PerformanceFeatureController
     }
   }
 
-  FutureOr<void> processAvailableEvents() async {
-    assert(!_processing.value);
-    _processing.value = true;
-    await processTraceEvents(allTraceEvents);
-    _processing.value = false;
+  Future<void> processAllTraceEvents() async {
+    await _workTracker.track(_processAllTraceEvents());
+  }
+
+  Future<void> _processAllTraceEvents() async {
+    if (_perfettoMode) {
+      // TODO(kenz): hook up Perfetto event processor to process events before
+      // loading.
+      await perfettoController.loadTrace(allTraceEvents);
+    } else {
+      await legacyController.processTraceEvents(
+        allTraceEvents,
+        threadNamesById: threadNamesById,
+      );
+    }
   }
 
   Future<void> selectTimelineEvent(
@@ -254,19 +290,8 @@ class TimelineEventsController extends PerformanceFeatureController
     }
   }
 
-  FutureOr<void> processTraceEvents(List<TraceEventWrapper> traceEvents) async {
-    if (FeatureFlags.embeddedPerfetto && !useLegacyTraceViewer.value) {
-      await perfettoController.loadTrace(traceEvents);
-    } else {
-      await legacyController.processTraceEvents(
-        traceEvents,
-        threadNamesById: threadNamesById,
-      );
-    }
-  }
-
   @override
-  void handleSelectedFrame(FlutterFrame frame) async {
+  Future<void> handleSelectedFrame(FlutterFrame frame) async {
     if (useLegacyTraceViewer.value) {
       await _legacySelectFrame(frame);
     } else if (FeatureFlags.embeddedPerfetto) {
@@ -300,7 +325,7 @@ class TimelineEventsController extends PerformanceFeatureController
         // Only try to pull timeline events for frames that are after the first
         // well formed frame. Timeline events that occurred before this frame will
         // have already fallen out of the buffer.
-        await processAvailableEvents();
+        await processAllTraceEvents();
       }
 
       if (framesController.currentFrameBeingSelected != frame) return;
@@ -309,13 +334,12 @@ class TimelineEventsController extends PerformanceFeatureController
       // events, wait a short delay and try to process events again after the
       // VM has been polled one more time.
       if (!frame.isWellFormed && !frameBeforeFirstWellFormedFrame) {
-        assert(!_processing.value);
-        _processing.value = true;
-        await Future.delayed(timelinePollingInterval, () async {
-          if (framesController.currentFrameBeingSelected != frame) return;
-          await processTraceEvents(allTraceEvents);
-          _processing.value = false;
-        });
+        await _workTracker.track(
+          Future.delayed(_timelinePollingInterval, () async {
+            if (framesController.currentFrameBeingSelected != frame) return;
+            await _processAllTraceEvents();
+          }),
+        );
       }
 
       if (framesController.currentFrameBeingSelected != frame) return;
@@ -410,11 +434,9 @@ class TimelineEventsController extends PerformanceFeatureController
     _httpTimelineLoggingEnabled.value = state;
   }
 
-  void toggleUseLegacyTraceViewer(bool? value) {
+  Future<void> toggleUseLegacyTraceViewer(bool? value) async {
     useLegacyTraceViewer.value = value ?? false;
-    // `unawaited` does not work for FutureOr
-    // ignore: discarded_futures
-    processAvailableEvents();
+    await processAllTraceEvents();
   }
 
   void recordTrace(Map<String, dynamic> trace) {
@@ -458,7 +480,7 @@ class TimelineEventsController extends PerformanceFeatureController
       ..clear()
       ..addAll(traceEvents);
     _primeThreadIds(traceEvents);
-    await processAvailableEvents();
+    await processAllTraceEvents();
 
     await legacyController.setOfflineData(offlineData);
   }
@@ -469,7 +491,7 @@ class TimelineEventsController extends PerformanceFeatureController
     _unassignedFlutterFrameEvents.clear();
 
     threadNamesById.clear();
-    _processing.value = false;
+    _workTracker.clear();
     legacyController.clearData();
     if (FeatureFlags.embeddedPerfetto) {
       await perfettoController.clear();
@@ -523,7 +545,7 @@ class LegacyTimelineEventsController with SearchControllerMixin<TimelineEvent> {
     );
   }
 
-  FutureOr<void> processTraceEvents(
+  Future<void> processTraceEvents(
     List<TraceEventWrapper> traceEvents, {
     required Map<int, String> threadNamesById,
   }) async {
@@ -591,14 +613,18 @@ class LegacyTimelineEventsController with SearchControllerMixin<TimelineEvent> {
 
     // Process trace events [processTraceEventsHelper] and time the operation
     // for analytics.
-    await ga.timeAsync(
-      analytics_constants.performance,
-      analytics_constants.traceEventProcessingTime,
-      asyncOperation: processTraceEventsHelper,
-      screenMetricsProvider: () => PerformanceScreenMetrics(
-        traceEventCount: processingTraceCount,
-      ),
-    );
+    try {
+      await ga.timeAsync(
+        analytics_constants.performance,
+        analytics_constants.traceEventProcessingTime,
+        asyncOperation: processTraceEventsHelper,
+        screenMetricsProvider: () => PerformanceScreenMetrics(
+          traceEventCount: processingTraceCount,
+        ),
+      );
+    } on ProcessCancelledException catch (_) {
+      // Do nothing for instances of [ProcessCancelledException].
+    }
   }
 
   Future<void> selectTimelineEvent(

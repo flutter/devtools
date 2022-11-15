@@ -19,8 +19,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../test_data/debugger/vm_service_object_tree.dart';
-import '../test_utils/tree_utils.dart';
+import '../test_infra/test_data/debugger/vm_service_object_tree.dart';
+import '../test_infra/utils/tree_utils.dart';
 
 void main() {
   group('Mock ProgramExplorer', () {

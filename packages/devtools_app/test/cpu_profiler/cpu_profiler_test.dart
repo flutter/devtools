@@ -24,7 +24,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-import '../test_data/cpu_profile.dart';
+import '../test_infra/matchers.dart';
+import '../test_infra/test_data/cpu_profile.dart';
 
 void main() {
   late CpuProfiler cpuProfiler;
@@ -71,6 +72,7 @@ void main() {
       expect(find.byType(CpuProfileFlameChart), findsNothing);
       expect(find.byType(CpuCallTreeTable), findsNothing);
       expect(find.byType(CpuBottomUpTable), findsNothing);
+      expect(find.byType(DisplayTreeGuidelinesToggle), findsNothing);
       expect(find.byType(UserTagDropdown), findsNothing);
       expect(find.byType(ExpandAllButton), findsNothing);
       expect(find.byType(CollapseAllButton), findsNothing);
@@ -99,6 +101,7 @@ void main() {
       expect(find.byType(CpuProfileFlameChart), findsNothing);
       expect(find.byType(CpuCallTreeTable), findsNothing);
       expect(find.byType(CpuBottomUpTable), findsNothing);
+      expect(find.byType(DisplayTreeGuidelinesToggle), findsNothing);
       expect(find.byType(UserTagDropdown), findsNothing);
       expect(find.byType(ExpandAllButton), findsNothing);
       expect(find.byType(CollapseAllButton), findsNothing);
@@ -122,6 +125,7 @@ void main() {
       expect(find.byType(TabBar), findsOneWidget);
       expect(find.byKey(CpuProfiler.dataProcessingKey), findsNothing);
       expect(find.byType(CpuBottomUpTable), findsOneWidget);
+      expect(find.byType(DisplayTreeGuidelinesToggle), findsOneWidget);
       expect(find.byType(UserTagDropdown), findsOneWidget);
       expect(find.byType(ExpandAllButton), findsOneWidget);
       expect(find.byType(CollapseAllButton), findsOneWidget);
@@ -148,6 +152,7 @@ void main() {
       expect(find.byKey(CpuProfiler.dataProcessingKey), findsNothing);
       expect(find.byKey(summaryViewKey), findsOneWidget);
       expect(find.byType(UserTagDropdown), findsNothing);
+      expect(find.byType(DisplayTreeGuidelinesToggle), findsNothing);
       expect(find.byType(ExpandAllButton), findsNothing);
       expect(find.byType(CollapseAllButton), findsNothing);
       expect(find.byType(FlameChartHelpButton), findsNothing);
@@ -384,6 +389,87 @@ void main() {
       }
     });
 
+    testWidgetsWithWindowSize('can enable and disable guidelines', windowSize,
+        (WidgetTester tester) async {
+      cpuProfiler = CpuProfiler(
+        data: cpuProfileData,
+        controller: controller,
+        searchFieldKey: searchFieldKey,
+      );
+      await tester.pumpWidget(wrap(cpuProfiler));
+      await tester.tap(find.text('Call Tree'));
+      await tester.pumpAndSettle();
+
+      expect(cpuProfileData.cpuProfileRoot.isExpanded, isFalse);
+      await tester.tap(find.byType(ExpandAllButton));
+      await tester.pumpAndSettle();
+
+      expect(cpuProfiler.callTreeRoots.first.isExpanded, isTrue);
+      expect(preferences.cpuProfiler.displayTreeGuidelines.value, false);
+      await expectLater(
+        find.byType(CpuProfiler),
+        matchesDevToolsGolden(
+          '../test_infra/goldens/cpu_profiler_call_tree_no_guidelines.png',
+        ),
+      );
+      await tester.tap(find.byType(DisplayTreeGuidelinesToggle));
+      await tester.pumpAndSettle();
+
+      expect(preferences.cpuProfiler.displayTreeGuidelines.value, true);
+      await expectLater(
+        find.byType(CpuProfiler),
+        matchesDevToolsGolden(
+          '../test_infra/goldens/cpu_profiler_call_tree_guidelines.png',
+        ),
+      );
+      await tester.tap(find.byType(DisplayTreeGuidelinesToggle));
+      await tester.pumpAndSettle();
+
+      expect(preferences.cpuProfiler.displayTreeGuidelines.value, false);
+      await expectLater(
+        find.byType(CpuProfiler),
+        matchesDevToolsGolden(
+          '../test_infra/goldens/cpu_profiler_call_tree_no_guidelines.png',
+        ),
+      );
+
+      await tester.tap(find.text('Bottom Up'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(ExpandAllButton));
+      for (final root in cpuProfiler.bottomUpRoots) {
+        expect(root.isExpanded, isTrue);
+      }
+      await tester.pumpAndSettle();
+
+      expect(preferences.cpuProfiler.displayTreeGuidelines.value, false);
+      await expectLater(
+        find.byType(CpuProfiler),
+        matchesDevToolsGolden(
+          '../test_infra/goldens/cpu_profiler_bottom_up_no_guidelines.png',
+        ),
+      );
+      await tester.tap(find.byType(DisplayTreeGuidelinesToggle));
+      await tester.pumpAndSettle();
+
+      expect(preferences.cpuProfiler.displayTreeGuidelines.value, true);
+      await expectLater(
+        find.byType(CpuProfiler),
+        matchesDevToolsGolden(
+          '../test_infra/goldens/cpu_profiler_bottom_up_guidelines.png',
+        ),
+      );
+      await tester.tap(find.byType(DisplayTreeGuidelinesToggle));
+      await tester.pumpAndSettle();
+
+      expect(preferences.cpuProfiler.displayTreeGuidelines.value, false);
+      await expectLater(
+        find.byType(CpuProfiler),
+        matchesDevToolsGolden(
+          '../test_infra/goldens/cpu_profiler_bottom_up_no_guidelines.png',
+        ),
+      );
+    });
+
     group('UserTag filters', () {
       late ProfilerScreenController controller;
 
@@ -427,6 +513,7 @@ void main() {
         expect(find.text('Filter by tag: userTagA'), findsWidgets);
         expect(find.text('Filter by tag: userTagB'), findsWidgets);
         expect(find.text('Filter by tag: userTagC'), findsWidgets);
+        expect(find.text('Group by: User Tag'), findsWidgets);
 
         await tester.tap(find.text('Call Tree'));
         await tester.pumpAndSettle();
@@ -446,6 +533,9 @@ void main() {
         expect(find.richText('Frame4'), findsOneWidget);
         expect(find.richText('Frame5'), findsOneWidget);
         expect(find.richText('Frame6'), findsOneWidget);
+        expect(find.text('userTagA'), findsNothing);
+        expect(find.text('userTagB'), findsNothing);
+        expect(find.text('userTagC'), findsNothing);
 
         await tester.tap(find.byType(UserTagDropdown));
         await tester.pumpAndSettle();
@@ -464,6 +554,9 @@ void main() {
         expect(find.text('Frame4'), findsNothing);
         expect(find.richText('Frame5'), findsOneWidget);
         expect(find.text('Frame6'), findsNothing);
+        expect(find.text('userTagA'), findsNothing);
+        expect(find.text('userTagB'), findsNothing);
+        expect(find.text('userTagC'), findsNothing);
 
         await tester.tap(find.byType(UserTagDropdown));
         await tester.pumpAndSettle();
@@ -482,6 +575,9 @@ void main() {
         expect(find.text('Frame4'), findsNothing);
         expect(find.text('Frame5'), findsNothing);
         expect(find.text('Frame6'), findsNothing);
+        expect(find.text('userTagA'), findsNothing);
+        expect(find.text('userTagB'), findsNothing);
+        expect(find.text('userTagC'), findsNothing);
 
         await tester.tap(find.byType(UserTagDropdown));
         await tester.pumpAndSettle();
@@ -500,6 +596,114 @@ void main() {
         expect(find.text('Frame4'), findsNothing);
         expect(find.richText('Frame5'), findsOneWidget);
         expect(find.richText('Frame6'), findsOneWidget);
+        expect(find.text('userTagA'), findsNothing);
+        expect(find.text('userTagB'), findsNothing);
+        expect(find.text('userTagC'), findsNothing);
+      });
+    });
+
+    group('Group by ', () {
+      late ProfilerScreenController controller;
+
+      setUp(() async {
+        controller = ProfilerScreenController();
+        preferences.toggleVmDeveloperMode(true);
+        cpuProfileData = CpuProfileData.parse(cpuProfileDataWithUserTagsJson);
+        for (final filter in controller.cpuProfilerController.toggleFilters) {
+          filter.enabled.value = false;
+        }
+        final data = CpuProfilePair(
+          functionProfile: cpuProfileData,
+          // Function and code profiles have the same structure, so just use
+          // the function profile in place of a dedicated code profile for
+          // testing since we don't care about the contents as much as we
+          // care about testing the ability to switch between function and
+          // code profile views.
+          codeProfile: cpuProfileData,
+        );
+        await data.process(
+          transformer: controller.cpuProfilerController.transformer,
+          processId: 'test',
+        );
+        // Call this to force the value of `_dataByTag[userTagNone]` to be set.
+        controller.cpuProfilerController.loadProcessedData(
+          data,
+          storeAsUserTagNone: true,
+        );
+      });
+
+      testWidgetsWithWindowSize('user tags', windowSize, (tester) async {
+        // We need to pump the entire `ProfilerScreenBody` widget because the
+        // CpuProfiler widget has `cpuProfileData` passed in from there, and
+        // CpuProfiler needs to be rebuilt on data updates.
+        await tester.pumpWidget(
+          wrapWithControllers(
+            const ProfilerScreenBody(),
+            profiler: controller,
+          ),
+        );
+
+        await tester.tap(find.text('Call Tree'));
+        await tester.pumpAndSettle();
+        expect(find.byType(CpuCallTreeTable), findsOneWidget);
+        await tester.tap(find.byType(UserTagDropdown));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Group by: User Tag').last);
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Expand All'));
+        await tester.pumpAndSettle();
+
+        expect(find.richText('Frame1'), findsNWidgets(3));
+        expect(find.richText('Frame2'), findsNWidgets(2));
+        expect(find.richText('Frame3'), findsNWidgets(1));
+        expect(find.richText('Frame4'), findsNWidgets(1));
+        expect(find.richText('Frame5'), findsNWidgets(2));
+        expect(find.richText('Frame6'), findsNWidgets(1));
+        expect(find.richText('userTagA'), findsOneWidget);
+        expect(find.richText('userTagB'), findsOneWidget);
+        expect(find.richText('userTagC'), findsOneWidget);
+      });
+
+      testWidgetsWithWindowSize('VM tags', windowSize, (tester) async {
+        // We need to pump the entire `ProfilerScreenBody` widget because the
+        // CpuProfiler widget has `cpuProfileData` passed in from there, and
+        // CpuProfiler needs to be rebuilt on data updates.
+        await tester.pumpWidget(
+          wrapWithControllers(
+            const ProfilerScreenBody(),
+            profiler: controller,
+          ),
+        );
+
+        await tester.tap(find.text('Call Tree'));
+        await tester.pumpAndSettle();
+        expect(find.byType(CpuCallTreeTable), findsOneWidget);
+        await tester.tap(find.byType(UserTagDropdown));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Group by: VM Tag').last);
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Expand All'));
+        await tester.pumpAndSettle();
+
+        expect(find.richText('Frame1'), findsNWidgets(3));
+        expect(find.richText('Frame2'), findsNWidgets(2));
+        expect(find.richText('Frame3'), findsNWidgets(1));
+        expect(find.richText('Frame4'), findsNWidgets(1));
+        expect(find.richText('Frame5'), findsNWidgets(2));
+        expect(find.richText('Frame6'), findsNWidgets(1));
+        expect(find.richText('vmTagA'), findsOneWidget);
+        expect(find.richText('vmTagB'), findsOneWidget);
+        expect(find.richText('vmTagC'), findsOneWidget);
+
+        // Check that disabling VM developer mode when grouping by VM tag
+        // automatically resets the view to 'Filter by tag: none'.
+        preferences.toggleVmDeveloperMode(false);
+        await tester.pumpAndSettle();
+        expect(find.byType(CpuCallTreeTable), findsOneWidget);
+        expect(find.text('Filter by tag: none'), findsOneWidget);
+        await tester.tap(find.byType(UserTagDropdown));
+        await tester.pumpAndSettle();
+        expect(find.text('Group by: VM Tag'), findsNothing);
       });
     });
   });

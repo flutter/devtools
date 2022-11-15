@@ -14,12 +14,11 @@ import 'raster_stats_model.dart';
 class RasterStatsController extends PerformanceFeatureController {
   RasterStatsController(super.performanceController);
 
+  /// The active raster stats for the view.
   ValueListenable<RasterStats> get rasterStats => _rasterStats;
-
   final _rasterStats = ValueNotifier<RasterStats>(RasterStats.empty());
 
   ValueListenable<bool> get loadingSnapshot => _loadingSnapshot;
-
   final _loadingSnapshot = ValueNotifier<bool>(false);
 
   final selectedSnapshot = ValueNotifier<LayerSnapshot?>(null);

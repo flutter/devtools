@@ -14,7 +14,7 @@ import '../../shared/theme.dart';
 import '../../shared/utils.dart';
 import '../../ui/icons.dart';
 import 'memory_controller.dart';
-import 'memory_heap_tree_view.dart';
+import 'memory_tabs.dart';
 import 'panes/chart/chart_pane.dart';
 import 'panes/chart/chart_pane_controller.dart';
 import 'panes/chart/memory_android_chart.dart';
@@ -84,16 +84,6 @@ class MemoryBodyState extends State<MemoryBody>
         sharedLabels: vmChartController.labelTimestamps,
       ),
     );
-
-    // Update the chart when the memorySource changes.
-    addAutoDisposeListener(memoryController.selectedSnapshotNotifier, () {
-      setState(() {
-        // TODO(terry): Create the snapshot data to display by Library,
-        //              by Class or by Objects.
-        // Create the snapshot data by Library.
-        memoryController.createSnapshotByLibrary();
-      });
-    });
   }
 
   @override
@@ -111,7 +101,7 @@ class MemoryBodyState extends State<MemoryBody>
           keyFocusNode: _focusNode,
         ),
         Expanded(
-          child: HeapTreeView(memoryController),
+          child: MemoryTabs(memoryController),
         ),
       ],
     );
