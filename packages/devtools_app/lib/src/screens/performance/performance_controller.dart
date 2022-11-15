@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../config_specific/import_export/import_export.dart';

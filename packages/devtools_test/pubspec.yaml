@@ -26,7 +26,6 @@ dependencies:
     sdk: flutter
   mockito: ^5.0.9
   path: ^1.8.0
-  pedantic: ^1.11.0
   provider: ^6.0.2
   vm_service: ^9.0.0
   vm_snapshot_analysis: ^0.7.1
