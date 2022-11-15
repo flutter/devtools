@@ -56,10 +56,18 @@ jobs:
             exit 1
           fi
 
+  release-note-validation:
+    runs-on: ubuntu-latest
+    name: Release Note Validation
+    steps:
+      - name: Get Pull Request Number
+        id: get-pull-request-number
+        run: |
+          PULL_REQUEST_NUMBER=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+          echo "PULL_REQUEST_NUMBER=$PULL_REQUEST_NUMBER" >> $GITHUB_OUTPUT
       - uses: dart-lang/setup-dart@9a04e6d73cca37bd455e0608d7e5092f881fd603
-        name: Setup Dart
-
-      - name: Verify the release note content
+      - uses: actions/checkout@v3
+      - name: Verify the release note integrity
         run: |
           cd tool/
           dart pub get
