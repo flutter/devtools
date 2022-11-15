@@ -211,7 +211,12 @@ void main() {
 
     test('json', () {
       final version = SemanticVersion(
-          major: 1, minor: 2, patch: 3, preReleaseMajor: 4, preReleaseMinor: 5);
+        major: 1,
+        minor: 2,
+        patch: 3,
+        preReleaseMajor: 4,
+        preReleaseMinor: 5,
+      );
       final encodedVersion = jsonEncode(version);
       final decodedVersion =
           SemanticVersion.fromJson(jsonDecode(encodedVersion));
