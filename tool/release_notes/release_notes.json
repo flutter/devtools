@@ -15,7 +15,7 @@
             "https://github.com/flutter/devtools/pull/4740"
           ],
           "message": "Changing the title",
-          "imageNames": null
+          "imageNames": ["title_change.png"]
         },
         {
           "githubPullRequestUrls": [
