@@ -365,10 +365,10 @@ class AutoUpdateCommand extends Command {
         await resetReleaseNotes(
             newVersion: SemanticVersion.parse(currentVersion));
 
-        newVersion = incrementDevVersion(newVersion!);
-    }
-    if (newVersion == null) {
-      throw 'Failed to determine the newVersion.';
+        if (newVersion == null) {
+          throw 'Failed to determine the newVersion.';
+        }
+        newVersion = incrementDevVersion(newVersion);
     }
     performTheVersionUpdate(
       currentVersion: currentVersion,

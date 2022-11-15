@@ -31,11 +31,6 @@ class MarkDownCommand extends Command {
 
   MarkDownCommand() {
     argParser.addOption(
-      'version',
-      abbr: 'v',
-      help: 'The released version to print the markdown for.',
-    );
-    argParser.addOption(
       'file',
       abbr: 'f',
       mandatory: true,
@@ -46,7 +41,6 @@ class MarkDownCommand extends Command {
   @override
   void run() async {
     final filePath = argResults!['file'].toString();
-    final version = argResults?['version']?.toString();
 
     final fileContents = await File(filePath).readAsString();
     Release release = Release.fromJson(jsonDecode(fileContents));
@@ -75,9 +69,8 @@ class VerifyCommand extends Command {
   @override
   void run() async {
     final filePath = argResults!['file'].toString();
-    final url = argResults!['file'].toString();
-    print("The filepath $filePath");
     final fileContents = await File(filePath).readAsString();
+
     // This step will fail if the json is not valid, or can't be unserialized
     Release.fromJson(jsonDecode(fileContents));
 

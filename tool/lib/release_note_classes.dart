@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:devtools_repo/repo_tool.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -51,13 +50,13 @@ class Release {
   String toMarkdown() {
     String markdown = '';
     markdown += '# DevTools $version release notes\n\n';
-    sections.forEach((section) {
+    for (var section in sections) {
       markdown += '# ${section.name}\n\n';
       for (var note in section.notes) {
         markdown += note.toMarkdown();
       }
       markdown += '\n';
-    });
+    }
     return markdown;
   }
 
