@@ -1,6 +1,6 @@
 # Beta testing
 
-This page provides fastest way to test the latest version of DevTools with all experemental features enabled. Do not mix this setup with development environment.
+This page describes the fastest way to test the latest version of DevTools with all experemental features enabled. Do not mix this setup with development environment.
 
 If you want to make code changes, follow [contributing guidance](https://github.com/flutter/devtools/blob/master/CONTRIBUTING.md).
 
