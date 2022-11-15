@@ -26,8 +26,6 @@ import 'panes/controls/enhance_tracing/enhance_tracing.dart';
 import 'panes/controls/layer_debugging_options.dart';
 import 'panes/controls/performance_settings.dart';
 import 'panes/flutter_frames/flutter_frames_chart.dart';
-import 'panes/flutter_frames/flutter_frames_controller.dart';
-import 'panes/timeline_events/timeline_events_controller.dart';
 import 'performance_controller.dart';
 import 'performance_model.dart';
 import 'tabbed_performance_view.dart';
@@ -66,10 +64,6 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
         AutoDisposeMixin,
         OfflineScreenMixin<PerformanceScreenBody, OfflinePerformanceData>,
         ProvidedControllerMixin<PerformanceController, PerformanceScreenBody> {
-  double processingProgress = 0.0;
-
-  late TimelineEventsController _timelineEventsController;
-
   @override
   void initState() {
     super.initState();
@@ -97,18 +91,7 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
 
     if (!initController()) return;
 
-    _timelineEventsController = controller.timelineEventsController;
-
     cancelListeners();
-
-    final legacyProcessor =
-        _timelineEventsController.legacyController.processor;
-    processingProgress = legacyProcessor.progressNotifier.value;
-    addAutoDisposeListener(legacyProcessor.progressNotifier, () {
-      setState(() {
-        processingProgress = legacyProcessor.progressNotifier.value;
-      });
-    });
 
     addAutoDisposeListener(controller.flutterFramesController.selectedFrame);
 
@@ -137,10 +120,6 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
         controller.offlinePerformanceData != null &&
         controller.offlinePerformanceData!.frames.isNotEmpty;
 
-    final tabbedPerformanceView = TabbedPerformanceView(
-      processing: processing,
-      processingProgress: processingProgress,
-    );
     final performanceScreen = Column(
       children: [
         if (!offlineController.offlineMode.value) _buildPerformanceControls(),
@@ -149,7 +128,7 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
             (!offlineController.offlineMode.value &&
                 serviceManager.connectedApp!.isFlutterAppNow!))
           FlutterFramesChart(controller.flutterFramesController),
-        Expanded(child: tabbedPerformanceView),
+        const Expanded(child: TabbedPerformanceView()),
       ],
     );
 

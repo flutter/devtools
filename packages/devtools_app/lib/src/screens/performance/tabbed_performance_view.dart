@@ -31,14 +31,7 @@ import 'performance_screen.dart';
 final timelineSearchFieldKey = GlobalKey(debugLabel: 'TimelineSearchFieldKey');
 
 class TabbedPerformanceView extends StatefulWidget {
-  const TabbedPerformanceView({
-    required this.processing,
-    required this.processingProgress,
-  });
-
-  final bool processing;
-
-  final double processingProgress;
+  const TabbedPerformanceView();
 
   @override
   _TabbedPerformanceViewState createState() => _TabbedPerformanceViewState();
@@ -90,7 +83,6 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
       showRebuildStats =
           showRebuildStats && offlineData.rebuildCountModel.isNotEmpty;
     }
-
     final tabRecords = <_PerformanceTabRecord>[
       if (showFrameAnalysis) _frameAnalysisRecord(),
       if (showRasterStats) _rasterStatsRecord(),
@@ -219,9 +211,6 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
   }
 
   _PerformanceTabRecord _timelineEventsRecord() {
-    final data = controller.data;
-    final hasData = data != null && !data.isEmpty;
-    final searchFieldEnabled = hasData && !widget.processing;
     return _PerformanceTabRecord(
       tab: _buildTab(
         tabName: 'Timeline Events',
@@ -232,7 +221,15 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 if (useLegacy || !FeatureFlags.embeddedPerfetto) ...[
-                  _buildSearchField(searchFieldEnabled),
+                  ValueListenableBuilder<bool>(
+                    valueListenable: _timelineEventsController.processing,
+                    builder: (context, processing, _) {
+                      final data = controller.data;
+                      final hasData = data != null && !data.isEmpty;
+                      final searchFieldEnabled = hasData && !processing;
+                      return _buildSearchField(searchFieldEnabled);
+                    },
+                  ),
                   const FlameChartHelpButton(
                     gaScreen: PerformanceScreen.id,
                     gaSelection: analytics_constants.timelineFlameChartHelp,
@@ -252,10 +249,17 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
         builder: (context, useLegacy, _) {
           return (useLegacy || !FeatureFlags.embeddedPerfetto)
               ? KeepAliveWrapper(
-                  child: TimelineEventsView(
-                    controller: _timelineEventsController,
-                    processing: widget.processing,
-                    processingProgress: widget.processingProgress,
+                  child: DualValueListenableBuilder<bool, double>(
+                    firstListenable: _timelineEventsController.processing,
+                    secondListenable: _timelineEventsController
+                        .legacyController.processor.progressNotifier,
+                    builder: (context, processing, processingProgress, _) {
+                      return TimelineEventsView(
+                        controller: _timelineEventsController,
+                        processing: processing,
+                        processingProgress: processingProgress,
+                      );
+                    },
                   ),
                 )
               : KeepAliveWrapper(

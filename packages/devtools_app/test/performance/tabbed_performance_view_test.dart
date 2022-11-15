@@ -90,10 +90,7 @@ void main() {
 
       await tester.pumpWidget(
         wrapWithControllers(
-          const TabbedPerformanceView(
-            processing: false,
-            processingProgress: 0.0,
-          ),
+          const TabbedPerformanceView(),
           performance: controller,
         ),
       );
