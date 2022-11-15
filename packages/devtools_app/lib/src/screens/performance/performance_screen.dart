@@ -148,8 +148,8 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
         if (isOfflineFlutterApp ||
             (!offlineController.offlineMode.value &&
                 serviceManager.connectedApp!.isFlutterAppNow!))
-        Expanded(child: tabbedPerformanceView),
           FlutterFramesChart(controller.flutterFramesController),
+        Expanded(child: tabbedPerformanceView),
       ],
     );
 
