@@ -88,7 +88,7 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
       showFrameAnalysis = showFrameAnalysis && offlineData.frames.isNotEmpty;
       showRasterStats = showRasterStats && offlineData.rasterStats != null;
       showRebuildStats = showRebuildStats &&
-          offlineData.rebuildCountModel.locationStats.value.isNotEmpty;
+          offlineData.rebuildCountModel.isNotEmpty;
     }
 
     final tabRecords = <_PerformanceTabRecord>[

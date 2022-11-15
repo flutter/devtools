@@ -21,8 +21,8 @@ class RasterStats {
     final originalHeight = json[_frameHeightKey] as num?;
     if (originalHeight != null && originalWidth != null) {
       originalFrameSize = Size(
-        (json[_frameWidthKey] as num).toDouble(),
-        (json[_frameHeightKey] as num).toDouble(),
+        originalWidth.toDouble(),
+        originalHeight.toDouble(),
       );
     }
     int? selectedId;
