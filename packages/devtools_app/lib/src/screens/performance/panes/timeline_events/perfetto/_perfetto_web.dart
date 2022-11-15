@@ -18,8 +18,8 @@ class Perfetto extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       color: Colors.white,
-      child: const HtmlElementView(
-        viewType: PerfettoController.viewId,
+      child: HtmlElementView(
+        viewType: perfettoController.viewId,
       ),
     );
   }
