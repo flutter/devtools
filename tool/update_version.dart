@@ -332,9 +332,12 @@ class AutoUpdateCommand extends Command {
           'release': 'strips any pre-release versions from the version.',
           'dev':
               'bumps the version to the next dev pre-release value (minor by default).',
-          'patch': 'bumps the version to the next patch value',
-          'minor': 'bumps the version to the next minor value',
-          'major': 'bumps the version to the next major value',
+          'patch':
+              'bumps the version to the next patch value, and sets the dev version to 0.',
+          'minor':
+              'bumps the version to the next minor value, and sets the dev version to 0.',
+          'major':
+              'bumps the version to the next major value, and sets the dev version to 0.',
         },
         mandatory: true,
         help: 'Bumps the devtools version by the selected type.');
@@ -361,6 +364,8 @@ class AutoUpdateCommand extends Command {
         // Doing a proper version update so cycle the release notes
         await resetReleaseNotes(
             newVersion: SemanticVersion.parse(currentVersion));
+
+        newVersion = incrementDevVersion(newVersion!);
     }
     if (newVersion == null) {
       throw 'Failed to determine the newVersion.';
