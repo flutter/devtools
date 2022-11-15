@@ -251,10 +251,7 @@ class TimelineEventsController extends PerformanceFeatureController
         );
       }
 
-      legacyController.processor.primeThreadIds(
-        uiThreadId: uiThreadId,
-        rasterThreadId: rasterThreadId,
-      );
+      _primeThreadIds(uiThreadId: uiThreadId, rasterThreadId: rasterThreadId);
     }
   }
 
@@ -443,9 +440,10 @@ class TimelineEventsController extends PerformanceFeatureController
     data!.traceEvents.add(trace);
   }
 
-  void _primeThreadIds(List<TraceEventWrapper> traceEvents) {
-    final uiThreadId = _threadIdForEvents({uiEventName}, traceEvents);
-    final rasterThreadId = _threadIdForEvents({rasterEventName}, traceEvents);
+  void _primeThreadIds({
+    required int? uiThreadId,
+    required int? rasterThreadId,
+  }) {
     legacyController.processor.primeThreadIds(
       uiThreadId: uiThreadId,
       rasterThreadId: rasterThreadId,
@@ -479,10 +477,18 @@ class TimelineEventsController extends PerformanceFeatureController
     allTraceEvents
       ..clear()
       ..addAll(traceEvents);
-    _primeThreadIds(traceEvents);
+
+    final uiThreadId = _threadIdForEvents({uiEventName}, traceEvents);
+    final rasterThreadId = _threadIdForEvents({rasterEventName}, traceEvents);
+    _primeThreadIds(uiThreadId: uiThreadId, rasterThreadId: rasterThreadId);
     await processAllTraceEvents();
 
     await legacyController.setOfflineData(offlineData);
+
+    if (offlineData.selectedFrame != null && _perfettoMode) {
+      await perfettoController
+          .scrollToTimeRange(offlineData.selectedFrame!.timeFromFrameTiming);
+    }
   }
 
   @override

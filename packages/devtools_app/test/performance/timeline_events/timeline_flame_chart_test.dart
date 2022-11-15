@@ -164,8 +164,8 @@ void main() {
                 .addTimelineEvent(goldenRasterTimelineEvent);
           final data = controller.data!;
           expect(data.frames.length, equals(1));
-          await controller.flutterFramesController
-              .toggleSelectedFrame(data.frames.first);
+          controller.flutterFramesController
+              .handleSelectedFrame(data.frames.first);
           await tester.pumpAndSettle();
         });
         expect(find.byType(TimelineFlameChart), findsOneWidget);

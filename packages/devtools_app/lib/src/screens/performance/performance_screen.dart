@@ -66,13 +66,9 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
         AutoDisposeMixin,
         OfflineScreenMixin<PerformanceScreenBody, OfflinePerformanceData>,
         ProvidedControllerMixin<PerformanceController, PerformanceScreenBody> {
-  bool processing = false;
-
   double processingProgress = 0.0;
 
   late TimelineEventsController _timelineEventsController;
-
-  late FlutterFramesController _flutterFramesController;
 
   @override
   void initState() {
@@ -102,16 +98,8 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
     if (!initController()) return;
 
     _timelineEventsController = controller.timelineEventsController;
-    _flutterFramesController = controller.flutterFramesController;
 
     cancelListeners();
-
-    processing = controller.timelineEventsController.processing.value;
-    addAutoDisposeListener(controller.timelineEventsController.processing, () {
-      setState(() {
-        processing = controller.timelineEventsController.processing.value;
-      });
-    });
 
     final legacyProcessor =
         _timelineEventsController.legacyController.processor;
@@ -122,7 +110,7 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
       });
     });
 
-    addAutoDisposeListener(_flutterFramesController.selectedFrame);
+    addAutoDisposeListener(controller.flutterFramesController.selectedFrame);
 
     // Load offline timeline data if available.
     if (shouldLoadOfflineData()) {
@@ -160,8 +148,8 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
         if (isOfflineFlutterApp ||
             (!offlineController.offlineMode.value &&
                 serviceManager.connectedApp!.isFlutterAppNow!))
-          FlutterFramesChart(_flutterFramesController),
         Expanded(child: tabbedPerformanceView),
+          FlutterFramesChart(controller.flutterFramesController),
       ],
     );
 
@@ -185,10 +173,15 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _PrimaryControls(
-          controller: controller,
-          processing: processing,
-          onClear: () => setState(() {}),
+        ValueListenableBuilder<bool>(
+          valueListenable: controller.timelineEventsController.processing,
+          builder: (context, processing, _) {
+            return _PrimaryControls(
+              controller: controller,
+              processing: processing,
+              onClear: () => setState(() {}),
+            );
+          },
         ),
         const SizedBox(width: defaultSpacing),
         SecondaryPerformanceControls(controller: controller),
