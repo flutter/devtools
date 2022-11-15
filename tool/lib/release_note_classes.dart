@@ -126,7 +126,7 @@ class ReleaseNote {
         final prNumber = match.namedGroup('pr_number');
         prUrls.add('[#$prNumber]($url)');
       }
-      markdown += ' - [](${prUrls.join(", ")})';
+      markdown += ' - ${prUrls.join(", ")}';
     }
 
     markdown += '\n';
