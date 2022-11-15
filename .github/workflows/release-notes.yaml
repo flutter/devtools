@@ -55,13 +55,16 @@ jobs:
             echo "::error file=$CURRENT_RELEASE_JSON_FILE_PATH,line=0,col=0,endColumn=0,title='Release Notes Weren\'t Modified'::Please add a release note entry or a reason to your description using: \`> NO RELEASE NOTE CHANGES: [reason goes here]\`"
             exit 1
           fi
+
       - uses: dart-lang/setup-dart@9a04e6d73cca37bd455e0608d7e5092f881fd603
         name: Setup Dart
+
       - name: Verify the release note content
         run: |
           cd tool/
           dart pub get
           dart release_note_helper.dart verify -f "../$CURRENT_RELEASE_JSON_FILE_PATH"
+
       - name: Check PR Urls
         env:
           PULL_NUMBER: ${{steps.get-pull-request-number.outputs.PULL_REQUEST_NUMBER}}
