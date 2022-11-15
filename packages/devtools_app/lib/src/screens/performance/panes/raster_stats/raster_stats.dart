@@ -29,15 +29,14 @@ class RenderingLayerVisualizer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DualValueListenableBuilder<RasterStats, bool>(
+    return DualValueListenableBuilder<RasterStats?, bool>(
       firstListenable: rasterStatsController.rasterStats,
       secondListenable: rasterStatsController.loadingSnapshot,
       builder: (context, rasterStats, loading, _) {
         if (loading) {
           return const CenteredCircularProgressIndicator();
         }
-        final snapshots = rasterStats.layerSnapshots;
-        if (snapshots.isEmpty) {
+        if (rasterStats == null || rasterStats.layerSnapshots.isEmpty) {
           return const Center(
             child: Text(
               'Take a snapshot to view raster stats for the current screen.',
@@ -50,15 +49,14 @@ class RenderingLayerVisualizer extends StatelessWidget {
           children: [
             LayerSnapshotTable(
               controller: rasterStatsController,
-              snapshots: snapshots,
+              snapshots: rasterStats.layerSnapshots,
             ),
             ValueListenableBuilder<LayerSnapshot?>(
               valueListenable: rasterStatsController.selectedSnapshot,
               builder: (context, snapshot, _) {
                 return LayerImage(
                   snapshot: snapshot,
-                  originalFrameSize:
-                      rasterStatsController.rasterStats.value.originalFrameSize,
+                  originalFrameSize: rasterStats.originalFrameSize,
                   includeFullScreenButton: true,
                 );
               },

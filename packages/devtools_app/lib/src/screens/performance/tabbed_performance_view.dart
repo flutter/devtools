@@ -77,12 +77,24 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
 
   @override
   Widget build(BuildContext context) {
+    final isOffline = offlineController.offlineMode.value;
+    final isFlutterApp = serviceManager.connectedApp!.isFlutterAppNow!;
+
+    var showFrameAnalysis = isFlutterApp;
+    var showRasterStats = isFlutterApp;
+    var showRebuildStats = FeatureFlags.widgetRebuildstats && isFlutterApp;
+    final offlineData = controller.offlinePerformanceData;
+    if (isOffline && offlineData != null) {
+      showFrameAnalysis = showFrameAnalysis && offlineData.frames.isNotEmpty;
+      showRasterStats = showRasterStats && offlineData.rasterStats != null;
+      showRebuildStats =
+          showRebuildStats && offlineData.rebuildCountModel.isNotEmpty;
+    }
+
     final tabRecords = <_PerformanceTabRecord>[
-      if (serviceManager.connectedApp!.isFlutterAppNow!) ...[
-        _frameAnalysisRecord(),
-        _rasterStatsRecord(),
-        if (FeatureFlags.widgetRebuildstats) _rebuildStatsRecord(),
-      ],
+      if (showFrameAnalysis) _frameAnalysisRecord(),
+      if (showRasterStats) _rasterStatsRecord(),
+      if (showRebuildStats) _rebuildStatsRecord(),
       _timelineEventsRecord(),
     ];
 
@@ -164,33 +176,36 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
     return _PerformanceTabRecord(
       tab: _buildTab(
         tabName: 'Raster Stats',
-        trailing: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            IconLabelButton(
-              tooltip: 'Take a snapshot of the rendering layers on the current'
-                  ' screen',
-              icon: Icons.camera,
-              label: 'Take Snapshot',
-              outlined: false,
-              onPressed: () {
-                ga.select(
-                  PerformanceScreen.id,
-                  analytics_constants.collectRasterStats,
-                );
-                unawaited(
-                  controller.rasterStatsController.collectRasterStats(),
-                );
-              },
-            ),
-            const SizedBox(width: denseSpacing),
-            ClearButton(
-              outlined: false,
-              onPressed: controller.rasterStatsController.clearData,
-            ),
-            const SizedBox(width: densePadding),
-          ],
-        ),
+        trailing: !offlineController.offlineMode.value
+            ? Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  IconLabelButton(
+                    tooltip:
+                        'Take a snapshot of the rendering layers on the current'
+                        ' screen',
+                    icon: Icons.camera,
+                    label: 'Take Snapshot',
+                    outlined: false,
+                    onPressed: () {
+                      ga.select(
+                        PerformanceScreen.id,
+                        analytics_constants.collectRasterStats,
+                      );
+                      unawaited(
+                        controller.rasterStatsController.collectRasterStats(),
+                      );
+                    },
+                  ),
+                  const SizedBox(width: denseSpacing),
+                  ClearButton(
+                    outlined: false,
+                    onPressed: controller.rasterStatsController.clearData,
+                  ),
+                  const SizedBox(width: densePadding),
+                ],
+              )
+            : null,
       ),
       tabView: KeepAliveWrapper(
         child: Center(
@@ -223,9 +238,10 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
                     gaSelection: analytics_constants.timelineFlameChartHelp,
                   ),
                 ],
-                RefreshTimelineEventsButton(
-                  controller: _timelineEventsController,
-                ),
+                if (!offlineController.offlineMode.value)
+                  RefreshTimelineEventsButton(
+                    controller: _timelineEventsController,
+                  ),
               ],
             );
           },
