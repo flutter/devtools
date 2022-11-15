@@ -18,7 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../matchers/matchers.dart';
+import '../test_infra/matchers.dart';
 
 void main() {
   // Set a wide enough screen width that we do not run into overflow.
@@ -82,7 +82,7 @@ void main() {
       await expectLater(
         find.byType(ProviderScreenBody),
         matchesDevToolsGolden(
-          '../goldens/provider_screen/list_error_banner.png',
+          '../test_infra/goldens/provider_screen/list_error_banner.png',
         ),
       );
     });
@@ -311,7 +311,7 @@ void main() {
       await expectLater(
         find.byType(ProviderScreenBody),
         matchesDevToolsGolden(
-          '../goldens/provider_screen/no_selected_provider.png',
+          '../test_infra/goldens/provider_screen/no_selected_provider.png',
         ),
       );
 
@@ -347,7 +347,7 @@ void main() {
       await expectLater(
         find.byType(ProviderScreenBody),
         matchesDevToolsGolden(
-          '../goldens/provider_screen/selected_provider.png',
+          '../test_infra/goldens/provider_screen/selected_provider.png',
         ),
       );
     });
@@ -400,7 +400,7 @@ void main() {
       await expectLater(
         find.byType(ProviderScreenBody),
         matchesDevToolsGolden(
-          '../goldens/provider_screen/selected_provider_error_banner.png',
+          '../test_infra/goldens/provider_screen/selected_provider_error_banner.png',
         ),
       );
     });

@@ -30,10 +30,12 @@ void main() {
   final grammarFile = File(path.join('assets', 'dart_syntax.json')).absolute;
   late Grammar grammar;
 
-  final Directory testDataDirectory =
-      Directory(path.join('test', 'test_data', 'syntax_highlighting')).absolute;
-  final Directory goldenDirectory =
-      Directory(path.join('test', 'goldens', 'syntax_highlighting')).absolute;
+  final Directory testDataDirectory = Directory(
+    path.join('test', 'test_infra', 'test_data', 'syntax_highlighting'),
+  ).absolute;
+  final Directory goldenDirectory = Directory(
+    path.join('test', 'test_infra', 'goldens', 'syntax_highlighting'),
+  ).absolute;
 
   setUpAll(() async {
     expect(grammarFile.existsSync(), true);

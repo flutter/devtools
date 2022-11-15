@@ -21,6 +21,7 @@ import 'panes/flutter_frames/flutter_frame_model.dart';
 import 'panes/flutter_frames/flutter_frames_controller.dart';
 import 'panes/frame_analysis/frame_analysis.dart';
 import 'panes/raster_stats/raster_stats.dart';
+import 'panes/rebuild_stats/widget_rebuild.dart';
 import 'panes/timeline_events/legacy/timeline_flame_chart.dart';
 import 'panes/timeline_events/perfetto/perfetto.dart';
 import 'panes/timeline_events/timeline_events_controller.dart';
@@ -57,11 +58,6 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
   FlutterFrame? _selectedFlutterFrame;
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!initController()) return;
@@ -85,6 +81,7 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
       if (serviceManager.connectedApp!.isFlutterAppNow!) ...[
         _frameAnalysisRecord(),
         _rasterStatsRecord(),
+        if (FeatureFlags.widgetRebuildstats) _rebuildStatsRecord(),
       ],
       _timelineEventsRecord(),
     ];
@@ -111,12 +108,13 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
 
   _PerformanceTabRecord _frameAnalysisRecord() {
     assert(serviceManager.connectedApp!.isFlutterAppNow!);
-    late Widget frameAnalysisView;
+    Widget frameAnalysisView;
     final selectedFrame = _selectedFlutterFrame;
     if (selectedFrame != null) {
       frameAnalysisView = FlutterFrameAnalysisView(
         frameAnalysis: selectedFrame.frameAnalysis,
         enhanceTracingController: controller.enhanceTracingController,
+        rebuildCountModel: controller.data!.rebuildCountModel,
       );
     } else {
       frameAnalysisView = const Center(
@@ -127,6 +125,35 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
       tab: _buildTab(tabName: 'Frame Analysis'),
       tabView: KeepAliveWrapper(
         child: frameAnalysisView,
+      ),
+      featureController: null,
+    );
+  }
+
+  _PerformanceTabRecord _rebuildStatsRecord() {
+    final rebuildStatsView = RebuildStatsView(
+      model: controller.data!.rebuildCountModel,
+      selectedFrame: controller.flutterFramesController.selectedFrame,
+    );
+
+    final data = controller.data;
+    return _PerformanceTabRecord(
+      tab: _buildTab(
+        tabName: 'Rebuild Stats',
+        trailing: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            if (data != null)
+              ClearButton(
+                outlined: false,
+                onPressed: data.rebuildCountModel.clearAllCounts,
+              ),
+            const SizedBox(width: densePadding),
+          ],
+        ),
+      ),
+      tabView: KeepAliveWrapper(
+        child: rebuildStatsView,
       ),
       featureController: null,
     );

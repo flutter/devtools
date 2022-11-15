@@ -21,13 +21,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-import '../test_data/app_size/deferred_app.dart';
-import '../test_data/app_size/diff_deferred_app.dart';
-import '../test_data/app_size/diff_no_deferred_app.dart';
-import '../test_data/app_size/new_v8.dart';
-import '../test_data/app_size/old_v8.dart';
-import '../test_data/app_size/sizes.dart';
-import '../test_data/app_size/unsupported_file.dart';
+import '../test_infra/test_data/app_size/deferred_app.dart';
+import '../test_infra/test_data/app_size/diff_deferred_app.dart';
+import '../test_infra/test_data/app_size/diff_no_deferred_app.dart';
+import '../test_infra/test_data/app_size/new_v8.dart';
+import '../test_infra/test_data/app_size/old_v8.dart';
+import '../test_infra/test_data/app_size/sizes.dart';
+import '../test_infra/test_data/app_size/unsupported_file.dart';
 
 void main() {
   setUp(() {

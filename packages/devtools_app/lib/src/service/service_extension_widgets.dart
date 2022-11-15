@@ -433,6 +433,7 @@ class ServiceExtensionCheckbox extends _ServiceExtensionWidget {
   ServiceExtensionCheckbox({
     Key? key,
     required this.serviceExtension,
+    this.showDescription = true,
   }) : super(
           key: key,
           // Don't show messages on success or when this toggle is in progress.
@@ -448,6 +449,8 @@ class ServiceExtensionCheckbox extends _ServiceExtensionWidget {
   }
 
   final ToggleableServiceExtensionDescription serviceExtension;
+
+  final bool showDescription;
 
   @override
   _ServiceExtensionMixin<_ServiceExtensionWidget> createState() =>
@@ -511,7 +514,9 @@ class _ServiceExtensionCheckboxState extends State<ServiceExtensionCheckbox>
               child: CheckboxSetting(
                 notifier: value,
                 title: widget.serviceExtension.title,
-                description: widget.serviceExtension.description,
+                description: widget.showDescription
+                    ? widget.serviceExtension.description
+                    : null,
                 tooltip: widget.serviceExtension.tooltip,
                 onChanged: _onChanged,
                 enabled: available,

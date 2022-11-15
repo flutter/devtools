@@ -61,7 +61,7 @@ Matcher equalsGoldenIgnoringHashCodes(String path) {
 
 class _EqualsGoldenIgnoringHashCodes extends Matcher {
   _EqualsGoldenIgnoringHashCodes(String pathWithinGoldenDirectory) {
-    path = 'test/goldens$_goldensSuffix/$pathWithinGoldenDirectory';
+    path = 'test/test_infra/goldens$_goldensSuffix/$pathWithinGoldenDirectory';
     try {
       _value = _normalize(io.File(path).readAsStringSync());
     } catch (e) {

@@ -4,7 +4,7 @@
 
 import 'package:vm_service/vm_service.dart';
 
-import '../../test_data/network.dart';
+import '../../test_infra/test_data/network.dart';
 
 SocketProfile loadSocketProfile() {
   return SocketProfile(

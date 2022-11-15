@@ -12,7 +12,11 @@ import 'cpu_profile_model.dart';
 
 /// A table of the CPU's top-down call tree.
 class CpuCallTreeTable extends StatelessWidget {
-  factory CpuCallTreeTable(List<CpuStackFrame> dataRoots, {Key? key}) {
+  factory CpuCallTreeTable(
+    List<CpuStackFrame> dataRoots, {
+    Key? key,
+    required bool displayTreeGuidelines,
+  }) {
     final treeColumn = MethodNameColumn();
     final startingSortColumn = TotalTimeColumn(titleTooltip: totalTimeTooltip);
     final columns = List<ColumnData<CpuStackFrame>>.unmodifiable([
@@ -27,6 +31,7 @@ class CpuCallTreeTable extends StatelessWidget {
       treeColumn,
       startingSortColumn,
       columns,
+      displayTreeGuidelines,
     );
   }
 
@@ -36,6 +41,7 @@ class CpuCallTreeTable extends StatelessWidget {
     this.treeColumn,
     this.sortColumn,
     this.columns,
+    this.displayTreeGuidelines,
   ) : super(key: key);
 
   static const totalTimeTooltip =
@@ -49,6 +55,7 @@ class CpuCallTreeTable extends StatelessWidget {
   final ColumnData<CpuStackFrame> sortColumn;
   final List<ColumnData<CpuStackFrame>> columns;
   final List<CpuStackFrame> dataRoots;
+  final bool displayTreeGuidelines;
 
   @override
   Widget build(BuildContext context) {
@@ -59,6 +66,7 @@ class CpuCallTreeTable extends StatelessWidget {
       columns: columns,
       treeColumn: treeColumn,
       defaultSortColumn: sortColumn,
+      displayTreeGuidelines: displayTreeGuidelines,
       defaultSortDirection: SortDirection.descending,
     );
   }

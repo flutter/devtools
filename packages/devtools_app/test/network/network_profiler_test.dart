@@ -25,7 +25,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../test_data/network.dart';
+import '../test_infra/test_data/network.dart';
 import 'utils/network_test_utils.dart';
 
 NetworkController controller = NetworkController();

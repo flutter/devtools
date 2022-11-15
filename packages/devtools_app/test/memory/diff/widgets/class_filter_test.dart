@@ -11,8 +11,8 @@ import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../../../matchers/matchers.dart';
-import '../../../scenes/memory/diff_snapshot.dart';
+import '../../../test_infra/matchers.dart';
+import '../../../test_infra/scenes/memory/diff_snapshot.dart';
 
 final _customFilter = ClassFilter(
   filterType: ClassFilterType.only,
@@ -28,11 +28,11 @@ class _FilterTest {
   String get name => isDiff ? 'diff' : 'single';
 
   String get sceneGolden =>
-      '../../../goldens/memory_diff_snapshot_scene_$name.png';
+      '../../../test_infra/goldens/memory_diff_snapshot_scene_$name.png';
   String snapshotGolden(ClassFilterType? type) =>
-      '../../../goldens/memory_diff_snapshot_${type?.name ?? 'custom'}_$name.png';
+      '../../../test_infra/goldens/memory_diff_snapshot_${type?.name ?? 'custom'}_$name.png';
   static String dialogGolden(ClassFilterType? type) =>
-      '../../../goldens/memory_diff_filter_dialog_${type?.name ?? 'custom'}.png';
+      '../../../test_infra/goldens/memory_diff_filter_dialog_${type?.name ?? 'custom'}.png';
 }
 
 final _tests = [_FilterTest(false), _FilterTest(true)];
