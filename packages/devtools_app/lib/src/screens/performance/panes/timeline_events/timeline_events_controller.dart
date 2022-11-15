@@ -486,8 +486,7 @@ class TimelineEventsController extends PerformanceFeatureController
     await legacyController.setOfflineData(offlineData);
 
     if (offlineData.selectedFrame != null && _perfettoMode) {
-      await perfettoController
-          .scrollToTimeRange(offlineData.selectedFrame!.timeFromFrameTiming);
+      // TODO(kenz): scroll the perfetto viewer to the selected time range.
     }
   }
 
