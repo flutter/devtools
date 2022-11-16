@@ -4,13 +4,13 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
-import 'package:devtools_app/src/screens/performance/panes/timeline_events/timeline_event_processor.dart';
+import 'package:devtools_app/src/screens/performance/panes/timeline_events/legacy/legacy_event_processor.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-import '../../test_infra/test_data/performance.dart';
-import '../../test_infra/utils/test_utils.dart';
+import '../../../test_infra/test_data/performance.dart';
+import '../../../test_infra/utils/test_utils.dart';
 
 void main() {
   final originalGoldenUiEvent = goldenUiTimelineEvent.deepCopy();
@@ -42,7 +42,7 @@ void main() {
     late PerformanceData data;
     late MockPerformanceController mockPerformanceController;
     late TimelineEventsController timelineEventsController;
-    late LegacyTimelineEventProcessor processor;
+    late LegacyEventProcessor processor;
 
     setUp(() async {
       data = PerformanceData();
@@ -64,7 +64,7 @@ void main() {
     });
 
     test('duration trace events form timeline event tree', () async {
-      await processor.processTraceEvents(goldenUiTraceEvents);
+      await processor.processData(goldenUiTraceEvents);
 
       final processedUiEvent =
           processor.performanceController.data!.timelineEvents.first;
@@ -83,7 +83,7 @@ void main() {
       traceEvents.insert(1, goldenUiTraceEvents[1]);
       final events = processor.performanceController.data!.timelineEvents;
 
-      await processor.processTraceEvents(traceEvents);
+      await processor.processData(traceEvents);
       expect(events.length, equals(1));
       expect(
         events.first.toString(),
@@ -106,7 +106,7 @@ void main() {
         goldenUiTraceEvents[goldenUiTraceEvents.length - 2],
       );
 
-      await processor.processTraceEvents(traceEvents);
+      await processor.processData(traceEvents);
       expect(events.length, equals(1));
       expect(
         events.first.toString(),
@@ -153,7 +153,7 @@ void main() {
       traceEvents.insert(2, goldenUiTraceEvents[0]);
       traceEvents.insert(3, goldenUiTraceEvents[1]);
 
-      await processor.processTraceEvents(traceEvents);
+      await processor.processData(traceEvents);
       expect(
         processor.currentDurationEventNodes[TimelineEventType.ui.index],
         isNull,
@@ -173,7 +173,7 @@ void main() {
         events,
         isEmpty,
       );
-      await processor.processTraceEvents(traceEvents);
+      await processor.processData(traceEvents);
       expect(
         events.length,
         equals(4),
@@ -204,7 +204,7 @@ void main() {
 
       final events = processor.performanceController.data!.timelineEvents;
 
-      await processor.processTraceEvents(traceEvents);
+      await processor.processData(traceEvents);
       expect(
         events.length,
         equals(2),
@@ -232,7 +232,7 @@ void main() {
         events,
         isEmpty,
       );
-      await processor.processTraceEvents(durationEventsWithDuplicateTraces);
+      await processor.processData(durationEventsWithDuplicateTraces);
       // If the processor is not handling duplicates properly, this value would
       // be 0.
       expect(
@@ -246,8 +246,7 @@ void main() {
         () async {
       // This test should complete without throwing an assert from
       // `AsyncTimelineEvent.endAsyncEvent`.
-      await processor
-          .processTraceEvents(asyncEventsWithChildrenWithDifferentIds);
+      await processor.processData(asyncEventsWithChildrenWithDifferentIds);
     });
 
     test('inferEventType', () {

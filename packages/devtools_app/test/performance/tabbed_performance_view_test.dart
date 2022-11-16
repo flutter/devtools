@@ -60,6 +60,11 @@ void main() {
       when(mockTimelineEventsController.data).thenReturn(controller.data);
       when(mockTimelineEventsController.useLegacyTraceViewer)
           .thenReturn(ValueNotifier<bool>(true));
+      when(mockTimelineEventsController.status).thenReturn(
+        const FixedValueListenable<EventsControllerStatus>(
+          EventsControllerStatus.ready,
+        ),
+      );
       when(mockTimelineEventsController.legacyController)
           .thenReturn(LegacyTimelineEventsController(controller));
       when(controller.timelineEventsController)
@@ -90,10 +95,7 @@ void main() {
 
       await tester.pumpWidget(
         wrapWithControllers(
-          const TabbedPerformanceView(
-            processing: false,
-            processingProgress: 0.0,
-          ),
+          const TabbedPerformanceView(),
           performance: controller,
         ),
       );

@@ -17,8 +17,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
-import '../../test_infra/matchers.dart';
-import '../../test_infra/test_data/performance.dart';
+import '../../../test_infra/matchers.dart';
+import '../../../test_infra/test_data/performance.dart';
 
 void main() {
   FakeServiceManager fakeServiceManager;
@@ -164,8 +164,8 @@ void main() {
                 .addTimelineEvent(goldenRasterTimelineEvent);
           final data = controller.data!;
           expect(data.frames.length, equals(1));
-          await controller.flutterFramesController
-              .toggleSelectedFrame(data.frames.first);
+          controller.flutterFramesController
+              .handleSelectedFrame(data.frames.first);
           await tester.pumpAndSettle();
         });
         expect(find.byType(TimelineFlameChart), findsOneWidget);

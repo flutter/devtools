@@ -26,7 +26,6 @@ import 'panes/controls/enhance_tracing/enhance_tracing.dart';
 import 'panes/controls/layer_debugging_options.dart';
 import 'panes/controls/performance_settings.dart';
 import 'panes/flutter_frames/flutter_frames_chart.dart';
-import 'panes/flutter_frames/flutter_frames_controller.dart';
 import 'panes/timeline_events/timeline_events_controller.dart';
 import 'performance_controller.dart';
 import 'performance_model.dart';
@@ -66,14 +65,6 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
         AutoDisposeMixin,
         OfflineScreenMixin<PerformanceScreenBody, OfflinePerformanceData>,
         ProvidedControllerMixin<PerformanceController, PerformanceScreenBody> {
-  bool processing = false;
-
-  double processingProgress = 0.0;
-
-  late TimelineEventsController _timelineEventsController;
-
-  late FlutterFramesController _flutterFramesController;
-
   @override
   void initState() {
     super.initState();
@@ -101,28 +92,9 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
 
     if (!initController()) return;
 
-    _timelineEventsController = controller.timelineEventsController;
-    _flutterFramesController = controller.flutterFramesController;
-
     cancelListeners();
 
-    processing = controller.timelineEventsController.processing.value;
-    addAutoDisposeListener(controller.timelineEventsController.processing, () {
-      setState(() {
-        processing = controller.timelineEventsController.processing.value;
-      });
-    });
-
-    final legacyProcessor =
-        _timelineEventsController.legacyController.processor;
-    processingProgress = legacyProcessor.progressNotifier.value;
-    addAutoDisposeListener(legacyProcessor.progressNotifier, () {
-      setState(() {
-        processingProgress = legacyProcessor.progressNotifier.value;
-      });
-    });
-
-    addAutoDisposeListener(_flutterFramesController.selectedFrame);
+    addAutoDisposeListener(controller.flutterFramesController.selectedFrame);
 
     // Load offline timeline data if available.
     if (shouldLoadOfflineData()) {
@@ -149,10 +121,6 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
         controller.offlinePerformanceData != null &&
         controller.offlinePerformanceData!.frames.isNotEmpty;
 
-    final tabbedPerformanceView = TabbedPerformanceView(
-      processing: processing,
-      processingProgress: processingProgress,
-    );
     final performanceScreen = Column(
       children: [
         if (!offlineController.offlineMode.value) _buildPerformanceControls(),
@@ -160,8 +128,8 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
         if (isOfflineFlutterApp ||
             (!offlineController.offlineMode.value &&
                 serviceManager.connectedApp!.isFlutterAppNow!))
-          FlutterFramesChart(_flutterFramesController),
-        Expanded(child: tabbedPerformanceView),
+          FlutterFramesChart(controller.flutterFramesController),
+        const Expanded(child: TabbedPerformanceView()),
       ],
     );
 
@@ -185,10 +153,15 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _PrimaryControls(
-          controller: controller,
-          processing: processing,
-          onClear: () => setState(() {}),
+        ValueListenableBuilder<EventsControllerStatus>(
+          valueListenable: controller.timelineEventsController.status,
+          builder: (context, status, _) {
+            return _PrimaryControls(
+              controller: controller,
+              processing: status == EventsControllerStatus.processing,
+              onClear: () => setState(() {}),
+            );
+          },
         ),
         const SizedBox(width: defaultSpacing),
         SecondaryPerformanceControls(controller: controller),
