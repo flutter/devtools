@@ -15,7 +15,7 @@ import '../timeline_event_processor.dart';
 
 /// Processor for composing a recorded list of trace events into a timeline of
 /// [AsyncTimelineEvent]s, [SyncTimelineEvent]s, and [FlutterFrame]s.
-/// 
+///
 /// This processor should only be used when the legacy trace event viewer is in
 /// use.
 class LegacyEventProcessor extends BaseTraceEventProcessor {
