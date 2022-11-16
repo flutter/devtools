@@ -6,17 +6,6 @@ part of 'release_note_classes.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-ReleaseNotes _$ReleaseNotesFromJson(Map<String, dynamic> json) => ReleaseNotes(
-      releases: (json['releases'] as List<dynamic>)
-          .map((e) => Release.fromJson(e as Map<String, dynamic>))
-          .toList(),
-    );
-
-Map<String, dynamic> _$ReleaseNotesToJson(ReleaseNotes instance) =>
-    <String, dynamic>{
-      'releases': instance.releases,
-    };
-
 Release _$ReleaseFromJson(Map<String, dynamic> json) => Release(
       version:
           SemanticVersion.fromJson(json['version'] as Map<String, dynamic>),

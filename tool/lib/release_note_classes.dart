@@ -1,3 +1,7 @@
+// Copyright 2022 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:io';
 
 import 'package:devtools_shared/devtools_shared.dart';
@@ -6,29 +10,8 @@ import 'package:json_annotation/json_annotation.dart';
 part 'release_note_classes.g.dart';
 
 @JsonSerializable()
-class ReleaseNotes {
-  ReleaseNotes({
-    required this.releases,
-  });
 
-  List<Release> releases;
-
-  String toMarkdown() {
-    String markdown = '';
-    for (var release in releases) {
-      markdown += release.toMarkdown();
-      markdown += '\n';
-    }
-    return markdown;
-  }
-
-  factory ReleaseNotes.fromJson(Map<String, dynamic> json) =>
-      _$ReleaseNotesFromJson(json);
-
-  Map<String, dynamic> toJson() => _$ReleaseNotesToJson(this);
-}
-
-@JsonSerializable()
+/// Stores all of the release note [sections] for a given [version].
 class Release {
   Release({
     required this.version,
@@ -67,6 +50,8 @@ class Release {
 }
 
 @JsonSerializable()
+
+/// Represents a section of release [notes] with a given [name].
 class ReleaseSection {
   ReleaseSection({
     required this.name,
@@ -87,6 +72,12 @@ class ReleaseSection {
 }
 
 @JsonSerializable()
+
+/// An individual release note entry, with a given [message].
+///
+/// The names of images relating to the releaseNote can be passed
+/// in [imageNames]. WThe GitHub pull request url that the message is added to,
+/// can be reflected through [githubPullRequestUrls].
 class ReleaseNote {
   ReleaseNote({
     required this.message,
