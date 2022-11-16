@@ -45,7 +45,7 @@ class PerfettoController extends DisposableController
 
   final PerformanceController performanceController;
 
-  late final viewId = 'embedded-perfetto-${_viewIdIncrementer++}';
+  final viewId = 'embedded-perfetto-${_viewIdIncrementer++}';
 
   /// Url when running Perfetto locally following the instructions here:
   /// https://perfetto.dev/docs/contributing/build-instructions#ui-development
