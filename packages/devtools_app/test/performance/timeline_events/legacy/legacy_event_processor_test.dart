@@ -38,7 +38,7 @@ void main() {
     setGlobal(ServiceConnectionManager, FakeServiceManager());
   });
 
-  group('TimelineProcessor', () {
+  group('$LegacyEventProcessor', () {
     late PerformanceData data;
     late MockPerformanceController mockPerformanceController;
     late TimelineEventsController timelineEventsController;
