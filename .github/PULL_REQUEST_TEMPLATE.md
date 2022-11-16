@@ -2,8 +2,6 @@
 
 *List which issues are fixed by this PR. You must list at least one issue.*
 
-*If you had to change anything in the [flutter/tests] repo, include a link to the migration guide as per the [breaking change policy].*
-
 <!-- Uncomment and modify the following section if your PR does not require changes to the release notes -->
 <!-- 
 > NO RELEASE NOTE CHANGES: <REASON GOES HERE>
@@ -17,17 +15,15 @@
 - [ ] I signed the [CLA].
 - [ ] I listed at least one issue that this PR fixes in the description above.
 - [ ] I updated/added relevant documentation (doc comments with `///`).
-- [ ] I added new tests to check the change I am making, or this PR is [test-exempt].
-- [ ] All existing and new tests are passing.
+- [ ] I added new tests to check the change I am making, or there is a reason for not adding tests.
+- [build.yaml badge] All existing and new tests are passing.
 
-If you need help, consider asking for advice on the #hackers-new channel on [Discord].
+If you need help, consider asking for advice on the #hackers-devexp-📐 channel on [Discord].
 
 <!-- Links -->
-[Contributor Guide]: https://github.com/flutter/flutter/wiki/Tree-hygiene#overview
+[Contributor Guide]: https://github.com/flutter/devtools/blob/master/CONTRIBUTING.md
 [Tree Hygiene]: https://github.com/flutter/flutter/wiki/Tree-hygiene
-[test-exempt]: https://github.com/flutter/flutter/wiki/Tree-hygiene#tests
 [Flutter Style Guide]: https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo
 [CLA]: https://cla.developers.google.com/
-[flutter/tests]: https://github.com/flutter/tests
-[breaking change policy]: https://github.com/flutter/flutter/wiki/Tree-hygiene#handling-breaking-changes
-[Discord]: https://github.com/flutter/flutter/wiki/Chat
+[Discord]: https://discord.com/channels/608014603317936148/608020249119555594
+[build.yaml badge]: https://github.com/flutter/devtools/actions/workflows/build.yaml/badge.svg
