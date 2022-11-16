@@ -60,8 +60,11 @@ void main() {
       when(mockTimelineEventsController.data).thenReturn(controller.data);
       when(mockTimelineEventsController.useLegacyTraceViewer)
           .thenReturn(ValueNotifier<bool>(true));
-      when(mockTimelineEventsController.processing)
-          .thenReturn(const FixedValueListenable<bool>(false));
+      when(mockTimelineEventsController.status).thenReturn(
+        const FixedValueListenable<EventsControllerStatus>(
+          EventsControllerStatus.ready,
+        ),
+      );
       when(mockTimelineEventsController.legacyController)
           .thenReturn(LegacyTimelineEventsController(controller));
       when(controller.timelineEventsController)
