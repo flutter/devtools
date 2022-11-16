@@ -34,6 +34,13 @@
             "program": "test/test_infra/scenes/memory/diff_snapshot.stager_app.dart",
         },
         {
+            "name": "performance/default",
+            "cwd": "devtools_app",
+            "request": "launch",
+            "type": "dart",
+            "program": "test/test_infra/scenes/performance/default.stager_app.dart",
+        },
+        {
             "name": "attach",
             "cwd": "devtools_app",
             "type": "dart",
