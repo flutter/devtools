@@ -14,6 +14,7 @@ import '../../../../../primitives/trace_event.dart';
 import '../../../../../primitives/utils.dart';
 import '../../../../../shared/globals.dart';
 import '../../../performance_controller.dart';
+import 'perfetto_event_processor.dart';
 
 /// Flag to enable embedding an instance of the Perfetto UI running on
 /// localhost.
@@ -38,7 +39,9 @@ var _viewIdIncrementer = 0;
 
 class PerfettoController extends DisposableController
     with AutoDisposeControllerMixin {
-  PerfettoController(this.performanceController);
+  PerfettoController(this.performanceController) {
+    processor = PerfettoEventProcessor(performanceController);
+  }
 
   final PerformanceController performanceController;
 
@@ -83,6 +86,8 @@ class PerfettoController extends DisposableController
   /// [post_message_handler.ts] will not try to handle this message and warn
   /// "Unknown postMessage() event received".
   static const _devtoolsThemeChange = 'DART-DEVTOOLS-THEME-CHANGE';
+
+  late final PerfettoEventProcessor processor;
 
   String get _perfettoUrl {
     if (_debugUseLocalPerfetto) {

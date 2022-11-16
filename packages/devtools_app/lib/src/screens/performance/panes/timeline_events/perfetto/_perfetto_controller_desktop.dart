@@ -5,11 +5,16 @@
 import '../../../../../primitives/trace_event.dart';
 import '../../../../../primitives/utils.dart';
 import '../../../performance_controller.dart';
+import 'perfetto_event_processor.dart';
 
 class PerfettoController {
-  PerfettoController(this.performanceController);
+  PerfettoController(this.performanceController) {
+    processor = PerfettoEventProcessor(performanceController);
+  }
 
   final PerformanceController performanceController;
+
+  late final PerfettoEventProcessor processor;
 
   void init() {}
 

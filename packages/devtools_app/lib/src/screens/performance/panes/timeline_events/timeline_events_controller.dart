@@ -30,6 +30,7 @@ import '../../performance_screen.dart';
 import '../../performance_utils.dart';
 import '../../simple_trace_example.dart';
 import '../flutter_frames/flutter_frame_model.dart';
+import 'legacy/legacy_event_processor.dart';
 import 'perfetto/_perfetto_controller_desktop.dart'
     if (dart.library.html) 'perfetto/_perfetto_controller_web.dart';
 import 'timeline_event_processor.dart';
@@ -535,14 +536,14 @@ class TimelineEventsController extends PerformanceFeatureController
 
 class LegacyTimelineEventsController with SearchControllerMixin<TimelineEvent> {
   LegacyTimelineEventsController(this.performanceController) {
-    processor = LegacyTimelineEventProcessor(performanceController);
+    processor = LegacyEventProcessor(performanceController);
   }
 
   final PerformanceController performanceController;
 
   PerformanceData? get data => performanceController.data;
 
-  late final LegacyTimelineEventProcessor processor;
+  late final LegacyEventProcessor processor;
 
   /// The currently selected timeline event.
   ValueListenable<TimelineEvent?> get selectedTimelineEvent =>
@@ -602,7 +603,7 @@ class LegacyTimelineEventsController with SearchControllerMixin<TimelineEvent> {
     final processingTraceCount = traceEventCount - _nextTraceIndexToProcess;
 
     Future<void> processTraceEventsHelper() async {
-      await processor.processTraceEvents(
+      await processor.processData(
         traceEvents,
         startIndex: _nextTraceIndexToProcess,
       );
