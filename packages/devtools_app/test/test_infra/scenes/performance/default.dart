@@ -3,6 +3,8 @@
 // in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
@@ -11,10 +13,8 @@ import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:stager/stager.dart';
 
-import '../load_offline_snapshot.dart';
-
 /// To run:
-/// flutter run -t test/scenes/performance/default.stager_app.dart -d macos
+/// flutter run -t test/test_infra/scenes/performance/default.stager_app.dart -d macos
 class PerformanceDefaultScene extends Scene {
   late PerformanceController controller;
   final screen = const PerformanceScreen();
@@ -37,8 +37,8 @@ class PerformanceDefaultScene extends Scene {
     setGlobal(NotificationService, NotificationService());
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(ServiceConnectionManager, ServiceConnectionManager());
-    await loadOfflineSnapshot(
-      'test/test_data/performance/performance_diagnosis_world_clock.json',
+    await _loadOfflineSnapshot(
+      'test/test_infra/test_data/performance/performance_diagnosis_world_clock.json',
     );
 
     controller = PerformanceController();
@@ -50,4 +50,20 @@ class PerformanceDefaultScene extends Scene {
   void tearDown() {
     FeatureFlags.widgetRebuildstats = false;
   }
+}
+
+Future<void> _loadOfflineSnapshot(String path) async {
+  final completer = Completer<bool>();
+  final importController = ImportController((screenId) {
+    completer.complete(true);
+  });
+
+  final data = await File(path).readAsString();
+  final jsonFile = DevToolsJsonFile(
+    name: path,
+    data: jsonDecode(data),
+    lastModifiedTime: DateTime.now(),
+  );
+  importController.importData(jsonFile);
+  await completer.future;
 }
