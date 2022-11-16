@@ -78,7 +78,9 @@ class _ClassNameColumn extends ColumnData<TracedClass> {
 class _InstancesColumn extends ColumnData<TracedClass> {
   _InstancesColumn()
       : super(
-          'Instances',
+          'Delta',
+          titleTooltip:
+              'Number of instances, allocated after the class was selected for tracing.',
           fixedWidthPx: scaleByFontFactor(_defaultNumberFieldWidth),
         );
 
