@@ -8,6 +8,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
+import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:vm_service/vm_service.dart';
 
 import '../config_specific/logger/logger.dart';
@@ -183,6 +184,11 @@ Future<void> buildVariablesTree(
               _createVariablesForWeakProperty(result, isolateRef),
             );
             break;
+          case InstanceKind.kStackTrace:
+            variable.addAllChildren(
+              _createVariablesForStackTrace(result, isolateRef),
+            );
+            break;
           default:
             break;
         }
@@ -305,6 +311,23 @@ Future<void> buildVariablesTree(
     }
   }
   variable.treeInitializeComplete = true;
+}
+
+List<DartObjectNode> _createVariablesForStackTrace(
+  Instance stackTrace,
+  IsolateRef? isolateRef,
+) {
+  final trace = stack_trace.Trace.parse(stackTrace.valueAsString!);
+  return [
+    for (int i = 0; i < trace.frames.length; ++i)
+      DartObjectNode.fromValue(
+        name: '[$i]',
+        value: trace.frames[i].toString(),
+        isolateRef: isolateRef,
+        artificialName: true,
+        artificialValue: true,
+      )
+  ];
 }
 
 List<DartObjectNode> _createVariablesForParameter(
@@ -979,11 +1002,15 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
       return true;
     // TODO(jacobr): do something smarter to avoid expandable variable flicker.
     final instanceRef = ref?.instanceRef;
-    return instanceRef != null
-        ? instanceRef.valueAsString == null
-        : ((ref?.value is! String?) &&
-            (ref?.value is! num?) &&
-            (ref?.value is! bool?));
+    if (instanceRef != null) {
+      if (instanceRef.kind == InstanceKind.kStackTrace) {
+        return true;
+      }
+      return instanceRef.valueAsString == null;
+    }
+    return (ref?.value is! String?) &&
+        (ref?.value is! num?) &&
+        (ref?.value is! bool?);
   }
 
   Object? get value => ref?.value;
@@ -1001,7 +1028,10 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
 
     if (value is InstanceRef) {
       final kind = value.kind;
-      if (value.valueAsString == null) {
+      if (kind == InstanceKind.kStackTrace) {
+        final depth = children.length;
+        valueStr = 'StackTrace ($depth ${pluralize('frame', depth)})';
+      } else if (value.valueAsString == null) {
         valueStr = value.classRef?.name ?? '';
       } else {
         valueStr = value.valueAsString ?? '';
