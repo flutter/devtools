@@ -221,12 +221,11 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 if (useLegacy || !FeatureFlags.embeddedPerfetto) ...[
-                  ValueListenableBuilder<bool>(
-                    valueListenable: _timelineEventsController.processing,
-                    builder: (context, processing, _) {
-                      final data = controller.data;
-                      final hasData = data != null && !data.isEmpty;
-                      final searchFieldEnabled = hasData && !processing;
+                  ValueListenableBuilder<EventsControllerStatus>(
+                    valueListenable: _timelineEventsController.status,
+                    builder: (context, status, _) {
+                      final searchFieldEnabled =
+                          status == EventsControllerStatus.ready;
                       return _buildSearchField(searchFieldEnabled);
                     },
                   ),
@@ -249,14 +248,15 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
         builder: (context, useLegacy, _) {
           return (useLegacy || !FeatureFlags.embeddedPerfetto)
               ? KeepAliveWrapper(
-                  child: DualValueListenableBuilder<bool, double>(
-                    firstListenable: _timelineEventsController.processing,
+                  child: DualValueListenableBuilder<EventsControllerStatus,
+                      double>(
+                    firstListenable: _timelineEventsController.status,
                     secondListenable: _timelineEventsController
                         .legacyController.processor.progressNotifier,
-                    builder: (context, processing, processingProgress, _) {
+                    builder: (context, status, processingProgress, _) {
                       return TimelineEventsView(
                         controller: _timelineEventsController,
-                        processing: processing,
+                        processing: status == EventsControllerStatus.processing,
                         processingProgress: processingProgress,
                       );
                     },

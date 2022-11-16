@@ -26,6 +26,7 @@ import 'panes/controls/enhance_tracing/enhance_tracing.dart';
 import 'panes/controls/layer_debugging_options.dart';
 import 'panes/controls/performance_settings.dart';
 import 'panes/flutter_frames/flutter_frames_chart.dart';
+import 'panes/timeline_events/timeline_events_controller.dart';
 import 'performance_controller.dart';
 import 'performance_model.dart';
 import 'tabbed_performance_view.dart';
@@ -152,12 +153,12 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        ValueListenableBuilder<bool>(
-          valueListenable: controller.timelineEventsController.processing,
-          builder: (context, processing, _) {
+        ValueListenableBuilder<EventsControllerStatus>(
+          valueListenable: controller.timelineEventsController.status,
+          builder: (context, status, _) {
             return _PrimaryControls(
               controller: controller,
-              processing: processing,
+              processing: status == EventsControllerStatus.processing,
               onClear: () => setState(() {}),
             );
           },

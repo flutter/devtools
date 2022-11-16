@@ -37,11 +37,25 @@ import 'timeline_event_processor.dart';
 /// Debugging flag to load sample trace events from [simple_trace_example.dart].
 bool debugSimpleTrace = false;
 
+enum EventsControllerStatus {
+  empty,
+  processing,
+  ready,
+}
+
 class TimelineEventsController extends PerformanceFeatureController
     with AutoDisposeControllerMixin {
   TimelineEventsController(super.performanceController) {
     legacyController = LegacyTimelineEventsController(performanceController);
     perfettoController = PerfettoController(performanceController);
+    addAutoDisposeListener(_workTracker.active, () {
+      final active = _workTracker.active.value;
+      if (active) {
+        _status.value = EventsControllerStatus.processing;
+      } else {
+        _status.value = EventsControllerStatus.ready;
+      }
+    });
   }
 
   /// Controller that contains business logic for the legacy trace viewer.
@@ -75,7 +89,10 @@ class TimelineEventsController extends PerformanceFeatureController
       FeatureFlags.embeddedPerfetto && !useLegacyTraceViewer.value;
 
   /// Whether the recorded timeline data is currently being processed.
-  ValueListenable<bool> get processing => _workTracker.active;
+  ValueListenable<EventsControllerStatus> get status => _status;
+  final _status =
+      ValueNotifier<EventsControllerStatus>(EventsControllerStatus.empty);
+
   final _workTracker = FutureWorkTracker();
 
   // TODO(jacobr): this isn't accurate. Another page of DevTools
@@ -498,6 +515,7 @@ class TimelineEventsController extends PerformanceFeatureController
     threadNamesById.clear();
     _workTracker.clear();
     legacyController.clearData();
+    _status.value = EventsControllerStatus.empty;
     if (FeatureFlags.embeddedPerfetto) {
       await perfettoController.clear();
     }
