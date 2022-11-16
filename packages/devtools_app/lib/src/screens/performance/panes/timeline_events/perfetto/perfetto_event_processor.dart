@@ -58,9 +58,6 @@ class PerfettoEventProcessor extends BaseTraceEventProcessor {
         // reassigned.
         _endFrameId = max(_endFrameId ?? -1, frameNumberFromEvent);
       }
-      if (frameNumberFromEvent == 1018) {
-        print('this is the event ');
-      }
 
       if (eventWrapper.event.timestampMicros == null) continue;
 
@@ -99,7 +96,8 @@ extension FrameIdentifierExtension on TraceEventWrapper {
   /// Returns the flutter frame number for this trace event, or null if it does
   /// not exist.
   int? get flutterFrameNumber {
-    final frameNumber = event.args![TraceEvent.frameNumberArg];
-    return frameNumber != null ? int.tryParse(frameNumber) : null;
+    final frameNumber = event.args?[TraceEvent.frameNumberArg];
+    if (frameNumber == null) return null;
+    return int.tryParse(frameNumber);
   }
 }
