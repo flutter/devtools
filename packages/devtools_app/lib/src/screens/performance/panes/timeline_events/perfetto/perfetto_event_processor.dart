@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 
 import '../../../../../primitives/trace_event.dart';
@@ -54,7 +56,7 @@ class PerfettoEventProcessor extends BaseTraceEventProcessor {
         _startFrameId ??= frameNumberFromEvent;
         // We process events in timestamp order, so [_endFrameId] will always be
         // reassigned.
-        _endFrameId = frameNumberFromEvent;
+        _endFrameId = max(_endFrameId ?? -1, frameNumberFromEvent);
       }
       if (frameNumberFromEvent == 1018) {
         print('this is the event ');
