@@ -18,7 +18,7 @@ import 'package:stager/stager.dart';
 import '../../../test_infra/test_data/memory/heap/heap_data.dart';
 
 /// To run:
-/// flutter run -t test/scenes/memory/diff_snapshot.stager_app.dart -d macos
+/// flutter run -t test/test_infra/scenes/memory/diff_snapshot.stager_app.dart -d macos
 class DiffSnapshotScene extends Scene {
   late DiffPaneController diffController;
   late FakeServiceManager fakeServiceManager;
