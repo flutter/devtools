@@ -42,7 +42,7 @@ class LegacyTimelineEventProcessor {
   /// Notifies with the current progress value of processing Timeline data.
   ///
   /// This value should sit between 0.0 and 1.0.
-  ValueListenable get progressNotifier => _progressNotifier;
+  ValueListenable<double> get progressNotifier => _progressNotifier;
   final _progressNotifier = ValueNotifier<double>(0.0);
 
   int _traceEventsProcessed = 0;

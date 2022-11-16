@@ -498,7 +498,7 @@ class FlutterFramesChartItem extends StatelessWidget {
         ),
       );
     }
-    unawaited(framesController.toggleSelectedFrame(frame));
+    framesController.handleSelectedFrame(frame);
   }
 }
 
@@ -516,7 +516,7 @@ class FlutterFrameTooltip extends StatelessWidget {
 
   final bool hasShaderJank;
 
-  static const double _moreInfoLinkWidth = 85.0;
+  static const double _moreInfoLinkWidth = 100.0;
 
   static const _textMeasurementBuffer = 4.0;
 
