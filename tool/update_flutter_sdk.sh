@@ -29,6 +29,7 @@ if [[ $UPDATE_LOCALLY = "--local" ]]; then
   FLUTTER_DIR="$FLUTTER_BIN/.."
 
   pushd $FLUTTER_DIR
+  # TODO: add a check here to verify that upstream is the remote flutter/flutter
   # Stash any local flutter SDK changes if they exist.
   git stash
   git checkout upstream/master
@@ -51,7 +52,7 @@ if [ -d "$FLUTTER_DIR" ]; then
 
   # switch to the specified version
   pushd $FLUTTER_DIR
-  git fetch upstream
+  git fetch
   git checkout $REQUIRED_FLUTTER_BRANCH -f
   ./bin/flutter --version
   popd
