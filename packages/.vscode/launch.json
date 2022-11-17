@@ -5,6 +5,12 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "opened test or devtools",
+            "cwd": "devtools_app",
+            "request": "launch",
+            "type": "dart",
+        },
+        {
             "name": "devtools",
             "cwd": "devtools_app",
             "request": "launch",
