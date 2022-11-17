@@ -47,7 +47,7 @@ class TimelineEventsController extends PerformanceFeatureController
     with AutoDisposeControllerMixin {
   TimelineEventsController(super.performanceController) {
     legacyController = LegacyTimelineEventsController(performanceController);
-    perfettoController = createPerfettoController(performanceController);
+    perfettoController = createPerfettoController(performanceController, this);
     addAutoDisposeListener(_workTracker.active, () {
       final active = _workTracker.active.value;
       if (active) {

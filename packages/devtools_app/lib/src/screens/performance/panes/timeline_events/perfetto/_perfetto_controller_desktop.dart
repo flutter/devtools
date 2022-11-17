@@ -5,5 +5,8 @@
 import 'perfetto_controller.dart';
 
 class PerfettoControllerImpl extends PerfettoController {
-  PerfettoControllerImpl(super.performanceController);
+  PerfettoControllerImpl(
+    super.performanceController,
+    super.timelineEventsController,
+  );
 }
