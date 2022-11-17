@@ -142,9 +142,9 @@ void main() {
       final refresh = find.text('Refresh');
       expect(refresh, findsOneWidget);
 
-      expect(find.text('Trace'), findsOneWidget);
+      expect(find.text('Trace'), findsNWidgets(2));
       expect(find.text('Class'), findsOneWidget);
-      expect(find.text('Instances'), findsOneWidget);
+      expect(find.text('Delta'), findsOneWidget);
 
       // There should be classes in the example class list.
       expect(find.byType(Checkbox), findsNWidgets(classList.classes!.length));
@@ -304,9 +304,9 @@ void main() {
       final refresh = find.text('Refresh');
       expect(refresh, findsOneWidget);
 
-      expect(find.text('Trace'), findsOneWidget);
+      expect(find.text('Trace'), findsNWidgets(2));
       expect(find.text('Class'), findsOneWidget);
-      expect(find.text('Instances'), findsOneWidget);
+      expect(find.text('Delta'), findsOneWidget);
 
       // There should be classes in the example class list.
       expect(find.byType(Checkbox), findsNWidgets(classList.classes!.length));
