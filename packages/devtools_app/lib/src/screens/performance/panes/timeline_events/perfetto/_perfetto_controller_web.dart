@@ -13,8 +13,7 @@ import '../../../../../primitives/auto_dispose.dart';
 import '../../../../../primitives/trace_event.dart';
 import '../../../../../primitives/utils.dart';
 import '../../../../../shared/globals.dart';
-import '../../../performance_controller.dart';
-import 'perfetto_event_processor.dart';
+import 'perfetto_controller.dart';
 
 /// Flag to enable embedding an instance of the Perfetto UI running on
 /// localhost.
@@ -37,14 +36,14 @@ const _debugUseLocalPerfetto = false;
 /// [_viewIdIncrementer] is used to create.
 var _viewIdIncrementer = 0;
 
-class PerfettoController extends DisposableController
+class PerfettoControllerImpl extends PerfettoController
     with AutoDisposeControllerMixin {
-  PerfettoController(this.performanceController) {
-    processor = PerfettoEventProcessor(performanceController);
-  }
+  PerfettoControllerImpl(
+    super.performanceController,
+    super.timelineEventsController,
+  );
 
-  final PerformanceController performanceController;
-
+  @override
   late final viewId = 'embedded-perfetto-${_viewIdIncrementer++}';
 
   /// Url when running Perfetto locally following the instructions here:
@@ -86,8 +85,6 @@ class PerfettoController extends DisposableController
   /// [post_message_handler.ts] will not try to handle this message and warn
   /// "Unknown postMessage() event received".
   static const _devtoolsThemeChange = 'DART-DEVTOOLS-THEME-CHANGE';
-
-  late final PerfettoEventProcessor processor;
 
   String get _perfettoUrl {
     if (_debugUseLocalPerfetto) {
@@ -138,6 +135,7 @@ class PerfettoController extends DisposableController
   /// [TimelineEventsController.isActiveFeature] is false).
   bool? pendingLoadDarkMode;
 
+  @override
   void init() {
     _perfettoIFrameReady = Completer();
     _perfettoHandlerReady = Completer();
@@ -176,6 +174,7 @@ class PerfettoController extends DisposableController
     }
   }
 
+  @override
   Future<void> onBecomingActive() async {
     if (pendingLoadDarkMode != null) {
       unawaited(_loadStyle(pendingLoadDarkMode!));
@@ -190,8 +189,9 @@ class PerfettoController extends DisposableController
     }
   }
 
+  @override
   Future<void> loadTrace(List<TraceEventWrapper> devToolsTraceEvents) async {
-    if (!performanceController.timelineEventsController.isActiveFeature) {
+    if (!timelineEventsController.isActiveFeature) {
       pendingTraceEventsToLoad = List.from(devToolsTraceEvents);
       return;
     }
@@ -215,8 +215,9 @@ class PerfettoController extends DisposableController
     });
   }
 
+  @override
   Future<void> scrollToTimeRange(TimeRange timeRange) async {
-    if (!performanceController.timelineEventsController.isActiveFeature) {
+    if (!timelineEventsController.isActiveFeature) {
       pendingScrollToTimeRange = timeRange;
       return;
     }
@@ -244,7 +245,7 @@ class PerfettoController extends DisposableController
 
   Future<void> _loadStyle(bool darkMode) async {
     if (!isExternalBuild) return;
-    if (!performanceController.timelineEventsController.isActiveFeature) {
+    if (!timelineEventsController.isActiveFeature) {
       pendingLoadDarkMode = darkMode;
       return;
     }
@@ -336,6 +337,7 @@ class PerfettoController extends DisposableController
     }
   }
 
+  @override
   Future<void> clear() async {
     await loadTrace([]);
   }
