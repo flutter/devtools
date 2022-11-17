@@ -31,8 +31,7 @@ import '../../performance_utils.dart';
 import '../../simple_trace_example.dart';
 import '../flutter_frames/flutter_frame_model.dart';
 import 'legacy/legacy_event_processor.dart';
-import 'perfetto/_perfetto_controller_desktop.dart'
-    if (dart.library.html) 'perfetto/_perfetto_controller_web.dart';
+import 'perfetto/perfetto_controller.dart';
 import 'timeline_event_processor.dart';
 
 /// Debugging flag to load sample trace events from [simple_trace_example.dart].
@@ -48,7 +47,7 @@ class TimelineEventsController extends PerformanceFeatureController
     with AutoDisposeControllerMixin {
   TimelineEventsController(super.performanceController) {
     legacyController = LegacyTimelineEventsController(performanceController);
-    perfettoController = PerfettoController(performanceController);
+    perfettoController = createPerfettoController(performanceController);
     addAutoDisposeListener(_workTracker.active, () {
       final active = _workTracker.active.value;
       if (active) {
