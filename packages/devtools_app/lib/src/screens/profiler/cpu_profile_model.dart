@@ -560,7 +560,6 @@ class CpuProfileData {
     // of all stacks, regardless of entrypoint. This should never be seen in the
     // final output from this method.
     const int kRootId = 0;
-    int nextId = kRootId;
     final traceObject = <String, dynamic>{
       CpuProfileData.sampleCountKey: cpuSamples.sampleCount,
       CpuProfileData.samplePeriodKey: cpuSamples.samplePeriod,
