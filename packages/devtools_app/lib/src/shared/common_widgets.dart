@@ -860,8 +860,10 @@ class ToolbarAction extends StatelessWidget {
     this.tooltip,
     Key? key,
     this.size,
+    this.style,
   }) : super(key: key);
 
+  final TextStyle? style;
   final IconData icon;
   final String? tooltip;
   final VoidCallback? onPressed;
@@ -873,9 +875,14 @@ class ToolbarAction extends StatelessWidget {
       style: TextButton.styleFrom(
         padding: EdgeInsets.zero,
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        textStyle: style,
       ),
       onPressed: onPressed,
-      child: Icon(icon, size: size ?? actionsIconSize),
+      child: Icon(
+        icon,
+        size: size ?? actionsIconSize,
+        color: style?.color,
+      ),
     );
 
     return tooltip == null
@@ -2014,8 +2021,10 @@ class CopyToClipboardControl extends StatelessWidget {
     this.size,
     this.gaScreen,
     this.gaItem,
+    this.style,
   });
 
+  final TextStyle? style;
   final ClipboardDataProvider? dataProvider;
   final String? successMessage;
   final String tooltip;
@@ -2043,6 +2052,7 @@ class CopyToClipboardControl extends StatelessWidget {
       onPressed: onPressed,
       key: buttonKey,
       size: size,
+      style: style,
     );
   }
 }
