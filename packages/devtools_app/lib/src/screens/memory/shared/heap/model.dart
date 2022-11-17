@@ -140,6 +140,7 @@ class ClassOnlyHeapPath {
           isLong: false,
         ),
         inverted: inverted,
+        skipObject: true,
       );
 
   String toLongString({
@@ -190,11 +191,24 @@ class ClassOnlyHeapPath {
   }
 
   static String _asString({
-    required List<String> data,
+    required Iterable<String> data,
     required String delimiter,
     required bool inverted,
-  }) =>
-      (inverted ? data.reversed : data).join(delimiter);
+    bool skipObject = false,
+  }) {
+    if (skipObject) data = data.take(data.length - 1);
+    if (inverted) data = data.toList().reversed;
+    var result = data.join(delimiter);
+    if (!skipObject) return result;
+
+    if (inverted) {
+      result = '$delimiter$result'.trim();
+    } else {
+      result = '$result$delimiter'.trim();
+    }
+
+    return result;
+  }
 
   @override
   bool operator ==(Object other) {
