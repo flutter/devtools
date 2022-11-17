@@ -140,33 +140,31 @@ class _AllocationTracingInstructions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(densePadding),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'To trace allocations for a class, enable the '
-            'checkbox for that class in the table.',
-          ),
-          Row(
-            children: [
-              const Text(
-                'After interacting with your app, come '
-                'back to tab and click the refresh button ',
-              ),
-              Icon(
-                Icons.refresh,
-                size: defaultIconSize,
-              ),
-            ],
-          ),
-          const Text(
-            'to view the tree of collected stack '
-            'traces of constructor calls.',
-          ),
-        ],
-      ),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text(
+          'To trace allocations for a class, enable the '
+          'checkbox for that class in the table.',
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              'After interacting with your app, come '
+              'back to tab and click the refresh button ',
+            ),
+            Icon(
+              Icons.refresh,
+              size: defaultIconSize,
+            ),
+          ],
+        ),
+        const Text(
+          'to view the tree of collected stack '
+          'traces of constructor calls.',
+        ),
+      ],
     );
   }
 }

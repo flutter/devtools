@@ -5,7 +5,6 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../../../../shared/split.dart';
-import '../../../../../../shared/theme.dart';
 import '../../../../shared/heap/heap.dart';
 import '../../controller/simple_controllers.dart';
 import 'path.dart';
@@ -31,8 +30,7 @@ class HeapClassDetails extends StatelessWidget {
   Widget build(BuildContext context) {
     final theEntries = entries;
     if (theEntries == null) {
-      return const Padding(
-        padding: EdgeInsets.all(densePadding),
+      return const Center(
         child: Text('Click a table row to see retaining paths here.'),
       );
     }
@@ -48,8 +46,7 @@ class HeapClassDetails extends StatelessWidget {
       valueListenable: selection,
       builder: (_, selection, __) {
         if (selection == null) {
-          return const Padding(
-            padding: EdgeInsets.all(densePadding),
+          return const Center(
             child: Text(
               'Click a table row to see the detailed path.',
             ),
