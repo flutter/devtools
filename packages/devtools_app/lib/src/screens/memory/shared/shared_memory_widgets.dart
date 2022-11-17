@@ -28,7 +28,7 @@ class HeapClassView extends StatelessWidget {
         Expanded(
           child: maybeWrapWithTooltip(
             tooltip: theClass.fullName,
-            child: Text(theClass.className, overflow: TextOverflow.ellipsis),
+            child: Text(theClass.shortName, overflow: TextOverflow.ellipsis),
           ),
         ),
         if (showCopyButton)
