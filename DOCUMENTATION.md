@@ -3,7 +3,7 @@ The documenatation for Dart & Flutter DevTools lives on [flutter.dev](https://do
 
 Our docs are written and pushed up the the [flutter/website](https://docs.flutter.dev/development/tools/devtools/overview)
 repo by the Flutter DevRel team. Developers working on DevTools should collaborate with Flutter tech writers by following
-the below worflow.
+the below workflow.
 
 ## How to request documenation updates
 
