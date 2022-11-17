@@ -7,9 +7,9 @@ import 'package:vm_service/vm_service.dart';
 import '../../../../analytics/analytics.dart' as ga;
 import '../../../../analytics/constants.dart' as analytics_constants;
 import '../../../../analytics/metrics.dart';
+import '../../../../primitives/utils.dart';
 import '../../primitives/class_name.dart';
 import '../../primitives/memory_utils.dart';
-import '../../../../primitives/utils.dart';
 
 /// Names for json fields.
 class _JsonFields {
