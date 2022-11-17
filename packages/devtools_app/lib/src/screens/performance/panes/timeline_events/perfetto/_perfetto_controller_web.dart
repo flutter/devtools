@@ -188,7 +188,7 @@ class PerfettoControllerImpl extends PerfettoController
 
   @override
   Future<void> loadTrace(List<TraceEventWrapper> devToolsTraceEvents) async {
-    if (!timelineEventsController.isActiveFeature) {
+    if (!performanceController.timelineEventsController.isActiveFeature) {
       pendingTraceEventsToLoad = List.from(devToolsTraceEvents);
       return;
     }
@@ -214,7 +214,7 @@ class PerfettoControllerImpl extends PerfettoController
 
   @override
   Future<void> scrollToTimeRange(TimeRange timeRange) async {
-    if (!timelineEventsController.isActiveFeature) {
+    if (!performanceController.timelineEventsController.isActiveFeature) {
       pendingScrollToTimeRange = timeRange;
       return;
     }
@@ -242,7 +242,7 @@ class PerfettoControllerImpl extends PerfettoController
 
   Future<void> _loadStyle(bool darkMode) async {
     if (!isExternalBuild) return;
-    if (!timelineEventsController.isActiveFeature) {
+    if (!performanceController.timelineEventsController.isActiveFeature) {
       pendingLoadDarkMode = darkMode;
       return;
     }

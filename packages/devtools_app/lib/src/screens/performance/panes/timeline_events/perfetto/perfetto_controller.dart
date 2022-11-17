@@ -6,7 +6,6 @@ import '../../../../../primitives/auto_dispose.dart';
 import '../../../../../primitives/trace_event.dart';
 import '../../../../../primitives/utils.dart';
 import '../../../performance_controller.dart';
-import '../timeline_events_controller.dart';
 import '_perfetto_controller_desktop.dart'
     if (dart.library.html) '_perfetto_controller_web.dart';
 import 'perfetto_event_processor.dart';
@@ -18,15 +17,13 @@ PerfettoControllerImpl createPerfettoController(
 }
 
 abstract class PerfettoController extends DisposableController {
-  PerfettoController(PerformanceController performanceController)
-      : timelineEventsController =
-            performanceController.timelineEventsController {
+  PerfettoController(this.performanceController) {
     processor = PerfettoEventProcessor(performanceController);
   }
 
   String get viewId => '';
 
-  final TimelineEventsController timelineEventsController;
+  final PerformanceController performanceController;
 
   late final PerfettoEventProcessor processor;
 
