@@ -5,7 +5,7 @@ Our docs are written and pushed up the the [flutter/website](https://docs.flutte
 repo by the Flutter DevRel team. Developers working on DevTools should collaborate with Flutter tech writers by following
 the below workflow.
 
-## How to request documenation updates
+## How to request documentation updates
 
 1. Create a [Screencast](chrome://extensions/?id=ccbdlfckiiklnpopmgihhnegpbcgceja) (preferred) or a Google Drive video
 explaining the new feature or functionality changes that require docs updates. If the feature is quick to document, you
