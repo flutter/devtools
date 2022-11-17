@@ -9,6 +9,7 @@ import '../../../../analytics/constants.dart' as analytics_constants;
 import '../../../../analytics/metrics.dart';
 import '../../primitives/class_name.dart';
 import '../../primitives/memory_utils.dart';
+import '../../../../primitives/utils.dart';
 
 /// Names for json fields.
 class _JsonFields {
@@ -191,23 +192,15 @@ class ClassOnlyHeapPath {
   }
 
   static String _asString({
-    required Iterable<String> data,
+    required List<String> data,
     required String delimiter,
     required bool inverted,
     bool skipObject = false,
   }) {
-    if (skipObject) data = data.take(data.length - 1);
-    if (inverted) data = data.toList().reversed;
-    var result = data.join(delimiter);
-    if (!skipObject) return result;
-
-    if (inverted) {
-      result = '$delimiter$result'.trim();
-    } else {
-      result = '$result$delimiter'.trim();
-    }
-
-    return result;
+    data = data.joinWith(delimiter).toList();
+    if (skipObject) data.removeAt(data.length - 1);
+    if (inverted) data = data.reversed.toList();
+    return data.join().trim();
   }
 
   @override
