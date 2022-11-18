@@ -61,8 +61,6 @@ class MemoryChartWidget extends StatelessWidget {
       ),
     );
 
-    return const Placeholder();
-
     iterator = vms.entries.iterator;
     while (iterator.moveNext()) {
       final legendEntry = iterator.current;
@@ -95,7 +93,7 @@ class MemoryChartWidget extends StatelessWidget {
       }
     }
 
-    return Icon(Icons.access_alarms);
+    return const Placeholder();
 
     return Container(
       padding: const EdgeInsets.fromLTRB(0, 5, 5, 8),
