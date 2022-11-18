@@ -15,8 +15,14 @@ import 'memory_events_pane.dart';
 import 'memory_vm_chart.dart';
 
 class MemoryChartWidget extends StatelessWidget {
-  const MemoryChartWidget({super.key, required this.isAndroidVisible});
+  const MemoryChartWidget({
+    super.key,
+    required this.isAndroidVisible,
+    required this.chartController,
+  });
+
   final bool isAndroidVisible;
+  final MemoryChartPaneController chartController;
 
   @override
   Widget build(BuildContext context) {
