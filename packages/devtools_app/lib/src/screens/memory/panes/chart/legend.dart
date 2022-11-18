@@ -99,7 +99,7 @@ class MemoryChartWidget extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(0, 5, 5, 8),
       decoration: BoxDecoration(
         color: colorScheme.defaultBackgroundColor,
-        border: Border.all(color: Colors.yellow),
+        border: Border.all(color: theme.focusColor),
         borderRadius: BorderRadius.circular(10.0),
       ),
       child: Column(
