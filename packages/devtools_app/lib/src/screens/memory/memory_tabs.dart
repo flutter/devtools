@@ -56,20 +56,20 @@ class _MemoryTabsState extends State<MemoryTabs>
         gaPrefix: _gaPrefix,
       ),
       DevToolsTab.create(
-        key: MemoryScreenKeys.dartHeapAllocationTracingTab,
-        tabName: 'Allocation Tracing',
-        gaPrefix: _gaPrefix,
-      ),
-      DevToolsTab.create(
         key: MemoryScreenKeys.diffTab,
         gaPrefix: _gaPrefix,
         tabName: 'Diff',
+      ),
+      DevToolsTab.create(
+        key: MemoryScreenKeys.dartHeapAllocationTracingTab,
+        tabName: 'Trace',
+        gaPrefix: _gaPrefix,
       ),
       if (widget.controller.shouldShowLeaksTab.value)
         DevToolsTab.create(
           key: MemoryScreenKeys.leaksTab,
           gaPrefix: _gaPrefix,
-          tabName: 'Leaks',
+          tabName: 'Detect Leaks',
         ),
     ];
 
@@ -131,20 +131,21 @@ class _MemoryTabsState extends State<MemoryTabs>
             physics: defaultTabBarViewPhysics,
             controller: _tabController,
             children: [
-              // Profile Tab
+              // Profile tab.
               KeepAliveWrapper(
                 child: AllocationProfileTableView(
                   controller: controller.allocationProfileController,
                 ),
-              ),
-              const KeepAliveWrapper(
-                child: AllocationProfileTracingView(),
               ),
               // Diff tab.
               KeepAliveWrapper(
                 child: DiffPane(
                   diffController: controller.diffPaneController,
                 ),
+              ),
+              // Trace tab.
+              const KeepAliveWrapper(
+                child: AllocationProfileTracingView(),
               ),
               // Leaks tab.
               if (controller.shouldShowLeaksTab.value)

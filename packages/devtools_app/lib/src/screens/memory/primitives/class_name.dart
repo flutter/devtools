@@ -43,7 +43,7 @@ class HeapClassName {
   final String className;
   final String library;
 
-  String get fullName => library.isNotEmpty ? '$library/$className' : className;
+  String get fullName => library.isNotEmpty ? '$library/$shortName' : shortName;
 
   bool get isSentinel => className == 'Sentinel' && library.isEmpty;
 
@@ -69,6 +69,11 @@ class HeapClassName {
     // class names.
     assert(false, 'Unexpected library for $className: $library.');
     return false;
+  }
+
+  String get shortName {
+    if (className == 'Context' && library == '') return 'Closure Context';
+    return className;
   }
 
   /// True, if the library does not belong to a package.

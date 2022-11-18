@@ -9,6 +9,7 @@ import '../../../../../analytics/constants.dart' as analytics_constants;
 import '../../../../../primitives/utils.dart';
 import '../../../../../shared/table/table.dart';
 import '../../../../../shared/table/table_data.dart';
+import '../../../../../shared/theme.dart';
 import '../../../../../shared/utils.dart';
 import '../../../primitives/simple_elements.dart';
 import '../../../shared/heap/heap.dart';
@@ -41,12 +42,16 @@ class _ClassNameColumn extends ColumnData<SingleClassStats>
     SingleClassStats data, {
     bool isRowSelected = false,
     VoidCallback? onPressed,
-  }) =>
-      HeapClassView(
-        theClass: data.heapClass,
-        showCopyButton: isRowSelected,
-        copyGaItem: analytics_constants.MemoryEvent.diffClassSingleCopy,
-      );
+  }) {
+    final theme = Theme.of(context);
+    return HeapClassView(
+      theClass: data.heapClass,
+      showCopyButton: isRowSelected,
+      copyGaItem: analytics_constants.MemoryEvent.diffClassSingleCopy,
+      textStyle:
+          isRowSelected ? theme.selectedTextStyle : theme.regularTextStyle,
+    );
+  }
 }
 
 class _InstanceColumn extends ColumnData<SingleClassStats> {
