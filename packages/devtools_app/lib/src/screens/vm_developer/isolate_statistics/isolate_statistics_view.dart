@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../primitives/simple_items.dart';
 import '../../../primitives/utils.dart';
 import '../../../shared/common_widgets.dart';
 import '../../../shared/split.dart';
@@ -28,7 +27,7 @@ class IsolateStatisticsView extends VMDeveloperView {
           title: 'Isolates',
           icon: Icons.bar_chart,
         );
-  static const id = ScreenIds.isolateStatistics;
+  static const id = 'isolate-statistics';
 
   @override
   bool get showIsolateSelector => true;

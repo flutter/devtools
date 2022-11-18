@@ -5,7 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../primitives/simple_items.dart';
 import '../../../primitives/utils.dart';
 import '../../../shared/common_widgets.dart';
 import '../../../shared/table/table.dart';
@@ -23,7 +22,7 @@ class VMStatisticsView extends VMDeveloperView {
           title: 'VM',
           icon: Icons.devices,
         );
-  static const id = ScreenIds.vmStatistics;
+  static const id = 'vm-statistics';
 
   @override
   Widget build(BuildContext context) => VMStatisticsViewBody();
