@@ -291,14 +291,6 @@ class MemoryController extends DisposableController
 
   final isAndroidChartVisibleNotifier = ValueNotifier<bool>(false);
 
-  final _updateClassStackTraces = ValueNotifier(0);
-
-  ValueListenable<int> get updateClassStackTraces => _updateClassStackTraces;
-
-  void changeStackTraces() {
-    _updateClassStackTraces.value += 1;
-  }
-
   String? get _isolateId =>
       serviceManager.isolateManager.selectedIsolate.value?.id;
 
