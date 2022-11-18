@@ -27,6 +27,88 @@ class MemoryChartWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Placeholder();
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final legendHeading = theme.hoverTextStyle;
+
+    final legendRows = <Widget>[];
+
+    final events = eventLegendContent(colorScheme.isLight);
+    legendRows.add(
+      Container(
+        padding: legendTitlePadding,
+        child: Text('Events Legend', style: legendHeading),
+      ),
+    );
+
+    var iterator = events.entries.iterator;
+    while (iterator.moveNext()) {
+      final leftEntry = iterator.current;
+      final rightEntry = iterator.moveNext() ? iterator.current : null;
+      legendRows.add(
+        LegendRow(
+          entry1: leftEntry,
+          entry2: rightEntry,
+          chartController: chartController,
+        ),
+      );
+    }
+
+    final vms = vmLegendContent(chartController.vm);
+    legendRows.add(
+      Container(
+        padding: legendTitlePadding,
+        child: Text('Memory Legend', style: legendHeading),
+      ),
+    );
+
+    iterator = vms.entries.iterator;
+    while (iterator.moveNext()) {
+      final legendEntry = iterator.current;
+      legendRows.add(
+        LegendRow(
+          entry1: legendEntry,
+          chartController: chartController,
+        ),
+      );
+    }
+
+    if (isAndroidVisible) {
+      final androids = androidLegendContent(chartController.android);
+      legendRows.add(
+        Container(
+          padding: legendTitlePadding,
+          child: Text('Android Legend', style: legendHeading),
+        ),
+      );
+
+      iterator = androids.entries.iterator;
+      while (iterator.moveNext()) {
+        final legendEntry = iterator.current;
+        legendRows.add(
+          LegendRow(
+            entry1: legendEntry,
+            chartController: chartController,
+          ),
+        );
+      }
+    }
+
+    return Icon(Icons.access_alarms);
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(0, 5, 5, 8),
+      decoration: BoxDecoration(
+        color: colorScheme.defaultBackgroundColor,
+        border: Border.all(color: Colors.yellow),
+        borderRadius: BorderRadius.circular(10.0),
+      ),
+      width: legendWidth,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: legendRows,
+      ),
+    );
   }
 }
 
