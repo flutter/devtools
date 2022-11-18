@@ -238,9 +238,12 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
                 secondListenable: controller.isAndroidChartVisibleNotifier,
                 builder: (_, isLegendVisible, isAndroidChartVisible, __) {
                   if (!isLegendVisible) return const SizedBox.shrink();
-                  return MemoryChartWidget(
-                    isAndroidVisible: isAndroidChartVisible,
-                    chartController: widget.chartController,
+                  return Padding(
+                    padding: const EdgeInsets.only(right: denseSpacing),
+                    child: MemoryChartWidget(
+                      isAndroidVisible: isAndroidChartVisible,
+                      chartController: widget.chartController,
+                    ),
                   );
                 },
               ),
