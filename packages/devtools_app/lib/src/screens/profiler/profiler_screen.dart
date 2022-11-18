@@ -11,7 +11,6 @@ import 'package:vm_service/vm_service.dart' hide Stack;
 import '../../analytics/analytics.dart' as ga;
 import '../../analytics/analytics_common.dart';
 import '../../analytics/constants.dart' as analytics_constants;
-import '../../config_specific/import_export/import_export.dart';
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../primitives/listenable.dart';
 import '../../shared/banner_messages.dart';
@@ -428,12 +427,9 @@ class _SecondaryControls extends StatelessWidget {
   }
 
   void _exportPerformance(BuildContext context) {
-    final exportedFile = controller.exportData();
+    controller.exportData();
     // TODO(kenz): investigate if we need to do any error handling here. Is the
     // download always successful?
-    // TODO(peterdjlee): find a way to push the notification logic into the
-    // export controller.
-    notificationService.push(successfulExportMessage(exportedFile));
   }
 }
 
