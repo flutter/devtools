@@ -154,7 +154,7 @@ class CpuProfilerController
   ValueNotifier<Flag>? get profilerFlagNotifier =>
       serviceManager.vmFlagManager.flag(vm_flags.profiler);
 
-  ValueNotifier<Flag>? get profileGranularityFlagNotifier =>
+  ValueNotifier<Flag>? get profilePeriodFlag =>
       serviceManager.vmFlagManager.flag(vm_flags.profilePeriod);
 
   /// Whether the profiler is enabled.

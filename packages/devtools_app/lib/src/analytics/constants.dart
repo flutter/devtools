@@ -87,8 +87,8 @@ const analyzeSelectedFrame = 'analyzeSelectedFrame';
 const collectRasterStats = 'collectRasterStats';
 
 // CPU profiler UX actions:
-const profileGranularityPrefix = 'profileGranularity';
-const profileGranularityDocs = 'profileGranularityDocs';
+const cpuSamplingRatePrefix = 'profileGranularity';
+const cpuSamplingRateDocs = 'profileGranularityDocs';
 const loadAllCpuSamples = 'loadAllCpuSamples';
 const profileAppStartUp = 'profileAppStartUp';
 const cpuProfileFlameChartHelp = 'cpuProfileFlameChartHelp';

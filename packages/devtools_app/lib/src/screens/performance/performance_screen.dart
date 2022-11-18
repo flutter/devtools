@@ -21,7 +21,6 @@ import '../../shared/screen.dart';
 import '../../shared/theme.dart';
 import '../../shared/utils.dart';
 import '../../ui/icons.dart';
-import '../../ui/vm_flag_widgets.dart';
 import 'panes/controls/enhance_tracing/enhance_tracing.dart';
 import 'panes/controls/layer_debugging_options.dart';
 import 'panes/controls/performance_settings.dart';
@@ -232,7 +231,7 @@ class SecondaryPerformanceControls extends StatelessWidget {
     required this.controller,
   }) : super(key: key);
 
-  static const minScreenWidthForTextBeforeScaling = 1140.0;
+  static const minScreenWidthForTextBeforeScaling = 920.0;
 
   final PerformanceController controller;
 
@@ -254,15 +253,6 @@ class SecondaryPerformanceControls extends StatelessWidget {
           const SizedBox(width: denseSpacing),
           const MoreDebuggingOptionsButton(),
         ],
-        const SizedBox(width: denseSpacing),
-        ProfileGranularityDropdown(
-          screenId: PerformanceScreen.id,
-          profileGranularityFlagNotifier: controller
-              .timelineEventsController
-              .legacyController
-              .cpuProfilerController
-              .profileGranularityFlagNotifier!,
-        ),
         const SizedBox(width: defaultSpacing),
         OutlinedIconButton(
           icon: Icons.file_download,

@@ -402,10 +402,10 @@ class _SecondaryControls extends StatelessWidget {
               : null,
         ),
         const SizedBox(width: denseSpacing),
-        ProfileGranularityDropdown(
+        CpuSamplingRateDropdown(
           screenId: ProfilerScreen.id,
-          profileGranularityFlagNotifier:
-              controller.cpuProfilerController.profileGranularityFlagNotifier!,
+          profilePeriodFlag:
+              controller.cpuProfilerController.profilePeriodFlag!,
         ),
         const SizedBox(width: denseSpacing),
         ExportButton(

@@ -10,10 +10,12 @@ import '../../../../../primitives/utils.dart';
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/theme.dart';
+import '../../../../../ui/vm_flag_widgets.dart';
 import '../../../../profiler/cpu_profile_controller.dart';
 import '../../../../profiler/cpu_profile_model.dart';
 import '../../../../profiler/cpu_profiler.dart';
 import '../../../performance_model.dart';
+import '../../../performance_screen.dart';
 import '../timeline_events_controller.dart';
 
 class EventDetails extends StatelessWidget {
@@ -40,7 +42,15 @@ class EventDetails extends StatelessWidget {
         children: [
           AreaPaneHeader(
             needsTopBorder: false,
+            tall: true,
             title: Text(_generateHeaderText()),
+            actions: [
+              CpuSamplingRateDropdown(
+                screenId: PerformanceScreen.id,
+                profilePeriodFlag:
+                    legacyController.cpuProfilerController.profilePeriodFlag!,
+              ),
+            ],
           ),
           Expanded(
             child: selectedEvent != null

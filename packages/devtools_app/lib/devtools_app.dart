@@ -53,7 +53,7 @@ export 'src/screens/performance/performance_model.dart';
 export 'src/screens/performance/performance_screen.dart';
 export 'src/screens/performance/timeline_streams.dart';
 export 'src/screens/profiler/cpu_profile_model.dart';
-export 'src/screens/profiler/profile_granularity.dart';
+export 'src/screens/profiler/sampling_rate.dart';
 export 'src/screens/profiler/profiler_screen.dart';
 export 'src/screens/profiler/profiler_screen_controller.dart';
 export 'src/screens/provider/provider_screen.dart';
