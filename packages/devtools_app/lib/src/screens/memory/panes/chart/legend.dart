@@ -40,8 +40,6 @@ class MemoryChartWidget extends StatelessWidget {
       ),
     );
 
-    return const Placeholder();
-
     var iterator = events.entries.iterator;
     while (iterator.moveNext()) {
       final leftEntry = iterator.current;
@@ -62,6 +60,8 @@ class MemoryChartWidget extends StatelessWidget {
         child: Text('Memory Legend', style: legendHeading),
       ),
     );
+
+    return const Placeholder();
 
     iterator = vms.entries.iterator;
     while (iterator.moveNext()) {
