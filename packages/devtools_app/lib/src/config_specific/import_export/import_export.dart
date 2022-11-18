@@ -10,7 +10,6 @@ import 'package:intl/intl.dart';
 import '../../../devtools.dart';
 import '../../primitives/simple_items.dart';
 import '../../primitives/utils.dart';
-import '../../screens/performance/performance_model.dart';
 import '../../shared/connected_app.dart';
 import '../../shared/globals.dart';
 import '_export_stub.dart'
