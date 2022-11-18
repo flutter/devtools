@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/charts/flame_chart.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
@@ -14,10 +12,9 @@ import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
-import '../../../test_infra/matchers.dart';
+import '../../../test_infra/matchers/matchers.dart';
 import '../../../test_infra/test_data/performance.dart';
 
 void main() {
@@ -32,27 +29,20 @@ void main() {
         timelineData: vm_service.Timeline.parse(timelineJson)!,
       ),
     );
-    final app = fakeServiceManager.connectedApp!;
-    when(app.initialized).thenReturn(Completer()..complete(true));
-    when(app.isDartWebAppNow).thenReturn(false);
-    when(app.isFlutterAppNow).thenReturn(true);
-    when(app.flutterVersionNow).thenReturn(
-      FlutterVersion.parse((await fakeServiceManager.flutterVersion).json!),
+    mockConnectedApp(
+      fakeServiceManager.connectedApp!,
+      isFlutterApp: true,
+      isProfileBuild: true,
+      isWebApp: false,
     );
-    when(app.isProfileBuild).thenAnswer((_) => Future.value(true));
-    when(app.isProfileBuildNow).thenReturn(true);
-    when(app.isDartCliAppNow).thenReturn(false);
-    when(app.isDebugFlutterAppNow).thenReturn(false);
     setGlobal(ServiceConnectionManager, fakeServiceManager);
     setGlobal(OfflineModeController, OfflineModeController());
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(NotificationService, NotificationService());
-    when(serviceManager.connectedApp!.isDartWebApp)
-        .thenAnswer((_) => Future.value(false));
   }
 
-  group('TimelineEventsView', () {
+  group('$TimelineEventsView', () {
     setUp(() async {
       await _setUpServiceManagerWithTimeline(testTimelineJson);
     });

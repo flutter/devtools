@@ -1,0 +1,118 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Perfetto Web Test",
+            "type": "dart",
+            "request": "launch",
+            "program": "./test/performance/timeline_events/perfetto/perfetto_test.dart",
+            "args": [
+                "--platform",
+                "chrome"
+            ]
+        },
+        {
+            "name": "devtools_app",
+            "request": "launch",
+            "type": "dart",
+            "args": [
+                "--dart-define=enable_experiments=true"
+            ]
+        },
+        {
+            "name": "devtools_app (profile mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "devtools_app (release mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "flutter_app",
+            "cwd": "test/fixtures/flutter_app",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "flutter_app (profile mode)",
+            "cwd": "test/fixtures/flutter_app",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "flutter_app (release mode)",
+            "cwd": "test/fixtures/flutter_app",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "flutter_error_app",
+            "cwd": "test/fixtures/flutter_error_app",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "flutter_error_app (profile mode)",
+            "cwd": "test/fixtures/flutter_error_app",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "flutter_error_app (release mode)",
+            "cwd": "test/fixtures/flutter_error_app",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "provider_app",
+            "cwd": "test/fixtures/provider_app",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "provider_app (profile mode)",
+            "cwd": "test/fixtures/provider_app",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "provider_app (release mode)",
+            "cwd": "test/fixtures/provider_app",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "riverpod_app",
+            "cwd": "test/fixtures/riverpod_app",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "riverpod_app (profile mode)",
+            "cwd": "test/fixtures/riverpod_app",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "riverpod_app (release mode)",
+            "cwd": "test/fixtures/riverpod_app",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        }
+    ]
+}
