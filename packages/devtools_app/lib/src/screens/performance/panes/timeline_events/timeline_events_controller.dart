@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../../../analytics/analytics.dart' as ga;
 import '../../../../analytics/constants.dart' as analytics_constants;
+import '../../../../analytics/metrics.dart';
 import '../../../../config_specific/logger/allowed_error.dart';
 import '../../../../config_specific/logger/logger.dart';
 import '../../../../http/http_service.dart';
@@ -26,7 +27,6 @@ import '../../../profiler/cpu_profile_service.dart';
 import '../../../profiler/profile_granularity.dart';
 import '../../performance_controller.dart';
 import '../../performance_model.dart';
-import '../../performance_screen.dart';
 import '../../performance_utils.dart';
 import '../../simple_trace_example.dart';
 import '../flutter_frames/flutter_frame_model.dart';

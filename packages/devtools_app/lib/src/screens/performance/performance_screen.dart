@@ -8,9 +8,9 @@ import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 
 import '../../analytics/analytics.dart' as ga;
-import '../../analytics/analytics_common.dart';
 import '../../analytics/constants.dart' as analytics_constants;
 import '../../primitives/auto_dispose_mixin.dart';
+import '../../primitives/simple_items.dart';
 import '../../service/service_extension_widgets.dart';
 import '../../service/service_extensions.dart' as extensions;
 import '../../shared/banner_messages.dart';
@@ -43,7 +43,7 @@ class PerformanceScreen extends Screen {
           icon: Octicons.pulse,
         );
 
-  static const id = 'performance';
+  static const id = ScreenIds.performance;
 
   @override
   String get docPageId => id;
@@ -291,18 +291,4 @@ class SecondaryPerformanceControls extends StatelessWidget {
       ),
     );
   }
-}
-
-class PerformanceScreenMetrics extends ScreenAnalyticsMetrics {
-  PerformanceScreenMetrics({
-    this.uiDuration,
-    this.rasterDuration,
-    this.shaderCompilationDuration,
-    this.traceEventCount,
-  });
-
-  final Duration? uiDuration;
-  final Duration? rasterDuration;
-  final Duration? shaderCompilationDuration;
-  final int? traceEventCount;
 }

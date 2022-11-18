@@ -10,6 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:provider/provider.dart' as provider show Provider;
 
 import '../../analytics/analytics.dart' as ga;
+import '../../primitives/simple_items.dart';
 import '../../shared/banner_messages.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/dialogs.dart';
@@ -55,7 +56,7 @@ class ProviderScreen extends Screen {
           icon: Icons.attach_file,
         );
 
-  static const id = 'provider';
+  static const id = ScreenIds.provider;
 
   @override
   Widget build(BuildContext context) {

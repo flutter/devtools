@@ -12,6 +12,7 @@ import '../../analytics/analytics.dart' as ga;
 import '../../analytics/constants.dart' as analytics_constants;
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../primitives/blocking_action_mixin.dart';
+import '../../primitives/simple_items.dart';
 import '../../service/service_extension_widgets.dart';
 import '../../service/service_extensions.dart' as extensions;
 import '../../shared/common_widgets.dart';
@@ -41,7 +42,7 @@ class InspectorScreen extends Screen {
           icon: Octicons.deviceMobile,
         );
 
-  static const id = 'inspector';
+  static const id = ScreenIds.inspector;
 
   // There is not enough room to safely show the console in the embed view of
   // the DevTools and IDEs have their own consoles.

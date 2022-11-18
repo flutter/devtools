@@ -9,10 +9,10 @@ import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../../analytics/analytics.dart' as ga;
-import '../../analytics/analytics_common.dart';
 import '../../analytics/constants.dart' as analytics_constants;
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../primitives/listenable.dart';
+import '../../primitives/simple_items.dart';
 import '../../shared/banner_messages.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
@@ -47,7 +47,7 @@ class ProfilerScreen extends Screen {
   @visibleForTesting
   static const recordingStatusKey = Key('Recording Status');
 
-  static const id = 'cpu-profiler';
+  static const id = ScreenIds.cpuProfiler;
 
   @override
   String get docPageId => id;
@@ -431,14 +431,4 @@ class _SecondaryControls extends StatelessWidget {
     // TODO(kenz): investigate if we need to do any error handling here. Is the
     // download always successful?
   }
-}
-
-class ProfilerScreenMetrics extends ScreenAnalyticsMetrics {
-  ProfilerScreenMetrics({
-    required this.cpuSampleCount,
-    required this.cpuStackDepth,
-  });
-
-  final int cpuSampleCount;
-  final int cpuStackDepth;
 }
