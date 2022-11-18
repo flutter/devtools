@@ -8,9 +8,9 @@ import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 
 import '../../../devtools.dart';
+import '../../primitives/simple_items.dart';
 import '../../primitives/utils.dart';
 import '../../screens/performance/performance_model.dart';
-import '../../screens/performance/performance_screen.dart';
 import '../../shared/connected_app.dart';
 import '../../shared/globals.dart';
 import '_export_stub.dart'
@@ -167,12 +167,12 @@ abstract class ExportController {
     // This is a workaround to guarantee that DevTools exports are compatible
     // with other trace viewers (catapult, perfetto, chrome://tracing), which
     // require a top level field named "traceEvents".
-    if (activeScreenId == PerformanceScreen.id) {
+    if (activeScreenId == ScreenIds.performance) {
       final traceEvents = List<Map<String, dynamic>>.from(
-        contents[PerformanceData.traceEventsKey],
+        contents[traceEventsFieldName],
       );
-      _contents[PerformanceData.traceEventsKey] = traceEvents;
-      contents.remove(PerformanceData.traceEventsKey);
+      _contents[traceEventsFieldName] = traceEvents;
+      contents.remove(traceEventsFieldName);
     }
     return jsonEncode(_contents..addAll({activeScreenId: contents}));
   }

@@ -41,3 +41,5 @@ class ScreenIds {
   static const memory = 'memory';
   static const logging = 'logging';
 }
+
+const String traceEventsFieldName = 'traceEvents';
