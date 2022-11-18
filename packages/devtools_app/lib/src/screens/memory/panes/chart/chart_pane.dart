@@ -240,7 +240,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
                   if (!isLegendVisible) return const SizedBox.shrink();
                   return Padding(
                     padding: const EdgeInsets.only(right: denseSpacing),
-                    child: MemoryChartWidget(
+                    child: MemoryChartLegend(
                       isAndroidVisible: isAndroidChartVisible,
                       chartController: widget.chartController,
                     ),
