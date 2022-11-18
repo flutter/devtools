@@ -28,7 +28,16 @@ class PackagePrefixes {
 class ScreenIds {
   ScreenIds._();
 
+  static const simple = 'simple';
+
+  static const appSize = 'app-size';
+  static const debugger = 'debugger';
+  static const provider = 'provider';
   static const inspector = 'inspector';
+  static const vmTools = 'vm-tools';
+  static const isolateStatistics = 'isolate-statistics';
+  static const objectInspectorView = 'object-inspector-view';
+  static const vmStatistics = 'vm-statistics';
   static const performance = 'performance';
   static const cpuProfiler = 'cpu-profiler';
   static const network = 'network';
