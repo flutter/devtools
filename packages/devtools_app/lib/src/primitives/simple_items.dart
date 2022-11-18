@@ -24,3 +24,14 @@ class PackagePrefixes {
   /// dart:ui is the library for the Dart part of the Flutter Engine code.
   static const dartUi = 'dart:ui';
 }
+
+class ScreenIds {
+  ScreenIds._();
+
+  static const inspector = 'inspector';
+  static const performance = 'performance';
+  static const cpuProfiler = 'cpu-profiler';
+  static const network = 'network';
+  static const memory = 'memory';
+  static const logging = 'logging';
+}

@@ -14,6 +14,7 @@ import '../../analytics/constants.dart' as analytics_constants;
 import '../../config_specific/import_export/import_export.dart';
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../primitives/listenable.dart';
+import '../../primitives/simple_items.dart';
 import '../../shared/banner_messages.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
@@ -48,7 +49,7 @@ class ProfilerScreen extends Screen {
   @visibleForTesting
   static const recordingStatusKey = Key('Recording Status');
 
-  static const id = 'cpu-profiler';
+  static const id = ScreenIds.cpuProfiler;
 
   @override
   String get docPageId => id;

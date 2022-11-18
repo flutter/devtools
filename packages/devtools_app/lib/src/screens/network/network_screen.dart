@@ -13,6 +13,7 @@ import '../../analytics/constants.dart' as analytics_constants;
 import '../../http/curl_command.dart';
 import '../../http/http_request_data.dart';
 import '../../primitives/auto_dispose_mixin.dart';
+import '../../primitives/simple_items.dart';
 import '../../primitives/utils.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
@@ -39,7 +40,7 @@ class NetworkScreen extends Screen {
           icon: Icons.network_check,
         );
 
-  static const id = 'network';
+  static const id = ScreenIds.network;
 
   @override
   String get docPageId => screenId;

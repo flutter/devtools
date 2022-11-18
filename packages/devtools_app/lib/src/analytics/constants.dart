@@ -2,12 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../screens/inspector/inspector_screen.dart';
-import '../screens/logging/logging_screen.dart';
-import '../screens/memory/memory_screen.dart';
-import '../screens/network/network_screen.dart';
-import '../screens/performance/performance_screen.dart';
-import '../screens/profiler/profiler_screen.dart';
+import '../primitives/simple_items.dart';
 
 // Type of events (event_category):
 const screenViewEvent = 'screen'; // Active screen (tab selected).
@@ -18,12 +13,12 @@ const timingEvent = 'timing'; // Timed operation.
 // These screen ids must match the `screenId` for each respective subclass of
 // [Screen]. This is to ensure that the analytics for documentation links match
 // the screen id for other analytics on the same screen.
-const inspector = InspectorScreen.id;
-const performance = PerformanceScreen.id;
-const cpuProfiler = ProfilerScreen.id;
-const memory = MemoryScreen.id;
-const network = NetworkScreen.id;
-const logging = LoggingScreen.id;
+const inspector = ScreenIds.inspector;
+const performance = ScreenIds.performance;
+const cpuProfiler = ScreenIds.cpuProfiler;
+const memory = ScreenIds.memory;
+const network = ScreenIds.network;
+const logging = ScreenIds.logging;
 
 // GA events not associated with a any screen e.g., hotReload, hotRestart, etc
 const devToolsMain = 'main';
