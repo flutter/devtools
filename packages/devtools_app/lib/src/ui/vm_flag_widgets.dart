@@ -23,12 +23,12 @@ import '../shared/theme.dart';
 class CpuSamplingRateDropdown extends StatelessWidget {
   const CpuSamplingRateDropdown({
     required this.screenId,
-    required this.profilePeriodFlag,
+    required this.profilePeriodFlagNotifier,
   });
 
   final String screenId;
 
-  final ValueNotifier<Flag> profilePeriodFlag;
+  final ValueNotifier<Flag> profilePeriodFlagNotifier;
 
   /// The key to identify the dropdown button.
   @visibleForTesting
@@ -37,7 +37,7 @@ class CpuSamplingRateDropdown extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<Flag>(
-      valueListenable: profilePeriodFlag,
+      valueListenable: profilePeriodFlagNotifier,
       builder: (context, flag, _) {
         // Use [CpuSamplingFrequencyExtension.fromValue] here so we can
         // guarantee that the value corresponds to one of the items in the

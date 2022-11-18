@@ -34,7 +34,7 @@ void main() {
       await fakeServiceManager.flagsInitialized.future;
       dropdown = CpuSamplingRateDropdown(
         screenId: ProfilerScreen.id,
-        profilePeriodFlag:
+        profilePeriodFlagNotifier:
             fakeServiceManager.vmFlagManager.flag(vm_flags.profilePeriod)!,
       );
     });

@@ -47,7 +47,7 @@ class EventDetails extends StatelessWidget {
             actions: [
               CpuSamplingRateDropdown(
                 screenId: PerformanceScreen.id,
-                profilePeriodFlag:
+                profilePeriodFlagNotifier:
                     legacyController.cpuProfilerController.profilePeriodFlag!,
               ),
             ],
