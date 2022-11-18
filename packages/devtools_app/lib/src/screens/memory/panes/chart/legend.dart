@@ -93,16 +93,15 @@ class MemoryChartWidget extends StatelessWidget {
       }
     }
 
-    return const Placeholder();
-
     return Container(
+      width: legendWidth,
+      height: isAndroidVisible ? legendHeight2Charts : legendHeight1Chart,
       padding: const EdgeInsets.fromLTRB(0, 5, 5, 8),
       decoration: BoxDecoration(
         color: colorScheme.defaultBackgroundColor,
         border: Border.all(color: Colors.yellow),
         borderRadius: BorderRadius.circular(10.0),
       ),
-      width: legendWidth,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: legendRows,
