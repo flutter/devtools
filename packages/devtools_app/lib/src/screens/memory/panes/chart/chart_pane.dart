@@ -240,6 +240,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
                   if (!isLegendVisible) return const SizedBox.shrink();
                   return MemoryChartWidget(
                     isAndroidVisible: isAndroidChartVisible,
+                    chartController: widget.chartController,
                   );
                 },
               ),
