@@ -210,12 +210,10 @@ class PerformanceController extends DisposableController
   }
 
   /// Exports the current performance screen data to a .json file.
-  ///
-  /// This method returns the name of the file that was downloaded.
-  String exportData() {
+  void exportData() {
     final encodedData =
         _exportController.encode(PerformanceScreen.id, data!.toJson());
-    return _exportController.downloadFile(encodedData);
+    _exportController.downloadFile(encodedData);
   }
 
   /// Clears the timeline data currently stored by the controller as well the
