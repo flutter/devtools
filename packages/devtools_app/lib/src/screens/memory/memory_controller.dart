@@ -14,7 +14,6 @@ import '../../analytics/constants.dart' as analytics_constants;
 import '../../config_specific/file/file.dart';
 import '../../config_specific/logger/logger.dart';
 import '../../primitives/auto_dispose.dart';
-import '../../primitives/utils.dart';
 import '../../service/service_extensions.dart';
 import '../../service/service_manager.dart';
 import '../../shared/globals.dart';
