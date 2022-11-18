@@ -27,7 +27,6 @@ import '../../../profiler/cpu_profile_service.dart';
 import '../../../profiler/profile_granularity.dart';
 import '../../performance_controller.dart';
 import '../../performance_model.dart';
-import '../../performance_screen.dart';
 import '../../performance_utils.dart';
 import '../../simple_trace_example.dart';
 import '../flutter_frames/flutter_frame_model.dart';

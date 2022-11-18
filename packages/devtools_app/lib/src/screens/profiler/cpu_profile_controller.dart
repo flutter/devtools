@@ -18,7 +18,6 @@ import '../../ui/search.dart';
 import 'cpu_profile_model.dart';
 import 'cpu_profile_service.dart';
 import 'cpu_profile_transformer.dart';
-import 'profiler_screen.dart';
 
 enum CpuProfilerViewType {
   function,

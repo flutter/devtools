@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../../analytics/analytics.dart' as ga;
-import '../../analytics/analytics_common.dart';
 import '../../analytics/constants.dart' as analytics_constants;
 import '../../config_specific/import_export/import_export.dart';
 import '../../primitives/auto_dispose_mixin.dart';
