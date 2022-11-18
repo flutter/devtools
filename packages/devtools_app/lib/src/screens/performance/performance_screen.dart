@@ -297,17 +297,3 @@ class SecondaryPerformanceControls extends StatelessWidget {
     );
   }
 }
-
-class PerformanceScreenMetrics extends ScreenAnalyticsMetrics {
-  PerformanceScreenMetrics({
-    this.uiDuration,
-    this.rasterDuration,
-    this.shaderCompilationDuration,
-    this.traceEventCount,
-  });
-
-  final Duration? uiDuration;
-  final Duration? rasterDuration;
-  final Duration? shaderCompilationDuration;
-  final int? traceEventCount;
-}

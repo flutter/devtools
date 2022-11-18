@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 
 import '../../../../analytics/analytics.dart' as ga;
 import '../../../../analytics/constants.dart' as analytics_constants;
+import '../../../../analytics/metrics.dart';
 import '../../../../framework/scaffold.dart';
 import '../../../../primitives/auto_dispose_mixin.dart';
 import '../../../../primitives/utils.dart';

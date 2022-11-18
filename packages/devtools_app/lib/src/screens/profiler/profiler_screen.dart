@@ -437,13 +437,3 @@ class _SecondaryControls extends StatelessWidget {
     notificationService.push(successfulExportMessage(exportedFile));
   }
 }
-
-class ProfilerScreenMetrics extends ScreenAnalyticsMetrics {
-  ProfilerScreenMetrics({
-    required this.cpuSampleCount,
-    required this.cpuStackDepth,
-  });
-
-  final int cpuSampleCount;
-  final int cpuStackDepth;
-}

@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../../../analytics/analytics.dart' as ga;
 import '../../../../analytics/constants.dart' as analytics_constants;
+import '../../../../analytics/metrics.dart';
 import '../../../../config_specific/logger/allowed_error.dart';
 import '../../../../config_specific/logger/logger.dart';
 import '../../../../http/http_service.dart';
