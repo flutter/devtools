@@ -138,11 +138,6 @@ class MemoryController extends DisposableController
 
   static const logFilenamePrefix = 'memory_log_';
 
-  /// Root nodes names that contains nodes of either libraries or classes depending on
-  /// group by library or group by class.
-  static const libraryRootNode = '___LIBRARY___';
-  static const classRootNode = '___CLASSES___';
-
   final _shouldShowLeaksTab = ValueNotifier<bool>(false);
   ValueListenable<bool> get shouldShowLeaksTab => _shouldShowLeaksTab;
 
