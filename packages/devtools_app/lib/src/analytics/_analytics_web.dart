@@ -17,8 +17,7 @@ import '../config_specific/logger/logger.dart';
 import '../config_specific/server/server.dart' as server;
 import '../config_specific/url/url.dart';
 import '../primitives/url_utils.dart';
-import '../screens/performance/performance_screen.dart';
-import '../screens/profiler/profiler_screen.dart';
+
 import '../shared/globals.dart';
 import '../ui/gtags.dart';
 import 'analytics_common.dart';
@@ -172,7 +171,7 @@ class GtagEventDevTools extends GtagEvent {
 GtagEventDevTools _gtagEvent({
   String? event_category,
   String? event_label,
-  String? send_to,
+  String? Function()? send_to,
   bool non_interaction = false,
   int value = 0,
   ScreenAnalyticsMetrics? screenMetrics,
@@ -180,7 +179,7 @@ GtagEventDevTools _gtagEvent({
   return GtagEventDevTools(
     event_category: event_category,
     event_label: event_label,
-    send_to: send_to,
+    send_to: send_to?.call(),
     non_interaction: non_interaction,
     value: value,
     user_app: userAppType,
@@ -389,7 +388,7 @@ void screen(
     _gtagEvent(
       event_category: analytics_constants.screenViewEvent,
       value: value,
-      send_to: gaDevToolsPropertyId(),
+      send_to: () => gaDevToolsPropertyId(),
     ),
   );
 }
@@ -533,7 +532,7 @@ void _timing(
       event_category: analytics_constants.timingEvent,
       event_label: timedOperation,
       value: durationMicros,
-      send_to: gaDevToolsPropertyId(),
+      send_to: () => gaDevToolsPropertyId(),
       screenMetrics: screenMetrics,
     ),
   );
@@ -553,7 +552,7 @@ void select(
       event_label: selectedItem,
       value: value,
       non_interaction: nonInteraction,
-      send_to: gaDevToolsPropertyId(),
+      send_to: () => gaDevToolsPropertyId(),
       screenMetrics:
           screenMetricsProvider != null ? screenMetricsProvider() : null,
     ),

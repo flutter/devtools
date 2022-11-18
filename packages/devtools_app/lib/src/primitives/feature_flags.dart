@@ -26,6 +26,9 @@ bool get enableBeta => enableExperiments || !isExternalBuild;
 // It is ok to have enum-like static only classes.
 // ignore: avoid_classes_with_only_static_members
 /// Flags to hide features under construction.
+///
+/// When adding a new feature flag, the developer is respsonsible for adding it
+/// to the [_allFlags] map for debugging purposes.
 abstract class FeatureFlags {
   /// Example usage of a flag for a beta feature.
   static bool myBetaFeature = enableBeta;
@@ -42,4 +45,20 @@ abstract class FeatureFlags {
   ///
   /// https://github.com/flutter/devtools/issues/4564.
   static bool widgetRebuildstats = enableExperiments;
+
+  /// Stores a map of all the feature flags for debugging purposes.
+  ///
+  /// When adding a new flag, you are responsible for adding it to this map as
+  /// well.
+  static final _allFlags = <String, bool>{
+    'embeddedPerfetto': embeddedPerfetto,
+    'widgetRebuildStats': widgetRebuildstats,
+  };
+
+  /// A helper to print the status of all the feature flags.
+  static void debugPrintFeatureFlags() {
+    for (final entry in _allFlags.entries) {
+      print('${entry.key}: ${entry.value}');
+    }
+  }
 }
