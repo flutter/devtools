@@ -10,7 +10,6 @@ library gtags;
 import 'dart:async';
 import 'dart:html';
 
-import 'package:flutter/foundation.dart';
 import 'package:js/js.dart';
 
 import '../../devtools.dart' as devtools show version;
