@@ -20,79 +20,16 @@ import '../../shared/globals.dart';
 import '../../shared/utils.dart';
 import 'memory_protocol.dart';
 import 'panes/allocation_profile/allocation_profile_table_view_controller.dart';
+import 'panes/chart/chart_pane.dart';
+import 'panes/chart/primitives.dart';
 import 'panes/diff/controller/diff_pane_controller.dart';
 import 'primitives/memory_timeline.dart';
 import 'shared/heap/model.dart';
-
-enum ChartType {
-  DartHeaps,
-  AndroidHeaps,
-}
 
 // TODO(terry): Consider supporting more than one file since app was launched.
 // Memory Log filename.
 final String _memoryLogFilename =
     '${MemoryController.logFilenamePrefix}${DateFormat("yyyyMMdd_HH_mm").format(DateTime.now())}';
-
-/// Automatic pruning of collected memory statistics (plotted) full data is
-/// still retained. Default is the best view each tick is 10 pixels, the
-/// width of an event symbol e.g., snapshot, monitor, etc.
-enum ChartInterval {
-  Default,
-  OneMinute,
-  FiveMinutes,
-  TenMinutes,
-  All,
-}
-
-/// Duration for each ChartInterval.
-const displayDurations = <Duration?>[
-  Duration.zero, // ChartInterval.Default
-  Duration(minutes: 1), // ChartInterval.OneMinute
-  Duration(minutes: 5), // ChartInterval.FiveMinutes
-  Duration(minutes: 10), // ChartInterval.TenMinutes
-  null, // ChartInterval.All
-];
-
-Duration? chartDuration(ChartInterval interval) =>
-    displayDurations[interval.index];
-
-const displayDefault = 'Default';
-const displayAll = 'All';
-
-final displayDurationsStrings = <String>[
-  displayDefault,
-  chartDuration(ChartInterval.OneMinute)!.inMinutes.toString(),
-  chartDuration(ChartInterval.FiveMinutes)!.inMinutes.toString(),
-  chartDuration(ChartInterval.TenMinutes)!.inMinutes.toString(),
-  displayAll,
-];
-
-String displayDuration(ChartInterval interval) =>
-    displayDurationsStrings[interval.index];
-
-ChartInterval chartInterval(String displayName) {
-  final index = displayDurationsStrings.indexOf(displayName);
-  switch (index) {
-    case 0:
-      assert(index == ChartInterval.Default.index);
-      return ChartInterval.Default;
-    case 1:
-      assert(index == ChartInterval.OneMinute.index);
-      return ChartInterval.OneMinute;
-    case 2:
-      assert(index == ChartInterval.FiveMinutes.index);
-      return ChartInterval.FiveMinutes;
-    case 3:
-      assert(index == ChartInterval.TenMinutes.index);
-      return ChartInterval.TenMinutes;
-    case 4:
-      assert(index == ChartInterval.All.index);
-      return ChartInterval.All;
-    default:
-      return ChartInterval.All;
-  }
-}
 
 class OfflineFileException implements Exception {
   OfflineFileException(this.message) : super();
@@ -142,7 +79,7 @@ class MemoryController extends DisposableController
 
   ValueListenable<bool> get legendVisibleNotifier => _legendVisibleNotifier;
 
-  final _legendVisibleNotifier = ValueNotifier<bool>(false);
+  final _legendVisibleNotifier = ValueNotifier<bool>(true);
 
   bool get isLegendVisible => _legendVisibleNotifier.value;
 

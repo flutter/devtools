@@ -10,6 +10,7 @@ import '../../../../shared/common_widgets.dart';
 import '../../../../shared/utils.dart';
 import '../../memory_controller.dart';
 import 'chart_pane_controller.dart';
+import 'primitives.dart';
 
 const verboseDropDownMinimumWidth = 950;
 
