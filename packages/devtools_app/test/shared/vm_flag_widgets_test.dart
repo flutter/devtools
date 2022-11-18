@@ -4,8 +4,8 @@
 
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/screens/profiler/sampling_rate.dart';
 import 'package:devtools_app/src/screens/profiler/profiler_screen.dart';
+import 'package:devtools_app/src/screens/profiler/sampling_rate.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/service/vm_flags.dart' as vm_flags;
 import 'package:devtools_app/src/shared/banner_messages.dart';
