@@ -16,8 +16,8 @@ import '../../shared/globals.dart';
 import 'cpu_profile_controller.dart';
 import 'cpu_profile_model.dart';
 import 'cpu_profile_service.dart';
-import 'profile_granularity.dart';
 import 'profiler_screen.dart';
+import 'sampling_rate.dart';
 
 class ProfilerScreenController extends DisposableController
     with AutoDisposeControllerMixin {

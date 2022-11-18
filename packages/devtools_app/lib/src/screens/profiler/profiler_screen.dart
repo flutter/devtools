@@ -352,7 +352,7 @@ class _SecondaryControls extends StatelessWidget {
 
   static const _secondaryControlsMinScreenWidthForText = 1050.0;
 
-  static const _profilingControlsMinScreenWidthForText = 815.0;
+  static const _profilingControlsMinScreenWidthForText = 825.0;
 
   final ProfilerScreenController controller;
 
@@ -401,10 +401,10 @@ class _SecondaryControls extends StatelessWidget {
               : null,
         ),
         const SizedBox(width: denseSpacing),
-        ProfileGranularityDropdown(
+        CpuSamplingRateDropdown(
           screenId: ProfilerScreen.id,
-          profileGranularityFlagNotifier:
-              controller.cpuProfilerController.profileGranularityFlagNotifier!,
+          profilePeriodFlagNotifier:
+              controller.cpuProfilerController.profilePeriodFlag!,
         ),
         const SizedBox(width: denseSpacing),
         ExportButton(

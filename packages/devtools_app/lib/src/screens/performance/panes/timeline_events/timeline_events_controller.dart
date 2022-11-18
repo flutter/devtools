@@ -24,7 +24,7 @@ import '../../../../ui/search.dart';
 import '../../../profiler/cpu_profile_controller.dart';
 import '../../../profiler/cpu_profile_model.dart';
 import '../../../profiler/cpu_profile_service.dart';
-import '../../../profiler/profile_granularity.dart';
+import '../../../profiler/sampling_rate.dart';
 import '../../performance_controller.dart';
 import '../../performance_model.dart';
 import '../../performance_utils.dart';
