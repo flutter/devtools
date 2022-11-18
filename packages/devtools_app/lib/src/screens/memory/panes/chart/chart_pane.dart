@@ -16,6 +16,7 @@ import '../../memory_controller.dart';
 import '../../primitives/painting.dart';
 import 'chart_control_pane.dart';
 import 'chart_pane_controller.dart';
+import 'legend.dart';
 import 'memory_android_chart.dart';
 import 'memory_charts.dart';
 import 'memory_events_pane.dart';
@@ -212,6 +213,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // The chart.
               Expanded(
                 child: Column(
                   children: [
@@ -230,6 +232,18 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
                   ],
                 ),
               ),
+              // The legend.
+              DualValueListenableBuilder<bool, bool>(
+                firstListenable: controller.legendVisibleNotifier,
+                secondListenable: controller.isAndroidChartVisibleNotifier,
+                builder: (_, isLegendVisible, isAndroidChartVisible, __) {
+                  if (!isLegendVisible) return const SizedBox.shrink();
+                  return MemoryChartWidget(
+                    isAndroidVisible: isAndroidChartVisible,
+                  );
+                },
+              ),
+              // Chart control pane.
               ChartControlPane(
                 chartController: widget.chartController,
               ),
