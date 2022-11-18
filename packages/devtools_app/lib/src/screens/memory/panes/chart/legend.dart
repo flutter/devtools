@@ -40,7 +40,7 @@ class MemoryChartLegend extends StatelessWidget {
       ),
     );
 
-    var iterator = events.entries.iterator;
+    final iterator = events.entries.iterator;
     while (iterator.moveNext()) {
       final leftEntry = iterator.current;
       final rightEntry = iterator.moveNext() ? iterator.current : null;
@@ -61,12 +61,10 @@ class MemoryChartLegend extends StatelessWidget {
       ),
     );
 
-    iterator = vms.entries.iterator;
-    while (iterator.moveNext()) {
-      final legendEntry = iterator.current;
+    for (final entry in vms.entries) {
       legendRows.add(
         LegendRow(
-          entry1: legendEntry,
+          entry1: entry,
           chartController: chartController,
         ),
       );
@@ -81,12 +79,10 @@ class MemoryChartLegend extends StatelessWidget {
         ),
       );
 
-      iterator = androids.entries.iterator;
-      while (iterator.moveNext()) {
-        final legendEntry = iterator.current;
+      for (final entry in androids.entries) {
         legendRows.add(
           LegendRow(
-            entry1: legendEntry,
+            entry1: entry,
             chartController: chartController,
           ),
         );
@@ -100,7 +96,7 @@ class MemoryChartLegend extends StatelessWidget {
       decoration: BoxDecoration(
         color: colorScheme.defaultBackgroundColor,
         border: Border.all(color: theme.focusColor),
-        borderRadius: BorderRadius.circular(10.0),
+        borderRadius: BorderRadius.circular(defaultBorderRadius),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

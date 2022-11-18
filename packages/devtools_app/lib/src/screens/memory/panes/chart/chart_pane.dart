@@ -356,7 +356,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
               color: focusColor,
               width: _hover_card_border_width,
             ),
-            borderRadius: BorderRadius.circular(10.0),
+            borderRadius: BorderRadius.circular(defaultBorderRadius),
           ),
           width: _hoverWidth,
           child: Column(
