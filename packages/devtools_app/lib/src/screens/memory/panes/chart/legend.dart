@@ -26,7 +26,6 @@ class MemoryChartWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final legendHeading = theme.hoverTextStyle;
@@ -40,6 +39,8 @@ class MemoryChartWidget extends StatelessWidget {
         child: Text('Events Legend', style: legendHeading),
       ),
     );
+
+    return const Placeholder();
 
     var iterator = events.entries.iterator;
     while (iterator.moveNext()) {
