@@ -431,9 +431,6 @@ class _SecondaryControls extends StatelessWidget {
     final exportedFile = controller.exportData();
     // TODO(kenz): investigate if we need to do any error handling here. Is the
     // download always successful?
-    // TODO(peterdjlee): find a way to push the notification logic into the
-    // export controller.
-    notificationService.push(successfulExportMessage(exportedFile));
   }
 }
 
