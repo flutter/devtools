@@ -42,4 +42,17 @@ abstract class FeatureFlags {
   ///
   /// https://github.com/flutter/devtools/issues/4564.
   static bool widgetRebuildstats = enableExperiments;
+
+  /// Stores a map of all the feature flags for debugging purposes.
+  static final _allFlags = <String, bool>{
+    'embeddedPerfetto': embeddedPerfetto,
+    'widgetRebuildStats': widgetRebuildstats,
+  };
+
+  /// A helper to print the status of all the feature flags.
+  static void debugPrintFeatureFlags() {
+    for (final entry in _allFlags.entries) {
+      print('${entry.key}: ${entry.value}');
+    }
+  }
 }
