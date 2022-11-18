@@ -26,8 +26,6 @@ import 'analytics_common.dart';
 import 'constants.dart' as analytics_constants;
 import 'metrics.dart';
 
-bool _debugAnalytics = false;
-
 // Dimensions1 AppType values:
 const String appTypeFlutter = 'flutter';
 const String appTypeWeb = 'web';
@@ -175,7 +173,7 @@ class GtagEventDevTools extends GtagEvent {
 GtagEventDevTools _gtagEvent({
   String? event_category,
   String? event_label,
-  String? send_to,
+  String? Function()? send_to,
   bool non_interaction = false,
   int value = 0,
   ScreenAnalyticsMetrics? screenMetrics,
@@ -183,7 +181,7 @@ GtagEventDevTools _gtagEvent({
   return GtagEventDevTools(
     event_category: event_category,
     event_label: event_label,
-    send_to: send_to,
+    send_to: send_to?.call(),
     non_interaction: non_interaction,
     value: value,
     user_app: userAppType,
@@ -387,16 +385,14 @@ void screen(
   String screenName, [
   int value = 0,
 ]) {
-  if (kReleaseMode || _debugAnalytics) {
-    GTag.event(
-      screenName,
-      _gtagEvent(
-        event_category: analytics_constants.screenViewEvent,
-        value: value,
-        send_to: gaDevToolsPropertyId(),
-      ),
-    );
-  }
+  GTag.event(
+    screenName,
+    _gtagEvent(
+      event_category: analytics_constants.screenViewEvent,
+      value: value,
+      send_to: () => gaDevToolsPropertyId(),
+    ),
+  );
 }
 
 String _operationKey(String screenName, String timedOperation) {
@@ -532,18 +528,16 @@ void _timing(
   required int durationMicros,
   ScreenAnalyticsMetrics? screenMetrics,
 }) {
-  if (kReleaseMode || _debugAnalytics) {
-    GTag.event(
-      screenName,
-      _gtagEvent(
-        event_category: analytics_constants.timingEvent,
-        event_label: timedOperation,
-        value: durationMicros,
-        send_to: gaDevToolsPropertyId(),
-        screenMetrics: screenMetrics,
-      ),
-    );
-  }
+  GTag.event(
+    screenName,
+    _gtagEvent(
+      event_category: analytics_constants.timingEvent,
+      event_label: timedOperation,
+      value: durationMicros,
+      send_to: () => gaDevToolsPropertyId(),
+      screenMetrics: screenMetrics,
+    ),
+  );
 }
 
 void select(
@@ -553,20 +547,18 @@ void select(
   bool nonInteraction = false,
   ScreenAnalyticsMetrics Function()? screenMetricsProvider,
 }) {
-  if (kReleaseMode || _debugAnalytics) {
-    GTag.event(
-      screenName,
-      _gtagEvent(
-        event_category: analytics_constants.selectEvent,
-        event_label: selectedItem,
-        value: value,
-        non_interaction: nonInteraction,
-        send_to: gaDevToolsPropertyId(),
-        screenMetrics:
-            screenMetricsProvider != null ? screenMetricsProvider() : null,
-      ),
-    );
-  }
+  GTag.event(
+    screenName,
+    _gtagEvent(
+      event_category: analytics_constants.selectEvent,
+      event_label: selectedItem,
+      value: value,
+      non_interaction: nonInteraction,
+      send_to: () => gaDevToolsPropertyId(),
+      screenMetrics:
+          screenMetricsProvider != null ? screenMetricsProvider() : null,
+    ),
+  );
 }
 
 String? _lastGaError;
