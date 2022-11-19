@@ -35,41 +35,32 @@ class _IntervalDropdownState extends State<IntervalDropdown>
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final mediaWidth = MediaQuery.of(context).size.width;
-    final isVerboseDropdown = mediaWidth > verboseDropDownMinimumWidth;
 
-    final displayOneMinute =
-        chartDuration(ChartInterval.oneMinute)!.inMinutes.toString();
-
-    final _displayTypes = displayDurationsStrings.map<DropdownMenuItem<String>>(
+    final _displayTypes =
+        ChartInterval.values.map<DropdownMenuItem<ChartInterval>>(
       (
-        String value,
+        ChartInterval value,
       ) {
-        final unit = value == displayDefault || value == displayAll
-            ? ''
-            : 'Minute${value == displayOneMinute ? '' : 's'}';
-
-        return DropdownMenuItem<String>(
+        return DropdownMenuItem<ChartInterval>(
           value: value,
-          child: Text(
-            '${isVerboseDropdown ? 'Display' : ''} $value $unit',
-          ),
+          child: Text(value.displayName),
         );
       },
     ).toList();
 
-    return RoundedDropDownButton<String>(
+    return RoundedDropDownButton<ChartInterval>(
       isDense: true,
       style: textTheme.bodyMedium,
-      value: displayDuration(controller.displayInterval),
-      onChanged: (String? newValue) {
+      value: controller.displayInterval,
+      onChanged: (ChartInterval? newValue) {
+        final value = newValue!;
         setState(() {
           ga.select(
             analytics_constants.memory,
-            '${analytics_constants.MemoryEvent.chartInterval}-$newValue',
+            '${analytics_constants.MemoryEvent.chartInterval}-${value.displayName}',
           );
-          controller.displayInterval = chartInterval(newValue!);
-          final duration = chartDuration(controller.displayInterval);
+          controller.displayInterval = value;
+          final duration = value.duration;
 
           widget.chartController.event.zoomDuration = duration;
           widget.chartController.vm.zoomDuration = duration;

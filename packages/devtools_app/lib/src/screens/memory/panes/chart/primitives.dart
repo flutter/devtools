@@ -11,58 +11,15 @@ enum ChartType {
 /// still retained. Default is the best view each tick is 10 pixels, the
 /// width of an event symbol e.g., snapshot, monitor, etc.
 enum ChartInterval {
-  theDefault,
-  oneMinute,
-  fiveMinutes,
-  tenMinutes,
-  all,
-}
+  theDefault(Duration.zero, 'Default'),
+  oneMinute(Duration(minutes: 1), '1 Minute'),
+  fiveMinutes(Duration(minutes: 5), '5 Minutes'),
+  tenMinutes(Duration(minutes: 10), '10 Minutes'),
+  all(null, 'All');
 
-/// Duration for each ChartInterval.
-const displayDurations = <Duration?>[
-  Duration.zero, // ChartInterval.Default
-  Duration(minutes: 1), // ChartInterval.OneMinute
-  Duration(minutes: 5), // ChartInterval.FiveMinutes
-  Duration(minutes: 10), // ChartInterval.TenMinutes
-  null, // ChartInterval.All
-];
+  const ChartInterval(this.duration, this.displayName);
 
-Duration? chartDuration(ChartInterval interval) =>
-    displayDurations[interval.index];
+  final Duration? duration;
 
-const displayDefault = 'Default';
-const displayAll = 'All';
-
-final displayDurationsStrings = <String>[
-  displayDefault,
-  chartDuration(ChartInterval.oneMinute)!.inMinutes.toString(),
-  chartDuration(ChartInterval.fiveMinutes)!.inMinutes.toString(),
-  chartDuration(ChartInterval.tenMinutes)!.inMinutes.toString(),
-  displayAll,
-];
-
-String displayDuration(ChartInterval interval) =>
-    displayDurationsStrings[interval.index];
-
-ChartInterval chartInterval(String displayName) {
-  final index = displayDurationsStrings.indexOf(displayName);
-  switch (index) {
-    case 0:
-      assert(index == ChartInterval.theDefault.index);
-      return ChartInterval.theDefault;
-    case 1:
-      assert(index == ChartInterval.oneMinute.index);
-      return ChartInterval.oneMinute;
-    case 2:
-      assert(index == ChartInterval.fiveMinutes.index);
-      return ChartInterval.fiveMinutes;
-    case 3:
-      assert(index == ChartInterval.tenMinutes.index);
-      return ChartInterval.tenMinutes;
-    case 4:
-      assert(index == ChartInterval.all.index);
-      return ChartInterval.all;
-    default:
-      return ChartInterval.all;
-  }
+  final String displayName;
 }
