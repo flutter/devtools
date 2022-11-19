@@ -97,12 +97,12 @@ class MemoryController extends DisposableController
 
   HeapSample? _selectedAndroidSample;
 
-  HeapSample? getSelectedSample(ChartType type) => type == ChartType.DartHeaps
+  HeapSample? getSelectedSample(ChartType type) => type == ChartType.dartHeaps
       ? _selectedDartSample
       : _selectedAndroidSample;
 
   void setSelectedSample(ChartType type, HeapSample sample) {
-    if (type == ChartType.DartHeaps) {
+    if (type == ChartType.dartHeaps) {
       _selectedDartSample = sample;
     } else {
       _selectedAndroidSample = sample;

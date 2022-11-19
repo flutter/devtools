@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 enum ChartType {
-  DartHeaps,
-  AndroidHeaps,
+  dartHeaps,
+  androidHeaps,
 }
 
 /// Automatic pruning of collected memory statistics (plotted) full data is
