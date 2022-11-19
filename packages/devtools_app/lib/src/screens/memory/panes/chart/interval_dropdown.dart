@@ -39,7 +39,7 @@ class _IntervalDropdownState extends State<IntervalDropdown>
     final isVerboseDropdown = mediaWidth > verboseDropDownMinimumWidth;
 
     final displayOneMinute =
-        chartDuration(ChartInterval.OneMinute)!.inMinutes.toString();
+        chartDuration(ChartInterval.oneMinute)!.inMinutes.toString();
 
     final _displayTypes = displayDurationsStrings.map<DropdownMenuItem<String>>(
       (

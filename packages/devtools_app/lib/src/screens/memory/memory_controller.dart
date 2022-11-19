@@ -136,7 +136,7 @@ class MemoryController extends DisposableController
   /// Default is to display default tick width based on width of chart of the collected
   /// data in the chart.
   final _displayIntervalNotifier =
-      ValueNotifier<ChartInterval>(ChartInterval.Default);
+      ValueNotifier<ChartInterval>(ChartInterval.theDefault);
 
   ValueListenable<ChartInterval> get displayIntervalNotifier =>
       _displayIntervalNotifier;

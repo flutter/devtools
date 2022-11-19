@@ -11,11 +11,11 @@ enum ChartType {
 /// still retained. Default is the best view each tick is 10 pixels, the
 /// width of an event symbol e.g., snapshot, monitor, etc.
 enum ChartInterval {
-  Default,
-  OneMinute,
-  FiveMinutes,
-  TenMinutes,
-  All,
+  theDefault,
+  oneMinute,
+  fiveMinutes,
+  tenMinutes,
+  all,
 }
 
 /// Duration for each ChartInterval.
@@ -35,9 +35,9 @@ const displayAll = 'All';
 
 final displayDurationsStrings = <String>[
   displayDefault,
-  chartDuration(ChartInterval.OneMinute)!.inMinutes.toString(),
-  chartDuration(ChartInterval.FiveMinutes)!.inMinutes.toString(),
-  chartDuration(ChartInterval.TenMinutes)!.inMinutes.toString(),
+  chartDuration(ChartInterval.oneMinute)!.inMinutes.toString(),
+  chartDuration(ChartInterval.fiveMinutes)!.inMinutes.toString(),
+  chartDuration(ChartInterval.tenMinutes)!.inMinutes.toString(),
   displayAll,
 ];
 
@@ -48,21 +48,21 @@ ChartInterval chartInterval(String displayName) {
   final index = displayDurationsStrings.indexOf(displayName);
   switch (index) {
     case 0:
-      assert(index == ChartInterval.Default.index);
-      return ChartInterval.Default;
+      assert(index == ChartInterval.theDefault.index);
+      return ChartInterval.theDefault;
     case 1:
-      assert(index == ChartInterval.OneMinute.index);
-      return ChartInterval.OneMinute;
+      assert(index == ChartInterval.oneMinute.index);
+      return ChartInterval.oneMinute;
     case 2:
-      assert(index == ChartInterval.FiveMinutes.index);
-      return ChartInterval.FiveMinutes;
+      assert(index == ChartInterval.fiveMinutes.index);
+      return ChartInterval.fiveMinutes;
     case 3:
-      assert(index == ChartInterval.TenMinutes.index);
-      return ChartInterval.TenMinutes;
+      assert(index == ChartInterval.tenMinutes.index);
+      return ChartInterval.tenMinutes;
     case 4:
-      assert(index == ChartInterval.All.index);
-      return ChartInterval.All;
+      assert(index == ChartInterval.all.index);
+      return ChartInterval.all;
     default:
-      return ChartInterval.All;
+      return ChartInterval.all;
   }
 }
