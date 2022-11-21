@@ -61,8 +61,9 @@ class AllocationProfileTableViewController extends DisposableController
   /// Clear the current allocation profile and request an updated version from
   /// the VM service.
   Future<void> refresh() async {
+    final service = serviceManager.service;
+    if (service == null) return;
     _currentAllocationProfile.value = null;
-    final service = serviceManager.service!;
     final isolate = serviceManager.isolateManager.selectedIsolate.value;
     final allocationProfile = await service.getAllocationProfile(isolate!.id!);
     _currentAllocationProfile.value =
