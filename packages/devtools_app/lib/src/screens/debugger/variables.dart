@@ -130,7 +130,7 @@ Widget displayProvider(
   }
   TextStyle variableDisplayStyle() {
     final style = theme.subtleFixedFontStyle;
-    switch (variable.ref!.instanceRef!.kind) {
+    switch (variable.ref?.instanceRef?.kind) {
       case InstanceKind.kString:
         return style.apply(
           color: theme.colorScheme.stringSyntaxColor,
@@ -150,8 +150,9 @@ Widget displayProvider(
   }
 
   final hasName = variable.name?.isNotEmpty ?? false;
+  final variableValue = variable.displayValue ?? 'Unknown';
   return DevToolsTooltip(
-    message: variable.displayValue,
+    message: variableValue,
     waitDuration: tooltipWaitLong,
     child: SelectableText.rich(
       TextSpan(
@@ -168,7 +169,7 @@ Widget displayProvider(
               style: theme.fixedFontStyle,
             ),
           TextSpan(
-            text: variable.displayValue,
+            text: variableValue,
             style: variableDisplayStyle(),
           ),
         ],
