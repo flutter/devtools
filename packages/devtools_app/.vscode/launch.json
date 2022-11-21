@@ -1,4 +1,9 @@
 {
+    // Set of configurations to launch devtools_app from VSCode.
+    //
+    // The configurations will be picked up by VSCode if the opened folder is devtools_app.
+    // To access them in VSCode, select the tab "Run and Debug".
+    //
     // Use IntelliSense to learn about possible attributes.
     // Hover to view descriptions of existing attributes.
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
