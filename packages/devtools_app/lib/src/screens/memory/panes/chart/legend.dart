@@ -14,6 +14,98 @@ import 'memory_charts.dart';
 import 'memory_events_pane.dart';
 import 'memory_vm_chart.dart';
 
+class MemoryChartLegend extends StatelessWidget {
+  const MemoryChartLegend({
+    super.key,
+    required this.isAndroidVisible,
+    required this.chartController,
+  });
+
+  final bool isAndroidVisible;
+  final MemoryChartPaneController chartController;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final legendHeading = theme.hoverTextStyle;
+
+    final legendRows = <Widget>[];
+
+    final events = eventLegendContent(colorScheme.isLight);
+    legendRows.add(
+      Container(
+        padding: legendTitlePadding,
+        child: Text('Events Legend', style: legendHeading),
+      ),
+    );
+
+    final iterator = events.entries.iterator;
+    while (iterator.moveNext()) {
+      final leftEntry = iterator.current;
+      final rightEntry = iterator.moveNext() ? iterator.current : null;
+      legendRows.add(
+        LegendRow(
+          entry1: leftEntry,
+          entry2: rightEntry,
+          chartController: chartController,
+        ),
+      );
+    }
+
+    final vms = vmLegendContent(chartController.vm);
+    legendRows.add(
+      Container(
+        padding: legendTitlePadding,
+        child: Text('Memory Legend', style: legendHeading),
+      ),
+    );
+
+    for (final entry in vms.entries) {
+      legendRows.add(
+        LegendRow(
+          entry1: entry,
+          chartController: chartController,
+        ),
+      );
+    }
+
+    if (isAndroidVisible) {
+      final androids = androidLegendContent(chartController.android);
+      legendRows.add(
+        Container(
+          padding: legendTitlePadding,
+          child: Text('Android Legend', style: legendHeading),
+        ),
+      );
+
+      for (final entry in androids.entries) {
+        legendRows.add(
+          LegendRow(
+            entry1: entry,
+            chartController: chartController,
+          ),
+        );
+      }
+    }
+
+    return Container(
+      width: legendWidth,
+      height: isAndroidVisible ? legendHeight2Charts : legendHeight1Chart,
+      padding: const EdgeInsets.fromLTRB(0, densePadding, densePadding, 0),
+      decoration: BoxDecoration(
+        color: colorScheme.defaultBackgroundColor,
+        border: Border.all(color: theme.focusColor),
+        borderRadius: BorderRadius.circular(defaultBorderRadius),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: legendRows,
+      ),
+    );
+  }
+}
+
 class LegendRow extends StatelessWidget {
   const LegendRow({
     Key? key,

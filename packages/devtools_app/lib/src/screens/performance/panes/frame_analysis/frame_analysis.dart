@@ -4,11 +4,16 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../../devtools_app.dart';
 import '../../../../service/service_extension_widgets.dart';
 import '../../../../service/service_extensions.dart' as extensions;
+import '../../../../shared/common_widgets.dart';
+import '../../../../shared/globals.dart';
+import '../../../../shared/theme.dart';
+import '../../../../ui/colors.dart';
+import '../controls/enhance_tracing/enhance_tracing_controller.dart';
 import '../rebuild_stats/rebuild_counts.dart';
 import '../rebuild_stats/widget_rebuild.dart';
+import 'frame_analysis_model.dart';
 import 'frame_hints.dart';
 import 'frame_time_visualizer.dart';
 
@@ -35,12 +40,32 @@ class FlutterFrameAnalysisView extends StatelessWidget {
       );
     }
     final rebuilds = rebuildCountModel.rebuildsForFrame(frameAnalysis.frame.id);
-
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.all(defaultSpacing),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          RichText(
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: 'Flutter frame: ',
+                  style: theme.regularTextStyle,
+                ),
+                TextSpan(
+                  text: '${frameAnalysis.frame.id}',
+                  style: theme.fixedFontStyle
+                      .copyWith(color: defaultSelectionColor),
+                ),
+              ],
+            ),
+          ),
+          const PaddedDivider(
+            padding: EdgeInsets.only(
+              bottom: denseSpacing,
+            ),
+          ),
           // TODO(jacobr): we might have so many frame hints that this content
           // needs to scroll. Supporting that would be hard as the RebuildTable
           // also needs to scroll and the devtools table functionality does not

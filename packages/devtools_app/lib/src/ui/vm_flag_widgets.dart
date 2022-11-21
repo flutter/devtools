@@ -11,86 +11,93 @@ import 'package:vm_service/vm_service.dart';
 import '../analytics/analytics.dart' as ga;
 import '../analytics/constants.dart' as analytics_constants;
 import '../screens/profiler/cpu_profile_service.dart';
-import '../screens/profiler/profile_granularity.dart';
+import '../screens/profiler/sampling_rate.dart';
 import '../shared/banner_messages.dart';
 import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
+import '../shared/theme.dart';
 
 /// DropdownButton that controls the value of the 'profile_period' vm flag.
 ///
 /// This flag controls the rate at which the vm samples the CPU call stack.
-class ProfileGranularityDropdown extends StatelessWidget {
-  const ProfileGranularityDropdown({
+class CpuSamplingRateDropdown extends StatelessWidget {
+  const CpuSamplingRateDropdown({
     required this.screenId,
-    required this.profileGranularityFlagNotifier,
+    required this.profilePeriodFlagNotifier,
   });
 
   final String screenId;
 
-  final ValueNotifier<Flag> profileGranularityFlagNotifier;
+  final ValueNotifier<Flag> profilePeriodFlagNotifier;
 
   /// The key to identify the dropdown button.
   @visibleForTesting
-  static const Key dropdownKey =
-      Key('ProfileGranularityDropdown DropdownButton');
+  static const Key dropdownKey = Key('CpuSamplingRateDropdown DropdownButton');
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<Flag>(
-      valueListenable: profileGranularityFlagNotifier,
+      valueListenable: profilePeriodFlagNotifier,
       builder: (context, flag, _) {
-        // Use [ProfileGranularityExtension.fromValue] here so we can
+        // Use [CpuSamplingFrequencyExtension.fromValue] here so we can
         // guarantee that the value corresponds to one of the items in the
-        // dropdown list. We default to [ProfileGranularity.medium] if the flag
-        // value is not one of the three defaults in DevTools (50, 250, 1000).
+        // dropdown list. We default to [CpuSamplingFrequency.medium] if the
+        // flag value is not one of the three defaults in DevTools
+        // (50, 250, 1000).
         final safeValue =
-            ProfileGranularityExtension.fromValue(flag.valueAsString ?? '')
-                .value;
+            CpuSamplingRateExtension.fromValue(flag.valueAsString ?? '').value;
         // Set the vm flag value to the [safeValue] if we get to this state.
         if (safeValue != flag.valueAsString) {
-          unawaited(_onProfileGranularityChanged(safeValue));
+          unawaited(_onSamplingFrequencyChanged(safeValue));
         }
 
         final bannerMessageController =
             Provider.of<BannerMessagesController>(context);
         if (safeValue == highProfilePeriod) {
           bannerMessageController.addMessage(
-            HighProfileGranularityMessage(screenId).build(context),
+            HighCpuSamplingRateMessage(screenId).build(context),
           );
         } else {
           bannerMessageController.removeMessageByKey(
-            HighProfileGranularityMessage(screenId).key,
+            HighCpuSamplingRateMessage(screenId).key,
             screenId,
           );
         }
-        return RoundedDropDownButton<String>(
-          key: ProfileGranularityDropdown.dropdownKey,
-          isDense: true,
-          style: Theme.of(context).textTheme.bodyMedium,
-          value: safeValue,
-          items: [
-            _buildMenuItem(ProfileGranularity.low),
-            _buildMenuItem(ProfileGranularity.medium),
-            _buildMenuItem(ProfileGranularity.high),
-          ],
-          onChanged: _onProfileGranularityChanged,
+        return SizedBox(
+          height: defaultButtonHeight,
+          child: DevToolsTooltip(
+            message:
+                'The frequency at which the CPU profiler will sample the call stack',
+            child: RoundedDropDownButton<String>(
+              key: CpuSamplingRateDropdown.dropdownKey,
+              isDense: true,
+              style: Theme.of(context).textTheme.bodyMedium,
+              value: safeValue,
+              items: [
+                _buildMenuItem(CpuSamplingRate.low),
+                _buildMenuItem(CpuSamplingRate.medium),
+                _buildMenuItem(CpuSamplingRate.high),
+              ],
+              onChanged: _onSamplingFrequencyChanged,
+            ),
+          ),
         );
       },
     );
   }
 
-  DropdownMenuItem<String> _buildMenuItem(ProfileGranularity granularity) {
+  DropdownMenuItem<String> _buildMenuItem(CpuSamplingRate samplingRate) {
     return DropdownMenuItem<String>(
-      value: granularity.value,
-      child: Text(granularity.display),
+      value: samplingRate.value,
+      child: Text(samplingRate.display),
     );
   }
 
-  Future<void> _onProfileGranularityChanged(String? newValue) async {
+  Future<void> _onSamplingFrequencyChanged(String? newValue) async {
     ga.select(
       screenId,
-      '${analytics_constants.profileGranularityPrefix}'
-      '${ProfileGranularityExtension.fromValue(newValue ?? '').displayShort}',
+      '${analytics_constants.cpuSamplingRatePrefix}'
+      '${CpuSamplingRateExtension.fromValue(newValue ?? '').displayShort}',
     );
     await serviceManager.service!.setProfilePeriod(
       newValue ?? mediumProfilePeriod,

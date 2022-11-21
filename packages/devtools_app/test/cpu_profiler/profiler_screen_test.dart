@@ -62,7 +62,7 @@ void main() {
       if (fakeServiceManager.connectedApp!.isFlutterNativeAppNow) {
         expect(find.text('Profile app start up'), findsOneWidget);
       }
-      expect(find.byType(ProfileGranularityDropdown), findsOneWidget);
+      expect(find.byType(CpuSamplingRateDropdown), findsOneWidget);
       expect(
         find.byKey(ProfilerScreen.recordingInstructionsKey),
         findsOneWidget,
@@ -160,7 +160,7 @@ void main() {
       expect(find.byType(RecordButton), findsNothing);
       expect(find.byType(StopRecordingButton), findsNothing);
       expect(find.byType(ClearButton), findsNothing);
-      expect(find.byType(ProfileGranularityDropdown), findsNothing);
+      expect(find.byType(CpuSamplingRateDropdown), findsNothing);
 
       await tester.tap(find.text('Enable profiler'));
       await tester.pumpAndSettle();

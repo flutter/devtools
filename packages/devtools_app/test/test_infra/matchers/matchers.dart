@@ -8,6 +8,8 @@ import 'dart:io' as io;
 
 import 'package:devtools_app/src/screens/inspector/diagnostics_node.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '_golden_matcher_io.dart'
+    if (dart.library.html) '_golden_matcher_web.dart' as golden_matcher;
 
 RemoteDiagnosticsNode? findNodeMatching(
   RemoteDiagnosticsNode node,
@@ -130,8 +132,8 @@ class _EqualsGoldenIgnoringHashCodes extends Matcher {
   }
 }
 
-class _AlwaysTrueMatcher extends Matcher {
-  const _AlwaysTrueMatcher();
+class AlwaysTrueMatcher extends Matcher {
+  const AlwaysTrueMatcher();
 
   @override
   bool matches(dynamic object, Map<dynamic, dynamic> matchState) {
@@ -152,8 +154,5 @@ class _AlwaysTrueMatcher extends Matcher {
 /// This should always be used instead of [matchesGoldenFile] for testing
 /// DevTools golden images.
 Matcher matchesDevToolsGolden(Object key) {
-  if (io.Platform.isMacOS) {
-    return matchesGoldenFile(key);
-  }
-  return const _AlwaysTrueMatcher();
+  return golden_matcher.matchesDevToolsGolden(key);
 }

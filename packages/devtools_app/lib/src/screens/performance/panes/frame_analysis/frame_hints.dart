@@ -194,6 +194,7 @@ class EnhanceTracingHint extends StatelessWidget {
           text: 'Since "$settingTitle" was enabled while this frame was drawn, '
               'you should be able to see timeline events for each '
               '$eventDescription.',
+          style: theme.regularTextStyle,
         ),
       ];
     }

@@ -9,6 +9,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../charts/flame_chart.dart';
+import '../../primitives/simple_items.dart';
 import '../../primitives/trace_event.dart';
 import '../../primitives/trees.dart';
 import '../../primitives/utils.dart';
@@ -38,7 +39,7 @@ class PerformanceData {
         displayRefreshRate = displayRefreshRate ?? defaultRefreshRate,
         timelineEvents = timelineEvents ?? <TimelineEvent>[];
 
-  static const traceEventsKey = 'traceEvents';
+  static const traceEventsKey = traceEventsFieldName;
 
   static const cpuProfileKey = 'cpuProfile';
 
