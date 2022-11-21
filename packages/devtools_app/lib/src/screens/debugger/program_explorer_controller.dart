@@ -285,29 +285,33 @@ class ProgramExplorerController extends DisposableController
       return res.cast<Func>();
     }
 
-    if (object == null || object is Obj) {
-      return;
-    } else if (object is LibraryRef) {
-      final lib = await service!.getObject(isolateId!, object.id!) as Library;
-      final results = await Future.wait([
-        getObjects(lib.variables!),
-        getFuncs(lib.functions!, lib.variables),
-      ]);
-      lib.variables = results[0].cast<Field>();
-      lib.functions = results[1].cast<Func>();
-      node.updateObject(lib);
-    } else if (object is ClassRef) {
-      final clazz = await service!.getObject(isolateId!, object.id!) as Class;
-      final results = await Future.wait([
-        getObjects(clazz.fields!),
-        getFuncs(clazz.functions!, clazz.fields),
-      ]);
-      clazz.fields = results[0].cast<Field>();
-      clazz.functions = results[1].cast<Func>();
-      node.updateObject(clazz);
-    } else {
-      final obj = await service!.getObject(isolateId!, object.id!);
-      node.updateObject(obj);
+    try {
+      if (object == null || object is Obj) {
+        return;
+      } else if (object is LibraryRef) {
+        final lib = await service!.getObject(isolateId!, object.id!) as Library;
+        final results = await Future.wait([
+          getObjects(lib.variables!),
+          getFuncs(lib.functions!, lib.variables),
+        ]);
+        lib.variables = results[0].cast<Field>();
+        lib.functions = results[1].cast<Func>();
+        node.updateObject(lib);
+      } else if (object is ClassRef) {
+        final clazz = await service!.getObject(isolateId!, object.id!) as Class;
+        final results = await Future.wait([
+          getObjects(clazz.fields!),
+          getFuncs(clazz.functions!, clazz.fields),
+        ]);
+        clazz.fields = results[0].cast<Field>();
+        clazz.functions = results[1].cast<Func>();
+        node.updateObject(clazz);
+      } else {
+        final obj = await service!.getObject(isolateId!, object.id!);
+        node.updateObject(obj);
+      }
+    } on RPCError {
+      // Swallow RPC errors that can be caused by the service disappearing.
     }
   }
 
