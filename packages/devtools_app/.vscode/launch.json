@@ -12,14 +12,12 @@
         },
         {
             "name": "devtools",
-            "cwd": "devtools_app",
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",
         },
         {
             "name": "devtools - profile",
-            "cwd": "devtools_app",
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",
@@ -27,28 +25,24 @@
         },
         {
             "name": "memory/default",
-            "cwd": "devtools_app",
             "request": "launch",
             "type": "dart",
             "program": "test/test_infra/scenes/memory/default.stager_app.dart",
         },
         {
             "name": "memory/diff_snapshot",
-            "cwd": "devtools_app",
             "request": "launch",
             "type": "dart",
             "program": "test/test_infra/scenes/memory/diff_snapshot.stager_app.dart",
         },
         {
             "name": "performance/default",
-            "cwd": "devtools_app",
             "request": "launch",
             "type": "dart",
             "program": "test/test_infra/scenes/performance/default.stager_app.dart",
         },
         {
             "name": "attach",
-            "cwd": "devtools_app",
             "type": "dart",
             "request": "attach",
         },
