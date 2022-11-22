@@ -29,8 +29,6 @@ abstract class PerfettoController extends DisposableController {
     processor = PerfettoEventProcessor(performanceController);
   }
 
-  String get viewId => '';
-
   final TimelineEventsController timelineEventsController;
 
   late final PerfettoEventProcessor processor;
