@@ -91,8 +91,10 @@ class MemoryChartLegend extends StatelessWidget {
 
     return Container(
       width: legendWidth,
-      // TODO(polina-c): instead of specifying height, we want the chart to take minimal height.
-      height: isAndroidVisible ? legendHeight2Charts : legendHeight1Chart,
+      // We need to specifying height here,
+      // because [legendRows] are designed to take all available space.
+      height:
+          isAndroidVisible ? legendHeight2Charts * 2 : legendHeight1Chart * 2,
       padding: const EdgeInsets.fromLTRB(0, densePadding, densePadding, 0),
       decoration: BoxDecoration(
         color: colorScheme.defaultBackgroundColor,
