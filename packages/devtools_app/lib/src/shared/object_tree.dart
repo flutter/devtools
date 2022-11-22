@@ -120,7 +120,7 @@ Future<void> buildVariablesTree(
         count: variable.childCount,
       );
       if (result is Instance) {
-        switch (result.kind!) {
+        switch (result.kind) {
           case InstanceKind.kMap:
             variable.addAllChildren(
               _createVariablesForAssociations(result, isolateRef),
