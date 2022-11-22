@@ -40,12 +40,17 @@ class PerfettoControllerImpl extends PerfettoController {
     super.timelineEventsController,
   );
 
+  /// The view id for the Perfetto iFrame.
+  ///
+  /// See [_viewIdIncrementer] for an explanation of why we use an incrementer
+  /// in the id.
   late final viewId = 'embedded-perfetto-${_viewIdIncrementer++}';
 
   /// Url when running Perfetto locally following the instructions here:
   /// https://perfetto.dev/docs/contributing/build-instructions#ui-development
   static const _debugPerfettoUrl = 'http://127.0.0.1:10000/$_embeddedModeQuery';
 
+  /// These query parameters have side effects in the Perfetto web app.
   static const _embeddedModeQuery = '?mode=embedded&hideSidebar=true';
 
   String get perfettoUrl {
@@ -62,10 +67,13 @@ class PerfettoControllerImpl extends PerfettoController {
 
   late final html.IFrameElement _perfettoIFrame;
 
+  /// The set of trace events that should be shown in the Perfetto trace viewer.
   ValueListenable<List<TraceEventWrapper>> get activeTraceEvents =>
       _activeTraceEvents;
   final _activeTraceEvents = ValueNotifier<List<TraceEventWrapper>>([]);
 
+  /// The time range that should be scrolled to, or focused, in the Perfetto
+  /// trace viewer.
   ValueListenable<TimeRange?> get activeScrollToTimeRange =>
       _activeScrollToTimeRange;
   final _activeScrollToTimeRange = ValueNotifier<TimeRange?>(null);
