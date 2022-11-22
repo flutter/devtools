@@ -126,7 +126,7 @@ class _PerfettoViewController extends DisposableController
 
   /// Completes when the perfetto iFrame has recevied the first event on the
   /// 'onLoad' stream.
-  late Completer<bool> _perfettoIFrameReady;
+  late final Completer<void> _perfettoIFrameReady;
 
   /// Completes when the Perfetto postMessage handler is ready, which is
   /// signaled by receiving a [_perfettoPong] event in response to sending a
@@ -155,7 +155,7 @@ class _PerfettoViewController extends DisposableController
 
     unawaited(
       perfettoController.perfettoIFrame.onLoad.first.then((_) {
-        _perfettoIFrameReady.complete(true);
+        _perfettoIFrameReady.complete();
       }),
     );
 
