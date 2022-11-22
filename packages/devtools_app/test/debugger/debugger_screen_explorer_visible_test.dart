@@ -22,8 +22,12 @@ void main() {
 
   final fakeServiceManager = FakeServiceManager();
   final scriptManager = MockScriptManager();
-  when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
-  when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
+  mockConnectedApp(
+    fakeServiceManager.connectedApp!,
+    isFlutterApp: true,
+    isProfileBuild: false,
+    isWebApp: false,
+  );
   setGlobal(ServiceConnectionManager, fakeServiceManager);
   setGlobal(IdeTheme, IdeTheme());
   setGlobal(NotificationService, NotificationService());
