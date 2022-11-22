@@ -50,7 +50,7 @@ void main() async {
     // Experiments are enabled here,
     // not at initialization, because
     // [enableExperiments] should be false for tests.
-    if (!kReleaseMode) enableExperiments();
+    if (!kReleaseMode) setExperimentsEnabled();
 
     // Run the app.
     runApp(
