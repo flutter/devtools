@@ -47,10 +47,10 @@ void main() async {
   await SyntaxHighlighter.initialize();
 
   setupErrorHandling(() async {
-    // [enableExperiments] is updated based on [kReleaseMode] here,
+    // Experiments are enabled here,
     // not at initialization, because
     // [enableExperiments] should be false for tests.
-    if (!kReleaseMode) enableExperiments = true;
+    if (!kReleaseMode) enableExperiments();
 
     // Run the app.
     runApp(

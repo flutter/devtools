@@ -18,10 +18,11 @@ import '../shared/globals.dart';
 ///   ]
 const bool _kEnableExperiments = bool.fromEnvironment('enable_experiments');
 
-bool enableExperiments = _kEnableExperiments;
+bool _enableExperiments = _kEnableExperiments;
+void enableExperiments() => _enableExperiments = true;
 
 @visibleForTesting
-bool get enableBeta => enableExperiments || !isExternalBuild;
+bool get enableBeta => _enableExperiments || !isExternalBuild;
 
 // It is ok to have enum-like static only classes.
 // ignore: avoid_classes_with_only_static_members
@@ -34,17 +35,17 @@ abstract class FeatureFlags {
   static bool myBetaFeature = enableBeta;
 
   /// Example usage of a flag for an experimental feature.
-  static bool myExperimentalFeature = enableExperiments;
+  static bool myExperimentalFeature = _enableExperiments;
 
   /// Flag to enable the embedded perfetto trace viewer.
   ///
   /// https://github.com/flutter/devtools/issues/4207.
-  static bool embeddedPerfetto = enableExperiments;
+  static bool embeddedPerfetto = _enableExperiments;
 
   /// Flag to enable widget rebuild stats ui.
   ///
   /// https://github.com/flutter/devtools/issues/4564.
-  static bool widgetRebuildstats = enableExperiments;
+  static bool widgetRebuildstats = _enableExperiments;
 
   /// Stores a map of all the feature flags for debugging purposes.
   ///
