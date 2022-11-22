@@ -55,8 +55,10 @@ class _DebuggingControlsState extends State<DebuggingControls>
           _stepButtons(canStep: canStep),
           const SizedBox(width: denseSpacing),
           BreakOnExceptionsControl(controller: controller),
-          const SizedBox(width: denseSpacing),
-          if (isVmApp) CodeCoverageToggle(controller: controller),
+          if (isVmApp) ...[
+            const SizedBox(width: denseSpacing),
+            CodeCoverageToggle(controller: controller),
+          ],
           const Expanded(child: SizedBox(width: denseSpacing)),
           _librariesButton(),
         ],
