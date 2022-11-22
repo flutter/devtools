@@ -10,6 +10,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../shared/common_widgets.dart';
+import '../../shared/globals.dart';
 import '../../shared/theme.dart';
 import '../../shared/utils.dart';
 import '../../ui/label.dart';
@@ -44,6 +45,7 @@ class _DebuggingControlsState extends State<DebuggingControls>
     final hasStackFrames = controller.stackFramesWithLocation.value.isNotEmpty;
     final isSystemIsolate = controller.isSystemIsolate;
     final canStep = isPaused && !resuming && hasStackFrames && !isSystemIsolate;
+    final isVmApp = serviceManager.connectedApp?.isRunningOnDartVM ?? false;
     return SizedBox(
       height: defaultButtonHeight,
       child: Row(
@@ -53,8 +55,10 @@ class _DebuggingControlsState extends State<DebuggingControls>
           _stepButtons(canStep: canStep),
           const SizedBox(width: denseSpacing),
           BreakOnExceptionsControl(controller: controller),
-          const SizedBox(width: denseSpacing),
-          CodeCoverageToggle(controller: controller),
+          if (isVmApp) ...[
+            const SizedBox(width: denseSpacing),
+            CodeCoverageToggle(controller: controller),
+          ],
           const Expanded(child: SizedBox(width: denseSpacing)),
           _librariesButton(),
         ],
