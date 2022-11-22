@@ -1,4 +1,9 @@
 {
+    // Set of configurations to launch devtools_app from VSCode.
+    //
+    // The configurations will be picked up by VSCode if the opened folder is devtools_app.
+    // To access them in VSCode, select the tab "Run and Debug".
+    //
     // Use IntelliSense to learn about possible attributes.
     // Hover to view descriptions of existing attributes.
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
@@ -12,14 +17,12 @@
         },
         {
             "name": "devtools",
-            "cwd": "devtools_app",
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",
         },
         {
             "name": "devtools - profile",
-            "cwd": "devtools_app",
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",
@@ -27,28 +30,24 @@
         },
         {
             "name": "memory/default",
-            "cwd": "devtools_app",
             "request": "launch",
             "type": "dart",
             "program": "test/test_infra/scenes/memory/default.stager_app.dart",
         },
         {
             "name": "memory/diff_snapshot",
-            "cwd": "devtools_app",
             "request": "launch",
             "type": "dart",
             "program": "test/test_infra/scenes/memory/diff_snapshot.stager_app.dart",
         },
         {
             "name": "performance/default",
-            "cwd": "devtools_app",
             "request": "launch",
             "type": "dart",
             "program": "test/test_infra/scenes/performance/default.stager_app.dart",
         },
         {
             "name": "attach",
-            "cwd": "devtools_app",
             "type": "dart",
             "request": "attach",
         },

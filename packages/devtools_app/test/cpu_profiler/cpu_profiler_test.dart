@@ -303,6 +303,9 @@ void main() {
       expect(find.byType(CpuProfileFlameChart), findsNothing);
       expect(find.byType(CpuCallTreeTable), findsNothing);
       expect(find.byType(CpuBottomUpTable), findsOneWidget);
+      expect(find.byType(FilterButton), findsOneWidget);
+      expect(find.byType(DisplayTreeGuidelinesToggle), findsOneWidget);
+      expect(find.byType(UserTagDropdown), findsOneWidget);
       expect(find.byType(ExpandAllButton), findsOneWidget);
       expect(find.byType(CollapseAllButton), findsOneWidget);
       expect(find.byType(FlameChartHelpButton), findsNothing);
@@ -314,6 +317,8 @@ void main() {
       expect(find.byType(CpuProfileFlameChart), findsNothing);
       expect(find.byType(CpuCallTreeTable), findsOneWidget);
       expect(find.byType(CpuBottomUpTable), findsNothing);
+      expect(find.byType(FilterButton), findsOneWidget);
+      expect(find.byType(DisplayTreeGuidelinesToggle), findsOneWidget);
       expect(find.byType(UserTagDropdown), findsOneWidget);
       expect(find.byType(ExpandAllButton), findsOneWidget);
       expect(find.byType(CollapseAllButton), findsOneWidget);
@@ -326,6 +331,8 @@ void main() {
       expect(find.byType(CpuProfileFlameChart), findsOneWidget);
       expect(find.byType(CpuCallTreeTable), findsNothing);
       expect(find.byType(CpuBottomUpTable), findsNothing);
+      expect(find.byType(FilterButton), findsOneWidget);
+      expect(find.byType(DisplayTreeGuidelinesToggle), findsNothing);
       expect(find.byType(UserTagDropdown), findsOneWidget);
       expect(find.byType(ExpandAllButton), findsNothing);
       expect(find.byType(CollapseAllButton), findsNothing);
