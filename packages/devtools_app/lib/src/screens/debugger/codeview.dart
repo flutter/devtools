@@ -26,6 +26,7 @@ import '../../ui/colors.dart';
 import '../../ui/hover.dart';
 import '../../ui/search.dart';
 import '../../ui/utils.dart';
+import '../vm_developer/vm_service_private_extensions.dart';
 import 'breakpoints.dart';
 import 'codeview_controller.dart';
 import 'common.dart';
@@ -94,6 +95,7 @@ class _CodeViewState extends State<CodeView>
 
   late final LinkedScrollControllerGroup verticalController;
   late final ScrollController gutterController;
+  ScrollController? profileController;
   late final ScrollController textController;
   late final ScrollController horizontalController;
 
@@ -130,6 +132,21 @@ class _CodeViewState extends State<CodeView>
       widget.codeViewController.scriptLocation,
       _handleScriptLocationChanged,
     );
+
+    // Create and dispose the controller used for the profile information
+    // gutter to ensure that the scroll position is kept in sync with the main
+    // gutter and code view when the widget is toggled on/off. If we don't do
+    // this, the profile information gutter will always be at position 0 when
+    // first enabled until the user scrolls.
+    addAutoDisposeListener(widget.codeViewController.showProfileInformation,
+        () {
+      if (widget.codeViewController.showProfileInformation.value) {
+        profileController = verticalController.addAndGet();
+      } else {
+        profileController!.dispose();
+        profileController = null;
+      }
+    });
   }
 
   @override
@@ -149,6 +166,7 @@ class _CodeViewState extends State<CodeView>
   @override
   void dispose() {
     gutterController.dispose();
+    profileController?.dispose();
     textController.dispose();
     horizontalController.dispose();
     widget.codeViewController.scriptLocation
@@ -347,6 +365,10 @@ class _CodeViewState extends State<CodeView>
                     ? null
                     : (frame.scriptRef == scriptRef ? frame : null);
                 final currentParsedScript = parsedScript;
+                final lineCount = widget.lineRange?.size ?? lines.length;
+                final lineOffset = (widget.lineRange?.begin ?? 1) - 1;
+                final sourceReport = currentParsedScript?.sourceReport ??
+                    const ProcessedSourceReport.empty();
                 return Row(
                   children: [
                     DualValueListenableBuilder<
@@ -359,8 +381,8 @@ class _CodeViewState extends State<CodeView>
                         return Gutter(
                           gutterWidth: gutterWidth,
                           scrollController: gutterController,
-                          lineCount: widget.lineRange?.size ?? lines.length,
-                          lineOffset: (widget.lineRange?.begin ?? 1) - 1,
+                          lineCount: lineCount,
+                          lineOffset: lineOffset,
                           pausedFrame: pausedFrame,
                           breakpoints: breakpoints
                               .where((bp) => bp.scriptRef == scriptRef)
@@ -368,12 +390,7 @@ class _CodeViewState extends State<CodeView>
                           executableLines:
                               currentParsedScript?.executableLines ??
                                   const <int>{},
-                          coverageHitLines:
-                              currentParsedScript?.coverageHitLines ??
-                                  const <int>{},
-                          coverageMissedLines:
-                              currentParsedScript?.coverageMissedLines ??
-                                  const <int>{},
+                          sourceReport: sourceReport,
                           onPressed: _onPressed,
                           // Disable dots for possible breakpoint locations.
                           allowInteraction:
@@ -384,6 +401,26 @@ class _CodeViewState extends State<CodeView>
                       },
                     ),
                     const SizedBox(width: denseSpacing),
+                    ValueListenableBuilder<bool>(
+                      valueListenable:
+                          widget.codeViewController.showProfileInformation,
+                      builder: (context, showProfileInformation, _) {
+                        if (!showProfileInformation) {
+                          return const SizedBox();
+                        }
+                        return Row(
+                          children: [
+                            ProfileInformationGutter(
+                              scrollController: profileController!,
+                              lineCount: lineCount,
+                              lineOffset: lineOffset,
+                              sourceReport: sourceReport,
+                            ),
+                            const SizedBox(width: denseSpacing),
+                          ],
+                        );
+                      },
+                    ),
                     Expanded(
                       child: LayoutBuilder(
                         builder: (context, constraints) {
@@ -544,6 +581,174 @@ class _CodeViewState extends State<CodeView>
   }
 }
 
+class ProfileInformationGutter extends StatelessWidget {
+  const ProfileInformationGutter({
+    required this.scrollController,
+    required this.lineOffset,
+    required this.lineCount,
+    required this.sourceReport,
+  });
+
+  final ScrollController scrollController;
+  final int lineOffset;
+  final int lineCount;
+  final ProcessedSourceReport sourceReport;
+
+  static const totalTimeTooltip =
+      'Percent of time that a sampled line spent executing its own\n code as '
+      'well as the code for any methods it called.';
+
+  static const selfTimeTooltip =
+      'Percent of time that a sampled line spent executing only its own code.';
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final gutterWidth = CodeView.assumedCharacterWidth * 10 + denseSpacing;
+    return Container(
+      width: gutterWidth,
+      decoration: BoxDecoration(
+        border: Border(right: defaultBorderSide(theme)),
+        color: Theme.of(context).titleSolidBackgroundColor,
+      ),
+      child: Stack(
+        children: [
+          Column(
+            children: [
+              Container(
+                height: CodeView.rowHeight,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: const [
+                    Expanded(
+                      child: DevToolsTooltip(
+                        message: totalTimeTooltip,
+                        child: Text(
+                          'Total %',
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: denseSpacing),
+                    Expanded(
+                      child: DevToolsTooltip(
+                        message: selfTimeTooltip,
+                        child: Text(
+                          'Self %',
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(
+                height: 0,
+              ),
+              Expanded(
+                child: ListView.builder(
+                  controller: scrollController,
+                  itemExtent: CodeView.rowHeight,
+                  itemCount: lineCount,
+                  itemBuilder: (context, index) {
+                    final lineNum = lineOffset + index + 1;
+                    final data = sourceReport.profilerEntries[lineNum];
+                    if (data == null) {
+                      return const SizedBox();
+                    }
+                    return ProfileInformationGutterItem(
+                      lineNumber: lineNum,
+                      profilerData: data,
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+          const Center(
+            child: VerticalDivider(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class ProfileInformationGutterItem extends StatelessWidget {
+  const ProfileInformationGutterItem({
+    Key? key,
+    required this.lineNumber,
+    required this.profilerData,
+  }) : super(key: key);
+
+  final int lineNumber;
+
+  final ProfileReportEntry profilerData;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: CodeView.rowHeight,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: ProfilePercentageItem(
+              percentage: profilerData.inclusivePercentage,
+              hoverText: ProfileInformationGutter.totalTimeTooltip,
+            ),
+          ),
+          Expanded(
+            child: ProfilePercentageItem(
+              percentage: profilerData.exclusivePercentage,
+              hoverText: ProfileInformationGutter.selfTimeTooltip,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class ProfilePercentageItem extends StatelessWidget {
+  const ProfilePercentageItem({
+    required this.percentage,
+    required this.hoverText,
+  });
+
+  final double percentage;
+  final String hoverText;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    Color? color;
+    if (percentage > 5) {
+      color = colorScheme.performanceHighImpactColor;
+    } else if (percentage > 1) {
+      color = colorScheme.performanceMediumImpactColor;
+    } else {
+      color = colorScheme.performanceLowImpactColor;
+    }
+    return DevToolsTooltip(
+      message: hoverText,
+      child: Container(
+        color: color,
+        child: Container(
+          margin: const EdgeInsets.symmetric(
+            horizontal: densePadding,
+          ),
+          child: Text(
+            '${percentage.toStringAsFixed(2)} %',
+            textAlign: TextAlign.end,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 typedef IntCallback = void Function(int value);
 
 class Gutter extends StatelessWidget {
@@ -557,8 +762,7 @@ class Gutter extends StatelessWidget {
     required this.executableLines,
     required this.onPressed,
     required this.allowInteraction,
-    required this.coverageHitLines,
-    required this.coverageMissedLines,
+    required this.sourceReport,
     required this.showCodeCoverage,
   });
 
@@ -569,8 +773,7 @@ class Gutter extends StatelessWidget {
   final StackFrameAndSourcePosition? pausedFrame;
   final List<BreakpointAndSourcePosition> breakpoints;
   final Set<int> executableLines;
-  final Set<int> coverageHitLines;
-  final Set<int> coverageMissedLines;
+  final ProcessedSourceReport sourceReport;
   final IntCallback onPressed;
   final bool allowInteraction;
   final bool showCodeCoverage;
@@ -579,7 +782,8 @@ class Gutter extends StatelessWidget {
   Widget build(BuildContext context) {
     final bpLineSet = Set.from(breakpoints.map((bp) => bp.line));
     final theme = Theme.of(context);
-    final coverageLines = coverageHitLines.union(coverageMissedLines);
+    final coverageLines =
+        sourceReport.coverageHitLines.union(sourceReport.coverageMissedLines);
     return Container(
       width: gutterWidth,
       decoration: BoxDecoration(
@@ -594,7 +798,7 @@ class Gutter extends StatelessWidget {
           final lineNum = lineOffset + index + 1;
           bool? coverageHit;
           if (showCodeCoverage && coverageLines.contains(lineNum)) {
-            coverageHit = coverageHitLines.contains(lineNum);
+            coverageHit = sourceReport.coverageHitLines.contains(lineNum);
           }
           return GutterItem(
             lineNumber: lineNum,
