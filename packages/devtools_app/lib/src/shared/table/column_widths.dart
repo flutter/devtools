@@ -134,7 +134,7 @@ extension TreeColumnWidthExtension<T extends TreeNode<T>>
         // always display the full column title.
         width = max(
               max(longestWidth, column.minWidthPx ?? 0),
-              column.title.length,
+              column.title.length * characterWidth,
             ) +
             characterWidth * 2;
       }

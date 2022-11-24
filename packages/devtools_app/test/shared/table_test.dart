@@ -982,6 +982,7 @@ void main() {
         current.addChild(next);
         current = next;
       }
+      root.expandCascading();
       final table = TreeTable<TestData>(
         columns: [
           _NumberColumn(),
@@ -996,7 +997,6 @@ void main() {
         defaultSortColumn: treeColumn,
         defaultSortDirection: SortDirection.ascending,
       );
-      // This test will throw an exception if the table overflows.
       await tester.pumpWidget(
         wrap(
           SizedBox(
@@ -1006,7 +1006,34 @@ void main() {
           ),
         ),
       );
+
       expect(find.byWidget(table), findsOneWidget);
+      expect(
+        find.text(
+          '\u2026', // Unicode '...'
+          findRichText: true,
+          skipOffstage: false,
+        ),
+        findsNothing,
+      );
+      expect(
+        find.text(
+          'Root',
+          findRichText: true,
+          skipOffstage: false,
+        ),
+        findsOneWidget,
+      );
+      for (final str in strings) {
+        expect(
+          find.text(
+            str,
+            findRichText: true,
+            skipOffstage: false,
+          ),
+          findsWidgets,
+        );
+      }
     });
 
     testWidgets('properly collapses and expands the tree',
@@ -1088,7 +1115,7 @@ void main() {
       await tester.pumpWidget(wrap(table));
       final TreeTableState state = tester.state(find.byWidget(table));
       expect(state.tableController.columnWidths[0], equals(400));
-      expect(state.tableController.columnWidths[1], equals(63));
+      expect(state.tableController.columnWidths[1], equals(81));
       final tree = state.tableController.dataRoots[0];
       expect(tree.children[0].name, equals('Bar'));
       expect(tree.children[0].children[0].name, equals('Baz'));
