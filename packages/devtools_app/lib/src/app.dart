@@ -148,13 +148,19 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   }
 
   /// Gets the page for a given page/path and args.
-  Page _getPage(BuildContext context, String? page, Map<String, String?> args) {
+  Page _getPage(
+    BuildContext context,
+    String? page,
+    Map<String, String?> args,
+    DevToolsNavigationState? state,
+  ) {
     // Provide the appropriate page route.
     if (pages.containsKey(page)) {
       Widget widget = pages[page!]!(
         context,
         page,
         args,
+        state,
       );
       assert(
         () {
@@ -163,6 +169,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
               context,
               page,
               args,
+              state,
             ),
           );
           return true;
@@ -185,6 +192,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     BuildContext context,
     String? page,
     Map<String, String?> params,
+    DevToolsNavigationState? state,
   ) {
     final vmServiceUri = params['uri'];
 
@@ -262,7 +270,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       homePageId: _buildTabbedPage,
       for (final screen in widget.screens)
         screen.screen.screenId: _buildTabbedPage,
-      snapshotPageId: (_, __, args) {
+      snapshotPageId: (_, __, args, ___) {
         final snapshotArgs = SnapshotArguments.fromArgs(args);
         return DevToolsScaffold.withChild(
           key: UniqueKey(),
@@ -273,7 +281,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
           ),
         );
       },
-      appSizePageId: (_, __, ___) {
+      appSizePageId: (_, __, ___, ____) {
         return DevToolsScaffold.withChild(
           key: const Key('appsize'),
           ideTheme: ideTheme,
@@ -407,11 +415,12 @@ class DevToolsScreen<C> {
 }
 
 /// A [WidgetBuilder] that takes an additional map of URL query parameters and
-/// args.
+/// args, as well a state not included in the URL.
 typedef UrlParametersBuilder = Widget Function(
   BuildContext,
   String?,
   Map<String, String?>,
+  DevToolsNavigationState?,
 );
 
 /// Displays the checked mode banner in the bottom end corner instead of the

@@ -11,13 +11,17 @@ import '../../config_specific/logger/logger.dart';
 import '../../primitives/auto_dispose.dart';
 import '../../primitives/history_manager.dart';
 import '../../shared/globals.dart';
+import '../../shared/routing.dart';
 import '../../ui/search.dart';
 import 'debugger_model.dart';
 import 'program_explorer_controller.dart';
 import 'syntax_highlighter.dart';
 
 class CodeViewController extends DisposableController
-    with AutoDisposeControllerMixin, SearchControllerMixin<SourceToken> {
+    with
+        AutoDisposeControllerMixin,
+        SearchControllerMixin<SourceToken>,
+        RouteStateHandlerMixin {
   CodeViewController() {
     _scriptHistoryListener = () {
       final currentScriptValue = scriptsHistory.current.value;
@@ -31,6 +35,23 @@ class CodeViewController extends DisposableController
   void dispose() {
     super.dispose();
     scriptsHistory.current.removeListener(_scriptHistoryListener);
+  }
+
+  /// Perform operations based on changes in navigation state.
+  ///
+  /// This method is only invoked if [subscribeToRouterEvents] has been called on
+  /// this instance with a valid [DevToolsRouterDelegate].
+  @override
+  void onRouteStateUpdate(DevToolsNavigationState state) {
+    switch (state.kind) {
+      case CodeViewSourceLocationNavigationState.type:
+        {
+          final processedState =
+              CodeViewSourceLocationNavigationState._fromState(state);
+          // TODO(bkonyi): investigate delay in scrolling to source location.
+          showScriptLocation(processedState.location);
+        }
+    }
   }
 
   ValueListenable<ScriptLocation?> get scriptLocation => _scriptLocation;
@@ -345,4 +366,41 @@ class ParsedScript {
   final List<String> lines;
 
   int get lineCount => lines.length;
+}
+
+/// State used to inform [CodeViewController]s listening for
+/// [DevToolsNavigationState] changes to display a specific source location.
+class CodeViewSourceLocationNavigationState extends DevToolsNavigationState {
+  CodeViewSourceLocationNavigationState({
+    required ScriptRef script,
+    required int line,
+  }) : super(
+          kind: type,
+          state: <String, String?>{
+            'scriptId': script.id,
+            'uri': script.uri,
+            'line': line.toString(),
+          },
+        );
+
+  CodeViewSourceLocationNavigationState._fromState(
+    DevToolsNavigationState state,
+  ) : super(
+          kind: type,
+          state: state.state,
+        );
+
+  static const type = 'codeViewSourceLocation';
+
+  ScriptRef get script => ScriptRef(
+        id: state['scriptId']!,
+        uri: state['uri'],
+      );
+
+  int get line => int.parse(state['line']!);
+
+  ScriptLocation get location => ScriptLocation(
+        script,
+        location: SourcePosition(line: line, column: 1),
+      );
 }
