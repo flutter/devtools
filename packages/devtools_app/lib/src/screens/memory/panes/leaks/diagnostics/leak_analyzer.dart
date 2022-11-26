@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:leak_tracker/leak_analysis.dart';
+import 'package:leak_tracker/devtools_integration.dart';
 
 import '../../../shared/heap/model.dart';
 import '../../../shared/heap/spanning_tree.dart';

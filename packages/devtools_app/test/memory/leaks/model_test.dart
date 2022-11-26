@@ -8,7 +8,7 @@ import 'package:devtools_app/src/screens/memory/panes/leaks/diagnostics/model.da
 import 'package:devtools_app/src/screens/memory/primitives/class_name.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/model.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker/leak_analysis.dart';
+import 'package:leak_tracker/devtools_integration.dart';
 
 void main() {
   test('$NotGCedAnalyzerTask serializes.', () {

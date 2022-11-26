@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:collection/collection.dart';
-import 'package:leak_tracker/leak_analysis.dart';
+import 'package:leak_tracker/devtools_integration.dart';
 
 import 'model.dart';
 

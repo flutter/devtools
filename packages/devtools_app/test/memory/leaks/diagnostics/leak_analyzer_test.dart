@@ -8,7 +8,7 @@ import 'package:devtools_app/src/screens/memory/panes/leaks/diagnostics/formatte
 import 'package:devtools_app/src/screens/memory/panes/leaks/diagnostics/leak_analyzer.dart';
 import 'package:devtools_app/src/screens/memory/panes/leaks/diagnostics/model.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker/leak_analysis.dart';
+import 'package:leak_tracker/devtools_integration.dart';
 
 import '../../../test_infra/test_data/memory/leaks/leaks_data.dart';
 

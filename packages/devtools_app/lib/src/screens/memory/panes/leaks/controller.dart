@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:leak_tracker/leak_analysis.dart';
+import 'package:leak_tracker/devtools_integration.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../config_specific/import_export/import_export.dart';
@@ -20,12 +20,7 @@ import 'diagnostics/leak_analyzer.dart';
 import 'diagnostics/model.dart';
 import 'primitives/analysis_status.dart';
 import 'primitives/simple_items.dart';
-
-// TODO(polina-c): reference these constants in dart SDK, when it gets submitted
-// there.
-// https://github.com/flutter/devtools/issues/3951
-const _extensionKindToReceiveLeaksSummary = 'memory_leaks_summary';
-const _extensionKindToReceiveLeaksDetails = 'memory_leaks_details';
+import 'package:vm_service/vm_service.dart';
 
 const yamlFilePrefix = 'memory_leaks';
 
@@ -51,14 +46,14 @@ class LeaksPaneController {
   late StreamSubscription subscriptionWithHistory;
   late StreamSubscription detailsSubscription;
 
-  /// Subscribes for summary with history and for details without history.
+  /// Subscribes for details without history and for all other messages with history.
   void _subscribeForMemoryLeaksMessages() {
     subscriptionWithHistory = serviceManager
         .service!.onExtensionEventWithHistory
         .listen(_onAppMessageWithHistory);
 
     detailsSubscription =
-        serviceManager.service!.onExtensionEvent.listen(_receivedLeaksDetails);
+        serviceManager.service!.onExtensionEvent.listen(_onLeakDetailsReceived);
   }
 
   void dispose() {
@@ -67,27 +62,33 @@ class LeaksPaneController {
     analysisAtatus.dispose();
   }
 
-  void _onAppMessageWithHistory(Event event) {
+  void _onAppMessageWithHistory(Event vmServiceEvent) {
     if (appStatus.value == AppStatus.unsupportedProtocolVersion) return;
 
-    if (event.extensionKind != _extensionKindToReceiveLeaksSummary) return;
-    appStatus.value = AppStatus.leaksFound;
-    try {
-      final newSummary = LeakSummary.fromJson(event.json!['extensionData']!);
-      final time = event.timestamp != null
-          ? DateTime.fromMicrosecondsSinceEpoch(event.timestamp!)
-          : DateTime.now();
+    final event = parseFromAppEvent(vmServiceEvent);
 
-      if (newSummary.matches(_lastLeakSummary)) return;
-      _lastLeakSummary = newSummary;
-      leakSummaryHistory.value =
-          '${formatDateTime(time)}: ${newSummary.toMessage()}\n'
-          '${leakSummaryHistory.value}';
-    } catch (error, trace) {
-      leakSummaryHistory.value = 'error: $error\n${leakSummaryHistory.value}';
-      logger.log(error);
-      logger.log(trace);
-    }
+    if (event is LeakTrackingStarted) {}
+
+    throw StateError('Unsupported event type: ${event.runtimeType}');
+
+    // if (event.extensionKind == ) return;
+    // appStatus.value = AppStatus.leaksFound;
+    // try {
+    //   final newSummary = LeakSummary.fromJson(event.json!['extensionData']!);
+    //   final time = event.timestamp != null
+    //       ? DateTime.fromMicrosecondsSinceEpoch(event.timestamp!)
+    //       : DateTime.now();
+
+    //   if (newSummary.matches(_lastLeakSummary)) return;
+    //   _lastLeakSummary = newSummary;
+    //   leakSummaryHistory.value =
+    //       '${formatDateTime(time)}: ${newSummary.toMessage()}\n'
+    //       '${leakSummaryHistory.value}';
+    // } catch (error, trace) {
+    //   leakSummaryHistory.value = 'error: $error\n${leakSummaryHistory.value}';
+    //   logger.log(error);
+    //   logger.log(trace);
+    // }
   }
 
   Future<NotGCedAnalyzerTask> _createAnalysisTask(
@@ -97,45 +98,45 @@ class LeaksPaneController {
     return NotGCedAnalyzerTask.fromSnapshot(graph, reports);
   }
 
-  Future<void> _receivedLeaksDetails(Event event) async {
-    if (event.extensionKind != _extensionKindToReceiveLeaksDetails) return;
-    if (analysisAtatus.status.value != AnalysisStatus.Ongoing) return;
-    NotGCedAnalyzerTask? task;
+  Future<void> _onLeakDetailsReceived(Event event) async {
+    // if (event.extensionKind != _extensionKindToReceiveLeaksDetails) return;
+    // if (analysisAtatus.status.value != AnalysisStatus.Ongoing) return;
+    // NotGCedAnalyzerTask? task;
 
-    try {
-      await _setMessageWithDelay('Received details. Parsing...');
-      final leakDetails = Leaks.fromJson(event.json!['extensionData']!);
+    // try {
+    //   await _setMessageWithDelay('Received details. Parsing...');
+    //   final leakDetails = Leaks.fromJson(event.json!['extensionData']!);
 
-      final notGCed = leakDetails.byType[LeakType.notGCed] ?? [];
+    //   final notGCed = leakDetails.byType[LeakType.notGCed] ?? [];
 
-      NotGCedAnalyzed? notGCedAnalyzed;
-      if (notGCed.isNotEmpty) {
-        await _setMessageWithDelay('Taking heap snapshot...');
-        task = await _createAnalysisTask(notGCed);
-        await _setMessageWithDelay('Detecting retaining paths...');
-        notGCedAnalyzed = analyseNotGCed(task);
-      }
+    //   NotGCedAnalyzed? notGCedAnalyzed;
+    //   if (notGCed.isNotEmpty) {
+    //     await _setMessageWithDelay('Taking heap snapshot...');
+    //     task = await _createAnalysisTask(notGCed);
+    //     await _setMessageWithDelay('Detecting retaining paths...');
+    //     notGCedAnalyzed = analyseNotGCed(task);
+    //   }
 
-      await _setMessageWithDelay('Formatting...');
+    //   await _setMessageWithDelay('Formatting...');
 
-      final yaml = analyzedLeaksToYaml(
-        gcedLate: leakDetails.gcedLate,
-        notDisposed: leakDetails.notDisposed,
-        notGCed: notGCedAnalyzed,
-      );
+    //   final yaml = analyzedLeaksToYaml(
+    //     gcedLate: leakDetails.gcedLate,
+    //     notDisposed: leakDetails.notDisposed,
+    //     notGCed: notGCedAnalyzed,
+    //   );
 
-      _saveResultAndSetStatus(yaml, task);
-    } catch (error, trace) {
-      var message = '${analysisAtatus.message.value}\nError: $error';
-      if (task != null) {
-        final fileName = _saveTask(task, DateTime.now());
-        message += '\nDownloaded raw data to $fileName.';
-        await _setMessageWithDelay(message);
-        analysisAtatus.status.value = AnalysisStatus.ShowingError;
-      }
-      logger.log(error);
-      logger.log(trace);
-    }
+    //   _saveResultAndSetStatus(yaml, task);
+    // } catch (error, trace) {
+    //   var message = '${analysisAtatus.message.value}\nError: $error';
+    //   if (task != null) {
+    //     final fileName = _saveTask(task, DateTime.now());
+    //     message += '\nDownloaded raw data to $fileName.';
+    //     await _setMessageWithDelay(message);
+    //     analysisAtatus.status.value = AnalysisStatus.ShowingError;
+    //   }
+    //   logger.log(error);
+    //   logger.log(trace);
+    // }
   }
 
   void _saveResultAndSetStatus(String yaml, NotGCedAnalyzerTask? task) async {
