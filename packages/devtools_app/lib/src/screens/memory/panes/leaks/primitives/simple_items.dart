@@ -10,5 +10,5 @@ enum AppStatus {
   leaksFound,
 }
 
-/// We may use https://pub.dev/packages/vendor to support old versions of leak_tracker.
+/// We may use https://pub.dev/packages/vendor to support previous versions of leak_tracker.
 const supportedLeakTrackingProtocols = {'1'};

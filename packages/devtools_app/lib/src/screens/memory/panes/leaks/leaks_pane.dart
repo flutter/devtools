@@ -4,9 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../shared/common_widgets.dart';
 import '../../../../shared/theme.dart';
-import '../../primitives/ui.dart';
 import 'controller.dart';
 import 'primitives/analysis_status.dart';
 import 'primitives/simple_items.dart';
@@ -58,8 +56,6 @@ class _LeaksPaneState extends State<LeaksPane> {
               analysisStarter: Row(
                 children: [
                   AnalyzeButton(leaksController: _leaksController),
-                  const SizedBox(width: denseSpacing),
-                  _ForceGCButton(leaksController: _leaksController),
                   const LeaksHelpLink(),
                 ],
               ),
@@ -76,25 +72,6 @@ class _LeaksPaneState extends State<LeaksPane> {
           ],
         );
       },
-    );
-  }
-}
-
-class _ForceGCButton extends StatelessWidget {
-  const _ForceGCButton({Key? key, required this.leaksController})
-      : super(key: key);
-
-  final LeaksPaneController leaksController;
-
-  @override
-  Widget build(BuildContext context) {
-    return IconLabelButton(
-      label: 'Force GC',
-      icon: Icons.delete,
-      tooltip: 'Force full GC in the application\n'
-          'to make sure to collect everything that can be collected.',
-      onPressed: () async => await leaksController.forceGC(),
-      minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
     );
   }
 }

@@ -45,25 +45,26 @@ class LeaksPaneController {
 
   final _exportController = ExportController();
 
-  late StreamSubscription summarySubscription;
+  late StreamSubscription subscriptionWithHistory;
   late StreamSubscription detailsSubscription;
 
   /// Subscribes for summary with history and for details without history.
   void _subscribeForMemoryLeaksMessages() {
+    subscriptionWithHistory = serviceManager
+        .service!.onExtensionEventWithHistory
+        .listen(_onAppMessageWithHistory);
+
     detailsSubscription =
         serviceManager.service!.onExtensionEvent.listen(_receivedLeaksDetails);
-
-    summarySubscription = serviceManager.service!.onExtensionEventWithHistory
-        .listen(_receivedLeaksSummary);
   }
 
   void dispose() {
-    unawaited(summarySubscription.cancel());
+    unawaited(subscriptionWithHistory.cancel());
     unawaited(detailsSubscription.cancel());
     analysisAtatus.dispose();
   }
 
-  void _receivedLeaksSummary(Event event) {
+  void _onAppMessageWithHistory(Event event) {
     if (event.extensionKind != _extensionKindToReceiveLeaksSummary) return;
     appStatus.value = AppStatus.leaksFound;
     try {
@@ -166,20 +167,6 @@ class LeaksPaneController {
   Future<void> _setMessageWithDelay(String message) async {
     analysisAtatus.message.value = message;
     await delayForBatchProcessing(micros: 5000);
-  }
-
-  Future<void> forceGC() async {
-    analysisAtatus.status.value = AnalysisStatus.Ongoing;
-    await _setMessageWithDelay('Forcing full garbage collection...');
-    await _invokeMemoryLeakTrackingExtension(
-      <String, dynamic>{
-        // TODO(polina-c): reference the constant in Flutter
-        // https://github.com/flutter/devtools/issues/3951
-        'forceGC': 'true',
-      },
-    );
-    analysisAtatus.status.value = AnalysisStatus.ShowingResult;
-    await _setMessageWithDelay('Full garbage collection initiated.');
   }
 
   Future<void> requestLeaks() async {
