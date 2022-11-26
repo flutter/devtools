@@ -9,6 +9,7 @@ import '../../../../shared/theme.dart';
 import '../../primitives/ui.dart';
 import 'controller.dart';
 import 'primitives/analysis_status.dart';
+import 'primitives/simple_items.dart';
 import 'widgets/simple_widgets.dart';
 
 // TODO(polina-c): review UX with UX specialists
@@ -37,14 +38,14 @@ class _LeaksPaneState extends State<LeaksPane> {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: _leaksController.leakSummaryReceived,
-      builder: (_, leakSummaryReceived, __) {
-        if (!leakSummaryReceived) {
+    return ValueListenableBuilder<AppStatus>(
+      valueListenable: _leaksController.appStatus,
+      builder: (_, appStatus, __) {
+        if (appStatus != AppStatus.leaksFound) {
           return Column(
-            children: const [
-              LeaksHelpLink(),
-              Text('No information about memory leaks yet.'),
+            children: [
+              const LeaksHelpLink(),
+              Text(_leaksController.appStatusMessage()),
             ],
           );
         }
@@ -53,7 +54,7 @@ class _LeaksPaneState extends State<LeaksPane> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             AnalysisStatusView(
-              controller: _leaksController.status,
+              controller: _leaksController.analysisAtatus,
               analysisStarter: Row(
                 children: [
                   AnalyzeButton(leaksController: _leaksController),

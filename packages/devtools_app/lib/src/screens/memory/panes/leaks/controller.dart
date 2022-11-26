@@ -19,6 +19,7 @@ import 'diagnostics/leak_analyzer.dart';
 import 'diagnostics/model.dart';
 import 'instrumentation/model.dart';
 import 'primitives/analysis_status.dart';
+import 'primitives/simple_items.dart';
 
 // TODO(polina-c): reference these constants in dart SDK, when it gets submitted
 // there.
@@ -33,10 +34,13 @@ class LeaksPaneController {
     _subscribeForMemoryLeaksMessages();
   }
 
-  final status = AnalysisStatusController();
+  final analysisAtatus = AnalysisStatusController();
 
   final leakSummaryHistory = ValueNotifier<String>('');
-  final leakSummaryReceived = ValueNotifier<bool>(false);
+  late String appProtocolVersion;
+  final appStatus =
+      ValueNotifier<AppStatus>(AppStatus.noCommunicationsRecieved);
+
   LeakSummary? _lastLeakSummary;
 
   final _exportController = ExportController();
@@ -56,12 +60,12 @@ class LeaksPaneController {
   void dispose() {
     unawaited(summarySubscription.cancel());
     unawaited(detailsSubscription.cancel());
-    status.dispose();
+    analysisAtatus.dispose();
   }
 
   void _receivedLeaksSummary(Event event) {
     if (event.extensionKind != _extensionKindToReceiveLeaksSummary) return;
-    leakSummaryReceived.value = true;
+    appStatus.value = AppStatus.leaksFound;
     try {
       final newSummary = LeakSummary.fromJson(event.json!['extensionData']!);
       final time = event.timestamp != null
@@ -89,7 +93,7 @@ class LeaksPaneController {
 
   Future<void> _receivedLeaksDetails(Event event) async {
     if (event.extensionKind != _extensionKindToReceiveLeaksDetails) return;
-    if (status.status.value != AnalysisStatus.Ongoing) return;
+    if (analysisAtatus.status.value != AnalysisStatus.Ongoing) return;
     NotGCedAnalyzerTask? task;
 
     try {
@@ -116,12 +120,12 @@ class LeaksPaneController {
 
       _saveResultAndSetStatus(yaml, task);
     } catch (error, trace) {
-      var message = '${status.message.value}\nError: $error';
+      var message = '${analysisAtatus.message.value}\nError: $error';
       if (task != null) {
         final fileName = _saveTask(task, DateTime.now());
         message += '\nDownloaded raw data to $fileName.';
         await _setMessageWithDelay(message);
-        status.status.value = AnalysisStatus.ShowingError;
+        analysisAtatus.status.value = AnalysisStatus.ShowingError;
       }
       logger.log(error);
       logger.log(trace);
@@ -142,7 +146,7 @@ class LeaksPaneController {
     await _setMessageWithDelay(
       'Downloaded the leak analysis to $yamlFile$taskFileMessage.',
     );
-    status.status.value = AnalysisStatus.ShowingResult;
+    analysisAtatus.status.value = AnalysisStatus.ShowingResult;
   }
 
   /// Saves raw analysis task for troubleshooting and deeper analysis.
@@ -160,12 +164,12 @@ class LeaksPaneController {
   }
 
   Future<void> _setMessageWithDelay(String message) async {
-    status.message.value = message;
+    analysisAtatus.message.value = message;
     await delayForBatchProcessing(micros: 5000);
   }
 
   Future<void> forceGC() async {
-    status.status.value = AnalysisStatus.Ongoing;
+    analysisAtatus.status.value = AnalysisStatus.Ongoing;
     await _setMessageWithDelay('Forcing full garbage collection...');
     await _invokeMemoryLeakTrackingExtension(
       <String, dynamic>{
@@ -174,12 +178,12 @@ class LeaksPaneController {
         'forceGC': 'true',
       },
     );
-    status.status.value = AnalysisStatus.ShowingResult;
+    analysisAtatus.status.value = AnalysisStatus.ShowingResult;
     await _setMessageWithDelay('Full garbage collection initiated.');
   }
 
   Future<void> requestLeaks() async {
-    status.status.value = AnalysisStatus.Ongoing;
+    analysisAtatus.status.value = AnalysisStatus.Ongoing;
     await _setMessageWithDelay('Requested details from the application.');
 
     await _invokeMemoryLeakTrackingExtension(
@@ -199,5 +203,21 @@ class LeaksPaneController {
       isolateId: serviceManager.isolateManager.mainIsolate.value!.id!,
       args: args,
     );
+  }
+
+  String appStatusMessage() {
+    switch (appStatus.value) {
+      case AppStatus.leakTrackingNotSupported:
+        return 'The application does not support leak tracking.';
+      case AppStatus.noCommunicationsRecieved:
+        return 'Waiting for leak tracking messages from the application...';
+      case AppStatus.protocolVersionIsWrong:
+        return 'The application uses unsupported leak tracking protocol $appProtocolVersion. '
+            'Upgrade to newer version of leak_tracker to switch to one of supported protocols: $supportedLeakTrackingProtocols.';
+      case AppStatus.leakTrackingStarted:
+        return 'Leak tracking started. No leaks communicated so far.';
+      case AppStatus.leaksFound:
+        throw StateError('there is no UI message for ${AppStatus.leaksFound}.');
+    }
   }
 }
