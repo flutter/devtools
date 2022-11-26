@@ -14,9 +14,9 @@ import '../../../../primitives/utils.dart';
 import '../../../../service/service_extensions.dart';
 import '../../../../shared/globals.dart';
 import '../../primitives/memory_utils.dart';
+import 'diagnostics/formatter.dart';
 import 'diagnostics/leak_analyzer.dart';
 import 'diagnostics/model.dart';
-import 'diagnostics/formatter.dart';
 import 'instrumentation/model.dart';
 import 'primitives/analysis_status.dart';
 
