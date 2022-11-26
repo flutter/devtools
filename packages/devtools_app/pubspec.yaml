@@ -43,6 +43,7 @@ dependencies:
   image: ^3.0.2
   intl: '>=0.16.1 <0.18.0'
   js: ^0.6.1+1
+  leak_tracker: ^1.0.0-1.0.dev
   mime: ^1.0.0
   path: ^1.8.0
   perfetto_compiled:
@@ -60,6 +61,7 @@ dependencies:
   vm_snapshot_analysis: ^0.7.1
   web_socket_channel: ^2.1.0
   # widget_icons: ^0.0.1
+
 
 dev_dependencies:
   build_runner: ^2.0.4
@@ -191,3 +193,5 @@ dependency_overrides:
     path: ../devtools_shared
   devtools_test:
     path: ../devtools_test
+  leak_tracker:
+    path: ../../../leak_tracker
