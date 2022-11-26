@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:leak_tracker/leak_analysis.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../config_specific/import_export/import_export.dart';
@@ -17,7 +18,6 @@ import '../../primitives/memory_utils.dart';
 import 'diagnostics/formatter.dart';
 import 'diagnostics/leak_analyzer.dart';
 import 'diagnostics/model.dart';
-import 'instrumentation/model.dart';
 import 'primitives/analysis_status.dart';
 import 'primitives/simple_items.dart';
 
@@ -30,7 +30,10 @@ const _extensionKindToReceiveLeaksDetails = 'memory_leaks_details';
 const yamlFilePrefix = 'memory_leaks';
 
 class LeaksPaneController {
-  LeaksPaneController() {
+  LeaksPaneController()
+      : assert(
+          supportedLeakTrackingProtocols.contains(leakTrackerProtocolVersion),
+        ) {
     _subscribeForMemoryLeaksMessages();
   }
 
@@ -65,6 +68,8 @@ class LeaksPaneController {
   }
 
   void _onAppMessageWithHistory(Event event) {
+    if (appStatus.value == AppStatus.unsupportedProtocolVersion) return;
+
     if (event.extensionKind != _extensionKindToReceiveLeaksSummary) return;
     appStatus.value = AppStatus.leaksFound;
     try {
@@ -198,7 +203,7 @@ class LeaksPaneController {
         return 'The application does not support leak tracking.';
       case AppStatus.noCommunicationsRecieved:
         return 'Waiting for leak tracking messages from the application...';
-      case AppStatus.protocolVersionIsWrong:
+      case AppStatus.unsupportedProtocolVersion:
         return 'The application uses unsupported leak tracking protocol $appProtocolVersion. '
             'Upgrade to newer version of leak_tracker to switch to one of supported protocols: $supportedLeakTrackingProtocols.';
       case AppStatus.leakTrackingStarted:
