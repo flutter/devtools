@@ -62,10 +62,16 @@ class LeaksPaneController {
     analysisAtatus.dispose();
   }
 
+  static DateTime _fromEpochOrNull(int? microsecondsSinceEpoch) =>
+      microsecondsSinceEpoch == null
+          ? DateTime.now()
+          : DateTime.fromMicrosecondsSinceEpoch(microsecondsSinceEpoch);
+
   void _onAppMessageWithHistory(Event vmServiceEvent) {
     if (appStatus.value == AppStatus.unsupportedProtocolVersion) return;
 
-    final event = parseFromAppEvent(vmServiceEvent);
+    final event = parseFromAppEvent(vmServiceEvent, withHistory: true);
+    if (event == null) return;
 
     if (event is LeakTrackingStarted) {
       appStatus.value = AppStatus.leakTrackingStarted;
@@ -73,26 +79,20 @@ class LeaksPaneController {
       return;
     }
 
+    if (event is LeakTrackingSumamry) {
+      appStatus.value = AppStatus.leaksFound;
+      if (event.leakSummary.matches(_lastLeakSummary)) return;
+      _lastLeakSummary = event.leakSummary;
+
+      final time = _fromEpochOrNull(vmServiceEvent.timestamp).toLocal();
+
+      leakSummaryHistory.value =
+          '${formatDateTime(time)}: ${event.leakSummary.toMessage()}\n'
+          '${leakSummaryHistory.value}';
+      return;
+    }
+
     throw StateError('Unsupported event type: ${event.runtimeType}');
-
-    // if (event.extensionKind == ) return;
-    // appStatus.value = AppStatus.leaksFound;
-    // try {
-    //   final newSummary = LeakSummary.fromJson(event.json!['extensionData']!);
-    //   final time = event.timestamp != null
-    //       ? DateTime.fromMicrosecondsSinceEpoch(event.timestamp!)
-    //       : DateTime.now();
-
-    //   if (newSummary.matches(_lastLeakSummary)) return;
-    //   _lastLeakSummary = newSummary;
-    //   leakSummaryHistory.value =
-    //       '${formatDateTime(time)}: ${newSummary.toMessage()}\n'
-    //       '${leakSummaryHistory.value}';
-    // } catch (error, trace) {
-    //   leakSummaryHistory.value = 'error: $error\n${leakSummaryHistory.value}';
-    //   logger.log(error);
-    //   logger.log(trace);
-    // }
   }
 
   Future<NotGCedAnalyzerTask> _createAnalysisTask(
