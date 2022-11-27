@@ -67,7 +67,11 @@ class LeaksPaneController {
 
     final event = parseFromAppEvent(vmServiceEvent);
 
-    if (event is LeakTrackingStarted) {}
+    if (event is LeakTrackingStarted) {
+      appStatus.value = AppStatus.leakTrackingStarted;
+      appProtocolVersion = event.protocolVersion;
+      return;
+    }
 
     throw StateError('Unsupported event type: ${event.runtimeType}');
 
