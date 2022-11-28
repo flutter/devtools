@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../shared/common_widgets.dart';
+import '../../shared/globals.dart';
 import '../../shared/theme.dart';
 import '../../shared/utils.dart';
 import '../../ui/search.dart';
@@ -49,6 +50,7 @@ class _MemoryTabsState extends State<MemoryTabs>
   final ValueNotifier<int> _currentTab = ValueNotifier(0);
 
   void _initTabs() {
+    final isProfile = serviceManager.connectedApp?.isProfileBuildNow ?? false;
     _tabs = [
       DevToolsTab.create(
         key: MemoryScreenKeys.dartHeapTableProfileTab,
@@ -60,11 +62,12 @@ class _MemoryTabsState extends State<MemoryTabs>
         gaPrefix: _gaPrefix,
         tabName: 'Diff',
       ),
-      DevToolsTab.create(
-        key: MemoryScreenKeys.dartHeapAllocationTracingTab,
-        tabName: 'Trace',
-        gaPrefix: _gaPrefix,
-      ),
+      if (!isProfile)
+        DevToolsTab.create(
+          key: MemoryScreenKeys.dartHeapAllocationTracingTab,
+          tabName: 'Trace',
+          gaPrefix: _gaPrefix,
+        ),
       if (widget.controller.shouldShowLeaksTab.value)
         DevToolsTab.create(
           key: MemoryScreenKeys.leaksTab,
@@ -107,7 +110,7 @@ class _MemoryTabsState extends State<MemoryTabs>
   @override
   Widget build(BuildContext context) {
     final themeData = Theme.of(context);
-
+    final isProfile = serviceManager.connectedApp?.isProfileBuildNow ?? false;
     return Column(
       children: [
         const SizedBox(height: defaultSpacing),
@@ -144,9 +147,10 @@ class _MemoryTabsState extends State<MemoryTabs>
                 ),
               ),
               // Trace tab.
-              const KeepAliveWrapper(
-                child: AllocationProfileTracingView(),
-              ),
+              if (!isProfile)
+                const KeepAliveWrapper(
+                  child: AllocationProfileTracingView(),
+                ),
               // Leaks tab.
               if (controller.shouldShowLeaksTab.value)
                 const KeepAliveWrapper(child: LeaksPane()),
