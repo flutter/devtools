@@ -1,4 +1,5 @@
 ## 2.20.0
+* Prepare for 2.20.0 release [#4843](https://github.com/flutter/devtools/pull/4843)
 * Turn off all rebuild related UI when the flag is off [#4840](https://github.com/flutter/devtools/pull/4840)
 * Disable allocation tracing in profile mode [#4839](https://github.com/flutter/devtools/pull/4839)
 * Fix column width calculations [#4818](https://github.com/flutter/devtools/pull/4818)
