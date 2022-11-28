@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
+import 'package:leak_tracker/devtools_integration.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../analytics/analytics.dart' as ga;
@@ -211,7 +212,7 @@ class MemoryController extends DisposableController
 
   void _refreshShouldShowLeaksTab() {
     _shouldShowLeaksTab.value = serviceManager.serviceExtensionManager
-        .hasServiceExtension(memoryLeakTracking)
+        .hasServiceExtension(memoryLeakTrackingExtensionName)
         .value;
   }
 

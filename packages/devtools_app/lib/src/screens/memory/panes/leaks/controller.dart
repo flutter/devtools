@@ -181,26 +181,20 @@ class LeaksPaneController {
   }
 
   Future<void> requestLeaks() async {
-    analysisAtatus.status.value = AnalysisStatus.Ongoing;
-    await _setMessageWithDelay('Requested details from the application.');
+    // analysisAtatus.status.value = AnalysisStatus.Ongoing;
+    // await _setMessageWithDelay('Requested details from the application.');
 
-    await _invokeMemoryLeakTrackingExtension(
-      <String, dynamic>{
-        // TODO(polina-c): reference the constant in Flutter
-        // https://github.com/flutter/devtools/issues/3951
-        'requestDetails': 'true',
-      },
-    );
+    await _invokeMemoryLeakTrackingExtension(RequestForLeakDetails());
   }
 
-  Future<void> _invokeMemoryLeakTrackingExtension(
-    Map<String, dynamic> args,
-  ) async {
-    await serviceManager.service!.callServiceExtension(
-      memoryLeakTracking,
+  Future<void> _invokeMemoryLeakTrackingExtension(ToAppEvent event) async {
+    final response = await serviceManager.service!.callServiceExtension(
+      memoryLeakTrackingExtensionName,
       isolateId: serviceManager.isolateManager.mainIsolate.value!.id!,
-      args: args,
+      args: event.toJson(),
     );
+
+    _exportController.downloadFile(jsonEncode(response.json));
   }
 
   String appStatusMessage() {
