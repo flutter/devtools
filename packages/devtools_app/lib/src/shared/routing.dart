@@ -71,9 +71,11 @@ class DevToolsRouteInformationParser
     final configuration = DevToolsRouteConfiguration(
       path,
       uri.queryParameters,
-      DevToolsNavigationState._(
-        (routeInformation.state as Map).cast<String, String?>(),
-      ),
+      routeInformation.state == null
+          ? null
+          : DevToolsNavigationState._(
+              (routeInformation.state as Map).cast<String, String?>(),
+            ),
     );
     return SynchronousFuture<DevToolsRouteConfiguration>(configuration);
   }
@@ -266,6 +268,9 @@ class DevToolsNavigationState {
           ...state,
         };
 
+  factory DevToolsNavigationState.fromJson(Map<String, dynamic> json) =>
+      DevToolsNavigationState._(json.cast<String, String?>());
+
   DevToolsNavigationState._(this._state) : kind = _state['_kind']!;
 
   final String kind;
@@ -279,6 +284,11 @@ class DevToolsNavigationState {
       state,
     );
   }
+
+  @override
+  String toString() => _state.toString();
+
+  Map<String, dynamic> toJson() => _state;
 }
 
 /// Mixin that gives controllers the ability to respond to changes in router

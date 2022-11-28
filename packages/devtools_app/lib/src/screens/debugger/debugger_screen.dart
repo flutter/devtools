@@ -119,9 +119,6 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!initController()) return;
-    controller.codeViewController.subscribeToRouterEvents(
-      DevToolsRouterDelegate.of(context),
-    );
     unawaited(controller.onFirstDebuggerScreenLoad());
   }
 
