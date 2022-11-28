@@ -82,7 +82,7 @@ class AllocationProfileTracingViewState
               ? const OutlineDecoration(
                   child: Center(
                     child: Text(
-                      'Allocation tracing is currently disabled in profile mode',
+                      'Allocation tracing is temporarily disabled in profile mode',
                     ),
                   ),
                 )
