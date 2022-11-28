@@ -10,6 +10,7 @@ library gtags;
 import 'dart:async';
 import 'dart:html';
 
+import 'package:flutter/foundation.dart';
 import 'package:js/js.dart';
 
 import '../../devtools.dart' as devtools show version;
@@ -23,6 +24,15 @@ import '../ui/gtags.dart';
 import 'analytics_common.dart';
 import 'constants.dart' as analytics_constants;
 import 'metrics.dart';
+
+/// For gtags API see https://developers.google.com/gtagjs/reference/api
+/// For debugging install the Chrome Plugin "Google Analytics Debugger".
+
+/// Enable this flag to debug analytics when DevTools is run in debug or profile
+/// mode, otherwise analytics will only be sent in release builds.
+///
+/// `ga.isAnalyticsEnabled()` still must return true for analytics to be sent.
+bool _debugAnalytics = false;
 
 // Dimensions1 AppType values:
 const String appTypeFlutter = 'flutter';
@@ -171,7 +181,7 @@ class GtagEventDevTools extends GtagEvent {
 GtagEventDevTools _gtagEvent({
   String? event_category,
   String? event_label,
-  String? Function()? send_to,
+  String? send_to,
   bool non_interaction = false,
   int value = 0,
   ScreenAnalyticsMetrics? screenMetrics,
@@ -179,7 +189,7 @@ GtagEventDevTools _gtagEvent({
   return GtagEventDevTools(
     event_category: event_category,
     event_label: event_label,
-    send_to: send_to?.call(),
+    send_to: send_to,
     non_interaction: non_interaction,
     value: value,
     user_app: userAppType,
@@ -383,14 +393,16 @@ void screen(
   String screenName, [
   int value = 0,
 ]) {
-  GTag.event(
-    screenName,
-    _gtagEvent(
-      event_category: analytics_constants.screenViewEvent,
-      value: value,
-      send_to: () => gaDevToolsPropertyId(),
-    ),
-  );
+  if (kReleaseMode || _debugAnalytics) {
+    GTag.event(
+      screenName,
+      _gtagEvent(
+        event_category: analytics_constants.screenViewEvent,
+        value: value,
+        send_to: gaDevToolsPropertyId(),
+      ),
+    );
+  }
 }
 
 String _operationKey(String screenName, String timedOperation) {
@@ -526,16 +538,18 @@ void _timing(
   required int durationMicros,
   ScreenAnalyticsMetrics? screenMetrics,
 }) {
-  GTag.event(
-    screenName,
-    _gtagEvent(
-      event_category: analytics_constants.timingEvent,
-      event_label: timedOperation,
-      value: durationMicros,
-      send_to: () => gaDevToolsPropertyId(),
-      screenMetrics: screenMetrics,
-    ),
-  );
+  if (kReleaseMode || _debugAnalytics) {
+    GTag.event(
+      screenName,
+      _gtagEvent(
+        event_category: analytics_constants.timingEvent,
+        event_label: timedOperation,
+        value: durationMicros,
+        send_to: gaDevToolsPropertyId(),
+        screenMetrics: screenMetrics,
+      ),
+    );
+  }
 }
 
 void select(
@@ -545,18 +559,20 @@ void select(
   bool nonInteraction = false,
   ScreenAnalyticsMetrics Function()? screenMetricsProvider,
 }) {
-  GTag.event(
-    screenName,
-    _gtagEvent(
-      event_category: analytics_constants.selectEvent,
-      event_label: selectedItem,
-      value: value,
-      non_interaction: nonInteraction,
-      send_to: () => gaDevToolsPropertyId(),
-      screenMetrics:
-          screenMetricsProvider != null ? screenMetricsProvider() : null,
-    ),
-  );
+  if (kReleaseMode || _debugAnalytics) {
+    GTag.event(
+      screenName,
+      _gtagEvent(
+        event_category: analytics_constants.selectEvent,
+        event_label: selectedItem,
+        value: value,
+        non_interaction: nonInteraction,
+        send_to: gaDevToolsPropertyId(),
+        screenMetrics:
+            screenMetricsProvider != null ? screenMetricsProvider() : null,
+      ),
+    );
+  }
 }
 
 String? _lastGaError;
