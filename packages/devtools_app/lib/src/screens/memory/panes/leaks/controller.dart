@@ -27,7 +27,8 @@ const yamlFilePrefix = 'memory_leaks';
 class LeaksPaneController {
   LeaksPaneController()
       : assert(
-          supportedLeakTrackingProtocols.contains(leakTrackerProtocolVersion),
+          supportedLeakTrackingProtocols
+              .contains(appLeakTrackerProtocolVersion),
         ) {
     _subscribeForMemoryLeaksMessages();
   }
@@ -79,7 +80,7 @@ class LeaksPaneController {
       return;
     }
 
-    if (event is LeakTrackingSumamry) {
+    if (event is LeakTrackingSummary) {
       appStatus.value = AppStatus.leaksFound;
       if (event.leakSummary.matches(_lastLeakSummary)) return;
       _lastLeakSummary = event.leakSummary;
