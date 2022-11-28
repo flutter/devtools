@@ -20,8 +20,12 @@ void main() {
   const windowSize = Size(4000.0, 4000.0);
   final fakeServiceManager = FakeServiceManager();
   final scriptManager = MockScriptManager();
-  when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
-  when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
+  mockConnectedApp(
+    fakeServiceManager.connectedApp!,
+    isProfileBuild: false,
+    isFlutterApp: true,
+    isWebApp: false,
+  );
   setGlobal(ServiceConnectionManager, fakeServiceManager);
   setGlobal(IdeTheme, IdeTheme());
   setGlobal(ScriptManager, scriptManager);
