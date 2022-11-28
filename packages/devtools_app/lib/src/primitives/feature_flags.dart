@@ -18,7 +18,9 @@ import '../shared/globals.dart';
 ///   ]
 const bool _kEnableExperiments = bool.fromEnvironment('enable_experiments');
 
+@visibleForTesting
 bool enableExperiments = _kEnableExperiments;
+void setExperimentsEnabled() => enableExperiments = true;
 
 @visibleForTesting
 bool get enableBeta => enableExperiments || !isExternalBuild;
