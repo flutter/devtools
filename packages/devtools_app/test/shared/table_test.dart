@@ -1008,6 +1008,7 @@ void main() {
       );
 
       expect(find.byWidget(table), findsOneWidget);
+      // Regression test for https://github.com/flutter/devtools/issues/4786
       expect(
         find.text(
           '\u2026', // Unicode '...'
