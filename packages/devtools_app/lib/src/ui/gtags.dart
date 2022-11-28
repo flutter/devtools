@@ -14,6 +14,7 @@ import '../analytics/analytics.dart' as ga;
 
 /// For gtags API see https://developers.google.com/gtagjs/reference/api
 /// For debugging install the Chrome Plugin "Google Analytics Debugger".
+
 /// Enable this flag to debug analytics when DevTools is run in debug or profile
 /// mode, otherwise analytics will only be sent in release builds.
 ///
