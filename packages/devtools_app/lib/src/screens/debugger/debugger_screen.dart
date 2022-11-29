@@ -198,7 +198,10 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   void _onNodeSelected(VMServiceObjectNode? node) {
     final location = node?.location;
     if (location != null) {
-      controller.codeViewController.showScriptLocation(location);
+      controller.codeViewController.showScriptLocation(
+        location,
+        focusLine: true,
+      );
     }
   }
 

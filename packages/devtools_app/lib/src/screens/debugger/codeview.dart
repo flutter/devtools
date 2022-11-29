@@ -33,7 +33,6 @@ import 'debugger_controller.dart';
 import 'debugger_model.dart';
 import 'file_search.dart';
 import 'key_sets.dart';
-import 'program_explorer_model.dart';
 import 'variables.dart';
 
 final debuggerCodeViewSearchKey =
@@ -794,12 +793,12 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
       itemBuilder: (context, index) {
         final lineNum = index + 1;
         final isPausedLine = pausedLine == lineNum;
-        return ValueListenableBuilder<VMServiceObjectNode?>(
+        return ValueListenableBuilder<int>(
           valueListenable: widget
-              .codeViewController.programExplorerController.outlineSelection,
-          builder: (context, outlineNode, _) {
-            final isFocusedLine =
-                (outlineNode?.location?.location?.line ?? -1) == lineNum;
+              .codeViewController.focusLine,
+          builder: (context, focusLine, _) {
+            final isFocusedLine = focusLine == lineNum;
+                //(outlineNode?.location?.location?.line ?? -1) == lineNum;
             return LineItem(
               lineContents: widget.lines[index],
               pausedFrame: isPausedLine ? widget.pausedFrame : null,

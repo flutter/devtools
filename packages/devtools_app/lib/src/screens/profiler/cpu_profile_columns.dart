@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -131,12 +132,14 @@ class SourceColumn extends ColumnData<CpuStackFrame>
     bool isRowSelected = false,
     VoidCallback? onPressed,
   }) {
-    final script = scriptManager.getScriptByUri(data.rawUrl);
+    final script = scriptManager.sortedScripts.value.firstWhereOrNull(
+      (element) => element.uri == data.packageUri,
+    );
     if (script == null) {
       return null;
     }
     final routerDelegate = DevToolsRouterDelegate.of(context);
-    return VmServiceObjectLink<Script>(
+    return VmServiceObjectLink<ScriptRef>(
       object: script,
       textBuilder: (_) => getDisplayValue(data),
       onTap: (e) {
