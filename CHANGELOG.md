@@ -14,7 +14,7 @@
 * Make chart legend visible by default [#4811](https://github.com/flutter/devtools/pull/4811)
 * Handle possible `RPCError` exceptions in `ProgramExplorerController` [#4820](https://github.com/flutter/devtools/pull/4820)
 * Fix null assertion failure in `AllocationProfileTableViewController` when service disconnects [#4819](https://github.com/flutter/devtools/pull/4819)
-* - [#4815](https://github.com/flutter/devtools/pull/4815)
+* Move launch config to the project it describes - [#4815](https://github.com/flutter/devtools/pull/4815)
 * Decouple traceEventsFieldName from Performance screen [#4814](https://github.com/flutter/devtools/pull/4814)
 * Hide the tree guidelines toggle for the CPU flame chart [#4813](https://github.com/flutter/devtools/pull/4813)
 * Add copy button for the Vm service uri in the Device Dialog [#4810](https://github.com/flutter/devtools/pull/4810)
