@@ -14,6 +14,7 @@ import 'package:devtools_app/src/screens/profiler/cpu_profile_transformer.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profiler.dart';
 import 'package:devtools_app/src/screens/profiler/profiler_screen.dart';
 import 'package:devtools_app/src/screens/profiler/profiler_screen_controller.dart';
+import 'package:devtools_app/src/scripts/script_manager.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/common_widgets.dart';
 import 'package:devtools_app/src/shared/globals.dart';
@@ -23,6 +24,7 @@ import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../test_infra/matchers.dart';
 import '../test_infra/test_data/cpu_profile.dart';
@@ -52,6 +54,11 @@ void main() {
     setGlobal(NotificationService, NotificationService());
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(IdeTheme, IdeTheme());
+    final mockScriptManager = MockScriptManager();
+    when(mockScriptManager.sortedScripts).thenReturn(
+      ValueNotifier<List<ScriptRef>>([]),
+    );
+    setGlobal(ScriptManager, mockScriptManager);
   });
 
   group('CpuProfiler', () {
