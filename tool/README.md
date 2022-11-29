@@ -6,8 +6,8 @@ Make sure:
 1. You have a local checkout of the Dart SDK
    - (for getting started instructions, see [sdk/CONTRIBUTING.md](https://github.com/dart-lang/sdk/blob/main/CONTRIBUTING.md)).
 2. Ensure your `.bashrc` sets `$LOCAL_DART_SDK`
-    
-   ```shell 
+
+   ```shell
    DART_SDK_REPO_DIR=<Path to cloned dart sdk>
    export LOCAL_DART_SDK=$DART_SDK_REPO_DIR/sdk
    ```
@@ -15,7 +15,7 @@ Make sure:
    - `git rebase-update`.
 4. Your Flutter version is equal to latest candidate release branch:
     - Run `./tool/update_flutter_sdk.sh --local` from the main devtools directory.
-5. You have goma [configured](http://go/ma-mac-setup). 
+5. You have goma [configured](http://go/ma-mac-setup).
 
 ### Prepare the release
 
@@ -69,7 +69,7 @@ These packages always have their version numbers updated in lock, so we don't ha
 intended to do the bulk of the work, but still needs manual review.
 * Verify
    * that the version for the CHANGELOG entry was correctly generated
-   * that the entries don't have any syntax errors. 
+   * that the entries don't have any syntax errors.
 
 #### Push the local branch
 
@@ -168,7 +168,7 @@ From the git GUI tool or from github.com directly:
    ./tools/build.py -mrelease -ax64 create_sdk;
    ```
 
-- Verify that running `dart devtools` launches the version of DevTools you just released. 
+- Verify that running `dart devtools` launches the version of DevTools you just released.
    - for OSX
       ```shell
       xcodebuild/ReleaseX64/dart-sdk/bin/dart devtools
@@ -179,7 +179,7 @@ From the git GUI tool or from github.com directly:
       ```
 
 - If the version of DevTools you just published to CIPD loads properly
-  
+
    > You may need to hard reload and clear your browser cache in order to see the changes.
 
    - push up the SDK CL for review.
@@ -201,15 +201,17 @@ From the git GUI tool or from github.com directly:
 ### Write release notes for the release
 Release notes should contain details about the user-facing changes included in the release.
 
+go/devtools-next-release-notes
+
 These notes are shown directly in DevTools when a user opens a new version of DevTools.
 
-1. Request the team to verify their important user facing changes are documented in 
+1. Request the team to verify their important user facing changes are documented in
    [release-notes-next.md][1].
 
 2. See the release notes
 [README.md](https://github.com/flutter/devtools/blob/master/packages/devtools_app/lib/src/framework/release_notes/README.md)
 for details on where to add DevTools release notes to Flutter website and how to test them.
-   
+
 3. Copy the content of [release-notes-template.md](../packages/devtools_app/lib/src/framework/release_notes/release-notes-template.md) to [release-notes-next.md][1], to contain
    draft for the next release.
 
