@@ -79,7 +79,7 @@ NEW_DEVTOOLS_VERSION=2.7.0 # Change this to the new version
 
 ```shell
 git add . && \
-git commit -m “Prepare for $NEW_DEVTOOLS_VERSION release.” && \
+git commit -m "Prepare for $NEW_DEVTOOLS_VERSION release." && \
 git push origin release_$NEW_DEVTOOLS_VERSION;
 ```
 
