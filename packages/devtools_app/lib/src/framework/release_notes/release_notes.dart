@@ -62,8 +62,7 @@ class _ReleaseNotesViewerState extends State<ReleaseNotesViewer>
     visibilityAnimation =
         Tween<double>(begin: 1.0, end: 0).animate(visibilityController);
 
-    addAutoDisposeListener(releaseNotesController.releaseNotesVisible,
-        () {
+    addAutoDisposeListener(releaseNotesController.releaseNotesVisible, () {
       setState(() {
         isVisible = releaseNotesController.releaseNotesVisible.value;
         if (isVisible) {
@@ -75,8 +74,7 @@ class _ReleaseNotesViewerState extends State<ReleaseNotesViewer>
     });
 
     markdownData = releaseNotesController.releaseNotesMarkdown.value;
-    addAutoDisposeListener(releaseNotesController.releaseNotesMarkdown,
-        () {
+    addAutoDisposeListener(releaseNotesController.releaseNotesMarkdown, () {
       setState(() {
         markdownData = releaseNotesController.releaseNotesMarkdown.value;
       });
@@ -199,19 +197,19 @@ class ReleaseNotesController {
   final _releaseNotesVisible = ValueNotifier<bool>(false);
 
   void _init() {
-    if (server.isDevToolsServerAvailable) {
+    if (debugTestReleaseNotes || server.isDevToolsServerAvailable) {
       _maybeFetchReleaseNotes();
     }
   }
 
   void _maybeFetchReleaseNotes() async {
-    final lastReleaseNotesShownVersion =
-        await server.getLastShownReleaseNotesVersion();
-    SemanticVersion previousVersion;
-    if (debugTestReleaseNotes || lastReleaseNotesShownVersion.isEmpty) {
-      previousVersion = SemanticVersion();
-    } else {
-      previousVersion = SemanticVersion.parse(lastReleaseNotesShownVersion);
+    SemanticVersion previousVersion = SemanticVersion();
+    if (server.isDevToolsServerAvailable) {
+      final lastReleaseNotesShownVersion =
+          await server.getLastShownReleaseNotesVersion();
+      if (lastReleaseNotesShownVersion.isNotEmpty) {
+        previousVersion = SemanticVersion.parse(lastReleaseNotesShownVersion);
+      }
     }
     // Parse the current version instead of using [devtools.version] directly to
     // strip off any build metadata (any characters following a '+' character).
