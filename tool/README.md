@@ -201,8 +201,6 @@ From the git GUI tool or from github.com directly:
 ### Write release notes for the release
 Release notes should contain details about the user-facing changes included in the release.
 
-go/devtools-next-release-notes
-
 These notes are shown directly in DevTools when a user opens a new version of DevTools.
 
 1. Request the team to verify their important user facing changes are documented in
