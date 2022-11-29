@@ -10,6 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 
 import '../../../devtools.dart' as devtools;
 import '../../config_specific/launch_url/launch_url.dart';
@@ -24,11 +25,8 @@ const debugTestReleaseNotes = false;
 class ReleaseNotesViewer extends StatefulWidget {
   const ReleaseNotesViewer({
     Key? key,
-    required this.releaseNotesController,
     required this.child,
   }) : super(key: key);
-
-  final ReleaseNotesController releaseNotesController;
 
   final Widget? child;
 
@@ -50,20 +48,24 @@ class _ReleaseNotesViewerState extends State<ReleaseNotesViewer>
 
   late bool isVisible;
 
+  late ReleaseNotesController releaseNotesController;
+
   @override
-  void initState() {
-    super.initState();
-    isVisible = widget.releaseNotesController.releaseNotesVisible.value;
-    markdownData = widget.releaseNotesController.releaseNotesMarkdown.value;
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    releaseNotesController = Provider.of<ReleaseNotesController>(context);
+
+    isVisible = releaseNotesController.releaseNotesVisible.value;
+    markdownData = releaseNotesController.releaseNotesMarkdown.value;
 
     visibilityController = longAnimationController(this);
     visibilityAnimation =
         Tween<double>(begin: 1.0, end: 0).animate(visibilityController);
 
-    addAutoDisposeListener(widget.releaseNotesController.releaseNotesVisible,
+    addAutoDisposeListener(releaseNotesController.releaseNotesVisible,
         () {
       setState(() {
-        isVisible = widget.releaseNotesController.releaseNotesVisible.value;
+        isVisible = releaseNotesController.releaseNotesVisible.value;
         if (isVisible) {
           visibilityController.forward();
         } else {
@@ -72,11 +74,11 @@ class _ReleaseNotesViewerState extends State<ReleaseNotesViewer>
       });
     });
 
-    markdownData = widget.releaseNotesController.releaseNotesMarkdown.value;
-    addAutoDisposeListener(widget.releaseNotesController.releaseNotesMarkdown,
+    markdownData = releaseNotesController.releaseNotesMarkdown.value;
+    addAutoDisposeListener(releaseNotesController.releaseNotesMarkdown,
         () {
       setState(() {
-        markdownData = widget.releaseNotesController.releaseNotesMarkdown.value;
+        markdownData = releaseNotesController.releaseNotesMarkdown.value;
       });
     });
   }
@@ -96,7 +98,7 @@ class _ReleaseNotesViewerState extends State<ReleaseNotesViewer>
             children: [
               if (child != null) child,
               ReleaseNotes(
-                releaseNotesController: widget.releaseNotesController,
+                releaseNotesController: releaseNotesController,
                 visibilityAnimation: visibilityAnimation,
                 markdownData: markdownData,
                 width: width,
