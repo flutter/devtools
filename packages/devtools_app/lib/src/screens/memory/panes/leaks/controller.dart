@@ -30,7 +30,9 @@ class LeaksPaneController {
           supportedLeakTrackingProtocols
               .contains(appLeakTrackerProtocolVersion),
         ) {
-    _subscribeForMemoryLeaksMessages();
+    subscriptionWithHistory = serviceManager
+        .service!.onExtensionEventWithHistory
+        .listen(_onAppMessageWithHistory);
   }
 
   final analysisAtatus = AnalysisStatusController();
@@ -45,21 +47,9 @@ class LeaksPaneController {
   final _exportController = ExportController();
 
   late StreamSubscription subscriptionWithHistory;
-  late StreamSubscription detailsSubscription;
-
-  /// Subscribes for details without history and for all other messages with history.
-  void _subscribeForMemoryLeaksMessages() {
-    subscriptionWithHistory = serviceManager
-        .service!.onExtensionEventWithHistory
-        .listen(_onAppMessageWithHistory);
-
-    detailsSubscription =
-        serviceManager.service!.onExtensionEvent.listen(_onLeakDetailsReceived);
-  }
 
   void dispose() {
     unawaited(subscriptionWithHistory.cancel());
-    unawaited(detailsSubscription.cancel());
     analysisAtatus.dispose();
   }
 
