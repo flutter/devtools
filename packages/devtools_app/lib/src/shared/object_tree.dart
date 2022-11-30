@@ -431,7 +431,7 @@ List<DartObjectNode> _createVariablesForTypeParameters(
     // TODO(bkonyi): determine if we want to display this and add
     // support for displaying Class objects.
     // DartObjectNode.fromValue(
-    //   name: 'paramaterizedClass',
+    //   name: 'parameterizedClass',
     //   value: result.parameterizedClass,
     //   isolateRef: isolateRef,
     // ),
