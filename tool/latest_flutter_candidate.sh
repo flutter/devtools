@@ -11,6 +11,8 @@ LATEST_FLUTTER_CANDIDATE=$(git ls-remote https://dart.googlesource.com/external/
   | grep "refs/heads/flutter-.*-candidate" \
   | cut -f2 \
   | sort --version-sort \
-  | tail -n1)
+  | tail -n1 \
+  | sed 's/^.*\(flutter.*\)$/\1/'\
+  )
 
 echo $LATEST_FLUTTER_CANDIDATE
