@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../devtools.dart' as devtools;
 import '../analytics/constants.dart' as analytics_constants;
@@ -12,8 +13,13 @@ import '../shared/common_widgets.dart';
 import '../shared/dialogs.dart';
 import '../shared/globals.dart';
 import '../shared/theme.dart';
+import 'release_notes/release_notes.dart';
 
 class DevToolsAboutDialog extends StatelessWidget {
+  const DevToolsAboutDialog(this.releaseNotesController);
+
+  final ReleaseNotesController releaseNotesController;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -23,7 +29,20 @@ class DevToolsAboutDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SelectableText('DevTools version ${devtools.version}'),
+          Row(
+            children: [
+              const SelectableText('DevTools version ${devtools.version}'),
+              const Text(' - '),
+              InkWell(
+                child: Text(
+                  'release notes',
+                  style: theme.linkTextStyle,
+                ),
+                onTap: () =>
+                    releaseNotesController.toggleReleaseNotesVisible(true),
+              ),
+            ],
+          ),
           const SizedBox(height: defaultSpacing),
           ...dialogSubHeader(theme, 'Feedback'),
           Wrap(
@@ -88,6 +107,7 @@ class _DiscordLink extends StatelessWidget {
 class OpenAboutAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final releaseNotesController = Provider.of<ReleaseNotesController>(context);
     return DevToolsTooltip(
       message: 'About DevTools',
       child: InkWell(
@@ -95,7 +115,7 @@ class OpenAboutAction extends StatelessWidget {
           unawaited(
             showDialog(
               context: context,
-              builder: (context) => DevToolsAboutDialog(),
+              builder: (context) => DevToolsAboutDialog(releaseNotesController),
             ),
           );
         },

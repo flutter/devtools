@@ -330,10 +330,12 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
             Provider<HoverCardController>.value(
               value: hoverCardController,
             ),
+            Provider<ReleaseNotesController>.value(
+              value: releaseNotesController,
+            ),
           ],
           child: NotificationsView(
             child: ReleaseNotesViewer(
-              releaseNotesController: releaseNotesController,
               child: child,
             ),
           ),
