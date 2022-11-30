@@ -124,7 +124,7 @@ class _PerfettoViewController extends DisposableController
   /// "Unknown postMessage() event received".
   static const _devtoolsThemeChange = 'DART-DEVTOOLS-THEME-CHANGE';
 
-  /// Completes when the perfetto iFrame has recevied the first event on the
+  /// Completes when the perfetto iFrame has received the first event on the
   /// 'onLoad' stream.
   late final Completer<void> _perfettoIFrameReady;
 
