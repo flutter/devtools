@@ -214,3 +214,16 @@ for details on where to add DevTools release notes to Flutter website and how to
    draft for the next release.
 
 [1]: ../packages/devtools_app/lib/src/framework/release_notes/release-notes-next.md
+
+### Notify stakeholders
+
+1. Send link draft release notes PR to the Chat space 'Flutter Release Hotline'
+
+2. When PR merges, send message to public email `flutter-announce@googlegroups.com`
+
+   Subject: Dart DevTools <version> released
+
+   Body:
+
+       Dart DevTools <version> is publicly available. 
+       Find whats new in release notes at <link to release notes>.
