@@ -217,7 +217,7 @@ for details on where to add DevTools release notes to Flutter website and how to
 
 ### Notify stakeholders
 
-1. Send link draft release notes PR to the Chat space 'Flutter Release Hotline'
+1. Send the draft PR for the release notes to the Chat space 'Flutter Release Hotline'
 
 2. When PR merges, send message to public email `flutter-announce@googlegroups.com`
 
