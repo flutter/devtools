@@ -834,17 +834,21 @@ class DevToolsIconButton extends StatelessWidget {
             size: defaultIconSize,
           )
         : iconWidget;
-    return DevToolsTooltip(
-      message: tooltip,
-      child: TextButton(
-        onPressed: () {
-          ga.select(gaScreen, gaSelection);
-          onPressed();
-        },
-        child: Container(
-          height: defaultButtonHeight,
-          width: defaultButtonHeight,
-          child: icon,
+    return SizedBox(
+      // This is required to force the button height.
+      height: defaultButtonHeight,
+      child: DevToolsTooltip(
+        message: tooltip,
+        child: TextButton(
+          onPressed: () {
+            ga.select(gaScreen, gaSelection);
+            onPressed();
+          },
+          child: SizedBox(
+            height: defaultButtonHeight,
+            width: defaultButtonHeight,
+            child: icon,
+          ),
         ),
       ),
     );
@@ -1001,20 +1005,23 @@ class DevToolsToggleButtonGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return ToggleButtons(
-      borderRadius:
-          const BorderRadius.all(Radius.circular(defaultBorderRadius)),
-      color: theme.colorScheme.toggleButtonsTitle,
-      selectedColor: theme.colorScheme.toggleButtonsTitleSelected,
-      fillColor: theme.colorScheme.toggleButtonsFillSelected,
-      textStyle: theme.textTheme.bodyLarge,
-      constraints: BoxConstraints(
-        minWidth: defaultButtonHeight,
-        minHeight: defaultButtonHeight,
+    return SizedBox(
+      height: defaultButtonHeight,
+      child: ToggleButtons(
+        borderRadius:
+            const BorderRadius.all(Radius.circular(defaultBorderRadius)),
+        color: theme.colorScheme.toggleButtonsTitle,
+        selectedColor: theme.colorScheme.toggleButtonsTitleSelected,
+        fillColor: theme.colorScheme.toggleButtonsFillSelected,
+        textStyle: theme.textTheme.bodyLarge,
+        constraints: BoxConstraints(
+          minWidth: defaultButtonHeight,
+          minHeight: defaultButtonHeight,
+        ),
+        isSelected: selectedStates,
+        onPressed: onPressed,
+        children: children,
       ),
-      isSelected: selectedStates,
-      onPressed: onPressed,
-      children: children,
     );
   }
 }

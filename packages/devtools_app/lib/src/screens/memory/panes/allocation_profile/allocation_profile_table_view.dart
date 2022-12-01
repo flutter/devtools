@@ -210,11 +210,11 @@ class AllocationProfileTableViewState
   Widget build(BuildContext context) {
     return Column(
       children: [
-        _AllocationProfileTableControls(
-          allocationProfileController: widget.controller,
-        ),
-        const SizedBox(
-          height: denseRowSpacing,
+        Padding(
+          padding: const EdgeInsets.all(denseSpacing),
+          child: _AllocationProfileTableControls(
+            allocationProfileController: widget.controller,
+          ),
         ),
         Expanded(
           child: _AllocationProfileTable(
@@ -291,11 +291,10 @@ class _AllocationProfileTable extends StatelessWidget {
         return ValueListenableBuilder<bool>(
           valueListenable: preferences.vmDeveloperModeEnabled,
           builder: (context, vmDeveloperModeEnabled, _) {
-            return ElevatedCard(
-              padding: EdgeInsets.zero,
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  return FlatTable<AllocationProfileRecord>(
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                return OutlineDecoration.onlyTop(
+                  child: FlatTable<AllocationProfileRecord>(
                     keyFactory: (element) => Key(element.heapClass.fullName),
                     data: profile.records,
                     dataKey: 'allocation-profile',
@@ -311,9 +310,9 @@ class _AllocationProfileTable extends StatelessWidget {
                         _AllocationProfileTable._initialSortColumn,
                     defaultSortDirection: SortDirection.descending,
                     pinBehavior: FlatTablePinBehavior.pinOriginalToTop,
-                  );
-                },
-              ),
+                  ),
+                );
+              },
             );
           },
         );

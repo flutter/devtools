@@ -4,6 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
+import '../../../../../../shared/common_widgets.dart';
 import '../../../../../../shared/split.dart';
 import '../../../../shared/heap/heap.dart';
 import '../../controller/simple_controllers.dart';
@@ -63,7 +64,14 @@ class HeapClassDetails extends StatelessWidget {
     return Split(
       axis: Axis.horizontal,
       initialFractions: const [0.7, 0.3],
-      children: [retainingPathsTable, selectedPathView],
+      children: [
+        OutlineDecoration.onlyRight(
+          child: retainingPathsTable,
+        ),
+        OutlineDecoration.onlyLeft(
+          child: selectedPathView,
+        ),
+      ],
     );
   }
 }
