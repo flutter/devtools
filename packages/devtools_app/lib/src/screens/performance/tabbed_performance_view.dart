@@ -318,14 +318,12 @@ class RefreshTimelineEventsButton extends StatelessWidget {
   }
 }
 
-class _PerformanceTabRecord {
+class _PerformanceTabRecord extends TabRecord {
   _PerformanceTabRecord({
-    required this.tab,
-    required this.tabView,
+    required super.tab,
+    required super.tabView,
     required this.featureController,
   });
 
-  final DevToolsTab tab;
-  final Widget tabView;
   final PerformanceFeatureController? featureController;
 }

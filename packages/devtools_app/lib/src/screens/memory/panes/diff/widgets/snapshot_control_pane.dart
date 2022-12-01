@@ -30,57 +30,53 @@ class SnapshotControlPane extends StatelessWidget {
       builder: (_, isProcessing, __) {
         final current = controller.core.selectedItem as SnapshotInstanceItem;
 
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  if (!isProcessing && current.heap != null) ...[
-                    _DiffDropdown(
-                      current: current,
-                      controller: controller,
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                if (!isProcessing && current.heap != null) ...[
+                  _DiffDropdown(
+                    current: current,
+                    controller: controller,
+                  ),
+                  const SizedBox(width: defaultSpacing),
+                  ValueListenableBuilder<ClassFilter>(
+                    valueListenable: filter,
+                    builder: (context, filterValue, ___) => ClassFilterButton(
+                      filter: filterValue,
+                      onChanged: controller.applyFilter,
                     ),
-                    const SizedBox(width: defaultSpacing),
-                    ValueListenableBuilder<ClassFilter>(
-                      valueListenable: filter,
-                      builder: (context, filterValue, ___) => ClassFilterButton(
-                        filter: filterValue,
-                        onChanged: controller.applyFilter,
-                      ),
-                    ),
-                    const SizedBox(width: defaultSpacing),
-                    ToCsvButton(
-                      minScreenWidthForTextBeforeScaling:
-                          primaryControlsMinVerboseWidth,
-                      onPressed: () {
-                        ga.select(
-                          analytics_constants.memory,
-                          analytics_constants
-                              .MemoryEvent.diffSnapshotDownloadCsv,
-                        );
-                        controller.downloadCurrentItemToCsv();
-                      },
-                    ),
-                  ],
+                  ),
+                  const SizedBox(width: defaultSpacing),
+                  ToCsvButton(
+                    minScreenWidthForTextBeforeScaling:
+                        primaryControlsMinVerboseWidth,
+                    onPressed: () {
+                      ga.select(
+                        analytics_constants.memory,
+                        analytics_constants.MemoryEvent.diffSnapshotDownloadCsv,
+                      );
+                      controller.downloadCurrentItemToCsv();
+                    },
+                  ),
                 ],
-              ),
-              ToolbarAction(
-                icon: Icons.clear,
-                tooltip: 'Delete snapshot',
-                onPressed: isProcessing
-                    ? null
-                    : () {
-                        controller.deleteCurrentSnapshot();
-                        ga.select(
-                          analytics_constants.memory,
-                          analytics_constants.MemoryEvent.diffSnapshotDelete,
-                        );
-                      },
-              ),
-            ],
-          ),
+              ],
+            ),
+            ToolbarAction(
+              icon: Icons.clear,
+              tooltip: 'Delete snapshot',
+              onPressed: isProcessing
+                  ? null
+                  : () {
+                      controller.deleteCurrentSnapshot();
+                      ga.select(
+                        analytics_constants.memory,
+                        analytics_constants.MemoryEvent.diffSnapshotDelete,
+                      );
+                    },
+            ),
+          ],
         );
       },
     );

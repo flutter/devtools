@@ -72,8 +72,12 @@ class SnapshotView extends StatelessWidget {
           initialFractions: const [0.4, 0.6],
           minSizes: const [80, 80],
           children: [
-            OutlineDecoration(child: classTable),
-            OutlineDecoration(child: pathTable),
+            OutlineDecoration.onlyBottom(
+              child: classTable,
+            ),
+            OutlineDecoration.onlyTop(
+              child: pathTable,
+            ),
           ],
         );
       },
