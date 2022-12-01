@@ -225,5 +225,5 @@ for details on where to add DevTools release notes to Flutter website and how to
 
    Body:
 
-       Dart DevTools <version> is publicly available. 
+       Dart DevTools <version> is publicly available at Flutter master channel. 
        Find whats new in release notes at <link to release notes>.
