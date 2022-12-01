@@ -52,7 +52,7 @@ class AnalyzeButton extends StatelessWidget {
       icon: Icons.file_download,
       tooltip: 'Analyze the leaks and download the result\n'
           'to ${yamlFilePrefix}_<time>.yaml.',
-      onPressed: () async => await leaksController.requestLeaks(),
+      onPressed: () async => await leaksController.requestLeaksAndSaveToYaml(),
       minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
     );
   }

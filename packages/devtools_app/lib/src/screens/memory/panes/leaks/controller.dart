@@ -61,29 +61,29 @@ class LeaksPaneController {
   void _onAppMessageWithHistory(Event vmServiceEvent) {
     if (appStatus.value == AppStatus.unsupportedProtocolVersion) return;
 
-    final event = parseFromAppEvent(vmServiceEvent, withHistory: true);
-    if (event == null) return;
+    final request = parseRequestFromApp(vmServiceEvent);
+    if (request == null) return;
 
-    if (event is LeakTrackingStarted) {
+    if (request is LeakTrackingStarted) {
       appStatus.value = AppStatus.leakTrackingStarted;
-      appProtocolVersion = event.protocolVersion;
+      appProtocolVersion = request.protocolVersion;
       return;
     }
 
-    if (event is LeakTrackingSummary) {
+    if (request is LeakSummary) {
       appStatus.value = AppStatus.leaksFound;
-      if (event.leakSummary.matches(_lastLeakSummary)) return;
-      _lastLeakSummary = event.leakSummary;
+      if (request.matches(_lastLeakSummary)) return;
+      _lastLeakSummary = request;
 
       final time = _fromEpochOrNull(vmServiceEvent.timestamp).toLocal();
 
       leakSummaryHistory.value =
-          '${formatDateTime(time)}: ${event.leakSummary.toMessage()}\n'
+          '${formatDateTime(time)}: ${request.toMessage()}\n'
           '${leakSummaryHistory.value}';
       return;
     }
 
-    throw StateError('Unsupported event type: ${event.runtimeType}');
+    throw StateError('Unsupported event type: ${request.runtimeType}');
   }
 
   Future<NotGCedAnalyzerTask> _createAnalysisTask(
@@ -170,21 +170,21 @@ class LeaksPaneController {
     await delayForBatchProcessing(micros: 5000);
   }
 
-  Future<void> requestLeaks() async {
+  Future<void> requestLeaksAndSaveToYaml() async {
     // analysisAtatus.status.value = AnalysisStatus.Ongoing;
     // await _setMessageWithDelay('Requested details from the application.');
 
     await _invokeMemoryLeakTrackingExtension(RequestForLeakDetails());
   }
 
-  Future<void> _invokeMemoryLeakTrackingExtension(ToAppEvent event) async {
+  Future<T> _invokeMemoryLeakTrackingExtension<T>(Object message) async {
     final response = await serviceManager.service!.callServiceExtension(
       memoryLeakTrackingExtensionName,
       isolateId: serviceManager.isolateManager.mainIsolate.value!.id!,
-      args: event.toJson(),
+      args: encodeMessage(message, Channel.requestToApp),
     );
 
-    _exportController.downloadFile(jsonEncode(response.json));
+    return parseResponseFromApp<T>(response);
   }
 
   String appStatusMessage() {
