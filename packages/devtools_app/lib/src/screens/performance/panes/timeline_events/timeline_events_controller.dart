@@ -137,7 +137,7 @@ class TimelineEventsController extends PerformanceFeatureController
   @override
   Future<void> onBecomingActive() async {
     if (_perfettoMode) {
-      await perfettoController.onBecomingActive();
+      perfettoController.onBecomingActive();
     }
     await super.onBecomingActive();
   }
@@ -279,7 +279,7 @@ class TimelineEventsController extends PerformanceFeatureController
   Future<void> _processAllTraceEvents() async {
     if (_perfettoMode) {
       await perfettoController.processor.processData(allTraceEvents);
-      await perfettoController.loadTrace(allTraceEvents);
+      perfettoController.loadTrace(allTraceEvents);
     } else {
       await legacyController.processTraceEvents(
         allTraceEvents,
@@ -349,7 +349,7 @@ class TimelineEventsController extends PerformanceFeatureController
       }
     }
 
-    await perfettoController.scrollToTimeRange(frame.timeFromFrameTiming);
+    perfettoController.scrollToTimeRange(frame.timeFromFrameTiming);
   }
 
   Future<void> _legacySelectFrame(FlutterFrame frame) async {
@@ -532,13 +532,13 @@ class TimelineEventsController extends PerformanceFeatureController
     await legacyController.setOfflineData(offlineData);
 
     if (offlineData.selectedFrame != null && _perfettoMode) {
-      await perfettoController
+      perfettoController
           .scrollToTimeRange(offlineData.selectedFrame!.timeFromFrameTiming);
     }
   }
 
   @override
-  Future<void> clearData() async {
+  void clearData() {
     allTraceEvents.clear();
     _unassignedFlutterFrameEvents.clear();
 
@@ -547,7 +547,7 @@ class TimelineEventsController extends PerformanceFeatureController
     legacyController.clearData();
     _status.value = EventsControllerStatus.empty;
     if (FeatureFlags.embeddedPerfetto) {
-      await perfettoController.clear();
+      perfettoController.clear();
     }
   }
 
