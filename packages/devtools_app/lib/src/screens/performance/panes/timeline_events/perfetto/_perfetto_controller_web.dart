@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:html' as html;
 import 'dart:ui' as ui;
 
@@ -116,20 +115,20 @@ class PerfettoControllerImpl extends PerfettoController {
   }
 
   @override
-  Future<void> onBecomingActive() async {
+  void onBecomingActive() {
     assert(timelineEventsController.isActiveFeature);
     if (pendingTraceEventsToLoad != null) {
-      await loadTrace(pendingTraceEventsToLoad!);
+      loadTrace(pendingTraceEventsToLoad!);
       pendingTraceEventsToLoad = null;
     }
     if (pendingScrollToTimeRange != null) {
-      await scrollToTimeRange(pendingScrollToTimeRange!);
+      scrollToTimeRange(pendingScrollToTimeRange!);
       pendingScrollToTimeRange = null;
     }
   }
 
   @override
-  Future<void> loadTrace(List<TraceEventWrapper> devToolsTraceEvents) async {
+  void loadTrace(List<TraceEventWrapper> devToolsTraceEvents) {
     if (!timelineEventsController.isActiveFeature) {
       pendingTraceEventsToLoad = List.from(devToolsTraceEvents);
       return;
@@ -139,7 +138,7 @@ class PerfettoControllerImpl extends PerfettoController {
   }
 
   @override
-  Future<void> scrollToTimeRange(TimeRange timeRange) async {
+  void scrollToTimeRange(TimeRange timeRange) {
     if (!timelineEventsController.isActiveFeature) {
       pendingScrollToTimeRange = timeRange;
       return;
@@ -149,7 +148,7 @@ class PerfettoControllerImpl extends PerfettoController {
   }
 
   @override
-  Future<void> clear() async {
-    await loadTrace([]);
+  void clear() {
+    loadTrace([]);
   }
 }

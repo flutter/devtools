@@ -88,7 +88,7 @@ void main() {
         // Verify an empty list is returned for bad input.
         expect(eventsController.legacyController.matchesForSearch(''), isEmpty);
 
-        await eventsController.clearData();
+        eventsController.clearData();
         expect(eventsController.data!.timelineEvents, isEmpty);
         expect(
           eventsController.legacyController.matchesForSearch('test'),
@@ -111,7 +111,7 @@ void main() {
       });
 
       test('search query searches through previous matches', () async {
-        await eventsController.clearData();
+        eventsController.clearData();
         eventsController.addTimelineEvent(goldenUiTimelineEvent..deepCopy());
 
         final data = eventsController.data!;
