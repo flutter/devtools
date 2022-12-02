@@ -17,7 +17,7 @@ import '../../../../shared/table/table_data.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../flutter_frames/flutter_frame_model.dart';
-import 'rebuild_counts.dart';
+import 'rebuild_stats_model.dart';
 
 class RebuildStatsView extends StatefulWidget {
   const RebuildStatsView({
