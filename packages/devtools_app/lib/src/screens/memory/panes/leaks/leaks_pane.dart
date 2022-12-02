@@ -8,11 +8,6 @@ import '../../../../shared/theme.dart';
 import 'controller.dart';
 import 'primitives/analysis_status.dart';
 import 'primitives/simple_items.dart';
-import '../../../../shared/common_widgets.dart';
-import '../../../../shared/theme.dart';
-import '../../primitives/ui.dart';
-import 'controller.dart';
-import 'primitives/analysis_status.dart';
 import 'widgets/simple_widgets.dart';
 
 // TODO(polina-c): review UX with UX specialists
