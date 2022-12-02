@@ -15,7 +15,7 @@ import 'panes/controls/enhance_tracing/enhance_tracing_controller.dart';
 import 'panes/flutter_frames/flutter_frame_model.dart';
 import 'panes/flutter_frames/flutter_frames_controller.dart';
 import 'panes/raster_stats/raster_stats_controller.dart';
-import 'panes/rebuild_stats/rebuild_counts.dart';
+import 'panes/rebuild_stats/rebuild_stats_model.dart';
 import 'panes/timeline_events/timeline_events_controller.dart';
 import 'performance_model.dart';
 import 'performance_screen.dart';

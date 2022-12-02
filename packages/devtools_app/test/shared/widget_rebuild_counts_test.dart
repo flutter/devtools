@@ -5,7 +5,7 @@
 import 'dart:convert';
 
 import 'package:collection/collection.dart';
-import 'package:devtools_app/src/screens/performance/panes/rebuild_stats/rebuild_counts.dart';
+import 'package:devtools_app/src/screens/performance/panes/rebuild_stats/rebuild_stats_model.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

@@ -18,7 +18,7 @@ import '../../ui/search.dart';
 import '../profiler/cpu_profile_model.dart';
 import 'panes/flutter_frames/flutter_frame_model.dart';
 import 'panes/raster_stats/raster_stats_model.dart';
-import 'panes/rebuild_stats/rebuild_counts.dart';
+import 'panes/rebuild_stats/rebuild_stats_model.dart';
 import 'panes/timeline_events/timeline_event_processor.dart';
 import 'performance_utils.dart';
 
