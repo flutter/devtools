@@ -22,6 +22,15 @@
             "program": "lib/main.dart",
         },
         {
+            "name": "devtools + experiments",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": [
+                "--dart-define=enable_experiments=true"
+            ]
+        },
+        {
             "name": "devtools - profile",
             "request": "launch",
             "type": "dart",

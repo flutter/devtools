@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import '../../../../analytics/analytics.dart' as ga;
 import '../../../../analytics/constants.dart' as analytics_constants;
 import '../../../../shared/common_widgets.dart';
+import '../../../../shared/globals.dart';
 import '../../../../shared/split.dart';
 import '../../../../shared/theme.dart';
 import 'allocation_profile_class_table.dart';
@@ -38,55 +39,95 @@ class AllocationProfileTracingViewState
 
   @override
   Widget build(BuildContext context) {
+    final isProfileMode =
+        serviceManager.connectedApp?.isProfileBuildNow ?? false;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            RefreshButton(
-              tooltip: 'Request the set of updated allocation traces',
-              onPressed: () async {
-                ga.select(
-                  analytics_constants.memory,
-                  analytics_constants.MemoryEvent.tracingRefresh,
-                );
-                await controller.refresh();
-              },
-            ),
-            const SizedBox(
-              width: denseSpacing,
-            ),
-            ClearButton(
-              tooltip: 'Clear the set of previously collected traces',
-              onPressed: () async {
-                ga.select(
-                  analytics_constants.memory,
-                  analytics_constants.MemoryEvent.tracingClear,
-                );
-                await controller.clear();
-              },
-            ),
-            const _ProfileHelpLink(),
-          ],
+        _TracingControls(
+          isProfileMode: isProfileMode,
+          controller: controller,
         ),
-        const SizedBox(height: denseRowSpacing),
         Expanded(
-          child: Split(
-            axis: Axis.horizontal,
-            initialFractions: const [0.25, 0.75],
-            children: [
-              AllocationTracingTable(
-                controller: controller,
-              ),
-              OutlineDecoration(
-                child: AllocationTracingTree(
-                  controller: controller,
+          child: isProfileMode
+              ? OutlineDecoration.onlyTop(
+                  child: const Center(
+                    child: Text(
+                      'Allocation tracing is temporary disabled in profile mode.\n'
+                      'Run the application in debug mode to trace allocations.',
+                    ),
+                  ),
+                )
+              : OutlineDecoration.onlyTop(
+                  child: Split(
+                    axis: Axis.horizontal,
+                    initialFractions: const [0.25, 0.75],
+                    children: [
+                      OutlineDecoration.onlyRight(
+                        child: AllocationTracingTable(
+                          controller: controller,
+                        ),
+                      ),
+                      OutlineDecoration.onlyLeft(
+                        child: AllocationTracingTree(
+                          controller: controller,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
         ),
       ],
+    );
+  }
+}
+
+class _TracingControls extends StatelessWidget {
+  const _TracingControls({
+    required this.isProfileMode,
+    required this.controller,
+  });
+
+  final bool isProfileMode;
+
+  final AllocationProfileTracingViewController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(denseSpacing),
+      child: Row(
+        children: [
+          RefreshButton(
+            tooltip: 'Request the set of updated allocation traces',
+            onPressed: isProfileMode
+                ? null
+                : () async {
+                    ga.select(
+                      analytics_constants.memory,
+                      analytics_constants.MemoryEvent.tracingRefresh,
+                    );
+                    await controller.refresh();
+                  },
+          ),
+          const SizedBox(
+            width: denseSpacing,
+          ),
+          ClearButton(
+            tooltip: 'Clear the set of previously collected traces',
+            onPressed: isProfileMode
+                ? null
+                : () async {
+                    ga.select(
+                      analytics_constants.memory,
+                      analytics_constants.MemoryEvent.tracingClear,
+                    );
+                    await controller.clear();
+                  },
+          ),
+          const _ProfileHelpLink(),
+        ],
+      ),
     );
   }
 }

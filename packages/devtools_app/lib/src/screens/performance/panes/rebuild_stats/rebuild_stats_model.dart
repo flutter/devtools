@@ -74,10 +74,10 @@ class LocationMap {
 
   final _locationMap = <int, Location>{};
 
-  int _countUnkownLocations = 0;
+  int _countUnknownLocations = 0;
 
   void clear() {
-    _countUnkownLocations = 0;
+    _countUnknownLocations = 0;
     _locationMap.clear();
   }
 
@@ -87,7 +87,7 @@ class LocationMap {
   Location operator [](int id) {
     var location = _locationMap[id];
     if (location == null) {
-      _countUnkownLocations++;
+      _countUnknownLocations++;
       _locationsResolved.value = false;
       // Add a placeholder location until we receive an event with the
       // path + line + column for the location.
@@ -150,7 +150,7 @@ class LocationMap {
             existing.column = columns[i];
             assert(existing.name == null);
             existing.name = names[i];
-            _countUnkownLocations--;
+            _countUnknownLocations--;
           } else {
             // Existing entry already has a path. Ensure it is consistent.
             // Data could become inconsistent if we had a bug and comingled data
@@ -174,7 +174,7 @@ class LocationMap {
       }
     }
 
-    _locationsResolved.value = _countUnkownLocations == 0;
+    _locationsResolved.value = _countUnknownLocations == 0;
   }
 }
 

@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../../../../primitives/feature_flags.dart';
 import '../../../../service/service_extension_widgets.dart';
 import '../../../../service/service_extensions.dart' as extensions;
 import '../../../../shared/common_widgets.dart';
@@ -11,8 +12,8 @@ import '../../../../shared/globals.dart';
 import '../../../../shared/theme.dart';
 import '../../../../ui/colors.dart';
 import '../controls/enhance_tracing/enhance_tracing_controller.dart';
-import '../rebuild_stats/rebuild_counts.dart';
-import '../rebuild_stats/widget_rebuild.dart';
+import '../rebuild_stats/rebuild_stats.dart';
+import '../rebuild_stats/rebuild_stats_model.dart';
 import 'frame_analysis_model.dart';
 import 'frame_hints.dart';
 import 'frame_time_visualizer.dart';
@@ -89,46 +90,48 @@ class FlutterFrameAnalysisView extends StatelessWidget {
             ),
           ),
 
-          if (rebuilds == null || rebuilds.isEmpty)
-            ValueListenableBuilder<bool>(
-              valueListenable:
-                  serviceManager.serviceExtensionManager.hasServiceExtension(
-                extensions.trackRebuildWidgets.extension,
-              ),
-              builder: (context, hasExtension, _) {
-                if (hasExtension) {
-                  return Row(
-                    children: [
-                      const Text(
-                        'To see widget rebuilds for Flutter frames, enable',
-                      ),
-                      Flexible(
-                        child: ServiceExtensionCheckbox(
-                          serviceExtension: extensions.trackRebuildWidgets,
-                          showDescription: false,
+          if (FeatureFlags.widgetRebuildstats) ...[
+            if (rebuilds == null || rebuilds.isEmpty)
+              ValueListenableBuilder<bool>(
+                valueListenable:
+                    serviceManager.serviceExtensionManager.hasServiceExtension(
+                  extensions.trackRebuildWidgets.extension,
+                ),
+                builder: (context, hasExtension, _) {
+                  if (hasExtension) {
+                    return Row(
+                      children: [
+                        const Text(
+                          'To see widget rebuilds for Flutter frames, enable',
                         ),
-                      ),
-                    ],
-                  );
-                }
-                return const SizedBox();
-              },
-            ),
-          if (rebuilds == null)
-            const Text(
-              'Rebuild information not available for this frame.',
-            )
-          else if (rebuilds.isEmpty)
-            const Text(
-              'No widget rebuilds occurred for widgets that were directly created in your project.',
-            )
-          else
-            Expanded(
-              child: RebuildTable(
-                metricNames: const ['Rebuild Count'],
-                metrics: combineStats([rebuilds]),
+                        Flexible(
+                          child: ServiceExtensionCheckbox(
+                            serviceExtension: extensions.trackRebuildWidgets,
+                            showDescription: false,
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+                  return const SizedBox();
+                },
               ),
-            )
+            if (rebuilds == null)
+              const Text(
+                'Rebuild information not available for this frame.',
+              )
+            else if (rebuilds.isEmpty)
+              const Text(
+                'No widget rebuilds occurred for widgets that were directly created in your project.',
+              )
+            else
+              Expanded(
+                child: RebuildTable(
+                  metricNames: const ['Rebuild Count'],
+                  metrics: combineStats([rebuilds]),
+                ),
+              )
+          ],
         ],
       ),
     );

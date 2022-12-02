@@ -29,19 +29,17 @@ abstract class PerfettoController extends DisposableController {
     processor = PerfettoEventProcessor(performanceController);
   }
 
-  String get viewId => '';
-
   final TimelineEventsController timelineEventsController;
 
   late final PerfettoEventProcessor processor;
 
   void init() {}
 
-  Future<void> onBecomingActive() async {}
+  void onBecomingActive() async {}
 
-  Future<void> loadTrace(List<TraceEventWrapper> devToolsTraceEvents) async {}
+  void loadTrace(List<TraceEventWrapper> devToolsTraceEvents) async {}
 
-  Future<void> scrollToTimeRange(TimeRange timeRange) async {}
+  void scrollToTimeRange(TimeRange timeRange) async {}
 
-  Future<void> clear() async {}
+  void clear() async {}
 }

@@ -21,7 +21,7 @@ import 'panes/flutter_frames/flutter_frame_model.dart';
 import 'panes/flutter_frames/flutter_frames_controller.dart';
 import 'panes/frame_analysis/frame_analysis.dart';
 import 'panes/raster_stats/raster_stats.dart';
-import 'panes/rebuild_stats/widget_rebuild.dart';
+import 'panes/rebuild_stats/rebuild_stats.dart';
 import 'panes/timeline_events/legacy/timeline_flame_chart.dart';
 import 'panes/timeline_events/perfetto/perfetto.dart';
 import 'panes/timeline_events/timeline_events_controller.dart';
@@ -318,14 +318,12 @@ class RefreshTimelineEventsButton extends StatelessWidget {
   }
 }
 
-class _PerformanceTabRecord {
+class _PerformanceTabRecord extends TabRecord {
   _PerformanceTabRecord({
-    required this.tab,
-    required this.tabView,
+    required super.tab,
+    required super.tabView,
     required this.featureController,
   });
 
-  final DevToolsTab tab;
-  final Widget tabView;
   final PerformanceFeatureController? featureController;
 }
