@@ -217,13 +217,10 @@ for details on where to add DevTools release notes to Flutter website and how to
 
 ### Notify stakeholders
 
-1. Send the draft PR for the release notes to the Chat space 'Flutter Release Hotline'
+Check beta and stable Flutter versions for the release at [go/dash-team-releases](https://sites.google.com/corp/google.com/dash/releases) and send the information to the Chat space 'Flutter Release Hotline':
 
-2. When PR merges, send message to public email `flutter-announce@googlegroups.com`
-
-   Subject: Dart DevTools <version> released
-
-   Body:
-
-       Dart DevTools <version> is publicly available at Flutter master channel. 
-       Find whats new in release notes at <link to release notes>.
+```
+Dart DevTools <version> is released to Flutter master channel.
+It will be available for Flutter beta X of Flutter stable Y.
+Release notes: <link to the PR for the release notes>
+```
