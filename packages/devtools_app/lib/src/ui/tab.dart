@@ -237,3 +237,13 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
     );
   }
 }
+
+class TabRecord {
+  TabRecord({
+    required this.tab,
+    required this.tabView,
+  });
+
+  final DevToolsTab tab;
+  final Widget tabView;
+}

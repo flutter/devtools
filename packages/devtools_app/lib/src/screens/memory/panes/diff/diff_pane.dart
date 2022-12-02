@@ -27,10 +27,10 @@ class DiffPane extends StatelessWidget {
       initialFractions: const [0.1, 0.9],
       minSizes: const [80, 80],
       children: [
-        OutlineDecoration(
+        OutlineDecoration.onlyRight(
           child: SnapshotList(controller: diffController),
         ),
-        OutlineDecoration(
+        OutlineDecoration.onlyLeft(
           child: _SnapshotItemContent(
             controller: diffController,
           ),
@@ -87,9 +87,12 @@ class SnapshotInstanceItemPane extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const SizedBox(height: denseRowSpacing),
-        SnapshotControlPane(controller: controller),
-        const SizedBox(height: denseRowSpacing),
+        OutlineDecoration.onlyBottom(
+          child: Padding(
+            padding: const EdgeInsets.all(denseSpacing),
+            child: SnapshotControlPane(controller: controller),
+          ),
+        ),
         Expanded(
           child: SnapshotView(
             controller: controller,

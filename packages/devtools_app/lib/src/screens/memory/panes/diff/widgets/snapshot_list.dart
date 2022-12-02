@@ -23,7 +23,15 @@ class SnapshotList extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        _ListControlPane(controller: controller),
+        OutlineDecoration.onlyBottom(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              vertical: denseSpacing,
+              horizontal: densePadding,
+            ),
+            child: _ListControlPane(controller: controller),
+          ),
+        ),
         Expanded(
           child: _SnapshotListItems(controller: controller),
         ),
