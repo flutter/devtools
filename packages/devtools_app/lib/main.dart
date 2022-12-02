@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -15,7 +14,6 @@ import 'src/config_specific/url_strategy/url_strategy.dart';
 import 'src/extension_points/extensions_base.dart';
 import 'src/extension_points/extensions_external.dart';
 import 'src/framework/app_error_handling.dart';
-import 'src/primitives/feature_flags.dart';
 import 'src/primitives/url_utils.dart';
 import 'src/screens/debugger/syntax_highlighter.dart';
 import 'src/screens/provider/riverpod_error_logger_observer.dart';
@@ -47,11 +45,6 @@ void main() async {
   await SyntaxHighlighter.initialize();
 
   setupErrorHandling(() async {
-    // Experiments are enabled here,
-    // not at initialization, because
-    // [enableExperiments] should be false for tests.
-    if (!kReleaseMode) setExperimentsEnabled();
-
     // Run the app.
     runApp(
       ProviderScope(
