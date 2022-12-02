@@ -7,7 +7,7 @@
 # Any subsequent commands failure will cause this script to exit immediately
 set -e
 
-LATEST_FLUTTER_CANDIDATE=$(git ls-remote https://dart.googlesource.com/external/github.com/flutter/flutter.git \
+LATEST_FLUTTER_CANDIDATE=$(git ls-remote --heads --sort='-v:refname' git@github.com:flutter/flutter.git \
   | grep "refs/heads/flutter-.*-candidate" \
   | cut -f2 \
   | sort --version-sort \
