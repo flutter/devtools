@@ -149,9 +149,9 @@ class _PerfettoViewController extends DisposableController
   static const _pollUntilReadyTimeout = Duration(seconds: 10);
 
   void init() {
-    _perfettoIFrameReady = Completer();
-    _perfettoHandlerReady = Completer();
-    _devtoolsThemeHandlerReady = Completer();
+    _perfettoIFrameReady = Completer<void>();
+    _perfettoHandlerReady = Completer<void>();
+    _devtoolsThemeHandlerReady = Completer<void>();
 
     unawaited(
       perfettoController.perfettoIFrame.onLoad.first.then((_) {
