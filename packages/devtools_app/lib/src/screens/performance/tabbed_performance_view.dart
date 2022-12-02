@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../analytics/analytics.dart' as ga;
 import '../../analytics/constants.dart' as analytics_constants;
 import '../../charts/flame_chart.dart';
 import '../../primitives/auto_dispose_mixin.dart';
@@ -140,22 +139,8 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
       selectedFrame: controller.flutterFramesController.selectedFrame,
     );
 
-    final data = controller.data;
     return _PerformanceTabRecord(
-      tab: _buildTab(
-        tabName: 'Rebuild Stats',
-        trailing: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            if (data != null)
-              ClearButton(
-                outlined: false,
-                onPressed: data.rebuildCountModel.clearAllCounts,
-              ),
-            const SizedBox(width: densePadding),
-          ],
-        ),
-      ),
+      tab: _buildTab(tabName: 'Rebuild Stats'),
       tabView: KeepAliveWrapper(
         child: rebuildStatsView,
       ),
@@ -166,42 +151,10 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
   _PerformanceTabRecord _rasterStatsRecord() {
     assert(serviceManager.connectedApp!.isFlutterAppNow!);
     return _PerformanceTabRecord(
-      tab: _buildTab(
-        tabName: 'Raster Stats',
-        trailing: !offlineController.offlineMode.value
-            ? Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  IconLabelButton(
-                    tooltip:
-                        'Take a snapshot of the rendering layers on the current'
-                        ' screen',
-                    icon: Icons.camera,
-                    label: 'Take Snapshot',
-                    outlined: false,
-                    onPressed: () {
-                      ga.select(
-                        PerformanceScreen.id,
-                        analytics_constants.collectRasterStats,
-                      );
-                      unawaited(
-                        controller.rasterStatsController.collectRasterStats(),
-                      );
-                    },
-                  ),
-                  const SizedBox(width: denseSpacing),
-                  ClearButton(
-                    outlined: false,
-                    onPressed: controller.rasterStatsController.clearData,
-                  ),
-                  const SizedBox(width: densePadding),
-                ],
-              )
-            : null,
-      ),
+      tab: _buildTab(tabName: 'Raster Stats'),
       tabView: KeepAliveWrapper(
         child: Center(
-          child: RenderingLayerVisualizer(
+          child: RasterStatsView(
             rasterStatsController: controller.rasterStatsController,
           ),
         ),

@@ -171,7 +171,7 @@ void main() {
         await tester.tap(find.text('Raster Stats'));
         await tester.pumpAndSettle();
 
-        expect(find.byType(RenderingLayerVisualizer), findsOneWidget);
+        expect(find.byType(RasterStatsView), findsOneWidget);
         expect(find.text('Take Snapshot'), findsOneWidget);
         expect(find.byType(ClearButton), findsOneWidget);
       });

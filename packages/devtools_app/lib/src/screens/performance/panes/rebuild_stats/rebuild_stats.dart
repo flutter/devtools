@@ -91,51 +91,57 @@ class _RebuildStatsViewState extends State<RebuildStatsView>
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(defaultSpacing),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ServiceExtensionCheckbox(
-            serviceExtension: extensions.trackRebuildWidgets,
-          ),
-          const SizedBox(width: denseSpacing),
-          const PaddedDivider(
-            padding: EdgeInsets.only(
-              top: denseSpacing,
-              bottom: denseSpacing,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        OutlineDecoration.onlyBottom(
+          child: Padding(
+            padding: const EdgeInsets.all(denseSpacing),
+            child: Row(
+              children: [
+                ClearButton(
+                  onPressed: widget.model.clearAllCounts,
+                ),
+                const SizedBox(width: denseSpacing),
+                Flexible(
+                  child: ServiceExtensionCheckbox(
+                    serviceExtension: extensions.trackRebuildWidgets,
+                  ),
+                ),
+                const Spacer(),
+              ],
             ),
           ),
-          Expanded(
-            child: ValueListenableBuilder<ServiceExtensionState>(
-              valueListenable: serviceManager.serviceExtensionManager
-                  .getServiceExtensionState(
-                extensions.trackRebuildWidgets.extension,
-              ),
-              builder: (context, state, _) {
-                if (metrics.isEmpty && !state.enabled)
-                  return const Center(
-                    child: Text(
-                      'Track widget build counts must be enabled to see data.',
-                    ),
-                  );
-                if (metrics.isEmpty) {
-                  return const Center(
-                    child: Text(
-                      'Interact with the app to trigger rebuilds.',
-                    ),
-                  ); // No data to display but there should be data soon.
-                }
-                return RebuildTable(
-                  key: const Key('Rebuild Table'),
-                  metricNames: metricNames,
-                  metrics: metrics,
+        ),
+        Expanded(
+          child: ValueListenableBuilder<ServiceExtensionState>(
+            valueListenable:
+                serviceManager.serviceExtensionManager.getServiceExtensionState(
+              extensions.trackRebuildWidgets.extension,
+            ),
+            builder: (context, state, _) {
+              if (metrics.isEmpty && !state.enabled)
+                return const Center(
+                  child: Text(
+                    'Track widget build counts must be enabled to see data.',
+                  ),
                 );
-              },
-            ),
-          )
-        ],
-      ),
+              if (metrics.isEmpty) {
+                return const Center(
+                  child: Text(
+                    'Interact with the app to trigger rebuilds.',
+                  ),
+                ); // No data to display but there should be data soon.
+              }
+              return RebuildTable(
+                key: const Key('Rebuild Table'),
+                metricNames: metricNames,
+                metrics: metrics,
+              );
+            },
+          ),
+        )
+      ],
     );
   }
 }

@@ -2112,11 +2112,14 @@ class NotifierCheckbox extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: notifier,
       builder: (context, bool? value, _) {
-        return Checkbox(
-          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          value: value,
-          onChanged: enabled ? _updateValue : null,
-          key: checkboxKey,
+        return SizedBox(
+          height: defaultButtonHeight,
+          child: Checkbox(
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            value: value,
+            onChanged: enabled ? _updateValue : null,
+            key: checkboxKey,
+          ),
         );
       },
     );

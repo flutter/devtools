@@ -13,7 +13,7 @@ import '../../test_infra/matchers/matchers.dart';
 import '../../test_infra/test_data/performance_raster_stats.dart';
 
 void main() {
-  group('RenderingLayerVisualizer', () {
+  group('$RasterStatsView', () {
     late RasterStatsController controller;
 
     setUp(() async {
@@ -32,7 +32,7 @@ void main() {
     Future<void> pumpRenderingLayerVisualizer(WidgetTester tester) async {
       await tester.pumpWidget(
         wrap(
-          RenderingLayerVisualizer(
+          RasterStatsView(
             rasterStatsController: controller,
           ),
         ),
@@ -71,7 +71,7 @@ void main() {
       expect(find.byType(LayerImage), findsOneWidget);
 
       await expectLater(
-        find.byType(RenderingLayerVisualizer),
+        find.byType(RasterStatsView),
         matchesDevToolsGolden('goldens/raster_stats_with_data.png'),
       );
     });
@@ -93,7 +93,7 @@ void main() {
 
       expect(controller.selectedSnapshot.value, equals(secondLayer));
       await expectLater(
-        find.byType(RenderingLayerVisualizer),
+        find.byType(RasterStatsView),
         matchesDevToolsGolden('goldens/raster_stats_changed_selection.png'),
       );
     });
