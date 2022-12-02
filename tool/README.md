@@ -224,3 +224,5 @@ Dart DevTools <version> is released to Flutter master channel.
 It will be available for Flutter beta X of Flutter stable Y.
 Release notes: <link to the PR for the release notes>
 ```
+
+NOTE: if you do not have access to the Chat room, ask your teammates to add you.
