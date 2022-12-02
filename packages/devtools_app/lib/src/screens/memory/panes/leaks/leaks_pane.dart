@@ -52,7 +52,7 @@ class _LeaksPaneState extends State<LeaksPane> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             AnalysisStatusView(
-              controller: _leaksController.analysisAtatus,
+              controller: _leaksController.analysisStatus,
               analysisStarter: Row(
                 children: [
                   AnalyzeButton(leaksController: _leaksController),

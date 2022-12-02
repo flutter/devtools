@@ -10,9 +10,7 @@ import 'package:leak_tracker/devtools_integration.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../config_specific/import_export/import_export.dart';
-import '../../../../config_specific/logger/logger.dart' as logger;
 import '../../../../primitives/utils.dart';
-import '../../../../service/service_extensions.dart';
 import '../../../../shared/globals.dart';
 import '../../primitives/memory_utils.dart';
 import 'diagnostics/formatter.dart';
@@ -20,7 +18,6 @@ import 'diagnostics/leak_analyzer.dart';
 import 'diagnostics/model.dart';
 import 'primitives/analysis_status.dart';
 import 'primitives/simple_items.dart';
-import 'package:vm_service/vm_service.dart';
 
 const yamlFilePrefix = 'memory_leaks';
 
@@ -35,7 +32,7 @@ class LeaksPaneController {
         .listen(_onAppMessageWithHistory);
   }
 
-  final analysisAtatus = AnalysisStatusController();
+  final analysisStatus = AnalysisStatusController();
 
   final leakSummaryHistory = ValueNotifier<String>('');
   late String appProtocolVersion;
@@ -50,7 +47,7 @@ class LeaksPaneController {
 
   void dispose() {
     unawaited(subscriptionWithHistory.cancel());
-    analysisAtatus.dispose();
+    analysisStatus.dispose();
   }
 
   static DateTime _fromEpochOrNull(int? microsecondsSinceEpoch) =>
@@ -93,48 +90,41 @@ class LeaksPaneController {
     return NotGCedAnalyzerTask.fromSnapshot(graph, reports);
   }
 
-  Future<void> _onLeakDetailsReceived(Event event) async {
-    // if (event.extensionKind != _extensionKindToReceiveLeaksDetails) return;
-    // if (analysisAtatus.status.value != AnalysisStatus.Ongoing) return;
-    // NotGCedAnalyzerTask? task;
+  Future<void> requestLeaksAndSaveToYaml() async {
+    analysisStatus.status.value = AnalysisStatus.Ongoing;
+    await _setMessageWithDelay('Requested details from the application.');
 
-    // try {
-    //   await _setMessageWithDelay('Received details. Parsing...');
-    //   final leakDetails = Leaks.fromJson(event.json!['extensionData']!);
+    final leakDetails = await _invokeMemoryLeakTrackingExtension<Leaks>(
+      RequestForLeakDetails(),
+    );
 
-    //   final notGCed = leakDetails.byType[LeakType.notGCed] ?? [];
+    final notGCed = leakDetails.byType[LeakType.notGCed] ?? [];
 
-    //   NotGCedAnalyzed? notGCedAnalyzed;
-    //   if (notGCed.isNotEmpty) {
-    //     await _setMessageWithDelay('Taking heap snapshot...');
-    //     task = await _createAnalysisTask(notGCed);
-    //     await _setMessageWithDelay('Detecting retaining paths...');
-    //     notGCedAnalyzed = analyseNotGCed(task);
-    //   }
+    NotGCedAnalyzerTask? task;
+    NotGCedAnalyzed? notGCedAnalyzed;
 
-    //   await _setMessageWithDelay('Formatting...');
+    if (notGCed.isNotEmpty) {
+      await _setMessageWithDelay('Taking heap snapshot...');
+      task = await _createAnalysisTask(notGCed);
+      await _setMessageWithDelay('Detecting retaining paths...');
+      notGCedAnalyzed = analyseNotGCed(task);
+    }
 
-    //   final yaml = analyzedLeaksToYaml(
-    //     gcedLate: leakDetails.gcedLate,
-    //     notDisposed: leakDetails.notDisposed,
-    //     notGCed: notGCedAnalyzed,
-    //   );
+    await _setMessageWithDelay('Formatting...');
 
-    //   _saveResultAndSetStatus(yaml, task);
-    // } catch (error, trace) {
-    //   var message = '${analysisAtatus.message.value}\nError: $error';
-    //   if (task != null) {
-    //     final fileName = _saveTask(task, DateTime.now());
-    //     message += '\nDownloaded raw data to $fileName.';
-    //     await _setMessageWithDelay(message);
-    //     analysisAtatus.status.value = AnalysisStatus.ShowingError;
-    //   }
-    //   logger.log(error);
-    //   logger.log(trace);
-    // }
+    final yaml = analyzedLeaksToYaml(
+      gcedLate: leakDetails.gcedLate,
+      notDisposed: leakDetails.notDisposed,
+      notGCed: notGCedAnalyzed,
+    );
+
+    _saveResultAndSetAnalysisStatus(yaml, task);
   }
 
-  void _saveResultAndSetStatus(String yaml, NotGCedAnalyzerTask? task) async {
+  void _saveResultAndSetAnalysisStatus(
+    String yaml,
+    NotGCedAnalyzerTask? task,
+  ) async {
     final now = DateTime.now();
     final yamlFile = ExportController.generateFileName(
       time: now,
@@ -148,7 +138,7 @@ class LeaksPaneController {
     await _setMessageWithDelay(
       'Downloaded the leak analysis to $yamlFile$taskFileMessage.',
     );
-    analysisAtatus.status.value = AnalysisStatus.ShowingResult;
+    analysisStatus.status.value = AnalysisStatus.ShowingResult;
   }
 
   /// Saves raw analysis task for troubleshooting and deeper analysis.
@@ -166,15 +156,8 @@ class LeaksPaneController {
   }
 
   Future<void> _setMessageWithDelay(String message) async {
-    analysisAtatus.message.value = message;
+    analysisStatus.message.value = message;
     await delayForBatchProcessing(micros: 5000);
-  }
-
-  Future<void> requestLeaksAndSaveToYaml() async {
-    // analysisAtatus.status.value = AnalysisStatus.Ongoing;
-    // await _setMessageWithDelay('Requested details from the application.');
-
-    await _invokeMemoryLeakTrackingExtension(RequestForLeakDetails());
   }
 
   Future<T> _invokeMemoryLeakTrackingExtension<T>(Object message) async {
