@@ -91,35 +91,40 @@ class LeaksPaneController {
   }
 
   Future<void> requestLeaksAndSaveToYaml() async {
-    analysisStatus.status.value = AnalysisStatus.Ongoing;
-    await _setMessageWithDelay('Requested details from the application.');
+    try {
+      analysisStatus.status.value = AnalysisStatus.Ongoing;
+      await _setMessageWithDelay('Requested details from the application.');
 
-    final leakDetails =
-        await _invokeLeakExtension<RequestForLeakDetails, Leaks>(
-      RequestForLeakDetails(),
-    );
+      final leakDetails =
+          await _invokeLeakExtension<RequestForLeakDetails, Leaks>(
+        RequestForLeakDetails(),
+      );
 
-    final notGCed = leakDetails.byType[LeakType.notGCed] ?? [];
+      final notGCed = leakDetails.byType[LeakType.notGCed] ?? [];
 
-    NotGCedAnalyzerTask? task;
-    NotGCedAnalyzed? notGCedAnalyzed;
+      NotGCedAnalyzerTask? task;
+      NotGCedAnalyzed? notGCedAnalyzed;
 
-    if (notGCed.isNotEmpty) {
-      await _setMessageWithDelay('Taking heap snapshot...');
-      task = await _createAnalysisTask(notGCed);
-      await _setMessageWithDelay('Detecting retaining paths...');
-      notGCedAnalyzed = analyseNotGCed(task);
+      if (notGCed.isNotEmpty) {
+        await _setMessageWithDelay('Taking heap snapshot...');
+        task = await _createAnalysisTask(notGCed);
+        await _setMessageWithDelay('Detecting retaining paths...');
+        notGCedAnalyzed = analyseNotGCed(task);
+      }
+
+      await _setMessageWithDelay('Formatting...');
+
+      final yaml = analyzedLeaksToYaml(
+        gcedLate: leakDetails.gcedLate,
+        notDisposed: leakDetails.notDisposed,
+        notGCed: notGCedAnalyzed,
+      );
+
+      _saveResultAndSetAnalysisStatus(yaml, task);
+    } catch (error) {
+      analysisStatus.message.value = 'Error: $error';
+      analysisStatus.status.value = AnalysisStatus.ShowingError;
     }
-
-    await _setMessageWithDelay('Formatting...');
-
-    final yaml = analyzedLeaksToYaml(
-      gcedLate: leakDetails.gcedLate,
-      notDisposed: leakDetails.notDisposed,
-      notGCed: notGCedAnalyzed,
-    );
-
-    _saveResultAndSetAnalysisStatus(yaml, task);
   }
 
   void _saveResultAndSetAnalysisStatus(

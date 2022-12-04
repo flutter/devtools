@@ -36,42 +36,45 @@ class _LeaksPaneState extends State<LeaksPane> {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<AppStatus>(
-      valueListenable: _leaksController.appStatus,
-      builder: (_, appStatus, __) {
-        if (appStatus != AppStatus.leaksFound) {
-          return Column(
-            children: [
-              const LeaksHelpLink(),
-              Text(_leaksController.appStatusMessage()),
-            ],
-          );
-        }
+    return Padding(
+      padding: const EdgeInsets.all(densePadding),
+      child: ValueListenableBuilder<AppStatus>(
+        valueListenable: _leaksController.appStatus,
+        builder: (_, appStatus, __) {
+          if (appStatus != AppStatus.leaksFound) {
+            return Column(
+              children: [
+                const LeaksHelpLink(),
+                Text(_leaksController.appStatusMessage()),
+              ],
+            );
+          }
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            AnalysisStatusView(
-              controller: _leaksController.analysisStatus,
-              analysisStarter: Row(
-                children: [
-                  AnalyzeButton(leaksController: _leaksController),
-                  const LeaksHelpLink(),
-                ],
-              ),
-            ),
-            const SizedBox(height: denseSpacing),
-            Expanded(
-              child: SingleChildScrollView(
-                child: ValueListenableBuilder<String>(
-                  valueListenable: _leaksController.leakSummaryHistory,
-                  builder: (_, value, __) => Text(value),
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AnalysisStatusView(
+                controller: _leaksController.analysisStatus,
+                analysisStarter: Row(
+                  children: [
+                    AnalyzeButton(leaksController: _leaksController),
+                    const LeaksHelpLink(),
+                  ],
                 ),
               ),
-            ),
-          ],
-        );
-      },
+              const SizedBox(height: denseSpacing),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: ValueListenableBuilder<String>(
+                    valueListenable: _leaksController.leakSummaryHistory,
+                    builder: (_, value, __) => Text(value),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 }
