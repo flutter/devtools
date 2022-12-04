@@ -82,6 +82,7 @@ class AnalyticsTabbedView<T> extends StatefulWidget {
     this.outlined = true,
     this.sendAnalytics = true,
     this.onTabChanged,
+    this.selectedTabNotifier,
   })  : trailingWidgets = List.generate(
           tabs.length,
           (index) => tabs[index].trailing ?? const SizedBox(),
@@ -105,6 +106,8 @@ class AnalyticsTabbedView<T> extends StatefulWidget {
   final bool sendAnalytics;
 
   final void Function(int)? onTabChanged;
+
+  final ValueNotifier<Key>? selectedTabNotifier;
 
   @override
   _AnalyticsTabbedViewState createState() => _AnalyticsTabbedViewState();
@@ -131,6 +134,8 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
       ..index = _currentTabControllerIndex
       ..addListener(_onTabChanged);
 
+    widget.selectedTabNotifier?.addListener(_onChangeTab);
+
     // Record a selection for the visible tab.
     if (widget.sendAnalytics) {
       ga.select(
@@ -146,6 +151,8 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
     if (_currentTabControllerIndex != newIndex) {
       setState(() {
         _currentTabControllerIndex = newIndex;
+        widget.selectedTabNotifier?.value =
+            _tabIndexToTabKey(_currentTabControllerIndex)!;
         widget.onTabChanged?.call(newIndex);
       });
       if (widget.sendAnalytics) {
@@ -155,6 +162,26 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
         );
       }
     }
+  }
+
+  void _onChangeTab() {
+    if (widget.selectedTabNotifier == null) return;
+    _currentTabControllerIndex =
+        _tabKeyToTabIndex(widget.selectedTabNotifier!.value);
+    _tabController?.animateTo(
+      _currentTabControllerIndex,
+      duration: const Duration(),
+    );
+  }
+
+  int _tabKeyToTabIndex(Key tabKey) {
+    final tabIndex = widget.tabs.indexWhere((tab) => tab.key == tabKey);
+    if (tabIndex == -1) print('Unable to find tab with key $tabKey');
+    return tabIndex;
+  }
+
+  Key? _tabIndexToTabKey(int tabIndex) {
+    return widget.tabs[tabIndex].key;
   }
 
   @override
@@ -174,6 +201,7 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
 
   @override
   void dispose() {
+    widget.selectedTabNotifier?.removeListener(_onChangeTab);
     _tabController?.removeListener(_onTabChanged);
     _tabController?.dispose();
     super.dispose();

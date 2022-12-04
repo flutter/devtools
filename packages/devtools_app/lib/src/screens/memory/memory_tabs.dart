@@ -13,7 +13,6 @@ import 'panes/allocation_tracing/allocation_profile_tracing_view.dart';
 import 'panes/diff/diff_pane.dart';
 import 'panes/leaks/leaks_pane.dart';
 
-@visibleForTesting
 class MemoryScreenKeys {
   static const leaksTab = Key('Leaks Tab');
   static const dartHeapTableProfileTab = Key('Dart Heap Profile Tab');
@@ -48,6 +47,7 @@ class MemoryTabView extends StatelessWidget {
           tabs: tabs,
           tabViews: tabViews,
           gaScreen: analytics_constants.memory,
+          selectedTabNotifier: controller.currentTab,
         );
       },
     );

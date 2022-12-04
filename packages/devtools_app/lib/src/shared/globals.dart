@@ -4,6 +4,7 @@
 
 import '../config_specific/ide_theme/ide_theme.dart';
 import '../config_specific/import_export/import_export.dart';
+import '../extensibility/discoverable.dart';
 import '../extension_points/extensions_base.dart';
 import '../primitives/message_bus.dart';
 import '../primitives/storage.dart';
@@ -14,6 +15,9 @@ import '../shared/notifications.dart';
 import 'framework_controller.dart';
 import 'preferences.dart';
 import 'survey.dart';
+
+export '../extensibility/discoverable.dart'
+    show StructuredLogEvent, DevToolsUserEvent, VMEvent;
 
 /// Whether this DevTools build is external.
 bool get isExternalBuild => _isExternalBuild;
@@ -30,6 +34,10 @@ ScriptManager get scriptManager => globals[ScriptManager];
 MessageBus get messageBus => globals[MessageBus];
 
 FrameworkController get frameworkController => globals[FrameworkController];
+
+EventsManager get eventsManager => globals[EventsManager];
+
+DiscoverableDevToolsApp get discoverableApp => globals[DiscoverableDevToolsApp];
 
 Storage get storage => globals[Storage];
 

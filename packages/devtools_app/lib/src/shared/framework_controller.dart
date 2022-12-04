@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import '../extensibility/discoverable.dart';
 import 'globals.dart';
 
 /// This controller is used by the connection to the DevTools server to receive
@@ -57,6 +58,11 @@ class FrameworkController {
   /// Notify the controller that the current page has changed.
   void notifyPageChange(PageChangeEvent page) {
     _pageChangeController.add(page);
+    eventsManager.addEvent(
+      StructuredLogEvent(
+        '${DiscoverableDevToolsApp.pageChangedEventKeyPrefix}${page.id}',
+      ),
+    );
   }
 
   /// Notifies when a device disconnects from DevTools.

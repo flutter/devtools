@@ -18,7 +18,9 @@ import '../../service/service_extensions.dart';
 import '../../service/service_manager.dart';
 import '../../shared/globals.dart';
 import '../../shared/utils.dart';
+import 'memory_controller_discoverable.dart';
 import 'memory_protocol.dart';
+import 'memory_tabs.dart';
 import 'panes/allocation_profile/allocation_profile_table_view_controller.dart';
 import 'panes/chart/primitives.dart';
 import 'panes/diff/controller/diff_pane_controller.dart';
@@ -46,6 +48,7 @@ class OfflineFileException implements Exception {
 class MemoryController extends DisposableController
     with AutoDisposeControllerMixin {
   MemoryController({DiffPaneController? diffPaneController}) {
+    DiscoverableMemoryPage(this);
     memoryTimeline = MemoryTimeline(offline);
     memoryLog = _MemoryLog(this);
     this.diffPaneController =
@@ -64,6 +67,9 @@ class MemoryController extends DisposableController
       refreshAllCharts();
     });
   }
+
+  final ValueNotifier<Key> currentTab =
+      ValueNotifier(MemoryScreenKeys.dartHeapTableProfileTab);
 
   /// The controller is late to enable test injection.
   late final DiffPaneController diffPaneController;
