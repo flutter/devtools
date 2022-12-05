@@ -12,7 +12,6 @@ import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../memory_controller.dart';
 import '../../primitives/ui.dart';
-import '../../shared/constants.dart';
 import 'chart_pane_controller.dart';
 import 'interval_dropdown.dart';
 
@@ -97,7 +96,6 @@ class _ChartControlPaneState extends State<ChartControlPane>
         ValueListenableBuilder<bool>(
           valueListenable: controller.legendVisibleNotifier,
           builder: (_, legendVisible, __) => IconLabelButton(
-            key: legendKey,
             onPressed: () {
               controller.toggleLegendVisibility();
               if (legendVisible) {
