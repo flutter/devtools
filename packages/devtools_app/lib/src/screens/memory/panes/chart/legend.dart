@@ -14,17 +14,13 @@ import 'memory_charts.dart';
 import 'memory_events_pane.dart';
 import 'memory_vm_chart.dart';
 
-const legendXOffset = 20;
-const legendYOffset = 7.0;
 double get _legendWidth => scaleByFontFactor(200.0);
 double get _legendTextWidth => scaleByFontFactor(55.0);
 double get _legendHeight1Chart => scaleByFontFactor(200.0);
 double get _legendHeight2Charts => scaleByFontFactor(323.0);
 
-final legendKey = GlobalKey(debugLabel: 'Legend Button');
-
 /// Padding for each title in the legend.
-const legendTitlePadding = EdgeInsets.fromLTRB(5, 0, 0, 4);
+const _legendTitlePadding = EdgeInsets.fromLTRB(5, 0, 0, 4);
 
 class MemoryChartLegend extends StatelessWidget {
   const MemoryChartLegend({
@@ -47,7 +43,7 @@ class MemoryChartLegend extends StatelessWidget {
     final events = eventLegendContent(colorScheme.isLight);
     legendRows.add(
       Container(
-        padding: legendTitlePadding,
+        padding: _legendTitlePadding,
         child: Text('Events Legend', style: legendHeading),
       ),
     );
@@ -68,7 +64,7 @@ class MemoryChartLegend extends StatelessWidget {
     final vms = vmLegendContent(chartController.vm);
     legendRows.add(
       Container(
-        padding: legendTitlePadding,
+        padding: _legendTitlePadding,
         child: Text('Memory Legend', style: legendHeading),
       ),
     );
@@ -86,7 +82,7 @@ class MemoryChartLegend extends StatelessWidget {
       final androids = androidLegendContent(chartController.android);
       legendRows.add(
         Container(
-          padding: legendTitlePadding,
+          padding: _legendTitlePadding,
           child: Text('Android Legend', style: legendHeading),
         ),
       );
