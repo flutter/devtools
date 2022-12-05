@@ -122,12 +122,6 @@ class LegendRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isRSS = entry1.key == 'RSS';
-
-    void out(Object? content) {
-      if (isRSS) print(content);
-    }
-
     final theme = Theme.of(context);
     final legendEntry = theme.legendTextStyle;
 
@@ -168,15 +162,11 @@ class LegendRow extends StatelessWidget {
       Widget traceColor;
       if (color != null) {
         if (dashedLine as bool) {
-          out('dashed: $color');
-
           traceColor = createDashWidget(color);
         } else {
-          out('solid');
           traceColor = createSolidLine(color);
         }
       } else {
-        out('no color');
         traceColor =
             image == null ? const SizedBox() : Image(image: AssetImage(image));
       }
