@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 
+// TODO(polina-c): use the same constants as for dash in the chart.
 const _dashHeight = 2.0;
 const _dashWidth = 5.0;
 const _spaceBetweenDash = 3.0;
