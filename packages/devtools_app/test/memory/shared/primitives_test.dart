@@ -2,28 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:devtools_app/src/screens/memory/shared/primitives.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-void main() {
-  test('doc links are not broken', () async {
-    final request = await HttpClient().getUrl(Uri.parse(DocLinks.chart.value));
-    final response = await request.close();
+import '../../test_infra/utils/test_utils.dart';
 
-    final completer = Completer<String>();
-    final content = StringBuffer();
-    response.transform(utf8.decoder).listen(
-      (data) {
-        content.write(data);
-      },
-      onDone: () => completer.complete(content.toString()),
-    );
-    await completer.future;
-    final hash = DocLinks.chart.hash;
-    expect(content.toString(), contains('href="#$hash"'));
-  });
+void main() {
+  for (final link in DocLinks.values) {
+    test('$link is not broken', () async {
+      final content = await loadPageHtmlContent(link.value);
+      final hash = link.hash;
+      expect(content, contains('href="#$hash"'));
+    });
+  }
 }

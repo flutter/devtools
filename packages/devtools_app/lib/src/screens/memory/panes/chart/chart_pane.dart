@@ -234,7 +234,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
               ),
               // The legend.
               DualValueListenableBuilder<bool, bool>(
-                firstListenable: controller.legendVisibleNotifier,
+                firstListenable: widget.chartController.legendVisibleNotifier,
                 secondListenable: controller.isAndroidChartVisibleNotifier,
                 builder: (_, isLegendVisible, isAndroidChartVisible, __) {
                   if (!isLegendVisible) return const SizedBox.shrink();

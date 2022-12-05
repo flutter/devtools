@@ -9,6 +9,7 @@ import '../../../../analytics/constants.dart' as analytics_constants;
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/split.dart';
 import '../../../../shared/theme.dart';
+import '../../shared/primitives.dart';
 import 'controller/diff_pane_controller.dart';
 import 'controller/item_controller.dart';
 import 'widgets/snapshot_control_pane.dart';
@@ -46,6 +47,8 @@ class _SnapshotItemContent extends StatelessWidget {
 
   final DiffPaneController controller;
 
+  static const _documentationTopic = analytics_constants.MemoryEvent.diffHelp;
+
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<SnapshotItem>(
@@ -57,14 +60,15 @@ class _SnapshotItemContent extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Expanded(child: Markdown(data: _snapshotDocumentation)),
+                const Expanded(
+                  child: Markdown(data: _snapshotDocumentation),
+                ),
                 const SizedBox(height: denseSpacing),
-                IconLabelButton(
-                  onPressed: controller.takeSnapshotHandler(
-                    analytics_constants.MemoryEvent.diffTakeSnapshotAfterHelp,
-                  ),
-                  icon: Icons.fiber_manual_record,
-                  label: 'Take Snapshot',
+                MoreInfoLink(
+                  url: DocLinks.diff.value,
+                  gaScreenName: '',
+                  gaSelectedItemDescription: analytics_constants
+                      .topicDocumentationLink(_documentationTopic),
                 )
               ],
             ),
@@ -108,7 +112,6 @@ const _snapshotDocumentation = '''
 Take a **heap snapshot** to view current memory allocation:
 
 1. In the Snapshots panel, click the ● button
-(or click **Take Snapshot** below these instructions)
 2. Use the **Filter** button to refine the results
 3. Select a class from the snapshot table to view its retaining paths
 4. View the path detail by selecting from the **Shortest Retaining Paths…** table
