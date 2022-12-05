@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/screens/performance/panes/raster_stats/raster_stats.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -13,7 +14,7 @@ import '../../test_infra/matchers/matchers.dart';
 import '../../test_infra/test_data/performance_raster_stats.dart';
 
 void main() {
-  group('RenderingLayerVisualizer', () {
+  group('$RasterStatsView', () {
     late RasterStatsController controller;
 
     setUp(() async {
@@ -22,6 +23,7 @@ void main() {
         (_) => Future.value(Response.parse(rasterStatsFromServiceJson)),
       );
       setGlobal(ServiceConnectionManager, mockServiceManager);
+      setGlobal(OfflineModeController, OfflineModeController());
       setGlobal(IdeTheme, IdeTheme());
 
       controller =
@@ -32,7 +34,7 @@ void main() {
     Future<void> pumpRenderingLayerVisualizer(WidgetTester tester) async {
       await tester.pumpWidget(
         wrap(
-          RenderingLayerVisualizer(
+          RasterStatsView(
             rasterStatsController: controller,
           ),
         ),
@@ -71,7 +73,7 @@ void main() {
       expect(find.byType(LayerImage), findsOneWidget);
 
       await expectLater(
-        find.byType(RenderingLayerVisualizer),
+        find.byType(RasterStatsView),
         matchesDevToolsGolden('goldens/raster_stats_with_data.png'),
       );
     });
@@ -93,7 +95,7 @@ void main() {
 
       expect(controller.selectedSnapshot.value, equals(secondLayer));
       await expectLater(
-        find.byType(RenderingLayerVisualizer),
+        find.byType(RasterStatsView),
         matchesDevToolsGolden('goldens/raster_stats_changed_selection.png'),
       );
     });
