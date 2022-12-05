@@ -4,9 +4,8 @@
 
 import 'package:flutter/material.dart';
 
-const _totalDashWidth = 15.0;
 const _dashHeight = 2.0;
-const _dashWidth = 4.0;
+const _dashWidth = 5.0;
 const _spaceBetweenDash = 3.0;
 
 Widget createDashWidget(Color color) {
@@ -16,7 +15,7 @@ Widget createDashWidget(Color color) {
     color: color,
   );
   const space = SizedBox(
-    width: _dashWidth,
+    width: _spaceBetweenDash,
     height: _dashHeight,
   );
   return Row(
