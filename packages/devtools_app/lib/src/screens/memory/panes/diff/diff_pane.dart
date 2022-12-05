@@ -64,7 +64,7 @@ class _SnapshotItemContent extends StatelessWidget {
                 const SizedBox(height: denseSpacing),
                 MoreInfoLink(
                   url: DocLinks.diff.value,
-                  gaScreenName: '',
+                  gaScreenName: analytics_constants.memory,
                   gaSelectedItemDescription: analytics_constants
                       .topicDocumentationLink(_documentationTopic),
                 )
