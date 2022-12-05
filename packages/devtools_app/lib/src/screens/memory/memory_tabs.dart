@@ -43,7 +43,6 @@ class MemoryTabView extends StatelessWidget {
           tabs.add(record.tab);
           tabViews.add(record.tabView);
         }
-        print('rebuilding analytics tabbed view');
         return AnalyticsTabbedView(
           tabs: tabs,
           tabViews: tabViews,

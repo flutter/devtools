@@ -10,24 +10,17 @@ const _dashWidth = 4.0;
 const _spaceBetweenDash = 3.0;
 
 Widget createDashWidget(Color color) {
-  return Container(
-    padding: const EdgeInsets.only(right: 20),
-    child: CustomPaint(
-      painter: DashedLine(
-        _totalDashWidth,
-        color,
-        _dashHeight,
-        _dashWidth,
-        _spaceBetweenDash,
-      ),
-      foregroundPainter: DashedLine(
-        _totalDashWidth,
-        color,
-        _dashHeight,
-        _dashWidth,
-        _spaceBetweenDash,
-      ),
-    ),
+  final dash = Container(
+    width: _dashWidth,
+    height: _dashHeight,
+    color: color,
+  );
+  const space = SizedBox(
+    width: _dashWidth,
+    height: _dashHeight,
+  );
+  return Row(
+    children: [dash, space, dash, space, dash],
   );
 }
 
