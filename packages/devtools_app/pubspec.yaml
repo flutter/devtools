@@ -94,25 +94,19 @@ flutter:
     # TODO(kenz): investigate whether we really need all these assets for the trace viewer.
     - packages/perfetto_compiled/dist/index.html
     - packages/perfetto_compiled/dist/service_worker.js
-    - packages/perfetto_compiled/dist/service_worker.js.map
     - packages/perfetto_compiled/dist/devtools/devtools_dark.css
     - packages/perfetto_compiled/dist/devtools/devtools_light.css
     - packages/perfetto_compiled/dist/devtools/devtools_shared.css
     - packages/perfetto_compiled/dist/devtools/devtools_theme_handler.js
     # The version number for all the Perfetto asset paths below is updated by running the
     # ./tool/update_perfetto.sh script.
-    - packages/perfetto_compiled/dist/v31.0-0394aac11/controller_bundle.js
-    - packages/perfetto_compiled/dist/v31.0-0394aac11/controller_bundle.js.map
     - packages/perfetto_compiled/dist/v31.0-0394aac11/engine_bundle.js
-    - packages/perfetto_compiled/dist/v31.0-0394aac11/engine_bundle.js.map
     - packages/perfetto_compiled/dist/v31.0-0394aac11/frontend_bundle.js
-    - packages/perfetto_compiled/dist/v31.0-0394aac11/frontend_bundle.js.map
     - packages/perfetto_compiled/dist/v31.0-0394aac11/manifest.json
     - packages/perfetto_compiled/dist/v31.0-0394aac11/perfetto.css
     - packages/perfetto_compiled/dist/v31.0-0394aac11/trace_processor.wasm
     - packages/perfetto_compiled/dist/v31.0-0394aac11/traceconv.wasm
     - packages/perfetto_compiled/dist/v31.0-0394aac11/traceconv_bundle.js
-    - packages/perfetto_compiled/dist/v31.0-0394aac11/traceconv_bundle.js.map
     - packages/perfetto_compiled/dist/v31.0-0394aac11/assets/brand.png
     - packages/perfetto_compiled/dist/v31.0-0394aac11/assets/catapult_trace_viewer.html
     - packages/perfetto_compiled/dist/v31.0-0394aac11/assets/catapult_trace_viewer.js
