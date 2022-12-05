@@ -97,7 +97,6 @@ class _ChartControlPaneState extends State<ChartControlPane>
         ValueListenableBuilder<bool>(
           valueListenable: controller.legendVisibleNotifier,
           builder: (_, legendVisible, __) => IconLabelButton(
-            key: legendKey,
             onPressed: () {
               controller.toggleLegendVisibility();
               if (legendVisible) {

@@ -6,13 +6,25 @@ import 'package:flutter/material.dart';
 
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/theme.dart';
+import '../../../../shared/utils.dart';
 import '../../primitives/painting.dart';
-import '../../shared/constants.dart';
 import 'chart_pane_controller.dart';
 import 'memory_android_chart.dart';
 import 'memory_charts.dart';
 import 'memory_events_pane.dart';
 import 'memory_vm_chart.dart';
+
+const legendXOffset = 20;
+const legendYOffset = 7.0;
+double get _legendWidth => scaleByFontFactor(200.0);
+double get _legendTextWidth => scaleByFontFactor(55.0);
+double get _legendHeight1Chart => scaleByFontFactor(200.0);
+double get _legendHeight2Charts => scaleByFontFactor(323.0);
+
+final legendKey = GlobalKey(debugLabel: 'Legend Button');
+
+/// Padding for each title in the legend.
+const legendTitlePadding = EdgeInsets.fromLTRB(5, 0, 0, 4);
 
 class MemoryChartLegend extends StatelessWidget {
   const MemoryChartLegend({
@@ -90,10 +102,10 @@ class MemoryChartLegend extends StatelessWidget {
     }
 
     return Container(
-      width: legendWidth,
+      width: _legendWidth,
       // The height is specified here,
       // because [legendRows] are designed to take all available space.
-      height: isAndroidVisible ? legendHeight2Charts : legendHeight1Chart,
+      height: isAndroidVisible ? _legendHeight2Charts : _legendHeight1Chart,
       padding: const EdgeInsets.fromLTRB(0, densePadding, densePadding, 0),
       decoration: BoxDecoration(
         color: colorScheme.defaultBackgroundColor,
@@ -135,7 +147,7 @@ class LegendRow extends StatelessWidget {
         Expanded(
           child: Container(
             padding: EdgeInsets.fromLTRB(leftEdge, 0, 0, 2),
-            width: legendTextWidth + leftEdge,
+            width: _legendTextWidth + leftEdge,
             child: Text(name, style: legendEntry),
           ),
         ),

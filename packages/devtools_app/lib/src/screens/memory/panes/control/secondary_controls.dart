@@ -15,6 +15,7 @@ import '../../memory_controller.dart';
 import '../../primitives/ui.dart';
 import '../../shared/constants.dart';
 import '../chart/chart_pane_controller.dart';
+import 'primitives.dart';
 import 'settings_dialog.dart';
 import 'source_dropdown.dart';
 
