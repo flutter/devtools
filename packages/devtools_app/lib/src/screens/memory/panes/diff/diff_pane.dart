@@ -60,9 +60,7 @@ class _SnapshotItemContent extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Expanded(
-                  child: Markdown(data: _snapshotDocumentation),
-                ),
+                const Expanded(child: Markdown(data: _snapshotDocumentation)),
                 const SizedBox(height: denseSpacing),
                 MoreInfoLink(
                   url: DocLinks.diff.value,
