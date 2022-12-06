@@ -12,7 +12,7 @@ import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../memory_controller.dart';
 import '../../primitives/ui.dart';
-import '../../shared/constants.dart';
+import '../../shared/primitives.dart';
 import 'chart_pane_controller.dart';
 import 'interval_dropdown.dart';
 
@@ -94,28 +94,72 @@ class _ChartControlPaneState extends State<ChartControlPane>
           ],
         ),
         const SizedBox(height: denseSpacing),
-        ValueListenableBuilder<bool>(
-          valueListenable: controller.legendVisibleNotifier,
-          builder: (_, legendVisible, __) => IconLabelButton(
-            key: legendKey,
-            onPressed: () {
-              controller.toggleLegendVisibility();
-              if (legendVisible) {
-                ga.select(
-                  analytics_constants.memory,
-                  analytics_constants.MemoryEvent.chartLegend,
-                );
-              }
-            },
-            icon: legendVisible ? Icons.close : Icons.storage,
-            label: 'Legend',
-            tooltip: 'Show chart legend',
-            minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
-          ),
+        Row(
+          children: [
+            _LegendButton(chartController: widget.chartController),
+            const _ChartHelpLink(),
+          ],
         ),
         const SizedBox(height: denseSpacing),
         IntervalDropdown(chartController: widget.chartController),
       ],
+    );
+  }
+}
+
+class _LegendButton extends StatelessWidget {
+  const _LegendButton({required this.chartController});
+
+  final MemoryChartPaneController chartController;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: chartController.legendVisibleNotifier,
+      builder: (_, legendVisible, __) => IconLabelButton(
+        onPressed: () {
+          chartController.toggleLegendVisibility();
+          if (legendVisible) {
+            ga.select(
+              analytics_constants.memory,
+              analytics_constants.MemoryEvent.chartLegend,
+            );
+          }
+        },
+        icon: legendVisible ? Icons.close : Icons.storage,
+        label: 'Legend',
+        tooltip: 'Show chart legend',
+        minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
+      ),
+    );
+  }
+}
+
+class _ChartHelpLink extends StatelessWidget {
+  const _ChartHelpLink({Key? key}) : super(key: key);
+
+  static const _documentationTopic = analytics_constants.MemoryEvent.chartHelp;
+
+  @override
+  Widget build(BuildContext context) {
+    return HelpButtonWithDialog(
+      gaScreen: analytics_constants.memory,
+      gaSelection:
+          analytics_constants.topicDocumentationButton(_documentationTopic),
+      dialogTitle: 'Memory Chart Help',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          const Text('Memory chart shows trace\n'
+              'of application memory usage.'),
+          MoreInfoLink(
+            url: DocLinks.chart.value,
+            gaScreenName: '',
+            gaSelectedItemDescription:
+                analytics_constants.topicDocumentationLink(_documentationTopic),
+          )
+        ],
+      ),
     );
   }
 }

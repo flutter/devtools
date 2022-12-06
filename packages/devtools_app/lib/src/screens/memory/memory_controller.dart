@@ -76,15 +76,6 @@ class MemoryController extends DisposableController
   final _shouldShowLeaksTab = ValueNotifier<bool>(false);
   ValueListenable<bool> get shouldShowLeaksTab => _shouldShowLeaksTab;
 
-  ValueListenable<bool> get legendVisibleNotifier => _legendVisibleNotifier;
-
-  final _legendVisibleNotifier = ValueNotifier<bool>(true);
-
-  bool get isLegendVisible => _legendVisibleNotifier.value;
-
-  bool toggleLegendVisibility() =>
-      _legendVisibleNotifier.value = !_legendVisibleNotifier.value;
-
   late MemoryTimeline memoryTimeline;
 
   late _MemoryLog memoryLog;

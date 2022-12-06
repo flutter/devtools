@@ -153,6 +153,7 @@ class MemoryEvent {
   static const showChart = 'showChart';
   static const hideChart = 'hideChart';
   static const chartInterval = 'chartInterval';
+  static const chartHelp = 'memoryChartHelp';
 
   static const profileDownloadCsv = 'profileDownloadCsv';
   static const profileRefreshManual = 'profileRefreshManual';
@@ -168,6 +169,7 @@ class MemoryEvent {
   static const diffTakeSnapshotControlPane = 'diffTakeSnapshotControlPane';
   static const diffTakeSnapshotAfterHelp = 'diffTakeSnapshotAfterHelp';
   static const diffClearSnapshots = 'diffClearSnapshots';
+  static const diffHelp = 'memoryDiffHelp';
 
   static const diffSnapshotDiffSelect = 'diffSnapshotDiffSelect';
   static const diffSnapshotDiffOff = 'diffSnapshotDiffSelectOff';
