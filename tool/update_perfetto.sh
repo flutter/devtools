@@ -42,6 +42,8 @@ fi
 
 echo "UPDATE_PERFETTO: Deleting unnecessary js source map files"
 find ./ -name '*.js.map' -exec rm {} \;
+find ./ -name 'traceconv.wasm' -exec rm {} \;
+find ./ -name 'traceconv_bundle.js' -exec rm {} \;
 
 echo "UPDATE_PERFETTO: Moving DevTools-Perfetto integration files back from _tmp/"
 mkdir dist/devtools
