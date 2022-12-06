@@ -107,8 +107,6 @@ flutter:
     - packages/perfetto_compiled/dist/v31.0-0394aac11/manifest.json
     - packages/perfetto_compiled/dist/v31.0-0394aac11/perfetto.css
     - packages/perfetto_compiled/dist/v31.0-0394aac11/trace_processor.wasm
-    - packages/perfetto_compiled/dist/v31.0-0394aac11/traceconv.wasm
-    - packages/perfetto_compiled/dist/v31.0-0394aac11/traceconv_bundle.js
     - packages/perfetto_compiled/dist/v31.0-0394aac11/assets/brand.png
     - packages/perfetto_compiled/dist/v31.0-0394aac11/assets/catapult_trace_viewer.html
     - packages/perfetto_compiled/dist/v31.0-0394aac11/assets/catapult_trace_viewer.js
