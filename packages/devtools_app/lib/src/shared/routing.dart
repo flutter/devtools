@@ -183,7 +183,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     Map<String, String?>? argUpdates,
     DevToolsNavigationState? state,
   ]) {
-    final newArgs = {...currentConfiguration!.args, ...?argUpdates};
+    final newArgs = {...currentConfiguration?.args ?? {}, ...?argUpdates};
 
     // Ensure we disconnect from any previously connected applications if we do
     // not have a vm service uri as a query parameter, unless we are loading an
@@ -195,6 +195,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     _replaceStack(
       DevToolsRouteConfiguration(page, newArgs, state),
     );
+    notifyListeners();
   }
 
   void navigateHome({
@@ -215,7 +216,6 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     routes
       ..clear()
       ..add(configuration);
-    notifyListeners();
   }
 
   @override
@@ -234,25 +234,30 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
       return;
     }
 
-    final currentPage = currentConfiguration!.page;
-    final newArgs = {...currentConfiguration!.args, ...argUpdates};
+    final currentConfig = currentConfiguration!;
+    final currentPage = currentConfig.page;
+    final newArgs = {...currentConfig.args, ...argUpdates};
     _replaceStack(
       DevToolsRouteConfiguration(
         currentPage,
         newArgs,
-        currentConfiguration!.state,
+        currentConfig.state,
       ),
+    );
+    notifyListeners();
+  }
+
+  /// Checks whether applying [changes] over the current route's args will result
+  /// in any changes.
+  bool _changesArgs(Map<String, String?>? changes) {
+    final currentConfig = currentConfiguration!;
+    return !mapEquals(
+      {...currentConfig.args, ...?changes},
+      {...currentConfig.args},
     );
   }
 
-  /// Checks whether applying [changes] over the current routes args will result
-  /// in any changes.
-  bool _changesArgs(Map<String, String?>? changes) => !mapEquals(
-        {...currentConfiguration!.args, ...?changes},
-        {...currentConfiguration!.args},
-      );
-
-  /// Checks whether applying [changes] over the current routes state will result
+  /// Checks whether applying [changes] over the current route's state will result
   /// in any changes.
   bool _changesState(DevToolsNavigationState? changes) {
     return currentConfiguration!.state?.hasChanges(changes) ?? false;
@@ -264,14 +269,16 @@ class DevToolsNavigationState {
     required this.kind,
     required Map<String, String?> state,
   }) : _state = {
-          '_kind': kind,
+          _kKind: kind,
           ...state,
         };
 
   factory DevToolsNavigationState.fromJson(Map<String, dynamic> json) =>
       DevToolsNavigationState._(json.cast<String, String?>());
 
-  DevToolsNavigationState._(this._state) : kind = _state['_kind']!;
+  DevToolsNavigationState._(this._state) : kind = _state[_kKind]!;
+
+  static const _kKind = '_kind';
 
   final String kind;
 
@@ -321,5 +328,5 @@ mixin RouteStateHandlerMixin on DisposableController {
   ///
   /// This method is only invoked if [subscribeToRouterEvents] has been called on
   /// this instance with a valid [DevToolsRouterDelegate].
-  void onRouteStateUpdate(DevToolsNavigationState state) {}
+  void onRouteStateUpdate(DevToolsNavigationState state);
 }

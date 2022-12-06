@@ -797,7 +797,6 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
           valueListenable: widget.codeViewController.focusLine,
           builder: (context, focusLine, _) {
             final isFocusedLine = focusLine == lineNum;
-            //(outlineNode?.location?.location?.line ?? -1) == lineNum;
             return LineItem(
               lineContents: widget.lines[index],
               pausedFrame: isPausedLine ? widget.pausedFrame : null,

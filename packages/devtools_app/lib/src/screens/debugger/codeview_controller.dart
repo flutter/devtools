@@ -395,9 +395,9 @@ class CodeViewSourceLocationNavigationState extends DevToolsNavigationState {
   }) : super(
           kind: type,
           state: <String, String?>{
-            'scriptId': script.id,
-            'uri': script.uri,
-            'line': line.toString(),
+            _kScriptId: script.id,
+            _kUri: script.uri,
+            _kLine: line.toString(),
           },
         );
 
@@ -408,14 +408,17 @@ class CodeViewSourceLocationNavigationState extends DevToolsNavigationState {
           state: state.state,
         );
 
+  static const _kScriptId = 'scriptId';
+  static const _kUri = 'uri';
+  static const _kLine = 'line';
   static const type = 'codeViewSourceLocation';
 
   ScriptRef get script => ScriptRef(
-        id: state['scriptId']!,
-        uri: state['uri'],
+        id: state[_kScriptId]!,
+        uri: state[_kUri],
       );
 
-  int get line => int.parse(state['line']!);
+  int get line => int.parse(state[_kLine]!);
 
   ScriptLocation get location => ScriptLocation(
         script,
