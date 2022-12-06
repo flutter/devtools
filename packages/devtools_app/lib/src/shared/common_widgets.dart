@@ -34,6 +34,7 @@ const debuggerDeviceWidth = 800.0;
 
 const defaultDialogRadius = 20.0;
 double get areaPaneHeaderHeight => scaleByFontFactor(36.0);
+double get assumedMonospaceCharacterWidth => scaleByFontFactor(9.0);
 
 /// Convenience [Divider] with [Padding] that provides a good divider in forms.
 class PaddedDivider extends StatelessWidget {

@@ -533,9 +533,10 @@ class ProfileReportRange {
             )
             .toList() {
     for (int i = 0; i < lines.length; ++i) {
-      entries[lines[i]] = ProfileReportEntry(
+      final line = lines[i];
+      entries[line] = ProfileReportEntry(
         sampleCount: metadata.sampleCount,
-        line: lines[i],
+        line: line,
         inclusive: inclusiveTicks[i],
         exclusive: exclusiveTicks[i],
       );

@@ -67,7 +67,6 @@ class CodeView extends StatefulWidget {
       Key('debuggerCodeViewVerticalScrollbarKey');
 
   static double get rowHeight => scaleByFontFactor(20.0);
-  static double get assumedCharacterWidth => scaleByFontFactor(16.0);
 
   final CodeViewController codeViewController;
   final DebuggerController? debuggerController;
@@ -116,6 +115,9 @@ class _CodeViewState extends State<CodeView>
     verticalController = LinkedScrollControllerGroup();
     gutterController = verticalController.addAndGet();
     textController = verticalController.addAndGet();
+    if (widget.codeViewController.showProfileInformation.value) {
+      profileController = verticalController.addAndGet();
+    }
     horizontalController = ScrollController();
     _lastScriptRef = widget.scriptRef;
 
@@ -238,14 +240,6 @@ class _CodeViewState extends State<CodeView>
     _lastScriptRef = scriptRef;
   }
 
-  void _onPressed(int line) {
-    final onSelected = widget.onSelected;
-    final script = scriptRef;
-    if (onSelected != null && script != null) {
-      onSelected(script, line);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     if (parsedScript == null) {
@@ -334,13 +328,6 @@ class _CodeViewState extends State<CodeView>
       }
     }
 
-    // Apply the log change-of-base formula, then add 16dp padding for every
-    // digit in the maximum number of lines.
-    final gutterWidth = CodeView.assumedCharacterWidth * 1.5 +
-        CodeView.assumedCharacterWidth *
-            (defaultEpsilon + math.log(math.max(lines.length, 100)) / math.ln10)
-                .truncateToDouble();
-
     _updateScrollPosition(animate: false);
 
     final contentBuilder = (context, ScriptRef? script) {
@@ -364,60 +351,24 @@ class _CodeViewState extends State<CodeView>
                 final pausedFrame = frame == null
                     ? null
                     : (frame.scriptRef == scriptRef ? frame : null);
-                final currentParsedScript = parsedScript;
-                final lineCount = widget.lineRange?.size ?? lines.length;
-                final lineOffset = (widget.lineRange?.begin ?? 1) - 1;
-                final sourceReport = currentParsedScript?.sourceReport ??
-                    const ProcessedSourceReport.empty();
                 return Row(
                   children: [
-                    DualValueListenableBuilder<
-                        List<BreakpointAndSourcePosition>, bool>(
-                      firstListenable:
-                          breakpointManager.breakpointsWithLocation,
-                      secondListenable:
-                          widget.codeViewController.showCodeCoverage,
-                      builder: (context, breakpoints, showCodeCoverage, _) {
-                        return Gutter(
-                          gutterWidth: gutterWidth,
-                          scrollController: gutterController,
-                          lineCount: lineCount,
-                          lineOffset: lineOffset,
-                          pausedFrame: pausedFrame,
-                          breakpoints: breakpoints
-                              .where((bp) => bp.scriptRef == scriptRef)
-                              .toList(),
-                          executableLines:
-                              currentParsedScript?.executableLines ??
-                                  const <int>{},
-                          sourceReport: sourceReport,
-                          onPressed: _onPressed,
-                          // Disable dots for possible breakpoint locations.
-                          allowInteraction:
-                              !(widget.debuggerController?.isSystemIsolate ??
-                                  false),
-                          showCodeCoverage: showCodeCoverage,
-                        );
-                      },
-                    ),
-                    const SizedBox(width: denseSpacing),
                     ValueListenableBuilder<bool>(
                       valueListenable:
                           widget.codeViewController.showProfileInformation,
                       builder: (context, showProfileInformation, _) {
-                        if (!showProfileInformation) {
-                          return const SizedBox();
-                        }
-                        return Row(
-                          children: [
-                            ProfileInformationGutter(
-                              scrollController: profileController!,
-                              lineCount: lineCount,
-                              lineOffset: lineOffset,
-                              sourceReport: sourceReport,
-                            ),
-                            const SizedBox(width: denseSpacing),
-                          ],
+                        return Gutters(
+                          scriptRef: script,
+                          gutterController: gutterController,
+                          profileController: profileController,
+                          codeViewController: widget.codeViewController,
+                          debuggerController: widget.debuggerController,
+                          lines: lines,
+                          lineRange: widget.lineRange,
+                          onSelected: widget.onSelected,
+                          pausedFrame: pausedFrame,
+                          parsedScript: parsedScript,
+                          showProfileInformation: showProfileInformation,
                         );
                       },
                     ),
@@ -603,71 +554,98 @@ class ProfileInformationGutter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final gutterWidth = CodeView.assumedCharacterWidth * 10 + denseSpacing;
-    return Container(
-      width: gutterWidth,
-      decoration: BoxDecoration(
-        border: Border(right: defaultBorderSide(theme)),
-        color: Theme.of(context).titleSolidBackgroundColor,
+    // Gutter width accounts for:
+    //  - a maximum of 16 characters of text (e.g., '100.00 %' x 2)
+    //  - Spacing for the vertical divider
+    final gutterWidth = assumedMonospaceCharacterWidth * 16 + denseSpacing;
+    return OutlineDecoration.onlyRight(
+      child: Container(
+        width: gutterWidth,
+        decoration: BoxDecoration(
+          color: Theme.of(context).titleSolidBackgroundColor,
+        ),
+        child: Stack(
+          children: [
+            Column(
+              children: [
+                const _ProfileInformationGutterHeader(
+                  totalTimeTooltip: totalTimeTooltip,
+                  selfTimeTooltip: selfTimeTooltip,
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    controller: scrollController,
+                    itemExtent: CodeView.rowHeight,
+                    itemCount: lineCount,
+                    itemBuilder: (context, index) {
+                      final lineNum = lineOffset + index + 1;
+                      final data = sourceReport.profilerEntries[lineNum];
+                      if (data == null) {
+                        return const SizedBox();
+                      }
+                      return ProfileInformationGutterItem(
+                        lineNumber: lineNum,
+                        profilerData: data,
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const Center(
+              child: VerticalDivider(),
+            ),
+          ],
+        ),
       ),
-      child: Stack(
+    );
+  }
+}
+
+class _ProfileInformationGutterHeader extends StatelessWidget {
+  const _ProfileInformationGutterHeader({
+    required this.totalTimeTooltip,
+    required this.selfTimeTooltip,
+  });
+
+  final String totalTimeTooltip;
+  final String selfTimeTooltip;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: CodeView.rowHeight,
+      child: Column(
         children: [
-          Column(
-            children: [
-              Container(
-                height: CodeView.rowHeight,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: const [
-                    Expanded(
-                      child: DevToolsTooltip(
-                        message: totalTimeTooltip,
-                        child: Text(
-                          'Total %',
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
+          Expanded(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Expanded(
+                  child: DevToolsTooltip(
+                    message: totalTimeTooltip,
+                    child: const Text(
+                      'Total %',
+                      textAlign: TextAlign.center,
                     ),
-                    SizedBox(width: denseSpacing),
-                    Expanded(
-                      child: DevToolsTooltip(
-                        message: selfTimeTooltip,
-                        child: Text(
-                          'Self %',
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
+                  ),
+                ),
+                const SizedBox(width: denseSpacing),
+                Expanded(
+                  child: DevToolsTooltip(
+                    message: selfTimeTooltip,
+                    child: const Text(
+                      'Self %',
+                      textAlign: TextAlign.center,
                     ),
-                  ],
+                  ),
                 ),
-              ),
-              const Divider(
-                height: 0,
-              ),
-              Expanded(
-                child: ListView.builder(
-                  controller: scrollController,
-                  itemExtent: CodeView.rowHeight,
-                  itemCount: lineCount,
-                  itemBuilder: (context, index) {
-                    final lineNum = lineOffset + index + 1;
-                    final data = sourceReport.profilerEntries[lineNum];
-                    if (data == null) {
-                      return const SizedBox();
-                    }
-                    return ProfileInformationGutterItem(
-                      lineNumber: lineNum,
-                      profilerData: data,
-                    );
-                  },
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
-          const Center(
-            child: VerticalDivider(),
+          const Divider(
+            height: 0,
           ),
         ],
       ),
@@ -735,14 +713,12 @@ class ProfilePercentageItem extends StatelessWidget {
       message: hoverText,
       child: Container(
         color: color,
-        child: Container(
-          margin: const EdgeInsets.symmetric(
-            horizontal: densePadding,
-          ),
-          child: Text(
-            '${percentage.toStringAsFixed(2)} %',
-            textAlign: TextAlign.end,
-          ),
+        padding: const EdgeInsets.symmetric(
+          horizontal: densePadding,
+        ),
+        child: Text(
+          '${percentage.toStringAsFixed(2)} %',
+          textAlign: TextAlign.end,
         ),
       ),
     );
@@ -750,6 +726,98 @@ class ProfilePercentageItem extends StatelessWidget {
 }
 
 typedef IntCallback = void Function(int value);
+
+class Gutters extends StatelessWidget {
+  const Gutters({
+    required this.scriptRef,
+    this.debuggerController,
+    required this.codeViewController,
+    required this.lines,
+    required this.lineRange,
+    required this.gutterController,
+    required this.showProfileInformation,
+    required this.profileController,
+    required this.parsedScript,
+    this.pausedFrame,
+    this.onSelected,
+  });
+
+  final ScriptRef? scriptRef;
+  final DebuggerController? debuggerController;
+  final CodeViewController codeViewController;
+  final ScrollController gutterController;
+  final ScrollController? profileController;
+  final StackFrameAndSourcePosition? pausedFrame;
+  final List<TextSpan> lines;
+  final LineRange? lineRange;
+  final ParsedScript? parsedScript;
+  final void Function(ScriptRef scriptRef, int line)? onSelected;
+  final bool showProfileInformation;
+
+  @override
+  Widget build(BuildContext context) {
+    final lineCount = lineRange?.size ?? lines.length;
+    final lineOffset = (lineRange?.begin ?? 1) - 1;
+    final sourceReport =
+        parsedScript?.sourceReport ?? const ProcessedSourceReport.empty();
+
+    // Apply the log change-of-base formula to get the max number of digits in
+    // a line number. Add a character width space for:
+    //   - each character in the longest line number
+    //   - one for the breakpoint dot
+    //   - two for the paused arrow
+    final gutterWidth = assumedMonospaceCharacterWidth * 4 +
+        assumedMonospaceCharacterWidth *
+            (defaultEpsilon + math.log(math.max(lines.length, 100)) / math.ln10)
+                .truncateToDouble();
+
+    return Row(
+      children: [
+        DualValueListenableBuilder<List<BreakpointAndSourcePosition>, bool>(
+          firstListenable: breakpointManager.breakpointsWithLocation,
+          secondListenable: codeViewController.showCodeCoverage,
+          builder: (context, breakpoints, showCodeCoverage, _) {
+            return Gutter(
+              gutterWidth: gutterWidth,
+              scrollController: gutterController,
+              lineCount: lineCount,
+              lineOffset: lineOffset,
+              pausedFrame: pausedFrame,
+              breakpoints:
+                  breakpoints.where((bp) => bp.scriptRef == scriptRef).toList(),
+              executableLines: parsedScript?.executableLines ?? const <int>{},
+              sourceReport: sourceReport,
+              onPressed: _onPressed,
+              // Disable dots for possible breakpoint locations.
+              allowInteraction: !(debuggerController?.isSystemIsolate ?? false),
+              showCodeCoverage: showCodeCoverage,
+            );
+          },
+        ),
+        const SizedBox(width: denseSpacing),
+        !showProfileInformation
+            ? const SizedBox()
+            : Padding(
+                padding: const EdgeInsets.only(right: denseSpacing),
+                child: ProfileInformationGutter(
+                  scrollController: profileController!,
+                  lineCount: lineCount,
+                  lineOffset: lineOffset,
+                  sourceReport: sourceReport,
+                ),
+              ),
+      ],
+    );
+  }
+
+  void _onPressed(int line) {
+    final onSelectedLocal = onSelected!;
+    final script = scriptRef;
+    if (onSelected != null && script != null) {
+      onSelectedLocal(script, line);
+    }
+  }
+}
 
 class Gutter extends StatelessWidget {
   const Gutter({

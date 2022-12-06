@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/primitives/listenable.dart';
 import 'package:devtools_app/src/screens/debugger/breakpoint_manager.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_screen.dart';
@@ -43,6 +44,9 @@ void main() {
 
   when(scriptManager.sortedScripts).thenReturn(ValueNotifier(scripts));
   when(codeViewController.showFileOpener).thenReturn(ValueNotifier(false));
+  when(codeViewController.showProfileInformation).thenReturn(
+    const FixedValueListenable(false),
+  );
 
   // File Explorer view is hidden
   when(codeViewController.fileExplorerVisible).thenReturn(ValueNotifier(false));

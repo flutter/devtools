@@ -187,6 +187,7 @@ class CodeViewController extends DisposableController
       final report = await serviceManager.service!.getSourceReport(
         isolateRef.id!,
         // TODO(bkonyi): make _Profile a public report type.
+        // See https://github.com/dart-lang/sdk/issues/50641
         const [
           SourceReportKind.kCoverage,
           '_Profile',

@@ -85,6 +85,9 @@ MockCodeViewController createMockCodeViewControllerWithDefaults({
   when(codeViewController.programExplorerController).thenReturn(
     mockProgramExplorerController,
   );
+  when(codeViewController.showProfileInformation).thenReturn(
+    const FixedValueListenable(false),
+  );
   when(codeViewController.showCodeCoverage).thenReturn(ValueNotifier(false));
 
   return codeViewController;

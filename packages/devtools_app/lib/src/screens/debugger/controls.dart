@@ -19,7 +19,7 @@ import 'debugger_controller.dart';
 class DebuggingControls extends StatefulWidget {
   const DebuggingControls({Key? key}) : super(key: key);
 
-  static const minWidthBeforeScaling = 1680.0;
+  static const minWidthBeforeScaling = 1750.0;
 
   @override
   _DebuggingControlsState createState() => _DebuggingControlsState();
