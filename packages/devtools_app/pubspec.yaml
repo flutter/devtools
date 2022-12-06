@@ -62,7 +62,6 @@ dependencies:
   web_socket_channel: ^2.1.0
   # widget_icons: ^0.0.1
 
-
 dev_dependencies:
   build_runner: ^2.0.4
   devtools_test: 2.20.0
