@@ -17,6 +17,7 @@ import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../primitives/simple_elements.dart';
 import '../../primitives/ui.dart';
+import '../../shared/primitives.dart';
 import 'allocation_profile_table_view_controller.dart';
 import 'model.dart';
 
@@ -433,9 +434,7 @@ class _ProfileHelpLink extends StatelessWidget {
               'allocated objects in the Dart heap of the selected\n'
               'isolate.'),
           MoreInfoLink(
-            url: 'https://github.com/flutter/devtools/blob/master/'
-                'packages/devtools_app/lib/src/screens/memory/panes/'
-                'allocation_profile/ALLOCATION_PROFILE.md',
+            url: DocLinks.profile.value,
             gaScreenName: '',
             gaSelectedItemDescription:
                 analytics_constants.topicDocumentationLink(_documentationTopic),

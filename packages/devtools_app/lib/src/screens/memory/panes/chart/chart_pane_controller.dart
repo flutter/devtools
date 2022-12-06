@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
+
 import 'memory_android_chart.dart';
 import 'memory_events_pane.dart';
 import 'memory_vm_chart.dart';
@@ -16,6 +18,15 @@ class MemoryChartPaneController {
   final EventChartController event;
   final VMChartController vm;
   final AndroidChartController android;
+
+  ValueListenable<bool> get legendVisibleNotifier => _legendVisibleNotifier;
+
+  final _legendVisibleNotifier = ValueNotifier<bool>(true);
+
+  bool get isLegendVisible => _legendVisibleNotifier.value;
+
+  bool toggleLegendVisibility() =>
+      _legendVisibleNotifier.value = !_legendVisibleNotifier.value;
 
   void resetAll() {
     event.reset();
