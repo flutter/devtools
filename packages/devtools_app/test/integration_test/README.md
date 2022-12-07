@@ -24,7 +24,7 @@ xattr -d com.apple.quarantine ~/path/to/chromedriver
 
 ```shell
 flutter drive \
-  --driver=integration_test/test_driver/integration_test.dart \
-  --target=integration_test/path/to/test.dart \
+  --driver=test/integration_test/test_driver/integration_test.dart \
+  --target=test/integration_test/path/to/test.dart \
   -d chrome
 ```
