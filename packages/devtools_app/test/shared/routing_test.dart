@@ -43,7 +43,16 @@ void main() {
   group('Route state handler', () {
     test('gets basic router updates', () {
       expect(controller.count, 0);
-      routerDelegate.navigate('Test');
+      routerDelegate.navigate(
+        'Test',
+        {},
+        DevToolsNavigationState(
+          kind: 'Test',
+          state: {
+            'state': '1',
+          },
+        ),
+      );
       expect(controller.count, 1);
     });
   });

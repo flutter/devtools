@@ -264,6 +264,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
   }
 }
 
+/// Encapsulates state associated with a [Router] navigation event.
 class DevToolsNavigationState {
   DevToolsNavigationState({
     required this.kind,
