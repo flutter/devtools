@@ -84,7 +84,7 @@ class CodeViewController extends DisposableController
 
   ValueListenable<bool> get showProfileInformation => _showProfileInformation;
   final _showProfileInformation = ValueNotifier<bool>(false);
-  
+
   /// Specifies which line should have focus applied in [CodeView].
   ///
   /// A line can be focused by invoking `showScriptLocation` with `focusLine`
