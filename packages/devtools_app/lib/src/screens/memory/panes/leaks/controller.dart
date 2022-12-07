@@ -179,11 +179,11 @@ class LeaksPaneController {
         return 'Waiting for leak tracking messages from the application...';
       case AppStatus.unsupportedProtocolVersion:
         return 'The application uses unsupported leak tracking protocol $appProtocolVersion. '
-            'Upgrade to newer version of leak_tracker to switch to one of supported protocols: $supportedLeakTrackingProtocols.';
+            'Upgrade to a newer version of leak_tracker to switch to one of supported protocols: $supportedLeakTrackingProtocols.';
       case AppStatus.leakTrackingStarted:
         return 'Leak tracking started. No leaks communicated so far.';
       case AppStatus.leaksFound:
-        throw StateError('there is no UI message for ${AppStatus.leaksFound}.');
+        throw StateError('There is no UI message for ${AppStatus.leaksFound}.');
     }
   }
 }

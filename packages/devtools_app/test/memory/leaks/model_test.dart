@@ -16,7 +16,7 @@ void main() {
       reports: [
         LeakReport(
           type: 'type',
-          context: {},
+          context: const <String, dynamic>{},
           code: 2,
           trackedClass: 'trackedClass',
         )

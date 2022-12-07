@@ -63,7 +63,7 @@ void main() {
 
 LeakReport _createReport(int code, String path) => LeakReport(
       type: '',
-      context: {},
+      context: const <String, dynamic>{},
       code: 0,
       trackedClass: 'trackedClass',
     )..retainingPath = path;
