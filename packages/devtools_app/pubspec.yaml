@@ -66,6 +66,8 @@ dev_dependencies:
   devtools_test: 2.20.0
   flutter_test:
     sdk: flutter
+  integration_test:
+    sdk: flutter
   mockito: ^5.1.0
   webkit_inspection_protocol: '>=0.5.0 <2.0.0'
   stager: ^0.1.0
