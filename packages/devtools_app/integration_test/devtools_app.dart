@@ -16,4 +16,5 @@ void main() {
       await pumpDevTools(tester);
       expect(find.byType(LandingScreenBody), findsOneWidget);
     });
+  });
 }

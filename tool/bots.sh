@@ -144,22 +144,20 @@ elif [[ "$BOT" == "test_ddc" || "$BOT" == "test_dart2js" ]]; then
 
 elif [ "$BOT" = "integration_ddc" ]; then
 
-    # Provision our packages.
-    flutter pub get
-    flutter config --enable-web
-
     # TODO(https://github.com/flutter/devtools/issues/1987): rewrite integration tests.
     # We need to run integration tests with -j1 to run with no concurrency.
     # flutter test -j1 test/integration_tests/
 
 elif [ "$BOT" = "integration_dart2js" ]; then
 
-    flutter pub get
-    flutter config --enable-web
-
     # TODO(https://github.com/flutter/devtools/issues/1987): rewrite integration tests.
     # We need to run integration tests with -j1 to run with no concurrency.
     # WEBDEV_RELEASE=true flutter test -j1 test/integration_tests/
+
+    flutter drive \
+    --driver=integration_test/test_driver/integration_test.dart \
+    --target=integration_test/path/to/test.dart \
+    -d chrome
 
 else
 
