@@ -16,6 +16,7 @@ import '../../service/isolate_state.dart';
 import '../../service/vm_service_wrapper.dart';
 import '../../shared/globals.dart';
 import '../../shared/object_tree.dart';
+import '../../shared/routing.dart';
 import 'codeview_controller.dart';
 import 'debugger_model.dart';
 
@@ -30,10 +31,16 @@ class DebuggerController extends DisposableController
     with AutoDisposeControllerMixin {
   // `initialSwitchToIsolate` can be set to false for tests to skip the logic
   // in `switchToIsolate`.
-  DebuggerController({this.initialSwitchToIsolate = true}) {
+  DebuggerController({
+    DevToolsRouterDelegate? routerDelegate,
+    this.initialSwitchToIsolate = true,
+  }) {
     autoDisposeStreamSubscription(
       serviceManager.onConnectionAvailable.listen(_handleConnectionAvailable),
     );
+    if (routerDelegate != null) {
+      codeViewController.subscribeToRouterEvents(routerDelegate);
+    }
     if (serviceManager.hasService) {
       initialize();
     }
