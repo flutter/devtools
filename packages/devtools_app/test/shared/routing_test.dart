@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(bkonyi): add integration tests for navigation state.
+// See https://github.com/flutter/devtools/issues/4902.
+
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
@@ -103,19 +106,19 @@ void main() {
       // Navigating to another page with args should result in the router
       // event callback being invoked.
       expect(controller.count, 0);
-      routerDelegate.navigate(page, defaultArgs, originalState);
+      routerDelegate.navigate(page, defaultArgs);
       expect(controller.count, 1);
       expectConfigArgs();
 
       // Navigating to the same page with identical args doesn't trigger the
       // callback
       controller.count = 0;
-      routerDelegate.navigateIfNotCurrent(page, defaultArgs, originalState);
+      routerDelegate.navigateIfNotCurrent(page, defaultArgs);
       expect(controller.count, 0);
       expectConfigArgs();
 
       // Navigating to the same page with updated args triggers callback.
-      routerDelegate.navigateIfNotCurrent(page, updatedArgs, originalState);
+      routerDelegate.navigateIfNotCurrent(page, updatedArgs);
       expect(controller.count, 1);
       expectConfigArgs(updatedArgs);
     });
