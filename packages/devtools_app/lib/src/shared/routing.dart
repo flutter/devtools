@@ -154,9 +154,9 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     return true;
   }
 
-  /// Navigates to a new page, optionally updating arguments.
+  /// Navigates to a new page, optionally updating arguments and state.
   ///
-  /// If page and args would be the same, does nothing.
+  /// If page, args, and state would be the same, does nothing.
   /// Existing arguments (for example &uri=) will be preserved unless
   /// overwritten by [argUpdates].
   void navigateIfNotCurrent(
@@ -174,7 +174,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     navigate(page, argUpdates, stateUpdates);
   }
 
-  /// Navigates to a new page, optionally updating arguments.
+  /// Navigates to a new page, optionally updating arguments and state.
   ///
   /// Existing arguments (for example &uri=) will be preserved unless
   /// overwritten by [argUpdates].
@@ -260,7 +260,11 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
   /// Checks whether applying [changes] over the current route's state will result
   /// in any changes.
   bool _changesState(DevToolsNavigationState? changes) {
-    return currentConfiguration!.state?.hasChanges(changes) ?? false;
+    final currentState = currentConfiguration!.state;
+    if (currentState == null) {
+      return changes != null;
+    }
+    return currentState.hasChanges(changes);
   }
 }
 

@@ -4,7 +4,7 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_test/devtools_test.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestController extends DisposableController with RouteStateHandlerMixin {
@@ -21,8 +21,26 @@ void main() {
   late GlobalKey<NavigatorState> navKey;
   late DevToolsRouterDelegate routerDelegate;
 
+  const page = 'Test';
+  const defaultArgs = <String, String>{};
+  const updatedArgs = <String, String>{
+    'arg': 'foo',
+  };
+
+  final originalState = DevToolsNavigationState(
+    kind: 'Test',
+    state: {
+      'state': '1',
+    },
+  );
+  final updatedState = DevToolsNavigationState(
+    kind: 'Test',
+    state: {
+      'state': '2',
+    },
+  );
+
   setUp(() {
-    WidgetsFlutterBinding.ensureInitialized();
     setGlobal(ServiceConnectionManager, FakeServiceManager());
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(NotificationService, NotificationService());
@@ -30,7 +48,7 @@ void main() {
     controller = TestController();
     navKey = GlobalKey<NavigatorState>();
     routerDelegate = DevToolsRouterDelegate(
-      (p0, p1, p2, p3) => const CupertinoPage(child: SizedBox.shrink()),
+      (p0, p1, p2, p3) => const MaterialPage(child: SizedBox.shrink()),
       navKey,
     );
     controller.subscribeToRouterEvents(routerDelegate);
@@ -40,20 +58,66 @@ void main() {
     controller.dispose();
   });
 
+  void expectConfigArgs([Map<String, String> args = defaultArgs]) {
+    expect(routerDelegate.currentConfiguration!.args, args);
+  }
+
   group('Route state handler', () {
-    test('gets basic router updates', () {
+    test('state objects', () {
+      expect(originalState.hasChanges(originalState), false);
+      expect(originalState.hasChanges(updatedState), true);
+    });
+
+    test('gets basic router updates with state change', () {
+      // Navigating with no state won't trigger the callback.
+      routerDelegate.navigate(page);
       expect(controller.count, 0);
-      routerDelegate.navigate(
-        'Test',
-        {},
-        DevToolsNavigationState(
-          kind: 'Test',
-          state: {
-            'state': '1',
-          },
-        ),
-      );
+      expectConfigArgs();
+
+      // Navigating to another page with state should result in the router
+      // event callback being invoked.
+      expect(controller.count, 0);
+      routerDelegate.navigate(page, defaultArgs, originalState);
       expect(controller.count, 1);
+      expectConfigArgs();
+
+      // Navigating to the same page with identical state doesn't trigger the
+      // callback
+      controller.count = 0;
+      routerDelegate.navigateIfNotCurrent(page, defaultArgs, originalState);
+      expect(controller.count, 0);
+      expectConfigArgs();
+
+      // Navigating to the same page with updated state triggers callback.
+      routerDelegate.navigateIfNotCurrent(page, defaultArgs, updatedState);
+      expect(controller.count, 1);
+      expectConfigArgs();
+    });
+
+    test('gets basic router updates with arg change', () {
+      // Navigating with no args or state won't trigger the callback.
+      routerDelegate.navigate(page);
+      expect(controller.count, 0);
+      expectConfigArgs();
+
+      // Navigating to another page with args should result in the router
+      // event callback being invoked.
+      expect(controller.count, 0);
+      routerDelegate.navigate(page, defaultArgs, originalState);
+      expect(controller.count, 1);
+      expectConfigArgs();
+
+      // Navigating to the same page with identical args doesn't trigger the
+      // callback
+      controller.count = 0;
+      routerDelegate.navigateIfNotCurrent(page, defaultArgs, originalState);
+      expect(controller.count, 0);
+      expectConfigArgs();
+
+      // Navigating to the same page with updated args triggers callback.
+      routerDelegate.navigateIfNotCurrent(page, updatedArgs, originalState);
+      expect(controller.count, 1);
+      expectConfigArgs(updatedArgs);
     });
   });
 }
