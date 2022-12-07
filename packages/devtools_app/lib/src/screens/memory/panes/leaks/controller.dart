@@ -50,11 +50,6 @@ class LeaksPaneController {
     analysisStatus.dispose();
   }
 
-  static DateTime _fromEpochOrNull(int? microsecondsSinceEpoch) =>
-      microsecondsSinceEpoch == null
-          ? DateTime.now()
-          : DateTime.fromMicrosecondsSinceEpoch(microsecondsSinceEpoch);
-
   void _onAppMessageWithHistory(Event vmServiceEvent) {
     if (appStatus.value == AppStatus.unsupportedProtocolVersion) return;
 
@@ -72,10 +67,8 @@ class LeaksPaneController {
       if (message.matches(_lastLeakSummary)) return;
       _lastLeakSummary = message;
 
-      final time = _fromEpochOrNull(vmServiceEvent.timestamp).toLocal();
-
       leakSummaryHistory.value =
-          '${formatDateTime(time)}: ${message.toMessage()}\n'
+          '${formatDateTime(message.time)}: ${message.toMessage()}\n'
           '${leakSummaryHistory.value}';
       return;
     }
