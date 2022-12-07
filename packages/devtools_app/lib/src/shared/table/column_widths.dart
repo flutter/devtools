@@ -6,8 +6,8 @@ import 'dart:math';
 
 import '../../primitives/trees.dart';
 import '../../primitives/utils.dart';
+import '../common_widgets.dart';
 import '../theme.dart';
-import '../utils.dart';
 import 'table_controller.dart';
 import 'table_data.dart';
 
@@ -121,7 +121,7 @@ extension TreeColumnWidthExtension<T extends TreeNode<T>>
         //
         // `characterWidth` was determined through trial and error to roughly
         // approximate the width of a single character.
-        final characterWidth = scaleByFontFactor(9.0);
+        final characterWidth = assumedMonospaceCharacterWidth;
         double longestWidth = 0;
         for (var node in flattenedList) {
           final width = column.getNodeIndentPx(node) +

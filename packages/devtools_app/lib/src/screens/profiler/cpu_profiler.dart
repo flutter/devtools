@@ -178,9 +178,10 @@ class _CpuProfilerState extends State<CpuProfiler>
                 isFilterActive: widget.controller.isToggleFilterActive,
               ),
               const SizedBox(width: denseSpacing),
-              if (currentTab.key != CpuProfiler.flameChartTab)
+              if (currentTab.key != CpuProfiler.flameChartTab) ...[
                 const DisplayTreeGuidelinesToggle(),
-              const SizedBox(width: denseSpacing),
+                const SizedBox(width: denseSpacing),
+              ],
               UserTagDropdown(widget.controller),
               const SizedBox(width: denseSpacing),
               ValueListenableBuilder<bool>(

@@ -218,8 +218,7 @@ void main() {
         script: testScript,
         highlighter: mockSyntaxHighlighter,
         executableLines: const {},
-        coverageHitLines: const {},
-        coverageMissedLines: const {},
+        sourceReport: const ProcessedSourceReport.empty(),
       );
     });
 
