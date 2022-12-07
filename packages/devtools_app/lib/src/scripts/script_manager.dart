@@ -66,18 +66,27 @@ class ScriptManager extends DisposableController
   Future<Script> getScript(ScriptRef scriptRef) {
     return _scriptCache.getScript(_service, _currentIsolate, scriptRef);
   }
+
+  Script? getScriptByUri(String uri) {
+    return _scriptCache.getScriptByUri(uri);
+  }
 }
 
 class _ScriptCache {
   _ScriptCache();
 
   final _scripts = <String, Script>{};
+  final _uriToScript = <String, Script>{};
   final _inProgress = <String, Future<Script>>{};
 
   /// Return a cached [Script] for the given [ScriptRef], returning null
   /// if there is no cached [Script].
   Script? getScriptCached(ScriptRef scriptRef) {
     return _scripts[scriptRef.id];
+  }
+
+  Script? getScriptByUri(String uri) {
+    return _uriToScript[uri];
   }
 
   /// Retrieve the [Script] for the given [ScriptRef].
@@ -109,6 +118,7 @@ class _ScriptCache {
     unawaited(
       scriptFuture.then((script) {
         scripts[scriptId] = script;
+        _uriToScript[script.uri!] = script;
       }),
     );
 

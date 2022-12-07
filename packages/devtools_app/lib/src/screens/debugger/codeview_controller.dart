@@ -11,13 +11,17 @@ import '../../config_specific/logger/logger.dart';
 import '../../primitives/auto_dispose.dart';
 import '../../primitives/history_manager.dart';
 import '../../shared/globals.dart';
+import '../../shared/routing.dart';
 import '../../ui/search.dart';
 import 'debugger_model.dart';
 import 'program_explorer_controller.dart';
 import 'syntax_highlighter.dart';
 
 class CodeViewController extends DisposableController
-    with AutoDisposeControllerMixin, SearchControllerMixin<SourceToken> {
+    with
+        AutoDisposeControllerMixin,
+        SearchControllerMixin<SourceToken>,
+        RouteStateHandlerMixin {
   CodeViewController() {
     _scriptHistoryListener = () {
       final currentScriptValue = scriptsHistory.current.value;
@@ -31,6 +35,23 @@ class CodeViewController extends DisposableController
   void dispose() {
     super.dispose();
     scriptsHistory.current.removeListener(_scriptHistoryListener);
+  }
+
+  /// Perform operations based on changes in navigation state.
+  ///
+  /// This method is only invoked if [subscribeToRouterEvents] has been called on
+  /// this instance with a valid [DevToolsRouterDelegate].
+  @override
+  void onRouteStateUpdate(DevToolsNavigationState state) {
+    switch (state.kind) {
+      case CodeViewSourceLocationNavigationState.type:
+        {
+          final processedState =
+              CodeViewSourceLocationNavigationState._fromState(state);
+          // TODO(bkonyi): investigate delay in scrolling to source location.
+          showScriptLocation(processedState.location, focusLine: true);
+        }
+    }
   }
 
   ValueListenable<ScriptLocation?> get scriptLocation => _scriptLocation;
@@ -59,6 +80,13 @@ class CodeViewController extends DisposableController
 
   ValueListenable<bool> get showCodeCoverage => _showCodeCoverage;
   final _showCodeCoverage = ValueNotifier<bool>(false);
+
+  /// Specifies which line should have focus applied in [CodeView].
+  ///
+  /// A line can be focused by invoking `showScriptLocation` with `focusLine`
+  /// set to true.
+  ValueListenable<int> get focusLine => _focusLine;
+  final _focusLine = ValueNotifier<int>(-1);
 
   void toggleShowCodeCoverage() {
     _showCodeCoverage.value = !_showCodeCoverage.value;
@@ -110,14 +138,17 @@ class CodeViewController extends DisposableController
   }
 
   /// Jump to the given ScriptRef and optional SourcePosition.
-  void showScriptLocation(ScriptLocation scriptLocation) {
+  void showScriptLocation(
+    ScriptLocation scriptLocation, {
+    bool focusLine = false,
+  }) {
     // TODO(elliette): This is here so that when a program is selected in the
     // program explorer, the file opener will close (if it was open). Instead,
     // give the program explorer focus so that the focus changes so the file
     // opener will close automatically when its focus is lost.
     toggleFileOpenerVisibility(false);
 
-    _showScriptLocation(scriptLocation);
+    _showScriptLocation(scriptLocation, focusLine: focusLine);
 
     // Update the scripts history (and make sure we don't react to the
     // subsequent event).
@@ -160,7 +191,10 @@ class CodeViewController extends DisposableController
 
   /// Show the given script location (without updating the script navigation
   /// history).
-  void _showScriptLocation(ScriptLocation scriptLocation) {
+  void _showScriptLocation(
+    ScriptLocation scriptLocation, {
+    bool focusLine = false,
+  }) {
     _currentScriptRef.value = scriptLocation.scriptRef;
     if (_currentScriptRef.value == null) {
       log('Trying to show a location with a null script ref', LogLevel.error);
@@ -168,6 +202,9 @@ class CodeViewController extends DisposableController
 
     unawaited(_parseCurrentScript());
 
+    if (focusLine) {
+      _focusLine.value = scriptLocation.location?.line ?? -1;
+    }
     // We want to notify regardless of the previous scriptLocation, temporarily
     // set to null to ensure that happens.
     _scriptLocation.value = null;
@@ -225,7 +262,9 @@ class CodeViewController extends DisposableController
           isolateRef,
           script,
         );
-        executableLines = Set.from(positions.map((p) => p.line));
+        executableLines = Set.from(
+          positions.where((p) => p.line != null).map((p) => p.line),
+        );
       } catch (e) {
         // Ignore - not supported for all vm service implementations.
         log('$e');
@@ -345,4 +384,44 @@ class ParsedScript {
   final List<String> lines;
 
   int get lineCount => lines.length;
+}
+
+/// State used to inform [CodeViewController]s listening for
+/// [DevToolsNavigationState] changes to display a specific source location.
+class CodeViewSourceLocationNavigationState extends DevToolsNavigationState {
+  CodeViewSourceLocationNavigationState({
+    required ScriptRef script,
+    required int line,
+  }) : super(
+          kind: type,
+          state: <String, String?>{
+            _kScriptId: script.id,
+            _kUri: script.uri,
+            _kLine: line.toString(),
+          },
+        );
+
+  CodeViewSourceLocationNavigationState._fromState(
+    DevToolsNavigationState state,
+  ) : super(
+          kind: type,
+          state: state.state,
+        );
+
+  static const _kScriptId = 'scriptId';
+  static const _kUri = 'uri';
+  static const _kLine = 'line';
+  static const type = 'codeViewSourceLocation';
+
+  ScriptRef get script => ScriptRef(
+        id: state[_kScriptId]!,
+        uri: state[_kUri],
+      );
+
+  int get line => int.parse(state[_kLine]!);
+
+  ScriptLocation get location => ScriptLocation(
+        script,
+        location: SourcePosition(line: line, column: 1),
+      );
 }
