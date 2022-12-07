@@ -6,78 +6,74 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:leak_tracker/devtools_integration.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../config_specific/import_export/import_export.dart';
-import '../../../../config_specific/logger/logger.dart' as logger;
 import '../../../../primitives/utils.dart';
-import '../../../../service/service_extensions.dart';
 import '../../../../shared/globals.dart';
 import '../../primitives/memory_utils.dart';
 import 'diagnostics/formatter.dart';
 import 'diagnostics/leak_analyzer.dart';
 import 'diagnostics/model.dart';
-import 'instrumentation/model.dart';
 import 'primitives/analysis_status.dart';
-
-// TODO(polina-c): reference these constants in dart SDK, when it gets submitted
-// there.
-// https://github.com/flutter/devtools/issues/3951
-const _extensionKindToReceiveLeaksSummary = 'memory_leaks_summary';
-const _extensionKindToReceiveLeaksDetails = 'memory_leaks_details';
+import 'primitives/simple_items.dart';
 
 const yamlFilePrefix = 'memory_leaks';
 
 class LeaksPaneController {
-  LeaksPaneController() {
-    _subscribeForMemoryLeaksMessages();
+  LeaksPaneController()
+      : assert(
+          supportedLeakTrackingProtocols
+              .contains(appLeakTrackerProtocolVersion),
+        ) {
+    subscriptionWithHistory = serviceManager
+        .service!.onExtensionEventWithHistory
+        .listen(_onAppMessageWithHistory);
   }
 
-  final status = AnalysisStatusController();
+  final analysisStatus = AnalysisStatusController();
 
   final leakSummaryHistory = ValueNotifier<String>('');
-  final leakSummaryReceived = ValueNotifier<bool>(false);
+  late String appProtocolVersion;
+  final appStatus =
+      ValueNotifier<AppStatus>(AppStatus.noCommunicationsRecieved);
+
   LeakSummary? _lastLeakSummary;
 
   final _exportController = ExportController();
 
-  late StreamSubscription summarySubscription;
-  late StreamSubscription detailsSubscription;
-
-  /// Subscribes for summary with history and for details without history.
-  void _subscribeForMemoryLeaksMessages() {
-    detailsSubscription =
-        serviceManager.service!.onExtensionEvent.listen(_receivedLeaksDetails);
-
-    summarySubscription = serviceManager.service!.onExtensionEventWithHistory
-        .listen(_receivedLeaksSummary);
-  }
+  late StreamSubscription subscriptionWithHistory;
 
   void dispose() {
-    unawaited(summarySubscription.cancel());
-    unawaited(detailsSubscription.cancel());
-    status.dispose();
+    unawaited(subscriptionWithHistory.cancel());
+    analysisStatus.dispose();
   }
 
-  void _receivedLeaksSummary(Event event) {
-    if (event.extensionKind != _extensionKindToReceiveLeaksSummary) return;
-    leakSummaryReceived.value = true;
-    try {
-      final newSummary = LeakSummary.fromJson(event.json!['extensionData']!);
-      final time = event.timestamp != null
-          ? DateTime.fromMicrosecondsSinceEpoch(event.timestamp!)
-          : DateTime.now();
+  void _onAppMessageWithHistory(Event vmServiceEvent) {
+    if (appStatus.value == AppStatus.unsupportedProtocolVersion) return;
 
-      if (newSummary.matches(_lastLeakSummary)) return;
-      _lastLeakSummary = newSummary;
-      leakSummaryHistory.value =
-          '${formatDateTime(time)}: ${newSummary.toMessage()}\n'
-          '${leakSummaryHistory.value}';
-    } catch (error, trace) {
-      leakSummaryHistory.value = 'error: $error\n${leakSummaryHistory.value}';
-      logger.log(error);
-      logger.log(trace);
+    final message = EventFromApp.fromVmServiceEvent(vmServiceEvent)?.message;
+    if (message == null) return;
+
+    if (message is LeakTrackingStarted) {
+      appStatus.value = AppStatus.leakTrackingStarted;
+      appProtocolVersion = message.protocolVersion;
+      return;
     }
+
+    if (message is LeakSummary) {
+      appStatus.value = AppStatus.leaksFound;
+      if (message.matches(_lastLeakSummary)) return;
+      _lastLeakSummary = message;
+
+      leakSummaryHistory.value =
+          '${formatDateTime(message.time)}: ${message.toMessage()}\n'
+          '${leakSummaryHistory.value}';
+      return;
+    }
+
+    throw StateError('Unsupported event type: ${message.runtimeType}');
   }
 
   Future<NotGCedAnalyzerTask> _createAnalysisTask(
@@ -87,18 +83,21 @@ class LeaksPaneController {
     return NotGCedAnalyzerTask.fromSnapshot(graph, reports);
   }
 
-  Future<void> _receivedLeaksDetails(Event event) async {
-    if (event.extensionKind != _extensionKindToReceiveLeaksDetails) return;
-    if (status.status.value != AnalysisStatus.Ongoing) return;
-    NotGCedAnalyzerTask? task;
-
+  Future<void> requestLeaksAndSaveToYaml() async {
     try {
-      await _setMessageWithDelay('Received details. Parsing...');
-      final leakDetails = Leaks.fromJson(event.json!['extensionData']!);
+      analysisStatus.status.value = AnalysisStatus.Ongoing;
+      await _setMessageWithDelay('Requested details from the application.');
+
+      final leakDetails =
+          await _invokeLeakExtension<RequestForLeakDetails, Leaks>(
+        RequestForLeakDetails(),
+      );
 
       final notGCed = leakDetails.byType[LeakType.notGCed] ?? [];
 
+      NotGCedAnalyzerTask? task;
       NotGCedAnalyzed? notGCedAnalyzed;
+
       if (notGCed.isNotEmpty) {
         await _setMessageWithDelay('Taking heap snapshot...');
         task = await _createAnalysisTask(notGCed);
@@ -114,21 +113,17 @@ class LeaksPaneController {
         notGCed: notGCedAnalyzed,
       );
 
-      _saveResultAndSetStatus(yaml, task);
-    } catch (error, trace) {
-      var message = '${status.message.value}\nError: $error';
-      if (task != null) {
-        final fileName = _saveTask(task, DateTime.now());
-        message += '\nDownloaded raw data to $fileName.';
-        await _setMessageWithDelay(message);
-        status.status.value = AnalysisStatus.ShowingError;
-      }
-      logger.log(error);
-      logger.log(trace);
+      _saveResultAndSetAnalysisStatus(yaml, task);
+    } catch (error) {
+      analysisStatus.message.value = 'Error: $error';
+      analysisStatus.status.value = AnalysisStatus.ShowingError;
     }
   }
 
-  void _saveResultAndSetStatus(String yaml, NotGCedAnalyzerTask? task) async {
+  void _saveResultAndSetAnalysisStatus(
+    String yaml,
+    NotGCedAnalyzerTask? task,
+  ) async {
     final now = DateTime.now();
     final yamlFile = ExportController.generateFileName(
       time: now,
@@ -142,7 +137,7 @@ class LeaksPaneController {
     await _setMessageWithDelay(
       'Downloaded the leak analysis to $yamlFile$taskFileMessage.',
     );
-    status.status.value = AnalysisStatus.ShowingResult;
+    analysisStatus.status.value = AnalysisStatus.ShowingResult;
   }
 
   /// Saves raw analysis task for troubleshooting and deeper analysis.
@@ -160,44 +155,35 @@ class LeaksPaneController {
   }
 
   Future<void> _setMessageWithDelay(String message) async {
-    status.message.value = message;
+    analysisStatus.message.value = message;
     await delayForBatchProcessing(micros: 5000);
   }
 
-  Future<void> forceGC() async {
-    status.status.value = AnalysisStatus.Ongoing;
-    await _setMessageWithDelay('Forcing full garbage collection...');
-    await _invokeMemoryLeakTrackingExtension(
-      <String, dynamic>{
-        // TODO(polina-c): reference the constant in Flutter
-        // https://github.com/flutter/devtools/issues/3951
-        'forceGC': 'true',
-      },
-    );
-    status.status.value = AnalysisStatus.ShowingResult;
-    await _setMessageWithDelay('Full garbage collection initiated.');
-  }
-
-  Future<void> requestLeaks() async {
-    status.status.value = AnalysisStatus.Ongoing;
-    await _setMessageWithDelay('Requested details from the application.');
-
-    await _invokeMemoryLeakTrackingExtension(
-      <String, dynamic>{
-        // TODO(polina-c): reference the constant in Flutter
-        // https://github.com/flutter/devtools/issues/3951
-        'requestDetails': 'true',
-      },
-    );
-  }
-
-  Future<void> _invokeMemoryLeakTrackingExtension(
-    Map<String, dynamic> args,
+  Future<R> _invokeLeakExtension<M extends Object, R extends Object>(
+    M message,
   ) async {
-    await serviceManager.service!.callServiceExtension(
-      memoryLeakTracking,
+    final response = await serviceManager.service!.callServiceExtension(
+      memoryLeakTrackingExtensionName,
       isolateId: serviceManager.isolateManager.mainIsolate.value!.id!,
-      args: args,
+      args: RequestToApp(message).toRequestParameters(),
     );
+
+    return ResponseFromApp<R>.fromServiceResponse(response).message;
+  }
+
+  String appStatusMessage() {
+    switch (appStatus.value) {
+      case AppStatus.leakTrackingNotSupported:
+        return 'The application does not support leak tracking.';
+      case AppStatus.noCommunicationsRecieved:
+        return 'Waiting for leak tracking messages from the application...';
+      case AppStatus.unsupportedProtocolVersion:
+        return 'The application uses unsupported leak tracking protocol $appProtocolVersion. '
+            'Upgrade to a newer version of leak_tracker to switch to one of supported protocols: $supportedLeakTrackingProtocols.';
+      case AppStatus.leakTrackingStarted:
+        return 'Leak tracking started. No leaks communicated so far.';
+      case AppStatus.leaksFound:
+        throw StateError('There is no UI message for ${AppStatus.leaksFound}.');
+    }
   }
 }

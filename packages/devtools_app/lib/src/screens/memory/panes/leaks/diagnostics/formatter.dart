@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:collection/collection.dart';
+import 'package:leak_tracker/devtools_integration.dart';
 
-import '../instrumentation/model.dart';
 import 'model.dart';
 
 const linkToGuidance =
