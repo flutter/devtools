@@ -103,13 +103,6 @@ void main() {
       expect(controller.count, 0);
       expectConfigArgs();
 
-      // Navigating to another page with args should result in the router
-      // event callback being invoked.
-      expect(controller.count, 0);
-      routerDelegate.navigate(page, defaultArgs);
-      expect(controller.count, 1);
-      expectConfigArgs();
-
       // Navigating to the same page with identical args doesn't trigger the
       // callback
       controller.count = 0;
