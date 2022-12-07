@@ -89,6 +89,7 @@ MockCodeViewController createMockCodeViewControllerWithDefaults({
     const FixedValueListenable(false),
   );
   when(codeViewController.showCodeCoverage).thenReturn(ValueNotifier(false));
+  when(codeViewController.focusLine).thenReturn(ValueNotifier(-1));
 
   return codeViewController;
 }

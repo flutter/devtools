@@ -34,7 +34,6 @@ import 'debugger_controller.dart';
 import 'debugger_model.dart';
 import 'file_search.dart';
 import 'key_sets.dart';
-import 'program_explorer_model.dart';
 import 'variables.dart';
 
 final debuggerCodeViewSearchKey =
@@ -188,56 +187,65 @@ class _CodeViewState extends State<CodeView>
       return;
     }
 
-    if (!verticalController.hasAttachedControllers) {
-      // TODO(devoncarew): I'm uncertain why this occurs.
-      log('LinkedScrollControllerGroup has no attached controllers');
-      return;
-    }
-    final line = widget.codeViewController.scriptLocation.value?.location?.line;
-    if (line == null) {
-      // Don't scroll to top if we're just rebuilding the code view for the
-      // same script.
-      if (_lastScriptRef?.uri != scriptRef?.uri) {
-        // Default to scrolling to the top of the script.
+    void updateScrollPositionImpl() {
+      if (!verticalController.hasAttachedControllers) {
+        // TODO(devoncarew): I'm uncertain why this occurs.
+        log('LinkedScrollControllerGroup has no attached controllers');
+        return;
+      }
+      final line =
+          widget.codeViewController.scriptLocation.value?.location?.line;
+      if (line == null) {
+        // Don't scroll to top if we're just rebuilding the code view for the
+        // same script.
+        if (_lastScriptRef?.uri != scriptRef?.uri) {
+          // Default to scrolling to the top of the script.
+          if (animate) {
+            unawaited(
+              verticalController.animateTo(
+                0,
+                duration: longDuration,
+                curve: defaultCurve,
+              ),
+            );
+          } else {
+            verticalController.jumpTo(0);
+          }
+          _lastScriptRef = scriptRef;
+        }
+        return;
+      }
+
+      final position = verticalController.position;
+      final extent = position.extentInside;
+
+      // TODO(devoncarew): Adjust this so we don't scroll if we're already in the
+      // middle third of the screen.
+      final lineCount = parsedScript?.lineCount;
+      if (lineCount != null && lineCount * CodeView.rowHeight > extent) {
+        final lineIndex = line - 1;
+        final scrollPosition = lineIndex * CodeView.rowHeight -
+            ((extent - CodeView.rowHeight) / 2);
         if (animate) {
           unawaited(
             verticalController.animateTo(
-              0,
+              scrollPosition,
               duration: longDuration,
               curve: defaultCurve,
             ),
           );
         } else {
-          verticalController.jumpTo(0);
+          verticalController.jumpTo(scrollPosition);
         }
-        _lastScriptRef = scriptRef;
       }
-      return;
+      _lastScriptRef = scriptRef;
     }
 
-    final position = verticalController.position;
-    final extent = position.extentInside;
-
-    // TODO(devoncarew): Adjust this so we don't scroll if we're already in the
-    // middle third of the screen.
-    final lineCount = parsedScript?.lineCount;
-    if (lineCount != null && lineCount * CodeView.rowHeight > extent) {
-      final lineIndex = line - 1;
-      final scrollPosition =
-          lineIndex * CodeView.rowHeight - ((extent - CodeView.rowHeight) / 2);
-      if (animate) {
-        unawaited(
-          verticalController.animateTo(
-            scrollPosition,
-            duration: longDuration,
-            curve: defaultCurve,
-          ),
-        );
-      } else {
-        verticalController.jumpTo(scrollPosition);
-      }
-    }
-    _lastScriptRef = scriptRef;
+    verticalController.hasAttachedControllers
+        ? updateScrollPositionImpl()
+        : WidgetsBinding.instance.addPostFrameCallback(
+            (_) => updateScrollPositionImpl(),
+          );
   }
 
   @override
@@ -1057,12 +1065,10 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
       itemBuilder: (context, index) {
         final lineNum = index + 1;
         final isPausedLine = pausedLine == lineNum;
-        return ValueListenableBuilder<VMServiceObjectNode?>(
-          valueListenable: widget
-              .codeViewController.programExplorerController.outlineSelection,
-          builder: (context, outlineNode, _) {
-            final isFocusedLine =
-                (outlineNode?.location?.location?.line ?? -1) == lineNum;
+        return ValueListenableBuilder<int>(
+          valueListenable: widget.codeViewController.focusLine,
+          builder: (context, focusLine, _) {
+            final isFocusedLine = focusLine == lineNum;
             return LineItem(
               lineContents: widget.lines[index],
               pausedFrame: isPausedLine ? widget.pausedFrame : null,
