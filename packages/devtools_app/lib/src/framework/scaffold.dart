@@ -227,6 +227,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
           routerDelegate.navigateIfNotCurrent(
             _currentScreen.screenId,
             routerDelegate.currentConfiguration?.args,
+            routerDelegate.currentConfiguration?.state,
           );
         });
       });

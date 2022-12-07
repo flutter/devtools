@@ -7,6 +7,7 @@ import 'package:devtools_app/src/config_specific/import_export/import_export.dar
 import 'package:devtools_app/src/screens/profiler/cpu_profiler.dart';
 import 'package:devtools_app/src/screens/profiler/profiler_screen.dart';
 import 'package:devtools_app/src/screens/profiler/profiler_screen_controller.dart';
+import 'package:devtools_app/src/scripts/script_manager.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/service/vm_flags.dart' as vm_flags;
 import 'package:devtools_app/src/shared/common_widgets.dart';
@@ -48,6 +49,11 @@ void main() {
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(NotificationService, NotificationService());
       setGlobal(PreferencesController, PreferencesController());
+      final mockScriptManager = MockScriptManager();
+      when(mockScriptManager.sortedScripts).thenReturn(
+        ValueNotifier<List<ScriptRef>>([]),
+      );
+      setGlobal(ScriptManager, mockScriptManager);
       screen = const ProfilerScreen();
     });
 
