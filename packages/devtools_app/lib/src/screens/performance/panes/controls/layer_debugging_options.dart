@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 
 import '../../../../service/service_extension_widgets.dart';
 import '../../../../service/service_extensions.dart' as extensions;
-import '../../../../shared/globals.dart';
 import '../../../../shared/feature_flags.dart';
+import '../../../../shared/globals.dart';
 import '../../../../shared/theme.dart';
 import '../../performance_screen.dart';
 

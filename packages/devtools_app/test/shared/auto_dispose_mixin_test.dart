@@ -6,7 +6,6 @@
 import 'dart:async';
 
 import 'package:devtools_app/src/shared/primitives/auto_dispose.dart';
-import 'package:devtools_app/src/shared/primitives/auto_dispose.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
