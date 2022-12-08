@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/primitives/feature_flags.dart';
+import 'package:devtools_app/src/shared/feature_flags.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

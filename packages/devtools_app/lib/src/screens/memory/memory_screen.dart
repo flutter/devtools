@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/banner_messages.dart';
-import '../../shared/primitives/auto_dispose_mixin.dart';
+import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/listenable.dart';
 import '../../shared/primitives/simple_items.dart';
 import '../../shared/screen.dart';

@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import '../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
-import '../../../../shared/primitives/auto_dispose_mixin.dart';
+import '../../../../shared/primitives/auto_dispose.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../memory_controller.dart';

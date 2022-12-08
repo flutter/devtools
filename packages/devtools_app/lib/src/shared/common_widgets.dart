@@ -18,7 +18,7 @@ import 'config_specific/launch_url/launch_url.dart';
 import 'dialogs.dart';
 import 'globals.dart';
 import 'object_tree.dart';
-import 'primitives/auto_dispose_mixin.dart';
+import 'primitives/auto_dispose.dart';
 import 'primitives/flutter_widgets/linked_scroll_controller.dart';
 import 'primitives/utils.dart';
 import 'theme.dart';

@@ -13,7 +13,7 @@ import 'package:flutter/services.dart';
 
 import '../common_widgets.dart';
 import '../dialogs.dart';
-import '../primitives/auto_dispose_mixin.dart';
+import '../primitives/auto_dispose.dart';
 import '../primitives/extent_delegate_list.dart';
 import '../primitives/flutter_widgets/linked_scroll_controller.dart';
 import '../primitives/trees.dart';

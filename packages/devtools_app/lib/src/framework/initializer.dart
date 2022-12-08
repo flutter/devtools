@@ -11,7 +11,7 @@ import '../shared/analytics/analytics.dart' as ga;
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
-import '../shared/primitives/auto_dispose_mixin.dart';
+import '../shared/primitives/auto_dispose.dart';
 import '../shared/primitives/utils.dart';
 import '../shared/routing.dart';
 import '../shared/theme.dart';

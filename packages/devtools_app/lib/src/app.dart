@@ -46,7 +46,7 @@ import 'shared/common_widgets.dart';
 import 'shared/config_specific/server/server.dart';
 import 'shared/dialogs.dart';
 import 'shared/globals.dart';
-import 'shared/primitives/auto_dispose_mixin.dart';
+import 'shared/primitives/auto_dispose.dart';
 import 'shared/routing.dart';
 import 'shared/screen.dart';
 import 'shared/snapshot_screen.dart';

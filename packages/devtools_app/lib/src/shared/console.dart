@@ -11,7 +11,7 @@ import '../screens/debugger/debugger_controller.dart';
 import '../screens/debugger/variables.dart';
 import 'common_widgets.dart';
 import 'console_service.dart';
-import 'primitives/auto_dispose_mixin.dart';
+import 'primitives/auto_dispose.dart';
 import 'primitives/utils.dart';
 import 'theme.dart';
 import 'utils.dart';

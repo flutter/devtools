@@ -16,7 +16,7 @@ import '../../../../shared/future_work_tracker.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/http/http_service.dart';
 import '../../../../shared/primitives/auto_dispose.dart';
-import '../../../../shared/primitives/feature_flags.dart';
+import '../../../../shared/feature_flags.dart';
 import '../../../../shared/primitives/trace_event.dart';
 import '../../../../shared/primitives/trees.dart';
 import '../../../../shared/primitives/utils.dart';

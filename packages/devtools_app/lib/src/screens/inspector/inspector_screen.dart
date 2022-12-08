@@ -18,7 +18,7 @@ import '../../shared/dialogs.dart';
 import '../../shared/editable_list.dart';
 import '../../shared/error_badge_manager.dart';
 import '../../shared/globals.dart';
-import '../../shared/primitives/auto_dispose_mixin.dart';
+import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/blocking_action_mixin.dart';
 import '../../shared/primitives/simple_items.dart';
 import '../../shared/screen.dart';

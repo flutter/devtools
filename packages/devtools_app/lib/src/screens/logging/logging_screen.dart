@@ -10,7 +10,7 @@ import 'package:provider/provider.dart';
 import '../../service/service_extension_widgets.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/common_widgets.dart';
-import '../../shared/primitives/auto_dispose_mixin.dart';
+import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/simple_items.dart';
 import '../../shared/screen.dart';
 import '../../shared/split.dart';

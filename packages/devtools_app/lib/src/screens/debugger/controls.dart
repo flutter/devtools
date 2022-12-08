@@ -10,7 +10,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
-import '../../shared/primitives/auto_dispose_mixin.dart';
+import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/theme.dart';
 import '../../shared/ui/label.dart';
 import '../../shared/utils.dart';

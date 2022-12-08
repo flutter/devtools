@@ -12,7 +12,7 @@ import '../shared/analytics/analytics.dart' as ga;
 import '../shared/common_widgets.dart';
 import '../shared/config_specific/logger/logger.dart';
 import '../shared/globals.dart';
-import '../shared/primitives/auto_dispose_mixin.dart';
+import '../shared/primitives/auto_dispose.dart';
 import '../shared/primitives/message_bus.dart';
 import '../shared/primitives/utils.dart';
 import '../shared/theme.dart';

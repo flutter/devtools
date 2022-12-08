@@ -18,7 +18,7 @@ import '../shared/config_specific/ide_theme/ide_theme.dart';
 import '../shared/config_specific/import_export/import_export.dart';
 import '../shared/framework_controller.dart';
 import '../shared/globals.dart';
-import '../shared/primitives/auto_dispose_mixin.dart';
+import '../shared/primitives/auto_dispose.dart';
 import '../shared/primitives/simple_items.dart';
 import '../shared/routing.dart';
 import '../shared/screen.dart';

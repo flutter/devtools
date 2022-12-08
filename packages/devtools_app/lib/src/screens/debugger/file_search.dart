@@ -8,7 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../shared/globals.dart';
-import '../../shared/primitives/auto_dispose_mixin.dart';
+import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/search.dart';
 import 'codeview_controller.dart';

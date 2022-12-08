@@ -11,7 +11,7 @@ import 'common_widgets.dart';
 import 'connected_app.dart';
 import 'dialogs.dart';
 import 'globals.dart';
-import 'primitives/auto_dispose_mixin.dart';
+import 'primitives/auto_dispose.dart';
 import 'primitives/utils.dart';
 import 'routing.dart';
 import 'table/table.dart';

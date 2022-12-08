@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/dialogs.dart';
 import '../../../../shared/globals.dart';
-import '../../../../shared/primitives/feature_flags.dart';
+import '../../../../shared/feature_flags.dart';
 import '../../../../shared/theme.dart';
 import '../../performance_controller.dart';
 
