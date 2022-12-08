@@ -76,6 +76,7 @@ class AnalysisStatusView extends StatelessWidget {
         }
 
         return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
               padding: const EdgeInsets.all(denseSpacing),

@@ -4,8 +4,6 @@
 
 import 'analytics_common.dart';
 
-// TODO(polina-c): move other subclasses of ScreenAnalyticsMetrics here.
-
 class MemoryScreenMetrics extends ScreenAnalyticsMetrics {
   MemoryScreenMetrics({
     this.heapObjectsTotal,
@@ -16,4 +14,28 @@ class MemoryScreenMetrics extends ScreenAnalyticsMetrics {
   final int? heapDiffObjectsBefore;
   final int? heapDiffObjectsAfter;
   final int? heapObjectsTotal;
+}
+
+class PerformanceScreenMetrics extends ScreenAnalyticsMetrics {
+  PerformanceScreenMetrics({
+    this.uiDuration,
+    this.rasterDuration,
+    this.shaderCompilationDuration,
+    this.traceEventCount,
+  });
+
+  final Duration? uiDuration;
+  final Duration? rasterDuration;
+  final Duration? shaderCompilationDuration;
+  final int? traceEventCount;
+}
+
+class ProfilerScreenMetrics extends ScreenAnalyticsMetrics {
+  ProfilerScreenMetrics({
+    required this.cpuSampleCount,
+    required this.cpuStackDepth,
+  });
+
+  final int cpuSampleCount;
+  final int cpuStackDepth;
 }

@@ -12,10 +12,9 @@ import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../memory_controller.dart';
 import '../../primitives/ui.dart';
-import '../../shared/constants.dart';
+import '../../shared/primitives.dart';
 import 'chart_pane_controller.dart';
 import 'interval_dropdown.dart';
-import 'legend.dart';
 
 class ChartControlPane extends StatefulWidget {
   const ChartControlPane({Key? key, required this.chartController})
@@ -39,37 +38,10 @@ class _ChartControlPaneState extends State<ChartControlPane>
     with
         ProvidedControllerMixin<MemoryController, ChartControlPane>,
         AutoDisposeMixin {
-  OverlayEntry? _legendOverlayEntry;
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!initController()) return;
-
-    addAutoDisposeListener(controller.legendVisibleNotifier, () {
-      setState(() {
-        if (controller.isLegendVisible) {
-          ga.select(
-            analytics_constants.memory,
-            analytics_constants.MemoryEvent.chartLegend,
-          );
-          _showLegend(context);
-        } else {
-          _hideLegend();
-        }
-      });
-    });
-
-    // Refresh legend if android chary visibility changed.
-    addAutoDisposeListener(controller.isAndroidChartVisibleNotifier, () {
-      setState(() {
-        if (controller.isLegendVisible) {
-          // Recompute the legend with the new traces now visible.
-          _hideLegend();
-          _showLegend(context);
-        }
-      });
-    });
+    initController();
   }
 
   void _onPause() {
@@ -122,122 +94,72 @@ class _ChartControlPaneState extends State<ChartControlPane>
           ],
         ),
         const SizedBox(height: denseSpacing),
-        IconLabelButton(
-          key: legendKey,
-          onPressed: controller.toggleLegendVisibility,
-          icon: _legendOverlayEntry == null ? Icons.storage : Icons.close,
-          label: 'Legend',
-          tooltip: 'Show chart legend',
-          minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
+        Row(
+          children: [
+            _LegendButton(chartController: widget.chartController),
+            const _ChartHelpLink(),
+          ],
         ),
         const SizedBox(height: denseSpacing),
         IntervalDropdown(chartController: widget.chartController),
       ],
     );
   }
+}
 
-  void _showLegend(BuildContext context) {
-    final box = legendKey.currentContext!.findRenderObject() as RenderBox;
+class _LegendButton extends StatelessWidget {
+  const _LegendButton({required this.chartController});
 
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final legendHeading = theme.hoverTextStyle;
+  final MemoryChartPaneController chartController;
 
-    // Global position.
-    final position = box.localToGlobal(Offset.zero);
-
-    final legendRows = <Widget>[];
-
-    final events = eventLegendContent(colorScheme.isLight);
-    legendRows.add(
-      Container(
-        padding: legendTitlePadding,
-        child: Text('Events Legend', style: legendHeading),
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: chartController.legendVisibleNotifier,
+      builder: (_, legendVisible, __) => IconLabelButton(
+        onPressed: () {
+          chartController.toggleLegendVisibility();
+          if (legendVisible) {
+            ga.select(
+              analytics_constants.memory,
+              analytics_constants.MemoryEvent.chartLegend,
+            );
+          }
+        },
+        icon: legendVisible ? Icons.close : Icons.storage,
+        label: 'Legend',
+        tooltip: 'Show chart legend',
+        minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
       ),
     );
-
-    var iterator = events.entries.iterator;
-    while (iterator.moveNext()) {
-      final leftEntry = iterator.current;
-      final rightEntry = iterator.moveNext() ? iterator.current : null;
-      legendRows.add(
-        LegendRow(
-          entry1: leftEntry,
-          entry2: rightEntry,
-          chartController: widget.chartController,
-        ),
-      );
-    }
-
-    final vms = vmLegendContent(widget.chartController.vm);
-    legendRows.add(
-      Container(
-        padding: legendTitlePadding,
-        child: Text('Memory Legend', style: legendHeading),
-      ),
-    );
-
-    iterator = vms.entries.iterator;
-    while (iterator.moveNext()) {
-      final legendEntry = iterator.current;
-      legendRows.add(
-        LegendRow(
-          entry1: legendEntry,
-          chartController: widget.chartController,
-        ),
-      );
-    }
-
-    if (controller.isAndroidChartVisibleNotifier.value) {
-      final androids = androidLegendContent(widget.chartController.android);
-      legendRows.add(
-        Container(
-          padding: legendTitlePadding,
-          child: Text('Android Legend', style: legendHeading),
-        ),
-      );
-
-      iterator = androids.entries.iterator;
-      while (iterator.moveNext()) {
-        final legendEntry = iterator.current;
-        legendRows.add(
-          LegendRow(
-            entry1: legendEntry,
-            chartController: widget.chartController,
-          ),
-        );
-      }
-    }
-
-    final OverlayState overlayState = Overlay.of(context);
-    _legendOverlayEntry ??= OverlayEntry(
-      builder: (context) => Positioned(
-        top: position.dy + box.size.height + legendYOffset,
-        left: position.dx - legendWidth + box.size.width - legendXOffset,
-        height: controller.isAndroidChartVisibleNotifier.value
-            ? legendHeight2Charts
-            : legendHeight1Chart,
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(0, 5, 5, 8),
-          decoration: BoxDecoration(
-            color: colorScheme.defaultBackgroundColor,
-            border: Border.all(color: Colors.yellow),
-            borderRadius: BorderRadius.circular(10.0),
-          ),
-          width: legendWidth,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: legendRows,
-          ),
-        ),
-      ),
-    );
-
-    overlayState.insert(_legendOverlayEntry!);
   }
+}
 
-  void _hideLegend() {
-    _legendOverlayEntry?.remove();
-    _legendOverlayEntry = null;
+class _ChartHelpLink extends StatelessWidget {
+  const _ChartHelpLink({Key? key}) : super(key: key);
+
+  static const _documentationTopic = analytics_constants.MemoryEvent.chartHelp;
+
+  @override
+  Widget build(BuildContext context) {
+    return HelpButtonWithDialog(
+      gaScreen: analytics_constants.memory,
+      gaSelection:
+          analytics_constants.topicDocumentationButton(_documentationTopic),
+      dialogTitle: 'Memory Chart Help',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          const Text('Memory chart shows trace\n'
+              'of application memory usage.'),
+          MoreInfoLink(
+            url: DocLinks.chart.value,
+            gaScreenName: '',
+            gaSelectedItemDescription:
+                analytics_constants.topicDocumentationLink(_documentationTopic),
+          )
+        ],
+      ),
+    );
   }
 }

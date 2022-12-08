@@ -140,15 +140,6 @@ class FlutterFramesController extends PerformanceFeatureController {
     return _unassignedFlutterFrames.containsKey(frameNumber);
   }
 
-  Future<void> toggleSelectedFrame(FlutterFrame frame) async {
-    handleSelectedFrame(frame);
-    // We do not need to block the UI on the TimelineEvents feature loading the
-    // selected frame.
-    unawaited(
-      performanceController.timelineEventsController.handleSelectedFrame(frame),
-    );
-  }
-
   void _addPendingFlutterFrames() {
     _pendingFlutterFrames.forEach(_maybeBadgeTabForJankyFrame);
     data!.frames.addAll(_pendingFlutterFrames);
@@ -210,6 +201,12 @@ class FlutterFramesController extends PerformanceFeatureController {
 
     _data.selectedFrame = frame;
     _selectedFrameNotifier.value = frame;
+
+    // We do not need to block the UI on the TimelineEvents feature loading the
+    // selected frame.
+    unawaited(
+      performanceController.timelineEventsController.handleSelectedFrame(frame),
+    );
   }
 
   @override

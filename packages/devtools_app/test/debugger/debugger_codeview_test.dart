@@ -19,7 +19,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../test_infra/matchers.dart';
+import '../test_infra/matchers/matchers.dart';
 
 void main() {
   const mockScriptRefFileUri = 'the/path/mapped/to/script/ref/uri';
@@ -42,9 +42,12 @@ void main() {
       mockCodeViewController: codeViewController,
     );
     scriptsHistory = ScriptsHistory();
-
-    when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
-    when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
+    mockConnectedApp(
+      fakeServiceManager.connectedApp!,
+      isProfileBuild: false,
+      isFlutterApp: true,
+      isWebApp: false,
+    );
     setGlobal(ServiceConnectionManager, fakeServiceManager);
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(ScriptManager, MockScriptManager());

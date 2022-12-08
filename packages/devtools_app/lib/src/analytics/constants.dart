@@ -2,12 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../screens/inspector/inspector_screen.dart';
-import '../screens/logging/logging_screen.dart';
-import '../screens/memory/memory_screen.dart';
-import '../screens/network/network_screen.dart';
-import '../screens/performance/performance_screen.dart';
-import '../screens/profiler/profiler_screen.dart';
+import '../primitives/simple_items.dart';
 
 // Type of events (event_category):
 const screenViewEvent = 'screen'; // Active screen (tab selected).
@@ -18,12 +13,12 @@ const timingEvent = 'timing'; // Timed operation.
 // These screen ids must match the `screenId` for each respective subclass of
 // [Screen]. This is to ensure that the analytics for documentation links match
 // the screen id for other analytics on the same screen.
-const inspector = InspectorScreen.id;
-const performance = PerformanceScreen.id;
-const cpuProfiler = ProfilerScreen.id;
-const memory = MemoryScreen.id;
-const network = NetworkScreen.id;
-const logging = LoggingScreen.id;
+const inspector = ScreenIds.inspector;
+const performance = ScreenIds.performance;
+const cpuProfiler = ScreenIds.cpuProfiler;
+const memory = ScreenIds.memory;
+const network = ScreenIds.network;
+const logging = ScreenIds.logging;
 
 // GA events not associated with a any screen e.g., hotReload, hotRestart, etc
 const devToolsMain = 'main';
@@ -87,8 +82,8 @@ const analyzeSelectedFrame = 'analyzeSelectedFrame';
 const collectRasterStats = 'collectRasterStats';
 
 // CPU profiler UX actions:
-const profileGranularityPrefix = 'profileGranularity';
-const profileGranularityDocs = 'profileGranularityDocs';
+const cpuSamplingRatePrefix = 'profileGranularity';
+const cpuSamplingRateDocs = 'profileGranularityDocs';
 const loadAllCpuSamples = 'loadAllCpuSamples';
 const profileAppStartUp = 'profileAppStartUp';
 const cpuProfileFlameChartHelp = 'cpuProfileFlameChartHelp';
@@ -158,6 +153,7 @@ class MemoryEvent {
   static const showChart = 'showChart';
   static const hideChart = 'hideChart';
   static const chartInterval = 'chartInterval';
+  static const chartHelp = 'memoryChartHelp';
 
   static const profileDownloadCsv = 'profileDownloadCsv';
   static const profileRefreshManual = 'profileRefreshManual';
@@ -173,6 +169,7 @@ class MemoryEvent {
   static const diffTakeSnapshotControlPane = 'diffTakeSnapshotControlPane';
   static const diffTakeSnapshotAfterHelp = 'diffTakeSnapshotAfterHelp';
   static const diffClearSnapshots = 'diffClearSnapshots';
+  static const diffHelp = 'memoryDiffHelp';
 
   static const diffSnapshotDiffSelect = 'diffSnapshotDiffSelect';
   static const diffSnapshotDiffOff = 'diffSnapshotDiffSelectOff';

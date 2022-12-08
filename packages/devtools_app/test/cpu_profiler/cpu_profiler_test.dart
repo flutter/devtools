@@ -14,6 +14,7 @@ import 'package:devtools_app/src/screens/profiler/cpu_profile_transformer.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profiler.dart';
 import 'package:devtools_app/src/screens/profiler/profiler_screen.dart';
 import 'package:devtools_app/src/screens/profiler/profiler_screen_controller.dart';
+import 'package:devtools_app/src/scripts/script_manager.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/common_widgets.dart';
 import 'package:devtools_app/src/shared/globals.dart';
@@ -23,8 +24,9 @@ import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+import 'package:vm_service/vm_service.dart';
 
-import '../test_infra/matchers.dart';
+import '../test_infra/matchers/matchers.dart';
 import '../test_infra/test_data/cpu_profile.dart';
 
 void main() {
@@ -52,6 +54,11 @@ void main() {
     setGlobal(NotificationService, NotificationService());
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(IdeTheme, IdeTheme());
+    final mockScriptManager = MockScriptManager();
+    when(mockScriptManager.sortedScripts).thenReturn(
+      ValueNotifier<List<ScriptRef>>([]),
+    );
+    setGlobal(ScriptManager, mockScriptManager);
   });
 
   group('CpuProfiler', () {
@@ -303,6 +310,9 @@ void main() {
       expect(find.byType(CpuProfileFlameChart), findsNothing);
       expect(find.byType(CpuCallTreeTable), findsNothing);
       expect(find.byType(CpuBottomUpTable), findsOneWidget);
+      expect(find.byType(FilterButton), findsOneWidget);
+      expect(find.byType(DisplayTreeGuidelinesToggle), findsOneWidget);
+      expect(find.byType(UserTagDropdown), findsOneWidget);
       expect(find.byType(ExpandAllButton), findsOneWidget);
       expect(find.byType(CollapseAllButton), findsOneWidget);
       expect(find.byType(FlameChartHelpButton), findsNothing);
@@ -314,6 +324,8 @@ void main() {
       expect(find.byType(CpuProfileFlameChart), findsNothing);
       expect(find.byType(CpuCallTreeTable), findsOneWidget);
       expect(find.byType(CpuBottomUpTable), findsNothing);
+      expect(find.byType(FilterButton), findsOneWidget);
+      expect(find.byType(DisplayTreeGuidelinesToggle), findsOneWidget);
       expect(find.byType(UserTagDropdown), findsOneWidget);
       expect(find.byType(ExpandAllButton), findsOneWidget);
       expect(find.byType(CollapseAllButton), findsOneWidget);
@@ -326,6 +338,8 @@ void main() {
       expect(find.byType(CpuProfileFlameChart), findsOneWidget);
       expect(find.byType(CpuCallTreeTable), findsNothing);
       expect(find.byType(CpuBottomUpTable), findsNothing);
+      expect(find.byType(FilterButton), findsOneWidget);
+      expect(find.byType(DisplayTreeGuidelinesToggle), findsNothing);
       expect(find.byType(UserTagDropdown), findsOneWidget);
       expect(find.byType(ExpandAllButton), findsNothing);
       expect(find.byType(CollapseAllButton), findsNothing);

@@ -14,6 +14,7 @@ import '../../analytics/analytics.dart' as ga;
 import '../../analytics/constants.dart' as analytics_constants;
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../primitives/listenable.dart';
+import '../../primitives/simple_items.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/flex_split_column.dart';
 import '../../shared/globals.dart';
@@ -44,7 +45,7 @@ class DebuggerScreen extends Screen {
           showFloatingDebuggerControls: false,
         );
 
-  static const id = 'debugger';
+  static const id = ScreenIds.debugger;
 
   @override
   bool showConsole(bool embed) => true;
@@ -198,7 +199,10 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   void _onNodeSelected(VMServiceObjectNode? node) {
     final location = node?.location;
     if (location != null) {
-      controller.codeViewController.showScriptLocation(location);
+      controller.codeViewController.showScriptLocation(
+        location,
+        focusLine: true,
+      );
     }
   }
 

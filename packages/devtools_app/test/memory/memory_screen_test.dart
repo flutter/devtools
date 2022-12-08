@@ -9,8 +9,8 @@ import 'package:devtools_app/src/screens/memory/memory_screen.dart';
 import 'package:devtools_app/src/screens/memory/panes/chart/chart_control_pane.dart';
 import 'package:devtools_app/src/screens/memory/panes/chart/memory_events_pane.dart';
 import 'package:devtools_app/src/screens/memory/panes/chart/memory_vm_chart.dart';
+import 'package:devtools_app/src/screens/memory/panes/control/primitives.dart';
 import 'package:devtools_app/src/screens/memory/panes/control/source_dropdown.dart';
-import 'package:devtools_app/src/screens/memory/shared/constants.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/common_widgets.dart';
 import 'package:devtools_app/src/shared/globals.dart';
@@ -22,7 +22,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-import '../test_infra/matchers.dart';
+import '../test_infra/matchers/matchers.dart';
 import '../test_infra/test_data/memory.dart';
 import '../test_infra/test_data/memory_allocation.dart';
 

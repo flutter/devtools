@@ -15,6 +15,7 @@ import 'package:devtools_app/src/screens/memory/panes/allocation_tracing/allocat
 import 'package:devtools_app/src/screens/memory/panes/allocation_tracing/allocation_profile_tracing_view.dart';
 import 'package:devtools_app/src/screens/memory/panes/allocation_tracing/allocation_profile_tracing_view_controller.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profile_model.dart';
+import 'package:devtools_app/src/scripts/script_manager.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/common_widgets.dart';
 import 'package:devtools_app/src/shared/globals.dart';
@@ -24,6 +25,7 @@ import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../test_infra/test_data/memory_allocation.dart';
@@ -110,6 +112,11 @@ void main() {
       setGlobal(OfflineModeController, OfflineModeController());
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(PreferencesController, PreferencesController());
+      final mockScriptManager = MockScriptManager();
+      when(mockScriptManager.sortedScripts).thenReturn(
+        ValueNotifier<List<ScriptRef>>([]),
+      );
+      setGlobal(ScriptManager, mockScriptManager);
       _setUpServiceManager();
     });
 
@@ -142,9 +149,10 @@ void main() {
       final refresh = find.text('Refresh');
       expect(refresh, findsOneWidget);
 
-      expect(find.text('Trace'), findsOneWidget);
+      // Tab name and column name.
+      expect(find.text('Trace'), findsNWidgets(2));
       expect(find.text('Class'), findsOneWidget);
-      expect(find.text('Instances'), findsOneWidget);
+      expect(find.text('Delta'), findsOneWidget);
 
       // There should be classes in the example class list.
       expect(find.byType(Checkbox), findsNWidgets(classList.classes!.length));
@@ -304,9 +312,10 @@ void main() {
       final refresh = find.text('Refresh');
       expect(refresh, findsOneWidget);
 
-      expect(find.text('Trace'), findsOneWidget);
+      // Tab name and column name.
+      expect(find.text('Trace'), findsNWidgets(2));
       expect(find.text('Class'), findsOneWidget);
-      expect(find.text('Instances'), findsOneWidget);
+      expect(find.text('Delta'), findsOneWidget);
 
       // There should be classes in the example class list.
       expect(find.byType(Checkbox), findsNWidgets(classList.classes!.length));

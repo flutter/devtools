@@ -17,6 +17,7 @@ import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../primitives/simple_elements.dart';
 import '../../primitives/ui.dart';
+import '../../shared/primitives.dart';
 import 'allocation_profile_table_view_controller.dart';
 import 'model.dart';
 
@@ -210,11 +211,11 @@ class AllocationProfileTableViewState
   Widget build(BuildContext context) {
     return Column(
       children: [
-        _AllocationProfileTableControls(
-          allocationProfileController: widget.controller,
-        ),
-        const SizedBox(
-          height: denseRowSpacing,
+        Padding(
+          padding: const EdgeInsets.all(denseSpacing),
+          child: _AllocationProfileTableControls(
+            allocationProfileController: widget.controller,
+          ),
         ),
         Expanded(
           child: _AllocationProfileTable(
@@ -291,11 +292,10 @@ class _AllocationProfileTable extends StatelessWidget {
         return ValueListenableBuilder<bool>(
           valueListenable: preferences.vmDeveloperModeEnabled,
           builder: (context, vmDeveloperModeEnabled, _) {
-            return ElevatedCard(
-              padding: EdgeInsets.zero,
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  return FlatTable<AllocationProfileRecord>(
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                return OutlineDecoration.onlyTop(
+                  child: FlatTable<AllocationProfileRecord>(
                     keyFactory: (element) => Key(element.heapClass.fullName),
                     data: profile.records,
                     dataKey: 'allocation-profile',
@@ -311,9 +311,9 @@ class _AllocationProfileTable extends StatelessWidget {
                         _AllocationProfileTable._initialSortColumn,
                     defaultSortDirection: SortDirection.descending,
                     pinBehavior: FlatTablePinBehavior.pinOriginalToTop,
-                  );
-                },
-              ),
+                  ),
+                );
+              },
             );
           },
         );
@@ -434,9 +434,7 @@ class _ProfileHelpLink extends StatelessWidget {
               'allocated objects in the Dart heap of the selected\n'
               'isolate.'),
           MoreInfoLink(
-            url: 'https://github.com/flutter/devtools/blob/master/'
-                'packages/devtools_app/lib/src/screens/memory/panes/'
-                'allocation_profile/ALLOCATION_PROFILE.md',
+            url: DocLinks.profile.value,
             gaScreenName: '',
             gaSelectedItemDescription:
                 analytics_constants.topicDocumentationLink(_documentationTopic),

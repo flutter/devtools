@@ -4,11 +4,11 @@
 
 import 'dart:io';
 
+import 'package:devtools_app/src/screens/memory/panes/leaks/diagnostics/formatter.dart';
 import 'package:devtools_app/src/screens/memory/panes/leaks/diagnostics/leak_analyzer.dart';
 import 'package:devtools_app/src/screens/memory/panes/leaks/diagnostics/model.dart';
-import 'package:devtools_app/src/screens/memory/panes/leaks/formatter.dart';
-import 'package:devtools_app/src/screens/memory/panes/leaks/instrumentation/model.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker/devtools_integration.dart';
 
 import '../../../test_infra/test_data/memory/leaks/leaks_data.dart';
 
@@ -63,6 +63,7 @@ void main() {
 
 LeakReport _createReport(int code, String path) => LeakReport(
       type: '',
-      details: ['details'],
+      context: const <String, dynamic>{},
       code: 0,
+      trackedClass: 'trackedClass',
     )..retainingPath = path;

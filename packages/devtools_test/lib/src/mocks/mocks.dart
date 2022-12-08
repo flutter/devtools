@@ -780,12 +780,42 @@ const executableLines = <int>{
   ...coverageMissLines,
 };
 
+const profilerEntries = <int, ProfileReportEntry>{
+  1: ProfileReportEntry(
+    sampleCount: 5,
+    line: 1,
+    inclusive: 2,
+    exclusive: 2,
+  ),
+  3: ProfileReportEntry(
+    sampleCount: 5,
+    line: 3,
+    inclusive: 1,
+    exclusive: 1,
+  ),
+  4: ProfileReportEntry(
+    sampleCount: 5,
+    line: 4,
+    inclusive: 1,
+    exclusive: 1,
+  ),
+  7: ProfileReportEntry(
+    sampleCount: 5,
+    line: 7,
+    inclusive: 1,
+    exclusive: 1,
+  ),
+};
+
 final mockParsedScript = ParsedScript(
   script: mockScript!,
   highlighter: mockSyntaxHighlighter,
   executableLines: executableLines,
-  coverageHitLines: coverageHitLines,
-  coverageMissedLines: coverageMissLines,
+  sourceReport: ProcessedSourceReport(
+    coverageHitLines: coverageHitLines,
+    coverageMissedLines: coverageMissLines,
+    profilerEntries: profilerEntries,
+  ),
 );
 
 final mockScriptRefs = [

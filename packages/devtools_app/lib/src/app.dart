@@ -97,6 +97,8 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
 
   late ReleaseNotesController releaseNotesController;
 
+  late final routerDelegate = DevToolsRouterDelegate(_getPage);
+
   @override
   void initState() {
     super.initState();
@@ -148,13 +150,19 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   }
 
   /// Gets the page for a given page/path and args.
-  Page _getPage(BuildContext context, String? page, Map<String, String?> args) {
+  Page _getPage(
+    BuildContext context,
+    String? page,
+    Map<String, String?> args,
+    DevToolsNavigationState? state,
+  ) {
     // Provide the appropriate page route.
     if (pages.containsKey(page)) {
       Widget widget = pages[page!]!(
         context,
         page,
         args,
+        state,
       );
       assert(
         () {
@@ -163,6 +171,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
               context,
               page,
               args,
+              state,
             ),
           );
           return true;
@@ -185,6 +194,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     BuildContext context,
     String? page,
     Map<String, String?> params,
+    DevToolsNavigationState? state,
   ) {
     final vmServiceUri = params['uri'];
 
@@ -262,7 +272,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       homePageId: _buildTabbedPage,
       for (final screen in widget.screens)
         screen.screen.screenId: _buildTabbedPage,
-      snapshotPageId: (_, __, args) {
+      snapshotPageId: (_, __, args, ___) {
         final snapshotArgs = SnapshotArguments.fromArgs(args);
         return DevToolsScaffold.withChild(
           key: UniqueKey(),
@@ -273,7 +283,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
           ),
         );
       },
-      appSizePageId: (_, __, ___) {
+      appSizePageId: (_, __, ___, ____) {
         return DevToolsScaffold.withChild(
           key: const Key('appsize'),
           ideTheme: ideTheme,
@@ -303,7 +313,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         .where(
           (s) => s.providesController && (offline ? s.supportsOffline : true),
         )
-        .map((s) => s.controllerProvider)
+        .map((s) => s.controllerProvider(routerDelegate))
         .toList();
 
     return MultiProvider(
@@ -330,16 +340,18 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
             Provider<HoverCardController>.value(
               value: hoverCardController,
             ),
+            Provider<ReleaseNotesController>.value(
+              value: releaseNotesController,
+            ),
           ],
           child: NotificationsView(
             child: ReleaseNotesViewer(
-              releaseNotesController: releaseNotesController,
               child: child,
             ),
           ),
         );
       },
-      routerDelegate: DevToolsRouterDelegate(_getPage),
+      routerDelegate: routerDelegate,
       routeInformationParser: DevToolsRouteInformationParser(),
       // Disable default scrollbar behavior on web to fix duplicate scrollbars
       // bug, see https://github.com/flutter/flutter/issues/90697:
@@ -372,7 +384,7 @@ class DevToolsScreen<C> {
   ///
   /// If [createController] and [controller] are both null, [screen] will be
   /// responsible for creating and maintaining its own controller.
-  final C Function()? createController;
+  final C Function(DevToolsRouterDelegate)? createController;
 
   /// A provided controller for this screen, if non-null.
   ///
@@ -393,7 +405,7 @@ class DevToolsScreen<C> {
   /// Defaults to false.
   final bool supportsOffline;
 
-  Provider<C> get controllerProvider {
+  Provider<C> controllerProvider(DevToolsRouterDelegate routerDelegate) {
     assert(
       (createController != null && controller == null) ||
           (createController == null && controller != null),
@@ -402,16 +414,17 @@ class DevToolsScreen<C> {
     if (controllerLocal != null) {
       return Provider<C>.value(value: controllerLocal);
     }
-    return Provider<C>(create: (_) => createController!());
+    return Provider<C>(create: (_) => createController!(routerDelegate));
   }
 }
 
 /// A [WidgetBuilder] that takes an additional map of URL query parameters and
-/// args.
+/// args, as well a state not included in the URL.
 typedef UrlParametersBuilder = Widget Function(
   BuildContext,
   String?,
   Map<String, String?>,
+  DevToolsNavigationState?,
 );
 
 /// Displays the checked mode banner in the bottom end corner instead of the
@@ -566,7 +579,7 @@ List<DevToolsScreen> get defaultScreens {
   return <DevToolsScreen>[
     DevToolsScreen<InspectorController>(
       const InspectorScreen(),
-      createController: () => InspectorController(
+      createController: (_) => InspectorController(
         inspectorTree: InspectorTreeController(),
         detailsTree: InspectorTreeController(),
         treeType: FlutterTreeType.widget,
@@ -574,44 +587,46 @@ List<DevToolsScreen> get defaultScreens {
     ),
     DevToolsScreen<PerformanceController>(
       const PerformanceScreen(),
-      createController: () => PerformanceController(),
+      createController: (_) => PerformanceController(),
       supportsOffline: true,
     ),
     DevToolsScreen<ProfilerScreenController>(
       const ProfilerScreen(),
-      createController: () => ProfilerScreenController(),
+      createController: (_) => ProfilerScreenController(),
       supportsOffline: true,
     ),
     DevToolsScreen<MemoryController>(
       const MemoryScreen(),
-      createController: () => MemoryController(),
+      createController: (_) => MemoryController(),
     ),
     DevToolsScreen<DebuggerController>(
       const DebuggerScreen(),
-      createController: () => DebuggerController(),
+      createController: (routerDelegate) => DebuggerController(
+        routerDelegate: routerDelegate,
+      ),
     ),
     DevToolsScreen<NetworkController>(
       const NetworkScreen(),
-      createController: () => NetworkController(),
+      createController: (_) => NetworkController(),
     ),
     DevToolsScreen<LoggingController>(
       const LoggingScreen(),
-      createController: () => LoggingController(),
+      createController: (_) => LoggingController(),
     ),
-    DevToolsScreen<void>(const ProviderScreen(), createController: () {}),
+    DevToolsScreen<void>(const ProviderScreen(), createController: (_) {}),
     DevToolsScreen<AppSizeController>(
       const AppSizeScreen(),
-      createController: () => AppSizeController(),
+      createController: (_) => AppSizeController(),
     ),
     DevToolsScreen<VMDeveloperToolsController>(
       const VMDeveloperToolsScreen(),
-      createController: () => VMDeveloperToolsController(),
+      createController: (_) => VMDeveloperToolsController(),
     ),
     // Show the sample DevTools screen.
     if (debugEnableSampleScreen && (kDebugMode || kProfileMode))
       DevToolsScreen<ExampleController>(
         const ExampleConditionalScreen(),
-        createController: () => ExampleController(),
+        createController: (_) => ExampleController(),
         supportsOffline: true,
       ),
   ];

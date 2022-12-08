@@ -412,9 +412,9 @@ final disablePhysicalShapeLayers =
   gaScreenName: analytics_constants.performance,
   gaItem: analytics_constants.disablePhysicalShapeLayersOption,
   description: 'Render all physical modeling effects during paint.',
-  tooltip: '''Disable this option to check whether excessive use of physical 
-modeling effects is affecting performance (shadows, elevations, etc.). 
-If performance improves with this option disabled, try to reduce the 
+  tooltip: '''Disable this option to check whether excessive use of physical
+modeling effects is affecting performance (shadows, elevations, etc.).
+If performance improves with this option disabled, try to reduce the
 use of physical modeling effects in your app.''',
   documentationUrl:
       'https://docs.flutter.dev/development/tools/devtools/performance#more-debugging-options',
@@ -530,11 +530,6 @@ final trackRebuildWidgets = ToggleableServiceExtensionDescription<bool>._(
 // This extensions below should never be displayed as a button so does not need
 // a ServiceExtensionDescription object.
 const String didSendFirstFrameEvent = 'ext.flutter.didSendFirstFrameEvent';
-
-// TODO(polinach): reference this constant in dart SDK, when it gets submitted
-// there.
-// https://github.com/flutter/devtools/issues/3951
-const String memoryLeakTracking = 'ext.dart.memoryLeakTracking';
 
 final List<ServiceExtensionDescription> _extensionDescriptions = [
   debugPaint,

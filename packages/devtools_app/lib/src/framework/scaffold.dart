@@ -13,6 +13,7 @@ import '../config_specific/drag_and_drop/drag_and_drop.dart';
 import '../config_specific/ide_theme/ide_theme.dart';
 import '../config_specific/import_export/import_export.dart';
 import '../primitives/auto_dispose_mixin.dart';
+import '../primitives/simple_items.dart';
 import '../screens/debugger/console.dart';
 import '../screens/debugger/debugger_screen.dart';
 import '../shared/banner_messages.dart';
@@ -226,6 +227,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
           routerDelegate.navigateIfNotCurrent(
             _currentScreen.screenId,
             routerDelegate.currentConfiguration?.args,
+            routerDelegate.currentConfiguration?.state,
           );
         });
       });
@@ -521,7 +523,7 @@ class SimpleScreen extends Screen {
           showFloatingDebuggerControls: false,
         );
 
-  static const id = 'simple';
+  static const id = ScreenIds.simple;
 
   final Widget child;
 

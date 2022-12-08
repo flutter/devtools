@@ -102,7 +102,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
       Flag(
         name: profilePeriod,
         comment: 'Mock Flag',
-        valueAsString: ProfileGranularity.medium.value,
+        valueAsString: CpuSamplingRate.medium.value,
         modified: false,
       ),
     ],

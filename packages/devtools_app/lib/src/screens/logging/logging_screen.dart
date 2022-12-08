@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 
 import '../../analytics/analytics.dart' as ga;
 import '../../primitives/auto_dispose_mixin.dart';
+import '../../primitives/simple_items.dart';
 import '../../service/service_extension_widgets.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/screen.dart';
@@ -33,7 +34,7 @@ class LoggingScreen extends Screen {
           icon: Octicons.clippy,
         );
 
-  static const id = 'logging';
+  static const id = ScreenIds.logging;
 
   @override
   String get docPageId => screenId;

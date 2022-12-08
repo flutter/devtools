@@ -5,9 +5,11 @@
 import 'dart:collection';
 import 'dart:math' as math;
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../charts/flame_chart.dart';
+import '../../primitives/simple_items.dart';
 import '../../primitives/trace_event.dart';
 import '../../primitives/trees.dart';
 import '../../primitives/utils.dart';
@@ -16,7 +18,7 @@ import '../../ui/search.dart';
 import '../profiler/cpu_profile_model.dart';
 import 'panes/flutter_frames/flutter_frame_model.dart';
 import 'panes/raster_stats/raster_stats_model.dart';
-import 'panes/rebuild_stats/rebuild_counts.dart';
+import 'panes/rebuild_stats/rebuild_stats_model.dart';
 import 'panes/timeline_events/timeline_event_processor.dart';
 import 'performance_utils.dart';
 
@@ -37,7 +39,7 @@ class PerformanceData {
         displayRefreshRate = displayRefreshRate ?? defaultRefreshRate,
         timelineEvents = timelineEvents ?? <TimelineEvent>[];
 
-  static const traceEventsKey = 'traceEvents';
+  static const traceEventsKey = traceEventsFieldName;
 
   static const cpuProfileKey = 'cpuProfile';
 
@@ -333,6 +335,8 @@ class OfflinePerformanceData extends PerformanceData {
     final frames = framesJson
         .map((Map<String, dynamic> f) => FlutterFrame.parse(f))
         .toList();
+    final selectedFrame =
+        frames.firstWhereOrNull((frame) => frame.id == selectedFrameId);
 
     final Map<String, dynamic> selectedEventJson =
         json[PerformanceData.selectedEventKey] ?? {};
@@ -354,6 +358,7 @@ class OfflinePerformanceData extends PerformanceData {
 
     return OfflinePerformanceData._(
       traceEvents: traceEvents,
+      selectedFrame: selectedFrame,
       selectedFrameId: selectedFrameId,
       frames: frames,
       selectedEvent: selectedEvent,

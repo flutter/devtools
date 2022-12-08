@@ -24,7 +24,7 @@ import '../../../test_infra/test_data/memory/heap/heap_data.dart';
 import '../../../test_infra/test_data/memory_allocation.dart';
 
 /// To run:
-/// flutter run -t test/scenes/memory/default.stager_app.dart -d macos
+/// flutter run -t test/test_infra/scenes/memory/default.stager_app.dart -d macos
 class MemoryDefaultScene extends Scene {
   late MemoryController controller;
   late FakeServiceManager fakeServiceManager;

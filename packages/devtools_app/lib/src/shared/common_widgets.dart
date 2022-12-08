@@ -34,6 +34,7 @@ const debuggerDeviceWidth = 800.0;
 
 const defaultDialogRadius = 20.0;
 double get areaPaneHeaderHeight => scaleByFontFactor(36.0);
+double get assumedMonospaceCharacterWidth => scaleByFontFactor(9.0);
 
 /// Convenience [Divider] with [Padding] that provides a good divider in forms.
 class PaddedDivider extends StatelessWidget {
@@ -834,17 +835,21 @@ class DevToolsIconButton extends StatelessWidget {
             size: defaultIconSize,
           )
         : iconWidget;
-    return DevToolsTooltip(
-      message: tooltip,
-      child: TextButton(
-        onPressed: () {
-          ga.select(gaScreen, gaSelection);
-          onPressed();
-        },
-        child: Container(
-          height: defaultButtonHeight,
-          width: defaultButtonHeight,
-          child: icon,
+    return SizedBox(
+      // This is required to force the button height.
+      height: defaultButtonHeight,
+      child: DevToolsTooltip(
+        message: tooltip,
+        child: TextButton(
+          onPressed: () {
+            ga.select(gaScreen, gaSelection);
+            onPressed();
+          },
+          child: SizedBox(
+            height: defaultButtonHeight,
+            width: defaultButtonHeight,
+            child: icon,
+          ),
         ),
       ),
     );
@@ -860,8 +865,10 @@ class ToolbarAction extends StatelessWidget {
     this.tooltip,
     Key? key,
     this.size,
+    this.style,
   }) : super(key: key);
 
+  final TextStyle? style;
   final IconData icon;
   final String? tooltip;
   final VoidCallback? onPressed;
@@ -873,9 +880,14 @@ class ToolbarAction extends StatelessWidget {
       style: TextButton.styleFrom(
         padding: EdgeInsets.zero,
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        textStyle: style,
       ),
       onPressed: onPressed,
-      child: Icon(icon, size: size ?? actionsIconSize),
+      child: Icon(
+        icon,
+        size: size ?? actionsIconSize,
+        color: style?.color,
+      ),
     );
 
     return tooltip == null
@@ -994,20 +1006,23 @@ class DevToolsToggleButtonGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return ToggleButtons(
-      borderRadius:
-          const BorderRadius.all(Radius.circular(defaultBorderRadius)),
-      color: theme.colorScheme.toggleButtonsTitle,
-      selectedColor: theme.colorScheme.toggleButtonsTitleSelected,
-      fillColor: theme.colorScheme.toggleButtonsFillSelected,
-      textStyle: theme.textTheme.bodyLarge,
-      constraints: BoxConstraints(
-        minWidth: defaultButtonHeight,
-        minHeight: defaultButtonHeight,
+    return SizedBox(
+      height: defaultButtonHeight,
+      child: ToggleButtons(
+        borderRadius:
+            const BorderRadius.all(Radius.circular(defaultBorderRadius)),
+        color: theme.colorScheme.toggleButtonsTitle,
+        selectedColor: theme.colorScheme.toggleButtonsTitleSelected,
+        fillColor: theme.colorScheme.toggleButtonsFillSelected,
+        textStyle: theme.textTheme.bodyLarge,
+        constraints: BoxConstraints(
+          minWidth: defaultButtonHeight,
+          minHeight: defaultButtonHeight,
+        ),
+        isSelected: selectedStates,
+        onPressed: onPressed,
+        children: children,
       ),
-      isSelected: selectedStates,
-      onPressed: onPressed,
-      children: children,
     );
   }
 }
@@ -2014,8 +2029,10 @@ class CopyToClipboardControl extends StatelessWidget {
     this.size,
     this.gaScreen,
     this.gaItem,
+    this.style,
   });
 
+  final TextStyle? style;
   final ClipboardDataProvider? dataProvider;
   final String? successMessage;
   final String tooltip;
@@ -2043,6 +2060,7 @@ class CopyToClipboardControl extends StatelessWidget {
       onPressed: onPressed,
       key: buttonKey,
       size: size,
+      style: style,
     );
   }
 }
@@ -2095,11 +2113,14 @@ class NotifierCheckbox extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: notifier,
       builder: (context, bool? value, _) {
-        return Checkbox(
-          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          value: value,
-          onChanged: enabled ? _updateValue : null,
-          key: checkboxKey,
+        return SizedBox(
+          height: defaultButtonHeight,
+          child: Checkbox(
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            value: value,
+            onChanged: enabled ? _updateValue : null,
+            key: checkboxKey,
+          ),
         );
       },
     );

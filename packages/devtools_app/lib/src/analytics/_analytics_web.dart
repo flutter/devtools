@@ -17,8 +17,7 @@ import '../config_specific/logger/logger.dart';
 import '../config_specific/server/server.dart' as server;
 import '../config_specific/url/url.dart';
 import '../primitives/url_utils.dart';
-import '../screens/performance/performance_screen.dart';
-import '../screens/profiler/profiler_screen.dart';
+
 import '../shared/globals.dart';
 import '../ui/gtags.dart';
 import 'analytics_common.dart';
@@ -386,7 +385,7 @@ void screen(
 ]) {
   GTag.event(
     screenName,
-    _gtagEvent(
+    gaEventProvider: () => _gtagEvent(
       event_category: analytics_constants.screenViewEvent,
       value: value,
       send_to: gaDevToolsPropertyId(),
@@ -529,7 +528,7 @@ void _timing(
 }) {
   GTag.event(
     screenName,
-    _gtagEvent(
+    gaEventProvider: () => _gtagEvent(
       event_category: analytics_constants.timingEvent,
       event_label: timedOperation,
       value: durationMicros,
@@ -548,7 +547,7 @@ void select(
 }) {
   GTag.event(
     screenName,
-    _gtagEvent(
+    gaEventProvider: () => _gtagEvent(
       event_category: analytics_constants.selectEvent,
       event_label: selectedItem,
       value: value,
@@ -572,7 +571,7 @@ void reportError(
   _lastGaError = errorMessage;
 
   GTag.exception(
-    _gtagException(
+    gaExceptionProvider: () => _gtagException(
       errorMessage,
       fatal: fatal,
       screenMetrics:

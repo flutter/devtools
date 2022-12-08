@@ -78,7 +78,9 @@ class _ClassNameColumn extends ColumnData<TracedClass> {
 class _InstancesColumn extends ColumnData<TracedClass> {
   _InstancesColumn()
       : super(
-          'Instances',
+          'Delta',
+          titleTooltip:
+              'Number of instances, allocated after the class was selected for tracing.',
           fixedWidthPx: scaleByFontFactor(_defaultNumberFieldWidth),
         );
 
@@ -136,7 +138,7 @@ class _AllocationTracingTableState extends State<AllocationTracingTable> {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.only(bottom: densePadding),
+          padding: const EdgeInsets.all(denseSpacing),
           child: DevToolsClearableTextField(
             labelText: 'Class Filter',
             hintText: 'Filter by class name',
@@ -148,29 +150,27 @@ class _AllocationTracingTableState extends State<AllocationTracingTable> {
           ),
         ),
         Expanded(
-          child: OutlineDecoration(
-            child: DualValueListenableBuilder<bool,
-                AllocationProfileTracingIsolateState>(
-              firstListenable: widget.controller.refreshing,
-              secondListenable: widget.controller.stateForIsolate,
-              builder: (context, _, state, __) {
-                return ValueListenableBuilder<List<TracedClass>>(
-                  valueListenable: state.filteredClassList,
-                  builder: (context, filteredClassList, _) {
-                    return FlatTable<TracedClass>(
-                      keyFactory: (e) => Key(e.cls.id!),
-                      data: filteredClassList,
-                      dataKey: 'allocation-tracing',
-                      columns: columns,
-                      defaultSortColumn: _classNameColumn,
-                      defaultSortDirection: SortDirection.ascending,
-                      selectionNotifier: state.selectedTracedClass,
-                      pinBehavior: FlatTablePinBehavior.pinOriginalToTop,
-                    );
-                  },
-                );
-              },
-            ),
+          child: DualValueListenableBuilder<bool,
+              AllocationProfileTracingIsolateState>(
+            firstListenable: widget.controller.refreshing,
+            secondListenable: widget.controller.stateForIsolate,
+            builder: (context, _, state, __) {
+              return ValueListenableBuilder<List<TracedClass>>(
+                valueListenable: state.filteredClassList,
+                builder: (context, filteredClassList, _) {
+                  return FlatTable<TracedClass>(
+                    keyFactory: (e) => Key(e.cls.id!),
+                    data: filteredClassList,
+                    dataKey: 'allocation-tracing',
+                    columns: columns,
+                    defaultSortColumn: _classNameColumn,
+                    defaultSortDirection: SortDirection.ascending,
+                    selectionNotifier: state.selectedTracedClass,
+                    pinBehavior: FlatTablePinBehavior.pinOriginalToTop,
+                  );
+                },
+              );
+            },
           ),
         ),
       ],

@@ -13,6 +13,7 @@ import '../../config_specific/drag_and_drop/drag_and_drop.dart';
 import '../../config_specific/server/server.dart' as server;
 import '../../config_specific/url/url.dart';
 import '../../primitives/auto_dispose_mixin.dart';
+import '../../primitives/simple_items.dart';
 import '../../primitives/utils.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/file_import.dart';
@@ -46,7 +47,7 @@ class AppSizeScreen extends Screen {
   ///
   /// This must be different to the top-level appSizePageId which is also used
   /// in routing when to ensure they have unique URLs.
-  static const id = 'app-size';
+  static const id = ScreenIds.appSize;
 
   @visibleForTesting
   static const diffTypeDropdownKey = Key('Diff Tree Type Dropdown');

@@ -22,13 +22,17 @@ void main() {
   late MockDebuggerController debuggerController;
   late MockScriptManager scriptManager;
 
-  const windowSize = Size(2500, 4000);
+  const windowSize = Size(2800, 4000);
 
   setUp(() {
     fakeServiceManager = FakeServiceManager();
     scriptManager = MockScriptManager();
-    when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
-    when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
+    mockConnectedApp(
+      fakeServiceManager.connectedApp!,
+      isProfileBuild: false,
+      isFlutterApp: true,
+      isWebApp: false,
+    );
     setGlobal(ServiceConnectionManager, fakeServiceManager);
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(ScriptManager, scriptManager);
