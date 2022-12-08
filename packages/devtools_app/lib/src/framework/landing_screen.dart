@@ -9,18 +9,18 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../analytics/analytics.dart' as ga;
-import '../analytics/constants.dart' as analytics_constants;
-import '../config_specific/import_export/import_export.dart';
-import '../primitives/blocking_action_mixin.dart';
-import '../primitives/utils.dart';
+import '../shared/analytics/analytics.dart' as ga;
+import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
+import '../shared/config_specific/import_export/import_export.dart';
 import '../shared/file_import.dart';
 import '../shared/globals.dart';
+import '../shared/primitives/blocking_action_mixin.dart';
+import '../shared/primitives/utils.dart';
 import '../shared/routing.dart';
 import '../shared/theme.dart';
+import '../shared/ui/label.dart';
 import '../shared/utils.dart';
-import '../ui/label.dart';
 import 'framework_core.dart';
 
 /// The landing screen when starting Dart DevTools without being connected to an
@@ -38,7 +38,7 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
   @override
   void initState() {
     super.initState();
-    ga.screen(analytics_constants.landingScreen);
+    ga.screen(gac.landingScreen);
   }
 
   @override
@@ -201,8 +201,8 @@ class _ConnectDialogState extends State<ConnectDialog>
 
   Future<void> _connectHelper() async {
     ga.select(
-      analytics_constants.landingScreen,
-      analytics_constants.connectToApp,
+      gac.landingScreen,
+      gac.connectToApp,
     );
     if (connectDialogController.text.isEmpty) {
       notificationService.push('Please enter a VM Service URL.');
@@ -281,8 +281,8 @@ class ImportFileInstructions extends StatelessWidget {
 
   Future<void> _importFile(BuildContext context) async {
     ga.select(
-      analytics_constants.landingScreen,
-      analytics_constants.importFile,
+      gac.landingScreen,
+      gac.importFile,
     );
     final DevToolsJsonFile? importedFile = await importFileFromPicker(
       acceptedTypes: ['json'],
@@ -327,8 +327,8 @@ class AppSizeToolingInstructions extends StatelessWidget {
 
   void _onOpenAppSizeToolSelected(BuildContext context) {
     ga.select(
-      analytics_constants.landingScreen,
-      analytics_constants.openAppSizeTool,
+      gac.landingScreen,
+      gac.openAppSizeTool,
     );
     DevToolsRouterDelegate.of(context).navigate(appSizePageId);
   }

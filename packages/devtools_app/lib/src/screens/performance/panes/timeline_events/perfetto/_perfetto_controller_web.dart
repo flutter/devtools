@@ -7,9 +7,9 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 
-import '../../../../../primitives/trace_event.dart';
-import '../../../../../primitives/utils.dart';
 import '../../../../../shared/globals.dart';
+import '../../../../../shared/primitives/trace_event.dart';
+import '../../../../../shared/primitives/utils.dart';
 import 'perfetto_controller.dart';
 
 /// Flag to enable embedding an instance of the Perfetto UI running on

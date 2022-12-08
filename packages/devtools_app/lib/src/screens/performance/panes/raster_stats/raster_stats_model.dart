@@ -5,7 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../primitives/utils.dart';
+import '../../../../shared/primitives/utils.dart';
 
 class RasterStats {
   RasterStats._({

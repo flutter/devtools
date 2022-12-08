@@ -7,18 +7,18 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../../../../analytics/analytics.dart' as ga;
-import '../../../../analytics/constants.dart' as analytics_constants;
-import '../../../../primitives/utils.dart';
+import '../../../../shared/analytics/analytics.dart' as ga;
+import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/dialogs.dart';
 import '../../../../shared/globals.dart';
+import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/split.dart';
 import '../../../../shared/table/table.dart';
 import '../../../../shared/table/table_data.dart';
 import '../../../../shared/theme.dart';
+import '../../../../shared/ui/colors.dart';
 import '../../../../shared/utils.dart';
-import '../../../../ui/colors.dart';
 import 'raster_stats_controller.dart';
 import 'raster_stats_model.dart';
 
@@ -67,8 +67,8 @@ class _RasterStatsControls extends StatelessWidget {
               label: 'Take Snapshot',
               onPressed: () {
                 ga.select(
-                  analytics_constants.performance,
-                  analytics_constants.collectRasterStats,
+                  gac.performance,
+                  gac.collectRasterStats,
                 );
                 unawaited(
                   rasterStatsController.collectRasterStats(),

@@ -4,9 +4,9 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../../analytics/analytics.dart' as ga;
-import '../../../../../analytics/constants.dart' as analytics_constants;
-import '../../../../../primitives/utils.dart';
+import '../../../../../shared/analytics/analytics.dart' as ga;
+import '../../../../../shared/analytics/constants.dart' as gac;
+import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/table/table.dart';
 import '../../../../../shared/table/table_data.dart';
 import '../../../../../shared/theme.dart';
@@ -57,7 +57,7 @@ class _ClassNameColumn extends ColumnData<DiffClassStats>
     return HeapClassView(
       theClass: data.heapClass,
       showCopyButton: isRowSelected,
-      copyGaItem: analytics_constants.MemoryEvent.diffClassDiffCopy,
+      copyGaItem: gac.MemoryEvent.diffClassDiffCopy,
       textStyle:
           isRowSelected ? theme.selectedTextStyle : theme.regularTextStyle,
     );
@@ -221,8 +221,8 @@ class ClassesTableDiff extends StatelessWidget {
       keyFactory: (e) => Key(e.heapClass.fullName),
       selectionNotifier: selection,
       onItemSelected: (_) => ga.select(
-        analytics_constants.memory,
-        analytics_constants.MemoryEvent.diffClassDiffSelect,
+        gac.memory,
+        gac.MemoryEvent.diffClassDiffSelect,
       ),
       defaultSortColumn: _retainedSizeDeltaColumn,
       defaultSortDirection: SortDirection.descending,

@@ -4,9 +4,9 @@
 
 import 'package:flutter/material.dart' hide Badge;
 
-import '../../primitives/utils.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/utils.dart';
 import '../../shared/theme.dart';
 import '../../shared/utils.dart';
 import 'common.dart';

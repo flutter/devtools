@@ -7,12 +7,12 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../config_specific/logger/logger.dart';
-import '../../primitives/auto_dispose.dart';
-import '../../primitives/history_manager.dart';
+import '../../shared/config_specific/logger/logger.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/auto_dispose.dart';
+import '../../shared/primitives/history_manager.dart';
 import '../../shared/routing.dart';
-import '../../ui/search.dart';
+import '../../shared/ui/search.dart';
 import '../vm_developer/vm_service_private_extensions.dart';
 import 'debugger_model.dart';
 import 'program_explorer_controller.dart';

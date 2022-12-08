@@ -9,9 +9,9 @@ import 'package:dds_service_extensions/dds_service_extensions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../primitives/utils.dart';
 import '../screens/vm_developer/vm_service_private_extensions.dart';
 import '../shared/globals.dart';
+import '../shared/primitives/utils.dart';
 import 'json_to_service_cache.dart';
 
 class VmServiceWrapper implements VmService {

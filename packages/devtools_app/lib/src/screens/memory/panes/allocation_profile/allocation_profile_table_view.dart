@@ -5,11 +5,11 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../../analytics/analytics.dart' as ga;
-import '../../../../analytics/constants.dart' as analytics_constants;
-import '../../../../primitives/utils.dart';
+import '../../../../shared/analytics/analytics.dart' as ga;
+import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
+import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/table/table.dart';
 import '../../../../shared/table/table_controller.dart';
 import '../../../../shared/table/table_data.dart';
@@ -341,8 +341,8 @@ class _AllocationProfileTableControls extends StatelessWidget {
         RefreshButton.icon(
           onPressed: () async {
             ga.select(
-              analytics_constants.memory,
-              analytics_constants.MemoryEvent.profileRefreshManual,
+              gac.memory,
+              gac.MemoryEvent.profileRefreshManual,
             );
             await allocationProfileController.refresh();
           },
@@ -404,8 +404,8 @@ class _RefreshOnGCToggleButton extends StatelessWidget {
           onPressed: () {
             allocationProfileController.toggleRefreshOnGc();
             ga.select(
-              analytics_constants.memory,
-              '${analytics_constants.MemoryEvent.profileRefreshOnGc}-$refreshOnGc',
+              gac.memory,
+              '${gac.MemoryEvent.profileRefreshOnGc}-$refreshOnGc',
             );
           },
         );
@@ -417,15 +417,13 @@ class _RefreshOnGCToggleButton extends StatelessWidget {
 class _ProfileHelpLink extends StatelessWidget {
   const _ProfileHelpLink({Key? key}) : super(key: key);
 
-  static const _documentationTopic =
-      analytics_constants.MemoryEvent.profileHelp;
+  static const _documentationTopic = gac.MemoryEvent.profileHelp;
 
   @override
   Widget build(BuildContext context) {
     return HelpButtonWithDialog(
-      gaScreen: analytics_constants.memory,
-      gaSelection:
-          analytics_constants.topicDocumentationButton(_documentationTopic),
+      gaScreen: gac.memory,
+      gaSelection: gac.topicDocumentationButton(_documentationTopic),
       dialogTitle: 'Memory Allocation Profile Help',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -437,7 +435,7 @@ class _ProfileHelpLink extends StatelessWidget {
             url: DocLinks.profile.value,
             gaScreenName: '',
             gaSelectedItemDescription:
-                analytics_constants.topicDocumentationLink(_documentationTopic),
+                gac.topicDocumentationLink(_documentationTopic),
           )
         ],
       ),

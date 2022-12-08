@@ -4,10 +4,10 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../analytics/analytics.dart' as ga;
-import '../../../../analytics/constants.dart' as analytics_constants;
-import '../../../../primitives/utils.dart';
+import '../../../../shared/analytics/analytics.dart' as ga;
+import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
+import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/table/table.dart';
 import '../../../../shared/table/table_controller.dart';
 import '../../../../shared/table/table_data.dart';
@@ -46,8 +46,8 @@ class _TraceCheckBoxColumn extends ColumnData<TracedClass>
       value: item.traceAllocations,
       onChanged: (value) async {
         ga.select(
-          analytics_constants.memory,
-          '${analytics_constants.MemoryEvent.tracingTraceCheck}-$value',
+          gac.memory,
+          '${gac.MemoryEvent.tracingTraceCheck}-$value',
         );
         await controller.setAllocationTracingForClass(item.cls, value!);
       },
@@ -127,8 +127,8 @@ class _AllocationTracingTableState extends State<AllocationTracingTable> {
     final now = DateTime.now();
     if (now.difference(_editFilterGaSent) < _editFilterGaThrottling) return;
     ga.select(
-      analytics_constants.memory,
-      analytics_constants.MemoryEvent.tracingClassFilter,
+      gac.memory,
+      gac.MemoryEvent.tracingClassFilter,
     );
     _editFilterGaSent = now;
   }

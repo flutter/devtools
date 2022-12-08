@@ -4,9 +4,9 @@
 
 import 'package:flutter/material.dart';
 
-import '../../analytics/constants.dart' as analytics_constants;
+import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
-import '../../ui/tab.dart';
+import '../../shared/ui/tab.dart';
 import 'memory_controller.dart';
 import 'panes/allocation_profile/allocation_profile_table_view.dart';
 import 'panes/allocation_tracing/allocation_profile_tracing_view.dart';
@@ -46,7 +46,7 @@ class MemoryTabView extends StatelessWidget {
         return AnalyticsTabbedView(
           tabs: tabs,
           tabViews: tabViews,
-          gaScreen: analytics_constants.memory,
+          gaScreen: gac.memory,
         );
       },
     );

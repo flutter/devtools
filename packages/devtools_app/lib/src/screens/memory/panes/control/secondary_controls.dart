@@ -6,8 +6,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../../../analytics/analytics.dart' as ga;
-import '../../../../analytics/constants.dart' as analytics_constants;
+import '../../../../shared/analytics/analytics.dart' as ga;
+import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/theme.dart';
@@ -65,8 +65,8 @@ class SecondaryControls extends StatelessWidget {
 
   void _openSettingsDialog(BuildContext context) {
     ga.select(
-      analytics_constants.memory,
-      analytics_constants.MemoryEvent.settings,
+      gac.memory,
+      gac.MemoryEvent.settings,
     );
     unawaited(
       showDialog(
@@ -85,8 +85,8 @@ class SecondaryControls extends StatelessWidget {
 
   Future<void> _gc() async {
     ga.select(
-      analytics_constants.memory,
-      analytics_constants.MemoryEvent.gc,
+      gac.memory,
+      gac.MemoryEvent.gc,
     );
     controller.memoryTimeline.addGCEvent();
     await controller.gc();

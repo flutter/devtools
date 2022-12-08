@@ -4,13 +4,13 @@
 
 import 'package:flutter/material.dart';
 
-import '../../primitives/utils.dart';
 import '../../shared/globals.dart';
 import '../../shared/object_tree.dart';
+import '../../shared/primitives/utils.dart';
 import '../../shared/theme.dart';
-import '../../ui/hover.dart';
-import '../../ui/icons.dart';
-import '../../ui/utils.dart';
+import '../../shared/ui/hover.dart';
+import '../../shared/ui/icons.dart';
+import '../../shared/ui/utils.dart';
 import '../debugger/debugger_controller.dart';
 import '../debugger/variables.dart';
 import 'diagnostics_node.dart';

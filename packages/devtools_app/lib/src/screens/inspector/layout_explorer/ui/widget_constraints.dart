@@ -4,8 +4,8 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../primitives/math_utils.dart';
-import '../../../../primitives/utils.dart';
+import '../../../../shared/primitives/math_utils.dart';
+import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/theme.dart';
 import '../../inspector_data_models.dart';
 import 'arrow.dart';

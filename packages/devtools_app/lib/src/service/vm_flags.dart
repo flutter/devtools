@@ -7,7 +7,7 @@ import 'dart:core';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
-import '../primitives/auto_dispose.dart';
+import '../shared/primitives/auto_dispose.dart';
 import 'vm_service_wrapper.dart';
 
 // Defined in SDK: https://github.com/dart-lang/sdk/blob/master/runtime/vm/flag_list.h.

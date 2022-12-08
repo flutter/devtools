@@ -4,8 +4,8 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../../../analytics/analytics.dart' as ga;
-import '../../../../../../analytics/constants.dart' as analytics_constants;
+import '../../../../../../shared/analytics/analytics.dart' as ga;
+import '../../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../../shared/common_widgets.dart';
 import '../../../../../../shared/theme.dart';
 import '../../../../shared/heap/model.dart';
@@ -76,8 +76,8 @@ class _PathControlPane extends StatelessWidget {
           // top of the path widget, that makes the widget anavailable
           // while message is here.
           successMessage: null,
-          gaScreen: analytics_constants.memory,
-          gaItem: analytics_constants.MemoryEvent.diffPathCopy,
+          gaScreen: gac.memory,
+          gaItem: gac.MemoryEvent.diffPathCopy,
         ),
         const SizedBox(width: denseSpacing),
         ValueListenableBuilder<bool>(
@@ -85,8 +85,8 @@ class _PathControlPane extends StatelessWidget {
           builder: (_, hideStandard, __) => FilterButton(
             onPressed: () {
               ga.select(
-                analytics_constants.memory,
-                '${analytics_constants.MemoryEvent.diffPathFilter}-$hideStandard',
+                gac.memory,
+                '${gac.MemoryEvent.diffPathFilter}-$hideStandard',
               );
               controller.hideStandard.value = !controller.hideStandard.value;
             },
@@ -100,8 +100,8 @@ class _PathControlPane extends StatelessWidget {
           builder: (_, invert, __) => ToggleButton(
             onPressed: () {
               ga.select(
-                analytics_constants.memory,
-                '${analytics_constants.MemoryEvent.diffPathInvert}-$invert',
+                gac.memory,
+                '${gac.MemoryEvent.diffPathInvert}-$invert',
               );
               controller.invert.value = !controller.invert.value;
             },

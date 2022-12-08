@@ -7,8 +7,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../primitives/utils.dart';
 import 'common_widgets.dart';
+import 'primitives/utils.dart';
 import 'theme.dart';
 import 'utils.dart';
 

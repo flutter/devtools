@@ -5,7 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../primitives/simple_items.dart';
+import '../../../shared/primitives/simple_items.dart';
 
 @immutable
 class HeapClassName {

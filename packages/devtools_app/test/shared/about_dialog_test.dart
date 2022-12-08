@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools.dart' as devtools;
-import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/extension_points/extensions_base.dart';
 import 'package:devtools_app/src/extension_points/extensions_external.dart';
 import 'package:devtools_app/src/framework/about_dialog.dart';
 import 'package:devtools_app/src/framework/release_notes/release_notes.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
