@@ -5,7 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../charts/flame_chart.dart';
+import '../../shared/charts/flame_chart.dart';
 import '../../ui/colors.dart';
 import '../../ui/utils.dart';
 import 'cpu_profile_model.dart';

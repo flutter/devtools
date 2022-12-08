@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../../charts/treemap.dart';
+import '../../shared/charts/treemap.dart';
 import '../../primitives/utils.dart';
 import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';

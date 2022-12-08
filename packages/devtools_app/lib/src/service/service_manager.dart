@@ -10,7 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
 import '../shared/analytics/analytics.dart' as ga;
-import '../config_specific/logger/logger.dart';
+import '../shared/config_specific/logger/logger.dart';
 import '../primitives/utils.dart';
 import '../screens/inspector/inspector_service.dart';
 import '../screens/logging/vm_service_logger.dart';

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:collection/collection.dart';
-import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
+import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';

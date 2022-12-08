@@ -4,12 +4,12 @@
 
 export 'src/shared/analytics/analytics.dart';
 export 'src/shared/analytics/analytics_controller.dart';
-export 'src/charts/treemap.dart';
-export 'src/config_specific/ide_theme/ide_theme.dart';
+export 'src/shared/charts/treemap.dart';
+export 'src/shared/config_specific/ide_theme/ide_theme.dart';
 export 'src/extension_points/extensions_base.dart';
 export 'src/extension_points/extensions_external.dart';
 export 'src/framework/notifications_view.dart';
-export 'src/http/http_request_data.dart';
+export 'src/shared/http/http_request_data.dart';
 export 'src/primitives/auto_dispose.dart';
 export 'src/primitives/auto_dispose_mixin.dart';
 export 'src/primitives/listenable.dart';

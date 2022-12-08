@@ -4,10 +4,10 @@
 
 import 'dart:html' hide Storage;
 
-import '../../primitives/storage.dart';
-import '../../service/service_manager.dart';
-import '../../shared/globals.dart';
-import '../../shared/server_api_client.dart';
+import '../../../primitives/storage.dart';
+import '../../../service/service_manager.dart';
+import '../../globals.dart';
+import '../../server_api_client.dart';
 
 /// Return the url the application is launched from.
 Future<String> initializePlatform() async {

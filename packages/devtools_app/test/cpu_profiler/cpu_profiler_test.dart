@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/charts/flame_chart.dart';
-import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
+import 'package:devtools_app/src/shared/charts/flame_chart.dart';
+import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profile_bottom_up.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profile_call_tree.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profile_controller.dart';

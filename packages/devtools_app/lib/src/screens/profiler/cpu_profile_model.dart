@@ -8,7 +8,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
-import '../../charts/flame_chart.dart';
+import '../../shared/charts/flame_chart.dart';
 import '../../primitives/simple_items.dart';
 import '../../primitives/trace_event.dart';
 import '../../primitives/trees.dart';

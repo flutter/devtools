@@ -11,7 +11,7 @@ import 'package:provider/provider.dart';
 import 'shared/analytics/analytics.dart' as ga;
 import 'shared/analytics/analytics_controller.dart';
 import 'shared/analytics/constants.dart' as analytics_constants;
-import 'config_specific/server/server.dart';
+import 'shared/config_specific/server/server.dart';
 import 'example/conditional_screen.dart';
 import 'framework/about_dialog.dart';
 import 'framework/framework_core.dart';

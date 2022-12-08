@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/charts/flame_chart.dart';
-import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
+import 'package:devtools_app/src/shared/charts/flame_chart.dart';
+import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/screens/performance/panes/frame_analysis/frame_analysis.dart';
 import 'package:devtools_app/src/screens/performance/panes/raster_stats/raster_stats.dart';
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/legacy/timeline_flame_chart.dart';

@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import '../../primitives/utils.dart';
+import '../../../primitives/utils.dart';
 
 const unsupportedMessage =
     'Unsupported RPC: The DevTools Server is not available on Desktop';

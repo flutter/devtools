@@ -10,7 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../config_specific/logger/logger.dart';
+import '../shared/config_specific/logger/logger.dart';
 import '../primitives/auto_dispose.dart';
 import '../primitives/auto_dispose_mixin.dart';
 import '../primitives/trees.dart';

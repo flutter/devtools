@@ -7,7 +7,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../config_specific/logger/logger.dart';
+import '../../shared/config_specific/logger/logger.dart';
 import '../../primitives/auto_dispose.dart';
 import '../../primitives/history_manager.dart';
 import '../../shared/globals.dart';

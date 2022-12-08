@@ -8,9 +8,9 @@ import 'package:flutter/widgets.dart';
 import 'package:http/http.dart';
 
 import 'analytics/analytics.dart' as ga;
-import '../config_specific/launch_url/launch_url.dart';
-import '../config_specific/logger/logger.dart';
-import '../config_specific/server/server.dart' as server;
+import 'config_specific/launch_url/launch_url.dart';
+import 'config_specific/logger/logger.dart';
+import 'config_specific/server/server.dart' as server;
 import '../primitives/utils.dart';
 import '../shared/notifications.dart';
 import 'globals.dart';

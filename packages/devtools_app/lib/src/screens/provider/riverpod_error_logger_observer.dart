@@ -4,7 +4,7 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../config_specific/logger/logger.dart';
+import '../../shared/config_specific/logger/logger.dart';
 import '../../shared/eval_on_dart_library.dart';
 
 class ErrorLoggerObserver extends ProviderObserver {

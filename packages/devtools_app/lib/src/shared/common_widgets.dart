@@ -12,7 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import 'analytics/analytics.dart' as ga;
-import '../config_specific/launch_url/launch_url.dart';
+import 'config_specific/launch_url/launch_url.dart';
 import '../primitives/auto_dispose_mixin.dart';
 import '../primitives/flutter_widgets/linked_scroll_controller.dart';
 import '../primitives/utils.dart';

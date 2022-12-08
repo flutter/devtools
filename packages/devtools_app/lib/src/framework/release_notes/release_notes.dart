@@ -13,9 +13,9 @@ import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
 import '../../../devtools.dart' as devtools;
-import '../../config_specific/launch_url/launch_url.dart';
-import '../../config_specific/logger/logger.dart' as logger;
-import '../../config_specific/server/server.dart' as server;
+import '../../shared/config_specific/launch_url/launch_url.dart';
+import '../../shared/config_specific/logger/logger.dart' as logger;
+import '../../shared/config_specific/server/server.dart' as server;
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/theme.dart';

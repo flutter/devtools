@@ -7,9 +7,9 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../config_specific/logger/allowed_error.dart';
-import '../../http/http_request_data.dart';
-import '../../http/http_service.dart';
+import '../../shared/config_specific/logger/allowed_error.dart';
+import '../../shared/http/http_request_data.dart';
+import '../../shared/http/http_service.dart';
 import '../../primitives/utils.dart';
 import '../../shared/globals.dart';
 import '../../ui/filter.dart';

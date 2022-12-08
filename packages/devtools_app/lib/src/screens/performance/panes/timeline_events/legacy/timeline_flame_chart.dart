@@ -9,7 +9,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../../charts/flame_chart.dart';
+import '../../../../../shared/charts/flame_chart.dart';
 import '../../../../../primitives/auto_dispose_mixin.dart';
 import '../../../../../primitives/flutter_widgets/linked_scroll_controller.dart';
 import '../../../../../primitives/geometry.dart';

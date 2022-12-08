@@ -11,18 +11,18 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../primitives/auto_dispose_mixin.dart';
-import '../primitives/extent_delegate_list.dart';
-import '../primitives/flutter_widgets/linked_scroll_controller.dart';
-import '../primitives/trees.dart';
-import '../primitives/utils.dart';
-import '../shared/common_widgets.dart';
-import '../shared/dialogs.dart';
-import '../shared/theme.dart';
-import '../shared/utils.dart';
-import '../ui/colors.dart';
-import '../ui/search.dart';
-import '../ui/utils.dart';
+import '../../primitives/auto_dispose_mixin.dart';
+import '../../primitives/extent_delegate_list.dart';
+import '../../primitives/flutter_widgets/linked_scroll_controller.dart';
+import '../../primitives/trees.dart';
+import '../../primitives/utils.dart';
+import '../common_widgets.dart';
+import '../dialogs.dart';
+import '../theme.dart';
+import '../utils.dart';
+import '../../ui/colors.dart';
+import '../../ui/search.dart';
+import '../../ui/utils.dart';
 
 const double rowPadding = 2.0;
 // Flame chart rows contain text so are not readable if they do not scale with

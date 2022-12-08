@@ -6,8 +6,8 @@ import 'dart:html';
 
 import 'package:flutter/widgets.dart';
 
-import '../../primitives/utils.dart';
-import '../../shared/theme.dart';
+import '../../../primitives/utils.dart';
+import '../../theme.dart';
 import '../logger/logger.dart';
 import '../url/url.dart';
 import 'ide_theme.dart';

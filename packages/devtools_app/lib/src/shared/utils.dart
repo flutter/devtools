@@ -15,7 +15,7 @@ import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../devtools.dart' as devtools;
-import '../config_specific/logger/logger.dart' as logger;
+import 'config_specific/logger/logger.dart' as logger;
 import 'common_widgets.dart';
 import 'connected_app.dart';
 import 'globals.dart';

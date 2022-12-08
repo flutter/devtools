@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../../charts/chart_controller.dart';
+import '../../../../shared/charts/chart_controller.dart';
 import '../../../../primitives/auto_dispose_mixin.dart';
 import '../../../../primitives/utils.dart';
 import '../../../../shared/common_widgets.dart';

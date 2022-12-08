@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:ansicolor/ansicolor.dart';
-import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/screens/debugger/console.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/scripts/script_manager.dart';

@@ -7,10 +7,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'src/shared/analytics/analytics_controller.dart';
 import 'src/app.dart';
-import 'src/config_specific/framework_initialize/framework_initialize.dart';
-import 'src/config_specific/ide_theme/ide_theme.dart';
-import 'src/config_specific/url/url.dart';
-import 'src/config_specific/url_strategy/url_strategy.dart';
+import 'src/shared/config_specific/framework_initialize/framework_initialize.dart';
+import 'src/shared/config_specific/ide_theme/ide_theme.dart';
+import 'src/shared/config_specific/url/url.dart';
+import 'src/shared/config_specific/url_strategy/url_strategy.dart';
 import 'src/extension_points/extensions_base.dart';
 import 'src/extension_points/extensions_external.dart';
 import 'src/framework/app_error_handling.dart';

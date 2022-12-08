@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be found
 // in the LICENSE file.
 
-import '../../shared/theme.dart';
+import '../../theme.dart';
 
 import 'ide_theme.dart';
 

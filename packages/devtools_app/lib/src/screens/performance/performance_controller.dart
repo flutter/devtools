@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:vm_service/vm_service.dart';
 
-import '../../config_specific/import_export/import_export.dart';
+import '../../shared/config_specific/import_export/import_export.dart';
 import '../../primitives/auto_dispose.dart';
 import '../../primitives/feature_flags.dart';
 import '../../shared/globals.dart';

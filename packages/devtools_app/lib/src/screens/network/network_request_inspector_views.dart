@@ -5,8 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as image;
 
-import '../../http/http.dart';
-import '../../http/http_request_data.dart';
+import '../../shared/http/http.dart';
+import '../../shared/http/http_request_data.dart';
 import '../../primitives/utils.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/table/table.dart';

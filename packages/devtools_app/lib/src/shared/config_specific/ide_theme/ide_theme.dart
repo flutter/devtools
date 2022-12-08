@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
-import '../../shared/theme.dart';
+import '../../theme.dart';
 
 export 'ide_theme_stub.dart'
     if (dart.library.html) 'ide_theme_web.dart'

@@ -9,9 +9,9 @@ import 'package:provider/provider.dart';
 
 import '../shared/analytics/prompt.dart';
 import '../app.dart';
-import '../config_specific/drag_and_drop/drag_and_drop.dart';
-import '../config_specific/ide_theme/ide_theme.dart';
-import '../config_specific/import_export/import_export.dart';
+import '../shared/config_specific/drag_and_drop/drag_and_drop.dart';
+import '../shared/config_specific/ide_theme/ide_theme.dart';
+import '../shared/config_specific/import_export/import_export.dart';
 import '../primitives/auto_dispose_mixin.dart';
 import '../primitives/simple_items.dart';
 import '../screens/debugger/console.dart';

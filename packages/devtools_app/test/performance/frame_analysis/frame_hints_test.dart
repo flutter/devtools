@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
+import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/screens/performance/panes/controls/enhance_tracing/enhance_tracing_model.dart';
 import 'package:devtools_app/src/screens/performance/panes/frame_analysis/frame_hints.dart';
 import 'package:devtools_test/devtools_test.dart';

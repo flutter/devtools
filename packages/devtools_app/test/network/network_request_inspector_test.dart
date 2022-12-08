@@ -4,7 +4,7 @@
 
 import 'dart:convert';
 
-import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/screens/network/network_controller.dart';
 import 'package:devtools_app/src/screens/network/network_request_inspector.dart';
 import 'package:devtools_app/src/service/service_manager.dart';

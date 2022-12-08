@@ -8,10 +8,10 @@ import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
-import '../../charts/treemap.dart';
-import '../../config_specific/drag_and_drop/drag_and_drop.dart';
-import '../../config_specific/server/server.dart' as server;
-import '../../config_specific/url/url.dart';
+import '../../shared/charts/treemap.dart';
+import '../../shared/config_specific/drag_and_drop/drag_and_drop.dart';
+import '../../shared/config_specific/server/server.dart' as server;
+import '../../shared/config_specific/url/url.dart';
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../primitives/simple_items.dart';
 import '../../primitives/utils.dart';

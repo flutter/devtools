@@ -11,7 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../shared/analytics/analytics.dart' as ga;
 import '../shared/analytics/constants.dart' as analytics_constants;
-import '../config_specific/import_export/import_export.dart';
+import '../shared/config_specific/import_export/import_export.dart';
 import '../primitives/blocking_action_mixin.dart';
 import '../primitives/utils.dart';
 import '../shared/common_widgets.dart';

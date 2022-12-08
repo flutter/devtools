@@ -5,8 +5,8 @@
 import 'dart:async';
 
 import '../../devtools.dart' as devtools show version;
-import '../config_specific/import_export/import_export.dart';
-import '../config_specific/logger/logger.dart';
+import '../shared/config_specific/import_export/import_export.dart';
+import '../shared/config_specific/logger/logger.dart';
 import '../primitives/message_bus.dart';
 import '../primitives/utils.dart';
 import '../screens/debugger/breakpoint_manager.dart';

@@ -12,7 +12,7 @@ import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
 import 'package:vm_service/vm_service.dart';
 
-import '../../config_specific/logger/logger.dart' as logger;
+import '../../shared/config_specific/logger/logger.dart' as logger;
 import '../../primitives/auto_dispose.dart';
 import '../../primitives/message_bus.dart';
 import '../../primitives/utils.dart';

@@ -10,8 +10,8 @@ import 'package:provider/provider.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as analytics_constants;
-import '../../http/curl_command.dart';
-import '../../http/http_request_data.dart';
+import '../../shared/http/curl_command.dart';
+import '../../shared/http/http_request_data.dart';
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../primitives/simple_items.dart';
 import '../../primitives/utils.dart';

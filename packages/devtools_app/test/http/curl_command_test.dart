@@ -5,7 +5,7 @@
 import 'dart:typed_data';
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/http/curl_command.dart';
+import 'package:devtools_app/src/shared/http/curl_command.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
 

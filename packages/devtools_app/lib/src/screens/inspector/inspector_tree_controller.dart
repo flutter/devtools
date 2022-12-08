@@ -15,7 +15,7 @@ import 'package:provider/provider.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as analytics_constants;
-import '../../config_specific/logger/logger.dart';
+import '../../shared/config_specific/logger/logger.dart';
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../primitives/utils.dart';
 import '../../shared/collapsible_mixin.dart';

@@ -7,7 +7,7 @@ import 'dart:async';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-import '../../config_specific/launch_url/launch_url.dart';
+import '../config_specific/launch_url/launch_url.dart';
 import '../common_widgets.dart';
 import '../theme.dart';
 import '../utils.dart';
