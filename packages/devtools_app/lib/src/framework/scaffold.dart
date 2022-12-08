@@ -7,7 +7,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../analytics/prompt.dart';
+import '../shared/analytics/prompt.dart';
 import '../app.dart';
 import '../config_specific/drag_and_drop/drag_and_drop.dart';
 import '../config_specific/ide_theme/ide_theme.dart';

@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:provider/provider.dart' as provider show Provider;
 
-import '../../analytics/analytics.dart' as ga;
+import '../../shared/analytics/analytics.dart' as ga;
 import '../../primitives/simple_items.dart';
 import '../../shared/banner_messages.dart';
 import '../../shared/common_widgets.dart';

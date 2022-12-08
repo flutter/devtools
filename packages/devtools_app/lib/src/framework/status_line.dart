@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../devtools.dart' as devtools;
-import '../analytics/constants.dart' as analytics_constants;
+import '../shared/analytics/constants.dart' as analytics_constants;
 import '../service/isolate_manager.dart';
 import '../service/service_manager.dart';
 import '../shared/common_widgets.dart';

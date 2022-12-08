@@ -4,8 +4,9 @@
 
 import 'package:flutter/widgets.dart';
 
-import '../../../../../../analytics/analytics.dart' as ga;
-import '../../../../../../analytics/constants.dart' as analytics_constants;
+import '../../../../../../shared/analytics/analytics.dart' as ga;
+import '../../../../../../shared/analytics/constants.dart'
+    as analytics_constants;
 import '../../../../../../primitives/utils.dart';
 import '../../../../../../shared/table/table.dart';
 import '../../../../../../shared/table/table_data.dart';

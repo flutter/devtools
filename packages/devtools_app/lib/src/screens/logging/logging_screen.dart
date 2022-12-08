@@ -7,7 +7,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../analytics/analytics.dart' as ga;
+import '../../shared/analytics/analytics.dart' as ga;
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../primitives/simple_items.dart';
 import '../../service/service_extension_widgets.dart';

@@ -5,7 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../analytics/analytics.dart' as ga;
+import '../../shared/analytics/analytics.dart' as ga;
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../primitives/listenable.dart';
 import '../../primitives/simple_items.dart';

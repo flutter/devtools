@@ -10,8 +10,8 @@ import 'package:flutter/material.dart' hide Stack;
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../analytics/analytics.dart' as ga;
-import '../../analytics/constants.dart' as analytics_constants;
+import '../../shared/analytics/analytics.dart' as ga;
+import '../../shared/analytics/constants.dart' as analytics_constants;
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../primitives/listenable.dart';
 import '../../primitives/simple_items.dart';

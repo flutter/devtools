@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../analytics/constants.dart' as analytics_constants;
+import '../../shared/analytics/constants.dart' as analytics_constants;
 import '../../charts/flame_chart.dart';
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../primitives/feature_flags.dart';

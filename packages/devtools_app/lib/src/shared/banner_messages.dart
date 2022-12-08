@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../analytics/constants.dart' as analytics_constants;
+import 'analytics/constants.dart' as analytics_constants;
 import '../primitives/utils.dart';
 import '../screens/performance/performance_utils.dart';
 import 'common_widgets.dart';

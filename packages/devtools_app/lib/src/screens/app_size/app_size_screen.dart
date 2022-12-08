@@ -7,7 +7,7 @@ import 'dart:async';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 
-import '../../analytics/analytics.dart' as ga;
+import '../../shared/analytics/analytics.dart' as ga;
 import '../../charts/treemap.dart';
 import '../../config_specific/drag_and_drop/drag_and_drop.dart';
 import '../../config_specific/server/server.dart' as server;

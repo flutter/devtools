@@ -5,7 +5,7 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../../devtools_app.dart';
-import '../../../analytics/constants.dart' as analytics_constants;
+import '../../../shared/analytics/constants.dart' as analytics_constants;
 import '../primitives/class_name.dart';
 
 class HeapClassView extends StatelessWidget {

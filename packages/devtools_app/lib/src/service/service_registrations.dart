@@ -5,7 +5,7 @@
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 
-import '../analytics/constants.dart' as analytics_constants;
+import '../shared/analytics/constants.dart' as analytics_constants;
 import '../shared/theme.dart';
 import '../ui/icons.dart';
 

@@ -7,8 +7,8 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 
-import '../analytics/analytics.dart' as ga;
-import '../analytics/constants.dart' as analytics_constants;
+import 'analytics/analytics.dart' as ga;
+import 'analytics/constants.dart' as analytics_constants;
 import '../primitives/auto_dispose.dart';
 import '../primitives/utils.dart';
 import '../screens/inspector/inspector_service.dart';

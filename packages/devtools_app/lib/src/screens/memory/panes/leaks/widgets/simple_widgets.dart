@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../../analytics/constants.dart' as analytics_constants;
+import '../../../../../shared/analytics/constants.dart' as analytics_constants;
 import '../../../../../shared/common_widgets.dart';
 import '../../../primitives/ui.dart';
 import '../controller.dart';

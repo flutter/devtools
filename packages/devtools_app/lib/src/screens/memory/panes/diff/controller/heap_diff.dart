@@ -4,9 +4,9 @@
 
 import 'package:flutter/foundation.dart';
 
-import '../../../../../analytics/analytics.dart' as ga;
-import '../../../../../analytics/constants.dart' as analytics_constants;
-import '../../../../../analytics/metrics.dart';
+import '../../../../../shared/analytics/analytics.dart' as ga;
+import '../../../../../shared/analytics/constants.dart' as analytics_constants;
+import '../../../../../shared/analytics/metrics.dart';
 import '../../../../../primitives/utils.dart';
 import '../../../primitives/class_name.dart';
 import '../../../shared/heap/heap.dart';

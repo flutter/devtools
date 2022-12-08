@@ -7,8 +7,8 @@ import 'dart:async';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 
-import '../analytics/analytics.dart' as ga;
-import '../analytics/constants.dart' as analytics_constants;
+import '../shared/analytics/analytics.dart' as ga;
+import '../shared/analytics/constants.dart' as analytics_constants;
 import '../primitives/auto_dispose_mixin.dart';
 import '../primitives/utils.dart';
 import '../shared/common_widgets.dart';

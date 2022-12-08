@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../analytics/analytics.dart' as ga;
+import '../shared/analytics/analytics.dart' as ga;
 import '../shared/common_widgets.dart';
 import '../shared/theme.dart';
 import '../shared/utils.dart';

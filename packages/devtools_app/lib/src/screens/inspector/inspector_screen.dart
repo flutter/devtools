@@ -8,8 +8,8 @@ import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
-import '../../analytics/analytics.dart' as ga;
-import '../../analytics/constants.dart' as analytics_constants;
+import '../../shared/analytics/analytics.dart' as ga;
+import '../../shared/analytics/constants.dart' as analytics_constants;
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../primitives/blocking_action_mixin.dart';
 import '../../primitives/simple_items.dart';

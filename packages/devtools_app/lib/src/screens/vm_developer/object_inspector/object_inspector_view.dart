@@ -7,7 +7,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../analytics/constants.dart' as analytics_constants;
+import '../../../shared/analytics/constants.dart' as analytics_constants;
 import '../../../shared/split.dart';
 import '../../../ui/tab.dart';
 import '../../debugger/program_explorer.dart';

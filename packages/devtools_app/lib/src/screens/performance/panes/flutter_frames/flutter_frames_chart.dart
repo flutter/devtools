@@ -8,9 +8,9 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../analytics/analytics.dart' as ga;
-import '../../../../analytics/constants.dart' as analytics_constants;
-import '../../../../analytics/metrics.dart';
+import '../../../../shared/analytics/analytics.dart' as ga;
+import '../../../../shared/analytics/constants.dart' as analytics_constants;
+import '../../../../shared/analytics/metrics.dart';
 import '../../../../framework/scaffold.dart';
 import '../../../../primitives/auto_dispose_mixin.dart';
 import '../../../../primitives/utils.dart';

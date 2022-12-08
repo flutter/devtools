@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../../analytics/constants.dart' as analytics_constants;
+import '../../shared/analytics/constants.dart' as analytics_constants;
 import '../../http/http_request_data.dart';
 import '../../shared/common_widgets.dart';
 import '../../ui/tab.dart';

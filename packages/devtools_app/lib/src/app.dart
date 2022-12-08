@@ -8,9 +8,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'analytics/analytics.dart' as ga;
-import 'analytics/analytics_controller.dart';
-import 'analytics/constants.dart' as analytics_constants;
+import 'shared/analytics/analytics.dart' as ga;
+import 'shared/analytics/analytics_controller.dart';
+import 'shared/analytics/constants.dart' as analytics_constants;
 import 'config_specific/server/server.dart';
 import 'example/conditional_screen.dart';
 import 'framework/about_dialog.dart';

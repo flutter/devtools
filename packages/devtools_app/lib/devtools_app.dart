@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-export 'src/analytics/analytics.dart';
-export 'src/analytics/analytics_controller.dart';
+export 'src/shared/analytics/analytics.dart';
+export 'src/shared/analytics/analytics_controller.dart';
 export 'src/charts/treemap.dart';
 export 'src/config_specific/ide_theme/ide_theme.dart';
 export 'src/extension_points/extensions_base.dart';

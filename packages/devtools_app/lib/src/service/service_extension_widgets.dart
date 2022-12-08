@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-import '../analytics/analytics.dart' as ga;
+import '../shared/analytics/analytics.dart' as ga;
 import '../config_specific/logger/logger.dart';
 import '../primitives/auto_dispose_mixin.dart';
 import '../primitives/message_bus.dart';

@@ -7,7 +7,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../analytics/constants.dart' as analytics_constants;
+import '../../shared/analytics/constants.dart' as analytics_constants;
 import '../../config_specific/import_export/import_export.dart';
 import '../../config_specific/logger/allowed_error.dart';
 import '../../primitives/auto_dispose.dart';

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/analytics/analytics_controller.dart';
-import 'package:devtools_app/src/analytics/prompt.dart';
+import 'package:devtools_app/src/shared/analytics/analytics_controller.dart';
+import 'package:devtools_app/src/shared/analytics/prompt.dart';
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/common_widgets.dart';
