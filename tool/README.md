@@ -51,6 +51,15 @@ Run the `tool/update_version.dart` script to update the DevTools version.
    dart tool/update_version.dart auto --type release
    ```
 
+Verify:
+* that this script updated the pubspecs under packages/
+* updated all references to those packages.
+*  make sure that the version constant in `packages/devtools_app/lib/devtools.dart` was updated
+
+These packages always have their version numbers updated in lock, so we don't have to worry about versioning.
+
+> Note: Updating to a new `dev` version will automatically prepare the version for a new `minor` release (eg, `2.17.0` will become `2.18.0-dev.0`). To update to a `major` or `patch` release instead, specify either `dev,patch` or `dev,major` (eg, `dart tool/update_version.dart auto --type dev,patch`).
+
 #### Update the CHANGELOG.md (for non-dev releases)
 
 * Use the tool `generate-changelog` to automatically update the `packages/devtools/CHANGELOG.md` file.
