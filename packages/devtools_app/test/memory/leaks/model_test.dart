@@ -5,8 +5,8 @@
 import 'dart:convert';
 
 import 'package:devtools_app/src/screens/memory/panes/leaks/diagnostics/model.dart';
-import 'package:devtools_app/src/screens/memory/primitives/class_name.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/model.dart';
+import 'package:devtools_app/src/screens/memory/shared/primitives/class_name.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker/devtools_integration.dart';
 

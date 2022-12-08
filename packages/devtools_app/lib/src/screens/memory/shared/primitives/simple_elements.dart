@@ -17,3 +17,23 @@ const String nonGcableInstancesColumnTooltip =
     'Number of instances of the class,\n'
     'that are reachable, i.e. have a retaining path from the root\n'
     "and therefore can't be garbage collected.";
+
+/// When to have verbose Dropdown based on media width.
+const memoryControlsMinVerboseWidth = 950.0;
+
+const _memoryDocUrl =
+    'https://docs.flutter.dev/development/tools/devtools/memory';
+
+enum DocLinks {
+  chart(_memoryDocUrl, 'expandable-chart'),
+  profile(_memoryDocUrl, 'profile-tab'),
+  diff(_memoryDocUrl, 'diff-tab'),
+  trace(_memoryDocUrl, 'trace-tab'),
+  ;
+
+  const DocLinks(this.url, this.hash);
+
+  final String url;
+  final String hash;
+  String get value => '$url#$hash';
+}

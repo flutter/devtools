@@ -11,8 +11,8 @@ import '../../../../../shared/table/table.dart';
 import '../../../../../shared/table/table_data.dart';
 import '../../../../../shared/theme.dart';
 import '../../../../../shared/utils.dart';
-import '../../../primitives/simple_elements.dart';
 import '../../../shared/heap/heap.dart';
+import '../../../shared/primitives/simple_elements.dart';
 import '../../../shared/shared_memory_widgets.dart';
 
 class _ClassNameColumn extends ColumnData<SingleClassStats>

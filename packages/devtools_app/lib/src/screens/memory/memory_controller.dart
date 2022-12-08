@@ -22,8 +22,8 @@ import 'memory_protocol.dart';
 import 'panes/allocation_profile/allocation_profile_table_view_controller.dart';
 import 'panes/chart/primitives.dart';
 import 'panes/diff/controller/diff_pane_controller.dart';
-import 'primitives/memory_timeline.dart';
 import 'shared/heap/model.dart';
+import 'shared/primitives/memory_timeline.dart';
 
 // TODO(terry): Consider supporting more than one file since app was launched.
 // Memory Log filename.

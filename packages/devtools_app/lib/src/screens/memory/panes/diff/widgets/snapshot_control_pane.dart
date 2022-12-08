@@ -10,8 +10,8 @@ import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/theme.dart';
-import '../../../primitives/ui.dart';
 import '../../../shared/heap/class_filter.dart';
+import '../../../shared/primitives/simple_elements.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/item_controller.dart';
 import 'class_filter_dialog.dart';
@@ -51,7 +51,7 @@ class SnapshotControlPane extends StatelessWidget {
                   const SizedBox(width: defaultSpacing),
                   ToCsvButton(
                     minScreenWidthForTextBeforeScaling:
-                        primaryControlsMinVerboseWidth,
+                        memoryControlsMinVerboseWidth,
                     onPressed: () {
                       ga.select(
                         gac.memory,

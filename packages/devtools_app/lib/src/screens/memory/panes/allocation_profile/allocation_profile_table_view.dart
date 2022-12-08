@@ -15,9 +15,8 @@ import '../../../../shared/table/table_controller.dart';
 import '../../../../shared/table/table_data.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
-import '../../primitives/simple_elements.dart';
-import '../../primitives/ui.dart';
-import '../../shared/primitives.dart';
+import '../../shared/primitives/simple_elements.dart';
+
 import 'allocation_profile_table_view_controller.dart';
 import 'model.dart';
 
@@ -371,7 +370,7 @@ class _ExportAllocationProfileButton extends StatelessWidget {
       valueListenable: allocationProfileController.currentAllocationProfile,
       builder: (context, currentAllocationProfile, _) {
         return ToCsvButton(
-          minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
+          minScreenWidthForTextBeforeScaling: memoryControlsMinVerboseWidth,
           tooltip: 'Download allocation profile data in CSV format',
           onPressed: currentAllocationProfile == null
               ? null

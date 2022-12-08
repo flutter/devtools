@@ -11,8 +11,7 @@ import '../../../../shared/primitives/auto_dispose.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../memory_controller.dart';
-import '../../primitives/ui.dart';
-import '../../shared/primitives.dart';
+import '../../shared/primitives/simple_elements.dart';
 import 'chart_pane_controller.dart';
 import 'interval_dropdown.dart';
 
@@ -87,8 +86,7 @@ class _ChartControlPaneState extends State<ChartControlPane>
               onPressed: controller.memorySource == MemoryController.liveFeed
                   ? _clearTimeline
                   : null,
-              minScreenWidthForTextBeforeScaling:
-                  primaryControlsMinVerboseWidth,
+              minScreenWidthForTextBeforeScaling: memoryControlsMinVerboseWidth,
               tooltip: 'Clear memory chart.',
             ),
           ],
@@ -129,7 +127,7 @@ class _LegendButton extends StatelessWidget {
         icon: legendVisible ? Icons.close : Icons.storage,
         label: 'Legend',
         tooltip: 'Show chart legend',
-        minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
+        minScreenWidthForTextBeforeScaling: memoryControlsMinVerboseWidth,
       ),
     );
   }
