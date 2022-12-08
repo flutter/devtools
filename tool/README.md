@@ -33,27 +33,7 @@ git checkout -b release_$(date +%s);
 
 #### Update the DevTools version number
 
-##### Releasing a clean version
 Run the `tool/update_version.dart` script to update the DevTools version.
-- When doing a release, the pre-releases can be stripped with:
-   ```shell
-   dart tool/update_version.dart auto --type release
-   ```
-- Create a PR with this cleaned version number to denote the official release of Devtools under that number
-
-Verify:
-* that this script updated the pubspecs under packages/
-* updated all references to those packages.
-*  make sure that the version constant in `packages/devtools_app/lib/devtools.dart` was updated
-
-These packages always have their version numbers updated in lock, so we don't have to worry about versioning.
-
-##### Updating to the next version
-After merging a cleaned version of the current release, you can then perform a `patch`, `minor`, or `major` update.
-This version can be pushed up in a separate PR to denote the start of this next version.
-
-> NOTE: In the future these two released commits will automatically be handled by GitHub.
-
 - For regular monthly releases, use `minor`:
    ```shell
    dart tool/update_version.dart auto --type minor
@@ -65,6 +45,10 @@ This version can be pushed up in a separate PR to denote the start of this next 
 - To automatically update the version by `major`, `minor`, `patch`, or `dev`:
    ```shell
    dart tool/update_version.dart auto --type patch
+   ```
+- Pre-release versions can be stripped with:
+   ```shell
+   dart tool/update_version.dart auto --type release
    ```
 
 #### Update the CHANGELOG.md (for non-dev releases)
