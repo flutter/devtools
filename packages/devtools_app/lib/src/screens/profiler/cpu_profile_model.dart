@@ -9,11 +9,11 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../../shared/charts/flame_chart.dart';
+import '../../shared/globals.dart';
 import '../../shared/primitives/simple_items.dart';
 import '../../shared/primitives/trace_event.dart';
 import '../../shared/primitives/trees.dart';
 import '../../shared/primitives/utils.dart';
-import '../../shared/globals.dart';
 import '../../shared/profiler_utils.dart';
 import '../../shared/ui/search.dart';
 import '../vm_developer/vm_service_private_extensions.dart';

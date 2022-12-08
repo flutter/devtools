@@ -8,10 +8,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../analytics/analytics.dart' as ga;
-import '../analytics/constants.dart' as gac;
 import '../../screens/profiler/cpu_profile_service.dart';
 import '../../screens/profiler/sampling_rate.dart';
+import '../analytics/analytics.dart' as ga;
+import '../analytics/constants.dart' as gac;
 import '../banner_messages.dart';
 import '../common_widgets.dart';
 import '../globals.dart';

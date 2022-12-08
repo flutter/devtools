@@ -7,12 +7,12 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../service/vm_flags.dart' as vm_flags;
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/analytics/metrics.dart';
-import '../../shared/primitives/utils.dart';
-import '../../service/vm_flags.dart' as vm_flags;
 import '../../shared/globals.dart';
+import '../../shared/primitives/utils.dart';
 import '../../shared/ui/filter.dart';
 import '../../shared/ui/search.dart';
 import 'cpu_profile_model.dart';

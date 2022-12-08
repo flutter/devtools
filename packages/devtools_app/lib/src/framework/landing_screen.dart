@@ -11,16 +11,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../shared/analytics/analytics.dart' as ga;
 import '../shared/analytics/constants.dart' as gac;
-import '../shared/config_specific/import_export/import_export.dart';
-import '../shared/primitives/blocking_action_mixin.dart';
-import '../shared/primitives/utils.dart';
 import '../shared/common_widgets.dart';
+import '../shared/config_specific/import_export/import_export.dart';
 import '../shared/file_import.dart';
 import '../shared/globals.dart';
+import '../shared/primitives/blocking_action_mixin.dart';
+import '../shared/primitives/utils.dart';
 import '../shared/routing.dart';
 import '../shared/theme.dart';
-import '../shared/utils.dart';
 import '../shared/ui/label.dart';
+import '../shared/utils.dart';
 import 'framework_core.dart';
 
 /// The landing screen when starting Dart DevTools without being connected to an

@@ -8,10 +8,10 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../shared/config_specific/logger/allowed_error.dart';
+import '../../shared/globals.dart';
 import '../../shared/http/http_request_data.dart';
 import '../../shared/http/http_service.dart';
 import '../../shared/primitives/utils.dart';
-import '../../shared/globals.dart';
 import '../../shared/ui/filter.dart';
 import '../../shared/ui/search.dart';
 import 'network_model.dart';

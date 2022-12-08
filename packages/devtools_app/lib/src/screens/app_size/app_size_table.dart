@@ -8,9 +8,8 @@ import '../../shared/charts/treemap.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
-import '../../shared/utils.dart';
 import '../../shared/ui/colors.dart';
-
+import '../../shared/utils.dart';
 import 'app_size_controller.dart';
 
 class AppSizeAnalysisTable extends StatelessWidget {

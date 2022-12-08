@@ -8,14 +8,14 @@ import 'package:flutter/material.dart';
 
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/charts/flame_chart.dart';
-import '../../shared/primitives/auto_dispose_mixin.dart';
-import '../../shared/primitives/feature_flags.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/auto_dispose_mixin.dart';
+import '../../shared/primitives/feature_flags.dart';
 import '../../shared/theme.dart';
-import '../../shared/utils.dart';
 import '../../shared/ui/search.dart';
 import '../../shared/ui/tab.dart';
+import '../../shared/utils.dart';
 import 'panes/flutter_frames/flutter_frame_model.dart';
 import 'panes/flutter_frames/flutter_frames_controller.dart';
 import 'panes/frame_analysis/frame_analysis.dart';

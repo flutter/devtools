@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../shared/analytics/constants.dart' as gac;
 import '../screens/debugger/codeview.dart';
 import '../screens/inspector/inspector_service.dart';
+import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
 import '../shared/utils.dart';

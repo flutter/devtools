@@ -5,8 +5,8 @@
 import 'package:flutter/material.dart';
 
 import '../../shared/analytics/constants.dart' as gac;
-import '../../shared/http/http_request_data.dart';
 import '../../shared/common_widgets.dart';
+import '../../shared/http/http_request_data.dart';
 import '../../shared/ui/tab.dart';
 import 'network_controller.dart';
 import 'network_model.dart';

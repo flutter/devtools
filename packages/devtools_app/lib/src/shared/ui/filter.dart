@@ -4,10 +4,10 @@
 
 import 'package:flutter/material.dart';
 
-import '../primitives/auto_dispose_mixin.dart';
-import '../primitives/utils.dart';
 import '../common_widgets.dart';
 import '../dialogs.dart';
+import '../primitives/auto_dispose_mixin.dart';
+import '../primitives/utils.dart';
 import '../theme.dart';
 
 // TODO(kenz): consider breaking this up flat data filtering and tree data

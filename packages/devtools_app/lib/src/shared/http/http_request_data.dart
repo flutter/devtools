@@ -10,10 +10,10 @@ import 'package:flutter/widgets.dart';
 import 'package:mime/mime.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../config_specific/logger/logger.dart';
-import '../primitives/utils.dart';
 import '../../screens/network/network_model.dart';
+import '../config_specific/logger/logger.dart';
 import '../globals.dart';
+import '../primitives/utils.dart';
 import 'http.dart';
 
 /// Used to represent an instant event emitted during an HTTP request.

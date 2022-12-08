@@ -8,8 +8,8 @@ import 'package:flutter/material.dart';
 
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
-import '../../../../../shared/primitives/auto_dispose_mixin.dart';
 import '../../../../../shared/common_widgets.dart';
+import '../../../../../shared/primitives/auto_dispose_mixin.dart';
 import '../../../../../shared/table/table.dart';
 import '../../../../../shared/theme.dart';
 import '../controller/diff_pane_controller.dart';

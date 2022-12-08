@@ -9,16 +9,16 @@ import 'package:flutter/material.dart';
 
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/charts/flame_chart.dart';
-import '../../shared/primitives/auto_dispose_mixin.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/dialogs.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/auto_dispose_mixin.dart';
 import '../../shared/theme.dart';
-import '../../shared/utils.dart';
 import '../../shared/ui/colors.dart';
 import '../../shared/ui/filter.dart';
 import '../../shared/ui/search.dart';
 import '../../shared/ui/tab.dart';
+import '../../shared/utils.dart';
 import 'cpu_profile_bottom_up.dart';
 import 'cpu_profile_call_tree.dart';
 import 'cpu_profile_controller.dart';

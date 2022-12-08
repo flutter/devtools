@@ -8,10 +8,10 @@ import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../devtools.dart';
-import '../../primitives/simple_items.dart';
-import '../../primitives/utils.dart';
 import '../../connected_app.dart';
 import '../../globals.dart';
+import '../../primitives/simple_items.dart';
+import '../../primitives/utils.dart';
 import '_export_stub.dart'
     if (dart.library.html) '_export_web.dart'
     if (dart.library.io) '_export_desktop.dart';

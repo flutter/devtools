@@ -8,11 +8,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'analytics/constants.dart' as gac;
-import 'primitives/utils.dart';
 import '../screens/performance/performance_utils.dart';
+import 'analytics/constants.dart' as gac;
 import 'common_widgets.dart';
 import 'globals.dart';
+import 'primitives/utils.dart';
 import 'screen.dart';
 import 'theme.dart';
 import 'version.dart';

@@ -8,8 +8,8 @@ import 'package:flutter/material.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
-import '../../shared/primitives/blocking_action_mixin.dart';
 import '../../shared/common_widgets.dart';
+import '../../shared/primitives/blocking_action_mixin.dart';
 import '../../shared/theme.dart';
 import '../../shared/ui/tab.dart';
 import 'inspector_controller.dart';

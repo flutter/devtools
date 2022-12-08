@@ -5,10 +5,10 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart' hide TimelineEvent;
 
-import '../../../../../shared/primitives/trace_event.dart';
-import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/globals.dart';
+import '../../../../../shared/primitives/trace_event.dart';
+import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/theme.dart';
 import '../../../../../shared/ui/vm_flag_widgets.dart';
 import '../../../../profiler/cpu_profile_controller.dart';

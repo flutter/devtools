@@ -10,13 +10,13 @@ import 'package:intl/intl.dart';
 import 'package:leak_tracker/devtools_integration.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../service/service_manager.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/config_specific/file/file.dart';
 import '../../shared/config_specific/logger/logger.dart';
-import '../../shared/primitives/auto_dispose.dart';
-import '../../service/service_manager.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/utils.dart';
 import 'memory_protocol.dart';
 import 'panes/allocation_profile/allocation_profile_table_view_controller.dart';

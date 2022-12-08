@@ -4,9 +4,9 @@
 
 import 'package:flutter/material.dart';
 
-import '../../shared/primitives/utils.dart';
 import '../../shared/globals.dart';
 import '../../shared/object_tree.dart';
+import '../../shared/primitives/utils.dart';
 import '../../shared/theme.dart';
 import '../../shared/ui/hover.dart';
 import '../../shared/ui/icons.dart';

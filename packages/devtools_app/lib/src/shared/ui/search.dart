@@ -10,15 +10,15 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../common_widgets.dart';
 import '../config_specific/logger/logger.dart';
 import '../primitives/auto_dispose.dart';
 import '../primitives/auto_dispose_mixin.dart';
 import '../primitives/trees.dart';
 import '../primitives/utils.dart';
-import '../common_widgets.dart';
 import '../theme.dart';
-import '../utils.dart';
 import '../ui/utils.dart';
+import '../utils.dart';
 
 /// Top 10 matches to display in auto-complete overlay.
 const defaultTopMatchesLimit = 10;

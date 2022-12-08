@@ -9,16 +9,16 @@ import 'package:flutter/material.dart';
 
 import '../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../shared/analytics/constants.dart' as gac;
-import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/dialogs.dart';
 import '../../../../shared/globals.dart';
+import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/split.dart';
 import '../../../../shared/table/table.dart';
 import '../../../../shared/table/table_data.dart';
 import '../../../../shared/theme.dart';
-import '../../../../shared/utils.dart';
 import '../../../../shared/ui/colors.dart';
+import '../../../../shared/utils.dart';
 import 'raster_stats_controller.dart';
 import 'raster_stats_model.dart';
 

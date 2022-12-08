@@ -5,10 +5,10 @@
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as image;
 
+import '../../shared/common_widgets.dart';
 import '../../shared/http/http.dart';
 import '../../shared/http/http_request_data.dart';
 import '../../shared/primitives/utils.dart';
-import '../../shared/common_widgets.dart';
 import '../../shared/table/table.dart';
 import '../../shared/theme.dart';
 import '../../shared/ui/colors.dart';
