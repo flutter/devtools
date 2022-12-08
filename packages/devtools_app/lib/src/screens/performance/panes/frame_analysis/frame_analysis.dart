@@ -4,13 +4,13 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../primitives/feature_flags.dart';
 import '../../../../service/service_extension_widgets.dart';
 import '../../../../service/service_extensions.dart' as extensions;
 import '../../../../shared/common_widgets.dart';
+import '../../../../shared/feature_flags.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/theme.dart';
-import '../../../../ui/colors.dart';
+import '../../../../shared/ui/colors.dart';
 import '../controls/enhance_tracing/enhance_tracing_controller.dart';
 import '../rebuild_stats/rebuild_stats.dart';
 import '../rebuild_stats/rebuild_stats_model.dart';

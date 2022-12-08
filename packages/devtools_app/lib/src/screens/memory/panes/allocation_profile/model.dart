@@ -6,7 +6,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../../../shared/table/table_data.dart';
 import '../../../vm_developer/vm_service_private_extensions.dart';
-import '../../primitives/class_name.dart';
+import '../../shared/primitives/class_name.dart';
 
 class AdaptedAllocationProfile {
   AdaptedAllocationProfile.fromAllocationProfile(AllocationProfile profile) {

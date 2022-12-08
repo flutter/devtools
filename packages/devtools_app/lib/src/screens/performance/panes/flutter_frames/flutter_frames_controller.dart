@@ -8,10 +8,10 @@ import 'dart:math' as math;
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../../../primitives/trace_event.dart';
-import '../../../../primitives/utils.dart';
 import '../../../../service/service_manager.dart';
 import '../../../../shared/globals.dart';
+import '../../../../shared/primitives/trace_event.dart';
+import '../../../../shared/primitives/utils.dart';
 import '../../performance_controller.dart';
 import '../../performance_model.dart';
 import '../../performance_screen.dart';

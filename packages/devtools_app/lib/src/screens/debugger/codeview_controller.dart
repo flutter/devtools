@@ -7,12 +7,13 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../config_specific/logger/logger.dart';
-import '../../primitives/auto_dispose.dart';
-import '../../primitives/history_manager.dart';
+import '../../shared/config_specific/logger/logger.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/auto_dispose.dart';
+import '../../shared/primitives/history_manager.dart';
 import '../../shared/routing.dart';
-import '../../ui/search.dart';
+import '../../shared/ui/search.dart';
+import '../vm_developer/vm_service_private_extensions.dart';
 import 'debugger_model.dart';
 import 'program_explorer_controller.dart';
 import 'syntax_highlighter.dart';
@@ -81,6 +82,9 @@ class CodeViewController extends DisposableController
   ValueListenable<bool> get showCodeCoverage => _showCodeCoverage;
   final _showCodeCoverage = ValueNotifier<bool>(false);
 
+  ValueListenable<bool> get showProfileInformation => _showProfileInformation;
+  final _showProfileInformation = ValueNotifier<bool>(false);
+
   /// Specifies which line should have focus applied in [CodeView].
   ///
   /// A line can be focused by invoking `showScriptLocation` with `focusLine`
@@ -90,6 +94,10 @@ class CodeViewController extends DisposableController
 
   void toggleShowCodeCoverage() {
     _showCodeCoverage.value = !_showCodeCoverage.value;
+  }
+
+  void toggleShowProfileInformation() {
+    _showProfileInformation.value = !_showProfileInformation.value;
   }
 
   void clearState() {
@@ -157,27 +165,22 @@ class CodeViewController extends DisposableController
     scriptsHistory.current.addListener(_scriptHistoryListener);
   }
 
-  Future<void> refreshCodeCoverage() async {
-    final hitLines = <int>{};
-    final missedLines = <int>{};
+  Future<void> refreshCodeStatistics() async {
     final current = parsedScript.value;
     if (current == null) {
       return;
     }
     final isolateRef = serviceManager.isolateManager.selectedIsolate.value!;
-    await _getCoverageReport(
+    final processedReport = await _getSourceReport(
       isolateRef,
       current.script,
-      hitLines,
-      missedLines,
     );
 
     parsedScript.value = ParsedScript(
       script: current.script,
       highlighter: current.highlighter,
       executableLines: current.executableLines,
-      coverageHitLines: hitLines,
-      coverageMissedLines: missedLines,
+      sourceReport: processedReport,
     );
   }
 
@@ -211,28 +214,46 @@ class CodeViewController extends DisposableController
     _scriptLocation.value = scriptLocation;
   }
 
-  Future<void> _getCoverageReport(
+  Future<ProcessedSourceReport> _getSourceReport(
     IsolateRef isolateRef,
-    ScriptRef script,
-    Set<int> hitLines,
-    Set<int> missedLines,
+    Script script,
   ) async {
+    final hitLines = <int>{};
+    final missedLines = <int>{};
     try {
       final report = await serviceManager.service!.getSourceReport(
         isolateRef.id!,
-        const [SourceReportKind.kCoverage],
+        // TODO(bkonyi): make _Profile a public report type.
+        // See https://github.com/dart-lang/sdk/issues/50641
+        const [
+          SourceReportKind.kCoverage,
+          '_Profile',
+        ],
         scriptId: script.id!,
         reportLines: true,
       );
+
       for (final range in report.ranges!) {
         final coverage = range.coverage!;
         hitLines.addAll(coverage.hits!);
         missedLines.addAll(coverage.misses!);
       }
+
+      final profileReport = report.asProfileReport(script);
+      return ProcessedSourceReport(
+        coverageHitLines: hitLines,
+        coverageMissedLines: missedLines,
+        profilerEntries:
+            profileReport.profileRanges.fold<Map<int, ProfileReportEntry>>(
+          {},
+          (last, e) => last..addAll(e.entries),
+        ),
+      );
     } catch (e) {
       // Ignore - not supported for all vm service implementations.
       log('$e');
     }
+    return const ProcessedSourceReport.empty();
   }
 
   /// Parses the current script into executable lines and prepares the script
@@ -252,9 +273,6 @@ class CodeViewController extends DisposableController
     // Gather the data to display breakable lines.
     var executableLines = <int>{};
 
-    final hitLines = <int>{};
-    final missedLines = <int>{};
-
     if (script != null) {
       final isolateRef = serviceManager.isolateManager.selectedIsolate.value!;
       try {
@@ -270,19 +288,16 @@ class CodeViewController extends DisposableController
         log('$e');
       }
 
-      await _getCoverageReport(
+      final processedReport = await _getSourceReport(
         isolateRef,
         script,
-        hitLines,
-        missedLines,
       );
 
       parsedScript.value = ParsedScript(
         script: script,
         highlighter: highlighter,
         executableLines: executableLines,
-        coverageHitLines: hitLines,
-        coverageMissedLines: missedLines,
+        sourceReport: processedReport,
       );
     }
   }
@@ -336,6 +351,23 @@ class CodeViewController extends DisposableController
   }
 }
 
+class ProcessedSourceReport {
+  ProcessedSourceReport({
+    required this.coverageHitLines,
+    required this.coverageMissedLines,
+    required this.profilerEntries,
+  });
+
+  const ProcessedSourceReport.empty()
+      : coverageHitLines = const <int>{},
+        coverageMissedLines = const <int>{},
+        profilerEntries = const <int, ProfileReportEntry>{};
+
+  final Set<int> coverageHitLines;
+  final Set<int> coverageMissedLines;
+  final Map<int, ProfileReportEntry> profilerEntries;
+}
+
 /// Maintains the navigation history of the debugger's code area - which files
 /// were opened, whether it's possible to navigate forwards and backwards in the
 /// history, ...
@@ -368,8 +400,7 @@ class ParsedScript {
     required this.script,
     required this.highlighter,
     required this.executableLines,
-    required this.coverageHitLines,
-    required this.coverageMissedLines,
+    required this.sourceReport,
   }) : lines = (script.source?.split('\n') ?? const []).toList();
 
   final Script script;
@@ -378,8 +409,7 @@ class ParsedScript {
 
   final Set<int> executableLines;
 
-  final Set<int> coverageHitLines;
-  final Set<int> coverageMissedLines;
+  final ProcessedSourceReport? sourceReport;
 
   final List<String> lines;
 

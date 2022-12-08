@@ -5,13 +5,13 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../../primitives/utils.dart';
 import '../../../../shared/common_widgets.dart';
+import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/table/table.dart';
 import '../../../../shared/table/table_data.dart';
 import '../../../../shared/theme.dart';
+import '../../../../shared/ui/tab.dart';
 import '../../../../shared/utils.dart';
-import '../../../../ui/tab.dart';
 import '../../../profiler/cpu_profile_columns.dart';
 import '../../../profiler/cpu_profile_model.dart';
 import 'allocation_profile_tracing_view_controller.dart';

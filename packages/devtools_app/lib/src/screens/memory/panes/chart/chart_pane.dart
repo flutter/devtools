@@ -5,15 +5,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../../charts/chart_controller.dart';
-import '../../../../primitives/auto_dispose_mixin.dart';
-import '../../../../primitives/utils.dart';
+import '../../../../shared/charts/chart_controller.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
+import '../../../../shared/primitives/auto_dispose.dart';
+import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../memory_controller.dart';
-import '../../primitives/painting.dart';
+import '../../shared/primitives/painting.dart';
 import 'chart_control_pane.dart';
 import 'chart_pane_controller.dart';
 import 'legend.dart';

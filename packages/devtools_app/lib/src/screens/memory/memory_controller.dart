@@ -7,23 +7,23 @@ import 'dart:async';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
+import 'package:leak_tracker/devtools_integration.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../analytics/analytics.dart' as ga;
-import '../../analytics/constants.dart' as analytics_constants;
-import '../../config_specific/file/file.dart';
-import '../../config_specific/logger/logger.dart';
-import '../../primitives/auto_dispose.dart';
-import '../../service/service_extensions.dart';
 import '../../service/service_manager.dart';
+import '../../shared/analytics/analytics.dart' as ga;
+import '../../shared/analytics/constants.dart' as gac;
+import '../../shared/config_specific/file/file.dart';
+import '../../shared/config_specific/logger/logger.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/utils.dart';
 import 'memory_protocol.dart';
 import 'panes/allocation_profile/allocation_profile_table_view_controller.dart';
 import 'panes/chart/primitives.dart';
 import 'panes/diff/controller/diff_pane_controller.dart';
-import 'primitives/memory_timeline.dart';
 import 'shared/heap/model.dart';
+import 'shared/primitives/memory_timeline.dart';
 
 // TODO(terry): Consider supporting more than one file since app was launched.
 // Memory Log filename.
@@ -202,7 +202,7 @@ class MemoryController extends DisposableController
 
   void _refreshShouldShowLeaksTab() {
     _shouldShowLeaksTab.value = serviceManager.serviceExtensionManager
-        .hasServiceExtension(memoryLeakTracking)
+        .hasServiceExtension(memoryLeakTrackingExtensionName)
         .value;
   }
 
@@ -379,7 +379,7 @@ class _MemoryLog {
 
   /// Persist the the live memory data to a JSON file in the /tmp directory.
   List<String> exportMemory() {
-    ga.select(analytics_constants.memory, analytics_constants.export);
+    ga.select(gac.memory, gac.export);
 
     final liveData = controller.memoryTimeline.liveData;
 

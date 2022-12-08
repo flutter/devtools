@@ -4,15 +4,14 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../analytics/analytics.dart' as ga;
-import '../../../../analytics/constants.dart' as analytics_constants;
-import '../../../../primitives/auto_dispose_mixin.dart';
+import '../../../../shared/analytics/analytics.dart' as ga;
+import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
+import '../../../../shared/primitives/auto_dispose.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../memory_controller.dart';
-import '../../primitives/ui.dart';
-import '../../shared/primitives.dart';
+import '../../shared/primitives/simple_elements.dart';
 import 'chart_pane_controller.dart';
 import 'interval_dropdown.dart';
 
@@ -45,17 +44,17 @@ class _ChartControlPaneState extends State<ChartControlPane>
   }
 
   void _onPause() {
-    ga.select(analytics_constants.memory, analytics_constants.pause);
+    ga.select(gac.memory, gac.pause);
     controller.pauseLiveFeed();
   }
 
   void _onResume() {
-    ga.select(analytics_constants.memory, analytics_constants.resume);
+    ga.select(gac.memory, gac.resume);
     controller.resumeLiveFeed();
   }
 
   void _clearTimeline() {
-    ga.select(analytics_constants.memory, analytics_constants.clear);
+    ga.select(gac.memory, gac.clear);
 
     controller.memoryTimeline.reset();
 
@@ -87,8 +86,7 @@ class _ChartControlPaneState extends State<ChartControlPane>
               onPressed: controller.memorySource == MemoryController.liveFeed
                   ? _clearTimeline
                   : null,
-              minScreenWidthForTextBeforeScaling:
-                  primaryControlsMinVerboseWidth,
+              minScreenWidthForTextBeforeScaling: memoryControlsMinVerboseWidth,
               tooltip: 'Clear memory chart.',
             ),
           ],
@@ -121,15 +119,15 @@ class _LegendButton extends StatelessWidget {
           chartController.toggleLegendVisibility();
           if (legendVisible) {
             ga.select(
-              analytics_constants.memory,
-              analytics_constants.MemoryEvent.chartLegend,
+              gac.memory,
+              gac.MemoryEvent.chartLegend,
             );
           }
         },
         icon: legendVisible ? Icons.close : Icons.storage,
         label: 'Legend',
         tooltip: 'Show chart legend',
-        minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
+        minScreenWidthForTextBeforeScaling: memoryControlsMinVerboseWidth,
       ),
     );
   }
@@ -138,14 +136,13 @@ class _LegendButton extends StatelessWidget {
 class _ChartHelpLink extends StatelessWidget {
   const _ChartHelpLink({Key? key}) : super(key: key);
 
-  static const _documentationTopic = analytics_constants.MemoryEvent.chartHelp;
+  static const _documentationTopic = gac.MemoryEvent.chartHelp;
 
   @override
   Widget build(BuildContext context) {
     return HelpButtonWithDialog(
-      gaScreen: analytics_constants.memory,
-      gaSelection:
-          analytics_constants.topicDocumentationButton(_documentationTopic),
+      gaScreen: gac.memory,
+      gaSelection: gac.topicDocumentationButton(_documentationTopic),
       dialogTitle: 'Memory Chart Help',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -156,7 +153,7 @@ class _ChartHelpLink extends StatelessWidget {
             url: DocLinks.chart.value,
             gaScreenName: '',
             gaSelectedItemDescription:
-                analytics_constants.topicDocumentationLink(_documentationTopic),
+                gac.topicDocumentationLink(_documentationTopic),
           )
         ],
       ),

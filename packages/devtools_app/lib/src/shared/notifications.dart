@@ -6,7 +6,7 @@ import 'dart:collection';
 
 import 'package:flutter/material.dart';
 
-import '../primitives/utils.dart';
+import 'primitives/utils.dart';
 
 class NotificationMessage {
   NotificationMessage(

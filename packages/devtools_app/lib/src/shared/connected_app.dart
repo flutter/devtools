@@ -6,9 +6,9 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
-import '../config_specific/import_export/import_export.dart';
-import '../config_specific/logger/logger.dart' as logger;
 import '../service/service_registrations.dart' as registrations;
+import 'config_specific/import_export/import_export.dart';
+import 'config_specific/logger/logger.dart' as logger;
 import 'eval_on_dart_library.dart';
 import 'globals.dart';
 import 'title.dart';

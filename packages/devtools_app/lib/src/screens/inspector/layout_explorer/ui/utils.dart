@@ -6,8 +6,8 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-import '../../../../primitives/utils.dart';
 import '../../../../shared/common_widgets.dart';
+import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/theme.dart';
 import '../../diagnostics_node.dart';
 import '../../inspector_data_models.dart';

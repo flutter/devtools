@@ -8,23 +8,23 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../analytics/analytics.dart' as ga;
-import '../../analytics/constants.dart' as analytics_constants;
-import '../../http/curl_command.dart';
-import '../../http/http_request_data.dart';
-import '../../primitives/auto_dispose_mixin.dart';
-import '../../primitives/simple_items.dart';
-import '../../primitives/utils.dart';
+import '../../shared/analytics/analytics.dart' as ga;
+import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
+import '../../shared/http/curl_command.dart';
+import '../../shared/http/http_request_data.dart';
+import '../../shared/primitives/auto_dispose.dart';
+import '../../shared/primitives/simple_items.dart';
+import '../../shared/primitives/utils.dart';
 import '../../shared/screen.dart';
 import '../../shared/split.dart';
 import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
 import '../../shared/theme.dart';
+import '../../shared/ui/filter.dart';
+import '../../shared/ui/search.dart';
 import '../../shared/utils.dart';
-import '../../ui/filter.dart';
-import '../../ui/search.dart';
 import 'network_controller.dart';
 import 'network_model.dart';
 import 'network_request_inspector.dart';
@@ -222,8 +222,8 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
           onPressed: _recording
               ? () {
                   ga.select(
-                    analytics_constants.network,
-                    analytics_constants.pause,
+                    gac.network,
+                    gac.pause,
                   );
                   widget.controller.togglePolling(false);
                 }
@@ -238,8 +238,8 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
               ? null
               : () {
                   ga.select(
-                    analytics_constants.network,
-                    analytics_constants.resume,
+                    gac.network,
+                    gac.resume,
                   );
                   widget.controller.togglePolling(true);
                 },
@@ -250,8 +250,8 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
               _NetworkProfilerControls._includeTextWidth,
           onPressed: () {
             ga.select(
-              analytics_constants.network,
-              analytics_constants.clear,
+              gac.network,
+              gac.clear,
             );
             unawaited(widget.controller.clear());
           },

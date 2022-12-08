@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/primitives/storage.dart';
+import 'package:devtools_app/src/shared/primitives/storage.dart';
 
 /// A [Storage] implementation that does not store state between instances.
 ///

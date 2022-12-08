@@ -6,13 +6,14 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../../../analytics/analytics.dart' as ga;
-import '../../../../analytics/constants.dart' as analytics_constants;
+import '../../../../shared/analytics/analytics.dart' as ga;
+import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/split.dart';
 import '../../../../shared/theme.dart';
-import '../../shared/primitives.dart';
+
+import '../../shared/primitives/simple_elements.dart';
 import 'allocation_profile_class_table.dart';
 import 'allocation_profile_tracing_tree.dart';
 import 'allocation_profile_tracing_view_controller.dart';
@@ -105,8 +106,8 @@ class _TracingControls extends StatelessWidget {
                 ? null
                 : () async {
                     ga.select(
-                      analytics_constants.memory,
-                      analytics_constants.MemoryEvent.tracingRefresh,
+                      gac.memory,
+                      gac.MemoryEvent.tracingRefresh,
                     );
                     await controller.refresh();
                   },
@@ -120,8 +121,8 @@ class _TracingControls extends StatelessWidget {
                 ? null
                 : () async {
                     ga.select(
-                      analytics_constants.memory,
-                      analytics_constants.MemoryEvent.tracingClear,
+                      gac.memory,
+                      gac.MemoryEvent.tracingClear,
                     );
                     await controller.clear();
                   },
@@ -136,15 +137,13 @@ class _TracingControls extends StatelessWidget {
 class _ProfileHelpLink extends StatelessWidget {
   const _ProfileHelpLink({Key? key}) : super(key: key);
 
-  static const _documentationTopic =
-      analytics_constants.MemoryEvent.tracingHelp;
+  static const _documentationTopic = gac.MemoryEvent.tracingHelp;
 
   @override
   Widget build(BuildContext context) {
     return HelpButtonWithDialog(
-      gaScreen: analytics_constants.memory,
-      gaSelection:
-          analytics_constants.topicDocumentationButton(_documentationTopic),
+      gaScreen: gac.memory,
+      gaSelection: gac.topicDocumentationButton(_documentationTopic),
       dialogTitle: 'Memory Allocation Tracing Help',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -162,9 +161,9 @@ class _ProfileHelpLink extends StatelessWidget {
           ),
           MoreInfoLink(
             url: DocLinks.trace.value,
-            gaScreenName: analytics_constants.memory,
+            gaScreenName: gac.memory,
             gaSelectedItemDescription:
-                analytics_constants.topicDocumentationLink(_documentationTopic),
+                gac.topicDocumentationLink(_documentationTopic),
           )
         ],
       ),

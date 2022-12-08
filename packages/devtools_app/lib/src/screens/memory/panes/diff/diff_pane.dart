@@ -5,11 +5,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
-import '../../../../analytics/constants.dart' as analytics_constants;
+import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/split.dart';
 import '../../../../shared/theme.dart';
-import '../../shared/primitives.dart';
+import '../../shared/primitives/simple_elements.dart';
 import 'controller/diff_pane_controller.dart';
 import 'controller/item_controller.dart';
 import 'widgets/snapshot_control_pane.dart';
@@ -47,7 +47,7 @@ class _SnapshotItemContent extends StatelessWidget {
 
   final DiffPaneController controller;
 
-  static const _documentationTopic = analytics_constants.MemoryEvent.diffHelp;
+  static const _documentationTopic = gac.MemoryEvent.diffHelp;
 
   @override
   Widget build(BuildContext context) {
@@ -64,9 +64,9 @@ class _SnapshotItemContent extends StatelessWidget {
                 const SizedBox(height: denseSpacing),
                 MoreInfoLink(
                   url: DocLinks.diff.value,
-                  gaScreenName: analytics_constants.memory,
-                  gaSelectedItemDescription: analytics_constants
-                      .topicDocumentationLink(_documentationTopic),
+                  gaScreenName: gac.memory,
+                  gaSelectedItemDescription:
+                      gac.topicDocumentationLink(_documentationTopic),
                 )
               ],
             ),

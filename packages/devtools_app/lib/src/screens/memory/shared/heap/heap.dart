@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../../primitives/class_name.dart';
+import '../primitives/class_name.dart';
 import 'class_filter.dart';
 import 'model.dart';
 import 'spanning_tree.dart';

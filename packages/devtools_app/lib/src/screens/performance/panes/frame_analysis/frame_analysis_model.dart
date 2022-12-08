@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../../../../primitives/trees.dart';
-import '../../../../primitives/utils.dart';
+import '../../../../shared/primitives/trees.dart';
+import '../../../../shared/primitives/utils.dart';
 import '../../performance_model.dart';
 import '../flutter_frames/flutter_frame_model.dart';
 

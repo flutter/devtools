@@ -5,15 +5,15 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../analytics/analytics.dart' as ga;
-import '../../primitives/auto_dispose_mixin.dart';
-import '../../primitives/listenable.dart';
-import '../../primitives/simple_items.dart';
+import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/banner_messages.dart';
+import '../../shared/primitives/auto_dispose.dart';
+import '../../shared/primitives/listenable.dart';
+import '../../shared/primitives/simple_items.dart';
 import '../../shared/screen.dart';
 import '../../shared/theme.dart';
+import '../../shared/ui/icons.dart';
 import '../../shared/utils.dart';
-import '../../ui/icons.dart';
 import 'memory_controller.dart';
 import 'memory_tabs.dart';
 import 'panes/chart/chart_pane.dart';

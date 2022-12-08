@@ -7,19 +7,19 @@ import 'dart:async';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 
-import '../../analytics/analytics.dart' as ga;
-import '../../analytics/constants.dart' as analytics_constants;
-import '../../primitives/auto_dispose_mixin.dart';
-import '../../primitives/simple_items.dart';
 import '../../service/service_extension_widgets.dart';
 import '../../service/service_extensions.dart' as extensions;
+import '../../shared/analytics/analytics.dart' as ga;
+import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/banner_messages.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/auto_dispose.dart';
+import '../../shared/primitives/simple_items.dart';
 import '../../shared/screen.dart';
 import '../../shared/theme.dart';
+import '../../shared/ui/icons.dart';
 import '../../shared/utils.dart';
-import '../../ui/icons.dart';
 import 'panes/controls/enhance_tracing/enhance_tracing.dart';
 import 'panes/controls/layer_debugging_options.dart';
 import 'panes/controls/performance_settings.dart';
@@ -218,7 +218,7 @@ class _PrimaryControls extends StatelessWidget {
   }
 
   Future<void> _clearPerformanceData() async {
-    ga.select(analytics_constants.performance, analytics_constants.clear);
+    ga.select(gac.performance, gac.clear);
     await controller.clearData();
     onClear();
   }
@@ -267,7 +267,7 @@ class SecondaryPerformanceControls extends StatelessWidget {
   }
 
   void _exportPerformanceData(BuildContext context) {
-    ga.select(analytics_constants.performance, analytics_constants.export);
+    ga.select(gac.performance, gac.export);
     controller.exportData();
     // TODO(kenz): investigate if we need to do any error handling here. Is the
     // download always successful?

@@ -6,8 +6,8 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 
-import '../../../../../primitives/trace_event.dart';
-import '../../../../../primitives/utils.dart';
+import '../../../../../shared/primitives/trace_event.dart';
+import '../../../../../shared/primitives/utils.dart';
 import '../../../performance_model.dart';
 import '../timeline_event_processor.dart';
 

@@ -16,8 +16,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/theme.dart';
+import '../../shared/ui/search.dart';
 import '../../shared/utils.dart';
-import '../../ui/search.dart';
 import 'diagnostics_node.dart';
 import 'primitives/inspector_common.dart';
 

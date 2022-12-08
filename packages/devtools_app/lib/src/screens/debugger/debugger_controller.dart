@@ -9,13 +9,13 @@ import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../primitives/auto_dispose.dart';
-import '../../primitives/message_bus.dart';
-import '../../primitives/utils.dart';
 import '../../service/isolate_state.dart';
 import '../../service/vm_service_wrapper.dart';
 import '../../shared/globals.dart';
 import '../../shared/object_tree.dart';
+import '../../shared/primitives/auto_dispose.dart';
+import '../../shared/primitives/message_bus.dart';
+import '../../shared/primitives/utils.dart';
 import '../../shared/routing.dart';
 import 'codeview_controller.dart';
 import 'debugger_model.dart';

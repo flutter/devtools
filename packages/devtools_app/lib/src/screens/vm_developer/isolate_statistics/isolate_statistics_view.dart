@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../primitives/utils.dart';
 import '../../../shared/common_widgets.dart';
+import '../../../shared/primitives/utils.dart';
 import '../../../shared/split.dart';
 import '../../../shared/table/table.dart';
 import '../../../shared/table/table_data.dart';

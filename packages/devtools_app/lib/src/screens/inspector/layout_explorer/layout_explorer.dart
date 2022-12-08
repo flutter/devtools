@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
-import '../../../primitives/auto_dispose_mixin.dart';
+import '../../../shared/primitives/auto_dispose.dart';
 import '../diagnostics_node.dart';
 import '../inspector_controller.dart';
 import '../layout_explorer/box/box.dart';

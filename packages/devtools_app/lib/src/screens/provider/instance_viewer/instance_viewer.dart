@@ -12,8 +12,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../primitives/sliver_iterable_child_delegate.dart';
 import '../../../shared/eval_on_dart_library.dart';
+import '../../../shared/primitives/sliver_iterable_child_delegate.dart';
 import '../../../shared/theme.dart';
 import '../../inspector/primitives/inspector_text_styles.dart';
 import 'instance_details.dart';

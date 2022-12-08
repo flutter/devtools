@@ -4,14 +4,14 @@
 
 import 'package:flutter/widgets.dart';
 
-import '../../../../../../analytics/analytics.dart' as ga;
-import '../../../../../../analytics/constants.dart' as analytics_constants;
-import '../../../../../../primitives/utils.dart';
+import '../../../../../../shared/analytics/analytics.dart' as ga;
+import '../../../../../../shared/analytics/constants.dart' as gac;
+import '../../../../../../shared/primitives/utils.dart';
 import '../../../../../../shared/table/table.dart';
 import '../../../../../../shared/table/table_data.dart';
 import '../../../../../../shared/utils.dart';
-import '../../../../primitives/simple_elements.dart';
 import '../../../../shared/heap/heap.dart';
+import '../../../../shared/primitives/simple_elements.dart';
 
 class _RetainingPathColumn extends ColumnData<StatsByPathEntry> {
   _RetainingPathColumn(String className)
@@ -149,8 +149,8 @@ class RetainingPathTable extends StatelessWidget {
       keyFactory: (e) => Key(e.key.toLongString()),
       selectionNotifier: selection,
       onItemSelected: (_) => ga.select(
-        analytics_constants.memory,
-        '${analytics_constants.MemoryEvent.diffPathSelect}-${isDiff ? "diff" : "single"}',
+        gac.memory,
+        '${gac.MemoryEvent.diffPathSelect}-${isDiff ? "diff" : "single"}',
       ),
       defaultSortColumn: columns.retainedSizeColumn,
       defaultSortDirection: SortDirection.descending,

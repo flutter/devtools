@@ -6,12 +6,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../../../../analytics/analytics.dart' as ga;
-import '../../../../../analytics/constants.dart' as analytics_constants;
+import '../../../../../shared/analytics/analytics.dart' as ga;
+import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/theme.dart';
-import '../../../primitives/ui.dart';
 import '../../../shared/heap/class_filter.dart';
+import '../../../shared/primitives/simple_elements.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/item_controller.dart';
 import 'class_filter_dialog.dart';
@@ -51,11 +51,11 @@ class SnapshotControlPane extends StatelessWidget {
                   const SizedBox(width: defaultSpacing),
                   ToCsvButton(
                     minScreenWidthForTextBeforeScaling:
-                        primaryControlsMinVerboseWidth,
+                        memoryControlsMinVerboseWidth,
                     onPressed: () {
                       ga.select(
-                        analytics_constants.memory,
-                        analytics_constants.MemoryEvent.diffSnapshotDownloadCsv,
+                        gac.memory,
+                        gac.MemoryEvent.diffSnapshotDownloadCsv,
                       );
                       controller.downloadCurrentItemToCsv();
                     },
@@ -71,8 +71,8 @@ class SnapshotControlPane extends StatelessWidget {
                   : () {
                       controller.deleteCurrentSnapshot();
                       ga.select(
-                        analytics_constants.memory,
-                        analytics_constants.MemoryEvent.diffSnapshotDelete,
+                        gac.memory,
+                        gac.MemoryEvent.diffSnapshotDelete,
                       );
                     },
             ),
@@ -95,8 +95,8 @@ class ClassFilterButton extends StatelessWidget {
     return FilterButton(
       onPressed: () {
         ga.select(
-          analytics_constants.memory,
-          analytics_constants.MemoryEvent.diffSnapshotFilter,
+          gac.memory,
+          gac.MemoryEvent.diffSnapshotFilter,
         );
 
         unawaited(
@@ -161,14 +161,14 @@ class _DiffDropdown extends StatelessWidget {
               late SnapshotInstanceItem? newDiffWith;
               if ((value ?? current) == current) {
                 ga.select(
-                  analytics_constants.memory,
-                  analytics_constants.MemoryEvent.diffSnapshotDiffOff,
+                  gac.memory,
+                  gac.MemoryEvent.diffSnapshotDiffOff,
                 );
                 newDiffWith = null;
               } else {
                 ga.select(
-                  analytics_constants.memory,
-                  analytics_constants.MemoryEvent.diffSnapshotDiffSelect,
+                  gac.memory,
+                  gac.MemoryEvent.diffSnapshotDiffSelect,
                 );
                 newDiffWith = value;
               }

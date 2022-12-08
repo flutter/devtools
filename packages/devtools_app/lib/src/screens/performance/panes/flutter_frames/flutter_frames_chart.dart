@@ -8,20 +8,20 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../analytics/analytics.dart' as ga;
-import '../../../../analytics/constants.dart' as analytics_constants;
-import '../../../../analytics/metrics.dart';
 import '../../../../framework/scaffold.dart';
-import '../../../../primitives/auto_dispose_mixin.dart';
-import '../../../../primitives/utils.dart';
+import '../../../../shared/analytics/analytics.dart' as ga;
+import '../../../../shared/analytics/constants.dart' as gac;
+import '../../../../shared/analytics/metrics.dart';
 import '../../../../shared/banner_messages.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
+import '../../../../shared/primitives/auto_dispose.dart';
+import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/theme.dart';
+import '../../../../shared/ui/colors.dart';
+import '../../../../shared/ui/hover.dart';
+import '../../../../shared/ui/utils.dart';
 import '../../../../shared/utils.dart';
-import '../../../../ui/colors.dart';
-import '../../../../ui/hover.dart';
-import '../../../../ui/utils.dart';
 import '../../performance_screen.dart';
 import '../../performance_utils.dart';
 import 'flutter_frame_model.dart';
@@ -317,12 +317,12 @@ class FramesChartControls extends StatelessWidget {
   }
 
   void _pauseFrameRecording() {
-    ga.select(analytics_constants.performance, analytics_constants.pause);
+    ga.select(gac.performance, gac.pause);
     framesController.toggleRecordingFrames(false);
   }
 
   void _resumeFrameRecording() {
-    ga.select(analytics_constants.performance, analytics_constants.resume);
+    ga.select(gac.performance, gac.resume);
     framesController.toggleRecordingFrames(true);
   }
 }
@@ -490,8 +490,8 @@ class FlutterFramesChartItem extends StatelessWidget {
       // FlutterFrame. If this is the case, process the analytics call once
       // the frame's timeline events are available.
       ga.select(
-        analytics_constants.performance,
-        analytics_constants.selectFlutterFrame,
+        gac.performance,
+        gac.selectFlutterFrame,
         screenMetricsProvider: () => PerformanceScreenMetrics(
           uiDuration: frame.buildTime,
           rasterDuration: frame.rasterTime,
@@ -569,9 +569,9 @@ class FlutterFrameTooltip extends StatelessWidget {
                   ),
                   const MoreInfoLink(
                     url: preCompileShadersDocsUrl,
-                    gaScreenName: analytics_constants.performance,
+                    gaScreenName: gac.performance,
                     gaSelectedItemDescription:
-                        analytics_constants.shaderCompilationDocsTooltipLink,
+                        gac.shaderCompilationDocsTooltipLink,
                   ),
                 ],
               ),
