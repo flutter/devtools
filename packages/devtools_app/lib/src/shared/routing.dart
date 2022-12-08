@@ -221,6 +221,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
   @override
   Future<void> setNewRoutePath(DevToolsRouteConfiguration configuration) {
     _replaceStack(configuration);
+    notifyListeners();
     return SynchronousFuture<void>(null);
   }
 
@@ -244,6 +245,31 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
         currentConfig.state,
       ),
     );
+    notifyListeners();
+  }
+
+  /// Updates state for the current page.
+  ///
+  /// Existing state will be preserved unless overwritten by [stateUpdate].
+  void updateStateIfNotCurrent(
+    BuildContext context,
+    DevToolsNavigationState stateUpdate,
+  ) {
+    final stateChanged = _changesState(stateUpdate);
+    if (!stateChanged) {
+      return;
+    }
+
+    final currentConfig = currentConfiguration!;
+    _replaceStack(
+      DevToolsRouteConfiguration(
+        currentConfig.page,
+        currentConfig.args,
+        currentConfig.state?.merge(stateUpdate) ?? stateUpdate,
+      ),
+    );
+    // Add the new state to the browser history.
+    Router.navigate(context, () => null);
     notifyListeners();
   }
 
@@ -295,6 +321,20 @@ class DevToolsNavigationState {
       {...state, ...?other?.state},
       state,
     );
+  }
+
+  /// Creates a new [DevToolsNavigationState] by merging this instance with
+  /// [other].
+  ///
+  /// State contained in [other] will take presidence over state contanied in
+  /// this instance (e.g., if both instances have state with the same key, the
+  /// state in [other] will be used).
+  DevToolsNavigationState merge(DevToolsNavigationState other) {
+    final newState = <String, String?>{
+      ..._state,
+      ...other._state,
+    };
+    return DevToolsNavigationState(kind: kind, state: newState);
   }
 
   @override

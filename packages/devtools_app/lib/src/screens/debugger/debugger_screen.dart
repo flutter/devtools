@@ -18,6 +18,7 @@ import '../../primitives/simple_items.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/flex_split_column.dart';
 import '../../shared/globals.dart';
+import '../../shared/routing.dart';
 import '../../shared/screen.dart';
 import '../../shared/split.dart';
 import '../../shared/theme.dart';
@@ -199,9 +200,13 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   void _onNodeSelected(VMServiceObjectNode? node) {
     final location = node?.location;
     if (location != null) {
-      controller.codeViewController.showScriptLocation(
-        location,
-        focusLine: true,
+      final routerDelegate = DevToolsRouterDelegate.of(context);
+      routerDelegate.updateStateIfNotCurrent(
+        context,
+        CodeViewSourceLocationNavigationState(
+          script: location.scriptRef,
+          line: location.location?.line ?? -1,
+        ),
       );
     }
   }
