@@ -6,9 +6,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
-import 'package:devtools_shared/devtools_shared.dart';
-
-import 'lib/release_note_classes.dart' as rn;
 
 // This script must be executed from the top level devtools/ directory.
 // TODO(kenz): If changes are made to this script, first consider refactoring to
@@ -60,37 +57,6 @@ Future<void> performTheVersionUpdate(
   process.stdout.asBroadcastStream().listen((event) {
     print(utf8.decode(event));
   });
-}
-
-Future<void> resetReleaseNotes({
-  required SemanticVersion newVersion,
-}) async {
-  final release = rn.Release(version: newVersion, sections: [
-    rn.ReleaseSection(name: 'General updates'),
-    rn.ReleaseSection(name: 'Inspector update'),
-    rn.ReleaseSection(name: 'Performance updates'),
-    rn.ReleaseSection(name: 'CPU profiler updates'),
-    rn.ReleaseSection(name: 'Memory updates'),
-    rn.ReleaseSection(name: 'Network profiler updates'),
-    rn.ReleaseSection(name: 'Logging updates'),
-    rn.ReleaseSection(name: 'App size tool updates'),
-  ]);
-
-  // Clear out the current notes
-  final releaseNotesDir = Directory('./tool/release_notes/');
-  if (releaseNotesDir.existsSync()) {
-    releaseNotesDir.delete(recursive: true);
-  }
-  final filesDir = Directory('./tool/release_notes/files');
-
-  await releaseNotesDir.create();
-  await filesDir.create();
-
-  // populate a blank release notes file
-  JsonEncoder encoder = JsonEncoder.withIndent('  ');
-  await File('./tool/release_notes/release_notes.json').writeAsString(
-    encoder.convert(release),
-  );
 }
 
 String? incrementVersionByType(String version, String type) {
@@ -360,11 +326,6 @@ class AutoUpdateCommand extends Command {
         break;
       default:
         newVersion = incrementVersionByType(currentVersion, type);
-
-        // Doing a proper version update so cycle the release notes
-        await resetReleaseNotes(
-            newVersion: SemanticVersion.parse(currentVersion));
-
         if (newVersion == null) {
           throw 'Failed to determine the newVersion.';
         }
