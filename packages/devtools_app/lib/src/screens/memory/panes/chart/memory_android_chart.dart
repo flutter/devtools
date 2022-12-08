@@ -12,7 +12,7 @@ import '../../../../shared/primitives/auto_dispose.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../memory_controller.dart';
-import '../../primitives/memory_timeline.dart';
+import '../../shared/primitives/memory_timeline.dart';
 
 class AndroidChartController extends ChartController {
   AndroidChartController(this._memoryController, {sharedLabels = const <int>[]})

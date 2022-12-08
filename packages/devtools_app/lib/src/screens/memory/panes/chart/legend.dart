@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
-import '../../primitives/painting.dart';
+import '../../shared/primitives/painting.dart';
 import 'chart_pane_controller.dart';
 import 'memory_android_chart.dart';
 import 'memory_charts.dart';

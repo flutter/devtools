@@ -15,9 +15,9 @@ import '../../../../shared/table/table_controller.dart';
 import '../../../../shared/table/table_data.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
-import '../../primitives/simple_elements.dart';
-import '../../primitives/ui.dart';
-import '../../shared/primitives.dart';
+import '../../shared/primitives/simple_elements.dart';
+import '../../shared/primitives/ui.dart';
+
 import 'allocation_profile_table_view_controller.dart';
 import 'model.dart';
 

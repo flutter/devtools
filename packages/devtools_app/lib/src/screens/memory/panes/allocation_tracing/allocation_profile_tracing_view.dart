@@ -12,7 +12,8 @@ import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/split.dart';
 import '../../../../shared/theme.dart';
-import '../../shared/primitives.dart';
+
+import '../../shared/primitives/simple_elements.dart';
 import 'allocation_profile_class_table.dart';
 import 'allocation_profile_tracing_tree.dart';
 import 'allocation_profile_tracing_view_controller.dart';

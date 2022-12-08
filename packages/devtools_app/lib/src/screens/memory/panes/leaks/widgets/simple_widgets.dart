@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
-import '../../../primitives/ui.dart';
+import '../../../shared/primitives/ui.dart';
 import '../controller.dart';
 import '../diagnostics/formatter.dart';
 

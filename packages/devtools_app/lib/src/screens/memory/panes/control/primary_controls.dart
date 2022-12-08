@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
-import '../../primitives/ui.dart';
+import '../../shared/primitives/ui.dart';
 
 class PrimaryControls extends StatelessWidget {
   const PrimaryControls({

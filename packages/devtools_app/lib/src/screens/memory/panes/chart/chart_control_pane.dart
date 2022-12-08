@@ -11,8 +11,8 @@ import '../../../../shared/primitives/auto_dispose.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../memory_controller.dart';
-import '../../primitives/ui.dart';
-import '../../shared/primitives.dart';
+import '../../shared/primitives/simple_elements.dart';
+import '../../shared/primitives/ui.dart';
 import 'chart_pane_controller.dart';
 import 'interval_dropdown.dart';
 
