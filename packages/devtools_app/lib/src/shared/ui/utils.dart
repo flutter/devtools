@@ -10,8 +10,8 @@ import 'package:flutter/scheduler.dart';
 
 import '../primitives/enum_utils.dart';
 import '../primitives/utils.dart';
-import '../shared/table/table.dart';
-import '../shared/theme.dart';
+import '../table/table.dart';
+import '../theme.dart';
 
 /// Returns a [TextSpan] that only includes the first [length] characters of
 /// [span].

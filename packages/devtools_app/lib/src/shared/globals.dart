@@ -5,10 +5,10 @@
 import 'config_specific/ide_theme/ide_theme.dart';
 import 'config_specific/import_export/import_export.dart';
 import '../extension_points/extensions_base.dart';
-import '../primitives/message_bus.dart';
-import '../primitives/storage.dart';
+import 'primitives/message_bus.dart';
+import 'primitives/storage.dart';
 import '../screens/debugger/breakpoint_manager.dart';
-import '../scripts/script_manager.dart';
+import 'scripts/script_manager.dart';
 import '../service/service_manager.dart';
 import '../shared/notifications.dart';
 import 'framework_controller.dart';

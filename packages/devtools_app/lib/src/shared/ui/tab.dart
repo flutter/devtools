@@ -4,10 +4,10 @@
 
 import 'package:flutter/material.dart';
 
-import '../shared/analytics/analytics.dart' as ga;
-import '../shared/common_widgets.dart';
-import '../shared/theme.dart';
-import '../shared/utils.dart';
+import '../analytics/analytics.dart' as ga;
+import '../common_widgets.dart';
+import '../theme.dart';
+import '../utils.dart';
 
 double get _tabHeight => scaleByFontFactor(46.0);
 double get _textAndIconTabHeight => scaleByFontFactor(72.0);

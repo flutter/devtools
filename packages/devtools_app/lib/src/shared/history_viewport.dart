@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../primitives/history_manager.dart';
+import 'primitives/history_manager.dart';
 import '../screens/debugger/common.dart';
 import 'common_widgets.dart';
 import 'theme.dart';

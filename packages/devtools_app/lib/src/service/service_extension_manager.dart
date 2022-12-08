@@ -9,7 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
 import '../shared/config_specific/logger/logger.dart';
-import '../primitives/auto_dispose.dart';
+import '../shared/primitives/auto_dispose.dart';
 import '../shared/connected_app.dart';
 import 'isolate_manager.dart';
 import 'service_extensions.dart' as extensions;

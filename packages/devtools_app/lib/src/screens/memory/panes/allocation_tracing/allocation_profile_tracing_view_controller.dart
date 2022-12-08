@@ -6,8 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../../primitives/auto_dispose.dart';
-import '../../../../primitives/utils.dart';
+import '../../../../shared/primitives/auto_dispose.dart';
+import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/table/table_data.dart';
 import '../../../profiler/cpu_profile_model.dart';

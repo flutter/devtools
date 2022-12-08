@@ -8,8 +8,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
-import '../../primitives/auto_dispose_mixin.dart';
-import '../../primitives/utils.dart';
+import '../../shared/primitives/auto_dispose_mixin.dart';
+import '../../shared/primitives/utils.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/flex_split_column.dart';
 import '../../shared/globals.dart';

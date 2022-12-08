@@ -11,7 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import 'config_specific/logger/logger.dart';
-import '../primitives/auto_dispose.dart';
+import 'primitives/auto_dispose.dart';
 import '../screens/inspector/inspector_service.dart';
 import '../service/vm_service_wrapper.dart';
 import 'globals.dart';

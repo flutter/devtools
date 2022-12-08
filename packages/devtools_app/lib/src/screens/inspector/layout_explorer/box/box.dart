@@ -7,8 +7,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../../../../primitives/math_utils.dart';
-import '../../../../primitives/utils.dart';
+import '../../../../shared/primitives/math_utils.dart';
+import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/theme.dart';
 import '../../diagnostics_node.dart';
 import '../../inspector_controller.dart';

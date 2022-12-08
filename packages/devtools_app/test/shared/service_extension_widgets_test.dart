@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/primitives/message_bus.dart';
-import 'package:devtools_app/src/primitives/utils.dart';
+import 'package:devtools_app/src/shared/primitives/message_bus.dart';
+import 'package:devtools_app/src/shared/primitives/utils.dart';
 import 'package:devtools_app/src/service/service_extension_manager.dart';
 import 'package:devtools_app/src/service/service_extension_widgets.dart';
 import 'package:devtools_app/src/service/service_extensions.dart';

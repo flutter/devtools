@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../shared/theme.dart';
+import '../theme.dart';
 import 'icons.dart';
 
 /// Label including an image icon and optional text.

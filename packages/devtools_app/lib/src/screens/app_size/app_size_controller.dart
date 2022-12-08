@@ -11,9 +11,9 @@ import 'package:vm_snapshot_analysis/utils.dart';
 import 'package:vm_snapshot_analysis/v8_profile.dart';
 
 import '../../shared/charts/treemap.dart';
-import '../../primitives/utils.dart';
+import '../../shared/primitives/utils.dart';
 import '../../shared/table/table.dart';
-import '../../ui/colors.dart';
+import '../../shared/ui/colors.dart';
 import 'app_size_screen.dart';
 
 // Temporary feature flag for deferred loading.

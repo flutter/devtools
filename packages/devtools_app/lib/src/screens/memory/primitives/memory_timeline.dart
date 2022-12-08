@@ -8,7 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../shared/config_specific/logger/logger.dart';
-import '../../../primitives/utils.dart';
+import '../../../shared/primitives/utils.dart';
 
 enum ContinuesState {
   none,

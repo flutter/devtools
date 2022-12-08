@@ -8,9 +8,9 @@ import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 
 import '../shared/analytics/analytics.dart' as ga;
-import '../shared/analytics/constants.dart' as analytics_constants;
-import '../primitives/auto_dispose_mixin.dart';
-import '../primitives/utils.dart';
+import '../shared/analytics/constants.dart' as gac;
+import '../shared/primitives/auto_dispose_mixin.dart';
+import '../shared/primitives/utils.dart';
 import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
 import '../shared/routing.dart';
@@ -137,8 +137,8 @@ class _InitializerState extends State<Initializer>
           ModalRoute.of(context)!.isCurrent &&
           currentDisconnectedOverlay == null) {
         ga.select(
-          analytics_constants.devToolsMain,
-          analytics_constants.appDisconnected,
+          gac.devToolsMain,
+          gac.appDisconnected,
         );
         Overlay.of(context).insert(_createDisconnectedOverlay());
 

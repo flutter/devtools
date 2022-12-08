@@ -11,7 +11,7 @@ import 'package:vm_service/vm_service.dart' hide Error;
 
 import '../shared/analytics/analytics.dart' as ga;
 import '../shared/config_specific/logger/logger.dart';
-import '../primitives/utils.dart';
+import '../shared/primitives/utils.dart';
 import '../screens/inspector/inspector_service.dart';
 import '../screens/logging/vm_service_logger.dart';
 import '../screens/performance/timeline_streams.dart';

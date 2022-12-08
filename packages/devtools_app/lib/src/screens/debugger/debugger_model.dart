@@ -4,8 +4,8 @@
 
 import 'package:vm_service/vm_service.dart';
 
-import '../../primitives/trees.dart';
-import '../../ui/search.dart';
+import '../../shared/primitives/trees.dart';
+import '../../shared/ui/search.dart';
 import '../inspector/diagnostics_node.dart';
 import '../inspector/inspector_service.dart';
 

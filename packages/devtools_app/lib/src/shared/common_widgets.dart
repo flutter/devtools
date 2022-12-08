@@ -13,13 +13,13 @@ import 'package:vm_service/vm_service.dart';
 
 import 'analytics/analytics.dart' as ga;
 import 'config_specific/launch_url/launch_url.dart';
-import '../primitives/auto_dispose_mixin.dart';
-import '../primitives/flutter_widgets/linked_scroll_controller.dart';
-import '../primitives/utils.dart';
+import 'primitives/auto_dispose_mixin.dart';
+import 'primitives/flutter_widgets/linked_scroll_controller.dart';
+import 'primitives/utils.dart';
 import '../screens/debugger/debugger_controller.dart';
 import '../screens/debugger/variables.dart';
-import '../ui/icons.dart';
-import '../ui/label.dart';
+import 'ui/icons.dart';
+import 'ui/label.dart';
 import 'dialogs.dart';
 import 'globals.dart';
 import 'object_tree.dart';

@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../../shared/analytics/constants.dart' as analytics_constants;
+import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
 import '../../../primitives/ui.dart';
 import '../controller.dart';
@@ -18,9 +18,8 @@ class LeaksHelpLink extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return HelpButtonWithDialog(
-      gaScreen: analytics_constants.memory,
-      gaSelection:
-          analytics_constants.topicDocumentationButton(_documentationTopic),
+      gaScreen: gac.memory,
+      gaSelection: gac.topicDocumentationButton(_documentationTopic),
       dialogTitle: 'Memory Leak Detection Help',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -29,9 +28,9 @@ class LeaksHelpLink extends StatelessWidget {
               'and troubleshoot some types of memory leaks.'),
           MoreInfoLink(
             url: linkToGuidance,
-            gaScreenName: analytics_constants.memory,
+            gaScreenName: gac.memory,
             gaSelectedItemDescription:
-                analytics_constants.topicDocumentationLink(_documentationTopic),
+                gac.topicDocumentationLink(_documentationTopic),
           )
         ],
       ),

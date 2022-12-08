@@ -7,11 +7,11 @@ import 'package:image/image.dart' as image;
 
 import '../../shared/http/http.dart';
 import '../../shared/http/http_request_data.dart';
-import '../../primitives/utils.dart';
+import '../../shared/primitives/utils.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/table/table.dart';
 import '../../shared/theme.dart';
-import '../../ui/colors.dart';
+import '../../shared/ui/colors.dart';
 import 'network_model.dart';
 
 // Approximately double the indent of the expandable tile's title.

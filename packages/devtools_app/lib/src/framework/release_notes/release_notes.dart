@@ -16,7 +16,7 @@ import '../../../devtools.dart' as devtools;
 import '../../shared/config_specific/launch_url/launch_url.dart';
 import '../../shared/config_specific/logger/logger.dart' as logger;
 import '../../shared/config_specific/server/server.dart' as server;
-import '../../primitives/auto_dispose_mixin.dart';
+import '../../shared/primitives/auto_dispose_mixin.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/theme.dart';
 

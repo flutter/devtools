@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/primitives/trees.dart';
-import 'package:devtools_app/src/primitives/utils.dart';
+import 'package:devtools_app/src/shared/primitives/trees.dart';
+import 'package:devtools_app/src/shared/primitives/utils.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/table/column_widths.dart';

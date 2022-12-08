@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../shared/theme.dart';
+import '../theme.dart';
 import 'utils.dart';
 
 /// This file holds color constants that are used throughout DevTools.

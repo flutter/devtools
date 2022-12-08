@@ -7,11 +7,11 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../shared/analytics/constants.dart' as analytics_constants;
+import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/config_specific/import_export/import_export.dart';
 import '../../shared/config_specific/logger/allowed_error.dart';
-import '../../primitives/auto_dispose.dart';
-import '../../primitives/utils.dart';
+import '../../shared/primitives/auto_dispose.dart';
+import '../../shared/primitives/utils.dart';
 import '../../shared/globals.dart';
 import 'cpu_profile_controller.dart';
 import 'cpu_profile_model.dart';
@@ -60,7 +60,7 @@ class ProfilerScreenController extends DisposableController
   }
 
   final cpuProfilerController =
-      CpuProfilerController(analyticsScreenId: analytics_constants.cpuProfiler);
+      CpuProfilerController(analyticsScreenId: gac.cpuProfiler);
 
   final _exportController = ExportController();
 

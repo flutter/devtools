@@ -7,8 +7,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
-import '../primitives/auto_dispose_mixin.dart';
-import '../primitives/utils.dart';
+import '../shared/primitives/auto_dispose_mixin.dart';
+import '../shared/primitives/utils.dart';
 import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
 import '../shared/notifications.dart';

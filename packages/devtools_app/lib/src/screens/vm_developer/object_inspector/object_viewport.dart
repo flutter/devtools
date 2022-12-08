@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../primitives/history_manager.dart';
+import '../../../shared/primitives/history_manager.dart';
 import '../../../shared/common_widgets.dart';
 import '../../../shared/history_viewport.dart';
 import '../vm_developer_common_widgets.dart';

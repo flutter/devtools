@@ -5,9 +5,8 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../../../../shared/analytics/analytics.dart' as ga;
-import '../../../../../../shared/analytics/constants.dart'
-    as analytics_constants;
-import '../../../../../../primitives/utils.dart';
+import '../../../../../../shared/analytics/constants.dart' as gac;
+import '../../../../../../shared/primitives/utils.dart';
 import '../../../../../../shared/table/table.dart';
 import '../../../../../../shared/table/table_data.dart';
 import '../../../../../../shared/utils.dart';
@@ -150,8 +149,8 @@ class RetainingPathTable extends StatelessWidget {
       keyFactory: (e) => Key(e.key.toLongString()),
       selectionNotifier: selection,
       onItemSelected: (_) => ga.select(
-        analytics_constants.memory,
-        '${analytics_constants.MemoryEvent.diffPathSelect}-${isDiff ? "diff" : "single"}',
+        gac.memory,
+        '${gac.MemoryEvent.diffPathSelect}-${isDiff ? "diff" : "single"}',
       ),
       defaultSortColumn: columns.retainedSizeColumn,
       defaultSortDirection: SortDirection.descending,

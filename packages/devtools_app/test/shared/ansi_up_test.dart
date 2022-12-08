@@ -6,7 +6,7 @@
 
 import 'package:ansi_up/ansi_up.dart';
 import 'package:ansicolor/ansicolor.dart';
-import 'package:devtools_app/src/primitives/utils.dart';
+import 'package:devtools_app/src/shared/primitives/utils.dart';
 import 'package:devtools_app/src/screens/debugger/console.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/screens/logging/logging_controller.dart';

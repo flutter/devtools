@@ -6,7 +6,7 @@ import 'package:devtools_app/src/shared/charts/chart.dart';
 import 'package:devtools_app/src/shared/charts/chart_controller.dart';
 import 'package:devtools_app/src/shared/charts/chart_trace.dart';
 import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/primitives/utils.dart';
+import 'package:devtools_app/src/shared/primitives/utils.dart';
 import 'package:devtools_app/src/screens/memory/panes/chart/memory_charts.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';

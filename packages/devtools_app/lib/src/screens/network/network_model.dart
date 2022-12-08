@@ -5,8 +5,8 @@
 import 'package:vm_service/vm_service.dart';
 
 import '../../shared/http/http_request_data.dart';
-import '../../primitives/utils.dart';
-import '../../ui/search.dart';
+import '../../shared/primitives/utils.dart';
+import '../../shared/ui/search.dart';
 
 abstract class NetworkRequest with DataSearchStateMixin {
   NetworkRequest(this._timelineMicrosBase);

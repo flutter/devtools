@@ -7,8 +7,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../primitives/auto_dispose_mixin.dart';
-import '../primitives/utils.dart';
+import 'primitives/auto_dispose_mixin.dart';
+import 'primitives/utils.dart';
 import '../screens/debugger/debugger_controller.dart';
 import '../screens/debugger/variables.dart';
 import 'common_widgets.dart';

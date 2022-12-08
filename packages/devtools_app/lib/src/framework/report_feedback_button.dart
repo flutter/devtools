@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 
 import '../shared/analytics/analytics.dart' as ga;
-import '../shared/analytics/constants.dart' as analytics_constants;
+import '../shared/analytics/constants.dart' as gac;
 import '../shared/config_specific/launch_url/launch_url.dart';
 import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
@@ -19,8 +19,8 @@ class ReportFeedbackButton extends StatelessWidget {
       child: InkWell(
         onTap: () async {
           ga.select(
-            analytics_constants.devToolsMain,
-            analytics_constants.feedbackButton,
+            gac.devToolsMain,
+            gac.feedbackButton,
           );
           await launchUrl(
             devToolsExtensionPoints.issueTrackerLink().url,

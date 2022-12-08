@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../primitives/utils.dart';
+import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../inspector_data_models.dart';
 import 'arrow.dart';

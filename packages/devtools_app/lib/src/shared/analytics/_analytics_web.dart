@@ -16,12 +16,12 @@ import '../../../devtools.dart' as devtools show version;
 import '../config_specific/logger/logger.dart';
 import '../config_specific/server/server.dart' as server;
 import '../config_specific/url/url.dart';
-import '../../primitives/url_utils.dart';
+import '../primitives/url_utils.dart';
 
 import '../globals.dart';
-import '../../ui/gtags.dart';
+import '../ui/gtags.dart';
 import 'analytics_common.dart';
-import 'constants.dart' as analytics_constants;
+import 'constants.dart' as gac;
 import 'metrics.dart';
 
 // Dimensions1 AppType values:
@@ -386,7 +386,7 @@ void screen(
   GTag.event(
     screenName,
     gaEventProvider: () => _gtagEvent(
-      event_category: analytics_constants.screenViewEvent,
+      event_category: gac.screenViewEvent,
       value: value,
       send_to: gaDevToolsPropertyId(),
     ),
@@ -529,7 +529,7 @@ void _timing(
   GTag.event(
     screenName,
     gaEventProvider: () => _gtagEvent(
-      event_category: analytics_constants.timingEvent,
+      event_category: gac.timingEvent,
       event_label: timedOperation,
       value: durationMicros,
       send_to: gaDevToolsPropertyId(),
@@ -548,7 +548,7 @@ void select(
   GTag.event(
     screenName,
     gaEventProvider: () => _gtagEvent(
-      event_category: analytics_constants.selectEvent,
+      event_category: gac.selectEvent,
       event_label: selectedItem,
       value: value,
       non_interaction: nonInteraction,

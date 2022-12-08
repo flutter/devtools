@@ -5,7 +5,7 @@
 import 'dart:convert';
 
 import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/primitives/utils.dart';
+import 'package:devtools_app/src/shared/primitives/utils.dart';
 import 'package:devtools_app/src/screens/app_size/app_size_controller.dart';
 import 'package:devtools_app/src/screens/app_size/app_size_screen.dart';
 import 'package:devtools_app/src/screens/app_size/app_size_table.dart';

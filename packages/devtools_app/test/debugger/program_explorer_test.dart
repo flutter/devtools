@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/primitives/listenable.dart';
+import 'package:devtools_app/src/shared/primitives/listenable.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_model.dart';
 import 'package:devtools_app/src/screens/debugger/program_explorer.dart';
 import 'package:devtools_app/src/screens/debugger/program_explorer_model.dart';
-import 'package:devtools_app/src/scripts/script_manager.dart';
+import 'package:devtools_app/src/shared/scripts/script_manager.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/common_widgets.dart';
 import 'package:devtools_app/src/shared/flex_split_column.dart';

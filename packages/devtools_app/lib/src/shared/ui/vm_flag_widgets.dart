@@ -8,14 +8,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../shared/analytics/analytics.dart' as ga;
-import '../shared/analytics/constants.dart' as analytics_constants;
-import '../screens/profiler/cpu_profile_service.dart';
-import '../screens/profiler/sampling_rate.dart';
-import '../shared/banner_messages.dart';
-import '../shared/common_widgets.dart';
-import '../shared/globals.dart';
-import '../shared/theme.dart';
+import '../analytics/analytics.dart' as ga;
+import '../analytics/constants.dart' as gac;
+import '../../screens/profiler/cpu_profile_service.dart';
+import '../../screens/profiler/sampling_rate.dart';
+import '../banner_messages.dart';
+import '../common_widgets.dart';
+import '../globals.dart';
+import '../theme.dart';
 
 /// DropdownButton that controls the value of the 'profile_period' vm flag.
 ///
@@ -96,7 +96,7 @@ class CpuSamplingRateDropdown extends StatelessWidget {
   Future<void> _onSamplingFrequencyChanged(String? newValue) async {
     ga.select(
       screenId,
-      '${analytics_constants.cpuSamplingRatePrefix}'
+      '${gac.cpuSamplingRatePrefix}'
       '${CpuSamplingRateExtension.fromValue(newValue ?? '').displayShort}',
     );
     await serviceManager.service!.setProfilePeriod(

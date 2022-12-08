@@ -6,8 +6,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../primitives/trees.dart';
-import '../../primitives/utils.dart';
+import '../primitives/trees.dart';
+import '../primitives/utils.dart';
 import '../utils.dart';
 
 // TODO(peterdjlee): Remove get from method names.

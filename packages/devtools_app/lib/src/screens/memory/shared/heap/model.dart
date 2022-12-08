@@ -5,9 +5,9 @@
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../shared/analytics/analytics.dart' as ga;
-import '../../../../shared/analytics/constants.dart' as analytics_constants;
+import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/analytics/metrics.dart';
-import '../../../../primitives/utils.dart';
+import '../../../../shared/primitives/utils.dart';
 import '../../primitives/class_name.dart';
 import '../../primitives/memory_utils.dart';
 
@@ -288,8 +288,8 @@ class SnapshotTaker {
 AdaptedHeapData _adaptSnapshotGaWrapper(HeapSnapshotGraph graph) {
   late final AdaptedHeapData result;
   ga.timeSync(
-    analytics_constants.memory,
-    analytics_constants.MemoryTime.adaptSnapshot,
+    gac.memory,
+    gac.MemoryTime.adaptSnapshot,
     syncOperation: () => result = AdaptedHeapData.fromHeapSnapshot(graph),
     screenMetricsProvider: () => MemoryScreenMetrics(
       heapObjectsTotal: graph.objects.length,

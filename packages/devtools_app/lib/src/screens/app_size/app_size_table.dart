@@ -5,11 +5,11 @@
 import 'package:flutter/material.dart';
 
 import '../../shared/charts/treemap.dart';
-import '../../primitives/utils.dart';
+import '../../shared/primitives/utils.dart';
 import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
 import '../../shared/utils.dart';
-import '../../ui/colors.dart';
+import '../../shared/ui/colors.dart';
 
 import 'app_size_controller.dart';
 

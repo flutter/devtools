@@ -7,7 +7,7 @@ import 'package:devtools_app/src/screens/debugger/program_explorer.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/object_inspector_view.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/object_viewport.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_developer_tools_controller.dart';
-import 'package:devtools_app/src/scripts/script_manager.dart';
+import 'package:devtools_app/src/shared/scripts/script_manager.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/service/vm_service_wrapper.dart';
 import 'package:devtools_app/src/shared/globals.dart';

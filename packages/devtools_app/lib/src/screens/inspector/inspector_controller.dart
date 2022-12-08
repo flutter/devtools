@@ -23,8 +23,8 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../shared/config_specific/logger/logger.dart';
 import '../../shared/config_specific/url/url.dart';
-import '../../primitives/auto_dispose.dart';
-import '../../primitives/utils.dart';
+import '../../shared/primitives/auto_dispose.dart';
+import '../../shared/primitives/utils.dart';
 import '../../service/service_extensions.dart' as extensions;
 import '../../shared/globals.dart';
 import 'diagnostics_node.dart';

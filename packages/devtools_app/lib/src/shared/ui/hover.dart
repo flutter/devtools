@@ -9,10 +9,10 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../shared/common_widgets.dart';
-import '../shared/eval_on_dart_library.dart';
-import '../shared/theme.dart';
-import '../shared/utils.dart';
+import '../common_widgets.dart';
+import '../eval_on_dart_library.dart';
+import '../theme.dart';
+import '../utils.dart';
 import 'utils.dart';
 
 /// Regex for valid Dart identifiers.

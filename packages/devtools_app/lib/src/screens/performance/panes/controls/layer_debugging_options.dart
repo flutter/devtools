@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../primitives/feature_flags.dart';
+import '../../../../shared/primitives/feature_flags.dart';
 import '../../../../service/service_extension_widgets.dart';
 import '../../../../service/service_extensions.dart' as extensions;
 import '../../../../shared/globals.dart';

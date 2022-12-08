@@ -8,7 +8,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../primitives/auto_dispose.dart';
+import '../../shared/primitives/auto_dispose.dart';
 import '../../service/vm_service_wrapper.dart';
 import '../../shared/globals.dart';
 import 'debugger_model.dart';

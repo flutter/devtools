@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:html';
 
-import '../../../primitives/utils.dart';
+import '../../primitives/utils.dart';
 import '../../globals.dart';
 import 'drag_and_drop.dart';
 

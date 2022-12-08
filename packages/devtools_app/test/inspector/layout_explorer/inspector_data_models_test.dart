@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/primitives/math_utils.dart';
+import 'package:devtools_app/src/shared/primitives/math_utils.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_data_models.dart';
 import 'package:devtools_app/src/screens/inspector/layout_explorer/ui/theme.dart';
 import 'package:devtools_app/src/shared/globals.dart';

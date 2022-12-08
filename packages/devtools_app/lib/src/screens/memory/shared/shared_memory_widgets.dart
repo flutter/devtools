@@ -5,7 +5,7 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../../devtools_app.dart';
-import '../../../shared/analytics/constants.dart' as analytics_constants;
+import '../../../shared/analytics/constants.dart' as gac;
 import '../primitives/class_name.dart';
 
 class HeapClassView extends StatelessWidget {
@@ -43,7 +43,7 @@ class HeapClassView extends StatelessWidget {
             tooltip: 'Copy full class name to clipboard.',
             size: tableIconSize,
             style: textStyle,
-            gaScreen: analytics_constants.memory,
+            gaScreen: gac.memory,
             gaItem: copyGaItem,
           ),
       ],

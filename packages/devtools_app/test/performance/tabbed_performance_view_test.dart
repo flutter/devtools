@@ -9,7 +9,7 @@ import 'package:devtools_app/src/screens/performance/panes/frame_analysis/frame_
 import 'package:devtools_app/src/screens/performance/panes/raster_stats/raster_stats.dart';
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/legacy/timeline_flame_chart.dart';
 import 'package:devtools_app/src/screens/performance/tabbed_performance_view.dart';
-import 'package:devtools_app/src/ui/tab.dart';
+import 'package:devtools_app/src/shared/ui/tab.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';

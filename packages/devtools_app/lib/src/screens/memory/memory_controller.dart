@@ -11,10 +11,10 @@ import 'package:leak_tracker/devtools_integration.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
-import '../../shared/analytics/constants.dart' as analytics_constants;
+import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/config_specific/file/file.dart';
 import '../../shared/config_specific/logger/logger.dart';
-import '../../primitives/auto_dispose.dart';
+import '../../shared/primitives/auto_dispose.dart';
 import '../../service/service_manager.dart';
 import '../../shared/globals.dart';
 import '../../shared/utils.dart';
@@ -379,7 +379,7 @@ class _MemoryLog {
 
   /// Persist the the live memory data to a JSON file in the /tmp directory.
   List<String> exportMemory() {
-    ga.select(analytics_constants.memory, analytics_constants.export);
+    ga.select(gac.memory, gac.export);
 
     final liveData = controller.memoryTimeline.liveData;
 

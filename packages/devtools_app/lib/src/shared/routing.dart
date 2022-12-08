@@ -7,8 +7,8 @@ import 'dart:collection';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../primitives/auto_dispose.dart';
-import '../primitives/utils.dart';
+import 'primitives/auto_dispose.dart';
+import 'primitives/utils.dart';
 import 'globals.dart';
 
 /// The page ID (used in routing) for the standalone app-size page.

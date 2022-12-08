@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 
-import '../ui/label.dart';
+import 'ui/label.dart';
 import 'common_widgets.dart';
 import 'theme.dart';
 

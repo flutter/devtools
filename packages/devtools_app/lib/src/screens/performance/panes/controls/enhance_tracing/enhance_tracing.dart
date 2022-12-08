@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../../../../primitives/auto_dispose_mixin.dart';
+import '../../../../../shared/primitives/auto_dispose_mixin.dart';
 import '../../../../../service/service_extension_manager.dart';
 import '../../../../../service/service_extension_widgets.dart';
 import '../../../../../service/service_extensions.dart' as extensions;

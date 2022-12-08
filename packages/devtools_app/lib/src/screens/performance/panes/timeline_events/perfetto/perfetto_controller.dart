@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../../../../../primitives/auto_dispose.dart';
-import '../../../../../primitives/trace_event.dart';
-import '../../../../../primitives/utils.dart';
+import '../../../../../shared/primitives/auto_dispose.dart';
+import '../../../../../shared/primitives/trace_event.dart';
+import '../../../../../shared/primitives/utils.dart';
 import '../../../performance_controller.dart';
 import '../timeline_events_controller.dart';
 import '_perfetto_controller_desktop.dart'

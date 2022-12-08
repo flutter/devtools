@@ -14,19 +14,19 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
-import '../../shared/analytics/constants.dart' as analytics_constants;
+import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/config_specific/logger/logger.dart';
-import '../../primitives/auto_dispose_mixin.dart';
-import '../../primitives/utils.dart';
+import '../../shared/primitives/auto_dispose_mixin.dart';
+import '../../shared/primitives/utils.dart';
 import '../../shared/collapsible_mixin.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/error_badge_manager.dart';
 import '../../shared/globals.dart';
 import '../../shared/theme.dart';
 import '../../shared/utils.dart';
-import '../../ui/colors.dart';
-import '../../ui/search.dart';
-import '../../ui/utils.dart';
+import '../../shared/ui/colors.dart';
+import '../../shared/ui/search.dart';
+import '../../shared/ui/utils.dart';
 import '../debugger/debugger_controller.dart';
 import 'diagnostics.dart';
 import 'diagnostics_node.dart';
@@ -421,8 +421,8 @@ class InspectorTreeController extends Object
   void onSelectNode(InspectorTreeNode? node) {
     selection = node;
     ga.select(
-      analytics_constants.inspector,
-      analytics_constants.treeNodeSelection,
+      gac.inspector,
+      gac.treeNodeSelection,
     );
     expandPath(node);
   }
@@ -990,11 +990,11 @@ class _InspectorTreeState extends State<InspectorTree>
     }
 
     if (!controller.firstInspectorTreeLoadCompleted && widget.isSummaryTree) {
-      ga.timeEnd(InspectorScreen.id, analytics_constants.pageReady);
+      ga.timeEnd(InspectorScreen.id, gac.pageReady);
       unawaited(
         serviceManager.sendDwdsEvent(
           screen: InspectorScreen.id,
-          action: analytics_constants.pageReady,
+          action: gac.pageReady,
         ),
       );
       controller.firstInspectorTreeLoadCompleted = true;
