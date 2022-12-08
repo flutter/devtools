@@ -19,7 +19,7 @@ const String nonGcableInstancesColumnTooltip =
     "and therefore can't be garbage collected.";
 
 /// When to have verbose Dropdown based on media width.
-const verboseDropDownMinimumWidth = 950;
+const memoryControlsMinVerboseWidth = 950.0;
 
 const _memoryDocUrl =
     'https://docs.flutter.dev/development/tools/devtools/memory';

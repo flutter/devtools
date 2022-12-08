@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
-import '../../../shared/primitives/ui.dart';
+import '../../../shared/primitives/simple_elements.dart';
 import '../controller.dart';
 import '../diagnostics/formatter.dart';
 
@@ -52,7 +52,7 @@ class AnalyzeButton extends StatelessWidget {
       tooltip: 'Analyze the leaks and download the result\n'
           'to ${yamlFilePrefix}_<time>.yaml.',
       onPressed: () async => await leaksController.requestLeaksAndSaveToYaml(),
-      minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
+      minScreenWidthForTextBeforeScaling: memoryControlsMinVerboseWidth,
     );
   }
 }

@@ -13,7 +13,6 @@ import '../../../../shared/globals.dart';
 import '../../../../shared/theme.dart';
 import '../../memory_controller.dart';
 import '../../shared/primitives/simple_elements.dart';
-import '../../shared/primitives/ui.dart';
 import '../chart/chart_pane_controller.dart';
 import 'primitives.dart';
 import 'settings_dialog.dart';
@@ -33,7 +32,7 @@ class SecondaryControls extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mediaWidth = MediaQuery.of(context).size.width;
-    controller.memorySourcePrefix = mediaWidth > verboseDropDownMinimumWidth
+    controller.memorySourcePrefix = mediaWidth > memoryControlsMinVerboseWidth
         ? memorySourceMenuItemPrefix
         : '';
 
@@ -47,12 +46,12 @@ class SecondaryControls extends StatelessWidget {
           icon: Icons.delete,
           label: 'GC',
           tooltip: 'Trigger full garbage collection.',
-          minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
+          minScreenWidthForTextBeforeScaling: memoryControlsMinVerboseWidth,
         ),
         const SizedBox(width: denseSpacing),
         ExportButton(
           onPressed: controller.offline.value ? null : _exportToFile,
-          minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
+          minScreenWidthForTextBeforeScaling: memoryControlsMinVerboseWidth,
         ),
         const SizedBox(width: denseSpacing),
         SettingsOutlinedButton(
