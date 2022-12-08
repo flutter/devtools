@@ -216,7 +216,7 @@ String stripPreReleases(String currentVersion) {
   final devVerMatch =
       RegExp(r'^(?<semver>\d+\.\d+\.\d+).*$').firstMatch(currentVersion);
   if (devVerMatch == null) {
-    throw 'Invalid version, could not increment dev version';
+    throw 'Could not strip pre-releases from version: $currentVersion';
   } else {
     return devVerMatch.namedGroup('semver')!;
   }
