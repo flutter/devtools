@@ -11,7 +11,7 @@ import 'package:vm_service/vm_service.dart' hide Stack;
 import '../../shared/common_widgets.dart';
 import '../../shared/flex_split_column.dart';
 import '../../shared/globals.dart';
-import '../../shared/primitives/auto_dispose_mixin.dart';
+import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/theme.dart';
 import '../../shared/tree.dart';

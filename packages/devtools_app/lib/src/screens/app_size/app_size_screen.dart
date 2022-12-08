@@ -15,7 +15,7 @@ import '../../shared/config_specific/server/server.dart' as server;
 import '../../shared/config_specific/url/url.dart';
 import '../../shared/file_import.dart';
 import '../../shared/globals.dart';
-import '../../shared/primitives/auto_dispose_mixin.dart';
+import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/simple_items.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/screen.dart';

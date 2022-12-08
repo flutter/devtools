@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
 
 import 'collapsible_mixin.dart';
-import 'primitives/auto_dispose_mixin.dart';
+import 'primitives/auto_dispose.dart';
 import 'primitives/trees.dart';
 import 'theme.dart';
 

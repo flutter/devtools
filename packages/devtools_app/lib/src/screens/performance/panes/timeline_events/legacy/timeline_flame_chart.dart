@@ -12,7 +12,7 @@ import 'package:flutter/material.dart';
 import '../../../../../shared/charts/flame_chart.dart';
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/globals.dart';
-import '../../../../../shared/primitives/auto_dispose_mixin.dart';
+import '../../../../../shared/primitives/auto_dispose.dart';
 import '../../../../../shared/primitives/flutter_widgets/linked_scroll_controller.dart';
 import '../../../../../shared/primitives/geometry.dart';
 import '../../../../../shared/primitives/trace_event.dart';

@@ -13,7 +13,6 @@ import 'package:flutter/services.dart';
 import '../common_widgets.dart';
 import '../config_specific/logger/logger.dart';
 import '../primitives/auto_dispose.dart';
-import '../primitives/auto_dispose_mixin.dart';
 import '../primitives/trees.dart';
 import '../primitives/utils.dart';
 import '../theme.dart';
