@@ -7,10 +7,10 @@ import 'dart:async';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-import '../config_specific/launch_url/launch_url.dart';
-import '../shared/common_widgets.dart';
-import '../shared/theme.dart';
-import '../shared/utils.dart';
+import '../../config_specific/launch_url/launch_url.dart';
+import '../common_widgets.dart';
+import '../theme.dart';
+import '../utils.dart';
 import 'analytics_controller.dart';
 
 /// Conditionally displays a prompt to request permission for collection of

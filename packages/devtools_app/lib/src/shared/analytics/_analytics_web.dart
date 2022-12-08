@@ -12,14 +12,14 @@ import 'dart:html';
 
 import 'package:js/js.dart';
 
-import '../../devtools.dart' as devtools show version;
-import '../config_specific/logger/logger.dart';
-import '../config_specific/server/server.dart' as server;
-import '../config_specific/url/url.dart';
-import '../primitives/url_utils.dart';
+import '../../../devtools.dart' as devtools show version;
+import '../../config_specific/logger/logger.dart';
+import '../../config_specific/server/server.dart' as server;
+import '../../config_specific/url/url.dart';
+import '../../primitives/url_utils.dart';
 
-import '../shared/globals.dart';
-import '../ui/gtags.dart';
+import '../globals.dart';
+import '../../ui/gtags.dart';
 import 'analytics_common.dart';
 import 'constants.dart' as analytics_constants;
 import 'metrics.dart';
