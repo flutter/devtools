@@ -38,20 +38,23 @@ void main() {
       expect(find.text('About DevTools'), findsOneWidget);
     });
 
-    testWidgets('DevTools section', (WidgetTester tester) async {
+    testWidgets('content renders correctly', (WidgetTester tester) async {
       await tester.pumpWidget(wrap(aboutDialog));
       expect(find.text('About DevTools'), findsOneWidget);
       expect(findSubstring(aboutDialog, devtools.version), findsOneWidget);
       expect(find.text('release notes'), findsOneWidget);
-    });
-
-    testWidgets('Feedback section', (WidgetTester tester) async {
-      await tester.pumpWidget(wrap(aboutDialog));
-      expect(find.text('Feedback'), findsOneWidget);
+      expect(find.textContaining('Encountered an issue?'), findsOneWidget);
       expect(
-        findSubstring(aboutDialog, 'github.com/flutter/devtools'),
+        findSubstring(aboutDialog, 'github.com/flutter/devtools/issues/new'),
         findsOneWidget,
       );
+      expect(find.text('Contributing'), findsOneWidget);
+      expect(
+        find.textContaining('Want to contribute to DevTools?'),
+        findsOneWidget,
+      );
+      expect(findSubstring(aboutDialog, 'CONTRIBUTING'), findsOneWidget);
+      expect(find.textContaining('connect with us on'), findsOneWidget);
       expect(
         findSubstring(aboutDialog, 'Discord'),
         findsOneWidget,
