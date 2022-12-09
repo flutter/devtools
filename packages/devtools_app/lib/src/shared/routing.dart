@@ -6,6 +6,7 @@ import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../primitives/auto_dispose.dart';
 import '../primitives/utils.dart';
@@ -145,6 +146,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
   }
 
   bool _handleOnPopPage(Route<dynamic> route, dynamic result) {
+    print('on pop page');
     if (routes.length <= 1) {
       return false;
     }
@@ -248,6 +250,31 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     notifyListeners();
   }
 
+  Future<void> replaceState(DevToolsNavigationState state) async {
+    final currentConfig = currentConfiguration!;
+    _replaceStack(
+      DevToolsRouteConfiguration(
+        currentConfig.page,
+        currentConfig.args,
+        state,
+      ),
+    );
+
+    final path = '/${currentConfig.page}';
+    // Create a new map in case the one we were given was unmodifiable.
+    final params = {...currentConfig.args};
+    params.removeWhere((key, value) => value == null);
+    //await SystemNavigator.selectMultiEntryHistory();
+    await SystemNavigator.routeInformationUpdated(
+      location: Uri(
+        path: path,
+        queryParameters: params,
+      ).toString(),
+      state: state,
+      replace: true,
+    );
+  }
+
   /// Updates state for the current page.
   ///
   /// Existing state will be preserved unless overwritten by [stateUpdate].
@@ -269,6 +296,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
       ),
     );
     // Add the new state to the browser history.
+    print('router navigate');
     Router.navigate(context, () => null);
     notifyListeners();
   }

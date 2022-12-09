@@ -176,6 +176,16 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
                           action: analytics_constants.pageReady,
                         ),
                       );
+
+                      final routerDelegate = DevToolsRouterDelegate.of(context);
+                      unawaited(
+                        routerDelegate.replaceState(
+                          CodeViewSourceLocationNavigationState(
+                            script: scriptRef,
+                            line: 0,
+                          ),
+                        ),
+                      );
                       _shownFirstScript = true;
                     }
 
@@ -199,13 +209,14 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
 
   void _onNodeSelected(VMServiceObjectNode? node) {
     final location = node?.location;
-    if (location != null) {
+    if (node != null && location != null) {
       final routerDelegate = DevToolsRouterDelegate.of(context);
       routerDelegate.updateStateIfNotCurrent(
         context,
         CodeViewSourceLocationNavigationState(
           script: location.scriptRef,
           line: location.location?.line ?? -1,
+          object: node.object,
         ),
       );
     }

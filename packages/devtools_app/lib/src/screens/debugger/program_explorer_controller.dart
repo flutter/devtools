@@ -134,6 +134,12 @@ class ProgramExplorerController extends DisposableController
     }
   }
 
+  VMServiceObjectNode? findOutlineNode(
+    ObjRef object,
+  ) {
+    return breadthFirstSearchObject(object, _outlineNodes.value);
+  }
+
   int _calculateNodeIndex({
     bool matchingNodeCondition(VMServiceObjectNode node)?,
     bool includeCollapsedNodes = true,
@@ -174,6 +180,11 @@ class ProgramExplorerController extends DisposableController
     _outlineSelection.value = null;
   }
 
+  void clearOutlineSelection() {
+    _outlineSelection.value?.unselect();
+    _outlineSelection.value = null;
+  }
+
   /// Marks [node] as the currently selected node, clearing the selection state
   /// of any currently selected node.
   Future<void> selectNode(VMServiceObjectNode node) async {
@@ -203,6 +214,7 @@ class ProgramExplorerController extends DisposableController
       node.select();
       _outlineSelection.value?.unselect();
       _outlineSelection.value = node;
+      _outlineNodes.notifyListeners();
     }
   }
 

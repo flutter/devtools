@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
@@ -48,8 +49,20 @@ class CodeViewController extends DisposableController
         {
           final processedState =
               CodeViewSourceLocationNavigationState._fromState(state);
-          // TODO(bkonyi): investigate delay in scrolling to source location.
+          print('state: ${processedState.location}');
+          final object = processedState.object;
           showScriptLocation(processedState.location, focusLine: true);
+          if (programExplorerController.initialized.value) {
+            if (object != null) {
+              final node =
+                  programExplorerController.findOutlineNode(object);
+              if (node != null) {
+                programExplorerController.selectOutlineNode(node);
+              }
+            } else {
+              programExplorerController.clearOutlineSelection();
+            }
+          }
         }
     }
   }
@@ -392,12 +405,14 @@ class CodeViewSourceLocationNavigationState extends DevToolsNavigationState {
   CodeViewSourceLocationNavigationState({
     required ScriptRef script,
     required int line,
+    ObjRef? object,
   }) : super(
           kind: type,
           state: <String, String?>{
             _kScriptId: script.id,
             _kUri: script.uri,
             _kLine: line.toString(),
+            if (object != null) _kObject: json.encode(object.json),
           },
         );
 
@@ -411,6 +426,7 @@ class CodeViewSourceLocationNavigationState extends DevToolsNavigationState {
   static const _kScriptId = 'scriptId';
   static const _kUri = 'uri';
   static const _kLine = 'line';
+  static const _kObject = 'object';
   static const type = 'codeViewSourceLocation';
 
   ScriptRef get script => ScriptRef(
@@ -419,6 +435,14 @@ class CodeViewSourceLocationNavigationState extends DevToolsNavigationState {
       );
 
   int get line => int.parse(state[_kLine]!);
+
+  ObjRef? get object {
+    final obj = state[_kObject];
+    if (obj == null) {
+      return null;
+    }
+    return createServiceObject(json.decode(obj), const []) as ObjRef?;
+  }
 
   ScriptLocation get location => ScriptLocation(
         script,
