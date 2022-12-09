@@ -125,7 +125,8 @@ class ProviderScreenBody extends ConsumerWidget {
                 needsTopBorder: false,
                 title: Text(detailsTitleText),
                 actions: [
-                  SettingsOutlinedButton(
+                  ToolbarAction(
+                    icon: Icons.settings,
                     onPressed: () {
                       unawaited(
                         showDialog(
